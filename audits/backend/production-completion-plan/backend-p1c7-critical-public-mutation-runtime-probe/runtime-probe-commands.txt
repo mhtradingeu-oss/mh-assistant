@@ -1,0 +1,15 @@
+Run when backend server is running.
+
+Default compatibility summary:
+node scripts/backend/check-public-alias-compatibility.js
+
+Block flag summary:
+MH_BLOCK_CRITICAL_PUBLIC_MUTATION_ALIASES=true node scripts/backend/check-public-alias-compatibility.js
+
+Example blocked runtime probes:
+curl -i -X POST http://127.0.0.1:3000/public/media-manager/project/demo/integrations/test/connect
+curl -i -X POST http://127.0.0.1:3000/public/media-manager/project/demo/publishing/job-1/publish
+curl -i -X POST http://127.0.0.1:3000/public/media-manager/project/demo/ai/workflows/workflow-1/run
+
+Expected:
+HTTP 410 when MH_BLOCK_CRITICAL_PUBLIC_MUTATION_ALIASES=true is set in the backend server environment.

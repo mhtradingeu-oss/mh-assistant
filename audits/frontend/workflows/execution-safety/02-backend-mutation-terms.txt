@@ -1,0 +1,243 @@
+9:  getSharedHandoff,
+11:  setSharedHandoff
+27:} from "../automation-engine.js";
+34:    requiredInputs: ["project", "campaign", "product", "channel", "goal"],
+42:    requiredInputs: ["project", "campaign", "product", "channel", "goal"],
+49:    purpose: "Prepare media production inputs, format guidance, and downstream handoff steps.",
+50:    requiredInputs: ["project", "campaign", "product", "channel", "goal"],
+58:    requiredInputs: ["project", "campaign", "channel", "goal"],
+66:    requiredInputs: ["project", "campaign", "goal"],
+74:    requiredInputs: ["project", "product", "goal"],
+81:    purpose: "Prioritize integration recovery actions that restore readiness and automation reliability.",
+82:    requiredInputs: ["project", "channel", "goal"],
+192:function createDefaultInputs(state) {
+217:    output: null,
+230:function createInputsMap(defaults) {
+251:    const raw = window.localStorage?.getItem(WORKFLOW_LOCAL_DRAFTS_KEY) || "{}";
+262:    window.localStorage?.setItem(WORKFLOW_LOCAL_DRAFTS_KEY, JSON.stringify(map || {}));
+271:function saveLocalDraft(projectName, workflowId, payload) {
+291:    session.inputsByWorkflow[workflow.id] = {
+292:      ...session.inputsByWorkflow[workflow.id],
+293:      ...asObject(draft.inputs)
+305:function persistWorkflowDraft(projectName, session, workflowId, hint, selected) {
+306:  const saved = saveLocalDraft(projectName, workflowId, {
+307:    inputs: asObject(session.inputsByWorkflow[workflowId]),
+319:      inputsByWorkflow: createInputsMap(defaults),
+339:    session.inputsByWorkflow = WORKFLOW_CATALOG.reduce((acc, workflow) => {
+342:        ...asObject(session.inputsByWorkflow?.[workflow.id])
+379:    const output = asObject(item.output);
+386:      output,
+387:      blockedRequirements: asArray(output.blockedRequirements || output.blocked_requirements),
+392:          output
+476:    const when = asString(item.executed_at || item.created_at);
+485:function getBlockedRequirements(workflow, inputs, context) {
+487:  const missingRequired = workflow.requiredInputs.filter((field) => !asString(inputs[field]).trim());
+489:    blocked.push(`Missing required inputs: ${missingRequired.map(titleCase).join(", ")}`);
+507:function buildWorkflowPrompt(workflow, inputs, context) {
+511:    `Project: ${inputs.project || context.projectName || "not set"}`,
+512:    `Campaign: ${inputs.campaign || context.campaignName || "not set"}`,
+513:    `Product: ${inputs.product || "not set"}`,
+514:    `Channel: ${inputs.channel || "not set"}`,
+515:    `Goal: ${inputs.goal || "not set"}`,
+522:function buildFallbackOutput(workflow, inputs, context) {
+525:  const blockedRequirements = getBlockedRequirements(workflow, inputs, context);
+529:    summary: `Prepared ${workflow.title.toLowerCase()} for ${inputs.project || context.projectName || "the current project"} with ${inputs.goal || "a defined goal"}.`,
+536:    requiredInputs: workflow.requiredInputs.map(titleCase),
+579:      reason: `${context.missingIntegrations.length} integration gap${context.missingIntegrations.length === 1 ? "" : "s"} can block automation and report quality.`,
+599:      reason: "A campaign operating sequence is required before content, media, and publishing lanes can execute clearly.",
+694:          : `<div class="wfexec-empty">No safe automation steps are available.</div>`
+780:function renderBuilderSection(session, workflow, inputs, validationMessage, draftStatus, escapeHtml) {
+792:          <label class="wfexec-label" for="wfexecInputProject">Project</label>
+793:          <input id="wfexecInputProject" class="wfexec-input" data-wf-input="project" type="text" value="${escapeHtml(inputs.project || "")}" placeholder="Current project">
+796:          <label class="wfexec-label" for="wfexecInputCampaign">Campaign</label>
+797:          <input id="wfexecInputCampaign" class="wfexec-input" data-wf-input="campaign" type="text" value="${escapeHtml(inputs.campaign || "")}" placeholder="Campaign name">
+800:          <label class="wfexec-label" for="wfexecInputProduct">Product</label>
+801:          <input id="wfexecInputProduct" class="wfexec-input" data-wf-input="product" type="text" value="${escapeHtml(inputs.product || "")}" placeholder="Product or offer">
+804:          <label class="wfexec-label" for="wfexecInputChannel">Channel</label>
+805:          <input id="wfexecInputChannel" class="wfexec-input" data-wf-input="channel" type="text" value="${escapeHtml(inputs.channel || "")}" placeholder="Channel or channel set">
+808:          <label class="wfexec-label" for="wfexecInputGoal">Goal</label>
+809:          <input id="wfexecInputGoal" class="wfexec-input" data-wf-input="goal" type="text" value="${escapeHtml(inputs.goal || "")}" placeholder="Outcome goal">
+831:          const inputs = asObject(session.inputsByWorkflow[workflow.id]);
+833:          const blocked = getBlockedRequirements(workflow, inputs, context);
+839:                <span class="card-badge ${ready ? "success" : "warning"}">${escapeHtml(ready ? "Ready" : "Needs input")}</span>
+842:              <div class="wfexec-required"><strong>Required inputs:</strong> ${escapeHtml(workflow.requiredInputs.map(titleCase).join(", "))}</div>
+859:  const output = asObject(run.output);
+860:  if (!output.summary) {
+864:        <div class="wfexec-empty">No execution result yet. Run a workflow to generate output.</div>
+875:      <div class="wfexec-result-summary">${escapeHtml(output.summary)}</div>
+885:          <ul>${asArray(output.nextActions).map((item) => `<li>${escapeHtml(asString(item))}</li>`).join("") || "<li>No next action list</li>"}</ul>
+904:  automationPlan,
+908:  inputs,
+919:          ${renderAutomationSection(automationPlan, autoFixPlan, escapeHtml)}
+920:          ${renderBuilderSection(session, workflow, inputs, session.validationMessage, session.draftStatus, escapeHtml)}
+932:  const handoff = getSharedHandoff(projectName, "workflows", operations);
+943:  session.inputsByWorkflow[workflowId] = {
+944:    ...session.inputsByWorkflow[workflowId],
+945:    project: firstNonEmpty(payload?.draft_context?.projectName, session.inputsByWorkflow[workflowId].project),
+946:    campaign: firstNonEmpty(payload?.campaign_name, session.inputsByWorkflow[workflowId].campaign),
+947:    goal: firstNonEmpty(payload?.draft_context?.lastResponseTitle, payload?.workflow_title, session.inputsByWorkflow[workflowId].goal),
+948:    product: firstNonEmpty(payload?.output?.product, session.inputsByWorkflow[workflowId].product),
+949:    channel: firstNonEmpty(payload?.output?.channel, session.inputsByWorkflow[workflowId].channel)
+952:  if (payload.output) {
+954:    run.output = asObject(payload.output);
+958:    run.history.unshift({ createdAt: run.lastRunAt, source: run.source, output: run.output });
+974:  fetchProjectInsights,
+975:  fetchProjectLearning,
+1005:          fetchProjectInsights(projectName),
+1006:          fetchProjectLearning(projectName)
+1039:function buildAiHandoffPrompt(workflow, inputs, runOutput, context) {
+1040:  if (runOutput?.summary) {
+1043:      `Project: ${inputs.project || context.projectName || "not set"}`,
+1044:      `Campaign: ${inputs.campaign || context.campaignName || "not set"}`,
+1045:      `Summary: ${runOutput.summary}`,
+1046:      `Next actions: ${asArray(runOutput.nextActions).join("; ")}`
+1051:    `Project: ${inputs.project || context.projectName || "not set"}`,
+1052:    `Campaign: ${inputs.campaign || context.campaignName || "not set"}`,
+1053:    `Product: ${inputs.product || "not set"}`,
+1054:    `Channel: ${inputs.channel || "not set"}`,
+1055:    `Goal: ${inputs.goal || "not set"}`,
+1064:  inputs,
+1072:  const prompt = buildAiHandoffPrompt(workflow, inputs, run.output, context);
+1077:    lastResponseTitle: asString(run.output?.title || workflow.title),
+1078:    routeSuggestions: asArray(run.output?.routeSuggestions)
+1091:      output: asObject(run.output)
+1096:  setSharedHandoff(projectName, "ai-command", handoff);
+1108:function validateWorkflowInputs(workflow, inputs) {
+1109:  const missing = workflow.requiredInputs.filter((field) => !asString(inputs[field]).trim());
+1128:      fetchProjectInsights,
+1129:      fetchProjectLearning,
+1139:    const session = ensureSession(projectName, createDefaultInputs(state), state.data.operations);
+1143:    session.inputsByWorkflow[workflow.id] = {
+1144:      ...session.inputsByWorkflow[workflow.id],
+1145:      project: firstNonEmpty(projectName, session.inputsByWorkflow[workflow.id].project),
+1146:      goal: firstNonEmpty(meta.assistantTitle, session.inputsByWorkflow[workflow.id].goal),
+1147:      campaign: firstNonEmpty(session.inputsByWorkflow[workflow.id].campaign, state.context.activeCampaign),
+1148:      product: firstNonEmpty(session.inputsByWorkflow[workflow.id].product, state.context.currentProject)
+1167:        fetchProjectInsights,
+1168:        fetchProjectLearning,
+1177:        inputs: session.inputsByWorkflow[workflow.id],
+1178:        prompt: firstNonEmpty(message, buildWorkflowPrompt(workflow, session.inputsByWorkflow[workflow.id], contextModel)),
+1184:      const output = asObject(result?.output || result?.run?.output) || buildFallbackOutput(workflow, session.inputsByWorkflow[workflow.id], contextModel);
+1189:      run.output = output;
+1190:      run.blockedRequirements = asArray(output.blockedRequirements || output.blocked_requirements);
+1191:      run.history.unshift({ createdAt: run.lastRunAt, source: run.source, output });
+1213:  fetchProjectInsights,
+1214:  fetchProjectLearning,
+1231:  const session = ensureSession(projectName, createDefaultInputs(state), state.data.operations);
+1233:  const inputs = asObject(session.inputsByWorkflow[workflow.id]);
+1247:  function syncInputField(field, value) {
+1248:    session.inputsByWorkflow[session.selectedWorkflowId][field] = value;
+1249:    persistWorkflowDraft(projectName, session, session.selectedWorkflowId, "Draft auto-saved", true);
+1252:  Array.from(document.querySelectorAll("[data-wf-input]")).forEach((input) => {
+1253:    input.oninput = () => {
+1254:      const field = input.getAttribute("data-wf-input") || "";
+1256:      syncInputField(field, input.value || "");
+1265:      persistWorkflowDraft(projectName, session, session.selectedWorkflowId, "Workflow switched", true);
+1274:      persistWorkflowDraft(projectName, session, session.selectedWorkflowId, "Draft saved", true);
+1283:      const defaults = createDefaultInputs(getState());
+1284:      session.inputsByWorkflow[session.selectedWorkflowId] = { ...defaults };
+1285:      persistWorkflowDraft(projectName, session, session.selectedWorkflowId, "Draft cleared", true);
+1297:        const safePrompt = `Create a workflow for ${projectName || "this project"} focused on ${inputs.goal || "operational improvement"}.`;
+1298:        setSharedHandoff(projectName, "workflows", {
+1312:        session.inputsByWorkflow[session.selectedWorkflowId].goal = firstNonEmpty(inputs.goal, "Execution loop optimization");
+1313:        persistWorkflowDraft(projectName, session, session.selectedWorkflowId, "Local handoff seed created", true);
+1319:      session.inputsByWorkflow[session.selectedWorkflowId] = {
+1320:        ...session.inputsByWorkflow[session.selectedWorkflowId],
+1321:        project: firstNonEmpty(draft.projectName, session.inputsByWorkflow[session.selectedWorkflowId].project),
+1322:        goal: firstNonEmpty(draft.lastResponseTitle, session.inputsByWorkflow[session.selectedWorkflowId].goal),
+1323:        campaign: firstNonEmpty(session.inputsByWorkflow[session.selectedWorkflowId].campaign, state.context.activeCampaign),
+1324:        product: firstNonEmpty(session.inputsByWorkflow[session.selectedWorkflowId].product, state.context.currentProject),
+1325:        channel: firstNonEmpty(session.inputsByWorkflow[session.selectedWorkflowId].channel, "multi-channel")
+1327:      persistWorkflowDraft(projectName, session, session.selectedWorkflowId, "AI state loaded", true);
+1328:      showMessage?.("AI Command state loaded into workflow inputs.");
+1333:  async function runWorkflow(workflowId) {
+1337:    const activeInputs = asObject(session.inputsByWorkflow[activeWorkflow.id]);
+1338:    const validationMessage = validateWorkflowInputs(activeWorkflow, activeInputs);
+1341:      const firstMissing = activeWorkflow.requiredInputs.find((field) => !asString(activeInputs[field]).trim());
+1342:      const target = $(`wfexecInput${titleCase(firstMissing)}`);
+1364:        fetchProjectInsights,
+1365:        fetchProjectLearning,
+1375:        inputs: activeInputs,
+1376:        prompt: buildWorkflowPrompt(activeWorkflow, activeInputs, freshContext),
+1384:      const output = asObject(result?.output || result?.run?.output);
+1385:      const safeOutput = Object.keys(output).length
+1386:        ? output
+1387:        : buildFallbackOutput(activeWorkflow, activeInputs, freshContext);
+1392:      activeRun.output = safeOutput;
+1393:      activeRun.blockedRequirements = asArray(safeOutput.blockedRequirements || safeOutput.blocked_requirements);
+1394:      activeRun.history.unshift({ createdAt: activeRun.lastRunAt, source: "manual-run", output: safeOutput });
+1397:      setSharedHandoff(projectName, "workflows", {
+1403:          output: safeOutput,
+1404:          inputs: activeInputs,
+1414:      activeRun.output = {
+1417:        blockedRequirements: ["Execution failed. Review inputs and retry."],
+1420:      activeRun.blockedRequirements = asArray(activeRun.output.blockedRequirements);
+1428:  if (runBtn) runBtn.onclick = () => runWorkflow(session.selectedWorkflowId);
+1430:  if (runBtnMain) runBtnMain.onclick = () => runWorkflow(session.selectedWorkflowId);
+1436:      runWorkflow(rec.workflowId);
+1445:      session.inputsByWorkflow[rec.workflowId].goal = firstNonEmpty(session.inputsByWorkflow[rec.workflowId].goal, rec.title);
+1446:      persistWorkflowDraft(projectName, session, rec.workflowId, "Recommendation saved as draft", true);
+1461:        inputs: asObject(session.inputsByWorkflow[recWorkflow.id]),
+1473:    button.onclick = () => runWorkflow(button.getAttribute("data-wf-catalog-run") || session.selectedWorkflowId);
+1480:      persistWorkflowDraft(projectName, session, workflowId, "Draft saved", true);
+1494:        inputs: asObject(session.inputsByWorkflow[workflowId]),
+1511:        inputs,
+1528:      if (!run.output) {
+1534:          title: `${workflow.title} • ${inputs.campaign || inputs.project || projectName || "Project"}`,
+1535:          description: asString(run.output.summary),
+1543:          output: asObject(run.output),
+1544:          notes: asArray(run.output.nextActions || [])
+1572:      setSharedHandoff(projectName, "ai-command", {
+1595:        `Project: ${inputs.project || projectName || "not set"}`,
+1596:        `Campaign: ${inputs.campaign || "not set"}`,
+1597:        `Product: ${inputs.product || "not set"}`,
+1598:        `Channel: ${inputs.channel || "not set"}`,
+1599:        `Goal: ${inputs.goal || "not set"}`,
+1608:      setSharedHandoff(projectName, "ai-command", {
+1631:        workflowAutomationState.result = "No safe automation steps available.";
+1635:      const confirmed = window.confirm(`Confirm automation run\n\nAction: Run ${plan.length} safe automation steps.\nRisk: This can execute workflow actions that create downstream tasks or handoffs.\n\nSelect Cancel to stop automation.`);
+1660:        workflowAutomationState.result = "No safe automation steps available.";
+1665:      const confirmed = window.confirm("Confirm single automation step\n\nAction: Run the next safe automation step.\nRisk: This can execute a workflow action and change downstream state.\n\nSelect Cancel to keep the current state.");
+1681:        ? "Step-by-step automation completed."
+1682:        : "Step executed. Run again for next step.";
+1801:      inputsByWorkflow: WORKFLOW_CATALOG.reduce((acc, workflow) => {
+1827:    function getMissingInputs(workflow, inputs) {
+1828:      return workflow.requiredInputs.filter((field) => !asString(inputs[field]).trim());
+1831:    function buildSessionPrompt(workflow, inputs) {
+1835:        `Project: ${inputs.project || projectName || "not set"}`,
+1836:        `Campaign: ${inputs.campaign || campaignName || "not set"}`,
+1837:        `Product: ${inputs.product || "not set"}`,
+1838:        `Channel: ${inputs.channel || "not set"}`,
+1839:        `Goal: ${inputs.goal || "Prepare an execution-ready workflow package."}`
+1843:    function buildStepModel(workflow, inputs) {
+1844:      const missing = getMissingInputs(workflow, inputs);
+1896:      const inputs = asObject(stateModel.inputsByWorkflow[workflow.id]);
+1897:      const missing = getMissingInputs(workflow, inputs);
+1922:      const steps = buildStepModel(workflow, inputs);
+1969:                  const itemInputs = asObject(stateModel.inputsByWorkflow[item.id]);
+1970:                  const itemMissing = getMissingInputs(item, itemInputs);
+1971:                  const requiredCount = item.requiredInputs.length;
+2006:                  <select id="wfLightWorkflowType" class="setup-input">
+2012:                  <input id="wfLightProject" class="setup-input" type="text" value="${escapeHtml(inputs.project || "")}" placeholder="Current project">
+2016:                  <input id="wfLightCampaign" class="setup-input" type="text" value="${escapeHtml(inputs.campaign || "")}" placeholder="Campaign name">
+2020:                  <input id="wfLightGoal" class="setup-input" type="text" value="${escapeHtml(inputs.goal || "")}" placeholder="Workflow goal">
+2026:                  <p class="wfloop-session-label">Output to prepare</p>
+2031:                  <p class="wfloop-session-value">${escapeHtml(workflow.requiredInputs.map(titleCase).join(", "))}</p>
+2035:                  <p class="wfloop-session-value">${escapeHtml(workflow.requiredInputs.filter((field) => asString(inputs[field]).trim()).map(titleCase).join(", ") || "None")}</p>
+2038:                  <p class="wfloop-session-label">Missing inputs</p>
+2075:                <p class="mhos-ai-guidance-reason">Remaining gaps: ${escapeHtml(missing.map(titleCase).join(", ") || "No missing inputs")}. Safest next step: ${escapeHtml(nextAction)}</p>
+2090:                      <p class="mhos-destination-meta"><strong>Context carried</strong> workflow package prompt, selected workflow, and input state</p>
+2146:                          <span>${escapeHtml(formatDateTime(item.created_at || item.executed_at || nowIso()))}</span>
+2180:        const input = $(id);
+2181:        if (!input) return;
+2182:        input.oninput = () => {
+2183:          stateModel.inputsByWorkflow[stateModel.selectedWorkflowId][field] = input.value || "";
+2199:        const activeInputs = asObject(stateModel.inputsByWorkflow[activeWorkflow.id]);
+2200:        const missingFields = getMissingInputs(activeWorkflow, activeInputs);
+2208:        const prompt = buildSessionPrompt(activeWorkflow, activeInputs);
+2209:        const globalInput = $("quickCommandInput");
+2210:        if (globalInput) globalInput.value = prompt;
+2225:        const activeInputs = asObject(stateModel.inputsByWorkflow[activeWorkflow.id]);
+2228:          : buildSessionPrompt(activeWorkflow, activeInputs);
+2245:        const globalInput = $("quickCommandInput");
+2246:        if (globalInput) globalInput.value = prompt;

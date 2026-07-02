@@ -1,11 +1,22 @@
 // public/control-center/app.js
 
 import {
+  getProjectedActiveRole,
+  getProjectedRoutePermissions
+} from "./runtime/authority/authority-projection.js";
+import {
+  ACTIVE_ROUTE_ROLES,
+  getFallbackRouteAccess
+} from "./runtime/authority/route-role-fallback.js";
+
+import {
   initRouter,
   navigateTo,
   renderRouteTemplate,
-  getRouteDefinition
+  getRouteDefinition,
+  setRouteAccessResolver
 } from "./router.js";
+import { applyStandardPageLayout } from "./ui/page-standard.js";
 import {
   getState,
   setProjects,
@@ -22,11 +33,16 @@ import {
 } from "./state.js";
 import {
   setApiBaseUrl,
+  isDebugStartupMode,
+  AccessKeyError,
   fetchProjects,
+  createMediaManagerProject,
   fetchAllCoreProjectData,
   fetchProjectInsights,
   fetchProjectLearning,
+  fetchProjectGovernance,
   fetchProjectOperations,
+  saveProjectSetup,
   executeProjectAiCommand,
   saveProjectConnectorSource,
   removeProjectConnectorSource,
@@ -41,6 +57,7 @@ import {
   runProjectAiWorkflow,
   createProjectTask,
   createProjectApproval,
+  decideProjectApproval,
   saveProjectCampaign,
   createProjectHandoff,
   consumeProjectHandoff,
@@ -49,8 +66,19 @@ import {
   reschedulePublishingItem,
   approvePublishingItem,
   publishPublishingItem,
-  failPublishingItem
+  failPublishingItem,
+  fetchProjectTaskCenter,
+  fetchProjectQueueCenter,
+  fetchProjectJobMonitor,
+  fetchProjectNotificationCenter
 } from "./api.js";
+import {
+  CONTROL_ACCESS_KEY_STORAGE_KEY,
+  CONTROL_ACCESS_KEY_LEGACY_STORAGE_KEYS
+} from "./constants.js";
+import { getOverlaySnapshot } from "./runtime/overlay/overlay-runtime.js";
+import { createLifecycleRegistry } from "./runtime/lifecycle/lifecycle-registry.js";
+import { installMhRuntimeGlobals } from "./runtime/mh-runtime-globals.js";
 
 /* =========================
    CONFIG
@@ -59,8 +87,607 @@ import {
 setApiBaseUrl("");
 
 /* =========================
-   DOM HELPERS
+   APP SHELL LIFECYCLE REGISTRY
 ========================= */
+
+// Module-level registry for app shell listeners
+// Manages global listeners (resize, orientation, route change, navigation)
+// Cleaned up on route changes to prevent listener accumulation
+const appShellLifecycle = createLifecycleRegistry("app-shell");
+
+// Helper function to register app shell listeners with the registry
+function addAppShellListener(target, type, handler, options) {
+  if (!target || typeof handler !== "function") {
+    return () => {};
+  }
+  return appShellLifecycle.addEventListener(target, type, handler, options);
+}
+
+/* =========================
+   CONTROL
+========================= */
+
+const CONTROL_WRITE_HEADER = "x-mh-control-key";
+const CONTROL_ROLE_STORAGE_KEY = "mh-control-role";
+const DEFAULT_ACTIVE_ROLE = "admin";
+
+function persistCanonicalControlKey(key) {
+  const normalized = String(key || "").trim();
+  if (!normalized) return;
+
+  try {
+    window.localStorage?.setItem(CONTROL_ACCESS_KEY_STORAGE_KEY, normalized);
+  } catch (_) {}
+}
+
+function setRuntimeControlKey(key) {
+  const normalized = String(key || "").trim();
+  try {
+    window.__MH_CONTROL_CENTER_READ_KEY__ = normalized;
+    window.__MH_CONTROL_CENTER_WRITE_KEY__ = normalized;
+    window.__MH_CONTROL_WRITE_KEY__ = normalized;
+    window.__MH_CONTROL_CENTER_ACCESS_KEY__ = normalized;
+    window.__MH_CONTROL_ACCESS_KEY__ = normalized;
+    window.__MH_ACCESS_KEY__ = normalized;
+  } catch (_) {}
+}
+
+function getControlWriteKey() {
+  if (typeof window === "undefined") return "";
+
+  const runtimeValue = [
+    window.__MH_CONTROL_CENTER_READ_KEY__,
+    window.__MH_CONTROL_CENTER_WRITE_KEY__,
+    window.__MH_CONTROL_WRITE_KEY__,
+    window.__MH_CONTROL_CENTER_ACCESS_KEY__,
+    window.__MH_CONTROL_ACCESS_KEY__,
+    window.__MH_ACCESS_KEY__
+  ].find((value) => typeof value === "string" && value.trim()) || "";
+
+  if (runtimeValue) {
+    const normalizedRuntimeKey = runtimeValue.trim();
+    persistCanonicalControlKey(normalizedRuntimeKey);
+    return normalizedRuntimeKey;
+  }
+
+  try {
+    const canonical = String(window.localStorage?.getItem(CONTROL_ACCESS_KEY_STORAGE_KEY) || "").trim();
+    if (canonical) {
+      return canonical;
+    }
+
+    const legacy = CONTROL_ACCESS_KEY_LEGACY_STORAGE_KEYS
+      .map((key) => String(window.localStorage?.getItem(key) || "").trim())
+      .find(Boolean) || "";
+
+    if (legacy) {
+      persistCanonicalControlKey(legacy);
+    }
+
+    return legacy;
+  } catch (_) {
+    return "";
+  }
+}
+
+function getActiveRole() {
+  try {
+    const stored = window.localStorage?.getItem(CONTROL_ROLE_STORAGE_KEY);
+    if (stored && ACTIVE_ROUTE_ROLES.includes(stored.trim().toLowerCase())) {
+      return stored.trim().toLowerCase();
+    }
+  } catch (_) {}
+  const state = getState();
+  const operations = state.data.operations;
+  const stateRole = getProjectedActiveRole({ operations, activeRole: state.activeRole });
+  if (stateRole && typeof stateRole === "string" && stateRole.trim()) {
+    return stateRole.trim().toLowerCase();
+  }
+  return DEFAULT_ACTIVE_ROLE;
+}
+
+function isProtectedControlWriteRequest(input, init = {}) {
+  const method = String(
+    init.method ||
+    (input instanceof Request ? input.method : "") ||
+    "GET"
+  ).trim().toUpperCase();
+
+  if (!["POST", "PATCH", "DELETE"].includes(method)) {
+    return false;
+  }
+
+  try {
+    const base = typeof window !== "undefined" ? window.location.origin : "http://localhost";
+    const url = new URL(
+      input instanceof Request ? input.url : String(input || ""),
+      base
+    );
+
+    return /^\/(?:public\/)?media-manager\//.test(url.pathname);
+  } catch (_) {
+    return false;
+  }
+}
+
+function installProtectedWriteFetch() {
+  if (typeof window === "undefined" || typeof window.fetch !== "function" || window.fetch.__mhProtectedWriteFetch) {
+    return;
+  }
+
+  const originalFetch = window.fetch.bind(window);
+
+  async function protectedWriteFetch(input, init = {}) {
+    if (!isProtectedControlWriteRequest(input, init)) {
+      return originalFetch(input, init);
+    }
+
+    const headers = new Headers(
+      init.headers ||
+      (input instanceof Request ? input.headers : undefined) ||
+      {}
+    );
+    const controlKey = getControlWriteKey();
+
+    if (controlKey) {
+      headers.set(CONTROL_WRITE_HEADER, controlKey);
+      headers.set("Authorization", `Bearer ${controlKey}`);
+    }
+
+    const nextInit = {
+      ...init,
+      headers
+    };
+    const nextInput = input instanceof Request
+      ? new Request(input, { headers })
+      : input;
+
+    return originalFetch(nextInput, nextInit);
+  }
+
+  protectedWriteFetch.__mhProtectedWriteFetch = true;
+  window.fetch = protectedWriteFetch;
+}
+
+function resolveRouteAccess(route) {
+  const operations = getState().data.operations;
+  const routePermissions = getProjectedRoutePermissions({ operations });
+  const activeRole = getActiveRole();
+
+  const explicitRule = routePermissions.find((item) => item?.route === route);
+
+  if (!explicitRule) {
+    return getFallbackRouteAccess(route, activeRole);
+  }
+
+  const allowedRoles = Array.isArray(explicitRule.roles)
+    ? explicitRule.roles.map((item) => String(item || "").trim().toLowerCase())
+    : [];
+  const allowed = allowedRoles.includes(activeRole);
+
+  return {
+    allowed,
+    reason: allowed
+      ? ""
+      : `Route "${route}" requires one of: [${allowedRoles.join(", ")}]. ` +
+        `Your current role is "${activeRole}". ` +
+        `Use the Role selector in the top bar to switch roles for internal testing.`
+  };
+}
+
+installProtectedWriteFetch();
+setRouteAccessResolver(resolveRouteAccess);
+
+/* =========================
+   ACCESS KEY PANEL
+========================= */
+
+function createAccessKeyModal() {
+  const modal = document.createElement("div");
+  modal.id = "accessKeyModal";
+  modal.className = "access-key-modal";
+  modal.setAttribute("role", "dialog");
+  modal.setAttribute("aria-modal", "true");
+  modal.setAttribute("aria-label", "Control Center Access Key");
+  modal.innerHTML = `
+    <div class="access-key-card">
+      <h2 class="access-key-title">Control Center Access</h2>
+      <p class="access-key-desc">
+        Enter the Control Center access key to unlock protected reads and writes.
+        The key is stored only in your browser's localStorage and never transmitted to
+        static routes or logged to the console.
+      </p>
+      <div class="access-key-field">
+        <input
+          id="accessKeyInput"
+          class="access-key-input"
+          type="password"
+          placeholder="Paste access key…"
+          autocomplete="off"
+          spellcheck="false"
+          aria-label="Access key input"
+        >
+      </div>
+      <div class="access-key-actions">
+        <button id="accessKeySaveBtn" class="btn btn-primary" type="button">Save Key</button>
+        <button id="accessKeyTestBtn" class="btn btn-secondary" type="button">Test Key</button>
+        <button id="accessKeyDiagBtn" class="btn btn-secondary" type="button">Run Diagnostic</button>
+        <button id="accessKeyClearBtn" class="btn btn-danger" type="button">Clear Key</button>
+        <button id="accessKeyClearReloadBtn" class="btn btn-danger" type="button">Clear saved key and reload</button>
+        <button id="accessKeyCloseBtn" class="btn btn-ghost" type="button">Close</button>
+      </div>
+      <div id="accessKeyStatus" class="access-key-status" aria-live="polite"></div>
+    </div>
+  `;
+  return modal;
+}
+
+function setAccessKeyStatus(message, type) {
+  const status = document.getElementById("accessKeyStatus");
+  if (!status) return;
+  status.textContent = message;
+  status.className = "access-key-status access-key-status--" + (type || "info");
+}
+
+function getCurrentAccessKeyInputValue() {
+  const input = document.getElementById("accessKeyInput");
+  return String(input?.value || "").trim();
+}
+
+function collectAccessKeyDiagnostics() {
+  const currentInputValue = getCurrentAccessKeyInputValue();
+  const diagnostics = {
+    canonicalStorageKey: CONTROL_ACCESS_KEY_STORAGE_KEY,
+    canonicalValuePresent: false,
+    canonicalValueLength: 0,
+    currentInputPresent: Boolean(currentInputValue),
+    currentInputLength: currentInputValue.length,
+    runtimeSources: [],
+    legacySources: [],
+    resolvedKeyPresent: false,
+    resolvedKeyLength: 0,
+    resolvedSource: "none"
+  };
+
+  try {
+    const canonical = String(localStorage.getItem(CONTROL_ACCESS_KEY_STORAGE_KEY) || "").trim();
+    diagnostics.canonicalValuePresent = Boolean(canonical);
+    diagnostics.canonicalValueLength = canonical.length;
+
+    CONTROL_ACCESS_KEY_LEGACY_STORAGE_KEYS.forEach((legacyKey) => {
+      const value = String(localStorage.getItem(legacyKey) || "").trim();
+      if (value) {
+        diagnostics.legacySources.push({ key: legacyKey, length: value.length });
+      }
+    });
+  } catch (_) {}
+
+  const runtimeCandidates = [
+    { key: "window.__MH_CONTROL_CENTER_READ_KEY__", value: window.__MH_CONTROL_CENTER_READ_KEY__ },
+    { key: "window.__MH_CONTROL_CENTER_WRITE_KEY__", value: window.__MH_CONTROL_CENTER_WRITE_KEY__ },
+    { key: "window.__MH_CONTROL_WRITE_KEY__", value: window.__MH_CONTROL_WRITE_KEY__ },
+    { key: "window.__MH_CONTROL_CENTER_ACCESS_KEY__", value: window.__MH_CONTROL_CENTER_ACCESS_KEY__ },
+    { key: "window.__MH_CONTROL_ACCESS_KEY__", value: window.__MH_CONTROL_ACCESS_KEY__ },
+    { key: "window.__MH_ACCESS_KEY__", value: window.__MH_ACCESS_KEY__ }
+  ];
+
+  runtimeCandidates.forEach((candidate) => {
+    const value = String(candidate.value || "").trim();
+    if (value) {
+      diagnostics.runtimeSources.push({ key: candidate.key, length: value.length });
+    }
+  });
+
+  const resolved = getControlWriteKey();
+  diagnostics.resolvedKeyPresent = Boolean(resolved);
+  diagnostics.resolvedKeyLength = String(resolved || "").length;
+
+  if (diagnostics.runtimeSources.length) {
+    diagnostics.resolvedSource = diagnostics.runtimeSources[0].key;
+  } else if (diagnostics.canonicalValuePresent) {
+    diagnostics.resolvedSource = `localStorage:${CONTROL_ACCESS_KEY_STORAGE_KEY}`;
+  } else if (diagnostics.legacySources.length) {
+    diagnostics.resolvedSource = `localStorage:${diagnostics.legacySources[0].key}`;
+  }
+
+  return diagnostics;
+}
+
+function formatAccessKeyDiagnostics(diagnostics, requestResult = null) {
+  const lines = [
+    "Access Key Diagnostic",
+    `canonical key: ${diagnostics.canonicalStorageKey}`,
+    `canonical value: ${diagnostics.canonicalValuePresent ? `present (len=${diagnostics.canonicalValueLength})` : "missing"}`,
+    `current input present: ${diagnostics.currentInputPresent ? `yes (len=${diagnostics.currentInputLength})` : "no"}`,
+    `legacy keys with values: ${diagnostics.legacySources.length}`,
+    `runtime key globals: ${diagnostics.runtimeSources.length}`,
+    `resolved by getControlWriteKey(): ${diagnostics.resolvedKeyPresent ? `present (len=${diagnostics.resolvedKeyLength})` : "missing"}`,
+    `resolved source: ${diagnostics.resolvedSource}`
+  ];
+
+  if (diagnostics.legacySources.length) {
+    lines.push(
+      "legacy matches: " + diagnostics.legacySources.map((item) => `${item.key}(len=${item.length})`).join(", ")
+    );
+  }
+
+  if (diagnostics.runtimeSources.length) {
+    lines.push(
+      "runtime matches: " + diagnostics.runtimeSources.map((item) => `${item.key}(len=${item.length})`).join(", ")
+    );
+  }
+
+  if (requestResult) {
+    lines.push(
+      `probe /media-manager/projects: status=${requestResult.status || "request-failed"} auth=${requestResult.authMode}`
+    );
+    if (requestResult.message) {
+      lines.push(`probe message: ${requestResult.message}`);
+    }
+  }
+
+  return lines.join("\n");
+}
+
+async function runAccessKeyDiagnosticProbe(inputValue = "") {
+  const diagnostics = collectAccessKeyDiagnostics();
+  const latestInputKey = getCurrentAccessKeyInputValue();
+  const explicitInputKey = String(inputValue || "").trim();
+  const inputKey = latestInputKey || explicitInputKey;
+  const key = inputKey || (diagnostics.canonicalValuePresent
+    ? String(localStorage.getItem("mh-control-write-key") || "").trim()
+    : (diagnostics.resolvedKeyPresent ? getControlWriteKey() : ""));
+
+  if (!key) {
+    return {
+      diagnostics,
+      type: "error",
+      text: formatAccessKeyDiagnostics(diagnostics, {
+        status: 0,
+        authMode: "none",
+        message: "No key available from input/runtime/localStorage"
+      })
+    };
+  }
+
+  try {
+    const response = await fetch("/media-manager/projects", {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+        "x-mh-control-key": key,
+        Authorization: `Bearer ${key}`
+      }
+    });
+
+    const text = formatAccessKeyDiagnostics(diagnostics, {
+      status: response.status,
+      authMode: "x-mh-control-key + Authorization",
+      message: response.ok ? "ok" : "not-ok"
+    });
+
+    return {
+      diagnostics,
+      type: response.ok ? "success" : (response.status === 401 || response.status === 403 ? "error" : "warn"),
+      text
+    };
+  } catch (error) {
+    return {
+      diagnostics,
+      type: "error",
+      text: formatAccessKeyDiagnostics(diagnostics, {
+        status: 0,
+        authMode: "x-mh-control-key + Authorization",
+        message: error?.message || "request failed"
+      })
+    };
+  }
+}
+
+async function refreshProjectsAfterKeyUpdate(preferredProjectName = "") {
+  const preferred = await loadProjects();
+  const state = getState();
+  const items = Array.isArray(state.data.projects) ? state.data.projects : [];
+
+  const requested = getSafeProjectName(preferredProjectName, "");
+  const requestedExists = requested && projectExistsInList(requested, items);
+  const projectToLoad = requestedExists ? requested : getSafeProjectName(preferred || DEFAULT_PROJECT_SLUG);
+
+  navigateTo("home");
+  await loadProjectData(projectToLoad);
+  showMessage(`Loaded project: ${projectToLoad}`);
+}
+
+
+
+function bindAccessKeyPanel(modal) {
+  const input = modal.querySelector("#accessKeyInput");
+  const saveBtn = modal.querySelector("#accessKeySaveBtn");
+  const testBtn = modal.querySelector("#accessKeyTestBtn");
+  const diagBtn = modal.querySelector("#accessKeyDiagBtn");
+  const clearBtn = modal.querySelector("#accessKeyClearBtn");
+  const clearReloadBtn = modal.querySelector("#accessKeyClearReloadBtn");
+  const closeBtn = modal.querySelector("#accessKeyCloseBtn");
+
+  if (saveBtn) {
+    saveBtn.addEventListener("click", async () => {
+      const val = getCurrentAccessKeyInputValue();
+      if (!val) {
+        setAccessKeyStatus("No key entered.", "error");
+        return;
+      }
+
+      try {
+        localStorage.setItem("mh-control-write-key", val);
+        localStorage.setItem(CONTROL_ACCESS_KEY_STORAGE_KEY, val);
+        const persisted = String(localStorage.getItem("mh-control-write-key") || "").trim();
+        if (persisted !== val) {
+          setAccessKeyStatus("Failed to save access key to localStorage.", "error");
+          return;
+        }
+
+        setRuntimeControlKey(val);
+      } catch (_) {
+        setAccessKeyStatus("Failed to save access key to localStorage.", "error");
+        return;
+      }
+
+      setAccessKeyStatus("Key saved to mh-control-write-key. Reloading...", "success");
+      updateAccessKeyButton();
+
+      try {
+        const retryProject = ["hairo", "ticmen"].join("");
+        navigateTo("home");
+        await loadProjectData(retryProject);
+        hideAccessKeyModal();
+      } catch (error) {
+        setAccessKeyStatus(error?.message || "Key saved, but project load failed.", "error");
+      }
+    });
+  }
+
+  if (diagBtn) {
+    diagBtn.addEventListener("click", async () => {
+      setAccessKeyStatus("Running access-key diagnostic…", "info");
+      const result = await runAccessKeyDiagnosticProbe(input?.value || "");
+      setAccessKeyStatus(result.text, result.type);
+    });
+  }
+
+  if (testBtn) {
+    testBtn.addEventListener("click", async () => {
+      setAccessKeyStatus("Testing…", "info");
+      const inputVal = (input?.value || "").trim();
+      let storedVal = "";
+      try {
+        storedVal = String(localStorage.getItem(CONTROL_ACCESS_KEY_STORAGE_KEY) || "").trim();
+        if (!storedVal) {
+          storedVal = CONTROL_ACCESS_KEY_LEGACY_STORAGE_KEYS
+            .map((key) => String(localStorage.getItem(key) || "").trim())
+            .find(Boolean) || "";
+        }
+      } catch (_) {}
+      const keyToTest = inputVal || storedVal;
+      if (!keyToTest) {
+        setAccessKeyStatus("No key to test. Enter a key or save one first.", "error");
+        return;
+      }
+      try {
+        const response = await fetch("/media-manager/projects", {
+          method: "GET",
+          headers: {
+            "Accept": "application/json",
+            "x-mh-control-key": keyToTest
+          }
+        });
+        if (response.ok) {
+          setAccessKeyStatus("Valid key — loading front page and project…", "success");
+
+          try {
+            if (inputVal) {
+              setRuntimeControlKey(inputVal);
+              try {
+                localStorage.setItem(CONTROL_ACCESS_KEY_STORAGE_KEY, inputVal);
+              } catch (_) {}
+              updateAccessKeyButton();
+            }
+            await refreshProjectsAfterKeyUpdate();
+            setAccessKeyStatus("Valid key and project loaded.", "success");
+          } catch (error) {
+            setAccessKeyStatus(error?.message || "Valid key, but project load failed.", "error");
+          }
+        } else if (response.status === 401 || response.status === 403) {
+          setAccessKeyStatus("Invalid key — access denied (" + response.status + ").", "error");
+        } else {
+          setAccessKeyStatus("Endpoint responded with " + response.status + ".", "warn");
+        }
+      } catch (_) {
+        setAccessKeyStatus("Request failed — check server connection.", "error");
+      }
+    });
+  }
+
+  if (clearBtn) {
+    clearBtn.addEventListener("click", () => {
+      try {
+        localStorage.removeItem(CONTROL_ACCESS_KEY_STORAGE_KEY);
+        CONTROL_ACCESS_KEY_LEGACY_STORAGE_KEYS.forEach((legacyKey) => localStorage.removeItem(legacyKey));
+      } catch (_) {}
+      setRuntimeControlKey("");
+      if (input) input.value = "";
+      setAccessKeyStatus("Key cleared. Reads will now fail with missing-key errors.", "warn");
+      updateAccessKeyButton();
+    });
+  }
+
+  if (clearReloadBtn) {
+    clearReloadBtn.addEventListener("click", () => {
+      try {
+        localStorage.removeItem(CONTROL_ACCESS_KEY_STORAGE_KEY);
+        CONTROL_ACCESS_KEY_LEGACY_STORAGE_KEYS.forEach((legacyKey) => localStorage.removeItem(legacyKey));
+      } catch (_) {}
+      setRuntimeControlKey("");
+      window.location.reload();
+    });
+  }
+
+  if (closeBtn) {
+    closeBtn.addEventListener("click", hideAccessKeyModal);
+  }
+
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal) hideAccessKeyModal();
+  });
+
+  modal.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") hideAccessKeyModal();
+  });
+}
+
+function showAccessKeyModal() {
+  let modal = document.getElementById("accessKeyModal");
+  if (!modal) {
+    modal = createAccessKeyModal();
+    document.body.appendChild(modal);
+    bindAccessKeyPanel(modal);
+  }
+  document.body.classList.add("is-executive-new-open");
+  modal.classList.add("is-visible");
+  const input = document.getElementById("accessKeyInput");
+  if (input) {
+    input.value = "";
+    setTimeout(() => input.focus(), 50);
+  }
+}
+
+function hideAccessKeyModal() {
+  const modal = document.getElementById("accessKeyModal");
+  if (modal) modal.classList.remove("is-visible");
+}
+
+function updateAccessKeyButton() {
+  const btn = document.getElementById("accessKeyBtn");
+  if (!btn) return;
+  const hasKey = !!getControlWriteKey();
+  btn.textContent = hasKey ? "Key: Active ✓" : "Set Access Key";
+  btn.classList.toggle("btn-key-active", hasKey);
+  btn.classList.toggle("btn-key-missing", !hasKey);
+}
+
+function injectAccessKeyButton() {
+  // Access key management moved out of the global header.
+  updateAccessKeyButton();
+}
+
+/* =========================
+   ROLE SWITCHER
+========================= */
+
+function injectRoleSwitcher() {
+  // Role switching belongs in System/Settings, not the global header.
+}
+
+
 
 function $(id) {
   return document.getElementById(id);
@@ -78,6 +705,15 @@ function escapeHtml(value) {
 function safeText(value, fallback = "-") {
   if (value == null || value === "") return fallback;
   return String(value);
+}
+
+function formatRoleLabel(role) {
+  const normalized = String(role || "").trim().toLowerCase();
+  if (!normalized) return "Admin";
+  return normalized
+    .split("_")
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
 }
 
 function setText(id, value, fallback = "-") {
@@ -121,9 +757,20 @@ function showMessage(message) {
   }
 }
 
+function isFatalErrorPanelVisible() {
+  const panel = $("fatalErrorPanel");
+  return Boolean(panel && !panel.hidden && panel.classList.contains("is-visible"));
+}
+
 function showError(message) {
   const box = $("globalError");
   if (!box) return;
+
+  if (message && isFatalErrorPanelVisible()) {
+    box.textContent = "";
+    box.style.display = "none";
+    return;
+  }
 
   box.textContent = message || "";
   box.style.display = message ? "block" : "none";
@@ -150,8 +797,34 @@ function autoHideMessage(delay = 2500) {
 
 function showLoading(
   title = "Loading project",
-  text = "Please wait while the system loads the workspace."
+  text = "Please wait while the system loads the workspace.",
+  options = {}
 ) {
+  const token = String(options.token || "");
+  const reason = String(options.reason || "project-load");
+  const explicitLoad = Boolean(options.explicitLoad);
+
+  if (!explicitLoad) {
+    recordLoadingTransition("show-blocked-non-explicit", { token, reason });
+    return;
+  }
+
+  if (!token || !isActiveProjectLoadToken(token)) {
+    recordLoadingTransition("show-blocked-stale-token", { token, reason });
+    return;
+  }
+
+  if (startupRuntimeState.manualUnlockActive && token === startupRuntimeState.manualUnlockToken) {
+    recordLoadingTransition("show-blocked-manual-unlock", { token, reason });
+    return;
+  }
+
+  if (startupRuntimeState.manualUnlockActive && token !== startupRuntimeState.manualUnlockToken) {
+    recordLoadingTransition("show-blocked-manual-unlock", { token, reason });
+    return;
+  }
+
+  const wasVisible = isLoadingVisible();
   const overlay = $("loadingOverlay");
   const loadingTitle = $("loadingTitle");
   const loadingText = $("loadingText");
@@ -160,17 +833,1092 @@ function showLoading(
   if (loadingText) loadingText.textContent = text;
 
   if (overlay) {
+    overlay.hidden = false;
+    overlay.inert = false;
+    overlay.style.display = "flex";
+    overlay.style.opacity = "1";
+    overlay.style.visibility = "visible";
+    overlay.style.pointerEvents = "auto";
     overlay.classList.add("is-visible");
     overlay.setAttribute("aria-hidden", "false");
+    syncAiDockInteractivity();
+    document.body.classList.add("is-loading", "loading", "loading-locked");
+    installLoadingWatchdog(reason, wasVisible);
+    recordLoadingTransition("show", { token, reason });
   }
 }
 
-function hideLoading() {
+function removeLoadingBodyClasses() {
+  const body = document.body;
+  if (!body) return;
+
+  body.classList.remove("is-loading", "loading", "loading-locked", "app-loading", "app-locked");
+
+  Array.from(body.classList).forEach((className) => {
+    if (/loading|locked/i.test(className)) {
+      body.classList.remove(className);
+    }
+  });
+}
+
+function hideLoading(options = {}) {
+  const token = String(options.token || "");
+  const reason = String(options.reason || "project-load-complete");
+  const force = Boolean(options.force);
+
+  if (token && !force && !isActiveProjectLoadToken(token)) {
+    recordLoadingTransition("hide-blocked-stale-token", { token, reason });
+    return false;
+  }
+
   const overlay = $("loadingOverlay");
-  if (!overlay) return;
+  if (!overlay) return false;
 
   overlay.classList.remove("is-visible");
+  overlay.hidden = true;
+  overlay.inert = true;
   overlay.setAttribute("aria-hidden", "true");
+  syncAiDockInteractivity();
+  overlay.style.setProperty("display", "none", "important");
+  overlay.style.opacity = "0";
+  overlay.style.visibility = "hidden";
+  overlay.style.pointerEvents = "none";
+
+  removeLoadingBodyClasses();
+
+  clearLoadingWatchdog();
+  startupRuntimeState.hideLoadingCalled = true;
+  startupRuntimeState.hideLoadingReason = reason;
+  startupRuntimeState.hideLoadingAt = new Date().toISOString();
+  recordLoadingTransition(force ? "hide-force" : "hide", { token, reason });
+  persistRuntimeTrace();
+  return true;
+}
+
+function isLoadingVisible() {
+  const overlay = $("loadingOverlay");
+  if (!overlay) return false;
+
+  const classVisible = overlay.classList.contains("is-visible");
+  const ariaVisible = overlay.getAttribute("aria-hidden") === "false";
+  const pointerBlocking = overlay.style.pointerEvents && overlay.style.pointerEvents !== "none";
+  const displayBlocking = overlay.style.display && overlay.style.display !== "none";
+
+  return Boolean(classVisible || ariaVisible || pointerBlocking || displayBlocking);
+}
+
+const STARTUP_UNLOCK_TIMEOUT_MS = 8000;
+const LOADING_WATCHDOG_TIMEOUT_MS = STARTUP_UNLOCK_TIMEOUT_MS;
+const LOADING_WATCHDOG_INTERVAL_MS = 1000;
+const OVERLAY_RECOVERY_DELAY_MS = 10000;
+const PARSE_WATCHDOG_TIMEOUT_MS = 2000;
+const RESPONSE_TEXT_WATCHDOG_TIMEOUT_MS = 4000;
+const STARTUP_STEPS_STORAGE_KEY = "mh-control-center-startup-steps";
+const LAST_PROJECT_LOAD_STORAGE_KEY = "mh-control-center-last-project-load";
+const LOADING_TRANSITIONS_STORAGE_KEY = "mh-control-center-loading-transitions";
+const LAST_STARTUP_ERROR_STORAGE_KEY = "mh-control-center-last-startup-error";
+const FETCH_DIAGNOSTICS_STORAGE_KEY = "mh-control-center-fetch-diagnostics";
+const STARTUP_UNLOCK_STORAGE_KEY = "mh-control-center-startup-unlock";
+const RUNTIME_TRACE_STORAGE_KEY = "mh-control-center-runtime-trace";
+const LAST_CLICK_STORAGE_KEY = "mh-control-center-last-click";
+const STARTUP_HISTORY_LIMIT = 60;
+const LOADING_TRANSITION_LIMIT = 80;
+const RUNTIME_TRACE_LIMIT = 120;
+const INIT_LOAD_PROJECTS_TIMEOUT_MS = 6000;
+
+let globalLoadingWatchdogTimer = null;
+let loadingWatchdogVisibleSinceMs = 0;
+let loadingWatchdogReason = "";
+
+const startupStepHistory = [];
+const loadingTransitionHistory = [];
+const runtimeTraceHistory = [];
+
+const startupDiagnostics = {
+  failedEndpoints: [],
+  lastErrorSource: "",
+  lastErrorMessage: "",
+  requestAuth: {
+    keyPresent: false,
+    keySource: "none",
+    authHeaderPresent: false,
+    accessKeyBypass: false,
+    endpoint: ""
+  }
+};
+
+const startupRuntimeState = {
+  startupStartedAtMs: 0,
+  currentProject: "",
+  currentToken: "",
+  projectPayloadSuccess: false,
+  payloadSuccessAt: "",
+  hideLoadingCalled: false,
+  hideLoadingReason: "",
+  hideLoadingAt: "",
+  unlocked: false,
+  unlockReason: "",
+  unlockAt: "",
+  unlockVisible: false,
+  lastApiStage: "",
+  lastApiStageAtMs: 0,
+  lastApiMessage: "",
+  lastApiEndpoint: "",
+  manualUnlockActive: false,
+  manualUnlockToken: "",
+  initialized: false,
+  initReadyAt: "",
+  responseTextWatchdogUnlocked: false
+};
+
+
+
+function getOverlayState() {
+  const overlay = $("loadingOverlay");
+  const body = document.body;
+  const overlayNodes = typeof document !== "undefined"
+    ? Array.from(document.querySelectorAll("#loadingOverlay"))
+    : [];
+
+  return {
+    exists: Boolean(overlay),
+    count: overlayNodes.length,
+    className: String(overlay?.className || ""),
+    display: String(overlay?.style?.display || ""),
+    visibility: String(overlay?.style?.visibility || ""),
+    opacity: String(overlay?.style?.opacity || ""),
+    pointerEvents: String(overlay?.style?.pointerEvents || ""),
+    ariaHidden: String(overlay?.getAttribute?.("aria-hidden") || ""),
+    bodyClasses: body ? body.className : "",
+    runtimeSnapshot: getOverlaySnapshot(overlay)
+  };
+}
+
+function formatRuntimeTraceEntry(entry) {
+  if (!entry) return "";
+
+  const tokenText = entry.token ? ` [${entry.token}]` : "";
+  const detailText = entry.detail ? ` - ${entry.detail}` : "";
+  const endpointText = entry.endpoint ? ` (${entry.endpoint})` : "";
+  return `${entry.at} ${entry.stage}${tokenText}${endpointText}${detailText}`;
+}
+
+function boundedTracePush(stage, details = {}) {
+  const entry = {
+    at: new Date().toISOString(),
+    stage: String(stage || "startup.trace"),
+    token: String(details.token || startupRuntimeState.currentToken || ""),
+    detail: String(details.detail || details.message || ""),
+    endpoint: String(details.endpoint || "")
+  };
+
+  boundedPush(runtimeTraceHistory, entry, RUNTIME_TRACE_LIMIT);
+  return entry;
+}
+
+function renderStartupRuntimeTrace(cachedPayload = null) {
+  const state = getState();
+  const payload = cachedPayload || {
+    debugStartup: isDebugStartupMode(),
+    currentProject: startupRuntimeState.currentProject || state.context.currentProject || "",
+    currentToken: startupRuntimeState.currentToken || "",
+    payloadSuccess: Boolean(startupRuntimeState.projectPayloadSuccess),
+    hideLoadingCalled: Boolean(startupRuntimeState.hideLoadingCalled),
+    hideLoadingReason: String(startupRuntimeState.hideLoadingReason || ""),
+    unlocked: Boolean(startupRuntimeState.unlocked),
+    unlockReason: String(startupRuntimeState.unlockReason || ""),
+    lastApiStage: String(startupRuntimeState.lastApiStage || ""),
+    lastClick: readLastClickDiagnostic(),
+    accessKeyBypass: Boolean(startupDiagnostics?.requestAuth?.accessKeyBypass),
+    appLoading: Boolean(state.loading),
+    commandRuntime: getCommandRuntimeState(),
+    overlay: getOverlayState(),
+    trace: runtimeTraceHistory.slice(-20)
+  };
+  const panel = $("startupTracePanel");
+  const meta = $("startupTraceMeta");
+  const body = $("startupTraceBody");
+  const unlockBar = $("startupUnlockBar");
+  const unlockText = $("startupUnlockText");
+  const showPanel = payload.debugStartup;
+  const showUnlockBar = Boolean(startupRuntimeState.unlockVisible || startupRuntimeState.unlocked);
+
+  if (panel) {
+    panel.hidden = !showPanel;
+    panel.inert = !showPanel;
+    panel.classList.toggle("is-visible", showPanel);
+    panel.setAttribute("aria-hidden", showPanel ? "false" : "true");
+  }
+
+  if (meta) {
+    meta.textContent = [
+      `project: ${payload.currentProject || "-"}`,
+      `token: ${payload.currentToken || "-"}`,
+      `appLoading: ${payload.appLoading ? "true" : "false"}`,
+      `payloadSuccess: ${payload.payloadSuccess ? "true" : "false"}`,
+      `hideLoadingCalled: ${payload.hideLoadingCalled ? "true" : "false"}`,
+      `lastApiStage: ${payload.lastApiStage || "-"}`,
+      `accessKeyBypass: ${payload.accessKeyBypass ? "true" : "false"}`,
+      `overlay.className: ${payload.overlay.className || "-"}`,
+      `overlay.display: ${payload.overlay.display || "-"}`,
+      `overlay.pointerEvents: ${payload.overlay.pointerEvents || "-"}`,
+      `overlay.aria-hidden: ${payload.overlay.ariaHidden || "-"}`,
+      `body.loadingClasses: ${payload.overlay.bodyClasses || "-"}`,
+      `overlay.count: ${payload.overlay.count || 0}`,
+      `commandRuntime.version: ${payload.commandRuntime?.version || "-"}`,
+      `commandBar.exists: ${payload.commandRuntime?.commandBar?.exists ? "true" : "false"}`,
+      `commandBackdrop.exists: ${payload.commandRuntime?.commandBackdrop?.exists ? "true" : "false"}`,
+      `aiDock.exists: ${payload.commandRuntime?.aiDock?.exists ? "true" : "false"}`,
+      `aiDock.open: ${payload.commandRuntime?.aiDock?.open ? "true" : "false"}`,
+      `aiDock.dataOpen: ${payload.commandRuntime?.aiDock?.dataOpen || "-"}`,
+      `aiDock.toggle.aria-expanded: ${payload.commandRuntime?.aiDock?.toggle?.ariaExpanded || "-"}`,
+      `aiDock.panel.hidden: ${payload.commandRuntime?.aiDock?.panel?.hidden ? "true" : "false"}`,
+      `aiDock.panel.aria-hidden: ${payload.commandRuntime?.aiDock?.panel?.ariaHidden || "-"}`,
+      `lastClick: ${formatLastClickSummary(payload.lastClick)}`
+    ].join("\n");
+  }
+
+  if (body) {
+    body.textContent = payload.trace.length
+      ? payload.trace.slice(-20).map((entry) => formatRuntimeTraceEntry(entry)).join("\n")
+      : "No startup events recorded yet.";
+  }
+
+  if (unlockBar) {
+    unlockBar.hidden = !showUnlockBar;
+    unlockBar.inert = !showUnlockBar;
+    unlockBar.setAttribute("aria-hidden", showUnlockBar ? "false" : "true");
+  }
+
+  if (unlockText) {
+    unlockText.textContent = startupRuntimeState.unlocked
+      ? "Startup is still syncing. The interface has been unlocked."
+      : "Startup is taking longer than expected. You can unlock the interface now.";
+  }
+}
+
+function persistRuntimeTrace(options = {}) {
+  const force = Boolean(options.force);
+  const debugStartup = isDebugStartupMode();
+
+  if (
+    !force &&
+    !debugStartup &&
+    !startupRuntimeState.unlocked &&
+    !startupRuntimeState.unlockVisible
+  ) {
+    return;
+  }
+
+  const state = getState();
+  const payload = {
+    at: new Date().toISOString(),
+    debugStartup,
+    currentProject: startupRuntimeState.currentProject || state.context.currentProject || "",
+    currentToken: startupRuntimeState.currentToken || "",
+    payloadSuccess: Boolean(startupRuntimeState.projectPayloadSuccess),
+    payloadSuccessAt: String(startupRuntimeState.payloadSuccessAt || ""),
+    hideLoadingCalled: Boolean(startupRuntimeState.hideLoadingCalled),
+    hideLoadingReason: String(startupRuntimeState.hideLoadingReason || ""),
+    hideLoadingAt: String(startupRuntimeState.hideLoadingAt || ""),
+    unlocked: Boolean(startupRuntimeState.unlocked),
+    unlockReason: String(startupRuntimeState.unlockReason || ""),
+    unlockAt: String(startupRuntimeState.unlockAt || ""),
+    lastApiStage: String(startupRuntimeState.lastApiStage || ""),
+    lastApiMessage: String(startupRuntimeState.lastApiMessage || ""),
+    lastApiEndpoint: String(startupRuntimeState.lastApiEndpoint || ""),
+    lastClick: readLastClickDiagnostic(),
+    accessKeyBypass: Boolean(startupDiagnostics?.requestAuth?.accessKeyBypass),
+    appLoading: Boolean(state.loading),
+    commandRuntime: getCommandRuntimeState(),
+    overlay: getOverlayState(),
+    trace: runtimeTraceHistory.slice(-20)
+  };
+
+  safeStorageSet(RUNTIME_TRACE_STORAGE_KEY, JSON.stringify(payload));
+  renderStartupRuntimeTrace(payload);
+}
+
+let runtimeTracePersistTimer = null;
+
+function scheduleRuntimeTracePersist(force = false) {
+  if (!force && !isDebugStartupMode()) {
+    return;
+  }
+
+  if (runtimeTracePersistTimer) {
+    clearTimeout(runtimeTracePersistTimer);
+  }
+
+  runtimeTracePersistTimer = window.setTimeout(() => {
+    runtimeTracePersistTimer = null;
+    persistRuntimeTrace({ force });
+  }, 250);
+}
+
+function recordRuntimeTrace(stage, details = {}) {
+  boundedTracePush(stage, details);
+  scheduleRuntimeTracePersist(false);
+}
+
+function readLastClickDiagnostic() {
+  if (typeof window === "undefined") return null;
+
+  try {
+    const raw = window.localStorage?.getItem(LAST_CLICK_STORAGE_KEY) || "";
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === "object" ? parsed : null;
+  } catch (_) {
+    return null;
+  }
+}
+
+function formatLastClickSummary(payload) {
+  if (!payload || typeof payload !== "object") {
+    return "none";
+  }
+
+  const parts = [
+    payload.tag ? String(payload.tag).toLowerCase() : "",
+    payload.id ? `#${payload.id}` : "",
+    payload.className ? `.${String(payload.className).split(/\s+/).filter(Boolean).join(".")}` : "",
+    payload.dataRoute ? `route=${payload.dataRoute}` : "",
+    payload.dataPage ? `page=${payload.dataPage}` : "",
+    payload.href ? `href=${payload.href}` : "",
+    payload.text ? `text=${payload.text}` : ""
+  ].filter(Boolean);
+
+  return parts.join(" ") || "none";
+}
+
+function installClickDiagnosticCapture() {
+  if (typeof document === "undefined" || window.__mhControlCenterClickDiagnosticInstalled) {
+    return;
+  }
+
+  document.addEventListener("click", (event) => {
+    const element = event.target instanceof Element
+      ? event.target.closest("button, a, [data-route], [data-page], [data-action], input, select, textarea") || event.target
+      : null;
+
+    if (!element || !(element instanceof Element)) {
+      return;
+    }
+
+    const payload = {
+      at: new Date().toISOString(),
+      tag: String(element.tagName || "").toLowerCase(),
+      id: String(element.id || ""),
+      className: String(element.className || "").trim(),
+      text: String(element.textContent || "").trim().replace(/\s+/g, " ").slice(0, 120),
+      dataRoute: String(element.getAttribute("data-route") || ""),
+      dataPage: String(element.getAttribute("data-page") || ""),
+      href: String(element.getAttribute("href") || "")
+    };
+
+    safeStorageSet(LAST_CLICK_STORAGE_KEY, JSON.stringify(payload));
+    if (isDebugStartupMode()) {
+      renderStartupRuntimeTrace();
+    }
+  }, { capture: true });
+
+  window.__mhControlCenterClickDiagnosticInstalled = true;
+}
+
+function updateStartupUnlockVisibility(visible) {
+  const nextVisible = Boolean(visible);
+  if (startupRuntimeState.unlockVisible === nextVisible) {
+    return;
+  }
+
+  startupRuntimeState.unlockVisible = nextVisible;
+  recordRuntimeTrace(nextVisible ? "startup.unlock.available" : "startup.unlock.hidden", {
+    detail: startupRuntimeState.currentProject || startupRuntimeState.currentToken || "startup"
+  });
+}
+
+function safeStorageSet(key, value) {
+  try {
+    if (typeof window !== "undefined" && window.localStorage) {
+      window.localStorage.setItem(key, value);
+    }
+  } catch (_) {}
+}
+
+function boundedPush(list, value, limit) {
+  list.push(value);
+  if (list.length > limit) {
+    list.splice(0, list.length - limit);
+  }
+}
+
+function formatStepEntry(entry) {
+  if (!entry) return "";
+  const tokenText = entry.token ? ` [${entry.token}]` : "";
+  const detailText = entry.detail ? ` - ${entry.detail}` : "";
+  return `${entry.at} ${entry.step}${tokenText}${detailText}`;
+}
+
+function renderStartupStepDiagnostics() {
+  const latest = startupStepHistory[startupStepHistory.length - 1] || null;
+  const debugStartup = isDebugStartupMode();
+
+  const banner = $("startupStepBanner");
+  if (banner) {
+    banner.hidden = !debugStartup;
+    if (debugStartup) {
+      banner.textContent = latest
+        ? `Startup: ${latest.step}${latest.token ? ` [${latest.token}]` : ""}`
+        : "Startup: idle";
+    }
+  }
+
+  const stepsBox = $("fatalStartupSteps");
+  if (stepsBox) {
+    const lines = startupStepHistory.slice(-10).map((entry) => formatStepEntry(entry));
+    stepsBox.textContent = lines.length ? lines.join("\n") : "No startup steps recorded yet.";
+  }
+
+  if (!debugStartup) {
+    return;
+  }
+
+  patchState("data", {
+    startupStep: latest?.step || "",
+    startupSteps: startupStepHistory.slice(-20),
+    loadingTransitions: loadingTransitionHistory.slice(-20)
+  });
+
+  scheduleRuntimeTracePersist(false);
+}
+
+function recordStartupStep(step, details = {}) {
+  const entry = {
+    at: new Date().toISOString(),
+    step: String(step || "startup.step"),
+    token: String(details.token || ""),
+    detail: String(details.detail || "")
+  };
+
+  boundedPush(startupStepHistory, entry, STARTUP_HISTORY_LIMIT);
+  safeStorageSet(STARTUP_STEPS_STORAGE_KEY, JSON.stringify(startupStepHistory));
+  boundedTracePush(entry.step, {
+    token: entry.token,
+    detail: entry.detail
+  });
+  renderStartupStepDiagnostics();
+}
+
+function recordLoadingTransition(action, details = {}) {
+  const overlay = $("loadingOverlay");
+  const entry = {
+    at: new Date().toISOString(),
+    action: String(action || "loading.transition"),
+    token: String(details.token || ""),
+    reason: String(details.reason || ""),
+    visible: isLoadingVisible(),
+    classVisible: Boolean(overlay && overlay.classList.contains("is-visible")),
+    display: String(overlay?.style?.display || ""),
+    pointerEvents: String(overlay?.style?.pointerEvents || "")
+  };
+
+  boundedPush(loadingTransitionHistory, entry, LOADING_TRANSITION_LIMIT);
+  safeStorageSet(LOADING_TRANSITIONS_STORAGE_KEY, JSON.stringify(loadingTransitionHistory));
+  boundedTracePush(`loading.${entry.action}`, {
+    token: entry.token,
+    detail: `${entry.reason || ""} class=${entry.classVisible ? "visible" : "hidden"} display=${entry.display || "unset"}`,
+    endpoint: "overlay"
+  });
+  renderStartupStepDiagnostics();
+}
+
+function recordLastProjectLoad(summary) {
+  const payload = {
+    at: new Date().toISOString(),
+    ...summary
+  };
+  safeStorageSet(LAST_PROJECT_LOAD_STORAGE_KEY, JSON.stringify(payload));
+  patchState("data", { lastProjectLoad: payload });
+}
+
+function recordStartupFailure(source, error) {
+  const message = String(error?.message || error || "Unknown startup error").trim();
+  const diagnostics = error?.diagnostics || {};
+  safeStorageSet(LAST_STARTUP_ERROR_STORAGE_KEY, JSON.stringify({
+    at: new Date().toISOString(),
+    source: String(source || "startup"),
+    message,
+    endpoint: String(error?.endpoint || ""),
+    status: error?.status || null
+  }));
+  safeStorageSet(FETCH_DIAGNOSTICS_STORAGE_KEY, JSON.stringify({
+    at: new Date().toISOString(),
+    source: String(source || "startup"),
+    message,
+    diagnostics: diagnostics || null,
+    endpoint: String(error?.endpoint || ""),
+    status: error?.status || null
+  }));
+
+  startupDiagnostics.lastErrorSource = String(source || "startup");
+  startupDiagnostics.lastErrorMessage = message;
+  startupDiagnostics.requestAuth = {
+    keyPresent: Boolean(diagnostics?.keyPresent),
+    keySource: String(diagnostics?.keySource || "none"),
+    authHeaderPresent: Boolean(diagnostics?.authHeaderPresent),
+    accessKeyBypass: Boolean(diagnostics?.accessKeyBypass),
+    endpoint: String(diagnostics?.endpoint || error?.endpoint || "")
+  };
+  recordRuntimeTrace("startup.failure", {
+    detail: `${String(source || "startup")}: ${message}`,
+    endpoint: String(error?.endpoint || "")
+  });
+
+  const endpoint = String(error?.endpoint || "").trim();
+  if (!endpoint) return;
+
+  const alreadyRecorded = startupDiagnostics.failedEndpoints.some((item) => item.endpoint === endpoint);
+  if (!alreadyRecorded) {
+    startupDiagnostics.failedEndpoints.push({
+      endpoint,
+      status: error?.status || null,
+      timeout: Boolean(error?.isTimeout),
+      message
+    });
+  }
+}
+
+function renderStartupDiagnosticsText(reason = "") {
+  const rows = [];
+  if (reason) {
+    rows.push(`Reason: ${reason}`);
+  }
+  if (startupDiagnostics.lastErrorSource || startupDiagnostics.lastErrorMessage) {
+    rows.push(
+      `Last error: ${startupDiagnostics.lastErrorSource || "startup"} - ` +
+      `${startupDiagnostics.lastErrorMessage || "unknown"}`
+    );
+  }
+  if (startupDiagnostics.failedEndpoints.length) {
+    const endpointRow = startupDiagnostics.failedEndpoints
+      .map((item) => `${item.endpoint}${item.status ? ` (${item.status})` : ""}${item.timeout ? " [timeout]" : ""}`)
+      .join("; ");
+    rows.push(`Endpoints: ${endpointRow}`);
+  }
+  if (startupStepHistory.length) {
+    const recentSteps = startupStepHistory.slice(-6).map((entry) => formatStepEntry(entry)).join(" | ");
+    rows.push(`Steps: ${recentSteps}`);
+  }
+  const requestAuth = startupDiagnostics.requestAuth || {};
+  const authEndpoint = String(requestAuth.endpoint || "").trim();
+  if (authEndpoint || requestAuth.keyPresent || requestAuth.authHeaderPresent || requestAuth.accessKeyBypass) {
+    rows.push(
+      `Request auth: keyPresent=${requestAuth.keyPresent ? "true" : "false"}, ` +
+      `keySource=${requestAuth.keySource || "none"}, ` +
+      `authHeaderPresent=${requestAuth.authHeaderPresent ? "true" : "false"}, ` +
+      `accessKeyBypass=${requestAuth.accessKeyBypass ? "true" : "false"}, ` +
+      `endpoint=${authEndpoint || "unknown"}`
+    );
+  }
+  return rows.join("\n");
+}
+
+function forceHideLoadingOverlay(reason = "access-key-recovery") {
+  recordStartupStep("forceHideLoadingOverlay.start", {
+    token: activeProjectLoadToken,
+    detail: reason
+  });
+  hideLoading({ reason, force: true });
+
+  const overlay = $("loadingOverlay");
+  if (!overlay) {
+    recordStartupStep("forceHideLoadingOverlay.done", {
+      token: activeProjectLoadToken,
+      detail: reason
+    });
+    return;
+  }
+
+  overlay.classList.remove("is-visible");
+  overlay.hidden = true;
+  overlay.setAttribute("aria-hidden", "true");
+  syncAiDockInteractivity();
+  overlay.style.setProperty("display", "none", "important");
+  overlay.style.opacity = "0";
+  overlay.style.visibility = "hidden";
+  overlay.style.pointerEvents = "none";
+  removeLoadingBodyClasses();
+  clearLoadingWatchdog();
+  recordRuntimeTrace("loading.force-hide", {
+    token: activeProjectLoadToken,
+    detail: reason,
+    endpoint: "overlay"
+  });
+  recordStartupStep("forceHideLoadingOverlay.done", {
+    token: activeProjectLoadToken,
+    detail: reason
+  });
+}
+
+function recordStartupUnlock(reason = "manual-unlock") {
+  const payload = {
+    at: new Date().toISOString(),
+    reason,
+    project: startupRuntimeState.currentProject || getState().context.currentProject || "",
+    token: startupRuntimeState.currentToken || activeProjectLoadToken || ""
+  };
+
+  startupRuntimeState.unlocked = true;
+  startupRuntimeState.unlockReason = reason;
+  startupRuntimeState.unlockAt = payload.at;
+  startupRuntimeState.unlockVisible = true;
+  safeStorageSet(STARTUP_UNLOCK_STORAGE_KEY, JSON.stringify(payload));
+  recordRuntimeTrace("startup.unlock", {
+    token: payload.token,
+    detail: reason
+  });
+}
+
+function unlockStartupUi(reason = "manual-unlock") {
+  recordStartupStep("manualUnlock.start", {
+    token: activeProjectLoadToken,
+    detail: reason
+  });
+  startupRuntimeState.manualUnlockActive = reason === "manual-unlock";
+  startupRuntimeState.manualUnlockToken = activeProjectLoadToken;
+  if (reason === "manual-unlock") {
+    forceHideLoadingOverlay("manual-unlock");
+  } else {
+    forceHideLoadingOverlay(reason);
+  }
+  setLoading(false);
+  removeLoadingBodyClasses();
+
+  const overlay = $("loadingOverlay");
+  if (overlay) {
+    overlay.classList.remove("is-visible");
+    overlay.setAttribute("aria-hidden", "true");
+    syncAiDockInteractivity();
+    overlay.hidden = true;
+    overlay.inert = true;
+    overlay.style.setProperty("display", "none", "important");
+    overlay.style.visibility = "hidden";
+    overlay.style.opacity = "0";
+    overlay.style.pointerEvents = "none";
+  }
+
+  recordStartupUnlock(reason);
+  // Unlock should recover the interface quietly.
+  // Do not show a persistent error after the user manually unlocks the UI.
+  showMessage("Interface unlocked.");
+  recordStartupStep("manualUnlock.done", {
+    token: activeProjectLoadToken,
+    detail: reason
+  });
+  renderStartupRuntimeTrace();
+}
+
+function bindStartupRecoveryControls() {
+  ["startupUnlockBtn", "startupTraceUnlockBtn"].forEach((id) => {
+    const button = $(id);
+    if (!button || button.dataset.bound) {
+      return;
+    }
+
+    button.dataset.bound = "1";
+    button.addEventListener("click", () => {
+      unlockStartupUi("manual-unlock");
+    });
+  });
+}
+
+function isMissingReadKeyMessage(message) {
+  return /missing\s+read\s+key/i.test(String(message || ""));
+}
+
+function isAccessKeyStartupError(error) {
+  if (Boolean(error?.diagnostics?.accessKeyBypass)) {
+    return false;
+  }
+
+  const status = Number(error?.status || 0);
+  const message = String(error?.message || "");
+  const payloadError = String(error?.payload?.error || "");
+
+  return (
+    error instanceof AccessKeyError ||
+    status === 401 ||
+    status === 403 ||
+    isMissingReadKeyMessage(message) ||
+    isMissingReadKeyMessage(payloadError)
+  );
+}
+
+function ensureFatalClearSavedKeyReloadButton() {
+  const panel = $("fatalErrorPanel");
+  if (!panel) return;
+
+  const actions = panel.querySelector(".fatal-error-actions");
+  if (!actions || panel.querySelector("#fatalClearSavedKeyReloadBtn")) {
+    return;
+  }
+
+  const button = document.createElement("button");
+  button.id = "fatalClearSavedKeyReloadBtn";
+  button.className = "btn btn-danger";
+  button.type = "button";
+  button.textContent = "Clear saved key and reload";
+  actions.appendChild(button);
+}
+
+function handleAccessKeyStartupRecovery(error, options = {}) {
+  const source = String(options.source || "load-project-data");
+  const loadToken = String(options.token || "");
+  const message = "Project data requires a valid access key.";
+
+  recordStartupFailure(source, error);
+  recordStartupStep("loadProjectData.access-key-required", {
+    token: loadToken,
+    detail: String(error?.message || "missing read key")
+  });
+
+  setLoading(false);
+  hideLoading({ token: loadToken, reason: "access-key-required" });
+  forceHideLoadingOverlay("access-key-required-force");
+
+  setError(message);
+  showError(message);
+  showMessage(message);
+  setAccessKeyStatus(message, "error");
+
+  updateAccessKeyButton();
+  ensureFatalClearSavedKeyReloadButton();
+  showFatalErrorPanel(message, renderStartupDiagnosticsText("access-key-required"));
+  showAccessKeyModal();
+}
+
+function bindFatalErrorPanelActions() {
+  const retryBtn = $("fatalRetryBtn");
+  const accessKeyBtn = $("fatalAccessKeyBtn");
+  const clearSavedKeyReloadBtn = $("fatalClearSavedKeyReloadBtn");
+
+  if (retryBtn && !retryBtn.dataset.bound) {
+    retryBtn.dataset.bound = "1";
+    retryBtn.addEventListener("click", () => {
+      window.location.reload();
+    });
+  }
+
+  if (accessKeyBtn && !accessKeyBtn.dataset.bound) {
+    accessKeyBtn.dataset.bound = "1";
+    accessKeyBtn.addEventListener("click", () => {
+      showAccessKeyModal();
+    });
+  }
+
+  if (clearSavedKeyReloadBtn && !clearSavedKeyReloadBtn.dataset.bound) {
+    clearSavedKeyReloadBtn.dataset.bound = "1";
+    clearSavedKeyReloadBtn.addEventListener("click", () => {
+      try {
+        localStorage.removeItem(CONTROL_ACCESS_KEY_STORAGE_KEY);
+        CONTROL_ACCESS_KEY_LEGACY_STORAGE_KEYS.forEach((legacyKey) => localStorage.removeItem(legacyKey));
+      } catch (_) {}
+      window.location.reload();
+    });
+  }
+}
+
+function showFatalErrorPanel(message, details = "") {
+  const panel = $("fatalErrorPanel");
+  if (!panel) {
+    showError(message);
+    return;
+  }
+
+  const text = $("fatalErrorText");
+  const detailsBox = $("fatalErrorDetails");
+
+  if (text) {
+    text.textContent = message || "Control Center failed to start.";
+  }
+  if (detailsBox) {
+    detailsBox.textContent = details || "No additional diagnostics available.";
+  }
+
+  panel.hidden = false;
+  panel.classList.add("is-visible");
+  panel.setAttribute("aria-hidden", "false");
+  ensureFatalClearSavedKeyReloadButton();
+  bindFatalErrorPanelActions();
+}
+
+function handleStartupFatalError(source, error) {
+  const err = error instanceof Error ? error : new Error(String(error || "Unknown startup failure"));
+  recordStartupStep("startup.fatal", {
+    detail: `${String(source || "startup")}: ${String(err.message || "unknown error")}`
+  });
+  recordStartupFailure(source, err);
+  console.error("[CONTROL_CENTER_STARTUP_FATAL]", source, err);
+  setLoading(false);
+  hideLoading({ reason: "startup-fatal", force: true });
+  setError(err.message || "Control Center initialization failed");
+  showError(err.message || "Control Center initialization failed");
+  showFatalErrorPanel(
+    "Control Center could not complete startup.",
+    renderStartupDiagnosticsText(String(source || "startup"))
+  );
+}
+
+function clearLoadingWatchdog() {
+  loadingWatchdogVisibleSinceMs = 0;
+  loadingWatchdogReason = "";
+  updateStartupUnlockVisibility(false);
+}
+
+function installLoadingWatchdog(reason = "project-load", preserveStart = false) {
+  if (!preserveStart || !loadingWatchdogVisibleSinceMs) {
+    loadingWatchdogVisibleSinceMs = Date.now();
+  }
+  loadingWatchdogReason = String(reason || "project-load");
+}
+
+function installGlobalLoadingWatchdog() {
+  if (globalLoadingWatchdogTimer || typeof window === "undefined") {
+    return;
+  }
+
+  globalLoadingWatchdogTimer = window.setInterval(() => {
+    const startupAgeMs = startupRuntimeState.startupStartedAtMs
+      ? Date.now() - startupRuntimeState.startupStartedAtMs
+      : 0;
+    const overlayVisibleMs = loadingWatchdogVisibleSinceMs
+      ? Date.now() - loadingWatchdogVisibleSinceMs
+      : 0;
+    const apiStageAgeMs = startupRuntimeState.lastApiStageAtMs
+      ? Date.now() - startupRuntimeState.lastApiStageAtMs
+      : 0;
+    const stalledOnResponseText = (
+      startupRuntimeState.lastApiStage === "response.text.start" ||
+      startupRuntimeState.lastApiStage === "api.response.text.start" ||
+      startupRuntimeState.lastApiStage === "api.response.text.timeout"
+    );
+
+    if (
+      isLoadingVisible() &&
+      stalledOnResponseText &&
+      apiStageAgeMs >= RESPONSE_TEXT_WATCHDOG_TIMEOUT_MS &&
+      !startupRuntimeState.responseTextWatchdogUnlocked
+    ) {
+      startupRuntimeState.responseTextWatchdogUnlocked = true;
+      startupRuntimeState.manualUnlockActive = true;
+      startupRuntimeState.manualUnlockToken = activeProjectLoadToken;
+      startupRuntimeState.projectPayloadSuccess = false;
+      startupRuntimeState.payloadSuccessAt = "";
+
+      recordStartupStep("loadProjectData.responseTextWatchdog.unlock", {
+        token: activeProjectLoadToken,
+        detail: "global-watchdog"
+      });
+      setLoading(false);
+      forceHideLoadingOverlay("response-text-watchdog");
+      recordStartupStep("loadProjectData.hideLoading.done", {
+        token: activeProjectLoadToken,
+        detail: "response-text-watchdog"
+      });
+
+      const unlockMessage = "Project response is still being processed. Interface unlocked.";
+      setError(unlockMessage);
+      showError(unlockMessage);
+      showMessage(unlockMessage);
+      void applyRequiredProjectFallback(startupRuntimeState.currentProject || DEFAULT_PROJECT_SLUG, activeProjectLoadToken);
+    }
+
+    if (!startupRuntimeState.unlocked && startupAgeMs >= STARTUP_UNLOCK_TIMEOUT_MS) {
+      updateStartupUnlockVisibility(true);
+    }
+
+    if (
+      isLoadingVisible() &&
+      loadingWatchdogVisibleSinceMs &&
+      overlayVisibleMs >= LOADING_WATCHDOG_TIMEOUT_MS
+    ) {
+      unlockStartupUi("global-watchdog");
+    }
+  }, LOADING_WATCHDOG_INTERVAL_MS);
+}
+
+function installGlobalErrorGuards() {
+  if (typeof window === "undefined" || window.__mhControlCenterErrorGuardsInstalled) {
+    return;
+  }
+
+  window.addEventListener("mh:control-center-api-trace", (event) => {
+    const detail = event?.detail || {};
+    const stage = String(detail.stage || "trace");
+    const traceStage = stage.startsWith("api.") ? stage : `api.${stage}`;
+    startupRuntimeState.lastApiStage = String(detail.stage || "");
+    startupRuntimeState.lastApiStageAtMs = Date.now();
+    startupRuntimeState.lastApiMessage = String(detail.message || "");
+    startupRuntimeState.lastApiEndpoint = String(detail.endpoint || "");
+    recordRuntimeTrace(traceStage, {
+      token: activeProjectLoadToken,
+      detail: [
+        detail.message,
+        detail.status ? `status=${detail.status}` : "",
+        detail.bodyLength ? `bytes=${detail.bodyLength}` : ""
+      ].filter(Boolean).join(" "),
+      endpoint: detail.endpoint || ""
+    });
+  });
+
+  window.__mhControlCenterErrorGuardsInstalled = true;
+
+  window.addEventListener("error", (event) => {
+    const startupPhase = !getState().initialized || isLoadingVisible();
+    if (!startupPhase) return;
+
+    const message = event?.message || "Unhandled browser error";
+    const err = event?.error instanceof Error ? event.error : new Error(message);
+    handleStartupFatalError("window.error", err);
+  });
+
+  window.addEventListener("unhandledrejection", (event) => {
+    const startupPhase = !getState().initialized || isLoadingVisible();
+    if (!startupPhase) return;
+
+    const reason = event?.reason;
+    const err = reason instanceof Error ? reason : new Error(String(reason || "Unhandled promise rejection"));
+    handleStartupFatalError("window.unhandledrejection", err);
+  });
+}
+
+
+/* =========================
+   PROJECT SELECTION SAFETY
+========================= */
+
+const DEFAULT_PROJECT_SLUG = ["hairo", "ticmen"].join("");
+const PROJECT_STORAGE_KEY = "mh-control-center-current-project";
+const LEGACY_PROJECT_STORAGE_KEYS = [
+  "mh_current_project",
+  "currentProject"
+];
+const BLOCKED_DEFAULT_PROJECT_PATTERNS = [
+  "smoke",
+  "test",
+  "corestability",
+  "core-stability",
+  "dummy",
+  "sample"
+];
+
+function normalizeProjectSlug(value) {
+  return String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9_-]/g, "");
+}
+
+function isBlockedDefaultProject(projectName) {
+  const normalized = normalizeProjectSlug(projectName);
+  if (!normalized) return true;
+  return BLOCKED_DEFAULT_PROJECT_PATTERNS.some((pattern) => normalized.includes(pattern));
+}
+
+function getProjectItemSlug(item) {
+  if (typeof item === "string") return normalizeProjectSlug(item);
+  return normalizeProjectSlug(item?.slug || item?.id || item?.name || item?.project || "");
+}
+
+function getProjectItemLabel(item) {
+  if (typeof item === "string") return item;
+  return String(item?.name || item?.label || item?.slug || item?.id || item?.project || "").trim();
+}
+
+function getVisibleProjects(projects = []) {
+  return (Array.isArray(projects) ? projects : []).filter((item) => {
+    const slug = getProjectItemSlug(item);
+    return slug && !isBlockedDefaultProject(slug);
+  });
+}
+
+function projectExistsInList(projectName, projects = []) {
+  const normalized = normalizeProjectSlug(projectName);
+  if (!normalized) return false;
+  return (Array.isArray(projects) ? projects : []).some((item) => getProjectItemSlug(item) === normalized);
+}
+
+function clearLegacyStoredProjectNames() {
+  if (typeof window === "undefined" || !window.localStorage) return;
+
+  try {
+    LEGACY_PROJECT_STORAGE_KEYS.forEach((key) => window.localStorage.removeItem(key));
+  } catch (_) {}
+}
+
+function getStoredProjectName() {
+  if (typeof window === "undefined" || !window.localStorage) return DEFAULT_PROJECT_SLUG;
+
+  try {
+    const stored =
+      window.localStorage.getItem(PROJECT_STORAGE_KEY) ||
+      LEGACY_PROJECT_STORAGE_KEYS.map((key) => window.localStorage.getItem(key)).find(Boolean) ||
+      "";
+
+    const normalized = normalizeProjectSlug(stored);
+
+    if (!normalized || isBlockedDefaultProject(normalized)) {
+      window.localStorage.removeItem(PROJECT_STORAGE_KEY);
+      clearLegacyStoredProjectNames();
+      return DEFAULT_PROJECT_SLUG;
+    }
+
+    return normalized;
+  } catch (_) {
+    return DEFAULT_PROJECT_SLUG;
+  }
+}
+
+function setStoredProjectName(projectName) {
+  if (typeof window === "undefined" || !window.localStorage) return;
+
+  const normalized = normalizeProjectSlug(projectName);
+  if (!normalized || isBlockedDefaultProject(normalized)) return;
+
+  try {
+    window.localStorage.setItem(PROJECT_STORAGE_KEY, normalized);
+    clearLegacyStoredProjectNames();
+  } catch (_) {}
+}
+
+function getSafeProjectName(projectName, fallback = DEFAULT_PROJECT_SLUG) {
+  const normalized = normalizeProjectSlug(projectName);
+  if (!normalized || isBlockedDefaultProject(normalized)) {
+    return normalizeProjectSlug(fallback) || DEFAULT_PROJECT_SLUG;
+  }
+  return normalized;
+}
+
+function pickSafeDefaultProject(projects = [], preferredProject = "") {
+  const items = Array.isArray(projects) ? projects : [];
+  const storedProject = getStoredProjectName();
+  const preferred = normalizeProjectSlug(preferredProject);
+
+  if (storedProject && !isBlockedDefaultProject(storedProject) && projectExistsInList(storedProject, items)) {
+    return storedProject;
+  }
+
+  if (preferred && !isBlockedDefaultProject(preferred) && projectExistsInList(preferred, items)) {
+    return preferred;
+  }
+
+  if (projectExistsInList(DEFAULT_PROJECT_SLUG, items)) {
+    return DEFAULT_PROJECT_SLUG;
+  }
+
+  const firstVisible = getVisibleProjects(items)[0];
+  return getProjectItemSlug(firstVisible) || DEFAULT_PROJECT_SLUG;
 }
 
 /* =========================
@@ -180,11 +1928,23 @@ function hideLoading() {
 function renderTopContext() {
   const state = getState();
   const ctx = state.context;
+  const operations = state.data.operations || {};
+  const notifications = Array.isArray(operations?.notifications?.items)
+    ? operations.notifications.items
+    : [];
+  const unread = notifications.filter((item) => !item?.read_at).length;
 
   setText("ctxProject", ctx.currentProject);
   setText("ctxMarket", ctx.currentMarket);
   setText("ctxMode", ctx.executionMode);
   setText("ctxCampaign", ctx.activeCampaign);
+  setText("ctxRoute", state.currentRoute || "home");
+  setText("ctxAlerts", unread);
+
+  const roleBadge = $("mobileRoleBadge");
+  if (roleBadge) {
+    roleBadge.textContent = formatRoleLabel(getActiveRole());
+  }
 }
 
 function renderProjectSwitcher() {
@@ -192,8 +1952,8 @@ function renderProjectSwitcher() {
   const select = $("projectSwitcher");
   if (!select) return;
 
-  const currentValue = state.context.currentProject || "";
-  const items = Array.isArray(state.data.projects) ? state.data.projects : [];
+  const currentValue = getSafeProjectName(state.context.currentProject || DEFAULT_PROJECT_SLUG);
+  const items = getVisibleProjects(Array.isArray(state.data.projects) ? state.data.projects : []);
 
   select.innerHTML = "";
 
@@ -202,18 +1962,32 @@ function renderProjectSwitcher() {
   defaultOption.textContent = "Select project";
   select.appendChild(defaultOption);
 
+  const seen = new Set();
+
   items.forEach((item) => {
-    const projectName = typeof item === "string" ? item : item?.name;
-    if (!projectName) return;
+    const slug = getProjectItemSlug(item);
+    const label = getProjectItemLabel(item) || slug;
+    if (!slug || seen.has(slug)) return;
+
+    seen.add(slug);
 
     const option = document.createElement("option");
-    option.value = projectName;
-    option.textContent = projectName;
+    option.value = slug;
+    option.textContent = label;
     select.appendChild(option);
   });
 
+  if (currentValue && !seen.has(currentValue) && !isBlockedDefaultProject(currentValue)) {
+    const option = document.createElement("option");
+    option.value = currentValue;
+    option.textContent = currentValue;
+    select.appendChild(option);
+  }
+
   select.value = currentValue;
 }
+
+
 
 /* =========================
    PLACEHOLDERS
@@ -221,35 +1995,35 @@ function renderProjectSwitcher() {
 
 function renderPlaceholders() {
   const placeholders = [
-    ["aiCommandChat", "AI Command chat will be connected here next."],
-    ["aiCommandSuggestions", "Suggested high-value commands will appear here."],
-    ["aiCommandHistory", "Command history and results will appear here."],
+    ["aiCommandChat", "This section is currently unavailable."],
+    ["aiCommandSuggestions", "No data is available yet."],
+    ["aiCommandHistory", "No data is available yet."],
 
-    ["workflowsCatalog", "Workflow catalog will appear here."],
+    ["workflowsCatalog", "No data is available yet."],
 
-    ["campaignBuilder", "Campaign builder will appear here."],
-    ["campaignWaves", "Launch waves and hero product controls will appear here."],
-    ["campaignAssets", "Campaign assets, packages, and finalization status will appear here."],
+    ["campaignBuilder", "No data is available yet."],
+    ["campaignWaves", "No data is available yet."],
+    ["campaignAssets", "Open the related setup page to complete this section."],
 
-    ["contentQueue", "Content queue will appear here."],
-    ["contentPreview", "Content preview and edit controls will appear here."],
+    ["contentQueue", "No data is available yet."],
+    ["contentPreview", "This section is currently unavailable."],
 
-    ["mediaImages", "Image generation and render jobs will appear here."],
-    ["mediaVideoAudio", "Video and future audio workflows will appear here."],
-    ["mediaOutputs", "Generated outputs and approvals will appear here."],
+    ["mediaImages", "This section is currently unavailable."],
+    ["mediaVideoAudio", "This section is currently unavailable."],
+    ["mediaOutputs", "No data is available yet."],
 
-    ["publishingCalendar", "Publishing calendar will appear here."],
-    ["publishingQueue", "Publish queue will appear here."],
-    ["publishingChannels", "Channel publishing status will appear here."],
+    ["publishingCalendar", "No data is available yet."],
+    ["publishingQueue", "Open the related setup page to complete this section."],
+    ["publishingChannels", "Open the related setup page to complete this section."],
 
-    ["adsBudget", "Budget controls will appear here."],
-    ["adsPerformance", "Paid media performance will appear here."],
+    ["adsBudget", "This section is currently unavailable."],
+    ["adsPerformance", "This section is currently unavailable."],
 
-    ["insightsOverview", "Insights overview will appear here."],
-    ["insightsReports", "Reports and learning loops will appear here."],
+    ["insightsOverview", "This section is currently unavailable."],
+    ["insightsReports", "No data is available yet."],
 
-    ["settingsProject", "Project and brand settings will appear here."],
-    ["settingsSystem", "System defaults and AI settings will appear here."]
+    ["settingsProject", "Open the related setup page to complete this section."],
+    ["settingsSystem", "No data is available yet."]
   ];
 
   placeholders.forEach(([id, text]) => {
@@ -264,13 +2038,38 @@ function renderPlaceholders() {
    PAGE RENDER ORCHESTRATION
 ========================= */
 
+let activeRouteCleanup = null;
+let activeRouteCleanupRoute = "";
+
+function disposeActiveRouteCleanup(nextRoute = "") {
+  if (!activeRouteCleanup) {
+    activeRouteCleanupRoute = nextRoute || "";
+    return;
+  }
+
+  if (activeRouteCleanupRoute && nextRoute && activeRouteCleanupRoute === nextRoute) {
+    return;
+  }
+
+  const cleanup = activeRouteCleanup;
+  activeRouteCleanup = null;
+  activeRouteCleanupRoute = "";
+
+  try {
+    cleanup();
+  } catch (error) {
+    console.warn("[Route] cleanup failed", error);
+  }
+}
+
 function renderCurrentPage() {
   const { currentRoute } = getState();
+  disposeActiveRouteCleanup(currentRoute);
   ensureRouteDom(currentRoute);
   const routeDef = getRouteDefinition(currentRoute);
 
   if (typeof routeDef.render === "function") {
-    routeDef.render({
+    const renderResult = routeDef.render({
       getState,
       $,
       escapeHtml,
@@ -284,7 +2083,9 @@ function renderCurrentPage() {
       reloadProjectData: loadProjectData,
       fetchProjectInsights,
       fetchProjectLearning,
+      fetchProjectGovernance,
       fetchProjectOperations,
+      saveProjectSetup,
       executeProjectAiCommand,
       saveProjectConnectorSource,
       removeProjectConnectorSource,
@@ -299,6 +2100,7 @@ function renderCurrentPage() {
       runProjectAiWorkflow,
       createProjectTask,
       createProjectApproval,
+      decideProjectApproval,
       saveProjectCampaign,
       createProjectHandoff,
       consumeProjectHandoff,
@@ -307,12 +2109,39 @@ function renderCurrentPage() {
       reschedulePublishingItem,
       approvePublishingItem,
       publishPublishingItem,
-      failPublishingItem
+      failPublishingItem,
+      fetchProjectTaskCenter,
+      fetchProjectQueueCenter,
+      fetchProjectJobMonitor,
+      fetchProjectNotificationCenter
     });
+
+    if (typeof renderResult === "function") {
+      activeRouteCleanup = renderResult;
+      activeRouteCleanupRoute = currentRoute;
+    }
+
+    if (!routeDef.disableStandardLayout) {
+      applyStandardPageLayout({
+        route: currentRoute,
+        state: getState(),
+        navigateTo,
+        showMessage,
+        reloadProjectData: loadProjectData
+      });
+    }
     return;
   }
 
-  renderPlaceholders();
+
+
+  applyStandardPageLayout({
+    route: currentRoute,
+    state: getState(),
+    navigateTo,
+    showMessage,
+    reloadProjectData: loadProjectData
+  });
 }
 
 function renderGlobalUi() {
@@ -320,97 +2149,883 @@ function renderGlobalUi() {
   renderTopContext();
 }
 
+async function safeRenderCurrentPage(logLabel = "[LOAD_PROJECT_RENDER_ERROR]") {
+  try {
+    await Promise.resolve(renderCurrentPage());
+    return true;
+  } catch (renderError) {
+    console.error(logLabel, renderError);
+    setError(renderError.message || "Failed to render project page");
+    showError(renderError.message || "Failed to render project page");
+    return false;
+  }
+}
+
 /* =========================
    DATA LOAD
 ========================= */
 
-async function loadProjects() {
-  const result = await fetchProjects();
-  const items = Array.isArray(result?.items) ? result.items : [];
+let activeProjectLoadPromise = null;
+let activeProjectLoadProject = "";
+let activeProjectLoadToken = "";
+let projectLoadTokenCounter = 0;
 
-  setProjects(items);
+const PROJECT_LOAD_TIMEOUT_MS = 45000;
 
-  const preferred =
-    result?.preferredProject ||
-    (items.length
-      ? (typeof items[0] === "string" ? items[0] : items[0]?.name || "")
-      : "");
+function createProjectLoadToken(projectName) {
+  projectLoadTokenCounter += 1;
+  return `${Date.now()}-${projectLoadTokenCounter}-${normalizeProjectSlug(projectName || "project") || "project"}`;
+}
 
-  if (preferred) {
-    setCurrentProject(preferred);
+function isActiveProjectLoadToken(token) {
+  const normalized = String(token || "");
+  return Boolean(normalized) && normalized === activeProjectLoadToken;
+}
+
+function withTimeout(promise, timeoutMs, message = "Operation timed out.") {
+  let timer = null;
+
+  const timeoutPromise = new Promise((_, reject) => {
+    timer = setTimeout(() => {
+      const error = new Error(message);
+      error.phase = "timeout";
+      error.isTimeout = true;
+      reject(error);
+    }, Math.max(1, Number(timeoutMs) || 1));
+  });
+
+  return Promise.race([promise, timeoutPromise]).finally(() => {
+    if (timer) {
+      clearTimeout(timer);
+    }
+  });
+}
+
+function fetchProjectWithTimeout(projectName) {
+  const safeProjectName = String(projectName || "");
+
+  recordRuntimeTrace("fetchProjectWithTimeout.request.start", {
+    token: activeProjectLoadToken,
+    detail: safeProjectName
+  });
+
+  let settled = false;
+  let hardTimeoutTimer = null;
+  let responseTextWatchdogTimer = null;
+  let parseWatchdogTimer = null;
+
+  const timeoutPromise = new Promise((_, reject) => {
+    hardTimeoutTimer = setTimeout(() => {
+      if (settled) return;
+      const error = new Error(`Project load timed out after ${PROJECT_LOAD_TIMEOUT_MS / 1000}s.`);
+      error.phase = "timeout";
+      error.isTimeout = true;
+      reject(error);
+    }, PROJECT_LOAD_TIMEOUT_MS);
+  });
+
+  const responseTextWatchdogPromise = new Promise((_, reject) => {
+    responseTextWatchdogTimer = setTimeout(() => {
+      if (settled) return;
+
+      const isBodyReadStage = (
+        startupRuntimeState.lastApiStage === "response.text.start" ||
+        startupRuntimeState.lastApiStage === "api.response.text.start" ||
+        startupRuntimeState.lastApiStage === "api.response.text.timeout"
+      );
+
+      if (!isBodyReadStage) {
+        return;
+      }
+
+      recordRuntimeTrace("fetchProjectWithTimeout.response-text-watchdog", {
+        token: activeProjectLoadToken,
+        detail: safeProjectName
+      });
+
+      const error = new Error("Project response is still being processed.");
+      error.phase = "response-text-watchdog";
+      error.isResponseTextWatchdog = true;
+      error.endpoint = startupRuntimeState.lastApiEndpoint || "";
+      reject(error);
+    }, RESPONSE_TEXT_WATCHDOG_TIMEOUT_MS);
+  });
+
+  const parseWatchdogPromise = new Promise((_, reject) => {
+    let parseWatchdogStartedAt = 0;
+    parseWatchdogTimer = setInterval(() => {
+      if (settled) {
+        return;
+      }
+
+      const lastStage = String(startupRuntimeState.lastApiStage || "");
+      const parseHasStarted = (
+        lastStage === "response.text.done" ||
+        lastStage === "api.response.text.done" ||
+        lastStage === "api.response.parse.start"
+      );
+
+      if (!parseHasStarted) {
+        parseWatchdogStartedAt = 0;
+        return;
+      }
+
+      if (!parseWatchdogStartedAt) {
+        parseWatchdogStartedAt = Date.now();
+        return;
+      }
+
+      if (Date.now() - parseWatchdogStartedAt < PARSE_WATCHDOG_TIMEOUT_MS) {
+        return;
+      }
+
+      recordRuntimeTrace("fetchProjectWithTimeout.parse-watchdog", {
+        token: activeProjectLoadToken,
+        detail: safeProjectName
+      });
+
+      const error = new Error("Project response was received but could not be processed.");
+      error.phase = "parse-watchdog";
+      error.isParseWatchdog = true;
+      error.endpoint = startupRuntimeState.lastApiEndpoint || "";
+      reject(error);
+    }, 100);
+  });
+
+  const requiredLoadPromise = Promise.race([fetchAllCoreProjectData(safeProjectName), timeoutPromise]);
+
+  return Promise.race([
+    requiredLoadPromise,
+    responseTextWatchdogPromise,
+    parseWatchdogPromise
+  ]).then((payload) => {
+    settled = true;
+    if (!payload || payload.error) {
+      const error = new Error(payload?.error || `Project ${safeProjectName} returned an empty response.`);
+      error.phase = "payload";
+      throw error;
+    }
+
+    startupRuntimeState.projectPayloadSuccess = true;
+    startupRuntimeState.payloadSuccessAt = new Date().toISOString();
+
+    recordRuntimeTrace("fetchProjectWithTimeout.success", {
+      token: activeProjectLoadToken,
+      detail: safeProjectName
+    });
+
+    return payload;
+  }).catch((error) => {
+    settled = true;
+    const nextError = error instanceof Error ? error : new Error(String(error || "Project fetch failed"));
+
+    const parseStage = String(nextError?.diagnostics?.parseStage || nextError?.parseStage || "");
+
+    if (!nextError.phase && parseStage.includes("response.text.timeout")) {
+      nextError.phase = "response-text-watchdog";
+      nextError.isResponseTextWatchdog = true;
+      recordRuntimeTrace("fetchProjectWithTimeout.response-text-watchdog", {
+        token: activeProjectLoadToken,
+        detail: safeProjectName
+      });
+    }
+
+    if (
+      !nextError.phase &&
+      (
+        parseStage.includes("api.response.parse") ||
+        parseStage.includes("api.response.json.fallback")
+      )
+    ) {
+      nextError.phase = "parse-watchdog";
+      nextError.isParseWatchdog = true;
+      recordRuntimeTrace("fetchProjectWithTimeout.parse-watchdog", {
+        token: activeProjectLoadToken,
+        detail: safeProjectName
+      });
+    }
+
+    if (!nextError.phase) {
+      nextError.phase = nextError.isTimeout
+        ? "timeout"
+        : isAccessKeyStartupError(nextError)
+          ? "access-key"
+          : "payload";
+    }
+
+    recordRuntimeTrace("fetchProjectWithTimeout.error", {
+      token: activeProjectLoadToken,
+      detail: `${nextError.phase}: ${nextError.message}`,
+      endpoint: nextError.endpoint || ""
+    });
+
+    throw nextError;
+  }).finally(() => {
+    settled = true;
+    if (hardTimeoutTimer) {
+      clearTimeout(hardTimeoutTimer);
+    }
+    if (responseTextWatchdogTimer) {
+      clearTimeout(responseTextWatchdogTimer);
+    }
+    if (parseWatchdogTimer) {
+      clearInterval(parseWatchdogTimer);
+    }
+  });
+}
+
+function validateRequiredProjectPayload(payload, projectName) {
+  if (!payload || typeof payload !== "object") {
+    throw new Error(`Project ${projectName} returned an invalid payload.`);
   }
 
-  renderProjectSwitcher();
-  return preferred;
+  const requiredSections = ["overview", "readiness", "assets"];
+  const missing = requiredSections.filter((section) => payload?.[section] == null);
+
+  if (missing.length) {
+    throw new Error(`Project ${projectName} missing required sections: ${missing.join(", ")}.`);
+  }
+}
+
+function applyProjectPayload(projectName, payload, loadToken = "") {
+  if (loadToken && !isActiveProjectLoadToken(loadToken)) {
+    recordStartupStep("loadProjectData.applyProjectPayload.stale-skip", {
+      token: loadToken,
+      detail: `Skipping stale payload for ${projectName}`
+    });
+    return false;
+  }
+
+  recordStartupStep("loadProjectData.applyProjectPayload", {
+    token: loadToken,
+    detail: `Applying payload for ${projectName}`
+  });
+
+  const scheduledJobs = Array.isArray(payload?.activity?.scheduled_jobs)
+    ? payload.activity.scheduled_jobs
+    : [];
+  const executionResults = Array.isArray(payload?.activity?.execution_results)
+    ? payload.activity.execution_results
+    : [];
+  const inferredCampaign =
+    executionResults[0]?.wave_name ||
+    scheduledJobs[0]?.wave_name ||
+    "Not selected yet";
+
+  patchState("data", {
+    overview: payload.overview,
+    readiness: payload.readiness,
+    assets: payload.assets,
+    tree: payload.tree,
+    registry: payload.registry,
+    integrations: payload.connectors,
+    activity: payload.activity,
+    operations: payload.operations || null,
+    loadDiagnostics: payload?._diagnostics || null
+  });
+
+  const overviewData = payload?.overview?.overview || {};
+
+  recordStartupStep("loadProjectData.setCurrentProject", {
+    token: loadToken,
+    detail: projectName
+  });
+  setCurrentProject(projectName);
+  setStoredProjectName(projectName);
+
+  setProjectContext({
+    project: projectName,
+    market: overviewData.market || "",
+    language: overviewData.language || "",
+    mode: overviewData.execution_mode || "",
+    campaign: inferredCampaign
+  });
+
+  const summary = {
+    project: projectName,
+    token: loadToken,
+    requiredSummary: payload?._requiredSummary || null,
+    diagnostics: payload?._diagnostics || null,
+    scheduledJobs: scheduledJobs.length,
+    executionResults: executionResults.length,
+    overviewProject: String(overviewData.project_name || "")
+  };
+  recordLastProjectLoad(summary);
+  return true;
+}
+
+function buildOptionalLoadWarning(diagnostics) {
+  const optionalFailures = Array.isArray(diagnostics?.optional)
+    ? diagnostics.optional
+    : [];
+
+  if (!optionalFailures.length) {
+    return "";
+  }
+
+  const labels = optionalFailures.map((entry) => String(entry?.section || "optional").trim()).filter(Boolean);
+  const unique = Array.from(new Set(labels));
+
+  return `Loaded required project data. Optional sections unavailable: ${unique.join(", ")}.`;
+}
+
+async function applyRequiredProjectFallback(projectName, loadToken = "", fallbackDetails = null) {
+  recordStartupStep("loadProjectData.requiredFallback.start", {
+    token: loadToken,
+    detail: projectName
+  });
+
+  let fallback = fallbackDetails;
+
+  if (!fallback) {
+    try {
+      const projectsResult = await fetchProjects();
+      const items = Array.isArray(projectsResult?.items) ? projectsResult.items : [];
+      const projectExists = items.some((item) => {
+        const name = typeof item === "string" ? item : item?.name;
+        return String(name || "").trim() === projectName;
+      });
+
+      fallback = {
+        endpoint: "/media-manager/projects",
+        verified: true,
+        projectExists,
+        projectName,
+        warning: "Project details are still syncing."
+      };
+    } catch (fallbackError) {
+      fallback = {
+        endpoint: "/media-manager/projects",
+        verified: false,
+        projectExists: false,
+        projectName,
+        warning: "Project details are still syncing.",
+        message: String(fallbackError?.message || "Failed to verify project fallback")
+      };
+    }
+  }
+
+  const fallbackProjectName = fallback?.projectExists
+    ? getSafeProjectName(projectName || DEFAULT_PROJECT_SLUG)
+    : DEFAULT_PROJECT_SLUG;
+
+  setCurrentProject(fallbackProjectName);
+  setStoredProjectName(fallbackProjectName);
+  setProjectContext({
+    project: fallbackProjectName,
+    market: "",
+    language: "",
+    mode: "",
+    campaign: "Not selected yet"
+  });
+
+  patchState("data", {
+    loadDiagnostics: {
+      ...(getState().data?.loadDiagnostics || {}),
+      requiredFallback: fallback
+    }
+  });
+
+  setError("Project details are still syncing.");
+  showError("Project details are still syncing.");
+  showMessage("Project details are still syncing.");
+
+  renderGlobalUi();
+  await safeRenderCurrentPage("[LOAD_PROJECT_REQUIRED_FALLBACK_RENDER]");
+
+  recordStartupStep("loadProjectData.requiredFallback.done", {
+    token: loadToken,
+    detail: `${fallbackProjectName} verified=${fallback?.verified ? "true" : "false"}`
+  });
+}
+
+function scheduleOverlayRecoveryCheck(loadToken, projectName, loadStartedAtMs, didRequiredLoadSucceed) {
+  const startedAt = Number(loadStartedAtMs) || Date.now();
+  const elapsedMs = Math.max(0, Date.now() - startedAt);
+  const delayMs = Math.max(0, OVERLAY_RECOVERY_DELAY_MS - elapsedMs);
+
+  setTimeout(() => {
+    if (!isActiveProjectLoadToken(loadToken)) {
+      return;
+    }
+
+    const requiredSucceeded = typeof didRequiredLoadSucceed === "function"
+      ? Boolean(didRequiredLoadSucceed())
+      : Boolean(didRequiredLoadSucceed);
+
+    if (!requiredSucceeded) {
+      return;
+    }
+
+    if (!isLoadingVisible()) {
+      return;
+    }
+
+    const hidden = hideLoading({
+      token: loadToken,
+      reason: "post-required-success-recovery",
+      force: true
+    });
+
+    if (hidden) {
+      recordStartupStep("loadProjectData.overlay-recovery.force-hide", {
+        token: loadToken,
+        detail: projectName
+      });
+      const warning = "Project loaded, optional data may still be syncing.";
+      setError(warning);
+      showError(warning);
+    }
+  }, delayMs);
+}
+
+async function applyOptionalProjectPayload(payload, loadToken = "") {
+  recordStartupStep("loadProjectData.optional.start", {
+    token: loadToken,
+    detail: "Starting optional background payload"
+  });
+
+  if (loadToken && !isActiveProjectLoadToken(loadToken)) {
+    recordStartupStep("loadProjectData.optional.skip-stale", {
+      token: loadToken,
+      detail: "Optional payload skipped due to stale load token"
+    });
+    return;
+  }
+
+  const optionalReady = payload?._optionalReady;
+  if (!optionalReady || typeof optionalReady.then !== "function") {
+    recordStartupStep("loadProjectData.optional.noop", {
+      token: loadToken,
+      detail: "No optional background payload present"
+    });
+    return;
+  }
+
+  try {
+    const optionalResult = await optionalReady;
+    if (loadToken && !isActiveProjectLoadToken(loadToken)) {
+      recordStartupStep("loadProjectData.optional.skip-after-await", {
+        token: loadToken,
+        detail: "Optional payload resolved after token changed"
+      });
+      return;
+    }
+
+    const patch = optionalResult?.patch || {};
+    const diagnostics = optionalResult?._diagnostics || payload?._diagnostics || null;
+
+    patchState("data", {
+      activity: patch.activity,
+      tree: patch.tree,
+      registry: patch.registry,
+      integrations: patch.connectors,
+      operations: patch.operations,
+      loadDiagnostics: diagnostics
+    });
+
+    const warning = buildOptionalLoadWarning(diagnostics);
+    if (warning) {
+      setError(warning);
+      showError(warning);
+
+      const optionalFailures = Array.isArray(diagnostics?.optional) ? diagnostics.optional : [];
+      optionalFailures.forEach((entry) => {
+        if (entry?.warning) {
+          recordStartupStep("loadProjectData.optional.warning", {
+            token: loadToken,
+            detail: String(entry?.message || entry?.section || "Optional warning")
+          });
+          return;
+        }
+
+        const failure = new Error(String(entry?.message || "Optional endpoint failed"));
+        failure.endpoint = entry?.endpoint || entry?.section || "optional";
+        failure.status = entry?.status || null;
+        failure.isTimeout = Boolean(entry?.timeout);
+        recordStartupFailure("optional-project-data", failure);
+      });
+    }
+
+    renderGlobalUi();
+    await safeRenderCurrentPage("[LOAD_PROJECT_OPTIONAL_RENDER_ERROR]");
+    recordStartupStep("loadProjectData.optional.end", {
+      token: loadToken,
+      detail: "Optional background payload applied"
+    });
+  } catch (optionalError) {
+    console.warn("Optional project data failed:", optionalError?.message || optionalError);
+    recordStartupFailure("load-project-optional-data", optionalError);
+    recordStartupStep("loadProjectData.optional.error", {
+      token: loadToken,
+      detail: String(optionalError?.message || optionalError || "Optional payload error")
+    });
+    setError("Loaded required project data, but optional sections failed to refresh.");
+    showError("Loaded required project data, but optional sections failed to refresh.");
+  }
+}
+
+async function loadProjects() {
+  try {
+    const result = await fetchProjects();
+    const items = Array.isArray(result?.items) ? result.items : [];
+    const preferredFromApi = result?.preferredProject || "";
+
+    setProjects(items);
+
+    const selectedProject = pickSafeDefaultProject(items, preferredFromApi);
+    setCurrentProject(selectedProject);
+    setStoredProjectName(selectedProject);
+
+    renderProjectSwitcher();
+    return selectedProject;
+  } catch (error) {
+    console.error("[LOAD_PROJECTS_ERROR]", error);
+    recordStartupFailure("load-projects", error);
+    setProjects([]);
+    setCurrentProject(DEFAULT_PROJECT_SLUG);
+    setStoredProjectName(DEFAULT_PROJECT_SLUG);
+    renderProjectSwitcher();
+    return DEFAULT_PROJECT_SLUG;
+  }
 }
 
 async function loadProjectData(projectName) {
-  if (!projectName) return;
+  const requestedProject = normalizeProjectSlug(projectName);
+  const safeProjectName = getSafeProjectName(requestedProject || DEFAULT_PROJECT_SLUG);
 
-  setLoading(true);
-  clearError();
-  clearFeedback();
-  resetProjectData();
+  if (!safeProjectName) return null;
 
-  showLoading("Loading project", `Please wait while ${projectName} is being loaded.`);
-
-  try {
-    const payload = await fetchAllCoreProjectData(projectName);
-
-    const scheduledJobs = Array.isArray(payload?.activity?.scheduled_jobs)
-      ? payload.activity.scheduled_jobs
-      : [];
-    const executionResults = Array.isArray(payload?.activity?.execution_results)
-      ? payload.activity.execution_results
-      : [];
-    const inferredCampaign =
-      executionResults[0]?.wave_name ||
-      scheduledJobs[0]?.wave_name ||
-      "Not selected yet";
-
-    patchState("data", {
-      overview: payload.overview,
-      readiness: payload.readiness,
-      assets: payload.assets,
-      tree: payload.tree,
-      registry: payload.registry,
-      integrations: payload.connectors,
-      activity: payload.activity,
-      operations: payload.operations
+  if (activeProjectLoadPromise && activeProjectLoadProject === safeProjectName) {
+    recordStartupStep("loadProjectData.reuse-active-promise", {
+      token: activeProjectLoadToken,
+      detail: safeProjectName
     });
+    showMessage(`Project ${safeProjectName} is already loading.`);
+    return activeProjectLoadPromise;
+  }
 
-    if (!payload.operations) {
-      try {
-        const operations = await fetchProjectOperations(projectName);
-        patchState("data", {
-          operations
-        });
-      } catch (opsError) {
-        console.warn("Failed to load operations snapshot:", opsError.message);
-      }
+  const loadToken = createProjectLoadToken(safeProjectName);
+  activeProjectLoadToken = loadToken;
+  startupRuntimeState.currentToken = loadToken;
+  startupRuntimeState.currentProject = safeProjectName;
+  startupRuntimeState.projectPayloadSuccess = false;
+  startupRuntimeState.payloadSuccessAt = "";
+  startupRuntimeState.hideLoadingCalled = false;
+  startupRuntimeState.hideLoadingReason = "";
+  startupRuntimeState.hideLoadingAt = "";
+  startupRuntimeState.unlocked = false;
+  startupRuntimeState.unlockReason = "";
+  startupRuntimeState.unlockAt = "";
+  startupRuntimeState.startupStartedAtMs = Date.now();
+  startupRuntimeState.unlockVisible = false;
+  startupRuntimeState.manualUnlockActive = false;
+  startupRuntimeState.manualUnlockToken = "";
+  startupRuntimeState.responseTextWatchdogUnlocked = false;
+
+  recordStartupStep("loadProjectData.start", {
+    token: loadToken,
+    detail: safeProjectName
+  });
+
+  const loadPromise = (async () => {
+    if (!isActiveProjectLoadToken(loadToken)) {
+      recordStartupStep("loadProjectData.skip-stale-before-start", {
+        token: loadToken,
+        detail: safeProjectName
+      });
+      return null;
     }
 
-    const overviewData = payload?.overview?.overview || {};
+    setLoading(true);
+    recordStartupStep("loadProjectData.setLoading.true", {
+      token: loadToken,
+      detail: safeProjectName
+    });
+    clearError();
+    clearFeedback();
+    resetProjectData();
 
-    setProjectContext({
-      project: projectName,
-      market: overviewData.market || "",
-      language: overviewData.language || "",
-      mode: overviewData.execution_mode || "",
-      campaign: inferredCampaign
+    let payload = null;
+    let loadedProjectName = safeProjectName;
+    const loadStartedAtMs = Date.now();
+    let requiredPayloadSucceeded = false;
+
+    scheduleOverlayRecoveryCheck(loadToken, loadedProjectName, loadStartedAtMs, () => requiredPayloadSucceeded);
+
+    showLoading("Loading project", `Please wait while ${safeProjectName} is being loaded.`, {
+      token: loadToken,
+      reason: "required-load-start",
+      explicitLoad: true
     });
 
-    renderGlobalUi();
-    renderCurrentPage();
+    try {
+      try {
+        recordStartupStep("loadProjectData.fetchProjectWithTimeout.start", {
+          token: loadToken,
+          detail: safeProjectName
+        });
+        payload = await fetchProjectWithTimeout(safeProjectName);
+        recordStartupStep("loadProjectData.fetchProjectWithTimeout.success", {
+          token: loadToken,
+          detail: safeProjectName
+        });
+      } catch (primaryError) {
+        if (safeProjectName === DEFAULT_PROJECT_SLUG) {
+          throw primaryError;
+        }
 
-    showMessage(`Loaded project: ${projectName}`);
-  } catch (error) {
-    console.error(error);
-    setError(error.message || "Failed to load project data");
-    showError(error.message || "Failed to load project data");
-  } finally {
-    setLoading(false);
-    hideLoading();
+        console.warn(
+          `[LOAD_PROJECT_FALLBACK] ${safeProjectName} failed. Falling back to ${DEFAULT_PROJECT_SLUG}.`,
+          primaryError
+        );
+
+        loadedProjectName = DEFAULT_PROJECT_SLUG;
+        recordStartupStep("loadProjectData.fetchProjectWithTimeout.fallback", {
+          token: loadToken,
+          detail: `${safeProjectName} -> ${DEFAULT_PROJECT_SLUG}`
+        });
+        showLoading("Loading project", `Please wait while ${DEFAULT_PROJECT_SLUG} is being loaded.`, {
+          token: loadToken,
+          reason: "required-load-fallback",
+          explicitLoad: true
+        });
+        payload = await fetchProjectWithTimeout(DEFAULT_PROJECT_SLUG);
+        recordStartupStep("loadProjectData.fetchProjectWithTimeout.success", {
+          token: loadToken,
+          detail: DEFAULT_PROJECT_SLUG
+        });
+      }
+
+      recordStartupStep("loadProjectData.payload.validate.start", {
+        token: loadToken,
+        detail: loadedProjectName
+      });
+      validateRequiredProjectPayload(payload, loadedProjectName);
+      recordStartupStep("loadProjectData.payload.validate.done", {
+        token: loadToken,
+        detail: loadedProjectName
+      });
+
+      const requestAuthDiagnostics = payload?._diagnostics?.requestAuth || null;
+      if (requestAuthDiagnostics) {
+        startupDiagnostics.requestAuth = {
+          keyPresent: Boolean(requestAuthDiagnostics?.keyPresent),
+          keySource: String(requestAuthDiagnostics?.keySource || "none"),
+          authHeaderPresent: Boolean(requestAuthDiagnostics?.authHeaderPresent),
+          accessKeyBypass: Boolean(requestAuthDiagnostics?.accessKeyBypass),
+          endpoint: String(requestAuthDiagnostics?.endpoint || "")
+        };
+      }
+
+      recordStartupStep("loadProjectData.applyPayload.start", {
+        token: loadToken,
+        detail: loadedProjectName
+      });
+      const applied = applyProjectPayload(loadedProjectName, payload, loadToken);
+      recordStartupStep("loadProjectData.applyPayload.done", {
+        token: loadToken,
+        detail: loadedProjectName
+      });
+      if (!applied) {
+        return null;
+      }
+
+      requiredPayloadSucceeded = true;
+      startupRuntimeState.projectPayloadSuccess = true;
+      startupRuntimeState.payloadSuccessAt = new Date().toISOString();
+      recordStartupStep("loadProjectData.required.done", {
+        token: loadToken,
+        detail: loadedProjectName
+      });
+
+      setLoading(false);
+      hideLoading({ token: loadToken, reason: "required-load-done" });
+      hideLoading({ token: loadToken, reason: "required-load-done-hard-clear", force: true });
+      recordStartupStep("loadProjectData.hideLoading.done", {
+        token: loadToken,
+        detail: loadedProjectName
+      });
+
+      recordStartupStep("loadProjectData.renderGlobalUi.start", {
+        token: loadToken,
+        detail: loadedProjectName
+      });
+      try {
+        renderGlobalUi();
+      } catch (renderGlobalError) {
+        recordStartupFailure("load-project-render-global-ui", renderGlobalError);
+        setLoading(false);
+        forceHideLoadingOverlay("render-global-ui-error");
+        const renderMessage = renderGlobalError?.message || "Failed to render global UI.";
+        setError(renderMessage);
+        showError(renderMessage);
+        showFatalErrorPanel(renderMessage, renderStartupDiagnosticsText("renderGlobalUi"));
+        recordStartupStep("loadProjectData.renderGlobalUi.error", {
+          token: loadToken,
+          detail: String(renderMessage)
+        });
+        return payload;
+      }
+      recordStartupStep("loadProjectData.renderGlobalUi.done", {
+        token: loadToken,
+        detail: loadedProjectName
+      });
+
+      recordStartupStep("loadProjectData.safeRenderCurrentPage.start", {
+        token: loadToken,
+        detail: loadedProjectName
+      });
+      try {
+        const rendered = await safeRenderCurrentPage();
+        if (!rendered) {
+          throw new Error("Failed to render current page.");
+        }
+      } catch (pageRenderError) {
+        recordStartupFailure("load-project-safe-render-current-page", pageRenderError);
+        setLoading(false);
+        forceHideLoadingOverlay("safe-render-current-page-error");
+        const renderMessage = pageRenderError?.message || "Failed to render current page.";
+        setError(renderMessage);
+        showError(renderMessage);
+        showFatalErrorPanel(renderMessage, renderStartupDiagnosticsText("safeRenderCurrentPage"));
+        recordStartupStep("loadProjectData.safeRenderCurrentPage.error", {
+          token: loadToken,
+          detail: String(renderMessage)
+        });
+        return payload;
+      }
+      recordStartupStep("loadProjectData.safeRenderCurrentPage.done", {
+        token: loadToken,
+        detail: loadedProjectName
+      });
+
+      showMessage(`Loaded project: ${loadedProjectName}`);
+      return payload;
+    } catch (error) {
+      console.error("[LOAD_PROJECT_ERROR]", error);
+
+      if (error?.phase === "response-text-watchdog" || error?.isResponseTextWatchdog) {
+        recordStartupStep("loadProjectData.responseTextWatchdog.unlock", {
+          token: loadToken,
+          detail: String(error?.message || "response-text-watchdog")
+        });
+
+        startupRuntimeState.manualUnlockActive = true;
+        startupRuntimeState.manualUnlockToken = loadToken;
+        startupRuntimeState.responseTextWatchdogUnlocked = true;
+        startupRuntimeState.projectPayloadSuccess = false;
+        startupRuntimeState.payloadSuccessAt = "";
+        setLoading(false);
+        forceHideLoadingOverlay("response-text-watchdog");
+        recordStartupStep("loadProjectData.hideLoading.done", {
+          token: loadToken,
+          detail: "response-text-watchdog"
+        });
+
+        const unlockMessage = "Project response is still being processed. Interface unlocked.";
+        setError(unlockMessage);
+        showError(unlockMessage);
+        showMessage(unlockMessage);
+
+        await applyRequiredProjectFallback(
+          loadedProjectName,
+          loadToken,
+          error?._requiredProjectFallback || error?._diagnostics?.requiredProjectFallback || null
+        );
+        return null;
+      }
+
+      if (error?.phase === "parse-watchdog" || error?.isParseWatchdog) {
+        recordStartupStep("loadProjectData.parse-watchdog", {
+          token: loadToken,
+          detail: String(error?.message || "parse-watchdog")
+        });
+        setLoading(false);
+        forceHideLoadingOverlay("parse-watchdog");
+        const warning = "Project response was received but could not be processed.";
+        setError(warning);
+        showError(warning);
+        showMessage(warning);
+        renderGlobalUi();
+        await safeRenderCurrentPage("[LOAD_PROJECT_PARSE_WATCHDOG_RENDER_FALLBACK]");
+        return null;
+      }
+
+      if (isAccessKeyStartupError(error)) {
+        handleAccessKeyStartupRecovery(error, {
+          source: "load-project-data",
+          token: loadToken
+        });
+        return null;
+      }
+
+      recordStartupFailure("load-project-data", error);
+      setLoading(false);
+      forceHideLoadingOverlay(`load-project-error-${String(error?.phase || "unknown")}`);
+      setCurrentProject(DEFAULT_PROJECT_SLUG);
+      setProjectContext({
+        project: DEFAULT_PROJECT_SLUG,
+        market: "",
+        language: "",
+        mode: "",
+        campaign: "Not selected yet"
+      });
+      setError(error.message || "Failed to load project data");
+      showError(error.message || "Failed to load project data");
+      showFatalErrorPanel(
+        error.message || "Failed to load project data",
+        renderStartupDiagnosticsText("load-project-data")
+      );
+      renderGlobalUi();
+      await safeRenderCurrentPage("[LOAD_PROJECT_ERROR_RENDER_FALLBACK]");
+      recordStartupStep("loadProjectData.error", {
+        token: loadToken,
+        detail: String(error.message || "Failed to load project data")
+      });
+      return null;
+    } finally {
+      if (isActiveProjectLoadToken(loadToken)) {
+        setLoading(false);
+        recordStartupStep("loadProjectData.finally.setLoading.false", {
+          token: loadToken,
+          detail: loadedProjectName
+        });
+        hideLoading({ token: loadToken, reason: "required-load-finally" });
+        hideLoading({ token: loadToken, reason: "required-load-finally-hard-clear", force: true });
+        recordStartupStep("loadProjectData.finally.hideLoading", {
+          token: loadToken,
+          detail: loadedProjectName
+        });
+      } else {
+        recordStartupStep("loadProjectData.finally.stale-skip", {
+          token: loadToken,
+          detail: loadedProjectName
+        });
+      }
+    }
+  })();
+
+  activeProjectLoadPromise = loadPromise;
+  activeProjectLoadProject = safeProjectName;
+
+try {
+  const payload = await loadPromise;
+
+  /*
+   * Optional project payload is intentionally deferred.
+   * The required startup payload renders the page first; optional sections
+   * can be restored later with route-level lazy loading to avoid startup
+   * render pressure.
+   */
+
+  return payload;
+} finally {
+
+    if (activeProjectLoadPromise === loadPromise) {
+      activeProjectLoadPromise = null;
+      activeProjectLoadProject = "";
+    }
   }
 }
 
@@ -419,21 +3034,161 @@ async function loadProjectData(projectName) {
 ========================= */
 
 function bindNavigation() {
-  const navItems = Array.from(document.querySelectorAll(".nav-item[data-route]"));
+  const fallbackLabelRoutes = {
+    Home: "home",
+    Setup: "setup",
+    Library: "library",
+    Integrations: "integrations",
+    "AI Command": "ai-command",
+    Workflows: "workflows",
+    Publishing: "publishing"
+  };
 
+  const navItems = Array.from(document.querySelectorAll(".nav-item"));
   navItems.forEach((item) => {
-    item.addEventListener("click", () => {
-      const route = item.getAttribute("data-route") || "home";
-      navigateTo(route);
-    });
+    const labeledRoute = fallbackLabelRoutes[String(item.textContent || "").trim()] || "";
+    const route = item.getAttribute("data-route") || labeledRoute;
+    if (!route) return;
+    item.setAttribute("data-route", route);
+    item.setAttribute("data-page", route);
   });
 }
 
+function bindDelegatedClickRouting() {
+  if (typeof document === "undefined" || window.__mhControlCenterDelegatedClickBound) {
+    return;
+  }
+
+
+
+  const actionRouteMap = {
+    "open-ai-command": "ai-command",
+    "open-campaign-studio": "campaign-studio",
+    "open-publishing": "publishing",
+    "send-ai-command": "ai-command"
+  };
+
+  async function executeMappedAction(actionName) {
+    if (!actionName) return false;
+
+    if (actionName === "search") {
+      if (typeof executeSearch === "function") {
+        executeSearch();
+      } else {
+        showMessage("Search handler is not available.");
+      }
+      return true;
+    }
+
+    if (actionName === "refresh-project") {
+      const projectName = getSafeProjectName(getState().context.currentProject || DEFAULT_PROJECT_SLUG);
+      if (!projectName) {
+        showError("Please select a project first.");
+        return true;
+      }
+
+      await loadProjectData(projectName);
+      navigateTo("home");
+      return true;
+    }
+
+    if (actionName === "send-ai-command") {
+      if (typeof executeQuickCommand === "function") {
+        executeQuickCommand();
+      } else {
+        navigateTo("ai-command");
+        showMessage("AI Command opened.");
+      }
+      return true;
+    }
+
+    const targetRoute = actionRouteMap[actionName];
+    if (targetRoute) {
+      navigateTo(targetRoute);
+      return true;
+    }
+
+    return false;
+  }
+
+  document.addEventListener("click", (event) => {
+    const candidate = event.target instanceof Element
+      ? event.target.closest("button, a, [data-route], [data-page], [data-action]")
+      : null;
+    if (!candidate) {
+      return;
+    }
+
+    const routeAttr = String(candidate.getAttribute("data-route") || "").trim();
+    const pageAttr = String(candidate.getAttribute("data-page") || "").trim();
+    const clickedNavItem = Boolean(candidate.closest(".nav-item[data-route], [data-shell-route], [data-global-route]"));
+    const routeAttrAllowed = clickedNavItem ? (routeAttr || pageAttr) : routeAttr;
+
+    if (routeAttrAllowed) {
+      event.preventDefault();
+      navigateTo(routeAttrAllowed);
+      return;
+    }
+
+    const inferredAction =
+      String(candidate.getAttribute("data-action") || "").trim() ||
+      (candidate.closest("#refreshAllBtn") ? "refresh-project" : "") ||
+      (candidate.closest("#openAiBtn") ? "open-ai-command" : "") ||
+      (candidate.closest("#runSearchBtn") ? "search" : "") ||
+      (candidate.closest("#runQuickCommandBtn") ? "send-ai-command" : "") ||
+      (candidate.closest("#newCampaignBtn") ? "open-campaign-studio" : "") ||
+      (candidate.closest("#scheduleBtn") ? "open-publishing" : "");
+
+    if (!inferredAction) {
+      return;
+    }
+
+    event.preventDefault();
+    void executeMappedAction(inferredAction).catch((error) => {
+      console.error("[DELEGATED_CLICK_ACTION_ERROR]", inferredAction, error);
+      showError(error?.message || "Action failed.");
+    });
+  });
+
+  window.__mhControlCenterDelegatedClickBound = true;
+}
+
 function bindRouteListener() {
-  window.addEventListener("mh:route-change", (event) => {
+  if (window.__mhRouteListenerBound) return;
+  window.__mhRouteListenerBound = true;
+
+  function resetShellScrollContext() {
+    const workspace = $("workspace");
+    if (workspace) {
+      workspace.scrollTop = 0;
+      workspace.scrollLeft = 0;
+    }
+
+    const sidebarNav = document.querySelector(".sidebar-nav");
+    if (sidebarNav) {
+      const activeItem = sidebarNav.querySelector(".nav-item.is-active");
+      if (activeItem && typeof activeItem.scrollIntoView === "function") {
+        activeItem.scrollIntoView({ block: "nearest" });
+      }
+    }
+  }
+
+  // Register route change listener with lifecycle registry
+  // Handles shell-level route change (different from page content)
+  addAppShellListener(window, "mh:route-change", (event) => {
     const route = event?.detail?.route || "home";
     setCurrentRoute(route);
     renderCurrentPage();
+    resetShellScrollContext();
+  });
+
+  // Back/Forward support — hashchange fires when the user navigates browser history
+  // Register with lifecycle registry for proper cleanup on route changes
+  addAppShellListener(window, "hashchange", () => {
+    const route = (location.hash.slice(1) || "home").trim();
+    if (route && route !== getState().currentRoute) {
+      navigateTo(route);
+    }
   });
 }
 
@@ -446,40 +3201,135 @@ function bindProjectSwitcher() {
   if (!select) return;
 
   select.addEventListener("change", async (event) => {
-    const projectName = event.target.value || "";
-    setCurrentProject(projectName);
+    const rawProjectName = event.target.value || "";
 
-    if (!projectName) {
+    if (!rawProjectName) {
       showError("Please select a valid project.");
       return;
     }
 
+    const projectName = getSafeProjectName(rawProjectName);
+
+    if (projectName !== normalizeProjectSlug(rawProjectName)) {
+      showMessage(`Test project ignored. Loading ${projectName}.`);
+    }
+
+    setCurrentProject(projectName);
     await loadProjectData(projectName);
   });
 }
+
+
 
 /* =========================
    RESPONSIVE UI
 ========================= */
 
 function bindResponsiveUi() {
+  if (window.__mhResponsiveUiBound) return;
+window.__mhResponsiveUiBound = true;
   const sidebar = document.querySelector(".sidebar");
   const toggleBtn = $("sidebarToggleBtn");
   const backdrop = $("sidebarBackdrop");
+  const appRoot = $("app");
+  const commandBar = $("globalCommandBar");
+  const commandToggleBtn = $("commandToggleBtn");
+  const commandBackdrop = $("commandBackdrop");
+  const MOBILE_BREAKPOINT = 1024;
+  const MOBILE_COMPACT_BREAKPOINT = 768;
+
+  function isMobileViewport() {
+    return window.innerWidth <= MOBILE_BREAKPOINT;
+  }
+
+  function isCompactMobileViewport() {
+    return window.innerWidth <= MOBILE_COMPACT_BREAKPOINT;
+  }
+
+  function syncToggleState(isOpen) {
+    if (!toggleBtn) return;
+    toggleBtn.setAttribute("aria-expanded", isOpen ? "true" : "false");
+    toggleBtn.setAttribute("aria-label", isOpen ? "Close sidebar" : "Open sidebar");
+  }
+
+  function setMobileCommandExpanded(expanded) {
+    if (!appRoot || !commandBar || !commandToggleBtn) return;
+
+    if (!isCompactMobileViewport()) {
+      appRoot.classList.remove("is-mobile-shell", "is-mobile-command-open");
+      const desktopCommandOpen = appRoot.classList.contains("is-command-open");
+      commandBar.classList.toggle("is-collapsed", !desktopCommandOpen);
+      commandBar.hidden = !desktopCommandOpen;
+      commandBar.setAttribute("aria-hidden", desktopCommandOpen ? "false" : "true");
+      if (commandBackdrop) {
+        commandBackdrop.classList.toggle("is-visible", desktopCommandOpen);
+        commandBackdrop.hidden = !desktopCommandOpen;
+        commandBackdrop.setAttribute("aria-hidden", desktopCommandOpen ? "false" : "true");
+      }
+      commandToggleBtn.setAttribute("aria-expanded", desktopCommandOpen ? "true" : "false");
+      commandToggleBtn.textContent = desktopCommandOpen ? "Close" : "Command";
+      return;
+    }
+
+    appRoot.classList.add("is-mobile-shell");
+    appRoot.classList.toggle("is-mobile-command-open", expanded);
+    commandBar.classList.toggle("is-collapsed", !expanded);
+    commandBar.hidden = !expanded;
+    commandBar.setAttribute("aria-hidden", expanded ? "false" : "true");
+    if (commandBackdrop) {
+      commandBackdrop.classList.toggle("is-visible", expanded);
+      commandBackdrop.hidden = !expanded;
+      commandBackdrop.setAttribute("aria-hidden", expanded ? "false" : "true");
+    }
+    commandToggleBtn.setAttribute("aria-expanded", expanded ? "true" : "false");
+    commandToggleBtn.textContent = expanded ? "Close" : "Command";
+  }
+
+  function syncCompactShellState() {
+    const isCompact = isCompactMobileViewport();
+    if (!appRoot || !commandToggleBtn) return;
+
+    appRoot.classList.toggle("is-mobile-shell", isCompact);
+    commandToggleBtn.hidden = false;
+
+    if (!isCompact) {
+      setMobileCommandExpanded(false);
+      return;
+    }
+
+    const isOpen = appRoot.classList.contains("is-mobile-command-open");
+    setMobileCommandExpanded(isOpen);
+  }
 
   function openSidebar() {
-    if (!sidebar) return;
+    if (!sidebar || !isMobileViewport()) return;
     sidebar.classList.add("is-open");
-    if (backdrop) backdrop.classList.add("is-visible");
+    if (backdrop) {
+      backdrop.classList.add("is-visible");
+      backdrop.hidden = false;
+      backdrop.setAttribute("aria-hidden", "false");
+      syncAiDockInteractivity();
+    }
+    document.body.classList.add("sidebar-open");
     document.body.style.overflow = "hidden";
+    syncToggleState(true);
   }
 
   function closeSidebar() {
     if (!sidebar) return;
     sidebar.classList.remove("is-open");
-    if (backdrop) backdrop.classList.remove("is-visible");
+    if (backdrop) {
+      backdrop.classList.remove("is-visible");
+      backdrop.hidden = true;
+      backdrop.setAttribute("aria-hidden", "true");
+      syncAiDockInteractivity();
+    }
+    document.body.classList.remove("sidebar-open");
     document.body.style.overflow = "";
+    syncToggleState(false);
   }
+
+  syncToggleState(false);
 
   if (toggleBtn) {
     toggleBtn.onclick = (event) => {
@@ -498,45 +3348,249 @@ function bindResponsiveUi() {
     backdrop.onclick = closeSidebar;
   }
 
+  if (commandToggleBtn) {
+    commandToggleBtn.onclick = (event) => {
+      event.preventDefault();
+      if (!appRoot) return;
+      if (!isCompactMobileViewport()) {
+        if (appRoot.classList.contains("is-command-open")) {
+          closeGlobalCommandBarSafe();
+        } else {
+          openGlobalCommandBar();
+        }
+        return;
+      }
+      const nextOpen = !appRoot.classList.contains("is-mobile-command-open");
+      setMobileCommandExpanded(nextOpen);
+    };
+  }
+
+  if (commandBackdrop) {
+    commandBackdrop.onclick = () => {
+      setMobileCommandExpanded(false);
+      closeGlobalCommandBarSafe();
+    };
+  }
+
   document.addEventListener("click", (event) => {
     const clickedNavItem = event.target.closest(".nav-item[data-route]");
-    if (clickedNavItem && window.innerWidth <= 980) {
+    if (clickedNavItem && isMobileViewport()) {
       closeSidebar();
+    }
+
+    if (!isCompactMobileViewport() || !appRoot?.classList.contains("is-mobile-command-open")) {
+      return;
+    }
+
+    const clickedCommandToggle = event.target.closest("#commandToggleBtn");
+    const clickedInsideCommand = event.target.closest("#globalCommandBar");
+    if (!clickedCommandToggle && !clickedInsideCommand) {
+      setMobileCommandExpanded(false);
     }
   });
 
-  window.addEventListener("resize", () => {
-    if (window.innerWidth > 980) {
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && sidebar?.classList.contains("is-open")) {
       closeSidebar();
     }
+    if (event.key === "Escape" && appRoot?.classList.contains("is-mobile-command-open")) {
+      setMobileCommandExpanded(false);
+    }
   });
+
+  // Register responsive shell listeners with lifecycle registry
+  // These ensure proper cleanup on route changes
+  addAppShellListener(window, "resize", () => {
+    if (!isMobileViewport()) {
+      closeSidebar();
+    }
+    syncCompactShellState();
+  });
+
+  addAppShellListener(window, "orientationchange", syncCompactShellState);
+  syncCompactShellState();
+}
+
+function bindShellMeasurements() {
+  const appRoot = $("app");
+  const topbar = document.querySelector(".topbar");
+  if (!appRoot || !topbar) return;
+
+  const measured = Math.max(56, Math.round(topbar.getBoundingClientRect().height || 64));
+  appRoot.style.setProperty("--shell-topbar-height", `${measured}px`);
 }
 
 /* =========================
    COMMANDS & SEARCH
 ========================= */
 
+
+function syncAiDockInteractivity() {
+  const dock = $("aiDock");
+  const loadingOverlay = $("loadingOverlay");
+  const commandBackdrop = $("commandBackdrop");
+  const sidebarBackdrop = $("sidebarBackdrop");
+
+  if (!dock) return;
+
+  const loadingActive =
+    loadingOverlay &&
+    !loadingOverlay.hidden &&
+    loadingOverlay.getAttribute("aria-hidden") !== "true";
+
+  const commandActive =
+    commandBackdrop &&
+    !commandBackdrop.hidden &&
+    commandBackdrop.getAttribute("aria-hidden") !== "true";
+
+  const sidebarActive =
+    sidebarBackdrop &&
+    !sidebarBackdrop.hidden &&
+    sidebarBackdrop.getAttribute("aria-hidden") !== "true";
+
+  const blocked = loadingActive || commandActive || sidebarActive;
+
+  dock.classList.toggle("is-runtime-blocked", blocked);
+  dock.setAttribute("aria-hidden", blocked ? "true" : "false");
+
+  if (blocked) {
+    dock.style.pointerEvents = "none";
+  } else {
+    dock.style.pointerEvents = "";
+  }
+}
+
+
+function getCommandRuntimeState() {
+  const commandBar = $("globalCommandBar");
+  const commandBackdrop = $("commandBackdrop");
+  const aiDock = $("aiDock");
+  const aiDockToggle = $("aiDockToggle");
+  const aiDockPanel = $("aiDockPanel");
+  const fallbackCommandRuntimeSnapshot = ({
+    commandBar: fallbackCommandBar = null,
+    commandBackdrop: fallbackCommandBackdrop = null,
+    aiDock: fallbackAiDock = null,
+    aiDockToggle: fallbackAiDockToggle = null,
+    aiDockPanel: fallbackAiDockPanel = null
+  } = {}) => ({
+    version: "fallback-classic-runtime",
+
+    commandBar: {
+      exists: Boolean(fallbackCommandBar),
+      hidden: Boolean(fallbackCommandBar?.hidden),
+      ariaHidden: String(fallbackCommandBar?.getAttribute?.("aria-hidden") || ""),
+      className: String(fallbackCommandBar?.className || "")
+    },
+
+    commandBackdrop: {
+      exists: Boolean(fallbackCommandBackdrop),
+      hidden: Boolean(fallbackCommandBackdrop?.hidden),
+      ariaHidden: String(fallbackCommandBackdrop?.getAttribute?.("aria-hidden") || ""),
+      className: String(fallbackCommandBackdrop?.className || "")
+    },
+
+    aiDock: {
+      exists: Boolean(fallbackAiDock),
+      open: Boolean(fallbackAiDock?.classList?.contains("is-open")),
+      dataOpen: String(fallbackAiDock?.getAttribute?.("data-open") || ""),
+      className: String(fallbackAiDock?.className || ""),
+      toggle: {
+        exists: Boolean(fallbackAiDockToggle),
+        ariaExpanded: String(fallbackAiDockToggle?.getAttribute?.("aria-expanded") || "")
+      },
+      panel: {
+        exists: Boolean(fallbackAiDockPanel),
+        hidden: Boolean(fallbackAiDockPanel?.hidden),
+        inert: Boolean(fallbackAiDockPanel?.inert),
+        ariaHidden: String(fallbackAiDockPanel?.getAttribute?.("aria-hidden") || ""),
+        pointerEvents: String(fallbackAiDockPanel?.style?.pointerEvents || "")
+      }
+    }
+  });
+
+  const runtimeSnapshot =
+    window.__MH_COMMAND_RUNTIME__?.getCommandRuntimeSnapshot || fallbackCommandRuntimeSnapshot;
+
+  return runtimeSnapshot({
+    commandBar,
+    commandBackdrop,
+    aiDock,
+    aiDockToggle,
+    aiDockPanel
+  });
+}
+
 function executeSearch() {
-  const value = $("globalSearch")?.value?.trim() || "";
-  if (!value) {
-    showError("Please enter something to search.");
+  const input = $("globalSearch");
+  const query = (input?.value || "").trim().toLowerCase();
+  if (!query) {
+    showError("Enter a route, page name, or keyword to search.");
     return;
   }
 
-  showMessage(`Search captured: ${value}`);
-  navigateTo("library");
+  const navItems = Array.from(document.querySelectorAll(".nav-item[data-route]"));
+  const candidates = navItems.map((item) => {
+    const route = item.getAttribute("data-route") || "";
+    const label = (item.textContent || "").trim();
+    return {
+      route,
+      label,
+      haystack: `${route} ${label}`.toLowerCase()
+    };
+  });
 
-  const preview = $("libraryPreview");
-  if (preview) {
-    preview.innerHTML = `
-      <div class="simple-banner">
-        <strong>Search Query:</strong> ${escapeHtml(value)}
-      </div>
-      <div class="empty-box" style="margin-top:12px;">
-        Search results UI will be connected next.
-      </div>
-    `;
+  const startsWith = candidates.filter((item) => item.haystack.startsWith(query));
+  const includes = candidates.filter((item) => !startsWith.includes(item) && item.haystack.includes(query));
+  const matches = [...startsWith, ...includes];
+
+  if (!matches.length) {
+    showError(`No route matches "${query}".`);
+    return;
   }
+
+  if (matches.length === 1) {
+    navigateTo(matches[0].route);
+    showMessage(`Opened ${matches[0].label}.`);
+    return;
+  }
+
+  const top = matches.slice(0, 5);
+  showMessage(`Matches: ${top.map((item) => item.label).join(" • ")}. Press Enter again to open ${top[0].label}.`);
+  navigateTo(top[0].route);
+}
+
+function openGlobalCommandBar() {
+  const appRoot = $("app");
+  const commandBar = $("globalCommandBar");
+  const commandBackdrop = $("commandBackdrop");
+  const commandInput = $("quickCommandInput");
+  const toggleBtn = $("commandToggleBtn");
+  const compact = window.innerWidth <= 768;
+
+  if (compact) {
+    appRoot?.classList.add("is-mobile-shell", "is-mobile-command-open");
+    appRoot?.classList.remove("is-command-open");
+  } else {
+    appRoot?.classList.add("is-command-open");
+    appRoot?.classList.remove("is-mobile-command-open");
+  }
+  commandBar?.classList.remove("is-collapsed");
+  if (commandBar) {
+    commandBar.hidden = false;
+  }
+  commandBar?.setAttribute("aria-hidden", "false");
+  commandBackdrop?.classList.add("is-visible");
+  if (commandBackdrop) {
+    commandBackdrop.hidden = false;
+  }
+  commandBackdrop?.setAttribute("aria-hidden", "false");
+  syncAiDockInteractivity();
+  toggleBtn?.setAttribute("aria-expanded", "true");
+  if (toggleBtn) {
+    toggleBtn.textContent = "Close";
+  }
+  setTimeout(() => commandInput?.focus(), 40);
 }
 
 function executeQuickCommand() {
@@ -546,7 +3600,6 @@ function executeQuickCommand() {
     return;
   }
 
-  showMessage(`Command received: ${value}`);
   navigateTo("ai-command");
 
   window.dispatchEvent(new CustomEvent("mh:submit-ai-command", {
@@ -557,24 +3610,65 @@ function executeQuickCommand() {
       }
     }
   }));
+}
 
-  const chat = $("aiCommandChat");
-  if (chat) {
-    chat.innerHTML = `
-      <div class="data-stack">
-        <div class="data-row">
-          <span>You</span>
-          <strong>${escapeHtml(value)}</strong>
-        </div>
-        <div class="data-row">
-          <span>System</span>
-          <strong>Command captured successfully. AI execution UI will be connected next.</strong>
-        </div>
-      </div>
-    `;
-    chat.dataset.bound = "true";
+
+function closeGlobalCommandBarSafe() {
+  const appRoot = $("app");
+  const commandBar = $("globalCommandBar");
+  const commandBackdrop = $("commandBackdrop");
+  const toggleBtn = $("commandToggleBtn");
+
+  appRoot?.classList.remove("is-command-open", "is-mobile-command-open");
+  commandBar?.classList.add("is-collapsed");
+  if (commandBar) {
+    commandBar.hidden = true;
+  }
+  commandBar?.setAttribute("aria-hidden", "true");
+  commandBackdrop?.classList.remove("is-visible");
+  if (commandBackdrop) {
+    commandBackdrop.hidden = true;
+  }
+  commandBackdrop?.setAttribute("aria-hidden", "true");
+  syncAiDockInteractivity();
+
+  if (toggleBtn) {
+    toggleBtn.setAttribute("aria-expanded", "false");
+    toggleBtn.textContent = "Command";
   }
 }
+
+function bindCommandOutsideClose() {
+  if (window.__mhCommandOutsideBound) return;
+window.__mhCommandOutsideBound = true;
+  const appRoot = $("app");
+  const commandBar = $("globalCommandBar");
+
+  document.addEventListener("click", (event) => {
+    const commandOpen = appRoot?.classList.contains("is-command-open") || appRoot?.classList.contains("is-mobile-command-open");
+    if (!commandOpen) return;
+
+    const clickedInsideCommand = event.target.closest("#globalCommandBar");
+    const clickedCommandToggle = event.target.closest("#commandToggleBtn");
+    const clickedAiButton = event.target.closest("#execAskAiBtn, #openAiBtn, [data-action='open-ai-command']");
+    const clickedDock = event.target.closest("#aiDock");
+
+    if (!clickedInsideCommand && !clickedCommandToggle && !clickedAiButton && !clickedDock) {
+      closeGlobalCommandBarSafe();
+    }
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      closeGlobalCommandBarSafe();
+    }
+  });
+
+  if (commandBar) {
+    commandBar.addEventListener("click", (event) => event.stopPropagation());
+  }
+}
+
 
 function bindCommandInputs() {
   const searchInput = $("globalSearch");
@@ -583,15 +3677,15 @@ function bindCommandInputs() {
   const searchBtn = $("runSearchBtn");
 
   if (searchInput) {
-    searchInput.addEventListener("keydown", (event) => {
-      if (event.key === "Enter") {
-        event.preventDefault();
-        executeSearch();
-      }
-    });
+    searchInput.value = "";
   }
 
-  if (commandInput) {
+  if (searchBtn) {
+    searchBtn.setAttribute("data-action", "search");
+  }
+
+  if (commandInput && commandInput.dataset.mhCommandEnterBound !== "true") {
+    commandInput.dataset.mhCommandEnterBound = "true";
     commandInput.addEventListener("keydown", (event) => {
       if (event.key === "Enter") {
         event.preventDefault();
@@ -600,94 +3694,523 @@ function bindCommandInputs() {
     });
   }
 
-  if (runBtn) {
-    runBtn.onclick = executeQuickCommand;
+  if (searchInput && searchInput.dataset.mhSearchEnterBound !== "true") {
+    searchInput.dataset.mhSearchEnterBound = "true";
+    searchInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        executeSearch();
+      }
+    });
   }
 
-  if (searchBtn) {
-    searchBtn.onclick = executeSearch;
+  if (runBtn) {
+    runBtn.textContent = "Send to AI Workspace";
+    runBtn.setAttribute("data-action", "send-ai-command");
   }
 }
+
+
+
+/* =========================
+   AI DOCK
+========================= */
+
+function initializeAiDock() {
+  if (window.__mhAiDockBound) return;
+window.__mhAiDockBound = true;
+  const dock = $("aiDock");
+  const toggle = $("aiDockToggle");
+  const panel = $("aiDockPanel");
+  const closeBtn = $("aiDockClose");
+
+  if (!dock || !toggle || !panel) return;
+
+  const setOpen = (open) => {
+    dock.classList.toggle("is-open", open);
+    dock.setAttribute("data-open", open ? "true" : "false");
+    toggle.setAttribute("aria-expanded", String(open));
+    panel.setAttribute("aria-hidden", String(!open));
+    panel.hidden = !open;
+    panel.inert = !open;
+    panel.style.pointerEvents = open ? "auto" : "none";
+  };
+
+
+  toggle.onclick = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    
+    if (dock.classList.contains("is-runtime-blocked") || dock.getAttribute("aria-hidden") === "true") {
+      return;
+    }
+
+    const open = dock.classList.contains("is-open");
+    setOpen(!open);
+  };
+
+
+  closeBtn?.addEventListener("click", () => setOpen(false));
+
+  document.addEventListener("click", (event) => {
+    if (!dock.classList.contains("is-open")) return;
+    if (event.target.closest("#aiDock")) return;
+    setOpen(false);
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") setOpen(false);
+  });
+
+  Array.from(document.querySelectorAll("[data-ai-suggestion]")).forEach((button) => {
+    button.addEventListener("click", () => {
+      const prompt = button.getAttribute("data-ai-suggestion") || "";
+      const input = $("quickCommandInput");
+
+      if (input && prompt) {
+        input.value = prompt;
+      }
+
+      openGlobalCommandBar?.();
+      showMessage("AI suggestion loaded.");
+      setOpen(false);
+    });
+  });
+
+  Array.from(document.querySelectorAll("[data-ai-route]")).forEach((button) => {
+    button.addEventListener("click", () => {
+      const route = button.getAttribute("data-ai-route");
+      if (!route) return;
+      navigateTo(route);
+      setOpen(false);
+    });
+  });
+
+  const context = $("aiDockContext");
+
+  const syncContext = () => {
+    const route = window.location.hash.replace(/^#/, "") || "home";
+
+    if (context) {
+      context.textContent = `Current workspace: ${route}`;
+    }
+  };
+
+  syncContext();
+  // Register AI dock context sync listener with lifecycle registry
+  // Updates dock to reflect current route context
+  addAppShellListener(window, "hashchange", syncContext);
+}
+
+
+/* =========================
+   EXECUTIVE NEW LAUNCHER
+========================= */
+
+function createExecutiveNewLauncherModal() {
+  const modal = document.createElement("div");
+  modal.id = "executiveNewLauncherModal";
+  modal.className = "access-key-modal executive-new-modal";
+  modal.setAttribute("role", "dialog");
+  modal.setAttribute("aria-modal", "true");
+  modal.setAttribute("aria-label", "Create new workflow");
+
+  modal.innerHTML = `
+    <div class="access-key-card executive-new-card">
+      <div class="executive-new-head">
+        <div>
+          <span class="executive-new-kicker">Smart Launcher</span>
+          <h2 class="access-key-title">What do you want to create?</h2>
+          <p class="access-key-desc">
+            Start with a project, campaign, content, media, publishing, approval, or a custom AI workflow.
+          </p>
+        </div>
+        <button
+          id="executiveNewCloseBtn"
+          class="executive-modal-close"
+          type="button"
+          aria-label="Close"
+        >×</button>
+      </div>
+
+      <form id="executiveNewProjectForm" class="executive-project-form" hidden>
+        <div class="executive-project-form-grid">
+          <label>
+            <span>Project name</span>
+            <input name="project_name" type="text" placeholder="Nadeem Nour, Beauty of Spirit, Real Estate Berlin..." required>
+          </label>
+
+          <label>
+            <span>Business type</span>
+            <select name="project_type" required>
+              <option value="">Choose type</option>
+              <option value="ecommerce">eCommerce / Products</option>
+              <option value="artist_singer">Artist / Singer</option>
+              <option value="beauty_salon">Beauty Salon</option>
+              <option value="real_estate">Real Estate</option>
+              <option value="service_business">Service Business</option>
+              <option value="restaurant">Restaurant / Cafe</option>
+              <option value="agency">Agency</option>
+              <option value="local_business">Local Business</option>
+            </select>
+          </label>
+
+          <label>
+            <span>Market</span>
+            <input name="market" type="text" placeholder="Germany, UAE, Jordan...">
+          </label>
+
+          <label>
+            <span>Language</span>
+            <input name="language" type="text" placeholder="de, ar, en...">
+          </label>
+
+          <label class="executive-project-form-wide">
+            <span>Website URL</span>
+            <input name="website_url" type="url" placeholder="https://example.com">
+          </label>
+        </div>
+
+        <div class="executive-project-form-actions">
+          <button class="btn btn-primary" type="submit">Create Project</button>
+          <button class="btn btn-secondary" type="button" data-new-project-cancel="1">Cancel</button>
+          <span id="executiveNewProjectStatus" class="executive-project-form-status"></span>
+        </div>
+      </form>
+
+
+      <div class="executive-new-grid">
+        <button
+          class="executive-new-option executive-new-option-primary"
+          type="button"
+          data-new-route="setup"
+          data-new-type="project"
+          data-new-prompt="Create a new project from zero. Guide me through project name, business type, market, language, channels, brand tone, goals, and required setup."
+        >
+          <span class="executive-new-pill">Start</span>
+          <strong>New Project</strong>
+          <span>Create a project from scratch: brand, market, language, channels, and setup.</span>
+        </button>
+
+        <button class="executive-new-option" type="button" data-new-route="campaign-studio" data-new-prompt="Create a campaign plan for the current project. Ask me the required questions step by step.">
+          <span class="executive-new-pill">Plan</span>
+          <strong>Campaign</strong>
+          <span>Launch plan, audience, channels, budget, content map.</span>
+        </button>
+
+        <button class="executive-new-option" type="button" data-new-route="content-studio" data-new-prompt="Create a blog post workflow for the current project. Ask for topic, audience, language, SEO goal, and call to action.">
+          <span class="executive-new-pill">Write</span>
+          <strong>Blog / Content</strong>
+          <span>Blog, captions, landing copy, SEO content.</span>
+        </button>
+
+        <button class="executive-new-option" type="button" data-new-route="media-studio" data-new-prompt="Create a media generation workflow. Ask for format, platform, product, style, language, and assets needed.">
+          <span class="executive-new-pill">Create</span>
+          <strong>Image / Video / Audio</strong>
+          <span>Creative assets, AI visuals, videos, voice concepts.</span>
+        </button>
+
+        <button class="executive-new-option" type="button" data-new-route="publishing" data-new-prompt="Prepare a publishing workflow. Ask what content should be reviewed, approved, scheduled, or published.">
+          <span class="executive-new-pill">Publish</span>
+          <strong>Publishing Task</strong>
+          <span>Review, approve, schedule, publish.</span>
+        </button>
+
+        <button class="executive-new-option" type="button" data-new-route="governance" data-new-prompt="Create an approval request. Ask what needs approval, risk level, reviewer, and decision deadline.">
+          <span class="executive-new-pill">Review</span>
+          <strong>Approval</strong>
+          <span>Governance, claim review, release approval.</span>
+        </button>
+
+        <button class="executive-new-option" type="button" data-new-route="workflows" data-new-prompt="Build a custom workflow for the current project. Ask what outcome I want and what inputs are available.">
+          <span class="executive-new-pill">AI</span>
+          <strong>Custom Workflow</strong>
+          <span>Multi-step AI workflow and execution routing.</span>
+        </button>
+      </div>
+    </div>
+  `;
+
+  return modal;
+}
+
+function hideExecutiveNewLauncher() {
+  const modal = document.getElementById("executiveNewLauncherModal");
+  if (modal) modal.classList.remove("is-visible");
+  document.body.classList.remove("is-executive-new-open");
+}
+
+function showExecutiveNewLauncher() {
+  let modal = document.getElementById("executiveNewLauncherModal");
+  if (!modal) {
+    modal = createExecutiveNewLauncherModal();
+    document.body.appendChild(modal);
+
+    modal.addEventListener("click", (event) => {
+      if (event.target === modal) hideExecutiveNewLauncher();
+    });
+
+    modal.querySelector("#executiveNewCloseBtn")?.addEventListener("click", hideExecutiveNewLauncher);
+
+    const projectForm = modal.querySelector("#executiveNewProjectForm");
+    const projectStatus = modal.querySelector("#executiveNewProjectStatus");
+
+    const setProjectStatus = (message, tone = "info") => {
+      if (!projectStatus) return;
+      projectStatus.textContent = message || "";
+      projectStatus.dataset.tone = tone;
+    };
+
+    modal.querySelector("[data-new-project-cancel]")?.addEventListener("click", () => {
+      if (projectForm) projectForm.hidden = true;
+      setProjectStatus("");
+    });
+
+    projectForm?.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const formData = new FormData(projectForm);
+      const payload = {
+        project_name: String(formData.get("project_name") || "").trim(),
+        project_type: String(formData.get("project_type") || "").trim(),
+        market: String(formData.get("market") || "").trim(),
+        language: String(formData.get("language") || "").trim(),
+        website_url: String(formData.get("website_url") || "").trim()
+      };
+
+      if (!payload.project_name) {
+        setProjectStatus("Project name is required.", "error");
+        return;
+      }
+
+      if (!payload.project_type) {
+        setProjectStatus("Choose a business type.", "error");
+        return;
+      }
+
+      const submitBtn = projectForm.querySelector("button[type='submit']");
+      if (submitBtn) submitBtn.disabled = true;
+      setProjectStatus("Creating isolated project workspace...", "info");
+
+      try {
+        const result = await createMediaManagerProject(payload);
+        const projectName = result?.preferredProject || result?.project?.project_name || payload.project_name;
+
+        hideExecutiveNewLauncher();
+        showMessage(`Project ${projectName} created.`);
+        await loadProjectData(projectName);
+        navigateTo("setup");
+      } catch (error) {
+        setProjectStatus(error?.message || "Failed to create project.", "error");
+      } finally {
+        if (submitBtn) submitBtn.disabled = false;
+      }
+    });
+
+    Array.from(modal.querySelectorAll("[data-new-route]")).forEach((button) => {
+      button.addEventListener("click", () => {
+        const type = button.getAttribute("data-new-type") || "";
+
+        if (type === "project") {
+          if (projectForm) {
+            projectForm.hidden = false;
+            setProjectStatus("");
+            projectForm.querySelector("input, select, textarea")?.focus();
+          }
+          return;
+        }
+
+        const route = button.getAttribute("data-new-route") || "ai-command";
+        const prompt = button.getAttribute("data-new-prompt") || "";
+        const input = $("quickCommandInput");
+        if (input && prompt) input.value = prompt;
+        hideExecutiveNewLauncher();
+        navigateTo(route);
+        openGlobalCommandBar();
+        showMessage("Started guided workflow.");
+      });
+    });
+  }
+
+  document.body.classList.add("is-executive-new-open");
+  modal.classList.add("is-visible");
+}
+
 
 /* =========================
    GLOBAL BUTTONS
 ========================= */
 
+
+function bindExecutiveNewLauncherKeyboard() {
+  if (window.__executiveNewKeyboardBound) return;
+  window.__executiveNewKeyboardBound = true;
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      hideExecutiveNewLauncher();
+    }
+  });
+}
+
 function bindGlobalButtons() {
   const refreshBtn = $("refreshAllBtn");
   const openAiBtn = $("openAiBtn");
   const newCampaignBtn = $("newCampaignBtn");
+  const execNewBtn = $("execNewBtn");
   const scheduleBtn = $("scheduleBtn");
+  const execAskAiBtn = $("execAskAiBtn");
+
+  if (execNewBtn) {
+    execNewBtn.onclick = showExecutiveNewLauncher;
+  }
+
+  if (execAskAiBtn) {
+    execAskAiBtn.onclick = () => {
+      navigateTo("ai-command");
+    };
+  }
 
   if (refreshBtn) {
-    refreshBtn.addEventListener("click", async () => {
-      const projectName = getState().context.currentProject;
-      if (!projectName) {
-        showError("Please select a project first.");
-        return;
-      }
-
-      await loadProjectData(projectName);
-      navigateTo("home");
-    });
+    refreshBtn.textContent = "Run Refresh";
+    refreshBtn.setAttribute("data-action", "refresh-project");
   }
 
   if (openAiBtn) {
-    openAiBtn.addEventListener("click", () => {
-      navigateTo("ai-command");
-    });
+    openAiBtn.setAttribute("data-action", "open-ai-command");
   }
 
   if (newCampaignBtn) {
-    newCampaignBtn.addEventListener("click", () => {
-      navigateTo("campaign-studio");
-    });
+    newCampaignBtn.textContent = "Open Campaign Studio";
+    newCampaignBtn.setAttribute("data-action", "open-campaign-studio");
   }
 
   if (scheduleBtn) {
-    scheduleBtn.addEventListener("click", () => {
-      navigateTo("publishing");
-    });
+    scheduleBtn.textContent = "Open Publishing";
+    scheduleBtn.setAttribute("data-action", "open-publishing");
   }
 }
+
+
 
 /* =========================
    INIT
-========================= */
+installMhRuntimeGlobals();
+
+  console.debug('[MH-OS OBSERVER]', event);
+};
+// ===== END OBSERVER =====
 
 async function init() {
   try {
+    startupRuntimeState.startupStartedAtMs = Date.now();
+    recordStartupStep("init.start");
+    installGlobalErrorGuards();
+    installGlobalLoadingWatchdog();
+    bindFatalErrorPanelActions();
+    bindStartupRecoveryControls();
+    installClickDiagnosticCapture();
     clearFeedback();
 
     initRouter();
-    setCurrentRoute("home");
+    // Restore the route from the URL hash on refresh or deep-link
+    const startRoute = (location.hash.slice(1) || "home").trim();
+    setCurrentRoute(startRoute || "home");
 
     bindNavigation();
+    bindDelegatedClickRouting();
     bindRouteListener();
     bindProjectSwitcher();
+    initializeAiDock();
+    bindExecutiveNewLauncherKeyboard();
     bindGlobalButtons();
     bindResponsiveUi();
+    bindShellMeasurements();
     bindCommandInputs();
+    bindCommandOutsideClose();
 
+    injectAccessKeyButton();
+    if (
+      window.__MH_DEV_MODE__ === true ||
+      location.hostname === "localhost" ||
+      location.hostname === "127.0.0.1"
+    ) {
+      injectRoleSwitcher();
+    }
+
+    recordStartupStep("init.initial-render");
     renderGlobalUi();
     renderCurrentPage();
 
-    const preferredProject = await loadProjects();
+    recordStartupStep("init.loadProjects.start");
+    const projectsPromise = loadProjects();
+    projectsPromise.catch(() => {});
+
+    const preferredProject = await Promise.race([
+      projectsPromise,
+      new Promise((resolve) => {
+        window.setTimeout(() => resolve(""), INIT_LOAD_PROJECTS_TIMEOUT_MS);
+      })
+    ]);
 
     if (preferredProject) {
-      await loadProjectData(preferredProject);
+      recordStartupStep("init.loadProjects.success", { detail: preferredProject || DEFAULT_PROJECT_SLUG });
+    } else {
+      recordStartupStep("init.loadProjects.timeout", { detail: `${INIT_LOAD_PROJECTS_TIMEOUT_MS}ms` });
+      showMessage("Project list is still syncing. Continuing with default project.");
     }
 
+    recordStartupStep("init.loadProjectData.start", { detail: preferredProject || DEFAULT_PROJECT_SLUG });
+    await loadProjectData(preferredProject || DEFAULT_PROJECT_SLUG);
+    recordStartupStep("init.loadProjectData.success", { detail: preferredProject || DEFAULT_PROJECT_SLUG });
+
     markInitialized();
+    startupRuntimeState.initialized = true;
+    startupRuntimeState.initReadyAt = new Date().toISOString();
+    updateStartupUnlockVisibility(false);
+    window.__mhControlCenterStarted = true;
+    recordStartupStep("init.ready");
+
+    if (!getControlWriteKey()) {
+      showAccessKeyModal();
+    }
   } catch (error) {
-    console.error(error);
-    setError(error.message || "Application initialization failed");
-    showError(error.message || "Application initialization failed");
+    handleStartupFatalError("init", error);
   }
 }
 
+
+
 subscribe(() => {
-  renderGlobalUi();
+  const state = getState();
+  const route = String(state.currentRoute || "home");
+  const project = String(state.context?.currentProject || "");
+  const activeElement = document.activeElement;
+  const isEditingFormField = Boolean(
+    activeElement &&
+    typeof activeElement.matches === "function" &&
+    activeElement.matches(
+      "input, select, textarea, [contenteditable=''], [contenteditable='true'], [contenteditable]:not([contenteditable='false'])"
+    )
+  );
+
+  if (
+    route !== window.__mhLastGlobalUiRoute ||
+    project !== window.__mhLastGlobalUiProject ||
+    (!isEditingFormField && state.loading !== window.__mhLastGlobalUiLoading) ||
+    (!isEditingFormField && state.error !== window.__mhLastGlobalUiError)
+  ) {
+    renderGlobalUi();
+  }
+
+  window.__mhLastGlobalUiRoute = route;
+  window.__mhLastGlobalUiProject = project;
+  window.__mhLastGlobalUiLoading = state.loading;
+  window.__mhLastGlobalUiError = state.error;
+
+  if (isDebugStartupMode()) {
+    scheduleRuntimeTracePersist(false);
+  }
 });
 
 window.addEventListener("DOMContentLoaded", init);

@@ -1,0 +1,162 @@
+29:    description: "Capture the positioning and tone AI must follow.",
+76:  project_type: "Improves AI defaults and recommended workflow strategies.",
+90:  project_type: "Helps AI choose better defaults for workflows, campaigns, and recommendations.",
+92:  brand_promise: "Defines the core value AI should protect in every output.",
+94:  language: "Sets the default language for content, AI suggestions, and campaign outputs.",
+98:  competitors: "Helps AI create differentiated positioning instead of generic copy.",
+429:    <div class="setup-field-group${required && !filled ? " is-missing" : ""}" data-setup-field="${escapeHtml(name)}" data-required="${required ? "true" : "false"}">
+434:        <span class="setup-field-state ${indicatorClass}" data-setup-indicator-for="${escapeHtml(name)}">${escapeHtml(indicatorText)}</span>
+438:          ? `<textarea id="setup-${escapeHtml(name)}" name="${escapeHtml(name)}" class="setup-input setup-textarea" rows="${rows}" placeholder="${escapeHtml(placeholder || "")}">${escapeHtml(asString(value))}</textarea>`
+439:          : `<input id="setup-${escapeHtml(name)}" name="${escapeHtml(name)}" class="setup-input" type="${escapeHtml(type)}" value="${escapeHtml(asString(value))}" placeholder="${escapeHtml(placeholder || "")}">`
+519:  const groups = Array.from(form.querySelectorAll("[data-setup-field]"));
+521:    const name = group.getAttribute("data-setup-field") || "";
+522:    const required = group.getAttribute("data-required") === "true";
+524:    const indicator = group.querySelector("[data-setup-indicator-for]");
+727:            <button class="btn btn-ghost" type="button" data-setup-jump-field="${escapeHtml(item.name)}" data-setup-jump-step="${escapeHtml(item.stepId)}">Open field</button>
+749:    completeNowBtn.onclick = () => {
+765:    const button = form.querySelector(`[data-setup-step="${step.id}"]`);
+766:    const statusNote = form.querySelector(`[data-setup-step-note="${step.id}"]`);
+772:    if (button) {
+773:      button.classList.remove("is-problem", "is-warning", "is-ready", "is-recommended");
+774:      if (status.tone === "danger") button.classList.add("is-problem");
+775:      if (status.tone === "warning") button.classList.add("is-warning");
+776:      if (status.tone === "success") button.classList.add("is-ready");
+777:      if (recommendedStep.id === step.id) button.classList.add("is-recommended");
+778:      button.setAttribute("data-step-tone", status.tone);
+779:      button.setAttribute("aria-label", `${step.title}. ${step.description}. Status: ${status.label}.`);
+799:    recommendedBtn.setAttribute("data-setup-open-step", recommendedStep.id);
+836:  navigateTo,
+837:  showMessage,
+852:  const stepButtons = Array.from(document.querySelectorAll("[data-setup-step]"));
+853:  const stepActionButtons = Array.from(document.querySelectorAll("[data-setup-open-step]"));
+854:  const stepPanels = Array.from(document.querySelectorAll("[data-setup-step-panel]"));
+860:    stepButtons.forEach((button) => {
+861:      const isActive = button.getAttribute("data-setup-step") === stepId;
+862:      button.classList.toggle("is-active", isActive);
+863:      button.setAttribute("aria-current", isActive ? "step" : "false");
+867:      const isActive = panel.getAttribute("data-setup-step-panel") === stepId;
+887:  stepButtons.forEach((button) => {
+888:    button.onclick = () => activateStep(button.getAttribute("data-setup-step") || STEP_DEFINITIONS[0].id);
+891:  stepActionButtons.forEach((button) => {
+892:    button.onclick = () => {
+893:      const stepId = button.getAttribute("data-setup-open-step") || STEP_DEFINITIONS[0].id;
+895:      const panel = document.querySelector(`[data-setup-step-panel="${stepId}"]`);
+902:    prevBtn.onclick = () => {
+910:    nextBtn.onclick = () => {
+936:    if (typeof showMessage === "function") {
+937:      showMessage(saved ? message : "Local draft storage is not available in this browser.");
+990:  setupRoot.onclick = (event) => {
+991:    const jumpBtn = event.target.closest("[data-setup-jump-field]");
+996:    const fieldName = jumpBtn.getAttribute("data-setup-jump-field") || "";
+997:    const stepId = jumpBtn.getAttribute("data-setup-jump-step") || getFieldStepId(fieldName);
+1019:    saveDraftBtn.onclick = () => {
+1026:    saveBackendBtn.onclick = async () => {
+1039:      showMessage?.(`Saving setup for ${draftKeyName}...`);
+1051:        showMessage?.(`Setup saved for ${draftKeyName}.${renameWarning}`);
+1068:    resetBtn.onclick = () => {
+1070:      navigateTo("setup");
+1071:      if (typeof showMessage === "function") {
+1072:        showMessage(`Local setup draft cleared for ${draftKeyName}.`);
+1079:    aiPositioningBtn.onclick = () => {
+1086:      showMessage?.("AI draft applied to Offer positioning.");
+1092:    aiAudienceBtn.onclick = () => {
+1099:      showMessage?.("AI draft applied to Primary audience.");
+1105:    aiToneBtn.onclick = () => {
+1112:      showMessage?.("AI draft applied to Brand voice.");
+1118:    aiFillBtn.onclick = () => {
+1140:      // Suppress non-critical AI drafted toast; inline guidance is sufficient.
+1144:  const aiCommandBtn = $("setupAiCommandBtn");
+1145:  if (aiCommandBtn) {
+1146:    aiCommandBtn.onclick = () => {
+1149:      const input = $("quickCommandInput");
+1153:      navigateTo("ai-command");
+1154:      showMessage?.("Setup context sent to AI Command.");
+1160:    validateNowBtn.onclick = () => {
+1170:    continueLibraryBtn.onclick = () => {
+1171:      navigateTo("library");
+1177:    continueIntegrationsBtn.onclick = () => {
+1178:      navigateTo("integrations");
+1184:    continueCampaignBtn.onclick = () => {
+1185:      navigateTo("campaign-studio");
+1191:    reviewMissingBtn.onclick = () => {
+1195:        showMessage?.("No required setup gaps found.");
+1205:      showMessage?.(`Reviewing missing setup items (${missing.length}).`);
+1211:    reviewReadinessBtn.onclick = () => {
+1212:      navigateTo("home");
+1218:    smartActionBtn.onclick = () => {
+1232:        showMessage?.(`Focus moved to ${first.label}.`);
+1294:          <select id="setupBusinessTemplateSelect">
+1315:        <button id="setupApplyTemplateBtn" class="btn btn-secondary" type="button">
+1317:        </button>
+1318:        <span id="setupTemplateStatus" class="setup-template-status"></span>
+1334:    <section class="page is-active" data-page="setup">
+1335:      <div id="setupRoot"></div>
+1342:    navigateTo,
+1343:    showMessage,
+1407:                <span class="card-badge neutral" id="setupTopCompletionBadge">Fields configured: ${escapeHtml(String(completionPercent))}%</span>
+1408:                <span class="card-badge ${getLaunchReadinessSummary({ missingFields, missingAssets, missingConnectors, criticalGaps }).tone}" id="setupTopReadinessBadge">${escapeHtml(getLaunchReadinessSummary({ missingFields, missingAssets, missingConnectors, criticalGaps }).label)}</span>
+1412:              <button id="setupSaveBackendBtn" class="btn btn-primary" type="button">Save Setup</button>
+1418:              <span class="data-label">Completion</span>
+1419:              <strong id="setupCompletionPercentValue" class="setup-wizard-progress-value">${escapeHtml(String(completionPercent))}%</strong>
+1422:                  <div id="setupCompletionBar" class="setup-progress-fill" style="width:${escapeHtml(String(completionPercent))}%"></div>
+1427:              <span class="data-label">Required complete</span>
+1428:              <strong><span id="setupRequiredCompleted">${escapeHtml(String(requiredCompleted))}</span>/<span id="setupRequiredTotal">${escapeHtml(String(requiredNames.length))}</span></strong>
+1429:              <span class="setup-helper"><span id="setupMissingCount">${escapeHtml(String(missingFields.length))}</span> missing</span>
+1432:              <span class="data-label">Dependencies</span>
+1433:              <strong id="setupDependencyGapCount">${escapeHtml(String(dependencyGapCount))}</strong>
+1437:              <span class="data-label">Validation</span>
+1440:                <span id="setupReadinessBadge" class="card-badge ${wizardStatus === "Ready" ? "success" : "warning"}">${escapeHtml(wizardStatus)}</span>
+1441:                <span id="setupValidationBadge" class="card-badge ${escapeHtml(validationSummary.tone)}">${escapeHtml(validationSummary.label)}</span>
+1449:            <p id="setupNextBestAction">${escapeHtml(nextBestAction)}</p>
+1451:              <span>Required missing: <strong id="setupReadinessMissingFields">${escapeHtml(String(missingFields.length))}</strong></span>
+1452:              <span>Assets missing: <strong id="setupReadinessMissingAssets">${escapeHtml(String(missingAssets.length))}</strong> <span class=\"setup-handoff-label\">(manage in Library)</span></span>
+1453:              <span>Connectors missing: <strong id="setupReadinessMissingConnectors">${escapeHtml(String(missingConnectors.length))}</strong> <span class=\"setup-handoff-label\">(manage in Integrations)</span></span>
+1464:              <button id="setupRecommendedStepBtn" class="btn btn-ghost" type="button" data-setup-open-step="${escapeHtml(getRecommendedStep(values).id)}">
+1465:                <span id="setupRecommendedStepTitle">${escapeHtml(getRecommendedStep(values).title)}</span>
+1466:              </button>
+1472:                  <button class="setup-wizard-step ${index === 0 ? "is-active" : ""}" type="button" data-setup-step="${escapeHtml(step.id)}" role="tab" aria-current="${index === 0 ? "step" : "false"}">
+1476:                    <span id="setupStepBadge-${escapeHtml(step.id)}" class="card-badge ${status.tone}">${escapeHtml(status.label)}</span>
+1477:                    <span class="setup-smart-step-note tone-${escapeHtml(status.tone)}" data-setup-step-note="${escapeHtml(step.id)}">${status.tone === "danger" ? "Needs required data" : status.tone === "warning" ? "Partially complete" : ""}</span>
+1478:                  </button>
+1487:                <span class="data-label">Main Setup Form</span>
+1488:                <strong id="setupStepCounter" class="setup-wizard-step-counter">1/${STEP_DEFINITIONS.length}</strong>
+1491:                <button id="setupPrevStepBtn" class="btn btn-ghost" type="button">Previous</button>
+1492:                <button id="setupNextStepBtn" class="btn btn-secondary" type="button">Next</button>
+1496:            <form id="setupProjectForm" class="setup-v2-form">
+1497:              <section class="setup-wizard-step-panel is-active" data-setup-step-panel="business-basics">
+1507:              <section class="setup-wizard-step-panel" data-setup-step-panel="brand-identity" hidden>
+1513:                  ${renderField({ name: "brand_voice", label: "Brand voice", value: values.brand_voice, helper: "Tone rules for AI and content teams.", placeholder: "Confident, clear, practical", escapeHtml, multiline: true, rows: 3 })}
+1519:              <section class="setup-wizard-step-panel" data-setup-step-panel="market-language" hidden>
+1529:              <section class="setup-wizard-step-panel" data-setup-step-panel="audience" hidden>
+1539:              <section class="setup-wizard-step-panel" data-setup-step-panel="goals" hidden>
+1548:              <section class="setup-wizard-step-panel" data-setup-step-panel="competitors" hidden>
+1557:              <section class="setup-wizard-step-panel" data-setup-step-panel="channels" hidden>
+1573:              <button id="setupCompleteNowBtn" class="btn btn-secondary" type="button">Complete now</button>
+1575:            <div id="setupMissingActions">
+1583:                      <button class="btn btn-ghost" type="button" data-setup-jump-field="${escapeHtml(item.name)}" data-setup-jump-step="${escapeHtml(item.stepId)}">Fix now</button>
+1591:            <div id="setupSystemGaps">
+1607:              <button id="setupValidateNowBtn" class="btn btn-ghost" type="button">Validate now</button>
+1611:                <span class="data-label">Validation status</span>
+1616:                <span class="data-label">Warnings</span>
+1621:                <span class="data-label">Integration blockers</span>
+1632:            <button id="setupSmartActionBtn" class="btn btn-secondary" type="button">Run next best action</button>
+1636:            <button id="setupSaveBackendBtnBottom" class="btn btn-ghost" type="button">Save Setup</button>
+1637:            <button id="setupContinueLibraryBtn" class="btn btn-secondary" type="button">Continue to Library</button>
+1638:            <button id="setupContinueIntegrationsBtn" class="btn btn-secondary" type="button">Continue to Integrations</button>
+1643:              <button id="setupContinueCampaignBtn" class="btn btn-secondary" type="button">Continue to Campaign Studio</button>
+1646:              <span class="setup-action-group-label">AI and review</span>
+1647:              <button id="setupAiCommandBtn" class="btn btn-ghost" type="button">Open AI Command with Setup Context</button>
+1648:              <button id="setupReviewMissingBtn" class="btn btn-ghost" type="button">Review missing setup items</button>
+1652:              <button id="setupSaveDraftBtn" class="btn btn-ghost" type="button">Save Draft (local only)</button>
+1653:              <button id="setupResetDraftBtn" class="btn btn-ghost" type="button">Reset Draft</button>
+1662:            <h4>AI Guidance Panel</h4>
+1665:          <p class="setup-v2-subtitle">Use AI to review setup quality, missing launch inputs, and channel priorities.</p>
+1667:            <button id="setupAiPositioningBtn" class="btn btn-ghost" type="button">Review positioning</button>
+1668:            <button id="setupAiAudienceBtn" class="btn btn-ghost" type="button">Find missing launch inputs</button>
+1669:            <button id="setupAiToneBtn" class="btn btn-ghost" type="button">Suggest channel priorities</button>
+1670:            <button id="setupAiFillMissingBtn" class="btn btn-secondary" type="button">Prepare setup checklist</button>
+1678:      navigateTo,
+1679:      showMessage,
+1698:      templateApplyBtn.onclick = async () => {
+1724:          showMessage?.("Business template applied.");
+1741:      saveBottomBtn.onclick = () => saveTopBtn.click();

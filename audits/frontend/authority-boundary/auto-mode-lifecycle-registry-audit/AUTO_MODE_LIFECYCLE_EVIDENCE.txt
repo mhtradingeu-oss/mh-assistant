@@ -1,0 +1,2609 @@
+===== BRANCH =====
+architecture/frontend-consolidation-v1
+
+===== STATUS =====
+?? audits/frontend/authority-boundary/auto-mode-lifecycle-registry-audit/
+
+===== LOG HEAD =====
+a8f3f3a Add workflows behavior contract
+fdf81ef Add workflows runtime ownership audit
+c4dee6f Add publishing shadow compare contract
+736b0e9 Add publishing runtime ownership audit
+a6cf556 Add route role fallback closeout report
+02dde34 Centralize route role fallback authority
+96ec03f Add route role fallback authority audit
+c04b263 Add frontend consolidation audit baseline
+c73886b Add frontend consolidation QA report
+b09ce0f Fix operations center loading settlement
+
+===== AUTOMATION ENGINE STATE / CONTROLLER =====
+7:  "navigate",
+69:    approvalRequiredStep: null
+82:    status: ["idle", "running", "paused", "waiting_approval", "completed", "failed"].includes(normalizeText(parsed.status))
+87:    approvalRequiredStep: parsed.approvalRequiredStep == null ? null : asObject(parsed.approvalRequiredStep)
+95:    const raw = window.sessionStorage?.getItem(AUTO_MODE_STORAGE_KEY);
+99:    if (state.status === "running" || state.status === "waiting_approval") {
+121:    window.sessionStorage?.setItem(AUTO_MODE_STORAGE_KEY, JSON.stringify(state));
+125:let autoModeState = readPersistedAutoModeState();
+128:  autoModeState.logs = [
+129:    ...asArray(autoModeState.logs),
+140:  persistAutoModeState(autoModeState);
+141:  const snapshot = clone(autoModeState);
+216:function gateForStep(step) {
+342:    if (normalizeText(step.type) === "navigate") {
+343:      if (typeof context.navigateTo === "function") {
+344:        context.navigateTo(destination);
+473:export async function runAutomationPlan(plan, options = {}) {
+522:  const steps = asArray(autoModeState.currentPlan);
+526:  while (autoModeState.currentStepIndex < steps.length) {
+528:    if (autoModeState.status !== "running") return getAutoModeState();
+530:    const index = autoModeState.currentStepIndex;
+532:    const gate = gateForStep(step);
+534:    if (gate.required) {
+535:      autoModeState.status = "waiting_approval";
+536:      autoModeState.approvalRequiredStep = {
+539:        reason: gate.reason,
+540:        whatWillHappen: gate.whatWillHappen
+549:      autoModeState.currentStepIndex = index + 1;
+555:    autoModeState.currentStepIndex = index + 1;
+563:      autoModeState.status = "failed";
+564:      autoModeState.enabled = false;
+565:      autoModeState.mode = "off";
+570:    if (autoModeState.mode === "guided" && autoModeState.currentStepIndex < steps.length) {
+571:      autoModeState.status = "paused";
+580:  autoModeState.status = "completed";
+581:  autoModeState.enabled = false;
+582:  autoModeState.mode = "off";
+583:  autoModeState.approvalRequiredStep = null;
+589:export function createAutoModeController(state, context = {}) {
+596:    startAutoMode,
+597:    pauseAutoMode,
+598:    resumeAutoMode,
+599:    stopAutoMode,
+600:    approveCurrentGate,
+601:    skipCurrentStep,
+603:    subscribeAutoMode
+607:export async function startAutoMode(plan, options = {}) {
+614:  autoModeState.enabled = true;
+615:  autoModeState.mode = mode;
+616:  autoModeState.currentPlan = steps;
+617:  autoModeState.currentStepIndex = 0;
+618:  autoModeState.status = "running";
+619:  autoModeState.lastRunAt = nowIso();
+620:  autoModeState.approvalRequiredStep = null;
+625:    autoModeState.status = "failed";
+626:    autoModeState.enabled = false;
+627:    autoModeState.mode = "off";
+636:export function pauseAutoMode() {
+637:  if (autoModeState.status !== "running") return getAutoModeState();
+639:  autoModeState.status = "paused";
+645:export async function resumeAutoMode(options = {}) {
+646:  if (!["paused", "idle", "failed"].includes(autoModeState.status)) return getAutoModeState();
+647:  if (!asArray(autoModeState.currentPlan).length) return getAutoModeState();
+648:  if (autoModeState.currentStepIndex >= autoModeState.currentPlan.length) return getAutoModeState();
+651:  autoModeState.enabled = true;
+652:  if (autoModeState.mode === "off") {
+653:    autoModeState.mode = ["guided", "auto_until_approval"].includes(normalizeText(options.mode))
+657:  autoModeState.status = "running";
+658:  autoModeState.approvalRequiredStep = null;
+664:export function stopAutoMode() {
+666:  autoModeState.enabled = false;
+667:  autoModeState.mode = "off";
+668:  autoModeState.status = "idle";
+669:  autoModeState.approvalRequiredStep = null;
+675:export async function approveCurrentGate(options = {}) {
+676:  if (autoModeState.status !== "waiting_approval" || !autoModeState.approvalRequiredStep) return getAutoModeState();
+678:  const gate = asObject(autoModeState.approvalRequiredStep);
+679:  const step = asObject(gate.step);
+683:  pushAutoLog(`Approval granted for step ${Number(gate.index) + 1}: ${stepActionText(step)}`, "info", { stepIndex: Number(gate.index) });
+686:  if (targetPage && typeof context.navigateTo === "function") {
+687:    context.navigateTo(targetPage);
+690:  autoModeState.currentStepIndex = Math.max(0, Number(gate.index) + 1);
+691:  autoModeState.approvalRequiredStep = null;
+693:  if (autoModeState.currentStepIndex >= autoModeState.currentPlan.length) {
+694:    autoModeState.status = "completed";
+695:    autoModeState.enabled = false;
+696:    autoModeState.mode = "off";
+697:    pushAutoLog("Auto Mode completed after approval gate.", "success");
+703:  autoModeState.status = "running";
+708:export async function skipCurrentStep(options = {}) {
+709:  if (autoModeState.status !== "waiting_approval" || !autoModeState.approvalRequiredStep) return getAutoModeState();
+710:  const index = Number(autoModeState.approvalRequiredStep.index) || autoModeState.currentStepIndex;
+711:  pushAutoLog(`Skipped step ${index + 1} after approval gate.`, "warning", { stepIndex: index });
+712:  autoModeState.currentStepIndex = Math.max(0, index + 1);
+713:  autoModeState.approvalRequiredStep = null;
+715:  if (autoModeState.currentStepIndex >= autoModeState.currentPlan.length) {
+716:    autoModeState.status = "completed";
+717:    autoModeState.enabled = false;
+718:    autoModeState.mode = "off";
+719:    pushAutoLog("Auto Mode completed after skipping gated step.", "success");
+725:  autoModeState.status = "running";
+731:  return clone(autoModeState);
+734:export function subscribeAutoMode(listener) {
+
+===== AUTOMATION ENGINE IMPORTANT RANGES =====
+import { buildSystemIntelligence } from "./system-intelligence.js";
+import { setSharedAiDraft, setSharedHandoff } from "./shared-context.js";
+
+const AUTO_MODE_STORAGE_KEY = "mh-auto-mode-state-v1";
+const AUTO_MODE_MAX_LOGS = 80;
+const AUTO_SAFE_TYPES = new Set([
+  "navigate",
+  "create_draft",
+  "save_local_draft",
+  "create_handoff",
+  "generate_prompt",
+  "prepare_workflow",
+  "prepare_publishing_draft"
+]);
+
+const AUTO_BLOCK_PATTERNS = [
+  { test: /publish\s*now|go\s*live|send\s*live|execute\s*publish|push\s*live/i, reason: "Publishing requires approval and manual confirmation." },
+  { test: /\bdelete\b|\bremove\b|\bdestroy\b|\berase\b/i, reason: "Destructive actions are blocked in Auto Mode." },
+  { test: /\boverwrite\b|\breplace\b|\btruncate\b/i, reason: "Overwrite actions are blocked in Auto Mode." },
+  { test: /disconnect|revoke|unlink/i, reason: "Connection removal is blocked in Auto Mode." },
+  { test: /approve\s*final\s*asset|final\s*approval/i, reason: "Final approvals require a human decision." },
+  { test: /spend\s*money|charge|billing|payment|purchase/i, reason: "Spending actions require explicit manual approval." },
+  { test: /send\s*external|send\s*email|send\s*message|dm\b|sms\b/i, reason: "External sending requires approval." },
+  { test: /paid\s*ads|launch\s*ads|ad\s*spend|budget/i, reason: "Paid promotion requires approval." },
+  { test: /credential|api\s*key|secret|token|auth/i, reason: "Credential and provider connection actions require approval." }
+];
+
+const autoModeListeners = new Set();
+
+const autoModeRuntime = {
+  context: {},
+  runToken: 0
+};
+
+function asArray(value) {
+  return Array.isArray(value) ? value : [];
+}
+
+function asObject(value) {
+  return value && typeof value === "object" ? value : {};
+}
+
+function asString(value) {
+  if (value == null) return "";
+  return String(value);
+}
+
+function normalizeText(value) {
+  return asString(value).trim().toLowerCase();
+}
+
+function nowIso() {
+  return new Date().toISOString();
+}
+
+function clone(value) {
+  return JSON.parse(JSON.stringify(value));
+}
+
+function buildDefaultAutoModeState() {
+  return {
+    enabled: false,
+    mode: "off",
+    currentPlan: [],
+    currentStepIndex: 0,
+    status: "idle",
+    logs: [],
+    lastRunAt: "",
+    approvalRequiredStep: null
+  };
+}
+
+function normalizeAutoModeState(raw) {
+  const parsed = asObject(raw);
+  const next = {
+    enabled: Boolean(parsed.enabled),
+    mode: ["off", "guided", "auto_until_approval"].includes(normalizeText(parsed.mode))
+      ? normalizeText(parsed.mode)
+      : "off",
+    currentPlan: asArray(parsed.currentPlan),
+    currentStepIndex: Math.max(0, Number(parsed.currentStepIndex) || 0),
+    status: ["idle", "running", "paused", "waiting_approval", "completed", "failed"].includes(normalizeText(parsed.status))
+      ? normalizeText(parsed.status)
+      : "idle",
+    logs: asArray(parsed.logs).slice(-AUTO_MODE_MAX_LOGS),
+    lastRunAt: asString(parsed.lastRunAt),
+    approvalRequiredStep: parsed.approvalRequiredStep == null ? null : asObject(parsed.approvalRequiredStep)
+  };
+  return next;
+}
+
+function readPersistedAutoModeState() {
+  if (typeof window === "undefined") return buildDefaultAutoModeState();
+  try {
+    const raw = window.sessionStorage?.getItem(AUTO_MODE_STORAGE_KEY);
+    if (!raw) return buildDefaultAutoModeState();
+    const parsed = JSON.parse(raw);
+    const state = normalizeAutoModeState(parsed);
+    if (state.status === "running" || state.status === "waiting_approval") {
+      state.status = "paused";
+      state.enabled = false;
+      state.mode = "off";
+      state.logs = [
+        ...state.logs,
+        {
+          at: nowIso(),
+          level: "warning",
+          message: "Auto Mode did not continue after reload. Resume manually if needed."
+        }
+      ].slice(-AUTO_MODE_MAX_LOGS);
+    }
+    return state;
+  } catch (_) {
+    return buildDefaultAutoModeState();
+  }
+}
+
+function persistAutoModeState(state) {
+  if (typeof window === "undefined") return;
+  try {
+    window.sessionStorage?.setItem(AUTO_MODE_STORAGE_KEY, JSON.stringify(state));
+  } catch (_) {}
+}
+
+let autoModeState = readPersistedAutoModeState();
+
+function pushAutoLog(message, level = "info", extra = {}) {
+  autoModeState.logs = [
+    ...asArray(autoModeState.logs),
+    {
+      at: nowIso(),
+      level,
+      message: asString(message),
+      ...asObject(extra)
+    }
+  ].slice(-AUTO_MODE_MAX_LOGS);
+}
+
+function emitAutoModeState() {
+  persistAutoModeState(autoModeState);
+  const snapshot = clone(autoModeState);
+  autoModeListeners.forEach((listener) => {
+    try {
+      listener(snapshot);
+    } catch (_) {}
+  });
+}
+
+function resolveControllerContext(override = {}) {
+  return {
+    ...asObject(autoModeRuntime.context),
+    ...asObject(override)
+  };
+}
+
+function stepActionText(step) {
+  return asString(step?.action || step?.type || "step");
+}
+
+function stepTextFingerprint(step) {
+  return [
+    asString(step?.type),
+    stepActionText(step),
+    asString(step?.targetPage),
+    asString(step?.payload?.intent),
+    asString(step?.payload?.prompt)
+  ].join(" ");
+}
+
+function priorityRank(priority) {
+  if (priority === "critical") return 3;
+  if (priority === "recommended") return 2;
+  return 1;
+}
+
+function normalizePriority(value) {
+  const normalized = normalizeText(value);
+  if (["critical", "recommended", "optional"].includes(normalized)) return normalized;
+  return "recommended";
+}
+
+function defaultPromptForStep(step) {
+  return asString(step?.payload?.prompt || step?.payload?.reason || `Prepare ${asString(step?.targetPage || "next action")}`);
+}
+
+function createStep({
+  type,
+  targetPage,
+  action,
+  payload = {},
+  priority = "recommended"
+}) {
+  return {
+    id: `${type}:${targetPage}:${Math.random().toString(36).slice(2, 8)}`,
+    type,
+    targetPage,
+    action,
+    payload: asObject(payload),
+    priority: normalizePriority(priority)
+  };
+}
+
+export function isSafeAction(step) {
+  const type = normalizeText(step?.type);
+  const fingerprint = normalizeText(stepTextFingerprint(step));
+
+  if (!AUTO_SAFE_TYPES.has(type)) return false;
+
+  for (const rule of AUTO_BLOCK_PATTERNS) {
+    if (rule.test.test(fingerprint)) return false;
+  }
+
+  return true;
+}
+
+function gateForStep(step) {
+  const type = normalizeText(step?.type);
+  const action = stepActionText(step);
+  const fingerprint = normalizeText(stepTextFingerprint(step));
+
+  for (const rule of AUTO_BLOCK_PATTERNS) {
+    if (rule.test.test(fingerprint)) {
+      return {
+        required: true,
+        reason: rule.reason,
+        whatWillHappen: `${action} is not executed automatically. A human must approve the next move.`
+      };
+    }
+  }
+
+  if (type === "prepare_publishing_draft") {
+    return { required: false, reason: "", whatWillHappen: "" };
+  }
+
+  if (fingerprint.includes("publishing") && /publish/.test(fingerprint)) {
+    return {
+      required: true,
+      reason: "Publishing actions require manual approval before execution.",
+      whatWillHappen: "Auto Mode will stop at this step and wait for approval."
+    };
+  }
+
+  return { required: false, reason: "", whatWillHappen: "" };
+}
+
+export function buildAutomationPlan(state) {
+  const intelligence = buildSystemIntelligence(state);
+  const recommendations = asArray(intelligence.recommendations);
+
+  const steps = recommendations.map((rec) => {
+    const targetPage = asString(rec?.targetPage || "ai-command");
+    const reason = asString(rec?.reason);
+    const prompt = asString(rec?.draftPayload?.prompt || `Plan and execute: ${asString(rec?.title)}`);
+
+    return createStep({
+      type: "create_handoff",
+      targetPage,
+      action: `Prepare ${targetPage} step from system intelligence`,
+      payload: {
+        recommendationId: asString(rec?.id),
+
+        recommendationId: asString(rec?.id),
+        title: asString(rec?.title),
+        reason,
+        prompt,
+        impactChips: asArray(rec?.impactChips),
+        blockerType: asString(rec?.blockerType)
+      },
+      priority: asString(rec?.priority)
+    });
+  });
+
+  steps.sort((a, b) => priorityRank(b.priority) - priorityRank(a.priority));
+  return steps;
+}
+
+export function getAutoFixPlan(state) {
+  return buildAutomationPlan(state).filter((step) => step.priority === "critical");
+}
+
+export function getAutoFlowPlan(state) {
+  const intelligence = buildSystemIntelligence(state);
+  const projectName = asString(intelligence.projectName || state?.context?.currentProject || "");
+
+  return [
+    createStep({
+      type: "create_draft",
+      targetPage: "content-studio",
+      action: "Create content draft",
+      payload: {
+        projectName,
+        prompt: "Create a conversion-ready content draft from campaign context and current blockers.",
+        source: "automation-flow"
+      },
+      priority: "recommended"
+    }),
+    createStep({
+      type: "create_handoff",
+      targetPage: "media-studio",
+      action: "Create content-to-media handoff",
+      payload: {
+        projectName,
+        prompt: "Prepare media generation plan from content draft.",
+        source_page: "content-studio"
+      },
+      priority: "recommended"
+    }),
+    createStep({
+      type: "create_handoff",
+      targetPage: "library",
+      action: "Create media-to-library handoff",
+      payload: {
+        projectName,
+        prompt: "Save approved media as managed library assets.",
+        source_page: "media-studio"
+      },
+      priority: "recommended"
+    }),
+    createStep({
+      type: "create_handoff",
+      targetPage: "publishing",
+      action: "Create library-to-publishing handoff",
+      payload: {
+        projectName,
+        prompt: "Prepare publishing draft with approved content/media and schedule-safe checklist.",
+        source_page: "library"
+      },
+      priority: "recommended"
+    })
+  ];
+}
+
+export async function runAutomationStep(step, context = {}) {
+  const safe = isSafeAction(step);
+  if (!safe) {
+    return { status: "skipped", reason: "Blocked by safety rules.", step };
+  }
+
+  const state = typeof context.getState === "function" ? context.getState() : asObject(context.state);
+  const projectName = asString(context.projectName || state?.context?.currentProject || step?.payload?.projectName || "__default__");
+  const destination = asString(step?.targetPage || "ai-command");
+
+  try {
+    if (normalizeText(step.type) === "navigate") {
+      if (typeof context.navigateTo === "function") {
+        context.navigateTo(destination);
+      }
+      return { status: "success", reason: "Navigation completed.", step };
+    }
+
+    if (normalizeText(step.type) === "generate_prompt") {
+      const prompt = defaultPromptForStep(step);
+      setSharedAiDraft(projectName, {
+        projectName,
+        modeId: "operations",
+        lastCommand: prompt,
+        lastResponseTitle: asString(step?.payload?.title || "Automation suggestion"),
+        routeSuggestions: [{ route: destination, label: destination }],
+        updatedAt: new Date().toISOString()
+      });
+      return { status: "success", reason: "Prompt generated.", step };
+    }
+
+    if (normalizeText(step.type) === "save_local_draft") {
+      const prompt = defaultPromptForStep(step);
+      const localDraft = {
+        source_page: "automation-engine",
+        destination_page: destination,
+        status: "available",
+        payload: {
+          prompt,
+          intent: "save_local_draft",
+          automation_step: asObject(step)
+        }
+      };
+      setSharedHandoff(projectName, destination, localDraft);
+      return { status: "success", reason: "Local draft prepared.", step };
+    }
+
+    if (normalizeText(step.type) === "create_draft") {
+      const prompt = defaultPromptForStep(step);
+      const draftPayload = {
+        source_page: "automation-engine",
+        destination_page: destination,
+        status: "available",
+        payload: {
+          prompt,
+          draft_context: {
+            projectName,
+            modeId: "operations",
+            lastCommand: prompt,
+            lastResponseTitle: asString(step?.payload?.title || "Automation draft")
+          },
+          automation_step: asObject(step)
+        }
+      };
+      setSharedHandoff(projectName, destination, draftPayload);
+      if (typeof context.createProjectHandoff === "function") {
+        context.createProjectHandoff(projectName, draftPayload).catch(() => {});
+      }
+      return { status: "success", reason: "Draft created.", step };
+    }
+
+    if (normalizeText(step.type) === "prepare_workflow") {
+      const prompt = defaultPromptForStep(step);
+      const handoff = {
+        source_page: "automation-engine",
+        destination_page: "workflows",
+        status: "available",
+        payload: {
+          prompt,
+          title: asString(step?.payload?.title || "Prepared workflow draft"),
+          reason: asString(step?.payload?.reason || ""),
+          automation_step: asObject(step)
+        }
+      };
+      setSharedHandoff(projectName, "workflows", handoff);
+      if (typeof context.createProjectHandoff === "function") {
+        context.createProjectHandoff(projectName, handoff).catch(() => {});
+      }
+      return { status: "success", reason: "Workflow draft prepared.", step };
+    }
+
+    if (normalizeText(step.type) === "prepare_publishing_draft") {
+      const prompt = defaultPromptForStep(step);
+      const handoff = {
+        source_page: "automation-engine",
+        destination_page: "publishing",
+        status: "available",
+        payload: {
+          prompt,
+          title: asString(step?.payload?.title || "Prepared publishing draft"),
+          reason: asString(step?.payload?.reason || ""),
+          intent: "prepare_publishing_draft",
+          automation_step: asObject(step)
+        }
+      };
+      setSharedHandoff(projectName, "publishing", handoff);
+      if (typeof context.createProjectHandoff === "function") {
+        context.createProjectHandoff(projectName, handoff).catch(() => {});
+      }
+      return { status: "success", reason: "Publishing draft prepared.", step };
+    }
+
+    if (normalizeText(step.type) === "create_handoff") {
+      const prompt = defaultPromptForStep(step);
+      const handoff = {
+        source_page: asString(step?.payload?.source_page || "automation-engine"),
+        destination_page: destination,
+        status: "available",
+        payload: {
+          prompt,
+          recommendation_id: asString(step?.payload?.recommendationId),
+          title: asString(step?.payload?.title),
+          reason: asString(step?.payload?.reason),
+          impact_chips: asArray(step?.payload?.impactChips),
+          blocker_type: asString(step?.payload?.blockerType),
+          automation_step: asObject(step)
+        }
+      };
+
+      setSharedHandoff(projectName, destination, handoff);
+      if (typeof context.createProjectHandoff === "function") {
+        context.createProjectHandoff(projectName, handoff).catch(() => {});
+      }
+      return { status: "success", reason: "Handoff created.", step };
+    }
+
+    return { status: "skipped", reason: "No runnable action for step type.", step };
+  } catch (error) {
+    return { status: "failed", reason: asString(error?.message || "Step failed."), step };
+  }
+}
+
+export async function runAutomationPlan(plan, options = {}) {
+  const steps = asArray(plan);
+  const results = [];
+
+  for (let index = 0; index < steps.length; index += 1) {
+    const step = steps[index];
+    if (!isSafeAction(step)) {
+      const blocked = { status: "skipped", reason: "Blocked by safety rules.", step };
+      results.push(blocked);
+      if (typeof options.onProgress === "function") {
+        options.onProgress({ index: index + 1, total: steps.length, step, result: blocked });
+      }
+      continue;
+    }
+
+    const result = await runAutomationStep(step, options.context || {});
+    results.push(result);
+
+    if (typeof options.onProgress === "function") {
+      options.onProgress({ index: index + 1, total: steps.length, step, result });
+    }
+
+    if (result.status === "failed") {
+      return {
+        status: "failed",
+        steps,
+        results,
+        failedStep: step
+      };
+    }
+
+    if (options.stopAfterStep === true) {
+      return {
+        status: "in_progress",
+        steps,
+        results,
+        remaining: steps.slice(index + 1)
+      };
+    }
+  }
+
+  return {
+    status: "success",
+    steps,
+    results
+  };
+}
+
+async function runAutoModeLoop(options = {}) {
+  const steps = asArray(autoModeState.currentPlan);
+  const context = resolveControllerContext(options.context);
+  const activeToken = autoModeRuntime.runToken;
+
+  while (autoModeState.currentStepIndex < steps.length) {
+    if (activeToken !== autoModeRuntime.runToken) return getAutoModeState();
+    if (autoModeState.status !== "running") return getAutoModeState();
+
+    const index = autoModeState.currentStepIndex;
+    const step = steps[index];
+    const gate = gateForStep(step);
+
+    if (gate.required) {
+      autoModeState.status = "waiting_approval";
+      autoModeState.approvalRequiredStep = {
+        index,
+        step,
+        reason: gate.reason,
+        whatWillHappen: gate.whatWillHappen
+      };
+      pushAutoLog(`Approval required at step ${index + 1}: ${stepActionText(step)}`, "warning", { stepIndex: index });
+      emitAutoModeState();
+      return getAutoModeState();
+    }
+
+    if (!isSafeAction(step)) {
+      pushAutoLog(`Skipped blocked step ${index + 1}: ${stepActionText(step)}`, "warning", { stepIndex: index });
+      autoModeState.currentStepIndex = index + 1;
+      emitAutoModeState();
+      continue;
+    }
+
+    const result = await runAutomationStep(step, context);
+    autoModeState.currentStepIndex = index + 1;
+    pushAutoLog(`Step ${index + 1}/${steps.length}: ${stepActionText(step)} (${result.status})`, result.status === "failed" ? "error" : "info", { stepIndex: index });
+
+    if (typeof options.onProgress === "function") {
+      options.onProgress({ index: index + 1, total: steps.length, step, result });
+    }
+
+    }
+
+    if (result.status === "failed") {
+      autoModeState.status = "failed";
+      autoModeState.enabled = false;
+      autoModeState.mode = "off";
+      emitAutoModeState();
+      return getAutoModeState();
+    }
+
+    if (autoModeState.mode === "guided" && autoModeState.currentStepIndex < steps.length) {
+      autoModeState.status = "paused";
+      pushAutoLog("Guided mode paused after one step.", "info");
+      emitAutoModeState();
+      return getAutoModeState();
+    }
+
+    emitAutoModeState();
+  }
+
+  autoModeState.status = "completed";
+  autoModeState.enabled = false;
+  autoModeState.mode = "off";
+  autoModeState.approvalRequiredStep = null;
+  pushAutoLog("Auto Mode completed all safe steps.", "success");
+  emitAutoModeState();
+  return getAutoModeState();
+}
+
+export function createAutoModeController(state, context = {}) {
+  autoModeRuntime.context = {
+    state,
+    ...asObject(context)
+  };
+  emitAutoModeState();
+  return {
+    startAutoMode,
+    pauseAutoMode,
+    resumeAutoMode,
+    stopAutoMode,
+    approveCurrentGate,
+    skipCurrentStep,
+    getAutoModeState,
+    subscribeAutoMode
+  };
+}
+
+export async function startAutoMode(plan, options = {}) {
+  const steps = asArray(plan).map((step) => ({ ...asObject(step) }));
+  const mode = ["guided", "auto_until_approval"].includes(normalizeText(options.mode))
+    ? normalizeText(options.mode)
+    : "guided";
+
+  autoModeRuntime.runToken += 1;
+  autoModeState.enabled = true;
+  autoModeState.mode = mode;
+  autoModeState.currentPlan = steps;
+  autoModeState.currentStepIndex = 0;
+  autoModeState.status = "running";
+  autoModeState.lastRunAt = nowIso();
+  autoModeState.approvalRequiredStep = null;
+  pushAutoLog(`Auto Mode started in ${mode} mode with ${steps.length} step(s).`, "info");
+  emitAutoModeState();
+
+  if (!steps.length) {
+    autoModeState.status = "failed";
+    autoModeState.enabled = false;
+    autoModeState.mode = "off";
+    pushAutoLog("Auto Mode failed: no plan steps provided.", "error");
+    emitAutoModeState();
+    return getAutoModeState();
+  }
+
+  return runAutoModeLoop(options);
+}
+
+export function pauseAutoMode() {
+  if (autoModeState.status !== "running") return getAutoModeState();
+  autoModeRuntime.runToken += 1;
+  autoModeState.status = "paused";
+  pushAutoLog("Auto Mode paused.", "info");
+  emitAutoModeState();
+  return getAutoModeState();
+}
+
+export async function resumeAutoMode(options = {}) {
+  if (!["paused", "idle", "failed"].includes(autoModeState.status)) return getAutoModeState();
+  if (!asArray(autoModeState.currentPlan).length) return getAutoModeState();
+  if (autoModeState.currentStepIndex >= autoModeState.currentPlan.length) return getAutoModeState();
+
+  autoModeRuntime.runToken += 1;
+  autoModeState.enabled = true;
+  if (autoModeState.mode === "off") {
+    autoModeState.mode = ["guided", "auto_until_approval"].includes(normalizeText(options.mode))
+      ? normalizeText(options.mode)
+      : "guided";
+  }
+  autoModeState.status = "running";
+  autoModeState.approvalRequiredStep = null;
+  pushAutoLog("Auto Mode resumed.", "info");
+  emitAutoModeState();
+  return runAutoModeLoop(options);
+}
+
+export function stopAutoMode() {
+  autoModeRuntime.runToken += 1;
+  autoModeState.enabled = false;
+  autoModeState.mode = "off";
+  autoModeState.status = "idle";
+  autoModeState.approvalRequiredStep = null;
+  pushAutoLog("Auto Mode stopped.", "info");
+  emitAutoModeState();
+  return getAutoModeState();
+}
+
+export async function approveCurrentGate(options = {}) {
+  if (autoModeState.status !== "waiting_approval" || !autoModeState.approvalRequiredStep) return getAutoModeState();
+
+  const gate = asObject(autoModeState.approvalRequiredStep);
+  const step = asObject(gate.step);
+  const targetPage = asString(step.targetPage);
+  const context = resolveControllerContext(options.context);
+
+  pushAutoLog(`Approval granted for step ${Number(gate.index) + 1}: ${stepActionText(step)}`, "info", { stepIndex: Number(gate.index) });
+
+  // Approval means proceed manually for guarded actions; never auto-publish or execute destructive actions.
+  if (targetPage && typeof context.navigateTo === "function") {
+    context.navigateTo(targetPage);
+  }
+
+  autoModeState.currentStepIndex = Math.max(0, Number(gate.index) + 1);
+  autoModeState.approvalRequiredStep = null;
+
+  if (autoModeState.currentStepIndex >= autoModeState.currentPlan.length) {
+    autoModeState.status = "completed";
+    autoModeState.enabled = false;
+    autoModeState.mode = "off";
+    pushAutoLog("Auto Mode completed after approval gate.", "success");
+    emitAutoModeState();
+    return getAutoModeState();
+  }
+
+  autoModeRuntime.runToken += 1;
+  autoModeState.status = "running";
+  emitAutoModeState();
+  return runAutoModeLoop(options);
+}
+
+export async function skipCurrentStep(options = {}) {
+  if (autoModeState.status !== "waiting_approval" || !autoModeState.approvalRequiredStep) return getAutoModeState();
+  const index = Number(autoModeState.approvalRequiredStep.index) || autoModeState.currentStepIndex;
+  pushAutoLog(`Skipped step ${index + 1} after approval gate.`, "warning", { stepIndex: index });
+  autoModeState.currentStepIndex = Math.max(0, index + 1);
+  autoModeState.approvalRequiredStep = null;
+
+  if (autoModeState.currentStepIndex >= autoModeState.currentPlan.length) {
+    autoModeState.status = "completed";
+    autoModeState.enabled = false;
+    autoModeState.mode = "off";
+    pushAutoLog("Auto Mode completed after skipping gated step.", "success");
+    emitAutoModeState();
+    return getAutoModeState();
+  }
+
+  autoModeRuntime.runToken += 1;
+  autoModeState.status = "running";
+  emitAutoModeState();
+  return runAutoModeLoop(options);
+}
+
+export function getAutoModeState() {
+  return clone(autoModeState);
+}
+
+export function subscribeAutoMode(listener) {
+  if (typeof listener !== "function") return () => {};
+  autoModeListeners.add(listener);
+  return () => {
+    autoModeListeners.delete(listener);
+  };
+}
+
+===== PUBLISHING AUTO MODE MARKERS =====
+11:  startAutoMode,
+12:  stopAutoMode,
+13:  approveCurrentGate,
+14:  skipCurrentStep,
+15:  subscribeAutoMode
+38:let publishingAutoModeUnsubscribe = null;
+39:let publishingAutoModeControllerReady = false;
+40:let publishingAutomationEnabled = false;
+62:function ensurePublishingAutoModeBinding(getState, navigateTo, render) {
+65:  if (!publishingAutomationEnabled) {
+69:  if (!publishingAutoModeControllerReady) {
+71:    publishingAutoModeControllerReady = true;
+74:  if (publishingAutoModeUnsubscribe) {
+78:  publishingAutoModeUnsubscribe = subscribeAutoMode(() => {
+520:      type: "prepare_publishing_draft",
+532:      type: "publish_now",
+1341:  ensurePublishingAutoModeBinding(getState, navigateTo, render);
+1668:      publishingAutomationEnabled = true;
+1669:      ensurePublishingAutoModeBinding(getState, navigateTo, render);
+1672:      const runResult = await startAutoMode(plan, {
+1692:      stopAutoMode();
+1700:      await approveCurrentGate({ context: { getState, navigateTo, projectName } });
+1708:      await skipCurrentStep({ context: { getState, navigateTo, projectName } });
+
+===== PUBLISHING AUTO MODE RANGES =====
+import { getSharedHandoff, setSharedAiDraft, setSharedHandoff } from "../shared-context.js";
+import {
+  filterAssetCategories,
+  getAssetNextAction,
+  renderAssetDependencyRows
+} from "../asset-library.js";
+import { getReadinessBlockers } from "../system-intelligence.js";
+import {
+  createAutoModeController,
+  getAutoModeState,
+  startAutoMode,
+  stopAutoMode,
+  approveCurrentGate,
+  skipCurrentStep,
+  subscribeAutoMode
+} from "../automation-engine.js";
+
+const publishingSessions = new Map();
+const PUBLISHING_LOCAL_DRAFTS_KEY = "mh-publishing-local-drafts-v1";
+const STATUS_FILTERS = ["all", "draft", "ready", "needs approval", "scheduled", "published", "failed"];
+const DISPLAY_STATUSES = ["draft", "ready", "needs approval", "scheduled", "published", "failed"];
+const CHANNEL_DEFAULTS = ["instagram", "facebook", "tiktok", "youtube", "email", "amazon", "ebay", "website"];
+const APPROVAL_STATUSES = ["draft", "needs approval", "approved"];
+const PUBLISHING_ASSET_KEYS = [
+  "legal_doc",
+  "pricing_doc",
+  "product_csv",
+  "product_photos",
+  "product_videos",
+  "campaign_assets",
+  "social_assets",
+  "logo"
+];
+const publishingAutomationState = {
+  progress: "",
+  result: ""
+};
+let publishingAutoModeUnsubscribe = null;
+let publishingAutoModeControllerReady = false;
+let publishingAutomationEnabled = false;
+let publishingRenderCallback = null;
+let publishingRenderTimer = null;
+
+function schedulePublishingRender(render) {
+  if (typeof render === "function") {
+    publishingRenderCallback = render;
+  }
+
+  if (publishingRenderTimer) {
+    return;
+  }
+
+  publishingRenderTimer = window.setTimeout(() => {
+    publishingRenderTimer = null;
+
+    if (typeof publishingRenderCallback === "function") {
+      publishingRenderCallback();
+    }
+  }, 120);
+}
+
+function ensurePublishingAutoModeBinding(getState, navigateTo, render) {
+  publishingRenderCallback = render;
+
+  if (!publishingAutomationEnabled) {
+    return;
+  }
+
+  if (!publishingAutoModeControllerReady) {
+    createAutoModeController(getState, { getState, navigateTo });
+    publishingAutoModeControllerReady = true;
+  }
+
+  if (publishingAutoModeUnsubscribe) {
+    return;
+  }
+
+  publishingAutoModeUnsubscribe = subscribeAutoMode(() => {
+    const autoState = getAutoModeState();
+    const status = asString(autoState.status || "idle");
+
+    if (status === "idle") {
+      return;
+    }
+
+    schedulePublishingRender();
+  });
+}
+
+
+
+function asArray(value) {
+  return Array.isArray(value) ? value : [];
+}
+
+function asObject(value) {
+  return value && typeof value === "object" ? value : {};
+}
+
+function asString(value) {
+  if (value == null) return "";
+  return String(value);
+}
+
+function clean(value) {
+  return asString(value).trim();
+}
+
+function titleCase(value) {
+  return asString(value)
+    .replace(/[_-]+/g, " ")
+    .replace(/\b\w/g, (match) => match.toUpperCase());
+}
+
+function toKey(value) {
+  return clean(value).toLowerCase();
+}
+
+function toDate(value) {
+  const parsed = new Date(value);
+
+    channel: session.form.channel,
+    contentItem: session.form.contentItem,
+    scheduledFor: buildScheduleTime(session.form),
+    approvalStatus: session.form.approvalStatus,
+    status,
+    notes: session.form.notes,
+    updatedAt: nowIso()
+  };
+}
+
+function buildPublishingAutoModePlan(session) {
+  const draftPrompt = firstText(
+    session.form.contentItem,
+    session.form.notes,
+    "Prepare publishing draft from current project context."
+  );
+
+  return [
+    {
+      id: `publishing-prepare-${Date.now()}`,
+      type: "prepare_publishing_draft",
+      targetPage: "publishing",
+      action: "Prepare publishing draft",
+      payload: {
+        prompt: draftPrompt,
+        reason: "Prepare a safe publishing draft without executing publish.",
+        title: firstText(session.form.title, "Prepared publishing draft")
+      },
+      priority: "recommended"
+    },
+    {
+      id: `publishing-gate-${Date.now()}`,
+      type: "publish_now",
+      targetPage: "publishing",
+      action: "Publish now to external channels",
+      payload: {
+        prompt: draftPrompt,
+        reason: "Publishing is gated and requires manual approval."
+      },
+      priority: "critical"
+    }
+  ];
+}
+
+function validateBuilder(session, intent) {
+  const errors = {};
+
+  reschedulePublishingItem,
+  approvePublishingItem,
+  publishPublishingItem,
+  failPublishingItem,
+  render,
+  queue,
+  handoff
+}) {
+
+  const state = getState();
+  const projectName = state.context.currentProject || "";
+  const session = ensureSession(projectName, state);
+
+  ensurePublishingAutoModeBinding(getState, navigateTo, render);
+
+  function rerender() {
+    schedulePublishingRender(render);
+  }
+
+
+  function selected() {
+    return getSelectedItem(queue, session.selectedId);
+  }
+
+      navigateTo("ai-command");
+      showMessage?.("Publishing context sent to AI Command.");
+    };
+  }
+
+  const autoPrepareBtn = $("publishingAutoPrepareBtn");
+  if (autoPrepareBtn) {
+    autoPrepareBtn.onclick = async () => {
+      const plan = buildPublishingAutoModePlan(session);
+      if (!plan.length) {
+        publishingAutomationState.progress = "";
+        publishingAutomationState.result = "No safe publishing preparation steps available.";
+        rerender();
+        return;
+      }
+
+      publishingAutomationState.result = "";
+      publishingAutomationState.progress = `Step 0 / ${plan.length}`;
+      publishingAutomationEnabled = true;
+      ensurePublishingAutoModeBinding(getState, navigateTo, render);
+      rerender();
+
+      const runResult = await startAutoMode(plan, {
+        mode: "auto_until_approval",
+        context: { getState, navigateTo, projectName },
+        onProgress: ({ index, total, step, result }) => {
+        publishingAutomationState.progress = `Step ${index} / ${total}: ${step.action} (${result.status})`;
+        schedulePublishingRender(render);
+        }
+      });
+
+      publishingAutomationState.result = runResult.status === "success"
+        ? "Auto Prepare Publishing completed."
+        : "Auto Prepare Publishing stopped before completion.";
+      showMessage?.(publishingAutomationState.result);
+      rerender();
+    };
+  }
+
+  const autoStopBtn = $("publishingAutoStopBtn");
+  if (autoStopBtn) {
+    autoStopBtn.onclick = () => {
+      stopAutoMode();
+      showMessage?.("Auto Mode stopped.");
+    };
+  }
+
+  const autoApproveBtn = $("publishingAutoApproveBtn");
+  if (autoApproveBtn) {
+    autoApproveBtn.onclick = async () => {
+      await approveCurrentGate({ context: { getState, navigateTo, projectName } });
+      showMessage?.("Approval gate accepted.");
+    };
+  }
+
+  const autoSkipBtn = $("publishingAutoSkipBtn");
+  if (autoSkipBtn) {
+    autoSkipBtn.onclick = async () => {
+      await skipCurrentStep({ context: { getState, navigateTo, projectName } });
+      showMessage?.("Gated step skipped.");
+    };
+  }
+}
+
+export const publishingRoute = {
+  id: "publishing",
+
+===== WORKFLOWS AUTO MODE MARKERS =====
+18:  startAutoMode,
+19:  pauseAutoMode,
+20:  resumeAutoMode,
+21:  stopAutoMode,
+22:  approveCurrentGate,
+23:  skipCurrentStep,
+24:  subscribeAutoMode,
+26:  runAutomationPlan
+109:let workflowAutoModeUnsubscribe = null;
+110:let workflowAutomationEnabled = false;
+716:        <button id="workflowAutoStartBtn" class="wfexec-btn wfexec-btn-primary" type="button">
+719:        <button id="workflowAutoPauseBtn" class="wfexec-btn wfexec-btn-secondary" type="button">
+722:        <button id="workflowAutoResumeBtn" class="wfexec-btn wfexec-btn-secondary" type="button">
+725:        <button id="workflowAutoStopBtn" class="wfexec-btn wfexec-btn-ghost" type="button">
+750:              <button id="workflowAutoApproveBtn" class="wfexec-btn wfexec-btn-secondary" type="button">
+753:              <button id="workflowAutoSkipBtn" class="wfexec-btn wfexec-btn-secondary" type="button">
+1214:  if (workflowAutomationEnabled) {
+1216:    if (workflowAutoModeUnsubscribe) workflowAutoModeUnsubscribe();
+1217:    workflowAutoModeUnsubscribe = subscribeAutoMode(() => {
+1634:      const result = await runAutomationPlan(plan, {
+1663:      const stepResult = await runAutomationPlan(singleStep, {
+1681:  const autoStartBtn = $("workflowAutoStartBtn");
+1685:      workflowAutomationEnabled = true;
+1687:      if (workflowAutoModeUnsubscribe) workflowAutoModeUnsubscribe();
+1688:      workflowAutoModeUnsubscribe = subscribeAutoMode(() => {
+1692:      await startAutoMode(plan, {
+1700:  const autoPauseBtn = $("workflowAutoPauseBtn");
+1703:      pauseAutoMode();
+1708:  const autoResumeBtn = $("workflowAutoResumeBtn");
+1711:      await resumeAutoMode({ context: { getState, navigateTo, createProjectHandoff, projectName } });
+1716:  const autoStopBtn = $("workflowAutoStopBtn");
+1719:      stopAutoMode();
+1724:  const autoApproveBtn = $("workflowAutoApproveBtn");
+1727:      await approveCurrentGate({ context: { getState, navigateTo, createProjectHandoff, projectName } });
+1732:  const autoSkipBtn = $("workflowAutoSkipBtn");
+1735:      await skipCurrentStep({ context: { getState, navigateTo, createProjectHandoff, projectName } });
+
+===== WORKFLOWS AUTO MODE RANGES =====
+  "run-weekly-report": "generate-report",
+  "build-ads": "launch-campaign"
+};
+
+const WORKFLOW_LOCAL_DRAFTS_KEY = "mh-workflow-local-drafts-v1";
+
+const workflowSessions = new Map();
+let lastWorkflowRenderContext = null;
+let workflowBridgeRegistered = false;
+let workflowAutoModeUnsubscribe = null;
+let workflowAutomationEnabled = false;
+const workflowAutomationState = {
+  progress: "",
+  result: "",
+  cursor: 0,
+  lastPlan: [],
+  lastResults: []
+};
+
+function asArray(value) {
+  return Array.isArray(value) ? value : [];
+}
+
+function asObject(value) {
+  return value && typeof value === "object" ? value : {};
+}
+
+function asString(value) {
+  if (value == null) return "";
+  return String(value);
+}
+
+  $,
+  getState,
+  navigateTo,
+  showMessage,
+  showError,
+  reloadProjectData,
+  fetchProjectInsights,
+  fetchProjectLearning,
+  runProjectWorkflow,
+  runProjectAiWorkflow,
+  createProjectTask,
+  createProjectHandoff,
+  render
+}) {
+  if (workflowAutomationEnabled) {
+    createAutoModeController(getState, { getState, navigateTo, createProjectHandoff });
+    if (workflowAutoModeUnsubscribe) workflowAutoModeUnsubscribe();
+    workflowAutoModeUnsubscribe = subscribeAutoMode(() => {
+      render();
+    });
+  }
+
+  const state = getState();
+  const projectName = state.context.currentProject || "";
+  const session = ensureSession(projectName, createDefaultInputs(state), state.data.operations);
+  const workflow = getWorkflowDef(session.selectedWorkflowId);
+
+            lastResponseTitle: "Custom workflow builder"
+          }
+        },
+        status: "available"
+      });
+      navigateTo("ai-command");
+    };
+  }
+
+  const fullAutomationBtn = $("workflowRunFullAutomationBtn");
+  if (fullAutomationBtn) {
+    fullAutomationBtn.onclick = async () => {
+      const plan = buildAutomationPlan(getState());
+      if (!plan.length) {
+        workflowAutomationState.result = "No safe automation steps available.";
+        render();
+        return;
+      }
+      const confirmed = window.confirm(`Run ${plan.length} safe automation steps?`);
+      if (!confirmed) return;
+
+      workflowAutomationState.lastPlan = plan;
+      workflowAutomationState.cursor = 0;
+      workflowAutomationState.result = "";
+      const result = await runAutomationPlan(plan, {
+        context: { getState, navigateTo, createProjectHandoff, projectName },
+        onProgress: ({ index, total, step, result: stepResult }) => {
+          workflowAutomationState.progress = `Step ${index} / ${total}: ${step.action} (${stepResult.status})`;
+          render();
+        }
+      });
+      workflowAutomationState.lastResults = asArray(result.results);
+      workflowAutomationState.result = result.status === "success" ? "Automation run completed." : "Automation stopped before completion.";
+      showMessage?.(workflowAutomationState.result);
+      render();
+    };
+  }
+
+  const stepAutomationBtn = $("workflowRunStepAutomationBtn");
+  if (stepAutomationBtn) {
+    stepAutomationBtn.onclick = async () => {
+      const plan = buildAutomationPlan(getState());
+      if (!plan.length) {
+        workflowAutomationState.result = "No safe automation steps available.";
+        render();
+        return;
+      }
+
+      const confirmed = window.confirm("Run next safe automation step?");
+      if (!confirmed) return;
+
+      const nextIndex = Math.min(workflowAutomationState.cursor, plan.length - 1);
+      const singleStep = [plan[nextIndex]];
+      const stepResult = await runAutomationPlan(singleStep, {
+        context: { getState, navigateTo, createProjectHandoff, projectName },
+        onProgress: ({ index, total, step, result: runResult }) => {
+          workflowAutomationState.progress = `Step ${nextIndex + index} / ${plan.length}: ${step.action} (${runResult.status})`;
+        }
+      });
+
+      workflowAutomationState.cursor = Math.min(nextIndex + 1, plan.length);
+      workflowAutomationState.lastPlan = plan;
+      workflowAutomationState.lastResults = [...asArray(workflowAutomationState.lastResults), ...asArray(stepResult.results)];
+      workflowAutomationState.result = workflowAutomationState.cursor >= plan.length
+        ? "Step-by-step automation completed."
+        : "Step executed. Run again for next step.";
+      showMessage?.(workflowAutomationState.result);
+      render();
+    };
+  }
+
+  const autoStartBtn = $("workflowAutoStartBtn");
+  if (autoStartBtn) {
+    autoStartBtn.onclick = async () => {
+      const plan = buildAutomationPlan(getState());
+      workflowAutomationEnabled = true;
+      createAutoModeController(getState, { getState, navigateTo, createProjectHandoff });
+      if (workflowAutoModeUnsubscribe) workflowAutoModeUnsubscribe();
+      workflowAutoModeUnsubscribe = subscribeAutoMode(() => {
+        render();
+      });
+
+      await startAutoMode(plan, {
+        mode: "auto_until_approval",
+        context: { getState, navigateTo, createProjectHandoff, projectName }
+      });
+      showMessage?.("Workflow Auto Mode started.");
+    };
+  }
+
+  const autoPauseBtn = $("workflowAutoPauseBtn");
+  if (autoPauseBtn) {
+    autoPauseBtn.onclick = () => {
+      pauseAutoMode();
+      showMessage?.("Auto Mode paused.");
+    };
+  }
+
+  const autoResumeBtn = $("workflowAutoResumeBtn");
+  if (autoResumeBtn) {
+    autoResumeBtn.onclick = async () => {
+      await resumeAutoMode({ context: { getState, navigateTo, createProjectHandoff, projectName } });
+      showMessage?.("Auto Mode resumed.");
+    };
+  }
+
+  const autoStopBtn = $("workflowAutoStopBtn");
+  if (autoStopBtn) {
+    autoStopBtn.onclick = () => {
+      stopAutoMode();
+      showMessage?.("Auto Mode stopped.");
+    };
+  }
+
+  const autoApproveBtn = $("workflowAutoApproveBtn");
+  if (autoApproveBtn) {
+    autoApproveBtn.onclick = async () => {
+      await approveCurrentGate({ context: { getState, navigateTo, createProjectHandoff, projectName } });
+      showMessage?.("Approval gate accepted.");
+    };
+  }
+
+  const autoSkipBtn = $("workflowAutoSkipBtn");
+  if (autoSkipBtn) {
+    autoSkipBtn.onclick = async () => {
+      await skipCurrentStep({ context: { getState, navigateTo, createProjectHandoff, projectName } });
+      showMessage?.("Auto Mode skipped gated step.");
+    };
+  }
+}
+
+
+
+export const workflowsRoute = {
+  id: "workflows",
+  disableStandardLayout: true,
+  meta: {
+    eyebrow: "AI & Build",
+    title: "Workflows",
+    description: "Run structured, repeatable workflows for common marketing and execution operations."
+  },
+  template: `
+    <section class="page is-active" data-page="workflows">
+      <div id="workflowsRoot"></div>
+    </section>
+  `,
+    render({
+    getState,
+    $,
+    escapeHtml,
+    navigateTo,
+    showMessage
+  }) {
+    const state = getState();
+    const projectName = asString(selectCurrentProject(state) || "");
+    const campaignName = asString(state.context.activeCampaign || "");
+    const executionMode = asString(state.context.executionMode || "");
+
+    const payload = asObject(selectProjectPayload(state));
+
+    const overview = asObject(payload.overview?.overview || payload.overview);
+    const readinessRoot = asObject(payload.readiness?.dashboard || payload.readiness);
+    const operations = asObject(selectOperationsSnapshot(state));
+
+    const readinessScore = readinessRoot.readiness_score ?? overview.readiness_score ?? null;
+    const readinessStatus = firstNonEmpty(readinessRoot.readiness_status, overview.readiness_status, "Unknown");
+
+    const workflowsTotal = Number(operations.workflows?.total_runs || operations.workflows?.total || 0);
+    const tasksTotal = Number(operations.tasks?.total || 0);
+    const approvalsTotal = Number(operations.approvals?.total || 0);
+
+    const root = $("workflowsRoot");
+    if (!root) return;
+
+    root.innerHTML = `
+      <div class="wfexec-shell">
+        <section class="wfexec-section wfexec-overview">
+          <div class="wfexec-head">
+            <h3>Workflow Overview</h3>
+            <span class="card-badge success">Ready</span>
+          </div>
+
+          <div class="wfexec-overview-grid">
+            <article class="wfexec-stat">
+              <span>Current project</span>
+              <strong>${escapeHtml(projectName || "Not selected")}</strong>
+            </article>
+
+            <article class="wfexec-stat">
+              <span>Active campaign</span>
+              <strong>${escapeHtml(campaignName || "Not selected")}</strong>
+            </article>
+
+            <article class="wfexec-stat">
+              <span>Readiness</span>
+              <strong>${escapeHtml(readinessScore == null ? "Unknown" : `${readinessScore}/100`)}</strong>
+            </article>
+
+            <article class="wfexec-stat">
+              <span>Status</span>
+              <strong>${escapeHtml(readinessStatus)}</strong>
+            </article>
+
+            <article class="wfexec-stat wfexec-stat-wide">
+              <span>Execution mode</span>
+              <strong>${escapeHtml(executionMode || "Not set")}</strong>
+            </article>
+
+            <article class="wfexec-stat wfexec-stat-wide">
+              <span>Workflow runs</span>
+              <strong>${escapeHtml(String(workflowsTotal))}</strong>
+            </article>
+          </div>
+        </section>
+
+        <section class="wfexec-section">
+          <div class="wfexec-head">
+            <h3>Workflow Builder</h3>
+          </div>
+
+          <div class="wfexec-field-grid">
+            <div>
+              <label class="wfexec-label" for="wfLightWorkflowType">Workflow type</label>
+              <select id="wfLightWorkflowType" class="wfexec-select">
+                ${WORKFLOW_CATALOG.map((workflow) => `
+                  <option value="${escapeHtml(workflow.id)}">${escapeHtml(workflow.title)}</option>
+                `).join("")}
+              </select>
+            </div>
+
+            <div>
+              <label class="wfexec-label" for="wfLightProject">Project</label>
+              <input id="wfLightProject" class="wfexec-input" type="text" value="${escapeHtml(projectName)}" placeholder="Current project">
+            </div>
+
+            <div>
+              <label class="wfexec-label" for="wfLightCampaign">Campaign</label>
+              <input id="wfLightCampaign" class="wfexec-input" type="text" value="${escapeHtml(campaignName)}" placeholder="Campaign name">
+            </div>
+
+            <div>
+              <label class="wfexec-label" for="wfLightGoal">Goal</label>
+              <input id="wfLightGoal" class="wfexec-input" type="text" placeholder="Workflow goal">
+            </div>
+          </div>
+
+          <div class="wfexec-action-row">
+            <button id="wfLightPrepareBtn" class="wfexec-btn wfexec-btn-primary" type="button">Prepare Workflow</button>
+            <button id="wfLightAiBtn" class="wfexec-btn wfexec-btn-secondary" type="button">Send to AI Workspace</button>
+            <button id="wfLightCampaignBtn" class="wfexec-btn wfexec-btn-ghost" type="button">Open Campaign Studio</button>
+            <button id="wfLightTasksBtn" class="wfexec-btn wfexec-btn-ghost" type="button">Open Task Center</button>
+          </div>
+
+          <div id="wfLightStatus" class="wfexec-meta">
+            Workflows is ready. Prepare workflow inputs, send them to AI Workspace, or continue from Campaign Studio and Task Center.
+          </div>
+
+          <div class="wfexec-operating-strip" aria-label="Workflow execution context">
+            <div>
+              <span>Execution</span>
+              <strong>${escapeHtml(executionMode || "manual")}</strong>
+            </div>
+
+            <div>
+              <span>Workflow Runs</span>
+              <strong>${escapeHtml(String(workflowsTotal))}</strong>
+            </div>
+
+            <div>
+              <span>Approvals</span>
+              <strong>${escapeHtml(String(approvalsTotal))}</strong>
+            </div>
+
+            <div>
+              <span>Runtime</span>
+              <strong>Execution ready</strong>
+            </div>
+          </div>
+        </section>
+
+        <section class="wfexec-section">
+          <div class="wfexec-head">
+            <h3>Current Operations State</h3>
+          </div>
+
+          <div class="wfexec-overview-grid">
+            <article class="wfexec-stat">
+              <span>Workflow runs</span>
+              <strong>${escapeHtml(String(workflowsTotal))}</strong>
+            </article>
+
+            <article class="wfexec-stat">
+              <span>Tasks</span>
+              <strong>${escapeHtml(String(tasksTotal))}</strong>
+            </article>
+
+            <article class="wfexec-stat">
+              <span>Approvals</span>
+              <strong>${escapeHtml(String(approvalsTotal))}</strong>
+            </article>
+          </div>
+        </section>
+      </div>
+    `;
+
+    const status = $("wfLightStatus");
+
+    const prepareBtn = $("wfLightPrepareBtn");
+    if (prepareBtn) {
+      prepareBtn.onclick = () => {
+        const workflowId = $("wfLightWorkflowType")?.value || WORKFLOW_CATALOG[0].id;
+        const workflow = getWorkflowDef(workflowId);
+        const goal = asString($("wfLightGoal")?.value || "").trim();
+
+        const prompt = [
+          `Workflow: ${workflow.title}`,
+          `Project: ${$("wfLightProject")?.value || projectName || "not set"}`,
+          `Campaign: ${$("wfLightCampaign")?.value || campaignName || "not set"}`,
+          `Goal: ${goal || "Prepare an execution-ready workflow plan."}`,
+          `Purpose: ${workflow.purpose}`
+        ].join("\\n");
+
+        const globalInput = $("quickCommandInput");
+        if (globalInput) {
+          globalInput.value = prompt;
+        }
+
+        if (status) {
+          status.textContent = "Workflow prompt prepared in the global AI bar. Review it before running or routing it to AI Command.";
+        }
+
+        showMessage?.("Workflow prepared.");
+      };
+    }
+
+    const aiBtn = $("wfLightAiBtn");
+    if (aiBtn) {
+      aiBtn.onclick = () => {
+        const workflowId = $("wfLightWorkflowType")?.value || WORKFLOW_CATALOG[0].id;
+        const workflow = getWorkflowDef(workflowId);
+        const goal = asString($("wfLightGoal")?.value || "").trim();
+
+        const prompt = [
+          `Build a workflow execution package.`,
+          `Workflow: ${workflow.title}`,
+          `Project: ${projectName || "not set"}`,
+          `Campaign: ${campaignName || "not set"}`,
+          `Goal: ${goal || workflow.purpose}`
+        ].join("\\n");
+
+        setSharedAiDraft(projectName, {
+          projectName,
+          modeId: workflow.aiModeId,
+          lastCommand: prompt,
+          lastResponseTitle: workflow.title,
+          routeSuggestions: [
+            {
+              label: "Workflows",
+              route: "workflows",
+              reason: "Return to workflows after AI refinement."
+            }
+          ],
+          updatedAt: nowIso()
+        });
+
+        const globalInput = $("quickCommandInput");
+        if (globalInput) {
+          globalInput.value = prompt;
+        }
+
+        navigateTo("ai-command");
+      };
+    }
+
+    const campaignBtn = $("wfLightCampaignBtn");
+    if (campaignBtn) {
+      campaignBtn.onclick = () => navigateTo("campaign-studio");
+    }
+
+    const tasksBtn = $("wfLightTasksBtn");
+    if (tasksBtn) {
+      tasksBtn.onclick = () => navigateTo("task-center");
+    }
+  }
+};
+
+===== APP / ROUTER LIFECYCLE MARKERS =====
+public/control-center/app.js:14:  navigateTo,
+public/control-center/app.js:15:  renderRouteTemplate,
+public/control-center/app.js:471:  navigateTo("home");
+public/control-center/app.js:488:    saveBtn.addEventListener("click", async () => {
+public/control-center/app.js:515:        navigateTo("home");
+public/control-center/app.js:525:    diagBtn.addEventListener("click", async () => {
+public/control-center/app.js:533:    testBtn.addEventListener("click", async () => {
+public/control-center/app.js:586:    clearBtn.addEventListener("click", () => {
+public/control-center/app.js:599:    clearReloadBtn.addEventListener("click", () => {
+public/control-center/app.js:610:    closeBtn.addEventListener("click", hideAccessKeyModal);
+public/control-center/app.js:613:  modal.addEventListener("click", (e) => {
+public/control-center/app.js:617:  modal.addEventListener("keydown", (e) => {
+public/control-center/app.js:713:    renderRouteTemplate(route);
+public/control-center/app.js:1175:  document.addEventListener("click", (event) => {
+public/control-center/app.js:1505:    button.addEventListener("click", () => {
+public/control-center/app.js:1583:    retryBtn.addEventListener("click", () => {
+public/control-center/app.js:1590:    accessKeyBtn.addEventListener("click", () => {
+public/control-center/app.js:1597:    clearSavedKeyReloadBtn.addEventListener("click", () => {
+public/control-center/app.js:1731:  window.addEventListener("mh:control-center-api-trace", (event) => {
+public/control-center/app.js:1752:  window.addEventListener("error", (event) => {
+public/control-center/app.js:1761:  window.addEventListener("unhandledrejection", (event) => {
+public/control-center/app.js:1916:  setText("ctxRoute", state.currentRoute || "home");
+public/control-center/app.js:2029:  const cleanup = activeRouteCleanup;
+public/control-center/app.js:2034:    cleanup();
+public/control-center/app.js:2036:    console.warn("[Route] cleanup failed", error);
+public/control-center/app.js:2041:  const { currentRoute } = getState();
+public/control-center/app.js:2042:  disposeActiveRouteCleanup(currentRoute);
+public/control-center/app.js:2043:  ensureRouteDom(currentRoute);
+public/control-center/app.js:2044:  const routeDef = getRouteDefinition(currentRoute);
+public/control-center/app.js:2054:      navigateTo,
+public/control-center/app.js:2094:      activeRouteCleanupRoute = currentRoute;
+public/control-center/app.js:2099:        route: currentRoute,
+public/control-center/app.js:2101:        navigateTo,
+public/control-center/app.js:2112:    route: currentRoute,
+public/control-center/app.js:2114:    navigateTo,
+public/control-center/app.js:3064:      navigateTo("home");
+public/control-center/app.js:3072:        navigateTo("ai-command");
+public/control-center/app.js:3080:      navigateTo(targetRoute);
+public/control-center/app.js:3087:  document.addEventListener("click", (event) => {
+public/control-center/app.js:3102:      navigateTo(routeAttrAllowed);
+public/control-center/app.js:3146:  window.addEventListener("mh:route-change", (event) => {
+public/control-center/app.js:3154:  window.addEventListener("hashchange", () => {
+public/control-center/app.js:3156:    if (route && route !== getState().currentRoute) {
+public/control-center/app.js:3157:      navigateTo(route);
+public/control-center/app.js:3170:  select.addEventListener("change", async (event) => {
+public/control-center/app.js:3342:  document.addEventListener("click", (event) => {
+public/control-center/app.js:3359:  document.addEventListener("keydown", (event) => {
+public/control-center/app.js:3368:  window.addEventListener("resize", () => {
+public/control-center/app.js:3375:  window.addEventListener("orientationchange", syncCompactShellState);
+public/control-center/app.js:3518:    navigateTo(matches[0].route);
+public/control-center/app.js:3525:  navigateTo(top[0].route);
+public/control-center/app.js:3568:  navigateTo("ai-command");
+public/control-center/app.js:3612:  document.addEventListener("click", (event) => {
+public/control-center/app.js:3626:  document.addEventListener("keydown", (event) => {
+public/control-center/app.js:3633:    commandBar.addEventListener("click", (event) => event.stopPropagation());
+public/control-center/app.js:3654:    commandInput.addEventListener("keydown", (event) => {
+public/control-center/app.js:3664:    searchInput.addEventListener("keydown", (event) => {
+public/control-center/app.js:3718:  closeBtn?.addEventListener("click", () => setOpen(false));
+public/control-center/app.js:3720:  document.addEventListener("click", (event) => {
+public/control-center/app.js:3726:  document.addEventListener("keydown", (event) => {
+public/control-center/app.js:3731:    button.addEventListener("click", () => {
+public/control-center/app.js:3746:    button.addEventListener("click", () => {
+public/control-center/app.js:3749:      navigateTo(route);
+public/control-center/app.js:3765:  window.addEventListener("hashchange", syncContext);
+public/control-center/app.js:3912:    modal.addEventListener("click", (event) => {
+public/control-center/app.js:3916:    modal.querySelector("#executiveNewCloseBtn")?.addEventListener("click", hideExecutiveNewLauncher);
+public/control-center/app.js:3927:    modal.querySelector("[data-new-project-cancel]")?.addEventListener("click", () => {
+public/control-center/app.js:3932:    projectForm?.addEventListener("submit", async (event) => {
+public/control-center/app.js:3965:        navigateTo("setup");
+public/control-center/app.js:3974:      button.addEventListener("click", () => {
+public/control-center/app.js:3991:        navigateTo(route);
+public/control-center/app.js:4012:  document.addEventListener("keydown", (event) => {
+public/control-center/app.js:4033:      navigateTo("ai-command");
+public/control-center/app.js:4145:  const route = String(state.currentRoute || "home");
+public/control-center/app.js:4175:window.addEventListener("DOMContentLoaded", init);
+public/control-center/router.js:205:export function renderRouteTemplate(route) {
+public/control-center/router.js:216:export function navigateTo(route, emit = true) {
+public/control-center/router.js:217:  renderRouteTemplate(route);
+public/control-center/router.js:236:  renderRouteTemplate("home");
+
+===== SHARED CONTEXT AUTO/HANDOFF MARKERS =====
+2:const aiDraftCache = new Map();
+3:const handoffCache = new Map();
+23:  const handoffs = asArray(operations?.handoffs?.items);
+24:  const available = handoffs.filter((item) => {
+40:  const cached = campaignCache.get(buildKey(projectName));
+41:  if (cached) return cached;
+54:  aiDraftCache.set(buildKey(projectName), draft);
+58:  const cached = aiDraftCache.get(buildKey(projectName));
+59:  if (cached) return cached;
+61:  const handoff =
+66:  return asObject(handoff?.payload?.draft_context);
+69:export function setSharedHandoff(projectName, destinationPage, handoff) {
+70:  if (!projectName || !destinationPage || !handoff) return;
+71:  handoffCache.set(buildKey(projectName, destinationPage), handoff);
+75:  const cached = handoffCache.get(buildKey(projectName, destinationPage));
+76:  if (cached) return cached;
+
+===== PRIOR AUDITS =====
+# Publishing Runtime Ownership Audit
+
+## Scope
+- Branch: architecture/frontend-consolidation-v1
+- Baseline: a6cf556, 02dde34, 96ec03f
+- Mode: audit only (no production code changes)
+- Primary page audited: public/control-center/pages/publishing.js
+
+## Doctrine alignment check
+- Backend authority doctrine is explicitly documented in public/control-center/runtime/authority/authority-projection.js:7-8.
+- Frontend route fallback is centralized in public/control-center/runtime/authority/route-role-fallback.js.
+- Publishing page is a runtime executor surface with approval/publish/fail/schedule controls and Auto Mode controls.
+
+## 1) What Publishing owns today
+
+### Display-only state
+- Queue rendering, status pills, overview cards, recommendation chips, and filter chips are presentation-only: public/control-center/pages/publishing.js:893-1278, 1768-1806.
+- Recommendation text and counts are derived projections over existing state: public/control-center/pages/publishing.js:852-892.
+
+### Local session state
+- Per-project in-memory UI session map: publishingSessions, selected item, filter, validation, form source id: public/control-center/pages/publishing.js:17, 274-290.
+- Auto Mode UI-only progress/result banners: publishingAutomationState: public/control-center/pages/publishing.js:34-37.
+
+### Draft/convenience state
+- Local draft persistence in browser localStorage under mh-publishing-local-drafts-v1: public/control-center/pages/publishing.js:18, 208-247.
+- Local fallback update path for schedule/approve/fail/publish status when item is localOnly: public/control-center/pages/publishing.js:1450-1458, 1509-1515, 1552-1557, 1576-1580.
+
+### Backend-projected authority
+- Route and active-role projection in app authority resolver: public/control-center/app.js:227-254.
+- Governance/approvals/handoffs projection doctrine helpers: public/control-center/runtime/authority/authority-projection.js:41-84.
+- Publishing queue itself is hydrated from backend-fed activity datasets in state: public/control-center/pages/publishing.js:340-385.
+
+### Write actions (runtime mutations)
+- savePublishingSchedule -> POST /publishing/schedule: public/control-center/api.js:1788-1798.
+- reschedulePublishingItem -> POST /publishing/:jobId/reschedule: public/control-center/api.js:1801-1815.
+- approvePublishingItem -> POST /publishing/:jobId/ready: public/control-center/api.js:1818-1832.
+- publishPublishingItem -> POST /publishing/:jobId/publish: public/control-center/api.js:1835-1849.
+- failPublishingItem -> POST /publishing/:jobId/fail: public/control-center/api.js:1852-1866.
+- createProjectHandoff/consumeProjectHandoff durable endpoints exist: public/control-center/api.js:2162-2188.
+
+### Approval-gated actions
+- Frontend builder validation requires approvalStatus=approved for publish intent: public/control-center/pages/publishing.js:555-557.
+- Backend hard-gates ready/publish via governance policy and approval record checks: runtime/orchestrator-service/server.js:13614-13704.
+
+### Auto Mode actions
+- Auto controls are bound to explicit buttons only (prepare/stop/approve gate/skip): public/control-center/pages/publishing.js:1655-1709.
+- Plan contains safe prepare step plus intentional gated publish step type publish_now: public/control-center/pages/publishing.js:520-542.
+- Engine safe-type whitelist excludes publish_now and blocks risky patterns: public/control-center/automation-engine.js:6-22, 203-214.
+
+### Handoff actions
+- Publishing consumes handoff data from shared context + operations fallback: public/control-center/pages/publishing.js:834-839.
+- Load Handoff writes local draft/session fields only: public/control-center/pages/publishing.js:1591-1610.
+- Push to AI writes shared ai-command handoff context (frontend cache): public/control-center/pages/publishing.js:1616-1649.
+
+### Dangerous/destructive actions
+- Publish now and fail are high-impact state transitions (durable backend mutations): public/control-center/pages/publishing.js:1520-1524, 1582-1586; runtime/orchestrator-service/server.js:11988-12049, 12052-12113.
+- Local-only path can mark local draft as published/failed without backend record (UX-level only, but authority-adjacent for operator interpretation): public/control-center/pages/publishing.js:1509-1515, 1576-1580.
+
+## 2) Where runtime actions are defined
+
+- publish: UI data-publishing-action="publish" and publish button handling at public/control-center/pages/publishing.js:1008, 1484-1524.
+- approve: manual approve button at public/control-center/pages/publishing.js:1542-1563.
+- fail: manual fail button at public/control-center/pages/publishing.js:1567-1587.
+- schedule: builder schedule button and queue schedule action at public/control-center/pages/publishing.js:1440-1477, 1498-1503.
+- reschedule: reschedulePublishingItem calls in publish/pause/retry flows at public/control-center/pages/publishing.js:1463, 1528, 1534.
+- execute: publishPublishingItem path + backend execution result record at runtime/orchestrator-service/server.js:11988-12049.
+- auto prepare: public/control-center/pages/publishing.js:1655-1686.
+- auto stop: public/control-center/pages/publishing.js:1689-1694.
+- auto approve: public/control-center/pages/publishing.js:1697-1702.
+- auto skip: public/control-center/pages/publishing.js:1705-1710.
+- handoff load: public/control-center/pages/publishing.js:1591-1610.
+- AI push: public/control-center/pages/publishing.js:1616-1652.
+- buttons with onclick: concentrated in bindPublishingWorkspace: public/control-center/pages/publishing.js:1383-1710.
+- context/API calls: runAndRefresh wrappers + direct shared-context writes: public/control-center/pages/publishing.js:1308-1317, 1364-1374, 1463-1472, 1522-1535, 1560-1561, 1584-1585, 1628-1629.
+
+## 3) Auto Mode lifecycle
+
+- createAutoModeController imported in publishing and used in ensurePublishingAutoModeBinding: public/control-center/pages/publishing.js:9, 62-72.
+- subscribeAutoMode used in ensurePublishingAutoModeBinding once per process unless already subscribed: public/control-center/pages/publishing.js:74-88.
+- startAutoMode called from explicit Auto Prepare button click only: public/control-center/pages/publishing.js:1657-1679.
+- Auto Mode does not start from render/mount. Render path only ensures controller/subscription when publishingAutomationEnabled=true: public/control-center/pages/publishing.js:62-67, 1668-1669.
+- Controller binding happens in render cycle via ensurePublishingAutoModeBinding call inside bindPublishingWorkspace: public/control-center/pages/publishing.js:1341.
+- Guard flags exist:
+  - publishingAutomationEnabled gate: line 65.
+  - publishingAutoModeControllerReady one-time controller creation: lines 69-72.
+  - publishingAutoModeUnsubscribe existence gate: lines 74-76.
+- Unsubscribe cleanup is not executed on route unmount in this file; unsubscribe function is stored but never called in publishing.js.
+- State leak risk:
+  - module-level flags and callback references persist across route revisits: public/control-center/pages/publishing.js:38-42.
+  - schedulePublishingRender keeps callback/timeouts across route renders: lines 44-60.
+  - risk is moderate: duplicate subscriptions are guarded, but stale callback/subscription lifecycle is not explicitly torn down.
+
+## 4) Backend authority alignment
+
+### Actions that call backend through API/context
+- schedule draft or new schedule: savePublishingSchedule: public/control-center/pages/publishing.js:1366, 1464.
+- reschedule/pause/retry: reschedulePublishingItem: public/control-center/pages/publishing.js:1463, 1528, 1534.
+- approve ready: approvePublishingItem: public/control-center/pages/publishing.js:1560.
+- publish: publishPublishingItem: public/control-center/pages/publishing.js:1522.
+- fail: failPublishingItem: public/control-center/pages/publishing.js:1584.
+
+### Frontend-only actions
+- Local draft save/update/approve/fail/publish markers for localOnly items: public/control-center/pages/publishing.js:1450-1458, 1509-1515, 1552-1557, 1576-1580.
+- Filter/select/review/scroll behaviors: public/control-center/pages/publishing.js:1383-1400, 1492-1503.
+- Push to AI shared cache/handoff: public/control-center/pages/publishing.js:1628-1649; shared cache implementation in public/control-center/shared-context.js:52-77.
+
+### Durable operation records
+- Backend publishing mutations write/update scheduled jobs and execution outcomes: runtime/orchestrator-service/server.js:11818-12113.
+- syncPublishingJob persists queue/event/notification durable operations: runtime/orchestrator-service/lib/ops/backbone.js:3142 onward.
+- Durable handoffs: create/consume handoff in backbone: runtime/orchestrator-service/lib/ops/backbone.js:2931-3128.
+
+### Should require backend/governance authority
+- ready/publish and freeze-sensitive schedule/reschedule are governed by assertPublishingMutationAllowed: runtime/orchestrator-service/server.js:13614-13704.
+
+### Reliant on local session only
+- Form draft edits, selected item, validation map, draft message, filter state: public/control-center/pages/publishing.js:274-290.
+
+### Should remain local UX
+- Filter chips, queue row highlighting, scroll navigation, inline validation text, recommendation display.
+
+## 5) Approval/governance boundary
+
+- Approval state read in frontend:
+  - Local form approvalStatus and validateBuilder check: public/control-center/pages/publishing.js:555-557.
+  - Queue item approval projection normalization: public/control-center/pages/publishing.js:327-333.
+- Publish/fail/approve state changed in frontend via backend mutation APIs or local-only branch:
+  - approve: 1542-1563
+  - publish: 1520-1524
+  - fail: 1567-1587
+- Frontend does not finalize governance authority; it requests mutation and backend enforces policy:
+  - assertPublishingMutationAllowed governance gate: runtime/orchestrator-service/server.js:13614-13704.
+- Backend stores approvals/handoffs durably:
+  - createApproval/decideApproval: runtime/orchestrator-service/lib/ops/backbone.js:2555-2918.
+  - createHandoff/consumeHandoff: runtime/orchestrator-service/lib/ops/backbone.js:2931-3128.
+- Potential bypass check:
+  - Frontend localOnly branch can mark local drafts approved/published/failed without backend mutation (not durable, UX-visible only). This does not bypass backend authority for durable operations but can create misleading local status.
+
+## 6) Handoff boundary
+
+- Handoffs loaded:
+  - getPublishingHandoff uses getSharedHandoff with operations fallback: public/control-center/pages/publishing.js:834-839.
+- Handoffs consumed in publishing:
+  - load handoff button transfers summary into local draft/session: public/control-center/pages/publishing.js:1591-1610.
+- Publishing receives data from shared-context:
+  - imports and calls getSharedHandoff/setSharedHandoff/setSharedAiDraft: public/control-center/pages/publishing.js:1, 836-838, 1628-1629.
+- Shared-context durability level:
+  - shared context caches are in-memory maps only: public/control-center/shared-context.js:2-3, 52-77.
+  - durable handoffs require backend create/consume endpoints (not invoked in publishing page handlers directly).
+- What can become orphaned:
+  - cached shared handoff/AI draft may be superseded by operations data or lost on reload.
+  - local draft loaded from handoff may diverge from backend if never persisted.
+
+## 7) Loading/session lifecycle
+
+- No dedicated session.loading/isLoading flag in publishing session model (session tracks form/filter/validation only): public/control-center/pages/publishing.js:274-290.
+- Render does not trigger fetch itself; mutations call runAndRefresh which invokes reloadProjectData after action success: public/control-center/pages/publishing.js:1308-1313.
+- Fetch lifecycle settlement:
+  - success -> showMessage
+  - failure -> showError with message
+  - both settle and return (no uncaught throw from runAndRefresh): public/control-center/pages/publishing.js:1308-1317.
+- Error visibility exists through showError wiring in runAndRefresh and button handlers.
+- Repeated render rebind risk:
+  - root.innerHTML rewrite then bindPublishingWorkspace reassigns handlers every render, but old nodes are replaced, reducing duplicate-listener accumulation on DOM nodes.
+  - module-level Auto Mode subscription is not cleaned up explicitly, so lifecycle risk remains for long-lived callbacks.
+
+## 8) Authority risk classification summary
+
+- Safe projection:
+  - queue/status rendering from backend activity, recommendation summaries, route-role projection read paths.
+- Safe local UX:
+  - filters, local form typing, scroll/open queue, review selection.
+- Authority-adjacent:
+  - local draft status changes (localOnly approve/publish/fail), push-to-AI handoff payload shaping.
+- Duplicate authority risk:
+  - localOnly path can show terminal statuses without durable backend record.
+- High-risk execution:
+  - publish/fail endpoints and ready transition.
+- Needs backend confirmation:
+  - schedule/reschedule/ready/publish/fail.
+- Needs explicit user action:
+  - startAutoMode, publish/fail/approve buttons, load handoff button.
+- Should not be changed yet:
+  - core publish/approve/fail semantics and governance guard coupling, until shadow-compare lifecycle audit is complete.
+
+## 9) Recommended next step
+
+Recommended: F. Create shadow-compare plan before extraction.
+
+Why this is safest now:
+- Publishing has mixed local-only and durable paths.
+- Auto Mode has module-level lifecycle state and render-time bindings.
+- Governance enforcement is backend-only and must remain untouched while extracting.
+- A shadow-compare phase allows evidence-based parity checks on action outcomes before any structural refactor.
+
+## 10) Implementation-later anchor (high-level)
+
+- First safe change (future): add a publishing action lifecycle registry document + non-invasive instrumentation contract (no behavior change).
+- Candidate files later: public/control-center/pages/publishing.js, public/control-center/automation-engine.js, and an audit registry markdown under audits/frontend/authority-boundary.
+- Validate with static checks and targeted route behavior verification before any extraction.
+
+## Risk summary
+- Primary risk: authority-adjacent local status transitions can appear equivalent to backend durable transitions.
+- Secondary risk: Auto Mode binding lifecycle lacks explicit unsubscribe cleanup in page teardown.
+- Governance boundary is currently strong at backend mutation guard level, which should remain primary and unchanged.
+# Publishing Shadow-Compare Plan
+
+## Objective
+Define parity checks that allow future extraction to be validated without changing publishing behavior or duplicating backend mutations.
+
+## Compare Scope
+- Target: publishing handlers in public/control-center/pages/publishing.js
+- Target APIs: savePublishingSchedule, reschedulePublishingItem, approvePublishingItem, publishPublishingItem, failPublishingItem
+- Target lifecycle: Auto Mode prepare/stop/approve-gate/skip-gate behavior
+- Out of scope in shadow-run: duplicate backend mutation calls
+
+## Required Compare Points Per Action
+- action key
+- selected item id
+- localOnly status
+- payload sent to API
+- backend function called or not called
+- local draft mutations
+- shared-context writes
+- queue status before and after
+- visible status label before and after
+- reloadProjectData called or not
+- showMessage called or not
+- showError called or not
+- Auto Mode state before and after
+
+## Safe Shadow Trace Schema (Design Only, Not Implemented)
+
+```json
+{
+  "event_id": "string-uuid-or-monotonic-id",
+  "timestamp": "ISO-8601",
+  "route": "publishing",
+  "project": "string",
+  "action_key": "save_draft|schedule|reschedule|pause|retry|approve|publish|fail|load_handoff|send_ai|auto_prepare|auto_stop|auto_approve_gate|auto_skip_gate|local_only_publish|local_only_approve|local_only_fail",
+  "item_id": "jobId or local draft id",
+  "local_only": true,
+  "before_snapshot": {
+    "session": {
+      "selected_id": "string",
+      "form": {},
+      "validation": {}
+    },
+    "queue": {
+      "item_status": "draft|ready|scheduled|published|failed",
+      "visible_label": "string"
+    },
+    "auto_mode": {
+      "enabled": false,
+      "status": "idle|running|waiting_approval|paused|completed|failed",
+      "step_index": 0
+    }
+  },
+  "intended_api_call": {
+    "function": "string-or-null",
+    "endpoint": "string-or-null",
+    "payload": {}
+  },
+  "actual_api_call": {
+    "function": "string-or-null",
+    "endpoint": "string-or-null",
+    "payload": {},
+    "attempted": true,
+    "succeeded": true
+  },
+  "after_snapshot": {
+    "session": {
+      "selected_id": "string",
+      "form": {},
+      "validation": {}
+    },
+    "queue": {
+      "item_status": "draft|ready|scheduled|published|failed",
+      "visible_label": "string"
+    },
+    "auto_mode": {
+      "enabled": false,
+      "status": "idle|running|waiting_approval|paused|completed|failed",
+      "step_index": 0
+    }
+  },
+  "ui_visible_result": {
+    "show_message_called": true,
+    "show_error_called": false,
+    "message_text": "string",
+    "error_text": "string"
+  },
+  "error": {
+    "name": "string",
+    "message": "string",
+    "code": "string"
+  },
+  "parity_result": {
+    "passed": true,
+    "mismatches": []
+  }
+}
+```
+
+## Forbidden Rule: No Duplicate Backend Call
+- Shadow mode must never issue a second backend mutation for the same user action.
+- For mutation actions, shadow logic is observe-only and compare-only.
+- Disallowed in shadow mode: any second call to /publishing/schedule, /publishing/:jobId/reschedule, /publishing/:jobId/ready, /publishing/:jobId/publish, /publishing/:jobId/fail.
+- Reason: duplicate calls can create double status transitions, duplicate execution results, duplicate queue events, or duplicate notifications.
+
+## Never Shadow-Execute (Observe Only)
+- publish
+- fail
+- approve ready
+- reschedule
+- all backend mutations
+
+Why:
+- These paths are authoritative and durable in backend storage.
+- Server routes enforce governance and can reject/mutate based on current policy and approval state.
+- Double execution can alter durable truth and invalidate parity evidence.
+
+## Compare Mechanics
+- Capture before snapshot at click-handler entry.
+- Capture intended API function and payload at decision point.
+- Observe actual API invocation metadata from wrapper/interceptor (no second call).
+- Capture after snapshot after rerender/reload settle point.
+- Emit parity result with field-level mismatch list.
+
+## Parity Pass Criteria
+- Action mapping unchanged: same action key and target id resolution.
+- API parity unchanged: same backend function called (or intentionally not called) with equivalent payload semantics.
+- Local draft parity unchanged: same local storage mutation semantics for localOnly paths.
+- Shared-context parity unchanged: same setSharedAiDraft/setSharedHandoff writes for AI/handoff actions.
+- UI parity unchanged: equivalent visible status label, same message/error behavior category.
+- Reload parity unchanged: reloadProjectData invocation matches baseline for durable actions.
+- Auto Mode parity unchanged: no auto-start from render; same gated behavior for publish-like steps.
+
+## Parity Fail Conditions
+- Backend call introduced/removed unexpectedly for an action.
+- Payload field/value drift for durable mutation actions.
+- LocalOnly path starts invoking durable backend mutation.
+- Durable path stops invoking reloadProjectData.
+- Success path emits showError or failure path suppresses showError.
+- Auto Mode begins without explicit button click.
+- Any duplicate backend mutation detected for one user action.
+
+## Decision Gate After Shadow-Compare
+- Pass: proceed to pure-helper extraction only.
+- Fail: block extraction, capture mismatch evidence, rollback candidate implementation.
+
+# Workflows Runtime Ownership Audit
+
+## Scope
+- Branch: architecture/frontend-consolidation-v1
+- Baseline: c4dee6f, 736b0e9, 02dde34
+- Mode: audit only (no production code changes)
+- Primary page audited: public/control-center/pages/workflows.js
+- Related runtime surfaces: public/control-center/automation-engine.js, public/control-center/shared-context.js, public/control-center/api.js, runtime/orchestrator-service/server.js, runtime/orchestrator-service/lib/ops/backbone.js
+
+## Doctrine Alignment Check
+- Backend authority doctrine is explicit in public/control-center/runtime/authority/authority-projection.js:7-18.
+- Route fallback authority projection exists in public/control-center/runtime/authority/route-role-fallback.js.
+- Workflows contains authority-adjacent execution helpers and Auto Mode controls, but durable authority remains in backend workflow/handoff/approval routes and backbone persistence.
+
+## 1) What Workflows Owns Today
+
+### Display-only state
+- Overview cards, counts, readiness/status display in current exported route render: public/control-center/pages/workflows.js:1782-1913.
+- Legacy execution-loop renderer output sections (overview/recommendation/automation/catalog/result): public/control-center/pages/workflows.js:615-920.
+
+### Local session/UI state
+- In-memory sessions by project via workflowSessions map: public/control-center/pages/workflows.js:106, 309-356.
+- Local draft persistence key and helpers: public/control-center/pages/workflows.js:104, 250-306.
+- UI-only automation banners/progress/cursor state: public/control-center/pages/workflows.js:111-116.
+
+### Workflow plan generation
+- Workflow builder prompt generation and fallback output packaging: public/control-center/pages/workflows.js:500-538.
+- Recommendation-to-workflow mapping: public/control-center/pages/workflows.js:543-612.
+- Automation plan generation delegated to automation-engine buildAutomationPlan/getAutoFixPlan: public/control-center/pages/workflows.js:14-27, 1622, 1651.
+
+### Auto Mode state
+- Module-level toggles/subscription refs in workflows page: public/control-center/pages/workflows.js:108-110.
+- Engine-owned state machine in sessionStorage and module runtime: public/control-center/automation-engine.js:4, 30-34, 62-90, 125-142, 607-739.
+
+### Approval/gate state
+- Auto Mode gate state is runtime-local (approvalRequiredStep) in automation engine: public/control-center/automation-engine.js:71, 535-541, 675-731.
+- Approve/skip gate handlers in workflows page call engine gate APIs with local context: public/control-center/pages/workflows.js:1724-1736.
+
+### Handoff state
+- Shared-context in-memory handoff cache is read/write frontend cache: public/control-center/shared-context.js:3, 69-76.
+- Workflows writes handoffs locally and may persist to backend when createProjectHandoff is available: public/control-center/pages/workflows.js:1076-1093, 1291-1304, 1390-1399.
+
+### Backend-projected workflow state
+- Session run state is refreshed from operations.workflows.items (backend projection): public/control-center/pages/workflows.js:367-391.
+- Current route also projects operations totals/readiness only: public/control-center/pages/workflows.js:1766-1777, 1815-1913.
+
+### Durable workflow actions
+- runProjectWorkflow / runProjectAiWorkflow -> backend durable run routes: public/control-center/api.js:1477-1507.
+- createProjectHandoff / consumeProjectHandoff -> backend durable handoff routes: public/control-center/api.js:2162-2188.
+- Backend records workflow runs durably: runtime/orchestrator-service/server.js:11096-11134.
+- Backend records handoffs durably: runtime/orchestrator-service/server.js:11523-11554 and runtime/orchestrator-service/lib/ops/backbone.js:2958-3130.
+
+### Local-only UX actions
+- Current exported route actions are prompt prep, AI draft seed, and navigation: public/control-center/pages/workflows.js:1917-1989.
+- Shared-context-only handoff/draft writes are local cache until explicit durable handoff call occurs: public/control-center/shared-context.js:52-76.
+
+### High-risk execution actions
+- Durable AI workflow execution route: runtime/orchestrator-service/server.js:11188-11286.
+- Durable workflow run recording route: runtime/orchestrator-service/server.js:11096-11134.
+- Durable handoff create/consume routes: runtime/orchestrator-service/server.js:11523-11554.
+- Backend approval decision routes (governance boundary): runtime/orchestrator-service/server.js:11371-11409.
+
+## 2) Where Workflow Runtime Actions Are Defined
+
+### Action definitions found in workflows page
+- start Auto Mode: public/control-center/pages/workflows.js:1681-1696
+- pause Auto Mode: public/control-center/pages/workflows.js:1700-1704
+- resume Auto Mode: public/control-center/pages/workflows.js:1708-1712
+- stop Auto Mode: public/control-center/pages/workflows.js:1716-1720
+- approve gate: public/control-center/pages/workflows.js:1724-1728
+- skip step: public/control-center/pages/workflows.js:1732-1736
+- run automation plan (full): public/control-center/pages/workflows.js:1619-1643
+- run single automation step: public/control-center/pages/workflows.js:1648-1676
+- create handoff (workflow->ai-command): public/control-center/pages/workflows.js:1076-1093
+- navigate to target route: public/control-center/pages/workflows.js:1097, 1579, 1615, 1984, 1989
+
+### Engine definitions
+- createAutoModeController/start/pause/resume/stop/approve/skip/subscribe: public/control-center/automation-engine.js:589-739
+- runAutomationPlan: public/control-center/automation-engine.js:473-520
+
+### Important active-vs-defined nuance
+- The above runtime controls are defined in workflows.js, but current exported route render does not call bindWorkflowExecutionLoop/registerWorkflowBridge/renderWorkflowExecutionLoop.
+- Current exported route is the light builder shell path: public/control-center/pages/workflows.js:1741-1991.
+- Therefore many workflow runtime buttons/data attributes are presently defined in code but not mounted in the active route template.
+
+## 3) Auto Mode Lifecycle Findings
+
+- createAutoModeController import in workflows: public/control-center/pages/workflows.js:16.
+- createAutoModeController use sites in workflows: public/control-center/pages/workflows.js:1215, 1686.
+- subscribeAutoMode use sites in workflows: public/control-center/pages/workflows.js:1217, 1688.
+- startAutoMode call site in workflows: public/control-center/pages/workflows.js:1692.
+- runAutomationPlan call sites in workflows: public/control-center/pages/workflows.js:1634, 1663.
+- Auto Mode starts from explicit user click handler (workflowAutoStartBtn), not from mount: public/control-center/pages/workflows.js:1683-1696.
+- Controller/subscription binding also appears inside bindWorkflowExecutionLoop preamble if workflowAutomationEnabled is already true: public/control-center/pages/workflows.js:1214-1218.
+- Guard flags exist: workflowAutomationEnabled and workflowAutoModeUnsubscribe replacement logic: public/control-center/pages/workflows.js:110, 1214-1217, 1685-1688.
+- Unsubscribe cleanup exists as replacement before new subscribe, but no explicit route unmount teardown in workflows file.
+- Repeated route-visit leak risk:
+  - In current active route path, Auto Mode controls are not mounted, so leak risk is latent.
+  - In legacy execution-loop path, module-level flags/subscription refs can persist across route revisits; duplicate subscription is partially guarded by unsubscribe replacement and bridge registration flag (workflowBridgeRegistered), but not fully lifecycle-scoped.
+
+## 4) Backend Authority Alignment
+
+### Actions that call backend
+- Workflow run creation:
+  - Frontend call: runProjectWorkflow/runProjectAiWorkflow in workflows handlers (public/control-center/pages/workflows.js:1166-1177, 1364-1377)
+  - API routes: public/control-center/api.js:1477-1507
+  - Server handlers: runtime/orchestrator-service/server.js:11096-11134, 11188-11286
+- Durable handoff create/consume:
+  - Frontend calls: public/control-center/pages/workflows.js:1091-1093, 956-957
+  - API routes: public/control-center/api.js:2162-2188
+  - Server handlers: runtime/orchestrator-service/server.js:11523-11554
+
+### Frontend-only actions
+- Prompt preparation + quick command input seed + navigateTo in current route: public/control-center/pages/workflows.js:1917-1989.
+- Shared-context handoff/draft cache writes without guaranteed backend persistence: public/control-center/pages/workflows.js:1291-1304, 1390-1399, 1566-1578, 1602-1614; public/control-center/shared-context.js:52-76.
+- Auto Mode gate controls are engine-local state transitions/navigation, not backend approvals: public/control-center/automation-engine.js:675-731.
+
+### Durable handoff/workflow run status
+- Durable workflow runs: recorded via recordWorkflowRun in server/backbone path: runtime/orchestrator-service/server.js:11096-11134 and runtime/orchestrator-service/lib/ops/backbone.js:2042-2142.
+- Durable handoffs: create/consume in backbone collections and events: runtime/orchestrator-service/lib/ops/backbone.js:2958-3130.
+
+### Alignment conclusion
+- Durable truth remains backend-owned.
+- Workflows frontend mixes projection/local UX with optional durable writes.
+- Any action that mutates workflow run, handoff, or approval semantics should stay backend-authoritative.
+
+## 5) Approval/Gate Boundary
+
+- Auto Mode gate approval in workflows/automation-engine is frontend runtime gating, not backend durable approval:
+  - approveCurrentGate/skipCurrentStep operate on autoModeState and optional navigation only: public/control-center/automation-engine.js:675-731.
+- No direct backend approval decision call is made by workflow Auto Mode gate actions.
+- Backend has separate durable approvals APIs and storage:
+  - server routes: runtime/orchestrator-service/server.js:11371-11409
+  - backbone approvals persistence/decision: runtime/orchestrator-service/lib/ops/backbone.js:2557-2919
+- runAutomationPlan enforces safe-action constraints via type whitelist and block patterns:
+  - safe types: public/control-center/automation-engine.js:6-14
+  - block patterns: public/control-center/automation-engine.js:16-26
+  - safety checks: public/control-center/automation-engine.js:192-214, 473-520
+- Therefore: Auto Mode gate approval != governance approval. It is an execution-flow pause/continue gate in frontend, not a durable policy decision.
+
+## 6) Handoff Boundary
+
+### Where handoffs are created
+- In automation engine run steps (create_draft/create_handoff/prepare_workflow/prepare_publishing_draft): public/control-center/automation-engine.js:360-469.
+- In workflows push-to-AI and local seed actions: public/control-center/pages/workflows.js:1076-1093, 1291-1304, 1390-1399, 1566-1578, 1602-1614.
+
+### Durable vs cache
+- Shared-context handoffs are cache-level (in-memory map): public/control-center/shared-context.js:3, 69-76.
+- Durable handoffs require createProjectHandoff/consumeProjectHandoff APIs -> backend backbone handoffs store.
+
+### Workflow steps and handoff targets
+- To AI Command: pushWorkflowToAiCommand path in workflows page.
+- To Publishing/Content/Media/Library/Workflows: automation-engine targetPage in create_handoff/create_draft/prepare_* steps.
+- To Campaign route (local navigation): current route button navigation and route hints (campaign-studio) in catalog metadata.
+
+### Orphan risk
+- Cached handoffs can be superseded/lost if not durably persisted.
+- Optional persistence pattern (allowPersistent flags and catch-ignore) can leave partial local-only transfer.
+
+### Authority-adjacent handoff actions
+- Any handoff that implies ownership transfer, next role, or route transition should be treated authority-adjacent even if initiated from frontend.
+
+## 7) Loading/Session Lifecycle
+
+- Session state initialization and cache keyed by project: public/control-center/pages/workflows.js:309-356.
+- Intelligence loading lifecycle with loadingPromise, status/error, and rerender: public/control-center/pages/workflows.js:962-1029.
+- Render-triggered runtime work:
+  - Current exported route render builds a light UI and binds local button handlers only.
+  - Legacy execution-loop path can trigger ensureWorkflowIntelligenceLoaded and runtime calls when handlers run.
+- Rebind/listener behavior:
+  - registerWorkflowBridge uses global workflowBridgeRegistered guard with window listener: public/control-center/pages/workflows.js:1107-1197.
+  - No explicit removeEventListener teardown in workflows file.
+- Cleanup:
+  - Auto Mode subscribe replacement calls prior unsubscribe if present, but no explicit route unmount cleanup.
+
+## 8) Authority Risk Classification (Summary)
+
+- Safe projection:
+  - Operations/readiness/workflow totals rendering and catalog/readiness derivations.
+- Safe local UX:
+  - Local draft save/clear, quick prompt prep, local navigation, client-side validation.
+- Authority-adjacent:
+  - Handoff payload shaping, role-like ownership metadata in task payload, auto gate decisions.
+- Duplicate authority risk:
+  - Frontend cache handoff state can diverge from durable backend handoff records.
+  - Legacy runtime paths exist in code but may not match currently mounted UI behavior.
+- High-risk execution:
+  - Durable workflow run creation and AI workflow execution endpoints.
+- Needs backend confirmation:
+  - Any workflow run persistence, handoff durability, approval/governance decisions.
+- Needs explicit user action:
+  - Auto Mode start/pause/resume/stop/approve/skip and manual run operations in legacy runtime path.
+- Should not be changed yet:
+  - Legacy runtime control surfaces until behavior contract and shadow-compare plan are documented.
+
+## 9) Compare Workflows With Publishing
+
+### Shared Auto Mode risks
+- Both rely on module-level Auto Mode state/subscriptions and process-lifetime flags.
+- Both use explicit button-trigger starts, but lifecycle teardown/unsubscribe is not strictly route-unmount managed.
+
+### Durable backend authority differences
+- Publishing active UI directly mounts durable mutation controls (schedule/approve/publish/fail) and backend governance gates are central.
+- Workflows current exported route is primarily local prep/navigation; heavy durable runtime actions exist mostly in legacy, not currently mounted path.
+
+### Local-only state differences
+- Publishing local-only branches can mark statuses for local drafts and are tightly coupled to queue semantics.
+- Workflows local state centers on drafts/prompts/handoffs and run session visualization.
+
+### Handoff model differences
+- Publishing handoff usage is focused on loading/pushing operational publish context.
+- Workflows handoff usage is broader cross-page orchestration (workflows <-> ai-command plus automation-engine-generated destination handoffs).
+
+### Which should refactor first and why
+- Publishing should remain first for pure-helper extraction (already audited + has shadow-compare plan and direct durable mutation risk).
+- Workflows should first complete behavior contract and shadow-compare planning because active route and legacy runtime path are split, increasing hidden parity risk.
+
+## 10) Recommended Next Step
+
+Recommended option: B. Create workflows behavior contract.
+
+# Workflows Behavior Contract
+
+## Status and Scope
+- Branch: architecture/frontend-consolidation-v1
+- Baseline commits: fdf81ef, c4dee6f, 736b0e9
+- Mode: audit and contract only
+- No production code changes in this artifact
+
+## Contract Doctrine
+- Backend owns operational authority and durable truth.
+- Frontend projects backend authority and issues requests.
+- Auto Mode must start only from explicit user action.
+- Workflow execution must not start from route render or mount.
+- Auto Mode gate approval is runtime flow control, not backend governance approval.
+- No refactor before contract and shadow-compare acceptance.
+
+## A) Active Mounted Light Route Contract
+
+### Mounted route surface (currently active)
+- Exported route template: `workflowsRoute.template` mounts only `#workflowsRoot` inside the workflows page shell.
+- Exported route render: `workflowsRoute.render(...)` writes a light UI directly to `#workflowsRoot`.
+- Mounted root element: `workflowsRoot`.
+
+### Active controls mounted by current route
+- `wfLightPrepareBtn` (Prepare Workflow)
+- `wfLightAiBtn` (Send to AI Workspace)
+- `wfLightCampaignBtn` (Open Campaign Studio)
+- `wfLightTasksBtn` (Open Task Center)
+- Inputs/select: `wfLightWorkflowType`, `wfLightProject`, `wfLightCampaign`, `wfLightGoal`
+
+### Active handlers and behavior
+1. Prepare Workflow
+- Trigger: click `wfLightPrepareBtn`
+- Inputs: selected workflow, project, campaign, goal
+- Behavior: builds prompt text, writes prompt to global `quickCommandInput` if present, updates `wfLightStatus`, emits user message
+- Shared-context writes: none
+- Backend/API calls: none
+
+2. Send to AI Workspace
+- Trigger: click `wfLightAiBtn`
+- Inputs: selected workflow and goal (project/campaign pulled from current state)
+- Behavior: builds AI package prompt, writes shared AI draft, seeds global input if present, navigates to `ai-command`
+- Shared-context writes: `setSharedAiDraft(projectName, ...)`
+- Backend/API calls: none in active light route
+
+3. Open Campaign Studio
+- Trigger: click `wfLightCampaignBtn`
+- Behavior: `navigateTo("campaign-studio")`
+- Shared-context writes: none
+- Backend/API calls: none
+
+4. Open Task Center
+- Trigger: click `wfLightTasksBtn`
+- Behavior: `navigateTo("task-center")`
+- Shared-context writes: none
+- Backend/API calls: none
+
+### Active shared-context writes in mounted route
+- Only `setSharedAiDraft(...)` from Send to AI Workspace
+- No mounted `setSharedHandoff(...)` call path in current light route
+
+### Not mounted in active route
+- Auto Mode controls are not mounted.
+- Durable workflow-run controls are not mounted.
+- Legacy execution-loop render/bind/bridge functions are not invoked by current route render.
+
+## B) Legacy/Dormant Heavy Runtime Loop Contract
+
+### Legacy functions present in file
+- `renderWorkflowExecutionLoop(...)`: defined, not called by active route
+- `bindWorkflowExecutionLoop(...)`: defined, not called by active route
+- `registerWorkflowBridge(...)`: defined, not called by active route
+- Bridge listener: window `mh:submit-workflow` listener is defined under `registerWorkflowBridge`, dormant until function is called
+
+### Legacy controls defined (dormant unless legacy loop is mounted)
+- Manual run: `workflowRunBtn`, `workflowRunBtnMain`
+- Automation plan: `workflowRunFullAutomationBtn`, `workflowRunStepAutomationBtn`
+- Auto Mode: `workflowAutoStartBtn`, `workflowAutoPauseBtn`, `workflowAutoResumeBtn`, `workflowAutoStopBtn`, `workflowAutoApproveBtn`, `workflowAutoSkipBtn`
+- AI push/custom/recommend/task controls: `workflowPushAiBtn`, `workflowPushAiBtnSecondary`, `workflowSaveTaskBtn`, `workflowBuildCustomBtn`, `workflowRecommendBtn`
+
+### Legacy runtime handlers defined
+- Manual run workflow: `runWorkflow(...)` inside bind loop, calls `runProjectAiWorkflow || runProjectWorkflow`
+- AI-triggered auto-run: bridge event flow with `meta.autoRun`
+- Full automation: `runAutomationPlan(plan, ...)`
+- Single-step automation: `runAutomationPlan([nextStep], ...)`
+- Auto Mode lifecycle: `startAutoMode`, `pauseAutoMode`, `resumeAutoMode`, `stopAutoMode`
+- Auto Mode gate controls: `approveCurrentGate`, `skipCurrentStep`
+- Durable handoff path: optional `createProjectHandoff(...)` in `pushWorkflowToAiCommand(...)`
+- Structured workflow task save: `createProjectTask(...)`
+
+### Dormancy statement
+- These behaviors are defined in the module but are currently dormant because active mounted route render does not call legacy renderer/binder/bridge.
+
+## C) Action-by-Action Behavior Contract
+
+## Active light route actions
+
+### Action: Prepare workflow
+- State: active
+- Trigger: `wfLightPrepareBtn` click
+- Inputs: workflow type, project, campaign, goal
+- Preconditions: workflows route mounted
+- Local state changes: updates `quickCommandInput` value, updates `wfLightStatus`
+- Shared-context writes: none
+- Backend/API calls: none
+- Durable outputs: none
+- User-visible output: status text and "Workflow prepared." message
+- Error behavior: no explicit error path; silent if global input missing
+- Reload behavior: no reload
+- Risk level: low
+- Contract classification: must preserve
+
+### Action: Send to AI workspace
+- State: active
+- Trigger: `wfLightAiBtn` click
+- Inputs: workflow type, goal, current project/campaign
+- Preconditions: workflows route mounted
+- Local state changes: optional `quickCommandInput` seed
+- Shared-context writes: `setSharedAiDraft`
+- Backend/API calls: none
+- Durable outputs: none
+- User-visible output: route navigation to `ai-command`
+- Error behavior: no explicit error handling in mounted path
+- Reload behavior: no reload
+- Risk level: low to medium (cross-route context coupling)
+- Contract classification: must preserve
+
+### Action: Open Campaign Studio
+- State: active
+- Trigger: `wfLightCampaignBtn` click
+- Inputs: none
+- Preconditions: workflows route mounted
+- Local state changes: none
+- Shared-context writes: none
+- Backend/API calls: none
+- Durable outputs: none
+- User-visible output: route navigation
+- Error behavior: none
+- Reload behavior: no reload
+- Risk level: low
+- Contract classification: may retire later if route map changes
+
+### Action: Open Task Center
+- State: active
+- Trigger: `wfLightTasksBtn` click
+- Inputs: none
+- Preconditions: workflows route mounted
+- Local state changes: none
+- Shared-context writes: none
+- Backend/API calls: none
+- Durable outputs: none
+- User-visible output: route navigation
+- Error behavior: none
+- Reload behavior: no reload
+- Risk level: low
+- Contract classification: may retire later if route map changes
+
+## Legacy runtime actions (currently dormant)
+
+### Action: Manual run workflow
+- State: dormant
+- Trigger: `workflowRunBtn` or `workflowRunBtnMain` click
+- Inputs: selected workflow and validated builder inputs
+- Preconditions: project selected; required fields present; legacy loop mounted and bound
+- Local state changes: run status/history/output in session map; validation box; local workflows handoff cache write
+- Shared-context writes: `setSharedHandoff(project, "workflows", ... )`
+- Backend/API calls: `runProjectAiWorkflow || runProjectWorkflow`; `reloadProjectData`
+- Durable outputs: backend workflow run record
+- User-visible output: success/failure message, updated run panel
+- Error behavior: sets failed output summary and error message
+- Reload behavior: reloads project data on success
+- Risk level: high
+- Contract classification: must preserve semantics until explicit retire decision
+
+### Action: AI-triggered auto-run from bridge
+- State: dormant
+- Trigger: window event `mh:submit-workflow` with `meta.autoRun=true`
+- Inputs: event detail message/meta + selected project/session
+- Preconditions: `registerWorkflowBridge(...)` called; project selected
+- Local state changes: run state transitions and history
+- Shared-context writes: none required in bridge path
+- Backend/API calls: `runProjectAiWorkflow || runProjectWorkflow`; `reloadProjectData`
+- Durable outputs: backend workflow run record
+- User-visible output: success/failure message
+- Error behavior: marks run failed and surfaces error message
+- Reload behavior: reload on success
+- Risk level: high
+- Contract classification: must preserve until explicit lifecycle decision
+
+### Action: Run full automation plan
+- State: dormant
+- Trigger: `workflowRunFullAutomationBtn` click + confirm dialog
+- Inputs: automation plan from `buildAutomationPlan(getState())`
+- Preconditions: non-empty plan; user confirms; legacy loop mounted
+- Local state changes: `workflowAutomationState` progress/result/plan/results/cursor
+- Shared-context writes: possible via step execution helpers
+- Backend/API calls: indirect via plan steps (may call handoff creation through context)
+- Durable outputs: mixed, step-dependent
+- User-visible output: progress text and completion message
+- Error behavior: no-plan message; step status surfaced in result
+- Reload behavior: not guaranteed globally
+- Risk level: medium
+- Contract classification: must preserve semantics if retained
+
+### Action: Run single automation step
+- State: dormant
+- Trigger: `workflowRunStepAutomationBtn` click + confirm dialog
+- Inputs: next plan step
+- Preconditions: non-empty plan; user confirms; legacy loop mounted
+- Local state changes: cursor increments, progress/result updates
+- Shared-context writes: step-dependent
+- Backend/API calls: step-dependent, indirect
+- Durable outputs: mixed, step-dependent
+- User-visible output: step-executed message
+- Error behavior: no-plan message
+- Reload behavior: none guaranteed
+- Risk level: medium
+- Contract classification: must preserve semantics if retained
+
+### Action: Start Auto Mode
+
+# Workflows Active vs Legacy Decision Contract
+
+## Current Status
+- `public/control-center/pages/workflows.js` contains two behavior surfaces in one module.
+- Active mounted surface: light route shell rendered by exported `workflowsRoute.render(...)` into `#workflowsRoot`.
+- Legacy surface: execution-loop renderer, binder, bridge listener, manual run controls, automation controls, and Auto Mode controls are defined but not invoked by active route render.
+- Therefore current production behavior is light route only; heavy runtime loop is dormant.
+
+## Risk Statement
+- Mixed active and dormant surfaces in one file create high parity drift risk during extraction.
+- Hidden re-activation risk exists if legacy functions are accidentally wired during unrelated cleanup.
+- Authority confusion risk exists if runtime Auto Mode gate approval is mistaken for backend governance approval.
+- Handoff divergence risk exists when local cache handoff is used without durable backend persistence.
+
+## Decision Options
+
+### Option A: Keep light route active and archive legacy loop
+- Description
+  - Keep current mounted light route as operational surface.
+  - Formally deprecate and archive dormant legacy execution-loop controls.
+- Benefits
+  - Lowest immediate behavioral risk.
+  - Simplifies route lifecycle and avoids hidden runtime side effects.
+- Risks
+  - Legacy capabilities remain unavailable unless reintroduced elsewhere.
+  - Requires careful archival plan to avoid losing reusable pure helpers.
+
+### Option B: Re-activate heavy loop with lifecycle guardrails
+- Description
+  - Intentionally remount legacy execution-loop UI and handlers.
+  - Add explicit lifecycle guardrails for bridge/listener/subscription management.
+- Benefits
+  - Restores full workflow runtime controls in one page.
+- Risks
+  - Highest regression risk: durable run/handoff behavior, Auto Mode flow, and route lifecycle coupling.
+  - Requires strict shadow-compare and safety controls before rollout.
+
+### Option C: Extract useful pure helpers and retire runtime controls
+- Description
+  - Keep light route active.
+  - Extract pure helper logic from legacy path where safe.
+  - Retire runtime control bindings from the route surface.
+- Benefits
+  - Balances maintainability and risk control.
+  - Preserves reusable logic without reviving dormant runtime mutations.
+- Risks
+  - Requires precise boundary mapping to avoid partial behavioral drift.
+
+### Option D: Move durable execution controls to backend-projected operating surface
+- Description
+  - Keep frontend focused on projection and explicit request initiation.
+  - Relocate durable workflow execution control surfaces to backend-projected operations UI patterns.
+- Benefits
+  - Strongest alignment with backend authority doctrine.
+  - Reduces frontend authority-adjacent mutation complexity.
+- Risks
+  - Larger product and UX change scope.
+  - Requires phased migration and compatibility planning.
+
+## Recommended Direction
+- Recommended path: A now, then C, then evaluate D.
+- Why this is safest
+  - Current mounted truth is light route and should be preserved first.
+  - Immediate re-activation (B) introduces avoidable high-risk lifecycle and authority regressions.
+  - C allows low-risk simplification once behavior and parity are frozen.
+  - D is strategically aligned but should follow after parity-safe stabilization.
+
+## What Must Not Be Changed Yet
+- Do not rewire route render to call legacy execution-loop functions until shadow-compare contract is approved.
+- Do not start Auto Mode from render/mount or implicit route entry paths.
+- Do not blur Auto Mode gate approval with backend governance approval routes.
+- Do not convert local shared-context handoff cache into implied durable authority.
+- Do not change backend durable workflow/handoff/approval route ownership.
+
+## Decision Gate Prerequisites
+- Behavior contract approved.
+- Shadow-compare needs approved.
+- QA and rollback contract approved.
+- Explicit implementation decision recorded (A, B, C, or D) before any code change.

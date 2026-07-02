@@ -1,0 +1,256 @@
+      showError?.(message);
+    }
+  }
+}
+
+async function hydrateProtectedImageNode({
+  node,
+  projectName,
+  asset,
+  className,
+  alt,
+  fallbackMarkup,
+  showError
+}) {
+  if (!node || !asset) return;
+
+  try {
+    const resolved = await enqueueLibraryThumbLoad(() => getProtectedAssetObjectUrl(projectName, asset, {
+      timeoutMs: 30000
+    }));
+    if (!node.isConnected) return;
+
+    const image = document.createElement("img");
+    image.className = className;
+    image.alt = alt || asset.name || "Asset preview";
+    image.src = resolved.objectUrl;
+    image.onerror = () => {
+      if (!node.isConnected) return;
+      node.innerHTML = fallbackMarkup;
+    };
+
+    node.innerHTML = "";
+    node.appendChild(image);
+  } catch (error) {
+    if (!node.isConnected) return;
+    node.innerHTML = fallbackMarkup;
+
+    if (error instanceof AccessKeyError) {
+      return;
+    }
+
+    showError?.(`Could not load asset preview: ${error.message || "Unknown error."}`);
+  }
+}
+
+function protectLibraryInteractiveControls(scope) {
+  return;
+}
+
+function getWorkspaceAssetItems(assetsData, registry) {
+  const candidates = [
+    assetsData.assets,
+    assetsData.items,
+    assetsData.records,
+    registry.assets,
+    registry.items,
+    registry.records
+  ];
+
+  for (const candidate of candidates) {
+    if (Array.isArray(candidate) && candidate.length) return candidate;
+  }
+
+  return [];
+}
+
+function buildAiPrompt(projectName, mode, payload = {}) {
+  const project = asString(projectName).trim() || "this project";
+  if (mode === "classify") {
+    return `Classify the current library assets for ${project}, propose best category keys, and flag items that should be source-of-truth.`;
+  }
+  if (mode === "missing") {
+    const missing = asArray(payload.missing).join(", ") || "none";
+    return `For ${project}, find the fastest way to close missing required assets: ${missing}. Give a step-by-step upload priority.`;
+  }
+  const docs = asArray(payload.docs).join(", ") || "no document files selected";
+  return `Extract key facts from these library documents for ${project}: ${docs}. Return compliance notes, pricing references, and campaign-usable claims.`;
+}
+
+function promptForTextInput(title, initialValue = "") {
+  const initial = asString(initialValue);
+
+  if (typeof window !== "undefined" && typeof window.prompt === "function") {
+    try {
+      return Promise.resolve(window.prompt(title, initial));
+    } catch (_) {
+      // Fall through to custom modal when prompt is blocked.
+    }
+  }
+
+  return new Promise((resolve) => {
+    const overlay = document.createElement("div");
+    overlay.style.position = "fixed";
+    overlay.style.inset = "0";
+    overlay.style.background = "rgba(0,0,0,0.45)";
+    overlay.style.zIndex = "9999";
+    overlay.style.display = "grid";
+    overlay.style.placeItems = "center";
+
+    const modal = document.createElement("div");
+    modal.style.width = "min(480px, 92vw)";
+    modal.style.background = "#11141a";
+    modal.style.border = "1px solid rgba(255,255,255,0.12)";
+    modal.style.borderRadius = "12px";
+    modal.style.padding = "16px";
+    modal.style.color = "#f3f6fb";
+
+    const heading = document.createElement("div");
+    heading.textContent = title || "Enter value";
+    heading.style.fontWeight = "600";
+    heading.style.marginBottom = "10px";
+
+    const input = document.createElement("input");
+    input.type = "text";
+    input.value = initial;
+    input.style.width = "100%";
+    input.style.padding = "10px 12px";
+    input.style.borderRadius = "8px";
+    input.style.border = "1px solid rgba(255,255,255,0.2)";
+    input.style.background = "#0d1016";
+    input.style.color = "#f3f6fb";
+
+    const actions = document.createElement("div");
+    actions.style.display = "flex";
+    actions.style.justifyContent = "flex-end";
+    actions.style.gap = "8px";
+    actions.style.marginTop = "12px";
+
+    const cancelBtn = document.createElement("button");
+    cancelBtn.type = "button";
+    cancelBtn.textContent = "Cancel";
+    cancelBtn.className = "btn btn-secondary";
+
+    const submitBtn = document.createElement("button");
+    submitBtn.type = "button";
+    submitBtn.textContent = "Save";
+    submitBtn.className = "btn btn-primary";
+
+    const cleanup = () => {
+      overlay.remove();
+    };
+
+    cancelBtn.onclick = () => {
+      cleanup();
+      resolve(null);
+    };
+
+    submitBtn.onclick = () => {
+      const value = input.value;
+      cleanup();
+      resolve(value);
+    };
+
+    overlay.onclick = (event) => {
+      if (event.target === overlay) {
+        cleanup();
+        resolve(null);
+      }
+    };
+
+    input.onkeydown = (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        submitBtn.click();
+        return;
+      }
+
+      if (event.key === "Escape") {
+        event.preventDefault();
+        cancelBtn.click();
+      }
+    };
+
+    actions.appendChild(cancelBtn);
+    actions.appendChild(submitBtn);
+    modal.appendChild(heading);
+    modal.appendChild(input);
+    modal.appendChild(actions);
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+    input.focus();
+    input.select();
+  });
+}
+
+function bindLibraryWorkspace({
+  $,
+  projectName,
+  session,
+  assetsData,
+  operations,
+  registry,
+  categoryReadiness,
+  missingRequiredAssets,
+  navigateTo,
+  reloadProjectData,
+  showMessage,
+  showError,
+  escapeHtml
+}) {
+  const resolveActiveProjectName = () => asString(projectName || $("projectSwitcher")?.value || "").trim().toLowerCase();
+
+  const rerender = () => {
+    bindLibraryWorkspace({
+      $,
+      projectName,
+      session,
+      assetsData,
+      operations,
+      registry,
+      categoryReadiness,
+      missingRequiredAssets,
+      navigateTo,
+      reloadProjectData,
+      showMessage,
+      showError,
+      escapeHtml
+    });
+  };
+
+  const reloadOrRerender = async () => {
+    if (typeof reloadProjectData === "function") {
+      await reloadProjectData(projectName);
+      return;
+    }
+
+    rerender();
+  };
+
+  const catalog = getAssetCatalog(assetsData);
+  const categoryByType = getCategoryByType(categoryReadiness);
+  const managedAssets = getManagedMediaAssets(projectName, operations);
+  const workspaceAssetItems = getWorkspaceAssetItems(assetsData, registry);
+  const workspaceAssetsData = {
+    ...assetsData,
+    assets: workspaceAssetItems
+  };
+  const allAssets = [
+    ...managedAssets,
+    ...normalizeAssets(projectName, workspaceAssetsData, registry, categoryByType, catalog)
+  ];
+  const requiredGroups = buildRequiredAssetGroups(categoryReadiness);
+  const categoryBuckets = buildCategoryBuckets(categoryReadiness);
+  const bucketMap = new Map(categoryBuckets.map((item) => [item.key, item]));
+  const filteredAssets = getFilteredAssets(allAssets, session, bucketMap);
+  const totalPages = Math.max(1, Math.ceil(filteredAssets.length / LIBRARY_PAGE_SIZE));
+  session.page = Math.min(Math.max(Number(session.page) || 1, 1), totalPages);
+  const pageStart = (session.page - 1) * LIBRARY_PAGE_SIZE;
+  const paginatedAssets = filteredAssets.slice(pageStart, pageStart + LIBRARY_PAGE_SIZE);
+  const pageEnd = Math.min(pageStart + paginatedAssets.length, filteredAssets.length);
+  const selectedAssetExists = filteredAssets.some((asset) => asset.id === session.selectedAssetId);
+  if (!selectedAssetExists) {
+    session.selectedAssetId = filteredAssets[0]?.id || allAssets[0]?.id || "";
+  }
+
+  const selectedAsset = filteredAssets.find((asset) => asset.id === session.selectedAssetId)

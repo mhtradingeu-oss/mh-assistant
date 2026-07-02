@@ -1,0 +1,213 @@
+# Home Data Dependency Map
+
+50:    text.includes("failed") ||
+117:  if (!Number.isFinite(stamp)) return "Not available";
+132:  if (/(connector|integration|sync)/.test(text)) return "integrations";
+134:  if (/(campaign|launch wave|brief)/.test(text)) return "campaign-studio";
+135:  if (/(publish|schedule|queue)/.test(text)) return "publishing";
+136:  if (/(ad|budget|paid)/.test(text)) return "ads-manager";
+138:  return "ai-command";
+142:  const operations = asObject(selectOperationsSnapshot(state));
+143:  const notifications = asArray(operations.notifications?.items);
+144:  const tasks = asArray(operations.tasks?.items);
+145:  const approvals = asArray(operations.approvals?.items);
+168:    { id: "strategist", name: "Strategist", fallback: "Align campaign priorities and launch sequencing." },
+172:    { id: "publisher", name: "Publisher", fallback: "Prepare publishing packages, schedules, and manual handoffs." },
+173:    { id: "ads_operator", name: "Ads Optimizer", fallback: "Optimize paid testing, creative variants, and budget decisions." },
+175:    { id: "compliance_reviewer", name: "Compliance Reviewer", fallback: "Review claims, approvals, and publish safety before release." },
+181:    const roleTasks = tasks.filter((item) => asString(item?.owner_role).toLowerCase() === role.id);
+203:  const overview = asObject(state.data.overview);
+204:  const readiness = asObject(state.data.readiness);
+205:  const integrations = asObject(state.data.integrations);
+206:  const activity = asObject(state.data.activity);
+207:  const assets = asObject(state.data.assets);
+208:  const operations = asObject(selectOperationsSnapshot(state));
+210:  const overviewData = asObject(overview.overview);
+211:  const readinessData = asObject(readiness.dashboard);
+212:  const readinessPriorities = asObject(readinessData.priorities || readiness.priorities);
+214:  const scheduledJobs = asArray(activity.scheduled_jobs);
+216:  const recommendations = asArray(readinessData.next_best_actions).length
+217:    ? asArray(readinessData.next_best_actions)
+218:    : asArray(overview.next_best_actions);
+221:  const learning = asObject(activity.learning);
+222:  const notifications = asArray(operations.notifications?.items);
+236:    asString(overviewData.project_name);
+238:  const readinessScore =
+239:    readinessData.readiness_score ??
+240:    overviewData.readiness_score ??
+244:    integrations.readiness?.readiness_score ??
+245:    overviewData.connector_readiness_score ??
+248:  const criticalGaps = asArray(readinessPriorities.critical);
+249:  const failedExecutions = sortedExecution.filter((item) => statusTone(item?.execution_status) === "danger");
+252:  const connectorChecks = asObject(integrations.readiness?.checks);
+255:  const missingIntegrations = asArray(integrations.readiness?.missing).map((item) => humanizeStatus(item)).filter(Boolean);
+257:  const categoryReadiness = asArray(assets.category_readiness?.categories);
+259:    ...asArray(assets.missing_assets?.assets),
+260:    ...asArray(assets.missing_assets?.missing),
+261:    ...asArray(assets.missing_assets?.blockers),
+268:  const assetItems = asArray(assets.assets);
+269:  const sourceOfTruthCount = assetItems.filter((item) => Boolean(item.source_of_truth || item.use_as_source_of_truth)).length;
+271:  const insightsRecommendations = asArray(insights.recommendations);
+272:  const learningLessons = asArray(learning.system_lessons);
+273:  const tasks = asArray(operations.tasks?.items);
+274:  const approvals = asArray(operations.approvals?.items);
+276:  const automationTone = failedExecutions.length
+282:  const intelligenceScore = insightsRecommendations.length + learningLessons.length;
+288:      : failedExecutions.length
+289:        ? "Recover failed execution items"
+292:  const nextAction = asString(recommendations[0]).trim() || fallbackAction;
+297:    : failedExecutions.length
+299:      : "Acting now keeps momentum and converts current readiness into measurable output.";
+301:  const activeCampaignName =
+302:    asString(state.context.activeCampaign) ||
+314:    readinessData.readiness_status ||
+315:    overviewData.readiness_status,
+319:  const systemScore = Math.round((asNumber(readinessScore) + asNumber(connectorScore)) / 2);
+321:  const pendingTasks = tasks.filter((item) => {
+333:    : failedExecutions.length
+339:    : failedExecutions.length
+340:      ? `Stabilizes ${formatCount(failedExecutions.length)} failed job${failedExecutions.length === 1 ? "" : "s"}`
+341:      : "Maintains operational flow";
+355:  const mediaJobs = asArray(operations.media_jobs?.items);
+356:  const mediaReadyCount = mediaJobs.filter((item) => statusTone(item?.status) === "success").length;
+358:  const publishingQueue = asArray(operations.queues?.items).filter((item) =>
+359:    asString(item.entity_type) === "publishing_job" || asString(item.queue_type) === "publishing"
+361:  const publishReadyCount = publishingQueue.filter((item) => {
+363:    return ["ready", "manual_publish_ready", "scheduled", "queued"].includes(status);
+366:  const emailConnected = Boolean(
+367:    connectorChecks.email || connectorChecks.mailer || connectorChecks.smtp || connectorChecks.mailchimp
+370:  const readinessMissing = [
+371:    ...asArray(readinessData.missing),
+372:    ...asArray(readiness.missing_fields)
+378:    asNumber(readinessScore) >= 80 ? 1 : 0,
+380:    failedExecutions.length === 0 ? 1 : 0
+411:      detail: compact(item?.wave_name, "Execution result"),
+419:      detail: compact(item?.wave_name, "Scheduled job"),
+427:      detail: compact(item?.action || item?.status || item?.level, "Review required"),
+435:    integrations: missingIntegrations,
+436:    assets: missingAssets,
+437:    failedJobs: failedExecutions.slice(0, 8).map((item) =>
+438:      `${humanizeStatus(item?.channel, "Channel")}: ${humanizeStatus(item?.execution_status, "Failed")}`
+440:    readinessGaps: dedupe([
+442:      ...readinessMissing
+447:    blockers.integrations.length +
+448:    blockers.assets.length +
+449:    blockers.failedJobs.length +
+450:    blockers.readinessGaps.length;
+452:  const campaignReadinessTone = totalBlockers ? "warning" : "success";
+456:          statusLabel: campaignReadinessTone === "success" ? "Healthy" : totalBlockers ? "Attention" : "Unknown",
+458:          escalationLabel: failedExecutions.length ? `Escalations: ${formatCount(failedExecutions.length)}` : "None",
+461:          escalations: formatCount(failedExecutions.length),
+462:          summary: `${formatCount(pendingApprovals.length)} approvals pending, ${formatCount(failedExecutions.length)} escalations, ${formatCount(unreadNotifications.length)} notifications, system score ${formatPercent(systemScore)}.`
+466:      readinessData.readiness_status || overviewData.readiness_status || overviewData.status,
+469:    headerTone: statusTone(readinessData.readiness_status || overviewData.readiness_status, readinessScore),
+471:      ? `${projectName} is at ${formatPercent(readinessScore)} readiness with ${formatPercent(connectorScore)} connector coverage and ${formatCount(criticalGaps.length)} critical blocker${criticalGaps.length === 1 ? "" : "s"}.`
+473:    primaryActionLabel: nextActionRoute === "ai-command" ? "Open AI Workspace" : `Open ${humanizeStatus(nextActionRoute)}`,
+480:      projectReadiness: asNumber(readinessScore),
+487:      criticalAlerts: criticalGaps.length + failedExecutions.length + unreadNotifications.length
+494:      buttonLabel: nextActionRoute === "ai-command" ? "Start With AI" : `Fix In ${humanizeStatus(nextActionRoute)}`,
+506:        detail: dashboardLabelFromScore(systemScore),
+511:        value: formatPercent(readinessScore),
+512:        detail: criticalGaps.length ? `${formatCount(criticalGaps.length)} blockers` : "Ready for scale",
+513:        tone: statusTone("score", readinessScore)
+518:        detail: `${formatCount(failedExecutions.length)} failed jobs`,
+524:        detail: intelligenceScore ? "Signals captured" : "Needs fresh feedback",
+528:        title: "Active Campaign",
+529:        value: activeCampaignName ? "Live" : "Missing",
+530:        detail: activeCampaignName || "No campaign selected",
+531:        tone: activeCampaignName ? "success" : "warning"
+545:        hint: "Critical setup or assets",
+549:        label: "Failed",
+550:        value: formatCount(failedExecutions.length),
+551:        hint: "Execution failures",
+552:        tone: failedExecutions.length ? "danger" : "success"
+557:        hint: "Notifications, tasks, approvals",
+574:    campaign: {
+575:      name: activeCampaignName,
+578:      executionMode: compact(state.context.executionMode || overviewData.execution_mode, "Not set"),
+581:        : "No scheduled action yet — open Publishing or Campaign Studio to prepare the next launch step."
+592:      mediaReadiness: mediaReadyCount,
+593:      emailReadiness: emailConnected ? "Connected" : "Missing",
+595:      campaignReadiness: campaignReadinessTone === "success" ? "Ready" : "At risk"
+599:      apiStatus: overviewData.project_name || readinessData.readiness_score != null ? "Operational" : "Partial",
+600:      sourceOfTruth: sourceOfTruthCount ? `${sourceOfTruthCount} assets marked` : "Not configured",
+603:        ...blockers.integrations.map((item) => `Integration: ${item}`),
+604:        ...blockers.assets.map((item) => `Asset: ${item}`),
+605:        ...blockers.readinessGaps.map((item) => `Readiness: ${item}`)
+612:        : "No execution recorded yet — start with a campaign or publishing package to create the first signal.",
+613:      recommendation: asString(recommendations[0]).trim() || asString(insightsRecommendations[0]).trim() || "Ask Executive AI to generate the next best action from readiness, blockers, and recent activity.",
+614:      feedback: asString(learningLessons[0]).trim() || "Connect insights or run a reviewed campaign so the learning engine can capture feedback."
+624:      nextSchedule: nextScheduled ? formatRelativeDate(nextScheduled.scheduled_for || nextScheduled.updated_at) : "Not available",
+625:      lastExecution: latestExecution ? formatRelativeDate(latestExecution.executed_at || latestExecution.updated_at) : "Not available"
+661:    const aiTeamCards = buildAiTeamCards(state);
+665:    const campaignChannels = asArray(dashboard.campaign.channels);
+667:      { title: "Integrations", items: dashboard.blockers.integrations, tone: "warning" },
+668:      { title: "Assets", items: dashboard.blockers.assets, tone: "warning" },
+669:      { title: "Failed Jobs", items: dashboard.blockers.failedJobs, tone: "danger" },
+670:      { title: "Readiness Gaps", items: dashboard.blockers.readinessGaps, tone: "warning" }
+731:              <p class="executive-signal-detail">${escapeHtml(item.detail)}</p>
+763:        <div class="home-workspace-main">
+773:                  dashboard.launchSnapshot.campaignReadiness === "Ready" ? "success" : "warning",
+774:                  dashboard.launchSnapshot.campaignReadiness,
+786:                  <strong>${escapeHtml(formatCount(dashboard.launchSnapshot.mediaReadiness))}</strong>
+789:                  <span class="data-label">Email</span>
+790:                  <strong>${escapeHtml(dashboard.launchSnapshot.emailReadiness)}</strong>
+802:                  <p class="card-label">Active Campaign</p>
+803:                  <h3>${escapeHtml(compact(dashboard.campaign.name, "No active campaign"))}</h3>
+804:                  <span class="section-helper">Tracks the current campaign's operational state and next scheduled actions.</span>
+806:                ${renderBadge(dashboard.campaign.name ? "success" : "warning", dashboard.campaign.currentStage, escapeHtml)}
+809:              <div class="home-campaign-info">
+810:                <div class="home-campaign-row">
+812:                  <strong>${escapeHtml(dashboard.campaign.executionMode)}</strong>
+814:                <div class="home-campaign-row">
+816:                  <strong>${escapeHtml(dashboard.campaign.nextScheduledAction)}</strong>
+818:                <div class="home-campaign-row">
+820:                  <strong>${escapeHtml(campaignChannels.length ? campaignChannels.join(", ") : "No channels selected")}</strong>
+866:            <button id="homeQuickStartCampaignBtn" class="quick-action-btn" type="button">
+867:              <span class="home-action-title">Campaign Studio</span>
+868:              <span class="home-action-meta">Create launch waves and campaign briefs.</span>
+872:              <span class="home-action-meta">Upload and organize brand assets.</span>
+897:        <section class="card home-ai-guidance-panel">
+901:              <h3>AI explains, plans, and clarifies operational flow</h3>
+902:              <span class="section-helper">AI explains blockers, turns next action into a plan, and routes guidance to the right workspace.</span>
+909:          <div class="home-ai-prompt-grid">
+910:            <button id="homePromptNextBtn" class="home-ai-prompt-card" type="button">
+915:            <button id="homePromptReadinessBtn" class="home-ai-prompt-card" type="button">
+916:              <span class="home-prompt-title">Why is readiness low?</span>
+917:              <span class="home-prompt-meta">AI explains blockers and readiness gaps in operational terms.</span>
+920:            <button id="homePromptLaunchBtn" class="home-ai-prompt-card" type="button">
+925:            <button id="homePromptPlanBtn" class="home-ai-prompt-card" type="button">
+936:              <!-- Workflow Chain -->
+937:              <p class="mhos-workflow-chain-note">Roles represent operational handoffs, not personas.</p>
+938:              <div class="mhos-workflow-chain">
+940:                  // Projection-only workflow chain
+941:                  // Use aiTeamCards as workflow steps for now
+942:                  const workflowChain = aiTeamCards;
+943:                  const activeIdx = workflowChain.findIndex(card => card.status === "Active role");
+944:                  const blockedIdx = workflowChain.findIndex(card => card.status.toLowerCase().includes("blocked"));
+945:                  return workflowChain.map((card, idx) => {
+981:                    dashboard.blockers.failedJobs.map((msg, i) => ({
+982:                      id: `failed-job-${i}`,
+1022:      navigateTo("ai-command");
+1030:        strategist: `Act as the Strategist for ${projectLabel}. Review readiness, blockers, campaign state, and next best action. Give me the highest-impact strategic moves. Do not execute anything; prepare guidance only.`,
+1032:        designer: `Act as the Media Director for ${projectLabel}. Review the visual/asset readiness and suggest the next best creative actions. Do not execute anything; prepare guidance only.`,
+1034:        publisher: `Act as the Publisher for ${projectLabel}. Review publishing readiness, scheduled jobs, blockers, and what must be checked before publishing. Do not execute anything; prepare guidance only.`,
+1035:        ads_operator: `Act as the Ads Optimizer for ${projectLabel}. Review campaign readiness, channels, and paid media opportunities. Suggest next ad actions safely. Do not execute anything; prepare guidance only.`,
+1036:        analyst: `Act as the SEO & Insights Analyst for ${projectLabel}. Review readiness, signals, gaps, and recent activity. Tell me what data matters most and what to improve next. Do not execute anything; prepare guidance only.`,
+1037:        compliance_reviewer: `Act as the Compliance Reviewer for ${projectLabel}. Review launch blockers, claims, approvals, and publishing safety. Tell me what must be checked before release. Do not execute anything; prepare guidance only.`,
+1038:        admin: `Act as the Operations Lead for ${projectLabel}. Review tasks, blockers, failed jobs, and execution health. Give me the next operational steps. Do not execute anything; prepare guidance only.`
+1049:        if (dashboard.nextBestAction.route === "ai-command") {
+1058:      askNextActionBtn.onclick = () => openAiWithPrompt(`Explain this next best action and give me the exact steps: ${dashboard.nextBestAction.recommendation}`);
+1061:    const operationsBtn = $("homeOpenOperationsBtn");
+1062:    if (operationsBtn) operationsBtn.onclick = () => openRoute("operations-centers");
+1064:    const aiTeamBtn = $("homeOpenAiTeamBtn");
+1065:    if (aiTeamBtn) aiTeamBtn.onclick = () => openRoute("ai-command");
+1067:    const quickCampaignBtn = $("homeQuickStartCampaignBtn");
+1068:    if (quickCampaignBtn) quickCampaignBtn.onclick = () => openRoute("campaign-studio");
+1074:    if (quickConnectBtn) quickConnectBtn.onclick = () => openRoute("integrations");
+1086:      promptNextBtn.onclick = () => openAiWithPrompt("What should I do next for this project? Prioritize the answer based on readiness, blockers, campaign state, and recent activity.");
+1091:      promptReadinessBtn.onclick = () => openAiWithPrompt("Why is readiness low? Explain the missing integrations, assets, failed jobs, and readiness gaps in simple steps.");
+1096:      promptLaunchBtn.onclick = () => openAiWithPrompt("Summarize the launch blockers and tell me what must be fixed before publishing.");
+1101:      promptPlanBtn.onclick = () => openAiWithPrompt("Prepare today's action plan from the current dashboard. Give me prioritized tasks with owners and expected outcomes.");
+1104:    const aiRoleCards = document.querySelectorAll(".home-ai-team-card, .mhos-specialist, .mhos-workflow-step[data-role-id]");
+1105:    aiRoleCards.forEach((card) => {

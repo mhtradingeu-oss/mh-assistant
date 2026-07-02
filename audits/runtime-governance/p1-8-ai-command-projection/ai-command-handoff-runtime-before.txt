@@ -1,0 +1,146 @@
+					fetchProjectInsights(projectName),
+					fetchProjectLearning(projectName)
+				]);
+				const insightsMissing = insightsResult.status === "rejected" && isMissingIntelligenceError(insightsResult.reason);
+				const learningMissing = learningResult.status === "rejected" && isMissingIntelligenceError(learningResult.reason);
+				const intelligenceErrors = [
+					insightsResult.status === "rejected" && !insightsMissing ? insightsResult.reason?.message : "",
+					learningResult.status === "rejected" && !learningMissing ? learningResult.reason?.message : ""
+				].filter(Boolean);
+				session.intelligence = {
+					project: projectName,
+					status: "ready",
+					dashboard: getState().data,
+					insights: insightsResult.status === "fulfilled" ? insightsResult.value : (insightsMissing ? { project: projectName, generated_at: nowIso(), data_coverage: {} } : null),
+					learning: learningResult.status === "fulfilled" ? learningResult.value : (learningMissing ? { project: projectName, generated_at: nowIso(), learning_patterns: {}, recommendations: [] } : null),
+					error: intelligenceErrors[0] || "",
+					loadedAt: nowIso(),
+					loadingPromise: null
+				};
+			} catch (error) {
+				session.intelligence = { ...session.intelligence, project: projectName, status: "error", error: error.message || "Failed to load live intelligence", loadingPromise: null };
+			} finally {
+				rerender();
+			}
+		})()
+	};
+
+	rerender();
+	return session.intelligence.loadingPromise;
+}
+
+// ============================================================
+//  COMMAND SUBMISSION
+// ============================================================
+
+function syncAiWorkflowBridge({ projectName, modeId, command, response }) {
+	setSharedAiDraft(projectName, {
+		projectName: projectName || "",
+		modeId: modeId || "",
+		lastCommand: asString(command),
+		lastResponseTitle: asString(response?.title),
+		routeSuggestions: asArray(response?.routeSuggestions),
+		updatedAt: nowIso()
+	});
+}
+
+function applyDurableAiHandoff(projectName, operations, session, consumeProjectHandoff, showMessage) {
+	const handoff = getSharedHandoff(projectName, "ai-command", operations);
+	const handoffId = asString(handoff?.id);
+	if (!handoffId || handoffId === asString(session.lastAppliedHandoffId)) return;
+
+	const payload = asObject(handoff?.payload);
+	const draftContext = asObject(payload.draft_context);
+	const prompt = asString(payload.prompt);
+	if (draftContext.modeId) session.modeId = draftContext.modeId;
+	if (prompt) session.draftMessage = prompt;
+
+	if (draftContext.projectName || prompt) {
+		setSharedAiDraft(projectName, {
+			projectName,
+			modeId: draftContext.modeId || session.modeId,
+			lastCommand: prompt || draftContext.lastCommand || "",
+			lastResponseTitle: draftContext.lastResponseTitle || "",
+			routeSuggestions: asArray(draftContext.routeSuggestions)
+		});
+	}
+
+	session.lastAppliedHandoffId = handoffId;
+	consumeProjectHandoff?.(projectName, handoffId, { actor: "mh-assistant" }).catch((error) => {
+		console.warn("Failed to consume AI handoff:", error.message);
+	});
+	showMessage?.("AI Command restored context from the shared backbone.");
+}
+
+async function submitDurableCommand({
+	projectName,
+	aiContext,
+	session,
+	command,
+	modeId,
+	source,
+	executeProjectAiCommand,
+	reloadProjectData
+}) {
+	const cleanCommand = asString(command).trim();
+	if (!cleanCommand) return { accepted: false, failed: false };
+	if (typeof executeProjectAiCommand !== "function") throw new Error("AI command service is unavailable.");
+
+	let result = null;
+	let response = {};
+	let resolvedModeId = modeId || session.modeId;
+	let commandId = "";
+
+	try {
+		result = await executeProjectAiCommand(projectName, {
+			command: cleanCommand,
+			mode_id: modeId || session.modeId,
+			source,
+			actor: "mh-assistant",
+			asset_context: {
+				categories: aiContext.assetCategories,
+				approved_assets: aiContext.approvedAssets,
+				blockers: aiContext.assetBlockers
+			}
+		});
+		response = asObject(result?.response);
+		const classification = asObject(result?.command?.classification);
+		resolvedModeId = asString(classification.resolvedModeId) || asString(result?.command?.mode_id) || modeId || session.modeId;
+		commandId = asString(result?.command?.id);
+	} catch (error) {
+		const payload = asObject(error?.payload);
+		const payloadResponse = asObject(payload?.response);
+		const payloadCommand = asObject(payload?.command);
+		const failureReason = asString(payload?.error) || asString(payloadResponse?.error) || asString(error?.message) || "AI provider failed to return output.";
+		resolvedModeId = asString(payloadCommand?.mode_id) || modeId || session.modeId;
+		commandId = asString(payloadCommand?.id);
+		response = {
+			status: "failed",
+			title: "Command failed",
+			summary: failureReason,
+			findings: [failureReason],
+			nextActions: ["Check AI provider configuration and retry."],
+			routeSuggestions: [],
+			missingData: [],
+			error: failureReason
+		};
+	}
+
+	const createdAt = nowIso();
+	session.modeId = resolvedModeId;
+
+	session.messages.push({
+		id: `msg-user-${Date.now()}`,
+		role: "user",
+		modeId: resolvedModeId,
+		content: cleanCommand,
+		createdAt,
+		source
+	});
+
+	session.messages.push({
+		id: `msg-assistant-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+		role: "assistant",
+		modeId: resolvedModeId,
+		createdAt: asString(result?.command?.created_at) || nowIso(),
+		source: "durable-ai-response",

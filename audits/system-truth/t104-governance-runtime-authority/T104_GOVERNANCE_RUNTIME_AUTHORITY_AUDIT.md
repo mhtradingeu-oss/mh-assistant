@@ -1,0 +1,1180 @@
+# T104 — Governance Runtime Authority Audit
+
+## Status
+Audit-only. No production files changed.
+
+## Scope
+Focused runtime authority review of `public/control-center/pages/governance.js`.
+
+## Why Governance Is Next
+After Publishing was closed, Governance is the next high-risk active surface from the remaining T88 ranking.
+
+Governance is a critical authority surface because it may approve, reject, decide, resolve, or mutate approval records and source-evidence state.
+
+## File Summary
+- File: `public/control-center/pages/governance.js`
+- Lines: 1521
+- Imports: 1
+- Render writes: 2
+- Event bindings: 7
+- Backend/API signals: 465
+- Approval/decision signals: 438
+- Mutation signals: 63
+- Handoff signals: 10
+- Source/evidence signals: 99
+- Confirmation signals: 4
+- Access-key/credential signals: 0
+- Save/storage signals: 27
+- Navigation signals: 10
+- Disabled/read-only/draft/guard signals: 29
+- Risky terms: 551
+
+## Initial Risk Notes
+- Governance contains approval/decision signals. Exact approve/reject/decision paths must be classified.
+- Governance contains backend/API-like signals. Need separate read-only queue hydration from durable governance decisions.
+- Governance contains source/evidence/proof signals. Need verify evidence intake is stored safely and not treated as approval by itself.
+- Confirmation dialogs exist and must be mapped to exact approval-sensitive actions.
+
+## Imports
+- L137: `import {`
+
+## Render Writes
+- L1328: `root.innerHTML = renderPage(projectName, session, context.escapeHtml);`
+- L1509: `root.innerHTML = renderPage(projectName, session, context.escapeHtml);`
+
+## Event Bindings
+- L1333: `button.onclick = async () => {`
+- L1360: `button.onclick = () => {`
+- L1367: `button.onclick = () => {`
+- L1374: `button.onclick = async () => {`
+- L1407: `button.onclick = async () => {`
+- L1472: `button.onclick = () => {`
+- L1481: `button.onclick = () => {`
+
+## Backend / API Signals
+- L1: `// --- Governance Evidence Summary & Intake Patch ---`
+- L7: `function collectGovernanceEvidence({ selectedItem, projectData, governanceData }) {`
+- L10: `source_of_truth: [],`
+- L23: `const sources = [selectedItem, projectData, governanceData];`
+- L24: `sources.forEach((src) => {`
+- L28: `if (/source_of_truth|source/.test(key)) evidence.source_of_truth.push(v);`
+- L52: `if (s.includes("source_of_truth") || s.includes("source")) return "source_of_truth";`
+- L69: `evidence.source_of_truth.length ||`
+- L77: `function renderGovernanceEvidenceSummary({ selectedItem, projectData, governanceData, intakeContext, escapeHtml }) {`
+- L78: `const evidence = collectGovernanceEvidence({ selectedItem, projectData, governanceData });`
+- L81: `<div class="governance-evidence-summary">`
+- L82: `<div class="governance-evidence-summary-header">Evidence Summary</div>`
+- L83: `<div class="governance-evidence-cards">`
+- L84: `<div class="governance-evidence-card${evidence.source_of_truth.length ? '' : ' is-missing'}">`
+- L85: `<span class="governance-evidence-label">Source of Truth</span>`
+- L86: `<span class="governance-evidence-value">${evidence.source_of_truth.length ? escapeHtml(asString(evidence.source_of_truth[0])) : "Missing"}</span>`
+- L88: `<div class="governance-evidence-card${evidence.legal.length ? '' : ' is-missing'}">`
+- L89: `<span class="governance-evidence-label">Legal</span>`
+- L90: `<span class="governance-evidence-value">${evidence.legal.length ? escapeHtml(asString(evidence.legal[0])) : "Missing"}</span>`
+- L92: `<div class="governance-evidence-card${evidence.pricing.length ? '' : ' is-missing'}">`
+- L93: `<span class="governance-evidence-label">Pricing</span>`
+- L94: `<span class="governance-evidence-value">${evidence.pricing.length ? escapeHtml(asString(evidence.pricing[0])) : "Missing"}</span>`
+- L96: `<div class="governance-evidence-card${evidence.certificate.length ? '' : ' is-missing'}">`
+- L97: `<span class="governance-evidence-label">Certificate/Proof</span>`
+- L98: `<span class="governance-evidence-value">${evidence.certificate.length ? escapeHtml(asString(evidence.certificate[0])) : evidence.proof.length ? escapeHtml(asString(evidence.proof[0])) : "Missing"}</span>`
+- L100: `<div class="governance-evidence-card${evidence.brand.length ? '' : ' is-missing'}">`
+- L101: `<span class="governance-evidence-label">Brand Asset</span>`
+- L102: `<span class="governance-evidence-value">${evidence.brand.length ? escapeHtml(asString(evidence.brand[0])) : "Missing"}</span>`
+- L104: `<div class="governance-evidence-card${evidence.product.length ? '' : ' is-missing'}">`
+- L105: `<span class="governance-evidence-label">Product Asset</span>`
+- L106: `<span class="governance-evidence-value">${evidence.product.length ? escapeHtml(asString(evidence.product[0])) : "Missing"}</span>`
+- L109: `${!hasEvidence ? \`<div class="governance-evidence-card is-missing governance-source-warning">Missing source evidence — attach Library proof before high-risk approval.</div>\` : ""}`
+- L110: `<div class="governance-evidence-guidance">High-risk Governance decisions should reference source-of-truth evidence, proof assets, or an incoming handoff. Missing evidence should be resolved before approval, rejection, escalation, or override.</div>`
+- L115: `function renderGovernanceIntakePanel({ projectName, escapeHtml, intakeContext }) {`
+- L127: `<div class="governance-intake-panel">`
+- L128: `<div class="governance-intake-panel-header">Incoming Review Context</div>`
+- L129: `<div class="governance-intake-list">`
+- L131: `<div class="governance-intake-item"><span class="governance-intake-label">${escapeHtml(item.label)}</span><span class="governance-intake-value">${escapeHtml(item.value)}</span></div>`
+- L132: `\`).join("") : \`<div class="governance-intake-item is-missing">No intake yet</div>\`}`
+- L138: `createProjectApproval,`
+- L139: `decideProjectApproval,`
+- L140: `fetchProjectGovernance,`
+- L141: `updateProjectGovernancePolicy`
+- L142: `} from "../api.js";`
+- L144: `const governanceSessions = new Map();`
+- L187: `if (["approval", "approved", "approve"].includes(normalized)) {`
+- L188: `return "Submit reviewed approval decision? This records a backend Governance decision and may affect downstream readiness where policy gates apply. It does not publish, send, or execute directly.";`
+- L192: `return "Record high-risk override decision? This records a backend Governance override. It may unblock downstream gated actions where policy allows override. Continue only after verifying source evidence, risk, owner, and reason.";`
+- L196: `return "Submit reviewed Governance decision? This records a backend reviewed decision and may update linked queues or review state. It does not publish or execute directly.";`
+- L199: `return "Submit reviewed Governance decision? This records a backend reviewed decision and may update linked queues or review state. It does not publish or execute directly.";`
+- L202: `function confirmGovernanceDecision(decision) {`
+- L207: `function confirmGovernanceApprovalRequest({ title, entityType, risk }) {`
+- L212: `const itemRisk = risk || "medium";`
+- L216: `"Create Governance approval request?",`
+- L218: `\`Action: Create a backend approval request for ${itemTitle}.\`,`
+- L220: `\`Risk: ${itemRisk}\`,`
+- L222: `"Authority: This creates a durable Governance queue item for review. It does not approve, reject, publish, send, or execute directly.",`
+- L232: `if (!governanceSessions.has(key)) {`
+- L233: `governanceSessions.set(key, {`
+- L242: `return governanceSessions.get(key);`
+- L245: `function getSettingsDraftFromPolicy(summary) {`
+- L246: `return asObject(asObject(summary?.policy).settings_bridge?.form);`
+- L249: `function mapSettingsToGovernancePolicy(settings = {}) {`
+- L250: `const approval = asObject(settings.approval);`
+- L257: `policy_rules: {`
+- L258: `approval_before_publish: Boolean(publishing.approvalBeforePublish),`
+- L259: `high_risk_claim_review_required: Boolean(safety.aiClaimCheck),`
+- L262: `auto_escalate_critical_risk: String(operating.actionPolicy || "").toLowerCase().includes("blocked"),`
+- L265: `approval_owners: {`
+- L266: `content: asString(approval.contentOwner) || "Marketing lead",`
+- L267: `media: asString(approval.mediaOwner) || "Creative lead",`
+- L268: `campaign: asString(approval.adsOwner) || "Operations lead",`
+- L274: `source: "settings-durable-record",`
+- L276: `approval_mode: asString(ai.approvalRequiredMode) || "Only high-risk",`
+- L278: `approval_before_publish: Boolean(publishing.approvalBeforePublish)`
+- L283: `function findApprovalForEntity(summary, entityType, entityId) {`
+- L284: `return asArray(summary?.sections?.approval_queue).find((item) =>`
+- L290: `async function loadGovernance(projectName, session, rerender) {`
+- L298: `session.summary = await fetchProjectGovernance(projectName, {`
+- L303: `session.error = error.message || "Failed to load governance console.";`
+- L310: `async function refreshGovernance(projectName, session, rerender, showError) {`
+- L312: `await loadGovernance(projectName, session, rerender);`
+- L320: `<div class="governance-metric">`
+- L336: `<div class="governance-card-list">`
+- L338: `<div class="governance-card">`
+- L339: `<div class="governance-card-head">`
+- L350: `${Object.entries(escalationChain).map(([risk, roles]) => \``
+- L352: `<strong>${escapeHtml(titleCase(risk))}</strong>`
+- L367: `<div class="governance-flag-list">`
+- L369: `<div class="governance-flag">`
+- L378: `function renderApprovalCard(item, escapeHtml) {`
+- L380: `...asArray(item.policy_flags),`
+- L389: `<article class="governance-card">`
+- L390: `<div class="governance-card-head">`
+- L392: `<div class="panel-kicker">${escapeHtml(titleCase(item.entity_type || "approval"))}</div>`
+- L393: `<h4>${escapeHtml(item.title || "Approval item")}</h4>`
+- L395: `<span class="card-badge ${severityClass(item.risk_level || item.status)}">${escapeHtml(titleCase(item.status || item.risk_level || "pending"))}</span>`
+- L397: `<div class="governance-meta">`
+- L398: `<span>Risk: ${escapeHtml(titleCase(item.risk_level || "medium"))}</span>`
+- L403: `<p class="governance-copy">${escapeHtml(item.summary || "Awaiting review and decision.")}</p>`
+- L404: `${renderFlagList(flags, "No extra policy flags were attached to this approval.", escapeHtml)}`
+- L405: `<textarea id="${escapeHtml(noteId)}" class="setup-input setup-textarea governance-note" rows="3" placeholder="Add a decision reason, change request, or escalation note.">${escapeHtml(item.decision_note || "")}</textarea>`
+- L406: `<div class="governance-actions">`
+- L407: `<button class="btn btn-primary" type="button" data-governance-decision="approved" data-approval-id="${escapeHtml(item.id)}">Submit Reviewed Approval</button>`
+- L408: `<button class="btn btn-secondary" type="button" data-governance-decision="rejected" data-approval-id="${escapeHtml(item.id)}">Submit Rejection Decision</button>`
+- L409: `<button class="btn btn-secondary" type="button" data-governance-decision="changes_requested" data-approval-id="${escapeHtml(item.id)}">Request Changes Review</button>`
+- L410: `<button class="btn btn-secondary" type="button" data-governance-decision="escalated" data-approval-id="${escapeHtml(item.id)}">Escalate Review</button>`
+- L411: `<button class="btn btn-secondary" type="button" data-governance-decision="overridden" data-approval-id="${escapeHtml(item.id)}">Record High-Risk Override</button>`
+- L414: `<div class="governance-history">`
+- L416: `<div class="governance-history-item">`
+- L427: `function renderReviewCard(item, type, escapeHtml, approval) {`
+- L436: `<article class="governance-card">`
+- L437: `<div class="governance-card-head">`
+- L442: `<span class="card-badge ${approval ? "warning" : "neutral"}">${escapeHtml(approval ? "In approval queue" : "Not requested")}</span>`
+- L444: `<div class="governance-meta">`
+- L449: `${approval ? \``
+- L451: `<strong>Linked approval:</strong> ${escapeHtml(approval.title || approval.id)} • ${escapeHtml(titleCase(approval.status))}`
+- L454: `<div class="governance-actions">`
+- L458: `data-governance-request-approval="true"`
+- L461: `data-title="${escapeHtml(item.title || "Governance review")}"`
+- L462: `data-risk="${escapeHtml(flags[0]?.severity || "medium")}"`
+- L463: `data-summary="${escapeHtml(flags.map((flag) => flag.message).join(" | ") || "Governance review requested.")}"`
+- L465: `Create Approval Request`
+- L479: `<div class="governance-timeline">`
+- L481: `<div class="governance-timeline-item">`
+- L482: `<div class="governance-timeline-dot"></div>`
+- L483: `<div class="governance-timeline-copy">`
+- L494: `function renderPolicyControls(summary, settingsDraft, escapeHtml) {`
+- L495: `const policy = asObject(summary?.policy);`
+- L496: `const rules = asObject(policy.policy_rules);`
+- L497: `const owners = asObject(policy.approval_owners);`
+- L500: `<div class="governance-policy-grid">`
+- L501: `<label class="settings-toggle" for="governance-approval-before-publish">`
+- L502: `<span class="settings-field-label">Require approval before publishing mutations</span>`
+- L503: `<input id="governance-approval-before-publish" type="checkbox" class="settings-toggle-input" data-governance-policy="approval_before_publish" ${rules.approval_before_publish ? "checked" : ""} />`
+- L506: `<label class="settings-toggle" for="governance-claim-review">`
+- L508: `<input id="governance-claim-review" type="checkbox" class="settings-toggle-input" data-governance-policy="high_risk_claim_review_required" ${rules.high_risk_claim_review_required ? "checked" : ""} />`
+- L511: `<label class="settings-toggle" for="governance-brand-safety">`
+- L513: `<input id="governance-brand-safety" type="checkbox" class="settings-toggle-input" data-governance-policy="brand_safety_review_required" ${rules.brand_safety_review_required ? "checked" : ""} />`
+- L516: `<label class="settings-toggle" for="governance-auto-escalate">`
+- L517: `<span class="settings-field-label">Auto-escalate critical risk</span>`
+- L518: `<input id="governance-auto-escalate" type="checkbox" class="settings-toggle-input" data-governance-policy="auto_escalate_critical_risk" ${rules.auto_escalate_critical_risk ? "checked" : ""} />`
+- L521: `<label class="settings-toggle" for="governance-admin-override">`
+- L523: `<input id="governance-admin-override" type="checkbox" class="settings-toggle-input" data-governance-policy="allow_admin_override" ${rules.allow_admin_override ? "checked" : ""} />`
+- L526: `<label class="settings-toggle" for="governance-freeze-publishing">`
+- L528: `<input id="governance-freeze-publishing" type="checkbox" class="settings-toggle-input" data-governance-policy="freeze_publishing" ${rules.freeze_publishing ? "checked" : ""} />`
+- L532: `<label class="settings-field-label" for="governance-owner-content">Content owner</label>`
+- L533: `<input id="governance-owner-content" class="settings-control" type="text" data-governance-owner="content" value="${escapeHtml(owners.content || "")}" />`
+- L536: `<label class="settings-field-label" for="governance-owner-media">Media owner</label>`
+- L537: `<input id="governance-owner-media" class="settings-control" type="text" data-governance-owner="media" value="${escapeHtml(owners.media || "")}" />`
+- L540: `<label class="settings-field-label" for="governance-owner-publishing">Publishing owner</label>`
+- L541: `<input id="governance-owner-publishing" class="settings-control" type="text" data-governance-owner="publishing" value="${escapeHtml(owners.publishing || "")}" />`
+- L557: `const approvals = asArray(sections.approval_queue).map((item) => ({`
+- L559: `queue_kind: "approval",`
+- L560: `selected_key: \`approval:${asString(item.id)}\`,`
+- L561: `queue_title: item.title || "Approval item",`
+- L564: `queue_risk: item.risk_level || "medium",`
+- L568: `...asArray(item.policy_flags),`
+- L573: `linked_approval: item`
+- L577: `const approval = findApprovalForEntity(summary, item.entity_type, item.entity_id);`
+- L584: `queue_status: approval?.status || item.status || "open",`
+- L585: `queue_risk: asArray(item.claim_flags)[0]?.severity || "medium",`
+- L586: `queue_owner: approval?.reviewer || "Compliance Reviewer",`
+- L587: `queue_created: approval?.created_at || item.updated_at || item.created_at,`
+- L589: `linked_approval: approval`
+- L594: `const approval = findApprovalForEntity(summary, item.entity_type, item.entity_id);`
+- L601: `queue_status: approval?.status || item.status || "open",`
+- L602: `queue_risk: asArray(item.brand_safety_flags)[0]?.severity || "medium",`
+- L603: `queue_owner: approval?.reviewer || "Brand Reviewer",`
+- L604: `queue_created: approval?.created_at || item.updated_at || item.created_at,`
+- L606: `linked_approval: approval`
+- L611: `const approval = findApprovalForEntity(summary, "publishing_job", item.entity_id);`
+- L618: `queue_status: approval?.status || item.status || "open",`
+- L619: `queue_risk: asArray(item.publish_guardrails)[0]?.severity || "medium",`
+- L620: `queue_owner: approval?.reviewer || "Publishing Reviewer",`
+- L621: `queue_created: approval?.created_at || item.updated_at || item.created_at,`
+- L623: `linked_approval: approval`
+- L634: `queue_risk: "high",`
+- L640: `return [...approvals, ...claims, ...brand, ...publish, ...escalations];`
+- L643: `function buildGovernancePrompts(projectName, selectedItem, focusLabel) {`
+- L645: `const itemLabel = asString(selectedItem?.queue_title || selectedItem?.title || "the selected governance item");`
+- L648: `label: "Summarize governance state",`
+- L649: `preview: "Explain the current approval pressure, risk level, and next governance priority.",`
+- L650: `prompt: \`Summarize the current governance state for ${projectLabel}. Cover policy pressure, pending approvals, risky claims, brand safety issues, publish blockers, and the next governance priority.\``
+- L654: `preview: "Explain the selected governance item and what decision path is safest.",`
+- L655: `prompt: \`Review ${itemLabel} in Governance for ${projectLabel}. Explain the risk, what policy is implicated, and what decision path is safest next.\``
+- L658: `label: "Find governance gaps",`
+- L659: `preview: "Identify the highest-risk governance gaps and what rules or ownership need tightening.",`
+- L660: `prompt: \`Review Governance for ${projectLabel} with focus on ${focusLabel}. Identify the highest-risk governance gaps, where approval ownership is weak, and what rules need tightening next.\``
+- L667: `const policy = asObject(summary?.policy);`
+- L668: `const rules = asObject(policy.policy_rules);`
+- L669: `const owners = asObject(policy.approval_owners);`
+- L670: `const approvals = asArray(sections.approval_queue).length;`
+- L671: `const violations = asArray(sections.policy_violations).length;`
+- L678: `blockers.push("Publishing is currently frozen by governance policy.");`
+- L680: `if (approvals > 0) {`
+- L681: `blockers.push(\`${approvals} approval item${approvals === 1 ? " is" : "s are"} waiting for a decision.\`);`
+- L684: `blockers.push(\`${violations} policy violation${violations === 1 ? " requires" : "s require"} operator review.\`);`
+- L697: `let nextBestAction = "Run a governance AI summary, then keep policy owners and rules aligned with live operations.";`
+- L698: `if (selectedItem?.queue_kind === "approval") {`
+- L699: `nextBestAction = "Review the selected approval, document decision reasoning, and submit a governance decision.";`
+- L700: `} else if (approvals > 0) {`
+- L701: `nextBestAction = "Switch to Approvals focus and clear highest-risk decisions first.";`
+- L703: `nextBestAction = "Inspect policy violations and request approvals where review is still missing.";`
+- L714: `approvals,`
+- L721: `function governanceRiskRank(value) {`
+- L730: `function findHighestRiskQueueItem(queueItems) {`
+- L733: `return governanceRiskRank(item.queue_risk) > governanceRiskRank(highest.queue_risk) ? item : highest;`
+- L741: `function getGovernanceEscalationRoute(summary, risk) {`
+- L743: `const normalizedRisk = asString(risk).toLowerCase();`
+- L745: `escalationChain[normalizedRisk] ||`
+- L755: `<section class="page is-active" data-page="governance">`
+- L756: `<div class="governance-shell governance-workspace mhos-clean-root mhos-clean-shell">`
+- L761: `<h3>Governance command center</h3>`
+- L762: `<p>Governance operating surface for approvals, policy pressure, and decision routing.</p>`
+- L774: `<div class="empty-box">Select a project to review approvals, policy violations, overrides, and audit history.</div>`
+- L783: `<section class="page is-active" data-page="governance">`
+- L784: `<div class="governance-shell governance-workspace mhos-clean-root mhos-clean-shell">`
+- L789: `<h3>Governance command center for ${escapeHtml(projectName)}</h3>`
+- L790: `<p>Preparing the governance operating surface.</p>`
+- L802: `<div class="empty-box">Loading governance console...</div>`
+- L811: `<section class="page is-active" data-page="governance">`
+- L812: `<div class="governance-shell governance-workspace mhos-clean-root mhos-clean-shell">`
+- L817: `<h3>Governance command center for ${escapeHtml(projectName)}</h3>`
+- L818: `<p>Governance surface is available but the latest data could not be loaded.</p>`
+- L839: `const settingsDraft = getSettingsDraftFromPolicy(summary);`
+- L843: `approvals: queueItems.filter((item) => item.queue_kind === "approval").length,`
+- L852: `approvals: "approval",`
+- L862: `const prompts = buildGovernancePrompts(projectName, selectedItem, titleCase(session.focus || "all"));`
+- L863: `const policy = asObject(summary.policy);`
+- L864: `const rules = asObject(policy.policy_rules);`
+- L865: `const owners = asObject(policy.approval_owners);`
+- L866: `const settingsBridge = asObject(policy.settings_bridge);`
+- L869: `const highestRiskItem = findHighestRiskQueueItem(queueItems);`
+- L870: `const executiveFocusItem = selectedItem || highestRiskItem;`
+- L874: `"Governance owner";`
+- L875: `const highestRiskValue = asString(highestRiskItem?.queue_risk || executiveFocusItem?.queue_risk);`
+- L876: `const highestRiskLabel = highestRiskValue ? titleCase(highestRiskValue) : "No open risk";`
+- L877: `const highestRiskTone = highestRiskValue ? severityClass(highestRiskValue) : "success";`
+- L878: `const escalationRoute = getGovernanceEscalationRoute(summary, highestRiskValue || "high");`
+- L880: `const selectedDecisionKind = titleCase(executiveFocusItem?.queue_kind || "governance");`
+- L883: `<section class="page is-active" data-page="governance">`
+- L884: `<div class="governance-shell governance-workspace mhos-clean-root mhos-clean-shell">`
+- L885: `<section class="panel mhos-executive-surface mhos-context-ribbon governance-operating-header" aria-label="Executive governance command band">`
+- L886: `<div class="panel-header mhos-context-main governance-operating-header-main">`
+- L888: `<div class="panel-kicker mhos-context-kicker governance-operating-eyebrow">Governance Operating Surface</div>`
+- L889: `<h3 class="mhos-context-title governance-operating-title">Governance Command Center for ${escapeHtml(projectName)}</h3>`
+- L890: `<p class="mhos-context-description governance-operating-desc">Canonical executive surface for policy authority, approval pressure, escalation, and safe decision routing.</p>`
+- L892: `<span class="card-badge neutral governance-operating-status">${escapeHtml(session.loading ? "Refreshing" : "Active")}</span>`
+- L895: `<div class="mhos-executive-summary-grid governance-executive-summary-grid" aria-label="Governance executive anchors">`
+- L896: `<article class="mhos-executive-summary-item governance-summary-readiness">`
+- L901: `<article class="mhos-executive-summary-item governance-summary-approval">`
+- L902: `<span class="mhos-executive-metric-label">Approval Pressure</span>`
+- L903: `<strong class="mhos-executive-metric-value">${escapeHtml(asString(readiness.approvals))}</strong>`
+- L904: `<small class="mhos-executive-metric-note">${escapeHtml(readiness.approvals ? "Awaiting governed decision" : "No approval queue pressure")}</small>`
+- L906: `<article class="mhos-executive-summary-item governance-summary-escalation">`
+- L911: `<article class="mhos-executive-summary-item governance-summary-owner">`
+- L916: `<article class="mhos-executive-summary-item governance-summary-risk">`
+- L917: `<span class="mhos-executive-metric-label">Highest Risk</span>`
+- L918: `<strong class="mhos-executive-metric-value">${escapeHtml(highestRiskLabel)}</strong>`
+- L921: `<article class="mhos-executive-summary-item governance-summary-ai-boundary">`
+- L923: `<strong class="mhos-executive-metric-value governance-ai-boundary">Prepare / Review / Summarize Only</strong>`
+- L924: `<small class="mhos-executive-metric-note governance-ai-boundary-note">AI cannot approve or change policy. Human backend decision required.</small>`
+- L928: `<div class="governance-policy-summary-grid">`
+- L929: `<div class="governance-policy-block mhos-executive-panel">`
+- L930: `<h4>Next best governance action</h4>`
+- L931: `<p class="governance-copy mhos-executive-guidance">${escapeHtml(readiness.nextBestAction)}</p>`
+- L932: `<div class="governance-rule-list">`
+- L933: `<div class="governance-rule-item">`
+- L937: `<div class="governance-rule-item">`
+- L938: `<strong>Risk</strong>`
+- L939: `<span><span class="card-badge ${highestRiskTone}">${escapeHtml(highestRiskLabel)}</span></span>`
+- L942: `<div class="governance-actions std-action-row">`
+- L943: `<button class="btn btn-secondary" type="button" data-governance-focus="all">View Full Queue</button>`
+- L944: `<button class="btn btn-secondary" type="button" data-governance-focus="approvals">Open Approvals</button>`
+- L945: `<button class="btn btn-secondary" type="button" data-governance-open-ai>Ask AI for Guidance</button>`
+- L948: `<div class="governance-policy-block">`
+- L950: `<div class="governance-activity-list">`
+- L953: `<div class="governance-activity-item">`
+- L958: `: \`<div class="empty-box">No active governance blockers detected.</div>\`}`
+
+## Approval / Decision Signals
+- L1: `// --- Governance Evidence Summary & Intake Patch ---`
+- L7: `function collectGovernanceEvidence({ selectedItem, projectData, governanceData }) {`
+- L23: `const sources = [selectedItem, projectData, governanceData];`
+- L77: `function renderGovernanceEvidenceSummary({ selectedItem, projectData, governanceData, intakeContext, escapeHtml }) {`
+- L78: `const evidence = collectGovernanceEvidence({ selectedItem, projectData, governanceData });`
+- L81: `<div class="governance-evidence-summary">`
+- L82: `<div class="governance-evidence-summary-header">Evidence Summary</div>`
+- L83: `<div class="governance-evidence-cards">`
+- L84: `<div class="governance-evidence-card${evidence.source_of_truth.length ? '' : ' is-missing'}">`
+- L85: `<span class="governance-evidence-label">Source of Truth</span>`
+- L86: `<span class="governance-evidence-value">${evidence.source_of_truth.length ? escapeHtml(asString(evidence.source_of_truth[0])) : "Missing"}</span>`
+- L88: `<div class="governance-evidence-card${evidence.legal.length ? '' : ' is-missing'}">`
+- L89: `<span class="governance-evidence-label">Legal</span>`
+- L90: `<span class="governance-evidence-value">${evidence.legal.length ? escapeHtml(asString(evidence.legal[0])) : "Missing"}</span>`
+- L92: `<div class="governance-evidence-card${evidence.pricing.length ? '' : ' is-missing'}">`
+- L93: `<span class="governance-evidence-label">Pricing</span>`
+- L94: `<span class="governance-evidence-value">${evidence.pricing.length ? escapeHtml(asString(evidence.pricing[0])) : "Missing"}</span>`
+- L96: `<div class="governance-evidence-card${evidence.certificate.length ? '' : ' is-missing'}">`
+- L97: `<span class="governance-evidence-label">Certificate/Proof</span>`
+- L98: `<span class="governance-evidence-value">${evidence.certificate.length ? escapeHtml(asString(evidence.certificate[0])) : evidence.proof.length ? escapeHtml(asString(evidence.proof[0])) : "Missing"}</span>`
+- L100: `<div class="governance-evidence-card${evidence.brand.length ? '' : ' is-missing'}">`
+- L101: `<span class="governance-evidence-label">Brand Asset</span>`
+- L102: `<span class="governance-evidence-value">${evidence.brand.length ? escapeHtml(asString(evidence.brand[0])) : "Missing"}</span>`
+- L104: `<div class="governance-evidence-card${evidence.product.length ? '' : ' is-missing'}">`
+- L105: `<span class="governance-evidence-label">Product Asset</span>`
+- L106: `<span class="governance-evidence-value">${evidence.product.length ? escapeHtml(asString(evidence.product[0])) : "Missing"}</span>`
+- L109: `${!hasEvidence ? \`<div class="governance-evidence-card is-missing governance-source-warning">Missing source evidence — attach Library proof before high-risk approval.</div>\` : ""}`
+- L110: `<div class="governance-evidence-guidance">High-risk Governance decisions should reference source-of-truth evidence, proof assets, or an incoming handoff. Missing evidence should be resolved before approval, rejection, escalation, or override.</div>`
+- L115: `function renderGovernanceIntakePanel({ projectName, escapeHtml, intakeContext }) {`
+- L127: `<div class="governance-intake-panel">`
+- L128: `<div class="governance-intake-panel-header">Incoming Review Context</div>`
+- L129: `<div class="governance-intake-list">`
+- L131: `<div class="governance-intake-item"><span class="governance-intake-label">${escapeHtml(item.label)}</span><span class="governance-intake-value">${escapeHtml(item.value)}</span></div>`
+- L132: `\`).join("") : \`<div class="governance-intake-item is-missing">No intake yet</div>\`}`
+- L138: `createProjectApproval,`
+- L139: `decideProjectApproval,`
+- L140: `fetchProjectGovernance,`
+- L141: `updateProjectGovernancePolicy`
+- L144: `const governanceSessions = new Map();`
+- L180: `if (normalized === "approved" || normalized === "success") return "success";`
+- L184: `function getDecisionConfirmationMessage(decision) {`
+- L185: `const normalized = asString(decision).toLowerCase().replace(/\s+/g, "_");`
+- L187: `if (["approval", "approved", "approve"].includes(normalized)) {`
+- L188: `return "Submit reviewed approval decision? This records a backend Governance decision and may affect downstream readiness where policy gates apply. It does not publish, send, or execute directly.";`
+- L192: `return "Record high-risk override decision? This records a backend Governance override. It may unblock downstream gated actions where policy allows override. Continue only after verifying source evidence, risk, owner, and reason.";`
+- L195: `if (["reject", "rejected", "changes_requested", "request_changes", "escalated", "escalate"].includes(normalized)) {`
+- L196: `return "Submit reviewed Governance decision? This records a backend reviewed decision and may update linked queues or review state. It does not publish or execute directly.";`
+- L199: `return "Submit reviewed Governance decision? This records a backend reviewed decision and may update linked queues or review state. It does not publish or execute directly.";`
+- L202: `function confirmGovernanceDecision(decision) {`
+- L204: `return window.confirm(getDecisionConfirmationMessage(decision));`
+- L207: `function confirmGovernanceApprovalRequest({ title, entityType, risk }) {`
+- L216: `"Create Governance approval request?",`
+- L218: `\`Action: Create a backend approval request for ${itemTitle}.\`,`
+- L222: `"Authority: This creates a durable Governance queue item for review. It does not approve, reject, publish, send, or execute directly.",`
+- L224: `"Select Cancel to review evidence and ownership before continuing."`
+- L232: `if (!governanceSessions.has(key)) {`
+- L233: `governanceSessions.set(key, {`
+- L242: `return governanceSessions.get(key);`
+- L249: `function mapSettingsToGovernancePolicy(settings = {}) {`
+- L250: `const approval = asObject(settings.approval);`
+- L258: `approval_before_publish: Boolean(publishing.approvalBeforePublish),`
+- L259: `high_risk_claim_review_required: Boolean(safety.aiClaimCheck),`
+- L260: `brand_safety_review_required: true,`
+- L265: `approval_owners: {`
+- L266: `content: asString(approval.contentOwner) || "Marketing lead",`
+- L267: `media: asString(approval.mediaOwner) || "Creative lead",`
+- L268: `campaign: asString(approval.adsOwner) || "Operations lead",`
+- L270: `compliance: "Compliance Reviewer",`
+- L276: `approval_mode: asString(ai.approvalRequiredMode) || "Only high-risk",`
+- L278: `approval_before_publish: Boolean(publishing.approvalBeforePublish)`
+- L283: `function findApprovalForEntity(summary, entityType, entityId) {`
+- L284: `return asArray(summary?.sections?.approval_queue).find((item) =>`
+- L290: `async function loadGovernance(projectName, session, rerender) {`
+- L298: `session.summary = await fetchProjectGovernance(projectName, {`
+- L303: `session.error = error.message || "Failed to load governance console.";`
+- L310: `async function refreshGovernance(projectName, session, rerender, showError) {`
+- L312: `await loadGovernance(projectName, session, rerender);`
+- L320: `<div class="governance-metric">`
+- L328: `function renderReviewOwnership(summary, escapeHtml) {`
+- L329: `const reviewModel = asObject(summary?.review_model);`
+- L330: `const ownership = asObject(reviewModel.ownership);`
+- L331: `const escalationChain = asObject(reviewModel.escalation_chain);`
+- L335: `<div class="panel-header"><div><div class="panel-kicker">Review model</div><h3>Ownership and escalation chain</h3></div></div>`
+- L336: `<div class="governance-card-list">`
+- L338: `<div class="governance-card">`
+- L339: `<div class="governance-card-head">`
+- L367: `<div class="governance-flag-list">`
+- L369: `<div class="governance-flag">`
+- L378: `function renderApprovalCard(item, escapeHtml) {`
+- L389: `<article class="governance-card">`
+- L390: `<div class="governance-card-head">`
+- L392: `<div class="panel-kicker">${escapeHtml(titleCase(item.entity_type || "approval"))}</div>`
+- L393: `<h4>${escapeHtml(item.title || "Approval item")}</h4>`
+- L395: `<span class="card-badge ${severityClass(item.risk_level || item.status)}">${escapeHtml(titleCase(item.status || item.risk_level || "pending"))}</span>`
+- L397: `<div class="governance-meta">`
+- L399: `<span>Reviewer: ${escapeHtml(item.reviewer || "Operator")}</span>`
+- L403: `<p class="governance-copy">${escapeHtml(item.summary || "Awaiting review and decision.")}</p>`
+- L404: `${renderFlagList(flags, "No extra policy flags were attached to this approval.", escapeHtml)}`
+- L405: `<textarea id="${escapeHtml(noteId)}" class="setup-input setup-textarea governance-note" rows="3" placeholder="Add a decision reason, change request, or escalation note.">${escapeHtml(item.decision_note || "")}</textarea>`
+- L406: `<div class="governance-actions">`
+- L407: `<button class="btn btn-primary" type="button" data-governance-decision="approved" data-approval-id="${escapeHtml(item.id)}">Submit Reviewed Approval</button>`
+- L408: `<button class="btn btn-secondary" type="button" data-governance-decision="rejected" data-approval-id="${escapeHtml(item.id)}">Submit Rejection Decision</button>`
+- L409: `<button class="btn btn-secondary" type="button" data-governance-decision="changes_requested" data-approval-id="${escapeHtml(item.id)}">Request Changes Review</button>`
+- L410: `<button class="btn btn-secondary" type="button" data-governance-decision="escalated" data-approval-id="${escapeHtml(item.id)}">Escalate Review</button>`
+- L411: `<button class="btn btn-secondary" type="button" data-governance-decision="overridden" data-approval-id="${escapeHtml(item.id)}">Record High-Risk Override</button>`
+- L414: `<div class="governance-history">`
+- L416: `<div class="governance-history-item">`
+- L427: `function renderReviewCard(item, type, escapeHtml, approval) {`
+- L436: `<article class="governance-card">`
+- L437: `<div class="governance-card-head">`
+- L440: `<h4>${escapeHtml(item.title || "Review item")}</h4>`
+- L442: `<span class="card-badge ${approval ? "warning" : "neutral"}">${escapeHtml(approval ? "In approval queue" : "Not requested")}</span>`
+- L444: `<div class="governance-meta">`
+- L449: `${approval ? \``
+- L451: `<strong>Linked approval:</strong> ${escapeHtml(approval.title || approval.id)} • ${escapeHtml(titleCase(approval.status))}`
+- L454: `<div class="governance-actions">`
+- L458: `data-governance-request-approval="true"`
+- L461: `data-title="${escapeHtml(item.title || "Governance review")}"`
+- L463: `data-summary="${escapeHtml(flags.map((flag) => flag.message).join(" | ") || "Governance review requested.")}"`
+- L465: `Create Approval Request`
+- L479: `<div class="governance-timeline">`
+- L481: `<div class="governance-timeline-item">`
+- L482: `<div class="governance-timeline-dot"></div>`
+- L483: `<div class="governance-timeline-copy">`
+- L497: `const owners = asObject(policy.approval_owners);`
+- L500: `<div class="governance-policy-grid">`
+- L501: `<label class="settings-toggle" for="governance-approval-before-publish">`
+- L502: `<span class="settings-field-label">Require approval before publishing mutations</span>`
+- L503: `<input id="governance-approval-before-publish" type="checkbox" class="settings-toggle-input" data-governance-policy="approval_before_publish" ${rules.approval_before_publish ? "checked" : ""} />`
+- L506: `<label class="settings-toggle" for="governance-claim-review">`
+- L507: `<span class="settings-field-label">Claim review required</span>`
+- L508: `<input id="governance-claim-review" type="checkbox" class="settings-toggle-input" data-governance-policy="high_risk_claim_review_required" ${rules.high_risk_claim_review_required ? "checked" : ""} />`
+- L511: `<label class="settings-toggle" for="governance-brand-safety">`
+- L512: `<span class="settings-field-label">Brand safety review required</span>`
+- L513: `<input id="governance-brand-safety" type="checkbox" class="settings-toggle-input" data-governance-policy="brand_safety_review_required" ${rules.brand_safety_review_required ? "checked" : ""} />`
+- L516: `<label class="settings-toggle" for="governance-auto-escalate">`
+- L518: `<input id="governance-auto-escalate" type="checkbox" class="settings-toggle-input" data-governance-policy="auto_escalate_critical_risk" ${rules.auto_escalate_critical_risk ? "checked" : ""} />`
+- L521: `<label class="settings-toggle" for="governance-admin-override">`
+- L523: `<input id="governance-admin-override" type="checkbox" class="settings-toggle-input" data-governance-policy="allow_admin_override" ${rules.allow_admin_override ? "checked" : ""} />`
+- L526: `<label class="settings-toggle" for="governance-freeze-publishing">`
+- L528: `<input id="governance-freeze-publishing" type="checkbox" class="settings-toggle-input" data-governance-policy="freeze_publishing" ${rules.freeze_publishing ? "checked" : ""} />`
+- L532: `<label class="settings-field-label" for="governance-owner-content">Content owner</label>`
+- L533: `<input id="governance-owner-content" class="settings-control" type="text" data-governance-owner="content" value="${escapeHtml(owners.content || "")}" />`
+- L536: `<label class="settings-field-label" for="governance-owner-media">Media owner</label>`
+- L537: `<input id="governance-owner-media" class="settings-control" type="text" data-governance-owner="media" value="${escapeHtml(owners.media || "")}" />`
+- L540: `<label class="settings-field-label" for="governance-owner-publishing">Publishing owner</label>`
+- L541: `<input id="governance-owner-publishing" class="settings-control" type="text" data-governance-owner="publishing" value="${escapeHtml(owners.publishing || "")}" />`
+- L554: `function buildDecisionQueue(summary) {`
+- L557: `const approvals = asArray(sections.approval_queue).map((item) => ({`
+- L559: `queue_kind: "approval",`
+- L560: `selected_key: \`approval:${asString(item.id)}\`,`
+- L561: `queue_title: item.title || "Approval item",`
+- L562: `queue_summary: item.summary || "Awaiting review and decision.",`
+- L563: `queue_status: item.status || "pending",`
+- L565: `queue_owner: item.reviewer || item.requested_for || "Operator",`
+- L573: `linked_approval: item`
+- L576: `const claims = asArray(sections.claim_review).map((item) => {`
+- L577: `const approval = findApprovalForEntity(summary, item.entity_type, item.entity_id);`
+- L582: `queue_title: item.title || "Claim review item",`
+- L584: `queue_status: approval?.status || item.status || "open",`
+- L586: `queue_owner: approval?.reviewer || "Compliance Reviewer",`
+- L587: `queue_created: approval?.created_at || item.updated_at || item.created_at,`
+- L589: `linked_approval: approval`
+- L593: `const brand = asArray(sections.brand_safety_review).map((item) => {`
+- L594: `const approval = findApprovalForEntity(summary, item.entity_type, item.entity_id);`
+- L599: `queue_title: item.title || "Brand safety review",`
+- L601: `queue_status: approval?.status || item.status || "open",`
+- L603: `queue_owner: approval?.reviewer || "Brand Reviewer",`
+- L604: `queue_created: approval?.created_at || item.updated_at || item.created_at,`
+- L606: `linked_approval: approval`
+- L611: `const approval = findApprovalForEntity(summary, "publishing_job", item.entity_id);`
+- L618: `queue_status: approval?.status || item.status || "open",`
+- L620: `queue_owner: approval?.reviewer || "Publishing Reviewer",`
+- L621: `queue_created: approval?.created_at || item.updated_at || item.created_at,`
+- L623: `linked_approval: approval`
+- L635: `queue_owner: item.assignee || item.owner || item.reviewer || "Admin",`
+- L640: `return [...approvals, ...claims, ...brand, ...publish, ...escalations];`
+- L643: `function buildGovernancePrompts(projectName, selectedItem, focusLabel) {`
+- L645: `const itemLabel = asString(selectedItem?.queue_title || selectedItem?.title || "the selected governance item");`
+- L648: `label: "Summarize governance state",`
+- L649: `preview: "Explain the current approval pressure, risk level, and next governance priority.",`
+- L650: `prompt: \`Summarize the current governance state for ${projectLabel}. Cover policy pressure, pending approvals, risky claims, brand safety issues, publish blockers, and the next governance priority.\``
+- L653: `label: "Review selected decision",`
+- L654: `preview: "Explain the selected governance item and what decision path is safest.",`
+- L655: `prompt: \`Review ${itemLabel} in Governance for ${projectLabel}. Explain the risk, what policy is implicated, and what decision path is safest next.\``
+- L658: `label: "Find governance gaps",`
+- L659: `preview: "Identify the highest-risk governance gaps and what rules or ownership need tightening.",`
+- L660: `prompt: \`Review Governance for ${projectLabel} with focus on ${focusLabel}. Identify the highest-risk governance gaps, where approval ownership is weak, and what rules need tightening next.\``
+- L669: `const owners = asObject(policy.approval_owners);`
+- L670: `const approvals = asArray(sections.approval_queue).length;`
+- L678: `blockers.push("Publishing is currently frozen by governance policy.");`
+- L680: `if (approvals > 0) {`
+- L681: `blockers.push(\`${approvals} approval item${approvals === 1 ? " is" : "s are"} waiting for a decision.\`);`
+- L684: `blockers.push(\`${violations} policy violation${violations === 1 ? " requires" : "s require"} operator review.\`);`
+- L687: `blockers.push(\`${escalations} escalation${escalations === 1 ? " is" : "s are"} open for higher-level review.\`);`
+- L697: `let nextBestAction = "Run a governance AI summary, then keep policy owners and rules aligned with live operations.";`
+- L698: `if (selectedItem?.queue_kind === "approval") {`
+- L699: `nextBestAction = "Review the selected approval, document decision reasoning, and submit a governance decision.";`
+- L700: `} else if (approvals > 0) {`
+- L701: `nextBestAction = "Switch to Approvals focus and clear highest-risk decisions first.";`
+- L703: `nextBestAction = "Inspect policy violations and request approvals where review is still missing.";`
+- L705: `nextBestAction = "Review publish guardrails to ensure release paths remain compliant and safe.";`
+- L714: `approvals,`
+- L721: `function governanceRiskRank(value) {`
+- L733: `return governanceRiskRank(item.queue_risk) > governanceRiskRank(highest.queue_risk) ? item : highest;`
+- L741: `function getGovernanceEscalationRoute(summary, risk) {`
+- L742: `const escalationChain = asObject(summary?.review_model?.escalation_chain);`
+- L755: `<section class="page is-active" data-page="governance">`
+- L756: `<div class="governance-shell governance-workspace mhos-clean-root mhos-clean-shell">`
+- L761: `<h3>Governance command center</h3>`
+- L762: `<p>Governance operating surface for approvals, policy pressure, and decision routing.</p>`
+- L774: `<div class="empty-box">Select a project to review approvals, policy violations, overrides, and audit history.</div>`
+- L783: `<section class="page is-active" data-page="governance">`
+- L784: `<div class="governance-shell governance-workspace mhos-clean-root mhos-clean-shell">`
+- L789: `<h3>Governance command center for ${escapeHtml(projectName)}</h3>`
+- L790: `<p>Preparing the governance operating surface.</p>`
+- L802: `<div class="empty-box">Loading governance console...</div>`
+- L811: `<section class="page is-active" data-page="governance">`
+- L812: `<div class="governance-shell governance-workspace mhos-clean-root mhos-clean-shell">`
+- L817: `<h3>Governance command center for ${escapeHtml(projectName)}</h3>`
+- L818: `<p>Governance surface is available but the latest data could not be loaded.</p>`
+- L840: `const queueItems = buildDecisionQueue(summary);`
+- L843: `approvals: queueItems.filter((item) => item.queue_kind === "approval").length,`
+- L852: `approvals: "approval",`
+- L862: `const prompts = buildGovernancePrompts(projectName, selectedItem, titleCase(session.focus || "all"));`
+- L865: `const owners = asObject(policy.approval_owners);`
+- L874: `"Governance owner";`
+- L878: `const escalationRoute = getGovernanceEscalationRoute(summary, highestRiskValue || "high");`
+- L879: `const selectedDecisionLabel = asString(executiveFocusItem?.queue_title || "No selected decision");`
+- L880: `const selectedDecisionKind = titleCase(executiveFocusItem?.queue_kind || "governance");`
+- L883: `<section class="page is-active" data-page="governance">`
+- L884: `<div class="governance-shell governance-workspace mhos-clean-root mhos-clean-shell">`
+- L885: `<section class="panel mhos-executive-surface mhos-context-ribbon governance-operating-header" aria-label="Executive governance command band">`
+- L886: `<div class="panel-header mhos-context-main governance-operating-header-main">`
+- L888: `<div class="panel-kicker mhos-context-kicker governance-operating-eyebrow">Governance Operating Surface</div>`
+- L889: `<h3 class="mhos-context-title governance-operating-title">Governance Command Center for ${escapeHtml(projectName)}</h3>`
+- L890: `<p class="mhos-context-description governance-operating-desc">Canonical executive surface for policy authority, approval pressure, escalation, and safe decision routing.</p>`
+- L892: `<span class="card-badge neutral governance-operating-status">${escapeHtml(session.loading ? "Refreshing" : "Active")}</span>`
+- L895: `<div class="mhos-executive-summary-grid governance-executive-summary-grid" aria-label="Governance executive anchors">`
+- L896: `<article class="mhos-executive-summary-item governance-summary-readiness">`
+- L899: `<small class="mhos-executive-metric-note">${escapeHtml(\`${readiness.totalQueue} open decision${readiness.totalQueue === 1 ? "" : "s"}\`)}</small>`
+- L901: `<article class="mhos-executive-summary-item governance-summary-approval">`
+- L902: `<span class="mhos-executive-metric-label">Approval Pressure</span>`
+- L903: `<strong class="mhos-executive-metric-value">${escapeHtml(asString(readiness.approvals))}</strong>`
+- L904: `<small class="mhos-executive-metric-note">${escapeHtml(readiness.approvals ? "Awaiting governed decision" : "No approval queue pressure")}</small>`
+- L906: `<article class="mhos-executive-summary-item governance-summary-escalation">`
+- L911: `<article class="mhos-executive-summary-item governance-summary-owner">`
+- L914: `<small class="mhos-executive-metric-note">${escapeHtml(selectedDecisionKind)} focus</small>`
+- L916: `<article class="mhos-executive-summary-item governance-summary-risk">`
+- L919: `<small class="mhos-executive-metric-note">${escapeHtml(selectedDecisionLabel)}</small>`
+- L921: `<article class="mhos-executive-summary-item governance-summary-ai-boundary">`
+- L923: `<strong class="mhos-executive-metric-value governance-ai-boundary">Prepare / Review / Summarize Only</strong>`
+- L924: `<small class="mhos-executive-metric-note governance-ai-boundary-note">AI cannot approve or change policy. Human backend decision required.</small>`
+- L928: `<div class="governance-policy-summary-grid">`
+- L929: `<div class="governance-policy-block mhos-executive-panel">`
+- L930: `<h4>Next best governance action</h4>`
+- L931: `<p class="governance-copy mhos-executive-guidance">${escapeHtml(readiness.nextBestAction)}</p>`
+- L932: `<div class="governance-rule-list">`
+- L933: `<div class="governance-rule-item">`
+- L937: `<div class="governance-rule-item">`
+- L942: `<div class="governance-actions std-action-row">`
+- L943: `<button class="btn btn-secondary" type="button" data-governance-focus="all">View Full Queue</button>`
+- L944: `<button class="btn btn-secondary" type="button" data-governance-focus="approvals">Open Approvals</button>`
+- L945: `<button class="btn btn-secondary" type="button" data-governance-open-ai>Ask AI for Guidance</button>`
+- L948: `<div class="governance-policy-block">`
+- L950: `<div class="governance-activity-list">`
+- L953: `<div class="governance-activity-item">`
+- L958: `: \`<div class="empty-box">No active governance blockers detected.</div>\`}`
+- L961: `<div class="governance-policy-block">`
+- L963: `<div class="governance-rule-list">`
+- L964: `<div class="governance-rule-item">`
+- L965: `<strong>Approval route</strong>`
+- L966: `<span>${escapeHtml(readiness.approvals ? "Review queued approvals" : "No queued approvals")}</span>`
+- L968: `<div class="governance-rule-item">`
+- L976: `<div class="governance-actions std-action-row mhos-executive-action-row">`
+- L977: `<button class="btn btn-secondary" type="button" data-governance-action="refresh">Refresh Governance Data</button>`
+- L978: `<button class="btn btn-secondary" type="button" data-governance-open-ai>Open AI Context</button>`
+- L979: `<button class="btn btn-secondary" type="button" data-governance-focus="approvals">Focus Approvals</button>`
+- L983: `<section class="panel mhos-clean-surface" aria-label="Supporting governance signals">`
+- L987: `<h3>Governance signal inventory</h3>`
+
+## Mutation Signals
+- L110: `<div class="governance-evidence-guidance">High-risk Governance decisions should reference source-of-truth evidence, proof assets, or an incoming handoff. Missing evidence should be resolved before approval, rejection, escalation, or override.</div>`
+- L137: `import {`
+- L138: `createProjectApproval,`
+- L139: `decideProjectApproval,`
+- L141: `updateProjectGovernancePolicy`
+- L180: `if (normalized === "approved" || normalized === "success") return "success";`
+- L187: `if (["approval", "approved", "approve"].includes(normalized)) {`
+- L188: `return "Submit reviewed approval decision? This records a backend Governance decision and may affect downstream readiness where policy gates apply. It does not publish, send, or execute directly.";`
+- L195: `if (["reject", "rejected", "changes_requested", "request_changes", "escalated", "escalate"].includes(normalized)) {`
+- L196: `return "Submit reviewed Governance decision? This records a backend reviewed decision and may update linked queues or review state. It does not publish or execute directly.";`
+- L199: `return "Submit reviewed Governance decision? This records a backend reviewed decision and may update linked queues or review state. It does not publish or execute directly.";`
+- L216: `"Create Governance approval request?",`
+- L218: `\`Action: Create a backend approval request for ${itemTitle}.\`,`
+- L222: `"Authority: This creates a durable Governance queue item for review. It does not approve, reject, publish, send, or execute directly.",`
+- L275: `synced_at: new Date().toISOString(),`
+- L290: `async function loadGovernance(projectName, session, rerender) {`
+- L310: `async function refreshGovernance(projectName, session, rerender, showError) {`
+- L401: `<span>Created: ${escapeHtml(formatDateTime(item.created_at))}</span>`
+- L407: `<button class="btn btn-primary" type="button" data-governance-decision="approved" data-approval-id="${escapeHtml(item.id)}">Submit Reviewed Approval</button>`
+- L408: `<button class="btn btn-secondary" type="button" data-governance-decision="rejected" data-approval-id="${escapeHtml(item.id)}">Submit Rejection Decision</button>`
+- L417: `<strong>${escapeHtml(titleCase(entry.action || "updated"))}</strong>`
+- L465: `Create Approval Request`
+- L547: `function savePromptToQuickCommand(context, prompt) {`
+- L566: `queue_created: item.created_at,`
+- L587: `queue_created: approval?.created_at || item.updated_at || item.created_at,`
+- L604: `queue_created: approval?.created_at || item.updated_at || item.created_at,`
+- L621: `queue_created: approval?.created_at || item.updated_at || item.created_at,`
+- L636: `queue_created: item.updated_at || item.created_at,`
+- L699: `nextBestAction = "Review the selected approval, document decision reasoning, and submit a governance decision.";`
+- L924: `<small class="mhos-executive-metric-note governance-ai-boundary-note">AI cannot approve or change policy. Human backend decision required.</small>`
+- L1052: `<strong>Settings bridge:</strong> ${escapeHtml(settingsBridge.source || "Not synced")} • approval mode ${escapeHtml(settingsBridge.approval_mode || "unknown")} • claim mode ${escapeHtml(settingsBridge.claim_safety_mode || "unknown")} • synced ${escapeHtml(settingsBridge.synced_at ? formatDateTime(settingsBridge.synced_at) : "not yet")}`
+- L1091: `<th>Created</th>`
+- L1108: `<td>${escapeHtml(formatDateTime(item.queue_created))}</td>`
+- L1185: `<span>Created</span>`
+- L1186: `<strong>${escapeHtml(formatDateTime(selectedItem.queue_created))}</strong>`
+- L1205: `<strong>${escapeHtml(titleCase(entry.action || "updated"))}</strong>`
+- L1224: `<h3>Review, decide, and maintain policy controls</h3>`
+- L1229: `<div class="simple-banner"><strong>Authority boundary:</strong> Governance records reviewed backend decisions and policy gates. It does not publish, send, or execute directly. High-risk decisions require confirmation, evidence review, and backend authority remains enforced.</div>`
+- L1230: `<div class="simple-banner"><strong>Safe execution path:</strong> Review selected context, verify evidence, add rationale, submit one reviewed Governance decision, then refresh and validate queue impact.</div>`
+- L1234: `<button class="btn btn-primary" type="button" data-governance-action="save-policy">Save Backend Governance Policy</button>`
+- L1235: `<button class="btn btn-secondary" type="button" data-governance-action="sync-settings"${Object.keys(settingsDraft).length ? "" : " disabled"}>Review & Sync Settings-Derived Rules</button>`
+- L1239: `<button class="btn btn-primary" type="button" data-governance-decision="approved" data-approval-id="${escapeHtml(selectedItem.id)}">Submit Reviewed Approval</button>`
+- L1240: `<button class="btn btn-secondary" type="button" data-governance-decision="rejected" data-approval-id="${escapeHtml(selectedItem.id)}">Submit Rejection Decision</button>`
+- L1260: `Create Approval Request`
+- L1274: `<span>${escapeHtml(item.actor || "Operator")} • ${escapeHtml(formatDateTime(item.created_at))}</span>`
+- L1302: `<p>Explanation-only guidance. AI cannot approve, override, or change policy; backend decisions stay in governed controls.</p>`
+- L1333: `button.onclick = async () => {`
+- L1345: `await decideProjectApproval(projectName, approvalId, {`
+- L1354: `context.showError(error.message || "Failed to update approval.");`
+- L1374: `button.onclick = async () => {`
+- L1385: `await createProjectApproval(projectName, {`
+- L1407: `button.onclick = async () => {`
+- L1415: `if (action === "save-policy") {`
+- L1426: `const confirmed = window.confirm("Confirm backend Governance policy save\n\nAction: Save durable Governance policy rules for this project.\nRisk: These rules can affect approvals, publishing readiness, brand safety review, admin override behavior, and freeze-publishing behavior.\nAuthority: This is a backend-governed durable policy update.\n\nSelect Cancel to review the policy settings before saving.");`
+- L1432: `await updateProjectGovernancePolicy(projectName, {`
+- L1437: `context.showMessage("Backend Governance policy saved.");`
+- L1440: `context.showError(error.message || "Failed to save governance policy.");`
+- L1445: `if (action === "sync-settings") {`
+- L1452: `const confirmed = window.confirm("Sync Settings-derived rules to Governance policy? This updates durable Governance rules including approval-before-publish, claim review, escalation, owners, override behavior, and policy behavior. Continue only if the Settings snapshot was reviewed.");`
+- L1458: `await updateProjectGovernancePolicy(projectName, {`
+- L1462: `context.showMessage("Settings-derived rules synced into durable Governance policy.");`
+- L1465: `context.showError(error.message || "Failed to sync Settings into Governance.");`
+- L1484: `savePromptToQuickCommand(context, prompt.prompt);`
+
+## Handoff Signals
+- L110: `<div class="governance-evidence-guidance">High-risk Governance decisions should reference source-of-truth evidence, proof assets, or an incoming handoff. Missing evidence should be resolved before approval, rejection, escalation, or override.</div>`
+- L1150: `if (typeof getSharedHandoff === "function") {`
+- L1152: `intakeContext.publishing = getSharedHandoff(projectName, "publishing", operations)?.payload?.summary;`
+- L1153: `intakeContext.content = getSharedHandoff(projectName, "content-studio", operations)?.payload?.summary;`
+- L1154: `intakeContext.media = getSharedHandoff(projectName, "media-studio", operations)?.payload?.summary;`
+- L1155: `intakeContext.workflows = getSharedHandoff(projectName, "workflows", operations)?.payload?.summary;`
+- L1156: `intakeContext.operations = getSharedHandoff(projectName, "operations", operations)?.payload?.summary;`
+- L1157: `intakeContext.notifications = getSharedHandoff(projectName, "notifications", operations)?.payload?.summary;`
+- L1158: `intakeContext.insights = getSharedHandoff(projectName, "insights", operations)?.payload?.summary;`
+- L1396: `route_target: "governance"`
+
+## Source / Evidence Signals
+- L1: `// --- Governance Evidence Summary & Intake Patch ---`
+- L2: `// Evidence helpers`
+- L7: `function collectGovernanceEvidence({ selectedItem, projectData, governanceData }) {`
+- L8: `// Defensive extraction of evidence assets`
+- L9: `const evidence = {`
+- L10: `source_of_truth: [],`
+- L14: `proof: [],`
+- L17: `claim: [],`
+- L20: `library: [],`
+- L23: `const sources = [selectedItem, projectData, governanceData];`
+- L24: `sources.forEach((src) => {`
+- L28: `if (/source_of_truth|source/.test(key)) evidence.source_of_truth.push(v);`
+- L29: `else if (/legal/.test(key)) evidence.legal.push(v);`
+- L30: `else if (/pricing/.test(key)) evidence.pricing.push(v);`
+- L31: `else if (/certificate|certificates/.test(key)) evidence.certificate.push(v);`
+- L32: `else if (/proof/.test(key)) evidence.proof.push(v);`
+- L33: `else if (/product/.test(key)) evidence.product.push(v);`
+- L34: `else if (/brand/.test(key)) evidence.brand.push(v);`
+- L35: `else if (/claim/.test(key)) evidence.claim.push(v);`
+- L36: `else if (/media/.test(key)) evidence.media.push(v);`
+- L37: `else if (/content/.test(key)) evidence.content.push(v);`
+- L38: `else if (/library/.test(key)) evidence.library.push(v);`
+- L39: `else evidence.other.push(v);`
+- L43: `Object.keys(evidence).forEach((k) => {`
+- L44: `evidence[k] = asSafeArray(evidence[k]).flat().filter(Boolean);`
+- L46: `return evidence;`
+- L49: `function classifyEvidenceAsset(asset) {`
+- L52: `if (s.includes("source_of_truth") || s.includes("source")) return "source_of_truth";`
+- L56: `if (s.includes("proof")) return "proof";`
+- L59: `if (s.includes("claim")) return "claim";`
+- L62: `if (s.includes("library")) return "library";`
+- L66: `function summarizeEvidenceState(evidence) {`
+- L67: `// Returns true if any key evidence is present`
+- L69: `evidence.source_of_truth.length ||`
+- L70: `evidence.legal.length ||`
+- L71: `evidence.pricing.length ||`
+- L72: `evidence.certificate.length ||`
+- L73: `evidence.proof.length`
+- L77: `function renderGovernanceEvidenceSummary({ selectedItem, projectData, governanceData, intakeContext, escapeHtml }) {`
+- L78: `const evidence = collectGovernanceEvidence({ selectedItem, projectData, governanceData });`
+- L79: `const hasEvidence = summarizeEvidenceState(evidence);`
+- L81: `<div class="governance-evidence-summary">`
+- L82: `<div class="governance-evidence-summary-header">Evidence Summary</div>`
+- L83: `<div class="governance-evidence-cards">`
+- L84: `<div class="governance-evidence-card${evidence.source_of_truth.length ? '' : ' is-missing'}">`
+- L85: `<span class="governance-evidence-label">Source of Truth</span>`
+- L86: `<span class="governance-evidence-value">${evidence.source_of_truth.length ? escapeHtml(asString(evidence.source_of_truth[0])) : "Missing"}</span>`
+- L88: `<div class="governance-evidence-card${evidence.legal.length ? '' : ' is-missing'}">`
+- L89: `<span class="governance-evidence-label">Legal</span>`
+- L90: `<span class="governance-evidence-value">${evidence.legal.length ? escapeHtml(asString(evidence.legal[0])) : "Missing"}</span>`
+- L92: `<div class="governance-evidence-card${evidence.pricing.length ? '' : ' is-missing'}">`
+- L93: `<span class="governance-evidence-label">Pricing</span>`
+- L94: `<span class="governance-evidence-value">${evidence.pricing.length ? escapeHtml(asString(evidence.pricing[0])) : "Missing"}</span>`
+- L96: `<div class="governance-evidence-card${evidence.certificate.length ? '' : ' is-missing'}">`
+- L97: `<span class="governance-evidence-label">Certificate/Proof</span>`
+- L98: `<span class="governance-evidence-value">${evidence.certificate.length ? escapeHtml(asString(evidence.certificate[0])) : evidence.proof.length ? escapeHtml(asString(evidence.proof[0])) : "Missing"}</span>`
+- L100: `<div class="governance-evidence-card${evidence.brand.length ? '' : ' is-missing'}">`
+- L101: `<span class="governance-evidence-label">Brand Asset</span>`
+- L102: `<span class="governance-evidence-value">${evidence.brand.length ? escapeHtml(asString(evidence.brand[0])) : "Missing"}</span>`
+- L104: `<div class="governance-evidence-card${evidence.product.length ? '' : ' is-missing'}">`
+- L105: `<span class="governance-evidence-label">Product Asset</span>`
+- L106: `<span class="governance-evidence-value">${evidence.product.length ? escapeHtml(asString(evidence.product[0])) : "Missing"}</span>`
+- L109: `${!hasEvidence ? \`<div class="governance-evidence-card is-missing governance-source-warning">Missing source evidence — attach Library proof before high-risk approval.</div>\` : ""}`
+- L110: `<div class="governance-evidence-guidance">High-risk Governance decisions should reference source-of-truth evidence, proof assets, or an incoming handoff. Missing evidence should be resolved before approval, rejection, escalation, or override.</div>`
+- L192: `return "Record high-risk override decision? This records a backend Governance override. It may unblock downstream gated actions where policy allows override. Continue only after verifying source evidence, risk, owner, and reason.";`
+- L224: `"Select Cancel to review evidence and ownership before continuing."`
+- L259: `high_risk_claim_review_required: Boolean(safety.aiClaimCheck),`
+- L274: `source: "settings-durable-record",`
+- L277: `claim_safety_mode: asString(ai.claimSafetyMode) || "Strict evidence required",`
+- L381: `...asArray(item.claim_flags),`
+- L429: `type === "claim"`
+- L430: `? asArray(item.claim_flags)`
+- L506: `<label class="settings-toggle" for="governance-claim-review">`
+- L507: `<span class="settings-field-label">Claim review required</span>`
+- L508: `<input id="governance-claim-review" type="checkbox" class="settings-toggle-input" data-governance-policy="high_risk_claim_review_required" ${rules.high_risk_claim_review_required ? "checked" : ""} />`
+- L569: `...asArray(item.claim_flags),`
+- L576: `const claims = asArray(sections.claim_review).map((item) => {`
+- L580: `queue_kind: "claim",`
+- L581: `selected_key: \`claim:${asString(item.entity_id || item.id)}\`,`
+- L582: `queue_title: item.title || "Claim review item",`
+- L583: `queue_summary: asArray(item.claim_flags).map((flag) => flag.message).join(" | ") || "No claim issues detected.",`
+- L585: `queue_risk: asArray(item.claim_flags)[0]?.severity || "medium",`
+- L588: `queue_flags: asArray(item.claim_flags),`
+- L640: `return [...approvals, ...claims, ...brand, ...publish, ...escalations];`
+- L650: `prompt: \`Summarize the current governance state for ${projectLabel}. Cover policy pressure, pending approvals, risky claims, brand safety issues, publish blockers, and the next governance priority.\``
+- L699: `nextBestAction = "Review the selected approval, document decision reasoning, and submit a governance decision.";`
+- L844: `claims: queueItems.filter((item) => item.queue_kind === "claim").length,`
+- L853: `claims: "claim",`
+- L994: `${renderMetric("Claim Review", asArray(sections.claim_review).length, "Risky AI claims", escapeHtml)}`
+- L1052: `<strong>Settings bridge:</strong> ${escapeHtml(settingsBridge.source || "Not synced")} • approval mode ${escapeHtml(settingsBridge.approval_mode || "unknown")} • claim mode ${escapeHtml(settingsBridge.claim_safety_mode || "unknown")} • synced ${escapeHtml(settingsBridge.synced_at ? formatDateTime(settingsBridge.synced_at) : "not yet")}`
+- L1071: `["claims", "Claims", focusCounts.claims],`
+- L1124: `<p>${escapeHtml(selectedItem ? "Review risk, owner, evidence, and linked approval before decision." : "Choose a governance item from the queue to inspect it.")}</p>`
+- L1135: `<!-- Evidence Summary & Intake Panel -->`
+- L1136: `${renderGovernanceEvidenceSummary({`
+- L1182: `<strong>${escapeHtml(selectedItem.entity_type || selectedItem.source_type || "-")}</strong>`
+- L1229: `<div class="simple-banner"><strong>Authority boundary:</strong> Governance records reviewed backend decisions and policy gates. It does not publish, send, or execute directly. High-risk decisions require confirmation, evidence review, and backend authority remains enforced.</div>`
+- L1230: `<div class="simple-banner"><strong>Safe execution path:</strong> Review selected context, verify evidence, add rationale, submit one reviewed Governance decision, then refresh and validate queue impact.</div>`
+- L1395: `source_page: "governance",`
+- L1452: `const confirmed = window.confirm("Sync Settings-derived rules to Governance policy? This updates durable Governance rules including approval-before-publish, claim review, escalation, owners, override behavior, and policy behavior. Continue only if the Settings snapshot was reviewed.");`
+
+## Confirmation Signals
+- L204: `return window.confirm(getDecisionConfirmationMessage(decision));`
+- L214: `return window.confirm(`
+- L1426: `const confirmed = window.confirm("Confirm backend Governance policy save\n\nAction: Save durable Governance policy rules for this project.\nRisk: These rules can affect approvals, publishing readiness, brand safety review, admin override behavior, and freeze-publishing behavior.\nAuthority: This is a backend-governed durable policy update.\n\nSelect Cancel to review the policy settings before saving.");`
+- L1452: `const confirmed = window.confirm("Sync Settings-derived rules to Governance policy? This updates durable Governance rules including approval-before-publish, claim review, escalation, owners, override behavior, and policy behavior. Continue only if the Settings snapshot was reviewed.");`
+
+## Access-Key / Credential Signals
+- none
+
+## Save / Storage Signals
+- L167: `if (Number.isNaN(date.getTime())) return "Not recorded";`
+- L188: `return "Submit reviewed approval decision? This records a backend Governance decision and may affect downstream readiness where policy gates apply. It does not publish, send, or execute directly.";`
+- L192: `return "Record high-risk override decision? This records a backend Governance override. It may unblock downstream gated actions where policy allows override. Continue only after verifying source evidence, risk, owner, and reason.";`
+- L196: `return "Submit reviewed Governance decision? This records a backend reviewed decision and may update linked queues or review state. It does not publish or execute directly.";`
+- L199: `return "Submit reviewed Governance decision? This records a backend reviewed decision and may update linked queues or review state. It does not publish or execute directly.";`
+- L245: `function getSettingsDraftFromPolicy(summary) {`
+- L274: `source: "settings-durable-record",`
+- L411: `<button class="btn btn-secondary" type="button" data-governance-decision="overridden" data-approval-id="${escapeHtml(item.id)}">Record High-Risk Override</button>`
+- L485: `<p>${escapeHtml(item.summary || "Operational event recorded.")}</p>`
+- L494: `function renderPolicyControls(summary, settingsDraft, escapeHtml) {`
+- L547: `function savePromptToQuickCommand(context, prompt) {`
+- L839: `const settingsDraft = getSettingsDraftFromPolicy(summary);`
+- L1046: `${renderPolicyControls(summary, settingsDraft, escapeHtml)}`
+- L1151: `intakeContext.ai = (typeof getSharedAiDraft === "function") ? getSharedAiDraft(projectName, operations)?.summary : undefined;`
+- L1225: `<p>Backend-authoritative decisions only. Approval actions mutate durable approval records and appear only for real queued approvals.</p>`
+- L1229: `<div class="simple-banner"><strong>Authority boundary:</strong> Governance records reviewed backend decisions and policy gates. It does not publish, send, or execute directly. High-risk decisions require confirmation, evidence review, and backend authority remains enforced.</div>`
+- L1234: `<button class="btn btn-primary" type="button" data-governance-action="save-policy">Save Backend Governance Policy</button>`
+- L1235: `<button class="btn btn-secondary" type="button" data-governance-action="sync-settings"${Object.keys(settingsDraft).length ? "" : " disabled"}>Review & Sync Settings-Derived Rules</button>`
+- L1243: `<button class="btn btn-secondary" type="button" data-governance-decision="overridden" data-approval-id="${escapeHtml(selectedItem.id)}">Record High-Risk Override</button>`
+- L1415: `if (action === "save-policy") {`
+- L1426: `const confirmed = window.confirm("Confirm backend Governance policy save\n\nAction: Save durable Governance policy rules for this project.\nRisk: These rules can affect approvals, publishing readiness, brand safety review, admin override behavior, and freeze-publishing behavior.\nAuthority: This is a backend-governed durable policy update.\n\nSelect Cancel to review the policy settings before saving.");`
+- L1437: `context.showMessage("Backend Governance policy saved.");`
+- L1440: `context.showError(error.message || "Failed to save governance policy.");`
+- L1446: `const settingsDraft = getSettingsDraftFromPolicy(session.summary);`
+- L1447: `if (!Object.keys(settingsDraft).length) {`
+- L1460: `...mapSettingsToGovernancePolicy(settingsDraft)`
+- L1484: `savePromptToQuickCommand(context, prompt.prompt);`
+
+## Navigation Signals
+- L741: `function getGovernanceEscalationRoute(summary, risk) {`
+- L878: `const escalationRoute = getGovernanceEscalationRoute(summary, highestRiskValue || "high");`
+- L909: `<small class="mhos-executive-metric-note">${escapeHtml(escalationRoute)}</small>`
+- L965: `<strong>Approval route</strong>`
+- L969: `<strong>Escalation route</strong>`
+- L970: `<span>${escapeHtml(escalationRoute)}</span>`
+- L1396: `route_target: "governance"`
+- L1473: `context.navigateTo("ai-command");`
+- L1485: `context.navigateTo("ai-command");`
+- L1491: `export const governanceRoute = {`
+
+## Disabled / Read-only / Draft / Guard Signals
+- L245: `function getSettingsDraftFromPolicy(summary) {`
+- L262: `auto_escalate_critical_risk: String(operating.actionPolicy || "").toLowerCase().includes("blocked"),`
+- L383: `...asArray(item.publish_guardrails)`
+- L433: `: asArray(item.publish_guardrails);`
+- L494: `function renderPolicyControls(summary, settingsDraft, escapeHtml) {`
+- L571: `...asArray(item.publish_guardrails)`
+- L610: `const publish = asArray(sections.publish_guardrails).map((item) => {`
+- L616: `queue_title: item.title || "Publish guardrail",`
+- L617: `queue_summary: asArray(item.publish_guardrails).map((flag) => flag.message).join(" | ") || "No publish blockers detected.",`
+- L619: `queue_risk: asArray(item.publish_guardrails)[0]?.severity || "medium",`
+- L622: `queue_flags: asArray(item.publish_guardrails),`
+- L649: `preview: "Explain the current approval pressure, risk level, and next governance priority.",`
+- L654: `preview: "Explain the selected governance item and what decision path is safest.",`
+- L659: `preview: "Identify the highest-risk governance gaps and what rules or ownership need tightening.",`
+- L673: `const publishGuardrails = asArray(sections.publish_guardrails).length;`
+- L684: `blockers.push(\`${violations} policy violation${violations === 1 ? " requires" : "s require"} operator review.\`);`
+- L692: `state = "Blocked";`
+- L704: `} else if (publishGuardrails > 0) {`
+- L705: `nextBestAction = "Review publish guardrails to ensure release paths remain compliant and safe.";`
+- L839: `const settingsDraft = getSettingsDraftFromPolicy(summary);`
+- L996: `${renderMetric("Publish Guardrails", asArray(sections.publish_guardrails).length, "Release blockers", escapeHtml)}`
+- L1028: `<span>${escapeHtml(value ? "Enabled" : "Disabled")}</span>`
+- L1046: `${renderPolicyControls(summary, settingsDraft, escapeHtml)}`
+- L1151: `intakeContext.ai = (typeof getSharedAiDraft === "function") ? getSharedAiDraft(projectName, operations)?.summary : undefined;`
+- L1235: `<button class="btn btn-secondary" type="button" data-governance-action="sync-settings"${Object.keys(settingsDraft).length ? "" : " disabled"}>Review & Sync Settings-Derived Rules</button>`
+- L1313: `<span class="home-action-meta">${escapeHtml(item.preview)}</span>`
+- L1446: `const settingsDraft = getSettingsDraftFromPolicy(session.summary);`
+- L1447: `if (!Object.keys(settingsDraft).length) {`
+- L1460: `...mapSettingsToGovernancePolicy(settingsDraft)`
+
+## Risky Terms
+- L1: `// --- Governance Evidence Summary & Intake Patch ---`
+- L2: `// Evidence helpers`
+- L7: `function collectGovernanceEvidence({ selectedItem, projectData, governanceData }) {`
+- L8: `// Defensive extraction of evidence assets`
+- L9: `const evidence = {`
+- L10: `source_of_truth: [],`
+- L17: `claim: [],`
+- L23: `const sources = [selectedItem, projectData, governanceData];`
+- L24: `sources.forEach((src) => {`
+- L28: `if (/source_of_truth|source/.test(key)) evidence.source_of_truth.push(v);`
+- L29: `else if (/legal/.test(key)) evidence.legal.push(v);`
+- L30: `else if (/pricing/.test(key)) evidence.pricing.push(v);`
+- L31: `else if (/certificate|certificates/.test(key)) evidence.certificate.push(v);`
+- L32: `else if (/proof/.test(key)) evidence.proof.push(v);`
+- L33: `else if (/product/.test(key)) evidence.product.push(v);`
+- L34: `else if (/brand/.test(key)) evidence.brand.push(v);`
+- L35: `else if (/claim/.test(key)) evidence.claim.push(v);`
+- L36: `else if (/media/.test(key)) evidence.media.push(v);`
+- L37: `else if (/content/.test(key)) evidence.content.push(v);`
+- L38: `else if (/library/.test(key)) evidence.library.push(v);`
+- L39: `else evidence.other.push(v);`
+- L43: `Object.keys(evidence).forEach((k) => {`
+- L44: `evidence[k] = asSafeArray(evidence[k]).flat().filter(Boolean);`
+- L46: `return evidence;`
+- L49: `function classifyEvidenceAsset(asset) {`
+- L52: `if (s.includes("source_of_truth") || s.includes("source")) return "source_of_truth";`
+- L59: `if (s.includes("claim")) return "claim";`
+- L66: `function summarizeEvidenceState(evidence) {`
+- L67: `// Returns true if any key evidence is present`
+- L69: `evidence.source_of_truth.length ||`
+- L70: `evidence.legal.length ||`
+- L71: `evidence.pricing.length ||`
+- L72: `evidence.certificate.length ||`
+- L73: `evidence.proof.length`
+- L77: `function renderGovernanceEvidenceSummary({ selectedItem, projectData, governanceData, intakeContext, escapeHtml }) {`
+- L78: `const evidence = collectGovernanceEvidence({ selectedItem, projectData, governanceData });`
+- L79: `const hasEvidence = summarizeEvidenceState(evidence);`
+- L81: `<div class="governance-evidence-summary">`
+- L82: `<div class="governance-evidence-summary-header">Evidence Summary</div>`
+- L83: `<div class="governance-evidence-cards">`
+- L84: `<div class="governance-evidence-card${evidence.source_of_truth.length ? '' : ' is-missing'}">`
+- L85: `<span class="governance-evidence-label">Source of Truth</span>`
+- L86: `<span class="governance-evidence-value">${evidence.source_of_truth.length ? escapeHtml(asString(evidence.source_of_truth[0])) : "Missing"}</span>`
+- L88: `<div class="governance-evidence-card${evidence.legal.length ? '' : ' is-missing'}">`
+- L89: `<span class="governance-evidence-label">Legal</span>`
+- L90: `<span class="governance-evidence-value">${evidence.legal.length ? escapeHtml(asString(evidence.legal[0])) : "Missing"}</span>`
+- L92: `<div class="governance-evidence-card${evidence.pricing.length ? '' : ' is-missing'}">`
+- L93: `<span class="governance-evidence-label">Pricing</span>`
+- L94: `<span class="governance-evidence-value">${evidence.pricing.length ? escapeHtml(asString(evidence.pricing[0])) : "Missing"}</span>`
+- L96: `<div class="governance-evidence-card${evidence.certificate.length ? '' : ' is-missing'}">`
+- L97: `<span class="governance-evidence-label">Certificate/Proof</span>`
+- L98: `<span class="governance-evidence-value">${evidence.certificate.length ? escapeHtml(asString(evidence.certificate[0])) : evidence.proof.length ? escapeHtml(asString(evidence.proof[0])) : "Missing"}</span>`
+- L100: `<div class="governance-evidence-card${evidence.brand.length ? '' : ' is-missing'}">`
+- L101: `<span class="governance-evidence-label">Brand Asset</span>`
+- L102: `<span class="governance-evidence-value">${evidence.brand.length ? escapeHtml(asString(evidence.brand[0])) : "Missing"}</span>`
+- L104: `<div class="governance-evidence-card${evidence.product.length ? '' : ' is-missing'}">`
+- L105: `<span class="governance-evidence-label">Product Asset</span>`
+- L106: `<span class="governance-evidence-value">${evidence.product.length ? escapeHtml(asString(evidence.product[0])) : "Missing"}</span>`
+- L109: `${!hasEvidence ? \`<div class="governance-evidence-card is-missing governance-source-warning">Missing source evidence — attach Library proof before high-risk approval.</div>\` : ""}`
+- L110: `<div class="governance-evidence-guidance">High-risk Governance decisions should reference source-of-truth evidence, proof assets, or an incoming handoff. Missing evidence should be resolved before approval, rejection, escalation, or override.</div>`
+- L115: `function renderGovernanceIntakePanel({ projectName, escapeHtml, intakeContext }) {`
+- L116: `// Intake context: { ai, publishing, content, media, workflows, operations, notifications, insights }`
+- L119: `if (intakeContext?.publishing) items.push({ label: "Publishing", value: asString(intakeContext.publishing) });`
+- L127: `<div class="governance-intake-panel">`
+- L128: `<div class="governance-intake-panel-header">Incoming Review Context</div>`
+- L129: `<div class="governance-intake-list">`
+- L131: `<div class="governance-intake-item"><span class="governance-intake-label">${escapeHtml(item.label)}</span><span class="governance-intake-value">${escapeHtml(item.value)}</span></div>`
+- L132: `\`).join("") : \`<div class="governance-intake-item is-missing">No intake yet</div>\`}`
+- L138: `createProjectApproval,`
+- L139: `decideProjectApproval,`
+- L140: `fetchProjectGovernance,`
+- L141: `updateProjectGovernancePolicy`
+- L144: `const governanceSessions = new Map();`
+- L180: `if (normalized === "approved" || normalized === "success") return "success";`
+- L184: `function getDecisionConfirmationMessage(decision) {`
+- L185: `const normalized = asString(decision).toLowerCase().replace(/\s+/g, "_");`
+- L187: `if (["approval", "approved", "approve"].includes(normalized)) {`
+- L188: `return "Submit reviewed approval decision? This records a backend Governance decision and may affect downstream readiness where policy gates apply. It does not publish, send, or execute directly.";`
+- L192: `return "Record high-risk override decision? This records a backend Governance override. It may unblock downstream gated actions where policy allows override. Continue only after verifying source evidence, risk, owner, and reason.";`
+- L195: `if (["reject", "rejected", "changes_requested", "request_changes", "escalated", "escalate"].includes(normalized)) {`
+- L196: `return "Submit reviewed Governance decision? This records a backend reviewed decision and may update linked queues or review state. It does not publish or execute directly.";`
+- L199: `return "Submit reviewed Governance decision? This records a backend reviewed decision and may update linked queues or review state. It does not publish or execute directly.";`
+- L202: `function confirmGovernanceDecision(decision) {`
+- L204: `return window.confirm(getDecisionConfirmationMessage(decision));`
+- L207: `function confirmGovernanceApprovalRequest({ title, entityType, risk }) {`
+- L212: `const itemRisk = risk || "medium";`
+- L216: `"Create Governance approval request?",`
+- L218: `\`Action: Create a backend approval request for ${itemTitle}.\`,`
+- L220: `\`Risk: ${itemRisk}\`,`
+- L222: `"Authority: This creates a durable Governance queue item for review. It does not approve, reject, publish, send, or execute directly.",`
+- L224: `"Select Cancel to review evidence and ownership before continuing."`
+- L232: `if (!governanceSessions.has(key)) {`
+- L233: `governanceSessions.set(key, {`
+- L242: `return governanceSessions.get(key);`
+- L245: `function getSettingsDraftFromPolicy(summary) {`
+- L246: `return asObject(asObject(summary?.policy).settings_bridge?.form);`
+- L249: `function mapSettingsToGovernancePolicy(settings = {}) {`
+- L250: `const approval = asObject(settings.approval);`
+- L251: `const publishing = asObject(settings.publishing);`
+- L257: `policy_rules: {`
+- L258: `approval_before_publish: Boolean(publishing.approvalBeforePublish),`
+- L259: `high_risk_claim_review_required: Boolean(safety.aiClaimCheck),`
+- L262: `auto_escalate_critical_risk: String(operating.actionPolicy || "").toLowerCase().includes("blocked"),`
+- L263: `freeze_publishing: false`
+- L265: `approval_owners: {`
+- L266: `content: asString(approval.contentOwner) || "Marketing lead",`
+- L267: `media: asString(approval.mediaOwner) || "Creative lead",`
+- L268: `campaign: asString(approval.adsOwner) || "Operations lead",`
+- L269: `publishing: asString(settings.team?.publishAccess) || "Publisher",`
+- L274: `source: "settings-durable-record",`
+- L276: `approval_mode: asString(ai.approvalRequiredMode) || "Only high-risk",`
+- L277: `claim_safety_mode: asString(ai.claimSafetyMode) || "Strict evidence required",`
+- L278: `approval_before_publish: Boolean(publishing.approvalBeforePublish)`
+- L283: `function findApprovalForEntity(summary, entityType, entityId) {`
+- L284: `return asArray(summary?.sections?.approval_queue).find((item) =>`
+- L290: `async function loadGovernance(projectName, session, rerender) {`
+- L298: `session.summary = await fetchProjectGovernance(projectName, {`
+- L303: `session.error = error.message || "Failed to load governance console.";`
+- L310: `async function refreshGovernance(projectName, session, rerender, showError) {`
+- L312: `await loadGovernance(projectName, session, rerender);`
+- L320: `<div class="governance-metric">`
+- L336: `<div class="governance-card-list">`
+- L338: `<div class="governance-card">`
+- L339: `<div class="governance-card-head">`
+- L350: `${Object.entries(escalationChain).map(([risk, roles]) => \``
+- L352: `<strong>${escapeHtml(titleCase(risk))}</strong>`
+- L367: `<div class="governance-flag-list">`
+- L369: `<div class="governance-flag">`
+- L378: `function renderApprovalCard(item, escapeHtml) {`
+- L380: `...asArray(item.policy_flags),`
+- L381: `...asArray(item.claim_flags),`
+- L383: `...asArray(item.publish_guardrails)`
+- L389: `<article class="governance-card">`
+- L390: `<div class="governance-card-head">`
+- L392: `<div class="panel-kicker">${escapeHtml(titleCase(item.entity_type || "approval"))}</div>`
+- L393: `<h4>${escapeHtml(item.title || "Approval item")}</h4>`
+- L395: `<span class="card-badge ${severityClass(item.risk_level || item.status)}">${escapeHtml(titleCase(item.status || item.risk_level || "pending"))}</span>`
+- L397: `<div class="governance-meta">`
+- L398: `<span>Risk: ${escapeHtml(titleCase(item.risk_level || "medium"))}</span>`
+- L403: `<p class="governance-copy">${escapeHtml(item.summary || "Awaiting review and decision.")}</p>`
+- L404: `${renderFlagList(flags, "No extra policy flags were attached to this approval.", escapeHtml)}`
+- L405: `<textarea id="${escapeHtml(noteId)}" class="setup-input setup-textarea governance-note" rows="3" placeholder="Add a decision reason, change request, or escalation note.">${escapeHtml(item.decision_note || "")}</textarea>`
+- L406: `<div class="governance-actions">`
+- L407: `<button class="btn btn-primary" type="button" data-governance-decision="approved" data-approval-id="${escapeHtml(item.id)}">Submit Reviewed Approval</button>`
+- L408: `<button class="btn btn-secondary" type="button" data-governance-decision="rejected" data-approval-id="${escapeHtml(item.id)}">Submit Rejection Decision</button>`
+- L409: `<button class="btn btn-secondary" type="button" data-governance-decision="changes_requested" data-approval-id="${escapeHtml(item.id)}">Request Changes Review</button>`
+- L410: `<button class="btn btn-secondary" type="button" data-governance-decision="escalated" data-approval-id="${escapeHtml(item.id)}">Escalate Review</button>`
+- L411: `<button class="btn btn-secondary" type="button" data-governance-decision="overridden" data-approval-id="${escapeHtml(item.id)}">Record High-Risk Override</button>`
+- L414: `<div class="governance-history">`
+- L416: `<div class="governance-history-item">`
+- L427: `function renderReviewCard(item, type, escapeHtml, approval) {`
+- L429: `type === "claim"`
+- L430: `? asArray(item.claim_flags)`
+- L433: `: asArray(item.publish_guardrails);`
+- L436: `<article class="governance-card">`
+- L437: `<div class="governance-card-head">`
+- L442: `<span class="card-badge ${approval ? "warning" : "neutral"}">${escapeHtml(approval ? "In approval queue" : "Not requested")}</span>`
+- L444: `<div class="governance-meta">`
+- L449: `${approval ? \``
+- L451: `<strong>Linked approval:</strong> ${escapeHtml(approval.title || approval.id)} • ${escapeHtml(titleCase(approval.status))}`
+- L454: `<div class="governance-actions">`
+- L458: `data-governance-request-approval="true"`
+- L461: `data-title="${escapeHtml(item.title || "Governance review")}"`
+- L462: `data-risk="${escapeHtml(flags[0]?.severity || "medium")}"`
+- L463: `data-summary="${escapeHtml(flags.map((flag) => flag.message).join(" | ") || "Governance review requested.")}"`
+- L465: `Create Approval Request`
+- L479: `<div class="governance-timeline">`
+- L481: `<div class="governance-timeline-item">`
+- L482: `<div class="governance-timeline-dot"></div>`
+- L483: `<div class="governance-timeline-copy">`
+- L494: `function renderPolicyControls(summary, settingsDraft, escapeHtml) {`
+- L495: `const policy = asObject(summary?.policy);`
+- L496: `const rules = asObject(policy.policy_rules);`
+- L497: `const owners = asObject(policy.approval_owners);`
+- L500: `<div class="governance-policy-grid">`
+- L501: `<label class="settings-toggle" for="governance-approval-before-publish">`
+- L502: `<span class="settings-field-label">Require approval before publishing mutations</span>`
+- L503: `<input id="governance-approval-before-publish" type="checkbox" class="settings-toggle-input" data-governance-policy="approval_before_publish" ${rules.approval_before_publish ? "checked" : ""} />`
+- L506: `<label class="settings-toggle" for="governance-claim-review">`
+- L507: `<span class="settings-field-label">Claim review required</span>`
+- L508: `<input id="governance-claim-review" type="checkbox" class="settings-toggle-input" data-governance-policy="high_risk_claim_review_required" ${rules.high_risk_claim_review_required ? "checked" : ""} />`
+- L511: `<label class="settings-toggle" for="governance-brand-safety">`
+- L513: `<input id="governance-brand-safety" type="checkbox" class="settings-toggle-input" data-governance-policy="brand_safety_review_required" ${rules.brand_safety_review_required ? "checked" : ""} />`
+- L516: `<label class="settings-toggle" for="governance-auto-escalate">`
+- L517: `<span class="settings-field-label">Auto-escalate critical risk</span>`
+- L518: `<input id="governance-auto-escalate" type="checkbox" class="settings-toggle-input" data-governance-policy="auto_escalate_critical_risk" ${rules.auto_escalate_critical_risk ? "checked" : ""} />`
+- L521: `<label class="settings-toggle" for="governance-admin-override">`
+- L523: `<input id="governance-admin-override" type="checkbox" class="settings-toggle-input" data-governance-policy="allow_admin_override" ${rules.allow_admin_override ? "checked" : ""} />`
+- L526: `<label class="settings-toggle" for="governance-freeze-publishing">`
+- L527: `<span class="settings-field-label">Freeze publishing mutations</span>`
+- L528: `<input id="governance-freeze-publishing" type="checkbox" class="settings-toggle-input" data-governance-policy="freeze_publishing" ${rules.freeze_publishing ? "checked" : ""} />`
+- L532: `<label class="settings-field-label" for="governance-owner-content">Content owner</label>`
+- L533: `<input id="governance-owner-content" class="settings-control" type="text" data-governance-owner="content" value="${escapeHtml(owners.content || "")}" />`
+- L536: `<label class="settings-field-label" for="governance-owner-media">Media owner</label>`
+- L537: `<input id="governance-owner-media" class="settings-control" type="text" data-governance-owner="media" value="${escapeHtml(owners.media || "")}" />`
+- L540: `<label class="settings-field-label" for="governance-owner-publishing">Publishing owner</label>`
+- L541: `<input id="governance-owner-publishing" class="settings-control" type="text" data-governance-owner="publishing" value="${escapeHtml(owners.publishing || "")}" />`
+- L547: `function savePromptToQuickCommand(context, prompt) {`
+- L554: `function buildDecisionQueue(summary) {`
+- L557: `const approvals = asArray(sections.approval_queue).map((item) => ({`
+- L559: `queue_kind: "approval",`
+- L560: `selected_key: \`approval:${asString(item.id)}\`,`
+- L561: `queue_title: item.title || "Approval item",`
+- L562: `queue_summary: item.summary || "Awaiting review and decision.",`
+- L564: `queue_risk: item.risk_level || "medium",`
+- L568: `...asArray(item.policy_flags),`
+- L569: `...asArray(item.claim_flags),`
+- L571: `...asArray(item.publish_guardrails)`
+- L573: `linked_approval: item`
+- L576: `const claims = asArray(sections.claim_review).map((item) => {`
+- L577: `const approval = findApprovalForEntity(summary, item.entity_type, item.entity_id);`
+- L580: `queue_kind: "claim",`
+- L581: `selected_key: \`claim:${asString(item.entity_id || item.id)}\`,`
+- L582: `queue_title: item.title || "Claim review item",`
+- L583: `queue_summary: asArray(item.claim_flags).map((flag) => flag.message).join(" | ") || "No claim issues detected.",`
+- L584: `queue_status: approval?.status || item.status || "open",`
+- L585: `queue_risk: asArray(item.claim_flags)[0]?.severity || "medium",`
+- L586: `queue_owner: approval?.reviewer || "Compliance Reviewer",`
+- L587: `queue_created: approval?.created_at || item.updated_at || item.created_at,`
+- L588: `queue_flags: asArray(item.claim_flags),`
+- L589: `linked_approval: approval`
+- L594: `const approval = findApprovalForEntity(summary, item.entity_type, item.entity_id);`
+- L601: `queue_status: approval?.status || item.status || "open",`
+- L602: `queue_risk: asArray(item.brand_safety_flags)[0]?.severity || "medium",`
+- L603: `queue_owner: approval?.reviewer || "Brand Reviewer",`
+- L604: `queue_created: approval?.created_at || item.updated_at || item.created_at,`
+- L606: `linked_approval: approval`
+- L610: `const publish = asArray(sections.publish_guardrails).map((item) => {`
+- L611: `const approval = findApprovalForEntity(summary, "publishing_job", item.entity_id);`
+- L614: `queue_kind: "publish",`
+- L615: `selected_key: \`publish:${asString(item.entity_id || item.id)}\`,`
+- L616: `queue_title: item.title || "Publish guardrail",`
+- L617: `queue_summary: asArray(item.publish_guardrails).map((flag) => flag.message).join(" | ") || "No publish blockers detected.",`
+- L618: `queue_status: approval?.status || item.status || "open",`
+- L619: `queue_risk: asArray(item.publish_guardrails)[0]?.severity || "medium",`
+- L620: `queue_owner: approval?.reviewer || "Publishing Reviewer",`
+- L621: `queue_created: approval?.created_at || item.updated_at || item.created_at,`
+- L622: `queue_flags: asArray(item.publish_guardrails),`
+- L623: `linked_approval: approval`
+- L634: `queue_risk: "high",`
+- L640: `return [...approvals, ...claims, ...brand, ...publish, ...escalations];`
+- L643: `function buildGovernancePrompts(projectName, selectedItem, focusLabel) {`
+- L645: `const itemLabel = asString(selectedItem?.queue_title || selectedItem?.title || "the selected governance item");`
+- L648: `label: "Summarize governance state",`
+- L649: `preview: "Explain the current approval pressure, risk level, and next governance priority.",`
+- L650: `prompt: \`Summarize the current governance state for ${projectLabel}. Cover policy pressure, pending approvals, risky claims, brand safety issues, publish blockers, and the next governance priority.\``
+- L653: `label: "Review selected decision",`
+- L654: `preview: "Explain the selected governance item and what decision path is safest.",`
+- L655: `prompt: \`Review ${itemLabel} in Governance for ${projectLabel}. Explain the risk, what policy is implicated, and what decision path is safest next.\``
+- L658: `label: "Find governance gaps",`
+- L659: `preview: "Identify the highest-risk governance gaps and what rules or ownership need tightening.",`
+- L660: `prompt: \`Review Governance for ${projectLabel} with focus on ${focusLabel}. Identify the highest-risk governance gaps, where approval ownership is weak, and what rules need tightening next.\``
+- L667: `const policy = asObject(summary?.policy);`
+- L668: `const rules = asObject(policy.policy_rules);`
+- L669: `const owners = asObject(policy.approval_owners);`
+- L670: `const approvals = asArray(sections.approval_queue).length;`
+- L671: `const violations = asArray(sections.policy_violations).length;`
+- L673: `const publishGuardrails = asArray(sections.publish_guardrails).length;`
+- L677: `if (rules.freeze_publishing) {`
+- L678: `blockers.push("Publishing is currently frozen by governance policy.");`
+- L680: `if (approvals > 0) {`
+- L681: `blockers.push(\`${approvals} approval item${approvals === 1 ? " is" : "s are"} waiting for a decision.\`);`
+- L684: `blockers.push(\`${violations} policy violation${violations === 1 ? " requires" : "s require"} operator review.\`);`
+- L691: `if (rules.freeze_publishing || escalations > 0) {`
+- L697: `let nextBestAction = "Run a governance AI summary, then keep policy owners and rules aligned with live operations.";`
+- L698: `if (selectedItem?.queue_kind === "approval") {`
+- L699: `nextBestAction = "Review the selected approval, document decision reasoning, and submit a governance decision.";`
+- L700: `} else if (approvals > 0) {`
+- L701: `nextBestAction = "Switch to Approvals focus and clear highest-risk decisions first.";`
+- L703: `nextBestAction = "Inspect policy violations and request approvals where review is still missing.";`
+- L704: `} else if (publishGuardrails > 0) {`
+- L705: `nextBestAction = "Review publish guardrails to ensure release paths remain compliant and safe.";`
+- L714: `approvals,`
+- L721: `function governanceRiskRank(value) {`
+- L730: `function findHighestRiskQueueItem(queueItems) {`
+- L733: `return governanceRiskRank(item.queue_risk) > governanceRiskRank(highest.queue_risk) ? item : highest;`
+- L741: `function getGovernanceEscalationRoute(summary, risk) {`
+- L743: `const normalizedRisk = asString(risk).toLowerCase();`
+- L745: `escalationChain[normalizedRisk] ||`
+- L755: `<section class="page is-active" data-page="governance">`
+
+## Required Manual Classification
+Before any patch, classify exact Governance paths into:
+
+1. Governance queue display only
+2. Approval detail/review only
+3. Source/evidence intake
+4. Save evidence/source note
+5. Approve decision
+6. Reject decision
+7. Resolve/close governance item
+8. Request more evidence
+9. Handoff to Library/AI/Publishing/Workflows
+10. Local state/cache only
+11. Backend approval mutation
+12. Unknown / needs deeper inspection
+
+## Decision Rule
+- If approve/reject/resolve decisions mutate backend without confirmation, patch.
+- If source/evidence intake creates durable records without confirmation or clear status messaging, patch.
+- If actions are read-only, local-only, or shared context only, document and close.
+- If Governance delegates decision authority to backend APIs, verify frontend messages do not overclaim.
+- Do not redesign Governance in this pass.

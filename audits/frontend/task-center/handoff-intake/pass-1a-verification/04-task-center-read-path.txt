@@ -1,0 +1,19 @@
+1:import { getSharedHandoff } from "../shared-context.js";
+428:function renderTaskCenterIncomingHandoff(incomingHandoff, escapeHtml) {
+429:  if (!incomingHandoff) return "";
+431:  const source = asString(incomingHandoff.source_page || incomingHandoff.sourcePage || "unknown");
+433:    incomingHandoff.title ||
+434:    incomingHandoff.summary ||
+435:    incomingHandoff.payload?.title ||
+436:    incomingHandoff.payload?.summary ||
+440:    incomingHandoff.description ||
+441:    incomingHandoff.payload?.description ||
+442:    incomingHandoff.payload?.handoff_intent ||
+443:    incomingHandoff.payload?.prompt ||
+446:  const createdAt = asString(incomingHandoff.created_at || incomingHandoff.generatedAt || incomingHandoff.timestamp || "");
+453:          <h3>Incoming Task Handoff</h3>
+471:        <button class="btn btn-secondary" type="button" id="taskCenterCopyHandoffBtn">Copy Handoff Summary</button>
+488:  incomingHandoff
+606:            ${renderTaskCenterIncomingHandoff(incomingHandoff, escapeHtml)}
+718:  const incomingHandoff = getSharedHandoff(projectName, "task-center", ops);
+730:    incomingHandoff

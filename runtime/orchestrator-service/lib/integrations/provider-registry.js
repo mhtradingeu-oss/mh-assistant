@@ -9,6 +9,14 @@ const ops = require('./providers/ops');
 const { createUnsupportedAdapter } = require('./providers/unsupported');
 
 const registry = new Map();
+const UNSUPPORTED_INTEGRATION_IDS = ['amazon', 'smtp', 'mailer', 'crm'];
+const unsupportedAdapter = {
+  ...createUnsupportedAdapter(
+    UNSUPPORTED_INTEGRATION_IDS,
+    'This provider requires a dedicated auth flow or credential model that is not yet configured in MH Assistant OS.'
+  ),
+  unsupported: true
+};
 
 [
   website,
@@ -19,10 +27,7 @@ const registry = new Map();
   tiktok,
   ebay,
   ops,
-  createUnsupportedAdapter(
-    ['amazon', 'smtp', 'mailer', 'crm'],
-    'This provider requires a dedicated auth flow or credential model that is not yet configured in MH Assistant OS.'
-  )
+  unsupportedAdapter
 ].forEach((adapter) => {
   (adapter.integrationIds || []).forEach((integrationId) => {
     registry.set(integrationId, adapter);
@@ -33,6 +38,26 @@ function getProviderAdapter(integrationId) {
   return registry.get(String(integrationId || '').trim().toLowerCase()) || null;
 }
 
+function isSupportedProvider(integrationId) {
+  const adapter = getProviderAdapter(integrationId);
+  return Boolean(adapter) && adapter.unsupported !== true;
+}
+
+function getUnsupportedProviderMessage(integrationId) {
+  const adapter = getProviderAdapter(integrationId);
+  if (!adapter || adapter.unsupported !== true) {
+    return '';
+  }
+
+  return String(
+    adapter.unsupportedMessage ||
+    'This provider requires a dedicated auth flow or credential model that is not yet configured in MH Assistant OS.'
+  ).trim();
+}
+
 module.exports = {
-  getProviderAdapter
+  UNSUPPORTED_INTEGRATION_IDS,
+  getProviderAdapter,
+  isSupportedProvider,
+  getUnsupportedProviderMessage
 };

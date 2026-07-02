@@ -1,0 +1,19 @@
+260:		canHelp: ["Review inbox context", "Summarize customer threads", "Draft safe replies", "Prepare ticket drafts", "Flag SLA and escalation risk"],
+1346:		nextSafeAction: `Review in ${routeLabel(route)}`,
+1708:function buildStructuredPreviewBlocks(preview = {}) {
+1729:		? [{ label: "Main output", items: mainOutputItems }]
+1744:		blocks.push({ label: mainOutputItems.length ? "Details" : "Main output", items: bullets });
+1748:		blocks.push({ label: "Next step", items: steps, ordered: true });
+1752:		blocks.push({ label: "Next step", items: [humanizeValue(preview.nextStep)] });
+3958:	const structuredPreview = buildStructuredPreviewBlocks(preview);
+3967:			? "Route Draft to Publishing"
+3968:			: `Route Draft to ${destination}`;
+4014:					<p class="aicmd-v2-preview-next-action">${escapeHtml(humanizeValue(preview.nextSafeAction, `Review in ${destination}.`))}</p>
+4036:function renderAiRoomOutputWorkspace(session, aiContext, escapeHtml) {
+4040:	const structuredPreview = hasPreview ? buildStructuredPreviewBlocks(preview) : { blocks: [], draftText: "" };
+4050:			? "Route Draft to Publishing"
+4051:			: `Route Draft to ${destination}`;
+4098:					<p class="aicmd-room-output-summary">${escapeHtml(humanizeValue(preview.summary, "Guidance preview prepared."))}</p>
+4116:						<span>Next step</span>
+4117:						<strong>${escapeHtml(humanizeValue(preview.nextSafeAction, `Review in ${destination}.`))}</strong>
+4671:						${renderAiRoomOutputWorkspace(session, aiContext, escapeHtml)}

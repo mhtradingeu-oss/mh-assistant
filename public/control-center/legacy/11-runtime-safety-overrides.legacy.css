@@ -1,0 +1,25 @@
+/*
+  Runtime Safety Overrides
+  Temporary scope: hidden overlay guards and known form-click recovery only.
+*/
+
+:where(
+  .loading-overlay[aria-hidden="true"],
+  .loading-overlay:not(.is-visible),
+  .loading-overlay[hidden],
+  .sidebar-backdrop[aria-hidden="true"],
+  .sidebar-backdrop:not(.is-visible),
+  .command-backdrop[aria-hidden="true"],
+  .app-shell:not(.is-command-open):not(.is-mobile-command-open) .command-backdrop,
+  #startupUnlockBar[hidden],
+  #startupTracePanel[hidden],
+  #startupStepBanner[hidden],
+  .startup-unlock-bar[aria-hidden="true"],
+  .startup-trace-panel[aria-hidden="true"],
+  .startup-step-banner[aria-hidden="true"]
+) {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}

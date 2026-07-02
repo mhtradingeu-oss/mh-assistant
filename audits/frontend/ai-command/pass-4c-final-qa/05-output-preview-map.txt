@@ -1,0 +1,170 @@
+public/control-center/pages/ai-command.js:965:			outputPreview: null,
+public/control-center/pages/ai-command.js:967:			responseHistory: [],
+public/control-center/pages/ai-command.js:970:			responseHistoryLoaded: false,
+public/control-center/pages/ai-command.js:1117:        const responses = asArray(session.responseHistory);
+public/control-center/pages/ai-command.js:1118:        const hasContent = messages.length || responses.length || asObject(session.outputPreview).title;
+public/control-center/pages/ai-command.js:1134:                preview: session.outputPreview || null,
+public/control-center/pages/ai-command.js:1156:        session.responseHistory = asArray(record.responses).slice(0, 12);
+public/control-center/pages/ai-command.js:1157:        session.outputPreview = asObject(record.preview);
+public/control-center/pages/ai-command.js:1158:        session.outputWorkspaceTab = outputTabFromPreview(session.outputPreview);
+public/control-center/pages/ai-command.js:1709:function compactPreviewText(value, maxLength = 360) {
+public/control-center/pages/ai-command.js:1716:function splitPreviewLines(value, limit = 6) {
+public/control-center/pages/ai-command.js:1740:function buildStructuredPreviewBlocks(preview = {}) {
+public/control-center/pages/ai-command.js:1751:        const compactSummary = compactPreviewText(sourceText || summary, 420);
+public/control-center/pages/ai-command.js:1754:        const mainLines = splitPreviewLines(sourceText || summary, 14)
+public/control-center/pages/ai-command.js:1755:                .map((item) => compactPreviewText(item, 360));
+public/control-center/pages/ai-command.js:1758:                blocks.push({ label: "Main output", items: mainLines });
+public/control-center/pages/ai-command.js:1762:                .map((item) => compactPreviewText(item, 300));
+public/control-center/pages/ai-command.js:1769:                .map((item) => compactPreviewText(item, 280));
+public/control-center/pages/ai-command.js:1772:                blocks.push({ label: "Next steps", items: steps, ordered: true });
+public/control-center/pages/ai-command.js:1774:                blocks.push({ label: "Next step", items: [compactPreviewText(preview.nextStep, 280)] });
+public/control-center/pages/ai-command.js:1779:                draftText: "",
+public/control-center/pages/ai-command.js:2560:		draftContext.outputPreview,
+public/control-center/pages/ai-command.js:2563:		payload.outputPreview,
+public/control-center/pages/ai-command.js:2574:		outputPreview: null,
+public/control-center/pages/ai-command.js:2583:	normalized.outputPreview = normalizeAiInboundOutputPreview(rawOutputPreview, normalized);
+public/control-center/pages/ai-command.js:2607:	if (normalized.outputPreview) {
+public/control-center/pages/ai-command.js:2608:		session.outputPreview = normalized.outputPreview;
+public/control-center/pages/ai-command.js:2609:		session.outputWorkspaceTab = outputTabFromPreview(normalized.outputPreview);
+public/control-center/pages/ai-command.js:2612:			preview: session.outputPreview,
+public/control-center/pages/ai-command.js:2613:			responses: session.responseHistory,
+public/control-center/pages/ai-command.js:3237:        const latestResponse = asArray(session.responseHistory)[0] || null;
+public/control-center/pages/ai-command.js:3329:        session.outputPreview = preview;
+public/control-center/pages/ai-command.js:3453:	const preview = asObject(session.outputPreview);
+public/control-center/pages/ai-command.js:3459:	if (asArray(session.responseHistory).length) return 2;
+public/control-center/pages/ai-command.js:3487:	return outputTabFromPreview(asObject(session.outputPreview));
+public/control-center/pages/ai-command.js:3985:	const preview = asObject(session.outputPreview);
+public/control-center/pages/ai-command.js:4005:	const structuredPreview = buildStructuredPreviewBlocks(preview);
+public/control-center/pages/ai-command.js:4042:				${structuredPreview.draftText ? `
+public/control-center/pages/ai-command.js:4043:					<div class="aicmd-v2-preview-draft">${escapeHtml(structuredPreview.draftText)}</div>
+public/control-center/pages/ai-command.js:4047:					<div class="aicmd-v2-preview-structured-grid aicmd-room-output-blocks">
+public/control-center/pages/ai-command.js:4084:	const preview = asObject(session.outputPreview);
+public/control-center/pages/ai-command.js:4087:	const structuredPreview = hasPreview ? buildStructuredPreviewBlocks(preview) : { blocks: [], draftText: "", compactSummary: "" };
+public/control-center/pages/ai-command.js:4104:		<section class="aicmd-room-output-workspace">
+public/control-center/pages/ai-command.js:4105:			<div class="aicmd-room-output-head">
+public/control-center/pages/ai-command.js:4111:				<span class="aicmd-room-output-state">${escapeHtml(confirmationLabel)}</span>
+public/control-center/pages/ai-command.js:4115:							<div class="aicmd-room-output-tabs mhos-workflow-chain" role="tablist" aria-label="Output workspace tabs">
+public/control-center/pages/ai-command.js:4119:										class="aicmd-room-output-tab mhos-workflow-step${activeTab === tab.id ? " mhos-workflow-active is-active" : ""}"
+public/control-center/pages/ai-command.js:4130:                                <div class="aicmd-room-output-meta">
+public/control-center/pages/ai-command.js:4139:				<div class="aicmd-room-output-body">
+public/control-center/pages/ai-command.js:4140:					<div class="aicmd-room-output-title-row">
+public/control-center/pages/ai-command.js:4145:					<p class="aicmd-room-output-summary">${escapeHtml(structuredPreview.compactSummary || humanizeValue(preview.summary, "Guidance preview prepared."))}</p>
+public/control-center/pages/ai-command.js:4150:						<div class="aicmd-v2-preview-structured-grid aicmd-room-output-blocks">
+public/control-center/pages/ai-command.js:4162:					<div class="aicmd-room-output-next">
+public/control-center/pages/ai-command.js:4166:					<div class="aicmd-room-output-confirmation">
+public/control-center/pages/ai-command.js:4172:				<div class="aicmd-room-output-empty">
+public/control-center/pages/ai-command.js:4179:                                <div class="aicmd-room-output-actions">
+public/control-center/pages/ai-command.js:4194:	const preview = asObject(session.outputPreview);
+public/control-center/pages/ai-command.js:4199:	const recentAt = asArray(session.responseHistory)[0]?.generatedAt || preview.generatedAt || "";
+public/control-center/pages/ai-command.js:4261:        const selectedResponses = asArray(session.responseHistory).filter((item) => {
+public/control-center/pages/ai-command.js:4266:        const sharedResponses = asArray(session.responseHistory).filter((item) => {
+public/control-center/pages/ai-command.js:4485:	const destination = routeLabel(destinationRouteForSpecialist(session.modeId, asObject(session.outputPreview).outputType || "guidance"));
+public/control-center/pages/ai-command.js:4486:	const sessionState = session.responseLoading ? "Generating" : (session.outputPreview ? "Preview ready" : (asString(session.draftMessage).trim() ? "Drafting" : "Ready"));
+public/control-center/pages/ai-command.js:4567:	const responses = asArray(session.responseHistory);
+public/control-center/pages/ai-command.js:4568:	const preview = asObject(session.outputPreview);
+public/control-center/pages/ai-command.js:4648:		if (!session.outputPreview) {
+public/control-center/pages/ai-command.js:4651:				session.outputPreview = preview;
+public/control-center/pages/ai-command.js:4655:		if (!session.responseHistoryLoaded) {
+public/control-center/pages/ai-command.js:4656:			session.responseHistory = asArray(savedOutput.responses).slice(0, 12);
+public/control-center/pages/ai-command.js:4657:			session.responseHistoryLoaded = true;
+public/control-center/pages/ai-command.js:4725:					<aside class="aicmd-room-output">
+public/control-center/pages/ai-command.js:4756:			session.outputPreview = buildPhase2OutputPreview({
+public/control-center/pages/ai-command.js:4768:			return session.outputPreview;
+public/control-center/pages/ai-command.js:4784:		                        preview: session.outputPreview,
+public/control-center/pages/ai-command.js:4786:		                        responses: session.responseHistory,
+public/control-center/pages/ai-command.js:4808:		                session.outputPreview = null;
+public/control-center/pages/ai-command.js:4809:		                session.responseHistory = [];
+public/control-center/pages/ai-command.js:5035:		                        preview: session.outputPreview,
+public/control-center/pages/ai-command.js:5037:		                        responses: session.responseHistory,
+public/control-center/pages/ai-command.js:5115:		                        session.responseHistory.unshift({
+public/control-center/pages/ai-command.js:5134:		                        session.responseHistory = session.responseHistory.slice(0, 12);
+public/control-center/pages/ai-command.js:5139:		                                preview: session.outputPreview,
+public/control-center/pages/ai-command.js:5141:		                                responses: session.responseHistory,
+public/control-center/pages/ai-command.js:5156:		                                preview: session.outputPreview,
+public/control-center/pages/ai-command.js:5158:		                                responses: session.responseHistory,
+public/control-center/pages/ai-command.js:5334:		const latestResponse = asArray(session.responseHistory)[0] || null;
+public/control-center/pages/ai-command.js:5380:					preview: session.outputPreview,
+public/control-center/pages/ai-command.js:5381:					responses: session.responseHistory,
+public/control-center/pages/ai-command.js:5408:		                        preview: session.outputPreview,
+public/control-center/pages/ai-command.js:5410:		                        responses: session.responseHistory,
+public/control-center/pages/ai-command.js:5475:				const output = asObject(session.outputPreview);
+public/control-center/pages/ai-command.js:5499:				const output = asObject(session.outputPreview);
+public/control-center/pages/ai-command.js:5518:				const output = asObject(session.outputPreview);
+public/control-center/pages/ai-command.js:5554:				const output = asObject(session.outputPreview);
+public/control-center/pages/ai-command.js:5569:				const output = asObject(session.outputPreview);
+public/control-center/pages/ai-command.js:5588:				session.outputPreview = null;
+public/control-center/styles/12-pages.css:5715:[data-page="ai-command"] .aicmd-room-output-body h3,
+public/control-center/styles/12-pages.css:5854:[data-page="ai-command"] .aicmd-room-output {
+public/control-center/styles/12-pages.css:5859:[data-page="ai-command"] .aicmd-room-output {
+public/control-center/styles/12-pages.css:5888:[data-page="ai-command"] .aicmd-room-output-state {
+public/control-center/styles/12-pages.css:6062:[data-page="ai-command"] .aicmd-room-output-workspace,
+public/control-center/styles/12-pages.css:6187:[data-page="ai-command"] .aicmd-room-output-actions {
+public/control-center/styles/12-pages.css:6195:[data-page="ai-command"] .aicmd-room-output-empty {
+public/control-center/styles/12-pages.css:6207:[data-page="ai-command"] .aicmd-room-output-empty strong {
+public/control-center/styles/12-pages.css:6212:[data-page="ai-command"] .aicmd-room-output-empty span {
+public/control-center/styles/12-pages.css:6252:[data-page="ai-command"] .aicmd-room-output {
+public/control-center/styles/12-pages.css:6257:[data-page="ai-command"] .aicmd-room-output-workspace,
+public/control-center/styles/12-pages.css:6262:[data-page="ai-command"] .aicmd-room-output-head,
+public/control-center/styles/12-pages.css:6263:[data-page="ai-command"] .aicmd-room-output-title-row {
+public/control-center/styles/12-pages.css:6270:[data-page="ai-command"] .aicmd-room-output-head h2 {
+public/control-center/styles/12-pages.css:6277:[data-page="ai-command"] .aicmd-room-output-head p,
+public/control-center/styles/12-pages.css:6285:[data-page="ai-command"] .aicmd-room-output-tabs {
+public/control-center/styles/12-pages.css:6292:[data-page="ai-command"] .aicmd-room-output-tab {
+public/control-center/styles/12-pages.css:6305:[data-page="ai-command"] .aicmd-room-output-tab.is-active {
+public/control-center/styles/12-pages.css:6311:[data-page="ai-command"] .aicmd-room-output-tab strong,
+public/control-center/styles/12-pages.css:6312:[data-page="ai-command"] .aicmd-room-output-tab span {
+public/control-center/styles/12-pages.css:6320:[data-page="ai-command"] .aicmd-room-output-tab strong {
+public/control-center/styles/12-pages.css:6324:[data-page="ai-command"] .aicmd-room-output-tab span {
+public/control-center/styles/12-pages.css:6328:[data-page="ai-command"] .aicmd-room-output-meta {
+public/control-center/styles/12-pages.css:6335:[data-page="ai-command"] .aicmd-room-output-meta span {
+public/control-center/styles/12-pages.css:6347:[data-page="ai-command"] .aicmd-room-output-meta strong {
+public/control-center/styles/12-pages.css:6354:[data-page="ai-command"] .aicmd-room-output-body {
+public/control-center/styles/12-pages.css:6363:[data-page="ai-command"] .aicmd-room-output-title-row span {
+public/control-center/styles/12-pages.css:6373:[data-page="ai-command"] .aicmd-room-output-body h3 {
+public/control-center/styles/12-pages.css:6380:[data-page="ai-command"] .aicmd-room-output-summary {
+public/control-center/styles/12-pages.css:6387:[data-page="ai-command"] .aicmd-room-output-blocks {
+public/control-center/styles/12-pages.css:6391:[data-page="ai-command"] .aicmd-room-output-next,
+public/control-center/styles/12-pages.css:6392:[data-page="ai-command"] .aicmd-room-output-confirmation {
+public/control-center/styles/12-pages.css:6401:[data-page="ai-command"] .aicmd-room-output-next span,
+public/control-center/styles/12-pages.css:6402:[data-page="ai-command"] .aicmd-room-output-confirmation span {
+public/control-center/styles/12-pages.css:6408:[data-page="ai-command"] .aicmd-room-output-next strong,
+public/control-center/styles/12-pages.css:6409:[data-page="ai-command"] .aicmd-room-output-confirmation strong {
+public/control-center/styles/12-pages.css:6500:[data-page="ai-command"] .aicmd-room-output {
+public/control-center/styles/12-pages.css:6505:[data-page="ai-command"] .aicmd-room-output {
+public/control-center/styles/12-pages.css:6559:[data-page="ai-command"] .aicmd-room-output {
+public/control-center/styles/12-pages.css:6568:[data-page="ai-command"] .aicmd-room-output-workspace {
+public/control-center/styles/12-pages.css:6578:[data-page="ai-command"] .aicmd-room-output-head,
+public/control-center/styles/12-pages.css:6579:[data-page="ai-command"] .aicmd-room-output-title-row,
+public/control-center/styles/12-pages.css:6585:[data-page="ai-command"] .aicmd-room-output-empty {
+public/control-center/styles/12-pages.css:6589:[data-page="ai-command"] .aicmd-room-output-actions,
+public/control-center/styles/12-pages.css:6595:[data-page="ai-command"] .aicmd-room-output-actions button:disabled,
+public/control-center/styles/12-pages.css:6603:[data-page="ai-command"] .aicmd-room-output-summary,
+public/control-center/styles/12-pages.css:6605:[data-page="ai-command"] .aicmd-room-output-next strong,
+public/control-center/styles/12-pages.css:6606:[data-page="ai-command"] .aicmd-room-output-confirmation span {
+public/control-center/styles/12-pages.css:6634:  [data-page="ai-command"] .aicmd-room-output {
+public/control-center/styles/12-pages.css:6647:  [data-page="ai-command"] .aicmd-room-output-workspace,
+public/control-center/styles/12-pages.css:6653:  [data-page="ai-command"] .aicmd-room-output-meta {
+public/control-center/styles/12-pages.css:6706:  [data-page="ai-command"] .aicmd-room-output {
+public/control-center/styles/12-pages.css:6747:  [data-page="ai-command"] .aicmd-room-output-meta {
+public/control-center/styles/12-pages.css:6751:  [data-page="ai-command"] .aicmd-room-output-workspace {
+public/control-center/styles/12-pages.css:6820:  [data-page="ai-command"] .aicmd-room-output-tabs {
+public/control-center/styles/12-pages.css:6825:  [data-page="ai-command"] .aicmd-room-output-meta,
+public/control-center/styles/12-pages.css:6832:  [data-page="ai-command"] .aicmd-room-output-actions,
+public/control-center/styles/12-pages.css:6847:  [data-page="ai-command"] .aicmd-room-output-actions button,
+public/control-center/styles/12-pages.css:6883:  [data-page="ai-command"] .aicmd-room-output {
+public/control-center/styles/12-pages.css:6887:  [data-page="ai-command"] .aicmd-room-output-workspace {
+public/control-center/styles/12-pages.css:6895:  [data-page="ai-command"] .aicmd-room-output-tabs {
+public/control-center/styles/12-pages.css:6899:  [data-page="ai-command"] .aicmd-room-output-body {
+public/control-center/styles/12-pages.css:6914:  [data-page="ai-command"] .aicmd-room-output-workspace,
+public/control-center/styles/12-pages.css:6943:  [data-page="ai-command"] .aicmd-room-output {
+public/control-center/styles/12-pages.css:6955:  [data-page="ai-command"] .aicmd-room-output-workspace {
+public/control-center/styles/12-pages.css:6998:  [data-page="ai-command"] .aicmd-room-output {
+public/control-center/styles/12-pages.css:7017:  [data-page="ai-command"] .aicmd-room-output-workspace,
+public/control-center/styles/12-pages.css:8057:[data-page="ai-command"] .aicmd-room-output,
+public/control-center/styles/12-pages.css:8063:[data-page="ai-command"] .aicmd-room-output-workspace {
+public/control-center/styles/12-pages.css:8067:[data-page="ai-command"] .aicmd-room-output-tabs {
+public/control-center/styles/12-pages.css:8074:[data-page="ai-command"] .aicmd-room-output-tab {
+public/control-center/styles/12-pages.css:8081:[data-page="ai-command"] .aicmd-room-output-body {
+public/control-center/styles/12-pages.css:8320:[data-page="ai-command"] .aicmd-room-output-summary {
+public/control-center/styles/12-pages.css:8327:[data-page="ai-command"] .aicmd-room-output-section li {
+public/control-center/styles/12-pages.css:8334:[data-page="ai-command"] .aicmd-room-output-blocks {

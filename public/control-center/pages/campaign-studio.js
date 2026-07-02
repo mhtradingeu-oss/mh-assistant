@@ -1,4 +1,10 @@
-import { getSharedCampaignRecord, setSharedCampaignRecord, setSharedHandoff } from "../shared-context.js";
+import { getSharedCampaignRecord, getSharedHandoff, setSharedCampaignRecord, setSharedHandoff } from "../shared-context.js";
+import {
+  getAssetNextAction,
+  getCategoryReadinessList,
+  getMissingAssetLabels,
+  renderAssetDependencyRows
+} from "../asset-library.js";
 
 const campaignSessions = new Map();
 const campaignSaveTimers = new Map();
@@ -66,7 +72,7 @@ function asArray(value) {
 }
 
 function asObject(value) {
-  return value && typeof value === "object" ? value : {};
+  return value && typeof value === "object" && !Array.isArray(value) ? value : {};
 }
 
 function asString(value) {
@@ -143,9 +149,36 @@ function uniqueBy(items, keyFn) {
 function firstNonEmpty(...values) {
   for (const value of values) {
     const normalized = asString(value).trim();
-    if (normalized) return normalized;
+    if (normalized && normalized !== "[object Object]") return normalized;
   }
   return "";
+}
+
+function readableValue(value, fallback = "") {
+  if (value == null) return fallback;
+  if (typeof value === "string") return value.trim() === "[object Object]" ? fallback : value.trim();
+  if (typeof value === "number" || typeof value === "boolean") return String(value);
+  if (Array.isArray(value)) return uniqueStrings(value.map((item) => readableValue(item))).join(", ") || fallback;
+  const record = asObject(value);
+  return firstNonEmpty(
+    record.title,
+    record.label,
+    record.name,
+    record.action,
+    record.summary,
+    record.description,
+    record.recommendation,
+    record.reason,
+    record.body,
+    fallback
+  );
+}
+
+function isMissingIntelligenceError(error) {
+  const status = Number(error?.status);
+  if (status !== 404) return false;
+  const message = asString(error?.message).toLowerCase();
+  return message.includes("insights") || message.includes("learning") || message.includes("not found");
 }
 
 function parseList(value) {
@@ -164,10 +197,10 @@ function normalizeRecommendation(item) {
 
   const record = asObject(item);
   return {
-    title: firstNonEmpty(record.title, record.label, record.domain, "Recommendation"),
-    action: firstNonEmpty(record.action, record.summary, record.description, record.recommendation),
+    title: readableValue(record.title || record.label || record.domain, "Recommendation"),
+    action: readableValue(record.action || record.summary || record.description || record.recommendation),
     domain: asString(record.domain),
-    meta: firstNonEmpty(record.meta, record.reason, record.why, record.priority)
+    meta: readableValue(record.meta || record.reason || record.why || record.priority)
   };
 }
 
@@ -181,8 +214,8 @@ function buildDefaults(state) {
   const market = context.currentMarket || overviewData.market || "";
   const language = context.currentLanguage || overviewData.language || "";
   const campaignName = context.activeCampaign || `${context.currentProject || "Campaign"} Launch`;
-  const missingAssets = asArray(assets.missing_assets?.missing);
-  const requiredAssetTypes = asArray(assets.missing_assets?.required_asset_types);
+  const missingAssets = getMissingAssetLabels(assets);
+  const requiredAssetTypes = getCategoryReadinessList(assets).map((item) => item.display_label || item.label || item.asset_type);
   const scheduledJobs = asArray(activity.scheduled_jobs);
   const channels = Array.from(new Set(
     scheduledJobs
@@ -234,7 +267,8 @@ function ensureSession(projectName, defaults) {
         learning: null,
         error: ""
       },
-      generatedPackages: 0
+      generatedPackages: 0,
+      lastAiHandoffId: ""
     });
   } else {
     const session = campaignSessions.get(key);
@@ -247,6 +281,7 @@ function ensureSession(projectName, defaults) {
       error: asString(session.intelligence?.error)
     };
     session.generatedPackages = Number.isFinite(session.generatedPackages) ? session.generatedPackages : 0;
+    session.lastAiHandoffId = asString(session.lastAiHandoffId);
   }
 
   return campaignSessions.get(key);
@@ -323,6 +358,98 @@ function hydrateValuesFromCampaignRecord(defaults, campaign) {
   };
 }
 
+function joinPackageList(value) {
+  if (!Array.isArray(value)) return readableValue(value);
+  return uniqueStrings(asArray(value).map((item) => {
+    if (typeof item === "string") return item;
+    const record = asObject(item);
+    return firstNonEmpty(record.name, record.title, record.label, record.channel, record.product, record.summary, record.action);
+  })).join(", ");
+}
+
+function phaseValue(phases, index, key) {
+  const phase = asObject(asArray(phases)[index]);
+  if (!Object.keys(phase).length) return "";
+  if (key === "name") return firstNonEmpty(phase.name, phase.title, `Wave ${index + 1}`);
+  if (key === "focus") return firstNonEmpty(phase.goal, phase.objective, phase.focus, phase.summary, joinPackageList(phase.actions || phase.steps));
+  if (key === "channels") return joinPackageList(phase.channels);
+  return "";
+}
+
+function applyAiCampaignHandoff(projectName, operations, session) {
+  const handoff = getSharedHandoff(projectName, "campaign-studio", operations, "ai-command");
+  const handoffId = asString(handoff?.id || handoff?.updated_at || handoff?.created_at || handoff?.payload?.prompt);
+  if (!handoffId || handoffId === asString(session.lastAiHandoffId)) return false;
+
+  const payload = asObject(handoff.payload);
+  const output = asObject(payload.output);
+  const response = asObject(output.response || output);
+  const pkg = asObject(response.campaignPackage || response.campaign_package || payload.campaignPackage || payload.campaign_package);
+  if (!Object.keys(pkg).length) return false;
+
+  const phases = asArray(pkg.launchPhases || pkg.launch_phases || pkg.phases);
+  session.values = {
+    ...session.values,
+    campaignName: firstNonEmpty(pkg.concept, pkg.campaignConcept, response.title, session.values.campaignName),
+    campaignGoal: firstNonEmpty(response.summary, pkg.goal, pkg.objective, session.values.campaignGoal),
+    productFocus: firstNonEmpty(joinPackageList(pkg.products), session.values.productFocus),
+    productAngle: firstNonEmpty(joinPackageList(pkg.contentAngles || pkg.content_angles), pkg.concept, session.values.productAngle),
+    audiencePrimary: firstNonEmpty(pkg.targetAudience, pkg.target_audience, pkg.audience, session.values.audiencePrimary),
+    audienceNeed: firstNonEmpty(pkg.audienceNeed, pkg.audience_need, session.values.audienceNeed),
+    channelPlan: firstNonEmpty(joinPackageList(pkg.channels), session.values.channelPlan),
+    offerHeadline: firstNonEmpty(pkg.offer, pkg.offerStrategy, pkg.offer_strategy, session.values.offerHeadline),
+    offerDetail: firstNonEmpty(joinPackageList(pkg.adAngles || pkg.ad_angles), session.values.offerDetail),
+    wave1Name: firstNonEmpty(phaseValue(phases, 0, "name"), session.values.wave1Name),
+    wave1Focus: firstNonEmpty(phaseValue(phases, 0, "focus"), session.values.wave1Focus),
+    wave1Channels: firstNonEmpty(phaseValue(phases, 0, "channels"), session.values.wave1Channels),
+    wave2Name: firstNonEmpty(phaseValue(phases, 1, "name"), session.values.wave2Name),
+    wave2Focus: firstNonEmpty(phaseValue(phases, 1, "focus"), session.values.wave2Focus),
+    wave2Channels: firstNonEmpty(phaseValue(phases, 1, "channels"), session.values.wave2Channels),
+    wave3Name: firstNonEmpty(phaseValue(phases, 2, "name"), session.values.wave3Name),
+    wave3Focus: firstNonEmpty(phaseValue(phases, 2, "focus"), session.values.wave3Focus),
+    wave3Channels: firstNonEmpty(phaseValue(phases, 2, "channels"), session.values.wave3Channels),
+    assetChecklist: firstNonEmpty(joinPackageList(pkg.requiredAssets || pkg.required_assets), session.values.assetChecklist),
+    executionNotes: firstNonEmpty(
+      joinPackageList([
+        ...asArray(pkg.missingBlockers || pkg.missing_blockers || pkg.blockers),
+        ...asArray(pkg.nextActions || pkg.next_actions)
+      ]),
+      session.values.executionNotes
+    )
+  };
+  session.generatedPackages += 1;
+  session.lastAiHandoffId = handoffId;
+  setSharedCampaignRecord(projectName, {
+    ...(getSharedCampaignRecord(projectName, operations) || {}),
+    project: projectName,
+    source_page: "ai-command",
+    name: session.values.campaignName,
+    objective: session.values.campaignGoal,
+    audience: session.values.audiencePrimary,
+    channels: parseList(session.values.channelPlan),
+    offer: session.values.offerHeadline,
+    status: "draft",
+    form_values: { ...session.values },
+    updated_at: new Date().toISOString()
+  });
+  return true;
+}
+
+function confirmCampaignStudioAuthorityAction(action, detail = "") {
+  if (typeof window === "undefined" || typeof window.confirm !== "function") return true;
+
+  const message = [
+    `Confirm Campaign Studio action: ${action}`,
+    "",
+    detail || "This action may create or update backend campaign records or route handoffs.",
+    "",
+    "Authority: This does not publish, send externally, schedule ads, or approve anything automatically.",
+    "Select Cancel to review the campaign plan, evidence, and destination before continuing."
+  ].join("\n");
+
+  return window.confirm(message);
+}
+
 function buildCampaignRecordPayload(projectName, session) {
   const values = asObject(session.values);
   const timeline = [asString(values.startDate), asString(values.endDate)].filter(Boolean).join(" to ");
@@ -376,10 +503,20 @@ function persistCampaignRouteHandoff({ projectName, session, destinationPage, cr
     }
   };
 
+  if (!confirmCampaignStudioAuthorityAction(
+    "Create campaign route handoff",
+    `This will create a campaign handoff from Campaign Studio to ${destinationPage} for review and execution preparation.`
+  )) {
+    return false;
+  }
+
   setSharedHandoff(projectName, destinationPage, handoff);
+
   createProjectHandoff?.(projectName, handoff).catch((error) => {
     console.warn("Failed to persist campaign route handoff:", error.message);
   });
+
+  return true;
 }
 
 function scheduleCampaignPersistence(projectName, session, saveProjectCampaign) {
@@ -393,17 +530,13 @@ function scheduleCampaignPersistence(projectName, session, saveProjectCampaign) 
     clearTimeout(existing);
   }
 
-  const timer = setTimeout(async () => {
-    try {
-      const result = await saveProjectCampaign(projectName, buildCampaignRecordPayload(projectName, session));
-      const campaign = result?.campaign || null;
-      if (campaign?.id) {
-        session.recordId = campaign.id;
-        setSharedCampaignRecord(projectName, campaign);
-      }
-    } catch (error) {
-      console.warn("Failed to persist campaign draft:", error.message);
-    }
+  const timer = setTimeout(() => {
+    const draft = {
+      ...buildCampaignRecordPayload(projectName, session),
+      local_only: true,
+      autosave_note: "Campaign Studio autosave is local/shared-state only. Use Save campaign draft or Save campaign plan for backend persistence."
+    };
+    setSharedCampaignRecord(projectName, draft);
   }, 250);
 
   campaignSaveTimers.set(key, timer);
@@ -905,12 +1038,24 @@ function buildCampaignModel(state, session, values) {
     (item) => `${item.title}|${item.action}|${item.domain}`
   );
 
-  const missingAssets = uniqueStrings([
-    ...asArray(assets.missing_assets?.missing),
-    ...asArray(assets.missing_assets?.required_asset_types)
-  ]);
-  const requiredAssetTypes = uniqueStrings(asArray(assets.missing_assets?.required_asset_types));
-  const assetTypesPresent = uniqueStrings(asArray(assets.assets).map((item) => asString(item.asset_type)));
+  const campaignAssetKeys = [
+    "product_csv",
+    "pricing_doc",
+    "product_photos",
+    "product_videos",
+    "campaign_assets",
+    "social_assets",
+    "packaging_images"
+  ];
+  const campaignAssetCategories = getCategoryReadinessList(assets)
+    .filter((item) => campaignAssetKeys.includes(item.asset_type));
+  const missingAssets = getMissingAssetLabels(assets, campaignAssetKeys);
+  const requiredAssetTypes = uniqueStrings(campaignAssetCategories.map((item) => item.display_label || item.label || item.asset_type));
+  const assetTypesPresent = uniqueStrings(
+    campaignAssetCategories
+      .filter((item) => item.status !== "Missing")
+      .map((item) => item.display_label || item.label || item.asset_type)
+  );
   const connectedChannels = uniqueStrings(
     Object.entries(checks)
       .filter(([, isReady]) => Boolean(isReady))
@@ -1003,6 +1148,9 @@ function buildCampaignModel(state, session, values) {
     scheduledJobs,
     requiredAssetTypes,
     assetTypesPresent,
+    campaignAssetKeys,
+    campaignAssetCategories,
+    assetNextAction: getAssetNextAction(assets, campaignAssetKeys),
     missingAssets,
     missingIntegrations: uniqueBy(missingIntegrations, (item) => `${item.title}|${item.body}`),
     platformSignals,
@@ -1081,11 +1229,17 @@ function startIntelligenceHydration({
     typeof fetchProjectLearning === "function" ? fetchProjectLearning(projectName) : Promise.resolve(null)
   ])
     .then(([insightsResult, learningResult]) => {
-      const insights = insightsResult?.status === "fulfilled" ? insightsResult.value : null;
-      const learning = learningResult?.status === "fulfilled" ? learningResult.value : null;
+      const insightsMissing = insightsResult?.status === "rejected" && isMissingIntelligenceError(insightsResult.reason);
+      const learningMissing = learningResult?.status === "rejected" && isMissingIntelligenceError(learningResult.reason);
+      const insights = insightsResult?.status === "fulfilled"
+        ? insightsResult.value
+        : (insightsMissing ? { project: projectName, generated_at: new Date().toISOString(), data_coverage: {} } : null);
+      const learning = learningResult?.status === "fulfilled"
+        ? learningResult.value
+        : (learningMissing ? { project: projectName, generated_at: new Date().toISOString(), learning_patterns: {}, recommendations: [] } : null);
       const errors = [
-        insightsResult?.status === "rejected" ? insightsResult.reason?.message : "",
-        learningResult?.status === "rejected" ? learningResult.reason?.message : ""
+        insightsResult?.status === "rejected" && !insightsMissing ? insightsResult.reason?.message : "",
+        learningResult?.status === "rejected" && !learningMissing ? learningResult.reason?.message : ""
       ].filter(Boolean);
 
       session.intelligence.status = (insights || learning) ? "loaded" : "error";
@@ -1127,6 +1281,7 @@ function bindCampaignStudio({
     session.recordId = asString(durableCampaign.id || session.recordId);
     session.values = hydrateValuesFromCampaignRecord(session.values, durableCampaign);
   }
+  applyAiCampaignHandoff(projectName, state.data.operations, session);
   syncCampaignStudioBridge(projectName, session.values);
 
   const form = $("campaignStudioForm");
@@ -1134,10 +1289,15 @@ function bindCampaignStudio({
     form.oninput = (event) => {
       const target = event.target;
       if (!target?.name) return;
+
       session.values[target.name] = target.value || "";
       syncCampaignStudioBridge(projectName, session.values);
       scheduleCampaignPersistence(projectName, session, saveProjectCampaign);
-      render();
+
+      // Do not rerender on every keystroke.
+      // Rerendering here replaces the focused input and breaks typing/focus.
+      // Explicit actions such as Save, Build, Refresh, and route handoffs still
+      // persist the latest session values.
     };
   }
 
@@ -1145,13 +1305,22 @@ function bindCampaignStudio({
   if (saveBtn) {
     saveBtn.onclick = async () => {
       syncCampaignStudioBridge(projectName, session.values);
+
+      if (!confirmCampaignStudioAuthorityAction(
+        "Save backend campaign draft",
+        `This will save or update the Campaign Studio draft for ${projectName}.`
+      )) {
+        showMessage?.("Campaign draft save cancelled.");
+        return;
+      }
+
       try {
         const result = await saveProjectCampaign?.(projectName, buildCampaignRecordPayload(projectName, session));
         if (result?.campaign?.id) {
           session.recordId = result.campaign.id;
           setSharedCampaignRecord(projectName, result.campaign);
         }
-        showMessage?.("Campaign plan saved to the shared operating backbone.");
+        showMessage?.("Campaign draft saved to the shared operating backbone.");
       } catch (error) {
         showError?.(error.message || "Failed to save campaign plan.");
       }
@@ -1162,6 +1331,15 @@ function bindCampaignStudio({
   if (buildBtn) {
     buildBtn.onclick = async () => {
       syncCampaignStudioBridge(projectName, session.values);
+
+      if (!confirmCampaignStudioAuthorityAction(
+        "Save backend campaign plan",
+        `This will save or update the Campaign Studio plan for ${projectName}.`
+      )) {
+        showMessage?.("Campaign plan save cancelled.");
+        return;
+      }
+
       try {
         const result = await saveProjectCampaign?.(projectName, {
           ...buildCampaignRecordPayload(projectName, session),
@@ -1171,7 +1349,7 @@ function bindCampaignStudio({
           session.recordId = result.campaign.id;
           setSharedCampaignRecord(projectName, result.campaign);
         }
-        showMessage?.("Campaign plan is now stored as a durable shared record.");
+        showMessage?.("Campaign plan saved as a durable shared record.");
       } catch (error) {
         showError?.(error.message || "Failed to structure the campaign plan.");
       }
@@ -1186,6 +1364,14 @@ function bindCampaignStudio({
       if (input) {
         input.value = prompt;
       }
+      if (!confirmCampaignStudioAuthorityAction(
+        "Create AI Command campaign handoff",
+        "This will create a campaign handoff from Campaign Studio to AI Command for review and planning support."
+      )) {
+        showMessage?.("AI Command handoff cancelled.");
+        return;
+      }
+
       setSharedHandoff(projectName, "ai-command", {
         source_page: "campaign-studio",
         destination_page: "ai-command",
@@ -1197,6 +1383,7 @@ function bindCampaignStudio({
         },
         status: "available"
       });
+
       createProjectHandoff?.(projectName, {
         source_page: "campaign-studio",
         destination_page: "ai-command",
@@ -1221,15 +1408,15 @@ function bindCampaignStudio({
         console.warn("Failed to persist campaign handoff:", error.message);
       });
       navigateTo("ai-command");
-      showMessage?.("Campaign planning prompt added to AI Command.");
+      showMessage?.("Campaign context sent to AI Command.");
     };
   }
 
   const publishingBtn = $("campaignOpenPublishingBtn");
   if (publishingBtn) {
     publishingBtn.onclick = () => {
-      persistCampaignRouteHandoff({ projectName, session, destinationPage: "publishing", createProjectHandoff });
-      navigateTo("publishing");
+      const accepted = persistCampaignRouteHandoff({ projectName, session, destinationPage: "publishing", createProjectHandoff });
+      if (accepted) navigateTo("publishing");
     };
   }
 
@@ -1241,24 +1428,24 @@ function bindCampaignStudio({
   const contentBtn = $("campaignOpenContentStudioBtn");
   if (contentBtn) {
     contentBtn.onclick = () => {
-      persistCampaignRouteHandoff({ projectName, session, destinationPage: "content-studio", createProjectHandoff });
-      navigateTo("content-studio");
+      const accepted = persistCampaignRouteHandoff({ projectName, session, destinationPage: "content-studio", createProjectHandoff });
+      if (accepted) navigateTo("content-studio");
     };
   }
 
   const mediaBtn = $("campaignOpenMediaStudioBtn");
   if (mediaBtn) {
     mediaBtn.onclick = () => {
-      persistCampaignRouteHandoff({ projectName, session, destinationPage: "media-studio", createProjectHandoff });
-      navigateTo("media-studio");
+      const accepted = persistCampaignRouteHandoff({ projectName, session, destinationPage: "media-studio", createProjectHandoff });
+      if (accepted) navigateTo("media-studio");
     };
   }
 
   const adsBtn = $("campaignOpenAdsManagerBtn");
   if (adsBtn) {
     adsBtn.onclick = () => {
-      persistCampaignRouteHandoff({ projectName, session, destinationPage: "ads-manager", createProjectHandoff });
-      navigateTo("ads-manager");
+      const accepted = persistCampaignRouteHandoff({ projectName, session, destinationPage: "ads-manager", createProjectHandoff });
+      if (accepted) navigateTo("ads-manager");
     };
   }
 
@@ -1266,7 +1453,7 @@ function bindCampaignStudio({
   if (generatePackageBtn) {
     generatePackageBtn.onclick = () => {
       session.generatedPackages += 1;
-      showMessage?.("Campaign execution package drafted in session. Backend export wiring can be connected next.");
+      showMessage?.("Campaign package drafted in this session. Backend export wiring can be connected next.");
       render();
     };
   }
@@ -1308,6 +1495,7 @@ function bindCampaignStudio({
 
 export const campaignStudioRoute = {
   id: "campaign-studio",
+  disableStandardLayout: true,
   meta: {
     eyebrow: "AI & Build",
     title: "Campaign Studio",
@@ -1334,6 +1522,7 @@ export const campaignStudioRoute = {
     const state = getState();
     const projectName = state.context.currentProject || "";
     const session = ensureSession(projectName, buildDefaults(state));
+    applyAiCampaignHandoff(projectName, state.data.operations, session);
     const values = session.values;
     const root = $("campaignStudioRoot");
     if (!root) return;
@@ -1368,6 +1557,8 @@ export const campaignStudioRoute = {
       scheduledJobs,
       requiredAssetTypes,
       assetTypesPresent,
+      campaignAssetKeys,
+      assetNextAction,
       missingAssets,
       missingIntegrations,
       platformSignals,
@@ -1385,149 +1576,93 @@ export const campaignStudioRoute = {
       intelligenceError,
       hasLiveIntelligence
     } = model;
+    const activeCampaignLabel = safeText(firstNonEmpty(state.context.activeCampaign, values.campaignName), projectName || "Campaign Studio");
+    const intelligenceLabel = intelligenceStatus === "loading" ? "Refreshing" : hasLiveIntelligence ? "Live intelligence" : "Draft-assisted";
+    const intelligenceTone = intelligenceStatus === "loading" ? "warning" : hasLiveIntelligence ? "success" : "neutral";
+    const readinessTone = executionReadiness.total ? "warning" : "success";
+    const blockerTone = executionReadiness.total ? "warning" : "success";
+    const recommendedChannelCount = channelMix.organic.length + channelMix.paid.length + channelMix.support.length;
+    const channelStateLabel = connectedChannels.length
+      ? `${connectedChannels.length} connected`
+      : recommendedChannelCount
+        ? `${recommendedChannelCount} recommended`
+        : "Needs signal";
+    const channelTone = connectedChannels.length ? "success" : recommendedChannelCount ? "warning" : "neutral";
+    const budgetValue = formatCurrency(values.budget, overviewData.currency || "USD");
+    const budgetLabel = budgetValue === "-" ? "Budget pending" : budgetValue;
+    const launchWindowLabel = [values.startDate, values.endDate].filter(Boolean).join(" to ") || "Window pending";
+    const marketLabel = safeText(firstNonEmpty(values.market, overviewData.market), "Market pending");
+    const productLabel = safeText(firstNonEmpty(values.productFocus, overviewData.project_name, projectName), "Product pending");
+    const goalLabel = safeText(values.campaignGoal, "Goal pending");
+    const strategistNextAction = safeText(strategyGuidance.nextAction, "Review campaign plan");
+    const strategistMode = hasLiveIntelligence
+      ? "Current intelligence is shaping campaign direction and readiness."
+      : "Current draft data is projecting direction until live intelligence arrives.";
 
     root.innerHTML = `
       <div class="campaign-studio-wrapper">
-        <div class="campaign-studio-hero">
-          <div class="campaign-studio-hero-copy">
-            <div class="setup-kicker">Campaign Planning Workspace</div>
-            <h3 class="setup-hero-title">${escapeHtml(projectName ? `${projectName} Campaign Studio` : "Campaign Studio")}</h3>
-            <p class="setup-hero-text">
-              Keep the strong campaign planning flow, but layer in intelligence, readiness checks, and downstream routing so the plan can move into execution with fewer surprises.
-            </p>
-            <div class="campaign-studio-status">
-              <div class="setup-status-chip">
-                <span>Active campaign</span>
-                <strong>${escapeHtml(safeText(state.context.activeCampaign, "Not selected"))}</strong>
-              </div>
-              <div class="setup-status-chip">
-                <span>Intelligence</span>
-                <strong>${escapeHtml(intelligenceStatus === "loading" ? "Refreshing" : hasLiveIntelligence ? "Live" : "Partial")}</strong>
-              </div>
-              <div class="setup-status-chip">
-                <span>Execution readiness</span>
-                <strong>${escapeHtml(executionReadiness.status)}</strong>
-              </div>
-              <div class="setup-status-chip">
-                <span>Open blockers</span>
-                <strong>${escapeHtml(String(executionReadiness.total))}</strong>
-              </div>
+
+        <section class="mhos-campaign-command-header mhos-context-ribbon" aria-label="Campaign command board">
+          <div class="mhos-campaign-command-main mhos-context-main">
+            <div class="mhos-campaign-kicker-row mhos-context-kicker">
+              <span class="mhos-campaign-kicker mhos-context-kicker">Campaign Command Board</span>
+              <span class="mhos-campaign-state mhos-campaign-state--${readinessTone}">${escapeHtml(executionReadiness.status)}</span>
+            </div>
+            <h2 class="mhos-campaign-title mhos-context-title">${escapeHtml(activeCampaignLabel)}</h2>
+            <p class="mhos-campaign-summary mhos-context-description">${escapeHtml(goalLabel)}</p>
+            <div class="mhos-campaign-context-row mhos-context-chip-row" aria-label="Campaign context">
+              <span class="mhos-campaign-context-item mhos-context-chip">Market <strong class="mhos-campaign-context-value">${escapeHtml(marketLabel)}</strong></span>
+              <span class="mhos-campaign-context-item mhos-context-chip">Product <strong class="mhos-campaign-context-value">${escapeHtml(productLabel)}</strong></span>
+              <span class="mhos-campaign-context-item mhos-context-chip">Budget <strong class="mhos-campaign-context-value">${escapeHtml(budgetLabel)}</strong></span>
+              <span class="mhos-campaign-context-item mhos-context-chip">Window <strong class="mhos-campaign-context-value">${escapeHtml(launchWindowLabel)}</strong></span>
             </div>
           </div>
 
-          <div class="setup-hero-actions">
-            <button id="campaignRefreshIntelligenceBtn" class="btn btn-secondary" type="button">Refresh Intelligence</button>
-            <button id="campaignSaveDraftBtn" class="btn btn-secondary" type="button">Save Draft</button>
-            <button id="campaignBuildPlanBtn" class="btn btn-primary" type="button">Finalize Plan</button>
+          <aside class="mhos-campaign-strategist-panel mhos-context-actions mhos-executive-ai-panel" aria-label="Campaign strategist recommendation">
+            <span class="mhos-campaign-panel-label">Strategist next move</span>
+            <strong class="mhos-campaign-panel-action mhos-executive-guidance">${escapeHtml(strategistNextAction)}</strong>
+            <p class="mhos-campaign-panel-copy mhos-executive-guidance">${escapeHtml(strategistMode)}</p>
+          </aside>
+
+          <div class="mhos-campaign-actions mhos-context-actions mhos-executive-action-row" aria-label="Campaign command actions">
+            <button id="campaignRefreshIntelligenceBtn" class="btn btn-secondary mhos-context-action" type="button">Refresh campaign intelligence</button>
+            <button id="campaignSaveDraftBtn" class="btn btn-secondary mhos-context-action" type="button">Save campaign draft</button>
+            <button id="campaignBuildPlanBtn" class="btn btn-primary mhos-context-action" type="button">Save campaign plan</button>
           </div>
-        </div>
+
+          <div class="mhos-campaign-operating-summary mhos-executive-summary-grid" aria-label="Campaign operating summary">
+            <article class="mhos-campaign-summary-item mhos-campaign-summary-item--${readinessTone} mhos-executive-summary-item">
+              <span class="mhos-campaign-metric-label mhos-executive-metric-label">Readiness</span>
+              <strong class="mhos-campaign-metric-value mhos-executive-metric-value">${escapeHtml(executionReadiness.status)}</strong>
+              <small class="mhos-campaign-metric-note mhos-executive-metric-note">${escapeHtml(executionReadiness.total ? `${executionReadiness.total} open gate${executionReadiness.total === 1 ? "" : "s"}` : "Launch gates clear")}</small>
+            </article>
+            <article class="mhos-campaign-summary-item mhos-campaign-summary-item--${intelligenceTone} mhos-executive-summary-item">
+              <span class="mhos-campaign-metric-label mhos-executive-metric-label">Intelligence</span>
+              <strong class="mhos-campaign-metric-value mhos-executive-metric-value">${escapeHtml(intelligenceLabel)}</strong>
+              <small class="mhos-campaign-metric-note mhos-executive-metric-note">${escapeHtml(intelligenceError || (hasLiveIntelligence ? "Signals active" : "Projection mode"))}</small>
+            </article>
+            <article class="mhos-campaign-summary-item mhos-campaign-summary-item--${blockerTone} mhos-executive-summary-item">
+              <span class="mhos-campaign-metric-label mhos-executive-metric-label">Blockers</span>
+              <strong class="mhos-campaign-metric-value mhos-executive-metric-value">${escapeHtml(String(executionReadiness.total))}</strong>
+              <small class="mhos-campaign-metric-note mhos-executive-metric-note">${escapeHtml(executionReadiness.total ? "Needs operator attention" : "No open launch blockers")}</small>
+            </article>
+            <article class="mhos-campaign-summary-item mhos-campaign-summary-item--${channelTone} mhos-executive-summary-item">
+              <span class="mhos-campaign-metric-label mhos-executive-metric-label">Channels</span>
+              <strong class="mhos-campaign-metric-value mhos-executive-metric-value">${escapeHtml(channelStateLabel)}</strong>
+              <small class="mhos-campaign-metric-note mhos-executive-metric-note">${escapeHtml(recommendedChannelCount ? `${recommendedChannelCount} AI recommendations` : "Awaiting channel mix")}</small>
+            </article>
+          </div>
+        </section>
 
         <div class="campaign-studio-layout">
           <form id="campaignStudioForm" class="campaign-studio-main">
             <section class="card">
               <div class="card-head">
-                <h3>Team Operations Layer</h3>
-                <span class="card-badge neutral">${escapeHtml(titleCase(CAMPAIGN_ROLE_DEFAULTS.ownerRole))}</span>
+                <h3>Campaign Basics</h3>
+                <span class="card-badge neutral">Define</span>
               </div>
-              ${renderTeamOpsSummary(model, escapeHtml)}
-            </section>
-
-            <section class="card">
-              <div class="card-head">
-                <h3>Intelligence Input Panel</h3>
-                <span class="card-badge ${hasLiveIntelligence ? "success" : intelligenceStatus === "loading" ? "warning" : "neutral"}">${escapeHtml(hasLiveIntelligence ? "Live inputs" : intelligenceStatus === "loading" ? "Loading" : "Guided fallback")}</span>
-              </div>
-              <div class="insights-section-copy">
-                Use current system intelligence to shape the campaign before execution starts. When data is missing, the page stays usable and tells the operator what to connect next.
-              </div>
-              ${
-                intelligenceError
-                  ? `<div class="empty-box">${escapeHtml(`Intelligence refresh warning: ${intelligenceError}`)}</div>`
-                  : ""
-              }
-              <div class="campaign-studio-panel-grid">
-                <div class="campaign-studio-panel-block">
-                  <h4 class="insights-subtitle">Strongest platforms</h4>
-                  ${renderIntelligenceList(
-                    platformSignals.strongest,
-                    escapeHtml,
-                    "No strong platform signal yet",
-                    "Connect content and campaign performance data to reveal where the campaign already has momentum."
-                  )}
-                </div>
-                <div class="campaign-studio-panel-block">
-                  <h4 class="insights-subtitle">Weak platforms</h4>
-                  ${renderIntelligenceList(
-                    platformSignals.weak,
-                    escapeHtml,
-                    "No weak platform signal yet",
-                    "Weak platform signals will appear after more content, publishing, or channel performance data is connected."
-                  )}
-                </div>
-                <div class="campaign-studio-panel-block">
-                  <h4 class="insights-subtitle">Top-performing content patterns</h4>
-                  ${renderIntelligenceList(
-                    topPatterns,
-                    escapeHtml,
-                    "No winning content pattern yet",
-                    "Ingest post and campaign performance to discover which hooks, formats, and topics should be repeated."
-                  )}
-                </div>
-                <div class="campaign-studio-panel-block">
-                  <h4 class="insights-subtitle">Weak content patterns</h4>
-                  ${renderIntelligenceList(
-                    weakPatterns,
-                    escapeHtml,
-                    "No weak content pattern yet",
-                    "Weak content patterns will show up once underperforming content and improvement notes are available."
-                  )}
-                </div>
-                <div class="campaign-studio-panel-block">
-                  <h4 class="insights-subtitle">Best publishing windows</h4>
-                  ${renderIntelligenceList(
-                    publishingWindows,
-                    escapeHtml,
-                    "No timing signal yet",
-                    "Connect timestamped publishing performance so the system can recommend when to launch each wave."
-                  )}
-                </div>
-                <div class="campaign-studio-panel-block">
-                  <h4 class="insights-subtitle">SEO opportunities</h4>
-                  ${renderIntelligenceList(
-                    seoOpportunities,
-                    escapeHtml,
-                    "No SEO opportunity feed yet",
-                    "Connect website and search data to surface query, page, and CTR opportunities before launch."
-                  )}
-                </div>
-                <div class="campaign-studio-panel-block">
-                  <h4 class="insights-subtitle">Paid performance signals</h4>
-                  ${renderIntelligenceList(
-                    paidSignals,
-                    escapeHtml,
-                    "No paid signal yet",
-                    "Connect paid channels so scaling, pausing, and creative recommendations are based on live results."
-                  )}
-                </div>
-                <div class="campaign-studio-panel-block">
-                  <h4 class="insights-subtitle">Missing critical integrations</h4>
-                  ${renderIntelligenceList(
-                    missingIntegrations,
-                    escapeHtml,
-                    "No critical integration gap detected",
-                    "Connected sources look healthy. Keep monitoring as more campaign destinations are added."
-                  )}
-                </div>
-              </div>
-            </section>
-
-            <section class="card">
-              <div class="card-head">
-                <h3>Campaign Goal and Basics</h3>
-                <span class="card-badge neutral">Section 1</span>
-              </div>
-              <div class="insights-section-copy">
-                Lock the core operating context first so downstream teams and AI outputs are working from the same campaign definition.
+              <div class="campaign-section-copy">
+                Lock the core campaign definition first so planning, routing, and AI prompts all reference the same structure.
               </div>
               <div class="setup-form-grid setup-form-grid-2">
                 ${renderField({
@@ -1563,15 +1698,41 @@ export const campaignStudioRoute = {
                   escapeHtml
                 })}
               </div>
+              <div class="setup-form-grid setup-form-grid-3">
+                ${renderField({
+                  name: "startDate",
+                  label: "Start date",
+                  value: values.startDate,
+                  helper: "When should the campaign start going live?",
+                  placeholder: "2026-05-01",
+                  escapeHtml
+                })}
+                ${renderField({
+                  name: "endDate",
+                  label: "End date",
+                  value: values.endDate,
+                  helper: "Optional hard stop or review date.",
+                  placeholder: "2026-05-21",
+                  escapeHtml
+                })}
+                ${renderField({
+                  name: "budget",
+                  label: "Budget",
+                  value: values.budget,
+                  helper: "Use one working budget number even if later split by channel.",
+                  placeholder: "5000",
+                  escapeHtml
+                })}
+              </div>
             </section>
 
             <section class="card">
               <div class="card-head">
-                <h3>Product and Audience</h3>
-                <span class="card-badge neutral">Section 2</span>
+                <h3>Product / Audience / Channel Selection</h3>
+                <span class="card-badge neutral">Plan inputs</span>
               </div>
-              <div class="insights-section-copy">
-                Keep audience, problem, and product angle explicit so campaign guidance, approvals, and creative routing stay aligned.
+              <div class="campaign-section-copy">
+                Keep product, audience, offer, and channel choices explicit so downstream teams do not have to reinterpret the plan.
               </div>
               <div class="setup-form-grid">
                 ${renderField({
@@ -1610,26 +1771,6 @@ export const campaignStudioRoute = {
                   multiline: true
                 })}
                 ${renderField({
-                  name: "audienceStage",
-                  label: "Audience stage",
-                  value: values.audienceStage,
-                  helper: "Cold prospect, warm prospect, repeat buyer, or retention audience.",
-                  placeholder: "Warm prospect",
-                  escapeHtml
-                })}
-              </div>
-            </section>
-
-            <section class="card">
-              <div class="card-head">
-                <h3>Channels and Offer</h3>
-                <span class="card-badge neutral">Section 3</span>
-              </div>
-              <div class="insights-section-copy">
-                Keep the free-text planning fields, but support them with recommendation panels so channel decisions are easier to operationalize.
-              </div>
-              <div class="setup-form-grid">
-                ${renderField({
                   name: "channelPlan",
                   label: "Channel plan",
                   value: values.channelPlan,
@@ -1655,64 +1796,12 @@ export const campaignStudioRoute = {
                   escapeHtml,
                   multiline: true
                 })}
-              </div>
-            </section>
-
-            <section class="card">
-              <div class="card-head">
-                <h3>Channel Mix Recommendations</h3>
-                <span class="card-badge ${hasLiveIntelligence ? "success" : "neutral"}">${escapeHtml(hasLiveIntelligence ? "Intelligence-assisted" : "Readiness-assisted")}</span>
-              </div>
-              <div class="insights-section-copy">
-                Recommended channel mix based on current performance learning, connected systems, and campaign readiness. Use this to validate or tighten the free-text channel plan.
-              </div>
-              <div class="campaign-recommendation-grid">
-                <div class="campaign-studio-panel-block">
-                  <h4 class="insights-subtitle">Recommended organic channels</h4>
-                  ${renderChannelRecommendationCards(channelMix.organic, escapeHtml)}
-                </div>
-                <div class="campaign-studio-panel-block">
-                  <h4 class="insights-subtitle">Recommended paid channels</h4>
-                  ${renderChannelRecommendationCards(channelMix.paid, escapeHtml)}
-                </div>
-                <div class="campaign-studio-panel-block">
-                  <h4 class="insights-subtitle">Recommended support channels</h4>
-                  ${renderChannelRecommendationCards(channelMix.support, escapeHtml)}
-                </div>
-              </div>
-            </section>
-
-            <section class="card">
-              <div class="card-head">
-                <h3>Dates and Budget</h3>
-                <span class="card-badge neutral">Section 4</span>
-              </div>
-              <div class="insights-section-copy">
-                These fields drive launch timing, budget allocation, and execution routing across publishing and ads workflows.
-              </div>
-              <div class="setup-form-grid setup-form-grid-3">
                 ${renderField({
-                  name: "startDate",
-                  label: "Start date",
-                  value: values.startDate,
-                  helper: "When should the campaign start going live?",
-                  placeholder: "2026-05-01",
-                  escapeHtml
-                })}
-                ${renderField({
-                  name: "endDate",
-                  label: "End date",
-                  value: values.endDate,
-                  helper: "Optional hard stop or review date.",
-                  placeholder: "2026-05-21",
-                  escapeHtml
-                })}
-                ${renderField({
-                  name: "budget",
-                  label: "Budget",
-                  value: values.budget,
-                  helper: "Use one working budget number even if later split by channel.",
-                  placeholder: "5000",
+                  name: "audienceStage",
+                  label: "Audience stage",
+                  value: values.audienceStage,
+                  helper: "Cold prospect, warm prospect, repeat buyer, or retention audience.",
+                  placeholder: "Warm prospect",
                   escapeHtml
                 })}
               </div>
@@ -1720,11 +1809,11 @@ export const campaignStudioRoute = {
 
             <section class="card">
               <div class="card-head">
-                <h3>Launch Waves</h3>
-                <span class="card-badge neutral">Section 5</span>
+                <h3>Wave Planning</h3>
+                <span class="card-badge neutral">${escapeHtml(String(waves.length))} waves</span>
               </div>
-              <div class="insights-section-copy">
-                Keep the current wave structure, but use the added status, role, allocation, and asset guidance to make each wave execution-ready.
+              <div class="campaign-section-copy">
+                Plan each wave separately so launch, education, and conversion work stay clear before routing into execution workspaces.
               </div>
               <div class="campaign-wave-grid">
                 ${waves.map((wave) => `
@@ -1790,11 +1879,52 @@ export const campaignStudioRoute = {
 
             <section class="card">
               <div class="card-head">
-                <h3>Required Assets</h3>
-                <span class="card-badge ${missingAssets.length ? "danger" : "success"}">${escapeHtml(missingAssets.length ? `${missingAssets.length} missing` : "Ready")}</span>
+                <h3>Campaign Outputs / Readiness</h3>
+                <span class="card-badge ${executionReadiness.total ? "warning" : "success"}">${escapeHtml(executionReadiness.status)}</span>
               </div>
-              <div class="insights-section-copy">
-                Keep the core asset checklist, but use the readiness and routing panels to see which gaps actually block launch.
+              <div class="campaign-section-copy">
+                Review the recommended campaign direction, required assets, and real blockers before sending the plan into downstream work.
+              </div>
+              ${
+                intelligenceError
+                  ? `<div class="empty-box">${escapeHtml(`Intelligence refresh warning: ${intelligenceError}`)}</div>`
+                  : ""
+              }
+              <div class="campaign-strategy-stack">
+                <div class="campaign-strategy-item">
+                  <span>Recommended campaign angle</span>
+                  <strong>${escapeHtml(strategyGuidance.angle)}</strong>
+                </div>
+                <div class="campaign-strategy-item">
+                  <span>Recommended offer focus</span>
+                  <strong>${escapeHtml(strategyGuidance.offer)}</strong>
+                </div>
+                <div class="campaign-strategy-item">
+                  <span>Recommended audience emphasis</span>
+                  <strong>${escapeHtml(strategyGuidance.audience)}</strong>
+                </div>
+                <div class="campaign-strategy-item">
+                  <span>Recommended channel emphasis</span>
+                  <strong>${escapeHtml(strategyGuidance.channels)}</strong>
+                </div>
+                <div class="campaign-strategy-item">
+                  <span>Recommended next action</span>
+                  <strong>${escapeHtml(strategyGuidance.nextAction)}</strong>
+                </div>
+              </div>
+              <div class="campaign-recommendation-grid">
+                <div class="campaign-studio-panel-block">
+                  <h4 class="insights-subtitle">Recommended organic channels</h4>
+                  ${renderChannelRecommendationCards(channelMix.organic, escapeHtml)}
+                </div>
+                <div class="campaign-studio-panel-block">
+                  <h4 class="insights-subtitle">Recommended paid channels</h4>
+                  ${renderChannelRecommendationCards(channelMix.paid, escapeHtml)}
+                </div>
+                <div class="campaign-studio-panel-block">
+                  <h4 class="insights-subtitle">Recommended support channels</h4>
+                  ${renderChannelRecommendationCards(channelMix.support, escapeHtml)}
+                </div>
               </div>
               <div class="setup-form-grid">
                 ${renderField({
@@ -1816,15 +1946,10 @@ export const campaignStudioRoute = {
                   multiline: true
                 })}
               </div>
-            </section>
-
-            <section class="card">
-              <div class="card-head">
-                <h3>Execution Readiness Panel</h3>
-                <span class="card-badge ${executionReadiness.total ? "warning" : "success"}">${escapeHtml(executionReadiness.status)}</span>
-              </div>
-              <div class="insights-section-copy">
-                This is the go-live gate. It shows whether the campaign can actually move into content, media, publishing, ads, and measurement without avoidable breakage.
+              <div class="campaign-studio-panel-block">
+                <h4 class="insights-subtitle">Library inputs for campaign planning</h4>
+                ${renderAssetDependencyRows(state.data.assets, campaignAssetKeys, escapeHtml, "Product, pricing, and campaign assets are covered.")}
+                <div class="simple-banner" style="margin-top: 12px;">${escapeHtml(assetNextAction)}</div>
               </div>
               <div class="campaign-readiness-grid">
                 ${renderBlockerGroup(
@@ -1876,46 +2001,11 @@ export const campaignStudioRoute = {
           <aside class="campaign-studio-side">
             <section class="card">
               <div class="card-head">
-                <h3>AI Strategy Guidance</h3>
-                <span class="card-badge ${hasLiveIntelligence ? "success" : "neutral"}">Embedded guidance</span>
+                <h3>Campaign AI Assistant</h3>
+                <span class="card-badge ${hasLiveIntelligence ? "success" : "neutral"}">${escapeHtml(hasLiveIntelligence ? "Intelligence-assisted" : "Draft-assisted")}</span>
               </div>
-              <div class="insights-section-copy">
-                Keep Ask AI available, but use this embedded strategy layer to guide the draft continuously while the operator is still in the page.
-              </div>
-              <div class="campaign-strategy-stack">
-                <div class="campaign-strategy-item">
-                  <span>Recommended campaign angle</span>
-                  <strong>${escapeHtml(strategyGuidance.angle)}</strong>
-                </div>
-                <div class="campaign-strategy-item">
-                  <span>Recommended offer focus</span>
-                  <strong>${escapeHtml(strategyGuidance.offer)}</strong>
-                </div>
-                <div class="campaign-strategy-item">
-                  <span>Recommended audience emphasis</span>
-                  <strong>${escapeHtml(strategyGuidance.audience)}</strong>
-                </div>
-                <div class="campaign-strategy-item">
-                  <span>Recommended channel emphasis</span>
-                  <strong>${escapeHtml(strategyGuidance.channels)}</strong>
-                </div>
-                <div class="campaign-strategy-item">
-                  <span>Recommended next action</span>
-                  <strong>${escapeHtml(strategyGuidance.nextAction)}</strong>
-                </div>
-              </div>
-              <div class="quick-actions">
-                <button id="campaignAskAiBtn" class="quick-action-btn" type="button">
-                  <span class="home-action-title">Ask AI to refine plan</span>
-                  <span class="home-action-meta">Turn the current draft, blockers, and intelligence into a sharper execution brief.</span>
-                </button>
-              </div>
-            </section>
-
-            <section class="card">
-              <div class="card-head">
-                <h3>Campaign Summary</h3>
-                <span class="card-badge neutral">Live draft</span>
+              <div class="campaign-section-copy">
+                Send campaign context to AI prefills the current campaign draft and then navigates there. The downstream send actions open the linked workspace with the current campaign context attached.
               </div>
               <div class="data-stack">
                 ${renderSummaryItem("Campaign", values.campaignName, escapeHtml)}
@@ -1925,93 +2015,39 @@ export const campaignStudioRoute = {
                 ${renderSummaryItem("Channels", values.channelPlan, escapeHtml)}
                 ${renderSummaryItem("Budget", formatCurrency(values.budget, overviewData.currency || "USD"), escapeHtml)}
               </div>
-            </section>
-
-            <section class="card">
-              <div class="card-head">
-                <h3>Execution Signals</h3>
-                <span class="card-badge neutral">Current state</span>
-              </div>
-              <div class="data-stack">
-                ${renderSummaryItem("Connected channels", connectedChannels.map((item) => channelLabel(item)).join(", ") || "None", escapeHtml)}
-                ${renderSummaryItem("Scheduled jobs", String(scheduledJobs.length), escapeHtml)}
-                ${renderSummaryItem("Available asset types", assetTypesPresent.join(", ") || "None", escapeHtml)}
-                ${renderSummaryItem("Missing required assets", missingAssets.join(", ") || "None", escapeHtml)}
-                ${renderSummaryItem("Open recommendations", String(recommendations.length), escapeHtml)}
-              </div>
-            </section>
-
-            <section class="card">
-              <div class="card-head">
-                <h3>Required Assets</h3>
-                <span class="card-badge neutral">${escapeHtml(String(requiredAssetTypes.length))} types</span>
-              </div>
-              ${
-                requiredAssetTypes.length
-                  ? `
-                    <ul class="simple-list">
-                      ${requiredAssetTypes.map((item) => `<li>${escapeHtml(titleCase(item))}</li>`).join("")}
-                    </ul>
-                  `
-                  : renderEmptyState(
-                    "No required asset catalog yet",
-                    "Load or define the required asset types so launch readiness can identify exact execution gaps.",
-                    escapeHtml
-                  )
-              }
-            </section>
-
-            <section class="card">
-              <div class="card-head">
-                <h3>Downstream Routing</h3>
-                <span class="card-badge neutral">Execution next</span>
-              </div>
-              <div class="insights-section-copy">
-                Route the draft into the right downstream workspace once the blockers you care about are closed.
+              <div class="quick-actions">
+                <button id="campaignAskAiBtn" class="quick-action-btn" type="button">
+                  <span class="home-action-title">Send campaign context to AI</span>
+                  <span class="home-action-meta">Prefill AI Command with the current draft, blockers, and campaign context, then open that page.</span>
+                </button>
               </div>
               <div class="campaign-routing-grid">
                 <button id="campaignOpenContentStudioBtn" class="quick-action-btn" type="button">
                   <span class="home-action-title">Send to Content Studio</span>
-                  <span class="home-action-meta">Turn strategy and wave planning into copy, scripts, blog, and social drafts.</span>
+                  <span class="home-action-meta">Open Content Studio with a campaign handoff attached.</span>
                 </button>
                 <button id="campaignOpenMediaStudioBtn" class="quick-action-btn" type="button">
                   <span class="home-action-title">Send to Media Studio</span>
-                  <span class="home-action-meta">Route the campaign into visual production and creative package generation.</span>
+                  <span class="home-action-meta">Open Media Studio with a campaign handoff attached.</span>
                 </button>
                 <button id="campaignOpenPublishingBtn" class="quick-action-btn" type="button">
                   <span class="home-action-title">Send to Publishing</span>
-                  <span class="home-action-meta">Move the channel mix and wave plan into scheduling and launch operations.</span>
+                  <span class="home-action-meta">Open Publishing with a campaign handoff attached.</span>
                 </button>
                 <button id="campaignOpenAdsManagerBtn" class="quick-action-btn" type="button">
                   <span class="home-action-title">Send to Ads Manager</span>
-                  <span class="home-action-meta">Carry the budget, offer, and channel emphasis into paid activation planning.</span>
-                </button>
-                <button id="campaignGeneratePackageBtn" class="quick-action-btn" type="button">
-                  <span class="home-action-title">Generate Campaign Execution Package</span>
-                  <span class="home-action-meta">Package the draft for operators. Generated in this session: ${escapeHtml(String(session.generatedPackages))}.</span>
+                  <span class="home-action-meta">Open Ads Manager with a campaign handoff attached.</span>
                 </button>
                 <button id="campaignReviewDependenciesBtn" class="quick-action-btn" type="button">
-                  <span class="home-action-title">Review Missing Dependencies</span>
+                  <span class="home-action-title">Review campaign dependencies</span>
                   <span class="home-action-meta">Jump to the highest-priority place to close launch blockers.</span>
                 </button>
-              </div>
-            </section>
-
-            <section class="card">
-              <div class="card-head">
-                <h3>Quick Actions</h3>
-                <span class="card-badge neutral">Operator shortcuts</span>
-              </div>
-              <div class="quick-actions">
                 <button id="campaignReviewAssetsBtn" class="quick-action-btn" type="button">
-                  <span class="home-action-title">Review assets</span>
-                  <span class="home-action-meta">Open the library and close any missing asset gaps before execution starts.</span>
-                </button>
-                <button id="campaignRefreshIntelligenceBtnSecondary" class="quick-action-btn" type="button" disabled>
-                  <span class="home-action-title">Intelligence state</span>
-                  <span class="home-action-meta">${escapeHtml(hasLiveIntelligence ? "Live signals are informing this page." : "The page is using current readiness plus graceful intelligence fallbacks.")}</span>
+                  <span class="home-action-title">Review campaign assets in Library</span>
+                  <span class="home-action-meta">Navigation only. Review missing assets before execution starts.</span>
                 </button>
               </div>
+              <div class="campaign-helper-note">${escapeHtml(hasLiveIntelligence ? "Live intelligence is shaping the readiness and channel recommendations on this page." : "This page is still usable without full intelligence; recommendations are falling back to current draft and readiness inputs.")}</div>
             </section>
           </aside>
         </div>

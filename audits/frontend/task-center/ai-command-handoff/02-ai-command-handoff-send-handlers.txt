@@ -1,0 +1,71 @@
+14:        setSharedHandoff
+341:		{ label: "Prepare escalation", sub: "Route support, sales, or operations" }
+347:		{ label: "Prepare sales handoff", sub: "Route context to operations" }
+365:	{ id: "route", title: "Route", description: "Send context to the owning workspace." },
+374:	{ id: "handoff", label: "Prepare Handoff", helper: "Destination package" },
+492:		{ id: "route-support-sales-ops", label: "Route to Support / Sales / Operations", action: "preview", intent: "handoff", template: "Prepare routing guidance for {project}. Decide whether the customer item belongs with Support, Sales, or Operations, and explain the review gate." }
+1254:function destinationRouteForSpecialist(specialistId, outputType) {
+1294:	const route = destinationRouteForSpecialist(specialistId, outputType);
+1303:		destinationRoute: route,
+1323:					"Route execution draft to Campaign Studio or Workflows"
+1368:				"Route to Content Studio for refinement"
+1403:				"Route to Media Studio for production planning"
+1480:				"Route to Governance for formal review"
+1548:				"Route sales handoff without mutating CRM data"
+1630:		destinationRoute: outputType === "task" ? "task-center" : "workflows",
+1665:	lines.push(`Destination: ${routeLabel(output.destinationRoute)}`);
+2089:		return { title: "Content plan task block", owner: "Content Studio", steps: ["Use the strongest content pattern as the starting template.", "Map posts by platform, hook, format, and CTA.", "Route approved items into Publishing for scheduling."] };
+2365:function normalizeAiInboundRouteSuggestions(rawSuggestions, sourcePage, sourceLabel) {
+2366:	const fallbackRoute = sourcePage === "workspace" ? "workflows" : sourcePage;
+2367:	const fallbackLabel = sourceLabel || routeLabel(fallbackRoute);
+2370:		const rawRoute = firstAiInboundId(record.route, record.destination, record.page, record.targetPage, record.target_page);
+2371:		const stringRoute = rawRoute ? "" : firstAiInboundId(item);
+2372:		const route = normalizeAiInboundSourcePage(rawRoute || stringRoute || fallbackRoute);
+2380:		route: fallbackRoute,
+2390:	const destinationRoute = normalizeAiInboundSourcePage(
+2391:		preview.destinationRoute ||
+2404:		destinationRoute,
+2489:	const routeSuggestions = normalizeAiInboundRouteSuggestions(
+3434:		handoff: "Prepare Handoff",
+3442:function getToolDestinationRoute(tool, session) {
+3446:	return destinationRouteForSpecialist(session?.modeId || "operations", outputType);
+3708:function getCanonicalToolRoute(tool = {}, session) {
+3712:	return destinationRouteForSpecialist(session?.modeId || "operations", getCanonicalToolIntent(tool));
+3725:		route: getCanonicalToolRoute(tool, session),
+3786:					const destination = routeLabel(getToolDestinationRoute(tool, session));
+3802:								<span>Route: ${escapeHtml(destination)}</span>
+3922:	const destination = routeLabel(preview.destinationRoute || destinationRouteForSpecialist(session.modeId, preview.outputType || "guidance"));
+3930:			? "Route Draft to Publishing"
+3931:			: `Route Draft to ${destination}`;
+3990:				<button id="aicmdV2LegacyPreviewSendBtn" class="aicmd-v2-btn-secondary" type="button">Route Draft</button>
+4005:	const destination = routeLabel(preview.destinationRoute || destinationRouteForSpecialist(session.modeId, preview.outputType || "guidance"));
+4013:			? "Route Draft to Publishing"
+4014:			: `Route Draft to ${destination}`;
+4090:                                        <span>Choose Draft, Task, Draft Workflow, or Prepare Handoff, then create a preview from the conversation.</span>
+4103:                                <div class="aicmd-room-planned-note">No output actions yet. Create a Draft, Task, Draft Workflow, or Prepare Handoff from the conversation first.</div>
+4326:                                                <button id="aicmdV3ResponseSendBtn" class="aicmd-v2-btn-secondary" type="button">Route</button>
+4393:	const destination = routeLabel(destinationRouteForSpecialist(session.modeId, asObject(session.outputPreview).outputType || "guidance"));
+4517:export const aiCommandRoute = {
+4675:			aiCommandRoute.render(context);
+4701:		                aiCommandRoute.render(context);
+4737:		                aiCommandRoute.render(context);
+4758:				aiCommandRoute.render(context);
+4783:                                aiCommandRoute.render(context);
+4794:				aiCommandRoute.render(context);
+4914:		                        aiCommandRoute.render(context);
+4950:		                aiCommandRoute.render(context);
+5029:		                                destinationRoute: asString(routeSuggestion?.route) || destinationRouteForSpecialist(session.modeId, "guidance")
+5046:                                aiCommandRoute.render(context);
+5061:		                        aiCommandRoute.render(context);
+5084:                                aiCommandRoute.render(context);
+5108:                                aiCommandRoute.render(context);
+5131:                                aiCommandRoute.render(context);
+5155:                                aiCommandRoute.render(context);
+5315:		                aiCommandRoute.render(context);
+5319:		const responseSendBtn = $("aicmdV3ResponseSendBtn");
+5323:				const destination = asString(latestResponse.destinationRoute || destinationRouteForSpecialist(session.modeId, "guidance"));
+5333:				setSharedHandoff(projectName || "__default__", destination, {
+5416:				const destination = asString(output.destinationRoute || "").trim();
+5442:				setSharedHandoff(projectName || "__default__", destination, handoffRecord);
+5486:				aiCommandRoute.render(context);
+5500:				rerender: () => aiCommandRoute.render(context)

@@ -1,0 +1,114 @@
+public/control-center/ai-team-model.js:2:  Canonical AI Team Model
+public/control-center/ai-team-model.js:13:export const AI_TEAM_ROLES = [
+public/control-center/ai-team-model.js:54:    ownerSummary: "Publishing queue, schedules, manual handoffs, retries, and release readiness.",
+public/control-center/ai-team-model.js:57:    defaultPrompt: "Act as Publisher. Prepare the next publish-ready package and identify missing approvals or queue steps."
+public/control-center/ai-team-model.js:90:    ownerSummary: "Claims, approvals, publishing risk, brand safety, governance, and release trust.",
+public/control-center/ai-team-model.js:93:    defaultPrompt: "Act as Compliance Reviewer. Flag claims, approval gaps, and publishing risks before release."
+public/control-center/ai-team-model.js:99:    ownerSummary: "Workflows, tasks, queues, jobs, notifications, handoffs, and execution safety.",
+public/control-center/ai-team-model.js:106:export const AI_PAGE_SPECIALIST_MAP = {
+public/control-center/ai-team-model.js:128:export function getAiTeamRole(roleId) {
+public/control-center/ai-team-model.js:129:  return AI_TEAM_ROLES.find((role) => role.id === roleId) || null;
+public/control-center/ai-team-model.js:133:  const ids = AI_PAGE_SPECIALIST_MAP[pageId] || [];
+public/control-center/ai-team-model.js:134:  return ids.map(getAiTeamRole).filter(Boolean);
+public/control-center/ai-team-model.js:138:  return getAiRolesForPage(pageId)[0] || AI_TEAM_ROLES[0];
+public/control-center/pages/ai-command.js:2:	getSharedHandoff,
+public/control-center/pages/ai-command.js:4:	setSharedHandoff
+public/control-center/pages/ai-command.js:11://  AI TEAM DEFINITIONS
+public/control-center/pages/ai-command.js:45:		label: "Ads Specialist",
+public/control-center/pages/ai-command.js:68:		summary: "Tasks, timelines, handoffs, approvals, and execution plans.",
+public/control-center/pages/ai-command.js:73:// Map legacy mode IDs from older sessions to new team IDs
+public/control-center/pages/ai-command.js:150:		name: "Ads Specialist",
+public/control-center/pages/ai-command.js:153:		suggestedPrompt: "Act as Ads Specialist and propose paid experiments based on current readiness and data coverage."
+public/control-center/pages/ai-command.js:172:		purpose: "Translate intent into executable workflows and handoffs.",
+public/control-center/pages/ai-command.js:173:		bestUse: "When actions span multiple pages and teams.",
+public/control-center/pages/ai-command.js:214:	if (/publish\s*now|send\s*external|paid\s*ads|final\s*approval/i.test(command)) {
+public/control-center/pages/ai-command.js:222:				reason: "Requires approval gate before external publishing actions."
+public/control-center/pages/ai-command.js:385:			lastAppliedHandoffId: ""
+public/control-center/pages/ai-command.js:574:		operations: ["task plan", "workflow", "handoff", "approval", "timeline", "execution plan", "route", "publish", "status", "priority", "priorities", "blocking", "blocker", "readiness", "next", "do next"]
+public/control-center/pages/ai-command.js:589:	const actionRouting = /launch|build|reconnect|connect|improve|create|fix|route|plan|publish/.test(query);
+public/control-center/pages/ai-command.js:593:		actionRouting
+public/control-center/pages/ai-command.js:687:			routeSuggestion("Publishing", "publishing", "Schedule the next batch with stronger timing and approval control."),
+public/control-center/pages/ai-command.js:827:		title: "Operations routing brief",
+public/control-center/pages/ai-command.js:831:			aiContext.missingIntegrations.length ? "Intelligence coverage gaps may reduce execution quality." : "Core intelligence is available for routing."
+public/control-center/pages/ai-command.js:860:			return classified.actionRouting
+public/control-center/pages/ai-command.js:946:function applyDurableAiHandoff(projectName, operations, session, consumeProjectHandoff, showMessage) {
+public/control-center/pages/ai-command.js:947:	const handoff = getSharedHandoff(projectName, "ai-command", operations);
+public/control-center/pages/ai-command.js:948:	const handoffId = asString(handoff?.id);
+public/control-center/pages/ai-command.js:949:	if (!handoffId || handoffId === asString(session.lastAppliedHandoffId)) return;
+public/control-center/pages/ai-command.js:951:	const payload = asObject(handoff?.payload);
+public/control-center/pages/ai-command.js:967:	session.lastAppliedHandoffId = handoffId;
+public/control-center/pages/ai-command.js:968:	consumeProjectHandoff?.(projectName, handoffId, { actor: "mh-assistant" }).catch((error) => {
+public/control-center/pages/ai-command.js:969:		console.warn("Failed to consume AI handoff:", error.message);
+public/control-center/pages/ai-command.js:1086:	caps.push("Content generation", "Research & competitor analysis", "Execution routing");
+public/control-center/pages/ai-command.js:1135://  RENDER: TEAM SELECTOR
+public/control-center/pages/ai-command.js:1138:function renderTeamSelector(session, escapeHtml) {
+public/control-center/pages/ai-command.js:1141:			<div class="ctrl-room-section-label">Choose your AI specialist</div>
+public/control-center/pages/ai-command.js:1142:			<div class="ctrl-room-team">
+public/control-center/pages/ai-command.js:1145:						class="ctrl-team-card${agent.id === session.modeId ? " is-active" : ""}"
+public/control-center/pages/ai-command.js:1150:						<span class="ctrl-team-icon">${agent.icon}</span>
+public/control-center/pages/ai-command.js:1151:						<span class="ctrl-team-name">${escapeHtml(agent.label)}</span>
+public/control-center/pages/ai-command.js:1152:						${agent.id === session.modeId ? `<span class="ctrl-team-active-dot"></span>` : ""}
+public/control-center/pages/ai-command.js:1368:				<div class="ctrl-empty-body">Choose a specialist above, pick a suggested prompt, or write your own command and hit Send.</div>
+public/control-center/pages/ai-command.js:1584:			reason: "A clear campaign context helps every specialist agent generate more precise outputs.",
+public/control-center/pages/ai-command.js:1607:		description: "Talk to your AI team, run structured tasks, and turn intelligence into action."
+public/control-center/pages/ai-command.js:1689:          <h3>Choose your AI specialist</h3>
+public/control-center/pages/ai-command.js:1758:          ${escapeHtml(session.draftStatus || "AI Workspace is ready. Choose a specialist, prepare a command, then review and run it from the workspace command controls.")}
+public/control-center/pages/ai-command.js:1763:            <span>Specialist</span>
+public/control-center/pages/ai-command.js:1812:            <span>Selected specialist</span>
+public/control-center/pages/workflows.js:3:  getSharedHandoff,
+public/control-center/pages/workflows.js:5:  setSharedHandoff
+public/control-center/pages/workflows.js:43:    purpose: "Prepare media production inputs, format guidance, and downstream handoff steps.",
+public/control-center/pages/workflows.js:51:    purpose: "Package final channel payloads, approval checks, and publishing queue dependencies.",
+public/control-center/pages/workflows.js:312:      lastAppliedHandoffId: "",
+public/control-center/pages/workflows.js:337:    session.lastAppliedHandoffId = asString(session.lastAppliedHandoffId);
+public/control-center/pages/workflows.js:519:      `Open ${titleCase(workflow.routeHint)} for execution handoff.`,
+public/control-center/pages/workflows.js:520:      blockedRequirements.length ? "Resolve blockers before live execution." : "Proceed to execution handoff."
+public/control-center/pages/workflows.js:578:      prompt: "Prepare a publishing package checklist with missing assets and approval dependencies."
+public/control-center/pages/workflows.js:650:  const gate = asObject(autoMode?.approvalRequiredStep);
+public/control-center/pages/workflows.js:656:        Safe execution only: navigate, create draft, generate prompt, and create handoff.
+public/control-center/pages/workflows.js:706:        Hands-free safe execution with approval gates and inline logs.
+public/control-center/pages/workflows.js:735:        autoMode?.status === "waiting_approval"
+public/control-center/pages/workflows.js:738:              <strong>Approval needed:</strong> ${esc(gate.reason || "Manual approval required.")}
+public/control-center/pages/workflows.js:918:function applyDurableWorkflowHandoff({ projectName, session, operations, consumeProjectHandoff, showMessage }) {
+public/control-center/pages/workflows.js:919:  const handoff = getSharedHandoff(projectName, "workflows", operations);
+public/control-center/pages/workflows.js:920:  const handoffId = asString(handoff?.id);
+public/control-center/pages/workflows.js:921:  if (!handoffId || handoffId === asString(session.lastAppliedHandoffId)) return;
+public/control-center/pages/workflows.js:923:  const payload = asObject(handoff?.payload);
+public/control-center/pages/workflows.js:944:    run.source = "handoff";
+public/control-center/pages/workflows.js:949:  session.lastAppliedHandoffId = handoffId;
+public/control-center/pages/workflows.js:950:  consumeProjectHandoff?.(projectName, handoffId, { actor: "mh-assistant" }).catch((error) => {
+public/control-center/pages/workflows.js:951:    console.warn("Failed to consume workflow handoff:", error.message);
+public/control-center/pages/workflows.js:953:  showMessage?.("Workflow context restored from shared handoff.");
+public/control-center/pages/workflows.js:1026:function buildAiHandoffPrompt(workflow, inputs, runOutput, context) {
+public/control-center/pages/workflows.js:1055:  createProjectHandoff,
+public/control-center/pages/workflows.js:1059:  const prompt = buildAiHandoffPrompt(workflow, inputs, run.output, context);
+public/control-center/pages/workflows.js:1070:  const handoff = {
+public/control-center/pages/workflows.js:1083:  setSharedHandoff(projectName, "ai-command", handoff);
+public/control-center/pages/workflows.js:1085:  if (allowPersistent && typeof createProjectHandoff === "function") {
+public/control-center/pages/workflows.js:1086:    createProjectHandoff(projectName, handoff).catch((error) => {
+public/control-center/pages/workflows.js:1087:      console.warn("Failed to persist workflow-to-ai handoff:", error.message);
+public/control-center/pages/workflows.js:1205:  createProjectHandoff,
+public/control-center/pages/workflows.js:1209:    createAutoModeController(getState, { getState, navigateTo, createProjectHandoff });
+public/control-center/pages/workflows.js:1285:        setSharedHandoff(projectName, "workflows", {
+public/control-center/pages/workflows.js:1300:        persistWorkflowDraft(projectName, session, session.selectedWorkflowId, "Local handoff seed created", true);
+public/control-center/pages/workflows.js:1384:      setSharedHandoff(projectName, "workflows", {
+public/control-center/pages/workflows.js:1452:        createProjectHandoff,
+public/control-center/pages/workflows.js:1485:        createProjectHandoff,
+public/control-center/pages/workflows.js:1502:        createProjectHandoff,
+public/control-center/pages/workflows.js:1559:      setSharedHandoff(projectName, "ai-command", {
+public/control-center/pages/workflows.js:1595:      setSharedHandoff(projectName, "ai-command", {
+public/control-center/pages/workflows.js:1629:        context: { getState, navigateTo, createProjectHandoff, projectName },
+public/control-center/pages/workflows.js:1658:        context: { getState, navigateTo, createProjectHandoff, projectName },
+public/control-center/pages/workflows.js:1680:      createAutoModeController(getState, { getState, navigateTo, createProjectHandoff });
+public/control-center/pages/workflows.js:1687:        mode: "auto_until_approval",
+public/control-center/pages/workflows.js:1688:        context: { getState, navigateTo, createProjectHandoff, projectName }
+public/control-center/pages/workflows.js:1705:      await resumeAutoMode({ context: { getState, navigateTo, createProjectHandoff, projectName } });
+public/control-center/pages/workflows.js:1721:      await approveCurrentGate({ context: { getState, navigateTo, createProjectHandoff, projectName } });
+public/control-center/pages/workflows.js:1722:      showMessage?.("Approval gate accepted.");
+public/control-center/pages/workflows.js:1729:      await skipCurrentStep({ context: { getState, navigateTo, createProjectHandoff, projectName } });
+public/control-center/pages/workflows.js:1768:    const approvalsTotal = Number(operations.approvals?.total || 0);
+public/control-center/pages/workflows.js:1868:              <span>Approvals</span>
+public/control-center/pages/workflows.js:1869:              <strong>${escapeHtml(String(approvalsTotal))}</strong>
+public/control-center/pages/workflows.js:1896:              <span>Approvals</span>
+public/control-center/pages/workflows.js:1897:              <strong>${escapeHtml(String(approvalsTotal))}</strong>
+public/control-center/pages/workflows.js:1927:          status.textContent = "Workflow prompt prepared in the global AI bar. Review it before running or routing it to AI Command.";

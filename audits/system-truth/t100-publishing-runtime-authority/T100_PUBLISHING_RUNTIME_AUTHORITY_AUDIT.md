@@ -1,0 +1,1667 @@
+# T100 — Publishing Runtime Authority Audit
+
+## Status
+Audit-only. No production files changed.
+
+## Scope
+Focused runtime authority review of `public/control-center/pages/publishing.js`.
+
+## Why Publishing Is Next
+After AI Command, Tool Dock, and Library were closed, T88 ranks Publishing as the next high-risk active surface.
+
+Publishing is a critical authority surface because it may prepare channel payloads, schedules, approval packages, publishing drafts, or external release actions.
+
+## File Summary
+- File: `public/control-center/pages/publishing.js`
+- Lines: 2060
+- Imports: 5
+- Render writes: 1
+- Event bindings: 20
+- Backend/API signals: 549
+- Publish/schedule/channel signals: 497
+- Approval/governance signals: 104
+- Handoff signals: 39
+- Save/storage signals: 128
+- Destructive/execution signals: 504
+- Confirmation signals: 6
+- Access-key/credential signals: 0
+- Navigation signals: 16
+- Disabled/read-only/draft/guard signals: 140
+- Risky terms: 595
+
+## Initial Risk Notes
+- Publishing contains publish/schedule/channel/payload signals. Exact action paths must separate preview/draft from live publishing or scheduling.
+- Publishing contains backend/API-like signals. Need classify durable mutations, approvals, handoffs, and external channel actions.
+- Publishing contains approval/governance signals. Need verify publish/schedule actions are gated by review/approval state.
+- Confirmation dialogs exist and must be mapped to exact authority-sensitive actions.
+
+## Imports
+- L82: `import { getSharedHandoff, setSharedAiDraft, setSharedHandoff } from "../shared-context.js";`
+- L83: `import {`
+- L88: `import { getReadinessBlockers } from "../system-intelligence.js";`
+- L89: `import {`
+- L98: `import {`
+
+## Render Writes
+- L1990: `root.innerHTML = \``
+
+## Event Bindings
+- L13: `\`<button type="button" class="btn btn-secondary" onclick="document.getElementById('publishingBuilderPanel')?.scrollIntoView({behavior:'smooth',block:'start'})">Prepare Publishing Package</button>\`,`
+- L14: `\`<button type="button" class="btn btn-secondary" onclick="document.getElementById('publishingQueuePanel')?.scrollIntoView({behavior:'smooth',block:'start'})">Open Queue</button>\`,`
+- L15: `\`<button type="button" class="btn btn-secondary" onclick="document.getElementById('publishingHandoffPanel')?.scrollIntoView({behavior:'smooth',block:'start'})">Review Approval Gate</button>\`,`
+- L16: `\`<button type="button" class="btn btn-primary" onclick="document.getElementById('publishingPushAiBtn')?.scrollIntoView({behavior:'smooth',block:'start'})">Open AI Review</button>\``
+- L1518: `button.onclick = () => {`
+- L1525: `button.onclick = () => {`
+- L1535: `form.oninput = () => {`
+- L1546: `newBtn.onclick = () => {`
+- L1555: `openQueueBtn.onclick = () => {`
+- L1562: `button.onclick = async () => {`
+- L1575: `scheduleBtn.onclick = async () => {`
+- L1632: `button.onclick = async () => {`
+- L1724: `approveBtn.onclick = async () => {`
+- L1757: `failBtn.onclick = async () => {`
+- L1787: `loadHandoffBtn.onclick = () => {`
+- L1810: `pushAiBtn.onclick = () => {`
+- L1851: `autoPrepareBtn.onclick = async () => {`
+- L1892: `autoStopBtn.onclick = () => {`
+- L1900: `autoApproveBtn.onclick = async () => {`
+- L1916: `autoSkipBtn.onclick = async () => {`
+
+## Backend / API Signals
+- L2: `function renderPublishingCommandHeader({ projectName, recommendation, selectedItem, summary, queue, blockers, escapeHtml }) {`
+- L6: `selectedItem?.channel && \`<span>Channel: <strong>${escapeHtml(titleCase(selectedItem.channel))}</strong></span>\``
+- L9: `const approval = selectedItem?.approvalStatus ? titleCase(selectedItem.approvalStatus) : "Draft";`
+- L11: `const safety = \`Publishing prepares channel packages, manual schedule records, and approval-ready handoffs. External publishing requires provider proof; backend status changes remain <strong>confirmation-gated</strong> and governed by <strong>backend approval rules</strong>.\`;`
+- L13: `\`<button type="button" class="btn btn-secondary" onclick="document.getElementById('publishingBuilderPanel')?.scrollIntoView({behavior:'smooth',block:'start'})">Prepare Publishing Package</button>\`,`
+- L14: `\`<button type="button" class="btn btn-secondary" onclick="document.getElementById('publishingQueuePanel')?.scrollIntoView({behavior:'smooth',block:'start'})">Open Queue</button>\`,`
+- L15: `\`<button type="button" class="btn btn-secondary" onclick="document.getElementById('publishingHandoffPanel')?.scrollIntoView({behavior:'smooth',block:'start'})">Review Approval Gate</button>\`,`
+- L16: `\`<button type="button" class="btn btn-primary" onclick="document.getElementById('publishingPushAiBtn')?.scrollIntoView({behavior:'smooth',block:'start'})">Open AI Review</button>\``
+- L19: `<section class="publishing-command-header" role="region" aria-label="Publishing Command Header">`
+- L20: `<div class="publishing-command-header-title">Publishing Control Workspace</div>`
+- L21: `<div class="publishing-command-header-context">${context}</div>`
+- L22: `<div class="publishing-command-header-status">Status: <strong>${escapeHtml(status)}</strong> &middot; Approval: <strong>${escapeHtml(approval)}</strong></div>`
+- L23: `<div class="publishing-command-header-status">Next: <span>${nextAction}</span></div>`
+- L24: `<div class="publishing-command-header-safety">${safety}</div>`
+- L25: `<div class="publishing-command-header-actions">${actions}</div>`
+- L30: `function renderPublishingWorkflowStrip({ selectedItem, recommendation, blockers, approvalState, escapeHtml }) {`
+- L35: `{ key: "approval", label: "Approval" },`
+- L36: `{ key: "schedule", label: "Schedule" },`
+- L37: `{ key: "handoff", label: "Manual Completion Handoff" }`
+- L43: `approval: selectedItem?.approvalStatus === "approved" ? "ready" : selectedItem?.approvalStatus === "needs approval" ? "warning" : "missing",`
+- L44: `schedule: selectedItem?.status === "scheduled" ? "ready" : "missing",`
+- L45: `handoff: selectedItem?.status === "published" ? "ready" : "missing"`
+- L48: `<nav class="publishing-workflow-strip" aria-label="Publishing Workflow">`
+- L50: `<div class="publishing-workflow-step is-${statusMap[step.key]}" aria-label="${escapeHtml(step.label)}: ${statusMap[step.key]}">`
+- L52: `<span class="publishing-workflow-step-label">${statusMap[step.key]}</span>`
+- L59: `function renderPublishingReadinessSummary({ selectedItem, recommendation, blockers, assetData, escapeHtml }) {`
+- L64: `{ key: "channel", label: "Channel", state: selectedItem?.channel ? "ready" : "missing" },`
+- L65: `{ key: "schedule", label: "Schedule", state: selectedItem?.scheduledFor ? "ready" : "missing" },`
+- L67: `{ key: "approval", label: "Approval", state: selectedItem?.approvalStatus === "approved" ? "ready" : selectedItem?.approvalStatus === "needs approval" ? "warning" : "missing" }`
+- L69: `const blockersSummary = blockers && blockers.length ? \`<div class="publishing-readiness-card is-warning">${escapeHtml(blockers.length)} blocker(s) present</div>\` : "";`
+- L71: `<section class="publishing-readiness-summary" aria-label="Publishing Readiness Summary">`
+- L73: `<div class="publishing-readiness-card is-${r.state}">`
+- L74: `<span class="publishing-readiness-card-label">${escapeHtml(r.label)}</span>`
+- L82: `import { getSharedHandoff, setSharedAiDraft, setSharedHandoff } from "../shared-context.js";`
+- L83: `import {`
+- L88: `import { getReadinessBlockers } from "../system-intelligence.js";`
+- L89: `import {`
+- L98: `import {`
+- L99: `buildSchedulePayload,`
+- L101: `buildPublishingAiPrompt`
+- L102: `} from "./publishing/publishing-payloads.js";`
+- L104: `const publishingSessions = new Map();`
+- L105: `const PUBLISHING_LOCAL_DRAFTS_KEY = "mh-publishing-local-drafts-v1";`
+- L106: `const STATUS_FILTERS = ["all", "draft", "ready", "needs approval", "scheduled", "published", "failed"];`
+- L107: `const DISPLAY_STATUSES = ["draft", "ready", "needs approval", "scheduled", "published", "failed"];`
+- L108: `const CHANNEL_DEFAULTS = ["instagram", "facebook", "tiktok", "youtube", "email", "amazon", "ebay", "website"];`
+- L109: `const APPROVAL_STATUSES = ["draft", "needs approval", "approved"];`
+- L110: `const PUBLISHING_ASSET_KEYS = [`
+- L120: `const publishingAutomationState = {`
+- L124: `let publishingAutoModeUnsubscribe = null;`
+- L125: `let publishingAutoModeControllerReady = false;`
+- L126: `let publishingAutomationEnabled = false;`
+- L127: `let publishingRenderCallback = null;`
+- L128: `let publishingRenderTimer = null;`
+- L130: `function schedulePublishingRender(render) {`
+- L132: `publishingRenderCallback = render;`
+- L135: `if (publishingRenderTimer) {`
+- L139: `publishingRenderTimer = window.setTimeout(() => {`
+- L140: `publishingRenderTimer = null;`
+- L142: `if (typeof publishingRenderCallback === "function") {`
+- L143: `publishingRenderCallback();`
+- L148: `function ensurePublishingAutoModeBinding(getState, navigateTo, render) {`
+- L149: `publishingRenderCallback = render;`
+- L151: `if (!publishingAutomationEnabled) {`
+- L155: `if (!publishingAutoModeControllerReady) {`
+- L157: `publishingAutoModeControllerReady = true;`
+- L160: `if (publishingAutoModeUnsubscribe) {`
+- L164: `publishingAutoModeUnsubscribe = subscribeAutoMode(() => {`
+- L172: `schedulePublishingRender();`
+- L229: `function formatDateTime(value, fallback = "Not scheduled") {`
+- L242: `if (!date) return "Unscheduled";`
+- L272: `if (["ready", "approved", "ready_for_manual_publish", "ready_for_manual_send"].includes(normalized)) return "ready";`
+- L273: `if (["needs approval", "needs_approval", "approval", "pending_approval", "review", "in_review"].includes(normalized)) {`
+- L274: `return "needs approval";`
+- L276: `if (["scheduled", "queued", "queue", "pending", "pending_publish"].includes(normalized)) return "scheduled";`
+- L277: `if (["published", "completed", "complete", "success", "done", "sent", "live"].includes(normalized)) return "published";`
+- L284: `if (status === "published") return "success";`
+- L285: `if (status === "ready" || status === "scheduled") return "warning";`
+- L297: `const parsed = JSON.parse(window.localStorage?.getItem(PUBLISHING_LOCAL_DRAFTS_KEY) || "{}");`
+- L307: `window.localStorage?.setItem(PUBLISHING_LOCAL_DRAFTS_KEY, JSON.stringify(map || {}));`
+- L325: `id: asString(draft.id || \`local-publish-${Date.now()}\`),`
+- L353: `channel: "instagram",`
+- L355: `publishDate: toDateInput(tomorrow),`
+- L356: `publishTime: "09:00",`
+- L357: `approvalStatus: "draft",`
+- L365: `if (!publishingSessions.has(key)) {`
+- L366: `publishingSessions.set(key, {`
+- L373: `loadedHandoffId: "",`
+- L377: `return publishingSessions.get(key);`
+- L395: `if (item.campaign) return \`${item.campaign} ${titleCase(item.channel || "publish")}\`;`
+- L396: `if (context.activeCampaign) return \`${context.activeCampaign} ${titleCase(item.channel || "publish")}\`;`
+- L397: `return \`${titleCase(item.channel || "Publishing")} item\`;`
+- L403: `const scheduledFor = firstText(raw.scheduled_for, raw.scheduledFor);`
+- L404: `const status = normalizeStatus(raw.execution_status || raw.status, scheduledFor ? "scheduled" : "draft");`
+- L405: `const channel = toKey(raw.channel || preview.channel);`
+- L412: `channel,`
+- L414: `scheduledFor,`
+- L418: `approvalStatus: status === "ready" ? "approved" : status === "needs approval" ? "needs approval" : "draft",`
+- L444: `const scheduledItems = asArray(activity.scheduled_jobs).map((job) => {`
+- L453: `latest ? "Scheduled job + result" : "Scheduled job"`
+- L457: `const knownIds = new Set(scheduledItems.map((item) => item.jobId));`
+- L463: `const backendIds = new Set([...scheduledItems, ...orphanResults].map((item) => item.id));`
+- L466: `return [...visibleLocalDrafts, ...scheduledItems, ...orphanResults].sort(compareQueueItems);`
+- L473: `"needs approval": 2,`
+- L474: `scheduled: 3,`
+- L476: `published: 5`
+- L481: `const aTime = toDate(a.scheduledFor || a.updatedAt || a.createdAt)?.getTime() || 0;`
+- L482: `const bTime = toDate(b.scheduledFor || b.updatedAt || b.createdAt)?.getTime() || 0;`
+- L486: `function buildChannels(state, queue) {`
+- L491: `...queue.map((item) => item.channel),`
+- L492: `...CHANNEL_DEFAULTS`
+- L513: `function getNextPublishWindow(queue) {`
+- L515: `.filter((item) => item.scheduledFor && ["scheduled", "ready"].includes(item.status))`
+- L516: `.sort((a, b) => (toDate(a.scheduledFor)?.getTime() || 0) - (toDate(b.scheduledFor)?.getTime() || 0))[0];`
+- L517: `return next ? \`${formatDateTime(next.scheduledFor)} - ${next.title}\` : "No scheduled window";`
+- L520: `function syncFormFromItem(session, item) {`
+- L527: `channel: item.channel || session.form.channel || "",`
+- L529: `publishDate: toDateInput(item.scheduledFor),`
+- L530: `publishTime: toTimeInput(item.scheduledFor),`
+- L531: `approvalStatus: item.approvalStatus || "draft",`
+- L550: `function syncSessionForm(session, form) {`
+- L558: `function buildScheduleTime(form) {`
+- L559: `const date = clean(form.publishDate);`
+- L561: `return \`${date}T${clean(form.publishTime) || "09:00"}:00Z\`;`
+- L564: `function buildPublishingAutoModePlan(session) {`
+- L568: `"Prepare publishing draft from current project context."`
+- L573: `id: \`publishing-prepare-${Date.now()}\`,`
+- L574: `type: "prepare_publishing_draft",`
+- L575: `targetPage: "publishing",`
+- L576: `action: "Prepare publishing draft",`
+- L579: `reason: "Prepare a safe publishing draft without executing publish.",`
+- L580: `title: firstText(session.form.title, "Prepared publishing draft")`
+- L585: `id: \`publishing-gate-${Date.now()}\`,`
+- L586: `type: "publish_now",`
+- L587: `targetPage: "publishing",`
+- L588: `action: "Record manual publish completion",`
+- L591: `reason: "This records a manual publishing completion only after review; external provider execution requires separate proof."`
+- L604: `if (!clean(form.channel)) errors.channel = "Channel is required.";`
+- L606: `if (["schedule", "publish", "retry"].includes(intent) && !clean(form.publishDate)) {`
+- L607: `errors.publishDate = "Publish date is required for this action.";`
+- L609: `if (intent === "publish" && form.approvalStatus !== "approved") {`
+- L610: `errors.approvalStatus = "Publishing readiness must be approved before recording manual completion.";`
+- L617: `function summarizePublishingBlockers(assetBlockers = []) {`
+- L626: `function guardPublishingAssetBlockers(session, assetBlockers, showMessage, actionLabel = "this publishing action") {`
+- L629: `const summary = summarizePublishingBlockers(blockers);`
+- L630: `const message = \`Publishing blocker(s) must be resolved before ${actionLabel}: ${summary || "required publishing assets are missing or need review"}.\`;`
+- L636: `function confirmPublishingBackendAction(message) {`
+- L643: `return message ? \`<div class="publishing-inline-error">${escapeHtml(message)}</div>\` : "";`
+- L647: `// Add governance/approval hints for status pills`
+- L649: `if (status === "needs approval") {`
+- L650: `hint = "title=\"Request Approval Review. Confirmation required before execution.\" aria-label=\"Request Approval Review. Confirmation required before execution.\"";`
+- L652: `hint = "title=\"Prepare Governance Review. Backend approval rules apply.\" aria-label=\"Prepare Governance Review. Backend approval rules apply.\"";`
+- L653: `} else if (status === "scheduled") {`
+- L656: `return \`<span class="publishing-status-pill is-${escapeHtml(statusClass(status))}" ${hint}>${escapeHtml(titleCase(status))}</span>\`;`
+- L662: `.publishing-execution-center {`
+- L668: `.publishing-execution-grid {`
+- L674: `.publishing-main-column,`
+- L675: `.publishing-side-column {`
+- L682: `.publishing-card {`
+- L687: `.publishing-overview-grid {`
+- L693: `.publishing-overview-item,`
+- L694: `.publishing-impact-chip {`
+- L702: `.publishing-overview-item span,`
+- L703: `.publishing-impact-chip small {`
+- L710: `.publishing-overview-item strong,`
+- L711: `.publishing-impact-chip strong {`
+- L717: `.publishing-overview-item.is-wide {`
+- L721: `.publishing-impact-row,`
+- L722: `.publishing-action-row,`
+- L723: `.publishing-form-actions,`
+- L724: `.publishing-filter-row {`
+- L731: `.publishing-impact-row {`
+- L735: `.publishing-action-row,`
+- L736: `.publishing-form-actions {`
+- L740: `.publishing-action-row .btn,`
+- L741: `.publishing-form-actions .btn {`
+- L747: `.publishing-impact-chip {`
+- L751: `.publishing-filter-chip {`
+- L764: `.publishing-filter-chip.is-active {`
+- L769: `/* Publishing queue dark contrast correction */`
+- L770: `.publishing-queue-list,`
+- L771: `.publishing-calendar-list,`
+- L772: `.publishing-blocker-list {`
+- L779: `.publishing-queue-row {`
+- L790: `.publishing-queue-row.is-active {`
+- L795: `.publishing-queue-main,`
+- L796: `.publishing-calendar-row {`
+- L807: `.publishing-queue-title {`
+- L815: `.publishing-queue-meta {`
+- L824: `.publishing-queue-actions {`
+- L831: `.publishing-queue-actions button {`
+- L843: `.publishing-queue-actions button:focus-visible,`
+- L844: `.publishing-queue-main:focus-visible,`
+- L845: `.publishing-calendar-row:focus-visible,`
+- L846: `.publishing-filter-chip:focus-visible {`
+- L851: `.publishing-queue-actions button:disabled,`
+- L852: `.publishing-queue-actions button[disabled] {`
+- L860: `.publishing-status-pill {`
+- L873: `.publishing-status-pill.is-ready,`
+- L874: `.publishing-status-pill.is-scheduled {`
+- L878: `.publishing-status-pill.is-published {`
+- L882: `.publishing-status-pill.is-failed {`
+- L886: `.publishing-inline-error {`
+- L893: `.publishing-calendar-row {`
+- L904: `.publishing-calendar-row em {`
+- L913: `.publishing-execution-grid {`
+- L918: `.publishing-queue-row {`
+- L923: `.publishing-queue-actions {`
+- L937: `function extractHandoffSummary(handoff) {`
+- L938: `const payload = asObject(handoff?.payload);`
+- L942: `id: asString(handoff?.id || payload.workflow_id || payload.prompt || payload.workflow_title),`
+- L943: `sourcePage: asString(handoff?.source_page || "workflows"),`
+- L948: `channel: firstText(output.channel, payload.channel),`
+- L955: `function getPublishingHandoff(projectName, operations) {`
+- L957: `getSharedHandoff(projectName, "publishing", operations, "workflows") ||`
+- L958: `getSharedHandoff(projectName, "publishing", operations, "ai-command") ||`
+- L959: `getSharedHandoff(projectName, "publishing", operations)`
+- L967: `function buildRecommendation({ queue, counts, assetBlockers, checks, handoff, globalBlockers }) {`
+- L970: `const needsApproval = queue.find((item) => item.status === "needs approval");`
+- L977: `action: "Retry failed publishing item",`
+- L978: `why: \`${failed.title} is blocked or failed. Clear the blocker before adding more scheduled work.\`,`
+- L990: `if (needsApproval) {`
+- L992: `action: "Review approval queue",`
+- L993: `why: \`${needsApproval.title} needs approval before it can move into the manual publishing queue.\`,`
+- L994: `focusId: needsApproval.id,`
+- L998: `if (handoff) {`
+- L1001: `why: "A workflow handoff is available. Loading it keeps execution moving without inventing backend data.",`
+- L1008: `action: "Complete and schedule a draft",`
+- L1009: `why: \`${draft.title} is not yet executable. Add channel, content, approval, and timing details.\`,`
+- L1015: `action: connectedCount ? "Create a publishing draft" : "Connect a publishing channel",`
+- L1017: `? "No queue item is ready. Start with a draft and save it locally until it can be scheduled."`
+- L1018: `: "Channel readiness is missing. Publishing can prepare drafts, but live execution needs a connected destination.",`
+- L1026: `<section class="card publishing-card">`
+- L1029: `<div class="setup-kicker">Publishing Overview</div>`
+- L1034: `<div class="publishing-overview-grid">`
+- L1035: `<div class="publishing-overview-item"><span>Scheduled items</span><strong>${escapeHtml(String(counts.scheduled))}</strong></div>`
+- L1036: `<div class="publishing-overview-item"><span>Ready for manual review</span><strong>${escapeHtml(String(counts.ready))}</strong></div>`
+- L1037: `<div class="publishing-overview-item"><span>Draft items</span><strong>${escapeHtml(String(counts.draft))}</strong></div>`
+- L1038: `<div class="publishing-overview-item"><span>Failed / blocked items</span><strong>${escapeHtml(String(counts.failed))}</strong></div>`
+- L1039: `<div class="publishing-overview-item is-wide"><span>Next publish window</span><strong>${escapeHtml(getNextPublishWindow(queue))}</strong></div>`
+- L1047: `["Manual publishing readiness", counts.ready + counts.scheduled > 0 ? "Active" : "Needs queue"],`
+- L1048: `["Content", counts.draft || counts.ready || counts.scheduled ? "Present" : "Empty"],`
+- L1050: `["Channel readiness", Object.values(checks).filter(Boolean).length ? "Connected" : "Needs setup"],`
+- L1051: `["Approval", counts["needs approval"] ? "Pending" : counts.ready ? "Approved" : "Draft"],`
+- L1052: `["Automation", counts.scheduled ? "Scheduled" : "Manual"]`
+- L1056: `<section class="card publishing-card" id="publishingRecommendation">`
+- L1061: `<p class="publishing-section-copy">${escapeHtml(recommendation.why)}</p>`
+- L1065: `<div class="publishing-impact-row">`
+- L1067: `<span class="publishing-impact-chip">`
+- L1073: `<div class="publishing-action-row">`
+- L1074: `<button id="publishingOpenQueueBtn" class="btn btn-secondary" type="button">Open Publish Queue</button>`
+- L1075: `<button id="publishingSaveDraftBtn" class="btn btn-secondary" type="button">Save publishing draft</button>`
+- L1076: `<button id="publishingPushAiBtn" class="btn btn-primary" type="button">Send publishing context to AI</button>`
+- L1077: `<button id="publishingAutoPrepareBtn" class="btn btn-secondary" type="button">Auto-prepare publishing plan</button>`
+- L1078: `<button id="publishingAutoStopBtn" class="btn btn-secondary" type="button">Stop Auto Mode</button>`
+- L1080: `<details class="publishing-automation-preview publishing-block-gap">`
+- L1082: `<div class="publishing-automation-preview-copy">Automation cannot publish without manual review, confirmation, and backend approval gates.</div>`
+- L1083: `<div class="simple-banner publishing-inline-gap">Auto Mode status: ${escapeHtml(getAutoModeState().status || "idle")}</div>`
+- L1085: `<div class="simple-banner publishing-block-gap">Cross-system blockers: ${escapeHtml(asArray(recommendation.externalBlockers).map((item) => item.title).join("; "))}</div>`
+- L1087: `${publishingAutomationState.progress ? \`<div class="simple-banner publishing-block-gap">${escapeHtml(publishingAutomationState.progress)}</div>\` : ""}`
+- L1088: `${publishingAutomationState.result ? \`<div class="simple-banner publishing-inline-gap">${escapeHtml(publishingAutomationState.result)}</div>\` : ""}`
+- L1089: `${getAutoModeState().status === "waiting_approval" ? \``
+- L1090: `<div class="simple-banner publishing-inline-gap"><strong>Approval needed:</strong> ${escapeHtml(asObject(getAutoModeState().approvalRequiredStep).reason || "Manual approval required.")}</div>`
+- L1091: `<div class="publishing-action-row publishing-inline-gap">`
+- L1092: `<button id="publishingAutoApproveBtn" class="btn btn-secondary" type="button">Approve automation step</button>`
+- L1093: `<button id="publishingAutoSkipBtn" class="btn btn-secondary" type="button">Skip automation step</button>`
+- L1097: `<div class="simple-banner">Opens AI with this context only. <strong>No approval, publishing, or backend execution is performed.</strong></div>`
+- L1107: `<div class="publishing-filter-row">`
+- L1112: `<button class="publishing-filter-chip${active ? " is-active" : ""}" type="button" data-publishing-filter="${escapeHtml(status)}">`
+- L1125: `<article class="publishing-queue-row${item.id === selectedId ? " is-active" : ""}" data-publishing-row="${escapeHtml(item.id)}">`
+- L1126: `<button class="publishing-queue-main" type="button" data-publishing-select="${escapeHtml(item.id)}">`
+- L1127: `<span class="publishing-queue-title">${escapeHtml(item.title)}</span>`
+- L1128: `<span class="publishing-queue-meta">${escapeHtml(titleCase(item.channel || "unassigned"))} • ${escapeHtml(item.scheduledFor ? formatDateTime(item.scheduledFor) : "Unscheduled")} • ${escapeHtml(item.source)}</span>`
+- L1130: `<div class="publishing-queue-state">${renderStatusPill(item.status, escapeHtml)}</div>`
+- L1131: `<div class="publishing-queue-actions">`
+- L1132: `<button type="button" data-publishing-action="review" data-publishing-id="${escapeHtml(item.id)}">Review Package</button>`
+- L1133: `<button type="button" data-publishing-action="schedule" data-publishing-id="${escapeHtml(item.id)}">Queue for Manual Publishing</button>`
+- L1134: `<button type="button" data-publishing-action="publish" data-publishing-id="${escapeHtml(item.id)}">Record Manual Completion</button>`
+- L1135: `<button type="button" data-publishing-action="pause" data-publishing-id="${escapeHtml(item.id)}">Pause to draft</button>`
+- L1136: `<button type="button" data-publishing-action="retry" data-publishing-id="${escapeHtml(item.id)}">Retry scheduled item</button>`
+
+## Publish / Schedule / Channel Signals
+- L2: `function renderPublishingCommandHeader({ projectName, recommendation, selectedItem, summary, queue, blockers, escapeHtml }) {`
+- L6: `selectedItem?.channel && \`<span>Channel: <strong>${escapeHtml(titleCase(selectedItem.channel))}</strong></span>\``
+- L11: `const safety = \`Publishing prepares channel packages, manual schedule records, and approval-ready handoffs. External publishing requires provider proof; backend status changes remain <strong>confirmation-gated</strong> and governed by <strong>backend approval rules</strong>.\`;`
+- L13: `\`<button type="button" class="btn btn-secondary" onclick="document.getElementById('publishingBuilderPanel')?.scrollIntoView({behavior:'smooth',block:'start'})">Prepare Publishing Package</button>\`,`
+- L14: `\`<button type="button" class="btn btn-secondary" onclick="document.getElementById('publishingQueuePanel')?.scrollIntoView({behavior:'smooth',block:'start'})">Open Queue</button>\`,`
+- L15: `\`<button type="button" class="btn btn-secondary" onclick="document.getElementById('publishingHandoffPanel')?.scrollIntoView({behavior:'smooth',block:'start'})">Review Approval Gate</button>\`,`
+- L16: `\`<button type="button" class="btn btn-primary" onclick="document.getElementById('publishingPushAiBtn')?.scrollIntoView({behavior:'smooth',block:'start'})">Open AI Review</button>\``
+- L19: `<section class="publishing-command-header" role="region" aria-label="Publishing Command Header">`
+- L20: `<div class="publishing-command-header-title">Publishing Control Workspace</div>`
+- L21: `<div class="publishing-command-header-context">${context}</div>`
+- L22: `<div class="publishing-command-header-status">Status: <strong>${escapeHtml(status)}</strong> &middot; Approval: <strong>${escapeHtml(approval)}</strong></div>`
+- L23: `<div class="publishing-command-header-status">Next: <span>${nextAction}</span></div>`
+- L24: `<div class="publishing-command-header-safety">${safety}</div>`
+- L25: `<div class="publishing-command-header-actions">${actions}</div>`
+- L30: `function renderPublishingWorkflowStrip({ selectedItem, recommendation, blockers, approvalState, escapeHtml }) {`
+- L36: `{ key: "schedule", label: "Schedule" },`
+- L44: `schedule: selectedItem?.status === "scheduled" ? "ready" : "missing",`
+- L45: `handoff: selectedItem?.status === "published" ? "ready" : "missing"`
+- L48: `<nav class="publishing-workflow-strip" aria-label="Publishing Workflow">`
+- L50: `<div class="publishing-workflow-step is-${statusMap[step.key]}" aria-label="${escapeHtml(step.label)}: ${statusMap[step.key]}">`
+- L52: `<span class="publishing-workflow-step-label">${statusMap[step.key]}</span>`
+- L59: `function renderPublishingReadinessSummary({ selectedItem, recommendation, blockers, assetData, escapeHtml }) {`
+- L64: `{ key: "channel", label: "Channel", state: selectedItem?.channel ? "ready" : "missing" },`
+- L65: `{ key: "schedule", label: "Schedule", state: selectedItem?.scheduledFor ? "ready" : "missing" },`
+- L69: `const blockersSummary = blockers && blockers.length ? \`<div class="publishing-readiness-card is-warning">${escapeHtml(blockers.length)} blocker(s) present</div>\` : "";`
+- L71: `<section class="publishing-readiness-summary" aria-label="Publishing Readiness Summary">`
+- L73: `<div class="publishing-readiness-card is-${r.state}">`
+- L74: `<span class="publishing-readiness-card-label">${escapeHtml(r.label)}</span>`
+- L99: `buildSchedulePayload,`
+- L100: `buildLocalDraftPayload,`
+- L101: `buildPublishingAiPrompt`
+- L102: `} from "./publishing/publishing-payloads.js";`
+- L104: `const publishingSessions = new Map();`
+- L105: `const PUBLISHING_LOCAL_DRAFTS_KEY = "mh-publishing-local-drafts-v1";`
+- L106: `const STATUS_FILTERS = ["all", "draft", "ready", "needs approval", "scheduled", "published", "failed"];`
+- L107: `const DISPLAY_STATUSES = ["draft", "ready", "needs approval", "scheduled", "published", "failed"];`
+- L108: `const CHANNEL_DEFAULTS = ["instagram", "facebook", "tiktok", "youtube", "email", "amazon", "ebay", "website"];`
+- L110: `const PUBLISHING_ASSET_KEYS = [`
+- L120: `const publishingAutomationState = {`
+- L124: `let publishingAutoModeUnsubscribe = null;`
+- L125: `let publishingAutoModeControllerReady = false;`
+- L126: `let publishingAutomationEnabled = false;`
+- L127: `let publishingRenderCallback = null;`
+- L128: `let publishingRenderTimer = null;`
+- L130: `function schedulePublishingRender(render) {`
+- L132: `publishingRenderCallback = render;`
+- L135: `if (publishingRenderTimer) {`
+- L139: `publishingRenderTimer = window.setTimeout(() => {`
+- L140: `publishingRenderTimer = null;`
+- L142: `if (typeof publishingRenderCallback === "function") {`
+- L143: `publishingRenderCallback();`
+- L148: `function ensurePublishingAutoModeBinding(getState, navigateTo, render) {`
+- L149: `publishingRenderCallback = render;`
+- L151: `if (!publishingAutomationEnabled) {`
+- L155: `if (!publishingAutoModeControllerReady) {`
+- L157: `publishingAutoModeControllerReady = true;`
+- L160: `if (publishingAutoModeUnsubscribe) {`
+- L164: `publishingAutoModeUnsubscribe = subscribeAutoMode(() => {`
+- L172: `schedulePublishingRender();`
+- L229: `function formatDateTime(value, fallback = "Not scheduled") {`
+- L242: `if (!date) return "Unscheduled";`
+- L272: `if (["ready", "approved", "ready_for_manual_publish", "ready_for_manual_send"].includes(normalized)) return "ready";`
+- L276: `if (["scheduled", "queued", "queue", "pending", "pending_publish"].includes(normalized)) return "scheduled";`
+- L277: `if (["published", "completed", "complete", "success", "done", "sent", "live"].includes(normalized)) return "published";`
+- L284: `if (status === "published") return "success";`
+- L285: `if (status === "ready" || status === "scheduled") return "warning";`
+- L297: `const parsed = JSON.parse(window.localStorage?.getItem(PUBLISHING_LOCAL_DRAFTS_KEY) || "{}");`
+- L307: `window.localStorage?.setItem(PUBLISHING_LOCAL_DRAFTS_KEY, JSON.stringify(map || {}));`
+- L325: `id: asString(draft.id || \`local-publish-${Date.now()}\`),`
+- L353: `channel: "instagram",`
+- L355: `publishDate: toDateInput(tomorrow),`
+- L356: `publishTime: "09:00",`
+- L365: `if (!publishingSessions.has(key)) {`
+- L366: `publishingSessions.set(key, {`
+- L377: `return publishingSessions.get(key);`
+- L395: `if (item.campaign) return \`${item.campaign} ${titleCase(item.channel || "publish")}\`;`
+- L396: `if (context.activeCampaign) return \`${context.activeCampaign} ${titleCase(item.channel || "publish")}\`;`
+- L397: `return \`${titleCase(item.channel || "Publishing")} item\`;`
+- L403: `const scheduledFor = firstText(raw.scheduled_for, raw.scheduledFor);`
+- L404: `const status = normalizeStatus(raw.execution_status || raw.status, scheduledFor ? "scheduled" : "draft");`
+- L405: `const channel = toKey(raw.channel || preview.channel);`
+- L412: `channel,`
+- L413: `contentItem: firstText(raw.content_item, raw.contentItem, raw.content_id, preview.content_item, preview.caption, preview.body),`
+- L414: `scheduledFor,`
+- L444: `const scheduledItems = asArray(activity.scheduled_jobs).map((job) => {`
+- L453: `latest ? "Scheduled job + result" : "Scheduled job"`
+- L457: `const knownIds = new Set(scheduledItems.map((item) => item.jobId));`
+- L463: `const backendIds = new Set([...scheduledItems, ...orphanResults].map((item) => item.id));`
+- L466: `return [...visibleLocalDrafts, ...scheduledItems, ...orphanResults].sort(compareQueueItems);`
+- L474: `scheduled: 3,`
+- L476: `published: 5`
+- L481: `const aTime = toDate(a.scheduledFor || a.updatedAt || a.createdAt)?.getTime() || 0;`
+- L482: `const bTime = toDate(b.scheduledFor || b.updatedAt || b.createdAt)?.getTime() || 0;`
+- L486: `function buildChannels(state, queue) {`
+- L491: `...queue.map((item) => item.channel),`
+- L492: `...CHANNEL_DEFAULTS`
+- L513: `function getNextPublishWindow(queue) {`
+- L515: `.filter((item) => item.scheduledFor && ["scheduled", "ready"].includes(item.status))`
+- L516: `.sort((a, b) => (toDate(a.scheduledFor)?.getTime() || 0) - (toDate(b.scheduledFor)?.getTime() || 0))[0];`
+- L517: `return next ? \`${formatDateTime(next.scheduledFor)} - ${next.title}\` : "No scheduled window";`
+- L527: `channel: item.channel || session.form.channel || "",`
+- L529: `publishDate: toDateInput(item.scheduledFor),`
+- L530: `publishTime: toTimeInput(item.scheduledFor),`
+- L558: `function buildScheduleTime(form) {`
+- L559: `const date = clean(form.publishDate);`
+- L561: `return \`${date}T${clean(form.publishTime) || "09:00"}:00Z\`;`
+- L564: `function buildPublishingAutoModePlan(session) {`
+- L568: `"Prepare publishing draft from current project context."`
+- L573: `id: \`publishing-prepare-${Date.now()}\`,`
+- L574: `type: "prepare_publishing_draft",`
+- L575: `targetPage: "publishing",`
+- L576: `action: "Prepare publishing draft",`
+- L577: `payload: {`
+- L579: `reason: "Prepare a safe publishing draft without executing publish.",`
+- L580: `title: firstText(session.form.title, "Prepared publishing draft")`
+- L585: `id: \`publishing-gate-${Date.now()}\`,`
+- L586: `type: "publish_now",`
+- L587: `targetPage: "publishing",`
+- L588: `action: "Record manual publish completion",`
+- L589: `payload: {`
+- L591: `reason: "This records a manual publishing completion only after review; external provider execution requires separate proof."`
+- L604: `if (!clean(form.channel)) errors.channel = "Channel is required.";`
+- L606: `if (["schedule", "publish", "retry"].includes(intent) && !clean(form.publishDate)) {`
+- L607: `errors.publishDate = "Publish date is required for this action.";`
+- L609: `if (intent === "publish" && form.approvalStatus !== "approved") {`
+- L610: `errors.approvalStatus = "Publishing readiness must be approved before recording manual completion.";`
+- L617: `function summarizePublishingBlockers(assetBlockers = []) {`
+- L626: `function guardPublishingAssetBlockers(session, assetBlockers, showMessage, actionLabel = "this publishing action") {`
+- L629: `const summary = summarizePublishingBlockers(blockers);`
+- L630: `const message = \`Publishing blocker(s) must be resolved before ${actionLabel}: ${summary || "required publishing assets are missing or need review"}.\`;`
+- L636: `function confirmPublishingBackendAction(message) {`
+- L643: `return message ? \`<div class="publishing-inline-error">${escapeHtml(message)}</div>\` : "";`
+- L653: `} else if (status === "scheduled") {`
+- L656: `return \`<span class="publishing-status-pill is-${escapeHtml(statusClass(status))}" ${hint}>${escapeHtml(titleCase(status))}</span>\`;`
+- L662: `.publishing-execution-center {`
+- L668: `.publishing-execution-grid {`
+- L674: `.publishing-main-column,`
+- L675: `.publishing-side-column {`
+- L682: `.publishing-card {`
+- L687: `.publishing-overview-grid {`
+- L693: `.publishing-overview-item,`
+- L694: `.publishing-impact-chip {`
+- L702: `.publishing-overview-item span,`
+- L703: `.publishing-impact-chip small {`
+- L710: `.publishing-overview-item strong,`
+- L711: `.publishing-impact-chip strong {`
+- L717: `.publishing-overview-item.is-wide {`
+- L721: `.publishing-impact-row,`
+- L722: `.publishing-action-row,`
+- L723: `.publishing-form-actions,`
+- L724: `.publishing-filter-row {`
+- L731: `.publishing-impact-row {`
+- L735: `.publishing-action-row,`
+- L736: `.publishing-form-actions {`
+- L740: `.publishing-action-row .btn,`
+- L741: `.publishing-form-actions .btn {`
+- L747: `.publishing-impact-chip {`
+- L751: `.publishing-filter-chip {`
+- L764: `.publishing-filter-chip.is-active {`
+- L769: `/* Publishing queue dark contrast correction */`
+- L770: `.publishing-queue-list,`
+- L771: `.publishing-calendar-list,`
+- L772: `.publishing-blocker-list {`
+- L779: `.publishing-queue-row {`
+- L790: `.publishing-queue-row.is-active {`
+- L795: `.publishing-queue-main,`
+- L796: `.publishing-calendar-row {`
+- L807: `.publishing-queue-title {`
+- L815: `.publishing-queue-meta {`
+- L824: `.publishing-queue-actions {`
+- L831: `.publishing-queue-actions button {`
+- L843: `.publishing-queue-actions button:focus-visible,`
+- L844: `.publishing-queue-main:focus-visible,`
+- L845: `.publishing-calendar-row:focus-visible,`
+- L846: `.publishing-filter-chip:focus-visible {`
+- L851: `.publishing-queue-actions button:disabled,`
+- L852: `.publishing-queue-actions button[disabled] {`
+- L860: `.publishing-status-pill {`
+- L873: `.publishing-status-pill.is-ready,`
+- L874: `.publishing-status-pill.is-scheduled {`
+- L878: `.publishing-status-pill.is-published {`
+- L882: `.publishing-status-pill.is-failed {`
+- L886: `.publishing-inline-error {`
+- L893: `.publishing-calendar-row {`
+- L904: `.publishing-calendar-row em {`
+- L913: `.publishing-execution-grid {`
+- L918: `.publishing-queue-row {`
+- L923: `.publishing-queue-actions {`
+- L931: `function summarizeText(value, fallback = "No content payload available yet.") {`
+- L938: `const payload = asObject(handoff?.payload);`
+- L939: `const output = asObject(payload.output);`
+- L940: `const draftContext = asObject(payload.draft_context);`
+- L942: `id: asString(handoff?.id || payload.workflow_id || payload.prompt || payload.workflow_title),`
+- L944: `workflowId: asString(payload.workflow_id),`
+- L945: `title: firstText(output.title, payload.workflow_title, draftContext.lastResponseTitle, "Workflow output"),`
+- L946: `project: firstText(draftContext.projectName, payload.project_name, output.project),`
+- L947: `campaign: firstText(payload.campaign_name, output.campaign, output.campaignName),`
+- L948: `channel: firstText(output.channel, payload.channel),`
+- L949: `contentItem: firstText(output.content_item, output.contentItem, output.summary, payload.prompt),`
+- L950: `summary: firstText(output.summary, output.description, payload.prompt, draftContext.lastCommand),`
+- L955: `function getPublishingHandoff(projectName, operations) {`
+- L957: `getSharedHandoff(projectName, "publishing", operations, "workflows") ||`
+- L958: `getSharedHandoff(projectName, "publishing", operations, "ai-command") ||`
+- L959: `getSharedHandoff(projectName, "publishing", operations)`
+- L977: `action: "Retry failed publishing item",`
+- L978: `why: \`${failed.title} is blocked or failed. Clear the blocker before adding more scheduled work.\`,`
+- L993: `why: \`${needsApproval.title} needs approval before it can move into the manual publishing queue.\`,`
+- L1008: `action: "Complete and schedule a draft",`
+- L1009: `why: \`${draft.title} is not yet executable. Add channel, content, approval, and timing details.\`,`
+- L1015: `action: connectedCount ? "Create a publishing draft" : "Connect a publishing channel",`
+- L1017: `? "No queue item is ready. Start with a draft and save it locally until it can be scheduled."`
+- L1018: `: "Channel readiness is missing. Publishing can prepare drafts, but live execution needs a connected destination.",`
+- L1026: `<section class="card publishing-card">`
+- L1029: `<div class="setup-kicker">Publishing Overview</div>`
+- L1034: `<div class="publishing-overview-grid">`
+- L1035: `<div class="publishing-overview-item"><span>Scheduled items</span><strong>${escapeHtml(String(counts.scheduled))}</strong></div>`
+- L1036: `<div class="publishing-overview-item"><span>Ready for manual review</span><strong>${escapeHtml(String(counts.ready))}</strong></div>`
+- L1037: `<div class="publishing-overview-item"><span>Draft items</span><strong>${escapeHtml(String(counts.draft))}</strong></div>`
+- L1038: `<div class="publishing-overview-item"><span>Failed / blocked items</span><strong>${escapeHtml(String(counts.failed))}</strong></div>`
+- L1039: `<div class="publishing-overview-item is-wide"><span>Next publish window</span><strong>${escapeHtml(getNextPublishWindow(queue))}</strong></div>`
+- L1047: `["Manual publishing readiness", counts.ready + counts.scheduled > 0 ? "Active" : "Needs queue"],`
+- L1048: `["Content", counts.draft || counts.ready || counts.scheduled ? "Present" : "Empty"],`
+- L1050: `["Channel readiness", Object.values(checks).filter(Boolean).length ? "Connected" : "Needs setup"],`
+- L1052: `["Automation", counts.scheduled ? "Scheduled" : "Manual"]`
+- L1056: `<section class="card publishing-card" id="publishingRecommendation">`
+- L1061: `<p class="publishing-section-copy">${escapeHtml(recommendation.why)}</p>`
+- L1065: `<div class="publishing-impact-row">`
+- L1067: `<span class="publishing-impact-chip">`
+- L1073: `<div class="publishing-action-row">`
+- L1074: `<button id="publishingOpenQueueBtn" class="btn btn-secondary" type="button">Open Publish Queue</button>`
+- L1075: `<button id="publishingSaveDraftBtn" class="btn btn-secondary" type="button">Save publishing draft</button>`
+- L1076: `<button id="publishingPushAiBtn" class="btn btn-primary" type="button">Send publishing context to AI</button>`
+- L1077: `<button id="publishingAutoPrepareBtn" class="btn btn-secondary" type="button">Auto-prepare publishing plan</button>`
+- L1078: `<button id="publishingAutoStopBtn" class="btn btn-secondary" type="button">Stop Auto Mode</button>`
+- L1080: `<details class="publishing-automation-preview publishing-block-gap">`
+- L1082: `<div class="publishing-automation-preview-copy">Automation cannot publish without manual review, confirmation, and backend approval gates.</div>`
+- L1083: `<div class="simple-banner publishing-inline-gap">Auto Mode status: ${escapeHtml(getAutoModeState().status || "idle")}</div>`
+- L1085: `<div class="simple-banner publishing-block-gap">Cross-system blockers: ${escapeHtml(asArray(recommendation.externalBlockers).map((item) => item.title).join("; "))}</div>`
+- L1087: `${publishingAutomationState.progress ? \`<div class="simple-banner publishing-block-gap">${escapeHtml(publishingAutomationState.progress)}</div>\` : ""}`
+- L1088: `${publishingAutomationState.result ? \`<div class="simple-banner publishing-inline-gap">${escapeHtml(publishingAutomationState.result)}</div>\` : ""}`
+- L1090: `<div class="simple-banner publishing-inline-gap"><strong>Approval needed:</strong> ${escapeHtml(asObject(getAutoModeState().approvalRequiredStep).reason || "Manual approval required.")}</div>`
+- L1091: `<div class="publishing-action-row publishing-inline-gap">`
+- L1092: `<button id="publishingAutoApproveBtn" class="btn btn-secondary" type="button">Approve automation step</button>`
+- L1093: `<button id="publishingAutoSkipBtn" class="btn btn-secondary" type="button">Skip automation step</button>`
+- L1097: `<div class="simple-banner">Opens AI with this context only. <strong>No approval, publishing, or backend execution is performed.</strong></div>`
+- L1107: `<div class="publishing-filter-row">`
+- L1112: `<button class="publishing-filter-chip${active ? " is-active" : ""}" type="button" data-publishing-filter="${escapeHtml(status)}">`
+- L1125: `<article class="publishing-queue-row${item.id === selectedId ? " is-active" : ""}" data-publishing-row="${escapeHtml(item.id)}">`
+- L1126: `<button class="publishing-queue-main" type="button" data-publishing-select="${escapeHtml(item.id)}">`
+- L1127: `<span class="publishing-queue-title">${escapeHtml(item.title)}</span>`
+- L1128: `<span class="publishing-queue-meta">${escapeHtml(titleCase(item.channel || "unassigned"))} • ${escapeHtml(item.scheduledFor ? formatDateTime(item.scheduledFor) : "Unscheduled")} • ${escapeHtml(item.source)}</span>`
+- L1130: `<div class="publishing-queue-state">${renderStatusPill(item.status, escapeHtml)}</div>`
+- L1131: `<div class="publishing-queue-actions">`
+- L1132: `<button type="button" data-publishing-action="review" data-publishing-id="${escapeHtml(item.id)}">Review Package</button>`
+- L1133: `<button type="button" data-publishing-action="schedule" data-publishing-id="${escapeHtml(item.id)}">Queue for Manual Publishing</button>`
+- L1134: `<button type="button" data-publishing-action="publish" data-publishing-id="${escapeHtml(item.id)}">Record Manual Completion</button>`
+- L1135: `<button type="button" data-publishing-action="pause" data-publishing-id="${escapeHtml(item.id)}">Pause to draft</button>`
+- L1136: `<button type="button" data-publishing-action="retry" data-publishing-id="${escapeHtml(item.id)}">Retry scheduled item</button>`
+- L1140: `: \`<div class="empty-box">No publish queue items match this filter. Create or load a draft to start the execution queue.</div>\`;`
+- L1143: `<section class="card publishing-card" id="publishingQueuePanel">`
+- L1146: `<div class="setup-kicker">Publish Queue</div>`
+- L1152: `<div class="publishing-queue-list">${rows}</div>`
+- L1157: `function renderBuilder(session, channels, checks, escapeHtml) {`
+- L1159: `<section class="card publishing-card" id="publishingBuilderPanel">`
+- L1162: `<div class="setup-kicker">Publishing Builder</div>`
+- L1163: `<h3>Draft, validate, and queue manual publishing records</h3>`
+- L1167: `<form id="publishingBuilderForm" class="setup-form-grid publishing-builder-form" novalidate>`
+- L1171: `<label class="setup-label" for="publishingProjectInput">Project</label>`
+- L1174: `<input id="publishingProjectInput" name="project" class="setup-input" type="text" value="${escapeHtml(session.form.project)}" placeholder="Project name">`
+- L1179: `<label class="setup-label" for="publishingCampaignInput">Campaign</label>`
+- L1182: `<input id="publishingCampaignInput" name="campaign" class="setup-input" type="text" value="${escapeHtml(session.form.campaign)}" placeholder="Campaign or launch wave">`
+- L1190: `<label class="setup-label" for="publishingChannelInput">Channel</label>`
+- L1191: `<span class="setup-field-state is-optional">${escapeHtml(checks[toKey(session.form.channel)] ? "Ready" : "Planning")}</span>`
+- L1193: `<select id="publishingChannelInput" name="channel" class="setup-input">`
+- L1194: `<option value="">Choose channel</option>`
+- L1195: `${channels.map((channel) => \``
+- L1196: `<option value="${escapeHtml(channel)}"${channel === session.form.channel ? " selected" : ""}>${escapeHtml(titleCase(channel))}</option>`
+- L1199: `${fieldError(session, "channel", escapeHtml)}`
+- L1203: `<label class="setup-label" for="publishingContentInput">Content item</label>`
+- L1206: `<input id="publishingContentInput" name="contentItem" class="setup-input" type="text" value="${escapeHtml(session.form.contentItem)}" placeholder="Caption, email, product update, or workflow output">`
+
+## Approval / Governance Signals
+- L9: `const approval = selectedItem?.approvalStatus ? titleCase(selectedItem.approvalStatus) : "Draft";`
+- L10: `const nextAction = recommendation?.action ? escapeHtml(recommendation.action) : "Review queue";`
+- L11: `const safety = \`Publishing prepares channel packages, manual schedule records, and approval-ready handoffs. External publishing requires provider proof; backend status changes remain <strong>confirmation-gated</strong> and governed by <strong>backend approval rules</strong>.\`;`
+- L15: `\`<button type="button" class="btn btn-secondary" onclick="document.getElementById('publishingHandoffPanel')?.scrollIntoView({behavior:'smooth',block:'start'})">Review Approval Gate</button>\`,`
+- L16: `\`<button type="button" class="btn btn-primary" onclick="document.getElementById('publishingPushAiBtn')?.scrollIntoView({behavior:'smooth',block:'start'})">Open AI Review</button>\``
+- L22: `<div class="publishing-command-header-status">Status: <strong>${escapeHtml(status)}</strong> &middot; Approval: <strong>${escapeHtml(approval)}</strong></div>`
+- L30: `function renderPublishingWorkflowStrip({ selectedItem, recommendation, blockers, approvalState, escapeHtml }) {`
+- L35: `{ key: "approval", label: "Approval" },`
+- L43: `approval: selectedItem?.approvalStatus === "approved" ? "ready" : selectedItem?.approvalStatus === "needs approval" ? "warning" : "missing",`
+- L66: `{ key: "governance", label: "Governance", state: selectedItem?.governanceStatus === "approved" ? "ready" : "missing" },`
+- L67: `{ key: "approval", label: "Approval", state: selectedItem?.approvalStatus === "approved" ? "ready" : selectedItem?.approvalStatus === "needs approval" ? "warning" : "missing" }`
+- L94: `approveCurrentGate,`
+- L106: `const STATUS_FILTERS = ["all", "draft", "ready", "needs approval", "scheduled", "published", "failed"];`
+- L107: `const DISPLAY_STATUSES = ["draft", "ready", "needs approval", "scheduled", "published", "failed"];`
+- L109: `const APPROVAL_STATUSES = ["draft", "needs approval", "approved"];`
+- L272: `if (["ready", "approved", "ready_for_manual_publish", "ready_for_manual_send"].includes(normalized)) return "ready";`
+- L273: `if (["needs approval", "needs_approval", "approval", "pending_approval", "review", "in_review"].includes(normalized)) {`
+- L274: `return "needs approval";`
+- L278: `if (["failed", "error", "blocked", "rejected"].includes(normalized)) return "failed";`
+- L357: `approvalStatus: "draft",`
+- L402: `const preview = asObject(raw.preview || raw.connector_preview);`
+- L405: `const channel = toKey(raw.channel || preview.channel);`
+- L409: `title: firstText(raw.title, raw.name, preview.title, preview.headline),`
+- L413: `contentItem: firstText(raw.content_item, raw.contentItem, raw.content_id, preview.content_item, preview.caption, preview.body),`
+- L418: `approvalStatus: status === "ready" ? "approved" : status === "needs approval" ? "needs approval" : "draft",`
+- L421: `offer: firstText(raw.offer, preview.offer),`
+- L423: `preview,`
+- L426: `totalAssets: Number(raw.total_assets || preview.asset_count || 0) || 0`
+- L450: `preview: asObject(latest?.preview || job.preview || job.connector_preview)`
+- L473: `"needs approval": 2,`
+- L531: `approvalStatus: item.approvalStatus || "draft",`
+- L591: `reason: "This records a manual publishing completion only after review; external provider execution requires separate proof."`
+- L609: `if (intent === "publish" && form.approvalStatus !== "approved") {`
+- L610: `errors.approvalStatus = "Publishing readiness must be approved before recording manual completion.";`
+- L630: `const message = \`Publishing blocker(s) must be resolved before ${actionLabel}: ${summary || "required publishing assets are missing or need review"}.\`;`
+- L647: `// Add governance/approval hints for status pills`
+- L649: `if (status === "needs approval") {`
+- L650: `hint = "title=\"Request Approval Review. Confirmation required before execution.\" aria-label=\"Request Approval Review. Confirmation required before execution.\"";`
+- L652: `hint = "title=\"Prepare Governance Review. Backend approval rules apply.\" aria-label=\"Prepare Governance Review. Backend approval rules apply.\"";`
+- L970: `const needsApproval = queue.find((item) => item.status === "needs approval");`
+- L986: `why: \`${ready.title} is approved for a backend readiness update. Record manual completion only after external execution is verified.\`,`
+- L990: `if (needsApproval) {`
+- L992: `action: "Review approval queue",`
+- L993: `why: \`${needsApproval.title} needs approval before it can move into the manual publishing queue.\`,`
+- L994: `focusId: needsApproval.id,`
+- L1009: `why: \`${draft.title} is not yet executable. Add channel, content, approval, and timing details.\`,`
+- L1036: `<div class="publishing-overview-item"><span>Ready for manual review</span><strong>${escapeHtml(String(counts.ready))}</strong></div>`
+- L1051: `["Approval", counts["needs approval"] ? "Pending" : counts.ready ? "Approved" : "Draft"],`
+- L1080: `<details class="publishing-automation-preview publishing-block-gap">`
+- L1081: `<summary>Automation Preview</summary>`
+- L1082: `<div class="publishing-automation-preview-copy">Automation cannot publish without manual review, confirmation, and backend approval gates.</div>`
+- L1089: `${getAutoModeState().status === "waiting_approval" ? \``
+- L1090: `<div class="simple-banner publishing-inline-gap"><strong>Approval needed:</strong> ${escapeHtml(asObject(getAutoModeState().approvalRequiredStep).reason || "Manual approval required.")}</div>`
+- L1092: `<button id="publishingAutoApproveBtn" class="btn btn-secondary" type="button">Approve automation step</button>`
+- L1097: `<div class="simple-banner">Opens AI with this context only. <strong>No approval, publishing, or backend execution is performed.</strong></div>`
+- L1132: `<button type="button" data-publishing-action="review" data-publishing-id="${escapeHtml(item.id)}">Review Package</button>`
+- L1229: `<label class="setup-label" for="publishingApprovalInput">Approval status</label>`
+- L1232: `<select id="publishingApprovalInput" name="approvalStatus" class="setup-input">`
+- L1233: `${APPROVAL_STATUSES.map((status) => \``
+- L1234: `<option value="${escapeHtml(status)}"${status === session.form.approvalStatus ? " selected" : ""}>${escapeHtml(titleCase(status))}</option>`
+- L1237: `${fieldError(session, "approvalStatus", escapeHtml)}`
+- L1254: `<textarea id="publishingNotesInput" name="notes" class="setup-input setup-textarea" rows="4" placeholder="Approval notes, blockers, manual steps, content references">${escapeHtml(session.form.notes)}</textarea>`
+- L1414: `<div class="simple-banner">${escapeHtml(item.title)}: ${escapeHtml(normalizeNotes(item.notes).join("; ") || "Failed publish needs review.")}</div>`
+- L1425: `const blockers = assets.filter((item) => ["Missing", "Needs Review"].includes(item.status));`
+- L1430: `<div class="setup-kicker">Channel & Approval Readiness</div>`
+- L1462: `approvePublishingItem,`
+- L1601: `? "Confirm reschedule\n\nAction: Reschedule this publishing item.\n\nThis updates a backend publishing schedule and remains governed by approval rules.\n\nSelect Cancel to keep the current schedule."`
+- L1602: `: "Confirm schedule\n\nAction: Queue this publishing item for manual publishing.\n\nThis creates a backend publishing schedule and remains governed by approval rules.\n\nSelect Cancel to keep this as a draft."`
+- L1641: `if (action === "review") {`
+- L1674: `"Final Confirmation Required\n\nAction: Record manual publish completion for this backend job.\n\nThis is a high-risk status update. Confirm that external provider publishing was completed or verified outside this page before recording completion.\n\nThis does not prove live external publishing by itself. Backend approval rules still apply.\n\nSelect Cancel to keep this item in the queue."`
+- L1696: `{ projectName, reloadProjectData, showMessage, showError, successMessage: "Publishing item paused as a draft.\n\nConfirmation required before execution. Backend approval rules apply." }`
+- L1706: `"Confirm retry\n\nAction: Retry this backend publishing item in the scheduled queue.\n\nThis updates the backend publishing schedule/lifecycle state and remains governed by approval rules.\n\nSelect Cancel to keep the item unchanged."`
+- L1715: `{ projectName, reloadProjectData, showMessage, showError, successMessage: "Publishing item retried in the scheduled queue.\n\nConfirmation required before execution. Backend approval rules apply." }`
+- L1722: `const approveBtn = $("publishingApproveBtn");`
+- L1723: `if (approveBtn) {`
+- L1724: `approveBtn.onclick = async () => {`
+- L1727: `session.validation.contentItem = "Select or save a publishing draft before approval.";`
+- L1731: `session.form.approvalStatus = "approved";`
+- L1733: `updateLocalDraft(projectName, current.id, { ...buildLocalDraftPayload(session, "ready"), id: current.id, approvalStatus: "approved" });`
+- L1734: `showMessage?.("Local publishing draft approved.");`
+- L1740: `"Confirm publishing readiness\n\nAction: Mark this backend publishing item ready for manual publishing review.\n\nThis does not replace Governance approval or external provider readiness proof.\n\nSelect Cancel to keep the item unchanged."`
+- L1748: `() => approvePublishingItem(projectName, current.jobId, { notes: session.form.notes || current.notes }),`
+- L1749: `{ projectName, reloadProjectData, showMessage, showError, successMessage: "Publishing item marked ready for manual review." }`
+- L1771: `const confirmed = window.confirm("Confirm fail action\n\nAction: Mark this publishing item as failed.\nRisk: This creates a permanent failure record and stops the publishing lifecycle for this item.\nPolicy: Use only when this item cannot proceed and requires explicit failure logging.\n\nSelect Cancel to keep this item in its current state.");`
+- L1818: `lastResponseTitle: current?.title || session.form.title || "Publishing Execution Review",`
+- L1868: `"Risk: This may prepare publishing drafts and handoffs, but must not publish externally or approve Governance decisions without explicit approval.\n\n" +`
+- L1874: `mode: "auto_until_approval",`
+- L1898: `const autoApproveBtn = $("publishingAutoApproveBtn");`
+- L1899: `if (autoApproveBtn) {`
+- L1900: `autoApproveBtn.onclick = async () => {`
+- L1902: `"Confirm publishing gate approval\n\n" +`
+- L1903: `"Action: Approve the current publishing automation gate.\n" +`
+- L1904: `"Risk: This advances the guided publishing state, but does not replace Governance approval for protected actions.\n\n" +`
+- L1909: `await approveCurrentGate({ context: { getState, navigateTo, projectName } });`
+- L1910: `showMessage?.("Approval gate accepted.");`
+- L1920: `"Risk: Skipping may leave a publishing preparation step incomplete and should be used only when intentionally bypassing it.\n\n" +`
+- L1937: `description: "Review, prepare, queue, and record manual publishing status with clear previews and backend-controlled actions."`
+- L1955: `approvePublishingItem,`
+- L1986: `const assetBlockers = publishingAssets.filter((item) => ["Missing", "Needs Review"].includes(item.status));`
+- L1993: `${renderPublishingWorkflowStrip({ selectedItem, recommendation, blockers: assetBlockers, approvalState: selectedItem?.approvalStatus, escapeHtml })}`
+- L2012: `<button id="publishingApproveBtn" class="btn btn-secondary" type="button" title="Prepare publishing readiness review. Confirmation required. Backend approval rules apply.">Mark ready for manual review</button>`
+- L2013: `<button id="publishingFailBtn" class="btn btn-secondary" type="button" title="Request Approval Review or mark as failed. Confirmation required before execution.">Mark publishing item as failed</button>`
+- L2037: `approvePublishingItem,`
+- L2051: `approvePublishingItem,`
+
+## Handoff Signals
+- L11: `const safety = \`Publishing prepares channel packages, manual schedule records, and approval-ready handoffs. External publishing requires provider proof; backend status changes remain <strong>confirmation-gated</strong> and governed by <strong>backend approval rules</strong>.\`;`
+- L15: `\`<button type="button" class="btn btn-secondary" onclick="document.getElementById('publishingHandoffPanel')?.scrollIntoView({behavior:'smooth',block:'start'})">Review Approval Gate</button>\`,`
+- L37: `{ key: "handoff", label: "Manual Completion Handoff" }`
+- L45: `handoff: selectedItem?.status === "published" ? "ready" : "missing"`
+- L82: `import { getSharedHandoff, setSharedAiDraft, setSharedHandoff } from "../shared-context.js";`
+- L373: `loadedHandoffId: "",`
+- L937: `function extractHandoffSummary(handoff) {`
+- L938: `const payload = asObject(handoff?.payload);`
+- L942: `id: asString(handoff?.id || payload.workflow_id || payload.prompt || payload.workflow_title),`
+- L943: `sourcePage: asString(handoff?.source_page || "workflows"),`
+- L955: `function getPublishingHandoff(projectName, operations) {`
+- L957: `getSharedHandoff(projectName, "publishing", operations, "workflows") ||`
+- L958: `getSharedHandoff(projectName, "publishing", operations, "ai-command") ||`
+- L959: `getSharedHandoff(projectName, "publishing", operations)`
+- L967: `function buildRecommendation({ queue, counts, assetBlockers, checks, handoff, globalBlockers }) {`
+- L998: `if (handoff) {`
+- L1001: `why: "A workflow handoff is available. Loading it keeps execution moving without inventing backend data.",`
+- L1267: `function renderWorkflowHandoff(handoff, session, escapeHtml) {`
+- L1268: `if (!handoff) {`
+- L1273: `<div class="setup-kicker">Workflow Handoff</div>`
+- L1283: `const summary = extractHandoffSummary(handoff);`
+- L1284: `const isLoaded = summary.id && summary.id === session.loadedHandoffId;`
+- L1286: `<section class="card publishing-card" id="publishingHandoffPanel">`
+- L1289: `<div class="setup-kicker">Workflow Handoff</div>`
+- L1302: `<button id="publishingLoadHandoffBtn" class="btn btn-secondary" type="button">Load Workflow Output</button>`
+- L1467: `handoff`
+- L1785: `const loadHandoffBtn = $("publishingLoadHandoffBtn");`
+- L1786: `if (loadHandoffBtn) {`
+- L1787: `loadHandoffBtn.onclick = () => {`
+- L1788: `const summary = extractHandoffSummary(handoff);`
+- L1798: `session.loadedHandoffId = summary.id;`
+- L1813: `const prompt = buildPublishingAiPrompt(projectName, current, session, handoff);`
+- L1823: `setSharedHandoff(projectName, "ai-command", {`
+- L1825: `destination_page: "ai-command",`
+- L1868: `"Risk: This may prepare publishing drafts and handoffs, but must not publish externally or approve Governance decisions without explicit approval.\n\n" +`
+- L1966: `const handoff = getPublishingHandoff(projectName, operations);`
+- L1987: `const recommendation = buildRecommendation({ queue, counts, assetBlockers, checks, handoff, globalBlockers });`
+- L2019: `${renderWorkflowHandoff(handoff, session, escapeHtml)}`
+- L2056: `handoff`
+
+## Save / Storage Signals
+- L9: `const approval = selectedItem?.approvalStatus ? titleCase(selectedItem.approvalStatus) : "Draft";`
+- L11: `const safety = \`Publishing prepares channel packages, manual schedule records, and approval-ready handoffs. External publishing requires provider proof; backend status changes remain <strong>confirmation-gated</strong> and governed by <strong>backend approval rules</strong>.\`;`
+- L32: `{ key: "draft", label: "Draft" },`
+- L40: `draft: selectedItem?.status === "draft" ? "active" : selectedItem ? "ready" : "missing",`
+- L82: `import { getSharedHandoff, setSharedAiDraft, setSharedHandoff } from "../shared-context.js";`
+- L100: `buildLocalDraftPayload,`
+- L105: `const PUBLISHING_LOCAL_DRAFTS_KEY = "mh-publishing-local-drafts-v1";`
+- L106: `const STATUS_FILTERS = ["all", "draft", "ready", "needs approval", "scheduled", "published", "failed"];`
+- L107: `const DISPLAY_STATUSES = ["draft", "ready", "needs approval", "scheduled", "published", "failed"];`
+- L109: `const APPROVAL_STATUSES = ["draft", "needs approval", "approved"];`
+- L268: `function normalizeStatus(value, fallback = "draft") {`
+- L271: `if (["draft", "paused", "pause"].includes(normalized)) return "draft";`
+- L294: `function readDraftMap() {`
+- L297: `const parsed = JSON.parse(window.localStorage?.getItem(PUBLISHING_LOCAL_DRAFTS_KEY) || "{}");`
+- L304: `function writeDraftMap(map) {`
+- L307: `window.localStorage?.setItem(PUBLISHING_LOCAL_DRAFTS_KEY, JSON.stringify(map || {}));`
+- L315: `function loadLocalDrafts(projectName) {`
+- L316: `return asArray(readDraftMap()[projectKey(projectName)]);`
+- L319: `function saveLocalDraft(projectName, draft) {`
+- L320: `const map = readDraftMap();`
+- L322: `const drafts = asArray(map[key]).filter((item) => asString(item.id) !== asString(draft.id));`
+- L323: `const nextDraft = {`
+- L324: `...asObject(draft),`
+- L325: `id: asString(draft.id || \`local-publish-${Date.now()}\`),`
+- L326: `source: "Local draft",`
+- L330: `map[key] = [nextDraft, ...drafts].slice(0, 20);`
+- L331: `writeDraftMap(map);`
+- L332: `return nextDraft;`
+- L335: `function updateLocalDraft(projectName, itemId, patch) {`
+- L336: `const existing = loadLocalDrafts(projectName).find((item) => asString(item.id) === asString(itemId));`
+- L337: `return saveLocalDraft(projectName, {`
+- L357: `approvalStatus: "draft",`
+- L372: `draftMessage: "",`
+- L404: `const status = normalizeStatus(raw.execution_status || raw.status, scheduledFor ? "scheduled" : "draft");`
+- L418: `approvalStatus: status === "ready" ? "approved" : status === "needs approval" ? "needs approval" : "draft",`
+- L462: `const localDrafts = loadLocalDrafts(projectName).map((draft) => normalizeQueueItem(draft, state, "Local draft"));`
+- L464: `const visibleLocalDrafts = localDrafts.filter((item) => !backendIds.has(item.id));`
+- L466: `return [...visibleLocalDrafts, ...scheduledItems, ...orphanResults].sort(compareQueueItems);`
+- L475: `draft: 4,`
+- L531: `approvalStatus: item.approvalStatus || "draft",`
+- L546: `session.draftMessage = "";`
+- L565: `const draftPrompt = firstText(`
+- L568: `"Prepare publishing draft from current project context."`
+- L574: `type: "prepare_publishing_draft",`
+- L576: `action: "Prepare publishing draft",`
+- L578: `prompt: draftPrompt,`
+- L579: `reason: "Prepare a safe publishing draft without executing publish.",`
+- L580: `title: firstText(session.form.title, "Prepared publishing draft")`
+- L588: `action: "Record manual publish completion",`
+- L590: `prompt: draftPrompt,`
+- L591: `reason: "This records a manual publishing completion only after review; external provider execution requires separate proof."`
+- L610: `errors.approvalStatus = "Publishing readiness must be approved before recording manual completion.";`
+- L940: `const draftContext = asObject(payload.draft_context);`
+- L945: `title: firstText(output.title, payload.workflow_title, draftContext.lastResponseTitle, "Workflow output"),`
+- L946: `project: firstText(draftContext.projectName, payload.project_name, output.project),`
+- L950: `summary: firstText(output.summary, output.description, payload.prompt, draftContext.lastCommand),`
+- L971: `const draft = queue.find((item) => item.status === "draft");`
+- L985: `action: "Record manual completion for the ready item",`
+- L986: `why: \`${ready.title} is approved for a backend readiness update. Record manual completion only after external execution is verified.\`,`
+- L1000: `action: "Load workflow output into a draft",`
+- L1006: `if (draft) {`
+- L1008: `action: "Complete and schedule a draft",`
+- L1009: `why: \`${draft.title} is not yet executable. Add channel, content, approval, and timing details.\`,`
+- L1010: `focusId: draft.id,`
+- L1015: `action: connectedCount ? "Create a publishing draft" : "Connect a publishing channel",`
+- L1017: `? "No queue item is ready. Start with a draft and save it locally until it can be scheduled."`
+- L1018: `: "Channel readiness is missing. Publishing can prepare drafts, but live execution needs a connected destination.",`
+- L1037: `<div class="publishing-overview-item"><span>Draft items</span><strong>${escapeHtml(String(counts.draft))}</strong></div>`
+- L1048: `["Content", counts.draft || counts.ready || counts.scheduled ? "Present" : "Empty"],`
+- L1051: `["Approval", counts["needs approval"] ? "Pending" : counts.ready ? "Approved" : "Draft"],`
+- L1075: `<button id="publishingSaveDraftBtn" class="btn btn-secondary" type="button">Save publishing draft</button>`
+- L1134: `<button type="button" data-publishing-action="publish" data-publishing-id="${escapeHtml(item.id)}">Record Manual Completion</button>`
+- L1135: `<button type="button" data-publishing-action="pause" data-publishing-id="${escapeHtml(item.id)}">Pause to draft</button>`
+- L1140: `: \`<div class="empty-box">No publish queue items match this filter. Create or load a draft to start the execution queue.</div>\`;`
+- L1163: `<h3>Draft, validate, and queue manual publishing records</h3>`
+- L1258: `<button id="publishingNewItemBtn" class="btn btn-secondary" type="button">New Draft</button>`
+- L1259: `<button id="publishingBuilderSaveBtn" class="btn btn-secondary" type="button">Save publishing draft</button>`
+- L1262: `${session.draftMessage ? \`<div class="simple-banner">${escapeHtml(session.draftMessage)}</div>\` : ""}`
+- L1291: `<p class="publishing-section-copy">${escapeHtml(summarizeText(summary.summary, "Workflow output is available for draft loading."))}</p>`
+- L1460: `savePublishingSchedule,`
+- L1485: `function saveDraftLocally(message = "Publishing draft saved locally.") {`
+- L1486: `const local = saveLocalDraft(projectName, buildLocalDraftPayload(session, "draft"));`
+- L1490: `session.draftMessage = message;`
+- L1495: `async function persistDraft() {`
+- L1496: `const local = saveDraftLocally("Publishing draft saved locally.");`
+- L1497: `if (typeof savePublishingSchedule === "function") {`
+- L1499: `() => savePublishingSchedule(projectName, buildSchedulePayload(session, "draft")),`
+- L1505: `successMessage: "Publishing draft saved."`
+- L1548: `showMessage?.("New publishing draft opened.");`
+- L1560: `const saveDraftButtons = [$("publishingSaveDraftBtn"), $("publishingBuilderSaveBtn")].filter(Boolean);`
+- L1561: `saveDraftButtons.forEach((button) => {`
+- L1564: `if (!validateBuilder(session, "draft")) {`
+- L1568: `await persistDraft();`
+- L1589: `updateLocalDraft(projectName, current.id, {`
+- L1590: `...buildLocalDraftPayload(session, "scheduled"),`
+- L1593: `session.draftMessage = "Local publishing draft scheduled in this browser.";`
+- L1594: `showMessage?.(session.draftMessage);`
+- L1602: `: "Confirm schedule\n\nAction: Queue this publishing item for manual publishing.\n\nThis creates a backend publishing schedule and remains governed by approval rules.\n\nSelect Cancel to keep this as a draft."`
+- L1611: `: () => savePublishingSchedule(projectName, payload);`
+- L1618: `successMessage: current ? "Publishing item scheduled." : "Publishing schedule saved."`
+- L1625: `saveDraftLocally("Backend schedule unavailable; draft kept locally.");`
+- L1652: `const intent = action === "publish" ? "publish" : action === "retry" ? "retry" : "draft";`
+- L1659: `const nextStatus = action === "pause" ? "draft" : action === "retry" ? "scheduled" : action === "publish" ? "published" : item.status;`
+- L1660: `updateLocalDraft(projectName, item.id, { ...buildLocalDraftPayload(session, nextStatus), id: item.id });`
+- L1661: `session.draftMessage = \`Local draft ${action === "publish" ? "marked as manual completion recorded" : action === "pause" ? "paused" : "updated"}.\`;`
+- L1662: `showMessage?.(session.draftMessage);`
+- L1674: `"Final Confirmation Required\n\nAction: Record manual publish completion for this backend job.\n\nThis is a high-risk status update. Confirm that external provider publishing was completed or verified outside this page before recording completion.\n\nThis does not prove live external publishing by itself. Backend approval rules still apply.\n\nSelect Cancel to keep this item in the queue."`
+- L1682: `{ projectName, reloadProjectData, showMessage, showError, successMessage: "Manual publishing completion recorded." }`
+- L1687: `"Confirm pause\n\nAction: Move this backend publishing item back to draft.\n\nThis updates the backend publishing lifecycle state.\n\nSelect Cancel to keep the item unchanged."`
+- L1695: `() => reschedulePublishingItem(projectName, item.jobId, buildSchedulePayload(session, "draft")),`
+- L1696: `{ projectName, reloadProjectData, showMessage, showError, successMessage: "Publishing item paused as a draft.\n\nConfirmation required before execution. Backend approval rules apply." }`
+- L1727: `session.validation.contentItem = "Select or save a publishing draft before approval.";`
+- L1733: `updateLocalDraft(projectName, current.id, { ...buildLocalDraftPayload(session, "ready"), id: current.id, approvalStatus: "approved" });`
+- L1734: `showMessage?.("Local publishing draft approved.");`
+- L1765: `updateLocalDraft(projectName, current.id, { ...buildLocalDraftPayload(session, "failed"), id: current.id });`
+- L1766: `showMessage?.("Local publishing draft marked failed.");`
+- L1771: `const confirmed = window.confirm("Confirm fail action\n\nAction: Mark this publishing item as failed.\nRisk: This creates a permanent failure record and stops the publishing lifecycle for this item.\nPolicy: Use only when this item cannot proceed and requires explicit failure logging.\n\nSelect Cancel to keep this item in its current state.");`
+- L1803: `saveDraftLocally("Workflow output loaded into a local publishing draft.");`
+- L1814: `const aiDraft = {`
+- L1822: `setSharedAiDraft(projectName, aiDraft);`
+- L1834: `draft_context: aiDraft,`
+- L1836: `status: current?.status || "draft",`
+- L1868: `"Risk: This may prepare publishing drafts and handoffs, but must not publish externally or approve Governance decisions without explicit approval.\n\n" +`
+- L1937: `description: "Review, prepare, queue, and record manual publishing status with clear previews and backend-controlled actions."`
+- L1953: `savePublishingSchedule,`
+- L2009: `<span class="card-badge ${badgeTone(selectedItem?.status || "draft")}">${escapeHtml(selectedItem ? titleCase(selectedItem.status) : "Draft")}</span>`
+- L2035: `savePublishingSchedule,`
+- L2049: `savePublishingSchedule,`
+
+## Destructive / Execution Signals
+- L2: `function renderPublishingCommandHeader({ projectName, recommendation, selectedItem, summary, queue, blockers, escapeHtml }) {`
+- L11: `const safety = \`Publishing prepares channel packages, manual schedule records, and approval-ready handoffs. External publishing requires provider proof; backend status changes remain <strong>confirmation-gated</strong> and governed by <strong>backend approval rules</strong>.\`;`
+- L13: `\`<button type="button" class="btn btn-secondary" onclick="document.getElementById('publishingBuilderPanel')?.scrollIntoView({behavior:'smooth',block:'start'})">Prepare Publishing Package</button>\`,`
+- L14: `\`<button type="button" class="btn btn-secondary" onclick="document.getElementById('publishingQueuePanel')?.scrollIntoView({behavior:'smooth',block:'start'})">Open Queue</button>\`,`
+- L15: `\`<button type="button" class="btn btn-secondary" onclick="document.getElementById('publishingHandoffPanel')?.scrollIntoView({behavior:'smooth',block:'start'})">Review Approval Gate</button>\`,`
+- L16: `\`<button type="button" class="btn btn-primary" onclick="document.getElementById('publishingPushAiBtn')?.scrollIntoView({behavior:'smooth',block:'start'})">Open AI Review</button>\``
+- L19: `<section class="publishing-command-header" role="region" aria-label="Publishing Command Header">`
+- L20: `<div class="publishing-command-header-title">Publishing Control Workspace</div>`
+- L21: `<div class="publishing-command-header-context">${context}</div>`
+- L22: `<div class="publishing-command-header-status">Status: <strong>${escapeHtml(status)}</strong> &middot; Approval: <strong>${escapeHtml(approval)}</strong></div>`
+- L23: `<div class="publishing-command-header-status">Next: <span>${nextAction}</span></div>`
+- L24: `<div class="publishing-command-header-safety">${safety}</div>`
+- L25: `<div class="publishing-command-header-actions">${actions}</div>`
+- L30: `function renderPublishingWorkflowStrip({ selectedItem, recommendation, blockers, approvalState, escapeHtml }) {`
+- L36: `{ key: "schedule", label: "Schedule" },`
+- L43: `approval: selectedItem?.approvalStatus === "approved" ? "ready" : selectedItem?.approvalStatus === "needs approval" ? "warning" : "missing",`
+- L44: `schedule: selectedItem?.status === "scheduled" ? "ready" : "missing",`
+- L45: `handoff: selectedItem?.status === "published" ? "ready" : "missing"`
+- L48: `<nav class="publishing-workflow-strip" aria-label="Publishing Workflow">`
+- L50: `<div class="publishing-workflow-step is-${statusMap[step.key]}" aria-label="${escapeHtml(step.label)}: ${statusMap[step.key]}">`
+- L52: `<span class="publishing-workflow-step-label">${statusMap[step.key]}</span>`
+- L59: `function renderPublishingReadinessSummary({ selectedItem, recommendation, blockers, assetData, escapeHtml }) {`
+- L65: `{ key: "schedule", label: "Schedule", state: selectedItem?.scheduledFor ? "ready" : "missing" },`
+- L66: `{ key: "governance", label: "Governance", state: selectedItem?.governanceStatus === "approved" ? "ready" : "missing" },`
+- L67: `{ key: "approval", label: "Approval", state: selectedItem?.approvalStatus === "approved" ? "ready" : selectedItem?.approvalStatus === "needs approval" ? "warning" : "missing" }`
+- L69: `const blockersSummary = blockers && blockers.length ? \`<div class="publishing-readiness-card is-warning">${escapeHtml(blockers.length)} blocker(s) present</div>\` : "";`
+- L71: `<section class="publishing-readiness-summary" aria-label="Publishing Readiness Summary">`
+- L73: `<div class="publishing-readiness-card is-${r.state}">`
+- L74: `<span class="publishing-readiness-card-label">${escapeHtml(r.label)}</span>`
+- L82: `import { getSharedHandoff, setSharedAiDraft, setSharedHandoff } from "../shared-context.js";`
+- L83: `import {`
+- L88: `import { getReadinessBlockers } from "../system-intelligence.js";`
+- L89: `import {`
+- L92: `startAutoMode,`
+- L94: `approveCurrentGate,`
+- L98: `import {`
+- L99: `buildSchedulePayload,`
+- L101: `buildPublishingAiPrompt`
+- L102: `} from "./publishing/publishing-payloads.js";`
+- L104: `const publishingSessions = new Map();`
+- L105: `const PUBLISHING_LOCAL_DRAFTS_KEY = "mh-publishing-local-drafts-v1";`
+- L106: `const STATUS_FILTERS = ["all", "draft", "ready", "needs approval", "scheduled", "published", "failed"];`
+- L107: `const DISPLAY_STATUSES = ["draft", "ready", "needs approval", "scheduled", "published", "failed"];`
+- L109: `const APPROVAL_STATUSES = ["draft", "needs approval", "approved"];`
+- L110: `const PUBLISHING_ASSET_KEYS = [`
+- L120: `const publishingAutomationState = {`
+- L124: `let publishingAutoModeUnsubscribe = null;`
+- L125: `let publishingAutoModeControllerReady = false;`
+- L126: `let publishingAutomationEnabled = false;`
+- L127: `let publishingRenderCallback = null;`
+- L128: `let publishingRenderTimer = null;`
+- L130: `function schedulePublishingRender(render) {`
+- L132: `publishingRenderCallback = render;`
+- L135: `if (publishingRenderTimer) {`
+- L139: `publishingRenderTimer = window.setTimeout(() => {`
+- L140: `publishingRenderTimer = null;`
+- L142: `if (typeof publishingRenderCallback === "function") {`
+- L143: `publishingRenderCallback();`
+- L148: `function ensurePublishingAutoModeBinding(getState, navigateTo, render) {`
+- L149: `publishingRenderCallback = render;`
+- L151: `if (!publishingAutomationEnabled) {`
+- L155: `if (!publishingAutoModeControllerReady) {`
+- L157: `publishingAutoModeControllerReady = true;`
+- L160: `if (publishingAutoModeUnsubscribe) {`
+- L164: `publishingAutoModeUnsubscribe = subscribeAutoMode(() => {`
+- L172: `schedulePublishingRender();`
+- L229: `function formatDateTime(value, fallback = "Not scheduled") {`
+- L242: `if (!date) return "Unscheduled";`
+- L272: `if (["ready", "approved", "ready_for_manual_publish", "ready_for_manual_send"].includes(normalized)) return "ready";`
+- L276: `if (["scheduled", "queued", "queue", "pending", "pending_publish"].includes(normalized)) return "scheduled";`
+- L277: `if (["published", "completed", "complete", "success", "done", "sent", "live"].includes(normalized)) return "published";`
+- L278: `if (["failed", "error", "blocked", "rejected"].includes(normalized)) return "failed";`
+- L284: `if (status === "published") return "success";`
+- L285: `if (status === "ready" || status === "scheduled") return "warning";`
+- L297: `const parsed = JSON.parse(window.localStorage?.getItem(PUBLISHING_LOCAL_DRAFTS_KEY) || "{}");`
+- L307: `window.localStorage?.setItem(PUBLISHING_LOCAL_DRAFTS_KEY, JSON.stringify(map || {}));`
+- L325: `id: asString(draft.id || \`local-publish-${Date.now()}\`),`
+- L355: `publishDate: toDateInput(tomorrow),`
+- L356: `publishTime: "09:00",`
+- L365: `if (!publishingSessions.has(key)) {`
+- L366: `publishingSessions.set(key, {`
+- L377: `return publishingSessions.get(key);`
+- L395: `if (item.campaign) return \`${item.campaign} ${titleCase(item.channel || "publish")}\`;`
+- L396: `if (context.activeCampaign) return \`${context.activeCampaign} ${titleCase(item.channel || "publish")}\`;`
+- L397: `return \`${titleCase(item.channel || "Publishing")} item\`;`
+- L403: `const scheduledFor = firstText(raw.scheduled_for, raw.scheduledFor);`
+- L404: `const status = normalizeStatus(raw.execution_status || raw.status, scheduledFor ? "scheduled" : "draft");`
+- L414: `scheduledFor,`
+- L415: `executedAt: firstText(raw.executed_at, raw.executedAt),`
+- L416: `createdAt: firstText(raw.created_at, raw.createdAt, raw.executed_at),`
+- L417: `updatedAt: firstText(raw.updated_at, raw.updatedAt, raw.executed_at, raw.created_at),`
+- L418: `approvalStatus: status === "ready" ? "approved" : status === "needs approval" ? "needs approval" : "draft",`
+- L436: `.sort((a, b) => (toDate(b.executed_at)?.getTime() || 0) - (toDate(a.executed_at)?.getTime() || 0));`
+- L444: `const scheduledItems = asArray(activity.scheduled_jobs).map((job) => {`
+- L453: `latest ? "Scheduled job + result" : "Scheduled job"`
+- L457: `const knownIds = new Set(scheduledItems.map((item) => item.jobId));`
+- L463: `const backendIds = new Set([...scheduledItems, ...orphanResults].map((item) => item.id));`
+- L466: `return [...visibleLocalDrafts, ...scheduledItems, ...orphanResults].sort(compareQueueItems);`
+- L474: `scheduled: 3,`
+- L476: `published: 5`
+- L481: `const aTime = toDate(a.scheduledFor || a.updatedAt || a.createdAt)?.getTime() || 0;`
+- L482: `const bTime = toDate(b.scheduledFor || b.updatedAt || b.createdAt)?.getTime() || 0;`
+- L513: `function getNextPublishWindow(queue) {`
+- L515: `.filter((item) => item.scheduledFor && ["scheduled", "ready"].includes(item.status))`
+- L516: `.sort((a, b) => (toDate(a.scheduledFor)?.getTime() || 0) - (toDate(b.scheduledFor)?.getTime() || 0))[0];`
+- L517: `return next ? \`${formatDateTime(next.scheduledFor)} - ${next.title}\` : "No scheduled window";`
+- L520: `function syncFormFromItem(session, item) {`
+- L529: `publishDate: toDateInput(item.scheduledFor),`
+- L530: `publishTime: toTimeInput(item.scheduledFor),`
+- L550: `function syncSessionForm(session, form) {`
+- L558: `function buildScheduleTime(form) {`
+- L559: `const date = clean(form.publishDate);`
+- L561: `return \`${date}T${clean(form.publishTime) || "09:00"}:00Z\`;`
+- L564: `function buildPublishingAutoModePlan(session) {`
+- L568: `"Prepare publishing draft from current project context."`
+- L573: `id: \`publishing-prepare-${Date.now()}\`,`
+- L574: `type: "prepare_publishing_draft",`
+- L575: `targetPage: "publishing",`
+- L576: `action: "Prepare publishing draft",`
+- L579: `reason: "Prepare a safe publishing draft without executing publish.",`
+- L580: `title: firstText(session.form.title, "Prepared publishing draft")`
+- L585: `id: \`publishing-gate-${Date.now()}\`,`
+- L586: `type: "publish_now",`
+- L587: `targetPage: "publishing",`
+- L588: `action: "Record manual publish completion",`
+- L591: `reason: "This records a manual publishing completion only after review; external provider execution requires separate proof."`
+- L606: `if (["schedule", "publish", "retry"].includes(intent) && !clean(form.publishDate)) {`
+- L607: `errors.publishDate = "Publish date is required for this action.";`
+- L609: `if (intent === "publish" && form.approvalStatus !== "approved") {`
+- L610: `errors.approvalStatus = "Publishing readiness must be approved before recording manual completion.";`
+- L617: `function summarizePublishingBlockers(assetBlockers = []) {`
+- L626: `function guardPublishingAssetBlockers(session, assetBlockers, showMessage, actionLabel = "this publishing action") {`
+- L629: `const summary = summarizePublishingBlockers(blockers);`
+- L630: `const message = \`Publishing blocker(s) must be resolved before ${actionLabel}: ${summary || "required publishing assets are missing or need review"}.\`;`
+- L636: `function confirmPublishingBackendAction(message) {`
+- L643: `return message ? \`<div class="publishing-inline-error">${escapeHtml(message)}</div>\` : "";`
+- L653: `} else if (status === "scheduled") {`
+- L656: `return \`<span class="publishing-status-pill is-${escapeHtml(statusClass(status))}" ${hint}>${escapeHtml(titleCase(status))}</span>\`;`
+- L662: `.publishing-execution-center {`
+- L668: `.publishing-execution-grid {`
+- L674: `.publishing-main-column,`
+- L675: `.publishing-side-column {`
+- L679: `align-content: start;`
+- L682: `.publishing-card {`
+- L687: `.publishing-overview-grid {`
+- L693: `.publishing-overview-item,`
+- L694: `.publishing-impact-chip {`
+- L702: `.publishing-overview-item span,`
+- L703: `.publishing-impact-chip small {`
+- L710: `.publishing-overview-item strong,`
+- L711: `.publishing-impact-chip strong {`
+- L717: `.publishing-overview-item.is-wide {`
+- L721: `.publishing-impact-row,`
+- L722: `.publishing-action-row,`
+- L723: `.publishing-form-actions,`
+- L724: `.publishing-filter-row {`
+- L731: `.publishing-impact-row {`
+- L735: `.publishing-action-row,`
+- L736: `.publishing-form-actions {`
+- L740: `.publishing-action-row .btn,`
+- L741: `.publishing-form-actions .btn {`
+- L747: `.publishing-impact-chip {`
+- L751: `.publishing-filter-chip {`
+- L764: `.publishing-filter-chip.is-active {`
+- L769: `/* Publishing queue dark contrast correction */`
+- L770: `.publishing-queue-list,`
+- L771: `.publishing-calendar-list,`
+- L772: `.publishing-blocker-list {`
+- L779: `.publishing-queue-row {`
+- L790: `.publishing-queue-row.is-active {`
+- L795: `.publishing-queue-main,`
+- L796: `.publishing-calendar-row {`
+- L807: `.publishing-queue-title {`
+- L815: `.publishing-queue-meta {`
+- L824: `.publishing-queue-actions {`
+- L831: `.publishing-queue-actions button {`
+- L843: `.publishing-queue-actions button:focus-visible,`
+- L844: `.publishing-queue-main:focus-visible,`
+- L845: `.publishing-calendar-row:focus-visible,`
+- L846: `.publishing-filter-chip:focus-visible {`
+- L851: `.publishing-queue-actions button:disabled,`
+- L852: `.publishing-queue-actions button[disabled] {`
+- L860: `.publishing-status-pill {`
+- L873: `.publishing-status-pill.is-ready,`
+- L874: `.publishing-status-pill.is-scheduled {`
+- L878: `.publishing-status-pill.is-published {`
+- L882: `.publishing-status-pill.is-failed {`
+- L886: `.publishing-inline-error {`
+- L893: `.publishing-calendar-row {`
+- L904: `.publishing-calendar-row em {`
+- L913: `.publishing-execution-grid {`
+- L915: `align-items: start;`
+- L918: `.publishing-queue-row {`
+- L920: `align-items: start;`
+- L923: `.publishing-queue-actions {`
+- L955: `function getPublishingHandoff(projectName, operations) {`
+- L957: `getSharedHandoff(projectName, "publishing", operations, "workflows") ||`
+- L958: `getSharedHandoff(projectName, "publishing", operations, "ai-command") ||`
+- L959: `getSharedHandoff(projectName, "publishing", operations)`
+- L977: `action: "Retry failed publishing item",`
+- L978: `why: \`${failed.title} is blocked or failed. Clear the blocker before adding more scheduled work.\`,`
+- L986: `why: \`${ready.title} is approved for a backend readiness update. Record manual completion only after external execution is verified.\`,`
+- L993: `why: \`${needsApproval.title} needs approval before it can move into the manual publishing queue.\`,`
+- L1008: `action: "Complete and schedule a draft",`
+- L1015: `action: connectedCount ? "Create a publishing draft" : "Connect a publishing channel",`
+- L1017: `? "No queue item is ready. Start with a draft and save it locally until it can be scheduled."`
+- L1018: `: "Channel readiness is missing. Publishing can prepare drafts, but live execution needs a connected destination.",`
+- L1026: `<section class="card publishing-card">`
+- L1029: `<div class="setup-kicker">Publishing Overview</div>`
+- L1034: `<div class="publishing-overview-grid">`
+- L1035: `<div class="publishing-overview-item"><span>Scheduled items</span><strong>${escapeHtml(String(counts.scheduled))}</strong></div>`
+- L1036: `<div class="publishing-overview-item"><span>Ready for manual review</span><strong>${escapeHtml(String(counts.ready))}</strong></div>`
+- L1037: `<div class="publishing-overview-item"><span>Draft items</span><strong>${escapeHtml(String(counts.draft))}</strong></div>`
+- L1038: `<div class="publishing-overview-item"><span>Failed / blocked items</span><strong>${escapeHtml(String(counts.failed))}</strong></div>`
+- L1039: `<div class="publishing-overview-item is-wide"><span>Next publish window</span><strong>${escapeHtml(getNextPublishWindow(queue))}</strong></div>`
+- L1047: `["Manual publishing readiness", counts.ready + counts.scheduled > 0 ? "Active" : "Needs queue"],`
+- L1048: `["Content", counts.draft || counts.ready || counts.scheduled ? "Present" : "Empty"],`
+- L1051: `["Approval", counts["needs approval"] ? "Pending" : counts.ready ? "Approved" : "Draft"],`
+- L1052: `["Automation", counts.scheduled ? "Scheduled" : "Manual"]`
+- L1056: `<section class="card publishing-card" id="publishingRecommendation">`
+- L1061: `<p class="publishing-section-copy">${escapeHtml(recommendation.why)}</p>`
+- L1065: `<div class="publishing-impact-row">`
+- L1067: `<span class="publishing-impact-chip">`
+- L1073: `<div class="publishing-action-row">`
+- L1074: `<button id="publishingOpenQueueBtn" class="btn btn-secondary" type="button">Open Publish Queue</button>`
+- L1075: `<button id="publishingSaveDraftBtn" class="btn btn-secondary" type="button">Save publishing draft</button>`
+- L1076: `<button id="publishingPushAiBtn" class="btn btn-primary" type="button">Send publishing context to AI</button>`
+- L1077: `<button id="publishingAutoPrepareBtn" class="btn btn-secondary" type="button">Auto-prepare publishing plan</button>`
+- L1078: `<button id="publishingAutoStopBtn" class="btn btn-secondary" type="button">Stop Auto Mode</button>`
+- L1080: `<details class="publishing-automation-preview publishing-block-gap">`
+- L1082: `<div class="publishing-automation-preview-copy">Automation cannot publish without manual review, confirmation, and backend approval gates.</div>`
+- L1083: `<div class="simple-banner publishing-inline-gap">Auto Mode status: ${escapeHtml(getAutoModeState().status || "idle")}</div>`
+- L1085: `<div class="simple-banner publishing-block-gap">Cross-system blockers: ${escapeHtml(asArray(recommendation.externalBlockers).map((item) => item.title).join("; "))}</div>`
+- L1087: `${publishingAutomationState.progress ? \`<div class="simple-banner publishing-block-gap">${escapeHtml(publishingAutomationState.progress)}</div>\` : ""}`
+- L1088: `${publishingAutomationState.result ? \`<div class="simple-banner publishing-inline-gap">${escapeHtml(publishingAutomationState.result)}</div>\` : ""}`
+- L1090: `<div class="simple-banner publishing-inline-gap"><strong>Approval needed:</strong> ${escapeHtml(asObject(getAutoModeState().approvalRequiredStep).reason || "Manual approval required.")}</div>`
+- L1091: `<div class="publishing-action-row publishing-inline-gap">`
+- L1092: `<button id="publishingAutoApproveBtn" class="btn btn-secondary" type="button">Approve automation step</button>`
+- L1093: `<button id="publishingAutoSkipBtn" class="btn btn-secondary" type="button">Skip automation step</button>`
+- L1097: `<div class="simple-banner">Opens AI with this context only. <strong>No approval, publishing, or backend execution is performed.</strong></div>`
+- L1107: `<div class="publishing-filter-row">`
+- L1112: `<button class="publishing-filter-chip${active ? " is-active" : ""}" type="button" data-publishing-filter="${escapeHtml(status)}">`
+- L1125: `<article class="publishing-queue-row${item.id === selectedId ? " is-active" : ""}" data-publishing-row="${escapeHtml(item.id)}">`
+- L1126: `<button class="publishing-queue-main" type="button" data-publishing-select="${escapeHtml(item.id)}">`
+- L1127: `<span class="publishing-queue-title">${escapeHtml(item.title)}</span>`
+- L1128: `<span class="publishing-queue-meta">${escapeHtml(titleCase(item.channel || "unassigned"))} • ${escapeHtml(item.scheduledFor ? formatDateTime(item.scheduledFor) : "Unscheduled")} • ${escapeHtml(item.source)}</span>`
+- L1130: `<div class="publishing-queue-state">${renderStatusPill(item.status, escapeHtml)}</div>`
+- L1131: `<div class="publishing-queue-actions">`
+- L1132: `<button type="button" data-publishing-action="review" data-publishing-id="${escapeHtml(item.id)}">Review Package</button>`
+- L1133: `<button type="button" data-publishing-action="schedule" data-publishing-id="${escapeHtml(item.id)}">Queue for Manual Publishing</button>`
+- L1134: `<button type="button" data-publishing-action="publish" data-publishing-id="${escapeHtml(item.id)}">Record Manual Completion</button>`
+- L1135: `<button type="button" data-publishing-action="pause" data-publishing-id="${escapeHtml(item.id)}">Pause to draft</button>`
+- L1136: `<button type="button" data-publishing-action="retry" data-publishing-id="${escapeHtml(item.id)}">Retry scheduled item</button>`
+- L1140: `: \`<div class="empty-box">No publish queue items match this filter. Create or load a draft to start the execution queue.</div>\`;`
+- L1143: `<section class="card publishing-card" id="publishingQueuePanel">`
+- L1146: `<div class="setup-kicker">Publish Queue</div>`
+- L1152: `<div class="publishing-queue-list">${rows}</div>`
+- L1159: `<section class="card publishing-card" id="publishingBuilderPanel">`
+- L1162: `<div class="setup-kicker">Publishing Builder</div>`
+- L1163: `<h3>Draft, validate, and queue manual publishing records</h3>`
+- L1167: `<form id="publishingBuilderForm" class="setup-form-grid publishing-builder-form" novalidate>`
+- L1171: `<label class="setup-label" for="publishingProjectInput">Project</label>`
+- L1174: `<input id="publishingProjectInput" name="project" class="setup-input" type="text" value="${escapeHtml(session.form.project)}" placeholder="Project name">`
+- L1179: `<label class="setup-label" for="publishingCampaignInput">Campaign</label>`
+- L1182: `<input id="publishingCampaignInput" name="campaign" class="setup-input" type="text" value="${escapeHtml(session.form.campaign)}" placeholder="Campaign or launch wave">`
+- L1190: `<label class="setup-label" for="publishingChannelInput">Channel</label>`
+- L1193: `<select id="publishingChannelInput" name="channel" class="setup-input">`
+- L1203: `<label class="setup-label" for="publishingContentInput">Content item</label>`
+- L1206: `<input id="publishingContentInput" name="contentItem" class="setup-input" type="text" value="${escapeHtml(session.form.contentItem)}" placeholder="Caption, email, product update, or workflow output">`
+- L1214: `<label class="setup-label" for="publishingDateInput">Publish date</label>`
+- L1215: `<span class="setup-field-state is-optional">Queue for Manual Publishing</span>`
+- L1217: `<input id="publishingDateInput" name="publishDate" class="setup-input" type="date" value="${escapeHtml(session.form.publishDate)}">`
+- L1218: `${fieldError(session, "publishDate", escapeHtml)}`
+- L1222: `<label class="setup-label" for="publishingTimeInput">Publish time</label>`
+- L1225: `<input id="publishingTimeInput" name="publishTime" class="setup-input" type="time" value="${escapeHtml(session.form.publishTime)}">`
+- L1229: `<label class="setup-label" for="publishingApprovalInput">Approval status</label>`
+- L1232: `<select id="publishingApprovalInput" name="approvalStatus" class="setup-input">`
+- L1243: `<label class="setup-label" for="publishingTitleInput">Queue title</label>`
+- L1246: `<input id="publishingTitleInput" name="title" class="setup-input" type="text" value="${escapeHtml(session.form.title)}" placeholder="Operator-facing title">`
+- L1251: `<label class="setup-label" for="publishingNotesInput">Execution notes</label>`
+
+## Confirmation Signals
+- L638: `return window.confirm(message);`
+- L1673: `const confirmed = window.confirm(`
+- L1771: `const confirmed = window.confirm("Confirm fail action\n\nAction: Mark this publishing item as failed.\nRisk: This creates a permanent failure record and stops the publishing lifecycle for this item.\nPolicy: Use only when this item cannot proceed and requires explicit failure logging.\n\nSelect Cancel to keep this item in its current state.");`
+- L1865: `const confirmed = window.confirm(`
+- L1901: `const confirmed = window.confirm(`
+- L1917: `const confirmed = window.confirm(`
+
+## Access-Key / Credential Signals
+- none
+
+## Navigation Signals
+- L148: `function ensurePublishingAutoModeBinding(getState, navigateTo, render) {`
+- L156: `createAutoModeController(getState, { getState, navigateTo });`
+- L1278: `<div class="empty-box">Run or route a workflow into Publishing to load execution-ready output here.</div>`
+- L1456: `navigateTo,`
+- L1474: `ensurePublishingAutoModeBinding(getState, navigateTo, render);`
+- L1819: `routeSuggestions: []`
+- L1844: `navigateTo("ai-command");`
+- L1863: `ensurePublishingAutoModeBinding(getState, navigateTo, render);`
+- L1875: `context: { getState, navigateTo, projectName },`
+- L1909: `await approveCurrentGate({ context: { getState, navigateTo, projectName } });`
+- L1925: `await skipCurrentStep({ context: { getState, navigateTo, projectName } });`
+- L1931: `export const publishingRoute = {`
+- L1949: `navigateTo,`
+- L2031: `navigateTo,`
+- L2040: `render: () => publishingRoute.render({`
+- L2045: `navigateTo,`
+
+## Disabled / Read-only / Draft / Guard Signals
+- L9: `const approval = selectedItem?.approvalStatus ? titleCase(selectedItem.approvalStatus) : "Draft";`
+- L11: `const safety = \`Publishing prepares channel packages, manual schedule records, and approval-ready handoffs. External publishing requires provider proof; backend status changes remain <strong>confirmation-gated</strong> and governed by <strong>backend approval rules</strong>.\`;`
+- L32: `{ key: "draft", label: "Draft" },`
+- L40: `draft: selectedItem?.status === "draft" ? "active" : selectedItem ? "ready" : "missing",`
+- L82: `import { getSharedHandoff, setSharedAiDraft, setSharedHandoff } from "../shared-context.js";`
+- L100: `buildLocalDraftPayload,`
+- L105: `const PUBLISHING_LOCAL_DRAFTS_KEY = "mh-publishing-local-drafts-v1";`
+- L106: `const STATUS_FILTERS = ["all", "draft", "ready", "needs approval", "scheduled", "published", "failed"];`
+- L107: `const DISPLAY_STATUSES = ["draft", "ready", "needs approval", "scheduled", "published", "failed"];`
+- L109: `const APPROVAL_STATUSES = ["draft", "needs approval", "approved"];`
+- L268: `function normalizeStatus(value, fallback = "draft") {`
+- L271: `if (["draft", "paused", "pause"].includes(normalized)) return "draft";`
+- L278: `if (["failed", "error", "blocked", "rejected"].includes(normalized)) return "failed";`
+- L294: `function readDraftMap() {`
+- L297: `const parsed = JSON.parse(window.localStorage?.getItem(PUBLISHING_LOCAL_DRAFTS_KEY) || "{}");`
+- L304: `function writeDraftMap(map) {`
+- L307: `window.localStorage?.setItem(PUBLISHING_LOCAL_DRAFTS_KEY, JSON.stringify(map || {}));`
+- L315: `function loadLocalDrafts(projectName) {`
+- L316: `return asArray(readDraftMap()[projectKey(projectName)]);`
+- L319: `function saveLocalDraft(projectName, draft) {`
+- L320: `const map = readDraftMap();`
+- L322: `const drafts = asArray(map[key]).filter((item) => asString(item.id) !== asString(draft.id));`
+- L323: `const nextDraft = {`
+- L324: `...asObject(draft),`
+- L325: `id: asString(draft.id || \`local-publish-${Date.now()}\`),`
+- L326: `source: "Local draft",`
+- L330: `map[key] = [nextDraft, ...drafts].slice(0, 20);`
+- L331: `writeDraftMap(map);`
+- L332: `return nextDraft;`
+- L335: `function updateLocalDraft(projectName, itemId, patch) {`
+- L336: `const existing = loadLocalDrafts(projectName).find((item) => asString(item.id) === asString(itemId));`
+- L337: `return saveLocalDraft(projectName, {`
+- L357: `approvalStatus: "draft",`
+- L372: `draftMessage: "",`
+- L402: `const preview = asObject(raw.preview || raw.connector_preview);`
+- L404: `const status = normalizeStatus(raw.execution_status || raw.status, scheduledFor ? "scheduled" : "draft");`
+- L405: `const channel = toKey(raw.channel || preview.channel);`
+- L409: `title: firstText(raw.title, raw.name, preview.title, preview.headline),`
+- L413: `contentItem: firstText(raw.content_item, raw.contentItem, raw.content_id, preview.content_item, preview.caption, preview.body),`
+- L418: `approvalStatus: status === "ready" ? "approved" : status === "needs approval" ? "needs approval" : "draft",`
+- L421: `offer: firstText(raw.offer, preview.offer),`
+- L423: `preview,`
+- L426: `totalAssets: Number(raw.total_assets || preview.asset_count || 0) || 0`
+- L450: `preview: asObject(latest?.preview || job.preview || job.connector_preview)`
+- L462: `const localDrafts = loadLocalDrafts(projectName).map((draft) => normalizeQueueItem(draft, state, "Local draft"));`
+- L464: `const visibleLocalDrafts = localDrafts.filter((item) => !backendIds.has(item.id));`
+- L466: `return [...visibleLocalDrafts, ...scheduledItems, ...orphanResults].sort(compareQueueItems);`
+- L475: `draft: 4,`
+- L531: `approvalStatus: item.approvalStatus || "draft",`
+- L546: `session.draftMessage = "";`
+- L565: `const draftPrompt = firstText(`
+- L568: `"Prepare publishing draft from current project context."`
+- L574: `type: "prepare_publishing_draft",`
+- L576: `action: "Prepare publishing draft",`
+- L578: `prompt: draftPrompt,`
+- L579: `reason: "Prepare a safe publishing draft without executing publish.",`
+- L580: `title: firstText(session.form.title, "Prepared publishing draft")`
+- L590: `prompt: draftPrompt,`
+- L591: `reason: "This records a manual publishing completion only after review; external provider execution requires separate proof."`
+- L626: `function guardPublishingAssetBlockers(session, assetBlockers, showMessage, actionLabel = "this publishing action") {`
+- L851: `.publishing-queue-actions button:disabled,`
+- L852: `.publishing-queue-actions button[disabled] {`
+- L940: `const draftContext = asObject(payload.draft_context);`
+- L945: `title: firstText(output.title, payload.workflow_title, draftContext.lastResponseTitle, "Workflow output"),`
+- L946: `project: firstText(draftContext.projectName, payload.project_name, output.project),`
+- L950: `summary: firstText(output.summary, output.description, payload.prompt, draftContext.lastCommand),`
+- L971: `const draft = queue.find((item) => item.status === "draft");`
+- L978: `why: \`${failed.title} is blocked or failed. Clear the blocker before adding more scheduled work.\`,`
+- L1000: `action: "Load workflow output into a draft",`
+- L1006: `if (draft) {`
+- L1008: `action: "Complete and schedule a draft",`
+- L1009: `why: \`${draft.title} is not yet executable. Add channel, content, approval, and timing details.\`,`
+- L1010: `focusId: draft.id,`
+- L1015: `action: connectedCount ? "Create a publishing draft" : "Connect a publishing channel",`
+- L1017: `? "No queue item is ready. Start with a draft and save it locally until it can be scheduled."`
+- L1018: `: "Channel readiness is missing. Publishing can prepare drafts, but live execution needs a connected destination.",`
+- L1037: `<div class="publishing-overview-item"><span>Draft items</span><strong>${escapeHtml(String(counts.draft))}</strong></div>`
+- L1038: `<div class="publishing-overview-item"><span>Failed / blocked items</span><strong>${escapeHtml(String(counts.failed))}</strong></div>`
+- L1048: `["Content", counts.draft || counts.ready || counts.scheduled ? "Present" : "Empty"],`
+- L1051: `["Approval", counts["needs approval"] ? "Pending" : counts.ready ? "Approved" : "Draft"],`
+- L1075: `<button id="publishingSaveDraftBtn" class="btn btn-secondary" type="button">Save publishing draft</button>`
+- L1080: `<details class="publishing-automation-preview publishing-block-gap">`
+- L1081: `<summary>Automation Preview</summary>`
+- L1082: `<div class="publishing-automation-preview-copy">Automation cannot publish without manual review, confirmation, and backend approval gates.</div>`
+- L1135: `<button type="button" data-publishing-action="pause" data-publishing-id="${escapeHtml(item.id)}">Pause to draft</button>`
+- L1140: `: \`<div class="empty-box">No publish queue items match this filter. Create or load a draft to start the execution queue.</div>\`;`
+- L1163: `<h3>Draft, validate, and queue manual publishing records</h3>`
+- L1258: `<button id="publishingNewItemBtn" class="btn btn-secondary" type="button">New Draft</button>`
+- L1259: `<button id="publishingBuilderSaveBtn" class="btn btn-secondary" type="button">Save publishing draft</button>`
+- L1262: `${session.draftMessage ? \`<div class="simple-banner">${escapeHtml(session.draftMessage)}</div>\` : ""}`
+- L1291: `<p class="publishing-section-copy">${escapeHtml(summarizeText(summary.summary, "Workflow output is available for draft loading."))}</p>`
+- L1311: `const future = scheduled.filter((item) => toDate(item.scheduledFor)?.getTime() > now);`
+- L1314: `if (!future.length && !past.length) {`
+- L1330: `if (future.length) {`
+- L1333: `${future.slice(0, 8).map((item) => \``
+- L1365: `<h3>${future.length ? "Upcoming scheduled items" : "Past scheduled items — reschedule required"}</h3>`
+- L1367: `<span class="card-badge neutral">${escapeHtml(String(future.length || past.length))} ${future.length ? "upcoming" : "past"}</span>`
+- L1485: `function saveDraftLocally(message = "Publishing draft saved locally.") {`
+- L1486: `const local = saveLocalDraft(projectName, buildLocalDraftPayload(session, "draft"));`
+- L1490: `session.draftMessage = message;`
+- L1495: `async function persistDraft() {`
+- L1496: `const local = saveDraftLocally("Publishing draft saved locally.");`
+- L1499: `() => savePublishingSchedule(projectName, buildSchedulePayload(session, "draft")),`
+- L1505: `successMessage: "Publishing draft saved."`
+- L1548: `showMessage?.("New publishing draft opened.");`
+- L1560: `const saveDraftButtons = [$("publishingSaveDraftBtn"), $("publishingBuilderSaveBtn")].filter(Boolean);`
+- L1561: `saveDraftButtons.forEach((button) => {`
+- L1564: `if (!validateBuilder(session, "draft")) {`
+- L1568: `await persistDraft();`
+- L1584: `if (!current?.localOnly && guardPublishingAssetBlockers(session, assetBlockers, showMessage, "scheduling or rescheduling")) {`
+- L1589: `updateLocalDraft(projectName, current.id, {`
+- L1590: `...buildLocalDraftPayload(session, "scheduled"),`
+- L1593: `session.draftMessage = "Local publishing draft scheduled in this browser.";`
+- L1594: `showMessage?.(session.draftMessage);`
+- L1602: `: "Confirm schedule\n\nAction: Queue this publishing item for manual publishing.\n\nThis creates a backend publishing schedule and remains governed by approval rules.\n\nSelect Cancel to keep this as a draft."`
+- L1625: `saveDraftLocally("Backend schedule unavailable; draft kept locally.");`
+- L1652: `const intent = action === "publish" ? "publish" : action === "retry" ? "retry" : "draft";`
+- L1659: `const nextStatus = action === "pause" ? "draft" : action === "retry" ? "scheduled" : action === "publish" ? "published" : item.status;`
+- L1660: `updateLocalDraft(projectName, item.id, { ...buildLocalDraftPayload(session, nextStatus), id: item.id });`
+- L1661: `session.draftMessage = \`Local draft ${action === "publish" ? "marked as manual completion recorded" : action === "pause" ? "paused" : "updated"}.\`;`
+- L1662: `showMessage?.(session.draftMessage);`
+- L1668: `if (guardPublishingAssetBlockers(session, assetBlockers, showMessage, "publishing")) {`
+- L1687: `"Confirm pause\n\nAction: Move this backend publishing item back to draft.\n\nThis updates the backend publishing lifecycle state.\n\nSelect Cancel to keep the item unchanged."`
+- L1695: `() => reschedulePublishingItem(projectName, item.jobId, buildSchedulePayload(session, "draft")),`
+- L1696: `{ projectName, reloadProjectData, showMessage, showError, successMessage: "Publishing item paused as a draft.\n\nConfirmation required before execution. Backend approval rules apply." }`
+- L1700: `if (guardPublishingAssetBlockers(session, assetBlockers, showMessage, "retrying or rescheduling")) {`
+- L1727: `session.validation.contentItem = "Select or save a publishing draft before approval.";`
+- L1733: `updateLocalDraft(projectName, current.id, { ...buildLocalDraftPayload(session, "ready"), id: current.id, approvalStatus: "approved" });`
+- L1734: `showMessage?.("Local publishing draft approved.");`
+- L1765: `updateLocalDraft(projectName, current.id, { ...buildLocalDraftPayload(session, "failed"), id: current.id });`
+- L1766: `showMessage?.("Local publishing draft marked failed.");`
+- L1771: `const confirmed = window.confirm("Confirm fail action\n\nAction: Mark this publishing item as failed.\nRisk: This creates a permanent failure record and stops the publishing lifecycle for this item.\nPolicy: Use only when this item cannot proceed and requires explicit failure logging.\n\nSelect Cancel to keep this item in its current state.");`
+- L1803: `saveDraftLocally("Workflow output loaded into a local publishing draft.");`
+- L1814: `const aiDraft = {`
+- L1822: `setSharedAiDraft(projectName, aiDraft);`
+- L1834: `draft_context: aiDraft,`
+- L1836: `status: current?.status || "draft",`
+- L1868: `"Risk: This may prepare publishing drafts and handoffs, but must not publish externally or approve Governance decisions without explicit approval.\n\n" +`
+- L1937: `description: "Review, prepare, queue, and record manual publishing status with clear previews and backend-controlled actions."`
+- L2009: `<span class="card-badge ${badgeTone(selectedItem?.status || "draft")}">${escapeHtml(selectedItem ? titleCase(selectedItem.status) : "Draft")}</span>`
+
+## Risky Terms
+- L2: `function renderPublishingCommandHeader({ projectName, recommendation, selectedItem, summary, queue, blockers, escapeHtml }) {`
+- L6: `selectedItem?.channel && \`<span>Channel: <strong>${escapeHtml(titleCase(selectedItem.channel))}</strong></span>\``
+- L9: `const approval = selectedItem?.approvalStatus ? titleCase(selectedItem.approvalStatus) : "Draft";`
+- L10: `const nextAction = recommendation?.action ? escapeHtml(recommendation.action) : "Review queue";`
+- L11: `const safety = \`Publishing prepares channel packages, manual schedule records, and approval-ready handoffs. External publishing requires provider proof; backend status changes remain <strong>confirmation-gated</strong> and governed by <strong>backend approval rules</strong>.\`;`
+- L13: `\`<button type="button" class="btn btn-secondary" onclick="document.getElementById('publishingBuilderPanel')?.scrollIntoView({behavior:'smooth',block:'start'})">Prepare Publishing Package</button>\`,`
+- L14: `\`<button type="button" class="btn btn-secondary" onclick="document.getElementById('publishingQueuePanel')?.scrollIntoView({behavior:'smooth',block:'start'})">Open Queue</button>\`,`
+- L15: `\`<button type="button" class="btn btn-secondary" onclick="document.getElementById('publishingHandoffPanel')?.scrollIntoView({behavior:'smooth',block:'start'})">Review Approval Gate</button>\`,`
+- L16: `\`<button type="button" class="btn btn-primary" onclick="document.getElementById('publishingPushAiBtn')?.scrollIntoView({behavior:'smooth',block:'start'})">Open AI Review</button>\``
+- L19: `<section class="publishing-command-header" role="region" aria-label="Publishing Command Header">`
+- L20: `<div class="publishing-command-header-title">Publishing Control Workspace</div>`
+- L21: `<div class="publishing-command-header-context">${context}</div>`
+- L22: `<div class="publishing-command-header-status">Status: <strong>${escapeHtml(status)}</strong> &middot; Approval: <strong>${escapeHtml(approval)}</strong></div>`
+- L23: `<div class="publishing-command-header-status">Next: <span>${nextAction}</span></div>`
+- L24: `<div class="publishing-command-header-safety">${safety}</div>`
+- L25: `<div class="publishing-command-header-actions">${actions}</div>`
+- L30: `function renderPublishingWorkflowStrip({ selectedItem, recommendation, blockers, approvalState, escapeHtml }) {`
+- L33: `{ key: "source", label: "Source" },`
+- L35: `{ key: "approval", label: "Approval" },`
+- L36: `{ key: "schedule", label: "Schedule" },`
+- L37: `{ key: "handoff", label: "Manual Completion Handoff" }`
+- L41: `source: selectedItem?.source ? "ready" : "missing",`
+- L43: `approval: selectedItem?.approvalStatus === "approved" ? "ready" : selectedItem?.approvalStatus === "needs approval" ? "warning" : "missing",`
+- L44: `schedule: selectedItem?.status === "scheduled" ? "ready" : "missing",`
+- L45: `handoff: selectedItem?.status === "published" ? "ready" : "missing"`
+- L48: `<nav class="publishing-workflow-strip" aria-label="Publishing Workflow">`
+- L50: `<div class="publishing-workflow-step is-${statusMap[step.key]}" aria-label="${escapeHtml(step.label)}: ${statusMap[step.key]}">`
+- L52: `<span class="publishing-workflow-step-label">${statusMap[step.key]}</span>`
+- L59: `function renderPublishingReadinessSummary({ selectedItem, recommendation, blockers, assetData, escapeHtml }) {`
+- L61: `{ key: "source", label: "Source", state: selectedItem?.source ? "ready" : "missing" },`
+- L64: `{ key: "channel", label: "Channel", state: selectedItem?.channel ? "ready" : "missing" },`
+- L65: `{ key: "schedule", label: "Schedule", state: selectedItem?.scheduledFor ? "ready" : "missing" },`
+- L66: `{ key: "governance", label: "Governance", state: selectedItem?.governanceStatus === "approved" ? "ready" : "missing" },`
+- L67: `{ key: "approval", label: "Approval", state: selectedItem?.approvalStatus === "approved" ? "ready" : selectedItem?.approvalStatus === "needs approval" ? "warning" : "missing" }`
+- L69: `const blockersSummary = blockers && blockers.length ? \`<div class="publishing-readiness-card is-warning">${escapeHtml(blockers.length)} blocker(s) present</div>\` : "";`
+- L71: `<section class="publishing-readiness-summary" aria-label="Publishing Readiness Summary">`
+- L73: `<div class="publishing-readiness-card is-${r.state}">`
+- L74: `<span class="publishing-readiness-card-label">${escapeHtml(r.label)}</span>`
+- L82: `import { getSharedHandoff, setSharedAiDraft, setSharedHandoff } from "../shared-context.js";`
+- L83: `import {`
+- L87: `} from "../asset-library.js";`
+- L88: `import { getReadinessBlockers } from "../system-intelligence.js";`
+- L89: `import {`
+- L94: `approveCurrentGate,`
+- L98: `import {`
+- L99: `buildSchedulePayload,`
+- L101: `buildPublishingAiPrompt`
+- L102: `} from "./publishing/publishing-payloads.js";`
+- L104: `const publishingSessions = new Map();`
+- L105: `const PUBLISHING_LOCAL_DRAFTS_KEY = "mh-publishing-local-drafts-v1";`
+- L106: `const STATUS_FILTERS = ["all", "draft", "ready", "needs approval", "scheduled", "published", "failed"];`
+- L107: `const DISPLAY_STATUSES = ["draft", "ready", "needs approval", "scheduled", "published", "failed"];`
+- L108: `const CHANNEL_DEFAULTS = ["instagram", "facebook", "tiktok", "youtube", "email", "amazon", "ebay", "website"];`
+- L109: `const APPROVAL_STATUSES = ["draft", "needs approval", "approved"];`
+- L110: `const PUBLISHING_ASSET_KEYS = [`
+- L120: `const publishingAutomationState = {`
+- L124: `let publishingAutoModeUnsubscribe = null;`
+- L125: `let publishingAutoModeControllerReady = false;`
+- L126: `let publishingAutomationEnabled = false;`
+- L127: `let publishingRenderCallback = null;`
+- L128: `let publishingRenderTimer = null;`
+- L130: `function schedulePublishingRender(render) {`
+- L132: `publishingRenderCallback = render;`
+- L135: `if (publishingRenderTimer) {`
+- L139: `publishingRenderTimer = window.setTimeout(() => {`
+- L140: `publishingRenderTimer = null;`
+- L142: `if (typeof publishingRenderCallback === "function") {`
+- L143: `publishingRenderCallback();`
+- L148: `function ensurePublishingAutoModeBinding(getState, navigateTo, render) {`
+- L149: `publishingRenderCallback = render;`
+- L151: `if (!publishingAutomationEnabled) {`
+- L155: `if (!publishingAutoModeControllerReady) {`
+- L157: `publishingAutoModeControllerReady = true;`
+- L160: `if (publishingAutoModeUnsubscribe) {`
+- L164: `publishingAutoModeUnsubscribe = subscribeAutoMode(() => {`
+- L172: `schedulePublishingRender();`
+- L229: `function formatDateTime(value, fallback = "Not scheduled") {`
+- L242: `if (!date) return "Unscheduled";`
+- L272: `if (["ready", "approved", "ready_for_manual_publish", "ready_for_manual_send"].includes(normalized)) return "ready";`
+- L273: `if (["needs approval", "needs_approval", "approval", "pending_approval", "review", "in_review"].includes(normalized)) {`
+- L274: `return "needs approval";`
+- L276: `if (["scheduled", "queued", "queue", "pending", "pending_publish"].includes(normalized)) return "scheduled";`
+- L277: `if (["published", "completed", "complete", "success", "done", "sent", "live"].includes(normalized)) return "published";`
+- L284: `if (status === "published") return "success";`
+- L285: `if (status === "ready" || status === "scheduled") return "warning";`
+- L297: `const parsed = JSON.parse(window.localStorage?.getItem(PUBLISHING_LOCAL_DRAFTS_KEY) || "{}");`
+- L307: `window.localStorage?.setItem(PUBLISHING_LOCAL_DRAFTS_KEY, JSON.stringify(map || {}));`
+- L319: `function saveLocalDraft(projectName, draft) {`
+- L325: `id: asString(draft.id || \`local-publish-${Date.now()}\`),`
+- L326: `source: "Local draft",`
+- L337: `return saveLocalDraft(projectName, {`
+- L353: `channel: "instagram",`
+- L355: `publishDate: toDateInput(tomorrow),`
+- L356: `publishTime: "09:00",`
+- L357: `approvalStatus: "draft",`
+- L365: `if (!publishingSessions.has(key)) {`
+- L366: `publishingSessions.set(key, {`
+- L370: `formSourceId: "",`
+- L373: `loadedHandoffId: "",`
+- L377: `return publishingSessions.get(key);`
+- L395: `if (item.campaign) return \`${item.campaign} ${titleCase(item.channel || "publish")}\`;`
+- L396: `if (context.activeCampaign) return \`${context.activeCampaign} ${titleCase(item.channel || "publish")}\`;`
+- L397: `return \`${titleCase(item.channel || "Publishing")} item\`;`
+- L400: `function normalizeQueueItem(rawItem, state, source) {`
+- L402: `const preview = asObject(raw.preview || raw.connector_preview);`
+- L403: `const scheduledFor = firstText(raw.scheduled_for, raw.scheduledFor);`
+- L404: `const status = normalizeStatus(raw.execution_status || raw.status, scheduledFor ? "scheduled" : "draft");`
+- L405: `const channel = toKey(raw.channel || preview.channel);`
+- L409: `title: firstText(raw.title, raw.name, preview.title, preview.headline),`
+- L412: `channel,`
+- L413: `contentItem: firstText(raw.content_item, raw.contentItem, raw.content_id, preview.content_item, preview.caption, preview.body),`
+- L414: `scheduledFor,`
+- L415: `executedAt: firstText(raw.executed_at, raw.executedAt),`
+- L416: `createdAt: firstText(raw.created_at, raw.createdAt, raw.executed_at),`
+- L417: `updatedAt: firstText(raw.updated_at, raw.updatedAt, raw.executed_at, raw.created_at),`
+- L418: `approvalStatus: status === "ready" ? "approved" : status === "needs approval" ? "needs approval" : "draft",`
+- L421: `offer: firstText(raw.offer, preview.offer),`
+- L423: `preview,`
+- L424: `source,`
+- L426: `totalAssets: Number(raw.total_assets || preview.asset_count || 0) || 0`
+- L436: `.sort((a, b) => (toDate(b.executed_at)?.getTime() || 0) - (toDate(a.executed_at)?.getTime() || 0));`
+- L444: `const scheduledItems = asArray(activity.scheduled_jobs).map((job) => {`
+- L450: `preview: asObject(latest?.preview || job.preview || job.connector_preview)`
+- L453: `latest ? "Scheduled job + result" : "Scheduled job"`
+- L457: `const knownIds = new Set(scheduledItems.map((item) => item.jobId));`
+- L463: `const backendIds = new Set([...scheduledItems, ...orphanResults].map((item) => item.id));`
+- L466: `return [...visibleLocalDrafts, ...scheduledItems, ...orphanResults].sort(compareQueueItems);`
+- L473: `"needs approval": 2,`
+- L474: `scheduled: 3,`
+- L476: `published: 5`
+- L481: `const aTime = toDate(a.scheduledFor || a.updatedAt || a.createdAt)?.getTime() || 0;`
+- L482: `const bTime = toDate(b.scheduledFor || b.updatedAt || b.createdAt)?.getTime() || 0;`
+- L486: `function buildChannels(state, queue) {`
+- L491: `...queue.map((item) => item.channel),`
+- L492: `...CHANNEL_DEFAULTS`
+- L513: `function getNextPublishWindow(queue) {`
+- L515: `.filter((item) => item.scheduledFor && ["scheduled", "ready"].includes(item.status))`
+- L516: `.sort((a, b) => (toDate(a.scheduledFor)?.getTime() || 0) - (toDate(b.scheduledFor)?.getTime() || 0))[0];`
+- L517: `return next ? \`${formatDateTime(next.scheduledFor)} - ${next.title}\` : "No scheduled window";`
+- L520: `function syncFormFromItem(session, item) {`
+- L527: `channel: item.channel || session.form.channel || "",`
+- L529: `publishDate: toDateInput(item.scheduledFor),`
+- L530: `publishTime: toTimeInput(item.scheduledFor),`
+- L531: `approvalStatus: item.approvalStatus || "draft",`
+- L536: `session.formSourceId = item.id;`
+- L544: `session.formSourceId = "";`
+- L550: `function syncSessionForm(session, form) {`
+- L558: `function buildScheduleTime(form) {`
+- L559: `const date = clean(form.publishDate);`
+- L561: `return \`${date}T${clean(form.publishTime) || "09:00"}:00Z\`;`
+- L564: `function buildPublishingAutoModePlan(session) {`
+- L568: `"Prepare publishing draft from current project context."`
+- L573: `id: \`publishing-prepare-${Date.now()}\`,`
+- L574: `type: "prepare_publishing_draft",`
+- L575: `targetPage: "publishing",`
+- L576: `action: "Prepare publishing draft",`
+- L579: `reason: "Prepare a safe publishing draft without executing publish.",`
+- L580: `title: firstText(session.form.title, "Prepared publishing draft")`
+- L585: `id: \`publishing-gate-${Date.now()}\`,`
+- L586: `type: "publish_now",`
+- L587: `targetPage: "publishing",`
+- L588: `action: "Record manual publish completion",`
+- L591: `reason: "This records a manual publishing completion only after review; external provider execution requires separate proof."`
+- L604: `if (!clean(form.channel)) errors.channel = "Channel is required.";`
+- L606: `if (["schedule", "publish", "retry"].includes(intent) && !clean(form.publishDate)) {`
+- L607: `errors.publishDate = "Publish date is required for this action.";`
+- L609: `if (intent === "publish" && form.approvalStatus !== "approved") {`
+- L610: `errors.approvalStatus = "Publishing readiness must be approved before recording manual completion.";`
+- L617: `function summarizePublishingBlockers(assetBlockers = []) {`
+- L626: `function guardPublishingAssetBlockers(session, assetBlockers, showMessage, actionLabel = "this publishing action") {`
+- L629: `const summary = summarizePublishingBlockers(blockers);`
+- L630: `const message = \`Publishing blocker(s) must be resolved before ${actionLabel}: ${summary || "required publishing assets are missing or need review"}.\`;`
+- L636: `function confirmPublishingBackendAction(message) {`
+- L643: `return message ? \`<div class="publishing-inline-error">${escapeHtml(message)}</div>\` : "";`
+- L647: `// Add governance/approval hints for status pills`
+- L649: `if (status === "needs approval") {`
+- L650: `hint = "title=\"Request Approval Review. Confirmation required before execution.\" aria-label=\"Request Approval Review. Confirmation required before execution.\"";`
+- L652: `hint = "title=\"Prepare Governance Review. Backend approval rules apply.\" aria-label=\"Prepare Governance Review. Backend approval rules apply.\"";`
+- L653: `} else if (status === "scheduled") {`
+- L656: `return \`<span class="publishing-status-pill is-${escapeHtml(statusClass(status))}" ${hint}>${escapeHtml(titleCase(status))}</span>\`;`
+- L662: `.publishing-execution-center {`
+- L668: `.publishing-execution-grid {`
+- L674: `.publishing-main-column,`
+- L675: `.publishing-side-column {`
+- L682: `.publishing-card {`
+- L687: `.publishing-overview-grid {`
+- L693: `.publishing-overview-item,`
+- L694: `.publishing-impact-chip {`
+- L702: `.publishing-overview-item span,`
+- L703: `.publishing-impact-chip small {`
+- L710: `.publishing-overview-item strong,`
+- L711: `.publishing-impact-chip strong {`
+- L717: `.publishing-overview-item.is-wide {`
+- L721: `.publishing-impact-row,`
+- L722: `.publishing-action-row,`
+- L723: `.publishing-form-actions,`
+- L724: `.publishing-filter-row {`
+- L731: `.publishing-impact-row {`
+- L735: `.publishing-action-row,`
+- L736: `.publishing-form-actions {`
+- L740: `.publishing-action-row .btn,`
+- L741: `.publishing-form-actions .btn {`
+- L747: `.publishing-impact-chip {`
+- L751: `.publishing-filter-chip {`
+- L764: `.publishing-filter-chip.is-active {`
+- L769: `/* Publishing queue dark contrast correction */`
+- L770: `.publishing-queue-list,`
+- L771: `.publishing-calendar-list,`
+- L772: `.publishing-blocker-list {`
+- L779: `.publishing-queue-row {`
+- L790: `.publishing-queue-row.is-active {`
+- L795: `.publishing-queue-main,`
+- L796: `.publishing-calendar-row {`
+- L807: `.publishing-queue-title {`
+- L815: `.publishing-queue-meta {`
+- L824: `.publishing-queue-actions {`
+- L831: `.publishing-queue-actions button {`
+- L843: `.publishing-queue-actions button:focus-visible,`
+- L844: `.publishing-queue-main:focus-visible,`
+- L845: `.publishing-calendar-row:focus-visible,`
+- L846: `.publishing-filter-chip:focus-visible {`
+- L851: `.publishing-queue-actions button:disabled,`
+- L852: `.publishing-queue-actions button[disabled] {`
+- L860: `.publishing-status-pill {`
+- L873: `.publishing-status-pill.is-ready,`
+- L874: `.publishing-status-pill.is-scheduled {`
+- L878: `.publishing-status-pill.is-published {`
+- L882: `.publishing-status-pill.is-failed {`
+- L886: `.publishing-inline-error {`
+- L893: `.publishing-calendar-row {`
+- L904: `.publishing-calendar-row em {`
+- L913: `.publishing-execution-grid {`
+- L918: `.publishing-queue-row {`
+- L923: `.publishing-queue-actions {`
+- L937: `function extractHandoffSummary(handoff) {`
+- L938: `const payload = asObject(handoff?.payload);`
+- L942: `id: asString(handoff?.id || payload.workflow_id || payload.prompt || payload.workflow_title),`
+- L943: `sourcePage: asString(handoff?.source_page || "workflows"),`
+- L948: `channel: firstText(output.channel, payload.channel),`
+- L955: `function getPublishingHandoff(projectName, operations) {`
+- L957: `getSharedHandoff(projectName, "publishing", operations, "workflows") ||`
+- L958: `getSharedHandoff(projectName, "publishing", operations, "ai-command") ||`
+- L959: `getSharedHandoff(projectName, "publishing", operations)`
+- L967: `function buildRecommendation({ queue, counts, assetBlockers, checks, handoff, globalBlockers }) {`
+- L970: `const needsApproval = queue.find((item) => item.status === "needs approval");`
+- L977: `action: "Retry failed publishing item",`
+- L978: `why: \`${failed.title} is blocked or failed. Clear the blocker before adding more scheduled work.\`,`
+- L986: `why: \`${ready.title} is approved for a backend readiness update. Record manual completion only after external execution is verified.\`,`
+- L990: `if (needsApproval) {`
+- L992: `action: "Review approval queue",`
+- L993: `why: \`${needsApproval.title} needs approval before it can move into the manual publishing queue.\`,`
+- L994: `focusId: needsApproval.id,`
+- L998: `if (handoff) {`
+- L1001: `why: "A workflow handoff is available. Loading it keeps execution moving without inventing backend data.",`
+- L1008: `action: "Complete and schedule a draft",`
+- L1009: `why: \`${draft.title} is not yet executable. Add channel, content, approval, and timing details.\`,`
+- L1015: `action: connectedCount ? "Create a publishing draft" : "Connect a publishing channel",`
+- L1017: `? "No queue item is ready. Start with a draft and save it locally until it can be scheduled."`
+- L1018: `: "Channel readiness is missing. Publishing can prepare drafts, but live execution needs a connected destination.",`
+- L1026: `<section class="card publishing-card">`
+- L1029: `<div class="setup-kicker">Publishing Overview</div>`
+- L1034: `<div class="publishing-overview-grid">`
+- L1035: `<div class="publishing-overview-item"><span>Scheduled items</span><strong>${escapeHtml(String(counts.scheduled))}</strong></div>`
+- L1036: `<div class="publishing-overview-item"><span>Ready for manual review</span><strong>${escapeHtml(String(counts.ready))}</strong></div>`
+- L1037: `<div class="publishing-overview-item"><span>Draft items</span><strong>${escapeHtml(String(counts.draft))}</strong></div>`
+- L1038: `<div class="publishing-overview-item"><span>Failed / blocked items</span><strong>${escapeHtml(String(counts.failed))}</strong></div>`
+- L1039: `<div class="publishing-overview-item is-wide"><span>Next publish window</span><strong>${escapeHtml(getNextPublishWindow(queue))}</strong></div>`
+- L1047: `["Manual publishing readiness", counts.ready + counts.scheduled > 0 ? "Active" : "Needs queue"],`
+- L1048: `["Content", counts.draft || counts.ready || counts.scheduled ? "Present" : "Empty"],`
+- L1050: `["Channel readiness", Object.values(checks).filter(Boolean).length ? "Connected" : "Needs setup"],`
+- L1051: `["Approval", counts["needs approval"] ? "Pending" : counts.ready ? "Approved" : "Draft"],`
+- L1052: `["Automation", counts.scheduled ? "Scheduled" : "Manual"]`
+- L1056: `<section class="card publishing-card" id="publishingRecommendation">`
+- L1061: `<p class="publishing-section-copy">${escapeHtml(recommendation.why)}</p>`
+- L1065: `<div class="publishing-impact-row">`
+- L1067: `<span class="publishing-impact-chip">`
+- L1073: `<div class="publishing-action-row">`
+- L1074: `<button id="publishingOpenQueueBtn" class="btn btn-secondary" type="button">Open Publish Queue</button>`
+- L1075: `<button id="publishingSaveDraftBtn" class="btn btn-secondary" type="button">Save publishing draft</button>`
+- L1076: `<button id="publishingPushAiBtn" class="btn btn-primary" type="button">Send publishing context to AI</button>`
+
+## Required Manual Classification
+Before any patch, classify exact user-facing Publishing paths into:
+
+1. Publishing dashboard display only
+2. Payload/package preview only
+3. Schedule draft only
+4. Save publishing draft
+5. Create or update durable publishing record
+6. Request approval / governance review
+7. Approve/reject publishing item
+8. Send/publish/go-live action
+9. Channel/integration sync
+10. Handoff to Content/Media/Governance/Workflows
+11. Local state/cache only
+12. Unknown / needs deeper inspection
+
+## Decision Rule
+- If live publish/send/schedule exists without confirmation and approval guard, patch.
+- If durable publishing record changes exist without confirmation, patch.
+- If actions are preview/draft/local only, document and close.
+- If Publishing delegates authority to backend/governance APIs, verify the frontend messaging does not claim execution beyond what occurred.
+- Do not redesign Publishing in this pass.

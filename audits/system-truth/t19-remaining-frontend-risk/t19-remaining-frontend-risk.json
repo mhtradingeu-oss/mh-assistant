@@ -1,0 +1,3863 @@
+{
+  "closedTargets": [
+    "workflows.js",
+    "publishing.js",
+    "library.js",
+    "ai-command.js"
+  ],
+  "pageReports": [
+    {
+      "file": "public/control-center/pages/workflows.js",
+      "name": "workflows.js",
+      "closed": true,
+      "category": "closed-high-risk",
+      "risk": 220.3,
+      "metrics": {
+        "lines": 2395,
+        "innerHTML": 1,
+        "directFetch": 0,
+        "apiImports": 0,
+        "destructiveWords": 325,
+        "confirmations": 31,
+        "routeOnly": 25,
+        "previewOnly": 207,
+        "localStorage": 2,
+        "timers": 0,
+        "eventHandlers": 39,
+        "escapeEvidence": 162
+      },
+      "keyHits": {
+        "authority": [
+          {
+            "line": 65,
+            "text": "purpose: \"Summarize workflow state, results, blockers, and the next operational decision.\","
+          },
+          {
+            "line": 100,
+            "text": "\"run-weekly-report\": \"generate-report\","
+          },
+          {
+            "line": 101,
+            "text": "\"build-ads\": \"launch-campaign\""
+          },
+          {
+            "line": 104,
+            "text": "const WORKFLOW_LOCAL_DRAFTS_KEY = \"mh-workflow-local-drafts-v1\";"
+          },
+          {
+            "line": 224,
+            "text": "return WORKFLOW_CATALOG.reduce((acc, workflow) => {"
+          },
+          {
+            "line": 225,
+            "text": "acc[workflow.id] = createEmptyRunState();"
+          },
+          {
+            "line": 231,
+            "text": "return WORKFLOW_CATALOG.reduce((acc, workflow) => {"
+          },
+          {
+            "line": 232,
+            "text": "acc[workflow.id] = {"
+          },
+          {
+            "line": 288,
+            "text": "WORKFLOW_CATALOG.forEach((workflow) => {"
+          },
+          {
+            "line": 289,
+            "text": "const draft = asObject(local[workflow.id]);"
+          },
+          {
+            "line": 291,
+            "text": "session.inputsByWorkflow[workflow.id] = {"
+          },
+          {
+            "line": 292,
+            "text": "...session.inputsByWorkflow[workflow.id],"
+          },
+          {
+            "line": 296,
+            "text": "session.selectedWorkflowId = workflow.id;"
+          },
+          {
+            "line": 339,
+            "text": "session.inputsByWorkflow = WORKFLOW_CATALOG.reduce((acc, workflow) => {"
+          },
+          {
+            "line": 340,
+            "text": "acc[workflow.id] = {"
+          },
+          {
+            "line": 342,
+            "text": "...asObject(session.inputsByWorkflow?.[workflow.id])"
+          },
+          {
+            "line": 384,
+            "text": "source: asString(item.source || \"durable-run\"),"
+          },
+          {
+            "line": 391,
+            "text": "source: asString(item.source || \"durable-run\"),"
+          },
+          {
+            "line": 463,
+            "text": "allRuns.forEach((run) => {"
+          },
+          {
+            "line": 464,
+            "text": "const normalized = normalizeRunStatus(run.status);"
+          }
+        ],
+        "confirmations": [
+          {
+            "line": 57,
+            "text": "purpose: \"Package final channel payloads, approval checks, and publishing queue dependencies.\","
+          },
+          {
+            "line": 591,
+            "text": "prompt: \"Prepare a publishing package checklist with missing assets and approval dependencies.\""
+          },
+          {
+            "line": 663,
+            "text": "const gate = asObject(autoMode?.approvalRequiredStep);"
+          },
+          {
+            "line": 719,
+            "text": "Guided preparation mode with automation gates and inline logs. It does not replace Governance approval."
+          },
+          {
+            "line": 748,
+            "text": "autoMode?.status === \"waiting_approval\""
+          },
+          {
+            "line": 1334,
+            "text": "if (typeof window === \"undefined\" || typeof window.confirm !== \"function\") return true;"
+          },
+          {
+            "line": 1336,
+            "text": "return window.confirm("
+          },
+          {
+            "line": 1337,
+            "text": "`Confirm workflow review package preparation\\n\\nAction: Prepare and record backend workflow output for \"${title}\".\\n\\nThis may call the backend workflow run endpoint and update workflow run history. It prepares a review output only and does not publish, send messages, create CRM records, bypass Governance, or perform destructive actions.\\n\\nSelect Cancel to keep the workflow unchanged.`"
+          },
+          {
+            "line": 1656,
+            "text": "const confirmed = window.confirm(`Confirm guided preparation simulation\\n\\nAction: Simulate ${plan.length} guided automation steps.\\nRisk: This can prepare downstream draft or handoff state, but does not publish, approve Governance decisions, or send externally.\\n\\nSelect Cancel to stop.`);"
+          },
+          {
+            "line": 1686,
+            "text": "const confirmed = window.confirm(\"Confirm guided preparation step\\n\\nAction: Simulate the next preparation step.\\nRisk: This can prepare downstream draft or handoff state, but does not publish, approve Governance decisions, or send externally.\\n\\nSelect Cancel to keep the current state.\");"
+          },
+          {
+            "line": 1720,
+            "text": "const confirmed = window.confirm("
+          },
+          {
+            "line": 1723,
+            "text": "\"Risk: This may prepare workflow steps and handoffs, but must not publish externally or approve Governance decisions without explicit approval.\\n\\n\" +"
+          },
+          {
+            "line": 1729,
+            "text": "mode: \"auto_until_approval\","
+          },
+          {
+            "line": 1747,
+            "text": "const confirmed = window.confirm("
+          },
+          {
+            "line": 1770,
+            "text": "const confirmed = window.confirm("
+          },
+          {
+            "line": 1771,
+            "text": "\"Confirm workflow gate approval\\n\\n\" +"
+          },
+          {
+            "line": 1773,
+            "text": "\"Risk: This advances the guided workflow state, but does not replace Governance approval for protected actions.\\n\\n\" +"
+          },
+          {
+            "line": 1778,
+            "text": "showMessage?.(\"Automation gate accepted. This is not a Governance approval.\");"
+          },
+          {
+            "line": 1785,
+            "text": "const confirmed = window.confirm("
+          },
+          {
+            "line": 1793,
+            "text": "showMessage?.(\"Guided Preparation Mode skipped one automation step. This does not bypass Governance policy.\");"
+          }
+        ],
+        "rendering": [
+          {
+            "line": 1974,
+            "text": "root.innerHTML = `"
+          }
+        ]
+      }
+    },
+    {
+      "file": "public/control-center/pages/ai-command.js",
+      "name": "ai-command.js",
+      "closed": true,
+      "category": "closed-high-risk",
+      "risk": 195.3,
+      "metrics": {
+        "lines": 6183,
+        "innerHTML": 1,
+        "directFetch": 0,
+        "apiImports": 1,
+        "destructiveWords": 353,
+        "confirmations": 82,
+        "routeOnly": 21,
+        "previewOnly": 745,
+        "localStorage": 6,
+        "timers": 0,
+        "eventHandlers": 33,
+        "escapeEvidence": 505
+      },
+      "keyHits": {
+        "authority": [
+          {
+            "line": 71,
+            "text": "id: \"ads\","
+          },
+          {
+            "line": 72,
+            "text": "label: \"Ads Optimizer\","
+          },
+          {
+            "line": 75,
+            "text": "routeHint: \"ads-manager\""
+          },
+          {
+            "line": 102,
+            "text": "summary: \"Inbox review, reply drafts, ticket drafts, SLA risk, and escalation routing.\","
+          },
+          {
+            "line": 107,
+            "text": "label: \"Sales / CRM Lead\","
+          },
+          {
+            "line": 109,
+            "text": "summary: \"Lead qualification, outreach drafts, follow-up cadence, and CRM handoff notes.\","
+          },
+          {
+            "line": 131,
+            "text": "crm: \"sales_crm\","
+          },
+          {
+            "line": 149,
+            "text": "cannotDo: [\"Publish campaigns directly\", \"Execute workflows automatically\", \"Approve content\", \"Set live budgets\"],"
+          },
+          {
+            "line": 162,
+            "text": "cannotDo: [\"Publish directly\", \"Approve risky claims\", \"Invent unsupported facts\", \"Run workflows automatically\"],"
+          },
+          {
+            "line": 164,
+            "text": "safetyNote: \"Drafts require review before publishing. Cannot approve or publish without confirmation.\","
+          },
+          {
+            "line": 175,
+            "text": "cannotDo: [\"Generate images directly\", \"Upload assets without review\", \"Approve without confirmation\", \"Execute media jobs\"],"
+          },
+          {
+            "line": 188,
+            "text": "cannotDo: [\"Generate video directly\", \"Upload footage without review\", \"Approve without confirmation\", \"Run media jobs automatically\"],"
+          },
+          {
+            "line": 200,
+            "text": "canHelp: [\"Review publishing readiness\", \"Check scheduled jobs\", \"Prepare handoff packages\", \"Map publishing dependencies\", \"Flag pre-publish risks\"],"
+          },
+          {
+            "line": 201,
+            "text": "cannotDo: [\"Publish without explicit approval\", \"Override schedules\", \"Bypass governance gates\", \"Push to live channels directly\"],"
+          },
+          {
+            "line": 207,
+            "text": "id: \"ads\","
+          },
+          {
+            "line": 208,
+            "text": "label: \"Ads Optimizer\","
+          },
+          {
+            "line": 212,
+            "text": "placeholder: \"Ask the Ads Optimizer to draft ad copy, review targeting angles, or plan a paid campaign structure…\","
+          },
+          {
+            "line": 214,
+            "text": "cannotDo: [\"Launch ads directly\", \"Set live budgets without review\", \"Approve spend\", \"Access ad accounts directly\"],"
+          },
+          {
+            "line": 215,
+            "text": "destinations: [\"Ads Manager\", \"Integrations\", \"Campaign Studio\"],"
+          },
+          {
+            "line": 227,
+            "text": "cannotDo: [\"Update SEO settings directly\", \"Edit live website\", \"Set analytics configurations\", \"Publish recommendations automatically\"],"
+          }
+        ],
+        "confirmations": [
+          {
+            "line": 88,
+            "text": "summary: \"Claims review, approvals, safety language, and governance checks.\","
+          },
+          {
+            "line": 89,
+            "text": "routeHint: \"governance\""
+          },
+          {
+            "line": 95,
+            "text": "summary: \"Tasks, timelines, handoffs, approvals, and execution plans.\","
+          },
+          {
+            "line": 190,
+            "text": "safetyNote: \"Scripts and direction only. Video generation requires explicit backend action and approval.\","
+          },
+          {
+            "line": 201,
+            "text": "cannotDo: [\"Publish without explicit approval\", \"Override schedules\", \"Bypass governance gates\", \"Push to live channels directly\"],"
+          },
+          {
+            "line": 203,
+            "text": "safetyNote: \"Publishing always requires explicit approval. No live publishing from AI guidance alone.\","
+          },
+          {
+            "line": 216,
+            "text": "safetyNote: \"Ad concepts and copy only. Live ad actions require platform integration and explicit approval.\","
+          },
+          {
+            "line": 235,
+            "text": "position: \"Claims and Governance Lead\","
+          },
+          {
+            "line": 237,
+            "text": "summary: \"Claims review, approval safety, publishing risk, and governance notes.\","
+          },
+          {
+            "line": 238,
+            "text": "placeholder: \"Ask the Compliance Reviewer to check claims, approval risks, publishing safety, and governance notes…\","
+          },
+          {
+            "line": 239,
+            "text": "canHelp: [\"Review marketing claims\", \"Flag approval risks\", \"Check publishing safety\", \"Prepare governance notes\", \"Identify compliance blockers\"],"
+          },
+          {
+            "line": 240,
+            "text": "cannotDo: [\"Grant approvals directly\", \"Override governance gates\", \"Publish on behalf of approvers\", \"Remove flags without review\"],"
+          },
+          {
+            "line": 241,
+            "text": "destinations: [\"Workflows\", \"Publishing\", \"Governance\"],"
+          },
+          {
+            "line": 242,
+            "text": "safetyNote: \"Compliance review is advisory. Approvals always require human confirmation before execution.\","
+          },
+          {
+            "line": 250,
+            "text": "summary: \"Tasks, timelines, handoffs, approvals, and execution plans.\","
+          },
+          {
+            "line": 331,
+            "text": "{ label: \"Check claims for approval\", sub: \"Review all marketing claims\" },"
+          },
+          {
+            "line": 333,
+            "text": "{ label: \"Prepare governance notes\", sub: \"Document compliance status\" },"
+          },
+          {
+            "line": 334,
+            "text": "{ label: \"Review approval requirements\", sub: \"What needs sign-off\" }"
+          },
+          {
+            "line": 408,
+            "text": "label: \"Admin / Governance\","
+          },
+          {
+            "line": 411,
+            "text": "summary: \"Policy, approvals, roles, and audit controls stay destination-owned.\""
+          }
+        ],
+        "rendering": [
+          {
+            "line": 5296,
+            "text": "root.innerHTML = renderAiCommandChatFirstShell({"
+          }
+        ]
+      }
+    },
+    {
+      "file": "public/control-center/pages/library.js",
+      "name": "library.js",
+      "closed": true,
+      "category": "closed-high-risk",
+      "risk": 191.5,
+      "metrics": {
+        "lines": 3563,
+        "innerHTML": 26,
+        "directFetch": 0,
+        "apiImports": 1,
+        "destructiveWords": 41,
+        "confirmations": 9,
+        "routeOnly": 22,
+        "previewOnly": 19,
+        "localStorage": 1,
+        "timers": 8,
+        "eventHandlers": 83,
+        "escapeEvidence": 224
+      },
+      "keyHits": {
+        "authority": [
+          {
+            "line": 28,
+            "text": "// This must be run inside the render() function, after projectName is defined."
+          },
+          {
+            "line": 368,
+            "text": "libraryProtectedUrlCache.delete(key);"
+          },
+          {
+            "line": 460,
+            "text": "libraryProtectedUrlPromiseCache.delete(cacheKey);"
+          },
+          {
+            "line": 1152,
+            "text": "<button class=\"btn btn-secondary\" type=\"button\" data-library-command=\"send-to-ai\"${assetId ? \"\" : \" disabled aria-disabled=\\\"true\\\"\"}>Prepare AI review</button>"
+          },
+          {
+            "line": 1636,
+            "text": "if (/(auto|scroll)/.test(overflow) && node.scrollHeight > node.clientHeight && typeof node.scrollTo === \"function\") {"
+          },
+          {
+            "line": 1654,
+            "text": "const behavior = prefersReducedMotion ? \"auto\" : \"smooth\";"
+          },
+          {
+            "line": 2008,
+            "text": "<button class=\"btn btn-secondary btn-sm\" type=\"button\" data-library-command=\"send-to-ai\">Prepare AI review</button>"
+          },
+          {
+            "line": 2034,
+            "text": "<span>Local selection only. Batch metadata, archive, delete, and source changes are not enabled here.</span>"
+          },
+          {
+            "line": 2164,
+            "text": "<span class=\"library-inspector-ai-source-guide-text\">Select one Library item, then send it as review context to AI Command. This does not execute, approve, publish, or run workflows.</span>"
+          },
+          {
+            "line": 2506,
+            "text": "nextSelection.delete(assetId);"
+          },
+          {
+            "line": 2527,
+            "text": "nextSelection.delete(asset.id);"
+          },
+          {
+            "line": 2680,
+            "text": "const confirmed = status === \"approved\" ? true : confirm(`Confirm asset status change\\n\\nAction: Set asset status to \"${status}\".\\nRisk: This updates Library readiness metadata and may affect downstream review/publishing visibility. It does not publish anything.\\n\\nSelect Cancel to keep the current status.`);"
+          },
+          {
+            "line": 2765,
+            "text": "const archiveButtons = Array.from(document.querySelectorAll(\"[data-library-archive]\"));"
+          },
+          {
+            "line": 2775,
+            "text": "const id = button.getAttribute(\"data-library-archive\") || \"\";"
+          },
+          {
+            "line": 2784,
+            "text": "if (!confirm(`Confirm archive action\\n\\nAction: Archive this asset.\\nRisk: The asset is removed from active Library views but remains in the registry. This does not delete the physical file.\\n\\nSelect Cancel to keep this asset active.`)) {"
+          },
+          {
+            "line": 2794,
+            "text": "showError?.(error.message || \"Failed to archive asset.\");"
+          },
+          {
+            "line": 2840,
+            "text": "const deleteButtons = Array.from(document.querySelectorAll(\"[data-library-delete]\"));"
+          },
+          {
+            "line": 2850,
+            "text": "const id = button.getAttribute(\"data-library-delete\") || \"\";"
+          },
+          {
+            "line": 2859,
+            "text": "if (!confirm(`Confirm soft-delete action\\n\\nAction: Soft-delete this asset from active views.\\nRisk: This applies a registry-level soft delete and removes the asset from active Library flows. This action does not silently publish, approve, or run workflows.\\n\\nSelect Cancel to keep this asset available.`)) {"
+          },
+          {
+            "line": 2869,
+            "text": "showMessage?.(\"Asset deleted (soft delete).\");"
+          }
+        ],
+        "confirmations": [
+          {
+            "line": 721,
+            "text": "merged.approval_status ||"
+          },
+          {
+            "line": 845,
+            "text": "approval_status: asString(asset.approval_status || \"draft\"),"
+          },
+          {
+            "line": 927,
+            "text": ": \"Required assets are covered. Continue with classification and approvals.\""
+          },
+          {
+            "line": 1809,
+            "text": "<li>Use selected assets in AI Team, Content, Media, Publishing, Governance, and Insights.</li>"
+          },
+          {
+            "line": 2680,
+            "text": "const confirmed = status === \"approved\" ? true : confirm(`Confirm asset status change\\n\\nAction: Set asset status to \"${status}\".\\nRisk: This updates Library readiness metadata and may affect downstream review/publishing visibility. It does not publish anything.\\n\\nSelect Cancel to keep the current status.`);"
+          },
+          {
+            "line": 2731,
+            "text": "const confirmed = window.confirm("
+          },
+          {
+            "line": 2784,
+            "text": "if (!confirm(`Confirm archive action\\n\\nAction: Archive this asset.\\nRisk: The asset is removed from active Library views but remains in the registry. This does not delete the physical file.\\n\\nSelect Cancel to keep this asset active.`)) {"
+          },
+          {
+            "line": 2859,
+            "text": "if (!confirm(`Confirm soft-delete action\\n\\nAction: Soft-delete this asset from active views.\\nRisk: This applies a registry-level soft delete and removes the asset from active Library flows. This action does not silently publish, approve, or run workflows.\\n\\nSelect Cancel to keep this asset available.`)) {"
+          }
+        ],
+        "rendering": [
+          {
+            "line": 1378,
+            "text": "previewNode.outerHTML = renderUnsupportedPreviewCard(asset, escapeHtml, {"
+          },
+          {
+            "line": 1390,
+            "text": "previewNode.outerHTML = `"
+          },
+          {
+            "line": 1407,
+            "text": "previewNode.innerHTML = `<img src=\"${escapeHtml(resolved.objectUrl)}\" alt=\"${escapeHtml(asset.name)}\" class=\"library-preview-image\">`;"
+          },
+          {
+            "line": 1412,
+            "text": "previewNode.innerHTML = `<video class=\"library-preview-video\" controls src=\"${escapeHtml(resolved.objectUrl)}\"></video>`;"
+          },
+          {
+            "line": 1417,
+            "text": "previewNode.outerHTML = `"
+          },
+          {
+            "line": 1432,
+            "text": "previewNode.innerHTML = `<div class=\"library-preview-fallback\">${escapeHtml(message)}</div>`;"
+          },
+          {
+            "line": 1463,
+            "text": "node.innerHTML = fallbackMarkup;"
+          },
+          {
+            "line": 1466,
+            "text": "node.innerHTML = \"\";"
+          },
+          {
+            "line": 1470,
+            "text": "node.innerHTML = fallbackMarkup;"
+          },
+          {
+            "line": 1803,
+            "text": "explainerBox.innerHTML = `"
+          },
+          {
+            "line": 1818,
+            "text": "taxonomyBox.innerHTML = `"
+          },
+          {
+            "line": 1836,
+            "text": "requiredBox.innerHTML = requiredGroups.map((item) => {"
+          },
+          {
+            "line": 1866,
+            "text": "typeSelect.innerHTML = typeOptions.map((option) => `"
+          },
+          {
+            "line": 1933,
+            "text": "sourceSelect.innerHTML = sourceOptions.map((option) => `"
+          },
+          {
+            "line": 2001,
+            "text": "selectedSummary.innerHTML = selectedAsset"
+          },
+          {
+            "line": 2031,
+            "text": "selectionBar.innerHTML = `"
+          },
+          {
+            "line": 2045,
+            "text": "gridBody.innerHTML = paginatedAssets.length"
+          },
+          {
+            "line": 2086,
+            "text": "gridPagination.innerHTML = `"
+          },
+          {
+            "line": 2130,
+            "text": "previewVisual.innerHTML = renderPreview(selectedAsset, escapeHtml);"
+          },
+          {
+            "line": 2146,
+            "text": "previewMeta.innerHTML = selectedAsset"
+          }
+        ]
+      }
+    },
+    {
+      "file": "public/control-center/pages/integrations.js",
+      "name": "integrations.js",
+      "closed": false,
+      "category": "P0 review",
+      "risk": 80.1,
+      "metrics": {
+        "lines": 1965,
+        "innerHTML": 1,
+        "directFetch": 0,
+        "apiImports": 0,
+        "destructiveWords": 121,
+        "confirmations": 25,
+        "routeOnly": 6,
+        "previewOnly": 31,
+        "localStorage": 0,
+        "timers": 2,
+        "eventHandlers": 13,
+        "escapeEvidence": 68
+      },
+      "keyHits": {
+        "authority": [
+          {
+            "line": 37,
+            "text": "const UNSUPPORTED_INTEGRATION_IDS = new Set([\"amazon\", \"smtp\", \"mailer\", \"crm\"]);"
+          },
+          {
+            "line": 68,
+            "text": "purpose: \"Store, product, order, and sales sync for WooCommerce-driven projects.\","
+          },
+          {
+            "line": 70,
+            "text": "enables: \"Product sync, order sync, sales signals, and commerce intelligence.\","
+          },
+          {
+            "line": 88,
+            "text": "enables: \"Product sync, order sync, customer sync, and sales reporting.\","
+          },
+          {
+            "line": 107,
+            "text": "enables: \"Listing sync, sales signals, performance by product, and marketplace learning.\","
+          },
+          {
+            "line": 122,
+            "text": "purpose: \"Marketplace listing and commerce signal sync for eBay surfaces.\","
+          },
+          {
+            "line": 123,
+            "text": "whyItMatters: \"eBay extends commerce intelligence beyond the owned store and helps the system learn external demand patterns.\","
+          },
+          {
+            "line": 124,
+            "text": "enables: \"Listing sync, order sync, product demand signals, and marketplace coverage.\","
+          },
+          {
+            "line": 149,
+            "text": "dataScope: [\"Post insights\", \"Engagement\", \"Comments\", \"Publishing\", \"Ads linkage\"],"
+          },
+          {
+            "line": 164,
+            "text": "purpose: \"Post, reel, and profile insight sync for Instagram business performance.\","
+          },
+          {
+            "line": 182,
+            "text": "purpose: \"Video and post insight sync for TikTok creative and audience performance.\","
+          },
+          {
+            "line": 200,
+            "text": "purpose: \"Video performance and channel insight sync for long-form or short-form YouTube content.\","
+          },
+          {
+            "line": 302,
+            "text": "{ key: \"accountId\", label: \"Account ID\", placeholder: \"TikTok Ads account ID\" },"
+          },
+          {
+            "line": 344,
+            "text": "id: \"email-crm\","
+          },
+          {
+            "line": 345,
+            "text": "title: \"Email & CRM\","
+          },
+          {
+            "line": 346,
+            "text": "description: \"Lifecycle messaging, customer records, contact sync, and email campaign infrastructure.\","
+          },
+          {
+            "line": 357,
+            "text": "enables: \"Campaign sending, lifecycle messages, and email workflow execution.\","
+          },
+          {
+            "line": 377,
+            "text": "enables: \"Campaign sends, audience sync, templates, and performance reporting.\","
+          },
+          {
+            "line": 392,
+            "text": "purpose: \"Future-ready newsletter, audience, and campaign sync through Mailchimp.\","
+          },
+          {
+            "line": 394,
+            "text": "enables: \"Audience sync, campaigns, lists, and newsletter reporting.\","
+          }
+        ],
+        "confirmations": [
+          {
+            "line": 513,
+            "text": "whyItMatters: \"Slack can surface sync failures, content approvals, and campaign alerts where the team already works.\","
+          },
+          {
+            "line": 514,
+            "text": "enables: \"Alerts, approvals, sync notifications, and workflow coordination.\","
+          },
+          {
+            "line": 515,
+            "text": "dataScope: [\"Notifications\", \"Approvals\", \"Ops alerts\"],"
+          },
+          {
+            "line": 529,
+            "text": "purpose: \"Bot-based operational alerts, approvals, and lightweight workflow execution.\","
+          },
+          {
+            "line": 530,
+            "text": "whyItMatters: \"Telegram can keep MH Assistant responsive when quick approvals or notifications are needed.\","
+          },
+          {
+            "line": 531,
+            "text": "enables: \"Alerts, commands, approval handoff, and ops notifications.\","
+          },
+          {
+            "line": 532,
+            "text": "dataScope: [\"Alerts\", \"Commands\", \"Approvals\"],"
+          },
+          {
+            "line": 563,
+            "text": "purpose: \"Automation routing for triggers, syncs, approvals, and external workflow handoffs.\","
+          },
+          {
+            "line": 588,
+            "text": "{ key: \"eventScope\", label: \"Event scope\", placeholder: \"events, approvals, syncs\" },"
+          },
+          {
+            "line": 1135,
+            "text": "\"WooCommerce Store URL is not saved yet. Run Repair integration connection after governance approval, then test the connection.\""
+          },
+          {
+            "line": 1508,
+            "text": "const governanceCode = String("
+          },
+          {
+            "line": 1515,
+            "text": "if (reconnect && governanceCode === \"governance_approval_required\") {"
+          },
+          {
+            "line": 1516,
+            "text": "const approvalId = asString(error?.payload?.approval?.approval_id);"
+          },
+          {
+            "line": 1517,
+            "text": "showMessage?.(`Governance approval requested for ${integration.label}${approvalId ? ` (${approvalId})` : \"\"}. Review and decide it in Governance before reconnecting.`);"
+          },
+          {
+            "line": 1521,
+            "text": "navigateTo(\"governance\");"
+          },
+          {
+            "line": 1538,
+            "text": "const confirmed = window.confirm(`Confirm integration disconnect\\n\\nAction: Disconnect ${integration.label} from the current project.\\nRisk: This can stop data sync, attribution, learning signals, and automation inputs for this connector.\\nAuthority: This is a backend-governed integration state update.\\n\\nSelect Cancel to keep the integration connected.`);"
+          }
+        ],
+        "rendering": [
+          {
+            "line": 1743,
+            "text": "root.innerHTML = `"
+          }
+        ]
+      }
+    },
+    {
+      "file": "public/control-center/pages/ai-command/tool-dock.js",
+      "name": "tool-dock.js",
+      "closed": false,
+      "category": "P1 review",
+      "risk": 57.6,
+      "metrics": {
+        "lines": 1867,
+        "innerHTML": 4,
+        "directFetch": 0,
+        "apiImports": 0,
+        "destructiveWords": 70,
+        "confirmations": 42,
+        "routeOnly": 0,
+        "previewOnly": 74,
+        "localStorage": 0,
+        "timers": 1,
+        "eventHandlers": 9,
+        "escapeEvidence": 20
+      },
+      "keyHits": {
+        "authority": [
+          {
+            "line": 301,
+            "text": "<div class=\\\"mhos-tool-drawer-source-meta\\\">${escapeHtml(type)} · Added from Library · Not approval or publish readiness</div>"
+          },
+          {
+            "line": 354,
+            "text": "template: \"Rewrite the latest response or selected text for {projectName}. Make it clearer, more professional, and easier to use. Do not publish or execute anything.\""
+          },
+          {
+            "line": 421,
+            "text": "destinations: [\"chat-preview\", \"campaign-studio\", \"content-studio\", \"ads-manager\"],"
+          },
+          {
+            "line": 466,
+            "text": "template: \"Use the Content Writer to create a new written output for {projectName}. First ask or infer the output type: company profile, product copy, email, blog article, landing page, contract draft, presentation outline, speech, FAQ, proposal, social post, or ad copy. Ask for sources if needed. Keep it review-ready and do not publish or send anything.\""
+          },
+          {
+            "line": 479,
+            "text": "template: \"Rewrite the current text for {projectName}. Keep the meaning, improve clarity, structure, and tone. Offer variants such as professional, shorter, simpler, more persuasive, premium, or platform-specific. Do not publish anything.\""
+          },
+          {
+            "line": 560,
+            "text": "id: \"send\","
+          },
+          {
+            "line": 562,
+            "text": "label: \"Prepare Send-Off\","
+          },
+          {
+            "line": 570,
+            "text": "template: \"Prepare safe routing for this Content Writer output for {projectName}. Ask the destination: Content Studio, Save to Library, Prepare Media Brief, Publishing package, Compliance review, Task, or Handoff. Do not route or execute before review.\""
+          },
+          {
+            "line": 715,
+            "text": "destinations: [\"chat-preview\", \"media-studio\", \"publishing\", \"ads-manager\"],"
+          },
+          {
+            "line": 724,
+            "text": "id: \"publish-check\","
+          },
+          {
+            "line": 726,
+            "text": "label: \"Publish Check\","
+          },
+          {
+            "line": 734,
+            "text": "template: \"Review publishing readiness for {projectName}. Check copy, assets, channel fit, schedule, approvals, and missing items. Do not publish.\""
+          },
+          {
+            "line": 790,
+            "text": "ads: ["
+          },
+          {
+            "line": 798,
+            "text": "frontendOwnerPage: \"ads-manager\","
+          },
+          {
+            "line": 799,
+            "text": "destinations: [\"chat-preview\", \"ads-manager\", \"content-studio\", \"governance\"],"
+          },
+          {
+            "line": 811,
+            "text": "frontendOwnerPage: \"ads-manager\","
+          },
+          {
+            "line": 812,
+            "text": "destinations: [\"chat-preview\", \"ads-manager\", \"content-studio\", \"governance\"],"
+          },
+          {
+            "line": 824,
+            "text": "frontendOwnerPage: \"ads-manager\","
+          },
+          {
+            "line": 825,
+            "text": "destinations: [\"chat-preview\", \"ads-manager\", \"insights\", \"campaign-studio\"],"
+          },
+          {
+            "line": 837,
+            "text": "frontendOwnerPage: \"ads-manager\","
+          }
+        ],
+        "confirmations": [
+          {
+            "line": 301,
+            "text": "<div class=\\\"mhos-tool-drawer-source-meta\\\">${escapeHtml(type)} · Added from Library · Not approval or publish readiness</div>"
+          },
+          {
+            "line": 647,
+            "text": "destinations: [\"chat-preview\", \"media-studio\", \"governance\", \"library\"],"
+          },
+          {
+            "line": 731,
+            "text": "destinations: [\"chat-preview\", \"publishing\", \"governance\", \"content-studio\", \"media-studio\"],"
+          },
+          {
+            "line": 732,
+            "text": "sourceTypes: [\"content_draft\", \"media_asset\", \"publishing_package\", \"approval_notes\", \"current_chat\", \"manual_input\"],"
+          },
+          {
+            "line": 734,
+            "text": "template: \"Review publishing readiness for {projectName}. Check copy, assets, channel fit, schedule, approvals, and missing items. Do not publish.\""
+          },
+          {
+            "line": 746,
+            "text": "outputTypes: [\"channel_pack\", \"caption_pack\", \"format_notes\", \"approval_checklist\"],"
+          },
+          {
+            "line": 747,
+            "text": "template: \"Prepare a channel package for {projectName}. Include caption, hashtags, format notes, asset needs, schedule notes, and approval checklist.\""
+          },
+          {
+            "line": 758,
+            "text": "sourceTypes: [\"publishing_package\", \"campaign_timeline\", \"channel_notes\", \"approval_notes\", \"manual_input\"],"
+          },
+          {
+            "line": 776,
+            "text": "id: \"approval-pack\","
+          },
+          {
+            "line": 778,
+            "text": "label: \"Governance Review\","
+          },
+          {
+            "line": 782,
+            "text": "frontendOwnerPage: \"governance\","
+          },
+          {
+            "line": 783,
+            "text": "destinations: [\"chat-preview\", \"governance\", \"publishing\", \"workflows\"],"
+          },
+          {
+            "line": 784,
+            "text": "sourceTypes: [\"final_copy\", \"media_asset\", \"approval_notes\", \"claim_review\", \"publishing_package\", \"manual_input\"],"
+          },
+          {
+            "line": 785,
+            "text": "outputTypes: [\"approval_pack\", \"risk_summary\", \"asset_checklist\", \"confirmation_list\"],"
+          },
+          {
+            "line": 786,
+            "text": "template: \"Prepare an approval package for {projectName}. Include final copy summary, risk notes, assets checklist, and required confirmations.\""
+          },
+          {
+            "line": 799,
+            "text": "destinations: [\"chat-preview\", \"ads-manager\", \"content-studio\", \"governance\"],"
+          },
+          {
+            "line": 812,
+            "text": "destinations: [\"chat-preview\", \"ads-manager\", \"content-studio\", \"governance\"],"
+          },
+          {
+            "line": 851,
+            "text": "destinations: [\"chat-preview\", \"ads-manager\", \"content-studio\", \"governance\"],"
+          },
+          {
+            "line": 934,
+            "text": "frontendOwnerPage: \"governance\","
+          },
+          {
+            "line": 935,
+            "text": "destinations: [\"chat-preview\", \"governance\", \"content-studio\", \"publishing\"],"
+          }
+        ],
+        "rendering": [
+          {
+            "line": 285,
+            "text": "selectedNode.innerHTML = `<span class=\\\"mhos-tool-drawer-selected-source-empty\\\">No trusted Library source selected yet.</span>`;"
+          },
+          {
+            "line": 297,
+            "text": "selectedNode.innerHTML = `"
+          },
+          {
+            "line": 338,
+            "text": "if (selectedNode) selectedNode.innerHTML = `<span class=\\\"mhos-tool-drawer-selected-source-empty\\\">No trusted Library source selected yet.</span>`;"
+          },
+          {
+            "line": 1463,
+            "text": "select.innerHTML = options.map((value, index) => {"
+          }
+        ]
+      }
+    },
+    {
+      "file": "public/control-center/pages/settings.js",
+      "name": "settings.js",
+      "closed": false,
+      "category": "P1 review",
+      "risk": 43.4,
+      "metrics": {
+        "lines": 2057,
+        "innerHTML": 5,
+        "directFetch": 0,
+        "apiImports": 1,
+        "destructiveWords": 103,
+        "confirmations": 161,
+        "routeOnly": 4,
+        "previewOnly": 6,
+        "localStorage": 0,
+        "timers": 0,
+        "eventHandlers": 4,
+        "escapeEvidence": 122
+      },
+      "keyHits": {
+        "authority": [
+          {
+            "line": 22,
+            "text": "value: \"Semi-Auto\","
+          },
+          {
+            "line": 23,
+            "text": "label: \"Semi-Auto\","
+          },
+          {
+            "line": 49,
+            "text": "\"Route weak ads into Ads Manager\""
+          },
+          {
+            "line": 58,
+            "text": "\"Ads Operator\","
+          },
+          {
+            "line": 70,
+            "text": "description: \"Shapes priorities, campaign structures, and workflow sequencing.\""
+          },
+          {
+            "line": 98,
+            "text": "label: \"Ads Operator\","
+          },
+          {
+            "line": 100,
+            "text": "description: \"Manages variants, spend tests, and escalation into Ads Manager.\""
+          },
+          {
+            "line": 164,
+            "text": "options: [\"Planning Mode\", \"Guided Execution\", \"Semi-Auto\", \"Approval-First\", \"Full AI Assist\", \"Emergency Safe Mode\"]"
+          },
+          {
+            "line": 193,
+            "text": "options: [\"Recommend only\", \"Prepare actions with review\", \"Auto-run trusted actions\", \"Act unless blocked by policy\"]"
+          },
+          {
+            "line": 273,
+            "text": "backendLabel: \"Automation routing rules sync into the durable governance policy\","
+          },
+          {
+            "line": 298,
+            "text": "placeholder: \"Route SEO gaps into Research, weak ad performance into Ads Manager, and publish blockers into review queues.\""
+          },
+          {
+            "line": 306,
+            "text": "backendLabel: \"Publishing defaults sync into the durable governance policy\","
+          },
+          {
+            "line": 323,
+            "text": "label: \"Approval before publish\","
+          },
+          {
+            "line": 336,
+            "text": "placeholder: \"Route product launches to social + email, evergreen SEO to website, paid hooks to ads queue.\""
+          },
+          {
+            "line": 342,
+            "text": "options: [\"Organic posts\", \"Stories\", \"Reels\", \"Ads variants\", \"Landing pages\", \"Email sequence\"]"
+          },
+          {
+            "line": 368,
+            "text": "label: \"Ads approval owner\","
+          },
+          {
+            "line": 378,
+            "text": "options: [\"All publish actions\", \"Paid ads\", \"Medical or product claims\", \"New campaign launches\", \"AI-generated media\"]"
+          },
+          {
+            "line": 397,
+            "text": "description: \"Define who can operate the system, who can approve output, who runs each service lane, and who can change the machine itself.\","
+          },
+          {
+            "line": 410,
+            "text": "options: [\"Strategy\", \"Writing\", \"Design\", \"Video\", \"Publishing\", \"Ads\", \"Analytics\", \"Compliance\", \"Administration\"]"
+          },
+          {
+            "line": 421,
+            "text": "label: \"Who can publish\","
+          }
+        ],
+        "confirmations": [
+          {
+            "line": 2,
+            "text": "fetchProjectGovernancePolicy,"
+          },
+          {
+            "line": 5,
+            "text": "updateProjectGovernancePolicy"
+          },
+          {
+            "line": 27,
+            "text": "value: \"Approval-First\","
+          },
+          {
+            "line": 28,
+            "text": "label: \"Approval-First\","
+          },
+          {
+            "line": 164,
+            "text": "options: [\"Planning Mode\", \"Guided Execution\", \"Semi-Auto\", \"Approval-First\", \"Full AI Assist\", \"Emergency Safe Mode\"]"
+          },
+          {
+            "line": 236,
+            "text": "path: \"ai.approvalRequiredMode\","
+          },
+          {
+            "line": 237,
+            "text": "label: \"Approval-required mode\","
+          },
+          {
+            "line": 273,
+            "text": "backendLabel: \"Automation routing rules sync into the durable governance policy\","
+          },
+          {
+            "line": 306,
+            "text": "backendLabel: \"Publishing defaults sync into the durable governance policy\","
+          },
+          {
+            "line": 322,
+            "text": "path: \"publishing.approvalBeforePublish\","
+          },
+          {
+            "line": 323,
+            "text": "label: \"Approval before publish\","
+          },
+          {
+            "line": 347,
+            "text": "id: \"approval\","
+          },
+          {
+            "line": 348,
+            "text": "title: \"Approval Rules\","
+          },
+          {
+            "line": 350,
+            "text": "backendLabel: \"Approval policy syncs into the durable governance and team records\","
+          },
+          {
+            "line": 353,
+            "text": "path: \"approval.contentOwner\","
+          },
+          {
+            "line": 354,
+            "text": "label: \"Content approval owner\","
+          },
+          {
+            "line": 360,
+            "text": "path: \"approval.mediaOwner\","
+          },
+          {
+            "line": 361,
+            "text": "label: \"Media approval owner\","
+          },
+          {
+            "line": 367,
+            "text": "path: \"approval.adsOwner\","
+          },
+          {
+            "line": 368,
+            "text": "label: \"Ads approval owner\","
+          }
+        ],
+        "rendering": [
+          {
+            "line": 1811,
+            "text": "overviewHost.outerHTML = renderSettingsOverview(buildSummary(session), session, escapeHtml);"
+          },
+          {
+            "line": 1815,
+            "text": "summaryHost.outerHTML = renderSummary(buildSummary(session), session, escapeHtml);"
+          },
+          {
+            "line": 1819,
+            "text": "aiHost.outerHTML = renderSettingsAssistant(session, escapeHtml);"
+          },
+          {
+            "line": 1836,
+            "text": "root.innerHTML = buildPageMarkup(session, context.escapeHtml);"
+          },
+          {
+            "line": 2033,
+            "text": "root.innerHTML = `"
+          }
+        ]
+      }
+    },
+    {
+      "file": "public/control-center/pages/customer-center.js",
+      "name": "customer-center.js",
+      "closed": false,
+      "category": "P2 review",
+      "risk": 37.9,
+      "metrics": {
+        "lines": 470,
+        "innerHTML": 0,
+        "directFetch": 0,
+        "apiImports": 1,
+        "destructiveWords": 61,
+        "confirmations": 7,
+        "routeOnly": 3,
+        "previewOnly": 26,
+        "localStorage": 0,
+        "timers": 0,
+        "eventHandlers": 1,
+        "escapeEvidence": 28
+      },
+      "keyHits": {
+        "authority": [
+          {
+            "line": 101,
+            "text": "[\"Send reply\", \"Locked: Customer Center v1 cannot send external replies or provider messages.\"],"
+          },
+          {
+            "line": 102,
+            "text": "[\"Add CRM note\", \"Locked: CRM writes require a future confirmation gate, role check, and audit log.\"],"
+          },
+          {
+            "line": 103,
+            "text": "[\"Update ticket\", \"Locked: ticket changes are outside this read-only release.\"],"
+          },
+          {
+            "line": 104,
+            "text": "[\"Assign conversation\", \"Locked: assignment changes require a future workflow owner and audit trail.\"],"
+          },
+          {
+            "line": 108,
+            "text": "[\"Sync CRM\", \"Locked: CRM provider execution is not enabled from Customer Center.\"],"
+          },
+          {
+            "line": 109,
+            "text": "[\"Auto-reply\", \"Locked: autonomous customer replies remain forbidden by default.\"]"
+          },
+          {
+            "line": 145,
+            "text": "<p>No placeholder customer records are shown. External send, CRM updates, ticket changes, calls, IVR, provider sync, and auto-reply remain locked.</p>"
+          },
+          {
+            "line": 198,
+            "text": "return renderEmptyState(\"No ticket snapshots available\", \"Support ticket and SLA records will appear here when the read-only projection includes them. No ticket creation or update is available from this page.\");"
+          },
+          {
+            "line": 201,
+            "text": "return tickets.slice(0, 6).map((ticket) => `"
+          },
+          {
+            "line": 204,
+            "text": "<strong>${escapeHtml(ticket.ticket_id || \"Ticket\")}</strong>"
+          },
+          {
+            "line": 205,
+            "text": "<p>${escapeHtml(ticket.status || \"open\")} • ${escapeHtml(ticket.sla_status || \"unknown SLA\")}</p>"
+          },
+          {
+            "line": 207,
+            "text": "<span class=\"card-badge\">${escapeHtml(ticket.priority || \"normal\")}</span>"
+          },
+          {
+            "line": 215,
+            "text": "return renderEmptyState(\"No channel readiness records\", \"Provider readiness for email, social messaging, CRM, voice, and IVR will appear here when configured. Send and provider execution remain locked.\");"
+          },
+          {
+            "line": 224,
+            "text": "<span class=\"card-badge\">${channel.external_send_ready ? \"Send ready\" : \"Send locked\"}</span>"
+          },
+          {
+            "line": 233,
+            "text": "<p class=\"muted\">Visible for roadmap clarity only. These customer actions cannot execute here and require future confirmation gates, role permissions, provider readiness, and audit logging.</p>"
+          },
+          {
+            "line": 263,
+            "text": "? \"Customer Center is using read-only projections only. Outbound sends, CRM writes, ticket changes, assignments, calls, IVR, and auto-replies remain unavailable.\""
+          },
+          {
+            "line": 283,
+            "text": "<p class=\"mhos-context-description\">Protected-read customer communication surface for inbox visibility, conversation previews, ticket/SLA state, channel readiness, and handoff preparation. No customer execution happens here.</p>"
+          },
+          {
+            "line": 293,
+            "text": "${renderMetric(\"Waiting Replies\", countWaitingReplies(inbox), \"No auto-send\")}"
+          },
+          {
+            "line": 295,
+            "text": "${renderMetric(\"Channels\", channels.length || \"0\", \"Send locked\")}"
+          },
+          {
+            "line": 306,
+            "text": "<p class=\"muted\">This page can review customer context and prepare handoffs. Any future customer-facing action must happen in an owning workflow with confirmation, permissions, and audit logging.</p>"
+          }
+        ],
+        "confirmations": [
+          {
+            "line": 357,
+            "text": "<button class=\"btn btn-secondary\" type=\"button\" data-customer-center-action=\"governance-handoff\">Prepare Governance review</button>"
+          },
+          {
+            "line": 408,
+            "text": "if (action === \"governance-handoff\") {"
+          },
+          {
+            "line": 409,
+            "text": "context.setSharedHandoff?.(\"governance\", {"
+          },
+          {
+            "line": 411,
+            "text": "title: \"Customer communication governance review\","
+          },
+          {
+            "line": 414,
+            "text": "context.navigateTo?.(\"governance\");"
+          },
+          {
+            "line": 415,
+            "text": "context.showMessage?.(\"Customer governance handoff prepared.\");"
+          }
+        ],
+        "rendering": []
+      }
+    },
+    {
+      "file": "public/control-center/pages/ads-manager.js",
+      "name": "ads-manager.js",
+      "closed": false,
+      "category": "P2 review",
+      "risk": 32.4,
+      "metrics": {
+        "lines": 624,
+        "innerHTML": 1,
+        "directFetch": 0,
+        "apiImports": 0,
+        "destructiveWords": 44,
+        "confirmations": 1,
+        "routeOnly": 7,
+        "previewOnly": 0,
+        "localStorage": 0,
+        "timers": 0,
+        "eventHandlers": 4,
+        "escapeEvidence": 62
+      },
+      "keyHits": {
+        "authority": [
+          {
+            "line": 6,
+            "text": "label: \"Meta Ads\","
+          },
+          {
+            "line": 13,
+            "text": "label: \"Google Ads\","
+          },
+          {
+            "line": 20,
+            "text": "label: \"TikTok Ads\","
+          },
+          {
+            "line": 27,
+            "text": "label: \"Amazon Ads\","
+          },
+          {
+            "line": 207,
+            "text": "prompt: `Review the paid media setup for ${projectName || \"this project\"}. Use current strong platforms (${strongPlatforms.join(\", \") || \"none identified\"}) and recommend which campaigns to scale, what budget to move, and which creatives to duplicate.`"
+          },
+          {
+            "line": 259,
+            "text": "const aiButtons = Array.from(document.querySelectorAll(\"[data-ads-prompt]\"));"
+          },
+          {
+            "line": 262,
+            "text": "const index = Number(button.getAttribute(\"data-ads-prompt\"));"
+          },
+          {
+            "line": 287,
+            "text": "id: \"ads-manager\","
+          },
+          {
+            "line": 290,
+            "text": "eyebrow: \"Execute & Grow\","
+          },
+          {
+            "line": 291,
+            "text": "title: \"Ads Manager\","
+          },
+          {
+            "line": 295,
+            "text": "<section class=\"page is-active\" data-page=\"ads-manager\">"
+          },
+          {
+            "line": 345,
+            "text": "<div class=\"ads-manager-wrapper\">"
+          },
+          {
+            "line": 346,
+            "text": "<div class=\"ads-manager-hero\">"
+          },
+          {
+            "line": 347,
+            "text": "<div class=\"ads-manager-hero-copy\">"
+          },
+          {
+            "line": 349,
+            "text": "<h3 class=\"setup-hero-title\">${escapeHtml(projectName ? `${projectName} Ads Manager` : \"Ads Manager\")}</h3>"
+          },
+          {
+            "line": 351,
+            "text": "Use this workspace to set the working budget, check pacing, understand channel readiness, map creatives to platforms, and decide what to scale or pause next."
+          },
+          {
+            "line": 353,
+            "text": "<div class=\"ads-manager-status\">"
+          },
+          {
+            "line": 363,
+            "text": "<span>Budget</span>"
+          },
+          {
+            "line": 379,
+            "text": "<div class=\"ads-manager-layout\">"
+          },
+          {
+            "line": 380,
+            "text": "<div class=\"ads-manager-main\">"
+          }
+        ],
+        "confirmations": [
+          {
+            "line": 590,
+            "text": "<p class=\"home-action-meta\">AI can prepare a paid growth brief and route context to AI Command. Spend changes, publishing, and campaign launch remain manual or governance-controlled.</p>"
+          }
+        ],
+        "rendering": [
+          {
+            "line": 344,
+            "text": "root.innerHTML = `"
+          }
+        ]
+      }
+    },
+    {
+      "file": "public/control-center/pages/setup.js",
+      "name": "setup.js",
+      "closed": false,
+      "category": "P2 review",
+      "risk": 29.3,
+      "metrics": {
+        "lines": 1787,
+        "innerHTML": 3,
+        "directFetch": 0,
+        "apiImports": 1,
+        "destructiveWords": 12,
+        "confirmations": 0,
+        "routeOnly": 9,
+        "previewOnly": 76,
+        "localStorage": 6,
+        "timers": 4,
+        "eventHandlers": 25,
+        "escapeEvidence": 172
+      },
+      "keyHits": {
+        "authority": [
+          {
+            "line": 76,
+            "text": "project_type: \"Improves AI defaults and recommended workflow strategies.\","
+          },
+          {
+            "line": 85,
+            "text": "social_channels: \"Defines where campaign and publishing workflows should execute.\""
+          },
+          {
+            "line": 922,
+            "text": "// Disabled: wizard panel auto-scroll caused workspace jump during interaction."
+          },
+          {
+            "line": 1312,
+            "text": "<p class=\"setup-v2-subtitle\">Choose a model to load recommended defaults, checklist scope, and readiness priorities. Selection alone does not publish, connect, or execute anything.</p>"
+          },
+          {
+            "line": 1449,
+            "text": "<span>Does not publish, approve, send, or execute</span>"
+          },
+          {
+            "line": 1707,
+            "text": "<p class=\"setup-v2-subtitle\">AI suggestions update local form guidance or prepare an AI Command prompt. They do not save backend data, approve work, publish, send, connect, or upload.</p>"
+          }
+        ],
+        "confirmations": [],
+        "rendering": [
+          {
+            "line": 746,
+            "text": "missingActionList.innerHTML = missingInsights.length"
+          },
+          {
+            "line": 761,
+            "text": "blockerList.innerHTML = renderIndicatorList("
+          },
+          {
+            "line": 1425,
+            "text": "root.innerHTML = `"
+          }
+        ]
+      }
+    },
+    {
+      "file": "public/control-center/pages/campaign-studio.js",
+      "name": "campaign-studio.js",
+      "closed": false,
+      "category": "P2 review",
+      "risk": 21.1,
+      "metrics": {
+        "lines": 2023,
+        "innerHTML": 1,
+        "directFetch": 0,
+        "apiImports": 0,
+        "destructiveWords": 43,
+        "confirmations": 14,
+        "routeOnly": 14,
+        "previewOnly": 82,
+        "localStorage": 0,
+        "timers": 1,
+        "eventHandlers": 12,
+        "escapeEvidence": 165
+      },
+      "keyHits": {
+        "authority": [
+          {
+            "line": 45,
+            "text": "google_ads: \"Google Ads\","
+          },
+          {
+            "line": 46,
+            "text": "meta: \"Meta Ads\","
+          },
+          {
+            "line": 48,
+            "text": "ads: \"Paid Media\","
+          },
+          {
+            "line": 66,
+            "text": "\"ads-manager\": { role: \"ads_operator\", domain: \"campaign\" },"
+          },
+          {
+            "line": 120,
+            "text": "<div class=\"data-row\"><span>Route map</span><strong>${escapeHtml(`Content ${titleCase(CAMPAIGN_ROUTE_ROLES[\"content-studio\"].role)} • Media ${titleCase(CAMPAIGN_ROUTE_ROLES[\"media-studio\"].role)} • Publishing ${titleCase(CAMPAIGN_ROUTE_ROLES.publishing.role)} • Ads ${titleCase(CAMPAIGN_ROUTE_ROLES[\"ads-manager\"].role)}`)}</strong></div>"
+          },
+          {
+            "line": 242,
+            "text": "budget: \"5000\","
+          },
+          {
+            "line": 338,
+            "text": "budget: asString(values?.budget),"
+          },
+          {
+            "line": 357,
+            "text": "budget: asString(formValues.budget || record.budget || defaults.budget)"
+          },
+          {
+            "line": 450,
+            "text": "budget: asString(values.budget),"
+          },
+          {
+            "line": 764,
+            "text": "? \"Google Ads\""
+          },
+          {
+            "line": 766,
+            "text": "? \"TikTok Ads\""
+          },
+          {
+            "line": 767,
+            "text": ": \"Meta Ads\";"
+          },
+          {
+            "line": 856,
+            "text": "if (!values.budget) adsBlockers.push(\"Add a working campaign budget before routing to Ads Manager.\");"
+          },
+          {
+            "line": 1399,
+            "text": "persistCampaignRouteHandoff({ projectName, session, destinationPage: \"ads-manager\", createProjectHandoff });"
+          },
+          {
+            "line": 1400,
+            "text": "navigateTo(\"ads-manager\");"
+          },
+          {
+            "line": 1543,
+            "text": "const budgetValue = formatCurrency(values.budget, overviewData.currency || \"USD\");"
+          },
+          {
+            "line": 1544,
+            "text": "const budgetLabel = budgetValue === \"-\" ? \"Budget pending\" : budgetValue;"
+          },
+          {
+            "line": 1568,
+            "text": "<span class=\"mhos-campaign-context-item mhos-context-chip\">Budget <strong class=\"mhos-campaign-context-value\">${escapeHtml(budgetLabel)}</strong></span>"
+          },
+          {
+            "line": 1671,
+            "text": "name: \"budget\","
+          },
+          {
+            "line": 1672,
+            "text": "label: \"Budget\","
+          }
+        ],
+        "confirmations": [
+          {
+            "line": 67,
+            "text": "\"ai-command\": { role: \"admin\", domain: \"governance\" }"
+          },
+          {
+            "line": 459,
+            "text": "linked_approvals: [],"
+          },
+          {
+            "line": 845,
+            "text": "const approvalBlockers = [];"
+          },
+          {
+            "line": 877,
+            "text": "if (!values.executionNotes) approvalBlockers.push(\"Execution notes are missing, which makes approvals harder downstream.\");"
+          },
+          {
+            "line": 878,
+            "text": "if (!values.audiencePrimary || !values.audienceNeed) approvalBlockers.push(\"Audience framing is incomplete for creative review.\");"
+          },
+          {
+            "line": 879,
+            "text": "if (!values.productAngle) approvalBlockers.push(\"Product angle needs to be explicit so operators do not improvise.\");"
+          },
+          {
+            "line": 886,
+            "text": "approvalBlockers.length ||"
+          },
+          {
+            "line": 900,
+            "text": "approvalBlockers,"
+          },
+          {
+            "line": 908,
+            "text": "approvalBlockers.length"
+          },
+          {
+            "line": 1895,
+            "text": "helper: \"Capture dependencies, packaging notes, approval guidance, or production instructions for the next operator.\","
+          },
+          {
+            "line": 1944,
+            "text": "\"Approval blockers\","
+          },
+          {
+            "line": 1945,
+            "text": "executionReadiness.approvalBlockers,"
+          },
+          {
+            "line": 1947,
+            "text": "\"Approval inputs look complete enough for review.\""
+          }
+        ],
+        "rendering": [
+          {
+            "line": 1554,
+            "text": "root.innerHTML = `"
+          }
+        ]
+      }
+    },
+    {
+      "file": "public/control-center/pages/integrations/builders.js",
+      "name": "builders.js",
+      "closed": false,
+      "category": "low",
+      "risk": 19.6,
+      "metrics": {
+        "lines": 818,
+        "innerHTML": 0,
+        "directFetch": 0,
+        "apiImports": 0,
+        "destructiveWords": 30,
+        "confirmations": 0,
+        "routeOnly": 0,
+        "previewOnly": 1,
+        "localStorage": 0,
+        "timers": 0,
+        "eventHandlers": 0,
+        "escapeEvidence": 17
+      },
+      "keyHits": {
+        "authority": [
+          {
+            "line": 28,
+            "text": "label: \"Paid Ads\","
+          },
+          {
+            "line": 29,
+            "text": "ids: [\"meta-ads\", \"google-ads\", \"tiktok-ads\", \"meta-pixel\", \"tiktok-pixel\"]"
+          },
+          {
+            "line": 44,
+            "text": "label: \"Email / CRM\","
+          },
+          {
+            "line": 45,
+            "text": "ids: [\"smtp\", \"mailer\", \"mailchimp\", \"crm\"]"
+          },
+          {
+            "line": 121,
+            "text": "meta: `${reconnectNeeded[0].label} needs attention before sync and intelligence coverage can be trusted.`"
+          },
+          {
+            "line": 145,
+            "text": "meta: \"Best next step: attach provider-specific OAuth validation and background sync jobs to the existing integration routes.\""
+          },
+          {
+            "line": 164,
+            "text": "prompt: \"Review the current analytics, tracking, website, and paid integrations and tell me what is blocking full attribution across content, ads, and conversion tracking.\""
+          },
+          {
+            "line": 192,
+            "text": "label: \"Communication / CRM\","
+          },
+          {
+            "line": 193,
+            "text": "description: \"Email, CRM, and operational messaging connectors that keep lifecycle and team coordination intact.\","
+          },
+          {
+            "line": 194,
+            "text": "connectorIds: [\"smtp\", \"mailer\", \"mailchimp\", \"crm\", \"telegram\", \"slack\", \"notion\", \"zapier-make\", \"google-drive\", \"webhook\"]"
+          },
+          {
+            "line": 199,
+            "text": "connectorIds: [\"meta-ads\", \"google-ads\", \"tiktok-ads\"]"
+          },
+          {
+            "line": 365,
+            "text": "if (/(failed|error|disconnect|blocked|expired)/.test(text)) return \"danger\";"
+          },
+          {
+            "line": 367,
+            "text": "if (/(connected|sync|tested|passed|healthy|ready|imported)/.test(text)) return \"success\";"
+          },
+          {
+            "line": 408,
+            "text": "id: `${card.id}-sync`,"
+          },
+          {
+            "line": 409,
+            "text": "title: `${card.label} sync checkpoint`,"
+          },
+          {
+            "line": 410,
+            "text": "detail: \"Derived from the latest connector sync timestamp.\","
+          },
+          {
+            "line": 478,
+            "text": "domains: [byId.get(\"analytics\"), byId.get(\"ads\")].filter(Boolean)"
+          },
+          {
+            "line": 481,
+            "text": "id: \"email-crm\","
+          },
+          {
+            "line": 482,
+            "text": "title: \"Email & CRM\","
+          },
+          {
+            "line": 484,
+            "text": "domains: [byId.get(\"email-crm\")].filter(Boolean)"
+          }
+        ],
+        "confirmations": [],
+        "rendering": []
+      }
+    },
+    {
+      "file": "public/control-center/pages/publishing.js",
+      "name": "publishing.js",
+      "closed": true,
+      "category": "closed-high-risk",
+      "risk": 18.8,
+      "metrics": {
+        "lines": 2060,
+        "innerHTML": 1,
+        "directFetch": 0,
+        "apiImports": 0,
+        "destructiveWords": 69,
+        "confirmations": 104,
+        "routeOnly": 12,
+        "previewOnly": 189,
+        "localStorage": 2,
+        "timers": 1,
+        "eventHandlers": 20,
+        "escapeEvidence": 136
+      },
+      "keyHits": {
+        "authority": [
+          {
+            "line": 11,
+            "text": "const safety = `Publishing prepares channel packages, manual schedule records, and approval-ready handoffs. External publishing requires provider proof; backend status changes remain <strong>confirmation-gated</strong> and governed by <strong>backend approval rules</strong>.`;"
+          },
+          {
+            "line": 48,
+            "text": "<nav class=\"publishing-workflow-strip\" aria-label=\"Publishing Workflow\">"
+          },
+          {
+            "line": 50,
+            "text": "<div class=\"publishing-workflow-step is-${statusMap[step.key]}\" aria-label=\"${escapeHtml(step.label)}: ${statusMap[step.key]}\">"
+          },
+          {
+            "line": 52,
+            "text": "<span class=\"publishing-workflow-step-label\">${statusMap[step.key]}</span>"
+          },
+          {
+            "line": 325,
+            "text": "id: asString(draft.id || `local-publish-${Date.now()}`),"
+          },
+          {
+            "line": 395,
+            "text": "if (item.campaign) return `${item.campaign} ${titleCase(item.channel || \"publish\")}`;"
+          },
+          {
+            "line": 396,
+            "text": "if (context.activeCampaign) return `${context.activeCampaign} ${titleCase(item.channel || \"publish\")}`;"
+          },
+          {
+            "line": 579,
+            "text": "reason: \"Prepare a safe publishing draft without executing publish.\","
+          },
+          {
+            "line": 588,
+            "text": "action: \"Record manual publish completion\","
+          },
+          {
+            "line": 591,
+            "text": "reason: \"This records a manual publishing completion only after review; external provider execution requires separate proof.\""
+          },
+          {
+            "line": 606,
+            "text": "if ([\"schedule\", \"publish\", \"retry\"].includes(intent) && !clean(form.publishDate)) {"
+          },
+          {
+            "line": 607,
+            "text": "errors.publishDate = \"Publish date is required for this action.\";"
+          },
+          {
+            "line": 609,
+            "text": "if (intent === \"publish\" && form.approvalStatus !== \"approved\") {"
+          },
+          {
+            "line": 689,
+            "text": "grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));"
+          },
+          {
+            "line": 895,
+            "text": "grid-template-columns: minmax(0, 1fr) auto;"
+          },
+          {
+            "line": 919,
+            "text": "grid-template-columns: minmax(0, 1fr) auto;"
+          },
+          {
+            "line": 945,
+            "text": "title: firstText(output.title, payload.workflow_title, draftContext.lastResponseTitle, \"Workflow output\"),"
+          },
+          {
+            "line": 986,
+            "text": "why: `${ready.title} is approved for a backend readiness update. Record manual completion only after external execution is verified.`,"
+          },
+          {
+            "line": 1000,
+            "text": "action: \"Load workflow output into a draft\","
+          },
+          {
+            "line": 1001,
+            "text": "why: \"A workflow handoff is available. Loading it keeps execution moving without inventing backend data.\","
+          }
+        ],
+        "confirmations": [
+          {
+            "line": 9,
+            "text": "const approval = selectedItem?.approvalStatus ? titleCase(selectedItem.approvalStatus) : \"Draft\";"
+          },
+          {
+            "line": 11,
+            "text": "const safety = `Publishing prepares channel packages, manual schedule records, and approval-ready handoffs. External publishing requires provider proof; backend status changes remain <strong>confirmation-gated</strong> and governed by <strong>backend approval rules</strong>.`;"
+          },
+          {
+            "line": 15,
+            "text": "`<button type=\"button\" class=\"btn btn-secondary\" onclick=\"document.getElementById('publishingHandoffPanel')?.scrollIntoView({behavior:'smooth',block:'start'})\">Review Approval Gate</button>`,"
+          },
+          {
+            "line": 22,
+            "text": "<div class=\"publishing-command-header-status\">Status: <strong>${escapeHtml(status)}</strong> &middot; Approval: <strong>${escapeHtml(approval)}</strong></div>"
+          },
+          {
+            "line": 30,
+            "text": "function renderPublishingWorkflowStrip({ selectedItem, recommendation, blockers, approvalState, escapeHtml }) {"
+          },
+          {
+            "line": 35,
+            "text": "{ key: \"approval\", label: \"Approval\" },"
+          },
+          {
+            "line": 43,
+            "text": "approval: selectedItem?.approvalStatus === \"approved\" ? \"ready\" : selectedItem?.approvalStatus === \"needs approval\" ? \"warning\" : \"missing\","
+          },
+          {
+            "line": 66,
+            "text": "{ key: \"governance\", label: \"Governance\", state: selectedItem?.governanceStatus === \"approved\" ? \"ready\" : \"missing\" },"
+          },
+          {
+            "line": 67,
+            "text": "{ key: \"approval\", label: \"Approval\", state: selectedItem?.approvalStatus === \"approved\" ? \"ready\" : selectedItem?.approvalStatus === \"needs approval\" ? \"warning\" : \"missing\" }"
+          },
+          {
+            "line": 106,
+            "text": "const STATUS_FILTERS = [\"all\", \"draft\", \"ready\", \"needs approval\", \"scheduled\", \"published\", \"failed\"];"
+          },
+          {
+            "line": 107,
+            "text": "const DISPLAY_STATUSES = [\"draft\", \"ready\", \"needs approval\", \"scheduled\", \"published\", \"failed\"];"
+          },
+          {
+            "line": 109,
+            "text": "const APPROVAL_STATUSES = [\"draft\", \"needs approval\", \"approved\"];"
+          },
+          {
+            "line": 273,
+            "text": "if ([\"needs approval\", \"needs_approval\", \"approval\", \"pending_approval\", \"review\", \"in_review\"].includes(normalized)) {"
+          },
+          {
+            "line": 274,
+            "text": "return \"needs approval\";"
+          },
+          {
+            "line": 357,
+            "text": "approvalStatus: \"draft\","
+          },
+          {
+            "line": 418,
+            "text": "approvalStatus: status === \"ready\" ? \"approved\" : status === \"needs approval\" ? \"needs approval\" : \"draft\","
+          },
+          {
+            "line": 473,
+            "text": "\"needs approval\": 2,"
+          },
+          {
+            "line": 531,
+            "text": "approvalStatus: item.approvalStatus || \"draft\","
+          },
+          {
+            "line": 609,
+            "text": "if (intent === \"publish\" && form.approvalStatus !== \"approved\") {"
+          },
+          {
+            "line": 610,
+            "text": "errors.approvalStatus = \"Publishing readiness must be approved before recording manual completion.\";"
+          }
+        ],
+        "rendering": [
+          {
+            "line": 1990,
+            "text": "root.innerHTML = `"
+          }
+        ]
+      }
+    },
+    {
+      "file": "public/control-center/pages/home.js",
+      "name": "home.js",
+      "closed": false,
+      "category": "low",
+      "risk": 13.2,
+      "metrics": {
+        "lines": 1164,
+        "innerHTML": 1,
+        "directFetch": 0,
+        "apiImports": 0,
+        "destructiveWords": 29,
+        "confirmations": 25,
+        "routeOnly": 4,
+        "previewOnly": 26,
+        "localStorage": 0,
+        "timers": 0,
+        "eventHandlers": 14,
+        "escapeEvidence": 83
+      },
+      "keyHits": {
+        "authority": [
+          {
+            "line": 199,
+            "text": "title: \"Publish / execute\","
+          },
+          {
+            "line": 231,
+            "text": "if (/(connector|integration|sync|platform)/.test(text)) return \"integrations\";"
+          },
+          {
+            "line": 234,
+            "text": "if (/(publish|schedule|queue)/.test(text)) return \"publishing\";"
+          },
+          {
+            "line": 235,
+            "text": "if (/(ad|budget|paid)/.test(text)) return \"ads-manager\";"
+          },
+          {
+            "line": 273,
+            "text": "{ id: \"ads_operator\", name: \"Ads Optimizer\", fallback: \"Optimize paid testing, creative variants, and budget decisions.\" },"
+          },
+          {
+            "line": 275,
+            "text": "{ id: \"compliance_reviewer\", name: \"Compliance Reviewer\", fallback: \"Review claims, approvals, and publish safety before release.\" },"
+          },
+          {
+            "line": 715,
+            "text": "feedback: asString(learningLessons[0]).trim() || \"Connect insights or run a reviewed campaign so the learning engine can capture feedback.\""
+          },
+          {
+            "line": 930,
+            "text": "<span class=\"data-label\">Publish Ready</span>"
+          },
+          {
+            "line": 981,
+            "text": "<p class=\"mhos-os-panel-copy\">These buttons open the right workspace. Home does not save, upload, approve, publish, send, or execute.</p>"
+          },
+          {
+            "line": 1032,
+            "text": "<p class=\"mhos-os-panel-copy\">Prompt buttons fill AI Command with reviewed guidance requests. They do not execute actions.</p>"
+          },
+          {
+            "line": 1057,
+            "text": "${escapeHtml(compactModuleState(dashboard.health?.customerOpsStatus, \"Customer Ops activates when CRM/live channels are connected.\"))}"
+          },
+          {
+            "line": 1083,
+            "text": "strategist: `Act as the Strategist for ${projectLabel}. Review readiness, blockers, campaign state, and next best action. Give me the highest-impact strategic moves. Do not execute anything; prepare guidance only.`,"
+          },
+          {
+            "line": 1084,
+            "text": "writer: `Act as the Content Writer for ${projectLabel}. Review the current project context and suggest the next best writing actions, messaging angles, and content priorities. Do not execute anything; prepare guidance only.`,"
+          },
+          {
+            "line": 1085,
+            "text": "designer: `Act as the Media Director for ${projectLabel}. Review the visual/asset readiness and suggest the next best creative actions. Do not execute anything; prepare guidance only.`,"
+          },
+          {
+            "line": 1086,
+            "text": "video_lead: `Act as the Video Lead for ${projectLabel}. Review the project context and suggest the next best short-form/video actions. Do not execute anything; prepare guidance only.`,"
+          },
+          {
+            "line": 1087,
+            "text": "publisher: `Act as the Publisher for ${projectLabel}. Review publishing readiness, scheduled jobs, blockers, and what must be checked before publishing. Do not execute anything; prepare guidance only.`,"
+          },
+          {
+            "line": 1088,
+            "text": "ads_operator: `Act as the Ads Optimizer for ${projectLabel}. Review campaign readiness, channels, and paid media opportunities. Suggest next ad actions safely. Do not execute anything; prepare guidance only.`,"
+          },
+          {
+            "line": 1089,
+            "text": "analyst: `Act as the SEO & Insights Analyst for ${projectLabel}. Review readiness, signals, gaps, and recent activity. Tell me what data matters most and what to improve next. Do not execute anything; prepare guidance only.`,"
+          },
+          {
+            "line": 1090,
+            "text": "compliance_reviewer: `Act as the Compliance Reviewer for ${projectLabel}. Review launch blockers, claims, approvals, and publishing safety. Tell me what must be checked before release. Do not execute anything; prepare guidance only.`,"
+          },
+          {
+            "line": 1091,
+            "text": "admin: `Act as the Operations Lead for ${projectLabel}. Review tasks, blockers, failed jobs, and execution health. Give me the next operational steps. Do not execute anything; prepare guidance only.`"
+          }
+        ],
+        "confirmations": [
+          {
+            "line": 245,
+            "text": "const approvals = asArray(operations.approvals?.items);"
+          },
+          {
+            "line": 275,
+            "text": "{ id: \"compliance_reviewer\", name: \"Compliance Reviewer\", fallback: \"Review claims, approvals, and publish safety before release.\" },"
+          },
+          {
+            "line": 282,
+            "text": "const roleApprovals = approvals.filter((item) => asString(item?.reviewer_role).toLowerCase() === role.id);"
+          },
+          {
+            "line": 284,
+            "text": "const latest = roleNotifications[0] || roleTasks[0] || roleApprovals[0] || null;"
+          },
+          {
+            "line": 374,
+            "text": "const approvals = asArray(operations.approvals?.items);"
+          },
+          {
+            "line": 427,
+            "text": "const pendingApprovals = approvals.filter((item) => {"
+          },
+          {
+            "line": 452,
+            "text": "const escalationSummary = pendingApprovals.length"
+          },
+          {
+            "line": 453,
+            "text": "? `${formatCount(pendingApprovals.length)} approval${pendingApprovals.length === 1 ? \"\" : \"s\"} required`"
+          },
+          {
+            "line": 560,
+            "text": "approvals: formatCount(pendingApprovals.length),"
+          },
+          {
+            "line": 563,
+            "text": "summary: `${formatCount(pendingApprovals.length)} approvals pending, ${formatCount(failedExecutions.length)} escalations, ${formatCount(unreadNotifications.length)} notifications, system score ${formatPercent(systemScore)}.`"
+          },
+          {
+            "line": 657,
+            "text": "value: formatCount(unreadNotifications.length + pendingTasks.length + pendingApprovals.length),"
+          },
+          {
+            "line": 658,
+            "text": "hint: \"Notifications, tasks, approvals\","
+          },
+          {
+            "line": 659,
+            "text": "tone: unreadNotifications.length + pendingTasks.length + pendingApprovals.length ? \"warning\" : \"success\""
+          },
+          {
+            "line": 722,
+            "text": "pendingApprovals: pendingApprovals.length,"
+          },
+          {
+            "line": 865,
+            "text": "<span class=\"mhos-os-chip\">No approval, publishing, sending, or record changes here</span>"
+          },
+          {
+            "line": 1090,
+            "text": "compliance_reviewer: `Act as the Compliance Reviewer for ${projectLabel}. Review launch blockers, claims, approvals, and publishing safety. Tell me what must be checked before release. Do not execute anything; prepare guidance only.`,"
+          }
+        ],
+        "rendering": [
+          {
+            "line": 803,
+            "text": "root.innerHTML = `"
+          }
+        ]
+      }
+    },
+    {
+      "file": "public/control-center/pages/integrations/cards.js",
+      "name": "cards.js",
+      "closed": false,
+      "category": "low",
+      "risk": 11.3,
+      "metrics": {
+        "lines": 414,
+        "innerHTML": 0,
+        "directFetch": 0,
+        "apiImports": 0,
+        "destructiveWords": 17,
+        "confirmations": 0,
+        "routeOnly": 0,
+        "previewOnly": 0,
+        "localStorage": 0,
+        "timers": 0,
+        "eventHandlers": 0,
+        "escapeEvidence": 8
+      },
+      "keyHits": {
+        "authority": [
+          {
+            "line": 76,
+            "text": "${renderIntegrationMetric(\"Sync\", `${item.sync_success_rate}%`, item.sync_success_rate >= 80 ? \"success\" : \"warning\")}"
+          },
+          {
+            "line": 81,
+            "text": "<span>Last sync: ${esc(formatRelativeTime(item.last_sync_at))}</span>"
+          },
+          {
+            "line": 101,
+            "text": "<p>Connect platforms to unlock intelligence, sync, publishing, and reporting.</p>"
+          },
+          {
+            "line": 144,
+            "text": "return { action: \"sync\", label: \"Run backend sync\" };"
+          },
+          {
+            "line": 149,
+            "text": "action: \"reconnect\","
+          },
+          {
+            "line": 150,
+            "text": "label: card.statusLabel === \"Error\" ? \"Repair integration connection\" : \"Reconnect integration\""
+          },
+          {
+            "line": 222,
+            "text": "const healthLabel = shortenText(card.healthSummary, 62) || \"No sync health detail available.\";"
+          },
+          {
+            "line": 243,
+            "text": "<span class=\"integration-control-row-meta\">Last sync: ${esc(formatCardDate(card.lastSync))}</span>"
+          },
+          {
+            "line": 260,
+            "text": "? `<button class=\"btn btn-secondary\" type=\"button\" data-integration-action=\"sync\" data-integration-id=\"${esc(card.id)}\">Run backend sync</button>`"
+          },
+          {
+            "line": 313,
+            "text": "return \"Reconnect integration\";"
+          },
+          {
+            "line": 332,
+            "text": "? \"reconnect\""
+          },
+          {
+            "line": 350,
+            "text": "Last sync: ${esc(formatCardDate(card.lastSync))}"
+          },
+          {
+            "line": 397,
+            "text": "<p class=\"home-section-copy\" style=\"margin:6px 0 0;\">Open the setup drawer to configure fields and run connector actions.</p>"
+          }
+        ],
+        "confirmations": [],
+        "rendering": []
+      }
+    },
+    {
+      "file": "public/control-center/pages/research.js",
+      "name": "research.js",
+      "closed": false,
+      "category": "low",
+      "risk": 10.3,
+      "metrics": {
+        "lines": 1613,
+        "innerHTML": 1,
+        "directFetch": 0,
+        "apiImports": 0,
+        "destructiveWords": 16,
+        "confirmations": 4,
+        "routeOnly": 14,
+        "previewOnly": 38,
+        "localStorage": 0,
+        "timers": 0,
+        "eventHandlers": 11,
+        "escapeEvidence": 101
+      },
+      "keyHits": {
+        "authority": [
+          {
+            "line": 8,
+            "text": "seo: { route: \"workflows\", label: \"SEO Workflow\", destinationRole: \"strategist\", destinationDomain: \"research\" },"
+          },
+          {
+            "line": 9,
+            "text": "ads: { route: \"ads-manager\", label: \"Ads Manager\", destinationRole: \"ads_operator\", destinationDomain: \"campaign\" },"
+          },
+          {
+            "line": 533,
+            "text": "if (type.includes(\"ad\") || type.includes(\"paid\")) lane = \"ads\";"
+          },
+          {
+            "line": 545,
+            "text": "lane === \"ads\" ? ACTION_ROUTES.ads :"
+          },
+          {
+            "line": 752,
+            "text": "modeId: \"ads\","
+          },
+          {
+            "line": 959,
+            "text": "? `Build an SEO workflow for ${projectName || \"this project\"} from the current research page. Focus on keyword clusters, missing landing pages, long-tail ideas, and content clusters.`"
+          },
+          {
+            "line": 960,
+            "text": ": target === \"ads\""
+          },
+          {
+            "line": 1105,
+            "text": "eyebrow: \"Execute & Grow\","
+          },
+          {
+            "line": 1359,
+            "text": "<p class=\"research-section-copy\">Audience needs, buying intent, search openings, and keyword evidence that can support content, SEO, ads, or campaign decisions.</p>"
+          },
+          {
+            "line": 1523,
+            "text": "<button class=\"quick-action-btn\" type=\"button\" data-research-opportunity=\"${index}\">Send to ${escapeHtml(item.routeTarget.label)}</button>"
+          },
+          {
+            "line": 1566,
+            "text": "<button class=\"quick-action-btn\" type=\"button\" data-research-route=\"seo\">Route to SEO Workflow</button>"
+          },
+          {
+            "line": 1567,
+            "text": "<button class=\"quick-action-btn\" type=\"button\" data-research-route=\"ads\">Route to Ads Manager</button>"
+          }
+        ],
+        "confirmations": [
+          {
+            "line": 10,
+            "text": "ai: { route: \"ai-command\", label: \"AI Command\", destinationRole: \"admin\", destinationDomain: \"governance\" }"
+          },
+          {
+            "line": 79,
+            "text": "const approvalsByRole = asObject(operations.approvals?.by_reviewer_role);"
+          },
+          {
+            "line": 88,
+            "text": "<div class=\"data-row\"><span>Strategist review queue</span><strong>${escapeHtml(formatCount(asArray(approvalsByRole[RESEARCH_ROLE_DEFAULTS.reviewRole]).length))}</strong></div>"
+          }
+        ],
+        "rendering": [
+          {
+            "line": 1210,
+            "text": "root.innerHTML = `"
+          }
+        ]
+      }
+    },
+    {
+      "file": "public/control-center/pages/media-studio-workspace.js",
+      "name": "media-studio-workspace.js",
+      "closed": false,
+      "category": "low",
+      "risk": 10,
+      "metrics": {
+        "lines": 3659,
+        "innerHTML": 1,
+        "directFetch": 0,
+        "apiImports": 1,
+        "destructiveWords": 57,
+        "confirmations": 72,
+        "routeOnly": 15,
+        "previewOnly": 379,
+        "localStorage": 4,
+        "timers": 0,
+        "eventHandlers": 27,
+        "escapeEvidence": 280
+      },
+      "keyHits": {
+        "authority": [
+          {
+            "line": 1212,
+            "text": "action: \"Load workflow media brief\","
+          },
+          {
+            "line": 1213,
+            "text": "why: \"A workflow handoff is available. Load it into the generator to continue the Workflows -> Media Studio -> package handoff flow.\""
+          },
+          {
+            "line": 1261,
+            "text": "return \"Generator backend not connected yet — your prompt/job is ready. Review it, save it as a draft, send it to AI Command, save it to Library, or connect a provider in Integrations before trying real output generation.\";"
+          },
+          {
+            "line": 1294,
+            "text": "grid-template-columns: repeat(auto-fit, minmax(135px, 1fr));"
+          },
+          {
+            "line": 1564,
+            "text": "grid-template-columns: minmax(0, 1fr) auto;"
+          },
+          {
+            "line": 1646,
+            "text": "status: \"Workflow context\","
+          },
+          {
+            "line": 1823,
+            "text": "<nav class=\"media-workflow-strip\" id=\"mediaWorkflowStrip\" aria-label=\"Media Studio workflow: Brief Source Generate Prepare Review Save to Library Handoff\">"
+          },
+          {
+            "line": 1824,
+            "text": "<div class=\"media-workflow-title\">Brief &rarr; Source &rarr; Generate/Prepare &rarr; Review &rarr; Save to Library &rarr; Handoff</div>"
+          },
+          {
+            "line": 1825,
+            "text": "<ol class=\"media-workflow-list\" role=\"list\">"
+          },
+          {
+            "line": 1827,
+            "text": "<li class=\"media-workflow-step is-${escapeHtml(step.state)}\" role=\"listitem\">"
+          },
+          {
+            "line": 1828,
+            "text": "<span class=\"media-workflow-index\">${escapeHtml(String(index + 1))}</span>"
+          },
+          {
+            "line": 1829,
+            "text": "<span class=\"media-workflow-copy\">"
+          },
+          {
+            "line": 1869,
+            "text": "[\"Campaign readiness\", handoff ? \"Workflow linked\" : \"Draft first\"]"
+          },
+          {
+            "line": 1994,
+            "text": "<button id=\"mediaPromptFromHandoffBtn\" class=\"btn btn-secondary\" type=\"button\">Generate from workflow handoff</button>"
+          },
+          {
+            "line": 2018,
+            "text": "<div class=\"empty-box\">Route content, workflow, or AI context into Media Studio to load a media brief here.</div>"
+          },
+          {
+            "line": 2069,
+            "text": "<div class=\"empty-box\">Start a media job or load a workflow handoff to create the first prompt-ready draft.</div>"
+          },
+          {
+            "line": 2094,
+            "text": "<button type=\"button\" data-media-action=\"approve\" data-media-id=\"${escapeHtml(item.id)}\">Mark Review Ready</button>"
+          },
+          {
+            "line": 2096,
+            "text": "<button type=\"button\" data-media-action=\"send-publishing\" data-media-id=\"${escapeHtml(item.id)}\">Prepare Publishing Package</button>"
+          },
+          {
+            "line": 2332,
+            "text": "<div class=\"media-prompt-box media-block-gap\">${escapeHtml(voiceScript || asString(payload.message) || \"No voice script or audio output is available yet. Voice mode prepares voiceover scripts/audio outputs only; it does not run IVR, phone calls, or call-center workflows.\")}</div>"
+          },
+          {
+            "line": 2454,
+            "text": "<button class=\"btn btn-secondary\" type=\"button\" data-media-version-action=\"approve\">Mark Review Ready</button>"
+          }
+        ],
+        "confirmations": [
+          {
+            "line": 3,
+            "text": "createProjectApproval,"
+          },
+          {
+            "line": 6,
+            "text": "decideProjectApproval,"
+          },
+          {
+            "line": 13,
+            "text": "listProjectApprovals,"
+          },
+          {
+            "line": 71,
+            "text": "bestUse: \"Before approvals and publishing handoff, especially for regulated or claim-sensitive content.\","
+          },
+          {
+            "line": 86,
+            "text": "suggestedPrompt: \"Act as Publishing Assistant. Produce a final publishing handoff summary with readiness status, blockers, approval notes, and channel delivery checklist.\""
+          },
+          {
+            "line": 168,
+            "text": "if ([\"needs_review\", \"needs review\", \"review\", \"pending_approval\"].includes(normalized)) return \"needs_review\";"
+          },
+          {
+            "line": 470,
+            "text": "approvals: [],"
+          },
+          {
+            "line": 520,
+            "text": "approval_state: asString(raw.approval_state || raw.approvalStatus || \"\"),"
+          },
+          {
+            "line": 535,
+            "text": "linked_approvals: asArray(raw.linked_approvals),"
+          },
+          {
+            "line": 583,
+            "text": "listProjectApprovals(backendProjectName, 120),"
+          },
+          {
+            "line": 593,
+            "text": "approvalsResult,"
+          },
+          {
+            "line": 605,
+            "text": "const approvals = fulfilledValue(approvalsResult, { items: [] });"
+          },
+          {
+            "line": 617,
+            "text": "session.approvals = asArray(approvals.items);"
+          },
+          {
+            "line": 939,
+            "text": "function normalizeApprovalStatus(readinessStatus) {"
+          },
+          {
+            "line": 993,
+            "text": "approval_status: normalizeApprovalStatus(readiness.readinessStatus),"
+          },
+          {
+            "line": 1242,
+            "text": "const approvalsConnected = hasBackend || capabilityFromOperations(operations, [\"approval\", \"approvals\"]);"
+          },
+          {
+            "line": 1249,
+            "text": "approval_backend: approvalsConnected,"
+          },
+          {
+            "line": 1669,
+            "text": "const needsGovernance = source.state === \"missing\" || /claim|proof|medical|guarantee|legal|privacy|gdpr|discount|pricing/i.test(promptText);"
+          },
+          {
+            "line": 1707,
+            "text": "key: \"governance\","
+          },
+          {
+            "line": 1708,
+            "text": "label: \"Governance\","
+          }
+        ],
+        "rendering": [
+          {
+            "line": 3615,
+            "text": "root.innerHTML = `"
+          }
+        ]
+      }
+    },
+    {
+      "file": "public/control-center/pages/operations-centers.js",
+      "name": "operations-centers.js",
+      "closed": false,
+      "category": "low",
+      "risk": 10,
+      "metrics": {
+        "lines": 2268,
+        "innerHTML": 5,
+        "directFetch": 0,
+        "apiImports": 0,
+        "destructiveWords": 43,
+        "confirmations": 163,
+        "routeOnly": 20,
+        "previewOnly": 65,
+        "localStorage": 0,
+        "timers": 0,
+        "eventHandlers": 26,
+        "escapeEvidence": 268
+      },
+      "keyHits": {
+        "authority": [
+          {
+            "line": 653,
+            "text": "<button class=\"btn btn-ghost ops-deferred-action\" type=\"button\" disabled>Delete task (disabled: future mutation safety pass)</button>"
+          },
+          {
+            "line": 895,
+            "text": "<p class=\"std-context-description mhos-os-subtitle\">Review workflow, content, media, approval, publishing, and sync queue pressure for ${escapeHtml(projectLabel)}.</p>"
+          },
+          {
+            "line": 1004,
+            "text": "<button class=\"btn btn-ghost ops-deferred-action\" type=\"button\" disabled>Approve item (disabled: Governance/Publishing-owned)</button>"
+          },
+          {
+            "line": 1005,
+            "text": "<button class=\"btn btn-ghost ops-deferred-action\" type=\"button\" disabled>Publish item (disabled: Publishing-owned and Governance-gated)</button>"
+          },
+          {
+            "line": 1015,
+            "text": "<p class=\"mhos-os-panel-copy\">Context-only guidance: opens AI with prompt/context only. No approve, publish, retry, remove, Governance bypass, or backend execution is performed.</p>"
+          },
+          {
+            "line": 1229,
+            "text": "${[\"all\", \"workflow\", \"media\", \"publishing\"].map((value) => `<option value=\"${escapeHtml(value)}\"${value === session.kind ? \" selected\" : \"\"}>${escapeHtml(titleCase(value))}</option>`).join(\"\")}"
+          },
+          {
+            "line": 1277,
+            "text": "<p class=\"mhos-os-panel-copy\">Active actions are refresh, route, and AI guidance only. Job retry, cancel, rerun, delete, worker execution, publishing, and approval mutations remain disabled or destination-owned.</p>"
+          },
+          {
+            "line": 1295,
+            "text": "`).join(\"\") : `<div class=\"empty-box\">Execution logs will appear here as jobs run.</div>`}"
+          },
+          {
+            "line": 1301,
+            "text": "<button class=\"btn btn-ghost ops-deferred-action\" type=\"button\" disabled>Delete job (disabled: future destructive mutation safety pass)</button>"
+          },
+          {
+            "line": 1310,
+            "text": "<p class=\"mhos-os-panel-copy\">Context-only guidance: opens AI with prompt/context only. No retry, cancel, rerun, delete, worker trigger, approve, publish, Governance bypass, or backend execution is performed.</p>"
+          },
+          {
+            "line": 1486,
+            "text": "<button class=\"btn btn-primary\" type=\"button\" data-governance-decision=\"approved\" data-approval-id=\"${escapeHtml(approvalId)}\">Approve</button>"
+          },
+          {
+            "line": 1521,
+            "text": "const syncAlerts = asArray(notificationCenter.sync_failure_alerts).map((item) => ({ ...item, item_type: \"sync\" }));"
+          },
+          {
+            "line": 1526,
+            "text": "const publishAlerts = asArray(notificationCenter.publish_alerts).map((item) => ({ ...item, item_type: \"publish\" }));"
+          },
+          {
+            "line": 1529,
+            "text": "const workflowAlerts = asArray(notificationCenter.workflow_completion_alerts).map((item) => ({ ...item, item_type: \"workflow\" }));"
+          },
+          {
+            "line": 1608,
+            "text": "<p class=\"std-context-description mhos-os-subtitle\">Review operational alerts, unread inbox state, approvals, sync issues, publishing, claim risk, provider health, and workflow completion for ${escapeHtml(projectLabel)}.</p>"
+          },
+          {
+            "line": 1704,
+            "text": "${selectedItem?.notification_id ? `<button class=\"btn btn-secondary\" type=\"button\" data-mark-read=\"${escapeHtml(selectedItem.notification_id)}\" title=\"Updates notification read-state only. Does not acknowledge, resolve, dismiss, delete, send, approve, publish, or execute.\">Mark Read (read-state only)</button>` : \"\"}"
+          },
+          {
+            "line": 1725,
+            "text": "<button class=\"btn btn-ghost ops-deferred-action\" type=\"button\" disabled>Delete notification (disabled: future destructive mutation safety pass)</button>"
+          },
+          {
+            "line": 1734,
+            "text": "<p class=\"mhos-os-panel-copy\">Context-only guidance: opens AI with prompt/context only. No mark-read, acknowledge, resolve, dismiss, delete, send, approve, publish, Governance bypass, or backend execution is performed.</p>"
+          },
+          {
+            "line": 1851,
+            "text": "const confirmed = window.confirm(`Confirm Governance decision\\n\\nAction: ${titleCase(decision)} approval ${approvalId}.\\nRisk: This updates a durable Governance approval record. It does not publish, send, or execute anything directly.\\n\\nSelect Cancel to review before deciding.`);"
+          },
+          {
+            "line": 1976,
+            "text": "description: \"Review queue pressure and route workflow, content, media, approval, publishing, and sync items to owning workspaces without silent mutation.\""
+          }
+        ],
+        "confirmations": [
+          {
+            "line": 256,
+            "text": "prompt: `Summarize the current operational notification signal for ${projectLabel} with focus on ${focusLabel}. Highlight approvals, provider health, publishing events, and urgent follow-up.`"
+          },
+          {
+            "line": 282,
+            "text": "const approvalAlerts = asArray(notificationCenter.approval_pending_alerts).length;"
+          },
+          {
+            "line": 323,
+            "text": "label: \"Approvals\","
+          },
+          {
+            "line": 324,
+            "text": "value: formatCount(approvalAlerts),"
+          },
+          {
+            "line": 325,
+            "text": "helper: \"Pending approval signals\","
+          },
+          {
+            "line": 326,
+            "text": "tone: approvalAlerts ? \"warning\" : \"success\","
+          },
+          {
+            "line": 348,
+            "text": "route: \"governance\""
+          },
+          {
+            "line": 365,
+            "text": "|| \"Cross-center runtime health, queue pressure, failures, publishing, governance, and provider signals.\";"
+          },
+          {
+            "line": 662,
+            "text": "<p class=\"mhos-os-panel-copy\">Context-only guidance: opens AI with prompt/context only. No task creation, owner assignment, status change, approval, publishing, or backend execution is performed.</p>"
+          },
+          {
+            "line": 895,
+            "text": "<p class=\"std-context-description mhos-os-subtitle\">Review workflow, content, media, approval, publishing, and sync queue pressure for ${escapeHtml(projectLabel)}.</p>"
+          },
+          {
+            "line": 987,
+            "text": "<p class=\"mhos-os-panel-copy\">Active actions are refresh, route, and AI guidance only. Queue, publishing, approval, and removal mutations remain disabled until backend policy and mutation safety checks are approved.</p>"
+          },
+          {
+            "line": 1004,
+            "text": "<button class=\"btn btn-ghost ops-deferred-action\" type=\"button\" disabled>Approve item (disabled: Governance/Publishing-owned)</button>"
+          },
+          {
+            "line": 1005,
+            "text": "<button class=\"btn btn-ghost ops-deferred-action\" type=\"button\" disabled>Publish item (disabled: Publishing-owned and Governance-gated)</button>"
+          },
+          {
+            "line": 1015,
+            "text": "<p class=\"mhos-os-panel-copy\">Context-only guidance: opens AI with prompt/context only. No approve, publish, retry, remove, Governance bypass, or backend execution is performed.</p>"
+          },
+          {
+            "line": 1277,
+            "text": "<p class=\"mhos-os-panel-copy\">Active actions are refresh, route, and AI guidance only. Job retry, cancel, rerun, delete, worker execution, publishing, and approval mutations remain disabled or destination-owned.</p>"
+          },
+          {
+            "line": 1310,
+            "text": "<p class=\"mhos-os-panel-copy\">Context-only guidance: opens AI with prompt/context only. No retry, cancel, rerun, delete, worker trigger, approve, publish, Governance bypass, or backend execution is performed.</p>"
+          },
+          {
+            "line": 1433,
+            "text": "function buildGovernanceApprovalAlerts(summary) {"
+          },
+          {
+            "line": 1434,
+            "text": "return asArray(asObject(summary).sections?.approval_queue).map((item) => ({"
+          },
+          {
+            "line": 1435,
+            "text": "id: `governance-approval-${asString(item.id)}`,"
+          },
+          {
+            "line": 1436,
+            "text": "title: asString(item.title) || \"Approval pending\","
+          }
+        ],
+        "rendering": [
+          {
+            "line": 721,
+            "text": "root.innerHTML = renderTaskCenterLayout({"
+          },
+          {
+            "line": 1063,
+            "text": "root.innerHTML = renderQueueCenterLayout({"
+          },
+          {
+            "line": 1357,
+            "text": "root.innerHTML = renderJobMonitorLayout({"
+          },
+          {
+            "line": 1600,
+            "text": "root.innerHTML = `"
+          },
+          {
+            "line": 2162,
+            "text": "root.innerHTML = `"
+          }
+        ]
+      }
+    },
+    {
+      "file": "public/control-center/pages/integrations/drawer.js",
+      "name": "drawer.js",
+      "closed": false,
+      "category": "low",
+      "risk": 6.3,
+      "metrics": {
+        "lines": 439,
+        "innerHTML": 0,
+        "directFetch": 0,
+        "apiImports": 0,
+        "destructiveWords": 9,
+        "confirmations": 0,
+        "routeOnly": 0,
+        "previewOnly": 0,
+        "localStorage": 0,
+        "timers": 0,
+        "eventHandlers": 2,
+        "escapeEvidence": 6
+      },
+      "keyHits": {
+        "authority": [
+          {
+            "line": 68,
+            "text": ": \"Run a connection test to confirm data flow.\""
+          },
+          {
+            "line": 75,
+            "text": ": \"Connect or reconnect when requirements and validation are ready.\""
+          },
+          {
+            "line": 108,
+            "text": "return { action: \"reconnect\", label: \"Reconnect integration\" };"
+          },
+          {
+            "line": 112,
+            "text": "return { action: \"reconnect\", label: \"Repair integration connection\" };"
+          },
+          {
+            "line": 143,
+            "text": "${card.statusLabel === \"Connected\" ? `<button class=\"quick-action-btn\" type=\"button\" data-integration-action=\"sync\" data-integration-id=\"${esc(card.id)}\">Run backend sync</button>` : \"\"}"
+          },
+          {
+            "line": 390,
+            "text": "<div class=\"data-row\"><span>Last sync</span><strong>${esc(formatDrawerDate(card.lastSync))}</strong></div>"
+          }
+        ],
+        "confirmations": [],
+        "rendering": []
+      }
+    },
+    {
+      "file": "public/control-center/pages/library/action-panel.js",
+      "name": "action-panel.js",
+      "closed": false,
+      "category": "low",
+      "risk": 5.4,
+      "metrics": {
+        "lines": 150,
+        "innerHTML": 0,
+        "directFetch": 0,
+        "apiImports": 0,
+        "destructiveWords": 10,
+        "confirmations": 4,
+        "routeOnly": 0,
+        "previewOnly": 0,
+        "localStorage": 0,
+        "timers": 0,
+        "eventHandlers": 0,
+        "escapeEvidence": 0
+      },
+      "keyHits": {
+        "authority": [
+          {
+            "line": 30,
+            "text": "? \"Actions update Library metadata only. They do not approve Governance, publish, or run workflows.\""
+          },
+          {
+            "line": 70,
+            "text": "<button class=\"btn btn-secondary\" type=\"button\" data-library-command=\"send-to-ai\"${disabledAttr}>Prepare AI review</button>"
+          },
+          {
+            "line": 88,
+            "text": "<button class=\"btn btn-secondary\" type=\"button\" data-asset-status-action=\"approved\" data-library-asset=\"${selectedAssetId}\" data-asset-id=\"${selectedRegistryAssetId}\"${durableDisabledAttr}>Approve for use</button>"
+          },
+          {
+            "line": 91,
+            "text": "<button class=\"btn btn-secondary\" type=\"button\" data-library-archive=\"${selectedAssetId}\" data-asset-id=\"${selectedRegistryAssetId}\"${durableDisabledAttr}>Archive asset</button>"
+          },
+          {
+            "line": 119,
+            "text": "<button class=\"btn btn-secondary library-danger-action\" type=\"button\" data-library-delete=\"${selectedAssetId}\" data-asset-id=\"${selectedRegistryAssetId}\" title=\"Soft-delete this asset after confirmation\"${durableDisabledAttr}>Soft-delete asset</button>"
+          }
+        ],
+        "confirmations": [
+          {
+            "line": 30,
+            "text": "? \"Actions update Library metadata only. They do not approve Governance, publish, or run workflows.\""
+          },
+          {
+            "line": 83,
+            "text": "<div class=\"library-panel-boundary-note\">Source marks and ready states guide downstream review. They are not Governance approval or publishing approval.</div>"
+          }
+        ],
+        "rendering": []
+      }
+    },
+    {
+      "file": "public/control-center/pages/content-studio-workspace.js",
+      "name": "content-studio-workspace.js",
+      "closed": false,
+      "category": "low",
+      "risk": 3.5,
+      "metrics": {
+        "lines": 2404,
+        "innerHTML": 1,
+        "directFetch": 0,
+        "apiImports": 1,
+        "destructiveWords": 30,
+        "confirmations": 66,
+        "routeOnly": 11,
+        "previewOnly": 350,
+        "localStorage": 4,
+        "timers": 0,
+        "eventHandlers": 14,
+        "escapeEvidence": 180
+      },
+      "keyHits": {
+        "authority": [
+          {
+            "line": 834,
+            "text": "action: \"Approve or request revision on the selected draft\","
+          },
+          {
+            "line": 841,
+            "text": "action: \"Send approved content to Media Studio\","
+          },
+          {
+            "line": 1169,
+            "text": "<h3>Brief -> Draft -> Version -> Review -> Approve -> Send</h3>"
+          },
+          {
+            "line": 1232,
+            "text": "<button id=\"contentSendMediaBtn\" class=\"btn btn-secondary\" type=\"button\">Send Design Brief to Media Studio</button>"
+          },
+          {
+            "line": 1233,
+            "text": "<button id=\"contentSendPublishingBtn\" class=\"btn btn-secondary\" type=\"button\">Send to Publishing</button>"
+          },
+          {
+            "line": 1234,
+            "text": "<button id=\"contentSendAiBtn\" class=\"btn btn-secondary\" type=\"button\">Open AI: Send Context to AI Workspace</button>"
+          },
+          {
+            "line": 1237,
+            "text": "${handoff ? `<div class=\"simple-banner\" style=\"margin-top:12px;\">Inbound handoff from ${escapeHtml(titleCase(handoff.sourcePage || \"workflow\"))} is available below.</div>` : \"\"}"
+          },
+          {
+            "line": 1401,
+            "text": "<button class=\"btn btn-secondary\" type=\"button\" data-content-version-action=\"approve\">Approve</button>"
+          },
+          {
+            "line": 1432,
+            "text": "<button class=\"btn btn-secondary\" type=\"button\" data-content-agent-ai=\"${escapeHtml(agent.id)}\">Send to AI Workspace</button>"
+          },
+          {
+            "line": 1447,
+            "text": "<div class=\"setup-kicker\">Workflow / AI Handoff</div>"
+          },
+          {
+            "line": 1452,
+            "text": "<div class=\"empty-box\">Run AI Command or Workflows and route output to Content Studio to prefill the composer.</div>"
+          },
+          {
+            "line": 1461,
+            "text": "<div class=\"setup-kicker\">Workflow / AI Handoff</div>"
+          },
+          {
+            "line": 1463,
+            "text": "<p class=\"content-copy\">Source: ${escapeHtml(titleCase(handoff.sourcePage || \"workflow\"))}</p>"
+          },
+          {
+            "line": 1801,
+            "text": "function sync() {"
+          },
+          {
+            "line": 1811,
+            "text": "sync();"
+          },
+          {
+            "line": 1875,
+            "text": "sync();"
+          },
+          {
+            "line": 1964,
+            "text": "sync();"
+          },
+          {
+            "line": 1980,
+            "text": "sync();"
+          },
+          {
+            "line": 2017,
+            "text": "sync();"
+          },
+          {
+            "line": 2031,
+            "text": "sync();"
+          }
+        ],
+        "confirmations": [
+          {
+            "line": 2,
+            "text": "createProjectApproval,"
+          },
+          {
+            "line": 5,
+            "text": "decideProjectApproval,"
+          },
+          {
+            "line": 8,
+            "text": "listProjectApprovals,"
+          },
+          {
+            "line": 115,
+            "text": "bestUse: \"Before approval or sending drafts to Media Studio or Publishing.\","
+          },
+          {
+            "line": 185,
+            "text": "if ([\"needs_review\", \"needs review\", \"review\", \"pending_approval\"].includes(normalized)) return \"needs_review\";"
+          },
+          {
+            "line": 320,
+            "text": "approvalStatus = \"draft\","
+          },
+          {
+            "line": 334,
+            "text": "approval_status: asString(approvalStatus || \"draft\"),"
+          },
+          {
+            "line": 352,
+            "text": "approvalStatus: firstText(raw.approval_status, \"draft\"),"
+          },
+          {
+            "line": 369,
+            "text": "approvalStatus: firstText(seed.approvalStatus, \"draft\"),"
+          },
+          {
+            "line": 472,
+            "text": "approvalStatus: firstText(raw.approval_status, \"draft\")"
+          },
+          {
+            "line": 493,
+            "text": "approval_status: asString(raw.approval_status || \"draft\"),"
+          },
+          {
+            "line": 497,
+            "text": "linked_approvals: asArray(raw.linked_approvals),"
+          },
+          {
+            "line": 539,
+            "text": "approvals: [],"
+          },
+          {
+            "line": 649,
+            "text": "approval_status: firstText(selected?.approval_status, \"draft\"),"
+          },
+          {
+            "line": 663,
+            "text": "approval_status: version.approval_status,"
+          },
+          {
+            "line": 753,
+            "text": "approvalStatus: firstText(selectedVersion.approval_status, payload.approval_status, \"draft\")"
+          },
+          {
+            "line": 781,
+            "text": "const [contentItems, tasks, approvals, handoffs, events, operations] = await Promise.all(["
+          },
+          {
+            "line": 784,
+            "text": "listProjectApprovals(projectName, 120),"
+          },
+          {
+            "line": 794,
+            "text": "session.approvals = asArray(approvals.items);"
+          },
+          {
+            "line": 1382,
+            "text": "<div class=\"content-data-item\"><span>Approval status</span><strong>${escapeHtml(titleCase(firstText(selected?.approval_status, \"draft\")))}</strong></div>"
+          }
+        ],
+        "rendering": [
+          {
+            "line": 2365,
+            "text": "root.innerHTML = `"
+          }
+        ]
+      }
+    },
+    {
+      "file": "public/control-center/pages/library/command-router.js",
+      "name": "command-router.js",
+      "closed": false,
+      "category": "low",
+      "risk": 2.1,
+      "metrics": {
+        "lines": 64,
+        "innerHTML": 0,
+        "directFetch": 0,
+        "apiImports": 0,
+        "destructiveWords": 3,
+        "confirmations": 0,
+        "routeOnly": 0,
+        "previewOnly": 0,
+        "localStorage": 0,
+        "timers": 0,
+        "eventHandlers": 0,
+        "escapeEvidence": 0
+      },
+      "keyHits": {
+        "authority": [
+          {
+            "line": 13,
+            "text": "ARCHIVE_ASSET: \"archive-asset\","
+          },
+          {
+            "line": 14,
+            "text": "DELETE_ASSET: \"delete-asset\","
+          },
+          {
+            "line": 15,
+            "text": "SEND_TO_AI: \"send-to-ai\""
+          }
+        ],
+        "confirmations": [],
+        "rendering": []
+      }
+    },
+    {
+      "file": "public/control-center/pages/home/render-sections.js",
+      "name": "render-sections.js",
+      "closed": false,
+      "category": "low",
+      "risk": 1.5,
+      "metrics": {
+        "lines": 156,
+        "innerHTML": 0,
+        "directFetch": 0,
+        "apiImports": 0,
+        "destructiveWords": 6,
+        "confirmations": 0,
+        "routeOnly": 0,
+        "previewOnly": 4,
+        "localStorage": 0,
+        "timers": 0,
+        "eventHandlers": 0,
+        "escapeEvidence": 34
+      },
+      "keyHits": {
+        "authority": [
+          {
+            "line": 139,
+            "text": "<p class=\"home-empty-note\">Home opens workspaces or prepares AI guidance only. It does not approve, publish, send, upload, delete, archive, or execute.</p>"
+          }
+        ],
+        "confirmations": [],
+        "rendering": []
+      }
+    },
+    {
+      "file": "public/control-center/pages/insights.js",
+      "name": "insights.js",
+      "closed": false,
+      "category": "low",
+      "risk": 1.5,
+      "metrics": {
+        "lines": 1520,
+        "innerHTML": 1,
+        "directFetch": 0,
+        "apiImports": 0,
+        "destructiveWords": 5,
+        "confirmations": 0,
+        "routeOnly": 13,
+        "previewOnly": 19,
+        "localStorage": 0,
+        "timers": 0,
+        "eventHandlers": 5,
+        "escapeEvidence": 115
+      },
+      "keyHits": {
+        "authority": [
+          {
+            "line": 48,
+            "text": "label: \"Paid Ads\","
+          },
+          {
+            "line": 1031,
+            "text": "eyebrow: \"Execute & Grow\","
+          },
+          {
+            "line": 1307,
+            "text": "Prioritized actions the operator can route safely into Campaign, Content, Ads, Publishing, or AI review."
+          },
+          {
+            "line": 1348,
+            "text": "<button class=\"btn btn-secondary\" type=\"button\" data-insights-route=\"ads-manager\">Open Ads Manager</button>"
+          }
+        ],
+        "confirmations": [],
+        "rendering": [
+          {
+            "line": 1130,
+            "text": "root.innerHTML = `"
+          }
+        ]
+      }
+    },
+    {
+      "file": "public/control-center/pages/library/ai-panel.js",
+      "name": "ai-panel.js",
+      "closed": false,
+      "category": "low",
+      "risk": 1.4,
+      "metrics": {
+        "lines": 123,
+        "innerHTML": 0,
+        "directFetch": 0,
+        "apiImports": 0,
+        "destructiveWords": 2,
+        "confirmations": 0,
+        "routeOnly": 0,
+        "previewOnly": 2,
+        "localStorage": 0,
+        "timers": 0,
+        "eventHandlers": 0,
+        "escapeEvidence": 0
+      },
+      "keyHits": {
+        "authority": [
+          {
+            "line": 89,
+            "text": "suggestedMove: \"Mark as source once validated, then approve for operating use.\""
+          },
+          {
+            "line": 97,
+            "text": "suggestedMove: \"Use Mark for review or Approve for use from the Actions panel after validation.\""
+          }
+        ],
+        "confirmations": [],
+        "rendering": []
+      }
+    },
+    {
+      "file": "public/control-center/pages/integrations/render.js",
+      "name": "render.js",
+      "closed": false,
+      "category": "low",
+      "risk": 1.2,
+      "metrics": {
+        "lines": 206,
+        "innerHTML": 0,
+        "directFetch": 0,
+        "apiImports": 0,
+        "destructiveWords": 2,
+        "confirmations": 0,
+        "routeOnly": 0,
+        "previewOnly": 0,
+        "localStorage": 0,
+        "timers": 0,
+        "eventHandlers": 0,
+        "escapeEvidence": 3
+      },
+      "keyHits": {
+        "authority": [
+          {
+            "line": 167,
+            "text": "No integration events yet. Run a connection test or sync to populate recent activity."
+          }
+        ],
+        "confirmations": [],
+        "rendering": []
+      }
+    },
+    {
+      "file": "public/control-center/pages/library/catalog-readiness.js",
+      "name": "catalog-readiness.js",
+      "closed": false,
+      "category": "low",
+      "risk": 0.7,
+      "metrics": {
+        "lines": 65,
+        "innerHTML": 0,
+        "directFetch": 0,
+        "apiImports": 0,
+        "destructiveWords": 1,
+        "confirmations": 0,
+        "routeOnly": 0,
+        "previewOnly": 0,
+        "localStorage": 0,
+        "timers": 0,
+        "eventHandlers": 0,
+        "escapeEvidence": 0
+      },
+      "keyHits": {
+        "authority": [
+          {
+            "line": 60,
+            "text": "label: \"Review and approve Library assets\","
+          }
+        ],
+        "confirmations": [],
+        "rendering": []
+      }
+    },
+    {
+      "file": "public/control-center/pages/integrations/state.js",
+      "name": "state.js",
+      "closed": false,
+      "category": "low",
+      "risk": 0.6,
+      "metrics": {
+        "lines": 93,
+        "innerHTML": 0,
+        "directFetch": 0,
+        "apiImports": 0,
+        "destructiveWords": 1,
+        "confirmations": 0,
+        "routeOnly": 0,
+        "previewOnly": 10,
+        "localStorage": 0,
+        "timers": 0,
+        "eventHandlers": 0,
+        "escapeEvidence": 1
+      },
+      "keyHits": {
+        "authority": [
+          {
+            "line": 82,
+            "text": "delete session.drafts[integrationId];"
+          }
+        ],
+        "confirmations": [],
+        "rendering": []
+      }
+    },
+    {
+      "file": "public/control-center/pages/integrations/layout.js",
+      "name": "layout.js",
+      "closed": false,
+      "category": "low",
+      "risk": 0.5,
+      "metrics": {
+        "lines": 187,
+        "innerHTML": 0,
+        "directFetch": 0,
+        "apiImports": 0,
+        "destructiveWords": 1,
+        "confirmations": 0,
+        "routeOnly": 0,
+        "previewOnly": 0,
+        "localStorage": 0,
+        "timers": 0,
+        "eventHandlers": 0,
+        "escapeEvidence": 3
+      },
+      "keyHits": {
+        "authority": [
+          {
+            "line": 114,
+            "text": "Ready for test, sync, and provider-backed actions."
+          }
+        ],
+        "confirmations": [],
+        "rendering": []
+      }
+    },
+    {
+      "file": "public/control-center/pages/library/listener-lifecycle.js",
+      "name": "listener-lifecycle.js",
+      "closed": false,
+      "category": "low",
+      "risk": 0.3,
+      "metrics": {
+        "lines": 63,
+        "innerHTML": 0,
+        "directFetch": 0,
+        "apiImports": 0,
+        "destructiveWords": 0,
+        "confirmations": 0,
+        "routeOnly": 0,
+        "previewOnly": 0,
+        "localStorage": 0,
+        "timers": 0,
+        "eventHandlers": 1,
+        "escapeEvidence": 0
+      },
+      "keyHits": {
+        "authority": [],
+        "confirmations": [],
+        "rendering": []
+      }
+    },
+    {
+      "file": "public/control-center/pages/publishing/publishing-payloads.js",
+      "name": "publishing-payloads.js",
+      "closed": false,
+      "category": "low",
+      "risk": 0.3,
+      "metrics": {
+        "lines": 119,
+        "innerHTML": 0,
+        "directFetch": 0,
+        "apiImports": 0,
+        "destructiveWords": 4,
+        "confirmations": 7,
+        "routeOnly": 0,
+        "previewOnly": 24,
+        "localStorage": 0,
+        "timers": 0,
+        "eventHandlers": 0,
+        "escapeEvidence": 6
+      },
+      "keyHits": {
+        "authority": [
+          {
+            "line": 63,
+            "text": "title: firstText(output.title, payload.workflow_title, draftContext.lastResponseTitle, \"Workflow output\"),"
+          },
+          {
+            "line": 113,
+            "text": "`Publish window: ${session.form.publishDate ? `${session.form.publishDate} ${session.form.publishTime || \"09:00\"}` : \"not scheduled\"}`,"
+          },
+          {
+            "line": 115,
+            "text": "handoffSummary ? `Workflow handoff: ${handoffSummary.title} - ${summarizeText(handoffSummary.summary)}` : \"Workflow handoff: none\","
+          }
+        ],
+        "confirmations": [
+          {
+            "line": 82,
+            "text": "approval_status: session.form.approvalStatus,"
+          },
+          {
+            "line": 98,
+            "text": "approvalStatus: session.form.approvalStatus,"
+          },
+          {
+            "line": 114,
+            "text": "`Approval: ${titleCase(session.form.approvalStatus || selectedItem?.approvalStatus || \"draft\")}`,"
+          }
+        ],
+        "rendering": []
+      }
+    },
+    {
+      "file": "public/control-center/pages/governance.js",
+      "name": "governance.js",
+      "closed": false,
+      "category": "low",
+      "risk": 0,
+      "metrics": {
+        "lines": 1490,
+        "innerHTML": 2,
+        "directFetch": 0,
+        "apiImports": 1,
+        "destructiveWords": 43,
+        "confirmations": 494,
+        "routeOnly": 2,
+        "previewOnly": 26,
+        "localStorage": 0,
+        "timers": 0,
+        "eventHandlers": 7,
+        "escapeEvidence": 209
+      },
+      "keyHits": {
+        "authority": [
+          {
+            "line": 187,
+            "text": "if ([\"approval\", \"approved\", \"approve\"].includes(normalized)) {"
+          },
+          {
+            "line": 188,
+            "text": "return \"Submit reviewed approval decision? This records a backend Governance decision and may affect downstream readiness where policy gates apply. It does not publish, send, or execute directly.\";"
+          },
+          {
+            "line": 196,
+            "text": "return \"Submit reviewed Governance decision? This records a backend reviewed decision and may update linked queues or review state. It does not publish or execute directly.\";"
+          },
+          {
+            "line": 199,
+            "text": "return \"Submit reviewed Governance decision? This records a backend reviewed decision and may update linked queues or review state. It does not publish or execute directly.\";"
+          },
+          {
+            "line": 326,
+            "text": "<div class=\"workflow-history-list\">"
+          },
+          {
+            "line": 328,
+            "text": "<div class=\"workflow-history-item\">"
+          },
+          {
+            "line": 478,
+            "text": "<label class=\"settings-toggle\" for=\"governance-approval-before-publish\">"
+          },
+          {
+            "line": 480,
+            "text": "<input id=\"governance-approval-before-publish\" type=\"checkbox\" class=\"settings-toggle-input\" data-governance-policy=\"approval_before_publish\" ${rules.approval_before_publish ? \"checked\" : \"\"} />"
+          },
+          {
+            "line": 493,
+            "text": "<label class=\"settings-toggle\" for=\"governance-auto-escalate\">"
+          },
+          {
+            "line": 494,
+            "text": "<span class=\"settings-field-label\">Auto-escalate critical risk</span>"
+          },
+          {
+            "line": 495,
+            "text": "<input id=\"governance-auto-escalate\" type=\"checkbox\" class=\"settings-toggle-input\" data-governance-policy=\"auto_escalate_critical_risk\" ${rules.auto_escalate_critical_risk ? \"checked\" : \"\"} />"
+          },
+          {
+            "line": 587,
+            "text": "const publish = asArray(sections.publish_guardrails).map((item) => {"
+          },
+          {
+            "line": 591,
+            "text": "queue_kind: \"publish\","
+          },
+          {
+            "line": 592,
+            "text": "selected_key: `publish:${asString(item.entity_id || item.id)}`,"
+          },
+          {
+            "line": 593,
+            "text": "queue_title: item.title || \"Publish guardrail\","
+          },
+          {
+            "line": 594,
+            "text": "queue_summary: asArray(item.publish_guardrails).map((flag) => flag.message).join(\" | \") || \"No publish blockers detected.\","
+          },
+          {
+            "line": 617,
+            "text": "return [...approvals, ...claims, ...brand, ...publish, ...escalations];"
+          },
+          {
+            "line": 627,
+            "text": "prompt: `Summarize the current governance state for ${projectLabel}. Cover policy pressure, pending approvals, risky claims, brand safety issues, publish blockers, and the next governance priority.`"
+          },
+          {
+            "line": 674,
+            "text": "let nextBestAction = \"Run a governance AI summary, then keep policy owners and rules aligned with live operations.\";"
+          },
+          {
+            "line": 682,
+            "text": "nextBestAction = \"Review publish guardrails to ensure release paths remain compliant and safe.\";"
+          }
+        ],
+        "confirmations": [
+          {
+            "line": 1,
+            "text": "// --- Governance Evidence Summary & Intake Patch ---"
+          },
+          {
+            "line": 7,
+            "text": "function collectGovernanceEvidence({ selectedItem, projectData, governanceData }) {"
+          },
+          {
+            "line": 23,
+            "text": "const sources = [selectedItem, projectData, governanceData];"
+          },
+          {
+            "line": 77,
+            "text": "function renderGovernanceEvidenceSummary({ selectedItem, projectData, governanceData, intakeContext, escapeHtml }) {"
+          },
+          {
+            "line": 78,
+            "text": "const evidence = collectGovernanceEvidence({ selectedItem, projectData, governanceData });"
+          },
+          {
+            "line": 81,
+            "text": "<div class=\"governance-evidence-summary\">"
+          },
+          {
+            "line": 82,
+            "text": "<div class=\"governance-evidence-summary-header\">Evidence Summary</div>"
+          },
+          {
+            "line": 83,
+            "text": "<div class=\"governance-evidence-cards\">"
+          },
+          {
+            "line": 84,
+            "text": "<div class=\"governance-evidence-card${evidence.source_of_truth.length ? '' : ' is-missing'}\">"
+          },
+          {
+            "line": 85,
+            "text": "<span class=\"governance-evidence-label\">Source of Truth</span>"
+          },
+          {
+            "line": 86,
+            "text": "<span class=\"governance-evidence-value\">${evidence.source_of_truth.length ? escapeHtml(asString(evidence.source_of_truth[0])) : \"Missing\"}</span>"
+          },
+          {
+            "line": 88,
+            "text": "<div class=\"governance-evidence-card${evidence.legal.length ? '' : ' is-missing'}\">"
+          },
+          {
+            "line": 89,
+            "text": "<span class=\"governance-evidence-label\">Legal</span>"
+          },
+          {
+            "line": 90,
+            "text": "<span class=\"governance-evidence-value\">${evidence.legal.length ? escapeHtml(asString(evidence.legal[0])) : \"Missing\"}</span>"
+          },
+          {
+            "line": 92,
+            "text": "<div class=\"governance-evidence-card${evidence.pricing.length ? '' : ' is-missing'}\">"
+          },
+          {
+            "line": 93,
+            "text": "<span class=\"governance-evidence-label\">Pricing</span>"
+          },
+          {
+            "line": 94,
+            "text": "<span class=\"governance-evidence-value\">${evidence.pricing.length ? escapeHtml(asString(evidence.pricing[0])) : \"Missing\"}</span>"
+          },
+          {
+            "line": 96,
+            "text": "<div class=\"governance-evidence-card${evidence.certificate.length ? '' : ' is-missing'}\">"
+          },
+          {
+            "line": 97,
+            "text": "<span class=\"governance-evidence-label\">Certificate/Proof</span>"
+          },
+          {
+            "line": 98,
+            "text": "<span class=\"governance-evidence-value\">${evidence.certificate.length ? escapeHtml(asString(evidence.certificate[0])) : evidence.proof.length ? escapeHtml(asString(evidence.proof[0])) : \"Missing\"}</span>"
+          }
+        ],
+        "rendering": [
+          {
+            "line": 1305,
+            "text": "root.innerHTML = renderPage(projectName, session, context.escapeHtml);"
+          },
+          {
+            "line": 1478,
+            "text": "root.innerHTML = renderPage(projectName, session, context.escapeHtml);"
+          }
+        ]
+      }
+    },
+    {
+      "file": "public/control-center/pages/integrations/diagnostics.js",
+      "name": "diagnostics.js",
+      "closed": false,
+      "category": "low",
+      "risk": 0,
+      "metrics": {
+        "lines": 159,
+        "innerHTML": 0,
+        "directFetch": 0,
+        "apiImports": 0,
+        "destructiveWords": 0,
+        "confirmations": 0,
+        "routeOnly": 0,
+        "previewOnly": 0,
+        "localStorage": 0,
+        "timers": 0,
+        "eventHandlers": 0,
+        "escapeEvidence": 6
+      },
+      "keyHits": {
+        "authority": [],
+        "confirmations": [],
+        "rendering": []
+      }
+    },
+    {
+      "file": "public/control-center/pages/integrations/utils.js",
+      "name": "utils.js",
+      "closed": false,
+      "category": "low",
+      "risk": 0,
+      "metrics": {
+        "lines": 114,
+        "innerHTML": 0,
+        "directFetch": 0,
+        "apiImports": 0,
+        "destructiveWords": 0,
+        "confirmations": 0,
+        "routeOnly": 0,
+        "previewOnly": 0,
+        "localStorage": 0,
+        "timers": 0,
+        "eventHandlers": 0,
+        "escapeEvidence": 2
+      },
+      "keyHits": {
+        "authority": [],
+        "confirmations": [],
+        "rendering": []
+      }
+    },
+    {
+      "file": "public/control-center/pages/library/projection-adapter.js",
+      "name": "projection-adapter.js",
+      "closed": false,
+      "category": "low",
+      "risk": 0,
+      "metrics": {
+        "lines": 21,
+        "innerHTML": 0,
+        "directFetch": 0,
+        "apiImports": 0,
+        "destructiveWords": 0,
+        "confirmations": 0,
+        "routeOnly": 0,
+        "previewOnly": 1,
+        "localStorage": 0,
+        "timers": 0,
+        "eventHandlers": 0,
+        "escapeEvidence": 0
+      },
+      "keyHits": {
+        "authority": [],
+        "confirmations": [],
+        "rendering": []
+      }
+    },
+    {
+      "file": "public/control-center/pages/library/session-store.js",
+      "name": "session-store.js",
+      "closed": false,
+      "category": "low",
+      "risk": 0,
+      "metrics": {
+        "lines": 45,
+        "innerHTML": 0,
+        "directFetch": 0,
+        "apiImports": 0,
+        "destructiveWords": 0,
+        "confirmations": 0,
+        "routeOnly": 0,
+        "previewOnly": 0,
+        "localStorage": 0,
+        "timers": 0,
+        "eventHandlers": 0,
+        "escapeEvidence": 0
+      },
+      "keyHits": {
+        "authority": [],
+        "confirmations": [],
+        "rendering": []
+      }
+    }
+  ],
+  "cssReports": [
+    {
+      "file": "public/control-center/styles/12-pages.css",
+      "lines": 10216,
+      "important": 73,
+      "pageBlocks": 1339,
+      "duplicateLike": 827
+    },
+    {
+      "file": "public/control-center/styles/14-page-standard.css",
+      "lines": 2946,
+      "important": 18,
+      "pageBlocks": 459,
+      "duplicateLike": 216
+    },
+    {
+      "file": "public/control-center/styles/13-home-executive.css",
+      "lines": 1246,
+      "important": 55,
+      "pageBlocks": 206,
+      "duplicateLike": 201
+    },
+    {
+      "file": "public/control-center/styles/09-operations-centers.css",
+      "lines": 1694,
+      "important": 7,
+      "pageBlocks": 1,
+      "duplicateLike": 0
+    },
+    {
+      "file": "public/control-center/styles/08-components-foundation.css",
+      "lines": 1671,
+      "important": 2,
+      "pageBlocks": 49,
+      "duplicateLike": 45
+    },
+    {
+      "file": "public/control-center/styles/15-clean-operating-layer.css",
+      "lines": 1166,
+      "important": 0,
+      "pageBlocks": 0,
+      "duplicateLike": 0
+    },
+    {
+      "file": "public/control-center/styles/mhos-executive-surface-primitives.css",
+      "lines": 480,
+      "important": 2,
+      "pageBlocks": 1,
+      "duplicateLike": 0
+    },
+    {
+      "file": "public/control-center/styles/02-layer-system.css",
+      "lines": 258,
+      "important": 9,
+      "pageBlocks": 0,
+      "duplicateLike": 0
+    },
+    {
+      "file": "public/control-center/styles/04-command-layer.css",
+      "lines": 148,
+      "important": 9,
+      "pageBlocks": 0,
+      "duplicateLike": 0
+    },
+    {
+      "file": "public/control-center/styles/05-ai-layer.css",
+      "lines": 197,
+      "important": 4,
+      "pageBlocks": 0,
+      "duplicateLike": 0
+    },
+    {
+      "file": "public/control-center/styles/07-sidebar.css",
+      "lines": 194,
+      "important": 2,
+      "pageBlocks": 0,
+      "duplicateLike": 0
+    },
+    {
+      "file": "public/control-center/styles/10-topbar-canonical.css",
+      "lines": 170,
+      "important": 4,
+      "pageBlocks": 0,
+      "duplicateLike": 0
+    },
+    {
+      "file": "public/control-center/styles/00-tokens.css",
+      "lines": 180,
+      "important": 0,
+      "pageBlocks": 0,
+      "duplicateLike": 0
+    },
+    {
+      "file": "public/control-center/styles/mhos-workflow-primitives.css",
+      "lines": 147,
+      "important": 0,
+      "pageBlocks": 0,
+      "duplicateLike": 0
+    },
+    {
+      "file": "public/control-center/styles/mhos-action-primitives.css",
+      "lines": 114,
+      "important": 0,
+      "pageBlocks": 0,
+      "duplicateLike": 0
+    },
+    {
+      "file": "public/control-center/styles/03-app-shell.css",
+      "lines": 104,
+      "important": 0,
+      "pageBlocks": 0,
+      "duplicateLike": 0
+    },
+    {
+      "file": "public/control-center/styles/mhos-context-primitives.css",
+      "lines": 104,
+      "important": 0,
+      "pageBlocks": 0,
+      "duplicateLike": 0
+    },
+    {
+      "file": "public/control-center/styles/01-reset.css",
+      "lines": 41,
+      "important": 1,
+      "pageBlocks": 0,
+      "duplicateLike": 0
+    },
+    {
+      "file": "public/control-center/styles/integrations/cards.css",
+      "lines": 1,
+      "important": 0,
+      "pageBlocks": 0,
+      "duplicateLike": 0
+    },
+    {
+      "file": "public/control-center/styles/integrations/drawer.css",
+      "lines": 1,
+      "important": 0,
+      "pageBlocks": 0,
+      "duplicateLike": 0
+    },
+    {
+      "file": "public/control-center/styles/integrations/forms.css",
+      "lines": 1,
+      "important": 0,
+      "pageBlocks": 0,
+      "duplicateLike": 0
+    },
+    {
+      "file": "public/control-center/styles/integrations/grid.css",
+      "lines": 1,
+      "important": 0,
+      "pageBlocks": 0,
+      "duplicateLike": 0
+    },
+    {
+      "file": "public/control-center/styles/integrations/layout.css",
+      "lines": 1,
+      "important": 0,
+      "pageBlocks": 0,
+      "duplicateLike": 0
+    },
+    {
+      "file": "public/control-center/styles/integrations/responsive.css",
+      "lines": 1,
+      "important": 0,
+      "pageBlocks": 0,
+      "duplicateLike": 0
+    }
+  ]
+}

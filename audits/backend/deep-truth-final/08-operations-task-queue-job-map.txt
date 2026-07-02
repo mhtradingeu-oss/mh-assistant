@@ -1,0 +1,1221 @@
+runtime/orchestrator-service/server.js:23:const { createExecutionJobBridge } = require('./lib/execution/execution-job-bridge');
+runtime/orchestrator-service/server.js:118:} = require('./lib/media/native/orchestrator/job-dispatch-orchestrator');
+runtime/orchestrator-service/server.js:122:} = require('./lib/customer-operations/customer-operations-runtime');
+runtime/orchestrator-service/server.js:169:const customerCenterProjection = require('./lib/customer-operations/projections/customer-center-projection');
+runtime/orchestrator-service/server.js:214:  /^\/task\/?$/i,
+runtime/orchestrator-service/server.js:231:  /^\/schedule_execution_job\/?$/i,
+runtime/orchestrator-service/server.js:313:  /^\/scheduler_queue\/?$/i,
+runtime/orchestrator-service/server.js:456:  const mediaJobId = asString(req?.body?.media_job_id || req?.body?.id || '');
+runtime/orchestrator-service/server.js:468:      title: asString(req?.body?.title || `${requestType} media job`),
+runtime/orchestrator-service/server.js:501:      media_job: mediaJob,
+runtime/orchestrator-service/server.js:502:      operations: buildProjectOperationsPayload(projectName)
+runtime/orchestrator-service/server.js:775:  DRAFT_QUEUE: 'email_draft_queue',
+runtime/orchestrator-service/server.js:776:  MEDIA_QUEUE: 'email_media_queue'
+runtime/orchestrator-service/server.js:1358:    canonicalLiveMediaQueueDir: path.join(EXECUTION_DIR, 'projects', safeProject, 'media', 'queue'),
+runtime/orchestrator-service/server.js:1359:    legacyLiveMediaQueueDir: path.join(EXECUTION_DIR, safeProject, 'media', 'queue')
+runtime/orchestrator-service/server.js:1402:      relativePath: 'email-queue.json',
+runtime/orchestrator-service/server.js:1404:      requestedFile: 'content/email/email-queue.json',
+runtime/orchestrator-service/server.js:1405:      pathContract: 'execution/projects/<project>/content/email/email-queue.json -> execution/<project>/content/email/email-queue.json'
+runtime/orchestrator-service/server.js:1410:      relativePath: 'email-image-queue.json',
+runtime/orchestrator-service/server.js:1412:      requestedFile: 'media/queue/email-image-queue.json',
+runtime/orchestrator-service/server.js:1413:      pathContract: 'execution/projects/<project>/media/queue/email-image-queue.json -> execution/<project>/media/queue/email-image-queue.json'
+runtime/orchestrator-service/server.js:1495:function readLiveEmailQueue(projectName, requestedIdentifier = 'email-draft-queue') {
+runtime/orchestrator-service/server.js:1499:function writeLiveEmailQueue(projectName, queue = []) {
+runtime/orchestrator-service/server.js:1500:  return writeEmailArtifactArray(requireQueueProjectName(projectName), EMAIL_ARTIFACT_TYPES.DRAFT_QUEUE, queue);
+runtime/orchestrator-service/server.js:1503:function readLiveEmailMediaQueue(projectName, requestedIdentifier = 'email-media-queue') {
+runtime/orchestrator-service/server.js:1507:function writeLiveEmailMediaQueue(projectName, queue = []) {
+runtime/orchestrator-service/server.js:1508:  return writeEmailArtifactArray(requireQueueProjectName(projectName), EMAIL_ARTIFACT_TYPES.MEDIA_QUEUE, queue);
+runtime/orchestrator-service/server.js:1515:function getLegacyContentQueuePath(projectName, queueType) {
+runtime/orchestrator-service/server.js:1516:  const queueMap = {
+runtime/orchestrator-service/server.js:1517:    ads: path.join('content', 'ads', 'ad-queue.json'),
+runtime/orchestrator-service/server.js:1518:    social: path.join('content', 'social', 'post-queue.json'),
+runtime/orchestrator-service/server.js:1519:    blog: path.join('content', 'blog', 'blog-queue.json'),
+runtime/orchestrator-service/server.js:1520:    reel: path.join('content', 'campaigns', 'reel-brief-queue.json'),
+runtime/orchestrator-service/server.js:1521:    tasks: path.join('tasks', 'task-board.json')
+runtime/orchestrator-service/server.js:1523:  const relativePath = queueMap[queueType];
+runtime/orchestrator-service/server.js:1526:    throw new Error(`Unknown content queue type: ${queueType}`);
+runtime/orchestrator-service/server.js:1529:  const queuePath = path.join(getLegacyExecutionRoot(projectName), relativePath);
+runtime/orchestrator-service/server.js:1530:  ensureJsonFile(queuePath, []);
+runtime/orchestrator-service/server.js:1531:  return queuePath;
+runtime/orchestrator-service/server.js:1534:function readLegacyContentQueue(projectName, queueType) {
+runtime/orchestrator-service/server.js:1535:  return readJsonFile(getLegacyContentQueuePath(projectName, queueType), []);
+runtime/orchestrator-service/server.js:1538:function writeLegacyContentQueue(projectName, queueType, queue = []) {
+runtime/orchestrator-service/server.js:1539:  writeJsonFile(getLegacyContentQueuePath(projectName, queueType), Array.isArray(queue) ? queue : []);
+runtime/orchestrator-service/server.js:1555:  const queuePath = path.join(getProjectMediaDir(projectName), 'queue', 'blog-image-queue.json');
+runtime/orchestrator-service/server.js:1556:  ensureJsonFile(queuePath, []);
+runtime/orchestrator-service/server.js:1557:  return queuePath;
+runtime/orchestrator-service/server.js:3937:  const jobId = `sched_${Date.now()}`;
+runtime/orchestrator-service/server.js:3938:  const job = {
+runtime/orchestrator-service/server.js:3939:    job_id: jobId,
+runtime/orchestrator-service/server.js:3950:  const filePath = path.join(paths.legacySchedulerDir, `${jobId}.json`);
+runtime/orchestrator-service/server.js:3954:    artifactType: 'publishing_scheduler_job',
+runtime/orchestrator-service/server.js:3955:    identifier: jobId,
+runtime/orchestrator-service/server.js:3957:    data: job
+runtime/orchestrator-service/server.js:3961:    ...job,
+runtime/orchestrator-service/server.js:3971:  if (['queued', 'queue', 'scheduled', 'pending', 'pending_publish'].includes(normalized)) return 'scheduled';
+runtime/orchestrator-service/server.js:4114:function getPublishingJobFilePath(projectName, jobId) {
+runtime/orchestrator-service/server.js:4116:  return path.join(paths.legacySchedulerDir, `${String(jobId || '').trim()}.json`);
+runtime/orchestrator-service/server.js:4119:function hydrateScheduledJobRecord(projectName, job) {
+runtime/orchestrator-service/server.js:4120:  const rawJob = job && typeof job === 'object' ? { ...job } : {};
+runtime/orchestrator-service/server.js:4145:    job_id: String(rawJob.job_id || '').trim(),
+runtime/orchestrator-service/server.js:4167:function saveScheduledJobRecord(projectName, job) {
+runtime/orchestrator-service/server.js:4168:  const hydrated = hydrateScheduledJobRecord(projectName, job);
+runtime/orchestrator-service/server.js:4169:  const filePath = getPublishingJobFilePath(projectName, hydrated.job_id);
+runtime/orchestrator-service/server.js:4176:    artifactType: 'publishing_scheduler_job',
+runtime/orchestrator-service/server.js:4177:    identifier: hydrated.job_id,
+runtime/orchestrator-service/server.js:4222:  const requestedJobId = String(input.job_id || '').trim().replace(/[^a-z0-9_-]/gi, '');
+runtime/orchestrator-service/server.js:4228:    throw new Error('Scheduled job not found');
+runtime/orchestrator-service/server.js:4277:  const jobId = hasExisting ? existing.job_id : (requestedJobId || `sched_${Date.now()}`);
+runtime/orchestrator-service/server.js:4282:    job_id: jobId,
+runtime/orchestrator-service/server.js:4309:    requestedIdentifier: 'scheduled-jobs-list',
+runtime/orchestrator-service/server.js:4327:function updateScheduledJobRecord(projectName, jobId, updates = {}) {
+runtime/orchestrator-service/server.js:4330:    job_id: jobId
+runtime/orchestrator-service/server.js:4336:function updateScheduledJobStatus(projectName, jobId, status) {
+runtime/orchestrator-service/server.js:4338:    jobId,
+runtime/orchestrator-service/server.js:4341:  return updateScheduledJobRecord(projectName, jobId, {
+runtime/orchestrator-service/server.js:4541:  syncPublishingJob(safeProject, job, result);
+runtime/orchestrator-service/server.js:4729:  const jobsDir = path.join(baseDir, 'jobs');
+runtime/orchestrator-service/server.js:4732:  const legacyJobsDir = path.join(legacyBaseDir, 'jobs');
+runtime/orchestrator-service/server.js:4737:  ensureDir(jobsDir);
+runtime/orchestrator-service/server.js:4747:    jobsDir,
+runtime/orchestrator-service/server.js:4758:  const jobsDir = resolveExecutionReadCandidate({
+runtime/orchestrator-service/server.js:4761:    relativePath: 'jobs',
+runtime/orchestrator-service/server.js:4764:    requestedIdentifier: 'latest-generation-job',
+runtime/orchestrator-service/server.js:4765:    requestedFile: 'generated/jobs/*.json'
+runtime/orchestrator-service/server.js:4768:  const files = fs.readdirSync(jobsDir)
+runtime/orchestrator-service/server.js:4774:    throw new Error('No generation jobs found');
+runtime/orchestrator-service/server.js:4777:  const latestPath = path.join(jobsDir, files[0]);
+runtime/orchestrator-service/server.js:4781:function buildRenderRequestFromJob(projectName, job) {
+runtime/orchestrator-service/server.js:4785:  const outputPath = job.suggested_output_path ||
+runtime/orchestrator-service/server.js:4786:    path.join(paths.legacyOutputsDir, `${renderId}_${job.asset_type}.png`);
+runtime/orchestrator-service/server.js:4791:    job_id: job.job_id,
+runtime/orchestrator-service/server.js:4792:    asset_type: job.asset_type,
+runtime/orchestrator-service/server.js:4793:    goal: job.goal,
+runtime/orchestrator-service/server.js:4797:    source_of_truth: job.source_of_truth,
+runtime/orchestrator-service/server.js:4798:    guardrails: job.guardrails,
+runtime/orchestrator-service/server.js:4799:    allowed_transformations: job.allowed_transformations,
+runtime/orchestrator-service/server.js:4800:    final_generation_prompt: job.final_generation_prompt,
+runtime/orchestrator-service/server.js:4806:  const job = getLatestGenerationJob(projectName);
+runtime/orchestrator-service/server.js:4807:  const request = buildRenderRequestFromJob(projectName, job);
+runtime/orchestrator-service/server.js:4931:  const jobsDir = path.join(baseDir, 'jobs');
+runtime/orchestrator-service/server.js:4933:  const legacyJobsDir = path.join(legacyBaseDir, 'jobs');
+runtime/orchestrator-service/server.js:4937:  ensureDir(jobsDir);
+runtime/orchestrator-service/server.js:4945:    jobsDir,
+runtime/orchestrator-service/server.js:5031:  const jobId = `gen_${Date.now()}`;
+runtime/orchestrator-service/server.js:5032:  const outputFilename = `${jobId}_${assetType}.json`;
+runtime/orchestrator-service/server.js:5035:  const job = {
+runtime/orchestrator-service/server.js:5036:    job_id: jobId,
+runtime/orchestrator-service/server.js:5049:    suggested_output_path: path.join(outputPaths.legacyOutputsDir, `${jobId}_${assetType}.png`)
+runtime/orchestrator-service/server.js:5055:    artifactType: 'generation_job_record',
+runtime/orchestrator-service/server.js:5056:    identifier: jobId,
+runtime/orchestrator-service/server.js:5058:    data: job
+runtime/orchestrator-service/server.js:5061:  return job;
+runtime/orchestrator-service/server.js:5541:    operations: null,
+runtime/orchestrator-service/server.js:5573:    payload.errors.operations = message;
+runtime/orchestrator-service/server.js:5583:    operations: buildProjectOperationsPayload
+runtime/orchestrator-service/server.js:5639:      route: '/task',
+runtime/orchestrator-service/server.js:5981:  if (text.includes('jojoba')) enrichment.ingredients.push('jojoba oil');
+runtime/orchestrator-service/server.js:6033:function selectAgent(taskType) {
+runtime/orchestrator-service/server.js:6034:  switch (taskType) {
+runtime/orchestrator-service/server.js:6054:  const taskId = `task_${Date.now()}`;
+runtime/orchestrator-service/server.js:6056:  const taskType = detectTaskType(message);
+runtime/orchestrator-service/server.js:6058:  const agent = selectAgent(taskType);
+runtime/orchestrator-service/server.js:6080:    task_id: taskId,
+runtime/orchestrator-service/server.js:6085:    task_type: taskType,
+runtime/orchestrator-service/server.js:6093:      summary: `Task classified as ${taskType} for project ${project}.`,
+runtime/orchestrator-service/server.js:6109:    task_id: taskId,
+runtime/orchestrator-service/server.js:6114:    task_type: taskType,
+runtime/orchestrator-service/server.js:8464:  const queue = [rootDir];
+runtime/orchestrator-service/server.js:8467:  while (queue.length) {
+runtime/orchestrator-service/server.js:8468:    const current = queue.shift();
+runtime/orchestrator-service/server.js:8475:          queue.push(fullPath);
+runtime/orchestrator-service/server.js:9294:app.post('/task', (req, res) => {
+runtime/orchestrator-service/server.js:9305:    const tasks = readLegacyContentQueue(projectName, 'tasks');
+runtime/orchestrator-service/server.js:9307:    const pending = tasks.filter(t => t.status === 'pending');
+runtime/orchestrator-service/server.js:9311:      today_tasks: pending.slice(0, 5)
+runtime/orchestrator-service/server.js:9321:    const tasks = readLegacyContentQueue(projectName, 'tasks');
+runtime/orchestrator-service/server.js:9323:    const next = tasks.find(t => t.status === 'pending');
+runtime/orchestrator-service/server.js:9327:      next_task: next || null
+runtime/orchestrator-service/server.js:10797:      error: error.message || 'Failed to build project operations payload'
+runtime/orchestrator-service/server.js:10802:app.get('/media-manager/project/:project/operations', handleGetProjectOperations);
+runtime/orchestrator-service/server.js:10803:app.get('/public/media-manager/project/:project/operations', handleGetProjectOperations);
+runtime/orchestrator-service/server.js:10810:      task_center: snapshot.task_center || {}
+runtime/orchestrator-service/server.js:10814:      error: error.message || 'Failed to build task center payload'
+runtime/orchestrator-service/server.js:10824:      queue_center: snapshot.queue_center || {}
+runtime/orchestrator-service/server.js:10828:      error: error.message || 'Failed to build queue center payload'
+runtime/orchestrator-service/server.js:10838:      job_monitor: snapshot.job_monitor || {}
+runtime/orchestrator-service/server.js:10842:      error: error.message || 'Failed to build job monitor payload'
+runtime/orchestrator-service/server.js:10852:      notification_center: snapshot.notification_center || {}
+runtime/orchestrator-service/server.js:10856:      error: error.message || 'Failed to build notification center payload'
+runtime/orchestrator-service/server.js:10861:app.get('/media-manager/project/:project/task-center', handleGetTaskCenter);
+runtime/orchestrator-service/server.js:10862:app.get('/public/media-manager/project/:project/task-center', handleGetTaskCenter);
+runtime/orchestrator-service/server.js:10863:app.get('/media-manager/project/:project/queue-center', handleGetQueueCenter);
+runtime/orchestrator-service/server.js:10864:app.get('/public/media-manager/project/:project/queue-center', handleGetQueueCenter);
+runtime/orchestrator-service/server.js:10865:app.get('/media-manager/project/:project/job-monitor', handleGetJobMonitor);
+runtime/orchestrator-service/server.js:10866:app.get('/public/media-manager/project/:project/job-monitor', handleGetJobMonitor);
+runtime/orchestrator-service/server.js:10867:app.get('/media-manager/project/:project/notification-center', handleGetNotificationCenter);
+runtime/orchestrator-service/server.js:10868:app.get('/public/media-manager/project/:project/notification-center', handleGetNotificationCenter);
+runtime/orchestrator-service/server.js:10877:app.get('/media-manager/project/:project/operations/schema', handleGetOperationsSchema);
+runtime/orchestrator-service/server.js:10878:app.get('/public/media-manager/project/:project/operations/schema', handleGetOperationsSchema);
+runtime/orchestrator-service/server.js:10931:      operations: buildProjectOperationsPayload(req.params.project)
+runtime/orchestrator-service/server.js:10996:      operations: buildProjectOperationsPayload(req.params.project)
+runtime/orchestrator-service/server.js:11052:      error: error.message || 'Failed to list media jobs'
+runtime/orchestrator-service/server.js:11061:      media_job: mediaJob,
+runtime/orchestrator-service/server.js:11062:      operations: buildProjectOperationsPayload(req.params.project)
+runtime/orchestrator-service/server.js:11066:      error: error.message || 'Failed to save media job'
+runtime/orchestrator-service/server.js:11075:      return res.status(404).json({ error: 'Media job not found' });
+runtime/orchestrator-service/server.js:11077:    return res.json({ media_job: mediaJob });
+runtime/orchestrator-service/server.js:11080:      error: error.message || 'Failed to load media job'
+runtime/orchestrator-service/server.js:11085:app.get('/media-manager/project/:project/media-jobs', handleListMediaJobs);
+runtime/orchestrator-service/server.js:11086:app.get('/public/media-manager/project/:project/media-jobs', handleListMediaJobs);
+runtime/orchestrator-service/server.js:11087:app.post('/media-manager/project/:project/media-jobs', handleUpsertMediaJob);
+runtime/orchestrator-service/server.js:11088:app.post('/public/media-manager/project/:project/media-jobs', handleUpsertMediaJob);
+runtime/orchestrator-service/server.js:11089:app.patch('/media-manager/project/:project/media-jobs/:mediaJobId', (req, res) => {
+runtime/orchestrator-service/server.js:11096:app.patch('/public/media-manager/project/:project/media-jobs/:mediaJobId', (req, res) => {
+runtime/orchestrator-service/server.js:11103:app.get('/media-manager/project/:project/media-jobs/:mediaJobId', handleGetMediaJob);
+runtime/orchestrator-service/server.js:11104:app.get('/public/media-manager/project/:project/media-jobs/:mediaJobId', handleGetMediaJob);
+runtime/orchestrator-service/server.js:11172:      operations: buildProjectOperationsPayload(req.params.project)
+runtime/orchestrator-service/server.js:11209:      operations: buildProjectOperationsPayload(req.params.project)
+runtime/orchestrator-service/server.js:11327:      operations: buildProjectOperationsPayload(req.params.project)
+runtime/orchestrator-service/server.js:11442:      error: error.message || 'Failed to list tasks'
+runtime/orchestrator-service/server.js:11449:    const task = createTask(req.params.project, req.body || {});
+runtime/orchestrator-service/server.js:11451:      task,
+runtime/orchestrator-service/server.js:11452:      operations: buildProjectOperationsPayload(req.params.project)
+runtime/orchestrator-service/server.js:11456:      error: error.message || 'Failed to create task'
+runtime/orchestrator-service/server.js:11461:app.get('/media-manager/project/:project/tasks', handleListTasks);
+runtime/orchestrator-service/server.js:11462:app.get('/public/media-manager/project/:project/tasks', handleListTasks);
+runtime/orchestrator-service/server.js:11463:app.post('/media-manager/project/:project/tasks', handleCreateTask);
+runtime/orchestrator-service/server.js:11464:app.post('/public/media-manager/project/:project/tasks', handleCreateTask);
+runtime/orchestrator-service/server.js:11465:app.get('/media-manager/project/:project/tasks/:taskId', (req, res) => {
+runtime/orchestrator-service/server.js:11467:    const task = getTask(req.params.project, req.params.taskId);
+runtime/orchestrator-service/server.js:11468:    if (!task) {
+runtime/orchestrator-service/server.js:11471:    return res.json({ task });
+runtime/orchestrator-service/server.js:11474:      error: error.message || 'Failed to load task'
+runtime/orchestrator-service/server.js:11478:app.get('/public/media-manager/project/:project/tasks/:taskId', (req, res) => {
+runtime/orchestrator-service/server.js:11480:    const task = getTask(req.params.project, req.params.taskId);
+runtime/orchestrator-service/server.js:11481:    if (!task) {
+runtime/orchestrator-service/server.js:11484:    return res.json({ task });
+runtime/orchestrator-service/server.js:11487:      error: error.message || 'Failed to load task'
+runtime/orchestrator-service/server.js:11512:      operations: buildProjectOperationsPayload(req.params.project)
+runtime/orchestrator-service/server.js:11533:      operations: buildProjectOperationsPayload(req.params.project)
+runtime/orchestrator-service/server.js:11607:      error: error.message || 'Failed to list notifications'
+runtime/orchestrator-service/server.js:11612:app.get('/media-manager/project/:project/notifications', handleListNotifications);
+runtime/orchestrator-service/server.js:11613:app.get('/public/media-manager/project/:project/notifications', handleListNotifications);
+runtime/orchestrator-service/server.js:11614:app.patch('/media-manager/project/:project/notifications/:notificationId', (req, res) => {
+runtime/orchestrator-service/server.js:11616:    const notification = markNotification(req.params.project, req.params.notificationId, req.body || {});
+runtime/orchestrator-service/server.js:11618:      notification,
+runtime/orchestrator-service/server.js:11619:      operations: buildProjectOperationsPayload(req.params.project)
+runtime/orchestrator-service/server.js:11623:      error: error.message || 'Failed to update notification'
+runtime/orchestrator-service/server.js:11627:app.patch('/public/media-manager/project/:project/notifications/:notificationId', (req, res) => {
+runtime/orchestrator-service/server.js:11629:    const notification = markNotification(req.params.project, req.params.notificationId, req.body || {});
+runtime/orchestrator-service/server.js:11631:      notification,
+runtime/orchestrator-service/server.js:11632:      operations: buildProjectOperationsPayload(req.params.project)
+runtime/orchestrator-service/server.js:11636:      error: error.message || 'Failed to update notification'
+runtime/orchestrator-service/server.js:11664:      operations: buildProjectOperationsPayload(req.params.project)
+runtime/orchestrator-service/server.js:11678:      operations: buildProjectOperationsPayload(req.params.project)
+runtime/orchestrator-service/server.js:11945:      error: 'customer_operations_health_failed',
+runtime/orchestrator-service/server.js:11958:      error: 'customer_operations_readiness_failed',
+runtime/orchestrator-service/server.js:11972:      error: 'customer_operations_channels_failed',
+runtime/orchestrator-service/server.js:11986:      error: 'customer_operations_inbox_failed',
+runtime/orchestrator-service/server.js:12013:app.get('/api/projects/:project/customer-operations/readiness', (req, res) => {
+runtime/orchestrator-service/server.js:12019:app.get('/api/projects/:project/customer-operations/inbox', (req, res) => {
+runtime/orchestrator-service/server.js:12025:app.get('/api/projects/:project/customer-operations/conversations', (req, res) => {
+runtime/orchestrator-service/server.js:12031:app.get('/api/projects/:project/customer-operations/conversations/:conversationId', (req, res) => {
+runtime/orchestrator-service/server.js:12037:app.get('/api/projects/:project/customer-operations/conversations/:conversationId/messages', (req, res) => {
+runtime/orchestrator-service/server.js:12043:app.get('/api/projects/:project/customer-operations/customers/:customerId', (req, res) => {
+runtime/orchestrator-service/server.js:12049:app.get('/api/projects/:project/customer-operations/tickets', (req, res) => {
+runtime/orchestrator-service/server.js:12055:app.get('/api/projects/:project/customer-operations/channels', (req, res) => {
+runtime/orchestrator-service/server.js:12063:  '/media-manager/project/:project/customer-operations/health',
+runtime/orchestrator-service/server.js:12068:  '/public/media-manager/project/:project/customer-operations/health',
+runtime/orchestrator-service/server.js:12073:  '/media-manager/project/:project/customer-operations/readiness',
+runtime/orchestrator-service/server.js:12078:  '/public/media-manager/project/:project/customer-operations/readiness',
+runtime/orchestrator-service/server.js:12083:  '/media-manager/project/:project/customer-operations/channels',
+runtime/orchestrator-service/server.js:12088:  '/public/media-manager/project/:project/customer-operations/channels',
+runtime/orchestrator-service/server.js:12093:  '/media-manager/project/:project/customer-operations/inbox',
+runtime/orchestrator-service/server.js:12098:  '/public/media-manager/project/:project/customer-operations/inbox',
+runtime/orchestrator-service/server.js:12113:      error: 'customer_operations_conversations_failed',
+runtime/orchestrator-service/server.js:12127:      error: 'customer_operations_messages_failed',
+runtime/orchestrator-service/server.js:12141:      error: 'customer_operations_customers_failed',
+runtime/orchestrator-service/server.js:12155:      error: 'customer_operations_sla_failed',
+runtime/orchestrator-service/server.js:12169:      error: 'customer_operations_escalations_failed',
+runtime/orchestrator-service/server.js:12176:  '/media-manager/project/:project/customer-operations/conversations',
+runtime/orchestrator-service/server.js:12181:  '/public/media-manager/project/:project/customer-operations/conversations',
+runtime/orchestrator-service/server.js:12186:  '/media-manager/project/:project/customer-operations/messages',
+runtime/orchestrator-service/server.js:12191:  '/public/media-manager/project/:project/customer-operations/messages',
+runtime/orchestrator-service/server.js:12196:  '/media-manager/project/:project/customer-operations/customers',
+runtime/orchestrator-service/server.js:12201:  '/public/media-manager/project/:project/customer-operations/customers',
+runtime/orchestrator-service/server.js:12206:  '/media-manager/project/:project/customer-operations/sla',
+runtime/orchestrator-service/server.js:12211:  '/public/media-manager/project/:project/customer-operations/sla',
+runtime/orchestrator-service/server.js:12216:  '/media-manager/project/:project/customer-operations/escalations',
+runtime/orchestrator-service/server.js:12221:  '/public/media-manager/project/:project/customer-operations/escalations',
+runtime/orchestrator-service/server.js:12344:      job: result
+runtime/orchestrator-service/server.js:12377:      job: result
+runtime/orchestrator-service/server.js:12390:app.post('/media-manager/project/:project/publishing/:jobId/reschedule', (req, res) => {
+runtime/orchestrator-service/server.js:12393:      jobId: req.params.jobId,
+runtime/orchestrator-service/server.js:12396:    const result = updateScheduledJobRecord(req.params.project, req.params.jobId, {
+runtime/orchestrator-service/server.js:12409:      job: result
+runtime/orchestrator-service/server.js:12419:app.post('/public/media-manager/project/:project/publishing/:jobId/reschedule', (req, res) => {
+runtime/orchestrator-service/server.js:12422:      jobId: req.params.jobId,
+runtime/orchestrator-service/server.js:12425:    const result = updateScheduledJobRecord(req.params.project, req.params.jobId, {
+runtime/orchestrator-service/server.js:12438:      job: result
+runtime/orchestrator-service/server.js:12448:app.post('/media-manager/project/:project/publishing/:jobId/ready', (req, res) => {
+runtime/orchestrator-service/server.js:12451:      jobId: req.params.jobId,
+runtime/orchestrator-service/server.js:12454:    const job = updateScheduledJobRecord(req.params.project, req.params.jobId, {
+runtime/orchestrator-service/server.js:12460:      job
+runtime/orchestrator-service/server.js:12470:app.post('/public/media-manager/project/:project/publishing/:jobId/ready', (req, res) => {
+runtime/orchestrator-service/server.js:12473:      jobId: req.params.jobId,
+runtime/orchestrator-service/server.js:12476:    const job = updateScheduledJobRecord(req.params.project, req.params.jobId, {
+runtime/orchestrator-service/server.js:12482:      job
+runtime/orchestrator-service/server.js:12492:app.post('/media-manager/project/:project/publishing/:jobId/publish', (req, res) => {
+runtime/orchestrator-service/server.js:12495:      jobId: req.params.jobId,
+runtime/orchestrator-service/server.js:12498:    const job = updateScheduledJobRecord(req.params.project, req.params.jobId, {
+runtime/orchestrator-service/server.js:12502:    const result = recordPublishingExecutionOutcome(req.params.project, req.params.jobId, {
+runtime/orchestrator-service/server.js:12509:      job,
+runtime/orchestrator-service/server.js:12515:      jobId: req.params.jobId
+runtime/orchestrator-service/server.js:12524:app.post('/public/media-manager/project/:project/publishing/:jobId/publish', (req, res) => {
+runtime/orchestrator-service/server.js:12527:      jobId: req.params.jobId,
+runtime/orchestrator-service/server.js:12530:    const job = updateScheduledJobRecord(req.params.project, req.params.jobId, {
+runtime/orchestrator-service/server.js:12534:    const result = recordPublishingExecutionOutcome(req.params.project, req.params.jobId, {
+runtime/orchestrator-service/server.js:12541:      job,
+runtime/orchestrator-service/server.js:12547:      jobId: req.params.jobId
+runtime/orchestrator-service/server.js:12556:app.post('/media-manager/project/:project/publishing/:jobId/fail', (req, res) => {
+runtime/orchestrator-service/server.js:12559:      jobId: req.params.jobId,
+runtime/orchestrator-service/server.js:12562:    const job = updateScheduledJobRecord(req.params.project, req.params.jobId, {
+runtime/orchestrator-service/server.js:12566:    const result = recordPublishingExecutionOutcome(req.params.project, req.params.jobId, {
+runtime/orchestrator-service/server.js:12573:      job,
+runtime/orchestrator-service/server.js:12579:      jobId: req.params.jobId
+runtime/orchestrator-service/server.js:12588:app.post('/public/media-manager/project/:project/publishing/:jobId/fail', (req, res) => {
+runtime/orchestrator-service/server.js:12591:      jobId: req.params.jobId,
+runtime/orchestrator-service/server.js:12594:    const job = updateScheduledJobRecord(req.params.project, req.params.jobId, {
+runtime/orchestrator-service/server.js:12598:    const result = recordPublishingExecutionOutcome(req.params.project, req.params.jobId, {
+runtime/orchestrator-service/server.js:12605:      job,
+runtime/orchestrator-service/server.js:12611:      jobId: req.params.jobId
+runtime/orchestrator-service/server.js:13214:  const mediaDir = path.join(baseDir, 'media-jobs');
+runtime/orchestrator-service/server.js:13217:  const legacyMediaDir = path.join(legacyBaseDir, 'media-jobs');
+runtime/orchestrator-service/server.js:13246:  const jobId = `mediajob_${Date.now()}`;
+runtime/orchestrator-service/server.js:13252:  const job = {
+runtime/orchestrator-service/server.js:13253:    job_id: jobId,
+runtime/orchestrator-service/server.js:13265:    artifactType: 'campaign_media_job',
+runtime/orchestrator-service/server.js:13266:    identifier: jobId,
+runtime/orchestrator-service/server.js:13268:    data: job
+runtime/orchestrator-service/server.js:13272:    ...job,
+runtime/orchestrator-service/server.js:13356:    relativePath: 'media-jobs',
+runtime/orchestrator-service/server.js:13360:    requestedFile: `campaign-finalization/media-jobs/${safeName}*`
+runtime/orchestrator-service/server.js:13390:    media_jobs_count: mediaFiles.length,
+runtime/orchestrator-service/server.js:13787:function getScheduledJobById(projectName, jobId) {
+runtime/orchestrator-service/server.js:13791:    relativePath: path.join('scheduler', `${jobId}.json`),
+runtime/orchestrator-service/server.js:13793:    requestedIdentifier: jobId,
+runtime/orchestrator-service/server.js:13794:    requestedFile: `publishing/scheduler/${jobId}.json`
+runtime/orchestrator-service/server.js:13798:    throw new Error('Scheduled job not found');
+runtime/orchestrator-service/server.js:13807:function executeScheduledJob(projectName, jobId) {
+runtime/orchestrator-service/server.js:13813:      jobId,
+runtime/orchestrator-service/server.js:13818:  const job = getScheduledJobById(projectName, jobId);
+runtime/orchestrator-service/server.js:13824:    job_id: jobId,
+runtime/orchestrator-service/server.js:13825:    campaign_name: job.campaign_name || null,
+runtime/orchestrator-service/server.js:13826:    wave_name: job.wave_name,
+runtime/orchestrator-service/server.js:13827:    channel: job.channel,
+runtime/orchestrator-service/server.js:13830:    source_status: job.status,
+runtime/orchestrator-service/server.js:13838:    if (job.channel === 'email') {
+runtime/orchestrator-service/server.js:13842:    } else if (['instagram', 'facebook', 'tiktok', 'youtube'].includes(job.channel)) {
+runtime/orchestrator-service/server.js:13846:    } else if (['amazon', 'ebay'].includes(job.channel)) {
+runtime/orchestrator-service/server.js:13856:    if (job.channel === 'email') {
+runtime/orchestrator-service/server.js:13860:    } else if (['instagram', 'facebook', 'tiktok', 'youtube'].includes(job.channel)) {
+runtime/orchestrator-service/server.js:13864:    } else if (['amazon', 'ebay'].includes(job.channel)) {
+runtime/orchestrator-service/server.js:13875:  const filePath = path.join(execPaths.legacyResultsDir, `${jobId}.json`);
+runtime/orchestrator-service/server.js:13880:    identifier: jobId,
+runtime/orchestrator-service/server.js:13900:function recordManualPublish(projectName, campaignName, channel, jobId, operator, postUrl, notes = '') {
+runtime/orchestrator-service/server.js:13904:  const safeJobId = String(jobId || '').trim();
+runtime/orchestrator-service/server.js:13925:    const error = new Error('Missing job_id');
+runtime/orchestrator-service/server.js:13980:    job_id: safeJobId,
+runtime/orchestrator-service/server.js:14042:    warnings.push('Execution result file not found for job_id. Manual publish record saved without execution-result update.');
+runtime/orchestrator-service/server.js:14049:    job_id: safeJobId,
+runtime/orchestrator-service/server.js:14061:function recordPublishingExecutionOutcome(projectName, jobId, options = {}) {
+runtime/orchestrator-service/server.js:14063:  const job = hydrateScheduledJobRecord(safeProject, getScheduledJobById(safeProject, jobId));
+runtime/orchestrator-service/server.js:14065:  const filePath = path.join(execPaths.legacyResultsDir, `${jobId}.json`);
+runtime/orchestrator-service/server.js:14072:    job_id: jobId,
+runtime/orchestrator-service/server.js:14073:    title: job.title,
+runtime/orchestrator-service/server.js:14074:    wave_name: job.wave_name,
+runtime/orchestrator-service/server.js:14075:    channel: job.channel,
+runtime/orchestrator-service/server.js:14076:    mode: String(options.mode || job.mode || readExecutionMode(safeProject).mode || 'semi_auto').trim(),
+runtime/orchestrator-service/server.js:14078:    source_status: job.status,
+runtime/orchestrator-service/server.js:14079:    execution_status: String(options.execution_status || existing.execution_status || job.status || 'pending').trim(),
+runtime/orchestrator-service/server.js:14082:    preview: job.preview || job.connector_preview || null
+runtime/orchestrator-service/server.js:14089:    identifier: jobId,
+runtime/orchestrator-service/server.js:14107:function getLatestPublishingApproval(projectName, jobId) {
+runtime/orchestrator-service/server.js:14110:      String(item?.entity_type || '').trim() === 'publishing_job'
+runtime/orchestrator-service/server.js:14111:      && String(item?.entity_id || '').trim() === String(jobId || '').trim()
+runtime/orchestrator-service/server.js:14128:  const jobId = String(options.jobId || '').trim();
+runtime/orchestrator-service/server.js:14169:    if (!jobId) {
+runtime/orchestrator-service/server.js:14170:      logGovernanceBlock('approval_before_publish', { reason: 'job_id_missing' });
+runtime/orchestrator-service/server.js:14172:        'Approval before publish is enabled. This publishing action requires a durable publishing job with an approved governance decision.',
+runtime/orchestrator-service/server.js:14180:    const approval = getLatestPublishingApproval(projectName, jobId);
+runtime/orchestrator-service/server.js:14185:        job_id: jobId,
+runtime/orchestrator-service/server.js:14189:        'Approval before publish is enabled. The publishing job is not approved for ready/publish mutation.',
+runtime/orchestrator-service/server.js:14193:          job_id: jobId,
+runtime/orchestrator-service/server.js:14204:    scheduledJobs.find(item => item.job_id === rawResult.job_id) ||
+runtime/orchestrator-service/server.js:14207:        return hydrateScheduledJobRecord(projectName, getScheduledJobById(projectName, rawResult.job_id));
+runtime/orchestrator-service/server.js:14239:function reviewExecutionResult(projectName, jobId) {
+runtime/orchestrator-service/server.js:14243:    relativePath: `${jobId}.json`,
+runtime/orchestrator-service/server.js:14245:    requestedIdentifier: jobId,
+runtime/orchestrator-service/server.js:14246:    requestedFile: `execution-results/${jobId}.json`
+runtime/orchestrator-service/server.js:14660:    scheduled_jobs: hydratedScheduledJobs,
+runtime/orchestrator-service/server.js:14662:    total_scheduled_jobs: hydratedScheduledJobs.length,
+runtime/orchestrator-service/server.js:14699:    campaignStrategyQueuePath: path.join(projectDir, 'campaign-strategy-queue.json'),
+runtime/orchestrator-service/server.js:14833:      const taskBoardPath = getLegacyContentQueuePath(commandProject, 'tasks');
+runtime/orchestrator-service/server.js:14835:      const tasks = readJsonFile(taskBoardPath, []);
+runtime/orchestrator-service/server.js:14836:      const contentTasks = tasks.filter(
+runtime/orchestrator-service/server.js:14846:          marketing_tasks: contentTasks
+runtime/orchestrator-service/server.js:14878:      const queuePath = getLegacyContentQueuePath(commandProject, 'social');
+runtime/orchestrator-service/server.js:14880:      const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
+runtime/orchestrator-service/server.js:14881:      queue.push(postDraft);
+runtime/orchestrator-service/server.js:14882:      fs.writeFileSync(queuePath, JSON.stringify(queue, null, 2), 'utf8');
+runtime/orchestrator-service/server.js:14972:      const queuePath = getLegacyContentQueuePath(commandProject, 'blog');
+runtime/orchestrator-service/server.js:14974:      const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
+runtime/orchestrator-service/server.js:14975:      queue.push(blogDraft);
+runtime/orchestrator-service/server.js:14976:      fs.writeFileSync(queuePath, JSON.stringify(queue, null, 2), 'utf8');
+runtime/orchestrator-service/server.js:15001:      const { data: queue } = readLiveEmailQueue(commandProject, emailDraft.id);
+runtime/orchestrator-service/server.js:15002:      queue.push(emailDraft);
+runtime/orchestrator-service/server.js:15003:      writeLiveEmailQueue(commandProject, queue);
+runtime/orchestrator-service/server.js:15023:      const queuePath = getLegacyContentQueuePath(commandProject, 'ads');
+runtime/orchestrator-service/server.js:15025:      const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
+runtime/orchestrator-service/server.js:15026:      queue.push(adDraft);
+runtime/orchestrator-service/server.js:15027:      fs.writeFileSync(queuePath, JSON.stringify(queue, null, 2), 'utf8');
+runtime/orchestrator-service/server.js:15036:      const queuePath = getLegacyContentQueuePath(commandProject, 'ads');
+runtime/orchestrator-service/server.js:15038:      const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
+runtime/orchestrator-service/server.js:15042:        result: queue
+runtime/orchestrator-service/server.js:15047:      const queuePath = getLegacyContentQueuePath(commandProject, 'social');
+runtime/orchestrator-service/server.js:15049:      const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
+runtime/orchestrator-service/server.js:15053:        result: queue
+runtime/orchestrator-service/server.js:15058:      const queuePath = getLegacyContentQueuePath(commandProject, 'blog');
+runtime/orchestrator-service/server.js:15060:      const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
+runtime/orchestrator-service/server.js:15064:        result: queue
+runtime/orchestrator-service/server.js:15069:      const { data: queue } = readLiveEmailQueue(commandProject, 'review-emails');
+runtime/orchestrator-service/server.js:15073:        result: queue
+runtime/orchestrator-service/server.js:15083:      const queuePath = getLegacyContentQueuePath(commandProject, 'ads');
+runtime/orchestrator-service/server.js:15085:      const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
+runtime/orchestrator-service/server.js:15086:      const item = queue.find(x => x.id === draftId);
+runtime/orchestrator-service/server.js:15094:      fs.writeFileSync(queuePath, JSON.stringify(queue, null, 2), 'utf8');
+runtime/orchestrator-service/server.js:15108:      const queuePath = getLegacyContentQueuePath(commandProject, 'social');
+runtime/orchestrator-service/server.js:15110:      const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
+runtime/orchestrator-service/server.js:15111:      const item = queue.find(x => x.id === draftId);
+runtime/orchestrator-service/server.js:15119:      fs.writeFileSync(queuePath, JSON.stringify(queue, null, 2), 'utf8');
+runtime/orchestrator-service/server.js:15133:      const queuePath = getLegacyContentQueuePath(commandProject, 'blog');
+runtime/orchestrator-service/server.js:15135:      const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
+runtime/orchestrator-service/server.js:15136:      const item = queue.find(x => x.id === draftId);
+runtime/orchestrator-service/server.js:15144:      fs.writeFileSync(queuePath, JSON.stringify(queue, null, 2), 'utf8');
+runtime/orchestrator-service/server.js:15158:      const { data: queue } = readLiveEmailQueue(commandProject, draftId);
+runtime/orchestrator-service/server.js:15159:      const item = queue.find(x => x.id === draftId);
+runtime/orchestrator-service/server.js:15167:      writeLiveEmailQueue(commandProject, queue);
+runtime/orchestrator-service/server.js:15181:      const queuePath = getLegacyContentQueuePath(commandProject, 'ads');
+runtime/orchestrator-service/server.js:15183:      const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
+runtime/orchestrator-service/server.js:15184:      const item = queue.find(x => x.id === draftId);
+runtime/orchestrator-service/server.js:15207:      fs.writeFileSync(queuePath, JSON.stringify(queue, null, 2), 'utf8');
+runtime/orchestrator-service/server.js:15221:      const queuePath = getLegacyContentQueuePath(commandProject, 'social');
+runtime/orchestrator-service/server.js:15223:      const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
+runtime/orchestrator-service/server.js:15224:      const item = queue.find(x => x.id === draftId);
+runtime/orchestrator-service/server.js:15247:      fs.writeFileSync(queuePath, JSON.stringify(queue, null, 2), 'utf8');
+runtime/orchestrator-service/server.js:15261:      const queuePath = getLegacyContentQueuePath(commandProject, 'blog');
+runtime/orchestrator-service/server.js:15263:      const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
+runtime/orchestrator-service/server.js:15264:      const item = queue.find(x => x.id === draftId);
+runtime/orchestrator-service/server.js:15340:      fs.writeFileSync(queuePath, JSON.stringify(queue, null, 2), 'utf8');
+runtime/orchestrator-service/server.js:15354:      const { data: queue } = readLiveEmailQueue(commandProject, draftId);
+runtime/orchestrator-service/server.js:15355:      const item = queue.find(x => x.id === draftId);
+runtime/orchestrator-service/server.js:15371:      writeLiveEmailQueue(commandProject, queue);
+runtime/orchestrator-service/server.js:15385:      const queuePath = getLegacyContentQueuePath(commandProject, 'ads');
+runtime/orchestrator-service/server.js:15387:      const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
+runtime/orchestrator-service/server.js:15388:      const item = queue.find(x => x.id === draftId);
+runtime/orchestrator-service/server.js:15396:      fs.writeFileSync(queuePath, JSON.stringify(queue, null, 2), 'utf8');
+runtime/orchestrator-service/server.js:15411:      const queuePath = getLegacyContentQueuePath(commandProject, 'social');
+runtime/orchestrator-service/server.js:15413:      const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
+runtime/orchestrator-service/server.js:15414:      const item = queue.find(x => x.id === draftId);
+runtime/orchestrator-service/server.js:15422:      fs.writeFileSync(queuePath, JSON.stringify(queue, null, 2), 'utf8');
+runtime/orchestrator-service/server.js:15437:      const queuePath = getLegacyContentQueuePath(commandProject, 'blog');
+runtime/orchestrator-service/server.js:15439:      const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
+runtime/orchestrator-service/server.js:15440:      const item = queue.find(x => x.id === draftId);
+runtime/orchestrator-service/server.js:15448:      fs.writeFileSync(queuePath, JSON.stringify(queue, null, 2), 'utf8');
+runtime/orchestrator-service/server.js:15463:      const { data: queue } = readLiveEmailQueue(commandProject, draftId);
+runtime/orchestrator-service/server.js:15464:      const item = queue.find(x => x.id === draftId);
+runtime/orchestrator-service/server.js:15472:      writeLiveEmailQueue(commandProject, queue);
+runtime/orchestrator-service/server.js:15504:      const queuePath = getLegacyContentQueuePath(commandProject, 'blog');
+runtime/orchestrator-service/server.js:15506:      const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
+runtime/orchestrator-service/server.js:15507:      const item = queue.find(x => x.id === draftId);
+runtime/orchestrator-service/server.js:15533:      const queuePath = getLegacyContentQueuePath(commandProject, 'blog');
+runtime/orchestrator-service/server.js:15535:      const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
+runtime/orchestrator-service/server.js:15536:      const item = queue.find(x => x.id === draftId);
+runtime/orchestrator-service/server.js:15578:      fs.mkdirSync(path.join(mediaDir, 'queue'), { recursive: true });
+runtime/orchestrator-service/server.js:16014:      const { data: queue } = readLiveEmailQueue(commandProject, draftId);
+runtime/orchestrator-service/server.js:16015:      const item = queue.find(x => x.id === draftId);
+runtime/orchestrator-service/server.js:16058:      fs.mkdirSync(path.join(mediaDir, 'queue'), { recursive: true });
+runtime/orchestrator-service/server.js:16445:      const queuePath = projectPaths.campaignStrategyQueuePath;
+runtime/orchestrator-service/server.js:16452:      const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
+runtime/orchestrator-service/server.js:16502:      queue.push(strategy);
+runtime/orchestrator-service/server.js:16503:      fs.writeFileSync(queuePath, JSON.stringify(queue, null, 2), 'utf8');
+runtime/orchestrator-service/server.js:16519:      const queuePath = resolveLegacyExecutionProjectPaths(projectName).campaignStrategyQueuePath;
+runtime/orchestrator-service/server.js:16521:      if (!fs.existsSync(queuePath)) {
+runtime/orchestrator-service/server.js:16522:        return res.json({ error: 'Campaign strategy queue not found' });
+runtime/orchestrator-service/server.js:16525:      const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
+runtime/orchestrator-service/server.js:16526:      const strategy = queue.find(x => x.strategy_id === strategyId);
+runtime/orchestrator-service/server.js:16551:        return res.json({ error: 'Campaign strategy queue not found' });
+runtime/orchestrator-service/server.js:16726:    return res.json({ error: 'Blog queue not found' });
+runtime/orchestrator-service/server.js:16780:    return res.json({ error: 'Email queue not found' });
+runtime/orchestrator-service/server.js:16841:      const queuePath = path.join(
+runtime/orchestrator-service/server.js:16843:        'intelligence/competitor-queue.json'
+runtime/orchestrator-service/server.js:16846:      const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
+runtime/orchestrator-service/server.js:16876:      queue.push(record);
+runtime/orchestrator-service/server.js:16877:      fs.writeFileSync(queuePath, JSON.stringify(queue, null, 2), 'utf8');
+runtime/orchestrator-service/server.js:16893:      const queuePath = path.join(
+runtime/orchestrator-service/server.js:16895:        'intelligence/trend-queue.json'
+runtime/orchestrator-service/server.js:16898:      const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
+runtime/orchestrator-service/server.js:16920:      queue.push(record);
+runtime/orchestrator-service/server.js:16921:      fs.writeFileSync(queuePath, JSON.stringify(queue, null, 2), 'utf8');
+runtime/orchestrator-service/server.js:16937:      const queuePath = path.join(
+runtime/orchestrator-service/server.js:16939:        'intelligence/keyword-queue.json'
+runtime/orchestrator-service/server.js:16942:      const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
+runtime/orchestrator-service/server.js:16972:      queue.push(record);
+runtime/orchestrator-service/server.js:16973:      fs.writeFileSync(queuePath, JSON.stringify(queue, null, 2), 'utf8');
+runtime/orchestrator-service/server.js:16989:      const queuePath = path.join(
+runtime/orchestrator-service/server.js:16991:        'intelligence/hashtag-queue.json'
+runtime/orchestrator-service/server.js:16994:      const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
+runtime/orchestrator-service/server.js:17011:      queue.push(record);
+runtime/orchestrator-service/server.js:17012:      fs.writeFileSync(queuePath, JSON.stringify(queue, null, 2), 'utf8');
+runtime/orchestrator-service/server.js:17028:      const queuePath = path.join(
+runtime/orchestrator-service/server.js:17030:        'intelligence/intelligence-brief-queue.json'
+runtime/orchestrator-service/server.js:17033:      const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
+runtime/orchestrator-service/server.js:17051:      queue.push(record);
+runtime/orchestrator-service/server.js:17052:      fs.writeFileSync(queuePath, JSON.stringify(queue, null, 2), 'utf8');
+runtime/orchestrator-service/server.js:17066:  const queuePath = path.join(
+runtime/orchestrator-service/server.js:17068:    'intelligence/trend-queue.json'
+runtime/orchestrator-service/server.js:17071:  const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
+runtime/orchestrator-service/server.js:17072:  const trend = queue.find(t => t.id === trendId);
+runtime/orchestrator-service/server.js:17105:  fs.writeFileSync(queuePath, JSON.stringify(queue, null, 2), 'utf8');
+runtime/orchestrator-service/server.js:17119:  const queuePath = path.join(
+runtime/orchestrator-service/server.js:17121:    'intelligence/competitor-queue.json'
+runtime/orchestrator-service/server.js:17124:  const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
+runtime/orchestrator-service/server.js:17125:  const comp = queue.find(c => c.id === compId);
+runtime/orchestrator-service/server.js:17157:  fs.writeFileSync(queuePath, JSON.stringify(queue, null, 2), 'utf8');
+runtime/orchestrator-service/server.js:17171:  const queuePath = path.join(
+runtime/orchestrator-service/server.js:17173:    'intelligence/keyword-queue.json'
+runtime/orchestrator-service/server.js:17176:  const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
+runtime/orchestrator-service/server.js:17177:  const kw = queue.find(k => k.id === keywordId);
+runtime/orchestrator-service/server.js:17203:  fs.writeFileSync(queuePath, JSON.stringify(queue, null, 2), 'utf8');
+runtime/orchestrator-service/server.js:17224:        'intelligence/trend-queue.json'
+runtime/orchestrator-service/server.js:17229:        'intelligence/competitor-queue.json'
+runtime/orchestrator-service/server.js:17234:        'intelligence/keyword-queue.json'
+runtime/orchestrator-service/server.js:17239:        'intelligence/hashtag-queue.json'
+runtime/orchestrator-service/server.js:17244:        'intelligence/campaign-brain-queue.json'
+runtime/orchestrator-service/server.js:17349:        'intelligence/campaign-brain-queue.json'
+runtime/orchestrator-service/server.js:17352:      const queue = JSON.parse(fs.readFileSync(campaignBrainPath, 'utf8'));
+runtime/orchestrator-service/server.js:17353:      const latestBrain = [...queue].reverse().find(x => x.project_id === projectName);
+runtime/orchestrator-service/server.js:17381:        'intelligence/campaign-brain-queue.json'
+runtime/orchestrator-service/server.js:17384:      const queue = JSON.parse(fs.readFileSync(campaignBrainPath, 'utf8'));
+runtime/orchestrator-service/server.js:17385:      const latestBrain = [...queue].reverse().find(x => x.project_id === projectName);
+runtime/orchestrator-service/server.js:17416:        'intelligence/campaign-brain-queue.json'
+runtime/orchestrator-service/server.js:17419:      const queue = JSON.parse(fs.readFileSync(campaignBrainPath, 'utf8'));
+runtime/orchestrator-service/server.js:17420:      const latestBrain = [...queue].reverse().find(x => x.project_id === projectName);
+runtime/orchestrator-service/server.js:17458:    'intelligence/campaign-brain-queue.json'
+runtime/orchestrator-service/server.js:17463:    'campaign-output/campaign-output-queue.json'
+runtime/orchestrator-service/server.js:17559:        'campaign-output/campaign-output-queue.json'
+runtime/orchestrator-service/server.js:17765:        'campaign-output/campaign-output-queue.json'
+runtime/orchestrator-service/server.js:17795:        'campaign-output/campaign-output-queue.json'
+runtime/orchestrator-service/server.js:17852:        'campaign-output/campaign-output-queue.json'
+runtime/orchestrator-service/server.js:17913:        'campaign-output/campaign-output-queue.json'
+runtime/orchestrator-service/server.js:18578:      error: 'Failed to generate ad visual job',
+runtime/orchestrator-service/server.js:18599:      error: 'Failed to generate email hero job',
+runtime/orchestrator-service/server.js:18620:      error: 'Failed to generate blog visual job',
+runtime/orchestrator-service/server.js:18625:if (command === '/review_generation_job') {
+runtime/orchestrator-service/server.js:18634:    const files = fs.readdirSync(outputPaths.jobsDir)
+runtime/orchestrator-service/server.js:18640:      return res.json({ error: 'No generation jobs found' });
+runtime/orchestrator-service/server.js:18643:    const latestPath = path.join(outputPaths.jobsDir, files[0]);
+runtime/orchestrator-service/server.js:18652:      error: 'Failed to review generation job',
+runtime/orchestrator-service/server.js:18723:if (command === '/render_generation_job') {
+runtime/orchestrator-service/server.js:19776:if (command === '/build_campaign_media_job') {
+runtime/orchestrator-service/server.js:19793:      error: 'Failed to build campaign media job',
+runtime/orchestrator-service/server.js:19929:if (command === '/schedule_launch_job') {
+runtime/orchestrator-service/server.js:19944:      error: 'Failed to schedule launch job',
+runtime/orchestrator-service/server.js:19949:if (command === '/review_scheduled_jobs') {
+runtime/orchestrator-service/server.js:19961:      error: 'Failed to review scheduled jobs',
+runtime/orchestrator-service/server.js:19966:if (command === '/update_scheduled_job_status') {
+runtime/orchestrator-service/server.js:19968:  const jobId = (args[1] || '').trim();
+runtime/orchestrator-service/server.js:19971:  if (!projectName || !jobId || !status) {
+runtime/orchestrator-service/server.js:19972:    return res.json({ error: 'Missing project, job id, or status' });
+runtime/orchestrator-service/server.js:19976:    const result = updateScheduledJobStatus(projectName, jobId, status);
+runtime/orchestrator-service/server.js:19980:      error: 'Failed to update scheduled job status',
+runtime/orchestrator-service/server.js:19989:  const jobId = (args[3] || '').trim();
+runtime/orchestrator-service/server.js:19994:  if (!projectName || !campaignName || !channel || !jobId || !operator || !postUrl) {
+runtime/orchestrator-service/server.js:19996:      error: 'Missing required args. Usage: /record_manual_publish <project> <campaign> <channel> <job_id> <operator> <post_url> [notes...]'
+runtime/orchestrator-service/server.js:20001:    const result = recordManualPublish(projectName, campaignName, channel, jobId, operator, postUrl, notes);
+runtime/orchestrator-service/server.js:20045:if (command === '/execute_scheduled_job') {
+runtime/orchestrator-service/server.js:20047:  const jobId = (args[1] || '').trim();
+runtime/orchestrator-service/server.js:20049:  if (!projectName || !jobId) {
+runtime/orchestrator-service/server.js:20050:    return res.json({ error: 'Missing project or job id' });
+runtime/orchestrator-service/server.js:20054:    const result = executeScheduledJob(projectName, jobId);
+runtime/orchestrator-service/server.js:20058:      error: 'Failed to execute scheduled job',
+runtime/orchestrator-service/server.js:20065:  const jobId = (args[1] || '').trim();
+runtime/orchestrator-service/server.js:20067:  if (!projectName || !jobId) {
+runtime/orchestrator-service/server.js:20068:    return res.json({ error: 'Missing project or job id' });
+runtime/orchestrator-service/server.js:20072:    const result = reviewExecutionResult(projectName, jobId);
+runtime/orchestrator-service/server.js:20847:    const queuePath = getLegacyContentQueuePath(projectName, 'blog');
+runtime/orchestrator-service/server.js:20849:    const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
+runtime/orchestrator-service/server.js:20850:    const item = queue.find(x => x.id === draftId);
+runtime/orchestrator-service/server.js:20917:      fs.writeFileSync(queuePath, JSON.stringify(queue, null, 2), 'utf8');
+runtime/orchestrator-service/server.js:21074:function inferPerformanceContextFromJob(job = {}) {
+runtime/orchestrator-service/server.js:21075:  const payload = job && typeof job.package_payload === 'object' ? job.package_payload : {};
+runtime/orchestrator-service/server.js:21086:      || job.source_package_id
+runtime/orchestrator-service/server.js:21108:  const matchedJob = schedulerJobs.find((job) => String(job.id || '').trim() === String(input.job_id || '').trim()) || null;
+runtime/orchestrator-service/server.js:21119:    job_id: String(input.job_id || '').trim(),
+runtime/orchestrator-service/server.js:21268:  const jobs = readSchedulerJobs(safeProject);
+runtime/orchestrator-service/server.js:21269:  const completed = jobs.filter((job) => job.status === 'completed');
+runtime/orchestrator-service/server.js:21270:  const failed = jobs.filter((job) => job.status === 'failed');
+runtime/orchestrator-service/server.js:21271:  const retryable = jobs.filter((job) => job.status === 'retryable');
+runtime/orchestrator-service/server.js:21274:  for (const job of jobs) {
+runtime/orchestrator-service/server.js:21275:    const channel = String(job.channel || '').trim().toLowerCase();
+runtime/orchestrator-service/server.js:21280:      total_jobs: 0,
+runtime/orchestrator-service/server.js:21286:    current.total_jobs += 1;
+runtime/orchestrator-service/server.js:21287:    if (job.status === 'completed') current.completed += 1;
+runtime/orchestrator-service/server.js:21288:    if (job.status === 'failed') current.failed += 1;
+runtime/orchestrator-service/server.js:21289:    if (job.status === 'retryable') current.retryable += 1;
+runtime/orchestrator-service/server.js:21295:    failure_rate: entry.total_jobs > 0
+runtime/orchestrator-service/server.js:21296:      ? Number(((entry.failed + entry.retryable) / entry.total_jobs).toFixed(4))
+runtime/orchestrator-service/server.js:21301:    total_jobs: jobs.length,
+runtime/orchestrator-service/server.js:21302:    completed_jobs: completed.length,
+runtime/orchestrator-service/server.js:21303:    failed_jobs: failed.length,
+runtime/orchestrator-service/server.js:21304:    retryable_jobs: retryable.length,
+runtime/orchestrator-service/server.js:21443:    operations: {
+runtime/orchestrator-service/server.js:21452:app.post('/schedule_execution_job', (req, res) => {
+runtime/orchestrator-service/server.js:21461:        `Invalid job type "${type}". Valid types: ${SCHEDULER_VALID_JOB_TYPES.join(', ')}`
+runtime/orchestrator-service/server.js:21507:    const job = buildSchedulerJobRecordWithDefaults({
+runtime/orchestrator-service/server.js:21518:    const jobs = readSchedulerJobs(projectName);
+runtime/orchestrator-service/server.js:21519:    jobs.push(job);
+runtime/orchestrator-service/server.js:21520:    writeSchedulerJobs(projectName, jobs);
+runtime/orchestrator-service/server.js:21523:      job_id: job.id,
+runtime/orchestrator-service/server.js:21524:      action: 'job_created',
+runtime/orchestrator-service/server.js:21527:        type: job.type,
+runtime/orchestrator-service/server.js:21528:        scheduled_at: job.scheduled_at,
+runtime/orchestrator-service/server.js:21529:        mode: job.mode
+runtime/orchestrator-service/server.js:21535:      job
+runtime/orchestrator-service/server.js:21541:      message: error.message || 'Failed to schedule execution job'
+runtime/orchestrator-service/server.js:21546:app.get('/scheduler_queue', (req, res) => {
+runtime/orchestrator-service/server.js:21550:    const jobs = readSchedulerJobs(projectName);
+runtime/orchestrator-service/server.js:21559:    for (const job of jobs) {
+runtime/orchestrator-service/server.js:21560:      if (job.status === 'completed') {
+runtime/orchestrator-service/server.js:21561:        completed.push(job);
+runtime/orchestrator-service/server.js:21565:      if (job.status === 'failed') {
+runtime/orchestrator-service/server.js:21566:        failed.push(job);
+runtime/orchestrator-service/server.js:21570:      if (job.status === 'running') {
+runtime/orchestrator-service/server.js:21571:        running.push(isJobLockExpired(job, SCHEDULER_LOCK_TIMEOUT_MS) ? { ...job, lock_expired: true } : job);
+runtime/orchestrator-service/server.js:21575:      if (job.status === 'retryable') {
+runtime/orchestrator-service/server.js:21576:        retryable.push(job);
+runtime/orchestrator-service/server.js:21577:        const scheduledAt = new Date(job.scheduled_at).getTime();
+runtime/orchestrator-service/server.js:21579:          due.push(job);
+runtime/orchestrator-service/server.js:21584:      if (job.status === 'pending') {
+runtime/orchestrator-service/server.js:21585:        pending.push(job);
+runtime/orchestrator-service/server.js:21586:        const scheduledAt = new Date(job.scheduled_at).getTime();
+runtime/orchestrator-service/server.js:21588:          due.push(job);
+runtime/orchestrator-service/server.js:21596:      total: jobs.length,
+runtime/orchestrator-service/server.js:21597:      queue: {
+runtime/orchestrator-service/server.js:21605:      jobs: {
+runtime/orchestrator-service/server.js:21618:      message: error.message || 'Failed to retrieve scheduler queue'
+runtime/orchestrator-service/server.js:21632:    const jobs = readSchedulerJobs(projectName);
+runtime/orchestrator-service/server.js:21634:    // Phase 1: lock all due jobs atomically
+runtime/orchestrator-service/server.js:21635:    for (const job of jobs) {
+runtime/orchestrator-service/server.js:21636:      if (job.status === 'completed') continue;
+runtime/orchestrator-service/server.js:21637:      if (job.status === 'failed' && job.attempts >= job.max_attempts) continue;
+runtime/orchestrator-service/server.js:21639:      const isStaleRunning = job.status === 'running' && isJobLockExpired(job, SCHEDULER_LOCK_TIMEOUT_MS);
+runtime/orchestrator-service/server.js:21640:      const isDue = isJobDue(job);
+runtime/orchestrator-service/server.js:21644:      job.status = 'running';
+runtime/orchestrator-service/server.js:21645:      job.locked_at = lockTimestamp;
+runtime/orchestrator-service/server.js:21646:      job.locked_by = workerId;
+runtime/orchestrator-service/server.js:21647:      job.attempts = (job.attempts || 0) + 1;
+runtime/orchestrator-service/server.js:21648:      job.updated_at = lockTimestamp;
+runtime/orchestrator-service/server.js:21651:    writeSchedulerJobs(projectName, jobs);
+runtime/orchestrator-service/server.js:21653:    // Phase 2: execute locked jobs and update status
+runtime/orchestrator-service/server.js:21654:    for (const job of jobs) {
+runtime/orchestrator-service/server.js:21655:      if (job.status !== 'running' || job.locked_by !== workerId) continue;
+runtime/orchestrator-service/server.js:21660:        const result = executeJobBridge(job);
+runtime/orchestrator-service/server.js:21661:        job.status = 'completed';
+runtime/orchestrator-service/server.js:21662:        job.execution_state = result.execution_state || 'completed';
+runtime/orchestrator-service/server.js:21663:        job.last_error = null;
+runtime/orchestrator-service/server.js:21664:        job.locked_at = null;
+runtime/orchestrator-service/server.js:21665:        job.locked_by = null;
+runtime/orchestrator-service/server.js:21666:        job.updated_at = executionTimestamp;
+runtime/orchestrator-service/server.js:21669:          job_id: job.id,
+runtime/orchestrator-service/server.js:21670:          action: 'job_executed',
+runtime/orchestrator-service/server.js:21678:            trigger: 'job_completed',
+runtime/orchestrator-service/server.js:21679:            jobRecord: job,
+runtime/orchestrator-service/server.js:21684:            job_id: job.id,
+runtime/orchestrator-service/server.js:21692:          job_id: job.id,
+runtime/orchestrator-service/server.js:21693:          type: job.type,
+runtime/orchestrator-service/server.js:21695:          execution_state: job.execution_state,
+runtime/orchestrator-service/server.js:21701:        const canRetry = job.attempts < job.max_attempts;
+runtime/orchestrator-service/server.js:21704:        job.status = canRetry ? 'retryable' : 'failed';
+runtime/orchestrator-service/server.js:21705:        job.execution_state = 'failed';
+runtime/orchestrator-service/server.js:21706:        job.last_error = errorMessage;
+runtime/orchestrator-service/server.js:21707:        job.locked_at = null;
+runtime/orchestrator-service/server.js:21708:        job.locked_by = null;
+runtime/orchestrator-service/server.js:21709:        job.updated_at = executionTimestamp2;
+runtime/orchestrator-service/server.js:21712:          job_id: job.id,
+runtime/orchestrator-service/server.js:21713:          action: 'job_failed',
+runtime/orchestrator-service/server.js:21714:          status: job.status,
+runtime/orchestrator-service/server.js:21717:            attempts: job.attempts,
+runtime/orchestrator-service/server.js:21718:            max_attempts: job.max_attempts,
+runtime/orchestrator-service/server.js:21724:          job_id: job.id,
+runtime/orchestrator-service/server.js:21725:          type: job.type,
+runtime/orchestrator-service/server.js:21726:          status: job.status,
+runtime/orchestrator-service/server.js:21727:          attempts: job.attempts,
+runtime/orchestrator-service/server.js:21728:          max_attempts: job.max_attempts,
+runtime/orchestrator-service/server.js:21735:    writeSchedulerJobs(projectName, jobs);
+runtime/orchestrator-service/server.js:21756:    const jobId = String(req.body?.job_id || '').trim();
+runtime/orchestrator-service/server.js:21760:    if (!jobId) {
+runtime/orchestrator-service/server.js:21761:      const err = new Error('Missing job_id');
+runtime/orchestrator-service/server.js:21792:      job_id: jobId,
+runtime/orchestrator-service/lib/integrations/providers/ops.js:37:    readScopes: ['notifications'],
+runtime/orchestrator-service/lib/integrations/providers/ops.js:73:    readScopes: ['notifications'],
+runtime/orchestrator-service/lib/execution/scheduler-helpers.js:4:  return `job-${crypto.randomBytes(8).toString('hex')}`;
+runtime/orchestrator-service/lib/execution/scheduler-helpers.js:11:function isJobDue(job) {
+runtime/orchestrator-service/lib/execution/scheduler-helpers.js:12:  if (job.status !== 'pending' && job.status !== 'retryable') return false;
+runtime/orchestrator-service/lib/execution/scheduler-helpers.js:13:  const scheduledAt = new Date(job.scheduled_at).getTime();
+runtime/orchestrator-service/lib/execution/scheduler-helpers.js:17:function isJobLockExpired(job, lockTimeoutMs) {
+runtime/orchestrator-service/lib/execution/scheduler-helpers.js:18:  if (!job.locked_at) return false;
+runtime/orchestrator-service/lib/execution/scheduler-helpers.js:19:  const lockedAt = new Date(job.locked_at).getTime();
+runtime/orchestrator-service/lib/execution/scheduler-storage.js:33:  function writeSchedulerJobs(projectName, jobs) {
+runtime/orchestrator-service/lib/execution/scheduler-storage.js:34:    writeJsonFile(getSchedulerFilePath(projectName), jobs);
+runtime/orchestrator-service/lib/execution/scheduler-storage.js:49:      job_id: String(entry.job_id || ''),
+runtime/orchestrator-service/lib/execution/intelligence-loop.js:69:      job_id: context.jobRecord?.id || context.feedbackRecord?.job_id || null
+runtime/orchestrator-service/lib/execution/recommendation-runtime.js:75:        scheduler_jobs_tracked: executionSignals.total_jobs,
+runtime/orchestrator-service/lib/execution/recommendation-runtime.js:76:        completed_jobs: executionSignals.completed_jobs
+runtime/orchestrator-service/lib/execution/execution-job-bridge.js:14:  function executeJobBridge(job) {
+runtime/orchestrator-service/lib/execution/execution-job-bridge.js:15:    const project = job.project;
+runtime/orchestrator-service/lib/execution/execution-job-bridge.js:16:    const payload = job.package_payload && typeof job.package_payload === 'object'
+runtime/orchestrator-service/lib/execution/execution-job-bridge.js:17:      ? job.package_payload
+runtime/orchestrator-service/lib/execution/execution-job-bridge.js:20:    if (job.type === 'publish') {
+runtime/orchestrator-service/lib/execution/execution-job-bridge.js:31:    if (job.type === 'email') {
+runtime/orchestrator-service/lib/execution/execution-job-bridge.js:41:    if (job.type === 'media') {
+runtime/orchestrator-service/lib/execution/execution-job-bridge.js:61:    if (job.type === 'ads') {
+runtime/orchestrator-service/lib/execution/execution-job-bridge.js:71:    const err = new Error(`Unknown job type: ${job.type}`);
+runtime/orchestrator-service/lib/execution/recommendation-builders.js:31:        job_id: record.job_id,
+runtime/orchestrator-service/lib/execution/recommendation-builders.js:45:        job_id: record.job_id,
+runtime/orchestrator-service/lib/ai/providers/openai.js:245:      operationsPlan: parsed.operationsPlan || parsed.operations_plan || null,
+runtime/orchestrator-service/lib/ai/providers/openai.js:268:    operationsPlan: null,
+runtime/orchestrator-service/lib/ai/providers/openai.js:296:              'Return actionable marketing output, not a process description, unless the command asks for operations.',
+runtime/orchestrator-service/lib/ai/providers/openai.js:306:              'For outputType "operations_plan", include operationsPlan with tasks, timeline, owners, handoffs, approvals, dependencies.',
+runtime/orchestrator-service/lib/ai/providers/openai.js:407:        operationsPlan: normalized.operationsPlan,
+runtime/orchestrator-service/lib/ai/provider-config.js:83:  operations: {
+runtime/orchestrator-service/lib/ai/provider-config.js:85:    purpose: 'tasks, timelines, handoffs, approvals, and execution planning',
+runtime/orchestrator-service/lib/ai/provider-config.js:86:    outputType: 'operations_plan',
+runtime/orchestrator-service/lib/ai/provider-config.js:89:      'Produce task plans, timelines, handoffs, approvals, ownership, and execution plans.',
+runtime/orchestrator-service/lib/ai/provider-config.js:103:    operations_planner: 'operations'
+runtime/orchestrator-service/lib/ops/backbone.js:39:  tasks: 400,
+runtime/orchestrator-service/lib/ops/backbone.js:40:  notifications: 400,
+runtime/orchestrator-service/lib/ops/backbone.js:41:  queue: 400,
+runtime/orchestrator-service/lib/ops/backbone.js:57:  media_jobs: {
+runtime/orchestrator-service/lib/ops/backbone.js:58:    statuses: ['requested', 'queued', 'processing', 'completed', 'failed', 'cancelled'],
+runtime/orchestrator-service/lib/ops/backbone.js:63:    statuses: ['queued', 'running', 'completed', 'failed', 'cancelled'],
+runtime/orchestrator-service/lib/ops/backbone.js:64:    lifecycle: ['queued', 'running', 'completed', 'closed']
+runtime/orchestrator-service/lib/ops/backbone.js:67:    statuses: ['queued', 'running', 'completed', 'failed', 'cancelled'],
+runtime/orchestrator-service/lib/ops/backbone.js:68:    intents: ['inspect', 'task', 'workflow', 'campaign', 'content', 'media', 'approval', 'recommendation']
+runtime/orchestrator-service/lib/ops/backbone.js:76:    route_targets: ['campaign-studio', 'content-studio', 'media-studio', 'publishing', 'ads-manager', 'task-center', 'governance']
+runtime/orchestrator-service/lib/ops/backbone.js:86:  tasks: {
+runtime/orchestrator-service/lib/ops/backbone.js:87:    statuses: ['open', 'queued', 'in_progress', 'blocked', 'completed', 'cancelled'],
+runtime/orchestrator-service/lib/ops/backbone.js:91:  notifications: {
+runtime/orchestrator-service/lib/ops/backbone.js:156:    actions: ['analyze_performance', 'build_report', 'open_research_task']
+runtime/orchestrator-service/lib/ops/backbone.js:244:  media_job: 'media',
+runtime/orchestrator-service/lib/ops/backbone.js:245:  publishing_job: 'publishing',
+runtime/orchestrator-service/lib/ops/backbone.js:248:  task: 'governance'
+runtime/orchestrator-service/lib/ops/backbone.js:479:    title: 'Team operations model updated',
+runtime/orchestrator-service/lib/ops/backbone.js:529:  if (asString(entityType) === 'media_job') {
+runtime/orchestrator-service/lib/ops/backbone.js:783:    mediaJobsPath: path.join(opsDir, 'media-jobs.json'),
+runtime/orchestrator-service/lib/ops/backbone.js:789:    tasksPath: path.join(opsDir, 'tasks.json'),
+runtime/orchestrator-service/lib/ops/backbone.js:791:    notificationsPath: path.join(opsDir, 'notifications.json'),
+runtime/orchestrator-service/lib/ops/backbone.js:792:    queuePath: path.join(opsDir, 'queue.json'),
+runtime/orchestrator-service/lib/ops/backbone.js:815:      'media_jobs',
+runtime/orchestrator-service/lib/ops/backbone.js:821:      'tasks',
+runtime/orchestrator-service/lib/ops/backbone.js:823:      'notifications',
+runtime/orchestrator-service/lib/ops/backbone.js:824:      'queue',
+runtime/orchestrator-service/lib/ops/backbone.js:838:  ensureJsonFile(paths.tasksPath, []);
+runtime/orchestrator-service/lib/ops/backbone.js:840:  ensureJsonFile(paths.notificationsPath, []);
+runtime/orchestrator-service/lib/ops/backbone.js:841:  ensureJsonFile(paths.queuePath, []);
+runtime/orchestrator-service/lib/ops/backbone.js:904:      'media_jobs',
+runtime/orchestrator-service/lib/ops/backbone.js:910:      'tasks',
+runtime/orchestrator-service/lib/ops/backbone.js:912:      'notifications',
+runtime/orchestrator-service/lib/ops/backbone.js:913:      'queue',
+runtime/orchestrator-service/lib/ops/backbone.js:974:  if (value.includes('campaign') || value.includes('content') || value.includes('media') || value.includes('task')) return 'entity';
+runtime/orchestrator-service/lib/ops/backbone.js:1004:  const items = readCollection(paths.notificationsPath);
+runtime/orchestrator-service/lib/ops/backbone.js:1006:  const notification = {
+runtime/orchestrator-service/lib/ops/backbone.js:1024:  items.unshift(notification);
+runtime/orchestrator-service/lib/ops/backbone.js:1025:  writeCollection(paths.notificationsPath, items, MAX_ITEMS.notifications);
+runtime/orchestrator-service/lib/ops/backbone.js:1027:  return notification;
+runtime/orchestrator-service/lib/ops/backbone.js:1032:  return listItems(readCollection(paths.notificationsPath), options);
+runtime/orchestrator-service/lib/ops/backbone.js:1035:function markNotification(projectName, notificationId, input = {}) {
+runtime/orchestrator-service/lib/ops/backbone.js:1037:  const items = readCollection(paths.notificationsPath);
+runtime/orchestrator-service/lib/ops/backbone.js:1038:  const index = items.findIndex((item) => asString(item.id) === asString(notificationId));
+runtime/orchestrator-service/lib/ops/backbone.js:1054:  writeJsonFile(paths.notificationsPath, items);
+runtime/orchestrator-service/lib/ops/backbone.js:1061:  const items = readCollection(paths.queuePath);
+runtime/orchestrator-service/lib/ops/backbone.js:1073:  const queueItem = {
+runtime/orchestrator-service/lib/ops/backbone.js:1074:    id: asString(current.id) || asString(input.id) || createId('queue'),
+runtime/orchestrator-service/lib/ops/backbone.js:1076:    queue_type: asString(input.queue_type || current.queue_type) || 'general',
+runtime/orchestrator-service/lib/ops/backbone.js:1080:    status: asString(input.status || current.status) || 'queued',
+runtime/orchestrator-service/lib/ops/backbone.js:1093:    paths.queuePath,
+runtime/orchestrator-service/lib/ops/backbone.js:1094:    upsertById(items, queueItem),
+runtime/orchestrator-service/lib/ops/backbone.js:1095:    MAX_ITEMS.queue
+runtime/orchestrator-service/lib/ops/backbone.js:1098:  return queueItem;
+runtime/orchestrator-service/lib/ops/backbone.js:1103:  return listItems(readCollection(paths.queuePath), options);
+runtime/orchestrator-service/lib/ops/backbone.js:1118:      : normalizedType === 'media_job'
+runtime/orchestrator-service/lib/ops/backbone.js:1124:      : normalizedType === 'media_job'
+runtime/orchestrator-service/lib/ops/backbone.js:1154:  const items = readCollection(paths.queuePath);
+runtime/orchestrator-service/lib/ops/backbone.js:1176:  writeCollection(paths.queuePath, items, MAX_ITEMS.queue);
+runtime/orchestrator-service/lib/ops/backbone.js:1315:  if (normalizedType === 'media_job') {
+runtime/orchestrator-service/lib/ops/backbone.js:1323:  if (normalizedType === 'publishing_job') {
+runtime/orchestrator-service/lib/ops/backbone.js:1324:    return readCollection(paths.queuePath).find((item) =>
+runtime/orchestrator-service/lib/ops/backbone.js:1325:      asString(item.entity_type) === 'publishing_job' &&
+runtime/orchestrator-service/lib/ops/backbone.js:1344:  if (asBoolean(governance.policy_rules?.freeze_publishing) && asString(record.entity_type) === 'publishing_job') {
+runtime/orchestrator-service/lib/ops/backbone.js:1422:  if (asString(record.entity_type) === 'media_job' && asBoolean(governance.policy_rules?.brand_safety_review_required, true)) {
+runtime/orchestrator-service/lib/ops/backbone.js:1479:  const queueItems = readCollection(paths.queuePath);
+runtime/orchestrator-service/lib/ops/backbone.js:1497:      entity_type: asString(item.entity_type) || (item.prompt ? 'media_job' : 'content_item'),
+runtime/orchestrator-service/lib/ops/backbone.js:1508:      entity_type: 'media_job',
+runtime/orchestrator-service/lib/ops/backbone.js:1510:      title: item.title || `${item.request_type || 'media'} job`,
+runtime/orchestrator-service/lib/ops/backbone.js:1516:  const publishGuardrails = queueItems
+runtime/orchestrator-service/lib/ops/backbone.js:1517:    .filter((item) => asString(item.entity_type) === 'publishing_job')
+runtime/orchestrator-service/lib/ops/backbone.js:1562:        entity_type: 'publishing_job',
+runtime/orchestrator-service/lib/ops/backbone.js:1576:    ...readCollection(paths.tasksPath).filter((item) =>
+runtime/orchestrator-service/lib/ops/backbone.js:1599:      approval_queue: approvalQueue,
+runtime/orchestrator-service/lib/ops/backbone.js:1610:      escalation_queue: escalationQueue
+runtime/orchestrator-service/lib/ops/backbone.js:1615:      media_jobs: mediaJobs.length,
+runtime/orchestrator-service/lib/ops/backbone.js:1616:      publishing_jobs: queueItems.filter((item) => asString(item.entity_type) === 'publishing_job').length,
+runtime/orchestrator-service/lib/ops/backbone.js:1624:    queue_type: 'content',
+runtime/orchestrator-service/lib/ops/backbone.js:1647:function syncMediaQueue(projectName, job = {}) {
+runtime/orchestrator-service/lib/ops/backbone.js:1649:    queue_type: 'media',
+runtime/orchestrator-service/lib/ops/backbone.js:1650:    entity_type: 'media_job',
+runtime/orchestrator-service/lib/ops/backbone.js:1651:    entity_id: job.id,
+runtime/orchestrator-service/lib/ops/backbone.js:1652:    title: job.title || `${job.request_type || 'media'} job`,
+runtime/orchestrator-service/lib/ops/backbone.js:1653:    status: job.approval_state === 'pending' ? 'pending_approval' : (job.status || 'requested'),
+runtime/orchestrator-service/lib/ops/backbone.js:1654:    assignee: job.owner,
+runtime/orchestrator-service/lib/ops/backbone.js:1655:    role: asString(job.owner_role || job.review_role || 'designer'),
+runtime/orchestrator-service/lib/ops/backbone.js:1656:    priority: job.approval_state === 'pending' ? 'high' : 'normal',
+runtime/orchestrator-service/lib/ops/backbone.js:1659:      request_type: job.request_type,
+runtime/orchestrator-service/lib/ops/backbone.js:1660:      provider: job.provider,
+runtime/orchestrator-service/lib/ops/backbone.js:1661:      model: job.model,
+runtime/orchestrator-service/lib/ops/backbone.js:1662:      campaign_id: job.campaign_id,
+runtime/orchestrator-service/lib/ops/backbone.js:1663:      content_item_id: job.content_item_id,
+runtime/orchestrator-service/lib/ops/backbone.js:1664:      publishing_job_id: job.publishing_job_id,
+runtime/orchestrator-service/lib/ops/backbone.js:1665:      approval_state: job.approval_state,
+runtime/orchestrator-service/lib/ops/backbone.js:1666:      owner_role: job.owner_role,
+runtime/orchestrator-service/lib/ops/backbone.js:1667:      review_role: job.review_role,
+runtime/orchestrator-service/lib/ops/backbone.js:1668:      service_domain: job.service_domain
+runtime/orchestrator-service/lib/ops/backbone.js:1709:    linked_tasks: normalizeStringList(input.linked_tasks || current.linked_tasks),
+runtime/orchestrator-service/lib/ops/backbone.js:1841:    linked_tasks: normalizeStringList(input.linked_tasks || current.linked_tasks),
+runtime/orchestrator-service/lib/ops/backbone.js:1844:    linked_media_jobs: normalizeStringList(input.linked_media_jobs || current.linked_media_jobs),
+runtime/orchestrator-service/lib/ops/backbone.js:1848:    queue_status: asString(input.queue_status || current.queue_status || publishStatus || approvalStatus || status) || 'draft',
+runtime/orchestrator-service/lib/ops/backbone.js:1909:    throw new Error('Media job request_type is required');
+runtime/orchestrator-service/lib/ops/backbone.js:1914:  const routing = inferPrimaryRole('media_job', {
+runtime/orchestrator-service/lib/ops/backbone.js:1948:  const job = {
+runtime/orchestrator-service/lib/ops/backbone.js:1949:    id: asString(current.id) || asString(input.id) || createId('mediajob'),
+runtime/orchestrator-service/lib/ops/backbone.js:1951:    title: asString(input.title || current.title) || `${requestType} job`,
+runtime/orchestrator-service/lib/ops/backbone.js:1969:    publishing_job_id: asString(input.publishing_job_id || current.publishing_job_id),
+runtime/orchestrator-service/lib/ops/backbone.js:1975:    linked_tasks: normalizeStringList(input.linked_tasks || current.linked_tasks),
+runtime/orchestrator-service/lib/ops/backbone.js:1985:      current.id ? 'media_job_updated' : 'media_job_created',
+runtime/orchestrator-service/lib/ops/backbone.js:1996:  writeCollection(paths.mediaJobsPath, upsertById(items, job), MAX_ITEMS.mediaJobs);
+runtime/orchestrator-service/lib/ops/backbone.js:1997:  syncMediaQueue(paths.project, job);
+runtime/orchestrator-service/lib/ops/backbone.js:2000:    type: current.id ? 'media_job_updated' : 'media_job_created',
+runtime/orchestrator-service/lib/ops/backbone.js:2001:    entity_type: 'media_job',
+runtime/orchestrator-service/lib/ops/backbone.js:2002:    entity_id: job.id,
+runtime/orchestrator-service/lib/ops/backbone.js:2003:    title: `${job.request_type} job`,
+runtime/orchestrator-service/lib/ops/backbone.js:2004:    summary: `Media job ${job.status} stored in the durable backbone.`,
+runtime/orchestrator-service/lib/ops/backbone.js:2007:      request_type: job.request_type,
+runtime/orchestrator-service/lib/ops/backbone.js:2008:      provider: job.provider,
+runtime/orchestrator-service/lib/ops/backbone.js:2009:      model: job.model,
+runtime/orchestrator-service/lib/ops/backbone.js:2010:      status: job.status,
+runtime/orchestrator-service/lib/ops/backbone.js:2015:  return job;
+runtime/orchestrator-service/lib/ops/backbone.js:2061:      status === 'running' ? 'running' : status === 'queued' ? 'queued' : 'completed'
+runtime/orchestrator-service/lib/ops/backbone.js:2087:    queue_type: 'workflow',
+runtime/orchestrator-service/lib/ops/backbone.js:2415:  const items = readCollection(paths.tasksPath);
+runtime/orchestrator-service/lib/ops/backbone.js:2426:  const routing = inferPrimaryRole('task', {
+runtime/orchestrator-service/lib/ops/backbone.js:2434:  const task = {
+runtime/orchestrator-service/lib/ops/backbone.js:2435:    id: asString(current.id) || asString(input.id) || createId('task'),
+runtime/orchestrator-service/lib/ops/backbone.js:2452:      status === 'completed' ? 'done' : status === 'blocked' ? 'blocked' : ['queued', 'in_progress'].includes(status) ? 'active' : 'open'
+runtime/orchestrator-service/lib/ops/backbone.js:2454:    queue_status: asString(input.queue_status || current.queue_status || status) || 'queued',
+runtime/orchestrator-service/lib/ops/backbone.js:2474:      current.id ? 'task_updated' : 'task_created',
+runtime/orchestrator-service/lib/ops/backbone.js:2485:  writeCollection(paths.tasksPath, upsertById(items, task), MAX_ITEMS.tasks);
+runtime/orchestrator-service/lib/ops/backbone.js:2487:    queue_type: 'task',
+runtime/orchestrator-service/lib/ops/backbone.js:2488:    entity_type: 'task',
+runtime/orchestrator-service/lib/ops/backbone.js:2489:    entity_id: task.id,
+runtime/orchestrator-service/lib/ops/backbone.js:2490:    title: task.title,
+runtime/orchestrator-service/lib/ops/backbone.js:2491:    status: task.queue_status,
+runtime/orchestrator-service/lib/ops/backbone.js:2492:    assignee: task.assignee || task.owner,
+runtime/orchestrator-service/lib/ops/backbone.js:2494:    priority: task.priority,
+runtime/orchestrator-service/lib/ops/backbone.js:2495:    route: task.route_target,
+runtime/orchestrator-service/lib/ops/backbone.js:2497:      workflow_id: task.workflow_id,
+runtime/orchestrator-service/lib/ops/backbone.js:2498:      source_type: task.source_type,
+runtime/orchestrator-service/lib/ops/backbone.js:2499:      source_id: task.source_id,
+runtime/orchestrator-service/lib/ops/backbone.js:2500:      linked_entity: task.linked_entity,
+runtime/orchestrator-service/lib/ops/backbone.js:2503:      service_domain: task.service_domain
+runtime/orchestrator-service/lib/ops/backbone.js:2508:    type: current.id ? 'task_updated' : 'task_created',
+runtime/orchestrator-service/lib/ops/backbone.js:2509:    entity_type: 'task',
+runtime/orchestrator-service/lib/ops/backbone.js:2510:    entity_id: task.id,
+runtime/orchestrator-service/lib/ops/backbone.js:2511:    title: task.title,
+runtime/orchestrator-service/lib/ops/backbone.js:2512:    summary: 'A durable task was added to the project operating queue.',
+runtime/orchestrator-service/lib/ops/backbone.js:2516:    category: 'task',
+runtime/orchestrator-service/lib/ops/backbone.js:2517:    type: 'task',
+runtime/orchestrator-service/lib/ops/backbone.js:2518:    title: `${task.title} added to queue`,
+runtime/orchestrator-service/lib/ops/backbone.js:2519:    message: 'The task is now available for team execution and follow-up.',
+runtime/orchestrator-service/lib/ops/backbone.js:2520:    body: 'The task is now available for team execution and follow-up.',
+runtime/orchestrator-service/lib/ops/backbone.js:2523:      entity_type: 'task',
+runtime/orchestrator-service/lib/ops/backbone.js:2524:      entity_id: task.id,
+runtime/orchestrator-service/lib/ops/backbone.js:2525:      route: inferRouteTarget('task', task)
+runtime/orchestrator-service/lib/ops/backbone.js:2527:    entity_type: 'task',
+runtime/orchestrator-service/lib/ops/backbone.js:2528:    entity_id: task.id
+runtime/orchestrator-service/lib/ops/backbone.js:2531:  if (task.linked_entity?.entity_type && task.linked_entity?.entity_id) {
+runtime/orchestrator-service/lib/ops/backbone.js:2532:    updateLinkedEntity(paths.project, task.linked_entity.entity_type, task.linked_entity.entity_id, (record) => ({
+runtime/orchestrator-service/lib/ops/backbone.js:2534:      linked_tasks: [...new Set([task.id, ...normalizeStringList(record.linked_tasks)])],
+runtime/orchestrator-service/lib/ops/backbone.js:2536:      history: appendHistory(record, 'linked_task_added', input.actor || input.owner || input.assignee, {
+runtime/orchestrator-service/lib/ops/backbone.js:2537:        task_id: task.id
+runtime/orchestrator-service/lib/ops/backbone.js:2542:  return task;
+runtime/orchestrator-service/lib/ops/backbone.js:2547:  return listItems(readCollection(paths.tasksPath), options);
+runtime/orchestrator-service/lib/ops/backbone.js:2550:function getTask(projectName, taskId) {
+runtime/orchestrator-service/lib/ops/backbone.js:2552:  return findById(readCollection(paths.tasksPath), taskId);
+runtime/orchestrator-service/lib/ops/backbone.js:2675:    queue_type: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:2696:      approval.entity_type === 'media_job'
+runtime/orchestrator-service/lib/ops/backbone.js:2700:      approval.entity_type === 'media_job'
+runtime/orchestrator-service/lib/ops/backbone.js:2717:      nextRecord.queue_status = 'pending_approval';
+runtime/orchestrator-service/lib/ops/backbone.js:2720:    if (approval.entity_type === 'media_job') {
+runtime/orchestrator-service/lib/ops/backbone.js:2726:    } else if (approval.entity_type === 'media_job') {
+runtime/orchestrator-service/lib/ops/backbone.js:2862:      nextRecord.queue_status = ['approved', 'overridden'].includes(decision) ? 'approved' : decision === 'escalated' ? 'escalated' : 'changes_requested';
+runtime/orchestrator-service/lib/ops/backbone.js:2864:    } else if (next.entity_type === 'media_job') {
+runtime/orchestrator-service/lib/ops/backbone.js:2884:  if (next.entity_type === 'publishing_job') {
+runtime/orchestrator-service/lib/ops/backbone.js:2885:    updateQueueEntity(paths.project, 'publishing_job', next.entity_id, {
+runtime/orchestrator-service/lib/ops/backbone.js:2953:  const sourceRouting = inferPrimaryRole(linkedEntity?.entity_type || sourceEntity?.entity_type || 'task', {
+runtime/orchestrator-service/lib/ops/backbone.js:3057:        nextRecord.queue_status =
+runtime/orchestrator-service/lib/ops/backbone.js:3060:            : nextRecord.queue_status;
+runtime/orchestrator-service/lib/ops/backbone.js:3062:      } else if (handoffLinkedEntity.entity_type === 'media_job') {
+runtime/orchestrator-service/lib/ops/backbone.js:3063:        nextRecord.queue_status =
+runtime/orchestrator-service/lib/ops/backbone.js:3066:            : asString(nextRecord.queue_status);
+runtime/orchestrator-service/lib/ops/backbone.js:3142:function syncPublishingJob(projectName, job = {}, executionResult = null) {
+runtime/orchestrator-service/lib/ops/backbone.js:3145:  const normalizedJob = asObject(job);
+runtime/orchestrator-service/lib/ops/backbone.js:3147:  const jobId = asString(normalizedJob.job_id);
+runtime/orchestrator-service/lib/ops/backbone.js:3149:  if (!jobId) {
+runtime/orchestrator-service/lib/ops/backbone.js:3150:    throw new Error('Publishing job missing job_id');
+runtime/orchestrator-service/lib/ops/backbone.js:3154:  const queueItem = upsertQueueItem(safeProject, {
+runtime/orchestrator-service/lib/ops/backbone.js:3155:    queue_type: 'publishing',
+runtime/orchestrator-service/lib/ops/backbone.js:3156:    entity_type: 'publishing_job',
+runtime/orchestrator-service/lib/ops/backbone.js:3157:    entity_id: jobId,
+runtime/orchestrator-service/lib/ops/backbone.js:3158:    title: asString(normalizedJob.title) || `Publishing ${jobId}`,
+runtime/orchestrator-service/lib/ops/backbone.js:3181:      title: `${queueItem.title} is ready`,
+runtime/orchestrator-service/lib/ops/backbone.js:3186:        entity_type: 'publishing_job',
+runtime/orchestrator-service/lib/ops/backbone.js:3187:        entity_id: jobId,
+runtime/orchestrator-service/lib/ops/backbone.js:3190:      entity_type: 'publishing_job',
+runtime/orchestrator-service/lib/ops/backbone.js:3191:      entity_id: jobId
+runtime/orchestrator-service/lib/ops/backbone.js:3199:      title: `${queueItem.title} published`,
+runtime/orchestrator-service/lib/ops/backbone.js:3204:        entity_type: 'publishing_job',
+runtime/orchestrator-service/lib/ops/backbone.js:3205:        entity_id: jobId,
+runtime/orchestrator-service/lib/ops/backbone.js:3208:      entity_type: 'publishing_job',
+runtime/orchestrator-service/lib/ops/backbone.js:3209:      entity_id: jobId
+runtime/orchestrator-service/lib/ops/backbone.js:3217:      title: `${queueItem.title} failed`,
+runtime/orchestrator-service/lib/ops/backbone.js:3222:        entity_type: 'publishing_job',
+runtime/orchestrator-service/lib/ops/backbone.js:3223:        entity_id: jobId,
+runtime/orchestrator-service/lib/ops/backbone.js:3226:      entity_type: 'publishing_job',
+runtime/orchestrator-service/lib/ops/backbone.js:3227:      entity_id: jobId
+runtime/orchestrator-service/lib/ops/backbone.js:3233:    type: 'publishing_job_synced',
+runtime/orchestrator-service/lib/ops/backbone.js:3234:    entity_type: 'publishing_job',
+runtime/orchestrator-service/lib/ops/backbone.js:3235:    entity_id: jobId,
+runtime/orchestrator-service/lib/ops/backbone.js:3236:    title: queueItem.title,
+runtime/orchestrator-service/lib/ops/backbone.js:3237:    summary: `Publishing job synced into the durable queue with status ${status}.`,
+runtime/orchestrator-service/lib/ops/backbone.js:3245:  return queueItem;
+runtime/orchestrator-service/lib/ops/backbone.js:3319:  if (['pending', 'queued', 'running', 'in_progress', 'processing'].includes(normalized)) return 1;
+runtime/orchestrator-service/lib/ops/backbone.js:3369:  if (normalizedType === 'task') return 'workflows';
+runtime/orchestrator-service/lib/ops/backbone.js:3373:  if (normalizedType === 'media_job') return 'media-studio';
+runtime/orchestrator-service/lib/ops/backbone.js:3374:  if (normalizedType === 'publishing_job') return 'publishing';
+runtime/orchestrator-service/lib/ops/backbone.js:3377:  if (normalizedType === 'notification') return inferRouteTarget(record.entity_type, record) || 'home';
+runtime/orchestrator-service/lib/ops/backbone.js:3395:function buildTaskCenter(tasks = []) {
+runtime/orchestrator-service/lib/ops/backbone.js:3396:  const items = asArray(tasks)
+runtime/orchestrator-service/lib/ops/backbone.js:3397:    .map((task) => {
+runtime/orchestrator-service/lib/ops/backbone.js:3398:      const dueAt = asString(task.due_at || task.due_date);
+runtime/orchestrator-service/lib/ops/backbone.js:3400:        id: asString(task.id),
+runtime/orchestrator-service/lib/ops/backbone.js:3401:        title: asString(task.title) || 'Task',
+runtime/orchestrator-service/lib/ops/backbone.js:3402:        description: asString(task.description),
+runtime/orchestrator-service/lib/ops/backbone.js:3403:        owner: asString(task.owner || task.assignee),
+runtime/orchestrator-service/lib/ops/backbone.js:3404:        owner_role: asString(task.owner_role || task.assignee_role),
+runtime/orchestrator-service/lib/ops/backbone.js:3405:        assignee: asString(task.assignee || task.owner),
+runtime/orchestrator-service/lib/ops/backbone.js:3406:        assignee_role: asString(task.assignee_role || task.owner_role),
+runtime/orchestrator-service/lib/ops/backbone.js:3409:        priority: asString(task.priority) || 'normal',
+runtime/orchestrator-service/lib/ops/backbone.js:3410:        source_page: asString(task.source_page),
+runtime/orchestrator-service/lib/ops/backbone.js:3411:        service_domain: asString(task.service_domain),
+runtime/orchestrator-service/lib/ops/backbone.js:3412:        linked_entity: normalizeLinkedEntity(task.linked_entity || {}),
+runtime/orchestrator-service/lib/ops/backbone.js:3413:        status: asString(task.status) || 'open',
+runtime/orchestrator-service/lib/ops/backbone.js:3414:        route: buildRouteLink('task', task),
+runtime/orchestrator-service/lib/ops/backbone.js:3415:        updated_at: asString(task.updated_at),
+runtime/orchestrator-service/lib/ops/backbone.js:3416:        created_at: asString(task.created_at)
+runtime/orchestrator-service/lib/ops/backbone.js:3429:    open_count: items.filter((item) => ['open', 'queued', 'in_progress'].includes(item.status)).length,
+runtime/orchestrator-service/lib/ops/backbone.js:3446:    .filter((item) => ['queued', 'running', 'failed', 'completed'].includes(asString(item.status)))
+runtime/orchestrator-service/lib/ops/backbone.js:3448:      id: createId('queuewf'),
+runtime/orchestrator-service/lib/ops/backbone.js:3449:      queue_type: 'workflow',
+runtime/orchestrator-service/lib/ops/backbone.js:3453:      status: asString(item.status) || 'queued',
+runtime/orchestrator-service/lib/ops/backbone.js:3473:      queue_type: 'sync',
+runtime/orchestrator-service/lib/ops/backbone.js:3494:    queue_type: asString(item.queue_type) || 'general',
+runtime/orchestrator-service/lib/ops/backbone.js:3498:    status: asString(item.status) || 'queued',
+runtime/orchestrator-service/lib/ops/backbone.js:3510:function buildQueueCenter(queueItems = [], workflowRuns = [], events = []) {
+runtime/orchestrator-service/lib/ops/backbone.js:3511:  const normalizedQueue = asArray(queueItems).map((item) => normalizeQueueItemRecord(item));
+runtime/orchestrator-service/lib/ops/backbone.js:3512:  const workflowQueue = normalizedQueue.filter((item) => item.queue_type === 'workflow' || item.entity_type === 'workflow_run');
+runtime/orchestrator-service/lib/ops/backbone.js:3515:    ...normalizedQueue.filter((item) => item.queue_type === 'sync'),
+runtime/orchestrator-service/lib/ops/backbone.js:3517:  ].slice(0, MAX_ITEMS.queue);
+runtime/orchestrator-service/lib/ops/backbone.js:3518:  const queueGroups = {
+runtime/orchestrator-service/lib/ops/backbone.js:3520:    content: normalizedQueue.filter((item) => item.queue_type === 'content'),
+runtime/orchestrator-service/lib/ops/backbone.js:3521:    media: normalizedQueue.filter((item) => item.queue_type === 'media'),
+runtime/orchestrator-service/lib/ops/backbone.js:3522:    approval: normalizedQueue.filter((item) => item.queue_type === 'approval'),
+runtime/orchestrator-service/lib/ops/backbone.js:3523:    publishing: normalizedQueue.filter((item) => item.queue_type === 'publishing'),
+runtime/orchestrator-service/lib/ops/backbone.js:3527:  const items = Object.entries(queueGroups)
+runtime/orchestrator-service/lib/ops/backbone.js:3528:    .flatMap(([queueType, groupedItems]) =>
+runtime/orchestrator-service/lib/ops/backbone.js:3531:        queue_type: queueType
+runtime/orchestrator-service/lib/ops/backbone.js:3545:    queue_counts: Object.entries(queueGroups).map(([queueType, groupedItems]) => ({
+runtime/orchestrator-service/lib/ops/backbone.js:3546:      queue_type: queueType,
+runtime/orchestrator-service/lib/ops/backbone.js:3551:      queue_types: mapFilterCounts(items, 'queue_type'),
+runtime/orchestrator-service/lib/ops/backbone.js:3556:    workflow_queue: workflowFallback,
+runtime/orchestrator-service/lib/ops/backbone.js:3557:    content_queue: queueGroups.content,
+runtime/orchestrator-service/lib/ops/backbone.js:3558:    media_queue: queueGroups.media,
+runtime/orchestrator-service/lib/ops/backbone.js:3559:    approval_queue: queueGroups.approval,
+runtime/orchestrator-service/lib/ops/backbone.js:3560:    publishing_queue: queueGroups.publishing,
+runtime/orchestrator-service/lib/ops/backbone.js:3561:    sync_queue: queueGroups.sync,
+runtime/orchestrator-service/lib/ops/backbone.js:3566:function buildJobEntries(workflowRuns = [], mediaJobs = [], queueItems = []) {
+runtime/orchestrator-service/lib/ops/backbone.js:3573:    status: asString(item.status) || 'queued',
+runtime/orchestrator-service/lib/ops/backbone.js:3584:    entity_type: 'media_job',
+runtime/orchestrator-service/lib/ops/backbone.js:3586:    title: asString(item.title) || `${asString(item.request_type) || 'media'} job`,
+runtime/orchestrator-service/lib/ops/backbone.js:3588:    route: inferRouteTarget('media_job', item),
+runtime/orchestrator-service/lib/ops/backbone.js:3590:    health_state: ['failed', 'cancelled'].includes(asString(item.status)) ? 'critical' : ['processing', 'queued', 'requested'].includes(asString(item.status)) ? 'active' : 'healthy',
+runtime/orchestrator-service/lib/ops/backbone.js:3595:  const publishingJobs = asArray(queueItems)
+runtime/orchestrator-service/lib/ops/backbone.js:3596:    .filter((item) => asString(item.entity_type) === 'publishing_job')
+runtime/orchestrator-service/lib/ops/backbone.js:3600:      entity_type: 'publishing_job',
+runtime/orchestrator-service/lib/ops/backbone.js:3602:      title: asString(item.title) || 'Publishing job',
+runtime/orchestrator-service/lib/ops/backbone.js:3604:      route: inferRouteTarget('publishing_job', item),
+runtime/orchestrator-service/lib/ops/backbone.js:3620:function buildJobMonitor(jobEntries = [], events = []) {
+runtime/orchestrator-service/lib/ops/backbone.js:3621:  const items = asArray(jobEntries);
+runtime/orchestrator-service/lib/ops/backbone.js:3622:  const runningJobs = items.filter((item) => ['queued', 'running', 'requested', 'processing', 'scheduled', 'ready'].includes(asString(item.status)));
+runtime/orchestrator-service/lib/ops/backbone.js:3627:    .filter((item) => ['workflow', 'publish', 'sync', 'system'].includes(asString(item.category)) || ['workflow_run', 'publishing_job', 'media_job'].includes(asString(item.entity_type)))
+runtime/orchestrator-service/lib/ops/backbone.js:3649:    running_jobs: runningJobs,
+runtime/orchestrator-service/lib/ops/backbone.js:3650:    completed_jobs: completedJobs.slice(0, 20),
+runtime/orchestrator-service/lib/ops/backbone.js:3651:    failed_jobs: failedJobs.slice(0, 20),
+runtime/orchestrator-service/lib/ops/backbone.js:3670:    notification_id: asString(input.notification_id || input.id)
+runtime/orchestrator-service/lib/ops/backbone.js:3675:  notifications = [],
+runtime/orchestrator-service/lib/ops/backbone.js:3677:  queueItems = [],
+runtime/orchestrator-service/lib/ops/backbone.js:3682:  const unreadNotifications = asArray(notifications).filter((item) => !asBoolean(item.read));
+runtime/orchestrator-service/lib/ops/backbone.js:3684:    ...asArray(notifications)
+runtime/orchestrator-service/lib/ops/backbone.js:3689:        notification_id: item.id
+runtime/orchestrator-service/lib/ops/backbone.js:3714:  const publishAlerts = asArray(queueItems)
+runtime/orchestrator-service/lib/ops/backbone.js:3715:    .filter((item) => asString(item.entity_type) === 'publishing_job' && ['ready', 'published', 'failed'].includes(asString(item.status)))
+runtime/orchestrator-service/lib/ops/backbone.js:3732:      entity_type: 'publishing_job',
+runtime/orchestrator-service/lib/ops/backbone.js:3738:    ...asArray(notifications)
+runtime/orchestrator-service/lib/ops/backbone.js:3743:        notification_id: item.id,
+runtime/orchestrator-service/lib/ops/backbone.js:3814:    notification_items: asArray(notifications).slice(0, 40),
+runtime/orchestrator-service/lib/ops/backbone.js:3838:  const tasks = readCollection(paths.tasksPath);
+runtime/orchestrator-service/lib/ops/backbone.js:3840:  const queueItems = readCollection(paths.queuePath);
+runtime/orchestrator-service/lib/ops/backbone.js:3841:  const notifications = readCollection(paths.notificationsPath);
+runtime/orchestrator-service/lib/ops/backbone.js:3847:  const taskLimit = Number(options.taskLimit || 10) || 10;
+runtime/orchestrator-service/lib/ops/backbone.js:3850:  const notificationLimit = Number(options.notificationLimit || 8) || 8;
+runtime/orchestrator-service/lib/ops/backbone.js:3851:  const queueLimit = Number(options.queueLimit || 12) || 12;
+runtime/orchestrator-service/lib/ops/backbone.js:3861:    ...tasks,
+runtime/orchestrator-service/lib/ops/backbone.js:3863:    ...queueItems
+runtime/orchestrator-service/lib/ops/backbone.js:3879:  const taskCenter = buildTaskCenter(tasks);
+runtime/orchestrator-service/lib/ops/backbone.js:3880:  const queueCenter = buildQueueCenter(queueItems, workflowRuns, events);
+runtime/orchestrator-service/lib/ops/backbone.js:3881:  const jobMonitor = buildJobMonitor(buildJobEntries(workflowRuns, mediaJobs, queueItems), events);
+runtime/orchestrator-service/lib/ops/backbone.js:3882:  const notificationCenter = buildNotificationCenter({
+runtime/orchestrator-service/lib/ops/backbone.js:3883:    notifications,
+runtime/orchestrator-service/lib/ops/backbone.js:3885:    queueItems,
+runtime/orchestrator-service/lib/ops/backbone.js:3902:    task_center: taskCenter,
+runtime/orchestrator-service/lib/ops/backbone.js:3903:    queue_center: queueCenter,
+runtime/orchestrator-service/lib/ops/backbone.js:3904:    job_monitor: jobMonitor,
+runtime/orchestrator-service/lib/ops/backbone.js:3905:    notification_center: notificationCenter,
+runtime/orchestrator-service/lib/ops/backbone.js:3936:      queue_by_role: summarizeOwnershipVisibility(team, queueItems),
+runtime/orchestrator-service/lib/ops/backbone.js:3962:    media_jobs: {
+runtime/orchestrator-service/lib/ops/backbone.js:3993:      items: aiMemory.slice(0, taskLimit)
+runtime/orchestrator-service/lib/ops/backbone.js:3995:    tasks: {
+runtime/orchestrator-service/lib/ops/backbone.js:3996:      total: tasks.length,
+runtime/orchestrator-service/lib/ops/backbone.js:3997:      open_count: tasks.filter((item) => ['open', 'queued', 'in_progress'].includes(asString(item.status))).length,
+runtime/orchestrator-service/lib/ops/backbone.js:3998:      blocked_count: tasks.filter((item) => asString(item.status) === 'blocked').length,
+runtime/orchestrator-service/lib/ops/backbone.js:3999:      items: tasks.slice(0, taskLimit)
+runtime/orchestrator-service/lib/ops/backbone.js:4007:    queues: {
+runtime/orchestrator-service/lib/ops/backbone.js:4008:      total: queueItems.length,
+runtime/orchestrator-service/lib/ops/backbone.js:4009:      active_count: queueItems.filter((item) => !['published', 'completed', 'closed'].includes(asString(item.status))).length,
+runtime/orchestrator-service/lib/ops/backbone.js:4010:      items: queueItems.slice(0, queueLimit)
+runtime/orchestrator-service/lib/ops/backbone.js:4012:    notifications: {
+runtime/orchestrator-service/lib/ops/backbone.js:4013:      total: notifications.length,
+runtime/orchestrator-service/lib/ops/backbone.js:4014:      unread_count: notifications.filter((item) => !item.read).length,
+runtime/orchestrator-service/lib/ops/backbone.js:4015:      items: notifications.slice(0, notificationLimit)
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:125:  operations: 'workflows'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:135:  operations: 'operations_plan'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:144:  publisher: 'operations',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:148:  compliance_reviewer: 'operations',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:149:  operations: 'operations',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:206:    'Guidance-only response. Do not execute operations. Do not claim execution happened.'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:217:          : specialistId === 'operations'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:218:            ? 'As Operations Lead, return draft checklist/task/workflow steps only; do not execute or claim execution.'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:247:    'If the user asks for hooks, captions, scripts, emails, headlines, tasks, workflow steps, or checklists, produce the actual requested items.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:248:    'Do not summarize the task.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:258:    'Do not claim task/workflow/handoff/approval/publish actions were executed.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:259:    'Do not claim task creation, workflow run, handoff creation, or approval creation happened.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:261:    'Do not claim operations were run.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:316:    operations: [
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:318:      "Focus on tasks, workflows, ownership, timelines, handoffs, blockers, and operating next steps.",
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:319:      "When asked to turn conversation into work, prepare a task/workflow-ready draft but do not execute it."
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:333:      "Think across strategy, content, media, publishing, ads, SEO, compliance, operations, customer operations, and sales.",
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:391:    '- If the user asks for copy, caption, script, plan, task, workflow, handoff, or route, help prepare it conversationally.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:404:    '- Do not claim that publishing, approval, deletion, sync, CRM update, customer reply, workflow run, export, task creation, handoff creation, or backend action happened.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:540:  if (intent === 'operations') return 'workflows';
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:545:  if (intent === 'task') return 'task-center';
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:598:      intent: 'operations',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:599:      modeId: 'operations',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:601:      outputType: 'operations_plan',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:602:      pattern: /\b(task plan|workflow|handoff|approval|approvals|timeline|execution plan|operator|owners?|assign|todo|follow up|route)\b/
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:609:      intent: selectedMode === 'operations' ? 'operations' : selectedMode,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:611:      actionType: selectedMode === 'operations' ? 'workflow' : 'recommendation',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:632:    modeId = modeId || 'operations';
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:633:    outputType = 'operations_plan';
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:634:  } else if (matches(/\b(task|todo|follow up|assign)\b/) && intent === 'operations') {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:635:    intent = 'task';
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:636:    actionType = 'task';
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:682:  const operations = asObject(deps.buildOperations(projectName));
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:696:    recent_handoffs: asArray(operations.handoffs?.items).filter((item) => asString(item.destination_page) === 'research').slice(0, 3)
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:705:    operations,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:835:      actions: normalizeReadableList(phase.actions || phase.tasks || phase.steps, 8),
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:926:  const operationsPlan = outputType === 'operations_plan'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:927:    ? normalizeStructuredObject(providerOutput.operationsPlan || providerOutput.raw?.operationsPlan || providerOutput.raw?.operations_plan)
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:954:    normalizeRouteSuggestion('task-center', 'Save a durable execution task if an operator follow-up is needed.')
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:967:  const taskBlock = ['workflow', 'task', 'approval'].includes(classified.actionType)
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:970:      owner: classified.resolvedModeId === 'operations' ? 'Operations Planner' : 'mh-assistant',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1001:    operationsPlan,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1015:    taskBlock
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1039:      context.summary.recommendations[0] || 'No recommendation stack was available, so the workflow leaned on project settings and operations context.'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1044:      `Use tasks or approvals if human follow-through is required.`
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1048:      'Create a structured task for the first operator-owned follow-up.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1053:      normalizeRouteSuggestion('task-center', 'Convert the run into a durable task if manual execution is required.')
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1174:        if (classified.actionType === 'task') {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1175:          const task = createTask(projectName, {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1176:            title: response.taskBlock.title,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1178:            route_target: 'task-center',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1185:          linkedEntities.push({ entity_type: 'task', entity_id: task.id, route: 'task-center', label: task.title });
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1454:            created_task: false,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1461:            mutated_operations: false,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1631:            created_task: false,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1638:            mutated_operations: false
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1662:            taskBlock: {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1667:                'Create task/workflow/handoff manually only if explicitly approved.'
+runtime/orchestrator-service/lib/customer-operations/contracts/message-contract.js:39:      source_runtime: 'mh-os-customer-operations'
+runtime/orchestrator-service/lib/customer-operations/contracts/unified-inbox-contract.js:57:      source_runtime: 'mh-os-customer-operations'
+runtime/orchestrator-service/lib/customer-operations/contracts/conversation-contract.js:21:      queue: String(input.escalation?.queue || ''),
+runtime/orchestrator-service/lib/customer-operations/contracts/conversation-contract.js:32:      source_runtime: 'mh-os-customer-operations'
+runtime/orchestrator-service/lib/customer-operations/contracts/ticket-contract.js:33:      source_runtime: 'mh-os-customer-operations'
+runtime/orchestrator-service/lib/customer-operations/contracts/escalation-contract.js:23:      escalation_queue: String(
+runtime/orchestrator-service/lib/customer-operations/contracts/escalation-contract.js:24:        input.routing?.escalation_queue || 'default'
+runtime/orchestrator-service/lib/customer-operations/contracts/escalation-contract.js:55:      source_runtime: 'mh-os-customer-operations'
+runtime/orchestrator-service/lib/customer-operations/contracts/customer-profile-contract.js:43:      source_runtime: 'mh-os-customer-operations'
+runtime/orchestrator-service/lib/customer-operations/contracts/sla-policy-contract.js:35:      escalation_queue: String(
+runtime/orchestrator-service/lib/customer-operations/contracts/sla-policy-contract.js:36:        input.escalation?.escalation_queue || 'customer-care'
+runtime/orchestrator-service/lib/customer-operations/contracts/sla-policy-contract.js:53:      source_runtime: 'mh-os-customer-operations'
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:41:} = require('./readiness/customer-operations-readiness-snapshot');
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:116:        runtime: 'mh-os-customer-operations',
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:45:    runtime: 'mh-os-customer-operations',
+runtime/orchestrator-service/lib/customer-operations/README.md:13:- AI customer operations
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js:32:    runtime: 'mh-os-customer-operations',
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/register-integration-inbox.js:81:      source_runtime: 'mh-os-customer-operations'
+runtime/orchestrator-service/lib/customer-operations/channels/channel-integration-mapper.js:119:    customer_operations: {
+runtime/orchestrator-service/lib/customer-operations/channels/channel-integration-mapper.js:128:      source_runtime: 'mh-os-customer-operations'
+runtime/orchestrator-service/lib/customer-operations/channels/register-integration-channel.js:33:      customer_operations: channel.customer_operations
+runtime/orchestrator-service/lib/customer-operations/channels/registry/channel-registry-store.js:27:      source_runtime: 'mh-os-customer-operations'
+runtime/orchestrator-service/lib/media/native/capabilities/README.md:15:- keep jobs in not_configured state
+runtime/orchestrator-service/lib/media/native/media-output-storage.js:10:function writeMediaOutput({ baseDir, project, jobId, filename, buffer }) {
+runtime/orchestrator-service/lib/media/native/media-output-storage.js:12:  const safeJobId = String(jobId || `job_${Date.now()}`).replace(/[^a-z0-9_-]/gi, '_');
+runtime/orchestrator-service/lib/media/native/providers/README.md:16:Create provider adapters that transform MH-OS worker jobs into provider-specific API calls.
+runtime/orchestrator-service/lib/media/native/providers/adapters/openai-provider-adapter.js:17:  async function generateImage(job = {}) {
+runtime/orchestrator-service/lib/media/native/providers/adapters/openai-provider-adapter.js:27:    const prompt = String(job.prompt || '').trim();
+runtime/orchestrator-service/lib/media/native/providers/adapters/openai-provider-adapter.js:42:          model: String(job.model || job.model_id || 'gpt-image-1'),
+runtime/orchestrator-service/lib/media/native/providers/adapters/openai-provider-adapter.js:44:          size: String(job.size || '1024x1024')
+runtime/orchestrator-service/lib/media/native/providers/adapters/openai-provider-adapter.js:51:          timeout: Number(job.timeout_ms || 120000)
+runtime/orchestrator-service/lib/media/native/providers/adapters/README.md:3:Transforms MH-OS native media jobs into provider-specific API executions.
+runtime/orchestrator-service/lib/media/native/providers/router/provider-execution-router.js:10:  async function execute(job = {}) {
+runtime/orchestrator-service/lib/media/native/providers/router/provider-execution-router.js:11:    const provider = String(job.provider || 'native').toLowerCase();
+runtime/orchestrator-service/lib/media/native/providers/router/provider-execution-router.js:12:    const mediaType = String(job.media_type || job.type || 'image').toLowerCase();
+runtime/orchestrator-service/lib/media/native/providers/router/provider-execution-router.js:28:        return adapter.generateImage(job);
+runtime/orchestrator-service/lib/media/native/providers/router/provider-execution-router.js:32:        return adapter.createRealtimeVoiceSession(job);
+runtime/orchestrator-service/lib/media/native/providers/router/provider-execution-router.js:45:      return gpuWorker.submitJob(job);
+runtime/orchestrator-service/lib/media/native/providers/router/README.md:3:Routes native media jobs to provider execution adapters.
+runtime/orchestrator-service/lib/media/native/lifecycle/lifecycle-demo.js:3:const { createJobLifecycleManager } = require('./job-lifecycle-manager');
+runtime/orchestrator-service/lib/media/native/lifecycle/lifecycle-demo.js:8:  const queued = lifecycle.queueJob({
+runtime/orchestrator-service/lib/media/native/lifecycle/lifecycle-demo.js:9:    job_id: 'demo_job_1',
+runtime/orchestrator-service/lib/media/native/lifecycle/lifecycle-demo.js:15:  lifecycle.markDispatched('demo_job_1');
+runtime/orchestrator-service/lib/media/native/lifecycle/lifecycle-demo.js:16:  lifecycle.markRendering('demo_job_1', 45);
+runtime/orchestrator-service/lib/media/native/lifecycle/lifecycle-demo.js:18:  lifecycle.markCompleted('demo_job_1', [
+runtime/orchestrator-service/lib/media/native/lifecycle/lifecycle-demo.js:26:    queued,
+runtime/orchestrator-service/lib/media/native/lifecycle/lifecycle-demo.js:27:    final: lifecycle.getJob('demo_job_1'),
+runtime/orchestrator-service/lib/media/native/lifecycle/lifecycle-demo.js:28:    jobs: lifecycle.listJobs()
+runtime/orchestrator-service/lib/media/native/lifecycle/README.md:3:Tracks rendering job states.
+runtime/orchestrator-service/lib/media/native/lifecycle/README.md:6:- queued
+runtime/orchestrator-service/lib/media/native/lifecycle/job-lifecycle-manager.js:8:} = require('./job-state-store');
+runtime/orchestrator-service/lib/media/native/lifecycle/job-lifecycle-manager.js:11:  function queueJob(input = {}) {
+runtime/orchestrator-service/lib/media/native/lifecycle/job-lifecycle-manager.js:13:      job_id: input.job_id,
+runtime/orchestrator-service/lib/media/native/lifecycle/job-lifecycle-manager.js:15:      status: 'queued',
+runtime/orchestrator-service/lib/media/native/lifecycle/job-lifecycle-manager.js:22:  function markDispatched(jobId) {
+runtime/orchestrator-service/lib/media/native/lifecycle/job-lifecycle-manager.js:23:    return updateJob(jobId, {
+runtime/orchestrator-service/lib/media/native/lifecycle/job-lifecycle-manager.js:28:  function markRendering(jobId, progress = 0) {
+runtime/orchestrator-service/lib/media/native/lifecycle/job-lifecycle-manager.js:29:    return updateJob(jobId, {
+runtime/orchestrator-service/lib/media/native/lifecycle/job-lifecycle-manager.js:35:  function markCompleted(jobId, outputs = []) {
+runtime/orchestrator-service/lib/media/native/lifecycle/job-lifecycle-manager.js:36:    return updateJob(jobId, {
+runtime/orchestrator-service/lib/media/native/lifecycle/job-lifecycle-manager.js:43:  function markFailed(jobId, error = '') {
+runtime/orchestrator-service/lib/media/native/lifecycle/job-lifecycle-manager.js:44:    return updateJob(jobId, {
+runtime/orchestrator-service/lib/media/native/lifecycle/job-lifecycle-manager.js:51:    queueJob,
+runtime/orchestrator-service/lib/media/native/lifecycle/job-state-store.js:3:const jobs = new Map();
+runtime/orchestrator-service/lib/media/native/lifecycle/job-state-store.js:6:  const jobId = String(record.job_id || '');
+runtime/orchestrator-service/lib/media/native/lifecycle/job-state-store.js:8:  if (!jobId) {
+runtime/orchestrator-service/lib/media/native/lifecycle/job-state-store.js:9:    throw new Error('job_id is required');
+runtime/orchestrator-service/lib/media/native/lifecycle/job-state-store.js:13:    job_id: jobId,
+runtime/orchestrator-service/lib/media/native/lifecycle/job-state-store.js:15:    status: String(record.status || 'queued'),
+runtime/orchestrator-service/lib/media/native/lifecycle/job-state-store.js:24:  jobs.set(jobId, state);
+runtime/orchestrator-service/lib/media/native/lifecycle/job-state-store.js:29:function updateJob(jobId, updates = {}) {
+runtime/orchestrator-service/lib/media/native/lifecycle/job-state-store.js:30:  const current = jobs.get(String(jobId || ''));
+runtime/orchestrator-service/lib/media/native/lifecycle/job-state-store.js:42:  jobs.set(jobId, next);
+runtime/orchestrator-service/lib/media/native/lifecycle/job-state-store.js:47:function getJob(jobId) {
+runtime/orchestrator-service/lib/media/native/lifecycle/job-state-store.js:48:  return jobs.get(String(jobId || '')) || null;
+runtime/orchestrator-service/lib/media/native/lifecycle/job-state-store.js:52:  return Array.from(jobs.values());
+runtime/orchestrator-service/lib/media/native/protocol/worker-result-contract.js:6:    job_id: String(input.job_id || ''),
+runtime/orchestrator-service/lib/media/native/protocol/worker-progress-contract.js:5:    job_id: String(input.job_id || ''),
+runtime/orchestrator-service/lib/media/native/protocol/worker-progress-contract.js:7:    stage: String(input.stage || 'queued'),
+runtime/orchestrator-service/lib/media/native/protocol/worker-heartbeat-contract.js:9:    active_jobs: Number(input.active_jobs || 0),
+runtime/orchestrator-service/lib/media/native/protocol/worker-heartbeat-contract.js:10:    max_jobs: Number(input.max_jobs || 1),
+runtime/orchestrator-service/lib/media/native/protocol/README.md:6:- worker-job-contract
+runtime/orchestrator-service/lib/media/native/protocol/README.md:13:- standardized rendering jobs
+runtime/orchestrator-service/lib/media/native/protocol/worker-job-contract.js:6:    job_id: String(input.job_id || ''),
+runtime/orchestrator-service/lib/media/native/media-job-queue.js:3:const queue = [];
+runtime/orchestrator-service/lib/media/native/media-job-queue.js:5:function enqueueMediaJob(job = {}) {
+runtime/orchestrator-service/lib/media/native/media-job-queue.js:7:    ...job,
+runtime/orchestrator-service/lib/media/native/media-job-queue.js:8:    id: job.id || `media_job_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+runtime/orchestrator-service/lib/media/native/media-job-queue.js:9:    status: job.status || 'queued',
+runtime/orchestrator-service/lib/media/native/media-job-queue.js:10:    queued_at: new Date().toISOString()
+runtime/orchestrator-service/lib/media/native/media-job-queue.js:13:  queue.push(item);
+runtime/orchestrator-service/lib/media/native/media-job-queue.js:18:  return queue.slice();
+runtime/orchestrator-service/lib/media/native/media-job-queue.js:22:  return queue.find(job => job.id === id) || null;
+runtime/orchestrator-service/lib/media/native/media-job-queue.js:26:  enqueueMediaJob,
+runtime/orchestrator-service/lib/media/native/README.md:12:- In-memory queue foundation
+runtime/orchestrator-service/lib/media/native/README.md:21:It prepares, scores, routes, and structures media generation jobs before actual rendering engines are integrated.
+runtime/orchestrator-service/lib/media/native/execution/README.md:3:This layer executes prepared native media jobs.
+runtime/orchestrator-service/lib/media/native/execution/README.md:7:- queueing
+runtime/orchestrator-service/lib/media/native/execution/native-runtime-executor.js:5:const { enqueueMediaJob } = require('../media-job-queue');
+runtime/orchestrator-service/lib/media/native/execution/native-runtime-executor.js:34:    const queuedJob = enqueueMediaJob({
+runtime/orchestrator-service/lib/media/native/execution/native-runtime-executor.js:36:      status: 'queued',
+runtime/orchestrator-service/lib/media/native/execution/native-runtime-executor.js:80:      jobId: queuedJob.id,
+runtime/orchestrator-service/lib/media/native/execution/native-runtime-executor.js:88:      media_job: queuedJob,
+runtime/orchestrator-service/lib/media/native/registry/worker-heartbeat-manager.js:12:      active_jobs: heartbeat.active_jobs,
+runtime/orchestrator-service/lib/media/native/registry/worker-heartbeat-manager.js:13:      max_jobs: heartbeat.max_jobs,
+runtime/orchestrator-service/lib/media/native/registry/worker-selection-engine.js:21:      const aLoad = a.max_jobs - a.active_jobs;
+runtime/orchestrator-service/lib/media/native/registry/worker-selection-engine.js:22:      const bLoad = b.max_jobs - b.active_jobs;
+runtime/orchestrator-service/lib/media/native/registry/worker-registry-store.js:17:    active_jobs: Number(worker.active_jobs || 0),
+runtime/orchestrator-service/lib/media/native/registry/worker-registry-store.js:18:    max_jobs: Number(worker.max_jobs || 1),
+runtime/orchestrator-service/lib/media/native/registry/worker-registry-store.js:39:    worker.active_jobs < worker.max_jobs
+runtime/orchestrator-service/lib/media/native/workers/external-gpu-worker-adapter.js:11:  async function submitJob(job = {}) {
+runtime/orchestrator-service/lib/media/native/workers/external-gpu-worker-adapter.js:29:      job_summary: {
+runtime/orchestrator-service/lib/media/native/workers/external-gpu-worker-adapter.js:30:        type: job.type || job.media_type || '',
+runtime/orchestrator-service/lib/media/native/workers/external-gpu-worker-adapter.js:31:        platform: job.platform || '',
+runtime/orchestrator-service/lib/media/native/workers/external-gpu-worker-adapter.js:32:        project: job.project || '',
+runtime/orchestrator-service/lib/media/native/workers/external-gpu-worker-adapter.js:33:        prompt_hash: job.prompt_hash || ''
+runtime/orchestrator-service/lib/media/native/orchestrator/orchestrator-demo.js:5:const { createJobDispatchOrchestrator } = require('./job-dispatch-orchestrator');
+runtime/orchestrator-service/lib/media/native/orchestrator/orchestrator-demo.js:16:    active_jobs: 1,
+runtime/orchestrator-service/lib/media/native/orchestrator/orchestrator-demo.js:17:    max_jobs: 4,
+runtime/orchestrator-service/lib/media/native/orchestrator/job-dispatch-orchestrator.js:5:const { createWorkerJobContract } = require('../protocol/worker-job-contract');
+runtime/orchestrator-service/lib/media/native/orchestrator/job-dispatch-orchestrator.js:54:      job_id: input.job_id || `job_${Date.now()}`,
+runtime/orchestrator-service/lib/media/native/orchestrator/job-dispatch-orchestrator.js:78:      worker_job: workerJob,
+runtime/orchestrator-service/lib/media/native/orchestrator/README.md:6:- worker job contracts
+runtime/orchestrator-service/lib/media/provider-layer.js:3:const PROVIDER_NOT_CONFIGURED_MESSAGE = 'Generator backend not connected yet — prompt/job is ready.';

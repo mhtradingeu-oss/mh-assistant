@@ -1,0 +1,123 @@
+5:} from "../shared-context.js";
+68:		summary: "Tasks, timelines, handoffs, approvals, and execution plans.",
+69:		routeHint: "workflows"
+90:const AI_COMMAND_LOCAL_DRAFTS_KEY = "mh-ai-command-local-drafts-v1";
+159:		bestUse: "When you need evidence-backed recommendations.",
+172:		purpose: "Translate intent into executable workflows and handoffs.",
+187:function buildAutoPlanFromCommand(commandText, session) {
+188:	const command = humanizeValue(commandText || session?.draftMessage, "Prepare workflow action from AI command.");
+193:			targetPage: "ai-command",
+194:			action: "Generate prompt from AI command",
+196:				prompt: command,
+197:				title: "AI command auto plan"
+202:			id: `auto-workflow-${Date.now()}`,
+203:			type: "prepare_workflow",
+204:			targetPage: "workflows",
+205:			action: "Prepare workflow from AI command",
+207:				prompt: command,
+208:				reason: "AI command prepared for workflow execution."
+214:	if (/publish\s*now|send\s*external|paid\s*ads|final\s*approval/i.test(command)) {
+221:				prompt: command,
+222:				reason: "Requires approval gate before external publishing actions."
+266:			value.recommendation ||
+363:			commandType: "strategy",
+431:	if (localDraft.commandType) session.commandType = asString(localDraft.commandType);
+444:		commandType: session.commandType,
+478:	const recommendations = asArray(learning.recommendations || insights.recommendations);
+479:	const nextBestActions = asArray(overviewBlock.next_best_actions || readinessDashboard.next_best_actions);
+511:		nextBestActions,
+544:		recommendations,
+552:		aiRecommendations: asObject(learning.ai_recommendations || insights.ai_recommendations),
+574:		operations: ["task plan", "workflow", "handoff", "approval", "timeline", "execution plan", "route", "publish", "status", "priority", "priorities", "blocking", "blocker", "readiness", "next", "do next"]
+629:	const topRecommendation = aiContext.recommendations[0];
+633:	if (aiContext.recommendations.length) summaryParts.push(`${aiContext.recommendations.length} recommendations available.`);
+640:			topRecommendation ? `Top recommendation: ${topRecommendation.title}.` : "No recommendation stack yet."
+642:		recommendations: [
+643:			topRecommendation ? `${topRecommendation.title}: ${topRecommendation.action}` : "Connect missing integrations to produce better recommendations.",
+644:			...aiContext.recommendations.slice(1, 3).map((item) => `${item.title}: ${item.action}`)
+647:			...aiContext.nextBestActions.slice(0, 4).map((item) => `Resolve ${normalizeActionLabel(item)}.`),
+653:			routeSuggestion("Insights", "insights", "Review performance signals and the recommendation stack.")
+675:		recommendations: [
+682:			weak ? `Move ${extractTopMessage(weak)} into a rewrite workflow.` : "Audit current content for posts not converting attention to clicks.",
+687:			routeSuggestion("Publishing", "publishing", "Schedule the next batch with stronger timing and approval control."),
+711:		recommendations: [
+714:			aiContext.recommendations.find((item) => item.domain === "seo")?.action || ""
+746:		recommendations: [
+749:			aiContext.recommendations.find((item) => item.domain === "paid")?.action || ""
+774:		recommendations: [
+782:			"Use Insights to identify where the recommendation stack is still blind."
+825:	if (!routeSuggestions.length) routeSuggestions.push(routeSuggestion("Workflows", "workflows", "Use Workflows when the task spans multiple execution areas."));
+828:		summary: "This request is best handled as a structured workflow — moving into the right workspace gets results faster than chat alone.",
+833:		recommendations: [
+835:			aiContext.recommendations[0]?.action || "Use the current recommendation stack to choose the first high-impact step."
+914:					learning: learningResult.status === "fulfilled" ? learningResult.value : (learningMissing ? { project: projectName, generated_at: nowIso(), learning_patterns: {}, recommendations: [] } : null),
+935:function syncAiWorkflowBridge({ projectName, modeId, command, response }) {
+939:		lastCommand: asString(command),
+947:	const handoff = getSharedHandoff(projectName, "ai-command", operations);
+978:	command,
+984:	const cleanCommand = asString(command).trim();
+986:	if (typeof executeProjectAiCommand !== "function") throw new Error("AI command service is unavailable.");
+991:	let commandId = "";
+995:			command: cleanCommand,
+1006:		const classification = asObject(result?.command?.classification);
+1007:		resolvedModeId = asString(classification.resolvedModeId) || asString(result?.command?.mode_id) || modeId || session.modeId;
+1008:		commandId = asString(result?.command?.id);
+1012:		const payloadCommand = asObject(payload?.command);
+1015:		commandId = asString(payloadCommand?.id);
+1033:		role: "user",
+1042:		role: "assistant",
+1044:		createdAt: asString(result?.command?.created_at) || nowIso(),
+1050:		id: commandId || `history-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+1052:		command: cleanCommand,
+1061:	syncAiWorkflowBridge({ projectName: aiContext.projectName, modeId: resolvedModeId, command: cleanCommand, response });
+1082:	if (aiContext.recommendations.length) caps.push(`${aiContext.recommendations.length} recommendations ready`);
+1141:			<div class="ctrl-room-section-label">Choose your AI specialist</div>
+1219:					<button type="button" id="ctrlBuildTaskBtn" class="ctrl-build-task-btn">Build command from task →</button>
+1276:	const recommendations = normalizeDisplayList(response.recommendations, 4);
+1287:	const hasContent = title || summary || findings.length || recommendations.length || nextActions.length;
+1314:			${recommendations.length ? `
+1318:						${recommendations.map((item) => `<div class="ctrl-response-item"><span>${escapeHtml(item)}</span></div>`).join("")}
+1368:				<div class="ctrl-empty-body">Choose a specialist above, pick a suggested prompt, or write your own command and hit Send.</div>
+1375:		if (message.role === "user") {
+1423:				<h3 style="margin:0;font-size:14px;font-weight:600;color:var(--color-text-0);">Recent commands</h3>
+1437:										<div class="ctrl-recent-command">${escapeHtml(entry.command)}</div>
+1461:	const recommendations = aiContext.recommendations.slice(0, 4);
+1466:		.filter((msg) => msg.role === "assistant" && asString(msg.response?.outputType || msg.response?.output_type))
+1475:	const hasContent = recommendations.length || patterns.length || artifacts.length;
+1481:				<span style="font-size:11px;color:var(--color-text-2);">${recommendations.length} rec${recommendations.length !== 1 ? "s" : ""} · ${patterns.length} patterns</span>
+1496:						${recommendations.map((rec) => {
+1499:							const recAction = humanizeValue(r.action || r.recommendation || r.summary || r.description || "");
+1529:	return asArray(session.messages).slice().reverse().find((item) => item.role === "user") || null;
+1533:	return asArray(session.messages).slice().reverse().find((item) => item.role === "assistant") || null;
+1537:	const commandTypeLabel = COMMAND_TYPES.find((item) => item.id === session.commandType)?.label || "Strategy";
+1541:	return `${asString(prompt).trim()}\n\nCommand type: ${commandTypeLabel}\nTarget: ${targetLine}`;
+1557:			command: `Review the critical readiness gaps for ${aiContext.projectName || "this project"} and produce a fix plan with owners, order, and dependencies.`,
+1566:			command: `Create an asset unblock plan for ${aiContext.projectName || "this project"}. List missing files, priority, and where each is needed.`,
+1576:			command: `Build an integration recovery plan for ${aiContext.projectName || "this project"}. Prioritize connectors by business impact and data coverage gain.`,
+1584:			reason: "A clear campaign context helps every specialist agent generate more precise outputs.",
+1585:			command: `Create a campaign operating brief for ${aiContext.projectName || "this project"} with objective, audience, channels, and first execution wave.`,
+1593:		command: `Generate the next high-impact content wave for ${aiContext.projectName || "this project"} based on current readiness and campaign context.`,
+1603:	id: "ai-command",
+1610:		<section class="page is-active" data-page="ai-command">
+1635:  const aiCommandsTotal = Number(operations.ai_commands?.total || 0);
+1637:  const recommendationsTotal = Number(operations.ai_recommendations?.open_count || 0);
+1646:  root.innerHTML = `
+1689:          <h3>Choose your AI specialist</h3>
+1758:          ${escapeHtml(session.draftStatus || "AI Workspace is ready. Choose a specialist, prepare a command, then run it from the global AI bar.")}
+1793:            <span>Selected specialist</span>
+1798:            <span>AI commands</span>
+1808:            <span>Open recommendations</span>
+1809:            <strong>${escapeHtml(String(recommendationsTotal))}</strong>
+1820:    button.onclick = () => {
+1831:    button.onclick = () => {
+1857:    sendBtn.onclick = () => {
+1861:        if (status) status.textContent = "Please write a command first.";
+1875:        status.textContent = "Command prepared in the global AI bar. Review it, then run it from the command controls.";
+1878:      showMessage?.(`${currentMode.label} command prepared.`);
+1884:    saveDraftBtn.onclick = () => {
+1894:    clearBtn.onclick = () => {
+1903:  const workflowsBtn = $("aicmdOpenWorkflowsBtn");
+1904:  if (workflowsBtn) {
+1905:    workflowsBtn.onclick = () => navigateTo("workflows");
+1910:    campaignBtn.onclick = () => navigateTo("campaign-studio");
+1915:    insightsBtn.onclick = () => navigateTo("insights");

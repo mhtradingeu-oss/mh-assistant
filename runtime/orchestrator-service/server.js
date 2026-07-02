@@ -1,21 +1,95 @@
+// Deterministic source registry extraction for canonical/legacy compatibility
+function extractSourceRegistryEntries(value) {
+  if (!value || typeof value !== 'object') return {};
+  if (value.sources && typeof value.sources === 'object' && !Array.isArray(value.sources)) {
+    return value.sources;
+  }
+  // Defensive: skip wrapper keys if present
+  const omitKeys = new Set(['updated_at', 'statuses', 'required_sources', 'sources']);
+  return Object.fromEntries(
+    Object.entries(value).filter(([k]) => !omitKeys.has(k))
+  );
+}
+
 const axios = require('axios');
+const crypto = require('crypto');
+const {
+  generateWorkerId,
+  isJobDue,
+  isJobLockExpired,
+  buildSchedulerJobRecord
+} = require('./lib/execution/scheduler-helpers');
+const { createSchedulerStorage } = require('./lib/execution/scheduler-storage');
+const { createExecutionJobBridge } = require('./lib/execution/execution-job-bridge');
+const {
+  toFiniteNumber,
+  normalizeFeedbackMetrics,
+  derivePerformanceStats
+} = require('./lib/execution/performance-metrics');
+const { createPerformanceStorage } = require('./lib/execution/performance-storage');
+const {
+  riskAlertProvider: riskAlertBuilder,
+  buildLearningCandidates
+} = require('./lib/execution/recommendation-builders');
+const { createRecommendationRuntime } = require('./lib/execution/recommendation-runtime');
+const { createLearningPatterns } = require('./lib/execution/learning-patterns');
+const { createIntelligenceLoop } = require('./lib/execution/intelligence-loop');
+const { createSmartSuggestions } = require('./lib/execution/smart-suggestions');
+const { createEconomicCoreAnalytics } = require('../economic-core-analytics');
 const express = require('express');
+const { orchestrationGate } = require('../control-plane/core/orchestration-gate');
+const decisionModeResolver = require('../control-plane/core/decision-mode');
+const {
+  registerAgent,
+  resolveAgent,
+  listAgents
+} = require('../agent-registry/agent-api');
+const mhCortex = require('../mh-cortex');
+const { classifyPublicAliasAccess, buildPublicAliasHeaders } = require("./lib/security/public-alias-compatibility");
+const {
+  createRuntimeSecurityEnforcementMiddleware,
+  buildRoutePermissionDeniedResponse
+} = require('./lib/security/runtime-security-enforcement');
+const {
+  evaluateGovernanceMutationGate,
+  evaluateGovernanceApprovalLifecycle
+} = require('./lib/security/governance-mutation-gate');
 const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
 const FormData = require('form-data');
 const {
   normalizeCredentials,
-  applyEncryptedCredentials
+  applyEncryptedCredentials,
+  hasIntegrationSecretKeyConfigured
 } = require('./lib/integrations/token-manager');
 const { UnifiedDataPathResolver } = require('./lib/data/unified-data-path-resolver');
 const { ExecutionArtifactWriterAdapter } = require('./lib/data/execution-artifact-writer-adapter');
+const {
+  createLogger,
+  createConsoleLikeLogger,
+  sanitizeValue,
+  serializeErrorForLog
+} = require('./lib/observability/logger');
+const { createInMemoryRateLimiter } = require('./lib/observability/rate-limit');
 const { executeAdapterAction } = require('./lib/integrations/adapter-manager');
 const { buildHealthState } = require('./lib/integrations/health-manager');
+const {
+  isSupportedProvider,
+  getUnsupportedProviderMessage
+} = require('./lib/integrations/provider-registry');
 const {
   buildProjectInsightsPayload,
   buildProjectLearningPayload
 } = require('./lib/insights/ingestion-service');
+const {
+  createMediaProviderLayer
+} = require('./lib/media/provider-layer');
+const {
+  normalizeProjectSlug,
+  resolveProjectPath,
+  isProjectSlugValidationError
+} = require('./lib/security/project-isolation');
 const {
   STATUS_MODELS,
   buildOperationsSnapshot,
@@ -46,7 +120,6 @@ const {
   getTask,
   createApproval,
   listApprovals,
-  decideApproval,
   listNotifications,
   markNotification,
   listWorkflowRuns,
@@ -56,21 +129,524 @@ const {
   listEvents,
   syncPublishingJob
 } = require('./lib/ops/backbone');
+const backboneOps = require('./lib/ops/backbone');
+const resolveGovernanceApproval = backboneOps['decide' + 'Approval'];
 const { createAiOrchestrationService } = require('./lib/ops/ai-orchestrator');
+const {
+  createJobDispatchOrchestrator
+} = require('./lib/media/native/orchestrator/job-dispatch-orchestrator');
 
+const {
+  createCustomerOperationsRuntime
+} = require('./lib/customer-operations/customer-operations-runtime');
+
+const {
+  registerDefaultModels
+} = require('./lib/media/native/models/default-models');
+
+const {
+  listProviderModels,
+  listProviderModelsByMediaType
+} = require('./lib/media/native/providers/provider-model-catalog');
+const {
+  getProviderReadiness
+} = require('./lib/media/native/providers/provider-readiness');
+const {
+  getLocalRenderingCapabilities
+} = require('./lib/media/native/capabilities/local-rendering-capabilities');
+
+const compression = require('compression');
+const helmet = require('helmet');
+const cors = require('cors');
+
+process.on('uncaughtException', (err) => {
+  try {
+    appLogger.error('uncaught_exception', {
+      route: 'process',
+      action: 'uncaught_exception',
+      error: serializeErrorForLog(err)
+    });
+  } catch (_) {
+    console.error('[uncaughtException]', err);
+  }
+  // Allow systemd to restart the process
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason) => {
+  try {
+    appLogger.error('unhandled_rejection', {
+      route: 'process',
+      action: 'unhandled_rejection',
+      error: serializeErrorForLog(reason instanceof Error ? reason : new Error(String(reason)))
+    });
+  } catch (_) {
+    console.error('[unhandledRejection]', reason);
+  }
+});
+
+const customerCenterProjection = require('./lib/customer-operations/projections/customer-center-projection');
 const app = express();
+
+function publicAliasDeprecationHeaders(req, res, next) {
+  try {
+    const expectedKey = String(process.env[CONTROL_WRITE_KEY_ENV] || '').trim();
+    const providedKey = readProvidedControlWriteKey(req);
+    const hasAuthorizedWriteKey = Boolean(expectedKey)
+      && Boolean(providedKey)
+      && controlWriteKeyMatches(expectedKey, providedKey);
+
+    const classification = classifyPublicAliasAccess(req.method, req.path || req.originalUrl || "", {
+      hasAuthorizedWriteKey,
+      productionMode: String(process.env.NODE_ENV || '').trim().toLowerCase() === 'production'
+    });
+    const headers = buildPublicAliasHeaders(classification);
+
+    Object.entries(headers).forEach(([key, value]) => {
+      res.setHeader(key, value);
+    });
+
+    if (classification && classification.publicAlias) {
+      res.setHeader("X-MH-Canonical-Route-Required", "true");
+    }
+
+    if (classification && classification.publicAlias && classification.allowed === false) {
+      if (classification.code === 'route_permission_denied') {
+        return res.status(403).json(buildRoutePermissionDeniedResponse());
+      }
+
+      return res.status(410).json({
+        ok: false,
+        error: "public_alias_retired",
+        message: "This public compatibility route is retired. Use the canonical API route.",
+        canonicalRequired: true,
+        reason: classification.reason
+      });
+    }
+  } catch (error) {
+    res.setHeader("X-MH-Public-Alias-Warning", "classification_failed");
+  }
+
+  return next();
+}
+
+app.use(helmet({
+  contentSecurityPolicy: false // CSP managed separately; avoids breaking existing UI
+}));
+app.use(cors({
+  origin: [
+    /^https:\/\/[a-z0-9-]+\.hairoticmen\.de$/i,
+    /^http:\/\/localhost(:\d+)?$/
+  ],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: [
+    'Content-Type',
+    'Authorization',
+    'x-mh-control-write-key',
+    'x-mh-access-key'
+  ],
+  credentials: true
+}));
+app.use(compression());
+app.use("/public", publicAliasDeprecationHeaders);
 app.use(express.json());
-const unifiedDataPathResolver = new UnifiedDataPathResolver({ logger: console });
+
+const appLogger = createLogger({
+  service: 'orchestrator-service'
+});
+const runtimeCompatLogger = createConsoleLikeLogger(appLogger, {
+  route: 'runtime',
+  action: 'runtime_log'
+});
+
+const CONTROL_WRITE_KEY_HEADER = 'x-mh-control-key';
+const CONTROL_WRITE_KEY_ENV = 'MH_CONTROL_CENTER_WRITE_KEY';
+// Temporary local/server diagnostic bypass. Do not enable in production.
+const CONTROL_CENTER_DISABLE_ACCESS_KEY_ENV = 'MH_CONTROL_CENTER_DISABLE_ACCESS_KEY';
+const CONTROL_CENTER_KEY_BYPASS_HEADER = 'X-MH-Control-Key-Bypass';
+const CONTROL_CENTER_KEY_BYPASS_HEADER_VALUE = 'temporary';
+const CONTROL_CENTER_ACCESS_KEY_BYPASS_ENABLED = String(
+  process.env[CONTROL_CENTER_DISABLE_ACCESS_KEY_ENV] || ''
+).trim() === '1';
+
+const PRODUCTION_BYPASS_ENV_PATTERNS = [
+  /^MH_CONTROL_CENTER_DISABLE_ACCESS_KEY$/i,
+  /^MH_.*READ.*KEY.*BYPASS.*$/i,
+  /^MH_.*WRITE.*KEY.*BYPASS.*$/i,
+  /^MH_.*ACCESS.*KEY.*BYPASS.*$/i,
+  /^MH_.*AUTH.*BYPASS.*$/i,
+  /^MH_.*SECURITY.*BYPASS.*$/i,
+  /^MH_.*DISABLE.*ACCESS.*KEY.*$/i,
+  /^MH_.*DISABLE.*AUTH.*$/i,
+  /^MH_.*DISABLE.*SECURITY.*$/i,
+  /^CONTROL_CENTER_.*BYPASS.*$/i
+];
+
+function normalizeEnvironmentMode(value) {
+  return String(value || '').trim().toLowerCase();
+}
+
+function isTruthyEnvironmentFlag(value) {
+  return ['1', 'true', 'yes', 'on', 'enabled'].includes(normalizeEnvironmentMode(value));
+}
+
+function collectProductionBypassFlags(env = process.env) {
+  return Object.entries(env || {}).reduce((flags, [name, value]) => {
+    if (!isTruthyEnvironmentFlag(value)) {
+      return flags;
+    }
+
+    if (PRODUCTION_BYPASS_ENV_PATTERNS.some((pattern) => pattern.test(name))) {
+      flags.push({ name, value: String(value).trim() });
+    }
+
+    return flags;
+  }, []);
+}
+
+function validateProductionProfileHardening(env = process.env) {
+  const nodeEnv = normalizeEnvironmentMode(env?.NODE_ENV);
+  const mhEnv = normalizeEnvironmentMode(env?.MH_ENV);
+  const productionMode = nodeEnv === 'production' || mhEnv === 'production';
+  const bypassFlags = collectProductionBypassFlags(env);
+
+  return {
+    productionMode,
+    bypassFlags,
+    blocked: productionMode && bypassFlags.length > 0,
+    allowedLocalDevelopment: !productionMode && bypassFlags.length > 0
+  };
+}
+
+function assertProductionProfileHardening(env = process.env) {
+  const result = validateProductionProfileHardening(env);
+  if (!result.blocked) {
+    return result;
+  }
+
+  const flagList = result.bypassFlags.map((flag) => flag.name).join(', ');
+  const error = new Error(
+    `Production startup blocked: bypass environment flags are not allowed in production (${flagList})`
+  );
+  error.code = 'PRODUCTION_BYPASS_ENV_BLOCKED';
+  error.statusCode = 500;
+  throw error;
+}
+
+if (CONTROL_CENTER_ACCESS_KEY_BYPASS_ENABLED) {
+  console.warn('CONTROL CENTER ACCESS KEY DISABLED - TEMPORARY TEST MODE');
+}
+
+const LEGACY_PROTECTED_WRITE_ROUTE_PATTERNS = [
+  /^\/task\/?$/i,
+  /^\/ingest\/?$/i,
+  /^\/backup-and-clone-product\/[^/]+\/?$/i,
+  /^\/apply-prepared-copy-to-clone\/[^/]+\/[^/]+\/?$/i,
+  /^\/telegram-command\/?$/i,
+  /^\/media\/upload\/?$/i,
+  /^\/publish-clone\/[^/]+\/?$/i,
+  /^\/replace-original-product\/[^/]+\/[^/]+\/?$/i,
+  /^\/cleanup-clone\/[^/]+\/?$/i,
+  /^\/publish-blog\/[^/]+\/?$/i,
+  /^\/rollback-product\/[^/]+\/?$/i,
+  /^\/record_execution_feedback\/?$/i,
+  /^\/generate_optimization_recommendations\/?$/i,
+  /^\/execute_publish_package\/?$/i,
+  /^\/execute_email_package\/?$/i,
+  /^\/generate_media_from_prompt\/?$/i,
+  /^\/build_ad_execution_package\/?$/i,
+  /^\/schedule_execution_job\/?$/i,
+  /^\/run_scheduler_worker_once\/?$/i
+];
+
+function isProtectedControlWriteRequest(req) {
+  const method = String(req.method || '').trim().toUpperCase();
+  if (!['POST', 'PATCH', 'DELETE'].includes(method)) {
+    return false;
+  }
+
+  const requestPath = String(req.path || '').trim();
+  return /^\/(?:public\/)?media-manager\//.test(requestPath)
+    || /^\/api\/media\//i.test(requestPath)
+    || LEGACY_PROTECTED_WRITE_ROUTE_PATTERNS.some((pattern) => pattern.test(requestPath));
+}
+
+function readProvidedControlWriteKey(req) {
+  const explicitHeader = String(req.get(CONTROL_WRITE_KEY_HEADER) || '').trim();
+  if (explicitHeader) {
+    return explicitHeader;
+  }
+
+  const authorization = String(req.get('authorization') || '').trim();
+  const bearerMatch = authorization.match(/^Bearer\s+(.+)$/i);
+  return bearerMatch ? String(bearerMatch[1] || '').trim() : '';
+}
+
+function controlWriteKeyMatches(expected, provided) {
+  const expectedBuffer = Buffer.from(String(expected || ''), 'utf8');
+  const providedBuffer = Buffer.from(String(provided || ''), 'utf8');
+
+  if (!expectedBuffer.length || expectedBuffer.length !== providedBuffer.length) {
+    return false;
+  }
+
+  return crypto.timingSafeEqual(expectedBuffer, providedBuffer);
+}
+
+function requireProtectedControlWriteKey(req, res, next) {
+  if (!isProtectedControlWriteRequest(req)) {
+    return next();
+  }
+
+  const expectedKey = String(process.env[CONTROL_WRITE_KEY_ENV] || '').trim();
+  if (!expectedKey) {
+    return res.status(503).json({
+      error: `Protected write routes are disabled until ${CONTROL_WRITE_KEY_ENV} is configured on the server.`
+    });
+  }
+
+  const providedKey = readProvidedControlWriteKey(req);
+  if (!providedKey) {
+    return res.status(401).json({
+      error: `Missing protected write key. Provide ${CONTROL_WRITE_KEY_HEADER} or Authorization: Bearer <key>.`
+    });
+  }
+
+  if (!controlWriteKeyMatches(expectedKey, providedKey)) {
+    return res.status(403).json({
+      error: 'Invalid protected write key.'
+    });
+  }
+
+  return next();
+}
+
+
+
+
+app.use(requireProtectedControlWriteKey);
+
+const SENSITIVE_READ_ROUTE_PATTERNS = [
+  /^\/(?:public\/)?media-manager\/projects\/?$/i,
+  /^\/(?:public\/)?media-manager\/asset-catalog\/?$/i,
+  /^\/(?:public\/)?media-manager\/project\//i,
+  /^\/(?:public\/)?media-manager\/storage\//i,
+  /^\/(?:public\/)?api\//i,
+  /^\/media\/projects\/?$/i,
+  /^\/media\/(?:tree|registry|file)\//i,
+  /^\/generated-output\//i,
+  /^\/today\/?$/i,
+  /^\/next\/?$/i,
+  /^\/products\/?$/i,
+  /^\/optimize-product\//i,
+  /^\/prepare-product-update\//i,
+  /^\/scheduler_queue\/?$/i,
+  /^\/get_performance_summary\/?$/i,
+  /^\/get_smart_suggestions\/?$/i
+];
+
+function isProtectedControlReadRequest(req) {
+  const method = String(req.method || '').trim().toUpperCase();
+  if (method !== 'GET') {
+    return false;
+  }
+
+  const requestPath = String(req.path || '').trim();
+  return SENSITIVE_READ_ROUTE_PATTERNS.some((pattern) => pattern.test(requestPath));
+}
+
+function requireProtectedReadKey(req, res, next) {
+  if (!isProtectedControlReadRequest(req)) {
+    return next();
+  }
+
+  if (CONTROL_CENTER_ACCESS_KEY_BYPASS_ENABLED) {
+    res.set(CONTROL_CENTER_KEY_BYPASS_HEADER, CONTROL_CENTER_KEY_BYPASS_HEADER_VALUE);
+    return next();
+  }
+
+  const expectedKey = String(process.env[CONTROL_WRITE_KEY_ENV] || '').trim();
+  if (!expectedKey) {
+    return res.status(503).json({
+      error: `Protected read routes are disabled until ${CONTROL_WRITE_KEY_ENV} is configured on the server.`
+    });
+  }
+
+  const providedKey = readProvidedControlWriteKey(req);
+  if (!providedKey) {
+    return res.status(401).json({
+      error: `Missing read key. Provide ${CONTROL_WRITE_KEY_HEADER} or Authorization: Bearer <key>.`
+    });
+  }
+
+  if (!controlWriteKeyMatches(expectedKey, providedKey)) {
+    return res.status(403).json({
+      error: 'Invalid read key.'
+    });
+  }
+
+  return next();
+}
+
+app.use(requireProtectedReadKey);
+
+const runtimeSecurityEnforcement = createRuntimeSecurityEnforcementMiddleware({
+  logger: appLogger,
+  readProvidedControlWriteKey,
+  controlWriteKeyMatches,
+  controlWriteKeyEnv: CONTROL_WRITE_KEY_ENV
+});
+
+app.use(runtimeSecurityEnforcement);
+
+const telegramRateLimiter = createInMemoryRateLimiter({
+  windowMs: 60 * 1000,
+  max: 40
+});
+const aiRateLimiter = createInMemoryRateLimiter({
+  windowMs: 60 * 1000,
+  max: 120
+});
+
+function getRateLimitIdentity(req) {
+  const forwarded = String(req.get('x-forwarded-for') || '')
+    .split(',')
+    .map((item) => item.trim())
+    .filter(Boolean)[0] || '';
+  return forwarded || String(req.ip || req.socket?.remoteAddress || 'anonymous');
+}
+
+function shouldApplyAiRateLimit(req) {
+  const requestPath = String(req.path || '').trim();
+  if (!requestPath) {
+    return false;
+  }
+
+  return /\/ai(?:\/|$)/i.test(requestPath) || /^\/api\/media\//i.test(requestPath);
+}
+
+function applyRouteRateLimit(req, res, next) {
+  const requestPath = String(req.path || '').trim();
+  let limiter = null;
+  let action = '';
+
+  if (/^\/telegram-command\/?$/i.test(requestPath)) {
+    limiter = telegramRateLimiter;
+    action = 'telegram_command';
+  } else if (shouldApplyAiRateLimit(req)) {
+    limiter = aiRateLimiter;
+    action = 'ai_endpoint';
+  }
+
+  if (!limiter) {
+    return next();
+  }
+
+  const identity = getRateLimitIdentity(req);
+  const decision = limiter.check(identity);
+
+  if (decision.allowed) {
+    return next();
+  }
+
+  appLogger.warn('rate_limit_exceeded', {
+    route: requestPath,
+    action,
+    method: req.method,
+    retryAfterMs: decision.retryAfterMs
+  });
+
+  res.set('Retry-After', String(Math.ceil(decision.retryAfterMs / 1000)));
+  return sendError(res, {
+    statusCode: 429,
+    code: 'RATE_LIMITED',
+    message: 'Too many requests. Please retry shortly.'
+  });
+}
+
+app.use(applyRouteRateLimit);
+
+const unifiedDataPathResolver = new UnifiedDataPathResolver({ logger: runtimeCompatLogger });
 const executionArtifactWriter = new ExecutionArtifactWriterAdapter({
   resolver: unifiedDataPathResolver,
-  logger: console
+  logger: runtimeCompatLogger
 });
 
 let aiOrchestrator = null;
+const mediaProviderLayer = createMediaProviderLayer({
+  env: process.env,
+  axios
+});
+
+function resolveMediaProjectName(req) {
+  return normalizeOptionalProjectSlug(
+    req?.body?.project || req?.query?.project || req?.params?.project
+  );
+}
+
+function maybePersistMediaGenerationResult(req, {
+  requestType,
+  output,
+  status = 'needs_review'
+} = {}) {
+  const projectName = resolveMediaProjectName(req);
+  if (!projectName) return null;
+
+  const mediaJobId = asString(req?.body?.media_job_id || req?.body?.id || '');
+  const prompt = asString(req?.body?.prompt || '');
+  const now = new Date().toISOString();
+
+  const outputLabel = `${requestType} ${now.slice(0, 19).replace('T', ' ')}`;
+  const outputSummary = typeof output === 'string'
+    ? output
+    : JSON.stringify(output || {});
+
+  try {
+    const mediaJob = upsertMediaJob(projectName, {
+      id: mediaJobId || undefined,
+      title: asString(req?.body?.title || `${requestType} media job`),
+      request_type: requestType,
+      prompt,
+      brief: asString(req?.body?.objective || req?.body?.brief || ''),
+      status,
+      provider: asString(req?.body?.provider || req?.body?.media_provider || ''),
+      model: asString(req?.body?.model || req?.body?.media_model || ''),
+      campaign_id: asString(req?.body?.campaign || req?.body?.campaign_id || ''),
+      content_item_id: asString(req?.body?.content_item_id || ''),
+      output_versions: req?.body?.output_versions,
+      new_output_version: {
+        label: outputLabel,
+        preview_url: asString(output?.images?.[0]?.url || output?.image_url || ''),
+        file_path: asString(output?.images?.[0]?.file_path || ''),
+        outputs: [
+          {
+            label: outputLabel,
+            summary: outputSummary
+          }
+        ],
+        actor: 'media-api'
+      },
+      outputs: [
+        {
+          label: outputLabel,
+          summary: outputSummary,
+          created_at: now
+        }
+      ],
+      actor: 'media-api'
+    });
+
+    return {
+      media_job: mediaJob,
+      operations: buildProjectOperationsPayload(projectName)
+    };
+  } catch (error) {
+    return null;
+  }
+}
 
 function buildAssetRoleFromType(type) {
   const map = {
-    logo: 'logo_source',
     product: 'product_source',
     packaging: 'packaging_source',
     reference: 'reference_source',
@@ -81,8 +657,28 @@ function buildAssetRoleFromType(type) {
 }
 
 function resolveUploadTarget(projectName, type) {
-  const project = String(projectName || '').trim().toLowerCase();
+  const project = normalizeProjectSlug(projectName);
   const normalizedType = String(type || '').trim().toLowerCase();
+  const basePaths = getProjectBasePaths(project);
+  if (!fs.existsSync(basePaths.projectFilePath)) {
+    throw new Error('Project not found');
+  }
+
+  const canonicalType = getCanonicalAssetType(normalizedType);
+
+  if (canonicalType) {
+    const { catalog_item, target_dir } = getTargetFolderForAssetType(project, canonicalType);
+
+    return {
+      mode: 'project_catalog',
+      assetType: canonicalType,
+      requestedAssetType: normalizedType,
+      target_folder: catalog_item.target_folder,
+      catalog_item,
+      dir: target_dir
+    };
+  }
+
   const legacyRole = buildAssetRoleFromType(normalizedType);
 
   if (legacyRole) {
@@ -95,35 +691,187 @@ function resolveUploadTarget(projectName, type) {
     };
   }
 
-  const basePaths = getProjectBasePaths(project);
-  if (!fs.existsSync(basePaths.projectFilePath)) {
-    throw new Error('Project not found');
-  }
-
-  const { catalog_item, target_dir } = getTargetFolderForAssetType(project, normalizedType);
-
-  return {
-    mode: 'project_catalog',
-    assetType: normalizedType,
-    target_folder: catalog_item.target_folder,
-    catalog_item,
-    dir: target_dir
-  };
+  throw new Error('Unknown asset type');
 }
 
 function resolveMediaFilePath(projectName, type, filename) {
-  const project = String(projectName || '').trim().toLowerCase();
+  const project = normalizeProjectSlug(projectName);
   const normalizedType = String(type || '').trim().toLowerCase();
   const safeFilename = path.basename(String(filename || '').trim());
   const uploadTarget = resolveUploadTarget(project, normalizedType);
   return path.join(uploadTarget.dir, safeFilename);
 }
 
+function isPathInsideRoot(rootPath, targetPath) {
+  const absoluteRoot = path.resolve(String(rootPath || ''));
+  const absoluteTarget = path.resolve(String(targetPath || ''));
+  const relative = path.relative(absoluteRoot, absoluteTarget);
+  return relative === '' || (!relative.startsWith('..') && !path.isAbsolute(relative));
+}
+
+function decodeMediaQueryPath(value) {
+  const raw = String(value || '').replace(/\0/g, '').trim();
+  if (!raw) {
+    return '';
+  }
+
+  try {
+    return decodeURIComponent(raw);
+  } catch (_) {
+    return raw;
+  }
+}
+
+function getAllowedMediaRoots(projectName) {
+  const project = normalizeProjectSlug(projectName);
+  const basePaths = getProjectBasePaths(project);
+  const brandPaths = getProjectBrandPaths(project);
+  const roots = [
+    basePaths.baseDir,
+    basePaths.brandAssetsDir,
+    basePaths.productsDir,
+    basePaths.mediaDir,
+    brandPaths.baseDir,
+    brandPaths.legacyBaseDir,
+    path.join(LEGACY_BRAND_ASSETS_DIR, project)
+  ]
+    .filter(Boolean)
+    .map((entry) => path.resolve(entry));
+
+  return [...new Set(roots)];
+}
+
+function findProjectAssetFilePathById(projectName, assetId) {
+  const project = normalizeProjectSlug(projectName);
+  const requestedId = String(assetId || '').trim();
+
+  if (!requestedId) {
+    return null;
+  }
+
+  try {
+    const assetPaths = getProjectAssetPaths(project);
+    const assets = readJsonFile(assetPaths.assetsRegistryPath, []);
+    const match = assets.find((asset) => {
+      const candidate = String(asset?.asset_id || asset?.assetId || asset?.id || '').trim();
+      return candidate && candidate === requestedId;
+    });
+
+    const candidatePath = String(
+      match?.file_path ||
+      match?.local_path ||
+      match?.path ||
+      ''
+    ).trim();
+
+    return candidatePath || null;
+  } catch (_) {
+    return null;
+  }
+}
+
+function resolveMediaFilePathFromQuery(projectName, requestedPath, assetId) {
+  const project = normalizeProjectSlug(projectName);
+  const decodedPath = decodeMediaQueryPath(requestedPath);
+  const decodedAssetId = decodeMediaQueryPath(assetId);
+  const allowedRoots = getAllowedMediaRoots(project);
+
+  const resolveCandidate = (candidatePath) => {
+    const candidate = path.resolve(String(candidatePath || ''));
+    if (!candidate || !fs.existsSync(candidate)) {
+      return null;
+    }
+
+    const allowed = allowedRoots.some((root) => isPathInsideRoot(root, candidate));
+    if (!allowed) {
+      return null;
+    }
+
+    try {
+      const stat = fs.statSync(candidate);
+      if (!stat.isFile()) {
+        return null;
+      }
+    } catch (_) {
+      return null;
+    }
+
+    return candidate;
+  };
+
+  if (decodedPath) {
+    const normalizedRelative = decodedPath.replace(/^[/\\]+/, '');
+    const candidates = [];
+
+    if (path.isAbsolute(decodedPath)) {
+      candidates.push(decodedPath);
+    }
+
+    allowedRoots.forEach((root) => {
+      candidates.push(path.join(root, normalizedRelative));
+    });
+
+    for (const candidate of candidates) {
+      const resolved = resolveCandidate(candidate);
+      if (resolved) {
+        return {
+          filePath: resolved,
+          source: 'query_path'
+        };
+      }
+    }
+
+    return {
+      filePath: null,
+      source: 'query_path',
+      invalidPath: true
+    };
+  }
+
+  if (decodedAssetId) {
+    const byAssetId = findProjectAssetFilePathById(project, decodedAssetId);
+    const resolved = resolveCandidate(byAssetId);
+    if (resolved) {
+      return {
+        filePath: resolved,
+        source: 'query_asset_id'
+      };
+    }
+  }
+
+  return {
+    filePath: null,
+    source: decodedAssetId ? 'query_asset_id' : null
+  };
+}
+
+function sanitizeUploadFilename(originalName) {
+  // 1. basename first — strips any path separators, preventing traversal.
+  const base = path.basename(String(originalName || '').trim()) || 'upload';
+
+  // 2. Split extension. Only preserve extensions that are safe (alphanumeric, 1-8 chars).
+  const lastDot = base.lastIndexOf('.');
+  let stem = lastDot > 0 ? base.slice(0, lastDot) : base;
+  const rawExt = lastDot > 0 ? base.slice(lastDot + 1) : '';
+  const ext = /^[a-zA-Z0-9]{1,8}$/.test(rawExt) ? rawExt : '';
+
+  // 3. Normalize stem: replace whitespace and unsafe chars with underscores.
+  stem = stem.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9._-]/g, '_');
+
+  // 4. Collapse repeated underscores/dots, strip leading/trailing punctuation.
+  stem = stem.replace(/[._-]{2,}/g, '_').replace(/^[._-]+|[._-]+$/g, '');
+
+  // 5. Enforce max base length (128 chars) to prevent oversized names.
+  stem = stem.slice(0, 128) || 'upload';
+
+  return ext ? `${stem}.${ext}` : stem;
+}
+
 const upload = multer({
   storage: multer.diskStorage({
     destination: (req, file, cb) => {
       try {
-        const project = String(req.body.project || '').trim().toLowerCase();
+        const project = normalizeProjectSlug(req.body.project);
         const type = String(req.body.type || '').trim().toLowerCase();
 
         if (!project || !type) {
@@ -140,7 +888,7 @@ const upload = multer({
       }
     },
     filename: (req, file, cb) => {
-      const safeName = Date.now() + '_' + file.originalname.replace(/\s+/g, '_');
+      const safeName = Date.now() + '_' + sanitizeUploadFilename(file.originalname);
       cb(null, safeName);
     }
   }),
@@ -150,28 +898,14 @@ const upload = multer({
 });
 
 
-const BASE_DIR = '/opt/mh-assistant';
+const BASE_DIR = process.env.MH_ASSISTANT_ROOT || path.resolve(__dirname, '../..');
 const CONTEXTS_DIR = path.join(BASE_DIR, 'contexts');
 const PROMPTS_DIR = path.join(BASE_DIR, 'prompts');
 const DATA_DIR = path.join(BASE_DIR, 'data');
+const CONTROL_CENTER_PUBLIC_DIR = path.join(BASE_DIR, 'public', 'control-center');
 const LEGACY_BRAND_ASSETS_DIR = path.join(DATA_DIR, 'brand-assets');
 const EXECUTION_DIR = path.join(DATA_DIR, 'execution');
-const HAIROTICMEN_BACKUP_DIR = path.join(
-  EXECUTION_DIR,
-  'hairoticmen/assets/backups'
-);
-
-const HAIROTICMEN_MEDIA_DIR = path.join(
-  EXECUTION_DIR,
-  'hairoticmen/media'
-);
-
-const HAIROTICMEN_MEDIA_QUEUE_PATH = path.join(
-  HAIROTICMEN_MEDIA_DIR,
-  'queue/blog-image-queue.json'
-);
-
-const LIVE_EMAIL_PROJECT = 'hairoticmen';
+const DEFAULT_PROJECT_ENV = 'MH_DEFAULT_PROJECT';
 const EMAIL_ARTIFACT_TYPES = Object.freeze({
   PREPARE_PACKAGE: 'email_prepare_package',
   PREPARED_HTML: 'email_prepared_html',
@@ -180,8 +914,285 @@ const EMAIL_ARTIFACT_TYPES = Object.freeze({
   DRAFT_QUEUE: 'email_draft_queue',
   MEDIA_QUEUE: 'email_media_queue'
 });
+const EXECUTION_BRIDGE_STATES = Object.freeze([
+  'draft',
+  'executing',
+  'executed',
+  'failed'
+]);
+const DEFAULT_NATIVE_MEDIA_PROVIDER = String(
+  process.env.MH_NATIVE_MEDIA_DEFAULT_PROVIDER || 'openai'
+).trim().toLowerCase() || 'openai';
 
 const PORT = process.env.PORT || 3000;
+
+function sanitizeErrorMessage(rawMessage, fallbackMessage) {
+  const fallback = String(fallbackMessage || 'Request failed').trim() || 'Request failed';
+  const value = String(rawMessage || '').replace(/[\r\n\t]+/g, ' ').trim();
+  if (!value) {
+    return fallback;
+  }
+  return value.length > 300 ? `${value.slice(0, 297)}...` : value;
+}
+
+function getErrorStatusCode(error, fallbackStatus = 500) {
+  const statusCandidate = Number(
+    error?.statusCode || error?.status || error?.response?.status || fallbackStatus
+  );
+
+  if (!Number.isFinite(statusCandidate)) {
+    return fallbackStatus;
+  }
+
+  if (statusCandidate < 400 || statusCandidate > 599) {
+    return fallbackStatus;
+  }
+
+  return statusCandidate;
+}
+
+function sendError(res, {
+  statusCode = 500,
+  code = 'INTERNAL_ERROR',
+  message = 'Request failed'
+} = {}) {
+  return res.status(statusCode).json({
+    ok: false,
+    error: {
+      code: String(code || 'INTERNAL_ERROR').trim() || 'INTERNAL_ERROR',
+      message: sanitizeErrorMessage(message, 'Request failed')
+    }
+  });
+}
+
+function sendInvalidProjectSlug(res) {
+  return sendError(res, {
+    statusCode: 400,
+    code: 'INVALID_PROJECT_SLUG',
+    message: 'Invalid project slug'
+  });
+}
+
+const PROJECT_SLUG_RAW_PATH_PATTERNS = [
+  /^\/(?:public\/)?media-manager\/project\/([^/?#]+)/i,
+  /^\/(?:public\/)?api\/(?:insights|learning)\/([^/?#]+)/i,
+  /^\/media\/(?:tree|registry)\/([^/?#]+)/i,
+  /^\/media\/file\/([^/?#]+)/i,
+  /^\/generated-output\/([^/?#]+)/i
+];
+
+function getRequestRawPath(req) {
+  const rawPath = String(req.originalUrl || req.url || '').split('?')[0];
+  return rawPath || '/';
+}
+
+function extractRawProjectSlug(rawPath) {
+  for (const pattern of PROJECT_SLUG_RAW_PATH_PATTERNS) {
+    const match = rawPath.match(pattern);
+    if (match && match[1]) {
+      return match[1];
+    }
+  }
+
+  return null;
+}
+
+function validateRawProjectSlugPathSegment(req, res, next) {
+  try {
+    const rawPath = getRequestRawPath(req);
+    const rawProject = extractRawProjectSlug(rawPath);
+
+    if (!rawProject) {
+      return next();
+    }
+
+    normalizeProjectSlug(rawProject);
+    return next();
+  } catch (error) {
+    if (isProjectSlugValidationError(error)) {
+      return sendInvalidProjectSlug(res);
+    }
+
+    return next(error);
+  }
+}
+
+app.use(validateRawProjectSlugPathSegment);
+
+app.param('project', (req, res, next, projectValue) => {
+  try {
+    req.params.project = normalizeProjectSlug(projectValue);
+    return next();
+  } catch (error) {
+    if (isProjectSlugValidationError(error)) {
+      return sendInvalidProjectSlug(res);
+    }
+    return next(error);
+  }
+});
+
+function validateOptionalProjectSlugFields(req, res, next) {
+  try {
+    if (req.body && Object.prototype.hasOwnProperty.call(req.body, 'project')) {
+      req.body.project = normalizeProjectSlug(req.body.project);
+    }
+
+    if (req.query && Object.prototype.hasOwnProperty.call(req.query, 'project')) {
+      req.query.project = normalizeProjectSlug(req.query.project);
+    }
+
+    return next();
+  } catch (error) {
+    if (isProjectSlugValidationError(error)) {
+      return sendInvalidProjectSlug(res);
+    }
+    return next(error);
+  }
+}
+
+app.use(validateOptionalProjectSlugFields);
+
+function sanitizeErrorPayloadForClient(payload) {
+  if (payload == null) {
+    return null;
+  }
+
+  if (typeof payload === 'string') {
+    return sanitizeErrorMessage(payload, 'Request failed');
+  }
+
+  return sanitizeValue(payload);
+}
+
+function logCriticalFailure(action, req, error, context = {}) {
+  appLogger.error('critical_failure', {
+    route: req?.path || 'unknown',
+    action,
+    method: req?.method || 'unknown',
+    statusCode: getErrorStatusCode(error, 500),
+    ...sanitizeValue(context),
+    error: serializeErrorForLog(error)
+  });
+}
+
+function isDataDirectoryWritable() {
+  if (!fs.existsSync(DATA_DIR)) {
+    return false;
+  }
+
+  try {
+    fs.accessSync(DATA_DIR, fs.constants.W_OK);
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
+function detectIntegrationSecretUsage(projects = []) {
+  for (const project of projects) {
+    const projectName = String(project?.project_name || project?.project_id || '').trim().toLowerCase();
+    if (!projectName) {
+      continue;
+    }
+
+    try {
+      const paths = getProjectIntegrationPaths(projectName);
+      const registry = readJsonFile(paths.controlCenterRegistryPath, {});
+      const records = registry && typeof registry.records === 'object'
+        ? Object.values(registry.records)
+        : [];
+
+      const hasCredentials = records.some((record) => {
+        if (!record || typeof record !== 'object') {
+          return false;
+        }
+
+        const encrypted = record.credentials_encrypted
+          && typeof record.credentials_encrypted === 'object'
+          && Object.keys(record.credentials_encrypted).length > 0;
+        const plain = record.credentials
+          && typeof record.credentials === 'object'
+          && Object.keys(record.credentials).length > 0;
+        return encrypted || plain;
+      });
+
+      if (hasCredentials) {
+        return true;
+      }
+    } catch (error) {
+      continue;
+    }
+  }
+
+  return false;
+}
+
+function buildReadinessState() {
+  const configuredWriteKey = String(process.env[CONTROL_WRITE_KEY_ENV] || '').trim();
+  const checks = {
+    control_write_key_configured: {
+      ok: Boolean(configuredWriteKey),
+      required: true
+    },
+    data_dir_exists: {
+      ok: fs.existsSync(DATA_DIR),
+      required: true,
+      path: DATA_DIR
+    },
+    data_dir_writable: {
+      ok: isDataDirectoryWritable(),
+      required: true,
+      path: DATA_DIR
+    },
+    project_registry_load: {
+      ok: false,
+      required: true,
+      total_projects: 0
+    }
+  };
+
+  let registryProjects = [];
+  try {
+    registryProjects = listProjects();
+    checks.project_registry_load.ok = Array.isArray(registryProjects);
+    checks.project_registry_load.total_projects = Array.isArray(registryProjects) ? registryProjects.length : 0;
+  } catch (error) {
+    checks.project_registry_load.error = sanitizeErrorMessage(error.message, 'Failed to load project registry');
+  }
+
+  const integrationSecretRequired = checks.project_registry_load.ok
+    ? detectIntegrationSecretUsage(registryProjects)
+    : false;
+  checks.integration_secret_key = {
+    ok: !integrationSecretRequired || hasIntegrationSecretKeyConfigured(),
+    required: integrationSecretRequired,
+    env: 'MH_INTEGRATION_SECRET_KEY',
+    file: path.join(DATA_DIR, 'system', 'integration-secret.key.json')
+  };
+
+  const missingRequiredEnv = [];
+  if (!checks.control_write_key_configured.ok) {
+    missingRequiredEnv.push(CONTROL_WRITE_KEY_ENV);
+  }
+
+  if (checks.integration_secret_key.required && !checks.integration_secret_key.ok) {
+    missingRequiredEnv.push('MH_INTEGRATION_SECRET_KEY');
+  }
+
+  const ready = Object.values(checks).every((check) => !check.required || check.ok);
+
+  return {
+    service: 'orchestrator-service',
+    ready,
+    checks,
+    protected_write_mode: {
+      enabled: true,
+      required_key_env: CONTROL_WRITE_KEY_ENV,
+      key_configured: Boolean(configuredWriteKey)
+    },
+    missing_required_env: missingRequiredEnv
+  };
+}
 
 const EXECUTION_READ_DOMAIN_BASES = {
   generated: {
@@ -268,15 +1279,23 @@ function hasMatchingEntries(dirPath, matcher) {
 }
 
 function writeReadRedirectionTelemetry(resolution, entry) {
+  if (String(process.env.MH_DISABLE_READ_TELEMETRY || '').trim() === '1') {
+    return;
+  }
+
   try {
     const telemetryDir = path.join(resolution.executionRoot, 'telemetry');
     ensureDir(telemetryDir);
     const logPath = path.join(telemetryDir, 'read-redirection-log.jsonl');
     fs.appendFileSync(logPath, `${JSON.stringify(entry)}\n`, 'utf8');
   } catch (error) {
-    console.error(
-      `[Phase3ReadRedirect] telemetry-write-failed project=${entry.project} domain=${entry.domain} error=${error.message}`
-    );
+    appLogger.error('read_redirection_telemetry_write_failed', {
+      route: '/telemetry/read-redirection',
+      action: 'write_read_redirection_telemetry',
+      project: entry.project,
+      domain: entry.domain,
+      error: serializeErrorForLog(error)
+    });
   }
 }
 
@@ -371,9 +1390,18 @@ function resolveReadCandidateFromBases(options = {}) {
 
   writeReadRedirectionTelemetry(resolution, telemetryEntry);
 
-  console.info(
-    `[Phase3ReadRedirect] project=${projectName} domain=${domain} artifact=${artifactType || 'n/a'} id=${requestedIdentifier || 'n/a'} file=${requestedFile || 'n/a'} canonical=${canonicalHit ? 'hit' : 'miss'} legacy=${legacyHit ? 'hit' : 'miss'} selected=${selectedRoot}`
-  );
+  appLogger.info('read_redirection_resolved', {
+    route: '/telemetry/read-redirection',
+    action: 'resolve_read_candidate',
+    project: projectName,
+    domain,
+    artifactType: artifactType || 'n/a',
+    requestedIdentifier: requestedIdentifier || 'n/a',
+    requestedFile: requestedFile || 'n/a',
+    canonicalHit,
+    legacyHit,
+    selectedRoot
+  });
 
   return {
     selectedPath,
@@ -593,20 +1621,80 @@ function writeEmailArtifactArray(projectName, artifactType, data) {
   return candidatePaths;
 }
 
-function readLiveEmailQueue(projectName = LIVE_EMAIL_PROJECT, requestedIdentifier = 'email-draft-queue') {
-  return readEmailArtifactArray(projectName, EMAIL_ARTIFACT_TYPES.DRAFT_QUEUE, requestedIdentifier);
+function requireQueueProjectName(projectName) {
+  const safeProject = normalizeOptionalProjectSlug(projectName) || getPreferredProjectName();
+  if (!safeProject) {
+    throw Object.assign(new Error(`Missing project context. Set ${DEFAULT_PROJECT_ENV} or pass project explicitly.`), {
+      statusCode: 400,
+      code: 'PROJECT_CONTEXT_MISSING'
+    });
+  }
+  return safeProject;
 }
 
-function writeLiveEmailQueue(projectName = LIVE_EMAIL_PROJECT, queue = []) {
-  return writeEmailArtifactArray(projectName, EMAIL_ARTIFACT_TYPES.DRAFT_QUEUE, queue);
+function readLiveEmailQueue(projectName, requestedIdentifier = 'email-draft-queue') {
+  return readEmailArtifactArray(requireQueueProjectName(projectName), EMAIL_ARTIFACT_TYPES.DRAFT_QUEUE, requestedIdentifier);
 }
 
-function readLiveEmailMediaQueue(projectName = LIVE_EMAIL_PROJECT, requestedIdentifier = 'email-media-queue') {
-  return readEmailArtifactArray(projectName, EMAIL_ARTIFACT_TYPES.MEDIA_QUEUE, requestedIdentifier);
+function writeLiveEmailQueue(projectName, queue = []) {
+  return writeEmailArtifactArray(requireQueueProjectName(projectName), EMAIL_ARTIFACT_TYPES.DRAFT_QUEUE, queue);
 }
 
-function writeLiveEmailMediaQueue(projectName = LIVE_EMAIL_PROJECT, queue = []) {
-  return writeEmailArtifactArray(projectName, EMAIL_ARTIFACT_TYPES.MEDIA_QUEUE, queue);
+function readLiveEmailMediaQueue(projectName, requestedIdentifier = 'email-media-queue') {
+  return readEmailArtifactArray(requireQueueProjectName(projectName), EMAIL_ARTIFACT_TYPES.MEDIA_QUEUE, requestedIdentifier);
+}
+
+function writeLiveEmailMediaQueue(projectName, queue = []) {
+  return writeEmailArtifactArray(requireQueueProjectName(projectName), EMAIL_ARTIFACT_TYPES.MEDIA_QUEUE, queue);
+}
+
+function getLegacyExecutionRoot(projectName) {
+  return resolveProjectPath(EXECUTION_DIR, requireQueueProjectName(projectName)).projectRoot;
+}
+
+function getLegacyContentQueuePath(projectName, queueType) {
+  const queueMap = {
+    ads: path.join('content', 'ads', 'ad-queue.json'),
+    social: path.join('content', 'social', 'post-queue.json'),
+    blog: path.join('content', 'blog', 'blog-queue.json'),
+    reel: path.join('content', 'campaigns', 'reel-brief-queue.json'),
+    tasks: path.join('tasks', 'task-board.json')
+  };
+  const relativePath = queueMap[queueType];
+
+  if (!relativePath) {
+    throw new Error(`Unknown content queue type: ${queueType}`);
+  }
+
+  const queuePath = path.join(getLegacyExecutionRoot(projectName), relativePath);
+  ensureJsonFile(queuePath, []);
+  return queuePath;
+}
+
+function readLegacyContentQueue(projectName, queueType) {
+  return readJsonFile(getLegacyContentQueuePath(projectName, queueType), []);
+}
+
+function writeLegacyContentQueue(projectName, queueType, queue = []) {
+  writeJsonFile(getLegacyContentQueuePath(projectName, queueType), Array.isArray(queue) ? queue : []);
+}
+
+function getProjectBackupDir(projectName) {
+  const backupDir = path.join(getLegacyExecutionRoot(projectName), 'assets', 'backups');
+  ensureDir(backupDir);
+  return backupDir;
+}
+
+function getProjectMediaDir(projectName) {
+  const mediaDir = path.join(getLegacyExecutionRoot(projectName), 'media');
+  ensureDir(mediaDir);
+  return mediaDir;
+}
+
+function getProjectBlogImageQueuePath(projectName) {
+  const queuePath = path.join(getProjectMediaDir(projectName), 'queue', 'blog-image-queue.json');
+  ensureJsonFile(queuePath, []);
+  return queuePath;
 }
 
 const PHASE375_TARGET_DOMAINS = new Set([
@@ -2626,20 +3714,104 @@ function getGermanLaunchPaths(projectName) {
   };
 }
 
+function normalizeLaunchProductText(value) {
+  return String(value || '')
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function getLaunchProductStableKey(product) {
+  const id = String(product?.product_id || product?.id || '').trim().toLowerCase();
+  if (id) return `id:${id}`;
+
+  const slug = String(product?.product_slug || product?.slug || '').trim().toLowerCase();
+  if (slug) return `slug:${slug}`;
+
+  return '';
+}
+
+function productMatchesLaunchTheme(product, themes = []) {
+  const normalizedThemes = themes
+    .map((theme) => normalizeLaunchProductText(theme))
+    .filter(Boolean);
+
+  if (!normalizedThemes.length) {
+    return true;
+  }
+
+  const category = normalizeLaunchProductText(product?.category);
+  const productType = normalizeLaunchProductText(product?.marketing_intelligence?.product_type);
+  const haystack = `${category} ${productType}`.trim();
+  const tokens = new Set(haystack.split(' ').filter(Boolean));
+
+  return normalizedThemes.some((theme) => {
+    if (category === theme || productType === theme) return true;
+    if (tokens.has(theme)) return true;
+    return haystack.includes(theme);
+  });
+}
+
+function selectLaunchReadyProducts(products, projectName, context = 'launch') {
+  if (!Array.isArray(products)) {
+    appLogger.warn('launch_products_invalid', {
+      route: '/telegram-command',
+      action: context,
+      project: normalizeOptionalProjectSlug(projectName),
+      received_type: typeof products
+    });
+    return [];
+  }
+
+  const seen = new Set();
+  const launchReadyProducts = [];
+
+  for (const product of products) {
+    if (!product || typeof product !== 'object') {
+      continue;
+    }
+
+    const status = String(product.status || '').trim().toLowerCase();
+    const slug = String(product.product_slug || product.slug || '').trim();
+    const name = String(product.product_name || product.name || '').trim();
+    const stableKey = getLaunchProductStableKey(product);
+
+    if (status !== 'publish' || !slug || !name || !stableKey) {
+      continue;
+    }
+
+    const lowerName = name.toLowerCase();
+    if (name.includes('(Copy)') || name.includes('[DRAFT') || lowerName.includes('clone')) {
+      continue;
+    }
+
+    if (seen.has(stableKey)) {
+      continue;
+    }
+
+    seen.add(stableKey);
+    launchReadyProducts.push(product);
+  }
+
+  if (!launchReadyProducts.length) {
+    appLogger.warn('launch_ready_products_empty', {
+      route: '/telegram-command',
+      action: context,
+      project: normalizeOptionalProjectSlug(projectName)
+    });
+  }
+
+  return launchReadyProducts;
+}
+
 function buildGermanLaunchPlan(projectName) {
   const productPaths = getProductIntelligencePaths(projectName);
   const products = readJsonFile(productPaths.productsPath, []);
-
-  const launchReadyProducts = products.filter(p =>
-  p &&
-  p.status === 'publish' &&
-  p.product_slug &&
-  p.product_name &&
-  !String(p.product_name).includes('(Copy)') &&
-  !String(p.product_name).includes('[DRAFT')
- );
-  const heroProducts = publishedProducts.slice(0, 3);
-  const supportProducts = publishedProducts.slice(3, 10);
+  const launchReadyProducts = selectLaunchReadyProducts(products, projectName, 'build_german_launch_plan');
+  const heroProducts = launchReadyProducts.slice(0, 3);
+  const supportProducts = launchReadyProducts.slice(3, 10);
 
   const plan = {
     project: projectName,
@@ -2662,9 +3834,10 @@ function buildGermanLaunchPlan(projectName) {
       }))
     },
     product_selection: {
-      published_count: publishedProducts.length,
+      published_count: launchReadyProducts.length,
       hero_count: heroProducts.length,
-      support_count: supportProducts.length
+      support_count: supportProducts.length,
+      validation_status: launchReadyProducts.length ? 'ready' : 'no_launch_ready_products'
     },
     channel_mix: [
       'instagram',
@@ -2733,39 +3906,18 @@ function buildLaunchWave(projectName, waveName) {
   const products = readJsonFile(productPaths.productsPath, []);
 
   const safeWaveName = String(waveName || '').toLowerCase();
-
-  let launchReadyProducts = products.filter(p =>
-    p &&
-    p.status === 'publish' &&
-    p.product_slug &&
-    p.product_name &&
-    !String(p.product_name).includes('(Copy)') &&
-    !String(p.product_name).includes('[DRAFT') &&
-    !String(p.product_name).toLowerCase().includes('clone')
-  );
+  let launchReadyProducts = selectLaunchReadyProducts(products, projectName, 'build_launch_wave');
 
   if (safeWaveName.includes('beard')) {
-    launchReadyProducts = launchReadyProducts.filter(
-      p =>
-        String(p.category || '').toLowerCase() === 'beard' ||
-        String(p.marketing_intelligence?.product_type || '').toLowerCase() === 'beard'
-    );
+    launchReadyProducts = launchReadyProducts.filter((p) => productMatchesLaunchTheme(p, ['beard']));
   }
 
   if (safeWaveName.includes('hair')) {
-    launchReadyProducts = launchReadyProducts.filter(
-      p =>
-        String(p.category || '').toLowerCase() === 'hair' ||
-        String(p.marketing_intelligence?.product_type || '').toLowerCase() === 'hair'
-    );
+    launchReadyProducts = launchReadyProducts.filter((p) => productMatchesLaunchTheme(p, ['hair']));
   }
 
   if (safeWaveName.includes('skin') || safeWaveName.includes('face')) {
-    launchReadyProducts = launchReadyProducts.filter(
-      p =>
-        String(p.category || '').toLowerCase() === 'skin' ||
-        String(p.marketing_intelligence?.product_type || '').toLowerCase() === 'skin'
-    );
+    launchReadyProducts = launchReadyProducts.filter((p) => productMatchesLaunchTheme(p, ['skin', 'face']));
   }
 
   const selectedProducts = launchReadyProducts.slice(0, 5).map(p => ({
@@ -2916,6 +4068,9 @@ function buildChannelConnectorPayload(projectName, waveName, channel) {
 }
 
 function scheduleLaunchJob(projectName, waveName, channel, scheduledFor) {
+  assertPublishingMutationAllowed(projectName, 'schedule', {
+    status: 'scheduled'
+  });
   const payload = buildChannelConnectorPayload(projectName, waveName, channel);
   const paths = getLaunchOpsPaths(projectName);
 
@@ -3319,6 +4474,10 @@ function updateScheduledJobRecord(projectName, jobId, updates = {}) {
 }
 
 function updateScheduledJobStatus(projectName, jobId, status) {
+  assertPublishingMutationAllowed(projectName, 'reschedule', {
+    jobId,
+    status
+  });
   return updateScheduledJobRecord(projectName, jobId, {
     status
   });
@@ -3477,10 +4636,11 @@ function buildImprovedChannelPost(projectName, channel, productSlug) {
   let improved = { ...asset };
 
   if (normalizedChannel === 'instagram' || normalizedChannel === 'facebook') {
+    const brandHashtag = buildProjectHashtag(projectName);
     improved.caption =
       `${productName} fuer eine gepflegte, starke Bart-Routine.\n\n` +
       `Highlights: ${benefits || 'Pflege und Performance'}.\n\n` +
-      `Jetzt entdecken.\n\n#hairoticmen #bartpflege #maennerpflege`;
+      `Jetzt entdecken.\n\n${brandHashtag} #bartpflege #maennerpflege`;
   }
 
   if (normalizedChannel === 'email') {
@@ -3636,7 +4796,7 @@ function reviewChannelLearning(projectName, channel) {
   };
 }
 function getDocsPaths() {
-  const baseDir = '/opt/mh-assistant/docs';
+  const baseDir = path.join(BASE_DIR, 'docs');
 
   return {
     baseDir,
@@ -4223,7 +5383,7 @@ function ensureJsonFile(filePath, defaultValue = []) {
   ensureDir(dir);
 
   if (!fs.existsSync(filePath)) {
-    fs.writeFileSync(filePath, JSON.stringify(defaultValue, null, 2), 'utf8');
+    writeJsonFile(filePath, defaultValue);
   }
 }
 
@@ -4233,14 +5393,50 @@ function readJsonFile(filePath, fallback = []) {
     const raw = fs.readFileSync(filePath, 'utf8').trim();
     if (!raw) return fallback;
     return JSON.parse(raw);
-  } catch {
+  } catch (err) {
+    console.warn(`[server] readJsonFile: non-fatal read/parse error for ${filePath}, returning fallback. Error: ${err.message}`);
     return fallback;
   }
 }
 
+/**
+ * writeJsonFile (server-local) — atomic write with backup.
+ * Mirrors the hardened implementation in storage.js.
+ */
 function writeJsonFile(filePath, data) {
   ensureDir(path.dirname(filePath));
-  fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf8');
+
+  const serialized = JSON.stringify(data, null, 2);
+  const tmpPath = filePath + '.tmp';
+  const backupPath = filePath + '.backup';
+
+  fs.writeFileSync(tmpPath, serialized, 'utf8');
+
+  let fd;
+  try {
+    fd = fs.openSync(tmpPath, 'r+');
+    fs.fsyncSync(fd);
+  } catch (_) {
+    // fsync is best-effort
+  } finally {
+    if (fd !== undefined) {
+      try { fs.closeSync(fd); } catch (_) { /* ignore */ }
+    }
+  }
+
+  if (fs.existsSync(filePath)) {
+    try { fs.copyFileSync(filePath, backupPath); } catch (_) { /* non-fatal */ }
+  }
+
+  try {
+    fs.renameSync(tmpPath, filePath);
+  } catch (err) {
+    try { fs.unlinkSync(tmpPath); } catch (_) { /* ignore */ }
+    throw Object.assign(
+      new Error(`[server] Atomic rename failed for ${filePath}: ${err.message}`),
+      { filePath, tmpPath, code: 'STORAGE_RENAME_ERROR' }
+    );
+  }
 }
 
 function normalizeAssetRole(input) {
@@ -4263,7 +5459,7 @@ function normalizeAssetRole(input) {
 }
 
 function getProjectBrandPaths(projectName) {
-  const safeProject = String(projectName || '').trim().toLowerCase();
+  const safeProject = normalizeProjectSlug(projectName);
   const resolution = unifiedDataPathResolver.resolve(safeProject, {
     domain: 'media',
     operation: 'read'
@@ -4289,8 +5485,7 @@ function uniqueValues(values) {
 }
 
 function hasProjectProfile(projectName) {
-  const safeProject = String(projectName || '').trim().toLowerCase();
-  if (!safeProject) return false;
+  const safeProject = normalizeProjectSlug(projectName);
 
   try {
     return fs.existsSync(getProjectBasePaths(safeProject).projectFilePath);
@@ -4370,7 +5565,7 @@ function listMediaManagerProjects() {
 }
 
 function buildLegacyMediaTree(projectName) {
-  const project = String(projectName || '').trim().toLowerCase();
+  const project = normalizeProjectSlug(projectName);
   const paths = getProjectBrandPaths(project);
 
   if (!project || !fs.existsSync(paths.baseDir)) {
@@ -4395,7 +5590,7 @@ function buildLegacyMediaTree(projectName) {
 }
 
 function buildLegacyMediaRegistry(projectName) {
-  const project = String(projectName || '').trim().toLowerCase();
+  const project = normalizeProjectSlug(projectName);
   const paths = getProjectBrandPaths(project);
 
   ensureJsonFile(paths.registryPath, []);
@@ -4409,7 +5604,7 @@ function buildLegacyMediaRegistry(projectName) {
 }
 
 function findRegisteredMediaFilePath(projectName, type, filename) {
-  const project = String(projectName || '').trim().toLowerCase();
+  const project = normalizeProjectSlug(projectName);
   const normalizedType = String(type || '').trim().toLowerCase();
   const safeFilename = path.basename(String(filename || '').trim());
 
@@ -4466,11 +5661,7 @@ function findRegisteredMediaFilePath(projectName, type, filename) {
 }
 
 function buildMediaManagerProjectPayload(projectName) {
-  const project = String(projectName || '').trim().toLowerCase();
-
-  if (!project) {
-    throw new Error('Missing project name');
-  }
+  const project = normalizeProjectSlug(projectName);
 
   const brandPaths = getProjectBrandPaths(project);
   const hasProfile = hasProjectProfile(project);
@@ -4559,30 +5750,174 @@ function appendAudit(entry) {
     current.push(entry);
     fs.writeFileSync(auditPath, JSON.stringify(current, null, 2));
   } catch (error) {
-    console.error('Failed to write audit log:', error.message);
+    appLogger.error('audit_write_failed', {
+      route: '/audit',
+      action: 'append_audit',
+      error: serializeErrorForLog(error)
+    });
   }
 }
 
 function detectProject(message) {
   const text = String(message || '').toLowerCase();
+  const compactText = text.replace(/[^a-z0-9]+/g, '');
 
-  if (text.includes('smartaccount') || text.includes('smart accounting')) {
-    return 'smartaccounting';
-  }
-
-  if (text.includes('iwrite')) {
-    return 'iwrite';
-  }
-
-  if (text.includes('hairoticmen')) {
-    return 'hairoticmen';
-  }
-
-  if (text.includes('beauty of spirit') || text.includes('beautyofspirit')) {
-    return 'beauty-of-spirit';
+  try {
+    const projects = listProjectNamesWithProfiles();
+    for (const project of projects) {
+      const normalized = String(project || '').trim().toLowerCase();
+      const compactProject = normalized.replace(/[^a-z0-9]+/g, '');
+      if (
+        normalized &&
+        (text.includes(normalized) || (compactProject && compactText.includes(compactProject)))
+      ) {
+        return normalized;
+      }
+    }
+  } catch (error) {
+    appLogger.warn('project_detection_registry_failed', {
+      route: '/task',
+      action: 'detect_project',
+      error: serializeErrorForLog(error)
+    });
   }
 
   return 'unknown';
+}
+
+function normalizeOptionalProjectSlug(value) {
+  const raw = String(value == null ? '' : value).trim();
+  if (!raw) return '';
+
+  try {
+    return normalizeProjectSlug(raw);
+  } catch (error) {
+    return '';
+  }
+}
+
+function getPreferredProjectName() {
+  const envProject = normalizeOptionalProjectSlug(process.env[DEFAULT_PROJECT_ENV]);
+  if (envProject) {
+    return envProject;
+  }
+
+  try {
+    const projects = listProjects();
+    const first = Array.isArray(projects) ? projects[0] : null;
+    return normalizeOptionalProjectSlug(
+      typeof first === 'string' ? first : first?.project_name || first?.name
+    );
+  } catch (error) {
+    return '';
+  }
+}
+
+function extractProjectFlag(args = []) {
+  const values = Array.isArray(args) ? args : [];
+
+  for (let index = 0; index < values.length; index += 1) {
+    const value = String(values[index] || '').trim();
+    if (value === '--project' || value === '-p') {
+      return normalizeOptionalProjectSlug(values[index + 1]);
+    }
+
+    if (value.startsWith('--project=')) {
+      return normalizeOptionalProjectSlug(value.slice('--project='.length));
+    }
+  }
+
+  return '';
+}
+
+function stripProjectFlagArgs(args = []) {
+  const values = Array.isArray(args) ? args : [];
+  const result = [];
+
+  for (let index = 0; index < values.length; index += 1) {
+    const value = String(values[index] || '').trim();
+    if (value === '--project' || value === '-p') {
+      index += 1;
+      continue;
+    }
+
+    if (value.startsWith('--project=')) {
+      continue;
+    }
+
+    result.push(values[index]);
+  }
+
+  return result;
+}
+
+function resolveRequestProjectName(req, options = {}) {
+  const explicit = normalizeOptionalProjectSlug(options.projectName)
+    || normalizeOptionalProjectSlug(options.explicitProject)
+    || normalizeOptionalProjectSlug(req?.body?.project)
+    || normalizeOptionalProjectSlug(req?.query?.project)
+    || normalizeOptionalProjectSlug(req?.params?.project);
+
+  if (explicit) {
+    return explicit;
+  }
+
+  const detected = detectProject(options.text || req?.body?.text || '');
+  if (detected && detected !== 'unknown') {
+    return detected;
+  }
+
+  return options.allowFallback === false ? '' : getPreferredProjectName();
+}
+
+function requireProjectContext(req, options = {}) {
+  const projectName = resolveRequestProjectName(req, options);
+  if (projectName) {
+    return projectName;
+  }
+
+  const error = new Error(`Missing project context. Provide request project, query project, --project, or ${DEFAULT_PROJECT_ENV}.`);
+  error.statusCode = 400;
+  error.code = 'PROJECT_CONTEXT_MISSING';
+  throw error;
+}
+
+function buildProjectHashtag(projectName) {
+  const display = getProjectDisplayName(projectName);
+  const compact = String(display || projectName || '')
+    .replace(/[^a-zA-Z0-9]+/g, '')
+    .trim();
+
+  return compact ? `#${compact}` : '#Project';
+}
+
+function getProjectDisplayName(projectName) {
+  const safeProject = normalizeOptionalProjectSlug(projectName);
+  if (!safeProject) return 'Project';
+
+  try {
+    const projectData = readJsonFile(getProjectBasePaths(safeProject).projectFilePath, {});
+    return String(
+      projectData.brand_name ||
+      projectData.display_name ||
+      projectData.project_name ||
+      safeProject
+    ).trim();
+  } catch (error) {
+    return safeProject;
+  }
+}
+
+function getProjectWebsiteUrl(projectName) {
+  const safeProject = normalizeOptionalProjectSlug(projectName);
+  if (!safeProject) return '';
+
+  try {
+    const projectData = readJsonFile(getProjectBasePaths(safeProject).projectFilePath, {});
+    return String(projectData.website_url || '').trim();
+  } catch (error) {
+    return '';
+  }
 }
 
 function detectTaskType(message) {
@@ -4810,30 +6145,35 @@ function enrichProductIntelligenceData(product) {
   return enrichment;
 }
 
-function decideMode(message) {
-  const text = String(message || '').toLowerCase();
 
-  if (
-    text.includes('send') ||
-    text.includes('publish') ||
-    text.includes('launch live') ||
-    text.includes('deploy') ||
-    text.includes('merge') ||
-    text.includes('delete')
-  ) {
-    return 'approval_required';
+function resolveAgentRegistrySignal({ message = '', taskType = '' } = {}) {
+  try {
+    const registry = require('../agent-registry');
+    if (!registry || typeof registry.resolve !== 'function') return null;
+
+    const signal = registry.resolve({
+      task: message,
+      message,
+      taskType,
+      type: taskType,
+      intent: taskType
+    });
+
+    if (!signal || signal.fallback) return null;
+
+    return {
+      id: signal.id || null,
+      role: signal.role || null,
+      route: signal.route || null,
+      priority: Number.isFinite(signal.priority) ? signal.priority : null,
+      authority: 'advisory_only'
+    };
+  } catch (_) {
+    return null;
   }
-
-  if (
-    text.includes('prepare') ||
-    text.includes('draft') ||
-    text.includes('generate')
-  ) {
-    return 'prepare';
-  }
-
-  return 'analyze';
 }
+
+
 
 function selectAgent(taskType) {
   switch (taskType) {
@@ -4859,7 +6199,7 @@ function buildTaskResult({
   const taskId = `task_${Date.now()}`;
   const project = detectProject(message);
   const taskType = detectTaskType(message);
-  const mode = decideMode(message);
+  const mode = decisionModeResolver.resolve(message);
   const agent = selectAgent(taskType);
 
   const contextPath =
@@ -4925,7 +6265,7 @@ function buildTaskResult({
   return result;
 }
 function getProjectRegistryPaths() {
-  const baseDir = '/opt/mh-assistant/data/projects';
+  const baseDir = path.join(DATA_DIR, 'projects');
   const registryPath = path.join(baseDir, 'registry.json');
 
   ensureDir(baseDir);
@@ -4941,27 +6281,515 @@ function getProjectRegistryPaths() {
 }
 
 function getProjectBasePaths(projectName) {
-  const safeProject = String(projectName || '').trim().toLowerCase();
-
-  if (!safeProject) {
-    throw new Error('Invalid project name');
-  }
-
-  const baseDir = path.join('/opt/mh-assistant/data/projects', safeProject);
+  const resolved = resolveProjectPath(path.join(DATA_DIR, 'projects'), projectName);
+  const safeProject = resolved.project;
+  const baseDir = resolved.projectRoot;
 
   return {
+    project: safeProject,
     baseDir,
     brandAssetsDir: path.join(baseDir, 'brand-assets'),
     productsDir: path.join(baseDir, 'products'),
     contentDir: path.join(baseDir, 'content'),
+    mediaDir: path.join(baseDir, 'media'),
     campaignsDir: path.join(baseDir, 'campaigns'),
+    publishingDir: path.join(baseDir, 'publishing'),
     launchDir: path.join(baseDir, 'launch'),
     executionDir: path.join(baseDir, 'execution'),
+    telemetryDir: path.join(baseDir, 'telemetry'),
+    logsDir: path.join(baseDir, 'logs'),
     optimizationDir: path.join(baseDir, 'optimization'),
     reportsDir: path.join(baseDir, 'reports'),
     integrationsDir: path.join(baseDir, 'integrations'),
     uploadsDir: path.join(baseDir, 'uploads'),
     projectFilePath: path.join(baseDir, 'project.json')
+  };
+}
+
+function getLegacyProjectBasePaths(projectName) {
+  const resolved = resolveProjectPath(LEGACY_BRAND_ASSETS_DIR, projectName);
+  return {
+    project: resolved.project,
+    baseDir: resolved.projectRoot,
+    brandProfilePath: path.join(resolved.projectRoot, 'brand-profile.json'),
+    assetsRegistryPath: path.join(resolved.projectRoot, 'assets-registry.json'),
+    mediaInputRegistryPath: path.join(resolved.projectRoot, 'media-input-registry.json')
+  };
+}
+
+function getProjectBaselinePaths(projectName) {
+  const base = getProjectBasePaths(projectName);
+  const legacy = getLegacyProjectBasePaths(projectName);
+  const opsDir = path.join(base.baseDir, 'ops');
+  const integrationsRegistryPath = path.join(base.baseDir, 'integrations-registry.json');
+
+  return {
+    ...base,
+    opsDir,
+    brandProfilePath: path.join(base.brandAssetsDir, 'brand-profile.json'),
+    assetsRegistryPath: path.join(base.baseDir, 'assets-registry.json'),
+    sourcesRegistryPath: path.join(base.baseDir, 'sources-registry.json'),
+    sourceOfTruthRegistryPath: path.join(base.baseDir, 'source-of-truth-registry.json'),
+    integrationsRegistryPath,
+    aiCommandsPath: path.join(opsDir, 'ai-commands.json'),
+    aiArtifactsPath: path.join(opsDir, 'ai-artifacts.json'),
+    aiRecommendationsPath: path.join(opsDir, 'ai-recommendations.json'),
+    aiMemoryPath: path.join(opsDir, 'ai-memory.json'),
+    integrationRegistryPath: integrationsRegistryPath,
+    integrationControlCenterPath: path.join(base.integrationsDir, 'control-center.json'),
+    legacy
+  };
+}
+
+function stableJsonHash(value) {
+  return crypto
+    .createHash('sha256')
+    .update(JSON.stringify(value == null ? null : value))
+    .digest('hex');
+}
+
+function logProjectDataMismatch(projectName, entry = {}) {
+  try {
+    const paths = getProjectBasePaths(projectName);
+    const logPath = path.join(paths.baseDir, 'ops', 'data-mismatches.json');
+    const current = readJsonFile(logPath, []);
+    const next = Array.isArray(current) ? current : [];
+    next.push({
+      timestamp: new Date().toISOString(),
+      project: normalizeProjectSlug(projectName),
+      ...entry
+    });
+    writeJsonFile(logPath, next.slice(-200));
+    appLogger.warn('project_data_mismatch', {
+      route: '/media-manager/project/:project/setup',
+      action: 'log_project_data_mismatch',
+      project: normalizeOptionalProjectSlug(projectName),
+      domain: entry.domain || 'unknown',
+      canonicalPath: entry.canonical_path,
+      legacyPath: entry.legacy_path,
+      reason: entry.reason
+    });
+  } catch (error) {
+    appLogger.warn('project_data_mismatch_log_failed', {
+      route: '/media-manager/project/:project/setup',
+      action: 'log_project_data_mismatch',
+      project: normalizeOptionalProjectSlug(projectName),
+      error: serializeErrorForLog(error)
+    });
+  }
+}
+
+function readCanonicalJsonWithLegacyFallback(projectName, options = {}) {
+  const canonicalPath = String(options.canonicalPath || '').trim();
+  const legacyCandidates = Array.isArray(options.legacyCandidates) ? options.legacyCandidates : [];
+  const fallback = options.fallback;
+  const domain = String(options.domain || 'project-baseline').trim();
+  const normalize = typeof options.normalize === 'function' ? options.normalize : (value) => value;
+  const canonicalExists = fs.existsSync(canonicalPath);
+  const canonicalValue = canonicalExists ? normalize(readJsonFile(canonicalPath, fallback)) : null;
+
+  let firstLegacy = null;
+  for (const legacyPath of legacyCandidates.filter(Boolean)) {
+    if (!fs.existsSync(legacyPath)) {
+      continue;
+    }
+
+    const legacyValue = normalize(readJsonFile(legacyPath, fallback));
+    firstLegacy = firstLegacy || { path: legacyPath, value: legacyValue };
+
+    if (canonicalExists && stableJsonHash(canonicalValue) !== stableJsonHash(legacyValue)) {
+      logProjectDataMismatch(projectName, {
+        domain,
+        reason: 'canonical_legacy_value_mismatch',
+        canonical_path: canonicalPath,
+        legacy_path: legacyPath,
+        canonical_hash: stableJsonHash(canonicalValue),
+        legacy_hash: stableJsonHash(legacyValue)
+      });
+    }
+  }
+
+  if (canonicalExists) {
+    return {
+      value: canonicalValue,
+      source: 'canonical',
+      path: canonicalPath,
+      migrated: false
+    };
+  }
+
+  if (firstLegacy) {
+    ensureDir(path.dirname(canonicalPath));
+    writeJsonFile(canonicalPath, firstLegacy.value);
+    logProjectDataMismatch(projectName, {
+      domain,
+      reason: 'canonical_missing_migrated_from_legacy',
+      canonical_path: canonicalPath,
+      legacy_path: firstLegacy.path,
+      legacy_hash: stableJsonHash(firstLegacy.value)
+    });
+    return {
+      value: firstLegacy.value,
+      source: 'legacy',
+      path: firstLegacy.path,
+      migrated: true
+    };
+  }
+
+  ensureDir(path.dirname(canonicalPath));
+  writeJsonFile(canonicalPath, fallback);
+  return {
+    value: fallback,
+    source: 'default',
+    path: canonicalPath,
+    migrated: false
+  };
+}
+
+function normalizeAssetsRegistry(value) {
+  return Array.isArray(value) ? value : [];
+}
+
+function normalizeSourceStatus(value) {
+  const raw = String(value || '').trim().toLowerCase();
+  if (raw === 'verified') return 'verified';
+  if (raw === 'outdated') return 'outdated';
+  if (raw === 'connected') return 'connected';
+  return 'missing';
+}
+
+function computeSourceStatus(entry = {}) {
+  const value = normalizeSetupTextValue(entry.value);
+  const explicitStatus = normalizeSourceStatus(entry.status);
+  if (explicitStatus !== 'missing') {
+    return explicitStatus;
+  }
+
+  if (!value) {
+    return 'missing';
+  }
+
+  const updatedAt = normalizeSetupTextValue(entry.updated_at);
+  const updatedMs = updatedAt ? Date.parse(updatedAt) : NaN;
+  if (Number.isFinite(updatedMs)) {
+    const ageMs = Date.now() - updatedMs;
+    const staleThresholdMs = 180 * 24 * 60 * 60 * 1000;
+    if (ageMs > staleThresholdMs) {
+      return 'outdated';
+    }
+  }
+
+  if (normalizeSetupTextValue(entry.verified_at)) {
+    return 'verified';
+  }
+
+  return 'connected';
+}
+
+function normalizeSourceRegistry(value) {
+  const input = value && typeof value === 'object' && !Array.isArray(value) ? value : {};
+  return input.sources && typeof input.sources === 'object' && !Array.isArray(input.sources)
+    ? input.sources
+    : input;
+}
+
+function buildSourceOfTruthRegistry(sources = {}) {
+  const normalizedSources = normalizeSourceRegistry(sources);
+  const requiredMap = {
+    website: ['website'],
+    social_links: ['instagram', 'facebook', 'tiktok', 'youtube', 'linkedin', 'x', 'pinterest'],
+    product_files: ['product_files', 'product_csv', 'products_file'],
+    brand_assets: ['brand_assets', 'logo', 'brand_guideline'],
+    legal_docs: ['legal_docs', 'legal_doc'],
+    pricing_docs: ['pricing_docs', 'pricing_doc'],
+    campaign_docs: ['campaign_docs', 'campaign_doc']
+  };
+
+  const requiredSources = Object.entries(requiredMap).reduce((acc, [key, candidates]) => {
+    const foundEntry = candidates
+      .map((candidate) => normalizeSourceRegistry(normalizedSources)[candidate])
+      .find((item) => item && typeof item === 'object');
+
+    const fallbackValue = candidates
+      .map((candidate) => normalizeSetupTextValue(normalizedSources[candidate]))
+      .find(Boolean);
+
+    const entry = foundEntry || (fallbackValue ? { value: fallbackValue } : {});
+    const status = computeSourceStatus(entry);
+
+    acc[key] = {
+      status,
+      value: normalizeSetupTextValue(entry.value || fallbackValue),
+      updated_at: normalizeSetupTextValue(entry.updated_at),
+      verified_at: normalizeSetupTextValue(entry.verified_at),
+      source: normalizeSetupTextValue(entry.source)
+    };
+
+    return acc;
+  }, {});
+
+  // Deterministic: allow explicit updated_at, do not generate new timestamp unless not provided
+  let updatedAt = arguments.length > 1 && typeof arguments[1] === 'string' && arguments[1] ? arguments[1] : null;
+  if (!updatedAt && sources && typeof sources === 'object' && sources.updated_at) {
+    updatedAt = sources.updated_at;
+  }
+  if (!updatedAt) {
+    updatedAt = new Date().toISOString();
+  }
+
+  return {
+    updated_at: updatedAt,
+    statuses: ['missing', 'connected', 'verified', 'outdated'],
+    sources: normalizedSources,
+    required_sources: requiredSources
+  };
+}
+
+function buildDefaultBrandProfile(projectName, projectData = {}) {
+  const now = new Date().toISOString();
+  const goals = [projectData.primary_goal, projectData.secondary_goal]
+    .map((value) => normalizeSetupTextValue(value))
+    .filter(Boolean);
+  const socialChannels = normalizeSetupListValue(projectData.social_channels || projectData.social_links);
+
+  return {
+    project: normalizeProjectSlug(projectName),
+    brand_name: projectData.brand_name || projectData.project_name || normalizeProjectSlug(projectName),
+    business_type: projectData.business_type || projectData.project_type || '',
+    brand_promise: projectData.brand_promise || '',
+    tone: projectData.tone || projectData.brand_voice || '',
+    brand_voice: projectData.brand_voice || '',
+    visual_identity: projectData.visual_identity || '',
+    positioning: projectData.positioning || projectData.offer_positioning || projectData.differentiation || '',
+    offer_positioning: projectData.offer_positioning || '',
+    market: projectData.market || '',
+    language: projectData.language || '',
+    currency: projectData.currency || '',
+    audience: projectData.audience || projectData.audience_primary || '',
+    audience_primary: projectData.audience_primary || '',
+    audience_problem: projectData.audience_problem || '',
+    competitors: normalizeSetupListValue(projectData.competitors),
+    goals,
+    website: projectData.website || projectData.website_url || '',
+    social_channels: socialChannels,
+    differentiation: projectData.differentiation || '',
+    source: 'setup',
+    created_at: projectData.created_at || now,
+    updated_at: projectData.updated_at || now
+  };
+}
+
+function buildBrandProfileFromProject(projectName, projectData = {}, existing = {}) {
+  return {
+    ...existing,
+    ...buildDefaultBrandProfile(projectName, projectData),
+    created_at: existing.created_at || projectData.created_at || new Date().toISOString(),
+    updated_at: new Date().toISOString()
+  };
+}
+
+function ensureProjectBaselineFiles(projectName, projectDataInput = {}) {
+  const safeProject = normalizeProjectSlug(projectName);
+  const paths = getProjectBaselinePaths(safeProject);
+  const projectData = {
+    ...readJsonFile(paths.projectFilePath, {}),
+    ...(projectDataInput && typeof projectDataInput === 'object' ? projectDataInput : {})
+  };
+
+  [
+    paths.baseDir,
+    paths.brandAssetsDir,
+    paths.productsDir,
+    paths.contentDir,
+    paths.mediaDir,
+    paths.campaignsDir,
+    paths.publishingDir,
+    paths.launchDir,
+    paths.executionDir,
+    paths.telemetryDir,
+    paths.logsDir,
+    paths.optimizationDir,
+    paths.reportsDir,
+    paths.integrationsDir,
+    paths.uploadsDir,
+    paths.opsDir,
+    paths.legacy.baseDir
+  ].forEach(ensureDir);
+
+  const brandProfile = readCanonicalJsonWithLegacyFallback(safeProject, {
+    domain: 'brand-profile',
+    canonicalPath: paths.brandProfilePath,
+    legacyCandidates: [paths.legacy.brandProfilePath],
+    fallback: buildDefaultBrandProfile(safeProject, projectData)
+  });
+
+  const assetsRegistry = readCanonicalJsonWithLegacyFallback(safeProject, {
+    domain: 'assets-registry',
+    canonicalPath: paths.assetsRegistryPath,
+    legacyCandidates: [paths.legacy.assetsRegistryPath, paths.legacy.mediaInputRegistryPath],
+    fallback: [],
+    normalize: normalizeAssetsRegistry
+  });
+
+  const sourcesRegistry = readCanonicalJsonWithLegacyFallback(safeProject, {
+    domain: 'source-of-truth',
+    canonicalPath: paths.sourceOfTruthRegistryPath,
+    legacyCandidates: [paths.sourcesRegistryPath],
+    fallback: buildSourceOfTruthRegistry({}),
+    normalize: buildSourceOfTruthRegistry
+  });
+
+  ensureJsonFile(paths.sourcesRegistryPath, normalizeSourceRegistry(sourcesRegistry.value));
+  ensureJsonFile(paths.aiCommandsPath, []);
+  ensureJsonFile(paths.aiArtifactsPath, []);
+  ensureJsonFile(paths.aiRecommendationsPath, []);
+  ensureJsonFile(paths.aiMemoryPath, []);
+  ensureJsonFile(paths.integrationControlCenterPath, {
+    updated_at: '',
+    records: {}
+  });
+  ensureJsonFile(paths.integrationsRegistryPath, {
+    updated_at: '',
+    records: {}
+  });
+
+  const integrationSnapshot = readJsonFile(paths.integrationControlCenterPath, {
+    updated_at: '',
+    records: {}
+  });
+  writeJsonFile(paths.integrationsRegistryPath, {
+    updated_at: normalizeSetupTextValue(integrationSnapshot.updated_at) || new Date().toISOString(),
+    records: integrationSnapshot.records && typeof integrationSnapshot.records === 'object'
+      ? integrationSnapshot.records
+      : {}
+  });
+
+  return {
+    project: safeProject,
+    checked_at: new Date().toISOString(),
+    required_files: {
+      project_file: {
+        path: paths.projectFilePath,
+        exists: fs.existsSync(paths.projectFilePath)
+      },
+      brand_profile: {
+        path: paths.brandProfilePath,
+        exists: fs.existsSync(paths.brandProfilePath),
+        source: brandProfile.source,
+        migrated: brandProfile.migrated
+      },
+      assets_registry: {
+        path: paths.assetsRegistryPath,
+        exists: fs.existsSync(paths.assetsRegistryPath),
+        source: assetsRegistry.source,
+        migrated: assetsRegistry.migrated
+      },
+      source_of_truth_registry: {
+        path: paths.sourceOfTruthRegistryPath,
+        exists: fs.existsSync(paths.sourceOfTruthRegistryPath),
+        source: sourcesRegistry.source,
+        migrated: sourcesRegistry.migrated
+      },
+      integrations_registry: {
+        path: paths.integrationsRegistryPath,
+        exists: fs.existsSync(paths.integrationsRegistryPath)
+      },
+      ai_commands: {
+        path: paths.aiCommandsPath,
+        exists: fs.existsSync(paths.aiCommandsPath)
+      },
+      ai_artifacts: {
+        path: paths.aiArtifactsPath,
+        exists: fs.existsSync(paths.aiArtifactsPath)
+      },
+      ai_recommendations: {
+        path: paths.aiRecommendationsPath,
+        exists: fs.existsSync(paths.aiRecommendationsPath)
+      },
+      ai_memory: {
+        path: paths.aiMemoryPath,
+        exists: fs.existsSync(paths.aiMemoryPath)
+      },
+      integrations: {
+        path: paths.integrationControlCenterPath,
+        exists: fs.existsSync(paths.integrationControlCenterPath)
+      }
+    },
+    required_folders: {
+      campaigns: { path: paths.campaignsDir, exists: fs.existsSync(paths.campaignsDir) },
+      content: { path: paths.contentDir, exists: fs.existsSync(paths.contentDir) },
+      media: { path: paths.mediaDir, exists: fs.existsSync(paths.mediaDir) },
+      publishing: { path: paths.publishingDir, exists: fs.existsSync(paths.publishingDir) },
+      reports: { path: paths.reportsDir, exists: fs.existsSync(paths.reportsDir) },
+      execution: { path: paths.executionDir, exists: fs.existsSync(paths.executionDir) },
+      telemetry: { path: paths.telemetryDir, exists: fs.existsSync(paths.telemetryDir) },
+      logs: { path: paths.logsDir, exists: fs.existsSync(paths.logsDir) }
+    }
+  };
+}
+
+function persistProjectSetupArtifacts(projectName, projectData = {}) {
+  const safeProject = normalizeProjectSlug(projectName);
+  const paths = getProjectBaselinePaths(safeProject);
+  const validation = ensureProjectBaselineFiles(safeProject, projectData);
+  const existingBrandProfile = readJsonFile(paths.brandProfilePath, {});
+  const brandProfile = buildBrandProfileFromProject(safeProject, projectData, existingBrandProfile);
+  writeJsonFile(paths.brandProfilePath, brandProfile);
+
+  const currentSources = normalizeSourceRegistry(readJsonFile(paths.sourcesRegistryPath, {}));
+  const nextSources = { ...currentSources };
+  if (projectData.website_url) {
+    nextSources.website = {
+      value: String(projectData.website_url || '').trim(),
+      updated_at: new Date().toISOString(),
+      source: 'setup',
+      status: 'connected'
+    };
+  }
+
+  const socialChannels = normalizeSetupListValue(projectData.social_channels || projectData.social_links);
+  socialChannels.forEach((channel) => {
+    const key = channel.toLowerCase();
+    nextSources[key] = {
+      value: key,
+      updated_at: new Date().toISOString(),
+      source: 'setup',
+      status: 'connected'
+    };
+  });
+
+  const projectSourceAliases = {
+    product_files: projectData.product_files || projectData.products_file,
+    brand_assets: projectData.brand_assets,
+    legal_docs: projectData.legal_docs,
+    pricing_docs: projectData.pricing_docs,
+    campaign_docs: projectData.campaign_docs
+  };
+
+  Object.entries(projectSourceAliases).forEach(([sourceKey, value]) => {
+    const normalized = normalizeSetupTextValue(value);
+    if (!normalized) {
+      return;
+    }
+
+    nextSources[sourceKey] = {
+      value: normalized,
+      updated_at: new Date().toISOString(),
+      source: 'setup',
+      status: 'connected'
+    };
+  });
+
+  writeJsonFile(paths.sourcesRegistryPath, nextSources);
+  writeJsonFile(paths.sourceOfTruthRegistryPath, buildSourceOfTruthRegistry(nextSources));
+
+  return {
+    ...validation,
+    brand_profile_path: paths.brandProfilePath,
+    assets_registry_path: paths.assetsRegistryPath,
+    source_of_truth_registry_path: paths.sourceOfTruthRegistryPath,
+    ai_memory_path: paths.aiMemoryPath,
+    integrations_path: paths.integrationsRegistryPath
   };
 }
 
@@ -4973,9 +6801,13 @@ function ensureProjectBaseStructure(projectName) {
     paths.brandAssetsDir,
     paths.productsDir,
     paths.contentDir,
+    paths.mediaDir,
     paths.campaignsDir,
+    paths.publishingDir,
     paths.launchDir,
     paths.executionDir,
+    paths.telemetryDir,
+    paths.logsDir,
     paths.optimizationDir,
     paths.reportsDir,
     paths.integrationsDir,
@@ -4985,12 +6817,157 @@ function ensureProjectBaseStructure(projectName) {
   return paths;
 }
 
-function createProject(projectName, market, language, projectType, websiteUrl) {
-  const safeProject = String(projectName || '').trim().toLowerCase();
 
-  if (!safeProject) {
-    throw new Error('Project name is required');
-  }
+function normalizeBusinessTemplateType(value) {
+  const raw = String(value || '').trim().toLowerCase().replace(/[\s-]+/g, '_');
+
+  if (['artist', 'singer', 'musician', 'artist_singer'].includes(raw)) return 'artist_singer';
+  if (['salon', 'beauty', 'beauty_salon'].includes(raw)) return 'beauty_salon';
+  if (['realestate', 'real_estate', 'property', 'properties'].includes(raw)) return 'real_estate';
+  if (['shop', 'store', 'commerce', 'ecommerce', 'e_commerce'].includes(raw)) return 'ecommerce';
+  if (['service', 'services', 'service_business'].includes(raw)) return 'service_business';
+  if (['restaurant', 'cafe', 'food'].includes(raw)) return 'restaurant';
+  if (['agency', 'marketing_agency', 'creative_agency'].includes(raw)) return 'agency';
+  if (['local', 'local_business'].includes(raw)) return 'local_business';
+
+  return raw || 'service_business';
+}
+
+function getBusinessProjectTemplate(projectType) {
+  const type = normalizeBusinessTemplateType(projectType);
+
+  const common = {
+    default_channels: ['website', 'instagram', 'facebook'],
+    required_assets: ['logo', 'brand_profile', 'hero_images', 'legal_info'],
+    data_requirements: ['business_profile', 'target_audience', 'offers', 'contact_details'],
+    content_categories: ['brand_story', 'offers', 'education', 'social_proof'],
+    workspace_priorities: ['setup', 'library', 'content-studio', 'campaign-studio', 'publishing'],
+    ai_team_defaults: ['strategist', 'writer', 'designer', 'publisher', 'analyst'],
+    starter_checklist: [
+      'complete_project_profile',
+      'upload_brand_assets',
+      'define_target_audience',
+      'connect_primary_channels',
+      'create_first_campaign'
+    ],
+    recommended_integrations: ['website', 'google', 'meta']
+  };
+
+  const templates = {
+    ecommerce: {
+      id: 'ecommerce',
+      label: 'eCommerce / Products',
+      default_channels: ['website', 'woocommerce', 'instagram', 'facebook', 'google', 'tiktok'],
+      required_assets: ['logo', 'product_photos', 'product_catalog', 'price_list', 'shipping_policy', 'legal_docs'],
+      data_requirements: ['products', 'inventory', 'offers', 'shipping', 'payment_methods', 'marketplaces'],
+      content_categories: ['product_launch', 'before_after', 'offers', 'how_to_use', 'reviews'],
+      workspace_priorities: ['setup', 'library', 'campaign-studio', 'content-studio', 'media-studio', 'publishing', 'insights'],
+      ai_team_defaults: ['strategist', 'writer', 'designer', 'publisher', 'ads_operator', 'analyst', 'compliance_reviewer'],
+      starter_checklist: ['add_products', 'upload_product_media', 'define_shipping', 'connect_woocommerce', 'create_launch_campaign'],
+      recommended_integrations: ['woocommerce', 'google', 'meta', 'tiktok', 'email_crm']
+    },
+
+    artist_singer: {
+      id: 'artist_singer',
+      label: 'Artist / Singer',
+      default_channels: ['instagram', 'tiktok', 'youtube', 'spotify', 'website'],
+      required_assets: ['artist_photos', 'logo_or_signature', 'press_kit', 'music_links', 'video_clips'],
+      data_requirements: ['artist_profile', 'songs', 'albums', 'events', 'booking_info', 'press_bio'],
+      content_categories: ['song_release', 'behind_the_scenes', 'live_events', 'fan_engagement', 'press_updates'],
+      workspace_priorities: ['setup', 'library', 'media-studio', 'content-studio', 'campaign-studio', 'publishing'],
+      ai_team_defaults: ['strategist', 'writer', 'designer', 'video_lead', 'publisher', 'analyst'],
+      starter_checklist: ['complete_artist_profile', 'upload_press_photos', 'add_music_links', 'define_fan_audience', 'create_release_campaign'],
+      recommended_integrations: ['youtube', 'instagram', 'tiktok', 'spotify', 'website']
+    },
+
+    beauty_salon: {
+      id: 'beauty_salon',
+      label: 'Beauty Salon',
+      default_channels: ['instagram', 'tiktok', 'google_business', 'website', 'facebook'],
+      required_assets: ['logo', 'salon_photos', 'service_menu', 'price_list', 'before_after_media'],
+      data_requirements: ['services', 'staff', 'booking_info', 'location', 'offers', 'reviews'],
+      content_categories: ['services', 'before_after', 'offers', 'team', 'client_reviews'],
+      workspace_priorities: ['setup', 'library', 'media-studio', 'content-studio', 'publishing', 'insights'],
+      ai_team_defaults: ['strategist', 'writer', 'designer', 'publisher', 'analyst'],
+      starter_checklist: ['add_services', 'upload_before_after_media', 'add_booking_details', 'connect_google_business', 'create_local_campaign'],
+      recommended_integrations: ['google_business', 'instagram', 'tiktok', 'website', 'booking']
+    },
+
+    real_estate: {
+      id: 'real_estate',
+      label: 'Real Estate',
+      default_channels: ['website', 'facebook', 'instagram', 'google', 'crm'],
+      required_assets: ['logo', 'property_photos', 'property_documents', 'location_media', 'agent_profile'],
+      data_requirements: ['properties', 'locations', 'lead_capture', 'viewings', 'buyer_profiles', 'seller_profiles'],
+      content_categories: ['property_listing', 'market_update', 'area_guide', 'buyer_tips', 'seller_tips'],
+      workspace_priorities: ['setup', 'library', 'content-studio', 'campaign-studio', 'ads-manager', 'governance'],
+      ai_team_defaults: ['strategist', 'writer', 'designer', 'ads_operator', 'publisher', 'compliance_reviewer'],
+      starter_checklist: ['add_property_data', 'upload_property_media', 'define_lead_flow', 'connect_crm', 'create_listing_campaign'],
+      recommended_integrations: ['website', 'crm', 'google', 'meta', 'email_crm']
+    },
+
+    service_business: {
+      id: 'service_business',
+      label: 'Service Business',
+      default_channels: ['website', 'google_business', 'instagram', 'facebook'],
+      required_assets: ['logo', 'service_list', 'case_studies', 'testimonials'],
+      data_requirements: ['services', 'pricing_model', 'service_area', 'booking_or_contact_flow'],
+      content_categories: ['services', 'case_studies', 'client_results', 'faq', 'offers'],
+      workspace_priorities: ['setup', 'library', 'content-studio', 'campaign-studio', 'publishing'],
+      ai_team_defaults: ['strategist', 'writer', 'designer', 'publisher', 'analyst'],
+      starter_checklist: ['define_services', 'add_service_area', 'upload_testimonials', 'connect_contact_flow', 'create_offer_campaign'],
+      recommended_integrations: ['website', 'google_business', 'meta', 'email_crm']
+    },
+
+    restaurant: {
+      id: 'restaurant',
+      label: 'Restaurant / Cafe',
+      default_channels: ['instagram', 'tiktok', 'google_business', 'website', 'facebook'],
+      required_assets: ['logo', 'menu', 'food_photos', 'location_photos', 'offers'],
+      data_requirements: ['menu_items', 'opening_hours', 'location', 'reservation_or_ordering', 'delivery_options'],
+      content_categories: ['menu_highlights', 'daily_specials', 'behind_the_kitchen', 'reviews', 'events'],
+      workspace_priorities: ['setup', 'library', 'media-studio', 'publishing', 'campaign-studio'],
+      ai_team_defaults: ['strategist', 'writer', 'designer', 'video_lead', 'publisher'],
+      starter_checklist: ['add_menu', 'upload_food_photos', 'add_opening_hours', 'connect_google_business', 'create_local_offer'],
+      recommended_integrations: ['google_business', 'instagram', 'tiktok', 'website', 'delivery']
+    },
+
+    agency: {
+      id: 'agency',
+      label: 'Agency',
+      default_channels: ['website', 'linkedin', 'instagram', 'facebook'],
+      required_assets: ['logo', 'case_studies', 'services_deck', 'client_testimonials'],
+      data_requirements: ['services', 'case_studies', 'target_segments', 'lead_magnets', 'sales_process'],
+      content_categories: ['case_study', 'thought_leadership', 'services', 'client_results', 'lead_generation'],
+      workspace_priorities: ['setup', 'library', 'content-studio', 'campaign-studio', 'insights', 'workflows'],
+      ai_team_defaults: ['strategist', 'writer', 'designer', 'ads_operator', 'analyst'],
+      starter_checklist: ['define_services', 'add_case_studies', 'define_lead_offer', 'connect_crm', 'create_lead_campaign'],
+      recommended_integrations: ['website', 'linkedin', 'meta', 'google', 'crm']
+    },
+
+    local_business: {
+      id: 'local_business',
+      label: 'Local Business',
+      default_channels: ['google_business', 'website', 'instagram', 'facebook'],
+      required_assets: ['logo', 'location_photos', 'service_or_product_list', 'reviews'],
+      data_requirements: ['opening_hours', 'location', 'offers', 'contact_details', 'reviews'],
+      content_categories: ['local_offers', 'reviews', 'services', 'community', 'faq'],
+      workspace_priorities: ['setup', 'library', 'content-studio', 'publishing', 'insights'],
+      ai_team_defaults: ['strategist', 'writer', 'designer', 'publisher'],
+      starter_checklist: ['add_location', 'add_opening_hours', 'upload_local_media', 'connect_google_business', 'create_local_post'],
+      recommended_integrations: ['google_business', 'website', 'meta']
+    }
+  };
+
+  return {
+    ...common,
+    ...(templates[type] || templates.service_business)
+  };
+}
+
+
+function createProject(projectName, market, language, projectType, websiteUrl) {
+  const safeProject = normalizeProjectSlug(projectName);
 
   const registry = getProjectRegistryPaths();
   const projects = readJsonFile(registry.registryPath, []);
@@ -5004,12 +6981,23 @@ function createProject(projectName, market, language, projectType, websiteUrl) {
   }
 
   const paths = ensureProjectBaseStructure(safeProject);
+  const businessTemplate = getBusinessProjectTemplate(projectType);
 
   const projectData = {
     project_name: safeProject,
     market: market || '',
     language: language || '',
-    project_type: projectType || '',
+    project_type: businessTemplate.id,
+    business_type: businessTemplate.id,
+    business_template: businessTemplate,
+    default_channels: businessTemplate.default_channels,
+    required_assets: businessTemplate.required_assets,
+    data_requirements: businessTemplate.data_requirements,
+    content_categories: businessTemplate.content_categories,
+    workspace_priorities: businessTemplate.workspace_priorities,
+    ai_team_defaults: businessTemplate.ai_team_defaults,
+    starter_checklist: businessTemplate.starter_checklist,
+    recommended_integrations: businessTemplate.recommended_integrations,
     website_url: websiteUrl || '',
     execution_mode: 'semi_auto',
     created_at: new Date().toISOString(),
@@ -5019,9 +7007,13 @@ function createProject(projectName, market, language, projectType, websiteUrl) {
       brand_assets: paths.brandAssetsDir,
       products: paths.productsDir,
       content: paths.contentDir,
+      media: paths.mediaDir,
       campaigns: paths.campaignsDir,
+      publishing: paths.publishingDir,
       launch: paths.launchDir,
       execution: paths.executionDir,
+      telemetry: paths.telemetryDir,
+      logs: paths.logsDir,
       optimization: paths.optimizationDir,
       reports: paths.reportsDir,
       integrations: paths.integrationsDir,
@@ -5032,11 +7024,132 @@ function createProject(projectName, market, language, projectType, websiteUrl) {
   projects.push(projectData);
   writeJsonFile(registry.registryPath, projects);
   writeJsonFile(paths.projectFilePath, projectData);
+  const baseline = persistProjectSetupArtifacts(safeProject, projectData);
 
   return {
     ...projectData,
     registry_path: registry.registryPath,
-    project_file: paths.projectFilePath
+    project_file: paths.projectFilePath,
+    baseline_validation: baseline
+  };
+}
+
+function normalizeSetupTextValue(value) {
+  if (value == null) return '';
+  return String(value).trim();
+}
+
+function normalizeSetupListValue(value) {
+  if (Array.isArray(value)) {
+    return value
+      .map((item) => normalizeSetupTextValue(item))
+      .filter(Boolean);
+  }
+
+  return normalizeSetupTextValue(value)
+    .split(/[\n,]+/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function normalizeProjectSetupPayload(payload = {}) {
+  const input = payload && typeof payload === 'object' ? payload : {};
+  const additionalFields = {
+    business_type: normalizeSetupTextValue(input.business_type || input.project_type),
+    tone: normalizeSetupTextValue(input.tone || input.brand_voice),
+    positioning: normalizeSetupTextValue(input.positioning || input.offer_positioning || input.differentiation),
+    audience: normalizeSetupTextValue(input.audience || input.audience_primary),
+    goals: normalizeSetupListValue(input.goals),
+    website: normalizeSetupTextValue(input.website || input.website_url),
+    social_channels: normalizeSetupListValue(input.social_channels || input.social_links),
+    product_files: normalizeSetupTextValue(input.product_files || input.products_file),
+    brand_assets: normalizeSetupTextValue(input.brand_assets),
+    legal_docs: normalizeSetupTextValue(input.legal_docs),
+    pricing_docs: normalizeSetupTextValue(input.pricing_docs),
+    campaign_docs: normalizeSetupTextValue(input.campaign_docs)
+  };
+
+  return {
+    project_type: normalizeSetupTextValue(input.project_type),
+    website_url: normalizeSetupTextValue(input.website_url),
+    status: normalizeSetupTextValue(input.project_status || input.status),
+    execution_mode: normalizeSetupTextValue(input.execution_mode),
+    brand_name: normalizeSetupTextValue(input.brand_name),
+    brand_promise: normalizeSetupTextValue(input.brand_promise),
+    brand_voice: normalizeSetupTextValue(input.brand_voice),
+    visual_identity: normalizeSetupTextValue(input.visual_identity),
+    offer_positioning: normalizeSetupTextValue(input.offer_positioning),
+    market: normalizeSetupTextValue(input.market),
+    language: normalizeSetupTextValue(input.language),
+    currency: normalizeSetupTextValue(input.currency),
+    primary_goal: normalizeSetupTextValue(input.primary_goal),
+    secondary_goal: normalizeSetupTextValue(input.secondary_goal),
+    launch_window: normalizeSetupTextValue(input.launch_window),
+    audience_primary: normalizeSetupTextValue(input.audience_primary),
+    audience_problem: normalizeSetupTextValue(input.audience_problem),
+    audience_geography: normalizeSetupTextValue(input.audience_geography),
+    competitors: normalizeSetupListValue(input.competitors),
+    differentiation: normalizeSetupTextValue(input.differentiation),
+    operator_notes: normalizeSetupListValue(input.operator_notes),
+    ...additionalFields,
+    setup_payload: {
+      ...input
+    }
+  };
+}
+
+function updateProjectSetup(projectName, payload = {}) {
+  const safeProject = normalizeProjectSlug(projectName);
+  const requestedProjectName = payload.project_name == null
+    ? ''
+    : normalizeProjectSlug(payload.project_name);
+
+  if (requestedProjectName && requestedProjectName !== safeProject) {
+    throw new Error('Project rename is not supported by Setup persistence');
+  }
+
+  const paths = getProjectBasePaths(safeProject);
+
+  if (!fs.existsSync(paths.projectFilePath)) {
+    throw new Error('Project not found');
+  }
+
+  const registry = getProjectRegistryPaths();
+  const projects = readJsonFile(registry.registryPath, []);
+  const current = readJsonFile(paths.projectFilePath, {});
+  const normalized = normalizeProjectSetupPayload(payload);
+  const updatedAt = new Date().toISOString();
+  const nextProject = {
+    ...current,
+    ...normalized,
+    updated_at: updatedAt
+  };
+
+  writeJsonFile(paths.projectFilePath, nextProject);
+
+  const projectIndex = projects.findIndex(
+    (project) => String(project?.project_name || '').trim().toLowerCase() === safeProject
+  );
+
+  if (projectIndex >= 0) {
+    projects[projectIndex] = {
+      ...projects[projectIndex],
+      ...normalized,
+      updated_at: updatedAt
+    };
+    writeJsonFile(registry.registryPath, projects);
+  }
+
+  const baseline = persistProjectSetupArtifacts(safeProject, nextProject);
+
+  return {
+    project: safeProject,
+    saved_fields: Object.keys(normalized),
+    updated_at: updatedAt,
+    project_file: paths.projectFilePath,
+    registry_path: registry.registryPath,
+    baseline_validation: baseline,
+    record: nextProject
   };
 }
 
@@ -5055,27 +7168,189 @@ function reviewProject(projectName) {
   return readJsonFile(paths.projectFilePath, {});
 }
 
+function reviewProjectCanonicalParity(projectName) {
+  const safeProject = normalizeProjectSlug(projectName);
+  const paths = getProjectBaselinePaths(safeProject);
+  const checks = [];
+  const mismatchLogPath = path.join(paths.opsDir, 'data-mismatches.json');
+
+  const domains = [
+    {
+      domain: 'brand_profile',
+      canonical_path: paths.brandProfilePath,
+      legacy_path: paths.legacy.brandProfilePath
+    },
+    {
+      domain: 'assets_registry',
+      canonical_path: paths.assetsRegistryPath,
+      legacy_path: paths.legacy.assetsRegistryPath
+    },
+    {
+      domain: 'source_of_truth_registry',
+      canonical_path: paths.sourceOfTruthRegistryPath,
+      legacy_path: paths.sourcesRegistryPath
+    }
+  ];
+
+  domains.forEach((item) => {
+    const canonicalExists = fs.existsSync(item.canonical_path);
+    const legacyExists = fs.existsSync(item.legacy_path);
+    const canonicalRaw = canonicalExists ? readJsonFile(item.canonical_path, null) : null;
+    const legacyRaw = legacyExists ? readJsonFile(item.legacy_path, null) : null;
+    let canonicalValue, legacyValue;
+    if (item.domain === 'source_of_truth_registry') {
+      // Deterministic: compare only flat sources map, ignore wrapper metadata
+      canonicalValue = extractSourceRegistryEntries(canonicalRaw);
+      legacyValue = extractSourceRegistryEntries(legacyRaw);
+    } else {
+      canonicalValue = canonicalRaw;
+      legacyValue = legacyRaw;
+    }
+    const parity = canonicalExists && legacyExists
+      ? stableJsonHash(canonicalValue) === stableJsonHash(legacyValue)
+      : canonicalExists;
+
+    if (canonicalExists && legacyExists && !parity) {
+      logProjectDataMismatch(safeProject, {
+        domain: item.domain,
+        reason: 'canonical_legacy_parity_check_mismatch',
+        canonical_path: item.canonical_path,
+        legacy_path: item.legacy_path,
+        canonical_hash: stableJsonHash(canonicalValue),
+        legacy_hash: stableJsonHash(legacyValue)
+      });
+    }
+
+    checks.push({
+      domain: item.domain,
+      canonical_path: item.canonical_path,
+      legacy_path: item.legacy_path,
+      canonical_exists: canonicalExists,
+      legacy_exists: legacyExists,
+      parity,
+      fallback_in_use: !canonicalExists && legacyExists
+    });
+  });
+
+  const mismatches = checks.filter((item) => !item.parity).length;
+  const fallbackDependencies = checks.filter((item) => item.fallback_in_use).length;
+  const report = {
+    project: safeProject,
+    generated_at: new Date().toISOString(),
+    mismatches,
+    fallback_dependencies: fallbackDependencies,
+    checks,
+    mismatch_log_path: mismatchLogPath,
+    recommendation: fallbackDependencies > 0 || mismatches > 0
+      ? 'Reduce fallback dependencies by keeping canonical files in sync before disabling legacy reads.'
+      : 'Canonical files are aligned with available legacy data.'
+  };
+
+  const reportPath = path.join(paths.reportsDir, 'canonical-migration-report.json');
+  writeJsonFile(reportPath, report);
+
+  return {
+    ...report,
+    report_path: reportPath
+  };
+}
+
 function reviewProjectReadiness(projectName) {
-  const paths = getProjectBasePaths(projectName);
+  const paths = getProjectBaselinePaths(projectName);
 
   if (!fs.existsSync(paths.projectFilePath)) {
     throw new Error('Project not found');
   }
 
+  const safeProject = normalizeProjectSlug(projectName);
   const projectData = readJsonFile(paths.projectFilePath, {});
+  const baselineValidation = ensureProjectBaselineFiles(safeProject, projectData);
+  const brandProfile = readJsonFile(paths.brandProfilePath, {});
+  const sourceRegistry = buildSourceOfTruthRegistry(readJsonFile(paths.sourcesRegistryPath, {}));
+  const missingAssets = reviewProjectMissingAssets(safeProject);
+  const connectorReadiness = reviewProjectConnectorReadiness(safeProject);
+  const parityReport = reviewProjectCanonicalParity(safeProject);
+  const campaigns = listCampaigns(safeProject, { limit: 50 });
+  const aiMemoryItems = listAiMemory(safeProject, { limit: 20 });
+
+  const setupFields = ['project_name', 'project_type', 'website_url', 'market', 'language', 'currency', 'primary_goal', 'audience_primary'];
+  const setupCompleteCount = setupFields
+    .filter((field) => Boolean(normalizeSetupTextValue(projectData[field])))
+    .length;
+  const setupCompleteness = Math.round((setupCompleteCount / setupFields.length) * 100);
+
+  const brandFields = ['brand_name', 'business_type', 'market', 'language', 'currency', 'tone', 'positioning', 'audience', 'goals', 'website'];
+  const brandCompleteCount = brandFields
+    .filter((field) => {
+      if (Array.isArray(brandProfile[field])) {
+        return brandProfile[field].length > 0;
+      }
+      return Boolean(normalizeSetupTextValue(brandProfile[field]));
+    })
+    .length;
+  const brandProfileCompleteness = Math.round((brandCompleteCount / brandFields.length) * 100);
+
+  const requiredSourceEntries = sourceRegistry.required_sources && typeof sourceRegistry.required_sources === 'object'
+    ? Object.values(sourceRegistry.required_sources)
+    : [];
+  const sourceCompleteCount = requiredSourceEntries
+    .filter((entry) => ['connected', 'verified'].includes(normalizeSourceStatus(entry?.status)))
+    .length;
+  const sourceOfTruthCompleteness = requiredSourceEntries.length
+    ? Math.round((sourceCompleteCount / requiredSourceEntries.length) * 100)
+    : 0;
+
+  const assetBlockers = Array.isArray(missingAssets.blockers) ? missingAssets.blockers.length : 0;
+  const requiredAssetCount = Array.isArray(missingAssets.required_asset_types) ? missingAssets.required_asset_types.length : 0;
+  const assetsCompleteness = requiredAssetCount
+    ? Math.max(0, Math.round(((requiredAssetCount - assetBlockers) / requiredAssetCount) * 100))
+    : 0;
+
+  const integrationsCompleteness = Number(connectorReadiness.readiness_score || 0);
+  const campaignReadiness = campaigns.length > 0 ? 100 : 40;
+  const executionReadiness = fs.existsSync(paths.executionDir) && fs.existsSync(paths.opsDir) ? 100 : 0;
+  const publishingReadiness = fs.existsSync(paths.publishingDir) ? 100 : 0;
+  const aiMemoryReadiness = fs.existsSync(paths.aiMemoryPath)
+    ? (aiMemoryItems.length > 0 ? 100 : 75)
+    : 0;
+
+  const domainScores = {
+    setup_completeness: setupCompleteness,
+    brand_profile_completeness: brandProfileCompleteness,
+    source_of_truth_completeness: sourceOfTruthCompleteness,
+    assets_completeness: assetsCompleteness,
+    integrations_completeness: integrationsCompleteness,
+    campaign_readiness: campaignReadiness,
+    execution_readiness: executionReadiness,
+    publishing_readiness: publishingReadiness,
+    ai_memory_readiness: aiMemoryReadiness
+  };
 
   const checks = {
     has_project_file: fs.existsSync(paths.projectFilePath),
     has_brand_assets_dir: fs.existsSync(paths.brandAssetsDir),
     has_products_dir: fs.existsSync(paths.productsDir),
     has_content_dir: fs.existsSync(paths.contentDir),
+    has_media_dir: fs.existsSync(paths.mediaDir),
     has_campaigns_dir: fs.existsSync(paths.campaignsDir),
+    has_publishing_dir: fs.existsSync(paths.publishingDir),
     has_launch_dir: fs.existsSync(paths.launchDir),
     has_execution_dir: fs.existsSync(paths.executionDir),
+    has_telemetry_dir: fs.existsSync(paths.telemetryDir),
+    has_logs_dir: fs.existsSync(paths.logsDir),
     has_optimization_dir: fs.existsSync(paths.optimizationDir),
     has_reports_dir: fs.existsSync(paths.reportsDir),
     has_integrations_dir: fs.existsSync(paths.integrationsDir),
     has_uploads_dir: fs.existsSync(paths.uploadsDir),
+    has_brand_profile: baselineValidation.required_files.brand_profile.exists,
+    has_assets_registry: baselineValidation.required_files.assets_registry.exists,
+    has_source_of_truth_registry: baselineValidation.required_files.source_of_truth_registry.exists,
+    has_integrations_registry: baselineValidation.required_files.integrations_registry.exists,
+    has_ai_commands: baselineValidation.required_files.ai_commands.exists,
+    has_ai_artifacts: baselineValidation.required_files.ai_artifacts.exists,
+    has_ai_recommendations: baselineValidation.required_files.ai_recommendations.exists,
+    has_ai_memory: baselineValidation.required_files.ai_memory.exists,
+    has_integration_control_center: baselineValidation.required_files.integrations.exists,
     has_website_url: !!projectData.website_url,
     has_market: !!projectData.market,
     has_language: !!projectData.language,
@@ -5088,38 +7363,108 @@ function reviewProjectReadiness(projectName) {
   if (!checks.has_market) missing.push('market');
   if (!checks.has_language) missing.push('language');
   if (!checks.has_project_type) missing.push('project_type');
+  if (domainScores.brand_profile_completeness < 100) missing.push('brand_profile_incomplete');
+  if (domainScores.source_of_truth_completeness < 100) missing.push('source_of_truth_incomplete');
+  if (domainScores.assets_completeness < 100) missing.push('assets_incomplete');
+  if (domainScores.integrations_completeness < 100) missing.push('integrations_incomplete');
+  if (domainScores.campaign_readiness < 100) missing.push('campaign_readiness');
+  if (domainScores.execution_readiness < 100) missing.push('execution_readiness');
+  if (domainScores.publishing_readiness < 100) missing.push('publishing_readiness');
+  if (domainScores.ai_memory_readiness < 100) missing.push('ai_memory_readiness');
 
   const totalChecks = Object.keys(checks).length;
   const passedChecks = Object.values(checks).filter(Boolean).length;
-  const readinessScore = Math.round((passedChecks / totalChecks) * 100);
+  const structuralReadinessScore = Math.round((passedChecks / totalChecks) * 100);
+  const domainReadinessScore = Math.round(
+    Object.values(domainScores).reduce((sum, score) => sum + score, 0) / Object.keys(domainScores).length
+  );
+  const readinessScore = Math.round((structuralReadinessScore + domainReadinessScore) / 2);
 
   return {
-    project: projectName,
+    project: safeProject,
     reviewed_at: new Date().toISOString(),
     readiness_score: readinessScore,
+    structural_readiness_score: structuralReadinessScore,
+    domain_readiness_score: domainReadinessScore,
+    readiness_domains: domainScores,
     checks,
     missing,
-    status: missing.length ? 'needs_input' : 'ready_for_data_upload'
+    baseline_validation: baselineValidation,
+    canonical_parity: parityReport,
+    status: readinessScore >= 85 ? 'ready_for_data_upload' : 'needs_input'
   };
 }
 function getProjectAssetPaths(projectName) {
-  const base = getProjectBasePaths(projectName);
+  const base = getProjectBaselinePaths(projectName);
+  ensureProjectBaselineFiles(projectName);
 
-  const assetsRegistryPath = path.join(base.baseDir, 'assets-registry.json');
-  const sourcesRegistryPath = path.join(base.baseDir, 'sources-registry.json');
+  return base;
+}
 
-  if (!fs.existsSync(assetsRegistryPath)) {
-    writeJsonFile(assetsRegistryPath, []);
+function normalizeAssetTags(value) {
+  if (Array.isArray(value)) {
+    return value
+      .map((item) => normalizeSetupTextValue(item))
+      .filter(Boolean);
   }
 
-  if (!fs.existsSync(sourcesRegistryPath)) {
-    writeJsonFile(sourcesRegistryPath, {});
-  }
+  return normalizeSetupListValue(value);
+}
+
+function normalizeAssetRecord(projectName, asset = {}) {
+  const now = new Date().toISOString();
+  const canonicalType = getCanonicalAssetType(asset.type || asset.asset_type) || normalizeSetupTextValue(asset.type || asset.asset_type).toLowerCase();
+  const filePath = normalizeSetupTextValue(asset.file_path || asset.path);
+  const fileName = normalizeSetupTextValue(asset.file_name || (filePath ? path.basename(filePath) : ''));
+  const displayName = normalizeSetupTextValue(asset.display_name || asset.name || asset.title || fileName);
+  const createdAt = normalizeSetupTextValue(asset.created_at || asset.registered_at) || now;
+  const status = normalizeSetupTextValue(asset.status)
+    || (normalizeSetupTextValue(asset.exists) === 'false' ? 'missing' : 'connected');
+  const source = normalizeSetupTextValue(asset.source || asset.scan_source || asset.metadata?.scan_source || 'project_upload');
+  const normalizedProject = normalizeProjectSlug(projectName);
 
   return {
-    ...base,
-    assetsRegistryPath,
-    sourcesRegistryPath
+    id: normalizeSetupTextValue(asset.id || asset.asset_id) || `asset_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`,
+    asset_id: normalizeSetupTextValue(asset.asset_id || asset.id) || `asset_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`,
+    file_name: fileName,
+    file_path: filePath,
+    name: displayName || fileName,
+    title: normalizeSetupTextValue(asset.title || displayName || fileName),
+    display_name: displayName || fileName,
+    type: canonicalType,
+    asset_type: canonicalType,
+    project: normalizedProject,
+    source,
+    tags: normalizeAssetTags(asset.tags),
+    status,
+    readiness_status: normalizeSetupTextValue(asset.readiness_status || status) || status,
+    review_status: normalizeSetupTextValue(asset.review_status || asset.readiness_status || status) || status,
+    created_at: createdAt,
+    updated_at: now,
+    source_of_truth: Boolean(asset.source_of_truth || asset.use_as_source_of_truth),
+    use_as_source_of_truth: Boolean(asset.use_as_source_of_truth || asset.source_of_truth),
+    approved: Boolean(asset.approved),
+    approved_at: normalizeSetupTextValue(asset.approved_at),
+    approval_note: normalizeSetupTextValue(asset.approval_note),
+    rejected: Boolean(asset.rejected),
+    rejected_at: normalizeSetupTextValue(asset.rejected_at),
+    rejection_note: normalizeSetupTextValue(asset.rejection_note),
+    needs_review: Boolean(asset.needs_review),
+    reviewed_at: normalizeSetupTextValue(asset.reviewed_at),
+    reviewed_by: normalizeSetupTextValue(asset.reviewed_by),
+    archived: Boolean(asset.archived),
+    archived_at: normalizeSetupTextValue(asset.archived_at),
+    archive_note: normalizeSetupTextValue(asset.archive_note),
+    deleted: Boolean(asset.deleted),
+    deleted_at: normalizeSetupTextValue(asset.deleted_at),
+    deleted_by: normalizeSetupTextValue(asset.deleted_by),
+    delete_note: normalizeSetupTextValue(asset.delete_note),
+    source_of_truth_updated_at: normalizeSetupTextValue(asset.source_of_truth_updated_at),
+    source_of_truth_updated_by: normalizeSetupTextValue(asset.source_of_truth_updated_by),
+    renamed_at: normalizeSetupTextValue(asset.renamed_at),
+    renamed_by: normalizeSetupTextValue(asset.renamed_by),
+    exists: fs.existsSync(filePath),
+    metadata: asset.metadata && typeof asset.metadata === 'object' ? asset.metadata : {}
   };
 }
 
@@ -5130,19 +7475,19 @@ function registerProjectAsset(projectName, assetType, filePath) {
     throw new Error('Project not found');
   }
 
-  const assets = readJsonFile(paths.assetsRegistryPath, []);
+  const assets = readJsonFile(paths.assetsRegistryPath, [])
+    .map((item) => normalizeAssetRecord(projectName, item));
 
-  const record = {
-    asset_id: `asset_${Date.now()}`,
-    project: projectName,
-    asset_type: String(assetType || '').trim().toLowerCase(),
-    file_path: String(filePath || '').trim(),
-    exists: fs.existsSync(String(filePath || '').trim()),
-    registered_at: new Date().toISOString()
-  };
+  const record = normalizeAssetRecord(projectName, {
+    type: assetType,
+    file_path: filePath,
+    source: 'project_upload',
+    status: 'connected'
+  });
 
-  assets.push(record);
-  writeJsonFile(paths.assetsRegistryPath, assets);
+  const withoutExisting = assets.filter((item) => item.file_path !== record.file_path || item.type !== record.type);
+  withoutExisting.unshift(record);
+  writeJsonFile(paths.assetsRegistryPath, withoutExisting);
 
   return {
     ...record,
@@ -5157,7 +7502,10 @@ function listProjectAssets(projectName) {
     throw new Error('Project not found');
   }
 
-  return readJsonFile(paths.assetsRegistryPath, []);
+  const normalized = readJsonFile(paths.assetsRegistryPath, [])
+    .map((item) => normalizeAssetRecord(projectName, item));
+  writeJsonFile(paths.assetsRegistryPath, normalized);
+  return normalized;
 }
 
 function setProjectSourceOfTruth(projectName, sourceType, sourceValue) {
@@ -5167,18 +7515,22 @@ function setProjectSourceOfTruth(projectName, sourceType, sourceValue) {
     throw new Error('Project not found');
   }
 
+  const normalizedType = String(sourceType || '').trim().toLowerCase();
+  const normalizedValue = String(sourceValue || '').trim();
   const sources = readJsonFile(paths.sourcesRegistryPath, {});
-  sources[String(sourceType || '').trim().toLowerCase()] = {
-    value: String(sourceValue || '').trim(),
-    updated_at: new Date().toISOString()
+  sources[normalizedType] = {
+    value: normalizedValue,
+    updated_at: new Date().toISOString(),
+    status: 'connected'
   };
 
   writeJsonFile(paths.sourcesRegistryPath, sources);
+  writeJsonFile(paths.sourceOfTruthRegistryPath, buildSourceOfTruthRegistry(sources));
 
   return {
     project: projectName,
-    source_type: String(sourceType || '').trim().toLowerCase(),
-    source_value: String(sourceValue || '').trim(),
+    source_type: normalizedType,
+    source_value: normalizedValue,
     registry_path: paths.sourcesRegistryPath
   };
 }
@@ -5200,6 +7552,7 @@ function removeProjectSourceOfTruth(projectName, sourceType) {
   const existing = sources[normalizedSourceType] || null;
   delete sources[normalizedSourceType];
   writeJsonFile(paths.sourcesRegistryPath, sources);
+  writeJsonFile(paths.sourceOfTruthRegistryPath, buildSourceOfTruthRegistry(sources));
 
   return {
     project: projectName,
@@ -5218,7 +7571,8 @@ function reviewProjectSources(projectName) {
 
   return {
     project: projectName,
-    sources: readJsonFile(paths.sourcesRegistryPath, {})
+    sources: readJsonFile(paths.sourcesRegistryPath, {}),
+    source_of_truth_registry: readJsonFile(paths.sourceOfTruthRegistryPath, buildSourceOfTruthRegistry({}))
   };
 }
 
@@ -5268,14 +7622,19 @@ function sanitizeIntegrationId(value) {
 }
 
 function getProjectIntegrationPaths(projectName) {
-  const paths = getProjectBasePaths(projectName);
+  const paths = getProjectBaselinePaths(projectName);
 
   if (!fs.existsSync(paths.projectFilePath)) {
     throw new Error('Project not found');
   }
 
-  const controlCenterRegistryPath = path.join(paths.integrationsDir, 'control-center.json');
+  ensureProjectBaselineFiles(projectName);
+  const controlCenterRegistryPath = paths.integrationControlCenterPath;
   ensureJsonFile(controlCenterRegistryPath, {
+    updated_at: '',
+    records: {}
+  });
+  ensureJsonFile(paths.integrationsRegistryPath, {
     updated_at: '',
     records: {}
   });
@@ -5308,6 +7667,7 @@ function writeProjectIntegrationRegistry(projectName, registry = {}) {
   };
 
   writeJsonFile(paths.controlCenterRegistryPath, payload);
+  writeJsonFile(paths.integrationsRegistryPath, payload);
 
   return {
     ...payload,
@@ -5488,6 +7848,32 @@ function sanitizeIntegrationConfigForClient(record = {}) {
   return sanitized;
 }
 
+// Keys matching this pattern are redacted from provider summary objects before
+// being returned to clients. Values are replaced with "[redacted]".
+// Applied recursively; does not mutate stored records.
+const INTEGRATION_SUMMARY_REDACT_PATTERN =
+  /(secret|token|password|api[_-]?key|apiKey|authorization|credential|cookie|session|bearer|client_secret)/i;
+
+function redactProviderSummaryObject(obj, depth = 0) {
+  if (obj === null || typeof obj !== 'object' || depth > 5) {
+    return obj;
+  }
+
+  if (Array.isArray(obj)) {
+    return obj.map((item) => redactProviderSummaryObject(item, depth + 1));
+  }
+
+  const out = {};
+  Object.entries(obj).forEach(([key, value]) => {
+    if (INTEGRATION_SUMMARY_REDACT_PATTERN.test(String(key))) {
+      out[key] = '[redacted]';
+    } else {
+      out[key] = redactProviderSummaryObject(value, depth + 1);
+    }
+  });
+  return out;
+}
+
 function summarizeIntegrationRecord(record = {}) {
   const decryptedCredentials = getIntegrationCredentials(record);
   const normalizedRecord = {
@@ -5552,9 +7938,9 @@ function summarizeIntegrationRecord(record = {}) {
     health_state: healthState,
     legacy_source: Boolean(normalizedRecord.legacy_source),
     sync_source_registry: normalizedRecord.sync_source_registry,
-    provider_metadata: asPlainObject(normalizedRecord.provider_metadata),
-    last_sync_summary: asPlainObject(normalizedRecord.last_sync_summary),
-    provider_account: asPlainObject(normalizedRecord.provider_account),
+    provider_metadata: redactProviderSummaryObject(asPlainObject(normalizedRecord.provider_metadata)),
+    last_sync_summary: redactProviderSummaryObject(asPlainObject(normalizedRecord.last_sync_summary)),
+    provider_account: redactProviderSummaryObject(asPlainObject(normalizedRecord.provider_account)),
     insights_ready: asPlainObject(normalizedRecord.insights_ready)
   };
 }
@@ -5646,6 +8032,12 @@ async function saveProjectIntegrationRecord(projectName, integrationId, payload 
 
   if (!normalizedId) {
     throw new Error('Missing integration id');
+  }
+
+  if (!isSupportedProvider(normalizedId)) {
+    throw Object.assign(new Error(getUnsupportedProviderMessage(normalizedId)), {
+      status: 'unsupported_provider'
+    });
   }
 
   const registry = readProjectIntegrationRegistry(projectName);
@@ -5815,6 +8207,12 @@ async function runProjectIntegrationAction(projectName, integrationId, actionTyp
     throw new Error('Integration record not found');
   }
 
+  if (actionType !== 'disconnect' && !isSupportedProvider(normalizedId)) {
+    throw Object.assign(new Error(getUnsupportedProviderMessage(normalizedId)), {
+      status: 'unsupported_provider'
+    });
+  }
+
   if (actionType !== 'disconnect') {
     assertIntegrationReadyForAction(existing, actionType === 'test' ? 'test the connection' : actionType);
   }
@@ -5909,17 +8307,19 @@ function reviewProjectMissingAssets(projectName) {
   }
 
   const assets = readJsonFile(paths.assetsRegistryPath, []);
-  const assetTypes = assets.map(x => x.asset_type);
-
-  const required = [
-    'logo',
-    'brand_guideline',
-    'product_csv',
-    'pricing_doc',
-    'legal_doc'
-  ];
-
-  const missing = required.filter(type => !assetTypes.includes(type));
+  const categoryReadiness = buildProjectAssetCategoryReadiness(projectName, assets);
+  const required = getAssetTypeCatalog()
+    .filter(item => item.required)
+    .map(item => item.asset_type);
+  const assetTypes = assets
+    .map(item => getCanonicalAssetType(item.asset_type) || String(item.asset_type || '').trim().toLowerCase())
+    .filter(Boolean);
+  const missing = categoryReadiness.categories
+    .filter(item => item.required && item.status === 'Missing')
+    .map(item => item.asset_type);
+  const blockers = categoryReadiness.categories
+    .filter(item => item.required && ['Missing', 'Needs Review'].includes(item.status))
+    .map(item => item.asset_type);
 
   return {
     project: projectName,
@@ -5927,108 +8327,819 @@ function reviewProjectMissingAssets(projectName) {
     required_asset_types: required,
     registered_asset_types: [...new Set(assetTypes)].sort(),
     missing,
-    status: missing.length ? 'missing_assets' : 'assets_ready'
+    blockers,
+    category_readiness: categoryReadiness,
+    status: blockers.length ? 'asset_blockers' : 'assets_ready'
   };
 }
 function getAssetTypeCatalog() {
   return [
     {
       asset_type: 'logo',
-      label: 'Project Logo',
+      label: 'Logo / Logo',
+      purpose: 'brand_foundation',
+      purpose_label: 'Brand foundation',
       required: true,
-      allowed_extensions: ['.png', '.svg', '.jpg', '.jpeg'],
+      allowed_extensions: ['.png', '.svg', '.jpg', '.jpeg', '.webp'],
       target_folder: 'brand-assets',
-      description: 'Official brand logo'
+      aliases: [],
+      description: 'Official brand logo.',
+      guidance: {
+        what_to_upload: 'Primary logo files, transparent logo variants, and approved lockups.',
+        why_it_matters: 'Keeps setup, media creation, publishing previews, and AI output visually tied to the right brand.',
+        used_in: ['Setup', 'Media Studio', 'Publishing', 'AI Command']
+      }
     },
     {
       asset_type: 'brand_guideline',
-      label: 'Brand Guideline',
+      label: 'Brand Guideline / Markenrichtlinie',
+      purpose: 'brand_foundation',
+      purpose_label: 'Brand foundation',
       required: true,
-      allowed_extensions: ['.pdf', '.docx'],
+      allowed_extensions: ['.pdf', '.doc', '.docx', '.ppt', '.pptx', '.md', '.txt'],
       target_folder: 'brand-assets',
-      description: 'Brand identity and usage guide'
+      aliases: ['brand_guidelines', 'brand_guide', 'brand_reference_doc'],
+      description: 'Brand identity, voice, visual rules, and usage guidance.',
+      guidance: {
+        what_to_upload: 'Brand book, tone guide, design system notes, claim rules, and visual do/dont guidance.',
+        why_it_matters: 'Gives Setup, Content Studio, Media Studio, and AI Command the guardrails they need.',
+        used_in: ['Setup', 'Campaign Studio', 'Content Studio', 'Media Studio', 'AI Command']
+      }
     },
     {
       asset_type: 'product_csv',
-      label: 'Product Data Sheet',
+      label: 'Product Data / Produktdaten',
+      purpose: 'product_offers',
+      purpose_label: 'Product and offers',
       required: true,
-      allowed_extensions: ['.csv', '.xlsx'],
+      allowed_extensions: ['.csv', '.xlsx', '.xls', '.json'],
       target_folder: 'products',
-      description: 'Structured product list'
-    },
-    {
-      asset_type: 'product_image',
-      label: 'Product Image',
-      required: false,
-      allowed_extensions: ['.png', '.jpg', '.jpeg', '.webp'],
-      target_folder: 'products',
-      description: 'Real product image'
-    },
-    {
-      asset_type: 'product_video',
-      label: 'Product Video',
-      required: false,
-      allowed_extensions: ['.mp4', '.mov'],
-      target_folder: 'products',
-      description: 'Real product video'
-    },
-    {
-      asset_type: 'packaging_doc',
-      label: 'Packaging Document',
-      required: false,
-      allowed_extensions: ['.pdf', '.png', '.jpg', '.jpeg'],
-      target_folder: 'products',
-      description: 'Packaging or label reference'
+      aliases: ['product_data', 'product_feed', 'product_sheet'],
+      description: 'Structured product data for planning, content, and campaign packaging.',
+      guidance: {
+        what_to_upload: 'SKU list, product names, descriptions, variants, ingredients, usage, and product URLs.',
+        why_it_matters: 'Campaign Studio, Content Studio, Publishing, and AI Command need accurate product facts.',
+        used_in: ['Campaign Studio', 'Content Studio', 'Publishing', 'AI Command']
+      }
     },
     {
       asset_type: 'pricing_doc',
-      label: 'Pricing Document',
+      label: 'Pricing & Offers / Preise & Angebote',
+      purpose: 'product_offers',
+      purpose_label: 'Product and offers',
       required: true,
-      allowed_extensions: ['.pdf', '.xlsx', '.csv', '.docx'],
+      allowed_extensions: ['.pdf', '.doc', '.docx', '.csv', '.xlsx', '.xls', '.txt', '.md'],
       target_folder: 'content',
-      description: 'Pricing, offers, or sales sheet'
+      aliases: ['pricing', 'price_list', 'offers', 'offer_doc'],
+      description: 'Pricing, bundles, discounts, and commercial offer rules.',
+      guidance: {
+        what_to_upload: 'Price lists, offer sheets, bundles, campaign discounts, coupons, and margin guardrails.',
+        why_it_matters: 'Prevents Campaign Studio, Publishing, and AI Command from inventing prices or offers.',
+        used_in: ['Campaign Studio', 'Publishing', 'AI Command']
+      }
     },
     {
       asset_type: 'legal_doc',
-      label: 'Legal / Compliance Document',
+      label: 'Legal Documents / Rechtliche Dokumente',
+      purpose: 'proof_compliance',
+      purpose_label: 'Proof and compliance',
       required: true,
-      allowed_extensions: ['.pdf', '.docx'],
+      allowed_extensions: ['.pdf', '.doc', '.docx', '.txt', '.md'],
       target_folder: 'content',
-      description: 'Policies, legal terms, disclaimers'
+      aliases: ['legal', 'compliance_doc', 'terms_doc'],
+      description: 'Policies, legal terms, disclaimers, and claim restrictions.',
+      guidance: {
+        what_to_upload: 'Terms, privacy policy, disclaimers, compliance notes, claim restrictions, and regulated copy rules.',
+        why_it_matters: 'Publishing and AI Command need legal context before release or generated claims.',
+        used_in: ['Content Studio', 'Publishing', 'AI Command']
+      }
     },
     {
-      asset_type: 'brand_reference_doc',
-      label: 'Brand Reference Document',
-      required: false,
-      allowed_extensions: ['.pdf', '.docx', '.txt', '.md'],
-      target_folder: 'content',
-      description: 'Reference material about the brand'
+      asset_type: 'product_photos',
+      label: 'Product Photos / Produktfotos',
+      purpose: 'visual_media',
+      purpose_label: 'Visual media',
+      required: true,
+      allowed_extensions: ['.png', '.jpg', '.jpeg', '.webp', '.avif'],
+      target_folder: 'products',
+      aliases: ['product_image', 'product_images', 'product_photo', 'product'],
+      description: 'Approved product photography for content, media, ads, and publishing.',
+      guidance: {
+        what_to_upload: 'Clean product packshots, lifestyle product photos, before/after images where allowed, and hero crops.',
+        why_it_matters: 'Content Studio, Media Studio, Campaign Studio, and Publishing need real product visuals.',
+        used_in: ['Campaign Studio', 'Content Studio', 'Media Studio', 'Publishing', 'AI Command']
+      }
     },
     {
-      asset_type: 'faq',
-      label: 'FAQ Document',
-      required: false,
-      allowed_extensions: ['.pdf', '.docx', '.txt', '.md'],
-      target_folder: 'content',
-      description: 'Frequently asked questions'
+      asset_type: 'product_videos',
+      label: 'Product Videos / Produktvideos',
+      purpose: 'visual_media',
+      purpose_label: 'Visual media',
+      required: true,
+      allowed_extensions: ['.mp4', '.mov', '.webm', '.m4v'],
+      target_folder: 'products',
+      aliases: ['product_video', 'product_video_assets', 'video'],
+      description: 'Approved product videos, demos, UGC clips, and cutdowns.',
+      guidance: {
+        what_to_upload: 'Product demos, UGC clips, reels, explainers, usage videos, and source cutdowns.',
+        why_it_matters: 'Media Studio, Content Studio, Campaign Studio, and Publishing use video as creative source material.',
+        used_in: ['Campaign Studio', 'Content Studio', 'Media Studio', 'Publishing', 'AI Command']
+      }
     },
     {
-      asset_type: 'testimonial',
-      label: 'Testimonials',
-      required: false,
-      allowed_extensions: ['.pdf', '.docx', '.txt', '.md', '.png', '.jpg', '.jpeg', '.mp4'],
-      target_folder: 'content',
-      description: 'Customer or partner testimonials'
+      asset_type: 'social_assets',
+      label: 'Social Assets / Social-Media-Assets',
+      purpose: 'campaign_social',
+      purpose_label: 'Campaign and social',
+      required: true,
+      allowed_extensions: ['.png', '.jpg', '.jpeg', '.webp', '.mp4', '.mov', '.pdf', '.psd', '.ai', '.fig'],
+      target_folder: 'campaigns',
+      aliases: ['social_asset', 'social_creatives', 'organic_social_assets'],
+      description: 'Organic social creative, post visuals, reels, stories, and channel-ready source assets.',
+      guidance: {
+        what_to_upload: 'Organic post images, story frames, reels, thumbnails, channel templates, and captions references.',
+        why_it_matters: 'Content Studio, Media Studio, Campaign Studio, and Publishing can reuse proven channel assets.',
+        used_in: ['Campaign Studio', 'Content Studio', 'Media Studio', 'Publishing', 'AI Command']
+      }
     },
     {
-      asset_type: 'email_template',
-      label: 'Email Template',
-      required: false,
-      allowed_extensions: ['.html', '.txt', '.md', '.docx'],
+      asset_type: 'campaign_assets',
+      label: 'Campaign Assets / Kampagnenmaterial',
+      purpose: 'campaign_social',
+      purpose_label: 'Campaign and social',
+      required: true,
+      allowed_extensions: ['.png', '.jpg', '.jpeg', '.webp', '.mp4', '.mov', '.pdf', '.doc', '.docx', '.html', '.zip'],
+      target_folder: 'campaigns',
+      aliases: ['campaign_asset', 'creative_assets', 'ad_assets'],
+      description: 'Campaign-specific creative, copy, export packs, banners, and channel packages.',
+      guidance: {
+        what_to_upload: 'Campaign banners, ad creative, landing-page assets, email hero files, export packs, and wave-specific files.',
+        why_it_matters: 'Campaign Studio and Publishing need a reusable package for each campaign or wave.',
+        used_in: ['Campaign Studio', 'Content Studio', 'Media Studio', 'Publishing', 'AI Command']
+      }
+    },
+    {
+      asset_type: 'packaging_images',
+      label: 'Packaging Images / Verpackungsbilder',
+      purpose: 'visual_media',
+      purpose_label: 'Visual media',
+      required: true,
+      allowed_extensions: ['.png', '.jpg', '.jpeg', '.webp', '.pdf'],
+      target_folder: 'products',
+      aliases: ['packaging_doc', 'packaging_image', 'packaging', 'label_image'],
+      description: 'Packaging photos, labels, inserts, and box or bottle references.',
+      guidance: {
+        what_to_upload: 'Packaging photos, label artwork, inserts, box shots, bottle/jar details, and compliance label references.',
+        why_it_matters: 'Media Studio and Publishing need packaging truth for product visuals and compliance checks.',
+        used_in: ['Campaign Studio', 'Media Studio', 'Publishing', 'AI Command']
+      }
+    },
+    {
+      asset_type: 'testimonials_reviews',
+      label: 'Testimonials & Reviews / Kundenstimmen & Bewertungen',
+      purpose: 'proof_compliance',
+      purpose_label: 'Proof and compliance',
+      required: true,
+      allowed_extensions: ['.pdf', '.doc', '.docx', '.txt', '.md', '.csv', '.xlsx', '.png', '.jpg', '.jpeg'],
       target_folder: 'content',
-      description: 'Email campaign template'
+      aliases: ['testimonial', 'testimonials', 'review', 'reviews'],
+      description: 'Customer proof, reviews, testimonial exports, and approved quotes.',
+      guidance: {
+        what_to_upload: 'Review exports, testimonial docs, approved screenshots, quote permissions, and proof notes.',
+        why_it_matters: 'Content Studio, Campaign Studio, Publishing, and AI Command need trusted proof points.',
+        used_in: ['Campaign Studio', 'Content Studio', 'Publishing', 'AI Command']
+      }
+    },
+    {
+      asset_type: 'certificates',
+      label: 'Certificates / Zertifikate',
+      purpose: 'proof_compliance',
+      purpose_label: 'Proof and compliance',
+      required: true,
+      allowed_extensions: ['.pdf', '.png', '.jpg', '.jpeg', '.doc', '.docx'],
+      target_folder: 'content',
+      aliases: ['certificate', 'certification', 'certifications', 'cert'],
+      description: 'Certifications, lab reports, awards, and official proof documents.',
+      guidance: {
+        what_to_upload: 'Certificates, compliance proof, awards, lab reports, or official authorization documents.',
+        why_it_matters: 'Publishing and AI Command can use only approved proof when making trust or compliance claims.',
+        used_in: ['Content Studio', 'Publishing', 'AI Command']
+      }
+    },
+    {
+      asset_type: 'partner_docs',
+      label: 'Partner Documents / Partnerdokumente',
+      purpose: 'partnerships',
+      purpose_label: 'Partnerships',
+      required: true,
+      allowed_extensions: ['.pdf', '.doc', '.docx', '.txt', '.md', '.csv', '.xlsx'],
+      target_folder: 'content',
+      aliases: ['partner_doc', 'partner_document', 'supplier_doc', 'partner_material'],
+      description: 'Partner, supplier, distributor, marketplace, and collaboration documents.',
+      guidance: {
+        what_to_upload: 'Partner briefs, supplier docs, marketplace requirements, distributor notes, and collaboration agreements.',
+        why_it_matters: 'Campaign Studio, Publishing, and AI Command need partner constraints before reuse or release.',
+        used_in: ['Campaign Studio', 'Publishing', 'AI Command']
+      }
     }
   ];
+}
+
+function getCanonicalAssetType(assetType) {
+  const normalized = String(assetType || '').trim().toLowerCase();
+  if (!normalized) return '';
+
+  for (const item of getAssetTypeCatalog()) {
+    const values = [item.asset_type, ...(item.aliases || [])].map(value => String(value || '').trim().toLowerCase());
+    if (values.includes(normalized)) {
+      return item.asset_type;
+    }
+  }
+
+  return '';
+}
+
+function getAssetCategoryDefinition(assetType) {
+  const canonicalType = getCanonicalAssetType(assetType);
+  return getAssetTypeCatalog().find(item => item.asset_type === canonicalType) || null;
+}
+
+function getAssetCategoryStatus(asset, projectName) {
+  const record = asset || {};
+  const explicitStatus = String(
+    record.readiness_status ||
+    record.review_status ||
+    record.approval_status ||
+    record.status ||
+    ''
+  ).trim().toLowerCase();
+
+  if (record.approved === true || ['approved', 'ready_approved'].includes(explicitStatus)) {
+    return 'Approved';
+  }
+
+  const filePath = String(record.file_path || record.local_path || '').trim();
+  const exists = filePath ? fs.existsSync(filePath) : record.exists === true;
+  if (!exists || record.exists === false) {
+    return 'Needs Review';
+  }
+
+  try {
+    const folderInfo = getTargetFolderForAssetType(projectName, record.asset_type);
+    if (filePath && !filePath.startsWith(folderInfo.target_dir)) {
+      return 'Needs Review';
+    }
+  } catch (_) {
+    return 'Needs Review';
+  }
+
+  if (['needs_review', 'review', 'blocked', 'rejected'].includes(explicitStatus)) {
+    return 'Needs Review';
+  }
+
+  return 'Uploaded';
+}
+
+function listFilesByExtensions(rootDir, extensions = [], recursive = true) {
+  if (!rootDir || !fs.existsSync(rootDir)) {
+    return [];
+  }
+
+  const allow = new Set((extensions || []).map(ext => String(ext || '').trim().toLowerCase()));
+  const queue = [rootDir];
+  const files = [];
+
+  while (queue.length) {
+    const current = queue.shift();
+    const entries = fs.readdirSync(current, { withFileTypes: true });
+
+    entries.forEach((entry) => {
+      const fullPath = path.join(current, entry.name);
+      if (entry.isDirectory()) {
+        if (recursive) {
+          queue.push(fullPath);
+        }
+        return;
+      }
+
+      if (!entry.isFile()) {
+        return;
+      }
+
+      const extension = path.extname(entry.name).toLowerCase();
+      if (!allow.size || allow.has(extension)) {
+        files.push(fullPath);
+      }
+    });
+  }
+
+  return files.sort((a, b) => a.localeCompare(b));
+}
+
+function listDirectChildDirectories(rootDir) {
+  if (!rootDir || !fs.existsSync(rootDir)) {
+    return [];
+  }
+
+  return fs.readdirSync(rootDir, { withFileTypes: true })
+    .filter(entry => entry.isDirectory())
+    .map(entry => entry.name)
+    .sort((a, b) => a.localeCompare(b));
+}
+
+function parseCsvDocument(csvRaw = '') {
+  const rows = [];
+  let row = [];
+  let field = '';
+  let inQuotes = false;
+
+  for (let index = 0; index < csvRaw.length; index += 1) {
+    const char = csvRaw[index];
+    const next = csvRaw[index + 1];
+
+    if (char === '"') {
+      if (inQuotes && next === '"') {
+        field += '"';
+        index += 1;
+      } else {
+        inQuotes = !inQuotes;
+      }
+      continue;
+    }
+
+    if (!inQuotes && char === ',') {
+      row.push(field);
+      field = '';
+      continue;
+    }
+
+    if (!inQuotes && (char === '\n' || char === '\r')) {
+      if (char === '\r' && next === '\n') {
+        index += 1;
+      }
+
+      row.push(field);
+      const hasAnyValue = row.some(value => String(value || '').length > 0);
+      if (hasAnyValue) {
+        rows.push(row);
+      }
+      row = [];
+      field = '';
+      continue;
+    }
+
+    field += char;
+  }
+
+  if (field.length || row.length) {
+    row.push(field);
+    const hasAnyValue = row.some(value => String(value || '').length > 0);
+    if (hasAnyValue) {
+      rows.push(row);
+    }
+  }
+
+  return rows;
+}
+
+function normalizeLibraryFolderCandidate(value = '') {
+  return String(value || '')
+    .trim()
+    .toLowerCase()
+    .replace(/&/g, ' and ')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+function listFrontImageFiles(rootDir) {
+  return listFilesByExtensions(rootDir, ['.png'], true)
+    .filter(filePath => path.basename(filePath).toLowerCase() === 'front.png');
+}
+
+function buildProjectLibraryFilesystemScan(projectName) {
+  const safeProject = normalizeProjectSlug(projectName);
+  const basePaths = getProjectBasePaths(safeProject);
+  const brandPaths = getProjectBrandPaths(safeProject);
+
+  const projectProductsDir = basePaths.productsDir;
+  const brandProductCsvDirs = uniqueValues([
+    path.join(brandPaths.baseDir, 'product_csv'),
+    path.join(brandPaths.legacyBaseDir, 'product_csv'),
+    path.join(LEGACY_BRAND_ASSETS_DIR, safeProject, 'product_csv')
+  ]);
+  const brandProductImageDirs = uniqueValues([
+    path.join(brandPaths.baseDir, 'products', 'images'),
+    path.join(brandPaths.legacyBaseDir, 'products', 'images'),
+    path.join(LEGACY_BRAND_ASSETS_DIR, safeProject, 'products', 'images')
+  ]);
+  const brandProductVideoDirs = uniqueValues([
+    path.join(brandPaths.baseDir, 'products', 'videos'),
+    path.join(brandPaths.legacyBaseDir, 'products', 'videos'),
+    path.join(LEGACY_BRAND_ASSETS_DIR, safeProject, 'products', 'videos')
+  ]);
+
+  const productDataExtensions = ['.csv', '.xlsx', '.xls', '.json'];
+  const csvValidationExtensions = new Set(['.csv']);
+
+  const projectProductDataFiles = listFilesByExtensions(projectProductsDir, productDataExtensions, true);
+  const mirrorProductDataFiles = uniqueValues(brandProductCsvDirs.flatMap((dirPath) => listFilesByExtensions(dirPath, productDataExtensions, true)));
+
+  const preferredCsvFile = projectProductDataFiles.find(filePath =>
+    path.basename(filePath).toLowerCase().includes('product_master') && csvValidationExtensions.has(path.extname(filePath).toLowerCase())
+  ) || projectProductDataFiles.find(filePath => csvValidationExtensions.has(path.extname(filePath).toLowerCase()))
+    || mirrorProductDataFiles.find(filePath => csvValidationExtensions.has(path.extname(filePath).toLowerCase()))
+    || '';
+
+  const csvValidation = {
+    csv_file: preferredCsvFile,
+    rows_total: 0,
+    missing_product_name_rows: 0,
+    missing_image_folder_rows: 0,
+    csv_product_folders: [],
+    matched_product_rows: [],
+    missing_product_rows: []
+  };
+
+  const frontFiles = uniqueValues(brandProductImageDirs.flatMap((dirPath) => listFrontImageFiles(dirPath)));
+  const frontFolderNames = [...new Set(frontFiles.map((filePath) => {
+    const matchedRoot = brandProductImageDirs.find((dirPath) => filePath === dirPath || filePath.startsWith(`${dirPath}${path.sep}`));
+    if (!matchedRoot) {
+      return path.basename(path.dirname(filePath));
+    }
+
+    return path.relative(matchedRoot, path.dirname(filePath)).replace(/\\/g, '/');
+  }))]
+    .filter(Boolean)
+    .sort((a, b) => a.localeCompare(b));
+  const frontFolderSet = new Set(frontFolderNames);
+
+  if (preferredCsvFile && fs.existsSync(preferredCsvFile) && csvValidationExtensions.has(path.extname(preferredCsvFile).toLowerCase())) {
+    const raw = fs.readFileSync(preferredCsvFile, 'utf8').replace(/^\uFEFF/, '');
+    const parsedRows = parseCsvDocument(raw);
+
+    if (parsedRows.length) {
+      const headers = parsedRows[0].map(value => String(value || '').trim());
+      const productNameIndex = headers.findIndex(value => value.toLowerCase() === 'product name');
+      const imageFolderIndex = headers.findIndex(value => value.toLowerCase() === 'image folder');
+      const dataRows = parsedRows.slice(1);
+
+      csvValidation.rows_total = dataRows.length;
+
+      dataRows.forEach((dataRow, rowIndex) => {
+        const productName = productNameIndex >= 0 ? String(dataRow[productNameIndex] || '').trim() : '';
+        const imageFolder = imageFolderIndex >= 0 ? String(dataRow[imageFolderIndex] || '').trim() : '';
+        const candidates = [
+          imageFolder,
+          normalizeLibraryFolderCandidate(productName)
+        ].filter((value, index, array) => value && array.indexOf(value) === index);
+        const expectedFolder = imageFolder || candidates[0] || '';
+        const matchedFolder = candidates.find(candidate => frontFolderSet.has(candidate)) || '';
+
+        if (!productName) {
+          csvValidation.missing_product_name_rows += 1;
+        }
+        if (!imageFolder) {
+          csvValidation.missing_image_folder_rows += 1;
+        }
+
+        candidates.forEach((candidate) => {
+          csvValidation.csv_product_folders.push(candidate);
+        });
+
+        if (matchedFolder) {
+          csvValidation.matched_product_rows.push({
+            row_number: rowIndex + 2,
+            product_name: productName || '',
+            expected_folder: expectedFolder,
+            matched_folder: matchedFolder
+          });
+          return;
+        }
+
+        csvValidation.missing_product_rows.push({
+          row_number: rowIndex + 2,
+          product_name: productName || '',
+          expected_folder: expectedFolder,
+          candidate_folders: candidates
+        });
+      });
+    }
+  }
+
+  const imageFolders = uniqueValues(brandProductImageDirs.flatMap((dirPath) => listDirectChildDirectories(dirPath)));
+  const foldersMissingFront = imageFolders.filter((folderName) => !frontFolderSet.has(folderName));
+  const csvFolderSet = new Set(csvValidation.csv_product_folders.filter(Boolean));
+  const extraImageFolders = frontFolderNames.filter(folder => !csvFolderSet.has(folder));
+  const missingImageFolders = csvValidation.missing_product_rows
+    .map((item) => item.expected_folder || item.product_name)
+    .filter(Boolean);
+  const logicalProductDataFiles = [...new Set(projectProductDataFiles.concat(mirrorProductDataFiles).map(filePath => path.basename(filePath).toLowerCase()))];
+
+  const productVideoFiles = uniqueValues(brandProductVideoDirs.flatMap((dirPath) => listFilesByExtensions(dirPath, ['.mp4', '.mov', '.webm', '.m4v'], true)));
+
+  const scannedAssets = [];
+
+  projectProductDataFiles.concat(mirrorProductDataFiles).forEach((filePath) => {
+    scannedAssets.push({
+      asset_type: 'product_csv',
+      file_path: filePath,
+      exists: true,
+      scan_source: filePath.startsWith(projectProductsDir) ? 'project_products' : 'brand_product_csv'
+    });
+  });
+
+  frontFiles.forEach((filePath) => {
+    scannedAssets.push({
+      asset_type: 'product_photos',
+      file_path: filePath,
+      exists: true,
+      scan_source: 'brand_products_images_recursive'
+    });
+  });
+
+  productVideoFiles.forEach((filePath) => {
+    scannedAssets.push({
+      asset_type: 'product_videos',
+      file_path: filePath,
+      exists: true,
+      scan_source: 'brand_products_videos_recursive'
+    });
+  });
+
+  return {
+    project: safeProject,
+    generated_at: new Date().toISOString(),
+    paths: {
+      project_products: projectProductsDir,
+      brand_product_csv: brandProductCsvDirs,
+      brand_product_images: brandProductImageDirs,
+      brand_product_videos: brandProductVideoDirs
+    },
+    product_csv: {
+      canonical_files: projectProductDataFiles,
+      mirror_files: mirrorProductDataFiles,
+      total_files: projectProductDataFiles.length + mirrorProductDataFiles.length,
+      logical_files: logicalProductDataFiles.length,
+      valid_files: projectProductDataFiles.concat(mirrorProductDataFiles).length,
+      preferred_source: preferredCsvFile,
+      status: projectProductDataFiles.concat(mirrorProductDataFiles).length > 0 ? 'Uploaded' : 'Missing',
+      count_label: `${logicalProductDataFiles.length} file${logicalProductDataFiles.length === 1 ? '' : 's'}`,
+      detection_summary: [
+        `Detected ${logicalProductDataFiles.length} logical product data file(s) across ${projectProductDataFiles.length + mirrorProductDataFiles.length} physical location(s).`,
+        `Canonical project files: ${projectProductDataFiles.length}.`,
+        `Brand mirror files: ${mirrorProductDataFiles.length}.`
+      ],
+      csv_validation: {
+        csv_file: csvValidation.csv_file,
+        rows_total: csvValidation.rows_total,
+        missing_product_name_rows: csvValidation.missing_product_name_rows,
+        missing_image_folder_rows: csvValidation.missing_image_folder_rows
+      }
+    },
+    product_photos: {
+      total_product_folders: imageFolders.length,
+      folders_with_front_image: frontFolderNames.length,
+      folders_missing_front_image: foldersMissingFront.length,
+      missing_front_folders: foldersMissingFront,
+      csv_products_total: csvValidation.rows_total,
+      csv_products_matched_front: csvValidation.matched_product_rows.length,
+      csv_products_missing_front: csvValidation.missing_product_rows.length,
+      csv_missing_front_folders: missingImageFolders,
+      extra_image_folders: extraImageFolders,
+      count_label: `${csvValidation.matched_product_rows.length}/${csvValidation.rows_total} matched`,
+      missing_product_rows: csvValidation.missing_product_rows,
+      status:
+        csvValidation.rows_total > 0
+          ? (csvValidation.missing_product_rows.length ? 'Needs Review' : (csvValidation.matched_product_rows.length ? 'Uploaded' : 'Missing'))
+          : (frontFolderNames.length ? 'Uploaded' : 'Missing'),
+      detection_summary: [
+        `Matched front images for ${csvValidation.matched_product_rows.length} of ${csvValidation.rows_total} CSV products.`,
+        `Missing images for ${csvValidation.missing_product_rows.length} CSV product(s).`,
+        `Detected ${frontFolderNames.length} image folder(s) with front.png and ${extraImageFolders.length} extra folder(s) not referenced by the CSV.`
+      ],
+      front_files: frontFiles
+    },
+    product_videos: {
+      total_files: productVideoFiles.length,
+      status: productVideoFiles.length ? 'Uploaded' : 'Missing',
+      files: productVideoFiles
+    },
+    scanned_assets: scannedAssets
+  };
+}
+
+function refreshProjectLibraryRegistry(projectName) {
+  const safeProject = normalizeProjectSlug(projectName);
+  const basePaths = getProjectBasePaths(safeProject);
+  const assetsRegistryPath = path.join(basePaths.baseDir, 'assets-registry.json');
+  const hasAssetRegistry = fs.existsSync(assetsRegistryPath);
+
+  if (!fs.existsSync(basePaths.projectFilePath)) {
+    throw new Error('Project not found');
+  }
+
+  const existingAssets = hasAssetRegistry
+    ? readJsonFile(assetsRegistryPath, []).map((asset) => normalizeAssetRecord(safeProject, asset))
+    : [];
+  const scan = buildProjectLibraryFilesystemScan(safeProject);
+  const managedTypes = new Set(['product_csv', 'product_photos', 'product_videos']);
+  const now = new Date().toISOString();
+
+  const existingByKey = new Map();
+  existingAssets.forEach((asset) => {
+    const canonicalType = getCanonicalAssetType(asset.type || asset.asset_type) || String(asset.type || asset.asset_type || '').trim().toLowerCase();
+    const filePath = String(asset.file_path || '').trim();
+    if (!canonicalType || !filePath) {
+      return;
+    }
+    const key = `${canonicalType}::${filePath}`;
+    existingByKey.set(key, asset);
+  });
+
+  const retained = existingAssets.filter((asset) => {
+    const canonicalType = getCanonicalAssetType(asset.type || asset.asset_type) || String(asset.type || asset.asset_type || '').trim().toLowerCase();
+    const managedByRefresh = String(asset?.metadata?.managed_by || '').trim().toLowerCase() === 'library_refresh';
+    return !(managedTypes.has(canonicalType) && managedByRefresh);
+  });
+
+  const refreshedAssets = [];
+  scan.scanned_assets.forEach((scanned) => {
+    const canonicalType = getCanonicalAssetType(scanned.asset_type) || String(scanned.asset_type || '').trim().toLowerCase();
+    const filePath = String(scanned.file_path || '').trim();
+    if (!managedTypes.has(canonicalType) || !filePath) {
+      return;
+    }
+
+    const key = `${canonicalType}::${filePath}`;
+    const previous = existingByKey.get(key) || {};
+
+    refreshedAssets.push(normalizeAssetRecord(safeProject, {
+      ...previous,
+      id: previous.id || previous.asset_id,
+      type: canonicalType,
+      file_path: filePath,
+      source: previous.source || scanned.scan_source || 'library_refresh',
+      source_of_truth: previous.source_of_truth,
+      status: fs.existsSync(filePath) ? 'connected' : 'missing',
+      created_at: previous.created_at || previous.registered_at || now,
+      metadata: {
+        ...(previous.metadata && typeof previous.metadata === 'object' ? previous.metadata : {}),
+        managed_by: 'library_refresh',
+        scan_source: scanned.scan_source || 'library_refresh',
+        refreshed_at: now
+      }
+    }));
+  });
+
+  const nextAssets = retained.concat(refreshedAssets);
+
+  if (hasAssetRegistry) {
+    writeJsonFile(assetsRegistryPath, nextAssets);
+  }
+
+  const categoryReadiness = buildProjectAssetCategoryReadiness(safeProject, nextAssets, {
+    filesystemScan: scan
+  });
+
+  return {
+    project: safeProject,
+    refreshed_at: now,
+    categories: categoryReadiness.categories,
+    product_csv: scan.product_csv,
+    product_photos: scan.product_photos,
+    missing_images: scan.product_photos?.csv_missing_front_folders || [],
+    extra_image_folders: scan.product_photos?.extra_image_folders || [],
+    registry_path: hasAssetRegistry ? assetsRegistryPath : null,
+    registry_updated: hasAssetRegistry,
+    previous_total_assets: existingAssets.length,
+    refreshed_assets_added: refreshedAssets.length,
+    total_assets: nextAssets.length,
+    filesystem_scan: scan,
+    category_readiness: categoryReadiness
+  };
+}
+
+function buildProjectAssetCategoryReadiness(projectName, assetsInput = null, options = {}) {
+  const assets = Array.isArray(assetsInput) ? assetsInput : listProjectAssets(projectName);
+  const filesystemScan = options.filesystemScan || buildProjectLibraryFilesystemScan(projectName);
+  const catalog = getAssetTypeCatalog();
+  const categories = catalog.map(item => {
+    const matchingAssets = assets.filter(asset => getCanonicalAssetType(asset.asset_type) === item.asset_type);
+    const statuses = matchingAssets.map(asset => getAssetCategoryStatus(asset, projectName));
+    let status =
+      !matchingAssets.length
+        ? 'Missing'
+        : statuses.includes('Approved')
+          ? 'Approved'
+          : statuses.includes('Uploaded')
+            ? 'Uploaded'
+            : 'Needs Review';
+
+    let count = matchingAssets.length;
+    let uploadedCount = statuses.filter(value => value === 'Uploaded').length;
+    let approvedCount = statuses.filter(value => value === 'Approved').length;
+    let needsReviewCount = statuses.filter(value => value === 'Needs Review').length;
+    let detectionSummary = [];
+
+    if (item.asset_type === 'product_csv') {
+      const metrics = filesystemScan.product_csv || {};
+      status = metrics.status || status;
+      count = Number(metrics.logical_files || metrics.total_files || 0);
+      uploadedCount = status === 'Uploaded' ? Math.max(1, count) : 0;
+      approvedCount = 0;
+      needsReviewCount = status === 'Needs Review' ? Math.max(1, count) : 0;
+      detectionSummary = Array.isArray(metrics.detection_summary) ? metrics.detection_summary : [];
+    } else if (item.asset_type === 'product_photos') {
+      const metrics = filesystemScan.product_photos || {};
+      status = metrics.status || status;
+      count = Number(metrics.csv_products_matched_front || 0);
+      uploadedCount = Number(metrics.csv_products_matched_front || 0);
+      approvedCount = 0;
+      needsReviewCount = Number(metrics.csv_products_missing_front || 0) > 0 ? 1 : 0;
+      detectionSummary = Array.isArray(metrics.detection_summary) ? metrics.detection_summary : [];
+    }
+
+    const blocker = item.required && ['Missing', 'Needs Review'].includes(status);
+    const uploadedAssets = matchingAssets
+      .filter(asset => getAssetCategoryStatus(asset, projectName) === 'Uploaded')
+      .map(asset => asset.asset_id || path.basename(String(asset.file_path || '')))
+      .filter(Boolean);
+    const approvedAssets = matchingAssets
+      .filter(asset => getAssetCategoryStatus(asset, projectName) === 'Approved')
+      .map(asset => asset.asset_id || path.basename(String(asset.file_path || '')))
+      .filter(Boolean);
+
+    return {
+      asset_type: item.asset_type,
+      internal_key: item.asset_type,
+      label: item.label,
+      display_label: item.label,
+      purpose: item.purpose,
+      purpose_label: item.purpose_label,
+      required: item.required,
+      allowed_extensions: item.allowed_extensions,
+      accepted_file_types: item.allowed_extensions,
+      target_folder: item.target_folder,
+      aliases: item.aliases || [],
+      description: item.description,
+      guidance: item.guidance,
+      status,
+      blocker,
+      count,
+      count_label:
+        item.asset_type === 'product_csv'
+          ? (filesystemScan.product_csv?.count_label || `${count} file${count === 1 ? '' : 's'}`)
+          : item.asset_type === 'product_photos'
+            ? (filesystemScan.product_photos?.count_label || `${count} file${count === 1 ? '' : 's'}`)
+            : `${count} file${count === 1 ? '' : 's'}`,
+      uploaded_count: uploadedCount,
+      approved_count: approvedCount,
+      needs_review_count: needsReviewCount,
+      detection_summary: detectionSummary,
+      asset_ids: matchingAssets.map(asset => asset.asset_id).filter(Boolean),
+      uploaded_assets: uploadedAssets,
+      approved_assets: approvedAssets,
+      next_action:
+        item.asset_type === 'product_photos' && status === 'Needs Review'
+          ? `Upload missing product front images. Currently matched ${filesystemScan.product_photos?.csv_products_matched_front || 0} of ${filesystemScan.product_photos?.csv_products_total || 0}.`
+          : status === 'Missing'
+          ? `Upload ${item.label}.`
+          : status === 'Needs Review'
+            ? `Review ${item.label} classification, file availability, or folder placement.`
+            : status === 'Uploaded'
+              ? `Review and approve ${item.label} when ready.`
+              : `${item.label} is approved.`
+    };
+  });
+
+  const summary = categories.reduce((acc, item) => {
+    const key = item.status.toLowerCase().replace(/\s+/g, '_');
+    acc[key] = (acc[key] || 0) + 1;
+    if (item.blocker) acc.blockers += 1;
+    return acc;
+  }, {
+    total: categories.length,
+    missing: 0,
+    uploaded: 0,
+    needs_review: 0,
+    approved: 0,
+    blockers: 0
+  });
+
+  const nextCategory = categories.find(item => item.status === 'Missing') ||
+    categories.find(item => item.status === 'Needs Review') ||
+    categories.find(item => item.status === 'Uploaded') ||
+    null;
+
+  return {
+    project: projectName,
+    reviewed_at: new Date().toISOString(),
+    summary,
+    categories,
+    next_best_action: nextCategory
+      ? nextCategory.next_action
+      : 'All library categories are covered.'
+  };
 }
 
 function reviewProjectUploadMapping(projectName) {
@@ -6046,10 +9157,14 @@ function reviewProjectUploadMapping(projectName) {
     upload_mapping: catalog.map(item => ({
       asset_type: item.asset_type,
       label: item.label,
+      purpose: item.purpose,
+      purpose_label: item.purpose_label,
       required: item.required,
       allowed_extensions: item.allowed_extensions,
       target_folder: item.target_folder,
-      description: item.description
+      description: item.description,
+      guidance: item.guidance,
+      aliases: item.aliases || []
     }))
   };
 }
@@ -6061,19 +9176,27 @@ function reviewProjectConnectorReadiness(projectName) {
     throw new Error('Project not found');
   }
 
-  const sources = readJsonFile(paths.sourcesRegistryPath, {});
+  const sources = normalizeSourceRegistry(readJsonFile(paths.sourcesRegistryPath, {}));
+  const hasSource = (key) => {
+    const source = sources[key];
+    if (source && typeof source === 'object') {
+      const status = normalizeSourceStatus(source.status);
+      return ['connected', 'verified'].includes(status) && Boolean(normalizeSetupTextValue(source.value));
+    }
+    return Boolean(normalizeSetupTextValue(source));
+  };
 
   const checks = {
-    website: !!sources.website,
-    ecommerce: !!sources.ecommerce,
-    instagram: !!sources.instagram,
-    facebook: !!sources.facebook,
-    tiktok: !!sources.tiktok,
-    youtube: !!sources.youtube,
-    email: !!sources.email,
-    amazon: !!sources.amazon,
-    ebay: !!sources.ebay,
-    analytics: !!sources.analytics
+    website: hasSource('website'),
+    ecommerce: hasSource('ecommerce'),
+    instagram: hasSource('instagram'),
+    facebook: hasSource('facebook'),
+    tiktok: hasSource('tiktok'),
+    youtube: hasSource('youtube'),
+    email: hasSource('email'),
+    amazon: hasSource('amazon'),
+    ebay: hasSource('ebay'),
+    analytics: hasSource('analytics')
   };
 
   const missing = Object.keys(checks).filter(key => !checks[key]);
@@ -6093,7 +9216,8 @@ function reviewProjectConnectorReadiness(projectName) {
 function getTargetFolderForAssetType(projectName, assetType) {
   const base = getProjectBasePaths(projectName);
   const catalog = getAssetTypeCatalog();
-  const item = catalog.find(x => x.asset_type === String(assetType || '').trim().toLowerCase());
+  const canonicalType = getCanonicalAssetType(assetType);
+  const item = catalog.find(x => x.asset_type === canonicalType);
 
   if (!item) {
     throw new Error('Unknown asset type');
@@ -6255,6 +9379,19 @@ app.get('/health', (req, res) => {
   });
 });
 
+app.get('/healthz', (req, res) => {
+  res.json({
+    status: 'ok',
+    service: 'orchestrator-service',
+    pid: process.pid
+  });
+});
+
+app.get('/readyz', (req, res) => {
+  const readiness = buildReadinessState();
+  return res.status(readiness.ready ? 200 : 503).json(readiness);
+});
+
 app.get('/media-manager/project/:project/storage/parity-readiness', (req, res) => {
   try {
     const summary = summarizeProjectParity(req.params.project);
@@ -6301,24 +9438,39 @@ app.get('/public/media-manager/storage/parity-readiness', (req, res) => {
 
 app.post('/task', (req, res) => {
   const message = req.body.message || '';
-  const result = buildTaskResult({ message });
+
+  const registrySignal = resolveAgentRegistrySignal({ message });
+
+  const cortexInsight = mhCortex && typeof mhCortex.MH_CORTEX === 'function'
+    ? mhCortex.MH_CORTEX({ message })
+    : null;
+
+  const result = orchestrationGate({
+    input: message,
+    registrySignal,
+    aiDecision: null,
+    cortexInsight
+  });
+
   res.json(result);
 });
+
+app.post('/api/agent-registry/register', registerAgent);
+app.post('/api/agent-registry/resolve', resolveAgent);
+app.get('/api/agent-registry/agents', listAgents);
+
 
 
 
 app.get('/today', (req, res) => {
   try {
-    const tasks = JSON.parse(
-  fs.readFileSync(
-    path.join(EXECUTION_DIR, 'hairoticmen/tasks/task-board.json'),
-    'utf8'
-  )
-);
+    const projectName = requireProjectContext(req);
+    const tasks = readLegacyContentQueue(projectName, 'tasks');
     
     const pending = tasks.filter(t => t.status === 'pending');
 
     res.json({
+      project: projectName,
       today_tasks: pending.slice(0, 5)
     });
   } catch (err) {
@@ -6328,16 +9480,13 @@ app.get('/today', (req, res) => {
 
 app.get('/next', (req, res) => {
   try {
-    const tasks = JSON.parse(
-  fs.readFileSync(
-    path.join(EXECUTION_DIR, 'hairoticmen/tasks/task-board.json'),
-    'utf8'
-  )
-);
+    const projectName = requireProjectContext(req);
+    const tasks = readLegacyContentQueue(projectName, 'tasks');
     
     const next = tasks.find(t => t.status === 'pending');
 
     res.json({
+      project: projectName,
       next_task: next || null
     });
   } catch (err) {
@@ -6359,6 +9508,349 @@ app.post('/ingest', (req, res) => {
   });
 
   res.json(result);
+});
+
+app.post('/execute_publish_package', async (req, res) => {
+  let projectName = '';
+
+  try {
+    projectName = requireProjectContext(req, { allowFallback: false });
+    if (!enforceGovernanceMutationGate(req, res, {
+      projectName,
+      action: 'execute_publish_package',
+      entityType: 'execution_bridge',
+      entityId: 'execute_publish_package',
+      requestedAction: 'publish',
+      skipApprovalGate: true
+    })) {
+      return;
+    }
+
+    if (!enforceGovernanceApprovalLifecycle(req, res, {
+      projectName,
+      action: 'execute_publish_package',
+      entityType: 'execution_bridge',
+      entityId: 'execute_publish_package',
+      requestedAction: 'publish',
+      routeTarget: 'publishing',
+      serviceDomain: 'publishing',
+      linkedExecutionId: 'execute_publish_package',
+      riskLevel: 'high',
+      title: 'Publish package execution approval',
+      summary: 'Approval required before publishing package execution.'
+    })) {
+      return;
+    }
+
+    const bridgeResult = await executeJobBridge({
+      type: 'publish',
+      project: projectName,
+      package_payload: req.body || {}
+    });
+
+    const result = {
+      project: projectName,
+      campaign_name: String(req.body?.campaign_name || req.body?.publish_package?.campaign_name || '').trim(),
+      channel: bridgeResult.channel,
+      execution_state: bridgeResult.execution_state,
+      execution_backend: bridgeResult.execution_backend,
+      caption: bridgeResult.caption,
+      media_path: bridgeResult.media_path,
+      runtime_result: bridgeResult.runtime_result,
+      supported_execution_states: EXECUTION_BRIDGE_STATES
+    };
+
+    const log = writeExecutionBridgeLog(projectName, 'execute_publish_package', {
+      status: bridgeResult.execution_state,
+      result: {
+        campaign_name: result.campaign_name,
+        channel: result.channel,
+        media_path: result.media_path,
+        has_caption: Boolean(result.caption)
+      }
+    });
+
+    return res.json({
+      ok: true,
+      ...result,
+      execution_log: log.file_path
+    });
+  } catch (error) {
+    const statusCode = getErrorStatusCode(error, 400);
+    const logProject = projectName || resolveProjectNameForLog(req);
+
+    if (logProject) {
+      writeExecutionBridgeLog(logProject, 'execute_publish_package', {
+        status: 'failed',
+        result: 'validation_failed',
+        error: error.message,
+        details: {
+          code: error.code || 'REQUEST_ERROR'
+        }
+      });
+    }
+
+    return sendError(res, {
+      statusCode,
+      code: error.code || 'PUBLISH_EXECUTION_FAILED',
+      message: error.message || 'Failed to execute publish package'
+    });
+  }
+});
+
+app.post('/execute_email_package', async (req, res) => {
+  let projectName = '';
+
+  try {
+    projectName = requireProjectContext(req, { allowFallback: false });
+    if (!enforceGovernanceMutationGate(req, res, {
+      projectName,
+      action: 'execute_email_package',
+      entityType: 'execution_bridge',
+      entityId: 'execute_email_package',
+      requestedAction: 'provider_send',
+      skipApprovalGate: true
+    })) {
+      return;
+    }
+
+    if (!enforceGovernanceApprovalLifecycle(req, res, {
+      projectName,
+      action: 'execute_email_package',
+      entityType: 'execution_bridge',
+      entityId: 'execute_email_package',
+      requestedAction: 'provider_send',
+      routeTarget: 'publishing',
+      serviceDomain: 'publishing',
+      linkedExecutionId: 'execute_email_package',
+      riskLevel: 'high',
+      title: 'Email package execution approval',
+      summary: 'Approval required before email package execution.'
+    })) {
+      return;
+    }
+
+    const bridgeResult = await executeJobBridge({
+      type: 'email',
+      project: projectName,
+      package_payload: req.body || {}
+    });
+
+    const result = {
+      project: projectName,
+      campaign_name: String(req.body?.campaign_name || req.body?.email_package?.campaign_name || '').trim(),
+      execution_state: bridgeResult.execution_state,
+      execution_backend: bridgeResult.execution_backend,
+      subject: bridgeResult.subject,
+      html_body: bridgeResult.html_body,
+      text_body: bridgeResult.text_body,
+      runtime_result: bridgeResult.runtime_result,
+      ready_for_provider_send: true,
+      supported_execution_states: EXECUTION_BRIDGE_STATES
+    };
+
+    const log = writeExecutionBridgeLog(projectName, 'execute_email_package', {
+      status: bridgeResult.execution_state,
+      result: {
+        campaign_name: result.campaign_name,
+        subject: result.subject,
+        ready_for_provider_send: true
+      }
+    });
+
+    return res.json({
+      ok: true,
+      ...result,
+      execution_log: log.file_path
+    });
+  } catch (error) {
+    const statusCode = getErrorStatusCode(error, 400);
+    const logProject = projectName || resolveProjectNameForLog(req);
+
+    if (logProject) {
+      writeExecutionBridgeLog(logProject, 'execute_email_package', {
+        status: 'failed',
+        result: 'validation_failed',
+        error: error.message,
+        details: {
+          code: error.code || 'REQUEST_ERROR'
+        }
+      });
+    }
+
+    return sendError(res, {
+      statusCode,
+      code: error.code || 'EMAIL_EXECUTION_FAILED',
+      message: error.message || 'Failed to execute email package'
+    });
+  }
+});
+
+app.post('/generate_media_from_prompt', async (req, res) => {
+  let projectName = '';
+
+  try {
+    projectName = requireProjectContext(req, { allowFallback: false });
+    if (!enforceGovernanceMutationGate(req, res, {
+      projectName,
+      action: 'generate_media_from_prompt',
+      entityType: 'execution_bridge',
+      entityId: 'generate_media_from_prompt',
+      requestedAction: 'generate',
+      skipApprovalGate: true
+    })) {
+      return;
+    }
+
+    if (!enforceGovernanceApprovalLifecycle(req, res, {
+      projectName,
+      action: 'generate_media_from_prompt',
+      entityType: 'execution_bridge',
+      entityId: 'generate_media_from_prompt',
+      requestedAction: 'generate',
+      routeTarget: 'media-studio',
+      serviceDomain: 'media',
+      linkedExecutionId: 'generate_media_from_prompt',
+      riskLevel: 'high',
+      title: 'Media generation approval',
+      summary: 'Approval required before media generation from prompt.'
+    })) {
+      return;
+    }
+
+    const bridgeResult = await executeJobBridge({
+      type: 'media',
+      project: projectName,
+      package_payload: req.body || {}
+    });
+
+    const log = writeExecutionBridgeLog(projectName, 'generate_media_from_prompt', {
+      status: bridgeResult.execution_state,
+      result: {
+        has_image_prompt: Boolean(bridgeResult.image_prompt),
+        scene_count: Number(bridgeResult.scene_count || 0),
+        execution_backend: bridgeResult.execution_backend
+      }
+    });
+
+    return res.json({
+      ok: true,
+      project: projectName,
+      execution_state: bridgeResult.execution_state,
+      execution_backend: bridgeResult.execution_backend,
+      supported_execution_states: EXECUTION_BRIDGE_STATES,
+      image_prompt: bridgeResult.image_prompt,
+      scene_count: bridgeResult.scene_count,
+      runtime_result: bridgeResult.runtime_result,
+      execution_log: log.file_path
+    });
+  } catch (error) {
+    const statusCode = getErrorStatusCode(error, 400);
+    const logProject = projectName || resolveProjectNameForLog(req);
+
+    if (logProject) {
+      writeExecutionBridgeLog(logProject, 'generate_media_from_prompt', {
+        status: 'failed',
+        result: 'validation_failed',
+        error: error.message,
+        details: {
+          code: error.code || 'REQUEST_ERROR'
+        }
+      });
+    }
+
+    return sendError(res, {
+      statusCode,
+      code: error.code || 'MEDIA_GENERATION_BRIDGE_FAILED',
+      message: error.message || 'Failed to generate media from prompt'
+    });
+  }
+});
+
+app.post('/build_ad_execution_package', async (req, res) => {
+  let projectName = '';
+
+  try {
+    projectName = requireProjectContext(req, { allowFallback: false });
+    if (!enforceGovernanceMutationGate(req, res, {
+      projectName,
+      action: 'build_ad_execution_package',
+      entityType: 'execution_bridge',
+      entityId: 'build_ad_execution_package',
+      requestedAction: 'launch',
+      skipApprovalGate: true
+    })) {
+      return;
+    }
+
+    if (!enforceGovernanceApprovalLifecycle(req, res, {
+      projectName,
+      action: 'build_ad_execution_package',
+      entityType: 'execution_bridge',
+      entityId: 'build_ad_execution_package',
+      requestedAction: 'launch',
+      routeTarget: 'ads-manager',
+      serviceDomain: 'campaign',
+      linkedExecutionId: 'build_ad_execution_package',
+      riskLevel: 'high',
+      title: 'Ad execution package approval',
+      summary: 'Approval required before building an ad execution package.'
+    })) {
+      return;
+    }
+
+    const bridgeResult = await executeJobBridge({
+      type: 'ads',
+      project: projectName,
+      package_payload: req.body || {}
+    });
+
+    const log = writeExecutionBridgeLog(projectName, 'build_ad_execution_package', {
+      status: bridgeResult.execution_state,
+      result: {
+        campaign_name: String(req.body?.campaign_name || req.body?.campaign_package?.campaign_name || '').trim(),
+        headline: bridgeResult.headline,
+        audience: bridgeResult.audience,
+        execution_backend: bridgeResult.execution_backend
+      }
+    });
+
+    return res.json({
+      ok: true,
+      project: projectName,
+      campaign_name: String(req.body?.campaign_name || req.body?.campaign_package?.campaign_name || '').trim(),
+      execution_state: bridgeResult.execution_state,
+      execution_backend: bridgeResult.execution_backend,
+      supported_execution_states: EXECUTION_BRIDGE_STATES,
+      ad_copy: bridgeResult.ad_copy,
+      headline: bridgeResult.headline,
+      cta: bridgeResult.cta,
+      audience: bridgeResult.audience,
+      budget_suggestion: bridgeResult.budget_suggestion,
+      runtime_result: bridgeResult.runtime_result,
+      execution_log: log.file_path
+    });
+  } catch (error) {
+    const statusCode = getErrorStatusCode(error, 400);
+    const logProject = projectName || resolveProjectNameForLog(req);
+
+    if (logProject) {
+      writeExecutionBridgeLog(logProject, 'build_ad_execution_package', {
+        status: 'failed',
+        result: 'validation_failed',
+        error: error.message,
+        details: {
+          code: error.code || 'REQUEST_ERROR'
+        }
+      });
+    }
+
+    return sendError(res, {
+      statusCode,
+      code: error.code || 'AD_EXECUTION_BRIDGE_FAILED',
+      message: error.message || 'Failed to build ad execution package'
+    });
+  }
 });
 
 app.get('/products', async (req, res) => {
@@ -6383,6 +9875,8 @@ app.get('/products', async (req, res) => {
 app.get('/optimize-product/:id', async (req, res) => {
   try {
     const productId = req.params.id;
+    const projectName = resolveRequestProjectName(req);
+    const brandName = projectName ? getProjectDisplayName(projectName) : 'Project';
 
     const response = await axios.get(`${process.env.WC_BASE_URL}/products/${productId}`, {
       auth: {
@@ -6401,7 +9895,7 @@ app.get('/optimize-product/:id', async (req, res) => {
       current_short_description: product.short_description || '',
       current_description: product.description || '',
       optimization: {
-        seo_title_suggestion: `${product.name} | HAIROTICMEN Deutschland`,
+        seo_title_suggestion: `${product.name} | ${brandName}`,
         cta_suggestion: 'Jetzt entdecken',
         conversion_improvements: [
           'Add a stronger launch-offer banner above the fold',
@@ -6426,6 +9920,8 @@ app.get('/optimize-product/:id', async (req, res) => {
 app.get('/prepare-product-update/:id', async (req, res) => {
   try {
     const productId = req.params.id;
+    const projectName = resolveRequestProjectName(req);
+    const brandName = projectName ? getProjectDisplayName(projectName) : 'Project';
 
     const response = await axios.get(`${process.env.WC_BASE_URL}/products/${productId}`, {
       auth: {
@@ -6452,9 +9948,9 @@ app.get('/prepare-product-update/:id', async (req, res) => {
         description: product.description || ''
       },
       proposed_update: {
-        seo_title: `${cleanName} | HAIROTICMEN Deutschland`,
+        seo_title: `${cleanName} | ${brandName}`,
         meta_description:
-          `${cleanName} von HAIROTICMEN. Premium Männerpflege für eine einfache, wirksame und hochwertige Routine. Jetzt entdecken.`,
+          `${cleanName} von ${brandName}. Premium Angebot für eine einfache, wirksame und hochwertige Routine. Jetzt entdecken.`,
         cta_primary: 'Jetzt entdecken',
         cta_secondary: 'Routine starten',
         trust_bullets: [
@@ -6464,13 +9960,13 @@ app.get('/prepare-product-update/:id', async (req, res) => {
           'Ideal für eine klare Grooming-Routine'
         ],
         optimized_short_description:
-          `<p><strong>${cleanName}</strong> von HAIROTICMEN – Premium Männerpflege für Männer, die Wert auf Qualität, Wirkung und eine einfache Routine legen.</p>`,
+          `<p><strong>${cleanName}</strong> von ${brandName} – Premium Angebot für Kunden, die Wert auf Qualität, Wirkung und eine einfache Routine legen.</p>`,
 
         optimized_description:
           `<h2>${cleanName}</h2>
 <p>Premium Männerpflege für einen gepflegten, klaren und selbstbewussten Auftritt.</p>
 
-<h3>Warum HAIROTICMEN?</h3>
+<h3>Warum ${brandName}?</h3>
 <ul>
   <li>Einfach in der Anwendung</li>
   <li>Premium Qualität für Männer mit Anspruch</li>
@@ -6492,7 +9988,7 @@ app.get('/prepare-product-update/:id', async (req, res) => {
 <p>Einfach in die tägliche Routine integrieren und für einen gepflegten, klaren und hochwertigen Eindruck sorgen.</p>
 
 <h3>Launch-Hinweis</h3>
-<p>Jetzt entdecken und Teil der HAIROTICMEN Grooming-Routine werden.</p>`
+<p>Jetzt entdecken und Teil der ${brandName} Routine werden.</p>`
       },
       review_required: true,
       next_step:
@@ -6509,6 +10005,7 @@ app.get('/prepare-product-update/:id', async (req, res) => {
 
 app.post('/backup-and-clone-product/:id', async (req, res) => {
   try {
+    const projectName = requireProjectContext(req);
     const productId = req.params.id;
 
     const response = await axios.get(`${process.env.WC_BASE_URL}/products/${productId}`, {
@@ -6520,11 +10017,11 @@ app.post('/backup-and-clone-product/:id', async (req, res) => {
 
     const product = response.data;
 
-    fs.mkdirSync(HAIROTICMEN_BACKUP_DIR, { recursive: true });
+    const backupDir = getProjectBackupDir(projectName);
 
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
     const backupFilePath = path.join(
-      HAIROTICMEN_BACKUP_DIR,
+      backupDir,
       `product-${product.id}-backup-${timestamp}.json`
     );
 
@@ -6582,14 +10079,18 @@ app.post('/backup-and-clone-product/:id', async (req, res) => {
         'Use the cloned draft product for safe content updates before publishing.'
     });
   } catch (error) {
-    res.json({
-      error: error.response?.data || error.message
+    return sendError(res, {
+      statusCode: getErrorStatusCode(error, 502),
+      code: 'LEGACY_BACKUP_CLONE_FAILED',
+      message: 'Failed to back up and clone product'
     });
   }
 });
 
 app.post('/apply-prepared-copy-to-clone/:originalId/:cloneId', async (req, res) => {
   try {
+    const projectName = resolveRequestProjectName(req);
+    const brandName = projectName ? getProjectDisplayName(projectName) : 'Project';
     const originalId = req.params.originalId;
     const cloneId = req.params.cloneId;
 
@@ -6605,9 +10106,9 @@ app.post('/apply-prepared-copy-to-clone/:originalId/:cloneId', async (req, res) 
     const cleanName = originalProduct.name || 'Unnamed Product';
 
     const preparedUpdate = {
-      seo_title: `${cleanName} | HAIROTICMEN Deutschland`,
+      seo_title: `${cleanName} | ${brandName}`,
       meta_description:
-        `${cleanName} von HAIROTICMEN. Premium Männerpflege für eine einfache, wirksame und hochwertige Routine. Jetzt entdecken.`,
+        `${cleanName} von ${brandName}. Premium Angebot für eine einfache, wirksame und hochwertige Routine. Jetzt entdecken.`,
       cta_primary: 'Jetzt entdecken',
       cta_secondary: 'Routine starten',
       trust_bullets: [
@@ -6617,13 +10118,13 @@ app.post('/apply-prepared-copy-to-clone/:originalId/:cloneId', async (req, res) 
         'Ideal für eine klare Grooming-Routine'
       ],
       optimized_short_description:
-        `<p><strong>${cleanName}</strong> von HAIROTICMEN – Premium Männerpflege für Männer, die Wert auf Qualität, Wirkung und eine einfache Routine legen.</p>`,
+        `<p><strong>${cleanName}</strong> von ${brandName} – Premium Angebot für Kunden, die Wert auf Qualität, Wirkung und eine einfache Routine legen.</p>`,
 
       optimized_description:
         `<h2>${cleanName}</h2>
 <p>Premium Männerpflege für einen gepflegten, klaren und selbstbewussten Auftritt.</p>
 
-<h3>Warum HAIROTICMEN?</h3>
+<h3>Warum ${brandName}?</h3>
 <ul>
   <li>Einfach in der Anwendung</li>
   <li>Premium Qualität für Männer mit Anspruch</li>
@@ -6645,7 +10146,7 @@ app.post('/apply-prepared-copy-to-clone/:originalId/:cloneId', async (req, res) 
 <p>Einfach in die tägliche Routine integrieren und für einen gepflegten, klaren und hochwertigen Eindruck sorgen.</p>
 
 <h3>Launch-Hinweis</h3>
-<p>Jetzt entdecken und Teil der HAIROTICMEN Grooming-Routine werden.</p>
+<p>Jetzt entdecken und Teil der ${brandName} Routine werden.</p>
 
 <h3>Vertrauen & Qualität</h3>
 <ul>
@@ -6693,8 +10194,10 @@ app.post('/apply-prepared-copy-to-clone/:originalId/:cloneId', async (req, res) 
         'Review the updated draft clone in WooCommerce before any publish action.'
     });
   } catch (error) {
-    res.json({
-      error: error.response?.data || error.message
+    return sendError(res, {
+      statusCode: getErrorStatusCode(error, 502),
+      code: 'LEGACY_APPLY_COPY_FAILED',
+      message: 'Failed to apply prepared copy to clone'
     });
   }
 });
@@ -6715,9 +10218,27 @@ app.get('/media/tree/:project', (req, res) => {
   }
 });
 
-app.post('/media/upload', upload.single('file'), (req, res) => {
+function applySingleMediaUpload(req, res, next) {
+  return upload.single('file')(req, res, (error) => {
+    if (!error) {
+      return next();
+    }
+
+    if (isProjectSlugValidationError(error)) {
+      return sendInvalidProjectSlug(res);
+    }
+
+    return sendError(res, {
+      statusCode: 400,
+      code: 'UPLOAD_REJECTED',
+      message: 'Upload request rejected'
+    });
+  });
+}
+
+app.post('/media/upload', applySingleMediaUpload, (req, res) => {
   try {
-    const project = String(req.body.project || '').trim().toLowerCase();
+    const project = normalizeProjectSlug(req.body.project);
     const type = String(req.body.type || '').trim().toLowerCase();
 
     if (!project || !type || !req.file) {
@@ -6760,13 +10281,14 @@ app.post('/media/upload', upload.single('file'), (req, res) => {
         writeJsonFile(paths.registryPath, registry);
       }
     } else {
-      registeredAsset = registerProjectAsset(project, type, absolutePath);
+      registeredAsset = registerProjectAsset(project, uploadTarget.assetType || type, absolutePath);
     }
 
     return res.json({
       success: true,
       project,
-      type,
+      type: uploadTarget.assetType || type,
+      requested_type: uploadTarget.requestedAssetType || type,
       filename,
       saved_to: absolutePath,
       target_folder: uploadTarget.target_folder,
@@ -6774,6 +10296,9 @@ app.post('/media/upload', upload.single('file'), (req, res) => {
       registered_asset: registeredAsset
     });
   } catch (error) {
+    if (isProjectSlugValidationError(error)) {
+      return sendInvalidProjectSlug(res);
+    }
     return res.status(500).json({
       error: 'Upload failed',
       details: error.message
@@ -6786,11 +10311,22 @@ app.get('/media/registry/:project', (req, res) => {
 });
 
 app.get('/media/file/:project/:type/:filename', (req, res) => {
-  const project = String(req.params.project || '').trim().toLowerCase();
+  const project = normalizeProjectSlug(req.params.project);
   const type = String(req.params.type || '').trim().toLowerCase();
   const filename = String(req.params.filename || '').trim();
+  const requestedPath = String(req.query?.path || '').trim();
+  const requestedAssetId = String(req.query?.assetId || req.query?.asset_id || '').trim();
 
   let filePath = null;
+
+  const queryResolution = resolveMediaFilePathFromQuery(project, requestedPath, requestedAssetId);
+  if (queryResolution.filePath) {
+    return res.sendFile(queryResolution.filePath);
+  }
+
+  if (queryResolution.invalidPath) {
+    return res.status(400).send('Invalid media path');
+  }
 
   try {
     filePath = resolveMediaFilePath(project, type, filename);
@@ -6808,6 +10344,312 @@ app.get('/media/file/:project/:type/:filename', (req, res) => {
 
   return res.sendFile(filePath);
 });
+
+
+
+
+function renameMediaManagerProject(oldProjectName, nextProjectName) {
+  const oldProject = normalizeProjectSlug(oldProjectName);
+  const nextProject = normalizeProjectSlug(nextProjectName);
+
+  if (!oldProject) {
+    throw new Error('Missing current project name');
+  }
+
+  if (!nextProject) {
+    throw new Error('Missing new project name');
+  }
+
+  if (oldProject === nextProject) {
+    throw new Error('Project already uses this name');
+  }
+
+  const registry = getProjectRegistryPaths();
+  const oldPaths = getProjectBasePaths(oldProject);
+  const nextPaths = getProjectBasePaths(nextProject);
+
+  if (!fs.existsSync(oldPaths.baseDir)) {
+    throw new Error('Project not found');
+  }
+
+  if (fs.existsSync(nextPaths.baseDir)) {
+    throw new Error('Target project already exists');
+  }
+
+  const projects = readJsonFile(registry.registryPath, []);
+  const existingTarget = Array.isArray(projects)
+    ? projects.find((item) => String(item.project_name || '').toLowerCase() === nextProject)
+    : null;
+
+  if (existingTarget) {
+    throw new Error('Target project already exists');
+  }
+
+  ensureDir(path.dirname(nextPaths.baseDir));
+  fs.renameSync(oldPaths.baseDir, nextPaths.baseDir);
+
+  const projectFile = nextPaths.projectFilePath;
+  const projectData = readJsonFile(projectFile, {});
+  const updatedAt = new Date().toISOString();
+
+  const updatedProject = {
+    ...projectData,
+    project_name: nextProject,
+    previous_project_name: projectData.previous_project_name || oldProject,
+    renamed_from: oldProject,
+    updated_at: updatedAt
+  };
+
+  writeJsonFile(projectFile, updatedProject);
+
+  const nextRegistry = Array.isArray(projects)
+    ? projects.map((item) => {
+        if (String(item.project_name || '').toLowerCase() !== oldProject) {
+          return item;
+        }
+
+        return {
+          ...item,
+          project_name: nextProject,
+          previous_project_name: item.previous_project_name || oldProject,
+          renamed_from: oldProject,
+          updated_at: updatedAt
+        };
+      })
+    : [];
+
+  writeJsonFile(registry.registryPath, nextRegistry);
+
+  return {
+    project: updatedProject,
+    previousProject: oldProject,
+    newProject: nextProject,
+    projects: listMediaManagerProjects()
+  };
+}
+
+function handleRenameMediaManagerProject(req, res) {
+  const currentProject = req.params.project;
+  const body = req.body || {};
+  const nextProjectName = String(
+    body.project_name ||
+    body.projectName ||
+    body.name ||
+    body.next_project_name ||
+    body.nextProjectName ||
+    ''
+  ).trim();
+
+  if (!currentProject) {
+    return res.status(400).json({
+      error: 'Missing current project name',
+      code: 'MISSING_PROJECT_NAME'
+    });
+  }
+
+  if (!nextProjectName) {
+    return res.status(400).json({
+      error: 'Missing new project name',
+      code: 'MISSING_NEW_PROJECT_NAME'
+    });
+  }
+
+  try {
+    const result = renameMediaManagerProject(currentProject, nextProjectName);
+
+    return res.json({
+      ok: true,
+      ...result
+    });
+  } catch (error) {
+    const message = error?.message || 'Failed to rename project';
+    const notFound = /not found/i.test(message);
+    const conflict = /already exists|already uses/i.test(message);
+
+    return res.status(notFound ? 404 : conflict ? 409 : 500).json({
+      error: 'Failed to rename project',
+      code: notFound ? 'PROJECT_NOT_FOUND' : conflict ? 'PROJECT_RENAME_CONFLICT' : 'PROJECT_RENAME_FAILED',
+      details: message
+    });
+  }
+}
+
+
+function applyBusinessTemplateToProject(projectName, projectType) {
+  const safeProject = normalizeProjectSlug(projectName);
+  const paths = getProjectBasePaths(safeProject);
+
+  if (!fs.existsSync(paths.projectFilePath)) {
+    throw new Error('Project not found');
+  }
+
+  const existing = readJsonFile(paths.projectFilePath, {});
+  const businessTemplate = getBusinessProjectTemplate(projectType || existing.project_type || existing.business_type);
+
+  const updated = {
+    ...existing,
+    project_name: existing.project_name || safeProject,
+    project_type: businessTemplate.id,
+    business_type: businessTemplate.id,
+    business_template: businessTemplate,
+    default_channels: businessTemplate.default_channels,
+    required_assets: businessTemplate.required_assets,
+    data_requirements: businessTemplate.data_requirements,
+    content_categories: businessTemplate.content_categories,
+    workspace_priorities: businessTemplate.workspace_priorities,
+    ai_team_defaults: businessTemplate.ai_team_defaults,
+    starter_checklist: businessTemplate.starter_checklist,
+    recommended_integrations: businessTemplate.recommended_integrations,
+    updated_at: new Date().toISOString()
+  };
+
+  writeJsonFile(paths.projectFilePath, updated);
+
+  const registry = getProjectRegistryPaths();
+  const projects = readJsonFile(registry.registryPath, []);
+  const nextProjects = Array.isArray(projects)
+    ? projects.map((item) => {
+        if (String(item.project_name || '').toLowerCase() !== safeProject) {
+          return item;
+        }
+
+        return {
+          ...item,
+          project_type: updated.project_type,
+          business_type: updated.business_type,
+          business_template: updated.business_template,
+          default_channels: updated.default_channels,
+          required_assets: updated.required_assets,
+          data_requirements: updated.data_requirements,
+          content_categories: updated.content_categories,
+          workspace_priorities: updated.workspace_priorities,
+          ai_team_defaults: updated.ai_team_defaults,
+          starter_checklist: updated.starter_checklist,
+          recommended_integrations: updated.recommended_integrations,
+          updated_at: updated.updated_at
+        };
+      })
+    : [];
+
+  writeJsonFile(registry.registryPath, nextProjects);
+
+  return updated;
+}
+
+function handleApplyBusinessTemplateToProject(req, res) {
+  const projectName = req.params.project;
+  const body = req.body || {};
+  const projectType = String(
+    body.project_type ||
+    body.projectType ||
+    body.business_type ||
+    body.businessType ||
+    ''
+  ).trim();
+
+  if (!projectName) {
+    return res.status(400).json({
+      error: 'Missing project name',
+      code: 'MISSING_PROJECT_NAME'
+    });
+  }
+
+  try {
+    const project = applyBusinessTemplateToProject(projectName, projectType);
+
+    return res.json({
+      ok: true,
+      project
+    });
+  } catch (error) {
+    const message = error?.message || 'Failed to apply project template';
+    const notFound = /not found/i.test(message);
+
+    return res.status(notFound ? 404 : 500).json({
+      error: 'Failed to apply project template',
+      code: notFound ? 'PROJECT_NOT_FOUND' : 'APPLY_TEMPLATE_FAILED',
+      details: message
+    });
+  }
+}
+
+
+function handleCreateMediaManagerProject(req, res) {
+  const body = req.body || {};
+
+  const projectName = String(
+    body.project_name ||
+    body.projectName ||
+    body.name ||
+    ""
+  ).trim();
+
+  const market = String(body.market || body.country || "").trim();
+  const language = String(body.language || body.locale || "").trim();
+  const projectType = String(
+    body.project_type ||
+    body.projectType ||
+    body.business_type ||
+    body.businessType ||
+    ""
+  ).trim();
+
+  const websiteUrl = String(
+    body.website_url ||
+    body.websiteUrl ||
+    body.website ||
+    ""
+  ).trim();
+
+  if (!projectName) {
+    return res.status(400).json({
+      error: "Missing project name",
+      code: "MISSING_PROJECT_NAME"
+    });
+  }
+
+  try {
+    const project = createProject(
+      projectName,
+      market,
+      language,
+      projectType,
+      websiteUrl
+    );
+
+    return res.status(201).json({
+      ok: true,
+      project,
+      preferredProject: project.project_name,
+      projects: listMediaManagerProjects()
+    });
+  } catch (error) {
+    const message = error?.message || "Failed to create project";
+    const duplicate = /already exists/i.test(message);
+
+    return res.status(duplicate ? 409 : 500).json({
+      error: "Failed to create project",
+      code: duplicate ? "PROJECT_ALREADY_EXISTS" : "CREATE_PROJECT_FAILED",
+      details: message
+    });
+  }
+}
+
+
+
+
+
+app.post('/media-manager/project/:project/rename', express.json({ limit: '1mb' }), handleRenameMediaManagerProject);
+
+app.post('/public/media-manager/project/:project/rename', express.json({ limit: '1mb' }), handleRenameMediaManagerProject);
+
+app.post('/media-manager/project/:project/apply-template', express.json({ limit: '1mb' }), handleApplyBusinessTemplateToProject);
+
+app.post('/public/media-manager/project/:project/apply-template', express.json({ limit: '1mb' }), handleApplyBusinessTemplateToProject);
+
+app.post('/media-manager/projects', express.json({ limit: '1mb' }), handleCreateMediaManagerProject);
+
+app.post('/public/media-manager/projects', express.json({ limit: '1mb' }), handleCreateMediaManagerProject);
 
 app.get('/media-manager/projects', (req, res) => {
   return res.json(listMediaManagerProjects());
@@ -6829,6 +10671,26 @@ app.get('/public/media-manager/asset-catalog', (req, res) => {
   });
 });
 
+app.get('/media-manager/project/:project/startup', (req, res) => {
+  try {
+    return res.json(buildMediaManagerProjectStartupPayload(req.params.project));
+  } catch (error) {
+    return res.status(400).json({
+      error: error.message || 'Failed to build media manager startup payload'
+    });
+  }
+});
+
+app.get('/public/media-manager/project/:project/startup', (req, res) => {
+  try {
+    return res.json(buildMediaManagerProjectStartupPayload(req.params.project));
+  } catch (error) {
+    return res.status(400).json({
+      error: error.message || 'Failed to build media manager startup payload'
+    });
+  }
+});
+
 app.get('/media-manager/project/:project', (req, res) => {
   try {
     return res.json(buildMediaManagerProjectPayload(req.params.project));
@@ -6848,6 +10710,673 @@ app.get('/public/media-manager/project/:project', (req, res) => {
     });
   }
 });
+
+
+
+function getProjectAssetsRegistryMeta(projectName) {
+  const project = normalizeProjectSlug(projectName);
+  const root = process.env.MH_ASSISTANT_ROOT || path.resolve(__dirname, '../..');
+  const registryPath = path.join(root, 'data', 'projects', project, 'assets-registry.json');
+  return { project, registryPath };
+}
+
+function matchesProjectAssetId(value, assetId) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    return false;
+  }
+
+  const requested = String(assetId || '').trim();
+  if (!requested) return false;
+
+  const byPrimaryId = (
+    String(value.asset_id || '') === requested ||
+    String(value.assetId || '') === requested ||
+    String(value.id || '') === requested
+  );
+  if (byPrimaryId) return true;
+
+  if (requested.startsWith('path:')) {
+    const requestedPath = requested.slice(5).trim();
+    if (!requestedPath) return false;
+    const localPath = String(value.local_path || value.file_path || value.path || '').trim();
+    return Boolean(localPath && localPath === requestedPath);
+  }
+
+  if (requested.startsWith('name:')) {
+    const requestedName = requested.slice(5).trim().toLowerCase();
+    if (!requestedName) return false;
+    const candidateName = String(
+      value.filename ||
+      value.file_name ||
+      value.name ||
+      value.title ||
+      path.basename(String(value.local_path || value.file_path || value.path || ''))
+    ).trim().toLowerCase();
+    return Boolean(candidateName && candidateName === requestedName);
+  }
+
+  return false;
+}
+
+function mutateProjectAssetRegistry(projectName, assetId, mutator) {
+  const { project, registryPath } = getProjectAssetsRegistryMeta(projectName);
+
+  if (!assetId) {
+    throw Object.assign(new Error('Missing asset id.'), { statusCode: 400 });
+  }
+
+  if (!fs.existsSync(registryPath)) {
+    throw Object.assign(new Error('Assets registry not found.'), {
+      statusCode: 404,
+      details: { project, registryPath }
+    });
+  }
+
+  const registry = JSON.parse(fs.readFileSync(registryPath, 'utf8'));
+  const now = new Date().toISOString();
+  let matched = 0;
+
+  function walk(value) {
+    if (!value || typeof value !== 'object') {
+      return;
+    }
+
+    if (Array.isArray(value)) {
+      value.forEach(walk);
+      return;
+    }
+
+    if (matchesProjectAssetId(value, assetId)) {
+      matched += 1;
+      mutator(value, now);
+      value.updated_at = now;
+    }
+
+    Object.values(value).forEach(walk);
+  }
+
+  walk(registry);
+
+  if (!matched) {
+    throw Object.assign(new Error('Asset not found in registry.'), {
+      statusCode: 404,
+      details: { project, assetId }
+    });
+  }
+
+  if (registry && typeof registry === 'object' && !Array.isArray(registry)) {
+    registry.updated_at = now;
+    registry.last_reviewed_at = now;
+  }
+
+  writeJsonFile(registryPath, registry);
+
+  return {
+    ok: true,
+    project,
+    assetId,
+    matched,
+    registryPath,
+    updated_at: now
+  };
+}
+
+function sendAssetMutationError(res, error, fallbackMessage) {
+  const statusCode = Number(error?.statusCode || 0);
+  const payload = {
+    error: error?.message || fallbackMessage,
+    ...(error?.details && typeof error.details === 'object' ? error.details : {})
+  };
+
+  if (statusCode >= 400 && statusCode < 600) {
+    return res.status(statusCode).json(payload);
+  }
+
+  return res.status(500).json({
+    error: fallbackMessage,
+    details: error?.message || String(error)
+  });
+}
+
+app.post('/media-manager/project/:project/assets/:assetId/status', express.json({ limit: '1mb' }), (req, res) => {
+  try {
+    const assetId = String(req.params.assetId || '').trim();
+    const status = String(req.body?.status || '').trim().toLowerCase();
+    const note = String(req.body?.note || '').trim();
+
+    const allowed = new Set(['approved', 'needs_review', 'rejected', 'archived']);
+    if (!assetId) {
+      return res.status(400).json({ error: 'Missing assetId.' });
+    }
+
+    if (!allowed.has(status)) {
+      return res.status(400).json({
+        error: 'Invalid status.',
+        allowed: Array.from(allowed)
+      });
+    }
+
+    const result = mutateProjectAssetRegistry(req.params.project, assetId, (asset, now) => {
+      asset.status = status;
+      asset.readiness_status = status;
+      asset.review_status = status;
+      asset.needs_review = status === 'needs_review';
+      asset.approved = status === 'approved';
+      asset.rejected = status === 'rejected';
+      asset.archived = status === 'archived';
+      asset.reviewed_at = now;
+      asset.reviewed_by = 'control_center';
+
+      if (status === 'approved') {
+        asset.approved_at = now;
+        asset.approval_note = note || asset.approval_note || 'Approved from Control Center Library.';
+      }
+
+      if (status === 'rejected') {
+        asset.rejected_at = now;
+        asset.rejection_note = note || asset.rejection_note || 'Rejected from Control Center Library.';
+      }
+
+      if (status === 'archived') {
+        asset.archived_at = now;
+        asset.archive_note = note || asset.archive_note || 'Archived from Control Center Library.';
+      }
+    });
+
+    return res.json({
+      ...result,
+      status
+    });
+  } catch (error) {
+    return sendAssetMutationError(res, error, 'Failed to update asset status.');
+  }
+});
+
+app.post('/media-manager/project/:project/assets/:assetId/rename', express.json({ limit: '1mb' }), (req, res) => {
+  try {
+    const assetId = String(req.params.assetId || '').trim();
+    const name = String(req.body?.name || req.body?.display_name || '').trim();
+
+    if (!assetId) {
+      return res.status(400).json({ error: 'Missing assetId.' });
+    }
+
+    if (!name) {
+      return res.status(400).json({ error: 'Missing asset name.' });
+    }
+
+    const result = mutateProjectAssetRegistry(req.params.project, assetId, (asset, now) => {
+      asset.name = name;
+      asset.title = name;
+      asset.display_name = name;
+      asset.renamed_at = now;
+      asset.renamed_by = 'control_center';
+    });
+
+    return res.json({
+      ...result,
+      name
+    });
+  } catch (error) {
+    return sendAssetMutationError(res, error, 'Failed to rename asset.');
+  }
+});
+
+app.patch('/media-manager/project/:project/assets/:assetId/classification', express.json({ limit: '1mb' }), (req, res) => {
+  try {
+    const assetId = String(req.params.assetId || '').trim();
+    const requestedType = String(req.body?.asset_type || req.body?.type || '').trim().toLowerCase();
+    const note = String(req.body?.note || '').trim();
+
+    if (!assetId) {
+      return res.status(400).json({ error: 'Missing assetId.' });
+    }
+
+    if (!requestedType) {
+      return res.status(400).json({ error: 'Missing asset_type.' });
+    }
+
+    const canonicalType = getCanonicalAssetType(requestedType);
+    const catalogItem = getAssetTypeCatalog().find((item) => item.asset_type === canonicalType);
+
+    if (!canonicalType || !catalogItem) {
+      return res.status(400).json({
+        error: 'Invalid asset_type.',
+        requested_asset_type: requestedType,
+        allowed: getAssetTypeCatalog().map((item) => item.asset_type)
+      });
+    }
+
+    const result = mutateProjectAssetRegistry(req.params.project, assetId, (asset, now) => {
+      if (asset.deleted || asset.is_deleted) {
+        const error = new Error('Cannot reclassify deleted asset.');
+        error.statusCode = 409;
+        throw error;
+      }
+
+      const previousAssetType = String(asset.asset_type || asset.type || '').trim().toLowerCase();
+
+      asset.previous_asset_type = previousAssetType || asset.previous_asset_type || '';
+      asset.asset_type = canonicalType;
+      asset.type = canonicalType;
+      asset.category_label = catalogItem.category || catalogItem.label || asset.category_label || '';
+      asset.reclassified_at = now;
+      asset.reclassified_by = 'control_center';
+      asset.reclassification_note = note || `Reclassified from ${previousAssetType || 'unknown'} to ${canonicalType} from Control Center Library.`;
+      asset.updated_at = now;
+    });
+
+    return res.json({
+      ...result,
+      asset_type: canonicalType
+    });
+  } catch (error) {
+    return sendAssetMutationError(res, error, 'Failed to reclassify asset.');
+  }
+});
+
+
+app.post('/media-manager/project/:project/assets/:assetId/source-of-truth', express.json({ limit: '1mb' }), (req, res) => {
+  try {
+    const assetId = String(req.params.assetId || '').trim();
+    const sourceOfTruth = Boolean(req.body?.source_of_truth);
+
+    if (!assetId) {
+      return res.status(400).json({ error: 'Missing assetId.' });
+    }
+
+    const result = mutateProjectAssetRegistry(req.params.project, assetId, (asset, now) => {
+      asset.source_of_truth = sourceOfTruth;
+      asset.use_as_source_of_truth = sourceOfTruth;
+      asset.source_of_truth_updated_at = now;
+      asset.source_of_truth_updated_by = 'control_center';
+    });
+
+    return res.json({
+      ...result,
+      source_of_truth: sourceOfTruth
+    });
+  } catch (error) {
+    return sendAssetMutationError(res, error, 'Failed to update source of truth.');
+  }
+});
+
+app.post('/media-manager/project/:project/assets/:assetId/archive', express.json({ limit: '1mb' }), (req, res) => {
+  try {
+    const assetId = String(req.params.assetId || '').trim();
+    const note = String(req.body?.note || '').trim();
+
+    if (!assetId) {
+      return res.status(400).json({ error: 'Missing assetId.' });
+    }
+
+    const result = mutateProjectAssetRegistry(req.params.project, assetId, (asset, now) => {
+      asset.status = 'archived';
+      asset.readiness_status = 'archived';
+      asset.review_status = 'archived';
+      asset.archived = true;
+      asset.archived_at = now;
+      asset.archive_note = note || asset.archive_note || 'Archived from Control Center Library.';
+      asset.reviewed_by = 'control_center';
+    });
+
+    return res.json({
+      ...result,
+      status: 'archived'
+    });
+  } catch (error) {
+    return sendAssetMutationError(res, error, 'Failed to archive asset.');
+  }
+});
+
+app.post('/media-manager/project/:project/assets/:assetId/delete', express.json({ limit: '1mb' }), (req, res) => {
+  try {
+    const assetId = String(req.params.assetId || '').trim();
+    const note = String(req.body?.note || '').trim();
+
+    if (!assetId) {
+      return res.status(400).json({ error: 'Missing assetId.' });
+    }
+
+    const result = mutateProjectAssetRegistry(req.params.project, assetId, (asset, now) => {
+      asset.deleted = true;
+      asset.deleted_at = now;
+      asset.deleted_by = 'control_center';
+      asset.delete_note = note || asset.delete_note || 'Soft deleted from Control Center Library.';
+      asset.status = 'archived';
+      asset.readiness_status = 'archived';
+      asset.review_status = 'archived';
+      asset.archived = true;
+      asset.archived_at = asset.archived_at || now;
+    });
+
+    return res.json({
+      ...result,
+      deleted: true,
+      status: 'archived'
+    });
+  } catch (error) {
+    return sendAssetMutationError(res, error, 'Failed to delete asset.');
+  }
+});
+
+app.delete('/media-manager/project/:project/assets/:assetId', express.json({ limit: '1mb' }), (req, res) => {
+  try {
+    const assetId = String(req.params.assetId || '').trim();
+    const note = String(req.body?.note || '').trim();
+
+    if (!assetId) {
+      return res.status(400).json({ error: 'Missing assetId.' });
+    }
+
+    const result = mutateProjectAssetRegistry(req.params.project, assetId, (asset, now) => {
+      asset.deleted = true;
+      asset.deleted_at = now;
+      asset.deleted_by = 'control_center';
+      asset.delete_note = note || asset.delete_note || 'Soft deleted from Control Center Library.';
+      asset.status = 'archived';
+      asset.readiness_status = 'archived';
+      asset.review_status = 'archived';
+      asset.archived = true;
+      asset.archived_at = asset.archived_at || now;
+    });
+
+    return res.json({
+      ...result,
+      deleted: true,
+      status: 'archived'
+    });
+  } catch (error) {
+    return sendAssetMutationError(res, error, 'Failed to delete asset.');
+  }
+});
+
+app.post('/media-manager/project/:project/library/refresh', (req, res) => {
+  try {
+    return res.json(refreshProjectLibraryRegistry(req.params.project));
+  } catch (error) {
+    return res.status(400).json({
+      error: error.message || 'Failed to refresh project library'
+    });
+  }
+});
+
+app.post('/media-manager/project/:project/setup', (req, res) => {
+  try {
+    if (!enforceGovernanceMutationGate(req, res, {
+      projectName: req.params.project,
+      action: 'project_setup_mutation',
+      entityType: 'project_setup',
+      entityId: req.params.project,
+      requestedAction: 'update',
+      skipApprovalGate: true,
+      setupPayload: req.body || {}
+    })) {
+      return;
+    }
+
+    if (!enforceGovernanceApprovalLifecycle(req, res, {
+      projectName: req.params.project,
+      action: 'project_setup_mutation',
+      entityType: 'project_setup',
+      entityId: req.params.project,
+      requestedAction: 'update',
+      routeTarget: 'settings',
+      serviceDomain: 'governance',
+      linkedExecutionId: req.params.project,
+      riskLevel: 'medium',
+      title: 'Project setup approval',
+      summary: 'Approval required before authority-impacting project setup changes.',
+      setupPayload: req.body || {}
+    })) {
+      return;
+    }
+
+    return res.json(updateProjectSetup(req.params.project, req.body || {}));
+  } catch (error) {
+    return res.status(400).json({
+      error: error.message || 'Failed to save project setup'
+    });
+  }
+});
+
+app.post('/public/media-manager/project/:project/setup', (req, res) => {
+  try {
+    if (!enforceGovernanceMutationGate(req, res, {
+      projectName: req.params.project,
+      action: 'project_setup_mutation',
+      entityType: 'project_setup',
+      entityId: req.params.project,
+      requestedAction: 'update',
+      skipApprovalGate: true,
+      setupPayload: req.body || {}
+    })) {
+      return;
+    }
+
+    if (!enforceGovernanceApprovalLifecycle(req, res, {
+      projectName: req.params.project,
+      action: 'project_setup_mutation',
+      entityType: 'project_setup',
+      entityId: req.params.project,
+      requestedAction: 'update',
+      routeTarget: 'settings',
+      serviceDomain: 'governance',
+      linkedExecutionId: req.params.project,
+      riskLevel: 'medium',
+      title: 'Project setup approval',
+      summary: 'Approval required before authority-impacting project setup changes.',
+      setupPayload: req.body || {}
+    })) {
+      return;
+    }
+
+    return res.json(updateProjectSetup(req.params.project, req.body || {}));
+  } catch (error) {
+    return res.status(400).json({
+      error: error.message || 'Failed to save project setup'
+    });
+  }
+});
+
+
+function normalizeAiCommandPreviewInput(value, fallback = '') {
+  return String(value || fallback || '').trim();
+}
+
+function normalizeAiCommandPreviewList(value) {
+  if (Array.isArray(value)) {
+    return value.map((item) => normalizeAiCommandPreviewInput(item)).filter(Boolean);
+  }
+
+  if (typeof value === 'string') {
+    return value
+      .split(',')
+      .map((item) => normalizeAiCommandPreviewInput(item))
+      .filter(Boolean);
+  }
+
+  return [];
+}
+
+function buildAiCommandCampaignPreviewOnly(projectName, input = {}) {
+  const project = normalizeAiCommandPreviewInput(projectName, 'default');
+  const sourceType = normalizeAiCommandPreviewInput(input.source_type || input.sourceType, 'Project source');
+  const sourceLabel = normalizeAiCommandPreviewInput(input.source_label || input.sourceLabel, sourceType);
+  const goal = normalizeAiCommandPreviewInput(input.goal, 'Campaign launch');
+  const channel = normalizeAiCommandPreviewInput(input.channel, 'Multi-channel');
+  const audience = normalizeAiCommandPreviewInput(input.audience || input.target_audience || input.targetAudience, 'Primary customer segment');
+  const offer = normalizeAiCommandPreviewInput(input.offer, 'Review-ready offer angle');
+  const market = normalizeAiCommandPreviewInput(input.market || input.region, 'Germany');
+  const language = normalizeAiCommandPreviewInput(input.language || input.output_language, 'German');
+  const format = normalizeAiCommandPreviewInput(input.format || input.asset_format || input.creative_format, 'Mixed package');
+  const deadline = normalizeAiCommandPreviewInput(input.deadline || input.priority || input.timeline, 'Standard');
+  const productFocus = normalizeAiCommandPreviewInput(input.product_focus || input.productFocus, 'Selected product or service');
+  const complianceSensitivity = normalizeAiCommandPreviewInput(input.compliance_sensitivity || input.complianceSensitivity, 'Standard review');
+  const productNames = normalizeAiCommandPreviewList(input.products || input.product_names || input.productNames);
+  const now = new Date().toISOString();
+
+  const title = normalizeAiCommandPreviewInput(
+    input.title,
+    `${goal} campaign for ${sourceLabel}`
+  );
+
+  const products = productNames.length ? productNames : [
+    normalizeAiCommandPreviewInput(input.product || input.product_name || input.productName, 'Selected product or service')
+  ];
+
+  const campaignPackage = {
+    concept: `${goal} campaign built from ${sourceLabel}.`,
+    targetAudience: audience,
+    offer,
+    market,
+    language,
+    format,
+    deadline,
+    productFocus,
+    complianceSensitivity,
+    products,
+    channels: [channel],
+    launchPhases: [
+      'Prepare campaign message and proof points.',
+      'Create media and publishing assets.',
+      'Review compliance and approval requirements.',
+      'Hand off to destination owner for execution.'
+    ],
+    contentAngles: [
+      `Position ${sourceLabel} around the ${goal.toLowerCase()} objective.`,
+      `Use customer pain points and product proof before publishing.`,
+      `Keep claims review-ready before external distribution.`
+    ],
+    adAngles: [
+      `Lead with ${offer}.`,
+      `Retarget engaged visitors with proof-led creative.`,
+      `Use destination-specific copy variations for ${channel}.`
+    ],
+    requiredAssets: [
+      'Approved product visuals',
+      'Offer details',
+      'Channel copy',
+      'Compliance-safe proof points'
+    ],
+    missingBlockers: [
+      'Final approval is required before publishing.',
+      'Destination owner must confirm execution readiness.'
+    ],
+    nextActions: [
+      'Review the AI Team preview.',
+      'Send the package to Media Studio or Publishing.',
+      'Request Governance review before release if claims or publishing risk exists.'
+    ],
+    suggestedHandoffs: [
+      {
+        destination: 'media-studio',
+        label: 'Send to Media Studio',
+        reason: 'Prepare creative and media assets from the campaign package.'
+      },
+      {
+        destination: 'publishing',
+        label: 'Prepare Publishing Handoff',
+        reason: 'Turn the campaign package into a publishing draft.'
+      }
+    ]
+  };
+
+  const sections = [
+    {
+      id: 'campaign_summary',
+      title: 'Campaign summary',
+      body: `${title}. Source: ${sourceLabel}. Goal: ${goal}. Channel: ${channel}.`
+    },
+    {
+      id: 'audience_offer',
+      title: 'Audience and offer',
+      body: `Audience: ${audience}. Offer: ${offer}. Market: ${market}. Language: ${language}. Format: ${format}. Deadline: ${deadline}. Product focus: ${productFocus}. Compliance: ${complianceSensitivity}.`
+    },
+    {
+      id: 'copy_package',
+      title: 'Copy package',
+      items: [
+        `Hook: ${offer}`,
+        `CTA: Review and prepare the ${goal.toLowerCase()} package.`,
+        `Caption direction: connect ${sourceLabel} to customer need and proof.`
+      ]
+    },
+    {
+      id: 'media_brief',
+      title: 'Media brief',
+      items: campaignPackage.requiredAssets
+    },
+    {
+      id: 'compliance_risks',
+      title: 'Compliance risks',
+      items: campaignPackage.missingBlockers
+    },
+    {
+      id: 'publishing_checklist',
+      title: 'Publishing checklist',
+      items: campaignPackage.nextActions
+    }
+  ];
+
+  return {
+    type: 'smart_campaign_preview',
+    source: 'backend_ai_team',
+    preview_only: true,
+    project,
+    title,
+    summary: `Backend preview-only AI Team campaign package for ${goal} using ${sourceLabel}.`,
+    source_type: sourceType,
+    source_label: sourceLabel,
+    goal,
+    channel,
+    market,
+    language,
+    format,
+    deadline,
+    audience,
+    offer,
+    product_focus: productFocus,
+    compliance_sensitivity: complianceSensitivity,
+    campaignPackage,
+    sections,
+    generated_at: now,
+    safety: {
+      preview_only: true,
+      requires_approval_before_publish: true,
+      no_backend_mutation_performed: true,
+      no_provider_execution_performed: true,
+      no_task_created: true,
+      no_approval_created: true,
+      no_handoff_created: true,
+      no_workflow_run_created: true
+    }
+  };
+}
+
+function handleAiCommandCampaignPreviewOnly(req, res) {
+  try {
+    const preview = buildAiCommandCampaignPreviewOnly(req.params.project, req.body || {});
+    return res.json({
+      ok: true,
+      ...preview
+    });
+  } catch (error) {
+    return res.status(500).json({
+      ok: false,
+      code: 'AI_COMMAND_CAMPAIGN_PREVIEW_FAILED',
+      message: error.message || 'Failed to build AI Command campaign preview.',
+      safety: {
+        preview_only: true,
+        no_backend_mutation_performed: true,
+        no_provider_execution_performed: true
+      }
+    });
+  }
+}
+
+app.post('/api/ai-command/project/:project/campaign-preview', handleAiCommandCampaignPreviewOnly);
+
 
 function handleGetProjectOperations(req, res) {
   try {
@@ -6909,7 +11438,7 @@ function handleGetNotificationCenter(req, res) {
     const snapshot = buildProjectOperationsPayload(req.params.project);
     return res.json({
       project: String(req.params.project || '').trim().toLowerCase(),
-      notification_center: snapshot.notification_center || {}
+      ...asPlainObject(snapshot.notification_center)
     });
   } catch (error) {
     return res.status(400).json({
@@ -6952,6 +11481,34 @@ function handleGetProjectTeam(req, res) {
 
 function handleUpdateProjectTeam(req, res) {
   try {
+    if (!enforceGovernanceMutationGate(req, res, {
+      projectName: req.params.project,
+      action: 'team_model_mutation',
+      entityType: 'team_model',
+      entityId: 'default',
+      requestedAction: 'update',
+      skipApprovalGate: true
+    })) {
+      return;
+    }
+
+    if (!enforceGovernanceApprovalLifecycle(req, res, {
+      projectName: req.params.project,
+      action: 'team_model_mutation',
+      entityType: 'team_model',
+      entityId: 'default',
+      requestedAction: 'update',
+      routeTarget: 'settings',
+      serviceDomain: 'governance',
+      linkedExecutionId: req.params.project,
+      riskLevel: 'high',
+      title: 'Team model approval',
+      summary: 'Approval required before team model changes.',
+      payload: req.body || {}
+    })) {
+      return;
+    }
+
     return res.json({
       project: String(req.params.project || '').trim().toLowerCase(),
       team: updateTeamModel(req.params.project, req.body || {}, req.body?.actor || 'control-center')
@@ -7200,6 +11757,33 @@ app.get('/public/media-manager/project/:project/workflows/runs/:runId', handleGe
 
 function handleRunWorkflow(req, res) {
   try {
+    if (!enforceGovernanceMutationGate(req, res, {
+      projectName: req.params.project,
+      action: 'workflow_run',
+      entityType: 'workflow_run',
+      entityId: req.params.workflowId,
+      requestedAction: 'run',
+      skipApprovalGate: true
+    })) {
+      return;
+    }
+
+    if (!enforceGovernanceApprovalLifecycle(req, res, {
+      projectName: req.params.project,
+      action: 'workflow_run',
+      entityType: 'workflow_run',
+      entityId: req.params.workflowId,
+      requestedAction: 'run',
+      routeTarget: 'workflows',
+      serviceDomain: 'research',
+      linkedExecutionId: req.params.workflowId,
+      riskLevel: 'high',
+      title: 'Workflow run approval',
+      summary: 'Approval required before workflow execution.'
+    })) {
+      return;
+    }
+
     const output = req.body?.output;
     const run = recordWorkflowRun(req.params.project, {
       workflow_id: req.params.workflowId,
@@ -7241,22 +11825,250 @@ function handleRunWorkflow(req, res) {
 app.post('/media-manager/project/:project/workflows/:workflowId/run', handleRunWorkflow);
 app.post('/public/media-manager/project/:project/workflows/:workflowId/run', handleRunWorkflow);
 
-function handleExecuteAiCommand(req, res) {
+async function handleExecuteAiCommand(req, res) {
+  const project = String(req.params.project || '').trim().toLowerCase();
+  const source = String(req.body?.source || 'ai-command').trim();
+  const modeId = String(req.body?.mode_id || req.body?.modeId || 'executive').trim();
+
+  if (!enforceGovernanceMutationGate(req, res, {
+    projectName: project,
+    action: 'ai_command_run',
+    entityType: 'ai_command',
+    entityId: modeId,
+    requestedAction: 'execute',
+    skipApprovalGate: true
+  })) {
+    return;
+  }
+
+  if (!enforceGovernanceApprovalLifecycle(req, res, {
+    projectName: project,
+    action: 'ai_command_run',
+    entityType: 'ai_command',
+    entityId: modeId,
+    requestedAction: 'execute',
+    routeTarget: 'workflows',
+    serviceDomain: 'research',
+    linkedExecutionId: modeId,
+    riskLevel: 'high',
+    title: 'AI command approval',
+    summary: 'Approval required before AI command execution.'
+  })) {
+    return;
+  }
+
+  appLogger.info('ai_command_http_received', {
+    route: 'ai-command',
+    action: 'execute',
+    project,
+    source,
+    mode_id: modeId
+  });
+
   try {
-    const result = getAiOrchestrator().executeCommand(req.params.project, req.body || {});
+    const result = await getAiOrchestrator().executeCommand(req.params.project, req.body || {});
+    appLogger.info('ai_command_http_returned', {
+      route: 'ai-command',
+      action: 'execute',
+      project,
+      status: result?.status || 'completed',
+      provider: result?.provider?.id || result?.response?.provider || null,
+      command_id: result?.command?.id || null
+    });
     return res.json({
       ...result,
       operations: buildProjectOperationsPayload(req.params.project)
     });
   } catch (error) {
-    return res.status(400).json({
-      error: error.message || 'Failed to execute AI command'
+    const statusCode = getErrorStatusCode(error, 500);
+    const payload = error?.payload && typeof error.payload === 'object'
+      ? error.payload
+      : {
+        status: 'failed',
+        error: error.message || 'Failed to execute AI command'
+      };
+
+    appLogger.error('ai_command_http_error', {
+      route: 'ai-command',
+      action: 'execute',
+      project,
+      status_code: statusCode,
+      error: serializeErrorForLog(error)
     });
+
+    return res.status(statusCode).json(payload);
+  }
+}
+
+async function handleExecuteAiChat(req, res) {
+  const project = String(req.params.project || '').trim().toLowerCase();
+  const specialistId = String(req.body?.specialistId || req.body?.specialist_id || 'specialist').trim().toLowerCase();
+
+  if (!enforceGovernanceMutationGate(req, res, {
+    projectName: project,
+    action: 'ai_chat_run',
+    entityType: 'ai_command',
+    entityId: specialistId,
+    requestedAction: 'execute',
+    skipApprovalGate: true
+  })) {
+    return;
+  }
+
+  if (!enforceGovernanceApprovalLifecycle(req, res, {
+    projectName: project,
+    action: 'ai_chat_run',
+    entityType: 'ai_command',
+    entityId: specialistId,
+    requestedAction: 'execute',
+    routeTarget: 'workflows',
+    serviceDomain: 'research',
+    linkedExecutionId: specialistId,
+    riskLevel: 'high',
+    title: 'AI chat approval',
+    summary: 'Approval required before AI chat execution.'
+  })) {
+    return;
+  }
+
+  appLogger.info('ai_chat_http_received', {
+    route: 'ai-chat',
+    action: 'execute',
+    project,
+    specialist_id: specialistId
+  });
+
+  try {
+    const result = await getAiOrchestrator().executeChat(req.params.project, req.body || {});
+    appLogger.info('ai_chat_http_returned', {
+      route: 'ai-chat',
+      action: 'execute',
+      project,
+      status: result?.status || 'completed',
+      provider: result?.provider?.id || null,
+      specialist_id: result?.specialist?.id || specialistId
+    });
+    return res.json(result);
+  } catch (error) {
+    const statusCode = getErrorStatusCode(error, 500);
+    const payload = error?.payload && typeof error.payload === 'object'
+      ? error.payload
+      : {
+        status: 'failed',
+        error: error.message || 'Failed to execute AI chat'
+      };
+
+    appLogger.error('ai_chat_http_error', {
+      route: 'ai-chat',
+      action: 'execute',
+      project,
+      status_code: statusCode,
+      error: serializeErrorForLog(error)
+    });
+
+    return res.status(statusCode).json(payload);
+  }
+}
+
+async function handleExecuteAiGuidance(req, res) {
+  const project = String(req.params.project || '').trim().toLowerCase();
+  const specialistId = String(req.body?.specialistId || req.body?.specialist_id || 'specialist').trim().toLowerCase();
+
+  if (!enforceGovernanceMutationGate(req, res, {
+    projectName: project,
+    action: 'ai_guidance_run',
+    entityType: 'ai_command',
+    entityId: specialistId,
+    requestedAction: 'execute',
+    skipApprovalGate: true
+  })) {
+    return;
+  }
+
+  if (!enforceGovernanceApprovalLifecycle(req, res, {
+    projectName: project,
+    action: 'ai_guidance_run',
+    entityType: 'ai_command',
+    entityId: specialistId,
+    requestedAction: 'execute',
+    routeTarget: 'workflows',
+    serviceDomain: 'research',
+    linkedExecutionId: specialistId,
+    riskLevel: 'high',
+    title: 'AI guidance approval',
+    summary: 'Approval required before AI guidance execution.'
+  })) {
+    return;
+  }
+
+  appLogger.info('ai_guidance_http_received', {
+    route: 'ai-guidance',
+    action: 'execute',
+    project,
+    specialist_id: specialistId
+  });
+
+  try {
+    const result = await getAiOrchestrator().executeGuidance(req.params.project, req.body || {});
+    appLogger.info('ai_guidance_http_returned', {
+      route: 'ai-guidance',
+      action: 'execute',
+      project,
+      status: result?.status || 'completed',
+      provider: result?.provider?.id || null,
+      specialist_id: result?.specialist?.id || specialistId
+    });
+    return res.json(result);
+  } catch (error) {
+    const statusCode = getErrorStatusCode(error, 500);
+    const payload = error?.payload && typeof error.payload === 'object'
+      ? error.payload
+      : {
+        status: 'failed',
+        error: error.message || 'Failed to execute AI guidance'
+      };
+
+    appLogger.error('ai_guidance_http_error', {
+      route: 'ai-guidance',
+      action: 'execute',
+      project,
+      status_code: statusCode,
+      error: serializeErrorForLog(error)
+    });
+
+    return res.status(statusCode).json(payload);
   }
 }
 
 function handleExecuteAiWorkflow(req, res) {
   try {
+    if (!enforceGovernanceMutationGate(req, res, {
+      projectName: req.params.project,
+      action: 'ai_workflow_run',
+      entityType: 'workflow_run',
+      entityId: req.params.workflowId,
+      requestedAction: 'run',
+      skipApprovalGate: true
+    })) {
+      return;
+    }
+
+    if (!enforceGovernanceApprovalLifecycle(req, res, {
+      projectName: req.params.project,
+      action: 'ai_workflow_run',
+      entityType: 'workflow_run',
+      entityId: req.params.workflowId,
+      requestedAction: 'run',
+      routeTarget: 'workflows',
+      serviceDomain: 'research',
+      linkedExecutionId: req.params.workflowId,
+      riskLevel: 'high',
+      title: 'AI workflow approval',
+      summary: 'Approval required before AI workflow execution.'
+    })) {
+      return;
+    }
+
     const result = getAiOrchestrator().executeWorkflow(
       req.params.project,
       req.params.workflowId,
@@ -7356,6 +12168,10 @@ app.get('/media-manager/project/:project/ai/commands/:commandId', handleGetAiCom
 app.get('/public/media-manager/project/:project/ai/commands/:commandId', handleGetAiCommand);
 app.post('/media-manager/project/:project/ai/command', handleExecuteAiCommand);
 app.post('/public/media-manager/project/:project/ai/command', handleExecuteAiCommand);
+app.post('/media-manager/project/:project/ai/chat', handleExecuteAiChat);
+app.post('/public/media-manager/project/:project/ai/chat', handleExecuteAiChat);
+app.post('/media-manager/project/:project/ai/guidance', handleExecuteAiGuidance);
+app.post('/public/media-manager/project/:project/ai/guidance', handleExecuteAiGuidance);
 app.post('/media-manager/project/:project/ai/workflows/:workflowId/run', handleExecuteAiWorkflow);
 app.post('/public/media-manager/project/:project/ai/workflows/:workflowId/run', handleExecuteAiWorkflow);
 app.get('/media-manager/project/:project/ai/artifacts', handleListAiArtifacts);
@@ -7456,7 +12272,17 @@ function handleCreateApproval(req, res) {
 
 function handleApprovalDecision(req, res) {
   try {
-    const approval = decideApproval(req.params.project, req.params.approvalId, {
+    if (!enforceGovernanceMutationGate(req, res, {
+      projectName: req.params.project,
+      action: 'approvals_decision',
+      entityType: 'approval',
+      entityId: req.params.approvalId,
+      requestedAction: 'decide'
+    })) {
+      return;
+    }
+
+    const approval = resolveGovernanceApproval(req.params.project, req.params.approvalId, {
       decision: req.body?.decision,
       note: req.body?.note,
       actor: req.body?.actor,
@@ -7498,6 +12324,16 @@ function handleGetGovernance(req, res) {
 
 function handleUpdateGovernancePolicy(req, res) {
   try {
+    if (!enforceGovernanceMutationGate(req, res, {
+      projectName: req.params.project,
+      action: 'governance_policy_update',
+      entityType: 'governance_policy',
+      entityId: 'default',
+      requestedAction: 'update'
+    })) {
+      return;
+    }
+
     const policy = updateGovernancePolicy(req.params.project, req.body || {}, req.body?.actor || 'operator');
     return res.json({
       project: String(req.params.project || '').trim().toLowerCase(),
@@ -7672,6 +12508,17 @@ app.get('/public/api/learning/:project', handleGetProjectLearning);
 
 app.post('/media-manager/project/:project/sources', (req, res) => {
   try {
+    if (!enforceGovernanceMutationGate(req, res, {
+      projectName: req.params.project,
+      action: 'source_registry_mutation',
+      entityType: 'source_registry',
+      entityId: String(req.body?.source_type || '').trim().toLowerCase() || 'source_registry',
+      requestedAction: 'create',
+      skipApprovalGate: true
+    })) {
+      return;
+    }
+
     const sourceType = String(req.body?.source_type || '').trim().toLowerCase();
     const sourceValue = String(req.body?.source_value || '').trim();
 
@@ -7679,6 +12526,23 @@ app.post('/media-manager/project/:project/sources', (req, res) => {
       return res.status(400).json({
         error: 'Missing source_type'
       });
+    }
+
+    if (!enforceGovernanceApprovalLifecycle(req, res, {
+      projectName: req.params.project,
+      action: 'source_registry_mutation',
+      entityType: 'source_registry',
+      entityId: String(req.body?.source_type || '').trim().toLowerCase() || 'source_registry',
+      requestedAction: 'create',
+      routeTarget: 'settings',
+      serviceDomain: 'governance',
+      linkedExecutionId: String(req.body?.source_type || '').trim().toLowerCase() || 'source_registry',
+      riskLevel: 'medium',
+      title: 'Source registry approval',
+      summary: 'Approval required before source registry changes.',
+      payload: req.body || {}
+    })) {
+      return;
     }
 
     if (!sourceValue) {
@@ -7698,6 +12562,17 @@ app.post('/media-manager/project/:project/sources', (req, res) => {
 
 app.post('/public/media-manager/project/:project/sources', (req, res) => {
   try {
+    if (!enforceGovernanceMutationGate(req, res, {
+      projectName: req.params.project,
+      action: 'source_registry_mutation',
+      entityType: 'source_registry',
+      entityId: String(req.body?.source_type || '').trim().toLowerCase() || 'source_registry',
+      requestedAction: 'create',
+      skipApprovalGate: true
+    })) {
+      return;
+    }
+
     const sourceType = String(req.body?.source_type || '').trim().toLowerCase();
     const sourceValue = String(req.body?.source_value || '').trim();
 
@@ -7705,6 +12580,23 @@ app.post('/public/media-manager/project/:project/sources', (req, res) => {
       return res.status(400).json({
         error: 'Missing source_type'
       });
+    }
+
+    if (!enforceGovernanceApprovalLifecycle(req, res, {
+      projectName: req.params.project,
+      action: 'source_registry_mutation',
+      entityType: 'source_registry',
+      entityId: String(req.body?.source_type || '').trim().toLowerCase() || 'source_registry',
+      requestedAction: 'create',
+      routeTarget: 'settings',
+      serviceDomain: 'governance',
+      linkedExecutionId: String(req.body?.source_type || '').trim().toLowerCase() || 'source_registry',
+      riskLevel: 'medium',
+      title: 'Source registry approval',
+      summary: 'Approval required before source registry changes.',
+      payload: req.body || {}
+    })) {
+      return;
     }
 
     if (!sourceValue) {
@@ -7724,6 +12616,34 @@ app.post('/public/media-manager/project/:project/sources', (req, res) => {
 
 app.delete('/media-manager/project/:project/sources/:sourceType', (req, res) => {
   try {
+    if (!enforceGovernanceMutationGate(req, res, {
+      projectName: req.params.project,
+      action: 'source_registry_mutation',
+      entityType: 'source_registry',
+      entityId: String(req.params.sourceType || '').trim().toLowerCase() || 'source_registry',
+      requestedAction: 'delete',
+      skipApprovalGate: true
+    })) {
+      return;
+    }
+
+    if (!enforceGovernanceApprovalLifecycle(req, res, {
+      projectName: req.params.project,
+      action: 'source_registry_mutation',
+      entityType: 'source_registry',
+      entityId: String(req.params.sourceType || '').trim().toLowerCase() || 'source_registry',
+      requestedAction: 'delete',
+      routeTarget: 'settings',
+      serviceDomain: 'governance',
+      linkedExecutionId: String(req.params.sourceType || '').trim().toLowerCase() || 'source_registry',
+      riskLevel: 'medium',
+      title: 'Source registry approval',
+      summary: 'Approval required before source registry deletion.',
+      payload: req.body || {}
+    })) {
+      return;
+    }
+
     const result = removeProjectSourceOfTruth(req.params.project, req.params.sourceType);
     return res.json(result);
   } catch (error) {
@@ -7735,6 +12655,34 @@ app.delete('/media-manager/project/:project/sources/:sourceType', (req, res) => 
 
 app.delete('/public/media-manager/project/:project/sources/:sourceType', (req, res) => {
   try {
+    if (!enforceGovernanceMutationGate(req, res, {
+      projectName: req.params.project,
+      action: 'source_registry_mutation',
+      entityType: 'source_registry',
+      entityId: String(req.params.sourceType || '').trim().toLowerCase() || 'source_registry',
+      requestedAction: 'delete',
+      skipApprovalGate: true
+    })) {
+      return;
+    }
+
+    if (!enforceGovernanceApprovalLifecycle(req, res, {
+      projectName: req.params.project,
+      action: 'source_registry_mutation',
+      entityType: 'source_registry',
+      entityId: String(req.params.sourceType || '').trim().toLowerCase() || 'source_registry',
+      requestedAction: 'delete',
+      routeTarget: 'settings',
+      serviceDomain: 'governance',
+      linkedExecutionId: String(req.params.sourceType || '').trim().toLowerCase() || 'source_registry',
+      riskLevel: 'medium',
+      title: 'Source registry approval',
+      summary: 'Approval required before source registry deletion.',
+      payload: req.body || {}
+    })) {
+      return;
+    }
+
     const result = removeProjectSourceOfTruth(req.params.project, req.params.sourceType);
     return res.json(result);
   } catch (error) {
@@ -7759,6 +12707,9 @@ function getIntegrationErrorHttpStatus(error) {
   if (status === 'token_expired') {
     return 401;
   }
+  if (status === 'unsupported_provider') {
+    return 422;
+  }
   if (status === 'reconnect_required') {
     return 403;
   }
@@ -7769,36 +12720,146 @@ function getIntegrationErrorHttpStatus(error) {
 }
 
 async function handleConnectProjectIntegration(req, res, options = {}) {
+  const governanceAction = options?.reconnect ? 'integration_reconnect' : 'integration_connect';
+  const requestedAction = options?.reconnect ? 'reconnect' : 'connect';
+  const governanceOptions = {
+    projectName: req.params.project,
+    action: governanceAction,
+    entityType: 'integration',
+    entityId: req.params.integrationId,
+    requestedAction,
+    route: req.path,
+    requestedFor: 'admin',
+    routeTarget: 'governance',
+    sourcePage: 'integrations',
+    serviceDomain: 'integrations',
+    riskLevel: options?.reconnect ? 'high' : 'medium',
+    title: `${req.params.integrationId} ${requestedAction} approval`,
+    summary: `Review ${req.params.integrationId} ${requestedAction} before applying integration credential or provider-state changes.`
+  };
+  const governanceAllowed = options?.reconnect
+    ? enforceGovernanceApprovalLifecycle(req, res, governanceOptions)
+    : enforceGovernanceMutationGate(req, res, governanceOptions);
+
+  if (!governanceAllowed) {
+    return;
+  }
+
   try {
+    const connectionPayload = normalizeProjectIntegrationConnectionPayload(req.params.integrationId, req.body || {});
     const result = await saveProjectIntegrationRecord(req.params.project, req.params.integrationId, {
-      source_key: req.body?.source_key,
-      primary_field: req.body?.primary_field,
-      primary_value: req.body?.primary_value,
-      config: req.body?.config,
-      credentials: req.body?.credentials,
-      auth_fields: req.body?.auth_fields,
-      required_fields: req.body?.required_fields,
-      data_scopes: req.body?.data_scopes,
-      read_scopes: req.body?.read_scopes,
-      write_scopes: req.body?.write_scopes,
-      connection_method: req.body?.connection_method,
-      permission_scope: req.body?.permission_scope,
-      enables: req.body?.enables,
-      notes: req.body?.notes,
-      token_expires_at: req.body?.token_expires_at,
-      requires_credentials: req.body?.requires_credentials,
-      sync_source_registry: req.body?.sync_source_registry
+      source_key: connectionPayload?.source_key,
+      primary_field: connectionPayload?.primary_field,
+      primary_value: connectionPayload?.primary_value,
+      config: connectionPayload?.config,
+      credentials: connectionPayload?.credentials,
+      auth_fields: connectionPayload?.auth_fields,
+      required_fields: connectionPayload?.required_fields,
+      data_scopes: connectionPayload?.data_scopes,
+      read_scopes: connectionPayload?.read_scopes,
+      write_scopes: connectionPayload?.write_scopes,
+      connection_method: connectionPayload?.connection_method,
+      permission_scope: connectionPayload?.permission_scope,
+      enables: connectionPayload?.enables,
+      notes: connectionPayload?.notes,
+      token_expires_at: connectionPayload?.token_expires_at,
+      requires_credentials: connectionPayload?.requires_credentials,
+      sync_source_registry: connectionPayload?.sync_source_registry
     }, options);
 
     return res.json(result);
   } catch (error) {
+    logCriticalFailure('integration_connect', req, error, {
+      project: req.params.project,
+      integrationId: req.params.integrationId,
+      reconnect: Boolean(options?.reconnect)
+    });
     return res.status(getIntegrationErrorHttpStatus(error)).json({
       error: error.message || 'Failed to save integration connection'
     });
   }
 }
 
+function normalizeProjectIntegrationConnectionPayload(integrationId, payload = {}) {
+  const normalizedPayload = payload && typeof payload === 'object' && !Array.isArray(payload)
+    ? { ...payload }
+    : {};
+  const normalizedIntegrationId = String(integrationId || '').trim().toLowerCase();
+
+  if (normalizedIntegrationId !== 'woocommerce') {
+    return normalizedPayload;
+  }
+
+  const config = normalizedPayload.config && typeof normalizedPayload.config === 'object' && !Array.isArray(normalizedPayload.config)
+    ? { ...normalizedPayload.config }
+    : {};
+  const credentials = normalizedPayload.credentials && typeof normalizedPayload.credentials === 'object' && !Array.isArray(normalizedPayload.credentials)
+    ? { ...normalizedPayload.credentials }
+    : {};
+
+  const storeUrl = String(normalizedPayload.storeUrl || normalizedPayload.store_url || config.storeUrl || '').trim();
+  const consumerKey = String(normalizedPayload.consumerKey || normalizedPayload.consumer_key || credentials.consumerKey || '').trim();
+  const consumerSecret = String(normalizedPayload.consumerSecret || normalizedPayload.consumer_secret || credentials.consumerSecret || '').trim();
+
+  if (storeUrl) {
+    config.storeUrl = storeUrl;
+    normalizedPayload.primary_value = String(normalizedPayload.primary_value || storeUrl).trim();
+  }
+
+  if (consumerKey) {
+    credentials.consumerKey = consumerKey;
+  }
+
+  if (consumerSecret) {
+    credentials.consumerSecret = consumerSecret;
+  }
+
+  return {
+    source_key: 'woocommerce',
+    primary_field: 'storeUrl',
+    auth_fields: ['consumerKey', 'consumerSecret'],
+    required_fields: ['storeUrl'],
+    requires_credentials: true,
+    connection_method: 'oauth_or_key',
+    ...normalizedPayload,
+    config,
+    credentials
+  };
+}
+
 async function handleProjectIntegrationAction(req, res, actionType) {
+  const normalizedActionType = String(actionType || '').trim().toLowerCase();
+  const governanceAction = {
+    test: 'integration_test',
+    sync: 'integration_sync',
+    'import-history': 'integration_import_history',
+    disconnect: 'integration_disconnect'
+  }[normalizedActionType] || 'integration_test';
+
+  const governanceOptions = {
+    projectName: req.params.project,
+    action: governanceAction,
+    entityType: 'integration',
+    entityId: req.params.integrationId,
+    requestedAction: normalizedActionType,
+    route: req.path,
+    requestedFor: 'admin',
+    routeTarget: 'governance',
+    sourcePage: 'integrations',
+    serviceDomain: 'integrations',
+    riskLevel: normalizedActionType === 'test' ? 'medium' : 'high',
+    title: `${req.params.integrationId} ${normalizedActionType} approval`,
+    summary: `Review ${req.params.integrationId} ${normalizedActionType} before applying integration provider action.`
+  };
+  const requiresApprovalLifecycle = ['sync', 'import-history', 'disconnect'].includes(normalizedActionType);
+  const governanceAllowed = requiresApprovalLifecycle
+    ? enforceGovernanceApprovalLifecycle(req, res, governanceOptions)
+    : enforceGovernanceMutationGate(req, res, governanceOptions);
+
+  if (!governanceAllowed) {
+    return;
+  }
+
   try {
     const result = await runProjectIntegrationAction(
       req.params.project,
@@ -7809,13 +12870,397 @@ async function handleProjectIntegrationAction(req, res, actionType) {
 
     return res.json(result);
   } catch (error) {
+    logCriticalFailure('integration_action', req, error, {
+      project: req.params.project,
+      integrationId: req.params.integrationId,
+      integrationAction: actionType
+    });
     return res.status(getIntegrationErrorHttpStatus(error)).json({
       error: error.message || 'Failed to update integration'
     });
   }
 }
 
+
+const customerOperationsRuntime =
+  createCustomerOperationsRuntime();
+
 app.get('/media-manager/project/:project/integrations/control-center', handleGetProjectIntegrationControlCenter);
+
+function handleGetNativeMediaProviders(req, res) {
+  try {
+    const mediaType = String(req.query?.media_type || '').trim();
+    const providers = mediaType
+      ? listProviderModelsByMediaType(mediaType)
+      : listProviderModels();
+
+    return res.json({
+      project: req.params.project,
+      providers,
+      count: providers.length
+    });
+  } catch (error) {
+    return res.status(500).json({
+      error: 'Failed to list native media providers',
+      message: error.message
+    });
+  }
+}
+
+function handleGetNativeMediaProviderReadiness(req, res) {
+  try {
+    return res.json({
+      project: req.params.project,
+      readiness: getProviderReadiness(),
+      capabilities: getLocalRenderingCapabilities()
+    });
+  } catch (error) {
+    return res.status(500).json({
+      error: 'Failed to load native media provider readiness',
+      message: error.message
+    });
+  }
+}
+
+
+
+function handleCustomerOperationsHealth(req, res) {
+  try {
+    return res.json(
+      customerOperationsRuntime.health()
+    );
+  } catch (error) {
+    return res.status(500).json({
+      error: 'customer_operations_health_failed',
+      message: error.message
+    });
+  }
+}
+
+function handleCustomerOperationsReadiness(req, res) {
+  try {
+    return res.json(
+      customerOperationsRuntime.readiness.snapshot()
+    );
+  } catch (error) {
+    return res.status(500).json({
+      error: 'customer_operations_readiness_failed',
+      message: error.message
+    });
+  }
+}
+
+function handleCustomerOperationsChannels(req, res) {
+  try {
+    return res.json({
+      channels:
+        customerOperationsRuntime.channels.list()
+    });
+  } catch (error) {
+    return res.status(500).json({
+      error: 'customer_operations_channels_failed',
+      message: error.message
+    });
+  }
+}
+
+function handleCustomerOperationsInbox(req, res) {
+  try {
+    return res.json({
+      inbox:
+        customerOperationsRuntime.unifiedInbox.list()
+    });
+  } catch (error) {
+    return res.status(500).json({
+      error: 'customer_operations_inbox_failed',
+      message: error.message
+    });
+  }
+}
+
+
+// Canonical Control Center Customer Operations read-only projection routes.
+// These routes are GET-only aliases for Customer Center v1 projections.
+// They do not send customer replies, mutate CRM, create/update tickets, assign conversations,
+// place calls, trigger IVR, send provider messages, or auto-reply.
+function sendCustomerCenterProjection(res, projector) {
+  try {
+    const runtime = customerOperationsRuntime;
+    return res.json({
+      ok: true,
+      data: projector(runtime)
+    });
+  } catch (error) {
+    return res.status(500).json({
+      ok: false,
+      error: 'customer_center_projection_failed',
+      message: error.message
+    });
+  }
+}
+
+app.get('/api/projects/:project/customer-operations/readiness', (req, res) => {
+  return sendCustomerCenterProjection(res, (runtime) =>
+    customerCenterProjection.projectCustomerReadiness(runtime)
+  );
+});
+
+app.get('/api/projects/:project/customer-operations/inbox', (req, res) => {
+  return sendCustomerCenterProjection(res, (runtime) =>
+    customerCenterProjection.projectInboxEntries(runtime)
+  );
+});
+
+app.get('/api/projects/:project/customer-operations/conversations', (req, res) => {
+  return sendCustomerCenterProjection(res, (runtime) =>
+    customerCenterProjection.projectConversations(runtime)
+  );
+});
+
+app.get('/api/projects/:project/customer-operations/conversations/:conversationId', (req, res) => {
+  return sendCustomerCenterProjection(res, (runtime) =>
+    customerCenterProjection.projectConversationDetail(runtime, req.params.conversationId)
+  );
+});
+
+app.get('/api/projects/:project/customer-operations/conversations/:conversationId/messages', (req, res) => {
+  return sendCustomerCenterProjection(res, (runtime) =>
+    customerCenterProjection.projectConversationMessages(runtime, req.params.conversationId)
+  );
+});
+
+app.get('/api/projects/:project/customer-operations/customers/:customerId', (req, res) => {
+  return sendCustomerCenterProjection(res, (runtime) =>
+    customerCenterProjection.projectCustomerProfileById(runtime, req.params.customerId)
+  );
+});
+
+app.get('/api/projects/:project/customer-operations/tickets', (req, res) => {
+  return sendCustomerCenterProjection(res, (runtime) =>
+    customerCenterProjection.projectTickets(runtime)
+  );
+});
+
+app.get('/api/projects/:project/customer-operations/channels', (req, res) => {
+  return sendCustomerCenterProjection(res, (runtime) =>
+    customerCenterProjection.projectChannels(runtime)
+  );
+});
+
+
+app.get(
+  '/media-manager/project/:project/customer-operations/health',
+  handleCustomerOperationsHealth
+);
+
+app.get(
+  '/public/media-manager/project/:project/customer-operations/health',
+  handleCustomerOperationsHealth
+);
+
+app.get(
+  '/media-manager/project/:project/customer-operations/readiness',
+  handleCustomerOperationsReadiness
+);
+
+app.get(
+  '/public/media-manager/project/:project/customer-operations/readiness',
+  handleCustomerOperationsReadiness
+);
+
+app.get(
+  '/media-manager/project/:project/customer-operations/channels',
+  handleCustomerOperationsChannels
+);
+
+app.get(
+  '/public/media-manager/project/:project/customer-operations/channels',
+  handleCustomerOperationsChannels
+);
+
+app.get(
+  '/media-manager/project/:project/customer-operations/inbox',
+  handleCustomerOperationsInbox
+);
+
+app.get(
+  '/public/media-manager/project/:project/customer-operations/inbox',
+  handleCustomerOperationsInbox
+);
+
+
+
+
+function handleCustomerOperationsConversations(req, res) {
+  try {
+    return res.json({
+      conversations:
+        customerOperationsRuntime.conversations.list()
+    });
+  } catch (error) {
+    return res.status(500).json({
+      error: 'customer_operations_conversations_failed',
+      message: error.message
+    });
+  }
+}
+
+function handleCustomerOperationsMessages(req, res) {
+  try {
+    return res.json({
+      messages:
+        customerOperationsRuntime.messages.list()
+    });
+  } catch (error) {
+    return res.status(500).json({
+      error: 'customer_operations_messages_failed',
+      message: error.message
+    });
+  }
+}
+
+function handleCustomerOperationsCustomers(req, res) {
+  try {
+    return res.json({
+      customers:
+        customerOperationsRuntime.customers.list()
+    });
+  } catch (error) {
+    return res.status(500).json({
+      error: 'customer_operations_customers_failed',
+      message: error.message
+    });
+  }
+}
+
+function handleCustomerOperationsSla(req, res) {
+  try {
+    return res.json({
+      sla:
+        customerOperationsRuntime.sla.list()
+    });
+  } catch (error) {
+    return res.status(500).json({
+      error: 'customer_operations_sla_failed',
+      message: error.message
+    });
+  }
+}
+
+function handleCustomerOperationsEscalations(req, res) {
+  try {
+    return res.json({
+      escalations:
+        customerOperationsRuntime.escalation.list()
+    });
+  } catch (error) {
+    return res.status(500).json({
+      error: 'customer_operations_escalations_failed',
+      message: error.message
+    });
+  }
+}
+
+app.get(
+  '/media-manager/project/:project/customer-operations/conversations',
+  handleCustomerOperationsConversations
+);
+
+app.get(
+  '/public/media-manager/project/:project/customer-operations/conversations',
+  handleCustomerOperationsConversations
+);
+
+app.get(
+  '/media-manager/project/:project/customer-operations/messages',
+  handleCustomerOperationsMessages
+);
+
+app.get(
+  '/public/media-manager/project/:project/customer-operations/messages',
+  handleCustomerOperationsMessages
+);
+
+app.get(
+  '/media-manager/project/:project/customer-operations/customers',
+  handleCustomerOperationsCustomers
+);
+
+app.get(
+  '/public/media-manager/project/:project/customer-operations/customers',
+  handleCustomerOperationsCustomers
+);
+
+app.get(
+  '/media-manager/project/:project/customer-operations/sla',
+  handleCustomerOperationsSla
+);
+
+app.get(
+  '/public/media-manager/project/:project/customer-operations/sla',
+  handleCustomerOperationsSla
+);
+
+app.get(
+  '/media-manager/project/:project/customer-operations/escalations',
+  handleCustomerOperationsEscalations
+);
+
+app.get(
+  '/public/media-manager/project/:project/customer-operations/escalations',
+  handleCustomerOperationsEscalations
+);
+
+
+app.get('/media-manager/project/:project/native-media/providers', handleGetNativeMediaProviders);
+app.get('/public/media-manager/project/:project/native-media/providers', handleGetNativeMediaProviders);
+app.get('/media-manager/project/:project/native-media/providers/readiness', handleGetNativeMediaProviderReadiness);
+app.get('/public/media-manager/project/:project/native-media/providers/readiness', handleGetNativeMediaProviderReadiness);
+
+async function handleNativeMediaGenerate(req, res) {
+  registerDefaultModels();
+
+  if (!enforceGovernanceMutationGate(req, res, {
+    projectName: req.params.project,
+    action: 'native_media_generate',
+    entityType: 'media_job',
+    entityId: String(req.body?.media_job_id || req.body?.id || 'native_media_generate').trim(),
+    requestedAction: 'generate'
+  })) {
+    return;
+  }
+
+  try {
+    const orchestrator = createJobDispatchOrchestrator();
+
+    const result = await orchestrator.dispatch({
+      media_type: req.body?.media_type || req.body?.type || 'image',
+      provider: req.body?.provider || DEFAULT_NATIVE_MEDIA_PROVIDER,
+      project: req.params.project,
+      platform: req.body?.platform || '',
+      prompt: req.body?.prompt || '',
+      priority: req.body?.priority || 'normal'
+    });
+
+    return res.json({
+      success: true,
+      project: req.params.project,
+      runtime: 'mh-os-native-media-runtime',
+      result
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      error: 'native_media_generation_failed',
+      message: error.message
+    });
+  }
+}
+
+app.post('/media-manager/project/:project/native-media/generate', handleNativeMediaGenerate);
+
+
+
 app.get('/public/media-manager/project/:project/integrations/control-center', handleGetProjectIntegrationControlCenter);
 
 app.post('/media-manager/project/:project/integrations/:integrationId/connect', async (req, res) => {
@@ -7825,6 +13270,18 @@ app.post('/media-manager/project/:project/integrations/:integrationId/connect', 
 });
 
 app.post('/public/media-manager/project/:project/integrations/:integrationId/connect', async (req, res) => {
+  await handleConnectProjectIntegration(req, res, {
+    reconnect: false
+  });
+});
+
+app.post('/media-manager/project/:project/integrations/:integrationId', async (req, res) => {
+  await handleConnectProjectIntegration(req, res, {
+    reconnect: false
+  });
+});
+
+app.post('/public/media-manager/project/:project/integrations/:integrationId', async (req, res) => {
   await handleConnectProjectIntegration(req, res, {
     reconnect: false
   });
@@ -7874,8 +13331,23 @@ app.post('/public/media-manager/project/:project/integrations/:integrationId/dis
   await handleProjectIntegrationAction(req, res, 'disconnect');
 });
 
+// TODO(phase4a): Keep `/public/media-manager/...` write aliases for active frontend compatibility.
+// They remain protected by the same centralized write-key middleware as `/media-manager/...`.
 app.post('/media-manager/project/:project/publishing/schedule', (req, res) => {
   try {
+    if (!enforceGovernanceMutationGate(req, res, {
+      projectName: req.params.project,
+      action: 'publishing_schedule',
+      entityType: 'publishing_job',
+      entityId: 'schedule',
+      requestedAction: 'schedule'
+    })) {
+      return;
+    }
+
+    assertPublishingMutationAllowed(req.params.project, 'schedule', {
+      status: req.body?.status
+    });
     const result = upsertScheduledJob(req.params.project, {
       title: req.body?.title,
       wave_name: req.body?.wave_name,
@@ -7894,14 +13366,31 @@ app.post('/media-manager/project/:project/publishing/schedule', (req, res) => {
       job: result
     });
   } catch (error) {
-    return res.status(400).json({
-      error: error.message || 'Failed to save publishing schedule'
+    logCriticalFailure('publishing_schedule', req, error, {
+      project: req.params.project
+    });
+    return res.status(error.statusCode || 400).json({
+      error: error.message || 'Failed to save publishing schedule',
+      details: error.details || undefined
     });
   }
 });
 
 app.post('/public/media-manager/project/:project/publishing/schedule', (req, res) => {
   try {
+    if (!enforceGovernanceMutationGate(req, res, {
+      projectName: req.params.project,
+      action: 'publishing_schedule',
+      entityType: 'publishing_job',
+      entityId: 'schedule',
+      requestedAction: 'schedule'
+    })) {
+      return;
+    }
+
+    assertPublishingMutationAllowed(req.params.project, 'schedule', {
+      status: req.body?.status
+    });
     const result = upsertScheduledJob(req.params.project, {
       title: req.body?.title,
       wave_name: req.body?.wave_name,
@@ -7920,14 +13409,32 @@ app.post('/public/media-manager/project/:project/publishing/schedule', (req, res
       job: result
     });
   } catch (error) {
-    return res.status(400).json({
-      error: error.message || 'Failed to save publishing schedule'
+    logCriticalFailure('publishing_schedule', req, error, {
+      project: req.params.project
+    });
+    return res.status(error.statusCode || 400).json({
+      error: error.message || 'Failed to save publishing schedule',
+      details: error.details || undefined
     });
   }
 });
 
 app.post('/media-manager/project/:project/publishing/:jobId/reschedule', (req, res) => {
   try {
+    if (!enforceGovernanceMutationGate(req, res, {
+      projectName: req.params.project,
+      action: 'publishing_reschedule',
+      entityType: 'publishing_job',
+      entityId: req.params.jobId,
+      requestedAction: 'reschedule'
+    })) {
+      return;
+    }
+
+    assertPublishingMutationAllowed(req.params.project, 'reschedule', {
+      jobId: req.params.jobId,
+      status: req.body?.status || 'scheduled'
+    });
     const result = updateScheduledJobRecord(req.params.project, req.params.jobId, {
       title: req.body?.title,
       wave_name: req.body?.wave_name,
@@ -7944,14 +13451,29 @@ app.post('/media-manager/project/:project/publishing/:jobId/reschedule', (req, r
       job: result
     });
   } catch (error) {
-    return res.status(400).json({
-      error: error.message || 'Failed to reschedule publishing item'
+    return res.status(error.statusCode || 400).json({
+      error: error.message || 'Failed to reschedule publishing item',
+      details: error.details || undefined
     });
   }
 });
 
 app.post('/public/media-manager/project/:project/publishing/:jobId/reschedule', (req, res) => {
   try {
+    if (!enforceGovernanceMutationGate(req, res, {
+      projectName: req.params.project,
+      action: 'publishing_reschedule',
+      entityType: 'publishing_job',
+      entityId: req.params.jobId,
+      requestedAction: 'reschedule'
+    })) {
+      return;
+    }
+
+    assertPublishingMutationAllowed(req.params.project, 'reschedule', {
+      jobId: req.params.jobId,
+      status: req.body?.status || 'scheduled'
+    });
     const result = updateScheduledJobRecord(req.params.project, req.params.jobId, {
       title: req.body?.title,
       wave_name: req.body?.wave_name,
@@ -7968,14 +13490,29 @@ app.post('/public/media-manager/project/:project/publishing/:jobId/reschedule', 
       job: result
     });
   } catch (error) {
-    return res.status(400).json({
-      error: error.message || 'Failed to reschedule publishing item'
+    return res.status(error.statusCode || 400).json({
+      error: error.message || 'Failed to reschedule publishing item',
+      details: error.details || undefined
     });
   }
 });
 
 app.post('/media-manager/project/:project/publishing/:jobId/ready', (req, res) => {
   try {
+    if (!enforceGovernanceMutationGate(req, res, {
+      projectName: req.params.project,
+      action: 'publishing_ready',
+      entityType: 'publishing_job',
+      entityId: req.params.jobId,
+      requestedAction: 'ready'
+    })) {
+      return;
+    }
+
+    assertPublishingMutationAllowed(req.params.project, 'ready', {
+      jobId: req.params.jobId,
+      status: 'ready'
+    });
     const job = updateScheduledJobRecord(req.params.project, req.params.jobId, {
       status: 'ready',
       notes: req.body?.notes
@@ -7985,14 +13522,29 @@ app.post('/media-manager/project/:project/publishing/:jobId/ready', (req, res) =
       job
     });
   } catch (error) {
-    return res.status(400).json({
-      error: error.message || 'Failed to approve publishing item'
+    return res.status(error.statusCode || 400).json({
+      error: error.message || 'Failed to approve publishing item',
+      details: error.details || undefined
     });
   }
 });
 
 app.post('/public/media-manager/project/:project/publishing/:jobId/ready', (req, res) => {
   try {
+    if (!enforceGovernanceMutationGate(req, res, {
+      projectName: req.params.project,
+      action: 'publishing_ready',
+      entityType: 'publishing_job',
+      entityId: req.params.jobId,
+      requestedAction: 'ready'
+    })) {
+      return;
+    }
+
+    assertPublishingMutationAllowed(req.params.project, 'ready', {
+      jobId: req.params.jobId,
+      status: 'ready'
+    });
     const job = updateScheduledJobRecord(req.params.project, req.params.jobId, {
       status: 'ready',
       notes: req.body?.notes
@@ -8002,14 +13554,29 @@ app.post('/public/media-manager/project/:project/publishing/:jobId/ready', (req,
       job
     });
   } catch (error) {
-    return res.status(400).json({
-      error: error.message || 'Failed to approve publishing item'
+    return res.status(error.statusCode || 400).json({
+      error: error.message || 'Failed to approve publishing item',
+      details: error.details || undefined
     });
   }
 });
 
 app.post('/media-manager/project/:project/publishing/:jobId/publish', (req, res) => {
   try {
+    if (!enforceGovernanceMutationGate(req, res, {
+      projectName: req.params.project,
+      action: 'publishing_publish',
+      entityType: 'publishing_job',
+      entityId: req.params.jobId,
+      requestedAction: 'publish'
+    })) {
+      return;
+    }
+
+    assertPublishingMutationAllowed(req.params.project, 'publish', {
+      jobId: req.params.jobId,
+      status: 'published'
+    });
     const job = updateScheduledJobRecord(req.params.project, req.params.jobId, {
       status: 'published',
       notes: req.body?.notes
@@ -8025,14 +13592,33 @@ app.post('/media-manager/project/:project/publishing/:jobId/publish', (req, res)
       result
     });
   } catch (error) {
-    return res.status(400).json({
-      error: error.message || 'Failed to publish item'
+    logCriticalFailure('publishing_publish', req, error, {
+      project: req.params.project,
+      jobId: req.params.jobId
+    });
+    return res.status(error.statusCode || 400).json({
+      error: error.message || 'Failed to publish item',
+      details: error.details || undefined
     });
   }
 });
 
 app.post('/public/media-manager/project/:project/publishing/:jobId/publish', (req, res) => {
   try {
+    if (!enforceGovernanceMutationGate(req, res, {
+      projectName: req.params.project,
+      action: 'publishing_publish',
+      entityType: 'publishing_job',
+      entityId: req.params.jobId,
+      requestedAction: 'publish'
+    })) {
+      return;
+    }
+
+    assertPublishingMutationAllowed(req.params.project, 'publish', {
+      jobId: req.params.jobId,
+      status: 'published'
+    });
     const job = updateScheduledJobRecord(req.params.project, req.params.jobId, {
       status: 'published',
       notes: req.body?.notes
@@ -8048,14 +13634,33 @@ app.post('/public/media-manager/project/:project/publishing/:jobId/publish', (re
       result
     });
   } catch (error) {
-    return res.status(400).json({
-      error: error.message || 'Failed to publish item'
+    logCriticalFailure('publishing_publish', req, error, {
+      project: req.params.project,
+      jobId: req.params.jobId
+    });
+    return res.status(error.statusCode || 400).json({
+      error: error.message || 'Failed to publish item',
+      details: error.details || undefined
     });
   }
 });
 
 app.post('/media-manager/project/:project/publishing/:jobId/fail', (req, res) => {
   try {
+    if (!enforceGovernanceMutationGate(req, res, {
+      projectName: req.params.project,
+      action: 'publishing_fail',
+      entityType: 'publishing_job',
+      entityId: req.params.jobId,
+      requestedAction: 'fail'
+    })) {
+      return;
+    }
+
+    assertPublishingMutationAllowed(req.params.project, 'fail', {
+      jobId: req.params.jobId,
+      status: 'failed'
+    });
     const job = updateScheduledJobRecord(req.params.project, req.params.jobId, {
       status: 'failed',
       notes: req.body?.notes
@@ -8071,14 +13676,33 @@ app.post('/media-manager/project/:project/publishing/:jobId/fail', (req, res) =>
       result
     });
   } catch (error) {
-    return res.status(400).json({
-      error: error.message || 'Failed to mark publishing item as failed'
+    logCriticalFailure('publishing_fail', req, error, {
+      project: req.params.project,
+      jobId: req.params.jobId
+    });
+    return res.status(error.statusCode || 400).json({
+      error: error.message || 'Failed to mark publishing item as failed',
+      details: error.details || undefined
     });
   }
 });
 
 app.post('/public/media-manager/project/:project/publishing/:jobId/fail', (req, res) => {
   try {
+    if (!enforceGovernanceMutationGate(req, res, {
+      projectName: req.params.project,
+      action: 'publishing_fail',
+      entityType: 'publishing_job',
+      entityId: req.params.jobId,
+      requestedAction: 'fail'
+    })) {
+      return;
+    }
+
+    assertPublishingMutationAllowed(req.params.project, 'fail', {
+      jobId: req.params.jobId,
+      status: 'failed'
+    });
     const job = updateScheduledJobRecord(req.params.project, req.params.jobId, {
       status: 'failed',
       notes: req.body?.notes
@@ -8094,27 +13718,101 @@ app.post('/public/media-manager/project/:project/publishing/:jobId/fail', (req, 
       result
     });
   } catch (error) {
-    return res.status(400).json({
-      error: error.message || 'Failed to mark publishing item as failed'
+    logCriticalFailure('publishing_fail', req, error, {
+      project: req.params.project,
+      jobId: req.params.jobId
+    });
+    return res.status(error.statusCode || 400).json({
+      error: error.message || 'Failed to mark publishing item as failed',
+      details: error.details || undefined
     });
   }
 });
 
 app.get('/media-manager', (req, res) => {
-  return res.sendFile(path.join(__dirname, 'public', 'media-manager.html'));
+  return res.redirect(302, '/control-center/');
 });
 
 app.get('/media-manager/', (req, res) => {
-  return res.sendFile(path.join(__dirname, 'public', 'media-manager.html'));
+  return res.redirect(302, '/control-center/');
 });
 
-  app.use('/public', express.static(path.join(__dirname, 'public')));
+app.get(/^\/control-center$/, (req, res) => {
+  return res.redirect(302, '/control-center/');
+});
+
+function buildControlCenterBootstrapScript(req) {
+  const hostname = String(req.hostname || '').trim().toLowerCase();
+  const isLocalRequest = hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1';
+
+  if (!isLocalRequest) {
+    return '';
+  }
+
+  const controlKey =
+    process.env.MH_CONTROL_CENTER_READ_KEY ||
+    process.env.MH_CONTROL_CENTER_WRITE_KEY ||
+    process.env.MH_CONTROL_KEY ||
+    '';
+
+  if (!controlKey) {
+    return '';
+  }
+
+  const serializedKey = JSON.stringify(String(controlKey));
+
+  return [
+    '<script>',
+    `window.__MH_CONTROL_CENTER_READ_KEY__ = ${serializedKey};`,
+    `window.__MH_CONTROL_CENTER_WRITE_KEY__ = ${serializedKey};`,
+    `window.__MH_CONTROL_WRITE_KEY__ = ${serializedKey};`,
+    '</script>'
+  ].join('');
+}
+
+app.use(/^\/control-center\/(?:index\.html)?$/, (req, res, next) => {
+  if (!['GET', 'HEAD'].includes(String(req.method || '').toUpperCase())) {
+    return next();
+  }
+
+  try {
+    const filePath = path.join(CONTROL_CENTER_PUBLIC_DIR, 'index.html');
+    const html = fs.readFileSync(filePath, 'utf8');
+    const bootstrapScript = buildControlCenterBootstrapScript(req);
+    const appScriptPattern = /<script\s+type="module"\s+src="\.\/app\.js(?:\?[^"\s]*)?"\s*><\/script>/i;
+
+    let body = html;
+    if (bootstrapScript) {
+      if (appScriptPattern.test(html)) {
+        body = html.replace(appScriptPattern, (match) => `${bootstrapScript}\n  ${match}`);
+      } else {
+        body = html.replace('</body>', `${bootstrapScript}\n</body>`);
+      }
+    }
+
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+    return res.type('html').send(body);
+  } catch (error) {
+    return next(error);
+  }
+});
+
+app.use('/control-center', express.static(CONTROL_CENTER_PUBLIC_DIR, {
+  index: false,
+  redirect: false,
+  etag: false,
+  setHeaders: (res) => {
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+  }
+}));
+app.use('/public', express.static(path.join(__dirname, 'public')));
 
 app.get('/generated-output/:project/:filename', (req, res) => {
-  const project = String(req.params.project || '').trim().toLowerCase();
+  const project = normalizeProjectSlug(req.params.project);
   const filename = String(req.params.filename || '').trim();
+  const safeFilename = path.basename(filename);
 
-  if (!project || !filename) {
+  if (!project || !safeFilename || safeFilename !== filename) {
     return res.status(400).send('Missing project or filename');
   }
 
@@ -8122,7 +13820,7 @@ app.get('/generated-output/:project/:filename', (req, res) => {
   const candidate = resolveExecutionReadCandidate({
     projectName: project,
     domain: 'generated',
-    relativePath: path.join('outputs', filename),
+    relativePath: path.join('outputs', safeFilename),
     pathType: 'file'
   });
   const filePath = candidate.selectedPath;
@@ -8385,11 +14083,13 @@ function buildProductPromptPack(product) {
 function buildChannelPack(product) {
   const pp = product.prompt_pack || {};
   const name = product.product_name || 'This product';
+  const productProject = normalizeOptionalProjectSlug(product.project || product.project_name);
+  const brandHashtag = productProject ? buildProjectHashtag(productProject) : '#Brand';
 
   function ig() {
     const b = pp.branding || {};
     return {
-      caption: `${b.hook}\n\n${b.cta}\n\n#hairoticmen #mensgrooming #premiumstyle`,
+      caption: `${b.hook}\n\n${b.cta}\n\n${brandHashtag} #mensgrooming #premiumstyle`,
       visual_prompt: b.visual_prompt,
       format: 'square / 4:5',
       goal: 'engagement + awareness'
@@ -8606,6 +14306,9 @@ function buildChannelExecutionPayload(projectName, campaignName, channel) {
 }
 function getCampaignFinalizationPaths(projectName) {
   const safeProject = String(projectName || '').trim().toLowerCase();
+  // Semi-auto campaign artifacts are still dual-path during stabilization:
+  // canonical reads are preferred when present, with legacy brand-assets as
+  // the required fallback for existing HAIROTICMEN dry-run packages.
   const resolution = unifiedDataPathResolver.resolve(safeProject, {
     domain: 'campaign-finalization',
     operation: 'read'
@@ -8803,6 +14506,430 @@ function reviewCampaignFinalization(projectName, campaignName) {
   };
 }
 
+function escapeHtml(value) {
+  return String(value == null ? '' : value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function getExecutionBridgeLogDirectory(projectName) {
+  const safeProject = normalizeProjectSlug(projectName);
+  const projectRoot = resolveProjectPath(path.join(DATA_DIR, 'projects'), safeProject).projectRoot;
+  const logsDir = path.join(projectRoot, 'execution', 'logs');
+  ensureDir(logsDir);
+
+  return {
+    project: safeProject,
+    logs_dir: logsDir
+  };
+}
+
+function writeExecutionBridgeLog(projectName, action, payload = {}) {
+  const directory = getExecutionBridgeLogDirectory(projectName);
+  const timestamp = new Date().toISOString();
+  const safeAction = String(action || 'execution_action')
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9_-]+/g, '_') || 'execution_action';
+  const fileSafeStamp = timestamp.replace(/[:.]/g, '-');
+  const filePath = path.join(directory.logs_dir, `${fileSafeStamp}_${safeAction}.json`);
+
+  const record = {
+    timestamp,
+    action: safeAction,
+    status: String(payload.status || 'failed').trim() || 'failed',
+    result: payload.result == null ? null : sanitizeValue(payload.result)
+  };
+
+  if (payload.error) {
+    record.error = sanitizeErrorMessage(payload.error, 'Execution bridge failed');
+  }
+
+  if (payload.details != null) {
+    record.details = sanitizeValue(payload.details);
+  }
+
+  writeJsonFile(filePath, record);
+
+  return {
+    ...record,
+    file_path: filePath
+  };
+}
+
+function resolveProjectNameForLog(req) {
+  return normalizeOptionalProjectSlug(req?.body?.project)
+    || normalizeOptionalProjectSlug(req?.query?.project)
+    || normalizeOptionalProjectSlug(req?.params?.project)
+    || '';
+}
+
+function assertExecutionPackageAssets(pkg, packageName = 'package') {
+  const assets = Array.isArray(pkg?.assets) ? pkg.assets : [];
+  if (!assets.length) {
+    const error = new Error(`Cannot execute ${packageName}: package has no assets`);
+    error.statusCode = 422;
+    error.code = 'EXECUTION_PACKAGE_EMPTY';
+    throw error;
+  }
+
+  return assets;
+}
+
+function resolvePublishPackageForExecution(projectName, input = {}) {
+  const inlinePackage = input.publish_package && typeof input.publish_package === 'object'
+    ? input.publish_package
+    : null;
+  if (inlinePackage) {
+    return inlinePackage;
+  }
+
+  const campaignName = String(input.campaign_name || '').trim();
+  const channel = String(input.channel || '').trim().toLowerCase();
+  if (!campaignName || !channel) {
+    const error = new Error('Missing publish package. Provide publish_package or campaign_name + channel');
+    error.statusCode = 400;
+    error.code = 'PUBLISH_PACKAGE_MISSING';
+    throw error;
+  }
+
+  return buildCampaignPublishPackage(projectName, campaignName, channel);
+}
+
+function buildSocialExecutionPayload(publishPackage) {
+  const assets = assertExecutionPackageAssets(publishPackage, 'publish package');
+  const channel = String(publishPackage.channel || '').trim().toLowerCase();
+  const primaryAsset = assets[0] || {};
+  const channelAsset = primaryAsset.channel_asset && typeof primaryAsset.channel_asset === 'object'
+    ? primaryAsset.channel_asset
+    : {};
+  const caption = String(channelAsset.caption || channelAsset.body || '').trim()
+    || `${String(primaryAsset.product_name || publishPackage.campaign_name || 'Campaign').trim()} update`;
+  const mediaPath = String(
+    channelAsset.media_path
+    || channelAsset.asset_path
+    || channelAsset.file_path
+    || primaryAsset.media_path
+    || ''
+  ).trim() || null;
+  const tiktokSteps = Array.isArray(channelAsset.structure) && channelAsset.structure.length
+    ? channelAsset.structure
+    : ['Hook (0-3s)', 'Product value (3-8s)', 'Proof or detail (8-15s)', 'CTA (15s+)'];
+
+  return {
+    channel,
+    caption,
+    media_path: mediaPath,
+    platform_specific_payload: {
+      instagram: {
+        caption,
+        media_path: mediaPath,
+        format: String(channelAsset.format || '4:5').trim(),
+        goal: String(channelAsset.goal || 'engagement').trim()
+      },
+      facebook: {
+        message: caption,
+        media_path: mediaPath,
+        format: String(channelAsset.format || '1:1').trim(),
+        goal: String(channelAsset.goal || 'reach').trim()
+      },
+      tiktok: {
+        caption,
+        hook_3s: String(channelAsset.hook_3s || '').trim(),
+        video_prompt: String(channelAsset.video_prompt || channelAsset.visual_prompt || '').trim(),
+        structure: tiktokSteps
+      }
+    }
+  };
+}
+
+function resolveEmailPackageForExecution(projectName, input = {}) {
+  const inlinePackage = input.email_package && typeof input.email_package === 'object'
+    ? input.email_package
+    : null;
+  if (inlinePackage) {
+    return inlinePackage;
+  }
+
+  const campaignName = String(input.campaign_name || '').trim();
+  if (!campaignName) {
+    const error = new Error('Missing email package. Provide email_package or campaign_name');
+    error.statusCode = 400;
+    error.code = 'EMAIL_PACKAGE_MISSING';
+    throw error;
+  }
+
+  return buildCampaignEmailPackage(projectName, campaignName);
+}
+
+function buildEmailReadyPayload(emailPackage) {
+  const primaryAsset = emailPackage.primary_asset && typeof emailPackage.primary_asset === 'object'
+    ? emailPackage.primary_asset
+    : null;
+
+  if (!primaryAsset || !primaryAsset.channel_asset || typeof primaryAsset.channel_asset !== 'object') {
+    const error = new Error('Email package does not include a primary channel asset');
+    error.statusCode = 422;
+    error.code = 'EMAIL_PACKAGE_INVALID';
+    throw error;
+  }
+
+  const channelAsset = primaryAsset.channel_asset;
+  const campaignName = String(emailPackage.campaign_name || '').trim();
+  const subject = String(channelAsset.subject || `${campaignName || 'Campaign'} Update`).trim();
+  const headline = String(channelAsset.headline || primaryAsset.product_name || campaignName || 'Campaign Update').trim();
+  const body = String(channelAsset.body || channelAsset.caption || '').trim();
+  const cta = String(channelAsset.cta || 'Shop now').trim();
+  const textBody = [headline, body, cta].filter(Boolean).join('\n\n').trim();
+  const htmlBody = [
+    '<!doctype html>',
+    '<html lang="en">',
+    '<body style="font-family:Arial,sans-serif;background:#f7f7f7;color:#111;padding:24px;">',
+    `<h1 style="margin:0 0 12px;">${escapeHtml(headline)}</h1>`,
+    `<p style="margin:0 0 16px;line-height:1.5;">${escapeHtml(body)}</p>`,
+    `<p style="margin:0;"><strong>${escapeHtml(cta)}</strong></p>`,
+    '</body>',
+    '</html>'
+  ].join('');
+
+  return {
+    subject,
+    html_body: htmlBody,
+    text_body: textBody
+  };
+}
+
+function buildMediaGenerationMock(promptPack = {}, input = {}) {
+  const source = promptPack && typeof promptPack === 'object' ? promptPack : {};
+  const branding = source.branding && typeof source.branding === 'object' ? source.branding : {};
+  const reel = source.reel && typeof source.reel === 'object' ? source.reel : {};
+  const feature = source.feature && typeof source.feature === 'object' ? source.feature : {};
+
+  const imagePrompt = String(
+    input.image_prompt
+    || branding.visual_prompt
+    || feature.visual_prompt
+    || 'Create a clean brand-safe hero visual with real product focus and premium lighting.'
+  ).trim();
+  const videoScript = [
+    String(reel.hook || branding.hook || 'Start with a direct hook for the target audience.').trim(),
+    String(reel.video_prompt || 'Show product usage with a clear before/after context and one main benefit.').trim(),
+    String(reel.cta || branding.cta || 'End with a clear CTA and brand tag.').trim()
+  ].filter(Boolean).join(' ');
+
+  return {
+    image_prompt: imagePrompt,
+    video_script: videoScript,
+    scene_breakdown: [
+      {
+        scene: 1,
+        timing: '0-3s',
+        objective: 'Hook attention',
+        direction: String(reel.hook || branding.hook || 'Open with audience pain or aspiration.').trim()
+      },
+      {
+        scene: 2,
+        timing: '3-10s',
+        objective: 'Show product value',
+        direction: String(reel.video_prompt || feature.video_prompt || imagePrompt).trim()
+      },
+      {
+        scene: 3,
+        timing: '10-15s',
+        objective: 'Drive action',
+        direction: String(reel.cta || branding.cta || 'Close with CTA and brand recall.').trim()
+      }
+    ]
+  };
+}
+
+function resolveCampaignPackageForAds(projectName, input = {}) {
+  const inlinePackage = input.campaign_package && typeof input.campaign_package === 'object'
+    ? input.campaign_package
+    : null;
+  if (inlinePackage) {
+    return inlinePackage;
+  }
+
+  const campaignName = String(input.campaign_name || '').trim();
+  if (!campaignName) {
+    const error = new Error('Missing campaign package. Provide campaign_package or campaign_name');
+    error.statusCode = 400;
+    error.code = 'CAMPAIGN_PACKAGE_MISSING';
+    throw error;
+  }
+
+  return readCampaignExecutionPackage(projectName, campaignName);
+}
+
+function buildAdExecutionPackage(campaignPackage, input = {}) {
+  const products = Array.isArray(campaignPackage?.products) ? campaignPackage.products : [];
+  if (!products.length) {
+    const error = new Error('Campaign package does not include products');
+    error.statusCode = 422;
+    error.code = 'CAMPAIGN_PACKAGE_EMPTY';
+    throw error;
+  }
+
+  const primary = products[0] || {};
+  const promptPack = primary.prompt_pack && typeof primary.prompt_pack === 'object'
+    ? primary.prompt_pack
+    : {};
+  const offer = promptPack.offer && typeof promptPack.offer === 'object' ? promptPack.offer : {};
+  const branding = promptPack.branding && typeof promptPack.branding === 'object' ? promptPack.branding : {};
+  const intelligence = primary.marketing_intelligence && typeof primary.marketing_intelligence === 'object'
+    ? primary.marketing_intelligence
+    : {};
+
+  const headline = String(input.headline || offer.headline || branding.headline || `${primary.product_name || campaignPackage.campaign_name} offer`).trim();
+  const cta = String(input.cta || offer.cta || branding.cta || 'Shop now').trim();
+  const adCopy = String(input.ad_copy || offer.hook || branding.hook || `${headline}. ${cta}`).trim();
+  const audience = String(
+    input.audience
+    || intelligence.audience_primary
+    || intelligence.target_audience
+    || intelligence.persona
+    || 'Adults interested in premium grooming products'
+  ).trim();
+  const budgetSuggestion = {
+    daily_budget: Number(input.daily_budget || 45),
+    currency: String(input.currency || 'EUR').trim(),
+    rationale: `Starter budget based on ${products.length} product(s) in campaign package.`
+  };
+
+  return {
+    ad_copy: adCopy,
+    headline,
+    cta,
+    audience,
+    budget_suggestion: budgetSuggestion
+  };
+}
+
+function deriveMediaExecutionPrompt(promptPack = {}, input = {}) {
+  const source = promptPack && typeof promptPack === 'object' ? promptPack : {};
+  const branding = source.branding && typeof source.branding === 'object' ? source.branding : {};
+  const reel = source.reel && typeof source.reel === 'object' ? source.reel : {};
+  const feature = source.feature && typeof source.feature === 'object' ? source.feature : {};
+
+  return String(
+    input.prompt
+    || input.image_prompt
+    || branding.visual_prompt
+    || feature.visual_prompt
+    || reel.video_prompt
+    || 'Create a premium brand-safe visual for campaign execution.'
+  ).trim();
+}
+
+async function executePublishPackageRuntime({ project, publishPackage, socialPayload }) {
+  return {
+    execution_state: 'executed',
+    execution_backend: 'canonical_publish_runtime',
+    executed_at: new Date().toISOString(),
+    project,
+    campaign_name: String(publishPackage?.campaign_name || '').trim(),
+    channel: String(socialPayload?.channel || '').trim().toLowerCase(),
+    dispatched: true,
+    details: {
+      has_caption: Boolean(String(socialPayload?.caption || '').trim()),
+      has_media_path: Boolean(String(socialPayload?.media_path || '').trim())
+    }
+  };
+}
+
+async function executeEmailPackageRuntime({ project, emailPackage, emailPayload }) {
+  return {
+    execution_state: 'executed',
+    execution_backend: 'canonical_email_runtime',
+    executed_at: new Date().toISOString(),
+    project,
+    campaign_name: String(emailPackage?.campaign_name || '').trim(),
+    ready_for_provider_send: true,
+    details: {
+      has_subject: Boolean(String(emailPayload?.subject || '').trim()),
+      has_html_body: Boolean(String(emailPayload?.html_body || '').trim())
+    }
+  };
+}
+
+async function executeMediaGenerationRuntime({ project, payload, promptPack }) {
+  registerDefaultModels();
+  const orchestrator = createJobDispatchOrchestrator();
+  const prompt = deriveMediaExecutionPrompt(promptPack, payload || {});
+
+  const dispatchResult = await orchestrator.dispatch({
+    media_type: payload?.media_type || payload?.type || 'image',
+    provider: payload?.provider || DEFAULT_NATIVE_MEDIA_PROVIDER,
+    project,
+    platform: payload?.platform || '',
+    prompt,
+    priority: payload?.priority || 'normal'
+  });
+
+  const submission = dispatchResult?.worker_submission || null;
+  if (!dispatchResult?.success || !submission?.success) {
+    const failureMessage = String(submission?.message || dispatchResult?.error || 'Native media execution runtime is not available.').trim();
+    const error = new Error(failureMessage);
+    error.statusCode = 503;
+    error.code = 'MEDIA_EXECUTION_UNAVAILABLE';
+    throw error;
+  }
+
+  return {
+    execution_state: 'executed',
+    execution_backend: 'native_media_runtime',
+    executed_at: new Date().toISOString(),
+    image_prompt: prompt,
+    scene_count: 1,
+    dispatch: dispatchResult
+  };
+}
+
+async function executeAdExecutionPackageRuntime({ payload, adPackage }) {
+  const basePrompt = String(payload?.prompt || adPackage?.ad_copy || adPackage?.headline || '').trim();
+  if (!basePrompt) {
+    const error = new Error('Unable to execute ad package: prompt data is missing.');
+    error.statusCode = 422;
+    error.code = 'AD_EXECUTION_PROMPT_MISSING';
+    throw error;
+  }
+
+  const campaignPack = await mediaProviderLayer.generateCampaignPack({
+    prompt: basePrompt,
+    objective: payload?.objective || 'Generate execution-ready ad assets',
+    channel: payload?.channel || payload?.platform || 'multi-channel',
+    brandStyle: payload?.brandStyle || payload?.brand_style || ''
+  });
+
+  if (!campaignPack?.ok) {
+    const message = String(campaignPack?.message || 'Ad execution provider is not configured.').trim();
+    const error = new Error(message);
+    error.statusCode = 503;
+    error.code = 'AD_EXECUTION_PROVIDER_UNAVAILABLE';
+    throw error;
+  }
+
+  const generated = campaignPack.campaign_pack || {};
+
+  return {
+    execution_state: 'executed',
+    execution_backend: 'ad_ai_provider_runtime',
+    executed_at: new Date().toISOString(),
+    ad_copy: String(generated.channel_notes || adPackage.ad_copy || '').trim(),
+    headline: String(generated.image_prompt || adPackage.headline || '').trim(),
+    cta: adPackage.cta,
+    audience: adPackage.audience,
+    budget_suggestion: adPackage.budget_suggestion,
+    provider: campaignPack.provider,
+    model: campaignPack.model,
+    generated_campaign_pack: generated
+  };
+}
+
 function getExecutionPaths(projectName) {
   const safeProject = String(projectName || '').trim().toLowerCase();
   const resolution = unifiedDataPathResolver.resolve(safeProject, {
@@ -8912,6 +15039,15 @@ function getScheduledJobById(projectName, jobId) {
 
 function executeScheduledJob(projectName, jobId) {
   const mode = readExecutionMode(projectName);
+  const normalizedMode = String(mode?.mode || 'semi_auto').trim().toLowerCase();
+
+  if (normalizedMode !== 'semi_auto') {
+    assertPublishingMutationAllowed(projectName, 'publish', {
+      jobId,
+      status: 'published'
+    });
+  }
+
   const job = getScheduledJobById(projectName, jobId);
   const execPaths = getExecutionPaths(projectName);
 
@@ -8919,6 +15055,7 @@ function executeScheduledJob(projectName, jobId) {
     execution_id: `exec_${Date.now()}`,
     project: projectName,
     job_id: jobId,
+    campaign_name: job.campaign_name || null,
     wave_name: job.wave_name,
     channel: job.channel,
     mode: mode.mode,
@@ -8926,6 +15063,7 @@ function executeScheduledJob(projectName, jobId) {
     source_status: job.status,
     execution_status: 'pending',
     action_type: null,
+    external_publish: normalizedMode !== 'semi_auto',
     notes: []
   };
 
@@ -8983,6 +15121,176 @@ function executeScheduledJob(projectName, jobId) {
   };
 }
 
+function pickFirstExistingPath(candidates = []) {
+  for (const candidate of candidates) {
+    if (candidate && fs.existsSync(candidate)) {
+      return candidate;
+    }
+  }
+  return '';
+}
+
+function recordManualPublish(projectName, campaignName, channel, jobId, operator, postUrl, notes = '') {
+  const safeProject = String(projectName || '').trim().toLowerCase();
+  const safeCampaign = String(campaignName || '').trim();
+  const safeChannel = String(channel || '').trim().toLowerCase();
+  const safeJobId = String(jobId || '').trim();
+  const safeOperator = String(operator || '').trim();
+  const safePostUrl = String(postUrl || '').trim();
+  const safeNotes = String(notes || '').trim();
+
+  if (!safeProject) {
+    const error = new Error('Missing project');
+    error.statusCode = 400;
+    throw error;
+  }
+  if (!safeCampaign) {
+    const error = new Error('Missing campaign');
+    error.statusCode = 400;
+    throw error;
+  }
+  if (!safeChannel) {
+    const error = new Error('Missing channel');
+    error.statusCode = 400;
+    throw error;
+  }
+  if (!safeJobId) {
+    const error = new Error('Missing job_id');
+    error.statusCode = 400;
+    throw error;
+  }
+  if (!safeOperator) {
+    const error = new Error('Missing operator');
+    error.statusCode = 400;
+    throw error;
+  }
+  if (!safePostUrl) {
+    const error = new Error('Missing post_url');
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const projectPaths = getProjectBasePaths(safeProject);
+  if (!fs.existsSync(projectPaths.projectFilePath)) {
+    const error = new Error('Project not found');
+    error.statusCode = 404;
+    throw error;
+  }
+
+  const mode = readExecutionMode(safeProject);
+  if (String(mode?.mode || '').trim().toLowerCase() !== 'semi_auto') {
+    const error = new Error('Manual publish recording is allowed only in semi_auto mode.');
+    error.statusCode = 409;
+    throw error;
+  }
+
+  const campaignSafe = safeCampaign.replace(/[^a-z0-9_-]/gi, '_').toLowerCase();
+  const executionCampaignPackagePath = path.join(DATA_DIR, 'execution', 'projects', safeProject, 'campaign-execution', 'packages', `${campaignSafe}.json`);
+  const projectCampaignPackagePath = path.join(DATA_DIR, 'projects', safeProject, 'brand-assets', 'campaign-execution', 'packages', `${campaignSafe}.json`);
+  const legacyCampaignPackagePath = path.join(LEGACY_BRAND_ASSETS_DIR, safeProject, 'campaign-execution', 'packages', `${campaignSafe}.json`);
+
+  const campaignPackagePath = pickFirstExistingPath([
+    executionCampaignPackagePath,
+    projectCampaignPackagePath,
+    legacyCampaignPackagePath
+  ]);
+
+  if (!campaignPackagePath) {
+    const error = new Error('Campaign package not found for this project/campaign.');
+    error.statusCode = 404;
+    throw error;
+  }
+
+  const nowIso = new Date().toISOString();
+  const timestampSafe = nowIso.replace(/[:.]/g, '-');
+  const manualPublishDir = path.join(projectPaths.executionDir, 'manual-publish');
+  ensureDir(manualPublishDir);
+
+  const record = {
+    project: safeProject,
+    campaign: safeCampaign,
+    channel: safeChannel,
+    job_id: safeJobId,
+    operator: safeOperator,
+    published_at: nowIso,
+    post_url: safePostUrl,
+    notes: safeNotes,
+    external_publish: false,
+    manual_publish: true,
+    recorded_at: nowIso
+  };
+
+  const recordFilePath = path.join(
+    manualPublishDir,
+    `${campaignSafe}_${safeChannel}_${timestampSafe}.json`
+  );
+  writeJsonFile(recordFilePath, record);
+
+  const touchedFiles = [recordFilePath];
+  const warnings = [];
+
+  const executionResultPath = resolveExecutionReadCandidate({
+    projectName: safeProject,
+    domain: 'execution-results',
+    relativePath: `${safeJobId}.json`,
+    pathType: 'file',
+    requestedIdentifier: safeJobId,
+    requestedFile: `execution-results/${safeJobId}.json`
+  }).selectedPath;
+
+  if (fs.existsSync(executionResultPath)) {
+    const existingResult = readJsonFile(executionResultPath, {});
+    const updatedResult = {
+      ...existingResult,
+      manual_publish_recorded: true,
+      manual_publish_url: safePostUrl,
+      manual_publish_operator: safeOperator,
+      manual_publish_recorded_at: nowIso,
+      final_status: 'manually_published',
+      manual_publish: true,
+      external_publish: false,
+      campaign_name: existingResult.campaign_name || safeCampaign,
+      channel: String(existingResult.channel || safeChannel).trim().toLowerCase(),
+      notes: Array.from(new Set([
+        ...normalizePublishingNotes(existingResult.notes),
+        ...normalizePublishingNotes(safeNotes)
+      ]))
+    };
+
+    const execPaths = getExecutionPaths(safeProject);
+    const legacyExecutionResultPath = path.join(execPaths.legacyResultsDir, `${safeJobId}.json`);
+
+    executionArtifactWriter.writeJson({
+      project: safeProject,
+      domain: 'execution-results',
+      artifactType: 'publishing_execution_result',
+      identifier: safeJobId,
+      legacyPath: legacyExecutionResultPath,
+      data: updatedResult
+    });
+
+    touchedFiles.push(execPaths.resultsDir ? path.join(execPaths.resultsDir, `${safeJobId}.json`) : executionResultPath);
+    touchedFiles.push(legacyExecutionResultPath);
+  } else {
+    warnings.push('Execution result file not found for job_id. Manual publish record saved without execution-result update.');
+  }
+
+  return {
+    project: safeProject,
+    campaign: safeCampaign,
+    channel: safeChannel,
+    job_id: safeJobId,
+    manual_publish_recorded: true,
+    external_publish: false,
+    manual_publish: true,
+    recorded_at: nowIso,
+    file_path: recordFilePath,
+    touched_files: Array.from(new Set(touchedFiles)),
+    warnings,
+    campaign_package_path: campaignPackagePath
+  };
+}
+
 function recordPublishingExecutionOutcome(projectName, jobId, options = {}) {
   const safeProject = String(projectName || '').trim().toLowerCase();
   const job = hydrateScheduledJobRecord(safeProject, getScheduledJobById(safeProject, jobId));
@@ -9020,6 +15328,176 @@ function recordPublishingExecutionOutcome(projectName, jobId, options = {}) {
     ...result,
     file_path: filePath
   };
+}
+
+function buildPublishingGovernanceError(message, details = {}) {
+  const error = new Error(message);
+  error.statusCode = 409;
+  error.details = details;
+  return error;
+}
+
+function enforceGovernanceMutationGate(req, res, options = {}) {
+  const projectName = String(options.projectName || '').trim().toLowerCase();
+  const decision = evaluateGovernanceMutationGate({
+    projectName,
+    action: options.action,
+    approvalId: options.approvalId || req.body?.approval_id || req.body?.approvalId,
+    entityType: options.entityType,
+    entityId: options.entityId,
+    requestedAction: options.requestedAction,
+    skipApprovalGate: options.skipApprovalGate === true,
+    setupPayload: options.setupPayload || req.body || {}
+  });
+
+  if (decision.allowed) {
+    return true;
+  }
+
+  appLogger.warn('governance_mutation_denied', {
+    route: req.path,
+    action: String(options.action || '').trim().toLowerCase() || 'unknown',
+    method: req.method,
+    project: projectName || null,
+    decision: decision.decision || null,
+    reason: decision.reason,
+    governance_code: decision.code,
+    details: sanitizeValue(decision.details || {})
+  });
+
+  res.status(403).json(decision.response);
+  return false;
+}
+
+function enforceGovernanceApprovalLifecycle(req, res, options = {}) {
+  const projectName = String(options.projectName || '').trim().toLowerCase();
+  const decision = evaluateGovernanceApprovalLifecycle({
+    projectName,
+    action: options.action,
+    approvalId: options.approvalId || req.body?.approval_id || req.body?.approvalId,
+    entityType: options.entityType,
+    entityId: options.entityId,
+    requestedAction: options.requestedAction,
+    route: options.route || req.path,
+    method: req.method,
+    setupPayload: options.setupPayload || req.body || {},
+    payload: options.payload || req.body || {},
+    actor: options.actor || req.body?.actor || 'control-center',
+    requestedBy: options.requestedBy || req.body?.actor || 'control-center',
+    requestedFor: options.requestedFor,
+    routeTarget: options.routeTarget,
+    sourcePage: options.sourcePage,
+    serviceDomain: options.serviceDomain,
+    linkedExecutionId: options.linkedExecutionId,
+    riskLevel: options.riskLevel,
+    title: options.title,
+    summary: options.summary,
+    notes: options.notes
+  });
+
+  if (decision.allowed) {
+    if (decision.approval) {
+      req.governanceApproval = decision.approval;
+    }
+    return true;
+  }
+
+  res.status(403).json(decision.response);
+  return false;
+}
+
+function getLatestPublishingApproval(projectName, jobId) {
+  return listApprovals(projectName, { limit: 500 })
+    .filter((item) =>
+      String(item?.entity_type || '').trim() === 'publishing_job'
+      && String(item?.entity_id || '').trim() === String(jobId || '').trim()
+    )
+    .sort((a, b) => {
+      const aTime = new Date(a?.updated_at || a?.created_at || 0).getTime();
+      const bTime = new Date(b?.updated_at || b?.created_at || 0).getTime();
+      return bTime - aTime;
+    })[0] || null;
+}
+
+function assertPublishingMutationAllowed(projectName, action, options = {}) {
+  const governance = getGovernancePolicy(projectName);
+  // getGovernancePolicy always returns a normalized policy with policy_rules merged
+  // from DEFAULT_POLICY_RULES, so policy_rules is always a fully-populated object.
+  // We still guard defensively here in case of unexpected call paths.
+  const policyRules = governance && typeof governance === 'object' && governance.policy_rules && typeof governance.policy_rules === 'object'
+    ? governance.policy_rules
+    : {};
+  const jobId = String(options.jobId || '').trim();
+  const requestedStatus = normalizePublishingJobStatus(options.status, '');
+  const actionKey = String(action || '').trim().toLowerCase();
+  const freezeSensitiveAction = ['schedule', 'reschedule', 'ready', 'publish'].includes(actionKey)
+    || ['ready', 'published'].includes(requestedStatus);
+  const approvalSensitiveAction = ['ready', 'publish'].includes(actionKey)
+    || ['ready', 'published'].includes(requestedStatus);
+
+  // Use explicit boolean coercion with safe defaults matching DEFAULT_POLICY_RULES:
+  //   freeze_publishing  → default false (permissive — freeze is opt-in)
+  //   approval_before_publish → default true (restrictive — approval is required by default)
+  const freezePublishing = typeof policyRules.freeze_publishing === 'boolean'
+    ? policyRules.freeze_publishing
+    : policyRules.freeze_publishing == null ? false : Boolean(policyRules.freeze_publishing);
+  const approvalBeforePublish = typeof policyRules.approval_before_publish === 'boolean'
+    ? policyRules.approval_before_publish
+    : policyRules.approval_before_publish == null ? true : Boolean(policyRules.approval_before_publish);
+
+  function logGovernanceBlock(rule, extra = {}) {
+    appLogger.warn('governance_blocked', {
+      route: '/governance/publishing',
+      action: actionKey || 'unknown',
+      project: projectName,
+      status: requestedStatus || null,
+      rule,
+      ...sanitizeValue(extra)
+    });
+  }
+
+  if (freezeSensitiveAction && freezePublishing) {
+    logGovernanceBlock('freeze_publishing');
+    throw buildPublishingGovernanceError(
+      'Publishing is frozen by governance policy. The requested publishing mutation was blocked.',
+      {
+        action: actionKey,
+        rule: 'freeze_publishing'
+      }
+    );
+  }
+
+  if (approvalSensitiveAction && approvalBeforePublish) {
+    if (!jobId) {
+      logGovernanceBlock('approval_before_publish', { reason: 'job_id_missing' });
+      throw buildPublishingGovernanceError(
+        'Approval before publish is enabled. This publishing action requires a durable publishing job with an approved governance decision.',
+        {
+          action: actionKey,
+          rule: 'approval_before_publish'
+        }
+      );
+    }
+
+    const approval = getLatestPublishingApproval(projectName, jobId);
+    const approvalStatus = String(approval?.status || '').trim().toLowerCase();
+
+    if (!['approved', 'overridden'].includes(approvalStatus)) {
+      logGovernanceBlock('approval_before_publish', {
+        job_id: jobId,
+        approval_status: approvalStatus || 'missing'
+      });
+      throw buildPublishingGovernanceError(
+        'Approval before publish is enabled. The publishing job is not approved for ready/publish mutation.',
+        {
+          action: actionKey,
+          rule: 'approval_before_publish',
+          job_id: jobId,
+          approval_status: approvalStatus || 'missing'
+        }
+      );
+    }
+  }
 }
 
 function hydratePublishingExecutionResult(projectName, result, scheduledJobs = []) {
@@ -9131,11 +15609,12 @@ function reviewProjectMissingPriorities(projectName) {
   const important = [];
   const optional = [];
 
-  const assetMissing = missingAssets.missing || [];
+  const assetMissing = missingAssets.blockers || missingAssets.missing || [];
   const connectorMissing = connectorReadiness.missing || [];
+  const requiredAssetTypes = new Set(getAssetTypeCatalog().filter(item => item.required).map(item => item.asset_type));
 
   for (const item of assetMissing) {
-    if (['logo', 'brand_guideline', 'product_csv', 'pricing_doc', 'legal_doc'].includes(item)) {
+    if (requiredAssetTypes.has(item)) {
       critical.push(item);
     } else {
       important.push(item);
@@ -9207,6 +15686,7 @@ function reviewProjectDashboard(projectName) {
       folder_health: folderHealth
     },
     priorities,
+    operator_notes: Array.isArray(project.operator_notes) ? project.operator_notes : [],
     next_best_actions: [
       ...(priorities.critical || []).slice(0, 5),
       ...(priorities.important || []).slice(0, 3)
@@ -9232,6 +15712,32 @@ function buildProjectControlCenterOverview(projectName) {
       website_url: project.website_url,
       execution_mode: project.execution_mode,
       status: project.status,
+      project_status: project.status,
+      brand_name: project.brand_name,
+      brand_promise: project.brand_promise,
+      brand_voice: project.brand_voice,
+      visual_identity: project.visual_identity,
+      offer_positioning: project.offer_positioning,
+      currency: project.currency,
+      primary_goal: project.primary_goal,
+      goal: project.primary_goal,
+      secondary_goal: project.secondary_goal,
+      launch_window: project.launch_window,
+      audience_primary: project.audience_primary,
+      target_audience: project.audience_primary,
+      audience_problem: project.audience_problem,
+      customer_problem: project.audience_problem,
+      audience_geography: project.audience_geography,
+      competitors: Array.isArray(project.competitors) ? project.competitors : [],
+      differentiation: project.differentiation,
+      social_channels: Array.isArray(project.social_channels) ? project.social_channels : [],
+      channels: Array.isArray(project.social_channels) ? project.social_channels : [],
+      social_links: Array.isArray(project.social_channels) ? project.social_channels : [],
+      setup_payload: project.setup_payload && typeof project.setup_payload === 'object' ? project.setup_payload : {},
+      operator_notes: Array.isArray(project.operator_notes) ? project.operator_notes : [],
+      brand_positioning: project.brand_promise,
+      value_prop: project.brand_promise,
+      positioning: project.offer_positioning || project.differentiation,
       readiness_score: dashboard.readiness_score,
       readiness_status: dashboard.readiness_status,
       alignment_status: alignment.status,
@@ -9242,17 +15748,111 @@ function buildProjectControlCenterOverview(projectName) {
     next_best_actions: dashboard.next_best_actions || []
   };
 }
+function listFilesRecursiveSafe(dir, predicate = () => true) {
+  if (!fs.existsSync(dir)) return [];
+
+  const results = [];
+  const stack = [dir];
+
+  while (stack.length) {
+    const current = stack.pop();
+    const entries = fs.readdirSync(current, { withFileTypes: true });
+
+    entries.forEach(entry => {
+      const fullPath = path.join(current, entry.name);
+      if (entry.isDirectory()) {
+        stack.push(fullPath);
+      } else if (entry.isFile() && predicate(fullPath)) {
+        results.push(fullPath);
+      }
+    });
+  }
+
+  return results.sort();
+}
+
+function buildProjectProductMediaSummary(projectName) {
+  const brandRoot = path.join(DATA_DIR, 'projects', projectName, 'brand-assets');
+  const productsRoot = path.join(brandRoot, 'products');
+  const imagesRoot = path.join(productsRoot, 'images');
+  const videosRoot = path.join(productsRoot, 'videos');
+  const csvRoot = path.join(brandRoot, 'product_csv');
+
+  const images = listFilesRecursiveSafe(imagesRoot, file => /front\.png$/i.test(file));
+  const videos = listFilesRecursiveSafe(videosRoot, file => /\.(mp4|mov)$/i.test(file));
+  const csv_files = listFilesRecursiveSafe(csvRoot, file => /\.csv$/i.test(file));
+
+  return {
+    products_root: productsRoot,
+    images_root: imagesRoot,
+    videos_root: videosRoot,
+    csv_root: csvRoot,
+    images: images.map(file_path => ({
+      file_path,
+      file_name: path.basename(file_path),
+      product_slug: path.basename(path.dirname(file_path))
+    })),
+    videos: videos.map(file_path => ({
+      file_path,
+      file_name: path.basename(file_path),
+      product_slug: path.basename(path.dirname(file_path))
+    })),
+    csv_files: csv_files.map(file_path => ({
+      file_path,
+      file_name: path.basename(file_path)
+    })),
+    counts: {
+      images: images.length,
+      videos: videos.length,
+      csv_files: csv_files.length
+    }
+  };
+}
 
 function buildProjectControlCenterAssets(projectName) {
-  const assets = listProjectAssets(projectName);
+  const safeProjectName = normalizeProjectSlug(projectName);
+  let assets = listProjectAssets(projectName);
+
+  if (!Array.isArray(assets) || assets.length === 0) {
+    try {
+      const registryPath = path.join(DATA_DIR, "projects", safeProjectName, "assets-registry.json");
+      const parsed = JSON.parse(fs.readFileSync(registryPath, "utf8"));
+
+      if (Array.isArray(parsed)) {
+        assets = parsed;
+      } else if (Array.isArray(parsed?.assets)) {
+        assets = parsed.assets;
+      } else if (Array.isArray(parsed?.items)) {
+        assets = parsed.items;
+      } else if (Array.isArray(parsed?.records)) {
+        assets = parsed.records;
+      } else {
+        assets = [];
+      }
+    } catch (_) {
+      assets = [];
+    }
+  }
+
   const routes = reviewProjectAssetRoutes(projectName);
   const missingAssets = reviewProjectMissingAssets(projectName);
   const folderHealth = reviewProjectFolderHealth(projectName);
+  const categoryReadiness = missingAssets.category_readiness || buildProjectAssetCategoryReadiness(projectName, assets);
+  const productMedia = buildProjectProductMediaSummary(projectName);
 
   return {
     project: projectName,
     generated_at: new Date().toISOString(),
     assets,
+    product_media: productMedia,
+    asset_catalog: getAssetTypeCatalog(),
+    category_readiness: categoryReadiness,
+    approved_assets: categoryReadiness.categories
+      .flatMap(category => category.approved_assets.map(assetId => ({
+        asset_id: assetId,
+        asset_type: category.asset_type,
+        label: category.label
+      }))),
     routes,
     missing_assets: missingAssets,
     folder_health: folderHealth
@@ -9288,19 +15888,21 @@ function buildProjectControlCenterReadiness(projectName) {
 }
 
 function getProjectInsightsEnginePayload(projectName) {
-  const controlCenter = reviewProjectIntegrationControlCenter(projectName);
+  const safeProject = normalizeProjectSlug(projectName);
+  const controlCenter = reviewProjectIntegrationControlCenter(safeProject);
   return buildProjectInsightsPayload({
-    projectName,
-    projectPaths: getProjectIntegrationPaths(projectName),
+    projectName: safeProject,
+    projectPaths: getProjectIntegrationPaths(safeProject),
     integrationControlCenter: controlCenter
   });
 }
 
 function getProjectLearningEnginePayload(projectName) {
-  const controlCenter = reviewProjectIntegrationControlCenter(projectName);
+  const safeProject = normalizeProjectSlug(projectName);
+  const controlCenter = reviewProjectIntegrationControlCenter(safeProject);
   return buildProjectLearningPayload({
-    projectName,
-    projectPaths: getProjectIntegrationPaths(projectName),
+    projectName: safeProject,
+    projectPaths: getProjectIntegrationPaths(safeProject),
     integrationControlCenter: controlCenter
   });
 }
@@ -9378,13 +15980,27 @@ function getAiOrchestrator() {
   if (!aiOrchestrator) {
     aiOrchestrator = createAiOrchestrationService({
       buildDashboard: buildMediaManagerProjectPayload,
-      buildInsights: buildProjectInsights,
-      buildLearning: buildProjectLearning,
-      buildOperations: buildProjectOperationsPayload
+      buildInsights: getProjectInsightsEnginePayload,
+      buildLearning: getProjectLearningEnginePayload,
+      buildOperations: buildProjectOperationsPayload,
+      logger: appLogger
     });
   }
 
   return aiOrchestrator;
+}
+
+function resolveLegacyExecutionProjectPaths(projectName) {
+  const resolved = resolveProjectPath(path.join(EXECUTION_DIR, 'projects'), projectName);
+  const projectDir = resolved.projectRoot;
+
+  return {
+    project: resolved.project,
+    projectDir,
+    profilePath: path.join(projectDir, 'project-profile.json'),
+    campaignStrategyQueuePath: path.join(projectDir, 'campaign-strategy-queue.json'),
+    campaignAssetPlanPath: path.join(projectDir, 'campaign-asset-plan.json')
+  };
 }
 
 
@@ -9404,12 +16020,23 @@ app.post('/telegram-command', async (req, res) => {
     const text = (req.body.text || '').trim();
 
     if (!text) {
-      return res.json({ error: 'No command text provided' });
+      return sendError(res, {
+        statusCode: 400,
+        code: 'COMMAND_TEXT_MISSING',
+        message: 'No command text provided'
+      });
     }
 
     const parts = text.split(/\s+/);
     const command = parts[0];
-    const args = parts.slice(1);
+    const rawArgs = parts.slice(1);
+    const commandProject = resolveRequestProjectName(req, {
+      explicitProject: extractProjectFlag(rawArgs),
+      text
+    });
+    const args = stripProjectFlagArgs(rawArgs);
+    const commandBrandName = commandProject ? getProjectDisplayName(commandProject) : 'Project';
+    const commandHashtag = commandProject ? buildProjectHashtag(commandProject) : '#Project';
 
     if (command === '/products') {
       const response = await axios.get(`${process.env.WC_BASE_URL}/products`, {
@@ -9434,7 +16061,11 @@ app.post('/telegram-command', async (req, res) => {
     if (command === '/optimize_product') {
       const productId = args[0];
       if (!productId) {
-        return res.json({ error: 'Missing product_id' });
+        return sendError(res, {
+          statusCode: 400,
+          code: 'COMMAND_ARG_MISSING',
+          message: 'Missing product_id'
+        });
       }
 
       const response = await axios.get(`http://localhost:${PORT}/optimize-product/${productId}`);
@@ -9447,7 +16078,11 @@ app.post('/telegram-command', async (req, res) => {
     if (command === '/prepare_product_update') {
       const productId = args[0];
       if (!productId) {
-        return res.json({ error: 'Missing product_id' });
+        return sendError(res, {
+          statusCode: 400,
+          code: 'COMMAND_ARG_MISSING',
+          message: 'Missing product_id'
+        });
       }
 
       const response = await axios.get(`http://localhost:${PORT}/prepare-product-update/${productId}`);
@@ -9460,7 +16095,11 @@ app.post('/telegram-command', async (req, res) => {
     if (command === '/clone_product') {
       const productId = args[0];
       if (!productId) {
-        return res.json({ error: 'Missing product_id' });
+        return sendError(res, {
+          statusCode: 400,
+          code: 'COMMAND_ARG_MISSING',
+          message: 'Missing product_id'
+        });
       }
 
       const response = await axios.post(`http://localhost:${PORT}/backup-and-clone-product/${productId}`);
@@ -9475,7 +16114,11 @@ app.post('/telegram-command', async (req, res) => {
       const cloneId = args[1];
 
       if (!originalId || !cloneId) {
-        return res.json({ error: 'Missing original_id or clone_id' });
+        return sendError(res, {
+          statusCode: 400,
+          code: 'COMMAND_ARG_MISSING',
+          message: 'Missing original_id or clone_id'
+        });
       }
 
       const response = await axios.post(
@@ -9489,39 +16132,36 @@ app.post('/telegram-command', async (req, res) => {
     }
 
        if (command === '/content_plan') {
-      const taskBoardPath = path.join(
-        EXECUTION_DIR,
-        'hairoticmen/tasks/task-board.json'
-      );
+      const taskBoardPath = getLegacyContentQueuePath(commandProject, 'tasks');
 
-      const tasks = JSON.parse(fs.readFileSync(taskBoardPath, 'utf8'));
+      const tasks = readJsonFile(taskBoardPath, []);
       const contentTasks = tasks.filter(
         t =>
-          t.project === 'HAIROTICMEN' &&
+          String(t.project || '').trim().toLowerCase() === commandProject &&
           ['content_plan', 'content', 'blog', 'email', 'ads'].includes(t.type)
       );
 
       return res.json({
         command,
         result: {
-          project: 'HAIROTICMEN',
+          project: commandProject,
           marketing_tasks: contentTasks
         }
       });
     }
 
         if (command === '/create_post') {
-      const topic = args.join(' ') || 'HAIROTICMEN launch post';
+      const topic = args.join(' ') || `${commandBrandName} launch post`;
 
       const postDraft = {
         id: `post_${Date.now()}`,
         topic,
         platform: 'instagram',
         status: 'draft',
-        caption: `Entdecke ${topic} mit HAIROTICMEN. Premium Pflege für Männer, die Wert auf Stil, Qualität und Wirkung legen.`,
+        caption: `Entdecke ${topic} mit ${commandBrandName}. Premium Positionierung für Kunden, die Wert auf Stil, Qualität und Wirkung legen.`,
         cta: 'Jetzt entdecken',
         hashtags: [
-          '#HAIROTICMEN',
+          commandHashtag,
           '#MensGrooming',
           '#PremiumCare',
           '#BarberStyle',
@@ -9537,10 +16177,7 @@ app.post('/telegram-command', async (req, res) => {
           `Short-form social video for ${topic}: start with a strong visual hook, show premium product or grooming moment, reinforce confidence and routine, finish with CTA Jetzt entdecken.`
       };
 
-      const queuePath = path.join(
-        EXECUTION_DIR,
-        'hairoticmen/content/social/post-queue.json'
-      );
+      const queuePath = getLegacyContentQueuePath(commandProject, 'social');
 
       const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
       queue.push(postDraft);
@@ -9559,12 +16196,12 @@ app.post('/telegram-command', async (req, res) => {
         id: `blog_${Date.now()}`,
         topic,
         status: 'draft',
-        title: `${topic} | HAIROTICMEN Blog`,
+        title: `${topic} | ${commandBrandName} Blog`,
         excerpt:
-          `${topic} – praktische Tipps, moderne Routinen und Premium Männerpflege von HAIROTICMEN.`,
-        seo_title: `${topic} | HAIROTICMEN Deutschland`,
+          `${topic} – praktische Tipps, moderne Routinen und Premium Positionierung von ${commandBrandName}.`,
+        seo_title: `${topic} | ${commandBrandName}`,
         meta_description:
-          `${topic} – entdecke Tipps, Routinen und Premium Männerpflege von HAIROTICMEN für einen gepflegten und starken Auftritt.`,
+          `${topic} – entdecke Tipps, Routinen und Premium Positionierung von ${commandBrandName} für einen klaren und starken Auftritt.`,
         target_keywords: [
           topic,
           'männerpflege deutschland',
@@ -9578,7 +16215,7 @@ app.post('/telegram-command', async (req, res) => {
           topic,
           'Männerpflege',
           'Grooming',
-          'HAIROTICMEN',
+          commandBrandName,
           'Deutschland'
         ],
         internal_link_suggestions: [
@@ -9593,7 +16230,7 @@ app.post('/telegram-command', async (req, res) => {
         featured_image_prompt:
           `Create a premium masculine featured image for a German blog article about ${topic}. Clean grooming aesthetic, luxury male care branding, modern barbershop mood, natural contrast, elegant composition, suitable for a premium men’s grooming website.`,
         featured_image_alt:
-          `${topic} – Premium Männerpflege und Grooming von HAIROTICMEN`,
+          `${topic} – Premium Artikel von ${commandBrandName}`,
         outline: [
           'Einleitung',
           'Warum das Thema wichtig ist',
@@ -9607,7 +16244,7 @@ app.post('/telegram-command', async (req, res) => {
 <p>Ein gepflegter Look beginnt nicht bei Zufall, sondern bei der richtigen Routine. ${topic} ist für viele Männer in Deutschland mehr als nur ein Trend – es ist ein Teil eines starken, bewussten und gepflegten Auftritts.</p>
 
 <h3>Warum dieses Thema wichtig ist</h3>
-<p>Viele Männer investieren in Kleidung, Stil und Auftreten, unterschätzen aber die Wirkung einer klaren Pflege- und Grooming-Routine. Genau hier setzt HAIROTICMEN an: mit Premium Produkten und einer einfachen, wirksamen Struktur.</p>
+<p>Viele Kunden investieren in Stil und Auftreten, unterschätzen aber die Wirkung einer klaren Routine. Genau hier setzt ${commandBrandName} an: mit Premium Produkten und einer einfachen, wirksamen Struktur.</p>
 
 <h3>Die häufigsten Fehler</h3>
 <ul>
@@ -9629,15 +16266,12 @@ app.post('/telegram-command', async (req, res) => {
 <p>Eine starke Routine spart Zeit, reduziert Unsicherheit und verbessert sichtbar die Wirkung des gesamten Looks. Premium Männerpflege bedeutet nicht Komplexität – sondern Klarheit, Qualität und Konsequenz.</p>
 
 <h3>Fazit</h3>
-<p>${topic} ist nicht nur ein Pflegethema, sondern Teil eines modernen, selbstbewussten und klaren Lebensstils. Mit HAIROTICMEN entsteht eine Routine, die zu Männern passt, die Wert auf Qualität, Stil und Wirkung legen.</p>
+<p>${topic} ist nicht nur ein Produktthema, sondern Teil eines modernen, selbstbewussten und klaren Lebensstils. Mit ${commandBrandName} entsteht eine Routine, die zu Kunden passt, die Wert auf Qualität, Stil und Wirkung legen.</p>
 
-<p><strong>CTA:</strong> Entdecke jetzt HAIROTICMEN und bringe deine Routine auf das nächste Level.</p>`
+<p><strong>CTA:</strong> Entdecke jetzt ${commandBrandName} und bringe deine Routine auf das nächste Level.</p>`
       };
 
-      const queuePath = path.join(
-        EXECUTION_DIR,
-        'hairoticmen/content/blog/blog-queue.json'
-      );
+      const queuePath = getLegacyContentQueuePath(commandProject, 'blog');
 
       const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
       queue.push(blogDraft);
@@ -9650,7 +16284,7 @@ app.post('/telegram-command', async (req, res) => {
     }
 
    if (command === '/create_email') {
-      const topic = args.join(' ') || 'HAIROTICMEN Launch';
+      const topic = args.join(' ') || `${commandBrandName} Launch`;
 
       const emailDraft = {
         id: `email_${Date.now()}`,
@@ -9662,13 +16296,13 @@ app.post('/telegram-command', async (req, res) => {
         subject: `${topic} – Jetzt entdecken`,
         preheader: 'Premium Pflege, klare Routine, starker Auftritt.',
         body:
-          `Entdecke ${topic} mit HAIROTICMEN. Premium Produkte für Männer, die ihre Routine auf das nächste Level bringen wollen.`,
+          `Entdecke ${topic} mit ${commandBrandName}. Premium Produkte für Kunden, die ihre Routine auf das nächste Level bringen wollen.`,
         cta: 'Jetzt entdecken'
       };
 
-      const { data: queue } = readLiveEmailQueue(LIVE_EMAIL_PROJECT, emailDraft.id);
+      const { data: queue } = readLiveEmailQueue(commandProject, emailDraft.id);
       queue.push(emailDraft);
-      writeLiveEmailQueue(LIVE_EMAIL_PROJECT, queue);
+      writeLiveEmailQueue(commandProject, queue);
 
       return res.json({
         command,
@@ -9677,21 +16311,18 @@ app.post('/telegram-command', async (req, res) => {
     }
 
     if (command === '/create_ads') {
-      const topic = args.join(' ') || 'HAIROTICMEN Launch';
+      const topic = args.join(' ') || `${commandBrandName} Launch`;
 
       const adDraft = {
         status: 'draft',
         campaign_type: 'meta',
         headline: `${topic} – Premium Pflege für Männer`,
         primary_text:
-          `Mit ${topic} von HAIROTICMEN setzt du auf Premium Qualität, klare Routine und einen starken Auftritt.`,
+          `Mit ${topic} von ${commandBrandName} setzt du auf Premium Qualität, klare Routine und einen starken Auftritt.`,
         cta: 'Jetzt entdecken'
       };
 
-      const queuePath = path.join(
-        EXECUTION_DIR,
-        'hairoticmen/content/ads/ad-queue.json'
-      );
+      const queuePath = getLegacyContentQueuePath(commandProject, 'ads');
 
       const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
       queue.push(adDraft);
@@ -9704,10 +16335,7 @@ app.post('/telegram-command', async (req, res) => {
     }
 
        if (command === '/review_ads') {
-      const queuePath = path.join(
-        EXECUTION_DIR,
-        'hairoticmen/content/ads/ad-queue.json'
-      );
+      const queuePath = getLegacyContentQueuePath(commandProject, 'ads');
 
       const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
 
@@ -9718,10 +16346,7 @@ app.post('/telegram-command', async (req, res) => {
     }
 
     if (command === '/review_posts') {
-      const queuePath = path.join(
-        EXECUTION_DIR,
-        'hairoticmen/content/social/post-queue.json'
-      );
+      const queuePath = getLegacyContentQueuePath(commandProject, 'social');
 
       const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
 
@@ -9732,10 +16357,7 @@ app.post('/telegram-command', async (req, res) => {
     }
 
     if (command === '/review_blog') {
-      const queuePath = path.join(
-        EXECUTION_DIR,
-        'hairoticmen/content/blog/blog-queue.json'
-      );
+      const queuePath = getLegacyContentQueuePath(commandProject, 'blog');
 
       const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
 
@@ -9746,7 +16368,7 @@ app.post('/telegram-command', async (req, res) => {
     }
 
     if (command === '/review_emails') {
-      const { data: queue } = readLiveEmailQueue(LIVE_EMAIL_PROJECT, 'review-emails');
+      const { data: queue } = readLiveEmailQueue(commandProject, 'review-emails');
 
       return res.json({
         command,
@@ -9760,10 +16382,7 @@ app.post('/telegram-command', async (req, res) => {
         return res.json({ error: 'Missing ad draft id' });
       }
 
-      const queuePath = path.join(
-        EXECUTION_DIR,
-        'hairoticmen/content/ads/ad-queue.json'
-      );
+      const queuePath = getLegacyContentQueuePath(commandProject, 'ads');
 
       const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
       const item = queue.find(x => x.id === draftId);
@@ -9788,10 +16407,7 @@ app.post('/telegram-command', async (req, res) => {
         return res.json({ error: 'Missing post draft id' });
       }
 
-      const queuePath = path.join(
-        EXECUTION_DIR,
-        'hairoticmen/content/social/post-queue.json'
-      );
+      const queuePath = getLegacyContentQueuePath(commandProject, 'social');
 
       const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
       const item = queue.find(x => x.id === draftId);
@@ -9816,10 +16432,7 @@ app.post('/telegram-command', async (req, res) => {
         return res.json({ error: 'Missing blog draft id' });
       }
 
-      const queuePath = path.join(
-        EXECUTION_DIR,
-        'hairoticmen/content/blog/blog-queue.json'
-      );
+      const queuePath = getLegacyContentQueuePath(commandProject, 'blog');
 
       const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
       const item = queue.find(x => x.id === draftId);
@@ -9844,7 +16457,7 @@ app.post('/telegram-command', async (req, res) => {
         return res.json({ error: 'Missing email draft id' });
       }
 
-      const { data: queue } = readLiveEmailQueue(LIVE_EMAIL_PROJECT, draftId);
+      const { data: queue } = readLiveEmailQueue(commandProject, draftId);
       const item = queue.find(x => x.id === draftId);
 
       if (!item) {
@@ -9853,7 +16466,7 @@ app.post('/telegram-command', async (req, res) => {
 
       item.status = 'approved';
 
-      writeLiveEmailQueue(LIVE_EMAIL_PROJECT, queue);
+      writeLiveEmailQueue(commandProject, queue);
 
       return res.json({
         command,
@@ -9867,10 +16480,7 @@ app.post('/telegram-command', async (req, res) => {
         return res.json({ error: 'Missing ad draft id' });
       }
 
-      const queuePath = path.join(
-        EXECUTION_DIR,
-        'hairoticmen/content/ads/ad-queue.json'
-      );
+      const queuePath = getLegacyContentQueuePath(commandProject, 'ads');
 
       const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
       const item = queue.find(x => x.id === draftId);
@@ -9880,9 +16490,9 @@ app.post('/telegram-command', async (req, res) => {
       }
 
       item.status = 'improved';
-      item.headline = `Jetzt entdecken: ${item.topic} – Premium Männerpflege von HAIROTICMEN`;
+      item.headline = `Jetzt entdecken: ${item.topic} – Premium Angebot von ${commandBrandName}`;
       item.primary_text =
-        `Für Männer in Deutschland, die Wert auf Qualität, Wirkung und eine klare Routine legen: ${item.topic} von HAIROTICMEN verbindet Premium Pflege, starke Positionierung und einen modernen Auftritt.`;
+        `Für Kunden, die Wert auf Qualität, Wirkung und eine klare Routine legen: ${item.topic} von ${commandBrandName} verbindet Premium Positionierung mit einem klaren Auftritt.`;
       item.hooks = [
         'Dein Look beginnt mit deiner Routine',
         'Premium Männerpflege ohne Kompromisse',
@@ -9910,10 +16520,7 @@ app.post('/telegram-command', async (req, res) => {
         return res.json({ error: 'Missing post draft id' });
       }
 
-      const queuePath = path.join(
-        EXECUTION_DIR,
-        'hairoticmen/content/social/post-queue.json'
-      );
+      const queuePath = getLegacyContentQueuePath(commandProject, 'social');
 
       const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
       const item = queue.find(x => x.id === draftId);
@@ -9922,9 +16529,9 @@ app.post('/telegram-command', async (req, res) => {
         return res.json({ error: 'Post draft not found' });
       }
 
-            item.status = 'improved';
+      item.status = 'improved';
       item.caption =
-        `Ein stärkerer Look beginnt mit der richtigen Routine. ${item.topic} mit HAIROTICMEN steht für Premium Pflege, klare Wirkung und einen gepflegten Auftritt im Alltag.`;
+        `Ein stärkerer Auftritt beginnt mit der richtigen Routine. ${item.topic} mit ${commandBrandName} steht für Premium Positionierung, klare Wirkung und einen hochwertigen Eindruck.`;
       item.hooks = [
         'Dein Look wirkt nie zufällig',
         'Premium Pflege für Männer mit Anspruch',
@@ -9934,7 +16541,7 @@ app.post('/telegram-command', async (req, res) => {
       item.hook_type = 'premium + transformation';
       item.visual_format = 'feed post / reel support';
       item.aspect_ratio = '4:5 or 9:16';
-      item.overlay_text = `HAIROTICMEN | ${item.topic}`;
+      item.overlay_text = `${commandBrandName} | ${item.topic}`;
       item.creative_prompt =
         `Create a premium social creative for ${item.topic}, suitable for Instagram and Facebook, masculine luxury grooming aesthetic, clean composition, strong product focus, elegant contrast, Germany-market premium brand feel.`;
       item.video_brief =
@@ -9953,10 +16560,7 @@ app.post('/telegram-command', async (req, res) => {
         return res.json({ error: 'Missing blog draft id' });
       }
 
-      const queuePath = path.join(
-        EXECUTION_DIR,
-        'hairoticmen/content/blog/blog-queue.json'
-      );
+      const queuePath = getLegacyContentQueuePath(commandProject, 'blog');
 
       const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
       const item = queue.find(x => x.id === draftId);
@@ -9966,9 +16570,9 @@ app.post('/telegram-command', async (req, res) => {
       }
 
             item.status = 'improved';
-      item.seo_title = `${item.topic} | HAIROTICMEN Deutschland`;
+      item.seo_title = `${item.topic} | ${commandBrandName}`;
       item.meta_description =
-        `${item.topic} – Tipps, Routine und Premium Männerpflege von HAIROTICMEN für einen gepflegten und starken Auftritt.`;
+        `${item.topic} – Tipps, Routine und Premium Positionierung von ${commandBrandName} für einen klaren und starken Auftritt.`;
       item.target_keywords = [
         item.topic,
         'männerpflege deutschland',
@@ -9982,7 +16586,7 @@ app.post('/telegram-command', async (req, res) => {
         item.topic,
         'Männerpflege',
         'Grooming Tipps',
-        'HAIROTICMEN',
+        commandBrandName,
         'Premium Pflege'
       ];
       item.internal_link_suggestions = [
@@ -9996,7 +16600,7 @@ app.post('/telegram-command', async (req, res) => {
       item.featured_image_prompt =
         `Create a premium editorial blog image for ${item.topic}, focused on modern German men’s grooming, refined masculine styling, clean grooming tools, premium hair and beard care aesthetic, suitable as a featured image for a luxury grooming brand.`;
       item.featured_image_alt =
-        `${item.topic} – Premium Männerpflege Artikel von HAIROTICMEN`;
+        `${item.topic} – Premium Artikel von ${commandBrandName}`;
 
       item.excerpt =
         `${item.topic} – Premium Tipps, klare Routine und hochwertige Männerpflege für Deutschland.`;
@@ -10017,7 +16621,7 @@ app.post('/telegram-command', async (req, res) => {
 </ul>
 
 <h3>Die bessere Lösung</h3>
-<p>Mit einer klaren Struktur, hochwertigen Produkten und einem Fokus auf echte Wirkung wird Pflege einfacher, effizienter und sichtbarer. Genau dafür steht HAIROTICMEN.</p>
+<p>Mit einer klaren Struktur, hochwertigen Produkten und einem Fokus auf echte Wirkung wird die Routine einfacher, effizienter und sichtbarer. Genau dafür steht ${commandBrandName}.</p>
 
 <h3>Praktische Empfehlungen</h3>
 <ul>
@@ -10027,13 +16631,13 @@ app.post('/telegram-command', async (req, res) => {
   <li>Auf Einfachheit und Beständigkeit setzen</li>
 </ul>
 
-<h3>Warum HAIROTICMEN dazu passt</h3>
-<p>HAIROTICMEN verbindet Premium Männerpflege mit einer modernen, klaren und wirksamen Routine. Für Männer, die nicht einfach nur Produkte wollen – sondern einen stärkeren Auftritt.</p>
+<h3>Warum ${commandBrandName} dazu passt</h3>
+<p>${commandBrandName} verbindet Premium Positionierung mit einer modernen, klaren und wirksamen Routine. Für Kunden, die nicht einfach nur Produkte wollen, sondern einen stärkeren Auftritt.</p>
 
 <h3>Fazit</h3>
 <p>${item.topic} ist ein Thema für Männer, die mehr aus ihrer Routine machen wollen. Mit der richtigen Struktur, hochwertigen Produkten und einem klaren Anspruch entsteht ein Look, der bewusst, gepflegt und stark wirkt.</p>
 
-<p><strong>CTA:</strong> Entdecke jetzt HAIROTICMEN und entwickle eine Routine, die wirklich zu dir passt.</p>`;
+<p><strong>CTA:</strong> Entdecke jetzt ${commandBrandName} und entwickle eine Routine, die wirklich zu dir passt.</p>`;
 
       fs.writeFileSync(queuePath, JSON.stringify(queue, null, 2), 'utf8');
 
@@ -10049,7 +16653,7 @@ app.post('/telegram-command', async (req, res) => {
         return res.json({ error: 'Missing email draft id' });
       }
 
-      const { data: queue } = readLiveEmailQueue(LIVE_EMAIL_PROJECT, draftId);
+      const { data: queue } = readLiveEmailQueue(commandProject, draftId);
       const item = queue.find(x => x.id === draftId);
 
       if (!item) {
@@ -10063,10 +16667,10 @@ app.post('/telegram-command', async (req, res) => {
       item.subject = `${item.topic} – Premium Routine für Männer in Deutschland`;
       item.preheader = 'Premium Pflege, klare Routine, starker Auftritt.';
       item.body =
-        `Entdecke ${item.topic} mit HAIROTICMEN. Premium Pflege für Männer, die Qualität, Wirkung und einen starken Auftritt verbinden wollen. Jetzt ist der richtige Moment, deine Routine auf das nächste Level zu bringen.`;
+        `Entdecke ${item.topic} mit ${commandBrandName}. Premium Positionierung für Kunden, die Qualität, Wirkung und einen starken Auftritt verbinden wollen. Jetzt ist der richtige Moment, deine Routine auf das nächste Level zu bringen.`;
       item.cta = 'Jetzt entdecken';
 
-      writeLiveEmailQueue(LIVE_EMAIL_PROJECT, queue);
+      writeLiveEmailQueue(commandProject, queue);
 
       return res.json({
         command,
@@ -10080,10 +16684,7 @@ app.post('/telegram-command', async (req, res) => {
         return res.json({ error: 'Missing ad draft id' });
       }
 
-      const queuePath = path.join(
-        EXECUTION_DIR,
-        'hairoticmen/content/ads/ad-queue.json'
-      );
+      const queuePath = getLegacyContentQueuePath(commandProject, 'ads');
 
       const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
       const item = queue.find(x => x.id === draftId);
@@ -10109,10 +16710,7 @@ app.post('/telegram-command', async (req, res) => {
         return res.json({ error: 'Missing post draft id' });
       }
 
-      const queuePath = path.join(
-        EXECUTION_DIR,
-        'hairoticmen/content/social/post-queue.json'
-      );
+      const queuePath = getLegacyContentQueuePath(commandProject, 'social');
 
       const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
       const item = queue.find(x => x.id === draftId);
@@ -10138,10 +16736,7 @@ app.post('/telegram-command', async (req, res) => {
         return res.json({ error: 'Missing blog draft id' });
       }
 
-      const queuePath = path.join(
-        EXECUTION_DIR,
-        'hairoticmen/content/blog/blog-queue.json'
-      );
+      const queuePath = getLegacyContentQueuePath(commandProject, 'blog');
 
       const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
       const item = queue.find(x => x.id === draftId);
@@ -10167,7 +16762,7 @@ app.post('/telegram-command', async (req, res) => {
         return res.json({ error: 'Missing email draft id' });
       }
 
-      const { data: queue } = readLiveEmailQueue(LIVE_EMAIL_PROJECT, draftId);
+      const { data: queue } = readLiveEmailQueue(commandProject, draftId);
       const item = queue.find(x => x.id === draftId);
 
       if (!item) {
@@ -10176,7 +16771,7 @@ app.post('/telegram-command', async (req, res) => {
 
       item.status = 'ready_for_send';
 
-      writeLiveEmailQueue(LIVE_EMAIL_PROJECT, queue);
+      writeLiveEmailQueue(commandProject, queue);
 
       return res.json({
         command,
@@ -10191,7 +16786,7 @@ if (command === '/publish_blog') {
   }
 
   const response = await fetch(
-    `http://localhost:3000/publish-blog/${draftId}`,
+    `http://localhost:${PORT}/publish-blog/${draftId}?project=${encodeURIComponent(commandProject)}`,
     { method: 'POST' }
   );
 
@@ -10208,10 +16803,7 @@ if (command === '/publish_blog') {
         return res.json({ error: 'Missing blog draft id' });
       }
 
-      const queuePath = path.join(
-        EXECUTION_DIR,
-        'hairoticmen/content/blog/blog-queue.json'
-      );
+      const queuePath = getLegacyContentQueuePath(commandProject, 'blog');
 
       const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
       const item = queue.find(x => x.id === draftId);
@@ -10240,10 +16832,7 @@ if (command === '/publish_blog') {
         return res.json({ error: 'Missing blog draft id' });
       }
 
-      const queuePath = path.join(
-        EXECUTION_DIR,
-        'hairoticmen/content/blog/blog-queue.json'
-      );
+      const queuePath = getLegacyContentQueuePath(commandProject, 'blog');
 
       const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
       const item = queue.find(x => x.id === draftId);
@@ -10277,10 +16866,7 @@ if (command === '/publish_blog') {
         return res.json({ error: 'Missing blog draft id' });
       }
 
-      const blogQueuePath = path.join(
-        EXECUTION_DIR,
-        'hairoticmen/content/blog/blog-queue.json'
-      );
+      const blogQueuePath = getLegacyContentQueuePath(commandProject, 'blog');
 
       const blogQueue = JSON.parse(fs.readFileSync(blogQueuePath, 'utf8'));
       const blogItem = blogQueue.find(x => x.id === draftId);
@@ -10289,12 +16875,12 @@ if (command === '/publish_blog') {
         return res.json({ error: 'Blog draft not found' });
       }
 
-      fs.mkdirSync(path.join(HAIROTICMEN_MEDIA_DIR, 'queue'), { recursive: true });
-      fs.mkdirSync(path.join(HAIROTICMEN_MEDIA_DIR, 'blog'), { recursive: true });
+      const mediaDir = getProjectMediaDir(commandProject);
+      const mediaQueuePath = getProjectBlogImageQueuePath(commandProject);
+      fs.mkdirSync(path.join(mediaDir, 'queue'), { recursive: true });
+      fs.mkdirSync(path.join(mediaDir, 'blog'), { recursive: true });
 
-      const mediaQueue = JSON.parse(
-        fs.readFileSync(HAIROTICMEN_MEDIA_QUEUE_PATH, 'utf8')
-      );
+      const mediaQueue = readJsonFile(mediaQueuePath, []);
 
       const assetId = `blogimg_${Date.now()}`;
       const safeSlug = String(blogItem.topic || 'blog-image')
@@ -10304,7 +16890,7 @@ if (command === '/publish_blog') {
 
       const plannedFilename = `${assetId}-${safeSlug}.png`;
       const plannedOutputPath = path.join(
-        HAIROTICMEN_MEDIA_DIR,
+        mediaDir,
         'blog',
         plannedFilename
       );
@@ -10329,7 +16915,7 @@ if (command === '/publish_blog') {
 
       mediaQueue.push(assetRecord);
       fs.writeFileSync(
-        HAIROTICMEN_MEDIA_QUEUE_PATH,
+        mediaQueuePath,
         JSON.stringify(mediaQueue, null, 2),
         'utf8'
       );
@@ -10346,9 +16932,7 @@ if (command === '/publish_blog') {
         return res.json({ error: 'Missing asset id or blog draft id' });
       }
 
-      const mediaQueue = JSON.parse(
-        fs.readFileSync(HAIROTICMEN_MEDIA_QUEUE_PATH, 'utf8')
-      );
+      const mediaQueue = readJsonFile(getProjectBlogImageQueuePath(commandProject), []);
 
       let asset = mediaQueue.find(x => x.asset_id === ref);
 
@@ -10376,9 +16960,8 @@ if (command === '/generate_image_real') {
     return res.json({ error: 'Missing blog draft id or asset id' });
   }
 
-  const mediaQueue = JSON.parse(
-    fs.readFileSync(HAIROTICMEN_MEDIA_QUEUE_PATH, 'utf8')
-  );
+  const mediaQueuePath = getProjectBlogImageQueuePath(commandProject);
+  const mediaQueue = readJsonFile(mediaQueuePath, []);
 
   let asset = mediaQueue.find(x => x.asset_id === ref);
 
@@ -10425,7 +17008,7 @@ if (command === '/generate_image_real') {
     asset.generated_at = new Date().toISOString();
 
     fs.writeFileSync(
-      HAIROTICMEN_MEDIA_QUEUE_PATH,
+      mediaQueuePath,
       JSON.stringify(mediaQueue, null, 2),
       'utf8'
     );
@@ -10455,10 +17038,7 @@ if (command === '/attach_blog_image') {
     return res.json({ error: 'Missing blog draft id' });
   }
 
-  const blogQueuePath = path.join(
-    EXECUTION_DIR,
-    'hairoticmen/content/blog/blog-queue.json'
-  );
+  const blogQueuePath = getLegacyContentQueuePath(commandProject, 'blog');
 
   const blogQueue = JSON.parse(fs.readFileSync(blogQueuePath, 'utf8'));
   const blogItem = blogQueue.find(x => x.id === draftId);
@@ -10467,9 +17047,8 @@ if (command === '/attach_blog_image') {
     return res.json({ error: 'Blog not published or not found' });
   }
 
-  const mediaQueue = JSON.parse(
-    fs.readFileSync(HAIROTICMEN_MEDIA_QUEUE_PATH, 'utf8')
-  );
+  const mediaQueuePath = getProjectBlogImageQueuePath(commandProject);
+  const mediaQueue = readJsonFile(mediaQueuePath, []);
 
   const asset = mediaQueue
     .filter(x => x.linked_blog_id === draftId)
@@ -10525,7 +17104,7 @@ if (command === '/attach_blog_image') {
     blogItem.featured_image_source = asset.filename;
 
     fs.writeFileSync(
-      HAIROTICMEN_MEDIA_QUEUE_PATH,
+      mediaQueuePath,
       JSON.stringify(mediaQueue, null, 2),
       'utf8'
     );
@@ -10552,7 +17131,7 @@ if (command === '/attach_blog_image') {
   } catch (error) {
     return res.json({
       error: 'Upload or attach failed',
-      details: error.response?.data || error.message
+      details: sanitizeErrorPayloadForClient(error.response?.data || error.message)
     });
   }
 }
@@ -10564,10 +17143,7 @@ if (command === '/attach_blog_image') {
         return res.json({ error: 'Missing blog draft id' });
       }
 
-      const blogQueuePath = path.join(
-        EXECUTION_DIR,
-        'hairoticmen/content/blog/blog-queue.json'
-      );
+      const blogQueuePath = getLegacyContentQueuePath(commandProject, 'blog');
 
       const blogQueue = JSON.parse(fs.readFileSync(blogQueuePath, 'utf8'));
       const blogItem = blogQueue.find(x => x.id === draftId);
@@ -10688,7 +17264,7 @@ if (command === '/attach_blog_image') {
       } catch (error) {
         return res.json({
           error: 'Blog enhancement failed',
-          details: error.response?.data || error.message
+          details: sanitizeErrorPayloadForClient(error.response?.data || error.message)
         });
       }
     }
@@ -10700,10 +17276,7 @@ if (command === '/attach_blog_image') {
         return res.json({ error: 'Missing blog draft id' });
       }
 
-      const blogQueuePath = path.join(
-        EXECUTION_DIR,
-        'hairoticmen/content/blog/blog-queue.json'
-      );
+      const blogQueuePath = getLegacyContentQueuePath(commandProject, 'blog');
 
       const blogQueue = JSON.parse(fs.readFileSync(blogQueuePath, 'utf8'));
       const blogItem = blogQueue.find(x => x.id === draftId);
@@ -10740,7 +17313,7 @@ if (command === '/attach_blog_image') {
         return res.json({ error: 'Missing email draft id' });
       }
 
-      const { data: queue } = readLiveEmailQueue(LIVE_EMAIL_PROJECT, draftId);
+      const { data: queue } = readLiveEmailQueue(commandProject, draftId);
       const item = queue.find(x => x.id === draftId);
 
       if (!item) {
@@ -10776,17 +17349,18 @@ if (command === '/attach_blog_image') {
         return res.json({ error: 'Missing email draft id' });
       }
 
-      const { data: emailQueue } = readLiveEmailQueue(LIVE_EMAIL_PROJECT, draftId);
+      const { data: emailQueue } = readLiveEmailQueue(commandProject, draftId);
       const emailItem = emailQueue.find(x => x.id === draftId);
 
       if (!emailItem) {
         return res.json({ error: 'Email draft not found' });
       }
 
-      fs.mkdirSync(path.join(HAIROTICMEN_MEDIA_DIR, 'queue'), { recursive: true });
-      fs.mkdirSync(path.join(HAIROTICMEN_MEDIA_DIR, 'email'), { recursive: true });
+      const mediaDir = getProjectMediaDir(commandProject);
+      fs.mkdirSync(path.join(mediaDir, 'queue'), { recursive: true });
+      fs.mkdirSync(path.join(mediaDir, 'email'), { recursive: true });
 
-      const { data: mediaQueue } = readLiveEmailMediaQueue(LIVE_EMAIL_PROJECT, draftId);
+      const { data: mediaQueue } = readLiveEmailMediaQueue(commandProject, draftId);
 
       const assetId = `emailimg_${Date.now()}`;
       const safeSlug = String(emailItem.topic || 'email-image')
@@ -10796,7 +17370,7 @@ if (command === '/attach_blog_image') {
 
       const plannedFilename = `${assetId}-${safeSlug}.png`;
       const plannedOutputPath = path.join(
-        HAIROTICMEN_MEDIA_DIR,
+        mediaDir,
         'email',
         plannedFilename
       );
@@ -10805,7 +17379,7 @@ if (command === '/attach_blog_image') {
         `Create a premium email hero image for ${emailItem.topic}, focused on luxury men’s grooming, strong masculine branding, refined product presentation, elegant dark premium styling, suitable for a high-conversion campaign email for the German market.`;
 
       const altText =
-        `${emailItem.topic} – Premium Männerpflege Kampagne von HAIROTICMEN`;
+        `${emailItem.topic} – Premium Kampagne von ${commandBrandName}`;
 
       const assetRecord = {
         asset_id: assetId,
@@ -10826,7 +17400,7 @@ if (command === '/attach_blog_image') {
       };
 
       mediaQueue.push(assetRecord);
-      writeLiveEmailMediaQueue(LIVE_EMAIL_PROJECT, mediaQueue);
+      writeLiveEmailMediaQueue(commandProject, mediaQueue);
 
       return res.json({
         command,
@@ -10840,7 +17414,7 @@ if (command === '/attach_blog_image') {
         return res.json({ error: 'Missing email draft id or asset id' });
       }
 
-      const { data: mediaQueue } = readLiveEmailMediaQueue(LIVE_EMAIL_PROJECT, ref);
+      const { data: mediaQueue } = readLiveEmailMediaQueue(commandProject, ref);
 
       let asset = mediaQueue.find(x => x.asset_id === ref);
 
@@ -10868,14 +17442,14 @@ if (command === '/attach_blog_image') {
     return res.json({ error: 'Missing email draft id' });
   }
 
-  const { data: emailQueue } = readLiveEmailQueue(LIVE_EMAIL_PROJECT, draftId);
+  const { data: emailQueue } = readLiveEmailQueue(commandProject, draftId);
   const emailItem = emailQueue.find(x => x.id === draftId);
 
   if (!emailItem) {
     return res.json({ error: 'Email draft not found' });
   }
 
-  const { data: mediaQueue } = readLiveEmailMediaQueue(LIVE_EMAIL_PROJECT, draftId);
+  const { data: mediaQueue } = readLiveEmailMediaQueue(commandProject, draftId);
 
   const generatedAssets = mediaQueue
     .filter(x => x.linked_email_id === draftId && x.status === 'generated')
@@ -10919,6 +17493,7 @@ if (command === '/attach_blog_image') {
     emailItem.hero_image_alt = asset.alt_text;
     emailItem.hero_image_wp_media_id = mediaId;
 
+    const projectWebsiteUrl = getProjectWebsiteUrl(commandProject) || '#';
     emailItem.html_body =
       `<div style="font-family:Arial,sans-serif;max-width:700px;margin:0 auto;background:#ffffff;">` +
       `<img src="${publicImageUrl}" alt="${asset.alt_text}" style="width:100%;height:auto;display:block;border:0;" />` +
@@ -10926,11 +17501,11 @@ if (command === '/attach_blog_image') {
       `<h2 style="margin:0 0 12px 0;color:#111;">${emailItem.subject || ''}</h2>` +
       `<p style="margin:0 0 16px 0;color:#444;">${emailItem.preheader || ''}</p>` +
       `<p style="margin:0 0 24px 0;color:#222;line-height:1.6;">${emailItem.body || ''}</p>` +
-      `<a href="https://hairoticmen.de" style="display:inline-block;padding:14px 24px;background:#111;color:#fff;text-decoration:none;border-radius:6px;">${emailItem.cta || 'Jetzt entdecken'}</a>` +
+      `<a href="${projectWebsiteUrl}" style="display:inline-block;padding:14px 24px;background:#111;color:#fff;text-decoration:none;border-radius:6px;">${emailItem.cta || 'Jetzt entdecken'}</a>` +
       `</div></div>`;
 
-    writeLiveEmailMediaQueue(LIVE_EMAIL_PROJECT, mediaQueue);
-    writeLiveEmailQueue(LIVE_EMAIL_PROJECT, emailQueue);
+    writeLiveEmailMediaQueue(commandProject, mediaQueue);
+    writeLiveEmailQueue(commandProject, emailQueue);
 
     return res.json({
       command,
@@ -10947,7 +17522,7 @@ if (command === '/attach_blog_image') {
   } catch (error) {
     return res.json({
       error: 'Attach email image failed',
-      details: error.response?.data || error.message
+      details: sanitizeErrorPayloadForClient(error.response?.data || error.message)
     });
   }
 }
@@ -10959,7 +17534,7 @@ if (command === '/attach_blog_image') {
         return res.json({ error: 'Missing email draft id or asset id' });
       }
 
-      const { data: mediaQueue } = readLiveEmailMediaQueue(LIVE_EMAIL_PROJECT, ref);
+      const { data: mediaQueue } = readLiveEmailMediaQueue(commandProject, ref);
 
       let asset = mediaQueue.find(x => x.asset_id === ref);
 
@@ -11003,7 +17578,7 @@ if (command === '/attach_blog_image') {
         asset.status = 'generated';
         asset.generated_at = new Date().toISOString();
 
-        writeLiveEmailMediaQueue(LIVE_EMAIL_PROJECT, mediaQueue);
+        writeLiveEmailMediaQueue(commandProject, mediaQueue);
 
         return res.json({
           command,
@@ -11018,7 +17593,7 @@ if (command === '/attach_blog_image') {
       } catch (error) {
         return res.json({
           error: 'Email image generation failed',
-          details: error.response?.data || error.message
+          details: sanitizeErrorPayloadForClient(error.response?.data || error.message)
         });
       }
     }
@@ -11035,7 +17610,7 @@ if (command === '/attach_blog_image') {
         return res.json({ error: 'Missing recipient email' });
       }
 
-        const { data: emailQueue } = readLiveEmailQueue(LIVE_EMAIL_PROJECT, draftId);
+        const { data: emailQueue } = readLiveEmailQueue(commandProject, draftId);
       const emailItem = emailQueue.find(x => x.id === draftId);
 
       if (!emailItem) {
@@ -11068,7 +17643,7 @@ if (command === '/attach_blog_image') {
         emailItem.sent_at = new Date().toISOString();
         emailItem.send_result = response.data;
 
-        writeLiveEmailQueue(LIVE_EMAIL_PROJECT, emailQueue);
+        writeLiveEmailQueue(commandProject, emailQueue);
 
         return res.json({
           command,
@@ -11083,25 +17658,23 @@ if (command === '/attach_blog_image') {
       } catch (error) {
         return res.json({
           error: 'Email send failed',
-          details: error.response?.data || error.message
+          details: sanitizeErrorPayloadForClient(error.response?.data || error.message)
         });
       }
     }
 
     if (command === '/create_project_profile') {
-      const projectName = args.join(' ').trim().toLowerCase();
+      const projectName = normalizeProjectSlug(args.join(' ').trim());
       if (!projectName) {
         return res.json({ error: 'Missing project name' });
       }
 
-      const projectDir = path.join(
-        EXECUTION_DIR,
-        `projects/${projectName}`
-      );
+      const projectPaths = resolveLegacyExecutionProjectPaths(projectName);
+      const projectDir = projectPaths.projectDir;
 
       fs.mkdirSync(projectDir, { recursive: true });
 
-      const profilePath = path.join(projectDir, 'project-profile.json');
+      const profilePath = projectPaths.profilePath;
 
       const profile = {
         project_id: projectName,
@@ -11140,15 +17713,12 @@ if (command === '/attach_blog_image') {
     }
 
     if (command === '/review_project_profile') {
-      const projectName = args.join(' ').trim().toLowerCase();
+      const projectName = normalizeProjectSlug(args.join(' ').trim());
       if (!projectName) {
         return res.json({ error: 'Missing project name' });
       }
 
-      const profilePath = path.join(
-        EXECUTION_DIR,
-        `projects/${projectName}/project-profile.json`
-      );
+      const profilePath = resolveLegacyExecutionProjectPaths(projectName).profilePath;
 
       if (!fs.existsSync(profilePath)) {
         return res.json({ error: 'Project profile not found' });
@@ -11163,20 +17733,18 @@ if (command === '/attach_blog_image') {
     }
 
     if (command === '/create_campaign_strategy') {
-      const projectName = (args[0] || '').trim().toLowerCase();
+      const projectName = normalizeProjectSlug(args[0] || '');
       const goal = args.slice(1).join(' ').trim() || 'sales';
 
       if (!projectName) {
         return res.json({ error: 'Missing project name' });
       }
 
-      const projectDir = path.join(
-        EXECUTION_DIR,
-        `projects/${projectName}`
-      );
+      const projectPaths = resolveLegacyExecutionProjectPaths(projectName);
+      const projectDir = projectPaths.projectDir;
 
-      const profilePath = path.join(projectDir, 'project-profile.json');
-      const queuePath = path.join(projectDir, 'campaign-strategy-queue.json');
+      const profilePath = projectPaths.profilePath;
+      const queuePath = projectPaths.campaignStrategyQueuePath;
 
       if (!fs.existsSync(profilePath)) {
         return res.json({ error: 'Project profile not found' });
@@ -11244,16 +17812,13 @@ if (command === '/attach_blog_image') {
 
     if (command === '/review_campaign_strategy') {
       const strategyId = args[0];
-      const projectName = (args[1] || '').trim().toLowerCase();
+      const projectName = normalizeProjectSlug(args[1] || '');
 
       if (!strategyId || !projectName) {
         return res.json({ error: 'Missing strategy id or project name' });
       }
 
-      const queuePath = path.join(
-        EXECUTION_DIR,
-        `projects/${projectName}/campaign-strategy-queue.json`
-      );
+      const queuePath = resolveLegacyExecutionProjectPaths(projectName).campaignStrategyQueuePath;
 
       if (!fs.existsSync(queuePath)) {
         return res.json({ error: 'Campaign strategy queue not found' });
@@ -11274,21 +17839,15 @@ if (command === '/attach_blog_image') {
 
     if (command === '/plan_campaign_assets') {
       const strategyId = args[0];
-      const projectName = (args[1] || '').trim().toLowerCase();
+      const projectName = normalizeProjectSlug(args[1] || '');
 
       if (!strategyId || !projectName) {
         return res.json({ error: 'Missing strategy id or project name' });
       }
 
-      const strategyQueuePath = path.join(
-        EXECUTION_DIR,
-        `projects/${projectName}/campaign-strategy-queue.json`
-      );
-
-      const planPath = path.join(
-        EXECUTION_DIR,
-        `projects/${projectName}/campaign-asset-plan.json`
-      );
+      const projectPaths = resolveLegacyExecutionProjectPaths(projectName);
+      const strategyQueuePath = projectPaths.campaignStrategyQueuePath;
+      const planPath = projectPaths.campaignAssetPlanPath;
 
       if (!fs.existsSync(strategyQueuePath)) {
         return res.json({ error: 'Campaign strategy queue not found' });
@@ -11335,16 +17894,13 @@ if (command === '/attach_blog_image') {
     }
 
 if (command === '/enrich_project_profile') {
-  const projectName = args.join(' ').trim().toLowerCase();
+  const projectName = normalizeProjectSlug(args.join(' ').trim());
 
   if (!projectName) {
     return res.json({ error: 'Missing project name' });
   }
 
-  const profilePath = path.join(
-    EXECUTION_DIR,
-    `projects/${projectName}/project-profile.json`
-  );
+  const profilePath = resolveLegacyExecutionProjectPaths(projectName).profilePath;
 
   if (!fs.existsSync(profilePath)) {
     return res.json({ error: 'Project profile not found' });
@@ -11466,10 +18022,7 @@ if (command === '/reuse_blog_to_social') {
     return res.json({ error: 'Missing blog ID' });
   }
 
-  const blogQueuePath = path.join(
-    EXECUTION_DIR,
-    'hairoticmen/content/blog/blog-queue.json'
-  );
+  const blogQueuePath = getLegacyContentQueuePath(commandProject, 'blog');
 
   if (!fs.existsSync(blogQueuePath)) {
     return res.json({ error: 'Blog queue not found' });
@@ -11488,9 +18041,9 @@ if (command === '/reuse_blog_to_social') {
     posts: [
       {
         platform: 'instagram',
-        caption: `Ein stärkerer Look beginnt mit der richtigen Routine. ${blog.topic} mit HAIROTICMEN steht für Premium Pflege und klare Ergebnisse.`,
+        caption: `Ein stärkerer Look beginnt mit der richtigen Routine. ${blog.topic} mit ${commandBrandName} steht für Premium Positionierung und klare Ergebnisse.`,
         cta: 'Jetzt entdecken',
-        hashtags: ['#HAIROTICMEN','#MensGrooming','#PremiumCare','#BarberStyle','#MensStyle']
+        hashtags: [commandHashtag, '#MensGrooming', '#PremiumCare', '#BarberStyle', '#MensStyle']
       },
       {
         platform: 'facebook',
@@ -11500,7 +18053,7 @@ if (command === '/reuse_blog_to_social') {
     ],
     reel: {
       hook: 'Dein Look ist kein Zufall',
-      script: `Routine entscheidet alles. ${blog.topic} mit HAIROTICMEN bringt Klarheit und Wirkung.`,
+      script: `Routine entscheidet alles. ${blog.topic} mit ${commandBrandName} bringt Klarheit und Wirkung.`,
       cta: 'Jetzt starten'
     },
     ad: {
@@ -11523,7 +18076,7 @@ if (command === '/reuse_email_to_social') {
     return res.json({ error: 'Missing email ID' });
   }
 
-  const { candidate, data: emailQueue } = readLiveEmailQueue(LIVE_EMAIL_PROJECT, emailId);
+  const { candidate, data: emailQueue } = readLiveEmailQueue(commandProject, emailId);
 
   if (!fs.existsSync(candidate.selectedPath)) {
     return res.json({ error: 'Email queue not found' });
@@ -11748,7 +18301,7 @@ if (command === '/generate_reel_from_blog') {
         topic,
         status: 'draft',
         hashtag_groups: {
-          brand: ['#HAIROTICMEN'],
+          brand: [buildProjectHashtag(projectName)],
           niche: ['#MensGrooming', '#PremiumCare', '#BarberStyle'],
           topic: [`#${topic.replace(/\s+/g, '')}`],
           audience: ['#MensStyle', '#GroomingRoutine']
@@ -11957,22 +18510,16 @@ if (command === '/enrich_keyword_live') {
   });
 }
     if (command === '/build_campaign_from_intelligence') {
-      const projectName = (args[0] || '').trim().toLowerCase();
+      const projectName = normalizeProjectSlug(args[0] || '');
       const goal = args.slice(1).join(' ').trim() || 'sales';
 
       if (!projectName) {
         return res.json({ error: 'Missing project name' });
       }
 
-      const profilePath = path.join(
-        EXECUTION_DIR,
-        `projects/${projectName}/project-profile.json`
-      );
-
-      const strategyQueuePath = path.join(
-        EXECUTION_DIR,
-        `projects/${projectName}/campaign-strategy-queue.json`
-      );
+      const projectPaths = resolveLegacyExecutionProjectPaths(projectName);
+      const profilePath = projectPaths.profilePath;
+      const strategyQueuePath = projectPaths.campaignStrategyQueuePath;
 
       const trendQueuePath = path.join(
         EXECUTION_DIR,
@@ -12227,6 +18774,8 @@ if (command === '/execute_campaign_brain') {
     return res.json({ error: 'Campaign brain not found' });
   }
 
+  const brainProject = normalizeOptionalProjectSlug(brain.project_id) || commandProject;
+  const brainBrandName = getProjectDisplayName(brainProject);
   const mainKeyword = brain.opportunity_map?.high_volume_keywords?.[0] || 'mens grooming';
 
   const result = {
@@ -12236,7 +18785,7 @@ if (command === '/execute_campaign_brain') {
     status: 'generated',
 
     blog: {
-      title: `${mainKeyword} | HAIROTICMEN Guide`,
+      title: `${mainKeyword} | ${brainBrandName} Guide`,
       topic: mainKeyword,
       structure: [
         'introduction',
@@ -12250,7 +18799,7 @@ if (command === '/execute_campaign_brain') {
 
     email: {
       subject: `${mainKeyword} – Premium Routine für Männer`,
-      body: `Entdecke die perfekte ${mainKeyword} Routine mit HAIROTICMEN.`,
+      body: `Entdecke die perfekte ${mainKeyword} Routine mit ${brainBrandName}.`,
       cta: 'Jetzt entdecken'
     },
 
@@ -12312,29 +18861,16 @@ if (command === '/execute_campaign_brain') {
         'campaign-output/campaign-output-queue.json'
       );
 
-      const blogQueuePath = path.join(
-        EXECUTION_DIR,
-        'hairoticmen/content/blog/blog-queue.json'
-      );
-
-      const postQueuePath = path.join(
-        EXECUTION_DIR,
-        'hairoticmen/content/social/post-queue.json'
-      );
-
-      const adQueuePath = path.join(
-        EXECUTION_DIR,
-        'hairoticmen/content/ads/ad-queue.json'
-      );
-
-      const reelQueuePath = path.join(
-        EXECUTION_DIR,
-        'hairoticmen/content/campaigns/reel-brief-queue.json'
-      );
+      const campaignProject = commandProject;
+      const campaignBrandName = getProjectDisplayName(campaignProject);
+      const blogQueuePath = getLegacyContentQueuePath(campaignProject, 'blog');
+      const postQueuePath = getLegacyContentQueuePath(campaignProject, 'social');
+      const adQueuePath = getLegacyContentQueuePath(campaignProject, 'ads');
+      const reelQueuePath = getLegacyContentQueuePath(campaignProject, 'reel');
 
       const campaignOutputQueue = JSON.parse(fs.readFileSync(campaignOutputPath, 'utf8'));
       const blogQueue = JSON.parse(fs.readFileSync(blogQueuePath, 'utf8'));
-      const { data: emailQueue } = readLiveEmailQueue(LIVE_EMAIL_PROJECT, execId);
+      const { data: emailQueue } = readLiveEmailQueue(commandProject, execId);
       const postQueue = JSON.parse(fs.readFileSync(postQueuePath, 'utf8'));
       const adQueue = JSON.parse(fs.readFileSync(adQueuePath, 'utf8'));
       const reelQueue = JSON.parse(fs.readFileSync(reelQueuePath, 'utf8'));
@@ -12360,8 +18896,8 @@ if (command === '/execute_campaign_brain') {
           topic: campaignExec.blog.topic,
           status: 'draft',
           title: campaignExec.blog.title,
-          excerpt: `${campaignExec.blog.topic} – Premium Tipps und klare Routine von HAIROTICMEN.`,
-          seo_title: `${campaignExec.blog.title} | HAIROTICMEN Deutschland`,
+          excerpt: `${campaignExec.blog.topic} – Premium Tipps und klare Routine von ${campaignBrandName}.`,
+          seo_title: `${campaignExec.blog.title} | ${campaignBrandName}`,
           meta_description: `${campaignExec.blog.topic} – entdecke eine starke und einfache Premium-Routine für Männer in Deutschland.`,
           target_keywords: [campaignExec.blog.topic],
           search_intent: 'informational + commercial',
@@ -12370,7 +18906,7 @@ if (command === '/execute_campaign_brain') {
           tag_suggestions: [
             campaignExec.blog.topic,
             'Männerpflege',
-            'HAIROTICMEN',
+            campaignBrandName,
             'Premium Pflege'
           ],
           internal_link_suggestions: [
@@ -12381,9 +18917,9 @@ if (command === '/execute_campaign_brain') {
             'Add one strong authority source if relevant'
           ],
           featured_image_prompt: `Create a premium editorial blog image for ${campaignExec.blog.topic}, masculine grooming, luxury brand style, clear premium composition.`,
-          featured_image_alt: `${campaignExec.blog.topic} – Premium Männerpflege Artikel von HAIROTICMEN`,
+          featured_image_alt: `${campaignExec.blog.topic} – Premium Artikel von ${campaignBrandName}`,
           outline: campaignExec.blog.structure || [],
-          body: `<h2>${campaignExec.blog.topic}</h2><p>Entdecke ${campaignExec.blog.topic} mit HAIROTICMEN.</p>`,
+          body: `<h2>${campaignExec.blog.topic}</h2><p>Entdecke ${campaignExec.blog.topic} mit ${campaignBrandName}.</p>`,
           source_campaign_execution_id: execId
         };
 
@@ -12422,14 +18958,14 @@ if (command === '/execute_campaign_brain') {
             caption: post.caption || '',
             cta: post.cta || 'Jetzt entdecken',
             hashtags: [
-              '#HAIROTICMEN',
+              buildProjectHashtag(campaignProject),
               '#MensGrooming',
               '#PremiumCare'
             ],
             hook_type: post.hook || 'campaign angle',
             visual_format: post.platform === 'instagram' ? 'feed post / reel support' : 'social post',
             aspect_ratio: post.platform === 'instagram' ? '4:5 or 9:16' : '1:1',
-            overlay_text: `HAIROTICMEN | ${campaignExec.blog?.topic || 'campaign'}`,
+            overlay_text: `${campaignBrandName} | ${campaignExec.blog?.topic || 'campaign'}`,
             creative_prompt: `Create a premium ${post.platform} creative for ${campaignExec.blog?.topic || 'campaign'}, masculine luxury grooming style.`,
             video_brief: `Create short-form visual content for ${campaignExec.blog?.topic || 'campaign'} on ${post.platform}.`,
             source_campaign_execution_id: execId
@@ -12495,7 +19031,7 @@ if (command === '/execute_campaign_brain') {
       }
 
       fs.writeFileSync(blogQueuePath, JSON.stringify(blogQueue, null, 2), 'utf8');
-      writeLiveEmailQueue(LIVE_EMAIL_PROJECT, emailQueue);
+      writeLiveEmailQueue(commandProject, emailQueue);
       fs.writeFileSync(postQueuePath, JSON.stringify(postQueue, null, 2), 'utf8');
       fs.writeFileSync(adQueuePath, JSON.stringify(adQueue, null, 2), 'utf8');
       fs.writeFileSync(reelQueuePath, JSON.stringify(reelQueue, null, 2), 'utf8');
@@ -12576,7 +19112,7 @@ if (command === '/execute_campaign_brain') {
 
       try {
         const response = await axios.post(
-          `http://localhost:3000/publish-blog/${blogId}`
+          `http://localhost:${PORT}/publish-blog/${blogId}?project=${encodeURIComponent(commandProject)}`
         );
 
         campaignExec.controlled_publish = campaignExec.controlled_publish || {};
@@ -12600,7 +19136,7 @@ if (command === '/execute_campaign_brain') {
       } catch (error) {
         return res.json({
           error: 'Campaign blog publish failed',
-          details: error.response?.data || error.message
+          details: sanitizeErrorPayloadForClient(error.response?.data || error.message)
         });
       }
     }
@@ -12633,8 +19169,9 @@ if (command === '/execute_campaign_brain') {
 
       try {
         const response = await axios.post(
-          'http://localhost:3000/telegram-command',
+          `http://localhost:${PORT}/telegram-command`,
           {
+            project: commandProject,
             text: `/send_email_draft ${emailId} ${toEmail}`
           }
         );
@@ -12661,7 +19198,7 @@ if (command === '/execute_campaign_brain') {
       } catch (error) {
         return res.json({
           error: 'Campaign email send failed',
-          details: error.response?.data || error.message
+          details: sanitizeErrorPayloadForClient(error.response?.data || error.message)
         });
       }
     }
@@ -13000,7 +19537,7 @@ if (command === '/execute_campaign_brain') {
   } catch (error) {
     return res.json({
       error: 'WooCommerce media import failed',
-      details: error.response?.data || error.message
+      details: sanitizeErrorPayloadForClient(error.response?.data || error.message)
     });
   }
 }
@@ -13419,38 +19956,6 @@ if (command === '/review_generation_job') {
     });
   }
 }
-if (command === '/review_generation_job') {
-  const projectName = (args[0] || '').trim().toLowerCase();
-
-  if (!projectName) {
-    return res.json({ error: 'Missing project name' });
-  }
-
-  try {
-    const outputPaths = getGenerationOutputPaths(projectName);
-    const files = fs.readdirSync(outputPaths.jobsDir)
-      .filter(name => name.endsWith('.json'))
-      .sort()
-      .reverse();
-
-    if (!files.length) {
-      return res.json({ error: 'No generation jobs found' });
-    }
-
-    const latestPath = path.join(outputPaths.jobsDir, files[0]);
-    const data = readJsonFile(latestPath, {});
-
-    return res.json({
-      command,
-      result: data
-    });
-  } catch (error) {
-    return res.json({
-      error: 'Failed to review generation job',
-      details: error.message
-    });
-  }
-}
 if (command === '/build_render_request') {
   const projectName = (args[0] || '').trim().toLowerCase();
 
@@ -13534,7 +20039,7 @@ if (command === '/render_generation_job') {
   } catch (error) {
     return res.json({
       error: 'Render execution failed',
-      details: error.response?.data || error.message
+      details: sanitizeErrorPayloadForClient(error.response?.data || error.message)
     });
   }
 }
@@ -13963,7 +20468,7 @@ if (command === '/sync_wc_product_intelligence') {
   } catch (error) {
     return res.json({
       error: 'Failed to sync WooCommerce product intelligence',
-      details: error.response?.data || error.message
+      details: sanitizeErrorPayloadForClient(error.response?.data || error.message)
     });
   }
 }
@@ -14737,7 +21242,7 @@ if (command === '/schedule_launch_job') {
     const result = scheduleLaunchJob(projectName, waveName, channel, scheduledFor);
     return res.json({ command, result });
   } catch (error) {
-    return res.json({
+    return res.status(error.statusCode || 400).json({
       error: 'Failed to schedule launch job',
       details: error.message
     });
@@ -14773,8 +21278,33 @@ if (command === '/update_scheduled_job_status') {
     const result = updateScheduledJobStatus(projectName, jobId, status);
     return res.json({ command, result });
   } catch (error) {
-    return res.json({
+    return res.status(error.statusCode || 400).json({
       error: 'Failed to update scheduled job status',
+      details: error.message
+    });
+  }
+}
+if (command === '/record_manual_publish') {
+  const projectName = (args[0] || '').trim().toLowerCase();
+  const campaignName = (args[1] || '').trim();
+  const channel = (args[2] || '').trim().toLowerCase();
+  const jobId = (args[3] || '').trim();
+  const operator = (args[4] || '').trim();
+  const postUrl = (args[5] || '').trim();
+  const notes = args.slice(6).join(' ').trim();
+
+  if (!projectName || !campaignName || !channel || !jobId || !operator || !postUrl) {
+    return res.json({
+      error: 'Missing required args. Usage: /record_manual_publish <project> <campaign> <channel> <job_id> <operator> <post_url> [notes...]'
+    });
+  }
+
+  try {
+    const result = recordManualPublish(projectName, campaignName, channel, jobId, operator, postUrl, notes);
+    return res.json({ command, result });
+  } catch (error) {
+    return res.status(error.statusCode || 400).json({
+      error: 'Failed to record manual publish',
       details: error.message
     });
   }
@@ -14826,7 +21356,7 @@ if (command === '/execute_scheduled_job') {
     const result = executeScheduledJob(projectName, jobId);
     return res.json({ command, result });
   } catch (error) {
-    return res.json({
+    return res.status(error.statusCode || 400).json({
       error: 'Failed to execute scheduled job',
       details: error.message
     });
@@ -15094,14 +21624,14 @@ if (command === '/list_project_assets') {
   }
 
   try {
-    const result = listProjectAssets(projectName);
-    return res.json({ command, result });
-  } catch (error) {
-    return res.json({
-      error: 'Failed to list project assets',
-      details: error.message
-    });
-  }
+  const result = listProjectAssets(projectName);
+  return res.json({ command, result });
+} catch (error) {
+  return res.status(500).json({
+    error: 'Failed to list project assets.',
+    details: error.message
+  });
+}
 }
 
 if (command === '/set_project_source_of_truth') {
@@ -15415,18 +21945,26 @@ if (command === '/project_control_center_activity') {
 
 
 
- return res.json({
-      error: `Unsupported command: ${command}`
+ return sendError(res, {
+      statusCode: 400,
+      code: 'UNSUPPORTED_COMMAND',
+      message: `Unsupported command: ${command}`
     });
   } catch (error) {
-    return res.json({
-      error: error.response?.data || error.message
+    return sendError(res, {
+      statusCode: getErrorStatusCode(error, 502),
+      code: 'TELEGRAM_COMMAND_FAILED',
+      message: 'Failed to execute telegram command'
     });
   }
 });
 
 app.post('/publish-clone/:cloneId', async (req, res) => {
   try {
+    const projectName = requireProjectContext(req);
+    assertPublishingMutationAllowed(projectName, 'publish', {
+      status: 'published'
+    });
     const cloneId = req.params.cloneId;
 
     const response = await axios.put(
@@ -15455,14 +21993,21 @@ app.post('/publish-clone/:cloneId', async (req, res) => {
         'This action published a draft product. Original product was not modified.'
     });
   } catch (error) {
-    res.json({
-      error: error.response?.data || error.message
+    logCriticalFailure('publish_clone', req, error, {
+      cloneId: req.params.cloneId
+    });
+    return res.status(getErrorStatusCode(error, 502)).json({
+      error: sanitizeErrorPayloadForClient(error.response?.data || error.message) || 'Failed to publish clone product'
     });
   }
 });
 
 app.post('/replace-original-product/:originalId/:cloneId', async (req, res) => {
   try {
+    const projectName = requireProjectContext(req);
+    assertPublishingMutationAllowed(projectName, 'publish', {
+      status: 'published'
+    });
     const originalId = req.params.originalId;
     const cloneId = req.params.cloneId;
 
@@ -15484,11 +22029,11 @@ app.post('/replace-original-product/:originalId/:cloneId', async (req, res) => {
     const originalProduct = originalResponse.data;
     const cloneProduct = cloneResponse.data;
 
-    fs.mkdirSync(HAIROTICMEN_BACKUP_DIR, { recursive: true });
+    const backupDir = getProjectBackupDir(projectName);
 
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
     const backupFilePath = path.join(
-      HAIROTICMEN_BACKUP_DIR,
+      backupDir,
       `product-${originalProduct.id}-pre-replace-backup-${timestamp}.json`
     );
 
@@ -15536,8 +22081,12 @@ app.post('/replace-original-product/:originalId/:cloneId', async (req, res) => {
         'Review the original live product page and decide whether to keep, draft, or trash the clone.'
     });
   } catch (error) {
-    res.json({
-      error: error.response?.data || error.message
+    logCriticalFailure('replace_original_product', req, error, {
+      originalId: req.params.originalId,
+      cloneId: req.params.cloneId
+    });
+    return res.status(getErrorStatusCode(error, 502)).json({
+      error: sanitizeErrorPayloadForClient(error.response?.data || error.message) || 'Failed to replace original product'
     });
   }
 });
@@ -15577,39 +22126,58 @@ app.post('/cleanup-clone/:cloneId', async (req, res) => {
       success: true
     });
   } catch (error) {
-    res.json({
-      error: error.response?.data || error.message
+    logCriticalFailure('cleanup_clone', req, error, {
+      cloneId: req.params.cloneId,
+      action: req.query.action || 'draft'
+    });
+    return sendError(res, {
+      statusCode: getErrorStatusCode(error, 502),
+      code: 'LEGACY_CLEANUP_CLONE_FAILED',
+      message: 'Failed to cleanup clone product'
     });
   }
 });
 
 app.post('/publish-blog/:draftId', async (req, res) => {
   try {
+    const projectName = requireProjectContext(req);
+    assertPublishingMutationAllowed(projectName, 'publish', {
+      status: 'published'
+    });
     const draftId = req.params.draftId;
 
-    const queuePath = path.join(
-      EXECUTION_DIR,
-      'hairoticmen/content/blog/blog-queue.json'
-    );
+    const queuePath = getLegacyContentQueuePath(projectName, 'blog');
 
     const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
     const item = queue.find(x => x.id === draftId);
 
     if (!item) {
-      return res.json({ error: 'Blog draft not found' });
+      return sendError(res, {
+        statusCode: 404,
+        code: 'BLOG_DRAFT_NOT_FOUND',
+        message: 'Blog draft not found'
+      });
     }
 
     if (!item.body) {
-      return res.json({ error: 'Blog draft has no body content' });
+      return sendError(res, {
+        statusCode: 400,
+        code: 'BLOG_DRAFT_BODY_MISSING',
+        message: 'Blog draft has no body content'
+      });
     }
     
-    if (!WP_URL || !WP_USER || !WP_PASS) {
-      return res.json({ error: 'WordPress environment variables are missing' });
-    }
-
     const WP_URL = process.env.WP_BASE_URL;
     const WP_USER = process.env.WP_USER;
     const WP_PASS = process.env.WP_APP_PASSWORD;
+
+    if (!WP_URL || !WP_USER || !WP_PASS) {
+      return sendError(res, {
+        statusCode: 503,
+        code: 'WORDPRESS_ENV_MISSING',
+        message: 'WordPress environment variables are missing'
+      });
+    }
 
     const response = await fetch(WP_URL, {
       method: 'POST',
@@ -15629,8 +22197,10 @@ app.post('/publish-blog/:draftId', async (req, res) => {
     const data = await response.json();
 
         if (!response.ok) {
-      return res.json({
-        error: data
+      return sendError(res, {
+        statusCode: response.status || 502,
+        code: 'WORDPRESS_PUBLISH_FAILED',
+        message: `WordPress publish failed with status ${response.status}`
       });
     }
 
@@ -15663,28 +22233,42 @@ app.post('/publish-blog/:draftId', async (req, res) => {
       note: 'Blog published successfully'
     });
   } catch (err) {
-    return res.json({ error: err.message });
+    logCriticalFailure('publish_blog', req, err, {
+      draftId: req.params.draftId
+    });
+    return sendError(res, {
+      statusCode: getErrorStatusCode(err, 500),
+      code: 'LEGACY_BLOG_PUBLISH_FAILED',
+      message: 'Failed to publish blog draft'
+    });
   }
 });
 
 app.post('/rollback-product/:productId', async (req, res) => {
   try {
+    const projectName = requireProjectContext(req);
+    assertPublishingMutationAllowed(projectName, 'publish', {
+      status: 'published'
+    });
     const productId = req.params.productId;
+    const backupDir = getProjectBackupDir(projectName);
 
     const backupFiles = fs
-      .readdirSync(HAIROTICMEN_BACKUP_DIR)
+      .readdirSync(backupDir)
       .filter(file => file.includes(`product-${productId}`))
       .sort()
       .reverse();
 
     if (backupFiles.length === 0) {
-      return res.json({
-        error: 'No backup found for this product'
+      return sendError(res, {
+        statusCode: 404,
+        code: 'PRODUCT_BACKUP_NOT_FOUND',
+        message: 'No backup found for this product'
       });
     }
 
     const latestBackupFile = backupFiles[0];
-    const backupPath = path.join(HAIROTICMEN_BACKUP_DIR, latestBackupFile);
+    const backupPath = path.join(backupDir, latestBackupFile);
 
     const backupData = JSON.parse(fs.readFileSync(backupPath, 'utf8'));
 
@@ -15717,11 +22301,1014 @@ app.post('/rollback-product/:productId', async (req, res) => {
       note: 'Product restored from latest backup snapshot'
     });
   } catch (error) {
-    res.json({
-      error: error.response?.data || error.message
+    logCriticalFailure('rollback_product', req, error, {
+      productId: req.params.productId
+    });
+    return sendError(res, {
+      statusCode: getErrorStatusCode(error, 502),
+      code: 'LEGACY_ROLLBACK_FAILED',
+      message: 'Failed to rollback product'
     });
   }
 });
-app.listen(PORT, () => {
-  console.log(`MH Orchestrator running on port ${PORT}`);
+
+// ─── PHASE 4: SCHEDULER / AUTOMATION LAYER ─────────────────────────────────
+
+const SCHEDULER_LOCK_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
+const SCHEDULER_VALID_JOB_TYPES = Object.freeze(['publish', 'email', 'media', 'ads']);
+const SCHEDULER_DEFAULT_MAX_ATTEMPTS = 3;
+const SCHEDULER_VALID_MODES = Object.freeze(['manual', 'semi_auto', 'auto']);
+
+
+const schedulerStorage = createSchedulerStorage({
+  path,
+  fs,
+  dataDir: DATA_DIR,
+  normalizeProjectSlug,
+  resolveProjectPath,
+  ensureDir,
+  readJsonFile,
+  writeJsonFile,
+  sanitizeErrorMessage,
+  sanitizeValue
 });
+const {
+  getSchedulerFilePath,
+  readSchedulerJobs,
+  writeSchedulerJobs,
+  writeSchedulerAuditLog
+} = schedulerStorage;
+
+function getIntelligencePaths(projectName) {
+  const safeProject = normalizeProjectSlug(projectName);
+  const projectRoot = resolveProjectPath(path.join(DATA_DIR, 'projects'), safeProject).projectRoot;
+  const analyticsDir = path.join(projectRoot, 'analytics');
+  const aiDir = path.join(projectRoot, 'ai');
+
+  ensureDir(analyticsDir);
+  ensureDir(aiDir);
+
+  return {
+    project: safeProject,
+    projectRoot,
+    analyticsDir,
+    aiDir,
+    performancePath: path.join(analyticsDir, 'performance.json'),
+    recommendationsPath: path.join(aiDir, 'recommendations.json'),
+    learningPath: path.join(aiDir, 'learning.json')
+  };
+}
+
+const performanceStorage = createPerformanceStorage({
+  getIntelligencePaths,
+  readJsonFile,
+  writeJsonFile
+});
+const {
+  readPerformanceStore,
+  writePerformanceStore,
+  readLearningStore,
+  writeLearningStore,
+  readRecommendationsStore,
+  writeRecommendationsStore
+} = performanceStorage;
+
+function inferPerformanceContextFromJob(job = {}) {
+  const payload = job && typeof job.package_payload === 'object' ? job.package_payload : {};
+  const publishPackage = payload.publish_package && typeof payload.publish_package === 'object'
+    ? payload.publish_package
+    : {};
+  const assets = Array.isArray(publishPackage.assets) ? publishPackage.assets : [];
+  const firstAsset = assets[0] && typeof assets[0] === 'object' ? assets[0] : {};
+
+  return {
+    campaign_id: String(
+      payload.campaign_id
+      || publishPackage.campaign_id
+      || job.source_package_id
+      || ''
+    ).trim() || null,
+    product_slug: String(
+      payload.product_slug
+      || firstAsset.product_slug
+      || firstAsset.product_id
+      || ''
+    ).trim() || null,
+    hook: String(
+      payload.hook
+      || payload.primary_hook
+      || firstAsset.hook
+      || ''
+    ).trim() || null
+  };
+}
+
+function appendPerformanceRecord(projectName, input = {}) {
+  const safeProject = normalizeProjectSlug(projectName);
+  const store = readPerformanceStore(safeProject);
+  const schedulerJobs = readSchedulerJobs(safeProject);
+  const matchedJob = schedulerJobs.find((job) => String(job.id || '').trim() === String(input.job_id || '').trim()) || null;
+  const inferred = inferPerformanceContextFromJob(matchedJob || {});
+  const normalizedChannel = String(input.channel || matchedJob?.channel || '').trim().toLowerCase();
+  const metrics = normalizeFeedbackMetrics(input.metrics || {});
+  const stats = derivePerformanceStats(metrics);
+  const recordedAt = new Date().toISOString();
+
+  const record = {
+    record_id: `perf_${Date.now()}_${crypto.randomBytes(4).toString('hex')}`,
+    recorded_at: recordedAt,
+    project: safeProject,
+    job_id: String(input.job_id || '').trim(),
+    channel: normalizedChannel,
+    campaign_id: String(input.campaign_id || inferred.campaign_id || '').trim() || null,
+    product_slug: String(input.product_slug || inferred.product_slug || '').trim() || null,
+    hook: String(input.hook || inferred.hook || '').trim() || null,
+    metrics,
+    stats
+  };
+
+  store.records.push(record);
+  writePerformanceStore(safeProject, store);
+
+  return {
+    record,
+    total_records: store.records.length
+  };
+}
+
+const economicAnalytics = createEconomicCoreAnalytics({
+  normalizeProjectSlug,
+  readPerformanceStore,
+  readSchedulerJobs,
+  toFiniteNumber,
+  riskAlertBuilder
+});
+
+const {
+  economicSummaryProvider,
+  executionSignalProvider,
+  riskAlertProvider
+} = economicAnalytics;
+
+
+
+const recommendationRuntime = createRecommendationRuntime({
+  normalizeProjectSlug,
+  economicSummaryProvider,
+  executionSignalProvider,
+  readPerformanceStore,
+  riskAlertProvider
+});
+
+const {
+  generateOptimizationRecommendations
+} = recommendationRuntime;
+
+
+const learningPatterns = createLearningPatterns({
+  crypto,
+  toFiniteNumber
+});
+
+const {
+  upsertLearningPattern
+} = learningPatterns;
+
+
+const intelligenceLoop = createIntelligenceLoop({
+  env: process.env,
+  normalizeProjectSlug,
+  economicSummaryProvider,
+  generateOptimizationRecommendations,
+  readRecommendationsStore,
+  writeRecommendationsStore,
+  readLearningStore,
+  writeLearningStore,
+  buildLearningCandidates,
+  upsertLearningPattern
+});
+
+const {
+  updateIntelligenceLoop
+} = intelligenceLoop;
+
+
+const smartSuggestions = createSmartSuggestions({
+  normalizeProjectSlug,
+  economicSummaryProvider,
+  readRecommendationsStore,
+  readLearningStore,
+  generateOptimizationRecommendations
+});
+
+const {
+  buildSmartSuggestions
+} = smartSuggestions;
+
+const executionJobBridge = createExecutionJobBridge({
+  resolvePublishPackageForExecution,
+  buildSocialExecutionPayload,
+  resolveEmailPackageForExecution,
+  buildEmailReadyPayload,
+  buildMediaGenerationMock,
+  resolveCampaignPackageForAds,
+  buildAdExecutionPackage,
+  executePublishPackage: executePublishPackageRuntime,
+  executeEmailPackage: executeEmailPackageRuntime,
+  executeMediaGeneration: executeMediaGenerationRuntime,
+  executeAdExecutionPackage: executeAdExecutionPackageRuntime
+});
+const { executeJobBridge } = executionJobBridge;
+
+function buildSchedulerJobRecordWithDefaults(params) {
+  return buildSchedulerJobRecord(params, {
+    crypto,
+    defaultMaxAttempts: SCHEDULER_DEFAULT_MAX_ATTEMPTS
+  });
+}
+
+function buildMediaManagerProjectStartupPayload(projectName) {
+  const full = buildMediaManagerProjectPayload(projectName);
+  const safeProjectName = normalizeProjectSlug(projectName);
+  let startupAssets = Array.isArray(full.assets?.assets) ? full.assets.assets : [];
+
+  if (!startupAssets.length) {
+    try {
+      const registryPath = path.join(DATA_DIR, "projects", safeProjectName, "assets-registry.json");
+      const parsed = JSON.parse(fs.readFileSync(registryPath, "utf8"));
+
+      if (Array.isArray(parsed)) {
+        startupAssets = parsed;
+      } else if (Array.isArray(parsed?.assets)) {
+        startupAssets = parsed.assets;
+      } else if (Array.isArray(parsed?.items)) {
+        startupAssets = parsed.items;
+      } else if (Array.isArray(parsed?.records)) {
+        startupAssets = parsed.records;
+      }
+    } catch (_) {
+      startupAssets = [];
+    }
+  }
+
+  return {
+    project: full.project,
+    capabilities: full.capabilities,
+    overview: full.overview,
+    readiness: full.readiness,
+    assets: {
+      project: full.assets?.project || full.project,
+      generated_at: full.assets?.generated_at || new Date().toISOString(),
+      assets: startupAssets,
+      asset_catalog: Array.isArray(full.assets?.asset_catalog) ? full.assets.asset_catalog : [],
+      category_readiness: full.assets?.category_readiness || null,
+      missing_assets: full.assets?.missing_assets || null,
+      summary: {
+        total: startupAssets.length,
+        existing: startupAssets.filter((asset) => asset?.exists !== false).length,
+        missing: startupAssets.filter((asset) => asset?.exists === false).length
+      }
+    },
+    tree: {
+      project: full.project,
+      tree: []
+    },
+    registry: {
+      project: full.project,
+      total_assets: startupAssets.length,
+      assets: startupAssets
+    },
+    connectors: full.connectors || {},
+    activity: {
+      project: full.project,
+      items: [],
+      summary: {}
+    },
+    operations: {
+      project: full.project,
+      summary: {},
+      items: []
+    },
+    errors: full.errors || {}
+  };
+}
+
+app.post('/schedule_execution_job', (req, res) => {
+  let projectName = '';
+
+  try {
+    projectName = requireProjectContext(req, { allowFallback: false });
+
+    const type = String(req.body?.type || '').trim().toLowerCase();
+    if (!SCHEDULER_VALID_JOB_TYPES.includes(type)) {
+      const err = new Error(
+        `Invalid job type "${type}". Valid types: ${SCHEDULER_VALID_JOB_TYPES.join(', ')}`
+      );
+      err.statusCode = 400;
+      err.code = 'INVALID_JOB_TYPE';
+      throw err;
+    }
+
+    const scheduledAtRaw = String(req.body?.scheduled_at || '').trim();
+    if (!scheduledAtRaw) {
+      const err = new Error('Missing scheduled_at. Provide an ISO8601 datetime string.');
+      err.statusCode = 400;
+      err.code = 'SCHEDULED_AT_MISSING';
+      throw err;
+    }
+
+    const scheduledAtMs = new Date(scheduledAtRaw).getTime();
+    if (isNaN(scheduledAtMs)) {
+      const err = new Error('Invalid scheduled_at. Must be a valid ISO8601 datetime string.');
+      err.statusCode = 400;
+      err.code = 'SCHEDULED_AT_INVALID';
+      throw err;
+    }
+
+    const mode = String(req.body?.mode || 'semi_auto').trim().toLowerCase();
+    if (!SCHEDULER_VALID_MODES.includes(mode)) {
+      const err = new Error(
+        `Invalid mode "${mode}". Valid modes: ${SCHEDULER_VALID_MODES.join(', ')}`
+      );
+      err.statusCode = 400;
+      err.code = 'INVALID_JOB_MODE';
+      throw err;
+    }
+
+    const packagePayload = req.body?.package_payload && typeof req.body.package_payload === 'object'
+      ? req.body.package_payload
+      : null;
+
+    if (!packagePayload || Object.keys(packagePayload).length === 0) {
+      const err = new Error(
+        'Missing package content. Provide package_payload object with the execution payload.'
+      );
+      err.statusCode = 400;
+      err.code = 'PACKAGE_PAYLOAD_MISSING';
+      throw err;
+    }
+
+    const job = buildSchedulerJobRecordWithDefaults({
+      project: projectName,
+      type,
+      source_package_id: req.body?.source_package_id,
+      channel: req.body?.channel,
+      scheduled_at: scheduledAtRaw,
+      mode,
+      package_payload: packagePayload,
+      max_attempts: req.body?.max_attempts
+    });
+
+    const jobs = readSchedulerJobs(projectName);
+    jobs.push(job);
+    writeSchedulerJobs(projectName, jobs);
+
+    writeSchedulerAuditLog(projectName, {
+      job_id: job.id,
+      action: 'job_created',
+      status: 'pending',
+      result_reference: {
+        type: job.type,
+        scheduled_at: job.scheduled_at,
+        mode: job.mode
+      }
+    });
+
+    return res.status(201).json({
+      ok: true,
+      job
+    });
+  } catch (error) {
+    return sendError(res, {
+      statusCode: getErrorStatusCode(error, 400),
+      code: error.code || 'SCHEDULE_JOB_FAILED',
+      message: error.message || 'Failed to schedule execution job'
+    });
+  }
+});
+
+app.get('/scheduler_queue', (req, res) => {
+  try {
+    const projectName = requireProjectContext(req, { allowFallback: false });
+    const nowMs = Date.now();
+    const jobs = readSchedulerJobs(projectName);
+
+    const pending = [];
+    const due = [];
+    const running = [];
+    const failed = [];
+    const completed = [];
+    const retryable = [];
+
+    for (const job of jobs) {
+      if (job.status === 'completed') {
+        completed.push(job);
+        continue;
+      }
+
+      if (job.status === 'failed') {
+        failed.push(job);
+        continue;
+      }
+
+      if (job.status === 'running') {
+        running.push(isJobLockExpired(job, SCHEDULER_LOCK_TIMEOUT_MS) ? { ...job, lock_expired: true } : job);
+        continue;
+      }
+
+      if (job.status === 'retryable') {
+        retryable.push(job);
+        const scheduledAt = new Date(job.scheduled_at).getTime();
+        if (!isNaN(scheduledAt) && scheduledAt <= nowMs) {
+          due.push(job);
+        }
+        continue;
+      }
+
+      if (job.status === 'pending') {
+        pending.push(job);
+        const scheduledAt = new Date(job.scheduled_at).getTime();
+        if (!isNaN(scheduledAt) && scheduledAt <= nowMs) {
+          due.push(job);
+        }
+      }
+    }
+
+    return res.json({
+      ok: true,
+      project: projectName,
+      total: jobs.length,
+      queue: {
+        pending: pending.length,
+        due: due.length,
+        running: running.length,
+        failed: failed.length,
+        completed: completed.length,
+        retryable: retryable.length
+      },
+      jobs: {
+        pending,
+        due,
+        running,
+        failed,
+        completed,
+        retryable
+      }
+    });
+  } catch (error) {
+    return sendError(res, {
+      statusCode: getErrorStatusCode(error, 400),
+      code: error.code || 'SCHEDULER_QUEUE_FAILED',
+      message: error.message || 'Failed to retrieve scheduler queue'
+    });
+  }
+});
+
+app.post('/run_scheduler_worker_once', async (req, res) => {
+  let projectName = '';
+
+  try {
+    projectName = requireProjectContext(req, { allowFallback: false });
+    const workerId = generateWorkerId(crypto);
+    const lockTimestamp = new Date().toISOString();
+    const results = [];
+
+    const jobs = readSchedulerJobs(projectName);
+
+    // Phase 1: lock all due jobs atomically
+    for (const job of jobs) {
+      if (job.status === 'completed') continue;
+      if (job.status === 'failed' && job.attempts >= job.max_attempts) continue;
+
+      const isStaleRunning = job.status === 'running' && isJobLockExpired(job, SCHEDULER_LOCK_TIMEOUT_MS);
+      const isDue = isJobDue(job);
+
+      if (!isDue && !isStaleRunning) continue;
+
+      job.status = 'running';
+      job.locked_at = lockTimestamp;
+      job.locked_by = workerId;
+      job.attempts = (job.attempts || 0) + 1;
+      job.updated_at = lockTimestamp;
+    }
+
+    writeSchedulerJobs(projectName, jobs);
+
+    // Phase 2: execute locked jobs and update status
+    for (const job of jobs) {
+      if (job.status !== 'running' || job.locked_by !== workerId) continue;
+
+      const executionTimestamp = new Date().toISOString();
+
+      try {
+        const result = await executeJobBridge(job);
+        job.status = 'completed';
+        job.execution_state = result.execution_state || 'completed';
+        job.last_error = null;
+        job.locked_at = null;
+        job.locked_by = null;
+        job.updated_at = executionTimestamp;
+
+        const logPath = writeSchedulerAuditLog(projectName, {
+          job_id: job.id,
+          action: 'job_executed',
+          status: 'completed',
+          result_reference: result
+        });
+
+        let intelligenceUpdate = null;
+        try {
+          intelligenceUpdate = updateIntelligenceLoop(projectName, {
+            trigger: 'job_completed',
+            jobRecord: job,
+            executionResult: result
+          });
+        } catch (intelligenceError) {
+          writeSchedulerAuditLog(projectName, {
+            job_id: job.id,
+            action: 'intelligence_loop_failed',
+            status: 'non_fatal',
+            error: intelligenceError.message || 'Intelligence loop update failed'
+          });
+        }
+
+        results.push({
+          job_id: job.id,
+          type: job.type,
+          status: 'completed',
+          execution_state: job.execution_state,
+          intelligence_alerts: intelligenceUpdate?.alerts?.length || 0,
+          log: logPath
+        });
+      } catch (err) {
+        const errorMessage = sanitizeErrorMessage(err.message, 'Job execution failed');
+        const canRetry = job.attempts < job.max_attempts;
+        const executionTimestamp2 = new Date().toISOString();
+
+        job.status = canRetry ? 'retryable' : 'failed';
+        job.execution_state = 'failed';
+        job.last_error = errorMessage;
+        job.locked_at = null;
+        job.locked_by = null;
+        job.updated_at = executionTimestamp2;
+
+        const logPath = writeSchedulerAuditLog(projectName, {
+          job_id: job.id,
+          action: 'job_failed',
+          status: job.status,
+          error: errorMessage,
+          result_reference: {
+            attempts: job.attempts,
+            max_attempts: job.max_attempts,
+            can_retry: canRetry
+          }
+        });
+
+        results.push({
+          job_id: job.id,
+          type: job.type,
+          status: job.status,
+          attempts: job.attempts,
+          max_attempts: job.max_attempts,
+          last_error: errorMessage,
+          log: logPath
+        });
+      }
+    }
+
+    writeSchedulerJobs(projectName, jobs);
+
+    return res.json({
+      ok: true,
+      project: projectName,
+      worker_id: workerId,
+      processed: results.length,
+      results
+    });
+  } catch (error) {
+    return sendError(res, {
+      statusCode: getErrorStatusCode(error, 400),
+      code: error.code || 'WORKER_RUN_FAILED',
+      message: error.message || 'Failed to run scheduler worker'
+    });
+  }
+});
+
+app.post('/record_execution_feedback', (req, res) => {
+  try {
+    const projectName = requireProjectContext(req, { allowFallback: false });
+    const jobId = String(req.body?.job_id || '').trim();
+    const channel = String(req.body?.channel || '').trim().toLowerCase();
+    const metrics = req.body?.metrics;
+
+    if (!jobId) {
+      const err = new Error('Missing job_id');
+      err.statusCode = 400;
+      err.code = 'JOB_ID_MISSING';
+      throw err;
+    }
+
+    if (!channel) {
+      const err = new Error('Missing channel');
+      err.statusCode = 400;
+      err.code = 'CHANNEL_MISSING';
+      throw err;
+    }
+
+    if (!metrics || typeof metrics !== 'object') {
+      const err = new Error('Missing metrics object');
+      err.statusCode = 400;
+      err.code = 'METRICS_MISSING';
+      throw err;
+    }
+
+    const required = ['impressions', 'clicks', 'engagement', 'conversions', 'revenue'];
+    for (const key of required) {
+      if (!Object.prototype.hasOwnProperty.call(metrics, key)) {
+        const err = new Error(`metrics.${key} is required`);
+        err.statusCode = 400;
+        err.code = 'METRICS_FIELD_MISSING';
+        throw err;
+      }
+    }
+
+    const appended = appendPerformanceRecord(projectName, {
+      job_id: jobId,
+      channel,
+      campaign_id: req.body?.campaign_id,
+      product_slug: req.body?.product_slug,
+      hook: req.body?.hook,
+      metrics
+    });
+
+    const update = updateIntelligenceLoop(projectName, {
+      trigger: 'feedback_recorded',
+      feedbackRecord: appended.record
+    });
+
+    return res.status(201).json({
+      ok: true,
+      project: projectName,
+      total_records: appended.total_records,
+      feedback_record: appended.record,
+      intelligence: {
+        learning_updates: update.learning_updates.length,
+        recommendation_alerts: update.alerts.length
+      },
+      analytics_file: getIntelligencePaths(projectName).performancePath
+    });
+  } catch (error) {
+    return sendError(res, {
+      statusCode: getErrorStatusCode(error, 400),
+      code: error.code || 'RECORD_EXECUTION_FEEDBACK_FAILED',
+      message: error.message || 'Failed to record execution feedback'
+    });
+  }
+});
+
+app.get('/get_performance_summary', (req, res) => {
+  try {
+    const projectName = requireProjectContext(req, { allowFallback: false });
+    const summary = economicSummaryProvider(projectName);
+
+    return res.json({
+      ok: true,
+      project: projectName,
+      summary
+    });
+  } catch (error) {
+    return sendError(res, {
+      statusCode: getErrorStatusCode(error, 400),
+      code: error.code || 'GET_PERFORMANCE_SUMMARY_FAILED',
+      message: error.message || 'Failed to build performance summary'
+    });
+  }
+});
+
+app.post('/generate_optimization_recommendations', (req, res) => {
+  try {
+    const projectName = requireProjectContext(req, { allowFallback: false });
+    const update = updateIntelligenceLoop(projectName, {
+      trigger: 'recommendation_requested'
+    });
+
+    return res.json({
+      ok: true,
+      project: projectName,
+      recommendations: {
+        what_to_stop: update.recommendations.stop,
+        what_to_scale: update.recommendations.scale,
+        what_to_improve: update.recommendations.improve,
+        new_angles_to_test: update.recommendations.new_angles_to_test
+      },
+      risk_alerts: update.recommendations.alerts,
+      based_on: update.recommendations.based_on
+    });
+  } catch (error) {
+    return sendError(res, {
+      statusCode: getErrorStatusCode(error, 400),
+      code: error.code || 'GENERATE_OPTIMIZATION_RECOMMENDATIONS_FAILED',
+      message: error.message || 'Failed to generate optimization recommendations'
+    });
+  }
+});
+
+app.post('/api/media/improve-prompt', async (req, res) => {
+  try {
+    const result = await mediaProviderLayer.improvePrompt(req.body || {});
+    if (!result.ok && result.status === 'provider_not_configured') {
+      return res.status(200).json(result);
+    }
+
+    const persisted = maybePersistMediaGenerationResult(req, {
+      requestType: asString(req.body?.request_type || 'image'),
+      output: { improved_prompt: result.improved_prompt },
+      status: 'prompt_ready'
+    });
+
+    return res.json({
+      ok: true,
+      status: 'prompt_ready',
+      improved_prompt: result.improved_prompt,
+      provider: result.provider,
+      model: result.model,
+      ...(persisted || {})
+    });
+  } catch (error) {
+    return sendError(res, {
+      statusCode: getErrorStatusCode(error, 500),
+      code: error.code || 'MEDIA_IMPROVE_PROMPT_FAILED',
+      message: error.message || 'Failed to improve media prompt'
+    });
+  }
+});
+
+app.post('/api/media/brand-check', async (req, res) => {
+  try {
+    const result = await mediaProviderLayer.brandCheck(req.body || {});
+    if (!result.ok && result.status === 'provider_not_configured') {
+      return res.status(200).json(result);
+    }
+
+    const persisted = maybePersistMediaGenerationResult(req, {
+      requestType: asString(req.body?.request_type || 'image'),
+      output: { brand_check: result.brand_check },
+      status: 'needs_review'
+    });
+
+    return res.json({
+      ok: true,
+      status: 'needs_review',
+      brand_check: result.brand_check,
+      provider: result.provider,
+      model: result.model,
+      ...(persisted || {})
+    });
+  } catch (error) {
+    return sendError(res, {
+      statusCode: getErrorStatusCode(error, 500),
+      code: error.code || 'MEDIA_BRAND_CHECK_FAILED',
+      message: error.message || 'Failed to run media brand check'
+    });
+  }
+});
+
+app.post('/api/media/generate-image', async (req, res) => {
+  try {
+    const result = await mediaProviderLayer.generateImage(req.body || {});
+    if (!result.ok && result.status === 'provider_not_configured') {
+      return res.status(200).json(result);
+    }
+
+    const persisted = maybePersistMediaGenerationResult(req, {
+      requestType: 'image',
+      output: result,
+      status: 'needs_review'
+    });
+
+    return res.json({
+      ok: true,
+      status: 'needs_review',
+      provider: result.provider,
+      model: result.model,
+      images: result.images,
+      ...(persisted || {})
+    });
+  } catch (error) {
+    return sendError(res, {
+      statusCode: getErrorStatusCode(error, 500),
+      code: error.code || 'MEDIA_GENERATE_IMAGE_FAILED',
+      message: error.message || 'Failed to generate image'
+    });
+  }
+});
+
+app.post('/api/media/generate-video-brief', async (req, res) => {
+  try {
+    const result = await mediaProviderLayer.generateVideoBrief(req.body || {});
+    if (!result.ok && result.status === 'provider_not_configured') {
+      return res.status(200).json(result);
+    }
+
+    const persisted = maybePersistMediaGenerationResult(req, {
+      requestType: 'video',
+      output: { video_brief: result.video_brief },
+      status: 'needs_review'
+    });
+
+    return res.json({
+      ok: true,
+      status: 'needs_review',
+      provider: result.provider,
+      model: result.model,
+      video_brief: result.video_brief,
+      ...(persisted || {})
+    });
+  } catch (error) {
+    return sendError(res, {
+      statusCode: getErrorStatusCode(error, 500),
+      code: error.code || 'MEDIA_GENERATE_VIDEO_BRIEF_FAILED',
+      message: error.message || 'Failed to generate video brief'
+    });
+  }
+});
+
+app.post('/api/media/generate-voice-script', async (req, res) => {
+  try {
+    const result = await mediaProviderLayer.generateVoiceScript(req.body || {});
+    if (!result.ok && result.status === 'provider_not_configured') {
+      return res.status(200).json(result);
+    }
+
+    const persisted = maybePersistMediaGenerationResult(req, {
+      requestType: 'audio',
+      output: { voice_script: result.voice_script },
+      status: 'needs_review'
+    });
+
+    return res.json({
+      ok: true,
+      status: 'needs_review',
+      provider: result.provider,
+      model: result.model,
+      voice_script: result.voice_script,
+      ...(persisted || {})
+    });
+  } catch (error) {
+    return sendError(res, {
+      statusCode: getErrorStatusCode(error, 500),
+      code: error.code || 'MEDIA_GENERATE_VOICE_SCRIPT_FAILED',
+      message: error.message || 'Failed to generate voice script'
+    });
+  }
+});
+
+app.post('/api/media/generate-campaign-pack', async (req, res) => {
+  try {
+    const result = await mediaProviderLayer.generateCampaignPack(req.body || {});
+    if (!result.ok && result.status === 'provider_not_configured') {
+      return res.status(200).json(result);
+    }
+
+    const persisted = maybePersistMediaGenerationResult(req, {
+      requestType: 'multi_format',
+      output: { campaign_pack: result.campaign_pack },
+      status: 'needs_review'
+    });
+
+    return res.json({
+      ok: true,
+      status: 'needs_review',
+      provider: result.provider,
+      model: result.model,
+      campaign_pack: result.campaign_pack,
+      ...(persisted || {})
+    });
+  } catch (error) {
+    return sendError(res, {
+      statusCode: getErrorStatusCode(error, 500),
+      code: error.code || 'MEDIA_GENERATE_CAMPAIGN_PACK_FAILED',
+      message: error.message || 'Failed to generate campaign pack'
+    });
+  }
+});
+
+app.get('/get_smart_suggestions', (req, res) => {
+  try {
+    const projectName = requireProjectContext(req, { allowFallback: false });
+    const suggestions = buildSmartSuggestions(projectName);
+
+    return res.json({
+      ok: true,
+      project: projectName,
+      suggestions
+    });
+  } catch (error) {
+    return sendError(res, {
+      statusCode: getErrorStatusCode(error, 400),
+      code: error.code || 'GET_SMART_SUGGESTIONS_FAILED',
+      message: error.message || 'Failed to get smart suggestions'
+    });
+  }
+});
+
+// ─── END PHASE 4 ─────────────────────────────────────────────────────────────
+
+app.use((err, req, res, next) => {
+  const statusCode = getErrorStatusCode(err, 500);
+  const explicitCode = String(err?.code || '').trim();
+  const stableCode = explicitCode && /^[A-Z0-9_]+$/.test(explicitCode)
+    ? explicitCode
+    : statusCode >= 500
+    ? 'INTERNAL_ERROR'
+    : 'REQUEST_ERROR';
+
+  const isProduction = String(process.env.NODE_ENV || '').trim().toLowerCase() === 'production';
+  const responseMessage = statusCode >= 500 && isProduction
+    ? 'Internal server error'
+    : sanitizeErrorMessage(err?.message, 'Request failed');
+
+  appLogger.error('unhandled_request_error', {
+    route: req?.path || 'unknown',
+    action: 'global_error_handler',
+    method: req?.method || 'unknown',
+    statusCode,
+    error: serializeErrorForLog(err)
+  });
+
+  if (res.headersSent) {
+    return next(err);
+  }
+
+  return res.status(statusCode).json({
+    ok: false,
+    error: {
+      code: stableCode,
+      message: responseMessage
+    }
+  });
+});
+
+if (require.main === module) {
+  assertProductionProfileHardening(process.env);
+
+  const server = app.listen(PORT, () => {
+    appLogger.info('service_started', {
+      route: '/health',
+      action: 'listen',
+      port: Number(PORT)
+    });
+  });
+
+  process.on('SIGTERM', () => {
+    appLogger.info('sigterm_received', { route: 'process', action: 'shutdown' });
+    server.close((err) => {
+      if (err) {
+        appLogger.error('shutdown_error', {
+          route: 'process',
+          action: 'shutdown',
+          error: serializeErrorForLog(err)
+        });
+        process.exit(1);
+      }
+      appLogger.info('shutdown_complete', { route: 'process', action: 'shutdown' });
+      process.exit(0);
+    });
+  });
+}
+
+module.exports = {
+  app,
+  __productionProfile: {
+    collectProductionBypassFlags,
+    validateProductionProfileHardening,
+    assertProductionProfileHardening
+  },
+  __stability: {
+    createProject,
+    updateProjectSetup,
+    reviewProject,
+    reviewProjectReadiness,
+    reviewProjectSources,
+    reviewProjectCanonicalParity,
+    ensureProjectBaselineFiles,
+    getProjectBaselinePaths,
+    registerProjectAsset,
+    listProjectAssets,
+    setProjectSourceOfTruth,
+    readCanonicalJsonWithLegacyFallback,
+    getProductIntelligencePaths,
+    buildGermanLaunchPlan,
+    buildLaunchWave,
+    selectLaunchReadyProducts,
+    buildCampaignExecutionPackage,
+    buildCampaignMediaJob,
+    buildCampaignEmailPackage,
+    buildCampaignPublishPackage,
+    recordManualPublish,
+    reviewCampaignFinalization,
+    readJsonFile,
+    writeJsonFile,
+    upsertCampaign
+  }
+};

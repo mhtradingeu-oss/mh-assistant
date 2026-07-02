@@ -1,0 +1,462 @@
+runtime/orchestrator-service/lib/customer-operations/customers/store/customer-profile-store.js:5:} = require('../../contracts/customer-profile-contract');
+runtime/orchestrator-service/lib/customer-operations/customers/store/customer-profile-store.js:7:const customers = new Map();
+runtime/orchestrator-service/lib/customer-operations/customers/store/customer-profile-store.js:9:function createCustomerProfile(input = {}) {
+runtime/orchestrator-service/lib/customer-operations/customers/store/customer-profile-store.js:12:  if (!profile.customer_id) {
+runtime/orchestrator-service/lib/customer-operations/customers/store/customer-profile-store.js:13:    throw new Error('customer_id is required');
+runtime/orchestrator-service/lib/customer-operations/customers/store/customer-profile-store.js:16:  customers.set(profile.customer_id, profile);
+runtime/orchestrator-service/lib/customer-operations/customers/store/customer-profile-store.js:21:function getCustomerProfile(customerId) {
+runtime/orchestrator-service/lib/customer-operations/customers/store/customer-profile-store.js:22:  return customers.get(String(customerId || '')) || null;
+runtime/orchestrator-service/lib/customer-operations/customers/store/customer-profile-store.js:25:function listCustomerProfiles() {
+runtime/orchestrator-service/lib/customer-operations/customers/store/customer-profile-store.js:26:  return Array.from(customers.values());
+runtime/orchestrator-service/lib/customer-operations/customers/store/customer-profile-store.js:29:function updateCustomerProfile(customerId, updates = {}) {
+runtime/orchestrator-service/lib/customer-operations/customers/store/customer-profile-store.js:30:  const current = getCustomerProfile(customerId);
+runtime/orchestrator-service/lib/customer-operations/customers/store/customer-profile-store.js:45:  customers.set(current.customer_id, updated);
+runtime/orchestrator-service/lib/customer-operations/customers/store/customer-profile-store.js:50:module.exports = {
+runtime/orchestrator-service/lib/customer-operations/tickets/README.md:6:- ticket creation
+runtime/orchestrator-service/lib/customer-operations/tickets/store/ticket-store.js:5:} = require('../../contracts/ticket-contract');
+runtime/orchestrator-service/lib/customer-operations/tickets/store/ticket-store.js:7:const tickets = new Map();
+runtime/orchestrator-service/lib/customer-operations/tickets/store/ticket-store.js:9:function createTicket(input = {}) {
+runtime/orchestrator-service/lib/customer-operations/tickets/store/ticket-store.js:10:  const ticket = createTicketContract(input);
+runtime/orchestrator-service/lib/customer-operations/tickets/store/ticket-store.js:12:  if (!ticket.ticket_id) {
+runtime/orchestrator-service/lib/customer-operations/tickets/store/ticket-store.js:13:    throw new Error('ticket_id is required');
+runtime/orchestrator-service/lib/customer-operations/tickets/store/ticket-store.js:16:  tickets.set(ticket.ticket_id, ticket);
+runtime/orchestrator-service/lib/customer-operations/tickets/store/ticket-store.js:18:  return ticket;
+runtime/orchestrator-service/lib/customer-operations/tickets/store/ticket-store.js:21:function getTicket(ticketId) {
+runtime/orchestrator-service/lib/customer-operations/tickets/store/ticket-store.js:22:  return tickets.get(String(ticketId || '')) || null;
+runtime/orchestrator-service/lib/customer-operations/tickets/store/ticket-store.js:25:function listTickets() {
+runtime/orchestrator-service/lib/customer-operations/tickets/store/ticket-store.js:26:  return Array.from(tickets.values());
+runtime/orchestrator-service/lib/customer-operations/tickets/store/ticket-store.js:29:function updateTicket(ticketId, updates = {}) {
+runtime/orchestrator-service/lib/customer-operations/tickets/store/ticket-store.js:30:  const current = getTicket(ticketId);
+runtime/orchestrator-service/lib/customer-operations/tickets/store/ticket-store.js:45:  tickets.set(current.ticket_id, updated);
+runtime/orchestrator-service/lib/customer-operations/tickets/store/ticket-store.js:50:module.exports = {
+runtime/orchestrator-service/lib/customer-operations/contracts/message-contract.js:3:function createMessageContract(input = {}) {
+runtime/orchestrator-service/lib/customer-operations/contracts/message-contract.js:5:    message_id: String(input.message_id || ''),
+runtime/orchestrator-service/lib/customer-operations/contracts/message-contract.js:6:    conversation_id: String(input.conversation_id || ''),
+runtime/orchestrator-service/lib/customer-operations/contracts/message-contract.js:8:    channel_id: String(input.channel_id || ''),
+runtime/orchestrator-service/lib/customer-operations/contracts/message-contract.js:13:      type: String(input.sender?.type || 'customer'),
+runtime/orchestrator-service/lib/customer-operations/contracts/message-contract.js:39:      source_runtime: 'mh-os-customer-operations'
+runtime/orchestrator-service/lib/customer-operations/contracts/message-contract.js:44:module.exports = {
+runtime/orchestrator-service/lib/customer-operations/contracts/unified-inbox-contract.js:3:function createUnifiedInboxContract(input = {}) {
+runtime/orchestrator-service/lib/customer-operations/contracts/unified-inbox-contract.js:5:    inbox_id: String(input.inbox_id || ''),
+runtime/orchestrator-service/lib/customer-operations/contracts/unified-inbox-contract.js:7:    channel: {
+runtime/orchestrator-service/lib/customer-operations/contracts/unified-inbox-contract.js:8:      channel_id: String(input.channel?.channel_id || ''),
+runtime/orchestrator-service/lib/customer-operations/contracts/unified-inbox-contract.js:9:      provider: String(input.channel?.provider || '')
+runtime/orchestrator-service/lib/customer-operations/contracts/unified-inbox-contract.js:12:    conversation: {
+runtime/orchestrator-service/lib/customer-operations/contracts/unified-inbox-contract.js:13:      conversation_id: String(
+runtime/orchestrator-service/lib/customer-operations/contracts/unified-inbox-contract.js:14:        input.conversation?.conversation_id || ''
+runtime/orchestrator-service/lib/customer-operations/contracts/unified-inbox-contract.js:17:      customer_id: String(
+runtime/orchestrator-service/lib/customer-operations/contracts/unified-inbox-contract.js:18:        input.conversation?.customer_id || ''
+runtime/orchestrator-service/lib/customer-operations/contracts/unified-inbox-contract.js:24:        input.assignment?.assigned_team || 'customer-care'
+runtime/orchestrator-service/lib/customer-operations/contracts/unified-inbox-contract.js:57:      source_runtime: 'mh-os-customer-operations'
+runtime/orchestrator-service/lib/customer-operations/contracts/unified-inbox-contract.js:62:module.exports = {
+runtime/orchestrator-service/lib/customer-operations/contracts/conversation-contract.js:3:function createConversationContract(input = {}) {
+runtime/orchestrator-service/lib/customer-operations/contracts/conversation-contract.js:5:    conversation_id: String(input.conversation_id || ''),
+runtime/orchestrator-service/lib/customer-operations/contracts/conversation-contract.js:6:    channel: String(input.channel || 'website'),
+runtime/orchestrator-service/lib/customer-operations/contracts/conversation-contract.js:7:    customer_id: String(input.customer_id || ''),
+runtime/orchestrator-service/lib/customer-operations/contracts/conversation-contract.js:17:    last_message_at: input.last_message_at || new Date().toISOString(),
+runtime/orchestrator-service/lib/customer-operations/contracts/conversation-contract.js:32:      source_runtime: 'mh-os-customer-operations'
+runtime/orchestrator-service/lib/customer-operations/contracts/conversation-contract.js:37:module.exports = {
+runtime/orchestrator-service/lib/customer-operations/contracts/README.md:4:- conversation contracts
+runtime/orchestrator-service/lib/customer-operations/contracts/README.md:5:- ticket contracts
+runtime/orchestrator-service/lib/customer-operations/contracts/README.md:6:- customer profile contracts
+runtime/orchestrator-service/lib/customer-operations/contracts/README.md:7:- channel message contracts
+runtime/orchestrator-service/lib/customer-operations/contracts/ticket-contract.js:3:function createTicketContract(input = {}) {
+runtime/orchestrator-service/lib/customer-operations/contracts/ticket-contract.js:5:    ticket_id: String(input.ticket_id || ''),
+runtime/orchestrator-service/lib/customer-operations/contracts/ticket-contract.js:6:    conversation_id: String(input.conversation_id || ''),
+runtime/orchestrator-service/lib/customer-operations/contracts/ticket-contract.js:12:    customer_id: String(input.customer_id || ''),
+runtime/orchestrator-service/lib/customer-operations/contracts/ticket-contract.js:33:      source_runtime: 'mh-os-customer-operations'
+runtime/orchestrator-service/lib/customer-operations/contracts/ticket-contract.js:38:module.exports = {
+runtime/orchestrator-service/lib/customer-operations/contracts/escalation-contract.js:3:function createEscalationContract(input = {}) {
+runtime/orchestrator-service/lib/customer-operations/contracts/escalation-contract.js:8:      type: String(input.source?.type || 'conversation'),
+runtime/orchestrator-service/lib/customer-operations/contracts/escalation-contract.js:16:        input.routing?.assigned_team || 'customer-care'
+runtime/orchestrator-service/lib/customer-operations/contracts/escalation-contract.js:55:      source_runtime: 'mh-os-customer-operations'
+runtime/orchestrator-service/lib/customer-operations/contracts/escalation-contract.js:60:module.exports = {
+runtime/orchestrator-service/lib/customer-operations/contracts/customer-profile-contract.js:3:function createCustomerProfileContract(input = {}) {
+runtime/orchestrator-service/lib/customer-operations/contracts/customer-profile-contract.js:5:    customer_id: String(input.customer_id || ''),
+runtime/orchestrator-service/lib/customer-operations/contracts/customer-profile-contract.js:15:    channels: {
+runtime/orchestrator-service/lib/customer-operations/contracts/customer-profile-contract.js:16:      instagram: String(input.channels?.instagram || ''),
+runtime/orchestrator-service/lib/customer-operations/contracts/customer-profile-contract.js:17:      whatsapp: String(input.channels?.whatsapp || ''),
+runtime/orchestrator-service/lib/customer-operations/contracts/customer-profile-contract.js:18:      telegram: String(input.channels?.telegram || '')
+runtime/orchestrator-service/lib/customer-operations/contracts/customer-profile-contract.js:43:      source_runtime: 'mh-os-customer-operations'
+runtime/orchestrator-service/lib/customer-operations/contracts/customer-profile-contract.js:48:module.exports = {
+runtime/orchestrator-service/lib/customer-operations/contracts/sla-policy-contract.js:3:function createSlaPolicyContract(input = {}) {
+runtime/orchestrator-service/lib/customer-operations/contracts/sla-policy-contract.js:8:      channel_id: String(input.scope?.channel_id || ''),
+runtime/orchestrator-service/lib/customer-operations/contracts/sla-policy-contract.js:9:      customer_type: String(input.scope?.customer_type || 'default'),
+runtime/orchestrator-service/lib/customer-operations/contracts/sla-policy-contract.js:36:        input.escalation?.escalation_queue || 'customer-care'
+runtime/orchestrator-service/lib/customer-operations/contracts/sla-policy-contract.js:45:      auto_classification_enabled: Boolean(
+runtime/orchestrator-service/lib/customer-operations/contracts/sla-policy-contract.js:46:        input.ai?.auto_classification_enabled ?? true
+runtime/orchestrator-service/lib/customer-operations/contracts/sla-policy-contract.js:53:      source_runtime: 'mh-os-customer-operations'
+runtime/orchestrator-service/lib/customer-operations/contracts/sla-policy-contract.js:58:module.exports = {
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:3:const conversationStore = require('./conversations/store/conversation-store');
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:4:const ticketStore = require('./tickets/store/ticket-store');
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:6:const messageStore = require('./conversations/messages/message-store');
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:8:const customerProfileStore = require('./customers/store/customer-profile-store');
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:14:const unifiedInboxStore = require('./unified-inbox/store/unified-inbox-store');
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:18:} = require('./unified-inbox/register-integration-inbox');
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:27:} = require('./channels/registry/default-channels');
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:31:} = require('./channels/registry/channel-registry-store');
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:36:} = require('./channels/register-integration-channel');
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:41:} = require('./readiness/customer-operations-readiness-snapshot');
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:43:function createCustomerOperationsRuntime() {
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:48:    conversations: {
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:49:      create: conversationStore.createConversation,
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:50:      get: conversationStore.getConversation,
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:51:      list: conversationStore.listConversations,
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:52:      update: conversationStore.updateConversation
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:83:    customers: {
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:84:      create: customerProfileStore.createCustomerProfile,
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:85:      get: customerProfileStore.getCustomerProfile,
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:86:      list: customerProfileStore.listCustomerProfiles,
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:87:      update: customerProfileStore.updateCustomerProfile
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:90:    messages: {
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:91:      create: messageStore.createMessage,
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:92:      get: messageStore.getMessage,
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:93:      list: messageStore.listMessages,
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:95:        messageStore.listConversationMessages
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:98:    channels: {
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:103:    tickets: {
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:104:      create: ticketStore.createTicket,
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:105:      get: ticketStore.getTicket,
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:106:      list: ticketStore.listTickets,
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:107:      update: ticketStore.updateTicket
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:110:    readiness: {
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:116:        runtime: 'mh-os-customer-operations',
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:119:          conversations: true,
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:120:          tickets: true,
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:121:          channels: true,
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:123:          messages: true,
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:124:          customers: true,
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:127:          unified_inbox: true,
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:128:          integration_inbox_bridge: true,
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:141:module.exports = {
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:1:function asArray(value) {
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:5:function asString(value) {
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:9:function truncate(value, max = 180) {
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:14:function maskIdentifier(value, fallback = 'customer') {
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:25:function safeList(fn) {
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:27:    return typeof fn === 'function' ? asArray(fn()) : [];
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:33:function getRuntimeCapabilities(runtime = {}) {
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:34:  const health = typeof runtime.health?.snapshot === 'function' ? runtime.health.snapshot() : {};
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:38:function projectCustomerReadiness(runtime = {}) {
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:39:  const health = typeof runtime.health?.snapshot === 'function' ? runtime.health.snapshot() : {};
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:42:  const provider = health.provider_readiness || {};
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:45:    runtime: 'mh-os-customer-operations',
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:46:    runtime_ready: Boolean(capabilities.conversations || capabilities.unified_inbox),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:47:    inbox_ready: Boolean(capabilities.unified_inbox),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:48:    conversations_ready: Boolean(capabilities.conversations),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:49:    messages_ready: Boolean(capabilities.messages),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:50:    tickets_ready: Boolean(capabilities.tickets),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:51:    customers_ready: Boolean(capabilities.customers),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:54:    integration_inbox_bridge_ready: Boolean(capabilities.integration_inbox_bridge),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:68:      'Customer messages may be truncated or masked for privacy.'
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:73:function projectInboxEntry(entry = {}) {
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:74:  const conversation = entry.conversation || {};
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:75:  const channel = entry.channel || {};
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:78:  const lastMessage = entry.last_message || entry.message || {};
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:81:    inbox_id: asString(entry.inbox_id || entry.id),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:82:    channel: {
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:83:      channel_id: asString(channel.channel_id || entry.channel_id || conversation.channel || 'unknown'),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:84:      provider: asString(channel.provider || ''),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:85:      type: asString(channel.type || '')
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:87:    conversation_id: asString(conversation.conversation_id || entry.conversation_id),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:88:    customer_label: maskIdentifier(conversation.customer_id || entry.customer_id || 'customer'),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:89:    masked_customer_id: maskIdentifier(conversation.customer_id || entry.customer_id || ''),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:93:      assigned_team: asString(assignment.assigned_team || 'customer-care'),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:96:    last_message_preview: truncate(lastMessage.body || lastMessage.message || entry.last_message_preview || ''),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:97:    last_message_at: asString(lastMessage.created_at || entry.last_message_at || conversation.last_message_at || ''),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:101:    privacy_flags: ['customer_identity_masked', 'message_preview_truncated']
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:105:function projectInboxEntries(runtime = {}) {
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:109:function projectConversation(conversation = {}, runtime = {}) {
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:110:  const messages = safeList(runtime.messages?.listByConversation?.bind(null, conversation.conversation_id));
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:111:  const tickets = safeList(runtime.tickets?.list).filter((ticket) => ticket.conversation_id === conversation.conversation_id);
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:114:    conversation_id: asString(conversation.conversation_id),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:115:    customer_label: maskIdentifier(conversation.customer_id || 'customer'),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:116:    masked_customer_id: maskIdentifier(conversation.customer_id || ''),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:117:    channel: asString(conversation.channel || conversation.channel_id || 'unknown'),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:118:    status: asString(conversation.status || 'open'),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:119:    priority: asString(conversation.priority || 'normal'),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:120:    assigned_team: asString(conversation.assigned_team || 'customer-care'),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:121:    assigned_ai_agent: asString(conversation.assigned_ai_agent || ''),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:122:    last_message_at: asString(conversation.last_message_at || ''),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:123:    message_count: messages.length,
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:124:    ticket_count: tickets.length,
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:125:    escalation_state: tickets.some((ticket) => ticket.escalation_state) ? 'active' : 'none',
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:126:    privacy_flags: ['customer_identity_masked']
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:130:function projectConversations(runtime = {}) {
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:131:  return safeList(runtime.conversations?.list).map((conversation) => projectConversation(conversation, runtime));
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:134:function projectConversationMessages(runtime = {}, conversationId = '') {
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:135:  return safeList(runtime.messages?.listByConversation?.bind(null, conversationId)).map((message) => ({
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:136:    message_id: asString(message.message_id),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:137:    conversation_id: asString(message.conversation_id),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:138:    channel_id: asString(message.channel_id || ''),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:139:    sender_type: asString(message.sender?.type || message.sender_type || 'unknown'),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:140:    sender_label: asString(message.sender?.type || message.sender_label || 'participant'),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:141:    body_preview: truncate(message.body || message.message || ''),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:142:    timestamp: asString(message.created_at || message.timestamp || ''),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:143:    direction: asString(message.direction || ''),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:144:    safety_labels: asArray(message.safety_labels),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:145:    sensitive_data_flag: Boolean(message.sensitive_data_flag),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:146:    privacy_flags: ['message_preview_truncated']
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:150:function projectCustomerProfile(profile = {}) {
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:152:  const channels = profile.channels || {};
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:156:    customer_id: asString(profile.customer_id),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:157:    display_label: maskIdentifier(profileData.email || profile.customer_id || 'customer'),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:159:    channel_handles_masked: {
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:160:      instagram: maskIdentifier(channels.instagram || ''),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:161:      whatsapp: maskIdentifier(channels.whatsapp || '')
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:167:    privacy_flags: ['customer_profile_masked']
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:171:function projectConversationDetail(runtime = {}, conversationId = '') {
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:172:  const conversation = typeof runtime.conversations?.get === 'function' ? runtime.conversations.get(conversationId) : null;
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:173:  if (!conversation) return null;
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:175:  const messages = projectConversationMessages(runtime, conversationId);
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:176:  const customer = typeof runtime.customers?.get === 'function' ? runtime.customers.get(conversation.customer_id) : null;
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:177:  const tickets = safeList(runtime.tickets?.list).filter((ticket) => ticket.conversation_id === conversationId);
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:180:    conversation: projectConversation(conversation, runtime),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:181:    messages,
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:182:    customer: customer ? projectCustomerProfile(customer) : null,
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:183:    tickets: tickets.map(projectTicket),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:184:    escalation_summary: tickets.some((ticket) => ticket.escalation_state) ? 'Escalation active' : 'No escalation recorded',
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:185:    privacy_flags: ['customer_identity_masked', 'message_preview_truncated']
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:189:function projectTickets(runtime = {}) {
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:190:  return safeList(runtime.tickets?.list).map(projectTicket);
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:193:function projectTicket(ticket = {}) {
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:195:    ticket_id: asString(ticket.ticket_id),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:196:    conversation_id: asString(ticket.conversation_id),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:197:    customer_label: maskIdentifier(ticket.customer_id || 'customer'),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:198:    type: asString(ticket.type || 'support'),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:199:    status: asString(ticket.status || 'open'),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:200:    priority: asString(ticket.priority || 'normal'),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:201:    assigned_team: asString(ticket.assigned_team || 'customer-care'),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:202:    sla_status: asString(ticket.sla_status || 'unknown'),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:203:    escalation_state: asString(ticket.escalation_state || ''),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:204:    created_at: asString(ticket.created_at || ''),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:205:    updated_at: asString(ticket.updated_at || ''),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:206:    privacy_flags: ['customer_identity_masked']
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:210:function projectCustomerProfileById(runtime = {}, customerId = '') {
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:211:  const profile = typeof runtime.customers?.get === 'function' ? runtime.customers.get(customerId) : null;
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:215:function projectChannels(runtime = {}) {
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:217:  const channels = safeList(runtime.channels?.list);
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:218:  const fallbackChannels = channels.length ? channels : [
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:219:    { channel_id: 'email', provider: 'email', type: 'email' },
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:220:    { channel_id: 'instagram', provider: 'meta', type: 'social' },
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:221:    { channel_id: 'whatsapp', provider: 'meta', type: 'messaging' },
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:222:    { channel_id: 'voice', provider: 'not-configured', type: 'voice' },
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:223:    { channel_id: 'crm', provider: 'not-configured', type: 'crm' }
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:226:  return fallbackChannels.map((channel) => ({
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:227:    channel_id: asString(channel.channel_id || channel.id),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:228:    provider: asString(channel.provider || ''),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:229:    type: asString(channel.type || ''),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:230:    read_ready: Boolean(capabilities.integration_inbox_bridge || capabilities.unified_inbox),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:233:    voice_ready: Boolean(channel.capabilities?.voice || capabilities.voice),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:234:    ivr_ready: Boolean(channel.capabilities?.ivr || capabilities.ivr),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:235:    crm_sync_ready: Boolean(channel.capabilities?.crm || capabilities.crm),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:236:    backend_supported: Boolean(capabilities.integration_inbox_bridge || capabilities.unified_inbox),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:241:module.exports = {
+runtime/orchestrator-service/lib/customer-operations/README.md:5:- customer conversations
+runtime/orchestrator-service/lib/customer-operations/README.md:6:- tickets
+runtime/orchestrator-service/lib/customer-operations/README.md:7:- unified inbox
+runtime/orchestrator-service/lib/customer-operations/README.md:8:- channel connectors
+runtime/orchestrator-service/lib/customer-operations/README.md:10:- customer profiles
+runtime/orchestrator-service/lib/customer-operations/README.md:13:- AI customer operations
+runtime/orchestrator-service/lib/customer-operations/conversations/messages/message-store.js:5:} = require('../../contracts/message-contract');
+runtime/orchestrator-service/lib/customer-operations/conversations/messages/message-store.js:7:const messages = new Map();
+runtime/orchestrator-service/lib/customer-operations/conversations/messages/message-store.js:9:function createMessage(input = {}) {
+runtime/orchestrator-service/lib/customer-operations/conversations/messages/message-store.js:10:  const message = createMessageContract(input);
+runtime/orchestrator-service/lib/customer-operations/conversations/messages/message-store.js:12:  if (!message.message_id) {
+runtime/orchestrator-service/lib/customer-operations/conversations/messages/message-store.js:13:    throw new Error('message_id is required');
+runtime/orchestrator-service/lib/customer-operations/conversations/messages/message-store.js:16:  messages.set(message.message_id, message);
+runtime/orchestrator-service/lib/customer-operations/conversations/messages/message-store.js:18:  return message;
+runtime/orchestrator-service/lib/customer-operations/conversations/messages/message-store.js:21:function getMessage(messageId) {
+runtime/orchestrator-service/lib/customer-operations/conversations/messages/message-store.js:22:  return messages.get(String(messageId || '')) || null;
+runtime/orchestrator-service/lib/customer-operations/conversations/messages/message-store.js:25:function listMessages() {
+runtime/orchestrator-service/lib/customer-operations/conversations/messages/message-store.js:26:  return Array.from(messages.values());
+runtime/orchestrator-service/lib/customer-operations/conversations/messages/message-store.js:29:function listConversationMessages(conversationId) {
+runtime/orchestrator-service/lib/customer-operations/conversations/messages/message-store.js:30:  const id = String(conversationId || '');
+runtime/orchestrator-service/lib/customer-operations/conversations/messages/message-store.js:33:    (message) => message.conversation_id === id
+runtime/orchestrator-service/lib/customer-operations/conversations/messages/message-store.js:37:module.exports = {
+runtime/orchestrator-service/lib/customer-operations/conversations/README.md:6:- inbox threads
+runtime/orchestrator-service/lib/customer-operations/conversations/README.md:7:- AI/human messages
+runtime/orchestrator-service/lib/customer-operations/conversations/README.md:9:- conversation state
+runtime/orchestrator-service/lib/customer-operations/conversations/create-integration-session.js:5:} = require('../unified-inbox/register-integration-inbox');
+runtime/orchestrator-service/lib/customer-operations/conversations/create-integration-session.js:9:} = require('./store/conversation-store');
+runtime/orchestrator-service/lib/customer-operations/conversations/create-integration-session.js:13:} = require('./messages/message-store');
+runtime/orchestrator-service/lib/customer-operations/conversations/create-integration-session.js:15:function asString(value) {
+runtime/orchestrator-service/lib/customer-operations/conversations/create-integration-session.js:19:function createIntegrationConversationSession(
+runtime/orchestrator-service/lib/customer-operations/conversations/create-integration-session.js:24:  const inboxSeed = createIntegrationInboxSeed(
+runtime/orchestrator-service/lib/customer-operations/conversations/create-integration-session.js:30:  if (!inboxSeed.created) {
+runtime/orchestrator-service/lib/customer-operations/conversations/create-integration-session.js:33:      reason: inboxSeed.reason,
+runtime/orchestrator-service/lib/customer-operations/conversations/create-integration-session.js:38:  const inbox = inboxSeed.inbox;
+runtime/orchestrator-service/lib/customer-operations/conversations/create-integration-session.js:40:  const conversation = createConversation({
+runtime/orchestrator-service/lib/customer-operations/conversations/create-integration-session.js:41:    conversation_id: inbox.conversation.conversation_id,
+runtime/orchestrator-service/lib/customer-operations/conversations/create-integration-session.js:42:    channel: inbox.channel.channel_id,
+runtime/orchestrator-service/lib/customer-operations/conversations/create-integration-session.js:43:    customer_id: inbox.conversation.customer_id,
+runtime/orchestrator-service/lib/customer-operations/conversations/create-integration-session.js:44:    assigned_ai_agent: inbox.assignment.assigned_ai_agent,
+runtime/orchestrator-service/lib/customer-operations/conversations/create-integration-session.js:45:    priority: inbox.state.priority,
+runtime/orchestrator-service/lib/customer-operations/conversations/create-integration-session.js:49:  const message = createMessage({
+runtime/orchestrator-service/lib/customer-operations/conversations/create-integration-session.js:50:    message_id: asString(
+runtime/orchestrator-service/lib/customer-operations/conversations/create-integration-session.js:51:      payload.message_id ||
+runtime/orchestrator-service/lib/customer-operations/conversations/create-integration-session.js:52:      `${conversation.conversation_id}_message_1`
+runtime/orchestrator-service/lib/customer-operations/conversations/create-integration-session.js:54:    conversation_id: conversation.conversation_id,
+runtime/orchestrator-service/lib/customer-operations/conversations/create-integration-session.js:55:    channel_id: inbox.channel.channel_id,
+runtime/orchestrator-service/lib/customer-operations/conversations/create-integration-session.js:58:      id: asString(payload.customer_id || ''),
+runtime/orchestrator-service/lib/customer-operations/conversations/create-integration-session.js:59:      type: 'customer',
+runtime/orchestrator-service/lib/customer-operations/conversations/create-integration-session.js:64:        payload.message ||
+runtime/orchestrator-service/lib/customer-operations/conversations/create-integration-session.js:65:        'New customer conversation started.'
+runtime/orchestrator-service/lib/customer-operations/conversations/create-integration-session.js:75:    inbox,
+runtime/orchestrator-service/lib/customer-operations/conversations/create-integration-session.js:76:    conversation,
+runtime/orchestrator-service/lib/customer-operations/conversations/create-integration-session.js:77:    message
+runtime/orchestrator-service/lib/customer-operations/conversations/create-integration-session.js:81:module.exports = {
+runtime/orchestrator-service/lib/customer-operations/conversations/store/conversation-store.js:5:} = require('../../contracts/conversation-contract');
+runtime/orchestrator-service/lib/customer-operations/conversations/store/conversation-store.js:7:const conversations = new Map();
+runtime/orchestrator-service/lib/customer-operations/conversations/store/conversation-store.js:9:function createConversation(input = {}) {
+runtime/orchestrator-service/lib/customer-operations/conversations/store/conversation-store.js:10:  const conversation = createConversationContract(input);
+runtime/orchestrator-service/lib/customer-operations/conversations/store/conversation-store.js:12:  if (!conversation.conversation_id) {
+runtime/orchestrator-service/lib/customer-operations/conversations/store/conversation-store.js:13:    throw new Error('conversation_id is required');
+runtime/orchestrator-service/lib/customer-operations/conversations/store/conversation-store.js:16:  conversations.set(conversation.conversation_id, conversation);
+runtime/orchestrator-service/lib/customer-operations/conversations/store/conversation-store.js:18:  return conversation;
+runtime/orchestrator-service/lib/customer-operations/conversations/store/conversation-store.js:21:function getConversation(conversationId) {
+runtime/orchestrator-service/lib/customer-operations/conversations/store/conversation-store.js:22:  return conversations.get(String(conversationId || '')) || null;
+runtime/orchestrator-service/lib/customer-operations/conversations/store/conversation-store.js:25:function listConversations() {
+runtime/orchestrator-service/lib/customer-operations/conversations/store/conversation-store.js:26:  return Array.from(conversations.values());
+runtime/orchestrator-service/lib/customer-operations/conversations/store/conversation-store.js:29:function updateConversation(conversationId, updates = {}) {
+runtime/orchestrator-service/lib/customer-operations/conversations/store/conversation-store.js:30:  const current = getConversation(conversationId);
+runtime/orchestrator-service/lib/customer-operations/conversations/store/conversation-store.js:45:  conversations.set(current.conversation_id, updated);
+runtime/orchestrator-service/lib/customer-operations/conversations/store/conversation-store.js:50:module.exports = {
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js:3:function safeList(fn) {
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js:4:  if (typeof fn !== 'function') return [];
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js:13:function countEnabled(items) {
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js:17:function createCustomerOperationsReadinessSnapshot(runtime = {}) {
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js:18:  const channels = safeList(runtime.channels?.list);
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js:19:  const conversations = safeList(runtime.conversations?.list);
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js:20:  const tickets = safeList(runtime.tickets?.list);
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js:21:  const messages = safeList(runtime.messages?.list);
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js:22:  const customers = safeList(runtime.customers?.list);
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js:25:  const inboxEntries = safeList(runtime.unifiedInbox?.list);
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js:27:  const capabilities = typeof runtime.health === 'function'
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js:32:    runtime: 'mh-os-customer-operations',
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js:37:      integration_channel_registration: typeof runtime.channels?.registerIntegration === 'function',
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js:38:      integration_inbox_seed: typeof runtime.unifiedInbox?.createFromIntegration === 'function'
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js:42:      channels: channels.length,
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js:43:      enabled_channels: countEnabled(channels),
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js:44:      conversations: conversations.length,
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js:45:      messages: messages.length,
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js:46:      tickets: tickets.length,
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js:47:      customers: customers.length,
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js:50:      unified_inbox_entries: inboxEntries.length
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js:53:    readiness: {
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js:54:      channels_ready: channels.length > 0,
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js:55:      inbox_ready: Boolean(capabilities.unified_inbox),
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js:56:      tickets_ready: Boolean(capabilities.tickets),
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js:57:      customer_profiles_ready: Boolean(capabilities.customers),
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js:61:      integration_inbox_bridge_ready: Boolean(capabilities.integration_inbox_bridge)
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js:64:    channels: channels.map((channel) => ({
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js:65:      channel_id: channel.channel_id,
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js:66:      provider: channel.provider,
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js:67:      type: channel.type,
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js:68:      enabled: Boolean(channel.enabled),
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js:70:        messaging: Boolean(channel.capabilities?.messaging),
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js:71:        attachments: Boolean(channel.capabilities?.attachments),
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js:72:        voice: Boolean(channel.capabilities?.voice),
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js:73:        realtime: Boolean(channel.capabilities?.realtime)
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js:80:      creates_tickets: false,
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js:88:module.exports = {
+runtime/orchestrator-service/lib/customer-operations/registry/README.md:4:- channels
+runtime/orchestrator-service/lib/customer-operations/registry/README.md:5:- AI customer agents
+runtime/orchestrator-service/lib/customer-operations/registry/README.md:8:- conversation providers
+runtime/orchestrator-service/lib/customer-operations/escalation/store/escalation-store.js:9:function createEscalation(input = {}) {
+runtime/orchestrator-service/lib/customer-operations/escalation/store/escalation-store.js:21:function getEscalation(escalationId) {
+runtime/orchestrator-service/lib/customer-operations/escalation/store/escalation-store.js:25:function listEscalations() {
+runtime/orchestrator-service/lib/customer-operations/escalation/store/escalation-store.js:29:function updateEscalation(escalationId, updates = {}) {
+runtime/orchestrator-service/lib/customer-operations/escalation/store/escalation-store.js:50:module.exports = {
+runtime/orchestrator-service/lib/customer-operations/sla/store/sla-policy-store.js:9:function createSlaPolicy(input = {}) {
+runtime/orchestrator-service/lib/customer-operations/sla/store/sla-policy-store.js:21:function getSlaPolicy(policyId) {
+runtime/orchestrator-service/lib/customer-operations/sla/store/sla-policy-store.js:25:function listSlaPolicies() {
+runtime/orchestrator-service/lib/customer-operations/sla/store/sla-policy-store.js:29:function updateSlaPolicy(policyId, updates = {}) {
+runtime/orchestrator-service/lib/customer-operations/sla/store/sla-policy-store.js:50:module.exports = {
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/register-integration-inbox.js:5:} = require('../channels/register-integration-channel');
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/register-integration-inbox.js:9:} = require('./store/unified-inbox-store');
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/register-integration-inbox.js:11:function asString(value) {
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/register-integration-inbox.js:15:function createIntegrationInboxSeed(
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/register-integration-inbox.js:33:  const channel = registration.channel;
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/register-integration-inbox.js:35:  const inboxId = asString(
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/register-integration-inbox.js:36:    options.inbox_id ||
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/register-integration-inbox.js:37:    `inbox_${channel.channel_id}`
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/register-integration-inbox.js:41:    inbox_id: inboxId,
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/register-integration-inbox.js:43:    channel: {
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/register-integration-inbox.js:44:      channel_id: channel.channel_id,
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/register-integration-inbox.js:45:      provider: channel.provider
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/register-integration-inbox.js:48:    conversation: {
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/register-integration-inbox.js:49:      conversation_id: asString(
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/register-integration-inbox.js:50:        options.conversation_id ||
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/register-integration-inbox.js:51:        `${channel.channel_id}_conversation`
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/register-integration-inbox.js:54:      customer_id: asString(
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/register-integration-inbox.js:55:        options.customer_id || ''
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/register-integration-inbox.js:61:        options.assigned_team || 'customer-care'
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/register-integration-inbox.js:81:      source_runtime: 'mh-os-customer-operations'
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/register-integration-inbox.js:88:    inbox: entry
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/register-integration-inbox.js:92:module.exports = {
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/store/unified-inbox-store.js:5:} = require('../../contracts/unified-inbox-contract');
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/store/unified-inbox-store.js:7:const inboxEntries = new Map();
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/store/unified-inbox-store.js:9:function createInboxEntry(input = {}) {
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/store/unified-inbox-store.js:12:  if (!entry.inbox_id) {
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/store/unified-inbox-store.js:13:    throw new Error('inbox_id is required');
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/store/unified-inbox-store.js:16:  inboxEntries.set(entry.inbox_id, entry);
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/store/unified-inbox-store.js:21:function getInboxEntry(inboxId) {
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/store/unified-inbox-store.js:22:  return inboxEntries.get(String(inboxId || '')) || null;
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/store/unified-inbox-store.js:25:function listInboxEntries() {
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/store/unified-inbox-store.js:26:  return Array.from(inboxEntries.values());
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/store/unified-inbox-store.js:29:function updateInboxEntry(inboxId, updates = {}) {
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/store/unified-inbox-store.js:30:  const current = getInboxEntry(inboxId);
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/store/unified-inbox-store.js:45:  inboxEntries.set(current.inbox_id, updated);
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/store/unified-inbox-store.js:50:module.exports = {
+runtime/orchestrator-service/lib/customer-operations/channels/channel-integration-mapper.js:3:function asString(value) {
+runtime/orchestrator-service/lib/customer-operations/channels/channel-integration-mapper.js:9:    channel_id: 'website-chat',
+runtime/orchestrator-service/lib/customer-operations/channels/channel-integration-mapper.js:21:    channel_id: 'instagram',
+runtime/orchestrator-service/lib/customer-operations/channels/channel-integration-mapper.js:33:    channel_id: 'facebook',
+runtime/orchestrator-service/lib/customer-operations/channels/channel-integration-mapper.js:45:    channel_id: 'email',
+runtime/orchestrator-service/lib/customer-operations/channels/channel-integration-mapper.js:57:    channel_id: 'email',
+runtime/orchestrator-service/lib/customer-operations/channels/channel-integration-mapper.js:69:    channel_id: 'telegram',
+runtime/orchestrator-service/lib/customer-operations/channels/channel-integration-mapper.js:81:    channel_id: 'webhook',
+runtime/orchestrator-service/lib/customer-operations/channels/channel-integration-mapper.js:93:function normalizeIntegrationId(integrationId) {
+runtime/orchestrator-service/lib/customer-operations/channels/channel-integration-mapper.js:97:function getChannelDefinitionForIntegration(integrationId, providerResult = {}) {
+runtime/orchestrator-service/lib/customer-operations/channels/channel-integration-mapper.js:119:    customer_operations: {
+runtime/orchestrator-service/lib/customer-operations/channels/channel-integration-mapper.js:120:      supports_inbox: Boolean(base.capabilities.messaging),
+runtime/orchestrator-service/lib/customer-operations/channels/channel-integration-mapper.js:121:      supports_messages: Boolean(base.capabilities.messaging),
+runtime/orchestrator-service/lib/customer-operations/channels/channel-integration-mapper.js:122:      supports_leads: ['instagram', 'facebook', 'website', 'telegram'].includes(base.channel_id),
+runtime/orchestrator-service/lib/customer-operations/channels/channel-integration-mapper.js:123:      supports_outreach: ['email', 'instagram', 'telegram'].includes(base.channel_id),
+runtime/orchestrator-service/lib/customer-operations/channels/channel-integration-mapper.js:128:      source_runtime: 'mh-os-customer-operations'
+runtime/orchestrator-service/lib/customer-operations/channels/channel-integration-mapper.js:133:function listMappableIntegrationIds() {
+runtime/orchestrator-service/lib/customer-operations/channels/channel-integration-mapper.js:137:module.exports = {
+runtime/orchestrator-service/lib/customer-operations/channels/register-integration-channel.js:5:} = require('./channel-integration-mapper');
+runtime/orchestrator-service/lib/customer-operations/channels/register-integration-channel.js:9:} = require('./registry/channel-registry-store');
+runtime/orchestrator-service/lib/customer-operations/channels/register-integration-channel.js:11:function registerIntegrationChannel(integrationId, providerResult = {}) {
+runtime/orchestrator-service/lib/customer-operations/channels/register-integration-channel.js:12:  const channel = getChannelDefinitionForIntegration(
+runtime/orchestrator-service/lib/customer-operations/channels/register-integration-channel.js:17:  if (!channel) {
+runtime/orchestrator-service/lib/customer-operations/channels/register-integration-channel.js:25:  const registeredChannel = registerChannel(channel);
+runtime/orchestrator-service/lib/customer-operations/channels/register-integration-channel.js:29:    channel: registeredChannel,
+runtime/orchestrator-service/lib/customer-operations/channels/register-integration-channel.js:31:      integration_id: channel.integration_id,
+runtime/orchestrator-service/lib/customer-operations/channels/register-integration-channel.js:32:      source_provider: channel.source_provider,
+runtime/orchestrator-service/lib/customer-operations/channels/register-integration-channel.js:33:      customer_operations: channel.customer_operations
+runtime/orchestrator-service/lib/customer-operations/channels/register-integration-channel.js:38:module.exports = {
+runtime/orchestrator-service/lib/customer-operations/channels/registry/default-channels.js:5:} = require('./channel-registry-store');
+runtime/orchestrator-service/lib/customer-operations/channels/registry/default-channels.js:7:function registerDefaultChannels() {
+runtime/orchestrator-service/lib/customer-operations/channels/registry/default-channels.js:9:    channel_id: 'website-chat',
+runtime/orchestrator-service/lib/customer-operations/channels/registry/default-channels.js:20:    channel_id: 'email',
+runtime/orchestrator-service/lib/customer-operations/channels/registry/default-channels.js:30:    channel_id: 'instagram',
+runtime/orchestrator-service/lib/customer-operations/channels/registry/default-channels.js:40:    channel_id: 'voice',
+runtime/orchestrator-service/lib/customer-operations/channels/registry/default-channels.js:50:module.exports = {
+runtime/orchestrator-service/lib/customer-operations/channels/registry/channel-registry-store.js:3:const channels = new Map();
+runtime/orchestrator-service/lib/customer-operations/channels/registry/channel-registry-store.js:5:function registerChannel(input = {}) {
+runtime/orchestrator-service/lib/customer-operations/channels/registry/channel-registry-store.js:6:  const channelId = String(input.channel_id || '');
+runtime/orchestrator-service/lib/customer-operations/channels/registry/channel-registry-store.js:8:  if (!channelId) {
+runtime/orchestrator-service/lib/customer-operations/channels/registry/channel-registry-store.js:9:    throw new Error('channel_id is required');
+runtime/orchestrator-service/lib/customer-operations/channels/registry/channel-registry-store.js:12:  const channel = {
+runtime/orchestrator-service/lib/customer-operations/channels/registry/channel-registry-store.js:13:    channel_id: channelId,
+runtime/orchestrator-service/lib/customer-operations/channels/registry/channel-registry-store.js:27:      source_runtime: 'mh-os-customer-operations'
+runtime/orchestrator-service/lib/customer-operations/channels/registry/channel-registry-store.js:31:  channels.set(channel.channel_id, channel);
+runtime/orchestrator-service/lib/customer-operations/channels/registry/channel-registry-store.js:33:  return channel;
+runtime/orchestrator-service/lib/customer-operations/channels/registry/channel-registry-store.js:36:function getChannel(channelId) {
+runtime/orchestrator-service/lib/customer-operations/channels/registry/channel-registry-store.js:37:  return channels.get(String(channelId || '')) || null;
+runtime/orchestrator-service/lib/customer-operations/channels/registry/channel-registry-store.js:40:function listChannels() {
+runtime/orchestrator-service/lib/customer-operations/channels/registry/channel-registry-store.js:41:  return Array.from(channels.values());
+runtime/orchestrator-service/lib/customer-operations/channels/registry/channel-registry-store.js:44:module.exports = {

@@ -1,0 +1,83 @@
+# Health Result Recheck
+
+## Existing health evidence
+# Live Health Checks
+
+## curl /health
+{"status":"ok","service":"orchestrator-service","port":3000}
+
+## curl /healthz
+{"status":"ok","service":"orchestrator-service","pid":2017443}
+
+## curl /readyz
+{"service":"orchestrator-service","ready":true,"checks":{"control_write_key_configured":{"ok":true,"required":true},"data_dir_exists":{"ok":true,"required":true,"path":"/opt/mh-assistant/data"},"data_dir_writable":{"ok":true,"required":true,"path":"/opt/mh-assistant/data"},"project_registry_load":{"ok":true,"required":true,"total_projects":4},"integration_secret_key":{"ok":true,"required":true,"env":"MH_INTEGRATION_SECRET_KEY","file":"/opt/mh-assistant/data/system/integration-secret.key.json"}},"protected_write_mode":{"enabled":true,"required_key_env":"MH_CONTROL_CENTER_WRITE_KEY","key_configured":true},"missing_required_env":[]}
+
+## Fresh /health
+HTTP/1.1 200 OK
+Cross-Origin-Opener-Policy: same-origin
+Cross-Origin-Resource-Policy: same-origin
+Origin-Agent-Cluster: ?1
+Referrer-Policy: no-referrer
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+X-Content-Type-Options: nosniff
+X-DNS-Prefetch-Control: off
+X-Download-Options: noopen
+X-Frame-Options: SAMEORIGIN
+X-Permitted-Cross-Domain-Policies: none
+X-XSS-Protection: 0
+Vary: Origin, Accept-Encoding
+Access-Control-Allow-Credentials: true
+Content-Type: application/json; charset=utf-8
+Content-Length: 60
+ETag: W/"3c-p/iufB1oHegPoIWX17xL7Hm/XpQ"
+Date: Mon, 25 May 2026 15:49:14 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+{"status":"ok","service":"orchestrator-service","port":3000}
+## Fresh /healthz
+HTTP/1.1 200 OK
+Cross-Origin-Opener-Policy: same-origin
+Cross-Origin-Resource-Policy: same-origin
+Origin-Agent-Cluster: ?1
+Referrer-Policy: no-referrer
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+X-Content-Type-Options: nosniff
+X-DNS-Prefetch-Control: off
+X-Download-Options: noopen
+X-Frame-Options: SAMEORIGIN
+X-Permitted-Cross-Domain-Policies: none
+X-XSS-Protection: 0
+Vary: Origin, Accept-Encoding
+Access-Control-Allow-Credentials: true
+Content-Type: application/json; charset=utf-8
+Content-Length: 62
+ETag: W/"3e-oCjSTA0B52p2URWyj58QOy9VACU"
+Date: Mon, 25 May 2026 15:49:14 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+{"status":"ok","service":"orchestrator-service","pid":2017443}
+## Fresh /readyz
+HTTP/1.1 200 OK
+Cross-Origin-Opener-Policy: same-origin
+Cross-Origin-Resource-Policy: same-origin
+Origin-Agent-Cluster: ?1
+Referrer-Policy: no-referrer
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+X-Content-Type-Options: nosniff
+X-DNS-Prefetch-Control: off
+X-Download-Options: noopen
+X-Frame-Options: SAMEORIGIN
+X-Permitted-Cross-Domain-Policies: none
+X-XSS-Protection: 0
+Vary: Origin, Accept-Encoding
+Access-Control-Allow-Credentials: true
+Content-Type: application/json; charset=utf-8
+Content-Length: 637
+ETag: W/"27d-/fepepI2FEvC1XChYJEZrknQqUM"
+Date: Mon, 25 May 2026 15:49:14 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+{"service":"orchestrator-service","ready":true,"checks":{"control_write_key_configured":{"ok":true,"required":true},"data_dir_exists":{"ok":true,"required":true,"path":"/opt/mh-assistant/data"},"data_dir_writable":{"ok":true,"required":true,"path":"/opt/mh-assistant/data"},"project_registry_load":{"ok":true,"required":true,"total_projects":4},"integration_secret_key":{"ok":true,"required":true,"env":"MH_INTEGRATION_SECRET_KEY","file":"/opt/mh-assistant/data/system/integration-secret.key.json"}},"protected_write_mode":{"enabled":true,"required_key_env":"MH_CONTROL_CENTER_WRITE_KEY","key_configured":true},"missing_required_env":[]}

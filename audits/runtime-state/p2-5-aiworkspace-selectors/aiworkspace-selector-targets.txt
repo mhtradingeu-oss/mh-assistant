@@ -1,0 +1,81 @@
+66:		id: "operations",
+69:		summary: "Tasks, timelines, handoffs, approvals, and execution plans.",
+76:	executive: "operations",
+91:const AI_COMMAND_LOCAL_DRAFTS_KEY = "mh-ai-command-local-drafts-v1";
+171:		id: "operations",
+173:		purpose: "Translate intent into executable workflows and handoffs.",
+189:	const command = humanizeValue(commandText || session?.draftMessage, "Prepare workflow action from AI command.");
+362:			modeId: "operations",
+363:			draftMessage: "",
+367:			draftStatus: "",
+415:function saveLocalDraft(projectName, draftPayload) {
+420:		...asObject(draftPayload),
+430:	if (localDraft.prompt) session.draftMessage = asString(localDraft.prompt);
+436:		session.draftStatus = `Draft restored ${formatTime(localDraft.updatedAt)}`;
+443:		prompt: session.draftMessage,
+449:	session.draftStatus = hint || `Saved locally ${formatTime(saved.updatedAt)}`;
+457:	const overviewBlock = asObject(state.data.overview);
+459:	const readiness = asObject(state.data.readiness);
+461:	const connectors = asObject(state.data.integrations);
+463:	const activity = asObject(state.data.activity);
+464:	const assets = asObject(state.data.assets);
+504:		projectName: state.context.currentProject || "",
+505:		market: state.context.currentMarket || overview.market || "",
+506:		language: state.context.currentLanguage || overview.language || "",
+507:		campaign: state.context.activeCampaign || "Not selected",
+508:		executionMode: state.context.executionMode || overview.execution_mode || "",
+575:		operations: ["task plan", "workflow", "handoff", "approval", "timeline", "execution plan", "route", "publish", "status", "priority", "priorities", "blocking", "blocker", "readiness", "next", "do next"]
+588:	const top = scores[0] || { modeId: selectedModeId || "operations" };
+593:		resolvedModeId: top.modeId || selectedModeId || "operations",
+687:			routeSuggestion("Content Studio", "content-studio", "Rewrite weak posts and turn winning patterns into new drafts."),
+859:		case "operations":
+889:	const state = getState();
+890:	const needsDashboard = !state.data.overview || !state.data.readiness || !state.data.integrations || !state.data.activity;
+913:					dashboard: getState().data,
+947:function applyDurableAiHandoff(projectName, operations, session, consumeProjectHandoff, showMessage) {
+948:	const handoff = getSharedHandoff(projectName, "ai-command", operations);
+949:	const handoffId = asString(handoff?.id);
+950:	if (!handoffId || handoffId === asString(session.lastAppliedHandoffId)) return;
+952:	const payload = asObject(handoff?.payload);
+953:	const draftContext = asObject(payload.draft_context);
+955:	if (draftContext.modeId) session.modeId = draftContext.modeId;
+956:	if (prompt) session.draftMessage = prompt;
+958:	if (draftContext.projectName || prompt) {
+961:			modeId: draftContext.modeId || session.modeId,
+962:			lastCommand: prompt || draftContext.lastCommand || "",
+963:			lastResponseTitle: draftContext.lastResponseTitle || "",
+964:			routeSuggestions: asArray(draftContext.routeSuggestions)
+968:	session.lastAppliedHandoffId = handoffId;
+969:	consumeProjectHandoff?.(projectName, handoffId, { actor: "mh-assistant" }).catch((error) => {
+970:		console.warn("Failed to consume AI handoff:", error.message);
+1060:	session.draftMessage = "";
+1074:  const activeRole = asString(getProjectedActiveRole(state)).toLowerCase();
+1082:      AGENT_CARDS.find((agent) => agent.id === "operations") ||
+1093:      active: id === activeRole
+1221:				>${escapeHtml(session.draftMessage)}</textarea>
+1652:  const state = getState();
+1653:  const projectName = asString(state.context.currentProject || "");
+1654:  const market = asString(state.context.currentMarket || "");
+1655:  const language = asString(state.context.currentLanguage || "");
+1656:  const campaign = asString(state.context.activeCampaign || "");
+1657:  const executionMode = asString(state.context.executionMode || "");
+1659:  const overview = asObject(state.data.overview?.overview || state.data.overview);
+1660:  const readiness = asObject(state.data.readiness?.dashboard || state.data.readiness);
+1661:  const operations = asObject(state.data.operations);
+1664:  const aiCommandsTotal = Number(operations.ai_commands?.total || 0);
+1665:  const aiArtifactsTotal = Number(operations.ai_artifacts?.total || 0);
+1666:  const recommendationsTotal = Number(operations.ai_recommendations?.open_count || 0);
+1672:  const currentMode = getModeMeta(session.modeId || "operations");
+1763:          >${escapeHtml(session.draftMessage || "")}</textarea>
+1787:        <div id="aicmdStatus" class="aicmd-draft-state">
+1788:          ${escapeHtml(session.draftStatus || "AI Workspace is ready. Choose a specialist, prepare a command, then review and run it from the workspace command controls.")}
+1870:      const agentId = button.getAttribute("data-aicmd-start-agent") || "operations";
+1873:      session.draftMessage = card?.suggestedPrompt || "";
+1882:      session.draftMessage = template;
+1891:      session.draftMessage = input.value || "";
+1907:      const value = asString(input?.value || session.draftMessage || "").trim();
+1915:      session.draftMessage = value;
+1934:      session.draftMessage = asString(input?.value || session.draftMessage || "");
+1937:      showMessage?.("AI draft saved.");
+1944:      session.draftMessage = "";
+1948:      showMessage?.("AI draft cleared.");

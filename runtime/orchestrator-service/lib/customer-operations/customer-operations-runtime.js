@@ -1,0 +1,143 @@
+'use strict';
+
+const conversationStore = require('./conversations/store/conversation-store');
+const ticketStore = require('./tickets/store/ticket-store');
+
+const messageStore = require('./conversations/messages/message-store');
+
+const customerProfileStore = require('./customers/store/customer-profile-store');
+
+const slaPolicyStore = require('./sla/store/sla-policy-store');
+
+const escalationStore = require('./escalation/store/escalation-store');
+
+const unifiedInboxStore = require('./unified-inbox/store/unified-inbox-store');
+
+const {
+  createIntegrationInboxSeed
+} = require('./unified-inbox/register-integration-inbox');
+
+
+
+
+
+
+const {
+  registerDefaultChannels
+} = require('./channels/registry/default-channels');
+
+const {
+  listChannels
+} = require('./channels/registry/channel-registry-store');
+
+
+const {
+  registerIntegrationChannel
+} = require('./channels/register-integration-channel');
+
+
+const {
+  createCustomerOperationsReadinessSnapshot
+} = require('./readiness/customer-operations-readiness-snapshot');
+
+function createCustomerOperationsRuntime() {
+  registerDefaultChannels();
+
+
+  const runtime = {
+    conversations: {
+      create: conversationStore.createConversation,
+      get: conversationStore.getConversation,
+      list: conversationStore.listConversations,
+      update: conversationStore.updateConversation
+    },
+
+
+
+
+
+
+
+    unifiedInbox: {
+      create: unifiedInboxStore.createInboxEntry,
+      get: unifiedInboxStore.getInboxEntry,
+      list: unifiedInboxStore.listInboxEntries,
+      update: unifiedInboxStore.updateInboxEntry,
+      createFromIntegration: createIntegrationInboxSeed
+    },
+
+    escalation: {
+      create: escalationStore.createEscalation,
+      get: escalationStore.getEscalation,
+      list: escalationStore.listEscalations,
+      update: escalationStore.updateEscalation
+    },
+
+    sla: {
+      create: slaPolicyStore.createSlaPolicy,
+      get: slaPolicyStore.getSlaPolicy,
+      list: slaPolicyStore.listSlaPolicies,
+      update: slaPolicyStore.updateSlaPolicy
+    },
+
+    customers: {
+      create: customerProfileStore.createCustomerProfile,
+      get: customerProfileStore.getCustomerProfile,
+      list: customerProfileStore.listCustomerProfiles,
+      update: customerProfileStore.updateCustomerProfile
+    },
+
+    messages: {
+      create: messageStore.createMessage,
+      get: messageStore.getMessage,
+      list: messageStore.listMessages,
+      listByConversation:
+        messageStore.listConversationMessages
+    },
+
+    channels: {
+      list: listChannels,
+      registerIntegration: registerIntegrationChannel
+    },
+
+    tickets: {
+      create: ticketStore.createTicket,
+      get: ticketStore.getTicket,
+      list: ticketStore.listTickets,
+      update: ticketStore.updateTicket
+    },
+
+    readiness: {
+      snapshot: () => createCustomerOperationsReadinessSnapshot(runtime)
+    },
+
+    health() {
+      return {
+        runtime: 'mh-os-customer-operations',
+        status: 'ready',
+        capabilities: {
+          conversations: true,
+          tickets: true,
+          channels: true,
+          integration_bridge: true,
+          messages: true,
+          customers: true,
+          sla: true,
+          escalation: true,
+          unified_inbox: true,
+          integration_inbox_bridge: true,
+          voice: false,
+          ivr: false,
+          outreach: false,
+          crm: false
+        }
+      };
+    }
+  };
+
+  return runtime;
+}
+
+module.exports = {
+  createCustomerOperationsRuntime
+};

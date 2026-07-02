@@ -1,0 +1,63 @@
+# Home Structure Map
+
+7:  renderHomeExecutiveIntro
+16:  selectOperationsSnapshot
+88:  if (tone === "success") return "Healthy";
+142:  const operations = asObject(selectOperationsSnapshot(state));
+159:          "AI Specialist"
+170:    { id: "designer", name: "Media Director", fallback: "Polish visual direction and creative consistency." },
+176:    { id: "admin", name: "Operations Lead", fallback: "Clear blockers and keep execution flow healthy." }
+208:  const operations = asObject(selectOperationsSnapshot(state));
+271:  const insightsRecommendations = asArray(insights.recommendations);
+282:  const intelligenceScore = insightsRecommendations.length + learningLessons.length;
+455:        executiveHealthStrip: {
+456:          statusLabel: campaignReadinessTone === "success" ? "Healthy" : totalBlockers ? "Attention" : "Unknown",
+473:    primaryActionLabel: nextActionRoute === "ai-command" ? "Open AI Workspace" : `Open ${humanizeStatus(nextActionRoute)}`,
+494:      buttonLabel: nextActionRoute === "ai-command" ? "Start With AI" : `Fix In ${humanizeStatus(nextActionRoute)}`,
+504:        title: "System Health",
+581:        : "No scheduled action yet — open Publishing or Campaign Studio to prepare the next launch step."
+598:    systemHealth: {
+599:      apiStatus: overviewData.project_name || readinessData.readiness_score != null ? "Operational" : "Partial",
+613:      recommendation: asString(recommendations[0]).trim() || asString(insightsRecommendations[0]).trim() || "Ask Executive AI to generate the next best action from readiness, blockers, and recent activity.",
+643:export const homeRoute = {
+659:    const root = $("homeExecRoot");
+688:              <span class="home-header-score-label">System Health</span>
+694:        <section class="mhos-next-action" aria-label="Next Best Action">
+720:              Ask AI: Why is this the focus?
+762:        <!-- 4. MAIN EXECUTIVE WORKSPACE -->
+768:                  <p class="card-label">Operational Readiness</p>
+785:                  <span class="data-label">Media Ready</span>
+871:              <span class="home-action-title">Asset Library</span>
+882:            <button id="homeOpenOperationsBtn" class="btn btn-secondary btn-sm" type="button">
+883:              Operations Centers
+888:            <p class="home-action-group-title">AI Guidance</p>
+890:              <span class="home-action-title">Open AI Workspace</span>
+891:              <span class="home-action-meta">Get AI guidance on the next best action.</span>
+896:        <!-- 6. AI GUIDANCE PANEL -->
+900:              <p class="card-label">AI Guidance for Operations</p>
+901:              <h3>AI explains, plans, and clarifies operational flow</h3>
+902:              <span class="section-helper">AI explains blockers, turns next action into a plan, and routes guidance to the right workspace.</span>
+912:              <span class="home-prompt-meta">AI can clarify why this is the focus and what to do next.</span>
+917:              <span class="home-prompt-meta">AI explains blockers and readiness gaps in operational terms.</span>
+922:              <span class="home-prompt-meta">AI prepares a risk summary for launch and escalation.</span>
+927:              <span class="home-prompt-meta">AI converts the next action into a stepwise operational plan.</span>
+933:              <span class="mhos-workforce-focus">AI Workforce Room</span>
+1023:      showMessage?.("Prompt prepared in AI Command.");
+1032:        designer: `Act as the Media Director for ${projectLabel}. Review the visual/asset readiness and suggest the next best creative actions. Do not execute anything; prepare guidance only.`,
+1038:        admin: `Act as the Operations Lead for ${projectLabel}. Review tasks, blockers, failed jobs, and execution health. Give me the next operational steps. Do not execute anything; prepare guidance only.`
+1043:      showMessage?.(`${roleName} context prepared in AI Command.`);
+1046:    const nextBtn = $("homeNextActionBtn");
+1056:    const askNextActionBtn = $("homeAskNextActionBtn");
+1061:    const operationsBtn = $("homeOpenOperationsBtn");
+1064:    const aiTeamBtn = $("homeOpenAiTeamBtn");
+1067:    const quickCampaignBtn = $("homeQuickStartCampaignBtn");
+1070:    const quickAssetBtn = $("homeQuickUploadAssetBtn");
+1073:    const quickConnectBtn = $("homeQuickConnectPlatformBtn");
+1076:    const quickReadinessBtn = $("homeQuickReviewReadinessBtn");
+1079:    const quickAiBtn = $("homeQuickOpenAiBtn");
+1084:    const promptNextBtn = $("homePromptNextBtn");
+1089:    const promptReadinessBtn = $("homePromptReadinessBtn");
+1094:    const promptLaunchBtn = $("homePromptLaunchBtn");
+1099:    const promptPlanBtn = $("homePromptPlanBtn");
+1104:    const aiRoleCards = document.querySelectorAll(".home-ai-team-card, .mhos-specialist, .mhos-workflow-step[data-role-id]");
+1107:      const roleName = card.querySelector("strong")?.textContent || "AI Specialist";

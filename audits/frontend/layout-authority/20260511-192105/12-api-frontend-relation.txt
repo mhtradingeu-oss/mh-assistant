@@ -1,0 +1,256 @@
+===== 12 API FRONTEND RELATION =====
+public/control-center/api.js:704:async function getJson(path, fallbackMessage, timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS, requestOptions = {}) {
+public/control-center/api.js:1005:export async function fetchProjects() {
+public/control-center/api.js:1007:    const payload = await getJson(
+public/control-center/api.js:1036:  const requiredDashboardPromise = getJson(
+public/control-center/api.js:1087:        const fallbackProjects = await fetchProjects();
+public/control-center/api.js:1184:      load: () => fetchProjectOperations(safeProjectName)
+public/control-center/api.js:1188:      load: () => fetchProjectInsights(safeProjectName)
+public/control-center/api.js:1192:      load: () => fetchProjectLearning(safeProjectName)
+public/control-center/api.js:1208:      load: () => fetchProjectOperations(safeProjectName)
+public/control-center/api.js:1212:      load: () => fetchProjectInsights(safeProjectName)
+public/control-center/api.js:1216:      load: () => fetchProjectLearning(safeProjectName)
+public/control-center/api.js:1287:  return getJson(
+public/control-center/api.js:1293:export async function fetchProjectInsights(projectName) {
+public/control-center/api.js:1298:  return getJson(
+public/control-center/api.js:1299:    `/api/insights/${encodeURIComponent(projectName)}`,
+public/control-center/api.js:1304:export async function fetchProjectLearning(projectName) {
+public/control-center/api.js:1309:  return getJson(
+public/control-center/api.js:1310:    `/api/learning/${encodeURIComponent(projectName)}`,
+public/control-center/api.js:1315:export async function fetchProjectOperations(projectName) {
+public/control-center/api.js:1320:  return getJson(
+public/control-center/api.js:1358:export async function saveProjectSetup(projectName, payload = {}) {
+public/control-center/api.js:1477:export async function runProjectWorkflow(projectName, workflowId, payload = {}) {
+public/control-center/api.js:1494:export async function runProjectAiWorkflow(projectName, workflowId, payload = {}) {
+public/control-center/api.js:1511:export async function executeProjectAiCommand(projectName, payload = {}) {
+public/control-center/api.js:1524:export async function createProjectTask(projectName, payload = {}) {
+public/control-center/api.js:1543:  return getJson(
+public/control-center/api.js:1549:export async function createProjectApproval(projectName, payload = {}) {
+public/control-center/api.js:1568:  return getJson(
+public/control-center/api.js:1574:export async function decideProjectApproval(projectName, approvalId, payload = {}) {
+public/control-center/api.js:1591:export async function fetchProjectGovernance(projectName, params = {}) {
+public/control-center/api.js:1604:  return getJson(
+public/control-center/api.js:1610:export async function fetchProjectGovernancePolicy(projectName) {
+public/control-center/api.js:1615:  return getJson(
+public/control-center/api.js:1634:export async function saveProjectConnectorSource(projectName, sourceType, sourceValue) {
+public/control-center/api.js:1675:export async function fetchProjectIntegrationControlCenter(projectName) {
+public/control-center/api.js:1680:  return getJson(
+public/control-center/api.js:1737:export async function syncProjectIntegration(projectName, integrationId, payload = {}) {
+public/control-center/api.js:1869:export async function fetchProjectOperationsSchema(projectName) {
+public/control-center/api.js:1874:  return getJson(
+public/control-center/api.js:1880:export async function fetchProjectTaskCenter(projectName) {
+public/control-center/api.js:1885:  return getJson(
+public/control-center/api.js:1891:export async function fetchProjectQueueCenter(projectName) {
+public/control-center/api.js:1896:  return getJson(
+public/control-center/api.js:1902:export async function fetchProjectJobMonitor(projectName) {
+public/control-center/api.js:1907:  return getJson(
+public/control-center/api.js:1913:export async function fetchProjectNotificationCenter(projectName) {
+public/control-center/api.js:1918:  return getJson(
+public/control-center/api.js:1924:export async function fetchProjectTeam(projectName) {
+public/control-center/api.js:1929:  return getJson(
+public/control-center/api.js:1935:export async function saveProjectTeam(projectName, payload = {}) {
+public/control-center/api.js:1955:  return getJson(
+public/control-center/api.js:1961:export async function saveProjectCampaign(projectName, payload = {}) {
+public/control-center/api.js:2000:  return getJson(
+public/control-center/api.js:2006:export async function saveProjectContentItem(projectName, payload = {}) {
+public/control-center/api.js:2049:  return getJson(
+public/control-center/api.js:2055:export async function saveProjectMediaJob(projectName, payload = {}) {
+public/control-center/api.js:2079:    "/api/media/improve-prompt",
+public/control-center/api.js:2088:    "/api/media/brand-check",
+public/control-center/api.js:2097:    "/api/media/generate-image",
+public/control-center/api.js:2106:    "/api/media/generate-video-brief",
+public/control-center/api.js:2115:    "/api/media/generate-voice-script",
+public/control-center/api.js:2124:    "/api/media/generate-campaign-pack",
+public/control-center/api.js:2156:  return getJson(
+public/control-center/api.js:2162:export async function createProjectHandoff(projectName, payload = {}) {
+public/control-center/api.js:2199:  return getJson(
+public/control-center/api.js:2205:export async function markProjectNotification(projectName, notificationId, payload = {}) {
+public/control-center/pages/ai-command.js:882:	fetchProjectInsights,
+public/control-center/pages/ai-command.js:883:	fetchProjectLearning,
+public/control-center/pages/ai-command.js:907:					fetchProjectInsights(projectName),
+public/control-center/pages/ai-command.js:908:					fetchProjectLearning(projectName)
+public/control-center/pages/ai-command.js:988:	executeProjectAiCommand,
+public/control-center/pages/ai-command.js:993:	if (typeof executeProjectAiCommand !== "function") throw new Error("AI command service is unavailable.");
+public/control-center/pages/ai-command.js:1001:		result = await executeProjectAiCommand(projectName, {
+public/control-center/pages/campaign-studio.js:464:function persistCampaignRouteHandoff({ projectName, session, destinationPage, createProjectHandoff }) {
+public/control-center/pages/campaign-studio.js:492:  createProjectHandoff?.(projectName, handoff).catch((error) => {
+public/control-center/pages/campaign-studio.js:497:function scheduleCampaignPersistence(projectName, session, saveProjectCampaign) {
+public/control-center/pages/campaign-studio.js:498:  if (!projectName || typeof saveProjectCampaign !== "function") {
+public/control-center/pages/campaign-studio.js:510:      const result = await saveProjectCampaign(projectName, buildCampaignRecordPayload(projectName, session));
+public/control-center/pages/campaign-studio.js:1194:  fetchProjectInsights,
+public/control-center/pages/campaign-studio.js:1195:  fetchProjectLearning,
+public/control-center/pages/campaign-studio.js:1201:  if (typeof fetchProjectInsights !== "function" && typeof fetchProjectLearning !== "function") return;
+public/control-center/pages/campaign-studio.js:1207:    typeof fetchProjectInsights === "function" ? fetchProjectInsights(projectName) : Promise.resolve(null),
+public/control-center/pages/campaign-studio.js:1208:    typeof fetchProjectLearning === "function" ? fetchProjectLearning(projectName) : Promise.resolve(null)
+public/control-center/pages/campaign-studio.js:1250:  fetchProjectInsights,
+public/control-center/pages/campaign-studio.js:1251:  fetchProjectLearning,
+public/control-center/pages/campaign-studio.js:1252:  saveProjectCampaign,
+public/control-center/pages/campaign-studio.js:1253:  createProjectHandoff
+public/control-center/pages/campaign-studio.js:1274:      scheduleCampaignPersistence(projectName, session, saveProjectCampaign);
+public/control-center/pages/campaign-studio.js:1288:        const result = await saveProjectCampaign?.(projectName, buildCampaignRecordPayload(projectName, session));
+public/control-center/pages/campaign-studio.js:1305:        const result = await saveProjectCampaign?.(projectName, {
+public/control-center/pages/campaign-studio.js:1339:      createProjectHandoff?.(projectName, {
+public/control-center/pages/campaign-studio.js:1370:      persistCampaignRouteHandoff({ projectName, session, destinationPage: "publishing", createProjectHandoff });
+public/control-center/pages/campaign-studio.js:1383:      persistCampaignRouteHandoff({ projectName, session, destinationPage: "content-studio", createProjectHandoff });
+public/control-center/pages/campaign-studio.js:1391:      persistCampaignRouteHandoff({ projectName, session, destinationPage: "media-studio", createProjectHandoff });
+public/control-center/pages/campaign-studio.js:1399:      persistCampaignRouteHandoff({ projectName, session, destinationPage: "ads-manager", createProjectHandoff });
+public/control-center/pages/campaign-studio.js:1437:        fetchProjectInsights,
+public/control-center/pages/campaign-studio.js:1438:        fetchProjectLearning,
+public/control-center/pages/campaign-studio.js:1468:    fetchProjectInsights,
+public/control-center/pages/campaign-studio.js:1469:    fetchProjectLearning,
+public/control-center/pages/campaign-studio.js:1470:    saveProjectCampaign,
+public/control-center/pages/campaign-studio.js:1471:    createProjectHandoff
+public/control-center/pages/campaign-studio.js:1489:      fetchProjectInsights,
+public/control-center/pages/campaign-studio.js:1490:      fetchProjectLearning,
+public/control-center/pages/campaign-studio.js:1491:      saveProjectCampaign,
+public/control-center/pages/campaign-studio.js:1492:      createProjectHandoff
+public/control-center/pages/campaign-studio.js:1498:      fetchProjectInsights,
+public/control-center/pages/campaign-studio.js:1499:      fetchProjectLearning,
+public/control-center/pages/campaign-studio.js:1973:      fetchProjectInsights,
+public/control-center/pages/campaign-studio.js:1974:      fetchProjectLearning,
+public/control-center/pages/campaign-studio.js:1975:      saveProjectCampaign,
+public/control-center/pages/campaign-studio.js:1976:      createProjectHandoff,
+public/control-center/pages/content-studio-workspace.js:2:  createProjectApproval,
+public/control-center/pages/content-studio-workspace.js:3:  createProjectHandoff,
+public/control-center/pages/content-studio-workspace.js:4:  createProjectTask,
+public/control-center/pages/content-studio-workspace.js:5:  decideProjectApproval,
+public/control-center/pages/content-studio-workspace.js:6:  executeProjectAiCommand,
+public/control-center/pages/content-studio-workspace.js:7:  fetchProjectOperations,
+public/control-center/pages/content-studio-workspace.js:13:  saveProjectContentItem
+public/control-center/pages/content-studio-workspace.js:694:    const result = await saveProjectContentItem(projectName, payload);
+public/control-center/pages/content-studio-workspace.js:787:      fetchProjectOperations(projectName)
+public/control-center/pages/content-studio-workspace.js:1697:      const result = await createProjectHandoff(projectName, handoff);
+public/control-center/pages/content-studio-workspace.js:1753:      await createProjectHandoff(projectName, handoff);
+public/control-center/pages/content-studio-workspace.js:1887:          const aiResult = await executeProjectAiCommand(projectName, {
+public/control-center/pages/content-studio-workspace.js:1997:        await executeProjectAiCommand(projectName, {
+public/control-center/pages/governance.js:2:  createProjectApproval,
+public/control-center/pages/governance.js:3:  decideProjectApproval,
+public/control-center/pages/governance.js:4:  fetchProjectGovernance,
+public/control-center/pages/governance.js:116:    session.summary = await fetchProjectGovernance(projectName, {
+public/control-center/pages/governance.js:940:        await decideProjectApproval(projectName, approvalId, {
+public/control-center/pages/governance.js:972:        await createProjectApproval(projectName, {
+public/control-center/pages/insights.js:947:function bindInsightsActions({ $, navigateTo, showMessage, prompts, projectName, createProjectHandoff }) {
+public/control-center/pages/insights.js:1016:        createProjectHandoff?.(projectName, handoff).catch((error) => {
+public/control-center/pages/insights.js:1047:    fetchProjectInsights,
+public/control-center/pages/insights.js:1048:    createProjectHandoff
+public/control-center/pages/insights.js:1419:      createProjectHandoff
+public/control-center/pages/insights.js:1435:          fetchProjectInsights,
+public/control-center/pages/insights.js:1436:          createProjectHandoff
+public/control-center/pages/insights.js:1441:      if (!fetchProjectInsights) {
+public/control-center/pages/insights.js:1453:          fetchProjectInsights,
+public/control-center/pages/insights.js:1454:          createProjectHandoff
+public/control-center/pages/insights.js:1468:        fetchProjectInsights,
+public/control-center/pages/insights.js:1469:        createProjectHandoff
+public/control-center/pages/insights.js:1472:      fetchProjectInsights(projectName)
+public/control-center/pages/insights.js:1495:            fetchProjectInsights,
+public/control-center/pages/insights.js:1496:            createProjectHandoff
+public/control-center/pages/insights.js:1511:            fetchProjectInsights,
+public/control-center/pages/insights.js:1512:            createProjectHandoff
+public/control-center/pages/integrations.js:1075:  syncProjectIntegration,
+public/control-center/pages/integrations.js:1313:        await syncProjectIntegration(projectName, integrationId, {
+public/control-center/pages/integrations.js:1402:    syncProjectIntegration,
+public/control-center/pages/integrations.js:1646:      syncProjectIntegration,
+public/control-center/pages/integrations.js:1663:        syncProjectIntegration,
+public/control-center/pages/media-studio-workspace.js:3:  createProjectApproval,
+public/control-center/pages/media-studio-workspace.js:4:  createProjectHandoff,
+public/control-center/pages/media-studio-workspace.js:5:  createProjectTask,
+public/control-center/pages/media-studio-workspace.js:6:  decideProjectApproval,
+public/control-center/pages/media-studio-workspace.js:7:  fetchProjectOperations,
+public/control-center/pages/media-studio-workspace.js:19:  saveProjectMediaJob,
+public/control-center/pages/media-studio-workspace.js:586:      fetchProjectOperations(backendProjectName)
+public/control-center/pages/media-studio-workspace.js:1063:      const result = await createProjectHandoff(backendProjectName, handoffPayload);
+public/control-center/pages/media-studio-workspace.js:2376:    const result = await saveProjectMediaJob(backendProjectName, buildMediaPayload(session, status));
+public/control-center/pages/media-studio-workspace.js:2791:            await decideProjectApproval(backendProjectName, pendingApproval.id, {
+public/control-center/pages/media-studio-workspace.js:2813:          await createProjectApproval(backendProjectName, {
+public/control-center/pages/media-studio-workspace.js:2859:            await decideProjectApproval(backendProjectName, pendingApproval.id, {
+public/control-center/pages/media-studio-workspace.js:2879:          await createProjectTask(backendProjectName, {
+public/control-center/pages/media-studio-workspace.js:3106:      await createProjectHandoff(backendProjectName, handoff);
+public/control-center/pages/operations-centers.js:676:    if (context.fetchProjectTaskCenter && projectName) {
+public/control-center/pages/operations-centers.js:680:      context.fetchProjectTaskCenter(projectName)
+public/control-center/pages/operations-centers.js:981:  if (!session.errorMessage && projectName && context.fetchProjectQueueCenter && !hasQueueSnapshot) {
+public/control-center/pages/operations-centers.js:1010:    if (context.fetchProjectQueueCenter && projectName) {
+public/control-center/pages/operations-centers.js:1014:      context.fetchProjectQueueCenter(projectName)
+public/control-center/pages/operations-centers.js:1300:  if (!session.errorMessage && projectName && context.fetchProjectJobMonitor && !hasJobSnapshot) {
+public/control-center/pages/operations-centers.js:1327:    if (context.fetchProjectJobMonitor && projectName) {
+public/control-center/pages/operations-centers.js:1331:      context.fetchProjectJobMonitor(projectName)
+public/control-center/pages/operations-centers.js:1416:  if (!session.errorMessage && projectName && context.fetchProjectNotificationCenter && !hasNotificationSnapshot) {
+public/control-center/pages/operations-centers.js:1674:    if (context.fetchProjectNotificationCenter && projectName) {
+public/control-center/pages/operations-centers.js:1678:      context.fetchProjectNotificationCenter(projectName)
+public/control-center/pages/operations-centers.js:1718:      if (!notificationId || !context.markProjectNotification) return;
+public/control-center/pages/operations-centers.js:1720:        await context.markProjectNotification(projectName, notificationId, { status: "read", read: true });
+public/control-center/pages/operations-centers.js:1749:      if (!projectName || !context.fetchProjectTaskCenter) return;
+public/control-center/pages/operations-centers.js:1750:      context.fetchProjectTaskCenter(projectName)
+public/control-center/pages/operations-centers.js:1781:      if (!projectName || !context.fetchProjectQueueCenter) return;
+public/control-center/pages/operations-centers.js:1782:      context.fetchProjectQueueCenter(projectName)
+public/control-center/pages/operations-centers.js:1813:      if (!projectName || !context.fetchProjectJobMonitor) return;
+public/control-center/pages/operations-centers.js:1825:      context.fetchProjectJobMonitor(projectName)
+public/control-center/pages/operations-centers.js:1860:      if (!projectName || !context.fetchProjectNotificationCenter) return;
+public/control-center/pages/operations-centers.js:1872:      context.fetchProjectNotificationCenter(projectName)
+public/control-center/pages/research.js:668:  fetchProjectInsights,
+public/control-center/pages/research.js:669:  fetchProjectLearning,
+public/control-center/pages/research.js:680:    fetchProjectInsights(projectName),
+public/control-center/pages/research.js:681:    fetchProjectLearning(projectName)
+public/control-center/pages/research.js:854:  fetchProjectInsights,
+public/control-center/pages/research.js:855:  fetchProjectLearning,
+public/control-center/pages/research.js:856:  createProjectHandoff,
+public/control-center/pages/research.js:880:        fetchProjectInsights,
+public/control-center/pages/research.js:881:        fetchProjectLearning,
+public/control-center/pages/research.js:917:        createProjectHandoff?.(projectName, {
+public/control-center/pages/research.js:982:      createProjectHandoff?.(projectName, handoff).catch((error) => {
+public/control-center/pages/research.js:1121:    fetchProjectInsights,
+public/control-center/pages/research.js:1122:    fetchProjectLearning,
+public/control-center/pages/research.js:1123:    createProjectHandoff
+public/control-center/pages/research.js:1139:      fetchProjectInsights,
+public/control-center/pages/research.js:1140:      fetchProjectLearning,
+public/control-center/pages/research.js:1141:      createProjectHandoff
+public/control-center/pages/research.js:1147:      fetchProjectInsights,
+public/control-center/pages/research.js:1148:      fetchProjectLearning,
+public/control-center/pages/research.js:1603:      fetchProjectInsights,
+public/control-center/pages/research.js:1604:      fetchProjectLearning,
+public/control-center/pages/research.js:1605:      createProjectHandoff,
+public/control-center/pages/settings.js:2:  fetchProjectGovernancePolicy,
+public/control-center/pages/settings.js:3:  fetchProjectTeam,
+public/control-center/pages/settings.js:4:  saveProjectTeam,
+public/control-center/pages/settings.js:1096:      fetchProjectTeam(session.projectName),
+public/control-center/pages/settings.js:1097:      fetchProjectGovernancePolicy(session.projectName)
+public/control-center/pages/settings.js:1744:            saveProjectTeam(session.projectName, teamPayload),
+public/control-center/pages/settings.js:1751:          await context.createProjectHandoff?.(session.projectName, {
+public/control-center/pages/setup.js:697:  saveProjectSetup,
+public/control-center/pages/setup.js:897:        await saveProjectSetup?.(projectName, payload);
+public/control-center/pages/setup.js:1169:    saveProjectSetup
+public/control-center/pages/setup.js:1501:      saveProjectSetup,
+public/control-center/pages/workflows.js:967:  fetchProjectInsights,
+public/control-center/pages/workflows.js:968:  fetchProjectLearning,
+public/control-center/pages/workflows.js:998:          fetchProjectInsights(projectName),
+public/control-center/pages/workflows.js:999:          fetchProjectLearning(projectName)
+public/control-center/pages/workflows.js:1061:  createProjectHandoff,
+public/control-center/pages/workflows.js:1091:  if (allowPersistent && typeof createProjectHandoff === "function") {
+public/control-center/pages/workflows.js:1092:    createProjectHandoff(projectName, handoff).catch((error) => {
+public/control-center/pages/workflows.js:1121:      fetchProjectInsights,
+public/control-center/pages/workflows.js:1122:      fetchProjectLearning,
+public/control-center/pages/workflows.js:1123:      runProjectWorkflow,
+public/control-center/pages/workflows.js:1124:      runProjectAiWorkflow,
+public/control-center/pages/workflows.js:1160:        fetchProjectInsights,
+public/control-center/pages/workflows.js:1161:        fetchProjectLearning,
+public/control-center/pages/workflows.js:1166:      const result = await (runProjectAiWorkflow || runProjectWorkflow)?.(projectName, workflow.id, {
+public/control-center/pages/workflows.js:1206:  fetchProjectInsights,
+public/control-center/pages/workflows.js:1207:  fetchProjectLearning,
+public/control-center/pages/workflows.js:1208:  runProjectWorkflow,
+public/control-center/pages/workflows.js:1209:  runProjectAiWorkflow,
+public/control-center/pages/workflows.js:1210:  createProjectTask,
+public/control-center/pages/workflows.js:1211:  createProjectHandoff,
+public/control-center/pages/workflows.js:1215:    createAutoModeController(getState, { getState, navigateTo, createProjectHandoff });
+public/control-center/pages/workflows.js:1357:        fetchProjectInsights,
+public/control-center/pages/workflows.js:1358:        fetchProjectLearning,
+public/control-center/pages/workflows.js:1364:      const result = await (runProjectAiWorkflow || runProjectWorkflow)?.(projectName, activeWorkflow.id, {
+public/control-center/pages/workflows.js:1458:        createProjectHandoff,
+public/control-center/pages/workflows.js:1491:        createProjectHandoff,
+public/control-center/pages/workflows.js:1508:        createProjectHandoff,
+public/control-center/pages/workflows.js:1526:        await createProjectTask?.(projectName, {
+public/control-center/pages/workflows.js:1635:        context: { getState, navigateTo, createProjectHandoff, projectName },
+public/control-center/pages/workflows.js:1664:        context: { getState, navigateTo, createProjectHandoff, projectName },
+public/control-center/pages/workflows.js:1686:      createAutoModeController(getState, { getState, navigateTo, createProjectHandoff });
+public/control-center/pages/workflows.js:1694:        context: { getState, navigateTo, createProjectHandoff, projectName }
+public/control-center/pages/workflows.js:1711:      await resumeAutoMode({ context: { getState, navigateTo, createProjectHandoff, projectName } });
+public/control-center/pages/workflows.js:1727:      await approveCurrentGate({ context: { getState, navigateTo, createProjectHandoff, projectName } });
+public/control-center/pages/workflows.js:1735:      await skipCurrentStep({ context: { getState, navigateTo, createProjectHandoff, projectName } });

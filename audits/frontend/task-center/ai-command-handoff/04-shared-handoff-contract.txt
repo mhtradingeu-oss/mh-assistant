@@ -1,0 +1,22 @@
+export function getSharedAiDraft(projectName, operations) {
+  const cached = aiDraftCache.get(buildKey(projectName));
+  if (cached) return cached;
+
+  const handoff =
+    getLatestHandoffFromOperations(operations, "workflows", "ai-command") ||
+    getLatestHandoffFromOperations(operations, "ai-command", "workflows") ||
+    null;
+
+  return asObject(handoff?.payload?.draft_context);
+}
+
+export function setSharedHandoff(projectName, destinationPage, handoff) {
+  if (!projectName || !destinationPage || !handoff) return;
+  handoffCache.set(buildKey(projectName, destinationPage), handoff);
+}
+
+export function getSharedHandoff(projectName, destinationPage, operations, sourcePage = "") {
+  const cached = handoffCache.get(buildKey(projectName, destinationPage));
+  if (cached) return cached;
+  return getLatestHandoffFromOperations(operations, destinationPage, sourcePage);
+}

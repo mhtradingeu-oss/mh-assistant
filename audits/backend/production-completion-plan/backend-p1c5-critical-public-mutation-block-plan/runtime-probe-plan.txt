@@ -1,0 +1,12 @@
+Run after BACKEND-P1C.6 when server is running:
+
+MH_BLOCK_CRITICAL_PUBLIC_MUTATION_ALIASES=false
+Expected: public critical mutation aliases remain compatible.
+
+MH_BLOCK_CRITICAL_PUBLIC_MUTATION_ALIASES=true
+Expected: public critical mutation aliases return 410 or 403.
+
+Example probes:
+curl -i -X POST http://127.0.0.1:3000/public/media-manager/project/demo/integrations/test/connect
+curl -i -X POST http://127.0.0.1:3000/public/media-manager/project/demo/publishing/job-1/publish
+curl -i -X POST http://127.0.0.1:3000/public/media-manager/project/demo/ai/workflows/workflow-1/run

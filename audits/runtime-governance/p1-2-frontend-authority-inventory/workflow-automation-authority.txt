@@ -1,0 +1,135 @@
+public/control-center/pages/workflows.js:3:  getSharedHandoff,
+public/control-center/pages/workflows.js:5:  setSharedHandoff
+public/control-center/pages/workflows.js:10:  createAutoModeController,
+public/control-center/pages/workflows.js:12:  startAutoMode,
+public/control-center/pages/workflows.js:14:  resumeAutoMode,
+public/control-center/pages/workflows.js:16:  approveCurrentGate,
+public/control-center/pages/workflows.js:17:  skipCurrentStep,
+public/control-center/pages/workflows.js:18:  subscribeAutoMode,
+public/control-center/pages/workflows.js:43:    purpose: "Prepare media production inputs, format guidance, and downstream handoff steps.",
+public/control-center/pages/workflows.js:51:    purpose: "Package final channel payloads, approval checks, and publishing queue dependencies.",
+public/control-center/pages/workflows.js:312:      lastAppliedHandoffId: "",
+public/control-center/pages/workflows.js:337:    session.lastAppliedHandoffId = asString(session.lastAppliedHandoffId);
+public/control-center/pages/workflows.js:519:      `Open ${titleCase(workflow.routeHint)} for execution handoff.`,
+public/control-center/pages/workflows.js:520:      blockedRequirements.length ? "Resolve blockers before live execution." : "Proceed to execution handoff."
+public/control-center/pages/workflows.js:578:      prompt: "Prepare a publishing package checklist with missing assets and approval dependencies."
+public/control-center/pages/workflows.js:650:  const gate = asObject(autoMode?.approvalRequiredStep);
+public/control-center/pages/workflows.js:656:        Safe execution only: navigate, create draft, generate prompt, and create handoff.
+public/control-center/pages/workflows.js:706:        Hands-free safe execution with approval gates and inline logs.
+public/control-center/pages/workflows.js:735:        autoMode?.status === "waiting_approval"
+public/control-center/pages/workflows.js:738:              <strong>Approval needed:</strong> ${esc(gate.reason || "Manual approval required.")}
+public/control-center/pages/workflows.js:918:function applyDurableWorkflowHandoff({ projectName, session, operations, consumeProjectHandoff, showMessage }) {
+public/control-center/pages/workflows.js:919:  const handoff = getSharedHandoff(projectName, "workflows", operations);
+public/control-center/pages/workflows.js:920:  const handoffId = asString(handoff?.id);
+public/control-center/pages/workflows.js:921:  if (!handoffId || handoffId === asString(session.lastAppliedHandoffId)) return;
+public/control-center/pages/workflows.js:923:  const payload = asObject(handoff?.payload);
+public/control-center/pages/workflows.js:944:    run.source = "handoff";
+public/control-center/pages/workflows.js:949:  session.lastAppliedHandoffId = handoffId;
+public/control-center/pages/workflows.js:950:  consumeProjectHandoff?.(projectName, handoffId, { actor: "mh-assistant" }).catch((error) => {
+public/control-center/pages/workflows.js:951:    console.warn("Failed to consume workflow handoff:", error.message);
+public/control-center/pages/workflows.js:953:  showMessage?.("Workflow context restored from shared handoff.");
+public/control-center/pages/workflows.js:1026:function buildAiHandoffPrompt(workflow, inputs, runOutput, context) {
+public/control-center/pages/workflows.js:1055:  createProjectHandoff,
+public/control-center/pages/workflows.js:1059:  const prompt = buildAiHandoffPrompt(workflow, inputs, run.output, context);
+public/control-center/pages/workflows.js:1070:  const handoff = {
+public/control-center/pages/workflows.js:1083:  setSharedHandoff(projectName, "ai-command", handoff);
+public/control-center/pages/workflows.js:1085:  if (allowPersistent && typeof createProjectHandoff === "function") {
+public/control-center/pages/workflows.js:1086:    createProjectHandoff(projectName, handoff).catch((error) => {
+public/control-center/pages/workflows.js:1087:      console.warn("Failed to persist workflow-to-ai handoff:", error.message);
+public/control-center/pages/workflows.js:1205:  createProjectHandoff,
+public/control-center/pages/workflows.js:1209:    createAutoModeController(getState, { getState, navigateTo, createProjectHandoff });
+public/control-center/pages/workflows.js:1211:    workflowAutoModeUnsubscribe = subscribeAutoMode(() => {
+public/control-center/pages/workflows.js:1285:        setSharedHandoff(projectName, "workflows", {
+public/control-center/pages/workflows.js:1300:        persistWorkflowDraft(projectName, session, session.selectedWorkflowId, "Local handoff seed created", true);
+public/control-center/pages/workflows.js:1384:      setSharedHandoff(projectName, "workflows", {
+public/control-center/pages/workflows.js:1452:        createProjectHandoff,
+public/control-center/pages/workflows.js:1485:        createProjectHandoff,
+public/control-center/pages/workflows.js:1502:        createProjectHandoff,
+public/control-center/pages/workflows.js:1559:      setSharedHandoff(projectName, "ai-command", {
+public/control-center/pages/workflows.js:1595:      setSharedHandoff(projectName, "ai-command", {
+public/control-center/pages/workflows.js:1629:        context: { getState, navigateTo, createProjectHandoff, projectName },
+public/control-center/pages/workflows.js:1658:        context: { getState, navigateTo, createProjectHandoff, projectName },
+public/control-center/pages/workflows.js:1680:      createAutoModeController(getState, { getState, navigateTo, createProjectHandoff });
+public/control-center/pages/workflows.js:1682:      workflowAutoModeUnsubscribe = subscribeAutoMode(() => {
+public/control-center/pages/workflows.js:1686:      await startAutoMode(plan, {
+public/control-center/pages/workflows.js:1687:        mode: "auto_until_approval",
+public/control-center/pages/workflows.js:1688:        context: { getState, navigateTo, createProjectHandoff, projectName }
+public/control-center/pages/workflows.js:1705:      await resumeAutoMode({ context: { getState, navigateTo, createProjectHandoff, projectName } });
+public/control-center/pages/workflows.js:1721:      await approveCurrentGate({ context: { getState, navigateTo, createProjectHandoff, projectName } });
+public/control-center/pages/workflows.js:1722:      showMessage?.("Approval gate accepted.");
+public/control-center/pages/workflows.js:1729:      await skipCurrentStep({ context: { getState, navigateTo, createProjectHandoff, projectName } });
+public/control-center/pages/workflows.js:1768:    const approvalsTotal = Number(operations.approvals?.total || 0);
+public/control-center/pages/workflows.js:1868:              <span>Approvals</span>
+public/control-center/pages/workflows.js:1869:              <strong>${escapeHtml(String(approvalsTotal))}</strong>
+public/control-center/pages/workflows.js:1896:              <span>Approvals</span>
+public/control-center/pages/workflows.js:1897:              <strong>${escapeHtml(String(approvalsTotal))}</strong>
+public/control-center/automation-engine.js:2:import { setSharedAiDraft, setSharedHandoff } from "./shared-context.js";
+public/control-center/automation-engine.js:10:  "create_handoff",
+public/control-center/automation-engine.js:17:  { test: /publish\s*now|go\s*live|send\s*live|execute\s*publish|push\s*live/i, reason: "Publishing requires approval and manual confirmation." },
+public/control-center/automation-engine.js:21:  { test: /approve\s*final\s*asset|final\s*approval/i, reason: "Final approvals require a human decision." },
+public/control-center/automation-engine.js:22:  { test: /spend\s*money|charge|billing|payment|purchase/i, reason: "Spending actions require explicit manual approval." },
+public/control-center/automation-engine.js:23:  { test: /send\s*external|send\s*email|send\s*message|dm\b|sms\b/i, reason: "External sending requires approval." },
+public/control-center/automation-engine.js:24:  { test: /paid\s*ads|launch\s*ads|ad\s*spend|budget/i, reason: "Paid promotion requires approval." },
+public/control-center/automation-engine.js:25:  { test: /credential|api\s*key|secret|token|auth/i, reason: "Credential and provider connection actions require approval." }
+public/control-center/automation-engine.js:69:    approvalRequiredStep: null
+public/control-center/automation-engine.js:77:    mode: ["off", "guided", "auto_until_approval"].includes(normalizeText(parsed.mode))
+public/control-center/automation-engine.js:82:    status: ["idle", "running", "paused", "waiting_approval", "completed", "failed"].includes(normalizeText(parsed.status))
+public/control-center/automation-engine.js:87:    approvalRequiredStep: parsed.approvalRequiredStep == null ? null : asObject(parsed.approvalRequiredStep)
+public/control-center/automation-engine.js:99:    if (state.status === "running" || state.status === "waiting_approval") {
+public/control-center/automation-engine.js:238:      reason: "Publishing actions require manual approval before execution.",
+public/control-center/automation-engine.js:239:      whatWillHappen: "Auto Mode will stop at this step and wait for approval."
+public/control-center/automation-engine.js:256:      type: "create_handoff",
+public/control-center/automation-engine.js:296:      type: "create_handoff",
+public/control-center/automation-engine.js:298:      action: "Create content-to-media handoff",
+public/control-center/automation-engine.js:307:      type: "create_handoff",
+public/control-center/automation-engine.js:309:      action: "Create media-to-library handoff",
+public/control-center/automation-engine.js:318:      type: "create_handoff",
+public/control-center/automation-engine.js:320:      action: "Create library-to-publishing handoff",
+public/control-center/automation-engine.js:374:      setSharedHandoff(projectName, destination, localDraft);
+public/control-center/automation-engine.js:395:      setSharedHandoff(projectName, destination, draftPayload);
+public/control-center/automation-engine.js:396:      if (typeof context.createProjectHandoff === "function") {
+public/control-center/automation-engine.js:397:        context.createProjectHandoff(projectName, draftPayload).catch(() => {});
+public/control-center/automation-engine.js:404:      const handoff = {
+public/control-center/automation-engine.js:415:      setSharedHandoff(projectName, "workflows", handoff);
+public/control-center/automation-engine.js:416:      if (typeof context.createProjectHandoff === "function") {
+public/control-center/automation-engine.js:417:        context.createProjectHandoff(projectName, handoff).catch(() => {});
+public/control-center/automation-engine.js:424:      const handoff = {
+public/control-center/automation-engine.js:436:      setSharedHandoff(projectName, "publishing", handoff);
+public/control-center/automation-engine.js:437:      if (typeof context.createProjectHandoff === "function") {
+public/control-center/automation-engine.js:438:        context.createProjectHandoff(projectName, handoff).catch(() => {});
+public/control-center/automation-engine.js:443:    if (normalizeText(step.type) === "create_handoff") {
+public/control-center/automation-engine.js:445:      const handoff = {
+public/control-center/automation-engine.js:460:      setSharedHandoff(projectName, destination, handoff);
+public/control-center/automation-engine.js:461:      if (typeof context.createProjectHandoff === "function") {
+public/control-center/automation-engine.js:462:        context.createProjectHandoff(projectName, handoff).catch(() => {});
+public/control-center/automation-engine.js:464:      return { status: "success", reason: "Handoff created.", step };
+public/control-center/automation-engine.js:535:      autoModeState.status = "waiting_approval";
+public/control-center/automation-engine.js:536:      autoModeState.approvalRequiredStep = {
+public/control-center/automation-engine.js:542:      pushAutoLog(`Approval required at step ${index + 1}: ${stepActionText(step)}`, "warning", { stepIndex: index });
+public/control-center/automation-engine.js:583:  autoModeState.approvalRequiredStep = null;
+public/control-center/automation-engine.js:589:export function createAutoModeController(state, context = {}) {
+public/control-center/automation-engine.js:596:    startAutoMode,
+public/control-center/automation-engine.js:598:    resumeAutoMode,
+public/control-center/automation-engine.js:600:    approveCurrentGate,
+public/control-center/automation-engine.js:601:    skipCurrentStep,
+public/control-center/automation-engine.js:603:    subscribeAutoMode
+public/control-center/automation-engine.js:607:export async function startAutoMode(plan, options = {}) {
+public/control-center/automation-engine.js:609:  const mode = ["guided", "auto_until_approval"].includes(normalizeText(options.mode))
+public/control-center/automation-engine.js:620:  autoModeState.approvalRequiredStep = null;
+public/control-center/automation-engine.js:645:export async function resumeAutoMode(options = {}) {
+public/control-center/automation-engine.js:653:    autoModeState.mode = ["guided", "auto_until_approval"].includes(normalizeText(options.mode))
+public/control-center/automation-engine.js:658:  autoModeState.approvalRequiredStep = null;
+public/control-center/automation-engine.js:669:  autoModeState.approvalRequiredStep = null;
+public/control-center/automation-engine.js:675:export async function approveCurrentGate(options = {}) {
+public/control-center/automation-engine.js:676:  if (autoModeState.status !== "waiting_approval" || !autoModeState.approvalRequiredStep) return getAutoModeState();
+public/control-center/automation-engine.js:678:  const gate = asObject(autoModeState.approvalRequiredStep);
+public/control-center/automation-engine.js:683:  pushAutoLog(`Approval granted for step ${Number(gate.index) + 1}: ${stepActionText(step)}`, "info", { stepIndex: Number(gate.index) });
+public/control-center/automation-engine.js:685:  // Approval means proceed manually for guarded actions; never auto-publish or execute destructive actions.
+public/control-center/automation-engine.js:691:  autoModeState.approvalRequiredStep = null;
+public/control-center/automation-engine.js:697:    pushAutoLog("Auto Mode completed after approval gate.", "success");
+public/control-center/automation-engine.js:708:export async function skipCurrentStep(options = {}) {
+public/control-center/automation-engine.js:709:  if (autoModeState.status !== "waiting_approval" || !autoModeState.approvalRequiredStep) return getAutoModeState();
+public/control-center/automation-engine.js:710:  const index = Number(autoModeState.approvalRequiredStep.index) || autoModeState.currentStepIndex;
+public/control-center/automation-engine.js:711:  pushAutoLog(`Skipped step ${index + 1} after approval gate.`, "warning", { stepIndex: index });
+public/control-center/automation-engine.js:713:  autoModeState.approvalRequiredStep = null;
+public/control-center/automation-engine.js:734:export function subscribeAutoMode(listener) {

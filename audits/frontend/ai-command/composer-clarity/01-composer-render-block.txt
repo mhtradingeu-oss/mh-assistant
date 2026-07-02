@@ -1,0 +1,79 @@
+  3870						const destination = routeLabel(getToolDestinationRoute(tool, session));
+  3871						const status = getToolExecutionStatusLabel(tool);
+  3872						return `
+  3873							<button
+  3874								type="button"
+  3875								class="aicmd-v2-tool-btn aicmd-room-tool-card"
+  3876								data-aicmdv2-tool="${escapeHtml(tool.id)}"
+  3877								data-output-type="${escapeHtml(outputLabel.toLowerCase())}"
+  3878							>
+  3879								<span class="aicmd-room-tool-topline">
+  3880									<strong class="aicmd-v2-tool-label">${escapeHtml(tool.label)}</strong>
+  3881									<span class="aicmd-room-tool-action">${escapeHtml(actionLabel)}</span>
+  3882								</span>
+  3883								<span class="aicmd-room-tool-purpose">${escapeHtml(purpose)}</span>
+  3884								<span class="aicmd-v2-tool-meta">
+  3885									<span>Output: ${escapeHtml(outputLabel)}</span>
+  3886									<span>Route: ${escapeHtml(destination)}</span>
+  3887									<span>Status: ${escapeHtml(status)}</span>
+  3888								</span>
+  3889							</button>
+  3890						`;
+  3891					}).join("")}
+  3892				</div>
+  3893				${projectName ? `<div class="aicmd-v2-tools-note">Project context: ${escapeHtml(projectName)}</div>` : ""}
+  3894			</section>
+  3895		`;
+  3896	}
+  3897	
+  3898	function renderLanguageMarketStrip(aiContext, escapeHtml) {
+  3899		const languagePlan = getWorkspaceLanguagePlan(aiContext);
+  3900		return `
+  3901			<div class="aicmd-v2-lang-strip">
+  3902				<span class="aicmd-v2-lang-chip" title="Input language">🎤 ${escapeHtml(languagePlan.conversationLanguage)}</span>
+  3903				<span class="aicmd-v2-lang-chip" title="Publishing language">📝 ${escapeHtml(languagePlan.publishLanguage)}</span>
+  3904				<span class="aicmd-v2-lang-chip" title="Target market">🌍 ${escapeHtml(languagePlan.market)}</span>
+  3905			</div>
+  3906		`;
+  3907	}
+  3908	
+  3909	function renderPhase35ReadinessStrip(aiContext, bridgeStatus, escapeHtml) {
+  3910		const providerConfigured = isProviderLikelyConfigured(aiContext);
+  3911		const readinessItems = [
+  3912			{ label: "Read preview", value: "Ready", className: "is-available" },
+  3913			{ label: "Voice input", value: "Coming", className: "is-planned" },
+  3914			{ label: "Team chat", value: bridgeStatus.available ? "Ready" : "Coming", className: bridgeStatus.available ? "is-available" : "is-planned" },
+  3915			{ label: "Media gen", value: "Coming", className: "is-planned" },
+  3916			{ label: "GPU video", value: "Coming", className: "is-planned" },
+  3917			{ label: "Image prompt generation", value: providerConfigured ? "Provider may be ready" : "Provider dependent", className: providerConfigured ? "is-available" : "is-planned" }
+  3918		];
+  3919	
+  3920		return `
+  3921			<section class="aicmd-v2-readiness-strip">
+  3922				${readinessItems.map((item) => `
+  3923					<span class="aicmd-v2-readiness-chip ${item.className}">
+  3924						<strong>${escapeHtml(item.label)}</strong> ${escapeHtml(item.value)}
+  3925					</span>
+  3926				`).join("")}
+  3927			</section>
+  3928		`;
+  3929	}
+  3930	
+  3931	function renderPhase1Composer(session, aiContext, escapeHtml) {
+  3932			const spec = getPhase1SpecialistById(session.modeId);
+  3933			const placeholder = "Message the AI specialist...";
+  3934			const isTeam = session.teamMode === "team";
+  3935			const specLabel = isTeam ? "Team Meeting Room" : spec.label;
+  3936			const headerText = isTeam
+  3937				? "Coordinated Team Review — Guidance Only"
+  3938				: `Chat with ${spec.label}`;
+  3939			const draftLabel = asString(session.draftMessage).trim() ? "Draft saved" : "Empty draft";
+  3940			const roleId = isTeam ? "team" : getAiRoomRoleId(spec.id);
+  3941			const isGenerating = Boolean(session.responseLoading);
+  3942	
+  3943			return `
+  3944				<div class="aicmd-v2-composer aicmd-room-composer aicmd-chatgpt-composer" data-role="${escapeHtml(roleId)}">
+  3945					<div class="aicmd-v2-composer-head aicmd-chatgpt-composer-head">
+  3946						<div class="aicmd-v2-composer-title-row">
+  3947							<span class="aicmd-v2-composer-icon">${escapeHtml(isTeam ? "Team" : getAiRoomInitials(spec))}</span>
+  3948							<span class="aicmd-v2-composer-label">${escapeHtml(headerText)}</span>

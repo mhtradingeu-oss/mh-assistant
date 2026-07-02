@@ -1,0 +1,67 @@
+557:      selectedType: "all",
+558:      selectedStatus: "active",
+559:      selectedSource: "all",
+561:      folderKey: "all_assets",
+971:  const selectedFolderKey = session.folderKey || "all_assets";
+974:  const selectedType = session.selectedType || "all";
+975:  const selectedStatus = session.selectedStatus || "active";
+976:  const effectiveSelectedStatus = selectedFolderKey === "archived" && selectedStatus === "active"
+978:    : selectedStatus;
+979:  const selectedSource = session.selectedSource || "all";
+1016:    const matchesType = selectedType === "all" || asset.asset_type === selectedType;
+1023:    const matchesSource = selectedSource === "all"
+1024:      || (selectedSource === "media-studio" && asset.kind === "managed_media")
+1025:      || (selectedSource === "generated-media" && asset.kind === "managed_media" && ["generated_media", "prompt_asset", "video_brief", "voice_script", "campaign_pack"].includes(asset.asset_type))
+1026:      || (selectedSource === "publishing-ready" && ["publishing_ready", "sent_to_publishing"].includes(normalizeReadinessStatus(asset.status)));
+1487:function scrollLibraryTargetIntoView(target, highlightClass = "is-required-action-target") {
+1510:function bindLibraryWorkspace({
+1530:    bindLibraryWorkspace({
+1677:              data-library-required-action="${escapeHtml(item.action)}"
+1678:              data-library-required-key="${escapeHtml(item.key)}"
+1679:              data-library-upload-type="${escapeHtml(item.uploadType)}"
+1690:      <option value="${escapeHtml(option.value)}"${session.selectedType === option.value ? " selected" : ""}>${escapeHtml(option.label)}</option>
+1692:    typeSelect.value = session.selectedType || "all";
+1701:          session.selectedType = value;
+1705:      bindLibraryWorkspace({
+1725:    statusSelect.value = session.selectedStatus;
+1732:          session.selectedStatus = value;
+1736:      bindLibraryWorkspace({
+1757:      <option value="${escapeHtml(option.value)}"${session.selectedSource === option.value ? " selected" : ""}>${escapeHtml(option.label)}</option>
+1759:    sourceSelect.value = session.selectedSource || "all";
+1768:          session.selectedSource = value;
+1772:      bindLibraryWorkspace({
+1803:      bindLibraryWorkspace({
+2034:  const requiredActionButtons = Array.from(document.querySelectorAll("[data-library-required-action]"));
+2037:      const action = button.getAttribute("data-library-required-action") || "review";
+2038:      const uploadType = button.getAttribute("data-library-upload-type") || "logo";
+2039:      const requiredKey = button.getAttribute("data-library-required-key") || "";
+2057:        session.folderKey = mappedFolder.key;
+2058:        session.selectedType = isReviewAction ? "all" : uploadType;
+2059:        session.selectedStatus = isReviewAction ? "active" : session.selectedStatus;
+2060:        session.selectedSource = isReviewAction ? "all" : session.selectedSource;
+2064:        bindLibraryWorkspace({
+2085:            const assetWorkspace = document.getElementById("libraryAssetWorkspace") || document.querySelector('[data-library-section="asset-workspace"]');
+2086:            scrollLibraryTargetIntoView(assetWorkspace);
+2093:          const assetIntake = document.querySelector(".library-actions-card") || document.getElementById("libraryDropZone");
+2094:          const dropZone = document.getElementById("libraryDropZone");
+2095:          scrollLibraryTargetIntoView(assetIntake);
+2113:        session.selectedStatus = "needs_review";
+2114:        bindLibraryWorkspace({
+2154:      bindLibraryWorkspace({
+2189:      bindLibraryWorkspace({
+2218:      bindLibraryWorkspace({
+2268:  const folderButtons = Array.from(document.querySelectorAll("[data-library-folder-select]"));
+2271:      const folderKey = button.getAttribute("data-library-folder-select") || "all_assets";
+2275:        value: folderKey
+2278:          session.folderKey = value;
+2282:            session.selectedStatus = "archived";
+2549:  const pickUploadTypeButtons = Array.from(document.querySelectorAll("[data-library-upload-type]"));
+2552:      const uploadType = button.getAttribute("data-library-upload-type") || "logo";
+2632:  const dropZone = $("libraryDropZone");
+2770:      bindLibraryWorkspace({
+2997:        const assetWorkspace = document.getElementById("libraryAssetWorkspace") || document.querySelector('[data-library-section="asset-workspace"]');
+3077:            <div id="libraryDropZone" class="library-drop-zone" role="button" tabindex="0">
+3098:        <section id="libraryAssetWorkspace" class="card library-asset-workspace-section" data-library-section="asset-workspace">
+3111:      const active = (session.folderKey || "all_assets") === folder.key;
+3113:                      <button type="button" class="library-folder-item ${active ? "is-active" : ""}" data-library-folder-select="${escapeHtml(folder.key)}">
+3188:    bindLibraryWorkspace({

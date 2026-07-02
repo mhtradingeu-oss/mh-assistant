@@ -1,0 +1,1301 @@
+# T119 — Campaign Studio Runtime Authority Audit
+
+## Status
+Audit-only. No production files changed.
+
+## Scope
+Focused runtime authority review of `public/control-center/pages/campaign-studio.js`.
+
+## Why Campaign Studio Is Next
+After Settings was closed, Campaign Studio is the next high-risk active surface from the remaining T88 ranking.
+
+Campaign Studio may contain campaign planning, publishing readiness, task/workflow routing, AI prompt generation, content/media handoffs, and possible durable campaign updates.
+
+## File Summary
+- File: `public/control-center/pages/campaign-studio.js`
+- Lines: 2068
+- Imports: 2
+- Render writes: 1
+- Event bindings: 13
+- Backend/API signals: 389
+- Campaign mutation signals: 142
+- Publishing/approval/governance signals: 84
+- Handoff signals: 45
+- AI signals: 454
+- Confirmation signals: 1
+- Local/session storage signals: 33
+- Navigation signals: 30
+- Disabled/read-only/draft/guard signals: 26
+- Risky terms: 472
+
+## Initial Risk Notes
+- Campaign Studio contains campaign mutation or execution-like signals. Exact runtime actions must be classified.
+- Campaign Studio contains publishing/approval/governance signals. Need verify no publishing authority is bypassed.
+- Campaign Studio contains handoff signals. Need classify local/shared handoffs versus durable backend handoffs.
+- Confirmation dialogs exist and must be mapped to authority-sensitive campaign actions.
+
+## Imports
+- L1: `import { getSharedCampaignRecord, getSharedHandoff, setSharedCampaignRecord, setSharedHandoff } from "../shared-context.js";`
+- L2: `import {`
+
+## Render Writes
+- L1599: `root.innerHTML = \``
+
+## Event Bindings
+- L652: `body: firstNonEmpty(record.opportunity, record.recommendation, record.reason, record.summary, "Improve visibility or click-through rate.")`
+- L1287: `form.oninput = (event) => {`
+- L1304: `saveBtn.onclick = async () => {`
+- L1330: `buildBtn.onclick = async () => {`
+- L1359: `askAiBtn.onclick = async () => {`
+- L1414: `publishingBtn.onclick = () => {`
+- L1422: `assetsBtn.onclick = () => navigateTo("library");`
+- L1427: `contentBtn.onclick = () => {`
+- L1435: `mediaBtn.onclick = () => {`
+- L1443: `adsBtn.onclick = () => {`
+- L1451: `generatePackageBtn.onclick = () => {`
+- L1460: `dependenciesBtn.onclick = () => {`
+- L1476: `refreshIntelligenceBtn.onclick = () => {`
+
+## Backend / API Signals
+- L1: `import { getSharedCampaignRecord, getSharedHandoff, setSharedCampaignRecord, setSharedHandoff } from "../shared-context.js";`
+- L9: `const campaignSessions = new Map();`
+- L10: `const campaignSaveTimers = new Map();`
+- L18: `roleHint: "Use this wave to introduce the campaign, establish the core promise, and create awareness."`
+- L54: `const PUBLISHING_KEYS = ["instagram", "facebook", "tiktok", "youtube", "email"];`
+- L57: `const CAMPAIGN_ROLE_DEFAULTS = {`
+- L58: `serviceDomain: "campaign",`
+- L62: `const CAMPAIGN_ROUTE_ROLES = {`
+- L65: `publishing: { role: "publisher", domain: "publishing" },`
+- L66: `"ads-manager": { role: "ads_operator", domain: "campaign" },`
+- L117: `<div class="data-row"><span>Service lane</span><strong>${escapeHtml(titleCase(CAMPAIGN_ROLE_DEFAULTS.serviceDomain))}</strong></div>`
+- L118: `<div class="data-row"><span>Owner role</span><strong>${escapeHtml(titleCase(CAMPAIGN_ROLE_DEFAULTS.ownerRole))}</strong></div>`
+- L119: `<div class="data-row"><span>Review owner</span><strong>${escapeHtml(titleCase(CAMPAIGN_ROLE_DEFAULTS.reviewRole))}</strong></div>`
+- L120: `<div class="data-row"><span>Route map</span><strong>${escapeHtml(\`Content ${titleCase(CAMPAIGN_ROUTE_ROLES["content-studio"].role)} • Media ${titleCase(CAMPAIGN_ROUTE_ROLES["media-studio"].role)} • Publishing ${titleCase(CAMPAIGN_ROUTE_ROLES.publishing.role)} • Ads ${titleCase(CAMPAIGN_ROUTE_ROLES["ads-manager"].role)}\`)}</strong></div>`
+- L216: `const campaignName = context.activeCampaign || \`${context.currentProject || "Campaign"} Launch\`;`
+- L227: `campaignName,`
+- L228: `campaignGoal: overviewData.primary_goal || "Launch",`
+- L229: `campaignType: overviewData.project_type || "Growth campaign",`
+- L243: `wave1Name: campaignName,`
+- L260: `if (!campaignSessions.has(key)) {`
+- L261: `campaignSessions.set(key, {`
+- L271: `lastAiHandoffId: ""`
+- L274: `const session = campaignSessions.get(key);`
+- L284: `session.lastAiHandoffId = asString(session.lastAiHandoffId);`
+- L287: `return campaignSessions.get(key);`
+- L303: `<label class="setup-label" for="campaign-${escapeHtml(name)}">${escapeHtml(label)}</label>`
+- L308: `? \`<textarea id="campaign-${escapeHtml(name)}" name="${escapeHtml(name)}" class="setup-input setup-textarea" rows="${rows}" placeholder="${escapeHtml(placeholder || "")}">${escapeHtml(asString(value))}</textarea>\``
+- L309: `: \`<input id="campaign-${escapeHtml(name)}" name="${escapeHtml(name)}" class="setup-input" type="text" value="${escapeHtml(asString(value))}" placeholder="${escapeHtml(placeholder || "")}">\``
+- L320: `function syncCampaignStudioBridge(projectName, values) {`
+- L321: `const current = getSharedCampaignRecord(projectName, null);`
+- L322: `setSharedCampaignRecord(projectName, {`
+- L325: `source_page: "campaign-studio",`
+- L326: `name: asString(values?.campaignName),`
+- L327: `objective: asString(values?.campaignGoal),`
+- L345: `function hydrateValuesFromCampaignRecord(defaults, campaign) {`
+- L346: `const record = asObject(campaign);`
+- L352: `campaignName: asString(formValues.campaignName || record.name || defaults.campaignName),`
+- L353: `campaignGoal: asString(formValues.campaignGoal || record.objective || defaults.campaignGoal),`
+- L379: `function applyAiCampaignHandoff(projectName, operations, session) {`
+- L380: `const handoff = getSharedHandoff(projectName, "campaign-studio", operations, "ai-command");`
+- L381: `const handoffId = asString(handoff?.id || handoff?.updated_at || handoff?.created_at || handoff?.payload?.prompt);`
+- L382: `if (!handoffId || handoffId === asString(session.lastAiHandoffId)) return false;`
+- L384: `const payload = asObject(handoff.payload);`
+- L387: `const pkg = asObject(response.campaignPackage || response.campaign_package || payload.campaignPackage || payload.campaign_package);`
+- L393: `campaignName: firstNonEmpty(pkg.concept, pkg.campaignConcept, response.title, session.values.campaignName),`
+- L394: `campaignGoal: firstNonEmpty(response.summary, pkg.goal, pkg.objective, session.values.campaignGoal),`
+- L421: `session.lastAiHandoffId = handoffId;`
+- L422: `setSharedCampaignRecord(projectName, {`
+- L423: `...(getSharedCampaignRecord(projectName, operations) || {}),`
+- L426: `name: session.values.campaignName,`
+- L427: `objective: session.values.campaignGoal,`
+- L438: `function confirmCampaignStudioAuthorityAction(action, detail = "") {`
+- L442: `\`Confirm Campaign Studio action: ${action}\`,`
+- L444: `detail || "This action may create or update backend campaign records or route handoffs.",`
+- L447: `"Select Cancel to review the campaign plan, evidence, and destination before continuing."`
+- L453: `function buildCampaignRecordPayload(projectName, session) {`
+- L459: `name: asString(values.campaignName || projectName),`
+- L460: `objective: asString(values.campaignGoal),`
+- L467: `source_page: "campaign-studio",`
+- L469: `owner_role: CAMPAIGN_ROLE_DEFAULTS.ownerRole,`
+- L470: `review_role: CAMPAIGN_ROLE_DEFAULTS.reviewRole,`
+- L471: `service_domain: CAMPAIGN_ROLE_DEFAULTS.serviceDomain,`
+- L473: `linked_tasks: [],`
+- L474: `linked_approvals: [],`
+- L479: `function persistCampaignRouteHandoff({ projectName, session, destinationPage, createProjectHandoff }) {`
+- L480: `const destination = CAMPAIGN_ROUTE_ROLES[destinationPage];`
+- L483: `const handoff = {`
+- L484: `source_page: "campaign-studio",`
+- L486: `source_role: CAMPAIGN_ROLE_DEFAULTS.ownerRole,`
+- L488: `source_service_domain: CAMPAIGN_ROLE_DEFAULTS.serviceDomain,`
+- L491: `entity_type: "campaign",`
+- L493: `route: "campaign-studio",`
+- L494: `label: asString(session.values.campaignName || projectName)`
+- L497: `campaign_id: session.recordId || "",`
+- L498: `campaign_name: asString(session.values.campaignName || projectName),`
+- L499: `owner_role: CAMPAIGN_ROLE_DEFAULTS.ownerRole,`
+- L500: `review_role: CAMPAIGN_ROLE_DEFAULTS.reviewRole,`
+- L501: `service_domain: CAMPAIGN_ROLE_DEFAULTS.serviceDomain,`
+- L502: `draft_context: buildCampaignRecordPayload(projectName, session)`
+- L506: `setSharedHandoff(projectName, destinationPage, handoff);`
+- L508: `if (!confirmCampaignStudioAuthorityAction(`
+- L509: `"Create campaign route handoff",`
+- L510: `\`This will create a backend handoff from Campaign Studio to ${destinationPage} for review and execution preparation.\``
+- L515: `createProjectHandoff?.(projectName, handoff).catch((error) => {`
+- L516: `console.warn("Failed to persist campaign route handoff:", error.message);`
+- L520: `function scheduleCampaignPersistence(projectName, session, saveProjectCampaign) {`
+- L521: `if (!projectName || typeof saveProjectCampaign !== "function") {`
+- L526: `const existing = campaignSaveTimers.get(key);`
+- L533: `...buildCampaignRecordPayload(projectName, session),`
+- L535: `autosave_note: "Campaign Studio autosave is local/shared-state only. Use Save campaign draft or Save campaign plan for backend persistence."`
+- L537: `setSharedCampaignRecord(projectName, draft);`
+- L540: `campaignSaveTimers.set(key, timer);`
+- L545: `<div class="campaign-studio-empty-state">`
+- L617: `function collectPublishingWindows(insights, learning, topContent) {`
+- L628: `body: "Best publishing window detected from current campaign intelligence."`
+- L669: `asArray(paid.best_campaigns || paid.best_creatives).slice(0, 2).forEach((item) => {`
+- L672: `title: firstNonEmpty(record.campaign_name, record.title, record.label, "Top paid signal"),`
+- L673: `body: firstNonEmpty(record.reason, record.insight, record.summary, record.recommendation, "This campaign is outperforming peers.")`
+- L677: `asArray(paid.weak_campaigns || paid.weak_creatives).slice(0, 2).forEach((item) => {`
+- L680: `title: firstNonEmpty(record.campaign_name, record.title, record.label, "Paid risk"),`
+- L729: `body: "This platform is not operational yet, so campaign execution will be constrained."`
+- L803: `? "Platform connection exists, so this can be activated once the campaign package is ready."`
+- L819: `rationale: seoOpportunities[0]?.body || "Use website and search support to capture campaign intent beyond social reach."`
+- L824: `rationale: "Campaign decisions will improve materially once attribution and landing behavior are measurable."`
+- L860: `const publishingBlockers = [];`
+- L864: `const approvalBlockers = [];`
+- L866: `if (!values.startDate) publishingBlockers.push("Set a launch start date before pushing work downstream.");`
+- L867: `if (!values.channelPlan) publishingBlockers.push("Define the operational channel plan so scheduling knows what to activate.");`
+- L868: `if (!connectedChannels.some((item) => PUBLISHING_KEYS.includes(item))) {`
+- L869: `publishingBlockers.push("No publishing channel is connected yet.");`
+- L872: `publishingBlockers.push("Critical creative or offer assets are still missing.");`
+- L875: `if (!values.budget) adsBlockers.push("Add a working campaign budget before routing to Ads Manager.");`
+- L885: `if (!values.campaignName || !values.campaignGoal) {`
+- L886: `trackingBlockers.push("Campaign naming and goal framing should be locked before measurement packages are generated.");`
+- L896: `if (!values.executionNotes) approvalBlockers.push("Execution notes are missing, which makes approvals harder downstream.");`
+- L897: `if (!values.audiencePrimary || !values.audienceNeed) approvalBlockers.push("Audience framing is incomplete for creative review.");`
+- L898: `if (!values.productAngle) approvalBlockers.push("Product angle needs to be explicit so operators do not improvise.");`
+- L901: `publishingBlockers.length ||`
+- L905: `approvalBlockers.length ||`
+- L915: `publishingBlockers,`
+- L919: `approvalBlockers,`
+- L923: `publishingBlockers.length +`
+- L927: `approvalBlockers.length`
+- L947: `aiRecommendations.campaign_angle,`
+- L953: `"Refine the campaign angle once stronger content and audience learning is available."`
+- L975: `readinessStatus ? \`Readiness status is ${readinessStatus}. Close the top blocker before routing this campaign.\` : "",`
+- L1022: `function buildCampaignModel(state, session, values) {`
+- L1039: `const campaignAssetKeys = [`
+- L1044: `"campaign_assets",`
+- L1048: `const campaignAssetCategories = getCategoryReadinessList(assets)`
+- L1049: `.filter((item) => campaignAssetKeys.includes(item.asset_type));`
+- L1050: `const missingAssets = getMissingAssetLabels(assets, campaignAssetKeys);`
+- L1051: `const requiredAssetTypes = uniqueStrings(campaignAssetCategories.map((item) => item.display_label || item.label || item.asset_type));`
+- L1053: `campaignAssetCategories`
+- L1106: `const publishingWindows = collectPublishingWindows(insights, learning, topContent);`
+- L1149: `campaignAssetKeys,`
+- L1150: `campaignAssetCategories,`
+- L1151: `assetNextAction: getAssetNextAction(assets, campaignAssetKeys),`
+- L1157: `publishingWindows,`
+- L1174: `"Connect more intelligence or lock the campaign inputs to tighten the channel recommendation.",`
+- L1180: `<div class="campaign-channel-card-list">`
+- L1182: `<div class="campaign-channel-card">`
+- L1183: `<div class="campaign-channel-head">`
+- L1196: `<div class="campaign-readiness-block">`
+- L1197: `<div class="campaign-readiness-head">`
+- L1213: `fetchProjectInsights,`
+- L1214: `fetchProjectLearning,`
+- L1220: `if (typeof fetchProjectInsights !== "function" && typeof fetchProjectLearning !== "function") return;`
+- L1226: `typeof fetchProjectInsights === "function" ? fetchProjectInsights(projectName) : Promise.resolve(null),`
+- L1227: `typeof fetchProjectLearning === "function" ? fetchProjectLearning(projectName) : Promise.resolve(null)`
+- L1249: `showError?.(\`Campaign intelligence could not be refreshed: ${session.intelligence.error}\`);`
+- L1256: `session.intelligence.error = error?.message || "Failed to load campaign intelligence";`
+- L1262: `function bindCampaignStudio({`
+- L1269: `fetchProjectInsights,`
+- L1270: `fetchProjectLearning,`
+- L1271: `saveProjectCampaign,`
+- L1272: `createProjectHandoff`
+- L1277: `const durableCampaign = getSharedCampaignRecord(projectName, state.data.operations);`
+- L1278: `if (durableCampaign) {`
+- L1279: `session.recordId = asString(durableCampaign.id || session.recordId);`
+- L1280: `session.values = hydrateValuesFromCampaignRecord(session.values, durableCampaign);`
+- L1282: `applyAiCampaignHandoff(projectName, state.data.operations, session);`
+- L1283: `syncCampaignStudioBridge(projectName, session.values);`
+- L1285: `const form = $("campaignStudioForm");`
+- L1292: `syncCampaignStudioBridge(projectName, session.values);`
+- L1293: `scheduleCampaignPersistence(projectName, session, saveProjectCampaign);`
+- L1297: `// Explicit actions such as Save, Build, Refresh, and route handoffs still`
+- L1302: `const saveBtn = $("campaignSaveDraftBtn");`
+- L1305: `syncCampaignStudioBridge(projectName, session.values);`
+- L1307: `if (!confirmCampaignStudioAuthorityAction(`
+- L1308: `"Save backend campaign draft",`
+- L1309: `\`This will save or update the Campaign Studio draft for ${projectName}.\``
+- L1311: `showMessage?.("Campaign draft save cancelled.");`
+- L1316: `const result = await saveProjectCampaign?.(projectName, buildCampaignRecordPayload(projectName, session));`
+- L1317: `if (result?.campaign?.id) {`
+- L1318: `session.recordId = result.campaign.id;`
+- L1319: `setSharedCampaignRecord(projectName, result.campaign);`
+- L1321: `showMessage?.("Campaign draft saved to the shared operating backbone.");`
+- L1323: `showError?.(error.message || "Failed to save campaign plan.");`
+- L1328: `const buildBtn = $("campaignBuildPlanBtn");`
+- L1331: `syncCampaignStudioBridge(projectName, session.values);`
+- L1333: `if (!confirmCampaignStudioAuthorityAction(`
+- L1334: `"Save backend campaign plan",`
+- L1335: `\`This will save or update the Campaign Studio plan for ${projectName}.\``
+- L1337: `showMessage?.("Campaign plan save cancelled.");`
+- L1342: `const result = await saveProjectCampaign?.(projectName, {`
+- L1343: `...buildCampaignRecordPayload(projectName, session),`
+- L1346: `if (result?.campaign?.id) {`
+- L1347: `session.recordId = result.campaign.id;`
+- L1348: `setSharedCampaignRecord(projectName, result.campaign);`
+- L1350: `showMessage?.("Campaign plan saved as a durable shared record.");`
+- L1352: `showError?.(error.message || "Failed to structure the campaign plan.");`
+- L1357: `const askAiBtn = $("campaignAskAiBtn");`
+- L1360: `const prompt = \`Build an execution plan for campaign ${session.values.campaignName || "this campaign"} with goal ${session.values.campaignGoal || "launch"}, channels ${session.values.channelPlan || "to be defined"}, and offer ${session.values.offerHeadline || "to be defined"}. Use current project intelligence, readiness blockers, and recommendation signals.\`;`
+- L1365: `setSharedHandoff(projectName, "ai-command", {`
+- L1366: `source_page: "campaign-studio",`
+- L1370: `campaign_id: session.recordId || "",`
+- L1371: `campaign_name: session.values.campaignName || projectName,`
+- L1372: `draft_context: buildCampaignRecordPayload(projectName, session)`
+- L1376: `if (!confirmCampaignStudioAuthorityAction(`
+- L1377: `"Create AI Command campaign handoff",`
+- L1378: `"This will create a backend handoff from Campaign Studio to AI Command for review and planning support."`
+- L1380: `showMessage?.("AI Command handoff cancelled.");`
+- L1384: `createProjectHandoff?.(projectName, {`
+- L1385: `source_page: "campaign-studio",`
+- L1387: `source_role: CAMPAIGN_ROLE_DEFAULTS.ownerRole,`
+- L1388: `destination_role: CAMPAIGN_ROUTE_ROLES["ai-command"].role,`
+- L1389: `source_service_domain: CAMPAIGN_ROLE_DEFAULTS.serviceDomain,`
+- L1390: `destination_service_domain: CAMPAIGN_ROUTE_ROLES["ai-command"].domain,`
+- L1392: `entity_type: "campaign",`
+- L1397: `campaign_id: session.recordId || "",`
+- L1398: `campaign_name: session.values.campaignName || projectName,`
+- L1399: `owner_role: CAMPAIGN_ROLE_DEFAULTS.ownerRole,`
+- L1400: `review_role: CAMPAIGN_ROLE_DEFAULTS.reviewRole,`
+- L1401: `service_domain: CAMPAIGN_ROLE_DEFAULTS.serviceDomain,`
+- L1402: `draft_context: buildCampaignRecordPayload(projectName, session)`
+- L1405: `console.warn("Failed to persist campaign handoff:", error.message);`
+- L1408: `showMessage?.("Campaign context sent to AI Command.");`
+- L1412: `const publishingBtn = $("campaignOpenPublishingBtn");`
+- L1413: `if (publishingBtn) {`
+- L1414: `publishingBtn.onclick = () => {`
+- L1415: `persistCampaignRouteHandoff({ projectName, session, destinationPage: "publishing", createProjectHandoff });`
+- L1416: `navigateTo("publishing");`
+- L1420: `const assetsBtn = $("campaignReviewAssetsBtn");`
+- L1425: `const contentBtn = $("campaignOpenContentStudioBtn");`
+- L1428: `persistCampaignRouteHandoff({ projectName, session, destinationPage: "content-studio", createProjectHandoff });`
+- L1433: `const mediaBtn = $("campaignOpenMediaStudioBtn");`
+- L1436: `persistCampaignRouteHandoff({ projectName, session, destinationPage: "media-studio", createProjectHandoff });`
+- L1441: `const adsBtn = $("campaignOpenAdsManagerBtn");`
+- L1444: `persistCampaignRouteHandoff({ projectName, session, destinationPage: "ads-manager", createProjectHandoff });`
+- L1449: `const generatePackageBtn = $("campaignGeneratePackageBtn");`
+- L1453: `showMessage?.("Campaign package drafted in this session. Backend export wiring can be connected next.");`
+- L1458: `const dependenciesBtn = $("campaignReviewDependenciesBtn");`
+- L1461: `const model = buildCampaignModel(state, session, session.values);`
+- L1474: `const refreshIntelligenceBtn = $("campaignRefreshIntelligenceBtn");`
+- L1482: `fetchProjectInsights,`
+- L1483: `fetchProjectLearning,`
+- L1488: `showMessage?.("Refreshing campaign intelligence.");`
+- L1493: `export const campaignStudioRoute = {`
+- L1494: `id: "campaign-studio",`
+- L1498: `title: "Campaign Studio",`
+- L1499: `description: "Plan campaign basics, launch waves, channel mix, and required assets in one execution-oriented workspace."`
+- L1502: `<section class="page is-active" data-page="campaign-studio">`
+- L1503: `<div id="campaignStudioRoot"></div>`
+- L1514: `fetchProjectInsights,`
+- L1515: `fetchProjectLearning,`
+- L1516: `saveProjectCampaign,`
+- L1517: `createProjectHandoff`
+- L1522: `applyAiCampaignHandoff(projectName, state.data.operations, session);`
+- L1524: `const root = $("campaignStudioRoot");`
+- L1535: `fetchProjectInsights,`
+- L1536: `fetchProjectLearning,`
+- L1537: `saveProjectCampaign,`
+- L1538: `createProjectHandoff`
+- L1544: `fetchProjectInsights,`
+- L1545: `fetchProjectLearning,`
+- L1550: `const model = buildCampaignModel(state, session, values);`
+- L1557: `campaignAssetKeys,`
+- L1564: `publishingWindows,`
+- L1576: `const activeCampaignLabel = safeText(firstNonEmpty(state.context.activeCampaign, values.campaignName), projectName || "Campaign Studio");`
+- L1593: `const goalLabel = safeText(values.campaignGoal, "Goal pending");`
+- L1594: `const strategistNextAction = safeText(strategyGuidance.nextAction, "Review campaign plan");`
+- L1596: `? "Current intelligence is shaping campaign direction and readiness."`
+- L1600: `<div class="campaign-studio-wrapper">`
+- L1602: `<section class="mhos-campaign-command-header mhos-context-ribbon" aria-label="Campaign command board">`
+- L1603: `<div class="mhos-campaign-command-main mhos-context-main">`
+- L1604: `<div class="mhos-campaign-kicker-row mhos-context-kicker">`
+- L1605: `<span class="mhos-campaign-kicker mhos-context-kicker">Campaign Command Board</span>`
+- L1606: `<span class="mhos-campaign-state mhos-campaign-state--${readinessTone}">${escapeHtml(executionReadiness.status)}</span>`
+- L1608: `<h2 class="mhos-campaign-title mhos-context-title">${escapeHtml(activeCampaignLabel)}</h2>`
+- L1609: `<p class="mhos-campaign-summary mhos-context-description">${escapeHtml(goalLabel)}</p>`
+- L1610: `<div class="mhos-campaign-context-row mhos-context-chip-row" aria-label="Campaign context">`
+- L1611: `<span class="mhos-campaign-context-item mhos-context-chip">Market <strong class="mhos-campaign-context-value">${escapeHtml(marketLabel)}</strong></span>`
+- L1612: `<span class="mhos-campaign-context-item mhos-context-chip">Product <strong class="mhos-campaign-context-value">${escapeHtml(productLabel)}</strong></span>`
+- L1613: `<span class="mhos-campaign-context-item mhos-context-chip">Budget <strong class="mhos-campaign-context-value">${escapeHtml(budgetLabel)}</strong></span>`
+- L1614: `<span class="mhos-campaign-context-item mhos-context-chip">Window <strong class="mhos-campaign-context-value">${escapeHtml(launchWindowLabel)}</strong></span>`
+- L1618: `<aside class="mhos-campaign-strategist-panel mhos-context-actions mhos-executive-ai-panel" aria-label="Campaign strategist recommendation">`
+- L1619: `<span class="mhos-campaign-panel-label">Strategist next move</span>`
+- L1620: `<strong class="mhos-campaign-panel-action mhos-executive-guidance">${escapeHtml(strategistNextAction)}</strong>`
+- L1621: `<p class="mhos-campaign-panel-copy mhos-executive-guidance">${escapeHtml(strategistMode)}</p>`
+
+## Campaign Mutation Signals
+- L1: `import { getSharedCampaignRecord, getSharedHandoff, setSharedCampaignRecord, setSharedHandoff } from "../shared-context.js";`
+- L2: `import {`
+- L10: `const campaignSaveTimers = new Map();`
+- L17: `defaultRole: "Launch and announcement",`
+- L18: `roleHint: "Use this wave to introduce the campaign, establish the core promise, and create awareness."`
+- L54: `const PUBLISHING_KEYS = ["instagram", "facebook", "tiktok", "youtube", "email"];`
+- L65: `publishing: { role: "publisher", domain: "publishing" },`
+- L120: `<div class="data-row"><span>Route map</span><strong>${escapeHtml(\`Content ${titleCase(CAMPAIGN_ROUTE_ROLES["content-studio"].role)} • Media ${titleCase(CAMPAIGN_ROUTE_ROLES["media-studio"].role)} • Publishing ${titleCase(CAMPAIGN_ROUTE_ROLES.publishing.role)} • Ads ${titleCase(CAMPAIGN_ROUTE_ROLES["ads-manager"].role)}\`)}</strong></div>`
+- L216: `const campaignName = context.activeCampaign || \`${context.currentProject || "Campaign"} Launch\`;`
+- L219: `const scheduledJobs = asArray(activity.scheduled_jobs);`
+- L221: `scheduledJobs`
+- L228: `campaignGoal: overviewData.primary_goal || "Launch",`
+- L240: `startDate: "",`
+- L244: `wave1Focus: "Launch announcement",`
+- L320: `function syncCampaignStudioBridge(projectName, values) {`
+- L335: `asString(values?.startDate),`
+- L341: `updated_at: new Date().toISOString()`
+- L381: `const handoffId = asString(handoff?.id || handoff?.updated_at || handoff?.created_at || handoff?.payload?.prompt);`
+- L390: `const phases = asArray(pkg.launchPhases || pkg.launch_phases || pkg.phases);`
+- L433: `updated_at: new Date().toISOString()`
+- L444: `detail || "This action may create or update backend campaign records or route handoffs.",`
+- L446: `"Authority: This does not publish, send externally, schedule ads, or approve anything automatically.",`
+- L455: `const timeline = [asString(values.startDate), asString(values.endDate)].filter(Boolean).join(" to ");`
+- L479: `function persistCampaignRouteHandoff({ projectName, session, destinationPage, createProjectHandoff }) {`
+- L509: `"Create campaign route handoff",`
+- L510: `\`This will create a backend handoff from Campaign Studio to ${destinationPage} for review and execution preparation.\``
+- L515: `createProjectHandoff?.(projectName, handoff).catch((error) => {`
+- L520: `function scheduleCampaignPersistence(projectName, session, saveProjectCampaign) {`
+- L521: `if (!projectName || typeof saveProjectCampaign !== "function") {`
+- L526: `const existing = campaignSaveTimers.get(key);`
+- L535: `autosave_note: "Campaign Studio autosave is local/shared-state only. Use Save campaign draft or Save campaign plan for backend persistence."`
+- L540: `campaignSaveTimers.set(key, timer);`
+- L617: `function collectPublishingWindows(insights, learning, topContent) {`
+- L628: `body: "Best publishing window detected from current campaign intelligence."`
+- L774: `? "Connected inside the current system, so this channel can support launch execution."`
+- L813: `? "Use lifecycle support to reinforce the launch and recover warm traffic."`
+- L860: `const publishingBlockers = [];`
+- L866: `if (!values.startDate) publishingBlockers.push("Set a launch start date before pushing work downstream.");`
+- L867: `if (!values.channelPlan) publishingBlockers.push("Define the operational channel plan so scheduling knows what to activate.");`
+- L868: `if (!connectedChannels.some((item) => PUBLISHING_KEYS.includes(item))) {`
+- L869: `publishingBlockers.push("No publishing channel is connected yet.");`
+- L872: `publishingBlockers.push("Critical creative or offer assets are still missing.");`
+- L880: `if (!values.offerHeadline) adsBlockers.push("Offer headline is still too incomplete for ad packaging.");`
+- L889: `trackingBlockers.push("Live intelligence is still sparse, so optimization loops will be weaker after launch.");`
+- L897: `if (!values.audiencePrimary || !values.audienceNeed) approvalBlockers.push("Audience framing is incomplete for creative review.");`
+- L901: `publishingBlockers.length ||`
+- L915: `publishingBlockers,`
+- L923: `publishingBlockers.length +`
+- L960: `"Clarify the single strongest commercial promise before launch."`
+- L1006: `? "Hero visual, launch copy, offer banner"`
+- L1062: `const scheduledJobs = asArray(activity.scheduled_jobs);`
+- L1081: `body: "Connection or readiness check is still incomplete."`
+- L1106: `const publishingWindows = collectPublishingWindows(insights, learning, topContent);`
+- L1146: `scheduledJobs,`
+- L1157: `publishingWindows,`
+- L1210: `function startIntelligenceHydration({`
+- L1226: `typeof fetchProjectInsights === "function" ? fetchProjectInsights(projectName) : Promise.resolve(null),`
+- L1227: `typeof fetchProjectLearning === "function" ? fetchProjectLearning(projectName) : Promise.resolve(null)`
+- L1230: `const insightsMissing = insightsResult?.status === "rejected" && isMissingIntelligenceError(insightsResult.reason);`
+- L1231: `const learningMissing = learningResult?.status === "rejected" && isMissingIntelligenceError(learningResult.reason);`
+- L1239: `insightsResult?.status === "rejected" && !insightsMissing ? insightsResult.reason?.message : "",`
+- L1240: `learningResult?.status === "rejected" && !learningMissing ? learningResult.reason?.message : ""`
+- L1271: `saveProjectCampaign,`
+- L1272: `createProjectHandoff`
+- L1283: `syncCampaignStudioBridge(projectName, session.values);`
+- L1292: `syncCampaignStudioBridge(projectName, session.values);`
+- L1293: `scheduleCampaignPersistence(projectName, session, saveProjectCampaign);`
+- L1297: `// Explicit actions such as Save, Build, Refresh, and route handoffs still`
+- L1302: `const saveBtn = $("campaignSaveDraftBtn");`
+- L1303: `if (saveBtn) {`
+- L1304: `saveBtn.onclick = async () => {`
+- L1305: `syncCampaignStudioBridge(projectName, session.values);`
+- L1308: `"Save backend campaign draft",`
+- L1309: `\`This will save or update the Campaign Studio draft for ${projectName}.\``
+- L1311: `showMessage?.("Campaign draft save cancelled.");`
+- L1316: `const result = await saveProjectCampaign?.(projectName, buildCampaignRecordPayload(projectName, session));`
+- L1321: `showMessage?.("Campaign draft saved to the shared operating backbone.");`
+- L1323: `showError?.(error.message || "Failed to save campaign plan.");`
+- L1330: `buildBtn.onclick = async () => {`
+- L1331: `syncCampaignStudioBridge(projectName, session.values);`
+- L1334: `"Save backend campaign plan",`
+- L1335: `\`This will save or update the Campaign Studio plan for ${projectName}.\``
+- L1337: `showMessage?.("Campaign plan save cancelled.");`
+- L1342: `const result = await saveProjectCampaign?.(projectName, {`
+- L1350: `showMessage?.("Campaign plan saved as a durable shared record.");`
+- L1359: `askAiBtn.onclick = async () => {`
+- L1360: `const prompt = \`Build an execution plan for campaign ${session.values.campaignName || "this campaign"} with goal ${session.values.campaignGoal || "launch"}, channels ${session.values.channelPlan || "to be defined"}, and offer ${session.values.offerHeadline || "to be defined"}. Use current project intelligence, readiness blockers, and recommendation signals.\`;`
+- L1377: `"Create AI Command campaign handoff",`
+- L1378: `"This will create a backend handoff from Campaign Studio to AI Command for review and planning support."`
+- L1384: `createProjectHandoff?.(projectName, {`
+- L1412: `const publishingBtn = $("campaignOpenPublishingBtn");`
+- L1413: `if (publishingBtn) {`
+- L1414: `publishingBtn.onclick = () => {`
+- L1415: `persistCampaignRouteHandoff({ projectName, session, destinationPage: "publishing", createProjectHandoff });`
+- L1416: `navigateTo("publishing");`
+- L1428: `persistCampaignRouteHandoff({ projectName, session, destinationPage: "content-studio", createProjectHandoff });`
+- L1436: `persistCampaignRouteHandoff({ projectName, session, destinationPage: "media-studio", createProjectHandoff });`
+- L1444: `persistCampaignRouteHandoff({ projectName, session, destinationPage: "ads-manager", createProjectHandoff });`
+- L1479: `startIntelligenceHydration({`
+- L1499: `description: "Plan campaign basics, launch waves, channel mix, and required assets in one execution-oriented workspace."`
+- L1516: `saveProjectCampaign,`
+- L1517: `createProjectHandoff`
+- L1537: `saveProjectCampaign,`
+- L1538: `createProjectHandoff`
+- L1541: `startIntelligenceHydration({`
+- L1554: `scheduledJobs,`
+- L1564: `publishingWindows,`
+- L1590: `const launchWindowLabel = [values.startDate, values.endDate].filter(Boolean).join(" to ") || "Window pending";`
+- L1614: `<span class="mhos-campaign-context-item mhos-context-chip">Window <strong class="mhos-campaign-context-value">${escapeHtml(launchWindowLabel)}</strong></span>`
+- L1626: `<button id="campaignSaveDraftBtn" class="btn btn-secondary mhos-context-action" type="button">Save campaign draft</button>`
+- L1627: `<button id="campaignBuildPlanBtn" class="btn btn-primary mhos-context-action" type="button">Save campaign plan</button>`
+- L1634: `<small class="mhos-campaign-metric-note mhos-executive-metric-note">${escapeHtml(executionReadiness.total ? \`${executionReadiness.total} open gate${executionReadiness.total === 1 ? "" : "s"}\` : "Launch gates clear")}</small>`
+- L1644: `<small class="mhos-campaign-metric-note mhos-executive-metric-note">${escapeHtml(executionReadiness.total ? "Needs operator attention" : "No open launch blockers")}</small>`
+- L1670: `placeholder: "Spring launch wave 1",`
+- L1677: `helper: "Lead with the business outcome: launch, revenue, retention, awareness, or activation.",`
+- L1678: `placeholder: "Launch, sales growth, lead generation...",`
+- L1686: `placeholder: "Product launch, seasonal push, retention sprint...",`
+- L1700: `name: "startDate",`
+- L1701: `label: "Start date",`
+- L1702: `value: values.startDate,`
+- L1703: `helper: "When should the campaign start going live?",`
+- L1711: `helper: "Optional hard stop or review date.",`
+- L1813: `Plan each wave separately so launch, education, and conversion work stay clear before routing into execution workspaces.`
+- L1851: `placeholder: wave.index === 1 ? "Launch wave" : wave.index === 2 ? "Education wave" : "Conversion wave",`
+- L1883: `Review the recommended campaign direction, required assets, and real blockers before sending the plan into downstream work.`
+- L1931: `helper: "Define what must exist before the campaign can execute smoothly across channels and waves.",`
+- L1965: `"Publishing blockers",`
+- L1966: `executionReadiness.publishingBlockers,`
+- L1968: `"No publishing blocker is currently stopping launch routing."`
+- L1992: `"Approval inputs look complete enough for review."`
+- L2005: `Send campaign context to AI prefills the current campaign draft and then navigates there. The downstream send actions open the linked workspace with the current campaign context attached.`
+- L2017: `<span class="home-action-title">Send campaign context to AI</span>`
+- L2023: `<span class="home-action-title">Send to Content Studio</span>`
+- L2027: `<span class="home-action-title">Send to Media Studio</span>`
+- L2030: `<button id="campaignOpenPublishingBtn" class="quick-action-btn" type="button">`
+- L2031: `<span class="home-action-title">Send to Publishing</span>`
+- L2032: `<span class="home-action-meta">Open Publishing with a campaign handoff attached.</span>`
+- L2035: `<span class="home-action-title">Send to Ads Manager</span>`
+- L2040: `<span class="home-action-meta">Jump to the highest-priority place to close launch blockers.</span>`
+- L2044: `<span class="home-action-meta">Navigation only. Review missing assets before execution starts.</span>`
+- L2062: `saveProjectCampaign,`
+- L2063: `createProjectHandoff,`
+
+## Publishing / Approval / Governance Signals
+- L17: `defaultRole: "Launch and announcement",`
+- L54: `const PUBLISHING_KEYS = ["instagram", "facebook", "tiktok", "youtube", "email"];`
+- L65: `publishing: { role: "publisher", domain: "publishing" },`
+- L67: `"ai-command": { role: "admin", domain: "governance" }`
+- L120: `<div class="data-row"><span>Route map</span><strong>${escapeHtml(\`Content ${titleCase(CAMPAIGN_ROUTE_ROLES["content-studio"].role)} • Media ${titleCase(CAMPAIGN_ROUTE_ROLES["media-studio"].role)} • Publishing ${titleCase(CAMPAIGN_ROUTE_ROLES.publishing.role)} • Ads ${titleCase(CAMPAIGN_ROUTE_ROLES["ads-manager"].role)}\`)}</strong></div>`
+- L216: `const campaignName = context.activeCampaign || \`${context.currentProject || "Campaign"} Launch\`;`
+- L219: `const scheduledJobs = asArray(activity.scheduled_jobs);`
+- L221: `scheduledJobs`
+- L228: `campaignGoal: overviewData.primary_goal || "Launch",`
+- L244: `wave1Focus: "Launch announcement",`
+- L390: `const phases = asArray(pkg.launchPhases || pkg.launch_phases || pkg.phases);`
+- L446: `"Authority: This does not publish, send externally, schedule ads, or approve anything automatically.",`
+- L474: `linked_approvals: [],`
+- L520: `function scheduleCampaignPersistence(projectName, session, saveProjectCampaign) {`
+- L617: `function collectPublishingWindows(insights, learning, topContent) {`
+- L628: `body: "Best publishing window detected from current campaign intelligence."`
+- L720: `Object.entries(asObject(checks)).forEach(([key, isReady]) => {`
+- L721: `if (isReady || strongest.find((item) => item.title === channelLabel(key)) || weak.find((item) => item.title === channelLabel(key))) {`
+- L774: `? "Connected inside the current system, so this channel can support launch execution."`
+- L803: `? "Platform connection exists, so this can be activated once the campaign package is ready."`
+- L813: `? "Use lifecycle support to reinforce the launch and recover warm traffic."`
+- L814: `: "Add email support once the channel is connected and lists are ready."`
+- L860: `const publishingBlockers = [];`
+- L864: `const approvalBlockers = [];`
+- L866: `if (!values.startDate) publishingBlockers.push("Set a launch start date before pushing work downstream.");`
+- L867: `if (!values.channelPlan) publishingBlockers.push("Define the operational channel plan so scheduling knows what to activate.");`
+- L868: `if (!connectedChannels.some((item) => PUBLISHING_KEYS.includes(item))) {`
+- L869: `publishingBlockers.push("No publishing channel is connected yet.");`
+- L872: `publishingBlockers.push("Critical creative or offer assets are still missing.");`
+- L889: `trackingBlockers.push("Live intelligence is still sparse, so optimization loops will be weaker after launch.");`
+- L896: `if (!values.executionNotes) approvalBlockers.push("Execution notes are missing, which makes approvals harder downstream.");`
+- L897: `if (!values.audiencePrimary || !values.audienceNeed) approvalBlockers.push("Audience framing is incomplete for creative review.");`
+- L898: `if (!values.productAngle) approvalBlockers.push("Product angle needs to be explicit so operators do not improvise.");`
+- L901: `publishingBlockers.length ||`
+- L905: `approvalBlockers.length ||`
+- L909: `: "Ready to route";`
+- L915: `publishingBlockers,`
+- L919: `approvalBlockers,`
+- L923: `publishingBlockers.length +`
+- L927: `approvalBlockers.length`
+- L960: `"Clarify the single strongest commercial promise before launch."`
+- L999: `const status = !missingInputs.length ? "Ready" : (channels.length || focus ? "Needs inputs" : "Blocked");`
+- L1006: `? "Hero visual, launch copy, offer banner"`
+- L1059: `.filter(([, isReady]) => Boolean(isReady))`
+- L1062: `const scheduledJobs = asArray(activity.scheduled_jobs);`
+- L1076: `Object.entries(checks).forEach(([key, isReady]) => {`
+- L1077: `if (isReady) return;`
+- L1106: `const publishingWindows = collectPublishingWindows(insights, learning, topContent);`
+- L1146: `scheduledJobs,`
+- L1157: `publishingWindows,`
+- L1293: `scheduleCampaignPersistence(projectName, session, saveProjectCampaign);`
+- L1360: `const prompt = \`Build an execution plan for campaign ${session.values.campaignName || "this campaign"} with goal ${session.values.campaignGoal || "launch"}, channels ${session.values.channelPlan || "to be defined"}, and offer ${session.values.offerHeadline || "to be defined"}. Use current project intelligence, readiness blockers, and recommendation signals.\`;`
+- L1412: `const publishingBtn = $("campaignOpenPublishingBtn");`
+- L1413: `if (publishingBtn) {`
+- L1414: `publishingBtn.onclick = () => {`
+- L1415: `persistCampaignRouteHandoff({ projectName, session, destinationPage: "publishing", createProjectHandoff });`
+- L1416: `navigateTo("publishing");`
+- L1499: `description: "Plan campaign basics, launch waves, channel mix, and required assets in one execution-oriented workspace."`
+- L1554: `scheduledJobs,`
+- L1564: `publishingWindows,`
+- L1590: `const launchWindowLabel = [values.startDate, values.endDate].filter(Boolean).join(" to ") || "Window pending";`
+- L1614: `<span class="mhos-campaign-context-item mhos-context-chip">Window <strong class="mhos-campaign-context-value">${escapeHtml(launchWindowLabel)}</strong></span>`
+- L1634: `<small class="mhos-campaign-metric-note mhos-executive-metric-note">${escapeHtml(executionReadiness.total ? \`${executionReadiness.total} open gate${executionReadiness.total === 1 ? "" : "s"}\` : "Launch gates clear")}</small>`
+- L1644: `<small class="mhos-campaign-metric-note mhos-executive-metric-note">${escapeHtml(executionReadiness.total ? "Needs operator attention" : "No open launch blockers")}</small>`
+- L1670: `placeholder: "Spring launch wave 1",`
+- L1677: `helper: "Lead with the business outcome: launch, revenue, retention, awareness, or activation.",`
+- L1678: `placeholder: "Launch, sales growth, lead generation...",`
+- L1686: `placeholder: "Product launch, seasonal push, retention sprint...",`
+- L1813: `Plan each wave separately so launch, education, and conversion work stay clear before routing into execution workspaces.`
+- L1820: `<span class="card-badge ${wave.status === "Ready" ? "success" : wave.status === "Needs inputs" ? "warning" : "danger"}">${escapeHtml(wave.status)}</span>`
+- L1843: `: \`<div class="campaign-wave-callout is-ready">${escapeHtml(wave.roleHint)}</div>\``
+- L1851: `placeholder: wave.index === 1 ? "Launch wave" : wave.index === 2 ? "Education wave" : "Conversion wave",`
+- L1940: `helper: "Capture dependencies, packaging notes, approval guidance, or production instructions for the next operator.",`
+- L1965: `"Publishing blockers",`
+- L1966: `executionReadiness.publishingBlockers,`
+- L1968: `"No publishing blocker is currently stopping launch routing."`
+- L1986: `"SEO support is not currently blocked."`
+- L1989: `"Approval blockers",`
+- L1990: `executionReadiness.approvalBlockers,`
+- L1992: `"Approval inputs look complete enough for review."`
+- L2030: `<button id="campaignOpenPublishingBtn" class="quick-action-btn" type="button">`
+- L2031: `<span class="home-action-title">Send to Publishing</span>`
+- L2032: `<span class="home-action-meta">Open Publishing with a campaign handoff attached.</span>`
+- L2040: `<span class="home-action-meta">Jump to the highest-priority place to close launch blockers.</span>`
+
+## Handoff Signals
+- L1: `import { getSharedCampaignRecord, getSharedHandoff, setSharedCampaignRecord, setSharedHandoff } from "../shared-context.js";`
+- L271: `lastAiHandoffId: ""`
+- L284: `session.lastAiHandoffId = asString(session.lastAiHandoffId);`
+- L379: `function applyAiCampaignHandoff(projectName, operations, session) {`
+- L380: `const handoff = getSharedHandoff(projectName, "campaign-studio", operations, "ai-command");`
+- L381: `const handoffId = asString(handoff?.id || handoff?.updated_at || handoff?.created_at || handoff?.payload?.prompt);`
+- L382: `if (!handoffId || handoffId === asString(session.lastAiHandoffId)) return false;`
+- L384: `const payload = asObject(handoff.payload);`
+- L421: `session.lastAiHandoffId = handoffId;`
+- L444: `detail || "This action may create or update backend campaign records or route handoffs.",`
+- L479: `function persistCampaignRouteHandoff({ projectName, session, destinationPage, createProjectHandoff }) {`
+- L483: `const handoff = {`
+- L485: `destination_page: destinationPage,`
+- L506: `setSharedHandoff(projectName, destinationPage, handoff);`
+- L509: `"Create campaign route handoff",`
+- L510: `\`This will create a backend handoff from Campaign Studio to ${destinationPage} for review and execution preparation.\``
+- L515: `createProjectHandoff?.(projectName, handoff).catch((error) => {`
+- L516: `console.warn("Failed to persist campaign route handoff:", error.message);`
+- L1272: `createProjectHandoff`
+- L1282: `applyAiCampaignHandoff(projectName, state.data.operations, session);`
+- L1297: `// Explicit actions such as Save, Build, Refresh, and route handoffs still`
+- L1365: `setSharedHandoff(projectName, "ai-command", {`
+- L1367: `destination_page: "ai-command",`
+- L1377: `"Create AI Command campaign handoff",`
+- L1378: `"This will create a backend handoff from Campaign Studio to AI Command for review and planning support."`
+- L1380: `showMessage?.("AI Command handoff cancelled.");`
+- L1384: `createProjectHandoff?.(projectName, {`
+- L1386: `destination_page: "ai-command",`
+- L1405: `console.warn("Failed to persist campaign handoff:", error.message);`
+- L1415: `persistCampaignRouteHandoff({ projectName, session, destinationPage: "publishing", createProjectHandoff });`
+- L1428: `persistCampaignRouteHandoff({ projectName, session, destinationPage: "content-studio", createProjectHandoff });`
+- L1436: `persistCampaignRouteHandoff({ projectName, session, destinationPage: "media-studio", createProjectHandoff });`
+- L1444: `persistCampaignRouteHandoff({ projectName, session, destinationPage: "ads-manager", createProjectHandoff });`
+- L1517: `createProjectHandoff`
+- L1522: `applyAiCampaignHandoff(projectName, state.data.operations, session);`
+- L1538: `createProjectHandoff`
+- L2023: `<span class="home-action-title">Send to Content Studio</span>`
+- L2024: `<span class="home-action-meta">Open Content Studio with a campaign handoff attached.</span>`
+- L2027: `<span class="home-action-title">Send to Media Studio</span>`
+- L2028: `<span class="home-action-meta">Open Media Studio with a campaign handoff attached.</span>`
+- L2031: `<span class="home-action-title">Send to Publishing</span>`
+- L2032: `<span class="home-action-meta">Open Publishing with a campaign handoff attached.</span>`
+- L2035: `<span class="home-action-title">Send to Ads Manager</span>`
+- L2036: `<span class="home-action-meta">Open Ads Manager with a campaign handoff attached.</span>`
+- L2063: `createProjectHandoff,`
+
+## AI Signals
+- L1: `import { getSharedCampaignRecord, getSharedHandoff, setSharedCampaignRecord, setSharedHandoff } from "../shared-context.js";`
+- L9: `const campaignSessions = new Map();`
+- L10: `const campaignSaveTimers = new Map();`
+- L18: `roleHint: "Use this wave to introduce the campaign, establish the core promise, and create awareness."`
+- L41: `email: "Email",`
+- L48: `ads: "Paid Media",`
+- L54: `const PUBLISHING_KEYS = ["instagram", "facebook", "tiktok", "youtube", "email"];`
+- L56: `const PAID_KEYS = ["meta", "google", "google_ads", "tiktok", "facebook", "instagram"];`
+- L57: `const CAMPAIGN_ROLE_DEFAULTS = {`
+- L58: `serviceDomain: "campaign",`
+- L62: `const CAMPAIGN_ROUTE_ROLES = {`
+- L63: `"content-studio": { role: "writer", domain: "content" },`
+- L64: `"media-studio": { role: "designer", domain: "media" },`
+- L65: `publishing: { role: "publisher", domain: "publishing" },`
+- L66: `"ads-manager": { role: "ads_operator", domain: "campaign" },`
+- L67: `"ai-command": { role: "admin", domain: "governance" }`
+- L117: `<div class="data-row"><span>Service lane</span><strong>${escapeHtml(titleCase(CAMPAIGN_ROLE_DEFAULTS.serviceDomain))}</strong></div>`
+- L118: `<div class="data-row"><span>Owner role</span><strong>${escapeHtml(titleCase(CAMPAIGN_ROLE_DEFAULTS.ownerRole))}</strong></div>`
+- L119: `<div class="data-row"><span>Review owner</span><strong>${escapeHtml(titleCase(CAMPAIGN_ROLE_DEFAULTS.reviewRole))}</strong></div>`
+- L120: `<div class="data-row"><span>Route map</span><strong>${escapeHtml(\`Content ${titleCase(CAMPAIGN_ROUTE_ROLES["content-studio"].role)} • Media ${titleCase(CAMPAIGN_ROUTE_ROLES["media-studio"].role)} • Publishing ${titleCase(CAMPAIGN_ROUTE_ROLES.publishing.role)} • Ads ${titleCase(CAMPAIGN_ROUTE_ROLES["ads-manager"].role)}\`)}</strong></div>`
+- L170: `record.recommendation,`
+- L188: `function normalizeRecommendation(item) {`
+- L191: `title: "Recommendation",`
+- L193: `domain: "",`
+- L200: `title: readableValue(record.title || record.label || record.domain, "Recommendation"),`
+- L201: `action: readableValue(record.action || record.summary || record.description || record.recommendation),`
+- L202: `domain: asString(record.domain),`
+- L216: `const campaignName = context.activeCampaign || \`${context.currentProject || "Campaign"} Launch\`;`
+- L227: `campaignName,`
+- L228: `campaignGoal: overviewData.primary_goal || "Launch",`
+- L229: `campaignType: overviewData.project_type || "Growth campaign",`
+- L239: `offerDetail: overviewData.offer_positioning || "",`
+- L243: `wave1Name: campaignName,`
+- L260: `if (!campaignSessions.has(key)) {`
+- L261: `campaignSessions.set(key, {`
+- L270: `generatedPackages: 0,`
+- L271: `lastAiHandoffId: ""`
+- L274: `const session = campaignSessions.get(key);`
+- L283: `session.generatedPackages = Number.isFinite(session.generatedPackages) ? session.generatedPackages : 0;`
+- L284: `session.lastAiHandoffId = asString(session.lastAiHandoffId);`
+- L287: `return campaignSessions.get(key);`
+- L303: `<label class="setup-label" for="campaign-${escapeHtml(name)}">${escapeHtml(label)}</label>`
+- L308: `? \`<textarea id="campaign-${escapeHtml(name)}" name="${escapeHtml(name)}" class="setup-input setup-textarea" rows="${rows}" placeholder="${escapeHtml(placeholder || "")}">${escapeHtml(asString(value))}</textarea>\``
+- L309: `: \`<input id="campaign-${escapeHtml(name)}" name="${escapeHtml(name)}" class="setup-input" type="text" value="${escapeHtml(asString(value))}" placeholder="${escapeHtml(placeholder || "")}">\``
+- L320: `function syncCampaignStudioBridge(projectName, values) {`
+- L321: `const current = getSharedCampaignRecord(projectName, null);`
+- L322: `setSharedCampaignRecord(projectName, {`
+- L325: `source_page: "campaign-studio",`
+- L326: `name: asString(values?.campaignName),`
+- L327: `objective: asString(values?.campaignGoal),`
+- L345: `function hydrateValuesFromCampaignRecord(defaults, campaign) {`
+- L346: `const record = asObject(campaign);`
+- L352: `campaignName: asString(formValues.campaignName || record.name || defaults.campaignName),`
+- L353: `campaignGoal: asString(formValues.campaignGoal || record.objective || defaults.campaignGoal),`
+- L379: `function applyAiCampaignHandoff(projectName, operations, session) {`
+- L380: `const handoff = getSharedHandoff(projectName, "campaign-studio", operations, "ai-command");`
+- L381: `const handoffId = asString(handoff?.id || handoff?.updated_at || handoff?.created_at || handoff?.payload?.prompt);`
+- L382: `if (!handoffId || handoffId === asString(session.lastAiHandoffId)) return false;`
+- L387: `const pkg = asObject(response.campaignPackage || response.campaign_package || payload.campaignPackage || payload.campaign_package);`
+- L393: `campaignName: firstNonEmpty(pkg.concept, pkg.campaignConcept, response.title, session.values.campaignName),`
+- L394: `campaignGoal: firstNonEmpty(response.summary, pkg.goal, pkg.objective, session.values.campaignGoal),`
+- L401: `offerDetail: firstNonEmpty(joinPackageList(pkg.adAngles || pkg.ad_angles), session.values.offerDetail),`
+- L420: `session.generatedPackages += 1;`
+- L421: `session.lastAiHandoffId = handoffId;`
+- L422: `setSharedCampaignRecord(projectName, {`
+- L423: `...(getSharedCampaignRecord(projectName, operations) || {}),`
+- L425: `source_page: "ai-command",`
+- L426: `name: session.values.campaignName,`
+- L427: `objective: session.values.campaignGoal,`
+- L438: `function confirmCampaignStudioAuthorityAction(action, detail = "") {`
+- L442: `\`Confirm Campaign Studio action: ${action}\`,`
+- L444: `detail || "This action may create or update backend campaign records or route handoffs.",`
+- L447: `"Select Cancel to review the campaign plan, evidence, and destination before continuing."`
+- L453: `function buildCampaignRecordPayload(projectName, session) {`
+- L459: `name: asString(values.campaignName || projectName),`
+- L460: `objective: asString(values.campaignGoal),`
+- L467: `source_page: "campaign-studio",`
+- L469: `owner_role: CAMPAIGN_ROLE_DEFAULTS.ownerRole,`
+- L470: `review_role: CAMPAIGN_ROLE_DEFAULTS.reviewRole,`
+- L471: `service_domain: CAMPAIGN_ROLE_DEFAULTS.serviceDomain,`
+- L479: `function persistCampaignRouteHandoff({ projectName, session, destinationPage, createProjectHandoff }) {`
+- L480: `const destination = CAMPAIGN_ROUTE_ROLES[destinationPage];`
+- L484: `source_page: "campaign-studio",`
+- L486: `source_role: CAMPAIGN_ROLE_DEFAULTS.ownerRole,`
+- L488: `source_service_domain: CAMPAIGN_ROLE_DEFAULTS.serviceDomain,`
+- L489: `destination_service_domain: destination.domain,`
+- L491: `entity_type: "campaign",`
+- L493: `route: "campaign-studio",`
+- L494: `label: asString(session.values.campaignName || projectName)`
+- L497: `campaign_id: session.recordId || "",`
+- L498: `campaign_name: asString(session.values.campaignName || projectName),`
+- L499: `owner_role: CAMPAIGN_ROLE_DEFAULTS.ownerRole,`
+- L500: `review_role: CAMPAIGN_ROLE_DEFAULTS.reviewRole,`
+- L501: `service_domain: CAMPAIGN_ROLE_DEFAULTS.serviceDomain,`
+- L502: `draft_context: buildCampaignRecordPayload(projectName, session)`
+- L508: `if (!confirmCampaignStudioAuthorityAction(`
+- L509: `"Create campaign route handoff",`
+- L510: `\`This will create a backend handoff from Campaign Studio to ${destinationPage} for review and execution preparation.\``
+- L516: `console.warn("Failed to persist campaign route handoff:", error.message);`
+- L520: `function scheduleCampaignPersistence(projectName, session, saveProjectCampaign) {`
+- L521: `if (!projectName || typeof saveProjectCampaign !== "function") {`
+- L526: `const existing = campaignSaveTimers.get(key);`
+- L533: `...buildCampaignRecordPayload(projectName, session),`
+- L535: `autosave_note: "Campaign Studio autosave is local/shared-state only. Use Save campaign draft or Save campaign plan for backend persistence."`
+- L537: `setSharedCampaignRecord(projectName, draft);`
+- L540: `campaignSaveTimers.set(key, timer);`
+- L545: `<div class="campaign-studio-empty-state">`
+- L605: `record.recommendation`
+- L628: `body: "Best publishing window detected from current campaign intelligence."`
+- L636: `...asArray(seo.recommendations),`
+- L652: `body: firstNonEmpty(record.opportunity, record.recommendation, record.reason, record.summary, "Improve visibility or click-through rate.")`
+- L657: `function collectPaidSignals(insights) {`
+- L658: `const paid = asObject(insights.paid);`
+- L660: `const summary = asObject(paid.summary || paid.overview || paid);`
+- L664: `title: "Paid efficiency",`
+- L669: `asArray(paid.best_campaigns || paid.best_creatives).slice(0, 2).forEach((item) => {`
+- L672: `title: firstNonEmpty(record.campaign_name, record.title, record.label, "Top paid signal"),`
+- L673: `body: firstNonEmpty(record.reason, record.insight, record.summary, record.recommendation, "This campaign is outperforming peers.")`
+- L677: `asArray(paid.weak_campaigns || paid.weak_creatives).slice(0, 2).forEach((item) => {`
+- L680: `title: firstNonEmpty(record.campaign_name, record.title, record.label, "Paid risk"),`
+- L681: `body: firstNonEmpty(record.reason, record.insight, record.summary, record.recommendation, "Performance or setup risk detected.")`
+- L688: `function buildPlatformSignals({ topContent, weakContent, connectedChannels, checks, recommendations }) {`
+- L729: `body: "This platform is not operational yet, so campaign execution will be constrained."`
+- L737: `body: "Currently connected and available for execution, but richer performance data is still needed."`
+- L742: `if (!weak.length && recommendations.length) {`
+- L745: `body: "Connect more performance data to identify where channel mix should be reduced or repaired."`
+- L755: `function buildChannelMix({ strongestPlatforms, weakPlatforms, connectedChannels, checks, paidSignals, seoOpportunities, recommendations }) {`
+- L757: `const paid = [];`
+- L769: `uniqueStrings([...connectedChannels, "email", "website"]).slice(0, 3).forEach((item) => {`
+- L780: `if (paidSignals.length) {`
+- L781: `paidSignals.slice(0, 3).forEach((item) => {`
+- L788: `paid.push({`
+- L796: `if (!paid.length) {`
+- L799: `paid.push({`
+- L803: `? "Platform connection exists, so this can be activated once the campaign package is ready."`
+- L804: `: "Useful paid lever, but it still needs platform connection or performance feedback."`
+- L810: `label: "Email",`
+- L811: `confidence: checks.email ? "High" : "Medium",`
+- L812: `rationale: checks.email`
+- L814: `: "Add email support once the channel is connected and lists are ready."`
+- L819: `rationale: seoOpportunities[0]?.body || "Use website and search support to capture campaign intent beyond social reach."`
+- L824: `rationale: "Campaign decisions will improve materially once attribution and landing behavior are measurable."`
+- L835: `if (!recommendations.length) {`
+- L839: `rationale: "The system needs more performance and learning data to tighten the recommendation quality."`
+- L845: `paid: uniqueBy(paid, (item) => item.label).slice(0, 3),`
+- L855: `recommendations,`
+- L875: `if (!values.budget) adsBlockers.push("Add a working campaign budget before routing to Ads Manager.");`
+- L876: `if (!channelMix.paid.length) adsBlockers.push("No paid channel recommendation is strong enough yet.");`
+- L877: `if (!Object.keys(checks).some((key) => PAID_KEYS.includes(key) && checks[key])) {`
+- L878: `adsBlockers.push("No paid media platform is connected.");`
+- L885: `if (!values.campaignName || !values.campaignGoal) {`
+- L886: `trackingBlockers.push("Campaign naming and goal framing should be locked before measurement packages are generated.");`
+- L888: `if (!recommendations.length) {`
+- L894: `if (!values.offerDetail) seoBlockers.push("Offer detail is too light to brief landing pages and SEO content well.");`
+- L931: `function buildStrategyGuidance({`
+- L933: `recommendations,`
+- L935: `aiRecommendations,`
+- L941: `const topRecommendation = recommendations[0] || normalizeRecommendation(asArray(readiness.next_best_actions)[0] || "");`
+- L943: `const topPaid = channelMix.paid[0];`
+- L947: `aiRecommendations.campaign_angle,`
+- L948: `aiRecommendations.angle,`
+- L949: `recommendations.find((item) => item.domain === "content")?.action,`
+- L953: `"Refine the campaign angle once stronger content and audience learning is available."`
+- L956: `aiRecommendations.offer_focus,`
+- L957: `aiRecommendations.offer,`
+- L958: `recommendations.find((item) => item.domain === "paid")?.action,`
+- L963: `aiRecommendations.audience_emphasis,`
+- L964: `aiRecommendations.audience,`
+- L969: `channels: topOrganic || topPaid`
+- L970: `? \`${topOrganic ? \`${topOrganic.label} first\` : ""}${topOrganic && topPaid ? " • " : ""}${topPaid ? \`${topPaid.label} as paid support\` : ""}\``
+- L973: `topRecommendation.action,`
+- L975: `readinessStatus ? \`Readiness status is ${readinessStatus}. Close the top blocker before routing this campaign.\` : "",`
+- L976: `"Use the current blockers and recommendations to choose the next highest-impact execution step."`
+- L984: `...channelMix.paid.map((item) => item.label.toLowerCase()),`
+- L1003: `: recommendedChannels.slice(wave.index - 1, wave.index + 1).map((item) => channelLabel(item)).join(", ") || "No channel recommendation yet";`
+- L1022: `function buildCampaignModel(state, session, values) {`
+- L1033: `const recommendations = uniqueBy(`
+- L1034: `asArray(learning.recommendations || insights.recommendations || overviewBlock.next_best_actions || readiness.next_best_actions)`
+- L1035: `.map((item) => normalizeRecommendation(item)),`
+- L1036: `(item) => \`${item.title}|${item.action}|${item.domain}\``
+- L1039: `const campaignAssetKeys = [`
+- L1044: `"campaign_assets",`
+- L1048: `const campaignAssetCategories = getCategoryReadinessList(assets)`
+- L1049: `.filter((item) => campaignAssetKeys.includes(item.asset_type));`
+- L1050: `const missingAssets = getMissingAssetLabels(assets, campaignAssetKeys);`
+- L1051: `const requiredAssetTypes = uniqueStrings(campaignAssetCategories.map((item) => item.display_label || item.label || item.asset_type));`
+- L1053: `campaignAssetCategories`
+- L1102: `recommendations`
+- L1108: `const paidSignals = collectPaidSignals(insights);`
+- L1114: `paidSignals,`
+- L1116: `recommendations`
+- L1123: `recommendations,`
+- L1128: `const strategyGuidance = buildStrategyGuidance({`
+- L1130: `recommendations,`
+- L1132: `aiRecommendations: asObject(learning.ai_recommendations || insights.ai_recommendations),`
+- L1144: `recommendations,`
+- L1149: `campaignAssetKeys,`
+- L1150: `campaignAssetCategories,`
+- L1151: `assetNextAction: getAssetNextAction(assets, campaignAssetKeys),`
+- L1159: `paidSignals,`
+- L1162: `strategyGuidance,`
+- L1170: `function renderChannelRecommendationCards(items, escapeHtml) {`
+- L1173: `"No recommendation yet",`
+- L1174: `"Connect more intelligence or lock the campaign inputs to tighten the channel recommendation.",`
+- L1180: `<div class="campaign-channel-card-list">`
+- L1182: `<div class="campaign-channel-card">`
+- L1183: `<div class="campaign-channel-head">`
+- L1196: `<div class="campaign-readiness-block">`
+- L1197: `<div class="campaign-readiness-head">`
+- L1234: `: (insightsMissing ? { project: projectName, generated_at: new Date().toISOString(), data_coverage: {} } : null);`
+- L1237: `: (learningMissing ? { project: projectName, generated_at: new Date().toISOString(), learning_patterns: {}, recommendations: [] } : null);`
+- L1249: `showError?.(\`Campaign intelligence could not be refreshed: ${session.intelligence.error}\`);`
+- L1256: `session.intelligence.error = error?.message || "Failed to load campaign intelligence";`
+- L1262: `function bindCampaignStudio({`
+- L1271: `saveProjectCampaign,`
+- L1277: `const durableCampaign = getSharedCampaignRecord(projectName, state.data.operations);`
+- L1278: `if (durableCampaign) {`
+- L1279: `session.recordId = asString(durableCampaign.id || session.recordId);`
+- L1280: `session.values = hydrateValuesFromCampaignRecord(session.values, durableCampaign);`
+- L1282: `applyAiCampaignHandoff(projectName, state.data.operations, session);`
+- L1283: `syncCampaignStudioBridge(projectName, session.values);`
+- L1285: `const form = $("campaignStudioForm");`
+- L1292: `syncCampaignStudioBridge(projectName, session.values);`
+- L1293: `scheduleCampaignPersistence(projectName, session, saveProjectCampaign);`
+- L1302: `const saveBtn = $("campaignSaveDraftBtn");`
+- L1305: `syncCampaignStudioBridge(projectName, session.values);`
+- L1307: `if (!confirmCampaignStudioAuthorityAction(`
+- L1308: `"Save backend campaign draft",`
+- L1309: `\`This will save or update the Campaign Studio draft for ${projectName}.\``
+- L1311: `showMessage?.("Campaign draft save cancelled.");`
+- L1316: `const result = await saveProjectCampaign?.(projectName, buildCampaignRecordPayload(projectName, session));`
+- L1317: `if (result?.campaign?.id) {`
+- L1318: `session.recordId = result.campaign.id;`
+- L1319: `setSharedCampaignRecord(projectName, result.campaign);`
+- L1321: `showMessage?.("Campaign draft saved to the shared operating backbone.");`
+- L1323: `showError?.(error.message || "Failed to save campaign plan.");`
+- L1328: `const buildBtn = $("campaignBuildPlanBtn");`
+- L1331: `syncCampaignStudioBridge(projectName, session.values);`
+- L1333: `if (!confirmCampaignStudioAuthorityAction(`
+- L1334: `"Save backend campaign plan",`
+- L1335: `\`This will save or update the Campaign Studio plan for ${projectName}.\``
+- L1337: `showMessage?.("Campaign plan save cancelled.");`
+- L1342: `const result = await saveProjectCampaign?.(projectName, {`
+- L1343: `...buildCampaignRecordPayload(projectName, session),`
+- L1346: `if (result?.campaign?.id) {`
+- L1347: `session.recordId = result.campaign.id;`
+- L1348: `setSharedCampaignRecord(projectName, result.campaign);`
+- L1350: `showMessage?.("Campaign plan saved as a durable shared record.");`
+- L1352: `showError?.(error.message || "Failed to structure the campaign plan.");`
+- L1357: `const askAiBtn = $("campaignAskAiBtn");`
+- L1358: `if (askAiBtn) {`
+- L1359: `askAiBtn.onclick = async () => {`
+- L1360: `const prompt = \`Build an execution plan for campaign ${session.values.campaignName || "this campaign"} with goal ${session.values.campaignGoal || "launch"}, channels ${session.values.channelPlan || "to be defined"}, and offer ${session.values.offerHeadline || "to be defined"}. Use current project intelligence, readiness blockers, and recommendation signals.\`;`
+- L1363: `input.value = prompt;`
+- L1365: `setSharedHandoff(projectName, "ai-command", {`
+- L1366: `source_page: "campaign-studio",`
+- L1367: `destination_page: "ai-command",`
+- L1369: `prompt,`
+- L1370: `campaign_id: session.recordId || "",`
+- L1371: `campaign_name: session.values.campaignName || projectName,`
+- L1372: `draft_context: buildCampaignRecordPayload(projectName, session)`
+- L1374: `status: "available"`
+- L1376: `if (!confirmCampaignStudioAuthorityAction(`
+- L1377: `"Create AI Command campaign handoff",`
+- L1378: `"This will create a backend handoff from Campaign Studio to AI Command for review and planning support."`
+- L1380: `showMessage?.("AI Command handoff cancelled.");`
+- L1385: `source_page: "campaign-studio",`
+- L1386: `destination_page: "ai-command",`
+- L1387: `source_role: CAMPAIGN_ROLE_DEFAULTS.ownerRole,`
+- L1388: `destination_role: CAMPAIGN_ROUTE_ROLES["ai-command"].role,`
+- L1389: `source_service_domain: CAMPAIGN_ROLE_DEFAULTS.serviceDomain,`
+- L1390: `destination_service_domain: CAMPAIGN_ROUTE_ROLES["ai-command"].domain,`
+- L1392: `entity_type: "campaign",`
+- L1396: `prompt,`
+- L1397: `campaign_id: session.recordId || "",`
+- L1398: `campaign_name: session.values.campaignName || projectName,`
+- L1399: `owner_role: CAMPAIGN_ROLE_DEFAULTS.ownerRole,`
+- L1400: `review_role: CAMPAIGN_ROLE_DEFAULTS.reviewRole,`
+- L1401: `service_domain: CAMPAIGN_ROLE_DEFAULTS.serviceDomain,`
+- L1402: `draft_context: buildCampaignRecordPayload(projectName, session)`
+
+## Confirmation Signals
+- L450: `return window.confirm(message);`
+
+## Local / Session Storage Signals
+- L304: `<span class="setup-field-state is-optional">Draft</span>`
+- L339: `status: "draft",`
+- L431: `status: "draft",`
+- L466: `status: "draft",`
+- L479: `function persistCampaignRouteHandoff({ projectName, session, destinationPage, createProjectHandoff }) {`
+- L502: `draft_context: buildCampaignRecordPayload(projectName, session)`
+- L516: `console.warn("Failed to persist campaign route handoff:", error.message);`
+- L520: `function scheduleCampaignPersistence(projectName, session, saveProjectCampaign) {`
+- L532: `const draft = {`
+- L535: `autosave_note: "Campaign Studio autosave is local/shared-state only. Use Save campaign draft or Save campaign plan for backend persistence."`
+- L537: `setSharedCampaignRecord(projectName, draft);`
+- L1293: `scheduleCampaignPersistence(projectName, session, saveProjectCampaign);`
+- L1298: `// persist the latest session values.`
+- L1302: `const saveBtn = $("campaignSaveDraftBtn");`
+- L1308: `"Save backend campaign draft",`
+- L1309: `\`This will save or update the Campaign Studio draft for ${projectName}.\``
+- L1311: `showMessage?.("Campaign draft save cancelled.");`
+- L1321: `showMessage?.("Campaign draft saved to the shared operating backbone.");`
+- L1372: `draft_context: buildCampaignRecordPayload(projectName, session)`
+- L1402: `draft_context: buildCampaignRecordPayload(projectName, session)`
+- L1405: `console.warn("Failed to persist campaign handoff:", error.message);`
+- L1415: `persistCampaignRouteHandoff({ projectName, session, destinationPage: "publishing", createProjectHandoff });`
+- L1428: `persistCampaignRouteHandoff({ projectName, session, destinationPage: "content-studio", createProjectHandoff });`
+- L1436: `persistCampaignRouteHandoff({ projectName, session, destinationPage: "media-studio", createProjectHandoff });`
+- L1444: `persistCampaignRouteHandoff({ projectName, session, destinationPage: "ads-manager", createProjectHandoff });`
+- L1453: `showMessage?.("Campaign package drafted in this session. Backend export wiring can be connected next.");`
+- L1577: `const intelligenceLabel = intelligenceStatus === "loading" ? "Refreshing" : hasLiveIntelligence ? "Live intelligence" : "Draft-assisted";`
+- L1597: `: "Current draft data is projecting direction until live intelligence arrives.";`
+- L1626: `<button id="campaignSaveDraftBtn" class="btn btn-secondary mhos-context-action" type="button">Save campaign draft</button>`
+- L2002: `<span class="card-badge ${hasLiveIntelligence ? "success" : "neutral"}">${escapeHtml(hasLiveIntelligence ? "Intelligence-assisted" : "Draft-assisted")}</span>`
+- L2005: `Send campaign context to AI prefills the current campaign draft and then navigates there. The downstream send actions open the linked workspace with the current campaign context attached.`
+- L2018: `<span class="home-action-meta">Prefill AI Command with the current draft, blockers, and campaign context, then open that page.</span>`
+- L2047: `<div class="campaign-helper-note">${escapeHtml(hasLiveIntelligence ? "Live intelligence is shaping the readiness and channel recommendations on this page." : "This page is still usable without full intelligence; recommendations are falling back to current draft and readiness inputs.")}</div>`
+
+## Navigation Signals
+- L62: `const CAMPAIGN_ROUTE_ROLES = {`
+- L120: `<div class="data-row"><span>Route map</span><strong>${escapeHtml(\`Content ${titleCase(CAMPAIGN_ROUTE_ROLES["content-studio"].role)} • Media ${titleCase(CAMPAIGN_ROUTE_ROLES["media-studio"].role)} • Publishing ${titleCase(CAMPAIGN_ROUTE_ROLES.publishing.role)} • Ads ${titleCase(CAMPAIGN_ROUTE_ROLES["ads-manager"].role)}\`)}</strong></div>`
+- L444: `detail || "This action may create or update backend campaign records or route handoffs.",`
+- L479: `function persistCampaignRouteHandoff({ projectName, session, destinationPage, createProjectHandoff }) {`
+- L480: `const destination = CAMPAIGN_ROUTE_ROLES[destinationPage];`
+- L493: `route: "campaign-studio",`
+- L509: `"Create campaign route handoff",`
+- L516: `console.warn("Failed to persist campaign route handoff:", error.message);`
+- L909: `: "Ready to route";`
+- L1265: `navigateTo,`
+- L1297: `// Explicit actions such as Save, Build, Refresh, and route handoffs still`
+- L1388: `destination_role: CAMPAIGN_ROUTE_ROLES["ai-command"].role,`
+- L1390: `destination_service_domain: CAMPAIGN_ROUTE_ROLES["ai-command"].domain,`
+- L1407: `navigateTo("ai-command");`
+- L1415: `persistCampaignRouteHandoff({ projectName, session, destinationPage: "publishing", createProjectHandoff });`
+- L1416: `navigateTo("publishing");`
+- L1422: `assetsBtn.onclick = () => navigateTo("library");`
+- L1428: `persistCampaignRouteHandoff({ projectName, session, destinationPage: "content-studio", createProjectHandoff });`
+- L1429: `navigateTo("content-studio");`
+- L1436: `persistCampaignRouteHandoff({ projectName, session, destinationPage: "media-studio", createProjectHandoff });`
+- L1437: `navigateTo("media-studio");`
+- L1444: `persistCampaignRouteHandoff({ projectName, session, destinationPage: "ads-manager", createProjectHandoff });`
+- L1445: `navigateTo("ads-manager");`
+- L1463: `navigateTo("integrations");`
+- L1467: `navigateTo("library");`
+- L1470: `navigateTo("insights");`
+- L1493: `export const campaignStudioRoute = {`
+- L1511: `navigateTo,`
+- L1532: `navigateTo,`
+- L2057: `navigateTo,`
+
+## Disabled / Read-only / Draft / Guard Signals
+- L304: `<span class="setup-field-state is-optional">Draft</span>`
+- L339: `status: "draft",`
+- L431: `status: "draft",`
+- L466: `status: "draft",`
+- L502: `draft_context: buildCampaignRecordPayload(projectName, session)`
+- L532: `const draft = {`
+- L535: `autosave_note: "Campaign Studio autosave is local/shared-state only. Use Save campaign draft or Save campaign plan for backend persistence."`
+- L537: `setSharedCampaignRecord(projectName, draft);`
+- L886: `trackingBlockers.push("Campaign naming and goal framing should be locked before measurement packages are generated.");`
+- L999: `const status = !missingInputs.length ? "Ready" : (channels.length || focus ? "Needs inputs" : "Blocked");`
+- L1302: `const saveBtn = $("campaignSaveDraftBtn");`
+- L1308: `"Save backend campaign draft",`
+- L1309: `\`This will save or update the Campaign Studio draft for ${projectName}.\``
+- L1311: `showMessage?.("Campaign draft save cancelled.");`
+- L1321: `showMessage?.("Campaign draft saved to the shared operating backbone.");`
+- L1372: `draft_context: buildCampaignRecordPayload(projectName, session)`
+- L1402: `draft_context: buildCampaignRecordPayload(projectName, session)`
+- L1453: `showMessage?.("Campaign package drafted in this session. Backend export wiring can be connected next.");`
+- L1577: `const intelligenceLabel = intelligenceStatus === "loading" ? "Refreshing" : hasLiveIntelligence ? "Live intelligence" : "Draft-assisted";`
+- L1597: `: "Current draft data is projecting direction until live intelligence arrives.";`
+- L1626: `<button id="campaignSaveDraftBtn" class="btn btn-secondary mhos-context-action" type="button">Save campaign draft</button>`
+- L1986: `"SEO support is not currently blocked."`
+- L2002: `<span class="card-badge ${hasLiveIntelligence ? "success" : "neutral"}">${escapeHtml(hasLiveIntelligence ? "Intelligence-assisted" : "Draft-assisted")}</span>`
+- L2005: `Send campaign context to AI prefills the current campaign draft and then navigates there. The downstream send actions open the linked workspace with the current campaign context attached.`
+- L2018: `<span class="home-action-meta">Prefill AI Command with the current draft, blockers, and campaign context, then open that page.</span>`
+- L2047: `<div class="campaign-helper-note">${escapeHtml(hasLiveIntelligence ? "Live intelligence is shaping the readiness and channel recommendations on this page." : "This page is still usable without full intelligence; recommendations are falling back to current draft and readiness inputs.")}</div>`
+
+## Risky Terms
+- L1: `import { getSharedCampaignRecord, getSharedHandoff, setSharedCampaignRecord, setSharedHandoff } from "../shared-context.js";`
+- L9: `const campaignSessions = new Map();`
+- L10: `const campaignSaveTimers = new Map();`
+- L17: `defaultRole: "Launch and announcement",`
+- L18: `roleHint: "Use this wave to introduce the campaign, establish the core promise, and create awareness."`
+- L41: `email: "Email",`
+- L48: `ads: "Paid Media",`
+- L54: `const PUBLISHING_KEYS = ["instagram", "facebook", "tiktok", "youtube", "email"];`
+- L56: `const PAID_KEYS = ["meta", "google", "google_ads", "tiktok", "facebook", "instagram"];`
+- L57: `const CAMPAIGN_ROLE_DEFAULTS = {`
+- L58: `serviceDomain: "campaign",`
+- L62: `const CAMPAIGN_ROUTE_ROLES = {`
+- L63: `"content-studio": { role: "writer", domain: "content" },`
+- L64: `"media-studio": { role: "designer", domain: "media" },`
+- L65: `publishing: { role: "publisher", domain: "publishing" },`
+- L66: `"ads-manager": { role: "ads_operator", domain: "campaign" },`
+- L67: `"ai-command": { role: "admin", domain: "governance" }`
+- L117: `<div class="data-row"><span>Service lane</span><strong>${escapeHtml(titleCase(CAMPAIGN_ROLE_DEFAULTS.serviceDomain))}</strong></div>`
+- L118: `<div class="data-row"><span>Owner role</span><strong>${escapeHtml(titleCase(CAMPAIGN_ROLE_DEFAULTS.ownerRole))}</strong></div>`
+- L119: `<div class="data-row"><span>Review owner</span><strong>${escapeHtml(titleCase(CAMPAIGN_ROLE_DEFAULTS.reviewRole))}</strong></div>`
+- L120: `<div class="data-row"><span>Route map</span><strong>${escapeHtml(\`Content ${titleCase(CAMPAIGN_ROUTE_ROLES["content-studio"].role)} • Media ${titleCase(CAMPAIGN_ROUTE_ROLES["media-studio"].role)} • Publishing ${titleCase(CAMPAIGN_ROUTE_ROLES.publishing.role)} • Ads ${titleCase(CAMPAIGN_ROUTE_ROLES["ads-manager"].role)}\`)}</strong></div>`
+- L193: `domain: "",`
+- L200: `title: readableValue(record.title || record.label || record.domain, "Recommendation"),`
+- L202: `domain: asString(record.domain),`
+- L216: `const campaignName = context.activeCampaign || \`${context.currentProject || "Campaign"} Launch\`;`
+- L219: `const scheduledJobs = asArray(activity.scheduled_jobs);`
+- L221: `scheduledJobs`
+- L227: `campaignName,`
+- L228: `campaignGoal: overviewData.primary_goal || "Launch",`
+- L229: `campaignType: overviewData.project_type || "Growth campaign",`
+- L239: `offerDetail: overviewData.offer_positioning || "",`
+- L243: `wave1Name: campaignName,`
+- L244: `wave1Focus: "Launch announcement",`
+- L260: `if (!campaignSessions.has(key)) {`
+- L261: `campaignSessions.set(key, {`
+- L271: `lastAiHandoffId: ""`
+- L274: `const session = campaignSessions.get(key);`
+- L284: `session.lastAiHandoffId = asString(session.lastAiHandoffId);`
+- L287: `return campaignSessions.get(key);`
+- L303: `<label class="setup-label" for="campaign-${escapeHtml(name)}">${escapeHtml(label)}</label>`
+- L308: `? \`<textarea id="campaign-${escapeHtml(name)}" name="${escapeHtml(name)}" class="setup-input setup-textarea" rows="${rows}" placeholder="${escapeHtml(placeholder || "")}">${escapeHtml(asString(value))}</textarea>\``
+- L309: `: \`<input id="campaign-${escapeHtml(name)}" name="${escapeHtml(name)}" class="setup-input" type="text" value="${escapeHtml(asString(value))}" placeholder="${escapeHtml(placeholder || "")}">\``
+- L320: `function syncCampaignStudioBridge(projectName, values) {`
+- L321: `const current = getSharedCampaignRecord(projectName, null);`
+- L322: `setSharedCampaignRecord(projectName, {`
+- L325: `source_page: "campaign-studio",`
+- L326: `name: asString(values?.campaignName),`
+- L327: `objective: asString(values?.campaignGoal),`
+- L345: `function hydrateValuesFromCampaignRecord(defaults, campaign) {`
+- L346: `const record = asObject(campaign);`
+- L352: `campaignName: asString(formValues.campaignName || record.name || defaults.campaignName),`
+- L353: `campaignGoal: asString(formValues.campaignGoal || record.objective || defaults.campaignGoal),`
+- L379: `function applyAiCampaignHandoff(projectName, operations, session) {`
+- L380: `const handoff = getSharedHandoff(projectName, "campaign-studio", operations, "ai-command");`
+- L381: `const handoffId = asString(handoff?.id || handoff?.updated_at || handoff?.created_at || handoff?.payload?.prompt);`
+- L382: `if (!handoffId || handoffId === asString(session.lastAiHandoffId)) return false;`
+- L384: `const payload = asObject(handoff.payload);`
+- L387: `const pkg = asObject(response.campaignPackage || response.campaign_package || payload.campaignPackage || payload.campaign_package);`
+- L390: `const phases = asArray(pkg.launchPhases || pkg.launch_phases || pkg.phases);`
+- L393: `campaignName: firstNonEmpty(pkg.concept, pkg.campaignConcept, response.title, session.values.campaignName),`
+- L394: `campaignGoal: firstNonEmpty(response.summary, pkg.goal, pkg.objective, session.values.campaignGoal),`
+- L401: `offerDetail: firstNonEmpty(joinPackageList(pkg.adAngles || pkg.ad_angles), session.values.offerDetail),`
+- L421: `session.lastAiHandoffId = handoffId;`
+- L422: `setSharedCampaignRecord(projectName, {`
+- L423: `...(getSharedCampaignRecord(projectName, operations) || {}),`
+- L425: `source_page: "ai-command",`
+- L426: `name: session.values.campaignName,`
+- L427: `objective: session.values.campaignGoal,`
+- L438: `function confirmCampaignStudioAuthorityAction(action, detail = "") {`
+- L442: `\`Confirm Campaign Studio action: ${action}\`,`
+- L444: `detail || "This action may create or update backend campaign records or route handoffs.",`
+- L446: `"Authority: This does not publish, send externally, schedule ads, or approve anything automatically.",`
+- L447: `"Select Cancel to review the campaign plan, evidence, and destination before continuing."`
+- L453: `function buildCampaignRecordPayload(projectName, session) {`
+- L459: `name: asString(values.campaignName || projectName),`
+- L460: `objective: asString(values.campaignGoal),`
+- L467: `source_page: "campaign-studio",`
+- L469: `owner_role: CAMPAIGN_ROLE_DEFAULTS.ownerRole,`
+- L470: `review_role: CAMPAIGN_ROLE_DEFAULTS.reviewRole,`
+- L471: `service_domain: CAMPAIGN_ROLE_DEFAULTS.serviceDomain,`
+- L473: `linked_tasks: [],`
+- L474: `linked_approvals: [],`
+- L479: `function persistCampaignRouteHandoff({ projectName, session, destinationPage, createProjectHandoff }) {`
+- L480: `const destination = CAMPAIGN_ROUTE_ROLES[destinationPage];`
+- L483: `const handoff = {`
+- L484: `source_page: "campaign-studio",`
+- L486: `source_role: CAMPAIGN_ROLE_DEFAULTS.ownerRole,`
+- L488: `source_service_domain: CAMPAIGN_ROLE_DEFAULTS.serviceDomain,`
+- L489: `destination_service_domain: destination.domain,`
+- L491: `entity_type: "campaign",`
+- L493: `route: "campaign-studio",`
+- L494: `label: asString(session.values.campaignName || projectName)`
+- L497: `campaign_id: session.recordId || "",`
+- L498: `campaign_name: asString(session.values.campaignName || projectName),`
+- L499: `owner_role: CAMPAIGN_ROLE_DEFAULTS.ownerRole,`
+- L500: `review_role: CAMPAIGN_ROLE_DEFAULTS.reviewRole,`
+- L501: `service_domain: CAMPAIGN_ROLE_DEFAULTS.serviceDomain,`
+- L502: `draft_context: buildCampaignRecordPayload(projectName, session)`
+- L506: `setSharedHandoff(projectName, destinationPage, handoff);`
+- L508: `if (!confirmCampaignStudioAuthorityAction(`
+- L509: `"Create campaign route handoff",`
+- L510: `\`This will create a backend handoff from Campaign Studio to ${destinationPage} for review and execution preparation.\``
+- L515: `createProjectHandoff?.(projectName, handoff).catch((error) => {`
+- L516: `console.warn("Failed to persist campaign route handoff:", error.message);`
+- L520: `function scheduleCampaignPersistence(projectName, session, saveProjectCampaign) {`
+- L521: `if (!projectName || typeof saveProjectCampaign !== "function") {`
+- L526: `const existing = campaignSaveTimers.get(key);`
+- L533: `...buildCampaignRecordPayload(projectName, session),`
+- L535: `autosave_note: "Campaign Studio autosave is local/shared-state only. Use Save campaign draft or Save campaign plan for backend persistence."`
+- L537: `setSharedCampaignRecord(projectName, draft);`
+- L540: `campaignSaveTimers.set(key, timer);`
+- L545: `<div class="campaign-studio-empty-state">`
+- L617: `function collectPublishingWindows(insights, learning, topContent) {`
+- L628: `body: "Best publishing window detected from current campaign intelligence."`
+- L657: `function collectPaidSignals(insights) {`
+- L658: `const paid = asObject(insights.paid);`
+- L660: `const summary = asObject(paid.summary || paid.overview || paid);`
+- L664: `title: "Paid efficiency",`
+- L669: `asArray(paid.best_campaigns || paid.best_creatives).slice(0, 2).forEach((item) => {`
+- L672: `title: firstNonEmpty(record.campaign_name, record.title, record.label, "Top paid signal"),`
+- L673: `body: firstNonEmpty(record.reason, record.insight, record.summary, record.recommendation, "This campaign is outperforming peers.")`
+- L677: `asArray(paid.weak_campaigns || paid.weak_creatives).slice(0, 2).forEach((item) => {`
+- L680: `title: firstNonEmpty(record.campaign_name, record.title, record.label, "Paid risk"),`
+- L729: `body: "This platform is not operational yet, so campaign execution will be constrained."`
+- L737: `body: "Currently connected and available for execution, but richer performance data is still needed."`
+- L745: `body: "Connect more performance data to identify where channel mix should be reduced or repaired."`
+- L755: `function buildChannelMix({ strongestPlatforms, weakPlatforms, connectedChannels, checks, paidSignals, seoOpportunities, recommendations }) {`
+- L757: `const paid = [];`
+- L769: `uniqueStrings([...connectedChannels, "email", "website"]).slice(0, 3).forEach((item) => {`
+- L774: `? "Connected inside the current system, so this channel can support launch execution."`
+- L780: `if (paidSignals.length) {`
+- L781: `paidSignals.slice(0, 3).forEach((item) => {`
+- L788: `paid.push({`
+- L796: `if (!paid.length) {`
+- L799: `paid.push({`
+- L803: `? "Platform connection exists, so this can be activated once the campaign package is ready."`
+- L804: `: "Useful paid lever, but it still needs platform connection or performance feedback."`
+- L810: `label: "Email",`
+- L811: `confidence: checks.email ? "High" : "Medium",`
+- L812: `rationale: checks.email`
+- L813: `? "Use lifecycle support to reinforce the launch and recover warm traffic."`
+- L814: `: "Add email support once the channel is connected and lists are ready."`
+- L819: `rationale: seoOpportunities[0]?.body || "Use website and search support to capture campaign intent beyond social reach."`
+- L824: `rationale: "Campaign decisions will improve materially once attribution and landing behavior are measurable."`
+- L845: `paid: uniqueBy(paid, (item) => item.label).slice(0, 3),`
+- L860: `const publishingBlockers = [];`
+- L864: `const approvalBlockers = [];`
+- L866: `if (!values.startDate) publishingBlockers.push("Set a launch start date before pushing work downstream.");`
+- L867: `if (!values.channelPlan) publishingBlockers.push("Define the operational channel plan so scheduling knows what to activate.");`
+- L868: `if (!connectedChannels.some((item) => PUBLISHING_KEYS.includes(item))) {`
+- L869: `publishingBlockers.push("No publishing channel is connected yet.");`
+- L872: `publishingBlockers.push("Critical creative or offer assets are still missing.");`
+- L875: `if (!values.budget) adsBlockers.push("Add a working campaign budget before routing to Ads Manager.");`
+- L876: `if (!channelMix.paid.length) adsBlockers.push("No paid channel recommendation is strong enough yet.");`
+- L877: `if (!Object.keys(checks).some((key) => PAID_KEYS.includes(key) && checks[key])) {`
+- L878: `adsBlockers.push("No paid media platform is connected.");`
+- L885: `if (!values.campaignName || !values.campaignGoal) {`
+- L886: `trackingBlockers.push("Campaign naming and goal framing should be locked before measurement packages are generated.");`
+- L889: `trackingBlockers.push("Live intelligence is still sparse, so optimization loops will be weaker after launch.");`
+- L894: `if (!values.offerDetail) seoBlockers.push("Offer detail is too light to brief landing pages and SEO content well.");`
+- L896: `if (!values.executionNotes) approvalBlockers.push("Execution notes are missing, which makes approvals harder downstream.");`
+- L897: `if (!values.audiencePrimary || !values.audienceNeed) approvalBlockers.push("Audience framing is incomplete for creative review.");`
+- L898: `if (!values.productAngle) approvalBlockers.push("Product angle needs to be explicit so operators do not improvise.");`
+- L901: `publishingBlockers.length ||`
+- L905: `approvalBlockers.length ||`
+- L915: `publishingBlockers,`
+- L919: `approvalBlockers,`
+- L923: `publishingBlockers.length +`
+- L927: `approvalBlockers.length`
+- L935: `aiRecommendations,`
+- L943: `const topPaid = channelMix.paid[0];`
+- L947: `aiRecommendations.campaign_angle,`
+- L948: `aiRecommendations.angle,`
+- L949: `recommendations.find((item) => item.domain === "content")?.action,`
+- L953: `"Refine the campaign angle once stronger content and audience learning is available."`
+- L956: `aiRecommendations.offer_focus,`
+- L957: `aiRecommendations.offer,`
+- L958: `recommendations.find((item) => item.domain === "paid")?.action,`
+- L960: `"Clarify the single strongest commercial promise before launch."`
+- L963: `aiRecommendations.audience_emphasis,`
+- L964: `aiRecommendations.audience,`
+- L969: `channels: topOrganic || topPaid`
+- L970: `? \`${topOrganic ? \`${topOrganic.label} first\` : ""}${topOrganic && topPaid ? " • " : ""}${topPaid ? \`${topPaid.label} as paid support\` : ""}\``
+- L975: `readinessStatus ? \`Readiness status is ${readinessStatus}. Close the top blocker before routing this campaign.\` : "",`
+- L984: `...channelMix.paid.map((item) => item.label.toLowerCase()),`
+- L1006: `? "Hero visual, launch copy, offer banner"`
+- L1022: `function buildCampaignModel(state, session, values) {`
+- L1036: `(item) => \`${item.title}|${item.action}|${item.domain}\``
+- L1039: `const campaignAssetKeys = [`
+- L1044: `"campaign_assets",`
+- L1048: `const campaignAssetCategories = getCategoryReadinessList(assets)`
+- L1049: `.filter((item) => campaignAssetKeys.includes(item.asset_type));`
+- L1050: `const missingAssets = getMissingAssetLabels(assets, campaignAssetKeys);`
+- L1051: `const requiredAssetTypes = uniqueStrings(campaignAssetCategories.map((item) => item.display_label || item.label || item.asset_type));`
+- L1053: `campaignAssetCategories`
+- L1062: `const scheduledJobs = asArray(activity.scheduled_jobs);`
+- L1106: `const publishingWindows = collectPublishingWindows(insights, learning, topContent);`
+- L1108: `const paidSignals = collectPaidSignals(insights);`
+- L1114: `paidSignals,`
+- L1132: `aiRecommendations: asObject(learning.ai_recommendations || insights.ai_recommendations),`
+- L1146: `scheduledJobs,`
+- L1149: `campaignAssetKeys,`
+- L1150: `campaignAssetCategories,`
+- L1151: `assetNextAction: getAssetNextAction(assets, campaignAssetKeys),`
+- L1157: `publishingWindows,`
+- L1159: `paidSignals,`
+- L1174: `"Connect more intelligence or lock the campaign inputs to tighten the channel recommendation.",`
+- L1180: `<div class="campaign-channel-card-list">`
+- L1182: `<div class="campaign-channel-card">`
+- L1183: `<div class="campaign-channel-head">`
+- L1196: `<div class="campaign-readiness-block">`
+- L1197: `<div class="campaign-readiness-head">`
+- L1249: `showError?.(\`Campaign intelligence could not be refreshed: ${session.intelligence.error}\`);`
+- L1256: `session.intelligence.error = error?.message || "Failed to load campaign intelligence";`
+- L1262: `function bindCampaignStudio({`
+- L1271: `saveProjectCampaign,`
+- L1272: `createProjectHandoff`
+- L1277: `const durableCampaign = getSharedCampaignRecord(projectName, state.data.operations);`
+- L1278: `if (durableCampaign) {`
+- L1279: `session.recordId = asString(durableCampaign.id || session.recordId);`
+- L1280: `session.values = hydrateValuesFromCampaignRecord(session.values, durableCampaign);`
+- L1282: `applyAiCampaignHandoff(projectName, state.data.operations, session);`
+- L1283: `syncCampaignStudioBridge(projectName, session.values);`
+- L1285: `const form = $("campaignStudioForm");`
+- L1292: `syncCampaignStudioBridge(projectName, session.values);`
+- L1293: `scheduleCampaignPersistence(projectName, session, saveProjectCampaign);`
+- L1297: `// Explicit actions such as Save, Build, Refresh, and route handoffs still`
+- L1302: `const saveBtn = $("campaignSaveDraftBtn");`
+- L1305: `syncCampaignStudioBridge(projectName, session.values);`
+- L1307: `if (!confirmCampaignStudioAuthorityAction(`
+- L1308: `"Save backend campaign draft",`
+- L1309: `\`This will save or update the Campaign Studio draft for ${projectName}.\``
+- L1311: `showMessage?.("Campaign draft save cancelled.");`
+- L1316: `const result = await saveProjectCampaign?.(projectName, buildCampaignRecordPayload(projectName, session));`
+- L1317: `if (result?.campaign?.id) {`
+- L1318: `session.recordId = result.campaign.id;`
+- L1319: `setSharedCampaignRecord(projectName, result.campaign);`
+- L1321: `showMessage?.("Campaign draft saved to the shared operating backbone.");`
+- L1323: `showError?.(error.message || "Failed to save campaign plan.");`
+- L1328: `const buildBtn = $("campaignBuildPlanBtn");`
+- L1331: `syncCampaignStudioBridge(projectName, session.values);`
+- L1333: `if (!confirmCampaignStudioAuthorityAction(`
+- L1334: `"Save backend campaign plan",`
+- L1335: `\`This will save or update the Campaign Studio plan for ${projectName}.\``
+- L1337: `showMessage?.("Campaign plan save cancelled.");`
+- L1342: `const result = await saveProjectCampaign?.(projectName, {`
+- L1343: `...buildCampaignRecordPayload(projectName, session),`
+- L1346: `if (result?.campaign?.id) {`
+- L1347: `session.recordId = result.campaign.id;`
+- L1348: `setSharedCampaignRecord(projectName, result.campaign);`
+- L1350: `showMessage?.("Campaign plan saved as a durable shared record.");`
+- L1352: `showError?.(error.message || "Failed to structure the campaign plan.");`
+- L1357: `const askAiBtn = $("campaignAskAiBtn");`
+- L1358: `if (askAiBtn) {`
+- L1359: `askAiBtn.onclick = async () => {`
+- L1360: `const prompt = \`Build an execution plan for campaign ${session.values.campaignName || "this campaign"} with goal ${session.values.campaignGoal || "launch"}, channels ${session.values.channelPlan || "to be defined"}, and offer ${session.values.offerHeadline || "to be defined"}. Use current project intelligence, readiness blockers, and recommendation signals.\`;`
+- L1363: `input.value = prompt;`
+- L1365: `setSharedHandoff(projectName, "ai-command", {`
+- L1366: `source_page: "campaign-studio",`
+- L1367: `destination_page: "ai-command",`
+- L1369: `prompt,`
+- L1370: `campaign_id: session.recordId || "",`
+- L1371: `campaign_name: session.values.campaignName || projectName,`
+- L1372: `draft_context: buildCampaignRecordPayload(projectName, session)`
+- L1374: `status: "available"`
+- L1376: `if (!confirmCampaignStudioAuthorityAction(`
+- L1377: `"Create AI Command campaign handoff",`
+- L1378: `"This will create a backend handoff from Campaign Studio to AI Command for review and planning support."`
+- L1380: `showMessage?.("AI Command handoff cancelled.");`
+- L1384: `createProjectHandoff?.(projectName, {`
+- L1385: `source_page: "campaign-studio",`
+- L1386: `destination_page: "ai-command",`
+- L1387: `source_role: CAMPAIGN_ROLE_DEFAULTS.ownerRole,`
+- L1388: `destination_role: CAMPAIGN_ROUTE_ROLES["ai-command"].role,`
+- L1389: `source_service_domain: CAMPAIGN_ROLE_DEFAULTS.serviceDomain,`
+- L1390: `destination_service_domain: CAMPAIGN_ROUTE_ROLES["ai-command"].domain,`
+- L1392: `entity_type: "campaign",`
+- L1396: `prompt,`
+- L1397: `campaign_id: session.recordId || "",`
+- L1398: `campaign_name: session.values.campaignName || projectName,`
+
+## Required Manual Classification
+Before any patch, classify exact Campaign Studio paths into:
+
+1. Campaign display/read-only
+2. Local/session draft only
+3. Durable campaign save/update
+4. Campaign-to-content/media/publishing handoff
+5. Durable backend handoff creation
+6. AI prompt/guidance only
+7. Task/workflow creation or routing
+8. Publishing queue/schedule/launch action
+9. Approval/governance decision or bypass risk
+10. Disabled future action
+11. Unknown / needs deeper inspection
+
+## Decision Rule
+- If durable campaign save/update exists without confirmation, patch.
+- If publishing queue/schedule/launch exists, it must route to Publishing/Governance authority or be confirmation-gated.
+- If durable handoff/task/workflow creation exists without confirmation, patch.
+- If AI guidance is prompt/navigation only, document and close.
+- If actions are local/session/shared-context only, document and close.
+- Do not redesign Campaign Studio in this pass.

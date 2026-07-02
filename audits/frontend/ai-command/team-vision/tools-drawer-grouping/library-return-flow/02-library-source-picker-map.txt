@@ -1,0 +1,706 @@
+public/control-center/pages/library.js:2:import { getSourceTypeMapping } from "../shared-context.js";
+public/control-center/pages/library.js:4:  setSharedAiSource,
+public/control-center/pages/library.js:9:} from "../shared-context.js";
+public/control-center/pages/library.js:12:  if (!asset) return null;
+public/control-center/pages/library.js:13:  return {
+public/control-center/pages/library.js:30:import { renderLibraryActionPanel } from "./library/action-panel.js";
+public/control-center/pages/library.js:31:import { renderLibraryAiPanel } from "./library/ai-panel.js";
+public/control-center/pages/library.js:32:import { normalizeLibraryAsset } from "./library/projection-adapter.js";
+public/control-center/pages/library.js:33:import { normalizeLibrarySession } from "./library/session-store.js";
+public/control-center/pages/library.js:34:import { createLibraryCommand, routeLibraryCommand } from "./library/command-router.js";
+public/control-center/pages/library.js:35:import { mountLibraryListeners } from "./library/listener-lifecycle.js";
+public/control-center/pages/library.js:53:} from "../asset-library.js";
+public/control-center/pages/library.js:55:const librarySessionStore = new Map();
+public/control-center/pages/library.js:56:let librarySearchRenderTimer = null;
+public/control-center/pages/library.js:57:const MEDIA_LIBRARY_LOCAL_ASSETS_KEY = "mh-media-library-assets-v1";
+public/control-center/pages/library.js:58:const libraryProtectedUrlCache = new Map();
+public/control-center/pages/library.js:60:const libraryProtectedUrlPromiseCache = new Map();
+public/control-center/pages/library.js:62:let _libraryFeedback = null;
+public/control-center/pages/library.js:65:let libraryThumbLoadsInFlight = 0;
+public/control-center/pages/library.js:66:const libraryThumbLoadQueue = [];
+public/control-center/pages/library.js:146:  return Array.isArray(value) ? value : [];
+public/control-center/pages/library.js:150:  return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+public/control-center/pages/library.js:154:  if (value == null) return "";
+public/control-center/pages/library.js:155:  return String(value);
+public/control-center/pages/library.js:159:  return Boolean(target?.closest?.(
+public/control-center/pages/library.js:160:    "button, a, input, select, textarea, label, option, [role='button'], .library-action-menu, .library-action-dropdown, .library-drop-zone"
+public/control-center/pages/library.js:168:  return;
+public/control-center/pages/library.js:172:  return asString(value)
+public/control-center/pages/library.js:178:  return asString(value).trim().toLowerCase();
+public/control-center/pages/library.js:182:  return toKey(projectName) || "__default__";
+public/control-center/pages/library.js:186:  if (typeof window === "undefined") return {};
+public/control-center/pages/library.js:189:    return parsed && typeof parsed === "object" ? parsed : {};
+public/control-center/pages/library.js:191:    return {};
+public/control-center/pages/library.js:198:  if (primary.length) return primary;
+public/control-center/pages/library.js:200:    return asArray(map.workspace || map.Workspace || map.__default__);
+public/control-center/pages/library.js:202:  return primary;
+public/control-center/pages/library.js:207:  if (!value) return "";
+public/control-center/pages/library.js:209:  return parts[parts.length - 1] || value;
+public/control-center/pages/library.js:215:  return index >= 0 ? value.slice(index + 1).toLowerCase() : "";
+public/control-center/pages/library.js:220:  if (!value) return "-";
+public/control-center/pages/library.js:222:  if (parts.length <= maxSegments) return `/${parts.join("/")}`;
+public/control-center/pages/library.js:223:  return `.../${parts.slice(parts.length - maxSegments).join("/")}`;
+public/control-center/pages/library.js:228:  if (!filePath) return "Library";
+public/control-center/pages/library.js:231:  if (!parts.length) return "Library";
+public/control-center/pages/library.js:234:  return tail || shortPath(filePath);
+public/control-center/pages/library.js:239:  if (!id) return "-";
+public/control-center/pages/library.js:240:  if (id.length <= 20) return id;
+public/control-center/pages/library.js:241:  return `${id.slice(0, 10)}...${id.slice(-8)}`;
+public/control-center/pages/library.js:246:  if (!text || text.length <= maxLength) return text || "-";
+public/control-center/pages/library.js:248:  return `${text.slice(0, keep)}...${text.slice(-keep)}`;
+public/control-center/pages/library.js:253:  if (!Number.isFinite(parsed)) return "0";
+public/control-center/pages/library.js:254:  return String(Math.max(0, Math.round(parsed)));
+public/control-center/pages/library.js:258:  if (!value) return "-";
+public/control-center/pages/library.js:260:  if (Number.isNaN(date.getTime())) return "-";
+public/control-center/pages/library.js:261:  return date.toLocaleString();
+public/control-center/pages/library.js:265:  return ["png", "jpg", "jpeg", "webp", "gif", "svg", "avif"].includes(extension);
+public/control-center/pages/library.js:269:  return ["mp4", "mov", "webm", "m4v"].includes(extension);
+public/control-center/pages/library.js:273:  if (!projectName) return "";
+public/control-center/pages/library.js:278:  if (!fileName || !assetType) return "";
+public/control-center/pages/library.js:291:  return params.length ? `${base}?${params.join("&")}` : base;
+public/control-center/pages/library.js:296:  if (!value) return false;
+public/control-center/pages/library.js:297:  if (/^blob:/i.test(value) || /^data:/i.test(value)) return false;
+public/control-center/pages/library.js:298:  if (/^https?:\/\//i.test(value) && !value.includes("/media/file/")) return false;
+public/control-center/pages/library.js:299:  return value.includes("/media/file/");
+public/control-center/pages/library.js:303:  if (!asset) return "";
+public/control-center/pages/library.js:304:  return asString(
+public/control-center/pages/library.js:316:  return [
+public/control-center/pages/library.js:325:  const entry = libraryProtectedUrlCache.get(key);
+public/control-center/pages/library.js:329:  libraryProtectedUrlCache.delete(key);
+public/control-center/pages/library.js:333:  if (libraryThumbLoadsInFlight >= MAX_CONCURRENT_LIBRARY_THUMB_LOADS) {
+public/control-center/pages/library.js:334:    return;
+public/control-center/pages/library.js:337:  const nextJob = libraryThumbLoadQueue.shift();
+public/control-center/pages/library.js:339:    return;
+public/control-center/pages/library.js:342:  libraryThumbLoadsInFlight += 1;
+public/control-center/pages/library.js:346:      libraryThumbLoadsInFlight = Math.max(0, libraryThumbLoadsInFlight - 1);
+public/control-center/pages/library.js:352:  return new Promise((resolve, reject) => {
+public/control-center/pages/library.js:353:    libraryThumbLoadQueue.push(async () => {
+public/control-center/pages/library.js:370:    return {
+public/control-center/pages/library.js:379:  const cached = libraryProtectedUrlCache.get(cacheKey);
+public/control-center/pages/library.js:381:    return {
+public/control-center/pages/library.js:393:  const inFlight = libraryProtectedUrlPromiseCache.get(cacheKey);
+public/control-center/pages/library.js:395:    return inFlight;
+public/control-center/pages/library.js:401:    libraryProtectedUrlCache.set(cacheKey, {
+public/control-center/pages/library.js:407:    return {
+public/control-center/pages/library.js:415:  libraryProtectedUrlPromiseCache.set(cacheKey, loadPromise);
+public/control-center/pages/library.js:418:    return await loadPromise;
+public/control-center/pages/library.js:420:    if (libraryProtectedUrlPromiseCache.get(cacheKey) === loadPromise) {
+public/control-center/pages/library.js:421:      libraryProtectedUrlPromiseCache.delete(cacheKey);
+public/control-center/pages/library.js:444:    return;
+public/control-center/pages/library.js:457:    return;
+public/control-center/pages/library.js:463:        Array.from(libraryProtectedUrlCache.keys()).forEach((key) => revokeLibraryProtectedUrl(key));
+public/control-center/pages/library.js:468:          if (!button || !button.closest(".library-workspace")) return;
+public/control-center/pages/library.js:473:          if (!value) return;
+public/control-center/pages/library.js:477:            _libraryFeedback?.("Asset path copied.");
+public/control-center/pages/library.js:483:          const link = event.target.closest?.("a.library-link-btn");
+public/control-center/pages/library.js:484:          if (!link || !link.closest(".library-workspace")) return;
+public/control-center/pages/library.js:487:          if (!fileUrl.includes("/media/file/")) return;
+public/control-center/pages/library.js:504:          const root = event.target?.closest?.(".library-workspace");
+public/control-center/pages/library.js:505:          if (!root) return;
+public/control-center/pages/library.js:507:          if (event.target?.closest?.(".library-action-menu")) {
+public/control-center/pages/library.js:508:            return;
+public/control-center/pages/library.js:520:    return;
+public/control-center/pages/library.js:531:  if (!librarySessionStore.has(key)) {
+public/control-center/pages/library.js:532:    librarySessionStore.set(key, normalizeLibrarySession({
+public/control-center/pages/library.js:549:  const current = librarySessionStore.get(key);
+public/control-center/pages/library.js:552:    librarySessionStore.set(key, normalized);
+public/control-center/pages/library.js:554:  return librarySessionStore.get(key);
+public/control-center/pages/library.js:559:  return routeLibraryCommand(envelope, handlers);
+public/control-center/pages/library.js:563:  Array.from(document.querySelectorAll(".library-action-dropdown.is-open")).forEach((item) => {
+public/control-center/pages/library.js:571:  return asString(value)
+public/control-center/pages/library.js:584:  return normalized;
+public/control-center/pages/library.js:588:  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+public/control-center/pages/library.js:597:  return map;
+public/control-center/pages/library.js:602:  if (!normalized) return "uploaded";
+public/control-center/pages/library.js:603:  if (normalized.includes("approved")) return "approved";
+public/control-center/pages/library.js:604:  if (normalized.includes("publishing_ready")) return "publishing_ready";
+public/control-center/pages/library.js:605:  if (normalized.includes("sent_to_publishing")) return "sent_to_publishing";
+public/control-center/pages/library.js:606:  if (normalized.includes("draft")) return "draft";
+public/control-center/pages/library.js:607:  if (normalized.includes("missing")) return "missing";
+public/control-center/pages/library.js:608:  if (normalized === "uploaded") return "uploaded";
+public/control-center/pages/library.js:609:  if (normalized.includes("needs_review") || normalized.includes("review")) return "needs_review";
+public/control-center/pages/library.js:610:  if (normalized.includes("reject")) return "rejected";
+public/control-center/pages/library.js:611:  if (normalized.includes("archiv")) return "archived";
+public/control-center/pages/library.js:612:  return "uploaded";
+public/control-center/pages/library.js:617:  if (value === "approved") return "Approved";
+public/control-center/pages/library.js:618:  if (value === "publishing_ready") return "Publishing Ready";
+public/control-center/pages/library.js:619:  if (value === "sent_to_publishing") return "Sent to Publishing";
+public/control-center/pages/library.js:620:  if (value === "draft") return "Draft";
+public/control-center/pages/library.js:621:  if (value === "needs_review") return "Needs Review";
+public/control-center/pages/library.js:622:  if (value === "missing") return "Missing";
+public/control-center/pages/library.js:623:  if (value === "rejected") return "Rejected";
+public/control-center/pages/library.js:624:  if (value === "archived") return "Archived";
+public/control-center/pages/library.js:625:  return "Uploaded";
+public/control-center/pages/library.js:630:  if (value === "publishing_ready" || value === "sent_to_publishing") return "success";
+public/control-center/pages/library.js:631:  if (value === "draft") return "neutral";
+public/control-center/pages/library.js:632:  if (value === "needs_review") return getAssetStatusTone("needs review");
+public/control-center/pages/library.js:633:  return getAssetStatusTone(value);
+public/control-center/pages/library.js:663:  return assetItems.map((asset, index) => {
+public/control-center/pages/library.js:716:    return {
+public/control-center/pages/library.js:722:      kind: "library_asset",
+public/control-center/pages/library.js:728:      source_key: asString(merged.source_key || merged.source || merged.scan_source || "library").toLowerCase(),
+public/control-center/pages/library.js:747:  if (mediaType === "campaign-pack") return "campaign_pack";
+public/control-center/pages/library.js:748:  if (mediaType === "video") return "generated_media";
+public/control-center/pages/library.js:749:  if (mediaType === "voice") return "voice_script";
+public/control-center/pages/library.js:750:  if (asset.video_brief) return "video_brief";
+public/control-center/pages/library.js:751:  if (asset.voice_script) return "voice_script";
+public/control-center/pages/library.js:752:  if (asset.prompt && !asset.image_url && !asset.video_url && !asset.audio_url) return "prompt_asset";
+public/control-center/pages/library.js:753:  if (["publishing_ready", "sent_to_publishing"].includes(normalizeReadinessStatus(asset.status))) return "publishing_ready_asset";
+public/control-center/pages/library.js:754:  return "generated_media";
+public/control-center/pages/library.js:760:  const id = asString(asset.handoff_id || asset.id || `media-managed-${index}`);
+public/control-center/pages/library.js:775:  return {
+public/control-center/pages/library.js:781:    file_path: asString(asset.handoff_id || asset.media_job_id || ""),
+public/control-center/pages/library.js:808:    source_label: sourceKind === "backend" ? "Media Studio (backend handoff)" : "Media Studio (local handoff)"
+public/control-center/pages/library.js:816:      return text;
+public/control-center/pages/library.js:819:  return "";
+public/control-center/pages/library.js:826:  const backendHandoffs = asArray(operations?.handoffs?.items)
+public/control-center/pages/library.js:827:    .filter((item) => asString(item?.destination_page) === "library" && asString(item?.source_page) === "media-studio")
+public/control-center/pages/library.js:830:      const libraryAsset = asObject(payload.library_asset);
+public/control-center/pages/library.js:831:      return normalizeManagedMediaAsset(
+public/control-center/pages/library.js:833:          ...libraryAsset,
+public/control-center/pages/library.js:834:          handoff_id: item.id,
+public/control-center/pages/library.js:837:          status: libraryAsset.status || libraryAsset.readiness_status || item.status
+public/control-center/pages/library.js:850:      return;
+public/control-center/pages/library.js:857:  return [...mergedBySignature.values()];
+public/control-center/pages/library.js:865:    if (!asset.uploaded_at) return false;
+public/control-center/pages/library.js:867:    return Number.isFinite(ts) && ts >= sevenDaysAgo;
+public/control-center/pages/library.js:877:  return {
+public/control-center/pages/library.js:894:  return SMART_CATEGORY_BUCKETS.map((bucket) => {
+public/control-center/pages/library.js:910:    return {
+public/control-center/pages/library.js:922:  return REQUIRED_ASSET_REQUIREMENTS.map((requirement) => {
+public/control-center/pages/library.js:939:    return {
+public/control-center/pages/library.js:973:    if (selectedFolderKey === "all_assets") return true;
+public/control-center/pages/library.js:974:    if (selectedFolderKey === "source_of_truth") return Boolean(asset.source_of_truth);
+public/control-center/pages/library.js:975:    if (selectedFolderKey === "archived") return statusValue === "archived";
+public/control-center/pages/library.js:978:      return Boolean(filename && recentUploadedNames.has(filename));
+public/control-center/pages/library.js:983:      return folder.types.includes(assetType);
+public/control-center/pages/library.js:986:    return true;
+public/control-center/pages/library.js:991:    if (isDeleted) return false;
+public/control-center/pages/library.js:1008:    return matchesBucket && matchesFolder && matchesType && matchesStatus && matchesSource && matchesSearch;
+public/control-center/pages/library.js:1013:    return Number.isFinite(ts) ? ts : 0;
+public/control-center/pages/library.js:1017:    if (sortBy === "name_asc") return left.name.localeCompare(right.name);
+public/control-center/pages/library.js:1018:    if (sortBy === "name_desc") return right.name.localeCompare(left.name);
+public/control-center/pages/library.js:1019:    if (sortBy === "updated_asc") return toTimestamp(left.uploaded_at) - toTimestamp(right.uploaded_at);
+public/control-center/pages/library.js:1020:    if (sortBy === "status") return toStatusLabel(left.status).localeCompare(toStatusLabel(right.status));
+public/control-center/pages/library.js:1021:    return toTimestamp(right.uploaded_at) - toTimestamp(left.uploaded_at);
+public/control-center/pages/library.js:1024:  return sorted;
+public/control-center/pages/library.js:1028:  return LIBRARY_FOLDERS.map((folder) => {
+public/control-center/pages/library.js:1035:      if (folder.key === "all_assets") return !Boolean(asset.deleted || asset.is_deleted);
+public/control-center/pages/library.js:1036:      if (folder.key === "source_of_truth") return Boolean(asset.source_of_truth);
+public/control-center/pages/library.js:1037:      if (folder.key === "archived") return statusValue === "archived";
+public/control-center/pages/library.js:1038:      if (folder.key === "uploaded_session") return inRecent;
+public/control-center/pages/library.js:1039:      return Array.isArray(folder.types) ? folder.types.includes(assetType) : false;
+public/control-center/pages/library.js:1042:    return {
+public/control-center/pages/library.js:1050:  return getFileExtension(
+public/control-center/pages/library.js:1062:  return ["pdf", "doc", "docx", "txt", "md", "csv", "xls", "xlsx"].includes(asString(extension).toLowerCase());
+public/control-center/pages/library.js:1067:  if (value === "pdf") return "PDF Document";
+public/control-center/pages/library.js:1068:  if (value === "csv") return "CSV Spreadsheet";
+public/control-center/pages/library.js:1069:  if (value === "xls" || value === "xlsx") return "Excel Spreadsheet";
+public/control-center/pages/library.js:1070:  if (value === "doc" || value === "docx") return "Word Document";
+public/control-center/pages/library.js:1071:  if (value === "txt" || value === "md") return "Text Document";
+public/control-center/pages/library.js:1072:  return "Document";
+public/control-center/pages/library.js:1076:  return Boolean(
+public/control-center/pages/library.js:1089:    return `<div class="empty-box">Select an asset to preview details, open files, copy paths, or prepare review actions.</div>`;
+public/control-center/pages/library.js:1097:      return `
+public/control-center/pages/library.js:1098:        <div class="library-preview-frame" data-library-protected-preview data-preview-asset-id="${escapeHtml(asset.id || asset.asset_id || "")}">
+public/control-center/pages/library.js:1099:          <div class="library-preview-fallback">Loading protected image preview...</div>
+public/control-center/pages/library.js:1104:    return `
+public/control-center/pages/library.js:1105:      <div class="library-preview-frame">
+public/control-center/pages/library.js:1106:        <img src="${escapeHtml(asString(asset.image_url || previewUrl))}" alt="${escapeHtml(asset.name)}" class="library-preview-image" onerror="this.closest('.library-preview-frame')?.replaceWith(Object.assign(document.createElement('div'), { className: 'library-preview-fallback', textContent: 'Preview unavailable for this image.' }))">
+public/control-center/pages/library.js:1113:      return `
+public/control-center/pages/library.js:1114:        <div class="library-preview-frame" data-library-protected-preview data-preview-asset-id="${escapeHtml(asset.id || asset.asset_id || "")}">
+public/control-center/pages/library.js:1115:          <div class="library-preview-fallback">Loading protected video preview...</div>
+public/control-center/pages/library.js:1120:    return `
+public/control-center/pages/library.js:1121:      <div class="library-preview-frame">
+public/control-center/pages/library.js:1122:        <video class="library-preview-video" controls src="${escapeHtml(asString(asset.video_url || previewUrl))}"></video>
+public/control-center/pages/library.js:1128:    return `
+public/control-center/pages/library.js:1129:      <div class="library-preview-frame">
+public/control-center/pages/library.js:1130:        <audio class="library-preview-audio" controls src="${escapeHtml(asString(asset.audio_url || previewUrl))}"></audio>
+public/control-center/pages/library.js:1137:      return `
+public/control-center/pages/library.js:1138:        <div class="library-preview-frame" data-library-protected-preview data-preview-asset-id="${escapeHtml(asset.id || asset.asset_id || "")}">
+public/control-center/pages/library.js:1139:          <div class="library-preview-fallback">Loading protected image preview...</div>
+public/control-center/pages/library.js:1144:    return `
+public/control-center/pages/library.js:1145:      <div class="library-preview-frame">
+public/control-center/pages/library.js:1146:        <img src="${escapeHtml(previewUrl)}" alt="${escapeHtml(asset.name)}" class="library-preview-image" onerror="this.closest('.library-preview-frame')?.replaceWith(Object.assign(document.createElement('div'), { className: 'library-preview-fallback', textContent: 'Preview unavailable for this image.' }))">
+public/control-center/pages/library.js:1153:      return `
+public/control-center/pages/library.js:1154:        <div class="library-preview-frame" data-library-protected-preview data-preview-asset-id="${escapeHtml(asset.id || asset.asset_id || "")}">
+public/control-center/pages/library.js:1155:          <div class="library-preview-fallback">Loading protected video preview...</div>
+public/control-center/pages/library.js:1160:    return `
+public/control-center/pages/library.js:1161:      <div class="library-preview-frame">
+public/control-center/pages/library.js:1162:        <video class="library-preview-video" controls src="${escapeHtml(previewUrl)}"></video>
+public/control-center/pages/library.js:1174:      ? `<button class="btn btn-primary" type="button" data-library-open="${escapeHtml(asset.id)}">Open document</button>`
+public/control-center/pages/library.js:1178:      return `
+public/control-center/pages/library.js:1179:        <div class="library-pdf-preview">
+public/control-center/pages/library.js:1186:      return `
+public/control-center/pages/library.js:1187:        <div class="library-preview-fallback library-document-preview" data-library-protected-preview data-preview-asset-id="${escapeHtml(asset.id || asset.asset_id || "")}">
+public/control-center/pages/library.js:1188:          <div class="library-preview-extension">PDF</div>
+public/control-center/pages/library.js:1190:          <div class="library-preview-copy">Loading protected PDF preview...</div>
+public/control-center/pages/library.js:1195:    return `
+public/control-center/pages/library.js:1196:      <div class="library-preview-fallback library-document-preview">
+public/control-center/pages/library.js:1197:        <div class="library-preview-extension">${escapeHtml((previewExtension || "doc").toUpperCase())}</div>
+public/control-center/pages/library.js:1199:        <div class="library-preview-copy">Inline preview is not available yet for this document type. You can open the file or send it to AI extraction.</div>
+public/control-center/pages/library.js:1200:        <div class="library-document-preview-actions">
+public/control-center/pages/library.js:1202:          <button class="btn btn-secondary" type="button" id="libraryAiExtractSelectedDocBtn">Extract with AI</button>
+public/control-center/pages/library.js:1210:    return `<div class="library-preview-fallback library-preview-text-fallback">${escapeHtml(asset.text_preview)}</div>`;
+public/control-center/pages/library.js:1215:    return `<div class="library-preview-fallback library-preview-text-fallback">${escapeHtml(jsonFallback)}</div>`;
+public/control-center/pages/library.js:1218:  return `
+public/control-center/pages/library.js:1219:    <div class="library-preview-fallback">
+public/control-center/pages/library.js:1220:      <div class="library-preview-extension">${escapeHtml((asset.extension || "file").toUpperCase())}</div>
+public/control-center/pages/library.js:1221:      <div class="library-preview-copy">Preview not available for this file type.</div>
+public/control-center/pages/library.js:1234:    return;
+public/control-center/pages/library.js:1244:      return;
+public/control-center/pages/library.js:1249:      return;
+public/control-center/pages/library.js:1253:      previewNode.innerHTML = `<img src="${escapeHtml(resolved.objectUrl)}" alt="${escapeHtml(asset.name)}" class="library-preview-image">`;
+public/control-center/pages/library.js:1254:      return;
+public/control-center/pages/library.js:1258:      previewNode.innerHTML = `<video class="library-preview-video" controls src="${escapeHtml(resolved.objectUrl)}"></video>`;
+public/control-center/pages/library.js:1259:      return;
+public/control-center/pages/library.js:1264:        <div class="library-pdf-preview">
+public/control-center/pages/library.js:1271:      return;
+public/control-center/pages/library.js:1278:    previewNode.innerHTML = `<div class="library-preview-fallback">${escapeHtml(message)}</div>`;
+public/control-center/pages/library.js:1295:  if (!node || !asset) return;
+public/control-center/pages/library.js:1301:    if (!node.isConnected) return;
+public/control-center/pages/library.js:1308:      if (!node.isConnected) return;
+public/control-center/pages/library.js:1315:    if (!node.isConnected) return;
+public/control-center/pages/library.js:1319:      return;
+public/control-center/pages/library.js:1327:  return;
+public/control-center/pages/library.js:1341:    if (Array.isArray(candidate) && candidate.length) return candidate;
+public/control-center/pages/library.js:1344:  return [];
+public/control-center/pages/library.js:1350:    return `Classify the current library assets for ${project}, propose best category keys, and flag items that should be source-of-truth.`;
+public/control-center/pages/library.js:1354:    return `For ${project}, find the fastest way to close missing required assets: ${missing}. Give a step-by-step upload priority.`;
+public/control-center/pages/library.js:1357:  return `Extract key facts from these library documents for ${project}: ${docs}. Return compliance notes, pricing references, and campaign-usable claims.`;
+public/control-center/pages/library.js:1365:      return Promise.resolve(window.prompt(title, initial));
+public/control-center/pages/library.js:1371:  return new Promise((resolve) => {
+public/control-center/pages/library.js:1445:        return;
+public/control-center/pages/library.js:1482:  _libraryFeedback = showMessage;
+public/control-center/pages/library.js:1506:      return;
+public/control-center/pages/library.js:1580:  const explainerBox = $("libraryExplainerBox");
+public/control-center/pages/library.js:1583:      <section class="library-explainer" aria-label="Library source-of-truth workspace explainer">
+public/control-center/pages/library.js:1584:        <strong>Library is the source-of-truth workspace for assets, documents, brand files, product files, proof/legal files, and AI source context.</strong>
+public/control-center/pages/library.js:1585:        <ol class="library-explainer-steps">
+public/control-center/pages/library.js:1595:  const taxonomyBox = $("libraryTaxonomyBox");
+public/control-center/pages/library.js:1598:      <div class="library-taxonomy-chips" aria-label="Library taxonomy">
+public/control-center/pages/library.js:1613:  const requiredBox = $("libraryRequiredAssetsGrid");
+public/control-center/pages/library.js:1621:      return `
+public/control-center/pages/library.js:1622:        <article class="library-required-card">
+public/control-center/pages/library.js:1623:          <div class="library-required-card-head">
+public/control-center/pages/library.js:1627:          <p class="library-required-why">${escapeHtml(reasonHint)}</p>
+public/control-center/pages/library.js:1628:          <div class="library-required-card-foot">
+public/control-center/pages/library.js:1633:              data-library-required-action="${escapeHtml(item.action)}"
+public/control-center/pages/library.js:1634:              data-library-required-key="${escapeHtml(item.key)}"
+public/control-center/pages/library.js:1635:              data-library-upload-type="${escapeHtml(item.uploadType)}"
+public/control-center/pages/library.js:1643:  const typeSelect = $("libraryFilterTypeSelect");
+public/control-center/pages/library.js:1679:  const statusSelect = $("libraryFilterStatusSelect");
+public/control-center/pages/library.js:1710:  const sourceSelect = $("libraryFilterSourceSelect");
+public/control-center/pages/library.js:1746:  const sortSelect = $("librarySortSelect");
+public/control-center/pages/library.js:1777:  const gridBody = $("libraryAssetGridBody");
+public/control-center/pages/library.js:1788:            ? `<div class="library-grid-thumb-shell" data-library-protected-thumb="${escapeHtml(asset.id)}"><div class="library-grid-icon">IMG</div></div>`
+public/control-center/pages/library.js:1789:            : `<img class="library-grid-thumb" src="${escapeHtml(assetPreviewUrl)}" alt="${escapeHtml(asset.name)}" onerror="this.replaceWith(Object.assign(document.createElement('div'), { className: 'library-grid-icon', textContent: '${escapeHtml((asset.extension || "file").toUpperCase())}' }))">`
+public/control-center/pages/library.js:1790:          : `<div class="library-grid-icon">${escapeHtml((asset.extension || "file").toUpperCase())}</div>`;
+public/control-center/pages/library.js:1793:        return `
+public/control-center/pages/library.js:1794:          <article class="library-grid-card${isSelected ? " is-active" : ""}" data-library-grid-select="${escapeHtml(asset.id)}" tabindex="0" aria-label="Select ${escapeHtml(asset.name)}" aria-selected="${isSelected ? "true" : "false"}">
+public/control-center/pages/library.js:1795:            <div class="library-grid-preview">${previewNode}</div>
+public/control-center/pages/library.js:1796:            <div class="library-grid-title" title="${escapeHtml(asset.name)}">${escapeHtml(titleName)}</div>
+public/control-center/pages/library.js:1797:            <div class="library-grid-meta" title="${escapeHtml(asset.filename || "-")}">${escapeHtml(fileName)}</div>
+public/control-center/pages/library.js:1798:            <div class="library-grid-foot">
+public/control-center/pages/library.js:1800:              <span class="library-grid-type">${escapeHtml(asset.asset_type)}</span>
+public/control-center/pages/library.js:1801:              ${isSelected ? `<button class="btn btn-primary btn-sm quick-ai-source-btn" aria-label="Use as Source in AI Command" data-library-use-ai-source="${escapeHtml(asset.id)}">Use as Source in AI Command</button>` : ""}
+public/control-center/pages/library.js:1809:  const gridPagination = $("libraryGridPagination");
+public/control-center/pages/library.js:1815:      <div class="library-grid-page-info">Showing ${escapeHtml(String(showingStart))}-${escapeHtml(String(showingEnd))} of ${escapeHtml(String(filteredAssets.length))}</div>
+public/control-center/pages/library.js:1816:      <div class="library-grid-page-actions">
+public/control-center/pages/library.js:1817:        <button class="btn btn-secondary btn-sm" type="button" data-library-grid-page="prev"${session.page <= 1 ? " disabled" : ""}>Previous</button>
+public/control-center/pages/library.js:1819:        <button class="btn btn-secondary btn-sm" type="button" data-library-grid-page="next"${session.page >= totalPages ? " disabled" : ""}>Next</button>
+public/control-center/pages/library.js:1824:  const protectedThumbNodes = Array.from(document.querySelectorAll("[data-library-protected-thumb]"));
+public/control-center/pages/library.js:1827:      const leftId = left.getAttribute("data-library-protected-thumb") || "";
+public/control-center/pages/library.js:1828:      const rightId = right.getAttribute("data-library-protected-thumb") || "";
+public/control-center/pages/library.js:1829:      if (leftId === session.selectedAssetId) return -1;
+public/control-center/pages/library.js:1830:      if (rightId === session.selectedAssetId) return 1;
+public/control-center/pages/library.js:1831:      return 0;
+public/control-center/pages/library.js:1836:    const assetId = node.getAttribute("data-library-protected-thumb") || "";
+public/control-center/pages/library.js:1838:    if (!asset) return;
+public/control-center/pages/library.js:1844:      className: "library-grid-thumb",
+public/control-center/pages/library.js:1846:      fallbackMarkup: `<div class="library-grid-icon">${escapeHtml((asset.extension || "file").toUpperCase())}</div>`,
+public/control-center/pages/library.js:1851:  const previewVisual = $("libraryPreviewVisual");
+public/control-center/pages/library.js:1855:    const protectedPreviewNode = previewVisual.querySelector("[data-library-protected-preview]");
+public/control-center/pages/library.js:1867:  const previewMeta = $("libraryPreviewMeta");
+public/control-center/pages/library.js:1871:        <div class="library-inspector-title">
+public/control-center/pages/library.js:1876:        <div class="library-inspector-quick">
+public/control-center/pages/library.js:1882:        <div class="library-inspector-path">${escapeHtml(assetContextHint(selectedAsset))}</div>
+public/control-center/pages/library.js:1884:        <button type="button" class="btn btn-primary std-ai-btn" aria-label="Use as Source in AI Command" data-library-use-ai-source="${escapeHtml(selectedAsset.id)}">Use as Source in AI Command</button>
+public/control-center/pages/library.js:1886:        <div class="library-inspector-ai-source-guide${getSharedLibrarySourceBridge(projectName) ? "" : " is-hidden"}" aria-live="polite">
+public/control-center/pages/library.js:1887:          <span class="library-inspector-ai-source-guide-text">Select one Library item, then click Use as Source in AI Command.</span>
+public/control-center/pages/library.js:1890:        <details class="library-inspector-more">
+public/control-center/pages/library.js:1905:    const useBtns = previewMeta.querySelectorAll("[data-library-use-ai-source]");
+public/control-center/pages/library.js:1908:      const gridBtn = gridBody.querySelector("[data-library-use-ai-source]");
+public/control-center/pages/library.js:1919:          return;
+public/control-center/pages/library.js:1924:        setSharedAiSource(sourceProjectName, payload);
+public/control-center/pages/library.js:1925:        setSharedAiSource("__default__", payload);
+public/control-center/pages/library.js:1927:        // Preserve/set drawer return context
+public/control-center/pages/library.js:1937:        navigateTo("ai-command");
+public/control-center/pages/library.js:1942:  const actionPanelMount = $("libraryActionPanelMount");
+public/control-center/pages/library.js:1950:  const aiPanelMount = $("libraryAiPanelMount");
+public/control-center/pages/library.js:1959:  const activityBox = $("libraryRecentActivity");
+public/control-center/pages/library.js:1975:  const uploadSummary = $("libraryUploadSummary");
+public/control-center/pages/library.js:1988:      : `<div class="empty-box">No uploads in this session yet. Choose files and upload them to start building the asset library.</div>`;
+public/control-center/pages/library.js:1991:  const requiredActionButtons = Array.from(document.querySelectorAll("[data-library-required-action]"));
+public/control-center/pages/library.js:1994:      const action = button.getAttribute("data-library-required-action") || "review";
+public/control-center/pages/library.js:1995:      const uploadType = button.getAttribute("data-library-upload-type") || "logo";
+public/control-center/pages/library.js:1999:        const uploadTypeSelect = $("libraryUploadTypeSelect");
+public/control-center/pages/library.js:2001:        const uploadInput = $("libraryUploadInput");
+public/control-center/pages/library.js:2003:        return;
+public/control-center/pages/library.js:2023:        return;
+public/control-center/pages/library.js:2028:      navigateTo("ai-command");
+public/control-center/pages/library.js:2033:  const selectButtons = Array.from(document.querySelectorAll("[data-library-select]"));
+public/control-center/pages/library.js:2039:        assetId: button.getAttribute("data-library-select") || ""
+public/control-center/pages/library.js:2045:      const selectedId = button.getAttribute("data-library-select") || "";
+public/control-center/pages/library.js:2066:  const selectableRows = Array.from(document.querySelectorAll("[data-library-row-select]"));
+public/control-center/pages/library.js:2070:        return;
+public/control-center/pages/library.js:2073:      const nextId = row.getAttribute("data-library-row-select") || "";
+public/control-center/pages/library.js:2074:      if (!nextId) return;
+public/control-center/pages/library.js:2101:      if (event.key !== "Enter" && event.key !== " ") return;
+public/control-center/pages/library.js:2103:      const nextId = row.getAttribute("data-library-row-select") || "";
+public/control-center/pages/library.js:2104:      if (!nextId) return;
+public/control-center/pages/library.js:2130:  const selectableCards = Array.from(document.querySelectorAll("[data-library-grid-select]"));
+public/control-center/pages/library.js:2133:      if (isLibraryInteractiveElement(event.target)) return;
+public/control-center/pages/library.js:2134:      const nextId = card.getAttribute("data-library-grid-select") || "";
+public/control-center/pages/library.js:2135:      if (!nextId) return;
+public/control-center/pages/library.js:2147:      if (event.key !== "Enter" && event.key !== " ") return;
+public/control-center/pages/library.js:2149:      const nextId = card.getAttribute("data-library-grid-select") || "";
+public/control-center/pages/library.js:2150:      if (!nextId) return;
+public/control-center/pages/library.js:2162:  const folderButtons = Array.from(document.querySelectorAll("[data-library-folder-select]"));
+public/control-center/pages/library.js:2165:      const folderKey = button.getAttribute("data-library-folder-select") || "all_assets";
+public/control-center/pages/library.js:2185:  const viewToggleButtons = Array.from(document.querySelectorAll("[data-library-view-mode]"));
+public/control-center/pages/library.js:2188:    const mode = button.getAttribute("data-library-view-mode") || "grid";
+public/control-center/pages/library.js:2203:  const finderWorkspace = $("libraryFinderWorkspace");
+public/control-center/pages/library.js:2205:    finderWorkspace.setAttribute("data-library-view-mode", session.viewMode === "grid" ? "grid" : "list");
+public/control-center/pages/library.js:2209:  const toolbarUpload = $("libraryToolbarUploadBtn");
+public/control-center/pages/library.js:2211:    toolbarUpload.onclick = () => $("libraryUploadInput")?.click();
+public/control-center/pages/library.js:2214:  const openButtons = Array.from(document.querySelectorAll("[data-library-open]"));
+public/control-center/pages/library.js:2217:      const id = button.getAttribute("data-library-open") || "";
+public/control-center/pages/library.js:2228:        return;
+public/control-center/pages/library.js:2242:  const sourceOfTruthButtons = Array.from(document.querySelectorAll("[data-library-source-truth]"));
+public/control-center/pages/library.js:2249:        return;
+public/control-center/pages/library.js:2252:      const assetId = button.getAttribute("data-library-source-truth") || "";
+public/control-center/pages/library.js:2256:        return;
+public/control-center/pages/library.js:2280:        return;
+public/control-center/pages/library.js:2284:      const id = button.getAttribute("data-library-asset") || "";
+public/control-center/pages/library.js:2290:        return;
+public/control-center/pages/library.js:2295:        return;
+public/control-center/pages/library.js:2312:  const archiveButtons = Array.from(document.querySelectorAll("[data-library-archive]"));
+public/control-center/pages/library.js:2319:        return;
+public/control-center/pages/library.js:2322:      const id = button.getAttribute("data-library-archive") || "";
+public/control-center/pages/library.js:2328:        return;
+public/control-center/pages/library.js:2332:        return;
+public/control-center/pages/library.js:2346:  const renameButtons = Array.from(document.querySelectorAll("[data-library-rename]"));
+public/control-center/pages/library.js:2353:        return;
+public/control-center/pages/library.js:2356:      const id = button.getAttribute("data-library-rename") || "";
+public/control-center/pages/library.js:2362:        return;
+public/control-center/pages/library.js:2367:        return;
+public/control-center/pages/library.js:2373:        return;
+public/control-center/pages/library.js:2387:  const deleteButtons = Array.from(document.querySelectorAll("[data-library-delete]"));
+public/control-center/pages/library.js:2394:        return;
+public/control-center/pages/library.js:2397:      const id = button.getAttribute("data-library-delete") || "";
+public/control-center/pages/library.js:2403:        return;
+public/control-center/pages/library.js:2407:        return;
+public/control-center/pages/library.js:2423:  const actionToggleButtons = Array.from(document.querySelectorAll(".library-action-toggle"));
+public/control-center/pages/library.js:2429:      const menu = button.closest(".library-action-menu");
+public/control-center/pages/library.js:2430:      const dropdown = menu?.querySelector(".library-action-dropdown");
+public/control-center/pages/library.js:2431:      if (!dropdown) return;
+public/control-center/pages/library.js:2443:  const pickUploadTypeButtons = Array.from(document.querySelectorAll("[data-library-upload-type]"));
+public/control-center/pages/library.js:2446:      const uploadType = button.getAttribute("data-library-upload-type") || "logo";
+public/control-center/pages/library.js:2448:      const uploadTypeSelect = $("libraryUploadTypeSelect");
+public/control-center/pages/library.js:2456:  const gridPageButtons = Array.from(document.querySelectorAll("[data-library-grid-page]"));
+public/control-center/pages/library.js:2462:      const action = button.getAttribute("data-library-grid-page");
+public/control-center/pages/library.js:2479:  const searchInput = $("librarySearchInput");
+public/control-center/pages/library.js:2493:      if (librarySearchRenderTimer) {
+public/control-center/pages/library.js:2494:        window.clearTimeout(librarySearchRenderTimer);
+public/control-center/pages/library.js:2497:      librarySearchRenderTimer = window.setTimeout(() => {
+public/control-center/pages/library.js:2503:  const uploadTypeSelect = $("libraryUploadTypeSelect");
+public/control-center/pages/library.js:2520:  const dropZone = $("libraryDropZone");
+public/control-center/pages/library.js:2521:  const uploadInput = $("libraryUploadInput");
+public/control-center/pages/library.js:2522:  const uploadBtn = $("libraryUploadBtn");
+public/control-center/pages/library.js:2529:      const info = $("libraryDropInfo");
+public/control-center/pages/library.js:2569:    if (!dropZone.dataset.libraryDndBound) {
+public/control-center/pages/library.js:2586:        if (!files.length) return;
+public/control-center/pages/library.js:2590:      dropZone.dataset.libraryDndBound = "1";
+public/control-center/pages/library.js:2614:    const chooseFilesBtn = $("libraryChooseFilesBtn");
+public/control-center/pages/library.js:2627:    uploadBtn.disabled = session.uploading || !Array.from($("libraryUploadInput")?.files || []).length;
+public/control-center/pages/library.js:2634:        return;
+public/control-center/pages/library.js:2637:      if (session.uploading) return;
+public/control-center/pages/library.js:2639:      const files = Array.from($("libraryUploadInput")?.files || []);
+public/control-center/pages/library.js:2642:        return;
+public/control-center/pages/library.js:2647:        assetType = getUploadAssetType(session, catalog, $("libraryUploadTypeSelect")?.value);
+public/control-center/pages/library.js:2650:        return;
+public/control-center/pages/library.js:2702:        const input = $("libraryUploadInput");
+public/control-center/pages/library.js:2704:        const dropInfo = $("libraryDropInfo");
+public/control-center/pages/library.js:2706:        uploadBtn.disabled = session.uploading || !Array.from($("libraryUploadInput")?.files || []).length;
+public/control-center/pages/library.js:2718:        uploadBtn.disabled = session.uploading || !Array.from($("libraryUploadInput")?.files || []).length;
+public/control-center/pages/library.js:2727:  const refreshBtn = $("libraryRefreshScanBtn");
+public/control-center/pages/library.js:2732:        return;
+public/control-center/pages/library.js:2740:        showError?.(error.message || "Failed to refresh library scan.");
+public/control-center/pages/library.js:2747:  const classifyBtn = $("libraryAiClassifyBtn");
+public/control-center/pages/library.js:2752:      navigateTo("ai-command");
+public/control-center/pages/library.js:2757:  const missingBtn = $("libraryAiMissingBtn");
+public/control-center/pages/library.js:2762:      navigateTo("ai-command");
+public/control-center/pages/library.js:2767:  const extractSelectedDocBtn = $("libraryAiExtractSelectedDocBtn");
+public/control-center/pages/library.js:2772:        return;
+public/control-center/pages/library.js:2777:      navigateTo("ai-command");
+public/control-center/pages/library.js:2782:  const extractBtn = $("libraryAiExtractBtn");
+public/control-center/pages/library.js:2791:      navigateTo("ai-command");
+public/control-center/pages/library.js:2796:  const sendToAiBtn = document.querySelector("[data-library-command=\"send-to-ai\"]");
+public/control-center/pages/library.js:2801:        return;
+public/control-center/pages/library.js:2807:      navigateTo("ai-command");
+public/control-center/pages/library.js:2812:export const libraryRoute = {
+public/control-center/pages/library.js:2813:  id: "library",
+public/control-center/pages/library.js:2821:    <section class="page is-active" data-page="library">
+public/control-center/pages/library.js:2822:      <div id="libraryRoot"></div>
+public/control-center/pages/library.js:2840:    const activeSourceMapping = activeSourceBridge?.type === "library_source_selection"
+public/control-center/pages/library.js:2851:            { id: "back-to-ai-command", label: "Back to Drawer" },
+public/control-center/pages/library.js:2860:      const guideBox = document.getElementById("librarySourceBridgeGuideBox");
+public/control-center/pages/library.js:2862:        const backBtn = guideBox.querySelector('[data-guide-action="back-to-ai-command"]');
+public/control-center/pages/library.js:2869:            navigateTo("ai-command");
+public/control-center/pages/library.js:2884:      if (activeSourceBridge && activeSourceBridge.type === "library_source_selection") {
+public/control-center/pages/library.js:2885:        const assetWorkspace = document.getElementById("libraryAssetWorkspace") || document.querySelector('[data-library-section="asset-workspace"]');
+public/control-center/pages/library.js:2919:    const root = $("libraryRoot");
+public/control-center/pages/library.js:2920:    if (!root) return;
+public/control-center/pages/library.js:2925:      <div class="library-smart-shell">
+public/control-center/pages/library.js:2932:            <button id="libraryRefreshScanBtn" class="btn btn-secondary" type="button">Refresh Library scan</button>
+public/control-center/pages/library.js:2934:          <div id="libraryOverviewCards" class="library-overview-grid"></div>
+public/control-center/pages/library.js:2942:          <div id="libraryRequiredAssetsGrid" class="library-required-grid"></div>
+public/control-center/pages/library.js:2945:        <section class="card library-actions-card">
+public/control-center/pages/library.js:2948:            <div class="library-action-toolbar">
+public/control-center/pages/library.js:2949:              <button id="libraryAiClassifyBtn" class="btn btn-secondary" type="button">Classify Assets</button>
+public/control-center/pages/library.js:2950:              <button id="libraryAiMissingBtn" class="btn btn-secondary" type="button">Review Missing</button>
+public/control-center/pages/library.js:2951:              <button id="libraryAiExtractBtn" class="btn btn-secondary" type="button">Extract Docs</button>
+public/control-center/pages/library.js:2954:          <div class="library-upload-grid">
+public/control-center/pages/library.js:2955:            <div id="libraryDropZone" class="library-drop-zone" role="button" tabindex="0">
+public/control-center/pages/library.js:2958:              <small id="libraryDropInfo">No files selected</small>
+public/control-center/pages/library.js:2959:              <button id="libraryChooseFilesBtn" class="btn btn-secondary btn-sm" type="button">Choose Files</button>
+public/control-center/pages/library.js:2960:              <input id="libraryUploadInput" class="library-file-input" type="file" multiple>
+public/control-center/pages/library.js:2962:            <div class="library-upload-controls">
+public/control-center/pages/library.js:2963:              <label class="setup-label" for="libraryUploadTypeSelect">Classify upload as</label>
+public/control-center/pages/library.js:2964:              <select id="libraryUploadTypeSelect" class="setup-input" aria-label="Upload asset type">
+public/control-center/pages/library.js:2970:              <button id="libraryUploadBtn" class="btn btn-primary" type="button">Upload asset to Library</button>
+public/control-center/pages/library.js:2973:          <div id="libraryUploadSummary" class="library-upload-summary"></div>
+public/control-center/pages/library.js:2976:        <section id="libraryAssetWorkspace" class="card library-asset-workspace-section" data-library-section="asset-workspace">
+public/control-center/pages/library.js:2981:          ${sourceGuideHtml ? `<div id="librarySourceBridgeGuideBox" class="library-source-guide-inline">${sourceGuideHtml}</div>` : ""}
+public/control-center/pages/library.js:2982:            <div id="libraryFinderWorkspace" class="library-workspace-grid library-finder-workspace" data-library-view-mode="${escapeHtml(session.viewMode || "grid")}">
+public/control-center/pages/library.js:2983:            <div class="library-workspace-main">
+public/control-center/pages/library.js:2984:              <div class="library-finder-topbar">
+public/control-center/pages/library.js:2985:                <div class="library-finder-sidebar-title"></div>
+public/control-center/pages/library.js:2986:                <div class="library-folder-list">
+public/control-center/pages/library.js:2990:      return `
+public/control-center/pages/library.js:2991:                      <button type="button" class="library-folder-item ${active ? "is-active" : ""}" data-library-folder-select="${escapeHtml(folder.key)}">
+public/control-center/pages/library.js:3000:              <div class="library-finder-toolbar">
+public/control-center/pages/library.js:3001:                <button id="libraryToolbarUploadBtn" class="btn btn-secondary btn-sm" type="button">Quick Upload</button>
+public/control-center/pages/library.js:3004:              <div class="library-filter-bar">
+public/control-center/pages/library.js:3005:                <div class="library-filter-field">
+public/control-center/pages/library.js:3006:                  <label class="setup-label" for="libraryFilterTypeSelect">Type</label>
+public/control-center/pages/library.js:3007:                  <select id="libraryFilterTypeSelect" class="setup-input" aria-label="Filter by type"></select>
+public/control-center/pages/library.js:3009:                <div class="library-filter-field">
+public/control-center/pages/library.js:3010:                  <label class="setup-label" for="libraryFilterStatusSelect">Status</label>
+public/control-center/pages/library.js:3011:                  <select id="libraryFilterStatusSelect" class="setup-input" aria-label="Filter by status">
+public/control-center/pages/library.js:3024:                <div class="library-filter-field">
+public/control-center/pages/library.js:3025:                  <label class="setup-label" for="libraryFilterSourceSelect">Source</label>
+public/control-center/pages/library.js:3026:                  <select id="libraryFilterSourceSelect" class="setup-input" aria-label="Filter by source"></select>
+public/control-center/pages/library.js:3028:                <div class="library-filter-field">
+public/control-center/pages/library.js:3029:                  <label class="setup-label" for="librarySortSelect">Sort</label>
+public/control-center/pages/library.js:3030:                  <select id="librarySortSelect" class="setup-input" aria-label="Sort assets">
+public/control-center/pages/library.js:3038:                <div class="library-filter-field library-filter-search">
+public/control-center/pages/library.js:3039:                  <label class="setup-label" for="librarySearchInput">Search</label>
+public/control-center/pages/library.js:3040:                  <input id="librarySearchInput" class="setup-input" type="text" placeholder="Search by name, path, type, or usage" />
+public/control-center/pages/library.js:3044:              <div id="libraryAssetGridBody" class="library-grid-body"></div>
+public/control-center/pages/library.js:3045:              <div id="libraryGridPagination" class="library-grid-pagination"></div>
+public/control-center/pages/library.js:3048:            <aside class="library-workspace-side">
+public/control-center/pages/library.js:3049:              <div class="library-side-stack">
+public/control-center/pages/library.js:3050:                <section class="card library-preview-card">
+public/control-center/pages/library.js:3054:                  <div id="libraryPreviewVisual"></div>
+public/control-center/pages/library.js:3055:                  <div id="libraryPreviewMeta" class="library-preview-meta"></div>
+public/control-center/pages/library.js:3057:                <div id="libraryActionPanelMount" class="library-panel-mount"></div>
+public/control-center/pages/library.js:3058:                <div id="libraryAiPanelMount" class="library-panel-mount"></div>
+public/control-center/pages/library.js:3081:    return () => {
+public/control-center/shared-context.js:5:    libraryFilter: "product_images",
+public/control-center/shared-context.js:12:    libraryFilter: "videos",
+public/control-center/shared-context.js:19:    libraryFilter: "documents",
+public/control-center/shared-context.js:26:    libraryFilter: "product_data",
+public/control-center/shared-context.js:33:    libraryFilter: "logos",
+public/control-center/shared-context.js:40:    libraryFilter: "legal_pricing",
+public/control-center/shared-context.js:47:    libraryFilter: "research_certificates",
+public/control-center/shared-context.js:54:    libraryFilter: "all_assets",
+public/control-center/shared-context.js:61:    libraryFilter: "all_assets",
+public/control-center/shared-context.js:69:  return SHARED_SOURCE_TYPE_MAP[type] || SHARED_SOURCE_TYPE_MAP.auto;
+public/control-center/shared-context.js:75:const handoffCache = new Map();
+public/control-center/shared-context.js:76:const librarySourceBridgeCache = new Map();
+public/control-center/shared-context.js:78:// Transient AI source cache
+public/control-center/shared-context.js:85:  if (!projectName || !payload) return;
+public/control-center/shared-context.js:86:  aiDrawerReturnCache.set(buildKey(projectName, "ai-drawer-return"), payload);
+public/control-center/shared-context.js:90:  return aiDrawerReturnCache.get(buildKey(projectName, "ai-drawer-return"));
+public/control-center/shared-context.js:94:  if (!projectName) return;
+public/control-center/shared-context.js:95:  aiDrawerReturnCache.delete(buildKey(projectName, "ai-drawer-return"));
+public/control-center/shared-context.js:100:  if (!projectName || !bridge) return;
+public/control-center/shared-context.js:101:  librarySourceBridgeCache.set(buildKey(projectName, "library-source-bridge"), bridge);
+public/control-center/shared-context.js:105:  return librarySourceBridgeCache.get(buildKey(projectName, "library-source-bridge"));
+public/control-center/shared-context.js:109:  if (!projectName) return;
+public/control-center/shared-context.js:110:  librarySourceBridgeCache.delete(buildKey(projectName, "library-source-bridge"));
+public/control-center/shared-context.js:114:export function setSharedAiSource(projectName, source) {
+public/control-center/shared-context.js:115:  if (!projectName || !source) return;
+public/control-center/shared-context.js:119:export function getSharedAiSource(projectName) {
+public/control-center/shared-context.js:120:  return aiSourceCache.get(buildKey(projectName, "ai-source"));
+public/control-center/shared-context.js:124:  if (!projectName) return;
+public/control-center/shared-context.js:129:  return Array.isArray(value) ? value : [];
+public/control-center/shared-context.js:133:  return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+public/control-center/shared-context.js:137:  if (value == null) return "";
+public/control-center/shared-context.js:138:  return String(value);
+public/control-center/shared-context.js:142:  return `${asString(projectName).trim().toLowerCase() || "__default__"}::${scope}`;
+public/control-center/shared-context.js:146:  const handoffs = asArray(operations?.handoffs?.items);
+public/control-center/shared-context.js:147:  const available = handoffs.filter((item) => {
+public/control-center/shared-context.js:151:    return destinationMatches && sourceMatches && active;
+public/control-center/shared-context.js:154:  return available[0] || null;
+public/control-center/shared-context.js:158:  if (!projectName || !campaign) return;
+public/control-center/shared-context.js:164:  if (cached) return cached;
+public/control-center/shared-context.js:172:  return activeDraft;
+public/control-center/shared-context.js:176:  if (!projectName || !draft) return;
+public/control-center/shared-context.js:182:  if (cached) return cached;
+public/control-center/shared-context.js:184:  const handoff =
+public/control-center/shared-context.js:185:    getLatestHandoffFromOperations(operations, "workflows", "ai-command") ||
+public/control-center/shared-context.js:186:    getLatestHandoffFromOperations(operations, "ai-command", "workflows") ||
+public/control-center/shared-context.js:189:  return asObject(handoff?.payload?.draft_context);
+public/control-center/shared-context.js:192:export function setSharedHandoff(projectName, destinationPage, handoff) {
+public/control-center/shared-context.js:193:  if (!projectName || !destinationPage || !handoff) return;
+public/control-center/shared-context.js:194:  handoffCache.set(buildKey(projectName, destinationPage), handoff);
+public/control-center/shared-context.js:198:  const cached = handoffCache.get(buildKey(projectName, destinationPage));
+public/control-center/shared-context.js:199:  if (cached) return cached;
+public/control-center/shared-context.js:200:  return getLatestHandoffFromOperations(operations, destinationPage, sourcePage);
+public/control-center/pages/ai-command/tool-dock.js:4:  getSharedAiSource,
+public/control-center/pages/ai-command/tool-dock.js:10:} from "../../shared-context.js";
+public/control-center/pages/ai-command/tool-dock.js:15:  if (!drawer || typeof document === "undefined") return;
+public/control-center/pages/ai-command/tool-dock.js:21:      return;
+public/control-center/pages/ai-command/tool-dock.js:27:      return;
+public/control-center/pages/ai-command/tool-dock.js:37:  return String(value ?? "").replace(/[&<>"']/g, (char) => ({
+public/control-center/pages/ai-command/tool-dock.js:47:  const returnContext = getSharedAiDrawerReturn(projectName) || getSharedAiDrawerReturn("__default__");
+public/control-center/pages/ai-command/tool-dock.js:48:  if (!returnContext?.drawerOpen) return;
+public/control-center/pages/ai-command/tool-dock.js:51:  const root = drawer?.closest?.("[data-page='ai-command'], .ai-command-page, body") || document;
+public/control-center/pages/ai-command/tool-dock.js:54:  if (returnContext.toolId) {
+public/control-center/pages/ai-command/tool-dock.js:55:    targetButton = root.querySelector(`[data-aicmd-tool-dock="${returnContext.toolId}"]`);
+public/control-center/pages/ai-command/tool-dock.js:72:  const selectedSource = getSharedAiSource(projectName) || getSharedAiSource("__default__");
+public/control-center/pages/ai-command/tool-dock.js:87:  origin = "ai-command",
+public/control-center/pages/ai-command/tool-dock.js:98:  return {
+public/control-center/pages/ai-command/tool-dock.js:99:    type: "ai_drawer_return",
+public/control-center/pages/ai-command/tool-dock.js:113:// --- When Open Library is clicked from tool dock, store both bridge and drawer return context ---
+public/control-center/pages/ai-command/tool-dock.js:123:  // Build and store drawer return context
+public/control-center/pages/ai-command/tool-dock.js:126:    origin: "ai-command",
+public/control-center/pages/ai-command/tool-dock.js:136:  // Also set library source bridge context if needed (existing logic)
+public/control-center/pages/ai-command/tool-dock.js:141:  if (!source || !source.name) return null;
+public/control-center/pages/ai-command/tool-dock.js:145:  return { name, type, path };
+public/control-center/pages/ai-command/tool-dock.js:149:  return getSharedAiSource(projectName) || getSharedAiSource("__default__");
+public/control-center/pages/ai-command/tool-dock.js:154:  if (!text || text.length <= maxLength) return text;
+public/control-center/pages/ai-command/tool-dock.js:155:  return `${text.slice(0, maxLength).trim()}...`;
+public/control-center/pages/ai-command/tool-dock.js:160:  if (!text || text.length <= maxLength) return text;
+public/control-center/pages/ai-command/tool-dock.js:163:  if (tail && tail.length < maxLength) return `.../${tail}`;
+public/control-center/pages/ai-command/tool-dock.js:164:  return `${text.slice(0, maxLength - 3).trim()}...`;
+public/control-center/pages/ai-command/tool-dock.js:169:  if (!source?.name) return "";
+public/control-center/pages/ai-command/tool-dock.js:192:  return lines.join("\n");
+public/control-center/pages/ai-command/tool-dock.js:197:  if (!warning) return;
+public/control-center/pages/ai-command/tool-dock.js:204:  return /source_of_truth_assets|selected_asset|proof_doc|legal_doc|privacy_policy/i.test(String(rawValue || ""));
+public/control-center/pages/ai-command/tool-dock.js:208:  return drawer?.dataset?.sourceRequired === "true";
+public/control-center/pages/ai-command/tool-dock.js:214:    return true;
+public/control-center/pages/ai-command/tool-dock.js:220:    return true;
+public/control-center/pages/ai-command/tool-dock.js:227:  return false;
+public/control-center/pages/ai-command/tool-dock.js:231:  if (!drawer) return;
+public/control-center/pages/ai-command/tool-dock.js:245:    return;
+public/control-center/pages/ai-command/tool-dock.js:272:    const libraryOption = Array.from(sourceSelect.options || []).find((option) => {
+public/control-center/pages/ai-command/tool-dock.js:274:      return /library|source|asset|brand|product/i.test(value);
+public/control-center/pages/ai-command/tool-dock.js:276:    if (libraryOption) sourceSelect.value = libraryOption.value;
+public/control-center/pages/ai-command/tool-dock.js:284:        drawer.querySelector('[data-aicmd-tool-drawer-open-library]')?.click();
+public/control-center/pages/ai-command/tool-dock.js:337:      sourceTypes: ["current_chat", "campaign_notes", "market_notes", "audience_notes", "product_data", "library_source", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:350:      sourceTypes: ["current_chat", "campaign_brief", "asset_requirements", "timeline_notes", "library_source", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:363:      sourceTypes: ["current_chat", "market_notes", "customer_notes", "insights_report", "library_source", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:376:      sourceTypes: ["current_chat", "product_data", "pricing_notes", "proof_points", "library_source", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:389:      sourceTypes: ["current_chat", "campaign_brief", "audience_notes", "content_inventory", "library_source", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:390:      outputTypes: ["funnel_map", "content_needs", "handoff_points", "retention_notes"],
+public/control-center/pages/ai-command/tool-dock.js:391:      template: "Map a funnel for {projectName}. Include awareness, consideration, conversion, retention, content needs, and handoff points."
+public/control-center/pages/ai-command/tool-dock.js:417:      destinations: ["chat-preview", "content-studio", "library", "media-studio", "publishing", "compliance"],
+public/control-center/pages/ai-command/tool-dock.js:418:      sourceTypes: ["current_chat", "library_folder", "brand_profile", "product_data", "legal_pricing_docs", "research_proof_docs", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:429:      frontendOwnerPage: "ai-command",
+public/control-center/pages/ai-command/tool-dock.js:455:      frontendOwnerPage: "ai-command",
+public/control-center/pages/ai-command/tool-dock.js:468:      frontendOwnerPage: "ai-command",
+public/control-center/pages/ai-command/tool-dock.js:481:      frontendOwnerPage: "library",
+public/control-center/pages/ai-command/tool-dock.js:482:      destinations: ["library", "ai-command", "content-studio"],
+public/control-center/pages/ai-command/tool-dock.js:483:      sourceTypes: ["current_chat", "library_folder", "brand_profile", "product_data", "legal_pricing_docs", "research_proof_docs", "source_of_truth_assets", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:495:      destinations: ["content-studio", "insights", "library"],
+public/control-center/pages/ai-command/tool-dock.js:496:      sourceTypes: ["topic", "market", "language", "audience", "current_chat", "library_folder"],
+public/control-center/pages/ai-command/tool-dock.js:509:      sourceTypes: ["existing_content", "composer_text", "content_draft", "current_chat", "library_folder"],
+public/control-center/pages/ai-command/tool-dock.js:520:      frontendOwnerPage: "ai-command",
+public/control-center/pages/ai-command/tool-dock.js:521:      destinations: ["content-studio", "library", "media-studio", "publishing", "compliance", "task", "handoff"],
+public/control-center/pages/ai-command/tool-dock.js:523:      outputTypes: ["content_studio_draft", "library_save", "media_brief", "publishing_package", "compliance_review", "task_preview", "handoff_preview"],
+public/control-center/pages/ai-command/tool-dock.js:536:      destinations: ["chat-preview", "media-studio", "library", "content-studio", "publishing"],
+public/control-center/pages/ai-command/tool-dock.js:537:      sourceTypes: ["current_chat", "campaign_brief", "brand_guidelines", "product_images", "reference_asset", "library_source", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:549:      destinations: ["chat-preview", "media-studio", "library"],
+public/control-center/pages/ai-command/tool-dock.js:550:      sourceTypes: ["current_chat", "brand_guidelines", "reference_asset", "campaign_mood", "library_source", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:562:      destinations: ["chat-preview", "media-studio", "library"],
+public/control-center/pages/ai-command/tool-dock.js:575:      destinations: ["chat-preview", "media-studio", "library", "workflows"],
+public/control-center/pages/ai-command/tool-dock.js:576:      sourceTypes: ["current_chat", "campaign_brief", "library_folder", "brand_assets", "product_images", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:601:      destinations: ["chat-preview", "media-studio", "governance", "library"],
+public/control-center/pages/ai-command/tool-dock.js:602:      sourceTypes: ["current_chat", "brand_guidelines", "visual_brief", "selected_asset", "library_source", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:618:      sourceTypes: ["current_chat", "campaign_brief", "content_draft", "product_data", "library_source", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:630:      destinations: ["chat-preview", "media-studio", "library", "publishing"],
+public/control-center/pages/ai-command/tool-dock.js:643:      destinations: ["chat-preview", "media-studio", "workflows", "library"],
+public/control-center/pages/ai-command/tool-dock.js:699:      sourceTypes: ["content_draft", "media_asset", "campaign_brief", "channel_notes", "library_source", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:754:      sourceTypes: ["campaign_brief", "audience_notes", "offer_data", "proof_points", "library_source", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:806:      sourceTypes: ["ad_copy", "landing_page_copy", "offer_data", "proof_points", "library_source", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:821:      destinations: ["chat-preview", "insights", "content-studio", "library"],
+public/control-center/pages/ai-command/tool-dock.js:822:      sourceTypes: ["topic", "market", "language", "audience", "library_source", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:847:      destinations: ["chat-preview", "insights", "content-studio", "library"],
+public/control-center/pages/ai-command/tool-dock.js:848:      sourceTypes: ["topic", "market", "audience", "seo_brief", "library_source", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:874:      sourceTypes: ["content_inventory", "seo_brief", "audience_notes", "competitor_notes", "library_source", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:915:      destinations: ["chat-preview", "governance", "library", "workflows"],
+public/control-center/pages/ai-command/tool-dock.js:970:      destinations: ["chat-preview", "workflows", "task", "handoff"],
+public/control-center/pages/ai-command/tool-dock.js:971:      sourceTypes: ["current_chat", "handoff_summary", "operations_snapshot", "approval_notes", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:976:      id: "handoff",
+public/control-center/pages/ai-command/tool-dock.js:983:      destinations: ["chat-preview", "handoff", "workflows", "content-studio", "media-studio", "publishing", "governance"],
+public/control-center/pages/ai-command/tool-dock.js:985:      outputTypes: ["handoff_summary", "destination_brief", "required_inputs", "review_notes"],
+public/control-center/pages/ai-command/tool-dock.js:986:      template: "Prepare a handoff summary for {projectName}. Include context, destination workspace, owner, required inputs, and review notes."
+public/control-center/pages/ai-command/tool-dock.js:1128:  return TOOL_DOCK_BY_SPECIALIST[specialistId] || TOOL_DOCK_BY_SPECIALIST.operations;
+public/control-center/pages/ai-command/tool-dock.js:1140:  return Number.isFinite(limit) ? tools.slice(0, limit) : tools.slice();
+public/control-center/pages/ai-command/tool-dock.js:1145:    return [
+public/control-center/pages/ai-command/tool-dock.js:1152:  return getSpecialistTools(specialistId).slice(0, 9);
+public/control-center/pages/ai-command/tool-dock.js:1156:  return String(template)
+public/control-center/pages/ai-command/tool-dock.js:1163:  return Array.isArray(value) ? value.filter(Boolean).join("|") : "";
+public/control-center/pages/ai-command/tool-dock.js:1168:  return Array.isArray(value) && value.length ? value : fallback;
+public/control-center/pages/ai-command/tool-dock.js:1172:  return `
+public/control-center/pages/ai-command/tool-dock.js:1271:          <button class="btn btn-secondary" type="button" data-aicmd-tool-drawer-open-library>Change Source</button>
+public/control-center/pages/ai-command/tool-dock.js:1284:  return renderSmartToolDrawerShell(safe);
+public/control-center/pages/ai-command/tool-dock.js:1294:  return `
+public/control-center/pages/ai-command/tool-dock.js:1311:            data-aicmd-tool-dock-owner="${safe(tool.frontendOwnerPage || "ai-command")}"
+public/control-center/pages/ai-command/tool-dock.js:1342:  if (exactLabels[normalized]) return exactLabels[normalized];
+public/control-center/pages/ai-command/tool-dock.js:1344:  return raw
+public/control-center/pages/ai-command/tool-dock.js:1361:  return String(rawValue || "")
+public/control-center/pages/ai-command/tool-dock.js:1368:  if (!select) return;
+public/control-center/pages/ai-command/tool-dock.js:1387:  if (!select || !select.value) return fallback;
+public/control-center/pages/ai-command/tool-dock.js:1388:  return humanizeMeta(select.value);
+public/control-center/pages/ai-command/tool-dock.js:1393:  return String(node?.value || "").trim();
+public/control-center/pages/ai-command/tool-dock.js:1398:  return value.includes("blog") ||
+public/control-center/pages/ai-command/tool-dock.js:1406:  if (!isSeoRelevantOutput(output)) return [];
+public/control-center/pages/ai-command/tool-dock.js:1408:  return [
+public/control-center/pages/ai-command/tool-dock.js:1491:  return lines.join("\n");
+public/control-center/pages/ai-command/tool-dock.js:1495:  if (!drawer) return;
+public/control-center/pages/ai-command/tool-dock.js:1497:  if (!summary) return;
+public/control-center/pages/ai-command/tool-dock.js:1526:  if (!drawer) return;
+public/control-center/pages/ai-command/tool-dock.js:1533:  if (!drawer || !btn) return false;
+public/control-center/pages/ai-command/tool-dock.js:1544:  setDrawerText(drawer, "[data-aicmd-tool-drawer-action]", `${humanizeMeta(actionType)} · ${humanizeMeta(btn.getAttribute("data-aicmd-tool-dock-owner") || "ai-command")}`);
+public/control-center/pages/ai-command/tool-dock.js:1580:  return true;
+public/control-center/pages/ai-command/tool-dock.js:1603:    "data-aicmd-tool-dock-owner": tool.frontendOwnerPage || tool.owner || "ai-command",
+public/control-center/pages/ai-command/tool-dock.js:1610:      return meta[name] || "";
+public/control-center/pages/ai-command/tool-dock.js:1614:  return openToolDrawer({
+public/control-center/pages/ai-command/tool-dock.js:1638:  if (!root || !session) return;
+public/control-center/pages/ai-command/tool-dock.js:1646:  const openLibraryBtn = root.querySelector("[data-aicmd-tool-drawer-open-library]");
+public/control-center/pages/ai-command/tool-dock.js:1655:        type: "library_source_selection",
+public/control-center/pages/ai-command/tool-dock.js:1656:        origin: "ai-command",
+public/control-center/pages/ai-command/tool-dock.js:1657:        returnTarget: "ai-command",
+public/control-center/pages/ai-command/tool-dock.js:1659:        libraryFilter: mapping.libraryFilter,
+public/control-center/pages/ai-command/tool-dock.js:1668:        origin: "ai-command",
+public/control-center/pages/ai-command/tool-dock.js:1679:      updateStatus?.("Library guide opened. Select an asset, click Use as Source in AI Command, then return to AI Command.");
+public/control-center/pages/ai-command/tool-dock.js:1681:        window.location.hash = "#library";
+public/control-center/pages/ai-command/tool-dock.js:1696:      if (!template) return;
+public/control-center/pages/ai-command/tool-dock.js:1699:        return;
+public/control-center/pages/ai-command/tool-dock.js:1734:      if (!template) return;
+public/control-center/pages/ai-command/tool-dock.js:1748:        if (opened) return;

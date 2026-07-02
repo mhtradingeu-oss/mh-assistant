@@ -1,0 +1,48 @@
+2:        bindAiToolDock,
+4:        openAiToolDrawerFromMetadata,
+5:        renderAiToolDrawerShell
+26:        executeProjectAiChat,
+3356:function setPreviewFromConversation({ session, intent, fallbackPrompt, projectName }) {
+3584:function renderAiRoomChainSegment(items, escapeHtml) {
+3591:function renderAiRoomTeamChain(escapeHtml) {
+3594:			${renderAiRoomChainSegment(AI_ROOM_TEAM_CHAIN, escapeHtml)}
+3596:			${renderAiRoomChainSegment(AI_ROOM_BUSINESS_BRANCH, escapeHtml)}
+3601:function renderPhase1Header(session, projectName, aiContext, bridgeStatus, escapeHtml) {
+3667:function renderPhase1TeamRail(session, bridgeStatus, escapeHtml) {
+3684:			${renderAiRoomTeamChain(escapeHtml)}
+3741:function renderPhase1Profile(session, escapeHtml) {
+3803:function renderAiRoomConversationHeader(session, bridgeStatus, escapeHtml) {
+3821:				${isTeam ? renderAiRoomTeamChain(escapeHtml) : ""}
+3874:function renderPhase35WorkspaceTabs(session, bridgeStatus, escapeHtml) {
+3901:function renderPhase35ToolsPanel(session, projectName, aiContext, escapeHtml) {
+3959:function renderPhase35ReadinessStrip(aiContext, bridgeStatus, escapeHtml) {
+3981:function renderPhase1Composer(session, aiContext, escapeHtml) {
+4034:function renderPhase2PreviewPanel(session, escapeHtml) {
+4133:function renderAiRoomOutputWorkspace(session, aiContext, escapeHtml) {
+4243:function renderAiRoomStatusStrip(aiContext, session, bridgeStatus, escapeHtml) {
+4263:function renderPhase2MediaStatusPanel(aiContext, escapeHtml) {
+4290:function renderPhase3SpecialistConversation(session, bridgeStatus, escapeHtml) {
+4502:function renderPhase1SuggestedPrompts(session, escapeHtml) {
+4530:function renderPhase1ContextPanel(state, session, aiContext, escapeHtml) {
+4587:function renderPhase1SafetyPanel(escapeHtml) {
+4616:function renderPhase4HistoryPanel(session, escapeHtml) {
+4659:export const aiCommandRoute = {
+4744:		const bridgeStatus = getAiResponseBridgeStatus(executeProjectAiChat);
+4761:				${renderPhase1Header(session, projectName, aiContext, bridgeStatus, escapeHtml)}
+4763:					${renderPhase1TeamRail(session, bridgeStatus, escapeHtml)}
+4767:												${renderAiRoomConversationHeader(session, bridgeStatus, escapeHtml)}
+4769:													${renderPhase3SpecialistConversation(session, bridgeStatus, escapeHtml)}
+4771:												${renderPhase1Composer(session, aiContext, escapeHtml)}
+4776:						${renderAiRoomOutputWorkspace(session, aiContext, escapeHtml)}
+4777:						${renderPhase35ToolsPanel(session, projectName, aiContext, escapeHtml)}
+4780:				${renderAiRoomStatusStrip(aiContext, session, bridgeStatus, escapeHtml)}
+4781:				${renderAiToolDrawerShell({ escapeHtml })}
+4792:		const setPreviewFromIntent = (intent, fallbackPrompt = "", options = {}) => {
+4966:                bindAiToolDock({
+5097:		                        const result = await executeProjectAiChat(projectName, {
+5226:                                const preview = setPreviewFromConversation({
+5251:                                const preview = setPreviewFromConversation({
+5274:                                const preview = setPreviewFromConversation({
+5298:                                const preview = setPreviewFromConversation({
+5334:				const opened = openAiToolDrawerFromMetadata({
+5440:		                const preview = setPreviewFromConversation({

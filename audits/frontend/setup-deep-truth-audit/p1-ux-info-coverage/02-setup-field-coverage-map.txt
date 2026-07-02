@@ -1,0 +1,155 @@
+# Setup Field Coverage Map
+
+5:const REQUIRED_FIELDS = [
+6:  { name: "project_name", label: "Project name" },
+9:  { name: "brand_promise", label: "Brand promise" },
+10:  { name: "market", label: "Market" },
+13:  { name: "audience_primary", label: "Primary audience" },
+14:  { name: "primary_goal", label: "Primary goal" },
+15:  { name: "competitors", label: "Competitors" },
+16:  { name: "social_channels", label: "Channels" }
+19:const STEP_DEFINITIONS = [
+24:    fields: ["project_name", "project_type", "website_url", "launch_window"]
+30:    fields: ["brand_name", "brand_promise", "brand_voice", "offer_positioning", "visual_identity"]
+33:    id: "market-language",
+36:    fields: ["market", "language", "currency"]
+39:    id: "audience",
+42:    fields: ["audience_primary", "audience_problem", "audience_geography"]
+45:    id: "goals",
+48:    fields: ["primary_goal", "secondary_goal"]
+51:    id: "competitors",
+53:    description: "Record benchmark references and your differentiation angle.",
+54:    fields: ["competitors", "differentiation"]
+60:    fields: ["social_channels", "operator_notes"]
+67:  "market-language": "🌍",
+68:  audience: "👥",
+69:  goals: "📈",
+70:  competitors: "⚔️",
+75:  project_name: "Used across routing, saves, and system context labels.",
+78:  brand_promise: "Guides positioning quality and channel consistency.",
+79:  market: "Controls localization and market-specific execution assumptions.",
+82:  audience_primary: "Improves message relevance and audience-specific tactics.",
+83:  primary_goal: "Aligns optimization priorities and readiness evaluation.",
+84:  competitors: "Supports differentiation and benchmark-aware recommendations.",
+85:  social_channels: "Defines where campaign and publishing workflows should execute."
+89:  project_name: "This name is used as the main project identity across the Control Center.",
+92:  brand_promise: "Defines the core value AI should protect in every output.",
+93:  market: "Controls regional assumptions, audience context, and localization.",
+96:  audience_primary: "Defines the main customer group the system should optimize messages for.",
+97:  primary_goal: "Tells the system what success means for this project.",
+98:  competitors: "Helps AI create differentiated positioning instead of generic copy.",
+99:  social_channels: "Defines where campaigns and publishing workflows should prepare content."
+144:  const names = STEP_DEFINITIONS.flatMap((step) => step.fields);
+221:  const projectName = context.currentProject || overviewData.project_name || "";
+224:    project_name: projectName,
+229:    brand_name: overviewData.brand_name || projectName,
+230:    brand_promise: overviewData.brand_promise || overviewData.brand_positioning || overviewData.value_prop || "",
+231:    brand_voice: overviewData.brand_voice || "",
+232:    visual_identity: overviewData.visual_identity || "",
+233:    offer_positioning: overviewData.offer_positioning || overviewData.positioning || "",
+234:    market: context.currentMarket || overviewData.market || "",
+237:    primary_goal: overviewData.primary_goal || overviewData.goal || "",
+238:    secondary_goal: overviewData.secondary_goal || "",
+240:    audience_primary: overviewData.audience_primary || overviewData.target_audience || "",
+241:    audience_problem: overviewData.audience_problem || overviewData.customer_problem || "",
+242:    audience_geography: overviewData.audience_geography || context.currentMarket || "",
+243:    competitors: toListText(overviewData.competitors),
+244:    differentiation: overviewData.differentiation || "",
+245:    social_channels: toListText(
+246:      overviewData.social_channels ||
+249:      overviewData.setup_payload?.social_channels ||
+253:    operator_notes: toListText(readinessDashboard.operator_notes)
+258:  return REQUIRED_FIELDS.filter((field) => !asString(values[field.name]).trim());
+263:  return Math.round(((REQUIRED_FIELDS.length - missing) / REQUIRED_FIELDS.length) * 100);
+267:  const step = STEP_DEFINITIONS.find((item) => item.fields.includes(fieldName));
+268:  return step ? step.id : STEP_DEFINITIONS[0].id;
+272:  const requiredInStep = step.fields.filter((name) => REQUIRED_FIELDS.some((field) => field.name === name));
+290:  const scored = STEP_DEFINITIONS.map((step) => {
+297:  return scored[0]?.step || STEP_DEFINITIONS[0];
+309:  const fields = ["brand_name", "brand_promise", "brand_voice", "offer_positioning"];
+317:  const fields = ["market", "language", "currency"];
+325:  const fields = ["project_name", "project_type", "website_url"];
+333:  const fields = ["brand_promise", "offer_positioning", "competitors", "differentiation"];
+341:  const hasChannels = Boolean(asString(values.social_channels).trim());
+348:  const fields = ["primary_goal", "audience_primary", "brand_voice", "operator_notes"];
+467:    project_name: values.project_name,
+472:    brand_name: values.brand_name,
+473:    brand_promise: values.brand_promise,
+474:    brand_voice: values.brand_voice,
+475:    visual_identity: values.visual_identity,
+476:    offer_positioning: values.offer_positioning,
+477:    market: values.market,
+480:    primary_goal: values.primary_goal,
+481:    secondary_goal: values.secondary_goal,
+483:    audience_primary: values.audience_primary,
+484:    audience_problem: values.audience_problem,
+485:    audience_geography: values.audience_geography,
+486:    competitors: values.competitors,
+487:    differentiation: values.differentiation,
+488:    social_channels: toList(values.social_channels),
+489:    operator_notes: values.operator_notes
+512:  const brand = asString(values.brand_name || values.project_name || "your brand").trim() || "your brand";
+513:  const promise = asString(values.brand_promise).trim() || "a clear practical benefit";
+514:  const audience = asString(values.audience_primary).trim() || "a focused customer segment";
+515:  const goal = asString(values.primary_goal).trim() || "consistent growth";
+517:  return `${brand} helps ${audience} achieve ${goal} through ${promise}.`;
+521:  const geo = asString(values.audience_geography || values.market).trim();
+522:  const problem = asString(values.audience_problem).trim() || "a high-priority pain point";
+528:  if (asString(values.brand_voice).trim()) {
+529:    return asString(values.brand_voice).trim();
+548:  const audience = document.getElementById("setupAiAudienceText");
+549:  if (audience) audience.textContent = compactListText([buildAudienceSuggestion(values)], "Identify missing launch inputs for audience targeting.");
+571:  const requiredNames = REQUIRED_FIELDS.map((field) => field.name);
+738:  STEP_DEFINITIONS.forEach((step) => {
+802:    const current = STEP_DEFINITIONS.findIndex((item) => item.id === activeStepId) + 1;
+803:    stepCounter.textContent = `${current}/${STEP_DEFINITIONS.length}`;
+831:  let activeStepId = STEP_DEFINITIONS[0].id;
+863:    button.onclick = () => activateStep(button.getAttribute("data-setup-step") || STEP_DEFINITIONS[0].id);
+868:      const stepId = button.getAttribute("data-setup-open-step") || STEP_DEFINITIONS[0].id;
+878:      const index = STEP_DEFINITIONS.findIndex((item) => item.id === activeStepId);
+879:      if (index > 0) activateStep(STEP_DEFINITIONS[index - 1].id);
+886:      const index = STEP_DEFINITIONS.findIndex((item) => item.id === activeStepId);
+887:      if (index < STEP_DEFINITIONS.length - 1) activateStep(STEP_DEFINITIONS[index + 1].id);
+1008:      const requestedProjectName = asString(values.project_name).trim().toLowerCase();
+1056:      const field = form.querySelector('[name="offer_positioning"]');
+1069:      const field = form.querySelector('[name="audience_primary"]');
+1074:      showMessage?.("AI draft applied to Primary audience.");
+1082:      const field = form.querySelector('[name="brand_voice"]');
+1102:      const inferredBrand = asString(values.brand_name || values.project_name || "Brand").trim() || "Brand";
+1103:      setIfEmpty("brand_promise", `${inferredBrand} delivers clear and trustworthy value with consistent quality.`);
+1104:      setIfEmpty("offer_positioning", buildPositioningSuggestion(values));
+1105:      setIfEmpty("audience_primary", buildAudienceSuggestion(values));
+1106:      setIfEmpty("brand_voice", buildToneSuggestion(values));
+1107:      setIfEmpty("social_channels", "instagram, facebook, email");
+1108:      setIfEmpty("competitors", "Competitor A, Competitor B");
+1109:      setIfEmpty("primary_goal", "Increase qualified conversions");
+1110:      setIfEmpty("market", asString(values.audience_geography || values.market || "US"));
+1126:        input.value = `Suggest final setup completion for ${draftKeyName}. Missing fields: ${missingFields.length ? missingFields.join(", ") : "none"}. Include positioning, audience, and tone guidance.`;
+1217:  activateStep(STEP_DEFINITIONS[0].id);
+1330:    const projectName = state.context.currentProject || overviewData.project_name || "";
+1359:    const requiredNames = REQUIRED_FIELDS.map((field) => field.name);
+1380:              <p class="setup-header-project">Project: ${escapeHtml(asString(values.project_name) || projectName || "No project selected")}</p>
+1445:              ${STEP_DEFINITIONS.map((step, index) => {
+1465:                <strong id="setupStepCounter" class="setup-wizard-step-counter">1/${STEP_DEFINITIONS.length}</strong>
+1477:                  ${renderField({ name: "project_name", label: "Project name", value: values.project_name, helper: "Canonical project identifier.", placeholder: "e.g. Hairotic Men", escapeHtml, required: true })}
+1488:                  ${renderField({ name: "brand_name", label: "Brand / display name", value: values.brand_name, helper: "Public-facing brand name.", placeholder: "Brand name", escapeHtml })}
+1489:                  ${renderField({ name: "brand_promise", label: "Brand promise", value: values.brand_promise, helper: "What value this brand consistently delivers.", placeholder: "Promise in one sentence", escapeHtml, multiline: true, rows: 3, required: true })}
+1490:                  ${renderField({ name: "brand_voice", label: "Brand voice", value: values.brand_voice, helper: "Tone rules for AI and content teams.", placeholder: "Confident, clear, practical", escapeHtml, multiline: true, rows: 3 })}
+1491:                  ${renderField({ name: "offer_positioning", label: "Offer positioning", value: values.offer_positioning, helper: "How the offer should be framed.", placeholder: "Why this offer wins", escapeHtml, multiline: true, rows: 3 })}
+1492:                  ${renderField({ name: "visual_identity", label: "Visual identity", value: values.visual_identity, helper: "Visual guardrails and cues.", placeholder: "Photography style, color direction, layout cues", escapeHtml, multiline: true, rows: 3 })}
+1496:              <section class="setup-wizard-step-panel" data-setup-step-panel="market-language" hidden>
+1500:                  ${renderField({ name: "market", label: "Market", value: values.market, helper: "Primary region.", placeholder: "e.g. US", escapeHtml, required: true })}
+1506:              <section class="setup-wizard-step-panel" data-setup-step-panel="audience" hidden>
+1508:                <p class="home-section-copy">Define audience profile and top pain points.</p>
+1510:                  ${renderField({ name: "audience_primary", label: "Primary audience", value: values.audience_primary, helper: "Main customer segment.", placeholder: "Who are we targeting?", escapeHtml, multiline: true, rows: 3, required: true })}
+1511:                  ${renderField({ name: "audience_problem", label: "Audience problem", value: values.audience_problem, helper: "What problem they want solved.", placeholder: "Core pain point", escapeHtml, multiline: true, rows: 3 })}
+1512:                  ${renderField({ name: "audience_geography", label: "Audience geography", value: values.audience_geography, helper: "Geography details for this audience.", placeholder: "Countries or regions", escapeHtml })}
+1516:              <section class="setup-wizard-step-panel" data-setup-step-panel="goals" hidden>
+1520:                  ${renderField({ name: "primary_goal", label: "Primary goal", value: values.primary_goal, helper: "Main measurable objective.", placeholder: "Increase qualified sales", escapeHtml, multiline: true, rows: 3, required: true })}
+1521:                  ${renderField({ name: "secondary_goal", label: "Secondary goal", value: values.secondary_goal, helper: "Supporting objective.", placeholder: "Optional secondary outcome", escapeHtml, multiline: true, rows: 3 })}
+1525:              <section class="setup-wizard-step-panel" data-setup-step-panel="competitors" hidden>
+1527:                <p class="home-section-copy">Benchmark competitors and your differentiator.</p>
+1529:                  ${renderField({ name: "competitors", label: "Competitors", value: values.competitors, helper: "Comma-separated list.", placeholder: "Competitor A, Competitor B", escapeHtml, multiline: true, rows: 3, required: true })}
+1530:                  ${renderField({ name: "differentiation", label: "Differentiation", value: values.differentiation, helper: "How this brand stands out.", placeholder: "Why customers choose us", escapeHtml, multiline: true, rows: 3 })}
+1538:                  ${renderField({ name: "social_channels", label: "Channels", value: values.social_channels, helper: "Comma-separated channels (e.g. Instagram, Email).", placeholder: "instagram, facebook, email", escapeHtml, multiline: true, rows: 3, required: true })}
+1539:                  ${renderField({ name: "operator_notes", label: "Operator notes", value: values.operator_notes, helper: "Important setup notes for the next operator.", placeholder: "Any constraints, watchouts, or handoff notes", escapeHtml, multiline: true, rows: 4 })}

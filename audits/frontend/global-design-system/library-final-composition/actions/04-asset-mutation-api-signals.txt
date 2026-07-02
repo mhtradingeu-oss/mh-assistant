@@ -1,0 +1,119 @@
+# LIB-FINAL-3 — Asset Mutation API Endpoints
+
+Generated: Sat Jun  6 08:17:06 CEST 2026
+Branch: architecture/frontend-consolidation-v1
+HEAD: 8ad728c
+
+public/control-center/api.js:1426:export async function updateProjectAssetStatus(projectName, assetId, status, note = "") {
+public/control-center/api.js:1436:    `/media-manager/project/${encodeURIComponent(projectName)}/assets/${encodeURIComponent(assetId)}/status`,
+public/control-center/api.js:1442:    "Failed to update asset status"
+public/control-center/api.js:1446:export async function renameProjectAsset(projectName, assetId, name) {
+public/control-center/api.js:1461:    `/media-manager/project/${encodeURIComponent(projectName)}/assets/${encodeURIComponent(assetId)}/rename`,
+public/control-center/api.js:1468:export async function setProjectAssetSourceOfTruth(projectName, assetId, sourceOfTruth) {
+public/control-center/api.js:1478:    `/media-manager/project/${encodeURIComponent(projectName)}/assets/${encodeURIComponent(assetId)}/source-of-truth`,
+public/control-center/api.js:1485:export async function archiveProjectAsset(projectName, assetId, note = "") {
+public/control-center/api.js:1495:    `/media-manager/project/${encodeURIComponent(projectName)}/assets/${encodeURIComponent(assetId)}/archive`,
+public/control-center/api.js:1502:export async function deleteProjectAsset(projectName, assetId, note = "") {
+public/control-center/api.js:1512:    `/media-manager/project/${encodeURIComponent(projectName)}/assets/${encodeURIComponent(assetId)}/delete`,
+public/control-center/api.js:2293:export async function uploadProjectAsset(projectName, assetType, file) {
+runtime/orchestrator-service/server.js:5147:    lines.push(`Reference assets may influence style direction only, never source-of-truth identity.`);
+runtime/orchestrator-service/server.js:5245:      item => item.asset_role === role && item.use_as_source_of_truth === true
+runtime/orchestrator-service/server.js:5351:    lines.push(`Reference assets may be used for inspiration only, never as source of truth.`);
+runtime/orchestrator-service/server.js:5725:  if (assetRole === 'logo_source') return paths.logoDir;
+runtime/orchestrator-service/server.js:5726:  if (assetRole === 'packaging_source') return paths.packagingDir;
+runtime/orchestrator-service/server.js:5727:  if (assetRole === 'product_source') return paths.productDir;
+runtime/orchestrator-service/server.js:5728:  if (assetRole === 'reference_source') return paths.referenceDir;
+runtime/orchestrator-service/server.js:5729:  if (assetRole === 'video_source') return paths.videoDir;
+runtime/orchestrator-service/server.js:6666:        source: assetsRegistry.source,
+runtime/orchestrator-service/server.js:7403:  const status = normalizeSetupTextValue(asset.status)
+runtime/orchestrator-service/server.js:7405:  const source = normalizeSetupTextValue(asset.source || asset.scan_source || asset.metadata?.scan_source || 'project_upload');
+runtime/orchestrator-service/server.js:7422:    readiness_status: normalizeSetupTextValue(asset.readiness_status || status) || status,
+runtime/orchestrator-service/server.js:7423:    review_status: normalizeSetupTextValue(asset.review_status || asset.readiness_status || status) || status,
+runtime/orchestrator-service/server.js:7426:    source_of_truth: Boolean(asset.source_of_truth || asset.use_as_source_of_truth),
+runtime/orchestrator-service/server.js:7427:    use_as_source_of_truth: Boolean(asset.use_as_source_of_truth || asset.source_of_truth),
+runtime/orchestrator-service/server.js:7437:    archived: Boolean(asset.archived),
+runtime/orchestrator-service/server.js:7438:    archived_at: normalizeSetupTextValue(asset.archived_at),
+runtime/orchestrator-service/server.js:7439:    archive_note: normalizeSetupTextValue(asset.archive_note),
+runtime/orchestrator-service/server.js:7440:    deleted: Boolean(asset.deleted),
+runtime/orchestrator-service/server.js:7441:    deleted_at: normalizeSetupTextValue(asset.deleted_at),
+runtime/orchestrator-service/server.js:7442:    deleted_by: normalizeSetupTextValue(asset.deleted_by),
+runtime/orchestrator-service/server.js:7443:    delete_note: normalizeSetupTextValue(asset.delete_note),
+runtime/orchestrator-service/server.js:7444:    source_of_truth_updated_at: normalizeSetupTextValue(asset.source_of_truth_updated_at),
+runtime/orchestrator-service/server.js:7445:    source_of_truth_updated_by: normalizeSetupTextValue(asset.source_of_truth_updated_by),
+runtime/orchestrator-service/server.js:7446:    renamed_at: normalizeSetupTextValue(asset.renamed_at),
+runtime/orchestrator-service/server.js:7447:    renamed_by: normalizeSetupTextValue(asset.renamed_by),
+runtime/orchestrator-service/server.js:9085:        item.asset_type === 'product_photos' && status === 'Needs Review'
+runtime/orchestrator-service/server.js:9232:function routeProjectAsset(projectName, assetType, sourceFilePath) {
+runtime/orchestrator-service/server.js:10239:          use_as_source_of_truth: uploadTarget.assetRole !== 'reference_source',
+runtime/orchestrator-service/server.js:10240:          use_as_reference_only: uploadTarget.assetRole === 'reference_source',
+runtime/orchestrator-service/server.js:10729:    throw Object.assign(new Error('Missing asset id.'), { statusCode: 400 });
+runtime/orchestrator-service/server.js:10805:app.post('/media-manager/project/:project/assets/:assetId/status', express.json({ limit: '1mb' }), (req, res) => {
+runtime/orchestrator-service/server.js:10824:      asset.status = status;
+runtime/orchestrator-service/server.js:10825:      asset.readiness_status = status;
+runtime/orchestrator-service/server.js:10826:      asset.review_status = status;
+runtime/orchestrator-service/server.js:10827:      asset.needs_review = status === 'needs_review';
+runtime/orchestrator-service/server.js:10828:      asset.approved = status === 'approved';
+runtime/orchestrator-service/server.js:10829:      asset.rejected = status === 'rejected';
+runtime/orchestrator-service/server.js:10830:      asset.archived = status === 'archived';
+runtime/orchestrator-service/server.js:10845:        asset.archived_at = now;
+runtime/orchestrator-service/server.js:10846:        asset.archive_note = note || asset.archive_note || 'Archived from Control Center Library.';
+runtime/orchestrator-service/server.js:10855:    return sendAssetMutationError(res, error, 'Failed to update asset status.');
+runtime/orchestrator-service/server.js:10859:app.post('/media-manager/project/:project/assets/:assetId/rename', express.json({ limit: '1mb' }), (req, res) => {
+runtime/orchestrator-service/server.js:10876:      asset.renamed_at = now;
+runtime/orchestrator-service/server.js:10877:      asset.renamed_by = 'control_center';
+runtime/orchestrator-service/server.js:10889:app.post('/media-manager/project/:project/assets/:assetId/source-of-truth', express.json({ limit: '1mb' }), (req, res) => {
+runtime/orchestrator-service/server.js:10899:      asset.source_of_truth = sourceOfTruth;
+runtime/orchestrator-service/server.js:10900:      asset.use_as_source_of_truth = sourceOfTruth;
+runtime/orchestrator-service/server.js:10901:      asset.source_of_truth_updated_at = now;
+runtime/orchestrator-service/server.js:10902:      asset.source_of_truth_updated_by = 'control_center';
+runtime/orchestrator-service/server.js:10914:app.post('/media-manager/project/:project/assets/:assetId/archive', express.json({ limit: '1mb' }), (req, res) => {
+runtime/orchestrator-service/server.js:10924:      asset.status = 'archived';
+runtime/orchestrator-service/server.js:10925:      asset.readiness_status = 'archived';
+runtime/orchestrator-service/server.js:10926:      asset.review_status = 'archived';
+runtime/orchestrator-service/server.js:10927:      asset.archived = true;
+runtime/orchestrator-service/server.js:10928:      asset.archived_at = now;
+runtime/orchestrator-service/server.js:10929:      asset.archive_note = note || asset.archive_note || 'Archived from Control Center Library.';
+runtime/orchestrator-service/server.js:10942:app.post('/media-manager/project/:project/assets/:assetId/delete', express.json({ limit: '1mb' }), (req, res) => {
+runtime/orchestrator-service/server.js:10952:      asset.deleted = true;
+runtime/orchestrator-service/server.js:10953:      asset.deleted_at = now;
+runtime/orchestrator-service/server.js:10954:      asset.deleted_by = 'control_center';
+runtime/orchestrator-service/server.js:10955:      asset.delete_note = note || asset.delete_note || 'Soft deleted from Control Center Library.';
+runtime/orchestrator-service/server.js:10956:      asset.status = 'archived';
+runtime/orchestrator-service/server.js:10957:      asset.readiness_status = 'archived';
+runtime/orchestrator-service/server.js:10958:      asset.review_status = 'archived';
+runtime/orchestrator-service/server.js:10959:      asset.archived = true;
+runtime/orchestrator-service/server.js:10960:      asset.archived_at = asset.archived_at || now;
+runtime/orchestrator-service/server.js:10983:      asset.deleted = true;
+runtime/orchestrator-service/server.js:10984:      asset.deleted_at = now;
+runtime/orchestrator-service/server.js:10985:      asset.deleted_by = 'control_center';
+runtime/orchestrator-service/server.js:10986:      asset.delete_note = note || asset.delete_note || 'Soft deleted from Control Center Library.';
+runtime/orchestrator-service/server.js:10987:      asset.status = 'archived';
+runtime/orchestrator-service/server.js:10988:      asset.readiness_status = 'archived';
+runtime/orchestrator-service/server.js:10989:      asset.review_status = 'archived';
+runtime/orchestrator-service/server.js:10990:      asset.archived = true;
+runtime/orchestrator-service/server.js:10991:      asset.archived_at = asset.archived_at || now;
+runtime/orchestrator-service/server.js:16718:    asset.status = 'generated';
+runtime/orchestrator-service/server.js:16731:        status: asset.status,
+runtime/orchestrator-service/server.js:16768:  if (!asset || asset.status !== 'generated') {
+runtime/orchestrator-service/server.js:16808:    asset.status = 'attached';
+runtime/orchestrator-service/server.js:17196:    asset.status = 'uploaded';
+runtime/orchestrator-service/server.js:17289:        asset.status = 'generated';
+runtime/orchestrator-service/server.js:17298:            status: asset.status,
+runtime/orchestrator-service/server.js:19191:        asset_role: 'product_source',
+runtime/orchestrator-service/server.js:19311:    use_as_source_of_truth: assetRole !== 'reference_source',
+runtime/orchestrator-service/server.js:19312:    use_as_reference_only: assetRole === 'reference_source',
+runtime/orchestrator-service/server.js:19362:  const isReferenceOnly = assetRole === 'reference_source' || assetRole === 'video_source';
+runtime/orchestrator-service/server.js:21455:  if (!projectName || !assetType || !sourceFilePath) {
+runtime/orchestrator-service/server.js:21456:    return res.json({ error: 'Missing project, asset type, or source file path' });
+runtime/orchestrator-service/server.js:21460:    const result = routeProjectAsset(projectName, assetType, sourceFilePath);
+runtime/orchestrator-service/node_modules/axios/README.md:1:<h3 align="center"> 💎 Platinum sponsors <br> </h3> <table align="center"><tr><td align="center" width="50%"> <a href="https://thanks.dev/?utm_source&#x3D;axios&amp;utm_medium&#x3D;sponsorlist&amp;utm_campaign&#x3D;sponsorship" style="padding: 10px; display: inline-block" target="_blank"> <img width="90px" height="90px" src="https://axios-http.com/assets/sponsors/opencollective/ed51c2ee8f1b70aa3484d6dd678652134079a036.png" alt="THANKS.DEV"/> </a> <p align="center" title="We&#x27;re passionate about making open source sustainable. Scan your dependancy tree to better understand which open source projects need funding the most. Maintainers can also register their projects to become eligible for funding.">We&#x27;re passionate about making open source sustainable. Scan your dependancy tree to better understand which open source projects need funding the...</p> <p align="center"> <a href="https://thanks.dev/?utm_source&#x3D;axios&amp;utm_medium&#x3D;readme_sponsorlist&amp;utm_campaign&#x3D;sponsorship" target="_blank"><b>thanks.dev</b></a> </p>
+runtime/orchestrator-service/node_modules/axios/README.md:6:<h3 align="center"> 🥇 Gold sponsors <br> </h3> <table align="center" width="100%"><tr width="33.333333333333336%"><td align="center" width="33.333333333333336%"> <a href="https://www.principal.com/about-us?utm_source&#x3D;axios&amp;utm_medium&#x3D;sponsorlist&amp;utm_campaign&#x3D;sponsorship" style="padding: 10px; display: inline-block" target="_blank"> <img width="133px" height="43px" src="https://axios-http.com/assets/sponsors/principal.svg" alt="Principal Financial Group"/> </a> <p align="center" title="We’re bound by one common purpose: to give you the financial tools, resources and information you need to live your best life.">We’re bound by one common purpose: to give you the financial tools, resources and information you ne...</p> <p align="center"> <a href="https://www.principal.com/about-us?utm_source&#x3D;axios&amp;utm_medium&#x3D;readme_sponsorlist&amp;utm_campaign&#x3D;sponsorship" target="_blank"><b>www.principal.com</b></a> </p>
+runtime/orchestrator-service/node_modules/axios/README.md:7:</td><td align="center" width="33.333333333333336%"> <a href="https://twicsy.com/buy-instagram-followers?utm_source&#x3D;axios&amp;utm_medium&#x3D;sponsorlist&amp;utm_campaign&#x3D;sponsorship" style="padding: 10px; display: inline-block" target="_blank"> <img width="85px" height="70px" src="https://axios-http.com/assets/sponsors/opencollective/dfa9670ad5e66eea17315332453c7f4e3a3b5905.png" alt="Buy Instagram Followers Twicsy"/> </a> <p align="center" title="Buy real Instagram followers from Twicsy starting at only $2.97. Twicsy has been voted the best site to buy followers from the likes of US Magazine.">Buy real Instagram followers from Twicsy starting at only $2.97. Twicsy has been voted the best site...</p> <p align="center"> <a href="https://twicsy.com/buy-instagram-followers?utm_source&#x3D;axios&amp;utm_medium&#x3D;readme_sponsorlist&amp;utm_campaign&#x3D;sponsorship" target="_blank"><b>twicsy.com</b></a> </p>
+runtime/orchestrator-service/node_modules/axios/README.md:8:</td><td align="center" width="33.333333333333336%"> <a href="https://www.descope.com/?utm_source&#x3D;axios&amp;utm_medium&#x3D;referral&amp;utm_campaign&#x3D;axios-oss-sponsorship" style="padding: 10px; display: inline-block" target="_blank"> <picture> <source width="200px" height="52px" media="(prefers-color-scheme: dark)" srcset="https://axios-http.com/assets/sponsors/descope_white.png"> <img width="200px" height="52px" src="https://axios-http.com/assets/sponsors/descope.png" alt="Descope"/> </picture> </a> <p align="center" title="Hi, we&#x27;re Descope! We are building something in the authentication space for app developers and can’t wait to place it in your hands.">Hi, we&#x27;re Descope! We are building something in the authentication space for app developers and...</p> <p align="center"> <a href="https://www.descope.com/?utm_source&#x3D;axios&amp;utm_medium&#x3D;referral&amp;utm_campaign&#x3D;axios-oss-sponsorship" target="_blank"><b>Website</b></a> | <a href="https://docs.descope.com/?utm_source&#x3D;axios&amp;utm_medium&#x3D;referral&amp;utm_campaign&#x3D;axios-oss-sponsorship" target="_blank"><b>Docs</b></a> | <a href="https://www.descope.com/community?utm_source&#x3D;axios&amp;utm_medium&#x3D;referral&amp;utm_campaign&#x3D;axios-oss-sponsorship" target="_blank"><b>Community</b></a> </p>
+runtime/orchestrator-service/node_modules/axios/README.md:9:</td></tr><tr width="33.333333333333336%"><td align="center" width="33.333333333333336%"> <a href="https://route4me.com/?utm_source&#x3D;axios&amp;utm_medium&#x3D;sponsorlist&amp;utm_campaign&#x3D;sponsorship" style="padding: 10px; display: inline-block" target="_blank"> <picture> <source width="200px" height="51px" media="(prefers-color-scheme: dark)" srcset="https://axios-http.com/assets/sponsors/route4me_white.png"> <img width="200px" height="51px" src="https://axios-http.com/assets/sponsors/route4me.png" alt="Route4Me"/> </picture> </a> <p align="center" title="Best Route Planning And Route Optimization Software">Best Route Planning And Route Optimization Software</p> <p align="center"> <a href="https://route4me.com/platform/route-optimization-software?utm_source&#x3D;axios&amp;utm_medium&#x3D;readme_sponsorlist&amp;utm_campaign&#x3D;sponsorship" target="_blank"><b>Explore</b></a> | <a href="https://route4me.com/platform/marketplace/pricing?utm_source&#x3D;axios&amp;utm_medium&#x3D;readme_sponsorlist&amp;utm_campaign&#x3D;sponsorship" target="_blank"><b>Free Trial</b></a> | <a href="https://route4me.com/contact?utm_source&#x3D;axios&amp;utm_medium&#x3D;readme_sponsorlist&amp;utm_campaign&#x3D;sponsorship" target="_blank"><b>Contact</b></a> </p>
+runtime/orchestrator-service/node_modules/axios/README.md:10:</td><td align="center" width="33.333333333333336%"> <a href="https://buzzoid.com/buy-instagram-followers/?utm_source&#x3D;axios&amp;utm_medium&#x3D;sponsorlist&amp;utm_campaign&#x3D;sponsorship" style="padding: 10px; display: inline-block" target="_blank"> <img width="62px" height="70px" src="https://axios-http.com/assets/sponsors/opencollective/e1625cb54e10ee40180c99d1495a462e9d6664a4.png" alt="Buzzoid - Buy Instagram Followers"/> </a> <p align="center" title="At Buzzoid, you can buy Instagram followers quickly, safely, and easily with just a few clicks. Rated world&#x27;s #1 IG service since 2012.">At Buzzoid, you can buy Instagram followers quickly, safely, and easily with just a few clicks. Rate...</p> <p align="center"> <a href="https://buzzoid.com/buy-instagram-followers/?utm_source&#x3D;axios&amp;utm_medium&#x3D;readme_sponsorlist&amp;utm_campaign&#x3D;sponsorship" target="_blank"><b>buzzoid.com</b></a> </p>
+runtime/orchestrator-service/node_modules/axios/README.md:11:</td><td align="center" width="33.333333333333336%"> <a href="https://poprey.com/?utm_source&#x3D;axios&amp;utm_medium&#x3D;sponsorlist&amp;utm_campaign&#x3D;sponsorship" style="padding: 10px; display: inline-block" target="_blank"> <img width="70px" height="70px" src="https://axios-http.com/assets/sponsors/opencollective/e699ec99f7df3a203ddbc49d3c7712a907e628ea.png" alt="Poprey - Buy Instagram Likes"/> </a> <p align="center" title="Buy Instagram Likes">Buy Instagram Likes</p> <p align="center"> <a href="https://poprey.com/?utm_source&#x3D;axios&amp;utm_medium&#x3D;readme_sponsorlist&amp;utm_campaign&#x3D;sponsorship" target="_blank"><b>poprey.com</b></a> </p>
+runtime/orchestrator-service/node_modules/axios/README.md:12:</td></tr><tr width="33.333333333333336%"><td align="center" width="33.333333333333336%"> <a href="https://requestly.com/?utm_source&#x3D;axios&amp;utm_medium&#x3D;sponsorlist&amp;utm_campaign&#x3D;sponsorship" style="padding: 10px; display: inline-block" target="_blank"> <img width="71px" height="70px" src="https://axios-http.com/assets/sponsors/opencollective/16450b4dc0deb9dab5a511bf2bc8b8b4ac33412f.png" alt="Requestly"/> </a> <p align="center" title="A lightweight open-source API Development, Testing &amp; Mocking platform">A lightweight open-source API Development, Testing &amp; Mocking platform</p> <p align="center"> <a href="https://requestly.com/?utm_source&#x3D;axios&amp;utm_medium&#x3D;readme_sponsorlist&amp;utm_campaign&#x3D;sponsorship" target="_blank"><b>requestly.com</b></a> </p>
+runtime/orchestrator-service/node_modules/axios/README.md:13:</td><td align="center" width="33.333333333333336%"> <a href="https://rxdb.info/?utm_source&#x3D;opencollective&amp;utm_medium&#x3D;banner&amp;utm_campaign&#x3D;opencollective_sponsor&amp;utm_content&#x3D;logo" style="padding: 10px; display: inline-block" target="_blank"> <img width="158px" height="70px" src="https://axios-http.com/assets/sponsors/opencollective/b28cc6ed919b414cb5f3d4a6d666cb8e06c5ff07.png" alt="RxDB"/> </a> <p align="center" title="RxDB is a fast, local-first NoSQL-database for JavaScript Applications like Websites, hybrid Apps, Electron-Apps, Progressive Web Apps and Node.js">RxDB is a fast, local-first NoSQL-database for JavaScript Applications like Websites, hybrid Apps, E...</p> <p align="center"> <a href="https://rxdb.info/?utm_source&#x3D;opencollective&amp;utm_medium&#x3D;banner&amp;utm_campaign&#x3D;opencollective_sponsor&amp;utm_content&#x3D;logo" target="_blank"><b>rxdb.info</b></a> </p>
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:83:    match: /media|asset|library|source|upload|generated-output/i,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:729:        .map((item) => `${asString(item.label || item.asset_type)}: ${asString(item.status)}`)

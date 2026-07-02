@@ -1,0 +1,1363 @@
+runtime/orchestrator-service/lib/ops/backbone.js:17:// Canonical defaults for policy_rules — these are the authoritative safe values.
+runtime/orchestrator-service/lib/ops/backbone.js:18:// Any governance file that is missing policy_rules (or missing individual keys)
+runtime/orchestrator-service/lib/ops/backbone.js:21:  approval_before_publish: true,
+runtime/orchestrator-service/lib/ops/backbone.js:38:  approvals: 300,
+runtime/orchestrator-service/lib/ops/backbone.js:40:  notifications: 400,
+runtime/orchestrator-service/lib/ops/backbone.js:54:    approval_statuses: ['not_requested', 'pending', 'approved', 'rejected'],
+runtime/orchestrator-service/lib/ops/backbone.js:60:    approval_states: ['not_requested', 'pending', 'approved', 'rejected']
+runtime/orchestrator-service/lib/ops/backbone.js:68:    intents: ['inspect', 'task', 'workflow', 'campaign', 'content', 'media', 'approval', 'recommendation']
+runtime/orchestrator-service/lib/ops/backbone.js:76:    route_targets: ['campaign-studio', 'content-studio', 'media-studio', 'publishing', 'ads-manager', 'task-center', 'governance']
+runtime/orchestrator-service/lib/ops/backbone.js:82:  approvals: {
+runtime/orchestrator-service/lib/ops/backbone.js:91:  notifications: {
+runtime/orchestrator-service/lib/ops/backbone.js:100:    categories: ['entity', 'workflow', 'approval', 'sync', 'publish', 'ai_routing', 'system']
+runtime/orchestrator-service/lib/ops/backbone.js:155:    service_domains: ['research', 'governance'],
+runtime/orchestrator-service/lib/ops/backbone.js:161:    routes: ['governance', 'content-studio', 'media-studio', 'publishing'],
+runtime/orchestrator-service/lib/ops/backbone.js:162:    service_domains: ['governance'],
+runtime/orchestrator-service/lib/ops/backbone.js:168:    routes: ['home', 'settings', 'integrations', 'governance', 'workflows'],
+runtime/orchestrator-service/lib/ops/backbone.js:169:    service_domains: ['governance'],
+runtime/orchestrator-service/lib/ops/backbone.js:170:    actions: ['override_policy', 'manage_team', 'resolve_escalation', 'manage_permissions']
+runtime/orchestrator-service/lib/ops/backbone.js:181:  governance: ['compliance_reviewer', 'admin', 'analyst'],
+runtime/orchestrator-service/lib/ops/backbone.js:185:  workflows: TEAM_ROLE_DEFS.map((role) => role.id),
+runtime/orchestrator-service/lib/ops/backbone.js:193:    owner_role: 'strategist',
+runtime/orchestrator-service/lib/ops/backbone.js:194:    review_role: 'admin',
+runtime/orchestrator-service/lib/ops/backbone.js:197:    page_permissions: ['campaign-studio', 'workflows', 'insights']
+runtime/orchestrator-service/lib/ops/backbone.js:201:    owner_role: 'writer',
+runtime/orchestrator-service/lib/ops/backbone.js:202:    review_role: 'compliance_reviewer',
+runtime/orchestrator-service/lib/ops/backbone.js:205:    page_permissions: ['content-studio', 'workflows', 'publishing']
+runtime/orchestrator-service/lib/ops/backbone.js:209:    owner_role: 'designer',
+runtime/orchestrator-service/lib/ops/backbone.js:210:    review_role: 'compliance_reviewer',
+runtime/orchestrator-service/lib/ops/backbone.js:213:    page_permissions: ['media-studio', 'workflows', 'publishing']
+runtime/orchestrator-service/lib/ops/backbone.js:217:    owner_role: 'publisher',
+runtime/orchestrator-service/lib/ops/backbone.js:218:    review_role: 'compliance_reviewer',
+runtime/orchestrator-service/lib/ops/backbone.js:221:    page_permissions: ['publishing', 'governance']
+runtime/orchestrator-service/lib/ops/backbone.js:225:    owner_role: 'analyst',
+runtime/orchestrator-service/lib/ops/backbone.js:226:    review_role: 'strategist',
+runtime/orchestrator-service/lib/ops/backbone.js:229:    page_permissions: ['research', 'workflows', 'insights']
+runtime/orchestrator-service/lib/ops/backbone.js:231:  governance: {
+runtime/orchestrator-service/lib/ops/backbone.js:233:    owner_role: 'compliance_reviewer',
+runtime/orchestrator-service/lib/ops/backbone.js:234:    review_role: 'admin',
+runtime/orchestrator-service/lib/ops/backbone.js:236:    route_target: 'governance',
+runtime/orchestrator-service/lib/ops/backbone.js:237:    page_permissions: ['governance', 'settings']
+runtime/orchestrator-service/lib/ops/backbone.js:247:  approval: 'governance',
+runtime/orchestrator-service/lib/ops/backbone.js:248:  task: 'governance'
+runtime/orchestrator-service/lib/ops/backbone.js:330:function getRoleDef(roleId) {
+runtime/orchestrator-service/lib/ops/backbone.js:331:  const normalized = normalizeRoleKey(roleId);
+runtime/orchestrator-service/lib/ops/backbone.js:339:function buildDefaultTeamMember(roleDef, index) {
+runtime/orchestrator-service/lib/ops/backbone.js:341:    id: `${roleDef.id}-member-${index + 1}`,
+runtime/orchestrator-service/lib/ops/backbone.js:342:    name: roleDef.label,
+runtime/orchestrator-service/lib/ops/backbone.js:343:    role: roleDef.id,
+runtime/orchestrator-service/lib/ops/backbone.js:347:    page_permissions: asArray(roleDef.routes),
+runtime/orchestrator-service/lib/ops/backbone.js:348:    action_permissions: asArray(roleDef.actions),
+runtime/orchestrator-service/lib/ops/backbone.js:349:    service_domains: asArray(roleDef.service_domains)
+runtime/orchestrator-service/lib/ops/backbone.js:355:  const roleId = normalizeRoleKey(source.role, 'strategist');
+runtime/orchestrator-service/lib/ops/backbone.js:356:  const roleDef = getRoleDef(roleId) || TEAM_ROLE_DEFS[0];
+runtime/orchestrator-service/lib/ops/backbone.js:359:    id: asString(source.id) || `${roleDef.id}-member-${index + 1}`,
+runtime/orchestrator-service/lib/ops/backbone.js:360:    name: asString(source.name) || roleDef.label,
+runtime/orchestrator-service/lib/ops/backbone.js:361:    role: roleDef.id,
+runtime/orchestrator-service/lib/ops/backbone.js:365:    page_permissions: normalizeStringList(source.page_permissions).length
+runtime/orchestrator-service/lib/ops/backbone.js:366:      ? normalizeStringList(source.page_permissions)
+runtime/orchestrator-service/lib/ops/backbone.js:367:      : asArray(roleDef.routes),
+runtime/orchestrator-service/lib/ops/backbone.js:368:    action_permissions: normalizeStringList(source.action_permissions).length
+runtime/orchestrator-service/lib/ops/backbone.js:369:      ? normalizeStringList(source.action_permissions)
+runtime/orchestrator-service/lib/ops/backbone.js:370:      : asArray(roleDef.actions),
+runtime/orchestrator-service/lib/ops/backbone.js:373:      : asArray(roleDef.service_domains)
+runtime/orchestrator-service/lib/ops/backbone.js:386:        role: 'system_orchestrator',
+runtime/orchestrator-service/lib/ops/backbone.js:389:        page_permissions: ['workflows', 'governance'],
+runtime/orchestrator-service/lib/ops/backbone.js:390:        action_permissions: ['route_work', 'record_state'],
+runtime/orchestrator-service/lib/ops/backbone.js:391:        service_domains: ['campaign', 'content', 'media', 'publishing', 'research', 'governance']
+runtime/orchestrator-service/lib/ops/backbone.js:393:      ...TEAM_ROLE_DEFS.map((roleDef, index) => buildDefaultTeamMember(roleDef, index))
+runtime/orchestrator-service/lib/ops/backbone.js:395:    active_role: 'strategist',
+runtime/orchestrator-service/lib/ops/backbone.js:396:    role_matrix: TEAM_ROLE_DEFS.map((roleDef) => ({
+runtime/orchestrator-service/lib/ops/backbone.js:397:      role: roleDef.id,
+runtime/orchestrator-service/lib/ops/backbone.js:398:      label: roleDef.label,
+runtime/orchestrator-service/lib/ops/backbone.js:399:      routes: asArray(roleDef.routes),
+runtime/orchestrator-service/lib/ops/backbone.js:400:      service_domains: asArray(roleDef.service_domains),
+runtime/orchestrator-service/lib/ops/backbone.js:401:      actions: asArray(roleDef.actions)
+runtime/orchestrator-service/lib/ops/backbone.js:403:    route_permissions: Object.entries(ROUTE_ROLE_ACCESS).map(([route, roles]) => ({
+runtime/orchestrator-service/lib/ops/backbone.js:405:      roles: asArray(roles)
+runtime/orchestrator-service/lib/ops/backbone.js:411:        owner_role: domain.owner_role,
+runtime/orchestrator-service/lib/ops/backbone.js:412:        review_role: domain.review_role,
+runtime/orchestrator-service/lib/ops/backbone.js:415:        page_permissions: asArray(domain.page_permissions)
+runtime/orchestrator-service/lib/ops/backbone.js:435:    active_role: normalizeRoleKey(patch.active_role || current.active_role || defaults.active_role, defaults.active_role),
+runtime/orchestrator-service/lib/ops/backbone.js:437:    role_matrix: defaults.role_matrix,
+runtime/orchestrator-service/lib/ops/backbone.js:438:    route_permissions: defaults.route_permissions,
+runtime/orchestrator-service/lib/ops/backbone.js:480:    summary: 'Role routing, permissions, or assignment settings changed.',
+runtime/orchestrator-service/lib/ops/backbone.js:483:      active_role: next.active_role,
+runtime/orchestrator-service/lib/ops/backbone.js:491:function findTeamMemberByRole(team, roleId) {
+runtime/orchestrator-service/lib/ops/backbone.js:492:  const normalizedRole = normalizeRoleKey(roleId);
+runtime/orchestrator-service/lib/ops/backbone.js:493:  return asArray(team?.members).find((member) => normalizeRoleKey(member.role) === normalizedRole) || null;
+runtime/orchestrator-service/lib/ops/backbone.js:496:function roleLabel(roleId) {
+runtime/orchestrator-service/lib/ops/backbone.js:497:  return getRoleDef(roleId)?.label || asString(roleId);
+runtime/orchestrator-service/lib/ops/backbone.js:500:function roleDisplay(team, roleId) {
+runtime/orchestrator-service/lib/ops/backbone.js:501:  const member = findTeamMemberByRole(team, roleId);
+runtime/orchestrator-service/lib/ops/backbone.js:502:  return member?.name || roleLabel(roleId) || 'Unassigned';
+runtime/orchestrator-service/lib/ops/backbone.js:517:  if (routeTarget === 'governance') return 'governance';
+runtime/orchestrator-service/lib/ops/backbone.js:527:  let ownerRole = domain.owner_role || 'strategist';
+runtime/orchestrator-service/lib/ops/backbone.js:541:    owner_role: normalizeRoleKey(record.owner_role || ownerRole, ownerRole),
+runtime/orchestrator-service/lib/ops/backbone.js:542:    reviewer_role: normalizeRoleKey(record.reviewer_role || domain.review_role, domain.review_role || 'admin'),
+runtime/orchestrator-service/lib/ops/backbone.js:543:    handoff_roles: normalizeStringList(record.handoff_roles).length
+runtime/orchestrator-service/lib/ops/backbone.js:544:      ? normalizeStringList(record.handoff_roles)
+runtime/orchestrator-service/lib/ops/backbone.js:546:    owner_display: roleDisplay(team, record.owner_role || ownerRole),
+runtime/orchestrator-service/lib/ops/backbone.js:547:    reviewer_display: roleDisplay(team, record.reviewer_role || domain.review_role)
+runtime/orchestrator-service/lib/ops/backbone.js:790:    approvalsPath: path.join(opsDir, 'approvals.json'),
+runtime/orchestrator-service/lib/ops/backbone.js:791:    notificationsPath: path.join(opsDir, 'notifications.json'),
+runtime/orchestrator-service/lib/ops/backbone.js:794:    governancePath: path.join(opsDir, 'governance.json'),
+runtime/orchestrator-service/lib/ops/backbone.js:822:      'approvals',
+runtime/orchestrator-service/lib/ops/backbone.js:823:      'notifications',
+runtime/orchestrator-service/lib/ops/backbone.js:839:  ensureJsonFile(paths.approvalsPath, []);
+runtime/orchestrator-service/lib/ops/backbone.js:840:  ensureJsonFile(paths.notificationsPath, []);
+runtime/orchestrator-service/lib/ops/backbone.js:844:  ensureJsonFile(paths.governancePath, {
+runtime/orchestrator-service/lib/ops/backbone.js:845:    approval_required_actions: ['publish', 'launch', 'budget_change', 'integration_reconnect', 'execution_mode_change'],
+runtime/orchestrator-service/lib/ops/backbone.js:847:    execution_policy: {
+runtime/orchestrator-service/lib/ops/backbone.js:848:      semi_auto_requires_approval: true,
+runtime/orchestrator-service/lib/ops/backbone.js:852:    policy_rules: {
+runtime/orchestrator-service/lib/ops/backbone.js:853:      approval_before_publish: true,
+runtime/orchestrator-service/lib/ops/backbone.js:860:    approval_owners: {
+runtime/orchestrator-service/lib/ops/backbone.js:871:      approval_mode: 'Only high-risk',
+runtime/orchestrator-service/lib/ops/backbone.js:873:      approval_before_publish: true
+runtime/orchestrator-service/lib/ops/backbone.js:911:      'approvals',
+runtime/orchestrator-service/lib/ops/backbone.js:912:      'notifications',
+runtime/orchestrator-service/lib/ops/backbone.js:969:  if (value.includes('approval')) return 'approval';
+runtime/orchestrator-service/lib/ops/backbone.js:1004:  const items = readCollection(paths.notificationsPath);
+runtime/orchestrator-service/lib/ops/backbone.js:1006:  const notification = {
+runtime/orchestrator-service/lib/ops/backbone.js:1024:  items.unshift(notification);
+runtime/orchestrator-service/lib/ops/backbone.js:1025:  writeCollection(paths.notificationsPath, items, MAX_ITEMS.notifications);
+runtime/orchestrator-service/lib/ops/backbone.js:1027:  return notification;
+runtime/orchestrator-service/lib/ops/backbone.js:1032:  return listItems(readCollection(paths.notificationsPath), options);
+runtime/orchestrator-service/lib/ops/backbone.js:1035:function markNotification(projectName, notificationId, input = {}) {
+runtime/orchestrator-service/lib/ops/backbone.js:1037:  const items = readCollection(paths.notificationsPath);
+runtime/orchestrator-service/lib/ops/backbone.js:1038:  const index = items.findIndex((item) => asString(item.id) === asString(notificationId));
+runtime/orchestrator-service/lib/ops/backbone.js:1054:  writeJsonFile(paths.notificationsPath, items);
+runtime/orchestrator-service/lib/ops/backbone.js:1084:    role: normalizeRoleKey(input.role || current.role),
+runtime/orchestrator-service/lib/ops/backbone.js:1182: * Normalizes a raw governance file object so that:
+runtime/orchestrator-service/lib/ops/backbone.js:1183: *  - policy_rules is always an object (never null/undefined/non-object)
+runtime/orchestrator-service/lib/ops/backbone.js:1184: *  - Any missing policy_rules key is filled from DEFAULT_POLICY_RULES
+runtime/orchestrator-service/lib/ops/backbone.js:1185: *  - freeze_publishing and approval_before_publish are always explicit booleans
+runtime/orchestrator-service/lib/ops/backbone.js:1192:  const rawRules = doc.policy_rules;
+runtime/orchestrator-service/lib/ops/backbone.js:1193:  // If policy_rules is not a plain object (missing, null, array, string, etc.)
+runtime/orchestrator-service/lib/ops/backbone.js:1205:    approval_before_publish: asBoolean(safeRules.approval_before_publish, DEFAULT_POLICY_RULES.approval_before_publish)
+runtime/orchestrator-service/lib/ops/backbone.js:1210:    policy_rules: mergedRules
+runtime/orchestrator-service/lib/ops/backbone.js:1218:    raw = readJsonFileDurable(paths.governancePath);
+runtime/orchestrator-service/lib/ops/backbone.js:1221:    console.error(`[backbone] getGovernancePolicy: governance file corrupt for project ${projectName}: ${err.message}`);
+runtime/orchestrator-service/lib/ops/backbone.js:1236:    execution_policy: {
+runtime/orchestrator-service/lib/ops/backbone.js:1237:      ...asObject(current.execution_policy),
+runtime/orchestrator-service/lib/ops/backbone.js:1238:      ...asObject(sourcePatch.execution_policy)
+runtime/orchestrator-service/lib/ops/backbone.js:1240:    policy_rules: {
+runtime/orchestrator-service/lib/ops/backbone.js:1241:      ...asObject(current.policy_rules),
+runtime/orchestrator-service/lib/ops/backbone.js:1242:      ...asObject(sourcePatch.policy_rules)
+runtime/orchestrator-service/lib/ops/backbone.js:1244:    approval_owners: {
+runtime/orchestrator-service/lib/ops/backbone.js:1245:      ...asObject(current.approval_owners),
+runtime/orchestrator-service/lib/ops/backbone.js:1246:      ...asObject(sourcePatch.approval_owners)
+runtime/orchestrator-service/lib/ops/backbone.js:1258:  writeJsonFile(paths.governancePath, next);
+runtime/orchestrator-service/lib/ops/backbone.js:1262:    type: 'governance_policy_updated',
+runtime/orchestrator-service/lib/ops/backbone.js:1263:    entity_type: 'governance_policy',
+runtime/orchestrator-service/lib/ops/backbone.js:1265:    title: 'Governance policy updated',
+runtime/orchestrator-service/lib/ops/backbone.js:1269:      policy_rules: next.policy_rules,
+runtime/orchestrator-service/lib/ops/backbone.js:1278:  const policy = getGovernancePolicy(projectName);
+runtime/orchestrator-service/lib/ops/backbone.js:1279:  const activeOverrides = asArray(policy.active_overrides);
+runtime/orchestrator-service/lib/ops/backbone.js:1284:    approval_id: asString(input.approval_id),
+runtime/orchestrator-service/lib/ops/backbone.js:1333:function buildPolicyFlags(record = {}, governance = {}) {
+runtime/orchestrator-service/lib/ops/backbone.js:1344:  if (asBoolean(governance.policy_rules?.freeze_publishing) && asString(record.entity_type) === 'publishing_job') {
+runtime/orchestrator-service/lib/ops/backbone.js:1348:      message: 'Publishing is frozen by governance policy.'
+runtime/orchestrator-service/lib/ops/backbone.js:1396:function buildBrandSafetyFlags(record = {}, governance = {}) {
+runtime/orchestrator-service/lib/ops/backbone.js:1422:  if (asString(record.entity_type) === 'media_job' && asBoolean(governance.policy_rules?.brand_safety_review_required, true)) {
+runtime/orchestrator-service/lib/ops/backbone.js:1423:    if (!asString(record.approval_state) || asString(record.approval_state) === 'not_requested') {
+runtime/orchestrator-service/lib/ops/backbone.js:1435:function buildPublishGuardrails(record = {}, governance = {}) {
+runtime/orchestrator-service/lib/ops/backbone.js:1452:  if (asBoolean(governance.policy_rules?.approval_before_publish, true) && !['approved', 'ready', 'published'].includes(status)) {
+runtime/orchestrator-service/lib/ops/backbone.js:1456:      message: 'Publishing item is not marked approved/ready under current policy.'
+runtime/orchestrator-service/lib/ops/backbone.js:1460:  if (asBoolean(governance.policy_rules?.freeze_publishing)) {
+runtime/orchestrator-service/lib/ops/backbone.js:1473:  const governance = getGovernancePolicy(projectName);
+runtime/orchestrator-service/lib/ops/backbone.js:1475:  const approvals = readCollection(paths.approvalsPath);
+runtime/orchestrator-service/lib/ops/backbone.js:1481:  const pendingApprovals = approvals.filter((item) => asString(item.status) === 'pending');
+runtime/orchestrator-service/lib/ops/backbone.js:1482:  const escalationApprovals = approvals.filter((item) => asString(item.status) === 'escalated');
+runtime/orchestrator-service/lib/ops/backbone.js:1483:  const activeOverrides = asArray(governance.active_overrides).filter((item) => asString(item.status) === 'active');
+runtime/orchestrator-service/lib/ops/backbone.js:1485:  const approvalQueue = pendingApprovals.map((approval) => ({
+runtime/orchestrator-service/lib/ops/backbone.js:1486:    ...approval,
+runtime/orchestrator-service/lib/ops/backbone.js:1487:    entity_snapshot: buildEntitySnapshot(projectName, approval.entity_type, approval.entity_id),
+runtime/orchestrator-service/lib/ops/backbone.js:1488:    policy_flags: buildPolicyFlags(approval, governance)
+runtime/orchestrator-service/lib/ops/backbone.js:1493:    ...approvals.filter((item) => ['pending', 'changes_requested', 'escalated'].includes(asString(item.status)))
+runtime/orchestrator-service/lib/ops/backbone.js:1500:      status: asString(item.status || item.approval_status) || 'open',
+runtime/orchestrator-service/lib/ops/backbone.js:1511:      status: asString(item.status || item.approval_state),
+runtime/orchestrator-service/lib/ops/backbone.js:1512:      brand_safety_flags: buildBrandSafetyFlags(item, governance)
+runtime/orchestrator-service/lib/ops/backbone.js:1520:      publish_guardrails: buildPublishGuardrails(item, governance)
+runtime/orchestrator-service/lib/ops/backbone.js:1524:  const policyViolations = [
+runtime/orchestrator-service/lib/ops/backbone.js:1525:    ...approvalQueue.flatMap((item) =>
+runtime/orchestrator-service/lib/ops/backbone.js:1526:      asArray(item.policy_flags).map((flag) => ({
+runtime/orchestrator-service/lib/ops/backbone.js:1528:        source: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:1577:      asString(item.source_type) === 'approval' || asString(item.route_target) === 'governance'
+runtime/orchestrator-service/lib/ops/backbone.js:1586:    policy: governance,
+runtime/orchestrator-service/lib/ops/backbone.js:1589:        campaign: roleDisplay(team, 'strategist'),
+runtime/orchestrator-service/lib/ops/backbone.js:1590:        content: roleDisplay(team, 'writer'),
+runtime/orchestrator-service/lib/ops/backbone.js:1591:        media: roleDisplay(team, 'designer'),
+runtime/orchestrator-service/lib/ops/backbone.js:1592:        publishing: roleDisplay(team, 'publisher'),
+runtime/orchestrator-service/lib/ops/backbone.js:1593:        compliance: roleDisplay(team, 'compliance_reviewer'),
+runtime/orchestrator-service/lib/ops/backbone.js:1594:        admin: roleDisplay(team, 'admin')
+runtime/orchestrator-service/lib/ops/backbone.js:1596:      escalation_chain: governance.escalation_chain || ESCALATION_CHAINS
+runtime/orchestrator-service/lib/ops/backbone.js:1599:      approval_queue: approvalQueue,
+runtime/orchestrator-service/lib/ops/backbone.js:1600:      policy_violations: policyViolations,
+runtime/orchestrator-service/lib/ops/backbone.js:1607:        freeze_publishing: asBoolean(governance.policy_rules?.freeze_publishing),
+runtime/orchestrator-service/lib/ops/backbone.js:1608:        allow_admin_override: asBoolean(governance.policy_rules?.allow_admin_override, true)
+runtime/orchestrator-service/lib/ops/backbone.js:1617:      pending_approvals: pendingApprovals.length
+runtime/orchestrator-service/lib/ops/backbone.js:1628:    status: item.publish_status || item.approval_status || item.status || 'draft',
+runtime/orchestrator-service/lib/ops/backbone.js:1630:    role: asString(item.owner_role || item.review_role || 'writer'),
+runtime/orchestrator-service/lib/ops/backbone.js:1631:    priority: item.approval_status === 'pending' ? 'high' : 'normal',
+runtime/orchestrator-service/lib/ops/backbone.js:1638:      approval_status: item.approval_status,
+runtime/orchestrator-service/lib/ops/backbone.js:1640:      owner_role: item.owner_role,
+runtime/orchestrator-service/lib/ops/backbone.js:1641:      review_role: item.review_role,
+runtime/orchestrator-service/lib/ops/backbone.js:1653:    status: job.approval_state === 'pending' ? 'pending_approval' : (job.status || 'requested'),
+runtime/orchestrator-service/lib/ops/backbone.js:1655:    role: asString(job.owner_role || job.review_role || 'designer'),
+runtime/orchestrator-service/lib/ops/backbone.js:1656:    priority: job.approval_state === 'pending' ? 'high' : 'normal',
+runtime/orchestrator-service/lib/ops/backbone.js:1665:      approval_state: job.approval_state,
+runtime/orchestrator-service/lib/ops/backbone.js:1666:      owner_role: job.owner_role,
+runtime/orchestrator-service/lib/ops/backbone.js:1667:      review_role: job.review_role,
+runtime/orchestrator-service/lib/ops/backbone.js:1701:    owner: asString(input.owner || current.owner) || roleDisplay(team, routing.owner_role),
+runtime/orchestrator-service/lib/ops/backbone.js:1702:    owner_role: normalizeRoleKey(input.owner_role || current.owner_role || routing.owner_role, routing.owner_role),
+runtime/orchestrator-service/lib/ops/backbone.js:1703:    review_role: normalizeRoleKey(input.review_role || current.review_role || routing.reviewer_role, routing.reviewer_role),
+runtime/orchestrator-service/lib/ops/backbone.js:1710:    linked_approvals: normalizeStringList(input.linked_approvals || current.linked_approvals),
+runtime/orchestrator-service/lib/ops/backbone.js:1773:  const approvalStatus = asString(input.approval_status || current.approval_status) || 'not_requested';
+runtime/orchestrator-service/lib/ops/backbone.js:1827:    approval_status: approvalStatus,
+runtime/orchestrator-service/lib/ops/backbone.js:1828:    owner: asString(input.owner || current.owner) || roleDisplay(team, routing.owner_role),
+runtime/orchestrator-service/lib/ops/backbone.js:1829:    owner_role: normalizeRoleKey(input.owner_role || current.owner_role || routing.owner_role, routing.owner_role),
+runtime/orchestrator-service/lib/ops/backbone.js:1830:    review_role: normalizeRoleKey(input.review_role || current.review_role || routing.reviewer_role, routing.reviewer_role),
+runtime/orchestrator-service/lib/ops/backbone.js:1839:      publishStatus === 'published' ? 'distribution' : approvalStatus === 'approved' ? 'approved' : 'draft'
+runtime/orchestrator-service/lib/ops/backbone.js:1842:    linked_approvals: normalizeStringList(input.linked_approvals || current.linked_approvals),
+runtime/orchestrator-service/lib/ops/backbone.js:1848:    queue_status: asString(input.queue_status || current.queue_status || publishStatus || approvalStatus || status) || 'draft',
+runtime/orchestrator-service/lib/ops/backbone.js:1857:        approval_status: approvalStatus,
+runtime/orchestrator-service/lib/ops/backbone.js:1877:      approval_status: approvalStatus,
+runtime/orchestrator-service/lib/ops/backbone.js:1964:    approval_state: asString(input.approval_state || current.approval_state) || 'not_requested',
+runtime/orchestrator-service/lib/ops/backbone.js:1966:    approval_notes: normalizeNotes(input.approval_notes || current.approval_notes),
+runtime/orchestrator-service/lib/ops/backbone.js:1970:    owner: asString(input.owner || current.owner) || roleDisplay(team, routing.owner_role),
+runtime/orchestrator-service/lib/ops/backbone.js:1971:    owner_role: normalizeRoleKey(input.owner_role || current.owner_role || routing.owner_role, routing.owner_role),
+runtime/orchestrator-service/lib/ops/backbone.js:1972:    review_role: normalizeRoleKey(input.review_role || current.review_role || routing.reviewer_role, routing.reviewer_role),
+runtime/orchestrator-service/lib/ops/backbone.js:1976:    linked_approvals: normalizeStringList(input.linked_approvals || current.linked_approvals),
+runtime/orchestrator-service/lib/ops/backbone.js:2093:    role: 'system_orchestrator',
+runtime/orchestrator-service/lib/ops/backbone.js:2432:  const ownerRole = normalizeRoleKey(input.owner_role || current.owner_role || routing.owner_role, routing.owner_role);
+runtime/orchestrator-service/lib/ops/backbone.js:2433:  const assigneeRole = normalizeRoleKey(input.assignee_role || current.assignee_role || ownerRole, ownerRole);
+runtime/orchestrator-service/lib/ops/backbone.js:2439:    owner: asString(input.owner || input.assignee || current.owner || current.assignee) || roleDisplay(team, ownerRole),
+runtime/orchestrator-service/lib/ops/backbone.js:2440:    owner_role: ownerRole,
+runtime/orchestrator-service/lib/ops/backbone.js:2441:    assignee: asString(input.assignee || current.assignee || input.owner) || roleDisplay(team, assigneeRole),
+runtime/orchestrator-service/lib/ops/backbone.js:2442:    assignee_role: assigneeRole,
+runtime/orchestrator-service/lib/ops/backbone.js:2443:    team_role: asString(input.team_role || current.team_role || assigneeRole),
+runtime/orchestrator-service/lib/ops/backbone.js:2459:    handoff_roles: normalizeStringList(input.handoff_roles || current.handoff_roles || routing.handoff_roles),
+runtime/orchestrator-service/lib/ops/backbone.js:2461:      owner_role: ownerRole,
+runtime/orchestrator-service/lib/ops/backbone.js:2462:      owner_label: roleDisplay(team, ownerRole),
+runtime/orchestrator-service/lib/ops/backbone.js:2463:      assignee_role: assigneeRole,
+runtime/orchestrator-service/lib/ops/backbone.js:2464:      assignee_label: roleDisplay(team, assigneeRole),
+runtime/orchestrator-service/lib/ops/backbone.js:2465:      review_role: routing.reviewer_role,
+runtime/orchestrator-service/lib/ops/backbone.js:2466:      review_label: roleDisplay(team, routing.reviewer_role)
+runtime/orchestrator-service/lib/ops/backbone.js:2479:        assignee_role: assigneeRole,
+runtime/orchestrator-service/lib/ops/backbone.js:2493:    role: assigneeRole,
+runtime/orchestrator-service/lib/ops/backbone.js:2501:      owner_role: ownerRole,
+runtime/orchestrator-service/lib/ops/backbone.js:2502:      assignee_role: assigneeRole,
+runtime/orchestrator-service/lib/ops/backbone.js:2557:  const items = readCollection(paths.approvalsPath);
+runtime/orchestrator-service/lib/ops/backbone.js:2558:  const governance = getGovernancePolicy(projectName);
+runtime/orchestrator-service/lib/ops/backbone.js:2568:  const title = asString(input.title) || `${targetEntityType} approval`;
+runtime/orchestrator-service/lib/ops/backbone.js:2577:    input.reviewer_role ||
+runtime/orchestrator-service/lib/ops/backbone.js:2578:      current.reviewer_role ||
+runtime/orchestrator-service/lib/ops/backbone.js:2581:      routing.reviewer_role,
+runtime/orchestrator-service/lib/ops/backbone.js:2582:    routing.reviewer_role
+runtime/orchestrator-service/lib/ops/backbone.js:2587:  const approval = {
+runtime/orchestrator-service/lib/ops/backbone.js:2588:    id: asString(current.id) || asString(input.id) || createId('approval'),
+runtime/orchestrator-service/lib/ops/backbone.js:2593:    reviewer: asString(input.reviewer || current.reviewer || input.requested_for) || roleDisplay(team, reviewerRole),
+runtime/orchestrator-service/lib/ops/backbone.js:2594:    reviewer_role: reviewerRole,
+runtime/orchestrator-service/lib/ops/backbone.js:2596:    requested_for: asString(input.requested_for || current.requested_for || input.reviewer) || roleDisplay(team, reviewerRole),
+runtime/orchestrator-service/lib/ops/backbone.js:2603:    approval_type: asString(input.approval_type || current.approval_type) || targetEntityType,
+runtime/orchestrator-service/lib/ops/backbone.js:2606:    route_target: asString(input.route_target || current.route_target || entityLink?.route || routing.route_target || 'governance'),
+runtime/orchestrator-service/lib/ops/backbone.js:2610:      owner_role: routing.owner_role,
+runtime/orchestrator-service/lib/ops/backbone.js:2611:      owner_label: roleDisplay(team, routing.owner_role),
+runtime/orchestrator-service/lib/ops/backbone.js:2612:      reviewer_role: reviewerRole,
+runtime/orchestrator-service/lib/ops/backbone.js:2613:      reviewer_label: roleDisplay(team, reviewerRole)
+runtime/orchestrator-service/lib/ops/backbone.js:2616:    policy_flags: asArray(input.policy_flags || current.policy_flags || buildPolicyFlags(input, governance)),
+runtime/orchestrator-service/lib/ops/backbone.js:2618:    brand_safety_flags: asArray(input.brand_safety_flags || current.brand_safety_flags || buildBrandSafetyFlags(input, governance)),
+runtime/orchestrator-service/lib/ops/backbone.js:2631:      current.id ? 'approval_updated' : 'approval_requested',
+runtime/orchestrator-service/lib/ops/backbone.js:2637:        reviewer_role: reviewerRole
+runtime/orchestrator-service/lib/ops/backbone.js:2642:  writeCollection(paths.approvalsPath, upsertById(items, approval), MAX_ITEMS.approvals);
+runtime/orchestrator-service/lib/ops/backbone.js:2645:    type: current.id ? 'approval_updated' : 'approval_requested',
+runtime/orchestrator-service/lib/ops/backbone.js:2646:    entity_type: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:2647:    entity_id: approval.id,
+runtime/orchestrator-service/lib/ops/backbone.js:2648:    title: approval.title,
+runtime/orchestrator-service/lib/ops/backbone.js:2649:    summary: approval.summary || 'A new approval was requested.',
+runtime/orchestrator-service/lib/ops/backbone.js:2650:    actor: approval.requested_by,
+runtime/orchestrator-service/lib/ops/backbone.js:2652:      entity_type: approval.entity_type,
+runtime/orchestrator-service/lib/ops/backbone.js:2653:      entity_id: approval.entity_id,
+runtime/orchestrator-service/lib/ops/backbone.js:2654:      risk_level: approval.risk_level,
+runtime/orchestrator-service/lib/ops/backbone.js:2655:      approval_type: approval.approval_type
+runtime/orchestrator-service/lib/ops/backbone.js:2659:    category: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:2660:    type: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:2661:    title: `${approval.title} needs approval`,
+runtime/orchestrator-service/lib/ops/backbone.js:2662:    message: approval.summary || 'Review and decide on the requested operation.',
+runtime/orchestrator-service/lib/ops/backbone.js:2663:    body: approval.summary || 'Review and decide on the requested operation.',
+runtime/orchestrator-service/lib/ops/backbone.js:2664:    severity: approval.risk_level === 'high' || approval.risk_level === 'critical' ? 'warning' : 'info',
+runtime/orchestrator-service/lib/ops/backbone.js:2666:      entity_type: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:2667:      entity_id: approval.id,
+runtime/orchestrator-service/lib/ops/backbone.js:2668:      route: inferRouteTarget('approval', approval)
+runtime/orchestrator-service/lib/ops/backbone.js:2670:    entity_type: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:2671:    entity_id: approval.id
+runtime/orchestrator-service/lib/ops/backbone.js:2675:    queue_type: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:2676:    entity_type: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:2677:    entity_id: approval.id,
+runtime/orchestrator-service/lib/ops/backbone.js:2678:    title: approval.title,
+runtime/orchestrator-service/lib/ops/backbone.js:2679:    status: approval.status,
+runtime/orchestrator-service/lib/ops/backbone.js:2680:    assignee: approval.reviewer,
+runtime/orchestrator-service/lib/ops/backbone.js:2681:    role: reviewerRole,
+runtime/orchestrator-service/lib/ops/backbone.js:2682:    priority: approval.risk_level === 'critical' ? 'critical' : approval.risk_level === 'high' ? 'high' : 'normal',
+runtime/orchestrator-service/lib/ops/backbone.js:2683:    route: 'governance',
+runtime/orchestrator-service/lib/ops/backbone.js:2685:      entity_type: approval.entity_type,
+runtime/orchestrator-service/lib/ops/backbone.js:2686:      entity_id: approval.entity_id,
+runtime/orchestrator-service/lib/ops/backbone.js:2687:      approval_type: approval.approval_type,
+runtime/orchestrator-service/lib/ops/backbone.js:2688:      requested_action: approval.requested_action,
+runtime/orchestrator-service/lib/ops/backbone.js:2689:      reviewer_role: reviewerRole,
+runtime/orchestrator-service/lib/ops/backbone.js:2690:      escalation_chain: approval.escalation_chain
+runtime/orchestrator-service/lib/ops/backbone.js:2694:  updateLinkedEntity(paths.project, approval.entity_type, approval.entity_id, (record) => {
+runtime/orchestrator-service/lib/ops/backbone.js:2696:      approval.entity_type === 'media_job'
+runtime/orchestrator-service/lib/ops/backbone.js:2700:      approval.entity_type === 'media_job'
+runtime/orchestrator-service/lib/ops/backbone.js:2706:      linked_approvals: [...new Set([approval.id, ...normalizeStringList(record.linked_approvals)])],
+runtime/orchestrator-service/lib/ops/backbone.js:2708:      history: appendHistory(record, 'approval_linked', input.actor || input.requested_by, {
+runtime/orchestrator-service/lib/ops/backbone.js:2709:        approval_id: approval.id,
+runtime/orchestrator-service/lib/ops/backbone.js:2710:        status: approval.status
+runtime/orchestrator-service/lib/ops/backbone.js:2714:    if (approval.entity_type === 'content_item') {
+runtime/orchestrator-service/lib/ops/backbone.js:2715:      nextRecord.approval_status = nextApprovalStatus;
+runtime/orchestrator-service/lib/ops/backbone.js:2717:      nextRecord.queue_status = 'pending_approval';
+runtime/orchestrator-service/lib/ops/backbone.js:2720:    if (approval.entity_type === 'media_job') {
+runtime/orchestrator-service/lib/ops/backbone.js:2721:      nextRecord.approval_state = nextApprovalState;
+runtime/orchestrator-service/lib/ops/backbone.js:2724:    if (approval.entity_type === 'content_item') {
+runtime/orchestrator-service/lib/ops/backbone.js:2726:    } else if (approval.entity_type === 'media_job') {
+runtime/orchestrator-service/lib/ops/backbone.js:2733:  return approval;
+runtime/orchestrator-service/lib/ops/backbone.js:2738:  return listItems(readCollection(paths.approvalsPath), options);
+runtime/orchestrator-service/lib/ops/backbone.js:2741:function decideApproval(projectName, approvalId, input = {}) {
+runtime/orchestrator-service/lib/ops/backbone.js:2743:  const items = readCollection(paths.approvalsPath);
+runtime/orchestrator-service/lib/ops/backbone.js:2745:  const targetId = asString(approvalId);
+runtime/orchestrator-service/lib/ops/backbone.js:2749:    throw new Error('Invalid approval decision');
+runtime/orchestrator-service/lib/ops/backbone.js:2765:      escalationChain.find((role) => normalizeRoleKey(role) !== normalizeRoleKey(current.reviewer_role)) ||
+runtime/orchestrator-service/lib/ops/backbone.js:2786:      `approval_${decision}`,
+runtime/orchestrator-service/lib/ops/backbone.js:2797:  writeJsonFile(paths.approvalsPath, items);
+runtime/orchestrator-service/lib/ops/backbone.js:2800:    type: `approval_${decision}`,
+runtime/orchestrator-service/lib/ops/backbone.js:2801:    entity_type: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:2813:    category: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:2814:    type: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:2820:      entity_type: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:2822:      route: inferRouteTarget('approval', next)
+runtime/orchestrator-service/lib/ops/backbone.js:2824:    entity_type: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:2828:  updateQueueEntity(paths.project, 'approval', next.id, {
+runtime/orchestrator-service/lib/ops/backbone.js:2842:      linked_approvals: [...new Set([next.id, ...normalizeStringList(record.linked_approvals)])],
+runtime/orchestrator-service/lib/ops/backbone.js:2844:      history: appendHistory(record, `linked_approval_${decision}`, input.actor, {
+runtime/orchestrator-service/lib/ops/backbone.js:2845:        approval_id: next.id,
+runtime/orchestrator-service/lib/ops/backbone.js:2851:      nextRecord.approval_status =
+runtime/orchestrator-service/lib/ops/backbone.js:2865:      nextRecord.approval_state =
+runtime/orchestrator-service/lib/ops/backbone.js:2900:      owner: roleDisplay(team, escalationTargetRole),
+runtime/orchestrator-service/lib/ops/backbone.js:2901:      owner_role: escalationTargetRole,
+runtime/orchestrator-service/lib/ops/backbone.js:2902:      assignee: roleDisplay(team, escalationTargetRole),
+runtime/orchestrator-service/lib/ops/backbone.js:2903:      assignee_role: escalationTargetRole,
+runtime/orchestrator-service/lib/ops/backbone.js:2905:      service_domain: 'governance',
+runtime/orchestrator-service/lib/ops/backbone.js:2906:      route_target: 'governance',
+runtime/orchestrator-service/lib/ops/backbone.js:2907:      source_type: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:2919:      approval_id: next.id,
+runtime/orchestrator-service/lib/ops/backbone.js:2957:  const destinationRole = getDomainDef(destinationDomain)?.owner_role || sourceRouting.reviewer_role || 'admin';
+runtime/orchestrator-service/lib/ops/backbone.js:2970:    source_role: normalizeRoleKey(input.source_role || current.source_role || sourceRouting.owner_role, sourceRouting.owner_role),
+runtime/orchestrator-service/lib/ops/backbone.js:2971:    destination_role: normalizeRoleKey(input.destination_role || current.destination_role || destinationRole, destinationRole),
+runtime/orchestrator-service/lib/ops/backbone.js:2972:    source_role_label: roleDisplay(team, input.source_role || current.source_role || sourceRouting.owner_role),
+runtime/orchestrator-service/lib/ops/backbone.js:2973:    destination_role_label: roleDisplay(team, input.destination_role || current.destination_role || destinationRole),
+runtime/orchestrator-service/lib/ops/backbone.js:2989:        destination_role: normalizeRoleKey(input.destination_role || current.destination_role || destinationRole, destinationRole)
+runtime/orchestrator-service/lib/ops/backbone.js:3041:        owner_role: asString(record.owner_role || sourceRouting.owner_role),
+runtime/orchestrator-service/lib/ops/backbone.js:3042:        next_owner_role: handoff.destination_role,
+runtime/orchestrator-service/lib/ops/backbone.js:3043:        next_owner_label: handoff.destination_role_label,
+runtime/orchestrator-service/lib/ops/backbone.js:3162:    assignee: roleDisplay(team, 'publisher'),
+runtime/orchestrator-service/lib/ops/backbone.js:3163:    role: 'publisher',
+runtime/orchestrator-service/lib/ops/backbone.js:3172:      owner_role: 'publisher',
+runtime/orchestrator-service/lib/ops/backbone.js:3173:      review_role: 'compliance_reviewer'
+runtime/orchestrator-service/lib/ops/backbone.js:3182:      message: 'The publishing item is waiting for operator approval or handoff.',
+runtime/orchestrator-service/lib/ops/backbone.js:3183:      body: 'The publishing item is waiting for operator approval or handoff.',
+runtime/orchestrator-service/lib/ops/backbone.js:3269:    const roleId = normalizeRoleKey(
+runtime/orchestrator-service/lib/ops/backbone.js:3270:      item.owner_role ||
+runtime/orchestrator-service/lib/ops/backbone.js:3271:      item.assignee_role ||
+runtime/orchestrator-service/lib/ops/backbone.js:3272:      item.reviewer_role ||
+runtime/orchestrator-service/lib/ops/backbone.js:3273:      item.role
+runtime/orchestrator-service/lib/ops/backbone.js:3276:    if (!roleId) {
+runtime/orchestrator-service/lib/ops/backbone.js:3280:    if (!byRole[roleId]) {
+runtime/orchestrator-service/lib/ops/backbone.js:3281:      byRole[roleId] = {
+runtime/orchestrator-service/lib/ops/backbone.js:3282:        role: roleId,
+runtime/orchestrator-service/lib/ops/backbone.js:3283:        label: roleDisplay(team, roleId),
+runtime/orchestrator-service/lib/ops/backbone.js:3289:    byRole[roleId].total += 1;
+runtime/orchestrator-service/lib/ops/backbone.js:3291:      byRole[roleId].open += 1;
+runtime/orchestrator-service/lib/ops/backbone.js:3370:  if (normalizedType === 'approval') return 'governance';
+runtime/orchestrator-service/lib/ops/backbone.js:3377:  if (normalizedType === 'notification') return inferRouteTarget(record.entity_type, record) || 'home';
+runtime/orchestrator-service/lib/ops/backbone.js:3404:        owner_role: asString(task.owner_role || task.assignee_role),
+runtime/orchestrator-service/lib/ops/backbone.js:3406:        assignee_role: asString(task.assignee_role || task.owner_role),
+runtime/orchestrator-service/lib/ops/backbone.js:3436:      owners: mapFilterCounts(items, 'owner_role'),
+runtime/orchestrator-service/lib/ops/backbone.js:3455:      role: 'system_orchestrator',
+runtime/orchestrator-service/lib/ops/backbone.js:3479:      role: 'admin',
+runtime/orchestrator-service/lib/ops/backbone.js:3501:    role: asString(item.role),
+runtime/orchestrator-service/lib/ops/backbone.js:3522:    approval: normalizedQueue.filter((item) => item.queue_type === 'approval'),
+runtime/orchestrator-service/lib/ops/backbone.js:3554:      roles: mapFilterCounts(items, 'role')
+runtime/orchestrator-service/lib/ops/backbone.js:3559:    approval_queue: queueGroups.approval,
+runtime/orchestrator-service/lib/ops/backbone.js:3670:    notification_id: asString(input.notification_id || input.id)
+runtime/orchestrator-service/lib/ops/backbone.js:3675:  notifications = [],
+runtime/orchestrator-service/lib/ops/backbone.js:3676:  approvals = [],
+runtime/orchestrator-service/lib/ops/backbone.js:3679:  governanceSummary = {},
+runtime/orchestrator-service/lib/ops/backbone.js:3682:  const unreadNotifications = asArray(notifications).filter((item) => !asBoolean(item.read));
+runtime/orchestrator-service/lib/ops/backbone.js:3684:    ...asArray(notifications)
+runtime/orchestrator-service/lib/ops/backbone.js:3689:        notification_id: item.id
+runtime/orchestrator-service/lib/ops/backbone.js:3701:  const approvalPendingAlerts = asArray(approvals)
+runtime/orchestrator-service/lib/ops/backbone.js:3704:      id: `approval-pending-${item.id}`,
+runtime/orchestrator-service/lib/ops/backbone.js:3708:      source: 'approval_pending',
+runtime/orchestrator-service/lib/ops/backbone.js:3709:      entity_type: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:3724:            : 'Publishing item is waiting for approval or release.',
+runtime/orchestrator-service/lib/ops/backbone.js:3738:    ...asArray(notifications)
+runtime/orchestrator-service/lib/ops/backbone.js:3743:        notification_id: item.id,
+runtime/orchestrator-service/lib/ops/backbone.js:3757:    ...asArray(governanceSummary?.sections?.claim_review)
+runtime/orchestrator-service/lib/ops/backbone.js:3767:    ...asArray(governanceSummary?.sections?.policy_violations)
+runtime/orchestrator-service/lib/ops/backbone.js:3799:    ...approvalPendingAlerts,
+runtime/orchestrator-service/lib/ops/backbone.js:3814:    notification_items: asArray(notifications).slice(0, 40),
+runtime/orchestrator-service/lib/ops/backbone.js:3816:    approval_pending_alerts: approvalPendingAlerts,
+runtime/orchestrator-service/lib/ops/backbone.js:3828:  const governance = asObject(readJsonFile(paths.governancePath, {}));
+runtime/orchestrator-service/lib/ops/backbone.js:3839:  const approvals = readCollection(paths.approvalsPath);
+runtime/orchestrator-service/lib/ops/backbone.js:3841:  const notifications = readCollection(paths.notificationsPath);
+runtime/orchestrator-service/lib/ops/backbone.js:3844:  const governanceSummary = buildGovernanceSummary(paths.project, {
+runtime/orchestrator-service/lib/ops/backbone.js:3849:  const approvalLimit = Number(options.approvalLimit || 8) || 8;
+runtime/orchestrator-service/lib/ops/backbone.js:3850:  const notificationLimit = Number(options.notificationLimit || 8) || 8;
+runtime/orchestrator-service/lib/ops/backbone.js:3862:    ...approvals,
+runtime/orchestrator-service/lib/ops/backbone.js:3868:    owner_role: domain.owner_role,
+runtime/orchestrator-service/lib/ops/backbone.js:3869:    owner_label: roleDisplay(team, domain.owner_role),
+runtime/orchestrator-service/lib/ops/backbone.js:3870:    review_role: domain.review_role,
+runtime/orchestrator-service/lib/ops/backbone.js:3871:    review_label: roleDisplay(team, domain.review_role),
+runtime/orchestrator-service/lib/ops/backbone.js:3872:    handoff_to: asArray(domain.handoff_to).map((roleId) => ({
+runtime/orchestrator-service/lib/ops/backbone.js:3873:      role: roleId,
+runtime/orchestrator-service/lib/ops/backbone.js:3874:      label: roleDisplay(team, roleId)
+runtime/orchestrator-service/lib/ops/backbone.js:3877:    page_permissions: asArray(domain.page_permissions)
+runtime/orchestrator-service/lib/ops/backbone.js:3882:  const notificationCenter = buildNotificationCenter({
+runtime/orchestrator-service/lib/ops/backbone.js:3883:    notifications,
+runtime/orchestrator-service/lib/ops/backbone.js:3884:    approvals,
+runtime/orchestrator-service/lib/ops/backbone.js:3887:    governanceSummary,
+runtime/orchestrator-service/lib/ops/backbone.js:3901:    governance,
+runtime/orchestrator-service/lib/ops/backbone.js:3905:    notification_center: notificationCenter,
+runtime/orchestrator-service/lib/ops/backbone.js:3907:      active_role: team.active_role,
+runtime/orchestrator-service/lib/ops/backbone.js:3908:      role_matrix: asArray(team.role_matrix),
+runtime/orchestrator-service/lib/ops/backbone.js:3909:      route_permissions: asArray(team.route_permissions),
+runtime/orchestrator-service/lib/ops/backbone.js:3915:      active_role: team.active_role,
+runtime/orchestrator-service/lib/ops/backbone.js:3916:      team_roles: asArray(team.members).map((member) => ({
+runtime/orchestrator-service/lib/ops/backbone.js:3919:        role: member.role,
+runtime/orchestrator-service/lib/ops/backbone.js:3921:        page_permissions: asArray(member.page_permissions),
+runtime/orchestrator-service/lib/ops/backbone.js:3922:        action_permissions: asArray(member.action_permissions),
+runtime/orchestrator-service/lib/ops/backbone.js:3930:      route_permissions: asArray(team.route_permissions),
+runtime/orchestrator-service/lib/ops/backbone.js:3931:      role_matrix: asArray(team.role_matrix),
+runtime/orchestrator-service/lib/ops/backbone.js:3935:      role_routes: domainRouting,
+runtime/orchestrator-service/lib/ops/backbone.js:3936:      queue_by_role: summarizeOwnershipVisibility(team, queueItems),
+runtime/orchestrator-service/lib/ops/backbone.js:3937:      handoffs_by_role: asArray(handoffs)
+runtime/orchestrator-service/lib/ops/backbone.js:3943:          source_role: item.source_role,
+runtime/orchestrator-service/lib/ops/backbone.js:3944:          source_role_label: item.source_role_label,
+runtime/orchestrator-service/lib/ops/backbone.js:3945:          destination_role: item.destination_role,
+runtime/orchestrator-service/lib/ops/backbone.js:3946:          destination_role_label: item.destination_role_label,
+runtime/orchestrator-service/lib/ops/backbone.js:3959:      pending_approval_count: contentItems.filter((item) => asString(item.approval_status) === 'pending').length,
+runtime/orchestrator-service/lib/ops/backbone.js:4001:    approvals: {
+runtime/orchestrator-service/lib/ops/backbone.js:4002:      total: approvals.length,
+runtime/orchestrator-service/lib/ops/backbone.js:4003:      pending_count: approvals.filter((item) => asString(item.status) === 'pending').length,
+runtime/orchestrator-service/lib/ops/backbone.js:4004:      by_reviewer_role: summarizeOwnershipVisibility(team, approvals),
+runtime/orchestrator-service/lib/ops/backbone.js:4005:      items: approvals.slice(0, approvalLimit)
+runtime/orchestrator-service/lib/ops/backbone.js:4012:    notifications: {
+runtime/orchestrator-service/lib/ops/backbone.js:4013:      total: notifications.length,
+runtime/orchestrator-service/lib/ops/backbone.js:4014:      unread_count: notifications.filter((item) => !item.read).length,
+runtime/orchestrator-service/lib/ops/backbone.js:4015:      items: notifications.slice(0, notificationLimit)
+runtime/orchestrator-service/lib/ops/backbone.js:4021:      by_role: asArray(handoffs)
+runtime/orchestrator-service/lib/ops/backbone.js:4025:          source_role: item.source_role,
+runtime/orchestrator-service/lib/ops/backbone.js:4026:          destination_role: item.destination_role,
+runtime/orchestrator-service/lib/ops/backbone.js:4027:          source_role_label: item.source_role_label,
+runtime/orchestrator-service/lib/ops/backbone.js:4028:          destination_role_label: item.destination_role_label,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:147:  if (intent === 'approval') return 'governance';
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:206:      pattern: /\b(task plan|workflow|handoff|approval|approvals|timeline|execution plan|operator|owners?|assign|todo|follow up|route)\b/
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:233:  if (matches(/\b(approve|approval|review)\b/) && !['ads', 'content', 'campaign'].includes(intent)) {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:234:    intent = 'approval';
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:235:    actionType = 'approval';
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:571:  const taskBlock = ['workflow', 'task', 'approval'].includes(classified.actionType)
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:578:        'Create approval only if execution changes publishing, spend, or sensitive settings.'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:648:      `Use tasks or approvals if human follow-through is required.`
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:814:        if (classified.actionType === 'approval') {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:815:          const approval = createApproval(projectName, {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:816:            title: `${response.title} approval`,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:823:          linkedEntities.push({ entity_type: 'approval', entity_id: approval.id, route: 'governance', label: approval.title });
+runtime/orchestrator-service/lib/integrations/provider-utils.js:48:  permissionScope = '',
+runtime/orchestrator-service/lib/integrations/provider-utils.js:63:    permission_scope: permissionScope,
+runtime/orchestrator-service/lib/integrations/adapter-manager.js:25:    permission_scope: asString(result.permission_scope),
+runtime/orchestrator-service/lib/integrations/providers/google.js:251:    permissionScope: 'GA4 property access token',
+runtime/orchestrator-service/lib/integrations/providers/google.js:329:    permissionScope: 'Search Console property access',
+runtime/orchestrator-service/lib/integrations/providers/google.js:402:    permissionScope: 'YouTube channel OAuth access',
+runtime/orchestrator-service/lib/integrations/providers/google.js:475:    permissionScope: 'Google Ads developer token + customer OAuth access',
+runtime/orchestrator-service/lib/integrations/providers/google.js:503:    permissionScope: 'Drive file or folder OAuth access',
+runtime/orchestrator-service/lib/integrations/providers/google.js:531:    permissionScope: 'GTM account OAuth access',
+runtime/orchestrator-service/lib/integrations/providers/ops.js:35:    permissionScope: 'Slack workspace bot access',
+runtime/orchestrator-service/lib/integrations/providers/ops.js:37:    readScopes: ['notifications'],
+runtime/orchestrator-service/lib/integrations/providers/ops.js:71:    permissionScope: 'Telegram bot API access',
+runtime/orchestrator-service/lib/integrations/providers/ops.js:73:    readScopes: ['notifications'],
+runtime/orchestrator-service/lib/integrations/providers/ops.js:110:    permissionScope: 'Notion integration access',
+runtime/orchestrator-service/lib/integrations/providers/ops.js:157:    permissionScope: 'Endpoint availability',
+runtime/orchestrator-service/lib/integrations/providers/ops.js:203:    permissionScope: 'Custom analytics endpoint access',
+runtime/orchestrator-service/lib/integrations/providers/ops.js:240:    permissionScope: 'LinkedIn OAuth access',
+runtime/orchestrator-service/lib/integrations/providers/ops.js:281:    permissionScope: 'Mailchimp audience and campaign access',
+runtime/orchestrator-service/lib/integrations/providers/shopify.js:71:    permissionScope: 'Store domain + Admin API token',
+runtime/orchestrator-service/lib/integrations/providers/woocommerce.js:56:    permissionScope: 'Store URL + consumer key/secret',
+runtime/orchestrator-service/lib/integrations/providers/ebay.js:40:    permissionScope: 'eBay seller OAuth access',
+runtime/orchestrator-service/lib/integrations/providers/tiktok.js:63:    permissionScope: 'TikTok business/user OAuth access',
+runtime/orchestrator-service/lib/integrations/providers/tiktok.js:143:    permissionScope: 'TikTok Ads advertiser access',
+runtime/orchestrator-service/lib/integrations/providers/tiktok.js:232:    permissionScope: 'TikTok Pixel advertiser access',
+runtime/orchestrator-service/lib/integrations/providers/meta.js:96:    permissionScope: 'Page insights and publishing access',
+runtime/orchestrator-service/lib/integrations/providers/meta.js:171:    permissionScope: 'Instagram business insights and publishing access',
+runtime/orchestrator-service/lib/integrations/providers/meta.js:244:    permissionScope: 'Meta Ads account access',
+runtime/orchestrator-service/lib/integrations/providers/meta.js:311:    permissionScope: 'Meta Pixel business access',
+runtime/orchestrator-service/lib/integrations/providers/website.js:45:    permissionScope: 'Website URL availability',
+runtime/orchestrator-service/lib/integrations/storage.js:55: * Use this for every read of critical ops state (collections, governance, team).
+runtime/orchestrator-service/lib/ai/providers/openai.js:178:            role: 'system',
+runtime/orchestrator-service/lib/ai/providers/openai.js:194:              'For outputType "operations_plan", include operationsPlan with tasks, timeline, owners, handoffs, approvals, dependencies.',
+runtime/orchestrator-service/lib/ai/providers/openai.js:200:            role: 'user',
+runtime/orchestrator-service/lib/ai/provider-config.js:85:    purpose: 'tasks, timelines, handoffs, approvals, and execution planning',
+runtime/orchestrator-service/lib/ai/provider-config.js:89:      'Produce task plans, timelines, handoffs, approvals, ownership, and execution plans.',
+runtime/orchestrator-service/lib/media/provider-layer.js:125:            { role: 'system', content: systemPrompt },
+runtime/orchestrator-service/lib/media/provider-layer.js:126:            { role: 'user', content: userPrompt }
+public/control-center/asset-library.js:77:      what_to_upload: "Terms, privacy policy, disclaimers, compliance notes, claim restrictions, and regulated copy rules.",
+public/control-center/asset-library.js:173:      what_to_upload: "Review exports, testimonial docs, approved screenshots, quote permissions, and proof notes.",
+public/control-center/asset-library.js:344:    asset.approval_status ||
+public/control-center/pages/publishing.js:20:const STATUS_FILTERS = ["all", "draft", "ready", "needs approval", "scheduled", "published", "failed"];
+public/control-center/pages/publishing.js:21:const DISPLAY_STATUSES = ["draft", "ready", "needs approval", "scheduled", "published", "failed"];
+public/control-center/pages/publishing.js:23:const APPROVAL_STATUSES = ["draft", "needs approval", "approved"];
+public/control-center/pages/publishing.js:182:  if (["needs approval", "needs_approval", "approval", "pending_approval", "review", "in_review"].includes(normalized)) {
+public/control-center/pages/publishing.js:183:    return "needs approval";
+public/control-center/pages/publishing.js:266:    approvalStatus: "draft",
+public/control-center/pages/publishing.js:327:    approvalStatus: status === "ready" ? "approved" : status === "needs approval" ? "needs approval" : "draft",
+public/control-center/pages/publishing.js:382:    "needs approval": 2,
+public/control-center/pages/publishing.js:440:    approvalStatus: item.approvalStatus || "draft",
+public/control-center/pages/publishing.js:482:    approval_status: session.form.approvalStatus,
+public/control-center/pages/publishing.js:498:    approvalStatus: session.form.approvalStatus,
+public/control-center/pages/publishing.js:532:        reason: "Publishing is gated and requires manual approval."
+public/control-center/pages/publishing.js:550:  if (intent === "publish" && form.approvalStatus !== "approved") {
+public/control-center/pages/publishing.js:551:    errors.approvalStatus = "Approval must be approved before publishing now.";
+public/control-center/pages/publishing.js:844:  const needsApproval = queue.find((item) => item.status === "needs approval");
+public/control-center/pages/publishing.js:866:      action: "Review approval queue",
+public/control-center/pages/publishing.js:867:      why: `${needsApproval.title} needs approval before it can move into the publishable queue.`,
+public/control-center/pages/publishing.js:883:      why: `${draft.title} is not yet executable. Add channel, content, approval, and timing details.`,
+public/control-center/pages/publishing.js:925:    ["Approval", counts["needs approval"] ? "Pending" : counts.ready ? "Approved" : "Draft"],
+public/control-center/pages/publishing.js:960:      ${getAutoModeState().status === "waiting_approval" ? `
+public/control-center/pages/publishing.js:961:        <div class="simple-banner" style="margin-top:8px;"><strong>Approval needed:</strong> ${escapeHtml(asObject(getAutoModeState().approvalRequiredStep).reason || "Manual approval required.")}</div>
+public/control-center/pages/publishing.js:1101:            <select id="publishingApprovalInput" name="approvalStatus" class="setup-input">
+public/control-center/pages/publishing.js:1103:                <option value="${escapeHtml(status)}"${status === session.form.approvalStatus ? " selected" : ""}>${escapeHtml(titleCase(status))}</option>
+public/control-center/pages/publishing.js:1106:            ${fieldError(session, "approvalStatus", escapeHtml)}
+public/control-center/pages/publishing.js:1297:    `Approval: ${titleCase(session.form.approvalStatus || selectedItem?.approvalStatus || "draft")}`,
+public/control-center/pages/publishing.js:1542:        session.validation.contentItem = "Select or save a publishing draft before approval.";
+public/control-center/pages/publishing.js:1546:      session.form.approvalStatus = "approved";
+public/control-center/pages/publishing.js:1548:        updateLocalDraft(projectName, current.id, { ...buildLocalDraftPayload(session, "ready"), id: current.id, approvalStatus: "approved" });
+public/control-center/pages/publishing.js:1666:        mode: "auto_until_approval",
+public/control-center/pages/operations-centers.js:4:const notificationSessions = new Map();
+public/control-center/pages/operations-centers.js:88:    item?.notification_id ||
+public/control-center/pages/operations-centers.js:234:      preview: "Sort current notifications by severity and action urgency.",
+public/control-center/pages/operations-centers.js:244:      preview: "Turn the current notification stream into a short operations summary.",
+public/control-center/pages/operations-centers.js:245:      prompt: `Summarize the current operational notification signal for ${projectLabel} with focus on ${focusLabel}. Highlight approvals, provider health, publishing events, and urgent follow-up.`
+public/control-center/pages/operations-centers.js:464:  if (session.owner !== "all") items = items.filter((item) => asString(item.owner_role) === session.owner);
+public/control-center/pages/operations-centers.js:514:            <span>${context.escapeHtml(titleCase(item.assignee_role || item.owner_role || "-"))}</span>
+public/control-center/pages/operations-centers.js:540:          { label: "Owner role", value: titleCase(selectedItem.assignee_role || selectedItem.owner_role || "-") },
+public/control-center/pages/operations-centers.js:636:    overviewCopy: "Workflow, content, media, approval, publishing, and sync queues aligned into one operational command surface.",
+public/control-center/pages/operations-centers.js:973:                ${allowMarkRead && item.notification_id ? `<button class="btn btn-secondary btn-sm" type="button" data-mark-read="${context.escapeHtml(item.notification_id)}">Mark Read</button>` : ""}
+public/control-center/pages/operations-centers.js:987:  const notificationCenter = asObject(asObject(state.data.operations).notification_center);
+public/control-center/pages/operations-centers.js:988:  const session = ensureSession(notificationSessions, projectName, {
+public/control-center/pages/operations-centers.js:995:  const providerDisconnectAlerts = deriveProviderDisconnectAlerts(state, notificationCenter.provider_disconnect_alerts);
+public/control-center/pages/operations-centers.js:996:  const inboxItems = asArray(notificationCenter.notification_items).map((item) => ({
+public/control-center/pages/operations-centers.js:1001:    notification_id: asString(item.id),
+public/control-center/pages/operations-centers.js:1005:  const syncAlerts = asArray(notificationCenter.sync_failure_alerts).map((item) => ({ ...item, item_type: "sync" }));
+public/control-center/pages/operations-centers.js:1006:  const approvalAlerts = asArray(notificationCenter.approval_pending_alerts).map((item) => ({ ...item, item_type: "approval" }));
+public/control-center/pages/operations-centers.js:1007:  const publishAlerts = asArray(notificationCenter.publish_alerts).map((item) => ({ ...item, item_type: "publish" }));
+public/control-center/pages/operations-centers.js:1009:  const claimAlerts = asArray(notificationCenter.claim_risk_alerts).map((item) => ({ ...item, item_type: "claim" }));
+public/control-center/pages/operations-centers.js:1010:  const workflowAlerts = asArray(notificationCenter.workflow_completion_alerts).map((item) => ({ ...item, item_type: "workflow" }));
+public/control-center/pages/operations-centers.js:1013:    ...approvalAlerts,
+public/control-center/pages/operations-centers.js:1030:  if (session.focus === "approvals") listItems = approvalAlerts.map((item, index) => ({ ...item, _opsKey: getOpsItemKey(item, index, "approval") }));
+public/control-center/pages/operations-centers.js:1037:  const prompts = buildOpsAssistantPrompts("notification-center", projectName, selectedItem, titleCase(session.focus || "all"));
+public/control-center/pages/operations-centers.js:1041:    pageKey: "notification-center",
+public/control-center/pages/operations-centers.js:1044:    overviewCopy: "Route-aware operational alerts for approvals, sync issues, publishing, claim risk, provider health, and workflow completion.",
+public/control-center/pages/operations-centers.js:1047:      { label: "Unread Inbox", value: formatCount(notificationCenter.unread_count), helper: "Durable notifications" },
+public/control-center/pages/operations-centers.js:1048:      { label: "Critical", value: formatCount(notificationCenter.critical_count), helper: "Immediate action" },
+public/control-center/pages/operations-centers.js:1049:      { label: "Approvals", value: formatCount(approvalAlerts.length), helper: "Waiting for decisions" }
+public/control-center/pages/operations-centers.js:1053:      { value: "critical", label: "Critical", count: formatCount(notificationCenter.critical_count) },
+public/control-center/pages/operations-centers.js:1054:      { value: "approvals", label: "Approvals", count: formatCount(approvalAlerts.length) },
+public/control-center/pages/operations-centers.js:1062:        <input id="notificationCenterSearch" class="command-input" type="text" placeholder="Search alerts, sources, messages..." value="${context.escapeHtml(session.search)}">
+public/control-center/pages/operations-centers.js:1063:        <select id="notificationCenterSeverity" class="sidebar-select">
+public/control-center/pages/operations-centers.js:1069:    listCopy: session.focus === "inbox" ? "Review durable inbox history and mark notifications as read where supported." : "Review route-aware alerts, then inspect the selected signal in detail.",
+public/control-center/pages/operations-centers.js:1087:      "No notifications match the current filters.",
+public/control-center/pages/operations-centers.js:1090:    detailsTitle: selectedItem?.title || "Select a notification",
+public/control-center/pages/operations-centers.js:1096:          <p>${context.escapeHtml(selectedItem.message || selectedItem.body || "No notification detail available.")}</p>
+public/control-center/pages/operations-centers.js:1105:    ` : `<div class="empty-box">${context.escapeHtml("No notification is selected.")}</div>`,
+public/control-center/pages/operations-centers.js:1107:    actionsCopy: "Use only the real actions available here: refresh, open the owning page, and mark inbox notifications as read when supported.",
+public/control-center/pages/operations-centers.js:1110:        <button class="btn btn-primary" type="button" id="notificationCenterRefreshBtn">Refresh</button>
+public/control-center/pages/operations-centers.js:1112:        ${selectedItem?.notification_id ? `<button class="btn btn-secondary" type="button" data-mark-read="${context.escapeHtml(selectedItem.notification_id)}">Mark Read</button>` : ""}
+public/control-center/pages/operations-centers.js:1117:          <span>${context.escapeHtml(`${formatCount(approvalAlerts.length)} alerts`)}</span>
+public/control-center/pages/operations-centers.js:1129:    assistantCopy: "Use AI to rank urgency, interpret the selected signal, or summarize what the current notification stream means operationally.",
+public/control-center/pages/operations-centers.js:1134:  root.querySelector("#notificationCenterRefreshBtn")?.addEventListener("click", () => {
+public/control-center/pages/operations-centers.js:1140:          ops.notification_center = liveData;
+public/control-center/pages/operations-centers.js:1156:  root.querySelector("#notificationCenterSearch")?.addEventListener("input", (event) => {
+public/control-center/pages/operations-centers.js:1160:  root.querySelector("#notificationCenterSeverity")?.addEventListener("change", (event) => {
+public/control-center/pages/operations-centers.js:1166:      const notificationId = button.getAttribute("data-mark-read") || "";
+public/control-center/pages/operations-centers.js:1167:      if (!notificationId || !context.markProjectNotification) return;
+public/control-center/pages/operations-centers.js:1169:        await context.markProjectNotification(projectName, notificationId, { status: "read", read: true });
+public/control-center/pages/operations-centers.js:1173:        context.showError?.(error.message || "Failed to update notification.");
+public/control-center/pages/operations-centers.js:1220:    description: "Control workflow, content, media, approval, publishing, and sync queues from one central operations surface."
+public/control-center/pages/operations-centers.js:1279:export const notificationCenterRoute = {
+public/control-center/pages/operations-centers.js:1280:  id: "notification-center",
+public/control-center/pages/operations-centers.js:1284:    description: "Review sync failures, pending approvals, publish events, provider disconnects, claim risks, and workflow completion alerts."
+public/control-center/pages/operations-centers.js:1286:  template: `<section class="page is-active" data-page="notification-center"><div class="ops-shell"></div></section>`,
+public/control-center/pages/operations-centers.js:1299:          ops.notification_center = liveData;
+public/control-center/pages/home.js:125:  const notifications = asArray(operations.notifications?.items);
+public/control-center/pages/home.js:127:  const approvals = asArray(operations.approvals?.items);
+public/control-center/pages/home.js:129:  const roles = [
+public/control-center/pages/home.js:139:  return roles.map((role) => {
+public/control-center/pages/home.js:140:    const roleNotifications = notifications.filter((item) => asString(item?.owner_role).toLowerCase() === role.id);
+public/control-center/pages/home.js:141:    const roleTasks = tasks.filter((item) => asString(item?.owner_role).toLowerCase() === role.id);
+public/control-center/pages/home.js:142:    const roleApprovals = approvals.filter((item) => asString(item?.reviewer_role).toLowerCase() === role.id);
+public/control-center/pages/home.js:144:    const latest = roleNotifications[0] || roleTasks[0] || roleApprovals[0] || null;
+public/control-center/pages/home.js:149:      ...role,
+public/control-center/pages/home.js:153:        ? asString(latest.title || latest.summary || latest.action || role.fallback)
+public/control-center/pages/home.js:154:        : role.fallback
+public/control-center/pages/home.js:179:  const notifications = asArray(operations.notifications?.items);
+public/control-center/pages/home.js:207:  const unreadNotifications = notifications.filter((item) => !item?.read_at);
+public/control-center/pages/home.js:231:  const approvals = asArray(operations.approvals?.items);
+public/control-center/pages/home.js:283:  const pendingApprovals = approvals.filter((item) => {
+public/control-center/pages/home.js:357:    ...notifications.slice(0, 8).map((item) => ({
+public/control-center/pages/home.js:476:        hint: "Notifications, tasks, approvals",
+public/control-center/pages/home.js:538:      notifications: unreadNotifications.length,
+public/control-center/pages/ai-command.js:83:		summary: "Tasks, timelines, handoffs, approvals, and execution plans.",
+public/control-center/pages/ai-command.js:229:	if (/publish\s*now|send\s*external|paid\s*ads|final\s*approval/i.test(command)) {
+public/control-center/pages/ai-command.js:237:				reason: "Requires approval gate before external publishing actions."
+public/control-center/pages/ai-command.js:589:		operations: ["task plan", "workflow", "handoff", "approval", "timeline", "execution plan", "route", "publish", "status", "priority", "priorities", "blocking", "blocker", "readiness", "next", "do next"]
+public/control-center/pages/ai-command.js:702:			routeSuggestion("Publishing", "publishing", "Schedule the next batch with stronger timing and approval control."),
+public/control-center/pages/ai-command.js:1048:		role: "user",
+public/control-center/pages/ai-command.js:1057:		role: "assistant",
+public/control-center/pages/ai-command.js:1390:		if (message.role === "user") {
+public/control-center/pages/ai-command.js:1481:		.filter((msg) => msg.role === "assistant" && asString(msg.response?.outputType || msg.response?.output_type))
+public/control-center/pages/ai-command.js:1544:	return asArray(session.messages).slice().reverse().find((item) => item.role === "user") || null;
+public/control-center/pages/ai-command.js:1548:	return asArray(session.messages).slice().reverse().find((item) => item.role === "assistant") || null;
+public/control-center/pages/ai-command.js:1741:	const gate = asObject(autoMode?.approvalRequiredStep);
+public/control-center/pages/ai-command.js:1764:			${autoMode?.status === "waiting_approval" ? `
+public/control-center/pages/ai-command.js:1765:				<div class="aicmd-draft-state"><strong>Approval needed:</strong> ${escapeHtml(gate.reason || "Manual approval required.")}</div>
+public/control-center/pages/ai-command.js:2174:				mode: "auto_until_approval",
+public/control-center/pages/ai-command.js:2206:			aiAutomationState.result = "Approval gates pause Auto Mode for publishing, final approvals, external sends, paid ads, destructive edits, and credential actions.";
+public/control-center/pages/ai-command.js:2282:				showError?.("Copy failed. Clipboard permission might be blocked.");
+public/control-center/pages/ai-command.js:2304:				const message = session.messages.find((item) => item.id === ownerId && item.role === "assistant");
+public/control-center/pages/ai-command.js:2309:					? session.messages.slice(0, messageIndex).reverse().find((item) => item.role === "user")
+public/control-center/pages/ai-command.js:2441:			const messageIndex = session.messages.findIndex((item) => item.id === ownerId && item.role === "assistant");
+public/control-center/pages/ai-command.js:2442:			const message = session.messages.find((item) => item.id === ownerId && item.role === "assistant");
+public/control-center/pages/ai-command.js:2445:			const priorUserMessage = messageIndex > 0 ? session.messages.slice(0, messageIndex).reverse().find((item) => item.role === "user") : null;
+public/control-center/pages/media-studio-workspace.js:69:    bestUse: "Before approvals and publishing handoff, especially for regulated or claim-sensitive content.",
+public/control-center/pages/media-studio-workspace.js:84:    suggestedPrompt: "Act as Publishing Assistant. Produce a final publishing handoff summary with readiness status, blockers, approval notes, and channel delivery checklist."
+public/control-center/pages/media-studio-workspace.js:166:  if (["needs_review", "needs review", "review", "pending_approval"].includes(normalized)) return "needs_review";
+public/control-center/pages/media-studio-workspace.js:463:      approvals: [],
+public/control-center/pages/media-studio-workspace.js:513:    approval_state: asString(raw.approval_state || raw.approvalStatus || ""),
+public/control-center/pages/media-studio-workspace.js:517:    owner_role: asString(raw.owner_role || ownerRoleForMode(mode)),
+public/control-center/pages/media-studio-workspace.js:518:    review_role: asString(raw.review_role || MEDIA_ROLE_DEFAULTS.reviewRole),
+public/control-center/pages/media-studio-workspace.js:528:    linked_approvals: asArray(raw.linked_approvals),
+public/control-center/pages/media-studio-workspace.js:572:    const [mediaJobs, contentItems, tasks, approvals, handoffs, events, operations] = await Promise.all([
+public/control-center/pages/media-studio-workspace.js:587:    session.approvals = asArray(approvals.items);
+public/control-center/pages/media-studio-workspace.js:801:    owner_role: ownerRoleForMode(mode),
+public/control-center/pages/media-studio-workspace.js:802:    review_role: MEDIA_ROLE_DEFAULTS.reviewRole,
+public/control-center/pages/media-studio-workspace.js:929:    approval_status: normalizeApprovalStatus(readiness.readinessStatus),
+public/control-center/pages/media-studio-workspace.js:994:    source_role: selectedItem?.owner_role || ownerRoleForMode(session.form.mode || session.mode || "image"),
+public/control-center/pages/media-studio-workspace.js:995:    destination_role: MEDIA_ROLE_DEFAULTS.reviewRole,
+public/control-center/pages/media-studio-workspace.js:1178:  const approvalsConnected = hasBackend || capabilityFromOperations(operations, ["approval", "approvals"]);
+public/control-center/pages/media-studio-workspace.js:1185:    approval_backend: approvalsConnected,
+public/control-center/pages/media-studio-workspace.js:1629:      <div class="media-mode-tabs" role="tablist" aria-label="Media generation mode">
+public/control-center/pages/media-studio-workspace.js:1805:  const approvalStatus = ["approved", "publishing_ready", "sent_to_publishing"].includes(readinessStatus) ? "approved" : "pending";
+public/control-center/pages/media-studio-workspace.js:1812:    ["approval status", approvalStatus === "approved"]
+public/control-center/pages/media-studio-workspace.js:1818:    approvalStatus,
+public/control-center/pages/media-studio-workspace.js:1858:          <strong>${escapeHtml(titleCase(readiness.approvalStatus))}</strong>
+public/control-center/pages/media-studio-workspace.js:2243:    ["approval backend", readiness.approval_backend]
+public/control-center/pages/media-studio-workspace.js:2289:    source_role: source.owner_role || ownerRoleForMode(source.mode),
+public/control-center/pages/media-studio-workspace.js:2290:    destination_role: MEDIA_ROLE_DEFAULTS.handoffRole,
+public/control-center/pages/media-studio-workspace.js:2724:        const pendingApproval = session.approvals.find((approval) =>
+public/control-center/pages/media-studio-workspace.js:2725:          asString(approval.entity_type) === "media_job" &&
+public/control-center/pages/media-studio-workspace.js:2726:          asString(approval.entity_id) === asString(item.id) &&
+public/control-center/pages/media-studio-workspace.js:2727:          asString(approval.status) === "pending"
+public/control-center/pages/media-studio-workspace.js:2739:      showMessage?.("Media approval recorded.");
+public/control-center/pages/media-studio-workspace.js:2758:            reviewer_role: MEDIA_ROLE_DEFAULTS.reviewRole,
+public/control-center/pages/media-studio-workspace.js:2792:        const pendingApproval = session.approvals.find((approval) =>
+public/control-center/pages/media-studio-workspace.js:2793:          asString(approval.entity_type) === "media_job" &&
+public/control-center/pages/media-studio-workspace.js:2794:          asString(approval.entity_id) === asString(item.id) &&
+public/control-center/pages/media-studio-workspace.js:2795:          asString(approval.status) === "pending"
+public/control-center/pages/media-studio-workspace.js:2821:            description: session.form.objective || item.brief || "Review prompt, outputs, approval, and publishing readiness.",
+public/control-center/pages/media-studio-workspace.js:2822:            owner_role: item.owner_role || ownerRoleForMode(item.mode),
+public/control-center/pages/media-studio-workspace.js:2823:            assignee_role: item.owner_role || ownerRoleForMode(item.mode),
+public/control-center/pages/media-studio-workspace.js:2826:            handoff_roles: [MEDIA_ROLE_DEFAULTS.handoffRole, MEDIA_ROLE_DEFAULTS.reviewRole],
+public/control-center/pages/media-studio-workspace.js:3067:    description: "Run saved image, video, voice, and campaign-pack jobs with prompts, review, approvals, and publishing routing."
+public/control-center/pages/media-studio-workspace.js:3122:        ${session.loading ? `<div class="empty-box">Loading media jobs, handoffs, approvals, tasks, and event history...</div>` : ""}
+public/control-center/pages/research.js:10:  ai: { route: "ai-command", label: "AI Command", destinationRole: "admin", destinationDomain: "governance" }
+public/control-center/pages/research.js:78:  const handoffsByRole = asObject(operations.handoffs?.by_role);
+public/control-center/pages/research.js:79:  const approvalsByRole = asObject(operations.approvals?.by_reviewer_role);
+public/control-center/pages/research.js:84:      <div class="data-row"><span>Owner role</span><strong>${escapeHtml(titleCase(RESEARCH_ROLE_DEFAULTS.ownerRole))}</strong></div>
+public/control-center/pages/research.js:88:      <div class="data-row"><span>Strategist review queue</span><strong>${escapeHtml(formatCount(asArray(approvalsByRole[RESEARCH_ROLE_DEFAULTS.reviewRole]).length))}</strong></div>
+public/control-center/pages/research.js:920:          source_role: RESEARCH_ROLE_DEFAULTS.ownerRole,
+public/control-center/pages/research.js:921:          destination_role: ACTION_ROUTES.ai.destinationRole,
+public/control-center/pages/research.js:967:        source_role: RESEARCH_ROLE_DEFAULTS.ownerRole,
+public/control-center/pages/research.js:968:        destination_role: action.destinationRole,
+public/control-center/pages/research.js:976:          owner_role: RESEARCH_ROLE_DEFAULTS.ownerRole,
+public/control-center/pages/research.js:977:          review_role: RESEARCH_ROLE_DEFAULTS.reviewRole,
+public/control-center/pages/content-studio-workspace.js:115:    bestUse: "Before approval or sending drafts to Media Studio or Publishing.",
+public/control-center/pages/content-studio-workspace.js:185:  if (["needs_review", "needs review", "review", "pending_approval"].includes(normalized)) return "needs_review";
+public/control-center/pages/content-studio-workspace.js:320:  approvalStatus = "draft",
+public/control-center/pages/content-studio-workspace.js:334:    approval_status: asString(approvalStatus || "draft"),
+public/control-center/pages/content-studio-workspace.js:352:    approvalStatus: firstText(raw.approval_status, "draft"),
+public/control-center/pages/content-studio-workspace.js:369:    approvalStatus: firstText(seed.approvalStatus, "draft"),
+public/control-center/pages/content-studio-workspace.js:472:    approvalStatus: firstText(raw.approval_status, "draft")
+public/control-center/pages/content-studio-workspace.js:493:    approval_status: asString(raw.approval_status || "draft"),
+public/control-center/pages/content-studio-workspace.js:497:    linked_approvals: asArray(raw.linked_approvals),
+public/control-center/pages/content-studio-workspace.js:539:      approvals: [],
+public/control-center/pages/content-studio-workspace.js:649:    approval_status: firstText(selected?.approval_status, "draft"),
+public/control-center/pages/content-studio-workspace.js:651:    owner_role: CONTENT_ROLE_DEFAULTS.ownerRole,
+public/control-center/pages/content-studio-workspace.js:652:    review_role: CONTENT_ROLE_DEFAULTS.reviewRole,
+public/control-center/pages/content-studio-workspace.js:663:      approval_status: version.approval_status,
+public/control-center/pages/content-studio-workspace.js:753:    approvalStatus: firstText(selectedVersion.approval_status, payload.approval_status, "draft")
+public/control-center/pages/content-studio-workspace.js:781:    const [contentItems, tasks, approvals, handoffs, events, operations] = await Promise.all([
+public/control-center/pages/content-studio-workspace.js:794:    session.approvals = asArray(approvals.items);
+public/control-center/pages/content-studio-workspace.js:1382:        <div class="content-data-item"><span>Approval status</span><strong>${escapeHtml(titleCase(firstText(selected?.approval_status, "draft")))}</strong></div>
+public/control-center/pages/content-studio-workspace.js:1506:    source_role: CONTENT_ROLE_DEFAULTS.ownerRole,
+public/control-center/pages/content-studio-workspace.js:1507:    destination_role: CONTENT_ROLE_DEFAULTS.mediaRole,
+public/control-center/pages/content-studio-workspace.js:1530:        approval_status: firstText(selected?.approval_status, "draft"),
+public/control-center/pages/content-studio-workspace.js:1547:  const approvalStatus = firstText(selected?.approval_status, selectedItem?.approval_status, "draft");
+public/control-center/pages/content-studio-workspace.js:1553:    source_role: CONTENT_ROLE_DEFAULTS.ownerRole,
+public/control-center/pages/content-studio-workspace.js:1554:    destination_role: CONTENT_ROLE_DEFAULTS.handoffRole,
+public/control-center/pages/content-studio-workspace.js:1568:      approval_status: approvalStatus,
+public/control-center/pages/content-studio-workspace.js:1577:        approval_status: approvalStatus,
+public/control-center/pages/content-studio-workspace.js:1659:    approval_status: firstText(selected.approval_status, "draft"),
+public/control-center/pages/content-studio-workspace.js:1669:    source_role: CONTENT_ROLE_DEFAULTS.ownerRole,
+public/control-center/pages/content-studio-workspace.js:1670:    destination_role: CONTENT_ROLE_DEFAULTS.reviewRole,
+public/control-center/pages/content-studio-workspace.js:1864:        approvalStatus: firstText(handoff.approvalStatus, "draft"),
+public/control-center/pages/content-studio-workspace.js:1908:              approvalStatus: "needs_review",
+public/control-center/pages/content-studio-workspace.js:1922:              approvalStatus: "draft",
+public/control-center/pages/content-studio-workspace.js:1936:            approvalStatus: "draft",
+public/control-center/pages/content-studio-workspace.js:1950:          approvalStatus: "draft",
+public/control-center/pages/content-studio-workspace.js:2152:        current.approval_status = "approved";
+public/control-center/pages/content-studio-workspace.js:2160:        current.approval_status = "rejected";
+public/control-center/pages/content-studio-workspace.js:2176:          approvalStatus: "draft",
+public/control-center/pages/content-studio-workspace.js:2306:        ${session.loading ? `<div class="empty-box">Loading content records, approvals, tasks, handoffs, and events...</div>` : ""}
+public/control-center/pages/setup.js:360:          ${infoText ? `<button class="setup-info-icon" type="button" aria-label="Info about ${escapeHtml(label)}" title="${escapeHtml(infoText)}">i<span class="setup-info-tooltip" role="tooltip">${escapeHtml(infoText)}</span></button>` : ""}
+public/control-center/pages/setup.js:1197:            <div class="setup-smart-step-list" role="tablist" aria-label="Setup wizard steps">
+public/control-center/pages/setup.js:1203:                    <button class="setup-wizard-step ${index === 0 ? "is-active" : ""}" type="button" data-setup-step="${escapeHtml(step.id)}" role="tab" aria-current="${index === 0 ? "step" : "false"}" title="${escapeHtml(step.description)}">
+public/control-center/pages/campaign-studio.js:18:    roleHint: "Use this wave to introduce the campaign, establish the core promise, and create awareness."
+public/control-center/pages/campaign-studio.js:25:    roleHint: "Use this wave to reinforce trust, deepen understanding, and turn interest into intent."
+public/control-center/pages/campaign-studio.js:32:    roleHint: "Use this wave to push the strongest offer, close objections, and convert active intent."
+public/control-center/pages/campaign-studio.js:63:  "content-studio": { role: "writer", domain: "content" },
+public/control-center/pages/campaign-studio.js:64:  "media-studio": { role: "designer", domain: "media" },
+public/control-center/pages/campaign-studio.js:65:  publishing: { role: "publisher", domain: "publishing" },
+public/control-center/pages/campaign-studio.js:66:  "ads-manager": { role: "ads_operator", domain: "campaign" },
+public/control-center/pages/campaign-studio.js:67:  "ai-command": { role: "admin", domain: "governance" }
+public/control-center/pages/campaign-studio.js:118:      <div class="data-row"><span>Owner role</span><strong>${escapeHtml(titleCase(CAMPAIGN_ROLE_DEFAULTS.ownerRole))}</strong></div>
+public/control-center/pages/campaign-studio.js:120:      <div class="data-row"><span>Route map</span><strong>${escapeHtml(`Content ${titleCase(CAMPAIGN_ROUTE_ROLES["content-studio"].role)} • Media ${titleCase(CAMPAIGN_ROUTE_ROLES["media-studio"].role)} • Publishing ${titleCase(CAMPAIGN_ROUTE_ROLES.publishing.role)} • Ads ${titleCase(CAMPAIGN_ROUTE_ROLES["ads-manager"].role)}`)}</strong></div>
+public/control-center/pages/campaign-studio.js:454:    owner_role: CAMPAIGN_ROLE_DEFAULTS.ownerRole,
+public/control-center/pages/campaign-studio.js:455:    review_role: CAMPAIGN_ROLE_DEFAULTS.reviewRole,
+public/control-center/pages/campaign-studio.js:459:    linked_approvals: [],
+public/control-center/pages/campaign-studio.js:471:    source_role: CAMPAIGN_ROLE_DEFAULTS.ownerRole,
+public/control-center/pages/campaign-studio.js:472:    destination_role: destination.role,
+public/control-center/pages/campaign-studio.js:484:      owner_role: CAMPAIGN_ROLE_DEFAULTS.ownerRole,
+public/control-center/pages/campaign-studio.js:485:      review_role: CAMPAIGN_ROLE_DEFAULTS.reviewRole,
+public/control-center/pages/campaign-studio.js:845:  const approvalBlockers = [];
+public/control-center/pages/campaign-studio.js:877:  if (!values.executionNotes) approvalBlockers.push("Execution notes are missing, which makes approvals harder downstream.");
+public/control-center/pages/campaign-studio.js:878:  if (!values.audiencePrimary || !values.audienceNeed) approvalBlockers.push("Audience framing is incomplete for creative review.");
+public/control-center/pages/campaign-studio.js:879:  if (!values.productAngle) approvalBlockers.push("Product angle needs to be explicit so operators do not improvise.");
+public/control-center/pages/campaign-studio.js:886:    approvalBlockers.length ||
+public/control-center/pages/campaign-studio.js:900:    approvalBlockers,
+public/control-center/pages/campaign-studio.js:908:      approvalBlockers.length
+public/control-center/pages/campaign-studio.js:1342:        source_role: CAMPAIGN_ROLE_DEFAULTS.ownerRole,
+public/control-center/pages/campaign-studio.js:1343:        destination_role: CAMPAIGN_ROUTE_ROLES["ai-command"].role,
+public/control-center/pages/campaign-studio.js:1354:          owner_role: CAMPAIGN_ROLE_DEFAULTS.ownerRole,
+public/control-center/pages/campaign-studio.js:1355:          review_role: CAMPAIGN_ROLE_DEFAULTS.reviewRole,
+public/control-center/pages/campaign-studio.js:1741:                        <span>Suggested role</span>
+public/control-center/pages/campaign-studio.js:1756:                        : `<div class="campaign-wave-callout is-ready">${escapeHtml(wave.roleHint)}</div>`
+public/control-center/pages/campaign-studio.js:1853:                  helper: "Capture dependencies, packaging notes, approval guidance, or production instructions for the next operator.",
+public/control-center/pages/campaign-studio.js:1903:                  executionReadiness.approvalBlockers,
+public/control-center/pages/integrations.js:20:        permissionScope: "Website endpoint or root domain access",
+public/control-center/pages/integrations.js:38:        permissionScope: "Store URL + API consumer key/secret",
+public/control-center/pages/integrations.js:56:        permissionScope: "Store domain + admin access token",
+public/control-center/pages/integrations.js:75:        permissionScope: "Merchant ID + SP-API credentials",
+public/control-center/pages/integrations.js:92:        permissionScope: "Seller account + OAuth access token",
+public/control-center/pages/integrations.js:116:        permissionScope: "Page ID + business access token",
+public/control-center/pages/integrations.js:134:        permissionScope: "Business account ID + Graph API token",
+public/control-center/pages/integrations.js:152:        permissionScope: "Business account ID + access token",
+public/control-center/pages/integrations.js:170:        permissionScope: "Channel ID + OAuth token",
+public/control-center/pages/integrations.js:188:        permissionScope: "Company page ID + OAuth token",
+public/control-center/pages/integrations.js:212:        permissionScope: "Property ID + service account or OAuth token",
+public/control-center/pages/integrations.js:230:        permissionScope: "Container ID + workspace access",
+public/control-center/pages/integrations.js:247:        permissionScope: "Pixel ID + business token",
+public/control-center/pages/integrations.js:264:        permissionScope: "Pixel ID + business token",
+public/control-center/pages/integrations.js:281:        permissionScope: "Property URL + Search Console auth",
+public/control-center/pages/integrations.js:299:        permissionScope: "Endpoint URL + auth token",
+public/control-center/pages/integrations.js:325:        permissionScope: "SMTP host + port + sender + auth",
+public/control-center/pages/integrations.js:345:        permissionScope: "Provider API key + sender domain",
+public/control-center/pages/integrations.js:362:        permissionScope: "Audience ID + API key",
+public/control-center/pages/integrations.js:381:        permissionScope: "CRM account ID + API token",
+public/control-center/pages/integrations.js:405:        permissionScope: "Ad account ID + access token",
+public/control-center/pages/integrations.js:423:        permissionScope: "Customer ID + OAuth token",
+public/control-center/pages/integrations.js:441:        permissionScope: "Advertiser ID + access token",
+public/control-center/pages/integrations.js:465:        permissionScope: "Drive folder ID + OAuth token",
+public/control-center/pages/integrations.js:478:        purpose: "Operational alerting, workflow notifications, and team collaboration handoff.",
+public/control-center/pages/integrations.js:479:        whyItMatters: "Slack can surface sync failures, content approvals, and campaign alerts where the team already works.",
+public/control-center/pages/integrations.js:480:        enables: "Alerts, approvals, sync notifications, and workflow coordination.",
+public/control-center/pages/integrations.js:482:        permissionScope: "Workspace ID + bot token",
+public/control-center/pages/integrations.js:495:        purpose: "Bot-based operational alerts, approvals, and lightweight workflow execution.",
+public/control-center/pages/integrations.js:496:        whyItMatters: "Telegram can keep MH Assistant responsive when quick approvals or notifications are needed.",
+public/control-center/pages/integrations.js:497:        enables: "Alerts, commands, approval handoff, and ops notifications.",
+public/control-center/pages/integrations.js:499:        permissionScope: "Bot token + chat ID",
+public/control-center/pages/integrations.js:516:        permissionScope: "Workspace + integration token",
+public/control-center/pages/integrations.js:529:        purpose: "Automation routing for triggers, syncs, approvals, and external workflow handoffs.",
+public/control-center/pages/integrations.js:533:        permissionScope: "Webhook or scenario endpoint",
+public/control-center/pages/integrations.js:548:        enables: "Custom events, syncs, notifications, and system handoffs.",
+public/control-center/pages/integrations.js:550:        permissionScope: "Webhook URL + auth secret",
+public/control-center/pages/integrations.js:554:          { key: "eventScope", label: "Event scope", placeholder: "events, approvals, syncs" },
+public/control-center/pages/integrations.js:906:    write: ["automation triggers", "notifications"]
+public/control-center/pages/integrations.js:936:    permission_scope: integration.permissionScope,
+public/control-center/pages/integrations.js:1071:    permissionScopeSummary: asString(record.permission_scope) || integration.permissionScope,
+public/control-center/pages/integrations.js:1516:    card.permissionScopeSummary
+public/control-center/pages/integrations.js:2079:      <aside class="integration-drawer" role="dialog" aria-modal="true" aria-label="${escapeHtml(card.label)} setup" data-integration-drawer>
+public/control-center/pages/integrations.js:2166:      description: "Automation and coordination tools that help orchestrate tasks, handoffs, notifications, and AI-assisted operations.",
+public/control-center/pages/integrations.js:2402:      permission_scope: integration.permissionScope,
+public/control-center/pages/library.js:123:    "button, a, input, select, textarea, label, option, [role='button'], .library-action-menu, .library-action-dropdown, .library-drop-zone"
+public/control-center/pages/library.js:604:      merged.approval_status ||
+public/control-center/pages/library.js:721:    approval_status: asString(asset.approval_status || "draft"),
+public/control-center/pages/library.js:803:      : "Required assets are covered. Continue with classification and approvals."
+public/control-center/pages/library.js:2525:            <div id="libraryDropZone" class="library-drop-zone" role="button" tabindex="0">
+public/control-center/pages/settings.js:111:    service: "Safety & policy review",
+public/control-center/pages/settings.js:112:    description: "Checks claims, legal risk, and policy-sensitive output."
+public/control-center/pages/settings.js:179:    backendLabel: "Operating policy is active now and ready for backend persistence",
+public/control-center/pages/settings.js:190:        label: "Action policy",
+public/control-center/pages/settings.js:193:        options: ["Recommend only", "Prepare actions with review", "Auto-run trusted actions", "Act unless blocked by policy"]
+public/control-center/pages/settings.js:236:        path: "ai.approvalRequiredMode",
+public/control-center/pages/settings.js:273:    backendLabel: "Automation routing rules sync into the durable governance policy",
+public/control-center/pages/settings.js:290:        label: "Automation failure policy",
+public/control-center/pages/settings.js:306:    backendLabel: "Publishing defaults sync into the durable governance policy",
+public/control-center/pages/settings.js:322:        path: "publishing.approvalBeforePublish",
+public/control-center/pages/settings.js:347:    id: "approval",
+public/control-center/pages/settings.js:350:    backendLabel: "Approval policy syncs into the durable governance and team records",
+public/control-center/pages/settings.js:353:        path: "approval.contentOwner",
+public/control-center/pages/settings.js:354:        label: "Content approval owner",
+public/control-center/pages/settings.js:360:        path: "approval.mediaOwner",
+public/control-center/pages/settings.js:361:        label: "Media approval owner",
+public/control-center/pages/settings.js:367:        path: "approval.adsOwner",
+public/control-center/pages/settings.js:368:        label: "Ads approval owner",
+public/control-center/pages/settings.js:374:        path: "approval.requirements",
+public/control-center/pages/settings.js:375:        label: "What requires human approval",
+public/control-center/pages/settings.js:381:        path: "approval.revisionRules",
+public/control-center/pages/settings.js:387:        path: "approval.escalationNotes",
+public/control-center/pages/settings.js:398:    backendLabel: "Permissions are modeled now and ready for future role persistence",
+public/control-center/pages/settings.js:401:        path: "team.roles",
+public/control-center/pages/settings.js:451:    description: "Give both AI operators and human teams consistent starting points for campaigns, media, SEO, ads, and approvals.",
+public/control-center/pages/settings.js:485:        path: "presets.approvalPreset",
+public/control-center/pages/settings.js:502:    backendLabel: "Sync policy is a safe placeholder until connector-level persistence lands",
+public/control-center/pages/settings.js:559:        label: "Primary notification mode",
+public/control-center/pages/settings.js:570:        path: "alerts.notificationNotes",
+public/control-center/pages/settings.js:602:        placeholder: "Flag regulated claims, platform policy risk, and market-specific labeling issues."
+public/control-center/pages/settings.js:612:        label: "Legal / policy caution notes",
+public/control-center/pages/settings.js:634:    id: "team-permissions",
+public/control-center/pages/settings.js:636:    description: "Keep approval ownership, publishing permissions, and team-role authority together so governance stays understandable.",
+public/control-center/pages/settings.js:637:    sectionIds: ["approval", "team"]
+public/control-center/pages/settings.js:642:    description: "Review connector refresh behavior, import policy, and alert routing without turning Settings into a sync control center.",
+public/control-center/pages/settings.js:687:function extractDurableSettingsSnapshot(governancePolicy = {}, teamModel = {}) {
+public/control-center/pages/settings.js:688:  const governance = asObject(governancePolicy);
+public/control-center/pages/settings.js:689:  const bridge = asObject(governance.settings_bridge);
+public/control-center/pages/settings.js:692:  const owners = asObject(governance.approval_owners);
+public/control-center/pages/settings.js:693:  const rules = asObject(governance.policy_rules);
+public/control-center/pages/settings.js:706:    actionPolicy: asString(normalized.operating?.actionPolicy || bridge.action_policy)
+public/control-center/pages/settings.js:710:    approvalRequiredMode: asString(normalized.ai?.approvalRequiredMode || bridge.approval_mode),
+public/control-center/pages/settings.js:715:    approvalBeforePublish: rules.approval_before_publish ?? normalized.publishing?.approvalBeforePublish
+public/control-center/pages/settings.js:721:  normalized.approval = {
+public/control-center/pages/settings.js:722:    ...asObject(normalized.approval),
+public/control-center/pages/settings.js:723:    contentOwner: asString(normalized.approval?.contentOwner || owners.content),
+public/control-center/pages/settings.js:724:    mediaOwner: asString(normalized.approval?.mediaOwner || owners.media),
+public/control-center/pages/settings.js:725:    adsOwner: asString(normalized.approval?.adsOwner || owners.campaign)
+public/control-center/pages/settings.js:730:    roles: Array.isArray(normalized.team?.roles)
+public/control-center/pages/settings.js:731:      ? normalized.team.roles
+public/control-center/pages/settings.js:732:      : asArray(team.members).map((member) => titleCase(member.role)).filter(Boolean)
+public/control-center/pages/settings.js:740:    active_role: "admin",
+public/control-center/pages/settings.js:746:      owner_role: "admin"
+public/control-center/pages/settings.js:759:  const approval = asObject(form.approval);
+public/control-center/pages/settings.js:768:    execution_policy: {
+public/control-center/pages/settings.js:770:      action_policy: asString(operating.actionPolicy)
+public/control-center/pages/settings.js:772:    policy_rules: {
+public/control-center/pages/settings.js:773:      approval_before_publish: Boolean(publishing.approvalBeforePublish),
+public/control-center/pages/settings.js:780:    approval_owners: {
+public/control-center/pages/settings.js:781:      content: asString(approval.contentOwner) || "Marketing lead",
+public/control-center/pages/settings.js:782:      media: asString(approval.mediaOwner) || "Creative lead",
+public/control-center/pages/settings.js:783:      campaign: asString(approval.adsOwner) || "Operations lead",
+public/control-center/pages/settings.js:791:      approval_mode: asString(ai.approvalRequiredMode) || "Only high-risk",
+public/control-center/pages/settings.js:794:      action_policy: asString(operating.actionPolicy),
+public/control-center/pages/settings.js:839:  if (normalized === "approval_first" || normalized === "approval first" || normalized === "approval-first") return "Approval-First";
+public/control-center/pages/settings.js:901:          ? "Act unless blocked by policy"
+public/control-center/pages/settings.js:906:      modeNotes: "Use stronger automation only when approvals, assets, and governance settings are complete."
+public/control-center/pages/settings.js:912:      approvalRequiredMode: "Only high-risk",
+public/control-center/pages/settings.js:932:      approvalBeforePublish: true,
+public/control-center/pages/settings.js:937:    approval: {
+public/control-center/pages/settings.js:946:      roles: ["Strategist", "Writer", "Designer", "Publisher", "Analyst", "Compliance Reviewer", "Admin", "Brand owner"],
+public/control-center/pages/settings.js:953:      roleMatrix: {
+public/control-center/pages/settings.js:1025:      approvalPreset: "Balanced launch control",
+public/control-center/pages/settings.js:1045:      notificationNotes: "Escalate provider disconnects and claim safety alerts immediately; batch lower-risk completions."
+public/control-center/pages/settings.js:1051:      complianceAlerts: "Alert on regulated claims, platform policy conflicts, and high-risk launch copy.",
+public/control-center/pages/settings.js:1080:    governancePolicy: null
+public/control-center/pages/settings.js:1095:    const [teamResult, governanceResult] = await Promise.allSettled([
+public/control-center/pages/settings.js:1101:    session.governancePolicy = governanceResult.status === "fulfilled" ? asObject(governanceResult.value?.policy || governanceResult.value) : null;
+public/control-center/pages/settings.js:1103:    const durableSnapshot = extractDurableSettingsSnapshot(session.governancePolicy, session.teamModel);
+public/control-center/pages/settings.js:1107:        session.governancePolicy?.updated_at ||
+public/control-center/pages/settings.js:1153:  if (!form.approval.contentOwner || !form.approval.mediaOwner || !form.approval.adsOwner) {
+public/control-center/pages/settings.js:1157:  if (!Array.isArray(form.approval.requirements) || !form.approval.requirements.length) {
+public/control-center/pages/settings.js:1158:    risks.push("Human approval triggers are missing, which increases the chance of unsupervised high-risk output.");
+public/control-center/pages/settings.js:1178:    risks.push("Alert rules are missing, which reduces visibility into sync failures, approval delays, and provider issues.");
+public/control-center/pages/settings.js:1190:    approvalMode: `${form.ai.approvalRequiredMode} • ${form.approval.requirements.length} human triggers`,
+public/control-center/pages/settings.js:1335:    <div class="settings-role-matrix">
+public/control-center/pages/settings.js:1336:      <div class="settings-role-matrix-head">
+public/control-center/pages/settings.js:1337:        <h4>Team services / role matrix</h4>
+public/control-center/pages/settings.js:1340:      <div class="settings-role-grid">
+public/control-center/pages/settings.js:1341:        ${TEAM_ROLE_MATRIX.map((role) => {
+public/control-center/pages/settings.js:1342:          const config = asObject(getPathValue(session.form, `team.roleMatrix.${role.id}`));
+public/control-center/pages/settings.js:1345:            <div class="settings-role-card">
+public/control-center/pages/settings.js:1346:              <div class="settings-role-card-head">
+public/control-center/pages/settings.js:1348:                  <strong>${escapeHtml(role.label)}</strong>
+public/control-center/pages/settings.js:1349:                  <span>${escapeHtml(role.service)}</span>
+public/control-center/pages/settings.js:1352:              <p class="settings-role-description">${escapeHtml(role.description)}</p>
+public/control-center/pages/settings.js:1353:              <div class="settings-role-card-grid">
+public/control-center/pages/settings.js:1355:                  <label class="settings-field-label" for="team-role-${role.id}-authority">Authority</label>
+public/control-center/pages/settings.js:1357:                    id="team-role-${role.id}-authority"
+public/control-center/pages/settings.js:1359:                    data-setting-path="team.roleMatrix.${escapeHtml(role.id)}.authority"
+public/control-center/pages/settings.js:1375:                <label class="settings-toggle settings-toggle-compact" for="team-role-${role.id}-approve">
+public/control-center/pages/settings.js:1378:                    id="team-role-${role.id}-approve"
+public/control-center/pages/settings.js:1381:                    data-setting-path="team.roleMatrix.${escapeHtml(role.id)}.canApprove"
+public/control-center/pages/settings.js:1386:                <label class="settings-toggle settings-toggle-compact" for="team-role-${role.id}-publish">
+public/control-center/pages/settings.js:1389:                    id="team-role-${role.id}-publish"
+public/control-center/pages/settings.js:1392:                    data-setting-path="team.roleMatrix.${escapeHtml(role.id)}.canPublish"
+public/control-center/pages/settings.js:1397:                <label class="settings-toggle settings-toggle-compact" for="team-role-${role.id}-integrations">
+public/control-center/pages/settings.js:1400:                    id="team-role-${role.id}-integrations"
+public/control-center/pages/settings.js:1403:                    data-setting-path="team.roleMatrix.${escapeHtml(role.id)}.canManageIntegrations"
+public/control-center/pages/settings.js:1408:                <label class="settings-toggle settings-toggle-compact" for="team-role-${role.id}-defaults">
+public/control-center/pages/settings.js:1411:                    id="team-role-${role.id}-defaults"
+public/control-center/pages/settings.js:1414:                    data-setting-path="team.roleMatrix.${escapeHtml(role.id)}.canChangeDefaults"
+public/control-center/pages/settings.js:1447:      preview: "Explain the current project, AI, approval, publishing, and sync posture in one concise review.",
+public/control-center/pages/settings.js:1448:      prompt: `Summarize the current settings for ${projectLabel}. Cover project defaults, AI behavior, approvals, permissions, integrations, sync posture, and the main configuration tradeoffs.`
+public/control-center/pages/settings.js:1457:      preview: "Advise on AI and automation settings based on current risk and approval posture.",
+public/control-center/pages/settings.js:1458:      prompt: `Review the AI, automation, safety, approval, and sync settings for ${projectLabel}. Recommend the best operating posture and what should be tightened or relaxed next.`
+public/control-center/pages/settings.js:1509:          <p class="settings-section-copy">Keep project setup, AI behavior, approvals, team access, and sync policy readable from one consistent workspace.</p>
+public/control-center/pages/settings.js:1524:          <strong>${escapeHtml(summary.approvalMode)}</strong>
+public/control-center/pages/settings.js:1543:          <p>${escapeHtml(session.dirty ? "Unsaved changes are present. Saving writes this configuration into the durable team and governance records used across the system." : "All changes captured. The shared durable governance and team records are in sync.")}</p>
+public/control-center/pages/settings.js:1642:          <strong>${escapeHtml(summary.approvalMode)}</strong>
+public/control-center/pages/settings.js:1669:        <strong>Status:</strong> ${escapeHtml(formatRelativeTime(session.savedAt))}. Settings sync into the shared governance and team records so every page can reuse the same operating policy.
+public/control-center/pages/settings.js:1683:        <p>${escapeHtml(dirtyText)}. Saving writes this configuration into the durable team and governance records used across the system.</p>
+public/control-center/pages/settings.js:1723:      ? "Unsaved changes are present. Saving will update the shared durable governance and team records."
+public/control-center/pages/settings.js:1724:      : "All changes captured. The shared durable governance and team records are in sync.";
+public/control-center/pages/settings.js:1746:          const governancePayload = mapSettingsToGovernancePolicy(session.form);
+public/control-center/pages/settings.js:1752:              ...governancePayload
+public/control-center/pages/settings.js:1758:            destination_page: "governance",
+public/control-center/pages/settings.js:1759:            source_role: "admin",
+public/control-center/pages/settings.js:1760:            destination_role: "compliance_reviewer",
+public/control-center/pages/settings.js:1762:            destination_service_domain: "governance",
+public/control-center/pages/settings.js:1764:              entity_type: "governance_policy",
+public/control-center/pages/settings.js:1766:              route: "governance",
+public/control-center/pages/settings.js:1767:              label: "Governance policy"
+public/control-center/pages/settings.js:1770:              summary: "Settings updated the shared durable operating policy.",
+public/control-center/pages/settings.js:1781:          session.governancePolicy = governancePayload;
+public/control-center/pages/settings.js:1900:    description: "Configure project defaults, AI behavior, publishing rules, approvals, sync behavior, and governance."
+public/control-center/pages/settings.js:1914:              Select a project to configure system defaults, approvals, sync policies, and governance rules.
+public/control-center/pages/governance.js:8:const governanceSessions = new Map();
+public/control-center/pages/governance.js:50:  if (!governanceSessions.has(key)) {
+public/control-center/pages/governance.js:51:    governanceSessions.set(key, {
+public/control-center/pages/governance.js:60:  return governanceSessions.get(key);
+public/control-center/pages/governance.js:64:  return asObject(asObject(summary?.policy).settings_bridge?.form);
+public/control-center/pages/governance.js:68:  const approval = asObject(settings.approval);
+public/control-center/pages/governance.js:75:    policy_rules: {
+public/control-center/pages/governance.js:76:      approval_before_publish: Boolean(publishing.approvalBeforePublish),
+public/control-center/pages/governance.js:83:    approval_owners: {
+public/control-center/pages/governance.js:84:      content: asString(approval.contentOwner) || "Marketing lead",
+public/control-center/pages/governance.js:85:      media: asString(approval.mediaOwner) || "Creative lead",
+public/control-center/pages/governance.js:86:      campaign: asString(approval.adsOwner) || "Operations lead",
+public/control-center/pages/governance.js:94:      approval_mode: asString(ai.approvalRequiredMode) || "Only high-risk",
+public/control-center/pages/governance.js:96:      approval_before_publish: Boolean(publishing.approvalBeforePublish)
+public/control-center/pages/governance.js:102:  return asArray(summary?.sections?.approval_queue).find((item) =>
+public/control-center/pages/governance.js:121:    session.error = error.message || "Failed to load governance console.";
+public/control-center/pages/governance.js:138:    <div class="governance-metric">
+public/control-center/pages/governance.js:154:      <div class="governance-card-list">
+public/control-center/pages/governance.js:156:          <div class="governance-card">
+public/control-center/pages/governance.js:157:            <div class="governance-card-head">
+public/control-center/pages/governance.js:168:        ${Object.entries(escalationChain).map(([risk, roles]) => `
+public/control-center/pages/governance.js:171:            <span>${escapeHtml(asArray(roles).map(titleCase).join(" -> ") || "No escalation path")}</span>
+public/control-center/pages/governance.js:185:    <div class="governance-flag-list">
+public/control-center/pages/governance.js:187:        <div class="governance-flag">
+public/control-center/pages/governance.js:198:    ...asArray(item.policy_flags),
+public/control-center/pages/governance.js:207:    <article class="governance-card">
+public/control-center/pages/governance.js:208:      <div class="governance-card-head">
+public/control-center/pages/governance.js:210:          <div class="panel-kicker">${escapeHtml(titleCase(item.entity_type || "approval"))}</div>
+public/control-center/pages/governance.js:215:      <div class="governance-meta">
+public/control-center/pages/governance.js:221:      <p class="governance-copy">${escapeHtml(item.summary || "Awaiting review and decision.")}</p>
+public/control-center/pages/governance.js:222:      ${renderFlagList(flags, "No extra policy flags were attached to this approval.", escapeHtml)}
+public/control-center/pages/governance.js:223:      <textarea id="${escapeHtml(noteId)}" class="setup-input setup-textarea governance-note" rows="3" placeholder="Add a decision reason, change request, or escalation note.">${escapeHtml(item.decision_note || "")}</textarea>
+public/control-center/pages/governance.js:224:      <div class="governance-actions">
+public/control-center/pages/governance.js:225:        <button class="btn btn-primary" type="button" data-governance-decision="approved" data-approval-id="${escapeHtml(item.id)}">Approve</button>
+public/control-center/pages/governance.js:226:        <button class="btn btn-secondary" type="button" data-governance-decision="rejected" data-approval-id="${escapeHtml(item.id)}">Reject</button>
+public/control-center/pages/governance.js:227:        <button class="btn btn-secondary" type="button" data-governance-decision="changes_requested" data-approval-id="${escapeHtml(item.id)}">Request Changes</button>
+public/control-center/pages/governance.js:228:        <button class="btn btn-secondary" type="button" data-governance-decision="escalated" data-approval-id="${escapeHtml(item.id)}">Escalate</button>
+public/control-center/pages/governance.js:229:        <button class="btn btn-secondary" type="button" data-governance-decision="overridden" data-approval-id="${escapeHtml(item.id)}">Override</button>
+public/control-center/pages/governance.js:232:        <div class="governance-history">
+public/control-center/pages/governance.js:234:            <div class="governance-history-item">
+public/control-center/pages/governance.js:245:function renderReviewCard(item, type, escapeHtml, approval) {
+public/control-center/pages/governance.js:254:    <article class="governance-card">
+public/control-center/pages/governance.js:255:      <div class="governance-card-head">
+public/control-center/pages/governance.js:260:        <span class="card-badge ${approval ? "warning" : "neutral"}">${escapeHtml(approval ? "In approval queue" : "Not requested")}</span>
+public/control-center/pages/governance.js:262:      <div class="governance-meta">
+public/control-center/pages/governance.js:267:      ${approval ? `
+public/control-center/pages/governance.js:269:          <strong>Linked approval:</strong> ${escapeHtml(approval.title || approval.id)} • ${escapeHtml(titleCase(approval.status))}
+public/control-center/pages/governance.js:272:        <div class="governance-actions">
+public/control-center/pages/governance.js:276:            data-governance-request-approval="true"
+public/control-center/pages/governance.js:297:    <div class="governance-timeline">
+public/control-center/pages/governance.js:299:        <div class="governance-timeline-item">
+public/control-center/pages/governance.js:300:          <div class="governance-timeline-dot"></div>
+public/control-center/pages/governance.js:301:          <div class="governance-timeline-copy">
+public/control-center/pages/governance.js:313:  const policy = asObject(summary?.policy);
+public/control-center/pages/governance.js:314:  const rules = asObject(policy.policy_rules);
+public/control-center/pages/governance.js:315:  const owners = asObject(policy.approval_owners);
+public/control-center/pages/governance.js:318:    <div class="governance-policy-grid">
+public/control-center/pages/governance.js:319:      <label class="settings-toggle" for="governance-approval-before-publish">
+public/control-center/pages/governance.js:321:        <input id="governance-approval-before-publish" type="checkbox" class="settings-toggle-input" data-governance-policy="approval_before_publish" ${rules.approval_before_publish ? "checked" : ""} />
+public/control-center/pages/governance.js:324:      <label class="settings-toggle" for="governance-claim-review">
+public/control-center/pages/governance.js:326:        <input id="governance-claim-review" type="checkbox" class="settings-toggle-input" data-governance-policy="high_risk_claim_review_required" ${rules.high_risk_claim_review_required ? "checked" : ""} />
+public/control-center/pages/governance.js:329:      <label class="settings-toggle" for="governance-brand-safety">
+public/control-center/pages/governance.js:331:        <input id="governance-brand-safety" type="checkbox" class="settings-toggle-input" data-governance-policy="brand_safety_review_required" ${rules.brand_safety_review_required ? "checked" : ""} />
+public/control-center/pages/governance.js:334:      <label class="settings-toggle" for="governance-auto-escalate">
+public/control-center/pages/governance.js:336:        <input id="governance-auto-escalate" type="checkbox" class="settings-toggle-input" data-governance-policy="auto_escalate_critical_risk" ${rules.auto_escalate_critical_risk ? "checked" : ""} />
+public/control-center/pages/governance.js:339:      <label class="settings-toggle" for="governance-admin-override">
+public/control-center/pages/governance.js:341:        <input id="governance-admin-override" type="checkbox" class="settings-toggle-input" data-governance-policy="allow_admin_override" ${rules.allow_admin_override ? "checked" : ""} />
+public/control-center/pages/governance.js:344:      <label class="settings-toggle" for="governance-freeze-publishing">
+public/control-center/pages/governance.js:346:        <input id="governance-freeze-publishing" type="checkbox" class="settings-toggle-input" data-governance-policy="freeze_publishing" ${rules.freeze_publishing ? "checked" : ""} />
+public/control-center/pages/governance.js:350:        <label class="settings-field-label" for="governance-owner-content">Content owner</label>
+public/control-center/pages/governance.js:351:        <input id="governance-owner-content" class="settings-control" type="text" data-governance-owner="content" value="${escapeHtml(owners.content || "")}" />
+public/control-center/pages/governance.js:354:        <label class="settings-field-label" for="governance-owner-media">Media owner</label>
+public/control-center/pages/governance.js:355:        <input id="governance-owner-media" class="settings-control" type="text" data-governance-owner="media" value="${escapeHtml(owners.media || "")}" />
+public/control-center/pages/governance.js:358:        <label class="settings-field-label" for="governance-owner-publishing">Publishing owner</label>
+public/control-center/pages/governance.js:359:        <input id="governance-owner-publishing" class="settings-control" type="text" data-governance-owner="publishing" value="${escapeHtml(owners.publishing || "")}" />
+public/control-center/pages/governance.js:375:  const approvals = asArray(sections.approval_queue).map((item) => ({
+public/control-center/pages/governance.js:377:    queue_kind: "approval",
+public/control-center/pages/governance.js:378:    selected_key: `approval:${asString(item.id)}`,
+public/control-center/pages/governance.js:386:      ...asArray(item.policy_flags),
+public/control-center/pages/governance.js:391:    linked_approval: item
+public/control-center/pages/governance.js:395:    const approval = findApprovalForEntity(summary, item.entity_type, item.entity_id);
+public/control-center/pages/governance.js:402:      queue_status: approval?.status || item.status || "open",
+public/control-center/pages/governance.js:404:      queue_owner: approval?.reviewer || "Compliance Reviewer",
+public/control-center/pages/governance.js:405:      queue_created: approval?.created_at || item.updated_at || item.created_at,
+public/control-center/pages/governance.js:407:      linked_approval: approval
+public/control-center/pages/governance.js:412:    const approval = findApprovalForEntity(summary, item.entity_type, item.entity_id);
+public/control-center/pages/governance.js:419:      queue_status: approval?.status || item.status || "open",
+public/control-center/pages/governance.js:421:      queue_owner: approval?.reviewer || "Brand Reviewer",
+public/control-center/pages/governance.js:422:      queue_created: approval?.created_at || item.updated_at || item.created_at,
+public/control-center/pages/governance.js:424:      linked_approval: approval
+public/control-center/pages/governance.js:429:    const approval = findApprovalForEntity(summary, "publishing_job", item.entity_id);
+public/control-center/pages/governance.js:436:      queue_status: approval?.status || item.status || "open",
+public/control-center/pages/governance.js:438:      queue_owner: approval?.reviewer || "Publishing Reviewer",
+public/control-center/pages/governance.js:439:      queue_created: approval?.created_at || item.updated_at || item.created_at,
+public/control-center/pages/governance.js:441:      linked_approval: approval
+public/control-center/pages/governance.js:458:  return [...approvals, ...claims, ...brand, ...publish, ...escalations];
+public/control-center/pages/governance.js:463:  const itemLabel = asString(selectedItem?.queue_title || selectedItem?.title || "the selected governance item");
+public/control-center/pages/governance.js:466:      label: "Summarize governance state",
+public/control-center/pages/governance.js:467:      preview: "Explain the current approval pressure, risk level, and next governance priority.",
+public/control-center/pages/governance.js:468:      prompt: `Summarize the current governance state for ${projectLabel}. Cover policy pressure, pending approvals, risky claims, brand safety issues, publish blockers, and the next governance priority.`
+public/control-center/pages/governance.js:472:      preview: "Explain the selected governance item and what decision path is safest.",
+public/control-center/pages/governance.js:473:      prompt: `Review ${itemLabel} in Governance for ${projectLabel}. Explain the risk, what policy is implicated, and what decision path is safest next.`
+public/control-center/pages/governance.js:476:      label: "Find governance gaps",
+public/control-center/pages/governance.js:477:      preview: "Identify the highest-risk governance gaps and what rules or ownership need tightening.",
+public/control-center/pages/governance.js:478:      prompt: `Review Governance for ${projectLabel} with focus on ${focusLabel}. Identify the highest-risk governance gaps, where approval ownership is weak, and what rules need tightening next.`
+public/control-center/pages/governance.js:486:      <section class="page is-active" data-page="governance">
+public/control-center/pages/governance.js:488:          <div class="empty-box">Select a project to review approvals, policy violations, overrides, and audit history.</div>
+public/control-center/pages/governance.js:496:      <section class="page is-active" data-page="governance">
+public/control-center/pages/governance.js:498:          <div class="empty-box">Loading governance console...</div>
+public/control-center/pages/governance.js:506:      <section class="page is-active" data-page="governance">
+public/control-center/pages/governance.js:520:    approvals: queueItems.filter((item) => item.queue_kind === "approval").length,
+public/control-center/pages/governance.js:529:      approvals: "approval",
+public/control-center/pages/governance.js:540:  const policy = asObject(summary.policy);
+public/control-center/pages/governance.js:541:  const rules = asObject(policy.policy_rules);
+public/control-center/pages/governance.js:542:  const owners = asObject(policy.approval_owners);
+public/control-center/pages/governance.js:543:  const settingsBridge = asObject(policy.settings_bridge);
+public/control-center/pages/governance.js:547:    <section class="page is-active" data-page="governance">
+public/control-center/pages/governance.js:548:      <div class="governance-shell governance-workspace">
+public/control-center/pages/governance.js:554:              <p>Review policy pressure, current approval demand, recent governance activity, and what needs a decision next.</p>
+public/control-center/pages/governance.js:558:          <div class="governance-overview-grid">
+public/control-center/pages/governance.js:559:            ${renderMetric("Approval Queue", asArray(sections.approval_queue).length, "Awaiting decision", escapeHtml)}
+public/control-center/pages/governance.js:560:            ${renderMetric("Policy Violations", asArray(sections.policy_violations).length, "Needs review", escapeHtml)}
+public/control-center/pages/governance.js:566:          <div class="governance-activity-list">
+public/control-center/pages/governance.js:569:                <div class="governance-activity-item">
+public/control-center/pages/governance.js:583:              <p>Keep the active rules, ownership, and settings bridge visible without duplicating separate governance cards.</p>
+public/control-center/pages/governance.js:586:          <div class="governance-policy-summary-grid">
+public/control-center/pages/governance.js:587:            <div class="governance-policy-block">
+public/control-center/pages/governance.js:589:              <div class="governance-rule-list">
+public/control-center/pages/governance.js:591:                  <div class="governance-rule-item">
+public/control-center/pages/governance.js:598:            <div class="governance-policy-block">
+public/control-center/pages/governance.js:600:              <div class="governance-rule-list">
+public/control-center/pages/governance.js:602:                  <div class="governance-rule-item">
+public/control-center/pages/governance.js:609:            <div class="governance-policy-block">
+public/control-center/pages/governance.js:610:              <h4>Editable policy controls</h4>
+public/control-center/pages/governance.js:613:            <div class="governance-policy-block">
+public/control-center/pages/governance.js:614:              <h4>Open policy signal</h4>
+public/control-center/pages/governance.js:615:              ${renderFlagList(asArray(sections.policy_violations), "No policy violations are currently open.", escapeHtml)}
+public/control-center/pages/governance.js:617:                <strong>Settings bridge:</strong> ${escapeHtml(settingsBridge.source || "Not synced")} • approval mode ${escapeHtml(settingsBridge.approval_mode || "unknown")} • claim mode ${escapeHtml(settingsBridge.claim_safety_mode || "unknown")} • synced ${escapeHtml(settingsBridge.synced_at ? formatDateTime(settingsBridge.synced_at) : "not yet")}
+public/control-center/pages/governance.js:627:              <h3>Pending approvals and governance decisions</h3>
+public/control-center/pages/governance.js:628:              <p>Browse the combined governance queue, then inspect one selected item before taking action.</p>
+public/control-center/pages/governance.js:632:          <div class="governance-focus-tabs">
+public/control-center/pages/governance.js:635:              ["approvals", "Approvals", focusCounts.approvals],
+public/control-center/pages/governance.js:641:              <button class="governance-focus-tab${session.focus === value ? " is-active" : ""}" type="button" data-governance-focus="${escapeHtml(value)}">
+public/control-center/pages/governance.js:665:                        <button class="governance-select-link" type="button" data-governance-select="${escapeHtml(item.selected_key)}">
+public/control-center/pages/governance.js:676:                  : `<tr><td colspan="6"><div class="empty-box">No governance items are visible in this focus state.</div></td></tr>`}
+public/control-center/pages/governance.js:682:        <div class="governance-workspace-grid">
+public/control-center/pages/governance.js:687:                <h3>${escapeHtml(selectedItem?.queue_title || "Select a governance item")}</h3>
+public/control-center/pages/governance.js:688:                <p>${escapeHtml(selectedItem ? "Review the selected item, its flags, and linked approval history before deciding." : "Choose a governance item from the queue to inspect it.")}</p>
+public/control-center/pages/governance.js:694:                  <div class="governance-selected-summary">
+public/control-center/pages/governance.js:698:                  <div class="governance-selected-grid">
+public/control-center/pages/governance.js:699:                    <div class="governance-selected-item">
+public/control-center/pages/governance.js:703:                    <div class="governance-selected-item">
+public/control-center/pages/governance.js:707:                    <div class="governance-selected-item">
+public/control-center/pages/governance.js:711:                    <div class="governance-selected-item">
+public/control-center/pages/governance.js:715:                    <div class="governance-selected-item">
+public/control-center/pages/governance.js:719:                    <div class="governance-selected-item">
+public/control-center/pages/governance.js:724:                  ${renderFlagList(asArray(selectedItem.queue_flags), "No policy flags were attached to this item.", escapeHtml)}
+public/control-center/pages/governance.js:726:                    selectedItem.linked_approval
+public/control-center/pages/governance.js:729:                          <strong>Linked approval:</strong> ${escapeHtml(selectedItem.linked_approval.title || selectedItem.linked_approval.id)} • ${escapeHtml(titleCase(selectedItem.linked_approval.status || "pending"))}
+public/control-center/pages/governance.js:737:                        <div class="governance-activity-list">
+public/control-center/pages/governance.js:739:                            <div class="governance-activity-item">
+public/control-center/pages/governance.js:749:                : `<div class="empty-box">No governance item is selected.</div>`
+public/control-center/pages/governance.js:757:                <h3>Review, decide, and maintain policy controls</h3>
+public/control-center/pages/governance.js:758:                <p>Only real governance actions are shown here. Approve and reject actions appear only for real approvals.</p>
+public/control-center/pages/governance.js:761:            <div class="governance-action-stack">
+public/control-center/pages/governance.js:762:              <textarea id="governanceDecisionNote" class="setup-input setup-textarea governance-note" rows="4" placeholder="Add a decision reason, change request, or escalation note.">${escapeHtml(selectedItem?.decision_note || "")}</textarea>
+public/control-center/pages/governance.js:763:              <div class="governance-actions">
+public/control-center/pages/governance.js:764:                <button class="btn btn-secondary" type="button" data-governance-action="refresh">Refresh</button>
+public/control-center/pages/governance.js:765:                <button class="btn btn-primary" type="button" data-governance-action="save-policy">Save Governance Policy</button>
+public/control-center/pages/governance.js:766:                <button class="btn btn-secondary" type="button" data-governance-action="sync-settings"${Object.keys(settingsDraft).length ? "" : " disabled"}>Sync Settings Rules</button>
+public/control-center/pages/governance.js:768:                  selectedItem?.queue_kind === "approval"
+public/control-center/pages/governance.js:770:                      <button class="btn btn-primary" type="button" data-governance-decision="approved" data-approval-id="${escapeHtml(selectedItem.id)}">Approve</button>
+public/control-center/pages/governance.js:771:                      <button class="btn btn-secondary" type="button" data-governance-decision="rejected" data-approval-id="${escapeHtml(selectedItem.id)}">Reject</button>
+public/control-center/pages/governance.js:772:                      <button class="btn btn-secondary" type="button" data-governance-decision="changes_requested" data-approval-id="${escapeHtml(selectedItem.id)}">Request Changes</button>
+public/control-center/pages/governance.js:773:                      <button class="btn btn-secondary" type="button" data-governance-decision="escalated" data-approval-id="${escapeHtml(selectedItem.id)}">Escalate</button>
+public/control-center/pages/governance.js:774:                      <button class="btn btn-secondary" type="button" data-governance-decision="overridden" data-approval-id="${escapeHtml(selectedItem.id)}">Override</button>
+public/control-center/pages/governance.js:779:                  selectedItem && selectedItem.queue_kind !== "approval" && !selectedItem.linked_approval
+public/control-center/pages/governance.js:784:                        data-governance-request-approval="true"
+public/control-center/pages/governance.js:797:              <div class="governance-policy-summary-grid">
+public/control-center/pages/governance.js:798:                <div class="governance-policy-block">
+public/control-center/pages/governance.js:800:                  <div class="governance-activity-list">
+public/control-center/pages/governance.js:803:                        <div class="governance-activity-item">
+public/control-center/pages/governance.js:811:                <div class="governance-policy-block">
+public/control-center/pages/governance.js:813:                  <div class="governance-rule-list">
+public/control-center/pages/governance.js:814:                    ${Object.entries(asObject(summary.review_model?.escalation_chain)).map(([risk, roles]) => `
+public/control-center/pages/governance.js:815:                      <div class="governance-rule-item">
+public/control-center/pages/governance.js:817:                        <span>${escapeHtml(asArray(roles).map(titleCase).join(" -> ") || "No escalation path")}</span>
+public/control-center/pages/governance.js:832:              <p>Ask AI for governance help after you review the current state and selected decision item.</p>
+public/control-center/pages/governance.js:835:          <div class="governance-ai-toolbar">
+public/control-center/pages/governance.js:836:            <button class="btn btn-secondary" type="button" data-governance-open-ai>Open AI Command</button>
+public/control-center/pages/governance.js:840:              <button class="quick-action-btn" type="button" data-governance-ai-prompt="${index}">
+public/control-center/pages/governance.js:861:  Array.from(root.querySelectorAll("[data-governance-decision]")).forEach((button) => {
+public/control-center/pages/governance.js:863:      const approvalId = button.getAttribute("data-approval-id") || "";
+public/control-center/pages/governance.js:864:      const decision = button.getAttribute("data-governance-decision") || "";
+public/control-center/pages/governance.js:865:      const note = root.querySelector("#governanceDecisionNote")?.value?.trim() || `${titleCase(decision)} from Governance console.`;
+public/control-center/pages/governance.js:870:        await decideProjectApproval(projectName, approvalId, {
+public/control-center/pages/governance.js:873:          actor: "governance-console",
+public/control-center/pages/governance.js:876:        context.showMessage(`Approval ${titleCase(decision)} for ${approvalId}.`);
+public/control-center/pages/governance.js:879:        context.showError(error.message || "Failed to update approval.");
+public/control-center/pages/governance.js:884:  Array.from(root.querySelectorAll("[data-governance-focus]")).forEach((button) => {
+public/control-center/pages/governance.js:886:      session.focus = button.getAttribute("data-governance-focus") || "all";
+public/control-center/pages/governance.js:891:  Array.from(root.querySelectorAll("[data-governance-select]")).forEach((button) => {
+public/control-center/pages/governance.js:893:      session.selectedKey = button.getAttribute("data-governance-select") || "";
+public/control-center/pages/governance.js:898:  Array.from(root.querySelectorAll("[data-governance-request-approval]")).forEach((button) => {
+public/control-center/pages/governance.js:905:          title: `${button.getAttribute("data-title") || "Governance item"} approval`,
+public/control-center/pages/governance.js:908:          reviewer_role: "compliance_reviewer",
+public/control-center/pages/governance.js:909:          requested_by: "governance-console",
+public/control-center/pages/governance.js:912:          source_page: "governance",
+public/control-center/pages/governance.js:913:          route_target: "governance"
+public/control-center/pages/governance.js:915:        context.showMessage("Approval request added to the governance queue.");
+public/control-center/pages/governance.js:918:        context.showError(error.message || "Failed to request approval.");
+public/control-center/pages/governance.js:923:  Array.from(root.querySelectorAll("[data-governance-action]")).forEach((button) => {
+public/control-center/pages/governance.js:925:      const action = button.getAttribute("data-governance-action");
+public/control-center/pages/governance.js:932:      if (action === "save-policy") {
+public/control-center/pages/governance.js:933:        const policyRules = {};
+public/control-center/pages/governance.js:934:        Array.from(root.querySelectorAll("[data-governance-policy]")).forEach((control) => {
+public/control-center/pages/governance.js:935:          policyRules[control.getAttribute("data-governance-policy")] = Boolean(control.checked);
+public/control-center/pages/governance.js:938:        const approvalOwners = {};
+public/control-center/pages/governance.js:939:        Array.from(root.querySelectorAll("[data-governance-owner]")).forEach((control) => {
+public/control-center/pages/governance.js:940:          approvalOwners[control.getAttribute("data-governance-owner")] = control.value || "";
+public/control-center/pages/governance.js:945:            actor: "governance-console",
+public/control-center/pages/governance.js:946:            policy_rules: policyRules,
+public/control-center/pages/governance.js:947:            approval_owners: approvalOwners
+public/control-center/pages/governance.js:949:          context.showMessage("Governance policy saved.");
+public/control-center/pages/governance.js:952:          context.showError(error.message || "Failed to save governance policy.");
+public/control-center/pages/governance.js:960:          context.showError("No durable Settings snapshot was found in the governance bridge for this project.");
+public/control-center/pages/governance.js:966:            actor: "governance-console",
+public/control-center/pages/governance.js:969:          context.showMessage("Settings rules synced into enforceable Governance policy.");
+public/control-center/pages/governance.js:978:  Array.from(root.querySelectorAll("[data-governance-open-ai]")).forEach((button) => {
+public/control-center/pages/governance.js:987:  Array.from(root.querySelectorAll("[data-governance-ai-prompt]")).forEach((button) => {
+public/control-center/pages/governance.js:989:      const prompt = prompts[Number(button.getAttribute("data-governance-ai-prompt"))];
+public/control-center/pages/governance.js:998:export const governanceRoute = {
+public/control-center/pages/governance.js:999:  id: "governance",
+public/control-center/pages/governance.js:1003:    description: "Review approvals, policy violations, overrides, escalation, and audit visibility across content, media, campaigns, and publishing."
+public/control-center/pages/governance.js:1005:  template: `<section class="page is-active" data-page="governance"><div class="governance-shell"></div></section>`,
+public/control-center/pages/workflows.js:51:    purpose: "Package final channel payloads, approval checks, and publishing queue dependencies.",
+public/control-center/pages/workflows.js:577:      prompt: "Prepare a publishing package checklist with missing assets and approval dependencies."
+public/control-center/pages/workflows.js:649:  const gate = asObject(autoMode?.approvalRequiredStep);
+public/control-center/pages/workflows.js:705:        Hands-free safe execution with approval gates and inline logs.
+public/control-center/pages/workflows.js:734:        autoMode?.status === "waiting_approval"
+public/control-center/pages/workflows.js:737:              <strong>Approval needed:</strong> ${esc(gate.reason || "Manual approval required.")}
+public/control-center/pages/workflows.js:1523:          owner_role: "admin",
+public/control-center/pages/workflows.js:1524:          assignee_role: "admin",
+public/control-center/pages/workflows.js:1677:        mode: "auto_until_approval",
+public/control-center/pages/workflows.js:1758:    const approvalsTotal = Number(operations.approvals?.total || 0);
+public/control-center/pages/workflows.js:1865:              <strong>${escapeHtml(String(approvalsTotal))}</strong>
+public/control-center/index.html:17:    <div id="globalMessage" class="global-message" role="status" aria-live="polite"></div>
+public/control-center/index.html:18:    <div id="globalError" class="global-error" role="alert" aria-live="assertive"></div>
+public/control-center/index.html:21:    <div id="startupStepBanner" class="startup-step-banner" role="status" aria-live="polite" hidden>
+public/control-center/index.html:28:      role="alert"
+public/control-center/index.html:55:      role="alert"
+public/control-center/index.html:72:      <div class="loading-card" role="status" aria-live="polite">
+public/control-center/index.html:122:            <button class="nav-item" data-route="notification-center" data-page="notification-center" type="button">Notifications</button>
+public/control-center/index.html:123:            <button class="nav-item" data-route="governance" data-page="governance" type="button">Governance</button>
+public/control-center/index.html:141:        <header id="topbar" class="topbar" role="banner">
+public/control-center/index.html:194:              <span id="mobileRoleBadge" class="role-badge" aria-label="Current role">Admin</span>
+public/control-center/index.html:246:        <main id="workspace" class="workspace page-container" role="main" aria-live="polite">
+public/control-center/automation-engine.js:17:  { test: /publish\s*now|go\s*live|send\s*live|execute\s*publish|push\s*live/i, reason: "Publishing requires approval and manual confirmation." },
+public/control-center/automation-engine.js:21:  { test: /approve\s*final\s*asset|final\s*approval/i, reason: "Final approvals require a human decision." },
+public/control-center/automation-engine.js:22:  { test: /spend\s*money|charge|billing|payment|purchase/i, reason: "Spending actions require explicit manual approval." },
+public/control-center/automation-engine.js:23:  { test: /send\s*external|send\s*email|send\s*message|dm\b|sms\b/i, reason: "External sending requires approval." },
+public/control-center/automation-engine.js:24:  { test: /paid\s*ads|launch\s*ads|ad\s*spend|budget/i, reason: "Paid promotion requires approval." },
+public/control-center/automation-engine.js:25:  { test: /credential|api\s*key|secret|token|auth/i, reason: "Credential and provider connection actions require approval." }
+public/control-center/automation-engine.js:69:    approvalRequiredStep: null
+public/control-center/automation-engine.js:77:    mode: ["off", "guided", "auto_until_approval"].includes(normalizeText(parsed.mode))
+public/control-center/automation-engine.js:82:    status: ["idle", "running", "paused", "waiting_approval", "completed", "failed"].includes(normalizeText(parsed.status))
+public/control-center/automation-engine.js:87:    approvalRequiredStep: parsed.approvalRequiredStep == null ? null : asObject(parsed.approvalRequiredStep)
+public/control-center/automation-engine.js:99:    if (state.status === "running" || state.status === "waiting_approval") {
+public/control-center/automation-engine.js:238:      reason: "Publishing actions require manual approval before execution.",
+public/control-center/automation-engine.js:239:      whatWillHappen: "Auto Mode will stop at this step and wait for approval."
+public/control-center/automation-engine.js:535:      autoModeState.status = "waiting_approval";
+public/control-center/automation-engine.js:536:      autoModeState.approvalRequiredStep = {
+public/control-center/automation-engine.js:583:  autoModeState.approvalRequiredStep = null;
+public/control-center/automation-engine.js:609:  const mode = ["guided", "auto_until_approval"].includes(normalizeText(options.mode))
+public/control-center/automation-engine.js:620:  autoModeState.approvalRequiredStep = null;
+public/control-center/automation-engine.js:653:    autoModeState.mode = ["guided", "auto_until_approval"].includes(normalizeText(options.mode))
+public/control-center/automation-engine.js:658:  autoModeState.approvalRequiredStep = null;
+public/control-center/automation-engine.js:669:  autoModeState.approvalRequiredStep = null;
+public/control-center/automation-engine.js:676:  if (autoModeState.status !== "waiting_approval" || !autoModeState.approvalRequiredStep) return getAutoModeState();
+public/control-center/automation-engine.js:678:  const gate = asObject(autoModeState.approvalRequiredStep);
+public/control-center/automation-engine.js:691:  autoModeState.approvalRequiredStep = null;
+public/control-center/automation-engine.js:697:    pushAutoLog("Auto Mode completed after approval gate.", "success");
+public/control-center/automation-engine.js:709:  if (autoModeState.status !== "waiting_approval" || !autoModeState.approvalRequiredStep) return getAutoModeState();
+public/control-center/automation-engine.js:710:  const index = Number(autoModeState.approvalRequiredStep.index) || autoModeState.currentStepIndex;
+public/control-center/automation-engine.js:711:  pushAutoLog(`Skipped step ${index + 1} after approval gate.`, "warning", { stepIndex: index });
+public/control-center/automation-engine.js:713:  autoModeState.approvalRequiredStep = null;
+public/control-center/router.js:17:  notificationCenterRoute
+public/control-center/router.js:23:import { governanceRoute } from "./pages/governance.js";
+public/control-center/router.js:49:  "notification-center": ACTIVE_ROUTE_ROLES,
+public/control-center/router.js:50:  governance: ["compliance_reviewer", "admin", "analyst"],
+public/control-center/router.js:66:  [notificationCenterRoute.id]: notificationCenterRoute,
+public/control-center/router.js:78:  [governanceRoute.id]: governanceRoute
+public/control-center/router.js:116:  const detail = reason || `Route "${route}" is not available for the current role.`;
+public/control-center/router.js:122:      description: "This workspace route is blocked by role access rules."
+public/control-center/router.js:133:                To access this page, use the <strong>Role</strong> selector in the top bar and switch to a permitted role.
+public/control-center/router.js:177:        `Default role is "${DEFAULT_ROLE}". Use the Role selector in the top bar to switch.`
+public/control-center/app.js:75:const CONTROL_ROLE_STORAGE_KEY = "mh-control-role";
+public/control-center/app.js:100:  "notification-center": ACTIVE_ROUTE_ROLES,
+public/control-center/app.js:101:  governance: ["compliance_reviewer", "admin", "analyst"],
+public/control-center/app.js:177:  const stateRole = operations?.team_service_model?.active_role;
+public/control-center/app.js:249:  const routePermissions = Array.isArray(operations?.team_service_model?.route_permissions)
+public/control-center/app.js:250:    ? operations.team_service_model.route_permissions
+public/control-center/app.js:255:    const rolesStr = allowedRoles.join(", ");
+public/control-center/app.js:257:      `Route "${route}" requires one of: [${rolesStr}]. ` +
+public/control-center/app.js:258:      `Your current role is "${activeRole}". ` +
+public/control-center/app.js:259:      `Use the Role selector in the top bar to switch roles for internal testing.`
+public/control-center/app.js:277:  const allowedRoles = Array.isArray(explicitRule.roles)
+public/control-center/app.js:278:    ? explicitRule.roles.map((item) => String(item || "").trim().toLowerCase())
+public/control-center/app.js:299:  modal.setAttribute("role", "dialog");
+public/control-center/app.js:708:  if (!topbarRight || document.getElementById("roleSwitcherWrap")) return;
+public/control-center/app.js:711:  wrapper.id = "roleSwitcherWrap";
+public/control-center/app.js:712:  wrapper.className = "role-switcher";
+public/control-center/app.js:715:  label.htmlFor = "roleSwitcherSelect";
+public/control-center/app.js:716:  label.className = "role-switcher-label";
+public/control-center/app.js:720:  select.id = "roleSwitcherSelect";
+public/control-center/app.js:721:  select.className = "role-switcher-select";
+public/control-center/app.js:722:  select.title = "Internal test role override (stored in localStorage)";
+public/control-center/app.js:735:    const role = select.value;
+public/control-center/app.js:736:    try { localStorage.setItem(CONTROL_ROLE_STORAGE_KEY, role); } catch (_) {}
+public/control-center/app.js:768:function formatRoleLabel(role) {
+public/control-center/app.js:769:  const normalized = String(role || "").trim().toLowerCase();
+public/control-center/app.js:1958:  const notifications = Array.isArray(operations?.notifications?.items)
+public/control-center/app.js:1959:    ? operations.notifications.items
+public/control-center/app.js:1961:  const unread = notifications.filter((item) => !item?.read_at).length;
+public/control-center/app.js:1970:  const roleBadge = $("mobileRoleBadge");
+public/control-center/app.js:1971:  if (roleBadge) {
+public/control-center/app.js:1972:    roleBadge.textContent = formatRoleLabel(getActiveRole());
+public/control-center/styles.css:284:.role-badge {
+public/control-center/styles.css:895:.role-switcher-select {
+public/control-center/styles.css:1871:.role-switcher {
+public/control-center/styles.css:1883:.role-switcher-label {
+public/control-center/styles.css:1890:.role-switcher .role-switcher-select {
+public/control-center/styles.css:3290:  .role-switcher,
+public/control-center/styles.css:3517:  .role-badge {
+public/control-center/styles.css:6041:  section[data-page="notification-center"] {
+public/control-center/styles.css:6069:  section[data-page="notification-center"] .ops-table-wrap,
+public/control-center/styles.css:6079:  section[data-page="notification-center"] .ops-table,
+public/control-center/api.js:1461:    `/media-manager/project/${encodeURIComponent(projectName)}/approvals`,
+public/control-center/api.js:1464:    "Failed to create approval request"
+public/control-center/api.js:1475:    `/media-manager/project/${encodeURIComponent(projectName)}/approvals${suffix}`,
+public/control-center/api.js:1476:    "Failed to load approvals"
+public/control-center/api.js:1480:export async function decideProjectApproval(projectName, approvalId, payload = {}) {
+public/control-center/api.js:1485:  if (!approvalId) {
+public/control-center/api.js:1486:    throw new Error("Missing approval id");
+public/control-center/api.js:1490:    `/media-manager/project/${encodeURIComponent(projectName)}/approvals/${encodeURIComponent(approvalId)}/decision`,
+public/control-center/api.js:1493:    "Failed to update approval"
+public/control-center/api.js:1511:    `/media-manager/project/${encodeURIComponent(projectName)}/governance${suffix}`,
+public/control-center/api.js:1512:    "Failed to load governance summary"
+public/control-center/api.js:1522:    `/media-manager/project/${encodeURIComponent(projectName)}/governance/policy`,
+public/control-center/api.js:1523:    "Failed to load governance policy"
+public/control-center/api.js:1533:    `/media-manager/project/${encodeURIComponent(projectName)}/governance/policy`,
+public/control-center/api.js:1536:    "Failed to update governance policy"
+public/control-center/api.js:1825:    `/media-manager/project/${encodeURIComponent(projectName)}/notification-center`,
+public/control-center/api.js:1826:    "Failed to load notification center"
+public/control-center/api.js:2111:export async function markProjectNotification(projectName, notificationId, payload = {}) {
+public/control-center/api.js:2116:  if (!notificationId) {
+public/control-center/api.js:2117:    throw new Error("Missing notification id");
+public/control-center/api.js:2121:    `/media-manager/project/${encodeURIComponent(projectName)}/notifications/${encodeURIComponent(notificationId)}`,
+public/control-center/api.js:2124:    "Failed to update notification"
+public/control-center/ui/page-standard.js:52:    description: "Direct role-aware AI agents, structured tasks, artifacts, recommendations, and operating decisions.",
+public/control-center/ui/page-standard.js:80:    description: "Manage media jobs, prompt packs, storyboards, generated assets, approvals, and publishing handoffs.",
+public/control-center/ui/page-standard.js:115:    description: "Configure project settings, AI mode, roles, publishing rules, approvals, and readiness safeguards.",
+public/control-center/ui/page-standard.js:117:    secondary: { label: "Check Governance", route: "governance" }
+public/control-center/ui/page-standard.js:141:    { label: "Review blockers", description: "Use readiness gaps and alerts as the operating queue.", route: "notification-center" },
+public/control-center/ui/page-standard.js:183:    { label: "Approve content", description: "Move selected copy through the review workflow.", action: "focus-content-approval" },
+public/control-center/ui/page-standard.js:189:    { label: "Approve media", description: "Move selected creative through review.", action: "focus-media-approval" },
+public/control-center/ui/page-standard.js:217:    { label: "Save settings", description: "Persist project, AI, team, publishing, and approval configuration.", action: "focus-save-settings" },
+public/control-center/ui/page-standard.js:219:    { label: "Update roles", description: "Inspect team permissions and route access.", action: "focus-settings-roles" },
+public/control-center/ui/page-standard.js:259:    description: "Use structured prompts to delegate work to the right AI role and route artifacts onward.",
+public/control-center/ui/page-standard.js:262:      "Recommend which AI role should handle the highest-risk blocker next."
+public/control-center/ui/page-standard.js:331:    description: "Use AI to review AI mode, roles, publishing safeguards, and production readiness.",
+public/control-center/ui/page-standard.js:360:  "focus-content-approval": "#contentRequestApprovalBtn, #contentApproveBtn",
+public/control-center/ui/page-standard.js:364:  "focus-media-approval": "#mediaRequestApprovalBtn, #mediaApproveBtn",
+public/control-center/ui/page-standard.js:373:  "focus-settings-roles": "[data-settings-action='review-critical']",
+public/control-center/ui/page-standard.js:437:  return asArray(items).filter((item) => wanted.has(asString(item?.status || item?.execution_status || item?.approval_status || item?.publish_status).toLowerCase())).length;
+public/control-center/ui/page-standard.js:483:  const notifications = asArray(ops.notifications?.items);
+public/control-center/ui/page-standard.js:484:  const unread = notifications.filter((item) => !item?.read_at).length;
+public/control-center/ui/page-standard.js:553:    contentReview: asNumber(ops.content_items?.pending_approval_count, countByStatus(contentItems, ["in_review", "pending"])),
+public/control-center/ui/page-standard.js:570:    criticalAlerts: asNumber(ops.notification_center?.critical_count, 0),
+public/control-center/ui/page-standard.js:581:    teamRoles: asArray(ops.team_service_model?.role_matrix).length || asArray(ops.team?.members).length,
+public/control-center/ui/page-standard.js:582:    approvalsPending: asNumber(ops.approvals?.pending_count, 0),
+public/control-center/ui/page-standard.js:583:    approvalRulesReady: Boolean(ops.governance?.policy_rules),
+public/control-center/ui/page-standard.js:640:      card("In review", String(m.contentReview), "Copy waiting for approval or changes.", m.contentReview ? "warning" : "success"),
+public/control-center/ui/page-standard.js:652:      card("Manual publish ready", String(m.publishingReady), "Items ready for approval or manual release.", m.publishingReady ? "success" : "neutral"),
+public/control-center/ui/page-standard.js:677:      card("Team roles", String(m.teamRoles), "Roles and route permissions available to the operating system.", m.teamRoles ? "success" : "warning"),
+public/control-center/ui/page-standard.js:678:      card("Approval rules", m.approvalRulesReady ? "Configured" : "Default", "Publishing and claim-safety review policy state.", m.approvalRulesReady ? "success" : "warning"),
+public/control-center/ui/page-standard.js:704:      card("Ready", "Composer ready", "AI command composer and role mode are available.", "success"),
+public/control-center/ui/page-standard.js:706:      card("Next step", m.recommendations.length ? "Run recommendation" : "Ask a role agent", "Best AI action for the current state.", m.recommendations.length ? "warning" : "success")
+public/control-center/ui/page-standard.js:720:      card("Review", String(m.contentReview), "Content needing approval or revision.", m.contentReview ? "warning" : "success"),
+public/control-center/ui/page-standard.js:750:      card("Needs attention", String(m.approvalsPending), "Pending approvals that may affect policy and publishing.", m.approvalsPending ? "warning" : "success"),
+public/control-center/ui/page-standard.js:777:    settings: "Save the current operating policy and review production readiness."
+public/control-center/ui/page-standard.js:791:    <section class="std-page-header" data-ui-role="page-header">
+public/control-center/ui/page-standard.js:803:    <section class="std-section-block" data-ui-role="page-power-summary">
+public/control-center/ui/page-standard.js:811:      <div class="kpi-grid" id="stdKpiGrid" data-ui-role="kpi-cards"></div>
+public/control-center/ui/page-standard.js:814:    <section class="std-section-block" data-ui-role="current-status">
+public/control-center/ui/page-standard.js:822:      <div class="dashboard-grid" id="stdStatusGrid" data-ui-role="status-cards"></div>
+public/control-center/ui/page-standard.js:825:    <section class="std-main-grid" data-ui-role="main-dashboard">
+public/control-center/ui/page-standard.js:826:      <section class="std-work-area" data-ui-role="main-work-area">
+public/control-center/ui/page-standard.js:827:        <section class="std-smart-strip" id="stdSmartStrip" data-ui-role="smart-strip" hidden>
+public/control-center/ui/page-standard.js:838:      <aside class="std-main-right" data-ui-role="route-side-panels">
+public/control-center/ui/page-standard.js:839:        <section class="card std-action-panel" data-ui-role="action-panel">
+public/control-center/ui/page-standard.js:850:        <section class="card action-card" data-ui-role="smart-next-action">
+public/control-center/ui/page-standard.js:862:        <section class="card ai-panel" data-ui-role="ai-panel">
+public/control-center/ui/page-standard.js:874:        <details class="card std-advanced-details" data-ui-role="advanced-details">
+public/control-center/ui/page-standard.js:953:      { label: "Open Notifications", route: "notification-center" }
+public/control-center/ui/page-standard.js:956:      { label: "Open Governance", route: "governance" },
+public/control-center/ui/page-standard.js:1091:      { label: "Data used", value: "Content items, approvals, handoffs, AI rewrite requests" },
+public/control-center/ui/page-standard.js:1095:      { label: "Data used", value: "Media jobs, approvals, outputs, preview history" },
+public/control-center/ui/page-standard.js:1115:      { label: "Data used", value: "Governance policy, role matrix, project configuration" },
+public/control-center/ui/page-standard.js:1116:      { label: "Approval state", value: `${m.approvalsPending} pending approvals` }

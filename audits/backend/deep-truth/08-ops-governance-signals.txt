@@ -1,0 +1,941 @@
+===== OPS / GOVERNANCE / APPROVAL SIGNALS =====
+runtime/orchestrator-service/lib/security/provider-execution-gate.js:20:  REQUIRE_APPROVAL: "require_approval",
+runtime/orchestrator-service/lib/security/provider-execution-gate.js:39:    defaultDecision: PROVIDER_DECISION.REQUIRE_APPROVAL,
+runtime/orchestrator-service/lib/security/provider-execution-gate.js:55:    defaultDecision: PROVIDER_DECISION.REQUIRE_APPROVAL,
+runtime/orchestrator-service/lib/security/provider-execution-gate.js:63:    defaultDecision: PROVIDER_DECISION.REQUIRE_APPROVAL,
+runtime/orchestrator-service/lib/security/provider-execution-gate.js:136:  } else if (rule.defaultDecision === PROVIDER_DECISION.REQUIRE_APPROVAL && approved && configured) {
+runtime/orchestrator-service/lib/security/provider-execution-gate.js:165:    message: "Provider execution is gated until configuration, approval, and audit requirements are satisfied.",
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:5:  getGovernancePolicy,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:6:  listApprovals,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:7:  createApproval
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:10:const GOVERNANCE_APPROVAL_REQUIRED_RESPONSE = Object.freeze({
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:13:  code: "governance_approval_required",
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:14:  message: "This backend action requires governance approval before execution."
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:17:const GOVERNANCE_POLICY_BLOCKED_RESPONSE = Object.freeze({
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:20:  code: "governance_policy_blocked",
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:21:  message: "This backend action is blocked by the active governance policy."
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:24:const GOVERNANCE_APPROVAL_REJECTED_RESPONSE = Object.freeze({
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:27:  code: "governance_approval_rejected",
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:28:  message: "This backend action was rejected by governance approval."
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:32:  publishing_schedule: { highRisk: true, requiresGovernance: true, requiresApproval: false, freezeSensitive: true },
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:33:  publishing_reschedule: { highRisk: true, requiresGovernance: true, requiresApproval: false, freezeSensitive: true },
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:34:  publishing_ready: { highRisk: true, requiresGovernance: true, requiresApproval: true, freezeSensitive: true },
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:35:  publishing_publish: { highRisk: true, requiresGovernance: true, requiresApproval: true, freezeSensitive: true },
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:36:  publishing_fail: { highRisk: true, requiresGovernance: true, requiresApproval: false, freezeSensitive: true },
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:37:  // Non-recursive by design: approvals must be decidable without requiring another approval.
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:38:  approvals_decision: { highRisk: false, requiresGovernance: true, requiresApproval: false, freezeSensitive: false },
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:39:  // Non-recursive by design: governance policy updates remain write-key + governance-checked.
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:40:  governance_policy_update: { highRisk: true, requiresGovernance: true, requiresApproval: false, freezeSensitive: false },
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:41:  workflow_run: { highRisk: true, requiresGovernance: true, requiresApproval: true, freezeSensitive: false },
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:42:  ai_workflow_run: { highRisk: true, requiresGovernance: true, requiresApproval: true, freezeSensitive: false },
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:43:  ai_command_run: { highRisk: true, requiresGovernance: true, requiresApproval: true, freezeSensitive: false },
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:44:  ai_chat_run: { highRisk: true, requiresGovernance: true, requiresApproval: true, freezeSensitive: false },
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:45:  ai_guidance_run: { highRisk: true, requiresGovernance: true, requiresApproval: true, freezeSensitive: false },
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:46:  integration_connect: { highRisk: true, requiresGovernance: true, requiresApproval: false, freezeSensitive: false },
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:47:  integration_reconnect: { highRisk: true, requiresGovernance: true, requiresApproval: true, freezeSensitive: false },
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:48:  integration_test: { highRisk: true, requiresGovernance: true, requiresApproval: false, freezeSensitive: false },
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:49:  integration_sync: { highRisk: true, requiresGovernance: true, requiresApproval: true, freezeSensitive: false },
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:50:  integration_import_history: { highRisk: true, requiresGovernance: true, requiresApproval: true, freezeSensitive: false },
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:51:  integration_disconnect: { highRisk: true, requiresGovernance: true, requiresApproval: true, freezeSensitive: false },
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:52:  native_media_generate: { highRisk: true, requiresGovernance: true, requiresApproval: true, freezeSensitive: false },
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:53:  execute_publish_package: { highRisk: true, requiresGovernance: true, requiresApproval: true, freezeSensitive: true },
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:54:  execute_email_package: { highRisk: true, requiresGovernance: true, requiresApproval: true, freezeSensitive: false },
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:55:  generate_media_from_prompt: { highRisk: true, requiresGovernance: true, requiresApproval: true, freezeSensitive: false },
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:56:  build_ad_execution_package: { highRisk: true, requiresGovernance: true, requiresApproval: true, freezeSensitive: false },
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:59:    requiresGovernance: true,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:60:    requiresApproval: true,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:62:    policyApprovalKey: "require_approval_for_team_model_changes",
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:67:    requiresGovernance: true,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:68:    requiresApproval: true,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:70:    policyApprovalKey: "require_approval_for_source_registry_changes",
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:75:    requiresGovernance: true,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:76:    requiresApproval: false,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:78:    policyApprovalKey: "require_approval_for_project_setup_authority_changes",
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:86:  /(^|\.)approval_required_actions$/i,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:87:  /(^|\.)policy_rules/i,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:88:  /(^|\.)governance/i,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:103:const GOVERNANCE_APPROVAL_REDACED_KEY_PATTERN = /token|secret|key|password|credential|authorization|cookie/i;
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:130:    requiresGovernance: false,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:131:    requiresApproval: false,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:146:function findApprovedDecision(approvals, selector = {}) {
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:147:  const selectedApprovalId = asString(selector.approvalId);
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:152:  const approved = sortByNewest(Array.isArray(approvals) ? approvals : [])
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:159:      if (selectedApprovalId && asString(entry && entry.id) !== selectedApprovalId) {
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:184:    decision: responsePayload.code === "governance_policy_blocked" ? "policy_blocked" : "approval_required",
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:215:function redactGovernancePayload(value, keyHint = "", depth = 0) {
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:225:    return value.map((item) => redactGovernancePayload(item, keyHint, depth + 1));
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:239:    if (GOVERNANCE_APPROVAL_REDACED_KEY_PATTERN.test(normalizedKey) || GOVERNANCE_APPROVAL_REDACED_KEY_PATTERN.test(keyHint)) {
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:243:    redacted[normalizedKey] = redactGovernancePayload(item, normalizedKey, depth + 1);
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:248:function buildGovernanceApprovalPayloadContext(input = {}) {
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:249:  const payload = redactGovernancePayload(input.payload || input.requestPayload || input.body || {});
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:254:  const entityType = asString(input.entityType || input.entity_type || "governance_mutation");
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:277:    approvalFingerprint: fingerprint,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:282:    routeTarget: asString(input.routeTarget || input.route_target || route || "governance"),
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:284:    serviceDomain: asString(input.serviceDomain || input.service_domain || "governance")
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:288:function findMatchingGovernanceApproval(projectName, fingerprint, selector = {}) {
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:289:  const approvals = sortByNewest(listApprovals(projectName, { limit: 500 }) || []);
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:297:  return approvals.find((item) => {
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:298:    if (selectedFingerprint && asString(item.approval_fingerprint) !== selectedFingerprint) {
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:310:    if (selectedAction && normalizeAction(item.mutation_type || item.approval_type) !== selectedAction) {
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:326:function buildGovernanceApprovalResponse(approval) {
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:329:    error: "approval_required",
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:330:    code: "governance_approval_required",
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:331:    message: "This backend action requires governance approval before execution.",
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:332:    approval: {
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:334:      approval_id: asString(approval && approval.id)
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:339:function buildGovernanceRejectedResponse() {
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:340:  return GOVERNANCE_APPROVAL_REJECTED_RESPONSE;
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:343:function issueGovernanceApprovalRequest(input = {}) {
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:344:  const context = buildGovernanceApprovalPayloadContext(input);
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:345:  const existing = findMatchingGovernanceApproval(context.projectName, context.approvalFingerprint, context);
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:352:        approval: existing,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:353:        reason: "approval_already_granted"
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:360:        approval: existing,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:361:        response: buildGovernanceRejectedResponse(),
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:362:        reason: "approval_rejected"
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:368:      approval: existing,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:369:      response: buildGovernanceApprovalResponse(existing),
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:370:      reason: "approval_pending"
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:374:  const approval = createApproval(context.projectName, {
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:375:    title: input.title || `${context.action} approval required`,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:381:    approval_type: context.action,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:389:    summary: input.summary || `Approval required for ${context.action}`,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:391:    approval_fingerprint: context.approvalFingerprint,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:408:    approval,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:409:    response: buildGovernanceApprovalResponse(approval),
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:410:    reason: "approval_created"
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:414:function evaluateGovernanceApprovalLifecycle(input = {}) {
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:415:  const policyDecision = decideGovernanceMutation({
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:417:    skipApprovalGate: true
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:423:      approval: null,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:430:  const requiresApproval = Boolean(policyDecision.details && policyDecision.details.requiresApproval);
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:431:  if (!requiresApproval) {
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:434:      approval: null,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:441:  return issueGovernanceApprovalRequest(input);
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:478:function decideGovernanceMutation(input = {}) {
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:482:  let requiresApproval = Boolean(rule.requiresApproval);
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:484:  if (!rule.requiresGovernance) {
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:488:      requiresGovernance: false,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:489:      requiresApproval: false,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:494:  const governance = input.governancePolicy && typeof input.governancePolicy === "object"
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:495:    ? input.governancePolicy
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:497:  const policyRules = governance.policy_rules && typeof governance.policy_rules === "object"
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:498:    ? governance.policy_rules
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:504:      GOVERNANCE_POLICY_BLOCKED_RESPONSE,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:512:      GOVERNANCE_POLICY_BLOCKED_RESPONSE,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:520:    const requiresApprovalForAuthorityChanges = asBoolean(
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:521:      policyRules.require_approval_for_project_setup_authority_changes,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:529:        requiresGovernance: true,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:530:        requiresApproval: false,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:536:    if (!requiresApprovalForAuthorityChanges) {
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:540:        requiresGovernance: true,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:541:        requiresApproval: false,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:544:        policy_key: "require_approval_for_project_setup_authority_changes"
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:548:    requiresApproval = true;
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:551:  if (input.skipApprovalGate === true && requiresApproval) {
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:555:      requiresGovernance: true,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:556:      requiresApproval: true,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:557:      approvalGateDeferred: true,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:559:    }, "approval_gate_deferred");
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:562:  if (rule.policyApprovalKey && !asBoolean(policyRules[rule.policyApprovalKey], true)) {
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:566:      requiresGovernance: true,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:567:      requiresApproval: false,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:569:      policy_key: rule.policyApprovalKey
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:573:  if (!requiresApproval) {
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:577:      requiresGovernance: true,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:578:      requiresApproval: false,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:586:      GOVERNANCE_APPROVAL_REQUIRED_RESPONSE,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:592:  const approvalSelector = {
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:593:    approvalId: input.approvalId,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:598:  const hasApprovalSelector = Boolean(
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:599:    asString(approvalSelector.approvalId)
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:600:    || asString(approvalSelector.entityType)
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:601:    || asString(approvalSelector.entityId)
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:602:    || asString(approvalSelector.requestedAction)
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:605:  if (!hasApprovalSelector) {
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:607:      GOVERNANCE_APPROVAL_REQUIRED_RESPONSE,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:608:      "missing_approval_selector",
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:616:  const approvedDecision = findApprovedDecision(input.approvals || [], approvalSelector);
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:620:      GOVERNANCE_APPROVAL_REQUIRED_RESPONSE,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:621:      "missing_approved_governance_decision",
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:626:          approval_id: asString(approvalSelector.approvalId) || null,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:627:          entity_type: asString(approvalSelector.entityType) || null,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:628:          entity_id: asString(approvalSelector.entityId) || null,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:629:          requested_action: asString(approvalSelector.requestedAction) || null
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:638:    requiresGovernance: true,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:639:    requiresApproval: true,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:641:    approvalId: asString(approvedDecision.id) || null
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:645:function evaluateGovernanceMutationGate(input = {}) {
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:648:  let governancePolicy = null;
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:649:  let approvals = [];
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:653:    governancePolicy = getGovernancePolicy(projectName);
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:656:    governancePolicy = {};
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:660:    approvals = listApprovals(projectName, { limit: 500 });
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:662:    approvals = [];
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:665:  return decideGovernanceMutation({
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:670:    governancePolicy,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:671:    approvals
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:678:  GOVERNANCE_APPROVAL_REQUIRED_RESPONSE,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:679:  GOVERNANCE_APPROVAL_REJECTED_RESPONSE,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:680:  GOVERNANCE_POLICY_BLOCKED_RESPONSE,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:682:  buildGovernanceApprovalPayloadContext,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:683:  issueGovernanceApprovalRequest,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:684:  evaluateGovernanceApprovalLifecycle,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:685:  decideGovernanceMutation,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:686:  evaluateGovernanceMutationGate
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:48:  return /customer-operations|integrations|publishing|governance|approvals|sources|workflows|ai\/workflows/i.test(value);
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:57:  return /ai\/|native-media|api\/media|execute_|generate_media_from_prompt|build_ad_execution_package|integrations|publishing|governance|approvals|sources|workflows/i.test(value);
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:47:    match: /publishing|publish|approval|governance|claim|compliance/i,
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:74:    match: /workflow|task|queue|job|notification|handoff|event/i,
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:174:  if (publicAlias && /customer-operations|publishing|integration|governance|approval|sources/i.test(routePath)) {
+runtime/orchestrator-service/lib/security/runtime-security-enforcement.js:12:  /^\/(?:public\/)?media-manager\/project\/[^/]+\/approvals(?:\/)?$/i,
+runtime/orchestrator-service/lib/security/runtime-security-enforcement.js:13:  /^\/(?:public\/)?media-manager\/project\/[^/]+\/approvals\/[^/]+\/decision(?:\/)?$/i,
+runtime/orchestrator-service/lib/security/runtime-security-enforcement.js:14:  /^\/(?:public\/)?media-manager\/project\/[^/]+\/governance\/policy(?:\/)?$/i,
+runtime/orchestrator-service/lib/integrations/providers/ops.js:37:    readScopes: ['notifications'],
+runtime/orchestrator-service/lib/integrations/providers/ops.js:73:    readScopes: ['notifications'],
+runtime/orchestrator-service/lib/integrations/storage.js:55: * Use this for every read of critical ops state (collections, governance, team).
+runtime/orchestrator-service/lib/ai/providers/openai.js:302:              'For outputType "campaign_package", include campaignPackage with concept, targetAudience, offer, products, channels, launchPhases, contentAngles, adAngles, requiredAssets, missingBlockers, nextActions, suggestedHandoffs.',
+runtime/orchestrator-service/lib/ai/providers/openai.js:306:              'For outputType "operations_plan", include operationsPlan with tasks, timeline, owners, handoffs, approvals, dependencies.',
+runtime/orchestrator-service/lib/ai/provider-config.js:39:      'Build campaign concepts, launch plans, channel mix, audience segments, offer strategy, launch phases, assets, blockers, and handoffs.',
+runtime/orchestrator-service/lib/ai/provider-config.js:85:    purpose: 'tasks, timelines, handoffs, approvals, and execution planning',
+runtime/orchestrator-service/lib/ai/provider-config.js:89:      'Produce task plans, timelines, handoffs, approvals, ownership, and execution plans.',
+runtime/orchestrator-service/lib/ops/backbone.js:17:// Canonical defaults for policy_rules — these are the authoritative safe values.
+runtime/orchestrator-service/lib/ops/backbone.js:18:// Any governance file that is missing policy_rules (or missing individual keys)
+runtime/orchestrator-service/lib/ops/backbone.js:20:const DEFAULT_POLICY_RULES = {
+runtime/orchestrator-service/lib/ops/backbone.js:21:  approval_before_publish: true,
+runtime/orchestrator-service/lib/ops/backbone.js:27:  require_approval_for_team_model_changes: true,
+runtime/orchestrator-service/lib/ops/backbone.js:28:  require_approval_for_source_registry_changes: true,
+runtime/orchestrator-service/lib/ops/backbone.js:29:  require_approval_for_project_setup_authority_changes: true,
+runtime/orchestrator-service/lib/ops/backbone.js:44:  approvals: 300,
+runtime/orchestrator-service/lib/ops/backbone.js:46:  notifications: 400,
+runtime/orchestrator-service/lib/ops/backbone.js:49:  handoffs: 250
+runtime/orchestrator-service/lib/ops/backbone.js:60:    approval_statuses: ['not_requested', 'pending', 'approved', 'rejected'],
+runtime/orchestrator-service/lib/ops/backbone.js:66:    approval_states: ['not_requested', 'pending', 'approved', 'rejected']
+runtime/orchestrator-service/lib/ops/backbone.js:74:    intents: ['inspect', 'task', 'workflow', 'campaign', 'content', 'media', 'approval', 'recommendation']
+runtime/orchestrator-service/lib/ops/backbone.js:82:    route_targets: ['campaign-studio', 'content-studio', 'media-studio', 'publishing', 'ads-manager', 'task-center', 'governance']
+runtime/orchestrator-service/lib/ops/backbone.js:88:  approvals: {
+runtime/orchestrator-service/lib/ops/backbone.js:97:  notifications: {
+runtime/orchestrator-service/lib/ops/backbone.js:101:  handoffs: {
+runtime/orchestrator-service/lib/ops/backbone.js:106:    categories: ['entity', 'workflow', 'approval', 'sync', 'publish', 'ai_routing', 'system']
+runtime/orchestrator-service/lib/ops/backbone.js:127:    actions: ['draft_content', 'revise_copy', 'handoff_to_review', 'handoff_to_publishing']
+runtime/orchestrator-service/lib/ops/backbone.js:134:    actions: ['create_visuals', 'revise_visuals', 'handoff_media']
+runtime/orchestrator-service/lib/ops/backbone.js:141:    actions: ['create_video', 'review_video', 'handoff_video']
+runtime/orchestrator-service/lib/ops/backbone.js:161:    service_domains: ['research', 'governance'],
+runtime/orchestrator-service/lib/ops/backbone.js:167:    routes: ['governance', 'content-studio', 'media-studio', 'publishing'],
+runtime/orchestrator-service/lib/ops/backbone.js:168:    service_domains: ['governance'],
+runtime/orchestrator-service/lib/ops/backbone.js:174:    routes: ['home', 'settings', 'integrations', 'governance', 'workflows'],
+runtime/orchestrator-service/lib/ops/backbone.js:175:    service_domains: ['governance'],
+runtime/orchestrator-service/lib/ops/backbone.js:187:  governance: ['compliance_reviewer', 'admin', 'analyst'],
+runtime/orchestrator-service/lib/ops/backbone.js:201:    handoff_to: ['writer', 'designer', 'ads_operator', 'analyst'],
+runtime/orchestrator-service/lib/ops/backbone.js:209:    handoff_to: ['designer', 'video_lead', 'publisher', 'compliance_reviewer'],
+runtime/orchestrator-service/lib/ops/backbone.js:217:    handoff_to: ['publisher', 'ads_operator', 'compliance_reviewer'],
+runtime/orchestrator-service/lib/ops/backbone.js:225:    handoff_to: ['analyst', 'strategist'],
+runtime/orchestrator-service/lib/ops/backbone.js:227:    page_permissions: ['publishing', 'governance']
+runtime/orchestrator-service/lib/ops/backbone.js:233:    handoff_to: ['strategist', 'writer', 'ads_operator'],
+runtime/orchestrator-service/lib/ops/backbone.js:237:  governance: {
+runtime/orchestrator-service/lib/ops/backbone.js:238:    label: 'Governance',
+runtime/orchestrator-service/lib/ops/backbone.js:241:    handoff_to: ['admin'],
+runtime/orchestrator-service/lib/ops/backbone.js:242:    route_target: 'governance',
+runtime/orchestrator-service/lib/ops/backbone.js:243:    page_permissions: ['governance', 'settings']
+runtime/orchestrator-service/lib/ops/backbone.js:247:const APPROVAL_DOMAIN_MAP = {
+runtime/orchestrator-service/lib/ops/backbone.js:253:  approval: 'governance',
+runtime/orchestrator-service/lib/ops/backbone.js:254:  task: 'governance'
+runtime/orchestrator-service/lib/ops/backbone.js:395:        page_permissions: ['workflows', 'governance'],
+runtime/orchestrator-service/lib/ops/backbone.js:397:        service_domains: ['campaign', 'content', 'media', 'publishing', 'research', 'governance']
+runtime/orchestrator-service/lib/ops/backbone.js:419:        handoff_to: asArray(domain.handoff_to),
+runtime/orchestrator-service/lib/ops/backbone.js:513:  if (APPROVAL_DOMAIN_MAP[normalizedType]) {
+runtime/orchestrator-service/lib/ops/backbone.js:514:    return APPROVAL_DOMAIN_MAP[normalizedType];
+runtime/orchestrator-service/lib/ops/backbone.js:523:  if (routeTarget === 'governance') return 'governance';
+runtime/orchestrator-service/lib/ops/backbone.js:549:    handoff_roles: normalizeStringList(record.handoff_roles).length
+runtime/orchestrator-service/lib/ops/backbone.js:550:      ? normalizeStringList(record.handoff_roles)
+runtime/orchestrator-service/lib/ops/backbone.js:551:      : asArray(domain.handoff_to),
+runtime/orchestrator-service/lib/ops/backbone.js:796:    approvalsPath: path.join(opsDir, 'approvals.json'),
+runtime/orchestrator-service/lib/ops/backbone.js:797:    notificationsPath: path.join(opsDir, 'notifications.json'),
+runtime/orchestrator-service/lib/ops/backbone.js:800:    governancePath: path.join(opsDir, 'governance.json'),
+runtime/orchestrator-service/lib/ops/backbone.js:802:    handoffsPath: path.join(opsDir, 'handoffs.json')
+runtime/orchestrator-service/lib/ops/backbone.js:828:      'approvals',
+runtime/orchestrator-service/lib/ops/backbone.js:829:      'notifications',
+runtime/orchestrator-service/lib/ops/backbone.js:831:      'handoffs',
+runtime/orchestrator-service/lib/ops/backbone.js:845:  ensureJsonFile(paths.approvalsPath, []);
+runtime/orchestrator-service/lib/ops/backbone.js:846:  ensureJsonFile(paths.notificationsPath, []);
+runtime/orchestrator-service/lib/ops/backbone.js:848:  ensureJsonFile(paths.handoffsPath, []);
+runtime/orchestrator-service/lib/ops/backbone.js:850:  ensureJsonFile(paths.governancePath, {
+runtime/orchestrator-service/lib/ops/backbone.js:851:    approval_required_actions: ['publish', 'launch', 'budget_change', 'integration_reconnect', 'execution_mode_change'],
+runtime/orchestrator-service/lib/ops/backbone.js:854:      semi_auto_requires_approval: true,
+runtime/orchestrator-service/lib/ops/backbone.js:858:    policy_rules: {
+runtime/orchestrator-service/lib/ops/backbone.js:859:      approval_before_publish: true,
+runtime/orchestrator-service/lib/ops/backbone.js:865:      require_approval_for_team_model_changes: true,
+runtime/orchestrator-service/lib/ops/backbone.js:866:      require_approval_for_source_registry_changes: true,
+runtime/orchestrator-service/lib/ops/backbone.js:867:      require_approval_for_project_setup_authority_changes: true,
+runtime/orchestrator-service/lib/ops/backbone.js:872:    approval_owners: {
+runtime/orchestrator-service/lib/ops/backbone.js:883:      approval_mode: 'Only high-risk',
+runtime/orchestrator-service/lib/ops/backbone.js:885:      approval_before_publish: true
+runtime/orchestrator-service/lib/ops/backbone.js:923:      'approvals',
+runtime/orchestrator-service/lib/ops/backbone.js:924:      'notifications',
+runtime/orchestrator-service/lib/ops/backbone.js:926:      'handoffs',
+runtime/orchestrator-service/lib/ops/backbone.js:981:  if (value.includes('approval')) return 'approval';
+runtime/orchestrator-service/lib/ops/backbone.js:985:  if (value.includes('routing') || value.includes('handoff') || value.includes('ai_')) return 'ai_routing';
+runtime/orchestrator-service/lib/ops/backbone.js:1014:function createNotification(projectName, input = {}) {
+runtime/orchestrator-service/lib/ops/backbone.js:1016:  const items = readCollection(paths.notificationsPath);
+runtime/orchestrator-service/lib/ops/backbone.js:1018:  const notification = {
+runtime/orchestrator-service/lib/ops/backbone.js:1036:  items.unshift(notification);
+runtime/orchestrator-service/lib/ops/backbone.js:1037:  writeCollection(paths.notificationsPath, items, MAX_ITEMS.notifications);
+runtime/orchestrator-service/lib/ops/backbone.js:1039:  return notification;
+runtime/orchestrator-service/lib/ops/backbone.js:1042:function listNotifications(projectName, options = {}) {
+runtime/orchestrator-service/lib/ops/backbone.js:1044:  return listItems(readCollection(paths.notificationsPath), options);
+runtime/orchestrator-service/lib/ops/backbone.js:1047:function markNotification(projectName, notificationId, input = {}) {
+runtime/orchestrator-service/lib/ops/backbone.js:1049:  const items = readCollection(paths.notificationsPath);
+runtime/orchestrator-service/lib/ops/backbone.js:1050:  const index = items.findIndex((item) => asString(item.id) === asString(notificationId));
+runtime/orchestrator-service/lib/ops/backbone.js:1053:    throw new Error('Notification not found');
+runtime/orchestrator-service/lib/ops/backbone.js:1066:  writeJsonFile(paths.notificationsPath, items);
+runtime/orchestrator-service/lib/ops/backbone.js:1194: * Normalizes a raw governance file object so that:
+runtime/orchestrator-service/lib/ops/backbone.js:1195: *  - policy_rules is always an object (never null/undefined/non-object)
+runtime/orchestrator-service/lib/ops/backbone.js:1196: *  - Any missing policy_rules key is filled from DEFAULT_POLICY_RULES
+runtime/orchestrator-service/lib/ops/backbone.js:1197: *  - freeze_publishing and approval_before_publish are always explicit booleans
+runtime/orchestrator-service/lib/ops/backbone.js:1202:function normalizeGovernancePolicy(raw) {
+runtime/orchestrator-service/lib/ops/backbone.js:1204:  const rawRules = doc.policy_rules;
+runtime/orchestrator-service/lib/ops/backbone.js:1205:  // If policy_rules is not a plain object (missing, null, array, string, etc.)
+runtime/orchestrator-service/lib/ops/backbone.js:1212:    ...DEFAULT_POLICY_RULES,
+runtime/orchestrator-service/lib/ops/backbone.js:1216:    freeze_publishing: asBoolean(safeRules.freeze_publishing, DEFAULT_POLICY_RULES.freeze_publishing),
+runtime/orchestrator-service/lib/ops/backbone.js:1217:    approval_before_publish: asBoolean(safeRules.approval_before_publish, DEFAULT_POLICY_RULES.approval_before_publish)
+runtime/orchestrator-service/lib/ops/backbone.js:1222:    policy_rules: mergedRules
+runtime/orchestrator-service/lib/ops/backbone.js:1226:function getGovernancePolicy(projectName) {
+runtime/orchestrator-service/lib/ops/backbone.js:1230:    raw = readJsonFileDurable(paths.governancePath);
+runtime/orchestrator-service/lib/ops/backbone.js:1232:    // Governance file is corrupt — do not silently bypass enforcement.
+runtime/orchestrator-service/lib/ops/backbone.js:1233:    console.error(`[backbone] getGovernancePolicy: governance file corrupt for project ${projectName}: ${err.message}`);
+runtime/orchestrator-service/lib/ops/backbone.js:1236:  // null means the file does not exist yet — normalizeGovernancePolicy({}) gives safe defaults
+runtime/orchestrator-service/lib/ops/backbone.js:1237:  return normalizeGovernancePolicy(raw === null ? {} : raw);
+runtime/orchestrator-service/lib/ops/backbone.js:1240:function updateGovernancePolicy(projectName, patch = {}, actor = 'mh-assistant') {
+runtime/orchestrator-service/lib/ops/backbone.js:1242:  const current = getGovernancePolicy(projectName);
+runtime/orchestrator-service/lib/ops/backbone.js:1252:    policy_rules: {
+runtime/orchestrator-service/lib/ops/backbone.js:1253:      ...asObject(current.policy_rules),
+runtime/orchestrator-service/lib/ops/backbone.js:1254:      ...asObject(sourcePatch.policy_rules)
+runtime/orchestrator-service/lib/ops/backbone.js:1256:    approval_owners: {
+runtime/orchestrator-service/lib/ops/backbone.js:1257:      ...asObject(current.approval_owners),
+runtime/orchestrator-service/lib/ops/backbone.js:1258:      ...asObject(sourcePatch.approval_owners)
+runtime/orchestrator-service/lib/ops/backbone.js:1270:  writeJsonFile(paths.governancePath, next);
+runtime/orchestrator-service/lib/ops/backbone.js:1274:    type: 'governance_policy_updated',
+runtime/orchestrator-service/lib/ops/backbone.js:1275:    entity_type: 'governance_policy',
+runtime/orchestrator-service/lib/ops/backbone.js:1277:    title: 'Governance policy updated',
+runtime/orchestrator-service/lib/ops/backbone.js:1278:    summary: 'Governance rules were updated and persisted.',
+runtime/orchestrator-service/lib/ops/backbone.js:1281:      policy_rules: next.policy_rules,
+runtime/orchestrator-service/lib/ops/backbone.js:1289:function appendGovernanceOverride(projectName, input = {}) {
+runtime/orchestrator-service/lib/ops/backbone.js:1290:  const policy = getGovernancePolicy(projectName);
+runtime/orchestrator-service/lib/ops/backbone.js:1296:    approval_id: asString(input.approval_id),
+runtime/orchestrator-service/lib/ops/backbone.js:1309:  return updateGovernancePolicy(projectName, {
+runtime/orchestrator-service/lib/ops/backbone.js:1345:function buildPolicyFlags(record = {}, governance = {}) {
+runtime/orchestrator-service/lib/ops/backbone.js:1356:  if (asBoolean(governance.policy_rules?.freeze_publishing) && asString(record.entity_type) === 'publishing_job') {
+runtime/orchestrator-service/lib/ops/backbone.js:1360:      message: 'Publishing is frozen by governance policy.'
+runtime/orchestrator-service/lib/ops/backbone.js:1408:function buildBrandSafetyFlags(record = {}, governance = {}) {
+runtime/orchestrator-service/lib/ops/backbone.js:1434:  if (asString(record.entity_type) === 'media_job' && asBoolean(governance.policy_rules?.brand_safety_review_required, true)) {
+runtime/orchestrator-service/lib/ops/backbone.js:1435:    if (!asString(record.approval_state) || asString(record.approval_state) === 'not_requested') {
+runtime/orchestrator-service/lib/ops/backbone.js:1447:function buildPublishGuardrails(record = {}, governance = {}) {
+runtime/orchestrator-service/lib/ops/backbone.js:1464:  if (asBoolean(governance.policy_rules?.approval_before_publish, true) && !['approved', 'ready', 'published'].includes(status)) {
+runtime/orchestrator-service/lib/ops/backbone.js:1472:  if (asBoolean(governance.policy_rules?.freeze_publishing)) {
+runtime/orchestrator-service/lib/ops/backbone.js:1483:function buildGovernanceSummary(projectName, options = {}) {
+runtime/orchestrator-service/lib/ops/backbone.js:1485:  const governance = getGovernancePolicy(projectName);
+runtime/orchestrator-service/lib/ops/backbone.js:1487:  const approvals = readCollection(paths.approvalsPath);
+runtime/orchestrator-service/lib/ops/backbone.js:1493:  const pendingApprovals = approvals.filter((item) => asString(item.status) === 'pending');
+runtime/orchestrator-service/lib/ops/backbone.js:1494:  const escalationApprovals = approvals.filter((item) => asString(item.status) === 'escalated');
+runtime/orchestrator-service/lib/ops/backbone.js:1495:  const activeOverrides = asArray(governance.active_overrides).filter((item) => asString(item.status) === 'active');
+runtime/orchestrator-service/lib/ops/backbone.js:1497:  const approvalQueue = pendingApprovals.map((approval) => ({
+runtime/orchestrator-service/lib/ops/backbone.js:1498:    ...approval,
+runtime/orchestrator-service/lib/ops/backbone.js:1499:    entity_snapshot: buildEntitySnapshot(projectName, approval.entity_type, approval.entity_id),
+runtime/orchestrator-service/lib/ops/backbone.js:1500:    policy_flags: buildPolicyFlags(approval, governance)
+runtime/orchestrator-service/lib/ops/backbone.js:1505:    ...approvals.filter((item) => ['pending', 'changes_requested', 'escalated'].includes(asString(item.status)))
+runtime/orchestrator-service/lib/ops/backbone.js:1512:      status: asString(item.status || item.approval_status) || 'open',
+runtime/orchestrator-service/lib/ops/backbone.js:1523:      status: asString(item.status || item.approval_state),
+runtime/orchestrator-service/lib/ops/backbone.js:1524:      brand_safety_flags: buildBrandSafetyFlags(item, governance)
+runtime/orchestrator-service/lib/ops/backbone.js:1532:      publish_guardrails: buildPublishGuardrails(item, governance)
+runtime/orchestrator-service/lib/ops/backbone.js:1537:    ...approvalQueue.flatMap((item) =>
+runtime/orchestrator-service/lib/ops/backbone.js:1540:        source: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:1587:    ...escalationApprovals,
+runtime/orchestrator-service/lib/ops/backbone.js:1589:      asString(item.source_type) === 'approval' || asString(item.route_target) === 'governance'
+runtime/orchestrator-service/lib/ops/backbone.js:1598:    policy: governance,
+runtime/orchestrator-service/lib/ops/backbone.js:1608:      escalation_chain: governance.escalation_chain || ESCALATION_CHAINS
+runtime/orchestrator-service/lib/ops/backbone.js:1611:      approval_queue: approvalQueue,
+runtime/orchestrator-service/lib/ops/backbone.js:1619:        freeze_publishing: asBoolean(governance.policy_rules?.freeze_publishing),
+runtime/orchestrator-service/lib/ops/backbone.js:1620:        allow_admin_override: asBoolean(governance.policy_rules?.allow_admin_override, true)
+runtime/orchestrator-service/lib/ops/backbone.js:1629:      pending_approvals: pendingApprovals.length
+runtime/orchestrator-service/lib/ops/backbone.js:1640:    status: item.publish_status || item.approval_status || item.status || 'draft',
+runtime/orchestrator-service/lib/ops/backbone.js:1643:    priority: item.approval_status === 'pending' ? 'high' : 'normal',
+runtime/orchestrator-service/lib/ops/backbone.js:1650:      approval_status: item.approval_status,
+runtime/orchestrator-service/lib/ops/backbone.js:1665:    status: job.approval_state === 'pending' ? 'pending_approval' : (job.status || 'requested'),
+runtime/orchestrator-service/lib/ops/backbone.js:1668:    priority: job.approval_state === 'pending' ? 'high' : 'normal',
+runtime/orchestrator-service/lib/ops/backbone.js:1677:      approval_state: job.approval_state,
+runtime/orchestrator-service/lib/ops/backbone.js:1722:    linked_approvals: normalizeStringList(input.linked_approvals || current.linked_approvals),
+runtime/orchestrator-service/lib/ops/backbone.js:1785:  const approvalStatus = asString(input.approval_status || current.approval_status) || 'not_requested';
+runtime/orchestrator-service/lib/ops/backbone.js:1839:    approval_status: approvalStatus,
+runtime/orchestrator-service/lib/ops/backbone.js:1851:      publishStatus === 'published' ? 'distribution' : approvalStatus === 'approved' ? 'approved' : 'draft'
+runtime/orchestrator-service/lib/ops/backbone.js:1854:    linked_approvals: normalizeStringList(input.linked_approvals || current.linked_approvals),
+runtime/orchestrator-service/lib/ops/backbone.js:1855:    linked_handoffs: normalizeStringList(input.linked_handoffs || current.linked_handoffs),
+runtime/orchestrator-service/lib/ops/backbone.js:1860:    queue_status: asString(input.queue_status || current.queue_status || publishStatus || approvalStatus || status) || 'draft',
+runtime/orchestrator-service/lib/ops/backbone.js:1869:        approval_status: approvalStatus,
+runtime/orchestrator-service/lib/ops/backbone.js:1889:      approval_status: approvalStatus,
+runtime/orchestrator-service/lib/ops/backbone.js:1976:    approval_state: asString(input.approval_state || current.approval_state) || 'not_requested',
+runtime/orchestrator-service/lib/ops/backbone.js:1978:    approval_notes: normalizeNotes(input.approval_notes || current.approval_notes),
+runtime/orchestrator-service/lib/ops/backbone.js:1988:    linked_approvals: normalizeStringList(input.linked_approvals || current.linked_approvals),
+runtime/orchestrator-service/lib/ops/backbone.js:1989:    linked_handoffs: normalizeStringList(input.linked_handoffs || current.linked_handoffs),
+runtime/orchestrator-service/lib/ops/backbone.js:2127:  createNotification(paths.project, {
+runtime/orchestrator-service/lib/ops/backbone.js:2471:    handoff_roles: normalizeStringList(input.handoff_roles || current.handoff_roles || routing.handoff_roles),
+runtime/orchestrator-service/lib/ops/backbone.js:2527:  createNotification(paths.project, {
+runtime/orchestrator-service/lib/ops/backbone.js:2567:function createApproval(projectName, input = {}) {
+runtime/orchestrator-service/lib/ops/backbone.js:2569:  const items = readCollection(paths.approvalsPath);
+runtime/orchestrator-service/lib/ops/backbone.js:2570:  const governance = getGovernancePolicy(projectName);
+runtime/orchestrator-service/lib/ops/backbone.js:2577:    throw new Error('Approval requires entity_type and entity_id');
+runtime/orchestrator-service/lib/ops/backbone.js:2580:  const title = asString(input.title) || `${targetEntityType} approval`;
+runtime/orchestrator-service/lib/ops/backbone.js:2599:  const approval = {
+runtime/orchestrator-service/lib/ops/backbone.js:2600:    id: asString(current.id) || asString(input.id) || createId('approval'),
+runtime/orchestrator-service/lib/ops/backbone.js:2605:    mutation_type: asString(input.mutation_type || current.mutation_type) || asString(input.approval_type || current.approval_type) || targetEntityType,
+runtime/orchestrator-service/lib/ops/backbone.js:2608:    approval_fingerprint: asString(input.approval_fingerprint || current.approval_fingerprint),
+runtime/orchestrator-service/lib/ops/backbone.js:2623:    approval_type: asString(input.approval_type || current.approval_type) || targetEntityType,
+runtime/orchestrator-service/lib/ops/backbone.js:2626:    route_target: asString(input.route_target || current.route_target || entityLink?.route || routing.route_target || 'governance'),
+runtime/orchestrator-service/lib/ops/backbone.js:2636:    policy_flags: asArray(input.policy_flags || current.policy_flags || buildPolicyFlags(input, governance)),
+runtime/orchestrator-service/lib/ops/backbone.js:2638:    brand_safety_flags: asArray(input.brand_safety_flags || current.brand_safety_flags || buildBrandSafetyFlags(input, governance)),
+runtime/orchestrator-service/lib/ops/backbone.js:2652:      current.id ? 'approval_updated' : 'approval_requested',
+runtime/orchestrator-service/lib/ops/backbone.js:2663:  writeCollection(paths.approvalsPath, upsertById(items, approval), MAX_ITEMS.approvals);
+runtime/orchestrator-service/lib/ops/backbone.js:2666:    type: current.id ? 'approval_updated' : 'approval_requested',
+runtime/orchestrator-service/lib/ops/backbone.js:2667:    entity_type: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:2668:    entity_id: approval.id,
+runtime/orchestrator-service/lib/ops/backbone.js:2669:    title: approval.title,
+runtime/orchestrator-service/lib/ops/backbone.js:2670:    summary: approval.summary || 'A new approval was requested.',
+runtime/orchestrator-service/lib/ops/backbone.js:2671:    actor: approval.requested_by,
+runtime/orchestrator-service/lib/ops/backbone.js:2673:      entity_type: approval.entity_type,
+runtime/orchestrator-service/lib/ops/backbone.js:2674:      entity_id: approval.entity_id,
+runtime/orchestrator-service/lib/ops/backbone.js:2675:      risk_level: approval.risk_level,
+runtime/orchestrator-service/lib/ops/backbone.js:2676:      approval_type: approval.approval_type
+runtime/orchestrator-service/lib/ops/backbone.js:2679:  createNotification(paths.project, {
+runtime/orchestrator-service/lib/ops/backbone.js:2680:    category: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:2681:    type: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:2682:    title: `${approval.title} needs approval`,
+runtime/orchestrator-service/lib/ops/backbone.js:2683:    message: approval.summary || 'Review and decide on the requested operation.',
+runtime/orchestrator-service/lib/ops/backbone.js:2684:    body: approval.summary || 'Review and decide on the requested operation.',
+runtime/orchestrator-service/lib/ops/backbone.js:2685:    severity: approval.risk_level === 'high' || approval.risk_level === 'critical' ? 'warning' : 'info',
+runtime/orchestrator-service/lib/ops/backbone.js:2687:      entity_type: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:2688:      entity_id: approval.id,
+runtime/orchestrator-service/lib/ops/backbone.js:2689:      route: inferRouteTarget('approval', approval)
+runtime/orchestrator-service/lib/ops/backbone.js:2691:    entity_type: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:2692:    entity_id: approval.id
+runtime/orchestrator-service/lib/ops/backbone.js:2696:    queue_type: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:2697:    entity_type: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:2698:    entity_id: approval.id,
+runtime/orchestrator-service/lib/ops/backbone.js:2699:    title: approval.title,
+runtime/orchestrator-service/lib/ops/backbone.js:2700:    status: approval.status,
+runtime/orchestrator-service/lib/ops/backbone.js:2701:    assignee: approval.reviewer,
+runtime/orchestrator-service/lib/ops/backbone.js:2703:    priority: approval.risk_level === 'critical' ? 'critical' : approval.risk_level === 'high' ? 'high' : 'normal',
+runtime/orchestrator-service/lib/ops/backbone.js:2704:    route: 'governance',
+runtime/orchestrator-service/lib/ops/backbone.js:2706:      entity_type: approval.entity_type,
+runtime/orchestrator-service/lib/ops/backbone.js:2707:      entity_id: approval.entity_id,
+runtime/orchestrator-service/lib/ops/backbone.js:2708:      approval_type: approval.approval_type,
+runtime/orchestrator-service/lib/ops/backbone.js:2709:      requested_action: approval.requested_action,
+runtime/orchestrator-service/lib/ops/backbone.js:2711:      escalation_chain: approval.escalation_chain
+runtime/orchestrator-service/lib/ops/backbone.js:2715:  updateLinkedEntity(paths.project, approval.entity_type, approval.entity_id, (record) => {
+runtime/orchestrator-service/lib/ops/backbone.js:2716:    const nextApprovalStatus =
+runtime/orchestrator-service/lib/ops/backbone.js:2717:      approval.entity_type === 'media_job'
+runtime/orchestrator-service/lib/ops/backbone.js:2720:    const nextApprovalState =
+runtime/orchestrator-service/lib/ops/backbone.js:2721:      approval.entity_type === 'media_job'
+runtime/orchestrator-service/lib/ops/backbone.js:2727:      linked_approvals: [...new Set([approval.id, ...normalizeStringList(record.linked_approvals)])],
+runtime/orchestrator-service/lib/ops/backbone.js:2729:      history: appendHistory(record, 'approval_linked', input.actor || input.requested_by, {
+runtime/orchestrator-service/lib/ops/backbone.js:2730:        approval_id: approval.id,
+runtime/orchestrator-service/lib/ops/backbone.js:2731:        status: approval.status
+runtime/orchestrator-service/lib/ops/backbone.js:2735:    if (approval.entity_type === 'content_item') {
+runtime/orchestrator-service/lib/ops/backbone.js:2736:      nextRecord.approval_status = nextApprovalStatus;
+runtime/orchestrator-service/lib/ops/backbone.js:2738:      nextRecord.queue_status = 'pending_approval';
+runtime/orchestrator-service/lib/ops/backbone.js:2741:    if (approval.entity_type === 'media_job') {
+runtime/orchestrator-service/lib/ops/backbone.js:2742:      nextRecord.approval_state = nextApprovalState;
+runtime/orchestrator-service/lib/ops/backbone.js:2745:    if (approval.entity_type === 'content_item') {
+runtime/orchestrator-service/lib/ops/backbone.js:2747:    } else if (approval.entity_type === 'media_job') {
+runtime/orchestrator-service/lib/ops/backbone.js:2754:  return approval;
+runtime/orchestrator-service/lib/ops/backbone.js:2757:function listApprovals(projectName, options = {}) {
+runtime/orchestrator-service/lib/ops/backbone.js:2759:  return listItems(readCollection(paths.approvalsPath), options);
+runtime/orchestrator-service/lib/ops/backbone.js:2762:function decideApproval(projectName, approvalId, input = {}) {
+runtime/orchestrator-service/lib/ops/backbone.js:2764:  const items = readCollection(paths.approvalsPath);
+runtime/orchestrator-service/lib/ops/backbone.js:2766:  const targetId = asString(approvalId);
+runtime/orchestrator-service/lib/ops/backbone.js:2770:    throw new Error('Invalid approval decision');
+runtime/orchestrator-service/lib/ops/backbone.js:2775:    throw new Error('Approval not found');
+runtime/orchestrator-service/lib/ops/backbone.js:2808:      `approval_${decision}`,
+runtime/orchestrator-service/lib/ops/backbone.js:2819:  writeJsonFile(paths.approvalsPath, items);
+runtime/orchestrator-service/lib/ops/backbone.js:2822:    type: `approval_${decision}`,
+runtime/orchestrator-service/lib/ops/backbone.js:2823:    entity_type: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:2826:    summary: next.decision_note || `Approval ${decision}.`,
+runtime/orchestrator-service/lib/ops/backbone.js:2834:  createNotification(paths.project, {
+runtime/orchestrator-service/lib/ops/backbone.js:2835:    category: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:2836:    type: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:2838:    message: next.decision_note || `Approval was ${decision}.`,
+runtime/orchestrator-service/lib/ops/backbone.js:2839:    body: next.decision_note || `Approval was ${decision}.`,
+runtime/orchestrator-service/lib/ops/backbone.js:2842:      entity_type: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:2844:      route: inferRouteTarget('approval', next)
+runtime/orchestrator-service/lib/ops/backbone.js:2846:    entity_type: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:2850:  updateQueueEntity(paths.project, 'approval', next.id, {
+runtime/orchestrator-service/lib/ops/backbone.js:2864:      linked_approvals: [...new Set([next.id, ...normalizeStringList(record.linked_approvals)])],
+runtime/orchestrator-service/lib/ops/backbone.js:2866:      history: appendHistory(record, `linked_approval_${decision}`, input.actor, {
+runtime/orchestrator-service/lib/ops/backbone.js:2867:        approval_id: next.id,
+runtime/orchestrator-service/lib/ops/backbone.js:2873:      nextRecord.approval_status =
+runtime/orchestrator-service/lib/ops/backbone.js:2887:      nextRecord.approval_state =
+runtime/orchestrator-service/lib/ops/backbone.js:2921:      description: next.decision_note || 'Governance escalation requires follow-up.',
+runtime/orchestrator-service/lib/ops/backbone.js:2927:      service_domain: 'governance',
+runtime/orchestrator-service/lib/ops/backbone.js:2928:      route_target: 'governance',
+runtime/orchestrator-service/lib/ops/backbone.js:2929:      source_type: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:2940:    appendGovernanceOverride(paths.project, {
+runtime/orchestrator-service/lib/ops/backbone.js:2941:      approval_id: next.id,
+runtime/orchestrator-service/lib/ops/backbone.js:2953:function createHandoff(projectName, input = {}) {
+runtime/orchestrator-service/lib/ops/backbone.js:2955:  const items = readCollection(paths.handoffsPath);
+runtime/orchestrator-service/lib/ops/backbone.js:2960:    throw new Error('Handoff requires destination_page');
+runtime/orchestrator-service/lib/ops/backbone.js:2980:  const handoff = {
+runtime/orchestrator-service/lib/ops/backbone.js:2981:    id: asString(current.id) || asString(input.id) || createId('handoff'),
+runtime/orchestrator-service/lib/ops/backbone.js:2983:    type: asString(input.type) || 'route_handoff',
+runtime/orchestrator-service/lib/ops/backbone.js:3005:      current.id ? 'handoff_updated' : 'handoff_created',
+runtime/orchestrator-service/lib/ops/backbone.js:3021:      asString(record.source_page) === handoff.source_page &&
+runtime/orchestrator-service/lib/ops/backbone.js:3022:      asString(record.id) !== handoff.id &&
+runtime/orchestrator-service/lib/ops/backbone.js:3033:      updated_at: handoff.updated_at,
+runtime/orchestrator-service/lib/ops/backbone.js:3034:      history: appendHistory(record, 'handoff_superseded', handoff.created_by, {
+runtime/orchestrator-service/lib/ops/backbone.js:3035:        replaced_by: handoff.id
+runtime/orchestrator-service/lib/ops/backbone.js:3040:  writeCollection(paths.handoffsPath, upsertById(normalizedItems, handoff), MAX_ITEMS.handoffs);
+runtime/orchestrator-service/lib/ops/backbone.js:3044:    type: 'route_handoff_created',
+runtime/orchestrator-service/lib/ops/backbone.js:3045:    entity_type: 'handoff',
+runtime/orchestrator-service/lib/ops/backbone.js:3046:    entity_id: handoff.id,
+runtime/orchestrator-service/lib/ops/backbone.js:3047:    title: `${handoff.source_page || 'system'} to ${handoff.destination_page}`,
+runtime/orchestrator-service/lib/ops/backbone.js:3048:    summary: 'Durable cross-page handoff recorded.',
+runtime/orchestrator-service/lib/ops/backbone.js:3049:    actor: handoff.created_by,
+runtime/orchestrator-service/lib/ops/backbone.js:3051:      source_page: handoff.source_page,
+runtime/orchestrator-service/lib/ops/backbone.js:3052:      destination_page: handoff.destination_page,
+runtime/orchestrator-service/lib/ops/backbone.js:3053:      route_key: handoff.route_key
+runtime/orchestrator-service/lib/ops/backbone.js:3057:  const handoffLinkedEntity = handoff.linked_entity || handoff.source_entity;
+runtime/orchestrator-service/lib/ops/backbone.js:3058:  if (handoffLinkedEntity?.entity_type && handoffLinkedEntity?.entity_id) {
+runtime/orchestrator-service/lib/ops/backbone.js:3059:    updateLinkedEntity(paths.project, handoffLinkedEntity.entity_type, handoffLinkedEntity.entity_id, (record) => {
+runtime/orchestrator-service/lib/ops/backbone.js:3062:        linked_handoffs: [...new Set([handoff.id, ...normalizeStringList(record.linked_handoffs)])],
+runtime/orchestrator-service/lib/ops/backbone.js:3064:        next_owner_role: handoff.destination_role,
+runtime/orchestrator-service/lib/ops/backbone.js:3065:        next_owner_label: handoff.destination_role_label,
+runtime/orchestrator-service/lib/ops/backbone.js:3066:        updated_at: handoff.updated_at,
+runtime/orchestrator-service/lib/ops/backbone.js:3067:        history: appendHistory(record, 'handoff_linked', input.actor || input.created_by, {
+runtime/orchestrator-service/lib/ops/backbone.js:3068:          handoff_id: handoff.id,
+runtime/orchestrator-service/lib/ops/backbone.js:3069:          destination_page: handoff.destination_page
+runtime/orchestrator-service/lib/ops/backbone.js:3073:      if (handoffLinkedEntity.entity_type === 'content_item') {
+runtime/orchestrator-service/lib/ops/backbone.js:3074:        nextRecord.destination = handoff.destination_page;
+runtime/orchestrator-service/lib/ops/backbone.js:3076:          handoff.destination_page === 'publishing'
+runtime/orchestrator-service/lib/ops/backbone.js:3080:          handoff.destination_page === 'publishing'
+runtime/orchestrator-service/lib/ops/backbone.js:3081:            ? 'ready_for_handoff'
+runtime/orchestrator-service/lib/ops/backbone.js:3084:      } else if (handoffLinkedEntity.entity_type === 'media_job') {
+runtime/orchestrator-service/lib/ops/backbone.js:3086:          handoff.destination_page === 'publishing'
+runtime/orchestrator-service/lib/ops/backbone.js:3087:            ? 'ready_for_handoff'
+runtime/orchestrator-service/lib/ops/backbone.js:3096:  return handoff;
+runtime/orchestrator-service/lib/ops/backbone.js:3099:function listHandoffs(projectName, options = {}) {
+runtime/orchestrator-service/lib/ops/backbone.js:3104:  let items = readCollection(paths.handoffsPath);
+runtime/orchestrator-service/lib/ops/backbone.js:3121:function consumeHandoff(projectName, handoffId, input = {}) {
+runtime/orchestrator-service/lib/ops/backbone.js:3123:  const items = readCollection(paths.handoffsPath);
+runtime/orchestrator-service/lib/ops/backbone.js:3124:  const index = items.findIndex((item) => asString(item.id) === asString(handoffId));
+runtime/orchestrator-service/lib/ops/backbone.js:3127:    throw new Error('Handoff not found');
+runtime/orchestrator-service/lib/ops/backbone.js:3138:    history: appendHistory(current, 'handoff_consumed', input.actor, {
+runtime/orchestrator-service/lib/ops/backbone.js:3144:  writeJsonFile(paths.handoffsPath, items);
+runtime/orchestrator-service/lib/ops/backbone.js:3148:    type: 'route_handoff_consumed',
+runtime/orchestrator-service/lib/ops/backbone.js:3149:    entity_type: 'handoff',
+runtime/orchestrator-service/lib/ops/backbone.js:3152:    summary: 'Durable cross-page handoff consumed.',
+runtime/orchestrator-service/lib/ops/backbone.js:3200:    createNotification(safeProject, {
+runtime/orchestrator-service/lib/ops/backbone.js:3204:      message: 'The publishing item is waiting for operator approval or handoff.',
+runtime/orchestrator-service/lib/ops/backbone.js:3205:      body: 'The publishing item is waiting for operator approval or handoff.',
+runtime/orchestrator-service/lib/ops/backbone.js:3218:    createNotification(safeProject, {
+runtime/orchestrator-service/lib/ops/backbone.js:3236:    createNotification(safeProject, {
+runtime/orchestrator-service/lib/ops/backbone.js:3270:function summarizeCurrentHandoffs(items = []) {
+runtime/orchestrator-service/lib/ops/backbone.js:3392:  if (normalizedType === 'approval') return 'governance';
+runtime/orchestrator-service/lib/ops/backbone.js:3398:  if (normalizedType === 'handoff') return asString(record.destination_page) || 'workflows';
+runtime/orchestrator-service/lib/ops/backbone.js:3399:  if (normalizedType === 'notification') return inferRouteTarget(record.entity_type, record) || 'home';
+runtime/orchestrator-service/lib/ops/backbone.js:3544:    approval: normalizedQueue.filter((item) => item.queue_type === 'approval'),
+runtime/orchestrator-service/lib/ops/backbone.js:3581:    approval_queue: queueGroups.approval,
+runtime/orchestrator-service/lib/ops/backbone.js:3679:function buildNotificationAlert(input = {}) {
+runtime/orchestrator-service/lib/ops/backbone.js:3692:    notification_id: asString(input.notification_id || input.id)
+runtime/orchestrator-service/lib/ops/backbone.js:3696:function buildNotificationCenter({
+runtime/orchestrator-service/lib/ops/backbone.js:3697:  notifications = [],
+runtime/orchestrator-service/lib/ops/backbone.js:3698:  approvals = [],
+runtime/orchestrator-service/lib/ops/backbone.js:3701:  governanceSummary = {},
+runtime/orchestrator-service/lib/ops/backbone.js:3704:  const unreadNotifications = asArray(notifications).filter((item) => !asBoolean(item.read));
+runtime/orchestrator-service/lib/ops/backbone.js:3706:    ...asArray(notifications)
+runtime/orchestrator-service/lib/ops/backbone.js:3708:      .map((item) => buildNotificationAlert({
+runtime/orchestrator-service/lib/ops/backbone.js:3711:        notification_id: item.id
+runtime/orchestrator-service/lib/ops/backbone.js:3715:      .map((item) => buildNotificationAlert({
+runtime/orchestrator-service/lib/ops/backbone.js:3723:  const approvalPendingAlerts = asArray(approvals)
+runtime/orchestrator-service/lib/ops/backbone.js:3725:    .map((item) => buildNotificationAlert({
+runtime/orchestrator-service/lib/ops/backbone.js:3726:      id: `approval-pending-${item.id}`,
+runtime/orchestrator-service/lib/ops/backbone.js:3727:      title: asString(item.title) || 'Approval pending',
+runtime/orchestrator-service/lib/ops/backbone.js:3728:      message: asString(item.summary) || 'Approval requires review.',
+runtime/orchestrator-service/lib/ops/backbone.js:3730:      source: 'approval_pending',
+runtime/orchestrator-service/lib/ops/backbone.js:3731:      entity_type: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:3738:    .map((item) => buildNotificationAlert({
+runtime/orchestrator-service/lib/ops/backbone.js:3746:            : 'Publishing item is waiting for approval or release.',
+runtime/orchestrator-service/lib/ops/backbone.js:3760:    ...asArray(notifications)
+runtime/orchestrator-service/lib/ops/backbone.js:3762:      .map((item) => buildNotificationAlert({
+runtime/orchestrator-service/lib/ops/backbone.js:3765:        notification_id: item.id,
+runtime/orchestrator-service/lib/ops/backbone.js:3770:      .map((item) => buildNotificationAlert({
+runtime/orchestrator-service/lib/ops/backbone.js:3779:    ...asArray(governanceSummary?.sections?.claim_review)
+runtime/orchestrator-service/lib/ops/backbone.js:3780:      .flatMap((item) => asArray(item.claim_flags).map((flag) => buildNotificationAlert({
+runtime/orchestrator-service/lib/ops/backbone.js:3789:    ...asArray(governanceSummary?.sections?.policy_violations)
+runtime/orchestrator-service/lib/ops/backbone.js:3791:      .map((item) => buildNotificationAlert({
+runtime/orchestrator-service/lib/ops/backbone.js:3805:    .map((item) => buildNotificationAlert({
+runtime/orchestrator-service/lib/ops/backbone.js:3821:    ...approvalPendingAlerts,
+runtime/orchestrator-service/lib/ops/backbone.js:3834:    unread_count: unreadNotifications.length,
+runtime/orchestrator-service/lib/ops/backbone.js:3836:    notification_items: asArray(notifications).slice(0, 40),
+runtime/orchestrator-service/lib/ops/backbone.js:3838:    approval_pending_alerts: approvalPendingAlerts,
+runtime/orchestrator-service/lib/ops/backbone.js:3850:  const governance = asObject(readJsonFile(paths.governancePath, {}));
+runtime/orchestrator-service/lib/ops/backbone.js:3861:  const approvals = readCollection(paths.approvalsPath);
+runtime/orchestrator-service/lib/ops/backbone.js:3863:  const notifications = readCollection(paths.notificationsPath);
+runtime/orchestrator-service/lib/ops/backbone.js:3864:  const handoffs = readCollection(paths.handoffsPath);
+runtime/orchestrator-service/lib/ops/backbone.js:3866:  const governanceSummary = buildGovernanceSummary(paths.project, {
+runtime/orchestrator-service/lib/ops/backbone.js:3871:  const approvalLimit = Number(options.approvalLimit || 8) || 8;
+runtime/orchestrator-service/lib/ops/backbone.js:3872:  const notificationLimit = Number(options.notificationLimit || 8) || 8;
+runtime/orchestrator-service/lib/ops/backbone.js:3878:  const handoffLimit = Number(options.handoffLimit || 12) || 12;
+runtime/orchestrator-service/lib/ops/backbone.js:3884:    ...approvals,
+runtime/orchestrator-service/lib/ops/backbone.js:3894:    handoff_to: asArray(domain.handoff_to).map((roleId) => ({
+runtime/orchestrator-service/lib/ops/backbone.js:3904:  const notificationCenter = buildNotificationCenter({
+runtime/orchestrator-service/lib/ops/backbone.js:3905:    notifications,
+runtime/orchestrator-service/lib/ops/backbone.js:3906:    approvals,
+runtime/orchestrator-service/lib/ops/backbone.js:3909:    governanceSummary,
+runtime/orchestrator-service/lib/ops/backbone.js:3923:    governance,
+runtime/orchestrator-service/lib/ops/backbone.js:3927:    notification_center: notificationCenter,
+runtime/orchestrator-service/lib/ops/backbone.js:3959:      handoffs_by_role: asArray(handoffs)
+runtime/orchestrator-service/lib/ops/backbone.js:3981:      pending_approval_count: contentItems.filter((item) => asString(item.approval_status) === 'pending').length,
+runtime/orchestrator-service/lib/ops/backbone.js:4023:    approvals: {
+runtime/orchestrator-service/lib/ops/backbone.js:4024:      total: approvals.length,
+runtime/orchestrator-service/lib/ops/backbone.js:4025:      pending_count: approvals.filter((item) => asString(item.status) === 'pending').length,
+runtime/orchestrator-service/lib/ops/backbone.js:4026:      by_reviewer_role: summarizeOwnershipVisibility(team, approvals),
+runtime/orchestrator-service/lib/ops/backbone.js:4027:      items: approvals.slice(0, approvalLimit)
+runtime/orchestrator-service/lib/ops/backbone.js:4034:    notifications: {
+runtime/orchestrator-service/lib/ops/backbone.js:4035:      total: notifications.length,
+runtime/orchestrator-service/lib/ops/backbone.js:4036:      unread_count: notifications.filter((item) => !item.read).length,
+runtime/orchestrator-service/lib/ops/backbone.js:4037:      items: notifications.slice(0, notificationLimit)
+runtime/orchestrator-service/lib/ops/backbone.js:4039:    handoffs: {
+runtime/orchestrator-service/lib/ops/backbone.js:4040:      total: handoffs.length,
+runtime/orchestrator-service/lib/ops/backbone.js:4041:      available_count: handoffs.filter((item) => asString(item.status) === 'available').length,
+runtime/orchestrator-service/lib/ops/backbone.js:4042:      current: summarizeCurrentHandoffs(handoffs),
+runtime/orchestrator-service/lib/ops/backbone.js:4043:      by_role: asArray(handoffs)
+runtime/orchestrator-service/lib/ops/backbone.js:4055:      items: handoffs.slice(0, handoffLimit)
+runtime/orchestrator-service/lib/ops/backbone.js:4070:  buildGovernanceSummary,
+runtime/orchestrator-service/lib/ops/backbone.js:4073:  getGovernancePolicy,
+runtime/orchestrator-service/lib/ops/backbone.js:4074:  updateGovernancePolicy,
+runtime/orchestrator-service/lib/ops/backbone.js:4099:  createApproval,
+runtime/orchestrator-service/lib/ops/backbone.js:4100:  listApprovals,
+runtime/orchestrator-service/lib/ops/backbone.js:4101:  decideApproval,
+runtime/orchestrator-service/lib/ops/backbone.js:4102:  createNotification,
+runtime/orchestrator-service/lib/ops/backbone.js:4103:  listNotifications,
+runtime/orchestrator-service/lib/ops/backbone.js:4104:  markNotification,
+runtime/orchestrator-service/lib/ops/backbone.js:4106:  createHandoff,
+runtime/orchestrator-service/lib/ops/backbone.js:4107:  listHandoffs,
+runtime/orchestrator-service/lib/ops/backbone.js:4108:  consumeHandoff,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:24:  createApproval,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:25:  createHandoff
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:216:          ? 'As Compliance Reviewer, return concrete risks, safer wording replacements, and approval notes.'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:258:    'Do not claim task/workflow/handoff/approval/publish actions were executed.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:259:    'Do not claim task creation, workflow run, handoff creation, or approval creation happened.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:260:    'Do not claim approvals were granted.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:298:      "Focus on publishing readiness, schedule review, channel fit, final packaging, captions, and handoff preparation.",
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:312:      "Specialist role: Claims and Governance Lead.",
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:313:      "Focus on approval safety, claims review, legal/compliance risk, disclaimers, and governance boundaries.",
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:317:      "Specialist role: Execution and Handoff Lead.",
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:318:      "Focus on tasks, workflows, ownership, timelines, handoffs, blockers, and operating next steps.",
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:391:    '- If the user asks for copy, caption, script, plan, task, workflow, handoff, or route, help prepare it conversationally.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:404:    '- Do not claim that publishing, approval, deletion, sync, CRM update, customer reply, workflow run, export, task creation, handoff creation, or backend action happened.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:543:  if (intent === 'approval') return 'governance';
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:545:  if (intent === 'task') return 'task-center';
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:602:      pattern: /\b(task plan|workflow|handoff|approval|approvals|timeline|execution plan|operator|owners?|assign|todo|follow up|route)\b/
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:629:  if (matches(/\b(approve|approval|review)\b/) && !['ads', 'content', 'campaign'].includes(intent)) {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:630:    intent = 'approval';
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:631:    actionType = 'approval';
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:696:    recent_handoffs: asArray(operations.handoffs?.items).filter((item) => asString(item.destination_page) === 'research').slice(0, 3)
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:841:  const suggestedHandoffs = normalizeReadableList(
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:842:    record.suggestedHandoffs ||
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:843:    record.suggested_handoffs ||
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:860:    suggestedHandoffs
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:954:    normalizeRouteSuggestion('task-center', 'Save a durable execution task if an operator follow-up is needed.')
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:967:  const taskBlock = ['workflow', 'task', 'approval'].includes(classified.actionType)
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:974:        'Create approval only if execution changes publishing, spend, or sensitive settings.'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1044:      `Use tasks or approvals if human follow-through is required.`
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1053:      normalizeRouteSuggestion('task-center', 'Convert the run into a durable task if manual execution is required.')
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1178:            route_target: 'task-center',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1185:          linkedEntities.push({ entity_type: 'task', entity_id: task.id, route: 'task-center', label: task.title });
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1210:        if (classified.actionType === 'approval') {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1211:          const approval = createApproval(projectName, {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1212:            title: `${response.title} approval`,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1219:          linkedEntities.push({ entity_type: 'approval', entity_id: approval.id, route: 'governance', label: approval.title });
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1222:        let handoff = null;
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1224:          handoff = createHandoff(projectName, {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1261:            handoff ? { entity_type: 'handoff', entity_id: handoff.id, route: classified.routeTarget, label: response.title } : null
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1298:          handoff
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1456:            created_handoff: false,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1457:            created_approval: false,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1633:            created_handoff: false,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1634:            created_approval: false,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1667:                'Create task/workflow/handoff manually only if explicitly approved.'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1791:      const handoff = createHandoff(projectName, {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1816:        handoff,
+runtime/orchestrator-service/lib/customer-operations/contracts/ticket-contract.js:22:      requires_approval: Boolean(input.workflow?.requires_approval || false),
+runtime/orchestrator-service/lib/customer-operations/contracts/ticket-contract.js:23:      approval_state: String(input.workflow?.approval_state || 'not_required')
+runtime/orchestrator-service/lib/customer-operations/contracts/sla-policy-contract.js:31:      human_handoff_minutes: Number(
+runtime/orchestrator-service/lib/customer-operations/contracts/sla-policy-contract.js:32:        input.escalation?.human_handoff_minutes || 120
+runtime/orchestrator-service/lib/customer-operations/README.md:20:- Reuse governance/escalation systems.
+runtime/orchestrator-service/server.js:45:  evaluateGovernanceMutationGate,
+runtime/orchestrator-service/server.js:46:  evaluateGovernanceApprovalLifecycle
+runtime/orchestrator-service/server.js:47:} = require('./lib/security/governance-mutation-gate');
+runtime/orchestrator-service/server.js:87:  buildGovernanceSummary,
+runtime/orchestrator-service/server.js:90:  getGovernancePolicy,
+runtime/orchestrator-service/server.js:91:  updateGovernancePolicy,
+runtime/orchestrator-service/server.js:112:  createApproval,
+runtime/orchestrator-service/server.js:113:  listApprovals,
+runtime/orchestrator-service/server.js:114:  decideApproval,
+runtime/orchestrator-service/server.js:115:  listNotifications,
+runtime/orchestrator-service/server.js:116:  markNotification,
+runtime/orchestrator-service/server.js:118:  createHandoff,
+runtime/orchestrator-service/server.js:119:  listHandoffs,
+runtime/orchestrator-service/server.js:120:  consumeHandoff,
+runtime/orchestrator-service/server.js:4104:      'ready_for_manual_handoff',
+runtime/orchestrator-service/server.js:6146:    return 'approval_required';
+runtime/orchestrator-service/server.js:6215:    approval_required: mode === 'approval_required',
+runtime/orchestrator-service/server.js:6222:        mode === 'approval_required'
+runtime/orchestrator-service/server.js:6223:          ? 'Prepare execution summary and request approval.'
+runtime/orchestrator-service/server.js:6885:      workspace_priorities: ['setup', 'library', 'content-studio', 'campaign-studio', 'ads-manager', 'governance'],
+runtime/orchestrator-service/server.js:7430:    approval_note: normalizeSetupTextValue(asset.approval_note),
+runtime/orchestrator-service/server.js:8554:    record.approval_status ||
+runtime/orchestrator-service/server.js:9482:    if (!enforceGovernanceMutationGate(req, res, {
+runtime/orchestrator-service/server.js:9488:      skipApprovalGate: true
+runtime/orchestrator-service/server.js:9493:    if (!enforceGovernanceApprovalLifecycle(req, res, {
+runtime/orchestrator-service/server.js:9503:      title: 'Publish package execution approval',
+runtime/orchestrator-service/server.js:9504:      summary: 'Approval required before publishing package execution.'
+runtime/orchestrator-service/server.js:9570:    if (!enforceGovernanceMutationGate(req, res, {
+runtime/orchestrator-service/server.js:9576:      skipApprovalGate: true
+runtime/orchestrator-service/server.js:9581:    if (!enforceGovernanceApprovalLifecycle(req, res, {
+runtime/orchestrator-service/server.js:9591:      title: 'Email package execution approval',
+runtime/orchestrator-service/server.js:9592:      summary: 'Approval required before email package execution.'
+runtime/orchestrator-service/server.js:9658:    if (!enforceGovernanceMutationGate(req, res, {
+runtime/orchestrator-service/server.js:9664:      skipApprovalGate: true
+runtime/orchestrator-service/server.js:9669:    if (!enforceGovernanceApprovalLifecycle(req, res, {
+runtime/orchestrator-service/server.js:9679:      title: 'Media generation approval',
+runtime/orchestrator-service/server.js:9680:      summary: 'Approval required before media generation from prompt.'
+runtime/orchestrator-service/server.js:9739:    if (!enforceGovernanceMutationGate(req, res, {
+runtime/orchestrator-service/server.js:9745:      skipApprovalGate: true
+runtime/orchestrator-service/server.js:9750:    if (!enforceGovernanceApprovalLifecycle(req, res, {
+runtime/orchestrator-service/server.js:9760:      title: 'Ad execution package approval',
+runtime/orchestrator-service/server.js:9761:      summary: 'Approval required before building an ad execution package.'
+runtime/orchestrator-service/server.js:10836:        asset.approval_note = note || asset.approval_note || 'Approved from Control Center Library.';
+runtime/orchestrator-service/server.js:11016:    if (!enforceGovernanceMutationGate(req, res, {
+runtime/orchestrator-service/server.js:11022:      skipApprovalGate: true,
+runtime/orchestrator-service/server.js:11028:    if (!enforceGovernanceApprovalLifecycle(req, res, {
+runtime/orchestrator-service/server.js:11035:      serviceDomain: 'governance',
+runtime/orchestrator-service/server.js:11038:      title: 'Project setup approval',
+runtime/orchestrator-service/server.js:11039:      summary: 'Approval required before authority-impacting project setup changes.',
+runtime/orchestrator-service/server.js:11055:    if (!enforceGovernanceMutationGate(req, res, {
+runtime/orchestrator-service/server.js:11061:      skipApprovalGate: true,
+runtime/orchestrator-service/server.js:11067:    if (!enforceGovernanceApprovalLifecycle(req, res, {
+runtime/orchestrator-service/server.js:11074:      serviceDomain: 'governance',
+runtime/orchestrator-service/server.js:11077:      title: 'Project setup approval',
+runtime/orchestrator-service/server.js:11078:      summary: 'Approval required before authority-impacting project setup changes.',
+runtime/orchestrator-service/server.js:11147:function handleGetNotificationCenter(req, res) {
+runtime/orchestrator-service/server.js:11152:      ...asPlainObject(snapshot.notification_center)
+runtime/orchestrator-service/server.js:11156:      error: error.message || 'Failed to build notification center payload'
+runtime/orchestrator-service/server.js:11161:app.get('/media-manager/project/:project/task-center', handleGetTaskCenter);
+runtime/orchestrator-service/server.js:11162:app.get('/public/media-manager/project/:project/task-center', handleGetTaskCenter);
+runtime/orchestrator-service/server.js:11163:app.get('/media-manager/project/:project/queue-center', handleGetQueueCenter);
+runtime/orchestrator-service/server.js:11164:app.get('/public/media-manager/project/:project/queue-center', handleGetQueueCenter);
+runtime/orchestrator-service/server.js:11165:app.get('/media-manager/project/:project/job-monitor', handleGetJobMonitor);
+runtime/orchestrator-service/server.js:11166:app.get('/public/media-manager/project/:project/job-monitor', handleGetJobMonitor);
+runtime/orchestrator-service/server.js:11167:app.get('/media-manager/project/:project/notification-center', handleGetNotificationCenter);
+runtime/orchestrator-service/server.js:11168:app.get('/public/media-manager/project/:project/notification-center', handleGetNotificationCenter);
+runtime/orchestrator-service/server.js:11195:    if (!enforceGovernanceMutationGate(req, res, {
+runtime/orchestrator-service/server.js:11201:      skipApprovalGate: true
+runtime/orchestrator-service/server.js:11206:    if (!enforceGovernanceApprovalLifecycle(req, res, {
+runtime/orchestrator-service/server.js:11213:      serviceDomain: 'governance',
+runtime/orchestrator-service/server.js:11216:      title: 'Team model approval',
+runtime/orchestrator-service/server.js:11217:      summary: 'Approval required before team model changes.',
+runtime/orchestrator-service/server.js:11471:    if (!enforceGovernanceMutationGate(req, res, {
+runtime/orchestrator-service/server.js:11477:      skipApprovalGate: true
+runtime/orchestrator-service/server.js:11482:    if (!enforceGovernanceApprovalLifecycle(req, res, {
+runtime/orchestrator-service/server.js:11492:      title: 'Workflow run approval',
+runtime/orchestrator-service/server.js:11493:      summary: 'Approval required before workflow execution.'
+runtime/orchestrator-service/server.js:11544:  if (!enforceGovernanceMutationGate(req, res, {
+runtime/orchestrator-service/server.js:11550:    skipApprovalGate: true
+runtime/orchestrator-service/server.js:11555:  if (!enforceGovernanceApprovalLifecycle(req, res, {
+runtime/orchestrator-service/server.js:11565:    title: 'AI command approval',
+runtime/orchestrator-service/server.js:11566:    summary: 'Approval required before AI command execution.'
+runtime/orchestrator-service/server.js:11618:  if (!enforceGovernanceMutationGate(req, res, {
+runtime/orchestrator-service/server.js:11624:    skipApprovalGate: true
+runtime/orchestrator-service/server.js:11629:  if (!enforceGovernanceApprovalLifecycle(req, res, {
+runtime/orchestrator-service/server.js:11639:    title: 'AI chat approval',
+runtime/orchestrator-service/server.js:11640:    summary: 'Approval required before AI chat execution.'
+runtime/orchestrator-service/server.js:11688:  if (!enforceGovernanceMutationGate(req, res, {
+runtime/orchestrator-service/server.js:11694:    skipApprovalGate: true
+runtime/orchestrator-service/server.js:11699:  if (!enforceGovernanceApprovalLifecycle(req, res, {
+runtime/orchestrator-service/server.js:11709:    title: 'AI guidance approval',
+runtime/orchestrator-service/server.js:11710:    summary: 'Approval required before AI guidance execution.'
+runtime/orchestrator-service/server.js:11756:    if (!enforceGovernanceMutationGate(req, res, {
+runtime/orchestrator-service/server.js:11762:      skipApprovalGate: true
+runtime/orchestrator-service/server.js:11767:    if (!enforceGovernanceApprovalLifecycle(req, res, {
+runtime/orchestrator-service/server.js:11777:      title: 'AI workflow approval',
+runtime/orchestrator-service/server.js:11778:      summary: 'Approval required before AI workflow execution.'
+runtime/orchestrator-service/server.js:11955:function handleListApprovals(req, res) {
+runtime/orchestrator-service/server.js:11959:      items: listApprovals(req.params.project, {
+runtime/orchestrator-service/server.js:11965:      error: error.message || 'Failed to list approvals'
+runtime/orchestrator-service/server.js:11970:function handleCreateApproval(req, res) {
+runtime/orchestrator-service/server.js:11972:    const approval = createApproval(req.params.project, req.body || {});
+runtime/orchestrator-service/server.js:11974:      approval,
+runtime/orchestrator-service/server.js:11979:      error: error.message || 'Failed to create approval'
+runtime/orchestrator-service/server.js:11984:function handleApprovalDecision(req, res) {
+runtime/orchestrator-service/server.js:11986:    if (!enforceGovernanceMutationGate(req, res, {
+runtime/orchestrator-service/server.js:11988:      action: 'approvals_decision',
+runtime/orchestrator-service/server.js:11989:      entityType: 'approval',
+runtime/orchestrator-service/server.js:11990:      entityId: req.params.approvalId,
+runtime/orchestrator-service/server.js:11996:    const approval = decideApproval(req.params.project, req.params.approvalId, {
+runtime/orchestrator-service/server.js:12005:      approval,
+runtime/orchestrator-service/server.js:12010:      error: error.message || 'Failed to update approval'
+runtime/orchestrator-service/server.js:12015:app.get('/media-manager/project/:project/approvals', handleListApprovals);
+runtime/orchestrator-service/server.js:12016:app.get('/public/media-manager/project/:project/approvals', handleListApprovals);
+runtime/orchestrator-service/server.js:12017:app.post('/media-manager/project/:project/approvals', handleCreateApproval);
+runtime/orchestrator-service/server.js:12018:app.post('/public/media-manager/project/:project/approvals', handleCreateApproval);
+runtime/orchestrator-service/server.js:12019:app.post('/media-manager/project/:project/approvals/:approvalId/decision', handleApprovalDecision);
+runtime/orchestrator-service/server.js:12020:app.post('/public/media-manager/project/:project/approvals/:approvalId/decision', handleApprovalDecision);
+runtime/orchestrator-service/server.js:12022:function handleGetGovernance(req, res) {
+runtime/orchestrator-service/server.js:12025:      buildGovernanceSummary(req.params.project, {
+runtime/orchestrator-service/server.js:12031:      error: error.message || 'Failed to load governance summary'
+runtime/orchestrator-service/server.js:12036:function handleUpdateGovernancePolicy(req, res) {
+runtime/orchestrator-service/server.js:12038:    if (!enforceGovernanceMutationGate(req, res, {
+runtime/orchestrator-service/server.js:12040:      action: 'governance_policy_update',
+runtime/orchestrator-service/server.js:12041:      entityType: 'governance_policy',
+runtime/orchestrator-service/server.js:12048:    const policy = updateGovernancePolicy(req.params.project, req.body || {}, req.body?.actor || 'operator');
+runtime/orchestrator-service/server.js:12055:      error: error.message || 'Failed to update governance policy'
+runtime/orchestrator-service/server.js:12060:function handleGetGovernancePolicy(req, res) {
+runtime/orchestrator-service/server.js:12064:      policy: getGovernancePolicy(req.params.project)
+runtime/orchestrator-service/server.js:12068:      error: error.message || 'Failed to load governance policy'
+runtime/orchestrator-service/server.js:12073:app.get('/media-manager/project/:project/governance', handleGetGovernance);
+runtime/orchestrator-service/server.js:12074:app.get('/public/media-manager/project/:project/governance', handleGetGovernance);
+runtime/orchestrator-service/server.js:12075:app.get('/media-manager/project/:project/governance/policy', handleGetGovernancePolicy);
+runtime/orchestrator-service/server.js:12076:app.get('/public/media-manager/project/:project/governance/policy', handleGetGovernancePolicy);
+runtime/orchestrator-service/server.js:12077:app.post('/media-manager/project/:project/governance/policy', handleUpdateGovernancePolicy);
+runtime/orchestrator-service/server.js:12078:app.post('/public/media-manager/project/:project/governance/policy', handleUpdateGovernancePolicy);
+runtime/orchestrator-service/server.js:12080:function handleListNotifications(req, res) {
+runtime/orchestrator-service/server.js:12084:      items: listNotifications(req.params.project, {
+runtime/orchestrator-service/server.js:12090:      error: error.message || 'Failed to list notifications'
+runtime/orchestrator-service/server.js:12095:app.get('/media-manager/project/:project/notifications', handleListNotifications);
+runtime/orchestrator-service/server.js:12096:app.get('/public/media-manager/project/:project/notifications', handleListNotifications);
+runtime/orchestrator-service/server.js:12097:app.patch('/media-manager/project/:project/notifications/:notificationId', (req, res) => {
+runtime/orchestrator-service/server.js:12099:    const notification = markNotification(req.params.project, req.params.notificationId, req.body || {});
+runtime/orchestrator-service/server.js:12101:      notification,
+runtime/orchestrator-service/server.js:12106:      error: error.message || 'Failed to update notification'
+runtime/orchestrator-service/server.js:12110:app.patch('/public/media-manager/project/:project/notifications/:notificationId', (req, res) => {
+runtime/orchestrator-service/server.js:12112:    const notification = markNotification(req.params.project, req.params.notificationId, req.body || {});
+runtime/orchestrator-service/server.js:12114:      notification,
+runtime/orchestrator-service/server.js:12119:      error: error.message || 'Failed to update notification'
+runtime/orchestrator-service/server.js:12124:function handleListHandoffs(req, res) {
+runtime/orchestrator-service/server.js:12128:      items: listHandoffs(req.params.project, {
+runtime/orchestrator-service/server.js:12137:      error: error.message || 'Failed to list handoffs'
+runtime/orchestrator-service/server.js:12142:function handleCreateHandoff(req, res) {
+runtime/orchestrator-service/server.js:12144:    const handoff = createHandoff(req.params.project, req.body || {});
+runtime/orchestrator-service/server.js:12146:      handoff,
+runtime/orchestrator-service/server.js:12151:      error: error.message || 'Failed to create handoff'
+runtime/orchestrator-service/server.js:12156:function handleConsumeHandoff(req, res) {
+runtime/orchestrator-service/server.js:12158:    const handoff = consumeHandoff(req.params.project, req.params.handoffId, req.body || {});
+runtime/orchestrator-service/server.js:12160:      handoff,
+runtime/orchestrator-service/server.js:12165:      error: error.message || 'Failed to consume handoff'
+runtime/orchestrator-service/server.js:12170:app.get('/media-manager/project/:project/handoffs', handleListHandoffs);
+runtime/orchestrator-service/server.js:12171:app.get('/public/media-manager/project/:project/handoffs', handleListHandoffs);
+runtime/orchestrator-service/server.js:12172:app.post('/media-manager/project/:project/handoffs', handleCreateHandoff);
+runtime/orchestrator-service/server.js:12173:app.post('/public/media-manager/project/:project/handoffs', handleCreateHandoff);
+runtime/orchestrator-service/server.js:12174:app.post('/media-manager/project/:project/handoffs/:handoffId/consume', handleConsumeHandoff);
+runtime/orchestrator-service/server.js:12175:app.post('/public/media-manager/project/:project/handoffs/:handoffId/consume', handleConsumeHandoff);
+runtime/orchestrator-service/server.js:12222:    if (!enforceGovernanceMutationGate(req, res, {
+runtime/orchestrator-service/server.js:12228:      skipApprovalGate: true
+runtime/orchestrator-service/server.js:12242:    if (!enforceGovernanceApprovalLifecycle(req, res, {
+runtime/orchestrator-service/server.js:12249:      serviceDomain: 'governance',
+runtime/orchestrator-service/server.js:12252:      title: 'Source registry approval',
+runtime/orchestrator-service/server.js:12253:      summary: 'Approval required before source registry changes.',
+runtime/orchestrator-service/server.js:12276:    if (!enforceGovernanceMutationGate(req, res, {
+runtime/orchestrator-service/server.js:12282:      skipApprovalGate: true
+runtime/orchestrator-service/server.js:12296:    if (!enforceGovernanceApprovalLifecycle(req, res, {
+runtime/orchestrator-service/server.js:12303:      serviceDomain: 'governance',
+runtime/orchestrator-service/server.js:12306:      title: 'Source registry approval',
+runtime/orchestrator-service/server.js:12307:      summary: 'Approval required before source registry changes.',
+runtime/orchestrator-service/server.js:12330:    if (!enforceGovernanceMutationGate(req, res, {
+runtime/orchestrator-service/server.js:12336:      skipApprovalGate: true
+runtime/orchestrator-service/server.js:12341:    if (!enforceGovernanceApprovalLifecycle(req, res, {
+runtime/orchestrator-service/server.js:12348:      serviceDomain: 'governance',
+runtime/orchestrator-service/server.js:12351:      title: 'Source registry approval',
+runtime/orchestrator-service/server.js:12352:      summary: 'Approval required before source registry deletion.',
+runtime/orchestrator-service/server.js:12369:    if (!enforceGovernanceMutationGate(req, res, {
+runtime/orchestrator-service/server.js:12375:      skipApprovalGate: true
+runtime/orchestrator-service/server.js:12380:    if (!enforceGovernanceApprovalLifecycle(req, res, {
+runtime/orchestrator-service/server.js:12387:      serviceDomain: 'governance',
+runtime/orchestrator-service/server.js:12390:      title: 'Source registry approval',
+runtime/orchestrator-service/server.js:12391:      summary: 'Approval required before source registry deletion.',
+runtime/orchestrator-service/server.js:12434:  const governanceAction = options?.reconnect ? 'integration_reconnect' : 'integration_connect';
+runtime/orchestrator-service/server.js:12436:  const governanceOptions = {
+runtime/orchestrator-service/server.js:12438:    action: governanceAction,
+runtime/orchestrator-service/server.js:12444:    routeTarget: 'governance',
+runtime/orchestrator-service/server.js:12448:    title: `${req.params.integrationId} ${requestedAction} approval`,
+runtime/orchestrator-service/server.js:12451:  const governanceAllowed = options?.reconnect
+runtime/orchestrator-service/server.js:12452:    ? enforceGovernanceApprovalLifecycle(req, res, governanceOptions)
+runtime/orchestrator-service/server.js:12453:    : enforceGovernanceMutationGate(req, res, governanceOptions);
+runtime/orchestrator-service/server.js:12455:  if (!governanceAllowed) {
+runtime/orchestrator-service/server.js:12543:  const governanceAction = {
+runtime/orchestrator-service/server.js:12550:  const governanceOptions = {
+runtime/orchestrator-service/server.js:12552:    action: governanceAction,
+runtime/orchestrator-service/server.js:12558:    routeTarget: 'governance',
+runtime/orchestrator-service/server.js:12562:    title: `${req.params.integrationId} ${normalizedActionType} approval`,
+runtime/orchestrator-service/server.js:12565:  const requiresApprovalLifecycle = ['sync', 'import-history', 'disconnect'].includes(normalizedActionType);
+runtime/orchestrator-service/server.js:12566:  const governanceAllowed = requiresApprovalLifecycle
+runtime/orchestrator-service/server.js:12567:    ? enforceGovernanceApprovalLifecycle(req, res, governanceOptions)
+runtime/orchestrator-service/server.js:12568:    : enforceGovernanceMutationGate(req, res, governanceOptions);
+runtime/orchestrator-service/server.js:12570:  if (!governanceAllowed) {
+runtime/orchestrator-service/server.js:12934:  if (!enforceGovernanceMutationGate(req, res, {
+runtime/orchestrator-service/server.js:13049:    if (!enforceGovernanceMutationGate(req, res, {
+runtime/orchestrator-service/server.js:13092:    if (!enforceGovernanceMutationGate(req, res, {
+runtime/orchestrator-service/server.js:13135:    if (!enforceGovernanceMutationGate(req, res, {
+runtime/orchestrator-service/server.js:13174:    if (!enforceGovernanceMutationGate(req, res, {
+runtime/orchestrator-service/server.js:13213:    if (!enforceGovernanceMutationGate(req, res, {
+runtime/orchestrator-service/server.js:13245:    if (!enforceGovernanceMutationGate(req, res, {
+runtime/orchestrator-service/server.js:13277:    if (!enforceGovernanceMutationGate(req, res, {
+runtime/orchestrator-service/server.js:13319:    if (!enforceGovernanceMutationGate(req, res, {
+runtime/orchestrator-service/server.js:13361:    if (!enforceGovernanceMutationGate(req, res, {
+runtime/orchestrator-service/server.js:13403:    if (!enforceGovernanceMutationGate(req, res, {
+runtime/orchestrator-service/server.js:14791:      result.execution_status = 'ready_for_manual_handoff';
+runtime/orchestrator-service/server.js:14792:      result.action_type = 'manual_marketplace_handoff';
+runtime/orchestrator-service/server.js:14793:      result.notes.push('Marketplace payload is ready for manual listing handoff.');
+runtime/orchestrator-service/server.js:15044:function buildPublishingGovernanceError(message, details = {}) {
+runtime/orchestrator-service/server.js:15051:function enforceGovernanceMutationGate(req, res, options = {}) {
+runtime/orchestrator-service/server.js:15053:  const decision = evaluateGovernanceMutationGate({
+runtime/orchestrator-service/server.js:15056:    approvalId: options.approvalId || req.body?.approval_id || req.body?.approvalId,
+runtime/orchestrator-service/server.js:15060:    skipApprovalGate: options.skipApprovalGate === true,
+runtime/orchestrator-service/server.js:15068:  appLogger.warn('governance_mutation_denied', {
+runtime/orchestrator-service/server.js:15075:    governance_code: decision.code,
+runtime/orchestrator-service/server.js:15083:function enforceGovernanceApprovalLifecycle(req, res, options = {}) {
+runtime/orchestrator-service/server.js:15085:  const decision = evaluateGovernanceApprovalLifecycle({
+runtime/orchestrator-service/server.js:15088:    approvalId: options.approvalId || req.body?.approval_id || req.body?.approvalId,
+runtime/orchestrator-service/server.js:15110:    if (decision.approval) {
+runtime/orchestrator-service/server.js:15111:      req.governanceApproval = decision.approval;
+runtime/orchestrator-service/server.js:15120:function getLatestPublishingApproval(projectName, jobId) {
+runtime/orchestrator-service/server.js:15121:  return listApprovals(projectName, { limit: 500 })
+runtime/orchestrator-service/server.js:15134:  const governance = getGovernancePolicy(projectName);
+runtime/orchestrator-service/server.js:15135:  // getGovernancePolicy always returns a normalized policy with policy_rules merged
+runtime/orchestrator-service/server.js:15136:  // from DEFAULT_POLICY_RULES, so policy_rules is always a fully-populated object.
+runtime/orchestrator-service/server.js:15138:  const policyRules = governance && typeof governance === 'object' && governance.policy_rules && typeof governance.policy_rules === 'object'
+runtime/orchestrator-service/server.js:15139:    ? governance.policy_rules
+runtime/orchestrator-service/server.js:15146:  const approvalSensitiveAction = ['ready', 'publish'].includes(actionKey)
+runtime/orchestrator-service/server.js:15149:  // Use explicit boolean coercion with safe defaults matching DEFAULT_POLICY_RULES:
+runtime/orchestrator-service/server.js:15151:  //   approval_before_publish → default true (restrictive — approval is required by default)
+runtime/orchestrator-service/server.js:15155:  const approvalBeforePublish = typeof policyRules.approval_before_publish === 'boolean'
+runtime/orchestrator-service/server.js:15156:    ? policyRules.approval_before_publish
+runtime/orchestrator-service/server.js:15157:    : policyRules.approval_before_publish == null ? true : Boolean(policyRules.approval_before_publish);
+runtime/orchestrator-service/server.js:15159:  function logGovernanceBlock(rule, extra = {}) {
+runtime/orchestrator-service/server.js:15160:    appLogger.warn('governance_blocked', {
+runtime/orchestrator-service/server.js:15161:      route: '/governance/publishing',
+runtime/orchestrator-service/server.js:15171:    logGovernanceBlock('freeze_publishing');
+runtime/orchestrator-service/server.js:15172:    throw buildPublishingGovernanceError(
+runtime/orchestrator-service/server.js:15173:      'Publishing is frozen by governance policy. The requested publishing mutation was blocked.',
+runtime/orchestrator-service/server.js:15181:  if (approvalSensitiveAction && approvalBeforePublish) {
+runtime/orchestrator-service/server.js:15183:      logGovernanceBlock('approval_before_publish', { reason: 'job_id_missing' });
+runtime/orchestrator-service/server.js:15184:      throw buildPublishingGovernanceError(
+runtime/orchestrator-service/server.js:15185:        'Approval before publish is enabled. This publishing action requires a durable publishing job with an approved governance decision.',
+runtime/orchestrator-service/server.js:15188:          rule: 'approval_before_publish'
+runtime/orchestrator-service/server.js:15193:    const approval = getLatestPublishingApproval(projectName, jobId);
+runtime/orchestrator-service/server.js:15194:    const approvalStatus = String(approval?.status || '').trim().toLowerCase();
+runtime/orchestrator-service/server.js:15196:    if (!['approved', 'overridden'].includes(approvalStatus)) {
+runtime/orchestrator-service/server.js:15197:      logGovernanceBlock('approval_before_publish', {
+runtime/orchestrator-service/server.js:15199:        approval_status: approvalStatus || 'missing'
+runtime/orchestrator-service/server.js:15201:      throw buildPublishingGovernanceError(
+runtime/orchestrator-service/server.js:15202:        'Approval before publish is enabled. The publishing job is not approved for ready/publish mutation.',
+runtime/orchestrator-service/server.js:15205:          rule: 'approval_before_publish',
+runtime/orchestrator-service/server.js:15207:          approval_status: approvalStatus || 'missing'
+runtime/orchestrator-service/server.js:17595:          'Generate assets from strategy, then run review -> approval -> media -> publish/send.',

@@ -1,0 +1,119 @@
+27:        executeProjectAiChat,
+649:	const command = humanizeValue(commandText || session?.draftMessage, "Prepare workflow action from AI command.");
+823:function setAiComposerValue(session, input, value) {
+825:  session.draftMessage = cleanValue;
+942:			draftMessage: "",
+972:			responseHistory: [],
+973:			responseLoading: false,
+975:			responseHistoryLoaded: false,
+1023:		session.draftMessage = asString(localDraft.prompt);
+1024:		session.composerText = session.draftMessage;
+1038:		prompt: session.draftMessage,
+1119:function saveAiChatSession(projectName, session, options = {}) {
+1121:        const messages = asArray(session.messages);
+1122:        const responses = asArray(session.responseHistory);
+1160:        session.messages = asArray(record.messages).slice(-40);
+1161:        session.responseHistory = asArray(record.responses).slice(0, 12);
+1165:        session.draftMessage = "";
+1168:        session.responseLoading = false;
+2644:	session.draftMessage = normalized.prompt;
+2664:			responses: session.responseHistory,
+2751:	session.messages.push({
+2760:	session.messages.push({
+2779:	session.draftMessage = "";
+2940:				>${escapeHtml(session.draftMessage)}</textarea>
+3154:				<span style="font-size:11px;color:var(--color-text-2);">${session.messages.length} message${session.messages.length !== 1 ? "s" : ""}</span>
+3157:				${renderMessageStream(session.messages, escapeHtml)}
+3213:	const artifacts = session.messages
+3277:	return asArray(session.messages).slice().reverse().find((item) => item.role === "user") || null;
+3281:	return asArray(session.messages).slice().reverse().find((item) => item.role === "assistant") || null;
+3285:        const messages = asArray(session.messages).slice(-12);
+3288:        const latestResponse = asArray(session.responseHistory)[0] || null;
+3308:                session.draftMessage ||
+3505:	if (session.responseLoading) return 0;
+3510:	if (asArray(session.responseHistory).length) return 2;
+3511:	if (asString(session.draftMessage).trim()) return 0;
+4021:		const draftLabel = asString(session.draftMessage).trim() ? "Draft saved" : "Empty draft";
+4023:		const isGenerating = Boolean(session.responseLoading);
+4037:						id="aicmdV2Input"
+4042:					>${escapeHtml(session.draftMessage)}</textarea>
+4046:							<button id="aicmdV2VoiceBtn" class="aicmd-chatgpt-icon-btn" type="button" disabled title="Voice input coming soon">🎙</button>
+4050:							<button id="aicmdV2AskBtn" class="aicmd-chatgpt-send-btn" type="button" ${isGenerating ? "disabled" : ""} title="Ask AI Team">
+4283:	const recentAt = asArray(session.responseHistory)[0]?.generatedAt || preview.generatedAt || "";
+4316:				<li><span>Voice input (microphone)</span><strong class="is-planned">Planned — SpeechRecognition not enabled</strong></li>
+4332:        const allMessages = asArray(session.messages);
+4345:        const selectedResponses = asArray(session.responseHistory).filter((item) => {
+4350:        const sharedResponses = asArray(session.responseHistory).filter((item) => {
+4467:                        ${session.responseLoading ? `
+4568:	const sessionState = session.responseLoading ? "Generating" : (session.outputPreview ? "Preview ready" : (asString(session.draftMessage).trim() ? "Drafting" : "Ready"));
+4650:	const responses = asArray(session.responseHistory);
+4728:           if (asArray(savedOutput.messages).length && !asArray(session.messages).length) {
+4729:                   session.messages = asArray(savedOutput.messages).slice(-40);
+4738:		if (!session.responseHistoryLoaded) {
+4739:			session.responseHistory = asArray(savedOutput.responses).slice(0, 12);
+4740:			session.responseHistoryLoaded = true;
+4744:		// Consume prompt set by home.js handleAiRoleClick via quickCommandInput.
+4746:		const globalInput = $("quickCommandInput");
+4762:			session.draftMessage = normalizeAiComposerPrompt(bridgeValue);
+4777:		const bridgeStatus = getAiResponseBridgeStatus(executeProjectAiChat);
+4818:		const input = $("aicmdV2Input");
+4826:			const value = asString(input?.value || session.draftMessage || fallbackPrompt || "").trim();
+4833:			session.draftMessage = value;
+4834:			session.composerText = session.draftMessage;
+4869:		                        messages: session.messages,
+4870:		                        responses: session.responseHistory,
+4884:		                saveAiChatSession(sessionKey, session, { title: "Previous AI Team session" });
+4886:		                session.draftMessage = "";
+4893:		                session.responseHistory = [];
+4894:		                session.messages = [];
+4896:		                session.responseLoading = false;
+4943:                                const existingDraft = asString(session.draftMessage).trim();
+4953:                                        session.draftMessage = `Act as the ${spec?.label || titleCase(specId)} for ${projectName}. Review the project context and suggest the next best actions. Do not execute anything; prepare guidance only.`;
+4954:                                } else if (!session.draftMessage) {
+4955:                                        session.draftMessage = "";
+4979:				session.draftMessage = text;
+4991:				session.draftMessage = text;
+5014:				session.draftMessage = input.value || "";
+5015:				session.composerText = session.draftMessage;
+5028:			        const sendBtn = $("aicmdV2AskBtn");
+5035:		const voiceBtn = $("aicmdV2VoiceBtn");
+5038:				const SpeechRecognitionCtor = typeof window !== "undefined"
+5039:					? (window.SpeechRecognition || window.webkitSpeechRecognition)
+5041:				if (!SpeechRecognitionCtor) {
+5048:					const recognition = new SpeechRecognitionCtor();
+5055:						setAiComposerValue(session, input, transcript);
+5075:		const askBtn = $("aicmdV2AskBtn");
+5078:		                const value = asString(input?.value || session.draftMessage || "").trim();
+5088:		                        session.responseLoading = false;
+5112:		                session.messages.push(userChatMessage);
+5113:		                session.messages = session.messages.slice(-40);
+5114:		                session.draftMessage = "";
+5116:		                session.responseLoading = true;
+5120:		                        messages: session.messages,
+5121:		                        responses: session.responseHistory,
+5130:		                        const result = await executeProjectAiChat(projectName, {
+5137:		                                messages: session.messages.slice(-12),
+5187:		                        session.messages.push(assistantChatMessage);
+5188:		                        session.messages = session.messages.slice(-40);
+5199:		                        session.responseHistory.unshift({
+5218:		                        session.responseHistory = session.responseHistory.slice(0, 12);
+5219:		                        session.responseLoading = false;
+5224:		                                messages: session.messages,
+5225:		                                responses: session.responseHistory,
+5230:		                        saveAiChatSession(sessionKey, session);
+5236:		                        session.responseLoading = false;
+5241:		                                messages: session.messages,
+5242:		                                responses: session.responseHistory,
+5258:                                const fallback = asString(input?.value || session.draftMessage || "").trim();
+5279:                                const value = asString(input?.value || session.draftMessage || "").trim();
+5302:                                const value = asString(input?.value || session.draftMessage || "").trim();
+5326:                                const value = asString(input?.value || session.draftMessage || "").trim();
+5389:				session.draftMessage = asString(input?.value || session.draftMessage || "");
+5400:				session.draftMessage = "";
+5413:		const latestResponse = asArray(session.responseHistory)[0] || null;
+5445:				setAiComposerValue(session, input, latestResponse.responseText);
+5460:					responses: session.responseHistory,
+5472:		                const fallback = latestResponse?.prompt || asString(input?.value || session.draftMessage || "");
+5488:		                        messages: session.messages,
+5489:		                        responses: session.responseHistory,
+5584:				session.draftMessage = text;

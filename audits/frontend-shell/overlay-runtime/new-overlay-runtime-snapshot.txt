@@ -1,0 +1,75 @@
+===== OVERLAY RUNTIME HELPERS =====
+/*
+  Overlay Runtime Helpers
+
+  Phase 1:
+  - Helper-only module.
+  - Not connected to app.js yet.
+  - No automatic side effects.
+  - No DOM mutation unless called explicitly.
+*/
+
+export function getOverlayElement(id, root = document) {
+  if (!id || !root?.getElementById) return null;
+  return root.getElementById(id);
+}
+
+export function markOverlayVisible(element) {
+  if (!element) return false;
+
+  element.hidden = false;
+  element.inert = false;
+  element.classList.add("is-visible");
+  element.setAttribute("aria-hidden", "false");
+  element.style.display = "";
+  element.style.visibility = "";
+  element.style.opacity = "";
+  element.style.pointerEvents = "";
+
+  return true;
+}
+
+export function markOverlayHidden(element) {
+  if (!element) return false;
+
+  element.classList.remove("is-visible");
+  element.hidden = true;
+  element.inert = true;
+  element.setAttribute("aria-hidden", "true");
+  element.style.setProperty("display", "none", "important");
+  element.style.visibility = "hidden";
+  element.style.opacity = "0";
+  element.style.pointerEvents = "none";
+
+  return true;
+}
+
+export function getOverlaySnapshot(element) {
+  if (!element) {
+    return {
+      exists: false
+    };
+  }
+
+  return {
+    exists: true,
+    id: element.id || "",
+    className: String(element.className || ""),
+    hidden: Boolean(element.hidden),
+    inert: Boolean(element.inert),
+    ariaHidden: String(element.getAttribute("aria-hidden") || ""),
+    display: String(element.style.display || ""),
+    visibility: String(element.style.visibility || ""),
+    opacity: String(element.style.opacity || ""),
+    pointerEvents: String(element.style.pointerEvents || ""),
+    isVisible: element.classList.contains("is-visible")
+  };
+}
+
+export function forceHideOverlayById(id, root = document) {
+  return markOverlayHidden(getOverlayElement(id, root));
+}
+
+export function forceShowOverlayById(id, root = document) {
+  return markOverlayVisible(getOverlayElement(id, root));
+}

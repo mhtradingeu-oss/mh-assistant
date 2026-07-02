@@ -1,0 +1,260 @@
+import {
+  AccessKeyError,
+  archiveProjectAsset,
+  deleteProjectAsset,
+  fetchProtectedMediaBlob,
+  refreshProjectLibrary,
+  renameProjectAsset,
+  setProjectAssetSourceOfTruth,
+  updateProjectAssetStatus,
+  uploadProjectAsset
+} from "../api.js";
+import {
+  getAssetCatalog,
+  getCanonicalAssetType,
+  getCategoryReadinessList,
+  getMissingAssetLabels,
+  getAssetStatusTone
+} from "../asset-library.js";
+
+const librarySessionStore = new Map();
+let librarySearchRenderTimer = null;
+const MEDIA_LIBRARY_LOCAL_ASSETS_KEY = "mh-media-library-assets-v1";
+const libraryProtectedUrlCache = new Map();
+const LIBRARY_PAGE_SIZE = 10;
+const libraryProtectedUrlPromiseCache = new Map();
+let libraryGlobalListenersInitialized = false;
+const MAX_CONCURRENT_LIBRARY_THUMB_LOADS = 4;
+const LIBRARY_THUMB_BATCH_LIMIT = 18;
+let libraryThumbLoadsInFlight = 0;
+const libraryThumbLoadQueue = [];
+
+const SMART_CATEGORY_BUCKETS = [
+  { key: "logos", label: "Logos", types: ["logo"] },
+  { key: "product_images", label: "Product Images", types: ["product_photos", "packaging_images"] },
+  { key: "videos", label: "Videos", types: ["product_videos"] },
+  { key: "documents", label: "Documents", types: ["brand_guideline", "partner_docs", "testimonials_reviews", "certificates"] },
+  { key: "legal", label: "Legal", types: ["legal_doc"] },
+  { key: "pricing", label: "Pricing", types: ["pricing_doc", "product_csv"] },
+  { key: "campaign_materials", label: "Campaign Materials", types: ["social_assets", "campaign_assets"] }
+];
+
+const REQUIRED_ASSET_REQUIREMENTS = [
+  {
+    key: "logos",
+    label: "Logos",
+    types: ["logo"],
+    why: "Logos keep brand identity consistent across setup, media generation, and publishing.",
+    uploadType: "logo"
+  },
+  {
+    key: "brand_guidelines",
+    label: "Brand Guidelines",
+    types: ["brand_guideline"],
+    why: "Guidelines prevent off-brand messaging and visual drift in AI outputs.",
+    uploadType: "brand_guideline"
+  },
+  {
+    key: "product_data",
+    label: "Product CSV / Product Data",
+    types: ["product_csv"],
+    why: "Product data anchors facts, variants, and claims for campaign and publishing.",
+    uploadType: "product_csv"
+  },
+  {
+    key: "product_images",
+    label: "Product Images",
+    types: ["product_photos", "packaging_images"],
+    why: "Approved product and packaging visuals are required for high-trust creative production.",
+    uploadType: "product_photos"
+  },
+  {
+    key: "videos",
+    label: "Videos",
+    types: ["product_videos"],
+    why: "Video source assets are required for reels, demos, and cutdowns.",
+    uploadType: "product_videos"
+  },
+  {
+    key: "legal_pricing",
+    label: "Legal / Pricing Documents",
+    types: ["legal_doc", "pricing_doc"],
+    why: "Legal and pricing documents prevent non-compliant copy and invented offers.",
+    uploadType: "legal_doc"
+  },
+  {
+    key: "research_documents",
+    label: "Research Documents",
+    types: ["partner_docs", "testimonials_reviews", "certificates"],
+    why: "Research and proof documents support claims, trust signals, and strategy decisions.",
+    uploadType: "partner_docs"
+  }
+];
+
+const LIBRARY_FOLDERS = [
+  { key: "all_assets", label: "All Assets" },
+  { key: "logos", label: "Logos", types: ["logo"] },
+  { key: "product_data", label: "Product Data", types: ["product_csv"] },
+  { key: "product_images", label: "Product Images", types: ["product_photos"] },
+  { key: "packaging_images", label: "Packaging Images", types: ["packaging_images"] },
+  { key: "videos", label: "Videos", types: ["product_videos"] },
+  { key: "legal_pricing", label: "Legal & Pricing", types: ["legal_doc", "pricing_doc"] },
+  { key: "brand_guidelines", label: "Brand Guidelines", types: ["brand_guideline"] },
+  { key: "research_certificates", label: "Research / Certificates", types: ["partner_docs", "testimonials_reviews", "certificates"] },
+  { key: "uploaded_session", label: "Uploaded This Session" },
+  { key: "source_of_truth", label: "Source of Truth" },
+  { key: "archived", label: "Archived" }
+];
+
+function asArray(value) {
+  return Array.isArray(value) ? value : [];
+}
+
+function asObject(value) {
+  return value && typeof value === "object" ? value : {};
+}
+
+function asString(value) {
+  if (value == null) return "";
+  return String(value);
+}
+
+function isLibraryInteractiveElement(target) {
+  return Boolean(target?.closest?.(
+    "button, a, input, select, textarea, label, option, [role='button'], .library-action-menu, .library-action-dropdown, .library-drop-zone"
+  ));
+}
+
+function bindLibraryControlEventShield(scope) {
+  // No-op by design.
+  // Do not stop events on native controls. Select/input/file controls must
+  // receive pointer/click/input events directly from the browser.
+  return;
+}
+
+function titleCase(value = "") {
+  return asString(value)
+    .replace(/[_-]+/g, " ")
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
+function toKey(value = "") {
+  return asString(value).trim().toLowerCase();
+}
+
+function projectKey(projectName) {
+  return toKey(projectName) || "__default__";
+}
+
+function readManagedMediaAssetMap() {
+  if (typeof window === "undefined") return {};
+  try {
+    const parsed = JSON.parse(window.localStorage?.getItem(MEDIA_LIBRARY_LOCAL_ASSETS_KEY) || "{}");
+    return parsed && typeof parsed === "object" ? parsed : {};
+  } catch (_) {
+    return {};
+  }
+}
+
+function loadLocalManagedMediaAssets(projectName) {
+  const map = readManagedMediaAssetMap();
+  const primary = asArray(map[projectKey(projectName)]);
+  if (primary.length) return primary;
+  if (!toKey(projectName)) {
+    return asArray(map.workspace || map.Workspace || map.__default__);
+  }
+  return primary;
+}
+
+function basename(filePath = "") {
+  const value = asString(filePath);
+  if (!value) return "";
+  const parts = value.split("/");
+  return parts[parts.length - 1] || value;
+}
+
+function getFileExtension(name = "") {
+  const value = basename(name);
+  const index = value.lastIndexOf(".");
+  return index >= 0 ? value.slice(index + 1).toLowerCase() : "";
+}
+
+function shortPath(filePath = "", maxSegments = 4) {
+  const value = asString(filePath).trim();
+  if (!value) return "-";
+  const parts = value.split("/").filter(Boolean);
+  if (parts.length <= maxSegments) return `/${parts.join("/")}`;
+  return `.../${parts.slice(parts.length - maxSegments).join("/")}`;
+}
+
+function assetContextHint(asset) {
+  const filePath = asString(asset?.file_path || "").trim();
+  if (!filePath) return "Library";
+
+  const parts = filePath.split("/").filter(Boolean);
+  if (!parts.length) return "Library";
+
+  const tail = parts.slice(-3).join("/");
+  return tail || shortPath(filePath);
+}
+
+function shortAssetId(value = "") {
+  const id = asString(value).trim();
+  if (!id) return "-";
+  if (id.length <= 20) return id;
+  return `${id.slice(0, 10)}...${id.slice(-8)}`;
+}
+
+function formatCount(value) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) return "0";
+  return String(Math.max(0, Math.round(parsed)));
+}
+
+function formatDate(value) {
+  if (!value) return "-";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "-";
+  return date.toLocaleString();
+}
+
+function isImageExtension(extension = "") {
+  return ["png", "jpg", "jpeg", "webp", "gif", "svg", "avif"].includes(extension);
+}
+
+function isVideoExtension(extension = "") {
+  return ["mp4", "mov", "webm", "m4v"].includes(extension);
+}
+
+function buildPreviewUrl(projectName, asset) {
+  if (!projectName) return "";
+  const fullPath = asString(asset.file_path || asset.local_path || asset.path || "").trim();
+  const fileName = basename(fullPath || asset.filename || asset.file_name || asset.name || "");
+  const assetId = asString(asset.asset_id || asset.assetId || asset.id || "").trim();
+  const assetType = asString(asset.asset_type || asset.type || "asset").trim().toLowerCase();
+  if (!fileName || !assetType) return "";
+
+  const base = `/media/file/${encodeURIComponent(projectName)}/${encodeURIComponent(assetType)}/${encodeURIComponent(fileName)}`;
+  const params = [];
+
+  if (fullPath) {
+    params.push(`path=${encodeURIComponent(fullPath)}`);
+  }
+
+  if (assetId) {
+    params.push(`assetId=${encodeURIComponent(assetId)}`);
+  }
+
+  return params.length ? `${base}?${params.join("&")}` : base;
+}
+
+function requiresProtectedMediaFetch(fileUrl = "") {
+  const value = asString(fileUrl).trim();
+  if (!value) return false;
+  if (/^blob:/i.test(value) || /^data:/i.test(value)) return false;
+  if (/^https?:\/\//i.test(value) && !value.includes("/media/file/")) return false;
+  return value.includes("/media/file/");
+}
+
+function getAssetPreviewUrl(asset) {
+  if (!asset) return "";

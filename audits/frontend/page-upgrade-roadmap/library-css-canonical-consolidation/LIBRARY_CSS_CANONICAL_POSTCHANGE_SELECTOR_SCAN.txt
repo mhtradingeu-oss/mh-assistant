@@ -1,0 +1,92 @@
+===== LIBRARY CSS CANONICAL POST-CHANGE SELECTOR SCAN =====
+Date: 2026-05-12
+Branch: architecture/frontend-consolidation-v1
+File: public/control-center/styles/14-page-standard.css
+
+===== FILE METRICS =====
+Lines before consolidation: 1270
+Lines after consolidation:  1054
+Net reduction:              -216 lines
+
+===== SELECTOR COUNTS =====
+Total Library selectors before: 103
+Total Library selectors after:  77
+Reduction:                      -26 selectors
+
+Duplicate Library selectors before: 21 (conflicting rules)
+Duplicate Library selectors after:  10 (all legitimate base + @media responsive pairs)
+Conflicting duplicates eliminated:  21 → 0
+
+===== REMAINING SELECTOR APPEARANCES (all are base + responsive) =====
+3x [data-page="library"] .library-filter-bar
+    → base (14-col grid) + @media 1280px (2-col) + @media 980px (1-col)
+
+2x [data-page="library"] .library-action-toolbar
+    → base (flex, flex-end) + @media 720px (justify stretch)
+
+2x [data-page="library"] .library-finder-toolbar .btn
+    → base (min-height, border-radius) + @media 720px (width 100%)
+
+2x [data-page="library"] .library-folder-list
+    → base (auto-fit minmax 150px) + @media 1280px (minmax 140px)
+
+2x [data-page="library"] .library-grid-body
+    → base (auto-fill minmax 180px) + @media 760px (1fr)
+
+2x [data-page="library"] .library-panel-action-grid
+    → base (2-col) + @media 1100px (1-col)
+
+2x [data-page="library"] .library-required-grid
+    → base (auto-fit) + @media 720px (1fr)
+
+2x [data-page="library"] .library-smart-shell
+    → base (gap 22px) + @media 720px (gap 16px)
+
+2x [data-page="library"] .library-workspace-grid.library-finder-workspace
+    → base (2-col 1fr/380px) + @media 1180px (1fr)
+
+2x [data-page="library"] .library-workspace-side
+    → base (sticky, max-height) + @media 1180px (static, no max-height)
+
+===== LIBRARY SECTION HEADERS AFTER CHANGE =====
+Line 478: /* ========= LIBRARY CANONICAL OPERATING SURFACE ========= */
+Line 484: /* ── 1. Shell */
+Line 499: /* ── 2. Overview / required cards */
+Line 508: /* ── 3. Upload area */
+Line 577: /* ── 4. Workspace layout */
+Line 611: /* ── 5. Folder list */
+Line 654: /* ── 6. Toolbar */
+Line 685: /* ── 7. Filter bar */
+Line 717: /* ── 8. Asset grid */
+Line 792: /* ── 9. Preview / inspector */
+Line 854: /* ── 10. Action Panel */
+Line 931: /* ── 11. AI Panel */
+Line 941: /* ── 12. Document preview */
+Line 973: /* ── 13. Pointer event safety */
+Line 991: /* ── 14. Responsive behavior */
+
+===== OLD SECTIONS REMOVED =====
+- Library Workspace UX Polish (unscoped)
+- Compact Finder Toolbar (unscoped)
+- Compact Filter Ribbon (unscoped)
+- Upload Zone Modernization (unscoped)
+- Asset Grid Density (unscoped)
+- Preview Panel (unscoped)
+- Mobile (unscoped responsive)
+- Library Interaction + Density Fix (unscoped)
+- Library professional polish - 20260510 (partial scope)
+- LIBRARY UX POLISH (scoped)
+- LIBRARY DOCUMENT PREVIEW (scoped)
+- LIBRARY UX FINAL SIZE + DARK UPLOAD FIX (scoped, used !important overrides)
+- LIBRARY OPERATING SURFACE PANELS (scoped)
+
+All 13 old sections replaced by one canonical section.
+
+===== VALIDATION RESULTS =====
+node --check library.js:           PASS
+node --check library/*.js:         PASS
+node --check app.js:               PASS
+Legacy guard:                      PASS (no legacy asset references)
+Forbidden diff check:              PASS (only 14-page-standard.css changed)
+Action selector preservation:      PASS (all data-library-* selectors in JS intact)
+Panel check:                       PASS (.library-action-panel and .library-ai-panel styled)

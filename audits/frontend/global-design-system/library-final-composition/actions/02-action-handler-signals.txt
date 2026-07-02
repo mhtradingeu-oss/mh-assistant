@@ -1,0 +1,48 @@
+# LIB-FINAL-3 — Library Action Handlers
+
+Generated: Sat Jun  6 08:17:06 CEST 2026
+Branch: architecture/frontend-consolidation-v1
+HEAD: 8ad728c
+
+public/control-center/pages/library.js:38:  archiveProjectAsset,
+public/control-center/pages/library.js:39:  deleteProjectAsset,
+public/control-center/pages/library.js:42:  renameProjectAsset,
+public/control-center/pages/library.js:43:  setProjectAssetSourceOfTruth,
+public/control-center/pages/library.js:44:  updateProjectAssetStatus,
+public/control-center/pages/library.js:45:  uploadProjectAsset
+public/control-center/pages/library.js:488:          const button = event.target.closest?.("[data-copy-asset-path]");
+public/control-center/pages/library.js:493:          const value = button.getAttribute("data-copy-asset-path") || "";
+public/control-center/pages/library.js:500:            window.prompt("Copy asset path:", value);
+public/control-center/pages/library.js:1386:      return Promise.resolve(window.prompt(title, initial));
+public/control-center/pages/library.js:2326:        await setProjectAssetSourceOfTruth(activeProjectName, asset.asset_id || asset.id, !asset.source_of_truth);
+public/control-center/pages/library.js:2339:  const statusActionButtons = Array.from(document.querySelectorAll("[data-asset-status-action]"));
+public/control-center/pages/library.js:2349:      const status = button.getAttribute("data-asset-status-action") || "needs_review";
+public/control-center/pages/library.js:2359:      const confirmed = status === "approved" ? true : confirm(`Confirm asset status change\n\nAction: Set asset status to "${status}".\nRisk: This updates Library readiness metadata and may affect downstream review/publishing visibility. It does not publish anything.\n\nSelect Cancel to keep the current status.`);
+public/control-center/pages/library.js:2365:        await updateProjectAssetStatus(activeProjectName, assetId, status, `Status changed to ${status} from Control Center Library.`);
+public/control-center/pages/library.js:2378:  const archiveButtons = Array.from(document.querySelectorAll("[data-library-archive]"));
+public/control-center/pages/library.js:2388:      const id = button.getAttribute("data-library-archive") || "";
+public/control-center/pages/library.js:2397:      if (!confirm(`Confirm archive action\n\nAction: Archive this asset.\nRisk: The asset is removed from active Library views but remains in the registry. This does not delete the physical file.\n\nSelect Cancel to keep this asset active.`)) {
+public/control-center/pages/library.js:2402:        await archiveProjectAsset(activeProjectName, assetId, "Archived from Control Center Library.");
+public/control-center/pages/library.js:2412:  const renameButtons = Array.from(document.querySelectorAll("[data-library-rename]"));
+public/control-center/pages/library.js:2422:      const id = button.getAttribute("data-library-rename") || "";
+public/control-center/pages/library.js:2443:        await renameProjectAsset(activeProjectName, assetId, normalized);
+public/control-center/pages/library.js:2453:  const deleteButtons = Array.from(document.querySelectorAll("[data-library-delete]"));
+public/control-center/pages/library.js:2463:      const id = button.getAttribute("data-library-delete") || "";
+public/control-center/pages/library.js:2472:      if (!confirm(`Confirm soft-delete action\n\nAction: Soft-delete this asset from active views.\nRisk: This applies a registry-level soft delete and removes the asset from active Library flows. This action does not silently publish, approve, or run workflows.\n\nSelect Cancel to keep this asset available.`)) {
+public/control-center/pages/library.js:2477:        await deleteProjectAsset(activeProjectName, assetId, "Soft deleted from Control Center Library.");
+public/control-center/pages/library.js:2643:        dropZone.addEventListener(eventName, (event) => {
+public/control-center/pages/library.js:2650:        dropZone.addEventListener(eventName, (event) => {
+public/control-center/pages/library.js:2656:      dropZone.addEventListener("drop", (event) => {
+public/control-center/pages/library.js:2749:            const result = await uploadProjectAsset(activeProjectName, assetType, file);
+public/control-center/pages/library/action-panel.js:59:          <button class="btn btn-secondary" type="button" data-copy-asset-path="${copyPathValue}"${copyDisabledAttr}>Copy asset path</button>
+public/control-center/pages/library/action-panel.js:69:             <button class="btn btn-secondary" type="button" data-asset-status-action="approved" data-library-asset="${selectedAssetId}" data-asset-id="${selectedRegistryAssetId}"${durableDisabledAttr}>Approve for use</button>
+public/control-center/pages/library/action-panel.js:70:             <button class="btn btn-secondary" type="button" data-asset-status-action="needs_review" data-library-asset="${selectedAssetId}" data-asset-id="${selectedRegistryAssetId}"${durableDisabledAttr}>Mark for review</button>`}
+public/control-center/pages/library/action-panel.js:71:          <button class="btn btn-secondary" type="button" data-library-rename="${selectedAssetId}" data-asset-id="${selectedRegistryAssetId}"${durableDisabledAttr}>Rename asset</button>
+public/control-center/pages/library/action-panel.js:72:          <button class="btn btn-secondary" type="button" data-library-archive="${selectedAssetId}" data-asset-id="${selectedRegistryAssetId}"${durableDisabledAttr}>Archive asset</button>
+public/control-center/pages/library/action-panel.js:78:        <button class="btn btn-secondary library-danger-action" type="button" data-library-delete="${selectedAssetId}" data-asset-id="${selectedRegistryAssetId}" title="Soft-delete this asset after confirmation"${durableDisabledAttr}>Soft-delete asset</button>
+public/control-center/api.js:1426:export async function updateProjectAssetStatus(projectName, assetId, status, note = "") {
+public/control-center/api.js:1446:export async function renameProjectAsset(projectName, assetId, name) {
+public/control-center/api.js:1468:export async function setProjectAssetSourceOfTruth(projectName, assetId, sourceOfTruth) {
+public/control-center/api.js:1485:export async function archiveProjectAsset(projectName, assetId, note = "") {
+public/control-center/api.js:1502:export async function deleteProjectAsset(projectName, assetId, note = "") {
+public/control-center/api.js:2293:export async function uploadProjectAsset(projectName, assetType, file) {

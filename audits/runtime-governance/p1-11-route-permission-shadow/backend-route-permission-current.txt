@@ -1,0 +1,31 @@
+    label: 'Compliance Reviewer',
+    routes: ['governance', 'content-studio', 'media-studio', 'publishing'],
+    service_domains: ['governance'],
+    actions: ['review_claims', 'review_brand_safety', 'approve_release', 'escalate_risk']
+  },
+  {
+    id: 'admin',
+    label: 'Admin',
+    routes: ['home', 'settings', 'integrations', 'governance', 'workflows'],
+    service_domains: ['governance'],
+    actions: ['override_policy', 'manage_team', 'resolve_escalation', 'manage_permissions']
+  }
+];
+
+const ROUTE_ROLE_ACCESS = {
+  home: ['strategist', 'analyst', 'admin'],
+  'campaign-studio': ['strategist', 'ads_operator', 'admin'],
+  'content-studio': ['writer', 'strategist', 'compliance_reviewer', 'admin'],
+  'media-studio': ['designer', 'video_lead', 'compliance_reviewer', 'admin'],
+  publishing: ['publisher', 'compliance_reviewer', 'admin'],
+  research: ['strategist', 'analyst', 'writer', 'admin'],
+  governance: ['compliance_reviewer', 'admin', 'analyst'],
+  'ads-manager': ['ads_operator', 'strategist', 'analyst', 'admin'],
+  insights: ['analyst', 'strategist', 'ads_operator', 'admin'],
+  integrations: ['admin'],
+  workflows: TEAM_ROLE_DEFS.map((role) => role.id),
+  library: ['designer', 'video_lead', 'publisher', 'admin'],
+  settings: ['admin']
+};
+
+const SERVICE_DOMAIN_DEFS = {

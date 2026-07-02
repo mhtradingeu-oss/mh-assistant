@@ -1,0 +1,428 @@
+public/control-center/router.js:1:// public/control-center/router.js
+public/control-center/router.js:59:const routeRegistry = {
+public/control-center/router.js:81:let routeAccessResolver = null;
+public/control-center/router.js:83:const routeChangeSubscribers = new Set();
+public/control-center/router.js:87:  routeChangeSubscribers.add(handler);
+public/control-center/router.js:88:  return () => routeChangeSubscribers.delete(handler);
+public/control-center/router.js:91:function notifyRouteChange(route) {
+public/control-center/router.js:92:  routeChangeSubscribers.forEach((handler) => {
+public/control-center/router.js:94:      handler(route);
+public/control-center/router.js:106:function getFallbackRoute(route) {
+public/control-center/router.js:108:    id: route,
+public/control-center/router.js:118:            <div class="empty-box">Unknown route: ${route}</div>
+public/control-center/router.js:134:function getAccessDeniedRoute(route, reason = "") {
+public/control-center/router.js:135:  const detail = reason || `Route "${route}" is not available for the current role.`;
+public/control-center/router.js:141:      description: "This workspace route is blocked by role access rules."
+public/control-center/router.js:144:      <section class="page is-active" data-page="access-denied">
+public/control-center/router.js:149:              <h3 class="access-denied-title">Route blocked: ${escapeHtmlMin(route)}</h3>
+public/control-center/router.js:163:function normalizeRouteAccessResult(result, route) {
+public/control-center/router.js:167:      reason: result ? "" : `Access to ${route} is restricted.`
+public/control-center/router.js:184:function getDefaultRouteAccess(route) {
+public/control-center/router.js:185:  const allowedRoles = DEFAULT_ROUTE_ROLE_ACCESS[route];
+public/control-center/router.js:195:      : `Route "${route}" requires one of: [${allowedRoles.join(", ")}]. ` +
+public/control-center/router.js:200:function getRouteAccess(route) {
+public/control-center/router.js:201:  if (typeof routeAccessResolver !== "function") {
+public/control-center/router.js:202:    return getDefaultRouteAccess(route);
+public/control-center/router.js:206:    return normalizeRouteAccessResult(routeAccessResolver(route), route);
+public/control-center/router.js:208:    return getDefaultRouteAccess(route);
+public/control-center/router.js:212:function updatePageHeader(route) {
+public/control-center/router.js:213:  const routeDef = getRouteDefinition(route);
+public/control-center/router.js:214:  const meta = routeDef.meta;
+public/control-center/router.js:225:function updateActiveNav(route) {
+public/control-center/router.js:226:  const navItems = Array.from(document.querySelectorAll(".nav-item[data-route]"));
+public/control-center/router.js:229:    const itemRoute = item.getAttribute("data-route");
+public/control-center/router.js:230:    item.classList.toggle("is-active", itemRoute === route);
+public/control-center/router.js:234:export function getRouteDefinition(route) {
+public/control-center/router.js:235:  const access = getRouteAccess(route);
+public/control-center/router.js:237:    return getAccessDeniedRoute(route, access.reason);
+public/control-center/router.js:240:  return routeRegistry[route] || getFallbackRoute(route);
+public/control-center/router.js:244:  routeAccessResolver = typeof resolver === "function" ? resolver : null;
+public/control-center/router.js:247:export function renderRouteTemplate(route) {
+public/control-center/router.js:251:  const routeDef = getRouteDefinition(route);
+public/control-center/router.js:252:  root.innerHTML = routeDef.template;
+public/control-center/router.js:254:  updatePageHeader(route);
+public/control-center/router.js:255:  updateActiveNav(route);
+public/control-center/router.js:258:export function navigateTo(route, emit = true) {
+public/control-center/router.js:259:  renderRouteTemplate(route);
+public/control-center/router.js:260:  notifyRouteChange(route);
+public/control-center/router.js:262:  // Sync browser URL — setting the same hash value does not re-fire hashchange
+public/control-center/router.js:263:  const newHash = `#${route}`;
+public/control-center/router.js:264:  if (typeof location !== "undefined" && location.hash !== newHash) {
+public/control-center/router.js:265:    location.hash = newHash;
+public/control-center/router.js:270:      new CustomEvent("mh:route-change", {
+public/control-center/router.js:271:        detail: { route }
+public/control-center/app.js:14:} from "./router.js";
+public/control-center/app.js:255:function resolveRouteAccess(route) {
+public/control-center/app.js:257:  const routePermissions = getProjectedRoutePermissions({ operations });
+public/control-center/app.js:263:      `Route "${route}" requires one of: [${rolesStr}]. ` +
+public/control-center/app.js:269:  const explicitRule = routePermissions.find((item) => item?.route === route);
+public/control-center/app.js:272:    const fallbackRoles = DEFAULT_ROUTE_ROLE_ACCESS[route];
+public/control-center/app.js:314:        static routes or logged to the console.
+public/control-center/app.js:748:function ensureRouteDom(route) {
+public/control-center/app.js:752:  const page = pageRoot.querySelector(`.page[data-page="${route}"]`);
+public/control-center/app.js:754:    renderRouteTemplate(route);
+public/control-center/app.js:1202:    payload.dataRoute ? `route=${payload.dataRoute}` : "",
+public/control-center/app.js:1218:      ? event.target.closest("button, a, [data-route], [data-page], [data-action], input, select, textarea") || event.target
+public/control-center/app.js:1231:      dataRoute: String(element.getAttribute("data-route") || ""),
+public/control-center/app.js:1232:      dataPage: String(element.getAttribute("data-page") || ""),
+public/control-center/app.js:2085:  const routeDef = getRouteDefinition(currentRoute);
+public/control-center/app.js:2087:  if (typeof routeDef.render === "function") {
+public/control-center/app.js:2088:    const renderResult = routeDef.render({
+public/control-center/app.js:2138:    if (!routeDef.disableStandardLayout) {
+public/control-center/app.js:2140:        route: currentRoute,
+public/control-center/app.js:2153:    route: currentRoute,
+public/control-center/app.js:3032:   * can be restored later with route-level lazy loading to avoid startup
+public/control-center/app.js:3064:    const route = item.getAttribute("data-route") || labeledRoute;
+public/control-center/app.js:3065:    if (!route) return;
+public/control-center/app.js:3066:    item.setAttribute("data-route", route);
+public/control-center/app.js:3067:    item.setAttribute("data-page", route);
+public/control-center/app.js:3130:      ? event.target.closest("button, a, [data-route], [data-page], [data-action]")
+public/control-center/app.js:3136:    const routeAttr = String(candidate.getAttribute("data-route") || "").trim();
+public/control-center/app.js:3137:    const pageAttr = String(candidate.getAttribute("data-page") || "").trim();
+public/control-center/app.js:3138:    const clickedNavItem = Boolean(candidate.closest(".nav-item[data-route], [data-shell-route], [data-global-route]"));
+public/control-center/app.js:3139:    const routeAttrAllowed = clickedNavItem ? (routeAttr || pageAttr) : routeAttr;
+public/control-center/app.js:3141:    if (routeAttrAllowed) {
+public/control-center/app.js:3143:      navigateTo(routeAttrAllowed);
+public/control-center/app.js:3187:  window.addEventListener("mh:route-change", (event) => {
+public/control-center/app.js:3188:    const route = event?.detail?.route || "home";
+public/control-center/app.js:3189:    setCurrentRoute(route);
+public/control-center/app.js:3194:  // Back/Forward support — hashchange fires when the user navigates browser history
+public/control-center/app.js:3195:  window.addEventListener("hashchange", () => {
+public/control-center/app.js:3196:    const route = (location.hash.slice(1) || "home").trim();
+public/control-center/app.js:3197:    if (route && route !== getState().currentRoute) {
+public/control-center/app.js:3198:      navigateTo(route);
+public/control-center/app.js:3384:    const clickedNavItem = event.target.closest(".nav-item[data-route]");
+public/control-center/app.js:3534:    showError("Enter a route, page name, or keyword to search.");
+public/control-center/app.js:3538:  const navItems = Array.from(document.querySelectorAll(".nav-item[data-route]"));
+public/control-center/app.js:3540:    const route = item.getAttribute("data-route") || "";
+public/control-center/app.js:3543:      route,
+public/control-center/app.js:3545:      haystack: `${route} ${label}`.toLowerCase()
+public/control-center/app.js:3554:    showError(`No route matches "${query}".`);
+public/control-center/app.js:3559:    navigateTo(matches[0].route);
+public/control-center/app.js:3566:  navigateTo(top[0].route);
+public/control-center/app.js:3786:  Array.from(document.querySelectorAll("[data-ai-route]")).forEach((button) => {
+public/control-center/app.js:3788:      const route = button.getAttribute("data-ai-route");
+public/control-center/app.js:3789:      if (!route) return;
+public/control-center/app.js:3790:      navigateTo(route);
+public/control-center/app.js:3798:    const route = window.location.hash.replace(/^#/, "") || "home";
+public/control-center/app.js:3801:      context.textContent = `Current workspace: ${route}`;
+public/control-center/app.js:3806:  window.addEventListener("hashchange", syncContext);
+public/control-center/app.js:3890:          data-new-route="setup"
+public/control-center/app.js:3899:        <button class="executive-new-option" type="button" data-new-route="campaign-studio" data-new-prompt="Create a campaign plan for the current project. Ask me the required questions step by step.">
+public/control-center/app.js:3905:        <button class="executive-new-option" type="button" data-new-route="content-studio" data-new-prompt="Create a blog post workflow for the current project. Ask for topic, audience, language, SEO goal, and call to action.">
+public/control-center/app.js:3911:        <button class="executive-new-option" type="button" data-new-route="media-studio" data-new-prompt="Create a media generation workflow. Ask for format, platform, product, style, language, and assets needed.">
+public/control-center/app.js:3917:        <button class="executive-new-option" type="button" data-new-route="publishing" data-new-prompt="Prepare a publishing workflow. Ask what content should be reviewed, approved, scheduled, or published.">
+public/control-center/app.js:3923:        <button class="executive-new-option" type="button" data-new-route="governance" data-new-prompt="Create an approval request. Ask what needs approval, risk level, reviewer, and decision deadline.">
+public/control-center/app.js:3929:        <button class="executive-new-option" type="button" data-new-route="workflows" data-new-prompt="Build a custom workflow for the current project. Ask what outcome I want and what inputs are available.">
+public/control-center/app.js:4014:    Array.from(modal.querySelectorAll("[data-new-route]")).forEach((button) => {
+public/control-center/app.js:4027:        const route = button.getAttribute("data-new-route") || "ai-command";
+public/control-center/app.js:4032:        navigateTo(route);
+public/control-center/app.js:4116:    // Restore the route from the URL hash on refresh or deep-link
+public/control-center/app.js:4117:    const startRoute = (location.hash.slice(1) || "home").trim();
+public/control-center/app.js:4186:  const route = String(state.currentRoute || "home");
+public/control-center/app.js:4198:    route !== window.__mhLastGlobalUiRoute ||
+public/control-center/app.js:4206:  window.__mhLastGlobalUiRoute = route;
+public/control-center/pages/workflows.js:36:    routeHint: "campaign-studio"
+public/control-center/pages/workflows.js:44:    routeHint: "content-studio"
+public/control-center/pages/workflows.js:52:    routeHint: "media-studio"
+public/control-center/pages/workflows.js:60:    routeHint: "publishing"
+public/control-center/pages/workflows.js:68:    routeHint: "insights"
+public/control-center/pages/workflows.js:76:    routeHint: "research"
+public/control-center/pages/workflows.js:84:    routeHint: "integrations"
+public/control-center/pages/workflows.js:525:      `Open ${titleCase(workflow.routeHint)} for execution handoff.`,
+public/control-center/pages/workflows.js:530:    routeSuggestions: [
+public/control-center/pages/workflows.js:532:        label: `Open ${titleCase(workflow.routeHint)}`,
+public/control-center/pages/workflows.js:533:        route: workflow.routeHint,
+public/control-center/pages/workflows.js:534:        reason: `Continue execution in ${titleCase(workflow.routeHint)}.`
+public/control-center/pages/workflows.js:538:        route: "ai-command",
+public/control-center/pages/workflows.js:1071:    routeSuggestions: asArray(run.output?.routeSuggestions)
+public/control-center/pages/workflows.js:1370:        route_target: activeWorkflow.routeHint,
+public/control-center/pages/workflows.js:1535:          route_target: "workflows",
+public/control-center/pages/workflows.js:1593:        "Return structured steps, blockers, route suggestions, and KPI checks."
+public/control-center/pages/workflows.js:1743:  disableStandardLayout: true,
+public/control-center/pages/workflows.js:1750:    <section class="page is-active" data-page="workflows">
+public/control-center/pages/workflows.js:1963:          routeSuggestions: [
+public/control-center/pages/workflows.js:1966:              route: "workflows",
+public/control-center/pages/setup.js:1151:  disableStandardLayout: true,
+public/control-center/pages/setup.js:1158:    <section class="page is-active" data-page="setup">
+public/control-center/pages/library/command-router.js:45:export function routeLibraryCommand(commandEnvelope, handlers = {}) {
+public/control-center/pages/content-studio-workspace.js:1452:        <div class="empty-box">Run AI Command or Workflows and route output to Content Studio to prefill the composer.</div>
+public/control-center/pages/content-studio-workspace.js:1513:      route: "content-studio",
+public/control-center/pages/content-studio-workspace.js:1560:      route: "content-studio",
+public/control-center/pages/content-studio-workspace.js:1676:      route: "content-studio",
+public/control-center/pages/content-studio-workspace.js:1889:            route_target: "content-studio",
+public/control-center/pages/content-studio-workspace.js:1999:          route_target: "content-studio",
+public/control-center/pages/content-studio-workspace.js:2039:        routeSuggestions: []
+public/control-center/pages/content-studio-workspace.js:2220:          routeSuggestions: []
+public/control-center/pages/content-studio-workspace.js:2249:  disableStandardLayout: true,
+public/control-center/pages/content-studio-workspace.js:2256:    <section class="page is-active" data-page="content-studio">
+public/control-center/pages/governance.js:486:      <section class="page is-active" data-page="governance">
+public/control-center/pages/governance.js:514:      <section class="page is-active" data-page="governance">
+public/control-center/pages/governance.js:542:      <section class="page is-active" data-page="governance">
+public/control-center/pages/governance.js:601:    <section class="page is-active" data-page="governance">
+public/control-center/pages/governance.js:983:          route_target: "governance"
+public/control-center/pages/governance.js:1070:  disableStandardLayout: true,
+public/control-center/pages/governance.js:1076:  template: `<section class="page is-active" data-page="governance"><div class="governance-shell"></div></section>`,
+public/control-center/pages/research.js:6:  campaign: { route: "campaign-studio", label: "Campaign Studio", destinationRole: "strategist", destinationDomain: "campaign" },
+public/control-center/pages/research.js:7:  content: { route: "content-studio", label: "Content Studio", destinationRole: "writer", destinationDomain: "content" },
+public/control-center/pages/research.js:8:  seo: { route: "workflows", label: "SEO Workflow", destinationRole: "strategist", destinationDomain: "research" },
+public/control-center/pages/research.js:9:  ads: { route: "ads-manager", label: "Ads Manager", destinationRole: "ads_operator", destinationDomain: "campaign" },
+public/control-center/pages/research.js:10:  ai: { route: "ai-command", label: "AI Command", destinationRole: "admin", destinationDomain: "governance" }
+public/control-center/pages/research.js:543:      routeTarget:
+public/control-center/pages/research.js:913:              routeSuggestions: []
+public/control-center/pages/research.js:931:              routeSuggestions: []
+public/control-center/pages/research.js:946:  const routeButtons = Array.from(document.querySelectorAll("[data-research-route]"));
+public/control-center/pages/research.js:947:  routeButtons.forEach((button) => {
+public/control-center/pages/research.js:949:      const target = button.getAttribute("data-research-route") || "";
+public/control-center/pages/research.js:966:        destination_page: action.route,
+public/control-center/pages/research.js:974:          source: "research-route",
+public/control-center/pages/research.js:975:          route_target: action.route,
+public/control-center/pages/research.js:981:      setSharedHandoff(projectName, action.route, handoff);
+public/control-center/pages/research.js:983:        console.warn("Failed to persist research route handoff:", error.message);
+public/control-center/pages/research.js:987:        navigateTo(action.route);
+public/control-center/pages/research.js:991:        navigateTo(action.route);
+public/control-center/pages/research.js:994:      showMessage?.(`Research context routed to ${action.label}.`);
+public/control-center/pages/research.js:1005:        `Operationalize this opportunity for ${projectName || "this project"}: ${item.title}. Context: ${item.summary}. Build a short action plan for ${item.routeTarget.label}.`
+public/control-center/pages/research.js:1007:      navigateTo(item.routeTarget.route);
+public/control-center/pages/research.js:1008:      showMessage?.(`Opportunity routed to ${item.routeTarget.label}.`);
+public/control-center/pages/research.js:1090:        target: opportunity.routeTarget.label,
+public/control-center/pages/research.js:1103:  disableStandardLayout: true,
+public/control-center/pages/research.js:1110:    <section class="page is-active" data-page="research">
+public/control-center/pages/research.js:1520:                              <span>Best route</span>
+public/control-center/pages/research.js:1521:                              <strong>${escapeHtml(item.routeTarget.label)}</strong>
+public/control-center/pages/research.js:1523:                            <button class="quick-action-btn" type="button" data-research-opportunity="${index}">Send to ${escapeHtml(item.routeTarget.label)}</button>
+public/control-center/pages/research.js:1564:                  <button class="quick-action-btn" type="button" data-research-route="campaign">Send to Campaign Studio</button>
+public/control-center/pages/research.js:1565:                  <button class="quick-action-btn" type="button" data-research-route="content">Send to Content Studio</button>
+public/control-center/pages/research.js:1566:                  <button class="quick-action-btn" type="button" data-research-route="seo">Send to SEO Workflow</button>
+public/control-center/pages/research.js:1567:                  <button class="quick-action-btn" type="button" data-research-route="ads">Send to Ads Manager</button>
+public/control-center/pages/research.js:1584:            <button class="btn btn-secondary" type="button" data-research-route="ai">Send to AI Workspace</button>
+public/control-center/pages/settings.js:129:      { path: "project.projectName", label: "Project name", type: "text", critical: true, placeholder: "project-name" },
+public/control-center/pages/settings.js:130:      { path: "project.brandName", label: "Brand name", type: "text", critical: true, placeholder: "Brand name" },
+public/control-center/pages/settings.js:132:        path: "project.market",
+public/control-center/pages/settings.js:139:        path: "project.language",
+public/control-center/pages/settings.js:146:        path: "project.currency",
+public/control-center/pages/settings.js:153:        path: "project.timezone",
+public/control-center/pages/settings.js:159:      { path: "project.website", label: "Website", type: "url", critical: true, placeholder: "https://brand.com" },
+public/control-center/pages/settings.js:161:        path: "project.defaultCampaignMode",
+public/control-center/pages/settings.js:167:        path: "project.businessType",
+public/control-center/pages/settings.js:182:        path: "operating.primaryMode",
+public/control-center/pages/settings.js:189:        path: "operating.actionPolicy",
+public/control-center/pages/settings.js:196:        path: "operating.emergencyOwner",
+public/control-center/pages/settings.js:202:        path: "operating.modeNotes",
+public/control-center/pages/settings.js:216:        path: "ai.tone",
+public/control-center/pages/settings.js:223:        path: "ai.responseStyle",
+public/control-center/pages/settings.js:229:        path: "ai.generationStrictness",
+public/control-center/pages/settings.js:236:        path: "ai.approvalRequiredMode",
+public/control-center/pages/settings.js:243:        path: "ai.creativitySafetyBalance",
+public/control-center/pages/settings.js:249:        path: "ai.claimSafetyMode",
+public/control-center/pages/settings.js:256:        path: "ai.contentGenerationDefaults",
+public/control-center/pages/settings.js:262:        path: "ai.mediaGenerationDefaults",
+public/control-center/pages/settings.js:272:    description: "Tell the system what should be suggested, blocked, routed, or escalated when operational conditions change.",
+public/control-center/pages/settings.js:276:        path: "automation.enabledRules",
+public/control-center/pages/settings.js:283:        path: "automation.readinessThreshold",
+public/control-center/pages/settings.js:289:        path: "automation.failurePolicy",
+public/control-center/pages/settings.js:292:        options: ["Pause and alert", "Retry then route", "Route to operator immediately", "Record only"]
+public/control-center/pages/settings.js:295:        path: "automation.routingNotes",
+public/control-center/pages/settings.js:305:    description: "Set where content goes, how it is routed, and what conditions must be true before anything ships.",
+public/control-center/pages/settings.js:309:        path: "publishing.channels",
+public/control-center/pages/settings.js:316:        path: "publishing.schedulingBehavior",
+public/control-center/pages/settings.js:322:        path: "publishing.approvalBeforePublish",
+public/control-center/pages/settings.js:327:        path: "publishing.namingConvention",
+public/control-center/pages/settings.js:333:        path: "publishing.contentRouting",
+public/control-center/pages/settings.js:339:        path: "publishing.campaignOutputs",
+public/control-center/pages/settings.js:353:        path: "approval.contentOwner",
+public/control-center/pages/settings.js:360:        path: "approval.mediaOwner",
+public/control-center/pages/settings.js:367:        path: "approval.adsOwner",
+public/control-center/pages/settings.js:374:        path: "approval.requirements",
+public/control-center/pages/settings.js:381:        path: "approval.revisionRules",
+public/control-center/pages/settings.js:384:        placeholder: "Reject anything with unsupported claims, brand mismatch, or missing route metadata. Two failed reviews escalate."
+public/control-center/pages/settings.js:387:        path: "approval.escalationNotes",
+public/control-center/pages/settings.js:401:        path: "team.roles",
+public/control-center/pages/settings.js:407:        path: "team.serviceCoverage",
+public/control-center/pages/settings.js:413:        path: "team.editAccess",
+public/control-center/pages/settings.js:420:        path: "team.publishAccess",
+public/control-center/pages/settings.js:427:        path: "team.approveAccess",
+public/control-center/pages/settings.js:434:        path: "team.integrationAccess",
+public/control-center/pages/settings.js:440:        path: "team.defaultsAccess",
+public/control-center/pages/settings.js:455:        path: "presets.campaignPreset",
+public/control-center/pages/settings.js:461:        path: "presets.contentPreset",
+public/control-center/pages/settings.js:467:        path: "presets.mediaPreset",
+public/control-center/pages/settings.js:473:        path: "presets.seoPreset",
+public/control-center/pages/settings.js:479:        path: "presets.adsPreset",
+public/control-center/pages/settings.js:485:        path: "presets.approvalPreset",
+public/control-center/pages/settings.js:491:        path: "presets.presetNotes",
+public/control-center/pages/settings.js:504:      { path: "sync.autoSync", label: "Auto sync", type: "toggle" },
+public/control-center/pages/settings.js:506:        path: "sync.frequency",
+public/control-center/pages/settings.js:512:        path: "sync.importHistoryPreference",
+public/control-center/pages/settings.js:518:        path: "sync.retryFailedBehavior",
+public/control-center/pages/settings.js:524:        path: "sync.healthCheckFrequency",
+public/control-center/pages/settings.js:530:        path: "sync.refreshDefaults",
+public/control-center/pages/settings.js:544:        path: "alerts.enabledRules",
+public/control-center/pages/settings.js:558:        path: "alerts.deliveryMode",
+public/control-center/pages/settings.js:564:        path: "alerts.alertCadence",
+public/control-center/pages/settings.js:570:        path: "alerts.notificationNotes",
+public/control-center/pages/settings.js:583:      { path: "safety.aiClaimCheck", label: "AI claim check", type: "toggle", critical: true },
+public/control-center/pages/settings.js:585:        path: "safety.productTruthRules",
+public/control-center/pages/settings.js:592:        path: "safety.prohibitedOutputs",
+public/control-center/pages/settings.js:599:        path: "safety.complianceAlerts",
+public/control-center/pages/settings.js:605:        path: "safety.brandProtectionRules",
+public/control-center/pages/settings.js:611:        path: "safety.legalNotes",
+public/control-center/pages/settings.js:927:      routingNotes: "Push readiness gaps into workflows, route SEO findings into Research, and send weak ads to Ads Manager."
+public/control-center/pages/settings.js:1150:    risks.push("No default publishing channels are selected, so campaign output cannot route automatically.");
+public/control-center/pages/settings.js:1687:    <section class="page is-active" data-page="settings">
+public/control-center/pages/settings.js:1761:              route: "governance",
+public/control-center/pages/settings.js:1892:  disableStandardLayout: true,
+public/control-center/pages/settings.js:1898:  template: `<section class="page is-active" data-page="settings"><div class="settings-page-surface"></div></section>`,
+public/control-center/pages/settings.js:1907:        <section class="page is-active" data-page="settings">
+public/control-center/pages/library.js:5:import { createLibraryCommand, routeLibraryCommand } from "./library/command-router.js";
+public/control-center/pages/library.js:442:            window.prompt("Copy asset path:", value);
+public/control-center/pages/library.js:522:  return routeLibraryCommand(envelope, handlers);
+public/control-center/pages/library.js:660:      (filePath ? `path:${filePath}` : fileName ? `name:${fileName}` : id)
+public/control-center/pages/library.js:669:        file_path: filePath,
+public/control-center/pages/library.js:696:      file_path: filePath,
+public/control-center/pages/library.js:744:    file_path: asString(asset.handoff_id || asset.media_job_id || ""),
+public/control-center/pages/library.js:2735:  disableStandardLayout: true,
+public/control-center/pages/library.js:2742:    <section class="page is-active" data-page="library">
+public/control-center/pages/library.js:2832:              <div class="setup-helper">Upload, classify, and route into review and source-of-truth decisions.</div>
+public/control-center/pages/insights.js:954:  Array.from(document.querySelectorAll("[data-insights-route]")).forEach((button) => {
+public/control-center/pages/insights.js:956:      const route = button.getAttribute("data-insights-route") || "";
+public/control-center/pages/insights.js:957:      if (!route) return;
+public/control-center/pages/insights.js:960:        setSharedHandoff(projectName, route, {
+public/control-center/pages/insights.js:962:          destination_page: route,
+public/control-center/pages/insights.js:966:            route: "insights",
+public/control-center/pages/insights.js:980:      navigateTo(route);
+public/control-center/pages/insights.js:1003:            route: "insights",
+public/control-center/pages/insights.js:1029:  disableStandardLayout: true,
+public/control-center/pages/insights.js:1036:    <section class="page is-active" data-page="insights">
+public/control-center/pages/insights.js:1346:            <button class="btn btn-primary" type="button" data-insights-route="campaign-studio">Open Campaign Studio</button>
+public/control-center/pages/insights.js:1347:            <button class="btn btn-secondary" type="button" data-insights-route="content-studio">Open Content Studio</button>
+public/control-center/pages/insights.js:1348:            <button class="btn btn-secondary" type="button" data-insights-route="ads-manager">Open Ads Manager</button>
+public/control-center/pages/insights.js:1349:            <button class="btn btn-secondary" type="button" data-insights-route="publishing">Open Publishing</button>
+public/control-center/pages/media-studio-workspace.js:980:    const routeMatches = asString(entry?.destination_page) === "library" && asString(entry?.source_page) === "media-studio";
+public/control-center/pages/media-studio-workspace.js:981:    return routeMatches && asString(libraryAsset.source_signature) === asString(sourceSignature);
+public/control-center/pages/media-studio-workspace.js:1034:      route: "media-studio",
+public/control-center/pages/media-studio-workspace.js:1737:        <div class="empty-box">Run or route a workflow into Media Studio to load a media brief here.</div>
+public/control-center/pages/media-studio-workspace.js:2329:      route: "media-studio",
+public/control-center/pages/media-studio-workspace.js:2824:              route: "media-studio",
+public/control-center/pages/media-studio-workspace.js:2888:            route_target: "media-studio",
+public/control-center/pages/media-studio-workspace.js:2892:              route: "media-studio",
+public/control-center/pages/media-studio-workspace.js:2919:        routeSuggestions: []
+public/control-center/pages/media-studio-workspace.js:3068:          routeSuggestions: []
+public/control-center/pages/media-studio-workspace.js:3124:  disableStandardLayout: true,
+public/control-center/pages/media-studio-workspace.js:3131:    <section class="page is-active" data-page="media-studio">
+public/control-center/pages/integrations.js:1380:  disableStandardLayout: true,
+public/control-center/pages/integrations.js:1387:    <section class="page is-active" data-page="integrations">
+public/control-center/pages/ads-manager.js:288:  disableStandardLayout: true,
+public/control-center/pages/ads-manager.js:295:    <section class="page is-active" data-page="ads-manager">
+public/control-center/pages/ai-command.js:27:		routeHint: "campaign-studio"
+public/control-center/pages/ai-command.js:34:		routeHint: "content-studio"
+public/control-center/pages/ai-command.js:41:		routeHint: "content-studio"
+public/control-center/pages/ai-command.js:48:		routeHint: "library"
+public/control-center/pages/ai-command.js:55:		routeHint: "ads-manager"
+public/control-center/pages/ai-command.js:62:		routeHint: "insights"
+public/control-center/pages/ai-command.js:69:		routeHint: "research"
+public/control-center/pages/ai-command.js:76:		routeHint: "workflows"
+public/control-center/pages/ai-command.js:581:		operations: ["task plan", "workflow", "handoff", "approval", "timeline", "execution plan", "route", "publish", "status", "priority", "priorities", "blocking", "blocker", "readiness", "next", "do next"]
+public/control-center/pages/ai-command.js:596:	const actionRouting = /launch|build|reconnect|connect|improve|create|fix|route|plan|publish/.test(query);
+public/control-center/pages/ai-command.js:604:function routeSuggestion(label, route, reason) {
+public/control-center/pages/ai-command.js:605:	return { label, route, reason };
+public/control-center/pages/ai-command.js:657:		routeSuggestions: [
+public/control-center/pages/ai-command.js:658:			routeSuggestion("Setup", "setup", "Close missing project basics, goals, and audience inputs."),
+public/control-center/pages/ai-command.js:659:			routeSuggestion("Integrations", "integrations", "Reconnect data sources and improve intelligence coverage."),
+public/control-center/pages/ai-command.js:660:			routeSuggestion("Insights", "insights", "Review performance signals and the recommendation stack.")
+public/control-center/pages/ai-command.js:692:		routeSuggestions: [
+public/control-center/pages/ai-command.js:693:			routeSuggestion("Content Studio", "content-studio", "Rewrite weak posts and turn winning patterns into new drafts."),
+public/control-center/pages/ai-command.js:694:			routeSuggestion("Publishing", "publishing", "Schedule the next batch with stronger timing and approval control."),
+public/control-center/pages/ai-command.js:695:			routeSuggestion("Insights", "insights", "Compare top and weak content performance.")
+public/control-center/pages/ai-command.js:728:		routeSuggestions: [
+public/control-center/pages/ai-command.js:729:			routeSuggestion("Insights", "insights", "Review search and website performance together."),
+public/control-center/pages/ai-command.js:730:			routeSuggestion("Integrations", "integrations", "Reconnect GA4 or Search Console."),
+public/control-center/pages/ai-command.js:731:			routeSuggestion("Setup", "setup", "Refine positioning if traffic signal is weak or misaligned.")
+public/control-center/pages/ai-command.js:763:		routeSuggestions: [
+public/control-center/pages/ai-command.js:764:			routeSuggestion("Ads Manager", "ads-manager", "Review pacing, creative mapping, and paid operating view."),
+public/control-center/pages/ai-command.js:765:			routeSuggestion("Integrations", "integrations", "Connect or reconnect paid reporting platforms."),
+public/control-center/pages/ai-command.js:766:			routeSuggestion("Insights", "insights", "Compare paid vs organic and website results.")
+public/control-center/pages/ai-command.js:791:		routeSuggestions: [
+public/control-center/pages/ai-command.js:792:			routeSuggestion("Setup", "setup", "Strengthen project assumptions, goals, and audience context."),
+public/control-center/pages/ai-command.js:793:			routeSuggestion("Integrations", "integrations", "Increase data coverage and reduce blind spots."),
+public/control-center/pages/ai-command.js:794:			routeSuggestion("Insights", "insights", "See where evidence is strong and where it is thin.")
+public/control-center/pages/ai-command.js:824:	const routeSuggestions = [];
+public/control-center/pages/ai-command.js:825:	if (/campaign/.test(query)) routeSuggestions.push(routeSuggestion("Campaign Studio", "campaign-studio", "Turn this into a structured launch plan."));
+public/control-center/pages/ai-command.js:827:		routeSuggestions.push(routeSuggestion("Content Studio", "content-studio", "Draft, rewrite, or prepare the requested content outputs."));
+public/control-center/pages/ai-command.js:828:		routeSuggestions.push(routeSuggestion("Publishing", "publishing", "Schedule or approve if the next step is publishing."));
+public/control-center/pages/ai-command.js:830:	if (/reconnect|connect|integration|tool|sync/.test(query)) routeSuggestions.push(routeSuggestion("Integrations", "integrations", "Reconnect data sources and restore intelligence coverage."));
+public/control-center/pages/ai-command.js:831:	if (/ads|campaign scale|roas|creative/.test(query)) routeSuggestions.push(routeSuggestion("Ads Manager", "ads-manager", "Review live paid performance and action the next media move."));
+public/control-center/pages/ai-command.js:832:	if (!routeSuggestions.length) routeSuggestions.push(routeSuggestion("Workflows", "workflows", "Use Workflows when the task spans multiple execution areas."));
+public/control-center/pages/ai-command.js:845:		routeSuggestions,
+public/control-center/pages/ai-command.js:948:		routeSuggestions: asArray(response?.routeSuggestions),
+public/control-center/pages/ai-command.js:970:			routeSuggestions: asArray(draftContext.routeSuggestions)
+public/control-center/pages/ai-command.js:1029:			routeSuggestions: [],
+public/control-center/pages/ai-command.js:1226:					placeholder="Ask ${escapeHtml(mode.label)} anything — what to do next, what content is working, which campaign to scale, or where to route the next action…"
+public/control-center/pages/ai-command.js:1313:	const routeSuggestions = asArray(response.routeSuggestions || response.route_suggestions).map((item) => {
+public/control-center/pages/ai-command.js:1316:			label: humanizeValue(record.label || record.title || record.route || item),
+public/control-center/pages/ai-command.js:1317:			route: asString(record.route || record.destination || record.page),
+public/control-center/pages/ai-command.js:1320:	}).filter((item) => item.label || item.route);
+public/control-center/pages/ai-command.js:1377:			${routeSuggestions.length ? `
+public/control-center/pages/ai-command.js:1380:					<div class="ctrl-route-row">
+public/control-center/pages/ai-command.js:1381:						${routeSuggestions.map((item, index) => `
+public/control-center/pages/ai-command.js:1382:							<button class="ctrl-route-btn" type="button" data-ctrl-route="${index}" data-ctrl-route-owner="${escapeHtml(ownerId || "")}" title="${escapeHtml(item.reason)}">
+public/control-center/pages/ai-command.js:1639:   disableStandardLayout: true,
+public/control-center/pages/ai-command.js:1646:		<section class="page is-active" data-page="ai-command">
+public/control-center/pages/campaign-studio.js:478:      route: "campaign-studio",
+public/control-center/pages/campaign-studio.js:493:    console.warn("Failed to persist campaign route handoff:", error.message);
+public/control-center/pages/campaign-studio.js:890:      : "Ready to route";
+public/control-center/pages/campaign-studio.js:1278:      // Explicit actions such as Save, Build, Refresh, and route handoffs still
+public/control-center/pages/campaign-studio.js:1450:  disableStandardLayout: true,
+public/control-center/pages/campaign-studio.js:1457:    <section class="page is-active" data-page="campaign-studio">
+public/control-center/pages/home.js:130:function routeForAction(action) {
+public/control-center/pages/home.js:293:  const nextActionRoute = routeForAction(nextAction);
+public/control-center/pages/home.js:460:      route: nextActionRoute,
+public/control-center/pages/home.js:607:  disableStandardLayout: true,
+public/control-center/pages/home.js:614:    <section class="page is-active" data-page="home">
+public/control-center/pages/home.js:824:    const openRoute = (route, message = "") => {
+public/control-center/pages/home.js:825:      navigateTo(route);
+public/control-center/pages/home.js:849:        if (dashboard.nextBestAction.route === "ai-command") {
+public/control-center/pages/home.js:853:        openRoute(dashboard.nextBestAction.route, "Next best action opened.");
+public/control-center/pages/operations-centers.js:72:  Array.from(root.querySelectorAll("[data-ops-route]")).forEach((button) => {
+public/control-center/pages/operations-centers.js:74:      const route = button.getAttribute("data-ops-route") || "home";
+public/control-center/pages/operations-centers.js:76:      context.navigateTo(route);
+public/control-center/pages/operations-centers.js:206:        prompt: `Review Queue Center for ${projectLabel}. Which queue needs attention first, why, and what should be routed next?`
+public/control-center/pages/operations-centers.js:298:      route: "job-monitor"
+public/control-center/pages/operations-centers.js:305:      route: "queue-center"
+public/control-center/pages/operations-centers.js:312:      route: "job-monitor"
+public/control-center/pages/operations-centers.js:319:      route: "notification-center"
+public/control-center/pages/operations-centers.js:326:      route: "notification-center"
+public/control-center/pages/operations-centers.js:333:      route: "publishing"
+public/control-center/pages/operations-centers.js:340:      route: "integrations"
+public/control-center/pages/operations-centers.js:347:      route: "governance"
+public/control-center/pages/operations-centers.js:354:      route: "notification-center"
+public/control-center/pages/operations-centers.js:379:          <button class="ops-runtime-signal" type="button" data-ops-route="${context.escapeHtml(signal.route)}" data-ops-label="${context.escapeHtml(signal.label)}">
+public/control-center/pages/operations-centers.js:401:  const route = asString(item?.route?.route || item?.route || item?.route_target);
+public/control-center/pages/operations-centers.js:402:  if (!route) return "";
+public/control-center/pages/operations-centers.js:404:  return `<button class="btn btn-secondary btn-sm" type="button" data-ops-route="${escapeHtml(route)}" data-ops-label="${escapeHtml(asString(item?.title || item?.name || label))}">${escapeHtml(label)}</button>`;
+public/control-center/pages/operations-centers.js:463:    <section class="page is-active" data-page="task-center">
+public/control-center/pages/operations-centers.js:471:            <p class="std-context-description">Durable operational tasks with ownership, due-state, linked entities, and route-aware follow-up for ${escapeHtml(projectLabel)}.</p>
+public/control-center/pages/operations-centers.js:801:    <section class="page is-active" data-page="queue-center">
+public/control-center/pages/operations-centers.js:837:                <p>Switch queue type focus and status filter to route each item to the owning page.</p>
+public/control-center/pages/operations-centers.js:874:                  <p>${escapeHtml(selectedItem ? "Inspect queue type, owner, status, and route target before acting." : "Choose a queue item from the table to inspect details.")}</p>
+public/control-center/pages/operations-centers.js:1092:    <section class="page is-active" data-page="job-monitor">
+public/control-center/pages/operations-centers.js:1164:                  <p>${escapeHtml(selectedItem ? "Inspect owner, execution health, retry state, and route context." : "Choose a job from the table to inspect details.")}</p>
+public/control-center/pages/operations-centers.js:1342:      route: { route: "integrations" }
+public/control-center/pages/operations-centers.js:1367:    route: asObject(item.linked_entity).route || "home",
+public/control-center/pages/operations-centers.js:1447:    <section class="page is-active" data-page="notification-center">
+public/control-center/pages/operations-centers.js:1482:                <p>${escapeHtml(session.focus === "inbox" ? "Review durable inbox history and mark notifications as read where supported." : "Review route-aware alerts, then inspect the selected signal in detail.")}</p>
+public/control-center/pages/operations-centers.js:1520:                  <p>${escapeHtml(selectedItem ? "Review source, severity, timing, and owning route before follow-up." : "Choose an alert or inbox item to inspect details.")}</p>
+public/control-center/pages/operations-centers.js:1533:                    { label: "Route", value: selectedItem.route?.route || selectedItem.route || "-" }
+public/control-center/pages/operations-centers.js:1662:  disableStandardLayout: true,
+public/control-center/pages/operations-centers.js:1668:  template: `<section class="page is-active" data-page="task-center"><div class="ops-shell"></div></section>`,
+public/control-center/pages/operations-centers.js:1697:  disableStandardLayout: true,
+public/control-center/pages/operations-centers.js:1703:  template: `<section class="page is-active" data-page="queue-center"><div class="ops-shell"></div></section>`,
+public/control-center/pages/operations-centers.js:1745:  disableStandardLayout: true,
+public/control-center/pages/operations-centers.js:1751:  template: `<section class="page is-active" data-page="job-monitor"><div class="ops-shell"></div></section>`,
+public/control-center/pages/operations-centers.js:1793:  disableStandardLayout: true,
+public/control-center/pages/operations-centers.js:1799:  template: `<section class="page is-active" data-page="notification-center"><div class="ops-shell"></div></section>`,
+public/control-center/pages/integrations/builders.js:145:      meta: "Best next step: attach provider-specific OAuth validation and background sync jobs to the existing integration routes."
+public/control-center/pages/publishing.js:1152:        <div class="empty-box">Run or route a workflow into Publishing to load execution-ready output here.</div>
+public/control-center/pages/publishing.js:1625:        routeSuggestions: []
+public/control-center/pages/publishing.js:1716:  disableStandardLayout: true,
+public/control-center/pages/publishing.js:1723:    <section class="page is-active" data-page="publishing">

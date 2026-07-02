@@ -1,0 +1,96 @@
+public/control-center/pages/home.js:137:  const operations = asObject(state.data.operations);
+public/control-center/pages/home.js:198:  const overview = asObject(state.data.overview);
+public/control-center/pages/home.js:199:  const readiness = asObject(state.data.readiness);
+public/control-center/pages/home.js:200:  const integrations = asObject(state.data.integrations);
+public/control-center/pages/home.js:201:  const activity = asObject(state.data.activity);
+public/control-center/pages/home.js:202:  const assets = asObject(state.data.assets);
+public/control-center/pages/home.js:203:  const operations = asObject(state.data.operations);
+public/control-center/pages/home.js:230:    asString(state.context.currentProject) ||
+public/control-center/pages/home.js:612:  render({ getState, $, escapeHtml, navigateTo, showMessage }) {    const state = getState();
+public/control-center/state.js:12:    currentProject: "",
+public/control-center/state.js:62:        listener(getState());
+public/control-center/state.js:91:    state.context.currentProject === "" &&
+public/control-center/state.js:101:    state.data.overview === null &&
+public/control-center/state.js:102:    state.data.readiness === null &&
+public/control-center/state.js:103:    state.data.assets === null &&
+public/control-center/state.js:104:    state.data.tree === null &&
+public/control-center/state.js:105:    state.data.registry === null &&
+public/control-center/state.js:106:    state.data.integrations === null &&
+public/control-center/state.js:107:    state.data.activity === null &&
+public/control-center/state.js:108:    state.data.operations === null &&
+public/control-center/state.js:109:    state.data.loadDiagnostics === null &&
+public/control-center/state.js:110:    state.data.startupStep === "" &&
+public/control-center/state.js:111:    Array.isArray(state.data.startupSteps) &&
+public/control-center/state.js:112:    state.data.startupSteps.length === 0 &&
+public/control-center/state.js:113:    Array.isArray(state.data.loadingTransitions) &&
+public/control-center/state.js:114:    state.data.loadingTransitions.length === 0 &&
+public/control-center/state.js:115:    state.data.lastProjectLoad === null
+public/control-center/state.js:119:export function getState() {
+public/control-center/state.js:178:  if (state.data.projects === next) {
+public/control-center/state.js:182:  state.data.projects = next;
+public/control-center/state.js:189:  if (state.context.currentProject === next) {
+public/control-center/state.js:193:  state.context.currentProject = next;
+public/control-center/state.js:216:    currentProject: project,
+public/control-center/state.js:243:    if (!hasShallowChanges(state.data, patch)) {
+public/control-center/state.js:247:    state.data = {
+public/control-center/state.js:248:      ...state.data,
+public/control-center/state.js:305:  state.data.overview = null;
+public/control-center/state.js:306:  state.data.readiness = null;
+public/control-center/state.js:307:  state.data.assets = null;
+public/control-center/state.js:308:  state.data.tree = null;
+public/control-center/state.js:309:  state.data.registry = null;
+public/control-center/state.js:310:  state.data.integrations = null;
+public/control-center/state.js:311:  state.data.activity = null;
+public/control-center/state.js:312:  state.data.operations = null;
+public/control-center/state.js:313:  state.data.loadDiagnostics = null;
+public/control-center/state.js:314:  state.data.startupStep = "";
+public/control-center/state.js:315:  state.data.startupSteps = [];
+public/control-center/state.js:316:  state.data.loadingTransitions = [];
+public/control-center/state.js:317:  state.data.lastProjectLoad = null;
+public/control-center/state.js:327:  state.context.currentProject = "";
+public/control-center/state.js:342:export function selectCurrentProject(state = getState()) {
+public/control-center/state.js:343:  return String(state?.context?.currentProject || "").trim();
+public/control-center/state.js:346:export function selectActiveRoute(state = getState()) {
+public/control-center/state.js:347:  return String(state?.activeRoute || state?.context?.activeRoute || "").trim();
+public/control-center/state.js:350:export function selectOperationsSnapshot(state = getState()) {
+public/control-center/state.js:354:export function selectProjectPayload(state = getState()) {
+public/control-center/state.js:358:export function selectSystemHealth(state = getState()) {
+public/control-center/state.js:362:export function selectActiveRoleProjection(state = getState()) {
+public/control-center/state.js:364:    state?.activeRole ||
+public/control-center/app.js:183:  const state = getState();
+public/control-center/app.js:184:  const operations = state.data.operations;
+public/control-center/app.js:185:  const stateRole = getProjectedActiveRole({ operations, activeRole: state.activeRole });
+public/control-center/app.js:256:  const operations = getState().data.operations;
+public/control-center/app.js:258:  const activeRole = getActiveRole();
+public/control-center/app.js:264:      `Your current role is "${activeRole}". ` +
+public/control-center/app.js:276:    const allowed = fallbackRoles.includes(activeRole);
+public/control-center/app.js:286:  const allowed = allowedRoles.includes(activeRole);
+public/control-center/app.js:505:  const state = getState();
+public/control-center/app.js:506:  const items = Array.isArray(state.data.projects) ? state.data.projects : [];
+public/control-center/app.js:957:  currentProject: "",
+public/control-center/app.js:1025:  const state = getState();
+public/control-center/app.js:1028:    currentProject: startupRuntimeState.currentProject || state.context.currentProject || "",
+public/control-center/app.js:1060:      `project: ${payload.currentProject || "-"}`,
+public/control-center/app.js:1118:  const state = getState();
+public/control-center/app.js:1122:    currentProject: startupRuntimeState.currentProject || state.context.currentProject || "",
+public/control-center/app.js:1242:    detail: startupRuntimeState.currentProject || startupRuntimeState.currentToken || "startup"
+public/control-center/app.js:1473:    project: startupRuntimeState.currentProject || getState().context.currentProject || "",
+public/control-center/app.js:1739:      void applyRequiredProjectFallback(startupRuntimeState.currentProject || DEFAULT_PROJECT_SLUG, activeProjectLoadToken);
+public/control-center/app.js:1783:    const startupPhase = !getState().initialized || isLoadingVisible();
+public/control-center/app.js:1792:    const startupPhase = !getState().initialized || isLoadingVisible();
+public/control-center/app.js:1810:  "currentProject"
+public/control-center/app.js:1934:  const state = getState();
+public/control-center/app.js:1936:  const operations = state.data.operations || {};
+public/control-center/app.js:1942:  setText("ctxProject", ctx.currentProject);
+public/control-center/app.js:1956:  const state = getState();
+public/control-center/app.js:1960:  const currentValue = getSafeProjectName(state.context.currentProject || DEFAULT_PROJECT_SLUG);
+public/control-center/app.js:1961:  const items = getVisibleProjects(Array.isArray(state.data.projects) ? state.data.projects : []);
+public/control-center/app.js:2047:  const { currentRoute } = getState();
+public/control-center/app.js:2100:        state: getState(),
+public/control-center/app.js:2113:    state: getState(),
+public/control-center/app.js:2497:      ...(getState().data?.loadDiagnostics || {}),
+public/control-center/app.js:2684:  startupRuntimeState.currentProject = safeProjectName;
+public/control-center/app.js:3057:      const projectName = getSafeProjectName(getState().context.currentProject || DEFAULT_PROJECT_SLUG);
+public/control-center/app.js:3156:    if (route && route !== getState().currentRoute) {
+public/control-center/app.js:4144:  const state = getState();
+public/control-center/app.js:4146:  const project = String(state.context?.currentProject || "");

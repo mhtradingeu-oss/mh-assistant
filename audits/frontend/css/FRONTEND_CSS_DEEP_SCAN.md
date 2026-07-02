@@ -1,0 +1,1197 @@
+# FRONTEND CSS DEEP SCAN
+
+
+## File: public/control-center/styles.css
+
+- lines: 8664
+
+## File: public/control-center/styles/00-tokens.css
+
+- lines: 54
+
+## File: public/control-center/styles/01-reset.css
+
+- lines: 41
+
+## File: public/control-center/styles/02-layer-system.css
+
+- lines: 34
+
+## File: public/control-center/styles/03-app-shell.css
+
+- lines: 52
+
+## File: public/control-center/styles/04-command-layer.css
+
+- lines: 49
+
+## File: public/control-center/styles/05-ai-layer.css
+
+- lines: 67
+
+## File: public/control-center/styles/06-topbar.css
+
+- lines: 127
+
+## File: public/control-center/styles/07-sidebar.css
+
+- lines: 76
+
+## File: public/control-center/styles/08-components-foundation.css
+
+- lines: 98
+
+## File: public/control-center/styles/09-command-legacy-isolation.css
+
+- lines: 60
+
+## File: public/control-center/styles/10-topbar-canonical.css
+
+- lines: 211
+
+# DUPLICATED SELECTORS
+
+- 21x `.topbar`
+- 18x `.topbar-right`
+- 14x `.command-bar`
+- 11x `.exec-action-cluster`
+- 10x `@media (max-width: 768px)`
+- 9x `.context-cards`
+- 8x `.topbar-left`
+- 8x `.command-bar-right`
+- 7x `body`
+- 7x `.topbar .page-title`
+- 7x `@media (max-width: 760px)`
+- 7x `.executive-new-card`
+- 6x `.context-card`
+- 6x `.command-backdrop`
+- 6x `.home-decision-quick-actions`
+- 6x `@media (max-width: 900px)`
+- 6x `.executive-new-grid`
+- 6x `.executive-new-option`
+- 6x `.workspace-chip`
+- 5x `.sidebar`
+- 5x `.page-context`
+- 5x `.workspace`
+- 5x `.setup-smart-handoff-actions`
+- 5x `@media (max-width: 1180px)`
+- 5x `.ai-dock`
+- 5x `.ai-dock-panel`
+- 4x `:root`
+- 4x `textarea`
+- 4x `.os-layout`
+- 4x `.command-toggle`
+- 4x `.home-decision-feed-table`
+- 4x `.error-state`
+- 4x `.library-preview-actions`
+- 4x `.integration-filter-search`
+- 4x `@media (max-width: 1280px)`
+- 4x `.library-filter-search`
+- 4x `.app-shell.is-mobile-shell.is-mobile-command-open .command-bar`
+- 4x `@media (max-width: 640px)`
+- 4x `.ctrl-room-team`
+- 4x `.exec-action-btn`
+- 4x `@media (max-width: 860px)`
+- 4x `.executive-new-head`
+- 3x `.app-shell`
+- 3x `.main-shell`
+- 3x `.page-title`
+- 3x `.context-card strong`
+- 3x `.sidebar-toggle`
+- 3x `.command-bar-right .btn`
+- 3x `.std-ai-btn`
+- 3x `.data-grid`
+- 3x `.setup-wizard-shell`
+- 3x `.setup-smart-gap-item`
+- 3x `.setup-v2-toolbar`
+- 3x `.setup-v2-status-strip`
+- 3x `.home-exec-health-grid`
+- 3x `.home-exec-main-grid`
+- 3x `.home-exec-team-grid`
+- 3x `.sidebar-backdrop.is-visible`
+- 3x `.integration-hub-card`
+- 3x `.integration-filter-bar`
+- 3x `@media (max-width: 1024px)`
+- 3x `.ctrl-room-main`
+- 3x `.startup-step-banner`
+- 3x `section[data-page="ai-command"] .aicmd-stat-wide`
+- 3x `.wf-catalog`
+- 3x `.app-shell.is-mobile-shell:not(.is-mobile-command-open) .command-bar`
+- 3x `.home-activity-item`
+- 3x `.setup-smart-handoff-actions .btn`
+- 3x `.setup-textarea`
+- 3x `.library-workspace-side`
+- 3x `[data-page="campaign-studio"] .campaign-studio-side`
+- 3x `.ops-runtime-signal-grid`
+- 3x `@media (max-width: 980px)`
+- 3x `.executive-new-option span`
+- 3x `.app-shell:not(.is-command-open):not(.is-mobile-command-open) .command-bar`
+- 3x `.topbar-center`
+- 3x `.ai-dock-toggle`
+- 3x `#execAskAiBtn`
+- 3x `.command-backdrop.is-visible`
+- 2x `button`
+- 2x `.setup-helper`
+- 2x `.sidebar-nav`
+- 2x `.nav-group`
+- 2x `.nav-item`
+- 2x `.nav-item:hover`
+- 2x `.nav-item.is-active`
+- 2x `.topbar-mobile-controls`
+- 2x `.role-badge`
+- 2x `.page-container`
+- 2x `.std-ai-btn:hover`
+- 2x `.home-ai-team-grid`
+- 2x `.section-grid`
+- 2x `.std-side-card`
+- 2x `.std-status-card`
+- 2x `.std-status-value`
+- 2x `.card-badge`
+- 2x `.home-main-grid`
+- 2x `)`
+- 2x `.setup-form-grid`
+- 2x `.setup-form-grid-3`
+- 2x `.setup-field-group`
+- 2x `.setup-field-head`
+- 2x `.setup-smart-overview-grid`
+- 2x `.setup-wizard-header-top`
+- 2x `.setup-wizard-progress-grid`
+- 2x `.setup-wizard-layout`
+- 2x `.setup-smart-step-list`
+- 2x `.setup-smart-step-item`
+- 2x `.setup-smart-step-item p`
+- 2x `.setup-wizard-step`
+- 2x `.setup-wizard-form-head`
+- 2x `.setup-wizard-nav-actions`
+- 2x `.setup-wizard-step-panel`
+- 2x `.setup-wizard-step-panel h4`
+- 2x `.setup-wizard-side-panels`
+- 2x `.setup-smart-gap-list`
+- 2x `.setup-smart-gap-item p`
+- 2x `.setup-smart-diagnostics-grid`
+- 2x `.setup-wizard-ai-item`
+- 2x `.setup-v2-hero-head`
+- 2x `.setup-v2-answers`
+- 2x `.home-exec-header-main`
+- 2x `.home-exec-stream-item`
+- 2x `.home-exec-recent-grid`
+- 2x `.home-decision-section`
+- 2x `.home-decision-health-grid`
+- 2x `.home-decision-feed-table-wrap`
+- 2x `to`
+- 2x `.sidebar-backdrop`
+- 2x `.access-key-btn`
+- 2x `.global-error`
+- 2x `.loading-overlay[hidden]`
+- 2x `.library-smart-shell`
+- 2x `.library-upload-controls`
+- 2x `.library-action-toolbar`
+- 2x `.library-required-grid`
+- 2x `.library-category-chip-group`
+- 2x `.integration-system-panel`
+- 2x `.integration-system-metric strong`
+- 2x `.integration-system-workspace-side`
+- 2x `.integration-control-group-list`
+- 2x `.integration-control-row-trigger`
+- 2x `.integration-system-prompt-row`
+- 2x `.integration-hub-head-actions`
+- 2x `.integration-hub-title-wrap`
+- 2x `.integration-hub-intro`
+- 2x `.integration-drawer`
+- 2x `.integration-hub-card--drawer`
+- 2x `.context-card:nth-child(n + 5)`
+- 2x `.library-filter-bar`
+- 2x `@media (max-width: 560px)`
+- 2x `.library-table`
+- 2x `.home-decision-row-actions .btn`
+- 2x `.ctrl-room-wrapper`
+- 2x `.ctrl-room-header-top`
+- 2x `.ctrl-prompts-grid`
+- 2x `.ctrl-room-bottom`
+- 2x `section[data-page="ai-command"] .aicmd-shell`
+- 2x `section[data-page="ai-command"] .aicmd-main-grid`
+- 2x `section[data-page="ai-command"] .aicmd-overview-grid`
+- 2x `section[data-page="ai-command"] .aicmd-textarea`
+- 2x `section[data-page="ai-command"] .aicmd-btn`
+- 2x `section[data-page="ai-command"] .aicmd-agent-grid`
+- 2x `.wf-header`
+- 2x `.wf-header-right`
+- 2x `.wf-status-strip`
+- 2x `.wf-body`
+- 2x `.wf-what-you-get`
+- 2x `.wf-run-btn-lg`
+- 2x `.wf-output-grid`
+- 2x `.wf-route-grid`
+- 2x `.wf-route-btn`
+- 2x `section[data-page="workflows"] .wfexec-shell`
+- 2x `section[data-page="workflows"] .wfexec-grid`
+- 2x `section[data-page="workflows"] .wfexec-stat-wide`
+- 2x `section[data-page="workflows"] .wfexec-field-grid`
+- 2x `section[data-page="workflows"] .wfexec-action-row`
+- 2x `section[data-page="workflows"] .wfexec-btn`
+- 2x `.startup-trace-panel button`
+- 2x `#pageRoot`
+- 2x `#pageRoot > div`
+- 2x `.home-exec-hero-status`
+- 2x `.home-two-column-grid`
+- 2x `.home-status-grid`
+- 2x `.setup-smart-handoff-panel`
+- 2x `.setup-smart-handoff-panel .card-head`
+- 2x `#setupSaveBackendBtnBottom`
+- 2x `.setup-save-note`
+- 2x `.setup-guidance-strip`
+- 2x `.setup-info-tooltip`
+- 2x `.setup-info-icon:focus-visible .setup-info-tooltip`
+- 2x `.library-workspace-grid.library-finder-workspace`
+- 2x `#libraryAssetGridBody`
+- 2x `#libraryPreviewVisual`
+- 2x `.library-preview-image`
+- 2x `[data-page="campaign-studio"] .campaign-studio-wrapper`
+- 2x `[data-page="campaign-studio"] .campaign-studio-layout`
+- 2x `[data-page="campaign-studio"] .setup-form-grid-3`
+- 2x `[data-page="campaign-studio"] .setup-textarea`
+- 2x `[data-page="campaign-studio"] .campaign-toolbar .btn`
+- 2x `@media (max-width: 620px)`
+- 2x `.exec-language-switcher`
+- 2x `.executive-new-option strong`
+- 2x `.exec-summary-strip`
+- 2x `.ai-dock-label`
+- 2x `.ai-dock-state`
+- 2x `.ai-dock-body`
+- 2x `.ai-dock-section`
+- 2x `.ai-dock-suggestion`
+- 2x `.ai-dock-suggestion:hover`
+- 2x `.workspace-chip strong`
+- 2x `#execAskAiBtn::after`
+- 2x `#execNewBtn`
+- 2x `#execNewBtn::after`
+- 2x `.executive-new-modal`
+- 2x `.executive-modal-close`
+- 2x `.executive-project-form`
+- 2x `.executive-project-form-grid`
+- 2x `.setup-template-head`
+- 2x `.setup-template-current`
+- 2x `.setup-template-body`
+
+# IMPORTANT RULES
+
+- public/control-center/styles.css:2131: `display: none !important;`
+- public/control-center/styles.css:2132: `visibility: hidden !important;`
+- public/control-center/styles.css:2133: `opacity: 0 !important;`
+- public/control-center/styles.css:2134: `pointer-events: none !important;`
+- public/control-center/styles.css:5998: `display: none !important;`
+- public/control-center/styles.css:5999: `visibility: hidden !important;`
+- public/control-center/styles.css:6000: `opacity: 0 !important;`
+- public/control-center/styles.css:6001: `pointer-events: none !important;`
+- public/control-center/styles.css:6007: `pointer-events: auto !important;`
+- public/control-center/styles.css:6119: `position: relative !important;`
+- public/control-center/styles.css:6120: `top: auto !important;`
+- public/control-center/styles.css:6122: `height: auto !important;`
+- public/control-center/styles.css:6130: `position: relative !important;`
+- public/control-center/styles.css:6131: `top: auto !important;`
+- public/control-center/styles.css:6181: `display: none !important;`
+- public/control-center/styles.css:6202: `position: relative !important;`
+- public/control-center/styles.css:6203: `top: auto !important;`
+- public/control-center/styles.css:6209: `position: relative !important;`
+- public/control-center/styles.css:6210: `top: auto !important;`
+- public/control-center/styles.css:6233: `display: none !important;`
+- public/control-center/styles.css:7370: `display: none !important;`
+- public/control-center/styles.css:7371: `visibility: hidden !important;`
+- public/control-center/styles.css:7372: `opacity: 0 !important;`
+- public/control-center/styles.css:7373: `pointer-events: none !important;`
+- public/control-center/styles.css:7766: `display: none !important;`
+- public/control-center/styles.css:7995: `display: none !important;`
+- public/control-center/styles.css:8123: `display: flex !important;`
+- public/control-center/styles.css:8220: `display: flex !important;`
+- public/control-center/styles.css:8230: `display: inline-flex !important;`
+- public/control-center/styles.css:8255: `display: inline-flex !important;`
+- public/control-center/styles.css:8276: `display: flex !important;`
+- public/control-center/styles.css:8282: `display: inline-flex !important;`
+- public/control-center/styles.css:8286: `padding: 0 !important;`
+- public/control-center/styles.css:8287: `font-size: 0 !important;`
+- public/control-center/styles.css:8298: `display: inline-flex !important;`
+- public/control-center/styles.css:8301: `padding: 0 12px !important;`
+- public/control-center/styles.css:8302: `font-size: 0 !important;`
+- public/control-center/styles.css:8348: `display: inline-flex !important;`
+- public/control-center/styles.css:8354: `padding: 0 !important;`
+- public/control-center/styles.css:8412: `display: none !important;`
+- public/control-center/styles/01-reset.css:40: `display: none !important;`
+- public/control-center/styles/02-layer-system.css:26: `pointer-events: none !important;`
+- public/control-center/styles/04-command-layer.css:44: `display: none !important;`
+- public/control-center/styles/04-command-layer.css:45: `opacity: 0 !important;`
+- public/control-center/styles/04-command-layer.css:46: `visibility: hidden !important;`
+- public/control-center/styles/04-command-layer.css:47: `pointer-events: none !important;`
+- public/control-center/styles/09-command-legacy-isolation.css:9: `position: relative !important;`
+- public/control-center/styles/09-command-legacy-isolation.css:11: `top: auto !important;`
+- public/control-center/styles/09-command-legacy-isolation.css:12: `left: auto !important;`
+- public/control-center/styles/09-command-legacy-isolation.css:13: `right: auto !important;`
+- public/control-center/styles/09-command-legacy-isolation.css:15: `transform: none !important;`
+- public/control-center/styles/09-command-legacy-isolation.css:17: `width: 100% !important;`
+- public/control-center/styles/09-command-legacy-isolation.css:18: `max-width: 100% !important;`
+- public/control-center/styles/09-command-legacy-isolation.css:25: `z-index: var(--layer-command) !important;`
+- public/control-center/styles/09-command-legacy-isolation.css:30: `display: none !important;`
+- public/control-center/styles/09-command-legacy-isolation.css:32: `opacity: 0 !important;`
+- public/control-center/styles/09-command-legacy-isolation.css:33: `visibility: hidden !important;`
+- public/control-center/styles/09-command-legacy-isolation.css:35: `pointer-events: none !important;`
+- public/control-center/styles/09-command-legacy-isolation.css:42: `display: block !important;`
+- public/control-center/styles/09-command-legacy-isolation.css:44: `opacity: 1 !important;`
+- public/control-center/styles/09-command-legacy-isolation.css:45: `visibility: visible !important;`
+- public/control-center/styles/09-command-legacy-isolation.css:47: `pointer-events: auto !important;`
+- public/control-center/styles/09-command-legacy-isolation.css:54: `display: none !important;`
+- public/control-center/styles/09-command-legacy-isolation.css:58: `display: grid !important;`
+
+# FIXED / Z-INDEX LAYERS
+
+- public/control-center/styles.css:245: `z-index: 50;`
+- public/control-center/styles.css:394: `z-index: 40;`
+- public/control-center/styles.css:1859: `position: fixed;`
+- public/control-center/styles.css:1864: `z-index: 60;`
+- public/control-center/styles.css:1910: `position: fixed;`
+- public/control-center/styles.css:1915: `z-index: 160;`
+- public/control-center/styles.css:1971: `position: fixed;`
+- public/control-center/styles.css:1974: `z-index: 140;`
+- public/control-center/styles.css:1992: `position: fixed;`
+- public/control-center/styles.css:1997: `z-index: 150;`
+- public/control-center/styles.css:2039: `position: fixed;`
+- public/control-center/styles.css:2042: `z-index: 145;`
+- public/control-center/styles.css:2056: `position: fixed;`
+- public/control-center/styles.css:2059: `z-index: 146;`
+- public/control-center/styles.css:2108: `position: fixed;`
+- public/control-center/styles.css:2111: `z-index: 130;`
+- public/control-center/styles.css:2826: `position: fixed;`
+- public/control-center/styles.css:2828: `z-index: 95;`
+- public/control-center/styles.css:3044: `position: fixed;`
+- public/control-center/styles.css:3052: `z-index: 70;`
+- public/control-center/styles.css:3317: `position: fixed;`
+- public/control-center/styles.css:3321: `z-index: 58;`
+- public/control-center/styles.css:3343: `position: fixed;`
+- public/control-center/styles.css:3349: `z-index: 55;`
+- public/control-center/styles.css:3912: `position: fixed;`
+- public/control-center/styles.css:3915: `z-index: 145;`
+- public/control-center/styles.css:5671: `z-index: 100;`
+- public/control-center/styles.css:6121: `z-index: 30;`
+- public/control-center/styles.css:6132: `z-index: 20;`
+- public/control-center/styles.css:6204: `z-index: 30;`
+- public/control-center/styles.css:6213: `z-index: 20;`
+- public/control-center/styles.css:6683: `z-index: 20;`
+- public/control-center/styles.css:6803: `z-index: 25;`
+- public/control-center/styles.css:6848: `z-index: 60;`
+- public/control-center/styles.css:7089: `z-index: 20;`
+- public/control-center/styles.css:7104: `z-index: 21;`
+- public/control-center/styles.css:7133: `z-index: 1;`
+- public/control-center/styles.css:7782: `position: fixed;`
+- public/control-center/styles.css:7785: `z-index: 1200;`
+- public/control-center/styles.css:8054: `position: fixed;`
+- public/control-center/styles.css:8056: `z-index: 80;`
+- public/control-center/styles.css:8062: `position: fixed;`
+- public/control-center/styles.css:8066: `z-index: 90;`
+- public/control-center/styles/02-layer-system.css:3: `Purpose: canonical z-index and interaction rules for global UI surfaces.`
+- public/control-center/styles/04-command-layer.css:12: `z-index: var(--layer-command);`
+- public/control-center/styles/04-command-layer.css:21: `z-index: calc(var(--layer-command) - 1);`
+- public/control-center/styles/05-ai-layer.css:7: `z-index: var(--layer-ai);`
+- public/control-center/styles/06-topbar.css:8: `z-index: var(--layer-topbar);`
+- public/control-center/styles/07-sidebar.css:7: `z-index: var(--layer-sidebar);`
+- public/control-center/styles/07-sidebar.css:64: `z-index: calc(var(--layer-sidebar) - 1);`
+- public/control-center/styles/07-sidebar.css:70: `z-index: var(--layer-sidebar);`
+- public/control-center/styles/09-command-legacy-isolation.css:25: `z-index: var(--layer-command) !important;`
+- public/control-center/styles/10-topbar-canonical.css:17: `z-index: var(--layer-topbar);`
+
+# POINTER EVENTS RULES
+
+- public/control-center/styles.css:2117: `pointer-events: none;`
+- public/control-center/styles.css:2125: `pointer-events: auto;`
+- public/control-center/styles.css:2134: `pointer-events: none !important;`
+- public/control-center/styles.css:3331: `pointer-events: none;`
+- public/control-center/styles.css:3338: `pointer-events: auto;`
+- public/control-center/styles.css:3347: `pointer-events: none;`
+- public/control-center/styles.css:3354: `pointer-events: auto;`
+- public/control-center/styles.css:5740: `pointer-events: none;`
+- public/control-center/styles.css:5956: `pointer-events: none;`
+- public/control-center/styles.css:5963: `pointer-events: auto;`
+- public/control-center/styles.css:5979: `pointer-events: none;`
+- public/control-center/styles.css:5986: `pointer-events: auto;`
+- public/control-center/styles.css:6001: `pointer-events: none !important;`
+- public/control-center/styles.css:6007: `pointer-events: auto !important;`
+- public/control-center/styles.css:6217: `pointer-events: auto;`
+- public/control-center/styles.css:6697: `pointer-events: none;`
+- public/control-center/styles.css:6849: `pointer-events: auto;`
+- public/control-center/styles.css:7091: `pointer-events: auto;`
+- public/control-center/styles.css:7105: `pointer-events: auto;`
+- public/control-center/styles.css:7117: `pointer-events: none;`
+- public/control-center/styles.css:7125: `pointer-events: auto;`
+- public/control-center/styles.css:7373: `pointer-events: none !important;`
+- public/control-center/styles.css:8655: `pointer-events: none;`
+- public/control-center/styles.css:8663: `pointer-events: auto;`
+- public/control-center/styles/02-layer-system.css:26: `pointer-events: none !important;`
+- public/control-center/styles/02-layer-system.css:33: `pointer-events: auto;`
+- public/control-center/styles/04-command-layer.css:20: `pointer-events: none;`
+- public/control-center/styles/04-command-layer.css:30: `pointer-events: auto;`
+- public/control-center/styles/04-command-layer.css:47: `pointer-events: none !important;`
+- public/control-center/styles/05-ai-layer.css:8: `pointer-events: none;`
+- public/control-center/styles/05-ai-layer.css:12: `pointer-events: auto;`
+- public/control-center/styles/07-sidebar.css:74: `pointer-events: auto;`
+- public/control-center/styles/09-command-legacy-isolation.css:35: `pointer-events: none !important;`
+- public/control-center/styles/09-command-legacy-isolation.css:47: `pointer-events: auto !important;`
+
+# DISPLAY NONE RULES
+
+- public/control-center/styles.css:279: `display: none;`
+- public/control-center/styles.css:382: `display: none;`
+- public/control-center/styles.css:408: `display: none;`
+- public/control-center/styles.css:466: `display: none;`
+- public/control-center/styles.css:836: `display: none;`
+- public/control-center/styles.css:1135: `display: none;`
+- public/control-center/styles.css:1384: `display: none;`
+- public/control-center/styles.css:1427: `display: none;`
+- public/control-center/styles.css:1863: `display: none;`
+- public/control-center/styles.css:1912: `display: none;`
+- public/control-center/styles.css:1982: `display: none;`
+- public/control-center/styles.css:2003: `display: none;`
+- public/control-center/styles.css:2062: `display: none;`
+- public/control-center/styles.css:2110: `display: none;`
+- public/control-center/styles.css:2131: `display: none !important;`
+- public/control-center/styles.css:2795: `display: none;`
+- public/control-center/styles.css:2829: `display: none;`
+- public/control-center/styles.css:2977: `display: none;`
+- public/control-center/styles.css:3081: `display: none;`
+- public/control-center/styles.css:3292: `display: none;`
+- public/control-center/styles.css:3313: `display: none;`
+- public/control-center/styles.css:3847: `display: none;`
+- public/control-center/styles.css:4608: `display: none;`
+- public/control-center/styles.css:5319: `display: none;`
+- public/control-center/styles.css:5472: `.wf-history-toggle::-webkit-details-marker { display: none; }`
+- public/control-center/styles.css:5667: `display: none;`
+- public/control-center/styles.css:5998: `display: none !important;`
+- public/control-center/styles.css:6181: `display: none !important;`
+- public/control-center/styles.css:6225: `display: none;`
+- public/control-center/styles.css:6233: `display: none !important;`
+- public/control-center/styles.css:6855: `display: none;`
+- public/control-center/styles.css:7370: `display: none !important;`
+- public/control-center/styles.css:7489: `display: none;`
+- public/control-center/styles.css:7495: `display: none;`
+- public/control-center/styles.css:7501: `display: none;`
+- public/control-center/styles.css:7583: `display: none;`
+- public/control-center/styles.css:7601: `display: none;`
+- public/control-center/styles.css:7641: `display: none;`
+- public/control-center/styles.css:7692: `display: none;`
+- public/control-center/styles.css:7742: `display: none;`
+- public/control-center/styles.css:7766: `display: none !important;`
+- public/control-center/styles.css:7846: `display: none;`
+- public/control-center/styles.css:7952: `display: none;`
+- public/control-center/styles.css:7995: `display: none !important;`
+- public/control-center/styles.css:8091: `display: none;`
+- public/control-center/styles.css:8198: `display: none;`
+- public/control-center/styles.css:8272: `display: none;`
+- public/control-center/styles.css:8412: `display: none !important;`
+- public/control-center/styles/01-reset.css:40: `display: none !important;`
+- public/control-center/styles/04-command-layer.css:8: `display: none;`
+- public/control-center/styles/04-command-layer.css:36: `display: none;`
+- public/control-center/styles/04-command-layer.css:44: `display: none !important;`
+- public/control-center/styles/09-command-legacy-isolation.css:30: `display: none !important;`
+- public/control-center/styles/09-command-legacy-isolation.css:54: `display: none !important;`
+- public/control-center/styles/10-topbar-canonical.css:200: `display: none;`
+
+# FONT SIZE RULES
+
+- public/control-center/styles.css:58: `--font-size-page: 20px;`
+- public/control-center/styles.css:59: `--font-size-h2: 18px;`
+- public/control-center/styles.css:60: `--font-size-h3: 16px;`
+- public/control-center/styles.css:61: `--font-size-body: 14px;`
+- public/control-center/styles.css:62: `--font-size-small: 12px;`
+- public/control-center/styles.css:144: `font-size: 20px;`
+- public/control-center/styles.css:151: `font-size: var(--font-size-small);`
+- public/control-center/styles.css:163: `font-size: 11px;`
+- public/control-center/styles.css:185: `font-size: 11px;`
+- public/control-center/styles.css:293: `font-size: 12px;`
+- public/control-center/styles.css:329: `font-size: var(--font-size-h2);`
+- public/control-center/styles.css:335: `font-size: 15px;`
+- public/control-center/styles.css:347: `font-size: var(--font-size-body);`
+- public/control-center/styles.css:376: `font-size: 12px;`
+- public/control-center/styles.css:481: `font-size: 13px;`
+- public/control-center/styles.css:623: `font-size: 28px;`
+- public/control-center/styles.css:632: `font-size: 12px;`
+- public/control-center/styles.css:644: `font-size: 11px;`
+- public/control-center/styles.css:711: `font-size: 16px;`
+- public/control-center/styles.css:810: `font-size: 13px;`
+- public/control-center/styles.css:815: `font-size: 12px;`
+- public/control-center/styles.css:938: `font-size: 20px;`
+- public/control-center/styles.css:974: `font-size: 24px;`
+- public/control-center/styles.css:1024: `font-size: 16px;`
+- public/control-center/styles.css:1030: `font-size: 13px;`
+- public/control-center/styles.css:1037: `font-size: 13px;`
+- public/control-center/styles.css:1086: `font-size: 11px;`
+- public/control-center/styles.css:1097: `font-size: 12px;`
+- public/control-center/styles.css:1125: `font-size: 18px;`
+- public/control-center/styles.css:1145: `font-size: 18px;`
+- public/control-center/styles.css:1161: `font-size: 13px;`
+- public/control-center/styles.css:1181: `font-size: 14px;`
+- public/control-center/styles.css:1222: `font-size: 18px;`
+- public/control-center/styles.css:1327: `font-size: 14px;`
+- public/control-center/styles.css:1348: `font-size: 24px;`
+- public/control-center/styles.css:1457: `font-size: 30px;`
+- public/control-center/styles.css:1465: `font-size: 15px;`
+- public/control-center/styles.css:1486: `font-size: 26px;`
+- public/control-center/styles.css:1493: `font-size: 13px;`
+- public/control-center/styles.css:1524: `font-size: 18px;`
+- public/control-center/styles.css:1552: `font-size: 14px;`
+- public/control-center/styles.css:1576: `font-size: 13px;`
+- public/control-center/styles.css:1582: `font-size: 12px;`
+- public/control-center/styles.css:1602: `font-size: 13px;`
+- public/control-center/styles.css:1679: `font-size: 18px;`
+- public/control-center/styles.css:1701: `font-size: 14px;`
+- public/control-center/styles.css:1723: `font-size: 18px;`
+- public/control-center/styles.css:1756: `font-size: 11px;`
+- public/control-center/styles.css:1849: `font-size: 12px;`
+- public/control-center/styles.css:1885: `font-size: 10px;`
+- public/control-center/styles.css:1893: `font-size: 12px;`
+- public/control-center/styles.css:1905: `font-size: 12px;`
+- public/control-center/styles.css:1947: `font-size: 12px;`
+- public/control-center/styles.css:2090: `font-size: 12px;`
+- public/control-center/styles.css:2104: `font-size: 12px;`
+- public/control-center/styles.css:2192: `font-size: 14px;`
+- public/control-center/styles.css:2204: `font-size: 24px;`
+- public/control-center/styles.css:2235: `font-size: 16px;`
+- public/control-center/styles.css:2275: `font-size: 15px;`
+- public/control-center/styles.css:2281: `font-size: 13px;`
+- public/control-center/styles.css:2347: `font-size: 12px;`
+- public/control-center/styles.css:2425: `font-size: 28px;`
+- public/control-center/styles.css:2431: `font-size: 12px;`
+- public/control-center/styles.css:2452: `font-size: 16px;`
+- public/control-center/styles.css:2458: `font-size: 13px;`
+- public/control-center/styles.css:2555: `font-size: 13px;`
+- public/control-center/styles.css:2578: `font-size: 13px;`
+- public/control-center/styles.css:2645: `font-size: 13px;`
+- public/control-center/styles.css:2674: `font-size: 13px;`
+- public/control-center/styles.css:2684: `font-size: 13px;`
+- public/control-center/styles.css:2721: `font-size: 11px;`
+- public/control-center/styles.css:2737: `font-size: 12px;`
+- public/control-center/styles.css:2771: `font-size: 12px;`
+- public/control-center/styles.css:2805: `font-size: 12px;`
+- public/control-center/styles.css:2816: `font-size: 12px;`
+- public/control-center/styles.css:2876: `font-size: 12px;`
+- public/control-center/styles.css:2929: `font-size: 12px;`
+- public/control-center/styles.css:2935: `font-size: 11px;`
+- public/control-center/styles.css:2947: `font-size: 11px;`
+- public/control-center/styles.css:3280: `font-size: 24px;`
+- public/control-center/styles.css:3308: `font-size: 16px;`
+- public/control-center/styles.css:3487: `--font-size-page: 24px;`
+- public/control-center/styles.css:3488: `--font-size-h2: 20px;`
+- public/control-center/styles.css:3489: `--font-size-body: 13px;`
+- public/control-center/styles.css:3519: `font-size: 11px;`
+- public/control-center/styles.css:3532: `font-size: 24px;`
+- public/control-center/styles.css:3571: `font-size: 11px;`
+- public/control-center/styles.css:3580: `font-size: var(--font-size-h2);`
+- public/control-center/styles.css:3603: `font-size: 12px;`
+- public/control-center/styles.css:3620: `font-size: 11px;`
+- public/control-center/styles.css:3639: `font-size: 11px;`
+- public/control-center/styles.css:3650: `font-size: 12px;`
+- public/control-center/styles.css:3673: `font-size: 12px;`
+- public/control-center/styles.css:3679: `font-size: 11px;`
+- public/control-center/styles.css:3722: `font-size: 22px;`
+- public/control-center/styles.css:3727: `font-size: 11px;`
+- public/control-center/styles.css:3791: `font-size: 14px;`
+- public/control-center/styles.css:3817: `font-size: 11px;`
+- public/control-center/styles.css:3851: `font-size: 11px;`
+- public/control-center/styles.css:3865: `font-size: 11px;`
+- public/control-center/styles.css:3878: `font-size: 13px;`
+- public/control-center/styles.css:3890: `font-size: 12px;`
+- public/control-center/styles.css:3903: `font-size: 12px;`
+- public/control-center/styles.css:3920: `font-size: 11px;`
+- public/control-center/styles.css:3963: `font-size: 18px;`
+- public/control-center/styles.css:3969: `font-size: 12px;`
+- public/control-center/styles.css:3977: `font-size: 10px;`
+- public/control-center/styles.css:3993: `font-size: 11px;`
+- public/control-center/styles.css:4006: `font-size: 13px;`
+- public/control-center/styles.css:4023: `font-size: 12px;`
+- public/control-center/styles.css:4078: `font-size: 36px;`
+- public/control-center/styles.css:4083: `font-size: 15px;`
+- public/control-center/styles.css:4089: `font-size: 13px;`
+- public/control-center/styles.css:4100: `font-size: 12px;`
+- public/control-center/styles.css:4121: `font-size: 13px;`
+- public/control-center/styles.css:4127: `font-size: 10px;`
+- public/control-center/styles.css:4148: `font-size: 15px;`
+- public/control-center/styles.css:4161: `font-size: 11px;`
+- public/control-center/styles.css:4184: `font-size: 12px;`
+- public/control-center/styles.css:4191: `font-size: 14px;`
+- public/control-center/styles.css:4199: `font-size: 13px;`
+- public/control-center/styles.css:4211: `font-size: 10px;`
+- public/control-center/styles.css:4228: `font-size: 13px;`
+- public/control-center/styles.css:4242: `font-size: 13px;`
+- public/control-center/styles.css:4264: `font-size: 11px;`
+- public/control-center/styles.css:4309: `font-size: 18px;`
+- public/control-center/styles.css:4320: `font-size: 12px;`
+- public/control-center/styles.css:4330: `font-size: 11px;`
+- public/control-center/styles.css:4347: `font-size: 10px;`
+- public/control-center/styles.css:4366: `font-size: 10px;`
+- public/control-center/styles.css:4375: `font-size: 13px;`
+- public/control-center/styles.css:4383: `font-size: 12px;`
+- public/control-center/styles.css:4462: `font-size: 14px;`
+- public/control-center/styles.css:4498: `font-size: 10px;`
+- public/control-center/styles.css:4505: `font-size: 13px;`
+- public/control-center/styles.css:4517: `font-size: 16px;`
+- public/control-center/styles.css:4524: `font-size: 13px;`
+- public/control-center/styles.css:4545: `font-size: 11px;`
+- public/control-center/styles.css:4564: `font-size: 11px;`
+- public/control-center/styles.css:4578: `font-size: 13px;`
+- public/control-center/styles.css:4606: `font-size: 12px;`
+- public/control-center/styles.css:4627: `font-size: 12px;`
+- public/control-center/styles.css:4661: `font-size: 12px;`
+- public/control-center/styles.css:4682: `font-size: 14px;`
+- public/control-center/styles.css:4689: `font-size: 12px;`
+- public/control-center/styles.css:4702: `font-size: 10px;`
+- public/control-center/styles.css:4713: `font-size: 13px;`
+- public/control-center/styles.css:4718: `font-size: 11px;`
+- public/control-center/styles.css:4788: `font-size: 11px;`
+- public/control-center/styles.css:4797: `font-size: 20px;`
+- public/control-center/styles.css:4813: `font-size: 14px;`
+- public/control-center/styles.css:4845: `font-size: 10px;`
+- public/control-center/styles.css:4853: `font-size: 13px;`
+- public/control-center/styles.css:4873: `font-size: 10px;`
+- public/control-center/styles.css:4912: `font-size: 13px;`
+- public/control-center/styles.css:4919: `font-size: 11px;`
+- public/control-center/styles.css:4947: `font-size: 10px;`
+- public/control-center/styles.css:4956: `font-size: 13px;`
+- public/control-center/styles.css:4983: `font-size: 11px;`
+- public/control-center/styles.css:4998: `font-size: 12px;`
+- public/control-center/styles.css:5023: `font-size: 15px;`
+- public/control-center/styles.css:5029: `font-size: 12px;`
+- public/control-center/styles.css:5044: `font-size: 13px;`
+- public/control-center/styles.css:5057: `font-size: 14px;`
+- public/control-center/styles.css:5080: `font-size: 12px;`
+- public/control-center/styles.css:5100: `font-size: 13px;`
+- public/control-center/styles.css:5122: `font-size: 14px;`
+- public/control-center/styles.css:5155: `font-size: 14px;`
+- public/control-center/styles.css:5189: `font-size: 10px;`
+- public/control-center/styles.css:5196: `font-size: 13px;`
+- public/control-center/styles.css:5207: `font-size: 15px;`
+- public/control-center/styles.css:5214: `font-size: 13px;`
+- public/control-center/styles.css:5234: `font-size: 11px;`
+- public/control-center/styles.css:5252: `font-size: 11px;`
+- public/control-center/styles.css:5266: `font-size: 13px;`
+- public/control-center/styles.css:5290: `font-size: 12px;`
+- public/control-center/styles.css:5317: `font-size: 12px;`
+- public/control-center/styles.css:5329: `font-size: 12px;`
+- public/control-center/styles.css:5359: `font-size: 14px;`
+- public/control-center/styles.css:5367: `font-size: 12px;`
+- public/control-center/styles.css:5376: `font-size: 13px;`
+- public/control-center/styles.css:5392: `font-size: 11px;`
+- public/control-center/styles.css:5409: `font-size: 12px;`
+- public/control-center/styles.css:5427: `font-size: 13px;`
+- public/control-center/styles.css:5465: `font-size: 12px;`
+- public/control-center/styles.css:5492: `font-size: 11px;`
+- public/control-center/styles.css:5499: `font-size: 12px;`
+- public/control-center/styles.css:5513: `font-size: 13px;`
+- public/control-center/styles.css:5525: `font-size: 12px;`
+- public/control-center/styles.css:5550: `font-size: 12px;`
+- public/control-center/styles.css:5569: `font-size: 11px;`
+- public/control-center/styles.css:5590: `font-size: 12px;`
+- public/control-center/styles.css:5695: `font-size: 12px;`
+- public/control-center/styles.css:5764: `font-size: var(--font-size-h3);`
+- public/control-center/styles.css:5781: `font-size: 10px;`
+- public/control-center/styles.css:5815: `font-size: var(--font-size-body);`
+- public/control-center/styles.css:5846: `font-size: 12px;`
+- public/control-center/styles.css:5859: `font-size: var(--font-size-body);`
+- public/control-center/styles.css:5863: `font-size: var(--font-size-small);`
+- public/control-center/styles.css:5884: `font-size: 11px;`
+- public/control-center/styles.css:5893: `font-size: var(--font-size-small);`
+- public/control-center/styles.css:5913: `font-size: 11px;`
+- public/control-center/styles.css:5925: `font-size: var(--font-size-small);`
+- public/control-center/styles.css:5938: `font-size: var(--font-size-small);`
+- public/control-center/styles.css:5945: `font-size: var(--font-size-body);`
+- public/control-center/styles.css:6279: `font-size: 28px;`
+- public/control-center/styles.css:6298: `font-size: 26px;`
+- public/control-center/styles.css:6614: `font-size: 12px;`
+- public/control-center/styles.css:6668: `font-size: 11px;`
+- public/control-center/styles.css:6691: `font-size: 12px;`
+- public/control-center/styles.css:6753: `font-size: 12px;`
+- public/control-center/styles.css:6786: `font-size: 11px;`
+- public/control-center/styles.css:6818: `font-size: 12px;`
+- public/control-center/styles.css:6906: `font-size: 12px;`
+- public/control-center/styles.css:6913: `font-size: 12px;`
+- public/control-center/styles.css:6922: `font-size: 10.5px;`
+- public/control-center/styles.css:6939: `font-size: 10.5px;`
+- public/control-center/styles.css:6958: `font-size: 12px;`
+- public/control-center/styles.css:7015: `font-size: 11px;`
+- public/control-center/styles.css:7020: `font-size: 11px;`
+- public/control-center/styles.css:7036: `font-size: 11px;`
+- public/control-center/styles.css:7273: `font-size: 11px;`
+- public/control-center/styles.css:7410: `font-size: 1.15rem;`
+- public/control-center/styles.css:7447: `font-size: 0.82rem;`
+- public/control-center/styles.css:7561: `font-size: 1rem;`
+- public/control-center/styles.css:7566: `font-size: 0.9rem;`
+- public/control-center/styles.css:7633: `font-size: 0.68rem;`
+- public/control-center/styles.css:7663: `font-size: 0.78rem;`
+- public/control-center/styles.css:7726: `font-size: 0.95rem;`
+- public/control-center/styles.css:7746: `font-size: 1rem;`
+- public/control-center/styles.css:7827: `font-size: 0.82rem;`
+- public/control-center/styles.css:7865: `font-size: 0.88rem;`
+- public/control-center/styles.css:7872: `font-size: 1.4rem;`
+- public/control-center/styles.css:7890: `font-size: 0.72rem;`
+- public/control-center/styles.css:7925: `font-size: 0.82rem;`
+- public/control-center/styles.css:7956: `font-size: 14px;`
+- public/control-center/styles.css:7975: `font-size: 12px;`
+- public/control-center/styles.css:8026: `font-size: 0;`
+- public/control-center/styles.css:8031: `font-size: 12px;`
+- public/control-center/styles.css:8037: `font-size: 0;`
+- public/control-center/styles.css:8042: `font-size: 18px;`
+- public/control-center/styles.css:8113: `font-size: 0.95rem;`
+- public/control-center/styles.css:8117: `font-size: 0.84rem;`
+- public/control-center/styles.css:8194: `font-size: 0.88rem;`
+- public/control-center/styles.css:8268: `font-size: 13px;`
+- public/control-center/styles.css:8287: `font-size: 0 !important;`
+- public/control-center/styles.css:8292: `font-size: 20px;`
+- public/control-center/styles.css:8302: `font-size: 0 !important;`
+- public/control-center/styles.css:8307: `font-size: 12px;`
+- public/control-center/styles.css:8341: `font-size: 0.72rem;`
+- public/control-center/styles.css:8359: `font-size: 22px;`
+- public/control-center/styles.css:8402: `font-size: 0.68rem;`
+- public/control-center/styles.css:8432: `font-size: 1.35rem;`
+- public/control-center/styles.css:8437: `font-size: 0.9rem;`
+- public/control-center/styles.css:8456: `font-size: 20px;`
+- public/control-center/styles.css:8483: `font-size: 0.82rem;`
+- public/control-center/styles.css:8511: `font-size: 0.84rem;`
+- public/control-center/styles.css:8562: `font-size: 0.78rem;`
+- public/control-center/styles.css:8577: `font-size: 0.82rem;`
+- public/control-center/styles.css:8601: `font-size: 0.82rem;`
+- public/control-center/styles.css:8606: `font-size: 0.82rem;`
+- public/control-center/styles.css:8619: `font-size: 0.84rem;`
+- public/control-center/styles/06-topbar.css:57: `font-size: 1.05rem;`
+- public/control-center/styles/10-topbar-canonical.css:105: `font-size: 14px;`
+- public/control-center/styles/10-topbar-canonical.css:205: `font-size: 13px;`
+
+# CARD / PANEL / SIZE RULES
+
+- public/control-center/styles.css:65: `--card-min-height: 148px;`
+- public/control-center/styles.css:120: `min-height: 100vh;`
+- public/control-center/styles.css:126: `min-height: 100vh;`
+- public/control-center/styles.css:157: `min-height: 22px;`
+- public/control-center/styles.css:178: `.card-label,`
+- public/control-center/styles.css:192: `min-height: 0;`
+- public/control-center/styles.css:206: `min-height: 40px;`
+- public/control-center/styles.css:275: `min-height: 0;`
+- public/control-center/styles.css:287: `min-height: 32px;`
+- public/control-center/styles.css:300: `min-height: 38px;`
+- public/control-center/styles.css:440: `min-height: 44px;`
+- public/control-center/styles.css:477: `min-height: var(--button-height-md);`
+- public/control-center/styles.css:587: `.card,`
+- public/control-center/styles.css:588: `.panel,`
+- public/control-center/styles.css:590: `.kpi-card,`
+- public/control-center/styles.css:591: `.metric-card,`
+- public/control-center/styles.css:604: `min-height: var(--card-min-height);`
+- public/control-center/styles.css:607: `.metric-card,`
+- public/control-center/styles.css:609: `.kpi-card,`
+- public/control-center/styles.css:629: `.card-description,`
+- public/control-center/styles.css:637: `.card-badge {`
+- public/control-center/styles.css:641: `min-height: 24px;`
+- public/control-center/styles.css:653: `.card-badge.success,`
+- public/control-center/styles.css:655: `.is-success .card-badge {`
+- public/control-center/styles.css:662: `.card-badge.warning,`
+- public/control-center/styles.css:664: `.is-warning .card-badge {`
+- public/control-center/styles.css:671: `.card-badge.danger,`
+- public/control-center/styles.css:673: `.is-danger .card-badge {`
+- public/control-center/styles.css:680: `.card-badge.neutral,`
+- public/control-center/styles.css:691: `.card-head,`
+- public/control-center/styles.css:692: `.panel-header,`
+- public/control-center/styles.css:707: `.card-head h3,`
+- public/control-center/styles.css:708: `.panel-header h3,`
+- public/control-center/styles.css:775: `.card-label,`
+- public/control-center/styles.css:821: `min-height: auto;`
+- public/control-center/styles.css:897: `min-height: 40px;`
+- public/control-center/styles.css:902: `min-height: 96px;`
+- public/control-center/styles.css:1843: `.panel-span-2 {`
+- public/control-center/styles.css:1892: `min-height: 24px;`
+- public/control-center/styles.css:1903: `min-height: 30px;`
+- public/control-center/styles.css:1941: `min-height: 34px;`
+- public/control-center/styles.css:2095: `min-height: 180px;`
+- public/control-center/styles.css:2197: `min-height: 96px;`
+- public/control-center/styles.css:2218: `min-height: 148px;`
+- public/control-center/styles.css:2418: `min-height: 0;`
+- public/control-center/styles.css:2855: `min-height: calc(100dvh - 36px);`
+- public/control-center/styles.css:2904: `min-height: 40px;`
+- public/control-center/styles.css:2907: `.integration-system-workspace-side .card,`
+- public/control-center/styles.css:2908: `.integration-system-workspace-main .card,`
+- public/control-center/styles.css:2923: `min-height: 28px;`
+- public/control-center/styles.css:2953: `min-height: 64px;`
+- public/control-center/styles.css:3018: `min-height: 64px;`
+- public/control-center/styles.css:3201: `min-height: 64px;`
+- public/control-center/styles.css:3272: `min-height: auto;`
+- public/control-center/styles.css:3303: `min-height: 40px;`
+- public/control-center/styles.css:3494: `.card,`
+- public/control-center/styles.css:3495: `.panel,`
+- public/control-center/styles.css:3496: `.metric-card,`
+- public/control-center/styles.css:3518: `min-height: 32px;`
+- public/control-center/styles.css:3524: `min-height: 38px;`
+- public/control-center/styles.css:3794: `min-height: 100px;`
+- public/control-center/styles.css:4042: `min-height: 420px;`
+- public/control-center/styles.css:4074: `min-height: 280px;`
+- public/control-center/styles.css:4539: `min-height: 24px;`
+- public/control-center/styles.css:4584: `min-height: 40px;`
+- public/control-center/styles.css:4590: `min-height: 180px;`
+- public/control-center/styles.css:4622: `min-height: 38px;`
+- public/control-center/styles.css:4811: `min-height: 40px;`
+- public/control-center/styles.css:5021: `min-height: 44px;`
+- public/control-center/styles.css:5228: `min-height: 24px;`
+- public/control-center/styles.css:5261: `min-height: 40px;`
+- public/control-center/styles.css:5285: `min-height: 38px;`
+- public/control-center/styles.css:6052: `.panel,`
+- public/control-center/styles.css:6053: `.card {`
+- public/control-center/styles.css:6100: `min-height: 100vh;`
+- public/control-center/styles.css:6106: `min-height: 0;`
+- public/control-center/styles.css:6112: `min-height: 0;`
+- public/control-center/styles.css:6123: `min-height: 64px;`
+- public/control-center/styles.css:6136: `min-height: 0;`
+- public/control-center/styles.css:6294: `min-height: 150px;`
+- public/control-center/styles.css:6463: `min-height: 40px;`
+- public/control-center/styles.css:6513: `min-height: 42px;`
+- public/control-center/styles.css:6553: `.setup-smart-handoff-panel .card-head {`
+- public/control-center/styles.css:6575: `.setup-smart-handoff-panel .card-head {`
+- public/control-center/styles.css:6816: `min-height: 34px;`
+- public/control-center/styles.css:6874: `min-height: 194px;`
+- public/control-center/styles.css:7034: `min-height: 32px;`
+- public/control-center/styles.css:7196: `[data-page="campaign-studio"] .card,`
+- public/control-center/styles.css:7197: `[data-page="campaign-studio"] .panel,`
+- public/control-center/styles.css:7217: `min-height: 42px;`
+- public/control-center/styles.css:7239: `min-height: 42px;`
+- public/control-center/styles.css:7294: `min-height: 58px;`
+- public/control-center/styles.css:7443: `min-height: 36px;`
+- public/control-center/styles.css:7473: `min-height: 36px;`
+- public/control-center/styles.css:7478: `min-height: 36px;`
+- public/control-center/styles.css:7531: `min-height: 140px;`
+- public/control-center/styles.css:7587: `min-height: 76px;`
+- public/control-center/styles.css:7658: `min-height: 36px;`
+- public/control-center/styles.css:7699: `min-height: 64px;`
+- public/control-center/styles.css:7737: `min-height: auto;`
+- public/control-center/styles.css:7756: `min-height: 40px;`
+- public/control-center/styles.css:7796: `min-height: 54px;`
+- public/control-center/styles.css:7942: `min-height: 58px;`
+- public/control-center/styles.css:7965: `min-height: 34px;`
+- public/control-center/styles.css:8001: `min-height: 56px;`
+- public/control-center/styles.css:8085: `min-height: 40px;`
+- public/control-center/styles.css:8108: `min-height: 112px;`
+- public/control-center/styles.css:8179: `min-height: 96px;`
+- public/control-center/styles.css:8189: `min-height: 46px;`
+- public/control-center/styles.css:8233: `min-height: 38px;`
+- public/control-center/styles.css:8379: `min-height: 118px;`
+- public/control-center/styles.css:8448: `min-height: 96px;`
+- public/control-center/styles.css:8490: `min-height: 42px;`
+- public/control-center/styles.css:8557: `min-height: 34px;`
+- public/control-center/styles.css:8583: `min-height: 42px;`
+- public/control-center/styles/01-reset.css:18: `min-height: 100%;`
+- public/control-center/styles/03-app-shell.css:16: `min-height: 100vh;`
+- public/control-center/styles/03-app-shell.css:22: `min-height: 0;`
+- public/control-center/styles/03-app-shell.css:29: `min-height: 0;`
+- public/control-center/styles/03-app-shell.css:36: `min-height: 0;`
+- public/control-center/styles/06-topbar.css:10: `min-height: 72px;`
+- public/control-center/styles/06-topbar.css:109: `min-height: auto;`
+- public/control-center/styles/07-sidebar.css:23: `min-height: 0;`
+- public/control-center/styles/08-components-foundation.css:58: `.card,`
+- public/control-center/styles/08-components-foundation.css:59: `.panel,`
+- public/control-center/styles/08-components-foundation.css:61: `.kpi-card,`
+- public/control-center/styles/08-components-foundation.css:62: `.metric-card,`
+- public/control-center/styles/08-components-foundation.css:75: `.card-badge {`
+- public/control-center/styles/08-components-foundation.css:90: `.card,`
+- public/control-center/styles/08-components-foundation.css:91: `.panel,`
+- public/control-center/styles/10-topbar-canonical.css:19: `min-height: 64px;`
+- public/control-center/styles/10-topbar-canonical.css:125: `min-height: 34px;`
+- public/control-center/styles/10-topbar-canonical.css:164: `min-height: 38px;`
+- public/control-center/styles/10-topbar-canonical.css:188: `min-height: 56px;`
+
+# TOPBAR RULES
+
+- public/control-center/styles.css:68: `--shell-topbar-height: 64px;`
+- public/control-center/styles.css:242: `.topbar {`
+- public/control-center/styles.css:258: `.topbar-left {`
+- public/control-center/styles.css:267: `.topbar-right {`
+- public/control-center/styles.css:278: `.topbar-mobile-controls {`
+- public/control-center/styles.css:334: `.topbar .page-title {`
+- public/control-center/styles.css:393: `top: var(--shell-topbar-height);`
+- public/control-center/styles.css:2951: `.topbar {`
+- public/control-center/styles.css:2959: `.topbar-left,`
+- public/control-center/styles.css:2960: `.topbar-right {`
+- public/control-center/styles.css:2964: `.topbar-right {`
+- public/control-center/styles.css:3017: `.topbar {`
+- public/control-center/styles.css:3025: `.topbar-left,`
+- public/control-center/styles.css:3026: `.topbar-right {`
+- public/control-center/styles.css:3030: `.topbar-right {`
+- public/control-center/styles.css:3066: `top: var(--shell-topbar-height);`
+- public/control-center/styles.css:3197: `.topbar {`
+- public/control-center/styles.css:3208: `.topbar-left {`
+- public/control-center/styles.css:3213: `.topbar-right {`
+- public/control-center/styles.css:3295: `.topbar-mobile-controls {`
+- public/control-center/styles.css:3307: `.topbar .page-title {`
+- public/control-center/styles.css:3318: `top: var(--shell-topbar-height);`
+- public/control-center/styles.css:3344: `inset: var(--shell-topbar-height) 0 0;`
+- public/control-center/styles.css:3513: `.topbar {`
+- public/control-center/styles.css:6089: `Prevent topbar / command bar overlap and restore clean scroll`
+- public/control-center/styles.css:6118: `.topbar {`
+- public/control-center/styles.css:6156: `/* Prevent topbar context badges from forcing overlap */`
+- public/control-center/styles.css:6174: `.topbar {`
+- public/control-center/styles.css:6201: `.topbar {`
+- public/control-center/styles.css:6743: `.library-finder-topbar {`
+- public/control-center/styles.css:7155: `The main app already has sidebar + topbar, so forcing 2 columns at 1112px makes forms unusable. */`
+- public/control-center/styles.css:7586: `.topbar {`
+- public/control-center/styles.css:7590: `.topbar-right {`
+- public/control-center/styles.css:7681: `.topbar-right {`
+- public/control-center/styles.css:7685: `.topbar {`
+- public/control-center/styles.css:7698: `.topbar {`
+- public/control-center/styles.css:7705: `.topbar-center {`
+- public/control-center/styles.css:7760: `.topbar-right {`
+- public/control-center/styles.css:7770: `.topbar-center {`
+- public/control-center/styles.css:7940: `.topbar {`
+- public/control-center/styles.css:7955: `.topbar .page-title {`
+- public/control-center/styles.css:7991: `.topbar-mobile-controls,`
+- public/control-center/styles.css:7999: `.topbar {`
+- public/control-center/styles.css:8005: `.topbar-left {`
+- public/control-center/styles.css:8009: `.topbar-right {`
+- public/control-center/styles.css:8128: `.topbar {`
+- public/control-center/styles.css:8133: `.topbar-left {`
+- public/control-center/styles.css:8137: `.topbar .page-title {`
+- public/control-center/styles.css:8210: `.topbar {`
+- public/control-center/styles.css:8214: `.topbar-right {`
+- public/control-center/styles.css:8248: `.topbar {`
+- public/control-center/styles.css:8258: `.topbar-left {`
+- public/control-center/styles.css:8266: `.topbar .page-title {`
+- public/control-center/styles/00-tokens.css:42: `--z-topbar: 200;`
+- public/control-center/styles/02-layer-system.css:10: `--layer-topbar: 200;`
+- public/control-center/styles/06-topbar.css:6: `.topbar {`
+- public/control-center/styles/06-topbar.css:8: `z-index: var(--layer-topbar);`
+- public/control-center/styles/06-topbar.css:33: `.topbar-left,`
+- public/control-center/styles/06-topbar.css:34: `.topbar-center,`
+- public/control-center/styles/06-topbar.css:35: `.topbar-right {`
+- public/control-center/styles/06-topbar.css:39: `.topbar-left {`
+- public/control-center/styles/06-topbar.css:45: `.topbar-right {`
+- public/control-center/styles/06-topbar.css:54: `.topbar .page-title {`
+- public/control-center/styles/06-topbar.css:94: `.topbar {`
+- public/control-center/styles/06-topbar.css:101: `.topbar-right {`
+- public/control-center/styles/06-topbar.css:108: `.topbar {`
+- public/control-center/styles/06-topbar.css:115: `.topbar-left,`
+- public/control-center/styles/06-topbar.css:116: `.topbar-right {`
+- public/control-center/styles/06-topbar.css:120: `.topbar-right {`
+- public/control-center/styles/06-topbar.css:124: `.topbar .page-title {`
+- public/control-center/styles/10-topbar-canonical.css:15: `.topbar {`
+- public/control-center/styles/10-topbar-canonical.css:17: `z-index: var(--layer-topbar);`
+- public/control-center/styles/10-topbar-canonical.css:52: `.topbar-left {`
+- public/control-center/styles/10-topbar-canonical.css:65: `.topbar-center {`
+- public/control-center/styles/10-topbar-canonical.css:77: `.topbar-right {`
+- public/control-center/styles/10-topbar-canonical.css:177: `.topbar {`
+- public/control-center/styles/10-topbar-canonical.css:191: `.topbar-left {`
+- public/control-center/styles/10-topbar-canonical.css:195: `.topbar-right {`
+
+# COMMAND RULES
+
+- public/control-center/styles.css:391: `.command-bar {`
+- public/control-center/styles.css:407: `.command-backdrop {`
+- public/control-center/styles.css:411: `.command-bar-left,`
+- public/control-center/styles.css:412: `.command-bar-center,`
+- public/control-center/styles.css:413: `.command-bar-right {`
+- public/control-center/styles.css:422: `.command-bar-left {`
+- public/control-center/styles.css:426: `.command-bar-center {`
+- public/control-center/styles.css:430: `.command-bar-right {`
+- public/control-center/styles.css:434: `.command-bar-right .btn {`
+- public/control-center/styles.css:2980: `.command-bar {`
+- public/control-center/styles.css:2985: `.command-bar-right {`
+- public/control-center/styles.css:3065: `.command-bar {`
+- public/control-center/styles.css:3316: `.command-bar {`
+- public/control-center/styles.css:3334: `.app-shell.is-mobile-shell.is-mobile-command-open .command-bar {`
+- public/control-center/styles.css:3341: `.command-backdrop {`
+- public/control-center/styles.css:3352: `.app-shell.is-mobile-shell.is-mobile-command-open .command-backdrop {`
+- public/control-center/styles.css:3357: `.command-bar-right {`
+- public/control-center/styles.css:3457: `.command-bar-right .btn {`
+- public/control-center/styles.css:3503: `.command-bar-right {`
+- public/control-center/styles.css:6129: `.command-bar {`
+- public/control-center/styles.css:6184: `.command-bar {`
+- public/control-center/styles.css:6188: `.command-bar-right {`
+- public/control-center/styles.css:6208: `.command-bar {`
+- public/control-center/styles.css:6224: `.app-shell.is-mobile-shell:not(.is-mobile-command-open) .command-bar {`
+- public/control-center/styles.css:6228: `.app-shell.is-mobile-shell.is-mobile-command-open .command-bar {`
+- public/control-center/styles.css:6232: `.command-backdrop {`
+- public/control-center/styles.css:7582: `.app-shell:not(.is-command-open):not(.is-mobile-command-open) .command-bar {`
+- public/control-center/styles.css:7712: `.command-bar {`
+- public/control-center/styles.css:7724: `.command-bar input,`
+- public/control-center/styles.css:7725: `.command-bar textarea {`
+- public/control-center/styles.css:7774: `.command-bar {`
+- public/control-center/styles.css:8051: `.app-shell.is-command-open .command-backdrop,`
+- public/control-center/styles.css:8052: `.app-shell.is-mobile-command-open .command-backdrop {`
+- public/control-center/styles.css:8061: `.command-bar {`
+- public/control-center/styles.css:8078: `.command-bar-right {`
+- public/control-center/styles.css:8084: `.command-bar-right .btn {`
+- public/control-center/styles.css:8090: `.app-shell:not(.is-command-open):not(.is-mobile-command-open) .command-bar {`
+- public/control-center/styles.css:8149: `.command-bar {`
+- public/control-center/styles.css:8158: `.command-bar-right {`
+- public/control-center/styles.css:8238: `.command-bar {`
+- public/control-center/styles.css:8652: `.command-backdrop {`
+- public/control-center/styles.css:8658: `.app-shell.is-command-open .command-backdrop,`
+- public/control-center/styles.css:8659: `.app-shell.is-mobile-command-open .command-backdrop,`
+- public/control-center/styles.css:8660: `.command-backdrop.is-visible {`
+- public/control-center/styles/02-layer-system.css:20: `.command-backdrop:not(.is-visible),`
+- public/control-center/styles/02-layer-system.css:23: `[aria-hidden="true"].command-backdrop,`
+- public/control-center/styles/02-layer-system.css:30: `.command-backdrop.is-visible,`
+- public/control-center/styles/04-command-layer.css:3: `Purpose: one canonical command-bar/backdrop behavior before legacy overrides.`
+- public/control-center/styles/04-command-layer.css:7: `.app-shell:not(.is-command-open):not(.is-mobile-command-open) .command-bar {`
+- public/control-center/styles/04-command-layer.css:11: `.command-bar {`
+- public/control-center/styles/04-command-layer.css:17: `.command-backdrop {`
+- public/control-center/styles/04-command-layer.css:25: `.app-shell.is-command-open .command-backdrop,`
+- public/control-center/styles/04-command-layer.css:26: `.app-shell.is-mobile-command-open .command-backdrop,`
+- public/control-center/styles/04-command-layer.css:27: `.command-backdrop.is-visible {`
+- public/control-center/styles/04-command-layer.css:35: `.app-shell.is-mobile-shell:not(.is-mobile-command-open) .command-bar {`
+- public/control-center/styles/04-command-layer.css:39: `.app-shell.is-mobile-shell.is-mobile-command-open .command-bar {`
+- public/control-center/styles/04-command-layer.css:43: `.app-shell.is-mobile-shell:not(.is-mobile-command-open) .command-backdrop {`
+- public/control-center/styles/09-command-legacy-isolation.css:8: `.command-bar {`
+- public/control-center/styles/09-command-legacy-isolation.css:29: `.command-backdrop {`
+- public/control-center/styles/09-command-legacy-isolation.css:39: `.app-shell.is-command-open .command-backdrop,`
+- public/control-center/styles/09-command-legacy-isolation.css:40: `.app-shell.is-mobile-command-open .command-backdrop,`
+- public/control-center/styles/09-command-legacy-isolation.css:41: `.command-backdrop.is-visible {`
+- public/control-center/styles/09-command-legacy-isolation.css:53: `.app-shell.is-mobile-shell:not(.is-mobile-command-open) .command-bar {`
+- public/control-center/styles/09-command-legacy-isolation.css:57: `.app-shell.is-mobile-shell.is-mobile-command-open .command-bar {`
+
+# OVERLAY RULES
+
+- public/control-center/styles.css:253: `backdrop-filter: blur(12px);`
+- public/control-center/styles.css:401: `backdrop-filter: blur(8px);`
+- public/control-center/styles.css:407: `.command-backdrop {`
+- public/control-center/styles.css:1793: `.loading-state,`
+- public/control-center/styles.css:1805: `.loading-state,`
+- public/control-center/styles.css:1818: `.loading-state {`
+- public/control-center/styles.css:1823: `.loading-state::after,`
+- public/control-center/styles.css:1858: `.sidebar-backdrop {`
+- public/control-center/styles.css:1862: `backdrop-filter: blur(2px);`
+- public/control-center/styles.css:1867: `.sidebar-backdrop.is-visible {`
+- public/control-center/styles.css:2038: `.startup-unlock-bar {`
+- public/control-center/styles.css:2055: `.startup-trace-panel {`
+- public/control-center/styles.css:2072: `.startup-trace-panel.is-visible {`
+- public/control-center/styles.css:2076: `.startup-trace-head {`
+- public/control-center/styles.css:2083: `.startup-trace-meta {`
+- public/control-center/styles.css:2093: `.startup-trace-body {`
+- public/control-center/styles.css:2107: `.loading-overlay {`
+- public/control-center/styles.css:2121: `.loading-overlay.is-visible {`
+- public/control-center/styles.css:2128: `.loading-overlay[aria-hidden="true"],`
+- public/control-center/styles.css:2129: `.loading-overlay:not(.is-visible),`
+- public/control-center/styles.css:2130: `.loading-overlay[hidden] {`
+- public/control-center/styles.css:2137: `.loading-card {`
+- public/control-center/styles.css:2146: `.loading-spinner {`
+- public/control-center/styles.css:2836: `.integration-drawer-backdrop {`
+- public/control-center/styles.css:2841: `backdrop-filter: blur(3px);`
+- public/control-center/styles.css:3341: `.command-backdrop {`
+- public/control-center/styles.css:3352: `.app-shell.is-mobile-shell.is-mobile-command-open .command-backdrop {`
+- public/control-center/styles.css:3663: `.ctrl-intel-dot.loading { background: var(--color-warning); animation: ctrl-pulse 1.4s ease-in-out infinite; }`
+- public/control-center/styles.css:3897: `.fatal-startup-steps {`
+- public/control-center/styles.css:3911: `.startup-step-banner {`
+- public/control-center/styles.css:3927: `body.is-loading,`
+- public/control-center/styles.css:3928: `body.loading,`
+- public/control-center/styles.css:3929: `body.loading-locked {`
+- public/control-center/styles.css:5950: `#startupUnlockBar,`
+- public/control-center/styles.css:5951: `#startupTracePanel,`
+- public/control-center/styles.css:5952: `#startupStepBanner,`
+- public/control-center/styles.css:5953: `.startup-unlock-bar,`
+- public/control-center/styles.css:5954: `.startup-trace-panel,`
+- public/control-center/styles.css:5955: `.startup-step-banner {`
+- public/control-center/styles.css:5959: `#startupUnlockBar button,`
+- public/control-center/styles.css:5960: `#startupTracePanel button,`
+- public/control-center/styles.css:5961: `.startup-unlock-bar button,`
+- public/control-center/styles.css:5962: `.startup-trace-panel button {`
+- public/control-center/styles.css:5968: `Keep overlays from trapping clicks after app startup.`
+- public/control-center/styles.css:5973: `#startupUnlockBar,`
+- public/control-center/styles.css:5974: `#startupTracePanel,`
+- public/control-center/styles.css:5975: `#startupStepBanner,`
+- public/control-center/styles.css:5976: `.startup-unlock-bar,`
+- public/control-center/styles.css:5977: `.startup-trace-panel,`
+- public/control-center/styles.css:5978: `.startup-step-banner {`
+- public/control-center/styles.css:5982: `#startupUnlockBar button,`
+- public/control-center/styles.css:5983: `#startupTracePanel button,`
+- public/control-center/styles.css:5984: `.startup-unlock-bar button,`
+- public/control-center/styles.css:5985: `.startup-trace-panel button {`
+- public/control-center/styles.css:5989: `/* Hide stale loading overlays only when the app is not actively loading. */`
+- public/control-center/styles.css:5990: `body:not(.is-loading):not(.loading):not(.loading-locked):not(.app-loading):not(.app-locked) #loadingOverlay,`
+- public/control-center/styles.css:5991: `body:not(.is-loading):not(.loading):not(.loading-locked):not(.app-loading):not(.app-locked) .loading-overlay,`
+- public/control-center/styles.css:5993: `body[data-loading-state="idle"] #loadingOverlay,`
+- public/control-center/styles.css:5994: `body[data-loading-state="idle"] .loading-overlay,`
+- public/control-center/styles.css:5995: `.loading-overlay[aria-hidden="true"],`
+- public/control-center/styles.css:5996: `.loading-overlay:not(.is-visible),`
+- public/control-center/styles.css:5997: `.loading-overlay[hidden] {`
+- public/control-center/styles.css:6004: `/* Allow the app shell to recover even if a loading class becomes stale. */`
+- public/control-center/styles.css:6005: `body:not(.is-loading):not(.loading):not(.loading-locked):not(.app-loading):not(.app-locked),`
+- public/control-center/styles.css:6006: `html:not(.is-loading):not(.loading):not(.loading-locked):not(.app-loading):not(.app-locked) {`
+- public/control-center/styles.css:6194: `/* Mobile command bar remains overlay only when explicitly opened */`
+- public/control-center/styles.css:6232: `.command-backdrop {`
+- public/control-center/styles.css:7363: `Ensure hidden startup recovery UI is actually invisible.`
+- public/control-center/styles.css:7366: `#startupUnlockBar[aria-hidden="true"],`
+- public/control-center/styles.css:7367: `#startupStepBanner[aria-hidden="true"],`
+- public/control-center/styles.css:7368: `.startup-unlock-bar[aria-hidden="true"],`
+- public/control-center/styles.css:7369: `.startup-step-banner[aria-hidden="true"] {`
+- public/control-center/styles.css:7702: `backdrop-filter: blur(18px);`
+- public/control-center/styles.css:7718: `backdrop-filter: blur(18px);`
+- public/control-center/styles.css:7781: `.ai-dock {`
+- public/control-center/styles.css:7792: `.ai-dock-toggle {`
+- public/control-center/styles.css:7807: `backdrop-filter: blur(18px);`
+- public/control-center/styles.css:7813: `.ai-dock-status-dot {`
+- public/control-center/styles.css:7821: `.ai-dock-label {`
+- public/control-center/styles.css:7825: `.ai-dock-state {`
+- public/control-center/styles.css:7830: `.ai-dock-panel {`
+- public/control-center/styles.css:7842: `backdrop-filter: blur(24px);`
+- public/control-center/styles.css:7849: `.ai-dock.is-open .ai-dock-panel {`
+- public/control-center/styles.css:7853: `.ai-dock-header {`
+- public/control-center/styles.css:7862: `.ai-dock-header p {`
+- public/control-center/styles.css:7868: `.ai-dock-close {`
+- public/control-center/styles.css:7876: `.ai-dock-body {`
+- public/control-center/styles.css:7883: `.ai-dock-section {`
+- public/control-center/styles.css:7889: `.ai-dock-section-label {`
+- public/control-center/styles.css:7897: `.ai-dock-suggestion {`
+- public/control-center/styles.css:7908: `.ai-dock-suggestion:hover {`
+- public/control-center/styles.css:7913: `.ai-dock-actions {`
+- public/control-center/styles.css:7919: `.ai-dock-chip {`
+- public/control-center/styles.css:7929: `.ai-dock {`
+- public/control-center/styles.css:7934: `.ai-dock-panel {`
+- public/control-center/styles.css:8051: `.app-shell.is-command-open .command-backdrop,`
+- public/control-center/styles.css:8052: `.app-shell.is-mobile-command-open .command-backdrop {`
+- public/control-center/styles.css:8058: `backdrop-filter: blur(2px);`
+- public/control-center/styles.css:8183: `.ai-dock {`
+- public/control-center/styles.css:8188: `.ai-dock-toggle {`
+- public/control-center/styles.css:8193: `.ai-dock-label {`
+- public/control-center/styles.css:8197: `.ai-dock-state {`
+- public/control-center/styles.css:8201: `.ai-dock-panel {`
+- public/control-center/styles.css:8651: `/* Safety patch: hidden command overlays must never block form fields or dropdowns. */`
+- public/control-center/styles.css:8652: `.command-backdrop {`
+- public/control-center/styles.css:8658: `.app-shell.is-command-open .command-backdrop,`
+- public/control-center/styles.css:8659: `.app-shell.is-mobile-command-open .command-backdrop,`
+- public/control-center/styles.css:8660: `.command-backdrop.is-visible {`
+- public/control-center/styles/00-tokens.css:44: `--z-overlay: 600;`
+- public/control-center/styles/02-layer-system.css:13: `--layer-overlay: 600;`
+- public/control-center/styles/02-layer-system.css:19: `/* Hidden global overlays must never block native controls. */`
+- public/control-center/styles/02-layer-system.css:20: `.command-backdrop:not(.is-visible),`
+- public/control-center/styles/02-layer-system.css:21: `.loading-overlay:not(.is-visible),`
+- public/control-center/styles/02-layer-system.css:22: `.sidebar-backdrop:not(.is-visible),`
+- public/control-center/styles/02-layer-system.css:23: `[aria-hidden="true"].command-backdrop,`
+- public/control-center/styles/02-layer-system.css:24: `[aria-hidden="true"].loading-overlay,`
+- public/control-center/styles/02-layer-system.css:25: `[aria-hidden="true"].sidebar-backdrop {`
+- public/control-center/styles/02-layer-system.css:30: `.command-backdrop.is-visible,`
+- public/control-center/styles/02-layer-system.css:31: `.loading-overlay.is-visible,`
+- public/control-center/styles/02-layer-system.css:32: `.sidebar-backdrop.is-visible {`
+- public/control-center/styles/04-command-layer.css:3: `Purpose: one canonical command-bar/backdrop behavior before legacy overrides.`
+- public/control-center/styles/04-command-layer.css:17: `.command-backdrop {`
+- public/control-center/styles/04-command-layer.css:25: `.app-shell.is-command-open .command-backdrop,`
+- public/control-center/styles/04-command-layer.css:26: `.app-shell.is-mobile-command-open .command-backdrop,`
+- public/control-center/styles/04-command-layer.css:27: `.command-backdrop.is-visible {`
+- public/control-center/styles/04-command-layer.css:43: `.app-shell.is-mobile-shell:not(.is-mobile-command-open) .command-backdrop {`
+- public/control-center/styles/05-ai-layer.css:6: `.ai-dock {`
+- public/control-center/styles/05-ai-layer.css:11: `.ai-dock > * {`
+- public/control-center/styles/05-ai-layer.css:15: `.ai-dock-toggle {`
+- public/control-center/styles/05-ai-layer.css:22: `.ai-dock-toggle:hover {`
+- public/control-center/styles/05-ai-layer.css:26: `.ai-dock-panel {`
+- public/control-center/styles/05-ai-layer.css:35: `.ai-dock-body {`
+- public/control-center/styles/05-ai-layer.css:40: `.ai-dock-section {`
+- public/control-center/styles/05-ai-layer.css:44: `.ai-dock-suggestion {`
+- public/control-center/styles/05-ai-layer.css:51: `.ai-dock-suggestion:hover {`
+- public/control-center/styles/05-ai-layer.css:58: `.ai-dock {`
+- public/control-center/styles/05-ai-layer.css:63: `.ai-dock-panel {`
+- public/control-center/styles/06-topbar.css:20: `backdrop-filter: blur(18px);`
+- public/control-center/styles/06-topbar.css:85: `backdrop-filter: blur(10px);`
+- public/control-center/styles/07-sidebar.css:63: `.sidebar-backdrop {`
+- public/control-center/styles/07-sidebar.css:73: `.sidebar-backdrop.is-visible {`
+- public/control-center/styles/08-components-foundation.css:80: `/* Empty / loading / error states */`
+- public/control-center/styles/08-components-foundation.css:83: `.loading-state,`
+- public/control-center/styles/09-command-legacy-isolation.css:28: `/* Prevent hidden overlays from trapping interactions */`
+- public/control-center/styles/09-command-legacy-isolation.css:29: `.command-backdrop {`
+- public/control-center/styles/09-command-legacy-isolation.css:39: `.app-shell.is-command-open .command-backdrop,`
+- public/control-center/styles/09-command-legacy-isolation.css:40: `.app-shell.is-mobile-command-open .command-backdrop,`
+- public/control-center/styles/09-command-legacy-isolation.css:41: `.command-backdrop.is-visible {`
+- public/control-center/styles/10-topbar-canonical.css:45: `backdrop-filter: blur(18px);`

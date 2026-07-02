@@ -1,0 +1,81 @@
+public/control-center/index.html:18:  <link rel="stylesheet" href="./styles/09-operations-centers.css?v=20260511-task-center-layout-1">
+public/control-center/index.html:136:            <button class="nav-item" data-route="task-center" data-page="task-center" type="button">Task Center</button>
+public/control-center/pages/operations-centers.js:171:  if (pageKey === "task-center") {
+public/control-center/pages/operations-centers.js:181:        prompt: `Review ${itemLabel} in Task Center for ${projectLabel}. Explain what is blocking progress, who should act next, and the fastest unblock path.`
+public/control-center/pages/operations-centers.js:186:        prompt: `Summarize execution risk in Task Center for ${projectLabel}. Focus on overdue, due soon, blocked, and ownership concentration risk.`
+public/control-center/pages/operations-centers.js:191:        prompt: `Review owner workload in Task Center for ${projectLabel}. Explain concentration risk, likely bottlenecks, and redistribution recommendations for the next cycle.`
+public/control-center/pages/operations-centers.js:446:    ? "No tasks match the current filters."
+public/control-center/pages/operations-centers.js:447:    : "No tasks are available for this project yet. Use Refresh or adjust project context to load latest assignments.";
+public/control-center/pages/operations-centers.js:463:    <section class="page is-active" data-page="task-center">
+public/control-center/pages/operations-centers.js:469:              <h3 class="std-context-title">Task Center</h3>
+public/control-center/pages/operations-centers.js:471:            <p class="std-context-description">Durable operational tasks with ownership, due-state, linked entities, and route-aware follow-up for ${escapeHtml(projectLabel)}.</p>
+public/control-center/pages/operations-centers.js:472:            <div class="std-context-metrics" aria-label="Task Center metrics">
+public/control-center/pages/operations-centers.js:513:              <input id="taskCenterSearch" class="command-input" type="text" placeholder="Search tasks, owners, domains..." value="${escapeHtml(session.search)}">
+public/control-center/pages/operations-centers.js:589:                <button class="btn btn-primary" type="button" id="taskCenterRefreshBtnRail">Refresh Task Center</button>
+public/control-center/pages/operations-centers.js:662:  const prompts = buildOpsAssistantPrompts("task-center", projectName, selectedItem, titleCase(session.focus || "all"));
+public/control-center/pages/operations-centers.js:691:          session.errorMessage = `Task Center: ${error?.message || "Failed to refresh."}`;
+public/control-center/pages/operations-centers.js:1661:  id: "task-center",
+public/control-center/pages/operations-centers.js:1665:    title: "Task Center",
+public/control-center/pages/operations-centers.js:1666:    description: "Manage durable tasks, owners, due dates, priorities, filters, and linked operational entities in one premium execution surface."
+public/control-center/pages/operations-centers.js:1668:  template: `<section class="page is-active" data-page="task-center"><div class="ops-shell"></div></section>`,
+public/control-center/pages/operations-centers.js:1687:          context.showError?.(`Task Center: ${error?.message || "Failed to load live data."}`);
+public/control-center/pages/operations-centers.js:1847:  const taskCount = asArray(operations.tasks?.items || operations.tasks).length;
+public/control-center/pages/operations-centers.js:1854:      route: "task-center",
+public/control-center/pages/operations-centers.js:1855:      title: "Task Center",
+public/control-center/pages/operations-centers.js:1858:      description: "Review generated tasks, owners, priorities, and execution readiness.",
+public/control-center/pages/operations-centers.js:1859:      action: "Open Task Center"
+public/control-center/pages/operations-centers.js:1907:          description: "Use this page as the routing hub from AI Team drafts, workflows, tasks, and runtime signals into the correct operations workspace.",
+public/control-center/pages/operations-centers.js:1918:                  <p>AI Team can prepare drafts, tasks, workflows, and handoffs. This overview routes the work to the correct operations center for review and monitoring.</p>
+public/control-center/pages/operations-centers.js:1946:                  <p>For new operational work, start in AI Team with Operations Lead or Full Team, then route the result to Task Center, Workflows, Queue, or Job Monitor.</p>
+public/control-center/pages/operations-centers.js:1960:                  <p>This overview does not execute jobs, mutate tasks, send notifications, or approve workflows. It only routes to the owning workspace.</p>
+public/control-center/pages/home.js:144:  const tasks = asArray(operations.tasks?.items);
+public/control-center/pages/home.js:181:    const roleTasks = tasks.filter((item) => asString(item?.owner_role).toLowerCase() === role.id);
+public/control-center/pages/home.js:273:  const tasks = asArray(operations.tasks?.items);
+public/control-center/pages/home.js:321:  const pendingTasks = tasks.filter((item) => {
+public/control-center/pages/home.js:557:        hint: "Notifications, tasks, approvals",
+public/control-center/pages/home.js:1038:        admin: `Act as the Operations Lead for ${projectLabel}. Review tasks, blockers, failed jobs, and execution health. Give me the next operational steps. Do not execute anything; prepare guidance only.`
+public/control-center/pages/home.js:1101:      promptPlanBtn.onclick = () => openAiWithPrompt("Prepare today's action plan from the current dashboard. Give me prioritized tasks with owners and expected outcomes.");
+public/control-center/pages/ai-command.js:246:		placeholder: "Ask the Operations Lead to turn this into tasks, workflow steps, or handoffs…",
+public/control-center/pages/ai-command.js:248:		cannotDo: ["Run workflows without confirmation", "Auto-approve tasks", "Override authority gates", "Execute backend operations directly"],
+public/control-center/pages/ai-command.js:332:		{ label: "Turn this into tasks", sub: "Break down into action items" },
+public/control-center/pages/ai-command.js:1266:	if (id === "operations") return outputType === "task" ? "task-center" : "workflows";
+public/control-center/pages/ai-command.js:1267:	if (id === "customer_ops") return outputType === "task" ? "task-center" : "operations-centers";
+public/control-center/pages/ai-command.js:1283:		"task-center": "Task Center",
+public/control-center/pages/ai-command.js:1325:				nextSafeAction: "Review and refine the task draft before creating durable tasks"
+public/control-center/pages/ai-command.js:1573:			summary: "Operational plan drafted with next tasks, owners, and route.",
+public/control-center/pages/ai-command.js:1575:				"Define immediate tasks",
+public/control-center/pages/ai-command.js:1628:			"Operations: convert the reviewed output into safe tasks, workflow draft, or handoff context"
+public/control-center/pages/ai-command.js:1630:		destinationRoute: outputType === "task" ? "task-center" : "workflows",
+public/control-center/pages/ai-command.js:2245:	"task-center": "Task Center",
+public/control-center/pages/ai-command.js:2267:	"task-center": "operations",
+public/control-center/pages/ai-command.js:2301:	tasks: "task-center",
+public/control-center/pages/ai-command.js:3444:	if (session?.teamMode === "team") return tool.intent === "task" ? "task-center" : "workflows";
+public/control-center/pages/ai-command.js:3502:				<p class="aicmd-room-subtitle mhos-context-description">One specialist or the full team turns requests into review-ready drafts, tasks, and handoffs.</p>
+public/control-center/pages/ai-command.js:4024:					<h2>Drafts, tasks, workflows, handoffs</h2>
+public/control-center/pages/ai-command.js:4523:		description: "Talk to your AI team, run structured tasks, and turn intelligence into action."
+public/control-center/pages/ai-command.js:5106:                                updateStatus("Task draft preview prepared from conversation context. Review before creating durable tasks.");
+public/control-center/pages/media-studio-workspace.js:469:      tasks: [],
+public/control-center/pages/media-studio-workspace.js:534:    linked_tasks: asArray(raw.linked_tasks),
+public/control-center/pages/media-studio-workspace.js:592:      tasksResult,
+public/control-center/pages/media-studio-workspace.js:604:    const tasks = fulfilledValue(tasksResult, { items: [] });
+public/control-center/pages/media-studio-workspace.js:616:    session.tasks = asArray(tasks.items);
+public/control-center/pages/media-studio-workspace.js:3618:        ${session.loading ? `<div class="empty-box">Loading media jobs, handoffs, approvals, tasks, and event history...</div>` : ""}
+public/control-center/pages/content-studio-workspace.js:496:    linked_tasks: asArray(raw.linked_tasks),
+public/control-center/pages/content-studio-workspace.js:538:      tasks: [],
+public/control-center/pages/content-studio-workspace.js:781:    const [contentItems, tasks, approvals, handoffs, events, operations] = await Promise.all([
+public/control-center/pages/content-studio-workspace.js:793:    session.tasks = asArray(tasks.items);
+public/control-center/pages/content-studio-workspace.js:2374:        ${session.loading ? `<div class="empty-box">Loading content records, approvals, tasks, handoffs, and events...</div>` : ""}
+public/control-center/pages/integrations/builders.js:489:      description: "Automation and coordination tools that help orchestrate tasks, handoffs, notifications, and AI-assisted operations.",
+public/control-center/pages/campaign-studio.js:458:    linked_tasks: [],
+public/control-center/pages/workflows.js:244:    String(operations?.tasks?.total || 0)
+public/control-center/pages/workflows.js:1783:    const tasksTotal = Number(operations.tasks?.total || 0);
+public/control-center/pages/workflows.js:2047:                <button id="wfLightTasksBtn" class="btn btn-ghost" type="button">Open Task Center</button>
+public/control-center/pages/workflows.js:2106:                      <button class="btn btn-ghost btn-sm" type="button" data-wf-open="task-center">Open Task Center</button>
+public/control-center/pages/workflows.js:2153:                  <span>Tasks ${escapeHtml(String(tasksTotal))}</span>
+public/control-center/pages/workflows.js:2277:      const tasksBtn = $("wfLightTasksBtn");
+public/control-center/pages/workflows.js:2278:      if (tasksBtn) {
+public/control-center/pages/workflows.js:2279:        tasksBtn.onclick = () => {
+public/control-center/pages/workflows.js:2282:          stateModel.lastStatusText = "Task Center opened for workflow handoff and tracking.";
+public/control-center/pages/workflows.js:2283:          navigateTo("task-center");
+public/control-center/pages/workflows.js:2290:          if (route === "task-center") stateModel.openedTaskCenter = true;
+public/control-center/pages/workflows.js:2291:          if (route !== "task-center") stateModel.openedDestination = true;

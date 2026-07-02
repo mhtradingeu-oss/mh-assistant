@@ -1,0 +1,39 @@
+130:function routeForAction(action) {
+293:  const nextActionRoute = routeForAction(nextAction);
+473:    primaryActionLabel: nextActionRoute === "ai-command" ? "Open AI Workspace" : `Open ${humanizeStatus(nextActionRoute)}`,
+493:      route: nextActionRoute,
+494:      buttonLabel: nextActionRoute === "ai-command" ? "Start With AI" : `Fix In ${humanizeStatus(nextActionRoute)}`,
+656:  render({ getState, $, escapeHtml, navigateTo, showMessage }) {
+709:            <span class="mhos-next-action-destination">Next: <strong>${escapeHtml(humanizeStatus(dashboard.nextBestAction.route))}</strong></span>
+882:            <button id="homeOpenOperationsBtn" class="btn btn-secondary btn-sm" type="button">
+889:            <button id="homeQuickOpenAiBtn" class="quick-action-btn" type="button">
+890:              <span class="home-action-title">Open AI Workspace</span>
+902:              <span class="section-helper">AI explains blockers, turns next action into a plan, and routes guidance to the right workspace.</span>
+904:            <button id="homeOpenAiTeamBtn" class="btn btn-ghost btn-sm" type="button">
+905:              Open Workspace
+964:                <button id="homeOpenFullAiTeamBtn" class="btn btn-ghost btn-sm" type="button">Open Full Team</button>
+1035:    const openRoute = (route, message = "") => {
+1036:      navigateTo(route);
+1042:      navigateTo("ai-command");
+1047:    const handleAiRoleClick = (roleId, roleName) => {
+1068:      nextBtn.onclick = () => {
+1069:        if (dashboard.nextBestAction.route === "ai-command") {
+1072:        openRoute(dashboard.nextBestAction.route, "Next best action opened.");
+1078:      askNextActionBtn.onclick = () => openAiWithPrompt(`Explain this next best action and give me the exact steps: ${dashboard.nextBestAction.recommendation}`);
+1081:    const operationsBtn = $("homeOpenOperationsBtn");
+1082:    if (operationsBtn) operationsBtn.onclick = () => openRoute("operations-centers");
+1084:    const aiTeamBtn = $("homeOpenAiTeamBtn");
+1085:    if (aiTeamBtn) aiTeamBtn.onclick = () => openRoute("ai-command");
+1086:    const fullAiTeamBtn = $("homeOpenFullAiTeamBtn");
+1087:    if (fullAiTeamBtn) fullAiTeamBtn.onclick = () => openRoute("ai-command");
+1090:    if (quickCampaignBtn) quickCampaignBtn.onclick = () => openRoute("campaign-studio");
+1093:    if (quickAssetBtn) quickAssetBtn.onclick = () => openRoute("library");
+1096:    if (quickConnectBtn) quickConnectBtn.onclick = () => openRoute("integrations");
+1099:    if (quickReadinessBtn) quickReadinessBtn.onclick = () => openRoute("setup");
+1101:    const quickAiBtn = $("homeQuickOpenAiBtn");
+1103:      quickAiBtn.onclick = () => openAiWithPrompt(dashboard.nextBestAction.recommendation);
+1108:      promptNextBtn.onclick = () => openAiWithPrompt("What should I do next for this project? Prioritize the answer based on readiness, blockers, campaign state, and recent activity.");
+1113:      promptReadinessBtn.onclick = () => openAiWithPrompt("Why is readiness low? Explain the missing integrations, assets, failed jobs, and readiness gaps in simple steps.");
+1118:      promptLaunchBtn.onclick = () => openAiWithPrompt("Summarize the launch blockers and tell me what must be fixed before publishing.");
+1123:      promptPlanBtn.onclick = () => openAiWithPrompt("Prepare today's action plan from the current dashboard. Give me prioritized tasks with owners and expected outcomes.");
+1130:      card.onclick = () => handleAiRoleClick(roleId, roleName);

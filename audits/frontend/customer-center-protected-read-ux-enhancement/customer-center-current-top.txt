@@ -1,0 +1,260 @@
+import {
+  fetchCustomerOperationsReadiness,
+  fetchCustomerOperationsInbox,
+  fetchCustomerConversations,
+  fetchCustomerTickets,
+  fetchCustomerChannels
+} from "../api.js";
+
+const CUSTOMER_CENTER_STATE = {
+  loading: false,
+  loaded: false,
+  error: "",
+  model: null
+};
+
+function asArray(value) {
+  return Array.isArray(value) ? value : [];
+}
+
+function asObject(value) {
+  return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+}
+
+function asString(value) {
+  return value == null ? "" : String(value);
+}
+
+function escapeHtml(value) {
+  return asString(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
+function getPayload(response) {
+  if (response && typeof response === "object" && "data" in response) {
+    return response.data;
+  }
+  return response;
+}
+
+function isProtectedReadGuard(value) {
+  const message = asString(value?.error || value?.message || value);
+  return /protected read routes are disabled/i.test(message);
+}
+
+function getProtectedReadMessage(value) {
+  return asString(value?.error || value?.message || value || "Protected read routes are disabled.");
+}
+
+async function loadCustomerCenterModel(projectName) {
+  const [readiness, inbox, conversations, tickets, channels] = await Promise.all([
+    fetchCustomerOperationsReadiness(projectName),
+    fetchCustomerOperationsInbox(projectName),
+    fetchCustomerConversations(projectName),
+    fetchCustomerTickets(projectName),
+    fetchCustomerChannels(projectName)
+  ]);
+
+  const responses = [readiness, inbox, conversations, tickets, channels];
+  const guard = responses.find(isProtectedReadGuard);
+  if (guard) {
+    return {
+      protectedReadGuard: true,
+      guardMessage: getProtectedReadMessage(guard),
+      readiness: {},
+      inbox: [],
+      conversations: [],
+      tickets: [],
+      channels: [],
+      blockers: ["Protected read route guard is active."],
+      warnings: ["Configure MH_CONTROL_CENTER_WRITE_KEY on the server to load Customer Center data."],
+      disabledActions: buildDisabledActions()
+    };
+  }
+
+  const readinessData = asObject(getPayload(readiness));
+  const inboxData = getPayload(inbox);
+  const conversationsData = getPayload(conversations);
+  const ticketsData = getPayload(tickets);
+  const channelsData = getPayload(channels);
+
+  return {
+    protectedReadGuard: false,
+    guardMessage: "",
+    readiness: readinessData,
+    inbox: asArray(inboxData?.inbox || inboxData),
+    conversations: asArray(conversationsData?.conversations || conversationsData),
+    tickets: asArray(ticketsData?.tickets || ticketsData),
+    channels: asArray(channelsData?.channels || channelsData),
+    blockers: asArray(readinessData.blockers),
+    warnings: asArray(readinessData.warnings),
+    disabledActions: buildDisabledActions()
+  };
+}
+
+function buildDisabledActions() {
+  return [
+    ["Send reply", "External send is locked for Customer Center v1."],
+    ["Add CRM note", "CRM mutation requires a future confirmation gate and audit log."],
+    ["Update ticket", "Ticket mutation is not enabled in this read-only release."],
+    ["Assign conversation", "Assignment mutation is not enabled in this read-only release."],
+    ["Mark reviewed", "Review state mutation requires a future safety pass."],
+    ["Trigger callback", "Call placement is not ready."],
+    ["Trigger IVR", "IVR provider execution is not ready."],
+    ["Sync CRM", "CRM provider execution is not ready."],
+    ["Auto-reply", "Auto-reply is forbidden by default."]
+  ];
+}
+
+function countWaitingReplies(inbox) {
+  return asArray(inbox).filter((entry) => /waiting|open|unread/i.test(`${entry.status || ""} ${entry.sla_status || ""}`)).length;
+}
+
+function countSlaRisk(items) {
+  return asArray(items).filter((item) => /risk|breach|late|urgent/i.test(`${item.sla_status || ""} ${item.priority || ""}`)).length;
+}
+
+function renderMetric(label, value, note = "") {
+  return `
+    <article class="mhos-executive-summary-item">
+      <span class="mhos-executive-metric-label">${escapeHtml(label)}</span>
+      <strong class="mhos-executive-metric-value">${escapeHtml(value)}</strong>
+      ${note ? `<small class="mhos-executive-metric-note">${escapeHtml(note)}</small>` : ""}
+    </article>
+  `;
+}
+
+function renderProtectedReadGuard(model) {
+  if (!model?.protectedReadGuard) return "";
+  return `
+    <section class="panel mhos-clean-surface" aria-label="Protected read guard">
+      <div class="panel-header">
+        <div>
+          <div class="panel-kicker">Protected read guard</div>
+          <h3>Customer Center data is locked by server configuration</h3>
+        </div>
+      </div>
+      <p class="muted">${escapeHtml(model.guardMessage)}</p>
+      <div class="empty-box">
+        <strong>Server setup required</strong>
+        <p>Configure <code>MH_CONTROL_CENTER_WRITE_KEY</code> on the server, restart the service, then reload this page to load read-only customer projections.</p>
+        <p>No fake customer data is shown. External send, CRM updates, ticket changes, calls, IVR, and auto-reply remain locked.</p>
+      </div>
+    </section>
+  `;
+}
+
+function renderEmptyState(title, body, nextStep = "Safe next step: connect/read customer operations data when backend readiness is confirmed.") {
+  return `
+    <div class="empty-state">
+      <strong>${escapeHtml(title)}</strong>
+      <p>${escapeHtml(body)}</p>
+      <small>${escapeHtml(nextStep)}</small>
+    </div>
+  `;
+}
+
+function renderInbox(model) {
+  const inbox = asArray(model?.inbox);
+  if (!inbox.length) {
+    return renderEmptyState("No inbox entries yet", "Customer conversations will appear here after read-only customer operations data is available.");
+  }
+
+  return inbox.slice(0, 8).map((entry) => `
+    <article class="ops-list-item">
+      <div>
+        <strong>${escapeHtml(entry.customer_label || "Masked customer")}</strong>
+        <p>${escapeHtml(entry.last_message_preview || "No message preview available.")}</p>
+      </div>
+      <span class="card-badge">${escapeHtml(entry.status || "open")}</span>
+    </article>
+  `).join("");
+}
+
+function renderConversations(model) {
+  const conversations = asArray(model?.conversations);
+  if (!conversations.length) {
+    return renderEmptyState("No conversations selected", "Conversation previews will appear here. Customer identity and messages remain masked/truncated by default.");
+  }
+
+  return conversations.slice(0, 6).map((item) => `
+    <article class="ops-list-item">
+      <div>
+        <strong>${escapeHtml(item.customer_label || "Masked customer")}</strong>
+        <p>${escapeHtml(item.channel || "unknown")} • ${escapeHtml(item.status || "open")} • ${escapeHtml(item.message_count || 0)} messages</p>
+      </div>
+      <span class="card-badge">${escapeHtml(item.priority || "normal")}</span>
+    </article>
+  `).join("");
+}
+
+function renderTickets(model) {
+  const tickets = asArray(model?.tickets);
+  if (!tickets.length) {
+    return renderEmptyState("No tickets yet", "Ticket and SLA snapshots will appear here when support records are available.");
+  }
+
+  return tickets.slice(0, 6).map((ticket) => `
+    <article class="ops-list-item">
+      <div>
+        <strong>${escapeHtml(ticket.ticket_id || "Ticket")}</strong>
+        <p>${escapeHtml(ticket.status || "open")} • ${escapeHtml(ticket.sla_status || "unknown SLA")}</p>
+      </div>
+      <span class="card-badge">${escapeHtml(ticket.priority || "normal")}</span>
+    </article>
+  `).join("");
+}
+
+function renderChannels(model) {
+  const channels = asArray(model?.channels);
+  if (!channels.length) {
+    return renderEmptyState("No channels connected", "Email, social messaging, CRM, voice, and IVR readiness will appear here when providers are configured.");
+  }
+
+  return channels.map((channel) => `
+    <article class="ops-list-item">
+      <div>
+        <strong>${escapeHtml(channel.channel_id || channel.provider || "Channel")}</strong>
+        <p>${escapeHtml(channel.blocked_reason || "Read-only projection only.")}</p>
+      </div>
+      <span class="card-badge">${channel.external_send_ready ? "Send ready" : "Send locked"}</span>
+    </article>
+  `).join("");
+}
+
+function renderDisabledActions(actions) {
+  return `
+    <div class="customer-center-locked-actions" aria-label="Future customer actions locked">
+      <div class="panel-kicker">Future actions locked</div>
+      <p class="muted">These actions require confirmation gates, role permissions, provider readiness, and audit logging before they can be enabled.</p>
+      <div class="button-row">
+        ${asArray(actions).map(([label, reason]) => `
+          <button class="btn btn-ghost" type="button" disabled title="${escapeHtml(reason)}">
+            ${escapeHtml(label)}
+          </button>
+        `).join("")}
+      </div>
+    </div>
+  `;
+}
+
+function renderCustomerCenter(context) {
+  const model = CUSTOMER_CENTER_STATE.model || {};
+  const inbox = asArray(model.inbox);
+  const conversations = asArray(model.conversations);
+  const tickets = asArray(model.tickets);
+  const channels = asArray(model.channels);
+
+  if (CUSTOMER_CENTER_STATE.loading) {
+    return `
+      <section class="page-grid">
+        <div class="panel mhos-clean-surface">
+          <div class="panel-kicker">Customer Center</div>
+          <h2>Loading customer operations…</h2>
+          <p class="muted">Fetching read-only customer projections.</p>
+        </div>
+      </section>

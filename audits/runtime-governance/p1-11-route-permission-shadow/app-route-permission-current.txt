@@ -1,0 +1,226 @@
+  fetchProjectQueueCenter,
+  fetchProjectJobMonitor,
+  fetchProjectNotificationCenter
+} from "./api.js";
+import {
+  CONTROL_ACCESS_KEY_STORAGE_KEY,
+  CONTROL_ACCESS_KEY_LEGACY_STORAGE_KEYS
+} from "./constants.js";
+import { getOverlaySnapshot } from "./runtime/overlay/overlay-runtime.js";
+
+/* =========================
+   CONFIG
+========================= */
+
+setApiBaseUrl("");
+
+const CONTROL_WRITE_HEADER = "x-mh-control-key";
+const CONTROL_ROLE_STORAGE_KEY = "mh-control-role";
+const DEFAULT_ACTIVE_ROLE = "admin";
+const ACTIVE_ROUTE_ROLES = [
+  "strategist",
+  "writer",
+  "designer",
+  "video_lead",
+  "publisher",
+  "ads_operator",
+  "analyst",
+  "compliance_reviewer",
+  "admin"
+];
+const DEFAULT_ROUTE_ROLE_ACCESS = {
+  home: ["strategist", "analyst", "admin"],
+  "ai-command": ACTIVE_ROUTE_ROLES,
+  "campaign-studio": ["strategist", "ads_operator", "admin"],
+  "content-studio": ["writer", "strategist", "compliance_reviewer", "admin"],
+  "media-studio": ["designer", "video_lead", "compliance_reviewer", "admin"],
+  publishing: ["publisher", "compliance_reviewer", "admin"],
+  research: ["strategist", "analyst", "writer", "admin"],
+  setup: ACTIVE_ROUTE_ROLES,
+  "task-center": ACTIVE_ROUTE_ROLES,
+  "queue-center": ACTIVE_ROUTE_ROLES,
+  "job-monitor": ACTIVE_ROUTE_ROLES,
+  "notification-center": ACTIVE_ROUTE_ROLES,
+  governance: ["compliance_reviewer", "admin", "analyst"],
+  "ads-manager": ["ads_operator", "strategist", "analyst", "admin"],
+  insights: ["analyst", "strategist", "ads_operator", "admin"],
+  integrations: ["admin"],
+  workflows: ACTIVE_ROUTE_ROLES,
+  library: ["designer", "video_lead", "publisher", "admin"],
+  settings: ["admin"]
+};
+
+function persistCanonicalControlKey(key) {
+  const normalized = String(key || "").trim();
+  if (!normalized) return;
+
+  try {
+    window.localStorage?.setItem(CONTROL_ACCESS_KEY_STORAGE_KEY, normalized);
+  } catch (_) {}
+}
+
+function setRuntimeControlKey(key) {
+  const normalized = String(key || "").trim();
+  try {
+    window.__MH_CONTROL_CENTER_READ_KEY__ = normalized;
+    window.__MH_CONTROL_CENTER_WRITE_KEY__ = normalized;
+    window.__MH_CONTROL_WRITE_KEY__ = normalized;
+    window.__MH_CONTROL_CENTER_ACCESS_KEY__ = normalized;
+    window.__MH_CONTROL_ACCESS_KEY__ = normalized;
+    window.__MH_ACCESS_KEY__ = normalized;
+  } catch (_) {}
+}
+
+function getControlWriteKey() {
+  if (typeof window === "undefined") return "";
+
+  const runtimeValue = [
+    window.__MH_CONTROL_CENTER_READ_KEY__,
+    window.__MH_CONTROL_CENTER_WRITE_KEY__,
+    window.__MH_CONTROL_WRITE_KEY__,
+    window.__MH_CONTROL_CENTER_ACCESS_KEY__,
+    window.__MH_CONTROL_ACCESS_KEY__,
+    window.__MH_ACCESS_KEY__
+  ].find((value) => typeof value === "string" && value.trim()) || "";
+
+  if (runtimeValue) {
+    const normalizedRuntimeKey = runtimeValue.trim();
+    persistCanonicalControlKey(normalizedRuntimeKey);
+    return normalizedRuntimeKey;
+  }
+
+  try {
+    const canonical = String(window.localStorage?.getItem(CONTROL_ACCESS_KEY_STORAGE_KEY) || "").trim();
+    if (canonical) {
+      return canonical;
+    }
+
+    const legacy = CONTROL_ACCESS_KEY_LEGACY_STORAGE_KEYS
+      .map((key) => String(window.localStorage?.getItem(key) || "").trim())
+      .find(Boolean) || "";
+
+    if (legacy) {
+      persistCanonicalControlKey(legacy);
+    }
+
+    return legacy;
+  } catch (_) {
+    return "";
+  }
+}
+
+function getActiveRole() {
+  try {
+    const stored = window.localStorage?.getItem(CONTROL_ROLE_STORAGE_KEY);
+    if (stored && ACTIVE_ROUTE_ROLES.includes(stored.trim().toLowerCase())) {
+      return stored.trim().toLowerCase();
+    }
+  } catch (_) {}
+  const operations = getState().data.operations;
+  const stateRole = operations?.team_service_model?.active_role;
+  if (stateRole && typeof stateRole === "string" && stateRole.trim()) {
+    return stateRole.trim().toLowerCase();
+  }
+  return DEFAULT_ACTIVE_ROLE;
+}
+
+function isProtectedControlWriteRequest(input, init = {}) {
+  const method = String(
+    init.method ||
+    (input instanceof Request ? input.method : "") ||
+    "GET"
+  ).trim().toUpperCase();
+
+  if (!["POST", "PATCH", "DELETE"].includes(method)) {
+    return false;
+  }
+
+  try {
+    const base = typeof window !== "undefined" ? window.location.origin : "http://localhost";
+    const url = new URL(
+      input instanceof Request ? input.url : String(input || ""),
+      base
+    );
+
+    return /^\/(?:public\/)?media-manager\//.test(url.pathname);
+  } catch (_) {
+    return false;
+  }
+}
+
+function installProtectedWriteFetch() {
+  if (typeof window === "undefined" || typeof window.fetch !== "function" || window.fetch.__mhProtectedWriteFetch) {
+    return;
+  }
+
+  const originalFetch = window.fetch.bind(window);
+
+  async function protectedWriteFetch(input, init = {}) {
+    if (!isProtectedControlWriteRequest(input, init)) {
+      return originalFetch(input, init);
+    }
+
+    const headers = new Headers(
+      init.headers ||
+      (input instanceof Request ? input.headers : undefined) ||
+      {}
+    );
+    const controlKey = getControlWriteKey();
+
+    if (controlKey) {
+      headers.set(CONTROL_WRITE_HEADER, controlKey);
+      headers.set("Authorization", `Bearer ${controlKey}`);
+    }
+
+    const nextInit = {
+      ...init,
+      headers
+    };
+    const nextInput = input instanceof Request
+      ? new Request(input, { headers })
+      : input;
+
+    return originalFetch(nextInput, nextInit);
+  }
+
+  protectedWriteFetch.__mhProtectedWriteFetch = true;
+  window.fetch = protectedWriteFetch;
+}
+
+function resolveRouteAccess(route) {
+  const operations = getState().data.operations;
+  const routePermissions = Array.isArray(operations?.team_service_model?.route_permissions)
+    ? operations.team_service_model.route_permissions
+    : [];
+  const activeRole = getActiveRole();
+
+  function buildBlockedReason(allowedRoles) {
+    const rolesStr = allowedRoles.join(", ");
+    return (
+      `Route "${route}" requires one of: [${rolesStr}]. ` +
+      `Your current role is "${activeRole}". ` +
+      `Use the Role selector in the top bar to switch roles for internal testing.`
+    );
+  }
+
+  const explicitRule = routePermissions.find((item) => item?.route === route);
+
+  if (!explicitRule) {
+    const fallbackRoles = DEFAULT_ROUTE_ROLE_ACCESS[route];
+    if (!Array.isArray(fallbackRoles)) {
+      return { allowed: true, reason: "" };
+    }
+    const allowed = fallbackRoles.includes(activeRole);
+    return {
+      allowed,
+      reason: allowed ? "" : buildBlockedReason(fallbackRoles)
+    };
+  }
+
+  const allowedRoles = Array.isArray(explicitRule.roles)
+    ? explicitRule.roles.map((item) => String(item || "").trim().toLowerCase())
+    : [];
+  const allowed = allowedRoles.includes(activeRole);
+
+  return {
+    allowed,

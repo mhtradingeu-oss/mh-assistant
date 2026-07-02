@@ -1,0 +1,546 @@
+  fetchProjectInsights,
+  fetchProjectLearning,
+  runProjectWorkflow,
+  runProjectAiWorkflow,
+  createProjectTask,
+  createProjectHandoff,
+  render
+}) {
+  if (workflowAutomationEnabled) {
+    createAutoModeController(getState, { getState, navigateTo, createProjectHandoff });
+    if (workflowAutoModeUnsubscribe) workflowAutoModeUnsubscribe();
+    workflowAutoModeUnsubscribe = subscribeAutoMode(() => {
+      render();
+    });
+  }
+
+  const state = getState();
+  const projectName = state.context.currentProject || "";
+  const session = ensureSession(projectName, createDefaultInputs(state), state.data.operations);
+  const workflow = getWorkflowDef(session.selectedWorkflowId);
+  const inputs = asObject(session.inputsByWorkflow[workflow.id]);
+  const run = session.runsByWorkflow[workflow.id];
+  const contextModel = buildWorkflowContext(state, session);
+  const aiDraft = asObject(getSharedAiDraft(projectName, state.data.operations));
+  const hasDirectAiState = Boolean(aiDraft.lastCommand || aiDraft.lastResponseTitle || aiDraft.modeId);
+
+  function setValidation(message) {
+    session.validationMessage = message || "";
+    const box = $("wfexecValidation");
+    if (!box) return;
+    box.textContent = session.validationMessage;
+    box.classList.toggle("is-visible", Boolean(session.validationMessage));
+  }
+
+  function syncInputField(field, value) {
+    session.inputsByWorkflow[session.selectedWorkflowId][field] = value;
+    persistWorkflowDraft(projectName, session, session.selectedWorkflowId, "Draft auto-saved", true);
+  }
+
+  Array.from(document.querySelectorAll("[data-wf-input]")).forEach((input) => {
+    input.oninput = () => {
+      const field = input.getAttribute("data-wf-input") || "";
+      if (!field) return;
+      syncInputField(field, input.value || "");
+      if (session.validationMessage) setValidation("");
+    };
+  });
+
+  const workflowTypeSelect = $("wfexecWorkflowType");
+  if (workflowTypeSelect) {
+    workflowTypeSelect.onchange = () => {
+      session.selectedWorkflowId = workflowTypeSelect.value || session.selectedWorkflowId;
+      persistWorkflowDraft(projectName, session, session.selectedWorkflowId, "Workflow switched", true);
+      session.validationMessage = "";
+      render();
+    };
+  }
+
+  const saveDraftBtn = $("wfexecSaveDraftBtn");
+  if (saveDraftBtn) {
+    saveDraftBtn.onclick = () => {
+      persistWorkflowDraft(projectName, session, session.selectedWorkflowId, "Draft saved", true);
+      showMessage?.("Workflow draft saved.");
+      render();
+    };
+  }
+
+  const clearDraftBtn = $("wfexecClearDraftBtn");
+  if (clearDraftBtn) {
+    clearDraftBtn.onclick = () => {
+      const defaults = createDefaultInputs(getState());
+      session.inputsByWorkflow[session.selectedWorkflowId] = { ...defaults };
+      persistWorkflowDraft(projectName, session, session.selectedWorkflowId, "Draft cleared", true);
+      session.validationMessage = "";
+      showMessage?.("Workflow draft cleared.");
+      render();
+    };
+  }
+
+  const loadAiStateBtn = $("wfexecLoadAiStateBtn");
+  if (loadAiStateBtn) {
+    loadAiStateBtn.onclick = () => {
+      const draft = asObject(getSharedAiDraft(projectName, getState().data.operations));
+      if (!Object.keys(draft).length) {
+        const safePrompt = `Create a workflow for ${projectName || "this project"} focused on ${inputs.goal || "operational improvement"}.`;
+        setSharedHandoff(projectName, "workflows", {
+          source_page: "workflows",
+          destination_page: "workflows",
+          payload: {
+            prompt: safePrompt,
+            draft_context: {
+              projectName,
+              modeId: workflow.aiModeId,
+              lastCommand: safePrompt,
+              lastResponseTitle: "Workflow seed"
+            }
+          },
+          status: "available"
+        });
+        session.inputsByWorkflow[session.selectedWorkflowId].goal = firstNonEmpty(inputs.goal, "Execution loop optimization");
+        persistWorkflowDraft(projectName, session, session.selectedWorkflowId, "Local handoff seed created", true);
+        showMessage?.("No AI state found. Local workflow seed created safely.");
+        render();
+        return;
+      }
+
+      session.inputsByWorkflow[session.selectedWorkflowId] = {
+        ...session.inputsByWorkflow[session.selectedWorkflowId],
+        project: firstNonEmpty(draft.projectName, session.inputsByWorkflow[session.selectedWorkflowId].project),
+        goal: firstNonEmpty(draft.lastResponseTitle, session.inputsByWorkflow[session.selectedWorkflowId].goal),
+        campaign: firstNonEmpty(session.inputsByWorkflow[session.selectedWorkflowId].campaign, state.context.activeCampaign),
+        product: firstNonEmpty(session.inputsByWorkflow[session.selectedWorkflowId].product, state.context.currentProject),
+        channel: firstNonEmpty(session.inputsByWorkflow[session.selectedWorkflowId].channel, "multi-channel")
+      };
+      persistWorkflowDraft(projectName, session, session.selectedWorkflowId, "AI state loaded", true);
+      showMessage?.("AI Command state loaded into workflow inputs.");
+      render();
+    };
+  }
+
+  async function runWorkflow(workflowId) {
+    const activeWorkflow = getWorkflowDef(workflowId || session.selectedWorkflowId);
+    session.selectedWorkflowId = activeWorkflow.id;
+
+    const activeInputs = asObject(session.inputsByWorkflow[activeWorkflow.id]);
+    const validationMessage = validateWorkflowInputs(activeWorkflow, activeInputs);
+    if (validationMessage) {
+      setValidation(validationMessage);
+      const firstMissing = activeWorkflow.requiredInputs.find((field) => !asString(activeInputs[field]).trim());
+      const target = $(`wfexecInput${titleCase(firstMissing)}`);
+      if (target) target.focus();
+      return;
+    }
+
+    if (!projectName) {
+      setValidation("Select a project before running a workflow.");
+      return;
+    }
+
+    setValidation("");
+    const activeRun = session.runsByWorkflow[activeWorkflow.id];
+    activeRun.status = "running";
+    activeRun.source = "manual-run";
+    render();
+
+    try {
+      await ensureWorkflowIntelligenceLoaded({
+        projectName,
+        session,
+        getState,
+        reloadProjectData,
+        fetchProjectInsights,
+        fetchProjectLearning,
+        rerender: render
+      });
+
+      const freshContext = buildWorkflowContext(getState(), session);
+      const createdAt = nowIso();
+      const result = await (runProjectAiWorkflow || runProjectWorkflow)?.(projectName, activeWorkflow.id, {
+        title: activeWorkflow.title,
+        status: "completed",
+        source: "manual-run",
+        inputs: activeInputs,
+        prompt: buildWorkflowPrompt(activeWorkflow, activeInputs, freshContext),
+        route_target: activeWorkflow.routeHint,
+        intelligence_stamp: {
+          refreshed_at: createdAt,
+          source: "workflow-manual-run"
+        }
+      });
+
+      const output = asObject(result?.output || result?.run?.output);
+      const safeOutput = Object.keys(output).length
+        ? output
+        : buildFallbackOutput(activeWorkflow, activeInputs, freshContext);
+
+      activeRun.status = "completed";
+      activeRun.lastRunAt = asString(result?.run?.created_at) || createdAt;
+      activeRun.runId = asString(result?.run?.id);
+      activeRun.output = safeOutput;
+      activeRun.blockedRequirements = asArray(safeOutput.blockedRequirements || safeOutput.blocked_requirements);
+      activeRun.history.unshift({ createdAt: activeRun.lastRunAt, source: "manual-run", output: safeOutput });
+      activeRun.history = activeRun.history.slice(0, 8);
+
+      setSharedHandoff(projectName, "workflows", {
+        source_page: "workflows",
+        destination_page: "workflows",
+        payload: {
+          workflow_id: activeWorkflow.id,
+          run_id: activeRun.runId,
+          output: safeOutput,
+          inputs: activeInputs,
+          createdAt: activeRun.lastRunAt
+        },
+        status: "available"
+      });
+
+      await reloadProjectData?.(projectName);
+      showMessage?.(`${activeWorkflow.title} completed.`);
+    } catch (error) {
+      activeRun.status = "failed";
+      activeRun.output = {
+        title: `${activeWorkflow.title} failed`,
+        summary: error.message || "Workflow execution failed.",
+        blockedRequirements: ["Execution failed. Review inputs and retry."],
+        nextActions: ["Retry workflow", "Validate project integrations", "Check workflow dependencies"]
+      };
+      activeRun.blockedRequirements = asArray(activeRun.output.blockedRequirements);
+      showError?.(error.message || "Workflow execution failed.");
+    }
+
+    render();
+  }
+
+  const runBtn = $("workflowRunBtn");
+  if (runBtn) runBtn.onclick = () => runWorkflow(session.selectedWorkflowId);
+  const runBtnMain = $("workflowRunBtnMain");
+  if (runBtnMain) runBtnMain.onclick = () => runWorkflow(session.selectedWorkflowId);
+
+  const startRecommendedBtn = $("wfexecStartRecommendedBtn");
+  if (startRecommendedBtn) {
+    startRecommendedBtn.onclick = () => {
+      const rec = buildSmartRecommendation(contextModel, session, getGlobalNextBestAction(getState()));
+      runWorkflow(rec.workflowId);
+    };
+  }
+
+  const saveRecommendedBtn = $("wfexecSaveRecommendedBtn");
+  if (saveRecommendedBtn) {
+    saveRecommendedBtn.onclick = () => {
+      const rec = buildSmartRecommendation(contextModel, session, getGlobalNextBestAction(getState()));
+      session.selectedWorkflowId = rec.workflowId;
+      session.inputsByWorkflow[rec.workflowId].goal = firstNonEmpty(session.inputsByWorkflow[rec.workflowId].goal, rec.title);
+      persistWorkflowDraft(projectName, session, rec.workflowId, "Recommendation saved as draft", true);
+      showMessage?.("Recommended workflow saved as draft.");
+      render();
+    };
+  }
+
+  const sendRecommendedAiBtn = $("wfexecSendRecommendedAiBtn");
+  if (sendRecommendedAiBtn) {
+    sendRecommendedAiBtn.onclick = () => {
+      const rec = buildSmartRecommendation(contextModel, session, getGlobalNextBestAction(getState()));
+      const recWorkflow = getWorkflowDef(rec.workflowId);
+      session.selectedWorkflowId = recWorkflow.id;
+      pushWorkflowToAiCommand({
+        projectName,
+        workflow: recWorkflow,
+        inputs: asObject(session.inputsByWorkflow[recWorkflow.id]),
+        run: session.runsByWorkflow[recWorkflow.id],
+        context: contextModel,
+        navigateTo,
+        createProjectHandoff,
+        showMessage,
+        allowPersistent: hasDirectAiState
+      });
+    };
+  }
+
+  Array.from(document.querySelectorAll("[data-wf-catalog-run]")).forEach((button) => {
+    button.onclick = () => runWorkflow(button.getAttribute("data-wf-catalog-run") || session.selectedWorkflowId);
+  });
+
+  Array.from(document.querySelectorAll("[data-wf-catalog-save]")).forEach((button) => {
+    button.onclick = () => {
+      const workflowId = button.getAttribute("data-wf-catalog-save") || session.selectedWorkflowId;
+      session.selectedWorkflowId = workflowId;
+      persistWorkflowDraft(projectName, session, workflowId, "Draft saved", true);
+      showMessage?.("Workflow draft saved.");
+      render();
+    };
+  });
+
+  Array.from(document.querySelectorAll("[data-wf-catalog-ai]")).forEach((button) => {
+    button.onclick = () => {
+      const workflowId = button.getAttribute("data-wf-catalog-ai") || session.selectedWorkflowId;
+      const wf = getWorkflowDef(workflowId);
+      session.selectedWorkflowId = workflowId;
+      pushWorkflowToAiCommand({
+        projectName,
+        workflow: wf,
+        inputs: asObject(session.inputsByWorkflow[workflowId]),
+        run: session.runsByWorkflow[workflowId],
+        context: contextModel,
+        navigateTo,
+        createProjectHandoff,
+        showMessage,
+        allowPersistent: hasDirectAiState
+      });
+    };
+  });
+
+  const pushAiBtn = $("workflowPushAiBtn");
+  if (pushAiBtn) {
+    pushAiBtn.onclick = () => {
+      pushWorkflowToAiCommand({
+        projectName,
+        workflow,
+        inputs,
+        run,
+        context: contextModel,
+        navigateTo,
+        createProjectHandoff,
+        showMessage,
+        allowPersistent: hasDirectAiState
+      });
+    };
+  }
+
+  const pushAiSecondaryBtn = $("workflowPushAiBtnSecondary");
+  if (pushAiSecondaryBtn) pushAiSecondaryBtn.onclick = pushAiBtn?.onclick || null;
+
+  const saveTaskBtn = $("workflowSaveTaskBtn");
+  if (saveTaskBtn) {
+    saveTaskBtn.onclick = async () => {
+      if (!run.output) {
+        showError?.("Run the workflow before saving a task.");
+        return;
+      }
+      try {
+        await createProjectTask?.(projectName, {
+          title: `${workflow.title} • ${inputs.campaign || inputs.project || projectName || "Project"}`,
+          description: asString(run.output.summary),
+          workflow_id: workflow.id,
+          source_type: "workflow_run",
+          source_id: run.runId || run.lastRunAt || "",
+          owner_role: "admin",
+          assignee_role: "admin",
+          service_domain: workflow.id === "generate-report" || workflow.id === "research-competitors" ? "research" : "campaign",
+          route_target: "workflows",
+          output: asObject(run.output),
+          notes: asArray(run.output.nextActions || [])
+        });
+        await reloadProjectData?.(projectName);
+        showMessage?.("Structured workflow task saved.");
+      } catch (error) {
+        showError?.(error.message || "Failed to save workflow task.");
+      }
+    };
+  }
+
+  const recommendBtn = $("workflowRecommendBtn");
+  if (recommendBtn) {
+    recommendBtn.onclick = () => {
+      const rec = buildSmartRecommendation(contextModel, session, getGlobalNextBestAction(getState()));
+      const prompt = [
+        "Recommend the best workflow to run next.",
+        `Project: ${projectName || "not set"}`,
+        `Current recommendation: ${rec.title}`,
+        `Reason: ${rec.reason}`,
+        `Missing integrations: ${contextModel.missingIntegrations.join(", ") || "none"}`,
+        `Missing assets: ${contextModel.missingAssets.join(", ") || "none"}`
+      ].join("\n");
+      setSharedAiDraft(projectName, {
+        projectName,
+        modeId: "operations",
+        lastCommand: prompt,
+        lastResponseTitle: "Workflow recommendation"
+      });
+      setSharedHandoff(projectName, "ai-command", {
+        source_page: "workflows",
+        destination_page: "ai-command",
+        payload: {
+          prompt,
+          draft_context: {
+            projectName,
+            modeId: "operations",
+            lastCommand: prompt,
+            lastResponseTitle: "Workflow recommendation"
+          }
+        },
+        status: "available"
+      });
+      navigateTo("ai-command");
+    };
+  }
+
+  const customBtn = $("workflowBuildCustomBtn");
+  if (customBtn) {
+    customBtn.onclick = () => {
+      const prompt = [
+        "Build a custom workflow blueprint.",
+        `Project: ${inputs.project || projectName || "not set"}`,
+        `Campaign: ${inputs.campaign || "not set"}`,
+        `Product: ${inputs.product || "not set"}`,
+        `Channel: ${inputs.channel || "not set"}`,
+        `Goal: ${inputs.goal || "not set"}`,
+        "Return structured steps, blockers, route suggestions, and KPI checks."
+      ].join("\n");
+      setSharedAiDraft(projectName, {
+        projectName,
+        modeId: "operations",
+        lastCommand: prompt,
+        lastResponseTitle: "Custom workflow builder"
+      });
+      setSharedHandoff(projectName, "ai-command", {
+        source_page: "workflows",
+        destination_page: "ai-command",
+        payload: {
+          prompt,
+          draft_context: {
+            projectName,
+            modeId: "operations",
+            lastCommand: prompt,
+            lastResponseTitle: "Custom workflow builder"
+          }
+        },
+        status: "available"
+      });
+      navigateTo("ai-command");
+    };
+  }
+
+  const fullAutomationBtn = $("workflowRunFullAutomationBtn");
+  if (fullAutomationBtn) {
+    fullAutomationBtn.onclick = async () => {
+      const plan = buildAutomationPlan(getState());
+      if (!plan.length) {
+        workflowAutomationState.result = "No safe automation steps available.";
+        render();
+        return;
+      }
+      const confirmed = window.confirm(`Run ${plan.length} safe automation steps?`);
+      if (!confirmed) return;
+
+      workflowAutomationState.lastPlan = plan;
+      workflowAutomationState.cursor = 0;
+      workflowAutomationState.result = "";
+      const result = await runAutomationPlan(plan, {
+        context: { getState, navigateTo, createProjectHandoff, projectName },
+        onProgress: ({ index, total, step, result: stepResult }) => {
+          workflowAutomationState.progress = `Step ${index} / ${total}: ${step.action} (${stepResult.status})`;
+          render();
+        }
+      });
+      workflowAutomationState.lastResults = asArray(result.results);
+      workflowAutomationState.result = result.status === "success" ? "Automation run completed." : "Automation stopped before completion.";
+      showMessage?.(workflowAutomationState.result);
+      render();
+    };
+  }
+
+  const stepAutomationBtn = $("workflowRunStepAutomationBtn");
+  if (stepAutomationBtn) {
+    stepAutomationBtn.onclick = async () => {
+      const plan = buildAutomationPlan(getState());
+      if (!plan.length) {
+        workflowAutomationState.result = "No safe automation steps available.";
+        render();
+        return;
+      }
+
+      const confirmed = window.confirm("Run next safe automation step?");
+      if (!confirmed) return;
+
+      const nextIndex = Math.min(workflowAutomationState.cursor, plan.length - 1);
+      const singleStep = [plan[nextIndex]];
+      const stepResult = await runAutomationPlan(singleStep, {
+        context: { getState, navigateTo, createProjectHandoff, projectName },
+        onProgress: ({ index, total, step, result: runResult }) => {
+          workflowAutomationState.progress = `Step ${nextIndex + index} / ${plan.length}: ${step.action} (${runResult.status})`;
+        }
+      });
+
+      workflowAutomationState.cursor = Math.min(nextIndex + 1, plan.length);
+      workflowAutomationState.lastPlan = plan;
+      workflowAutomationState.lastResults = [...asArray(workflowAutomationState.lastResults), ...asArray(stepResult.results)];
+      workflowAutomationState.result = workflowAutomationState.cursor >= plan.length
+        ? "Step-by-step automation completed."
+        : "Step executed. Run again for next step.";
+      showMessage?.(workflowAutomationState.result);
+      render();
+    };
+  }
+
+  const autoStartBtn = $("workflowAutoStartBtn");
+  if (autoStartBtn) {
+    autoStartBtn.onclick = async () => {
+      const plan = buildAutomationPlan(getState());
+      workflowAutomationEnabled = true;
+      createAutoModeController(getState, { getState, navigateTo, createProjectHandoff });
+      if (workflowAutoModeUnsubscribe) workflowAutoModeUnsubscribe();
+      workflowAutoModeUnsubscribe = subscribeAutoMode(() => {
+        render();
+      });
+
+      await startAutoMode(plan, {
+        mode: "auto_until_approval",
+        context: { getState, navigateTo, createProjectHandoff, projectName }
+      });
+      showMessage?.("Workflow Auto Mode started.");
+    };
+  }
+
+  const autoPauseBtn = $("workflowAutoPauseBtn");
+  if (autoPauseBtn) {
+    autoPauseBtn.onclick = () => {
+      pauseAutoMode();
+      showMessage?.("Auto Mode paused.");
+    };
+  }
+
+  const autoResumeBtn = $("workflowAutoResumeBtn");
+  if (autoResumeBtn) {
+    autoResumeBtn.onclick = async () => {
+      await resumeAutoMode({ context: { getState, navigateTo, createProjectHandoff, projectName } });
+      showMessage?.("Auto Mode resumed.");
+    };
+  }
+
+  const autoStopBtn = $("workflowAutoStopBtn");
+  if (autoStopBtn) {
+    autoStopBtn.onclick = () => {
+      stopAutoMode();
+      showMessage?.("Auto Mode stopped.");
+    };
+  }
+
+  const autoApproveBtn = $("workflowAutoApproveBtn");
+  if (autoApproveBtn) {
+    autoApproveBtn.onclick = async () => {
+      await approveCurrentGate({ context: { getState, navigateTo, createProjectHandoff, projectName } });
+      showMessage?.("Approval gate accepted.");
+    };
+  }
+
+  const autoSkipBtn = $("workflowAutoSkipBtn");
+  if (autoSkipBtn) {
+    autoSkipBtn.onclick = async () => {
+      await skipCurrentStep({ context: { getState, navigateTo, createProjectHandoff, projectName } });
+      showMessage?.("Auto Mode skipped gated step.");
+    };
+  }
+}
+
+export const workflowsRoute = {
+  id: "workflows",
+  meta: {
+    eyebrow: "AI & Build",
+    title: "Workflows",
+    description: "Run structured, repeatable workflows for common marketing and execution operations."
+  },
+  template: `
+    <section class="page is-active" data-page="workflows">
+      <div id="workflowsRoot"></div>
+    </section>

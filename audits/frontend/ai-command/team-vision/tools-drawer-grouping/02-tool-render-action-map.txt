@@ -1,0 +1,87 @@
+public/control-center/pages/ai-command.js:1:import { bindAiToolDock, getAiToolDockTools } from "./ai-command/tool-dock.js";
+public/control-center/pages/ai-command.js:2633:function applyDurableAiHandoff(projectName, operations, session, consumeProjectHandoff, showMessage) {
+public/control-center/pages/ai-command.js:2686:	showMessage?.(`Inbound handoff loaded from ${normalized.sourceLabel}.`);
+public/control-center/pages/ai-command.js:3845:function canonicalToolNeedsSelectedSource(tool = {}) {
+public/control-center/pages/ai-command.js:3856:		requiresSelectedSource: canonicalToolNeedsSelectedSource(tool),
+public/control-center/pages/ai-command.js:3906:					<h3 class="aicmd-v2-tools-title">${escapeHtml(specialistLabel)} Canonical Tools</h3>
+public/control-center/pages/ai-command.js:3922:							data-aicmdv2-tool="${escapeHtml(tool.id)}"
+public/control-center/pages/ai-command.js:4129:function renderAiRoomOutputWorkspace(session, aiContext, escapeHtml) {
+public/control-center/pages/ai-command.js:4674:			showMessage,
+public/control-center/pages/ai-command.js:4735:		applyDurableAiHandoff(sessionKey, operations, session, consumeProjectHandoff, showMessage);
+public/control-center/pages/ai-command.js:4772:						${renderAiRoomOutputWorkspace(session, aiContext, escapeHtml)}
+public/control-center/pages/ai-command.js:4838:		                showMessage?.("AI chat session loaded.");
+public/control-center/pages/ai-command.js:4874:		                showMessage?.("New AI session started. Previous chat saved to Recent chats.");
+public/control-center/pages/ai-command.js:4882:				showMessage?.("Opening Settings.");
+public/control-center/pages/ai-command.js:5005:					showMessage?.("Voice input readiness is staged for compatible browsers.");
+public/control-center/pages/ai-command.js:5054:		                        showMessage?.("AI chat route is not connected yet.");
+public/control-center/pages/ai-command.js:5196:		                        showMessage?.("Specialist reply generated.");
+public/control-center/pages/ai-command.js:5231:                                showMessage?.(`${specLabel} guidance preview prepared from conversation.`);
+public/control-center/pages/ai-command.js:5255:                                showMessage?.("Task draft preview prepared from conversation.");
+public/control-center/pages/ai-command.js:5278:                                showMessage?.("Workflow draft preview prepared from conversation.");
+public/control-center/pages/ai-command.js:5302:                                showMessage?.("Handoff preview prepared from conversation.");
+public/control-center/pages/ai-command.js:5306:		const toolButtons = Array.from(document.querySelectorAll("[data-aicmdv2-tool]"));
+public/control-center/pages/ai-command.js:5309:				const toolId = asString(btn.getAttribute("data-aicmdv2-tool") || "").trim();
+public/control-center/pages/ai-command.js:5317:					showMessage?.(`Opening ${routeLabel(destination)}.`);
+public/control-center/pages/ai-command.js:5323:				if (tool.requiresSelectedSource && !selectedLibrarySource?.name) {
+public/control-center/pages/ai-command.js:5324:					const message = "This tool needs a source. Choose from Library or change the source type before continuing.";
+public/control-center/pages/ai-command.js:5326:					showMessage?.(message);
+public/control-center/pages/ai-command.js:5348:				showMessage?.(`${tool.label} prepared as local preview.`);
+public/control-center/pages/ai-command.js:5359:				showMessage?.("Composer draft saved locally.");
+public/control-center/pages/ai-command.js:5375:				showMessage?.("Composer draft cleared.");
+public/control-center/pages/ai-command.js:5398:						showMessage?.("Response copied.");
+public/control-center/pages/ai-command.js:5432:				showMessage?.("Response saved locally.");
+public/control-center/pages/ai-command.js:5462:		                showMessage?.("Draft preview ready from conversation.");
+public/control-center/pages/ai-command.js:5497:				showMessage?.("Response draft context prepared. Review before saving or executing.");
+public/control-center/pages/ai-command.js:5532:						showMessage?.("Preview copied.");
+public/control-center/pages/ai-command.js:5592:				showMessage?.("Draft context prepared for routing. Review before saving or executing.");
+public/control-center/pages/ai-command.js:5608:				showMessage?.("Preview saved locally.");
+public/control-center/pages/ai-command.js:5636:				showMessage?.("Preview cleared.");
+public/control-center/pages/ai-command/tool-dock.js:55:    targetButton = root.querySelector(`[data-aicmd-tool-dock="${returnContext.toolId}"]`);
+public/control-center/pages/ai-command/tool-dock.js:59:    targetButton = root.querySelector("[data-aicmd-tool-dock][data-aicmd-tool-dock-action='guided']")
+public/control-center/pages/ai-command/tool-dock.js:60:      || root.querySelector("[data-aicmd-tool-dock]");
+public/control-center/pages/ai-command/tool-dock.js:72:  const selectedSource = getSharedAiSource(projectName) || getSharedAiSource("__default__");
+public/control-center/pages/ai-command/tool-dock.js:75:    msg.textContent = selectedSource?.name
+public/control-center/pages/ai-command/tool-dock.js:225:    "This tool needs a source. Choose from Library or change the source type before continuing."
+public/control-center/pages/ai-command/tool-dock.js:1288:    <section class="mhos-tool-dock aicmd-tool-dock" aria-label="${safe(label)}">
+public/control-center/pages/ai-command/tool-dock.js:1289:      <div class="mhos-tool-dock-head">
+public/control-center/pages/ai-command/tool-dock.js:1290:        <span class="mhos-tool-dock-kicker">${safe(label)}</span>
+public/control-center/pages/ai-command/tool-dock.js:1291:        <span class="mhos-tool-dock-copy">Smart tools · review before action</span>
+public/control-center/pages/ai-command/tool-dock.js:1293:      <div class="mhos-tool-dock-list">
+public/control-center/pages/ai-command/tool-dock.js:1297:            class="mhos-tool-dock-item"
+public/control-center/pages/ai-command/tool-dock.js:1298:            data-aicmd-tool-dock="${safe(tool.id)}"
+public/control-center/pages/ai-command/tool-dock.js:1299:            data-aicmd-tool-dock-label="${safe(tool.label)}"
+public/control-center/pages/ai-command/tool-dock.js:1300:            data-aicmd-tool-dock-icon="${safe(tool.icon)}"
+public/control-center/pages/ai-command/tool-dock.js:1301:            data-aicmd-tool-dock-badge="${safe(tool.badge)}"
+public/control-center/pages/ai-command/tool-dock.js:1302:            data-aicmd-tool-dock-action="${safe(tool.actionType || "guided")}"
+public/control-center/pages/ai-command/tool-dock.js:1303:            data-aicmd-tool-dock-safety="${safe(tool.safetyLevel || "review_only")}"
+public/control-center/pages/ai-command/tool-dock.js:1304:            data-aicmd-tool-dock-owner="${safe(tool.frontendOwnerPage || "ai-command")}"
+public/control-center/pages/ai-command/tool-dock.js:1305:            data-aicmd-tool-dock-destinations="${safe(joinMetaList(getToolMetaList(tool, "destinations", ["chat-preview"])))}"
+public/control-center/pages/ai-command/tool-dock.js:1306:            data-aicmd-tool-dock-sources="${safe(joinMetaList(getToolMetaList(tool, "sourceTypes", ["current_chat"])))}"
+public/control-center/pages/ai-command/tool-dock.js:1307:            data-aicmd-tool-dock-outputs="${safe(joinMetaList(getToolMetaList(tool, "outputTypes", [tool.id || "tool_output"])))}"
+public/control-center/pages/ai-command/tool-dock.js:1308:            data-aicmd-tool-dock-template="${safe(tool.template)}"
+public/control-center/pages/ai-command/tool-dock.js:1311:            <span class="mhos-tool-dock-icon" aria-hidden="true">${safe(tool.icon)}</span>
+public/control-center/pages/ai-command/tool-dock.js:1312:            <span class="mhos-tool-dock-label">${safe(tool.label)}</span>
+public/control-center/pages/ai-command/tool-dock.js:1313:            <span class="mhos-tool-dock-badge">${safe(tool.badge)}</span>
+public/control-center/pages/ai-command/tool-dock.js:1428:  const selectedSourceContext = buildSelectedSourceContextBlock(projectName);
+public/control-center/pages/ai-command/tool-dock.js:1446:  if (selectedSourceContext) {
+public/control-center/pages/ai-command/tool-dock.js:1447:    lines.push("", selectedSourceContext);
+public/control-center/pages/ai-command/tool-dock.js:1529:  drawer.dataset.pendingTool = btn.getAttribute("data-aicmd-tool-dock") || "tool";
+public/control-center/pages/ai-command/tool-dock.js:1530:  const actionType = btn.getAttribute("data-aicmd-tool-dock-action") || "guided";
+public/control-center/pages/ai-command/tool-dock.js:1535:  setDrawerText(drawer, "[data-aicmd-tool-drawer-icon]", btn.getAttribute("data-aicmd-tool-dock-icon") || "✦");
+public/control-center/pages/ai-command/tool-dock.js:1536:  setDrawerText(drawer, "[data-aicmd-tool-drawer-title]", btn.getAttribute("data-aicmd-tool-dock-label") || "Smart tool");
+public/control-center/pages/ai-command/tool-dock.js:1537:  setDrawerText(drawer, "[data-aicmd-tool-drawer-action]", `${humanizeMeta(actionType)} · ${humanizeMeta(btn.getAttribute("data-aicmd-tool-dock-owner") || "ai-command")}`);
+public/control-center/pages/ai-command/tool-dock.js:1541:    `Prepare ${btn.getAttribute("data-aicmd-tool-dock-label") || "this tool"} for the active project. Choose the output, source, destination, language, and tone before using it in the composer.`
+public/control-center/pages/ai-command/tool-dock.js:1543:  setDrawerText(drawer, "[data-aicmd-tool-drawer-safety]", humanizeMeta(btn.getAttribute("data-aicmd-tool-dock-safety") || "review_only"));
+public/control-center/pages/ai-command/tool-dock.js:1545:  const rawOutputs = btn.getAttribute("data-aicmd-tool-dock-outputs") || "";
+public/control-center/pages/ai-command/tool-dock.js:1546:  const rawSources = btn.getAttribute("data-aicmd-tool-dock-sources") || "";
+public/control-center/pages/ai-command/tool-dock.js:1547:  const rawDestinations = btn.getAttribute("data-aicmd-tool-dock-destinations") || "";
+public/control-center/pages/ai-command/tool-dock.js:1572:  updateStatus?.(`${btn.getAttribute("data-aicmd-tool-dock-label") || "Tool"} setup opened. Review requirements, then use in composer.`);
+public/control-center/pages/ai-command/tool-dock.js:1601:      const selectedSourceType = drawerSourceSelect?.value || "auto";
+public/control-center/pages/ai-command/tool-dock.js:1602:      const mapping = getSourceTypeMapping(selectedSourceType);
+public/control-center/pages/ai-command/tool-dock.js:1607:        sourceType: selectedSourceType,
+public/control-center/pages/ai-command/tool-dock.js:1623:        sourceType: selectedSourceType,
+public/control-center/pages/ai-command/tool-dock.js:1647:        updateStatus?.("This tool needs a source. Choose from Library or change the source type before continuing.");
+public/control-center/pages/ai-command/tool-dock.js:1678:  Array.from(root.querySelectorAll("[data-aicmd-tool-dock]")).forEach((btn) => {
+public/control-center/pages/ai-command/tool-dock.js:1680:      const template = btn.getAttribute("data-aicmd-tool-dock-template") || "";
+public/control-center/pages/ai-command/tool-dock.js:1681:      const label = btn.getAttribute("data-aicmd-tool-dock") || "tool";
+public/control-center/pages/ai-command/tool-dock.js:1682:      const actionType = btn.getAttribute("data-aicmd-tool-dock-action") || "prefill";

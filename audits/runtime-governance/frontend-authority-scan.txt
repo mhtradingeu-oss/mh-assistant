@@ -1,0 +1,86 @@
+public/control-center/app.js:77:const CONTROL_ROLE_STORAGE_KEY = "mh-control-role";
+public/control-center/app.js:103:  governance: ["compliance_reviewer", "admin", "analyst"],
+public/control-center/app.js:179:  const stateRole = operations?.team_service_model?.active_role;
+public/control-center/app.js:251:  const routePermissions = Array.isArray(operations?.team_service_model?.route_permissions)
+public/control-center/app.js:252:    ? operations.team_service_model.route_permissions
+public/control-center/app.js:257:    const rolesStr = allowedRoles.join(", ");
+public/control-center/app.js:259:      `Route "${route}" requires one of: [${rolesStr}]. ` +
+public/control-center/app.js:260:      `Your current role is "${activeRole}". ` +
+public/control-center/app.js:261:      `Use the Role selector in the top bar to switch roles for internal testing.`
+public/control-center/app.js:279:  const allowedRoles = Array.isArray(explicitRule.roles)
+public/control-center/app.js:280:    ? explicitRule.roles.map((item) => String(item || "").trim().toLowerCase())
+public/control-center/app.js:301:  modal.setAttribute("role", "dialog");
+public/control-center/app.js:722:function formatRoleLabel(role) {
+public/control-center/app.js:723:  const normalized = String(role || "").trim().toLowerCase();
+public/control-center/app.js:1945:  const roleBadge = $("mobileRoleBadge");
+public/control-center/app.js:1946:  if (roleBadge) {
+public/control-center/app.js:1947:    roleBadge.textContent = formatRoleLabel(getActiveRole());
+public/control-center/app.js:3773:  modal.setAttribute("role", "dialog");
+public/control-center/app.js:3784:            Start with a project, campaign, content, media, publishing, approval, or a custom AI workflow.
+public/control-center/app.js:3878:        <button class="executive-new-option" type="button" data-new-route="governance" data-new-prompt="Create an approval request. Ask what needs approval, risk level, reviewer, and decision deadline.">
+public/control-center/app.js:3881:          <span>Governance, claim review, release approval.</span>
+public/control-center/router.js:23:import { governanceRoute } from "./pages/governance.js";
+public/control-center/router.js:50:  governance: ["compliance_reviewer", "admin", "analyst"],
+public/control-center/router.js:78:  [governanceRoute.id]: governanceRoute
+public/control-center/router.js:116:  const detail = reason || `Route "${route}" is not available for the current role.`;
+public/control-center/router.js:122:      description: "This workspace route is blocked by role access rules."
+public/control-center/router.js:133:                To access this page, use the <strong>Role</strong> selector in the top bar and switch to a permitted role.
+public/control-center/router.js:177:        `Default role is "${DEFAULT_ROLE}". Use the Role selector in the top bar to switch.`
+public/control-center/pages/ai-command.js:68:		summary: "Tasks, timelines, handoffs, approvals, and execution plans.",
+public/control-center/pages/ai-command.js:172:		purpose: "Translate intent into executable workflows and handoffs.",
+public/control-center/pages/ai-command.js:214:	if (/publish\s*now|send\s*external|paid\s*ads|final\s*approval/i.test(command)) {
+public/control-center/pages/ai-command.js:222:				reason: "Requires approval gate before external publishing actions."
+public/control-center/pages/ai-command.js:574:		operations: ["task plan", "workflow", "handoff", "approval", "timeline", "execution plan", "route", "publish", "status", "priority", "priorities", "blocking", "blocker", "readiness", "next", "do next"]
+public/control-center/pages/ai-command.js:687:			routeSuggestion("Publishing", "publishing", "Schedule the next batch with stronger timing and approval control."),
+public/control-center/pages/ai-command.js:947:	const handoff = getSharedHandoff(projectName, "ai-command", operations);
+public/control-center/pages/ai-command.js:948:	const handoffId = asString(handoff?.id);
+public/control-center/pages/ai-command.js:949:	if (!handoffId || handoffId === asString(session.lastAppliedHandoffId)) return;
+public/control-center/pages/ai-command.js:951:	const payload = asObject(handoff?.payload);
+public/control-center/pages/ai-command.js:967:	session.lastAppliedHandoffId = handoffId;
+public/control-center/pages/ai-command.js:968:	consumeProjectHandoff?.(projectName, handoffId, { actor: "mh-assistant" }).catch((error) => {
+public/control-center/pages/ai-command.js:969:		console.warn("Failed to consume AI handoff:", error.message);
+public/control-center/pages/ai-command.js:1033:		role: "user",
+public/control-center/pages/ai-command.js:1042:		role: "assistant",
+public/control-center/pages/ai-command.js:1375:		if (message.role === "user") {
+public/control-center/pages/ai-command.js:1466:		.filter((msg) => msg.role === "assistant" && asString(msg.response?.outputType || msg.response?.output_type))
+public/control-center/pages/ai-command.js:1529:	return asArray(session.messages).slice().reverse().find((item) => item.role === "user") || null;
+public/control-center/pages/ai-command.js:1533:	return asArray(session.messages).slice().reverse().find((item) => item.role === "assistant") || null;
+public/control-center/pages/workflows.js:43:    purpose: "Prepare media production inputs, format guidance, and downstream handoff steps.",
+public/control-center/pages/workflows.js:51:    purpose: "Package final channel payloads, approval checks, and publishing queue dependencies.",
+public/control-center/pages/workflows.js:519:      `Open ${titleCase(workflow.routeHint)} for execution handoff.`,
+public/control-center/pages/workflows.js:520:      blockedRequirements.length ? "Resolve blockers before live execution." : "Proceed to execution handoff."
+public/control-center/pages/workflows.js:578:      prompt: "Prepare a publishing package checklist with missing assets and approval dependencies."
+public/control-center/pages/workflows.js:650:  const gate = asObject(autoMode?.approvalRequiredStep);
+public/control-center/pages/workflows.js:656:        Safe execution only: navigate, create draft, generate prompt, and create handoff.
+public/control-center/pages/workflows.js:706:        Hands-free safe execution with approval gates and inline logs.
+public/control-center/pages/workflows.js:735:        autoMode?.status === "waiting_approval"
+public/control-center/pages/workflows.js:738:              <strong>Approval needed:</strong> ${esc(gate.reason || "Manual approval required.")}
+public/control-center/pages/workflows.js:919:  const handoff = getSharedHandoff(projectName, "workflows", operations);
+public/control-center/pages/workflows.js:920:  const handoffId = asString(handoff?.id);
+public/control-center/pages/workflows.js:921:  if (!handoffId || handoffId === asString(session.lastAppliedHandoffId)) return;
+public/control-center/pages/workflows.js:923:  const payload = asObject(handoff?.payload);
+public/control-center/pages/workflows.js:944:    run.source = "handoff";
+public/control-center/pages/workflows.js:949:  session.lastAppliedHandoffId = handoffId;
+public/control-center/pages/workflows.js:950:  consumeProjectHandoff?.(projectName, handoffId, { actor: "mh-assistant" }).catch((error) => {
+public/control-center/pages/workflows.js:951:    console.warn("Failed to consume workflow handoff:", error.message);
+public/control-center/pages/workflows.js:953:  showMessage?.("Workflow context restored from shared handoff.");
+public/control-center/pages/workflows.js:1070:  const handoff = {
+public/control-center/pages/workflows.js:1083:  setSharedHandoff(projectName, "ai-command", handoff);
+public/control-center/pages/workflows.js:1086:    createProjectHandoff(projectName, handoff).catch((error) => {
+public/control-center/pages/workflows.js:1087:      console.warn("Failed to persist workflow-to-ai handoff:", error.message);
+public/control-center/pages/workflows.js:1300:        persistWorkflowDraft(projectName, session, session.selectedWorkflowId, "Local handoff seed created", true);
+public/control-center/pages/workflows.js:1526:          owner_role: "admin",
+public/control-center/pages/workflows.js:1527:          assignee_role: "admin",
+public/control-center/pages/workflows.js:1687:        mode: "auto_until_approval",
+public/control-center/pages/workflows.js:1768:    const approvalsTotal = Number(operations.approvals?.total || 0);
+public/control-center/pages/workflows.js:1869:              <strong>${escapeHtml(String(approvalsTotal))}</strong>
+public/control-center/pages/workflows.js:1897:              <strong>${escapeHtml(String(approvalsTotal))}</strong>
+public/control-center/shared-context.js:3:const handoffCache = new Map();
+public/control-center/shared-context.js:23:  const handoffs = asArray(operations?.handoffs?.items);
+public/control-center/shared-context.js:24:  const available = handoffs.filter((item) => {
+public/control-center/shared-context.js:61:  const handoff =
+public/control-center/shared-context.js:66:  return asObject(handoff?.payload?.draft_context);
+public/control-center/shared-context.js:69:export function setSharedHandoff(projectName, destinationPage, handoff) {
+public/control-center/shared-context.js:70:  if (!projectName || !destinationPage || !handoff) return;
+public/control-center/shared-context.js:71:  handoffCache.set(buildKey(projectName, destinationPage), handoff);
+public/control-center/shared-context.js:75:  const cached = handoffCache.get(buildKey(projectName, destinationPage));

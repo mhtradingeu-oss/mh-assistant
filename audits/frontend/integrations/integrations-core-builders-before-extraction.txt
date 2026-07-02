@@ -1,0 +1,366 @@
+  if (integration.id === "shopify") {
+    return "Connect with Shopify";
+  }
+  return "";
+}
+
+function getSmartConnectLabel(card) {
+  if (card.backendSupported === false) return "Open setup";
+  if (card.statusLabel === "Connected") return "Manage Connection";
+  if (card.statusLabel === "Partial") return "Complete Setup";
+  if (card.statusLabel === "Token expired") return "Reconnect Now";
+  if (card.statusLabel === "Error") return "Fix Connection";
+  return getQuickConnectLabel(card) || (card.id === "website" ? "Connect Website" : `Connect ${card.label}`);
+}
+
+function getDrawerPrimaryAction(card) {
+  if (card.backendSupported === false) {
+    return { action: "select", label: "Open setup" };
+  }
+  if (card.statusLabel === "Connected") {
+    return { action: "sync", label: "Sync Now" };
+  }
+  if (["Token expired", "Error"].includes(card.statusLabel)) {
+    return { action: "reconnect", label: getSmartConnectLabel(card) };
+  }
+  return { action: "connect", label: getSmartConnectLabel(card) };
+}
+
+function buildSuggestedValues(state, integration) {
+  return integration.fields.reduce((accumulator, field) => {
+    const suggested = getSuggestedFieldValue(state, integration, field);
+    if (suggested) {
+      accumulator[field.key] = suggested;
+    }
+    return accumulator;
+  }, {});
+}
+
+function ensureDraft(session, integrationId) {
+  if (!session.drafts[integrationId]) {
+    session.drafts[integrationId] = {};
+  }
+  return session.drafts[integrationId];
+}
+
+function clearDraft(session, integrationId) {
+  delete session.drafts[integrationId];
+}
+
+function setFieldValue(session, integrationId, fieldKey, value) {
+  const draft = ensureDraft(session, integrationId);
+  draft[fieldKey] = value;
+}
+
+function isSecretField(field) {
+  return field?.type === "password";
+}
+
+function requiresCredential(integration) {
+  if (!integration?.fields?.some(isSecretField)) {
+    return false;
+  }
+
+  return !["website"].includes(integration.id);
+}
+
+function shouldSyncLegacySource(integration) {
+  return [
+    "website",
+    "woocommerce",
+    "shopify",
+    "amazon",
+    "ebay",
+    "facebook",
+    "instagram",
+    "tiktok",
+    "youtube",
+    "linkedin",
+    "ga4",
+    "search-console",
+    "custom-analytics",
+    "smtp",
+    "google-ads"
+  ].includes(integration.id);
+}
+
+function getControlCenterPayload(state) {
+  return asObject(asObject(state.data?.integrations).control_center);
+}
+
+function getControlCenterRecords(state) {
+  return asObject(getControlCenterPayload(state).records);
+}
+
+function getLegacySources(state) {
+  return asObject(asObject(asObject(state.data?.integrations).sources).sources);
+}
+
+function getLegacySourceValue(integration, sources) {
+  const source = asObject(sources[integration.sourceKey]);
+  return asString(source.value);
+}
+
+function inferScopeKeys(integration) {
+  const sourceText = [
+    integration.label,
+    integration.purpose,
+    integration.enables,
+    ...asArray(integration.dataScope)
+  ]
+    .join(" ")
+    .toLowerCase();
+
+  const rules = [
+    { key: "posts", pattern: /post|reel|video|comment|publishing|profile|channel/ },
+    { key: "insights", pattern: /insight|engagement|watch|audience|query|ctr|position|seo|analytics|performance/ },
+    { key: "ads", pattern: /ads?|campaign|creative|spend|cpc|cpa|roas|pixel/ },
+    { key: "traffic", pattern: /traffic|session|landing|page|event|tag|attribution|website/ },
+    { key: "orders", pattern: /order|sale|revenue|product|listing|merchant|customer|contact|lead/ }
+  ];
+
+  return rules
+    .filter((rule) => rule.pattern.test(sourceText))
+    .map((rule) => rule.key);
+}
+
+function getIntegrationAccessModel(integration) {
+  const scopeKeys = inferScopeKeys(integration);
+
+  if (integration.domainId === "social") {
+    return {
+      read: [...new Set(["posts", "insights", ...scopeKeys])],
+      write: ["publishing", "audience updates"]
+    };
+  }
+
+  if (integration.domainId === "website-commerce") {
+    if (integration.id === "website") {
+      return {
+        read: [...new Set(["traffic", "landing pages", "conversion paths", ...scopeKeys])],
+        write: ["webhooks", "site updates"]
+      };
+    }
+
+    return {
+      read: [...new Set(["products", "orders", "sales", ...scopeKeys])],
+      write: ["catalog sync", "commerce updates"]
+    };
+  }
+
+  if (integration.domainId === "analytics") {
+    return {
+      read: [...new Set(["traffic", "events", "conversions", "seo", ...scopeKeys])],
+      write: ["tracking updates"]
+    };
+  }
+
+  if (integration.domainId === "email-crm") {
+    return {
+      read: [...new Set(["contacts", "campaign performance", ...scopeKeys])],
+      write: ["campaign sends", "audience sync"]
+    };
+  }
+
+  if (integration.domainId === "ads") {
+    return {
+      read: [...new Set(["ads", "spend", "campaigns", "creative performance", ...scopeKeys])],
+      write: ["budget changes", "campaign updates"]
+    };
+  }
+
+  return {
+    read: [...new Set(["workflow events", "shared files", ...scopeKeys])],
+    write: ["automation triggers", "notifications"]
+  };
+}
+
+function buildLegacyFallbackRecord(integration, state) {
+  if (!shouldSyncLegacySource(integration)) {
+    return {};
+  }
+
+  const sources = getLegacySources(state);
+  const value = getLegacySourceValue(integration, sources);
+
+  if (!value) {
+    return {};
+  }
+
+  const accessModel = getIntegrationAccessModel(integration);
+
+  return {
+    integration_id: integration.id,
+    source_key: integration.sourceKey,
+    status: "connected",
+    status_label: "Connected",
+    primary_field: integration.primaryField,
+    primary_value: value,
+    config: {},
+    credential_state: {},
+    data_scopes: inferScopeKeys(integration),
+    read_scopes: accessModel.read,
+    write_scopes: accessModel.write,
+    permission_scope: integration.permissionScope,
+    enables: integration.enables,
+    health_summary: "Connected through the legacy source registry.",
+    notes: "This integration is currently inferred from the legacy project source mapping.",
+    last_sync_at: asString(asObject(sources[integration.sourceKey]).updated_at),
+    updated_at: asString(asObject(sources[integration.sourceKey]).updated_at),
+    legacy_source: true
+  };
+}
+
+function getServerRecord(state, integration) {
+  const record = asObject(getControlCenterRecords(state)[integration.id]);
+  if (record.integration_id) {
+    return record;
+  }
+
+  return buildLegacyFallbackRecord(integration, state);
+}
+
+function getFieldValue(session, integration, field, record, sourceValue, suggestedValue = "") {
+  const draft = ensureDraft(session, integration.id);
+  if (draft[field.key] != null) return draft[field.key];
+  if (isSecretField(field)) return "";
+  if (field.key === integration.primaryField) {
+    return asString(record.primary_value || sourceValue || record.config?.[field.key] || suggestedValue);
+  }
+  return asString(record.config?.[field.key] || suggestedValue);
+}
+
+function hasSavedServerCredential(record, fieldKey) {
+  return Boolean(asObject(record.credential_state)[fieldKey]?.is_set);
+}
+
+function getLocalFillCount(session, integration, record, sourceValue, state) {
+  return integration.fields.filter((field) => {
+    const value = asString(getFieldValue(session, integration, field, record, sourceValue, getSuggestedFieldValue(state, integration, field))).trim();
+    return Boolean(value) || (isSecretField(field) && hasSavedServerCredential(record, field.key));
+  }).length;
+}
+
+function getRequiredMissing(session, integration, record, sourceValue, state) {
+  return integration.fields
+    .filter((field) => field.required)
+    .filter((field) => {
+      const value = asString(getFieldValue(session, integration, field, record, sourceValue, getSuggestedFieldValue(state, integration, field))).trim();
+      return !value && !(isSecretField(field) && hasSavedServerCredential(record, field.key));
+    })
+    .map((field) => field.label);
+}
+
+function normalizeStatusLabel(statusLabel, fallback = "Not Connected") {
+  const normalized = asString(statusLabel).trim().toLowerCase();
+
+  if (normalized === "unavailable") return "Unavailable";
+  if (normalized === "connected") return "Connected";
+  if (normalized === "partial") return "Partial";
+  if (normalized === "error") return "Error";
+  if (normalized === "token expired" || normalized === "token_expired") return "Token expired";
+  if (normalized === "not connected" || normalized === "not_connected") return "Not Connected";
+
+  return fallback;
+}
+
+function getHealthSummary(statusLabel, record, integration) {
+  if (integration.backendSupported === false || UNSUPPORTED_INTEGRATION_IDS.has(integration.id)) {
+    return asString(integration.unavailableReason) || "This integration is unavailable because backend provider support is not configured yet.";
+  }
+
+  if (asString(record.health_summary).trim()) {
+    return asString(record.health_summary).trim();
+  }
+
+  if (statusLabel === "Connected") {
+    return `${integration.label} is connected and ready for provider-level sync actions.`;
+  }
+  if (statusLabel === "Partial") {
+    return "Some required connection details are still missing.";
+  }
+  if (statusLabel === "Token expired") {
+    return "Reconnect the saved token before importing or syncing new data.";
+  }
+  if (statusLabel === "Error") {
+    return asString(record.last_error) || "The last action failed. Review the connection inputs and try again.";
+  }
+  return "This integration has not been configured yet.";
+}
+
+function buildIntegrationCardModel(integration, session, state) {
+  const sourceValue = getLegacySourceValue(integration, getLegacySources(state));
+  const record = getServerRecord(state, integration);
+  const backendSupported = integration.backendSupported !== false && !UNSUPPORTED_INTEGRATION_IDS.has(integration.id);
+  const statusLabel = backendSupported
+    ? normalizeStatusLabel(record.status_label || record.status)
+    : "Unavailable";
+  const localFillCount = getLocalFillCount(session, integration, record, sourceValue, state);
+  const missingRequired = getRequiredMissing(session, integration, record, sourceValue, state);
+  const totalFields = integration.fields.length;
+  const accessModel = getIntegrationAccessModel(integration);
+  const dataScopes = asArray(record.data_scopes).length
+    ? asArray(record.data_scopes).map(titleCase)
+    : inferScopeKeys(integration).map(titleCase);
+  const suggestedValues = buildSuggestedValues(state, integration);
+
+  return {
+    ...integration,
+    backendSupported,
+    record,
+    sourceValue: asString(record.primary_value || sourceValue),
+    statusLabel,
+    statusKey: statusLabel.toLowerCase().replace(/\s+/g, "_"),
+    statusTone:
+      statusLabel === "Connected" ? "success" :
+      statusLabel === "Unavailable" ? "danger" :
+      statusLabel === "Partial" ? "warning" :
+      statusLabel === "Token expired" ? "warning" :
+      statusLabel === "Error" ? "danger" :
+      "neutral",
+    dataScopes,
+    dataScopeSummary: dataScopes.join(", "),
+    readScopes: asArray(record.read_scopes).length ? asArray(record.read_scopes) : accessModel.read,
+    writeScopes: asArray(record.write_scopes).length ? asArray(record.write_scopes) : accessModel.write,
+    credentialState: asObject(record.credential_state),
+    suggestedValues,
+    missingRequired: backendSupported ? missingRequired : [],
+    lastSync: asString(record.last_sync_at),
+    lastImport: asString(record.last_import_at),
+    lastTest: asString(record.last_test_at),
+    healthSummary: getHealthSummary(statusLabel, record, integration),
+    notes: !backendSupported
+      ? (asString(integration.unavailableReason) || "Backend provider support is not configured yet.")
+      : asString(record.notes) || (integration.critical && statusLabel !== "Connected"
+      ? "Critical integration missing for full system capability."
+      : "Credentials are saved server-side and only masked status returns to the UI."),
+    localFillCount,
+    totalFields,
+    permissionScopeSummary: asString(record.permission_scope) || integration.permissionScope,
+    enablesSummary: asString(record.enables) || integration.enables
+  };
+}
+
+function buildDomainModels(state, session) {
+  return INTEGRATION_DOMAINS.map((domain) => {
+    const cards = domain.integrations.map((integration) =>
+      buildIntegrationCardModel(
+        {
+          ...integration,
+          domainId: domain.id,
+          domainTitle: domain.title
+        },
+        session,
+        state
+      )
+    );
+    const connectedCount = cards.filter((card) => card.statusLabel === "Connected").length;
+    const partialCount = cards.filter((card) => card.statusLabel === "Partial").length;
+    const blockedCount = cards.filter((card) => ["Not Connected", "Error", "Token expired"].includes(card.statusLabel)).length;
+
+    return {
+      ...domain,
+      cards,
+      connectedCount,
+      partialCount,
+      blockedCount

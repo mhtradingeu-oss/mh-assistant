@@ -1,0 +1,86 @@
+  1240	
+  1241		const sectionLine = asArray(response.sections)
+  1242			.map((section) => {
+  1243				const title = humanizeValue(section?.title);
+  1244				const items = normalizeDisplayList(section?.items, 4);
+  1245				if (!items.length) return "";
+  1246				return [title ? `${title}:` : "", ...items.map((item) => `- ${item}`)].filter(Boolean).join("\n");
+  1247			})
+  1248			.filter(Boolean)
+  1249			.join("\n\n");
+  1250	
+  1251		return [recommendationLine, findingLine, sectionLine].filter(Boolean).join("\n\n");
+  1252	}
+  1253	
+  1254	function destinationRouteForSpecialist(specialistId, outputType) {
+  1255		const rawId = getAiRoomRoleId(specialistId || "operations");
+  1256		const id = MODE_ID_ALIASES[rawId] || rawId;
+  1257		if (outputType === "workflow") return "workflows";
+  1258		if (id === "strategist") return outputType === "task" ? "campaign-studio" : "workflows";
+  1259		if (id === "writer") return "content-studio";
+  1260		if (id === "media") return "media-studio";
+  1261		if (id === "video_lead") return "media-studio";
+  1262		if (id === "publisher") return "publishing";
+  1263		if (id === "ads") return "ads-manager";
+  1264		if (id === "analyst") return "insights";
+  1265		if (id === "compliance_reviewer") return "governance";
+  1266		if (id === "operations") return outputType === "task" ? "task-center" : "workflows";
+  1267		if (id === "customer_ops") return outputType === "task" ? "task-center" : "operations-centers";
+  1268		if (id === "sales_crm") return "workflows";
+  1269		return "workflows";
+  1270	}
+  1271	
+  1272	function routeLabel(route) {
+  1273		const labels = {
+  1274			"campaign-studio": "Campaign Studio",
+  1275			"content-studio": "Content Studio",
+  1276			"media-studio": "Media Studio",
+  1277			publishing: "Publishing",
+  1278			"ads-manager": "Ads Manager",
+  1279			insights: "Insights",
+  1280			integrations: "Integrations",
+  1281			governance: "Governance",
+  1282			"operations-centers": "Operations Centers",
+  1283			"task-center": "Task Center",
+  1284			setup: "Setup",
+  1285			workflows: "Workflows"
+  1286		};
+  1287		return labels[route] || titleCase(route);
+  1288	}
+  1289	
+  1290	function specialistTemplateForOutput({ specialist, outputType, prompt, projectName }) {
+  1291		const cleanPrompt = asString(prompt).trim();
+  1292		const promptSnippet = cleanPrompt || `Project request for ${projectName || "current project"}`;
+  1293		const specialistId = asString(specialist?.id || "operations");
+  1294		const route = destinationRouteForSpecialist(specialistId, outputType);
+  1295	
+  1296		const base = {
+  1297			specialistId,
+  1298			outputType,
+  1299			title: "Draft output",
+  1300			summary: "Guidance prepared for review.",
+  1301			bullets: [],
+  1302			steps: [],
+  1303			destinationRoute: route,
+  1304			confirmationRequired: outputType === "handoff" || specialistId === "publisher" || specialistId === "compliance_reviewer",
+  1305			generatedAt: nowIso(),
+  1306			sourcePrompt: promptSnippet,
+  1307			status: "draft_preview",
+  1308			safetyLabel: "Guidance and draft only. No backend execution.",
+  1309			nextSafeAction: `Review in ${routeLabel(route)}`,
+  1310			confirmationNote: "Execution, approvals, and publishing require explicit confirmation in the owning workspace."
+  1311		};
+  1312	
+  1313		if (specialistId === "strategist") {
+  1314			if (outputType === "task") {
+  1315				return {
+  1316					...base,
+  1317					title: `Task: Strategic plan for ${projectName || "current project"}`,
+  1318					summary: "Strategic task draft prepared with priorities, blockers, and operating sequence.",
+  1319					steps: [
+  1320						"Define top 3 strategic priorities for this cycle",
+  1321						"List blockers and dependency owners",
+  1322						"Map next operating move by channel",
+  1323						"Route execution draft to Campaign Studio or Workflows"
+  1324					],
+  1325					nextSafeAction: "Review and refine the task draft before creating durable tasks"

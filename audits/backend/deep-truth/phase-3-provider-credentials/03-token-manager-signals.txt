@@ -1,0 +1,14 @@
+runtime/orchestrator-service/lib/integrations/token-manager.js:11:const KEY_PATH = path.join(SYSTEM_DIR, 'integration-secret.key.json');
+runtime/orchestrator-service/lib/integrations/token-manager.js:17: *   1. MH_INTEGRATION_SECRET_KEY env var (base64-encoded 32-byte key).
+runtime/orchestrator-service/lib/integrations/token-manager.js:19: *   2. data/system/integration-secret.key.json on the host filesystem.
+runtime/orchestrator-service/lib/integrations/token-manager.js:30:  const envKey = String(process.env.MH_INTEGRATION_SECRET_KEY || '').trim();
+runtime/orchestrator-service/lib/integrations/token-manager.js:35:        'MH_INTEGRATION_SECRET_KEY must be a base64-encoded 32-byte key. ' +
+runtime/orchestrator-service/lib/integrations/token-manager.js:55:    note: 'This file contains a secret encryption key. Never commit it to version control. Set MH_INTEGRATION_SECRET_KEY env var in production instead.',
+runtime/orchestrator-service/lib/integrations/token-manager.js:63:  const envKey = String(process.env.MH_INTEGRATION_SECRET_KEY || '').trim();
+runtime/orchestrator-service/lib/integrations/token-manager.js:128:function normalizeCredentials(record = {}) {
+runtime/orchestrator-service/lib/integrations/token-manager.js:129:  if (record.credentials_encrypted) {
+runtime/orchestrator-service/lib/integrations/token-manager.js:130:    return decryptJson(record.credentials_encrypted);
+runtime/orchestrator-service/lib/integrations/token-manager.js:140:function applyEncryptedCredentials(record = {}, credentials = {}) {
+runtime/orchestrator-service/lib/integrations/token-manager.js:144:    credentials_encrypted: encryptJson(credentials)
+runtime/orchestrator-service/lib/integrations/token-manager.js:149:  normalizeCredentials,
+runtime/orchestrator-service/lib/integrations/token-manager.js:150:  applyEncryptedCredentials,

@@ -1,0 +1,212 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# mh-assistant — required environment variables template
+# Copy this file to .env.local or .env.production and fill real values.
+# Never commit real secrets.
+# Keep .env, .env.local, .env.production, and key files out of Git.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# ── Server ───────────────────────────────────────────────────────────────────
+# TCP port for the orchestrator HTTP service.
+PORT=3000
+
+# Runtime mode. Use production in production.
+NODE_ENV=development
+
+# Optional root override for data/system path resolution.
+# Usually leave empty locally unless the app runs from a different working dir.
+MH_ASSISTANT_ROOT=
+
+# ── Control Center API Keys ──────────────────────────────────────────────────
+# Required. Protects read-only/projection routes.
+# Generate:
+#   openssl rand -hex 32
+# Use via:
+#   x-mh-control-key: <value>
+# or:
+#   Authorization: Bearer <value>
+MH_CONTROL_CENTER_READ_KEY=replace-with-random-read-secret
+
+# Required. Protects state-mutating routes.
+# Use a different value than READ_KEY in production.
+# Generate:
+#   openssl rand -hex 32
+MH_CONTROL_CENTER_WRITE_KEY=replace-with-random-write-secret
+
+# Optional legacy/compat control key.
+# Only fill if code/deployment still requires compatibility.
+MH_CONTROL_KEY=
+
+# ── Integration Credential Encryption ────────────────────────────────────────
+# Strongly recommended for production.
+# Base64-encoded 32-byte key used to encrypt/decrypt saved provider credentials.
+#
+# Generate:
+#   node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
+#
+# Important:
+# If old integration credentials were encrypted using data/system/integration-secret.key.json,
+# changing this key means old encrypted credentials may no longer decrypt.
+# Preserve the old key if you want to keep old connected integrations.
+MH_INTEGRATION_SECRET_KEY=
+
+# ── OpenAI / AI Runtime ──────────────────────────────────────────────────────
+# Required if OpenAI features are enabled.
+OPENAI_API_KEY=replace-with-openai-api-key
+
+# Optional alias used by some MH runtime paths.
+# Recommended: set same value as OPENAI_API_KEY if both are supported in your deployment.
+MH_OPENAI_API_KEY=replace-with-openai-api-key
+
+# ── Native Media / AI Media Runtime ──────────────────────────────────────────
+# Default provider for native media features if enabled.
+MH_NATIVE_MEDIA_DEFAULT_PROVIDER=openai
+
+# Optional remote GPU/media worker.
+NATIVE_MEDIA_GPU_WORKER_URL=
+NATIVE_MEDIA_GPU_WORKER_KEY=
+NATIVE_MEDIA_GPU_WORKER_TIMEOUT_MS=60000
+
+# Optional external media generation providers.
+ELEVENLABS_API_KEY=
+RUNWAY_API_KEY=
+
+# Optional legacy/media provider labels if still used by older scripts.
+MEDIA_IMAGE_PROVIDER=openai
+MEDIA_VIDEO_PROVIDER=openai
+MEDIA_VOICE_PROVIDER=openai
+
+# ── WordPress / WooCommerce Runtime ──────────────────────────────────────────
+# WordPress REST API / publishing integration.
+WP_BASE_URL=https://your-wordpress.example.com
+WP_USER=your-wp-username
+
+# WordPress application password from the WordPress user profile.
+# This is not the server password and not the normal login password.
+WP_APP_PASSWORD=replace-with-wordpress-application-password
+
+# WooCommerce REST API.
+# WC_BASE_URL may be the store base URL or full wc/v3 URL depending on the script.
+# Recommended store base:
+#   https://your-store.example.com
+# Recommended REST base:
+#   https://your-store.example.com/wp-json/wc/v3
+WC_BASE_URL=https://your-store.example.com/wp-json/wc/v3
+WC_KEY=replace-with-woocommerce-consumer-key
+WC_SECRET=replace-with-woocommerce-consumer-secret
+
+# ── Email Bridge ─────────────────────────────────────────────────────────────
+# Required only if email bridge/send integration is enabled.
+MH_EMAIL_BRIDGE_URL=https://your-email-bridge.example.com
+MH_EMAIL_BRIDGE_TOKEN=replace-with-email-bridge-token
+
+# ── Integration Provider Credentials ─────────────────────────────────────────
+# These are usually stored through the app integration records, not always as env vars.
+# Keep this section as a go-live checklist.
+
+# Website provider:
+# Required config: url
+
+# WooCommerce provider:
+# Required config: storeUrl
+# Required credentials: consumerKey, consumerSecret
+
+# Shopify provider:
+# Required config: storeDomain
+# Required credentials: adminToken
+SHOPIFY_STORE_DOMAIN=
+SHOPIFY_ADMIN_TOKEN=
+
+# eBay provider:
+# Optional config: sellerId
+# Required credentials: accessToken
+EBAY_SELLER_ID=
+EBAY_ACCESS_TOKEN=
+
+# Google providers:
+# Analytics config: propertyId, measurementId optional
+# Search Console config: propertyUrl or siteDomain
+# YouTube config: channelId or channelUrl
+# Ads config: customerId, managerId optional, developerToken
+# Drive config: folderId
+# Tag Manager config: containerId
+# Required credentials usually: accessToken and/or refreshToken
+GOOGLE_ACCESS_TOKEN=
+GOOGLE_REFRESH_TOKEN=
+GOOGLE_DEVELOPER_TOKEN=
+GOOGLE_ANALYTICS_PROPERTY_ID=
+GOOGLE_SEARCH_CONSOLE_PROPERTY_URL=
+GOOGLE_YOUTUBE_CHANNEL_ID=
+GOOGLE_ADS_CUSTOMER_ID=
+GOOGLE_ADS_MANAGER_ID=
+GOOGLE_DRIVE_FOLDER_ID=
+GOOGLE_TAG_MANAGER_CONTAINER_ID=
+
+# Meta / Facebook / Instagram:
+# Facebook Page config: pageId or pageUrl
+# Instagram config: businessAccountId or profileUrl
+# Ads config: adAccountId
+# Pixel config: pixelId
+# Required credentials: accessToken
+META_ACCESS_TOKEN=
+META_FACEBOOK_PAGE_ID=
+META_INSTAGRAM_BUSINESS_ACCOUNT_ID=
+META_AD_ACCOUNT_ID=
+META_PIXEL_ID=
+
+# TikTok:
+# Account config: accountId or profileUrl
+# Ads config: advertiserId
+# Pixel config: pixelId
+# Required credentials: accessToken
+TIKTOK_ACCESS_TOKEN=
+TIKTOK_ACCOUNT_ID=
+TIKTOK_ADVERTISER_ID=
+TIKTOK_PIXEL_ID=
+
+# Operations providers:
+# Slack required credentials: botToken
+SLACK_BOT_TOKEN=
+
+# Telegram required credentials: botToken
+TELEGRAM_BOT_TOKEN=
+
+# Notion required credentials: accessToken
+NOTION_ACCESS_TOKEN=
+NOTION_WORKSPACE_NAME=
+
+# Webhook / CRM / external API:
+WEBHOOK_ENDPOINT_URL=
+WEBHOOK_ACCESS_TOKEN=
+CRM_ENDPOINT_URL=
+CRM_ACCESS_TOKEN=
+
+# LinkedIn:
+LINKEDIN_ACCESS_TOKEN=
+LINKEDIN_COMPANY_URL=
+
+# Mailchimp-like email provider:
+MAILCHIMP_API_KEY=
+MAILCHIMP_SERVER_PREFIX=
+MAILCHIMP_AUDIENCE_ID=
+
+# ── Data Path / Migration Flags ──────────────────────────────────────────────
+# Optional. Leave empty for defaults unless running a planned migration.
+EXECUTION_CANONICAL_READ=
+EXECUTION_CANONICAL_WRITE=
+LEGACY_FALLBACK_READ=
+LEGACY_MIRROR_WRITE=
+CAMPAIGN_EXECUTION_READ_CANONICAL_FIRST=
+CAMPAIGN_FINALIZATION_READ_CANONICAL_FIRST=
+CHANNEL_PACKAGES_READ_CANONICAL_FIRST=
+EMAIL_READ_CANONICAL_FIRST=
+EXECUTION_RESULTS_READ_CANONICAL_FIRST=
+GENERATED_READ_CANONICAL_FIRST=
+PUBLISHING_READ_CANONICAL_FIRST=
+
+# ── Telemetry / Debug Flags ──────────────────────────────────────────────────
+# Optional.
+MH_DISABLE_READ_TELEMETRY=
+DEBUG=
+NO_DEPRECATION=
+TRACE_DEPRECATION=
+NO_PROXY=

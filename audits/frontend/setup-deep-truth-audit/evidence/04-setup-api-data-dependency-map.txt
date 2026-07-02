@@ -1,0 +1,484 @@
+# Setup API / Data Dependency Map
+
+public/control-center/pages/setup.js:2:import { applyProjectBusinessTemplate } from "../api.js";
+public/control-center/pages/setup.js:83:  primary_goal: "Aligns optimization priorities and readiness evaluation.",
+public/control-center/pages/setup.js:152:function getValidationSummary({ missingFields, readinessStatus, readinessScore, criticalGaps, failedCount }) {
+public/control-center/pages/setup.js:153:  const normalizedReadiness = asString(readinessStatus).toLowerCase();
+public/control-center/pages/setup.js:154:  const score = Number(readinessScore);
+public/control-center/pages/setup.js:173:    reason: FIELD_IMPORTANCE_REASON[field.name] || "Required to improve setup quality and downstream reliability.",
+public/control-center/pages/setup.js:179:  return `mh-control-center:setup-draft:${projectName || "default"}`;
+public/control-center/pages/setup.js:218:  const overviewData = asObject(state.data.overview?.overview);
+public/control-center/pages/setup.js:219:  const readinessDashboard = asObject(state.data.readiness?.dashboard);
+public/control-center/pages/setup.js:221:  const projectName = context.currentProject || overviewData.project_name || "";
+public/control-center/pages/setup.js:225:    project_type: overviewData.project_type || "",
+public/control-center/pages/setup.js:226:    website_url: overviewData.website_url || "",
+public/control-center/pages/setup.js:227:    project_status: overviewData.project_status || overviewData.status || "",
+public/control-center/pages/setup.js:228:    execution_mode: context.executionMode || overviewData.execution_mode || "",
+public/control-center/pages/setup.js:229:    brand_name: overviewData.brand_name || projectName,
+public/control-center/pages/setup.js:230:    brand_promise: overviewData.brand_promise || overviewData.brand_positioning || overviewData.value_prop || "",
+public/control-center/pages/setup.js:231:    brand_voice: overviewData.brand_voice || "",
+public/control-center/pages/setup.js:232:    visual_identity: overviewData.visual_identity || "",
+public/control-center/pages/setup.js:233:    offer_positioning: overviewData.offer_positioning || overviewData.positioning || "",
+public/control-center/pages/setup.js:234:    market: context.currentMarket || overviewData.market || "",
+public/control-center/pages/setup.js:235:    language: context.currentLanguage || overviewData.language || "",
+public/control-center/pages/setup.js:236:    currency: overviewData.currency || "",
+public/control-center/pages/setup.js:237:    primary_goal: overviewData.primary_goal || overviewData.goal || "",
+public/control-center/pages/setup.js:238:    secondary_goal: overviewData.secondary_goal || "",
+public/control-center/pages/setup.js:239:    launch_window: overviewData.launch_window || context.activeCampaign || "",
+public/control-center/pages/setup.js:240:    audience_primary: overviewData.audience_primary || overviewData.target_audience || "",
+public/control-center/pages/setup.js:241:    audience_problem: overviewData.audience_problem || overviewData.customer_problem || "",
+public/control-center/pages/setup.js:242:    audience_geography: overviewData.audience_geography || context.currentMarket || "",
+public/control-center/pages/setup.js:243:    competitors: toListText(overviewData.competitors),
+public/control-center/pages/setup.js:244:    differentiation: overviewData.differentiation || "",
+public/control-center/pages/setup.js:246:      overviewData.social_channels ||
+public/control-center/pages/setup.js:247:      overviewData.channels ||
+public/control-center/pages/setup.js:248:      overviewData.social_links ||
+public/control-center/pages/setup.js:249:      overviewData.setup_payload?.social_channels ||
+public/control-center/pages/setup.js:250:      overviewData.setup_payload?.channels ||
+public/control-center/pages/setup.js:251:      overviewData.setup_payload?.social_links
+public/control-center/pages/setup.js:253:    operator_notes: toListText(readinessDashboard.operator_notes)
+public/control-center/pages/setup.js:300:function getWizardReadinessStatus(values, readinessScore, readinessStatus) {
+public/control-center/pages/setup.js:302:  const score = Number(readinessScore);
+public/control-center/pages/setup.js:304:  const backendReady = asString(readinessStatus).toLowerCase() === "strong";
+public/control-center/pages/setup.js:371:      label: "Launch readiness: strong"
+public/control-center/pages/setup.js:378:      label: `Launch readiness: ${fieldGapCount} required field${fieldGapCount === 1 ? "" : "s"} missing`
+public/control-center/pages/setup.js:384:    label: `Launch readiness: ${totalGaps} dependency gap${totalGaps === 1 ? "" : "s"}`
+public/control-center/pages/setup.js:390:    return `Complete ${missingFields.length} required setup field${missingFields.length === 1 ? "" : "s"}.`;
+public/control-center/pages/setup.js:401:  return "Save setup, then continue to Library or Integrations.";
+public/control-center/pages/setup.js:429:    <div class="setup-field-group${required && !filled ? " is-missing" : ""}" data-setup-field="${escapeHtml(name)}" data-required="${required ? "true" : "false"}">
+public/control-center/pages/setup.js:430:      <div class="setup-field-head">
+public/control-center/pages/setup.js:431:        <div class="setup-label-with-info">
+public/control-center/pages/setup.js:432:          <label class="setup-label" for="setup-${escapeHtml(name)}">${escapeHtml(label)}</label>
+public/control-center/pages/setup.js:434:        <span class="setup-field-state ${indicatorClass}" data-setup-indicator-for="${escapeHtml(name)}">${escapeHtml(indicatorText)}</span>
+public/control-center/pages/setup.js:438:          ? `<textarea id="setup-${escapeHtml(name)}" name="${escapeHtml(name)}" class="setup-input setup-textarea" rows="${rows}" placeholder="${escapeHtml(placeholder || "")}">${escapeHtml(asString(value))}</textarea>`
+public/control-center/pages/setup.js:439:          : `<input id="setup-${escapeHtml(name)}" name="${escapeHtml(name)}" class="setup-input" type="${escapeHtml(type)}" value="${escapeHtml(asString(value))}" placeholder="${escapeHtml(placeholder || "")}">`
+public/control-center/pages/setup.js:441:      <div class="setup-helper">${escapeHtml(infoText)}</div>
+public/control-center/pages/setup.js:494:  const groups = Array.from(form.querySelectorAll("[data-setup-field]"));
+public/control-center/pages/setup.js:496:    const name = group.getAttribute("data-setup-field") || "";
+public/control-center/pages/setup.js:499:    const indicator = group.querySelector("[data-setup-indicator-for]");
+public/control-center/pages/setup.js:545:  const positioning = document.getElementById("setupAiPositioningText");
+public/control-center/pages/setup.js:546:  if (positioning) positioning.textContent = compactListText([buildPositioningSuggestion(values)], "Generate positioning guidance from setup context.");
+public/control-center/pages/setup.js:548:  const audience = document.getElementById("setupAiAudienceText");
+public/control-center/pages/setup.js:551:  const tone = document.getElementById("setupAiToneText");
+public/control-center/pages/setup.js:562:  readinessScore,
+public/control-center/pages/setup.js:563:  readinessStatus,
+public/control-center/pages/setup.js:584:    readinessStatus,
+public/control-center/pages/setup.js:585:    readinessScore,
+public/control-center/pages/setup.js:601:  const completionTextWide = document.getElementById("setupCompletionPercentValue");
+public/control-center/pages/setup.js:604:  const topCompletionBadge = document.getElementById("setupTopCompletionBadge");
+public/control-center/pages/setup.js:610:  const topReadinessBadge = document.getElementById("setupTopReadinessBadge");
+public/control-center/pages/setup.js:616:  const requiredCompleteEl = document.getElementById("setupRequiredCompleted");
+public/control-center/pages/setup.js:619:  const requiredTotalEl = document.getElementById("setupRequiredTotal");
+public/control-center/pages/setup.js:622:  const completionBar = document.getElementById("setupCompletionBar");
+public/control-center/pages/setup.js:635:  const missingCount = document.getElementById("setupMissingCount");
+public/control-center/pages/setup.js:638:  const nextBestActionEl = document.getElementById("setupNextBestAction");
+public/control-center/pages/setup.js:643:  const readinessMissingFieldsEl = document.getElementById("setupReadinessMissingFields");
+public/control-center/pages/setup.js:644:  if (readinessMissingFieldsEl) {
+public/control-center/pages/setup.js:645:    readinessMissingFieldsEl.textContent = String(missingFields.length);
+public/control-center/pages/setup.js:648:  const readinessMissingAssetsEl = document.getElementById("setupReadinessMissingAssets");
+public/control-center/pages/setup.js:649:  if (readinessMissingAssetsEl) {
+public/control-center/pages/setup.js:650:    readinessMissingAssetsEl.textContent = String(missingAssets.length);
+public/control-center/pages/setup.js:653:  const readinessMissingConnectorsEl = document.getElementById("setupReadinessMissingConnectors");
+public/control-center/pages/setup.js:654:  if (readinessMissingConnectorsEl) {
+public/control-center/pages/setup.js:655:    readinessMissingConnectorsEl.textContent = String(missingConnectors.length);
+public/control-center/pages/setup.js:658:  const dependencyGapCardEl = document.getElementById("setupDependencyGapCount");
+public/control-center/pages/setup.js:664:    { id: "setupBusinessIdentityStatus", value: businessIdentityStatus },
+public/control-center/pages/setup.js:665:    { id: "setupBrandStatus", value: brandStatus },
+public/control-center/pages/setup.js:666:    { id: "setupLocalizationStatus", value: localizationStatus },
+public/control-center/pages/setup.js:667:    { id: "setupChannelsStatus", value: channelsStatus },
+public/control-center/pages/setup.js:668:    { id: "setupContentTruthStatus", value: contentTruthStatus },
+public/control-center/pages/setup.js:669:    { id: "setupAiGuidanceStatus", value: aiGuidanceStatus }
+public/control-center/pages/setup.js:680:  const readinessBadge = document.getElementById("setupReadinessBadge");
+public/control-center/pages/setup.js:681:  if (readinessBadge) {
+public/control-center/pages/setup.js:682:    const label = getWizardReadinessStatus(values, readinessScore, readinessStatus);
+public/control-center/pages/setup.js:683:    readinessBadge.className = `card-badge ${label === "Ready" ? "success" : "warning"}`;
+public/control-center/pages/setup.js:684:    readinessBadge.textContent = label;
+public/control-center/pages/setup.js:687:  const validationBadge = document.getElementById("setupValidationBadge");
+public/control-center/pages/setup.js:693:  const missingActionList = document.getElementById("setupMissingActions");
+public/control-center/pages/setup.js:696:      ? `<div class="setup-smart-gap-list">${missingInsights.map((item) => `
+public/control-center/pages/setup.js:697:          <article class="setup-smart-gap-item">
+public/control-center/pages/setup.js:702:            <button class="btn btn-ghost" type="button" data-setup-jump-field="${escapeHtml(item.name)}" data-setup-jump-step="${escapeHtml(item.stepId)}">Open field</button>
+public/control-center/pages/setup.js:708:  const blockerList = document.getElementById("setupSystemGaps");
+public/control-center/pages/setup.js:717:      "No operational blockers detected from readiness signals."
+public/control-center/pages/setup.js:721:  const completeNowBtn = document.getElementById("setupCompleteNowBtn");
+public/control-center/pages/setup.js:739:    const badge = document.getElementById(`setupStepBadge-${step.id}`);
+public/control-center/pages/setup.js:740:    const button = form.querySelector(`[data-setup-step="${step.id}"]`);
+public/control-center/pages/setup.js:741:    const statusNote = form.querySelector(`[data-setup-step-note="${step.id}"]`);
+public/control-center/pages/setup.js:757:      statusNote.className = `setup-smart-step-note tone-${status.tone}`;
+public/control-center/pages/setup.js:766:  const recommendedTitle = document.getElementById("setupRecommendedStepTitle");
+public/control-center/pages/setup.js:769:  const recommendedReason = document.getElementById("setupRecommendedStepReason");
+public/control-center/pages/setup.js:772:  const recommendedBtn = document.getElementById("setupRecommendedStepBtn");
+public/control-center/pages/setup.js:774:    recommendedBtn.setAttribute("data-setup-open-step", recommendedStep.id);
+public/control-center/pages/setup.js:778:  const continueLibraryBtn = document.getElementById("setupContinueLibraryBtn");
+public/control-center/pages/setup.js:779:  const continueIntegrationsBtn = document.getElementById("setupContinueIntegrationsBtn");
+public/control-center/pages/setup.js:780:  const continueCampaignBtn = document.getElementById("setupContinueCampaignBtn");
+public/control-center/pages/setup.js:800:  const stepCounter = document.getElementById("setupStepCounter");
+public/control-center/pages/setup.js:817:  saveProjectSetup,
+public/control-center/pages/setup.js:820:  readinessScore,
+public/control-center/pages/setup.js:821:  readinessStatus,
+public/control-center/pages/setup.js:824:  const form = $("setupProjectForm");
+public/control-center/pages/setup.js:827:  const stepButtons = Array.from(document.querySelectorAll("[data-setup-step]"));
+public/control-center/pages/setup.js:828:  const stepActionButtons = Array.from(document.querySelectorAll("[data-setup-open-step]"));
+public/control-center/pages/setup.js:829:  const stepPanels = Array.from(document.querySelectorAll("[data-setup-step-panel]"));
+public/control-center/pages/setup.js:836:      const isActive = button.getAttribute("data-setup-step") === stepId;
+public/control-center/pages/setup.js:842:      const isActive = panel.getAttribute("data-setup-step-panel") === stepId;
+public/control-center/pages/setup.js:855:      readinessScore,
+public/control-center/pages/setup.js:856:      readinessStatus,
+public/control-center/pages/setup.js:863:    button.onclick = () => activateStep(button.getAttribute("data-setup-step") || STEP_DEFINITIONS[0].id);
+public/control-center/pages/setup.js:868:      const stepId = button.getAttribute("data-setup-open-step") || STEP_DEFINITIONS[0].id;
+public/control-center/pages/setup.js:870:      const panel = document.querySelector(`[data-setup-step-panel="${stepId}"]`);
+public/control-center/pages/setup.js:875:  const prevBtn = $("setupPrevStepBtn");
+public/control-center/pages/setup.js:883:  const nextBtn = $("setupNextStepBtn");
+public/control-center/pages/setup.js:900:      readinessScore,
+public/control-center/pages/setup.js:901:      readinessStatus,
+public/control-center/pages/setup.js:924:        setupDraft: {
+public/control-center/pages/setup.js:948:    const field = event.target?.closest?.(".setup-input, .setup-textarea");
+public/control-center/pages/setup.js:963:  const setupRoot = $("setupRoot") || form.closest(".setup-wizard-shell") || form;
+public/control-center/pages/setup.js:965:  setupRoot.onclick = (event) => {
+public/control-center/pages/setup.js:966:    const jumpBtn = event.target.closest("[data-setup-jump-field]");
+public/control-center/pages/setup.js:971:    const fieldName = jumpBtn.getAttribute("data-setup-jump-field") || "";
+public/control-center/pages/setup.js:972:    const stepId = jumpBtn.getAttribute("data-setup-jump-step") || getFieldStepId(fieldName);
+public/control-center/pages/setup.js:992:  const saveDraftBtn = $("setupSaveDraftBtn");
+public/control-center/pages/setup.js:999:  const saveBackendBtn = $("setupSaveBackendBtn");
+public/control-center/pages/setup.js:1014:      showMessage?.(`Saving setup for ${draftKeyName}...`);
+public/control-center/pages/setup.js:1017:        await saveProjectSetup?.(projectName, payload);
+public/control-center/pages/setup.js:1041:  const resetBtn = $("setupResetDraftBtn");
+public/control-center/pages/setup.js:1045:      navigateTo("setup");
+public/control-center/pages/setup.js:1047:        showMessage(`Local setup draft cleared for ${draftKeyName}.`);
+public/control-center/pages/setup.js:1052:  const aiPositioningBtn = $("setupAiPositioningBtn");
+public/control-center/pages/setup.js:1065:  const aiAudienceBtn = $("setupAiAudienceBtn");
+public/control-center/pages/setup.js:1078:  const aiToneBtn = $("setupAiToneBtn");
+public/control-center/pages/setup.js:1091:  const aiFillBtn = $("setupAiFillMissingBtn");
+public/control-center/pages/setup.js:1119:  const aiCommandBtn = $("setupAiCommandBtn");
+public/control-center/pages/setup.js:1126:        input.value = `Suggest final setup completion for ${draftKeyName}. Missing fields: ${missingFields.length ? missingFields.join(", ") : "none"}. Include positioning, audience, and tone guidance.`;
+public/control-center/pages/setup.js:1133:  const validateNowBtn = $("setupValidateNowBtn");
+public/control-center/pages/setup.js:1136:      const target = $("setupSaveBackendBtn");
+public/control-center/pages/setup.js:1143:  const continueLibraryBtn = $("setupContinueLibraryBtn");
+public/control-center/pages/setup.js:1150:  const continueIntegrationsBtn = $("setupContinueIntegrationsBtn");
+public/control-center/pages/setup.js:1153:      navigateTo("integrations");
+public/control-center/pages/setup.js:1157:  const continueCampaignBtn = $("setupContinueCampaignBtn");
+public/control-center/pages/setup.js:1164:  const reviewMissingBtn = $("setupReviewMissingBtn");
+public/control-center/pages/setup.js:1170:        showMessage?.("No required setup gaps found.");
+public/control-center/pages/setup.js:1180:      showMessage?.(`Reviewing missing setup items (${missing.length}).`);
+public/control-center/pages/setup.js:1184:  const reviewReadinessBtn = $("setupReviewReadinessBtn");
+public/control-center/pages/setup.js:1191:  const smartActionBtn = $("setupSmartActionBtn");
+public/control-center/pages/setup.js:1237:function renderBusinessTemplatePanel({ values, overviewData, escapeHtml }) {
+public/control-center/pages/setup.js:1239:    overviewData.business_type ||
+public/control-center/pages/setup.js:1240:    overviewData.project_type ||
+public/control-center/pages/setup.js:1245:  const currentLabel = overviewData.business_template?.label || getBusinessTemplateLabel(currentType);
+public/control-center/pages/setup.js:1246:  const requiredAssets = Array.isArray(overviewData.required_assets) ? overviewData.required_assets : [];
+public/control-center/pages/setup.js:1247:  const starterChecklist = Array.isArray(overviewData.starter_checklist) ? overviewData.starter_checklist : [];
+public/control-center/pages/setup.js:1256:    <section class="card setup-business-template-panel">
+public/control-center/pages/setup.js:1257:      <div class="setup-template-head">
+public/control-center/pages/setup.js:1259:          <div class="setup-kicker">Business Template</div>
+public/control-center/pages/setup.js:1260:          <h3 class="setup-v2-title">Project Operating Model</h3>
+public/control-center/pages/setup.js:1261:          <p class="setup-v2-subtitle">Select the template that sets setup defaults, checklist scope, and launch priorities.</p>
+public/control-center/pages/setup.js:1263:        <span class="setup-template-current">${escapeHtml(currentLabel)}</span>
+public/control-center/pages/setup.js:1266:      <div class="setup-template-body">
+public/control-center/pages/setup.js:1267:        <label class="setup-template-selector">
+public/control-center/pages/setup.js:1269:          <select id="setupBusinessTemplateSelect">
+public/control-center/pages/setup.js:1278:        <div class="setup-template-preview${requiredAssets.length ? "" : " is-empty"}">
+public/control-center/pages/setup.js:1280:          <span class="${requiredAssets.length ? "" : "setup-template-empty"}">${escapeHtml(requirementsText)}</span>
+public/control-center/pages/setup.js:1283:        <div class="setup-template-preview${starterChecklist.length ? "" : " is-empty"}">
+public/control-center/pages/setup.js:1285:          <span class="${starterChecklist.length ? "" : "setup-template-empty"}">${escapeHtml(checklistText)}</span>
+public/control-center/pages/setup.js:1289:      <div class="setup-template-actions">
+public/control-center/pages/setup.js:1290:        <button id="setupApplyTemplateBtn" class="btn btn-secondary" type="button">
+public/control-center/pages/setup.js:1293:        <span id="setupTemplateStatus" class="setup-template-status"></span>
+public/control-center/pages/setup.js:1300:export const setupRoute = {
+public/control-center/pages/setup.js:1301:  id: "setup",
+public/control-center/pages/setup.js:1306:    description: "Build a complete, validated project source of truth before moving to assets, integrations, and launch execution."
+public/control-center/pages/setup.js:1309:    <section class="page is-active" data-page="setup">
+public/control-center/pages/setup.js:1310:      <div id="setupRoot"></div>
+public/control-center/pages/setup.js:1321:    saveProjectSetup
+public/control-center/pages/setup.js:1324:    const overviewData = asObject(state.data.overview?.overview);
+public/control-center/pages/setup.js:1325:    const readiness = asObject(state.data.readiness);
+public/control-center/pages/setup.js:1326:    const readinessDashboard = asObject(readiness.dashboard);
+public/control-center/pages/setup.js:1327:    const integrations = asObject(state.data.integrations);
+public/control-center/pages/setup.js:1328:    const assets = asObject(state.data.assets);
+public/control-center/pages/setup.js:1330:    const projectName = state.context.currentProject || overviewData.project_name || "";
+public/control-center/pages/setup.js:1334:    const readinessScore = readinessDashboard.readiness_score ?? overviewData.readiness_score ?? 0;
+public/control-center/pages/setup.js:1335:    const readinessStatus = readinessDashboard.readiness_status || overviewData.readiness_status || "needs_work";
+public/control-center/pages/setup.js:1336:    const missingAssets = getMissingAssetLabels(assets);
+public/control-center/pages/setup.js:1337:    const missingConnectors = asArray(integrations.readiness?.missing);
+public/control-center/pages/setup.js:1338:    const criticalGaps = asArray(readinessDashboard.priorities?.critical);
+public/control-center/pages/setup.js:1342:    const wizardStatus = getWizardReadinessStatus(values, readinessScore, readinessStatus);
+public/control-center/pages/setup.js:1350:    const failedCount = asArray(integrations.readiness?.failed).length;
+public/control-center/pages/setup.js:1353:      readinessStatus,
+public/control-center/pages/setup.js:1354:      readinessScore,
+public/control-center/pages/setup.js:1364:      readinessDashboard.updated_at ||
+public/control-center/pages/setup.js:1365:      readinessDashboard.last_saved_at ||
+public/control-center/pages/setup.js:1366:      overviewData.updated_at ||
+public/control-center/pages/setup.js:1367:      overviewData.last_updated_at
+public/control-center/pages/setup.js:1370:    const root = $("setupRoot");
+public/control-center/pages/setup.js:1374:      <div class="setup-wizard-shell">
+public/control-center/pages/setup.js:1375:        <section class="card setup-smart-overview">
+public/control-center/pages/setup.js:1376:          <div class="setup-wizard-header-top">
+public/control-center/pages/setup.js:1378:              <h3 class="setup-v2-title">Smart Guided Setup</h3>
+public/control-center/pages/setup.js:1379:              <p class="setup-v2-subtitle">Configure the project source of truth used by AI, campaigns, and launch execution.</p>
+public/control-center/pages/setup.js:1380:              <p class="setup-header-project">Project: ${escapeHtml(asString(values.project_name) || projectName || "No project selected")}</p>
+public/control-center/pages/setup.js:1381:              <div class="setup-operating-chips">
+public/control-center/pages/setup.js:1382:                <span class="card-badge neutral" id="setupTopCompletionBadge">Fields configured: ${escapeHtml(String(completionPercent))}%</span>
+public/control-center/pages/setup.js:1383:                <span class="card-badge ${getLaunchReadinessSummary({ missingFields, missingAssets, missingConnectors, criticalGaps }).tone}" id="setupTopReadinessBadge">${escapeHtml(getLaunchReadinessSummary({ missingFields, missingAssets, missingConnectors, criticalGaps }).label)}</span>
+public/control-center/pages/setup.js:1386:            <div class="setup-v2-toolbar">
+public/control-center/pages/setup.js:1387:              <button id="setupSaveBackendBtn" class="btn btn-primary" type="button">Save Setup</button>
+public/control-center/pages/setup.js:1388:              <span class="setup-save-note">Draft is local browser state. Save writes setup to project data.</span>
+public/control-center/pages/setup.js:1392:          <div class="setup-top-summary-row" aria-label="Configuration intelligence summary">
+public/control-center/pages/setup.js:1393:            <article class="setup-top-summary-item">
+public/control-center/pages/setup.js:1395:              <strong id="setupCompletionPercentValue" class="setup-wizard-progress-value">${escapeHtml(String(completionPercent))}%</strong>
+public/control-center/pages/setup.js:1396:              <div class="setup-progress" aria-label="Setup completion">
+public/control-center/pages/setup.js:1397:                <div class="setup-progress-track">
+public/control-center/pages/setup.js:1398:                  <div id="setupCompletionBar" class="setup-progress-fill" style="width:${escapeHtml(String(completionPercent))}%"></div>
+public/control-center/pages/setup.js:1402:            <article class="setup-top-summary-item">
+public/control-center/pages/setup.js:1404:              <strong><span id="setupRequiredCompleted">${escapeHtml(String(requiredCompleted))}</span>/<span id="setupRequiredTotal">${escapeHtml(String(requiredNames.length))}</span></strong>
+public/control-center/pages/setup.js:1405:              <span class="setup-helper"><span id="setupMissingCount">${escapeHtml(String(missingFields.length))}</span> missing</span>
+public/control-center/pages/setup.js:1407:            <article class="setup-top-summary-item">
+public/control-center/pages/setup.js:1409:              <strong id="setupDependencyGapCount">${escapeHtml(String(dependencyGapCount))}</strong>
+public/control-center/pages/setup.js:1410:              <span class="setup-helper">Assets and connectors pending</span>
+public/control-center/pages/setup.js:1412:            <article class="setup-top-summary-item">
+public/control-center/pages/setup.js:1414:              <strong>${escapeHtml(formatPercent(readinessScore))}</strong>
+public/control-center/pages/setup.js:1415:              <div class="setup-inline-status-row">
+public/control-center/pages/setup.js:1416:                <span id="setupReadinessBadge" class="card-badge ${wizardStatus === "Ready" ? "success" : "warning"}">${escapeHtml(wizardStatus)}</span>
+public/control-center/pages/setup.js:1417:                <span id="setupValidationBadge" class="card-badge ${escapeHtml(validationSummary.tone)}">${escapeHtml(validationSummary.label)}</span>
+public/control-center/pages/setup.js:1419:              <span class="setup-helper">Updated ${escapeHtml(lastSavedAt)}</span>
+public/control-center/pages/setup.js:1423:          <div class="setup-guidance-strip">
+public/control-center/pages/setup.js:1425:            <p id="setupNextBestAction">${escapeHtml(nextBestAction)}</p>
+public/control-center/pages/setup.js:1426:            <div class="setup-config-intel-metrics">
+public/control-center/pages/setup.js:1427:              <span>Required missing: <strong id="setupReadinessMissingFields">${escapeHtml(String(missingFields.length))}</strong></span>
+public/control-center/pages/setup.js:1428:              <span>Assets missing: <strong id="setupReadinessMissingAssets">${escapeHtml(String(missingAssets.length))}</strong></span>
+public/control-center/pages/setup.js:1429:              <span>Connectors missing: <strong id="setupReadinessMissingConnectors">${escapeHtml(String(missingConnectors.length))}</strong></span>
+public/control-center/pages/setup.js:1434:        <div class="setup-wizard-layout">
+public/control-center/pages/setup.js:1435:          <aside class="setup-wizard-sidebar card setup-smart-steps-panel">
+public/control-center/pages/setup.js:1437:            <p class="setup-helper">Select a step to load that section in the main form.</p>
+public/control-center/pages/setup.js:1438:            <div class="setup-smart-recommended-inline">
+public/control-center/pages/setup.js:1439:              <span class="setup-smart-recommended-label">Recommended</span>
+public/control-center/pages/setup.js:1440:              <button id="setupRecommendedStepBtn" class="btn btn-ghost" type="button" data-setup-open-step="${escapeHtml(getRecommendedStep(values).id)}">
+public/control-center/pages/setup.js:1441:                <span id="setupRecommendedStepTitle">${escapeHtml(getRecommendedStep(values).title)}</span>
+public/control-center/pages/setup.js:1444:            <div class="setup-smart-step-list" role="tablist" aria-label="Setup wizard steps">
+public/control-center/pages/setup.js:1449:                  <button class="setup-wizard-step ${index === 0 ? "is-active" : ""}" type="button" data-setup-step="${escapeHtml(step.id)}" role="tab" aria-current="${index === 0 ? "step" : "false"}">
+public/control-center/pages/setup.js:1450:                    <span class="setup-wizard-step-meta">Step ${index + 1}</span>
+public/control-center/pages/setup.js:1451:                    <span class="setup-wizard-step-title"><span class="setup-step-icon" aria-hidden="true">${escapeHtml(icon)}</span>${escapeHtml(step.title)}</span>
+public/control-center/pages/setup.js:1452:                    <span class="setup-wizard-step-purpose">${escapeHtml(step.description)}</span>
+public/control-center/pages/setup.js:1453:                    <span id="setupStepBadge-${escapeHtml(step.id)}" class="card-badge ${status.tone}">${escapeHtml(status.label)}</span>
+public/control-center/pages/setup.js:1454:                    <span class="setup-smart-step-note tone-${escapeHtml(status.tone)}" data-setup-step-note="${escapeHtml(step.id)}">${status.tone === "danger" ? "Needs required data" : status.tone === "warning" ? "Partially complete" : ""}</span>
+public/control-center/pages/setup.js:1461:          <section class="setup-wizard-form card setup-smart-form-panel">
+public/control-center/pages/setup.js:1462:            <div class="setup-wizard-form-head">
+public/control-center/pages/setup.js:1465:                <strong id="setupStepCounter" class="setup-wizard-step-counter">1/${STEP_DEFINITIONS.length}</strong>
+public/control-center/pages/setup.js:1467:              <div class="setup-wizard-nav-actions">
+public/control-center/pages/setup.js:1468:                <button id="setupPrevStepBtn" class="btn btn-ghost" type="button">Previous</button>
+public/control-center/pages/setup.js:1469:                <button id="setupNextStepBtn" class="btn btn-secondary" type="button">Next</button>
+public/control-center/pages/setup.js:1473:            <form id="setupProjectForm" class="setup-v2-form">
+public/control-center/pages/setup.js:1474:              <section class="setup-wizard-step-panel is-active" data-setup-step-panel="business-basics">
+public/control-center/pages/setup.js:1476:                <div class="setup-form-grid setup-form-grid-2">
+public/control-center/pages/setup.js:1484:              <section class="setup-wizard-step-panel" data-setup-step-panel="brand-identity" hidden>
+public/control-center/pages/setup.js:1487:                <div class="setup-form-grid">
+public/control-center/pages/setup.js:1496:              <section class="setup-wizard-step-panel" data-setup-step-panel="market-language" hidden>
+public/control-center/pages/setup.js:1499:                <div class="setup-form-grid setup-form-grid-3">
+public/control-center/pages/setup.js:1506:              <section class="setup-wizard-step-panel" data-setup-step-panel="audience" hidden>
+public/control-center/pages/setup.js:1509:                <div class="setup-form-grid">
+public/control-center/pages/setup.js:1516:              <section class="setup-wizard-step-panel" data-setup-step-panel="goals" hidden>
+public/control-center/pages/setup.js:1519:                <div class="setup-form-grid">
+public/control-center/pages/setup.js:1525:              <section class="setup-wizard-step-panel" data-setup-step-panel="competitors" hidden>
+public/control-center/pages/setup.js:1528:                <div class="setup-form-grid">
+public/control-center/pages/setup.js:1534:              <section class="setup-wizard-step-panel" data-setup-step-panel="channels" hidden>
+public/control-center/pages/setup.js:1537:                <div class="setup-form-grid">
+public/control-center/pages/setup.js:1539:                  ${renderField({ name: "operator_notes", label: "Operator notes", value: values.operator_notes, helper: "Important setup notes for the next operator.", placeholder: "Any constraints, watchouts, or handoff notes", escapeHtml, multiline: true, rows: 4 })}
+public/control-center/pages/setup.js:1546:        <div class="setup-wizard-side-panels">
+public/control-center/pages/setup.js:1547:          <section class="card setup-wizard-missing-panel setup-smart-gaps-panel">
+public/control-center/pages/setup.js:1550:              <button id="setupCompleteNowBtn" class="btn btn-secondary" type="button">Complete now</button>
+public/control-center/pages/setup.js:1552:            <div id="setupMissingActions">
+public/control-center/pages/setup.js:1554:                ? `<div class="setup-smart-gap-list">${missingFieldInsights.map((item) => `
+public/control-center/pages/setup.js:1555:                    <article class="setup-smart-gap-item">
+public/control-center/pages/setup.js:1560:                      <button class="btn btn-ghost" type="button" data-setup-jump-field="${escapeHtml(item.name)}" data-setup-jump-step="${escapeHtml(item.stepId)}">Fix now</button>
+public/control-center/pages/setup.js:1563:                : `<div class="empty-box">All required setup fields are complete.</div>`
+public/control-center/pages/setup.js:1566:            <div class="setup-wizard-missing-divider"></div>
+public/control-center/pages/setup.js:1568:            <div id="setupSystemGaps">
+public/control-center/pages/setup.js:1576:                "No operational blockers detected from readiness signals."
+public/control-center/pages/setup.js:1581:          <section class="card setup-smart-validation-panel">
+public/control-center/pages/setup.js:1584:              <button id="setupValidateNowBtn" class="btn btn-ghost" type="button">Validate now</button>
+public/control-center/pages/setup.js:1586:            <div class="setup-smart-diagnostics-grid">
+public/control-center/pages/setup.js:1587:              <article class="setup-smart-diagnostic-card">
+public/control-center/pages/setup.js:1590:                <p>Readiness status: ${escapeHtml(asString(readinessStatus) || "Unknown")}</p>
+public/control-center/pages/setup.js:1592:              <article class="setup-smart-diagnostic-card">
+public/control-center/pages/setup.js:1595:                <p>Critical readiness gaps reported by diagnostics.</p>
+public/control-center/pages/setup.js:1597:              <article class="setup-smart-diagnostic-card">
+public/control-center/pages/setup.js:1606:        <section class="card setup-smart-handoff-panel">
+public/control-center/pages/setup.js:1609:            <button id="setupSmartActionBtn" class="btn btn-secondary" type="button">Run next best action</button>
+public/control-center/pages/setup.js:1611:          <p class="setup-v2-subtitle">Safe actions only: save, navigate, or open AI context.</p>
+public/control-center/pages/setup.js:1612:          <div class="setup-smart-handoff-actions setup-smart-handoff-actions-primary">
+public/control-center/pages/setup.js:1613:            <button id="setupSaveBackendBtnBottom" class="btn btn-ghost" type="button">Save before continuing</button>
+public/control-center/pages/setup.js:1614:            <button id="setupContinueLibraryBtn" class="btn btn-secondary" type="button">Continue to Library</button>
+public/control-center/pages/setup.js:1615:            <button id="setupContinueIntegrationsBtn" class="btn btn-secondary" type="button">Continue to Integrations</button>
+public/control-center/pages/setup.js:1617:          <div class="setup-smart-handoff-actions setup-smart-handoff-actions-secondary">
+public/control-center/pages/setup.js:1618:            <div class="setup-action-group">
+public/control-center/pages/setup.js:1619:              <span class="setup-action-group-label">Continue</span>
+public/control-center/pages/setup.js:1620:              <button id="setupContinueCampaignBtn" class="btn btn-secondary" type="button">Continue to Campaign Studio</button>
+public/control-center/pages/setup.js:1622:            <div class="setup-action-group">
+public/control-center/pages/setup.js:1623:              <span class="setup-action-group-label">AI and review</span>
+public/control-center/pages/setup.js:1624:              <button id="setupAiCommandBtn" class="btn btn-ghost" type="button">Open AI Command with Setup Context</button>
+public/control-center/pages/setup.js:1625:              <button id="setupReviewMissingBtn" class="btn btn-ghost" type="button">Review missing setup items</button>
+public/control-center/pages/setup.js:1627:            <div class="setup-action-group">
+public/control-center/pages/setup.js:1628:              <span class="setup-action-group-label">Local draft</span>
+public/control-center/pages/setup.js:1629:              <button id="setupSaveDraftBtn" class="btn btn-ghost" type="button">Save Draft (Local)</button>
+public/control-center/pages/setup.js:1630:              <button id="setupResetDraftBtn" class="btn btn-ghost" type="button">Reset Draft</button>
+public/control-center/pages/setup.js:1635:        ${renderBusinessTemplatePanel({ values, overviewData, escapeHtml })}
+public/control-center/pages/setup.js:1637:        <section class="card setup-smart-ai-tools">
+public/control-center/pages/setup.js:1642:          <p class="setup-v2-subtitle">Use AI to review setup quality, missing launch inputs, and channel priorities.</p>
+public/control-center/pages/setup.js:1643:          <div class="setup-smart-handoff-actions">
+public/control-center/pages/setup.js:1644:            <button id="setupAiPositioningBtn" class="btn btn-ghost" type="button">Review positioning</button>
+public/control-center/pages/setup.js:1645:            <button id="setupAiAudienceBtn" class="btn btn-ghost" type="button">Find missing launch inputs</button>
+public/control-center/pages/setup.js:1646:            <button id="setupAiToneBtn" class="btn btn-ghost" type="button">Suggest channel priorities</button>
+public/control-center/pages/setup.js:1647:            <button id="setupAiFillMissingBtn" class="btn btn-secondary" type="button">Prepare setup checklist</button>
+public/control-center/pages/setup.js:1661:      saveProjectSetup,
+public/control-center/pages/setup.js:1664:      readinessScore,
+public/control-center/pages/setup.js:1665:      readinessStatus,
+public/control-center/pages/setup.js:1670:    const templateSelect = $("setupBusinessTemplateSelect");
+public/control-center/pages/setup.js:1671:    const templateApplyBtn = $("setupApplyTemplateBtn");
+public/control-center/pages/setup.js:1672:    const templateStatus = $("setupTemplateStatus");
+public/control-center/pages/setup.js:1715:    const saveBottomBtn = $("setupSaveBackendBtnBottom");
+public/control-center/pages/setup.js:1716:    const saveTopBtn = $("setupSaveBackendBtn");
+public/control-center/api.js:1:// public/control-center/api.js
+public/control-center/api.js:223:    normalized === "api.response.text.start" ||
+public/control-center/api.js:224:    normalized === "api.response.text.done" ||
+public/control-center/api.js:225:    normalized === "api.response.text.timeout" ||
+public/control-center/api.js:226:    normalized === "api.response.parse.start" ||
+public/control-center/api.js:227:    normalized === "api.response.parse.done" ||
+public/control-center/api.js:228:    normalized === "api.response.parse.error" ||
+public/control-center/api.js:229:    normalized === "api.response.json.fallback.done" ||
+public/control-center/api.js:230:    normalized === "api.response.json.fallback.error" ||
+public/control-center/api.js:231:    normalized === "api.response.json.fallback.timeout" ||
+public/control-center/api.js:251:    window.dispatchEvent(new CustomEvent("mh:control-center-api-trace", {
+public/control-center/api.js:254:        stage: String(stage || "api.trace"),
+public/control-center/api.js:349:      emitApiRuntimeTrace("api.response.text.timeout", {
+public/control-center/api.js:368:                fallbackTimeoutError.parseStage = "api.response.json.fallback.timeout";
+public/control-center/api.js:380:          emitApiRuntimeTrace("api.response.json.fallback.done", {
+public/control-center/api.js:392:            parseStage: "api.response.json.fallback.done"
+public/control-center/api.js:396:            ? "api.response.json.fallback.timeout"
+public/control-center/api.js:397:            : "api.response.json.fallback.error";
+public/control-center/api.js:399:          emitApiRuntimeTrace("api.response.json.fallback.error", {
+public/control-center/api.js:429:        parseStage: "api.response.text.timeout",
+public/control-center/api.js:466:  emitApiRuntimeTrace("api.response.parse.start", {
+public/control-center/api.js:483:    emitApiRuntimeTrace("api.response.parse.done", {
+public/control-center/api.js:493:    emitApiRuntimeTrace("api.response.parse.error", {
+public/control-center/api.js:510:      parseStage: "api.response.parse.error",
+public/control-center/api.js:525:    parseStage = String(bodyReadResult.parseStage || "api.response.json.fallback.done");
+public/control-center/api.js:536:      parseStage = "api.response.parse.done";
+public/control-center/api.js:538:      parseStage = "api.response.parse.error";
+public/control-center/api.js:620:async function fetchWithTimeout(path, init = {}, timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS) {
+public/control-center/api.js:663:    const requestPromise = fetch(buildUrl(path), {
+public/control-center/api.js:707:  const response = await fetchWithTimeout(path, {
+public/control-center/api.js:725:  const response = await fetchWithTimeout(path, {
+public/control-center/api.js:765:  const response = await fetchWithTimeout(path, {
+public/control-center/api.js:790:  const response = await fetchWithTimeout(path, {
+public/control-center/api.js:791:    method: "POST",
+public/control-center/api.js:806:export async function fetchProtectedMediaBlob(path, timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS) {
+public/control-center/api.js:821:  const response = await fetchWithTimeout(normalizedPath, {
+public/control-center/api.js:886:    overview: payload?.overview || null,
+public/control-center/api.js:887:    readiness: payload?.readiness || null,
+public/control-center/api.js:888:    assets: payload?.assets || null,
+public/control-center/api.js:891:    connectors: payload?.connectors || null,
+public/control-center/api.js:930:      total_assets: 0,
+public/control-center/api.js:931:      assets: []
+public/control-center/api.js:935:  if (section === "connectors") {
+public/control-center/api.js:938:      readiness: {
+public/control-center/api.js:939:        readiness_score: 0,
+public/control-center/api.js:1023:  const response = await fetch("/media-manager/projects", {
+public/control-center/api.js:1024:    method: "POST",
+public/control-center/api.js:1047:export async function fetchProjects() {
+public/control-center/api.js:1071:export async function fetchAllCoreProjectData(projectName) {
+public/control-center/api.js:1101:  const requiredSections = ["overview", "readiness", "assets"];
+public/control-center/api.js:1129:        const fallbackProjects = await fetchProjects();
+public/control-center/api.js:1181:        "connectors",
+public/control-center/api.js:1196:    overview: requiredData.overview,
+public/control-center/api.js:1197:    readiness: requiredData.readiness,
+public/control-center/api.js:1198:    assets: requiredData.assets,
+public/control-center/api.js:1201:    connectors: requiredDashboardPayload?.connectors || createOptionalFallback(safeProjectName, "connectors"),
+public/control-center/api.js:1221:      section: "connectors",
+public/control-center/api.js:1222:      load: (dashboardPromise) => dashboardPromise.then((payload) => extractDashboardSection(payload, "connectors"))
+public/control-center/api.js:1226:      load: () => fetchProjectOperations(safeProjectName)
+public/control-center/api.js:1230:      load: () => fetchProjectInsights(safeProjectName)
+public/control-center/api.js:1234:      load: () => fetchProjectLearning(safeProjectName)
+public/control-center/api.js:1243:    connectors: requiredDashboardPayload?.connectors || createOptionalFallback(safeProjectName, "connectors"),
+public/control-center/api.js:1250:      load: () => fetchProjectOperations(safeProjectName)
+public/control-center/api.js:1254:      load: () => fetchProjectInsights(safeProjectName)
+public/control-center/api.js:1258:      load: () => fetchProjectLearning(safeProjectName)
+public/control-center/api.js:1309:  normalized.connectors = normalized.connectors || basePayload.connectors || {};
+public/control-center/api.js:1315:    fetchedAt: new Date().toISOString()
+public/control-center/api.js:1328:export async function fetchAssetCatalog() {
+public/control-center/api.js:1335:export async function fetchProjectInsights(projectName) {
+public/control-center/api.js:1341:    `/api/insights/${encodeURIComponent(projectName)}`,
+public/control-center/api.js:1346:export async function fetchProjectLearning(projectName) {
+public/control-center/api.js:1352:    `/api/learning/${encodeURIComponent(projectName)}`,
+public/control-center/api.js:1357:export async function fetchProjectOperations(projectName) {
+public/control-center/api.js:1374:  const response = await fetch(`/media-manager/project/${encodedProjectName}/apply-template`, {
+public/control-center/api.js:1375:    method: "POST",
+public/control-center/api.js:1400:export async function saveProjectSetup(projectName, payload = {}) {
+public/control-center/api.js:1406:    `/media-manager/project/${encodeURIComponent(projectName)}/setup`,
+public/control-center/api.js:1407:    "POST",
+public/control-center/api.js:1409:    "Failed to save project setup"
+public/control-center/api.js:1420:    "POST",
+public/control-center/api.js:1436:    `/media-manager/project/${encodeURIComponent(projectName)}/assets/${encodeURIComponent(assetId)}/status`,
+public/control-center/api.js:1437:    "POST",
+public/control-center/api.js:1461:    `/media-manager/project/${encodeURIComponent(projectName)}/assets/${encodeURIComponent(assetId)}/rename`,
+public/control-center/api.js:1462:    "POST",
+public/control-center/api.js:1478:    `/media-manager/project/${encodeURIComponent(projectName)}/assets/${encodeURIComponent(assetId)}/source-of-truth`,
+public/control-center/api.js:1479:    "POST",
+public/control-center/api.js:1480:    { source_of_truth: Boolean(sourceOfTruth) },
+public/control-center/api.js:1495:    `/media-manager/project/${encodeURIComponent(projectName)}/assets/${encodeURIComponent(assetId)}/archive`,
+public/control-center/api.js:1496:    "POST",
+public/control-center/api.js:1512:    `/media-manager/project/${encodeURIComponent(projectName)}/assets/${encodeURIComponent(assetId)}/delete`,
+public/control-center/api.js:1513:    "POST",
+public/control-center/api.js:1530:    "POST",
+public/control-center/api.js:1547:    "POST",
+public/control-center/api.js:1560:    "POST",
+public/control-center/api.js:1573:    "POST",
+public/control-center/api.js:1588:    "POST",
+public/control-center/api.js:1602:    "POST",
+public/control-center/api.js:1627:    "POST",
+public/control-center/api.js:1656:    "POST",
+public/control-center/api.js:1662:export async function fetchProjectGovernance(projectName, params = {}) {
+public/control-center/api.js:1681:export async function fetchProjectGovernancePolicy(projectName) {
+public/control-center/api.js:1699:    "POST",
+public/control-center/api.js:1720:    "POST",
+public/control-center/api.js:1746:export async function fetchProjectIntegrationControlCenter(projectName) {
+public/control-center/api.js:1752:    `/media-manager/project/${encodeURIComponent(projectName)}/integrations/control-center`,
+public/control-center/api.js:1767:    `/media-manager/project/${encodeURIComponent(projectName)}/integrations/${encodeURIComponent(integrationId)}/connect`,
+public/control-center/api.js:1768:    "POST",
+public/control-center/api.js:1784:    `/media-manager/project/${encodeURIComponent(projectName)}/integrations/${encodeURIComponent(integrationId)}/reconnect`,
+public/control-center/api.js:1785:    "POST",
+public/control-center/api.js:1801:    `/media-manager/project/${encodeURIComponent(projectName)}/integrations/${encodeURIComponent(integrationId)}/test`,
+public/control-center/api.js:1802:    "POST",
+public/control-center/api.js:1818:    `/media-manager/project/${encodeURIComponent(projectName)}/integrations/${encodeURIComponent(integrationId)}/sync`,
+public/control-center/api.js:1819:    "POST",
+public/control-center/api.js:1835:    `/media-manager/project/${encodeURIComponent(projectName)}/integrations/${encodeURIComponent(integrationId)}/import-history`,
+public/control-center/api.js:1836:    "POST",
+public/control-center/api.js:1852:    `/media-manager/project/${encodeURIComponent(projectName)}/integrations/${encodeURIComponent(integrationId)}/disconnect`,
+public/control-center/api.js:1853:    "POST",
+public/control-center/api.js:1866:    "POST",
+public/control-center/api.js:1883:    "POST",
+public/control-center/api.js:1900:    "POST",
+public/control-center/api.js:1917:    "POST",
+public/control-center/api.js:1934:    "POST",
+public/control-center/api.js:1940:export async function fetchProjectOperationsSchema(projectName) {
+public/control-center/api.js:1951:export async function fetchProjectTaskCenter(projectName) {
+public/control-center/api.js:1962:export async function fetchProjectQueueCenter(projectName) {
+public/control-center/api.js:1973:export async function fetchProjectJobMonitor(projectName) {
+public/control-center/api.js:1984:export async function fetchProjectNotificationCenter(projectName) {
+public/control-center/api.js:1995:export async function fetchProjectTeam(projectName) {
+public/control-center/api.js:2013:    "POST",
+public/control-center/api.js:2048:    "POST",
+public/control-center/api.js:2093:    "POST",
+public/control-center/api.js:2142:    "POST",
+public/control-center/api.js:2150:    "/api/media/improve-prompt",
+public/control-center/api.js:2151:    "POST",
+public/control-center/api.js:2159:    "/api/media/brand-check",
+public/control-center/api.js:2160:    "POST",
+public/control-center/api.js:2168:    "/api/media/generate-image",
+public/control-center/api.js:2169:    "POST",
+public/control-center/api.js:2177:    "/api/media/generate-video-brief",
+public/control-center/api.js:2178:    "POST",
+public/control-center/api.js:2186:    "/api/media/generate-voice-script",
+public/control-center/api.js:2187:    "POST",
+public/control-center/api.js:2195:    "/api/media/generate-campaign-pack",
+public/control-center/api.js:2196:    "POST",
+public/control-center/api.js:2240:    "POST",
+public/control-center/api.js:2257:    "POST",

@@ -1,0 +1,52 @@
+111:const workflowAutomationState = {
+172:function normalizeRunStatus(status) {
+181:  const runStatus = normalizeRunStatus(status);
+211:function createEmptyRunState() {
+225:    acc[workflow.id] = createEmptyRunState();
+320:      runsByWorkflow: createRunsMap(),
+346:    session.runsByWorkflow = session.runsByWorkflow || createRunsMap();
+398:  session.runsByWorkflow = nextRuns;
+453:  const allRuns = Object.values(asObject(session.runsByWorkflow));
+464:    const normalized = normalizeRunStatus(run.status);
+507:function buildWorkflowPrompt(workflow, inputs, context) {
+522:function buildFallbackOutput(workflow, inputs, context) {
+707:        ${esc(workflowAutomationState.progress || "")}
+711:        ${esc(workflowAutomationState.result || "")}
+832:          const run = asObject(session.runsByWorkflow[workflow.id]);
+895:      <div class="wfexec-meta">Workflow: ${escapeHtml(workflow.title)} · Status: ${escapeHtml(titleCase(normalizeRunStatus(run.status)))}</div>
+953:    const run = session.runsByWorkflow[workflowId];
+955:    run.status = "completed";
+1157:    const run = session.runsByWorkflow[workflow.id];
+1158:    run.status = "running";
+1178:        prompt: firstNonEmpty(message, buildWorkflowPrompt(workflow, session.inputsByWorkflow[workflow.id], contextModel)),
+1184:      const output = asObject(result?.output || result?.run?.output) || buildFallbackOutput(workflow, session.inputsByWorkflow[workflow.id], contextModel);
+1185:      run.status = "completed";
+1196:      run.status = "failed";
+1234:  const run = session.runsByWorkflow[workflow.id];
+1333:  async function runWorkflow(workflowId) {
+1353:    const activeRun = session.runsByWorkflow[activeWorkflow.id];
+1376:        prompt: buildWorkflowPrompt(activeWorkflow, activeInputs, freshContext),
+1387:        : buildFallbackOutput(activeWorkflow, activeInputs, freshContext);
+1428:  if (runBtn) runBtn.onclick = () => runWorkflow(session.selectedWorkflowId);
+1430:  if (runBtnMain) runBtnMain.onclick = () => runWorkflow(session.selectedWorkflowId);
+1436:      runWorkflow(rec.workflowId);
+1462:        run: session.runsByWorkflow[recWorkflow.id],
+1473:    button.onclick = () => runWorkflow(button.getAttribute("data-wf-catalog-run") || session.selectedWorkflowId);
+1495:        run: session.runsByWorkflow[workflowId],
+1631:        workflowAutomationState.result = "No safe automation steps available.";
+1638:      workflowAutomationState.lastPlan = plan;
+1639:      workflowAutomationState.cursor = 0;
+1640:      workflowAutomationState.result = "";
+1644:          workflowAutomationState.progress = `Step ${index} / ${total}: ${step.action} (${stepResult.status})`;
+1648:      workflowAutomationState.lastResults = asArray(result.results);
+1649:      workflowAutomationState.result = result.status === "success" ? "Automation run completed." : "Automation stopped before completion.";
+1650:      showMessage?.(workflowAutomationState.result);
+1660:        workflowAutomationState.result = "No safe automation steps available.";
+1668:      const nextIndex = Math.min(workflowAutomationState.cursor, plan.length - 1);
+1673:          workflowAutomationState.progress = `Step ${nextIndex + index} / ${plan.length}: ${step.action} (${runResult.status})`;
+1677:      workflowAutomationState.cursor = Math.min(nextIndex + 1, plan.length);
+1678:      workflowAutomationState.lastPlan = plan;
+1679:      workflowAutomationState.lastResults = [...asArray(workflowAutomationState.lastResults), ...asArray(stepResult.results)];
+1680:      workflowAutomationState.result = workflowAutomationState.cursor >= plan.length
+1683:      showMessage?.(workflowAutomationState.result);
+2145:                          <span>${escapeHtml(titleCase(normalizeRunStatus(item.status || "draft")))}</span>

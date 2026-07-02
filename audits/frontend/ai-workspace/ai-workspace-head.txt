@@ -1,0 +1,260 @@
+import {
+	getSharedHandoff,
+	setSharedAiDraft,
+	setSharedHandoff
+} from "../shared-context.js";
+import {
+	getCategoryReadinessList
+} from "../asset-library.js";
+
+// ============================================================
+//  AI TEAM DEFINITIONS
+// ============================================================
+
+const MODE_DEFS = [
+	{
+		id: "strategist",
+		label: "Strategist",
+		icon: "🎯",
+		summary: "Campaign concepts, launch plans, channel mix, and offer strategy.",
+		routeHint: "campaign-studio"
+	},
+	{
+		id: "writer",
+		label: "Writer",
+		icon: "✍️",
+		summary: "Captions, hooks, scripts, emails, and landing page copy.",
+		routeHint: "content-studio"
+	},
+	{
+		id: "designer",
+		label: "Designer",
+		icon: "🎨",
+		summary: "Visual direction, creative brief, format guidance, and brand consistency.",
+		routeHint: "content-studio"
+	},
+	{
+		id: "media",
+		label: "Media Agent",
+		icon: "📸",
+		summary: "Image selection, video direction, asset readiness, and media strategy.",
+		routeHint: "library"
+	},
+	{
+		id: "ads",
+		label: "Ads Specialist",
+		icon: "📢",
+		summary: "Ad concepts, targeting angles, platform copy, and paid strategy.",
+		routeHint: "ads-manager"
+	},
+	{
+		id: "analyst",
+		label: "Analyst",
+		icon: "📊",
+		summary: "SEO, performance data, content insights, and traffic patterns.",
+		routeHint: "insights"
+	},
+	{
+		id: "researcher",
+		label: "Researcher",
+		icon: "🔬",
+		summary: "Competitors, market trends, audience research, and positioning gaps.",
+		routeHint: "research"
+	},
+	{
+		id: "operations",
+		label: "Operations",
+		icon: "⚙️",
+		summary: "Tasks, timelines, handoffs, approvals, and execution plans.",
+		routeHint: "workflows"
+	}
+];
+
+// Map legacy mode IDs from older sessions to new team IDs
+const MODE_ID_ALIASES = {
+	executive: "operations",
+	campaign: "strategist",
+	content: "writer",
+	seo: "analyst",
+	research: "researcher"
+};
+
+// 4 quick-action prompts shown in the composer
+const QUICK_ACTIONS = [
+	{ icon: "🚀", label: "Launch Campaign", sub: "Build a campaign plan", template: "Build a launch campaign for {project}. Map the channels, offer, phases, and required assets." },
+	{ icon: "✍️", label: "Generate Content", sub: "Write hooks, captions & scripts", template: "Generate content for {project}. Create hooks, caption ideas, and a reel script for the next product push." },
+	{ icon: "📊", label: "Analyze Performance", sub: "Review what's working", template: "Analyze current performance for {project}. What content, campaigns, and channels are working best right now?" },
+	{ icon: "🔧", label: "Fix Readiness", sub: "Close critical gaps", template: "What are the critical readiness gaps for {project} and what exactly needs to be done to fix them?" }
+];
+
+const AI_COMMAND_LOCAL_DRAFTS_KEY = "mh-ai-command-local-drafts-v1";
+
+const COMMAND_TYPES = [
+	{ id: "strategy", label: "Strategy" },
+	{ id: "content", label: "Content" },
+	{ id: "campaign", label: "Campaign" },
+	{ id: "integration", label: "Integration" },
+	{ id: "asset", label: "Asset" },
+	{ id: "research", label: "Research" },
+	{ id: "report", label: "Report" },
+	{ id: "automation", label: "Automation" }
+];
+
+const TARGET_TYPES = [
+	{ id: "current-project", label: "Current project" },
+	{ id: "selected-context", label: "Selected page/context" },
+	{ id: "campaign", label: "Campaign" },
+	{ id: "product", label: "Product" }
+];
+
+const IMPACT_CHIP_LABELS = [
+	"Launch readiness",
+	"Content",
+	"Campaign",
+	"Integrations",
+	"Assets",
+	"Automation"
+];
+
+const AGENT_CARDS = [
+	{
+		id: "strategist",
+		name: "Strategist",
+		purpose: "Build high-leverage decisions for launch sequencing and channel focus.",
+		bestUse: "When priorities compete and you need the best next move.",
+		suggestedPrompt: "Act as Strategist and propose the next campaign move based on current readiness and integrations."
+	},
+	{
+		id: "writer",
+		name: "Writer",
+		purpose: "Transform strategy into high-converting copy and scripts.",
+		bestUse: "When campaigns need content batches fast.",
+		suggestedPrompt: "Act as Writer and generate content angles for the current project and active campaign."
+	},
+	{
+		id: "designer",
+		name: "Designer",
+		purpose: "Define creative direction, visual hierarchy, and asset guidance.",
+		bestUse: "When briefs need clear visual standards.",
+		suggestedPrompt: "Act as Designer and propose creative directions tied to current campaign goals."
+	},
+	{
+		id: "media",
+		name: "Media Planner",
+		purpose: "Align media formats with channels, cadence, and readiness.",
+		bestUse: "When planning image/video requirements across channels.",
+		suggestedPrompt: "Act as Media Planner and map media needs by platform for this launch cycle."
+	},
+	{
+		id: "ads",
+		name: "Ads Specialist",
+		purpose: "Optimize paid opportunities, creative testing, and budget decisions.",
+		bestUse: "When preparing or fixing paid performance.",
+		suggestedPrompt: "Act as Ads Specialist and propose paid experiments based on current readiness and data coverage."
+	},
+	{
+		id: "analyst",
+		name: "Analyst",
+		purpose: "Turn multi-channel signals into prioritized actions.",
+		bestUse: "When you need evidence-backed recommendations.",
+		suggestedPrompt: "Act as Analyst and summarize what is working, what is weak, and what to do next."
+	},
+	{
+		id: "researcher",
+		name: "Researcher",
+		purpose: "Strengthen decisions with market, competitor, and audience insight.",
+		bestUse: "When strategy needs stronger external evidence.",
+		suggestedPrompt: "Act as Researcher and identify high-confidence market opportunities for this project."
+	},
+	{
+		id: "operations",
+		name: "Operations Assistant",
+		purpose: "Translate intent into executable workflows and handoffs.",
+		bestUse: "When actions span multiple pages and teams.",
+		suggestedPrompt: "Act as Operations Assistant and convert priorities into a practical execution sequence."
+	}
+];
+
+const aiSessions = new Map();
+let lastRenderContext = null;
+let aiCommandBridgeRegistered = false;
+let aiAutoModeUnsubscribe = null;
+const aiAutomationState = {
+	progress: "",
+	result: ""
+};
+
+function buildAutoPlanFromCommand(commandText, session) {
+	const command = humanizeValue(commandText || session?.draftMessage, "Prepare workflow action from AI command.");
+	const plan = [
+		{
+			id: `auto-generate-${Date.now()}`,
+			type: "generate_prompt",
+			targetPage: "ai-command",
+			action: "Generate prompt from AI command",
+			payload: {
+				prompt: command,
+				title: "AI command auto plan"
+			},
+			priority: "recommended"
+		},
+		{
+			id: `auto-workflow-${Date.now()}`,
+			type: "prepare_workflow",
+			targetPage: "workflows",
+			action: "Prepare workflow from AI command",
+			payload: {
+				prompt: command,
+				reason: "AI command prepared for workflow execution."
+			},
+			priority: "recommended"
+		}
+	];
+
+	if (/publish\s*now|send\s*external|paid\s*ads|final\s*approval/i.test(command)) {
+		plan.push({
+			id: `auto-gated-${Date.now()}`,
+			type: "publish_now",
+			targetPage: "publishing",
+			action: "Publish now to external channels",
+			payload: {
+				prompt: command,
+				reason: "Requires approval gate before external publishing actions."
+			},
+			priority: "critical"
+		});
+	}
+
+	return plan;
+}
+
+// ============================================================
+//  HELPERS
+// ============================================================
+
+function asArray(value) {
+	return Array.isArray(value) ? value : [];
+}
+
+function asObject(value) {
+	return value && typeof value === "object" ? value : {};
+}
+
+function asString(value) {
+	if (value == null) return "";
+	return String(value);
+}
+
+function humanizeValue(value, fallback = "") {
+	if (value == null) return fallback;
+	if (typeof value === "string") {
+		const clean = value.trim();
+		return clean === "[object Object]" ? fallback : clean;
+	}
+	if (typeof value === "number" || typeof value === "boolean") {
+		return String(value);
+	}
+	if (Array.isArray(value)) {
+		return value.map((item) => humanizeValue(item)).filter(Boolean).join("; ") || fallback;
+	}
+	if (typeof value === "object") {

@@ -1,0 +1,158 @@
+652:    <section class="page is-active" data-page="home">
+675:      <div class="home-command-center">
+677:        <section class="home-exec-header">
+678:          <div class="home-header-left">
+679:            <p class="home-header-eyebrow">Executive Command Center</p>
+680:            <h1 class="home-header-title">${escapeHtml(dashboard.projectName || "Project Command Center")}</h1>
+681:            <p class="home-header-subtitle">${escapeHtml(dashboard.oneLineSummary)}</p>
+684:          <div class="home-header-status">
+686:            <div class="home-header-score">
+688:              <span class="home-header-score-label">System Health</span>
+694:        <section class="mhos-next-action" aria-label="Next Best Action">
+695:          <div class="mhos-next-action-title-row">
+696:            <span class="mhos-next-action-urgency">${escapeHtml(dashboard.nextBestAction.urgencyLabel)}</span>
+697:            <span class="mhos-next-action-title">${escapeHtml(dashboard.nextBestAction.recommendation)}</span>
+699:          <div class="mhos-next-action-reason">
+701:            <span class="mhos-next-action-helper">Current executive priority.</span>
+703:          <div class="mhos-next-action-impact">
+705:            <span class="mhos-next-action-helper">Execution continues here.</span>
+707:          <div class="mhos-next-action-flow">
+708:            <span class="mhos-next-action-continuation">${escapeHtml(dashboard.nextBestAction.continuationSummary)}</span>
+709:            <span class="mhos-next-action-destination">Next: <strong>${escapeHtml(humanizeStatus(dashboard.nextBestAction.route))}</strong></span>
+711:          <div class="mhos-next-action-meta-row">
+712:            <span class="mhos-next-action-confidence">${escapeHtml(dashboard.nextBestAction.confidenceSummary)}</span>
+713:            <span class="mhos-next-action-escalation">${escapeHtml(dashboard.nextBestAction.escalationSummary)}</span>
+715:          <div class="mhos-next-action-actions">
+716:            <button id="homeNextActionBtn" class="mhos-next-action-btn" type="button">
+719:            <button id="homeAskNextActionBtn" class="mhos-next-action-btn is-ghost" type="button">
+726:        <div class="home-snapshot-grid executive-signal-grid">
+728:            <article class="card home-snapshot-card executive-signal-card">
+729:              <span class="executive-signal-label">${escapeHtml(item.title)}</span>
+730:              <strong class="executive-signal-value">${escapeHtml(item.value)}</strong>
+731:              <p class="executive-signal-detail">${escapeHtml(item.detail)}</p>
+738:        <article class="card home-workspace-section home-exception-section">
+739:          <div class="home-section-head">
+741:              <p class="card-label">Exceptions</p>
+743:              <span class="section-helper">${dashboard.totalBlockers ? "Top blockers only; deeper operational context stays below." : "The system is clear to execute on the next best action."}</span>
+749:            <div class="home-blocker-grid home-exception-grid">
+755:            <div class="home-empty-state home-exception-clear">
+763:        <div class="home-workspace-main">
+764:          <div class="home-workspace-grid">
+765:            <article class="card home-workspace-section">
+766:              <div class="home-section-head">
+768:                  <p class="card-label">Operational Readiness</p>
+770:                  <span class="section-helper">Shows what is ready for executive action.</span>
+779:              <div class="home-status-grid">
+780:                <div class="home-status-item">
+781:                  <span class="data-label">Publish Ready</span>
+784:                <div class="home-status-item">
+785:                  <span class="data-label">Media Ready</span>
+788:                <div class="home-status-item">
+789:                  <span class="data-label">Email</span>
+792:                <div class="home-status-item">
+793:                  <span class="data-label">Scheduled Jobs</span>
+799:            <article class="card home-workspace-section">
+800:              <div class="home-section-head">
+802:                  <p class="card-label">Launch Readiness Snapshot</p>
+804:                  <span class="section-helper">Tracks campaign, publishing, and media readiness. Shows current campaign state and next scheduled actions.</span>
+809:              <div class="home-campaign-info">
+810:                <div class="home-campaign-row">
+811:                  <span class="home-info-label">Execution Mode</span>
+814:                <div class="home-campaign-row">
+815:                  <span class="home-info-label">Next Scheduled</span>
+818:                <div class="home-campaign-row">
+819:                  <span class="home-info-label">Channels</span>
+827:          <article class="card home-workspace-section">
+828:            <div class="home-section-head">
+829:              <p class="card-label">Operating State Overview</p>
+831:              <span class="section-helper">Shows operational health and movement.</span>
+834:            <div class="home-status-board">
+836:                <article class="home-status-board-card">
+837:                  <span class="data-label">${escapeHtml(item.label)}</span>
+848:        <section class="card home-action-panel">
+849:          <div class="home-panel-head">
+851:              <p class="card-label">Navigate & Execute</p>
+856:          <div class="home-action-group">
+857:            <p class="home-action-group-title">Continue Setup & Configuration</p>
+858:            <button id="homeQuickReviewReadinessBtn" class="quick-action-btn" type="button">
+859:              <span class="home-action-title">Review Setup Foundation</span>
+860:              <span class="home-action-meta">Resolve foundation issues and complete setup.</span>
+864:          <div class="home-action-group">
+865:            <p class="home-action-group-title">Build & Launch</p>
+866:            <button id="homeQuickStartCampaignBtn" class="quick-action-btn" type="button">
+867:              <span class="home-action-title">Campaign Studio</span>
+868:              <span class="home-action-meta">Create launch waves and campaign briefs.</span>
+870:            <button id="homeQuickUploadAssetBtn" class="quick-action-btn" type="button">
+871:              <span class="home-action-title">Asset Library</span>
+872:              <span class="home-action-meta">Upload and organize brand assets.</span>
+876:          <div class="home-action-group">
+877:            <p class="home-action-group-title">Integrations & Automation</p>
+878:            <button id="homeQuickConnectPlatformBtn" class="quick-action-btn" type="button">
+879:              <span class="home-action-title">Integrations</span>
+880:              <span class="home-action-meta">Connect platforms and configure automation.</span>
+882:            <button id="homeOpenOperationsBtn" class="btn btn-secondary btn-sm" type="button">
+887:          <div class="home-action-group">
+888:            <p class="home-action-group-title">AI Guidance</p>
+889:            <button id="homeQuickOpenAiBtn" class="quick-action-btn" type="button">
+890:              <span class="home-action-title">Open AI Workspace</span>
+891:              <span class="home-action-meta">Get AI guidance on the next best action.</span>
+897:        <section class="card home-ai-guidance-panel">
+898:          <div class="home-panel-head">
+900:              <p class="card-label">Executive AI Guidance</p>
+902:              <span class="section-helper">AI explains blockers, turns next action into a plan, and routes guidance to the right workspace.</span>
+904:            <button id="homeOpenAiTeamBtn" class="btn btn-ghost btn-sm" type="button">
+909:          <div class="home-ai-prompt-grid">
+910:            <button id="homePromptNextBtn" class="home-ai-prompt-card" type="button">
+911:              <span class="home-prompt-title">What is the next executive action?</span>
+912:              <span class="home-prompt-meta">AI can clarify why this is the focus and what to do next.</span>
+915:            <button id="homePromptReadinessBtn" class="home-ai-prompt-card" type="button">
+916:              <span class="home-prompt-title">Why is readiness low?</span>
+917:              <span class="home-prompt-meta">AI explains blockers and readiness gaps in operational terms.</span>
+920:            <button id="homePromptLaunchBtn" class="home-ai-prompt-card" type="button">
+921:              <span class="home-prompt-title">Summarize launch blockers</span>
+922:              <span class="home-prompt-meta">AI prepares a risk summary for launch and escalation.</span>
+925:            <button id="homePromptPlanBtn" class="home-ai-prompt-card" type="button">
+926:              <span class="home-prompt-title">Turn next action into a plan</span>
+927:              <span class="home-prompt-meta">AI converts the next action into a stepwise operational plan.</span>
+931:          <div class="mhos-workforce-room">
+932:            <div class="mhos-workforce-head">
+933:              <span class="mhos-workforce-focus">AI Team Command Center</span>
+935:            <div class="mhos-workforce-flow">
+937:              <p class="mhos-workflow-chain-note">Roles represent operational handoffs, not personas. Only key roles shown.</p>
+938:              <div class="mhos-workflow-chain">
+942:                  const activeIdx = workflowChain.findIndex(card => card.status === "Active role");
+943:                  const blockedIdx = workflowChain.findIndex(card => card.status.toLowerCase().includes("blocked"));
+944:                  return workflowChain.map((card, idx) => {
+948:                      <div class="mhos-workflow-step${isActive ? ' mhos-workflow-active' : ''}${isBlocked ? ' mhos-workflow-blocked' : ''}" data-role-id="${escapeHtml(card.id)}">
+949:                        <div class="mhos-specialist-row">
+950:                          <div class="mhos-specialist-state mhos-specialist-state--${escapeHtml(card.tone)}">${escapeHtml(card.status)}</div>
+951:                          <div class="mhos-specialist-summary">
+952:                            <strong>${escapeHtml(card.name)}</strong>
+953:                            <span>${escapeHtml(card.summary)}</span>
+956:                        ${isActive ? `<div class="mhos-workflow-handoff" aria-label="Active handoff"></div>` : ""}
+957:                        ${isBlocked ? `<div class="mhos-workflow-blocked" aria-label="Blocked step"></div>` : ""}
+963:              <div class="mhos-ai-team-handoff-row">
+964:                <button id="homeOpenFullAiTeamBtn" class="btn btn-ghost btn-sm" type="button">Open Full Team</button>
+967:              <div class="mhos-orchestration-pressure">
+968:                <span class="mhos-orchestration-pressure-label">Orchestration Pressure</span>
+969:                <span class="mhos-orchestration-pressure-value">${escapeHtml(formatPercent(dashboard.health?.systemScore))}</span>
+972:              <div class="mhos-escalation-lane">
+991:                    <div class="mhos-escalation-item mhos-escalation-severity--${escapeHtml(item.severity)}" data-escalation-id="${escapeHtml(item.id)}">
+992:                      <span class="mhos-escalation-severity">${escapeHtml(item.severity)}</span>
+993:                      <span class="mhos-escalation-message">${escapeHtml(item.message)}</span>
+995:                  `).join("") : `<div class="mhos-escalation-item mhos-escalation-severity--neutral"><span class="mhos-escalation-message">No escalations</span></div>`;
+1004:        <section class="card home-customer-ops-panel">
+1005:          <div class="home-panel-head">
+1007:              <p class="card-label">Customer Operations Pulse</p>
+1009:              <span class="section-helper">Status and handoff only. No live CRM/IVR claims.</span>
+1012:          <div class="home-customer-ops-body">
+1013:            <span class="home-customer-ops-badge">${dashboard.health?.customerOpsStatus || "Planned/Partial"}</span>
+1014:            <span class="home-comm-readiness-badge">Communication Readiness: <strong>${dashboard.health?.commReadiness || "Planned/Not Ready"}</strong></span>
+1022:        <section class="card home-activity-panel">
+1023:          <div class="home-section-head">
+1025:              <p class="card-label">Recent Activity</p>
+1126:    const aiRoleCards = document.querySelectorAll(".home-ai-team-card, .mhos-specialist, .mhos-workflow-step[data-role-id]");
+1127:    aiRoleCards.forEach((card) => {
+1128:      const roleId = card.getAttribute("data-role-id");
+1129:      const roleName = card.querySelector("strong")?.textContent || "AI Specialist";
+1130:      card.onclick = () => handleAiRoleClick(roleId, roleName);

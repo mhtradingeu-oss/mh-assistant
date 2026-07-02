@@ -1,0 +1,658 @@
+runtime/orchestrator-service/lib/ops/backbone.js:18:// Any governance file that is missing policy_rules (or missing individual keys)
+runtime/orchestrator-service/lib/ops/backbone.js:21:  approval_before_publish: true,
+runtime/orchestrator-service/lib/ops/backbone.js:38:  approvals: 300,
+runtime/orchestrator-service/lib/ops/backbone.js:43:  handoffs: 250
+runtime/orchestrator-service/lib/ops/backbone.js:54:    approval_statuses: ['not_requested', 'pending', 'approved', 'rejected'],
+runtime/orchestrator-service/lib/ops/backbone.js:60:    approval_states: ['not_requested', 'pending', 'approved', 'rejected']
+runtime/orchestrator-service/lib/ops/backbone.js:68:    intents: ['inspect', 'task', 'workflow', 'campaign', 'content', 'media', 'approval', 'recommendation']
+runtime/orchestrator-service/lib/ops/backbone.js:76:    route_targets: ['campaign-studio', 'content-studio', 'media-studio', 'publishing', 'ads-manager', 'task-center', 'governance']
+runtime/orchestrator-service/lib/ops/backbone.js:82:  approvals: {
+runtime/orchestrator-service/lib/ops/backbone.js:95:  handoffs: {
+runtime/orchestrator-service/lib/ops/backbone.js:100:    categories: ['entity', 'workflow', 'approval', 'sync', 'publish', 'ai_routing', 'system']
+runtime/orchestrator-service/lib/ops/backbone.js:108:const TEAM_ROLE_DEFS = [
+runtime/orchestrator-service/lib/ops/backbone.js:121:    actions: ['draft_content', 'revise_copy', 'handoff_to_review', 'handoff_to_publishing']
+runtime/orchestrator-service/lib/ops/backbone.js:128:    actions: ['create_visuals', 'revise_visuals', 'handoff_media']
+runtime/orchestrator-service/lib/ops/backbone.js:135:    actions: ['create_video', 'review_video', 'handoff_video']
+runtime/orchestrator-service/lib/ops/backbone.js:155:    service_domains: ['research', 'governance'],
+runtime/orchestrator-service/lib/ops/backbone.js:161:    routes: ['governance', 'content-studio', 'media-studio', 'publishing'],
+runtime/orchestrator-service/lib/ops/backbone.js:162:    service_domains: ['governance'],
+runtime/orchestrator-service/lib/ops/backbone.js:168:    routes: ['home', 'settings', 'integrations', 'governance', 'workflows'],
+runtime/orchestrator-service/lib/ops/backbone.js:169:    service_domains: ['governance'],
+runtime/orchestrator-service/lib/ops/backbone.js:170:    actions: ['override_policy', 'manage_team', 'resolve_escalation', 'manage_permissions']
+runtime/orchestrator-service/lib/ops/backbone.js:174:const ROUTE_ROLE_ACCESS = {
+runtime/orchestrator-service/lib/ops/backbone.js:181:  governance: ['compliance_reviewer', 'admin', 'analyst'],
+runtime/orchestrator-service/lib/ops/backbone.js:185:  workflows: TEAM_ROLE_DEFS.map((role) => role.id),
+runtime/orchestrator-service/lib/ops/backbone.js:193:    owner_role: 'strategist',
+runtime/orchestrator-service/lib/ops/backbone.js:194:    review_role: 'admin',
+runtime/orchestrator-service/lib/ops/backbone.js:195:    handoff_to: ['writer', 'designer', 'ads_operator', 'analyst'],
+runtime/orchestrator-service/lib/ops/backbone.js:197:    page_permissions: ['campaign-studio', 'workflows', 'insights']
+runtime/orchestrator-service/lib/ops/backbone.js:201:    owner_role: 'writer',
+runtime/orchestrator-service/lib/ops/backbone.js:202:    review_role: 'compliance_reviewer',
+runtime/orchestrator-service/lib/ops/backbone.js:203:    handoff_to: ['designer', 'video_lead', 'publisher', 'compliance_reviewer'],
+runtime/orchestrator-service/lib/ops/backbone.js:205:    page_permissions: ['content-studio', 'workflows', 'publishing']
+runtime/orchestrator-service/lib/ops/backbone.js:209:    owner_role: 'designer',
+runtime/orchestrator-service/lib/ops/backbone.js:210:    review_role: 'compliance_reviewer',
+runtime/orchestrator-service/lib/ops/backbone.js:211:    handoff_to: ['publisher', 'ads_operator', 'compliance_reviewer'],
+runtime/orchestrator-service/lib/ops/backbone.js:213:    page_permissions: ['media-studio', 'workflows', 'publishing']
+runtime/orchestrator-service/lib/ops/backbone.js:217:    owner_role: 'publisher',
+runtime/orchestrator-service/lib/ops/backbone.js:218:    review_role: 'compliance_reviewer',
+runtime/orchestrator-service/lib/ops/backbone.js:219:    handoff_to: ['analyst', 'strategist'],
+runtime/orchestrator-service/lib/ops/backbone.js:221:    page_permissions: ['publishing', 'governance']
+runtime/orchestrator-service/lib/ops/backbone.js:225:    owner_role: 'analyst',
+runtime/orchestrator-service/lib/ops/backbone.js:226:    review_role: 'strategist',
+runtime/orchestrator-service/lib/ops/backbone.js:227:    handoff_to: ['strategist', 'writer', 'ads_operator'],
+runtime/orchestrator-service/lib/ops/backbone.js:229:    page_permissions: ['research', 'workflows', 'insights']
+runtime/orchestrator-service/lib/ops/backbone.js:231:  governance: {
+runtime/orchestrator-service/lib/ops/backbone.js:232:    label: 'Governance',
+runtime/orchestrator-service/lib/ops/backbone.js:233:    owner_role: 'compliance_reviewer',
+runtime/orchestrator-service/lib/ops/backbone.js:234:    review_role: 'admin',
+runtime/orchestrator-service/lib/ops/backbone.js:235:    handoff_to: ['admin'],
+runtime/orchestrator-service/lib/ops/backbone.js:236:    route_target: 'governance',
+runtime/orchestrator-service/lib/ops/backbone.js:237:    page_permissions: ['governance', 'settings']
+runtime/orchestrator-service/lib/ops/backbone.js:241:const APPROVAL_DOMAIN_MAP = {
+runtime/orchestrator-service/lib/ops/backbone.js:247:  approval: 'governance',
+runtime/orchestrator-service/lib/ops/backbone.js:248:  task: 'governance'
+runtime/orchestrator-service/lib/ops/backbone.js:326:function normalizeRoleKey(value, fallback = '') {
+runtime/orchestrator-service/lib/ops/backbone.js:330:function getRoleDef(roleId) {
+runtime/orchestrator-service/lib/ops/backbone.js:331:  const normalized = normalizeRoleKey(roleId);
+runtime/orchestrator-service/lib/ops/backbone.js:332:  return TEAM_ROLE_DEFS.find((item) => item.id === normalized) || null;
+runtime/orchestrator-service/lib/ops/backbone.js:339:function buildDefaultTeamMember(roleDef, index) {
+runtime/orchestrator-service/lib/ops/backbone.js:341:    id: `${roleDef.id}-member-${index + 1}`,
+runtime/orchestrator-service/lib/ops/backbone.js:342:    name: roleDef.label,
+runtime/orchestrator-service/lib/ops/backbone.js:343:    role: roleDef.id,
+runtime/orchestrator-service/lib/ops/backbone.js:347:    page_permissions: asArray(roleDef.routes),
+runtime/orchestrator-service/lib/ops/backbone.js:348:    action_permissions: asArray(roleDef.actions),
+runtime/orchestrator-service/lib/ops/backbone.js:349:    service_domains: asArray(roleDef.service_domains)
+runtime/orchestrator-service/lib/ops/backbone.js:353:function normalizeTeamMember(input = {}, index = 0) {
+runtime/orchestrator-service/lib/ops/backbone.js:355:  const roleId = normalizeRoleKey(source.role, 'strategist');
+runtime/orchestrator-service/lib/ops/backbone.js:356:  const roleDef = getRoleDef(roleId) || TEAM_ROLE_DEFS[0];
+runtime/orchestrator-service/lib/ops/backbone.js:359:    id: asString(source.id) || `${roleDef.id}-member-${index + 1}`,
+runtime/orchestrator-service/lib/ops/backbone.js:360:    name: asString(source.name) || roleDef.label,
+runtime/orchestrator-service/lib/ops/backbone.js:361:    role: roleDef.id,
+runtime/orchestrator-service/lib/ops/backbone.js:365:    page_permissions: normalizeStringList(source.page_permissions).length
+runtime/orchestrator-service/lib/ops/backbone.js:366:      ? normalizeStringList(source.page_permissions)
+runtime/orchestrator-service/lib/ops/backbone.js:367:      : asArray(roleDef.routes),
+runtime/orchestrator-service/lib/ops/backbone.js:368:    action_permissions: normalizeStringList(source.action_permissions).length
+runtime/orchestrator-service/lib/ops/backbone.js:369:      ? normalizeStringList(source.action_permissions)
+runtime/orchestrator-service/lib/ops/backbone.js:370:      : asArray(roleDef.actions),
+runtime/orchestrator-service/lib/ops/backbone.js:373:      : asArray(roleDef.service_domains)
+runtime/orchestrator-service/lib/ops/backbone.js:377:function buildDefaultTeamModel() {
+runtime/orchestrator-service/lib/ops/backbone.js:381:    version: 'mh-team-ops-v1',
+runtime/orchestrator-service/lib/ops/backbone.js:386:        role: 'system_orchestrator',
+runtime/orchestrator-service/lib/ops/backbone.js:389:        page_permissions: ['workflows', 'governance'],
+runtime/orchestrator-service/lib/ops/backbone.js:390:        action_permissions: ['route_work', 'record_state'],
+runtime/orchestrator-service/lib/ops/backbone.js:391:        service_domains: ['campaign', 'content', 'media', 'publishing', 'research', 'governance']
+runtime/orchestrator-service/lib/ops/backbone.js:393:      ...TEAM_ROLE_DEFS.map((roleDef, index) => buildDefaultTeamMember(roleDef, index))
+runtime/orchestrator-service/lib/ops/backbone.js:395:    active_role: 'strategist',
+runtime/orchestrator-service/lib/ops/backbone.js:396:    role_matrix: TEAM_ROLE_DEFS.map((roleDef) => ({
+runtime/orchestrator-service/lib/ops/backbone.js:397:      role: roleDef.id,
+runtime/orchestrator-service/lib/ops/backbone.js:398:      label: roleDef.label,
+runtime/orchestrator-service/lib/ops/backbone.js:399:      routes: asArray(roleDef.routes),
+runtime/orchestrator-service/lib/ops/backbone.js:400:      service_domains: asArray(roleDef.service_domains),
+runtime/orchestrator-service/lib/ops/backbone.js:401:      actions: asArray(roleDef.actions)
+runtime/orchestrator-service/lib/ops/backbone.js:403:    route_permissions: Object.entries(ROUTE_ROLE_ACCESS).map(([route, roles]) => ({
+runtime/orchestrator-service/lib/ops/backbone.js:405:      roles: asArray(roles)
+runtime/orchestrator-service/lib/ops/backbone.js:411:        owner_role: domain.owner_role,
+runtime/orchestrator-service/lib/ops/backbone.js:412:        review_role: domain.review_role,
+runtime/orchestrator-service/lib/ops/backbone.js:413:        handoff_to: asArray(domain.handoff_to),
+runtime/orchestrator-service/lib/ops/backbone.js:415:        page_permissions: asArray(domain.page_permissions)
+runtime/orchestrator-service/lib/ops/backbone.js:423:function mergeTeamModel(current = {}, patch = {}) {
+runtime/orchestrator-service/lib/ops/backbone.js:424:  const defaults = buildDefaultTeamModel();
+runtime/orchestrator-service/lib/ops/backbone.js:426:    ? asArray(patch.members).map((item, index) => normalizeTeamMember(item, index))
+runtime/orchestrator-service/lib/ops/backbone.js:428:      ? asArray(current.members).map((item, index) => normalizeTeamMember(item, index))
+runtime/orchestrator-service/lib/ops/backbone.js:435:    active_role: normalizeRoleKey(patch.active_role || current.active_role || defaults.active_role, defaults.active_role),
+runtime/orchestrator-service/lib/ops/backbone.js:437:    role_matrix: defaults.role_matrix,
+runtime/orchestrator-service/lib/ops/backbone.js:438:    route_permissions: defaults.route_permissions,
+runtime/orchestrator-service/lib/ops/backbone.js:449:function readTeamModel(projectName) {
+runtime/orchestrator-service/lib/ops/backbone.js:453:    raw = readJsonFileDurable(paths.teamPath);
+runtime/orchestrator-service/lib/ops/backbone.js:455:    console.error(`[backbone] readTeamModel: team file corrupt for project ${projectName}: ${err.message}`);
+runtime/orchestrator-service/lib/ops/backbone.js:458:  return mergeTeamModel(asObject(raw));
+runtime/orchestrator-service/lib/ops/backbone.js:461:function updateTeamModel(projectName, patch = {}, actor = 'mh-assistant') {
+runtime/orchestrator-service/lib/ops/backbone.js:465:    raw = readJsonFileDurable(paths.teamPath);
+runtime/orchestrator-service/lib/ops/backbone.js:467:    console.error(`[backbone] updateTeamModel: team file corrupt for project ${projectName}: ${err.message}`);
+runtime/orchestrator-service/lib/ops/backbone.js:470:  const next = mergeTeamModel(asObject(raw), patch);
+runtime/orchestrator-service/lib/ops/backbone.js:472:  writeJsonFile(paths.teamPath, next);
+runtime/orchestrator-service/lib/ops/backbone.js:476:    type: 'team_model_updated',
+runtime/orchestrator-service/lib/ops/backbone.js:477:    entity_type: 'team',
+runtime/orchestrator-service/lib/ops/backbone.js:479:    title: 'Team operations model updated',
+runtime/orchestrator-service/lib/ops/backbone.js:480:    summary: 'Role routing, permissions, or assignment settings changed.',
+runtime/orchestrator-service/lib/ops/backbone.js:483:      active_role: next.active_role,
+runtime/orchestrator-service/lib/ops/backbone.js:491:function findTeamMemberByRole(team, roleId) {
+runtime/orchestrator-service/lib/ops/backbone.js:492:  const normalizedRole = normalizeRoleKey(roleId);
+runtime/orchestrator-service/lib/ops/backbone.js:493:  return asArray(team?.members).find((member) => normalizeRoleKey(member.role) === normalizedRole) || null;
+runtime/orchestrator-service/lib/ops/backbone.js:496:function roleLabel(roleId) {
+runtime/orchestrator-service/lib/ops/backbone.js:497:  return getRoleDef(roleId)?.label || asString(roleId);
+runtime/orchestrator-service/lib/ops/backbone.js:500:function roleDisplay(team, roleId) {
+runtime/orchestrator-service/lib/ops/backbone.js:501:  const member = findTeamMemberByRole(team, roleId);
+runtime/orchestrator-service/lib/ops/backbone.js:502:  return member?.name || roleLabel(roleId) || 'Unassigned';
+runtime/orchestrator-service/lib/ops/backbone.js:507:  if (APPROVAL_DOMAIN_MAP[normalizedType]) {
+runtime/orchestrator-service/lib/ops/backbone.js:508:    return APPROVAL_DOMAIN_MAP[normalizedType];
+runtime/orchestrator-service/lib/ops/backbone.js:517:  if (routeTarget === 'governance') return 'governance';
+runtime/orchestrator-service/lib/ops/backbone.js:524:function inferPrimaryRole(entityType, record = {}, team = null) {
+runtime/orchestrator-service/lib/ops/backbone.js:527:  let ownerRole = domain.owner_role || 'strategist';
+runtime/orchestrator-service/lib/ops/backbone.js:532:      ownerRole = 'video_lead';
+runtime/orchestrator-service/lib/ops/backbone.js:534:      ownerRole = 'designer';
+runtime/orchestrator-service/lib/ops/backbone.js:541:    owner_role: normalizeRoleKey(record.owner_role || ownerRole, ownerRole),
+runtime/orchestrator-service/lib/ops/backbone.js:542:    reviewer_role: normalizeRoleKey(record.reviewer_role || domain.review_role, domain.review_role || 'admin'),
+runtime/orchestrator-service/lib/ops/backbone.js:543:    handoff_roles: normalizeStringList(record.handoff_roles).length
+runtime/orchestrator-service/lib/ops/backbone.js:544:      ? normalizeStringList(record.handoff_roles)
+runtime/orchestrator-service/lib/ops/backbone.js:545:      : asArray(domain.handoff_to),
+runtime/orchestrator-service/lib/ops/backbone.js:546:    owner_display: roleDisplay(team, record.owner_role || ownerRole),
+runtime/orchestrator-service/lib/ops/backbone.js:547:    reviewer_display: roleDisplay(team, record.reviewer_role || domain.review_role)
+runtime/orchestrator-service/lib/ops/backbone.js:790:    approvalsPath: path.join(opsDir, 'approvals.json'),
+runtime/orchestrator-service/lib/ops/backbone.js:793:    teamPath: path.join(opsDir, 'team.json'),
+runtime/orchestrator-service/lib/ops/backbone.js:794:    governancePath: path.join(opsDir, 'governance.json'),
+runtime/orchestrator-service/lib/ops/backbone.js:796:    handoffsPath: path.join(opsDir, 'handoffs.json')
+runtime/orchestrator-service/lib/ops/backbone.js:822:      'approvals',
+runtime/orchestrator-service/lib/ops/backbone.js:825:      'handoffs',
+runtime/orchestrator-service/lib/ops/backbone.js:827:      'team'
+runtime/orchestrator-service/lib/ops/backbone.js:839:  ensureJsonFile(paths.approvalsPath, []);
+runtime/orchestrator-service/lib/ops/backbone.js:842:  ensureJsonFile(paths.handoffsPath, []);
+runtime/orchestrator-service/lib/ops/backbone.js:843:  ensureJsonFile(paths.teamPath, buildDefaultTeamModel());
+runtime/orchestrator-service/lib/ops/backbone.js:844:  ensureJsonFile(paths.governancePath, {
+runtime/orchestrator-service/lib/ops/backbone.js:845:    approval_required_actions: ['publish', 'launch', 'budget_change', 'integration_reconnect', 'execution_mode_change'],
+runtime/orchestrator-service/lib/ops/backbone.js:848:      semi_auto_requires_approval: true,
+runtime/orchestrator-service/lib/ops/backbone.js:853:      approval_before_publish: true,
+runtime/orchestrator-service/lib/ops/backbone.js:860:    approval_owners: {
+runtime/orchestrator-service/lib/ops/backbone.js:871:      approval_mode: 'Only high-risk',
+runtime/orchestrator-service/lib/ops/backbone.js:873:      approval_before_publish: true
+runtime/orchestrator-service/lib/ops/backbone.js:911:      'approvals',
+runtime/orchestrator-service/lib/ops/backbone.js:914:      'handoffs',
+runtime/orchestrator-service/lib/ops/backbone.js:916:      'team'
+runtime/orchestrator-service/lib/ops/backbone.js:969:  if (value.includes('approval')) return 'approval';
+runtime/orchestrator-service/lib/ops/backbone.js:973:  if (value.includes('routing') || value.includes('handoff') || value.includes('ai_')) return 'ai_routing';
+runtime/orchestrator-service/lib/ops/backbone.js:1084:    role: normalizeRoleKey(input.role || current.role),
+runtime/orchestrator-service/lib/ops/backbone.js:1182: * Normalizes a raw governance file object so that:
+runtime/orchestrator-service/lib/ops/backbone.js:1185: *  - freeze_publishing and approval_before_publish are always explicit booleans
+runtime/orchestrator-service/lib/ops/backbone.js:1190:function normalizeGovernancePolicy(raw) {
+runtime/orchestrator-service/lib/ops/backbone.js:1205:    approval_before_publish: asBoolean(safeRules.approval_before_publish, DEFAULT_POLICY_RULES.approval_before_publish)
+runtime/orchestrator-service/lib/ops/backbone.js:1214:function getGovernancePolicy(projectName) {
+runtime/orchestrator-service/lib/ops/backbone.js:1218:    raw = readJsonFileDurable(paths.governancePath);
+runtime/orchestrator-service/lib/ops/backbone.js:1220:    // Governance file is corrupt — do not silently bypass enforcement.
+runtime/orchestrator-service/lib/ops/backbone.js:1221:    console.error(`[backbone] getGovernancePolicy: governance file corrupt for project ${projectName}: ${err.message}`);
+runtime/orchestrator-service/lib/ops/backbone.js:1224:  // null means the file does not exist yet — normalizeGovernancePolicy({}) gives safe defaults
+runtime/orchestrator-service/lib/ops/backbone.js:1225:  return normalizeGovernancePolicy(raw === null ? {} : raw);
+runtime/orchestrator-service/lib/ops/backbone.js:1228:function updateGovernancePolicy(projectName, patch = {}, actor = 'mh-assistant') {
+runtime/orchestrator-service/lib/ops/backbone.js:1230:  const current = getGovernancePolicy(projectName);
+runtime/orchestrator-service/lib/ops/backbone.js:1244:    approval_owners: {
+runtime/orchestrator-service/lib/ops/backbone.js:1245:      ...asObject(current.approval_owners),
+runtime/orchestrator-service/lib/ops/backbone.js:1246:      ...asObject(sourcePatch.approval_owners)
+runtime/orchestrator-service/lib/ops/backbone.js:1258:  writeJsonFile(paths.governancePath, next);
+runtime/orchestrator-service/lib/ops/backbone.js:1262:    type: 'governance_policy_updated',
+runtime/orchestrator-service/lib/ops/backbone.js:1263:    entity_type: 'governance_policy',
+runtime/orchestrator-service/lib/ops/backbone.js:1265:    title: 'Governance policy updated',
+runtime/orchestrator-service/lib/ops/backbone.js:1266:    summary: 'Governance rules were updated and persisted.',
+runtime/orchestrator-service/lib/ops/backbone.js:1277:function appendGovernanceOverride(projectName, input = {}) {
+runtime/orchestrator-service/lib/ops/backbone.js:1278:  const policy = getGovernancePolicy(projectName);
+runtime/orchestrator-service/lib/ops/backbone.js:1284:    approval_id: asString(input.approval_id),
+runtime/orchestrator-service/lib/ops/backbone.js:1297:  return updateGovernancePolicy(projectName, {
+runtime/orchestrator-service/lib/ops/backbone.js:1333:function buildPolicyFlags(record = {}, governance = {}) {
+runtime/orchestrator-service/lib/ops/backbone.js:1344:  if (asBoolean(governance.policy_rules?.freeze_publishing) && asString(record.entity_type) === 'publishing_job') {
+runtime/orchestrator-service/lib/ops/backbone.js:1348:      message: 'Publishing is frozen by governance policy.'
+runtime/orchestrator-service/lib/ops/backbone.js:1396:function buildBrandSafetyFlags(record = {}, governance = {}) {
+runtime/orchestrator-service/lib/ops/backbone.js:1422:  if (asString(record.entity_type) === 'media_job' && asBoolean(governance.policy_rules?.brand_safety_review_required, true)) {
+runtime/orchestrator-service/lib/ops/backbone.js:1423:    if (!asString(record.approval_state) || asString(record.approval_state) === 'not_requested') {
+runtime/orchestrator-service/lib/ops/backbone.js:1435:function buildPublishGuardrails(record = {}, governance = {}) {
+runtime/orchestrator-service/lib/ops/backbone.js:1452:  if (asBoolean(governance.policy_rules?.approval_before_publish, true) && !['approved', 'ready', 'published'].includes(status)) {
+runtime/orchestrator-service/lib/ops/backbone.js:1460:  if (asBoolean(governance.policy_rules?.freeze_publishing)) {
+runtime/orchestrator-service/lib/ops/backbone.js:1471:function buildGovernanceSummary(projectName, options = {}) {
+runtime/orchestrator-service/lib/ops/backbone.js:1473:  const governance = getGovernancePolicy(projectName);
+runtime/orchestrator-service/lib/ops/backbone.js:1474:  const team = readTeamModel(paths.project);
+runtime/orchestrator-service/lib/ops/backbone.js:1475:  const approvals = readCollection(paths.approvalsPath);
+runtime/orchestrator-service/lib/ops/backbone.js:1481:  const pendingApprovals = approvals.filter((item) => asString(item.status) === 'pending');
+runtime/orchestrator-service/lib/ops/backbone.js:1482:  const escalationApprovals = approvals.filter((item) => asString(item.status) === 'escalated');
+runtime/orchestrator-service/lib/ops/backbone.js:1483:  const activeOverrides = asArray(governance.active_overrides).filter((item) => asString(item.status) === 'active');
+runtime/orchestrator-service/lib/ops/backbone.js:1485:  const approvalQueue = pendingApprovals.map((approval) => ({
+runtime/orchestrator-service/lib/ops/backbone.js:1486:    ...approval,
+runtime/orchestrator-service/lib/ops/backbone.js:1487:    entity_snapshot: buildEntitySnapshot(projectName, approval.entity_type, approval.entity_id),
+runtime/orchestrator-service/lib/ops/backbone.js:1488:    policy_flags: buildPolicyFlags(approval, governance)
+runtime/orchestrator-service/lib/ops/backbone.js:1493:    ...approvals.filter((item) => ['pending', 'changes_requested', 'escalated'].includes(asString(item.status)))
+runtime/orchestrator-service/lib/ops/backbone.js:1500:      status: asString(item.status || item.approval_status) || 'open',
+runtime/orchestrator-service/lib/ops/backbone.js:1511:      status: asString(item.status || item.approval_state),
+runtime/orchestrator-service/lib/ops/backbone.js:1512:      brand_safety_flags: buildBrandSafetyFlags(item, governance)
+runtime/orchestrator-service/lib/ops/backbone.js:1520:      publish_guardrails: buildPublishGuardrails(item, governance)
+runtime/orchestrator-service/lib/ops/backbone.js:1525:    ...approvalQueue.flatMap((item) =>
+runtime/orchestrator-service/lib/ops/backbone.js:1528:        source: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:1575:    ...escalationApprovals,
+runtime/orchestrator-service/lib/ops/backbone.js:1577:      asString(item.source_type) === 'approval' || asString(item.route_target) === 'governance'
+runtime/orchestrator-service/lib/ops/backbone.js:1586:    policy: governance,
+runtime/orchestrator-service/lib/ops/backbone.js:1588:      ownership: {
+runtime/orchestrator-service/lib/ops/backbone.js:1589:        campaign: roleDisplay(team, 'strategist'),
+runtime/orchestrator-service/lib/ops/backbone.js:1590:        content: roleDisplay(team, 'writer'),
+runtime/orchestrator-service/lib/ops/backbone.js:1591:        media: roleDisplay(team, 'designer'),
+runtime/orchestrator-service/lib/ops/backbone.js:1592:        publishing: roleDisplay(team, 'publisher'),
+runtime/orchestrator-service/lib/ops/backbone.js:1593:        compliance: roleDisplay(team, 'compliance_reviewer'),
+runtime/orchestrator-service/lib/ops/backbone.js:1594:        admin: roleDisplay(team, 'admin')
+runtime/orchestrator-service/lib/ops/backbone.js:1596:      escalation_chain: governance.escalation_chain || ESCALATION_CHAINS
+runtime/orchestrator-service/lib/ops/backbone.js:1599:      approval_queue: approvalQueue,
+runtime/orchestrator-service/lib/ops/backbone.js:1607:        freeze_publishing: asBoolean(governance.policy_rules?.freeze_publishing),
+runtime/orchestrator-service/lib/ops/backbone.js:1608:        allow_admin_override: asBoolean(governance.policy_rules?.allow_admin_override, true)
+runtime/orchestrator-service/lib/ops/backbone.js:1617:      pending_approvals: pendingApprovals.length
+runtime/orchestrator-service/lib/ops/backbone.js:1628:    status: item.publish_status || item.approval_status || item.status || 'draft',
+runtime/orchestrator-service/lib/ops/backbone.js:1629:    assignee: item.owner,
+runtime/orchestrator-service/lib/ops/backbone.js:1630:    role: asString(item.owner_role || item.review_role || 'writer'),
+runtime/orchestrator-service/lib/ops/backbone.js:1631:    priority: item.approval_status === 'pending' ? 'high' : 'normal',
+runtime/orchestrator-service/lib/ops/backbone.js:1638:      approval_status: item.approval_status,
+runtime/orchestrator-service/lib/ops/backbone.js:1640:      owner_role: item.owner_role,
+runtime/orchestrator-service/lib/ops/backbone.js:1641:      review_role: item.review_role,
+runtime/orchestrator-service/lib/ops/backbone.js:1653:    status: job.approval_state === 'pending' ? 'pending_approval' : (job.status || 'requested'),
+runtime/orchestrator-service/lib/ops/backbone.js:1654:    assignee: job.owner,
+runtime/orchestrator-service/lib/ops/backbone.js:1655:    role: asString(job.owner_role || job.review_role || 'designer'),
+runtime/orchestrator-service/lib/ops/backbone.js:1656:    priority: job.approval_state === 'pending' ? 'high' : 'normal',
+runtime/orchestrator-service/lib/ops/backbone.js:1665:      approval_state: job.approval_state,
+runtime/orchestrator-service/lib/ops/backbone.js:1666:      owner_role: job.owner_role,
+runtime/orchestrator-service/lib/ops/backbone.js:1667:      review_role: job.review_role,
+runtime/orchestrator-service/lib/ops/backbone.js:1676:  const team = readTeamModel(paths.project);
+runtime/orchestrator-service/lib/ops/backbone.js:1686:  const routing = inferPrimaryRole('campaign', input, team);
+runtime/orchestrator-service/lib/ops/backbone.js:1701:    owner: asString(input.owner || current.owner) || roleDisplay(team, routing.owner_role),
+runtime/orchestrator-service/lib/ops/backbone.js:1702:    owner_role: normalizeRoleKey(input.owner_role || current.owner_role || routing.owner_role, routing.owner_role),
+runtime/orchestrator-service/lib/ops/backbone.js:1703:    review_role: normalizeRoleKey(input.review_role || current.review_role || routing.reviewer_role, routing.reviewer_role),
+runtime/orchestrator-service/lib/ops/backbone.js:1710:    linked_approvals: normalizeStringList(input.linked_approvals || current.linked_approvals),
+runtime/orchestrator-service/lib/ops/backbone.js:1721:      input.actor || input.owner,
+runtime/orchestrator-service/lib/ops/backbone.js:1739:    actor: asString(input.actor || input.owner) || 'mh-assistant',
+runtime/orchestrator-service/lib/ops/backbone.js:1762:  const team = readTeamModel(paths.project);
+runtime/orchestrator-service/lib/ops/backbone.js:1772:  const routing = inferPrimaryRole('content_item', input, team);
+runtime/orchestrator-service/lib/ops/backbone.js:1773:  const approvalStatus = asString(input.approval_status || current.approval_status) || 'not_requested';
+runtime/orchestrator-service/lib/ops/backbone.js:1777:    ? normalizeCommentList(input.comments, input.actor || input.owner)
+runtime/orchestrator-service/lib/ops/backbone.js:1778:    : appendCommentList(current.comments, input.new_comment || input.comment, input.actor || input.owner);
+runtime/orchestrator-service/lib/ops/backbone.js:1780:    ? normalizeRequestList(input.ai_requests, input.actor || input.owner)
+runtime/orchestrator-service/lib/ops/backbone.js:1781:    : appendRequestList(current.ai_requests, input.ai_request, input.actor || input.owner);
+runtime/orchestrator-service/lib/ops/backbone.js:1783:    ? normalizeRevisionList(input.revisions, input.actor || input.owner)
+runtime/orchestrator-service/lib/ops/backbone.js:1784:    : normalizeRevisionList(current.revisions, input.actor || input.owner);
+runtime/orchestrator-service/lib/ops/backbone.js:1797:        actor: input.actor || input.owner,
+runtime/orchestrator-service/lib/ops/backbone.js:1810:        actor: input.actor || input.owner
+runtime/orchestrator-service/lib/ops/backbone.js:1827:    approval_status: approvalStatus,
+runtime/orchestrator-service/lib/ops/backbone.js:1828:    owner: asString(input.owner || current.owner) || roleDisplay(team, routing.owner_role),
+runtime/orchestrator-service/lib/ops/backbone.js:1829:    owner_role: normalizeRoleKey(input.owner_role || current.owner_role || routing.owner_role, routing.owner_role),
+runtime/orchestrator-service/lib/ops/backbone.js:1830:    review_role: normalizeRoleKey(input.review_role || current.review_role || routing.reviewer_role, routing.reviewer_role),
+runtime/orchestrator-service/lib/ops/backbone.js:1839:      publishStatus === 'published' ? 'distribution' : approvalStatus === 'approved' ? 'approved' : 'draft'
+runtime/orchestrator-service/lib/ops/backbone.js:1842:    linked_approvals: normalizeStringList(input.linked_approvals || current.linked_approvals),
+runtime/orchestrator-service/lib/ops/backbone.js:1843:    linked_handoffs: normalizeStringList(input.linked_handoffs || current.linked_handoffs),
+runtime/orchestrator-service/lib/ops/backbone.js:1848:    queue_status: asString(input.queue_status || current.queue_status || publishStatus || approvalStatus || status) || 'draft',
+runtime/orchestrator-service/lib/ops/backbone.js:1854:      input.actor || input.owner,
+runtime/orchestrator-service/lib/ops/backbone.js:1857:        approval_status: approvalStatus,
+runtime/orchestrator-service/lib/ops/backbone.js:1873:    actor: asString(input.actor || input.owner) || 'mh-assistant',
+runtime/orchestrator-service/lib/ops/backbone.js:1877:      approval_status: approvalStatus,
+runtime/orchestrator-service/lib/ops/backbone.js:1904:  const team = readTeamModel(paths.project);
+runtime/orchestrator-service/lib/ops/backbone.js:1914:  const routing = inferPrimaryRole('media_job', {
+runtime/orchestrator-service/lib/ops/backbone.js:1918:  }, team);
+runtime/orchestrator-service/lib/ops/backbone.js:1921:    ? normalizeOutputVersionList(input.output_versions, input.actor || input.owner)
+runtime/orchestrator-service/lib/ops/backbone.js:1922:    : normalizeOutputVersionList(current.output_versions, input.actor || input.owner);
+runtime/orchestrator-service/lib/ops/backbone.js:1937:        actor: input.actor || input.owner
+runtime/orchestrator-service/lib/ops/backbone.js:1944:    : appendPreviewHistory(current.preview_history, input.preview_entry, input.actor || input.owner);
+runtime/orchestrator-service/lib/ops/backbone.js:1946:    ? normalizeCommentList(input.comments, input.actor || input.owner)
+runtime/orchestrator-service/lib/ops/backbone.js:1947:    : appendCommentList(current.comments, input.new_comment || input.comment, input.actor || input.owner);
+runtime/orchestrator-service/lib/ops/backbone.js:1964:    approval_state: asString(input.approval_state || current.approval_state) || 'not_requested',
+runtime/orchestrator-service/lib/ops/backbone.js:1966:    approval_notes: normalizeNotes(input.approval_notes || current.approval_notes),
+runtime/orchestrator-service/lib/ops/backbone.js:1970:    owner: asString(input.owner || current.owner) || roleDisplay(team, routing.owner_role),
+runtime/orchestrator-service/lib/ops/backbone.js:1971:    owner_role: normalizeRoleKey(input.owner_role || current.owner_role || routing.owner_role, routing.owner_role),
+runtime/orchestrator-service/lib/ops/backbone.js:1972:    review_role: normalizeRoleKey(input.review_role || current.review_role || routing.reviewer_role, routing.reviewer_role),
+runtime/orchestrator-service/lib/ops/backbone.js:1976:    linked_approvals: normalizeStringList(input.linked_approvals || current.linked_approvals),
+runtime/orchestrator-service/lib/ops/backbone.js:1977:    linked_handoffs: normalizeStringList(input.linked_handoffs || current.linked_handoffs),
+runtime/orchestrator-service/lib/ops/backbone.js:1986:      input.actor || input.owner,
+runtime/orchestrator-service/lib/ops/backbone.js:2005:    actor: asString(input.actor || input.owner) || 'mh-assistant',
+runtime/orchestrator-service/lib/ops/backbone.js:2093:    role: 'system_orchestrator',
+runtime/orchestrator-service/lib/ops/backbone.js:2416:  const team = readTeamModel(paths.project);
+runtime/orchestrator-service/lib/ops/backbone.js:2426:  const routing = inferPrimaryRole('task', {
+runtime/orchestrator-service/lib/ops/backbone.js:2431:  }, team);
+runtime/orchestrator-service/lib/ops/backbone.js:2432:  const ownerRole = normalizeRoleKey(input.owner_role || current.owner_role || routing.owner_role, routing.owner_role);
+runtime/orchestrator-service/lib/ops/backbone.js:2433:  const assigneeRole = normalizeRoleKey(input.assignee_role || current.assignee_role || ownerRole, ownerRole);
+runtime/orchestrator-service/lib/ops/backbone.js:2439:    owner: asString(input.owner || input.assignee || current.owner || current.assignee) || roleDisplay(team, ownerRole),
+runtime/orchestrator-service/lib/ops/backbone.js:2440:    owner_role: ownerRole,
+runtime/orchestrator-service/lib/ops/backbone.js:2441:    assignee: asString(input.assignee || current.assignee || input.owner) || roleDisplay(team, assigneeRole),
+runtime/orchestrator-service/lib/ops/backbone.js:2442:    assignee_role: assigneeRole,
+runtime/orchestrator-service/lib/ops/backbone.js:2443:    team_role: asString(input.team_role || current.team_role || assigneeRole),
+runtime/orchestrator-service/lib/ops/backbone.js:2459:    handoff_roles: normalizeStringList(input.handoff_roles || current.handoff_roles || routing.handoff_roles),
+runtime/orchestrator-service/lib/ops/backbone.js:2461:      owner_role: ownerRole,
+runtime/orchestrator-service/lib/ops/backbone.js:2462:      owner_label: roleDisplay(team, ownerRole),
+runtime/orchestrator-service/lib/ops/backbone.js:2463:      assignee_role: assigneeRole,
+runtime/orchestrator-service/lib/ops/backbone.js:2464:      assignee_label: roleDisplay(team, assigneeRole),
+runtime/orchestrator-service/lib/ops/backbone.js:2465:      review_role: routing.reviewer_role,
+runtime/orchestrator-service/lib/ops/backbone.js:2466:      review_label: roleDisplay(team, routing.reviewer_role)
+runtime/orchestrator-service/lib/ops/backbone.js:2475:      input.actor || input.owner || input.assignee,
+runtime/orchestrator-service/lib/ops/backbone.js:2479:        assignee_role: assigneeRole,
+runtime/orchestrator-service/lib/ops/backbone.js:2492:    assignee: task.assignee || task.owner,
+runtime/orchestrator-service/lib/ops/backbone.js:2493:    role: assigneeRole,
+runtime/orchestrator-service/lib/ops/backbone.js:2501:      owner_role: ownerRole,
+runtime/orchestrator-service/lib/ops/backbone.js:2502:      assignee_role: assigneeRole,
+runtime/orchestrator-service/lib/ops/backbone.js:2513:    actor: asString(input.actor || input.owner || input.assignee) || 'mh-assistant'
+runtime/orchestrator-service/lib/ops/backbone.js:2519:    message: 'The task is now available for team execution and follow-up.',
+runtime/orchestrator-service/lib/ops/backbone.js:2520:    body: 'The task is now available for team execution and follow-up.',
+runtime/orchestrator-service/lib/ops/backbone.js:2536:      history: appendHistory(record, 'linked_task_added', input.actor || input.owner || input.assignee, {
+runtime/orchestrator-service/lib/ops/backbone.js:2555:function createApproval(projectName, input = {}) {
+runtime/orchestrator-service/lib/ops/backbone.js:2557:  const items = readCollection(paths.approvalsPath);
+runtime/orchestrator-service/lib/ops/backbone.js:2558:  const governance = getGovernancePolicy(projectName);
+runtime/orchestrator-service/lib/ops/backbone.js:2559:  const team = readTeamModel(paths.project);
+runtime/orchestrator-service/lib/ops/backbone.js:2565:    throw new Error('Approval requires entity_type and entity_id');
+runtime/orchestrator-service/lib/ops/backbone.js:2568:  const title = asString(input.title) || `${targetEntityType} approval`;
+runtime/orchestrator-service/lib/ops/backbone.js:2572:  const routing = inferPrimaryRole(targetEntityType, {
+runtime/orchestrator-service/lib/ops/backbone.js:2575:  }, team);
+runtime/orchestrator-service/lib/ops/backbone.js:2576:  const reviewerRole = normalizeRoleKey(
+runtime/orchestrator-service/lib/ops/backbone.js:2577:    input.reviewer_role ||
+runtime/orchestrator-service/lib/ops/backbone.js:2578:      current.reviewer_role ||
+runtime/orchestrator-service/lib/ops/backbone.js:2581:      routing.reviewer_role,
+runtime/orchestrator-service/lib/ops/backbone.js:2582:    routing.reviewer_role
+runtime/orchestrator-service/lib/ops/backbone.js:2587:  const approval = {
+runtime/orchestrator-service/lib/ops/backbone.js:2588:    id: asString(current.id) || asString(input.id) || createId('approval'),
+runtime/orchestrator-service/lib/ops/backbone.js:2593:    reviewer: asString(input.reviewer || current.reviewer || input.requested_for) || roleDisplay(team, reviewerRole),
+runtime/orchestrator-service/lib/ops/backbone.js:2594:    reviewer_role: reviewerRole,
+runtime/orchestrator-service/lib/ops/backbone.js:2596:    requested_for: asString(input.requested_for || current.requested_for || input.reviewer) || roleDisplay(team, reviewerRole),
+runtime/orchestrator-service/lib/ops/backbone.js:2603:    approval_type: asString(input.approval_type || current.approval_type) || targetEntityType,
+runtime/orchestrator-service/lib/ops/backbone.js:2606:    route_target: asString(input.route_target || current.route_target || entityLink?.route || routing.route_target || 'governance'),
+runtime/orchestrator-service/lib/ops/backbone.js:2609:    ownership: {
+runtime/orchestrator-service/lib/ops/backbone.js:2610:      owner_role: routing.owner_role,
+runtime/orchestrator-service/lib/ops/backbone.js:2611:      owner_label: roleDisplay(team, routing.owner_role),
+runtime/orchestrator-service/lib/ops/backbone.js:2612:      reviewer_role: reviewerRole,
+runtime/orchestrator-service/lib/ops/backbone.js:2613:      reviewer_label: roleDisplay(team, reviewerRole)
+runtime/orchestrator-service/lib/ops/backbone.js:2616:    policy_flags: asArray(input.policy_flags || current.policy_flags || buildPolicyFlags(input, governance)),
+runtime/orchestrator-service/lib/ops/backbone.js:2618:    brand_safety_flags: asArray(input.brand_safety_flags || current.brand_safety_flags || buildBrandSafetyFlags(input, governance)),
+runtime/orchestrator-service/lib/ops/backbone.js:2631:      current.id ? 'approval_updated' : 'approval_requested',
+runtime/orchestrator-service/lib/ops/backbone.js:2637:        reviewer_role: reviewerRole
+runtime/orchestrator-service/lib/ops/backbone.js:2642:  writeCollection(paths.approvalsPath, upsertById(items, approval), MAX_ITEMS.approvals);
+runtime/orchestrator-service/lib/ops/backbone.js:2645:    type: current.id ? 'approval_updated' : 'approval_requested',
+runtime/orchestrator-service/lib/ops/backbone.js:2646:    entity_type: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:2647:    entity_id: approval.id,
+runtime/orchestrator-service/lib/ops/backbone.js:2648:    title: approval.title,
+runtime/orchestrator-service/lib/ops/backbone.js:2649:    summary: approval.summary || 'A new approval was requested.',
+runtime/orchestrator-service/lib/ops/backbone.js:2650:    actor: approval.requested_by,
+runtime/orchestrator-service/lib/ops/backbone.js:2652:      entity_type: approval.entity_type,
+runtime/orchestrator-service/lib/ops/backbone.js:2653:      entity_id: approval.entity_id,
+runtime/orchestrator-service/lib/ops/backbone.js:2654:      risk_level: approval.risk_level,
+runtime/orchestrator-service/lib/ops/backbone.js:2655:      approval_type: approval.approval_type
+runtime/orchestrator-service/lib/ops/backbone.js:2659:    category: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:2660:    type: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:2661:    title: `${approval.title} needs approval`,
+runtime/orchestrator-service/lib/ops/backbone.js:2662:    message: approval.summary || 'Review and decide on the requested operation.',
+runtime/orchestrator-service/lib/ops/backbone.js:2663:    body: approval.summary || 'Review and decide on the requested operation.',
+runtime/orchestrator-service/lib/ops/backbone.js:2664:    severity: approval.risk_level === 'high' || approval.risk_level === 'critical' ? 'warning' : 'info',
+runtime/orchestrator-service/lib/ops/backbone.js:2666:      entity_type: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:2667:      entity_id: approval.id,
+runtime/orchestrator-service/lib/ops/backbone.js:2668:      route: inferRouteTarget('approval', approval)
+runtime/orchestrator-service/lib/ops/backbone.js:2670:    entity_type: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:2671:    entity_id: approval.id
+runtime/orchestrator-service/lib/ops/backbone.js:2675:    queue_type: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:2676:    entity_type: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:2677:    entity_id: approval.id,
+runtime/orchestrator-service/lib/ops/backbone.js:2678:    title: approval.title,
+runtime/orchestrator-service/lib/ops/backbone.js:2679:    status: approval.status,
+runtime/orchestrator-service/lib/ops/backbone.js:2680:    assignee: approval.reviewer,
+runtime/orchestrator-service/lib/ops/backbone.js:2681:    role: reviewerRole,
+runtime/orchestrator-service/lib/ops/backbone.js:2682:    priority: approval.risk_level === 'critical' ? 'critical' : approval.risk_level === 'high' ? 'high' : 'normal',
+runtime/orchestrator-service/lib/ops/backbone.js:2683:    route: 'governance',
+runtime/orchestrator-service/lib/ops/backbone.js:2685:      entity_type: approval.entity_type,
+runtime/orchestrator-service/lib/ops/backbone.js:2686:      entity_id: approval.entity_id,
+runtime/orchestrator-service/lib/ops/backbone.js:2687:      approval_type: approval.approval_type,
+runtime/orchestrator-service/lib/ops/backbone.js:2688:      requested_action: approval.requested_action,
+runtime/orchestrator-service/lib/ops/backbone.js:2689:      reviewer_role: reviewerRole,
+runtime/orchestrator-service/lib/ops/backbone.js:2690:      escalation_chain: approval.escalation_chain
+runtime/orchestrator-service/lib/ops/backbone.js:2694:  updateLinkedEntity(paths.project, approval.entity_type, approval.entity_id, (record) => {
+runtime/orchestrator-service/lib/ops/backbone.js:2695:    const nextApprovalStatus =
+runtime/orchestrator-service/lib/ops/backbone.js:2696:      approval.entity_type === 'media_job'
+runtime/orchestrator-service/lib/ops/backbone.js:2699:    const nextApprovalState =
+runtime/orchestrator-service/lib/ops/backbone.js:2700:      approval.entity_type === 'media_job'
+runtime/orchestrator-service/lib/ops/backbone.js:2706:      linked_approvals: [...new Set([approval.id, ...normalizeStringList(record.linked_approvals)])],
+runtime/orchestrator-service/lib/ops/backbone.js:2708:      history: appendHistory(record, 'approval_linked', input.actor || input.requested_by, {
+runtime/orchestrator-service/lib/ops/backbone.js:2709:        approval_id: approval.id,
+runtime/orchestrator-service/lib/ops/backbone.js:2710:        status: approval.status
+runtime/orchestrator-service/lib/ops/backbone.js:2714:    if (approval.entity_type === 'content_item') {
+runtime/orchestrator-service/lib/ops/backbone.js:2715:      nextRecord.approval_status = nextApprovalStatus;
+runtime/orchestrator-service/lib/ops/backbone.js:2717:      nextRecord.queue_status = 'pending_approval';
+runtime/orchestrator-service/lib/ops/backbone.js:2720:    if (approval.entity_type === 'media_job') {
+runtime/orchestrator-service/lib/ops/backbone.js:2721:      nextRecord.approval_state = nextApprovalState;
+runtime/orchestrator-service/lib/ops/backbone.js:2724:    if (approval.entity_type === 'content_item') {
+runtime/orchestrator-service/lib/ops/backbone.js:2726:    } else if (approval.entity_type === 'media_job') {
+runtime/orchestrator-service/lib/ops/backbone.js:2733:  return approval;
+runtime/orchestrator-service/lib/ops/backbone.js:2736:function listApprovals(projectName, options = {}) {
+runtime/orchestrator-service/lib/ops/backbone.js:2738:  return listItems(readCollection(paths.approvalsPath), options);
+runtime/orchestrator-service/lib/ops/backbone.js:2741:function decideApproval(projectName, approvalId, input = {}) {
+runtime/orchestrator-service/lib/ops/backbone.js:2743:  const items = readCollection(paths.approvalsPath);
+runtime/orchestrator-service/lib/ops/backbone.js:2744:  const team = readTeamModel(paths.project);
+runtime/orchestrator-service/lib/ops/backbone.js:2745:  const targetId = asString(approvalId);
+runtime/orchestrator-service/lib/ops/backbone.js:2749:    throw new Error('Invalid approval decision');
+runtime/orchestrator-service/lib/ops/backbone.js:2754:    throw new Error('Approval not found');
+runtime/orchestrator-service/lib/ops/backbone.js:2763:  const escalationTargetRole = normalizeRoleKey(
+runtime/orchestrator-service/lib/ops/backbone.js:2765:      escalationChain.find((role) => normalizeRoleKey(role) !== normalizeRoleKey(current.reviewer_role)) ||
+runtime/orchestrator-service/lib/ops/backbone.js:2786:      `approval_${decision}`,
+runtime/orchestrator-service/lib/ops/backbone.js:2791:        escalate_to: escalationTargetRole
+runtime/orchestrator-service/lib/ops/backbone.js:2797:  writeJsonFile(paths.approvalsPath, items);
+runtime/orchestrator-service/lib/ops/backbone.js:2800:    type: `approval_${decision}`,
+runtime/orchestrator-service/lib/ops/backbone.js:2801:    entity_type: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:2804:    summary: next.decision_note || `Approval ${decision}.`,
+runtime/orchestrator-service/lib/ops/backbone.js:2813:    category: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:2814:    type: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:2816:    message: next.decision_note || `Approval was ${decision}.`,
+runtime/orchestrator-service/lib/ops/backbone.js:2817:    body: next.decision_note || `Approval was ${decision}.`,
+runtime/orchestrator-service/lib/ops/backbone.js:2820:      entity_type: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:2822:      route: inferRouteTarget('approval', next)
+runtime/orchestrator-service/lib/ops/backbone.js:2824:    entity_type: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:2828:  updateQueueEntity(paths.project, 'approval', next.id, {
+runtime/orchestrator-service/lib/ops/backbone.js:2835:      escalate_to: escalationTargetRole
+runtime/orchestrator-service/lib/ops/backbone.js:2842:      linked_approvals: [...new Set([next.id, ...normalizeStringList(record.linked_approvals)])],
+runtime/orchestrator-service/lib/ops/backbone.js:2844:      history: appendHistory(record, `linked_approval_${decision}`, input.actor, {
+runtime/orchestrator-service/lib/ops/backbone.js:2845:        approval_id: next.id,
+runtime/orchestrator-service/lib/ops/backbone.js:2851:      nextRecord.approval_status =
+runtime/orchestrator-service/lib/ops/backbone.js:2865:      nextRecord.approval_state =
+runtime/orchestrator-service/lib/ops/backbone.js:2899:      description: next.decision_note || 'Governance escalation requires follow-up.',
+runtime/orchestrator-service/lib/ops/backbone.js:2900:      owner: roleDisplay(team, escalationTargetRole),
+runtime/orchestrator-service/lib/ops/backbone.js:2901:      owner_role: escalationTargetRole,
+runtime/orchestrator-service/lib/ops/backbone.js:2902:      assignee: roleDisplay(team, escalationTargetRole),
+runtime/orchestrator-service/lib/ops/backbone.js:2903:      assignee_role: escalationTargetRole,
+runtime/orchestrator-service/lib/ops/backbone.js:2905:      service_domain: 'governance',
+runtime/orchestrator-service/lib/ops/backbone.js:2906:      route_target: 'governance',
+runtime/orchestrator-service/lib/ops/backbone.js:2907:      source_type: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:2918:    appendGovernanceOverride(paths.project, {
+runtime/orchestrator-service/lib/ops/backbone.js:2919:      approval_id: next.id,
+runtime/orchestrator-service/lib/ops/backbone.js:2931:function createHandoff(projectName, input = {}) {
+runtime/orchestrator-service/lib/ops/backbone.js:2933:  const items = readCollection(paths.handoffsPath);
+runtime/orchestrator-service/lib/ops/backbone.js:2934:  const team = readTeamModel(paths.project);
+runtime/orchestrator-service/lib/ops/backbone.js:2938:    throw new Error('Handoff requires destination_page');
+runtime/orchestrator-service/lib/ops/backbone.js:2953:  const sourceRouting = inferPrimaryRole(linkedEntity?.entity_type || sourceEntity?.entity_type || 'task', {
+runtime/orchestrator-service/lib/ops/backbone.js:2956:  }, team);
+runtime/orchestrator-service/lib/ops/backbone.js:2957:  const destinationRole = getDomainDef(destinationDomain)?.owner_role || sourceRouting.reviewer_role || 'admin';
+runtime/orchestrator-service/lib/ops/backbone.js:2958:  const handoff = {
+runtime/orchestrator-service/lib/ops/backbone.js:2959:    id: asString(current.id) || asString(input.id) || createId('handoff'),
+runtime/orchestrator-service/lib/ops/backbone.js:2961:    type: asString(input.type) || 'route_handoff',
+runtime/orchestrator-service/lib/ops/backbone.js:2970:    source_role: normalizeRoleKey(input.source_role || current.source_role || sourceRouting.owner_role, sourceRouting.owner_role),
+runtime/orchestrator-service/lib/ops/backbone.js:2971:    destination_role: normalizeRoleKey(input.destination_role || current.destination_role || destinationRole, destinationRole),
+runtime/orchestrator-service/lib/ops/backbone.js:2972:    source_role_label: roleDisplay(team, input.source_role || current.source_role || sourceRouting.owner_role),
+runtime/orchestrator-service/lib/ops/backbone.js:2973:    destination_role_label: roleDisplay(team, input.destination_role || current.destination_role || destinationRole),
+runtime/orchestrator-service/lib/ops/backbone.js:2983:      current.id ? 'handoff_updated' : 'handoff_created',
+runtime/orchestrator-service/lib/ops/backbone.js:2989:        destination_role: normalizeRoleKey(input.destination_role || current.destination_role || destinationRole, destinationRole)
+runtime/orchestrator-service/lib/ops/backbone.js:2999:      asString(record.source_page) === handoff.source_page &&
+runtime/orchestrator-service/lib/ops/backbone.js:3000:      asString(record.id) !== handoff.id &&
+runtime/orchestrator-service/lib/ops/backbone.js:3011:      updated_at: handoff.updated_at,
+runtime/orchestrator-service/lib/ops/backbone.js:3012:      history: appendHistory(record, 'handoff_superseded', handoff.created_by, {
+runtime/orchestrator-service/lib/ops/backbone.js:3013:        replaced_by: handoff.id
+runtime/orchestrator-service/lib/ops/backbone.js:3018:  writeCollection(paths.handoffsPath, upsertById(normalizedItems, handoff), MAX_ITEMS.handoffs);
+runtime/orchestrator-service/lib/ops/backbone.js:3022:    type: 'route_handoff_created',
+runtime/orchestrator-service/lib/ops/backbone.js:3023:    entity_type: 'handoff',
+runtime/orchestrator-service/lib/ops/backbone.js:3024:    entity_id: handoff.id,
+runtime/orchestrator-service/lib/ops/backbone.js:3025:    title: `${handoff.source_page || 'system'} to ${handoff.destination_page}`,
+runtime/orchestrator-service/lib/ops/backbone.js:3026:    summary: 'Durable cross-page handoff recorded.',
+runtime/orchestrator-service/lib/ops/backbone.js:3027:    actor: handoff.created_by,
+runtime/orchestrator-service/lib/ops/backbone.js:3029:      source_page: handoff.source_page,
+runtime/orchestrator-service/lib/ops/backbone.js:3030:      destination_page: handoff.destination_page,
+runtime/orchestrator-service/lib/ops/backbone.js:3031:      route_key: handoff.route_key
+runtime/orchestrator-service/lib/ops/backbone.js:3035:  const handoffLinkedEntity = handoff.linked_entity || handoff.source_entity;
+runtime/orchestrator-service/lib/ops/backbone.js:3036:  if (handoffLinkedEntity?.entity_type && handoffLinkedEntity?.entity_id) {
+runtime/orchestrator-service/lib/ops/backbone.js:3037:    updateLinkedEntity(paths.project, handoffLinkedEntity.entity_type, handoffLinkedEntity.entity_id, (record) => {
+runtime/orchestrator-service/lib/ops/backbone.js:3040:        linked_handoffs: [...new Set([handoff.id, ...normalizeStringList(record.linked_handoffs)])],
+runtime/orchestrator-service/lib/ops/backbone.js:3041:        owner_role: asString(record.owner_role || sourceRouting.owner_role),
+runtime/orchestrator-service/lib/ops/backbone.js:3042:        next_owner_role: handoff.destination_role,
+runtime/orchestrator-service/lib/ops/backbone.js:3043:        next_owner_label: handoff.destination_role_label,
+runtime/orchestrator-service/lib/ops/backbone.js:3044:        updated_at: handoff.updated_at,
+runtime/orchestrator-service/lib/ops/backbone.js:3045:        history: appendHistory(record, 'handoff_linked', input.actor || input.created_by, {
+runtime/orchestrator-service/lib/ops/backbone.js:3046:          handoff_id: handoff.id,
+runtime/orchestrator-service/lib/ops/backbone.js:3047:          destination_page: handoff.destination_page
+runtime/orchestrator-service/lib/ops/backbone.js:3051:      if (handoffLinkedEntity.entity_type === 'content_item') {
+runtime/orchestrator-service/lib/ops/backbone.js:3052:        nextRecord.destination = handoff.destination_page;
+runtime/orchestrator-service/lib/ops/backbone.js:3054:          handoff.destination_page === 'publishing'
+runtime/orchestrator-service/lib/ops/backbone.js:3058:          handoff.destination_page === 'publishing'
+runtime/orchestrator-service/lib/ops/backbone.js:3059:            ? 'ready_for_handoff'
+runtime/orchestrator-service/lib/ops/backbone.js:3062:      } else if (handoffLinkedEntity.entity_type === 'media_job') {
+runtime/orchestrator-service/lib/ops/backbone.js:3064:          handoff.destination_page === 'publishing'
+runtime/orchestrator-service/lib/ops/backbone.js:3065:            ? 'ready_for_handoff'
+runtime/orchestrator-service/lib/ops/backbone.js:3074:  return handoff;
+runtime/orchestrator-service/lib/ops/backbone.js:3077:function listHandoffs(projectName, options = {}) {
+runtime/orchestrator-service/lib/ops/backbone.js:3082:  let items = readCollection(paths.handoffsPath);
+runtime/orchestrator-service/lib/ops/backbone.js:3099:function consumeHandoff(projectName, handoffId, input = {}) {
+runtime/orchestrator-service/lib/ops/backbone.js:3101:  const items = readCollection(paths.handoffsPath);
+runtime/orchestrator-service/lib/ops/backbone.js:3102:  const index = items.findIndex((item) => asString(item.id) === asString(handoffId));
+runtime/orchestrator-service/lib/ops/backbone.js:3105:    throw new Error('Handoff not found');
+runtime/orchestrator-service/lib/ops/backbone.js:3116:    history: appendHistory(current, 'handoff_consumed', input.actor, {
+runtime/orchestrator-service/lib/ops/backbone.js:3122:  writeJsonFile(paths.handoffsPath, items);
+runtime/orchestrator-service/lib/ops/backbone.js:3126:    type: 'route_handoff_consumed',
+runtime/orchestrator-service/lib/ops/backbone.js:3127:    entity_type: 'handoff',
+runtime/orchestrator-service/lib/ops/backbone.js:3130:    summary: 'Durable cross-page handoff consumed.',
+runtime/orchestrator-service/lib/ops/backbone.js:3144:  const team = readTeamModel(safeProject);
+runtime/orchestrator-service/lib/ops/backbone.js:3162:    assignee: roleDisplay(team, 'publisher'),
+runtime/orchestrator-service/lib/ops/backbone.js:3163:    role: 'publisher',
+runtime/orchestrator-service/lib/ops/backbone.js:3172:      owner_role: 'publisher',
+runtime/orchestrator-service/lib/ops/backbone.js:3173:      review_role: 'compliance_reviewer'
+runtime/orchestrator-service/lib/ops/backbone.js:3182:      message: 'The publishing item is waiting for operator approval or handoff.',
+runtime/orchestrator-service/lib/ops/backbone.js:3183:      body: 'The publishing item is waiting for operator approval or handoff.',
+runtime/orchestrator-service/lib/ops/backbone.js:3248:function summarizeCurrentHandoffs(items = []) {
+runtime/orchestrator-service/lib/ops/backbone.js:3265:function summarizeOwnershipVisibility(team, entities = []) {
+runtime/orchestrator-service/lib/ops/backbone.js:3266:  const byRole = {};
+runtime/orchestrator-service/lib/ops/backbone.js:3269:    const roleId = normalizeRoleKey(
+runtime/orchestrator-service/lib/ops/backbone.js:3270:      item.owner_role ||
+runtime/orchestrator-service/lib/ops/backbone.js:3271:      item.assignee_role ||
+runtime/orchestrator-service/lib/ops/backbone.js:3272:      item.reviewer_role ||
+runtime/orchestrator-service/lib/ops/backbone.js:3273:      item.role
+runtime/orchestrator-service/lib/ops/backbone.js:3276:    if (!roleId) {
+runtime/orchestrator-service/lib/ops/backbone.js:3280:    if (!byRole[roleId]) {
+runtime/orchestrator-service/lib/ops/backbone.js:3281:      byRole[roleId] = {
+runtime/orchestrator-service/lib/ops/backbone.js:3282:        role: roleId,
+runtime/orchestrator-service/lib/ops/backbone.js:3283:        label: roleDisplay(team, roleId),
+runtime/orchestrator-service/lib/ops/backbone.js:3289:    byRole[roleId].total += 1;
+runtime/orchestrator-service/lib/ops/backbone.js:3291:      byRole[roleId].open += 1;
+runtime/orchestrator-service/lib/ops/backbone.js:3295:  return Object.values(byRole).sort((a, b) => b.open - a.open || b.total - a.total);
+runtime/orchestrator-service/lib/ops/backbone.js:3370:  if (normalizedType === 'approval') return 'governance';
+runtime/orchestrator-service/lib/ops/backbone.js:3376:  if (normalizedType === 'handoff') return asString(record.destination_page) || 'workflows';
+runtime/orchestrator-service/lib/ops/backbone.js:3403:        owner: asString(task.owner || task.assignee),
+runtime/orchestrator-service/lib/ops/backbone.js:3404:        owner_role: asString(task.owner_role || task.assignee_role),
+runtime/orchestrator-service/lib/ops/backbone.js:3405:        assignee: asString(task.assignee || task.owner),
+runtime/orchestrator-service/lib/ops/backbone.js:3406:        assignee_role: asString(task.assignee_role || task.owner_role),
+runtime/orchestrator-service/lib/ops/backbone.js:3436:      owners: mapFilterCounts(items, 'owner_role'),
+runtime/orchestrator-service/lib/ops/backbone.js:3455:      role: 'system_orchestrator',
+runtime/orchestrator-service/lib/ops/backbone.js:3479:      role: 'admin',
+runtime/orchestrator-service/lib/ops/backbone.js:3501:    role: asString(item.role),
+runtime/orchestrator-service/lib/ops/backbone.js:3522:    approval: normalizedQueue.filter((item) => item.queue_type === 'approval'),
+runtime/orchestrator-service/lib/ops/backbone.js:3554:      roles: mapFilterCounts(items, 'role')
+runtime/orchestrator-service/lib/ops/backbone.js:3559:    approval_queue: queueGroups.approval,
+runtime/orchestrator-service/lib/ops/backbone.js:3575:    owner: asString(item.created_by) || 'MH Assistant',
+runtime/orchestrator-service/lib/ops/backbone.js:3589:    owner: asString(item.owner),
+runtime/orchestrator-service/lib/ops/backbone.js:3605:      owner: asString(item.assignee),
+runtime/orchestrator-service/lib/ops/backbone.js:3676:  approvals = [],
+runtime/orchestrator-service/lib/ops/backbone.js:3679:  governanceSummary = {},
+runtime/orchestrator-service/lib/ops/backbone.js:3701:  const approvalPendingAlerts = asArray(approvals)
+runtime/orchestrator-service/lib/ops/backbone.js:3704:      id: `approval-pending-${item.id}`,
+runtime/orchestrator-service/lib/ops/backbone.js:3705:      title: asString(item.title) || 'Approval pending',
+runtime/orchestrator-service/lib/ops/backbone.js:3706:      message: asString(item.summary) || 'Approval requires review.',
+runtime/orchestrator-service/lib/ops/backbone.js:3708:      source: 'approval_pending',
+runtime/orchestrator-service/lib/ops/backbone.js:3709:      entity_type: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:3724:            : 'Publishing item is waiting for approval or release.',
+runtime/orchestrator-service/lib/ops/backbone.js:3757:    ...asArray(governanceSummary?.sections?.claim_review)
+runtime/orchestrator-service/lib/ops/backbone.js:3767:    ...asArray(governanceSummary?.sections?.policy_violations)
+runtime/orchestrator-service/lib/ops/backbone.js:3799:    ...approvalPendingAlerts,
+runtime/orchestrator-service/lib/ops/backbone.js:3816:    approval_pending_alerts: approvalPendingAlerts,
+runtime/orchestrator-service/lib/ops/backbone.js:3828:  const governance = asObject(readJsonFile(paths.governancePath, {}));
+runtime/orchestrator-service/lib/ops/backbone.js:3829:  const team = readTeamModel(paths.project);
+runtime/orchestrator-service/lib/ops/backbone.js:3839:  const approvals = readCollection(paths.approvalsPath);
+runtime/orchestrator-service/lib/ops/backbone.js:3842:  const handoffs = readCollection(paths.handoffsPath);
+runtime/orchestrator-service/lib/ops/backbone.js:3844:  const governanceSummary = buildGovernanceSummary(paths.project, {
+runtime/orchestrator-service/lib/ops/backbone.js:3849:  const approvalLimit = Number(options.approvalLimit || 8) || 8;
+runtime/orchestrator-service/lib/ops/backbone.js:3856:  const handoffLimit = Number(options.handoffLimit || 12) || 12;
+runtime/orchestrator-service/lib/ops/backbone.js:3857:  const ownershipEntities = [
+runtime/orchestrator-service/lib/ops/backbone.js:3862:    ...approvals,
+runtime/orchestrator-service/lib/ops/backbone.js:3868:    owner_role: domain.owner_role,
+runtime/orchestrator-service/lib/ops/backbone.js:3869:    owner_label: roleDisplay(team, domain.owner_role),
+runtime/orchestrator-service/lib/ops/backbone.js:3870:    review_role: domain.review_role,
+runtime/orchestrator-service/lib/ops/backbone.js:3871:    review_label: roleDisplay(team, domain.review_role),
+runtime/orchestrator-service/lib/ops/backbone.js:3872:    handoff_to: asArray(domain.handoff_to).map((roleId) => ({
+runtime/orchestrator-service/lib/ops/backbone.js:3873:      role: roleId,
+runtime/orchestrator-service/lib/ops/backbone.js:3874:      label: roleDisplay(team, roleId)
+runtime/orchestrator-service/lib/ops/backbone.js:3877:    page_permissions: asArray(domain.page_permissions)
+runtime/orchestrator-service/lib/ops/backbone.js:3884:    approvals,
+runtime/orchestrator-service/lib/ops/backbone.js:3887:    governanceSummary,
+runtime/orchestrator-service/lib/ops/backbone.js:3901:    governance,
+runtime/orchestrator-service/lib/ops/backbone.js:3906:    team_service_model: {
+runtime/orchestrator-service/lib/ops/backbone.js:3907:      active_role: team.active_role,
+runtime/orchestrator-service/lib/ops/backbone.js:3908:      role_matrix: asArray(team.role_matrix),
+runtime/orchestrator-service/lib/ops/backbone.js:3909:      route_permissions: asArray(team.route_permissions),
+runtime/orchestrator-service/lib/ops/backbone.js:3910:      domains: asArray(team.service_model?.domains),
+runtime/orchestrator-service/lib/ops/backbone.js:3911:      escalation_chain: asObject(team.escalation_chain)
+runtime/orchestrator-service/lib/ops/backbone.js:3913:    ownership: {
+runtime/orchestrator-service/lib/ops/backbone.js:3914:      default_owner: 'mh-assistant',
+runtime/orchestrator-service/lib/ops/backbone.js:3915:      active_role: team.active_role,
+runtime/orchestrator-service/lib/ops/backbone.js:3916:      team_roles: asArray(team.members).map((member) => ({
+runtime/orchestrator-service/lib/ops/backbone.js:3919:        role: member.role,
+runtime/orchestrator-service/lib/ops/backbone.js:3921:        page_permissions: asArray(member.page_permissions),
+runtime/orchestrator-service/lib/ops/backbone.js:3922:        action_permissions: asArray(member.action_permissions),
+runtime/orchestrator-service/lib/ops/backbone.js:3925:      visibility: summarizeOwnershipVisibility(team, ownershipEntities)
+runtime/orchestrator-service/lib/ops/backbone.js:3927:    team: {
+runtime/orchestrator-service/lib/ops/backbone.js:3928:      members: asArray(team.members),
+runtime/orchestrator-service/lib/ops/backbone.js:3929:      service_model: asObject(team.service_model),
+runtime/orchestrator-service/lib/ops/backbone.js:3930:      route_permissions: asArray(team.route_permissions),
+runtime/orchestrator-service/lib/ops/backbone.js:3931:      role_matrix: asArray(team.role_matrix),
+runtime/orchestrator-service/lib/ops/backbone.js:3932:      escalation_chain: asObject(team.escalation_chain)
+runtime/orchestrator-service/lib/ops/backbone.js:3935:      role_routes: domainRouting,
+runtime/orchestrator-service/lib/ops/backbone.js:3936:      queue_by_role: summarizeOwnershipVisibility(team, queueItems),
+runtime/orchestrator-service/lib/ops/backbone.js:3937:      handoffs_by_role: asArray(handoffs)
+runtime/orchestrator-service/lib/ops/backbone.js:3943:          source_role: item.source_role,
+runtime/orchestrator-service/lib/ops/backbone.js:3944:          source_role_label: item.source_role_label,
+runtime/orchestrator-service/lib/ops/backbone.js:3945:          destination_role: item.destination_role,
+runtime/orchestrator-service/lib/ops/backbone.js:3946:          destination_role_label: item.destination_role_label,
+runtime/orchestrator-service/lib/ops/backbone.js:3959:      pending_approval_count: contentItems.filter((item) => asString(item.approval_status) === 'pending').length,
+runtime/orchestrator-service/lib/ops/backbone.js:4001:    approvals: {
+runtime/orchestrator-service/lib/ops/backbone.js:4002:      total: approvals.length,
+runtime/orchestrator-service/lib/ops/backbone.js:4003:      pending_count: approvals.filter((item) => asString(item.status) === 'pending').length,
+runtime/orchestrator-service/lib/ops/backbone.js:4004:      by_reviewer_role: summarizeOwnershipVisibility(team, approvals),
+runtime/orchestrator-service/lib/ops/backbone.js:4005:      items: approvals.slice(0, approvalLimit)
+runtime/orchestrator-service/lib/ops/backbone.js:4017:    handoffs: {
+runtime/orchestrator-service/lib/ops/backbone.js:4018:      total: handoffs.length,
+runtime/orchestrator-service/lib/ops/backbone.js:4019:      available_count: handoffs.filter((item) => asString(item.status) === 'available').length,
+runtime/orchestrator-service/lib/ops/backbone.js:4020:      current: summarizeCurrentHandoffs(handoffs),
+runtime/orchestrator-service/lib/ops/backbone.js:4021:      by_role: asArray(handoffs)
+runtime/orchestrator-service/lib/ops/backbone.js:4025:          source_role: item.source_role,
+runtime/orchestrator-service/lib/ops/backbone.js:4026:          destination_role: item.destination_role,
+runtime/orchestrator-service/lib/ops/backbone.js:4027:          source_role_label: item.source_role_label,
+runtime/orchestrator-service/lib/ops/backbone.js:4028:          destination_role_label: item.destination_role_label,
+runtime/orchestrator-service/lib/ops/backbone.js:4033:      items: handoffs.slice(0, handoffLimit)
+runtime/orchestrator-service/lib/ops/backbone.js:4048:  buildGovernanceSummary,
+runtime/orchestrator-service/lib/ops/backbone.js:4049:  readTeamModel,
+runtime/orchestrator-service/lib/ops/backbone.js:4050:  updateTeamModel,
+runtime/orchestrator-service/lib/ops/backbone.js:4051:  getGovernancePolicy,
+runtime/orchestrator-service/lib/ops/backbone.js:4052:  updateGovernancePolicy,
+runtime/orchestrator-service/lib/ops/backbone.js:4077:  createApproval,
+runtime/orchestrator-service/lib/ops/backbone.js:4078:  listApprovals,
+runtime/orchestrator-service/lib/ops/backbone.js:4079:  decideApproval,
+runtime/orchestrator-service/lib/ops/backbone.js:4084:  createHandoff,
+runtime/orchestrator-service/lib/ops/backbone.js:4085:  listHandoffs,
+runtime/orchestrator-service/lib/ops/backbone.js:4086:  consumeHandoff,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:24:  createApproval,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:25:  createHandoff
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:147:  if (intent === 'approval') return 'governance';
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:206:      pattern: /\b(task plan|workflow|handoff|approval|approvals|timeline|execution plan|operator|owners?|assign|todo|follow up|route)\b/
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:233:  if (matches(/\b(approve|approval|review)\b/) && !['ads', 'content', 'campaign'].includes(intent)) {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:234:    intent = 'approval';
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:235:    actionType = 'approval';
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:300:    recent_handoffs: asArray(operations.handoffs?.items).filter((item) => asString(item.destination_page) === 'research').slice(0, 3)
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:445:  const suggestedHandoffs = normalizeReadableList(
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:446:    record.suggestedHandoffs ||
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:447:    record.suggested_handoffs ||
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:464:    suggestedHandoffs
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:571:  const taskBlock = ['workflow', 'task', 'approval'].includes(classified.actionType)
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:574:      owner: classified.resolvedModeId === 'operations' ? 'Operations Planner' : 'mh-assistant',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:578:        'Create approval only if execution changes publishing, spend, or sensitive settings.'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:648:      `Use tasks or approvals if human follow-through is required.`
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:814:        if (classified.actionType === 'approval') {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:815:          const approval = createApproval(projectName, {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:816:            title: `${response.title} approval`,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:823:          linkedEntities.push({ entity_type: 'approval', entity_id: approval.id, route: 'governance', label: approval.title });
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:826:        let handoff = null;
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:828:          handoff = createHandoff(projectName, {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:865:            handoff ? { entity_type: 'handoff', entity_id: handoff.id, route: classified.routeTarget, label: response.title } : null
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:902:          handoff
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1035:      const handoff = createHandoff(projectName, {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1060:        handoff,

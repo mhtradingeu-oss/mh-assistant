@@ -1,0 +1,28 @@
+# LIB-FINAL-4C — Move To Folder Contract Search
+
+Generated: Sat Jun  6 08:51:35 CEST 2026
+Branch: architecture/frontend-consolidation-v1
+HEAD: e143d34
+
+public/control-center/pages/library.js:561:      folderKey: "all_assets",
+public/control-center/pages/library.js:685:    const rawType = asset.asset_type || asset.type || asset.category || asset.assetCategory || "";
+public/control-center/pages/library.js:971:  const selectedFolderKey = session.folderKey || "all_assets";
+public/control-center/pages/library.js:1027:    const haystack = `${asset.name} ${asset.asset_type} ${asset.category_label} ${asset.file_path} ${asset.used_in.join(" ")}`;
+public/control-center/pages/library.js:1826:      : `<div class="empty-box">No assets match this view. Try clearing filters, switching folders, or uploading a required asset.</div>`;
+public/control-center/pages/library.js:2008:      : `<div class="empty-box library-upload-empty-state"><strong>No session uploads yet.</strong><span>Choose files, classify them, then upload to add new assets to this Library.</span></div>`;
+public/control-center/pages/library.js:2033:        session.folderKey = mappedFolder.key;
+public/control-center/pages/library.js:2231:      const folderKey = button.getAttribute("data-library-folder-select") || "all_assets";
+public/control-center/pages/library.js:2235:        value: folderKey
+public/control-center/pages/library.js:2238:          session.folderKey = value;
+public/control-center/pages/library.js:2977:    const categoryReadiness = getCategoryReadinessList(assetsData);
+public/control-center/pages/library.js:3029:            <p class="card-subtitle">Upload, classify, and prepare asset candidates. Approval, source-of-truth status, and publishing readiness remain controlled follow-up steps.</p>
+public/control-center/pages/library.js:3071:      const active = (session.folderKey || "all_assets") === folder.key;
+public/control-center/pages/library/catalog-readiness.js:25:    const category = asset?.category || asset?.type || "uncategorized";
+public/control-center/pages/library/projection-adapter.js:6:    category: asset.category || "uncategorized",
+runtime/orchestrator-service/server.js:8292:  const categoryReadiness = buildProjectAssetCategoryReadiness(projectName, assets);
+runtime/orchestrator-service/server.js:9280:      in_expected_folder = String(asset.file_path || '').startsWith(folderInfo.target_dir);
+runtime/orchestrator-service/server.js:15295:  const routed = (routes.routed_assets || []).filter(x => x.in_expected_folder).length;
+runtime/orchestrator-service/server.js:15551:  const categoryReadiness = missingAssets.category_readiness || buildProjectAssetCategoryReadiness(projectName, assets);
+runtime/orchestrator-service/server.js:15562:      .flatMap(category => category.approved_assets.map(assetId => ({
+runtime/orchestrator-service/server.js:15564:        asset_type: category.asset_type,
+runtime/orchestrator-service/server.js:22437:      category_readiness: full.assets?.category_readiness || null,

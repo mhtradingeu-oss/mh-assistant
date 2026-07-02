@@ -1,0 +1,541 @@
+# T67 — Customer Center Runtime Authority Focused Audit
+
+## Status
+Audit-only. No production files changed.
+
+## Scope
+Focused runtime authority review of `public/control-center/pages/customer-center.js`.
+
+## Why Customer Center Is Next
+T61 ranked Customer Center after Home and Setup among remaining open frontend files. Customer Center may involve customer messages, tickets, inbox, replies, handoffs, SLA, and support operations, so it must be classified before any patch.
+
+## File Summary
+- File: `public/control-center/pages/customer-center.js`
+- Lines: 470
+- Imports: 1
+- Render writes: 0
+- Event bindings: 1
+- Backend/API/customer signals: 177
+- Write-like signals: 41
+- Confirmation signals: 0
+- Storage signals: 0
+- Navigation signals: 9
+- Disabled/read-only/future signals: 64
+- AI/handoff signals: 46
+- Risky terms: 147
+
+## Initial Risk Notes
+- Customer Center contains write-like/customer-operation terms. These must be classified as read-only projection, disabled future actions, AI handoff, or backend mutation.
+- No confirmation dialogs found. This is acceptable only if no customer send/reply/resolve/assign action is active.
+- Read-only/disabled/protected/future copy exists and should be checked against actual handlers.
+
+## Imports
+- L1: `import {`
+
+## Render Writes
+- none
+
+## Event Bindings
+- L375: `root.addEventListener("click", async (event) => {`
+
+## Backend / API / Customer Signals
+- L2: `fetchCustomerOperationsReadiness,`
+- L3: `fetchCustomerOperationsInbox,`
+- L4: `fetchCustomerConversations,`
+- L5: `fetchCustomerTickets,`
+- L6: `fetchCustomerChannels`
+- L7: `} from "../api.js";`
+- L9: `const CUSTOMER_CENTER_STATE = {`
+- L45: `const message = asString(value?.error || value?.message || value);`
+- L46: `return /protected read routes are disabled/i.test(message);`
+- L49: `function getProtectedReadMessage(value) {`
+- L50: `return asString(value?.error || value?.message || value || "Protected read routes are disabled.");`
+- L53: `async function loadCustomerCenterModel(projectName) {`
+- L54: `const [readiness, inbox, conversations, tickets, channels] = await Promise.all([`
+- L55: `fetchCustomerOperationsReadiness(projectName),`
+- L56: `fetchCustomerOperationsInbox(projectName),`
+- L57: `fetchCustomerConversations(projectName),`
+- L58: `fetchCustomerTickets(projectName),`
+- L59: `fetchCustomerChannels(projectName)`
+- L62: `const responses = [readiness, inbox, conversations, tickets, channels];`
+- L67: `guardMessage: getProtectedReadMessage(guard),`
+- L69: `inbox: [],`
+- L70: `conversations: [],`
+- L71: `tickets: [],`
+- L74: `warnings: ["Configure MH_CONTROL_CENTER_WRITE_KEY on the server to load Customer Center data."],`
+- L80: `const inboxData = getPayload(inbox);`
+- L81: `const conversationsData = getPayload(conversations);`
+- L82: `const ticketsData = getPayload(tickets);`
+- L87: `guardMessage: "",`
+- L89: `inbox: asArray(inboxData?.inbox || inboxData),`
+- L90: `conversations: asArray(conversationsData?.conversations || conversationsData),`
+- L91: `tickets: asArray(ticketsData?.tickets || ticketsData),`
+- L101: `["Send reply", "Locked: Customer Center v1 cannot send external replies or provider messages."],`
+- L103: `["Update ticket", "Locked: ticket changes are outside this read-only release."],`
+- L104: `["Assign conversation", "Locked: assignment changes require a future workflow owner and audit trail."],`
+- L106: `["Trigger callback", "Locked: call placement is not enabled from Customer Center."],`
+- L107: `["Trigger IVR", "Locked: IVR provider execution is not enabled from Customer Center."],`
+- L108: `["Sync CRM", "Locked: CRM provider execution is not enabled from Customer Center."],`
+- L109: `["Auto-reply", "Locked: autonomous customer replies remain forbidden by default."]`
+- L113: `function countWaitingReplies(inbox) {`
+- L114: `return asArray(inbox).filter((entry) => /waiting|open|unread/i.test(\`${entry.status || ""} ${entry.sla_status || ""}\`)).length;`
+- L117: `function countSlaRisk(items) {`
+- L118: `return asArray(items).filter((item) => /risk|breach|late|urgent/i.test(\`${item.sla_status || ""} ${item.priority || ""}\`)).length;`
+- L138: `<h3>Server guard is active: no customer data is loaded</h3>`
+- L141: `<p class="muted">${escapeHtml(model.guardMessage)}</p>`
+- L144: `<p>This page is intentionally blank while protected customer read routes are disabled. Configure <code>MH_CONTROL_CENTER_WRITE_KEY</code> on the server, restart the service, then reload to show read-only projections.</p>`
+- L145: `<p>No placeholder customer records are shown. External send, CRM updates, ticket changes, calls, IVR, provider sync, and auto-reply remain locked.</p>`
+- L151: `function renderEmptyState(title, body, nextStep = "Safe next step: verify protected-read readiness, then reload read-only customer projections.") {`
+- L161: `function renderInbox(model) {`
+- L162: `const inbox = asArray(model?.inbox);`
+- L163: `if (!inbox.length) {`
+- L164: `return renderEmptyState("Inbox is empty in read-only mode", "No inbound customer signals are available for this project right now. This is expected when protected-read data is not connected or no conversations match the current projection.");`
+- L167: `return inbox.slice(0, 8).map((entry) => \``
+- L170: `<strong>${escapeHtml(entry.customer_label || "Masked customer")}</strong>`
+- L171: `<p>${escapeHtml(entry.last_message_preview || "No message preview available.")}</p>`
+- L173: `<span class="card-badge">${escapeHtml(entry.status || "open")}</span>`
+- L178: `function renderConversations(model) {`
+- L179: `const conversations = asArray(model?.conversations);`
+- L180: `if (!conversations.length) {`
+- L181: `return renderEmptyState("No conversation previews available", "Masked conversation context will appear here after read-only projections return conversations. Customer identity and message content stay masked or truncated by default.");`
+- L184: `return conversations.slice(0, 6).map((item) => \``
+- L187: `<strong>${escapeHtml(item.customer_label || "Masked customer")}</strong>`
+- L188: `<p>${escapeHtml(item.channel || "unknown")} • ${escapeHtml(item.status || "open")} • ${escapeHtml(item.message_count || 0)} messages</p>`
+- L195: `function renderTickets(model) {`
+- L196: `const tickets = asArray(model?.tickets);`
+- L197: `if (!tickets.length) {`
+- L198: `return renderEmptyState("No ticket snapshots available", "Support ticket and SLA records will appear here when the read-only projection includes them. No ticket creation or update is available from this page.");`
+- L201: `return tickets.slice(0, 6).map((ticket) => \``
+- L204: `<strong>${escapeHtml(ticket.ticket_id || "Ticket")}</strong>`
+- L205: `<p>${escapeHtml(ticket.status || "open")} • ${escapeHtml(ticket.sla_status || "unknown SLA")}</p>`
+- L207: `<span class="card-badge">${escapeHtml(ticket.priority || "normal")}</span>`
+- L215: `return renderEmptyState("No channel readiness records", "Provider readiness for email, social messaging, CRM, voice, and IVR will appear here when configured. Send and provider execution remain locked.");`
+- L224: `<span class="card-badge">${channel.external_send_ready ? "Send ready" : "Send locked"}</span>`
+- L231: `<div class="customer-center-locked-actions" aria-label="Future customer actions locked">`
+- L233: `<p class="muted">Visible for roadmap clarity only. These customer actions cannot execute here and require future confirmation gates, role permissions, provider readiness, and audit logging.</p>`
+- L245: `function renderCustomerCenter(context) {`
+- L246: `const model = CUSTOMER_CENTER_STATE.model || {};`
+- L247: `const inbox = asArray(model.inbox);`
+- L248: `const conversations = asArray(model.conversations);`
+- L249: `const tickets = asArray(model.tickets);`
+- L251: `const protectedReadStatusTitle = model.protectedReadGuard`
+- L253: `: CUSTOMER_CENTER_STATE.error`
+- L255: `: CUSTOMER_CENTER_STATE.loaded`
+- L258: `const protectedReadStatusBody = model.protectedReadGuard`
+- L259: `? "Customer data is intentionally withheld until protected read routes are enabled on the server."`
+- L260: `: CUSTOMER_CENTER_STATE.error`
+- L261: `? "Customer Center could not load the current read-only projection. Customer execution actions remain unavailable."`
+- L262: `: CUSTOMER_CENTER_STATE.loaded`
+- L263: `? "Customer Center is using read-only projections only. Outbound sends, CRM writes, ticket changes, assignments, calls, IVR, and auto-replies remain unavailable."`
+- L264: `: "Customer Center will request protected read-only projections when the page initializes. No outbound or mutation action is available.";`
+- L266: `if (CUSTOMER_CENTER_STATE.loading) {`
+- L270: `<div class="panel-kicker">Customer Center</div>`
+- L271: `<h2>Loading customer operations…</h2>`
+- L272: `<p class="muted">Fetching read-only customer projections.</p>`
+- L281: `<p class="mhos-context-eyebrow">Customer Operations</p>`
+- L282: `<h1>Customer Center</h1>`
+- L283: `<p class="mhos-context-description">Protected-read customer communication surface for inbox visibility, conversation previews, ticket/SLA state, channel readiness, and handoff preparation. No customer execution happens here.</p>`
+- L286: `<button class="btn btn-secondary" type="button" data-customer-center-action="refresh">Refresh read-only data</button>`
+- L287: `<button class="btn btn-primary" type="button" data-customer-center-action="ai-handoff">Prepare AI support prompt</button>`
+- L292: `${renderMetric("Open Conversations", conversations.length || "0", "Read-only")}`
+- L293: `${renderMetric("Waiting Replies", countWaitingReplies(inbox), "No auto-send")}`
+- L294: `${renderMetric("SLA Risk", countSlaRisk([...tickets, ...inbox]), "Review only")}`
+- L295: `${renderMetric("Channels", channels.length || "0", "Send locked")}`
+- L300: `<div class="panel-header"><div><div class="panel-kicker">Protected-read status</div><h3>${protectedReadStatusTitle}</h3></div></div>`
+- L301: `<p class="muted">${protectedReadStatusBody}</p>`
+- L305: `<div class="panel-header"><div><div class="panel-kicker">Execution boundary</div><h3>No direct customer actions</h3></div></div>`
+- L306: `<p class="muted">This page can review customer context and prepare handoffs. Any future customer-facing action must happen in an owning workflow with confirmation, permissions, and audit logging.</p>`
+- L314: `<div class="panel-header"><div><div class="panel-kicker">Readiness Locks</div><h3>Read-only customer operations mode</h3></div></div>`
+- L316: `<article class="ops-list-item"><div><strong>Read-only projections</strong><p>Customer Center can display protected customer snapshots only.</p></div><span class="card-badge">Allowed</span></article>`
+- L317: `<article class="ops-list-item"><div><strong>External send</strong><p>Replies, social messages, SMS, and provider sends are unavailable here.</p></div><span class="card-badge">Locked</span></article>`
+- L318: `<article class="ops-list-item"><div><strong>CRM / Ticket / Assignment writes</strong><p>CRM notes, ticket updates, review marks, and ownership changes require future confirmation gates.</p></div><span class="card-badge">Locked</span></article>`
+- L319: `<article class="ops-list-item"><div><strong>Calls / IVR / Auto-reply</strong><p>Voice placement, IVR provider execution, and autonomous replies remain disabled.</p></div><span class="card-badge">Locked</span></article>`
+- L325: `<p class="muted">Use Customer Center to review, summarize, and prepare handoffs only. Nothing in this page sends a reply, changes CRM, updates tickets, assigns conversations, places calls, triggers IVR, or starts auto-reply.</p>`
+- L331: `<div class="panel-header"><div><div class="panel-kicker">Unified Inbox</div><h3>Inbound customer signals</h3></div></div>`
+- L332: `<div class="ops-list">${renderInbox(model)}</div>`
+- L336: `<div class="panel-header"><div><div class="panel-kicker">Conversation Preview</div><h3>Masked conversation context</h3></div></div>`
+- L337: `<div class="ops-list">${renderConversations(model)}</div>`
+- L341: `<div class="panel-header"><div><div class="panel-kicker">Tickets / SLA</div><h3>Support state snapshot</h3></div></div>`
+- L342: `<div class="ops-list">${renderTickets(model)}</div>`
+- L353: `<div class="panel-header"><div><div class="panel-kicker">Action Panel</div><h3>Handoff-only, no execution</h3></div></div>`
+- L354: `<p class="muted">These buttons prepare navigation/context handoffs only. They do not send customer messages, contact providers, update CRM, change tickets, assign conversations, or mark records reviewed.</p>`
+- L356: `<button class="btn btn-secondary" type="button" data-customer-center-action="task-handoff">Prepare Task Center handoff</button>`
+- L357: `<button class="btn btn-secondary" type="button" data-customer-center-action="governance-handoff">Prepare Governance review</button>`
+- L358: `<button class="btn btn-secondary" type="button" data-customer-center-action="ai-handoff">Prepare AI Command prompt</button>`
+- L365: `<p class="muted">AI may summarize read-only context, draft response guidance, translate, and suggest next steps for a human handoff. It must not send replies, update CRM, close tickets, assign conversations, place calls, trigger IVR, sync providers, or start auto-reply.</p>`
+- L371: `function attachCustomerCenterHandlers(context) {`
+- L372: `const root = document.querySelector('[data-page="customer-center"]');`
+- L376: `const button = event.target.closest("[data-customer-center-action]");`
+- L379: `const action = button.dataset.customerCenterAction;`
+- L381: `await loadAndRenderCustomerCenter(context);`
+- L382: `context.showMessage?.("Customer Center read-only data refreshed.");`
+- L386: `if (action === "ai-handoff") {`
+- L387: `context.setSharedAiDraft?.({`
+- L388: `source: "customer-center",`
+- L389: `title: "Customer Center support prompt",`
+- L390: `prompt: "Review Customer Center read-only state. Summarize customer support risks, draft safe reply guidance, and identify escalation needs. Do not send replies or mutate CRM."`
+- L392: `context.navigateTo?.("ai-command");`
+- L393: `context.showMessage?.("Customer Center context sent to AI Command.");`
+- L397: `if (action === "task-handoff") {`
+- L398: `context.setSharedHandoff?.("task-center", {`
+- L399: `source: "customer-center",`
+- L400: `title: "Customer follow-up task preview",`
+- L401: `summary: "Review Customer Center state and prepare a human follow-up task. No customer mutation was performed."`
+- L403: `context.navigateTo?.("task-center");`
+- L404: `context.showMessage?.("Customer task handoff prepared.");`
+- L408: `if (action === "governance-handoff") {`
+- L409: `context.setSharedHandoff?.("governance", {`
+- L410: `source: "customer-center",`
+- L411: `title: "Customer communication governance review",`
+- L412: `summary: "Review customer reply/escalation risk before any external response. No send action was performed."`
+- L414: `context.navigateTo?.("governance");`
+- L415: `context.showMessage?.("Customer governance handoff prepared.");`
+- L420: `async function loadAndRenderCustomerCenter(context) {`
+- L421: `const projectName = context.projectName || context.state?.projectName || "default";`
+- L422: `CUSTOMER_CENTER_STATE.loading = true;`
+- L423: `context.rerender?.();`
+- L426: `CUSTOMER_CENTER_STATE.model = await loadCustomerCenterModel(projectName);`
+- L427: `CUSTOMER_CENTER_STATE.loaded = true;`
+- L428: `CUSTOMER_CENTER_STATE.error = "";`
+- L430: `CUSTOMER_CENTER_STATE.error = error?.message || "Failed to load Customer Center.";`
+- L431: `CUSTOMER_CENTER_STATE.model = {`
+
+## Write-like Signals
+- L1: `import {`
+- L53: `async function loadCustomerCenterModel(projectName) {`
+- L101: `["Send reply", "Locked: Customer Center v1 cannot send external replies or provider messages."],`
+- L103: `["Update ticket", "Locked: ticket changes are outside this read-only release."],`
+- L104: `["Assign conversation", "Locked: assignment changes require a future workflow owner and audit trail."],`
+- L108: `["Sync CRM", "Locked: CRM provider execution is not enabled from Customer Center."],`
+- L109: `["Auto-reply", "Locked: autonomous customer replies remain forbidden by default."]`
+- L145: `<p>No placeholder customer records are shown. External send, CRM updates, ticket changes, calls, IVR, provider sync, and auto-reply remain locked.</p>`
+- L198: `return renderEmptyState("No ticket snapshots available", "Support ticket and SLA records will appear here when the read-only projection includes them. No ticket creation or update is available from this page.");`
+- L215: `return renderEmptyState("No channel readiness records", "Provider readiness for email, social messaging, CRM, voice, and IVR will appear here when configured. Send and provider execution remain locked.");`
+- L224: `<span class="card-badge">${channel.external_send_ready ? "Send ready" : "Send locked"}</span>`
+- L233: `<p class="muted">Visible for roadmap clarity only. These customer actions cannot execute here and require future confirmation gates, role permissions, provider readiness, and audit logging.</p>`
+- L263: `? "Customer Center is using read-only projections only. Outbound sends, CRM writes, ticket changes, assignments, calls, IVR, and auto-replies remain unavailable."`
+- L283: `<p class="mhos-context-description">Protected-read customer communication surface for inbox visibility, conversation previews, ticket/SLA state, channel readiness, and handoff preparation. No customer execution happens here.</p>`
+- L287: `<button class="btn btn-primary" type="button" data-customer-center-action="ai-handoff">Prepare AI support prompt</button>`
+- L293: `${renderMetric("Waiting Replies", countWaitingReplies(inbox), "No auto-send")}`
+- L295: `${renderMetric("Channels", channels.length || "0", "Send locked")}`
+- L306: `<p class="muted">This page can review customer context and prepare handoffs. Any future customer-facing action must happen in an owning workflow with confirmation, permissions, and audit logging.</p>`
+- L317: `<article class="ops-list-item"><div><strong>External send</strong><p>Replies, social messages, SMS, and provider sends are unavailable here.</p></div><span class="card-badge">Locked</span></article>`
+- L318: `<article class="ops-list-item"><div><strong>CRM / Ticket / Assignment writes</strong><p>CRM notes, ticket updates, review marks, and ownership changes require future confirmation gates.</p></div><span class="card-badge">Locked</span></article>`
+- L319: `<article class="ops-list-item"><div><strong>Calls / IVR / Auto-reply</strong><p>Voice placement, IVR provider execution, and autonomous replies remain disabled.</p></div><span class="card-badge">Locked</span></article>`
+- L325: `<p class="muted">Use Customer Center to review, summarize, and prepare handoffs only. Nothing in this page sends a reply, changes CRM, updates tickets, assigns conversations, places calls, triggers IVR, or starts auto-reply.</p>`
+- L353: `<div class="panel-header"><div><div class="panel-kicker">Action Panel</div><h3>Handoff-only, no execution</h3></div></div>`
+- L354: `<p class="muted">These buttons prepare navigation/context handoffs only. They do not send customer messages, contact providers, update CRM, change tickets, assign conversations, or mark records reviewed.</p>`
+- L356: `<button class="btn btn-secondary" type="button" data-customer-center-action="task-handoff">Prepare Task Center handoff</button>`
+- L357: `<button class="btn btn-secondary" type="button" data-customer-center-action="governance-handoff">Prepare Governance review</button>`
+- L358: `<button class="btn btn-secondary" type="button" data-customer-center-action="ai-handoff">Prepare AI Command prompt</button>`
+- L365: `<p class="muted">AI may summarize read-only context, draft response guidance, translate, and suggest next steps for a human handoff. It must not send replies, update CRM, close tickets, assign conversations, place calls, trigger IVR, sync providers, or start auto-reply.</p>`
+- L375: `root.addEventListener("click", async (event) => {`
+- L376: `const button = event.target.closest("[data-customer-center-action]");`
+- L386: `if (action === "ai-handoff") {`
+- L390: `prompt: "Review Customer Center read-only state. Summarize customer support risks, draft safe reply guidance, and identify escalation needs. Do not send replies or mutate CRM."`
+- L397: `if (action === "task-handoff") {`
+- L398: `context.setSharedHandoff?.("task-center", {`
+- L404: `context.showMessage?.("Customer task handoff prepared.");`
+- L408: `if (action === "governance-handoff") {`
+- L409: `context.setSharedHandoff?.("governance", {`
+- L412: `summary: "Review customer reply/escalation risk before any external response. No send action was performed."`
+- L415: `context.showMessage?.("Customer governance handoff prepared.");`
+- L420: `async function loadAndRenderCustomerCenter(context) {`
+- L454: `description: "Read-only customer operations, inbox visibility, ticket/SLA state, and safe AI handoffs."`
+
+## Confirmation Signals
+- none
+
+## Storage Signals
+- none
+
+## Navigation Signals
+- L46: `return /protected read routes are disabled/i.test(message);`
+- L50: `return asString(value?.error || value?.message || value || "Protected read routes are disabled.");`
+- L73: `blockers: ["Protected read route guard is active."],`
+- L144: `<p>This page is intentionally blank while protected customer read routes are disabled. Configure <code>MH_CONTROL_CENTER_WRITE_KEY</code> on the server, restart the service, then reload to show read-only projections.</p>`
+- L259: `? "Customer data is intentionally withheld until protected read routes are enabled on the server."`
+- L392: `context.navigateTo?.("ai-command");`
+- L403: `context.navigateTo?.("task-center");`
+- L414: `context.navigateTo?.("governance");`
+- L448: `export const customerCenterRoute = {`
+
+## Disabled / Read-only / Future Signals
+- L44: `function isProtectedReadGuard(value) {`
+- L46: `return /protected read routes are disabled/i.test(message);`
+- L49: `function getProtectedReadMessage(value) {`
+- L50: `return asString(value?.error || value?.message || value || "Protected read routes are disabled.");`
+- L63: `const guard = responses.find(isProtectedReadGuard);`
+- L66: `protectedReadGuard: true,`
+- L67: `guardMessage: getProtectedReadMessage(guard),`
+- L73: `blockers: ["Protected read route guard is active."],`
+- L75: `disabledActions: buildDisabledActions()`
+- L86: `protectedReadGuard: false,`
+- L95: `disabledActions: buildDisabledActions()`
+- L99: `function buildDisabledActions() {`
+- L102: `["Add CRM note", "Locked: CRM writes require a future confirmation gate, role check, and audit log."],`
+- L103: `["Update ticket", "Locked: ticket changes are outside this read-only release."],`
+- L104: `["Assign conversation", "Locked: assignment changes require a future workflow owner and audit trail."],`
+- L105: `["Mark reviewed", "Locked: review-state writes require a future safety pass."],`
+- L131: `function renderProtectedReadGuard(model) {`
+- L132: `if (!model?.protectedReadGuard) return "";`
+- L134: `<section class="panel mhos-clean-surface" aria-label="Protected read guard">`
+- L137: `<div class="panel-kicker">Protected read guard</div>`
+- L143: `<strong>Protected-read setup required</strong>`
+- L144: `<p>This page is intentionally blank while protected customer read routes are disabled. Configure <code>MH_CONTROL_CENTER_WRITE_KEY</code> on the server, restart the service, then reload to show read-only projections.</p>`
+- L151: `function renderEmptyState(title, body, nextStep = "Safe next step: verify protected-read readiness, then reload read-only customer projections.") {`
+- L164: `return renderEmptyState("Inbox is empty in read-only mode", "No inbound customer signals are available for this project right now. This is expected when protected-read data is not connected or no conversations match the current projection.");`
+- L171: `<p>${escapeHtml(entry.last_message_preview || "No message preview available.")}</p>`
+- L181: `return renderEmptyState("No conversation previews available", "Masked conversation context will appear here after read-only projections return conversations. Customer identity and message content stay masked or truncated by default.");`
+- L198: `return renderEmptyState("No ticket snapshots available", "Support ticket and SLA records will appear here when the read-only projection includes them. No ticket creation or update is available from this page.");`
+- L222: `<p>${escapeHtml(channel.blocked_reason || "Read-only projection only.")}</p>`
+- L229: `function renderDisabledActions(actions) {`
+- L231: `<div class="customer-center-locked-actions" aria-label="Future customer actions locked">`
+- L233: `<p class="muted">Visible for roadmap clarity only. These customer actions cannot execute here and require future confirmation gates, role permissions, provider readiness, and audit logging.</p>`
+- L236: `<button class="btn btn-ghost" type="button" disabled title="${escapeHtml(reason)}">`
+- L251: `const protectedReadStatusTitle = model.protectedReadGuard`
+- L254: `? "Protected-read request needs attention"`
+- L256: `? "Read-only projections loaded"`
+- L257: `: "Awaiting protected-read load";`
+- L258: `const protectedReadStatusBody = model.protectedReadGuard`
+- L259: `? "Customer data is intentionally withheld until protected read routes are enabled on the server."`
+- L261: `? "Customer Center could not load the current read-only projection. Customer execution actions remain unavailable."`
+- L263: `? "Customer Center is using read-only projections only. Outbound sends, CRM writes, ticket changes, assignments, calls, IVR, and auto-replies remain unavailable."`
+- L264: `: "Customer Center will request protected read-only projections when the page initializes. No outbound or mutation action is available.";`
+- L272: `<p class="muted">Fetching read-only customer projections.</p>`
+- L283: `<p class="mhos-context-description">Protected-read customer communication surface for inbox visibility, conversation previews, ticket/SLA state, channel readiness, and handoff preparation. No customer execution happens here.</p>`
+- L286: `<button class="btn btn-secondary" type="button" data-customer-center-action="refresh">Refresh read-only data</button>`
+- L292: `${renderMetric("Open Conversations", conversations.length || "0", "Read-only")}`
+- L300: `<div class="panel-header"><div><div class="panel-kicker">Protected-read status</div><h3>${protectedReadStatusTitle}</h3></div></div>`
+- L301: `<p class="muted">${protectedReadStatusBody}</p>`
+- L306: `<p class="muted">This page can review customer context and prepare handoffs. Any future customer-facing action must happen in an owning workflow with confirmation, permissions, and audit logging.</p>`
+- L310: `${renderProtectedReadGuard(model)}`
+- L314: `<div class="panel-header"><div><div class="panel-kicker">Readiness Locks</div><h3>Read-only customer operations mode</h3></div></div>`
+- L316: `<article class="ops-list-item"><div><strong>Read-only projections</strong><p>Customer Center can display protected customer snapshots only.</p></div><span class="card-badge">Allowed</span></article>`
+- L318: `<article class="ops-list-item"><div><strong>CRM / Ticket / Assignment writes</strong><p>CRM notes, ticket updates, review marks, and ownership changes require future confirmation gates.</p></div><span class="card-badge">Locked</span></article>`
+- L319: `<article class="ops-list-item"><div><strong>Calls / IVR / Auto-reply</strong><p>Voice placement, IVR provider execution, and autonomous replies remain disabled.</p></div><span class="card-badge">Locked</span></article>`
+- L324: `<div class="panel-header"><div><div class="panel-kicker">Safe Operating Rules</div><h3>Preview-first support workflow</h3></div></div>`
+- L336: `<div class="panel-header"><div><div class="panel-kicker">Conversation Preview</div><h3>Masked conversation context</h3></div></div>`
+- L360: `${renderDisabledActions(model.disabledActions)}`
+- L365: `<p class="muted">AI may summarize read-only context, draft response guidance, translate, and suggest next steps for a human handoff. It must not send replies, update CRM, close tickets, assign conversations, place calls, trigger IVR, sync providers, or start auto-reply.</p>`
+- L382: `context.showMessage?.("Customer Center read-only data refreshed.");`
+- L390: `prompt: "Review Customer Center read-only state. Summarize customer support risks, draft safe reply guidance, and identify escalation needs. Do not send replies or mutate CRM."`
+- L400: `title: "Customer follow-up task preview",`
+- L432: `protectedReadGuard: isProtectedReadGuard(error),`
+- L433: `guardMessage: getProtectedReadMessage(error),`
+- L440: `disabledActions: buildDisabledActions()`
+- L454: `description: "Read-only customer operations, inbox visibility, ticket/SLA state, and safe AI handoffs."`
+
+## AI / Handoff Signals
+- L54: `const [readiness, inbox, conversations, tickets, channels] = await Promise.all([`
+- L104: `["Assign conversation", "Locked: assignment changes require a future workflow owner and audit trail."],`
+- L109: `["Auto-reply", "Locked: autonomous customer replies remain forbidden by default."]`
+- L113: `function countWaitingReplies(inbox) {`
+- L114: `return asArray(inbox).filter((entry) => /waiting|open|unread/i.test(\`${entry.status || ""} ${entry.sla_status || ""}\`)).length;`
+- L145: `<p>No placeholder customer records are shown. External send, CRM updates, ticket changes, calls, IVR, provider sync, and auto-reply remain locked.</p>`
+- L164: `return renderEmptyState("Inbox is empty in read-only mode", "No inbound customer signals are available for this project right now. This is expected when protected-read data is not connected or no conversations match the current projection.");`
+- L171: `<p>${escapeHtml(entry.last_message_preview || "No message preview available.")}</p>`
+- L181: `return renderEmptyState("No conversation previews available", "Masked conversation context will appear here after read-only projections return conversations. Customer identity and message content stay masked or truncated by default.");`
+- L198: `return renderEmptyState("No ticket snapshots available", "Support ticket and SLA records will appear here when the read-only projection includes them. No ticket creation or update is available from this page.");`
+- L215: `return renderEmptyState("No channel readiness records", "Provider readiness for email, social messaging, CRM, voice, and IVR will appear here when configured. Send and provider execution remain locked.");`
+- L252: `? "Guard active: waiting for server readiness"`
+- L257: `: "Awaiting protected-read load";`
+- L261: `? "Customer Center could not load the current read-only projection. Customer execution actions remain unavailable."`
+- L263: `? "Customer Center is using read-only projections only. Outbound sends, CRM writes, ticket changes, assignments, calls, IVR, and auto-replies remain unavailable."`
+- L264: `: "Customer Center will request protected read-only projections when the page initializes. No outbound or mutation action is available.";`
+- L283: `<p class="mhos-context-description">Protected-read customer communication surface for inbox visibility, conversation previews, ticket/SLA state, channel readiness, and handoff preparation. No customer execution happens here.</p>`
+- L287: `<button class="btn btn-primary" type="button" data-customer-center-action="ai-handoff">Prepare AI support prompt</button>`
+- L293: `${renderMetric("Waiting Replies", countWaitingReplies(inbox), "No auto-send")}`
+- L306: `<p class="muted">This page can review customer context and prepare handoffs. Any future customer-facing action must happen in an owning workflow with confirmation, permissions, and audit logging.</p>`
+- L317: `<article class="ops-list-item"><div><strong>External send</strong><p>Replies, social messages, SMS, and provider sends are unavailable here.</p></div><span class="card-badge">Locked</span></article>`
+- L319: `<article class="ops-list-item"><div><strong>Calls / IVR / Auto-reply</strong><p>Voice placement, IVR provider execution, and autonomous replies remain disabled.</p></div><span class="card-badge">Locked</span></article>`
+- L325: `<p class="muted">Use Customer Center to review, summarize, and prepare handoffs only. Nothing in this page sends a reply, changes CRM, updates tickets, assigns conversations, places calls, triggers IVR, or starts auto-reply.</p>`
+- L353: `<div class="panel-header"><div><div class="panel-kicker">Action Panel</div><h3>Handoff-only, no execution</h3></div></div>`
+- L354: `<p class="muted">These buttons prepare navigation/context handoffs only. They do not send customer messages, contact providers, update CRM, change tickets, assign conversations, or mark records reviewed.</p>`
+- L356: `<button class="btn btn-secondary" type="button" data-customer-center-action="task-handoff">Prepare Task Center handoff</button>`
+- L357: `<button class="btn btn-secondary" type="button" data-customer-center-action="governance-handoff">Prepare Governance review</button>`
+- L358: `<button class="btn btn-secondary" type="button" data-customer-center-action="ai-handoff">Prepare AI Command prompt</button>`
+- L364: `<div class="panel-header"><div><div class="panel-kicker">AI Panel</div><h3>Draft and guidance only</h3></div></div>`
+- L365: `<p class="muted">AI may summarize read-only context, draft response guidance, translate, and suggest next steps for a human handoff. It must not send replies, update CRM, close tickets, assign conversations, place calls, trigger IVR, sync providers, or start auto-reply.</p>`
+- L381: `await loadAndRenderCustomerCenter(context);`
+- L386: `if (action === "ai-handoff") {`
+- L387: `context.setSharedAiDraft?.({`
+- L389: `title: "Customer Center support prompt",`
+- L390: `prompt: "Review Customer Center read-only state. Summarize customer support risks, draft safe reply guidance, and identify escalation needs. Do not send replies or mutate CRM."`
+- L392: `context.navigateTo?.("ai-command");`
+- L393: `context.showMessage?.("Customer Center context sent to AI Command.");`
+- L397: `if (action === "task-handoff") {`
+- L398: `context.setSharedHandoff?.("task-center", {`
+- L404: `context.showMessage?.("Customer task handoff prepared.");`
+- L408: `if (action === "governance-handoff") {`
+- L409: `context.setSharedHandoff?.("governance", {`
+- L415: `context.showMessage?.("Customer governance handoff prepared.");`
+- L426: `CUSTOMER_CENTER_STATE.model = await loadCustomerCenterModel(projectName);`
+- L430: `CUSTOMER_CENTER_STATE.error = error?.message || "Failed to load Customer Center.";`
+- L454: `description: "Read-only customer operations, inbox visibility, ticket/SLA state, and safe AI handoffs."`
+
+## Risky Terms
+- L2: `fetchCustomerOperationsReadiness,`
+- L3: `fetchCustomerOperationsInbox,`
+- L4: `fetchCustomerConversations,`
+- L5: `fetchCustomerTickets,`
+- L6: `fetchCustomerChannels`
+- L9: `const CUSTOMER_CENTER_STATE = {`
+- L45: `const message = asString(value?.error || value?.message || value);`
+- L46: `return /protected read routes are disabled/i.test(message);`
+- L49: `function getProtectedReadMessage(value) {`
+- L50: `return asString(value?.error || value?.message || value || "Protected read routes are disabled.");`
+- L53: `async function loadCustomerCenterModel(projectName) {`
+- L54: `const [readiness, inbox, conversations, tickets, channels] = await Promise.all([`
+- L55: `fetchCustomerOperationsReadiness(projectName),`
+- L56: `fetchCustomerOperationsInbox(projectName),`
+- L57: `fetchCustomerConversations(projectName),`
+- L58: `fetchCustomerTickets(projectName),`
+- L59: `fetchCustomerChannels(projectName)`
+- L62: `const responses = [readiness, inbox, conversations, tickets, channels];`
+- L67: `guardMessage: getProtectedReadMessage(guard),`
+- L70: `conversations: [],`
+- L71: `tickets: [],`
+- L74: `warnings: ["Configure MH_CONTROL_CENTER_WRITE_KEY on the server to load Customer Center data."],`
+- L81: `const conversationsData = getPayload(conversations);`
+- L82: `const ticketsData = getPayload(tickets);`
+- L87: `guardMessage: "",`
+- L90: `conversations: asArray(conversationsData?.conversations || conversationsData),`
+- L91: `tickets: asArray(ticketsData?.tickets || ticketsData),`
+- L101: `["Send reply", "Locked: Customer Center v1 cannot send external replies or provider messages."],`
+- L103: `["Update ticket", "Locked: ticket changes are outside this read-only release."],`
+- L104: `["Assign conversation", "Locked: assignment changes require a future workflow owner and audit trail."],`
+- L106: `["Trigger callback", "Locked: call placement is not enabled from Customer Center."],`
+- L107: `["Trigger IVR", "Locked: IVR provider execution is not enabled from Customer Center."],`
+- L108: `["Sync CRM", "Locked: CRM provider execution is not enabled from Customer Center."],`
+- L109: `["Auto-reply", "Locked: autonomous customer replies remain forbidden by default."]`
+- L114: `return asArray(inbox).filter((entry) => /waiting|open|unread/i.test(\`${entry.status || ""} ${entry.sla_status || ""}\`)).length;`
+- L117: `function countSlaRisk(items) {`
+- L118: `return asArray(items).filter((item) => /risk|breach|late|urgent/i.test(\`${item.sla_status || ""} ${item.priority || ""}\`)).length;`
+- L138: `<h3>Server guard is active: no customer data is loaded</h3>`
+- L141: `<p class="muted">${escapeHtml(model.guardMessage)}</p>`
+- L144: `<p>This page is intentionally blank while protected customer read routes are disabled. Configure <code>MH_CONTROL_CENTER_WRITE_KEY</code> on the server, restart the service, then reload to show read-only projections.</p>`
+- L145: `<p>No placeholder customer records are shown. External send, CRM updates, ticket changes, calls, IVR, provider sync, and auto-reply remain locked.</p>`
+- L151: `function renderEmptyState(title, body, nextStep = "Safe next step: verify protected-read readiness, then reload read-only customer projections.") {`
+- L164: `return renderEmptyState("Inbox is empty in read-only mode", "No inbound customer signals are available for this project right now. This is expected when protected-read data is not connected or no conversations match the current projection.");`
+- L170: `<strong>${escapeHtml(entry.customer_label || "Masked customer")}</strong>`
+- L171: `<p>${escapeHtml(entry.last_message_preview || "No message preview available.")}</p>`
+- L178: `function renderConversations(model) {`
+- L179: `const conversations = asArray(model?.conversations);`
+- L180: `if (!conversations.length) {`
+- L181: `return renderEmptyState("No conversation previews available", "Masked conversation context will appear here after read-only projections return conversations. Customer identity and message content stay masked or truncated by default.");`
+- L184: `return conversations.slice(0, 6).map((item) => \``
+- L187: `<strong>${escapeHtml(item.customer_label || "Masked customer")}</strong>`
+- L188: `<p>${escapeHtml(item.channel || "unknown")} • ${escapeHtml(item.status || "open")} • ${escapeHtml(item.message_count || 0)} messages</p>`
+- L195: `function renderTickets(model) {`
+- L196: `const tickets = asArray(model?.tickets);`
+- L197: `if (!tickets.length) {`
+- L198: `return renderEmptyState("No ticket snapshots available", "Support ticket and SLA records will appear here when the read-only projection includes them. No ticket creation or update is available from this page.");`
+- L201: `return tickets.slice(0, 6).map((ticket) => \``
+- L204: `<strong>${escapeHtml(ticket.ticket_id || "Ticket")}</strong>`
+- L205: `<p>${escapeHtml(ticket.status || "open")} • ${escapeHtml(ticket.sla_status || "unknown SLA")}</p>`
+- L207: `<span class="card-badge">${escapeHtml(ticket.priority || "normal")}</span>`
+- L215: `return renderEmptyState("No channel readiness records", "Provider readiness for email, social messaging, CRM, voice, and IVR will appear here when configured. Send and provider execution remain locked.");`
+- L224: `<span class="card-badge">${channel.external_send_ready ? "Send ready" : "Send locked"}</span>`
+- L231: `<div class="customer-center-locked-actions" aria-label="Future customer actions locked">`
+- L233: `<p class="muted">Visible for roadmap clarity only. These customer actions cannot execute here and require future confirmation gates, role permissions, provider readiness, and audit logging.</p>`
+- L245: `function renderCustomerCenter(context) {`
+- L246: `const model = CUSTOMER_CENTER_STATE.model || {};`
+- L248: `const conversations = asArray(model.conversations);`
+- L249: `const tickets = asArray(model.tickets);`
+- L253: `: CUSTOMER_CENTER_STATE.error`
+- L255: `: CUSTOMER_CENTER_STATE.loaded`
+- L259: `? "Customer data is intentionally withheld until protected read routes are enabled on the server."`
+- L260: `: CUSTOMER_CENTER_STATE.error`
+- L261: `? "Customer Center could not load the current read-only projection. Customer execution actions remain unavailable."`
+- L262: `: CUSTOMER_CENTER_STATE.loaded`
+- L263: `? "Customer Center is using read-only projections only. Outbound sends, CRM writes, ticket changes, assignments, calls, IVR, and auto-replies remain unavailable."`
+- L264: `: "Customer Center will request protected read-only projections when the page initializes. No outbound or mutation action is available.";`
+- L266: `if (CUSTOMER_CENTER_STATE.loading) {`
+- L270: `<div class="panel-kicker">Customer Center</div>`
+- L271: `<h2>Loading customer operations…</h2>`
+- L272: `<p class="muted">Fetching read-only customer projections.</p>`
+- L281: `<p class="mhos-context-eyebrow">Customer Operations</p>`
+- L282: `<h1>Customer Center</h1>`
+- L283: `<p class="mhos-context-description">Protected-read customer communication surface for inbox visibility, conversation previews, ticket/SLA state, channel readiness, and handoff preparation. No customer execution happens here.</p>`
+- L286: `<button class="btn btn-secondary" type="button" data-customer-center-action="refresh">Refresh read-only data</button>`
+- L287: `<button class="btn btn-primary" type="button" data-customer-center-action="ai-handoff">Prepare AI support prompt</button>`
+- L292: `${renderMetric("Open Conversations", conversations.length || "0", "Read-only")}`
+- L293: `${renderMetric("Waiting Replies", countWaitingReplies(inbox), "No auto-send")}`
+- L294: `${renderMetric("SLA Risk", countSlaRisk([...tickets, ...inbox]), "Review only")}`
+- L295: `${renderMetric("Channels", channels.length || "0", "Send locked")}`
+- L305: `<div class="panel-header"><div><div class="panel-kicker">Execution boundary</div><h3>No direct customer actions</h3></div></div>`
+- L306: `<p class="muted">This page can review customer context and prepare handoffs. Any future customer-facing action must happen in an owning workflow with confirmation, permissions, and audit logging.</p>`
+- L314: `<div class="panel-header"><div><div class="panel-kicker">Readiness Locks</div><h3>Read-only customer operations mode</h3></div></div>`
+- L316: `<article class="ops-list-item"><div><strong>Read-only projections</strong><p>Customer Center can display protected customer snapshots only.</p></div><span class="card-badge">Allowed</span></article>`
+- L317: `<article class="ops-list-item"><div><strong>External send</strong><p>Replies, social messages, SMS, and provider sends are unavailable here.</p></div><span class="card-badge">Locked</span></article>`
+- L318: `<article class="ops-list-item"><div><strong>CRM / Ticket / Assignment writes</strong><p>CRM notes, ticket updates, review marks, and ownership changes require future confirmation gates.</p></div><span class="card-badge">Locked</span></article>`
+- L319: `<article class="ops-list-item"><div><strong>Calls / IVR / Auto-reply</strong><p>Voice placement, IVR provider execution, and autonomous replies remain disabled.</p></div><span class="card-badge">Locked</span></article>`
+- L325: `<p class="muted">Use Customer Center to review, summarize, and prepare handoffs only. Nothing in this page sends a reply, changes CRM, updates tickets, assigns conversations, places calls, triggers IVR, or starts auto-reply.</p>`
+- L331: `<div class="panel-header"><div><div class="panel-kicker">Unified Inbox</div><h3>Inbound customer signals</h3></div></div>`
+- L336: `<div class="panel-header"><div><div class="panel-kicker">Conversation Preview</div><h3>Masked conversation context</h3></div></div>`
+- L337: `<div class="ops-list">${renderConversations(model)}</div>`
+- L341: `<div class="panel-header"><div><div class="panel-kicker">Tickets / SLA</div><h3>Support state snapshot</h3></div></div>`
+- L342: `<div class="ops-list">${renderTickets(model)}</div>`
+- L354: `<p class="muted">These buttons prepare navigation/context handoffs only. They do not send customer messages, contact providers, update CRM, change tickets, assign conversations, or mark records reviewed.</p>`
+- L356: `<button class="btn btn-secondary" type="button" data-customer-center-action="task-handoff">Prepare Task Center handoff</button>`
+- L357: `<button class="btn btn-secondary" type="button" data-customer-center-action="governance-handoff">Prepare Governance review</button>`
+- L358: `<button class="btn btn-secondary" type="button" data-customer-center-action="ai-handoff">Prepare AI Command prompt</button>`
+- L365: `<p class="muted">AI may summarize read-only context, draft response guidance, translate, and suggest next steps for a human handoff. It must not send replies, update CRM, close tickets, assign conversations, place calls, trigger IVR, sync providers, or start auto-reply.</p>`
+- L371: `function attachCustomerCenterHandlers(context) {`
+- L372: `const root = document.querySelector('[data-page="customer-center"]');`
+- L376: `const button = event.target.closest("[data-customer-center-action]");`
+- L379: `const action = button.dataset.customerCenterAction;`
+- L381: `await loadAndRenderCustomerCenter(context);`
+- L382: `context.showMessage?.("Customer Center read-only data refreshed.");`
+- L388: `source: "customer-center",`
+- L389: `title: "Customer Center support prompt",`
+- L390: `prompt: "Review Customer Center read-only state. Summarize customer support risks, draft safe reply guidance, and identify escalation needs. Do not send replies or mutate CRM."`
+- L393: `context.showMessage?.("Customer Center context sent to AI Command.");`
+- L399: `source: "customer-center",`
+- L400: `title: "Customer follow-up task preview",`
+- L401: `summary: "Review Customer Center state and prepare a human follow-up task. No customer mutation was performed."`
+- L404: `context.showMessage?.("Customer task handoff prepared.");`
+- L410: `source: "customer-center",`
+- L411: `title: "Customer communication governance review",`
+- L412: `summary: "Review customer reply/escalation risk before any external response. No send action was performed."`
+- L415: `context.showMessage?.("Customer governance handoff prepared.");`
+- L420: `async function loadAndRenderCustomerCenter(context) {`
+- L422: `CUSTOMER_CENTER_STATE.loading = true;`
+- L426: `CUSTOMER_CENTER_STATE.model = await loadCustomerCenterModel(projectName);`
+- L427: `CUSTOMER_CENTER_STATE.loaded = true;`
+- L428: `CUSTOMER_CENTER_STATE.error = "";`
+- L430: `CUSTOMER_CENTER_STATE.error = error?.message || "Failed to load Customer Center.";`
+- L431: `CUSTOMER_CENTER_STATE.model = {`
+- L433: `guardMessage: getProtectedReadMessage(error),`
+- L435: `conversations: [],`
+- L436: `tickets: [],`
+- L438: `blockers: [CUSTOMER_CENTER_STATE.error],`
+- L443: `CUSTOMER_CENTER_STATE.loading = false;`
+- L448: `export const customerCenterRoute = {`
+- L449: `id: "customer-center",`
+- L450: `label: "Customer Center",`
+- L452: `eyebrow: "Customer Operations",`
+- L453: `title: "Customer Center",`
+- L454: `description: "Read-only customer operations, inbox visibility, ticket/SLA state, and safe AI handoffs."`
+- L458: `<section class="page is-active customer-center-page" data-page="customer-center">`
+- L459: `${renderCustomerCenter({})}`
+- L467: `window.__mhCustomerCenterRefresh = loadAndRenderCustomerCenter;`
+- L468: `window.__mhAttachCustomerCenterHandlers = attachCustomerCenterHandlers;`
+
+## Required Manual Classification
+Before any patch, classify Customer Center actions into:
+
+1. Read-only customer projection
+2. Navigation only
+3. Disabled/future action
+4. AI context handoff only
+5. Backend customer mutation
+6. Customer send/reply action
+7. Ticket status mutation
+8. Unknown / needs deeper inspection
+
+## Decision Rule
+- If Customer Center is read-only/protected with disabled future actions, close with no patch or copy-only clarification.
+- If any active customer send/reply/resolve/assign action exists without explicit backend authority/confirmation, create a narrow T68 patch.
+- Do not redesign Customer Center in this pass.

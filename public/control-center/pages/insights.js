@@ -1,4 +1,3 @@
-import { renderDurableSystemSummary } from "../durable-ui.js";
 import { setSharedHandoff } from "../shared-context.js";
 
 const PLATFORM_DEFS = [
@@ -53,12 +52,34 @@ const PLATFORM_DEFS = [
   }
 ];
 
+const insightsRefreshState = new Map();
+
+function getInsightsRefreshState(projectName) {
+  const key = asString(projectName || "__default__");
+  if (!insightsRefreshState.has(key)) {
+    insightsRefreshState.set(key, {
+      loading: false,
+      error: ""
+    });
+  }
+  return insightsRefreshState.get(key);
+}
+
+function setInsightsRefreshState(projectName, nextState) {
+  const key = asString(projectName || "__default__");
+  const current = getInsightsRefreshState(projectName);
+  insightsRefreshState.set(key, {
+    ...current,
+    ...asObject(nextState)
+  });
+}
+
 function asArray(value) {
   return Array.isArray(value) ? value : [];
 }
 
 function asObject(value) {
-  return value && typeof value === "object" ? value : {};
+  return value && typeof value === "object" && !Array.isArray(value) ? value : {};
 }
 
 function asString(value) {
@@ -210,6 +231,11 @@ function getInsightRoot(state) {
     activity.performance_insights ||
     overview.insights
   );
+}
+
+function hasInsightPayload(data) {
+  const payload = asObject(data);
+  return Object.keys(payload).length > 0;
 }
 
 function normalizeSummary(raw) {
@@ -918,7 +944,65 @@ function renderKeyValueList(items, type, escapeHtml) {
   `;
 }
 
+function confirmInsightsAuthorityAction(action, detail = "") {
+  const message = [
+    `Insights action: ${action}`,
+    detail,
+    "This prepares review handoff context only. It does not publish, approve, send externally, or execute AI automatically.",
+    "Continue?"
+  ].filter(Boolean).join("\n\n");
+
+  if (typeof window === "undefined" || typeof window.confirm !== "function") {
+    return true;
+  }
+
+  return window.confirm(message);
+}
+
 function bindInsightsActions({ $, navigateTo, showMessage, prompts, projectName, createProjectHandoff }) {
+  Array.from(document.querySelectorAll("[data-insights-open]")).forEach((button) => {
+    button.onclick = () => {
+      navigateTo("ai-command");
+    };
+  });
+
+  Array.from(document.querySelectorAll("[data-insights-route]")).forEach((button) => {
+    button.onclick = () => {
+      const route = button.getAttribute("data-insights-route") || "";
+      if (!route) return;
+
+      if (projectName) {
+        const confirmed = confirmInsightsAuthorityAction(
+          "Create Insights route handoff",
+          `This will attach Insights handoff context and open ${route} for review.`
+        );
+        if (!confirmed) return;
+
+        setSharedHandoff(projectName, route, {
+          source_page: "insights",
+          destination_page: route,
+          linked_entity: {
+            entity_type: "project",
+            entity_id: projectName,
+            route: "insights",
+            label: projectName
+          },
+          payload: {
+            draft_context: {
+              origin: "insights",
+              projectName,
+              optimizationFocus: "next-action"
+            }
+          },
+          status: "available"
+        });
+      }
+
+      navigateTo(route);
+      showMessage?.(`Opened ${button.textContent?.trim() || "next workspace"}.`);
+    };
+  });
+
   Array.from(document.querySelectorAll("[data-insights-prompt]")).forEach((button) => {
     button.onclick = () => {
       const index = Number(button.getAttribute("data-insights-prompt"));
@@ -931,6 +1015,12 @@ function bindInsightsActions({ $, navigateTo, showMessage, prompts, projectName,
       }
 
       if (projectName && item.prompt) {
+        const confirmed = confirmInsightsAuthorityAction(
+          "Create Insights AI Command handoff",
+          `This will attach the "${item.label}" insight prompt to AI Command for review.`
+        );
+        if (!confirmed) return;
+
         const handoff = {
           source_page: "insights",
           destination_page: "ai-command",
@@ -963,10 +1053,11 @@ function bindInsightsActions({ $, navigateTo, showMessage, prompts, projectName,
 
 export const insightsRoute = {
   id: "insights",
+  disableStandardLayout: true,
   meta: {
     eyebrow: "Execute & Grow",
     title: "Insights",
-    description: "Cross-platform marketing intelligence for performance, learning, and optimization."
+    description: "Cross-platform intelligence for signals, decisions, and next-best actions."
   },
   template: `
     <section class="page is-active" data-page="insights">
@@ -980,10 +1071,13 @@ export const insightsRoute = {
     safeText,
     navigateTo,
     showMessage,
+    showError,
+    fetchProjectInsights,
     createProjectHandoff
   }) {
     const state = getState();
     const projectName = state.context.currentProject || "";
+    const refreshState = getInsightsRefreshState(projectName);
     const overview = asObject(state.data.overview?.overview);
     const currency = overview.currency || "USD";
     const connections = getConnections(state);
@@ -995,6 +1089,12 @@ export const insightsRoute = {
       seo: asObject(insightRoot.seo || insightRoot.search_console || {}),
       paid: asObject(insightRoot.paid || insightRoot.paid_media || {})
     };
+    const hasInsights = hasInsightPayload(insightRoot);
+    const refreshLabel = refreshState.loading
+      ? "Refreshing..."
+      : hasInsights
+        ? "Refresh insights"
+        : "Retry insights";
 
     const contentItems = buildContentInventory(state, feeds);
     const executive = buildExecutiveOverview(feeds, contentItems, connections, currency);
@@ -1006,291 +1106,238 @@ export const insightsRoute = {
     const paidIntel = buildPaidIntelligence(feeds, connections);
     const learning = buildLearningEngine(contentItems, platformCards, websiteIntel, seoIntel, paidIntel, connections);
     const optimization = buildOptimizationPanel(state, platformCards, websiteIntel, seoIntel, paidIntel, topContent, weakContent, learning);
+    const connectedSourceCount = PLATFORM_DEFS.filter((platform) => getConnectedValue(platform.sourceKeys, connections)).length;
+    const measuredContentCount = contentItems.filter((item) => item.hasMetrics).length;
+    const connectedInsights = platformCards.filter((item) => item.connected && item.hasData).slice(0, 3);
+    const riskPlatforms = platformCards
+      .filter((item) => {
+        const tone = asString(item.performanceLevel).toLowerCase();
+        return (item.connected && !item.hasData) || tone === "warning" || tone === "danger";
+      })
+      .slice(0, 4);
+    const learningHighlights = learning.cards.slice(0, 3);
+    const recommendationItems = optimization.recommendations.slice(0, 4);
+    const promptItems = optimization.prompts.slice(0, 4);
+    const domainSnapshots = [
+      {
+        title: "Website",
+        status: websiteIntel.connected ? (websiteIntel.hasData ? "Live analytics" : "Waiting for feed") : "Not connected",
+        tone: websiteIntel.connected ? (websiteIntel.hasData ? "success" : "warning") : "danger",
+        metrics: [
+          { label: "Sessions", value: formatCompact(websiteIntel.summary.sessions) },
+          { label: "Conversions", value: formatCompact(websiteIntel.summary.conversions) }
+        ],
+        note: websiteIntel.recommendations[0]?.title || websiteIntel.conversionSignals[0]?.label || "Landing-page and conversion signals will appear here when analytics is available."
+      },
+      {
+        title: "SEO / Search",
+        status: seoIntel.connected ? (seoIntel.hasData ? "Live SEO" : "Waiting for feed") : "Not connected",
+        tone: seoIntel.connected ? (seoIntel.hasData ? "success" : "warning") : "danger",
+        metrics: [
+          { label: "Clicks", value: formatCompact(seoIntel.summary.clicks) },
+          { label: "CTR", value: formatPercent(seoIntel.summary.ctr, 2) }
+        ],
+        note: seoIntel.topQueries[0]?.title || seoIntel.ctrOpportunities[0]?.title || "Query, page, and CTR opportunity signals will appear here when Search Console data is available."
+      },
+      {
+        title: "Paid Media",
+        status: paidIntel.connected ? (paidIntel.hasData ? "Live paid data" : "Waiting for feed") : "Not connected",
+        tone: paidIntel.connected ? (paidIntel.hasData ? "success" : "warning") : "danger",
+        metrics: [
+          { label: "Spend", value: formatCurrency(paidIntel.summary.spend, currency) },
+          { label: "ROAS", value: paidIntel.summary.roas == null ? "--" : `${paidIntel.summary.roas.toFixed(2)}x` }
+        ],
+        note: paidIntel.bestCampaigns[0]?.title || paidIntel.weakCampaigns[0]?.title || "Campaign and creative performance signals will appear here when paid reporting is available."
+      }
+    ];
 
     const root = $("insightsRoot");
     if (!root) return;
 
     root.innerHTML = `
-      <div class="insights-wrapper insights-engine">
-        <div class="insights-hero">
-          <div class="insights-hero-copy">
-            <div class="setup-kicker">Cross-Platform Insight Engine</div>
-            <h3 class="setup-hero-title">${escapeHtml(projectName ? `${projectName} Marketing Intelligence` : "Marketing Intelligence")}</h3>
-            <p class="setup-hero-text">
-              Understand what is working, what is weak, why performance is moving, and what MH Assistant should learn and reuse across content, publishing, SEO, website performance, and paid media.
-            </p>
-            <div class="insights-status">
-              <div class="setup-status-chip">
-                <span>Measured content</span>
-                <strong>${escapeHtml(String(contentItems.filter((item) => item.hasMetrics).length))}</strong>
-              </div>
-              <div class="setup-status-chip">
-                <span>Connected sources</span>
-                <strong>${escapeHtml(String(PLATFORM_DEFS.filter((platform) => getConnectedValue(platform.sourceKeys, connections)).length))}</strong>
-              </div>
-              <div class="setup-status-chip">
-                <span>SEO feed</span>
-                <strong>${escapeHtml(seoIntel.connected ? (seoIntel.hasData ? "Live" : "Waiting") : "Missing")}</strong>
-              </div>
-              <div class="setup-status-chip">
-                <span>Paid feed</span>
-                <strong>${escapeHtml(paidIntel.connected ? (paidIntel.hasData ? "Live" : "Waiting") : "Missing")}</strong>
-              </div>
-            </div>
-          </div>
-        </div>
-
+      <div class="insights-wrapper insights-workspace">
         <section class="card">
           <div class="card-head">
-            <h3>Executive Performance Overview</h3>
-            <span class="card-badge neutral">${escapeHtml(safeText(overview.project_name, projectName || "Project"))}</span>
+            <h3>Intelligence Command Overview</h3>
+            <div class="insights-assistant-toolbar">
+              <button class="btn btn-secondary" type="button" id="insightsRefreshBtn" ${refreshState.loading ? "disabled" : ""}>${escapeHtml(refreshLabel)}</button>
+              <span class="card-badge neutral">${escapeHtml(safeText(overview.project_name, projectName || "Project"))}</span>
+            </div>
           </div>
-          <div class="insights-kpi-strip">
+          ${refreshState.error ? `<div class="empty-box">${escapeHtml(refreshState.error)}</div>` : ""}
+          <p class="insights-section-copy">
+            Identify what changed, what needs attention, and the next safest action across content, website, SEO, and paid performance.
+          </p>
+          <div class="insights-overview-grid">
             ${executive.kpis.map((item) => `
-              <div class="insights-kpi-card">
+              <div class="insights-overview-item">
                 <span class="data-label">${escapeHtml(item.label)}</span>
                 <strong>${escapeHtml(item.value)}</strong>
                 <span class="insights-kpi-meta">${escapeHtml(item.meta)}</span>
               </div>
             `).join("")}
           </div>
-          <div class="insights-copy">${escapeHtml(executive.summary)}</div>
-        </section>
-
-        ${renderDurableSystemSummary(state.data.operations, escapeHtml, {
-          title: "Shared Execution Backbone",
-          kicker: "Durable Records",
-          emptyText: "Insights will surface shared durable tasks, approvals, jobs, and handoffs once the operations snapshot is available."
-        })}
-
-        <section class="card">
-          <div class="card-head">
-            <h3>Cross-Platform Performance Comparison</h3>
-            <span class="card-badge neutral">${escapeHtml(`${platformCards.length} intelligence lanes`)}</span>
+          <div class="insights-section-copy">${escapeHtml(executive.summary)}</div>
+          <div class="insights-overview-grid">
+            <div class="insights-overview-item">
+              <span class="data-label">Measured content</span>
+              <strong>${escapeHtml(String(measuredContentCount))}</strong>
+              <span class="insights-kpi-meta">Content items with usable performance data.</span>
+            </div>
+            <div class="insights-overview-item">
+              <span class="data-label">Connected sources</span>
+              <strong>${escapeHtml(String(connectedSourceCount))}</strong>
+              <span class="insights-kpi-meta">Sources that can feed this workspace.</span>
+            </div>
+            <div class="insights-overview-item">
+              <span class="data-label">SEO feed</span>
+              <strong>${escapeHtml(seoIntel.connected ? (seoIntel.hasData ? "Live" : "Waiting") : "Missing")}</strong>
+              <span class="insights-kpi-meta">Search visibility signal status.</span>
+            </div>
+            <div class="insights-overview-item">
+              <span class="data-label">Paid feed</span>
+              <strong>${escapeHtml(paidIntel.connected ? (paidIntel.hasData ? "Live" : "Waiting") : "Missing")}</strong>
+              <span class="insights-kpi-meta">Paid acquisition signal status.</span>
+            </div>
           </div>
-          ${renderPlatformCards(platformCards, currency, escapeHtml)}
-        </section>
-
-        <div class="insights-domain-grid">
-          <section class="card">
-            <div class="card-head">
-              <h3>Best Performing Published Content</h3>
-              <span class="card-badge success">${escapeHtml(topContent.length ? `${topContent.length} ranked` : "Awaiting feed")}</span>
-            </div>
-            ${
-              topContent.length
-                ? renderRankedContent(topContent, "", escapeHtml)
-                : renderFeedAwareEmptyState(
-                    "No measured content winners yet",
-                    "Published content can exist, but this section only ranks winners once post-level insight feeds from Facebook, Instagram, TikTok, YouTube, or commerce platforms are connected.",
-                    PLATFORM_DEFS.filter((platform) => platform.type === "social").some((platform) => getConnectedValue(platform.sourceKeys, connections)),
-                    escapeHtml
-                  )
-            }
-          </section>
-
-          <section class="card">
-            <div class="card-head">
-              <h3>Underperforming Content</h3>
-              <span class="card-badge warning">${escapeHtml(weakContent.length ? `${weakContent.length} flagged` : "Awaiting feed")}</span>
-            </div>
-            ${
-              weakContent.length
-                ? renderWeakContent(weakContent, "", escapeHtml)
-                : renderFeedAwareEmptyState(
-                    "No underperforming content feed yet",
-                    "This section will separate low-performing posts, videos, and campaigns once cross-platform content metrics are connected.",
-                    PLATFORM_DEFS.filter((platform) => platform.type === "social").some((platform) => getConnectedValue(platform.sourceKeys, connections)),
-                    escapeHtml
-                  )
-            }
-          </section>
-        </div>
-
-        <div class="insights-domain-grid">
-          <section class="card">
-            <div class="card-head">
-              <h3>Website & Conversion Intelligence</h3>
-              <span class="card-badge ${websiteIntel.connected ? (websiteIntel.hasData ? "success" : "warning") : "danger"}">${escapeHtml(websiteIntel.connected ? (websiteIntel.hasData ? "Live analytics" : "Waiting for feed") : "Not connected")}</span>
-            </div>
-            ${
-              websiteIntel.hasData
-                ? `
-                  <div class="insights-metric-grid">
-                    <div class="data-card">
-                      <span class="data-label">Sessions</span>
-                      <strong>${escapeHtml(formatCompact(websiteIntel.summary.sessions))}</strong>
-                    </div>
-                    <div class="data-card">
-                      <span class="data-label">Engaged sessions</span>
-                      <strong>${escapeHtml(formatCompact(websiteIntel.summary.engagedSessions))}</strong>
-                    </div>
-                    <div class="data-card">
-                      <span class="data-label">Clicks</span>
-                      <strong>${escapeHtml(formatCompact(websiteIntel.summary.clicks))}</strong>
-                    </div>
-                    <div class="data-card">
-                      <span class="data-label">Conversions</span>
-                      <strong>${escapeHtml(formatCompact(websiteIntel.summary.conversions))}</strong>
-                    </div>
-                  </div>
-                  <div class="insights-dual-grid">
-                    <div>
-                      <h4 class="insights-subtitle">Top traffic / landing pages</h4>
-                      ${renderKeyValueList(websiteIntel.topPages, "page", escapeHtml) || `<div class="empty-box">No top page list yet.</div>`}
-                    </div>
-                    <div>
-                      <h4 class="insights-subtitle">Weak pages / conversion risk</h4>
-                      ${renderKeyValueList(websiteIntel.weakPages, "page", escapeHtml) || `<div class="empty-box">No weak page list yet.</div>`}
-                    </div>
-                  </div>
-                  <div class="insights-section-copy">${escapeHtml(websiteIntel.recommendations[0]?.title || websiteIntel.recommendations[0]?.label || websiteIntel.conversionSignals[0]?.label || "Content-to-site performance signals will become more actionable as more page and conversion data is connected.")}</div>
-                `
-                : renderFeedAwareEmptyState(
-                    "No website analytics feed yet",
-                    "Connect GA4 or a website analytics source to unlock sessions, engaged sessions, landing-page performance, and conversion-path intelligence.",
-                    websiteIntel.connected,
-                    escapeHtml
-                  )
-            }
-          </section>
-
-          <section class="card">
-            <div class="card-head">
-              <h3>SEO / Search Console Intelligence</h3>
-              <span class="card-badge ${seoIntel.connected ? (seoIntel.hasData ? "success" : "warning") : "danger"}">${escapeHtml(seoIntel.connected ? (seoIntel.hasData ? "Live SEO" : "Waiting for feed") : "Not connected")}</span>
-            </div>
-            ${
-              seoIntel.hasData
-                ? `
-                  <div class="insights-metric-grid">
-                    <div class="data-card">
-                      <span class="data-label">Impressions</span>
-                      <strong>${escapeHtml(formatCompact(seoIntel.summary.impressions))}</strong>
-                    </div>
-                    <div class="data-card">
-                      <span class="data-label">Clicks</span>
-                      <strong>${escapeHtml(formatCompact(seoIntel.summary.clicks))}</strong>
-                    </div>
-                    <div class="data-card">
-                      <span class="data-label">CTR</span>
-                      <strong>${escapeHtml(formatPercent(seoIntel.summary.ctr, 2))}</strong>
-                    </div>
-                    <div class="data-card">
-                      <span class="data-label">Avg. position</span>
-                      <strong>${escapeHtml(seoIntel.summary.averagePosition == null ? "--" : String(seoIntel.summary.averagePosition))}</strong>
-                    </div>
-                  </div>
-                  <div class="insights-triple-grid">
-                    <div>
-                      <h4 class="insights-subtitle">Top queries</h4>
-                      ${renderKeyValueList(seoIntel.topQueries, "query", escapeHtml) || `<div class="empty-box">No query list yet.</div>`}
-                    </div>
-                    <div>
-                      <h4 class="insights-subtitle">Top pages</h4>
-                      ${renderKeyValueList(seoIntel.topPages, "page", escapeHtml) || `<div class="empty-box">No top page list yet.</div>`}
-                    </div>
-                    <div>
-                      <h4 class="insights-subtitle">CTR / ranking opportunities</h4>
-                      ${renderKeyValueList([...seoIntel.ctrOpportunities, ...seoIntel.rankingOpportunities].slice(0, 5), "page", escapeHtml) || `<div class="empty-box">No SEO opportunity list yet.</div>`}
-                    </div>
-                  </div>
-                `
-                : renderFeedAwareEmptyState(
-                    "No Search Console intelligence yet",
-                    "Connect Google Search Console data to unlock query-level performance, page CTR opportunity mapping, and ranking themes the system can expand.",
-                    seoIntel.connected,
-                    escapeHtml
-                  )
-            }
-          </section>
-        </div>
-
-        <section class="card">
-          <div class="card-head">
-            <h3>Paid Media Intelligence</h3>
-            <span class="card-badge ${paidIntel.connected ? (paidIntel.hasData ? "success" : "warning") : "danger"}">${escapeHtml(paidIntel.connected ? (paidIntel.hasData ? "Live paid data" : "Waiting for feed") : "Not connected")}</span>
-          </div>
-          ${
-            paidIntel.hasData
-              ? `
-                <div class="insights-kpi-strip">
-                  <div class="insights-kpi-card">
-                    <span class="data-label">Spend</span>
-                    <strong>${escapeHtml(formatCurrency(paidIntel.summary.spend, currency))}</strong>
-                    <span class="insights-kpi-meta">Total paid spend</span>
-                  </div>
-                  <div class="insights-kpi-card">
-                    <span class="data-label">CTR</span>
-                    <strong>${escapeHtml(formatPercent(paidIntel.summary.ctr, 2))}</strong>
-                    <span class="insights-kpi-meta">Click-through efficiency</span>
-                  </div>
-                  <div class="insights-kpi-card">
-                    <span class="data-label">CPC</span>
-                    <strong>${escapeHtml(formatCurrency(paidIntel.summary.cpc, currency))}</strong>
-                    <span class="insights-kpi-meta">Cost per click</span>
-                  </div>
-                  <div class="insights-kpi-card">
-                    <span class="data-label">CPA</span>
-                    <strong>${escapeHtml(formatCurrency(paidIntel.summary.cpa, currency))}</strong>
-                    <span class="insights-kpi-meta">Cost per acquisition</span>
-                  </div>
-                  <div class="insights-kpi-card">
-                    <span class="data-label">ROAS</span>
-                    <strong>${escapeHtml(paidIntel.summary.roas == null ? "--" : `${paidIntel.summary.roas.toFixed(2)}x`)}</strong>
-                    <span class="insights-kpi-meta">Return on ad spend</span>
-                  </div>
-                </div>
-                <div class="insights-domain-grid">
-                  <div>
-                    <h4 class="insights-subtitle">Best campaigns / creatives</h4>
-                    ${renderKeyValueList([...paidIntel.bestCampaigns, ...paidIntel.bestCreatives].slice(0, 5), "page", escapeHtml) || `<div class="empty-box">No winning paid campaign or creative list yet.</div>`}
-                  </div>
-                  <div>
-                    <h4 class="insights-subtitle">Weak campaigns / creatives</h4>
-                    ${renderKeyValueList([...paidIntel.weakCampaigns, ...paidIntel.weakCreatives].slice(0, 5), "page", escapeHtml) || `<div class="empty-box">No weak paid campaign or creative list yet.</div>`}
-                  </div>
-                </div>
-              `
-              : renderFeedAwareEmptyState(
-                  "No paid media insight feed yet",
-                  "Connect paid platform reporting to unlock spend, CTR, CPC, CPA, ROAS, and campaign / creative performance comparisons.",
-                  paidIntel.connected,
-                  escapeHtml
-                )
-          }
         </section>
 
         <section class="card">
           <div class="card-head">
-            <h3>Patterns & Learnings</h3>
-            <span class="card-badge neutral">Learning Engine</span>
+            <h3>What Is Working</h3>
+            <span class="card-badge neutral">${escapeHtml(topContent.length ? `${topContent.length} ranked items` : "Awaiting feed")}</span>
           </div>
-          <div class="insights-learning-grid">
-            ${learning.cards.map((item) => `
-              <div class="insights-learning-card">
-                <strong>${escapeHtml(item.title)}</strong>
-                <p>${escapeHtml(item.body)}</p>
+          <p class="insights-section-copy">
+            The strongest measured signals, reusable patterns, and channels worth scaling or repurposing.
+          </p>
+          <div class="insights-workspace-grid">
+            <div>
+              <h4 class="insights-subtitle">Strongest published content</h4>
+              ${
+                topContent.length
+                  ? renderRankedContent(topContent.slice(0, 3), "", escapeHtml)
+                  : renderFeedAwareEmptyState(
+                      "No measured content winners yet",
+                      "Published content can exist, but this section only ranks winners once post-level insight feeds from social or commerce sources are connected.",
+                      PLATFORM_DEFS.filter((platform) => platform.type === "social").some((platform) => getConnectedValue(platform.sourceKeys, connections)),
+                      escapeHtml
+                    )
+              }
+            </div>
+            <div class="insights-stack">
+              <div>
+                <h4 class="insights-subtitle">Best performing lanes</h4>
+                ${
+                  connectedInsights.length
+                    ? renderPlatformCards(connectedInsights, currency, escapeHtml)
+                    : renderFeedAwareEmptyState(
+                        "No connected performance lanes yet",
+                        "Cross-platform comparisons appear here as soon as at least one connected source is returning performance metrics.",
+                        connectedSourceCount > 0,
+                        escapeHtml
+                      )
+                }
               </div>
-            `).join("")}
+              <div>
+                <h4 class="insights-subtitle">Emerging patterns</h4>
+                <div class="insights-learning-grid">
+                  ${learningHighlights.map((item) => `
+                    <div class="insights-learning-card">
+                      <strong>${escapeHtml(item.title)}</strong>
+                      <p>${escapeHtml(item.body)}</p>
+                    </div>
+                  `).join("")}
+                </div>
+              </div>
+            </div>
           </div>
-          ${
-            learning.systemLessons.length
-              ? `<div class="insights-copy">${escapeHtml(learning.systemLessons.join(" • "))}</div>`
-              : ""
-          }
         </section>
 
         <section class="card">
           <div class="card-head">
-            <h3>AI Optimization Panel</h3>
-            <span class="card-badge neutral">${escapeHtml(`${optimization.prompts.length} prompts`)}</span>
+            <h3>What Needs Attention</h3>
+            <span class="card-badge warning">${escapeHtml(weakContent.length ? `${weakContent.length} flagged` : "Monitoring")}</span>
           </div>
-          <div class="insights-domain-grid">
+          <p class="insights-section-copy">
+            Weak signals, missing feeds, and performance gaps that should be reviewed before the next business decision.
+          </p>
+          <div class="insights-workspace-grid">
+            <div>
+              <h4 class="insights-subtitle">Underperforming content</h4>
+              ${
+                weakContent.length
+                  ? renderWeakContent(weakContent.slice(0, 4), "", escapeHtml)
+                  : renderFeedAwareEmptyState(
+                      "No underperforming content feed yet",
+                      "This section separates low-performing posts, videos, and campaigns once cross-platform content metrics are connected.",
+                      PLATFORM_DEFS.filter((platform) => platform.type === "social").some((platform) => getConnectedValue(platform.sourceKeys, connections)),
+                      escapeHtml
+                    )
+              }
+            </div>
+            <div class="insights-stack">
+              <div>
+                <h4 class="insights-subtitle">At-risk channels</h4>
+                ${
+                  riskPlatforms.length
+                    ? renderPlatformCards(riskPlatforms, currency, escapeHtml)
+                    : `<div class="empty-box">No major cross-platform risk signal is flagged right now.</div>`
+                }
+              </div>
+              <div class="insights-compact-grid">
+                <div>
+                  <h4 class="insights-subtitle">Website conversion risk</h4>
+                  ${
+                    websiteIntel.hasData
+                      ? renderKeyValueList(websiteIntel.weakPages.slice(0, 4), "page", escapeHtml) || `<div class="empty-box">No weak page list yet.</div>`
+                      : renderFeedAwareEmptyState(
+                          "No website analytics feed yet",
+                          "Connect GA4 or a website analytics source to surface weak landing pages and conversion risks.",
+                          websiteIntel.connected,
+                          escapeHtml
+                        )
+                  }
+                </div>
+                <div>
+                  <h4 class="insights-subtitle">SEO / paid weak signals</h4>
+                  ${
+                    seoIntel.hasData || paidIntel.hasData
+                      ? renderKeyValueList(
+                          [
+                            ...seoIntel.ctrOpportunities,
+                            ...seoIntel.rankingOpportunities,
+                            ...paidIntel.weakCampaigns,
+                            ...paidIntel.weakCreatives
+                          ].slice(0, 4),
+                          "page",
+                          escapeHtml
+                        ) || `<div class="empty-box">No SEO or paid weakness list yet.</div>`
+                      : renderFeedAwareEmptyState(
+                          "No SEO or paid weakness feed yet",
+                          "Connect Search Console and paid reporting to surface ranking, CTR, campaign, and creative risks here.",
+                          seoIntel.connected || paidIntel.connected,
+                          escapeHtml
+                        )
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-head">
+            <h3>Decision Queue / Next Actions</h3>
+            <span class="card-badge neutral">${escapeHtml(`${recommendationItems.length} priorities`)}</span>
+          </div>
+          <p class="insights-section-copy">
+            Prioritized actions the operator can route safely into Campaign, Content, Ads, Publishing, or AI review.
+          </p>
+          <div class="insights-workspace-grid">
             <div>
               <h4 class="insights-subtitle">Prioritized recommendations</h4>
               <div class="insights-list">
-                ${optimization.recommendations.map((item) => `
+                ${recommendationItems.map((item) => `
                   <div class="insights-list-item">
                     <div class="insights-list-head">
                       <strong>${escapeHtml(item.title)}</strong>
@@ -1302,16 +1349,90 @@ export const insightsRoute = {
               </div>
             </div>
             <div>
-              <h4 class="insights-subtitle">Optimization prompts</h4>
-              <div class="insights-prompt-list">
-                ${optimization.prompts.map((item, index) => `
-                  <button class="quick-action-btn" type="button" data-insights-prompt="${index}">
-                    <span class="home-action-title">${escapeHtml(item.label)}</span>
-                    <span class="home-action-meta">${escapeHtml(item.prompt)}</span>
-                  </button>
+              <h4 class="insights-subtitle">Readiness notes</h4>
+              <div class="insights-learning-grid">
+                ${
+                  learning.systemLessons.length
+                    ? learning.systemLessons.map((item) => `
+                      <div class="insights-learning-card">
+                        <strong>System lesson</strong>
+                        <p>${escapeHtml(item)}</p>
+                      </div>
+                    `).join("")
+                    : `
+                      <div class="insights-learning-card">
+                        <strong>Readiness status</strong>
+                        <p>More granular post, page, query, and campaign metrics will make these recommendations more specific.</p>
+                      </div>
+                    `
+                }
+              </div>
+            </div>
+          </div>
+          <div class="insights-assistant-toolbar" style="margin-top: 16px;">
+            <button class="btn btn-primary" type="button" data-insights-route="campaign-studio">Open Campaign Studio</button>
+            <button class="btn btn-secondary" type="button" data-insights-route="content-studio">Open Content Studio</button>
+            <button class="btn btn-secondary" type="button" data-insights-route="ads-manager">Open Ads Manager</button>
+            <button class="btn btn-secondary" type="button" data-insights-route="publishing">Open Publishing Workspace</button>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-head">
+            <h3>Comparative / Trend View</h3>
+            <span class="card-badge neutral">${escapeHtml(`${platformCards.length} intelligence lanes`)}</span>
+          </div>
+          <p class="insights-section-copy">
+            Compare the main channels side by side, then review the current website, SEO, and paid signal without opening separate summary panels.
+          </p>
+          <div class="insights-workspace-grid">
+            <div>
+              <h4 class="insights-subtitle">Cross-platform comparison</h4>
+              ${renderPlatformCards(platformCards, currency, escapeHtml)}
+            </div>
+            <div>
+              <h4 class="insights-subtitle">Current trend snapshots</h4>
+              <div class="insights-domain-summary-grid">
+                ${domainSnapshots.map((item) => `
+                  <div class="insights-domain-summary">
+                    <div class="insights-list-head">
+                      <strong>${escapeHtml(item.title)}</strong>
+                      <span class="card-badge ${escapeHtml(item.tone)}">${escapeHtml(item.status)}</span>
+                    </div>
+                    <div class="insights-domain-summary-metrics">
+                      ${item.metrics.map((metric) => `
+                        <div class="data-row">
+                          <span>${escapeHtml(metric.label)}</span>
+                          <strong>${escapeHtml(metric.value)}</strong>
+                        </div>
+                      `).join("")}
+                    </div>
+                    <div class="insights-list-note">${escapeHtml(item.note)}</div>
+                  </div>
                 `).join("")}
               </div>
             </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-head">
+            <h3>AI Intelligence Briefs</h3>
+            <span class="card-badge neutral">${escapeHtml(`${promptItems.length} prompt starters`)}</span>
+          </div>
+          <p class="insights-section-copy">
+            Use AI Workspace to turn current signals into a review-ready intelligence brief. Opening AI only navigates; sending a prompt prefills context and creates a handoff.
+          </p>
+          <div class="insights-assistant-toolbar">
+            <button class="btn ghost" type="button" data-insights-open>Open AI Workspace Review</button>
+          </div>
+          <div class="insights-prompt-list">
+            ${promptItems.map((item, index) => `
+              <button class="quick-action-btn" type="button" data-insights-prompt="${index}">
+                <span class="home-action-title">${escapeHtml(item.label)}</span>
+                <span class="home-action-meta">${escapeHtml(item.prompt)}</span>
+              </button>
+            `).join("")}
           </div>
         </section>
       </div>
@@ -1324,6 +1445,102 @@ export const insightsRoute = {
       prompts: optimization.prompts,
       projectName,
       createProjectHandoff
+    });
+
+    root.querySelector("#insightsRefreshBtn")?.addEventListener("click", () => {
+      if (!projectName) {
+        const message = "Insights: No active project selected.";
+        setInsightsRefreshState(projectName, { loading: false, error: message });
+        showError?.(message);
+        insightsRoute.render({
+          getState,
+          $,
+          escapeHtml,
+          safeText,
+          navigateTo,
+          showMessage,
+          showError,
+          fetchProjectInsights,
+          createProjectHandoff
+        });
+        return;
+      }
+
+      if (!fetchProjectInsights) {
+        const message = "Insights: Live refresh is unavailable in this context.";
+        setInsightsRefreshState(projectName, { loading: false, error: message });
+        showError?.(message);
+        insightsRoute.render({
+          getState,
+          $,
+          escapeHtml,
+          safeText,
+          navigateTo,
+          showMessage,
+          showError,
+          fetchProjectInsights,
+          createProjectHandoff
+        });
+        return;
+      }
+
+      setInsightsRefreshState(projectName, { loading: true, error: "" });
+      insightsRoute.render({
+        getState,
+        $,
+        escapeHtml,
+        safeText,
+        navigateTo,
+        showMessage,
+        showError,
+        fetchProjectInsights,
+        createProjectHandoff
+      });
+
+      fetchProjectInsights(projectName)
+        .then((liveData) => {
+          const currentState = getState();
+          const currentData = asObject(currentState.data);
+          const currentActivity = asObject(currentData.activity);
+
+          currentState.data = {
+            ...currentData,
+            activity: {
+              ...currentActivity,
+              insights: asObject(liveData)
+            }
+          };
+
+          setInsightsRefreshState(projectName, { loading: false, error: "" });
+          insightsRoute.render({
+            getState,
+            $,
+            escapeHtml,
+            safeText,
+            navigateTo,
+            showMessage,
+            showError,
+            fetchProjectInsights,
+            createProjectHandoff
+          });
+          showMessage?.("Insights refreshed.");
+        })
+        .catch((error) => {
+          const message = `Insights: ${error?.message || "Failed to refresh insights."}`;
+          setInsightsRefreshState(projectName, { loading: false, error: message });
+          insightsRoute.render({
+            getState,
+            $,
+            escapeHtml,
+            safeText,
+            navigateTo,
+            showMessage,
+            showError,
+            fetchProjectInsights,
+            createProjectHandoff
+          });
+          showError?.(message);
+        });
     });
   }
 };

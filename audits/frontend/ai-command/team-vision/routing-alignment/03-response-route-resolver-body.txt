@@ -1,0 +1,91 @@
+  1325	}
+  1326	
+  1327	function specialistTemplateForOutput({ specialist, outputType, prompt, projectName }) {
+  1328		const cleanPrompt = asString(prompt).trim();
+  1329		const promptSnippet = cleanPrompt || `Project request for ${projectName || "current project"}`;
+  1330		const specialistId = asString(specialist?.id || "operations");
+  1331		const route = destinationRouteForSpecialist(specialistId, outputType);
+  1332	
+  1333		const base = {
+  1334			specialistId,
+  1335			outputType,
+  1336			title: "Draft output",
+  1337			summary: "Guidance prepared for review.",
+  1338			bullets: [],
+  1339			steps: [],
+  1340			destinationRoute: route,
+  1341			confirmationRequired: outputType === "handoff" || specialistId === "publisher" || specialistId === "compliance_reviewer",
+  1342			generatedAt: nowIso(),
+  1343			sourcePrompt: promptSnippet,
+  1344			status: "draft_preview",
+  1345			safetyLabel: "Guidance and draft only. No backend execution.",
+  1346			nextSafeAction: `Review in ${routeLabel(route)}`,
+  1347			confirmationNote: "Execution, approvals, and publishing require explicit confirmation in the owning workspace."
+  1348		};
+  1349	
+  1350		if (specialistId === "strategist") {
+  1351			if (outputType === "task") {
+  1352				return {
+  1353					...base,
+  1354					title: `Task: Strategic plan for ${projectName || "current project"}`,
+  1355					summary: "Strategic task draft prepared with priorities, blockers, and operating sequence.",
+  1356					steps: [
+  1357						"Define top 3 strategic priorities for this cycle",
+  1358						"List blockers and dependency owners",
+  1359						"Map next operating move by channel",
+  1360						"Route execution draft to Campaign Studio or Workflows"
+  1361					],
+  1362					nextSafeAction: "Review and refine the task draft before creating durable tasks"
+  1363				};
+  1364			}
+  1365			return {
+  1366				...base,
+  1367				title: `Strategist Guidance: Next operating move`,
+  1368				summary: `Priority guidance prepared from: ${promptSnippet}`,
+  1369				bullets: [
+  1370					"Strategic priorities aligned to current readiness",
+  1371					"Key blockers and risk dependencies identified",
+  1372					"Next operating move drafted with destination routing"
+  1373				]
+  1374			};
+  1375		}
+  1376	
+  1377		if (specialistId === "writer") {
+  1378			return {
+  1379				...base,
+  1380				title: outputType === "task" ? "Task: Draft campaign copy" : "Content Guidance: Messaging draft",
+  1381				summary: "Content draft prepared with hooks, captions, CTA flow, and review checkpoint.",
+  1382				hooks: [
+  1383					`Problem-aware hook direction for ${projectName || "this project"}`,
+  1384					"Outcome-led hook direction for a German publishing draft",
+  1385					"Proof-led hook direction with claims marked for review"
+  1386				],
+  1387				captions: [
+  1388					"Caption opens with the audience problem, then moves into the practical value promise.",
+  1389					"German caption version should keep the CTA direct and easy to approve."
+  1390				],
+  1391				ctas: [
+  1392					"Jetzt mehr erfahren",
+  1393					"Mehr Details ansehen",
+  1394					"Zum Angebot"
+  1395				],
+  1396				notes: [
+  1397					"Use Arabic freely in the conversation; publishable copy should be reviewed in German.",
+  1398					"Claims, health, or performance promises need evidence before publishing."
+  1399				],
+  1400				nextStep: "Send this package to Content Studio or Publisher after review.",
+  1401				steps: [
+  1402					"Draft 3 hook variants",
+  1403					"Draft captions with CTA",
+  1404					"Prepare review notes and claims check",
+  1405					"Route to Content Studio for refinement"
+  1406				],
+  1407				safetyLabel: "Claims require review before publishing. No direct publish action."
+  1408			};
+  1409		}
+  1410	
+  1411		if (specialistId === "media") {
+  1412			return {
+  1413				...base,
+  1414				outputType: outputType === "guidance" ? "media_brief" : outputType,
+  1415				title: "Media Brief: Visual direction draft",

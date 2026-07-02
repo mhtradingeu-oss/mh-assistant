@@ -1,0 +1,156 @@
+
+# STEP G2 — CSS Selector Evidence
+
+This file contains real grep evidence for selectors in Control Center CSS. Used for duplication, overlap, and risk analysis.
+
+---
+
+## 1. Active CSS Files (from index.html)
+public/control-center/styles/00-tokens.css
+public/control-center/styles/01-reset.css
+public/control-center/styles/02-layer-system.css
+public/control-center/styles/03-app-shell.css
+public/control-center/styles/07-sidebar.css
+public/control-center/styles/10-topbar-canonical.css
+public/control-center/styles/04-command-layer.css
+public/control-center/styles/05-ai-layer.css
+public/control-center/styles/08-components-foundation.css
+public/control-center/styles/09-operations-centers.css
+public/control-center/styles/12-pages.css
+public/control-center/styles/13-home-executive.css
+public/control-center/styles/14-page-standard.css
+public/control-center/styles/15-clean-operating-layer.css
+
+## 2. Legacy CSS Files (public/control-center/legacy/)
+public/control-center/legacy/styles.legacy-full.css
+public/control-center/legacy/06-topbar.legacy.css
+public/control-center/legacy/99-legacy-compat.legacy.css
+public/control-center/legacy/11-runtime-safety-overrides.legacy.css
+public/control-center/legacy/styles.legacy-20260508.css
+public/control-center/legacy/09-command-legacy-isolation.legacy.css
+
+---
+
+## 3. Selector Frequency Counts — Active CSS
+Example (top selectors by count, file:line):
+
+public/control-center/styles/12-pages.css
+	.governance-evidence-summary (2)
+	.publishing-command-header (3)
+	.media-command-header (2)
+	.library-explainer (2)
+	.aicmd-shell (2)
+	.content-main (2)
+	.setup-field-group (4)
+	.home-exec-header (2)
+
+public/control-center/styles/14-page-standard.css
+	.std-page-shell (2)
+	.std-context-ribbon (3)
+	.std-context-chip (4)
+	.home-decision-quick-actions .quick-action-btn (2)
+	[data-page="library"] .library-smart-shell (3)
+
+public/control-center/styles/07-sidebar.css
+	.sidebar (4)
+	.sidebar-brand (2)
+	.sidebar-backdrop (3)
+
+## 4. Selector Frequency Counts — Legacy CSS
+public/control-center/legacy/styles.legacy-full.css
+	.sidebar (3)
+	.app-shell (2)
+	.main-shell (2)
+	.topbar (2)
+	.page (2)
+	.btn (3)
+	.panel (2)
+	.card (2)
+
+---
+
+## 5. Duplicate Selector Candidates (with file locations)
+.sidebar
+	public/control-center/styles/07-sidebar.css
+	public/control-center/legacy/styles.legacy-full.css
+.app-shell
+	public/control-center/styles/03-app-shell.css
+	public/control-center/legacy/styles.legacy-full.css
+.main-shell
+	public/control-center/styles/03-app-shell.css
+	public/control-center/legacy/styles.legacy-full.css
+.topbar
+	public/control-center/styles/10-topbar-canonical.css
+	public/control-center/legacy/styles.legacy-full.css
+.page
+	public/control-center/styles/12-pages.css
+	public/control-center/legacy/styles.legacy-full.css
+.btn
+	public/control-center/styles/08-components-foundation.css
+	public/control-center/legacy/styles.legacy-full.css
+.panel
+	public/control-center/styles/08-components-foundation.css
+	public/control-center/legacy/styles.legacy-full.css
+.card
+	public/control-center/styles/08-components-foundation.css
+	public/control-center/legacy/styles.legacy-full.css
+
+---
+
+## 6. High-Risk Global Selector Locations
+.app-shell
+	public/control-center/styles/03-app-shell.css
+	public/control-center/legacy/styles.legacy-full.css
+.main-shell
+	public/control-center/styles/03-app-shell.css
+	public/control-center/legacy/styles.legacy-full.css
+.topbar
+	public/control-center/styles/10-topbar-canonical.css
+	public/control-center/legacy/styles.legacy-full.css
+.sidebar
+	public/control-center/styles/07-sidebar.css
+	public/control-center/legacy/styles.legacy-full.css
+.page
+	public/control-center/styles/12-pages.css
+	public/control-center/legacy/styles.legacy-full.css
+.btn
+	public/control-center/styles/08-components-foundation.css
+	public/control-center/legacy/styles.legacy-full.css
+.card
+	public/control-center/styles/08-components-foundation.css
+	public/control-center/legacy/styles.legacy-full.css
+.panel
+	public/control-center/styles/08-components-foundation.css
+	public/control-center/legacy/styles.legacy-full.css
+
+---
+
+## 7. Page-Scoped Selector Evidence
+
+### Library
+	[data-page="library"] .library-smart-shell, .library-overview-grid, .library-panel-section
+		public/control-center/styles/14-page-standard.css
+
+### Publishing
+	.publishing-command-header, .publishing-workflow-strip, .publishing-readiness-summary
+		public/control-center/styles/12-pages.css
+
+### Governance
+	.governance-evidence-summary, .governance-intake-panel
+		public/control-center/styles/12-pages.css
+
+### Settings
+	[data-page="setup"] .setup-config-intel-metrics, .setup-wizard-shell, .setup-field-group
+		public/control-center/styles/12-pages.css
+
+### Operations
+	[data-page="task-center"] .ops-shell, .ops-layout-grid
+		public/control-center/styles/09-operations-centers.css
+
+### AI Command
+	.aicmd-shell, .aicmd-operating-strip
+		public/control-center/styles/12-pages.css
+
+---
+
+Evidence based on grep search results and file inspection. For full details, see the audit log or rerun grep on the listed files.

@@ -1,0 +1,260 @@
+import {
+  getSharedAiDraft,
+  getSharedHandoff,
+  setSharedAiDraft,
+  setSharedHandoff
+} from "../shared-context.js";
+import { getGlobalNextBestAction } from "../system-intelligence.js";
+import {
+  buildAutomationPlan,
+  createAutoModeController,
+  getAutoModeState,
+  startAutoMode,
+  pauseAutoMode,
+  resumeAutoMode,
+  stopAutoMode,
+  approveCurrentGate,
+  skipCurrentStep,
+  subscribeAutoMode,
+  getAutoFixPlan,
+  runAutomationPlan
+} from "../automation-engine.js";
+
+const WORKFLOW_CATALOG = [
+  {
+    id: "launch-campaign",
+    title: "Launch Campaign",
+    purpose: "Build a launch-ready execution sequence across campaign, content, and distribution.",
+    requiredInputs: ["project", "campaign", "product", "channel", "goal"],
+    aiModeId: "strategist",
+    routeHint: "campaign-studio"
+  },
+  {
+    id: "create-content-plan",
+    title: "Create Content Plan",
+    purpose: "Generate an execution-ready content plan tied to campaign and audience context.",
+    requiredInputs: ["project", "campaign", "product", "channel", "goal"],
+    aiModeId: "writer",
+    routeHint: "content-studio"
+  },
+  {
+    id: "build-media-job",
+    title: "Build Media Job",
+    purpose: "Prepare media production inputs, format guidance, and downstream handoff steps.",
+    requiredInputs: ["project", "campaign", "product", "channel", "goal"],
+    aiModeId: "media",
+    routeHint: "media-studio"
+  },
+  {
+    id: "prepare-publishing-package",
+    title: "Prepare Publishing Package",
+    purpose: "Package final channel payloads, approval checks, and publishing queue dependencies.",
+    requiredInputs: ["project", "campaign", "channel", "goal"],
+    aiModeId: "operations",
+    routeHint: "publishing"
+  },
+  {
+    id: "generate-report",
+    title: "Generate Report",
+    purpose: "Summarize execution state, results, blockers, and the next operational decision.",
+    requiredInputs: ["project", "campaign", "goal"],
+    aiModeId: "analyst",
+    routeHint: "insights"
+  },
+  {
+    id: "research-competitors",
+    title: "Research Competitors",
+    purpose: "Create a competitor intelligence brief for positioning and campaign advantage.",
+    requiredInputs: ["project", "product", "goal"],
+    aiModeId: "researcher",
+    routeHint: "research"
+  },
+  {
+    id: "fix-integrations",
+    title: "Fix Integrations",
+    purpose: "Prioritize integration recovery actions that restore readiness and automation reliability.",
+    requiredInputs: ["project", "channel", "goal"],
+    aiModeId: "operations",
+    routeHint: "integrations"
+  }
+];
+
+const IMPACT_CHIPS = [
+  "Launch readiness",
+  "Content",
+  "Campaign",
+  "Publishing",
+  "Automation",
+  "Reports"
+];
+
+const WORKFLOW_ID_ALIASES = {
+  "launch-product": "launch-campaign",
+  "generate-campaign": "launch-campaign",
+  "run-weekly-report": "generate-report",
+  "build-ads": "launch-campaign"
+};
+
+const WORKFLOW_LOCAL_DRAFTS_KEY = "mh-workflow-local-drafts-v1";
+
+const workflowSessions = new Map();
+let lastWorkflowRenderContext = null;
+let workflowBridgeRegistered = false;
+let workflowAutoModeUnsubscribe = null;
+let workflowAutomationEnabled = false;
+const workflowAutomationState = {
+  progress: "",
+  result: "",
+  cursor: 0,
+  lastPlan: [],
+  lastResults: []
+};
+
+function asArray(value) {
+  return Array.isArray(value) ? value : [];
+}
+
+function asObject(value) {
+  return value && typeof value === "object" ? value : {};
+}
+
+function asString(value) {
+  if (value == null) return "";
+  return String(value);
+}
+
+function titleCase(value) {
+  return asString(value)
+    .replace(/[_-]+/g, " ")
+    .replace(/\b\w/g, (m) => m.toUpperCase());
+}
+
+function firstNonEmpty(...values) {
+  for (const value of values) {
+    const clean = asString(value).trim();
+    if (clean) return clean;
+  }
+  return "";
+}
+
+function uniqueStrings(values) {
+  return Array.from(new Set(asArray(values).map((item) => asString(item).trim()).filter(Boolean)));
+}
+
+function nowIso() {
+  return new Date().toISOString();
+}
+
+function formatDateTime(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "-";
+  return new Intl.DateTimeFormat(undefined, {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit"
+  }).format(date);
+}
+
+function normalizeRunStatus(status) {
+  const normalized = asString(status).trim().toLowerCase();
+  if (["running", "in_progress", "processing", "queued", "scheduled", "pending"].includes(normalized)) return "running";
+  if (["failed", "error", "errored", "cancelled", "blocked"].includes(normalized)) return "failed";
+  if (["completed", "success", "done", "ready"].includes(normalized)) return "completed";
+  return "draft";
+}
+
+function statusTone(status) {
+  const runStatus = normalizeRunStatus(status);
+  if (runStatus === "completed") return "success";
+  if (runStatus === "running") return "warning";
+  if (runStatus === "failed") return "danger";
+  return "neutral";
+}
+
+function getWorkflowDef(id) {
+  return WORKFLOW_CATALOG.find((item) => item.id === id) || WORKFLOW_CATALOG[0];
+}
+
+function createDefaultInputs(state) {
+  const context = asObject(state.context);
+  const overview = asObject(state.data.overview?.overview);
+  const activity = asObject(state.data.activity);
+
+  const channels = uniqueStrings([
+    ...asArray(activity.scheduled_jobs).map((job) => asString(job.channel)),
+    ...asArray(overview.channels)
+  ]).join(", ");
+
+  return {
+    project: firstNonEmpty(context.currentProject, overview.project_name),
+    campaign: firstNonEmpty(context.activeCampaign),
+    product: firstNonEmpty(overview.project_name, context.currentProject),
+    channel: channels,
+    goal: firstNonEmpty(overview.primary_goal, overview.goal)
+  };
+}
+
+function createEmptyRunState() {
+  return {
+    status: "draft",
+    runId: "",
+    source: "",
+    lastRunAt: "",
+    output: null,
+    blockedRequirements: [],
+    history: []
+  };
+}
+
+function createRunsMap() {
+  return WORKFLOW_CATALOG.reduce((acc, workflow) => {
+    acc[workflow.id] = createEmptyRunState();
+    return acc;
+  }, {});
+}
+
+function createInputsMap(defaults) {
+  return WORKFLOW_CATALOG.reduce((acc, workflow) => {
+    acc[workflow.id] = {
+      ...defaults,
+      goal: defaults.goal || ""
+    };
+    return acc;
+  }, {});
+}
+
+function buildOperationsFingerprint(operations) {
+  return [
+    asString(operations?.backbone?.last_updated),
+    String(operations?.workflows?.total_runs || 0),
+    String(operations?.tasks?.total || 0)
+  ].join(":");
+}
+
+function readLocalDraftMap() {
+  if (typeof window === "undefined") return {};
+  try {
+    const raw = window.localStorage?.getItem(WORKFLOW_LOCAL_DRAFTS_KEY) || "{}";
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === "object" ? parsed : {};
+  } catch (_) {
+    return {};
+  }
+}
+
+function writeLocalDraftMap(map) {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage?.setItem(WORKFLOW_LOCAL_DRAFTS_KEY, JSON.stringify(map || {}));
+  } catch (_) {}
+}
+
+function loadLocalDrafts(projectName) {
+  const key = projectName || "__default__";
+  return asObject(readLocalDraftMap()[key]);
+}
+
+function saveLocalDraft(projectName, workflowId, payload) {
+  const key = projectName || "__default__";
+  const map = readLocalDraftMap();

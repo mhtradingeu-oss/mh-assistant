@@ -1,0 +1,186 @@
+public/control-center/pages/ai-command.js:11:        getSharedHandoff,
+public/control-center/pages/ai-command.js:14:        setSharedHandoff
+public/control-center/pages/ai-command.js:91:                routeHint: "workflows"
+public/control-center/pages/ai-command.js:105:                routeHint: "workflows"
+public/control-center/pages/ai-command.js:144:		cannotDo: ["Publish campaigns directly", "Execute workflows automatically", "Approve content", "Set live budgets"],
+public/control-center/pages/ai-command.js:157:		cannotDo: ["Publish directly", "Approve risky claims", "Invent unsupported facts", "Run workflows automatically"],
+public/control-center/pages/ai-command.js:172:		safetyNote: "Direction and briefs only. Media generation requires backend confirmation and explicit action.",
+public/control-center/pages/ai-command.js:185:		safetyNote: "Scripts and direction only. Video generation requires explicit backend action and approval.",
+public/control-center/pages/ai-command.js:248:		cannotDo: ["Run workflows without confirmation", "Auto-approve tasks", "Override authority gates", "Execute backend operations directly"],
+public/control-center/pages/ai-command.js:366:	{ id: "execute", title: "Execute", description: "Execution stays gated in backend-owned surfaces." },
+public/control-center/pages/ai-command.js:482:		{ id: "open-workflows", label: "Open Workflows / Operations", action: "route", route: "workflows" }
+public/control-center/pages/ai-command.js:597:		purpose: "Translate intent into executable workflows and handoffs.",
+public/control-center/pages/ai-command.js:660:			targetPage: "workflows",
+public/control-center/pages/ai-command.js:1254:function destinationRouteForSpecialist(specialistId, outputType) {
+public/control-center/pages/ai-command.js:1257:	if (outputType === "workflow") return "workflows";
+public/control-center/pages/ai-command.js:1258:	if (id === "strategist") return outputType === "task" ? "campaign-studio" : "workflows";
+public/control-center/pages/ai-command.js:1266:	if (id === "operations") return outputType === "task" ? "task-center" : "workflows";
+public/control-center/pages/ai-command.js:1267:	if (id === "customer_ops") return outputType === "task" ? "task-center" : "operations-centers";
+public/control-center/pages/ai-command.js:1268:	if (id === "sales_crm") return "workflows";
+public/control-center/pages/ai-command.js:1269:	return "workflows";
+public/control-center/pages/ai-command.js:1273:function resolveAiResponseOutputRoute(session, response = {}) {
+public/control-center/pages/ai-command.js:1302:                ? "task-center"
+public/control-center/pages/ai-command.js:1303:                : asString(response.destinationRoute || destinationRouteForSpecialist(session?.modeId || "operations", outputType));
+public/control-center/pages/ai-command.js:1320:		"task-center": "Task Center",
+public/control-center/pages/ai-command.js:1322:		workflows: "Workflows"
+public/control-center/pages/ai-command.js:1331:	const route = destinationRouteForSpecialist(specialistId, outputType);
+public/control-center/pages/ai-command.js:1345:		safetyLabel: "Guidance and draft only. No backend execution.",
+public/control-center/pages/ai-command.js:1362:				nextSafeAction: "Review and refine the task draft before creating durable tasks"
+public/control-center/pages/ai-command.js:1615:				"Review before creating durable records"
+public/control-center/pages/ai-command.js:1617:			safetyLabel: "No workflow run and no backend task creation executed."
+public/control-center/pages/ai-command.js:1667:		destinationRoute: outputType === "task" ? "task-center" : "workflows",
+public/control-center/pages/ai-command.js:2172:	if (!routeSuggestions.length) routeSuggestions.push(routeSuggestion("Workflows", "workflows", "Use Workflows when the task spans multiple execution areas."));
+public/control-center/pages/ai-command.js:2299:	workflows: "Workflows",
+public/control-center/pages/ai-command.js:2306:	"task-center": "Task Center",
+public/control-center/pages/ai-command.js:2321:	workflows: "operations",
+public/control-center/pages/ai-command.js:2328:	"task-center": "operations",
+public/control-center/pages/ai-command.js:2357:	workflow: "workflows",
+public/control-center/pages/ai-command.js:2362:	tasks: "task-center",
+public/control-center/pages/ai-command.js:2427:	const fallbackRoute = sourcePage === "workspace" ? "workflows" : sourcePage;
+public/control-center/pages/ai-command.js:2456:		"workflows"
+public/control-center/pages/ai-command.js:2470:		safetyLabel: firstAiInboundText(preview.safetyLabel, preview.safety_label, "Guidance and draft only. No backend execution."),
+public/control-center/pages/ai-command.js:2488:	const durableId = getAiInboundDurableHandoffId(handoff);
+public/control-center/pages/ai-command.js:2489:	if (durableId) return durableId;
+public/control-center/pages/ai-command.js:2541:	)) || `Review this ${sourceLabel} handoff for ${projectLabel}. Identify the right specialist, summarize the context, produce a review-ready draft, and recommend the next safe route. Do not execute publishing, task creation, CRM updates, customer replies, workflow runs, or backend actions.`;
+public/control-center/pages/ai-command.js:2581:		note: "Guidance only. No publishing, task creation, CRM updates, customer replies, workflow runs, exports, or backend actions are executed from this handoff."
+public/control-center/pages/ai-command.js:2588:	const handoff = getSharedHandoff(projectName, "ai-command", operations);
+public/control-center/pages/ai-command.js:2634:	const durableHandoffId = getAiInboundDurableHandoffId(handoff);
+public/control-center/pages/ai-command.js:2635:	if (durableHandoffId) {
+public/control-center/pages/ai-command.js:2636:		consumeProjectHandoff?.(projectName, durableHandoffId, { actor: "mh-assistant" }).catch((error) => {
+public/control-center/pages/ai-command.js:2714:		source: "durable-ai-response",
+public/control-center/pages/ai-command.js:3300:                "Keep it review-ready and do not execute backend actions.",
+public/control-center/pages/ai-command.js:3327:        preview.safetyLabel = preview.safetyLabel || "Conversation converted into a review-ready draft. No backend action executed.";
+public/control-center/pages/ai-command.js:3504:	if (tool.route) return asString(tool.route || "workflows");
+public/control-center/pages/ai-command.js:3505:	if (session?.teamMode === "team") return tool.intent === "task" ? "task-center" : "workflows";
+public/control-center/pages/ai-command.js:3507:	return destinationRouteForSpecialist(session?.modeId || "operations", outputType);
+public/control-center/pages/ai-command.js:3662:					const backendAlias = AI_ROOM_BACKEND_ROLE_ALIASES[roleId];
+public/control-center/pages/ai-command.js:3663:					const roleLine = `${spec.status || "Ready"} - ${spec.position || spec.label || "Specialist"}${backendAlias ? ` - Backend: ${backendAlias}` : ""}`;
+public/control-center/pages/ai-command.js:3796:	return destinationRouteForSpecialist(session?.modeId || "operations", getCanonicalToolIntent(tool));
+public/control-center/pages/ai-command.js:3861:					<span class="aicmd-v2-tools-subtitle">Same tool model as the Smart Dock. These prepare drafts only and do not execute backend operations.</span>
+public/control-center/pages/ai-command.js:4006:	const destination = routeLabel(preview.destinationRoute || destinationRouteForSpecialist(session.modeId, preview.outputType || "guidance"));
+public/control-center/pages/ai-command.js:4066:					<p class="aicmd-v2-preview-confirmation">${escapeHtml(humanizeValue(preview.safetyLabel, "Guidance only. No backend execution."))}</p>
+public/control-center/pages/ai-command.js:4089:	const destination = routeLabel(preview.destinationRoute || destinationRouteForSpecialist(session.modeId, preview.outputType || "guidance"));
+public/control-center/pages/ai-command.js:4108:					<h2>Drafts, tasks, workflows, handoffs</h2>
+public/control-center/pages/ai-command.js:4167:						<strong>${escapeHtml(humanizeValue(preview.safetyLabel, "Guidance only. No backend execution."))}</strong>
+public/control-center/pages/ai-command.js:4233:				<li><span>Team chat execution bridge</span><strong class="is-planned">Planned — requires backend bridge</strong></li>
+public/control-center/pages/ai-command.js:4485:	const destination = routeLabel(destinationRouteForSpecialist(session.modeId, asObject(session.outputPreview).outputType || "guidance"));
+public/control-center/pages/ai-command.js:4627:			navigateTo,
+public/control-center/pages/ai-command.js:4837:				navigateTo("settings");
+public/control-center/pages/ai-command.js:5107:                                        const responseRoute = resolveAiResponseOutputRoute(session, {
+public/control-center/pages/ai-command.js:5170:                // Phase 1: stages draft locally from conversation context. No backend execution.
+public/control-center/pages/ai-command.js:5191:                // Phase 1: converts the current conversation into a task preview. No backend execution.
+public/control-center/pages/ai-command.js:5208:                                updateStatus("Task draft preview prepared from conversation context. Review before creating durable tasks.");
+public/control-center/pages/ai-command.js:5238:                // Phase 1: converts the current conversation into a handoff preview. No backend write.
+public/control-center/pages/ai-command.js:5270:					const destination = asString(tool.route || "workflows");
+public/control-center/pages/ai-command.js:5272:					navigateTo(destination);
+public/control-center/pages/ai-command.js:5425:				const responseRoute = resolveAiResponseOutputRoute(session, latestResponse);
+public/control-center/pages/ai-command.js:5426:				const destination = asString(latestResponse.destinationRoute || responseRoute.destinationRoute || destinationRouteForSpecialist(session.modeId, responseRoute.outputType || "guidance"));
+public/control-center/pages/ai-command.js:5436:				setSharedHandoff(projectName || "__default__", destination, {
+public/control-center/pages/ai-command.js:5452:				navigateTo(destination);
+public/control-center/pages/ai-command.js:5545:				setSharedHandoff(projectName || "__default__", destination, handoffRecord);
+public/control-center/pages/ai-command.js:5547:				navigateTo(destination);
+public/control-center/pages/workflows.js:9:  getSharedHandoff,
+public/control-center/pages/workflows.js:11:  setSharedHandoff
+public/control-center/pages/workflows.js:243:    String(operations?.workflows?.total_runs || 0),
+public/control-center/pages/workflows.js:374:  asArray(operations?.workflows?.items).forEach((item) => {
+public/control-center/pages/workflows.js:384:      source: asString(item.source || "durable-run"),
+public/control-center/pages/workflows.js:391:          source: asString(item.source || "durable-run"),
+public/control-center/pages/workflows.js:625:        <article class="wfexec-stat"><span>Total workflows</span><strong>${escapeHtml(String(metrics.total))}</strong></article>
+public/control-center/pages/workflows.js:626:        <article class="wfexec-stat"><span>Ready workflows</span><strong>${escapeHtml(String(metrics.ready))}</strong></article>
+public/control-center/pages/workflows.js:627:        <article class="wfexec-stat"><span>Draft workflows</span><strong>${escapeHtml(String(metrics.draft))}</strong></article>
+public/control-center/pages/workflows.js:932:  const handoff = getSharedHandoff(projectName, "workflows", operations);
+public/control-center/pages/workflows.js:979:    session.intelligence = { ...session.intelligence, status: "error", error: "Select a project to run workflows." };
+public/control-center/pages/workflows.js:1067:  navigateTo,
+public/control-center/pages/workflows.js:1084:    source_page: "workflows",
+public/control-center/pages/workflows.js:1096:  setSharedHandoff(projectName, "ai-command", handoff);
+public/control-center/pages/workflows.js:1104:  navigateTo("ai-command");
+public/control-center/pages/workflows.js:1209:  navigateTo,
+public/control-center/pages/workflows.js:1222:    createAutoModeController(getState, { getState, navigateTo, createProjectHandoff });
+public/control-center/pages/workflows.js:1298:        setSharedHandoff(projectName, "workflows", {
+public/control-center/pages/workflows.js:1299:          source_page: "workflows",
+public/control-center/pages/workflows.js:1300:          destination_page: "workflows",
+public/control-center/pages/workflows.js:1397:      setSharedHandoff(projectName, "workflows", {
+public/control-center/pages/workflows.js:1398:        source_page: "workflows",
+public/control-center/pages/workflows.js:1399:        destination_page: "workflows",
+public/control-center/pages/workflows.js:1464:        navigateTo,
+public/control-center/pages/workflows.js:1497:        navigateTo,
+public/control-center/pages/workflows.js:1514:        navigateTo,
+public/control-center/pages/workflows.js:1534:        source_page: "workflows",
+public/control-center/pages/workflows.js:1535:        destination_page: "task-center",
+public/control-center/pages/workflows.js:1547:          route_target: "workflows",
+public/control-center/pages/workflows.js:1555:      setSharedHandoff(projectName, "task-center", handoff);
+public/control-center/pages/workflows.js:1557:      navigateTo("task-center");
+public/control-center/pages/workflows.js:1579:      setSharedHandoff(projectName, "ai-command", {
+public/control-center/pages/workflows.js:1580:        source_page: "workflows",
+public/control-center/pages/workflows.js:1593:      navigateTo("ai-command");
+public/control-center/pages/workflows.js:1615:      setSharedHandoff(projectName, "ai-command", {
+public/control-center/pages/workflows.js:1616:        source_page: "workflows",
+public/control-center/pages/workflows.js:1629:      navigateTo("ai-command");
+public/control-center/pages/workflows.js:1649:        context: { getState, navigateTo, createProjectHandoff, projectName },
+public/control-center/pages/workflows.js:1678:        context: { getState, navigateTo, createProjectHandoff, projectName },
+public/control-center/pages/workflows.js:1700:      createAutoModeController(getState, { getState, navigateTo, createProjectHandoff });
+public/control-center/pages/workflows.js:1708:        context: { getState, navigateTo, createProjectHandoff, projectName }
+public/control-center/pages/workflows.js:1725:      await resumeAutoMode({ context: { getState, navigateTo, createProjectHandoff, projectName } });
+public/control-center/pages/workflows.js:1741:      await approveCurrentGate({ context: { getState, navigateTo, createProjectHandoff, projectName } });
+public/control-center/pages/workflows.js:1749:      await skipCurrentStep({ context: { getState, navigateTo, createProjectHandoff, projectName } });
+public/control-center/pages/workflows.js:1755:export const workflowsRoute = {
+public/control-center/pages/workflows.js:1756:  id: "workflows",
+public/control-center/pages/workflows.js:1764:    <section class="page is-active" data-page="workflows">
+public/control-center/pages/workflows.js:1765:      <div id="workflowsRoot"></div>
+public/control-center/pages/workflows.js:1772:    navigateTo,
+public/control-center/pages/workflows.js:1789:    const workflowsTotal = Number(operations.workflows?.total_runs || operations.workflows?.total || 0);
+public/control-center/pages/workflows.js:1793:    const root = $("workflowsRoot");
+public/control-center/pages/workflows.js:1853:      const hasTracking = workflowsTotal > 0 || hasPrepared;
+public/control-center/pages/workflows.js:1889:          copy: hasTracking ? `${workflowsTotal} tracked` : "Pending"
+public/control-center/pages/workflows.js:1905:      const destinationRoute = destinationRouteByHint[workflow.routeHint] || "workflows";
+public/control-center/pages/workflows.js:1928:      const recentSessions = asArray(operations.workflows?.items).slice(0, 4);
+public/control-center/pages/workflows.js:2113:                      <button class="btn btn-ghost btn-sm" type="button" data-wf-open="task-center">Open Task Center</button>
+public/control-center/pages/workflows.js:2159:                  <span>Prepared ${escapeHtml(String(workflowsTotal))}</span>
+public/control-center/pages/workflows.js:2245:              route: "workflows",
+public/control-center/pages/workflows.js:2258:        navigateTo("ai-command");
+public/control-center/pages/workflows.js:2280:          navigateTo("campaign-studio");
+public/control-center/pages/workflows.js:2288:            source_page: "workflows",
+public/control-center/pages/workflows.js:2289:            destination_page: "task-center",
+public/control-center/pages/workflows.js:2301:          setSharedHandoff(projectName, "task-center", handoff);
+public/control-center/pages/workflows.js:2305:          navigateTo("task-center");
+public/control-center/pages/workflows.js:2311:          const route = button.getAttribute("data-wf-open") || "workflows";
+public/control-center/pages/workflows.js:2312:          if (route === "task-center") {
+public/control-center/pages/workflows.js:2314:              source_page: "workflows",
+public/control-center/pages/workflows.js:2315:              destination_page: "task-center",
+public/control-center/pages/workflows.js:2327:            setSharedHandoff(projectName, "task-center", handoff);
+public/control-center/pages/workflows.js:2330:          if (route !== "task-center") stateModel.openedDestination = true;
+public/control-center/pages/workflows.js:2333:          navigateTo(route);
+public/control-center/pages/operations-centers.js:1:import { getSharedHandoff } from "../shared-context.js";
+public/control-center/pages/operations-centers.js:77:      context.navigateTo(route);
+public/control-center/pages/operations-centers.js:121:      context.navigateTo("ai-command");
+public/control-center/pages/operations-centers.js:132:      context.navigateTo("ai-command");
+public/control-center/pages/operations-centers.js:172:  if (pageKey === "task-center") {
+public/control-center/pages/operations-centers.js:236:        preview: "Assess execution health across workflows, media, and publishing jobs.",
+public/control-center/pages/operations-centers.js:237:        prompt: `Summarize current execution health for ${projectLabel} across workflows, media, and publishing jobs. Highlight failure clusters, retry patterns, and risk areas.`
+public/control-center/pages/operations-centers.js:454:          <p>Review-only context from ${escapeHtml(titleCase(source))}. No durable task is created automatically.</p>
+public/control-center/pages/operations-centers.js:517:    <section class="page is-active" data-page="task-center">
+public/control-center/pages/operations-centers.js:640:                  <p>Active actions are safe and non-destructive. Mutation actions remain deferred and disabled until backend policy and mutation safety checks are approved.</p>
+public/control-center/pages/operations-centers.js:662:                  <p>Context-only handoff: opens AI with prompt/context only. No approval, publishing, or backend execution is performed.</p>
+public/control-center/pages/operations-centers.js:717:  const prompts = buildOpsAssistantPrompts("task-center", projectName, selectedItem, titleCase(session.focus || "all"));
+public/control-center/pages/operations-centers.js:718:  const incomingHandoff = getSharedHandoff(projectName, "task-center", ops);
+public/control-center/pages/operations-centers.js:987:                  <p>Safe actions are active. Queue mutation and execution controls remain deferred and disabled until backend policy and mutation safety checks are approved.</p>
+public/control-center/pages/operations-centers.js:1015:                  <p>Context-only handoff: opens AI with prompt/context only. No approval, publishing, or backend execution is performed.</p>
+public/control-center/pages/operations-centers.js:1187:            <p class="std-context-description">Track running, completed, and failed execution across workflows, media, and publishing for ${escapeHtml(projectLabel)}.</p>
+public/control-center/pages/operations-centers.js:1277:                  <p>Safe actions are active. Mutation and destructive controls remain deferred and disabled until backend policy and mutation safety checks are approved.</p>
+public/control-center/pages/operations-centers.js:1310:                  <p>Context-only handoff: opens AI with prompt/context only. No approval, publishing, or backend execution is performed.</p>
+public/control-center/pages/operations-centers.js:1569:                <p>${escapeHtml(session.focus === "inbox" ? "Review durable inbox history and mark notifications as read where supported." : "Review route-aware alerts, then inspect the selected signal in detail.")}</p>
+public/control-center/pages/operations-centers.js:1631:                  <p>Safe actions are active. Notification mutation controls remain deferred and disabled until backend policy and mutation safety checks are approved.</p>
+public/control-center/pages/operations-centers.js:1666:                  <p>Context-only handoff: opens AI with prompt/context only. No approval, publishing, or backend execution is performed.</p>
+public/control-center/pages/operations-centers.js:1748:  id: "task-center",
+public/control-center/pages/operations-centers.js:1753:    description: "Manage durable tasks, owners, due dates, priorities, filters, and linked operational entities in one premium execution surface."
+public/control-center/pages/operations-centers.js:1755:  template: `<section class="page is-active" data-page="task-center"><div class="ops-shell"></div></section>`,
+public/control-center/pages/operations-centers.js:1836:    description: "Track running jobs, failures, retries, health state, and execution logs across workflows, media, and publishing."
+public/control-center/pages/operations-centers.js:1941:      route: "task-center",
+public/control-center/pages/operations-centers.js:1994:          description: "Use this page as the routing hub from AI Team drafts, workflows, tasks, and runtime signals into the correct operations workspace.",
+public/control-center/pages/operations-centers.js:2005:                  <p>AI Team can prepare drafts, tasks, workflows, and handoffs. This overview routes the work to the correct operations center for review and monitoring.</p>
+public/control-center/pages/operations-centers.js:2038:                <button class="btn btn-ghost" type="button" data-route="workflows">Open Workflows</button>
+public/control-center/pages/operations-centers.js:2047:                  <p>This overview does not execute jobs, mutate tasks, send notifications, or approve workflows. It only routes to the owning workspace.</p>
+public/control-center/shared-context.js:185:    getLatestHandoffFromOperations(operations, "workflows", "ai-command") ||
+public/control-center/shared-context.js:186:    getLatestHandoffFromOperations(operations, "ai-command", "workflows") ||
+public/control-center/shared-context.js:192:export function setSharedHandoff(projectName, destinationPage, handoff) {
+public/control-center/shared-context.js:197:export function getSharedHandoff(projectName, destinationPage, operations, sourcePage = "") {

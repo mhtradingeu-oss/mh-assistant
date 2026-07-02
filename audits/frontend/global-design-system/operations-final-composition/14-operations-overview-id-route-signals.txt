@@ -1,0 +1,98 @@
+73:  Array.from(root.querySelectorAll("[data-ops-route]")).forEach((button) => {
+75:      const route = button.getAttribute("data-ops-route") || "home";
+76:      const label = button.getAttribute("data-ops-label") || "item";
+172:  if (pageKey === "task-center") {
+202:  if (pageKey === "queue-center") {
+222:  if (pageKey === "job-monitor") {
+299:      route: "job-monitor"
+306:      route: "queue-center"
+313:      route: "job-monitor"
+320:      route: "notification-center"
+327:      route: "notification-center"
+355:      route: "notification-center"
+360:function renderExecutiveRuntimeStrip(context, options = {}) {
+380:          <button class="ops-runtime-signal" type="button" data-ops-route="${context.escapeHtml(signal.route)}" data-ops-label="${context.escapeHtml(signal.label)}">
+405:  return `<button class="btn btn-secondary btn-sm" type="button" data-ops-route="${escapeHtml(route)}" data-ops-label="${escapeHtml(asString(item?.title || item?.name || label))}">${escapeHtml(label)}</button>`;
+471:        <button class="btn btn-secondary" type="button" id="taskCenterCopyHandoffBtn">Copy Handoff Summary</button>
+472:        <button class="btn btn-ghost" type="button" data-ops-ai-open>Open AI Workspace for Review</button>
+517:    <section class="page is-active" data-page="task-center">
+518:      <div class="ops-shell ops-workspace mhos-clean-root mhos-clean-shell">
+536:            <button class="btn btn-secondary std-context-btn" type="button" id="taskCenterRefreshBtn">Refresh</button>
+540:        ${renderExecutiveRuntimeStrip(context, {
+644:                <button class="btn btn-primary" type="button" id="taskCenterRefreshBtnRail">Refresh Task Center</button>
+646:                <button class="btn btn-secondary" type="button" id="taskCenterCopySummaryBtn">Copy Selected Task Summary</button>
+649:                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Update status (disabled: future mutation safety pass)</button>
+650:                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Reassign owner (disabled: future mutation safety pass)</button>
+651:                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Change priority (disabled: future mutation safety pass)</button>
+652:                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Update due date (disabled: future mutation safety pass)</button>
+653:                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Delete task (disabled: future mutation safety pass)</button>
+666:                <button class="btn btn-secondary" type="button" data-ops-ai-open>Open AI: Review Task Context</button>
+670:                  <button class="quick-action-btn" type="button" data-ops-ai-prompt="${index}">
+717:  const prompts = buildOpsAssistantPrompts("task-center", projectName, selectedItem, titleCase(session.focus || "all"));
+718:  const incomingHandoff = getSharedHandoff(projectName, "task-center", ops);
+888:    <section class="page is-active" data-page="queue-center">
+889:      <div class="ops-shell ops-workspace mhos-clean-root mhos-clean-shell">
+907:            <button class="btn btn-secondary std-context-btn" type="button" id="queueCenterRefreshBtnHeader">Refresh</button>
+911:        ${renderExecutiveRuntimeStrip(context, {
+991:                <button class="btn btn-primary" type="button" id="queueCenterRefreshBtn">Refresh Queue Center</button>
+1003:                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Retry item (disabled: future mutation safety pass)</button>
+1004:                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Approve item (disabled: Governance/Publishing-owned)</button>
+1005:                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Publish item (disabled: Publishing-owned and Governance-gated)</button>
+1006:                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Remove item (disabled: future destructive mutation safety pass)</button>
+1019:                <button class="btn btn-secondary" type="button" data-ops-ai-open>Open AI: Review Queue Context</button>
+1023:                  <button class="quick-action-btn" type="button" data-ops-ai-prompt="${index}">
+1061:  const prompts = buildOpsAssistantPrompts("queue-center", projectName, selectedItem, titleCase(session.focus || "all queues"));
+1179:    <section class="page is-active" data-page="job-monitor">
+1180:      <div class="ops-shell ops-workspace mhos-clean-root mhos-clean-shell">
+1197:            <button class="btn btn-secondary std-context-btn" type="button" id="jobMonitorRefreshBtnHeader">Refresh</button>
+1201:        ${renderExecutiveRuntimeStrip(context, {
+1281:                <button class="btn btn-primary" type="button" id="jobMonitorRefreshBtn">Refresh Job Monitor</button>
+1298:                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Retry job (disabled: future mutation safety pass)</button>
+1299:                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Cancel job (disabled: future destructive mutation safety pass)</button>
+1300:                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Rerun job (disabled: backend worker-control safety pass)</button>
+1301:                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Delete job (disabled: future destructive mutation safety pass)</button>
+1314:                <button class="btn btn-secondary" type="button" data-ops-ai-open>Open AI: Review Job Context</button>
+1318:                  <button class="quick-action-btn" type="button" data-ops-ai-prompt="${index}">
+1355:  const prompts = buildOpsAssistantPrompts("job-monitor", projectName, selectedItem, titleCase(session.focus || "all jobs"));
+1485:      <button class="btn btn-secondary" type="button" data-governance-action="refresh">Refresh Governance</button>
+1486:      <button class="btn btn-primary" type="button" data-governance-decision="approved" data-approval-id="${escapeHtml(approvalId)}">Approve</button>
+1487:      <button class="btn btn-secondary" type="button" data-governance-decision="rejected" data-approval-id="${escapeHtml(approvalId)}">Reject</button>
+1488:      <button class="btn btn-secondary" type="button" data-governance-decision="changes_requested" data-approval-id="${escapeHtml(approvalId)}">Request Changes</button>
+1489:      <button class="btn btn-secondary" type="button" data-governance-decision="escalated" data-approval-id="${escapeHtml(approvalId)}">Escalate</button>
+1556:  const prompts = buildOpsAssistantPrompts("notification-center", projectName, selectedItem, titleCase(session.focus || "all"));
+1601:    <section class="page is-active" data-page="notification-center">
+1602:      <div class="ops-shell ops-workspace mhos-clean-root mhos-clean-shell">
+1619:            <button class="btn btn-secondary std-context-btn" type="button" id="notificationCenterRefreshBtnHeader">Refresh</button>
+1623:        ${renderExecutiveRuntimeStrip(context, {
+1702:                <button class="btn btn-primary" type="button" id="notificationCenterRefreshBtn">Refresh Notification Center</button>
+1704:                ${selectedItem?.notification_id ? `<button class="btn btn-secondary" type="button" data-mark-read="${escapeHtml(selectedItem.notification_id)}" title="Updates notification read-state only. Does not acknowledge, resolve, dismiss, delete, send, approve, publish, or execute.">Mark Read (read-state only)</button>` : ""}
+1722:                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Acknowledge notification (disabled: future lifecycle mutation safety pass)</button>
+1723:                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Resolve notification (disabled: future incident-resolution safety pass)</button>
+1724:                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Dismiss notification (disabled: future visibility mutation safety pass)</button>
+1725:                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Delete notification (disabled: future destructive mutation safety pass)</button>
+1738:                <button class="btn btn-secondary" type="button" data-ops-ai-open>Open AI: Review Notification Context</button>
+1742:                  <button class="quick-action-btn" type="button" data-ops-ai-prompt="${index}">
+1858:          actor: "notification-center",
+1936:  id: "task-center",
+1943:  template: `<section class="page is-active" data-page="task-center"><div class="ops-shell"></div></section>`,
+1971:  id: "queue-center",
+1978:  template: `<section class="page is-active" data-page="queue-center"><div class="ops-shell"></div></section>`,
+2019:  id: "job-monitor",
+2026:  template: `<section class="page is-active" data-page="job-monitor"><div class="ops-shell"></div></section>`,
+2067:  id: "notification-center",
+2074:  template: `<section class="page is-active" data-page="notification-center"><div class="ops-shell"></div></section>`,
+2115:  const root = document.querySelector('[data-page="operations-centers"] .ops-shell');
+2129:      route: "task-center",
+2137:      route: "queue-center",
+2145:      route: "job-monitor",
+2153:      route: "notification-center",
+2163:    <section class="page is-active" data-page="operations-centers">
+2179:        ${renderExecutiveRuntimeStrip(context, {
+2205:                      <button class="btn btn-secondary" type="button" data-route="${context.escapeHtml(center.route)}">
+2225:                <button class="btn btn-secondary" type="button" data-route="ai-command">Open AI Team</button>
+2226:                <button class="btn btn-ghost" type="button" data-route="workflows">Open Workflows</button>
+2239:                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Planned disabled: create task from draft — future task mutation safety pass</button>
+2240:                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Planned disabled: execute workflow — future workflow execution safety pass</button>
+2241:                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Planned disabled: acknowledge signal — future notification lifecycle mutation safety pass</button>
+2254:  id: "operations-centers",
+2261:  template: `<section class="page is-active" data-page="operations-centers"><div class="ops-shell"></div></section>`,

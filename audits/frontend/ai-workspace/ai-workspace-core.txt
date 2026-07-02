@@ -1,0 +1,521 @@
+	return {
+		title: "SEO & traffic briefing",
+		summary: seo.summary?.impressions != null
+			? `${formatCompactNumber(seo.summary.impressions)} impressions tracked. SEO lane is ready for prioritization.`
+			: "SEO visibility not live — connect Search Console to unlock guidance.",
+		findings: [
+			topQuery ? `Top query: ${extractTopMessage(topQuery)} with ${formatCompactNumber(topQuery.clicks)} clicks.` : "No top query data yet.",
+			lowCtr ? `CTR opportunity: ${extractTopMessage(lowCtr)} has visibility but weak click-through.` : "No low-CTR list yet.",
+			weakPage ? `Weak landing page: ${extractTopMessage(weakPage)}.` : "No weak page signal yet.",
+			website.summary?.sessions != null ? `Website traffic: ${formatCompactNumber(website.summary.sessions)} sessions tracked.` : "Website sessions not measured yet."
+		],
+		recommendations: [
+			lowCtr ? `Improve title and SERP message for ${extractTopMessage(lowCtr)}.` : "Connect Search Console to unlock CTR analysis.",
+			weakPage ? `Tighten intent match and CTA on ${extractTopMessage(weakPage)}.` : "Review page titles and meta descriptions on priority pages.",
+			aiContext.recommendations.find((item) => item.domain === "seo")?.action || ""
+		].filter(Boolean),
+		nextActions: [
+			topQuery ? `Expand content around ${extractTopMessage(topQuery)}.` : "Reconnect Search Console before making SEO roadmap decisions.",
+			lowCtr ? `Rewrite metadata for ${extractTopMessage(lowCtr)}.` : "Audit page titles on highest-priority pages.",
+			"Review top landing pages for stronger offer clarity and conversion flow."
+		],
+		routeSuggestions: [
+			routeSuggestion("Insights", "insights", "Review search and website performance together."),
+			routeSuggestion("Integrations", "integrations", "Reconnect GA4 or Search Console."),
+			routeSuggestion("Setup", "setup", "Refine positioning if traffic signal is weak or misaligned.")
+		],
+		missingData: buildMissingDataNotes(aiContext, "seo")
+	};
+}
+
+function buildAdsResponse(aiContext) {
+	const paid = aiContext.paid;
+	const bestCampaign = asArray(paid.best_campaigns)[0];
+	const weakCampaign = asArray(paid.weak_campaigns)[0];
+	const bestCreative = asArray(paid.best_creatives)[0];
+	return {
+		title: "Paid performance briefing",
+		summary: paid.summary?.spend != null
+			? `Paid media live with ${formatCurrency(paid.summary.spend, aiContext.currency)} tracked spend.`
+			: "Paid reporting not connected — connect Meta Ads, Google Ads, or TikTok Ads.",
+		findings: [
+			bestCampaign ? `Best campaign: ${extractTopMessage(bestCampaign)}.` : "No winning campaign measured yet.",
+			weakCampaign ? `Weak campaign: ${extractTopMessage(weakCampaign)}.` : "No weak campaign list yet.",
+			bestCreative ? `Best creative: ${extractTopMessage(bestCreative)}.` : "No creative breakdown yet.",
+			paid.summary?.roas != null ? `Current ROAS: ${Number(paid.summary.roas).toFixed(2)}x.` : "ROAS not available yet."
+		],
+		recommendations: [
+			bestCampaign ? `Scale ${extractTopMessage(bestCampaign)} only after validating strong CTR and ROAS.` : "Connect paid platforms before making scale decisions.",
+			weakCampaign ? `Pause or refresh ${extractTopMessage(weakCampaign)} if weak pattern continues.` : null,
+			aiContext.recommendations.find((item) => item.domain === "paid")?.action || ""
+		].filter(Boolean),
+		nextActions: [
+			bestCreative ? `Reuse the creative pattern behind ${extractTopMessage(bestCreative)}.` : "Sync paid data before scaling any creative.",
+			weakCampaign ? `Rebuild hook and CTA for ${extractTopMessage(weakCampaign)}.` : "Audit campaign naming and creative mapping.",
+			"Tie paid decisions to conversion and revenue signal — not just clicks."
+		],
+		routeSuggestions: [
+			routeSuggestion("Ads Manager", "ads-manager", "Review pacing, creative mapping, and paid operating view."),
+			routeSuggestion("Integrations", "integrations", "Connect or reconnect paid reporting platforms."),
+			routeSuggestion("Insights", "insights", "Compare paid vs organic and website results.")
+		],
+		missingData: buildMissingDataNotes(aiContext, "ads")
+	};
+}
+
+function buildResearchResponse(aiContext) {
+	return {
+		title: "Research & evidence briefing",
+		summary: "The system has enough operating context to highlight where better evidence would improve decision quality.",
+		findings: [
+			aiContext.missingIntegrations.length ? `Missing intelligence: ${aiContext.missingIntegrations.map((item) => item.label).join(", ")}.` : "Main intelligence lanes are structurally connected.",
+			aiContext.criticalGaps.length ? `Critical gaps affecting research quality: ${aiContext.criticalGaps.slice(0, 4).map(normalizeActionLabel).join(", ")}.` : "No major setup gaps blocking research quality.",
+			aiContext.learningPatterns.best_topics?.label ? `Current system learning: ${aiContext.learningPatterns.best_topics.label}.` : "Learning engine needs more live data."
+		].filter(Boolean),
+		recommendations: [
+			"Use the missing intelligence list as the research roadmap for what the system cannot see clearly.",
+			"Validate audience-language fit and offer clarity before expanding execution volume.",
+			"Prioritize integrations that unlock attribution and performance evidence over vanity metrics."
+		],
+		nextActions: [
+			"Review Setup and tighten goals, audience, competitor, and market assumptions.",
+			"Reconnect missing analytics, SEO, and paid feeds to improve evidence quality.",
+			"Use Insights to identify where the recommendation stack is still blind."
+		],
+		routeSuggestions: [
+			routeSuggestion("Setup", "setup", "Strengthen project assumptions, goals, and audience context."),
+			routeSuggestion("Integrations", "integrations", "Increase data coverage and reduce blind spots."),
+			routeSuggestion("Insights", "insights", "See where evidence is strong and where it is thin.")
+		],
+		missingData: [
+			...buildMissingDataNotes(aiContext, "seo"),
+			...buildMissingDataNotes(aiContext, "ads"),
+			...buildMissingDataNotes(aiContext, "content")
+		]
+	};
+}
+
+function buildOperationsTaskBlock(aiContext, message) {
+	const query = asString(message).toLowerCase();
+	if (/launch.*campaign|new campaign/.test(query)) {
+		return { title: "Campaign launch task block", owner: "Campaign Studio", steps: ["Define the campaign objective, audience, and offer.", "Choose channels and budget based on current intelligence.", "List required assets and publishing dependencies before launch."] };
+	}
+	if (/content plan|7-day/.test(query)) {
+		return { title: "Content plan task block", owner: "Content Studio", steps: ["Use the strongest content pattern as the starting template.", "Map posts by platform, hook, format, and CTA.", "Route approved items into Publishing for scheduling."] };
+	}
+	if (/weak post|improve content/.test(query)) {
+		return { title: "Content repair task block", owner: "Content Studio", steps: ["Select the weakest items from Insights.", "Rewrite hooks, sharpen CTAs, and adjust format-platform fit.", "Republish only after updated versions are approved."] };
+	}
+	if (/reconnect|missing tools|missing integrations/.test(query)) {
+		return { title: "Integration recovery task block", owner: "Integrations", steps: ["Reconnect critical analytics and performance feeds first.", "Test each integration after reconnect and sync current data.", "Return to Insights to confirm coverage improves."] };
+	}
+	return { title: "Execution task block", owner: "Workflows", steps: ["Confirm the goal and required output.", "Identify which workspace owns the work.", "Move into the correct page and execute the first step."] };
+}
+
+function buildOperationsResponse(aiContext, message) {
+	const query = asString(message).toLowerCase();
+	const taskBlock = buildOperationsTaskBlock(aiContext, message);
+	const routeSuggestions = [];
+	if (/campaign/.test(query)) routeSuggestions.push(routeSuggestion("Campaign Studio", "campaign-studio", "Turn this into a structured launch plan."));
+	if (/content|post/.test(query)) {
+		routeSuggestions.push(routeSuggestion("Content Studio", "content-studio", "Draft, rewrite, or prepare the requested content outputs."));
+		routeSuggestions.push(routeSuggestion("Publishing", "publishing", "Schedule or approve if the next step is publishing."));
+	}
+	if (/reconnect|connect|integration|tool|sync/.test(query)) routeSuggestions.push(routeSuggestion("Integrations", "integrations", "Reconnect data sources and restore intelligence coverage."));
+	if (/ads|campaign scale|roas|creative/.test(query)) routeSuggestions.push(routeSuggestion("Ads Manager", "ads-manager", "Review live paid performance and action the next media move."));
+	if (!routeSuggestions.length) routeSuggestions.push(routeSuggestion("Workflows", "workflows", "Use Workflows when the task spans multiple execution areas."));
+	return {
+		title: "Operations routing brief",
+		summary: "This request is best handled as a structured workflow — moving into the right workspace gets results faster than chat alone.",
+		findings: [
+			aiContext.criticalGaps.length ? `Unresolved critical gaps: ${aiContext.criticalGaps.slice(0, 3).map(normalizeActionLabel).join(", ")}.` : "No critical gap is blocking this operation.",
+			aiContext.missingIntegrations.length ? "Intelligence coverage gaps may reduce execution quality." : "Core intelligence is available for routing."
+		],
+		recommendations: [
+			"Move into the correct workspace rather than managing the whole flow from chat.",
+			aiContext.recommendations[0]?.action || "Use the current recommendation stack to choose the first high-impact step."
+		].filter(Boolean),
+		nextActions: taskBlock.steps,
+		routeSuggestions,
+		taskBlock,
+		missingData: buildMissingDataNotes(aiContext, "content")
+	};
+}
+
+function buildResponseForMode(aiContext, classified, message) {
+	switch (classified.resolvedModeId) {
+		case "writer":
+		case "designer":
+		case "media":
+			return buildContentResponse(aiContext);
+		case "analyst":
+			return buildSeoResponse(aiContext);
+		case "ads":
+			return buildAdsResponse(aiContext);
+		case "researcher":
+			return buildResearchResponse(aiContext);
+		case "strategist":
+			return buildOperationsResponse(aiContext, message);
+		case "operations":
+		default:
+			return classified.actionRouting
+				? buildOperationsResponse(aiContext, message)
+				: buildExecutiveResponse(aiContext);
+	}
+}
+
+// ============================================================
+//  INTELLIGENCE LOADER
+// ============================================================
+
+async function ensureIntelligenceLoaded({
+	projectName,
+	session,
+	getState,
+	reloadProjectData,
+	fetchProjectInsights,
+	fetchProjectLearning,
+	rerender
+}) {
+	if (!projectName) {
+		session.intelligence = { ...session.intelligence, status: "error", error: "Select a project to load AI intelligence." };
+		return;
+	}
+	const current = session.intelligence;
+	const freshEnough = current.status === "ready" && current.project === projectName && current.loadedAt && (Date.now() - Date.parse(current.loadedAt)) < 1000 * 60 * 3;
+	if (freshEnough) return;
+	if (current.loadingPromise) return current.loadingPromise;
+
+	const state = getState();
+	const needsDashboard = !state.data.overview || !state.data.readiness || !state.data.integrations || !state.data.activity;
+
+	session.intelligence = {
+		...current,
+		project: projectName,
+		status: "loading",
+		error: "",
+		loadingPromise: (async () => {
+			try {
+				if (needsDashboard) await reloadProjectData(projectName);
+				const [insightsResult, learningResult] = await Promise.allSettled([
+					fetchProjectInsights(projectName),
+					fetchProjectLearning(projectName)
+				]);
+				const insightsMissing = insightsResult.status === "rejected" && isMissingIntelligenceError(insightsResult.reason);
+				const learningMissing = learningResult.status === "rejected" && isMissingIntelligenceError(learningResult.reason);
+				const intelligenceErrors = [
+					insightsResult.status === "rejected" && !insightsMissing ? insightsResult.reason?.message : "",
+					learningResult.status === "rejected" && !learningMissing ? learningResult.reason?.message : ""
+				].filter(Boolean);
+				session.intelligence = {
+					project: projectName,
+					status: "ready",
+					dashboard: getState().data,
+					insights: insightsResult.status === "fulfilled" ? insightsResult.value : (insightsMissing ? { project: projectName, generated_at: nowIso(), data_coverage: {} } : null),
+					learning: learningResult.status === "fulfilled" ? learningResult.value : (learningMissing ? { project: projectName, generated_at: nowIso(), learning_patterns: {}, recommendations: [] } : null),
+					error: intelligenceErrors[0] || "",
+					loadedAt: nowIso(),
+					loadingPromise: null
+				};
+			} catch (error) {
+				session.intelligence = { ...session.intelligence, project: projectName, status: "error", error: error.message || "Failed to load live intelligence", loadingPromise: null };
+			} finally {
+				rerender();
+			}
+		})()
+	};
+
+	rerender();
+	return session.intelligence.loadingPromise;
+}
+
+// ============================================================
+//  COMMAND SUBMISSION
+// ============================================================
+
+function syncAiWorkflowBridge({ projectName, modeId, command, response }) {
+	setSharedAiDraft(projectName, {
+		projectName: projectName || "",
+		modeId: modeId || "",
+		lastCommand: asString(command),
+		lastResponseTitle: asString(response?.title),
+		routeSuggestions: asArray(response?.routeSuggestions),
+		updatedAt: nowIso()
+	});
+}
+
+function applyDurableAiHandoff(projectName, operations, session, consumeProjectHandoff, showMessage) {
+	const handoff = getSharedHandoff(projectName, "ai-command", operations);
+	const handoffId = asString(handoff?.id);
+	if (!handoffId || handoffId === asString(session.lastAppliedHandoffId)) return;
+
+	const payload = asObject(handoff?.payload);
+	const draftContext = asObject(payload.draft_context);
+	const prompt = asString(payload.prompt);
+	if (draftContext.modeId) session.modeId = draftContext.modeId;
+	if (prompt) session.draftMessage = prompt;
+
+	if (draftContext.projectName || prompt) {
+		setSharedAiDraft(projectName, {
+			projectName,
+			modeId: draftContext.modeId || session.modeId,
+			lastCommand: prompt || draftContext.lastCommand || "",
+			lastResponseTitle: draftContext.lastResponseTitle || "",
+			routeSuggestions: asArray(draftContext.routeSuggestions)
+		});
+	}
+
+	session.lastAppliedHandoffId = handoffId;
+	consumeProjectHandoff?.(projectName, handoffId, { actor: "mh-assistant" }).catch((error) => {
+		console.warn("Failed to consume AI handoff:", error.message);
+	});
+	showMessage?.("AI Command restored context from the shared backbone.");
+}
+
+async function submitDurableCommand({
+	projectName,
+	aiContext,
+	session,
+	command,
+	modeId,
+	source,
+	executeProjectAiCommand,
+	reloadProjectData
+}) {
+	const cleanCommand = asString(command).trim();
+	if (!cleanCommand) return { accepted: false, failed: false };
+	if (typeof executeProjectAiCommand !== "function") throw new Error("AI command service is unavailable.");
+
+	let result = null;
+	let response = {};
+	let resolvedModeId = modeId || session.modeId;
+	let commandId = "";
+
+	try {
+		result = await executeProjectAiCommand(projectName, {
+			command: cleanCommand,
+			mode_id: modeId || session.modeId,
+			source,
+			actor: "mh-assistant",
+			asset_context: {
+				categories: aiContext.assetCategories,
+				approved_assets: aiContext.approvedAssets,
+				blockers: aiContext.assetBlockers
+			}
+		});
+		response = asObject(result?.response);
+		const classification = asObject(result?.command?.classification);
+		resolvedModeId = asString(classification.resolvedModeId) || asString(result?.command?.mode_id) || modeId || session.modeId;
+		commandId = asString(result?.command?.id);
+	} catch (error) {
+		const payload = asObject(error?.payload);
+		const payloadResponse = asObject(payload?.response);
+		const payloadCommand = asObject(payload?.command);
+		const failureReason = asString(payload?.error) || asString(payloadResponse?.error) || asString(error?.message) || "AI provider failed to return output.";
+		resolvedModeId = asString(payloadCommand?.mode_id) || modeId || session.modeId;
+		commandId = asString(payloadCommand?.id);
+		response = {
+			status: "failed",
+			title: "Command failed",
+			summary: failureReason,
+			findings: [failureReason],
+			nextActions: ["Check AI provider configuration and retry."],
+			routeSuggestions: [],
+			missingData: [],
+			error: failureReason
+		};
+	}
+
+	const createdAt = nowIso();
+	session.modeId = resolvedModeId;
+
+	session.messages.push({
+		id: `msg-user-${Date.now()}`,
+		role: "user",
+		modeId: resolvedModeId,
+		content: cleanCommand,
+		createdAt,
+		source
+	});
+
+	session.messages.push({
+		id: `msg-assistant-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+		role: "assistant",
+		modeId: resolvedModeId,
+		createdAt: asString(result?.command?.created_at) || nowIso(),
+		source: "durable-ai-response",
+		response
+	});
+
+	session.history.unshift({
+		id: commandId || `history-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+		modeId: resolvedModeId,
+		command: cleanCommand,
+		createdAt,
+		source,
+		responseTitle: response.title || (response.status === "failed" ? "Command failed" : ""),
+		failed: asString(response.status).toLowerCase() === "failed"
+	});
+	session.history = session.history.slice(0, 14);
+	session.draftMessage = "";
+
+	syncAiWorkflowBridge({ projectName: aiContext.projectName, modeId: resolvedModeId, command: cleanCommand, response });
+	await reloadProjectData?.(projectName);
+	return { accepted: true, failed: asString(response.status).toLowerCase() === "failed" };
+}
+
+// ============================================================
+//  RENDER: CONTROL ROOM HEADER
+// ============================================================
+
+function renderControlRoomHeader(aiContext, session, intelligenceStatus, escapeHtml) {
+	const projectLabel = aiContext.projectName || "No project selected";
+	const readinessLabel = aiContext.readinessScore != null ? `${aiContext.readinessScore}/100` : "--";
+	const coverageLabel = aiContext.coverageTotal > 0 ? `${aiContext.coveredCount}/${aiContext.coverageTotal}` : "--";
+
+	const intelDotClass = { ready: "ready", loading: "loading", error: "error", idle: "idle" }[intelligenceStatus] || "idle";
+	const intelLabel = { ready: "Live intelligence loaded", loading: "Loading intelligence…", error: "Intelligence limited", idle: "Waiting for intelligence" }[intelligenceStatus] || "Idle";
+
+
+	const caps = [];
+	if (aiContext.projectName) caps.push("Campaign planning");
+	if (aiContext.hasLiveIntelligence) caps.push("Performance analysis");
+	if (aiContext.recommendations.length) caps.push(`${aiContext.recommendations.length} recommendations ready`);
+	if (aiContext.topContent.length) caps.push("Content intelligence");
+	if (aiContext.paid?.summary?.spend != null) caps.push("Paid media briefing");
+	if (aiContext.seo?.summary?.impressions != null) caps.push("SEO analysis");
+	caps.push("Content generation", "Research & competitor analysis", "Execution routing");
+
+	return `
+		<div class="ctrl-room-header">
+			<div class="ctrl-room-header-top">
+				<div>
+					<div class="ctrl-room-eyebrow">AI Workspace</div>
+					<h2 class="ctrl-room-title">Control Room</h2>
+				</div>
+				<div style="display:flex;align-items:center;gap:12px;">
+					<span class="ctrl-intel-dot ${escapeHtml(intelDotClass)}"></span>
+					<span class="ctrl-intel-label">${escapeHtml(intelLabel)}</span>
+					<button id="ctrlRefreshBtn" class="ctrl-secondary-btn" type="button">Refresh intelligence</button>
+				</div>
+			</div>
+
+			<div class="ctrl-room-context-bar">
+				<div class="ctrl-room-ctx-chip">
+					<span>Project</span>
+					<strong>${escapeHtml(projectLabel)}</strong>
+				</div>
+				<div class="ctrl-room-ctx-chip">
+					<span>Readiness</span>
+					<strong>${escapeHtml(readinessLabel)}</strong>
+				</div>
+				<div class="ctrl-room-ctx-chip">
+					<span>Coverage</span>
+					<strong>${escapeHtml(coverageLabel)} connected</strong>
+				</div>
+				<div class="ctrl-room-ctx-chip">
+					<span>Campaign</span>
+					<strong>${escapeHtml(aiContext.campaign || "None")}</strong>
+				</div>
+				${aiContext.market ? `<div class="ctrl-room-ctx-chip"><span>Market</span><strong>${escapeHtml(aiContext.market)}</strong></div>` : ""}
+			</div>
+
+			<div class="ctrl-room-cap-row">
+				<span class="ctrl-cap-heading">What AI can do now</span>
+				<div class="ctrl-room-capability-bar">
+					${caps.slice(0, 8).map((cap) => `<span class="ctrl-room-cap-pill">${escapeHtml(cap)}</span>`).join("")}
+				</div>
+			</div>
+
+			${session.intelligence.error ? `<div class="ctrl-intel-error">${escapeHtml(session.intelligence.error)}</div>` : ""}
+		</div>
+	`;
+}
+
+// ============================================================
+//  RENDER: TEAM SELECTOR
+// ============================================================
+
+function renderTeamSelector(session, escapeHtml) {
+	return `
+		<div>
+			<div class="ctrl-room-section-label">Choose your AI specialist</div>
+			<div class="ctrl-room-team">
+				${MODE_DEFS.map((agent) => `
+					<button
+						class="ctrl-team-card${agent.id === session.modeId ? " is-active" : ""}"
+						type="button"
+						data-ctrl-mode="${escapeHtml(agent.id)}"
+						title="${escapeHtml(agent.summary)}"
+					>
+						<span class="ctrl-team-icon">${agent.icon}</span>
+						<span class="ctrl-team-name">${escapeHtml(agent.label)}</span>
+						${agent.id === session.modeId ? `<span class="ctrl-team-active-dot"></span>` : ""}
+					</button>
+				`).join("")}
+			</div>
+		</div>
+	`;
+}
+
+// ============================================================
+//  RENDER: COMMAND COMPOSER
+// ============================================================
+
+function renderCommandComposer(session, aiContext, escapeHtml) {
+	const mode = getModeMeta(session.modeId);
+	const projectLabel = aiContext.projectName || "this project";
+	const isStructured = session.taskMode === "structured";
+
+	const productOptions = [
+		...new Set(aiContext.assetCategories.map((cat) => cat.label || cat.asset_type).filter(Boolean).slice(0, 8))
+	];
+	const channelOptions = ["Instagram", "TikTok", "Facebook", "YouTube", "Email", "Google Ads", "Meta Ads", "LinkedIn"];
+
+	return `
+		<div class="ctrl-composer-card">
+			<div class="ctrl-composer-head">
+				<div style="display:flex;align-items:center;gap:8px;">
+					<span style="font-size:18px;">${mode.icon}</span>
+					<h3 style="margin:0;font-size:14px;font-weight:600;color:var(--color-text-0);">${escapeHtml(mode.label)} — Command Composer</h3>
+				</div>
+				<div class="ctrl-mode-toggle">
+					<button class="ctrl-mode-btn${!isStructured ? " is-active" : ""}" type="button" data-ctrl-task-toggle="free">Free text</button>
+					<button class="ctrl-mode-btn${isStructured ? " is-active" : ""}" type="button" data-ctrl-task-toggle="structured">Task builder</button>
+				</div>
+			</div>
+			<div class="ctrl-composer-body">
+				<textarea
+					id="ctrlComposerInput"
+					class="ctrl-composer-textarea"
+					rows="4"
+					placeholder="Ask ${escapeHtml(mode.label)} anything — what to do next, what content is working, which campaign to scale, or where to route the next action…"
+				>${escapeHtml(session.draftMessage)}</textarea>
+
+				<div id="ctrlTaskFields" class="ctrl-task-fields${!isStructured ? " is-hidden" : ""}">
+					<div class="ctrl-task-fields-label">Build a structured task</div>
+					<div class="ctrl-task-field">
+						<label>Task type</label>
+						<select id="ctrlTaskType" class="ctrl-task-select">
+							<option value="launch"${session.taskType === "launch" ? " selected" : ""}>🚀 Launch Campaign</option>
+							<option value="content"${session.taskType === "content" ? " selected" : ""}>✍️ Generate Content</option>
+							<option value="analyze"${session.taskType === "analyze" ? " selected" : ""}>📊 Analyze Performance</option>
+							<option value="fix"${session.taskType === "fix" ? " selected" : ""}>🔧 Fix Readiness</option>
+						</select>
+					</div>
+					<div class="ctrl-task-field">
+						<label>Product / focus area</label>
+						<select id="ctrlProductSelect" class="ctrl-task-select">
+							<option value="">— whole project —</option>
+							${productOptions.map((opt) => `<option value="${escapeHtml(opt)}"${session.taskProduct === opt ? " selected" : ""}>${escapeHtml(opt)}</option>`).join("")}
+						</select>
+					</div>
+					<div class="ctrl-task-field">
+						<label>Channel</label>
+						<select id="ctrlChannelSelect" class="ctrl-task-select">
+							<option value="">— all channels —</option>
+							${channelOptions.map((ch) => `<option value="${escapeHtml(ch)}"${session.taskChannel === ch ? " selected" : ""}>${escapeHtml(ch)}</option>`).join("")}
+						</select>
+					</div>
+					<button type="button" id="ctrlBuildTaskBtn" class="ctrl-build-task-btn">Build command from task →</button>
+				</div>

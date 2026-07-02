@@ -1,0 +1,1812 @@
+# T112 — Workflows Runtime Authority Audit
+
+## Status
+Audit-only. No production files changed.
+
+## Scope
+Focused runtime authority review of `public/control-center/pages/workflows.js`.
+
+## Why Workflows Is Next
+After Operations Centers was closed, Workflows is the next high-risk active surface from the remaining T88 ranking.
+
+Workflows may contain workflow planning, automation, job/task routing, execution-like language, handoffs, AI recommendations, and possible backend mutations.
+
+## File Summary
+- File: `public/control-center/pages/workflows.js`
+- Lines: 2395
+- Imports: 4
+- Render writes: 1
+- Event bindings: 38
+- Backend/API signals: 584
+- Workflow/execution signals: 611
+- Mutation signals: 291
+- Handoff signals: 86
+- AI signals: 271
+- Confirmation signals: 7
+- Access-key/credential signals: 0
+- Save/storage signals: 108
+- Navigation signals: 56
+- Disabled/read-only/draft/guard signals: 126
+- Risky terms: 812
+
+## Initial Risk Notes
+- Workflows contains workflow/execution/automation signals. Exact runtime actions must be classified.
+- Workflows contains backend/API-like signals. Need separate read-only planning from durable workflow/job/task mutations.
+- Confirmation dialogs exist and must be mapped to exact authority-sensitive actions.
+
+## Imports
+- L1: `import {`
+- L7: `import {`
+- L13: `import { getGlobalNextBestAction } from "../system-intelligence.js";`
+- L14: `import {`
+
+## Render Writes
+- L1974: `root.innerHTML = \``
+
+## Event Bindings
+- L1118: `window.addEventListener("mh:submit-workflow", async (event) => {`
+- L1253: `input.oninput = () => {`
+- L1263: `workflowTypeSelect.onchange = () => {`
+- L1273: `saveDraftBtn.onclick = () => {`
+- L1282: `clearDraftBtn.onclick = () => {`
+- L1294: `loadAiStateBtn.onclick = () => {`
+- L1442: `if (runBtn) runBtn.onclick = () => runWorkflow(session.selectedWorkflowId);`
+- L1444: `if (runBtnMain) runBtnMain.onclick = () => runWorkflow(session.selectedWorkflowId);`
+- L1448: `startRecommendedBtn.onclick = () => {`
+- L1456: `saveRecommendedBtn.onclick = () => {`
+- L1468: `sendRecommendedAiBtn.onclick = () => {`
+- L1487: `button.onclick = () => runWorkflow(button.getAttribute("data-wf-catalog-run") || session.selectedWorkflowId);`
+- L1491: `button.onclick = () => {`
+- L1501: `button.onclick = () => {`
+- L1521: `pushAiBtn.onclick = () => {`
+- L1537: `if (pushAiSecondaryBtn) pushAiSecondaryBtn.onclick = pushAiBtn?.onclick || null;`
+- L1541: `saveTaskBtn.onclick = () => {`
+- L1577: `recommendBtn.onclick = () => {`
+- L1613: `customBtn.onclick = () => {`
+- L1649: `fullAutomationBtn.onclick = async () => {`
+- L1678: `stepAutomationBtn.onclick = async () => {`
+- L1711: `autoStartBtn.onclick = async () => {`
+- L1738: `autoPauseBtn.onclick = () => {`
+- L1746: `autoResumeBtn.onclick = async () => {`
+- L1761: `autoStopBtn.onclick = () => {`
+- L1769: `autoApproveBtn.onclick = async () => {`
+- L1784: `autoSkipBtn.onclick = async () => {`
+- L2215: `workflowType.onchange = () => {`
+- L2232: `input.oninput = () => {`
+- L2238: `button.onclick = () => {`
+- L2305: `if (heroPrepareBtn) heroPrepareBtn.onclick = prepareCurrentWorkflow;`
+- L2308: `button.onclick = openAiWorkspace;`
+- L2312: `if (prepareBtn) prepareBtn.onclick = prepareCurrentWorkflow;`
+- L2315: `if (aiBtn) aiBtn.onclick = openAiWorkspace;`
+- L2319: `campaignBtn.onclick = () => {`
+- L2329: `tasksBtn.onclick = () => {`
+- L2353: `button.onclick = () => {`
+- L2382: `techBtn.onclick = () => {`
+
+## Backend / API Signals
+- L9: `getSharedHandoff,`
+- L11: `setSharedHandoff`
+- L15: `buildAutomationPlan,`
+- L26: `runAutomationPlan`
+- L27: `} from "../automation-engine.js";`
+- L29: `const WORKFLOW_CATALOG = [`
+- L33: `purpose: "Build a launch-ready review sequence across campaign, content, and distribution handoffs.",`
+- L47: `id: "build-media-job",`
+- L48: `title: "Build Media Job",`
+- L49: `purpose: "Prepare media production inputs, format guidance, and downstream handoff steps.",`
+- L57: `purpose: "Package final channel payloads, approval checks, and publishing queue dependencies.",`
+- L65: `purpose: "Summarize workflow state, results, blockers, and the next operational decision.",`
+- L81: `purpose: "Prioritize integration recovery actions that restore readiness and automation reliability.",`
+- L93: `"Automation",`
+- L97: `const WORKFLOW_ID_ALIASES = {`
+- L104: `const WORKFLOW_LOCAL_DRAFTS_KEY = "mh-workflow-local-drafts-v1";`
+- L106: `const workflowSessions = new Map();`
+- L107: `let lastWorkflowRenderContext = null;`
+- L108: `let workflowBridgeRegistered = false;`
+- L109: `let workflowAutoModeUnsubscribe = null;`
+- L110: `let workflowAutomationEnabled = false;`
+- L111: `const workflowAutomationState = {`
+- L188: `function getWorkflowDef(id) {`
+- L189: `return WORKFLOW_CATALOG.find((item) => item.id === id) || WORKFLOW_CATALOG[0];`
+- L198: `...asArray(activity.scheduled_jobs).map((job) => asString(job.channel)),`
+- L224: `return WORKFLOW_CATALOG.reduce((acc, workflow) => {`
+- L225: `acc[workflow.id] = createEmptyRunState();`
+- L231: `return WORKFLOW_CATALOG.reduce((acc, workflow) => {`
+- L232: `acc[workflow.id] = {`
+- L243: `String(operations?.workflows?.total_runs || 0),`
+- L244: `String(operations?.tasks?.total || 0)`
+- L251: `const raw = window.localStorage?.getItem(WORKFLOW_LOCAL_DRAFTS_KEY) || "{}";`
+- L262: `window.localStorage?.setItem(WORKFLOW_LOCAL_DRAFTS_KEY, JSON.stringify(map || {}));`
+- L271: `function saveLocalDraft(projectName, workflowId, payload) {`
+- L275: `projectDrafts[workflowId] = {`
+- L276: `...asObject(projectDrafts[workflowId]),`
+- L282: `return projectDrafts[workflowId];`
+- L288: `WORKFLOW_CATALOG.forEach((workflow) => {`
+- L289: `const draft = asObject(local[workflow.id]);`
+- L291: `session.inputsByWorkflow[workflow.id] = {`
+- L292: `...session.inputsByWorkflow[workflow.id],`
+- L296: `session.selectedWorkflowId = workflow.id;`
+- L305: `function persistWorkflowDraft(projectName, session, workflowId, hint, selected) {`
+- L306: `const saved = saveLocalDraft(projectName, workflowId, {`
+- L307: `inputs: asObject(session.inputsByWorkflow[workflowId]),`
+- L308: `workflowId,`
+- L316: `if (!workflowSessions.has(key)) {`
+- L317: `workflowSessions.set(key, {`
+- L318: `selectedWorkflowId: WORKFLOW_CATALOG[0].id,`
+- L319: `inputsByWorkflow: createInputsMap(defaults),`
+- L320: `runsByWorkflow: createRunsMap(),`
+- L325: `lastAppliedHandoffId: "",`
+- L338: `const session = workflowSessions.get(key);`
+- L339: `session.inputsByWorkflow = WORKFLOW_CATALOG.reduce((acc, workflow) => {`
+- L340: `acc[workflow.id] = {`
+- L342: `...asObject(session.inputsByWorkflow?.[workflow.id])`
+- L346: `session.runsByWorkflow = session.runsByWorkflow || createRunsMap();`
+- L350: `session.lastAppliedHandoffId = asString(session.lastAppliedHandoffId);`
+- L363: `const session = workflowSessions.get(key);`
+- L374: `asArray(operations?.workflows?.items).forEach((item) => {`
+- L375: `const sourceId = asString(item.workflow_id);`
+- L376: `const resolvedId = WORKFLOW_ID_ALIASES[sourceId] || sourceId;`
+- L398: `session.runsByWorkflow = nextRuns;`
+- L402: `function buildWorkflowContext(state, session) {`
+- L453: `const allRuns = Object.values(asObject(session.runsByWorkflow));`
+- L455: `total: WORKFLOW_CATALOG.length,`
+- L485: `function getBlockedRequirements(workflow, inputs, context) {`
+- L487: `const missingRequired = workflow.requiredInputs.filter((field) => !asString(inputs[field]).trim());`
+- L492: `if (workflow.id === "prepare-publishing-package" && context.missingAssets.length) {`
+- L496: `if (workflow.id === "generate-report" && context.missingIntegrations.length) {`
+- L500: `if (workflow.id === "fix-integrations" && !context.missingIntegrations.length) {`
+- L501: `blocked.push("No integration gaps detected. Use this workflow only if connectors are unstable.");`
+- L507: `function buildWorkflowPrompt(workflow, inputs, context) {`
+- L509: `\`Workflow: ${workflow.title}\`,`
+- L510: `\`Purpose: ${workflow.purpose}\`,`
+- L522: `function buildFallbackOutput(workflow, inputs, context) {`
+- L525: `const blockedRequirements = getBlockedRequirements(workflow, inputs, context);`
+- L528: `title: \`${workflow.title} review package\`,`
+- L529: `summary: \`Prepared ${workflow.title.toLowerCase()} for ${inputs.project || context.projectName || "the current project"} with ${inputs.goal || "a defined goal"}.\`,`
+- L532: `\`Open ${titleCase(workflow.routeHint)} for review handoff.\`,`
+- L533: `blockedRequirements.length ? "Resolve blockers before any destination-owned execution." : "Proceed to review handoff."`
+- L536: `requiredInputs: workflow.requiredInputs.map(titleCase),`
+- L539: `label: \`Open ${titleCase(workflow.routeHint)}\`,`
+- L540: `route: workflow.routeHint,`
+- L541: `reason: \`Continue review in ${titleCase(workflow.routeHint)}.\``
+- L546: `reason: "Refine this workflow package with AI reasoning."`
+- L552: `function mapGlobalActionToWorkflowId(globalAction) {`
+- L557: `if (target === "media-studio") return "build-media-job";`
+- L563: `const mappedWorkflowId = mapGlobalActionToWorkflowId(globalAction);`
+- L564: `if (mappedWorkflowId) {`
+- L565: `const mapped = getWorkflowDef(mappedWorkflowId);`
+- L567: `workflowId: mapped.id,`
+- L570: `chips: ["Launch readiness", "Automation", "Campaign"],`
+- L577: `workflowId: "fix-integrations",`
+- L579: `reason: \`${context.missingIntegrations.length} integration gap${context.missingIntegrations.length === 1 ? "" : "s"} can block automation and report quality.\`,`
+- L580: `chips: ["Launch readiness", "Automation", "Reports"],`
+- L581: `prompt: "Build a prioritized integration recovery workflow with dependency order and expected readiness impact."`
+- L587: `workflowId: "prepare-publishing-package",`
+- L588: `title: "Prepare publishing package handoff before distribution",`
+- L591: `prompt: "Prepare a publishing package checklist with missing assets and approval dependencies."`
+- L597: `workflowId: "launch-campaign",`
+- L598: `title: "Define launch campaign workflow",`
+- L600: `chips: ["Campaign", "Launch readiness", "Automation"],`
+- L601: `prompt: "Create a launch campaign workflow with owner sequence and execution gates."`
+- L605: `const selected = getWorkflowDef(session.selectedWorkflowId);`
+- L607: `workflowId: selected.id,`
+- L609: `reason: "Current context is sufficient to prepare the selected workflow review package now.",`
+- L611: `prompt: \`Refine ${selected.title.toLowerCase()} for reviewed handoff with explicit dependencies and next actions.\``
+- L623: `<div class="wfexec-head"><h3>Workflow Overview</h3></div>`
+- L625: `<article class="wfexec-stat"><span>Total workflows</span><strong>${escapeHtml(String(metrics.total))}</strong></article>`
+- L626: `<article class="wfexec-stat"><span>Ready workflows</span><strong>${escapeHtml(String(metrics.ready))}</strong></article>`
+- L627: `<article class="wfexec-stat"><span>Draft workflows</span><strong>${escapeHtml(String(metrics.draft))}</strong></article>`
+- L644: `<button id="wfexecStartRecommendedBtn" class="wfexec-btn wfexec-btn-primary" type="button">Start Workflow</button>`
+- L652: `function renderAutomationSection(fullPlan, fixPlan, autoMode, escapeHtml) {`
+- L663: `const gate = asObject(autoMode?.approvalRequiredStep);`
+- L667: `<div class="wfexec-head"><h3>Automation Layer</h3></div>`
+- L669: `Safe guided preparation only: navigate, create draft, generate prompt, and create review handoff.`
+- L694: `: \`<div class="wfexec-empty">No safe automation steps are available.</div>\``
+- L698: `<button id="workflowRunFullAutomationBtn" class="wfexec-btn wfexec-btn-primary" type="button">`
+- L701: `<button id="workflowRunStepAutomationBtn" class="wfexec-btn wfexec-btn-secondary" type="button">`
+- L706: `<div id="workflowAutomationProgress" class="wfexec-meta">`
+- L707: `${esc(workflowAutomationState.progress || "")}`
+- L710: `<div id="workflowAutomationResult" class="wfexec-meta">`
+- L711: `${esc(workflowAutomationState.result || "")}`
+- L719: `Guided preparation mode with automation gates and inline logs. It does not replace Governance approval.`
+- L723: `<button id="workflowAutoStartBtn" class="wfexec-btn wfexec-btn-primary" type="button">`
+- L726: `<button id="workflowAutoPauseBtn" class="wfexec-btn wfexec-btn-secondary" type="button">`
+- L729: `<button id="workflowAutoResumeBtn" class="wfexec-btn wfexec-btn-secondary" type="button">`
+- L732: `<button id="workflowAutoStopBtn" class="wfexec-btn wfexec-btn-ghost" type="button">`
+- L748: `autoMode?.status === "waiting_approval"`
+- L751: `<strong>Automation gate needs operator review:</strong> ${esc(gate.reason || "Operator review required.")}`
+- L757: `<button id="workflowAutoApproveBtn" class="wfexec-btn wfexec-btn-secondary" type="button">`
+- L758: `Approve Automation Gate Only`
+- L760: `<button id="workflowAutoSkipBtn" class="wfexec-btn wfexec-btn-secondary" type="button">`
+- L761: `Skip Automation Step`
+- L780: `function renderBuilderSection(session, workflow, inputs, validationMessage, draftStatus, escapeHtml) {`
+- L783: `<div class="wfexec-head"><h3>Workflow Review Package Builder</h3></div>`
+- L786: `<label class="wfexec-label" for="wfexecWorkflowType">Workflow type</label>`
+- L787: `<select id="wfexecWorkflowType" class="wfexec-select">`
+- L788: `${WORKFLOW_CATALOG.map((item) => \`<option value="${escapeHtml(item.id)}"${item.id === workflow.id ? " selected" : ""}>${escapeHtml(item.title)}</option>\`).join("")}`
+- L814: `<button id="workflowRunBtn" class="wfexec-btn wfexec-btn-primary" type="button">Prepare Review Package</button>`
+- L815: `<button id="workflowRunBtnMain" class="wfexec-btn wfexec-btn-primary" type="button">Prepare</button>`
+- L820: `<div class="wfexec-draft-status">${escapeHtml(draftStatus || "Drafts auto-save locally per workflow.")}</div>`
+- L828: `<div class="wfexec-head"><h3>Workflow Review Catalog</h3></div>`
+- L830: `${WORKFLOW_CATALOG.map((workflow) => {`
+- L831: `const inputs = asObject(session.inputsByWorkflow[workflow.id]);`
+- L832: `const run = asObject(session.runsByWorkflow[workflow.id]);`
+- L833: `const blocked = getBlockedRequirements(workflow, inputs, context);`
+- L836: `<article class="wfexec-catalog-card${workflow.id === session.selectedWorkflowId ? " is-active" : ""}">`
+- L838: `<h4>${escapeHtml(workflow.title)}</h4>`
+- L841: `<p>${escapeHtml(workflow.purpose)}</p>`
+- L842: `<div class="wfexec-required"><strong>Required inputs:</strong> ${escapeHtml(workflow.requiredInputs.map(titleCase).join(", "))}</div>`
+- L845: `<button class="wfexec-btn wfexec-btn-primary" type="button" data-wf-catalog-run="${escapeHtml(workflow.id)}">Prepare</button>`
+- L846: `<button class="wfexec-btn wfexec-btn-ghost" type="button" data-wf-catalog-save="${escapeHtml(workflow.id)}">Save Draft</button>`
+- L847: `<button class="wfexec-btn wfexec-btn-secondary" type="button" data-wf-catalog-ai="${escapeHtml(workflow.id)}">Open in AI Command</button>`
+- L858: `function renderExecutionSection(run, workflow, blockedRequirements, escapeHtml) {`
+- L864: `<div class="wfexec-empty">No prepared package yet. Prepare a workflow package to generate a review-ready output.</div>`
+- L889: `<button id="workflowPushAiBtn" class="wfexec-btn wfexec-btn-secondary" type="button">Send to AI for Review</button>`
+- L890: `<button id="workflowPushAiBtnSecondary" class="wfexec-btn wfexec-btn-secondary" type="button">Open in AI Command</button>`
+- L891: `<button id="workflowSaveTaskBtn" class="wfexec-btn wfexec-btn-ghost" type="button">Prepare Task Review Handoff</button>`
+- L892: `<button id="workflowBuildCustomBtn" class="wfexec-btn wfexec-btn-ghost" type="button">Build Custom Workflow</button>`
+- L893: `<button id="workflowRecommendBtn" class="wfexec-btn wfexec-btn-ghost" type="button">Recommend Review Workflow</button>`
+- L895: `<div class="wfexec-meta">Workflow review package: ${escapeHtml(workflow.title)} · Status: ${escapeHtml(titleCase(normalizeRunStatus(run.status)))}</div>`
+- L900: `function renderWorkflowExecutionLoop({`
+- L904: `automationPlan,`
+- L907: `workflow,`
+- L919: `${renderAutomationSection(automationPlan, autoFixPlan, escapeHtml)}`
+- L920: `${renderBuilderSection(session, workflow, inputs, session.validationMessage, session.draftStatus, escapeHtml)}`
+- L924: `${renderExecutionSection(run, workflow, blockedRequirements, escapeHtml)}`
+- L931: `function applyDurableWorkflowHandoff({ projectName, session, operations, consumeProjectHandoff, showMessage }) {`
+- L932: `const handoff = getSharedHandoff(projectName, "workflows", operations);`
+- L933: `const handoffId = asString(handoff?.id);`
+- L934: `if (!handoffId || handoffId === asString(session.lastAppliedHandoffId)) return;`
+- L936: `const payload = asObject(handoff?.payload);`
+- L937: `const fromWorkflowId = asString(payload.workflow_id);`
+- L939: `const modeMapped = WORKFLOW_CATALOG.find((item) => item.aiModeId === modeId)?.id;`
+- L940: `const workflowId = getWorkflowDef(fromWorkflowId || modeMapped || session.selectedWorkflowId).id;`
+- L942: `session.selectedWorkflowId = workflowId;`
+- L943: `session.inputsByWorkflow[workflowId] = {`
+- L944: `...session.inputsByWorkflow[workflowId],`
+- L945: `project: firstNonEmpty(payload?.draft_context?.projectName, session.inputsByWorkflow[workflowId].project),`
+- L946: `campaign: firstNonEmpty(payload?.campaign_name, session.inputsByWorkflow[workflowId].campaign),`
+- L947: `goal: firstNonEmpty(payload?.draft_context?.lastResponseTitle, payload?.workflow_title, session.inputsByWorkflow[workflowId].goal),`
+- L948: `product: firstNonEmpty(payload?.output?.product, session.inputsByWorkflow[workflowId].product),`
+- L949: `channel: firstNonEmpty(payload?.output?.channel, session.inputsByWorkflow[workflowId].channel)`
+- L953: `const run = session.runsByWorkflow[workflowId];`
+- L957: `run.source = "handoff";`
+- L962: `session.lastAppliedHandoffId = handoffId;`
+- L963: `consumeProjectHandoff?.(projectName, handoffId, { actor: "mh-assistant" }).catch((error) => {`
+- L964: `console.warn("Failed to consume workflow handoff:", error.message);`
+- L966: `showMessage?.("Workflow context restored from shared handoff.");`
+- L969: `async function ensureWorkflowIntelligenceLoaded({`
+- L974: `fetchProjectInsights,`
+- L975: `fetchProjectLearning,`
+- L979: `session.intelligence = { ...session.intelligence, status: "error", error: "Select a project to run workflows." };`
+- L1005: `fetchProjectInsights(projectName),`
+- L1006: `fetchProjectLearning(projectName)`
+- L1016: `? (insightsResult.reason?.message || learningResult.reason?.message || "Failed to load workflow intelligence")`
+- L1026: `error: error.message || "Failed to load workflow intelligence",`
+- L1039: `function buildAiHandoffPrompt(workflow, inputs, runOutput, context) {`
+- L1042: `\`Refine the ${workflow.title.toLowerCase()} review package.\`,`
+- L1050: `\`Build a ${workflow.title.toLowerCase()} review package.\`,`
+- L1061: `function pushWorkflowToAiCommand({`
+- L1063: `workflow,`
+- L1068: `createProjectHandoff,`
+- L1072: `const prompt = buildAiHandoffPrompt(workflow, inputs, run.output, context);`
+- L1075: `modeId: workflow.aiModeId,`
+- L1077: `lastResponseTitle: asString(run.output?.title || workflow.title),`
+- L1083: `const handoff = {`
+- L1084: `source_page: "workflows",`
+- L1088: `workflow_id: workflow.id,`
+- L1089: `workflow_title: workflow.title,`
+- L1096: `setSharedHandoff(projectName, "ai-command", handoff);`
+- L1098: `if (allowPersistent && typeof createProjectHandoff === "function") {`
+- L1099: `createProjectHandoff(projectName, handoff).catch((error) => {`
+- L1100: `console.warn("Failed to persist workflow-to-ai handoff:", error.message);`
+- L1105: `showMessage?.(allowPersistent ? "Workflow context sent to AI Command." : "Workflow context sent locally to AI Command.");`
+- L1108: `function validateWorkflowInputs(workflow, inputs) {`
+- L1109: `const missing = workflow.requiredInputs.filter((field) => !asString(inputs[field]).trim());`
+- L1114: `function registerWorkflowBridge(context) {`
+- L1115: `lastWorkflowRenderContext = context;`
+- L1116: `if (workflowBridgeRegistered || typeof window === "undefined") return;`
+- L1118: `window.addEventListener("mh:submit-workflow", async (event) => {`
+- L1119: `if (!lastWorkflowRenderContext) return;`
+- L1128: `fetchProjectInsights,`
+- L1129: `fetchProjectLearning,`
+- L1130: `runProjectWorkflow,`
+- L1131: `runProjectAiWorkflow,`
+- L1135: `} = lastWorkflowRenderContext;`
+- L1140: `const workflow = WORKFLOW_CATALOG.find((item) => item.aiModeId === asString(meta.modeId)) || WORKFLOW_CATALOG[0];`
+- L1142: `session.selectedWorkflowId = workflow.id;`
+- L1143: `session.inputsByWorkflow[workflow.id] = {`
+- L1144: `...session.inputsByWorkflow[workflow.id],`
+- L1145: `project: firstNonEmpty(projectName, session.inputsByWorkflow[workflow.id].project),`
+- L1146: `goal: firstNonEmpty(meta.assistantTitle, session.inputsByWorkflow[workflow.id].goal),`
+- L1147: `campaign: firstNonEmpty(session.inputsByWorkflow[workflow.id].campaign, state.context.activeCampaign),`
+- L1148: `product: firstNonEmpty(session.inputsByWorkflow[workflow.id].product, state.context.currentProject)`
+- L1152: `session.draftStatus = "AI prompt imported into workflow review builder";`
+- L1157: `const run = session.runsByWorkflow[workflow.id];`
+- L1162: `await ensureWorkflowIntelligenceLoaded({`
+- L1167: `fetchProjectInsights,`
+- L1168: `fetchProjectLearning,`
+- L1171: `const contextModel = buildWorkflowContext(getState(), session);`
+- L1173: `const result = await (runProjectAiWorkflow || runProjectWorkflow)?.(projectName, workflow.id, {`
+- L1174: `title: workflow.title,`
+- L1177: `inputs: session.inputsByWorkflow[workflow.id],`
+- L1178: `prompt: firstNonEmpty(message, buildWorkflowPrompt(workflow, session.inputsByWorkflow[workflow.id], contextModel)),`
+- L1181: `source: "workflow-auto-run"`
+- L1184: `const output = asObject(result?.output || result?.run?.output) || buildFallbackOutput(workflow, session.inputsByWorkflow[workflow.id], contextModel);`
+- L1194: `showMessage?.(\`${workflow.title} created from AI context.\`);`
+- L1197: `showError?.(error.message || "Workflow review package preparation failed.");`
+- L1203: `workflowBridgeRegistered = true;`
+- L1206: `function bindWorkflowExecutionLoop({`
+- L1213: `fetchProjectInsights,`
+- L1214: `fetchProjectLearning,`
+- L1215: `runProjectWorkflow,`
+- L1216: `runProjectAiWorkflow,`
+- L1217: `createProjectTask,`
+- L1218: `createProjectHandoff,`
+- L1221: `if (workflowAutomationEnabled) {`
+
+## Workflow / Execution Signals
+- L15: `buildAutomationPlan,`
+- L18: `startAutoMode,`
+- L21: `stopAutoMode,`
+- L22: `approveCurrentGate,`
+- L26: `runAutomationPlan`
+- L27: `} from "../automation-engine.js";`
+- L29: `const WORKFLOW_CATALOG = [`
+- L55: `id: "prepare-publishing-package",`
+- L56: `title: "Prepare Publishing Package",`
+- L57: `purpose: "Package final channel payloads, approval checks, and publishing queue dependencies.",`
+- L60: `routeHint: "publishing"`
+- L65: `purpose: "Summarize workflow state, results, blockers, and the next operational decision.",`
+- L81: `purpose: "Prioritize integration recovery actions that restore readiness and automation reliability.",`
+- L92: `"Publishing",`
+- L93: `"Automation",`
+- L97: `const WORKFLOW_ID_ALIASES = {`
+- L100: `"run-weekly-report": "generate-report",`
+- L104: `const WORKFLOW_LOCAL_DRAFTS_KEY = "mh-workflow-local-drafts-v1";`
+- L106: `const workflowSessions = new Map();`
+- L107: `let lastWorkflowRenderContext = null;`
+- L108: `let workflowBridgeRegistered = false;`
+- L109: `let workflowAutoModeUnsubscribe = null;`
+- L110: `let workflowAutomationEnabled = false;`
+- L111: `const workflowAutomationState = {`
+- L172: `function normalizeRunStatus(status) {`
+- L174: `if (["running", "in_progress", "processing", "queued", "scheduled", "pending"].includes(normalized)) return "running";`
+- L181: `const runStatus = normalizeRunStatus(status);`
+- L182: `if (runStatus === "completed") return "success";`
+- L183: `if (runStatus === "running") return "warning";`
+- L184: `if (runStatus === "failed") return "danger";`
+- L188: `function getWorkflowDef(id) {`
+- L189: `return WORKFLOW_CATALOG.find((item) => item.id === id) || WORKFLOW_CATALOG[0];`
+- L198: `...asArray(activity.scheduled_jobs).map((job) => asString(job.channel)),`
+- L211: `function createEmptyRunState() {`
+- L214: `runId: "",`
+- L216: `lastRunAt: "",`
+- L223: `function createRunsMap() {`
+- L224: `return WORKFLOW_CATALOG.reduce((acc, workflow) => {`
+- L225: `acc[workflow.id] = createEmptyRunState();`
+- L231: `return WORKFLOW_CATALOG.reduce((acc, workflow) => {`
+- L232: `acc[workflow.id] = {`
+- L243: `String(operations?.workflows?.total_runs || 0),`
+- L251: `const raw = window.localStorage?.getItem(WORKFLOW_LOCAL_DRAFTS_KEY) || "{}";`
+- L262: `window.localStorage?.setItem(WORKFLOW_LOCAL_DRAFTS_KEY, JSON.stringify(map || {}));`
+- L271: `function saveLocalDraft(projectName, workflowId, payload) {`
+- L275: `projectDrafts[workflowId] = {`
+- L276: `...asObject(projectDrafts[workflowId]),`
+- L282: `return projectDrafts[workflowId];`
+- L288: `WORKFLOW_CATALOG.forEach((workflow) => {`
+- L289: `const draft = asObject(local[workflow.id]);`
+- L291: `session.inputsByWorkflow[workflow.id] = {`
+- L292: `...session.inputsByWorkflow[workflow.id],`
+- L296: `session.selectedWorkflowId = workflow.id;`
+- L305: `function persistWorkflowDraft(projectName, session, workflowId, hint, selected) {`
+- L306: `const saved = saveLocalDraft(projectName, workflowId, {`
+- L307: `inputs: asObject(session.inputsByWorkflow[workflowId]),`
+- L308: `workflowId,`
+- L316: `if (!workflowSessions.has(key)) {`
+- L317: `workflowSessions.set(key, {`
+- L318: `selectedWorkflowId: WORKFLOW_CATALOG[0].id,`
+- L319: `inputsByWorkflow: createInputsMap(defaults),`
+- L320: `runsByWorkflow: createRunsMap(),`
+- L338: `const session = workflowSessions.get(key);`
+- L339: `session.inputsByWorkflow = WORKFLOW_CATALOG.reduce((acc, workflow) => {`
+- L340: `acc[workflow.id] = {`
+- L342: `...asObject(session.inputsByWorkflow?.[workflow.id])`
+- L346: `session.runsByWorkflow = session.runsByWorkflow || createRunsMap();`
+- L363: `const session = workflowSessions.get(key);`
+- L373: `const nextRuns = createRunsMap();`
+- L374: `asArray(operations?.workflows?.items).forEach((item) => {`
+- L375: `const sourceId = asString(item.workflow_id);`
+- L376: `const resolvedId = WORKFLOW_ID_ALIASES[sourceId] || sourceId;`
+- L377: `if (!nextRuns[resolvedId]) return;`
+- L380: `nextRuns[resolvedId] = {`
+- L381: `...nextRuns[resolvedId],`
+- L383: `runId: asString(item.id),`
+- L384: `source: asString(item.source || "durable-run"),`
+- L385: `lastRunAt: asString(item.created_at),`
+- L391: `source: asString(item.source || "durable-run"),`
+- L398: `session.runsByWorkflow = nextRuns;`
+- L402: `function buildWorkflowContext(state, session) {`
+- L453: `const allRuns = Object.values(asObject(session.runsByWorkflow));`
+- L455: `total: WORKFLOW_CATALOG.length,`
+- L459: `running: 0,`
+- L463: `allRuns.forEach((run) => {`
+- L464: `const normalized = normalizeRunStatus(run.status);`
+- L466: `else if (normalized === "running") counts.running += 1;`
+- L470: `if (asString(run.lastRunAt) && (!counts.lastExecutionAt || Date.parse(run.lastRunAt) > Date.parse(counts.lastExecutionAt))) {`
+- L471: `counts.lastExecutionAt = run.lastRunAt;`
+- L476: `const when = asString(item.executed_at || item.created_at);`
+- L485: `function getBlockedRequirements(workflow, inputs, context) {`
+- L487: `const missingRequired = workflow.requiredInputs.filter((field) => !asString(inputs[field]).trim());`
+- L492: `if (workflow.id === "prepare-publishing-package" && context.missingAssets.length) {`
+- L496: `if (workflow.id === "generate-report" && context.missingIntegrations.length) {`
+- L500: `if (workflow.id === "fix-integrations" && !context.missingIntegrations.length) {`
+- L501: `blocked.push("No integration gaps detected. Use this workflow only if connectors are unstable.");`
+- L507: `function buildWorkflowPrompt(workflow, inputs, context) {`
+- L509: `\`Workflow: ${workflow.title}\`,`
+- L510: `\`Purpose: ${workflow.purpose}\`,`
+- L522: `function buildFallbackOutput(workflow, inputs, context) {`
+- L525: `const blockedRequirements = getBlockedRequirements(workflow, inputs, context);`
+- L528: `title: \`${workflow.title} review package\`,`
+- L529: `summary: \`Prepared ${workflow.title.toLowerCase()} for ${inputs.project || context.projectName || "the current project"} with ${inputs.goal || "a defined goal"}.\`,`
+- L532: `\`Open ${titleCase(workflow.routeHint)} for review handoff.\`,`
+- L536: `requiredInputs: workflow.requiredInputs.map(titleCase),`
+- L539: `label: \`Open ${titleCase(workflow.routeHint)}\`,`
+- L540: `route: workflow.routeHint,`
+- L541: `reason: \`Continue review in ${titleCase(workflow.routeHint)}.\``
+- L546: `reason: "Refine this workflow package with AI reasoning."`
+- L552: `function mapGlobalActionToWorkflowId(globalAction) {`
+- L555: `if (target === "publishing") return "prepare-publishing-package";`
+- L563: `const mappedWorkflowId = mapGlobalActionToWorkflowId(globalAction);`
+- L564: `if (mappedWorkflowId) {`
+- L565: `const mapped = getWorkflowDef(mappedWorkflowId);`
+- L567: `workflowId: mapped.id,`
+- L570: `chips: ["Launch readiness", "Automation", "Campaign"],`
+- L577: `workflowId: "fix-integrations",`
+- L579: `reason: \`${context.missingIntegrations.length} integration gap${context.missingIntegrations.length === 1 ? "" : "s"} can block automation and report quality.\`,`
+- L580: `chips: ["Launch readiness", "Automation", "Reports"],`
+- L581: `prompt: "Build a prioritized integration recovery workflow with dependency order and expected readiness impact."`
+- L587: `workflowId: "prepare-publishing-package",`
+- L588: `title: "Prepare publishing package handoff before distribution",`
+- L589: `reason: \`${context.missingAssets.length} asset requirement${context.missingAssets.length === 1 ? "" : "s"} are still missing and can block final publishing.\`,`
+- L590: `chips: ["Publishing", "Campaign", "Launch readiness"],`
+- L591: `prompt: "Prepare a publishing package checklist with missing assets and approval dependencies."`
+- L597: `workflowId: "launch-campaign",`
+- L598: `title: "Define launch campaign workflow",`
+- L599: `reason: "A campaign operating sequence is required before content, media, and publishing lanes can execute clearly.",`
+- L600: `chips: ["Campaign", "Launch readiness", "Automation"],`
+- L601: `prompt: "Create a launch campaign workflow with owner sequence and execution gates."`
+- L605: `const selected = getWorkflowDef(session.selectedWorkflowId);`
+- L607: `workflowId: selected.id,`
+- L609: `reason: "Current context is sufficient to prepare the selected workflow review package now.",`
+- L610: `chips: ["Content", "Campaign", "Publishing"],`
+- L623: `<div class="wfexec-head"><h3>Workflow Overview</h3></div>`
+- L625: `<article class="wfexec-stat"><span>Total workflows</span><strong>${escapeHtml(String(metrics.total))}</strong></article>`
+- L626: `<article class="wfexec-stat"><span>Ready workflows</span><strong>${escapeHtml(String(metrics.ready))}</strong></article>`
+- L627: `<article class="wfexec-stat"><span>Draft workflows</span><strong>${escapeHtml(String(metrics.draft))}</strong></article>`
+- L644: `<button id="wfexecStartRecommendedBtn" class="wfexec-btn wfexec-btn-primary" type="button">Start Workflow</button>`
+- L646: `<button id="wfexecSendRecommendedAiBtn" class="wfexec-btn wfexec-btn-secondary" type="button">Send to AI Workspace</button>`
+- L652: `function renderAutomationSection(fullPlan, fixPlan, autoMode, escapeHtml) {`
+- L667: `<div class="wfexec-head"><h3>Automation Layer</h3></div>`
+- L694: `: \`<div class="wfexec-empty">No safe automation steps are available.</div>\``
+- L698: `<button id="workflowRunFullAutomationBtn" class="wfexec-btn wfexec-btn-primary" type="button">`
+- L701: `<button id="workflowRunStepAutomationBtn" class="wfexec-btn wfexec-btn-secondary" type="button">`
+- L706: `<div id="workflowAutomationProgress" class="wfexec-meta">`
+- L707: `${esc(workflowAutomationState.progress || "")}`
+- L710: `<div id="workflowAutomationResult" class="wfexec-meta">`
+- L711: `${esc(workflowAutomationState.result || "")}`
+- L719: `Guided preparation mode with automation gates and inline logs. It does not replace Governance approval.`
+- L723: `<button id="workflowAutoStartBtn" class="wfexec-btn wfexec-btn-primary" type="button">`
+- L724: `Start Guided Preparation Mode`
+- L726: `<button id="workflowAutoPauseBtn" class="wfexec-btn wfexec-btn-secondary" type="button">`
+- L729: `<button id="workflowAutoResumeBtn" class="wfexec-btn wfexec-btn-secondary" type="button">`
+- L732: `<button id="workflowAutoStopBtn" class="wfexec-btn wfexec-btn-ghost" type="button">`
+- L733: `Stop`
+- L751: `<strong>Automation gate needs operator review:</strong> ${esc(gate.reason || "Operator review required.")}`
+- L757: `<button id="workflowAutoApproveBtn" class="wfexec-btn wfexec-btn-secondary" type="button">`
+- L758: `Approve Automation Gate Only`
+- L760: `<button id="workflowAutoSkipBtn" class="wfexec-btn wfexec-btn-secondary" type="button">`
+- L761: `Skip Automation Step`
+- L780: `function renderBuilderSection(session, workflow, inputs, validationMessage, draftStatus, escapeHtml) {`
+- L783: `<div class="wfexec-head"><h3>Workflow Review Package Builder</h3></div>`
+- L786: `<label class="wfexec-label" for="wfexecWorkflowType">Workflow type</label>`
+- L787: `<select id="wfexecWorkflowType" class="wfexec-select">`
+- L788: `${WORKFLOW_CATALOG.map((item) => \`<option value="${escapeHtml(item.id)}"${item.id === workflow.id ? " selected" : ""}>${escapeHtml(item.title)}</option>\`).join("")}`
+- L814: `<button id="workflowRunBtn" class="wfexec-btn wfexec-btn-primary" type="button">Prepare Review Package</button>`
+- L815: `<button id="workflowRunBtnMain" class="wfexec-btn wfexec-btn-primary" type="button">Prepare</button>`
+- L820: `<div class="wfexec-draft-status">${escapeHtml(draftStatus || "Drafts auto-save locally per workflow.")}</div>`
+- L828: `<div class="wfexec-head"><h3>Workflow Review Catalog</h3></div>`
+- L830: `${WORKFLOW_CATALOG.map((workflow) => {`
+- L831: `const inputs = asObject(session.inputsByWorkflow[workflow.id]);`
+- L832: `const run = asObject(session.runsByWorkflow[workflow.id]);`
+- L833: `const blocked = getBlockedRequirements(workflow, inputs, context);`
+- L836: `<article class="wfexec-catalog-card${workflow.id === session.selectedWorkflowId ? " is-active" : ""}">`
+- L838: `<h4>${escapeHtml(workflow.title)}</h4>`
+- L841: `<p>${escapeHtml(workflow.purpose)}</p>`
+- L842: `<div class="wfexec-required"><strong>Required inputs:</strong> ${escapeHtml(workflow.requiredInputs.map(titleCase).join(", "))}</div>`
+- L845: `<button class="wfexec-btn wfexec-btn-primary" type="button" data-wf-catalog-run="${escapeHtml(workflow.id)}">Prepare</button>`
+- L846: `<button class="wfexec-btn wfexec-btn-ghost" type="button" data-wf-catalog-save="${escapeHtml(workflow.id)}">Save Draft</button>`
+- L847: `<button class="wfexec-btn wfexec-btn-secondary" type="button" data-wf-catalog-ai="${escapeHtml(workflow.id)}">Open in AI Command</button>`
+- L849: `${run.lastRunAt ? \`<div class="wfexec-catalog-meta">Last prepared ${escapeHtml(formatDateTime(run.lastRunAt))}</div>\` : ""}`
+- L858: `function renderExecutionSection(run, workflow, blockedRequirements, escapeHtml) {`
+- L859: `const output = asObject(run.output);`
+- L864: `<div class="wfexec-empty">No prepared package yet. Prepare a workflow package to generate a review-ready output.</div>`
+- L873: `<span class="wfexec-meta">${escapeHtml(run.lastRunAt ? formatDateTime(run.lastRunAt) : "recent")}</span>`
+- L889: `<button id="workflowPushAiBtn" class="wfexec-btn wfexec-btn-secondary" type="button">Send to AI for Review</button>`
+- L890: `<button id="workflowPushAiBtnSecondary" class="wfexec-btn wfexec-btn-secondary" type="button">Open in AI Command</button>`
+- L891: `<button id="workflowSaveTaskBtn" class="wfexec-btn wfexec-btn-ghost" type="button">Prepare Task Review Handoff</button>`
+- L892: `<button id="workflowBuildCustomBtn" class="wfexec-btn wfexec-btn-ghost" type="button">Build Custom Workflow</button>`
+- L893: `<button id="workflowRecommendBtn" class="wfexec-btn wfexec-btn-ghost" type="button">Recommend Review Workflow</button>`
+- L895: `<div class="wfexec-meta">Workflow review package: ${escapeHtml(workflow.title)} · Status: ${escapeHtml(titleCase(normalizeRunStatus(run.status)))}</div>`
+- L900: `function renderWorkflowExecutionLoop({`
+- L904: `automationPlan,`
+- L907: `workflow,`
+- L909: `run,`
+- L919: `${renderAutomationSection(automationPlan, autoFixPlan, escapeHtml)}`
+- L920: `${renderBuilderSection(session, workflow, inputs, session.validationMessage, session.draftStatus, escapeHtml)}`
+- L924: `${renderExecutionSection(run, workflow, blockedRequirements, escapeHtml)}`
+- L931: `function applyDurableWorkflowHandoff({ projectName, session, operations, consumeProjectHandoff, showMessage }) {`
+- L932: `const handoff = getSharedHandoff(projectName, "workflows", operations);`
+- L937: `const fromWorkflowId = asString(payload.workflow_id);`
+- L939: `const modeMapped = WORKFLOW_CATALOG.find((item) => item.aiModeId === modeId)?.id;`
+- L940: `const workflowId = getWorkflowDef(fromWorkflowId || modeMapped || session.selectedWorkflowId).id;`
+- L942: `session.selectedWorkflowId = workflowId;`
+- L943: `session.inputsByWorkflow[workflowId] = {`
+- L944: `...session.inputsByWorkflow[workflowId],`
+- L945: `project: firstNonEmpty(payload?.draft_context?.projectName, session.inputsByWorkflow[workflowId].project),`
+- L946: `campaign: firstNonEmpty(payload?.campaign_name, session.inputsByWorkflow[workflowId].campaign),`
+- L947: `goal: firstNonEmpty(payload?.draft_context?.lastResponseTitle, payload?.workflow_title, session.inputsByWorkflow[workflowId].goal),`
+- L948: `product: firstNonEmpty(payload?.output?.product, session.inputsByWorkflow[workflowId].product),`
+- L949: `channel: firstNonEmpty(payload?.output?.channel, session.inputsByWorkflow[workflowId].channel)`
+- L953: `const run = session.runsByWorkflow[workflowId];`
+- L954: `run.output = asObject(payload.output);`
+- L955: `run.status = "completed";`
+- L956: `run.lastRunAt = nowIso();`
+- L957: `run.source = "handoff";`
+- L958: `run.history.unshift({ createdAt: run.lastRunAt, source: run.source, output: run.output });`
+- L959: `run.history = run.history.slice(0, 8);`
+- L964: `console.warn("Failed to consume workflow handoff:", error.message);`
+- L966: `showMessage?.("Workflow context restored from shared handoff.");`
+- L969: `async function ensureWorkflowIntelligenceLoaded({`
+- L979: `session.intelligence = { ...session.intelligence, status: "error", error: "Select a project to run workflows." };`
+- L1016: `? (insightsResult.reason?.message || learningResult.reason?.message || "Failed to load workflow intelligence")`
+- L1026: `error: error.message || "Failed to load workflow intelligence",`
+- L1039: `function buildAiHandoffPrompt(workflow, inputs, runOutput, context) {`
+- L1040: `if (runOutput?.summary) {`
+- L1042: `\`Refine the ${workflow.title.toLowerCase()} review package.\`,`
+- L1045: `\`Summary: ${runOutput.summary}\`,`
+- L1046: `\`Next actions: ${asArray(runOutput.nextActions).join("; ")}\``
+- L1050: `\`Build a ${workflow.title.toLowerCase()} review package.\`,`
+- L1061: `function pushWorkflowToAiCommand({`
+- L1063: `workflow,`
+- L1065: `run,`
+- L1072: `const prompt = buildAiHandoffPrompt(workflow, inputs, run.output, context);`
+- L1075: `modeId: workflow.aiModeId,`
+- L1077: `lastResponseTitle: asString(run.output?.title || workflow.title),`
+- L1078: `routeSuggestions: asArray(run.output?.routeSuggestions)`
+- L1084: `source_page: "workflows",`
+- L1088: `workflow_id: workflow.id,`
+- L1089: `workflow_title: workflow.title,`
+- L1091: `output: asObject(run.output)`
+- L1100: `console.warn("Failed to persist workflow-to-ai handoff:", error.message);`
+- L1105: `showMessage?.(allowPersistent ? "Workflow context sent to AI Command." : "Workflow context sent locally to AI Command.");`
+- L1108: `function validateWorkflowInputs(workflow, inputs) {`
+- L1109: `const missing = workflow.requiredInputs.filter((field) => !asString(inputs[field]).trim());`
+- L1114: `function registerWorkflowBridge(context) {`
+- L1115: `lastWorkflowRenderContext = context;`
+- L1116: `if (workflowBridgeRegistered || typeof window === "undefined") return;`
+- L1118: `window.addEventListener("mh:submit-workflow", async (event) => {`
+- L1119: `if (!lastWorkflowRenderContext) return;`
+- L1130: `runProjectWorkflow,`
+- L1131: `runProjectAiWorkflow,`
+- L1135: `} = lastWorkflowRenderContext;`
+- L1140: `const workflow = WORKFLOW_CATALOG.find((item) => item.aiModeId === asString(meta.modeId)) || WORKFLOW_CATALOG[0];`
+- L1142: `session.selectedWorkflowId = workflow.id;`
+- L1143: `session.inputsByWorkflow[workflow.id] = {`
+- L1144: `...session.inputsByWorkflow[workflow.id],`
+- L1145: `project: firstNonEmpty(projectName, session.inputsByWorkflow[workflow.id].project),`
+- L1146: `goal: firstNonEmpty(meta.assistantTitle, session.inputsByWorkflow[workflow.id].goal),`
+
+## Mutation Signals
+- L1: `import {`
+- L7: `import {`
+- L13: `import { getGlobalNextBestAction } from "../system-intelligence.js";`
+- L14: `import {`
+- L16: `createAutoModeController,`
+- L18: `startAutoMode,`
+- L21: `stopAutoMode,`
+- L22: `approveCurrentGate,`
+- L26: `runAutomationPlan`
+- L39: `id: "create-content-plan",`
+- L40: `title: "Create Content Plan",`
+- L73: `purpose: "Create a competitor intelligence brief for positioning and campaign advantage.",`
+- L100: `"run-weekly-report": "generate-report",`
+- L172: `function normalizeRunStatus(status) {`
+- L174: `if (["running", "in_progress", "processing", "queued", "scheduled", "pending"].includes(normalized)) return "running";`
+- L176: `if (["completed", "success", "done", "ready"].includes(normalized)) return "completed";`
+- L181: `const runStatus = normalizeRunStatus(status);`
+- L182: `if (runStatus === "completed") return "success";`
+- L183: `if (runStatus === "running") return "warning";`
+- L184: `if (runStatus === "failed") return "danger";`
+- L192: `function createDefaultInputs(state) {`
+- L211: `function createEmptyRunState() {`
+- L214: `runId: "",`
+- L216: `lastRunAt: "",`
+- L223: `function createRunsMap() {`
+- L225: `acc[workflow.id] = createEmptyRunState();`
+- L230: `function createInputsMap(defaults) {`
+- L242: `asString(operations?.backbone?.last_updated),`
+- L243: `String(operations?.workflows?.total_runs || 0),`
+- L271: `function saveLocalDraft(projectName, workflowId, payload) {`
+- L278: `updatedAt: nowIso()`
+- L298: `if (draft.updatedAt) {`
+- L299: `session.draftStatus = \`Draft restored ${formatDateTime(draft.updatedAt)}\`;`
+- L306: `const saved = saveLocalDraft(projectName, workflowId, {`
+- L311: `session.draftStatus = hint || \`Draft saved ${formatDateTime(saved.updatedAt)}\`;`
+- L319: `inputsByWorkflow: createInputsMap(defaults),`
+- L320: `runsByWorkflow: createRunsMap(),`
+- L346: `session.runsByWorkflow = session.runsByWorkflow || createRunsMap();`
+- L373: `const nextRuns = createRunsMap();`
+- L376: `const resolvedId = WORKFLOW_ID_ALIASES[sourceId] || sourceId;`
+- L377: `if (!nextRuns[resolvedId]) return;`
+- L380: `nextRuns[resolvedId] = {`
+- L381: `...nextRuns[resolvedId],`
+- L382: `status: asString(item.status || "completed"),`
+- L383: `runId: asString(item.id),`
+- L384: `source: asString(item.source || "durable-run"),`
+- L385: `lastRunAt: asString(item.created_at),`
+- L390: `createdAt: asString(item.created_at),`
+- L391: `source: asString(item.source || "durable-run"),`
+- L398: `session.runsByWorkflow = nextRuns;`
+- L453: `const allRuns = Object.values(asObject(session.runsByWorkflow));`
+- L459: `running: 0,`
+- L463: `allRuns.forEach((run) => {`
+- L464: `const normalized = normalizeRunStatus(run.status);`
+- L465: `if (normalized === "completed") counts.ready += 1;`
+- L466: `else if (normalized === "running") counts.running += 1;`
+- L470: `if (asString(run.lastRunAt) && (!counts.lastExecutionAt || Date.parse(run.lastRunAt) > Date.parse(counts.lastExecutionAt))) {`
+- L471: `counts.lastExecutionAt = run.lastRunAt;`
+- L476: `const when = asString(item.executed_at || item.created_at);`
+- L533: `blockedRequirements.length ? "Resolve blockers before any destination-owned execution." : "Proceed to review handoff."`
+- L556: `if (target === "content-studio") return "create-content-plan";`
+- L599: `reason: "A campaign operating sequence is required before content, media, and publishing lanes can execute clearly.",`
+- L601: `prompt: "Create a launch campaign workflow with owner sequence and execution gates."`
+- L644: `<button id="wfexecStartRecommendedBtn" class="wfexec-btn wfexec-btn-primary" type="button">Start Workflow</button>`
+- L645: `<button id="wfexecSaveRecommendedBtn" class="wfexec-btn wfexec-btn-ghost" type="button">Save Draft</button>`
+- L669: `Safe guided preparation only: navigate, create draft, generate prompt, and create review handoff.`
+- L698: `<button id="workflowRunFullAutomationBtn" class="wfexec-btn wfexec-btn-primary" type="button">`
+- L701: `<button id="workflowRunStepAutomationBtn" class="wfexec-btn wfexec-btn-secondary" type="button">`
+- L723: `<button id="workflowAutoStartBtn" class="wfexec-btn wfexec-btn-primary" type="button">`
+- L724: `Start Guided Preparation Mode`
+- L732: `<button id="workflowAutoStopBtn" class="wfexec-btn wfexec-btn-ghost" type="button">`
+- L733: `Stop`
+- L757: `<button id="workflowAutoApproveBtn" class="wfexec-btn wfexec-btn-secondary" type="button">`
+- L758: `Approve Automation Gate Only`
+- L814: `<button id="workflowRunBtn" class="wfexec-btn wfexec-btn-primary" type="button">Prepare Review Package</button>`
+- L815: `<button id="workflowRunBtnMain" class="wfexec-btn wfexec-btn-primary" type="button">Prepare</button>`
+- L816: `<button id="wfexecSaveDraftBtn" class="wfexec-btn wfexec-btn-ghost" type="button">Save Draft</button>`
+- L820: `<div class="wfexec-draft-status">${escapeHtml(draftStatus || "Drafts auto-save locally per workflow.")}</div>`
+- L832: `const run = asObject(session.runsByWorkflow[workflow.id]);`
+- L845: `<button class="wfexec-btn wfexec-btn-primary" type="button" data-wf-catalog-run="${escapeHtml(workflow.id)}">Prepare</button>`
+- L846: `<button class="wfexec-btn wfexec-btn-ghost" type="button" data-wf-catalog-save="${escapeHtml(workflow.id)}">Save Draft</button>`
+- L849: `${run.lastRunAt ? \`<div class="wfexec-catalog-meta">Last prepared ${escapeHtml(formatDateTime(run.lastRunAt))}</div>\` : ""}`
+- L858: `function renderExecutionSection(run, workflow, blockedRequirements, escapeHtml) {`
+- L859: `const output = asObject(run.output);`
+- L873: `<span class="wfexec-meta">${escapeHtml(run.lastRunAt ? formatDateTime(run.lastRunAt) : "recent")}</span>`
+- L891: `<button id="workflowSaveTaskBtn" class="wfexec-btn wfexec-btn-ghost" type="button">Prepare Task Review Handoff</button>`
+- L895: `<div class="wfexec-meta">Workflow review package: ${escapeHtml(workflow.title)} · Status: ${escapeHtml(titleCase(normalizeRunStatus(run.status)))}</div>`
+- L909: `run,`
+- L924: `${renderExecutionSection(run, workflow, blockedRequirements, escapeHtml)}`
+- L953: `const run = session.runsByWorkflow[workflowId];`
+- L954: `run.output = asObject(payload.output);`
+- L955: `run.status = "completed";`
+- L956: `run.lastRunAt = nowIso();`
+- L957: `run.source = "handoff";`
+- L958: `run.history.unshift({ createdAt: run.lastRunAt, source: run.source, output: run.output });`
+- L959: `run.history = run.history.slice(0, 8);`
+- L969: `async function ensureWorkflowIntelligenceLoaded({`
+- L979: `session.intelligence = { ...session.intelligence, status: "error", error: "Select a project to run workflows." };`
+- L1001: `loadingPromise: (async () => {`
+- L1015: `error: insightsResult.status === "rejected" && learningResult.status === "rejected"`
+- L1039: `function buildAiHandoffPrompt(workflow, inputs, runOutput, context) {`
+- L1040: `if (runOutput?.summary) {`
+- L1045: `\`Summary: ${runOutput.summary}\`,`
+- L1046: `\`Next actions: ${asArray(runOutput.nextActions).join("; ")}\``
+- L1065: `run,`
+- L1068: `createProjectHandoff,`
+- L1072: `const prompt = buildAiHandoffPrompt(workflow, inputs, run.output, context);`
+- L1077: `lastResponseTitle: asString(run.output?.title || workflow.title),`
+- L1078: `routeSuggestions: asArray(run.output?.routeSuggestions)`
+- L1091: `output: asObject(run.output)`
+- L1098: `if (allowPersistent && typeof createProjectHandoff === "function") {`
+- L1099: `createProjectHandoff(projectName, handoff).catch((error) => {`
+- L1111: `return \`Please complete: ${missing.map(titleCase).join(", ")}.\`;`
+- L1118: `window.addEventListener("mh:submit-workflow", async (event) => {`
+- L1130: `runProjectWorkflow,`
+- L1131: `runProjectAiWorkflow,`
+- L1139: `const session = ensureSession(projectName, createDefaultInputs(state), state.data.operations);`
+- L1151: `if (!meta.autoRun) {`
+- L1152: `session.draftStatus = "AI prompt imported into workflow review builder";`
+- L1157: `const run = session.runsByWorkflow[workflow.id];`
+- L1158: `run.status = "running";`
+- L1172: `const createdAt = nowIso();`
+- L1173: `const result = await (runProjectAiWorkflow || runProjectWorkflow)?.(projectName, workflow.id, {`
+- L1175: `status: "completed",`
+- L1176: `source: meta.source || "external-trigger",`
+- L1180: `refreshed_at: createdAt,`
+- L1181: `source: "workflow-auto-run"`
+- L1184: `const output = asObject(result?.output || result?.run?.output) || buildFallbackOutput(workflow, session.inputsByWorkflow[workflow.id], contextModel);`
+- L1185: `run.status = "completed";`
+- L1186: `run.lastRunAt = asString(result?.run?.created_at) || createdAt;`
+- L1187: `run.runId = asString(result?.run?.id);`
+- L1188: `run.source = meta.source || "external-trigger";`
+- L1189: `run.output = output;`
+- L1190: `run.blockedRequirements = asArray(output.blockedRequirements || output.blocked_requirements);`
+- L1191: `run.history.unshift({ createdAt: run.lastRunAt, source: run.source, output });`
+- L1192: `run.history = run.history.slice(0, 8);`
+- L1194: `showMessage?.(\`${workflow.title} created from AI context.\`);`
+- L1196: `run.status = "failed";`
+- L1215: `runProjectWorkflow,`
+- L1216: `runProjectAiWorkflow,`
+- L1217: `createProjectTask,`
+- L1218: `createProjectHandoff,`
+- L1222: `createAutoModeController(getState, { getState, navigateTo, createProjectHandoff });`
+- L1231: `const session = ensureSession(projectName, createDefaultInputs(state), state.data.operations);`
+- L1234: `const run = session.runsByWorkflow[workflow.id];`
+- L1247: `function syncInputField(field, value) {`
+- L1249: `persistWorkflowDraft(projectName, session, session.selectedWorkflowId, "Draft auto-saved", true);`
+- L1256: `syncInputField(field, input.value || "");`
+- L1271: `const saveDraftBtn = $("wfexecSaveDraftBtn");`
+- L1272: `if (saveDraftBtn) {`
+- L1273: `saveDraftBtn.onclick = () => {`
+- L1274: `persistWorkflowDraft(projectName, session, session.selectedWorkflowId, "Draft saved", true);`
+- L1275: `showMessage?.("Workflow draft saved.");`
+- L1283: `const defaults = createDefaultInputs(getState());`
+- L1297: `const safePrompt = \`Create a workflow for ${projectName || "this project"} focused on ${inputs.goal || "operational improvement"}.\`;`
+- L1313: `persistWorkflowDraft(projectName, session, session.selectedWorkflowId, "Local handoff seed created", true);`
+- L1314: `showMessage?.("No AI state found. Local workflow seed created safely.");`
+- L1333: `function confirmWorkflowBackendRun(workflow) {`
+- L1337: `\`Confirm workflow review package preparation\n\nAction: Prepare and record backend workflow output for "${title}".\n\nThis may call the backend workflow run endpoint and update workflow run history. It prepares a review output only and does not publish, send messages, create CRM records, bypass Governance, or perform destructive actions.\n\nSelect Cancel to keep the workflow unchanged.\``
+- L1341: `async function runWorkflow(workflowId) {`
+- L1360: `const confirmed = confirmWorkflowBackendRun(activeWorkflow);`
+- L1362: `setValidation("Workflow preparation cancelled. No backend workflow run was recorded.");`
+- L1367: `const activeRun = session.runsByWorkflow[activeWorkflow.id];`
+- L1368: `activeRun.status = "running";`
+- L1369: `activeRun.source = "manual-run";`
+- L1384: `const createdAt = nowIso();`
+- L1385: `const result = await (runProjectAiWorkflow || runProjectWorkflow)?.(projectName, activeWorkflow.id, {`
+- L1387: `status: "completed",`
+- L1388: `source: "manual-run",`
+- L1393: `refreshed_at: createdAt,`
+- L1394: `source: "workflow-manual-run"`
+- L1398: `const output = asObject(result?.output || result?.run?.output);`
+- L1403: `activeRun.status = "completed";`
+- L1404: `activeRun.lastRunAt = asString(result?.run?.created_at) || createdAt;`
+- L1405: `activeRun.runId = asString(result?.run?.id);`
+- L1406: `activeRun.output = safeOutput;`
+- L1407: `activeRun.blockedRequirements = asArray(safeOutput.blockedRequirements || safeOutput.blocked_requirements);`
+- L1408: `activeRun.history.unshift({ createdAt: activeRun.lastRunAt, source: "manual-run", output: safeOutput });`
+- L1409: `activeRun.history = activeRun.history.slice(0, 8);`
+- L1416: `run_id: activeRun.runId,`
+- L1419: `createdAt: activeRun.lastRunAt`
+- L1425: `showMessage?.(\`${activeWorkflow.title} completed.\`);`
+- L1427: `activeRun.status = "failed";`
+- L1428: `activeRun.output = {`
+- L1431: `blockedRequirements: ["Preparation failed. Review inputs and retry."],`
+- L1432: `nextActions: ["Retry workflow", "Validate project integrations", "Check workflow dependencies"]`
+- L1434: `activeRun.blockedRequirements = asArray(activeRun.output.blockedRequirements);`
+- L1441: `const runBtn = $("workflowRunBtn");`
+- L1442: `if (runBtn) runBtn.onclick = () => runWorkflow(session.selectedWorkflowId);`
+- L1443: `const runBtnMain = $("workflowRunBtnMain");`
+- L1444: `if (runBtnMain) runBtnMain.onclick = () => runWorkflow(session.selectedWorkflowId);`
+- L1446: `const startRecommendedBtn = $("wfexecStartRecommendedBtn");`
+- L1447: `if (startRecommendedBtn) {`
+- L1448: `startRecommendedBtn.onclick = () => {`
+- L1450: `runWorkflow(rec.workflowId);`
+- L1454: `const saveRecommendedBtn = $("wfexecSaveRecommendedBtn");`
+- L1455: `if (saveRecommendedBtn) {`
+- L1456: `saveRecommendedBtn.onclick = () => {`
+- L1460: `persistWorkflowDraft(projectName, session, rec.workflowId, "Recommendation saved as draft", true);`
+- L1461: `showMessage?.("Recommended workflow saved as draft.");`
+- L1476: `run: session.runsByWorkflow[recWorkflow.id],`
+- L1479: `createProjectHandoff,`
+- L1486: `Array.from(document.querySelectorAll("[data-wf-catalog-run]")).forEach((button) => {`
+- L1487: `button.onclick = () => runWorkflow(button.getAttribute("data-wf-catalog-run") || session.selectedWorkflowId);`
+- L1490: `Array.from(document.querySelectorAll("[data-wf-catalog-save]")).forEach((button) => {`
+- L1492: `const workflowId = button.getAttribute("data-wf-catalog-save") || session.selectedWorkflowId;`
+- L1494: `persistWorkflowDraft(projectName, session, workflowId, "Draft saved", true);`
+- L1495: `showMessage?.("Workflow draft saved.");`
+- L1509: `run: session.runsByWorkflow[workflowId],`
+- L1512: `createProjectHandoff,`
+- L1526: `run,`
+- L1529: `createProjectHandoff,`
+- L1539: `const saveTaskBtn = $("workflowSaveTaskBtn");`
+- L1540: `if (saveTaskBtn) {`
+- L1541: `saveTaskBtn.onclick = () => {`
+- L1542: `if (!run.output) {`
+- L1551: `summary: asString(run.output.summary || "Review-only task handoff prepared from the Workflows operating path."),`
+- L1552: `description: asString(run.output.summary || "Review-only task handoff prepared from the Workflows operating path."),`
+- L1556: `source_type: "workflow_run",`
+- L1557: `source_id: run.runId || run.lastRunAt || "",`
+- L1559: `assignee_role: "admin",`
+- L1562: `output: asObject(run.output),`
+- L1563: `notes: asArray(run.output.nextActions || []),`
+- L1566: `created_at: new Date().toISOString()`
+- L1580: `"Recommend the best workflow to run next.",`
+- L1647: `const fullAutomationBtn = $("workflowRunFullAutomationBtn");`
+- L1649: `fullAutomationBtn.onclick = async () => {`
+- L1656: `const confirmed = window.confirm(\`Confirm guided preparation simulation\n\nAction: Simulate ${plan.length} guided automation steps.\nRisk: This can prepare downstream draft or handoff state, but does not publish, approve Governance decisions, or send externally.\n\nSelect Cancel to stop.\`);`
+- L1662: `const result = await runAutomationPlan(plan, {`
+- L1663: `context: { getState, navigateTo, createProjectHandoff, projectName },`
+- L1670: `workflowAutomationState.result = result.status === "success" ? "Guided preparation simulation completed." : "Guided preparation simulation stopped before completion.";`
+- L1676: `const stepAutomationBtn = $("workflowRunStepAutomationBtn");`
+- L1678: `stepAutomationBtn.onclick = async () => {`
+- L1686: `const confirmed = window.confirm("Confirm guided preparation step\n\nAction: Simulate the next preparation step.\nRisk: This can prepare downstream draft or handoff state, but does not publish, approve Governance decisions, or send externally.\n\nSelect Cancel to keep the current state.");`
+- L1691: `const stepResult = await runAutomationPlan(singleStep, {`
+- L1692: `context: { getState, navigateTo, createProjectHandoff, projectName },`
+- L1693: `onProgress: ({ index, total, step, result: runResult }) => {`
+- L1694: `workflowAutomationState.progress = \`Step ${nextIndex + index} / ${plan.length}: ${step.action} (${runResult.status})\`;`
+- L1702: `? "Step-by-step guided preparation completed."`
+- L1709: `const autoStartBtn = $("workflowAutoStartBtn");`
+- L1710: `if (autoStartBtn) {`
+- L1711: `autoStartBtn.onclick = async () => {`
+- L1714: `createAutoModeController(getState, { getState, navigateTo, createProjectHandoff });`
+- L1721: `"Confirm Auto Mode start\n\n" +`
+- L1722: `"Action: Start guided workflow Auto Mode for the current project context.\n" +`
+- L1723: `"Risk: This may prepare workflow steps and handoffs, but must not publish externally or approve Governance decisions without explicit approval.\n\n" +`
+- L1724: `"Select Cancel to stop."`
+- L1728: `await startAutoMode(plan, {`
+- L1730: `context: { getState, navigateTo, createProjectHandoff, projectName }`
+- L1732: `showMessage?.("Workflow Guided Preparation Mode started.");`
+- L1746: `autoResumeBtn.onclick = async () => {`
+- L1754: `await resumeAutoMode({ context: { getState, navigateTo, createProjectHandoff, projectName } });`
+- L1759: `const autoStopBtn = $("workflowAutoStopBtn");`
+- L1760: `if (autoStopBtn) {`
+- L1761: `autoStopBtn.onclick = () => {`
+- L1762: `stopAutoMode();`
+- L1763: `showMessage?.("Guided Preparation Mode stopped.");`
+- L1767: `const autoApproveBtn = $("workflowAutoApproveBtn");`
+- L1768: `if (autoApproveBtn) {`
+- L1769: `autoApproveBtn.onclick = async () => {`
+
+## Handoff Signals
+- L9: `getSharedHandoff,`
+- L11: `setSharedHandoff`
+- L33: `purpose: "Build a launch-ready review sequence across campaign, content, and distribution handoffs.",`
+- L49: `purpose: "Prepare media production inputs, format guidance, and downstream handoff steps.",`
+- L325: `lastAppliedHandoffId: "",`
+- L350: `session.lastAppliedHandoffId = asString(session.lastAppliedHandoffId);`
+- L532: `\`Open ${titleCase(workflow.routeHint)} for review handoff.\`,`
+- L533: `blockedRequirements.length ? "Resolve blockers before any destination-owned execution." : "Proceed to review handoff."`
+- L588: `title: "Prepare publishing package handoff before distribution",`
+- L611: `prompt: \`Refine ${selected.title.toLowerCase()} for reviewed handoff with explicit dependencies and next actions.\``
+- L646: `<button id="wfexecSendRecommendedAiBtn" class="wfexec-btn wfexec-btn-secondary" type="button">Send to AI Workspace</button>`
+- L669: `Safe guided preparation only: navigate, create draft, generate prompt, and create review handoff.`
+- L889: `<button id="workflowPushAiBtn" class="wfexec-btn wfexec-btn-secondary" type="button">Send to AI for Review</button>`
+- L891: `<button id="workflowSaveTaskBtn" class="wfexec-btn wfexec-btn-ghost" type="button">Prepare Task Review Handoff</button>`
+- L931: `function applyDurableWorkflowHandoff({ projectName, session, operations, consumeProjectHandoff, showMessage }) {`
+- L932: `const handoff = getSharedHandoff(projectName, "workflows", operations);`
+- L933: `const handoffId = asString(handoff?.id);`
+- L934: `if (!handoffId || handoffId === asString(session.lastAppliedHandoffId)) return;`
+- L936: `const payload = asObject(handoff?.payload);`
+- L957: `run.source = "handoff";`
+- L962: `session.lastAppliedHandoffId = handoffId;`
+- L963: `consumeProjectHandoff?.(projectName, handoffId, { actor: "mh-assistant" }).catch((error) => {`
+- L964: `console.warn("Failed to consume workflow handoff:", error.message);`
+- L966: `showMessage?.("Workflow context restored from shared handoff.");`
+- L1039: `function buildAiHandoffPrompt(workflow, inputs, runOutput, context) {`
+- L1068: `createProjectHandoff,`
+- L1072: `const prompt = buildAiHandoffPrompt(workflow, inputs, run.output, context);`
+- L1083: `const handoff = {`
+- L1085: `destination_page: "ai-command",`
+- L1096: `setSharedHandoff(projectName, "ai-command", handoff);`
+- L1098: `if (allowPersistent && typeof createProjectHandoff === "function") {`
+- L1099: `createProjectHandoff(projectName, handoff).catch((error) => {`
+- L1100: `console.warn("Failed to persist workflow-to-ai handoff:", error.message);`
+- L1218: `createProjectHandoff,`
+- L1222: `createAutoModeController(getState, { getState, navigateTo, createProjectHandoff });`
+- L1298: `setSharedHandoff(projectName, "workflows", {`
+- L1300: `destination_page: "workflows",`
+- L1313: `persistWorkflowDraft(projectName, session, session.selectedWorkflowId, "Local handoff seed created", true);`
+- L1391: `route_target: activeWorkflow.routeHint,`
+- L1411: `setSharedHandoff(projectName, "workflows", {`
+- L1413: `destination_page: "workflows",`
+- L1479: `createProjectHandoff,`
+- L1512: `createProjectHandoff,`
+- L1529: `createProjectHandoff,`
+- L1543: `showError?.("Prepare the workflow package before creating a task handoff.");`
+- L1547: `const handoff = {`
+- L1549: `destination_page: "task-center",`
+- L1551: `summary: asString(run.output.summary || "Review-only task handoff prepared from the Workflows operating path."),`
+- L1552: `description: asString(run.output.summary || "Review-only task handoff prepared from the Workflows operating path."),`
+- L1561: `route_target: "workflows",`
+- L1569: `setSharedHandoff(projectName, "task-center", handoff);`
+- L1570: `showMessage?.("Task handoff prepared for review in Task Center.");`
+- L1593: `setSharedHandoff(projectName, "ai-command", {`
+- L1595: `destination_page: "ai-command",`
+- L1629: `setSharedHandoff(projectName, "ai-command", {`
+- L1631: `destination_page: "ai-command",`
+- L1656: `const confirmed = window.confirm(\`Confirm guided preparation simulation\n\nAction: Simulate ${plan.length} guided automation steps.\nRisk: This can prepare downstream draft or handoff state, but does not publish, approve Governance decisions, or send externally.\n\nSelect Cancel to stop.\`);`
+- L1663: `context: { getState, navigateTo, createProjectHandoff, projectName },`
+- L1686: `const confirmed = window.confirm("Confirm guided preparation step\n\nAction: Simulate the next preparation step.\nRisk: This can prepare downstream draft or handoff state, but does not publish, approve Governance decisions, or send externally.\n\nSelect Cancel to keep the current state.");`
+- L1692: `context: { getState, navigateTo, createProjectHandoff, projectName },`
+- L1714: `createAutoModeController(getState, { getState, navigateTo, createProjectHandoff });`
+- L1723: `"Risk: This may prepare workflow steps and handoffs, but must not publish externally or approve Governance decisions without explicit approval.\n\n" +`
+- L1730: `context: { getState, navigateTo, createProjectHandoff, projectName }`
+- L1750: `"Risk: This may continue preparing workflow steps and handoffs from the current state.\n\n" +`
+- L1754: `await resumeAutoMode({ context: { getState, navigateTo, createProjectHandoff, projectName } });`
+- L1777: `await approveCurrentGate({ context: { getState, navigateTo, createProjectHandoff, projectName } });`
+- L1792: `await skipCurrentStep({ context: { getState, navigateTo, createProjectHandoff, projectName } });`
+- L1804: `description: "Prepare structured, repeatable workflow review packages and handoffs for common marketing operations."`
+- L1920: `title: "Create Task / Handoff",`
+- L2151: `<p class="mhos-destination-meta"><strong>Type</strong> task review handoff</p>`
+- L2152: `<p class="mhos-destination-meta"><strong>Destination context</strong> selected workflow session title and handoff intent</p>`
+- L2330: `const handoff = {`
+- L2332: `destination_page: "task-center",`
+- L2333: `title: asString(stateModel.selectedWorkflow?.name || stateModel.selectedWorkflow?.title || "Workflow task handoff"),`
+- L2334: `summary: asString(stateModel.preparedPackage?.summary || stateModel.packagePreview || "Review-only task handoff prepared from the Workflows operating path."),`
+- L2335: `description: asString(stateModel.preparedPackage?.summary || stateModel.packagePreview || "Review-only task handoff prepared from the Workflows operating path."),`
+- L2339: `handoff_intent: "Prepare task handoff from workflow package.",`
+- L2344: `setSharedHandoff(projectName, "task-center", handoff);`
+- L2347: `stateModel.lastStatusText = "Task Center opened for workflow handoff and tracking.";`
+- L2356: `const handoff = {`
+- L2358: `destination_page: "task-center",`
+- L2359: `title: asString(stateModel.selectedWorkflow?.name || stateModel.selectedWorkflow?.title || "Workflow task handoff"),`
+- L2360: `summary: asString(stateModel.preparedPackage?.summary || stateModel.packagePreview || "Review-only task handoff prepared from the Workflows operating path."),`
+- L2361: `description: asString(stateModel.preparedPackage?.summary || stateModel.packagePreview || "Review-only task handoff prepared from the Workflows operating path."),`
+- L2365: `handoff_intent: "Prepare task handoff from workflow package.",`
+- L2370: `setSharedHandoff(projectName, "task-center", handoff);`
+
+## AI Signals
+- L8: `getSharedAiDraft,`
+- L10: `setSharedAiDraft,`
+- L31: `id: "launch-campaign",`
+- L32: `title: "Launch Campaign",`
+- L33: `purpose: "Build a launch-ready review sequence across campaign, content, and distribution handoffs.",`
+- L34: `requiredInputs: ["project", "campaign", "product", "channel", "goal"],`
+- L35: `aiModeId: "strategist",`
+- L36: `routeHint: "campaign-studio"`
+- L41: `purpose: "Generate a review-ready content plan tied to campaign and audience context.",`
+- L42: `requiredInputs: ["project", "campaign", "product", "channel", "goal"],`
+- L43: `aiModeId: "writer",`
+- L49: `purpose: "Prepare media production inputs, format guidance, and downstream handoff steps.",`
+- L50: `requiredInputs: ["project", "campaign", "product", "channel", "goal"],`
+- L51: `aiModeId: "media",`
+- L58: `requiredInputs: ["project", "campaign", "channel", "goal"],`
+- L59: `aiModeId: "operations",`
+- L63: `id: "generate-report",`
+- L64: `title: "Generate Report",`
+- L66: `requiredInputs: ["project", "campaign", "goal"],`
+- L67: `aiModeId: "analyst",`
+- L73: `purpose: "Create a competitor intelligence brief for positioning and campaign advantage.",`
+- L75: `aiModeId: "researcher",`
+- L83: `aiModeId: "operations",`
+- L91: `"Campaign",`
+- L98: `"launch-product": "launch-campaign",`
+- L99: `"generate-campaign": "launch-campaign",`
+- L100: `"run-weekly-report": "generate-report",`
+- L101: `"build-ads": "launch-campaign"`
+- L175: `if (["failed", "error", "errored", "cancelled", "blocked"].includes(normalized)) return "failed";`
+- L184: `if (runStatus === "failed") return "danger";`
+- L204: `campaign: firstNonEmpty(context.activeCampaign),`
+- L428: `const recommendations = asArray(`
+- L429: `learningPayload.recommendations ||`
+- L430: `insightsPayload.recommendations ||`
+- L437: `campaignName: firstNonEmpty(state.context.activeCampaign),`
+- L445: `recommendations,`
+- L458: `failed: 0,`
+- L467: `else if (normalized === "failed") counts.failed += 1;`
+- L496: `if (workflow.id === "generate-report" && context.missingIntegrations.length) {`
+- L507: `function buildWorkflowPrompt(workflow, inputs, context) {`
+- L512: `\`Campaign: ${inputs.campaign || context.campaignName || "not set"}\`,`
+- L523: `const recommendation = asObject(asArray(context.recommendations)[0]);`
+- L524: `const recommendationText = firstNonEmpty(recommendation.action, recommendation.summary, recommendation.title);`
+- L531: `recommendationText,`
+- L544: `label: "Open AI Workspace",`
+- L545: `route: "ai-command",`
+- L546: `reason: "Refine this workflow package with AI reasoning."`
+- L558: `if (target === "setup" || target === "campaign-studio") return "launch-campaign";`
+- L562: `function buildSmartRecommendation(context, session, globalAction) {`
+- L570: `chips: ["Launch readiness", "Automation", "Campaign"],`
+- L571: `prompt: firstNonEmpty(globalAction?.draftPayload?.prompt, \`Build a ${mapped.title.toLowerCase()} review plan from current system blockers and dependencies.\`)`
+- L581: `prompt: "Build a prioritized integration recovery workflow with dependency order and expected readiness impact."`
+- L590: `chips: ["Publishing", "Campaign", "Launch readiness"],`
+- L591: `prompt: "Prepare a publishing package checklist with missing assets and approval dependencies."`
+- L595: `if (!context.campaignName) {`
+- L597: `workflowId: "launch-campaign",`
+- L598: `title: "Define launch campaign workflow",`
+- L599: `reason: "A campaign operating sequence is required before content, media, and publishing lanes can execute clearly.",`
+- L600: `chips: ["Campaign", "Launch readiness", "Automation"],`
+- L601: `prompt: "Create a launch campaign workflow with owner sequence and execution gates."`
+- L610: `chips: ["Content", "Campaign", "Publishing"],`
+- L611: `prompt: \`Refine ${selected.title.toLowerCase()} for reviewed handoff with explicit dependencies and next actions.\``
+- L628: `<article class="wfexec-stat"><span>Failed / blocked</span><strong>${escapeHtml(String(metrics.failed))}</strong></article>`
+- L636: `function renderRecommendationSection(recommendation, escapeHtml) {`
+- L639: `<div class="wfexec-head"><h3>Smart Recommendation</h3></div>`
+- L640: `<div class="wfexec-rec-title">${escapeHtml(recommendation.title)}</div>`
+- L641: `<p class="wfexec-rec-reason">${escapeHtml(recommendation.reason)}</p>`
+- L642: `<div class="wfexec-chip-row">${renderImpactChips(recommendation.chips, escapeHtml)}</div>`
+- L646: `<button id="wfexecSendRecommendedAiBtn" class="wfexec-btn wfexec-btn-secondary" type="button">Send to AI Workspace</button>`
+- L669: `Safe guided preparation only: navigate, create draft, generate prompt, and create review handoff.`
+- L694: `: \`<div class="wfexec-empty">No safe automation steps are available.</div>\``
+- L748: `autoMode?.status === "waiting_approval"`
+- L796: `<label class="wfexec-label" for="wfexecInputCampaign">Campaign</label>`
+- L797: `<input id="wfexecInputCampaign" class="wfexec-input" data-wf-input="campaign" type="text" value="${escapeHtml(inputs.campaign || "")}" placeholder="Campaign name">`
+- L815: `<button id="workflowRunBtnMain" class="wfexec-btn wfexec-btn-primary" type="button">Prepare</button>`
+- L817: `<button id="wfexecLoadAiStateBtn" class="wfexec-btn wfexec-btn-secondary" type="button">Load AI Command State</button>`
+- L847: `<button class="wfexec-btn wfexec-btn-secondary" type="button" data-wf-catalog-ai="${escapeHtml(workflow.id)}">Open in AI Command</button>`
+- L864: `<div class="wfexec-empty">No prepared package yet. Prepare a workflow package to generate a review-ready output.</div>`
+- L889: `<button id="workflowPushAiBtn" class="wfexec-btn wfexec-btn-secondary" type="button">Send to AI for Review</button>`
+- L890: `<button id="workflowPushAiBtnSecondary" class="wfexec-btn wfexec-btn-secondary" type="button">Open in AI Command</button>`
+- L903: `recommendation,`
+- L918: `${renderRecommendationSection(recommendation, escapeHtml)}`
+- L939: `const modeMapped = WORKFLOW_CATALOG.find((item) => item.aiModeId === modeId)?.id;`
+- L946: `campaign: firstNonEmpty(payload?.campaign_name, session.inputsByWorkflow[workflowId].campaign),`
+- L963: `consumeProjectHandoff?.(projectName, handoffId, { actor: "mh-assistant" }).catch((error) => {`
+- L964: `console.warn("Failed to consume workflow handoff:", error.message);`
+- L1003: `if (needsDashboard) await reloadProjectData(projectName);`
+- L1004: `const [insightsResult, learningResult] = await Promise.allSettled([`
+- L1016: `? (insightsResult.reason?.message || learningResult.reason?.message || "Failed to load workflow intelligence")`
+- L1026: `error: error.message || "Failed to load workflow intelligence",`
+- L1039: `function buildAiHandoffPrompt(workflow, inputs, runOutput, context) {`
+- L1044: `\`Campaign: ${inputs.campaign || context.campaignName || "not set"}\`,`
+- L1052: `\`Campaign: ${inputs.campaign || context.campaignName || "not set"}\`,`
+- L1061: `function pushWorkflowToAiCommand({`
+- L1072: `const prompt = buildAiHandoffPrompt(workflow, inputs, run.output, context);`
+- L1073: `const aiDraft = {`
+- L1075: `modeId: workflow.aiModeId,`
+- L1076: `lastCommand: prompt,`
+- L1081: `setSharedAiDraft(projectName, aiDraft);`
+- L1085: `destination_page: "ai-command",`
+- L1087: `prompt,`
+- L1090: `draft_context: aiDraft,`
+- L1093: `status: "available"`
+- L1096: `setSharedHandoff(projectName, "ai-command", handoff);`
+- L1100: `console.warn("Failed to persist workflow-to-ai handoff:", error.message);`
+- L1104: `navigateTo("ai-command");`
+- L1105: `showMessage?.(allowPersistent ? "Workflow context sent to AI Command." : "Workflow context sent locally to AI Command.");`
+- L1121: `const detail = asObject(event?.detail);`
+- L1122: `const message = asString(detail.message);`
+- L1123: `const meta = asObject(detail.meta);`
+- L1131: `runProjectAiWorkflow,`
+- L1140: `const workflow = WORKFLOW_CATALOG.find((item) => item.aiModeId === asString(meta.modeId)) || WORKFLOW_CATALOG[0];`
+- L1146: `goal: firstNonEmpty(meta.assistantTitle, session.inputsByWorkflow[workflow.id].goal),`
+- L1147: `campaign: firstNonEmpty(session.inputsByWorkflow[workflow.id].campaign, state.context.activeCampaign),`
+- L1152: `session.draftStatus = "AI prompt imported into workflow review builder";`
+- L1162: `await ensureWorkflowIntelligenceLoaded({`
+- L1173: `const result = await (runProjectAiWorkflow || runProjectWorkflow)?.(projectName, workflow.id, {`
+- L1178: `prompt: firstNonEmpty(message, buildWorkflowPrompt(workflow, session.inputsByWorkflow[workflow.id], contextModel)),`
+- L1193: `await reloadProjectData?.(projectName);`
+- L1194: `showMessage?.(\`${workflow.title} created from AI context.\`);`
+- L1196: `run.status = "failed";`
+- L1197: `showError?.(error.message || "Workflow review package preparation failed.");`
+- L1216: `runProjectAiWorkflow,`
+- L1236: `const aiDraft = asObject(getSharedAiDraft(projectName, state.data.operations));`
+- L1237: `const hasDirectAiState = Boolean(aiDraft.lastCommand || aiDraft.lastResponseTitle || aiDraft.modeId);`
+- L1292: `const loadAiStateBtn = $("wfexecLoadAiStateBtn");`
+- L1293: `if (loadAiStateBtn) {`
+- L1294: `loadAiStateBtn.onclick = () => {`
+- L1295: `const draft = asObject(getSharedAiDraft(projectName, getState().data.operations));`
+- L1297: `const safePrompt = \`Create a workflow for ${projectName || "this project"} focused on ${inputs.goal || "operational improvement"}.\`;`
+- L1302: `prompt: safePrompt,`
+- L1305: `modeId: workflow.aiModeId,`
+- L1306: `lastCommand: safePrompt,`
+- L1310: `status: "available"`
+- L1314: `showMessage?.("No AI state found. Local workflow seed created safely.");`
+- L1323: `campaign: firstNonEmpty(session.inputsByWorkflow[session.selectedWorkflowId].campaign, state.context.activeCampaign),`
+- L1327: `persistWorkflowDraft(projectName, session, session.selectedWorkflowId, "AI state loaded", true);`
+- L1328: `showMessage?.("AI Command state loaded into workflow inputs.");`
+- L1373: `await ensureWorkflowIntelligenceLoaded({`
+- L1385: `const result = await (runProjectAiWorkflow || runProjectWorkflow)?.(projectName, activeWorkflow.id, {`
+- L1390: `prompt: buildWorkflowPrompt(activeWorkflow, activeInputs, freshContext),`
+- L1421: `status: "available"`
+- L1424: `await reloadProjectData?.(projectName);`
+- L1427: `activeRun.status = "failed";`
+- L1429: `title: \`${activeWorkflow.title} failed\`,`
+- L1430: `summary: error.message || "Workflow review package preparation failed.",`
+- L1431: `blockedRequirements: ["Preparation failed. Review inputs and retry."],`
+- L1435: `showError?.(error.message || "Workflow review package preparation failed.");`
+- L1443: `const runBtnMain = $("workflowRunBtnMain");`
+- L1444: `if (runBtnMain) runBtnMain.onclick = () => runWorkflow(session.selectedWorkflowId);`
+- L1449: `const rec = buildSmartRecommendation(contextModel, session, getGlobalNextBestAction(getState()));`
+- L1457: `const rec = buildSmartRecommendation(contextModel, session, getGlobalNextBestAction(getState()));`
+- L1460: `persistWorkflowDraft(projectName, session, rec.workflowId, "Recommendation saved as draft", true);`
+- L1466: `const sendRecommendedAiBtn = $("wfexecSendRecommendedAiBtn");`
+- L1467: `if (sendRecommendedAiBtn) {`
+- L1468: `sendRecommendedAiBtn.onclick = () => {`
+- L1469: `const rec = buildSmartRecommendation(contextModel, session, getGlobalNextBestAction(getState()));`
+- L1472: `pushWorkflowToAiCommand({`
+- L1481: `allowPersistent: hasDirectAiState`
+- L1500: `Array.from(document.querySelectorAll("[data-wf-catalog-ai]")).forEach((button) => {`
+- L1502: `const workflowId = button.getAttribute("data-wf-catalog-ai") || session.selectedWorkflowId;`
+- L1505: `pushWorkflowToAiCommand({`
+- L1514: `allowPersistent: hasDirectAiState`
+- L1519: `const pushAiBtn = $("workflowPushAiBtn");`
+- L1520: `if (pushAiBtn) {`
+- L1521: `pushAiBtn.onclick = () => {`
+- L1522: `pushWorkflowToAiCommand({`
+- L1531: `allowPersistent: hasDirectAiState`
+- L1536: `const pushAiSecondaryBtn = $("workflowPushAiBtnSecondary");`
+- L1537: `if (pushAiSecondaryBtn) pushAiSecondaryBtn.onclick = pushAiBtn?.onclick || null;`
+- L1550: `title: \`${workflow.title} • ${inputs.campaign || inputs.project || projectName || "Project"}\`,`
+- L1560: `service_domain: workflow.id === "generate-report" || workflow.id === "research-competitors" ? "research" : "campaign",`
+- L1578: `const rec = buildSmartRecommendation(contextModel, session, getGlobalNextBestAction(getState()));`
+- L1579: `const prompt = [`
+- L1582: `\`Current recommendation: ${rec.title}\`,`
+- L1587: `setSharedAiDraft(projectName, {`
+- L1590: `lastCommand: prompt,`
+- L1591: `lastResponseTitle: "Workflow recommendation"`
+- L1593: `setSharedHandoff(projectName, "ai-command", {`
+- L1595: `destination_page: "ai-command",`
+- L1597: `prompt,`
+- L1601: `lastCommand: prompt,`
+- L1602: `lastResponseTitle: "Workflow recommendation"`
+- L1605: `status: "available"`
+- L1607: `navigateTo("ai-command");`
+- L1614: `const prompt = [`
+- L1617: `\`Campaign: ${inputs.campaign || "not set"}\`,`
+- L1623: `setSharedAiDraft(projectName, {`
+- L1626: `lastCommand: prompt,`
+- L1629: `setSharedHandoff(projectName, "ai-command", {`
+- L1631: `destination_page: "ai-command",`
+- L1633: `prompt,`
+- L1637: `lastCommand: prompt,`
+- L1641: `status: "available"`
+- L1643: `navigateTo("ai-command");`
+- L1652: `workflowAutomationState.result = "No safe automation steps available.";`
+- L1662: `const result = await runAutomationPlan(plan, {`
+- L1681: `workflowAutomationState.result = "No safe automation steps available.";`
+- L1691: `const stepResult = await runAutomationPlan(singleStep, {`
+- L1728: `await startAutoMode(plan, {`
+- L1754: `await resumeAutoMode({ context: { getState, navigateTo, createProjectHandoff, projectName } });`
+- L1777: `await approveCurrentGate({ context: { getState, navigateTo, createProjectHandoff, projectName } });`
+- L1792: `await skipCurrentStep({ context: { getState, navigateTo, createProjectHandoff, projectName } });`
+- L1802: `eyebrow: "AI & Build",`
+- L1820: `const campaignName = asString(state.context.activeCampaign || "");`
+- L1840: `"campaign-studio": "campaign-studio",`
+- L1854: `campaign: campaignName,`
+- L1864: `aiReviewed: false,`
+- L1881: `function buildSessionPrompt(workflow, inputs) {`
+- L1886: `\`Campaign: ${inputs.campaign || campaignName || "not set"}\`,`
+- L1912: `copy: hasPrepared ? "Prepared" : "Waiting"`
+- L1915: `title: "Review with AI",`
+- L1916: `status: stateModel.aiReviewed ? "complete" : hasPrepared ? "active" : "pending",`
+- L1917: `copy: stateModel.aiReviewed ? "Reviewed" : "Pending"`
+- L1963: `? "Review in AI Workspace."`
+- L1988: `<span class="badge">Campaign: ${escapeHtml(campaignName || "Not selected")}</span>`
+- L1993: `<button class="btn btn-secondary" type="button" data-wf-hero-ai="1">Review Session in AI Workspace</button>`
+- L2065: `<span>Campaign</span>`
+- L2066: `<input id="wfLightCampaign" class="setup-input" type="text" value="${escapeHtml(inputs.campaign || "")}" placeholder="Campaign name">`
+- L2084: `<p class="wfloop-session-label">Available context</p>`
+- L2095: `<button id="wfLightAiBtn" class="btn btn-secondary" type="button">Review in AI Workspace</button>`
+- L2096: `<button id="wfLightCampaignBtn" class="btn btn-ghost" type="button">Open Campaign Studio</button>`
+- L2110: `<p class="wfloop-preview-meta">${escapeHtml(preparedForSelected ? \`Prepared ${formatDateTime(preparedForSelected.createdAt)} · ${workflow.title} session package\` : "Prepare to generate a compact operating package preview.")}</p>`
+- L2111: `<pre>${escapeHtml(preparedForSelected?.prompt || "Package will include playbook, purpose, project, campaign, product, channel, goal, and destination context.")}</pre>`
+- L2114: `<details class="wfloop-tech-details">`
+- L2115: `<summary>Technical details</summary>`
+- L2117: `<p>Backend workflow run and automation helpers remain preserved, but this active surface stays limited to preparation, review, routing, and destination-owned execution authority.</p>`
+- L2118: `</details>`
+- L2122: `<section class="mhos-ai-guidance">`
+- L2123: `<h3 class="mhos-ai-guidance-title">AI Guidance</h3>`
+- L2124: `<p class="mhos-ai-guidance-copy">AI prepares structure, sequencing, destination context, and missing-input prompts for review only for ${escapeHtml(workflow.title)}.</p>`
+- L2125: `<p class="mhos-ai-guidance-reason">Remaining gaps: ${escapeHtml(missing.map(titleCase).join(", ") || "No missing inputs")}. Safest next step: ${escapeHtml(nextAction)}</p>`
+- L2126: `<div class="mhos-ai-guidance-actions">`
+- L2127: `<button class="btn btn-secondary btn-sm" type="button" data-wf-hero-ai="1">Open AI Workspace</button>`
+- L2138: `<p class="mhos-destination-title">Review in AI Workspace</p>`
+- L2139: `<p class="mhos-destination-meta"><strong>Type</strong> AI review</p>`
+- L2140: `<p class="mhos-destination-meta"><strong>Destination context</strong> workflow package prompt, selected workflow, and input state</p>`
+- L2144: `<button class="btn btn-secondary btn-sm" type="button" data-wf-hero-ai="1">Open</button>`
+- L2174: `<p class="mhos-destination-title">Technical Details</p>`
+- L2177: `<p class="mhos-destination-meta"><strong>Status</strong> Safe now · Destination tools own execution authority and Governance-gated actions remain protected</p>`
+- L2180: `<button class="btn btn-ghost btn-sm" type="button" data-wf-tech-focus="1">Open details</button>`
+- L2225: `["wfLightCampaign", "campaign"],`
+- L2258: `const prompt = buildSessionPrompt(activeWorkflow, activeInputs);`
+- L2260: `if (globalInput) globalInput.value = prompt;`
+- L2264: `prompt,`
+- L2268: `stateModel.lastStatusText = "Prepared package updated and mirrored in the global AI bar.";`
+- L2273: `function openAiWorkspace() {`
+- L2276: `const prompt = stateModel.preparedPackage?.workflowId === activeWorkflow.id`
+- L2277: `? stateModel.preparedPackage.prompt`
+- L2278: `: buildSessionPrompt(activeWorkflow, activeInputs);`
+- L2280: `setSharedAiDraft(projectName, {`
+- L2282: `modeId: activeWorkflow.aiModeId,`
+- L2283: `lastCommand: prompt,`
+- L2289: `reason: "Return to workflow session after AI review."`
+- L2296: `if (globalInput) globalInput.value = prompt;`
+- L2298: `stateModel.aiReviewed = true;`
+- L2300: `stateModel.lastStatusText = "Session context sent to AI Workspace for review and refinement.";`
+- L2301: `navigateTo("ai-command");`
+- L2307: `Array.from(root.querySelectorAll("[data-wf-hero-ai]")).forEach((button) => {`
+- L2308: `button.onclick = openAiWorkspace;`
+
+## Confirmation Signals
+- L1336: `return window.confirm(`
+- L1656: `const confirmed = window.confirm(\`Confirm guided preparation simulation\n\nAction: Simulate ${plan.length} guided automation steps.\nRisk: This can prepare downstream draft or handoff state, but does not publish, approve Governance decisions, or send externally.\n\nSelect Cancel to stop.\`);`
+- L1686: `const confirmed = window.confirm("Confirm guided preparation step\n\nAction: Simulate the next preparation step.\nRisk: This can prepare downstream draft or handoff state, but does not publish, approve Governance decisions, or send externally.\n\nSelect Cancel to keep the current state.");`
+- L1720: `const confirmed = window.confirm(`
+- L1747: `const confirmed = window.confirm(`
+- L1770: `const confirmed = window.confirm(`
+- L1785: `const confirmed = window.confirm(`
+
+## Access-Key / Credential Signals
+- none
+
+## Save / Storage Signals
+- L8: `getSharedAiDraft,`
+- L10: `setSharedAiDraft,`
+- L43: `aiModeId: "writer",`
+- L104: `const WORKFLOW_LOCAL_DRAFTS_KEY = "mh-workflow-local-drafts-v1";`
+- L177: `return "draft";`
+- L213: `status: "draft",`
+- L248: `function readLocalDraftMap() {`
+- L251: `const raw = window.localStorage?.getItem(WORKFLOW_LOCAL_DRAFTS_KEY) || "{}";`
+- L259: `function writeLocalDraftMap(map) {`
+- L262: `window.localStorage?.setItem(WORKFLOW_LOCAL_DRAFTS_KEY, JSON.stringify(map || {}));`
+- L266: `function loadLocalDrafts(projectName) {`
+- L268: `return asObject(readLocalDraftMap()[key]);`
+- L271: `function saveLocalDraft(projectName, workflowId, payload) {`
+- L273: `const map = readLocalDraftMap();`
+- L274: `const projectDrafts = asObject(map[key]);`
+- L275: `projectDrafts[workflowId] = {`
+- L276: `...asObject(projectDrafts[workflowId]),`
+- L280: `map[key] = projectDrafts;`
+- L281: `writeLocalDraftMap(map);`
+- L282: `return projectDrafts[workflowId];`
+- L285: `function hydrateFromLocalDrafts(projectName, session) {`
+- L286: `if (session.localDraftsHydrated) return;`
+- L287: `const local = loadLocalDrafts(projectName);`
+- L289: `const draft = asObject(local[workflow.id]);`
+- L290: `if (!Object.keys(draft).length) return;`
+- L293: `...asObject(draft.inputs)`
+- L295: `if (draft.lastSelected) {`
+- L298: `if (draft.updatedAt) {`
+- L299: `session.draftStatus = \`Draft restored ${formatDateTime(draft.updatedAt)}\`;`
+- L302: `session.localDraftsHydrated = true;`
+- L305: `function persistWorkflowDraft(projectName, session, workflowId, hint, selected) {`
+- L306: `const saved = saveLocalDraft(projectName, workflowId, {`
+- L311: `session.draftStatus = hint || \`Draft saved ${formatDateTime(saved.updatedAt)}\`;`
+- L322: `draftStatus: "",`
+- L323: `localDraftsHydrated: false,`
+- L348: `session.draftStatus = asString(session.draftStatus);`
+- L364: `hydrateFromLocalDrafts(projectName, session);`
+- L457: `draft: 0,`
+- L468: `else counts.draft += 1;`
+- L571: `prompt: firstNonEmpty(globalAction?.draftPayload?.prompt, \`Build a ${mapped.title.toLowerCase()} review plan from current system blockers and dependencies.\`)`
+- L627: `<article class="wfexec-stat"><span>Draft workflows</span><strong>${escapeHtml(String(metrics.draft))}</strong></article>`
+- L645: `<button id="wfexecSaveRecommendedBtn" class="wfexec-btn wfexec-btn-ghost" type="button">Save Draft</button>`
+- L669: `Safe guided preparation only: navigate, create draft, generate prompt, and create review handoff.`
+- L780: `function renderBuilderSection(session, workflow, inputs, validationMessage, draftStatus, escapeHtml) {`
+- L816: `<button id="wfexecSaveDraftBtn" class="wfexec-btn wfexec-btn-ghost" type="button">Save Draft</button>`
+- L818: `<button id="wfexecClearDraftBtn" class="wfexec-btn wfexec-btn-ghost" type="button">Clear</button>`
+- L820: `<div class="wfexec-draft-status">${escapeHtml(draftStatus || "Drafts auto-save locally per workflow.")}</div>`
+- L846: `<button class="wfexec-btn wfexec-btn-ghost" type="button" data-wf-catalog-save="${escapeHtml(workflow.id)}">Save Draft</button>`
+- L891: `<button id="workflowSaveTaskBtn" class="wfexec-btn wfexec-btn-ghost" type="button">Prepare Task Review Handoff</button>`
+- L920: `${renderBuilderSection(session, workflow, inputs, session.validationMessage, session.draftStatus, escapeHtml)}`
+- L938: `const modeId = asString(payload?.draft_context?.modeId);`
+- L945: `project: firstNonEmpty(payload?.draft_context?.projectName, session.inputsByWorkflow[workflowId].project),`
+- L947: `goal: firstNonEmpty(payload?.draft_context?.lastResponseTitle, payload?.workflow_title, session.inputsByWorkflow[workflowId].goal),`
+- L1070: `allowPersistent`
+- L1073: `const aiDraft = {`
+- L1081: `setSharedAiDraft(projectName, aiDraft);`
+- L1090: `draft_context: aiDraft,`
+- L1098: `if (allowPersistent && typeof createProjectHandoff === "function") {`
+- L1100: `console.warn("Failed to persist workflow-to-ai handoff:", error.message);`
+- L1105: `showMessage?.(allowPersistent ? "Workflow context sent to AI Command." : "Workflow context sent locally to AI Command.");`
+- L1152: `session.draftStatus = "AI prompt imported into workflow review builder";`
+- L1236: `const aiDraft = asObject(getSharedAiDraft(projectName, state.data.operations));`
+- L1237: `const hasDirectAiState = Boolean(aiDraft.lastCommand || aiDraft.lastResponseTitle || aiDraft.modeId);`
+- L1249: `persistWorkflowDraft(projectName, session, session.selectedWorkflowId, "Draft auto-saved", true);`
+- L1265: `persistWorkflowDraft(projectName, session, session.selectedWorkflowId, "Workflow switched", true);`
+- L1271: `const saveDraftBtn = $("wfexecSaveDraftBtn");`
+- L1272: `if (saveDraftBtn) {`
+- L1273: `saveDraftBtn.onclick = () => {`
+- L1274: `persistWorkflowDraft(projectName, session, session.selectedWorkflowId, "Draft saved", true);`
+- L1275: `showMessage?.("Workflow draft saved.");`
+- L1280: `const clearDraftBtn = $("wfexecClearDraftBtn");`
+- L1281: `if (clearDraftBtn) {`
+- L1282: `clearDraftBtn.onclick = () => {`
+- L1285: `persistWorkflowDraft(projectName, session, session.selectedWorkflowId, "Draft cleared", true);`
+- L1287: `showMessage?.("Workflow draft cleared.");`
+- L1295: `const draft = asObject(getSharedAiDraft(projectName, getState().data.operations));`
+- L1296: `if (!Object.keys(draft).length) {`
+- L1303: `draft_context: {`
+- L1313: `persistWorkflowDraft(projectName, session, session.selectedWorkflowId, "Local handoff seed created", true);`
+- L1321: `project: firstNonEmpty(draft.projectName, session.inputsByWorkflow[session.selectedWorkflowId].project),`
+- L1322: `goal: firstNonEmpty(draft.lastResponseTitle, session.inputsByWorkflow[session.selectedWorkflowId].goal),`
+- L1327: `persistWorkflowDraft(projectName, session, session.selectedWorkflowId, "AI state loaded", true);`
+- L1337: `\`Confirm workflow review package preparation\n\nAction: Prepare and record backend workflow output for "${title}".\n\nThis may call the backend workflow run endpoint and update workflow run history. It prepares a review output only and does not publish, send messages, create CRM records, bypass Governance, or perform destructive actions.\n\nSelect Cancel to keep the workflow unchanged.\``
+- L1362: `setValidation("Workflow preparation cancelled. No backend workflow run was recorded.");`
+- L1454: `const saveRecommendedBtn = $("wfexecSaveRecommendedBtn");`
+- L1455: `if (saveRecommendedBtn) {`
+- L1456: `saveRecommendedBtn.onclick = () => {`
+- L1460: `persistWorkflowDraft(projectName, session, rec.workflowId, "Recommendation saved as draft", true);`
+- L1461: `showMessage?.("Recommended workflow saved as draft.");`
+- L1481: `allowPersistent: hasDirectAiState`
+- L1490: `Array.from(document.querySelectorAll("[data-wf-catalog-save]")).forEach((button) => {`
+- L1492: `const workflowId = button.getAttribute("data-wf-catalog-save") || session.selectedWorkflowId;`
+- L1494: `persistWorkflowDraft(projectName, session, workflowId, "Draft saved", true);`
+- L1495: `showMessage?.("Workflow draft saved.");`
+- L1514: `allowPersistent: hasDirectAiState`
+- L1531: `allowPersistent: hasDirectAiState`
+- L1539: `const saveTaskBtn = $("workflowSaveTaskBtn");`
+- L1540: `if (saveTaskBtn) {`
+- L1541: `saveTaskBtn.onclick = () => {`
+- L1587: `setSharedAiDraft(projectName, {`
+- L1598: `draft_context: {`
+- L1623: `setSharedAiDraft(projectName, {`
+- L1634: `draft_context: {`
+- L1656: `const confirmed = window.confirm(\`Confirm guided preparation simulation\n\nAction: Simulate ${plan.length} guided automation steps.\nRisk: This can prepare downstream draft or handoff state, but does not publish, approve Governance decisions, or send externally.\n\nSelect Cancel to stop.\`);`
+- L1686: `const confirmed = window.confirm("Confirm guided preparation step\n\nAction: Simulate the next preparation step.\nRisk: This can prepare downstream draft or handoff state, but does not publish, approve Governance decisions, or send externally.\n\nSelect Cancel to keep the current state.");`
+- L2150: `<p class="mhos-destination-title">Create/Draft Task</p>`
+- L2195: `<span>${escapeHtml(titleCase(normalizeRunStatus(item.status || "draft")))}</span>`
+- L2280: `setSharedAiDraft(projectName, {`
+
+## Navigation Signals
+- L36: `routeHint: "campaign-studio"`
+- L44: `routeHint: "content-studio"`
+- L52: `routeHint: "media-studio"`
+- L60: `routeHint: "publishing"`
+- L68: `routeHint: "insights"`
+- L76: `routeHint: "research"`
+- L84: `routeHint: "integrations"`
+- L532: `\`Open ${titleCase(workflow.routeHint)} for review handoff.\`,`
+- L537: `routeSuggestions: [`
+- L539: `label: \`Open ${titleCase(workflow.routeHint)}\`,`
+- L540: `route: workflow.routeHint,`
+- L541: `reason: \`Continue review in ${titleCase(workflow.routeHint)}.\``
+- L545: `route: "ai-command",`
+- L1067: `navigateTo,`
+- L1078: `routeSuggestions: asArray(run.output?.routeSuggestions)`
+- L1104: `navigateTo("ai-command");`
+- L1209: `navigateTo,`
+- L1222: `createAutoModeController(getState, { getState, navigateTo, createProjectHandoff });`
+- L1391: `route_target: activeWorkflow.routeHint,`
+- L1478: `navigateTo,`
+- L1511: `navigateTo,`
+- L1528: `navigateTo,`
+- L1561: `route_target: "workflows",`
+- L1571: `navigateTo("task-center");`
+- L1607: `navigateTo("ai-command");`
+- L1621: `"Return structured steps, blockers, route suggestions, and KPI checks."`
+- L1643: `navigateTo("ai-command");`
+- L1663: `context: { getState, navigateTo, createProjectHandoff, projectName },`
+- L1692: `context: { getState, navigateTo, createProjectHandoff, projectName },`
+- L1714: `createAutoModeController(getState, { getState, navigateTo, createProjectHandoff });`
+- L1730: `context: { getState, navigateTo, createProjectHandoff, projectName }`
+- L1754: `await resumeAutoMode({ context: { getState, navigateTo, createProjectHandoff, projectName } });`
+- L1777: `await approveCurrentGate({ context: { getState, navigateTo, createProjectHandoff, projectName } });`
+- L1792: `await skipCurrentStep({ context: { getState, navigateTo, createProjectHandoff, projectName } });`
+- L1798: `export const workflowsRoute = {`
+- L1815: `navigateTo,`
+- L1839: `const destinationRouteByHint = {`
+- L1873: `function getDestinationLabel(routeHint) {`
+- L1874: `return titleCase(routeHint || "destination");`
+- L1948: `const destinationRoute = destinationRouteByHint[workflow.routeHint] || "workflows";`
+- L1949: `const destinationName = getDestinationLabel(workflow.routeHint);`
+- L1980: `<p class="wfloop-mission">Choose an operating playbook, prepare a review-ready package, and route it safely to the right MH-OS destination.</p>`
+- L2030: `<span class="wfloop-mini-chip">Destination ${escapeHtml(getDestinationLabel(item.routeHint))}</span>`
+- L2116: `<p>Safe preparation path only. This surface prepares review context and routes it to the correct destination.</p>`
+- L2164: `<p class="mhos-destination-meta"><strong>Destination context</strong> route hint, prepared package, and review context</p>`
+- L2168: `<button class="btn btn-ghost btn-sm" type="button" data-wf-open="${escapeHtml(destinationRoute)}">Open ${escapeHtml(destinationName)}</button>`
+- L2285: `routeSuggestions: [`
+- L2288: `route: "workflows",`
+- L2301: `navigateTo("ai-command");`
+- L2323: `navigateTo("campaign-studio");`
+- L2348: `navigateTo("task-center");`
+- L2354: `const route = button.getAttribute("data-wf-open") || "workflows";`
+- L2355: `if (route === "task-center") {`
+- L2373: `if (route !== "task-center") stateModel.openedDestination = true;`
+- L2375: `stateModel.lastStatusText = \`Opened ${titleCase(route)} for session continuity.\`;`
+- L2376: `navigateTo(route);`
+
+## Disabled / Read-only / Draft / Guard Signals
+- L8: `getSharedAiDraft,`
+- L10: `setSharedAiDraft,`
+- L104: `const WORKFLOW_LOCAL_DRAFTS_KEY = "mh-workflow-local-drafts-v1";`
+- L175: `if (["failed", "error", "errored", "cancelled", "blocked"].includes(normalized)) return "failed";`
+- L177: `return "draft";`
+- L213: `status: "draft",`
+- L218: `blockedRequirements: [],`
+- L248: `function readLocalDraftMap() {`
+- L251: `const raw = window.localStorage?.getItem(WORKFLOW_LOCAL_DRAFTS_KEY) || "{}";`
+- L259: `function writeLocalDraftMap(map) {`
+- L262: `window.localStorage?.setItem(WORKFLOW_LOCAL_DRAFTS_KEY, JSON.stringify(map || {}));`
+- L266: `function loadLocalDrafts(projectName) {`
+- L268: `return asObject(readLocalDraftMap()[key]);`
+- L271: `function saveLocalDraft(projectName, workflowId, payload) {`
+- L273: `const map = readLocalDraftMap();`
+- L274: `const projectDrafts = asObject(map[key]);`
+- L275: `projectDrafts[workflowId] = {`
+- L276: `...asObject(projectDrafts[workflowId]),`
+- L280: `map[key] = projectDrafts;`
+- L281: `writeLocalDraftMap(map);`
+- L282: `return projectDrafts[workflowId];`
+- L285: `function hydrateFromLocalDrafts(projectName, session) {`
+- L286: `if (session.localDraftsHydrated) return;`
+- L287: `const local = loadLocalDrafts(projectName);`
+- L289: `const draft = asObject(local[workflow.id]);`
+- L290: `if (!Object.keys(draft).length) return;`
+- L293: `...asObject(draft.inputs)`
+- L295: `if (draft.lastSelected) {`
+- L298: `if (draft.updatedAt) {`
+- L299: `session.draftStatus = \`Draft restored ${formatDateTime(draft.updatedAt)}\`;`
+- L302: `session.localDraftsHydrated = true;`
+- L305: `function persistWorkflowDraft(projectName, session, workflowId, hint, selected) {`
+- L306: `const saved = saveLocalDraft(projectName, workflowId, {`
+- L311: `session.draftStatus = hint || \`Draft saved ${formatDateTime(saved.updatedAt)}\`;`
+- L322: `draftStatus: "",`
+- L323: `localDraftsHydrated: false,`
+- L348: `session.draftStatus = asString(session.draftStatus);`
+- L364: `hydrateFromLocalDrafts(projectName, session);`
+- L387: `blockedRequirements: asArray(output.blockedRequirements || output.blocked_requirements),`
+- L457: `draft: 0,`
+- L468: `else counts.draft += 1;`
+- L485: `function getBlockedRequirements(workflow, inputs, context) {`
+- L486: `const blocked = [];`
+- L489: `blocked.push(\`Missing required inputs: ${missingRequired.map(titleCase).join(", ")}\`);`
+- L493: `blocked.push(\`Missing assets: ${context.missingAssets.slice(0, 4).join(", ")}\`);`
+- L497: `blocked.push(\`Data coverage gaps: ${context.missingIntegrations.slice(0, 3).join(", ")}\`);`
+- L501: `blocked.push("No integration gaps detected. Use this workflow only if connectors are unstable.");`
+- L504: `return blocked;`
+- L525: `const blockedRequirements = getBlockedRequirements(workflow, inputs, context);`
+- L533: `blockedRequirements.length ? "Resolve blockers before any destination-owned execution." : "Proceed to review handoff."`
+- L535: `blockedRequirements,`
+- L571: `prompt: firstNonEmpty(globalAction?.draftPayload?.prompt, \`Build a ${mapped.title.toLowerCase()} review plan from current system blockers and dependencies.\`)`
+- L627: `<article class="wfexec-stat"><span>Draft workflows</span><strong>${escapeHtml(String(metrics.draft))}</strong></article>`
+- L628: `<article class="wfexec-stat"><span>Failed / blocked</span><strong>${escapeHtml(String(metrics.failed))}</strong></article>`
+- L645: `<button id="wfexecSaveRecommendedBtn" class="wfexec-btn wfexec-btn-ghost" type="button">Save Draft</button>`
+- L669: `Safe guided preparation only: navigate, create draft, generate prompt, and create review handoff.`
+- L780: `function renderBuilderSection(session, workflow, inputs, validationMessage, draftStatus, escapeHtml) {`
+- L816: `<button id="wfexecSaveDraftBtn" class="wfexec-btn wfexec-btn-ghost" type="button">Save Draft</button>`
+- L818: `<button id="wfexecClearDraftBtn" class="wfexec-btn wfexec-btn-ghost" type="button">Clear</button>`
+- L820: `<div class="wfexec-draft-status">${escapeHtml(draftStatus || "Drafts auto-save locally per workflow.")}</div>`
+- L833: `const blocked = getBlockedRequirements(workflow, inputs, context);`
+- L834: `const ready = blocked.length === 0;`
+- L843: `<div class="wfexec-required"><strong>Readiness status:</strong> ${escapeHtml(ready ? "Ready to prepare" : blocked[0])}</div>`
+- L846: `<button class="wfexec-btn wfexec-btn-ghost" type="button" data-wf-catalog-save="${escapeHtml(workflow.id)}">Save Draft</button>`
+- L858: `function renderExecutionSection(run, workflow, blockedRequirements, escapeHtml) {`
+- L876: `${blockedRequirements.length ? \``
+- L878: `<strong>Blocked requirements</strong>`
+- L879: `<ul>${blockedRequirements.map((item) => \`<li>${escapeHtml(item)}</li>\`).join("")}</ul>`
+- L910: `blockedRequirements,`
+- L920: `${renderBuilderSection(session, workflow, inputs, session.validationMessage, session.draftStatus, escapeHtml)}`
+- L924: `${renderExecutionSection(run, workflow, blockedRequirements, escapeHtml)}`
+- L938: `const modeId = asString(payload?.draft_context?.modeId);`
+- L945: `project: firstNonEmpty(payload?.draft_context?.projectName, session.inputsByWorkflow[workflowId].project),`
+- L947: `goal: firstNonEmpty(payload?.draft_context?.lastResponseTitle, payload?.workflow_title, session.inputsByWorkflow[workflowId].goal),`
+- L1073: `const aiDraft = {`
+- L1081: `setSharedAiDraft(projectName, aiDraft);`
+- L1090: `draft_context: aiDraft,`
+- L1152: `session.draftStatus = "AI prompt imported into workflow review builder";`
+- L1190: `run.blockedRequirements = asArray(output.blockedRequirements || output.blocked_requirements);`
+- L1236: `const aiDraft = asObject(getSharedAiDraft(projectName, state.data.operations));`
+- L1237: `const hasDirectAiState = Boolean(aiDraft.lastCommand || aiDraft.lastResponseTitle || aiDraft.modeId);`
+- L1249: `persistWorkflowDraft(projectName, session, session.selectedWorkflowId, "Draft auto-saved", true);`
+- L1265: `persistWorkflowDraft(projectName, session, session.selectedWorkflowId, "Workflow switched", true);`
+- L1271: `const saveDraftBtn = $("wfexecSaveDraftBtn");`
+- L1272: `if (saveDraftBtn) {`
+- L1273: `saveDraftBtn.onclick = () => {`
+- L1274: `persistWorkflowDraft(projectName, session, session.selectedWorkflowId, "Draft saved", true);`
+- L1275: `showMessage?.("Workflow draft saved.");`
+- L1280: `const clearDraftBtn = $("wfexecClearDraftBtn");`
+- L1281: `if (clearDraftBtn) {`
+- L1282: `clearDraftBtn.onclick = () => {`
+- L1285: `persistWorkflowDraft(projectName, session, session.selectedWorkflowId, "Draft cleared", true);`
+- L1287: `showMessage?.("Workflow draft cleared.");`
+- L1295: `const draft = asObject(getSharedAiDraft(projectName, getState().data.operations));`
+- L1296: `if (!Object.keys(draft).length) {`
+- L1303: `draft_context: {`
+- L1313: `persistWorkflowDraft(projectName, session, session.selectedWorkflowId, "Local handoff seed created", true);`
+- L1321: `project: firstNonEmpty(draft.projectName, session.inputsByWorkflow[session.selectedWorkflowId].project),`
+- L1322: `goal: firstNonEmpty(draft.lastResponseTitle, session.inputsByWorkflow[session.selectedWorkflowId].goal),`
+- L1327: `persistWorkflowDraft(projectName, session, session.selectedWorkflowId, "AI state loaded", true);`
+- L1407: `activeRun.blockedRequirements = asArray(safeOutput.blockedRequirements || safeOutput.blocked_requirements);`
+- L1431: `blockedRequirements: ["Preparation failed. Review inputs and retry."],`
+- L1434: `activeRun.blockedRequirements = asArray(activeRun.output.blockedRequirements);`
+- L1460: `persistWorkflowDraft(projectName, session, rec.workflowId, "Recommendation saved as draft", true);`
+- L1461: `showMessage?.("Recommended workflow saved as draft.");`
+- L1494: `persistWorkflowDraft(projectName, session, workflowId, "Draft saved", true);`
+- L1495: `showMessage?.("Workflow draft saved.");`
+- L1587: `setSharedAiDraft(projectName, {`
+- L1598: `draft_context: {`
+- L1623: `setSharedAiDraft(projectName, {`
+- L1634: `draft_context: {`
+- L1656: `const confirmed = window.confirm(\`Confirm guided preparation simulation\n\nAction: Simulate ${plan.length} guided automation steps.\nRisk: This can prepare downstream draft or handoff state, but does not publish, approve Governance decisions, or send externally.\n\nSelect Cancel to stop.\`);`
+- L1686: `const confirmed = window.confirm("Confirm guided preparation step\n\nAction: Simulate the next preparation step.\nRisk: This can prepare downstream draft or handoff state, but does not publish, approve Governance decisions, or send externally.\n\nSelect Cancel to keep the current state.");`
+- L1911: `status: missing.length ? "blocked" : hasPrepared ? "complete" : "pending",`
+- L1940: `if (status === "blocked") return "is-danger";`
+- L2105: `<div class="wfloop-preview card">`
+- L2107: `<h4>Prepared Package Preview</h4>`
+- L2110: `<p class="wfloop-preview-meta">${escapeHtml(preparedForSelected ? \`Prepared ${formatDateTime(preparedForSelected.createdAt)} · ${workflow.title} session package\` : "Prepare to generate a compact operating package preview.")}</p>`
+- L2150: `<p class="mhos-destination-title">Create/Draft Task</p>`
+- L2195: `<span>${escapeHtml(titleCase(normalizeRunStatus(item.status || "draft")))}</span>`
+- L2253: `stateModel.lastStatusText = \`Preparation blocked. Missing: ${missingFields.map(titleCase).join(", ")}.\`;`
+- L2280: `setSharedAiDraft(projectName, {`
+- L2334: `summary: asString(stateModel.preparedPackage?.summary || stateModel.packagePreview || "Review-only task handoff prepared from the Workflows operating path."),`
+- L2335: `description: asString(stateModel.preparedPackage?.summary || stateModel.packagePreview || "Review-only task handoff prepared from the Workflows operating path."),`
+- L2360: `summary: asString(stateModel.preparedPackage?.summary || stateModel.packagePreview || "Review-only task handoff prepared from the Workflows operating path."),`
+- L2361: `description: asString(stateModel.preparedPackage?.summary || stateModel.packagePreview || "Review-only task handoff prepared from the Workflows operating path."),`
+
+## Risky Terms
+- L8: `getSharedAiDraft,`
+- L9: `getSharedHandoff,`
+- L10: `setSharedAiDraft,`
+- L11: `setSharedHandoff`
+- L15: `buildAutomationPlan,`
+- L26: `runAutomationPlan`
+- L27: `} from "../automation-engine.js";`
+- L29: `const WORKFLOW_CATALOG = [`
+- L31: `id: "launch-campaign",`
+- L32: `title: "Launch Campaign",`
+- L33: `purpose: "Build a launch-ready review sequence across campaign, content, and distribution handoffs.",`
+- L34: `requiredInputs: ["project", "campaign", "product", "channel", "goal"],`
+- L35: `aiModeId: "strategist",`
+- L36: `routeHint: "campaign-studio"`
+- L41: `purpose: "Generate a review-ready content plan tied to campaign and audience context.",`
+- L42: `requiredInputs: ["project", "campaign", "product", "channel", "goal"],`
+- L43: `aiModeId: "writer",`
+- L47: `id: "build-media-job",`
+- L48: `title: "Build Media Job",`
+- L49: `purpose: "Prepare media production inputs, format guidance, and downstream handoff steps.",`
+- L50: `requiredInputs: ["project", "campaign", "product", "channel", "goal"],`
+- L51: `aiModeId: "media",`
+- L55: `id: "prepare-publishing-package",`
+- L56: `title: "Prepare Publishing Package",`
+- L57: `purpose: "Package final channel payloads, approval checks, and publishing queue dependencies.",`
+- L58: `requiredInputs: ["project", "campaign", "channel", "goal"],`
+- L59: `aiModeId: "operations",`
+- L60: `routeHint: "publishing"`
+- L65: `purpose: "Summarize workflow state, results, blockers, and the next operational decision.",`
+- L66: `requiredInputs: ["project", "campaign", "goal"],`
+- L67: `aiModeId: "analyst",`
+- L73: `purpose: "Create a competitor intelligence brief for positioning and campaign advantage.",`
+- L75: `aiModeId: "researcher",`
+- L81: `purpose: "Prioritize integration recovery actions that restore readiness and automation reliability.",`
+- L83: `aiModeId: "operations",`
+- L91: `"Campaign",`
+- L92: `"Publishing",`
+- L93: `"Automation",`
+- L97: `const WORKFLOW_ID_ALIASES = {`
+- L98: `"launch-product": "launch-campaign",`
+- L99: `"generate-campaign": "launch-campaign",`
+- L100: `"run-weekly-report": "generate-report",`
+- L101: `"build-ads": "launch-campaign"`
+- L104: `const WORKFLOW_LOCAL_DRAFTS_KEY = "mh-workflow-local-drafts-v1";`
+- L106: `const workflowSessions = new Map();`
+- L107: `let lastWorkflowRenderContext = null;`
+- L108: `let workflowBridgeRegistered = false;`
+- L109: `let workflowAutoModeUnsubscribe = null;`
+- L110: `let workflowAutomationEnabled = false;`
+- L111: `const workflowAutomationState = {`
+- L172: `function normalizeRunStatus(status) {`
+- L174: `if (["running", "in_progress", "processing", "queued", "scheduled", "pending"].includes(normalized)) return "running";`
+- L175: `if (["failed", "error", "errored", "cancelled", "blocked"].includes(normalized)) return "failed";`
+- L181: `const runStatus = normalizeRunStatus(status);`
+- L182: `if (runStatus === "completed") return "success";`
+- L183: `if (runStatus === "running") return "warning";`
+- L184: `if (runStatus === "failed") return "danger";`
+- L188: `function getWorkflowDef(id) {`
+- L189: `return WORKFLOW_CATALOG.find((item) => item.id === id) || WORKFLOW_CATALOG[0];`
+- L198: `...asArray(activity.scheduled_jobs).map((job) => asString(job.channel)),`
+- L204: `campaign: firstNonEmpty(context.activeCampaign),`
+- L211: `function createEmptyRunState() {`
+- L214: `runId: "",`
+- L216: `lastRunAt: "",`
+- L223: `function createRunsMap() {`
+- L224: `return WORKFLOW_CATALOG.reduce((acc, workflow) => {`
+- L225: `acc[workflow.id] = createEmptyRunState();`
+- L231: `return WORKFLOW_CATALOG.reduce((acc, workflow) => {`
+- L232: `acc[workflow.id] = {`
+- L243: `String(operations?.workflows?.total_runs || 0),`
+- L244: `String(operations?.tasks?.total || 0)`
+- L251: `const raw = window.localStorage?.getItem(WORKFLOW_LOCAL_DRAFTS_KEY) || "{}";`
+- L262: `window.localStorage?.setItem(WORKFLOW_LOCAL_DRAFTS_KEY, JSON.stringify(map || {}));`
+- L271: `function saveLocalDraft(projectName, workflowId, payload) {`
+- L275: `projectDrafts[workflowId] = {`
+- L276: `...asObject(projectDrafts[workflowId]),`
+- L282: `return projectDrafts[workflowId];`
+- L288: `WORKFLOW_CATALOG.forEach((workflow) => {`
+- L289: `const draft = asObject(local[workflow.id]);`
+- L291: `session.inputsByWorkflow[workflow.id] = {`
+- L292: `...session.inputsByWorkflow[workflow.id],`
+- L296: `session.selectedWorkflowId = workflow.id;`
+- L305: `function persistWorkflowDraft(projectName, session, workflowId, hint, selected) {`
+- L306: `const saved = saveLocalDraft(projectName, workflowId, {`
+- L307: `inputs: asObject(session.inputsByWorkflow[workflowId]),`
+- L308: `workflowId,`
+- L316: `if (!workflowSessions.has(key)) {`
+- L317: `workflowSessions.set(key, {`
+- L318: `selectedWorkflowId: WORKFLOW_CATALOG[0].id,`
+- L319: `inputsByWorkflow: createInputsMap(defaults),`
+- L320: `runsByWorkflow: createRunsMap(),`
+- L325: `lastAppliedHandoffId: "",`
+- L338: `const session = workflowSessions.get(key);`
+- L339: `session.inputsByWorkflow = WORKFLOW_CATALOG.reduce((acc, workflow) => {`
+- L340: `acc[workflow.id] = {`
+- L342: `...asObject(session.inputsByWorkflow?.[workflow.id])`
+- L346: `session.runsByWorkflow = session.runsByWorkflow || createRunsMap();`
+- L350: `session.lastAppliedHandoffId = asString(session.lastAppliedHandoffId);`
+- L363: `const session = workflowSessions.get(key);`
+- L373: `const nextRuns = createRunsMap();`
+- L374: `asArray(operations?.workflows?.items).forEach((item) => {`
+- L375: `const sourceId = asString(item.workflow_id);`
+- L376: `const resolvedId = WORKFLOW_ID_ALIASES[sourceId] || sourceId;`
+- L377: `if (!nextRuns[resolvedId]) return;`
+- L380: `nextRuns[resolvedId] = {`
+- L381: `...nextRuns[resolvedId],`
+- L383: `runId: asString(item.id),`
+- L384: `source: asString(item.source || "durable-run"),`
+- L385: `lastRunAt: asString(item.created_at),`
+- L391: `source: asString(item.source || "durable-run"),`
+- L398: `session.runsByWorkflow = nextRuns;`
+- L402: `function buildWorkflowContext(state, session) {`
+- L437: `campaignName: firstNonEmpty(state.context.activeCampaign),`
+- L453: `const allRuns = Object.values(asObject(session.runsByWorkflow));`
+- L455: `total: WORKFLOW_CATALOG.length,`
+- L458: `failed: 0,`
+- L459: `running: 0,`
+- L463: `allRuns.forEach((run) => {`
+- L464: `const normalized = normalizeRunStatus(run.status);`
+- L466: `else if (normalized === "running") counts.running += 1;`
+- L467: `else if (normalized === "failed") counts.failed += 1;`
+- L470: `if (asString(run.lastRunAt) && (!counts.lastExecutionAt || Date.parse(run.lastRunAt) > Date.parse(counts.lastExecutionAt))) {`
+- L471: `counts.lastExecutionAt = run.lastRunAt;`
+- L476: `const when = asString(item.executed_at || item.created_at);`
+- L485: `function getBlockedRequirements(workflow, inputs, context) {`
+- L487: `const missingRequired = workflow.requiredInputs.filter((field) => !asString(inputs[field]).trim());`
+- L492: `if (workflow.id === "prepare-publishing-package" && context.missingAssets.length) {`
+- L496: `if (workflow.id === "generate-report" && context.missingIntegrations.length) {`
+- L500: `if (workflow.id === "fix-integrations" && !context.missingIntegrations.length) {`
+- L501: `blocked.push("No integration gaps detected. Use this workflow only if connectors are unstable.");`
+- L507: `function buildWorkflowPrompt(workflow, inputs, context) {`
+- L509: `\`Workflow: ${workflow.title}\`,`
+- L510: `\`Purpose: ${workflow.purpose}\`,`
+- L512: `\`Campaign: ${inputs.campaign || context.campaignName || "not set"}\`,`
+- L522: `function buildFallbackOutput(workflow, inputs, context) {`
+- L525: `const blockedRequirements = getBlockedRequirements(workflow, inputs, context);`
+- L528: `title: \`${workflow.title} review package\`,`
+- L529: `summary: \`Prepared ${workflow.title.toLowerCase()} for ${inputs.project || context.projectName || "the current project"} with ${inputs.goal || "a defined goal"}.\`,`
+- L532: `\`Open ${titleCase(workflow.routeHint)} for review handoff.\`,`
+- L533: `blockedRequirements.length ? "Resolve blockers before any destination-owned execution." : "Proceed to review handoff."`
+- L536: `requiredInputs: workflow.requiredInputs.map(titleCase),`
+- L539: `label: \`Open ${titleCase(workflow.routeHint)}\`,`
+- L540: `route: workflow.routeHint,`
+- L541: `reason: \`Continue review in ${titleCase(workflow.routeHint)}.\``
+- L544: `label: "Open AI Workspace",`
+- L545: `route: "ai-command",`
+- L546: `reason: "Refine this workflow package with AI reasoning."`
+- L552: `function mapGlobalActionToWorkflowId(globalAction) {`
+- L555: `if (target === "publishing") return "prepare-publishing-package";`
+- L557: `if (target === "media-studio") return "build-media-job";`
+- L558: `if (target === "setup" || target === "campaign-studio") return "launch-campaign";`
+- L563: `const mappedWorkflowId = mapGlobalActionToWorkflowId(globalAction);`
+- L564: `if (mappedWorkflowId) {`
+- L565: `const mapped = getWorkflowDef(mappedWorkflowId);`
+- L567: `workflowId: mapped.id,`
+- L570: `chips: ["Launch readiness", "Automation", "Campaign"],`
+- L571: `prompt: firstNonEmpty(globalAction?.draftPayload?.prompt, \`Build a ${mapped.title.toLowerCase()} review plan from current system blockers and dependencies.\`)`
+- L577: `workflowId: "fix-integrations",`
+- L579: `reason: \`${context.missingIntegrations.length} integration gap${context.missingIntegrations.length === 1 ? "" : "s"} can block automation and report quality.\`,`
+- L580: `chips: ["Launch readiness", "Automation", "Reports"],`
+- L581: `prompt: "Build a prioritized integration recovery workflow with dependency order and expected readiness impact."`
+- L587: `workflowId: "prepare-publishing-package",`
+- L588: `title: "Prepare publishing package handoff before distribution",`
+- L589: `reason: \`${context.missingAssets.length} asset requirement${context.missingAssets.length === 1 ? "" : "s"} are still missing and can block final publishing.\`,`
+- L590: `chips: ["Publishing", "Campaign", "Launch readiness"],`
+- L591: `prompt: "Prepare a publishing package checklist with missing assets and approval dependencies."`
+- L595: `if (!context.campaignName) {`
+- L597: `workflowId: "launch-campaign",`
+- L598: `title: "Define launch campaign workflow",`
+- L599: `reason: "A campaign operating sequence is required before content, media, and publishing lanes can execute clearly.",`
+- L600: `chips: ["Campaign", "Launch readiness", "Automation"],`
+- L601: `prompt: "Create a launch campaign workflow with owner sequence and execution gates."`
+- L605: `const selected = getWorkflowDef(session.selectedWorkflowId);`
+- L607: `workflowId: selected.id,`
+- L609: `reason: "Current context is sufficient to prepare the selected workflow review package now.",`
+- L610: `chips: ["Content", "Campaign", "Publishing"],`
+- L611: `prompt: \`Refine ${selected.title.toLowerCase()} for reviewed handoff with explicit dependencies and next actions.\``
+- L623: `<div class="wfexec-head"><h3>Workflow Overview</h3></div>`
+- L625: `<article class="wfexec-stat"><span>Total workflows</span><strong>${escapeHtml(String(metrics.total))}</strong></article>`
+- L626: `<article class="wfexec-stat"><span>Ready workflows</span><strong>${escapeHtml(String(metrics.ready))}</strong></article>`
+- L627: `<article class="wfexec-stat"><span>Draft workflows</span><strong>${escapeHtml(String(metrics.draft))}</strong></article>`
+- L628: `<article class="wfexec-stat"><span>Failed / blocked</span><strong>${escapeHtml(String(metrics.failed))}</strong></article>`
+- L644: `<button id="wfexecStartRecommendedBtn" class="wfexec-btn wfexec-btn-primary" type="button">Start Workflow</button>`
+- L646: `<button id="wfexecSendRecommendedAiBtn" class="wfexec-btn wfexec-btn-secondary" type="button">Send to AI Workspace</button>`
+- L652: `function renderAutomationSection(fullPlan, fixPlan, autoMode, escapeHtml) {`
+- L663: `const gate = asObject(autoMode?.approvalRequiredStep);`
+- L667: `<div class="wfexec-head"><h3>Automation Layer</h3></div>`
+- L669: `Safe guided preparation only: navigate, create draft, generate prompt, and create review handoff.`
+- L694: `: \`<div class="wfexec-empty">No safe automation steps are available.</div>\``
+- L698: `<button id="workflowRunFullAutomationBtn" class="wfexec-btn wfexec-btn-primary" type="button">`
+- L701: `<button id="workflowRunStepAutomationBtn" class="wfexec-btn wfexec-btn-secondary" type="button">`
+- L706: `<div id="workflowAutomationProgress" class="wfexec-meta">`
+- L707: `${esc(workflowAutomationState.progress || "")}`
+- L710: `<div id="workflowAutomationResult" class="wfexec-meta">`
+- L711: `${esc(workflowAutomationState.result || "")}`
+- L719: `Guided preparation mode with automation gates and inline logs. It does not replace Governance approval.`
+- L723: `<button id="workflowAutoStartBtn" class="wfexec-btn wfexec-btn-primary" type="button">`
+- L726: `<button id="workflowAutoPauseBtn" class="wfexec-btn wfexec-btn-secondary" type="button">`
+- L729: `<button id="workflowAutoResumeBtn" class="wfexec-btn wfexec-btn-secondary" type="button">`
+- L732: `<button id="workflowAutoStopBtn" class="wfexec-btn wfexec-btn-ghost" type="button">`
+- L748: `autoMode?.status === "waiting_approval"`
+- L751: `<strong>Automation gate needs operator review:</strong> ${esc(gate.reason || "Operator review required.")}`
+- L757: `<button id="workflowAutoApproveBtn" class="wfexec-btn wfexec-btn-secondary" type="button">`
+- L758: `Approve Automation Gate Only`
+- L760: `<button id="workflowAutoSkipBtn" class="wfexec-btn wfexec-btn-secondary" type="button">`
+- L761: `Skip Automation Step`
+- L780: `function renderBuilderSection(session, workflow, inputs, validationMessage, draftStatus, escapeHtml) {`
+- L783: `<div class="wfexec-head"><h3>Workflow Review Package Builder</h3></div>`
+- L786: `<label class="wfexec-label" for="wfexecWorkflowType">Workflow type</label>`
+- L787: `<select id="wfexecWorkflowType" class="wfexec-select">`
+- L788: `${WORKFLOW_CATALOG.map((item) => \`<option value="${escapeHtml(item.id)}"${item.id === workflow.id ? " selected" : ""}>${escapeHtml(item.title)}</option>\`).join("")}`
+- L796: `<label class="wfexec-label" for="wfexecInputCampaign">Campaign</label>`
+- L797: `<input id="wfexecInputCampaign" class="wfexec-input" data-wf-input="campaign" type="text" value="${escapeHtml(inputs.campaign || "")}" placeholder="Campaign name">`
+- L814: `<button id="workflowRunBtn" class="wfexec-btn wfexec-btn-primary" type="button">Prepare Review Package</button>`
+- L815: `<button id="workflowRunBtnMain" class="wfexec-btn wfexec-btn-primary" type="button">Prepare</button>`
+- L817: `<button id="wfexecLoadAiStateBtn" class="wfexec-btn wfexec-btn-secondary" type="button">Load AI Command State</button>`
+- L820: `<div class="wfexec-draft-status">${escapeHtml(draftStatus || "Drafts auto-save locally per workflow.")}</div>`
+- L828: `<div class="wfexec-head"><h3>Workflow Review Catalog</h3></div>`
+- L830: `${WORKFLOW_CATALOG.map((workflow) => {`
+- L831: `const inputs = asObject(session.inputsByWorkflow[workflow.id]);`
+- L832: `const run = asObject(session.runsByWorkflow[workflow.id]);`
+- L833: `const blocked = getBlockedRequirements(workflow, inputs, context);`
+- L836: `<article class="wfexec-catalog-card${workflow.id === session.selectedWorkflowId ? " is-active" : ""}">`
+- L838: `<h4>${escapeHtml(workflow.title)}</h4>`
+- L841: `<p>${escapeHtml(workflow.purpose)}</p>`
+- L842: `<div class="wfexec-required"><strong>Required inputs:</strong> ${escapeHtml(workflow.requiredInputs.map(titleCase).join(", "))}</div>`
+- L845: `<button class="wfexec-btn wfexec-btn-primary" type="button" data-wf-catalog-run="${escapeHtml(workflow.id)}">Prepare</button>`
+- L846: `<button class="wfexec-btn wfexec-btn-ghost" type="button" data-wf-catalog-save="${escapeHtml(workflow.id)}">Save Draft</button>`
+- L847: `<button class="wfexec-btn wfexec-btn-secondary" type="button" data-wf-catalog-ai="${escapeHtml(workflow.id)}">Open in AI Command</button>`
+- L849: `${run.lastRunAt ? \`<div class="wfexec-catalog-meta">Last prepared ${escapeHtml(formatDateTime(run.lastRunAt))}</div>\` : ""}`
+- L858: `function renderExecutionSection(run, workflow, blockedRequirements, escapeHtml) {`
+- L859: `const output = asObject(run.output);`
+- L864: `<div class="wfexec-empty">No prepared package yet. Prepare a workflow package to generate a review-ready output.</div>`
+- L873: `<span class="wfexec-meta">${escapeHtml(run.lastRunAt ? formatDateTime(run.lastRunAt) : "recent")}</span>`
+- L889: `<button id="workflowPushAiBtn" class="wfexec-btn wfexec-btn-secondary" type="button">Send to AI for Review</button>`
+- L890: `<button id="workflowPushAiBtnSecondary" class="wfexec-btn wfexec-btn-secondary" type="button">Open in AI Command</button>`
+- L891: `<button id="workflowSaveTaskBtn" class="wfexec-btn wfexec-btn-ghost" type="button">Prepare Task Review Handoff</button>`
+- L892: `<button id="workflowBuildCustomBtn" class="wfexec-btn wfexec-btn-ghost" type="button">Build Custom Workflow</button>`
+- L893: `<button id="workflowRecommendBtn" class="wfexec-btn wfexec-btn-ghost" type="button">Recommend Review Workflow</button>`
+- L895: `<div class="wfexec-meta">Workflow review package: ${escapeHtml(workflow.title)} · Status: ${escapeHtml(titleCase(normalizeRunStatus(run.status)))}</div>`
+- L900: `function renderWorkflowExecutionLoop({`
+- L904: `automationPlan,`
+- L907: `workflow,`
+- L909: `run,`
+- L919: `${renderAutomationSection(automationPlan, autoFixPlan, escapeHtml)}`
+- L920: `${renderBuilderSection(session, workflow, inputs, session.validationMessage, session.draftStatus, escapeHtml)}`
+- L924: `${renderExecutionSection(run, workflow, blockedRequirements, escapeHtml)}`
+- L931: `function applyDurableWorkflowHandoff({ projectName, session, operations, consumeProjectHandoff, showMessage }) {`
+- L932: `const handoff = getSharedHandoff(projectName, "workflows", operations);`
+- L933: `const handoffId = asString(handoff?.id);`
+- L934: `if (!handoffId || handoffId === asString(session.lastAppliedHandoffId)) return;`
+- L936: `const payload = asObject(handoff?.payload);`
+- L937: `const fromWorkflowId = asString(payload.workflow_id);`
+- L939: `const modeMapped = WORKFLOW_CATALOG.find((item) => item.aiModeId === modeId)?.id;`
+- L940: `const workflowId = getWorkflowDef(fromWorkflowId || modeMapped || session.selectedWorkflowId).id;`
+- L942: `session.selectedWorkflowId = workflowId;`
+- L943: `session.inputsByWorkflow[workflowId] = {`
+- L944: `...session.inputsByWorkflow[workflowId],`
+- L945: `project: firstNonEmpty(payload?.draft_context?.projectName, session.inputsByWorkflow[workflowId].project),`
+- L946: `campaign: firstNonEmpty(payload?.campaign_name, session.inputsByWorkflow[workflowId].campaign),`
+
+## Required Manual Classification
+Before any patch, classify exact Workflows paths into:
+
+1. Workflow dashboard/display only
+2. Workflow planning/local draft only
+3. Workflow template/step selection only
+4. AI prompt/guidance only
+5. Shared handoff only
+6. Backend workflow creation/update
+7. Backend workflow execution/run/trigger
+8. Backend job/task mutation
+9. Schedule/retry/rerun action
+10. Disabled future action
+11. Unknown / needs deeper inspection
+
+## Decision Rule
+- If execute/run/trigger/schedule/retry/rerun mutates backend without confirmation, patch.
+- If create/update/delete workflow mutations exist without confirmation, patch.
+- If AI guidance is prompt/navigation only, document and close.
+- If workflow actions are planning/local/session/shared-context only, document and close.
+- Do not redesign Workflows in this pass.

@@ -1,0 +1,1166 @@
+diff --git a/public/control-center/styles/12-pages.css b/public/control-center/styles/12-pages.css
+index 0604c3f..ba14d8a 100644
+--- a/public/control-center/styles/12-pages.css
++++ b/public/control-center/styles/12-pages.css
+@@ -6403,6 +6403,14 @@
+   text-transform: uppercase;
+ }
+ 
++[data-page="ai-command"] .aicmd-room-planned-mobile-summary,
++[data-page="ai-command"] .aicmd-mobile-safety-summary,
++[data-page="ai-command"] .aicmd-room-title-mobile,
++[data-page="ai-command"] .aicmd-mobile-sections,
++[data-page="ai-command"] .aicmd-mobile-flow-panel {
++  display: none;
++}
++
+ [data-page="ai-command"] .aicmd-room-member-planned {
+   opacity: 0.72;
+   background: rgba(15, 23, 42, 0.5);
+@@ -7140,13 +7148,24 @@
+ @media (max-width: 1280px) {
+   [data-page="ai-command"] .aicmd-room-header {
+     grid-template-columns: 1fr;
++    gap: 8px;
++  }
++
++  [data-page="ai-command"] .aicmd-room-title-block {
++    order: 1;
++  }
++
++  [data-page="ai-command"] .aicmd-room-meta {
++    order: 2;
+   }
+ 
+   [data-page="ai-command"] .aicmd-room-header-actions {
++    order: 3;
+     justify-content: flex-start;
+   }
+ 
+   [data-page="ai-command"] .aicmd-room-flow {
++    order: 4;
+     display: flex;
+     overflow-x: auto;
+     gap: 8px;
+@@ -7164,13 +7183,13 @@
+   }
+ 
+   [data-page="ai-command"] .aicmd-room-grid {
+-    display: grid;
+-    grid-template-columns: minmax(0, 1fr);
++    display: flex;
++    flex-direction: column;
+     gap: 12px;
+   }
+ 
+   [data-page="ai-command"] .aicmd-room-team-panel {
+-    order: 1;
++    order: 2;
+     width: 100%;
+     max-width: none;
+     position: static;
+@@ -7179,7 +7198,7 @@
+   }
+ 
+   [data-page="ai-command"] .aicmd-room-center {
+-    order: 2;
++    order: 1;
+     width: 100%;
+     min-height: 0;
+   }
+@@ -7219,6 +7238,23 @@
+     grid-template-columns: 34px minmax(0, 1fr) 8px;
+   }
+ 
++  [data-page="ai-command"] .aicmd-unified-chat-surface {
++    min-height: 0;
++    margin-bottom: 0;
++  }
++
++  [data-page="ai-command"] .aicmd-room-conversation-head {
++    order: 1;
++  }
++
++  [data-page="ai-command"] .aicmd-room-composer {
++    order: 2;
++  }
++
++  [data-page="ai-command"] .aicmd-room-specialist-conversation {
++    order: 3;
++  }
++
+   [data-page="ai-command"] .aicmd-room-chat {
+     min-height: 360px;
+     max-height: 56vh;
+@@ -7252,61 +7288,580 @@
+ /* Phone / very narrow */
+ @media (max-width: 760px) {
+   [data-page="ai-command"] .aicmd-room-header {
+-    display: block;
++    display: grid;
++    gap: 5px;
++    padding: 6px 8px;
++  }
++
++  [data-page="ai-command"] .aicmd-room-title-block {
++    padding: 0;
++    border: 0;
++    background: transparent;
++    box-shadow: none;
+   }
+ 
+   [data-page="ai-command"] .aicmd-room-grid {
+-    padding: 10px;
++    gap: 7px;
++    padding: 7px 8px;
++  }
++
++  [data-page="ai-command"] .aicmd-mobile-sections {
++    order: 2;
++    display: grid;
++    grid-template-columns: repeat(4, minmax(0, 1fr));
++    gap: 4px;
++    padding: 4px;
++    border: 1px solid rgba(122, 169, 205, 0.14);
++    border-radius: 10px;
++    background: rgba(3, 8, 18, 0.82);
++  }
++
++  [data-page="ai-command"] .aicmd-mobile-section-tab {
++    min-width: 0;
++    min-height: 30px;
++    padding: 5px 4px;
++    border: 1px solid rgba(148, 163, 184, 0.14);
++    border-radius: 8px;
++    background: rgba(15, 23, 42, 0.48);
++    color: rgba(203, 213, 225, 0.82);
++    font-size: 0.7rem;
++    font-weight: 900;
++    letter-spacing: 0;
++    cursor: pointer;
++  }
++
++  [data-page="ai-command"] .aicmd-mobile-section-tab.is-active {
++    border-color: rgba(34, 211, 238, 0.48);
++    background: rgba(8, 47, 73, 0.62);
++    color: rgba(240, 253, 250, 0.96);
+   }
+ 
+   [data-page="ai-command"] .aicmd-room-header-actions {
+-    margin-top: 10px;
++    margin-top: 0;
++    gap: 4px;
+     justify-content: flex-start;
+     flex-wrap: wrap;
++    padding: 0;
++    border: 0;
++    background: transparent;
++    box-shadow: none;
++  }
++
++  [data-page="ai-command"] .aicmd-v2-header-actions,
++  [data-page="ai-command"] .aicmd-v2-header-actions button,
++  [data-page="ai-command"] .aicmd-v2-header-actions select {
++    width: auto;
++  }
++
++  [data-page="ai-command"] .aicmd-v2-chat-bridge {
++    min-height: 26px;
++    padding: 4px 7px;
++    font-size: 0.61rem;
++    letter-spacing: 0;
++  }
++
++  [data-page="ai-command"] .aicmd-room-session-select {
++    flex: 1 1 136px;
++    min-width: 128px;
++    min-height: 28px;
++    padding: 4px 8px;
++    font-size: 0.72rem;
++  }
++
++  [data-page="ai-command"] .aicmd-room-header-actions .aicmd-v2-btn-secondary,
++  [data-page="ai-command"] .aicmd-room-header-actions .aicmd-v2-btn-ghost {
++    flex: 0 0 auto;
++    min-height: 28px;
++    padding: 4px 8px;
++    font-size: 0.72rem;
++  }
++
++  [data-page="ai-command"] .aicmd-room-eyebrow {
++    font-size: 0.62rem;
++  }
++
++  [data-page="ai-command"] .aicmd-room-title-full {
++    display: none;
++  }
++
++  [data-page="ai-command"] .aicmd-room-title-mobile {
++    display: inline;
+   }
+ 
+   [data-page="ai-command"] .aicmd-room-title {
+-    font-size: 20px;
++    margin: 0;
++    font-size: 1rem;
++    line-height: 1.08;
++  }
++
++  [data-page="ai-command"] .aicmd-room-subtitle {
++    display: block;
++    max-width: 100%;
++    overflow: hidden;
++    text-overflow: ellipsis;
++    white-space: nowrap;
++    font-size: 0.68rem;
++    line-height: 1.2;
++  }
++
++  [data-page="ai-command"] .aicmd-room-meta {
++    display: grid;
++    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr) minmax(0, 0.8fr);
++    gap: 4px;
++    padding: 0;
++    border: 0;
++    background: transparent;
++    box-shadow: none;
++  }
++
++  [data-page="ai-command"] .aicmd-room-meta .aicmd-v2-meta-chip {
++    min-height: 0;
++    padding: 5px 6px;
++    border-radius: 8px;
++  }
++
++  [data-page="ai-command"] .aicmd-room-meta .aicmd-v2-meta-chip:nth-child(n+4) {
++    display: none;
++  }
++
++  [data-page="ai-command"] .aicmd-room-meta .aicmd-v2-meta-chip span {
++    font-size: 0.56rem;
++  }
++
++  [data-page="ai-command"] .aicmd-room-meta .aicmd-v2-meta-chip strong {
++    font-size: 0.68rem;
++  }
++
++  [data-page="ai-command"] .aicmd-room-flow {
++    display: none;
+   }
+ 
+   [data-page="ai-command"] .aicmd-room-flow-step {
+-    flex-basis: 152px;
++    flex-basis: 126px;
++    min-height: 34px;
++    padding: 6px 8px;
+   }
+ 
+-  [data-page="ai-command"] .aicmd-room-member {
+-    flex-basis: 186px;
++  [data-page="ai-command"] .aicmd-room-flow-step small {
++    display: none;
++  }
++
++  [data-page="ai-command"] .aicmd-room-team-panel .aicmd-room-member {
++    flex: 0 0 136px !important;
++    min-height: 40px;
++    grid-template-columns: 24px minmax(0, 1fr);
++    gap: 6px;
++    padding: 6px !important;
++  }
++
++  [data-page="ai-command"] .aicmd-room-member-avatar {
++    width: 24px;
++    height: 24px;
++    font-size: 0.6rem;
++  }
++
++  [data-page="ai-command"] .aicmd-room-member-indicator {
++    display: none;
++  }
++
++  [data-page="ai-command"] .aicmd-room-member-role {
++    font-size: 0.6rem;
++    line-height: 1.2;
++  }
++
++  [data-page="ai-command"] .aicmd-v2-spec-name {
++    font-size: 0.72rem;
++    line-height: 1.1;
+   }
+ 
+   [data-page="ai-command"] .aicmd-room-conversation-head {
+     display: grid;
+-    grid-template-columns: auto minmax(0, 1fr);
+-    gap: 10px;
++    grid-template-columns: 28px minmax(0, 1fr) auto;
++    gap: 6px;
++    padding: 7px;
++  }
++
++  [data-page="ai-command"] .aicmd-room-active-avatar {
++    width: 28px;
++    height: 28px;
++    font-size: 0.62rem;
++  }
++
++  [data-page="ai-command"] .aicmd-room-active-copy strong {
++    font-size: 0.86rem;
++    line-height: 1.12;
++  }
++
++  [data-page="ai-command"] .aicmd-room-kicker {
++    font-size: 0.58rem;
++  }
++
++  [data-page="ai-command"] .aicmd-room-active-copy p {
++    display: block;
++    overflow: hidden;
++    text-overflow: ellipsis;
++    white-space: nowrap;
++    font-size: 0.66rem;
++  }
++
++  [data-page="ai-command"] .aicmd-room-conversation-head .aicmd-room-team-chain {
++    display: none;
+   }
+ 
+   [data-page="ai-command"] .aicmd-room-active-state {
++    grid-column: auto;
++    width: auto;
++    min-height: 0;
++    padding: 0;
++    justify-content: end;
++    font-size: 0.62rem;
++  }
++
++  [data-page="ai-command"] .aicmd-room-active-state strong {
++    font-size: 0.68rem;
++  }
++
++  [data-page="ai-command"] .aicmd-mobile-safety-summary {
+     grid-column: 1 / -1;
+-    width: 100%;
++    display: block;
++    padding: 5px 7px;
++    border: 1px solid rgba(52, 211, 153, 0.14);
++    border-radius: 7px;
++    background: rgba(20, 83, 45, 0.10);
++    color: rgba(187, 247, 208, 0.82);
++    font-size: 0.64rem;
++    line-height: 1.25;
++    white-space: nowrap;
++    overflow: hidden;
++    text-overflow: ellipsis;
+   }
+ 
+   [data-page="ai-command"] .aicmd-room-chat {
+-    min-height: 300px;
++    min-height: 0;
+     max-height: none;
+     overflow: visible;
+   }
+ 
+-  [data-page="ai-command"] .aicmd-room-bubble {
+-    max-width: 100%;
++  [data-page="ai-command"] .aicmd-room-chat.is-empty-mobile {
++    display: none;
++  }
++
++  [data-page="ai-command"] .aicmd-room-chat.has-activity {
++    max-height: 42vh;
++    overflow: auto;
++  }
++
++  [data-page="ai-command"] .aicmd-v2-chat-empty.aicmd-room-chat-empty {
++    min-height: 76px;
++    padding: 13px 12px;
++  }
++
++  [data-page="ai-command"] .aicmd-room-panel-head,
++  [data-page="ai-command"] .aicmd-room-mode-switch {
++    margin-bottom: 5px;
++  }
++
++  [data-page="ai-command"] .aicmd-room-team-panel {
++    order: 3;
++    padding: 7px;
++  }
++
++  [data-page="ai-command"] .aicmd-room-panel-head {
++    padding: 0 0 5px;
++  }
++
++  [data-page="ai-command"] .aicmd-room-panel-head strong {
++    font-size: 0.84rem;
++  }
++
++  [data-page="ai-command"] .aicmd-room-online-pill,
++  [data-page="ai-command"] .aicmd-room-output-state {
++    padding: 3px 6px;
++    font-size: 0.62rem;
++  }
++
++  [data-page="ai-command"] .aicmd-v2-toggle-btn {
++    min-height: 28px;
++    padding: 5px 8px;
++    font-size: 0.72rem;
++  }
++
++  [data-page="ai-command"] .aicmd-room-member-list {
++    gap: 5px !important;
++    padding-bottom: 5px !important;
++  }
++
++  [data-page="ai-command"] .aicmd-room-member .aicmd-v2-spec-summary {
++    display: none;
++  }
++
++  [data-page="ai-command"] .aicmd-room-planned-specialists {
++    max-height: none;
++    margin-top: 5px;
++    padding-top: 6px;
++    overflow: hidden;
++    opacity: 0.72;
++  }
++
++  [data-page="ai-command"] .aicmd-room-planned-title {
++    font-size: 0.66rem;
++  }
++
++  [data-page="ai-command"] .aicmd-room-planned-mobile-summary {
++    display: block;
++    color: rgba(203, 213, 225, 0.68);
++    font-size: 0.64rem;
++    line-height: 1.25;
++  }
++
++  [data-page="ai-command"] .aicmd-room-member-planned {
++    display: none;
++  }
++
++  [data-page="ai-command"] .aicmd-mobile-flow-panel {
++    order: 3;
++    padding: 7px;
++    border: 1px solid rgba(122, 169, 205, 0.14);
++    border-radius: 8px;
++    background: rgba(8, 19, 31, 0.84);
++  }
++
++  [data-page="ai-command"] .aicmd-mobile-panel-head {
++    display: grid;
++    gap: 2px;
++    margin-bottom: 5px;
++  }
++
++  [data-page="ai-command"] .aicmd-mobile-panel-head strong {
++    color: rgba(248, 250, 252, 0.94);
++    font-size: 0.76rem;
++    line-height: 1.18;
++  }
++
++  [data-page="ai-command"] .aicmd-mobile-flow-list {
++    display: grid;
++    gap: 4px;
++  }
++
++  [data-page="ai-command"] .aicmd-mobile-flow-step {
++    display: grid;
++    grid-template-columns: 20px minmax(0, 0.62fr) minmax(0, 1fr);
++    gap: 5px;
++    align-items: center;
++    padding: 6px;
++    border: 1px solid rgba(148, 163, 184, 0.12);
++    border-radius: 7px;
++    background: rgba(2, 6, 23, 0.32);
++  }
++
++  [data-page="ai-command"] .aicmd-mobile-flow-step span {
++    grid-row: auto;
++    width: 20px;
++    height: 20px;
++    display: grid;
++    place-items: center;
++    border-radius: 999px;
++    background: rgba(34, 211, 238, 0.10);
++    color: rgba(165, 243, 252, 0.94);
++    font-size: 0.6rem;
++    font-weight: 900;
++  }
++
++  [data-page="ai-command"] .aicmd-mobile-flow-step strong {
++    color: rgba(241, 245, 249, 0.94);
++    font-size: 0.7rem;
++    white-space: nowrap;
++  }
++
++  [data-page="ai-command"] .aicmd-mobile-flow-step small {
++    color: rgba(203, 213, 225, 0.68);
++    font-size: 0.64rem;
++    line-height: 1.2;
++    overflow: hidden;
++    text-overflow: ellipsis;
++    white-space: nowrap;
++  }
++
++  [data-page="ai-command"] .aicmd-mobile-flow-step.is-active {
++    border-color: rgba(34, 211, 238, 0.44);
++    background: rgba(8, 47, 73, 0.36);
++  }
++
++  [data-page="ai-command"] .aicmd-room-shell[data-mobile-section="team"] .aicmd-room-output,
++  [data-page="ai-command"] .aicmd-room-shell[data-mobile-section="team"] .aicmd-mobile-flow-panel,
++  [data-page="ai-command"] .aicmd-room-shell[data-mobile-section="tools"] .aicmd-room-team-panel,
++  [data-page="ai-command"] .aicmd-room-shell[data-mobile-section="tools"] .aicmd-room-output-workspace,
++  [data-page="ai-command"] .aicmd-room-shell[data-mobile-section="tools"] .aicmd-mobile-flow-panel,
++  [data-page="ai-command"] .aicmd-room-shell[data-mobile-section="output"] .aicmd-room-team-panel,
++  [data-page="ai-command"] .aicmd-room-shell[data-mobile-section="output"] .aicmd-room-tools,
++  [data-page="ai-command"] .aicmd-room-shell[data-mobile-section="output"] .aicmd-mobile-flow-panel,
++  [data-page="ai-command"] .aicmd-room-shell[data-mobile-section="flow"] .aicmd-room-team-panel,
++  [data-page="ai-command"] .aicmd-room-shell[data-mobile-section="flow"] .aicmd-room-output {
++    display: none !important;
++  }
++
++  [data-page="ai-command"] .aicmd-room-shell[data-mobile-section="tools"] .aicmd-room-output,
++  [data-page="ai-command"] .aicmd-room-shell[data-mobile-section="output"] .aicmd-room-output,
++  [data-page="ai-command"] .aicmd-room-shell[data-mobile-section="flow"] .aicmd-mobile-flow-panel {
++    display: grid !important;
++  }
++
++  [data-page="ai-command"] .aicmd-room-bubble {
++    max-width: 100%;
++  }
++
++  [data-page="ai-command"] .aicmd-room-output-tabs {
++    display: grid;
++    grid-template-columns: repeat(2, minmax(0, 1fr));
++  }
++
++  [data-page="ai-command"] .aicmd-room-output {
++    order: 3;
++    display: grid !important;
++    gap: 9px;
++  }
++
++  [data-page="ai-command"] .aicmd-room-output-workspace,
++  [data-page="ai-command"] .aicmd-room-tools {
++    padding: 7px;
++  }
++
++  [data-page="ai-command"] .aicmd-v2-tools-head,
++  [data-page="ai-command"] .aicmd-room-output-head {
++    align-items: center;
++    gap: 6px;
++    margin-bottom: 6px;
++  }
++
++  [data-page="ai-command"] .aicmd-v2-tools-title,
++  [data-page="ai-command"] .aicmd-room-output-head h2 {
++    margin: 0;
++    font-size: 0.84rem;
++    line-height: 1.16;
++  }
++
++  [data-page="ai-command"] .aicmd-v2-tools-subtitle,
++  [data-page="ai-command"] .aicmd-room-output-head p {
++    display: none;
++  }
++
++  [data-page="ai-command"] .aicmd-v2-tools-count {
++    padding: 3px 6px;
++    font-size: 0.62rem;
++  }
++
++  [data-page="ai-command"] .aicmd-room-tools-grid,
++  [data-page="ai-command"] .aicmd-v2-tools-grid {
++    gap: 5px;
++  }
++
++  [data-page="ai-command"] .aicmd-room-tool-card,
++  [data-page="ai-command"] .aicmd-v2-tool-btn {
++    min-height: 0;
++    padding: 7px 8px;
++    border-radius: 8px;
++    gap: 4px;
++  }
++
++  [data-page="ai-command"] .aicmd-room-tool-topline {
++    align-items: center;
++    gap: 6px;
++  }
++
++  [data-page="ai-command"] .aicmd-v2-tool-label {
++    font-size: 0.76rem;
++    line-height: 1.16;
++  }
++
++  [data-page="ai-command"] .aicmd-room-tool-action {
++    font-size: 0.58rem;
++  }
++
++  [data-page="ai-command"] .aicmd-room-tool-purpose {
++    display: none;
++  }
++
++  [data-page="ai-command"] .aicmd-v2-tool-meta {
++    display: flex;
++    gap: 4px;
++    flex-wrap: wrap;
++    font-size: 0.62rem;
++  }
++
++  [data-page="ai-command"] .aicmd-v2-tool-meta span:nth-child(n+2) {
++    display: none;
++  }
++
++  [data-page="ai-command"] .aicmd-room-output-empty {
++    min-height: 72px;
++    padding: 10px;
++  }
++
++  [data-page="ai-command"] .aicmd-room-output-empty strong {
++    font-size: 0.82rem;
++  }
++
++  [data-page="ai-command"] .aicmd-room-output-empty span {
++    font-size: 0.68rem;
++    line-height: 1.25;
++  }
++
++  [data-page="ai-command"] .aicmd-room-output-meta,
++  [data-page="ai-command"] .aicmd-room-tools-grid,
++  [data-page="ai-command"] .aicmd-room-status-strip {
++    grid-template-columns: 1fr;
++  }
++
++  [data-page="ai-command"] .aicmd-room-output-tabs {
++    gap: 4px;
++    margin-top: 6px;
++  }
++
++  [data-page="ai-command"] .aicmd-room-output-tab {
++    min-height: 34px;
++    padding: 5px 6px;
++    border-radius: 7px;
++  }
++
++  [data-page="ai-command"] .aicmd-room-output-tab strong {
++    font-size: 0.68rem;
++  }
++
++  [data-page="ai-command"] .aicmd-room-output-tab span {
++    display: none;
++  }
++
++  [data-page="ai-command"] .aicmd-room-output-meta {
++    gap: 4px;
++    margin: 6px 0;
++  }
++
++  [data-page="ai-command"] .aicmd-room-output-meta span {
++    padding: 5px 6px;
++    font-size: 0.68rem;
++  }
++
++  [data-page="ai-command"] .aicmd-room-output-body {
++    gap: 6px;
++    padding: 7px;
+   }
+ 
+-  [data-page="ai-command"] .aicmd-room-output-tabs {
+-    display: grid;
+-    grid-template-columns: repeat(2, minmax(0, 1fr));
++  [data-page="ai-command"] .aicmd-room-output-body h3 {
++    font-size: 0.88rem;
++    line-height: 1.18;
+   }
+ 
+-  [data-page="ai-command"] .aicmd-room-output-meta,
+-  [data-page="ai-command"] .aicmd-room-tools-grid,
+-  [data-page="ai-command"] .aicmd-room-status-strip {
+-    grid-template-columns: 1fr;
++  [data-page="ai-command"] .aicmd-room-output-summary,
++  [data-page="ai-command"] .aicmd-room-planned-note,
++  [data-page="ai-command"] .aicmd-room-output-next strong,
++  [data-page="ai-command"] .aicmd-room-output-confirmation span {
++    font-size: 0.68rem;
++    line-height: 1.25;
++  }
++
++  [data-page="ai-command"] .aicmd-room-output-next,
++  [data-page="ai-command"] .aicmd-room-output-confirmation {
++    padding: 6px;
+   }
+ 
+   [data-page="ai-command"] .aicmd-room-response-actions,
+@@ -7322,7 +7877,8 @@
+   }
+ 
+   [data-page="ai-command"] #aicmdV2AskBtn {
+-    flex-basis: 100%;
++    flex: 0 0 58px;
++    min-width: 58px;
+   }
+ 
+   [data-page="ai-command"] .aicmd-room-output-actions button,
+@@ -7461,10 +8017,13 @@
+ 
+ @media (max-width: 1180px) {
+   [data-page="ai-command"] .aicmd-room-grid {
++    display: flex !important;
++    flex-direction: column !important;
+     grid-template-columns: 1fr !important;
+   }
+ 
+   [data-page="ai-command"] .aicmd-room-team-panel {
++    order: 3 !important;
+     grid-column: 1 !important;
+     grid-row: auto !important;
+     position: static !important;
+@@ -7472,14 +8031,16 @@
+   }
+ 
+   [data-page="ai-command"] .aicmd-room-center {
++    order: 1 !important;
+     grid-column: 1 !important;
+     grid-row: auto !important;
+   }
+ 
+   [data-page="ai-command"] .aicmd-room-output {
++    order: 3 !important;
+     grid-column: 1 !important;
+     grid-row: auto !important;
+-    display: block !important;
++    display: grid !important;
+   }
+ 
+   [data-page="ai-command"] .aicmd-room-member-list {
+@@ -7492,7 +8053,7 @@
+   }
+ 
+   [data-page="ai-command"] .aicmd-room-member {
+-    flex: 0 0 220px !important;
++    flex: 0 0 210px !important;
+   }
+ 
+   [data-page="ai-command"] .aicmd-room-output-workspace,
+@@ -9089,12 +9650,66 @@
+ 
+ @media (max-width: 760px) {
+   [data-page="ai-command"] .aicmd-v2-composer.aicmd-room-composer.aicmd-chatgpt-composer {
+-    padding: 13px;
++    padding: 11px;
++  }
++
++  [data-page="ai-command"] .aicmd-chatgpt-composer-head,
++  [data-page="ai-command"] .aicmd-v2-composer-head {
++    gap: 8px;
++    margin-bottom: 9px;
++    padding-bottom: 8px;
++  }
++
++  [data-page="ai-command"] .aicmd-v2-composer-icon {
++    width: 30px;
++    height: 30px;
++    font-size: 0.68rem;
++  }
++
++  [data-page="ai-command"] .aicmd-v2-composer-label {
++    font-size: 0.9rem;
++  }
++
++  [data-page="ai-command"] .aicmd-v2-composer-label::after,
++  [data-page="ai-command"] .aicmd-chatgpt-enter-hint {
++    display: none;
+   }
+ 
+   [data-page="ai-command"] .aicmd-v2-textarea.aicmd-chatgpt-textarea,
+   [data-page="ai-command"] .aicmd-room-composer .aicmd-v2-textarea {
+-    min-height: 92px;
++    min-height: 88px !important;
++    padding: 12px;
++    border-radius: 14px;
++    font-size: 0.9rem;
++  }
++
++  [data-page="ai-command"] .aicmd-chatgpt-toolbar {
++    gap: 8px;
++  }
++
++  [data-page="ai-command"] .aicmd-chatgpt-tools-left {
++    flex: 0 0 auto;
++  }
++
++  [data-page="ai-command"] .aicmd-chatgpt-tools-right {
++    flex: 1 1 auto;
++    justify-content: flex-end;
++  }
++
++  [data-page="ai-command"] .aicmd-chatgpt-context-row,
++  [data-page="ai-command"] #aicmdV2Status,
++  [data-page="ai-command"] .aicmd-v2-composer-hint {
++    padding-inline: 0;
++    font-size: 0.72rem;
++  }
++
++  [data-page="ai-command"] .aicmd-v2-lang-strip {
++    gap: 5px;
++  }
++
++  [data-page="ai-command"] .aicmd-main-source-indicator {
++    margin-top: 6px;
++    padding: 7px 8px;
+   }
+ }
+ 
+@@ -9383,3 +9998,350 @@
+ [data-page="library"] #libraryAiPanelMount {
+   order: 4;
+ }
++
++/* AI Command universal chat-first shell */
++[data-page="ai-command"] .aicmd-universal-chat-shell {
++  --aicmd-chat-max: 1120px;
++}
++
++[data-page="ai-command"] .aicmd-universal-chat-shell .aicmd-room-header {
++  max-width: var(--aicmd-chat-max);
++  margin-inline: auto;
++}
++
++[data-page="ai-command"] .aicmd-universal-chat-shell .aicmd-room-grid {
++  display: grid;
++  grid-template-columns: minmax(0, var(--aicmd-chat-max));
++  justify-content: center;
++  gap: 14px;
++}
++
++[data-page="ai-command"] .aicmd-universal-chat-shell .aicmd-room-center {
++  width: 100%;
++  min-width: 0;
++}
++
++[data-page="ai-command"] .aicmd-universal-chat-shell .aicmd-unified-chat-surface {
++  display: grid;
++  gap: 10px;
++}
++
++[data-page="ai-command"] .aicmd-universal-chat-shell .aicmd-room-composer {
++  order: 2;
++  border-radius: 28px;
++}
++
++[data-page="ai-command"] .aicmd-universal-chat-shell .aicmd-room-chat {
++  order: 1;
++  max-height: 44vh;
++  overflow: auto;
++}
++
++[data-page="ai-command"] .aicmd-universal-chat-shell .aicmd-room-chat.is-empty-mobile {
++  display: none;
++}
++
++[data-page="ai-command"] .aicmd-universal-chat-topbar {
++  display: grid;
++  gap: 10px;
++  margin-bottom: 10px;
++  padding-bottom: 10px;
++  border-bottom: 1px solid rgba(148, 163, 184, 0.14);
++}
++
++[data-page="ai-command"] .aicmd-universal-chat-title {
++  display: flex;
++  align-items: baseline;
++  justify-content: space-between;
++  gap: 12px;
++  min-width: 0;
++}
++
++[data-page="ai-command"] .aicmd-universal-chat-title strong {
++  color: var(--text-primary);
++  font-size: 1rem;
++  font-weight: 900;
++}
++
++[data-page="ai-command"] .aicmd-universal-chat-title span {
++  color: var(--text-secondary);
++  font-size: 0.78rem;
++  overflow: hidden;
++  text-overflow: ellipsis;
++  white-space: nowrap;
++}
++
++[data-page="ai-command"] .aicmd-universal-chat-actions {
++  display: flex;
++  align-items: center;
++  gap: 8px;
++  min-width: 0;
++}
++
++[data-page="ai-command"] .aicmd-universal-specialist-select,
++[data-page="ai-command"] .aicmd-universal-icon-btn {
++  min-height: 36px;
++  border: 1px solid rgba(122, 169, 205, 0.22);
++  border-radius: 999px;
++  background: rgba(3, 13, 22, 0.72);
++  color: var(--text-primary);
++  font-weight: 800;
++}
++
++[data-page="ai-command"] .aicmd-universal-specialist-select {
++  flex: 1 1 220px;
++  min-width: 160px;
++  padding: 0 12px;
++}
++
++[data-page="ai-command"] .aicmd-universal-icon-btn {
++  flex: 0 0 auto;
++  display: inline-grid;
++  place-items: center;
++  padding: 0 12px;
++  cursor: pointer;
++}
++
++[data-page="ai-command"] .aicmd-universal-icon-btn.is-planned {
++  opacity: 0.72;
++}
++
++[data-page="ai-command"] .aicmd-universal-safety-strip {
++  padding: 8px 10px;
++  border: 1px solid rgba(52, 211, 153, 0.18);
++  border-radius: 14px;
++  background: rgba(20, 83, 45, 0.10);
++  color: rgba(187, 247, 208, 0.86);
++  font-size: 0.78rem;
++  line-height: 1.35;
++}
++
++[data-page="ai-command"] .aicmd-universal-chat-shell .aicmd-room-team-panel,
++[data-page="ai-command"] .aicmd-universal-chat-shell .aicmd-room-output {
++  width: min(100%, var(--aicmd-chat-max));
++  margin-inline: auto;
++}
++
++[data-page="ai-command"] .aicmd-universal-chat-shell .aicmd-room-team-panel {
++  order: 3;
++  position: static;
++  max-height: none;
++}
++
++[data-page="ai-command"] .aicmd-universal-chat-shell .aicmd-room-output {
++  order: 4;
++  display: grid;
++  grid-template-columns: minmax(0, 1fr) minmax(320px, 420px);
++  gap: 12px;
++}
++
++[data-page="ai-command"] .aicmd-universal-chat-shell .aicmd-mobile-sections {
++  display: grid;
++  grid-template-columns: repeat(4, minmax(0, 1fr));
++  width: min(100%, var(--aicmd-chat-max));
++  margin: 0 auto;
++  gap: 8px;
++}
++
++[data-page="ai-command"] .aicmd-universal-chat-shell .aicmd-mobile-section-tab {
++  min-height: 40px;
++  border: 1px solid rgba(122, 169, 205, 0.20);
++  border-radius: 14px;
++  background: rgba(15, 23, 42, 0.72);
++  color: var(--text-secondary);
++  font-weight: 900;
++  cursor: pointer;
++}
++
++[data-page="ai-command"] .aicmd-universal-chat-shell .aicmd-mobile-section-tab.is-active {
++  border-color: rgba(34, 211, 238, 0.56);
++  color: var(--text-primary);
++  background: rgba(8, 47, 73, 0.62);
++}
++
++[data-page="ai-command"] .aicmd-universal-chat-shell[data-universal-section="team"] .aicmd-room-output,
++[data-page="ai-command"] .aicmd-universal-chat-shell[data-universal-section="team"] .aicmd-mobile-flow-panel,
++[data-page="ai-command"] .aicmd-universal-chat-shell[data-universal-section="tools"] .aicmd-room-team-panel,
++[data-page="ai-command"] .aicmd-universal-chat-shell[data-universal-section="tools"] .aicmd-room-output-workspace,
++[data-page="ai-command"] .aicmd-universal-chat-shell[data-universal-section="tools"] .aicmd-mobile-flow-panel,
++[data-page="ai-command"] .aicmd-universal-chat-shell[data-universal-section="output"] .aicmd-room-team-panel,
++[data-page="ai-command"] .aicmd-universal-chat-shell[data-universal-section="output"] .aicmd-room-tools,
++[data-page="ai-command"] .aicmd-universal-chat-shell[data-universal-section="output"] .aicmd-mobile-flow-panel,
++[data-page="ai-command"] .aicmd-universal-chat-shell[data-universal-section="flow"] .aicmd-room-team-panel,
++[data-page="ai-command"] .aicmd-universal-chat-shell[data-universal-section="flow"] .aicmd-room-output {
++  display: none;
++}
++
++[data-page="ai-command"] .aicmd-universal-chat-shell[data-universal-section="tools"] .aicmd-room-output,
++[data-page="ai-command"] .aicmd-universal-chat-shell[data-universal-section="output"] .aicmd-room-output,
++[data-page="ai-command"] .aicmd-universal-chat-shell[data-universal-section="flow"] .aicmd-mobile-flow-panel {
++  display: grid;
++  width: min(100%, var(--aicmd-chat-max));
++  margin-inline: auto;
++}
++
++@media (max-width: 900px) {
++  [data-page="ai-command"] .aicmd-universal-chat-shell {
++    --aicmd-chat-max: 100%;
++  }
++
++  [data-page="ai-command"] .aicmd-universal-chat-shell .aicmd-room-header {
++    padding: 10px;
++  }
++
++  [data-page="ai-command"] .aicmd-universal-chat-shell .aicmd-room-grid {
++    gap: 10px;
++  }
++
++  [data-page="ai-command"] .aicmd-universal-chat-title {
++    display: grid;
++    gap: 3px;
++  }
++
++  [data-page="ai-command"] .aicmd-universal-chat-actions {
++    display: grid;
++    grid-template-columns: minmax(0, 1fr) auto auto auto auto;
++    gap: 6px;
++  }
++
++  [data-page="ai-command"] .aicmd-universal-specialist-select {
++    min-width: 0;
++  }
++
++  [data-page="ai-command"] .aicmd-universal-icon-btn {
++    min-width: 36px;
++    padding: 0 9px;
++  }
++
++  [data-page="ai-command"] .aicmd-universal-safety-strip {
++    font-size: 0.68rem;
++    white-space: nowrap;
++    overflow: hidden;
++    text-overflow: ellipsis;
++  }
++
++  [data-page="ai-command"] .aicmd-universal-chat-shell .aicmd-room-output {
++    grid-template-columns: 1fr;
++  }
++
++  [data-page="ai-command"] .aicmd-universal-chat-shell .aicmd-mobile-sections {
++    gap: 5px;
++  }
++
++  [data-page="ai-command"] .aicmd-universal-chat-shell .aicmd-mobile-section-tab {
++    min-height: 34px;
++    border-radius: 10px;
++    font-size: 0.75rem;
++  }
++}
++
++/* AI Command universal single chat box correction */
++[data-page="ai-command"] .aicmd-universal-chat-shell .aicmd-unified-chat-surface {
++  width: min(100%, var(--aicmd-chat-max, 1120px));
++  margin-inline: auto;
++  padding: 18px;
++  border: 1px solid rgba(34, 211, 238, 0.24);
++  border-radius: 28px;
++  background:
++    radial-gradient(circle at 50% 0%, rgba(34, 211, 238, 0.10), transparent 38%),
++    rgba(3, 8, 18, 0.88);
++  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.30);
++}
++
++[data-page="ai-command"] .aicmd-universal-chat-shell .aicmd-room-conversation-head {
++  padding: 0 0 12px;
++  border: 0;
++  border-bottom: 1px solid rgba(148, 163, 184, 0.12);
++  border-radius: 0;
++  background: transparent;
++  box-shadow: none;
++}
++
++[data-page="ai-command"] .aicmd-universal-chat-shell .aicmd-room-composer {
++  margin: 0;
++  border: 0;
++  border-radius: 0;
++  background: transparent;
++  box-shadow: none;
++}
++
++[data-page="ai-command"] .aicmd-universal-chat-shell .aicmd-room-chat {
++  margin: 0;
++  padding: 0;
++  border: 0;
++  border-radius: 0;
++  background: transparent;
++  box-shadow: none;
++}
++
++[data-page="ai-command"] .aicmd-universal-chat-shell .aicmd-v2-chat-head {
++  display: none;
++}
++
++[data-page="ai-command"] .aicmd-universal-chat-shell .aicmd-v2-chat-body {
++  padding: 0;
++  border: 0;
++  background: transparent;
++}
++
++[data-page="ai-command"] .aicmd-universal-chat-shell .aicmd-room-chat.has-activity {
++  max-height: 44vh;
++  overflow: auto;
++  padding-top: 12px;
++  border-top: 1px solid rgba(148, 163, 184, 0.12);
++}
++
++[data-page="ai-command"] .aicmd-universal-chat-shell .aicmd-room-chat.is-empty-mobile {
++  display: none;
++}
++
++[data-page="ai-command"] .aicmd-universal-chat-shell .aicmd-chatgpt-input-shell,
++[data-page="ai-command"] .aicmd-universal-chat-shell .aicmd-v2-textarea.aicmd-chatgpt-textarea,
++[data-page="ai-command"] .aicmd-universal-chat-shell .aicmd-room-composer .aicmd-v2-textarea {
++  border-radius: 22px;
++}
++
++[data-page="ai-command"] .aicmd-universal-chat-shell .aicmd-chatgpt-toolbar {
++  align-items: center;
++}
++
++[data-page="ai-command"] .aicmd-universal-chat-shell .aicmd-v2-composer-hint,
++[data-page="ai-command"] .aicmd-universal-chat-shell #aicmdV2Status {
++  max-width: 920px;
++}
++
++[data-page="ai-command"] .aicmd-universal-chat-shell .aicmd-mobile-sections {
++  margin-top: 4px;
++}
++
++@media (max-width: 760px) {
++  [data-page="ai-command"] .aicmd-universal-chat-shell .aicmd-unified-chat-surface {
++    padding: 10px;
++    border-radius: 18px;
++  }
++
++  [data-page="ai-command"] .aicmd-universal-chat-shell .aicmd-room-conversation-head {
++    padding-bottom: 8px;
++  }
++
++  [data-page="ai-command"] .aicmd-universal-chat-shell .aicmd-room-active-copy p,
++  [data-page="ai-command"] .aicmd-universal-chat-shell .aicmd-mobile-safety-summary {
++    white-space: nowrap;
++    overflow: hidden;
++    text-overflow: ellipsis;
++  }
++
++  [data-page="ai-command"] .aicmd-universal-chat-shell .aicmd-chatgpt-input-shell {
++    border-radius: 18px;
++  }
++
++  [data-page="ai-command"] .aicmd-universal-chat-shell .aicmd-v2-textarea.aicmd-chatgpt-textarea,
++  [data-page="ai-command"] .aicmd-universal-chat-shell .aicmd-room-composer .aicmd-v2-textarea {
++    min-height: 96px !important;
++  }
++
++  [data-page="ai-command"] .aicmd-universal-chat-shell .aicmd-v2-composer-hint {
++    font-size: 0.68rem;
++    line-height: 1.25;
++  }
++}

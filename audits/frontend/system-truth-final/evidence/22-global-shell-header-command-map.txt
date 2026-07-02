@@ -1,0 +1,627 @@
+# Global Shell / Header / Command / Dock Map
+
+public/control-center/index.html:12:  <link rel="stylesheet" href="./styles/07-sidebar.css?v=20260508-sidebar-2">
+public/control-center/index.html:13:  <link rel="stylesheet" href="./styles/10-topbar-canonical.css?v=20260508-topbar-canonical-2">
+public/control-center/index.html:30:    <!-- Mobile sidebar backdrop -->
+public/control-center/index.html:31:    <div id="sidebarBackdrop" class="sidebar-backdrop" aria-hidden="true" hidden></div>
+public/control-center/index.html:43:      id="startupUnlockBar"
+public/control-center/index.html:50:      <span id="startupUnlockText">Startup is taking longer than expected.</span>
+public/control-center/index.html:51:      <button id="startupUnlockBtn" class="btn btn-warning" type="button">Unlock UI</button>
+public/control-center/index.html:88:    <div id="loadingOverlay" class="loading-overlay" aria-hidden="true">
+public/control-center/index.html:98:      <aside id="sidebarNav" class="sidebar" aria-label="Main navigation">
+public/control-center/index.html:99:        <div class="sidebar-brand">
+public/control-center/index.html:105:        <div class="sidebar-project">
+public/control-center/index.html:106:          <label for="projectSwitcher" class="sidebar-label">Current Project</label>
+public/control-center/index.html:107:          <select id="projectSwitcher" class="sidebar-select" aria-label="Current Project">
+public/control-center/index.html:112:        <nav class="sidebar-nav" aria-label="Primary navigation">
+public/control-center/index.html:131:            <button class="nav-item" data-route="research" data-page="research" type="button">Research</button>
+public/control-center/index.html:139:            <button class="nav-item" data-route="notification-center" data-page="notification-center" type="button">Notifications</button>
+public/control-center/index.html:145:        <div class="sidebar-actions">
+public/control-center/index.html:158:        <header id="topbar" class="topbar" role="banner">
+public/control-center/index.html:160:            id="sidebarToggleBtn"
+public/control-center/index.html:161:            class="sidebar-toggle"
+public/control-center/index.html:163:            aria-label="Toggle sidebar"
+public/control-center/index.html:164:            aria-controls="sidebarNav"
+public/control-center/index.html:170:          <div class="topbar-left">
+public/control-center/index.html:177:          <div class="topbar-right">
+public/control-center/index.html:188:                aria-label="Toggle command bar"
+public/control-center/index.html:213:        </header>
+public/control-center/index.html:218:        <section id="globalCommandBar" class="command-bar" aria-hidden="true" hidden aria-label="Global command bar">
+public/control-center/index.html:225:              aria-label="Global search"
+public/control-center/index.html:242:            <button id="runSearchBtn" class="btn btn-secondary" data-action="search" type="button">Search</button>
+public/control-center/index.html:260:        var overlay = document.getElementById("loadingOverlay");
+public/control-center/index.html:371:        <header class="ai-dock-header">
+public/control-center/index.html:385:        </header>
+public/control-center/app.js:222:    const headers = new Headers(
+public/control-center/app.js:223:      init.headers ||
+public/control-center/app.js:224:      (input instanceof Request ? input.headers : undefined) ||
+public/control-center/app.js:230:      headers.set(CONTROL_WRITE_HEADER, controlKey);
+public/control-center/app.js:231:      headers.set("Authorization", `Bearer ${controlKey}`);
+public/control-center/app.js:236:      headers
+public/control-center/app.js:239:      ? new Request(input, { headers })
+public/control-center/app.js:453:      headers: {
+public/control-center/app.js:575:          headers: {
+public/control-center/app.js:675:  // Access key management moved out of the global header.
+public/control-center/app.js:684:  // Role switching belongs in System/Settings, not the global header.
+public/control-center/app.js:825:  const overlay = $("loadingOverlay");
+public/control-center/app.js:871:  const overlay = $("loadingOverlay");
+public/control-center/app.js:896:  const overlay = $("loadingOverlay");
+public/control-center/app.js:974:  const overlay = $("loadingOverlay");
+public/control-center/app.js:977:    ? Array.from(document.querySelectorAll("#loadingOverlay"))
+public/control-center/app.js:1038:  const unlockBar = $("startupUnlockBar");
+public/control-center/app.js:1039:  const unlockText = $("startupUnlockText");
+public/control-center/app.js:1066:      `commandBar.exists: ${payload.commandRuntime?.commandBar?.exists ? "true" : "false"}`,
+public/control-center/app.js:1311:  const overlay = $("loadingOverlay");
+public/control-center/app.js:1431:  const overlay = $("loadingOverlay");
+public/control-center/app.js:1495:  const overlay = $("loadingOverlay");
+public/control-center/app.js:1520:  ["startupUnlockBtn", "startupTraceUnlockBtn"].forEach((id) => {
+public/control-center/app.js:1929:  const notifications = Array.isArray(operations?.notifications?.items)
+public/control-center/app.js:1930:    ? operations.notifications.items
+public/control-center/app.js:1932:  const unread = notifications.filter((item) => !item?.read_at).length;
+public/control-center/app.js:2377:  const requiredSections = ["overview", "readiness", "assets"];
+public/control-center/app.js:2412:    readiness: payload.readiness,
+public/control-center/app.js:3069:    if (actionName === "search") {
+public/control-center/app.js:3132:      (candidate.closest("#runSearchBtn") ? "search" : "") ||
+public/control-center/app.js:3162:    const sidebarNav = document.querySelector(".sidebar-nav");
+public/control-center/app.js:3163:    if (sidebarNav) {
+public/control-center/app.js:3164:      const activeItem = sidebarNav.querySelector(".nav-item.is-active");
+public/control-center/app.js:3226:  const sidebar = document.querySelector(".sidebar");
+public/control-center/app.js:3227:  const toggleBtn = $("sidebarToggleBtn");
+public/control-center/app.js:3228:  const backdrop = $("sidebarBackdrop");
+public/control-center/app.js:3230:  const commandBar = $("globalCommandBar");
+public/control-center/app.js:3247:    toggleBtn.setAttribute("aria-label", isOpen ? "Close sidebar" : "Open sidebar");
+public/control-center/app.js:3251:    if (!appRoot || !commandBar || !commandToggleBtn) return;
+public/control-center/app.js:3256:      commandBar.classList.toggle("is-collapsed", !desktopCommandOpen);
+public/control-center/app.js:3257:      commandBar.hidden = !desktopCommandOpen;
+public/control-center/app.js:3258:      commandBar.setAttribute("aria-hidden", desktopCommandOpen ? "false" : "true");
+public/control-center/app.js:3271:    commandBar.classList.toggle("is-collapsed", !expanded);
+public/control-center/app.js:3272:    commandBar.hidden = !expanded;
+public/control-center/app.js:3273:    commandBar.setAttribute("aria-hidden", expanded ? "false" : "true");
+public/control-center/app.js:3300:    if (!sidebar || !isMobileViewport()) return;
+public/control-center/app.js:3301:    sidebar.classList.add("is-open");
+public/control-center/app.js:3308:    document.body.classList.add("sidebar-open");
+public/control-center/app.js:3314:    if (!sidebar) return;
+public/control-center/app.js:3315:    sidebar.classList.remove("is-open");
+public/control-center/app.js:3322:    document.body.classList.remove("sidebar-open");
+public/control-center/app.js:3334:      if (sidebar?.classList.contains("is-open")) {
+public/control-center/app.js:3388:    if (event.key === "Escape" && sidebar?.classList.contains("is-open")) {
+public/control-center/app.js:3411:  const topbar = document.querySelector(".topbar");
+public/control-center/app.js:3412:  if (!appRoot || !topbar) return;
+public/control-center/app.js:3414:  const measured = Math.max(56, Math.round(topbar.getBoundingClientRect().height || 64));
+public/control-center/app.js:3415:  appRoot.style.setProperty("--shell-topbar-height", `${measured}px`);
+public/control-center/app.js:3425:  const loadingOverlay = $("loadingOverlay");
+public/control-center/app.js:3427:  const sidebarBackdrop = $("sidebarBackdrop");
+public/control-center/app.js:3432:    loadingOverlay &&
+public/control-center/app.js:3433:    !loadingOverlay.hidden &&
+public/control-center/app.js:3434:    loadingOverlay.getAttribute("aria-hidden") !== "true";
+public/control-center/app.js:3441:  const sidebarActive =
+public/control-center/app.js:3442:    sidebarBackdrop &&
+public/control-center/app.js:3443:    !sidebarBackdrop.hidden &&
+public/control-center/app.js:3444:    sidebarBackdrop.getAttribute("aria-hidden") !== "true";
+public/control-center/app.js:3446:  const blocked = loadingActive || commandActive || sidebarActive;
+public/control-center/app.js:3460:  const commandBar = $("globalCommandBar");
+public/control-center/app.js:3466:    commandBar: fallbackCommandBar = null,
+public/control-center/app.js:3474:    commandBar: {
+public/control-center/app.js:3511:    commandBar,
+public/control-center/app.js:3523:    showError("Enter a route, page name, or keyword to search.");
+public/control-center/app.js:3560:  const commandBar = $("globalCommandBar");
+public/control-center/app.js:3573:  commandBar?.classList.remove("is-collapsed");
+public/control-center/app.js:3574:  if (commandBar) {
+public/control-center/app.js:3575:    commandBar.hidden = false;
+public/control-center/app.js:3577:  commandBar?.setAttribute("aria-hidden", "false");
+public/control-center/app.js:3613:  const commandBar = $("globalCommandBar");
+public/control-center/app.js:3618:  commandBar?.classList.add("is-collapsed");
+public/control-center/app.js:3619:  if (commandBar) {
+public/control-center/app.js:3620:    commandBar.hidden = true;
+public/control-center/app.js:3622:  commandBar?.setAttribute("aria-hidden", "true");
+public/control-center/app.js:3640:  const commandBar = $("globalCommandBar");
+public/control-center/app.js:3662:  if (commandBar) {
+public/control-center/app.js:3663:    commandBar.addEventListener("click", (event) => event.stopPropagation());
+public/control-center/app.js:3669:  const searchInput = $("globalSearch");
+public/control-center/app.js:3672:  const searchBtn = $("runSearchBtn");
+public/control-center/app.js:3674:  if (searchInput) {
+public/control-center/app.js:3675:    searchInput.value = "";
+public/control-center/app.js:3678:  if (searchBtn) {
+public/control-center/app.js:3679:    searchBtn.setAttribute("data-action", "search");
+public/control-center/app.js:3692:  if (searchInput && searchInput.dataset.mhSearchEnterBound !== "true") {
+public/control-center/app.js:3693:    searchInput.dataset.mhSearchEnterBound = "true";
+public/control-center/app.js:3694:    searchInput.addEventListener("keydown", (event) => {
+public/control-center/styles/08-components-foundation.css:171:.sidebar-select,
+public/control-center/styles/08-components-foundation.css:269:.panel-header,
+public/control-center/styles/08-components-foundation.css:283:.panel-header {
+public/control-center/styles/08-components-foundation.css:289:.panel-header h3,
+public/control-center/styles/08-components-foundation.css:290:.section-header h3,
+public/control-center/styles/08-components-foundation.css:683:.std-page-header,
+public/control-center/styles/08-components-foundation.css:684:.page-header {
+public/control-center/styles/08-components-foundation.css:692:.std-page-header {
+public/control-center/styles/08-components-foundation.css:912:  .std-page-header,
+public/control-center/styles/12-pages.css:2:[data-page="ai-command"] .aicmd-room-header {
+public/control-center/styles/12-pages.css:22:[data-page="ai-command"] .aicmd-room-header-actions {
+public/control-center/styles/12-pages.css:33:[data-page="ai-command"] .aicmd-room-header-actions .aicmd-v2-btn-secondary,
+public/control-center/styles/12-pages.css:34:[data-page="ai-command"] .aicmd-room-header-actions .aicmd-v2-btn-ghost {
+public/control-center/styles/12-pages.css:251:[data-page="governance"] .governance-operating-header {
+public/control-center/styles/12-pages.css:257:[data-page="governance"] .governance-operating-header-main {
+public/control-center/styles/12-pages.css:308:.governance-evidence-summary-header {
+public/control-center/styles/12-pages.css:368:.governance-intake-panel-header {
+public/control-center/styles/12-pages.css:406:.publishing-command-header {
+public/control-center/styles/12-pages.css:420:.publishing-command-header-title {
+public/control-center/styles/12-pages.css:426:.publishing-command-header-context,
+public/control-center/styles/12-pages.css:427:.publishing-command-header-status,
+public/control-center/styles/12-pages.css:428:.publishing-command-header-safety {
+public/control-center/styles/12-pages.css:433:.publishing-command-header-status span,
+public/control-center/styles/12-pages.css:434:.publishing-command-header strong {
+public/control-center/styles/12-pages.css:438:.publishing-command-header-safety {
+public/control-center/styles/12-pages.css:443:.publishing-command-header-actions {
+public/control-center/styles/12-pages.css:450:.publishing-command-header-actions .btn {
+public/control-center/styles/12-pages.css:507:.publishing-readiness-summary {
+public/control-center/styles/12-pages.css:517:.publishing-readiness-card {
+public/control-center/styles/12-pages.css:531:.publishing-readiness-card.is-warning {
+public/control-center/styles/12-pages.css:536:.publishing-readiness-card.is-missing {
+public/control-center/styles/12-pages.css:541:.publishing-readiness-card-label {
+public/control-center/styles/12-pages.css:579:.media-command-header {
+public/control-center/styles/12-pages.css:708:.media-readiness-chip.is-ready,
+public/control-center/styles/12-pages.css:714:.media-readiness-chip.is-active,
+public/control-center/styles/12-pages.css:720:.media-readiness-chip.is-warning,
+public/control-center/styles/12-pages.css:726:.media-readiness-chip.is-missing,
+public/control-center/styles/12-pages.css:731:.media-readiness-summary {
+public/control-center/styles/12-pages.css:736:.media-readiness-chip {
+public/control-center/styles/12-pages.css:746:.media-readiness-chip span,
+public/control-center/styles/12-pages.css:747:.media-readiness-chip small {
+public/control-center/styles/12-pages.css:752:.media-readiness-chip strong {
+public/control-center/styles/12-pages.css:817:  .media-command-header,
+public/control-center/styles/12-pages.css:839:.media-readiness-checklist,
+public/control-center/styles/12-pages.css:847:.media-readiness-checklist li strong,
+public/control-center/styles/12-pages.css:1125:.setup-wizard-header-top,
+public/control-center/styles/12-pages.css:1130:.library-finder-topbar,
+public/control-center/styles/12-pages.css:1667:[data-page="setup"] .setup-header-project {
+public/control-center/styles/12-pages.css:3267:.aicmd-v2-header {
+public/control-center/styles/12-pages.css:3307:.aicmd-v2-header-meta {
+public/control-center/styles/12-pages.css:3644:.aicmd-v2-profile-header {
+public/control-center/styles/12-pages.css:4574:.aicmd-v2-readiness-strip {
+public/control-center/styles/12-pages.css:4581:.aicmd-v2-readiness-chip {
+public/control-center/styles/12-pages.css:4590:.aicmd-v2-readiness-chip strong {
+public/control-center/styles/12-pages.css:4594:.aicmd-v2-readiness-chip.is-available {
+public/control-center/styles/12-pages.css:4599:.aicmd-v2-readiness-chip.is-available strong {
+public/control-center/styles/12-pages.css:4603:.aicmd-v2-readiness-chip.is-planned strong {
+public/control-center/styles/12-pages.css:4628:  .aicmd-v2-header {
+public/control-center/styles/12-pages.css:4666:[data-page="ai-command"] .aicmd-v2-header {
+public/control-center/styles/12-pages.css:4674:[data-page="ai-command"] .aicmd-v2-header-meta,
+public/control-center/styles/12-pages.css:4675:[data-page="ai-command"] .aicmd-v2-header-actions {
+public/control-center/styles/12-pages.css:4682:[data-page="ai-command"] .aicmd-v2-header-meta {
+public/control-center/styles/12-pages.css:4687:[data-page="ai-command"] .aicmd-v2-header-actions {
+public/control-center/styles/12-pages.css:4898:[data-page="ai-command"] .aicmd-v2-readiness-chip,
+public/control-center/styles/12-pages.css:4995:[data-page="ai-command"] .aicmd-v2-profile-header {
+public/control-center/styles/12-pages.css:5338:[data-page="ai-command"] .aicmd-v2-readiness-strip {
+public/control-center/styles/12-pages.css:5383:  [data-page="ai-command"] .aicmd-v2-header {
+public/control-center/styles/12-pages.css:5387:  [data-page="ai-command"] .aicmd-v2-header-actions,
+public/control-center/styles/12-pages.css:5388:  [data-page="ai-command"] .aicmd-v2-header-actions button,
+public/control-center/styles/12-pages.css:5406:.aicmd-v2-header,
+public/control-center/styles/12-pages.css:5734:[data-page="ai-command"] .aicmd-room-header {
+public/control-center/styles/12-pages.css:5775:[data-page="ai-command"] .aicmd-room-header-actions {
+public/control-center/styles/12-pages.css:6660:  [data-page="ai-command"] .aicmd-room-header {
+public/control-center/styles/12-pages.css:6664:  [data-page="ai-command"] .aicmd-room-header-actions {
+public/control-center/styles/12-pages.css:6773:  [data-page="ai-command"] .aicmd-room-header {
+public/control-center/styles/12-pages.css:6781:  [data-page="ai-command"] .aicmd-room-header-actions {
+public/control-center/styles/12-pages.css:7386:/* Library readiness patch: remove inline styles */
+public/control-center/styles/12-pages.css:7406:/* Content Studio readiness patch */
+public/control-center/styles/12-pages.css:7407:.content-readiness-list {
+public/control-center/styles/12-pages.css:7413:.content-readiness-hint {
+public/control-center/styles/12-pages.css:7417:/* Media Studio readiness patch */
+public/control-center/styles/12-pages.css:7418:.media-readiness-hint {
+public/control-center/styles/12-pages.css:7516:[data-page="governance"] .governance-operating-header {
+public/control-center/styles/12-pages.css:7977:[data-page="governance"] .governance-operating-header > .governance-policy-summary-grid {
+public/control-center/styles/12-pages.css:7984:[data-page="governance"] .governance-operating-header > .governance-policy-summary-grid .governance-policy-block {
+public/control-center/styles/12-pages.css:7992:[data-page="governance"] .governance-operating-header > .governance-policy-summary-grid .governance-policy-block:first-child {
+public/control-center/styles/12-pages.css:7998:[data-page="governance"] .governance-operating-header > .governance-policy-summary-grid .governance-policy-block h4 {
+public/control-center/styles/12-pages.css:8004:[data-page="governance"] .governance-operating-header > .governance-policy-summary-grid .governance-rule-list {
+public/control-center/styles/12-pages.css:8009:[data-page="governance"] .governance-operating-header > .governance-policy-summary-grid .governance-rule-item {
+public/control-center/styles/12-pages.css:8016:[data-page="governance"] .governance-operating-header > .governance-policy-summary-grid .governance-rule-item strong {
+public/control-center/styles/12-pages.css:8021:[data-page="governance"] .governance-operating-header > .governance-policy-summary-grid .governance-rule-item span {
+public/control-center/styles/12-pages.css:8026:[data-page="governance"] .governance-operating-header > .governance-policy-summary-grid .empty-box {
+public/control-center/styles/12-pages.css:8051:  [data-page="governance"] .governance-operating-header > .governance-policy-summary-grid {
+public/control-center/styles/05-ai-layer.css:88:.ai-dock-header {
+public/control-center/styles/05-ai-layer.css:97:.ai-dock-header p {
+public/control-center/styles/04-command-layer.css:3:  top: calc(var(--shell-topbar-height, 64px) + 10px);
+public/control-center/styles/04-command-layer.css:123:    top: calc(var(--shell-topbar-height, 56px) + 8px);
+public/control-center/styles/10-topbar-canonical.css:1:.topbar {
+public/control-center/styles/10-topbar-canonical.css:3:  z-index: var(--layer-topbar);
+public/control-center/styles/10-topbar-canonical.css:21:.topbar-left {
+public/control-center/styles/10-topbar-canonical.css:29:.topbar-center {
+public/control-center/styles/10-topbar-canonical.css:36:.topbar-right {
+public/control-center/styles/10-topbar-canonical.css:114:  .topbar {
+public/control-center/styles/10-topbar-canonical.css:127:  .topbar-right {
+public/control-center/styles/13-home-executive.css:22:.home-exec-header {
+public/control-center/styles/13-home-executive.css:47:.home-header-left {
+public/control-center/styles/13-home-executive.css:51:.home-header-eyebrow {
+public/control-center/styles/13-home-executive.css:61:.home-header-title {
+public/control-center/styles/13-home-executive.css:70:.home-header-subtitle {
+public/control-center/styles/13-home-executive.css:78:.home-header-status {
+public/control-center/styles/13-home-executive.css:85:.home-header-score {
+public/control-center/styles/13-home-executive.css:92:.home-header-score strong {
+public/control-center/styles/13-home-executive.css:98:.home-header-score-label {
+public/control-center/styles/13-home-executive.css:888:  .home-exec-header {
+public/control-center/styles/13-home-executive.css:892:  .home-header-status,
+public/control-center/styles/13-home-executive.css:893:  .home-header-score {
+public/control-center/styles/13-home-executive.css:907:  .home-exec-header,
+public/control-center/styles/13-home-executive.css:917:  .home-header-title {
+public/control-center/styles/15-clean-operating-layer.css:390::where(.mhos-clean-header) {
+public/control-center/styles/15-clean-operating-layer.css:401::where(.mhos-clean-header-head) {
+public/control-center/styles/15-clean-operating-layer.css:447::where(.mhos-clean-surface.is-selected, .mhos-clean-surface[aria-selected="true"], .mhos-clean-state.is-selected, .mhos-clean-readiness-item.is-selected, .mhos-clean-blocker.is-selected, .mhos-clean-next-step.is-selected) {
+public/control-center/styles/15-clean-operating-layer.css:668::where(.mhos-clean-readiness-list, .mhos-clean-blockers-list, .mhos-clean-safe-path) {
+public/control-center/styles/15-clean-operating-layer.css:677::where(.mhos-clean-readiness-item, .mhos-clean-blocker, .mhos-clean-next-step) {
+public/control-center/styles/15-clean-operating-layer.css:692::where(.mhos-clean-readiness-item:hover, .mhos-clean-blocker:hover, .mhos-clean-next-step:hover) {
+public/control-center/styles/15-clean-operating-layer.css:768:  :where(.mhos-clean-header) {
+public/control-center/styles/15-clean-operating-layer.css:795:  :where(.mhos-clean-surface, .mhos-clean-readiness-item, .mhos-clean-blocker, .mhos-clean-next-step, .mhos-clean-btn, .mhos-clean-pill) {
+public/control-center/styles/15-clean-operating-layer.css:859:.mhos-campaign-command-header {
+public/control-center/styles/15-clean-operating-layer.css:1117:  .mhos-campaign-command-header {
+public/control-center/styles/15-clean-operating-layer.css:1136:  .mhos-campaign-command-header {
+public/control-center/styles/00-tokens.css:166:  --sidebar-width: 286px;
+public/control-center/styles/00-tokens.css:167:  --shell-topbar-height: 64px;
+public/control-center/styles/09-operations-centers.css:43:[data-page="task-center"] .panel-header {
+public/control-center/styles/09-operations-centers.css:47:[data-page="task-center"] .panel-header h3 {
+public/control-center/styles/09-operations-centers.css:51:[data-page="task-center"] .panel-header p {
+public/control-center/styles/09-operations-centers.css:84:[data-page="task-center"] .ops-executive-strip .panel-header {
+public/control-center/styles/09-operations-centers.css:94:[data-page="task-center"] .ops-executive-strip .panel-header h3 {
+public/control-center/styles/09-operations-centers.css:99:[data-page="task-center"] .ops-executive-strip .panel-header p {
+public/control-center/styles/09-operations-centers.css:191:[data-page="task-center"] .ops-toolbar .sidebar-select {
+public/control-center/styles/09-operations-centers.css:400:[data-page="queue-center"] .panel-header {
+public/control-center/styles/09-operations-centers.css:404:[data-page="queue-center"] .panel-header h3 {
+public/control-center/styles/09-operations-centers.css:408:[data-page="queue-center"] .panel-header p {
+public/control-center/styles/09-operations-centers.css:441:[data-page="queue-center"] .ops-executive-strip .panel-header {
+public/control-center/styles/09-operations-centers.css:451:[data-page="queue-center"] .ops-executive-strip .panel-header h3 {
+public/control-center/styles/09-operations-centers.css:456:[data-page="queue-center"] .ops-executive-strip .panel-header p {
+public/control-center/styles/09-operations-centers.css:548:[data-page="queue-center"] .ops-toolbar .sidebar-select {
+public/control-center/styles/09-operations-centers.css:797:[data-page="job-monitor"] .panel-header {
+public/control-center/styles/09-operations-centers.css:801:[data-page="job-monitor"] .panel-header h3 {
+public/control-center/styles/09-operations-centers.css:805:[data-page="job-monitor"] .panel-header p {
+public/control-center/styles/09-operations-centers.css:838:[data-page="job-monitor"] .ops-executive-strip .panel-header {
+public/control-center/styles/09-operations-centers.css:848:[data-page="job-monitor"] .ops-executive-strip .panel-header h3 {
+public/control-center/styles/09-operations-centers.css:853:[data-page="job-monitor"] .ops-executive-strip .panel-header p {
+public/control-center/styles/09-operations-centers.css:945:[data-page="job-monitor"] .ops-toolbar .sidebar-select {
+public/control-center/styles/09-operations-centers.css:1170::is([data-page="notification-center"], [data-page="notifications"]) .ops-shell,
+public/control-center/styles/09-operations-centers.css:1171::is([data-page="notification-center"], [data-page="notifications"]) .ops-workspace {
+public/control-center/styles/09-operations-centers.css:1176::is([data-page="notification-center"], [data-page="notifications"]) .ops-layout-grid {
+public/control-center/styles/09-operations-centers.css:1183::is([data-page="notification-center"], [data-page="notifications"]) .ops-main-column {
+public/control-center/styles/09-operations-centers.css:1189::is([data-page="notification-center"], [data-page="notifications"]) .ops-right-rail {
+public/control-center/styles/09-operations-centers.css:1199::is([data-page="notification-center"], [data-page="notifications"]) .panel {
+public/control-center/styles/09-operations-centers.css:1203::is([data-page="notification-center"], [data-page="notifications"]) .panel-header {
+public/control-center/styles/09-operations-centers.css:1207::is([data-page="notification-center"], [data-page="notifications"]) .panel-header h3 {
+public/control-center/styles/09-operations-centers.css:1211::is([data-page="notification-center"], [data-page="notifications"]) .panel-header p {
+public/control-center/styles/09-operations-centers.css:1216::is([data-page="notification-center"], [data-page="notifications"]) .std-context-ribbon {
+public/control-center/styles/09-operations-centers.css:1222::is([data-page="notification-center"], [data-page="notifications"]) .std-context-description {
+public/control-center/styles/09-operations-centers.css:1226::is([data-page="notification-center"], [data-page="notifications"]) .std-context-chip {
+public/control-center/styles/09-operations-centers.css:1232::is([data-page="notification-center"], [data-page="notifications"]) .std-context-btn {
+public/control-center/styles/09-operations-centers.css:1237::is([data-page="notification-center"], [data-page="notifications"]) .ops-executive-strip {
+public/control-center/styles/09-operations-centers.css:1244::is([data-page="notification-center"], [data-page="notifications"]) .ops-executive-strip .panel-header {
+public/control-center/styles/09-operations-centers.css:1248::is([data-page="notification-center"], [data-page="notifications"]) .ops-executive-strip .panel-kicker {
+public/control-center/styles/09-operations-centers.css:1254::is([data-page="notification-center"], [data-page="notifications"]) .ops-executive-strip .panel-header h3 {
+public/control-center/styles/09-operations-centers.css:1259::is([data-page="notification-center"], [data-page="notifications"]) .ops-executive-strip .panel-header p {
+public/control-center/styles/09-operations-centers.css:1263::is([data-page="notification-center"], [data-page="notifications"]) .ops-executive-strip .card-badge.neutral {
+public/control-center/styles/09-operations-centers.css:1270::is([data-page="notification-center"], [data-page="notifications"]) .ops-runtime-signal-grid {
+public/control-center/styles/09-operations-centers.css:1277::is([data-page="notification-center"], [data-page="notifications"]) .ops-runtime-signal {
+public/control-center/styles/09-operations-centers.css:1290::is([data-page="notification-center"], [data-page="notifications"]) .ops-runtime-signal strong {
+public/control-center/styles/09-operations-centers.css:1296::is([data-page="notification-center"], [data-page="notifications"]) .ops-runtime-signal small {
+public/control-center/styles/09-operations-centers.css:1305::is([data-page="notification-center"], [data-page="notifications"]) .ops-runtime-signal .card-badge {
+public/control-center/styles/09-operations-centers.css:1311::is([data-page="notification-center"], [data-page="notifications"]) .ops-focus-tabs {
+public/control-center/styles/09-operations-centers.css:1317::is([data-page="notification-center"], [data-page="notifications"]) .ops-focus-tab {
+public/control-center/styles/09-operations-centers.css:1330::is([data-page="notification-center"], [data-page="notifications"]) .ops-focus-tab strong {
+public/control-center/styles/09-operations-centers.css:1335::is([data-page="notification-center"], [data-page="notifications"]) .ops-focus-tab span {
+public/control-center/styles/09-operations-centers.css:1339::is([data-page="notification-center"], [data-page="notifications"]) .ops-focus-tab.is-active {
+public/control-center/styles/09-operations-centers.css:1344::is([data-page="notification-center"], [data-page="notifications"]) .ops-toolbar {
+public/control-center/styles/09-operations-centers.css:1350::is([data-page="notification-center"], [data-page="notifications"]) .ops-toolbar .command-input,
+public/control-center/styles/09-operations-centers.css:1351::is([data-page="notification-center"], [data-page="notifications"]) .ops-toolbar .sidebar-select {
+public/control-center/styles/09-operations-centers.css:1357::is([data-page="notification-center"], [data-page="notifications"]) .ops-main-column .empty-box {
+public/control-center/styles/09-operations-centers.css:1368::is([data-page="notification-center"], [data-page="notifications"]) .ops-notification-state {
+public/control-center/styles/09-operations-centers.css:1374::is([data-page="notification-center"], [data-page="notifications"]) .ops-notification-state strong {
+public/control-center/styles/09-operations-centers.css:1380::is([data-page="notification-center"], [data-page="notifications"]) .ops-notification-state span {
+public/control-center/styles/09-operations-centers.css:1386::is([data-page="notification-center"], [data-page="notifications"]) .ops-state-row td {
+public/control-center/styles/09-operations-centers.css:1391::is([data-page="notification-center"], [data-page="notifications"]) .ops-state-row .ops-notification-state {
+public/control-center/styles/09-operations-centers.css:1395::is([data-page="notification-center"], [data-page="notifications"]) .ops-table-wrap {
+public/control-center/styles/09-operations-centers.css:1402::is([data-page="notification-center"], [data-page="notifications"]) .ops-table {
+public/control-center/styles/09-operations-centers.css:1408::is([data-page="notification-center"], [data-page="notifications"]) .ops-table th,
+public/control-center/styles/09-operations-centers.css:1409::is([data-page="notification-center"], [data-page="notifications"]) .ops-table td {
+public/control-center/styles/09-operations-centers.css:1416::is([data-page="notification-center"], [data-page="notifications"]) .ops-table th {
+public/control-center/styles/09-operations-centers.css:1424::is([data-page="notification-center"], [data-page="notifications"]) .ops-table tr.is-selected td {
+public/control-center/styles/09-operations-centers.css:1428::is([data-page="notification-center"], [data-page="notifications"]) .ops-select-link {
+public/control-center/styles/09-operations-centers.css:1439::is([data-page="notification-center"], [data-page="notifications"]) .ops-select-link span {
+public/control-center/styles/09-operations-centers.css:1444::is([data-page="notification-center"], [data-page="notifications"]) .ops-detail-card,
+public/control-center/styles/09-operations-centers.css:1445::is([data-page="notification-center"], [data-page="notifications"]) .ops-action-panel,
+public/control-center/styles/09-operations-centers.css:1446::is([data-page="notification-center"], [data-page="notifications"]) .ops-ai-panel {
+public/control-center/styles/09-operations-centers.css:1451::is([data-page="notification-center"], [data-page="notifications"]) .ops-detail-grid {
+public/control-center/styles/09-operations-centers.css:1457::is([data-page="notification-center"], [data-page="notifications"]) .ops-detail-card .ops-detail-card {
+public/control-center/styles/09-operations-centers.css:1464::is([data-page="notification-center"], [data-page="notifications"]) .ops-detail-card .ops-detail-card span {
+public/control-center/styles/09-operations-centers.css:1471::is([data-page="notification-center"], [data-page="notifications"]) .ops-detail-card .ops-detail-card strong {
+public/control-center/styles/09-operations-centers.css:1478::is([data-page="notification-center"], [data-page="notifications"]) .ops-action-row {
+public/control-center/styles/09-operations-centers.css:1484::is([data-page="notification-center"], [data-page="notifications"]) .ops-right-rail .btn {
+public/control-center/styles/09-operations-centers.css:1490::is([data-page="notification-center"], [data-page="notifications"]) .ops-mini-list,
+public/control-center/styles/09-operations-centers.css:1491::is([data-page="notification-center"], [data-page="notifications"]) .ops-deferred-list {
+public/control-center/styles/09-operations-centers.css:1496::is([data-page="notification-center"], [data-page="notifications"]) .ops-mini-item {
+public/control-center/styles/09-operations-centers.css:1507::is([data-page="notification-center"], [data-page="notifications"]) .ops-mini-item span {
+public/control-center/styles/09-operations-centers.css:1512::is([data-page="notification-center"], [data-page="notifications"]) .ops-deferred-action {
+public/control-center/styles/09-operations-centers.css:1518::is([data-page="notification-center"], [data-page="notifications"]) .quick-actions {
+public/control-center/styles/09-operations-centers.css:1522::is([data-page="notification-center"], [data-page="notifications"]) .quick-actions .quick-action-btn {
+public/control-center/styles/09-operations-centers.css:1527::is([data-page="notification-center"], [data-page="notifications"]) .ops-prompt-title {
+public/control-center/styles/09-operations-centers.css:1533::is([data-page="notification-center"], [data-page="notifications"]) .ops-prompt-meta {
+public/control-center/styles/09-operations-centers.css:1543:  :is([data-page="notification-center"], [data-page="notifications"]) .ops-layout-grid {
+public/control-center/styles/09-operations-centers.css:1547:  :is([data-page="notification-center"], [data-page="notifications"]) .ops-right-rail {
+public/control-center/styles/09-operations-centers.css:1554:  :is([data-page="notification-center"], [data-page="notifications"]) .ops-focus-tab {
+public/control-center/styles/09-operations-centers.css:1558:  :is([data-page="notification-center"], [data-page="notifications"]) .ops-detail-grid {
+public/control-center/styles/09-operations-centers.css:1562:  :is([data-page="notification-center"], [data-page="notifications"]) .ops-toolbar {
+public/control-center/styles/02-layer-system.css:4:  --layer-sidebar: 100;
+public/control-center/styles/02-layer-system.css:5:  --layer-topbar: 200;
+public/control-center/styles/02-layer-system.css:220:#startupUnlockBar[hidden],
+public/control-center/styles/02-layer-system.css:241:#loadingOverlay {
+public/control-center/styles/02-layer-system.css:249:#loadingOverlay:not(.hidden) {
+public/control-center/styles/02-layer-system.css:253:#loadingOverlay .loading-card,
+public/control-center/styles/02-layer-system.css:254:#loadingOverlay .loading-panel,
+public/control-center/styles/02-layer-system.css:255:#loadingOverlay [class*="loading"] {
+public/control-center/styles/03-app-shell.css:33:  grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
+public/control-center/styles/14-page-standard.css:238:.std-page-header,
+public/control-center/styles/14-page-standard.css:306:.sidebar-backdrop[hidden],
+public/control-center/styles/14-page-standard.css:307:.sidebar-backdrop[aria-hidden="true"],
+public/control-center/styles/14-page-standard.css:626::where(.std-readiness-list, .std-blockers-list, .std-safe-path-list) {
+public/control-center/styles/14-page-standard.css:634::where(.std-readiness-item, .std-blocker-item, .std-safe-step) {
+public/control-center/styles/14-page-standard.css:762::where(.std-detail-card.is-selected, .std-action-panel.is-selected, .std-ai-panel.is-selected, .std-readiness-item.is-selected, .std-blocker-item.is-selected, .std-safe-step.is-selected, .std-state-card.is-selected, .std-detail-card[aria-selected="true"], .std-action-panel[aria-selected="true"], .std-ai-panel[aria-selected="true"]) {
+public/control-center/styles/14-page-standard.css:768::where(.std-readiness-item, .std-blocker-item, .std-safe-step) {
+public/control-center/styles/14-page-standard.css:772::where(.std-readiness-item:hover, .std-blocker-item:hover, .std-safe-step:hover) {
+public/control-center/styles/14-page-standard.css:935:  :where(.std-detail-card, .std-action-panel, .std-ai-panel, .std-readiness-item, .std-blocker-item, .std-safe-step, .std-action-row > .btn, .std-action-row > button, .std-context-actions > .btn, .std-context-actions > button, .std-quick-actions > .btn, .std-quick-actions > button, .std-context-chip) {
+public/control-center/styles/14-page-standard.css:1272:[data-page="library"] .library-finder-topbar,
+public/control-center/styles/14-page-standard.css:1741:[data-page="integrations"] .integration-system-readiness-map,
+public/control-center/styles/14-page-standard.css:1749:[data-page="integrations"] .integration-system-readiness-map .card-head,
+public/control-center/styles/14-page-standard.css:1757:[data-page="integrations"] .integration-system-readiness-map .home-section-copy,
+public/control-center/styles/14-page-standard.css:2115:/* Compact header and executive health (Step 2 polish) */
+public/control-center/styles/07-sidebar.css:1:.sidebar {
+public/control-center/styles/07-sidebar.css:4:  z-index: var(--layer-sidebar);
+public/control-center/styles/07-sidebar.css:16:.sidebar-brand {
+public/control-center/styles/07-sidebar.css:21:.sidebar-brand h1 {
+public/control-center/styles/07-sidebar.css:28:.sidebar-brand p {
+public/control-center/styles/07-sidebar.css:51:.sidebar-project {
+public/control-center/styles/07-sidebar.css:56:.sidebar-label,
+public/control-center/styles/07-sidebar.css:65:.sidebar-nav {
+public/control-center/styles/07-sidebar.css:117:.sidebar-actions {
+public/control-center/styles/07-sidebar.css:122:.sidebar-backdrop {
+public/control-center/styles/07-sidebar.css:126:  z-index: calc(var(--layer-sidebar) - 1);
+public/control-center/styles/07-sidebar.css:132:.sidebar-backdrop.is-visible {
+public/control-center/styles/07-sidebar.css:137:.sidebar-backdrop[aria-hidden="true"],
+public/control-center/styles/07-sidebar.css:138:.sidebar-backdrop[hidden],
+public/control-center/styles/07-sidebar.css:139:.sidebar-backdrop:not(.is-visible) {
+public/control-center/styles/07-sidebar.css:144:.sidebar-toggle {
+public/control-center/styles/07-sidebar.css:158:.sidebar-nav::-webkit-scrollbar {
+public/control-center/styles/07-sidebar.css:162:.sidebar-nav::-webkit-scrollbar-thumb {
+public/control-center/styles/07-sidebar.css:168:  .sidebar {
+public/control-center/styles/07-sidebar.css:172:    z-index: var(--layer-sidebar);
+public/control-center/styles/07-sidebar.css:180:  .sidebar.is-open {
+public/control-center/styles/07-sidebar.css:184:  .sidebar-toggle {
+public/control-center/styles/07-sidebar.css:190:  .sidebar {
+public/control-center/ai-team-model.js:36:    ownerSummary: "Visual direction, brand assets, image quality, creative briefs, and media readiness.",
+public/control-center/ai-team-model.js:54:    ownerSummary: "Publishing queue, schedules, manual handoffs, retries, and release readiness.",
+public/control-center/ai-team-model.js:66:    defaultPrompt: "Act as Ads Optimizer. Build a paid testing plan based on current readiness and performance signals."
+public/control-center/ai-team-model.js:73:    primaryPages: ["insights", "research", "home"],
+public/control-center/ai-team-model.js:78:    id: "researcher",
+public/control-center/ai-team-model.js:79:    label: "Researcher",
+public/control-center/ai-team-model.js:81:    ownerSummary: "Market research, competitors, audience intelligence, and positioning evidence.",
+public/control-center/ai-team-model.js:82:    primaryPages: ["research", "setup", "campaign-studio"],
+public/control-center/ai-team-model.js:83:    outputTargets: ["research", "setup", "campaign-studio", "content-studio"],
+public/control-center/ai-team-model.js:84:    defaultPrompt: "Act as Researcher. Find the strongest market, competitor, and audience insights for this project."
+public/control-center/ai-team-model.js:99:    ownerSummary: "Workflows, tasks, queues, jobs, notifications, handoffs, and execution safety.",
+public/control-center/ai-team-model.js:100:    primaryPages: ["workflows", "task-center", "queue-center", "job-monitor", "notifications"],
+public/control-center/ai-team-model.js:101:    outputTargets: ["workflows", "task-center", "queue-center", "job-monitor", "notifications"],
+public/control-center/ai-team-model.js:108:  setup: ["strategist", "researcher", "compliance_reviewer"],
+public/control-center/ai-team-model.js:119:  research: ["researcher", "strategist"],
+public/control-center/ai-team-model.js:125:  notifications: ["operations_lead"]
+public/control-center/api.js:183:  const contentType = String(response?.headers?.get?.("content-type") || "");
+public/control-center/api.js:184:  const accessKeyBypass = String(response?.headers?.get?.("x-mh-control-key-bypass") || "")
+public/control-center/api.js:208:    return new URLSearchParams(window.location.search).get("debugStartup") === "1";
+public/control-center/api.js:269:  const headers = { Accept: "application/json" };
+public/control-center/api.js:273:    headers["x-mh-control-key"] = keyMeta.key;
+public/control-center/api.js:274:    headers.Authorization = `Bearer ${keyMeta.key}`;
+public/control-center/api.js:278:    headers,
+public/control-center/api.js:285:  const headers = {
+public/control-center/api.js:292:    headers["x-mh-control-key"] = keyMeta.key;
+public/control-center/api.js:293:    headers.Authorization = `Bearer ${keyMeta.key}`;
+public/control-center/api.js:297:    headers,
+public/control-center/api.js:313:    contentType: response?.headers?.get?.("content-type") || "",
+public/control-center/api.js:334:      contentType: response?.headers?.get?.("content-type") || "",
+public/control-center/api.js:352:        contentType: response?.headers?.get?.("content-type") || "",
+public/control-center/api.js:383:            contentType: response?.headers?.get?.("content-type") || "",
+public/control-center/api.js:402:            contentType: response?.headers?.get?.("content-type") || "",
+public/control-center/api.js:413:            contentType: String(response?.headers?.get?.("content-type") || ""),
+public/control-center/api.js:427:        contentType: String(response?.headers?.get?.("content-type") || ""),
+public/control-center/api.js:437:      contentType: response?.headers?.get?.("content-type") || "",
+public/control-center/api.js:469:    contentType: response?.headers?.get?.("content-type") || "",
+public/control-center/api.js:486:      contentType: response?.headers?.get?.("content-type") || "",
+public/control-center/api.js:496:      contentType: response?.headers?.get?.("content-type") || "",
+public/control-center/api.js:508:      contentType: String(response?.headers?.get?.("content-type") || ""),
+public/control-center/api.js:674:      contentType: response?.headers?.get?.("content-type") || ""
+public/control-center/api.js:706:  const { headers, keyPresent, keySource } = buildReadHeaders();
+public/control-center/api.js:709:    headers
+public/control-center/api.js:716:    authHeaderPresent: Boolean(headers.Authorization || headers.authorization),
+public/control-center/api.js:724:  const { headers } = buildWriteHeaders();
+public/control-center/api.js:727:    headers,
+public/control-center/api.js:764:  const { headers, keyPresent, keySource } = buildWriteHeaders();
+public/control-center/api.js:767:    headers,
+public/control-center/api.js:775:    authHeaderPresent: Boolean(headers.Authorization || headers.authorization),
+public/control-center/api.js:782:  const headers = {};
+public/control-center/api.js:786:    headers["x-mh-control-key"] = keyMeta.key;
+public/control-center/api.js:787:    headers.Authorization = `Bearer ${keyMeta.key}`;
+public/control-center/api.js:792:    headers,
+public/control-center/api.js:798:    keyPresent: Boolean(headers["x-mh-control-key"]),
+public/control-center/api.js:800:    authHeaderPresent: Boolean(headers.Authorization || headers.authorization),
+public/control-center/api.js:812:  const { headers, keyPresent, keySource } = buildReadHeaders();
+public/control-center/api.js:823:    headers
+public/control-center/api.js:846:        authHeaderPresent: Boolean(headers.Authorization || headers.authorization),
+public/control-center/api.js:847:        contentType: String(response.headers.get("content-type") || "")
+public/control-center/api.js:856:    contentType: String(response.headers.get("content-type") || "")
+public/control-center/api.js:887:    readiness: payload?.readiness || null,
+public/control-center/api.js:938:      readiness: {
+public/control-center/api.js:939:        readiness_score: 0,
+public/control-center/api.js:1025:    headers: {
+public/control-center/api.js:1101:  const requiredSections = ["overview", "readiness", "assets"];
+public/control-center/api.js:1197:    readiness: requiredData.readiness,
+public/control-center/api.js:1376:    headers: {
+public/control-center/api.js:1667:  const search = new URLSearchParams();
+public/control-center/api.js:1670:    search.set("timeline_limit", String(params.timeline_limit));
+public/control-center/api.js:1673:  const suffix = search.toString() ? `?${search.toString()}` : "";
+public/control-center/api.js:1990:    `/media-manager/project/${encodeURIComponent(projectName)}/notification-center`,
+public/control-center/api.js:1991:    "Failed to load notification center"
+public/control-center/api.js:2059:  const search = new URLSearchParams();
+public/control-center/api.js:2062:    search.set("limit", String(params.limit));
+public/control-center/api.js:2066:    search.set("campaign_id", String(params.campaign_id));
+public/control-center/api.js:2069:  const suffix = search.toString() ? `?${search.toString()}` : "";
+public/control-center/api.js:2104:  const search = new URLSearchParams();
+public/control-center/api.js:2107:    search.set("limit", String(params.limit));
+public/control-center/api.js:2111:    search.set("campaign_id", String(params.campaign_id));
+public/control-center/api.js:2115:    search.set("content_item_id", String(params.content_item_id));
+public/control-center/api.js:2118:  const suffix = search.toString() ? `?${search.toString()}` : "";
+public/control-center/api.js:2207:  const search = new URLSearchParams();
+public/control-center/api.js:2210:    search.set("limit", String(params.limit));
+public/control-center/api.js:2214:    search.set("destination_page", String(params.destination_page));
+public/control-center/api.js:2218:    search.set("source_page", String(params.source_page));
+public/control-center/api.js:2222:    search.set("status", String(params.status));
+public/control-center/api.js:2225:  const suffix = search.toString() ? `?${search.toString()}` : "";
+public/control-center/api.js:2276:export async function markProjectNotification(projectName, notificationId, payload = {}) {
+public/control-center/api.js:2281:  if (!notificationId) {
+public/control-center/api.js:2282:    throw new Error("Missing notification id");
+public/control-center/api.js:2286:    `/media-manager/project/${encodeURIComponent(projectName)}/notifications/${encodeURIComponent(notificationId)}`,
+public/control-center/api.js:2289:    "Failed to update notification"
+public/control-center/app.js:222:    const headers = new Headers(
+public/control-center/app.js:223:      init.headers ||
+public/control-center/app.js:224:      (input instanceof Request ? input.headers : undefined) ||
+public/control-center/app.js:230:      headers.set(CONTROL_WRITE_HEADER, controlKey);
+public/control-center/app.js:231:      headers.set("Authorization", `Bearer ${controlKey}`);
+public/control-center/app.js:236:      headers
+public/control-center/app.js:239:      ? new Request(input, { headers })
+public/control-center/app.js:453:      headers: {
+public/control-center/app.js:575:          headers: {
+public/control-center/app.js:675:  // Access key management moved out of the global header.
+public/control-center/app.js:684:  // Role switching belongs in System/Settings, not the global header.
+public/control-center/app.js:825:  const overlay = $("loadingOverlay");
+public/control-center/app.js:871:  const overlay = $("loadingOverlay");
+public/control-center/app.js:896:  const overlay = $("loadingOverlay");
+public/control-center/app.js:974:  const overlay = $("loadingOverlay");
+public/control-center/app.js:977:    ? Array.from(document.querySelectorAll("#loadingOverlay"))
+public/control-center/app.js:1038:  const unlockBar = $("startupUnlockBar");
+public/control-center/app.js:1039:  const unlockText = $("startupUnlockText");
+public/control-center/app.js:1066:      `commandBar.exists: ${payload.commandRuntime?.commandBar?.exists ? "true" : "false"}`,
+public/control-center/app.js:1311:  const overlay = $("loadingOverlay");
+public/control-center/app.js:1431:  const overlay = $("loadingOverlay");
+public/control-center/app.js:1495:  const overlay = $("loadingOverlay");
+public/control-center/app.js:1520:  ["startupUnlockBtn", "startupTraceUnlockBtn"].forEach((id) => {
+public/control-center/app.js:1929:  const notifications = Array.isArray(operations?.notifications?.items)
+public/control-center/app.js:1930:    ? operations.notifications.items
+public/control-center/app.js:1932:  const unread = notifications.filter((item) => !item?.read_at).length;
+public/control-center/app.js:2377:  const requiredSections = ["overview", "readiness", "assets"];
+public/control-center/app.js:2412:    readiness: payload.readiness,
+public/control-center/app.js:3069:    if (actionName === "search") {
+public/control-center/app.js:3132:      (candidate.closest("#runSearchBtn") ? "search" : "") ||
+public/control-center/app.js:3162:    const sidebarNav = document.querySelector(".sidebar-nav");
+public/control-center/app.js:3163:    if (sidebarNav) {
+public/control-center/app.js:3164:      const activeItem = sidebarNav.querySelector(".nav-item.is-active");
+public/control-center/app.js:3226:  const sidebar = document.querySelector(".sidebar");
+public/control-center/app.js:3227:  const toggleBtn = $("sidebarToggleBtn");
+public/control-center/app.js:3228:  const backdrop = $("sidebarBackdrop");
+public/control-center/app.js:3230:  const commandBar = $("globalCommandBar");
+public/control-center/app.js:3247:    toggleBtn.setAttribute("aria-label", isOpen ? "Close sidebar" : "Open sidebar");
+public/control-center/app.js:3251:    if (!appRoot || !commandBar || !commandToggleBtn) return;
+public/control-center/app.js:3256:      commandBar.classList.toggle("is-collapsed", !desktopCommandOpen);
+public/control-center/app.js:3257:      commandBar.hidden = !desktopCommandOpen;
+public/control-center/app.js:3258:      commandBar.setAttribute("aria-hidden", desktopCommandOpen ? "false" : "true");
+public/control-center/app.js:3271:    commandBar.classList.toggle("is-collapsed", !expanded);
+public/control-center/app.js:3272:    commandBar.hidden = !expanded;
+public/control-center/app.js:3273:    commandBar.setAttribute("aria-hidden", expanded ? "false" : "true");
+public/control-center/app.js:3300:    if (!sidebar || !isMobileViewport()) return;
+public/control-center/app.js:3301:    sidebar.classList.add("is-open");
+public/control-center/app.js:3308:    document.body.classList.add("sidebar-open");
+public/control-center/app.js:3314:    if (!sidebar) return;
+public/control-center/app.js:3315:    sidebar.classList.remove("is-open");
+public/control-center/app.js:3322:    document.body.classList.remove("sidebar-open");
+public/control-center/app.js:3334:      if (sidebar?.classList.contains("is-open")) {
+public/control-center/app.js:3388:    if (event.key === "Escape" && sidebar?.classList.contains("is-open")) {
+public/control-center/app.js:3411:  const topbar = document.querySelector(".topbar");
+public/control-center/app.js:3412:  if (!appRoot || !topbar) return;
+public/control-center/app.js:3414:  const measured = Math.max(56, Math.round(topbar.getBoundingClientRect().height || 64));
+public/control-center/app.js:3415:  appRoot.style.setProperty("--shell-topbar-height", `${measured}px`);
+public/control-center/app.js:3425:  const loadingOverlay = $("loadingOverlay");
+public/control-center/app.js:3427:  const sidebarBackdrop = $("sidebarBackdrop");
+public/control-center/app.js:3432:    loadingOverlay &&
+public/control-center/app.js:3433:    !loadingOverlay.hidden &&
+public/control-center/app.js:3434:    loadingOverlay.getAttribute("aria-hidden") !== "true";
+public/control-center/app.js:3441:  const sidebarActive =
+public/control-center/app.js:3442:    sidebarBackdrop &&
+public/control-center/app.js:3443:    !sidebarBackdrop.hidden &&
+public/control-center/app.js:3444:    sidebarBackdrop.getAttribute("aria-hidden") !== "true";
+public/control-center/app.js:3446:  const blocked = loadingActive || commandActive || sidebarActive;
+public/control-center/app.js:3460:  const commandBar = $("globalCommandBar");
+public/control-center/app.js:3466:    commandBar: fallbackCommandBar = null,
+public/control-center/app.js:3474:    commandBar: {
+public/control-center/app.js:3511:    commandBar,
+public/control-center/app.js:3523:    showError("Enter a route, page name, or keyword to search.");
+public/control-center/app.js:3560:  const commandBar = $("globalCommandBar");
+public/control-center/app.js:3573:  commandBar?.classList.remove("is-collapsed");
+public/control-center/app.js:3574:  if (commandBar) {
+public/control-center/app.js:3575:    commandBar.hidden = false;
+public/control-center/app.js:3577:  commandBar?.setAttribute("aria-hidden", "false");
+public/control-center/app.js:3613:  const commandBar = $("globalCommandBar");
+public/control-center/app.js:3618:  commandBar?.classList.add("is-collapsed");
+public/control-center/app.js:3619:  if (commandBar) {
+public/control-center/app.js:3620:    commandBar.hidden = true;
+public/control-center/app.js:3622:  commandBar?.setAttribute("aria-hidden", "true");
+public/control-center/app.js:3640:  const commandBar = $("globalCommandBar");
+public/control-center/app.js:3662:  if (commandBar) {
+public/control-center/app.js:3663:    commandBar.addEventListener("click", (event) => event.stopPropagation());
+public/control-center/app.js:3669:  const searchInput = $("globalSearch");
+public/control-center/app.js:3672:  const searchBtn = $("runSearchBtn");
+public/control-center/app.js:3674:  if (searchInput) {
+public/control-center/app.js:3675:    searchInput.value = "";
+public/control-center/app.js:3678:  if (searchBtn) {
+public/control-center/app.js:3679:    searchBtn.setAttribute("data-action", "search");
+public/control-center/app.js:3692:  if (searchInput && searchInput.dataset.mhSearchEnterBound !== "true") {
+public/control-center/app.js:3693:    searchInput.dataset.mhSearchEnterBound = "true";
+public/control-center/app.js:3694:    searchInput.addEventListener("keydown", (event) => {
+public/control-center/asset-library.js:342:    asset.readiness_status ||
+public/control-center/asset-library.js:357:  const fromServer = asArray(assetsData.category_readiness?.categories || assetsData.missing_assets?.category_readiness?.categories);
+public/control-center/asset-library.js:424:  return asString(blocker?.next_action || assetsData.category_readiness?.next_best_action || "Library inputs are covered for this step.");
+public/control-center/router.js:11:import { researchRoute } from "./pages/research.js";
+public/control-center/router.js:17:  notificationCenterRoute,
+public/control-center/router.js:38:  [notificationCenterRoute.id]: notificationCenterRoute,
+public/control-center/router.js:45:  [researchRoute.id]: researchRoute,
+public/control-center/shared-context.js:45:  research_proof: {
+public/control-center/shared-context.js:46:    label: "Research/Proof Document",
+public/control-center/shared-context.js:47:    libraryFilter: "research_certificates",
+public/control-center/shared-context.js:49:    shortGuideTitle: "Choose a research/proof document",
+public/control-center/state.js:22:    readiness: null,
+public/control-center/state.js:102:    state.data.readiness === null &&
+public/control-center/state.js:306:  state.data.readiness = null;
+public/control-center/system-intelligence.js:76:  const readinessRoot = asObject(state?.data?.readiness);
+public/control-center/system-intelligence.js:77:  const readiness = asObject(readinessRoot.dashboard || readinessRoot);
+public/control-center/system-intelligence.js:83:  const readinessCritical = dedupe([
+public/control-center/system-intelligence.js:84:    ...asArray(readiness.priorities?.critical),
+public/control-center/system-intelligence.js:85:    ...asArray(readiness.critical_gaps)
+public/control-center/system-intelligence.js:88:  const readinessImportant = dedupe([
+public/control-center/system-intelligence.js:89:    ...asArray(readiness.priorities?.important),
+public/control-center/system-intelligence.js:90:    ...asArray(readiness.missing),
+public/control-center/system-intelligence.js:91:    ...asArray(readinessRoot.missing_fields)
+public/control-center/system-intelligence.js:101:    ...readinessCritical,
+public/control-center/system-intelligence.js:102:    ...readinessImportant,
+public/control-center/system-intelligence.js:106:  const categoryReadiness = asArray(assetsRoot.category_readiness?.categories);
+public/control-center/system-intelligence.js:119:  const checks = asObject(integrations.readiness?.checks);
+public/control-center/system-intelligence.js:122:    ...asArray(integrations.readiness?.missing).map((item) => titleCase(item))
+public/control-center/system-intelligence.js:141:  const readinessScore = Number(readiness.readiness_score ?? overview.readiness_score);
+public/control-center/system-intelligence.js:156:    readinessScore: Number.isFinite(readinessScore) ? readinessScore : null,
+public/control-center/system-intelligence.js:188:      impactChips: ["Setup", "Integrations", "Campaign readiness"],
+public/control-center/system-intelligence.js:220:      impactChips: ["Integrations", "Automation", "Campaign readiness"],
+public/control-center/system-intelligence.js:280:      reason: "Content/media readiness exists but nothing is scheduled yet.",
+public/control-center/system-intelligence.js:316:      blockerType: "library_readiness",
+public/control-center/system-intelligence.js:322:  if (signals.readinessScore != null && signals.readinessScore < 75) {
+public/control-center/system-intelligence.js:324:      id: "campaign-readiness-low",
+public/control-center/system-intelligence.js:325:      title: "Raise campaign readiness before scale",
+public/control-center/system-intelligence.js:326:      reason: `Campaign readiness is ${Math.round(signals.readinessScore)}/100 and still below a stable launch threshold.`,
+public/control-center/system-intelligence.js:330:      impactChips: ["Campaign readiness", "Setup"],
+public/control-center/system-intelligence.js:331:      blockerType: "campaign_readiness",
+public/control-center/system-intelligence.js:369:  const readinessMap = buildReadinessMap(signals);
+public/control-center/system-intelligence.js:384:    reason: "Core readiness is stable. Continue with optimization and output quality improvements.",
+public/control-center/system-intelligence.js:401:    readinessMap,
+public/control-center/system-intelligence.js:403:      score: signals.readinessScore,
+public/control-center/system-intelligence.js:404:      status: signals.readinessScore != null && signals.readinessScore >= 80 ? "ready" : "in_progress"
+public/control-center/system-intelligence.js:417:  const readiness = asObject(asObject(data.readiness).dashboard || data.readiness);
+public/control-center/system-intelligence.js:422:    ...asArray(readiness.next_best_actions),

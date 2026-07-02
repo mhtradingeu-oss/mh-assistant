@@ -3,11 +3,34 @@ const {
   ensureDir,
   ensureJsonFile,
   readJsonFile,
+  readJsonFileDurable,
   writeJsonFile
 } = require('../integrations/storage');
+const {
+  normalizeProjectSlug,
+  resolveProjectPath
+} = require('../security/project-isolation');
 
-const PROJECTS_DIR = '/opt/mh-assistant/data/projects';
+const PROJECTS_DIR = path.join(process.env.MH_ASSISTANT_ROOT || path.resolve(__dirname, '../../../..'), 'data', 'projects');
 const BACKBONE_VERSION = 'mh-ops-backbone-v2';
+
+// Canonical defaults for policy_rules — these are the authoritative safe values.
+// Any governance file that is missing policy_rules (or missing individual keys)
+// will be merged with these at read-time so enforcement never silently bypasses.
+const DEFAULT_POLICY_RULES = {
+  approval_before_publish: true,
+  high_risk_claim_review_required: true,
+  brand_safety_review_required: true,
+  allow_admin_override: true,
+  auto_escalate_critical_risk: true,
+  freeze_publishing: false,
+  require_approval_for_team_model_changes: true,
+  require_approval_for_source_registry_changes: true,
+  require_approval_for_project_setup_authority_changes: true,
+  block_team_model_changes: false,
+  block_source_registry_changes: false,
+  block_project_setup_authority_changes: false
+};
 
 const MAX_ITEMS = {
   campaigns: 150,
@@ -56,7 +79,7 @@ const STATUS_MODELS = {
   },
   ai_recommendations: {
     statuses: ['open', 'accepted', 'routed', 'completed', 'dismissed'],
-    route_targets: ['campaign-studio', 'content-studio', 'media-studio', 'publishing', 'ads-manager', 'tasks', 'governance']
+    route_targets: ['campaign-studio', 'content-studio', 'media-studio', 'publishing', 'ads-manager', 'task-center', 'governance']
   },
   ai_memory: {
     scopes: ['project', 'campaign', 'workflow', 'channel', 'audience', 'content'],
@@ -81,6 +104,10 @@ const STATUS_MODELS = {
   },
   events: {
     categories: ['entity', 'workflow', 'approval', 'sync', 'publish', 'ai_routing', 'system']
+  },
+  execution_bridges: {
+    statuses: ['draft', 'ready_for_review', 'manual_publish_ready', 'pending_execution', 'executed', 'failed'],
+    bridge_actions: ['execute_publish_package', 'execute_email_package', 'generate_media_from_prompt', 'build_ad_execution_package']
   }
 };
 
@@ -235,13 +262,7 @@ const ESCALATION_CHAINS = {
 };
 
 function normalizeProjectName(projectName) {
-  const safeProject = String(projectName || '').trim().toLowerCase();
-
-  if (!safeProject) {
-    throw new Error('Invalid project name');
-  }
-
-  return safeProject;
+  return normalizeProjectSlug(projectName);
 }
 
 function nowIso() {
@@ -266,6 +287,25 @@ function asString(value) {
   }
 
   return String(value).trim();
+}
+
+function asReadableString(value, fallback = '') {
+  if (value == null) return fallback;
+  if (typeof value === 'string') {
+    const clean = value.trim();
+    return clean === '[object Object]' ? fallback : clean;
+  }
+  if (typeof value === 'number' || typeof value === 'boolean') return String(value);
+  if (Array.isArray(value)) {
+    return value.map((item) => asReadableString(item)).filter(Boolean).join('; ') || fallback;
+  }
+  if (typeof value === 'object') {
+    const title = asReadableString(value.title || value.label || value.name);
+    const detail = asReadableString(value.action || value.summary || value.description || value.recommendation || value.reason || value.body || value.value);
+    if (title && detail && title !== detail) return `${title}: ${detail}`;
+    if (title || detail) return title || detail;
+  }
+  return fallback;
 }
 
 function asBoolean(value, fallback = false) {
@@ -414,12 +454,26 @@ function mergeTeamModel(current = {}, patch = {}) {
 
 function readTeamModel(projectName) {
   const paths = getOperationsPaths(projectName);
-  return mergeTeamModel(readJsonFile(paths.teamPath, {}));
+  let raw;
+  try {
+    raw = readJsonFileDurable(paths.teamPath);
+  } catch (err) {
+    console.error(`[backbone] readTeamModel: team file corrupt for project ${projectName}: ${err.message}`);
+    throw err;
+  }
+  return mergeTeamModel(asObject(raw));
 }
 
 function updateTeamModel(projectName, patch = {}, actor = 'mh-assistant') {
   const paths = getOperationsPaths(projectName);
-  const next = mergeTeamModel(readJsonFile(paths.teamPath, {}), patch);
+  let raw;
+  try {
+    raw = readJsonFileDurable(paths.teamPath);
+  } catch (err) {
+    console.error(`[backbone] updateTeamModel: team file corrupt for project ${projectName}: ${err.message}`);
+    throw err;
+  }
+  const next = mergeTeamModel(asObject(raw), patch);
 
   writeJsonFile(paths.teamPath, next);
   updateSystem(paths);
@@ -516,10 +570,10 @@ function normalizeNotes(value) {
 
 function normalizeStringList(value) {
   if (Array.isArray(value)) {
-    return value.map((item) => asString(item)).filter(Boolean);
+    return value.map((item) => asReadableString(item)).filter(Boolean);
   }
 
-  const text = asString(value);
+  const text = asReadableString(value);
   return text
     ? text.split(',').map((item) => asString(item)).filter(Boolean)
     : [];
@@ -719,7 +773,7 @@ function writeLimitedArray(filePath, items, maxItems) {
 
 function getOperationsPaths(projectName) {
   const safeProject = normalizeProjectName(projectName);
-  const projectDir = path.join(PROJECTS_DIR, safeProject);
+  const projectDir = resolveProjectPath(PROJECTS_DIR, safeProject).projectRoot;
   const opsDir = path.join(projectDir, 'ops');
 
   ensureDir(projectDir);
@@ -807,7 +861,13 @@ function ensureOperationsFiles(paths) {
       brand_safety_review_required: true,
       allow_admin_override: true,
       auto_escalate_critical_risk: true,
-      freeze_publishing: false
+      freeze_publishing: false,
+      require_approval_for_team_model_changes: true,
+      require_approval_for_source_registry_changes: true,
+      require_approval_for_project_setup_authority_changes: true,
+      block_team_model_changes: false,
+      block_source_registry_changes: false,
+      block_project_setup_authority_changes: false
     },
     approval_owners: {
       content: 'Marketing lead',
@@ -832,7 +892,18 @@ function ensureOperationsFiles(paths) {
 }
 
 function updateSystem(paths, patch = {}) {
-  const current = asObject(readJsonFile(paths.systemPath, {}));
+  // Use readJsonFileDurable: corruption in the system file must not be silently
+  // swallowed — it would cause a silent overwrite of the entire system record.
+  // If the file does not exist yet, fall back to {} (first-time init path).
+  let currentRaw;
+  try {
+    currentRaw = readJsonFileDurable(paths.systemPath);
+  } catch (err) {
+    // System file is corrupt — log and re-throw so the caller sees a 500
+    console.error(`[backbone] updateSystem: system file is corrupt for project ${paths.project}: ${err.message}`);
+    throw err;
+  }
+  const current = asObject(currentRaw);
   const next = {
     ...current,
     ...patch,
@@ -863,8 +934,25 @@ function updateSystem(paths, patch = {}) {
   return next;
 }
 
+/**
+ * readCollection — reads a durable JSON array file.
+ *
+ * Uses readJsonFileDurable so corrupt files are quarantined and an error is
+ * thrown rather than silently returning [] and risking a subsequent write that
+ * wipes real data. Returns [] only when the file genuinely does not exist yet.
+ */
 function readCollection(filePath) {
-  return asArray(readJsonFile(filePath, []));
+  let raw;
+  try {
+    raw = readJsonFileDurable(filePath);
+  } catch (err) {
+    // File exists but is corrupt — error has already quarantined it.
+    // Re-throw so the HTTP layer returns a 500 rather than empty data.
+    console.error(`[backbone] readCollection: corrupt file quarantined: ${filePath} — ${err.message}`);
+    throw err;
+  }
+  // null means the file does not exist yet — that is a valid empty-collection state
+  return raw === null ? [] : asArray(raw);
 }
 
 function writeCollection(filePath, items, maxItems) {
@@ -1102,9 +1190,51 @@ function updateQueueEntity(projectName, entityType, entityId, patch = {}) {
   return next;
 }
 
+/**
+ * Normalizes a raw governance file object so that:
+ *  - policy_rules is always an object (never null/undefined/non-object)
+ *  - Any missing policy_rules key is filled from DEFAULT_POLICY_RULES
+ *  - freeze_publishing and approval_before_publish are always explicit booleans
+ *
+ * This is a pure, non-mutating read-time normalization.
+ * It does NOT write back to disk.
+ */
+function normalizeGovernancePolicy(raw) {
+  const doc = asObject(raw);
+  const rawRules = doc.policy_rules;
+  // If policy_rules is not a plain object (missing, null, array, string, etc.)
+  // treat it as empty so all defaults are applied.
+  const safeRules = (rawRules && typeof rawRules === 'object' && !Array.isArray(rawRules))
+    ? rawRules
+    : {};
+
+  const mergedRules = {
+    ...DEFAULT_POLICY_RULES,
+    ...safeRules,
+    // These two critical booleans are always coerced explicitly so
+    // string "true"/"false" or numeric 0/1 values from disk are safe.
+    freeze_publishing: asBoolean(safeRules.freeze_publishing, DEFAULT_POLICY_RULES.freeze_publishing),
+    approval_before_publish: asBoolean(safeRules.approval_before_publish, DEFAULT_POLICY_RULES.approval_before_publish)
+  };
+
+  return {
+    ...doc,
+    policy_rules: mergedRules
+  };
+}
+
 function getGovernancePolicy(projectName) {
   const paths = getOperationsPaths(projectName);
-  return asObject(readJsonFile(paths.governancePath, {}));
+  let raw;
+  try {
+    raw = readJsonFileDurable(paths.governancePath);
+  } catch (err) {
+    // Governance file is corrupt — do not silently bypass enforcement.
+    console.error(`[backbone] getGovernancePolicy: governance file corrupt for project ${projectName}: ${err.message}`);
+    throw err;
+  }
+  // null means the file does not exist yet — normalizeGovernancePolicy({}) gives safe defaults
+  return normalizeGovernancePolicy(raw === null ? {} : raw);
 }
 
 function updateGovernancePolicy(projectName, patch = {}, actor = 'mh-assistant') {
@@ -2105,13 +2235,13 @@ function createAiArtifact(projectName, input = {}) {
     id: asString(current.id) || asString(input.id) || createId('aiart'),
     project: paths.project,
     type: asString(input.type || current.type) || 'ai_response',
-    title: asString(input.title || current.title) || 'AI artifact',
+    title: asReadableString(input.title || current.title) || 'AI artifact',
     status: asString(input.status || current.status) || 'saved',
     route_target: asString(input.route_target || current.route_target),
     source_type: asString(input.source_type || current.source_type),
     source_id: asString(input.source_id || current.source_id),
     payload: asObject(input.payload || current.payload),
-    summary: asString(input.summary || current.summary),
+    summary: asReadableString(input.summary || current.summary),
     created_by: asString(input.created_by || input.actor || current.created_by) || 'mh-assistant',
     created_at: createdAt,
     updated_at: nowIso(),
@@ -2163,9 +2293,9 @@ function createAiRecommendation(projectName, input = {}) {
   const recommendation = {
     id: asString(current.id) || asString(input.id) || createId('aireco'),
     project: paths.project,
-    title: asString(input.title || current.title) || 'Recommendation',
-    summary: asString(input.summary || current.summary || input.action),
-    action: asString(input.action || current.action),
+    title: asReadableString(input.title || current.title) || 'Recommendation',
+    summary: asReadableString(input.summary || current.summary || input.action),
+    action: asReadableString(input.action || current.action),
     domain: asString(input.domain || current.domain),
     route_target: asString(input.route_target || current.route_target || input.route),
     source_type: asString(input.source_type || current.source_type),
@@ -2472,6 +2602,14 @@ function createApproval(projectName, input = {}) {
     title,
     entity_type: targetEntityType,
     entity_id: targetEntityId,
+    mutation_type: asString(input.mutation_type || current.mutation_type) || asString(input.approval_type || current.approval_type) || targetEntityType,
+    route: asString(input.route || current.route),
+    method: asString(input.method || current.method).toUpperCase(),
+    approval_fingerprint: asString(input.approval_fingerprint || current.approval_fingerprint),
+    intended_action_id: asString(input.intended_action_id || current.intended_action_id),
+    linked_execution_id: asString(input.linked_execution_id || current.linked_execution_id),
+    request_payload_hash: asString(input.request_payload_hash || current.request_payload_hash),
+    request_payload_summary: input.request_payload_summary != null ? input.request_payload_summary : current.request_payload_summary || null,
     reviewer: asString(input.reviewer || current.reviewer || input.requested_for) || roleDisplay(team, reviewerRole),
     reviewer_role: reviewerRole,
     requested_by: asString(input.requested_by || current.requested_by || input.actor) || 'mh-assistant',
@@ -2507,6 +2645,7 @@ function createApproval(projectName, input = {}) {
     created_at: createdAt,
     updated_at: nowIso(),
     decided_at: asString(input.decided_at || current.decided_at),
+    decision_at: asString(input.decision_at || current.decision_at),
     decided_by: asString(input.decided_by || current.decided_by),
     history: appendHistory(
       current,
@@ -2659,6 +2798,7 @@ function decideApproval(projectName, approvalId, input = {}) {
     escalation_chain: escalationChain,
     decided_at: decidedAt,
     updated_at: decidedAt,
+    decision_at: decidedAt,
     timestamps: mergeDefined(asObject(current.timestamps), {
       updated_at: decidedAt,
       decided_at: decidedAt

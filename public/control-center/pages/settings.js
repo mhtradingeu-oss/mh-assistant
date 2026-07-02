@@ -126,8 +126,8 @@ const SECTION_DEFINITIONS = [
     description: "Define the commercial identity, market defaults, and baseline operating context for the project.",
     backendLabel: "Project profile fields are ready for backend save",
     fields: [
-      { path: "project.projectName", label: "Project name", type: "text", critical: true, placeholder: "hairoticmen" },
-      { path: "project.brandName", label: "Brand name", type: "text", critical: true, placeholder: "Hairotic Men" },
+      { path: "project.projectName", label: "Project name", type: "text", critical: true, placeholder: "project-name" },
+      { path: "project.brandName", label: "Brand name", type: "text", critical: true, placeholder: "Brand name" },
       {
         path: "project.market",
         label: "Market",
@@ -617,6 +617,33 @@ const SECTION_DEFINITIONS = [
   }
 ];
 
+const SETTINGS_GROUPS = [
+  {
+    id: "project-config",
+    title: "Project Settings",
+    description: "Manage project identity, publishing defaults, and reusable presets without scattering core setup across multiple cards.",
+    sectionIds: ["project", "publishing", "presets"]
+  },
+  {
+    id: "ai-automation",
+    title: "AI / Automation Settings",
+    description: "Control system mode, AI behavior, automation routing, and safety rules in one execution-focused workspace.",
+    sectionIds: ["operating", "ai", "automation", "safety"]
+  },
+  {
+    id: "team-permissions",
+    title: "Team / Permissions",
+    description: "Keep approval ownership, publishing permissions, and team-role authority together so governance stays understandable.",
+    sectionIds: ["approval", "team"]
+  },
+  {
+    id: "integration-sync",
+    title: "Integration / Sync Settings",
+    description: "Review connector refresh behavior, import policy, and alert routing without turning Settings into a sync control center.",
+    sectionIds: ["sync", "alerts"]
+  }
+];
+
 function clone(value) {
   return JSON.parse(JSON.stringify(value));
 }
@@ -628,7 +655,7 @@ function titleCase(value) {
 }
 
 function asObject(value) {
-  return value && typeof value === "object" ? value : {};
+  return value && typeof value === "object" && !Array.isArray(value) ? value : {};
 }
 
 function getPathValue(source, path) {
@@ -1112,6 +1139,58 @@ function formatRelativeTime(value) {
   return `Saved ${days} day${days === 1 ? "" : "s"} ago`;
 }
 
+function buildReadinessModel(session, summary) {
+  const form = session.form;
+  const hasRisks = summary.risks.length > 0;
+  const approvalOwnersReady = Boolean(form.approval.contentOwner && form.approval.mediaOwner && form.approval.adsOwner);
+  const publishingReady = Array.isArray(form.publishing.channels) && form.publishing.channels.length > 0 && Boolean(form.publishing.approvalBeforePublish);
+  const aiSafetyReady = Boolean(form.safety.aiClaimCheck) && !String(form.ai.claimSafetyMode || "").toLowerCase().includes("relaxed");
+  const integrationReady = Boolean(form.sync.frequency && Array.isArray(form.alerts.enabledRules) && form.alerts.enabledRules.length);
+
+  const checks = [
+    {
+      label: "Governance and approvals",
+      ready: approvalOwnersReady,
+      helper: approvalOwnersReady
+        ? "Ownership is defined for content, media, and ads decisions."
+        : "Assign approval owners to avoid ambiguous review authority."
+    },
+    {
+      label: "Publishing and release safety",
+      ready: publishingReady,
+      helper: publishingReady
+        ? "Channels are selected and approval-before-publish is active."
+        : "Select channels and confirm approval-before-publish before launch."
+    },
+    {
+      label: "AI and policy safety",
+      ready: aiSafetyReady,
+      helper: aiSafetyReady
+        ? "Claim checks and safety posture are configured for controlled AI use."
+        : "Tighten claim safety mode and enable AI claim checks."
+    },
+    {
+      label: "Integrations and operations alerts",
+      ready: integrationReady,
+      helper: integrationReady
+        ? "Sync cadence and alert routing are defined for operations visibility."
+        : "Set sync cadence and alert coverage so operations can intervene safely."
+    }
+  ];
+
+  const nextBestAction = hasRisks
+    ? "Review the top blocker, fix it in this page, then save to sync durable governance and team records."
+    : "Save this configuration, then open Governance to verify policy impact and approval readiness.";
+
+  return {
+    checks,
+    blockers: summary.risks,
+    blockerCount: summary.risks.length,
+    readyCount: checks.filter((item) => item.ready).length,
+    nextBestAction
+  };
+}
+
 function collectRisks(form) {
   const risks = [];
 
@@ -1406,6 +1485,171 @@ function renderSectionExtension(section, session, escapeHtml) {
   return "";
 }
 
+function getSectionDefinition(sectionId) {
+  return SECTION_DEFINITIONS.find((section) => section.id === sectionId) || null;
+}
+
+function buildSettingsPrompts(session) {
+  const summary = buildSummary(session);
+  const projectLabel = session.projectName || "this project";
+  const topRisk = summary.risks[0] || "the biggest current configuration gap";
+  return [
+    {
+      label: "Summarize settings",
+      preview: "Explain the current project, AI, approval, publishing, and sync posture in one concise review.",
+      prompt: `Summarize the current settings for ${projectLabel}. Cover project defaults, AI behavior, approvals, permissions, integrations, sync posture, and the main configuration tradeoffs.`
+    },
+    {
+      label: "Find highest-risk gap",
+      preview: "Identify the most important settings gap and the safest next fix.",
+      prompt: `Review the current settings for ${projectLabel}. Identify the highest-risk configuration gap, starting with ${topRisk}, and explain the safest next fix.`
+    },
+    {
+      label: "Recommend automation posture",
+      preview: "Advise on AI and automation settings based on current risk and approval posture.",
+      prompt: `Review the AI, automation, safety, approval, and sync settings for ${projectLabel}. Recommend the best operating posture and what should be tightened or relaxed next.`
+    }
+  ];
+}
+
+function renderGroupedSection(group, session, escapeHtml) {
+  const definitions = group.sectionIds.map(getSectionDefinition).filter(Boolean);
+
+  return `
+    <article class="settings-section panel" id="settings-group-${group.id}">
+      <div class="panel-header">
+        <div>
+          <div class="panel-kicker">Configuration group</div>
+          <h3>${escapeHtml(group.title)}</h3>
+          <p class="settings-section-copy">${escapeHtml(group.description)}</p>
+        </div>
+      </div>
+      <div class="settings-group-grid">
+        ${definitions.map((section) => `
+          <div class="settings-group-block" id="settings-section-${section.id}">
+            <div class="settings-group-head">
+              <div>
+                <h4>${escapeHtml(section.title)}</h4>
+                <p>${escapeHtml(section.description)}</p>
+              </div>
+              <span class="settings-badge">${escapeHtml(section.backendLabel)}</span>
+            </div>
+            <div class="settings-fields-grid">
+              ${section.fields
+                .map((field) => renderField(field, getPathValue(session.form, field.path), escapeHtml))
+                .join("")}
+            </div>
+            ${renderSectionExtension(section, session, escapeHtml)}
+          </div>
+        `).join("")}
+      </div>
+    </article>
+  `;
+}
+
+function renderSettingsOverview(summary, session, escapeHtml) {
+  const readiness = buildReadinessModel(session, summary);
+  const riskItems = readiness.blockers.length
+    ? readiness.blockers.map((item) => `<li>${escapeHtml(item)}</li>`).join("")
+    : `<li>No active blockers are visible from current Settings signals.</li>`;
+
+  return `
+    <section class="panel settings-overview std-detail-card mhos-clean-surface">
+      <div class="panel-header">
+        <div>
+          <div class="panel-kicker">Settings operating surface</div>
+          <h3>Launch configuration for ${escapeHtml(session.projectName || "this project")}</h3>
+          <p class="settings-section-copy">Settings defines durable defaults for Governance, Publishing, AI, Integrations, and Operations. Backend remains the authority for enforcement.</p>
+        </div>
+        <span class="card-badge neutral">${escapeHtml(session.saveMode === "durable" ? "Durable backbone" : session.loading ? "Syncing..." : "Durable pending")}</span>
+      </div>
+      <div class="settings-overview-grid">
+        <div class="settings-overview-item">
+          <span>Project mode</span>
+          <strong>${escapeHtml(summary.projectMode)}</strong>
+        </div>
+        <div class="settings-overview-item">
+          <span>AI mode</span>
+          <strong>${escapeHtml(summary.aiMode)}</strong>
+        </div>
+        <div class="settings-overview-item">
+          <span>Approval mode</span>
+          <strong>${escapeHtml(summary.approvalMode)}</strong>
+        </div>
+        <div class="settings-overview-item">
+          <span>Publishing mode</span>
+          <strong>${escapeHtml(summary.publishingMode)}</strong>
+        </div>
+        <div class="settings-overview-item">
+          <span>Sync mode</span>
+          <strong>${escapeHtml(summary.syncMode)}</strong>
+        </div>
+        <div class="settings-overview-item">
+          <span>Save status</span>
+          <strong>${escapeHtml(formatRelativeTime(session.savedAt))}</strong>
+        </div>
+      </div>
+
+      <div class="settings-risk-panel">
+        <div class="settings-risk-head">
+          <h4>Readiness and blockers</h4>
+          <span class="card-badge ${readiness.blockerCount ? "danger" : "success"}">
+            ${escapeHtml(`${readiness.readyCount}/${readiness.checks.length} ready`)}
+          </span>
+        </div>
+        <div class="governance-rule-list">
+          ${readiness.checks.map((item) => `
+            <div class="governance-rule-item">
+              <strong>${escapeHtml(item.label)}</strong>
+              <span>${escapeHtml(item.ready ? "Ready" : "Needs review")}</span>
+            </div>
+          `).join("")}
+        </div>
+        <ul class="simple-list settings-risk-list">${riskItems}</ul>
+      </div>
+
+      <div class="governance-policy-block">
+        <h4>Next best action</h4>
+        <p class="governance-copy">${escapeHtml(readiness.nextBestAction)}</p>
+        <div class="settings-actions-buttons std-action-row">
+          <button class="btn btn-secondary" type="button" data-settings-action="focus-section" data-section-id="approval">Review approvals</button>
+          <button class="btn btn-secondary" type="button" data-settings-action="focus-section" data-section-id="publishing">Review publishing</button>
+          <button class="btn btn-secondary" type="button" data-settings-open-ai>Ask AI for guidance</button>
+        </div>
+      </div>
+    </section>
+  `;
+}
+
+function renderSettingsAssistant(session, escapeHtml) {
+  const prompts = buildSettingsPrompts(session);
+  return `
+    <section class="panel settings-ai-assistant std-ai-panel mhos-clean-surface">
+      <div class="panel-header">
+        <div>
+          <div class="panel-kicker">Settings AI assistant</div>
+          <h3>Analyze configuration, then execute in controlled paths</h3>
+          <p class="settings-section-copy">AI provides context and recommendations. Durable changes happen only through explicit Settings and Governance actions.</p>
+        </div>
+      </div>
+      <div class="simple-banner">
+        <strong>AI context scope:</strong> configuration readiness, approval ownership, publishing safety, AI posture, and operations routing.
+      </div>
+      <div class="settings-toolbar">
+        <button class="btn btn-secondary" type="button" data-settings-open-ai>Open AI: Review in AI Workspace</button>
+      </div>
+      <div class="quick-actions std-quick-actions">
+        ${prompts.map((item, index) => `
+          <button class="quick-action-btn" type="button" data-settings-ai-prompt="${index}">
+            <span class="home-action-title">${escapeHtml(item.label)}</span>
+            <span class="home-action-meta">${escapeHtml(item.preview)}</span>
+          </button>
+        `).join("")}
+      </div>
+    </section>
+  `;
+}
+
 function renderSection(section, session, escapeHtml) {
   return `
     <article class="settings-section panel" id="settings-section-${section.id}">
@@ -1433,18 +1677,42 @@ function renderSection(section, session, escapeHtml) {
 }
 
 function renderSummary(summary, session, escapeHtml) {
-  const riskItems = summary.risks.length
-    ? summary.risks.map((item) => `<li>${escapeHtml(item)}</li>`).join("")
-    : `<li>Critical controls are populated. Backend persistence is the main remaining readiness gap.</li>`;
+  const relationships = [
+    {
+      title: "Governance",
+      detail: "Approval ownership, policy rules, and settings bridge state are written into the durable governance policy."
+    },
+    {
+      title: "Publishing",
+      detail: "Channel defaults, scheduling behavior, and approval-before-publish shape outbound execution safety."
+    },
+    {
+      title: "AI",
+      detail: "Tone, strictness, claim safety, and approval-required mode define AI operating boundaries."
+    },
+    {
+      title: "Integrations and operations",
+      detail: "Sync cadence and alert routes determine how quickly teams detect connector or launch risk."
+    }
+  ];
 
   return `
-    <aside class="settings-summary panel">
+    <aside class="settings-summary panel std-detail-card mhos-clean-surface">
       <div class="panel-header">
         <div>
-          <div class="panel-kicker">Settings Summary</div>
-          <h3>System operating profile</h3>
-          <p>Live view of how this project will behave with the current configuration.</p>
+          <div class="panel-kicker">Cross-page operating impact</div>
+          <h3>How Settings drives other operating surfaces</h3>
+          <p>Use this map to understand where configuration choices influence runtime behavior across MH-OS.</p>
         </div>
+      </div>
+
+      <div class="governance-rule-list">
+        ${relationships.map((item) => `
+          <div class="governance-rule-item">
+            <strong>${escapeHtml(item.title)}</strong>
+            <span>${escapeHtml(item.detail)}</span>
+          </div>
+        `).join("")}
       </div>
 
       <div class="settings-summary-grid">
@@ -1474,18 +1742,13 @@ function renderSummary(summary, session, escapeHtml) {
         </div>
       </div>
 
-      <div class="settings-summary-block">
-        <div class="settings-risk-head">
-          <h4>Key risks</h4>
-          <span class="card-badge ${summary.risks.length ? "danger" : "success"}">
-            ${summary.risks.length ? `${summary.risks.length} open` : "Ready"}
-          </span>
-        </div>
-        <ul class="simple-list settings-risk-list">${riskItems}</ul>
-      </div>
-
       <div class="simple-banner">
-        <strong>Status:</strong> ${escapeHtml(formatRelativeTime(session.savedAt))}. Settings sync into the shared governance and team records so every page can reuse the same operating policy.
+        <strong>Status:</strong> ${escapeHtml(formatRelativeTime(session.savedAt))}. Save updates durable team and governance records; backend enforcement remains authoritative.
+      </div>
+      <div class="settings-actions-buttons std-action-row">
+        <button class="btn btn-secondary" type="button" data-settings-action="focus-section" data-section-id="operating">Open operating mode</button>
+        <button class="btn btn-secondary" type="button" data-settings-action="focus-section" data-section-id="sync">Open sync policy</button>
+        <button class="btn btn-secondary" type="button" data-settings-action="open-governance">Open Governance page</button>
       </div>
     </aside>
   `;
@@ -1495,18 +1758,28 @@ function renderActions(session, escapeHtml) {
   const dirtyText = session.dirty ? "Unsaved changes" : "All changes captured";
 
   return `
-    <div class="settings-actions panel">
-      <div class="settings-actions-copy">
-        <div class="panel-kicker">Control Actions</div>
-        <h3>Save or review this configuration</h3>
-        <p>${escapeHtml(dirtyText)}. Saving writes this configuration into the durable team and governance records used across the system.</p>
+    <section class="settings-actions panel std-action-panel mhos-clean-surface">
+      <div class="panel-header">
+        <div class="settings-actions-copy">
+          <div class="panel-kicker">Settings actions</div>
+          <h3>Execute safe configuration updates</h3>
+          <p>${escapeHtml(dirtyText)}. Saving writes this configuration into durable team and governance records used across the operating system.</p>
+        </div>
       </div>
-      <div class="settings-actions-buttons">
+      <div class="simple-banner">
+        <strong>Safe execution path:</strong> Review readiness and blockers, update the required section, save once, then validate Governance impact.
+      </div>
+      <div class="settings-actions-buttons std-action-row">
         <button class="btn btn-primary" type="button" data-settings-action="save-all">Save Settings</button>
-        <button class="btn btn-secondary" type="button" data-settings-action="restore-defaults">Restore Defaults</button>
         <button class="btn btn-secondary" type="button" data-settings-action="review-critical">Review Critical Settings</button>
+        <button class="btn btn-secondary" type="button" data-settings-action="restore-defaults">Restore Defaults</button>
       </div>
-    </div>
+      <div class="settings-actions-buttons std-action-row">
+        <button class="btn btn-secondary" type="button" data-settings-action="focus-section" data-section-id="project">Project defaults</button>
+        <button class="btn btn-secondary" type="button" data-settings-action="focus-section" data-section-id="team">Team permissions</button>
+        <button class="btn btn-secondary" type="button" data-settings-action="focus-section" data-section-id="safety">Safety and governance</button>
+      </div>
+    </section>
   `;
 }
 
@@ -1515,24 +1788,17 @@ function buildPageMarkup(session, escapeHtml) {
 
   return `
     <section class="page is-active" data-page="settings">
-      <div class="settings-shell">
-        ${renderActions(session, escapeHtml)}
-
-        <div class="settings-intro panel">
-          <div class="panel-header">
-            <div>
-              <div class="panel-kicker">Configuration Center</div>
-              <h3>Operational settings for ${escapeHtml(session.projectName || "this project")}</h3>
-              <p>These controls shape how MH Assistant behaves across generation, approvals, publishing, synchronization, and governance. The page now syncs them into shared durable records so other pages inherit the same model.</p>
-            </div>
+      <div class="settings-page-surface">
+        <div class="settings-workspace-grid">
+          <div class="settings-main-stack std-main-column mhos-clean-stack">
+            ${renderSettingsOverview(summary, session, escapeHtml)}
+            ${SETTINGS_GROUPS.map((group) => renderGroupedSection(group, session, escapeHtml)).join("")}
           </div>
-        </div>
-
-        <div class="settings-layout">
-          <div class="settings-main">
-            ${SECTION_DEFINITIONS.map((section) => renderSection(section, session, escapeHtml)).join("")}
-          </div>
-          ${renderSummary(summary, session, escapeHtml)}
+          <aside class="settings-right-rail std-right-rail mhos-clean-stack">
+            ${renderSummary(summary, session, escapeHtml)}
+            ${renderActions(session, escapeHtml)}
+            ${renderSettingsAssistant(session, escapeHtml)}
+          </aside>
         </div>
       </div>
     </section>
@@ -1540,9 +1806,18 @@ function buildPageMarkup(session, escapeHtml) {
 }
 
 function refreshSummary(root, session, escapeHtml) {
+  const overviewHost = root.querySelector(".settings-overview");
+  if (overviewHost) {
+    overviewHost.outerHTML = renderSettingsOverview(buildSummary(session), session, escapeHtml);
+  }
   const summaryHost = root.querySelector(".settings-summary");
-  if (!summaryHost) return;
-  summaryHost.outerHTML = renderSummary(buildSummary(session), session, escapeHtml);
+  if (summaryHost) {
+    summaryHost.outerHTML = renderSummary(buildSummary(session), session, escapeHtml);
+  }
+  const aiHost = root.querySelector(".settings-ai-assistant");
+  if (aiHost) {
+    aiHost.outerHTML = renderSettingsAssistant(session, escapeHtml);
+  }
 }
 
 function refreshActionState(root, session) {
@@ -1561,39 +1836,9 @@ function replacePage(context, session) {
   root.innerHTML = buildPageMarkup(session, context.escapeHtml);
 }
 
-function bindFormEvents(context, session) {
+function bindSettingsActionButtons(context, session) {
   const root = context.$("pageRoot");
   if (!root) return;
-
-  root.querySelectorAll("[data-setting-path]").forEach((control) => {
-    const eventName =
-      control.tagName === "TEXTAREA" || (control.tagName === "INPUT" && !["checkbox", "radio"].includes(control.type))
-        ? "input"
-        : "change";
-
-    control.addEventListener(eventName, () => {
-      const path = control.dataset.settingPath;
-      if (!path) return;
-
-      if (control.type === "checkbox" && control.closest(".settings-checklist")) {
-        const checkedValues = Array.from(
-          root.querySelectorAll(`input[type="checkbox"][data-setting-path="${path}"]:checked`)
-        ).map((item) => item.value);
-        setPathValue(session.form, path, checkedValues);
-      } else if (control.type === "radio") {
-        if (!control.checked) return;
-        setPathValue(session.form, path, control.value);
-      } else if (control.type === "checkbox") {
-        setPathValue(session.form, path, Boolean(control.checked));
-      } else {
-        setPathValue(session.form, path, control.value);
-      }
-
-      session.dirty = true;
-      refreshSummary(root, session, context.escapeHtml);
-      refreshActionState(root, session);
-    });
-  });
 
   root.querySelectorAll("[data-settings-action]").forEach((button) => {
     button.addEventListener("click", async () => {
@@ -1604,6 +1849,12 @@ function bindFormEvents(context, session) {
         try {
           const governancePayload = mapSettingsToGovernancePolicy(session.form);
           const teamPayload = mapSettingsToTeamPayload(session.form);
+
+          const confirmed = window.confirm("Confirm settings save\n\nAction: Save team and governance settings for this project.\nRisk: These settings can affect team roles, approval behavior, publishing readiness, brand safety review, and admin override behavior.\nAuthority: This is a backend-governed durable settings update.\n\nSelect Cancel to review the settings before saving.");
+          if (!confirmed) {
+            return;
+          }
+
           await Promise.all([
             saveProjectTeam(session.projectName, teamPayload),
             updateProjectGovernancePolicy(session.projectName, {
@@ -1671,6 +1922,18 @@ function bindFormEvents(context, session) {
         return;
       }
 
+      if (action === "focus-section" && sectionId) {
+        const target = context.$(`settings-section-${sectionId}`) || context.$(`settings-group-${sectionId}`);
+        target?.scrollIntoView({ behavior: "smooth", block: "start" });
+        context.showMessage(`Focused ${titleCase(sectionId)} settings.`);
+        return;
+      }
+
+      if (action === "open-governance") {
+        context.navigateTo("governance");
+        return;
+      }
+
       if (action === "review-critical") {
         const summary = buildSummary(session);
         if (summary.risks.length) {
@@ -1687,14 +1950,79 @@ function bindFormEvents(context, session) {
   });
 }
 
+function bindSettingsAiButtons(context, session) {
+  const root = context.$("pageRoot");
+  if (!root) return;
+
+  root.querySelectorAll("[data-settings-open-ai]").forEach((button) => {
+    button.addEventListener("click", () => {
+      context.navigateTo("ai-command");
+    });
+  });
+
+  root.querySelectorAll("[data-settings-ai-prompt]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const prompt = buildSettingsPrompts(session)[Number(button.dataset.settingsAiPrompt)];
+      if (!prompt) return;
+      const input = context.$("quickCommandInput");
+      if (input) {
+        input.value = prompt.prompt;
+      }
+      context.navigateTo("ai-command");
+      context.showMessage("Settings prompt added to AI Command.");
+    });
+  });
+}
+
+function bindFormEvents(context, session) {
+  const root = context.$("pageRoot");
+  if (!root) return;
+
+  root.querySelectorAll("[data-setting-path]").forEach((control) => {
+    const eventName =
+      control.tagName === "TEXTAREA" || (control.tagName === "INPUT" && !["checkbox", "radio"].includes(control.type))
+        ? "input"
+        : "change";
+
+    control.addEventListener(eventName, () => {
+      const path = control.dataset.settingPath;
+      if (!path) return;
+
+      if (control.type === "checkbox" && control.closest(".settings-checklist")) {
+        const checkedValues = Array.from(
+          root.querySelectorAll(`input[type="checkbox"][data-setting-path="${path}"]:checked`)
+        ).map((item) => item.value);
+        setPathValue(session.form, path, checkedValues);
+      } else if (control.type === "radio") {
+        if (!control.checked) return;
+        setPathValue(session.form, path, control.value);
+      } else if (control.type === "checkbox") {
+        setPathValue(session.form, path, Boolean(control.checked));
+      } else {
+        setPathValue(session.form, path, control.value);
+      }
+
+      session.dirty = true;
+      refreshSummary(root, session, context.escapeHtml);
+      refreshActionState(root, session);
+      bindSettingsActionButtons(context, session);
+      bindSettingsAiButtons(context, session);
+    });
+  });
+
+  bindSettingsActionButtons(context, session);
+  bindSettingsAiButtons(context, session);
+}
+
 export const settingsRoute = {
   id: "settings",
+  disableStandardLayout: true,
   meta: {
     eyebrow: "System",
     title: "Settings",
     description: "Configure project defaults, AI behavior, publishing rules, approvals, sync behavior, and governance."
   },
-  template: `<section class="page is-active" data-page="settings"><div class="settings-shell"></div></section>`,
+  template: `<section class="page is-active" data-page="settings"><div class="settings-page-surface"></div></section>`,
   render(context) {
     const state = context.getState();
     const projectName = state?.context?.currentProject;
@@ -1725,4 +2053,73 @@ export const settingsRoute = {
       });
     }
   }
+};
+
+/**
+ * ⚡ AI CONTROL CENTER CONNECTION LAYER
+ */
+
+async function loadAIControlCenter() {
+
+  const res = await fetch("/api/ai-control/dashboard");
+  const data = await res.json();
+
+  console.log("🧠 AI CONTROL CENTER DATA:", data);
+
+  return data;
+}
+
+async function updateAIControl(payload) {
+
+  const res = await fetch("/api/ai-control/update", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(payload)
+  });
+
+  return res.json();
+}
+
+// Example hooks for UI
+window.__AI_CONTROL_CENTER__ = {
+  load: loadAIControlCenter,
+  update: updateAIControl
+};
+
+/**
+ * ⚖️ GOVERNANCE UI INTEGRATION LAYER
+ */
+
+async function loadGovernanceState() {
+
+  const res = await fetch("/api/governance/audit");
+  return await res.json();
+}
+
+async function processGovernanceAction(action) {
+
+  const res = await fetch("/api/governance/process", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(action)
+  });
+
+  return await res.json();
+}
+
+async function loadGovernanceLiveState() {
+
+  const res = await fetch("/api/governance/state");
+  return await res.json();
+}
+
+// 🌐 GLOBAL GOVERNANCE UI HOOKS
+window.__GOVERNANCE_CENTER__ = {
+  loadAudit: loadGovernanceState,
+  process: processGovernanceAction,
+  live: loadGovernanceLiveState
 };

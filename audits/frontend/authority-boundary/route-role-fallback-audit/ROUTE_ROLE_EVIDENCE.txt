@@ -1,0 +1,843 @@
+===== BRANCH =====
+architecture/frontend-consolidation-v1
+
+===== STATUS =====
+?? audits/frontend/authority-boundary/
+
+===== LOG HEAD =====
+c04b263 Add frontend consolidation audit baseline
+c73886b Add frontend consolidation QA report
+b09ce0f Fix operations center loading settlement
+cdadb61 Fix Task Center grid stretch layout
+3b567ff Clean Settings duplicate heading labels
+69d354f Clean Governance duplicate heading labels
+e061a22 Clean Operations in-page loading states
+d62b412 Set Home as custom layout authority
+
+===== APP ROUTE ROLE MARKERS =====
+82:const CONTROL_ROLE_STORAGE_KEY = "mh-control-role";
+84:const ACTIVE_ROUTE_ROLES = [
+95:const DEFAULT_ROUTE_ROLE_ACCESS = {
+97:  "ai-command": ACTIVE_ROUTE_ROLES,
+103:  setup: ACTIVE_ROUTE_ROLES,
+104:  "task-center": ACTIVE_ROUTE_ROLES,
+105:  "queue-center": ACTIVE_ROUTE_ROLES,
+106:  "job-monitor": ACTIVE_ROUTE_ROLES,
+107:  "notification-center": ACTIVE_ROUTE_ROLES,
+112:  workflows: ACTIVE_ROUTE_ROLES,
+179:    if (stored && ACTIVE_ROUTE_ROLES.includes(stored.trim().toLowerCase())) {
+261:    const rolesStr = allowedRoles.join(", ");
+263:      `Route "${route}" requires one of: [${rolesStr}]. ` +
+264:      `Your current role is "${activeRole}". ` +
+265:      `Use the Role selector in the top bar to switch roles for internal testing.`
+272:    const fallbackRoles = DEFAULT_ROUTE_ROLE_ACCESS[route];
+283:  const allowedRoles = Array.isArray(explicitRule.roles)
+284:    ? explicitRule.roles.map((item) => String(item || "").trim().toLowerCase())
+305:  modal.setAttribute("role", "dialog");
+726:function formatRoleLabel(role) {
+727:  const normalized = String(role || "").trim().toLowerCase();
+1960:  const roleBadge = $("mobileRoleBadge");
+1961:  if (roleBadge) {
+1962:    roleBadge.textContent = formatRoleLabel(getActiveRole());
+3818:  modal.setAttribute("role", "dialog");
+
+===== ROUTER ROUTE ROLE MARKERS =====
+26:const ACTIVE_ROUTE_ROLES = [
+37:const DEFAULT_ROUTE_ROLE_ACCESS = {
+39:  "ai-command": ACTIVE_ROUTE_ROLES,
+45:  setup: ACTIVE_ROUTE_ROLES,
+46:  "task-center": ACTIVE_ROUTE_ROLES,
+47:  "queue-center": ACTIVE_ROUTE_ROLES,
+48:  "job-monitor": ACTIVE_ROUTE_ROLES,
+49:  "notification-center": ACTIVE_ROUTE_ROLES,
+54:  workflows: ACTIVE_ROUTE_ROLES,
+135:  const detail = reason || `Route "${route}" is not available for the current role.`;
+141:      description: "This workspace route is blocked by role access rules."
+152:                To access this page, use the <strong>Role</strong> selector in the top bar and switch to a permitted role.
+185:  const allowedRoles = DEFAULT_ROUTE_ROLE_ACCESS[route];
+196:        `Default role is "${DEFAULT_ROLE}". Use the Role selector in the top bar to switch.`
+
+===== AUTHORITY PROJECTION HELPER =====
+/**
+ * MH-OS Authority Projection Helper
+ *
+ * IMPORTANT:
+ * This file is projection-only.
+ *
+ * Backend owns operational authority.
+ * Frontend projects operational authority.
+ *
+ * This helper MUST NEVER:
+ * - enforce permissions
+ * - mutate governance
+ * - become source of truth
+ * - generate authority
+ * - own approvals
+ * - own workflows
+ */
+
+function safeArray(value) {
+  return Array.isArray(value) ? value : [];
+}
+
+function safeObject(value) {
+  return value && typeof value === "object" ? value : {};
+}
+
+function readOperationsProjection(state = {}) {
+  return safeObject(state.operations);
+}
+
+export function getProjectedTeamServiceModel(state = {}) {
+  const operations = readOperationsProjection(state);
+  return safeObject(operations.team_service_model);
+}
+
+export function getProjectedGovernance(state = {}) {
+  const operations = readOperationsProjection(state);
+  return safeObject(operations.governance);
+}
+
+export function getProjectedApprovals(state = {}) {
+  const operations = readOperationsProjection(state);
+  return safeObject(operations.approvals);
+}
+
+export function getProjectedWorkflowRuns(state = {}) {
+  const operations = readOperationsProjection(state);
+  return safeObject(operations.workflow_runs);
+}
+
+export function getProjectedHandoffs(state = {}) {
+  const operations = readOperationsProjection(state);
+  return safeObject(operations.handoffs);
+}
+
+export function getProjectedAiRecommendations(state = {}) {
+  const operations = readOperationsProjection(state);
+  return safeObject(operations.ai_recommendations);
+}
+
+export function getProjectedAiMemory(state = {}) {
+  const operations = readOperationsProjection(state);
+  return safeObject(operations.ai_memory);
+}
+
+export function getProjectedRoutePermissions(state = {}) {
+  const model = getProjectedTeamServiceModel(state);
+  return safeArray(model.route_permissions);
+}
+
+export function getProjectedTeamMembers(state = {}) {
+  const model = getProjectedTeamServiceModel(state);
+  return safeArray(model.members);
+}
+
+export function getProjectedServiceDomains(state = {}) {
+  const model = getProjectedTeamServiceModel(state);
+  return safeArray(model.domains);
+}
+
+export function getProjectedActiveRole(state = {}) {
+  const model = getProjectedTeamServiceModel(state);
+
+  return (
+    model.active_role ||
+    state.activeRole ||
+    "admin"
+  );
+}
+
+===== ROUTER FIRST 260 =====
+// public/control-center/router.js
+
+import { homeRoute } from "./pages/home.js";
+import { aiCommandRoute } from "./pages/ai-command.js";
+import { campaignStudioRoute } from "./pages/campaign-studio.js";
+import { contentStudioRoute } from "./pages/content-studio-workspace.js";
+import { mediaStudioRoute } from "./pages/media-studio-workspace.js";
+import { publishingRoute } from "./pages/publishing.js";
+import { adsManagerRoute } from "./pages/ads-manager.js";
+import { insightsRoute } from "./pages/insights.js";
+import { researchRoute } from "./pages/research.js";
+import { workflowsRoute } from "./pages/workflows.js";
+import {
+  taskCenterRoute,
+  queueCenterRoute,
+  jobMonitorRoute,
+  notificationCenterRoute
+} from "./pages/operations-centers.js";
+import { setupRoute } from "./pages/setup.js";
+import { libraryRoute } from "./pages/library.js";
+import { integrationsRoute } from "./pages/integrations.js";
+import { settingsRoute } from "./pages/settings.js";
+import { governanceRoute } from "./pages/governance.js";
+
+const DEFAULT_ROLE = "admin";
+const ACTIVE_ROUTE_ROLES = [
+  "strategist",
+  "writer",
+  "designer",
+  "video_lead",
+  "publisher",
+  "ads_operator",
+  "analyst",
+  "compliance_reviewer",
+  "admin"
+];
+const DEFAULT_ROUTE_ROLE_ACCESS = {
+  home: ["strategist", "analyst", "admin"],
+  "ai-command": ACTIVE_ROUTE_ROLES,
+  "campaign-studio": ["strategist", "ads_operator", "admin"],
+  "content-studio": ["writer", "strategist", "compliance_reviewer", "admin"],
+  "media-studio": ["designer", "video_lead", "compliance_reviewer", "admin"],
+  publishing: ["publisher", "compliance_reviewer", "admin"],
+  research: ["strategist", "analyst", "writer", "admin"],
+  setup: ACTIVE_ROUTE_ROLES,
+  "task-center": ACTIVE_ROUTE_ROLES,
+  "queue-center": ACTIVE_ROUTE_ROLES,
+  "job-monitor": ACTIVE_ROUTE_ROLES,
+  "notification-center": ACTIVE_ROUTE_ROLES,
+  governance: ["compliance_reviewer", "admin", "analyst"],
+  "ads-manager": ["ads_operator", "strategist", "analyst", "admin"],
+  insights: ["analyst", "strategist", "ads_operator", "admin"],
+  integrations: ["admin"],
+  workflows: ACTIVE_ROUTE_ROLES,
+  library: ["designer", "video_lead", "publisher", "admin"],
+  settings: ["admin"]
+};
+
+const routeRegistry = {
+  [homeRoute.id]: homeRoute,
+  [aiCommandRoute.id]: aiCommandRoute,
+  [workflowsRoute.id]: workflowsRoute,
+  [taskCenterRoute.id]: taskCenterRoute,
+  [queueCenterRoute.id]: queueCenterRoute,
+  [jobMonitorRoute.id]: jobMonitorRoute,
+  [notificationCenterRoute.id]: notificationCenterRoute,
+  [campaignStudioRoute.id]: campaignStudioRoute,
+  [contentStudioRoute.id]: contentStudioRoute,
+  [mediaStudioRoute.id]: mediaStudioRoute,
+  [publishingRoute.id]: publishingRoute,
+  [adsManagerRoute.id]: adsManagerRoute,
+  [insightsRoute.id]: insightsRoute,
+  [researchRoute.id]: researchRoute,
+  [setupRoute.id]: setupRoute,
+  [libraryRoute.id]: libraryRoute,
+  [integrationsRoute.id]: integrationsRoute,
+  [settingsRoute.id]: settingsRoute,
+  [governanceRoute.id]: governanceRoute
+};
+
+let routeAccessResolver = null;
+
+const routeChangeSubscribers = new Set();
+
+export function subscribeRouteChange(handler) {
+  if (typeof handler !== "function") return () => {};
+  routeChangeSubscribers.add(handler);
+  return () => routeChangeSubscribers.delete(handler);
+}
+
+function notifyRouteChange(route) {
+  routeChangeSubscribers.forEach((handler) => {
+    try {
+      handler(route);
+    } catch (error) {
+      console.warn("Route change subscriber failed:", error?.message || error);
+    }
+  });
+}
+
+
+function getPageRoot() {
+  return document.getElementById("pageRoot");
+}
+
+function getFallbackRoute(route) {
+  return {
+    id: route,
+    meta: {
+      eyebrow: "System",
+      title: "Page",
+      description: "Workspace view"
+    },
+    template: `
+      <section class="page is-active">
+        <div class="page-grid">
+          <div class="panel panel-span-2">
+            <div class="empty-box">Unknown route: ${route}</div>
+          </div>
+        </div>
+      </section>
+    `
+  };
+}
+
+function escapeHtmlMin(str) {
+  return String(str == null ? "" : str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function getAccessDeniedRoute(route, reason = "") {
+  const detail = reason || `Route "${route}" is not available for the current role.`;
+  return {
+    id: "__access-denied__",
+    meta: {
+      eyebrow: "Access",
+      title: "Route Blocked",
+      description: "This workspace route is blocked by role access rules."
+    },
+    template: `
+      <section class="page is-active" data-page="access-denied">
+        <div class="page-grid">
+          <div class="panel panel-span-2">
+            <div class="access-denied-box">
+              <div class="access-denied-icon">&#128274;</div>
+              <h3 class="access-denied-title">Route blocked: ${escapeHtmlMin(route)}</h3>
+              <p class="access-denied-detail">${escapeHtmlMin(detail)}</p>
+              <p class="access-denied-hint">
+                To access this page, use the <strong>Role</strong> selector in the top bar and switch to a permitted role.
+                For full access during internal testing, select <strong>admin</strong>.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+    `
+  };
+}
+
+function normalizeRouteAccessResult(result, route) {
+  if (typeof result === "boolean") {
+    return {
+      allowed: result,
+      reason: result ? "" : `Access to ${route} is restricted.`
+    };
+  }
+
+  if (result && typeof result === "object") {
+    return {
+      allowed: result.allowed !== false,
+      reason: String(result.reason || "")
+    };
+  }
+
+  return {
+    allowed: true,
+    reason: ""
+  };
+}
+
+function getDefaultRouteAccess(route) {
+  const allowedRoles = DEFAULT_ROUTE_ROLE_ACCESS[route];
+  if (!Array.isArray(allowedRoles)) {
+    return { allowed: true, reason: "" };
+  }
+
+  const allowed = allowedRoles.includes(DEFAULT_ROLE);
+  return {
+    allowed,
+    reason: allowed
+      ? ""
+      : `Route "${route}" requires one of: [${allowedRoles.join(", ")}]. ` +
+        `Default role is "${DEFAULT_ROLE}". Use the Role selector in the top bar to switch.`
+  };
+}
+
+function getRouteAccess(route) {
+  if (typeof routeAccessResolver !== "function") {
+    return getDefaultRouteAccess(route);
+  }
+
+  try {
+    return normalizeRouteAccessResult(routeAccessResolver(route), route);
+  } catch (_) {
+    return getDefaultRouteAccess(route);
+  }
+}
+
+function updatePageHeader(route) {
+  const routeDef = getRouteDefinition(route);
+  const meta = routeDef.meta;
+
+  const eyebrow = document.getElementById("pageEyebrow");
+  const title = document.getElementById("pageTitle");
+  const description = document.getElementById("pageDescription");
+
+  if (eyebrow) eyebrow.textContent = meta.eyebrow;
+  if (title) title.textContent = meta.title;
+  if (description) description.textContent = meta.description;
+}
+
+function updateActiveNav(route) {
+  const navItems = Array.from(document.querySelectorAll(".nav-item[data-route]"));
+
+  navItems.forEach((item) => {
+    const itemRoute = item.getAttribute("data-route");
+    item.classList.toggle("is-active", itemRoute === route);
+  });
+}
+
+export function getRouteDefinition(route) {
+  const access = getRouteAccess(route);
+  if (!access.allowed) {
+    return getAccessDeniedRoute(route, access.reason);
+  }
+
+  return routeRegistry[route] || getFallbackRoute(route);
+}
+
+export function setRouteAccessResolver(resolver) {
+  routeAccessResolver = typeof resolver === "function" ? resolver : null;
+}
+
+export function renderRouteTemplate(route) {
+  const root = getPageRoot();
+  if (!root) return;
+
+  const routeDef = getRouteDefinition(route);
+  root.innerHTML = routeDef.template;
+
+  updatePageHeader(route);
+  updateActiveNav(route);
+}
+
+export function navigateTo(route, emit = true) {
+  renderRouteTemplate(route);
+  notifyRouteChange(route);
+
+===== APP AUTHORITY RELATED RANGES =====
+12:  getRouteDefinition,
+84:const ACTIVE_ROUTE_ROLES = [
+95:const DEFAULT_ROUTE_ROLE_ACCESS = {
+97:  "ai-command": ACTIVE_ROUTE_ROLES,
+103:  setup: ACTIVE_ROUTE_ROLES,
+104:  "task-center": ACTIVE_ROUTE_ROLES,
+105:  "queue-center": ACTIVE_ROUTE_ROLES,
+106:  "job-monitor": ACTIVE_ROUTE_ROLES,
+107:  "notification-center": ACTIVE_ROUTE_ROLES,
+112:  workflows: ACTIVE_ROUTE_ROLES,
+179:    if (stored && ACTIVE_ROUTE_ROLES.includes(stored.trim().toLowerCase())) {
+272:    const fallbackRoles = DEFAULT_ROUTE_ROLE_ACCESS[route];
+2085:  const routeDef = getRouteDefinition(currentRoute);
+3119:    const targetRoute = actionRouteMap[actionName];
+3120:    if (targetRoute) {
+3121:      navigateTo(targetRoute);
+
+===== BACKEND OPS BACKBONE AUTHORITY MARKERS =====
+108:const TEAM_ROLE_DEFS = [
+185:  workflows: TEAM_ROLE_DEFS.map((role) => role.id),
+197:    page_permissions: ['campaign-studio', 'workflows', 'insights']
+205:    page_permissions: ['content-studio', 'workflows', 'publishing']
+213:    page_permissions: ['media-studio', 'workflows', 'publishing']
+221:    page_permissions: ['publishing', 'governance']
+229:    page_permissions: ['research', 'workflows', 'insights']
+237:    page_permissions: ['governance', 'settings']
+332:  return TEAM_ROLE_DEFS.find((item) => item.id === normalized) || null;
+347:    page_permissions: asArray(roleDef.routes),
+356:  const roleDef = getRoleDef(roleId) || TEAM_ROLE_DEFS[0];
+365:    page_permissions: normalizeStringList(source.page_permissions).length
+366:      ? normalizeStringList(source.page_permissions)
+389:        page_permissions: ['workflows', 'governance'],
+393:      ...TEAM_ROLE_DEFS.map((roleDef, index) => buildDefaultTeamMember(roleDef, index))
+395:    active_role: 'strategist',
+396:    role_matrix: TEAM_ROLE_DEFS.map((roleDef) => ({
+403:    route_permissions: Object.entries(ROUTE_ROLE_ACCESS).map(([route, roles]) => ({
+415:        page_permissions: asArray(domain.page_permissions)
+435:    active_role: normalizeRoleKey(patch.active_role || current.active_role || defaults.active_role, defaults.active_role),
+437:    role_matrix: defaults.role_matrix,
+438:    route_permissions: defaults.route_permissions,
+483:      active_role: next.active_role,
+3877:    page_permissions: asArray(domain.page_permissions)
+3906:    team_service_model: {
+3907:      active_role: team.active_role,
+3908:      role_matrix: asArray(team.role_matrix),
+3909:      route_permissions: asArray(team.route_permissions),
+3915:      active_role: team.active_role,
+3921:        page_permissions: asArray(member.page_permissions),
+3930:      route_permissions: asArray(team.route_permissions),
+3931:      role_matrix: asArray(team.role_matrix),
+
+===== BACKEND SERVER PROJECTION MARKERS =====
+6655:    ai_team_defaults: ['strategist', 'writer', 'designer', 'publisher', 'analyst'],
+6675:      ai_team_defaults: ['strategist', 'writer', 'designer', 'publisher', 'ads_operator', 'analyst', 'compliance_reviewer'],
+6688:      ai_team_defaults: ['strategist', 'writer', 'designer', 'video_lead', 'publisher', 'analyst'],
+6699:      content_categories: ['services', 'before_after', 'offers', 'team', 'client_reviews'],
+6701:      ai_team_defaults: ['strategist', 'writer', 'designer', 'publisher', 'analyst'],
+6714:      ai_team_defaults: ['strategist', 'writer', 'designer', 'ads_operator', 'publisher', 'compliance_reviewer'],
+6727:      ai_team_defaults: ['strategist', 'writer', 'designer', 'publisher', 'analyst'],
+6740:      ai_team_defaults: ['strategist', 'writer', 'designer', 'video_lead', 'publisher'],
+6753:      ai_team_defaults: ['strategist', 'writer', 'designer', 'ads_operator', 'analyst'],
+6766:      ai_team_defaults: ['strategist', 'writer', 'designer', 'publisher'],
+6808:    ai_team_defaults: businessTemplate.ai_team_defaults,
+10174:    ai_team_defaults: businessTemplate.ai_team_defaults,
+10200:          ai_team_defaults: updated.ai_team_defaults,
+10836:      team: readTeamModel(req.params.project)
+10840:      error: error.message || 'Failed to load project team model'
+10849:      team: updateTeamModel(req.params.project, req.body || {}, req.body?.actor || 'control-center')
+10853:      error: error.message || 'Failed to update project team model'
+10858:app.get('/media-manager/project/:project/team', handleGetProjectTeam);
+10859:app.get('/public/media-manager/project/:project/team', handleGetProjectTeam);
+10860:app.post('/media-manager/project/:project/team', handleUpdateProjectTeam);
+10861:app.post('/public/media-manager/project/:project/team', handleUpdateProjectTeam);
+
+===== EXISTING AUDIT REFERENCES =====
+# Frontend Runtime Authority Audit
+
+## Core doctrine check
+Documented projection doctrine exists in runtime/authority/authority-projection.js:
+- Backend owns authority.
+- Frontend projects authority.
+- Helper explicitly states it must not enforce or generate authority.
+
+## Auto Mode and heavy intelligence markers
+Auto Mode implementation surface:
+- automation-engine.js exports createAutoModeController, startAutoMode, runAutomationPlan, subscribeAutoMode.
+- workflows.js imports and uses createAutoModeController/startAutoMode/runAutomationPlan/subscribeAutoMode.
+- publishing.js imports and uses createAutoModeController/startAutoMode/subscribeAutoMode.
+
+Heavy intelligence surface:
+- system-intelligence.js exports buildSystemIntelligence and recommendation/blocker/handoff derivations.
+- workflows.js, publishing.js, and ui/page-standard.js consume intelligence outputs.
+
+## Initialization posture (implicit vs explicit)
+- Auto Mode starts through explicit user actions in workflows/publishing handlers (button/confirmation flows), not from app bootstrap.
+- No evidence of startAutoMode invocation during app init sequence.
+- runAutomationPlan is called from explicit workflow actions.
+
+## Frontend authority duplication signals
+### Duplicated route access fallback maps
+- router.js defines ACTIVE_ROUTE_ROLES and DEFAULT_ROUTE_ROLE_ACCESS.
+- app.js defines the same fallback structures again.
+Risk: dual fallback authority map can drift.
+
+### Authority-like rule creation in page flows
+Authority-like fields appear in payload assembly (examples):
+- owner_role/assignee_role in workflows/media/campaign flows
+- policy_rules construction in settings/governance flows
+- execution_mode mapping in settings/app context
+- handoff creation across multiple pages
+
+These are mostly projection/payload shaping, but still authority-adjacent in frontend.
+
+## Classification by doctrine
+- safe transient UX state:
+  - local render/session flags, selected filters, drawer open state, temporary form drafts
+- compatibility fallback:
+  - default route role maps in router/app
+  - legacy shell and legacy css/js files
+- duplicate authority risk:
+  - duplicated role-route fallback maps in both router.js and app.js
+  - local owner/assignee role stamping in page payload builders
+- should move to backend later:
+  - policy_rules shaping and normalization now performed in settings/governance page logic
+  - approval/role gate semantics encoded in frontend prompt and form templates
+- must remain frontend-only:
+  - shell rendering decisions, local navigation, UI-level command overlays, temporary handoff UX buffering
+
+## Lifecycle and listener risks
+Global listeners/timers are concentrated in app.js and selected pages.
+Key observations:
+- app.js registers many document/window listeners; init is bound once on DOMContentLoaded.
+- workflows bridge listener uses one-time guard (workflowBridgeRegistered) and auto-mode unsubscribe replacement logic.
+- integrations page removes prior Escape listener before re-registering.
+- multiple timers/watchdogs exist in app.js and api.js (timeouts/intervals) and should be governed by lifecycle registry over time.
+
+Risk callout:
+- High listener density in app.js increases cross-page side-effect risk if future re-init paths are introduced.
+
+## Must-fix-before-redesign list (audit decision, not implementation)
+1. Consolidate route fallback authority map into single canonical location.
+2. Define lifecycle ownership registry for global listeners/timers.
+3. Document Auto Mode gate contract (explicit trigger, approval-required behavior, safe-step constraints).
+4. Formalize authority boundary for role/policy payload shaping in settings/governance/workflows.
+
+# Frontend Route And Page Ownership
+
+## Route graph ownership (evidence-first)
+Source of truth for routes is router.js routeRegistry, with route objects exported from pages files.
+
+| Route | Owner file | disableStandardLayout | Shell ownership | data-page match | Notes |
+|---|---|---|---|---|---|
+| home | public/control-center/pages/home.js | true | Custom root mount (#homeExecRoot) | yes | Executive surface |
+| setup | public/control-center/pages/setup.js | true | Custom root mount (#setupRoot) | yes | Guided setup surface |
+| library | public/control-center/pages/library.js | true | Custom root mount (#libraryRoot) | yes | Includes action/AI panel modules |
+| integrations | public/control-center/pages/integrations.js | true | Custom root mount (#integrationsRoot) | yes | Drawer/listener handling in-page |
+| ai-command | public/control-center/pages/ai-command.js | true | Custom root mount (#ctrlRoomRoot) | yes | AI workspace surface |
+| workflows | public/control-center/pages/workflows.js | true | Custom root mount (#workflowsRoot) | yes | Auto mode controls here |
+| campaign-studio | public/control-center/pages/campaign-studio.js | true | Custom root mount (#campaignStudioRoot) | yes | Execution build page |
+| content-studio | public/control-center/pages/content-studio-workspace.js | true | Custom root mount (#contentStudioRoot) | yes | File name differs from route id |
+| media-studio | public/control-center/pages/media-studio-workspace.js | true | Custom root mount (#mediaStudioRoot) | yes | File name differs from route id |
+| publishing | public/control-center/pages/publishing.js | true | Custom root mount (#publishingRoot) | yes | Auto mode controls here |
+| ads-manager | public/control-center/pages/ads-manager.js | true | Custom root mount (#adsManagerRoot) | yes | Mostly local planner behavior |
+| insights | public/control-center/pages/insights.js | true | Custom root mount (#insightsRoot) | yes | Uses fetchProjectInsights + handoff |
+| research | public/control-center/pages/research.js | true | Custom root mount (#researchRoot) | yes | Uses insights/learning + routing |
+| governance | public/control-center/pages/governance.js | true | governance-shell | yes | Dedicated governance shell |
+| settings | public/control-center/pages/settings.js | true | settings-page-surface | yes | Dedicated settings shell surface |
+| task-center | public/control-center/pages/operations-centers.js | true | ops-shell | yes | Shared owner file |
+| queue-center | public/control-center/pages/operations-centers.js | true | ops-shell | yes | Shared owner file |
+| job-monitor | public/control-center/pages/operations-centers.js | true | ops-shell | yes | Shared owner file |
+| notification-center | public/control-center/pages/operations-centers.js | true | ops-shell | yes | Shared owner file |
+
+## Duplicate route and alias check
+- Duplicate route IDs detected: none.
+- Navigation target validation (navigateTo/data-route/data-page/hash targets vs route IDs): no invalid targets.
+- Old alias signal: CSS still references [data-page="notifications"] in operations stylesheet, while canonical route is notification-center.
+
+## disableStandardLayout and double wrapping risk
+- All exported page routes set disableStandardLayout: true.
+- app.js only applies applyStandardPageLayout when disableStandardLayout is false.
+- Current double-wrap risk: low for active routes.
+- Compatibility shell remains present in ui/page-standard.js and can reactivate if a route opts out of disableStandardLayout later.
+
+## Route names vs data-page values
+- Route IDs and data-page attributes are consistent across all 19 active routes.
+- Path naming inconsistency exists only at file level:
+  - content-studio route in content-studio-workspace.js
+  - media-studio route in media-studio-workspace.js
+
+## Sidebar/nav alignment
+index.html nav items align with route IDs:
+- home, setup, library, integrations, ai-command, workflows, publishing, insights
+- campaign-studio, content-studio, media-studio, ads-manager, research
+- task-center, queue-center, job-monitor, notification-center, governance, settings
+
+## Quick action and in-page navigation integrity
+- navigateTo targets across app/pages resolve to valid routes.
+- No broken navigation targets found from static marker scan.
+
+## Ownership observations
+- operations-centers.js owns 4 operations routes in one file (high coupling, shared lifecycle).
+- router.js and app.js both define route role fallback maps (authority duplication risk, see runtime authority audit).
+
+## Page shell and panel maturity (toward Header + Main View + Action Panel + AI Panel)
+
+| Page | Current shell type | In-page loading state evidence | Action Panel concept | AI Panel concept | Gap to target structure |
+|---|---|---|---|---|---|
+| home | custom executive surface | yes | partial (decision/actions blocks) | partial (AI prompt routing) | needs explicit persistent side panels |
+| setup | custom setup surface | yes | partial (guided actions) | partial (prompt routing) | needs explicit panelized action/AI rails |
+| library | custom operating surface | yes | explicit (library action panel module) | explicit (library ai panel module) | closest to target; formalize as reference page |
+| integrations | custom integrations surface | yes | partial (connector actions) | partial (AI recommendation blocks) | needs explicit dedicated AI panel region |
+| ai-command | custom AI workspace | yes | partial (task/action controls) | explicit (AI core workspace) | needs clearer split between main execution and side action rail |
+| workflows | custom workflow surface | yes | explicit (workflow execution controls) | partial (AI context routing) | needs stable panel boundary contract |
+| campaign-studio | custom campaign surface | yes | partial (campaign actions) | partial (AI handoff prompts) | needs explicit action/AI side panels |
+| content-studio-workspace | custom content surface | yes | partial | partial | needs explicit panelized operating-room layout |
+| media-studio-workspace | custom media surface | yes | partial-to-strong (job actions) | partial (AI-assisted prompts/checks) | needs standardized AI panel frame |
+| publishing | custom publishing surface | yes | strong (approve/schedule/publish controls) | partial (AI prompt assist) | needs explicit AI side panel contract |
+| ads-manager | custom ads surface | yes | partial | partial | needs panelized action + AI regions |
+| insights | custom insights surface | yes | partial | partial | needs explicit action and AI panel lanes |
+| research | custom research surface | yes | partial | partial | needs explicit panelized operating-room pattern |
+| governance | governance-shell | yes | partial (governance actions) | partial (AI prompt shortcuts) | needs explicit AI panel lane and action rail standardization |
+| settings | settings-page-surface | yes | partial (save/diagnostic actions) | partial (AI suggestion actions) | needs explicit panel boundaries |
+| task-center | ops-shell | yes | strong (queue/task controls) | partial (AI route buttons) | needs explicit AI side panel standard |
+| queue-center | ops-shell | yes | strong | partial | needs explicit AI side panel standard |
+| job-monitor | ops-shell | yes | strong | partial | needs explicit AI side panel standard |
+| notification-center | ops-shell | yes | strong | partial | needs explicit AI side panel standard |
+
+# Frontend Final Recommendations
+
+## What is clean now
+- Single active frontend root under public/control-center.
+- Route/page ownership is explicit and complete for 19 active routes.
+- disableStandardLayout is consistently enabled across active routes, reducing double-shell conflict.
+- API access is centralized in api.js with request diagnostics and timeout protections.
+- Navigation targets are valid against active route IDs.
+
+## What is stable
+- App shell startup path: index.html -> app.js -> router.js -> pages
+- Operations centers now project through dedicated ops-shell surfaces.
+- Governance/settings route shells are explicit.
+- Backend route coverage for frontend endpoints is present in server.js markers.
+
+## What is not clean / structurally risky
+- Legacy CSS/JS set remains inside active public tree and duplicates many selectors.
+- Authority fallback maps are duplicated in app.js and router.js.
+- Authority-adjacent shaping (roles/policy fields/handoffs) is spread across multiple page files.
+- Listener/timer density is high in app.js and several large pages.
+- Several modules appear unreferenced or ambiguous in ownership.
+
+## What is duplicated
+- CSS authority overlap between modern layered styles and legacy monolith styles.
+- state helper naming overlap (global state.js vs integrations/state.js).
+- page-standard compatibility implementation exists in both active ui and legacy JS versions.
+
+## What is connected well
+- Core operations pages, workflows, governance, settings, publishing, insights/research, media/content/campaign flows have backend-linked paths.
+- Handoff flows can persist to backend while supporting local fallback behavior.
+
+## What is not connected enough
+- ads-manager appears more local/planner-oriented than backend-projection-oriented.
+- ai-team-model.js is exported but not in active import graph.
+- runtime-boundaries.js exists but appears disconnected from active enforcement path.
+
+## Canonical structure recommendation
+Canonical keep set:
+- public/control-center/index.html
+- public/control-center/app.js
+- public/control-center/router.js
+- public/control-center/pages/** (active route owners + active submodules)
+- public/control-center/styles/00..14 layered stack
+- public/control-center/runtime/authority, runtime/overlay
+- public/control-center/api.js, state.js, shared-context.js, constants.js
+
+Compatibility-only keep set (quarantined):
+- public/control-center/legacy/**
+- runtime/command-runtime.js (until runtime layer decision)
+
+Audit-later set:
+- pages-core/, layouts/
+- styles/integrations/*.css empty placeholders
+- ai-team-model.js
+- pages/integrations/layout.js
+- pages/integrations/state.js
+- pages/library/catalog-readiness.js
+- runtime/runtime-boundaries.js
+
+## Route ownership doctrine direction
+- Keep one route owner per route ID, with explicit shared-owner exception only where approved (operations-centers.js currently).
+- Move duplicated route fallback authority map to one canonical resolver path.
+- Keep data-page strictly equal to route ID.
+
+## Lifecycle management direction
+- Introduce a centralized lifecycle registry for:
+  - document/window listeners
+  - setTimeout/setInterval handles
+  - route-level cleanup hooks
+- Keep page-level listener registration idempotent and route-scoped.
+
+## API boundary direction
+- Maintain api.js as the only backend call authority layer.
+- Keep pages on context-injected API functions where possible.
+- Document /media-manager vs /api endpoint ownership split and migration policy.
+
+## AI Panel / Action Panel standard direction
+Target page contract should converge to:
+- Header
+- Main View
+- Action Panel
+- AI Panel
+
+Current closest implementation:
+- Library already has explicit action-panel and ai-panel module boundaries.
+
+## Suggested implementation order (post-audit)
+1. Authority boundary hardening: unify route role fallback map and document policy/role payload limits.
+2. Lifecycle hardening: listener/timer registry and cleanup policy.
+3. CSS authority hardening: freeze canonical layer ownership; keep legacy excluded.
+4. Operations-centers modularization plan (without behavior change first).
+5. AI Panel/Action Panel structural standard rollout page-by-page.
+
+## What should not be touched yet
+- No page redesign before authority/lifecycle/API boundary decisions are approved.
+- Do not relink legacy CSS/JS into index.html.
+- Do not remove compatibility files until explicit retirement plan and rollback strategy exist.
+
+===== FRONTEND FALLBACK MAP DEFINITIONS (GLOBAL SEARCH) =====
+public/control-center/app.js:84:const ACTIVE_ROUTE_ROLES = [
+public/control-center/app.js:95:const DEFAULT_ROUTE_ROLE_ACCESS = {
+public/control-center/app.js:97:  "ai-command": ACTIVE_ROUTE_ROLES,
+public/control-center/app.js:103:  setup: ACTIVE_ROUTE_ROLES,
+public/control-center/app.js:104:  "task-center": ACTIVE_ROUTE_ROLES,
+public/control-center/app.js:105:  "queue-center": ACTIVE_ROUTE_ROLES,
+public/control-center/app.js:106:  "job-monitor": ACTIVE_ROUTE_ROLES,
+public/control-center/app.js:107:  "notification-center": ACTIVE_ROUTE_ROLES,
+public/control-center/app.js:112:  workflows: ACTIVE_ROUTE_ROLES,
+public/control-center/app.js:179:    if (stored && ACTIVE_ROUTE_ROLES.includes(stored.trim().toLowerCase())) {
+public/control-center/app.js:272:    const fallbackRoles = DEFAULT_ROUTE_ROLE_ACCESS[route];
+public/control-center/router.js:26:const ACTIVE_ROUTE_ROLES = [
+public/control-center/router.js:37:const DEFAULT_ROUTE_ROLE_ACCESS = {
+public/control-center/router.js:39:  "ai-command": ACTIVE_ROUTE_ROLES,
+public/control-center/router.js:45:  setup: ACTIVE_ROUTE_ROLES,
+public/control-center/router.js:46:  "task-center": ACTIVE_ROUTE_ROLES,
+public/control-center/router.js:47:  "queue-center": ACTIVE_ROUTE_ROLES,
+public/control-center/router.js:48:  "job-monitor": ACTIVE_ROUTE_ROLES,
+public/control-center/router.js:49:  "notification-center": ACTIVE_ROUTE_ROLES,
+public/control-center/router.js:54:  workflows: ACTIVE_ROUTE_ROLES,
+public/control-center/router.js:185:  const allowedRoles = DEFAULT_ROUTE_ROLE_ACCESS[route];
+
+===== ROUTE ACCESS CALL SITES =====
+public/control-center/runtime/authority/authority-projection.js:66:export function getProjectedRoutePermissions(state = {}) {
+public/control-center/runtime/authority/authority-projection.js:68:  return safeArray(model.route_permissions);
+public/control-center/runtime/authority/authority-projection.js:81:export function getProjectedActiveRole(state = {}) {
+public/control-center/router.js:184:function getDefaultRouteAccess(route) {
+public/control-center/router.js:200:function getRouteAccess(route) {
+public/control-center/router.js:202:    return getDefaultRouteAccess(route);
+public/control-center/router.js:208:    return getDefaultRouteAccess(route);
+public/control-center/router.js:235:  const access = getRouteAccess(route);
+public/control-center/router.js:243:export function setRouteAccessResolver(resolver) {
+public/control-center/app.js:4:  getProjectedActiveRole,
+public/control-center/app.js:5:  getProjectedRoutePermissions
+public/control-center/app.js:13:  setRouteAccessResolver
+public/control-center/app.js:185:  const stateRole = getProjectedActiveRole({ operations, activeRole: state.activeRole });
+public/control-center/app.js:255:function resolveRouteAccess(route) {
+public/control-center/app.js:257:  const routePermissions = getProjectedRoutePermissions({ operations });
+public/control-center/app.js:295:setRouteAccessResolver(resolveRouteAccess);
+
+===== MAP COMPARISON (APP vs ROUTER vs BACKBONE) =====
+ACTIVE_ROLES_APP ["strategist","writer","designer","video_lead","publisher","ads_operator","analyst","compliance_reviewer","admin"]
+ACTIVE_ROLES_ROUTER ["strategist","writer","designer","video_lead","publisher","ads_operator","analyst","compliance_reviewer","admin"]
+ACTIVE_ROLES_IDENTICAL true
+ROUTE_COUNT_APP 9
+ROUTE_COUNT_ROUTER 9
+ROUTE_COUNT_BACKEND 3
+ROUTE ai-command | app=__ALL_ACTIVE_ROLES__ | router=__ALL_ACTIVE_ROLES__ | backend=null | app_router_match=true
+ROUTE integrations | app=["admin"] | router=["admin"] | backend=[] | app_router_match=true
+ROUTE job-monitor | app=__ALL_ACTIVE_ROLES__ | router=__ALL_ACTIVE_ROLES__ | backend=null | app_router_match=true
+ROUTE notification-center | app=__ALL_ACTIVE_ROLES__ | router=__ALL_ACTIVE_ROLES__ | backend=null | app_router_match=true
+ROUTE queue-center | app=__ALL_ACTIVE_ROLES__ | router=__ALL_ACTIVE_ROLES__ | backend=null | app_router_match=true
+ROUTE settings | app=["admin"] | router=["admin"] | backend=[] | app_router_match=true
+ROUTE setup | app=__ALL_ACTIVE_ROLES__ | router=__ALL_ACTIVE_ROLES__ | backend=null | app_router_match=true
+ROUTE task-center | app=__ALL_ACTIVE_ROLES__ | router=__ALL_ACTIVE_ROLES__ | backend=null | app_router_match=true
+ROUTE workflows | app=__ALL_ACTIVE_ROLES__ | router=__ALL_ACTIVE_ROLES__ | backend=[] | app_router_match=true
+APP_ROUTER_DRIFT_COUNT 0
+
+===== MAP COMPARISON (PARSED ACCURATE V2) =====
+APP_ACTIVE_ROLE_COUNT 9
+ROUTER_ACTIVE_ROLE_COUNT 9
+ACTIVE_IDENTICAL true
+APP_ROUTE_COUNT 19
+ROUTER_ROUTE_COUNT 19
+BACKEND_ROUTE_COUNT 13
+ROUTE ads-manager | app=["ads_operator","strategist","analyst","admin"] | router=["ads_operator","strategist","analyst","admin"] | backend=["ads_operator","strategist","analyst","admin"] | app_router_match=true
+ROUTE ai-command | app=["strategist","writer","designer","video_lead","publisher","ads_operator","analyst","compliance_reviewer","admin"] | router=["strategist","writer","designer","video_lead","publisher","ads_operator","analyst","compliance_reviewer","admin"] | backend=null | app_router_match=true
+ROUTE campaign-studio | app=["strategist","ads_operator","admin"] | router=["strategist","ads_operator","admin"] | backend=["strategist","ads_operator","admin"] | app_router_match=true
+ROUTE content-studio | app=["writer","strategist","compliance_reviewer","admin"] | router=["writer","strategist","compliance_reviewer","admin"] | backend=["writer","strategist","compliance_reviewer","admin"] | app_router_match=true
+ROUTE governance | app=["compliance_reviewer","admin","analyst"] | router=["compliance_reviewer","admin","analyst"] | backend=["compliance_reviewer","admin","analyst"] | app_router_match=true
+ROUTE home | app=["strategist","analyst","admin"] | router=["strategist","analyst","admin"] | backend=["strategist","analyst","admin"] | app_router_match=true
+ROUTE insights | app=["analyst","strategist","ads_operator","admin"] | router=["analyst","strategist","ads_operator","admin"] | backend=["analyst","strategist","ads_operator","admin"] | app_router_match=true
+ROUTE integrations | app=["admin"] | router=["admin"] | backend=["admin"] | app_router_match=true
+ROUTE job-monitor | app=["strategist","writer","designer","video_lead","publisher","ads_operator","analyst","compliance_reviewer","admin"] | router=["strategist","writer","designer","video_lead","publisher","ads_operator","analyst","compliance_reviewer","admin"] | backend=null | app_router_match=true
+ROUTE library | app=["designer","video_lead","publisher","admin"] | router=["designer","video_lead","publisher","admin"] | backend=["designer","video_lead","publisher","admin"] | app_router_match=true
+ROUTE media-studio | app=["designer","video_lead","compliance_reviewer","admin"] | router=["designer","video_lead","compliance_reviewer","admin"] | backend=["designer","video_lead","compliance_reviewer","admin"] | app_router_match=true
+ROUTE notification-center | app=["strategist","writer","designer","video_lead","publisher","ads_operator","analyst","compliance_reviewer","admin"] | router=["strategist","writer","designer","video_lead","publisher","ads_operator","analyst","compliance_reviewer","admin"] | backend=null | app_router_match=true
+ROUTE publishing | app=["publisher","compliance_reviewer","admin"] | router=["publisher","compliance_reviewer","admin"] | backend=["publisher","compliance_reviewer","admin"] | app_router_match=true
+ROUTE queue-center | app=["strategist","writer","designer","video_lead","publisher","ads_operator","analyst","compliance_reviewer","admin"] | router=["strategist","writer","designer","video_lead","publisher","ads_operator","analyst","compliance_reviewer","admin"] | backend=null | app_router_match=true
+ROUTE research | app=["strategist","analyst","writer","admin"] | router=["strategist","analyst","writer","admin"] | backend=["strategist","analyst","writer","admin"] | app_router_match=true
+ROUTE settings | app=["admin"] | router=["admin"] | backend=["admin"] | app_router_match=true
+ROUTE setup | app=["strategist","writer","designer","video_lead","publisher","ads_operator","analyst","compliance_reviewer","admin"] | router=["strategist","writer","designer","video_lead","publisher","ads_operator","analyst","compliance_reviewer","admin"] | backend=null | app_router_match=true
+ROUTE task-center | app=["strategist","writer","designer","video_lead","publisher","ads_operator","analyst","compliance_reviewer","admin"] | router=["strategist","writer","designer","video_lead","publisher","ads_operator","analyst","compliance_reviewer","admin"] | backend=null | app_router_match=true
+ROUTE workflows | app=["strategist","writer","designer","video_lead","publisher","ads_operator","analyst","compliance_reviewer","admin"] | router=["strategist","writer","designer","video_lead","publisher","ads_operator","analyst","compliance_reviewer","admin"] | backend=["strategist","writer","designer","video_lead","publisher","ads_operator","analyst","compliance_reviewer","admin"] | app_router_match=true
+APP_ROUTER_DRIFT_COUNT_ACCURATE 0
+runtime/orchestrator-service/lib/ops/backbone.js:395:    active_role: 'strategist',
+runtime/orchestrator-service/lib/ops/backbone.js:396:    role_matrix: TEAM_ROLE_DEFS.map((roleDef) => ({
+runtime/orchestrator-service/lib/ops/backbone.js:403:    route_permissions: Object.entries(ROUTE_ROLE_ACCESS).map(([route, roles]) => ({
+runtime/orchestrator-service/lib/ops/backbone.js:407:    service_model: {
+runtime/orchestrator-service/lib/ops/backbone.js:435:    active_role: normalizeRoleKey(patch.active_role || current.active_role || defaults.active_role, defaults.active_role),
+runtime/orchestrator-service/lib/ops/backbone.js:437:    role_matrix: defaults.role_matrix,
+runtime/orchestrator-service/lib/ops/backbone.js:438:    route_permissions: defaults.route_permissions,
+runtime/orchestrator-service/lib/ops/backbone.js:439:    service_model: defaults.service_model,
+runtime/orchestrator-service/lib/ops/backbone.js:483:      active_role: next.active_role,
+runtime/orchestrator-service/lib/ops/backbone.js:3906:    team_service_model: {
+runtime/orchestrator-service/lib/ops/backbone.js:3907:      active_role: team.active_role,
+runtime/orchestrator-service/lib/ops/backbone.js:3908:      role_matrix: asArray(team.role_matrix),
+runtime/orchestrator-service/lib/ops/backbone.js:3909:      route_permissions: asArray(team.route_permissions),
+runtime/orchestrator-service/lib/ops/backbone.js:3910:      domains: asArray(team.service_model?.domains),
+runtime/orchestrator-service/lib/ops/backbone.js:3915:      active_role: team.active_role,
+runtime/orchestrator-service/lib/ops/backbone.js:3929:      service_model: asObject(team.service_model),
+runtime/orchestrator-service/lib/ops/backbone.js:3930:      route_permissions: asArray(team.route_permissions),
+runtime/orchestrator-service/lib/ops/backbone.js:3931:      role_matrix: asArray(team.role_matrix),
+runtime/orchestrator-service/server.js:14167:function buildProjectOperationsPayload(projectName) {

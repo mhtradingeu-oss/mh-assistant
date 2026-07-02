@@ -1,0 +1,783 @@
+public/control-center/pages/setup.js:2:import { applyProjectBusinessTemplate } from "../api.js";
+public/control-center/pages/setup.js:6:  { name: "project_name", label: "Project name" },
+public/control-center/pages/setup.js:7:  { name: "project_type", label: "Project type" },
+public/control-center/pages/setup.js:23:    description: "Define the project identity, type, website, and launch window.",
+public/control-center/pages/setup.js:24:    fields: ["project_name", "project_type", "website_url", "launch_window"]
+public/control-center/pages/setup.js:47:    description: "Clarify outcomes this project should optimize for.",
+public/control-center/pages/setup.js:75:  project_name: "Used across routing, saves, and system context labels.",
+public/control-center/pages/setup.js:76:  project_type: "Improves AI defaults and recommended workflow strategies.",
+public/control-center/pages/setup.js:83:  primary_goal: "Aligns optimization priorities and readiness evaluation.",
+public/control-center/pages/setup.js:89:  project_name: "This name is used as the main project identity across the Control Center.",
+public/control-center/pages/setup.js:90:  project_type: "Helps AI choose better defaults for workflows, campaigns, and recommendations.",
+public/control-center/pages/setup.js:97:  primary_goal: "Tells the system what success means for this project.",
+public/control-center/pages/setup.js:152:function getValidationSummary({ missingFields, readinessStatus, readinessScore, criticalGaps, failedCount }) {
+public/control-center/pages/setup.js:153:  const normalizedReadiness = asString(readinessStatus).toLowerCase();
+public/control-center/pages/setup.js:154:  const score = Number(readinessScore);
+public/control-center/pages/setup.js:173:    reason: FIELD_IMPORTANCE_REASON[field.name] || "Required to improve setup quality and downstream reliability.",
+public/control-center/pages/setup.js:178:function getSetupDraftKey(projectName) {
+public/control-center/pages/setup.js:179:  return `mh-control-center:setup-draft:${projectName || "default"}`;
+public/control-center/pages/setup.js:182:function loadSetupDraft(projectName) {
+public/control-center/pages/setup.js:186:    const raw = window.localStorage.getItem(getSetupDraftKey(projectName));
+public/control-center/pages/setup.js:195:function saveSetupDraft(projectName, data) {
+public/control-center/pages/setup.js:199:    window.localStorage.setItem(getSetupDraftKey(projectName), JSON.stringify(data));
+public/control-center/pages/setup.js:206:function clearSetupDraft(projectName) {
+public/control-center/pages/setup.js:210:    window.localStorage.removeItem(getSetupDraftKey(projectName));
+public/control-center/pages/setup.js:218:  const overviewData = asObject(state.data.overview?.overview);
+public/control-center/pages/setup.js:219:  const readinessDashboard = asObject(state.data.readiness?.dashboard);
+public/control-center/pages/setup.js:221:  const projectName = context.currentProject || overviewData.project_name || "";
+public/control-center/pages/setup.js:224:    project_name: projectName,
+public/control-center/pages/setup.js:225:    project_type: overviewData.project_type || "",
+public/control-center/pages/setup.js:226:    website_url: overviewData.website_url || "",
+public/control-center/pages/setup.js:227:    project_status: overviewData.project_status || overviewData.status || "",
+public/control-center/pages/setup.js:228:    execution_mode: context.executionMode || overviewData.execution_mode || "",
+public/control-center/pages/setup.js:229:    brand_name: overviewData.brand_name || projectName,
+public/control-center/pages/setup.js:230:    brand_promise: overviewData.brand_promise || overviewData.brand_positioning || overviewData.value_prop || "",
+public/control-center/pages/setup.js:231:    brand_voice: overviewData.brand_voice || "",
+public/control-center/pages/setup.js:232:    visual_identity: overviewData.visual_identity || "",
+public/control-center/pages/setup.js:233:    offer_positioning: overviewData.offer_positioning || overviewData.positioning || "",
+public/control-center/pages/setup.js:234:    market: context.currentMarket || overviewData.market || "",
+public/control-center/pages/setup.js:235:    language: context.currentLanguage || overviewData.language || "",
+public/control-center/pages/setup.js:236:    currency: overviewData.currency || "",
+public/control-center/pages/setup.js:237:    primary_goal: overviewData.primary_goal || overviewData.goal || "",
+public/control-center/pages/setup.js:238:    secondary_goal: overviewData.secondary_goal || "",
+public/control-center/pages/setup.js:239:    launch_window: overviewData.launch_window || context.activeCampaign || "",
+public/control-center/pages/setup.js:240:    audience_primary: overviewData.audience_primary || overviewData.target_audience || "",
+public/control-center/pages/setup.js:241:    audience_problem: overviewData.audience_problem || overviewData.customer_problem || "",
+public/control-center/pages/setup.js:242:    audience_geography: overviewData.audience_geography || context.currentMarket || "",
+public/control-center/pages/setup.js:243:    competitors: toListText(overviewData.competitors),
+public/control-center/pages/setup.js:244:    differentiation: overviewData.differentiation || "",
+public/control-center/pages/setup.js:246:      overviewData.social_channels ||
+public/control-center/pages/setup.js:247:      overviewData.channels ||
+public/control-center/pages/setup.js:248:      overviewData.social_links ||
+public/control-center/pages/setup.js:249:      overviewData.setup_payload?.social_channels ||
+public/control-center/pages/setup.js:250:      overviewData.setup_payload?.channels ||
+public/control-center/pages/setup.js:251:      overviewData.setup_payload?.social_links
+public/control-center/pages/setup.js:253:    operator_notes: toListText(readinessDashboard.operator_notes)
+public/control-center/pages/setup.js:300:function getWizardReadinessStatus(values, readinessScore, readinessStatus) {
+public/control-center/pages/setup.js:302:  const score = Number(readinessScore);
+public/control-center/pages/setup.js:304:  const backendReady = asString(readinessStatus).toLowerCase() === "strong";
+public/control-center/pages/setup.js:325:  const fields = ["project_name", "project_type", "website_url"];
+public/control-center/pages/setup.js:371:      label: "Launch readiness: strong"
+public/control-center/pages/setup.js:378:      label: `Launch readiness: ${fieldGapCount} required field${fieldGapCount === 1 ? "" : "s"} missing`
+public/control-center/pages/setup.js:384:    label: `Launch readiness: ${totalGaps} dependency gap${totalGaps === 1 ? "" : "s"}`
+public/control-center/pages/setup.js:390:    return `Complete ${missingFields.length} required setup field${missingFields.length === 1 ? "" : "s"}.`;
+public/control-center/pages/setup.js:401:  return "Save setup, then continue to Library or Integrations.";
+public/control-center/pages/setup.js:429:    <div class="setup-field-group${required && !filled ? " is-missing" : ""}" data-setup-field="${escapeHtml(name)}" data-required="${required ? "true" : "false"}">
+public/control-center/pages/setup.js:430:      <div class="setup-field-head">
+public/control-center/pages/setup.js:431:        <div class="setup-label-with-info">
+public/control-center/pages/setup.js:432:          <label class="setup-label" for="setup-${escapeHtml(name)}">${escapeHtml(label)}</label>
+public/control-center/pages/setup.js:434:        <span class="setup-field-state ${indicatorClass}" data-setup-indicator-for="${escapeHtml(name)}">${escapeHtml(indicatorText)}</span>
+public/control-center/pages/setup.js:438:          ? `<textarea id="setup-${escapeHtml(name)}" name="${escapeHtml(name)}" class="setup-input setup-textarea" rows="${rows}" placeholder="${escapeHtml(placeholder || "")}">${escapeHtml(asString(value))}</textarea>`
+public/control-center/pages/setup.js:439:          : `<input id="setup-${escapeHtml(name)}" name="${escapeHtml(name)}" class="setup-input" type="${escapeHtml(type)}" value="${escapeHtml(asString(value))}" placeholder="${escapeHtml(placeholder || "")}">`
+public/control-center/pages/setup.js:441:      <div class="setup-helper">${escapeHtml(infoText)}</div>
+public/control-center/pages/setup.js:465:  if (label === "social_assets") {
+public/control-center/pages/setup.js:466:    return "Social assets";
+public/control-center/pages/setup.js:492:    project_name: values.project_name,
+public/control-center/pages/setup.js:493:    project_type: values.project_type,
+public/control-center/pages/setup.js:495:    project_status: values.project_status,
+public/control-center/pages/setup.js:519:  const groups = Array.from(form.querySelectorAll("[data-setup-field]"));
+public/control-center/pages/setup.js:521:    const name = group.getAttribute("data-setup-field") || "";
+public/control-center/pages/setup.js:524:    const indicator = group.querySelector("[data-setup-indicator-for]");
+public/control-center/pages/setup.js:537:  const brand = asString(values.brand_name || values.project_name || "your brand").trim() || "your brand";
+public/control-center/pages/setup.js:557:  const type = asString(values.project_type).toLowerCase();
+public/control-center/pages/setup.js:570:  const positioning = document.getElementById("setupAiPositioningText");
+public/control-center/pages/setup.js:571:  if (positioning) positioning.textContent = compactListText([buildPositioningSuggestion(values)], "Generate positioning guidance from setup context.");
+public/control-center/pages/setup.js:573:  const audience = document.getElementById("setupAiAudienceText");
+public/control-center/pages/setup.js:576:  const tone = document.getElementById("setupAiToneText");
+public/control-center/pages/setup.js:587:  readinessScore,
+public/control-center/pages/setup.js:588:  readinessStatus,
+public/control-center/pages/setup.js:609:    readinessStatus,
+public/control-center/pages/setup.js:610:    readinessScore,
+public/control-center/pages/setup.js:626:  const completionTextWide = document.getElementById("setupCompletionPercentValue");
+public/control-center/pages/setup.js:629:  const topCompletionBadge = document.getElementById("setupTopCompletionBadge");
+public/control-center/pages/setup.js:635:  const topReadinessBadge = document.getElementById("setupTopReadinessBadge");
+public/control-center/pages/setup.js:641:  const requiredCompleteEl = document.getElementById("setupRequiredCompleted");
+public/control-center/pages/setup.js:644:  const requiredTotalEl = document.getElementById("setupRequiredTotal");
+public/control-center/pages/setup.js:647:  const completionBar = document.getElementById("setupCompletionBar");
+public/control-center/pages/setup.js:660:  const missingCount = document.getElementById("setupMissingCount");
+public/control-center/pages/setup.js:663:  const nextBestActionEl = document.getElementById("setupNextBestAction");
+public/control-center/pages/setup.js:668:  const readinessMissingFieldsEl = document.getElementById("setupReadinessMissingFields");
+public/control-center/pages/setup.js:669:  if (readinessMissingFieldsEl) {
+public/control-center/pages/setup.js:670:    readinessMissingFieldsEl.textContent = String(missingFields.length);
+public/control-center/pages/setup.js:673:  const readinessMissingAssetsEl = document.getElementById("setupReadinessMissingAssets");
+public/control-center/pages/setup.js:674:  if (readinessMissingAssetsEl) {
+public/control-center/pages/setup.js:675:    readinessMissingAssetsEl.textContent = String(missingAssets.length);
+public/control-center/pages/setup.js:678:  const readinessMissingConnectorsEl = document.getElementById("setupReadinessMissingConnectors");
+public/control-center/pages/setup.js:679:  if (readinessMissingConnectorsEl) {
+public/control-center/pages/setup.js:680:    readinessMissingConnectorsEl.textContent = String(missingConnectors.length);
+public/control-center/pages/setup.js:683:  const dependencyGapCardEl = document.getElementById("setupDependencyGapCount");
+public/control-center/pages/setup.js:689:    { id: "setupBusinessIdentityStatus", value: businessIdentityStatus },
+public/control-center/pages/setup.js:690:    { id: "setupBrandStatus", value: brandStatus },
+public/control-center/pages/setup.js:691:    { id: "setupLocalizationStatus", value: localizationStatus },
+public/control-center/pages/setup.js:692:    { id: "setupChannelsStatus", value: channelsStatus },
+public/control-center/pages/setup.js:693:    { id: "setupContentTruthStatus", value: contentTruthStatus },
+public/control-center/pages/setup.js:694:    { id: "setupAiGuidanceStatus", value: aiGuidanceStatus }
+public/control-center/pages/setup.js:705:  const readinessBadge = document.getElementById("setupReadinessBadge");
+public/control-center/pages/setup.js:706:  if (readinessBadge) {
+public/control-center/pages/setup.js:707:    const label = getWizardReadinessStatus(values, readinessScore, readinessStatus);
+public/control-center/pages/setup.js:708:    readinessBadge.className = `card-badge ${label === "Ready" ? "success" : "warning"}`;
+public/control-center/pages/setup.js:709:    readinessBadge.textContent = label;
+public/control-center/pages/setup.js:712:  const validationBadge = document.getElementById("setupValidationBadge");
+public/control-center/pages/setup.js:718:  const missingActionList = document.getElementById("setupMissingActions");
+public/control-center/pages/setup.js:721:      ? `<div class="setup-smart-gap-list">${missingInsights.map((item) => `
+public/control-center/pages/setup.js:722:          <article class="setup-smart-gap-item">
+public/control-center/pages/setup.js:727:            <button class="btn btn-ghost" type="button" data-setup-jump-field="${escapeHtml(item.name)}" data-setup-jump-step="${escapeHtml(item.stepId)}">Open field</button>
+public/control-center/pages/setup.js:733:  const blockerList = document.getElementById("setupSystemGaps");
+public/control-center/pages/setup.js:742:      "No operational blockers detected from readiness signals."
+public/control-center/pages/setup.js:746:  const completeNowBtn = document.getElementById("setupCompleteNowBtn");
+public/control-center/pages/setup.js:764:    const badge = document.getElementById(`setupStepBadge-${step.id}`);
+public/control-center/pages/setup.js:765:    const button = form.querySelector(`[data-setup-step="${step.id}"]`);
+public/control-center/pages/setup.js:766:    const statusNote = form.querySelector(`[data-setup-step-note="${step.id}"]`);
+public/control-center/pages/setup.js:782:      statusNote.className = `setup-smart-step-note tone-${status.tone}`;
+public/control-center/pages/setup.js:791:  const recommendedTitle = document.getElementById("setupRecommendedStepTitle");
+public/control-center/pages/setup.js:794:  const recommendedReason = document.getElementById("setupRecommendedStepReason");
+public/control-center/pages/setup.js:797:  const recommendedBtn = document.getElementById("setupRecommendedStepBtn");
+public/control-center/pages/setup.js:799:    recommendedBtn.setAttribute("data-setup-open-step", recommendedStep.id);
+public/control-center/pages/setup.js:803:  const continueLibraryBtn = document.getElementById("setupContinueLibraryBtn");
+public/control-center/pages/setup.js:804:  const continueIntegrationsBtn = document.getElementById("setupContinueIntegrationsBtn");
+public/control-center/pages/setup.js:805:  const continueCampaignBtn = document.getElementById("setupContinueCampaignBtn");
+public/control-center/pages/setup.js:825:  const stepCounter = document.getElementById("setupStepCounter");
+public/control-center/pages/setup.js:840:  projectName,
+public/control-center/pages/setup.js:845:  readinessScore,
+public/control-center/pages/setup.js:846:  readinessStatus,
+public/control-center/pages/setup.js:849:  const form = $("setupProjectForm");
+public/control-center/pages/setup.js:852:  const stepButtons = Array.from(document.querySelectorAll("[data-setup-step]"));
+public/control-center/pages/setup.js:853:  const stepActionButtons = Array.from(document.querySelectorAll("[data-setup-open-step]"));
+public/control-center/pages/setup.js:854:  const stepPanels = Array.from(document.querySelectorAll("[data-setup-step-panel]"));
+public/control-center/pages/setup.js:855:  const draftKeyName = projectName || "current project";
+public/control-center/pages/setup.js:861:      const isActive = button.getAttribute("data-setup-step") === stepId;
+public/control-center/pages/setup.js:867:      const isActive = panel.getAttribute("data-setup-step-panel") === stepId;
+public/control-center/pages/setup.js:880:      readinessScore,
+public/control-center/pages/setup.js:881:      readinessStatus,
+public/control-center/pages/setup.js:888:    button.onclick = () => activateStep(button.getAttribute("data-setup-step") || STEP_DEFINITIONS[0].id);
+public/control-center/pages/setup.js:893:      const stepId = button.getAttribute("data-setup-open-step") || STEP_DEFINITIONS[0].id;
+public/control-center/pages/setup.js:895:      const panel = document.querySelector(`[data-setup-step-panel="${stepId}"]`);
+public/control-center/pages/setup.js:900:  const prevBtn = $("setupPrevStepBtn");
+public/control-center/pages/setup.js:908:  const nextBtn = $("setupNextStepBtn");
+public/control-center/pages/setup.js:925:      readinessScore,
+public/control-center/pages/setup.js:926:      readinessStatus,
+public/control-center/pages/setup.js:935:    const saved = saveSetupDraft(projectName, values);
+public/control-center/pages/setup.js:949:        setupDraft: {
+public/control-center/pages/setup.js:950:          project: projectName || "",
+public/control-center/pages/setup.js:963:      saveSetupDraft(projectName, values);
+public/control-center/pages/setup.js:973:    const field = event.target?.closest?.(".setup-input, .setup-textarea");
+public/control-center/pages/setup.js:988:  const setupRoot = $("setupRoot") || form.closest(".setup-wizard-shell") || form;
+public/control-center/pages/setup.js:990:  setupRoot.onclick = (event) => {
+public/control-center/pages/setup.js:991:    const jumpBtn = event.target.closest("[data-setup-jump-field]");
+public/control-center/pages/setup.js:996:    const fieldName = jumpBtn.getAttribute("data-setup-jump-field") || "";
+public/control-center/pages/setup.js:997:    const stepId = jumpBtn.getAttribute("data-setup-jump-step") || getFieldStepId(fieldName);
+public/control-center/pages/setup.js:1017:  const saveDraftBtn = $("setupSaveDraftBtn");
+public/control-center/pages/setup.js:1024:  const saveBackendBtn = $("setupSaveBackendBtn");
+public/control-center/pages/setup.js:1027:      if (!projectName) {
+public/control-center/pages/setup.js:1028:        showError?.("Select a project before saving Setup changes.");
+public/control-center/pages/setup.js:1033:      const requestedProjectName = asString(values.project_name).trim().toLowerCase();
+public/control-center/pages/setup.js:1039:      showMessage?.(`Saving setup for ${draftKeyName}...`);
+public/control-center/pages/setup.js:1042:        await saveProjectSetup?.(projectName, payload);
+public/control-center/pages/setup.js:1043:        clearSetupDraft(projectName);
+public/control-center/pages/setup.js:1044:        await reloadProjectData?.(projectName);
+public/control-center/pages/setup.js:1047:          requestedProjectName && requestedProjectName !== asString(projectName).trim().toLowerCase()
+public/control-center/pages/setup.js:1048:            ? " Project name remains local-only until project rename support exists."
+public/control-center/pages/setup.js:1066:  const resetBtn = $("setupResetDraftBtn");
+public/control-center/pages/setup.js:1069:      clearSetupDraft(projectName);
+public/control-center/pages/setup.js:1070:      navigateTo("setup");
+public/control-center/pages/setup.js:1072:        showMessage(`Local setup draft cleared for ${draftKeyName}.`);
+public/control-center/pages/setup.js:1077:  const aiPositioningBtn = $("setupAiPositioningBtn");
+public/control-center/pages/setup.js:1090:  const aiAudienceBtn = $("setupAiAudienceBtn");
+public/control-center/pages/setup.js:1103:  const aiToneBtn = $("setupAiToneBtn");
+public/control-center/pages/setup.js:1116:  const aiFillBtn = $("setupAiFillMissingBtn");
+public/control-center/pages/setup.js:1127:      const inferredBrand = asString(values.brand_name || values.project_name || "Brand").trim() || "Brand";
+public/control-center/pages/setup.js:1144:  const aiCommandBtn = $("setupAiCommandBtn");
+public/control-center/pages/setup.js:1151:        input.value = `Suggest final setup completion for ${draftKeyName}. Missing fields: ${missingFields.length ? missingFields.join(", ") : "none"}. Include positioning, audience, and tone guidance.`;
+public/control-center/pages/setup.js:1158:  const validateNowBtn = $("setupValidateNowBtn");
+public/control-center/pages/setup.js:1161:      const target = $("setupSaveBackendBtn");
+public/control-center/pages/setup.js:1168:  const continueLibraryBtn = $("setupContinueLibraryBtn");
+public/control-center/pages/setup.js:1175:  const continueIntegrationsBtn = $("setupContinueIntegrationsBtn");
+public/control-center/pages/setup.js:1178:      navigateTo("integrations");
+public/control-center/pages/setup.js:1182:  const continueCampaignBtn = $("setupContinueCampaignBtn");
+public/control-center/pages/setup.js:1189:  const reviewMissingBtn = $("setupReviewMissingBtn");
+public/control-center/pages/setup.js:1195:        showMessage?.("No required setup gaps found.");
+public/control-center/pages/setup.js:1205:      showMessage?.(`Reviewing missing setup items (${missing.length}).`);
+public/control-center/pages/setup.js:1209:  const reviewReadinessBtn = $("setupReviewReadinessBtn");
+public/control-center/pages/setup.js:1216:  const smartActionBtn = $("setupSmartActionBtn");
+public/control-center/pages/setup.js:1262:function renderBusinessTemplatePanel({ values, overviewData, escapeHtml }) {
+public/control-center/pages/setup.js:1264:    overviewData.business_type ||
+public/control-center/pages/setup.js:1265:    overviewData.project_type ||
+public/control-center/pages/setup.js:1266:    values.project_type ||
+public/control-center/pages/setup.js:1270:  const currentLabel = overviewData.business_template?.label || getBusinessTemplateLabel(currentType);
+public/control-center/pages/setup.js:1271:  const requiredAssets = Array.isArray(overviewData.required_assets) ? overviewData.required_assets : [];
+public/control-center/pages/setup.js:1272:  const starterChecklist = Array.isArray(overviewData.starter_checklist) ? overviewData.starter_checklist : [];
+public/control-center/pages/setup.js:1281:    <section class="card setup-business-template-panel">
+public/control-center/pages/setup.js:1282:      <div class="setup-template-head">
+public/control-center/pages/setup.js:1284:          <div class="setup-kicker">Business Template</div>
+public/control-center/pages/setup.js:1285:          <h3 class="setup-v2-title">Project Operating Model</h3>
+public/control-center/pages/setup.js:1286:          <p class="setup-v2-subtitle">Select the template that sets setup defaults, checklist scope, and launch priorities.</p>
+public/control-center/pages/setup.js:1288:        <span class="setup-template-current">${escapeHtml(currentLabel)}</span>
+public/control-center/pages/setup.js:1291:      <div class="setup-template-body">
+public/control-center/pages/setup.js:1292:        <label class="setup-template-selector">
+public/control-center/pages/setup.js:1294:          <select id="setupBusinessTemplateSelect">
+public/control-center/pages/setup.js:1303:        <div class="setup-template-preview${requiredAssets.length ? "" : " is-empty"}">
+public/control-center/pages/setup.js:1305:          <span class="${requiredAssets.length ? "" : "setup-template-empty"}">${escapeHtml(requirementsText)}</span>
+public/control-center/pages/setup.js:1308:        <div class="setup-template-preview${starterChecklist.length ? "" : " is-empty"}">
+public/control-center/pages/setup.js:1310:          <span class="${starterChecklist.length ? "" : "setup-template-empty"}">${escapeHtml(checklistText)}</span>
+public/control-center/pages/setup.js:1314:      <div class="setup-template-actions">
+public/control-center/pages/setup.js:1315:        <button id="setupApplyTemplateBtn" class="btn btn-secondary" type="button">
+public/control-center/pages/setup.js:1318:        <span id="setupTemplateStatus" class="setup-template-status"></span>
+public/control-center/pages/setup.js:1325:export const setupRoute = {
+public/control-center/pages/setup.js:1326:  id: "setup",
+public/control-center/pages/setup.js:1331:    description: "Build a complete, validated project source of truth before moving to assets, integrations, and launch execution."
+public/control-center/pages/setup.js:1334:    <section class="page is-active" data-page="setup">
+public/control-center/pages/setup.js:1335:      <div id="setupRoot"></div>
+public/control-center/pages/setup.js:1349:    const overviewData = asObject(state.data.overview?.overview);
+public/control-center/pages/setup.js:1350:    const readiness = asObject(state.data.readiness);
+public/control-center/pages/setup.js:1351:    const readinessDashboard = asObject(readiness.dashboard);
+public/control-center/pages/setup.js:1352:    const integrations = asObject(state.data.integrations);
+public/control-center/pages/setup.js:1353:    const assets = asObject(state.data.assets);
+public/control-center/pages/setup.js:1355:    const projectName = state.context.currentProject || overviewData.project_name || "";
+public/control-center/pages/setup.js:1356:    const draft = loadSetupDraft(projectName);
+public/control-center/pages/setup.js:1359:    const readinessScore = readinessDashboard.readiness_score ?? overviewData.readiness_score ?? 0;
+public/control-center/pages/setup.js:1360:    const readinessStatus = readinessDashboard.readiness_status || overviewData.readiness_status || "needs_work";
+public/control-center/pages/setup.js:1361:    const missingAssets = getMissingAssetLabels(assets);
+public/control-center/pages/setup.js:1362:    const missingConnectors = asArray(integrations.readiness?.missing);
+public/control-center/pages/setup.js:1363:    const criticalGaps = asArray(readinessDashboard.priorities?.critical);
+public/control-center/pages/setup.js:1367:    const wizardStatus = getWizardReadinessStatus(values, readinessScore, readinessStatus);
+public/control-center/pages/setup.js:1375:    const failedCount = asArray(integrations.readiness?.failed).length;
+public/control-center/pages/setup.js:1378:      readinessStatus,
+public/control-center/pages/setup.js:1379:      readinessScore,
+public/control-center/pages/setup.js:1389:      readinessDashboard.updated_at ||
+public/control-center/pages/setup.js:1390:      readinessDashboard.last_saved_at ||
+public/control-center/pages/setup.js:1391:      overviewData.updated_at ||
+public/control-center/pages/setup.js:1392:      overviewData.last_updated_at
+public/control-center/pages/setup.js:1395:    const root = $("setupRoot");
+public/control-center/pages/setup.js:1399:      <div class="setup-wizard-shell">
+public/control-center/pages/setup.js:1400:        <section class="card setup-smart-overview">
+public/control-center/pages/setup.js:1401:          <div class="setup-wizard-header-top">
+public/control-center/pages/setup.js:1403:              <h3 class="setup-v2-title">Smart Guided Setup</h3>
+public/control-center/pages/setup.js:1404:              <p class="setup-v2-subtitle">Setup configures your project foundation and hands off assets, connectors, and publishing to the right workspace.</p>
+public/control-center/pages/setup.js:1405:              <p class="setup-header-project">Project: ${escapeHtml(asString(values.project_name) || projectName || "No project selected")}</p>
+public/control-center/pages/setup.js:1406:              <div class="setup-operating-chips">
+public/control-center/pages/setup.js:1407:                <span class="card-badge neutral" id="setupTopCompletionBadge">Fields configured: ${escapeHtml(String(completionPercent))}%</span>
+public/control-center/pages/setup.js:1408:                <span class="card-badge ${getLaunchReadinessSummary({ missingFields, missingAssets, missingConnectors, criticalGaps }).tone}" id="setupTopReadinessBadge">${escapeHtml(getLaunchReadinessSummary({ missingFields, missingAssets, missingConnectors, criticalGaps }).label)}</span>
+public/control-center/pages/setup.js:1411:            <div class="setup-v2-toolbar">
+public/control-center/pages/setup.js:1412:              <button id="setupSaveBackendBtn" class="btn btn-primary" type="button">Save Setup</button>
+public/control-center/pages/setup.js:1416:          <div class="setup-top-summary-row" aria-label="Configuration intelligence summary">
+public/control-center/pages/setup.js:1417:            <article class="setup-top-summary-item">
+public/control-center/pages/setup.js:1419:              <strong id="setupCompletionPercentValue" class="setup-wizard-progress-value">${escapeHtml(String(completionPercent))}%</strong>
+public/control-center/pages/setup.js:1420:              <div class="setup-progress" aria-label="Setup completion">
+public/control-center/pages/setup.js:1421:                <div class="setup-progress-track">
+public/control-center/pages/setup.js:1422:                  <div id="setupCompletionBar" class="setup-progress-fill" style="width:${escapeHtml(String(completionPercent))}%"></div>
+public/control-center/pages/setup.js:1426:            <article class="setup-top-summary-item">
+public/control-center/pages/setup.js:1428:              <strong><span id="setupRequiredCompleted">${escapeHtml(String(requiredCompleted))}</span>/<span id="setupRequiredTotal">${escapeHtml(String(requiredNames.length))}</span></strong>
+public/control-center/pages/setup.js:1429:              <span class="setup-helper"><span id="setupMissingCount">${escapeHtml(String(missingFields.length))}</span> missing</span>
+public/control-center/pages/setup.js:1431:            <article class="setup-top-summary-item">
+public/control-center/pages/setup.js:1433:              <strong id="setupDependencyGapCount">${escapeHtml(String(dependencyGapCount))}</strong>
+public/control-center/pages/setup.js:1434:              <span class="setup-helper">Assets and connectors pending</span>
+public/control-center/pages/setup.js:1436:            <article class="setup-top-summary-item">
+public/control-center/pages/setup.js:1438:              <strong>${escapeHtml(formatPercent(readinessScore))}</strong>
+public/control-center/pages/setup.js:1439:              <div class="setup-inline-status-row">
+public/control-center/pages/setup.js:1440:                <span id="setupReadinessBadge" class="card-badge ${wizardStatus === "Ready" ? "success" : "warning"}">${escapeHtml(wizardStatus)}</span>
+public/control-center/pages/setup.js:1441:                <span id="setupValidationBadge" class="card-badge ${escapeHtml(validationSummary.tone)}">${escapeHtml(validationSummary.label)}</span>
+public/control-center/pages/setup.js:1443:              <span class="setup-helper">Updated ${escapeHtml(lastSavedAt)}</span>
+public/control-center/pages/setup.js:1447:          <div class="setup-guidance-strip">
+public/control-center/pages/setup.js:1449:            <p id="setupNextBestAction">${escapeHtml(nextBestAction)}</p>
+public/control-center/pages/setup.js:1450:            <div class="setup-config-intel-metrics">
+public/control-center/pages/setup.js:1451:              <span>Required missing: <strong id="setupReadinessMissingFields">${escapeHtml(String(missingFields.length))}</strong></span>
+public/control-center/pages/setup.js:1452:              <span>Assets missing: <strong id="setupReadinessMissingAssets">${escapeHtml(String(missingAssets.length))}</strong> <span class=\"setup-handoff-label\">(manage in Library)</span></span>
+public/control-center/pages/setup.js:1453:              <span>Connectors missing: <strong id="setupReadinessMissingConnectors">${escapeHtml(String(missingConnectors.length))}</strong> <span class=\"setup-handoff-label\">(manage in Integrations)</span></span>
+public/control-center/pages/setup.js:1458:        <div class="setup-wizard-layout">
+public/control-center/pages/setup.js:1459:          <aside class="setup-wizard-sidebar card setup-smart-steps-panel">
+public/control-center/pages/setup.js:1461:            <p class="setup-helper">Select a step to load that section in the main form.</p>
+public/control-center/pages/setup.js:1462:            <div class="setup-smart-recommended-inline">
+public/control-center/pages/setup.js:1463:              <span class="setup-smart-recommended-label">Recommended</span>
+public/control-center/pages/setup.js:1464:              <button id="setupRecommendedStepBtn" class="btn btn-ghost" type="button" data-setup-open-step="${escapeHtml(getRecommendedStep(values).id)}">
+public/control-center/pages/setup.js:1465:                <span id="setupRecommendedStepTitle">${escapeHtml(getRecommendedStep(values).title)}</span>
+public/control-center/pages/setup.js:1468:            <div class="setup-smart-step-list" role="tablist" aria-label="Setup wizard steps">
+public/control-center/pages/setup.js:1472:                  <button class="setup-wizard-step ${index === 0 ? "is-active" : ""}" type="button" data-setup-step="${escapeHtml(step.id)}" role="tab" aria-current="${index === 0 ? "step" : "false"}">
+public/control-center/pages/setup.js:1473:                    <span class="setup-wizard-step-meta">Step ${index + 1}</span>
+public/control-center/pages/setup.js:1474:                    <span class="setup-wizard-step-title">${escapeHtml(step.title)}</span>
+public/control-center/pages/setup.js:1475:                    <span class="setup-wizard-step-purpose">${escapeHtml(step.description)}</span>
+public/control-center/pages/setup.js:1476:                    <span id="setupStepBadge-${escapeHtml(step.id)}" class="card-badge ${status.tone}">${escapeHtml(status.label)}</span>
+public/control-center/pages/setup.js:1477:                    <span class="setup-smart-step-note tone-${escapeHtml(status.tone)}" data-setup-step-note="${escapeHtml(step.id)}">${status.tone === "danger" ? "Needs required data" : status.tone === "warning" ? "Partially complete" : ""}</span>
+public/control-center/pages/setup.js:1484:          <section class="setup-wizard-form card setup-smart-form-panel">
+public/control-center/pages/setup.js:1485:            <div class="setup-wizard-form-head">
+public/control-center/pages/setup.js:1488:                <strong id="setupStepCounter" class="setup-wizard-step-counter">1/${STEP_DEFINITIONS.length}</strong>
+public/control-center/pages/setup.js:1490:              <div class="setup-wizard-nav-actions">
+public/control-center/pages/setup.js:1491:                <button id="setupPrevStepBtn" class="btn btn-ghost" type="button">Previous</button>
+public/control-center/pages/setup.js:1492:                <button id="setupNextStepBtn" class="btn btn-secondary" type="button">Next</button>
+public/control-center/pages/setup.js:1496:            <form id="setupProjectForm" class="setup-v2-form">
+public/control-center/pages/setup.js:1497:              <section class="setup-wizard-step-panel is-active" data-setup-step-panel="business-basics">
+public/control-center/pages/setup.js:1499:                <div class="setup-form-grid setup-form-grid-2">
+public/control-center/pages/setup.js:1500:                  ${renderField({ name: "project_name", label: "Project name", value: values.project_name, helper: "Canonical project identifier.", placeholder: "e.g. Hairotic Men", escapeHtml, required: true })}
+public/control-center/pages/setup.js:1501:                  ${renderField({ name: "project_type", label: "Project type", value: values.project_type, helper: "Broad business model.", placeholder: "e.g. Ecommerce", escapeHtml, required: true })}
+public/control-center/pages/setup.js:1507:              <section class="setup-wizard-step-panel" data-setup-step-panel="brand-identity" hidden>
+public/control-center/pages/setup.js:1510:                <div class="setup-form-grid">
+public/control-center/pages/setup.js:1519:              <section class="setup-wizard-step-panel" data-setup-step-panel="market-language" hidden>
+public/control-center/pages/setup.js:1522:                <div class="setup-form-grid setup-form-grid-3">
+public/control-center/pages/setup.js:1529:              <section class="setup-wizard-step-panel" data-setup-step-panel="audience" hidden>
+public/control-center/pages/setup.js:1532:                <div class="setup-form-grid">
+public/control-center/pages/setup.js:1539:              <section class="setup-wizard-step-panel" data-setup-step-panel="goals" hidden>
+public/control-center/pages/setup.js:1541:                <p class="home-section-copy">Business outcomes this project should drive.</p>
+public/control-center/pages/setup.js:1542:                <div class="setup-form-grid">
+public/control-center/pages/setup.js:1548:              <section class="setup-wizard-step-panel" data-setup-step-panel="competitors" hidden>
+public/control-center/pages/setup.js:1551:                <div class="setup-form-grid">
+public/control-center/pages/setup.js:1557:              <section class="setup-wizard-step-panel" data-setup-step-panel="channels" hidden>
+public/control-center/pages/setup.js:1560:                <div class="setup-form-grid">
+public/control-center/pages/setup.js:1562:                  ${renderField({ name: "operator_notes", label: "Operator notes", value: values.operator_notes, helper: "Important setup notes for the next operator.", placeholder: "Any constraints, watchouts, or handoff notes", escapeHtml, multiline: true, rows: 4 })}
+public/control-center/pages/setup.js:1569:        <div class="setup-wizard-side-panels">
+public/control-center/pages/setup.js:1570:          <section class="card setup-wizard-missing-panel setup-smart-gaps-panel">
+public/control-center/pages/setup.js:1573:              <button id="setupCompleteNowBtn" class="btn btn-secondary" type="button">Complete now</button>
+public/control-center/pages/setup.js:1575:            <div id="setupMissingActions">
+public/control-center/pages/setup.js:1577:                ? `<div class="setup-smart-gap-list">${missingFieldInsights.map((item) => `
+public/control-center/pages/setup.js:1578:                    <article class="setup-smart-gap-item">
+public/control-center/pages/setup.js:1583:                      <button class="btn btn-ghost" type="button" data-setup-jump-field="${escapeHtml(item.name)}" data-setup-jump-step="${escapeHtml(item.stepId)}">Fix now</button>
+public/control-center/pages/setup.js:1586:                : `<div class="empty-box">All required setup fields are complete.</div>`
+public/control-center/pages/setup.js:1589:            <div class="setup-wizard-missing-divider"></div>
+public/control-center/pages/setup.js:1591:            <div id="setupSystemGaps">
+public/control-center/pages/setup.js:1599:                "No operational blockers detected from readiness signals."
+public/control-center/pages/setup.js:1604:          <section class="card setup-smart-validation-panel">
+public/control-center/pages/setup.js:1607:              <button id="setupValidateNowBtn" class="btn btn-ghost" type="button">Validate now</button>
+public/control-center/pages/setup.js:1609:            <div class="setup-smart-diagnostics-grid">
+public/control-center/pages/setup.js:1610:              <article class="setup-smart-diagnostic-card">
+public/control-center/pages/setup.js:1613:                <p>Readiness status: ${escapeHtml(asString(readinessStatus) || "Unknown")}</p>
+public/control-center/pages/setup.js:1615:              <article class="setup-smart-diagnostic-card">
+public/control-center/pages/setup.js:1618:                <p>Critical readiness gaps reported by diagnostics.</p>
+public/control-center/pages/setup.js:1620:              <article class="setup-smart-diagnostic-card">
+public/control-center/pages/setup.js:1629:        <section class="card setup-smart-handoff-panel">
+public/control-center/pages/setup.js:1632:            <button id="setupSmartActionBtn" class="btn btn-secondary" type="button">Run next best action</button>
+public/control-center/pages/setup.js:1634:          <div class="setup-handoff-note">Brand evidence and product files belong in <strong>Library</strong> or <strong>Governance</strong>.</div>
+public/control-center/pages/setup.js:1635:          <div class="setup-smart-handoff-actions setup-smart-handoff-actions-primary">
+public/control-center/pages/setup.js:1636:            <button id="setupSaveBackendBtnBottom" class="btn btn-ghost" type="button">Save Setup</button>
+public/control-center/pages/setup.js:1637:            <button id="setupContinueLibraryBtn" class="btn btn-secondary" type="button">Continue to Library</button>
+public/control-center/pages/setup.js:1638:            <button id="setupContinueIntegrationsBtn" class="btn btn-secondary" type="button">Continue to Integrations</button>
+public/control-center/pages/setup.js:1640:          <div class="setup-smart-handoff-actions setup-smart-handoff-actions-secondary">
+public/control-center/pages/setup.js:1641:            <div class="setup-action-group">
+public/control-center/pages/setup.js:1642:              <span class="setup-action-group-label">Continue</span>
+public/control-center/pages/setup.js:1643:              <button id="setupContinueCampaignBtn" class="btn btn-secondary" type="button">Continue to Campaign Studio</button>
+public/control-center/pages/setup.js:1645:            <div class="setup-action-group">
+public/control-center/pages/setup.js:1646:              <span class="setup-action-group-label">AI and review</span>
+public/control-center/pages/setup.js:1647:              <button id="setupAiCommandBtn" class="btn btn-ghost" type="button">Open AI Command with Setup Context</button>
+public/control-center/pages/setup.js:1648:              <button id="setupReviewMissingBtn" class="btn btn-ghost" type="button">Review missing setup items</button>
+public/control-center/pages/setup.js:1650:            <div class="setup-action-group">
+public/control-center/pages/setup.js:1651:              <span class="setup-action-group-label">Local draft</span>
+public/control-center/pages/setup.js:1652:              <button id="setupSaveDraftBtn" class="btn btn-ghost" type="button">Save Draft (local only)</button>
+public/control-center/pages/setup.js:1653:              <button id="setupResetDraftBtn" class="btn btn-ghost" type="button">Reset Draft</button>
+public/control-center/pages/setup.js:1658:        ${renderBusinessTemplatePanel({ values, overviewData, escapeHtml })}
+public/control-center/pages/setup.js:1660:        <section class="card setup-smart-ai-tools">
+public/control-center/pages/setup.js:1665:          <p class="setup-v2-subtitle">Use AI to review setup quality, missing launch inputs, and channel priorities.</p>
+public/control-center/pages/setup.js:1666:          <div class="setup-smart-handoff-actions">
+public/control-center/pages/setup.js:1667:            <button id="setupAiPositioningBtn" class="btn btn-ghost" type="button">Review positioning</button>
+public/control-center/pages/setup.js:1668:            <button id="setupAiAudienceBtn" class="btn btn-ghost" type="button">Find missing launch inputs</button>
+public/control-center/pages/setup.js:1669:            <button id="setupAiToneBtn" class="btn btn-ghost" type="button">Suggest channel priorities</button>
+public/control-center/pages/setup.js:1670:            <button id="setupAiFillMissingBtn" class="btn btn-secondary" type="button">Prepare setup checklist</button>
+public/control-center/pages/setup.js:1682:      projectName,
+public/control-center/pages/setup.js:1687:      readinessScore,
+public/control-center/pages/setup.js:1688:      readinessStatus,
+public/control-center/pages/setup.js:1693:    const templateSelect = $("setupBusinessTemplateSelect");
+public/control-center/pages/setup.js:1694:    const templateApplyBtn = $("setupApplyTemplateBtn");
+public/control-center/pages/setup.js:1695:    const templateStatus = $("setupTemplateStatus");
+public/control-center/pages/setup.js:1717:          await applyProjectBusinessTemplate(projectName, selectedType);
+public/control-center/pages/setup.js:1720:            templateStatus.textContent = "Template applied. Reloading project...";
+public/control-center/pages/setup.js:1725:          await reloadProjectData?.(projectName);
+public/control-center/pages/setup.js:1738:    const saveBottomBtn = $("setupSaveBackendBtnBottom");
+public/control-center/pages/setup.js:1739:    const saveTopBtn = $("setupSaveBackendBtn");
+public/control-center/api.js:1:// public/control-center/api.js
+public/control-center/api.js:223:    normalized === "api.response.text.start" ||
+public/control-center/api.js:224:    normalized === "api.response.text.done" ||
+public/control-center/api.js:225:    normalized === "api.response.text.timeout" ||
+public/control-center/api.js:226:    normalized === "api.response.parse.start" ||
+public/control-center/api.js:227:    normalized === "api.response.parse.done" ||
+public/control-center/api.js:228:    normalized === "api.response.parse.error" ||
+public/control-center/api.js:229:    normalized === "api.response.json.fallback.done" ||
+public/control-center/api.js:230:    normalized === "api.response.json.fallback.error" ||
+public/control-center/api.js:231:    normalized === "api.response.json.fallback.timeout" ||
+public/control-center/api.js:251:    window.dispatchEvent(new CustomEvent("mh:control-center-api-trace", {
+public/control-center/api.js:254:        stage: String(stage || "api.trace"),
+public/control-center/api.js:349:      emitApiRuntimeTrace("api.response.text.timeout", {
+public/control-center/api.js:368:                fallbackTimeoutError.parseStage = "api.response.json.fallback.timeout";
+public/control-center/api.js:380:          emitApiRuntimeTrace("api.response.json.fallback.done", {
+public/control-center/api.js:392:            parseStage: "api.response.json.fallback.done"
+public/control-center/api.js:396:            ? "api.response.json.fallback.timeout"
+public/control-center/api.js:397:            : "api.response.json.fallback.error";
+public/control-center/api.js:399:          emitApiRuntimeTrace("api.response.json.fallback.error", {
+public/control-center/api.js:429:        parseStage: "api.response.text.timeout",
+public/control-center/api.js:466:  emitApiRuntimeTrace("api.response.parse.start", {
+public/control-center/api.js:483:    emitApiRuntimeTrace("api.response.parse.done", {
+public/control-center/api.js:493:    emitApiRuntimeTrace("api.response.parse.error", {
+public/control-center/api.js:510:      parseStage: "api.response.parse.error",
+public/control-center/api.js:525:    parseStage = String(bodyReadResult.parseStage || "api.response.json.fallback.done");
+public/control-center/api.js:536:      parseStage = "api.response.parse.done";
+public/control-center/api.js:538:      parseStage = "api.response.parse.error";
+public/control-center/api.js:620:async function fetchWithTimeout(path, init = {}, timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS) {
+public/control-center/api.js:663:    const requestPromise = fetch(buildUrl(path), {
+public/control-center/api.js:707:  const response = await fetchWithTimeout(path, {
+public/control-center/api.js:725:  const response = await fetchWithTimeout(path, {
+public/control-center/api.js:765:  const response = await fetchWithTimeout(path, {
+public/control-center/api.js:790:  const response = await fetchWithTimeout(path, {
+public/control-center/api.js:806:export async function fetchProtectedMediaBlob(path, timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS) {
+public/control-center/api.js:821:  const response = await fetchWithTimeout(normalizedPath, {
+public/control-center/api.js:867:    payload?.projects ||
+public/control-center/api.js:886:    overview: payload?.overview || null,
+public/control-center/api.js:887:    readiness: payload?.readiness || null,
+public/control-center/api.js:888:    assets: payload?.assets || null,
+public/control-center/api.js:898:  const projectName = String(value || "").trim();
+public/control-center/api.js:900:  if (!projectName) {
+public/control-center/api.js:901:    throw new Error("Missing project name");
+public/control-center/api.js:904:  return projectName;
+public/control-center/api.js:907:function createOptionalFallback(projectName, section) {
+public/control-center/api.js:908:  const project = String(projectName || "").trim();
+public/control-center/api.js:912:      project,
+public/control-center/api.js:922:      project,
+public/control-center/api.js:929:      project,
+public/control-center/api.js:930:      total_assets: 0,
+public/control-center/api.js:931:      assets: []
+public/control-center/api.js:937:      project,
+public/control-center/api.js:938:      readiness: {
+public/control-center/api.js:939:        readiness_score: 0,
+public/control-center/api.js:1008:    err.endpoint = `/media-manager/project/:project (${section})`;
+public/control-center/api.js:1013:  err.endpoint = `/media-manager/project/:project (${section})`;
+public/control-center/api.js:1023:  const response = await fetch("/media-manager/projects", {
+public/control-center/api.js:1039:    const message = data?.details || data?.error || `Failed to create project (${response.status})`;
+public/control-center/api.js:1047:export async function fetchProjects() {
+public/control-center/api.js:1050:      "/media-manager/projects",
+public/control-center/api.js:1051:      "Failed to load projects",
+public/control-center/api.js:1057:    console.warn("Using fallback projects list:", error.message);
+public/control-center/api.js:1071:export async function fetchAllCoreProjectData(projectName) {
+public/control-center/api.js:1072:  const safeProjectName = toProjectName(projectName);
+public/control-center/api.js:1079:    `/media-manager/project/${encodedProjectName}/startup`,
+public/control-center/api.js:1080:    "Failed to load project startup dashboard",
+public/control-center/api.js:1092:    endpoint: `/media-manager/project/${encodedProjectName}`
+public/control-center/api.js:1101:  const requiredSections = ["overview", "readiness", "assets"];
+public/control-center/api.js:1129:        const fallbackProjects = await fetchProjects();
+public/control-center/api.js:1131:        const projectExists = fallbackItems.some((item) => {
+public/control-center/api.js:1137:          endpoint: "/media-manager/projects",
+public/control-center/api.js:1139:          projectExists,
+public/control-center/api.js:1140:          projectName: safeProjectName,
+public/control-center/api.js:1141:          warning: projectExists ? "Project details are still syncing." : "Project not found in projects index."
+public/control-center/api.js:1145:          endpoint: "/media-manager/projects",
+public/control-center/api.js:1147:          projectExists: false,
+public/control-center/api.js:1148:          projectName: safeProjectName,
+public/control-center/api.js:1150:          message: String(fallbackError?.message || "Failed to verify project fallback")
+public/control-center/api.js:1158:    const error = new Error(`Required project data failed: ${message}`);
+public/control-center/api.js:1159:    error.endpoint = `/media-manager/project/${encodedProjectName}`;
+public/control-center/api.js:1169:      endpoint: String(authProbe?.endpoint || `/media-manager/project/${encodedProjectName}`)
+public/control-center/api.js:1194:    project: requiredDashboardPayload?.project || safeProjectName,
+public/control-center/api.js:1196:    overview: requiredData.overview,
+public/control-center/api.js:1197:    readiness: requiredData.readiness,
+public/control-center/api.js:1198:    assets: requiredData.assets,
+public/control-center/api.js:1226:      load: () => fetchProjectOperations(safeProjectName)
+public/control-center/api.js:1230:      load: () => fetchProjectInsights(safeProjectName)
+public/control-center/api.js:1234:      load: () => fetchProjectLearning(safeProjectName)
+public/control-center/api.js:1250:      load: () => fetchProjectOperations(safeProjectName)
+public/control-center/api.js:1254:      load: () => fetchProjectInsights(safeProjectName)
+public/control-center/api.js:1258:      load: () => fetchProjectLearning(safeProjectName)
+public/control-center/api.js:1307:  normalized.project = normalized.project || safeProjectName;
+public/control-center/api.js:1312:    project: safeProjectName,
+public/control-center/api.js:1315:    fetchedAt: new Date().toISOString()
+public/control-center/api.js:1328:export async function fetchAssetCatalog() {
+public/control-center/api.js:1335:export async function fetchProjectInsights(projectName) {
+public/control-center/api.js:1336:  if (!projectName) {
+public/control-center/api.js:1337:    throw new Error("Missing project name");
+public/control-center/api.js:1341:    `/api/insights/${encodeURIComponent(projectName)}`,
+public/control-center/api.js:1342:    "Failed to load project insights"
+public/control-center/api.js:1346:export async function fetchProjectLearning(projectName) {
+public/control-center/api.js:1347:  if (!projectName) {
+public/control-center/api.js:1348:    throw new Error("Missing project name");
+public/control-center/api.js:1352:    `/api/learning/${encodeURIComponent(projectName)}`,
+public/control-center/api.js:1353:    "Failed to load project learning"
+public/control-center/api.js:1357:export async function fetchProjectOperations(projectName) {
+public/control-center/api.js:1358:  if (!projectName) {
+public/control-center/api.js:1359:    throw new Error("Missing project name");
+public/control-center/api.js:1363:    `/media-manager/project/${encodeURIComponent(projectName)}/operations`,
+public/control-center/api.js:1364:    "Failed to load project operations",
+public/control-center/api.js:1370:export async function applyProjectBusinessTemplate(projectName, projectType) {
+public/control-center/api.js:1371:  const safeProjectName = toProjectName(projectName);
+public/control-center/api.js:1374:  const response = await fetch(`/media-manager/project/${encodedProjectName}/apply-template`, {
+public/control-center/api.js:1382:      project_type: projectType
+public/control-center/api.js:1392:    const message = data?.details || data?.error || `Failed to apply project template (${response.status})`;
+public/control-center/api.js:1400:export async function saveProjectSetup(projectName, payload = {}) {
+public/control-center/api.js:1401:  if (!projectName) {
+public/control-center/api.js:1402:    throw new Error("Missing project name");
+public/control-center/api.js:1406:    `/media-manager/project/${encodeURIComponent(projectName)}/setup`,
+public/control-center/api.js:1409:    "Failed to save project setup"
+public/control-center/api.js:1413:export async function refreshProjectLibrary(projectName) {
+public/control-center/api.js:1414:  if (!projectName) {
+public/control-center/api.js:1415:    throw new Error("Missing project name");
+public/control-center/api.js:1419:    `/media-manager/project/${encodeURIComponent(projectName)}/library/refresh`,
+public/control-center/api.js:1422:    "Failed to refresh project library"
+public/control-center/api.js:1426:export async function updateProjectAssetStatus(projectName, assetId, status, note = "") {
+public/control-center/api.js:1427:  if (!projectName) {
+public/control-center/api.js:1428:    throw new Error("Missing project name");
+public/control-center/api.js:1436:    `/media-manager/project/${encodeURIComponent(projectName)}/assets/${encodeURIComponent(assetId)}/status`,
+public/control-center/api.js:1446:export async function renameProjectAsset(projectName, assetId, name) {
+public/control-center/api.js:1447:  if (!projectName) {
+public/control-center/api.js:1448:    throw new Error("Missing project name");
+public/control-center/api.js:1461:    `/media-manager/project/${encodeURIComponent(projectName)}/assets/${encodeURIComponent(assetId)}/rename`,
+public/control-center/api.js:1468:export async function setProjectAssetSourceOfTruth(projectName, assetId, sourceOfTruth) {
+public/control-center/api.js:1469:  if (!projectName) {
+public/control-center/api.js:1470:    throw new Error("Missing project name");
+public/control-center/api.js:1478:    `/media-manager/project/${encodeURIComponent(projectName)}/assets/${encodeURIComponent(assetId)}/source-of-truth`,
+public/control-center/api.js:1485:export async function archiveProjectAsset(projectName, assetId, note = "") {
+public/control-center/api.js:1486:  if (!projectName) {
+public/control-center/api.js:1487:    throw new Error("Missing project name");
+public/control-center/api.js:1495:    `/media-manager/project/${encodeURIComponent(projectName)}/assets/${encodeURIComponent(assetId)}/archive`,
+public/control-center/api.js:1502:export async function deleteProjectAsset(projectName, assetId, note = "") {
+public/control-center/api.js:1503:  if (!projectName) {
+public/control-center/api.js:1504:    throw new Error("Missing project name");
+public/control-center/api.js:1512:    `/media-manager/project/${encodeURIComponent(projectName)}/assets/${encodeURIComponent(assetId)}/delete`,
+public/control-center/api.js:1519:export async function runProjectWorkflow(projectName, workflowId, payload = {}) {
+public/control-center/api.js:1520:  if (!projectName) {
+public/control-center/api.js:1521:    throw new Error("Missing project name");
+public/control-center/api.js:1529:    `/media-manager/project/${encodeURIComponent(projectName)}/workflows/${encodeURIComponent(workflowId)}/run`,
+public/control-center/api.js:1536:export async function runProjectAiWorkflow(projectName, workflowId, payload = {}) {
+public/control-center/api.js:1537:  if (!projectName) {
+public/control-center/api.js:1538:    throw new Error("Missing project name");
+public/control-center/api.js:1546:    `/media-manager/project/${encodeURIComponent(projectName)}/ai/workflows/${encodeURIComponent(workflowId)}/run`,
+public/control-center/api.js:1553:export async function executeProjectAiCommand(projectName, payload = {}) {
+public/control-center/api.js:1554:  if (!projectName) {
+public/control-center/api.js:1555:    throw new Error("Missing project name");
+public/control-center/api.js:1559:    `/media-manager/project/${encodeURIComponent(projectName)}/ai/command`,
+public/control-center/api.js:1566:export async function executeProjectAiChat(projectName, payload = {}) {
+public/control-center/api.js:1567:  if (!projectName) {
+public/control-center/api.js:1568:    throw new Error("Missing project name");
+public/control-center/api.js:1572:    `/media-manager/project/${encodeURIComponent(projectName)}/ai/chat`,
+public/control-center/api.js:1581:export async function executeProjectAiGuidance(projectName, payload = {}) {
+public/control-center/api.js:1582:  if (!projectName) {
+public/control-center/api.js:1583:    throw new Error("Missing project name");
+public/control-center/api.js:1587:    `/media-manager/project/${encodeURIComponent(projectName)}/ai/guidance`,
+public/control-center/api.js:1595:export async function createProjectTask(projectName, payload = {}) {
+public/control-center/api.js:1596:  if (!projectName) {
+public/control-center/api.js:1597:    throw new Error("Missing project name");
+public/control-center/api.js:1601:    `/media-manager/project/${encodeURIComponent(projectName)}/tasks`,
+public/control-center/api.js:1604:    "Failed to create project task"
+public/control-center/api.js:1608:export async function listProjectTasks(projectName, limit) {
+public/control-center/api.js:1609:  if (!projectName) {
+public/control-center/api.js:1610:    throw new Error("Missing project name");
+public/control-center/api.js:1615:    `/media-manager/project/${encodeURIComponent(projectName)}/tasks${suffix}`,
+public/control-center/api.js:1616:    "Failed to load project tasks"
+public/control-center/api.js:1620:export async function createProjectApproval(projectName, payload = {}) {
+public/control-center/api.js:1621:  if (!projectName) {
+public/control-center/api.js:1622:    throw new Error("Missing project name");
+public/control-center/api.js:1626:    `/media-manager/project/${encodeURIComponent(projectName)}/approvals`,
+public/control-center/api.js:1633:export async function listProjectApprovals(projectName, limit) {
+public/control-center/api.js:1634:  if (!projectName) {
+public/control-center/api.js:1635:    throw new Error("Missing project name");
+public/control-center/api.js:1640:    `/media-manager/project/${encodeURIComponent(projectName)}/approvals${suffix}`,
+public/control-center/api.js:1645:export async function decideProjectApproval(projectName, approvalId, payload = {}) {
+public/control-center/api.js:1646:  if (!projectName) {
+public/control-center/api.js:1647:    throw new Error("Missing project name");
+public/control-center/api.js:1655:    `/media-manager/project/${encodeURIComponent(projectName)}/approvals/${encodeURIComponent(approvalId)}/decision`,
+public/control-center/api.js:1662:export async function fetchProjectGovernance(projectName, params = {}) {
+public/control-center/api.js:1663:  if (!projectName) {
+public/control-center/api.js:1664:    throw new Error("Missing project name");
+public/control-center/api.js:1676:    `/media-manager/project/${encodeURIComponent(projectName)}/governance${suffix}`,
+public/control-center/api.js:1681:export async function fetchProjectGovernancePolicy(projectName) {
+public/control-center/api.js:1682:  if (!projectName) {
+public/control-center/api.js:1683:    throw new Error("Missing project name");
+public/control-center/api.js:1687:    `/media-manager/project/${encodeURIComponent(projectName)}/governance/policy`,
+public/control-center/api.js:1692:export async function updateProjectGovernancePolicy(projectName, payload = {}) {
+public/control-center/api.js:1693:  if (!projectName) {
+public/control-center/api.js:1694:    throw new Error("Missing project name");
+public/control-center/api.js:1698:    `/media-manager/project/${encodeURIComponent(projectName)}/governance/policy`,
+public/control-center/api.js:1705:export async function saveProjectConnectorSource(projectName, sourceType, sourceValue) {
+public/control-center/api.js:1706:  if (!projectName) {
+public/control-center/api.js:1707:    throw new Error("Missing project name");
+public/control-center/api.js:1719:    `/media-manager/project/${encodeURIComponent(projectName)}/sources`,
+public/control-center/api.js:1725:    "Failed to save project connector"
+public/control-center/api.js:1729:export async function removeProjectConnectorSource(projectName, sourceType) {
+public/control-center/api.js:1730:  if (!projectName) {
+public/control-center/api.js:1731:    throw new Error("Missing project name");
+public/control-center/api.js:1739:    `/media-manager/project/${encodeURIComponent(projectName)}/sources/${encodeURIComponent(sourceType)}`,
+public/control-center/api.js:1742:    "Failed to remove project connector"
+public/control-center/api.js:1746:export async function fetchProjectIntegrationControlCenter(projectName) {
+public/control-center/api.js:1747:  if (!projectName) {
+public/control-center/api.js:1748:    throw new Error("Missing project name");
+public/control-center/api.js:1752:    `/media-manager/project/${encodeURIComponent(projectName)}/integrations/control-center`,
+public/control-center/api.js:1757:export async function connectProjectIntegration(projectName, integrationId, payload = {}) {
+public/control-center/api.js:1758:  if (!projectName) {
+public/control-center/api.js:1759:    throw new Error("Missing project name");
+public/control-center/api.js:1767:    `/media-manager/project/${encodeURIComponent(projectName)}/integrations/${encodeURIComponent(integrationId)}/connect`,
+public/control-center/api.js:1774:export async function reconnectProjectIntegration(projectName, integrationId, payload = {}) {
+public/control-center/api.js:1775:  if (!projectName) {
+public/control-center/api.js:1776:    throw new Error("Missing project name");
+public/control-center/api.js:1784:    `/media-manager/project/${encodeURIComponent(projectName)}/integrations/${encodeURIComponent(integrationId)}/reconnect`,
+public/control-center/api.js:1791:export async function testProjectIntegration(projectName, integrationId, payload = {}) {
+public/control-center/api.js:1792:  if (!projectName) {
+public/control-center/api.js:1793:    throw new Error("Missing project name");
+public/control-center/api.js:1801:    `/media-manager/project/${encodeURIComponent(projectName)}/integrations/${encodeURIComponent(integrationId)}/test`,
+public/control-center/api.js:1808:export async function syncProjectIntegration(projectName, integrationId, payload = {}) {
+public/control-center/api.js:1809:  if (!projectName) {
+public/control-center/api.js:1810:    throw new Error("Missing project name");
+public/control-center/api.js:1818:    `/media-manager/project/${encodeURIComponent(projectName)}/integrations/${encodeURIComponent(integrationId)}/sync`,
+public/control-center/api.js:1825:export async function importProjectIntegrationHistory(projectName, integrationId, payload = {}) {
+public/control-center/api.js:1826:  if (!projectName) {
+public/control-center/api.js:1827:    throw new Error("Missing project name");
+public/control-center/api.js:1835:    `/media-manager/project/${encodeURIComponent(projectName)}/integrations/${encodeURIComponent(integrationId)}/import-history`,
+public/control-center/api.js:1842:export async function disconnectProjectIntegration(projectName, integrationId, payload = {}) {
+public/control-center/api.js:1843:  if (!projectName) {
+public/control-center/api.js:1844:    throw new Error("Missing project name");
+public/control-center/api.js:1852:    `/media-manager/project/${encodeURIComponent(projectName)}/integrations/${encodeURIComponent(integrationId)}/disconnect`,
+public/control-center/api.js:1859:export async function savePublishingSchedule(projectName, payload = {}) {
+public/control-center/api.js:1860:  if (!projectName) {
+public/control-center/api.js:1861:    throw new Error("Missing project name");
+public/control-center/api.js:1865:    `/media-manager/project/${encodeURIComponent(projectName)}/publishing/schedule`,
+public/control-center/api.js:1872:export async function reschedulePublishingItem(projectName, jobId, payload = {}) {
+public/control-center/api.js:1873:  if (!projectName) {
+public/control-center/api.js:1874:    throw new Error("Missing project name");
+public/control-center/api.js:1882:    `/media-manager/project/${encodeURIComponent(projectName)}/publishing/${encodeURIComponent(jobId)}/reschedule`,
+public/control-center/api.js:1889:export async function approvePublishingItem(projectName, jobId, payload = {}) {
+public/control-center/api.js:1890:  if (!projectName) {
+public/control-center/api.js:1891:    throw new Error("Missing project name");
+public/control-center/api.js:1899:    `/media-manager/project/${encodeURIComponent(projectName)}/publishing/${encodeURIComponent(jobId)}/ready`,
+public/control-center/api.js:1906:export async function publishPublishingItem(projectName, jobId, payload = {}) {
+public/control-center/api.js:1907:  if (!projectName) {
+public/control-center/api.js:1908:    throw new Error("Missing project name");
+public/control-center/api.js:1916:    `/media-manager/project/${encodeURIComponent(projectName)}/publishing/${encodeURIComponent(jobId)}/publish`,
+public/control-center/api.js:1923:export async function failPublishingItem(projectName, jobId, payload = {}) {
+public/control-center/api.js:1924:  if (!projectName) {
+public/control-center/api.js:1925:    throw new Error("Missing project name");
+public/control-center/api.js:1933:    `/media-manager/project/${encodeURIComponent(projectName)}/publishing/${encodeURIComponent(jobId)}/fail`,
+public/control-center/api.js:1940:export async function fetchProjectOperationsSchema(projectName) {
+public/control-center/api.js:1941:  if (!projectName) {
+public/control-center/api.js:1942:    throw new Error("Missing project name");
+public/control-center/api.js:1946:    `/media-manager/project/${encodeURIComponent(projectName)}/operations/schema`,
+public/control-center/api.js:1951:export async function fetchProjectTaskCenter(projectName) {
+public/control-center/api.js:1952:  if (!projectName) {
+public/control-center/api.js:1953:    throw new Error("Missing project name");
+public/control-center/api.js:1957:    `/media-manager/project/${encodeURIComponent(projectName)}/task-center`,
+public/control-center/api.js:1962:export async function fetchProjectQueueCenter(projectName) {
+public/control-center/api.js:1963:  if (!projectName) {
+public/control-center/api.js:1964:    throw new Error("Missing project name");
+public/control-center/api.js:1968:    `/media-manager/project/${encodeURIComponent(projectName)}/queue-center`,
+public/control-center/api.js:1973:export async function fetchProjectJobMonitor(projectName) {
+public/control-center/api.js:1974:  if (!projectName) {
+public/control-center/api.js:1975:    throw new Error("Missing project name");
+public/control-center/api.js:1979:    `/media-manager/project/${encodeURIComponent(projectName)}/job-monitor`,
+public/control-center/api.js:1984:export async function fetchProjectNotificationCenter(projectName) {
+public/control-center/api.js:1985:  if (!projectName) {
+public/control-center/api.js:1986:    throw new Error("Missing project name");
+public/control-center/api.js:1990:    `/media-manager/project/${encodeURIComponent(projectName)}/notification-center`,
+public/control-center/api.js:1995:export async function fetchProjectTeam(projectName) {
+public/control-center/api.js:1996:  if (!projectName) {
+public/control-center/api.js:1997:    throw new Error("Missing project name");
+public/control-center/api.js:2001:    `/media-manager/project/${encodeURIComponent(projectName)}/team`,
+public/control-center/api.js:2002:    "Failed to load project team model"
+public/control-center/api.js:2006:export async function saveProjectTeam(projectName, payload = {}) {
+public/control-center/api.js:2007:  if (!projectName) {
+public/control-center/api.js:2008:    throw new Error("Missing project name");
+public/control-center/api.js:2012:    `/media-manager/project/${encodeURIComponent(projectName)}/team`,
+public/control-center/api.js:2015:    "Failed to update project team model"
+public/control-center/api.js:2019:export async function listProjectCampaigns(projectName, limit) {
+public/control-center/api.js:2020:  if (!projectName) {
+public/control-center/api.js:2021:    throw new Error("Missing project name");
+public/control-center/api.js:2027:    `/media-manager/project/${encodeURIComponent(projectName)}/campaigns${suffix}`,
+public/control-center/api.js:2032:export async function saveProjectCampaign(projectName, payload = {}) {
+public/control-center/api.js:2033:  if (!projectName) {
+public/control-center/api.js:2034:    throw new Error("Missing project name");
+public/control-center/api.js:2039:      `/media-manager/project/${encodeURIComponent(projectName)}/campaigns/${encodeURIComponent(payload.id)}`,
+public/control-center/api.js:2047:    `/media-manager/project/${encodeURIComponent(projectName)}/campaigns`,
+public/control-center/api.js:2054:export async function listProjectContentItems(projectName, params = {}) {
+public/control-center/api.js:2055:  if (!projectName) {
+public/control-center/api.js:2056:    throw new Error("Missing project name");
+public/control-center/api.js:2072:    `/media-manager/project/${encodeURIComponent(projectName)}/content-items${suffix}`,
+public/control-center/api.js:2077:export async function saveProjectContentItem(projectName, payload = {}) {
+public/control-center/api.js:2078:  if (!projectName) {
+public/control-center/api.js:2079:    throw new Error("Missing project name");
+public/control-center/api.js:2084:      `/media-manager/project/${encodeURIComponent(projectName)}/content-items/${encodeURIComponent(payload.id)}`,
+public/control-center/api.js:2092:    `/media-manager/project/${encodeURIComponent(projectName)}/content-items`,
+public/control-center/api.js:2099:export async function listProjectMediaJobs(projectName, params = {}) {
+public/control-center/api.js:2100:  if (!projectName) {
+public/control-center/api.js:2101:    throw new Error("Missing project name");
+public/control-center/api.js:2121:    `/media-manager/project/${encodeURIComponent(projectName)}/media-jobs${suffix}`,
+public/control-center/api.js:2126:export async function saveProjectMediaJob(projectName, payload = {}) {
+public/control-center/api.js:2127:  if (!projectName) {
+public/control-center/api.js:2128:    throw new Error("Missing project name");
+public/control-center/api.js:2133:      `/media-manager/project/${encodeURIComponent(projectName)}/media-jobs/${encodeURIComponent(payload.id)}`,
+public/control-center/api.js:2141:    `/media-manager/project/${encodeURIComponent(projectName)}/media-jobs`,
+public/control-center/api.js:2150:    "/api/media/improve-prompt",
+public/control-center/api.js:2159:    "/api/media/brand-check",
+public/control-center/api.js:2168:    "/api/media/generate-image",
+public/control-center/api.js:2177:    "/api/media/generate-video-brief",
+public/control-center/api.js:2186:    "/api/media/generate-voice-script",
+public/control-center/api.js:2195:    "/api/media/generate-campaign-pack",
+public/control-center/api.js:2202:export async function listProjectHandoffs(projectName, params = {}) {
+public/control-center/api.js:2203:  if (!projectName) {
+public/control-center/api.js:2204:    throw new Error("Missing project name");
+public/control-center/api.js:2228:    `/media-manager/project/${encodeURIComponent(projectName)}/handoffs${suffix}`,
+public/control-center/api.js:2233:export async function createProjectHandoff(projectName, payload = {}) {
+public/control-center/api.js:2234:  if (!projectName) {
+public/control-center/api.js:2235:    throw new Error("Missing project name");
+public/control-center/api.js:2239:    `/media-manager/project/${encodeURIComponent(projectName)}/handoffs`,
+public/control-center/api.js:2246:export async function consumeProjectHandoff(projectName, handoffId, payload = {}) {
+public/control-center/api.js:2247:  if (!projectName) {
+public/control-center/api.js:2248:    throw new Error("Missing project name");
+public/control-center/api.js:2256:    `/media-manager/project/${encodeURIComponent(projectName)}/handoffs/${encodeURIComponent(handoffId)}/consume`,
+public/control-center/api.js:2263:export async function listProjectEvents(projectName, limit) {
+public/control-center/api.js:2264:  if (!projectName) {
+public/control-center/api.js:2265:    throw new Error("Missing project name");
+public/control-center/api.js:2271:    `/media-manager/project/${encodeURIComponent(projectName)}/events${suffix}`,
+public/control-center/api.js:2276:export async function markProjectNotification(projectName, notificationId, payload = {}) {
+public/control-center/api.js:2277:  if (!projectName) {
+public/control-center/api.js:2278:    throw new Error("Missing project name");
+public/control-center/api.js:2286:    `/media-manager/project/${encodeURIComponent(projectName)}/notifications/${encodeURIComponent(notificationId)}`,
+public/control-center/api.js:2293:export async function uploadProjectAsset(projectName, assetType, file) {
+public/control-center/api.js:2294:  if (!projectName) {
+public/control-center/api.js:2295:    throw new Error("Missing project name");
+public/control-center/api.js:2313:  formData.append("project", projectName);
+public/control-center/api.js:2324:export async function fetchCustomerOperationsReadiness(projectName) {
+public/control-center/api.js:2325:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/readiness`);
+public/control-center/api.js:2328:export async function fetchCustomerOperationsInbox(projectName) {
+public/control-center/api.js:2329:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/inbox`);
+public/control-center/api.js:2332:export async function fetchCustomerConversations(projectName) {
+public/control-center/api.js:2333:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/conversations`);
+public/control-center/api.js:2336:export async function fetchCustomerConversationDetail(projectName, conversationId) {
+public/control-center/api.js:2337:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/conversations/${encodeURIComponent(conversationId)}`);
+public/control-center/api.js:2340:export async function fetchCustomerConversationMessages(projectName, conversationId) {
+public/control-center/api.js:2341:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/conversations/${encodeURIComponent(conversationId)}/messages`);
+public/control-center/api.js:2344:export async function fetchCustomerProfilePreview(projectName, customerId) {
+public/control-center/api.js:2345:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/customers/${encodeURIComponent(customerId)}`);
+public/control-center/api.js:2348:export async function fetchCustomerTickets(projectName) {
+public/control-center/api.js:2349:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/tickets`);
+public/control-center/api.js:2352:export async function fetchCustomerChannels(projectName) {
+public/control-center/api.js:2353:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/channels`);
+public/control-center/shared-context.js:54:    libraryFilter: "all_assets",
+public/control-center/shared-context.js:61:    libraryFilter: "all_assets",
+public/control-center/shared-context.js:84:export function setSharedAiDrawerReturn(projectName, payload) {
+public/control-center/shared-context.js:85:  if (!projectName || !payload) return;
+public/control-center/shared-context.js:86:  aiDrawerReturnCache.set(buildKey(projectName, "ai-drawer-return"), payload);
+public/control-center/shared-context.js:89:export function getSharedAiDrawerReturn(projectName) {
+public/control-center/shared-context.js:90:  return aiDrawerReturnCache.get(buildKey(projectName, "ai-drawer-return"));
+public/control-center/shared-context.js:93:export function clearSharedAiDrawerReturn(projectName) {
+public/control-center/shared-context.js:94:  if (!projectName) return;
+public/control-center/shared-context.js:95:  aiDrawerReturnCache.delete(buildKey(projectName, "ai-drawer-return"));
+public/control-center/shared-context.js:99:export function setSharedLibrarySourceBridge(projectName, bridge) {
+public/control-center/shared-context.js:100:  if (!projectName || !bridge) return;
+public/control-center/shared-context.js:101:  librarySourceBridgeCache.set(buildKey(projectName, "library-source-bridge"), bridge);
+public/control-center/shared-context.js:104:export function getSharedLibrarySourceBridge(projectName) {
+public/control-center/shared-context.js:105:  return librarySourceBridgeCache.get(buildKey(projectName, "library-source-bridge"));
+public/control-center/shared-context.js:108:export function clearSharedLibrarySourceBridge(projectName) {
+public/control-center/shared-context.js:109:  if (!projectName) return;
+public/control-center/shared-context.js:110:  librarySourceBridgeCache.delete(buildKey(projectName, "library-source-bridge"));
+public/control-center/shared-context.js:114:export function setSharedAiSource(projectName, source) {
+public/control-center/shared-context.js:115:  if (!projectName || !source) return;
+public/control-center/shared-context.js:116:  aiSourceCache.set(buildKey(projectName, "ai-source"), source);
+public/control-center/shared-context.js:119:export function getSharedAiSource(projectName) {
+public/control-center/shared-context.js:120:  return aiSourceCache.get(buildKey(projectName, "ai-source"));
+public/control-center/shared-context.js:123:export function clearSharedAiSource(projectName) {
+public/control-center/shared-context.js:124:  if (!projectName) return;
+public/control-center/shared-context.js:125:  aiSourceCache.delete(buildKey(projectName, "ai-source"));
+public/control-center/shared-context.js:141:function buildKey(projectName, scope = "default") {
+public/control-center/shared-context.js:142:  return `${asString(projectName).trim().toLowerCase() || "__default__"}::${scope}`;
+public/control-center/shared-context.js:157:export function setSharedCampaignRecord(projectName, campaign) {
+public/control-center/shared-context.js:158:  if (!projectName || !campaign) return;
+public/control-center/shared-context.js:159:  campaignCache.set(buildKey(projectName), campaign);
+public/control-center/shared-context.js:162:export function getSharedCampaignRecord(projectName, operations) {
+public/control-center/shared-context.js:163:  const cached = campaignCache.get(buildKey(projectName));
+public/control-center/shared-context.js:175:export function setSharedAiDraft(projectName, draft) {
+public/control-center/shared-context.js:176:  if (!projectName || !draft) return;
+public/control-center/shared-context.js:177:  aiDraftCache.set(buildKey(projectName), draft);
+public/control-center/shared-context.js:180:export function getSharedAiDraft(projectName, operations) {
+public/control-center/shared-context.js:181:  const cached = aiDraftCache.get(buildKey(projectName));
+public/control-center/shared-context.js:192:export function setSharedHandoff(projectName, destinationPage, handoff) {
+public/control-center/shared-context.js:193:  if (!projectName || !destinationPage || !handoff) return;
+public/control-center/shared-context.js:194:  handoffCache.set(buildKey(projectName, destinationPage), handoff);
+public/control-center/shared-context.js:197:export function getSharedHandoff(projectName, destinationPage, operations, sourcePage = "") {
+public/control-center/shared-context.js:198:  const cached = handoffCache.get(buildKey(projectName, destinationPage));

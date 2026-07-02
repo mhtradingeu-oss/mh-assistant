@@ -1,0 +1,3706 @@
+{
+  "file": "public/control-center/pages/research.js",
+  "total_lines": 1613,
+  "imports": [
+    {
+      "line": 1,
+      "text": "import { setSharedHandoff } from \"../shared-context.js\";"
+    }
+  ],
+  "render_writes": [
+    {
+      "line": 1210,
+      "text": "    root.innerHTML = `"
+    }
+  ],
+  "event_bindings": [
+    {
+      "line": 866,
+      "text": "    refreshBtn.onclick = () => {"
+    },
+    {
+      "line": 893,
+      "text": "    button.onclick = () => {"
+    },
+    {
+      "line": 899,
+      "text": "    button.onclick = async () => {"
+    },
+    {
+      "line": 948,
+      "text": "    button.onclick = () => {"
+    },
+    {
+      "line": 1000,
+      "text": "    button.onclick = () => {"
+    },
+    {
+      "line": 1017,
+      "text": "    noteTitle.oninput = (event) => {"
+    },
+    {
+      "line": 1023,
+      "text": "    noteBody.oninput = (event) => {"
+    },
+    {
+      "line": 1029,
+      "text": "    noteTags.oninput = (event) => {"
+    },
+    {
+      "line": 1036,
+      "text": "    saveNoteBtn.onclick = () => {"
+    },
+    {
+      "line": 1059,
+      "text": "    button.onclick = () => {"
+    },
+    {
+      "line": 1079,
+      "text": "    saveRecommendationBtn.onclick = () => {"
+    }
+  ],
+  "api_signals": [
+    {
+      "line": 1,
+      "text": "import { setSharedHandoff } from \"../shared-context.js\";"
+    },
+    {
+      "line": 3,
+      "text": "const researchSessions = new Map();"
+    },
+    {
+      "line": 6,
+      "text": "  campaign: { route: \"campaign-studio\", label: \"Campaign Studio\", destinationRole: \"strategist\", destinationDomain: \"campaign\" },"
+    },
+    {
+      "line": 7,
+      "text": "  content: { route: \"content-studio\", label: \"Content Studio\", destinationRole: \"writer\", destinationDomain: \"content\" },"
+    },
+    {
+      "line": 8,
+      "text": "  seo: { route: \"workflows\", label: \"SEO Workflow\", destinationRole: \"strategist\", destinationDomain: \"research\" },"
+    },
+    {
+      "line": 9,
+      "text": "  ads: { route: \"ads-manager\", label: \"Ads Manager\", destinationRole: \"ads_operator\", destinationDomain: \"campaign\" },"
+    },
+    {
+      "line": 12,
+      "text": "const RESEARCH_ROLE_DEFAULTS = {"
+    },
+    {
+      "line": 13,
+      "text": "  serviceDomain: \"research\","
+    },
+    {
+      "line": 76,
+      "text": "function renderResearchTeamOps(state, escapeHtml) {"
+    },
+    {
+      "line": 78,
+      "text": "  const handoffsByRole = asObject(operations.handoffs?.by_role);"
+    },
+    {
+      "line": 79,
+      "text": "  const approvalsByRole = asObject(operations.approvals?.by_reviewer_role);"
+    },
+    {
+      "line": 83,
+      "text": "      <div class=\"data-row\"><span>Service lane</span><strong>${escapeHtml(titleCase(RESEARCH_ROLE_DEFAULTS.serviceDomain))}</strong></div>"
+    },
+    {
+      "line": 84,
+      "text": "      <div class=\"data-row\"><span>Owner role</span><strong>${escapeHtml(titleCase(RESEARCH_ROLE_DEFAULTS.ownerRole))}</strong></div>"
+    },
+    {
+      "line": 85,
+      "text": "      <div class=\"data-row\"><span>Review owner</span><strong>${escapeHtml(titleCase(RESEARCH_ROLE_DEFAULTS.reviewRole))}</strong></div>"
+    },
+    {
+      "line": 87,
+      "text": "      <div class=\"data-row\"><span>Analyst inbound</span><strong>${escapeHtml(formatCount(asArray(handoffsByRole[RESEARCH_ROLE_DEFAULTS.ownerRole]).length))}</strong></div>"
+    },
+    {
+      "line": 88,
+      "text": "      <div class=\"data-row\"><span>Strategist review queue</span><strong>${escapeHtml(formatCount(asArray(approvalsByRole[RESEARCH_ROLE_DEFAULTS.reviewRole]).length))}</strong></div>"
+    },
+    {
+      "line": 125,
+      "text": "function getPath(source, path) {"
+    },
+    {
+      "line": 126,
+      "text": "  if (!source || !path) return undefined;"
+    },
+    {
+      "line": 127,
+      "text": "  return path.split(\".\").reduce((acc, key) => (acc == null ? undefined : acc[key]), source);"
+    },
+    {
+      "line": 130,
+      "text": "function getFirstPath(sources, paths, fallback = null) {"
+    },
+    {
+      "line": 132,
+      "text": "    for (const source of sources) {"
+    },
+    {
+      "line": 133,
+      "text": "      const value = getPath(source, path);"
+    },
+    {
+      "line": 245,
+      "text": "function buildSourceCoverage(integrations, insights) {"
+    },
+    {
+      "line": 247,
+      "text": "  const sources = asObject(integrations?.sources?.sources);"
+    },
+    {
+      "line": 257,
+      "text": "  const fromIntegrations = Object.keys({ ...sources, ...readinessChecks }).map((id) => {"
+    },
+    {
+      "line": 258,
+      "text": "    const source = asObject(sources[id]);"
+    },
+    {
+      "line": 259,
+      "text": "    const connected = Boolean(readinessChecks[id] || asString(source.value).trim());"
+    },
+    {
+      "line": 265,
+      "text": "        ? firstNonEmpty(source.value, \"Connected and available for research enrichment.\")"
+    },
+    {
+      "line": 281,
+      "text": "function buildResearchModel(state, session) {"
+    },
+    {
+      "line": 307,
+      "text": "  const sourceCoverage = buildSourceCoverage(integrations, insights);"
+    },
+    {
+      "line": 308,
+      "text": "  const researchSources = ["
+    },
+    {
+      "line": 311,
+      "text": "    asObject(insights.research),"
+    },
+    {
+      "line": 312,
+      "text": "    asObject(learning.research),"
+    },
+    {
+      "line": 341,
+      "text": "      getFirstPath(researchSources, ["
+    },
+    {
+      "line": 346,
+      "text": "      getFirstPath(researchSources, ["
+    },
+    {
+      "line": 361,
+      "text": "      contentStyle: firstNonEmpty(meta.content_style, meta.editorial_style, \"Content style not classified\"),"
+    },
+    {
+      "line": 370,
+      "text": "      getFirstPath(researchSources, ["
+    },
+    {
+      "line": 390,
+      "text": "      preferences: normalizeStringList(pickFirst(meta.content_preferences, meta.preferences)),"
+    },
+    {
+      "line": 400,
+      "text": "      getFirstPath(researchSources, ["
+    },
+    {
+      "line": 407,
+      "text": "      getFirstPath(researchSources, ["
+    },
+    {
+      "line": 420,
+      "text": "      platform: firstNonEmpty(meta.platform, meta.channel, meta.source)"
+    },
+    {
+      "line": 424,
+      "text": "  const seoSource = asObject(getFirstPath(researchSources, [\"seo\"], {}));"
+    },
+    {
+      "line": 427,
+      "text": "      seoSource.opportunities,"
+    },
+    {
+      "line": 428,
+      "text": "      seoSource.recommendations,"
+    },
+    {
+      "line": 429,
+      "text": "      seoSource.keywords,"
+    },
+    {
+      "line": 430,
+      "text": "      seoSource.top_queries,"
+    },
+    {
+      "line": 431,
+      "text": "      seoSource.queries,"
+    },
+    {
+      "line": 432,
+      "text": "      getFirstPath(researchSources, [\"keyword_research\", \"seo.keywords\"], [])"
+    },
+    {
+      "line": 450,
+      "text": "      seoSource.long_tail_ideas,"
+    },
+    {
+      "line": 451,
+      "text": "      seoSource.long_tail_keywords,"
+    },
+    {
+      "line": 452,
+      "text": "      seoSource.query_expansions"
+    },
+    {
+      "line": 456,
+      "text": "  const contentThemes = normalizeStringList("
+    },
+    {
+      "line": 458,
+      "text": "      seoSource.content_themes,"
+    },
+    {
+      "line": 459,
+      "text": "      seoSource.themes,"
+    },
+    {
+      "line": 460,
+      "text": "      insights.content_themes,"
+    },
+    {
+      "line": 461,
+      "text": "      learning.content_themes"
+    },
+    {
+      "line": 467,
+      "text": "      seoSource.missing_clusters,"
+    },
+    {
+      "line": 468,
+      "text": "      seoSource.content_gaps,"
+    },
+    {
+      "line": 469,
+      "text": "      learning.content_gaps"
+    },
+    {
+      "line": 475,
+      "text": "      seoSource.top_pages_to_optimize,"
+    },
+    {
+      "line": 476,
+      "text": "      seoSource.pages_to_optimize,"
+    },
+    {
+      "line": 477,
+      "text": "      seoSource.ctr_opportunities,"
+    },
+    {
+      "line": 478,
+      "text": "      seoSource.ranking_opportunities"
+    },
+    {
+      "line": 484,
+      "text": "      getFirstPath(researchSources, ["
+    },
+    {
+      "line": 489,
+      "text": "        \"product_research\""
+    },
+    {
+      "line": 513,
+      "text": "        getFirstPath(researchSources, [\"opportunities\", \"opportunity_map\"], []),"
+    },
+    {
+      "line": 521,
+      "text": "      type: /buy|best|price|near me|for/i.test(item.keyword) ? \"seo\" : \"content\","
+    },
+    {
+      "line": 534,
+      "text": "    if (type.includes(\"content\")) lane = \"content\";"
+    },
+    {
+      "line": 546,
+      "text": "        lane === \"content\" ? ACTION_ROUTES.content :"
+    },
+    {
+      "line": 547,
+      "text": "        ACTION_ROUTES.campaign"
+    },
+    {
+      "line": 556,
+      "text": "    getFirstPath(researchSources, [\"updated_at\"], \"\"),"
+    },
+    {
+      "line": 565,
+      "text": "    !keywordRecords.length ? \"Keyword and SEO research\" : \"\","
+    },
+    {
+      "line": 566,
+      "text": "    !productIdeas.length ? \"Offer and product positioning research\" : \"\","
+    },
+    {
+      "line": 567,
+      "text": "    ...sourceCoverage.filter((item) => statusTone(item.status) !== \"success\").slice(0, 4).map((item) => `${item.label} coverage`)"
+    },
+    {
+      "line": 575,
+      "text": "      source: \"Opportunity map\""
+    },
+    {
+      "line": 580,
+      "text": "      tags: [\"risk\", \"research\"],"
+    },
+    {
+      "line": 581,
+      "text": "      source: \"Readiness / insight signal\""
+    },
+    {
+      "line": 587,
+      "text": "      source: \"SEO intelligence\""
+    },
+    {
+      "line": 591,
+      "text": "  const activeResearchAreas = ["
+    },
+    {
+      "line": 595,
+      "text": "    keywordRecords.length && \"SEO and keyword research\","
+    },
+    {
+      "line": 604,
+      "text": "    contentThemes.length * 4 +"
+    },
+    {
+      "line": 621,
+      "text": "    contentThemes,"
+    },
+    {
+      "line": 626,
+      "text": "    sourceCoverage,"
+    },
+    {
+      "line": 629,
+      "text": "    activeResearchAreas,"
+    },
+    {
+      "line": 642,
+      "text": "  if (!researchSessions.has(key)) {"
+    },
+    {
+      "line": 643,
+      "text": "    researchSessions.set(key, {"
+    },
+    {
+      "line": 662,
+      "text": "  return researchSessions.get(key);"
+    },
+    {
+      "line": 665,
+      "text": "function startResearchHydration({"
+    },
+    {
+      "line": 668,
+      "text": "  fetchProjectInsights,"
+    },
+    {
+      "line": 669,
+      "text": "  fetchProjectLearning,"
+    },
+    {
+      "line": 680,
+      "text": "    fetchProjectInsights(projectName),"
+    },
+    {
+      "line": 681,
+      "text": "    fetchProjectLearning(projectName)"
+    },
+    {
+      "line": 703,
+      "text": "      session.intelligence.error = error?.message || \"Research intelligence failed to load.\";"
+    },
+    {
+      "line": 721,
+      "text": "      label: \"Summarize research\","
+    },
+    {
+      "line": 722,
+      "text": "      modeId: \"research\","
+    },
+    {
+      "line": 724,
+      "text": "      prompt: `Summarize the current research intelligence for ${projectLabel}. Cover competitor signals, audience needs, market momentum, SEO opportunities, product angles, risks, and the next three strategic decisions.`"
+    },
+    {
+      "line": 728,
+      "text": "      modeId: \"research\","
+    },
+    {
+      "line": 734,
+      "text": "      modeId: \"research\","
+    },
+    {
+      "line": 741,
+      "text": "      preview: \"Turn current research into target topics, landing pages, clusters, and low-competition search plays.\","
+    },
+    {
+      "line": 742,
+      "text": "      prompt: `Review the research and identify the best SEO opportunities for ${projectLabel}. Start with ${topKeyword} and recommend target topics, landing pages, clusters, and low-competition long-tail ideas.`"
+    },
+    {
+      "line": 745,
+      "text": "      label: \"Suggest content directions\","
+    },
+    {
+      "line": 746,
+      "text": "      modeId: \"content\","
+    },
+    {
+      "line": 748,
+      "text": "      prompt: `Turn the current research for ${projectLabel} into content directions for ${topAudience}. Recommend hero topics, hooks, CTAs, and format ideas tied to search and buying intent.`"
+    },
+    {
+      "line": 753,
+      "text": "      preview: \"Generate ad hypotheses, audience emphasis, and first creative tests from the research base.\","
+    },
+    {
+      "line": 754,
+      "text": "      prompt: `Turn the research intelligence for ${projectLabel} into ad test ideas. Use ${topOpportunity} as the lead angle, identify creative hypotheses, audience emphasis, and what to test first.`"
+    },
+    {
+      "line": 760,
+      "text": "      prompt: `Review ${projectLabel} research and identify the key risks before launch. Start with ${topRisk}. Include mitigation steps, missing intelligence, and which teams should act next.`"
+    },
+    {
+      "line": 767,
+      "text": "    <div class=\"research-empty-state\">"
+    },
+    {
+      "line": 770,
+      "text": "      ${chips.length ? `<div class=\"research-chip-row\">${chips.map((chip) => `<span class=\"research-chip\">${escapeHtml(chip)}</span>`).join(\"\")}</div>` : \"\"}"
+    },
+    {
+      "line": 777,
+      "text": "    <div class=\"research-kpi-card\">"
+    },
+    {
+      "line": 780,
+      "text": "      <p class=\"research-kpi-meta research-tone-${escapeHtml(tone)}\">${escapeHtml(meta)}</p>"
+    },
+    {
+      "line": 807,
+      "text": "    <article class=\"research-signal-card\">"
+    },
+    {
+      "line": 808,
+      "text": "      <div class=\"research-signal-head\">"
+    },
+    {
+      "line": 815,
+      "text": "      <div class=\"research-detail-grid\">"
+    },
+    {
+      "line": 817,
+      "text": "          <div class=\"research-detail-item\">"
+    },
+    {
+      "line": 826,
+      "text": "            <div class=\"research-chip-groups\">"
+    },
+    {
+      "line": 827,
+      "text": "              ${item.channels?.length ? `<div class=\"research-chip-row\">${item.channels.map((entry) => `<span class=\"research-chip\">${escapeHtml(entry)}</span>`).join(\"\")}</div>` : \"\"}"
+    },
+    {
+      "line": 828,
+      "text": "              ${item.strengths?.length ? `<div class=\"research-chip-row\">${item.strengths.map((entry) => `<span class=\"research-chip success\">${escapeHtml(entry)}</span>`).join(\"\")}</div>` : \"\"}"
+    },
+    {
+      "line": 829,
+      "text": "              ${item.weaknesses?.length ? `<div class=\"research-chip-row\">${item.weaknesses.map((entry) => `<span class=\"research-chip danger\">${escapeHtml(entry)}</span>`).join(\"\")}</div>` : \"\"}"
+    },
+    {
+      "line": 830,
+      "text": "              ${item.painPoints?.length ? `<div class=\"research-chip-row\">${item.painPoints.map((entry) => `<span class=\"research-chip danger\">${escapeHtml(entry)}</span>`).join(\"\")}</div>` : \"\"}"
+    },
+    {
+      "line": 831,
+      "text": "              ${item.motivations?.length ? `<div class=\"research-chip-row\">${item.motivations.map((entry) => `<span class=\"research-chip success\">${escapeHtml(entry)}</span>`).join(\"\")}</div>` : \"\"}"
+    },
+    {
+      "line": 832,
+      "text": "              ${item.proof?.length ? `<div class=\"research-chip-row\">${item.proof.map((entry) => `<span class=\"research-chip\">${escapeHtml(entry)}</span>`).join(\"\")}</div>` : \"\"}"
+    },
+    {
+      "line": 848,
+      "text": "function bindResearchActions({"
+    },
+    {
+      "line": 854,
+      "text": "  fetchProjectInsights,"
+    },
+    {
+      "line": 855,
+      "text": "  fetchProjectLearning,"
+    },
+    {
+      "line": 856,
+      "text": "  createProjectHandoff,"
+    },
+    {
+      "line": 864,
+      "text": "  const refreshBtn = $(\"researchRefreshBtn\");"
+    },
+    {
+      "line": 868,
+      "text": "        showError?.(\"Select a project before refreshing research.\");"
+    },
+    {
+      "line": 872,
+      "text": "        showMessage?.(\"Research intelligence is already refreshing.\");"
+    },
+    {
+      "line": 877,
+      "text": "      startResearchHydration({"
+    },
+    {
+      "line": 880,
+      "text": "        fetchProjectInsights,"
+    },
+    {
+      "line": 881,
+      "text": "        fetchProjectLearning,"
+    },
+    {
+      "line": 886,
+      "text": "      showMessage?.(\"Research intelligence refresh started.\");"
+    },
+    {
+      "line": 890,
+      "text": "  const aiButtons = Array.from(document.querySelectorAll(\"[data-research-ai-prompt]\"));"
+    },
+    {
+      "line": 892,
+      "text": "  Array.from(document.querySelectorAll(\"[data-research-open]\")).forEach((button) => {"
+    },
+    {
+      "line": 900,
+      "text": "      const prompt = prompts[Number(button.getAttribute(\"data-research-ai-prompt\"))];"
+    },
+    {
+      "line": 903,
+      "text": "        setSharedHandoff(projectName, \"ai-command\", {"
+    },
+    {
+      "line": 904,
+      "text": "          source_page: \"research\","
+    },
+    {
+      "line": 912,
+      "text": "              lastResponseTitle: \"Research prompt\","
+    },
+    {
+      "line": 917,
+      "text": "        createProjectHandoff?.(projectName, {"
+    },
+    {
+      "line": 918,
+      "text": "          source_page: \"research\","
+    },
+    {
+      "line": 920,
+      "text": "          source_role: RESEARCH_ROLE_DEFAULTS.ownerRole,"
+    },
+    {
+      "line": 922,
+      "text": "          source_service_domain: RESEARCH_ROLE_DEFAULTS.serviceDomain,"
+    },
+    {
+      "line": 930,
+      "text": "              lastResponseTitle: \"Research prompt\","
+    },
+    {
+      "line": 935,
+      "text": "          console.warn(\"Failed to persist research AI handoff:\", error.message);"
+    },
+    {
+      "line": 939,
+      "text": "        showMessage?.(\"Research brief prompt added to AI Command.\");"
+    },
+    {
+      "line": 941,
+      "text": "        showError?.(error?.message || \"Failed to hand off the research prompt to AI Command.\");"
+    },
+    {
+      "line": 946,
+      "text": "  const routeButtons = Array.from(document.querySelectorAll(\"[data-research-route]\"));"
+    },
+    {
+      "line": 949,
+      "text": "      const target = button.getAttribute(\"data-research-route\") || \"\";"
+    },
+    {
+      "line": 954,
+      "text": "        target === \"campaign\""
+    },
+    {
+      "line": 955,
+      "text": "          ? `Use the current research intelligence for ${projectName || \"this project\"} to build a focused campaign direction. Start with ${model.marketOpportunities[0]?.title || \"the strongest opportunity\"} and account for ${model.risks[0]?.title || \"current research risks\"}.`"
+    },
+    {
+      "line": 956,
+      "text": "          : target === \"content\""
+    },
+    {
+      "line": 957,
+      "text": "            ? `Turn the current research intelligence for ${projectName || \"this project\"} into a content plan. Prioritize ${model.keywordRecords[0]?.keyword || \"high-intent search topics\"} and audience segment ${model.audienceSegments[0]?.title || \"the lead segment\"}.`"
+    },
+    {
+      "line": 959,
+      "text": "              ? `Build an SEO workflow for ${projectName || \"this project\"} from the current research page. Focus on keyword clusters, missing landing pages, long-tail ideas, and content clusters.`"
+    },
+    {
+      "line": 961,
+      "text": "                ? `Use the current research intelligence for ${projectName || \"this project\"} to define ad test angles, audiences, and the first creative hypotheses to launch.`"
+    },
+    {
+      "line": 962,
+      "text": "                : `Save this research intelligence for ${projectName || \"this project\"} and convert it into structured recommendations: opportunities ${model.marketOpportunities.map((item) => item.title).join(\", \") || \"pending\"}, risks ${model.risks.map((item) => item.title).join(\", \") || \"pending\"}.`;"
+    },
+    {
+      "line": 964,
+      "text": "      const handoff = {"
+    },
+    {
+      "line": 965,
+      "text": "        source_page: \"research\","
+    },
+    {
+      "line": 967,
+      "text": "        source_role: RESEARCH_ROLE_DEFAULTS.ownerRole,"
+    },
+    {
+      "line": 969,
+      "text": "        source_service_domain: RESEARCH_ROLE_DEFAULTS.serviceDomain,"
+    },
+    {
+      "line": 974,
+      "text": "          source: \"research-route\","
+    },
+    {
+      "line": 976,
+      "text": "          owner_role: RESEARCH_ROLE_DEFAULTS.ownerRole,"
+    },
+    {
+      "line": 977,
+      "text": "          review_role: RESEARCH_ROLE_DEFAULTS.reviewRole,"
+    },
+    {
+      "line": 978,
+      "text": "          service_domain: RESEARCH_ROLE_DEFAULTS.serviceDomain"
+    },
+    {
+      "line": 981,
+      "text": "      setSharedHandoff(projectName, action.route, handoff);"
+    },
+    {
+      "line": 982,
+      "text": "      createProjectHandoff?.(projectName, handoff).catch((error) => {"
+    },
+    {
+      "line": 983,
+      "text": "        console.warn(\"Failed to persist research route handoff:\", error.message);"
+    },
+    {
+      "line": 994,
+      "text": "      showMessage?.(`Research handoff routed to ${action.label}.`);"
+    },
+    {
+      "line": 998,
+      "text": "  const suggestionButtons = Array.from(document.querySelectorAll(\"[data-research-opportunity]\"));"
+    },
+    {
+      "line": 1001,
+      "text": "      const item = model.opportunityPool[Number(button.getAttribute(\"data-research-opportunity\"))];"
+    },
+    {
+      "line": 1008,
+      "text": "      showMessage?.(`Opportunity handoff routed to ${item.routeTarget.label}.`);"
+    },
+    {
+      "line": 1012,
+      "text": "  const noteTitle = $(\"researchNoteTitle\");"
+    },
+    {
+      "line": 1013,
+      "text": "  const noteBody = $(\"researchNoteBody\");"
+    },
+    {
+      "line": 1014,
+      "text": "  const noteTags = $(\"researchNoteTags\");"
+    },
+    {
+      "line": 1034,
+      "text": "  const saveNoteBtn = $(\"researchSaveFindingBtn\");"
+    },
+    {
+      "line": 1044,
+      "text": "        title: session.noteDraft.title.trim() || \"Untitled research finding\","
+    },
+    {
+      "line": 1047,
+      "text": "        source: \"Manual note\","
+    },
+    {
+      "line": 1053,
+      "text": "      showMessage?.(\"Research finding saved.\");"
+    },
+    {
+      "line": 1057,
+      "text": "  const saveBlockButtons = Array.from(document.querySelectorAll(\"[data-save-research-block]\"));"
+    },
+    {
+      "line": 1060,
+      "text": "      const item = model.autoFindings[Number(button.getAttribute(\"data-save-research-block\"))];"
+    },
+    {
+      "line": 1067,
+      "text": "        source: item.source,"
+    },
+    {
+      "line": 1070,
+      "text": "      session.savedFindings = uniqueBy(session.savedFindings, (entry) => `${entry.title}:${entry.source}`);"
+    },
+    {
+      "line": 1077,
+      "text": "  const saveRecommendationBtn = $(\"researchSaveRecommendationBtn\");"
+    },
+    {
+      "line": 1101,
+      "text": "export const researchRoute = {"
+    },
+    {
+      "line": 1102,
+      "text": "  id: \"research\","
+    },
+    {
+      "line": 1105,
+      "text": "    eyebrow: \"Execute & Grow\","
+    },
+    {
+      "line": 1106,
+      "text": "    title: \"Research\","
+    },
+    {
+      "line": 1107,
+      "text": "    description: \"Evidence-backed market intelligence for opportunities, risks, and destination-ready handoffs.\""
+    },
+    {
+      "line": 1110,
+      "text": "    <section class=\"page is-active\" data-page=\"research\">"
+    },
+    {
+      "line": 1111,
+      "text": "      <div id=\"researchRoot\"></div>"
+    },
+    {
+      "line": 1122,
+      "text": "    fetchProjectInsights,"
+    },
+    {
+      "line": 1123,
+      "text": "    fetchProjectLearning,"
+    },
+    {
+      "line": 1124,
+      "text": "    createProjectHandoff"
+    },
+    {
+      "line": 1129,
+      "text": "    const root = $(\"researchRoot\");"
+    },
+    {
+      "line": 1140,
+      "text": "      fetchProjectInsights,"
+    },
+    {
+      "line": 1141,
+      "text": "      fetchProjectLearning,"
+    },
+    {
+      "line": 1142,
+      "text": "      createProjectHandoff"
+    },
+    {
+      "line": 1145,
+      "text": "    startResearchHydration({"
+    },
+    {
+      "line": 1148,
+      "text": "      fetchProjectInsights,"
+    },
+    {
+      "line": 1149,
+      "text": "      fetchProjectLearning,"
+    },
+    {
+      "line": 1154,
+      "text": "    const model = buildResearchModel(state, session);"
+    },
+    {
+      "line": 1156,
+      "text": "    const projectLabel = projectName ? `${projectName} Research Intelligence` : \"Research Intelligence\";"
+    },
+    {
+      "line": 1157,
+      "text": "    const coveragePreview = model.sourceCoverage.slice(0, 6);"
+    },
+    {
+      "line": 1211,
+      "text": "      <div class=\"research-lab-wrapper\">"
+    },
+    {
+      "line": 1214,
+      "text": "            ? `<div class=\"simple-banner research-warning-banner\">"
+    },
+    {
+      "line": 1215,
+      "text": "                <strong>Research data is partial.</strong> ${escapeHtml(compactText(session.intelligence.error, 28, \"Some research feeds did not load, so the page is falling back to project context and any last successful intelligence.\"))}"
+    },
+    {
+      "line": 1223,
+      "text": "              <h3>Research Evidence Overview</h3>"
+    },
+    {
+      "line": 1224,
+      "text": "              <p class=\"research-section-copy\">Keep this workspace focused on what evidence exists, what is missing, and which destination should receive the next research handoff.</p>"
+    },
+    {
+      "line": 1228,
+      "text": "          <div class=\"research-toolbar\">"
+    },
+    {
+      "line": 1229,
+      "text": "            <button id=\"researchRefreshBtn\" class=\"btn btn-secondary\" type=\"button\">Refresh Research</button>"
+    },
+    {
+      "line": 1231,
+      "text": "          <div class=\"research-overview-grid\">"
+    },
+    {
+      "line": 1236,
+      "text": "                meta: model.activeResearchAreas.length ? joinPreview(model.activeResearchAreas, \"Waiting for structured inputs\", 4) : \"Waiting for structured inputs\""
+    },
+    {
+      "line": 1261,
+      "text": "                meta: compactText(model.audienceSignals[0] || \"Audience research not yet structured\", 12, \"Audience research not yet structured\")"
+    },
+    {
+      "line": 1271,
+      "text": "                meta: compactText(model.missingIntelligence[0] || \"Core research coverage is healthy\", 12, \"Core research coverage is healthy\")"
+    },
+    {
+      "line": 1274,
+      "text": "              <div class=\"research-overview-item\">"
+    },
+    {
+      "line": 1277,
+      "text": "                <p class=\"research-kpi-meta\">${escapeHtml(item.meta)}</p>"
+    },
+    {
+      "line": 1287,
+      "text": "              <p class=\"research-section-copy\">Evidence about market movement, competitor pressure, positioning gaps, and signals worth validating next.</p>"
+    },
+    {
+      "line": 1289,
+      "text": "            <span class=\"card-badge ${competitorMarketCards.length ? \"warning\" : \"neutral\"}\">${escapeHtml(competitorMarketCards.length ? `${competitorMarketCards.length} signals` : \"Needs research\")}</span>"
+    },
+    {
+      "line": 1291,
+      "text": "          <div class=\"research-workspace-grid\">"
+    },
+    {
+      "line": 1295,
+      "text": "                  ? `<div class=\"research-card-grid\">"
+    },
+    {
+      "line": 1297,
+      "text": "                        <article class=\"research-signal-card\">"
+    },
+    {
+      "line": 1298,
+      "text": "                          <div class=\"research-signal-head\">"
+    },
+    {
+      "line": 1305,
+      "text": "                          <div class=\"research-detail-grid\">"
+    },
+    {
+      "line": 1307,
+      "text": "                              <div class=\"research-detail-item\">"
+    },
+    {
+      "line": 1324,
+      "text": "            <div class=\"research-stack\">"
+    },
+    {
+      "line": 1325,
+      "text": "              <div class=\"research-seo-column\">"
+    },
+    {
+      "line": 1329,
+      "text": "              <div class=\"research-seo-column\">"
+    },
+    {
+      "line": 1333,
+      "text": "                    ? `<div class=\"research-coverage-list\">"
+    },
+    {
+      "line": 1337,
+      "text": "                            <strong class=\"research-tone-${escapeHtml(statusTone(item.status))}\">${escapeHtml(titleCase(item.status))}</strong>"
+    },
+    {
+      "line": 1345,
+      "text": "                    ? `<div class=\"research-missing-list\">"
+    },
+    {
+      "line": 1346,
+      "text": "                        ${model.missingIntelligence.slice(0, 6).map((item) => `<span class=\"research-chip danger\">${escapeHtml(item)}</span>`).join(\"\")}"
+    },
+    {
+      "line": 1359,
+      "text": "              <p class=\"research-section-copy\">Audience needs, buying intent, search openings, and keyword evidence that can support content, SEO, ads, or campaign decisions.</p>"
+    },
+    {
+      "line": 1363,
+      "text": "          <div class=\"research-workspace-grid\">"
+    },
+    {
+      "line": 1367,
+      "text": "                  ? `<div class=\"research-card-grid\">"
+    },
+    {
+      "line": 1369,
+      "text": "                        <article class=\"research-signal-card\">"
+    },
+    {
+      "line": 1370,
+      "text": "                          <div class=\"research-signal-head\">"
+    },
+    {
+      "line": 1377,
+      "text": "                          <div class=\"research-detail-grid\">"
+    },
+    {
+      "line": 1379,
+      "text": "                              <div class=\"research-detail-item\">"
+    },
+    {
+      "line": 1390,
+      "text": "                      \"Add audience research or keyword inputs to make this section more actionable.\","
+    },
+    {
+      "line": 1396,
+      "text": "            <div class=\"research-stack\">"
+    },
+    {
+      "line": 1397,
+      "text": "              <div class=\"research-seo-column\">"
+    },
+    {
+      "line": 1399,
+      "text": "                ${model.longTailIdeas.length ? `<div class=\"research-chip-groups\"><div class=\"research-chip-row\">${model.longTailIdeas.slice(0, 12).map((item) => `<span class=\"research-chip\">${escapeHtml(item)}</span>`).join(\"\")}</div></div>` : `<div class=\"empty-box\">No long-tail ideas saved yet.</div>`}"
+    },
+    {
+      "line": 1400,
+      "text": "                <h4 class=\"insights-subtitle\" style=\"margin-top:16px;\">Content themes</h4>"
+    },
+    {
+      "line": 1401,
+      "text": "                ${model.contentThemes.length ? `<div class=\"research-chip-groups\"><div class=\"research-chip-row\">${model.contentThemes.slice(0, 10).map((item) => `<span class=\"research-chip success\">${escapeHtml(item)}</span>`).join(\"\")}</div></div>` : `<div class=\"empty-box\">No content themes clustered yet.</div>`}"
+    },
+    {
+      "line": 1403,
+      "text": "              <div class=\"research-seo-column\">"
+    },
+    {
+      "line": 1417,
+      "text": "              <p class=\"research-section-copy\">Capture research evidence, reusable findings, and proof points before routing work into execution surfaces.</p>"
+    },
+    {
+      "line": 1421,
+      "text": "          <div class=\"research-findings-grid\">"
+    },
+    {
+      "line": 1422,
+      "text": "            <div class=\"research-note-composer\">"
+    },
+    {
+      "line": 1423,
+      "text": "              <input id=\"researchNoteTitle\" class=\"setup-input\" type=\"text\" placeholder=\"Finding title\" value=\"${escapeHtml(session.noteDraft.title)}\" />"
+    },
+    {
+      "line": 1424,
+      "text": "              <textarea id=\"researchNoteBody\" class=\"setup-input setup-textarea\" rows=\"5\" placeholder=\"Capture the key observation, implication, or market signal...\">${escapeHtml(session.noteDraft.body)}</textarea>"
+    },
+    {
+      "line": 1425,
+      "text": "              <input id=\"researchNoteTags\" class=\"setup-input\" type=\"text\" placeholder=\"Tags, comma separated\" value=\"${escapeHtml(session.noteDraft.tags)}\" />"
+    },
+    {
+      "line": 1426,
+      "text": "              <button id=\"researchSaveFindingBtn\" class=\"btn btn-primary\" type=\"button\">Save Finding</button>"
+    },
+    {
+      "line": 1428,
+      "text": "            <div class=\"research-stack\">"
+    },
+    {
+      "line": 1433,
+      "text": "                    ? `<div class=\"research-saved-list\">"
+    },
+    {
+      "line": 1435,
+      "text": "                          <article class=\"research-note-card\">"
+    },
+    {
+      "line": 1436,
+      "text": "                            <div class=\"research-signal-head\">"
+    },
+    {
+      "line": 1441,
+      "text": "                              <span class=\"card-badge neutral\">${escapeHtml(item.source)}</span>"
+    },
+    {
+      "line": 1443,
+      "text": "                            <div class=\"research-note-footer\">"
+    },
+    {
+      "line": 1445,
+      "text": "                              <div class=\"research-chip-row\">"
+    },
+    {
+      "line": 1446,
+      "text": "                                ${asArray(item.tags).map((tag) => `<span class=\"research-chip\">${escapeHtml(tag)}</span>`).join(\"\")}"
+    },
+    {
+      "line": 1459,
+      "text": "                    ? `<div class=\"research-saved-list\">"
+    },
+    {
+      "line": 1461,
+      "text": "                          <article class=\"research-note-card\">"
+    },
+    {
+      "line": 1462,
+      "text": "                            <div class=\"research-signal-head\">"
+    },
+    {
+      "line": 1467,
+      "text": "                              <span class=\"card-badge neutral\">${escapeHtml(item.source)}</span>"
+    },
+    {
+      "line": 1469,
+      "text": "                            <div class=\"research-note-footer\">"
+    },
+    {
+      "line": 1470,
+      "text": "                              <div class=\"research-chip-row\">"
+    },
+    {
+      "line": 1471,
+      "text": "                                ${item.tags.map((tag) => `<span class=\"research-chip\">${escapeHtml(tag)}</span>`).join(\"\")}"
+    },
+    {
+      "line": 1473,
+      "text": "                              <button class=\"quick-action-btn research-inline-action\" type=\"button\" data-save-research-block=\"${index}\">Save Block</button>"
+    },
+    {
+      "line": 1488,
+      "text": "              <h3>Recommendations / Next Research Actions</h3>"
+    },
+    {
+      "line": 1489,
+      "text": "              <p class=\"research-section-copy\">What matters most now, what should be explored next, and where validated research should go.</p>"
+    },
+    {
+      "line": 1493,
+      "text": "          <div class=\"research-workspace-grid\">"
+    },
+    {
+      "line": 1494,
+      "text": "            <div class=\"research-stack\">"
+    },
+    {
+      "line": 1507,
+      "text": "                    ? `<div class=\"research-opportunity-grid\">"
+    },
+    {
+      "line": 1509,
+      "text": "                          <article class=\"research-opportunity-card\">"
+    },
+    {
+      "line": 1510,
+      "text": "                            <div class=\"research-signal-head\">"
+    },
+    {
+      "line": 1517,
+      "text": "                            <div class=\"research-opportunity-meta\">"
+    },
+    {
+      "line": 1523,
+      "text": "                            <button class=\"quick-action-btn\" type=\"button\" data-research-opportunity=\"${index}\">Send to ${escapeHtml(item.routeTarget.label)}</button>"
+    },
+    {
+      "line": 1536,
+      "text": "            <div class=\"research-stack\">"
+    },
+    {
+      "line": 1537,
+      "text": "              <div class=\"research-seo-column\">"
+    },
+    {
+      "line": 1539,
+      "text": "                <button id=\"researchSaveRecommendationBtn\" class=\"btn btn-primary\" type=\"button\">Save Recommendation</button>"
+    },
+    {
+      "line": 1542,
+      "text": "                    ? `<div class=\"research-saved-list\" style=\"margin-top:16px;\">"
+    },
+    {
+      "line": 1544,
+      "text": "                          <article class=\"research-note-card\">"
+    },
+    {
+      "line": 1545,
+      "text": "                            <div class=\"research-signal-head\">"
+    },
+    {
+      "line": 1552,
+      "text": "                            <div class=\"research-note-footer\">"
+    },
+    {
+      "line": 1561,
+      "text": "              <div class=\"research-seo-column\">"
+    },
+    {
+      "line": 1562,
+      "text": "                <h4 class=\"insights-subtitle\">Destination handoffs</h4>"
+    },
+    {
+      "line": 1564,
+      "text": "                  <button class=\"quick-action-btn\" type=\"button\" data-research-route=\"campaign\">Route to Campaign Studio</button>"
+    },
+    {
+      "line": 1565,
+      "text": "                  <button class=\"quick-action-btn\" type=\"button\" data-research-route=\"content\">Route to Content Studio</button>"
+    },
+    {
+      "line": 1566,
+      "text": "                  <button class=\"quick-action-btn\" type=\"button\" data-research-route=\"seo\">Route to SEO Workflow</button>"
+    },
+    {
+      "line": 1567,
+      "text": "                  <button class=\"quick-action-btn\" type=\"button\" data-research-route=\"ads\">Route to Ads Manager</button>"
+    },
+    {
+      "line": 1577,
+      "text": "              <h3>Research AI Assistant</h3>"
+    },
+    {
+      "line": 1578,
+      "text": "              <p class=\"research-section-copy\">Use AI to turn current evidence into a review-ready research brief. AI should deepen the analysis, not replace saved findings or destination handoffs.</p>"
+    },
+    {
+      "line": 1582,
+      "text": "          <div class=\"research-toolbar\">"
+    },
+    {
+      "line": 1583,
+      "text": "            <button class=\"btn ghost\" type=\"button\" data-research-open>Open AI Workspace Review</button>"
+    },
+    {
+      "line": 1584,
+      "text": "            <button class=\"btn btn-secondary\" type=\"button\" data-research-route=\"ai\">Route to AI Workspace</button>"
+    },
+    {
+      "line": 1588,
+      "text": "              <button class=\"quick-action-btn\" type=\"button\" data-research-ai-prompt=\"${index}\">"
+    },
+    {
+      "line": 1598,
+      "text": "    bindResearchActions({"
+    },
+    {
+      "line": 1604,
+      "text": "      fetchProjectInsights,"
+    },
+    {
+      "line": 1605,
+      "text": "      fetchProjectLearning,"
+    },
+    {
+      "line": 1606,
+      "text": "      createProjectHandoff,"
+    }
+  ],
+  "ai_signals": [
+    {
+      "line": 6,
+      "text": "  campaign: { route: \"campaign-studio\", label: \"Campaign Studio\", destinationRole: \"strategist\", destinationDomain: \"campaign\" },"
+    },
+    {
+      "line": 7,
+      "text": "  content: { route: \"content-studio\", label: \"Content Studio\", destinationRole: \"writer\", destinationDomain: \"content\" },"
+    },
+    {
+      "line": 8,
+      "text": "  seo: { route: \"workflows\", label: \"SEO Workflow\", destinationRole: \"strategist\", destinationDomain: \"research\" },"
+    },
+    {
+      "line": 9,
+      "text": "  ads: { route: \"ads-manager\", label: \"Ads Manager\", destinationRole: \"ads_operator\", destinationDomain: \"campaign\" },"
+    },
+    {
+      "line": 10,
+      "text": "  ai: { route: \"ai-command\", label: \"AI Command\", destinationRole: \"admin\", destinationDomain: \"governance\" }"
+    },
+    {
+      "line": 13,
+      "text": "  serviceDomain: \"research\","
+    },
+    {
+      "line": 67,
+      "text": "  if (Number.isNaN(date.getTime())) return \"Waiting for update\";"
+    },
+    {
+      "line": 83,
+      "text": "      <div class=\"data-row\"><span>Service lane</span><strong>${escapeHtml(titleCase(RESEARCH_ROLE_DEFAULTS.serviceDomain))}</strong></div>"
+    },
+    {
+      "line": 205,
+      "text": "            summary: \"\","
+    },
+    {
+      "line": 226,
+      "text": "          summary: firstNonEmpty("
+    },
+    {
+      "line": 227,
+      "text": "            record.summary,"
+    },
+    {
+      "line": 230,
+      "text": "            record.insight,"
+    },
+    {
+      "line": 245,
+      "text": "function buildSourceCoverage(integrations, insights) {"
+    },
+    {
+      "line": 248,
+      "text": "  const coverage = asObject(insights?.data_coverage);"
+    },
+    {
+      "line": 250,
+      "text": "  const fromInsights = Object.entries(coverage).map(([id, item]) => ({"
+    },
+    {
+      "line": 254,
+      "text": "    detail: firstNonEmpty(item?.detail, item?.notes, item?.recommendation, \"Coverage detail pending\")"
+    },
+    {
+      "line": 264,
+      "text": "      detail: connected"
+    },
+    {
+      "line": 265,
+      "text": "        ? firstNonEmpty(source.value, \"Connected and available for research enrichment.\")"
+    },
+    {
+      "line": 270,
+      "text": "  return uniqueBy([...fromInsights, ...fromIntegrations], (item) => item.id);"
+    },
+    {
+      "line": 287,
+      "text": "  const insightsPayload = asObject(session.intelligence.insights);"
+    },
+    {
+      "line": 290,
+      "text": "  const insights = asObject("
+    },
+    {
+      "line": 291,
+      "text": "    insightsPayload.insights ||"
+    },
+    {
+      "line": 292,
+      "text": "    insightsPayload.data ||"
+    },
+    {
+      "line": 293,
+      "text": "    insightsPayload ||"
+    },
+    {
+      "line": 294,
+      "text": "    activity.insights ||"
+    },
+    {
+      "line": 295,
+      "text": "    activity.marketing_insights ||"
+    },
+    {
+      "line": 296,
+      "text": "    activity.performance_insights ||"
+    },
+    {
+      "line": 297,
+      "text": "    overviewBlock.insights"
+    },
+    {
+      "line": 307,
+      "text": "  const sourceCoverage = buildSourceCoverage(integrations, insights);"
+    },
+    {
+      "line": 309,
+      "text": "    insights,"
+    },
+    {
+      "line": 311,
+      "text": "    asObject(insights.research),"
+    },
+    {
+      "line": 318,
+      "text": "  const recommendations = normalizeRecords("
+    },
+    {
+      "line": 320,
+      "text": "      learning.recommendations,"
+    },
+    {
+      "line": 321,
+      "text": "      insights.recommendations,"
+    },
+    {
+      "line": 325,
+      "text": "    \"recommendation\""
+    },
+    {
+      "line": 331,
+      "text": "      insights.risks,"
+    },
+    {
+      "line": 356,
+      "text": "      positioning: firstNonEmpty(meta.positioning, meta.angle, meta.message, item.summary, \"Positioning hypothesis pending\"),"
+    },
+    {
+      "line": 379,
+      "text": "        learning.ai_recommendations?.audience,"
+    },
+    {
+      "line": 380,
+      "text": "        learning.ai_recommendations?.audience_emphasis"
+    },
+    {
+      "line": 388,
+      "text": "      painPoints: normalizeStringList(pickFirst(meta.pain_points, meta.problems, meta.frictions)),"
+    },
+    {
+      "line": 428,
+      "text": "      seoSource.recommendations,"
+    },
+    {
+      "line": 444,
+      "text": "      value: firstNonEmpty(meta.value, meta.opportunity, item.summary)"
+    },
+    {
+      "line": 448,
+      "text": "  const longTailIdeas = normalizeStringList("
+    },
+    {
+      "line": 450,
+      "text": "      seoSource.long_tail_ideas,"
+    },
+    {
+      "line": 451,
+      "text": "      seoSource.long_tail_keywords,"
+    },
+    {
+      "line": 460,
+      "text": "      insights.content_themes,"
+    },
+    {
+      "line": 491,
+      "text": "      recommendations.filter((item) => /offer|position|product|bundle|value/i.test(item.title || item.summary)).map((item) => ({"
+    },
+    {
+      "line": 493,
+      "text": "        summary: item.summary,"
+    },
+    {
+      "line": 502,
+      "text": "      angle: firstNonEmpty(meta.angle, meta.offer_angle, item.summary, \"Angle pending\"),"
+    },
+    {
+      "line": 514,
+      "text": "        recommendations"
+    },
+    {
+      "line": 520,
+      "text": "      summary: item.value,"
+    },
+    {
+      "line": 526,
+      "text": "      summary: item.angle,"
+    },
+    {
+      "line": 533,
+      "text": "    if (type.includes(\"ad\") || type.includes(\"paid\")) lane = \"ads\";"
+    },
+    {
+      "line": 539,
+      "text": "      summary: firstNonEmpty(item.summary, \"Opportunity detail pending\"),"
+    },
+    {
+      "line": 547,
+      "text": "        ACTION_ROUTES.campaign"
+    },
+    {
+      "line": 552,
+      "text": "  const audienceSignals = audienceSegments.slice(0, 3).flatMap((item) => item.motivations[0] || item.painPoints[0] || item.title).filter(Boolean);"
+    },
+    {
+      "line": 573,
+      "text": "      body: item.summary,"
+    },
+    {
+      "line": 579,
+      "text": "      body: firstNonEmpty(item.summary, \"Risk surfaced from current project intelligence.\"),"
+    },
+    {
+      "line": 581,
+      "text": "      source: \"Readiness / insight signal\""
+    },
+    {
+      "line": 597,
+      "text": "    recommendations.length && \"Action recommendations\""
+    },
+    {
+      "line": 603,
+      "text": "    longTailIdeas.length * 6 +"
+    },
+    {
+      "line": 612,
+      "text": "    insights,"
+    },
+    {
+      "line": 614,
+      "text": "    recommendations,"
+    },
+    {
+      "line": 620,
+      "text": "    longTailIdeas,"
+    },
+    {
+      "line": 634,
+      "text": "    latestUpdate: latestUpdateTimestamps.length ? formatDateTime(Math.max(...latestUpdateTimestamps)) : \"Waiting for data\","
+    },
+    {
+      "line": 635,
+      "text": "    hasLiveIntelligence: Boolean(Object.keys(insights).length || Object.keys(learning).length)"
+    },
+    {
+      "line": 650,
+      "text": "      savedRecommendations: [],"
+    },
+    {
+      "line": 653,
+      "text": "        insights: null,"
+    },
+    {
+      "line": 668,
+      "text": "  fetchProjectInsights,"
+    },
+    {
+      "line": 680,
+      "text": "    fetchProjectInsights(projectName),"
+    },
+    {
+      "line": 683,
+      "text": "    .then(([insightsResult, learningResult]) => {"
+    },
+    {
+      "line": 684,
+      "text": "      const insights = insightsResult?.status === \"fulfilled\" ? insightsResult.value : null;"
+    },
+    {
+      "line": 687,
+      "text": "        insightsResult?.status === \"rejected\" ? insightsResult.reason?.message : \"\","
+    },
+    {
+      "line": 691,
+      "text": "      session.intelligence.status = (insights || learning) ? \"loaded\" : \"error\";"
+    },
+    {
+      "line": 692,
+      "text": "      session.intelligence.insights = insights;"
+    },
+    {
+      "line": 697,
+      "text": "      if (errorMessage && !(insights || learning)) {"
+    },
+    {
+      "line": 703,
+      "text": "      session.intelligence.error = error?.message || \"Research intelligence failed to load.\";"
+    },
+    {
+      "line": 712,
+      "text": "function buildAiPrompts({ projectName, model }) {"
+    },
+    {
+      "line": 723,
+      "text": "      preview: \"Executive summary across competitors, audience, market, SEO, offers, risks, and next strategic decisions.\","
+    },
+    {
+      "line": 724,
+      "text": "      prompt: `Summarize the current research intelligence for ${projectLabel}. Cover competitor signals, audience needs, market momentum, SEO opportunities, product angles, risks, and the next three strategic decisions.`"
+    },
+    {
+      "line": 730,
+      "text": "      prompt: `Find the strongest market gaps for ${projectLabel}. Use current competitor, audience, trend, and product signals. Prioritize gaps by speed to test, revenue potential, and defensibility.`"
+    },
+    {
+      "line": 735,
+      "text": "      preview: \"Build a sharper positioning angle against the current competitor landscape.\","
+    },
+    {
+      "line": 736,
+      "text": "      prompt: `Create a sharper competitor angle for ${projectLabel}. Use ${topOpportunity} as the lead wedge and explain how we should position against incumbents.`"
+    },
+    {
+      "line": 742,
+      "text": "      prompt: `Review the research and identify the best SEO opportunities for ${projectLabel}. Start with ${topKeyword} and recommend target topics, landing pages, clusters, and low-competition long-tail ideas.`"
+    },
+    {
+      "line": 748,
+      "text": "      prompt: `Turn the current research for ${projectLabel} into content directions for ${topAudience}. Recommend hero topics, hooks, CTAs, and format ideas tied to search and buying intent.`"
+    },
+    {
+      "line": 753,
+      "text": "      preview: \"Generate ad hypotheses, audience emphasis, and first creative tests from the research base.\","
+    },
+    {
+      "line": 754,
+      "text": "      prompt: `Turn the research intelligence for ${projectLabel} into ad test ideas. Use ${topOpportunity} as the lead angle, identify creative hypotheses, audience emphasis, and what to test first.`"
+    },
+    {
+      "line": 760,
+      "text": "      prompt: `Review ${projectLabel} research and identify the key risks before launch. Start with ${topRisk}. Include mitigation steps, missing intelligence, and which teams should act next.`"
+    },
+    {
+      "line": 791,
+      "text": "    <div class=\"insights-list\">"
+    },
+    {
+      "line": 793,
+      "text": "        <div class=\"insights-list-item\">"
+    },
+    {
+      "line": 794,
+      "text": "          <div class=\"insights-list-head\">"
+    },
+    {
+      "line": 798,
+      "text": "          <div class=\"insights-list-meta\">${escapeHtml(compactText(firstNonEmpty(item.summary, \"Detail pending.\"), 24, \"Detail pending.\"))}</div>"
+    },
+    {
+      "line": 811,
+      "text": "          <p>${escapeHtml(compactText(firstNonEmpty(item.summary, \"Signal detail is still being formed from the current project context.\"), 28, \"Signal detail is still being formed from the current project context.\"))}</p>"
+    },
+    {
+      "line": 815,
+      "text": "      <div class=\"research-detail-grid\">"
+    },
+    {
+      "line": 817,
+      "text": "          <div class=\"research-detail-item\">"
+    },
+    {
+      "line": 824,
+      "text": "        item.channels?.length || item.strengths?.length || item.weaknesses?.length || item.painPoints?.length || item.motivations?.length || item.proof?.length"
+    },
+    {
+      "line": 830,
+      "text": "              ${item.painPoints?.length ? `<div class=\"research-chip-row\">${item.painPoints.map((entry) => `<span class=\"research-chip danger\">${escapeHtml(entry)}</span>`).join(\"\")}</div>` : \"\"}"
+    },
+    {
+      "line": 841,
+      "text": "function savePromptToQuickCommand($, prompt) {"
+    },
+    {
+      "line": 844,
+      "text": "    input.value = prompt;"
+    },
+    {
+      "line": 854,
+      "text": "  fetchProjectInsights,"
+    },
+    {
+      "line": 880,
+      "text": "        fetchProjectInsights,"
+    },
+    {
+      "line": 890,
+      "text": "  const aiButtons = Array.from(document.querySelectorAll(\"[data-research-ai-prompt]\"));"
+    },
+    {
+      "line": 891,
+      "text": "  const prompts = buildAiPrompts({ projectName, model });"
+    },
+    {
+      "line": 894,
+      "text": "      navigateTo(\"ai-command\");"
+    },
+    {
+      "line": 898,
+      "text": "  aiButtons.forEach((button) => {"
+    },
+    {
+      "line": 900,
+      "text": "      const prompt = prompts[Number(button.getAttribute(\"data-research-ai-prompt\"))];"
+    },
+    {
+      "line": 901,
+      "text": "      if (!prompt) return;"
+    },
+    {
+      "line": 903,
+      "text": "        setSharedHandoff(projectName, \"ai-command\", {"
+    },
+    {
+      "line": 905,
+      "text": "          destination_page: \"ai-command\","
+    },
+    {
+      "line": 907,
+      "text": "            prompt: prompt.prompt,"
+    },
+    {
+      "line": 910,
+      "text": "              modeId: prompt.modeId,"
+    },
+    {
+      "line": 911,
+      "text": "              lastCommand: prompt.prompt,"
+    },
+    {
+      "line": 912,
+      "text": "              lastResponseTitle: \"Research prompt\","
+    },
+    {
+      "line": 919,
+      "text": "          destination_page: \"ai-command\","
+    },
+    {
+      "line": 921,
+      "text": "          destination_role: ACTION_ROUTES.ai.destinationRole,"
+    },
+    {
+      "line": 922,
+      "text": "          source_service_domain: RESEARCH_ROLE_DEFAULTS.serviceDomain,"
+    },
+    {
+      "line": 923,
+      "text": "          destination_service_domain: ACTION_ROUTES.ai.destinationDomain,"
+    },
+    {
+      "line": 925,
+      "text": "            prompt: prompt.prompt,"
+    },
+    {
+      "line": 928,
+      "text": "              modeId: prompt.modeId,"
+    },
+    {
+      "line": 929,
+      "text": "              lastCommand: prompt.prompt,"
+    },
+    {
+      "line": 930,
+      "text": "              lastResponseTitle: \"Research prompt\","
+    },
+    {
+      "line": 935,
+      "text": "          console.warn(\"Failed to persist research AI handoff:\", error.message);"
+    },
+    {
+      "line": 937,
+      "text": "        navigateTo(\"ai-command\");"
+    },
+    {
+      "line": 938,
+      "text": "        savePromptToQuickCommand($, prompt.prompt);"
+    },
+    {
+      "line": 939,
+      "text": "        showMessage?.(\"Research brief prompt added to AI Command.\");"
+    },
+    {
+      "line": 941,
+      "text": "        showError?.(error?.message || \"Failed to hand off the research prompt to AI Command.\");"
+    },
+    {
+      "line": 953,
+      "text": "      const prompt ="
+    },
+    {
+      "line": 954,
+      "text": "        target === \"campaign\""
+    },
+    {
+      "line": 955,
+      "text": "          ? `Use the current research intelligence for ${projectName || \"this project\"} to build a focused campaign direction. Start with ${model.marketOpportunities[0]?.title || \"the strongest opportunity\"} and account for ${model.risks[0]?.title || \"current research risks\"}.`"
+    },
+    {
+      "line": 959,
+      "text": "              ? `Build an SEO workflow for ${projectName || \"this project\"} from the current research page. Focus on keyword clusters, missing landing pages, long-tail ideas, and content clusters.`"
+    },
+    {
+      "line": 962,
+      "text": "                : `Save this research intelligence for ${projectName || \"this project\"} and convert it into structured recommendations: opportunities ${model.marketOpportunities.map((item) => item.title).join(\", \") || \"pending\"}, risks ${model.risks.map((item) => item.title).join(\", \") || \"pending\"}.`;"
+    },
+    {
+      "line": 969,
+      "text": "        source_service_domain: RESEARCH_ROLE_DEFAULTS.serviceDomain,"
+    },
+    {
+      "line": 970,
+      "text": "        destination_service_domain: action.destinationDomain,"
+    },
+    {
+      "line": 972,
+      "text": "          prompt,"
+    },
+    {
+      "line": 978,
+      "text": "          service_domain: RESEARCH_ROLE_DEFAULTS.serviceDomain"
+    },
+    {
+      "line": 983,
+      "text": "        console.warn(\"Failed to persist research route handoff:\", error.message);"
+    },
+    {
+      "line": 986,
+      "text": "      if (target === \"ai\") {"
+    },
+    {
+      "line": 988,
+      "text": "        savePromptToQuickCommand($, prompt);"
+    },
+    {
+      "line": 990,
+      "text": "        savePromptToQuickCommand($, prompt);"
+    },
+    {
+      "line": 1003,
+      "text": "      savePromptToQuickCommand("
+    },
+    {
+      "line": 1005,
+      "text": "        `Operationalize this opportunity for ${projectName || \"this project\"}: ${item.title}. Context: ${item.summary}. Build a short action plan for ${item.routeTarget.label}.`"
+    },
+    {
+      "line": 1045,
+      "text": "        body: session.noteDraft.body.trim() || \"Observation captured without additional detail.\","
+    },
+    {
+      "line": 1077,
+      "text": "  const saveRecommendationBtn = $(\"researchSaveRecommendationBtn\");"
+    },
+    {
+      "line": 1078,
+      "text": "  if (saveRecommendationBtn) {"
+    },
+    {
+      "line": 1079,
+      "text": "    saveRecommendationBtn.onclick = () => {"
+    },
+    {
+      "line": 1086,
+      "text": "      session.savedRecommendations.unshift({"
+    },
+    {
+      "line": 1089,
+      "text": "        summary: opportunity.summary,"
+    },
+    {
+      "line": 1093,
+      "text": "      session.savedRecommendations = uniqueBy(session.savedRecommendations, (item) => `${item.title}:${item.target}`);"
+    },
+    {
+      "line": 1094,
+      "text": "      session.savedRecommendations = session.savedRecommendations.slice(0, 12);"
+    },
+    {
+      "line": 1096,
+      "text": "      showMessage?.(\"Structured recommendation saved.\");"
+    },
+    {
+      "line": 1105,
+      "text": "    eyebrow: \"Execute & Grow\","
+    },
+    {
+      "line": 1122,
+      "text": "    fetchProjectInsights,"
+    },
+    {
+      "line": 1140,
+      "text": "      fetchProjectInsights,"
+    },
+    {
+      "line": 1148,
+      "text": "      fetchProjectInsights,"
+    },
+    {
+      "line": 1155,
+      "text": "    const aiPrompts = buildAiPrompts({ projectName, model });"
+    },
+    {
+      "line": 1158,
+      "text": "    const topRecommendations = model.recommendations.slice(0, 4);"
+    },
+    {
+      "line": 1166,
+      "text": "        summary: item.opportunityGap || item.positioning || item.summary || \"Competitor signal pending.\","
+    },
+    {
+      "line": 1167,
+      "text": "        details: ["
+    },
+    {
+      "line": 1177,
+      "text": "        summary: item.summary || item.momentum || \"Market trend detail pending.\","
+    },
+    {
+      "line": 1178,
+      "text": "        details: ["
+    },
+    {
+      "line": 1190,
+      "text": "        summary: item.summary || item.painPoints[0] || item.motivations[0] || \"Audience detail pending.\","
+    },
+    {
+      "line": 1191,
+      "text": "        details: ["
+    },
+    {
+      "line": 1192,
+      "text": "          { label: \"Pain points\", value: item.painPoints.join(\", \") || \"Not mapped yet\" },"
+    },
+    {
+      "line": 1201,
+      "text": "        summary: item.value || item.summary || \"Keyword opportunity detail pending.\","
+    },
+    {
+      "line": 1202,
+      "text": "        details: ["
+    },
+    {
+      "line": 1236,
+      "text": "                meta: model.activeResearchAreas.length ? joinPreview(model.activeResearchAreas, \"Waiting for structured inputs\", 4) : \"Waiting for structured inputs\""
+    },
+    {
+      "line": 1301,
+      "text": "                              <p>${escapeHtml(compactText(item.summary, 28, \"Signal detail pending.\"))}</p>"
+    },
+    {
+      "line": 1305,
+      "text": "                          <div class=\"research-detail-grid\">"
+    },
+    {
+      "line": 1306,
+      "text": "                            ${item.details.map((field) => `"
+    },
+    {
+      "line": 1307,
+      "text": "                              <div class=\"research-detail-item\">"
+    },
+    {
+      "line": 1326,
+      "text": "                <h4 class=\"insights-subtitle\">What matters most now</h4>"
+    },
+    {
+      "line": 1330,
+      "text": "                <h4 class=\"insights-subtitle\">Coverage snapshot</h4>"
+    },
+    {
+      "line": 1341,
+      "text": "                    : `<div class=\"empty-box\">No intelligence coverage data is available yet.</div>`"
+    },
+    {
+      "line": 1359,
+      "text": "              <p class=\"research-section-copy\">Audience needs, buying intent, search openings, and keyword evidence that can support content, SEO, ads, or campaign decisions.</p>"
+    },
+    {
+      "line": 1373,
+      "text": "                              <p>${escapeHtml(compactText(item.summary, 28, \"Signal detail pending.\"))}</p>"
+    },
+    {
+      "line": 1377,
+      "text": "                          <div class=\"research-detail-grid\">"
+    },
+    {
+      "line": 1378,
+      "text": "                            ${item.details.map((field) => `"
+    },
+    {
+      "line": 1379,
+      "text": "                              <div class=\"research-detail-item\">"
+    },
+    {
+      "line": 1391,
+      "text": "                      [\"pain points\", \"intent mapping\", \"keyword clusters\"],"
+    },
+    {
+      "line": 1398,
+      "text": "                <h4 class=\"insights-subtitle\">Long-tail ideas</h4>"
+    },
+    {
+      "line": 1399,
+      "text": "                ${model.longTailIdeas.length ? `<div class=\"research-chip-groups\"><div class=\"research-chip-row\">${model.longTailIdeas.slice(0, 12).map((item) => `<span class=\"research-chip\">${escapeHtml(item)}</span>`).join(\"\")}</div></div>` : `<div class=\"empty-box\">No long-tail ideas saved yet.</div>`}"
+    },
+    {
+      "line": 1400,
+      "text": "                <h4 class=\"insights-subtitle\" style=\"margin-top:16px;\">Content themes</h4>"
+    },
+    {
+      "line": 1404,
+      "text": "                <h4 class=\"insights-subtitle\">Missing clusters</h4>"
+    },
+    {
+      "line": 1406,
+      "text": "                <h4 class=\"insights-subtitle\" style=\"margin-top:16px;\">Pages to optimize</h4>"
+    },
+    {
+      "line": 1430,
+      "text": "                <h4 class=\"insights-subtitle\">Saved findings</h4>"
+    },
+    {
+      "line": 1452,
+      "text": "                    : `<div class=\"empty-box\">No saved findings yet. Use the composer or save one of the reusable insight blocks below.</div>`"
+    },
+    {
+      "line": 1456,
+      "text": "                <h4 class=\"insights-subtitle\">Reusable insight blocks</h4>"
+    },
+    {
+      "line": 1478,
+      "text": "                    : `<div class=\"empty-box\">Reusable blocks will appear as soon as stronger opportunities, risks, or keyword signals are available.</div>`"
+    },
+    {
+      "line": 1488,
+      "text": "              <h3>Recommendations / Next Research Actions</h3>"
+    },
+    {
+      "line": 1491,
+      "text": "            <span class=\"card-badge neutral\">${escapeHtml(`${session.savedRecommendations.length} saved`)}</span>"
+    },
+    {
+      "line": 1496,
+      "text": "                <h4 class=\"insights-subtitle\">Recommendations</h4>"
+    },
+    {
+      "line": 1497,
+      "text": "                ${renderSignalList(topRecommendations, escapeHtml, \"No recommendations surfaced yet.\")}"
+    },
+    {
+      "line": 1500,
+      "text": "                <h4 class=\"insights-subtitle\">Risks to explore next</h4>"
+    },
+    {
+      "line": 1504,
+      "text": "                <h4 class=\"insights-subtitle\">Opportunity map</h4>"
+    },
+    {
+      "line": 1513,
+      "text": "                                <p>${escapeHtml(item.summary)}</p>"
+    },
+    {
+      "line": 1528,
+      "text": "                        \"Opportunity map is waiting for ranked inputs\","
+    },
+    {
+      "line": 1538,
+      "text": "                <h4 class=\"insights-subtitle\">Saved recommendation</h4>"
+    },
+    {
+      "line": 1539,
+      "text": "                <button id=\"researchSaveRecommendationBtn\" class=\"btn btn-primary\" type=\"button\">Save Recommendation</button>"
+    },
+    {
+      "line": 1541,
+      "text": "                  session.savedRecommendations.length"
+    },
+    {
+      "line": 1543,
+      "text": "                        ${session.savedRecommendations.slice(0, 4).map((item) => `"
+    },
+    {
+      "line": 1548,
+      "text": "                                <p>${escapeHtml(item.summary)}</p>"
+    },
+    {
+      "line": 1558,
+      "text": "                    : `<div class=\"empty-box\" style=\"margin-top:16px;\">Save a structured recommendation to keep the best next move accessible for later routing.</div>`"
+    },
+    {
+      "line": 1562,
+      "text": "                <h4 class=\"insights-subtitle\">Destination handoffs</h4>"
+    },
+    {
+      "line": 1564,
+      "text": "                  <button class=\"quick-action-btn\" type=\"button\" data-research-route=\"campaign\">Route to Campaign Studio</button>"
+    },
+    {
+      "line": 1577,
+      "text": "              <h3>Research AI Assistant</h3>"
+    },
+    {
+      "line": 1578,
+      "text": "              <p class=\"research-section-copy\">Use AI to turn current evidence into a review-ready research brief. AI should deepen the analysis, not replace saved findings or destination handoffs.</p>"
+    },
+    {
+      "line": 1583,
+      "text": "            <button class=\"btn ghost\" type=\"button\" data-research-open>Open AI Workspace Review</button>"
+    },
+    {
+      "line": 1584,
+      "text": "            <button class=\"btn btn-secondary\" type=\"button\" data-research-route=\"ai\">Route to AI Workspace</button>"
+    },
+    {
+      "line": 1587,
+      "text": "            ${aiPrompts.map((item, index) => `"
+    },
+    {
+      "line": 1588,
+      "text": "              <button class=\"quick-action-btn\" type=\"button\" data-research-ai-prompt=\"${index}\">"
+    },
+    {
+      "line": 1590,
+      "text": "                <span class=\"home-action-meta\" title=\"${escapeHtml(item.prompt)}\">${escapeHtml(item.preview || compactText(item.prompt, 18, \"\"))}</span>"
+    },
+    {
+      "line": 1604,
+      "text": "      fetchProjectInsights,"
+    }
+  ],
+  "save_storage_signals": [
+    {
+      "line": 644,
+      "text": "      noteDraft: {"
+    },
+    {
+      "line": 649,
+      "text": "      savedFindings: [],"
+    },
+    {
+      "line": 650,
+      "text": "      savedRecommendations: [],"
+    },
+    {
+      "line": 841,
+      "text": "function savePromptToQuickCommand($, prompt) {"
+    },
+    {
+      "line": 908,
+      "text": "            draft_context: {"
+    },
+    {
+      "line": 926,
+      "text": "            draft_context: {"
+    },
+    {
+      "line": 935,
+      "text": "          console.warn(\"Failed to persist research AI handoff:\", error.message);"
+    },
+    {
+      "line": 938,
+      "text": "        savePromptToQuickCommand($, prompt.prompt);"
+    },
+    {
+      "line": 962,
+      "text": "                : `Save this research intelligence for ${projectName || \"this project\"} and convert it into structured recommendations: opportunities ${model.marketOpportunities.map((item) => item.title).join(\", \") || \"pending\"}, risks ${model.risks.map((item) => item.title).join(\", \") || \"pending\"}.`;"
+    },
+    {
+      "line": 983,
+      "text": "        console.warn(\"Failed to persist research route handoff:\", error.message);"
+    },
+    {
+      "line": 988,
+      "text": "        savePromptToQuickCommand($, prompt);"
+    },
+    {
+      "line": 990,
+      "text": "        savePromptToQuickCommand($, prompt);"
+    },
+    {
+      "line": 1003,
+      "text": "      savePromptToQuickCommand("
+    },
+    {
+      "line": 1018,
+      "text": "      session.noteDraft.title = event.target.value || \"\";"
+    },
+    {
+      "line": 1024,
+      "text": "      session.noteDraft.body = event.target.value || \"\";"
+    },
+    {
+      "line": 1030,
+      "text": "      session.noteDraft.tags = event.target.value || \"\";"
+    },
+    {
+      "line": 1034,
+      "text": "  const saveNoteBtn = $(\"researchSaveFindingBtn\");"
+    },
+    {
+      "line": 1035,
+      "text": "  if (saveNoteBtn) {"
+    },
+    {
+      "line": 1036,
+      "text": "    saveNoteBtn.onclick = () => {"
+    },
+    {
+      "line": 1037,
+      "text": "      if (!session.noteDraft.title.trim() && !session.noteDraft.body.trim()) {"
+    },
+    {
+      "line": 1042,
+      "text": "      session.savedFindings.unshift({"
+    },
+    {
+      "line": 1044,
+      "text": "        title: session.noteDraft.title.trim() || \"Untitled research finding\","
+    },
+    {
+      "line": 1045,
+      "text": "        body: session.noteDraft.body.trim() || \"Observation captured without additional detail.\","
+    },
+    {
+      "line": 1046,
+      "text": "        tags: normalizeStringList(session.noteDraft.tags.split(\",\")),"
+    },
+    {
+      "line": 1050,
+      "text": "      session.savedFindings = session.savedFindings.slice(0, 18);"
+    },
+    {
+      "line": 1051,
+      "text": "      session.noteDraft = { title: \"\", body: \"\", tags: \"\" };"
+    },
+    {
+      "line": 1053,
+      "text": "      showMessage?.(\"Research finding saved.\");"
+    },
+    {
+      "line": 1057,
+      "text": "  const saveBlockButtons = Array.from(document.querySelectorAll(\"[data-save-research-block]\"));"
+    },
+    {
+      "line": 1058,
+      "text": "  saveBlockButtons.forEach((button) => {"
+    },
+    {
+      "line": 1060,
+      "text": "      const item = model.autoFindings[Number(button.getAttribute(\"data-save-research-block\"))];"
+    },
+    {
+      "line": 1062,
+      "text": "      session.savedFindings.unshift({"
+    },
+    {
+      "line": 1070,
+      "text": "      session.savedFindings = uniqueBy(session.savedFindings, (entry) => `${entry.title}:${entry.source}`);"
+    },
+    {
+      "line": 1071,
+      "text": "      session.savedFindings = session.savedFindings.slice(0, 18);"
+    },
+    {
+      "line": 1073,
+      "text": "      showMessage?.(\"Reusable intelligence block saved.\");"
+    },
+    {
+      "line": 1077,
+      "text": "  const saveRecommendationBtn = $(\"researchSaveRecommendationBtn\");"
+    },
+    {
+      "line": 1078,
+      "text": "  if (saveRecommendationBtn) {"
+    },
+    {
+      "line": 1079,
+      "text": "    saveRecommendationBtn.onclick = () => {"
+    },
+    {
+      "line": 1082,
+      "text": "        showError?.(\"No structured opportunity is ready to save yet.\");"
+    },
+    {
+      "line": 1086,
+      "text": "      session.savedRecommendations.unshift({"
+    },
+    {
+      "line": 1093,
+      "text": "      session.savedRecommendations = uniqueBy(session.savedRecommendations, (item) => `${item.title}:${item.target}`);"
+    },
+    {
+      "line": 1094,
+      "text": "      session.savedRecommendations = session.savedRecommendations.slice(0, 12);"
+    },
+    {
+      "line": 1096,
+      "text": "      showMessage?.(\"Structured recommendation saved.\");"
+    },
+    {
+      "line": 1399,
+      "text": "                ${model.longTailIdeas.length ? `<div class=\"research-chip-groups\"><div class=\"research-chip-row\">${model.longTailIdeas.slice(0, 12).map((item) => `<span class=\"research-chip\">${escapeHtml(item)}</span>`).join(\"\")}</div></div>` : `<div class=\"empty-box\">No long-tail ideas saved yet.</div>`}"
+    },
+    {
+      "line": 1416,
+      "text": "              <h3>Evidence Notes / Saved Findings</h3>"
+    },
+    {
+      "line": 1419,
+      "text": "            <span class=\"card-badge neutral\">${escapeHtml(`${session.savedFindings.length} saved`)}</span>"
+    },
+    {
+      "line": 1423,
+      "text": "              <input id=\"researchNoteTitle\" class=\"setup-input\" type=\"text\" placeholder=\"Finding title\" value=\"${escapeHtml(session.noteDraft.title)}\" />"
+    },
+    {
+      "line": 1424,
+      "text": "              <textarea id=\"researchNoteBody\" class=\"setup-input setup-textarea\" rows=\"5\" placeholder=\"Capture the key observation, implication, or market signal...\">${escapeHtml(session.noteDraft.body)}</textarea>"
+    },
+    {
+      "line": 1425,
+      "text": "              <input id=\"researchNoteTags\" class=\"setup-input\" type=\"text\" placeholder=\"Tags, comma separated\" value=\"${escapeHtml(session.noteDraft.tags)}\" />"
+    },
+    {
+      "line": 1426,
+      "text": "              <button id=\"researchSaveFindingBtn\" class=\"btn btn-primary\" type=\"button\">Save Finding</button>"
+    },
+    {
+      "line": 1430,
+      "text": "                <h4 class=\"insights-subtitle\">Saved findings</h4>"
+    },
+    {
+      "line": 1432,
+      "text": "                  session.savedFindings.length"
+    },
+    {
+      "line": 1433,
+      "text": "                    ? `<div class=\"research-saved-list\">"
+    },
+    {
+      "line": 1434,
+      "text": "                        ${session.savedFindings.slice(0, 6).map((item) => `"
+    },
+    {
+      "line": 1452,
+      "text": "                    : `<div class=\"empty-box\">No saved findings yet. Use the composer or save one of the reusable insight blocks below.</div>`"
+    },
+    {
+      "line": 1459,
+      "text": "                    ? `<div class=\"research-saved-list\">"
+    },
+    {
+      "line": 1473,
+      "text": "                              <button class=\"quick-action-btn research-inline-action\" type=\"button\" data-save-research-block=\"${index}\">Save Block</button>"
+    },
+    {
+      "line": 1491,
+      "text": "            <span class=\"card-badge neutral\">${escapeHtml(`${session.savedRecommendations.length} saved`)}</span>"
+    },
+    {
+      "line": 1538,
+      "text": "                <h4 class=\"insights-subtitle\">Saved recommendation</h4>"
+    },
+    {
+      "line": 1539,
+      "text": "                <button id=\"researchSaveRecommendationBtn\" class=\"btn btn-primary\" type=\"button\">Save Recommendation</button>"
+    },
+    {
+      "line": 1541,
+      "text": "                  session.savedRecommendations.length"
+    },
+    {
+      "line": 1542,
+      "text": "                    ? `<div class=\"research-saved-list\" style=\"margin-top:16px;\">"
+    },
+    {
+      "line": 1543,
+      "text": "                        ${session.savedRecommendations.slice(0, 4).map((item) => `"
+    },
+    {
+      "line": 1558,
+      "text": "                    : `<div class=\"empty-box\" style=\"margin-top:16px;\">Save a structured recommendation to keep the best next move accessible for later routing.</div>`"
+    },
+    {
+      "line": 1578,
+      "text": "              <p class=\"research-section-copy\">Use AI to turn current evidence into a review-ready research brief. AI should deepen the analysis, not replace saved findings or destination handoffs.</p>"
+    }
+  ],
+  "handoff_signals": [
+    {
+      "line": 1,
+      "text": "import { setSharedHandoff } from \"../shared-context.js\";"
+    },
+    {
+      "line": 5,
+      "text": "const ACTION_ROUTES = {"
+    },
+    {
+      "line": 6,
+      "text": "  campaign: { route: \"campaign-studio\", label: \"Campaign Studio\", destinationRole: \"strategist\", destinationDomain: \"campaign\" },"
+    },
+    {
+      "line": 7,
+      "text": "  content: { route: \"content-studio\", label: \"Content Studio\", destinationRole: \"writer\", destinationDomain: \"content\" },"
+    },
+    {
+      "line": 8,
+      "text": "  seo: { route: \"workflows\", label: \"SEO Workflow\", destinationRole: \"strategist\", destinationDomain: \"research\" },"
+    },
+    {
+      "line": 9,
+      "text": "  ads: { route: \"ads-manager\", label: \"Ads Manager\", destinationRole: \"ads_operator\", destinationDomain: \"campaign\" },"
+    },
+    {
+      "line": 10,
+      "text": "  ai: { route: \"ai-command\", label: \"AI Command\", destinationRole: \"admin\", destinationDomain: \"governance\" }"
+    },
+    {
+      "line": 78,
+      "text": "  const handoffsByRole = asObject(operations.handoffs?.by_role);"
+    },
+    {
+      "line": 86,
+      "text": "      <div class=\"data-row\"><span>Route map</span><strong>${escapeHtml(Object.values(ACTION_ROUTES).map((item) => `${item.label}: ${titleCase(item.destinationRole)}`).join(\" • \"))}</strong></div>"
+    },
+    {
+      "line": 87,
+      "text": "      <div class=\"data-row\"><span>Analyst inbound</span><strong>${escapeHtml(formatCount(asArray(handoffsByRole[RESEARCH_ROLE_DEFAULTS.ownerRole]).length))}</strong></div>"
+    },
+    {
+      "line": 543,
+      "text": "      routeTarget:"
+    },
+    {
+      "line": 544,
+      "text": "        lane === \"seo\" ? ACTION_ROUTES.seo :"
+    },
+    {
+      "line": 545,
+      "text": "        lane === \"ads\" ? ACTION_ROUTES.ads :"
+    },
+    {
+      "line": 546,
+      "text": "        lane === \"content\" ? ACTION_ROUTES.content :"
+    },
+    {
+      "line": 547,
+      "text": "        ACTION_ROUTES.campaign"
+    },
+    {
+      "line": 851,
+      "text": "  navigateTo,"
+    },
+    {
+      "line": 856,
+      "text": "  createProjectHandoff,"
+    },
+    {
+      "line": 894,
+      "text": "      navigateTo(\"ai-command\");"
+    },
+    {
+      "line": 903,
+      "text": "        setSharedHandoff(projectName, \"ai-command\", {"
+    },
+    {
+      "line": 905,
+      "text": "          destination_page: \"ai-command\","
+    },
+    {
+      "line": 913,
+      "text": "              routeSuggestions: []"
+    },
+    {
+      "line": 917,
+      "text": "        createProjectHandoff?.(projectName, {"
+    },
+    {
+      "line": 919,
+      "text": "          destination_page: \"ai-command\","
+    },
+    {
+      "line": 921,
+      "text": "          destination_role: ACTION_ROUTES.ai.destinationRole,"
+    },
+    {
+      "line": 923,
+      "text": "          destination_service_domain: ACTION_ROUTES.ai.destinationDomain,"
+    },
+    {
+      "line": 931,
+      "text": "              routeSuggestions: []"
+    },
+    {
+      "line": 935,
+      "text": "          console.warn(\"Failed to persist research AI handoff:\", error.message);"
+    },
+    {
+      "line": 937,
+      "text": "        navigateTo(\"ai-command\");"
+    },
+    {
+      "line": 946,
+      "text": "  const routeButtons = Array.from(document.querySelectorAll(\"[data-research-route]\"));"
+    },
+    {
+      "line": 947,
+      "text": "  routeButtons.forEach((button) => {"
+    },
+    {
+      "line": 949,
+      "text": "      const target = button.getAttribute(\"data-research-route\") || \"\";"
+    },
+    {
+      "line": 950,
+      "text": "      const action = ACTION_ROUTES[target];"
+    },
+    {
+      "line": 964,
+      "text": "      const handoff = {"
+    },
+    {
+      "line": 966,
+      "text": "        destination_page: action.route,"
+    },
+    {
+      "line": 968,
+      "text": "        destination_role: action.destinationRole,"
+    },
+    {
+      "line": 970,
+      "text": "        destination_service_domain: action.destinationDomain,"
+    },
+    {
+      "line": 974,
+      "text": "          source: \"research-route\","
+    },
+    {
+      "line": 975,
+      "text": "          route_target: action.route,"
+    },
+    {
+      "line": 981,
+      "text": "      setSharedHandoff(projectName, action.route, handoff);"
+    },
+    {
+      "line": 982,
+      "text": "      createProjectHandoff?.(projectName, handoff).catch((error) => {"
+    },
+    {
+      "line": 983,
+      "text": "        console.warn(\"Failed to persist research route handoff:\", error.message);"
+    },
+    {
+      "line": 987,
+      "text": "        navigateTo(action.route);"
+    },
+    {
+      "line": 991,
+      "text": "        navigateTo(action.route);"
+    },
+    {
+      "line": 994,
+      "text": "      showMessage?.(`Research handoff routed to ${action.label}.`);"
+    },
+    {
+      "line": 1005,
+      "text": "        `Operationalize this opportunity for ${projectName || \"this project\"}: ${item.title}. Context: ${item.summary}. Build a short action plan for ${item.routeTarget.label}.`"
+    },
+    {
+      "line": 1007,
+      "text": "      navigateTo(item.routeTarget.route);"
+    },
+    {
+      "line": 1008,
+      "text": "      showMessage?.(`Opportunity handoff routed to ${item.routeTarget.label}.`);"
+    },
+    {
+      "line": 1090,
+      "text": "        target: opportunity.routeTarget.label,"
+    },
+    {
+      "line": 1101,
+      "text": "export const researchRoute = {"
+    },
+    {
+      "line": 1107,
+      "text": "    description: \"Evidence-backed market intelligence for opportunities, risks, and destination-ready handoffs.\""
+    },
+    {
+      "line": 1119,
+      "text": "    navigateTo,"
+    },
+    {
+      "line": 1124,
+      "text": "    createProjectHandoff"
+    },
+    {
+      "line": 1137,
+      "text": "      navigateTo,"
+    },
+    {
+      "line": 1142,
+      "text": "      createProjectHandoff"
+    },
+    {
+      "line": 1224,
+      "text": "              <p class=\"research-section-copy\">Keep this workspace focused on what evidence exists, what is missing, and which destination should receive the next research handoff.</p>"
+    },
+    {
+      "line": 1520,
+      "text": "                              <span>Best route</span>"
+    },
+    {
+      "line": 1521,
+      "text": "                              <strong>${escapeHtml(item.routeTarget.label)}</strong>"
+    },
+    {
+      "line": 1523,
+      "text": "                            <button class=\"quick-action-btn\" type=\"button\" data-research-opportunity=\"${index}\">Send to ${escapeHtml(item.routeTarget.label)}</button>"
+    },
+    {
+      "line": 1562,
+      "text": "                <h4 class=\"insights-subtitle\">Destination handoffs</h4>"
+    },
+    {
+      "line": 1564,
+      "text": "                  <button class=\"quick-action-btn\" type=\"button\" data-research-route=\"campaign\">Route to Campaign Studio</button>"
+    },
+    {
+      "line": 1565,
+      "text": "                  <button class=\"quick-action-btn\" type=\"button\" data-research-route=\"content\">Route to Content Studio</button>"
+    },
+    {
+      "line": 1566,
+      "text": "                  <button class=\"quick-action-btn\" type=\"button\" data-research-route=\"seo\">Route to SEO Workflow</button>"
+    },
+    {
+      "line": 1567,
+      "text": "                  <button class=\"quick-action-btn\" type=\"button\" data-research-route=\"ads\">Route to Ads Manager</button>"
+    },
+    {
+      "line": 1578,
+      "text": "              <p class=\"research-section-copy\">Use AI to turn current evidence into a review-ready research brief. AI should deepen the analysis, not replace saved findings or destination handoffs.</p>"
+    },
+    {
+      "line": 1584,
+      "text": "            <button class=\"btn btn-secondary\" type=\"button\" data-research-route=\"ai\">Route to AI Workspace</button>"
+    },
+    {
+      "line": 1601,
+      "text": "      navigateTo,"
+    },
+    {
+      "line": 1606,
+      "text": "      createProjectHandoff,"
+    }
+  ],
+  "task_signals": [],
+  "approval_signals": [
+    {
+      "line": 10,
+      "text": "  ai: { route: \"ai-command\", label: \"AI Command\", destinationRole: \"admin\", destinationDomain: \"governance\" }"
+    },
+    {
+      "line": 15,
+      "text": "  reviewRole: \"strategist\""
+    },
+    {
+      "line": 79,
+      "text": "  const approvalsByRole = asObject(operations.approvals?.by_reviewer_role);"
+    },
+    {
+      "line": 85,
+      "text": "      <div class=\"data-row\"><span>Review owner</span><strong>${escapeHtml(titleCase(RESEARCH_ROLE_DEFAULTS.reviewRole))}</strong></div>"
+    },
+    {
+      "line": 88,
+      "text": "      <div class=\"data-row\"><span>Strategist review queue</span><strong>${escapeHtml(formatCount(asArray(approvalsByRole[RESEARCH_ROLE_DEFAULTS.reviewRole]).length))}</strong></div>"
+    },
+    {
+      "line": 101,
+      "text": "function joinPreview(values, fallback, maxItems = 3) {"
+    },
+    {
+      "line": 723,
+      "text": "      preview: \"Executive summary across competitors, audience, market, SEO, offers, risks, and next strategic decisions.\","
+    },
+    {
+      "line": 724,
+      "text": "      prompt: `Summarize the current research intelligence for ${projectLabel}. Cover competitor signals, audience needs, market momentum, SEO opportunities, product angles, risks, and the next three strategic decisions.`"
+    },
+    {
+      "line": 729,
+      "text": "      preview: \"Rank the most attractive market gaps by speed to test, upside, and defensibility.\","
+    },
+    {
+      "line": 735,
+      "text": "      preview: \"Build a sharper positioning angle against the current competitor landscape.\","
+    },
+    {
+      "line": 741,
+      "text": "      preview: \"Turn current research into target topics, landing pages, clusters, and low-competition search plays.\","
+    },
+    {
+      "line": 742,
+      "text": "      prompt: `Review the research and identify the best SEO opportunities for ${projectLabel}. Start with ${topKeyword} and recommend target topics, landing pages, clusters, and low-competition long-tail ideas.`"
+    },
+    {
+      "line": 747,
+      "text": "      preview: \"Translate audience and search intelligence into topics, hooks, formats, and calls to action.\","
+    },
+    {
+      "line": 753,
+      "text": "      preview: \"Generate ad hypotheses, audience emphasis, and first creative tests from the research base.\","
+    },
+    {
+      "line": 759,
+      "text": "      preview: \"Stress-test the launch plan and highlight missing intelligence, mitigation steps, and ownership.\","
+    },
+    {
+      "line": 760,
+      "text": "      prompt: `Review ${projectLabel} research and identify the key risks before launch. Start with ${topRisk}. Include mitigation steps, missing intelligence, and which teams should act next.`"
+    },
+    {
+      "line": 977,
+      "text": "          review_role: RESEARCH_ROLE_DEFAULTS.reviewRole,"
+    },
+    {
+      "line": 1157,
+      "text": "    const coveragePreview = model.sourceCoverage.slice(0, 6);"
+    },
+    {
+      "line": 1236,
+      "text": "                meta: model.activeResearchAreas.length ? joinPreview(model.activeResearchAreas, \"Waiting for structured inputs\", 4) : \"Waiting for structured inputs\""
+    },
+    {
+      "line": 1332,
+      "text": "                  coveragePreview.length"
+    },
+    {
+      "line": 1334,
+      "text": "                        ${coveragePreview.map((item) => `"
+    },
+    {
+      "line": 1359,
+      "text": "              <p class=\"research-section-copy\">Audience needs, buying intent, search openings, and keyword evidence that can support content, SEO, ads, or campaign decisions.</p>"
+    },
+    {
+      "line": 1578,
+      "text": "              <p class=\"research-section-copy\">Use AI to turn current evidence into a review-ready research brief. AI should deepen the analysis, not replace saved findings or destination handoffs.</p>"
+    },
+    {
+      "line": 1583,
+      "text": "            <button class=\"btn ghost\" type=\"button\" data-research-open>Open AI Workspace Review</button>"
+    },
+    {
+      "line": 1590,
+      "text": "                <span class=\"home-action-meta\" title=\"${escapeHtml(item.prompt)}\">${escapeHtml(item.preview || compactText(item.prompt, 18, \"\"))}</span>"
+    }
+  ],
+  "destructive_or_execution_signals": [
+    {
+      "line": 1,
+      "text": "import { setSharedHandoff } from \"../shared-context.js\";"
+    },
+    {
+      "line": 393,
+      "text": "      triggers: normalizeStringList(pickFirst(meta.buying_triggers, meta.triggers)),"
+    },
+    {
+      "line": 506,
+      "text": "      whyNow: firstNonEmpty(meta.why_buy_now, meta.urgency, meta.trigger)"
+    },
+    {
+      "line": 665,
+      "text": "function startResearchHydration({"
+    },
+    {
+      "line": 742,
+      "text": "      prompt: `Review the research and identify the best SEO opportunities for ${projectLabel}. Start with ${topKeyword} and recommend target topics, landing pages, clusters, and low-competition long-tail ideas.`"
+    },
+    {
+      "line": 753,
+      "text": "      preview: \"Generate ad hypotheses, audience emphasis, and first creative tests from the research base.\","
+    },
+    {
+      "line": 760,
+      "text": "      prompt: `Review ${projectLabel} research and identify the key risks before launch. Start with ${topRisk}. Include mitigation steps, missing intelligence, and which teams should act next.`"
+    },
+    {
+      "line": 877,
+      "text": "      startResearchHydration({"
+    },
+    {
+      "line": 886,
+      "text": "      showMessage?.(\"Research intelligence refresh started.\");"
+    },
+    {
+      "line": 899,
+      "text": "    button.onclick = async () => {"
+    },
+    {
+      "line": 955,
+      "text": "          ? `Use the current research intelligence for ${projectName || \"this project\"} to build a focused campaign direction. Start with ${model.marketOpportunities[0]?.title || \"the strongest opportunity\"} and account for ${model.risks[0]?.title || \"current research risks\"}.`"
+    },
+    {
+      "line": 1105,
+      "text": "    eyebrow: \"Execute & Grow\","
+    },
+    {
+      "line": 1145,
+      "text": "    startResearchHydration({"
+    },
+    {
+      "line": 1194,
+      "text": "          { label: \"Triggers\", value: item.triggers.join(\", \") || \"Not mapped yet\" }"
+    },
+    {
+      "line": 1523,
+      "text": "                            <button class=\"quick-action-btn\" type=\"button\" data-research-opportunity=\"${index}\">Send to ${escapeHtml(item.routeTarget.label)}</button>"
+    }
+  ],
+  "confirmation_signals": [],
+  "navigation_signals": [
+    {
+      "line": 5,
+      "text": "const ACTION_ROUTES = {"
+    },
+    {
+      "line": 6,
+      "text": "  campaign: { route: \"campaign-studio\", label: \"Campaign Studio\", destinationRole: \"strategist\", destinationDomain: \"campaign\" },"
+    },
+    {
+      "line": 7,
+      "text": "  content: { route: \"content-studio\", label: \"Content Studio\", destinationRole: \"writer\", destinationDomain: \"content\" },"
+    },
+    {
+      "line": 8,
+      "text": "  seo: { route: \"workflows\", label: \"SEO Workflow\", destinationRole: \"strategist\", destinationDomain: \"research\" },"
+    },
+    {
+      "line": 9,
+      "text": "  ads: { route: \"ads-manager\", label: \"Ads Manager\", destinationRole: \"ads_operator\", destinationDomain: \"campaign\" },"
+    },
+    {
+      "line": 10,
+      "text": "  ai: { route: \"ai-command\", label: \"AI Command\", destinationRole: \"admin\", destinationDomain: \"governance\" }"
+    },
+    {
+      "line": 86,
+      "text": "      <div class=\"data-row\"><span>Route map</span><strong>${escapeHtml(Object.values(ACTION_ROUTES).map((item) => `${item.label}: ${titleCase(item.destinationRole)}`).join(\" • \"))}</strong></div>"
+    },
+    {
+      "line": 543,
+      "text": "      routeTarget:"
+    },
+    {
+      "line": 544,
+      "text": "        lane === \"seo\" ? ACTION_ROUTES.seo :"
+    },
+    {
+      "line": 545,
+      "text": "        lane === \"ads\" ? ACTION_ROUTES.ads :"
+    },
+    {
+      "line": 546,
+      "text": "        lane === \"content\" ? ACTION_ROUTES.content :"
+    },
+    {
+      "line": 547,
+      "text": "        ACTION_ROUTES.campaign"
+    },
+    {
+      "line": 851,
+      "text": "  navigateTo,"
+    },
+    {
+      "line": 894,
+      "text": "      navigateTo(\"ai-command\");"
+    },
+    {
+      "line": 913,
+      "text": "              routeSuggestions: []"
+    },
+    {
+      "line": 921,
+      "text": "          destination_role: ACTION_ROUTES.ai.destinationRole,"
+    },
+    {
+      "line": 923,
+      "text": "          destination_service_domain: ACTION_ROUTES.ai.destinationDomain,"
+    },
+    {
+      "line": 931,
+      "text": "              routeSuggestions: []"
+    },
+    {
+      "line": 937,
+      "text": "        navigateTo(\"ai-command\");"
+    },
+    {
+      "line": 946,
+      "text": "  const routeButtons = Array.from(document.querySelectorAll(\"[data-research-route]\"));"
+    },
+    {
+      "line": 947,
+      "text": "  routeButtons.forEach((button) => {"
+    },
+    {
+      "line": 949,
+      "text": "      const target = button.getAttribute(\"data-research-route\") || \"\";"
+    },
+    {
+      "line": 950,
+      "text": "      const action = ACTION_ROUTES[target];"
+    },
+    {
+      "line": 966,
+      "text": "        destination_page: action.route,"
+    },
+    {
+      "line": 974,
+      "text": "          source: \"research-route\","
+    },
+    {
+      "line": 975,
+      "text": "          route_target: action.route,"
+    },
+    {
+      "line": 981,
+      "text": "      setSharedHandoff(projectName, action.route, handoff);"
+    },
+    {
+      "line": 983,
+      "text": "        console.warn(\"Failed to persist research route handoff:\", error.message);"
+    },
+    {
+      "line": 987,
+      "text": "        navigateTo(action.route);"
+    },
+    {
+      "line": 991,
+      "text": "        navigateTo(action.route);"
+    },
+    {
+      "line": 994,
+      "text": "      showMessage?.(`Research handoff routed to ${action.label}.`);"
+    },
+    {
+      "line": 1005,
+      "text": "        `Operationalize this opportunity for ${projectName || \"this project\"}: ${item.title}. Context: ${item.summary}. Build a short action plan for ${item.routeTarget.label}.`"
+    },
+    {
+      "line": 1007,
+      "text": "      navigateTo(item.routeTarget.route);"
+    },
+    {
+      "line": 1008,
+      "text": "      showMessage?.(`Opportunity handoff routed to ${item.routeTarget.label}.`);"
+    },
+    {
+      "line": 1090,
+      "text": "        target: opportunity.routeTarget.label,"
+    },
+    {
+      "line": 1101,
+      "text": "export const researchRoute = {"
+    },
+    {
+      "line": 1119,
+      "text": "    navigateTo,"
+    },
+    {
+      "line": 1137,
+      "text": "      navigateTo,"
+    },
+    {
+      "line": 1520,
+      "text": "                              <span>Best route</span>"
+    },
+    {
+      "line": 1521,
+      "text": "                              <strong>${escapeHtml(item.routeTarget.label)}</strong>"
+    },
+    {
+      "line": 1523,
+      "text": "                            <button class=\"quick-action-btn\" type=\"button\" data-research-opportunity=\"${index}\">Send to ${escapeHtml(item.routeTarget.label)}</button>"
+    },
+    {
+      "line": 1564,
+      "text": "                  <button class=\"quick-action-btn\" type=\"button\" data-research-route=\"campaign\">Route to Campaign Studio</button>"
+    },
+    {
+      "line": 1565,
+      "text": "                  <button class=\"quick-action-btn\" type=\"button\" data-research-route=\"content\">Route to Content Studio</button>"
+    },
+    {
+      "line": 1566,
+      "text": "                  <button class=\"quick-action-btn\" type=\"button\" data-research-route=\"seo\">Route to SEO Workflow</button>"
+    },
+    {
+      "line": 1567,
+      "text": "                  <button class=\"quick-action-btn\" type=\"button\" data-research-route=\"ads\">Route to Ads Manager</button>"
+    },
+    {
+      "line": 1584,
+      "text": "            <button class=\"btn btn-secondary\" type=\"button\" data-research-route=\"ai\">Route to AI Workspace</button>"
+    },
+    {
+      "line": 1601,
+      "text": "      navigateTo,"
+    }
+  ],
+  "disabled_or_readonly_signals": [
+    {
+      "line": 101,
+      "text": "function joinPreview(values, fallback, maxItems = 3) {"
+    },
+    {
+      "line": 152,
+      "text": "    normalized.includes(\"blocked\")"
+    },
+    {
+      "line": 644,
+      "text": "      noteDraft: {"
+    },
+    {
+      "line": 723,
+      "text": "      preview: \"Executive summary across competitors, audience, market, SEO, offers, risks, and next strategic decisions.\","
+    },
+    {
+      "line": 729,
+      "text": "      preview: \"Rank the most attractive market gaps by speed to test, upside, and defensibility.\","
+    },
+    {
+      "line": 735,
+      "text": "      preview: \"Build a sharper positioning angle against the current competitor landscape.\","
+    },
+    {
+      "line": 741,
+      "text": "      preview: \"Turn current research into target topics, landing pages, clusters, and low-competition search plays.\","
+    },
+    {
+      "line": 747,
+      "text": "      preview: \"Translate audience and search intelligence into topics, hooks, formats, and calls to action.\","
+    },
+    {
+      "line": 753,
+      "text": "      preview: \"Generate ad hypotheses, audience emphasis, and first creative tests from the research base.\","
+    },
+    {
+      "line": 759,
+      "text": "      preview: \"Stress-test the launch plan and highlight missing intelligence, mitigation steps, and ownership.\","
+    },
+    {
+      "line": 908,
+      "text": "            draft_context: {"
+    },
+    {
+      "line": 926,
+      "text": "            draft_context: {"
+    },
+    {
+      "line": 1018,
+      "text": "      session.noteDraft.title = event.target.value || \"\";"
+    },
+    {
+      "line": 1024,
+      "text": "      session.noteDraft.body = event.target.value || \"\";"
+    },
+    {
+      "line": 1030,
+      "text": "      session.noteDraft.tags = event.target.value || \"\";"
+    },
+    {
+      "line": 1037,
+      "text": "      if (!session.noteDraft.title.trim() && !session.noteDraft.body.trim()) {"
+    },
+    {
+      "line": 1044,
+      "text": "        title: session.noteDraft.title.trim() || \"Untitled research finding\","
+    },
+    {
+      "line": 1045,
+      "text": "        body: session.noteDraft.body.trim() || \"Observation captured without additional detail.\","
+    },
+    {
+      "line": 1046,
+      "text": "        tags: normalizeStringList(session.noteDraft.tags.split(\",\")),"
+    },
+    {
+      "line": 1051,
+      "text": "      session.noteDraft = { title: \"\", body: \"\", tags: \"\" };"
+    },
+    {
+      "line": 1157,
+      "text": "    const coveragePreview = model.sourceCoverage.slice(0, 6);"
+    },
+    {
+      "line": 1236,
+      "text": "                meta: model.activeResearchAreas.length ? joinPreview(model.activeResearchAreas, \"Waiting for structured inputs\", 4) : \"Waiting for structured inputs\""
+    },
+    {
+      "line": 1332,
+      "text": "                  coveragePreview.length"
+    },
+    {
+      "line": 1334,
+      "text": "                        ${coveragePreview.map((item) => `"
+    },
+    {
+      "line": 1423,
+      "text": "              <input id=\"researchNoteTitle\" class=\"setup-input\" type=\"text\" placeholder=\"Finding title\" value=\"${escapeHtml(session.noteDraft.title)}\" />"
+    },
+    {
+      "line": 1424,
+      "text": "              <textarea id=\"researchNoteBody\" class=\"setup-input setup-textarea\" rows=\"5\" placeholder=\"Capture the key observation, implication, or market signal...\">${escapeHtml(session.noteDraft.body)}</textarea>"
+    },
+    {
+      "line": 1425,
+      "text": "              <input id=\"researchNoteTags\" class=\"setup-input\" type=\"text\" placeholder=\"Tags, comma separated\" value=\"${escapeHtml(session.noteDraft.tags)}\" />"
+    },
+    {
+      "line": 1590,
+      "text": "                <span class=\"home-action-meta\" title=\"${escapeHtml(item.prompt)}\">${escapeHtml(item.preview || compactText(item.prompt, 18, \"\"))}</span>"
+    }
+  ],
+  "risky_terms": [
+    {
+      "line": 1,
+      "text": "import { setSharedHandoff } from \"../shared-context.js\";"
+    },
+    {
+      "line": 15,
+      "text": "  reviewRole: \"strategist\""
+    },
+    {
+      "line": 78,
+      "text": "  const handoffsByRole = asObject(operations.handoffs?.by_role);"
+    },
+    {
+      "line": 79,
+      "text": "  const approvalsByRole = asObject(operations.approvals?.by_reviewer_role);"
+    },
+    {
+      "line": 85,
+      "text": "      <div class=\"data-row\"><span>Review owner</span><strong>${escapeHtml(titleCase(RESEARCH_ROLE_DEFAULTS.reviewRole))}</strong></div>"
+    },
+    {
+      "line": 87,
+      "text": "      <div class=\"data-row\"><span>Analyst inbound</span><strong>${escapeHtml(formatCount(asArray(handoffsByRole[RESEARCH_ROLE_DEFAULTS.ownerRole]).length))}</strong></div>"
+    },
+    {
+      "line": 88,
+      "text": "      <div class=\"data-row\"><span>Strategist review queue</span><strong>${escapeHtml(formatCount(asArray(approvalsByRole[RESEARCH_ROLE_DEFAULTS.reviewRole]).length))}</strong></div>"
+    },
+    {
+      "line": 101,
+      "text": "function joinPreview(values, fallback, maxItems = 3) {"
+    },
+    {
+      "line": 125,
+      "text": "function getPath(source, path) {"
+    },
+    {
+      "line": 126,
+      "text": "  if (!source || !path) return undefined;"
+    },
+    {
+      "line": 127,
+      "text": "  return path.split(\".\").reduce((acc, key) => (acc == null ? undefined : acc[key]), source);"
+    },
+    {
+      "line": 130,
+      "text": "function getFirstPath(sources, paths, fallback = null) {"
+    },
+    {
+      "line": 132,
+      "text": "    for (const source of sources) {"
+    },
+    {
+      "line": 133,
+      "text": "      const value = getPath(source, path);"
+    },
+    {
+      "line": 245,
+      "text": "function buildSourceCoverage(integrations, insights) {"
+    },
+    {
+      "line": 247,
+      "text": "  const sources = asObject(integrations?.sources?.sources);"
+    },
+    {
+      "line": 257,
+      "text": "  const fromIntegrations = Object.keys({ ...sources, ...readinessChecks }).map((id) => {"
+    },
+    {
+      "line": 258,
+      "text": "    const source = asObject(sources[id]);"
+    },
+    {
+      "line": 259,
+      "text": "    const connected = Boolean(readinessChecks[id] || asString(source.value).trim());"
+    },
+    {
+      "line": 265,
+      "text": "        ? firstNonEmpty(source.value, \"Connected and available for research enrichment.\")"
+    },
+    {
+      "line": 307,
+      "text": "  const sourceCoverage = buildSourceCoverage(integrations, insights);"
+    },
+    {
+      "line": 308,
+      "text": "  const researchSources = ["
+    },
+    {
+      "line": 341,
+      "text": "      getFirstPath(researchSources, ["
+    },
+    {
+      "line": 346,
+      "text": "      getFirstPath(researchSources, ["
+    },
+    {
+      "line": 370,
+      "text": "      getFirstPath(researchSources, ["
+    },
+    {
+      "line": 400,
+      "text": "      getFirstPath(researchSources, ["
+    },
+    {
+      "line": 407,
+      "text": "      getFirstPath(researchSources, ["
+    },
+    {
+      "line": 420,
+      "text": "      platform: firstNonEmpty(meta.platform, meta.channel, meta.source)"
+    },
+    {
+      "line": 424,
+      "text": "  const seoSource = asObject(getFirstPath(researchSources, [\"seo\"], {}));"
+    },
+    {
+      "line": 427,
+      "text": "      seoSource.opportunities,"
+    },
+    {
+      "line": 428,
+      "text": "      seoSource.recommendations,"
+    },
+    {
+      "line": 429,
+      "text": "      seoSource.keywords,"
+    },
+    {
+      "line": 430,
+      "text": "      seoSource.top_queries,"
+    },
+    {
+      "line": 431,
+      "text": "      seoSource.queries,"
+    },
+    {
+      "line": 432,
+      "text": "      getFirstPath(researchSources, [\"keyword_research\", \"seo.keywords\"], [])"
+    },
+    {
+      "line": 450,
+      "text": "      seoSource.long_tail_ideas,"
+    },
+    {
+      "line": 451,
+      "text": "      seoSource.long_tail_keywords,"
+    },
+    {
+      "line": 452,
+      "text": "      seoSource.query_expansions"
+    },
+    {
+      "line": 458,
+      "text": "      seoSource.content_themes,"
+    },
+    {
+      "line": 459,
+      "text": "      seoSource.themes,"
+    },
+    {
+      "line": 467,
+      "text": "      seoSource.missing_clusters,"
+    },
+    {
+      "line": 468,
+      "text": "      seoSource.content_gaps,"
+    },
+    {
+      "line": 475,
+      "text": "      seoSource.top_pages_to_optimize,"
+    },
+    {
+      "line": 476,
+      "text": "      seoSource.pages_to_optimize,"
+    },
+    {
+      "line": 477,
+      "text": "      seoSource.ctr_opportunities,"
+    },
+    {
+      "line": 478,
+      "text": "      seoSource.ranking_opportunities"
+    },
+    {
+      "line": 484,
+      "text": "      getFirstPath(researchSources, ["
+    },
+    {
+      "line": 513,
+      "text": "        getFirstPath(researchSources, [\"opportunities\", \"opportunity_map\"], []),"
+    },
+    {
+      "line": 556,
+      "text": "    getFirstPath(researchSources, [\"updated_at\"], \"\"),"
+    },
+    {
+      "line": 567,
+      "text": "    ...sourceCoverage.filter((item) => statusTone(item.status) !== \"success\").slice(0, 4).map((item) => `${item.label} coverage`)"
+    },
+    {
+      "line": 575,
+      "text": "      source: \"Opportunity map\""
+    },
+    {
+      "line": 581,
+      "text": "      source: \"Readiness / insight signal\""
+    },
+    {
+      "line": 587,
+      "text": "      source: \"SEO intelligence\""
+    },
+    {
+      "line": 626,
+      "text": "    sourceCoverage,"
+    },
+    {
+      "line": 649,
+      "text": "      savedFindings: [],"
+    },
+    {
+      "line": 650,
+      "text": "      savedRecommendations: [],"
+    },
+    {
+      "line": 723,
+      "text": "      preview: \"Executive summary across competitors, audience, market, SEO, offers, risks, and next strategic decisions.\","
+    },
+    {
+      "line": 729,
+      "text": "      preview: \"Rank the most attractive market gaps by speed to test, upside, and defensibility.\","
+    },
+    {
+      "line": 735,
+      "text": "      preview: \"Build a sharper positioning angle against the current competitor landscape.\","
+    },
+    {
+      "line": 741,
+      "text": "      preview: \"Turn current research into target topics, landing pages, clusters, and low-competition search plays.\","
+    },
+    {
+      "line": 742,
+      "text": "      prompt: `Review the research and identify the best SEO opportunities for ${projectLabel}. Start with ${topKeyword} and recommend target topics, landing pages, clusters, and low-competition long-tail ideas.`"
+    },
+    {
+      "line": 747,
+      "text": "      preview: \"Translate audience and search intelligence into topics, hooks, formats, and calls to action.\","
+    },
+    {
+      "line": 753,
+      "text": "      preview: \"Generate ad hypotheses, audience emphasis, and first creative tests from the research base.\","
+    },
+    {
+      "line": 759,
+      "text": "      preview: \"Stress-test the launch plan and highlight missing intelligence, mitigation steps, and ownership.\","
+    },
+    {
+      "line": 760,
+      "text": "      prompt: `Review ${projectLabel} research and identify the key risks before launch. Start with ${topRisk}. Include mitigation steps, missing intelligence, and which teams should act next.`"
+    },
+    {
+      "line": 841,
+      "text": "function savePromptToQuickCommand($, prompt) {"
+    },
+    {
+      "line": 856,
+      "text": "  createProjectHandoff,"
+    },
+    {
+      "line": 899,
+      "text": "    button.onclick = async () => {"
+    },
+    {
+      "line": 903,
+      "text": "        setSharedHandoff(projectName, \"ai-command\", {"
+    },
+    {
+      "line": 904,
+      "text": "          source_page: \"research\","
+    },
+    {
+      "line": 917,
+      "text": "        createProjectHandoff?.(projectName, {"
+    },
+    {
+      "line": 918,
+      "text": "          source_page: \"research\","
+    },
+    {
+      "line": 920,
+      "text": "          source_role: RESEARCH_ROLE_DEFAULTS.ownerRole,"
+    },
+    {
+      "line": 922,
+      "text": "          source_service_domain: RESEARCH_ROLE_DEFAULTS.serviceDomain,"
+    },
+    {
+      "line": 935,
+      "text": "          console.warn(\"Failed to persist research AI handoff:\", error.message);"
+    },
+    {
+      "line": 938,
+      "text": "        savePromptToQuickCommand($, prompt.prompt);"
+    },
+    {
+      "line": 962,
+      "text": "                : `Save this research intelligence for ${projectName || \"this project\"} and convert it into structured recommendations: opportunities ${model.marketOpportunities.map((item) => item.title).join(\", \") || \"pending\"}, risks ${model.risks.map((item) => item.title).join(\", \") || \"pending\"}.`;"
+    },
+    {
+      "line": 964,
+      "text": "      const handoff = {"
+    },
+    {
+      "line": 965,
+      "text": "        source_page: \"research\","
+    },
+    {
+      "line": 967,
+      "text": "        source_role: RESEARCH_ROLE_DEFAULTS.ownerRole,"
+    },
+    {
+      "line": 969,
+      "text": "        source_service_domain: RESEARCH_ROLE_DEFAULTS.serviceDomain,"
+    },
+    {
+      "line": 974,
+      "text": "          source: \"research-route\","
+    },
+    {
+      "line": 977,
+      "text": "          review_role: RESEARCH_ROLE_DEFAULTS.reviewRole,"
+    },
+    {
+      "line": 981,
+      "text": "      setSharedHandoff(projectName, action.route, handoff);"
+    },
+    {
+      "line": 982,
+      "text": "      createProjectHandoff?.(projectName, handoff).catch((error) => {"
+    },
+    {
+      "line": 983,
+      "text": "        console.warn(\"Failed to persist research route handoff:\", error.message);"
+    },
+    {
+      "line": 988,
+      "text": "        savePromptToQuickCommand($, prompt);"
+    },
+    {
+      "line": 990,
+      "text": "        savePromptToQuickCommand($, prompt);"
+    },
+    {
+      "line": 994,
+      "text": "      showMessage?.(`Research handoff routed to ${action.label}.`);"
+    },
+    {
+      "line": 1003,
+      "text": "      savePromptToQuickCommand("
+    },
+    {
+      "line": 1008,
+      "text": "      showMessage?.(`Opportunity handoff routed to ${item.routeTarget.label}.`);"
+    },
+    {
+      "line": 1034,
+      "text": "  const saveNoteBtn = $(\"researchSaveFindingBtn\");"
+    },
+    {
+      "line": 1035,
+      "text": "  if (saveNoteBtn) {"
+    },
+    {
+      "line": 1036,
+      "text": "    saveNoteBtn.onclick = () => {"
+    },
+    {
+      "line": 1042,
+      "text": "      session.savedFindings.unshift({"
+    },
+    {
+      "line": 1047,
+      "text": "        source: \"Manual note\","
+    },
+    {
+      "line": 1050,
+      "text": "      session.savedFindings = session.savedFindings.slice(0, 18);"
+    },
+    {
+      "line": 1053,
+      "text": "      showMessage?.(\"Research finding saved.\");"
+    },
+    {
+      "line": 1057,
+      "text": "  const saveBlockButtons = Array.from(document.querySelectorAll(\"[data-save-research-block]\"));"
+    },
+    {
+      "line": 1058,
+      "text": "  saveBlockButtons.forEach((button) => {"
+    },
+    {
+      "line": 1060,
+      "text": "      const item = model.autoFindings[Number(button.getAttribute(\"data-save-research-block\"))];"
+    },
+    {
+      "line": 1062,
+      "text": "      session.savedFindings.unshift({"
+    },
+    {
+      "line": 1067,
+      "text": "        source: item.source,"
+    },
+    {
+      "line": 1070,
+      "text": "      session.savedFindings = uniqueBy(session.savedFindings, (entry) => `${entry.title}:${entry.source}`);"
+    },
+    {
+      "line": 1071,
+      "text": "      session.savedFindings = session.savedFindings.slice(0, 18);"
+    },
+    {
+      "line": 1073,
+      "text": "      showMessage?.(\"Reusable intelligence block saved.\");"
+    },
+    {
+      "line": 1077,
+      "text": "  const saveRecommendationBtn = $(\"researchSaveRecommendationBtn\");"
+    },
+    {
+      "line": 1078,
+      "text": "  if (saveRecommendationBtn) {"
+    },
+    {
+      "line": 1079,
+      "text": "    saveRecommendationBtn.onclick = () => {"
+    },
+    {
+      "line": 1082,
+      "text": "        showError?.(\"No structured opportunity is ready to save yet.\");"
+    },
+    {
+      "line": 1086,
+      "text": "      session.savedRecommendations.unshift({"
+    },
+    {
+      "line": 1093,
+      "text": "      session.savedRecommendations = uniqueBy(session.savedRecommendations, (item) => `${item.title}:${item.target}`);"
+    },
+    {
+      "line": 1094,
+      "text": "      session.savedRecommendations = session.savedRecommendations.slice(0, 12);"
+    },
+    {
+      "line": 1096,
+      "text": "      showMessage?.(\"Structured recommendation saved.\");"
+    },
+    {
+      "line": 1105,
+      "text": "    eyebrow: \"Execute & Grow\","
+    },
+    {
+      "line": 1107,
+      "text": "    description: \"Evidence-backed market intelligence for opportunities, risks, and destination-ready handoffs.\""
+    },
+    {
+      "line": 1124,
+      "text": "    createProjectHandoff"
+    },
+    {
+      "line": 1142,
+      "text": "      createProjectHandoff"
+    },
+    {
+      "line": 1157,
+      "text": "    const coveragePreview = model.sourceCoverage.slice(0, 6);"
+    },
+    {
+      "line": 1224,
+      "text": "              <p class=\"research-section-copy\">Keep this workspace focused on what evidence exists, what is missing, and which destination should receive the next research handoff.</p>"
+    },
+    {
+      "line": 1236,
+      "text": "                meta: model.activeResearchAreas.length ? joinPreview(model.activeResearchAreas, \"Waiting for structured inputs\", 4) : \"Waiting for structured inputs\""
+    },
+    {
+      "line": 1332,
+      "text": "                  coveragePreview.length"
+    },
+    {
+      "line": 1334,
+      "text": "                        ${coveragePreview.map((item) => `"
+    },
+    {
+      "line": 1399,
+      "text": "                ${model.longTailIdeas.length ? `<div class=\"research-chip-groups\"><div class=\"research-chip-row\">${model.longTailIdeas.slice(0, 12).map((item) => `<span class=\"research-chip\">${escapeHtml(item)}</span>`).join(\"\")}</div></div>` : `<div class=\"empty-box\">No long-tail ideas saved yet.</div>`}"
+    },
+    {
+      "line": 1416,
+      "text": "              <h3>Evidence Notes / Saved Findings</h3>"
+    },
+    {
+      "line": 1419,
+      "text": "            <span class=\"card-badge neutral\">${escapeHtml(`${session.savedFindings.length} saved`)}</span>"
+    },
+    {
+      "line": 1426,
+      "text": "              <button id=\"researchSaveFindingBtn\" class=\"btn btn-primary\" type=\"button\">Save Finding</button>"
+    },
+    {
+      "line": 1430,
+      "text": "                <h4 class=\"insights-subtitle\">Saved findings</h4>"
+    },
+    {
+      "line": 1432,
+      "text": "                  session.savedFindings.length"
+    },
+    {
+      "line": 1433,
+      "text": "                    ? `<div class=\"research-saved-list\">"
+    },
+    {
+      "line": 1434,
+      "text": "                        ${session.savedFindings.slice(0, 6).map((item) => `"
+    },
+    {
+      "line": 1441,
+      "text": "                              <span class=\"card-badge neutral\">${escapeHtml(item.source)}</span>"
+    },
+    {
+      "line": 1452,
+      "text": "                    : `<div class=\"empty-box\">No saved findings yet. Use the composer or save one of the reusable insight blocks below.</div>`"
+    },
+    {
+      "line": 1459,
+      "text": "                    ? `<div class=\"research-saved-list\">"
+    },
+    {
+      "line": 1467,
+      "text": "                              <span class=\"card-badge neutral\">${escapeHtml(item.source)}</span>"
+    },
+    {
+      "line": 1473,
+      "text": "                              <button class=\"quick-action-btn research-inline-action\" type=\"button\" data-save-research-block=\"${index}\">Save Block</button>"
+    },
+    {
+      "line": 1491,
+      "text": "            <span class=\"card-badge neutral\">${escapeHtml(`${session.savedRecommendations.length} saved`)}</span>"
+    },
+    {
+      "line": 1523,
+      "text": "                            <button class=\"quick-action-btn\" type=\"button\" data-research-opportunity=\"${index}\">Send to ${escapeHtml(item.routeTarget.label)}</button>"
+    },
+    {
+      "line": 1538,
+      "text": "                <h4 class=\"insights-subtitle\">Saved recommendation</h4>"
+    },
+    {
+      "line": 1539,
+      "text": "                <button id=\"researchSaveRecommendationBtn\" class=\"btn btn-primary\" type=\"button\">Save Recommendation</button>"
+    },
+    {
+      "line": 1541,
+      "text": "                  session.savedRecommendations.length"
+    },
+    {
+      "line": 1542,
+      "text": "                    ? `<div class=\"research-saved-list\" style=\"margin-top:16px;\">"
+    },
+    {
+      "line": 1543,
+      "text": "                        ${session.savedRecommendations.slice(0, 4).map((item) => `"
+    },
+    {
+      "line": 1558,
+      "text": "                    : `<div class=\"empty-box\" style=\"margin-top:16px;\">Save a structured recommendation to keep the best next move accessible for later routing.</div>`"
+    },
+    {
+      "line": 1562,
+      "text": "                <h4 class=\"insights-subtitle\">Destination handoffs</h4>"
+    },
+    {
+      "line": 1578,
+      "text": "              <p class=\"research-section-copy\">Use AI to turn current evidence into a review-ready research brief. AI should deepen the analysis, not replace saved findings or destination handoffs.</p>"
+    },
+    {
+      "line": 1583,
+      "text": "            <button class=\"btn ghost\" type=\"button\" data-research-open>Open AI Workspace Review</button>"
+    },
+    {
+      "line": 1590,
+      "text": "                <span class=\"home-action-meta\" title=\"${escapeHtml(item.prompt)}\">${escapeHtml(item.preview || compactText(item.prompt, 18, \"\"))}</span>"
+    },
+    {
+      "line": 1606,
+      "text": "      createProjectHandoff,"
+    }
+  ]
+}

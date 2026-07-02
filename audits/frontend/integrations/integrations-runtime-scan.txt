@@ -1,0 +1,1319 @@
+public/control-center/pages/integrations/render.js:2:  Integrations OS Render Layer
+public/control-center/pages/integrations/render.js:29:          <button class="btn btn-secondary" type="button" data-integration-select="${esc(rec.nextOptional.id)}">
+public/control-center/pages/integrations/render.js:42:          <h3>Integration layer is healthy</h3>
+public/control-center/pages/integrations/render.js:74:          <span class="card-badge ${esc(card.statusTone)}">${esc(card.statusLabel)}</span>
+public/control-center/pages/integrations/render.js:85:          <button class="btn btn-primary" type="button" data-integration-select="${esc(card.id)}">
+public/control-center/pages/integrations/render.js:95:export function renderIntegrationCoverageItem(item = {}) {
+public/control-center/pages/integrations/render.js:96:  const statusKey = asString(item.status).toLowerCase().replace(/\s+/g, "_");
+public/control-center/pages/integrations/render.js:99:    <article class="integration-coverage-item is-${esc(statusKey)}">
+public/control-center/pages/integrations/render.js:101:      <span>${esc(item.status)}</span>
+public/control-center/pages/integrations/render.js:107:export function renderIntegrationCoverageMap(items = []) {
+public/control-center/pages/integrations/render.js:109:    <section class="integration-coverage-grid">
+public/control-center/pages/integrations/render.js:110:      ${asArray(items).map(renderIntegrationCoverageItem).join("")}
+public/control-center/pages/integrations/render.js:115:export function renderIntegrationRecommendationsList(items = []) {
+public/control-center/pages/integrations/render.js:127:    <div class="integration-critical-list">
+public/control-center/pages/integrations/render.js:129:        <div class="integration-critical-item">
+public/control-center/pages/integrations/render.js:138:export function renderIntegrationCriticalMissing(items = []) {
+public/control-center/pages/integrations/render.js:144:        No critical missing integrations are currently flagged.
+public/control-center/pages/integrations/render.js:150:    <div class="integration-critical-list">
+public/control-center/pages/integrations/render.js:152:        <div class="integration-critical-item">
+public/control-center/pages/integrations/render.js:161:export function renderIntegrationActivityFeed(items = [], formatDateTime = (value) => value) {
+public/control-center/pages/integrations/render.js:167:        No integration events yet. Run a connection test or sync to populate recent activity.
+public/control-center/pages/integrations/render.js:173:    <div class="integration-activity-list">
+public/control-center/pages/integrations/render.js:175:        <div class="integration-activity-item">
+public/control-center/pages/integrations/render.js:176:          <div class="integration-activity-topline">
+public/control-center/pages/integrations/render.js:188:export function renderIntegrationDiagnosticsList(items = [], emptyText = "No diagnostics available.") {
+public/control-center/pages/integrations/render.js:196:    <div class="integration-diagnostic-list">
+public/control-center/pages/integrations/render.js:198:        <div class="integration-diagnostic-item">
+public/control-center/pages/integrations/layout.js:2:  Integrations OS Layout Layer
+public/control-center/pages/integrations/layout.js:10:  renderIntegrationCard
+public/control-center/pages/integrations/layout.js:27:  const attentionCount = cards.filter((card) => ["Error", "Token expired"].includes(card.statusLabel)).length;
+public/control-center/pages/integrations/layout.js:28:  const blockedCount = cards.filter((card) => card.statusLabel === "Not Connected").length;
+public/control-center/pages/integrations/layout.js:33:    <section class="card integration-domain-card">
+public/control-center/pages/integrations/layout.js:41:      <div class="integration-domain-grid">
+public/control-center/pages/integrations/layout.js:42:        ${cards.map((card) => renderIntegrationCard(card, session)).join("")}
+public/control-center/pages/integrations/layout.js:49:  renderIntegrationDetailsPanel
+public/control-center/pages/integrations/layout.js:52:export function renderIntegrationSection(
+public/control-center/pages/integrations/layout.js:78:    cards.find((card) => card.id === asString(session.selectedIntegrationId)) ||
+public/control-center/pages/integrations/layout.js:83:    (card) => card.statusLabel === "Connected"
+public/control-center/pages/integrations/layout.js:87:    ["Partial", "Token expired", "Error"].includes(card.statusLabel)
+public/control-center/pages/integrations/layout.js:91:    (card) => card.statusLabel === "Not Connected"
+public/control-center/pages/integrations/layout.js:95:    <section class="card integration-domain-card">
+public/control-center/pages/integrations/layout.js:109:      <div class="integration-coverage-grid integration-section-status-grid">
+public/control-center/pages/integrations/layout.js:110:        <div class="integration-coverage-item">
+public/control-center/pages/integrations/layout.js:113:          <div class="integration-coverage-meta">
+public/control-center/pages/integrations/layout.js:114:            Ready for test, sync, and provider-backed actions.
+public/control-center/pages/integrations/layout.js:118:        <div class="integration-coverage-item">
+public/control-center/pages/integrations/layout.js:121:          <div class="integration-coverage-meta">
+public/control-center/pages/integrations/layout.js:126:        <div class="integration-coverage-item">
+public/control-center/pages/integrations/layout.js:129:          <div class="integration-coverage-meta">
+public/control-center/pages/integrations/layout.js:135:      <div class="integration-status-group">
+public/control-center/pages/integrations/layout.js:136:        <div class="integration-mini-heading">Connected</div>
+public/control-center/pages/integrations/layout.js:138:        <div class="integration-simple-grid">
+public/control-center/pages/integrations/layout.js:142:                  .map((card) => renderIntegrationCard(card, session))
+public/control-center/pages/integrations/layout.js:144:              : `<div class="empty-box">No connected integrations in this group yet.</div>`
+public/control-center/pages/integrations/layout.js:149:      <div class="integration-status-group">
+public/control-center/pages/integrations/layout.js:150:        <div class="integration-mini-heading">Needs Attention</div>
+public/control-center/pages/integrations/layout.js:152:        <div class="integration-simple-grid">
+public/control-center/pages/integrations/layout.js:156:                  .map((card) => renderIntegrationCard(card, session))
+public/control-center/pages/integrations/layout.js:158:              : `<div class="empty-box">No integrations need attention in this group right now.</div>`
+public/control-center/pages/integrations/layout.js:163:      <div class="integration-status-group">
+public/control-center/pages/integrations/layout.js:164:        <div class="integration-mini-heading">Not Connected</div>
+public/control-center/pages/integrations/layout.js:166:        <div class="integration-simple-grid">
+public/control-center/pages/integrations/layout.js:170:                  .map((card) => renderIntegrationCard(card, session))
+public/control-center/pages/integrations/layout.js:172:              : `<div class="empty-box">All integrations in this group already have a connection state.</div>`
+public/control-center/pages/integrations/layout.js:179:          ? renderIntegrationDetailsPanel(selectedCard, session, {
+public/control-center/pages/integrations/state.js:2:  Integrations OS State Layer
+public/control-center/pages/integrations/state.js:5:  Own integration page session state only.
+public/control-center/pages/integrations/state.js:10:const integrationSessions = new Map();
+public/control-center/pages/integrations/state.js:21:export function ensureIntegrationSession(projectName) {
+public/control-center/pages/integrations/state.js:24:  if (!integrationSessions.has(key)) {
+public/control-center/pages/integrations/state.js:25:    integrationSessions.set(key, {
+public/control-center/pages/integrations/state.js:27:      selectedIntegrationId: "",
+public/control-center/pages/integrations/state.js:29:      statusFilter: "all",
+public/control-center/pages/integrations/state.js:31:      activeDrawerIntegrationId: "",
+public/control-center/pages/integrations/state.js:33:      validationIntegrationId: "",
+public/control-center/pages/integrations/state.js:39:  return integrationSessions.get(key);
+public/control-center/pages/integrations/state.js:42:export function openIntegrationDrawer(session, integrationId) {
+public/control-center/pages/integrations/state.js:43:  session.selectedIntegrationId = integrationId || "";
+public/control-center/pages/integrations/state.js:44:  session.activeDrawerIntegrationId = integrationId || "";
+public/control-center/pages/integrations/state.js:45:  session.drawerOpen = Boolean(integrationId);
+public/control-center/pages/integrations/state.js:48:export function closeIntegrationDrawer(session) {
+public/control-center/pages/integrations/state.js:50:  session.activeDrawerIntegrationId = "";
+public/control-center/pages/integrations/state.js:51:  session.validationIntegrationId = "";
+public/control-center/pages/integrations/state.js:56:export function setIntegrationValidation(session, integrationId, fieldKey, message) {
+public/control-center/pages/integrations/state.js:57:  session.validationIntegrationId = integrationId || "";
+public/control-center/pages/integrations/state.js:62:export function clearIntegrationValidation(session, integrationId, fieldKey) {
+public/control-center/pages/integrations/state.js:63:  const sameIntegration = !integrationId || session.validationIntegrationId === integrationId;
+public/control-center/pages/integrations/state.js:66:  if (!sameIntegration || !sameField) return;
+public/control-center/pages/integrations/state.js:68:  session.validationIntegrationId = "";
+public/control-center/pages/integrations/state.js:73:export function ensureIntegrationDraft(session, integrationId) {
+public/control-center/pages/integrations/state.js:74:  if (!session.drafts[integrationId]) {
+public/control-center/pages/integrations/state.js:75:    session.drafts[integrationId] = {};
+public/control-center/pages/integrations/state.js:78:  return session.drafts[integrationId];
+public/control-center/pages/integrations/state.js:81:export function clearIntegrationDraft(session, integrationId) {
+public/control-center/pages/integrations/state.js:82:  delete session.drafts[integrationId];
+public/control-center/pages/integrations/state.js:85:export function setIntegrationFieldValue(session, integrationId, fieldKey, value) {
+public/control-center/pages/integrations/state.js:86:  const draft = ensureIntegrationDraft(session, integrationId);
+public/control-center/pages/integrations/state.js:90:export function getIntegrationSessionsForDebug() {
+public/control-center/pages/integrations/state.js:91:  return integrationSessions;
+public/control-center/pages/integrations/drawer.js:2:  Integrations OS Drawer
+public/control-center/pages/integrations/drawer.js:22:export function renderIntegrationField(integrationId, field = {}, value = "", options = {}) {
+public/control-center/pages/integrations/drawer.js:27:    <div class="integration-field-group${invalidClass}" data-integration-field-group="${esc(integrationId)}:${esc(field.key)}">
+public/control-center/pages/integrations/drawer.js:28:      <div class="integration-field-head">
+public/control-center/pages/integrations/drawer.js:29:        <label class="setup-label" for="integration-${esc(integrationId)}-${esc(field.key)}">${esc(field.label)}</label>
+public/control-center/pages/integrations/drawer.js:30:        ${options.suggestion ? `<span class="integration-field-chip">Suggested from Setup</span>` : ""}
+public/control-center/pages/integrations/drawer.js:33:        id="integration-${esc(integrationId)}-${esc(field.key)}"
+public/control-center/pages/integrations/drawer.js:40:        data-integration-field="${esc(integrationId)}"
+public/control-center/pages/integrations/drawer.js:43:      ${options.invalid ? `<div class="integration-field-error">${esc(options.invalidMessage || "Complete this field before continuing.")}</div>` : ""}
+public/control-center/pages/integrations/drawer.js:44:      <div class="setup-helper" data-integration-field-helper="${esc(integrationId)}:${esc(field.key)}"></div>
+public/control-center/pages/integrations/drawer.js:52:  const stepTwoComplete = Boolean(card.lastTest) || card.statusLabel === "Connected";
+public/control-center/pages/integrations/drawer.js:53:  const stepThreeComplete = card.statusLabel === "Connected";
+public/control-center/pages/integrations/drawer.js:74:        ? "Provider is active in the Control Center."
+public/control-center/pages/integrations/drawer.js:80:    <div class="integration-drawer-progress">
+public/control-center/pages/integrations/drawer.js:82:        <div class="integration-progress-step is-${esc(step.state)}">
+public/control-center/pages/integrations/drawer.js:96:  if (card.statusLabel === "Connected") {
+public/control-center/pages/integrations/drawer.js:100:  if (["Partial", "Token expired", "Error"].includes(card.statusLabel)) {
+public/control-center/pages/integrations/drawer.js:104:  return { action: "connect", label: `Connect ${card.label || "Integration"}` };
+public/control-center/pages/integrations/drawer.js:119:export function renderIntegrationActionButtons(card = {}) {
+public/control-center/pages/integrations/drawer.js:121:    return `<div class="integration-side-note">${esc(card.unavailableReason || "Backend provider support is not configured yet.")}</div>`;
+public/control-center/pages/integrations/drawer.js:128:    <button class="quick-action-btn quick-action-btn--primary" type="button" data-integration-action="${esc(primary.action)}" data-integration-id="${esc(card.id)}">${esc(primary.label)}</button>
+public/control-center/pages/integrations/drawer.js:129:    <button class="quick-action-btn" type="button" data-integration-action="test" data-integration-id="${esc(card.id)}">Test Connection</button>
+public/control-center/pages/integrations/drawer.js:130:    ${card.statusLabel === "Connected" ? `<button class="quick-action-btn" type="button" data-integration-action="sync" data-integration-id="${esc(card.id)}">Sync Now</button>` : ""}
+public/control-center/pages/integrations/drawer.js:131:    ${quickConnectLabel && card.statusLabel !== "Connected" ? `<div class="integration-quick-connect-note">OAuth-style quick connect is the recommended path for this provider. Manual fields remain available as fallback.</div>` : ""}
+public/control-center/pages/integrations/drawer.js:153:export function renderIntegrationDetailsPanel(
+public/control-center/pages/integrations/drawer.js:170:      renderIntegrationField(
+public/control-center/pages/integrations/drawer.js:183:            session.validationIntegrationId === card.id &&
+public/control-center/pages/integrations/drawer.js:203:      renderIntegrationField(
+public/control-center/pages/integrations/drawer.js:234:        `<span class="integration-scope-pill">${esc(
+public/control-center/pages/integrations/drawer.js:241:    <section class="card integration-hub-card${isDrawer ? " integration-hub-card--drawer" : ""}">
+public/control-center/pages/integrations/drawer.js:242:      <div class="integration-hub-head">
+public/control-center/pages/integrations/drawer.js:243:        <div class="integration-hub-title-wrap">
+public/control-center/pages/integrations/drawer.js:244:          <div class="integration-hub-icon">${esc(card.icon)}</div>
+public/control-center/pages/integrations/drawer.js:251:        <div class="integration-hub-head-actions">
+public/control-center/pages/integrations/drawer.js:252:          <span class="card-badge ${esc(card.statusTone)}">${esc(card.statusLabel)}</span>
+public/control-center/pages/integrations/drawer.js:254:            ? `<button class="btn btn-secondary integration-drawer-close-btn" type="button" data-integration-drawer-close="close">Close</button>`
+public/control-center/pages/integrations/drawer.js:259:      <div class="integration-hub-intro">
+public/control-center/pages/integrations/drawer.js:260:        <div class="integration-hub-why">
+public/control-center/pages/integrations/drawer.js:261:          <strong>Status</strong>
+public/control-center/pages/integrations/drawer.js:265:        <div class="integration-hub-why">
+public/control-center/pages/integrations/drawer.js:273:      <div class="integration-hub-grid">
+public/control-center/pages/integrations/drawer.js:275:          <div class="integration-mini-heading">Required fields</div>
+public/control-center/pages/integrations/drawer.js:277:          <div class="integration-field-grid">
+public/control-center/pages/integrations/drawer.js:282:            session.validationIntegrationId === card.id &&
+public/control-center/pages/integrations/drawer.js:284:              ? `<div class="integration-drawer-validation">${esc(
+public/control-center/pages/integrations/drawer.js:293:                <details class="integration-optional-fields">
+public/control-center/pages/integrations/drawer.js:296:                  <div class="integration-field-grid integration-field-grid--optional">
+public/control-center/pages/integrations/drawer.js:304:          ${credentialItems ? `<div class="integration-scope-row">${credentialItems}</div>` : ""}
+public/control-center/pages/integrations/drawer.js:306:          <div class="integration-side-note">
+public/control-center/pages/integrations/drawer.js:312:        <div class="integration-side-panel">
+public/control-center/pages/integrations/drawer.js:314:            <div class="data-row"><span>Status</span><strong>${esc(card.statusLabel)}</strong></div>
+public/control-center/pages/integrations/drawer.js:316:            <div class="data-row"><span>Last sync</span><strong>${esc(formatDrawerDate(card.lastSync))}</strong></div>
+public/control-center/pages/integrations/drawer.js:321:          <div class="integration-side-note">${esc(card.notes)}</div>
+public/control-center/pages/integrations/drawer.js:325:              ? `<div class="integration-side-note">${esc(
+public/control-center/pages/integrations/drawer.js:333:      <div class="integration-action-row">
+public/control-center/pages/integrations/drawer.js:334:        ${renderIntegrationActionButtons(card)}
+public/control-center/pages/integrations/drawer.js:340:export function renderIntegrationDrawer(card = null, session = {}, options = {}) {
+public/control-center/pages/integrations/drawer.js:341:  if (!card || !session.drawerOpen || session.activeDrawerIntegrationId !== card.id) {
+public/control-center/pages/integrations/drawer.js:351:    <div class="integration-drawer-layer is-open" data-integration-drawer-layer>
+public/control-center/pages/integrations/drawer.js:353:        class="integration-drawer-backdrop"
+public/control-center/pages/integrations/drawer.js:356:        data-integration-drawer-close="backdrop"
+public/control-center/pages/integrations/drawer.js:360:        class="integration-drawer"
+public/control-center/pages/integrations/drawer.js:364:        data-integration-drawer
+public/control-center/pages/integrations/drawer.js:366:        ${renderIntegrationDetailsPanel(card, session, { mode: "drawer", getFieldValue })}
+public/control-center/pages/integrations/utils.js:2:  Integrations OS Utilities
+public/control-center/pages/integrations/utils.js:71:export function formatStatusLabel(status) {
+public/control-center/pages/integrations/utils.js:72:  const value = normalizeText(status);
+public/control-center/pages/integrations/utils.js:84:    case "syncing":
+public/control-center/pages/integrations/utils.js:85:      return "Syncing";
+public/control-center/pages/integrations/utils.js:92:export function buildIntegrationSearchText(integration) {
+public/control-center/pages/integrations/utils.js:93:  const item = asObject(integration);
+public/control-center/pages/integrations/utils.js:99:    item.provider,
+public/control-center/pages/integrations/utils.js:100:    item.status
+public/control-center/pages/integrations/builders.js:2:  Integrations OS Builders Layer
+public/control-center/pages/integrations/builders.js:13:    connected: list.filter((card) => card.statusLabel === "Connected").length,
+public/control-center/pages/integrations/builders.js:14:    notConnected: list.filter((card) => card.statusLabel === "Not Connected").length,
+public/control-center/pages/integrations/builders.js:16:      ["Partial", "Token expired", "Error"].includes(card.statusLabel)
+public/control-center/pages/integrations/builders.js:59:    const connected = cards.filter((card) => card.statusLabel === "Connected").length;
+public/control-center/pages/integrations/builders.js:61:      ["Partial", "Token expired", "Error"].includes(card.statusLabel)
+public/control-center/pages/integrations/builders.js:64:    const status =
+public/control-center/pages/integrations/builders.js:73:      status,
+public/control-center/pages/integrations/builders.js:85:      card.statusLabel !== "Connected"
+public/control-center/pages/integrations/builders.js:90:      meta: `${card.domainTitle} • ${card.statusLabel} • ${card.whyItMatters}`
+public/control-center/pages/integrations/builders.js:101:    (card) => card.critical && card.statusLabel !== "Connected"
+public/control-center/pages/integrations/builders.js:104:    ["Token expired", "Error"].includes(card.statusLabel)
+public/control-center/pages/integrations/builders.js:106:  const partial = actionableCards.filter((card) => card.statusLabel === "Partial");
+public/control-center/pages/integrations/builders.js:107:  const missingCoverage = coverageMap.filter((item) => item.status !== "Covered");
+public/control-center/pages/integrations/builders.js:121:      meta: `${reconnectNeeded[0].label} needs attention before sync and intelligence coverage can be trusted.`
+public/control-center/pages/integrations/builders.js:127:      title: "Finish partially configured integrations",
+public/control-center/pages/integrations/builders.js:128:      meta: `${partial.length} integration${partial.length === 1 ? "" : "s"} have staged values but are not fully connected yet.`
+public/control-center/pages/integrations/builders.js:144:      title: "Integration layer is structurally healthy",
+public/control-center/pages/integrations/builders.js:145:      meta: "Best next step: attach provider-specific OAuth validation and background sync jobs to the existing integration routes."
+public/control-center/pages/integrations/builders.js:152:      prompt: "Review all current integrations and tell me which platform or tool I should connect next to improve learning, attribution, and execution fastest."
+public/control-center/pages/integrations/builders.js:155:      label: "Which integrations are critical before launch?",
+public/control-center/pages/integrations/builders.js:156:      prompt: "Identify the critical missing integrations before launch and explain which ones block publishing, analytics, SEO, paid optimization, and conversion intelligence."
+public/control-center/pages/integrations/builders.js:160:      prompt: "Explain what is missing from the current SEO and Search Console integration coverage and what should be connected or configured next."
+public/control-center/pages/integrations/builders.js:164:      prompt: "Review the current analytics, tracking, website, and paid integrations and tell me what is blocking full attribution across content, ads, and conversion tracking."
+public/control-center/pages/integrations/builders.js:168:      prompt: "Review the integrations layer and tell me which tools and data sources are still needed before paid media optimization can be trusted."
+public/control-center/pages/integrations/builders.js:183:    description: "Organic distribution surfaces that supply audience, content, and publishing signals.",
+public/control-center/pages/integrations/builders.js:218:export function getConnectorWorkspaceStatus(card = {}) {
+public/control-center/pages/integrations/builders.js:219:  if (card.statusLabel === "Connected") return "connected";
+public/control-center/pages/integrations/builders.js:220:  if (["Error", "Token expired"].includes(card.statusLabel)) return "failed";
+public/control-center/pages/integrations/builders.js:221:  if (card.statusLabel === "Partial") return "needs_setup";
+public/control-center/pages/integrations/builders.js:225:export function getConnectorWorkspaceStatusLabel(statusKey = "") {
+public/control-center/pages/integrations/builders.js:226:  if (statusKey === "needs_setup") return "Needs setup";
+public/control-center/pages/integrations/builders.js:228:  return String(statusKey)
+public/control-center/pages/integrations/builders.js:254:export function buildIntegrationOverviewSummary(cards = [], recommendations = {}) {
+public/control-center/pages/integrations/builders.js:260:  const totalIntegrations = list.length;
+public/control-center/pages/integrations/builders.js:261:  const connectedIntegrations = list.filter((card) => getConnectorWorkspaceStatus(card) === "connected").length;
+public/control-center/pages/integrations/builders.js:262:  const missingRequired = requiredCards.filter((card) => getConnectorWorkspaceStatus(card) !== "connected").length;
+public/control-center/pages/integrations/builders.js:263:  const failedOrDisconnected = list.filter((card) => ["failed", "missing"].includes(getConnectorWorkspaceStatus(card))).length;
+public/control-center/pages/integrations/builders.js:264:  const blockerCount = requiredCards.filter((card) => card.critical && getConnectorWorkspaceStatus(card) !== "connected").length;
+public/control-center/pages/integrations/builders.js:265:  const warningCount = requiredCards.filter((card) => getConnectorWorkspaceStatus(card) === "needs_setup").length;
+public/control-center/pages/integrations/builders.js:267:  let launchReadinessImpact = "Launch-ready from an integrations perspective.";
+public/control-center/pages/integrations/builders.js:272:    launchReadinessImpact = `${warningCount} required connector${warningCount === 1 ? "" : "s"} still need setup before diagnostics can be trusted.`;
+public/control-center/pages/integrations/builders.js:278:    totalIntegrations,
+public/control-center/pages/integrations/builders.js:279:    connectedIntegrations,
+public/control-center/pages/integrations/builders.js:287:export function buildLaunchDiagnostics(cards = []) {
+public/control-center/pages/integrations/builders.js:297:      ["missing", "failed"].includes(getConnectorWorkspaceStatus(card))
+public/control-center/pages/integrations/builders.js:306:    .filter((card) => getConnectorWorkspaceStatus(card) === "needs_setup")
+public/control-center/pages/integrations/builders.js:320:          .filter((card) => getConnectorWorkspaceStatus(card) !== "connected")
+public/control-center/pages/integrations/builders.js:333:  const statusFilter = String(session.statusFilter || "").trim().toLowerCase() || "all";
+public/control-center/pages/integrations/builders.js:340:        .filter((card) => statusFilter === "all" || getConnectorWorkspaceStatus(card) === statusFilter)
+public/control-center/pages/integrations/builders.js:353:        connectedCount: groupCards.filter((card) => getConnectorWorkspaceStatus(card) === "connected").length,
+public/control-center/pages/integrations/builders.js:354:        failedCount: groupCards.filter((card) => getConnectorWorkspaceStatus(card) === "failed").length,
+public/control-center/pages/integrations/builders.js:355:        missingCount: groupCards.filter((card) => getConnectorWorkspaceStatus(card) === "missing").length,
+public/control-center/pages/integrations/builders.js:356:        setupCount: groupCards.filter((card) => getConnectorWorkspaceStatus(card) === "needs_setup").length
+public/control-center/pages/integrations/builders.js:367:  if (/(connected|sync|tested|passed|healthy|ready|imported)/.test(text)) return "success";
+public/control-center/pages/integrations/builders.js:372:export function buildIntegrationActivityFeed(controlCenter = {}, cards = []) {
+public/control-center/pages/integrations/builders.js:382:    ...(Array.isArray(controlCenter.recent_syncs) ? controlCenter.recent_syncs : []),
+public/control-center/pages/integrations/builders.js:387:      id: String(item.id || item.event_id || item.sync_id || `real-${index}`),
+public/control-center/pages/integrations/builders.js:388:      title: String(item.title || item.summary || item.message || item.event || item.type || "Integration event"),
+public/control-center/pages/integrations/builders.js:389:      detail: String(item.detail || item.notes || item.status || item.result || item.connector || item.integration_id || ""),
+public/control-center/pages/integrations/builders.js:391:      tone: mapActivityTone(item.status || item.level || item.type || item.result),
+public/control-center/pages/integrations/builders.js:406:      if (card.lastSync) {
+public/control-center/pages/integrations/builders.js:408:          id: `${card.id}-sync`,
+public/control-center/pages/integrations/builders.js:409:          title: `${card.label} sync checkpoint`,
+public/control-center/pages/integrations/builders.js:410:          detail: "Derived from the latest connector sync timestamp.",
+public/control-center/pages/integrations/builders.js:411:          timestamp: card.lastSync,
+public/control-center/pages/integrations/builders.js:439:      if (["Error", "Token expired"].includes(card.statusLabel)) {
+public/control-center/pages/integrations/builders.js:444:          timestamp: String(card.record?.updated_at || card.lastTest || card.lastSync || card.lastImport || ""),
+public/control-center/pages/integrations/builders.js:471:      description: "Audience and publishing platforms used for organic reach, social engagement, and content performance learning.",
+public/control-center/pages/integrations/builders.js:489:      description: "Automation and coordination tools that help orchestrate tasks, handoffs, notifications, and AI-assisted operations.",
+public/control-center/pages/integrations/builders.js:514:    criticalCards.every((card) => card.statusLabel === "Connected");
+public/control-center/pages/integrations/builders.js:519:    (card) => card.critical && ["Error", "Token expired"].includes(card.statusLabel)
+public/control-center/pages/integrations/builders.js:523:    targetCard = actionableCards.find((card) => card.id === "website" && card.statusLabel !== "Connected") || null;
+public/control-center/pages/integrations/builders.js:527:    targetCard = actionableCards.find((card) => card.id === "woocommerce" && card.statusLabel !== "Connected") || null;
+public/control-center/pages/integrations/builders.js:531:    targetCard = actionableCards.find((card) => card.id === "ga4" && card.statusLabel !== "Connected") || null;
+public/control-center/pages/integrations/builders.js:535:    targetCard = actionableCards.find((card) => card.id === "search-console" && card.statusLabel !== "Connected") || null;
+public/control-center/pages/integrations/builders.js:539:    targetCard = actionableCards.find((card) => ["instagram", "facebook"].includes(card.id) && card.statusLabel !== "Connected") || null;
+public/control-center/pages/integrations/builders.js:543:    targetCard = actionableCards.find((card) => card.id === "meta-pixel" && card.statusLabel !== "Connected") || null;
+public/control-center/pages/integrations/builders.js:547:    targetCard = actionableCards.find((card) => ["smtp", "mailer", "mailchimp"].includes(card.id) && card.statusLabel !== "Connected") || null;
+public/control-center/pages/integrations/builders.js:551:    targetCard = actionableCards.find((card) => card.critical && card.statusLabel !== "Connected") || null;
+public/control-center/pages/integrations/builders.js:555:    const nextOptional = actionableCards.find((card) => !card.critical && card.statusLabel !== "Connected") || null;
+public/control-center/pages/integrations/builders.js:565:    publishing_blocker: ["instagram", "facebook", "tiktok", "youtube", "linkedin"],
+public/control-center/pages/integrations/builders.js:581:    publishing_blocker: "Publishing blocker",
+public/control-center/pages/integrations/builders.js:596:    impactChips.push("Publishing");
+public/control-center/pages/integrations/builders.js:619:export function buildSuggestedValues(state = {}, integration = {}, options = {}) {
+public/control-center/pages/integrations/builders.js:625:  const fields = Array.isArray(integration.fields) ? integration.fields : [];
+public/control-center/pages/integrations/builders.js:628:    const suggested = getSuggestedFieldValue(state, integration, field);
+public/control-center/pages/integrations/builders.js:638:export function buildLegacyFallbackRecord(integration = {}, state = {}, options = {}) {
+public/control-center/pages/integrations/builders.js:639:  const shouldSyncLegacySource =
+public/control-center/pages/integrations/builders.js:640:    typeof options.shouldSyncLegacySource === "function"
+public/control-center/pages/integrations/builders.js:641:      ? options.shouldSyncLegacySource
+public/control-center/pages/integrations/builders.js:654:  const getIntegrationAccessModel =
+public/control-center/pages/integrations/builders.js:655:    typeof options.getIntegrationAccessModel === "function"
+public/control-center/pages/integrations/builders.js:656:      ? options.getIntegrationAccessModel
+public/control-center/pages/integrations/builders.js:674:  if (!shouldSyncLegacySource(integration)) {
+public/control-center/pages/integrations/builders.js:679:  const value = getLegacySourceValue(integration, sources);
+public/control-center/pages/integrations/builders.js:685:  const accessModel = getIntegrationAccessModel(integration);
+public/control-center/pages/integrations/builders.js:686:  const sourceRecord = asObject(sources[integration.sourceKey]);
+public/control-center/pages/integrations/builders.js:689:    integration_id: integration.id,
+public/control-center/pages/integrations/builders.js:690:    source_key: integration.sourceKey,
+public/control-center/pages/integrations/builders.js:691:    status: "connected",
+public/control-center/pages/integrations/builders.js:692:    status_label: "Connected",
+public/control-center/pages/integrations/builders.js:693:    primary_field: integration.primaryField,
+public/control-center/pages/integrations/builders.js:697:    data_scopes: inferScopeKeys(integration),
+public/control-center/pages/integrations/builders.js:700:    permission_scope: integration.permissionScope,
+public/control-center/pages/integrations/builders.js:701:    enables: integration.enables,
+public/control-center/pages/integrations/builders.js:703:    notes: "This integration is currently inferred from the legacy project source mapping.",
+public/control-center/pages/integrations/builders.js:704:    last_sync_at: asString(sourceRecord.updated_at),
+public/control-center/pages/integrations/builders.js:712:  const buildIntegrationCardModel =
+public/control-center/pages/integrations/builders.js:713:    typeof options.buildIntegrationCardModel === "function"
+public/control-center/pages/integrations/builders.js:714:      ? options.buildIntegrationCardModel
+public/control-center/pages/integrations/builders.js:715:      : (integration) => integration;
+public/control-center/pages/integrations/builders.js:718:    const integrations = Array.isArray(domain.integrations) ? domain.integrations : [];
+public/control-center/pages/integrations/builders.js:720:    const cards = integrations.map((integration) =>
+public/control-center/pages/integrations/builders.js:721:      buildIntegrationCardModel(
+public/control-center/pages/integrations/builders.js:723:          ...integration,
+public/control-center/pages/integrations/builders.js:732:    const connectedCount = cards.filter((card) => card.statusLabel === "Connected").length;
+public/control-center/pages/integrations/builders.js:733:    const partialCount = cards.filter((card) => card.statusLabel === "Partial").length;
+public/control-center/pages/integrations/builders.js:735:      ["Not Connected", "Error", "Token expired"].includes(card.statusLabel)
+public/control-center/pages/integrations/builders.js:748:export function buildIntegrationCardModel(integration = {}, session = {}, state = {}, options = {}) {
+public/control-center/pages/integrations/builders.js:752:  const unsupportedIntegrationIds = options.unsupportedIntegrationIds instanceof Set ? options.unsupportedIntegrationIds : new Set();
+public/control-center/pages/integrations/builders.js:753:  const normalizeStatusLabel = typeof options.normalizeStatusLabel === "function" ? options.normalizeStatusLabel : (value) => value || "Not Connected";
+public/control-center/pages/integrations/builders.js:756:  const getIntegrationAccessModel = typeof options.getIntegrationAccessModel === "function" ? options.getIntegrationAccessModel : () => ({ read: [], write: [] });
+public/control-center/pages/integrations/builders.js:766:  const sourceValue = getLegacySourceValue(integration, getLegacySources(state));
+public/control-center/pages/integrations/builders.js:767:  const record = getServerRecord(state, integration);
+public/control-center/pages/integrations/builders.js:768:  const backendSupported = integration.backendSupported !== false && !unsupportedIntegrationIds.has(integration.id);
+public/control-center/pages/integrations/builders.js:769:  const statusLabel = backendSupported
+public/control-center/pages/integrations/builders.js:770:    ? normalizeStatusLabel(record.status_label || record.status)
+public/control-center/pages/integrations/builders.js:772:  const localFillCount = getLocalFillCount(session, integration, record, sourceValue, state);
+public/control-center/pages/integrations/builders.js:773:  const missingRequired = getRequiredMissing(session, integration, record, sourceValue, state);
+public/control-center/pages/integrations/builders.js:774:  const totalFields = Array.isArray(integration.fields) ? integration.fields.length : 0;
+public/control-center/pages/integrations/builders.js:775:  const accessModel = getIntegrationAccessModel(integration);
+public/control-center/pages/integrations/builders.js:779:    : inferScopeKeys(integration).map(titleCase);
+public/control-center/pages/integrations/builders.js:780:  const suggestedValues = buildSuggestedValuesFn(state, integration, { getSuggestedFieldValue });
+public/control-center/pages/integrations/builders.js:783:    ...integration,
+public/control-center/pages/integrations/builders.js:787:    statusLabel,
+public/control-center/pages/integrations/builders.js:788:    statusKey: statusLabel.toLowerCase().replace(/\s+/g, "_"),
+public/control-center/pages/integrations/builders.js:789:    statusTone:
+public/control-center/pages/integrations/builders.js:790:      statusLabel === "Connected" ? "success" :
+public/control-center/pages/integrations/builders.js:791:      statusLabel === "Unavailable" ? "danger" :
+public/control-center/pages/integrations/builders.js:792:      statusLabel === "Partial" ? "warning" :
+public/control-center/pages/integrations/builders.js:793:      statusLabel === "Token expired" ? "warning" :
+public/control-center/pages/integrations/builders.js:794:      statusLabel === "Error" ? "danger" :
+public/control-center/pages/integrations/builders.js:803:    lastSync: asString(record.last_sync_at),
+public/control-center/pages/integrations/builders.js:806:    healthSummary: getHealthSummary(statusLabel, record, integration),
+public/control-center/pages/integrations/builders.js:808:      ? (asString(integration.unavailableReason) || "Backend provider support is not configured yet.")
+public/control-center/pages/integrations/builders.js:809:      : asString(record.notes) || (integration.critical && statusLabel !== "Connected"
+public/control-center/pages/integrations/builders.js:810:        ? "Critical integration missing for full system capability."
+public/control-center/pages/integrations/builders.js:811:        : "Credentials are saved server-side and only masked status returns to the UI."),
+public/control-center/pages/integrations/builders.js:814:    permissionScopeSummary: asString(record.permission_scope) || integration.permissionScope,
+public/control-center/pages/integrations/builders.js:815:    enablesSummary: asString(record.enables) || integration.enables
+public/control-center/pages/integrations/diagnostics.js:2:  Integrations OS Diagnostics
+public/control-center/pages/integrations/diagnostics.js:4:  Pure diagnostic helpers only.
+public/control-center/pages/integrations/diagnostics.js:17:export function normalizeIntegrationRecord(record = {}) {
+public/control-center/pages/integrations/diagnostics.js:21:    id: asString(item.id || item.key || item.provider),
+public/control-center/pages/integrations/diagnostics.js:22:    provider: asString(item.provider || item.name),
+public/control-center/pages/integrations/diagnostics.js:23:    label: asString(item.label || item.name || item.provider),
+public/control-center/pages/integrations/diagnostics.js:24:    status: normalizeStatus(item.status),
+public/control-center/pages/integrations/diagnostics.js:26:    sync_success_rate: clampScore(item.sync_success_rate),
+public/control-center/pages/integrations/diagnostics.js:27:    last_sync_at: asString(item.last_sync_at),
+public/control-center/pages/integrations/diagnostics.js:33:    diagnostics: asArray(item.diagnostics)
+public/control-center/pages/integrations/diagnostics.js:37:export function normalizeStatus(status) {
+public/control-center/pages/integrations/diagnostics.js:38:  const value = asString(status).trim().toLowerCase();
+public/control-center/pages/integrations/diagnostics.js:85:export function buildDiagnosticsSummary(records = []) {
+public/control-center/pages/integrations/diagnostics.js:86:  const items = asArray(records).map(normalizeIntegrationRecord);
+public/control-center/pages/integrations/diagnostics.js:111:    switch (item.status) {
+public/control-center/pages/integrations/diagnostics.js:137:export function detectCriticalProviders(records = []) {
+public/control-center/pages/integrations/diagnostics.js:139:    .map(normalizeIntegrationRecord)
+public/control-center/pages/integrations/diagnostics.js:140:    .filter((item) => item.status === "critical");
+public/control-center/pages/integrations/diagnostics.js:143:export function detectSlowProviders(
+public/control-center/pages/integrations/diagnostics.js:148:    .map(normalizeIntegrationRecord)
+public/control-center/pages/integrations/diagnostics.js:154:export function detectSyncFailures(records = []) {
+public/control-center/pages/integrations/diagnostics.js:156:    .map(normalizeIntegrationRecord)
+public/control-center/pages/integrations/cards.js:2:  Integrations OS Cards
+public/control-center/pages/integrations/cards.js:13:  formatStatusLabel
+public/control-center/pages/integrations/cards.js:17:  normalizeIntegrationRecord
+public/control-center/pages/integrations/cards.js:18:} from "./diagnostics.js";
+public/control-center/pages/integrations/cards.js:28:export function renderIntegrationStatusBadge(status) {
+public/control-center/pages/integrations/cards.js:29:  const normalized = asString(status || "unknown").toLowerCase();
+public/control-center/pages/integrations/cards.js:30:  const label = formatStatusLabel(normalized);
+public/control-center/pages/integrations/cards.js:33:    <span class="integration-status-badge is-${esc(normalized)}">
+public/control-center/pages/integrations/cards.js:39:export function renderIntegrationMetric(label, value, tone = "neutral") {
+public/control-center/pages/integrations/cards.js:41:    <span class="integration-card-metric is-${esc(tone)}">
+public/control-center/pages/integrations/cards.js:48:export function renderIntegrationStatusCard(record = {}) {
+public/control-center/pages/integrations/cards.js:49:  const item = normalizeIntegrationRecord(record);
+public/control-center/pages/integrations/cards.js:60:      class="integration-os-card is-${esc(item.status)}"
+public/control-center/pages/integrations/cards.js:61:      data-integration-card="${esc(item.id)}"
+public/control-center/pages/integrations/cards.js:63:      <header class="integration-os-card-head">
+public/control-center/pages/integrations/cards.js:65:          <span class="integration-card-provider">
+public/control-center/pages/integrations/cards.js:66:            ${esc(item.provider || "Provider")}
+public/control-center/pages/integrations/cards.js:68:          <h3>${esc(item.label || item.id || "Integration")}</h3>
+public/control-center/pages/integrations/cards.js:71:        ${renderIntegrationStatusBadge(item.status)}
+public/control-center/pages/integrations/cards.js:74:      <div class="integration-card-metrics">
+public/control-center/pages/integrations/cards.js:75:        ${renderIntegrationMetric("Health", `${item.health_score}%`, healthTone)}
+public/control-center/pages/integrations/cards.js:76:        ${renderIntegrationMetric("Sync", `${item.sync_success_rate}%`, item.sync_success_rate >= 80 ? "success" : "warning")}
+public/control-center/pages/integrations/cards.js:77:        ${renderIntegrationMetric("Errors", item.error_count, item.error_count ? "danger" : "success")}
+public/control-center/pages/integrations/cards.js:80:      <footer class="integration-os-card-foot">
+public/control-center/pages/integrations/cards.js:81:        <span>Last sync: ${esc(formatRelativeTime(item.last_sync_at))}</span>
+public/control-center/pages/integrations/cards.js:85:          data-integration-open="${esc(item.id)}"
+public/control-center/pages/integrations/cards.js:94:export function renderIntegrationCards(records = []) {
+public/control-center/pages/integrations/cards.js:99:      <section class="integration-empty-state">
+public/control-center/pages/integrations/cards.js:100:        <strong>No integrations found</strong>
+public/control-center/pages/integrations/cards.js:101:        <p>Connect platforms to unlock intelligence, sync, publishing, and reporting.</p>
+public/control-center/pages/integrations/cards.js:107:    <section class="integration-os-grid">
+public/control-center/pages/integrations/cards.js:108:      ${items.map(renderIntegrationStatusCard).join("")}
+public/control-center/pages/integrations/cards.js:113:function getConnectorWorkspaceStatus(card = {}) {
+public/control-center/pages/integrations/cards.js:114:  if (card.statusLabel === "Connected") return "connected";
+public/control-center/pages/integrations/cards.js:115:  if (["Error", "Token expired"].includes(card.statusLabel)) return "failed";
+public/control-center/pages/integrations/cards.js:116:  if (card.statusLabel === "Partial") return "needs_setup";
+public/control-center/pages/integrations/cards.js:120:function getConnectorWorkspaceStatusLabel(statusKey) {
+public/control-center/pages/integrations/cards.js:121:  if (statusKey === "needs_setup") return "Needs setup";
+public/control-center/pages/integrations/cards.js:122:  return statusKey
+public/control-center/pages/integrations/cards.js:128:  const statusKey = getConnectorWorkspaceStatus(card);
+public/control-center/pages/integrations/cards.js:134:  if (statusKey === "connected") {
+public/control-center/pages/integrations/cards.js:135:    return { action: "sync", label: "Sync Now" };
+public/control-center/pages/integrations/cards.js:138:  if (statusKey === "failed") {
+public/control-center/pages/integrations/cards.js:142:  if (statusKey === "needs_setup") {
+public/control-center/pages/integrations/cards.js:146:  return { action: "connect", label: `Connect ${card.label || "Integration"}` };
+public/control-center/pages/integrations/cards.js:150:  const statusKey = getConnectorWorkspaceStatus(card);
+public/control-center/pages/integrations/cards.js:151:  const statusLabel = getConnectorWorkspaceStatusLabel(statusKey);
+public/control-center/pages/integrations/cards.js:153:  const isSelected = asString(session.selectedIntegrationId) === card.id;
+public/control-center/pages/integrations/cards.js:156:    <article class="integration-control-row${isSelected ? " is-selected" : ""}">
+public/control-center/pages/integrations/cards.js:157:      <div class="integration-control-row-main">
+public/control-center/pages/integrations/cards.js:158:        <button class="integration-control-row-trigger" type="button" data-integration-select="${esc(card.id)}">
+public/control-center/pages/integrations/cards.js:159:          <span class="integration-control-row-icon">${esc(card.icon)}</span>
+public/control-center/pages/integrations/cards.js:160:          <span class="integration-control-row-copy">
+public/control-center/pages/integrations/cards.js:161:            <span class="integration-control-row-topline">
+public/control-center/pages/integrations/cards.js:163:              <span class="card-badge ${esc(card.statusTone)}">${esc(statusLabel)}</span>
+public/control-center/pages/integrations/cards.js:165:            <span class="integration-control-row-meta">Why it matters: ${esc(card.whyItMatters)}</span>
+public/control-center/pages/integrations/cards.js:166:            <span class="integration-control-row-meta">Recommended action: ${esc(recommendedAction.label)}</span>
+public/control-center/pages/integrations/cards.js:170:      <div class="integration-control-row-actions">
+public/control-center/pages/integrations/cards.js:172:          ? `<button class="btn btn-secondary" type="button" data-integration-select="${esc(card.id)}">Open setup</button>`
+public/control-center/pages/integrations/cards.js:173:          : `<button class="btn btn-primary" type="button" data-integration-primary="${esc(recommendedAction.action)}" data-integration-id="${esc(card.id)}">${esc(recommendedAction.label)}</button>`}
+public/control-center/pages/integrations/cards.js:174:        <button class="btn btn-secondary" type="button" data-integration-select="${esc(card.id)}">Workspace</button>
+public/control-center/pages/integrations/cards.js:177:          : `<button class="btn btn-secondary" type="button" data-integration-action="test" data-integration-id="${esc(card.id)}">Test</button>`}
+public/control-center/pages/integrations/cards.js:180:          : `<button class="btn btn-secondary" type="button" data-integration-action="sync" data-integration-id="${esc(card.id)}">Sync</button>`}
+public/control-center/pages/integrations/cards.js:191:    <section class="card integration-control-group">
+public/control-center/pages/integrations/cards.js:192:      <div class="card-head integration-control-group-head">
+public/control-center/pages/integrations/cards.js:199:      <div class="integration-control-group-list">
+public/control-center/pages/integrations/cards.js:223:  if (card.statusLabel === "Connected") {
+public/control-center/pages/integrations/cards.js:227:  if (["Partial", "Token expired", "Error"].includes(card.statusLabel)) {
+public/control-center/pages/integrations/cards.js:231:  return `Connect ${card.label || "Integration"}`;
+public/control-center/pages/integrations/cards.js:234:export function renderIntegrationCard(card = {}, session = {}) {
+public/control-center/pages/integrations/cards.js:235:  const isSelected = asString(session.selectedIntegrationId) === card.id;
+public/control-center/pages/integrations/cards.js:240:      : card.statusLabel === "Connected"
+public/control-center/pages/integrations/cards.js:242:      : ["Partial", "Token expired", "Error"].includes(card.statusLabel)
+public/control-center/pages/integrations/cards.js:249:    <section class="integration-simple-card${isSelected ? " is-selected" : ""}">
+public/control-center/pages/integrations/cards.js:250:      <div class="integration-simple-head">
+public/control-center/pages/integrations/cards.js:251:        <div class="integration-hub-icon">${esc(card.icon)}</div>
+public/control-center/pages/integrations/cards.js:253:        <div class="integration-simple-copy">
+public/control-center/pages/integrations/cards.js:256:          <span class="integration-card-meta">
+public/control-center/pages/integrations/cards.js:260:          <span class="integration-card-meta">
+public/control-center/pages/integrations/cards.js:261:            Last sync: ${esc(formatCardDate(card.lastSync))}
+public/control-center/pages/integrations/cards.js:265:        <span class="card-badge ${esc(card.statusTone)}">
+public/control-center/pages/integrations/cards.js:267:            card.statusLabel === "Partial" ||
+public/control-center/pages/integrations/cards.js:268:            card.statusLabel === "Token expired" ||
+public/control-center/pages/integrations/cards.js:269:            card.statusLabel === "Error"
+public/control-center/pages/integrations/cards.js:271:              : card.statusLabel
+public/control-center/pages/integrations/cards.js:276:      <div class="integration-simple-actions">
+public/control-center/pages/integrations/cards.js:280:          data-integration-primary="${esc(primaryAction)}"
+public/control-center/pages/integrations/cards.js:281:          data-integration-id="${esc(card.id)}"
+public/control-center/pages/integrations/cards.js:290:          data-integration-select="${esc(card.id)}"
+public/control-center/pages/integrations/cards.js:303:    <section class="card integration-selected-summary">
+public/control-center/pages/integrations/cards.js:309:        <span class="card-badge ${esc(card.statusTone)}">${esc(card.statusLabel)}</span>
+public/control-center/pages/integrations/cards.js:311:      <div class="integration-selected-summary-body">
+public/control-center/pages/integrations/cards.js:312:        <div class="integration-hub-title-wrap">
+public/control-center/pages/integrations/cards.js:313:          <div class="integration-hub-icon">${esc(card.icon)}</div>
+public/control-center/pages/integrations/cards.js:319:        <button class="btn btn-primary" type="button" data-integration-select="${esc(card.id)}">${esc(smartLabel)}</button>
+public/control-center/pages/integrations.js:7:  buildIntegrationActivityFeed,
+public/control-center/pages/integrations.js:8:  buildIntegrationCardModel,
+public/control-center/pages/integrations.js:9:  buildIntegrationOverviewSummary,
+public/control-center/pages/integrations.js:10:  buildLaunchDiagnostics,
+public/control-center/pages/integrations.js:16:  getConnectorWorkspaceStatus
+public/control-center/pages/integrations.js:17:} from "./integrations/builders.js";
+public/control-center/pages/integrations.js:19:import { renderIntegrationDrawer } from "./integrations/drawer.js";
+public/control-center/pages/integrations.js:24:} from "./integrations/cards.js";
+public/control-center/pages/integrations.js:28:  renderIntegrationActivityFeed,
+public/control-center/pages/integrations.js:29:  renderIntegrationCoverageMap,
+public/control-center/pages/integrations.js:30:  renderIntegrationCriticalMissing,
+public/control-center/pages/integrations.js:31:  renderIntegrationDiagnosticsList,
+public/control-center/pages/integrations.js:32:  renderIntegrationRecommendationsList
+public/control-center/pages/integrations.js:33:} from "./integrations/render.js";
+public/control-center/pages/integrations.js:35:const integrationSessions = new Map();
+public/control-center/pages/integrations.js:36:let integrationDrawerEscapeHandler = null;
+public/control-center/pages/integrations.js:37:const UNSUPPORTED_INTEGRATION_IDS = new Set(["amazon", "smtp", "mailer", "crm"]);
+public/control-center/pages/integrations.js:39:const INTEGRATION_DOMAINS = [
+public/control-center/pages/integrations.js:44:    integrations: [
+public/control-center/pages/integrations.js:68:        purpose: "Store, product, order, and sales sync for WooCommerce-driven projects.",
+public/control-center/pages/integrations.js:70:        enables: "Product sync, order sync, sales signals, and commerce intelligence.",
+public/control-center/pages/integrations.js:86:        purpose: "Future-ready Shopify storefront integration for products, orders, and sales intelligence.",
+public/control-center/pages/integrations.js:88:        enables: "Product sync, order sync, customer sync, and sales reporting.",
+public/control-center/pages/integrations.js:102:        unavailableReason: "Backend provider support is not configured yet.",
+public/control-center/pages/integrations.js:107:        enables: "Listing sync, sales signals, performance by product, and marketplace learning.",
+public/control-center/pages/integrations.js:122:        purpose: "Marketplace listing and commerce signal sync for eBay surfaces.",
+public/control-center/pages/integrations.js:124:        enables: "Listing sync, order sync, product demand signals, and marketplace coverage.",
+public/control-center/pages/integrations.js:139:    description: "Post insights, video performance, engagement, comments, publishing paths, and linked account intelligence.",
+public/control-center/pages/integrations.js:140:    integrations: [
+public/control-center/pages/integrations.js:148:        enables: "Post insights, engagement data, comments, publishing support, and ad account linkage.",
+public/control-center/pages/integrations.js:149:        dataScope: ["Post insights", "Engagement", "Comments", "Publishing", "Ads linkage"],
+public/control-center/pages/integrations.js:164:        purpose: "Post, reel, and profile insight sync for Instagram business performance.",
+public/control-center/pages/integrations.js:166:        enables: "Post insights, reel insights, engagement, comments, publishing, and business account analytics.",
+public/control-center/pages/integrations.js:167:        dataScope: ["Posts", "Reels", "Engagement", "Comments", "Publishing"],
+public/control-center/pages/integrations.js:182:        purpose: "Video and post insight sync for TikTok creative and audience performance.",
+public/control-center/pages/integrations.js:184:        enables: "Video insights, engagement, comments, profile metrics, and future publishing support.",
+public/control-center/pages/integrations.js:185:        dataScope: ["Video insights", "Engagement", "Comments", "Audience", "Publishing"],
+public/control-center/pages/integrations.js:200:        purpose: "Video performance and channel insight sync for long-form or short-form YouTube content.",
+public/control-center/pages/integrations.js:202:        enables: "Video insights, watch metrics, subscriber trends, comments, and publishing context.",
+public/control-center/pages/integrations.js:203:        dataScope: ["Videos", "Views", "Watch time", "Engagement", "Publishing"],
+public/control-center/pages/integrations.js:218:        purpose: "Future-ready business profile insight and publishing connection for LinkedIn surfaces.",
+public/control-center/pages/integrations.js:220:        enables: "Post insights, audience signals, company page analytics, and publishing support.",
+public/control-center/pages/integrations.js:221:        dataScope: ["Posts", "Audience", "Engagement", "Publishing"],
+public/control-center/pages/integrations.js:236:    integrations: [
+public/control-center/pages/integrations.js:346:    description: "Lifecycle messaging, customer records, contact sync, and email campaign infrastructure.",
+public/control-center/pages/integrations.js:347:    integrations: [
+public/control-center/pages/integrations.js:352:        unavailableReason: "Backend provider support is not configured yet.",
+public/control-center/pages/integrations.js:357:        enables: "Campaign sending, lifecycle messages, and email workflow execution.",
+public/control-center/pages/integrations.js:364:          { key: "smtpHost", label: "SMTP host", placeholder: "smtp.provider.com", required: true },
+public/control-center/pages/integrations.js:372:        unavailableReason: "Backend provider support is not configured yet.",
+public/control-center/pages/integrations.js:373:        label: "Mailer Integration",
+public/control-center/pages/integrations.js:375:        purpose: "Provider-specific email platform integration for campaigns and audience workflows.",
+public/control-center/pages/integrations.js:376:        whyItMatters: "A mailer integration improves sending reliability, segmentation, and performance tracking.",
+public/control-center/pages/integrations.js:377:        enables: "Campaign sends, audience sync, templates, and performance reporting.",
+public/control-center/pages/integrations.js:379:        permissionScope: "Provider API key + sender domain",
+public/control-center/pages/integrations.js:380:        primaryField: "providerName",
+public/control-center/pages/integrations.js:382:          { key: "providerName", label: "Provider name", placeholder: "SendGrid / Mailgun / Resend", required: true },
+public/control-center/pages/integrations.js:392:        purpose: "Future-ready newsletter, audience, and campaign sync through Mailchimp.",
+public/control-center/pages/integrations.js:394:        enables: "Audience sync, campaigns, lists, and newsletter reporting.",
+public/control-center/pages/integrations.js:408:        unavailableReason: "Backend provider support is not configured yet.",
+public/control-center/pages/integrations.js:409:        label: "CRM Integration",
+public/control-center/pages/integrations.js:411:        purpose: "Customer record sync for lead, customer, and lifecycle intelligence.",
+public/control-center/pages/integrations.js:413:        enables: "Contact sync, customer sync, lead intelligence, and lifecycle learning.",
+public/control-center/pages/integrations.js:429:    integrations: [
+public/control-center/pages/integrations.js:437:        enables: "Spend sync, campaign import, creative performance, and paid optimization.",
+public/control-center/pages/integrations.js:455:        enables: "Spend sync, campaign import, keyword performance, and paid optimization.",
+public/control-center/pages/integrations.js:473:        enables: "Spend sync, campaign import, creative performance, and short-form paid optimization.",
+public/control-center/pages/integrations.js:488:    description: "Workspace, automation, webhook, and operations tools that keep workflows moving.",
+public/control-center/pages/integrations.js:489:    integrations: [
+public/control-center/pages/integrations.js:495:        purpose: "File sync and shared asset operations through Google Drive.",
+public/control-center/pages/integrations.js:497:        enables: "Asset sync, doc sync, shared files, and automation inputs.",
+public/control-center/pages/integrations.js:512:        purpose: "Operational alerting, workflow notifications, and team collaboration handoff.",
+public/control-center/pages/integrations.js:513:        whyItMatters: "Slack can surface sync failures, content approvals, and campaign alerts where the team already works.",
+public/control-center/pages/integrations.js:514:        enables: "Alerts, approvals, sync notifications, and workflow coordination.",
+public/control-center/pages/integrations.js:515:        dataScope: ["Notifications", "Approvals", "Ops alerts"],
+public/control-center/pages/integrations.js:529:        purpose: "Bot-based operational alerts, approvals, and lightweight workflow execution.",
+public/control-center/pages/integrations.js:530:        whyItMatters: "Telegram can keep MH Assistant responsive when quick approvals or notifications are needed.",
+public/control-center/pages/integrations.js:531:        enables: "Alerts, commands, approval handoff, and ops notifications.",
+public/control-center/pages/integrations.js:532:        dataScope: ["Alerts", "Commands", "Approvals"],
+public/control-center/pages/integrations.js:548:        enables: "Docs sync, planning sync, task context, and knowledge reuse.",
+public/control-center/pages/integrations.js:550:        permissionScope: "Workspace + integration token",
+public/control-center/pages/integrations.js:555:          { key: "accessToken", label: "Integration token", placeholder: "Notion token", type: "password" }
+public/control-center/pages/integrations.js:563:        purpose: "Automation routing for triggers, syncs, approvals, and external workflow handoffs.",
+public/control-center/pages/integrations.js:565:        enables: "Workflow automation, triggers, sync jobs, and handoffs.",
+public/control-center/pages/integrations.js:566:        dataScope: ["Automations", "Triggers", "Sync jobs"],
+public/control-center/pages/integrations.js:580:        purpose: "Internal system-to-system webhook integration for custom workflows and events.",
+public/control-center/pages/integrations.js:582:        enables: "Custom events, syncs, notifications, and system handoffs.",
+public/control-center/pages/integrations.js:583:        dataScope: ["Custom events", "Payloads", "Sync triggers"],
+public/control-center/pages/integrations.js:588:          { key: "eventScope", label: "Event scope", placeholder: "events, approvals, syncs" },
+public/control-center/pages/integrations.js:633:function getAllIntegrations() {
+public/control-center/pages/integrations.js:634:  return INTEGRATION_DOMAINS.flatMap((domain) =>
+public/control-center/pages/integrations.js:635:    domain.integrations.map((integration) => ({
+public/control-center/pages/integrations.js:636:      ...integration,
+public/control-center/pages/integrations.js:643:function getIntegrationById(integrationId) {
+public/control-center/pages/integrations.js:644:  return getAllIntegrations().find((item) => item.id === integrationId) || null;
+public/control-center/pages/integrations.js:649:  if (!integrationSessions.has(key)) {
+public/control-center/pages/integrations.js:650:    integrationSessions.set(key, {
+public/control-center/pages/integrations.js:652:      selectedIntegrationId: "",
+public/control-center/pages/integrations.js:654:      statusFilter: "all",
+public/control-center/pages/integrations.js:656:      activeDrawerIntegrationId: "",
+public/control-center/pages/integrations.js:658:      validationIntegrationId: "",
+public/control-center/pages/integrations.js:663:  return integrationSessions.get(key);
+public/control-center/pages/integrations.js:666:function openIntegrationDrawer(session, integrationId) {
+public/control-center/pages/integrations.js:667:  session.selectedIntegrationId = integrationId || "";
+public/control-center/pages/integrations.js:668:  session.activeDrawerIntegrationId = integrationId || "";
+public/control-center/pages/integrations.js:669:  session.drawerOpen = Boolean(integrationId);
+public/control-center/pages/integrations.js:672:function closeIntegrationDrawer(session) {
+public/control-center/pages/integrations.js:674:  session.activeDrawerIntegrationId = "";
+public/control-center/pages/integrations.js:675:  session.validationIntegrationId = "";
+public/control-center/pages/integrations.js:680:function setIntegrationValidation(session, integrationId, fieldKey, message) {
+public/control-center/pages/integrations.js:681:  session.validationIntegrationId = integrationId || "";
+public/control-center/pages/integrations.js:686:function clearIntegrationValidation(session, integrationId, fieldKey) {
+public/control-center/pages/integrations.js:687:  const sameIntegration = !integrationId || session.validationIntegrationId === integrationId;
+public/control-center/pages/integrations.js:689:  if (!sameIntegration || !sameField) return;
+public/control-center/pages/integrations.js:690:  session.validationIntegrationId = "";
+public/control-center/pages/integrations.js:716:function getSuggestedFieldValue(state, integration, field) {
+public/control-center/pages/integrations.js:723:  if (integration.id === "website" && field.key === "url") {
+public/control-center/pages/integrations.js:726:  if (integration.id === "website" && field.key === "webhookUrl" && websiteUrl) {
+public/control-center/pages/integrations.js:733:  if (integration.id === "woocommerce" && field.key === "storeUrl") {
+public/control-center/pages/integrations.js:736:  if (integration.id === "search-console" && field.key === "propertyUrl") {
+public/control-center/pages/integrations.js:739:  if (integration.id === "search-console" && field.key === "siteDomain" && hostname) {
+public/control-center/pages/integrations.js:742:  if (integration.id === "mailer" && field.key === "senderDomain") {
+public/control-center/pages/integrations.js:749:function getResolvedFieldValue(state, session, integration, field, record, sourceValue) {
+public/control-center/pages/integrations.js:750:  const draft = ensureDraft(session, integration.id);
+public/control-center/pages/integrations.js:753:  const suggested = getSuggestedFieldValue(state, integration, field);
+public/control-center/pages/integrations.js:754:  if (field.key === integration.primaryField) {
+public/control-center/pages/integrations.js:760:function getQuickConnectLabel(integration) {
+public/control-center/pages/integrations.js:761:  if (["ga4", "gtm", "search-console", "youtube", "google-ads", "google-drive"].includes(integration.id)) {
+public/control-center/pages/integrations.js:764:  if (["facebook", "instagram", "meta-pixel", "meta-ads"].includes(integration.id)) {
+public/control-center/pages/integrations.js:767:  if (integration.id === "shopify") {
+public/control-center/pages/integrations.js:775:  if (card.statusLabel === "Connected") return "Manage Connection";
+public/control-center/pages/integrations.js:776:  if (card.statusLabel === "Partial") return "Complete Setup";
+public/control-center/pages/integrations.js:777:  if (card.statusLabel === "Token expired") return "Reconnect Now";
+public/control-center/pages/integrations.js:778:  if (card.statusLabel === "Error") return "Fix Connection";
+public/control-center/pages/integrations.js:786:  if (card.statusLabel === "Connected") {
+public/control-center/pages/integrations.js:787:    return { action: "sync", label: "Sync Now" };
+public/control-center/pages/integrations.js:789:  if (["Token expired", "Error"].includes(card.statusLabel)) {
+public/control-center/pages/integrations.js:795:function ensureDraft(session, integrationId) {
+public/control-center/pages/integrations.js:796:  if (!session.drafts[integrationId]) {
+public/control-center/pages/integrations.js:797:    session.drafts[integrationId] = {};
+public/control-center/pages/integrations.js:799:  return session.drafts[integrationId];
+public/control-center/pages/integrations.js:802:function clearDraft(session, integrationId) {
+public/control-center/pages/integrations.js:803:  delete session.drafts[integrationId];
+public/control-center/pages/integrations.js:806:function setFieldValue(session, integrationId, fieldKey, value) {
+public/control-center/pages/integrations.js:807:  const draft = ensureDraft(session, integrationId);
+public/control-center/pages/integrations.js:815:function requiresCredential(integration) {
+public/control-center/pages/integrations.js:816:  if (!integration?.fields?.some(isSecretField)) {
+public/control-center/pages/integrations.js:820:  return !["website"].includes(integration.id);
+public/control-center/pages/integrations.js:823:function shouldSyncLegacySource(integration) {
+public/control-center/pages/integrations.js:840:  ].includes(integration.id);
+public/control-center/pages/integrations.js:844:  return asObject(asObject(state.data?.integrations).control_center);
+public/control-center/pages/integrations.js:852:  return asObject(asObject(asObject(state.data?.integrations).sources).sources);
+public/control-center/pages/integrations.js:855:function getLegacySourceValue(integration, sources) {
+public/control-center/pages/integrations.js:856:  const source = asObject(sources[integration.sourceKey]);
+public/control-center/pages/integrations.js:860:function inferScopeKeys(integration) {
+public/control-center/pages/integrations.js:862:    integration.label,
+public/control-center/pages/integrations.js:863:    integration.purpose,
+public/control-center/pages/integrations.js:864:    integration.enables,
+public/control-center/pages/integrations.js:865:    ...asArray(integration.dataScope)
+public/control-center/pages/integrations.js:871:    { key: "posts", pattern: /post|reel|video|comment|publishing|profile|channel/ },
+public/control-center/pages/integrations.js:883:function getIntegrationAccessModel(integration) {
+public/control-center/pages/integrations.js:884:  const scopeKeys = inferScopeKeys(integration);
+public/control-center/pages/integrations.js:886:  if (integration.domainId === "social") {
+public/control-center/pages/integrations.js:889:      write: ["publishing", "audience updates"]
+public/control-center/pages/integrations.js:893:  if (integration.domainId === "website-commerce") {
+public/control-center/pages/integrations.js:894:    if (integration.id === "website") {
+public/control-center/pages/integrations.js:903:      write: ["catalog sync", "commerce updates"]
+public/control-center/pages/integrations.js:907:  if (integration.domainId === "analytics") {
+public/control-center/pages/integrations.js:914:  if (integration.domainId === "email-crm") {
+public/control-center/pages/integrations.js:917:      write: ["campaign sends", "audience sync"]
+public/control-center/pages/integrations.js:921:  if (integration.domainId === "ads") {
+public/control-center/pages/integrations.js:929:    read: [...new Set(["workflow events", "shared files", ...scopeKeys])],
+public/control-center/pages/integrations.js:934:function getServerRecord(state, integration) {
+public/control-center/pages/integrations.js:935:  const record = asObject(getControlCenterRecords(state)[integration.id]);
+public/control-center/pages/integrations.js:936:  if (record.integration_id) {
+public/control-center/pages/integrations.js:940:  return buildLegacyFallbackRecord(integration, state, {
+public/control-center/pages/integrations.js:941:    shouldSyncLegacySource,
+public/control-center/pages/integrations.js:944:    getIntegrationAccessModel,
+public/control-center/pages/integrations.js:951:function getFieldValue(session, integration, field, record, sourceValue, suggestedValue = "") {
+public/control-center/pages/integrations.js:952:  const draft = ensureDraft(session, integration.id);
+public/control-center/pages/integrations.js:955:  if (field.key === integration.primaryField) {
+public/control-center/pages/integrations.js:965:function getLocalFillCount(session, integration, record, sourceValue, state) {
+public/control-center/pages/integrations.js:966:  return integration.fields.filter((field) => {
+public/control-center/pages/integrations.js:967:    const value = asString(getFieldValue(session, integration, field, record, sourceValue, getSuggestedFieldValue(state, integration, field))).trim();
+public/control-center/pages/integrations.js:972:function getRequiredMissing(session, integration, record, sourceValue, state) {
+public/control-center/pages/integrations.js:973:  return integration.fields
+public/control-center/pages/integrations.js:976:      const value = asString(getFieldValue(session, integration, field, record, sourceValue, getSuggestedFieldValue(state, integration, field))).trim();
+public/control-center/pages/integrations.js:982:function normalizeStatusLabel(statusLabel, fallback = "Not Connected") {
+public/control-center/pages/integrations.js:983:  const normalized = asString(statusLabel).trim().toLowerCase();
+public/control-center/pages/integrations.js:995:function getHealthSummary(statusLabel, record, integration) {
+public/control-center/pages/integrations.js:996:  if (integration.backendSupported === false || UNSUPPORTED_INTEGRATION_IDS.has(integration.id)) {
+public/control-center/pages/integrations.js:997:    return asString(integration.unavailableReason) || "This integration is unavailable because backend provider support is not configured yet.";
+public/control-center/pages/integrations.js:1004:  if (statusLabel === "Connected") {
+public/control-center/pages/integrations.js:1005:    return `${integration.label} is connected and ready for provider-level sync actions.`;
+public/control-center/pages/integrations.js:1007:  if (statusLabel === "Partial") {
+public/control-center/pages/integrations.js:1010:  if (statusLabel === "Token expired") {
+public/control-center/pages/integrations.js:1011:    return "Reconnect the saved token before importing or syncing new data.";
+public/control-center/pages/integrations.js:1013:  if (statusLabel === "Error") {
+public/control-center/pages/integrations.js:1016:  return "This integration has not been configured yet.";
+public/control-center/pages/integrations.js:1020:  const statusKey = getConnectorWorkspaceStatus(card);
+public/control-center/pages/integrations.js:1026:  if (statusKey === "connected") {
+public/control-center/pages/integrations.js:1028:      label: card.lastSync ? "Test" : "Sync",
+public/control-center/pages/integrations.js:1029:      action: card.lastSync ? "test" : "sync"
+public/control-center/pages/integrations.js:1033:  if (statusKey === "failed") {
+public/control-center/pages/integrations.js:1037:  if (statusKey === "needs_setup") {
+public/control-center/pages/integrations.js:1054:    const input = document.querySelector(`[data-integration-drawer] [data-integration-field="${card.id}"][data-field-key="${fieldKey}"]`);
+public/control-center/pages/integrations.js:1065:function bindIntegrationActions({
+public/control-center/pages/integrations.js:1072:  connectProjectIntegration,
+public/control-center/pages/integrations.js:1073:  reconnectProjectIntegration,
+public/control-center/pages/integrations.js:1074:  testProjectIntegration,
+public/control-center/pages/integrations.js:1075:  syncProjectIntegration,
+public/control-center/pages/integrations.js:1076:  importProjectIntegrationHistory,
+public/control-center/pages/integrations.js:1077:  disconnectProjectIntegration,
+public/control-center/pages/integrations.js:1082:  Array.from(document.querySelectorAll("[data-integration-select]")).forEach((button) => {
+public/control-center/pages/integrations.js:1083:    button.onclick = () => {
+public/control-center/pages/integrations.js:1084:      const integrationId = button.getAttribute("data-integration-select") || "";
+public/control-center/pages/integrations.js:1085:      openIntegrationDrawer(session, integrationId);
+public/control-center/pages/integrations.js:1090:  Array.from(document.querySelectorAll("[data-integration-primary]")).forEach((button) => {
+public/control-center/pages/integrations.js:1091:    button.onclick = async () => {
+public/control-center/pages/integrations.js:1092:      const action = button.getAttribute("data-integration-primary") || "";
+public/control-center/pages/integrations.js:1093:      const integrationId = button.getAttribute("data-integration-id") || "";
+public/control-center/pages/integrations.js:1094:      openIntegrationDrawer(session, integrationId);
+public/control-center/pages/integrations.js:1110:  Array.from(document.querySelectorAll("[data-integration-field]")).forEach((input) => {
+public/control-center/pages/integrations.js:1112:      const integrationId = input.getAttribute("data-integration-field") || "";
+public/control-center/pages/integrations.js:1115:      setFieldValue(session, integrationId, fieldKey, nextValue);
+public/control-center/pages/integrations.js:1117:        clearIntegrationValidation(session, integrationId, fieldKey);
+public/control-center/pages/integrations.js:1122:  Array.from(document.querySelectorAll("[data-integration-field-helper]")).forEach((helper) => {
+public/control-center/pages/integrations.js:1123:    const [integrationId, fieldKey] = asString(helper.getAttribute("data-integration-field-helper")).split(":");
+public/control-center/pages/integrations.js:1124:    const integration = getIntegrationById(integrationId);
+public/control-center/pages/integrations.js:1126:    const record = integration ? getServerRecord(state, integration) : {};
+public/control-center/pages/integrations.js:1127:    const field = integration?.fields?.find((item) => item.key === fieldKey);
+public/control-center/pages/integrations.js:1139:    if (session.validationIntegrationId === integrationId && session.validationFieldKey === fieldKey && session.validationMessage) {
+public/control-center/pages/integrations.js:1146:      : "Optional, but useful for scoping and diagnostics.";
+public/control-center/pages/integrations.js:1149:  Array.from(document.querySelectorAll("[data-integration-category-filter]")).forEach((select) => {
+public/control-center/pages/integrations.js:1156:  Array.from(document.querySelectorAll("[data-integration-status-filter]")).forEach((select) => {
+public/control-center/pages/integrations.js:1158:      session.statusFilter = event.target.value || "all";
+public/control-center/pages/integrations.js:1163:  Array.from(document.querySelectorAll("[data-integration-search]")).forEach((input) => {
+public/control-center/pages/integrations.js:1170:  Array.from(document.querySelectorAll("[data-integration-drawer-close]")).forEach((button) => {
+public/control-center/pages/integrations.js:1171:    button.onclick = () => {
+public/control-center/pages/integrations.js:1172:      closeIntegrationDrawer(session);
+public/control-center/pages/integrations.js:1177:  function buildConnectionPayload(integrationId) {
+public/control-center/pages/integrations.js:1178:    const integration = getIntegrationById(integrationId);
+public/control-center/pages/integrations.js:1179:    if (!integration) return null;
+public/control-center/pages/integrations.js:1182:    const record = getServerRecord(state, integration);
+public/control-center/pages/integrations.js:1183:    const draft = ensureDraft(session, integration.id);
+public/control-center/pages/integrations.js:1187:    integration.fields.forEach((field) => {
+public/control-center/pages/integrations.js:1188:      const resolvedValue = asString(getResolvedFieldValue(state, session, integration, field, record, getLegacySourceValue(integration, getLegacySources(state)))).trim();
+public/control-center/pages/integrations.js:1190:      if (field.key === integration.primaryField) {
+public/control-center/pages/integrations.js:1210:      integration,
+public/control-center/pages/integrations.js:1211:      integration.fields.find((field) => field.key === integration.primaryField) || integration.fields[0],
+public/control-center/pages/integrations.js:1213:      getLegacySourceValue(integration, getLegacySources(state))
+public/control-center/pages/integrations.js:1216:    const accessModel = getIntegrationAccessModel(integration);
+public/control-center/pages/integrations.js:1219:      source_key: integration.sourceKey,
+public/control-center/pages/integrations.js:1220:      primary_field: integration.primaryField,
+public/control-center/pages/integrations.js:1224:      auth_fields: integration.fields.filter(isSecretField).map((field) => field.key),
+public/control-center/pages/integrations.js:1225:      required_fields: integration.fields.filter((field) => field.required).map((field) => field.key),
+public/control-center/pages/integrations.js:1226:      requires_credentials: requiresCredential(integration),
+public/control-center/pages/integrations.js:1227:      data_scopes: inferScopeKeys(integration),
+public/control-center/pages/integrations.js:1230:      connection_method: integration.fields.some(isSecretField) ? "oauth_or_key" : "direct_config",
+public/control-center/pages/integrations.js:1231:      permission_scope: integration.permissionScope,
+public/control-center/pages/integrations.js:1232:      enables: integration.enables,
+public/control-center/pages/integrations.js:1233:      sync_source_registry: shouldSyncLegacySource(integration)
+public/control-center/pages/integrations.js:1237:  async function persistPrimary(integrationId, reconnect = false) {
+public/control-center/pages/integrations.js:1238:    const integration = getIntegrationById(integrationId);
+public/control-center/pages/integrations.js:1239:    if (!integration) return;
+public/control-center/pages/integrations.js:1240:    if (integration.backendSupported === false || UNSUPPORTED_INTEGRATION_IDS.has(integration.id)) {
+public/control-center/pages/integrations.js:1241:      showError?.(integration.unavailableReason || "This integration is unavailable because backend provider support is not configured yet.");
+public/control-center/pages/integrations.js:1244:    const payload = buildConnectionPayload(integrationId);
+public/control-center/pages/integrations.js:1245:    const primaryField = integration.fields.find((field) => field.key === integration.primaryField) || integration.fields[0];
+public/control-center/pages/integrations.js:1249:      setIntegrationValidation(
+public/control-center/pages/integrations.js:1251:        integrationId,
+public/control-center/pages/integrations.js:1255:      openIntegrationDrawer(session, integrationId);
+public/control-center/pages/integrations.js:1257:      showError?.(`Enter ${primaryField.label.toLowerCase()} before connecting ${integration.label}.`);
+public/control-center/pages/integrations.js:1263:        await reconnectProjectIntegration(projectName, integrationId, payload);
+public/control-center/pages/integrations.js:1265:        await connectProjectIntegration(projectName, integrationId, payload);
+public/control-center/pages/integrations.js:1267:      clearDraft(session, integrationId);
+public/control-center/pages/integrations.js:1268:      clearIntegrationValidation(session, integrationId);
+public/control-center/pages/integrations.js:1269:      showMessage?.(reconnect ? `${integration.label} reconnected.` : `${integration.label} connected.`);
+public/control-center/pages/integrations.js:1273:      showError?.(error.message || `Failed to connect ${integration.label}.`);
+public/control-center/pages/integrations.js:1277:  async function disconnect(integrationId) {
+public/control-center/pages/integrations.js:1278:    const integration = getIntegrationById(integrationId);
+public/control-center/pages/integrations.js:1279:    if (!integration) return;
+public/control-center/pages/integrations.js:1280:    if (integration.backendSupported === false || UNSUPPORTED_INTEGRATION_IDS.has(integration.id)) {
+public/control-center/pages/integrations.js:1281:      showError?.(integration.unavailableReason || "This integration is unavailable because backend provider support is not configured yet.");
+public/control-center/pages/integrations.js:1286:      await disconnectProjectIntegration(projectName, integrationId, {
+public/control-center/pages/integrations.js:1287:        notes: `${integration.label} disconnected from the Control Center.`
+public/control-center/pages/integrations.js:1289:      clearDraft(session, integrationId);
+public/control-center/pages/integrations.js:1290:      showMessage?.(`${integration.label} disconnected.`);
+public/control-center/pages/integrations.js:1294:      showError?.(error.message || `Failed to disconnect ${integration.label}.`);
+public/control-center/pages/integrations.js:1298:  async function runServerAction(integrationId, type) {
+public/control-center/pages/integrations.js:1299:    const integration = getIntegrationById(integrationId);
+public/control-center/pages/integrations.js:1300:    if (!integration) return;
+public/control-center/pages/integrations.js:1301:    if (integration.backendSupported === false || UNSUPPORTED_INTEGRATION_IDS.has(integration.id)) {
+public/control-center/pages/integrations.js:1302:      showError?.(integration.unavailableReason || "This integration is unavailable because backend provider support is not configured yet.");
+public/control-center/pages/integrations.js:1308:        await testProjectIntegration(projectName, integrationId, {
+public/control-center/pages/integrations.js:1309:          notes: `${integration.label} connection test passed from the Control Center.`
+public/control-center/pages/integrations.js:1311:        showMessage?.(`${integration.label} test completed.`);
+public/control-center/pages/integrations.js:1312:      } else if (type === "sync") {
+public/control-center/pages/integrations.js:1313:        await syncProjectIntegration(projectName, integrationId, {
+public/control-center/pages/integrations.js:1314:          notes: `${integration.label} sync triggered from the Control Center.`
+public/control-center/pages/integrations.js:1316:        showMessage?.(`${integration.label} sync started.`);
+public/control-center/pages/integrations.js:1318:        await importProjectIntegrationHistory(projectName, integrationId, {
+public/control-center/pages/integrations.js:1319:          notes: `${integration.label} historical import triggered from the Control Center.`
+public/control-center/pages/integrations.js:1321:        showMessage?.(`${integration.label} historical import started.`);
+public/control-center/pages/integrations.js:1327:      showError?.(error.message || `Failed to ${type} ${integration.label}.`);
+public/control-center/pages/integrations.js:1331:  Array.from(document.querySelectorAll("[data-integration-action]")).forEach((button) => {
+public/control-center/pages/integrations.js:1332:    button.onclick = async () => {
+public/control-center/pages/integrations.js:1333:      const action = button.getAttribute("data-integration-action") || "";
+public/control-center/pages/integrations.js:1334:      const integrationId = button.getAttribute("data-integration-id") || "";
+public/control-center/pages/integrations.js:1337:        await persistPrimary(integrationId, false);
+public/control-center/pages/integrations.js:1341:        await persistPrimary(integrationId, true);
+public/control-center/pages/integrations.js:1345:        await disconnect(integrationId);
+public/control-center/pages/integrations.js:1349:      await runServerAction(integrationId, action);
+public/control-center/pages/integrations.js:1353:  Array.from(document.querySelectorAll("[data-integration-prompt]")).forEach((button) => {
+public/control-center/pages/integrations.js:1354:    button.onclick = () => {
+public/control-center/pages/integrations.js:1355:      const prompt = button.getAttribute("data-integration-prompt-text") || "";
+public/control-center/pages/integrations.js:1361:      showMessage?.("Integration review prompt added to AI Command.");
+public/control-center/pages/integrations.js:1366:    if (integrationDrawerEscapeHandler) {
+public/control-center/pages/integrations.js:1367:      document.removeEventListener("keydown", integrationDrawerEscapeHandler);
+public/control-center/pages/integrations.js:1369:    integrationDrawerEscapeHandler = (event) => {
+public/control-center/pages/integrations.js:1371:      closeIntegrationDrawer(session);
+public/control-center/pages/integrations.js:1374:    document.addEventListener("keydown", integrationDrawerEscapeHandler);
+public/control-center/pages/integrations.js:1378:export const integrationsRoute = {
+public/control-center/pages/integrations.js:1379:  id: "integrations",
+public/control-center/pages/integrations.js:1382:    title: "Integrations",
+public/control-center/pages/integrations.js:1383:    description: "Connect, test, sync, import, reconnect, and control the external platforms that power MH Assistant OS."
+public/control-center/pages/integrations.js:1386:    <section class="page is-active" data-page="integrations">
+public/control-center/pages/integrations.js:1387:      <div id="integrationsRoot"></div>
+public/control-center/pages/integrations.js:1399:    connectProjectIntegration,
+public/control-center/pages/integrations.js:1400:    reconnectProjectIntegration,
+public/control-center/pages/integrations.js:1401:    testProjectIntegration,
+public/control-center/pages/integrations.js:1402:    syncProjectIntegration,
+public/control-center/pages/integrations.js:1403:    importProjectIntegrationHistory,
+public/control-center/pages/integrations.js:1404:    disconnectProjectIntegration
+public/control-center/pages/integrations.js:1410:      domains: INTEGRATION_DOMAINS,
+public/control-center/pages/integrations.js:1411:      buildIntegrationCardModel: (integration, localSession, localState) => buildIntegrationCardModel(
+public/control-center/pages/integrations.js:1412:        integration,
+public/control-center/pages/integrations.js:1419:          unsupportedIntegrationIds: UNSUPPORTED_INTEGRATION_IDS,
+public/control-center/pages/integrations.js:1420:          normalizeStatusLabel,
+public/control-center/pages/integrations.js:1423:          getIntegrationAccessModel,
+public/control-center/pages/integrations.js:1437:    if (!session.selectedIntegrationId || !allCards.find((card) => card.id === session.selectedIntegrationId)) {
+public/control-center/pages/integrations.js:1438:      session.selectedIntegrationId = allCards[0]?.id || "";
+public/control-center/pages/integrations.js:1445:    const overview = buildIntegrationOverviewSummary(allCards, recommendations);
+public/control-center/pages/integrations.js:1446:    const diagnostics = buildLaunchDiagnostics(allCards);
+public/control-center/pages/integrations.js:1449:    const selectedCard = filteredCards.find((card) => card.id === session.selectedIntegrationId) || allCards.find((card) => card.id === session.selectedIntegrationId) || filteredCards[0] || allCards[0] || null;
+public/control-center/pages/integrations.js:1450:    const drawerCard = allCards.find((card) => card.id === session.activeDrawerIntegrationId) || selectedCard;
+public/control-center/pages/integrations.js:1451:    const attentionTotal = allCards.filter((card) => ["needs_setup", "failed"].includes(getConnectorWorkspaceStatus(card))).length;
+public/control-center/pages/integrations.js:1454:    const connectedTotal = allCards.filter((card) => getConnectorWorkspaceStatus(card) === "connected").length;
+public/control-center/pages/integrations.js:1455:    const partialTotal = allCards.filter((card) => getConnectorWorkspaceStatus(card) === "needs_setup").length;
+public/control-center/pages/integrations.js:1457:    const activityFeed = buildIntegrationActivityFeed(controlCenter, allCards);
+public/control-center/pages/integrations.js:1458:    const lastGlobalSync =
+public/control-center/pages/integrations.js:1459:      asString(controlCenter.summary?.last_global_sync) ||
+public/control-center/pages/integrations.js:1461:        .map((card) => card.lastSync)
+public/control-center/pages/integrations.js:1465:    const root = $("integrationsRoot");
+public/control-center/pages/integrations.js:1468:    root.innerHTML = `
+public/control-center/pages/integrations.js:1469:      <div class="integrations-wrapper integration-system-panel">
+public/control-center/pages/integrations.js:1470:        <section class="card integration-system-overview">
+public/control-center/pages/integrations.js:1471:          <div class="card-head integration-system-overview-head">
+public/control-center/pages/integrations.js:1473:              <div class="setup-kicker">Integration Overview</div>
+public/control-center/pages/integrations.js:1475:              <p class="home-section-copy" style="margin:6px 0 0;">Track launch-critical connectors, diagnose readiness impact, and operate integrations without leaving the standard page shell.</p>
+public/control-center/pages/integrations.js:1479:          <div class="integration-system-overview-grid">
+public/control-center/pages/integrations.js:1480:            <div class="data-card integration-system-metric">
+public/control-center/pages/integrations.js:1481:              <span class="data-label">Total Integrations</span>
+public/control-center/pages/integrations.js:1482:              <strong>${escapeHtml(String(overview.totalIntegrations))}</strong>
+public/control-center/pages/integrations.js:1483:              <span class="integration-system-metric-copy">All providers currently modeled in the control center.</span>
+public/control-center/pages/integrations.js:1485:            <div class="data-card integration-system-metric">
+public/control-center/pages/integrations.js:1486:              <span class="data-label">Connected Integrations</span>
+public/control-center/pages/integrations.js:1487:              <strong>${escapeHtml(String(overview.connectedIntegrations))}</strong>
+public/control-center/pages/integrations.js:1488:              <span class="integration-system-metric-copy">Ready for sync, testing, or downstream workflows.</span>
+public/control-center/pages/integrations.js:1490:            <div class="data-card integration-system-metric">
+public/control-center/pages/integrations.js:1493:              <span class="integration-system-metric-copy">Required launch connectors not yet fully connected.</span>
+public/control-center/pages/integrations.js:1495:            <div class="data-card integration-system-metric">
+public/control-center/pages/integrations.js:1498:              <span class="integration-system-metric-copy">Connectors with missing or failed state across the full stack.</span>
+public/control-center/pages/integrations.js:1501:          <div class="integration-system-summary-grid">
+public/control-center/pages/integrations.js:1502:            <div class="integration-system-summary-card">
+public/control-center/pages/integrations.js:1505:              <span>System score: ${escapeHtml(String(systemScore))}% • Last global sync: ${escapeHtml(formatDateTime(lastGlobalSync))}</span>
+public/control-center/pages/integrations.js:1507:            <div class="integration-system-summary-card">
+public/control-center/pages/integrations.js:1517:        <section class="integration-system-workspace">
+public/control-center/pages/integrations.js:1518:          <div class="integration-system-workspace-main">
+public/control-center/pages/integrations.js:1519:            <section class="card integration-system-filters">
+public/control-center/pages/integrations.js:1520:              <div class="card-head integration-system-filters-head">
+public/control-center/pages/integrations.js:1524:                  <p class="home-section-copy" style="margin:6px 0 0;">Filter by category or status, search any provider, and move directly into the connector setup workspace.</p>
+public/control-center/pages/integrations.js:1528:              <div class="integration-filter-bar">
+public/control-center/pages/integrations.js:1529:                <label class="integration-filter-field">
+public/control-center/pages/integrations.js:1531:                  <select data-integration-category-filter>
+public/control-center/pages/integrations.js:1536:                <label class="integration-filter-field">
+public/control-center/pages/integrations.js:1537:                  <span class="setup-label">Status</span>
+public/control-center/pages/integrations.js:1538:                  <select data-integration-status-filter>
+public/control-center/pages/integrations.js:1539:                    <option value="all">All statuses</option>
+public/control-center/pages/integrations.js:1540:                    <option value="connected" ${session.statusFilter === "connected" ? "selected" : ""}>Connected</option>
+public/control-center/pages/integrations.js:1541:                    <option value="missing" ${session.statusFilter === "missing" ? "selected" : ""}>Missing</option>
+public/control-center/pages/integrations.js:1542:                    <option value="failed" ${session.statusFilter === "failed" ? "selected" : ""}>Failed</option>
+public/control-center/pages/integrations.js:1543:                    <option value="needs_setup" ${session.statusFilter === "needs_setup" ? "selected" : ""}>Needs setup</option>
+public/control-center/pages/integrations.js:1546:                <label class="integration-filter-field integration-filter-search">
+public/control-center/pages/integrations.js:1551:                    placeholder="Search connector, provider, or source"
+public/control-center/pages/integrations.js:1552:                    data-integration-search
+public/control-center/pages/integrations.js:1558:            <section class="integration-system-group-stack">
+public/control-center/pages/integrations.js:1565:          <aside class="integration-system-workspace-side">
+public/control-center/pages/integrations.js:1568:            <section class="card integration-system-diagnostics">
+public/control-center/pages/integrations.js:1571:                  <h3>Diagnostics / Readiness Impact</h3>
+public/control-center/pages/integrations.js:1574:                <span class="card-badge ${escapeHtml(diagnostics.blockers.length ? "danger" : diagnostics.warnings.length ? "warning" : "success")}">${escapeHtml(diagnostics.blockers.length ? "Blockers" : diagnostics.warnings.length ? "Warnings" : "Clear")}</span>
+public/control-center/pages/integrations.js:1576:              <div class="integration-diagnostic-section">
+public/control-center/pages/integrations.js:1577:                <h4 class="integration-mini-heading">Blockers</h4>
+public/control-center/pages/integrations.js:1578:                ${renderIntegrationDiagnosticsList(diagnostics.blockers, "No launch blockers are currently flagged.")}
+public/control-center/pages/integrations.js:1580:              <div class="integration-diagnostic-section">
+public/control-center/pages/integrations.js:1581:                <h4 class="integration-mini-heading">Warnings</h4>
+public/control-center/pages/integrations.js:1582:                ${renderIntegrationDiagnosticsList(diagnostics.warnings, "No connector warnings are currently active.")}
+public/control-center/pages/integrations.js:1584:              <div class="integration-diagnostic-section">
+public/control-center/pages/integrations.js:1585:                <h4 class="integration-mini-heading">Fix Before Launch</h4>
+public/control-center/pages/integrations.js:1586:                ${renderIntegrationDiagnosticsList(diagnostics.mustFix, "No integration fixes are required before launch.")}
+public/control-center/pages/integrations.js:1588:              <div class="integration-system-prompt-row">
+public/control-center/pages/integrations.js:1590:                  <button class="btn btn-secondary" type="button" data-integration-prompt="prompt" data-integration-prompt-text="${escapeHtml(item.prompt)}">${escapeHtml(item.label)}</button>
+public/control-center/pages/integrations.js:1595:            <section class="card integration-system-activity">
+public/control-center/pages/integrations.js:1598:                  <h3>Activity / Recent Syncs</h3>
+public/control-center/pages/integrations.js:1599:                  <p class="home-section-copy" style="margin:6px 0 0;">Shows live integration events when available, otherwise derived connector checkpoints.</p>
+public/control-center/pages/integrations.js:1603:              ${renderIntegrationActivityFeed(activityFeed, formatDateTime)}
+public/control-center/pages/integrations.js:1608:        <section class="card integration-system-readiness-map">
+public/control-center/pages/integrations.js:1616:          <div class="integration-ai-grid">
+public/control-center/pages/integrations.js:1618:              <h4 class="integration-mini-heading">Critical missing integrations</h4>
+public/control-center/pages/integrations.js:1619:              ${renderIntegrationCriticalMissing(criticalMissing)}
+public/control-center/pages/integrations.js:1622:              <h4 class="integration-mini-heading">Recommended next actions</h4>
+public/control-center/pages/integrations.js:1623:              ${renderIntegrationRecommendationsList(recommendations.recommendations)}
+public/control-center/pages/integrations.js:1626:          <div class="integration-system-coverage-block">
+public/control-center/pages/integrations.js:1627:            <h4 class="integration-mini-heading">Launch coverage</h4>
+public/control-center/pages/integrations.js:1628:            ${renderIntegrationCoverageMap(coverageMap)}
+public/control-center/pages/integrations.js:1632:        ${drawerCard ? renderIntegrationDrawer(drawerCard, session, { getFieldValue }) : ""}
+public/control-center/pages/integrations.js:1636:    bindIntegrationActions({
+public/control-center/pages/integrations.js:1643:      connectProjectIntegration,
+public/control-center/pages/integrations.js:1644:      reconnectProjectIntegration,
+public/control-center/pages/integrations.js:1645:      testProjectIntegration,
+public/control-center/pages/integrations.js:1646:      syncProjectIntegration,
+public/control-center/pages/integrations.js:1647:      importProjectIntegrationHistory,
+public/control-center/pages/integrations.js:1648:      disconnectProjectIntegration,
+public/control-center/pages/integrations.js:1660:        connectProjectIntegration,
+public/control-center/pages/integrations.js:1661:        reconnectProjectIntegration,
+public/control-center/pages/integrations.js:1662:        testProjectIntegration,
+public/control-center/pages/integrations.js:1663:        syncProjectIntegration,
+public/control-center/pages/integrations.js:1664:        importProjectIntegrationHistory,
+public/control-center/pages/integrations.js:1665:        disconnectProjectIntegration
+public/control-center/pages/integrations/render.js:2:  Integrations OS Render Layer
+public/control-center/pages/integrations/render.js:29:          <button class="btn btn-secondary" type="button" data-integration-select="${esc(rec.nextOptional.id)}">
+public/control-center/pages/integrations/render.js:42:          <h3>Integration layer is healthy</h3>
+public/control-center/pages/integrations/render.js:74:          <span class="card-badge ${esc(card.statusTone)}">${esc(card.statusLabel)}</span>
+public/control-center/pages/integrations/render.js:85:          <button class="btn btn-primary" type="button" data-integration-select="${esc(card.id)}">
+public/control-center/pages/integrations/render.js:95:export function renderIntegrationCoverageItem(item = {}) {
+public/control-center/pages/integrations/render.js:96:  const statusKey = asString(item.status).toLowerCase().replace(/\s+/g, "_");
+public/control-center/pages/integrations/render.js:99:    <article class="integration-coverage-item is-${esc(statusKey)}">
+public/control-center/pages/integrations/render.js:101:      <span>${esc(item.status)}</span>
+public/control-center/pages/integrations/render.js:107:export function renderIntegrationCoverageMap(items = []) {
+public/control-center/pages/integrations/render.js:109:    <section class="integration-coverage-grid">
+public/control-center/pages/integrations/render.js:110:      ${asArray(items).map(renderIntegrationCoverageItem).join("")}
+public/control-center/pages/integrations/render.js:115:export function renderIntegrationRecommendationsList(items = []) {
+public/control-center/pages/integrations/render.js:127:    <div class="integration-critical-list">
+public/control-center/pages/integrations/render.js:129:        <div class="integration-critical-item">
+public/control-center/pages/integrations/render.js:138:export function renderIntegrationCriticalMissing(items = []) {
+public/control-center/pages/integrations/render.js:144:        No critical missing integrations are currently flagged.
+public/control-center/pages/integrations/render.js:150:    <div class="integration-critical-list">
+public/control-center/pages/integrations/render.js:152:        <div class="integration-critical-item">
+public/control-center/pages/integrations/render.js:161:export function renderIntegrationActivityFeed(items = [], formatDateTime = (value) => value) {
+public/control-center/pages/integrations/render.js:167:        No integration events yet. Run a connection test or sync to populate recent activity.
+public/control-center/pages/integrations/render.js:173:    <div class="integration-activity-list">
+public/control-center/pages/integrations/render.js:175:        <div class="integration-activity-item">
+public/control-center/pages/integrations/render.js:176:          <div class="integration-activity-topline">
+public/control-center/pages/integrations/render.js:188:export function renderIntegrationDiagnosticsList(items = [], emptyText = "No diagnostics available.") {
+public/control-center/pages/integrations/render.js:196:    <div class="integration-diagnostic-list">
+public/control-center/pages/integrations/render.js:198:        <div class="integration-diagnostic-item">
+public/control-center/pages/integrations/layout.js:2:  Integrations OS Layout Layer
+public/control-center/pages/integrations/layout.js:10:  renderIntegrationCard
+public/control-center/pages/integrations/layout.js:27:  const attentionCount = cards.filter((card) => ["Error", "Token expired"].includes(card.statusLabel)).length;
+public/control-center/pages/integrations/layout.js:28:  const blockedCount = cards.filter((card) => card.statusLabel === "Not Connected").length;
+public/control-center/pages/integrations/layout.js:33:    <section class="card integration-domain-card">
+public/control-center/pages/integrations/layout.js:41:      <div class="integration-domain-grid">
+public/control-center/pages/integrations/layout.js:42:        ${cards.map((card) => renderIntegrationCard(card, session)).join("")}
+public/control-center/pages/integrations/layout.js:49:  renderIntegrationDetailsPanel
+public/control-center/pages/integrations/layout.js:52:export function renderIntegrationSection(
+public/control-center/pages/integrations/layout.js:78:    cards.find((card) => card.id === asString(session.selectedIntegrationId)) ||
+public/control-center/pages/integrations/layout.js:83:    (card) => card.statusLabel === "Connected"
+public/control-center/pages/integrations/layout.js:87:    ["Partial", "Token expired", "Error"].includes(card.statusLabel)
+public/control-center/pages/integrations/layout.js:91:    (card) => card.statusLabel === "Not Connected"
+public/control-center/pages/integrations/layout.js:95:    <section class="card integration-domain-card">
+public/control-center/pages/integrations/layout.js:109:      <div class="integration-coverage-grid integration-section-status-grid">
+public/control-center/pages/integrations/layout.js:110:        <div class="integration-coverage-item">
+public/control-center/pages/integrations/layout.js:113:          <div class="integration-coverage-meta">
+public/control-center/pages/integrations/layout.js:114:            Ready for test, sync, and provider-backed actions.
+public/control-center/pages/integrations/layout.js:118:        <div class="integration-coverage-item">
+public/control-center/pages/integrations/layout.js:121:          <div class="integration-coverage-meta">
+public/control-center/pages/integrations/layout.js:126:        <div class="integration-coverage-item">
+public/control-center/pages/integrations/layout.js:129:          <div class="integration-coverage-meta">
+public/control-center/pages/integrations/layout.js:135:      <div class="integration-status-group">
+public/control-center/pages/integrations/layout.js:136:        <div class="integration-mini-heading">Connected</div>
+public/control-center/pages/integrations/layout.js:138:        <div class="integration-simple-grid">
+public/control-center/pages/integrations/layout.js:142:                  .map((card) => renderIntegrationCard(card, session))
+public/control-center/pages/integrations/layout.js:144:              : `<div class="empty-box">No connected integrations in this group yet.</div>`
+public/control-center/pages/integrations/layout.js:149:      <div class="integration-status-group">
+public/control-center/pages/integrations/layout.js:150:        <div class="integration-mini-heading">Needs Attention</div>
+public/control-center/pages/integrations/layout.js:152:        <div class="integration-simple-grid">
+public/control-center/pages/integrations/layout.js:156:                  .map((card) => renderIntegrationCard(card, session))
+public/control-center/pages/integrations/layout.js:158:              : `<div class="empty-box">No integrations need attention in this group right now.</div>`
+public/control-center/pages/integrations/layout.js:163:      <div class="integration-status-group">
+public/control-center/pages/integrations/layout.js:164:        <div class="integration-mini-heading">Not Connected</div>
+public/control-center/pages/integrations/layout.js:166:        <div class="integration-simple-grid">
+public/control-center/pages/integrations/layout.js:170:                  .map((card) => renderIntegrationCard(card, session))
+public/control-center/pages/integrations/layout.js:172:              : `<div class="empty-box">All integrations in this group already have a connection state.</div>`
+public/control-center/pages/integrations/layout.js:179:          ? renderIntegrationDetailsPanel(selectedCard, session, {
+public/control-center/pages/integrations/state.js:2:  Integrations OS State Layer
+public/control-center/pages/integrations/state.js:5:  Own integration page session state only.
+public/control-center/pages/integrations/state.js:10:const integrationSessions = new Map();
+public/control-center/pages/integrations/state.js:21:export function ensureIntegrationSession(projectName) {
+public/control-center/pages/integrations/state.js:24:  if (!integrationSessions.has(key)) {
+public/control-center/pages/integrations/state.js:25:    integrationSessions.set(key, {
+public/control-center/pages/integrations/state.js:27:      selectedIntegrationId: "",
+public/control-center/pages/integrations/state.js:29:      statusFilter: "all",
+public/control-center/pages/integrations/state.js:31:      activeDrawerIntegrationId: "",
+public/control-center/pages/integrations/state.js:33:      validationIntegrationId: "",
+public/control-center/pages/integrations/state.js:39:  return integrationSessions.get(key);
+public/control-center/pages/integrations/state.js:42:export function openIntegrationDrawer(session, integrationId) {
+public/control-center/pages/integrations/state.js:43:  session.selectedIntegrationId = integrationId || "";
+public/control-center/pages/integrations/state.js:44:  session.activeDrawerIntegrationId = integrationId || "";
+public/control-center/pages/integrations/state.js:45:  session.drawerOpen = Boolean(integrationId);
+public/control-center/pages/integrations/state.js:48:export function closeIntegrationDrawer(session) {
+public/control-center/pages/integrations/state.js:50:  session.activeDrawerIntegrationId = "";
+public/control-center/pages/integrations/state.js:51:  session.validationIntegrationId = "";
+public/control-center/pages/integrations/state.js:56:export function setIntegrationValidation(session, integrationId, fieldKey, message) {
+public/control-center/pages/integrations/state.js:57:  session.validationIntegrationId = integrationId || "";
+public/control-center/pages/integrations/state.js:62:export function clearIntegrationValidation(session, integrationId, fieldKey) {
+public/control-center/pages/integrations/state.js:63:  const sameIntegration = !integrationId || session.validationIntegrationId === integrationId;
+public/control-center/pages/integrations/state.js:66:  if (!sameIntegration || !sameField) return;
+public/control-center/pages/integrations/state.js:68:  session.validationIntegrationId = "";
+public/control-center/pages/integrations/state.js:73:export function ensureIntegrationDraft(session, integrationId) {
+public/control-center/pages/integrations/state.js:74:  if (!session.drafts[integrationId]) {
+public/control-center/pages/integrations/state.js:75:    session.drafts[integrationId] = {};
+public/control-center/pages/integrations/state.js:78:  return session.drafts[integrationId];
+public/control-center/pages/integrations/state.js:81:export function clearIntegrationDraft(session, integrationId) {
+public/control-center/pages/integrations/state.js:82:  delete session.drafts[integrationId];
+public/control-center/pages/integrations/state.js:85:export function setIntegrationFieldValue(session, integrationId, fieldKey, value) {
+public/control-center/pages/integrations/state.js:86:  const draft = ensureIntegrationDraft(session, integrationId);
+public/control-center/pages/integrations/state.js:90:export function getIntegrationSessionsForDebug() {
+public/control-center/pages/integrations/state.js:91:  return integrationSessions;
+public/control-center/pages/integrations/drawer.js:2:  Integrations OS Drawer
+public/control-center/pages/integrations/drawer.js:22:export function renderIntegrationField(integrationId, field = {}, value = "", options = {}) {
+public/control-center/pages/integrations/drawer.js:27:    <div class="integration-field-group${invalidClass}" data-integration-field-group="${esc(integrationId)}:${esc(field.key)}">
+public/control-center/pages/integrations/drawer.js:28:      <div class="integration-field-head">
+public/control-center/pages/integrations/drawer.js:29:        <label class="setup-label" for="integration-${esc(integrationId)}-${esc(field.key)}">${esc(field.label)}</label>
+public/control-center/pages/integrations/drawer.js:30:        ${options.suggestion ? `<span class="integration-field-chip">Suggested from Setup</span>` : ""}
+public/control-center/pages/integrations/drawer.js:33:        id="integration-${esc(integrationId)}-${esc(field.key)}"
+public/control-center/pages/integrations/drawer.js:40:        data-integration-field="${esc(integrationId)}"
+public/control-center/pages/integrations/drawer.js:43:      ${options.invalid ? `<div class="integration-field-error">${esc(options.invalidMessage || "Complete this field before continuing.")}</div>` : ""}
+public/control-center/pages/integrations/drawer.js:44:      <div class="setup-helper" data-integration-field-helper="${esc(integrationId)}:${esc(field.key)}"></div>
+public/control-center/pages/integrations/drawer.js:52:  const stepTwoComplete = Boolean(card.lastTest) || card.statusLabel === "Connected";
+public/control-center/pages/integrations/drawer.js:53:  const stepThreeComplete = card.statusLabel === "Connected";
+public/control-center/pages/integrations/drawer.js:74:        ? "Provider is active in the Control Center."
+public/control-center/pages/integrations/drawer.js:80:    <div class="integration-drawer-progress">
+public/control-center/pages/integrations/drawer.js:82:        <div class="integration-progress-step is-${esc(step.state)}">
+public/control-center/pages/integrations/drawer.js:96:  if (card.statusLabel === "Connected") {
+public/control-center/pages/integrations/drawer.js:100:  if (["Partial", "Token expired", "Error"].includes(card.statusLabel)) {
+public/control-center/pages/integrations/drawer.js:104:  return { action: "connect", label: `Connect ${card.label || "Integration"}` };
+public/control-center/pages/integrations/drawer.js:119:export function renderIntegrationActionButtons(card = {}) {
+public/control-center/pages/integrations/drawer.js:121:    return `<div class="integration-side-note">${esc(card.unavailableReason || "Backend provider support is not configured yet.")}</div>`;
+public/control-center/pages/integrations/drawer.js:128:    <button class="quick-action-btn quick-action-btn--primary" type="button" data-integration-action="${esc(primary.action)}" data-integration-id="${esc(card.id)}">${esc(primary.label)}</button>
+public/control-center/pages/integrations/drawer.js:129:    <button class="quick-action-btn" type="button" data-integration-action="test" data-integration-id="${esc(card.id)}">Test Connection</button>
+public/control-center/pages/integrations/drawer.js:130:    ${card.statusLabel === "Connected" ? `<button class="quick-action-btn" type="button" data-integration-action="sync" data-integration-id="${esc(card.id)}">Sync Now</button>` : ""}
+public/control-center/pages/integrations/drawer.js:131:    ${quickConnectLabel && card.statusLabel !== "Connected" ? `<div class="integration-quick-connect-note">OAuth-style quick connect is the recommended path for this provider. Manual fields remain available as fallback.</div>` : ""}
+public/control-center/pages/integrations/drawer.js:153:export function renderIntegrationDetailsPanel(
+public/control-center/pages/integrations/drawer.js:170:      renderIntegrationField(
+public/control-center/pages/integrations/drawer.js:183:            session.validationIntegrationId === card.id &&
+public/control-center/pages/integrations/drawer.js:203:      renderIntegrationField(
+public/control-center/pages/integrations/drawer.js:234:        `<span class="integration-scope-pill">${esc(
+public/control-center/pages/integrations/drawer.js:241:    <section class="card integration-hub-card${isDrawer ? " integration-hub-card--drawer" : ""}">
+public/control-center/pages/integrations/drawer.js:242:      <div class="integration-hub-head">
+public/control-center/pages/integrations/drawer.js:243:        <div class="integration-hub-title-wrap">
+public/control-center/pages/integrations/drawer.js:244:          <div class="integration-hub-icon">${esc(card.icon)}</div>
+public/control-center/pages/integrations/drawer.js:251:        <div class="integration-hub-head-actions">
+public/control-center/pages/integrations/drawer.js:252:          <span class="card-badge ${esc(card.statusTone)}">${esc(card.statusLabel)}</span>
+public/control-center/pages/integrations/drawer.js:254:            ? `<button class="btn btn-secondary integration-drawer-close-btn" type="button" data-integration-drawer-close="close">Close</button>`
+public/control-center/pages/integrations/drawer.js:259:      <div class="integration-hub-intro">
+public/control-center/pages/integrations/drawer.js:260:        <div class="integration-hub-why">
+public/control-center/pages/integrations/drawer.js:261:          <strong>Status</strong>
+public/control-center/pages/integrations/drawer.js:265:        <div class="integration-hub-why">
+public/control-center/pages/integrations/drawer.js:273:      <div class="integration-hub-grid">
+public/control-center/pages/integrations/drawer.js:275:          <div class="integration-mini-heading">Required fields</div>
+public/control-center/pages/integrations/drawer.js:277:          <div class="integration-field-grid">
+public/control-center/pages/integrations/drawer.js:282:            session.validationIntegrationId === card.id &&
+public/control-center/pages/integrations/drawer.js:284:              ? `<div class="integration-drawer-validation">${esc(
+public/control-center/pages/integrations/drawer.js:293:                <details class="integration-optional-fields">
+public/control-center/pages/integrations/drawer.js:296:                  <div class="integration-field-grid integration-field-grid--optional">
+public/control-center/pages/integrations/drawer.js:304:          ${credentialItems ? `<div class="integration-scope-row">${credentialItems}</div>` : ""}
+public/control-center/pages/integrations/drawer.js:306:          <div class="integration-side-note">
+public/control-center/pages/integrations/drawer.js:312:        <div class="integration-side-panel">
+public/control-center/pages/integrations/drawer.js:314:            <div class="data-row"><span>Status</span><strong>${esc(card.statusLabel)}</strong></div>
+public/control-center/pages/integrations/drawer.js:316:            <div class="data-row"><span>Last sync</span><strong>${esc(formatDrawerDate(card.lastSync))}</strong></div>
+public/control-center/pages/integrations/drawer.js:321:          <div class="integration-side-note">${esc(card.notes)}</div>
+public/control-center/pages/integrations/drawer.js:325:              ? `<div class="integration-side-note">${esc(
+public/control-center/pages/integrations/drawer.js:333:      <div class="integration-action-row">
+public/control-center/pages/integrations/drawer.js:334:        ${renderIntegrationActionButtons(card)}
+public/control-center/pages/integrations/drawer.js:340:export function renderIntegrationDrawer(card = null, session = {}, options = {}) {
+public/control-center/pages/integrations/drawer.js:341:  if (!card || !session.drawerOpen || session.activeDrawerIntegrationId !== card.id) {
+public/control-center/pages/integrations/drawer.js:351:    <div class="integration-drawer-layer is-open" data-integration-drawer-layer>
+public/control-center/pages/integrations/drawer.js:353:        class="integration-drawer-backdrop"
+public/control-center/pages/integrations/drawer.js:356:        data-integration-drawer-close="backdrop"
+public/control-center/pages/integrations/drawer.js:360:        class="integration-drawer"
+public/control-center/pages/integrations/drawer.js:364:        data-integration-drawer
+public/control-center/pages/integrations/drawer.js:366:        ${renderIntegrationDetailsPanel(card, session, { mode: "drawer", getFieldValue })}
+public/control-center/pages/integrations/utils.js:2:  Integrations OS Utilities
+public/control-center/pages/integrations/utils.js:71:export function formatStatusLabel(status) {
+public/control-center/pages/integrations/utils.js:72:  const value = normalizeText(status);
+public/control-center/pages/integrations/utils.js:84:    case "syncing":
+public/control-center/pages/integrations/utils.js:85:      return "Syncing";
+public/control-center/pages/integrations/utils.js:92:export function buildIntegrationSearchText(integration) {
+public/control-center/pages/integrations/utils.js:93:  const item = asObject(integration);
+public/control-center/pages/integrations/utils.js:99:    item.provider,
+public/control-center/pages/integrations/utils.js:100:    item.status
+public/control-center/pages/integrations/builders.js:2:  Integrations OS Builders Layer
+public/control-center/pages/integrations/builders.js:13:    connected: list.filter((card) => card.statusLabel === "Connected").length,
+public/control-center/pages/integrations/builders.js:14:    notConnected: list.filter((card) => card.statusLabel === "Not Connected").length,
+public/control-center/pages/integrations/builders.js:16:      ["Partial", "Token expired", "Error"].includes(card.statusLabel)
+public/control-center/pages/integrations/builders.js:59:    const connected = cards.filter((card) => card.statusLabel === "Connected").length;
+public/control-center/pages/integrations/builders.js:61:      ["Partial", "Token expired", "Error"].includes(card.statusLabel)
+public/control-center/pages/integrations/builders.js:64:    const status =
+public/control-center/pages/integrations/builders.js:73:      status,
+public/control-center/pages/integrations/builders.js:85:      card.statusLabel !== "Connected"
+public/control-center/pages/integrations/builders.js:90:      meta: `${card.domainTitle} • ${card.statusLabel} • ${card.whyItMatters}`
+public/control-center/pages/integrations/builders.js:101:    (card) => card.critical && card.statusLabel !== "Connected"
+public/control-center/pages/integrations/builders.js:104:    ["Token expired", "Error"].includes(card.statusLabel)
+public/control-center/pages/integrations/builders.js:106:  const partial = actionableCards.filter((card) => card.statusLabel === "Partial");
+public/control-center/pages/integrations/builders.js:107:  const missingCoverage = coverageMap.filter((item) => item.status !== "Covered");
+public/control-center/pages/integrations/builders.js:121:      meta: `${reconnectNeeded[0].label} needs attention before sync and intelligence coverage can be trusted.`
+public/control-center/pages/integrations/builders.js:127:      title: "Finish partially configured integrations",
+public/control-center/pages/integrations/builders.js:128:      meta: `${partial.length} integration${partial.length === 1 ? "" : "s"} have staged values but are not fully connected yet.`
+public/control-center/pages/integrations/builders.js:144:      title: "Integration layer is structurally healthy",
+public/control-center/pages/integrations/builders.js:145:      meta: "Best next step: attach provider-specific OAuth validation and background sync jobs to the existing integration routes."
+public/control-center/pages/integrations/builders.js:152:      prompt: "Review all current integrations and tell me which platform or tool I should connect next to improve learning, attribution, and execution fastest."
+public/control-center/pages/integrations/builders.js:155:      label: "Which integrations are critical before launch?",
+public/control-center/pages/integrations/builders.js:156:      prompt: "Identify the critical missing integrations before launch and explain which ones block publishing, analytics, SEO, paid optimization, and conversion intelligence."
+public/control-center/pages/integrations/builders.js:160:      prompt: "Explain what is missing from the current SEO and Search Console integration coverage and what should be connected or configured next."
+public/control-center/pages/integrations/builders.js:164:      prompt: "Review the current analytics, tracking, website, and paid integrations and tell me what is blocking full attribution across content, ads, and conversion tracking."
+public/control-center/pages/integrations/builders.js:168:      prompt: "Review the integrations layer and tell me which tools and data sources are still needed before paid media optimization can be trusted."
+public/control-center/pages/integrations/builders.js:183:    description: "Organic distribution surfaces that supply audience, content, and publishing signals.",
+public/control-center/pages/integrations/builders.js:218:export function getConnectorWorkspaceStatus(card = {}) {
+public/control-center/pages/integrations/builders.js:219:  if (card.statusLabel === "Connected") return "connected";
+public/control-center/pages/integrations/builders.js:220:  if (["Error", "Token expired"].includes(card.statusLabel)) return "failed";
+public/control-center/pages/integrations/builders.js:221:  if (card.statusLabel === "Partial") return "needs_setup";
+public/control-center/pages/integrations/builders.js:225:export function getConnectorWorkspaceStatusLabel(statusKey = "") {
+public/control-center/pages/integrations/builders.js:226:  if (statusKey === "needs_setup") return "Needs setup";
+public/control-center/pages/integrations/builders.js:228:  return String(statusKey)
+public/control-center/pages/integrations/builders.js:254:export function buildIntegrationOverviewSummary(cards = [], recommendations = {}) {
+public/control-center/pages/integrations/builders.js:260:  const totalIntegrations = list.length;
+public/control-center/pages/integrations/builders.js:261:  const connectedIntegrations = list.filter((card) => getConnectorWorkspaceStatus(card) === "connected").length;
+public/control-center/pages/integrations/builders.js:262:  const missingRequired = requiredCards.filter((card) => getConnectorWorkspaceStatus(card) !== "connected").length;
+public/control-center/pages/integrations/builders.js:263:  const failedOrDisconnected = list.filter((card) => ["failed", "missing"].includes(getConnectorWorkspaceStatus(card))).length;
+public/control-center/pages/integrations/builders.js:264:  const blockerCount = requiredCards.filter((card) => card.critical && getConnectorWorkspaceStatus(card) !== "connected").length;
+public/control-center/pages/integrations/builders.js:265:  const warningCount = requiredCards.filter((card) => getConnectorWorkspaceStatus(card) === "needs_setup").length;
+public/control-center/pages/integrations/builders.js:267:  let launchReadinessImpact = "Launch-ready from an integrations perspective.";
+public/control-center/pages/integrations/builders.js:272:    launchReadinessImpact = `${warningCount} required connector${warningCount === 1 ? "" : "s"} still need setup before diagnostics can be trusted.`;
+public/control-center/pages/integrations/builders.js:278:    totalIntegrations,
+public/control-center/pages/integrations/builders.js:279:    connectedIntegrations,
+public/control-center/pages/integrations/builders.js:287:export function buildLaunchDiagnostics(cards = []) {
+public/control-center/pages/integrations/builders.js:297:      ["missing", "failed"].includes(getConnectorWorkspaceStatus(card))
+public/control-center/pages/integrations/builders.js:306:    .filter((card) => getConnectorWorkspaceStatus(card) === "needs_setup")
+public/control-center/pages/integrations/builders.js:320:          .filter((card) => getConnectorWorkspaceStatus(card) !== "connected")
+public/control-center/pages/integrations/builders.js:333:  const statusFilter = String(session.statusFilter || "").trim().toLowerCase() || "all";
+public/control-center/pages/integrations/builders.js:340:        .filter((card) => statusFilter === "all" || getConnectorWorkspaceStatus(card) === statusFilter)
+public/control-center/pages/integrations/builders.js:353:        connectedCount: groupCards.filter((card) => getConnectorWorkspaceStatus(card) === "connected").length,
+public/control-center/pages/integrations/builders.js:354:        failedCount: groupCards.filter((card) => getConnectorWorkspaceStatus(card) === "failed").length,
+public/control-center/pages/integrations/builders.js:355:        missingCount: groupCards.filter((card) => getConnectorWorkspaceStatus(card) === "missing").length,
+public/control-center/pages/integrations/builders.js:356:        setupCount: groupCards.filter((card) => getConnectorWorkspaceStatus(card) === "needs_setup").length
+public/control-center/pages/integrations/builders.js:367:  if (/(connected|sync|tested|passed|healthy|ready|imported)/.test(text)) return "success";
+public/control-center/pages/integrations/builders.js:372:export function buildIntegrationActivityFeed(controlCenter = {}, cards = []) {
+public/control-center/pages/integrations/builders.js:382:    ...(Array.isArray(controlCenter.recent_syncs) ? controlCenter.recent_syncs : []),
+public/control-center/pages/integrations/builders.js:387:      id: String(item.id || item.event_id || item.sync_id || `real-${index}`),
+public/control-center/pages/integrations/builders.js:388:      title: String(item.title || item.summary || item.message || item.event || item.type || "Integration event"),
+public/control-center/pages/integrations/builders.js:389:      detail: String(item.detail || item.notes || item.status || item.result || item.connector || item.integration_id || ""),
+public/control-center/pages/integrations/builders.js:391:      tone: mapActivityTone(item.status || item.level || item.type || item.result),
+public/control-center/pages/integrations/builders.js:406:      if (card.lastSync) {
+public/control-center/pages/integrations/builders.js:408:          id: `${card.id}-sync`,
+public/control-center/pages/integrations/builders.js:409:          title: `${card.label} sync checkpoint`,
+public/control-center/pages/integrations/builders.js:410:          detail: "Derived from the latest connector sync timestamp.",
+public/control-center/pages/integrations/builders.js:411:          timestamp: card.lastSync,
+public/control-center/pages/integrations/builders.js:439:      if (["Error", "Token expired"].includes(card.statusLabel)) {
+public/control-center/pages/integrations/builders.js:444:          timestamp: String(card.record?.updated_at || card.lastTest || card.lastSync || card.lastImport || ""),
+public/control-center/pages/integrations/builders.js:471:      description: "Audience and publishing platforms used for organic reach, social engagement, and content performance learning.",
+public/control-center/pages/integrations/builders.js:489:      description: "Automation and coordination tools that help orchestrate tasks, handoffs, notifications, and AI-assisted operations.",
+public/control-center/pages/integrations/builders.js:514:    criticalCards.every((card) => card.statusLabel === "Connected");
+public/control-center/pages/integrations/builders.js:519:    (card) => card.critical && ["Error", "Token expired"].includes(card.statusLabel)
+public/control-center/pages/integrations/builders.js:523:    targetCard = actionableCards.find((card) => card.id === "website" && card.statusLabel !== "Connected") || null;
+public/control-center/pages/integrations/builders.js:527:    targetCard = actionableCards.find((card) => card.id === "woocommerce" && card.statusLabel !== "Connected") || null;
+public/control-center/pages/integrations/builders.js:531:    targetCard = actionableCards.find((card) => card.id === "ga4" && card.statusLabel !== "Connected") || null;
+public/control-center/pages/integrations/builders.js:535:    targetCard = actionableCards.find((card) => card.id === "search-console" && card.statusLabel !== "Connected") || null;
+public/control-center/pages/integrations/builders.js:539:    targetCard = actionableCards.find((card) => ["instagram", "facebook"].includes(card.id) && card.statusLabel !== "Connected") || null;
+public/control-center/pages/integrations/builders.js:543:    targetCard = actionableCards.find((card) => card.id === "meta-pixel" && card.statusLabel !== "Connected") || null;
+public/control-center/pages/integrations/builders.js:547:    targetCard = actionableCards.find((card) => ["smtp", "mailer", "mailchimp"].includes(card.id) && card.statusLabel !== "Connected") || null;
+public/control-center/pages/integrations/builders.js:551:    targetCard = actionableCards.find((card) => card.critical && card.statusLabel !== "Connected") || null;
+public/control-center/pages/integrations/builders.js:555:    const nextOptional = actionableCards.find((card) => !card.critical && card.statusLabel !== "Connected") || null;
+public/control-center/pages/integrations/builders.js:565:    publishing_blocker: ["instagram", "facebook", "tiktok", "youtube", "linkedin"],
+public/control-center/pages/integrations/builders.js:581:    publishing_blocker: "Publishing blocker",
+public/control-center/pages/integrations/builders.js:596:    impactChips.push("Publishing");
+public/control-center/pages/integrations/builders.js:619:export function buildSuggestedValues(state = {}, integration = {}, options = {}) {
+public/control-center/pages/integrations/builders.js:625:  const fields = Array.isArray(integration.fields) ? integration.fields : [];
+public/control-center/pages/integrations/builders.js:628:    const suggested = getSuggestedFieldValue(state, integration, field);
+public/control-center/pages/integrations/builders.js:638:export function buildLegacyFallbackRecord(integration = {}, state = {}, options = {}) {
+public/control-center/pages/integrations/builders.js:639:  const shouldSyncLegacySource =
+public/control-center/pages/integrations/builders.js:640:    typeof options.shouldSyncLegacySource === "function"
+public/control-center/pages/integrations/builders.js:641:      ? options.shouldSyncLegacySource
+public/control-center/pages/integrations/builders.js:654:  const getIntegrationAccessModel =
+public/control-center/pages/integrations/builders.js:655:    typeof options.getIntegrationAccessModel === "function"
+public/control-center/pages/integrations/builders.js:656:      ? options.getIntegrationAccessModel
+public/control-center/pages/integrations/builders.js:674:  if (!shouldSyncLegacySource(integration)) {
+public/control-center/pages/integrations/builders.js:679:  const value = getLegacySourceValue(integration, sources);
+public/control-center/pages/integrations/builders.js:685:  const accessModel = getIntegrationAccessModel(integration);
+public/control-center/pages/integrations/builders.js:686:  const sourceRecord = asObject(sources[integration.sourceKey]);
+public/control-center/pages/integrations/builders.js:689:    integration_id: integration.id,
+public/control-center/pages/integrations/builders.js:690:    source_key: integration.sourceKey,
+public/control-center/pages/integrations/builders.js:691:    status: "connected",
+public/control-center/pages/integrations/builders.js:692:    status_label: "Connected",
+public/control-center/pages/integrations/builders.js:693:    primary_field: integration.primaryField,
+public/control-center/pages/integrations/builders.js:697:    data_scopes: inferScopeKeys(integration),
+public/control-center/pages/integrations/builders.js:700:    permission_scope: integration.permissionScope,
+public/control-center/pages/integrations/builders.js:701:    enables: integration.enables,
+public/control-center/pages/integrations/builders.js:703:    notes: "This integration is currently inferred from the legacy project source mapping.",
+public/control-center/pages/integrations/builders.js:704:    last_sync_at: asString(sourceRecord.updated_at),
+public/control-center/pages/integrations/builders.js:712:  const buildIntegrationCardModel =
+public/control-center/pages/integrations/builders.js:713:    typeof options.buildIntegrationCardModel === "function"
+public/control-center/pages/integrations/builders.js:714:      ? options.buildIntegrationCardModel
+public/control-center/pages/integrations/builders.js:715:      : (integration) => integration;
+public/control-center/pages/integrations/builders.js:718:    const integrations = Array.isArray(domain.integrations) ? domain.integrations : [];
+public/control-center/pages/integrations/builders.js:720:    const cards = integrations.map((integration) =>
+public/control-center/pages/integrations/builders.js:721:      buildIntegrationCardModel(
+public/control-center/pages/integrations/builders.js:723:          ...integration,
+public/control-center/pages/integrations/builders.js:732:    const connectedCount = cards.filter((card) => card.statusLabel === "Connected").length;
+public/control-center/pages/integrations/builders.js:733:    const partialCount = cards.filter((card) => card.statusLabel === "Partial").length;
+public/control-center/pages/integrations/builders.js:735:      ["Not Connected", "Error", "Token expired"].includes(card.statusLabel)
+public/control-center/pages/integrations/builders.js:748:export function buildIntegrationCardModel(integration = {}, session = {}, state = {}, options = {}) {
+public/control-center/pages/integrations/builders.js:752:  const unsupportedIntegrationIds = options.unsupportedIntegrationIds instanceof Set ? options.unsupportedIntegrationIds : new Set();
+public/control-center/pages/integrations/builders.js:753:  const normalizeStatusLabel = typeof options.normalizeStatusLabel === "function" ? options.normalizeStatusLabel : (value) => value || "Not Connected";
+public/control-center/pages/integrations/builders.js:756:  const getIntegrationAccessModel = typeof options.getIntegrationAccessModel === "function" ? options.getIntegrationAccessModel : () => ({ read: [], write: [] });
+public/control-center/pages/integrations/builders.js:766:  const sourceValue = getLegacySourceValue(integration, getLegacySources(state));
+public/control-center/pages/integrations/builders.js:767:  const record = getServerRecord(state, integration);
+public/control-center/pages/integrations/builders.js:768:  const backendSupported = integration.backendSupported !== false && !unsupportedIntegrationIds.has(integration.id);
+public/control-center/pages/integrations/builders.js:769:  const statusLabel = backendSupported
+public/control-center/pages/integrations/builders.js:770:    ? normalizeStatusLabel(record.status_label || record.status)
+public/control-center/pages/integrations/builders.js:772:  const localFillCount = getLocalFillCount(session, integration, record, sourceValue, state);
+public/control-center/pages/integrations/builders.js:773:  const missingRequired = getRequiredMissing(session, integration, record, sourceValue, state);
+public/control-center/pages/integrations/builders.js:774:  const totalFields = Array.isArray(integration.fields) ? integration.fields.length : 0;
+public/control-center/pages/integrations/builders.js:775:  const accessModel = getIntegrationAccessModel(integration);
+public/control-center/pages/integrations/builders.js:779:    : inferScopeKeys(integration).map(titleCase);
+public/control-center/pages/integrations/builders.js:780:  const suggestedValues = buildSuggestedValuesFn(state, integration, { getSuggestedFieldValue });
+public/control-center/pages/integrations/builders.js:783:    ...integration,
+public/control-center/pages/integrations/builders.js:787:    statusLabel,
+public/control-center/pages/integrations/builders.js:788:    statusKey: statusLabel.toLowerCase().replace(/\s+/g, "_"),
+public/control-center/pages/integrations/builders.js:789:    statusTone:
+public/control-center/pages/integrations/builders.js:790:      statusLabel === "Connected" ? "success" :
+public/control-center/pages/integrations/builders.js:791:      statusLabel === "Unavailable" ? "danger" :
+public/control-center/pages/integrations/builders.js:792:      statusLabel === "Partial" ? "warning" :
+public/control-center/pages/integrations/builders.js:793:      statusLabel === "Token expired" ? "warning" :
+public/control-center/pages/integrations/builders.js:794:      statusLabel === "Error" ? "danger" :
+public/control-center/pages/integrations/builders.js:803:    lastSync: asString(record.last_sync_at),
+public/control-center/pages/integrations/builders.js:806:    healthSummary: getHealthSummary(statusLabel, record, integration),
+public/control-center/pages/integrations/builders.js:808:      ? (asString(integration.unavailableReason) || "Backend provider support is not configured yet.")
+public/control-center/pages/integrations/builders.js:809:      : asString(record.notes) || (integration.critical && statusLabel !== "Connected"
+public/control-center/pages/integrations/builders.js:810:        ? "Critical integration missing for full system capability."
+public/control-center/pages/integrations/builders.js:811:        : "Credentials are saved server-side and only masked status returns to the UI."),
+public/control-center/pages/integrations/builders.js:814:    permissionScopeSummary: asString(record.permission_scope) || integration.permissionScope,
+public/control-center/pages/integrations/builders.js:815:    enablesSummary: asString(record.enables) || integration.enables
+public/control-center/pages/integrations/diagnostics.js:2:  Integrations OS Diagnostics
+public/control-center/pages/integrations/diagnostics.js:4:  Pure diagnostic helpers only.
+public/control-center/pages/integrations/diagnostics.js:17:export function normalizeIntegrationRecord(record = {}) {
+public/control-center/pages/integrations/diagnostics.js:21:    id: asString(item.id || item.key || item.provider),
+public/control-center/pages/integrations/diagnostics.js:22:    provider: asString(item.provider || item.name),
+public/control-center/pages/integrations/diagnostics.js:23:    label: asString(item.label || item.name || item.provider),
+public/control-center/pages/integrations/diagnostics.js:24:    status: normalizeStatus(item.status),
+public/control-center/pages/integrations/diagnostics.js:26:    sync_success_rate: clampScore(item.sync_success_rate),
+public/control-center/pages/integrations/diagnostics.js:27:    last_sync_at: asString(item.last_sync_at),
+public/control-center/pages/integrations/diagnostics.js:33:    diagnostics: asArray(item.diagnostics)
+public/control-center/pages/integrations/diagnostics.js:37:export function normalizeStatus(status) {
+public/control-center/pages/integrations/diagnostics.js:38:  const value = asString(status).trim().toLowerCase();
+public/control-center/pages/integrations/diagnostics.js:85:export function buildDiagnosticsSummary(records = []) {
+public/control-center/pages/integrations/diagnostics.js:86:  const items = asArray(records).map(normalizeIntegrationRecord);
+public/control-center/pages/integrations/diagnostics.js:111:    switch (item.status) {
+public/control-center/pages/integrations/diagnostics.js:137:export function detectCriticalProviders(records = []) {
+public/control-center/pages/integrations/diagnostics.js:139:    .map(normalizeIntegrationRecord)
+public/control-center/pages/integrations/diagnostics.js:140:    .filter((item) => item.status === "critical");
+public/control-center/pages/integrations/diagnostics.js:143:export function detectSlowProviders(
+public/control-center/pages/integrations/diagnostics.js:148:    .map(normalizeIntegrationRecord)
+public/control-center/pages/integrations/diagnostics.js:154:export function detectSyncFailures(records = []) {
+public/control-center/pages/integrations/diagnostics.js:156:    .map(normalizeIntegrationRecord)
+public/control-center/pages/integrations/cards.js:2:  Integrations OS Cards
+public/control-center/pages/integrations/cards.js:13:  formatStatusLabel
+public/control-center/pages/integrations/cards.js:17:  normalizeIntegrationRecord
+public/control-center/pages/integrations/cards.js:18:} from "./diagnostics.js";
+public/control-center/pages/integrations/cards.js:28:export function renderIntegrationStatusBadge(status) {
+public/control-center/pages/integrations/cards.js:29:  const normalized = asString(status || "unknown").toLowerCase();
+public/control-center/pages/integrations/cards.js:30:  const label = formatStatusLabel(normalized);
+public/control-center/pages/integrations/cards.js:33:    <span class="integration-status-badge is-${esc(normalized)}">
+public/control-center/pages/integrations/cards.js:39:export function renderIntegrationMetric(label, value, tone = "neutral") {
+public/control-center/pages/integrations/cards.js:41:    <span class="integration-card-metric is-${esc(tone)}">
+public/control-center/pages/integrations/cards.js:48:export function renderIntegrationStatusCard(record = {}) {
+public/control-center/pages/integrations/cards.js:49:  const item = normalizeIntegrationRecord(record);
+public/control-center/pages/integrations/cards.js:60:      class="integration-os-card is-${esc(item.status)}"
+public/control-center/pages/integrations/cards.js:61:      data-integration-card="${esc(item.id)}"
+public/control-center/pages/integrations/cards.js:63:      <header class="integration-os-card-head">
+public/control-center/pages/integrations/cards.js:65:          <span class="integration-card-provider">
+public/control-center/pages/integrations/cards.js:66:            ${esc(item.provider || "Provider")}
+public/control-center/pages/integrations/cards.js:68:          <h3>${esc(item.label || item.id || "Integration")}</h3>
+public/control-center/pages/integrations/cards.js:71:        ${renderIntegrationStatusBadge(item.status)}
+public/control-center/pages/integrations/cards.js:74:      <div class="integration-card-metrics">
+public/control-center/pages/integrations/cards.js:75:        ${renderIntegrationMetric("Health", `${item.health_score}%`, healthTone)}
+public/control-center/pages/integrations/cards.js:76:        ${renderIntegrationMetric("Sync", `${item.sync_success_rate}%`, item.sync_success_rate >= 80 ? "success" : "warning")}
+public/control-center/pages/integrations/cards.js:77:        ${renderIntegrationMetric("Errors", item.error_count, item.error_count ? "danger" : "success")}
+public/control-center/pages/integrations/cards.js:80:      <footer class="integration-os-card-foot">
+public/control-center/pages/integrations/cards.js:81:        <span>Last sync: ${esc(formatRelativeTime(item.last_sync_at))}</span>
+public/control-center/pages/integrations/cards.js:85:          data-integration-open="${esc(item.id)}"
+public/control-center/pages/integrations/cards.js:94:export function renderIntegrationCards(records = []) {
+public/control-center/pages/integrations/cards.js:99:      <section class="integration-empty-state">
+public/control-center/pages/integrations/cards.js:100:        <strong>No integrations found</strong>
+public/control-center/pages/integrations/cards.js:101:        <p>Connect platforms to unlock intelligence, sync, publishing, and reporting.</p>
+public/control-center/pages/integrations/cards.js:107:    <section class="integration-os-grid">
+public/control-center/pages/integrations/cards.js:108:      ${items.map(renderIntegrationStatusCard).join("")}
+public/control-center/pages/integrations/cards.js:113:function getConnectorWorkspaceStatus(card = {}) {
+public/control-center/pages/integrations/cards.js:114:  if (card.statusLabel === "Connected") return "connected";
+public/control-center/pages/integrations/cards.js:115:  if (["Error", "Token expired"].includes(card.statusLabel)) return "failed";
+public/control-center/pages/integrations/cards.js:116:  if (card.statusLabel === "Partial") return "needs_setup";
+public/control-center/pages/integrations/cards.js:120:function getConnectorWorkspaceStatusLabel(statusKey) {
+public/control-center/pages/integrations/cards.js:121:  if (statusKey === "needs_setup") return "Needs setup";
+public/control-center/pages/integrations/cards.js:122:  return statusKey
+public/control-center/pages/integrations/cards.js:128:  const statusKey = getConnectorWorkspaceStatus(card);
+public/control-center/pages/integrations/cards.js:134:  if (statusKey === "connected") {
+public/control-center/pages/integrations/cards.js:135:    return { action: "sync", label: "Sync Now" };
+public/control-center/pages/integrations/cards.js:138:  if (statusKey === "failed") {
+public/control-center/pages/integrations/cards.js:142:  if (statusKey === "needs_setup") {
+public/control-center/pages/integrations/cards.js:146:  return { action: "connect", label: `Connect ${card.label || "Integration"}` };
+public/control-center/pages/integrations/cards.js:150:  const statusKey = getConnectorWorkspaceStatus(card);
+public/control-center/pages/integrations/cards.js:151:  const statusLabel = getConnectorWorkspaceStatusLabel(statusKey);
+public/control-center/pages/integrations/cards.js:153:  const isSelected = asString(session.selectedIntegrationId) === card.id;
+public/control-center/pages/integrations/cards.js:156:    <article class="integration-control-row${isSelected ? " is-selected" : ""}">
+public/control-center/pages/integrations/cards.js:157:      <div class="integration-control-row-main">
+public/control-center/pages/integrations/cards.js:158:        <button class="integration-control-row-trigger" type="button" data-integration-select="${esc(card.id)}">
+public/control-center/pages/integrations/cards.js:159:          <span class="integration-control-row-icon">${esc(card.icon)}</span>
+public/control-center/pages/integrations/cards.js:160:          <span class="integration-control-row-copy">
+public/control-center/pages/integrations/cards.js:161:            <span class="integration-control-row-topline">
+public/control-center/pages/integrations/cards.js:163:              <span class="card-badge ${esc(card.statusTone)}">${esc(statusLabel)}</span>
+public/control-center/pages/integrations/cards.js:165:            <span class="integration-control-row-meta">Why it matters: ${esc(card.whyItMatters)}</span>
+public/control-center/pages/integrations/cards.js:166:            <span class="integration-control-row-meta">Recommended action: ${esc(recommendedAction.label)}</span>
+public/control-center/pages/integrations/cards.js:170:      <div class="integration-control-row-actions">
+public/control-center/pages/integrations/cards.js:172:          ? `<button class="btn btn-secondary" type="button" data-integration-select="${esc(card.id)}">Open setup</button>`
+public/control-center/pages/integrations/cards.js:173:          : `<button class="btn btn-primary" type="button" data-integration-primary="${esc(recommendedAction.action)}" data-integration-id="${esc(card.id)}">${esc(recommendedAction.label)}</button>`}
+public/control-center/pages/integrations/cards.js:174:        <button class="btn btn-secondary" type="button" data-integration-select="${esc(card.id)}">Workspace</button>
+public/control-center/pages/integrations/cards.js:177:          : `<button class="btn btn-secondary" type="button" data-integration-action="test" data-integration-id="${esc(card.id)}">Test</button>`}
+public/control-center/pages/integrations/cards.js:180:          : `<button class="btn btn-secondary" type="button" data-integration-action="sync" data-integration-id="${esc(card.id)}">Sync</button>`}
+public/control-center/pages/integrations/cards.js:191:    <section class="card integration-control-group">
+public/control-center/pages/integrations/cards.js:192:      <div class="card-head integration-control-group-head">
+public/control-center/pages/integrations/cards.js:199:      <div class="integration-control-group-list">
+public/control-center/pages/integrations/cards.js:223:  if (card.statusLabel === "Connected") {
+public/control-center/pages/integrations/cards.js:227:  if (["Partial", "Token expired", "Error"].includes(card.statusLabel)) {
+public/control-center/pages/integrations/cards.js:231:  return `Connect ${card.label || "Integration"}`;
+public/control-center/pages/integrations/cards.js:234:export function renderIntegrationCard(card = {}, session = {}) {
+public/control-center/pages/integrations/cards.js:235:  const isSelected = asString(session.selectedIntegrationId) === card.id;
+public/control-center/pages/integrations/cards.js:240:      : card.statusLabel === "Connected"
+public/control-center/pages/integrations/cards.js:242:      : ["Partial", "Token expired", "Error"].includes(card.statusLabel)
+public/control-center/pages/integrations/cards.js:249:    <section class="integration-simple-card${isSelected ? " is-selected" : ""}">
+public/control-center/pages/integrations/cards.js:250:      <div class="integration-simple-head">
+public/control-center/pages/integrations/cards.js:251:        <div class="integration-hub-icon">${esc(card.icon)}</div>
+public/control-center/pages/integrations/cards.js:253:        <div class="integration-simple-copy">
+public/control-center/pages/integrations/cards.js:256:          <span class="integration-card-meta">
+public/control-center/pages/integrations/cards.js:260:          <span class="integration-card-meta">
+public/control-center/pages/integrations/cards.js:261:            Last sync: ${esc(formatCardDate(card.lastSync))}
+public/control-center/pages/integrations/cards.js:265:        <span class="card-badge ${esc(card.statusTone)}">
+public/control-center/pages/integrations/cards.js:267:            card.statusLabel === "Partial" ||
+public/control-center/pages/integrations/cards.js:268:            card.statusLabel === "Token expired" ||
+public/control-center/pages/integrations/cards.js:269:            card.statusLabel === "Error"
+public/control-center/pages/integrations/cards.js:271:              : card.statusLabel
+public/control-center/pages/integrations/cards.js:276:      <div class="integration-simple-actions">
+public/control-center/pages/integrations/cards.js:280:          data-integration-primary="${esc(primaryAction)}"
+public/control-center/pages/integrations/cards.js:281:          data-integration-id="${esc(card.id)}"
+public/control-center/pages/integrations/cards.js:290:          data-integration-select="${esc(card.id)}"
+public/control-center/pages/integrations/cards.js:303:    <section class="card integration-selected-summary">
+public/control-center/pages/integrations/cards.js:309:        <span class="card-badge ${esc(card.statusTone)}">${esc(card.statusLabel)}</span>
+public/control-center/pages/integrations/cards.js:311:      <div class="integration-selected-summary-body">
+public/control-center/pages/integrations/cards.js:312:        <div class="integration-hub-title-wrap">
+public/control-center/pages/integrations/cards.js:313:          <div class="integration-hub-icon">${esc(card.icon)}</div>
+public/control-center/pages/integrations/cards.js:319:        <button class="btn btn-primary" type="button" data-integration-select="${esc(card.id)}">${esc(smartLabel)}</button>

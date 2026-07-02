@@ -1,0 +1,411 @@
+runtime/orchestrator-service/server.js:117:  createJobDispatchOrchestrator
+runtime/orchestrator-service/server.js:118:} = require('./lib/media/native/orchestrator/job-dispatch-orchestrator');
+runtime/orchestrator-service/server.js:307:  /^\/generated-output\//i,
+runtime/orchestrator-service/server.js:450:  output,
+runtime/orchestrator-service/server.js:460:  const outputLabel = `${requestType} ${now.slice(0, 19).replace('T', ' ')}`;
+runtime/orchestrator-service/server.js:461:  const outputSummary = typeof output === 'string'
+runtime/orchestrator-service/server.js:462:    ? output
+runtime/orchestrator-service/server.js:463:    : JSON.stringify(output || {});
+runtime/orchestrator-service/server.js:477:      output_versions: req?.body?.output_versions,
+runtime/orchestrator-service/server.js:478:      new_output_version: {
+runtime/orchestrator-service/server.js:479:        label: outputLabel,
+runtime/orchestrator-service/server.js:480:        preview_url: asString(output?.images?.[0]?.url || output?.image_url || ''),
+runtime/orchestrator-service/server.js:481:        file_path: asString(output?.images?.[0]?.file_path || ''),
+runtime/orchestrator-service/server.js:482:        outputs: [
+runtime/orchestrator-service/server.js:484:            label: outputLabel,
+runtime/orchestrator-service/server.js:485:            summary: outputSummary
+runtime/orchestrator-service/server.js:490:      outputs: [
+runtime/orchestrator-service/server.js:492:          label: outputLabel,
+runtime/orchestrator-service/server.js:493:          summary: outputSummary,
+runtime/orchestrator-service/server.js:841:  /^\/generated-output\/([^/?#]+)/i
+runtime/orchestrator-service/server.js:1835:  const outputsDir = resolveExecutionReadCandidate({
+runtime/orchestrator-service/server.js:1838:    relativePath: 'outputs',
+runtime/orchestrator-service/server.js:1842:    requestedFile: 'generated/outputs/*.{png,jpg,jpeg,webp}'
+runtime/orchestrator-service/server.js:1845:  const files = fs.readdirSync(outputsDir)
+runtime/orchestrator-service/server.js:1854:  return path.join(outputsDir, files[0]);
+runtime/orchestrator-service/server.js:1905:function getLatestRenderedOutput(projectName) {
+runtime/orchestrator-service/server.js:1912:  const outputPath =
+runtime/orchestrator-service/server.js:1913:    renderRequest.result?.output_path ||
+runtime/orchestrator-service/server.js:1914:    renderRequest.output_path ||
+runtime/orchestrator-service/server.js:1917:  if (!outputPath || !fs.existsSync(outputPath)) {
+runtime/orchestrator-service/server.js:1918:    throw new Error('Rendered output file not found');
+runtime/orchestrator-service/server.js:1923:    output_path: outputPath,
+runtime/orchestrator-service/server.js:1932:  const rendered = readiness.status !== 'blocked' ? getLatestRenderedOutput(projectName) : null;
+runtime/orchestrator-service/server.js:1968:  const imagePath = packageData.rendered_asset?.output_path || '';
+runtime/orchestrator-service/server.js:2025:  const publicImageUrl = buildPublicImageUrl(projectName, packageData.rendered_asset?.output_path || '');
+runtime/orchestrator-service/server.js:2119:function buildPublicImageUrl(projectName, outputPath) {
+runtime/orchestrator-service/server.js:2120:  if (!outputPath) return '';
+runtime/orchestrator-service/server.js:2122:  const filename = path.basename(outputPath);
+runtime/orchestrator-service/server.js:2123:  return `http://46.62.173.30/generated-output/${projectName}/${filename}`;
+runtime/orchestrator-service/server.js:2368:- Keep the real product visually recognizable and faithful to the input.
+runtime/orchestrator-service/server.js:2404:  const outputPath = renderRequest.output_path;
+runtime/orchestrator-service/server.js:2425:  form.append('output_format', 'png');
+runtime/orchestrator-service/server.js:2426:  form.append('input_fidelity', 'high');
+runtime/orchestrator-service/server.js:2452:  ensureDir(path.dirname(outputPath));
+runtime/orchestrator-service/server.js:2456:    artifactType: 'generated_output_image',
+runtime/orchestrator-service/server.js:2458:    legacyPath: outputPath,
+runtime/orchestrator-service/server.js:2464:  output_path: outputPath,
+runtime/orchestrator-service/server.js:2788:  const outputDirResolution = resolveExecutionReadCandidate({
+runtime/orchestrator-service/server.js:2791:    relativePath: 'outputs',
+runtime/orchestrator-service/server.js:2795:    requestedFile: 'outputs/*.{png,jpg,jpeg,webp}'
+runtime/orchestrator-service/server.js:2797:  const outputDir = outputDirResolution.selectedPath;
+runtime/orchestrator-service/server.js:2799:  ensureDir(outputDir);
+runtime/orchestrator-service/server.js:2801:  const files = fs.readdirSync(outputDir)
+runtime/orchestrator-service/server.js:2807:    throw new Error('No generated image output found');
+runtime/orchestrator-service/server.js:2814:    path: path.join(outputDir, latest),
+runtime/orchestrator-service/server.js:2815:    public_url: `http://46.62.173.30/generated-output/${projectName}/${latest}`
+runtime/orchestrator-service/server.js:4035:function buildPublishingPreviewBase(input = {}, existingPreview = null) {
+runtime/orchestrator-service/server.js:4037:  const channel = String(input.channel || base.channel || '').trim().toLowerCase();
+runtime/orchestrator-service/server.js:4038:  const title = buildPublishingDisplayTitle(input.title || base.title, input.wave_name || base.wave_name, channel);
+runtime/orchestrator-service/server.js:4039:  const notes = normalizePublishingNotes(input.notes != null ? input.notes : base.notes);
+runtime/orchestrator-service/server.js:4040:  const offer = String(input.offer || base.offer || '').trim();
+runtime/orchestrator-service/server.js:4042:    String(input.body || input.caption || base.body || base.caption || '').trim() ||
+runtime/orchestrator-service/server.js:4056:    headline: String(input.headline || base.headline || title).trim(),
+runtime/orchestrator-service/server.js:4058:    caption: String(input.caption || base.caption || body).trim(),
+runtime/orchestrator-service/server.js:4059:    subject: String(input.subject || base.subject || title).trim(),
+runtime/orchestrator-service/server.js:4060:    cta: String(input.cta || base.cta || (channel === 'email' ? 'Review email' : 'Shop now')).trim(),
+runtime/orchestrator-service/server.js:4062:    format: String(input.format || base.format || '').trim(),
+runtime/orchestrator-service/server.js:4063:    goal: String(input.goal || base.goal || '').trim(),
+runtime/orchestrator-service/server.js:4064:    visual_prompt: String(input.visual_prompt || base.visual_prompt || '').trim(),
+runtime/orchestrator-service/server.js:4065:    primary_product_name: String(input.primary_product_name || base.primary_product_name || '').trim(),
+runtime/orchestrator-service/server.js:4066:    primary_product_slug: String(input.primary_product_slug || base.primary_product_slug || '').trim(),
+runtime/orchestrator-service/server.js:4067:    asset_count: Number(input.total_assets || base.asset_count || 0) || 0,
+runtime/orchestrator-service/server.js:4073:function buildPublishingPreviewFromConnectorPayload(payload, input = {}) {
+runtime/orchestrator-service/server.js:4083:      channel: input.channel || payload.channel,
+runtime/orchestrator-service/server.js:4084:      title: input.title || payload.wave_name,
+runtime/orchestrator-service/server.js:4085:      wave_name: input.wave_name || payload.wave_name,
+runtime/orchestrator-service/server.js:4097:      offer: input.offer || ''
+runtime/orchestrator-service/server.js:4099:    input.preview || null
+runtime/orchestrator-service/server.js:4171:  delete payload.file_path;
+runtime/orchestrator-service/server.js:4189:function tryBuildPublishingConnector(projectName, waveName, channel, input = {}) {
+runtime/orchestrator-service/server.js:4206:      connector_preview: buildPublishingPreviewFromConnectorPayload(payload, input),
+runtime/orchestrator-service/server.js:4220:function upsertScheduledJob(projectName, input = {}, options = {}) {
+runtime/orchestrator-service/server.js:4222:  const requestedJobId = String(input.job_id || '').trim().replace(/[^a-z0-9_-]/gi, '');
+runtime/orchestrator-service/server.js:4232:  const channel = String(input.channel || existing.channel || '').trim().toLowerCase();
+runtime/orchestrator-service/server.js:4238:  const scheduledForInput =
+runtime/orchestrator-service/server.js:4239:    input.scheduled_for !== undefined
+runtime/orchestrator-service/server.js:4240:      ? String(input.scheduled_for || '').trim()
+runtime/orchestrator-service/server.js:4244:  if (scheduledForInput) {
+runtime/orchestrator-service/server.js:4245:    const parsed = new Date(scheduledForInput);
+runtime/orchestrator-service/server.js:4252:  const waveName = String(input.wave_name || existing.wave_name || '').trim();
+runtime/orchestrator-service/server.js:4253:  const title = buildPublishingDisplayTitle(input.title || existing.title, waveName, channel);
+runtime/orchestrator-service/server.js:4255:    input.notes !== undefined ? input.notes : existing.notes
+runtime/orchestrator-service/server.js:4258:    ...input,
+runtime/orchestrator-service/server.js:4261:    offer: input.offer || existing.offer || ''
+runtime/orchestrator-service/server.js:4267:      ...(input.preview && typeof input.preview === 'object' ? input.preview : {}),
+runtime/orchestrator-service/server.js:4271:      offer: input.offer || existing.offer || '',
+runtime/orchestrator-service/server.js:4290:    status: normalizePublishingJobStatus(input.status, existing.status || fallbackStatus),
+runtime/orchestrator-service/server.js:4295:    mode: String(input.mode || existing.mode || readExecutionMode(safeProject).mode || 'semi_auto').trim(),
+runtime/orchestrator-service/server.js:4296:    offer: String(input.offer || existing.offer || '').trim(),
+runtime/orchestrator-service/server.js:4714:function getRenderOutputPaths(projectName) {
+runtime/orchestrator-service/server.js:4730:  const outputsDir = path.join(baseDir, 'outputs');
+runtime/orchestrator-service/server.js:4733:  const legacyOutputsDir = path.join(legacyBaseDir, 'outputs');
+runtime/orchestrator-service/server.js:4738:  ensureDir(outputsDir);
+runtime/orchestrator-service/server.js:4742:  ensureDir(legacyOutputsDir);
+runtime/orchestrator-service/server.js:4748:    outputsDir,
+runtime/orchestrator-service/server.js:4752:    legacyOutputsDir,
+runtime/orchestrator-service/server.js:4782:  const paths = getRenderOutputPaths(projectName);
+runtime/orchestrator-service/server.js:4785:  const outputPath = job.suggested_output_path ||
+runtime/orchestrator-service/server.js:4786:    path.join(paths.legacyOutputsDir, `${renderId}_${job.asset_type}.png`);
+runtime/orchestrator-service/server.js:4801:    output_path: outputPath
+runtime/orchestrator-service/server.js:4809:  const paths = getRenderOutputPaths(projectName);
+runtime/orchestrator-service/server.js:4916:function getGenerationOutputPaths(projectName) {
+runtime/orchestrator-service/server.js:4932:  const outputsDir = path.join(baseDir, 'outputs');
+runtime/orchestrator-service/server.js:4934:  const legacyOutputsDir = path.join(legacyBaseDir, 'outputs');
+runtime/orchestrator-service/server.js:4938:  ensureDir(outputsDir);
+runtime/orchestrator-service/server.js:4941:  ensureDir(legacyOutputsDir);
+runtime/orchestrator-service/server.js:4946:    outputsDir,
+runtime/orchestrator-service/server.js:4949:    legacyOutputsDir
+runtime/orchestrator-service/server.js:5029:  const outputPaths = getGenerationOutputPaths(projectName);
+runtime/orchestrator-service/server.js:5032:  const outputFilename = `${jobId}_${assetType}.json`;
+runtime/orchestrator-service/server.js:5033:  const outputPath = path.join(outputPaths.legacyJobsDir, outputFilename);
+runtime/orchestrator-service/server.js:5049:    suggested_output_path: path.join(outputPaths.legacyOutputsDir, `${jobId}_${assetType}.png`)
+runtime/orchestrator-service/server.js:5057:    legacyPath: outputPath,
+runtime/orchestrator-service/server.js:5302:function normalizeAssetRole(input) {
+runtime/orchestrator-service/server.js:5303:  const value = String(input || '').trim().toLowerCase();
+runtime/orchestrator-service/server.js:5333:    registryPath: path.join(baseDir, 'media-input-registry.json'),
+runtime/orchestrator-service/server.js:6017:    text.includes('delete')
+runtime/orchestrator-service/server.js:6091:    user_facing_output: {
+runtime/orchestrator-service/server.js:6171:    mediaInputRegistryPath: path.join(resolved.projectRoot, 'media-input-registry.json')
+runtime/orchestrator-service/server.js:6316:function computeSourceStatus(entry = {}) {
+runtime/orchestrator-service/server.js:6345:  const input = value && typeof value === 'object' && !Array.isArray(value) ? value : {};
+runtime/orchestrator-service/server.js:6346:  return input.sources && typeof input.sources === 'object' && !Array.isArray(input.sources)
+runtime/orchestrator-service/server.js:6347:    ? input.sources
+runtime/orchestrator-service/server.js:6348:    : input;
+runtime/orchestrator-service/server.js:6373:    const status = computeSourceStatus(entry);
+runtime/orchestrator-service/server.js:6446:function ensureProjectBaselineFiles(projectName, projectDataInput = {}) {
+runtime/orchestrator-service/server.js:6451:    ...(projectDataInput && typeof projectDataInput === 'object' ? projectDataInput : {})
+runtime/orchestrator-service/server.js:6484:    legacyCandidates: [paths.legacy.assetsRegistryPath, paths.legacy.mediaInputRegistryPath],
+runtime/orchestrator-service/server.js:6911:  const input = payload && typeof payload === 'object' ? payload : {};
+runtime/orchestrator-service/server.js:6913:    business_type: normalizeSetupTextValue(input.business_type || input.project_type),
+runtime/orchestrator-service/server.js:6914:    tone: normalizeSetupTextValue(input.tone || input.brand_voice),
+runtime/orchestrator-service/server.js:6915:    positioning: normalizeSetupTextValue(input.positioning || input.offer_positioning || input.differentiation),
+runtime/orchestrator-service/server.js:6916:    audience: normalizeSetupTextValue(input.audience || input.audience_primary),
+runtime/orchestrator-service/server.js:6917:    goals: normalizeSetupListValue(input.goals),
+runtime/orchestrator-service/server.js:6918:    website: normalizeSetupTextValue(input.website || input.website_url),
+runtime/orchestrator-service/server.js:6919:    social_channels: normalizeSetupListValue(input.social_channels || input.social_links),
+runtime/orchestrator-service/server.js:6920:    product_files: normalizeSetupTextValue(input.product_files || input.products_file),
+runtime/orchestrator-service/server.js:6921:    brand_assets: normalizeSetupTextValue(input.brand_assets),
+runtime/orchestrator-service/server.js:6922:    legal_docs: normalizeSetupTextValue(input.legal_docs),
+runtime/orchestrator-service/server.js:6923:    pricing_docs: normalizeSetupTextValue(input.pricing_docs),
+runtime/orchestrator-service/server.js:6924:    campaign_docs: normalizeSetupTextValue(input.campaign_docs)
+runtime/orchestrator-service/server.js:6928:    project_type: normalizeSetupTextValue(input.project_type),
+runtime/orchestrator-service/server.js:6929:    website_url: normalizeSetupTextValue(input.website_url),
+runtime/orchestrator-service/server.js:6930:    status: normalizeSetupTextValue(input.project_status || input.status),
+runtime/orchestrator-service/server.js:6931:    execution_mode: normalizeSetupTextValue(input.execution_mode),
+runtime/orchestrator-service/server.js:6932:    brand_name: normalizeSetupTextValue(input.brand_name),
+runtime/orchestrator-service/server.js:6933:    brand_promise: normalizeSetupTextValue(input.brand_promise),
+runtime/orchestrator-service/server.js:6934:    brand_voice: normalizeSetupTextValue(input.brand_voice),
+runtime/orchestrator-service/server.js:6935:    visual_identity: normalizeSetupTextValue(input.visual_identity),
+runtime/orchestrator-service/server.js:6936:    offer_positioning: normalizeSetupTextValue(input.offer_positioning),
+runtime/orchestrator-service/server.js:6937:    market: normalizeSetupTextValue(input.market),
+runtime/orchestrator-service/server.js:6938:    language: normalizeSetupTextValue(input.language),
+runtime/orchestrator-service/server.js:6939:    currency: normalizeSetupTextValue(input.currency),
+runtime/orchestrator-service/server.js:6940:    primary_goal: normalizeSetupTextValue(input.primary_goal),
+runtime/orchestrator-service/server.js:6941:    secondary_goal: normalizeSetupTextValue(input.secondary_goal),
+runtime/orchestrator-service/server.js:6942:    launch_window: normalizeSetupTextValue(input.launch_window),
+runtime/orchestrator-service/server.js:6943:    audience_primary: normalizeSetupTextValue(input.audience_primary),
+runtime/orchestrator-service/server.js:6944:    audience_problem: normalizeSetupTextValue(input.audience_problem),
+runtime/orchestrator-service/server.js:6945:    audience_geography: normalizeSetupTextValue(input.audience_geography),
+runtime/orchestrator-service/server.js:6946:    competitors: normalizeSetupListValue(input.competitors),
+runtime/orchestrator-service/server.js:6947:    differentiation: normalizeSetupTextValue(input.differentiation),
+runtime/orchestrator-service/server.js:6948:    operator_notes: normalizeSetupListValue(input.operator_notes),
+runtime/orchestrator-service/server.js:6951:      ...input
+runtime/orchestrator-service/server.js:7249:    status: readinessScore >= 85 ? 'ready_for_data_upload' : 'needs_input'
+runtime/orchestrator-service/server.js:7313:    deleted: Boolean(asset.deleted),
+runtime/orchestrator-service/server.js:7314:    deleted_at: normalizeSetupTextValue(asset.deleted_at),
+runtime/orchestrator-service/server.js:7315:    deleted_by: normalizeSetupTextValue(asset.deleted_by),
+runtime/orchestrator-service/server.js:7316:    delete_note: normalizeSetupTextValue(asset.delete_note),
+runtime/orchestrator-service/server.js:7408:  delete sources[normalizedSourceType];
+runtime/orchestrator-service/server.js:8204:        why_it_matters: 'Keeps setup, media creation, publishing previews, and AI output visually tied to the right brand.',
+runtime/orchestrator-service/server.js:8877:function buildProjectAssetCategoryReadiness(projectName, assetsInput = null, options = {}) {
+runtime/orchestrator-service/server.js:8878:  const assets = Array.isArray(assetsInput) ? assetsInput : listProjectAssets(projectName);
+runtime/orchestrator-service/server.js:9112:  const inputPath = String(sourceFilePath || '').trim();
+runtime/orchestrator-service/server.js:9113:  if (!inputPath || !fs.existsSync(inputPath)) {
+runtime/orchestrator-service/server.js:9120:  const fileName = path.basename(inputPath);
+runtime/orchestrator-service/server.js:9123:  fs.copyFileSync(inputPath, destinationPath);
+runtime/orchestrator-service/server.js:9130:    source_file_path: inputPath,
+runtime/orchestrator-service/server.js:9294:app.post('/task', (req, res) => {
+runtime/orchestrator-service/server.js:9334:app.post('/ingest', (req, res) => {
+runtime/orchestrator-service/server.js:9335:  const message = req.body.message || req.body.text || req.body.input || '';
+runtime/orchestrator-service/server.js:9350:app.post('/execute_publish_package', (req, res) => {
+runtime/orchestrator-service/server.js:9408:app.post('/execute_email_package', (req, res) => {
+runtime/orchestrator-service/server.js:9465:app.post('/generate_media_from_prompt', (req, res) => {
+runtime/orchestrator-service/server.js:9499:      mock_output: true,
+runtime/orchestrator-service/server.js:9525:app.post('/build_ad_execution_package', (req, res) => {
+runtime/orchestrator-service/server.js:9728:app.post('/backup-and-clone-product/:id', async (req, res) => {
+runtime/orchestrator-service/server.js:9812:app.post('/apply-prepared-copy-to-clone/:originalId/:cloneId', async (req, res) => {
+runtime/orchestrator-service/server.js:9889:    const updateResponse = await axios.put(
+runtime/orchestrator-service/server.js:9961:app.post('/media/upload', applySingleMediaUpload, (req, res) => {
+runtime/orchestrator-service/server.js:10364:app.post('/media-manager/project/:project/rename', express.json({ limit: '1mb' }), handleRenameMediaManagerProject);
+runtime/orchestrator-service/server.js:10366:app.post('/public/media-manager/project/:project/rename', express.json({ limit: '1mb' }), handleRenameMediaManagerProject);
+runtime/orchestrator-service/server.js:10368:app.post('/media-manager/project/:project/apply-template', express.json({ limit: '1mb' }), handleApplyBusinessTemplateToProject);
+runtime/orchestrator-service/server.js:10370:app.post('/public/media-manager/project/:project/apply-template', express.json({ limit: '1mb' }), handleApplyBusinessTemplateToProject);
+runtime/orchestrator-service/server.js:10372:app.post('/media-manager/projects', express.json({ limit: '1mb' }), handleCreateMediaManagerProject);
+runtime/orchestrator-service/server.js:10374:app.post('/public/media-manager/projects', express.json({ limit: '1mb' }), handleCreateMediaManagerProject);
+runtime/orchestrator-service/server.js:10563:app.post('/media-manager/project/:project/assets/:assetId/status', express.json({ limit: '1mb' }), (req, res) => {
+runtime/orchestrator-service/server.js:10617:app.post('/media-manager/project/:project/assets/:assetId/rename', express.json({ limit: '1mb' }), (req, res) => {
+runtime/orchestrator-service/server.js:10647:app.post('/media-manager/project/:project/assets/:assetId/source-of-truth', express.json({ limit: '1mb' }), (req, res) => {
+runtime/orchestrator-service/server.js:10672:app.post('/media-manager/project/:project/assets/:assetId/archive', express.json({ limit: '1mb' }), (req, res) => {
+runtime/orchestrator-service/server.js:10700:app.post('/media-manager/project/:project/assets/:assetId/delete', express.json({ limit: '1mb' }), (req, res) => {
+runtime/orchestrator-service/server.js:10710:      asset.deleted = true;
+runtime/orchestrator-service/server.js:10711:      asset.deleted_at = now;
+runtime/orchestrator-service/server.js:10712:      asset.deleted_by = 'control_center';
+runtime/orchestrator-service/server.js:10713:      asset.delete_note = note || asset.delete_note || 'Soft deleted from Control Center Library.';
+runtime/orchestrator-service/server.js:10723:      deleted: true,
+runtime/orchestrator-service/server.js:10727:    return sendAssetMutationError(res, error, 'Failed to delete asset.');
+runtime/orchestrator-service/server.js:10731:app.delete('/media-manager/project/:project/assets/:assetId', express.json({ limit: '1mb' }), (req, res) => {
+runtime/orchestrator-service/server.js:10741:      asset.deleted = true;
+runtime/orchestrator-service/server.js:10742:      asset.deleted_at = now;
+runtime/orchestrator-service/server.js:10743:      asset.deleted_by = 'control_center';
+runtime/orchestrator-service/server.js:10744:      asset.delete_note = note || asset.delete_note || 'Soft deleted from Control Center Library.';
+runtime/orchestrator-service/server.js:10754:      deleted: true,
+runtime/orchestrator-service/server.js:10758:    return sendAssetMutationError(res, error, 'Failed to delete asset.');
+runtime/orchestrator-service/server.js:10762:app.post('/media-manager/project/:project/library/refresh', (req, res) => {
+runtime/orchestrator-service/server.js:10772:app.post('/media-manager/project/:project/setup', (req, res) => {
+runtime/orchestrator-service/server.js:10782:app.post('/public/media-manager/project/:project/setup', (req, res) => {
+runtime/orchestrator-service/server.js:10908:app.post('/media-manager/project/:project/team', handleUpdateProjectTeam);
+runtime/orchestrator-service/server.js:10909:app.post('/public/media-manager/project/:project/team', handleUpdateProjectTeam);
+runtime/orchestrator-service/server.js:10956:app.post('/media-manager/project/:project/campaigns', handleUpsertCampaign);
+runtime/orchestrator-service/server.js:10957:app.post('/public/media-manager/project/:project/campaigns', handleUpsertCampaign);
+runtime/orchestrator-service/server.js:10958:app.patch('/media-manager/project/:project/campaigns/:campaignId', (req, res) => {
+runtime/orchestrator-service/server.js:10965:app.patch('/public/media-manager/project/:project/campaigns/:campaignId', (req, res) => {
+runtime/orchestrator-service/server.js:11021:app.post('/media-manager/project/:project/content-items', handleUpsertContentItem);
+runtime/orchestrator-service/server.js:11022:app.post('/public/media-manager/project/:project/content-items', handleUpsertContentItem);
+runtime/orchestrator-service/server.js:11023:app.patch('/media-manager/project/:project/content-items/:contentItemId', (req, res) => {
+runtime/orchestrator-service/server.js:11030:app.patch('/public/media-manager/project/:project/content-items/:contentItemId', (req, res) => {
+runtime/orchestrator-service/server.js:11087:app.post('/media-manager/project/:project/media-jobs', handleUpsertMediaJob);
+runtime/orchestrator-service/server.js:11088:app.post('/public/media-manager/project/:project/media-jobs', handleUpsertMediaJob);
+runtime/orchestrator-service/server.js:11089:app.patch('/media-manager/project/:project/media-jobs/:mediaJobId', (req, res) => {
+runtime/orchestrator-service/server.js:11096:app.patch('/public/media-manager/project/:project/media-jobs/:mediaJobId', (req, res) => {
+runtime/orchestrator-service/server.js:11143:    const output = req.body?.output;
+runtime/orchestrator-service/server.js:11150:      inputs: req.body?.inputs,
+runtime/orchestrator-service/server.js:11151:      output,
+runtime/orchestrator-service/server.js:11156:    const artifact = output && Object.keys(output).length
+runtime/orchestrator-service/server.js:11158:        type: 'workflow_output',
+runtime/orchestrator-service/server.js:11160:        summary: output.summary || '',
+runtime/orchestrator-service/server.js:11164:        payload: output,
+runtime/orchestrator-service/server.js:11181:app.post('/media-manager/project/:project/workflows/:workflowId/run', handleRunWorkflow);
+runtime/orchestrator-service/server.js:11182:app.post('/public/media-manager/project/:project/workflows/:workflowId/run', handleRunWorkflow);
+runtime/orchestrator-service/server.js:11417:app.post('/media-manager/project/:project/ai/command', handleExecuteAiCommand);
+runtime/orchestrator-service/server.js:11418:app.post('/public/media-manager/project/:project/ai/command', handleExecuteAiCommand);
+runtime/orchestrator-service/server.js:11419:app.post('/media-manager/project/:project/ai/chat', handleExecuteAiChat);
+runtime/orchestrator-service/server.js:11420:app.post('/public/media-manager/project/:project/ai/chat', handleExecuteAiChat);
+runtime/orchestrator-service/server.js:11421:app.post('/media-manager/project/:project/ai/guidance', handleExecuteAiGuidance);
+runtime/orchestrator-service/server.js:11422:app.post('/public/media-manager/project/:project/ai/guidance', handleExecuteAiGuidance);
+runtime/orchestrator-service/server.js:11423:app.post('/media-manager/project/:project/ai/workflows/:workflowId/run', handleExecuteAiWorkflow);
+runtime/orchestrator-service/server.js:11424:app.post('/public/media-manager/project/:project/ai/workflows/:workflowId/run', handleExecuteAiWorkflow);
+runtime/orchestrator-service/server.js:11463:app.post('/media-manager/project/:project/tasks', handleCreateTask);
+runtime/orchestrator-service/server.js:11464:app.post('/public/media-manager/project/:project/tasks', handleCreateTask);
+runtime/orchestrator-service/server.js:11544:app.post('/media-manager/project/:project/approvals', handleCreateApproval);
+runtime/orchestrator-service/server.js:11545:app.post('/public/media-manager/project/:project/approvals', handleCreateApproval);
+runtime/orchestrator-service/server.js:11546:app.post('/media-manager/project/:project/approvals/:approvalId/decision', handleApprovalDecision);
+runtime/orchestrator-service/server.js:11547:app.post('/public/media-manager/project/:project/approvals/:approvalId/decision', handleApprovalDecision);
+runtime/orchestrator-service/server.js:11594:app.post('/media-manager/project/:project/governance/policy', handleUpdateGovernancePolicy);
+runtime/orchestrator-service/server.js:11595:app.post('/public/media-manager/project/:project/governance/policy', handleUpdateGovernancePolicy);
+runtime/orchestrator-service/server.js:11614:app.patch('/media-manager/project/:project/notifications/:notificationId', (req, res) => {
+runtime/orchestrator-service/server.js:11627:app.patch('/public/media-manager/project/:project/notifications/:notificationId', (req, res) => {
+runtime/orchestrator-service/server.js:11689:app.post('/media-manager/project/:project/handoffs', handleCreateHandoff);
+runtime/orchestrator-service/server.js:11690:app.post('/public/media-manager/project/:project/handoffs', handleCreateHandoff);
+runtime/orchestrator-service/server.js:11691:app.post('/media-manager/project/:project/handoffs/:handoffId/consume', handleConsumeHandoff);
+runtime/orchestrator-service/server.js:11692:app.post('/public/media-manager/project/:project/handoffs/:handoffId/consume', handleConsumeHandoff);
+runtime/orchestrator-service/server.js:11737:app.post('/media-manager/project/:project/sources', (req, res) => {
+runtime/orchestrator-service/server.js:11763:app.post('/public/media-manager/project/:project/sources', (req, res) => {
+runtime/orchestrator-service/server.js:11789:app.delete('/media-manager/project/:project/sources/:sourceType', (req, res) => {
+runtime/orchestrator-service/server.js:11800:app.delete('/public/media-manager/project/:project/sources/:sourceType', (req, res) => {
+runtime/orchestrator-service/server.js:12234:    const orchestrator = createJobDispatchOrchestrator();
+runtime/orchestrator-service/server.js:12236:    const result = await orchestrator.dispatch({
+runtime/orchestrator-service/server.js:12260:app.post('/media-manager/project/:project/native-media/generate', handleNativeMediaGenerate);
+runtime/orchestrator-service/server.js:12266:app.post('/media-manager/project/:project/integrations/:integrationId/connect', async (req, res) => {
+runtime/orchestrator-service/server.js:12272:app.post('/public/media-manager/project/:project/integrations/:integrationId/connect', async (req, res) => {
+runtime/orchestrator-service/server.js:12278:app.post('/media-manager/project/:project/integrations/:integrationId/reconnect', async (req, res) => {
+runtime/orchestrator-service/server.js:12284:app.post('/public/media-manager/project/:project/integrations/:integrationId/reconnect', async (req, res) => {
+runtime/orchestrator-service/server.js:12290:app.post('/media-manager/project/:project/integrations/:integrationId/test', async (req, res) => {
+runtime/orchestrator-service/server.js:12294:app.post('/public/media-manager/project/:project/integrations/:integrationId/test', async (req, res) => {
+runtime/orchestrator-service/server.js:12298:app.post('/media-manager/project/:project/integrations/:integrationId/sync', async (req, res) => {
+runtime/orchestrator-service/server.js:12302:app.post('/public/media-manager/project/:project/integrations/:integrationId/sync', async (req, res) => {
+runtime/orchestrator-service/server.js:12306:app.post('/media-manager/project/:project/integrations/:integrationId/import-history', async (req, res) => {
+runtime/orchestrator-service/server.js:12310:app.post('/public/media-manager/project/:project/integrations/:integrationId/import-history', async (req, res) => {
+runtime/orchestrator-service/server.js:12314:app.post('/media-manager/project/:project/integrations/:integrationId/disconnect', async (req, res) => {
+runtime/orchestrator-service/server.js:12318:app.post('/public/media-manager/project/:project/integrations/:integrationId/disconnect', async (req, res) => {
+runtime/orchestrator-service/server.js:12324:app.post('/media-manager/project/:project/publishing/schedule', (req, res) => {
+runtime/orchestrator-service/server.js:12357:app.post('/public/media-manager/project/:project/publishing/schedule', (req, res) => {
+runtime/orchestrator-service/server.js:12390:app.post('/media-manager/project/:project/publishing/:jobId/reschedule', (req, res) => {
+runtime/orchestrator-service/server.js:12419:app.post('/public/media-manager/project/:project/publishing/:jobId/reschedule', (req, res) => {
+runtime/orchestrator-service/server.js:12448:app.post('/media-manager/project/:project/publishing/:jobId/ready', (req, res) => {
+runtime/orchestrator-service/server.js:12470:app.post('/public/media-manager/project/:project/publishing/:jobId/ready', (req, res) => {
+runtime/orchestrator-service/server.js:12492:app.post('/media-manager/project/:project/publishing/:jobId/publish', (req, res) => {
+runtime/orchestrator-service/server.js:12524:app.post('/public/media-manager/project/:project/publishing/:jobId/publish', (req, res) => {
+runtime/orchestrator-service/server.js:12556:app.post('/media-manager/project/:project/publishing/:jobId/fail', (req, res) => {
+runtime/orchestrator-service/server.js:12588:app.post('/public/media-manager/project/:project/publishing/:jobId/fail', (req, res) => {
+runtime/orchestrator-service/server.js:12698:app.get('/generated-output/:project/:filename', (req, res) => {
+runtime/orchestrator-service/server.js:12711:    relativePath: path.join('outputs', safeFilename),
+runtime/orchestrator-service/server.js:12717:    return res.status(404).send('Generated output not found');
+runtime/orchestrator-service/server.js:13470:function resolvePublishPackageForExecution(projectName, input = {}) {
+runtime/orchestrator-service/server.js:13471:  const inlinePackage = input.publish_package && typeof input.publish_package === 'object'
+runtime/orchestrator-service/server.js:13472:    ? input.publish_package
+runtime/orchestrator-service/server.js:13478:  const campaignName = String(input.campaign_name || '').trim();
+runtime/orchestrator-service/server.js:13479:  const channel = String(input.channel || '').trim().toLowerCase();
+runtime/orchestrator-service/server.js:13537:function resolveEmailPackageForExecution(projectName, input = {}) {
+runtime/orchestrator-service/server.js:13538:  const inlinePackage = input.email_package && typeof input.email_package === 'object'
+runtime/orchestrator-service/server.js:13539:    ? input.email_package
+runtime/orchestrator-service/server.js:13545:  const campaignName = String(input.campaign_name || '').trim();
+runtime/orchestrator-service/server.js:13593:function buildMediaGenerationMock(promptPack = {}, input = {}) {
+runtime/orchestrator-service/server.js:13600:    input.image_prompt
+runtime/orchestrator-service/server.js:13637:function resolveCampaignPackageForAds(projectName, input = {}) {
+runtime/orchestrator-service/server.js:13638:  const inlinePackage = input.campaign_package && typeof input.campaign_package === 'object'
+runtime/orchestrator-service/server.js:13639:    ? input.campaign_package
+runtime/orchestrator-service/server.js:13645:  const campaignName = String(input.campaign_name || '').trim();
+runtime/orchestrator-service/server.js:13656:function buildAdExecutionPackage(campaignPackage, input = {}) {
+runtime/orchestrator-service/server.js:13675:  const headline = String(input.headline || offer.headline || branding.headline || `${primary.product_name || campaignPackage.campaign_name} offer`).trim();
+runtime/orchestrator-service/server.js:13676:  const cta = String(input.cta || offer.cta || branding.cta || 'Shop now').trim();
+runtime/orchestrator-service/server.js:13677:  const adCopy = String(input.ad_copy || offer.hook || branding.hook || `${headline}. ${cta}`).trim();
+runtime/orchestrator-service/server.js:13679:    input.audience
+runtime/orchestrator-service/server.js:13686:    daily_budget: Number(input.daily_budget || 45),
+runtime/orchestrator-service/server.js:13687:    currency: String(input.currency || 'EUR').trim(),
+runtime/orchestrator-service/server.js:14716:app.post('/telegram-command', async (req, res) => {
+runtime/orchestrator-service/server.js:15590:      const plannedOutputPath = path.join(
+runtime/orchestrator-service/server.js:15608:        output_path: plannedOutputPath,
+runtime/orchestrator-service/server.js:15703:    fs.writeFileSync(asset.output_path, imageBuffer);
+runtime/orchestrator-service/server.js:15719:        file_saved: asset.output_path,
+runtime/orchestrator-service/server.js:15760:    const fileData = fs.readFileSync(asset.output_path);
+runtime/orchestrator-service/server.js:16070:      const plannedOutputPath = path.join(
+runtime/orchestrator-service/server.js:16094:        output_path: plannedOutputPath,
+runtime/orchestrator-service/server.js:16163:    const fileData = fs.readFileSync(asset.output_path);
+runtime/orchestrator-service/server.js:16189:    emailItem.hero_image_path = asset.output_path;
+runtime/orchestrator-service/server.js:16274:        fs.writeFileSync(asset.output_path, imageBuffer);
+runtime/orchestrator-service/server.js:16286:            file_saved: asset.output_path,
+runtime/orchestrator-service/server.js:16472:        content_outputs: [
+runtime/orchestrator-service/server.js:16479:        media_outputs: [
+runtime/orchestrator-service/server.js:16866:        output_structure: [
+runtime/orchestrator-service/server.js:16910:        output_structure: [
+runtime/orchestrator-service/server.js:17461:  const outputPath = path.join(
+runtime/orchestrator-service/server.js:17463:    'campaign-output/campaign-output-queue.json'
+runtime/orchestrator-service/server.js:17467:  const outputQueue = JSON.parse(fs.readFileSync(outputPath, 'utf8'));
+runtime/orchestrator-service/server.js:17542:  outputQueue.push(result);
+runtime/orchestrator-service/server.js:17543:  fs.writeFileSync(outputPath, JSON.stringify(outputQueue, null, 2), 'utf8');
+runtime/orchestrator-service/server.js:17557:      const campaignOutputPath = path.join(
+runtime/orchestrator-service/server.js:17559:        'campaign-output/campaign-output-queue.json'
+runtime/orchestrator-service/server.js:17569:      const campaignOutputQueue = JSON.parse(fs.readFileSync(campaignOutputPath, 'utf8'));
+runtime/orchestrator-service/server.js:17576:      const campaignExec = campaignOutputQueue.find(x => x.id === execId);
+runtime/orchestrator-service/server.js:17742:        campaignOutputPath,
+runtime/orchestrator-service/server.js:17743:        JSON.stringify(campaignOutputQueue, null, 2),
+runtime/orchestrator-service/server.js:17763:      const campaignOutputPath = path.join(
+runtime/orchestrator-service/server.js:17765:        'campaign-output/campaign-output-queue.json'
+runtime/orchestrator-service/server.js:17768:      const campaignOutputQueue = JSON.parse(fs.readFileSync(campaignOutputPath, 'utf8'));
+runtime/orchestrator-service/server.js:17769:      const campaignExec = campaignOutputQueue.find(x => x.id === execId);
+runtime/orchestrator-service/server.js:17793:      const campaignOutputPath = path.join(
+runtime/orchestrator-service/server.js:17795:        'campaign-output/campaign-output-queue.json'
+runtime/orchestrator-service/server.js:17798:      const campaignOutputQueue = JSON.parse(fs.readFileSync(campaignOutputPath, 'utf8'));
+runtime/orchestrator-service/server.js:17799:      const campaignExec = campaignOutputQueue.find(x => x.id === execId);
+runtime/orchestrator-service/server.js:17825:          campaignOutputPath,
+runtime/orchestrator-service/server.js:17826:          JSON.stringify(campaignOutputQueue, null, 2),
+runtime/orchestrator-service/server.js:17850:      const campaignOutputPath = path.join(
+runtime/orchestrator-service/server.js:17852:        'campaign-output/campaign-output-queue.json'
+runtime/orchestrator-service/server.js:17855:      const campaignOutputQueue = JSON.parse(fs.readFileSync(campaignOutputPath, 'utf8'));
+runtime/orchestrator-service/server.js:17856:      const campaignExec = campaignOutputQueue.find(x => x.id === execId);
+runtime/orchestrator-service/server.js:17887:          campaignOutputPath,
+runtime/orchestrator-service/server.js:17888:          JSON.stringify(campaignOutputQueue, null, 2),
+runtime/orchestrator-service/server.js:17911:      const campaignOutputPath = path.join(
+runtime/orchestrator-service/server.js:17913:        'campaign-output/campaign-output-queue.json'
+runtime/orchestrator-service/server.js:17916:      const campaignOutputQueue = JSON.parse(fs.readFileSync(campaignOutputPath, 'utf8'));
+runtime/orchestrator-service/server.js:17917:      const campaignExec = campaignOutputQueue.find(x => x.id === execId);
+runtime/orchestrator-service/server.js:18371:if (command === '/review_media_inputs') {
+runtime/orchestrator-service/server.js:18633:    const outputPaths = getGenerationOutputPaths(projectName);
+runtime/orchestrator-service/server.js:18634:    const files = fs.readdirSync(outputPaths.jobsDir)
+runtime/orchestrator-service/server.js:18643:    const latestPath = path.join(outputPaths.jobsDir, files[0]);
+runtime/orchestrator-service/server.js:18701:  const outputPath = args.slice(3).join(' ').trim();
+runtime/orchestrator-service/server.js:18709:      output_path: outputPath || null
+runtime/orchestrator-service/server.js:20660:app.post('/publish-clone/:cloneId', async (req, res) => {
+runtime/orchestrator-service/server.js:20668:    const response = await axios.put(
+runtime/orchestrator-service/server.js:20703:app.post('/replace-original-product/:originalId/:cloneId', async (req, res) => {
+runtime/orchestrator-service/server.js:20750:    const updateResponse = await axios.put(
+runtime/orchestrator-service/server.js:20792:app.post('/cleanup-clone/:cloneId', async (req, res) => {
+runtime/orchestrator-service/server.js:20803:    const response = await axios.put(
+runtime/orchestrator-service/server.js:20839:app.post('/publish-blog/:draftId', async (req, res) => {
+runtime/orchestrator-service/server.js:20945:app.post('/rollback-product/:productId', async (req, res) => {
+runtime/orchestrator-service/server.js:20980:    const response = await axios.put(
+runtime/orchestrator-service/server.js:21104:function appendPerformanceRecord(projectName, input = {}) {
+runtime/orchestrator-service/server.js:21108:  const matchedJob = schedulerJobs.find((job) => String(job.id || '').trim() === String(input.job_id || '').trim()) || null;
+runtime/orchestrator-service/server.js:21110:  const normalizedChannel = String(input.channel || matchedJob?.channel || '').trim().toLowerCase();
+runtime/orchestrator-service/server.js:21111:  const metrics = normalizeFeedbackMetrics(input.metrics || {});
+runtime/orchestrator-service/server.js:21119:    job_id: String(input.job_id || '').trim(),
+runtime/orchestrator-service/server.js:21121:    campaign_id: String(input.campaign_id || inferred.campaign_id || '').trim() || null,
+runtime/orchestrator-service/server.js:21122:    product_slug: String(input.product_slug || inferred.product_slug || '').trim() || null,
+runtime/orchestrator-service/server.js:21123:    hook: String(input.hook || inferred.hook || '').trim() || null,
+runtime/orchestrator-service/server.js:21452:app.post('/schedule_execution_job', (req, res) => {
+runtime/orchestrator-service/server.js:21623:app.post('/run_scheduler_worker_once', (req, res) => {
+runtime/orchestrator-service/server.js:21753:app.post('/record_execution_feedback', (req, res) => {
+runtime/orchestrator-service/server.js:21844:app.post('/generate_optimization_recommendations', (req, res) => {
+runtime/orchestrator-service/server.js:21872:app.post('/api/media/improve-prompt', async (req, res) => {
+runtime/orchestrator-service/server.js:21881:      output: { improved_prompt: result.improved_prompt },
+runtime/orchestrator-service/server.js:21902:app.post('/api/media/brand-check', async (req, res) => {
+runtime/orchestrator-service/server.js:21911:      output: { brand_check: result.brand_check },
+runtime/orchestrator-service/server.js:21932:app.post('/api/media/generate-image', async (req, res) => {
+runtime/orchestrator-service/server.js:21941:      output: result,
+runtime/orchestrator-service/server.js:21962:app.post('/api/media/generate-video-brief', async (req, res) => {
+runtime/orchestrator-service/server.js:21971:      output: { video_brief: result.video_brief },
+runtime/orchestrator-service/server.js:21992:app.post('/api/media/generate-voice-script', async (req, res) => {
+runtime/orchestrator-service/server.js:22001:      output: { voice_script: result.voice_script },
+runtime/orchestrator-service/server.js:22022:app.post('/api/media/generate-campaign-pack', async (req, res) => {
+runtime/orchestrator-service/server.js:22031:      output: { campaign_pack: result.campaign_pack },

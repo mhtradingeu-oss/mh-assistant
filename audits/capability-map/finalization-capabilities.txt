@@ -1,0 +1,97 @@
+runtime/orchestrator-service/server.js:385:  const mediaJobId = asString(req?.body?.media_job_id || req?.body?.id || '');
+runtime/orchestrator-service/server.js:430:      media_job: mediaJob,
+runtime/orchestrator-service/server.js:985:  'campaign-finalization': {
+runtime/orchestrator-service/server.js:986:    legacy: 'campaign-finalization',
+runtime/orchestrator-service/server.js:987:    canonical: 'campaign-finalization'
+runtime/orchestrator-service/server.js:1472:  'campaign-finalization',
+runtime/orchestrator-service/server.js:9059:app.post('/execute_publish_package', (req, res) => {
+runtime/orchestrator-service/server.js:9079:    const log = writeExecutionBridgeLog(projectName, 'execute_publish_package', {
+runtime/orchestrator-service/server.js:9099:      writeExecutionBridgeLog(logProject, 'execute_publish_package', {
+runtime/orchestrator-service/server.js:9117:app.post('/execute_email_package', (req, res) => {
+runtime/orchestrator-service/server.js:9137:    const log = writeExecutionBridgeLog(projectName, 'execute_email_package', {
+runtime/orchestrator-service/server.js:9156:      writeExecutionBridgeLog(logProject, 'execute_email_package', {
+runtime/orchestrator-service/server.js:9181:      : req.body?.publish_package?.assets?.[0]?.fallback_prompt_pack;
+runtime/orchestrator-service/server.js:9184:      const error = new Error('Missing prompt_pack. Provide prompt_pack or publish_package.assets[0].fallback_prompt_pack');
+runtime/orchestrator-service/server.js:9234:app.post('/build_ad_execution_package', (req, res) => {
+runtime/orchestrator-service/server.js:9242:    const log = writeExecutionBridgeLog(projectName, 'build_ad_execution_package', {
+runtime/orchestrator-service/server.js:9269:      writeExecutionBridgeLog(logProject, 'build_ad_execution_package', {
+runtime/orchestrator-service/server.js:10464:      media_job: mediaJob,
+runtime/orchestrator-service/server.js:10480:    return res.json({ media_job: mediaJob });
+runtime/orchestrator-service/server.js:12068:    artifactType: 'campaign_execution_package',
+runtime/orchestrator-service/server.js:12146:    domain: 'campaign-finalization',
+runtime/orchestrator-service/server.js:12151:    domain: 'campaign-finalization',
+runtime/orchestrator-service/server.js:12154:    requestedIdentifier: 'campaign-finalization-root',
+runtime/orchestrator-service/server.js:12155:    requestedFile: 'campaign-finalization'
+runtime/orchestrator-service/server.js:12157:  const legacyBaseDir = path.join(resolution.legacyRoot, 'campaign-finalization');
+runtime/orchestrator-service/server.js:12209:    domain: 'campaign-finalization',
+runtime/orchestrator-service/server.js:12210:    artifactType: 'campaign_media_job',
+runtime/orchestrator-service/server.js:12245:    domain: 'campaign-finalization',
+runtime/orchestrator-service/server.js:12246:    artifactType: 'campaign_publish_package',
+runtime/orchestrator-service/server.js:12283:    domain: 'campaign-finalization',
+runtime/orchestrator-service/server.js:12284:    artifactType: 'campaign_email_package',
+runtime/orchestrator-service/server.js:12300:    domain: 'campaign-finalization',
+runtime/orchestrator-service/server.js:12305:    requestedFile: `campaign-finalization/media-jobs/${safeName}*`
+runtime/orchestrator-service/server.js:12309:    domain: 'campaign-finalization',
+runtime/orchestrator-service/server.js:12314:    requestedFile: `campaign-finalization/publish-packages/${safeName}*`
+runtime/orchestrator-service/server.js:12318:    domain: 'campaign-finalization',
+runtime/orchestrator-service/server.js:12322:    requestedFile: `campaign-finalization/email/${safeName}.json`
+runtime/orchestrator-service/server.js:12335:    media_jobs_count: mediaFiles.length,
+runtime/orchestrator-service/server.js:12336:    publish_packages_count: publishFiles.length,
+runtime/orchestrator-service/server.js:12337:    has_email_package: fs.existsSync(emailFile),
+runtime/orchestrator-service/server.js:12416:  const inlinePackage = input.publish_package && typeof input.publish_package === 'object'
+runtime/orchestrator-service/server.js:12417:    ? input.publish_package
+runtime/orchestrator-service/server.js:12426:    const error = new Error('Missing publish package. Provide publish_package or campaign_name + channel');
+runtime/orchestrator-service/server.js:12483:  const inlinePackage = input.email_package && typeof input.email_package === 'object'
+runtime/orchestrator-service/server.js:12484:    ? input.email_package
+runtime/orchestrator-service/server.js:12492:    const error = new Error('Missing email package. Provide email_package or campaign_name');
+runtime/orchestrator-service/server.js:17458:if (command === '/build_execution_package') {
+runtime/orchestrator-service/server.js:17480:if (command === '/review_execution_package') {
+runtime/orchestrator-service/server.js:18640:if (command === '/build_campaign_execution_package') {
+runtime/orchestrator-service/server.js:18672:if (command === '/review_campaign_execution_package') {
+runtime/orchestrator-service/server.js:18721:if (command === '/build_campaign_media_job') {
+runtime/orchestrator-service/server.js:18764:if (command === '/build_campaign_publish_package') {
+runtime/orchestrator-service/server.js:18786:if (command === '/review_campaign_finalization') {
+runtime/orchestrator-service/server.js:18802:      error: 'Failed to review campaign finalization',
+runtime/orchestrator-service/server.js:20177:  const publishPackage = payload.publish_package && typeof payload.publish_package === 'object'
+runtime/orchestrator-service/server.js:20178:    ? payload.publish_package
+runtime/orchestrator-service/server.js:20720:    publish: '/execute_publish_package',
+runtime/orchestrator-service/server.js:20721:    email: '/execute_email_package',
+runtime/orchestrator-service/server.js:20723:    ads: '/build_ad_execution_package'
+runtime/orchestrator-service/server.js:20780:      : payload.publish_package?.assets?.[0]?.fallback_prompt_pack;
+runtime/orchestrator-service/lib/ops/backbone.js:57:  media_jobs: {
+runtime/orchestrator-service/lib/ops/backbone.js:104:    bridge_actions: ['execute_publish_package', 'execute_email_package', 'generate_media_from_prompt', 'build_ad_execution_package']
+runtime/orchestrator-service/lib/ops/backbone.js:244:  media_job: 'media',
+runtime/orchestrator-service/lib/ops/backbone.js:529:  if (asString(entityType) === 'media_job') {
+runtime/orchestrator-service/lib/ops/backbone.js:815:      'media_jobs',
+runtime/orchestrator-service/lib/ops/backbone.js:904:      'media_jobs',
+runtime/orchestrator-service/lib/ops/backbone.js:1118:      : normalizedType === 'media_job'
+runtime/orchestrator-service/lib/ops/backbone.js:1124:      : normalizedType === 'media_job'
+runtime/orchestrator-service/lib/ops/backbone.js:1315:  if (normalizedType === 'media_job') {
+runtime/orchestrator-service/lib/ops/backbone.js:1422:  if (asString(record.entity_type) === 'media_job' && asBoolean(governance.policy_rules?.brand_safety_review_required, true)) {
+runtime/orchestrator-service/lib/ops/backbone.js:1497:      entity_type: asString(item.entity_type) || (item.prompt ? 'media_job' : 'content_item'),
+runtime/orchestrator-service/lib/ops/backbone.js:1508:      entity_type: 'media_job',
+runtime/orchestrator-service/lib/ops/backbone.js:1615:      media_jobs: mediaJobs.length,
+runtime/orchestrator-service/lib/ops/backbone.js:1650:    entity_type: 'media_job',
+runtime/orchestrator-service/lib/ops/backbone.js:1844:    linked_media_jobs: normalizeStringList(input.linked_media_jobs || current.linked_media_jobs),
+runtime/orchestrator-service/lib/ops/backbone.js:1914:  const routing = inferPrimaryRole('media_job', {
+runtime/orchestrator-service/lib/ops/backbone.js:1985:      current.id ? 'media_job_updated' : 'media_job_created',
+runtime/orchestrator-service/lib/ops/backbone.js:2000:    type: current.id ? 'media_job_updated' : 'media_job_created',
+runtime/orchestrator-service/lib/ops/backbone.js:2001:    entity_type: 'media_job',
+runtime/orchestrator-service/lib/ops/backbone.js:2696:      approval.entity_type === 'media_job'
+runtime/orchestrator-service/lib/ops/backbone.js:2700:      approval.entity_type === 'media_job'
+runtime/orchestrator-service/lib/ops/backbone.js:2720:    if (approval.entity_type === 'media_job') {
+runtime/orchestrator-service/lib/ops/backbone.js:2726:    } else if (approval.entity_type === 'media_job') {
+runtime/orchestrator-service/lib/ops/backbone.js:2864:    } else if (next.entity_type === 'media_job') {
+runtime/orchestrator-service/lib/ops/backbone.js:3062:      } else if (handoffLinkedEntity.entity_type === 'media_job') {
+runtime/orchestrator-service/lib/ops/backbone.js:3373:  if (normalizedType === 'media_job') return 'media-studio';
+runtime/orchestrator-service/lib/ops/backbone.js:3584:    entity_type: 'media_job',
+runtime/orchestrator-service/lib/ops/backbone.js:3588:    route: inferRouteTarget('media_job', item),
+runtime/orchestrator-service/lib/ops/backbone.js:3627:    .filter((item) => ['workflow', 'publish', 'sync', 'system'].includes(asString(item.category)) || ['workflow_run', 'publishing_job', 'media_job'].includes(asString(item.entity_type)))
+runtime/orchestrator-service/lib/ops/backbone.js:3962:    media_jobs: {
+runtime/orchestrator-service/lib/data/execution-artifact-writer-adapter.js:29:  'campaign-finalization': {
+runtime/orchestrator-service/lib/data/execution-artifact-writer-adapter.js:30:    legacy: 'campaign-finalization',
+runtime/orchestrator-service/lib/data/execution-artifact-writer-adapter.js:31:    canonical: 'campaign-finalization'
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:65:      campaign_finalization_read_canonical_first: parseBooleanFlag(
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:115:      'campaign-finalization': 'campaign_finalization_read_canonical_first',
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:262:      'campaign-finalization',
+runtime/orchestrator-service/package.json:8:    "verify:read-only": "node --check server.js && node ../../scripts/verify-ai-marketing-engine.js && node ../../scripts/verify-control-center-ui.js && node ../../scripts/verify-launch-wave-selection.js && node ../../scripts/verify-campaign-finalization-readiness.js && node ../../scripts/verify-semi-auto-dry-run-readiness.js",

@@ -1,0 +1,149 @@
+const PANEL_ASSET_TYPE_OPTIONS = [
+  ["logo", "Logos"],
+  ["brand_guideline", "Brand Guidelines"],
+  ["product_csv", "Product Data / CSV"],
+  ["pricing_doc", "Pricing & Offers"],
+  ["legal_doc", "Legal Documents"],
+  ["product_photos", "Product Images"],
+  ["product_videos", "Videos"],
+  ["social_assets", "Social Assets"],
+  ["campaign_assets", "Campaign Assets"],
+  ["packaging_images", "Packaging Images"],
+  ["testimonials_reviews", "Testimonials & Reviews"],
+  ["certificates", "Certificates"],
+  ["partner_docs", "Partner Documents"]
+];
+
+export function renderLibraryActionPanel({ selectedAsset = null, disabled = false } = {}) {
+  const hasSelectedAsset = Boolean(selectedAsset);
+  const selectedAssetId = escapePanelHtml(selectedAsset?.id || "");
+  const selectedRegistryAssetId = escapePanelHtml(selectedAsset?.mutation_id || selectedAsset?.asset_id || "");
+  const assetName = escapePanelHtml(selectedAsset?.name || selectedAsset?.filename || "No asset selected");
+  const assetTypeRaw = String(selectedAsset?.type || selectedAsset?.asset_type || selectedAsset?.category || "n/a").trim().toLowerCase();
+  const assetType = escapePanelHtml(toPanelTypeLabel(assetTypeRaw || "n/a"));
+  const status = escapePanelHtml(toPanelStatusLabel(selectedAsset?.status || "n/a"));
+  const sourceLabel = getPanelSourceOfTruth(selectedAsset) ? "Source of truth" : "Not source of truth";
+  const isManagedMedia = selectedAsset?.kind === "managed_media";
+  const filePath = selectedAsset?.file_path || selectedAsset?.preview_url || "";
+  const copyPathValue = escapePanelHtml(filePath);
+  const selectedHint = hasSelectedAsset
+    ? "Actions update Library metadata only. They do not approve Governance, publish, or run workflows."
+    : "Select an asset in the workspace to activate asset actions.";
+  const copyDisabledAttr = hasSelectedAsset && copyPathValue ? "" : " disabled aria-disabled=\"true\"";
+  const disabledAttr = disabled || !hasSelectedAsset ? " disabled aria-disabled=\"true\"" : "";
+  const durableDisabledAttr = disabled || !hasSelectedAsset || !selectedRegistryAssetId ? " disabled aria-disabled=\"true\"" : "";
+
+
+  return `
+    <section class="card library-action-panel" data-library-action-panel>
+      <div class="card-head library-panel-head">
+        <div>
+          <p class="eyebrow">Selected Asset</p>
+          
+        </div>
+      </div>
+
+      <div class="library-panel-hero">
+        <strong>${assetName}</strong>
+        <span>${escapePanelHtml(selectedHint)}</span>
+      </div>
+
+      <div class="library-panel-metrics">
+        <div class="library-panel-metric">
+          <span>Review Status</span>
+          <strong>${status}</strong>
+        </div>
+        <div class="library-panel-metric">
+          <span>Type</span>
+          <strong>${assetType}</strong>
+        </div>
+        <div class="library-panel-metric">
+          <span>Source Status</span>
+          <strong>${escapePanelHtml(sourceLabel)}</strong>
+        </div>
+      </div>
+
+      <div class="library-panel-section">
+        <p class="setup-helper">Primary actions</p>
+        <div class="library-panel-action-grid library-panel-actions-primary">
+          <button class="btn btn-primary" type="button" data-library-open="${selectedAssetId}"${disabledAttr}>Open asset</button>
+          <button class="btn btn-secondary" type="button" data-library-command="send-to-ai"${disabledAttr}>Prepare AI review</button>
+        </div>
+      </div>
+
+      <div class="library-panel-section">
+        <p class="setup-helper">Utility</p>
+        <div class="library-panel-action-grid library-panel-actions-utility">
+          <button class="btn btn-secondary" type="button" data-copy-asset-path="${copyPathValue}"${copyDisabledAttr}>Copy asset path</button>
+        </div>
+      </div>
+
+      <div class="library-panel-section">
+        <p class="setup-helper">Library metadata</p>
+        <div class="library-panel-boundary-note">Source marks and ready states guide downstream review. They are not Governance approval or publishing approval.</div>
+        <div class="library-panel-action-grid library-panel-actions-durable">
+          ${isManagedMedia
+      ? `<button class="btn btn-secondary" type="button" disabled aria-disabled="true">${escapePanelHtml(selectedAsset?.source_label || "Managed")}</button>`
+      : `<button class="btn btn-secondary" type="button" data-library-source-truth="${selectedAssetId}"${disabledAttr}>${escapePanelHtml(getPanelSourceOfTruth(selectedAsset) ? "Remove source mark" : "Mark source of truth")}</button>
+             <button class="btn btn-secondary" type="button" data-asset-status-action="approved" data-library-asset="${selectedAssetId}" data-asset-id="${selectedRegistryAssetId}"${durableDisabledAttr}>Approve for use</button>
+             <button class="btn btn-secondary" type="button" data-asset-status-action="needs_review" data-library-asset="${selectedAssetId}" data-asset-id="${selectedRegistryAssetId}"${durableDisabledAttr}>Mark for review</button>`}
+          <button class="btn btn-secondary" type="button" data-library-rename="${selectedAssetId}" data-asset-id="${selectedRegistryAssetId}"${durableDisabledAttr}>Rename asset</button>
+          <button class="btn btn-secondary" type="button" data-library-archive="${selectedAssetId}" data-asset-id="${selectedRegistryAssetId}"${durableDisabledAttr}>Archive asset</button>
+        </div>
+        <div class="library-panel-move-control">
+          <div class="library-panel-move-head">
+            <div>
+              <div class="library-panel-move-title">Move to group</div>
+              <p>Change the Library group only. The file path stays unchanged.</p>
+            </div>
+            <span class="library-panel-current-group">${escapePanelHtml(toPanelTypeLabel(assetTypeRaw || "current"))}</span>
+          </div>
+          <div class="library-panel-choice-grid">
+            ${PANEL_ASSET_TYPE_OPTIONS.map(([value, label]) => `
+              <button
+                class="btn btn-secondary btn-sm library-panel-choice-btn${assetTypeRaw === value ? " is-current" : ""}"
+                type="button"
+                data-library-reclassify="${selectedAssetId}"
+                data-asset-id="${selectedRegistryAssetId}"
+                data-current-asset-type="${escapePanelHtml(assetTypeRaw)}"
+                data-target-asset-type="${escapePanelHtml(value)}"
+                ${durableDisabledAttr}
+              >${escapePanelHtml(label)}${assetTypeRaw === value ? '<span class="library-panel-current-chip">Current</span>' : ""}</button>
+            `).join("")}
+          </div>
+        </div>
+      </div>
+
+      <div class="library-panel-section library-panel-section-danger">
+        <p class="setup-helper">Danger</p>
+        <button class="btn btn-secondary library-danger-action" type="button" data-library-delete="${selectedAssetId}" data-asset-id="${selectedRegistryAssetId}" title="Soft-delete this asset after confirmation"${durableDisabledAttr}>Soft-delete asset</button>
+      </div>
+    </section>
+  `;
+}
+
+function escapePanelHtml(value = "") {
+  return String(value ?? "").replace(/[&<>"']/g, (character) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    "\"": "&quot;",
+    "'": "&#39;"
+  })[character]);
+}
+
+function getPanelSourceOfTruth(asset = {}) {
+  return Boolean(asset?.source_of_truth ?? asset?.sourceOfTruth ?? asset?.is_source_of_truth);
+}
+
+function toPanelStatusLabel(value = "") {
+  return String(value || "n/a")
+    .replace(/[_-]+/g, " ")
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
+function toPanelTypeLabel(value = "") {
+  const normalized = String(value || "").trim().toLowerCase();
+  const match = PANEL_ASSET_TYPE_OPTIONS.find(([type]) => type === normalized);
+  return match?.[1] || toPanelStatusLabel(normalized || "n/a");
+}

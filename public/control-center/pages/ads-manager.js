@@ -36,7 +36,7 @@ function asArray(value) {
 }
 
 function asObject(value) {
-  return value && typeof value === "object" ? value : {};
+  return value && typeof value === "object" && !Array.isArray(value) ? value : {};
 }
 
 function asString(value) {
@@ -285,6 +285,7 @@ function bindAdsManager({
 
 export const adsManagerRoute = {
   id: "ads-manager",
+  disableStandardLayout: true,
   meta: {
     eyebrow: "Execute & Grow",
     title: "Ads Manager",
@@ -370,8 +371,8 @@ export const adsManagerRoute = {
           </div>
 
           <div class="setup-hero-actions">
-            <button id="adsManagerOpenLibraryBtn" class="btn btn-secondary" type="button">Review Creatives</button>
-            <button id="adsManagerOpenPublishingBtn" class="btn btn-primary" type="button">Open Publishing</button>
+            <button id="adsManagerOpenLibraryBtn" class="btn btn-secondary" type="button">Navigate: Open Library Workspace</button>
+            <button id="adsManagerOpenPublishingBtn" class="btn btn-primary" type="button">Navigate: Open Publishing Workspace</button>
           </div>
         </div>
 
@@ -380,7 +381,7 @@ export const adsManagerRoute = {
             <section class="card">
               <div class="card-head">
                 <h3>Budget Overview</h3>
-                <span class="card-badge neutral">Section 1</span>
+                <span class="card-badge neutral">Budget Control</span>
               </div>
               <form id="adsManagerBudgetForm" class="setup-form-grid setup-form-grid-2">
                 ${renderBudgetField({
@@ -494,7 +495,7 @@ export const adsManagerRoute = {
             <section class="card">
               <div class="card-head">
                 <h3>Creative Mapping</h3>
-                <span class="card-badge neutral">Section 5</span>
+                <span class="card-badge neutral">Creative Readiness</span>
               </div>
               <div class="ads-creative-list">
                 ${creativeMappings.map((item) => `
@@ -518,7 +519,7 @@ export const adsManagerRoute = {
             <section class="card">
               <div class="card-head">
                 <h3>Core Metrics</h3>
-                <span class="card-badge neutral">Section 4</span>
+                <span class="card-badge neutral">Performance Signals</span>
               </div>
               <div class="setup-form-grid">
                 ${renderBudgetField({
@@ -580,9 +581,15 @@ export const adsManagerRoute = {
 
             <section class="card">
               <div class="card-head">
-                <h3>Action Prompts</h3>
-                <span class="card-badge neutral">Section 6</span>
+                <h3>Paid Growth Next Actions</h3>
+                <span class="card-badge neutral">Paid Growth AI</span>
               </div>
+              <div class="data-card">
+                <span class="data-label">Next Best Action</span>
+                <strong>Review pacing, creative readiness, and source coverage before preparing the next paid growth move.</strong>
+                <p class="home-action-meta">AI can prepare a paid growth brief and route context to AI Command. Spend changes, publishing, and campaign launch remain manual or governance-controlled.</p>
+              </div>
+
               <div class="ads-prompt-list">
                 ${promptItems.map((item, index) => `
                   <button class="quick-action-btn" type="button" data-ads-prompt="${index}">

@@ -1,28 +1,195 @@
-import { renderDurableSystemSummary } from "../durable-ui.js";
+// --- UI/UX Consolidation Helpers ---
+function renderPublishingCommandHeader({ projectName, recommendation, selectedItem, summary, queue, blockers, escapeHtml }) {
+  const context = [
+    projectName && `<span>Project: <strong>${escapeHtml(projectName)}</strong></span>`,
+    selectedItem?.campaign && `<span>Campaign: <strong>${escapeHtml(selectedItem.campaign)}</strong></span>`,
+    selectedItem?.channel && `<span>Channel: <strong>${escapeHtml(titleCase(selectedItem.channel))}</strong></span>`
+  ].filter(Boolean).join(' &middot; ');
+  const status = selectedItem ? titleCase(selectedItem.status) : "No item selected";
+  const approval = selectedItem?.approvalStatus ? titleCase(selectedItem.approvalStatus) : "Draft";
+  const nextAction = recommendation?.action ? escapeHtml(recommendation.action) : "Review queue";
+  const safety = `Publishing prepares channel packages, manual schedule records, and approval-ready handoffs. External publishing requires provider proof; backend status changes remain <strong>confirmation-gated</strong> and governed by <strong>backend approval rules</strong>.`;
+  const actions = [
+    `<button type="button" class="btn btn-secondary" onclick="document.getElementById('publishingBuilderPanel')?.scrollIntoView({behavior:'smooth',block:'start'})">Prepare Publishing Package</button>`,
+    `<button type="button" class="btn btn-secondary" onclick="document.getElementById('publishingQueuePanel')?.scrollIntoView({behavior:'smooth',block:'start'})">Open Queue</button>`,
+    `<button type="button" class="btn btn-secondary" onclick="document.getElementById('publishingHandoffPanel')?.scrollIntoView({behavior:'smooth',block:'start'})">Review Approval Gate</button>`,
+    `<button type="button" class="btn btn-primary" onclick="document.getElementById('publishingPushAiBtn')?.scrollIntoView({behavior:'smooth',block:'start'})">Open AI Review</button>`
+  ].join(' ');
+  return `
+    <section class="publishing-command-header" role="region" aria-label="Publishing Command Header">
+      <div class="publishing-command-header-title">Publishing Control Workspace</div>
+      <div class="publishing-command-header-context">${context}</div>
+      <div class="publishing-command-header-status">Status: <strong>${escapeHtml(status)}</strong> &middot; Approval: <strong>${escapeHtml(approval)}</strong></div>
+      <div class="publishing-command-header-status">Next: <span>${nextAction}</span></div>
+      <div class="publishing-command-header-safety">${safety}</div>
+      <div class="publishing-command-header-actions">${actions}</div>
+    </section>
+  `;
+}
+
+function renderPublishingWorkflowStrip({ selectedItem, recommendation, blockers, approvalState, escapeHtml }) {
+  const steps = [
+    { key: "draft", label: "Draft" },
+    { key: "source", label: "Source" },
+    { key: "package", label: "Package" },
+    { key: "approval", label: "Approval" },
+    { key: "schedule", label: "Schedule" },
+    { key: "handoff", label: "Manual Completion Handoff" }
+  ];
+  const statusMap = {
+    draft: selectedItem?.status === "draft" ? "active" : selectedItem ? "ready" : "missing",
+    source: selectedItem?.source ? "ready" : "missing",
+    package: selectedItem ? "ready" : "missing",
+    approval: selectedItem?.approvalStatus === "approved" ? "ready" : selectedItem?.approvalStatus === "needs approval" ? "warning" : "missing",
+    schedule: selectedItem?.status === "scheduled" ? "ready" : "missing",
+    handoff: selectedItem?.status === "published" ? "ready" : "missing"
+  };
+  return `
+    <nav class="publishing-workflow-strip" aria-label="Publishing Workflow">
+      ${steps.map(step => `
+        <div class="publishing-workflow-step is-${statusMap[step.key]}" aria-label="${escapeHtml(step.label)}: ${statusMap[step.key]}">
+          <span>${escapeHtml(step.label)}</span>
+          <span class="publishing-workflow-step-label">${statusMap[step.key]}</span>
+        </div>
+      `).join('')}
+    </nav>
+  `;
+}
+
+function renderPublishingReadinessSummary({ selectedItem, recommendation, blockers, assetData, escapeHtml }) {
+  const readiness = [
+    { key: "source", label: "Source", state: selectedItem?.source ? "ready" : "missing" },
+    { key: "copy", label: "Copy", state: selectedItem?.contentItem ? "ready" : "missing" },
+    { key: "media", label: "Media", state: assetData?.some(a => a.type === "media" && a.status === "Ready") ? "ready" : "missing" },
+    { key: "channel", label: "Channel", state: selectedItem?.channel ? "ready" : "missing" },
+    { key: "schedule", label: "Schedule", state: selectedItem?.scheduledFor ? "ready" : "missing" },
+    { key: "governance", label: "Governance", state: selectedItem?.governanceStatus === "approved" ? "ready" : "missing" },
+    { key: "approval", label: "Approval", state: selectedItem?.approvalStatus === "approved" ? "ready" : selectedItem?.approvalStatus === "needs approval" ? "warning" : "missing" }
+  ];
+  const blockersSummary = blockers && blockers.length ? `<div class="publishing-readiness-card is-warning">${escapeHtml(blockers.length)} blocker(s) present</div>` : "";
+  return `
+    <section class="publishing-readiness-summary" aria-label="Publishing Readiness Summary">
+      ${readiness.map(r => `
+        <div class="publishing-readiness-card is-${r.state}">
+          <span class="publishing-readiness-card-label">${escapeHtml(r.label)}</span>
+          <span>${r.state}</span>
+        </div>
+      `).join('')}
+      ${blockersSummary}
+    </section>
+  `;
+}
+import { getSharedHandoff, setSharedAiDraft, setSharedHandoff } from "../shared-context.js";
+import {
+  filterAssetCategories,
+  getAssetNextAction,
+  renderAssetDependencyRows
+} from "../asset-library.js";
+import { getReadinessBlockers } from "../system-intelligence.js";
+import {
+  createAutoModeController,
+  getAutoModeState,
+  startAutoMode,
+  stopAutoMode,
+  approveCurrentGate,
+  skipCurrentStep,
+  subscribeAutoMode
+} from "../automation-engine.js";
+import {
+  buildSchedulePayload,
+  buildLocalDraftPayload,
+  buildPublishingAiPrompt
+} from "./publishing/publishing-payloads.js";
 
 const publishingSessions = new Map();
-
-const STATUS_FILTERS = ["all", "draft", "scheduled", "ready", "published", "failed"];
-const DISPLAY_STATUSES = ["draft", "scheduled", "ready", "published", "failed"];
-const SOCIAL_CHANNELS = ["instagram", "facebook", "tiktok", "youtube"];
-const PUBLISHING_ROLE_DEFAULTS = {
-  serviceDomain: "publishing",
-  ownerRole: "publisher",
-  reviewRole: "compliance_reviewer",
-  upstreamRoles: ["writer", "designer", "video_lead", "strategist"]
+const PUBLISHING_LOCAL_DRAFTS_KEY = "mh-publishing-local-drafts-v1";
+const STATUS_FILTERS = ["all", "draft", "ready", "needs approval", "scheduled", "published", "failed"];
+const DISPLAY_STATUSES = ["draft", "ready", "needs approval", "scheduled", "published", "failed"];
+const CHANNEL_DEFAULTS = ["instagram", "facebook", "tiktok", "youtube", "email", "amazon", "ebay", "website"];
+const APPROVAL_STATUSES = ["draft", "needs approval", "approved"];
+const PUBLISHING_ASSET_KEYS = [
+  "legal_doc",
+  "pricing_doc",
+  "product_csv",
+  "product_photos",
+  "product_videos",
+  "campaign_assets",
+  "social_assets",
+  "logo"
+];
+const publishingAutomationState = {
+  progress: "",
+  result: ""
 };
+let publishingAutoModeUnsubscribe = null;
+let publishingAutoModeControllerReady = false;
+let publishingAutomationEnabled = false;
+let publishingRenderCallback = null;
+let publishingRenderTimer = null;
+
+function schedulePublishingRender(render) {
+  if (typeof render === "function") {
+    publishingRenderCallback = render;
+  }
+
+  if (publishingRenderTimer) {
+    return;
+  }
+
+  publishingRenderTimer = window.setTimeout(() => {
+    publishingRenderTimer = null;
+
+    if (typeof publishingRenderCallback === "function") {
+      publishingRenderCallback();
+    }
+  }, 120);
+}
+
+function ensurePublishingAutoModeBinding(getState, navigateTo, render) {
+  publishingRenderCallback = render;
+
+  if (!publishingAutomationEnabled) {
+    return;
+  }
+
+  if (!publishingAutoModeControllerReady) {
+    createAutoModeController(getState, { getState, navigateTo });
+    publishingAutoModeControllerReady = true;
+  }
+
+  if (publishingAutoModeUnsubscribe) {
+    return;
+  }
+
+  publishingAutoModeUnsubscribe = subscribeAutoMode(() => {
+    const autoState = getAutoModeState();
+    const status = asString(autoState.status || "idle");
+
+    if (status === "idle") {
+      return;
+    }
+
+    schedulePublishingRender();
+  });
+}
+
+
 
 function asArray(value) {
   return Array.isArray(value) ? value : [];
 }
 
 function asObject(value) {
-  return value && typeof value === "object" ? value : {};
+  return value && typeof value === "object" && !Array.isArray(value) ? value : {};
 }
 
 function asString(value) {
   if (value == null) return "";
   return String(value);
+}
+
+function clean(value) {
+  return asString(value).trim();
 }
 
 function titleCase(value) {
@@ -31,8 +198,8 @@ function titleCase(value) {
     .replace(/\b\w/g, (match) => match.toUpperCase());
 }
 
-function toChannelKey(value) {
-  return asString(value).trim().toLowerCase();
+function toKey(value) {
+  return clean(value).toLowerCase();
 }
 
 function toDate(value) {
@@ -40,25 +207,37 @@ function toDate(value) {
   return Number.isNaN(parsed.getTime()) ? null : parsed;
 }
 
-function toIsoDate(value) {
-  const date = value instanceof Date ? value : toDate(value);
+function nowIso() {
+  return new Date().toISOString();
+}
+
+function toDateInput(value) {
+  const date = toDate(value);
   return date ? date.toISOString().slice(0, 10) : "";
 }
 
-function formatDateTime(value, options = {}) {
+function toTimeInput(value) {
   const date = toDate(value);
-  if (!date) return "Not scheduled";
+  if (!date) return "";
+  return new Intl.DateTimeFormat("en-GB", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false
+  }).format(date);
+}
 
+function formatDateTime(value, fallback = "Not scheduled") {
+  const date = toDate(value);
+  if (!date) return fallback;
   return new Intl.DateTimeFormat(undefined, {
     month: "short",
     day: "numeric",
     hour: "numeric",
-    minute: "2-digit",
-    ...options
+    minute: "2-digit"
   }).format(date);
 }
 
-function formatDayLabel(value) {
+function formatDate(value) {
   const date = toDate(value);
   if (!date) return "Unscheduled";
 
@@ -69,307 +248,249 @@ function formatDayLabel(value) {
   }).format(date);
 }
 
-function formatTimeLabel(value) {
+function formatTime(value) {
   const date = toDate(value);
-  if (!date) return "Time not set";
-
+  if (!date) return "Time TBD";
   return new Intl.DateTimeFormat(undefined, {
     hour: "numeric",
     minute: "2-digit"
   }).format(date);
 }
 
+function firstText(...values) {
+  for (const value of values) {
+    const text = clean(value);
+    if (text) return text;
+  }
+  return "";
+}
+
 function normalizeStatus(value, fallback = "draft") {
-  const normalized = toChannelKey(value);
-
+  const normalized = toKey(value);
   if (!normalized) return fallback;
-  if (normalized === "draft") return "draft";
-  if (["queued", "queue", "scheduled", "pending", "pending_publish"].includes(normalized)) return "scheduled";
-  if (
-    [
-      "ready",
-      "ready_for_manual_publish",
-      "ready_for_manual_send",
-      "ready_for_manual_handoff",
-      "ready_for_manual_review",
-      "manual_publish",
-      "manual_send",
-      "manual_review"
-    ].includes(normalized)
-  ) {
-    return "ready";
+  if (["draft", "paused", "pause"].includes(normalized)) return "draft";
+  if (["ready", "approved", "ready_for_manual_publish", "ready_for_manual_send"].includes(normalized)) return "ready";
+  if (["needs approval", "needs_approval", "approval", "pending_approval", "review", "in_review"].includes(normalized)) {
+    return "needs approval";
   }
-  if (["published", "completed", "complete", "success", "done", "sent", "live"].includes(normalized)) {
-    return "published";
-  }
+  if (["scheduled", "queued", "queue", "pending", "pending_publish"].includes(normalized)) return "scheduled";
+  if (["published", "completed", "complete", "success", "done", "sent", "live"].includes(normalized)) return "published";
   if (["failed", "error", "blocked", "rejected"].includes(normalized)) return "failed";
-
+  
   return fallback;
 }
 
-function normalizeNotes(...groups) {
-  return Array.from(
-    new Set(
-      groups
-        .flatMap((group) => {
-          if (Array.isArray(group)) return group;
-          if (typeof group === "string") return group.split(/\n+/);
-          return [];
-        })
-        .map((item) => asString(item).trim())
-        .filter(Boolean)
-    )
-  );
-}
-
-function getStatusBadgeClass(status) {
+function badgeTone(status) {
   if (status === "published") return "success";
-  if (status === "ready") return "warning";
+  if (status === "ready" || status === "scheduled") return "warning";
   if (status === "failed") return "danger";
   return "neutral";
 }
 
-function getSortTimestamp(item) {
-  return item.scheduledFor || item.executedAt || item.updatedAt || item.createdAt || "";
+function statusClass(status) {
+  return asString(status).replace(/\s+/g, "-");
 }
 
-function compareQueueItems(a, b) {
-  const order = {
-    ready: 0,
-    scheduled: 1,
-    draft: 2,
-    failed: 3,
-    published: 4
+function readDraftMap() {
+  if (typeof window === "undefined") return {};
+  try {
+    const parsed = JSON.parse(window.localStorage?.getItem(PUBLISHING_LOCAL_DRAFTS_KEY) || "{}");
+    return parsed && typeof parsed === "object" ? parsed : {};
+  } catch (_) {
+    return {};
+  }
+}
+
+function writeDraftMap(map) {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage?.setItem(PUBLISHING_LOCAL_DRAFTS_KEY, JSON.stringify(map || {}));
+  } catch (_) {}
+}
+
+function projectKey(projectName) {
+  return toKey(projectName) || "__default__";
+}
+
+function loadLocalDrafts(projectName) {
+  return asArray(readDraftMap()[projectKey(projectName)]);
+}
+
+function saveLocalDraft(projectName, draft) {
+  const map = readDraftMap();
+  const key = projectKey(projectName);
+  const drafts = asArray(map[key]).filter((item) => asString(item.id) !== asString(draft.id));
+  const nextDraft = {
+    ...asObject(draft),
+    id: asString(draft.id || `local-publish-${Date.now()}`),
+    source: "Local draft",
+    localOnly: true,
+    updatedAt: nowIso()
   };
-
-  const aPriority = order[a.status] ?? 99;
-  const bPriority = order[b.status] ?? 99;
-  if (aPriority !== bPriority) return aPriority - bPriority;
-
-  const aTime = toDate(getSortTimestamp(a))?.getTime() || 0;
-  const bTime = toDate(getSortTimestamp(b))?.getTime() || 0;
-  return bTime - aTime;
+  map[key] = [nextDraft, ...drafts].slice(0, 20);
+  writeDraftMap(map);
+  return nextDraft;
 }
 
-function buildDefaultForm(state, channels) {
-  const overview = asObject(state.data.overview?.overview);
+function updateLocalDraft(projectName, itemId, patch) {
+  const existing = loadLocalDrafts(projectName).find((item) => asString(item.id) === asString(itemId));
+  return saveLocalDraft(projectName, {
+    ...asObject(existing),
+    ...asObject(patch),
+    id: itemId
+  });
+}
+
+function buildDefaultForm(state) {
   const context = asObject(state.context);
-  const checks = asObject(state.data.integrations?.readiness?.checks);
-  const preferredChannel =
-    channels.find((channel) => checks[channel]) ||
-    channels[0] ||
-    "instagram";
+  const overview = asObject(state.data.overview?.overview);
   const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000);
   tomorrow.setHours(9, 0, 0, 0);
 
   return {
-    title: `${context.activeCampaign || context.currentProject || "Project"} publish`,
-    waveName: asString(context.activeCampaign),
-    channel: preferredChannel,
-    scheduledDate: toIsoDate(tomorrow),
-    scheduledTime: "09:00",
-    mode: asString(context.executionMode || overview.execution_mode || "semi_auto"),
-    offer: asString(overview.value_prop || overview.brand_promise || ""),
+    project: firstText(context.currentProject, overview.project_name),
+    campaign: firstText(context.activeCampaign, overview.active_campaign),
+    channel: "instagram",
+    contentItem: "",
+    publishDate: toDateInput(tomorrow),
+    publishTime: "09:00",
+    approvalStatus: "draft",
+    title: "",
     notes: ""
   };
 }
 
-function ensureSession(projectName, state, channels) {
-  const key = projectName || "__default__";
+function ensureSession(projectName, state) {
+  const key = projectKey(projectName);
   if (!publishingSessions.has(key)) {
     publishingSessions.set(key, {
       selectedId: "",
       filter: "all",
-      form: buildDefaultForm(state, channels),
+      form: buildDefaultForm(state),
       formSourceId: "",
-      isCreatingNew: false
+      validation: {},
+      draftMessage: "",
+      loadedHandoffId: "",
+      isCreatingNew: true
     });
   }
   return publishingSessions.get(key);
 }
 
-function renderStatusPill(status, escapeHtml) {
-  return `<span class="publishing-status-pill is-${escapeHtml(status)}">${escapeHtml(titleCase(status))}</span>`;
+function normalizeNotes(...values) {
+  return values
+    .flatMap((value) => {
+      if (Array.isArray(value)) return value;
+      if (typeof value === "string") return value.split(/\n+/);
+      return [];
+    })
+    .map((item) => clean(item))
+    .filter(Boolean);
 }
 
-function mergePreviewData(preview, item, form) {
-  const basePreview = asObject(preview);
-  const channel = toChannelKey(form?.channel || item?.channel || basePreview.channel);
-  const title = asString(form?.title || item?.title || basePreview.title || "Publishing item");
-  const offer = asString(form?.offer || item?.offer || basePreview.offer);
-  const notes = normalizeNotes(form?.notes, item?.notes, basePreview.notes);
-  const body =
-    asString(basePreview.body || basePreview.caption) ||
-    offer ||
-    notes[0] ||
-    "";
-
-  return {
-    previewType:
-      channel === "email"
-        ? "email"
-        : SOCIAL_CHANNELS.includes(channel)
-          ? "social"
-          : "listing",
-    channel,
-    title,
-    headline: asString(basePreview.headline || title),
-    subject: asString(basePreview.subject || title),
-    body,
-    caption: asString(basePreview.caption || body),
-    cta: asString(basePreview.cta || (channel === "email" ? "Review email" : "Shop now")),
-    format: asString(basePreview.format),
-    goal: asString(basePreview.goal),
-    visualPrompt: asString(basePreview.visual_prompt),
-    primaryProductName: asString(basePreview.primary_product_name),
-    primaryProductSlug: asString(basePreview.primary_product_slug),
-    assetCount: Number(basePreview.asset_count || item?.totalAssets || 0) || 0,
-    assetPreviewItems: asArray(basePreview.asset_preview_items),
-    offer,
-    notes
-  };
-}
-
-function buildItemTitle(item, context) {
-  const channel = titleCase(item.channel || "channel");
-  const waveName = asString(item.waveName);
+function buildItemTitle(item, state) {
+  const context = asObject(state.context);
   if (item.title) return item.title;
-  if (waveName) return waveName;
-  if (context.activeCampaign) return `${context.activeCampaign} ${channel}`;
-  return `${channel} publish`;
+  if (item.contentItem) return item.contentItem;
+  if (item.campaign) return `${item.campaign} ${titleCase(item.channel || "publish")}`;
+  if (context.activeCampaign) return `${context.activeCampaign} ${titleCase(item.channel || "publish")}`;
+  return `${titleCase(item.channel || "Publishing")} item`;
 }
 
-function renderTeamOwnership(state, queue, selectedItem, escapeHtml) {
-  const operations = asObject(state.data.operations);
-  const handoffsByRole = asObject(operations.handoffs?.by_role);
-  const approvalsByRole = asObject(operations.approvals?.by_reviewer_role);
-  const ownership = asObject(operations.ownership?.visibility);
-  const routing = asObject(operations.routing);
-
-  return `
-    <div class="data-stack">
-      <div class="data-row"><span>Service lane</span><strong>${escapeHtml(titleCase(PUBLISHING_ROLE_DEFAULTS.serviceDomain))}</strong></div>
-      <div class="data-row"><span>Owner role</span><strong>${escapeHtml(titleCase(PUBLISHING_ROLE_DEFAULTS.ownerRole))}</strong></div>
-      <div class="data-row"><span>Review role</span><strong>${escapeHtml(titleCase(PUBLISHING_ROLE_DEFAULTS.reviewRole))}</strong></div>
-      <div class="data-row"><span>Upstream roles</span><strong>${escapeHtml(PUBLISHING_ROLE_DEFAULTS.upstreamRoles.map((item) => titleCase(item)).join(" • "))}</strong></div>
-      <div class="data-row"><span>Inbound queue</span><strong>${escapeHtml(String(asArray(handoffsByRole[PUBLISHING_ROLE_DEFAULTS.ownerRole]).length))}</strong></div>
-      <div class="data-row"><span>Compliance queue</span><strong>${escapeHtml(String(asArray(approvalsByRole[PUBLISHING_ROLE_DEFAULTS.reviewRole]).length))}</strong></div>
-      <div class="data-row"><span>Visible entities</span><strong>${escapeHtml(String(ownership.entities || 0))}</strong></div>
-      <div class="data-row"><span>Role routes</span><strong>${escapeHtml(String(asArray(routing.role_routes).length || 0))}</strong></div>
-      <div class="data-row"><span>Selected item</span><strong>${escapeHtml(selectedItem ? `${titleCase(selectedItem.status)} • ${titleCase(selectedItem.channel || "channel")}` : "No item selected")}</strong></div>
-    </div>
-  `;
+function normalizeQueueItem(rawItem, state, source) {
+  const raw = asObject(rawItem);
+  const preview = asObject(raw.preview || raw.connector_preview);
+  const scheduledFor = firstText(raw.scheduled_for, raw.scheduledFor);
+  const status = normalizeStatus(raw.execution_status || raw.status, scheduledFor ? "scheduled" : "draft");
+  const channel = toKey(raw.channel || preview.channel);
+  const item = {
+    id: firstText(raw.job_id, raw.execution_id, raw.id),
+    jobId: firstText(raw.job_id, raw.execution_id, raw.id),
+    title: firstText(raw.title, raw.name, preview.title, preview.headline),
+    project: firstText(raw.project, raw.project_name, state.context?.currentProject),
+    campaign: firstText(raw.campaign, raw.campaign_name, raw.wave_name, raw.waveName, state.context?.activeCampaign),
+    channel,
+    contentItem: firstText(raw.content_item, raw.contentItem, raw.content_id, preview.content_item, preview.caption, preview.body),
+    scheduledFor,
+    executedAt: firstText(raw.executed_at, raw.executedAt),
+    createdAt: firstText(raw.created_at, raw.createdAt, raw.executed_at),
+    updatedAt: firstText(raw.updated_at, raw.updatedAt, raw.executed_at, raw.created_at),
+    approvalStatus: status === "ready" ? "approved" : status === "needs approval" ? "needs approval" : "draft",
+    status,
+    rawStatus: firstText(raw.execution_status, raw.status),
+    offer: firstText(raw.offer, preview.offer),
+    notes: normalizeNotes(raw.notes, raw.connector_error),
+    preview,
+    source,
+    localOnly: Boolean(raw.localOnly),
+    totalAssets: Number(raw.total_assets || preview.asset_count || 0) || 0
+  };
+  item.title = buildItemTitle(item, state);
+  return item;
 }
 
-function buildQueue(state) {
+function buildQueue(state, projectName) {
   const activity = asObject(state.data.activity);
   const results = asArray(activity.execution_results)
     .slice()
     .sort((a, b) => (toDate(b.executed_at)?.getTime() || 0) - (toDate(a.executed_at)?.getTime() || 0));
   const latestResultByJob = new Map();
+
   results.forEach((result) => {
-    const jobId = asString(result.job_id || result.execution_id);
-    if (jobId && !latestResultByJob.has(jobId)) {
-      latestResultByJob.set(jobId, result);
-    }
+    const jobId = firstText(result.job_id, result.execution_id);
+    if (jobId && !latestResultByJob.has(jobId)) latestResultByJob.set(jobId, result);
   });
 
-  const checks = asObject(state.data.integrations?.readiness?.checks);
-  const queue = asArray(activity.scheduled_jobs).map((job) => {
-    const latestResult = latestResultByJob.get(asString(job.job_id));
-    const preview = latestResult?.preview || job.preview || job.connector_preview || {};
-    const item = {
-      id: asString(job.job_id),
-      jobId: asString(job.job_id),
-      title: asString(job.title),
-      waveName: asString(job.wave_name),
-      channel: toChannelKey(job.channel),
-      scheduledFor: asString(job.scheduled_for),
-      executedAt: asString(latestResult?.executed_at),
-      createdAt: asString(job.created_at),
-      updatedAt: asString(job.updated_at || latestResult?.executed_at || job.created_at),
-      status: normalizeStatus(latestResult?.execution_status || job.status, job.scheduled_for ? "scheduled" : "draft"),
-      rawStatus: asString(latestResult?.execution_status || job.status),
-      executionStatus: asString(latestResult?.execution_status),
-      actionType: asString(latestResult?.action_type),
-      mode: asString(job.mode || latestResult?.mode || state.context.executionMode || "semi_auto"),
-      offer: asString(job.offer || preview.offer),
-      notes: normalizeNotes(job.notes, latestResult?.notes, job.connector_error),
-      preview: mergePreviewData(preview, {
-        title: asString(job.title),
-        channel: toChannelKey(job.channel),
-        offer: asString(job.offer),
-        totalAssets: Number(job.total_assets || preview.asset_count || 0) || 0,
-        notes: normalizeNotes(job.notes, latestResult?.notes)
-      }),
-      source: latestResult ? "Scheduled job + result" : "Scheduled job",
-      totalAssets: Number(job.total_assets || preview.asset_count || 0) || 0,
-      connectorReady: Boolean(checks[toChannelKey(job.channel)])
-    };
-
-    item.title = buildItemTitle(item, state.context);
-    return item;
+  const scheduledItems = asArray(activity.scheduled_jobs).map((job) => {
+    const latest = latestResultByJob.get(asString(job.job_id));
+    return normalizeQueueItem(
+      {
+        ...asObject(job),
+        ...asObject(latest),
+        preview: asObject(latest?.preview || job.preview || job.connector_preview)
+      },
+      state,
+      latest ? "Scheduled job + result" : "Scheduled job"
+    );
   });
 
-  const knownIds = new Set(queue.map((item) => item.jobId));
+  const knownIds = new Set(scheduledItems.map((item) => item.jobId));
   const orphanResults = results
-    .filter((result) => !knownIds.has(asString(result.job_id)))
-    .map((result) => {
-      const preview = result.preview || {};
-      const item = {
-        id: asString(result.job_id || result.execution_id),
-        jobId: asString(result.job_id || result.execution_id),
-        title: asString(result.title),
-        waveName: asString(result.wave_name),
-        channel: toChannelKey(result.channel),
-        scheduledFor: "",
-        executedAt: asString(result.executed_at),
-        createdAt: asString(result.executed_at),
-        updatedAt: asString(result.executed_at),
-        status: normalizeStatus(result.execution_status, "draft"),
-        rawStatus: asString(result.execution_status),
-        executionStatus: asString(result.execution_status),
-        actionType: asString(result.action_type),
-        mode: asString(result.mode || state.context.executionMode || "semi_auto"),
-        offer: asString(result.offer || preview.offer),
-        notes: normalizeNotes(result.notes),
-        preview: mergePreviewData(preview, {
-          title: asString(result.title),
-          channel: toChannelKey(result.channel),
-          offer: asString(result.offer),
-          totalAssets: Number(result.total_assets || preview.asset_count || 0) || 0,
-          notes: normalizeNotes(result.notes)
-        }),
-        source: "Execution result",
-        totalAssets: Number(result.total_assets || preview.asset_count || 0) || 0,
-        connectorReady: Boolean(checks[toChannelKey(result.channel)])
-      };
-      item.title = buildItemTitle(item, state.context);
-      return item;
-    });
+    .filter((result) => !knownIds.has(firstText(result.job_id, result.execution_id)))
+    .map((result) => normalizeQueueItem(result, state, "Execution result"));
 
-  return [...queue, ...orphanResults].sort(compareQueueItems);
+  const localDrafts = loadLocalDrafts(projectName).map((draft) => normalizeQueueItem(draft, state, "Local draft"));
+  const backendIds = new Set([...scheduledItems, ...orphanResults].map((item) => item.id));
+  const visibleLocalDrafts = localDrafts.filter((item) => !backendIds.has(item.id));
+
+  return [...visibleLocalDrafts, ...scheduledItems, ...orphanResults].sort(compareQueueItems);
 }
 
-function buildAvailableChannels(state, queue) {
+function compareQueueItems(a, b) {
+  const order = {
+    failed: 0,
+    ready: 1,
+    "needs approval": 2,
+    scheduled: 3,
+    draft: 4,
+    published: 5
+  };
+  const aOrder = order[a.status] ?? 99;
+  const bOrder = order[b.status] ?? 99;
+  if (aOrder !== bOrder) return aOrder - bOrder;
+  const aTime = toDate(a.scheduledFor || a.updatedAt || a.createdAt)?.getTime() || 0;
+  const bTime = toDate(b.scheduledFor || b.updatedAt || b.createdAt)?.getTime() || 0;
+  return bTime - aTime;
+}
+
+function buildChannels(state, queue) {
   const checks = asObject(state.data.integrations?.readiness?.checks);
   return Array.from(
-    new Set(
-      [
-        ...Object.keys(checks),
-        ...queue.map((item) => item.channel),
-        "instagram",
-        "facebook",
-        "tiktok",
-        "youtube",
-        "email",
-        "amazon",
-        "ebay",
-        "website"
-      ]
-        .map(toChannelKey)
-        .filter(Boolean)
-    )
+    new Set([
+      ...Object.keys(checks),
+      ...queue.map((item) => item.channel),
+      ...CHANNEL_DEFAULTS
+    ].map(toKey).filter(Boolean))
   );
 }
 
@@ -389,114 +510,670 @@ function getSelectedItem(queue, selectedId) {
   return queue.find((item) => item.id === selectedId) || null;
 }
 
+function getNextPublishWindow(queue) {
+  const next = queue
+    .filter((item) => item.scheduledFor && ["scheduled", "ready"].includes(item.status))
+    .sort((a, b) => (toDate(a.scheduledFor)?.getTime() || 0) - (toDate(b.scheduledFor)?.getTime() || 0))[0];
+  return next ? `${formatDateTime(next.scheduledFor)} - ${next.title}` : "No scheduled window";
+}
+
 function syncFormFromItem(session, item) {
   if (!item) return;
-  const scheduledDate = item.scheduledFor ? toIsoDate(item.scheduledFor) : "";
-  const scheduledTime = item.scheduledFor
-    ? new Intl.DateTimeFormat("en-GB", {
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: false
-      }).format(toDate(item.scheduledFor))
-    : "";
+
 
   session.form = {
+    project: item.project || session.form.project || "",
+    campaign: item.campaign || "",
+    channel: item.channel || session.form.channel || "",
+    contentItem: item.contentItem || item.title || "",
+    publishDate: toDateInput(item.scheduledFor),
+    publishTime: toTimeInput(item.scheduledFor),
+    approvalStatus: item.approvalStatus || "draft",
     title: item.title || "",
-    waveName: item.waveName || "",
-    channel: item.channel || "",
-    scheduledDate,
-    scheduledTime,
-    mode: item.mode || "semi_auto",
-    offer: item.offer || "",
+
     notes: normalizeNotes(item.notes).join("\n")
   };
   session.formSourceId = item.id;
+  session.validation = {};
   session.isCreatingNew = false;
 }
 
-function resetForm(session, state, channels) {
-  session.form = buildDefaultForm(state, channels);
-  session.formSourceId = "";
+function resetForm(session, state) {
   session.selectedId = "";
+  session.form = buildDefaultForm(state);
+  session.formSourceId = "";
+  session.validation = {};
+  session.draftMessage = "";
   session.isCreatingNew = true;
 }
 
-function buildPreviewModel(state, session, selectedItem) {
-  if (!selectedItem && !session.isCreatingNew) return null;
+function syncSessionForm(session, form) {
+  if (!form) return;
+  Array.from(form.elements).forEach((field) => {
+    if (!field.name) return;
+    session.form[field.name] = field.value || "";
+  });
+}
 
-  const previewSource = selectedItem?.preview || {};
-  const notes = normalizeNotes(session.form.notes, selectedItem?.notes, previewSource.notes);
-  const channel = toChannelKey(session.form.channel || selectedItem?.channel || previewSource.channel);
-  const title = asString(session.form.title || selectedItem?.title || previewSource.title || "Publishing item");
+function buildScheduleTime(form) {
+  const date = clean(form.publishDate);
+  if (!date) return "";
+  return `${date}T${clean(form.publishTime) || "09:00"}:00Z`;
+}
+
+function buildPublishingAutoModePlan(session) {
+  const draftPrompt = firstText(
+    session.form.contentItem,
+    session.form.notes,
+    "Prepare publishing draft from current project context."
+  );
+
+  return [
+    {
+      id: `publishing-prepare-${Date.now()}`,
+      type: "prepare_publishing_draft",
+      targetPage: "publishing",
+      action: "Prepare publishing draft",
+      payload: {
+        prompt: draftPrompt,
+        reason: "Prepare a safe publishing draft without executing publish.",
+        title: firstText(session.form.title, "Prepared publishing draft")
+      },
+      priority: "recommended"
+    },
+    {
+      id: `publishing-gate-${Date.now()}`,
+      type: "publish_now",
+      targetPage: "publishing",
+      action: "Record manual publish completion",
+      payload: {
+        prompt: draftPrompt,
+        reason: "This records a manual publishing completion only after review; external provider execution requires separate proof."
+      },
+      priority: "critical"
+    }
+  ];
+}
+
+function validateBuilder(session, intent) {
+  const errors = {};
+  const form = session.form;
+
+  if (!clean(form.project)) errors.project = "Project is required.";
+  if (!clean(form.campaign)) errors.campaign = "Campaign is required.";
+  if (!clean(form.channel)) errors.channel = "Channel is required.";
+  if (!clean(form.contentItem)) errors.contentItem = "Content item is required.";
+  if (["schedule", "publish", "retry"].includes(intent) && !clean(form.publishDate)) {
+    errors.publishDate = "Publish date is required for this action.";
+  }
+  if (intent === "publish" && form.approvalStatus !== "approved") {
+    errors.approvalStatus = "Publishing readiness must be approved before recording manual completion.";
+  }
+
+  session.validation = errors;
+  return !Object.keys(errors).length;
+}
+
+function summarizePublishingBlockers(assetBlockers = []) {
+  const blockers = asArray(assetBlockers);
+  if (!blockers.length) return "";
+  return blockers
+    .slice(0, 4)
+    .map((item) => firstText(item.label, item.name, item.key, item.id, "Required asset"))
+    .join(", ");
+}
+
+function guardPublishingAssetBlockers(session, assetBlockers, showMessage, actionLabel = "this publishing action") {
+  const blockers = asArray(assetBlockers);
+  if (!blockers.length) return false;
+  const summary = summarizePublishingBlockers(blockers);
+  const message = `Publishing blocker(s) must be resolved before ${actionLabel}: ${summary || "required publishing assets are missing or need review"}.`;
+  session.validation.contentItem = message;
+  showMessage?.(message);
+  return true;
+}
+
+function confirmPublishingBackendAction(message) {
+  if (typeof window === "undefined" || typeof window.confirm !== "function") return true;
+  return window.confirm(message);
+}
+
+function fieldError(session, key, escapeHtml) {
+  const message = session.validation[key];
+  return message ? `<div class="publishing-inline-error">${escapeHtml(message)}</div>` : "";
+}
+
+function renderStatusPill(status, escapeHtml) {
+  // Add governance/approval hints for status pills
+  let hint = "";
+  if (status === "needs approval") {
+    hint = "title=\"Request Approval Review. Confirmation required before execution.\" aria-label=\"Request Approval Review. Confirmation required before execution.\"";
+  } else if (status === "ready") {
+    hint = "title=\"Prepare Governance Review. Backend approval rules apply.\" aria-label=\"Prepare Governance Review. Backend approval rules apply.\"";
+  } else if (status === "scheduled") {
+    hint = "title=\"Confirmation required before execution.\" aria-label=\"Confirmation required before execution.\"";
+  }
+  return `<span class="publishing-status-pill is-${escapeHtml(statusClass(status))}" ${hint}>${escapeHtml(titleCase(status))}</span>`;
+}
+
+function renderScopedStyles() {
+  return `
+    <style>
+      .publishing-execution-center {
+        display: grid;
+        gap: 14px;
+        min-width: 0;
+      }
+
+      .publishing-execution-grid {
+        display: grid;
+        gap: 14px;
+        min-width: 0;
+      }
+
+      .publishing-main-column,
+      .publishing-side-column {
+        display: grid;
+        gap: 14px;
+        min-width: 0;
+        align-content: start;
+      }
+
+      .publishing-card {
+        min-width: 0;
+        overflow: hidden;
+      }
+
+      .publishing-overview-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
+        gap: 9px;
+      }
+
+      .publishing-overview-item,
+      .publishing-impact-chip {
+        min-width: 0;
+        border: 1px solid var(--border, rgba(148, 163, 184, 0.24));
+        border-radius: 8px;
+        padding: 10px;
+        background: var(--surface-muted, rgba(15, 23, 42, 0.03));
+      }
+
+      .publishing-overview-item span,
+      .publishing-impact-chip small {
+        display: block;
+        color: var(--text-muted, #64748b);
+        font-size: 0.78rem;
+        line-height: 1.3;
+      }
+
+      .publishing-overview-item strong,
+      .publishing-impact-chip strong {
+        display: block;
+        margin-top: 4px;
+        overflow-wrap: anywhere;
+      }
+
+      .publishing-overview-item.is-wide {
+        grid-column: 1 / -1;
+      }
+
+      .publishing-impact-row,
+      .publishing-action-row,
+      .publishing-form-actions,
+      .publishing-filter-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        min-width: 0;
+      }
+
+      .publishing-impact-row {
+        margin-top: 12px;
+      }
+
+      .publishing-action-row,
+      .publishing-form-actions {
+        margin-top: 12px;
+      }
+
+      .publishing-action-row .btn,
+      .publishing-form-actions .btn {
+        white-space: normal;
+        line-height: 1.2;
+        text-align: center;
+      }
+
+      .publishing-impact-chip {
+        flex: 1 1 150px;
+      }
+
+      .publishing-filter-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        min-height: 36px;
+        border: 1px solid var(--border, rgba(148, 163, 184, 0.28));
+        border-radius: 999px;
+        padding: 6px 10px;
+        background: transparent;
+        color: inherit;
+        cursor: pointer;
+      }
+
+      .publishing-filter-chip.is-active {
+        border-color: var(--accent, #2563eb);
+        background: rgba(37, 99, 235, 0.08);
+      }
+
+      /* Publishing queue dark contrast correction */
+      .publishing-queue-list,
+      .publishing-calendar-list,
+      .publishing-blocker-list {
+        display: grid;
+        gap: 9px;
+        margin-top: 12px;
+        min-width: 0;
+      }
+
+      .publishing-queue-row {
+        display: grid;
+        gap: 9px;
+        min-width: 0;
+        padding: 10px;
+        border-radius: 12px;
+        background: rgba(15, 23, 42, 0.74);
+        border: 1px solid rgba(148, 163, 184, 0.18);
+        color: #e5eef8;
+      }
+
+      .publishing-queue-row.is-active {
+        background: rgba(15, 23, 42, 0.88);
+        border-color: rgba(34, 211, 238, 0.34);
+      }
+
+      .publishing-queue-main,
+      .publishing-calendar-row {
+        width: 100%;
+        min-width: 0;
+        border: 0;
+        padding: 0;
+        background: transparent;
+        color: #e5eef8;
+        text-align: left;
+        cursor: pointer;
+      }
+
+      .publishing-queue-title {
+        display: block;
+        font-weight: 800;
+        color: #f8fafc;
+        line-height: 1.18;
+        overflow-wrap: anywhere;
+      }
+
+      .publishing-queue-meta {
+        display: block;
+        margin-top: 4px;
+        color: rgba(226, 232, 240, 0.72);
+        font-size: 0.82rem;
+        line-height: 1.35;
+        overflow-wrap: anywhere;
+      }
+
+      .publishing-queue-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 7px;
+        align-items: center;
+      }
+
+      .publishing-queue-actions button {
+        min-height: 32px;
+        border: 1px solid rgba(148, 163, 184, 0.22);
+        border-radius: 999px;
+        padding: 6px 10px;
+        background: rgba(15, 23, 42, 0.72);
+        color: #e5eef8;
+        cursor: pointer;
+        white-space: normal;
+        line-height: 1.18;
+      }
+
+      .publishing-queue-actions button:focus-visible,
+      .publishing-queue-main:focus-visible,
+      .publishing-calendar-row:focus-visible,
+      .publishing-filter-chip:focus-visible {
+        outline: 2px solid rgba(34, 211, 238, 0.72);
+        outline-offset: 2px;
+      }
+
+      .publishing-queue-actions button:disabled,
+      .publishing-queue-actions button[disabled] {
+        background: rgba(15, 23, 42, 0.44);
+        border-color: rgba(148, 163, 184, 0.14);
+        color: rgba(226, 232, 240, 0.44);
+        opacity: 1;
+        cursor: not-allowed;
+      }
+
+      .publishing-status-pill {
+        display: inline-flex;
+        width: fit-content;
+        max-width: 100%;
+        border-radius: 999px;
+        padding: 4px 8px;
+        background: rgba(100, 116, 139, 0.12);
+        color: inherit;
+        font-size: 0.76rem;
+        font-weight: 700;
+        line-height: 1.2;
+      }
+
+      .publishing-status-pill.is-ready,
+      .publishing-status-pill.is-scheduled {
+        background: rgba(217, 119, 6, 0.12);
+      }
+
+      .publishing-status-pill.is-published {
+        background: rgba(22, 163, 74, 0.12);
+      }
+
+      .publishing-status-pill.is-failed {
+        background: rgba(220, 38, 38, 0.12);
+      }
+
+      .publishing-inline-error {
+        margin-top: 6px;
+        color: var(--danger, #b91c1c);
+        font-size: 0.82rem;
+        line-height: 1.35;
+      }
+
+      .publishing-calendar-row {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 6px 10px;
+        align-items: center;
+        min-height: 42px;
+        border: 1px solid var(--border, rgba(148, 163, 184, 0.24));
+        border-radius: 8px;
+        padding: 9px 10px;
+      }
+
+      .publishing-calendar-row em {
+        grid-column: 1 / -1;
+        min-width: 0;
+        font-style: normal;
+        color: var(--text-muted, #64748b);
+        overflow-wrap: anywhere;
+      }
+
+      @media (min-width: 980px) {
+        .publishing-execution-grid {
+          grid-template-columns: minmax(0, 1.4fr) minmax(300px, 0.8fr);
+          align-items: start;
+        }
+
+        .publishing-queue-row {
+          grid-template-columns: minmax(0, 1fr) auto;
+          align-items: start;
+        }
+
+        .publishing-queue-actions {
+          grid-column: 1 / -1;
+        }
+      }
+    </style>
+  `;
+}
+
+function summarizeText(value, fallback = "No content payload available yet.") {
+  const text = clean(value);
+  if (!text) return fallback;
+  return text.length > 180 ? `${text.slice(0, 177)}...` : text;
+}
+
+function extractHandoffSummary(handoff) {
+  const direct = asObject(handoff);
+  const payload = asObject(handoff?.payload);
+  const output = asObject(payload.output);
+  const draftContext = asObject(payload.draft_context);
+  const isAiCampaign = asString(direct.type || payload.type) === "ai_command_campaign_handoff";
+  const sections = asArray(direct.sections || payload.sections || output.sections);
+  const goal = asString(direct.goal || payload.goal);
+  const channel = asString(direct.channel || payload.channel);
+  const sourceType = asString(direct.source_type || payload.source_type || direct.source);
 
   return {
-    ...mergePreviewData(previewSource, selectedItem, session.form),
+    id: asString(direct.id || handoff?.id || payload.workflow_id || payload.prompt || payload.workflow_title),
+    sourcePage: asString(handoff?.source_page || direct.source || "workflows"),
+    workflowId: asString(payload.workflow_id || direct.id),
+    title: firstText(direct.title, output.title, payload.workflow_title, draftContext.lastResponseTitle, isAiCampaign ? "AI Team Campaign Handoff" : "Workflow output"),
+    summary: firstText(direct.summary, output.summary, payload.summary, draftContext.lastResponseSummary, payload.prompt, isAiCampaign ? "AI Team campaign package is available for publishing preparation." : "Workflow output is available for publishing preparation."),
+    isAiCampaign,
+    campaignPackage: asObject(direct.campaignPackage || payload.campaignPackage || output.campaignPackage),
+    backendPreview: Boolean(direct.backend_preview || direct.backendPreview || payload.backendPreview || output.backendPreview),
+    backendSource: asString(direct.backend_source || direct.backendSource || payload.backendSource || output.backendSource || ""),
+    sections,
+    goal,
     channel,
-    title,
-    headline: asString(previewSource.headline || title),
-    subject: asString(previewSource.subject || title),
-    body:
-      asString(previewSource.body || previewSource.caption) ||
-      asString(session.form.offer) ||
-      notes[0] ||
-      "Preview content will appear here when this publishing item includes channel-ready copy or offer context.",
-    caption:
-      asString(previewSource.caption || previewSource.body) ||
-      asString(session.form.offer) ||
-      notes[0] ||
-      "Preview copy will appear here.",
-    cta: asString(previewSource.cta || (channel === "email" ? "Review email" : "Shop now")),
-    notes
+    sourceType,
+    packageLabel: isAiCampaign ? "AI Team Campaign Handoff" : "Workflow Handoff"
   };
 }
 
-function buildChannelCards(state, queue) {
-  const checks = asObject(state.data.integrations?.readiness?.checks);
-  const channels = buildAvailableChannels(state, queue);
-  return channels.map((channel) => {
-    const items = queue.filter((item) => item.channel === channel);
-    const counts = getStatusCounts(items);
-    const connected = checks[channel] === true;
-    const summaryStatus = counts.failed
-      ? "failed"
-      : counts.ready
-        ? "ready"
-        : counts.scheduled
-          ? "scheduled"
-          : counts.published
-            ? "published"
-            : "draft";
 
-    const issues = [];
-    if (!connected) issues.push("Connector missing");
-    if (counts.ready) issues.push(`${counts.ready} waiting for approval or manual publish`);
-    if (counts.draft) issues.push(`${counts.draft} still in planning`);
-    if (!items.length) issues.push("No queued items");
+function getAiCommandLocalCampaignHandoff(destinationRoute) {
+  const keys = [
+    `mh_ai_command_handoff_${destinationRoute}`,
+    "mh_ai_command_campaign_handoff"
+  ];
 
+  for (const storage of [window.sessionStorage, window.localStorage]) {
+    for (const key of keys) {
+      try {
+        const parsed = JSON.parse(storage?.getItem?.(key) || "null");
+        if (!parsed || typeof parsed !== "object") continue;
+
+        const type = asString(parsed.type);
+        const route = asString(parsed.destination_route);
+        if (type === "ai_command_campaign_handoff" && (!route || route === destinationRoute)) {
+          return parsed;
+        }
+      } catch (error) {
+        console.warn("Unable to read AI Command campaign handoff", error);
+      }
+    }
+  }
+
+  return null;
+}
+
+function clearAiCommandLocalCampaignHandoff(destinationRoute) {
+  const keys = [
+    `mh_ai_command_handoff_${destinationRoute}`,
+    "mh_ai_command_campaign_handoff"
+  ];
+
+  for (const storage of [window.sessionStorage, window.localStorage]) {
+    for (const key of keys) {
+      try {
+        storage?.removeItem?.(key);
+      } catch (error) {
+        console.warn("Unable to clear AI Command campaign handoff", error);
+      }
+    }
+  }
+}
+
+
+function getPublishingHandoff(projectName, operations) {
+  const aiCommandLocalHandoff = getAiCommandLocalCampaignHandoff("publishing");
+  if (aiCommandLocalHandoff) return aiCommandLocalHandoff;
+
+  return (
+    getSharedHandoff(projectName, "publishing", operations, "workflows") ||
+    getSharedHandoff(projectName, "publishing", operations, "ai-command") ||
+    getSharedHandoff(projectName, "publishing", operations)
+  );
+}
+
+function getAssetData(state) {
+  return asObject(state.data.assets);
+}
+
+function buildRecommendation({ queue, counts, assetBlockers, checks, handoff, globalBlockers }) {
+  const failed = queue.find((item) => item.status === "failed");
+  const ready = queue.find((item) => item.status === "ready");
+  const needsApproval = queue.find((item) => item.status === "needs approval");
+  const draft = queue.find((item) => item.status === "draft");
+  const connectedCount = Object.values(checks).filter(Boolean).length;
+  const externalBlockers = asArray(globalBlockers).slice(0, 3);
+
+  if (failed) {
     return {
-      channel,
-      connected,
-      summaryStatus,
-      total: items.length,
-      counts,
-      issues
+      action: "Retry failed publishing item",
+      why: `${failed.title} is blocked or failed. Clear the blocker before adding more scheduled work.`,
+      focusId: failed.id,
+      externalBlockers
     };
-  });
+  }
+  if (ready && !assetBlockers.length) {
+    return {
+      action: "Record manual completion for the ready item",
+      why: `${ready.title} is approved for a backend readiness update. Record manual completion only after external execution is verified.`,
+      focusId: ready.id
+    };
+  }
+  if (needsApproval) {
+    return {
+      action: "Review approval queue",
+      why: `${needsApproval.title} needs approval before it can move into the manual publishing queue.`,
+      focusId: needsApproval.id,
+      externalBlockers
+    };
+  }
+  if (handoff) {
+    const handoffSummary = extractHandoffSummary(handoff);
+    return {
+      action: handoffSummary.isAiCampaign ? "Load campaign package into a draft" : "Load workflow output into a draft",
+      why: handoffSummary.isAiCampaign
+        ? "An AI Team campaign package is available. Loading it creates a local publishing draft without publishing externally."
+        : "A workflow handoff is available. Loading it keeps execution moving without inventing backend data.",
+      focusId: "",
+      externalBlockers
+    };
+  }
+  if (draft) {
+    return {
+      action: "Complete and schedule a draft",
+      why: `${draft.title} is not yet executable. Add channel, content, approval, and timing details.`,
+      focusId: draft.id,
+      externalBlockers
+    };
+  }
+  return {
+    action: connectedCount ? "Create a publishing draft" : "Connect a publishing channel",
+    why: connectedCount
+      ? "No queue item is ready. Start with a draft and save it locally until it can be scheduled."
+      : "Channel readiness is missing. Publishing can prepare drafts, but live execution needs a connected destination.",
+    focusId: "",
+    externalBlockers
+  };
+}
+
+function renderOverview(counts, queue, escapeHtml) {
+  return `
+    <section class="card publishing-card">
+      <div class="card-head">
+        <div>
+          <div class="setup-kicker">Publishing Overview</div>
+          <h3>Execution Destination</h3>
+        </div>
+        <span class="card-badge neutral">${escapeHtml(String(queue.length))} items</span>
+      </div>
+      <div class="publishing-overview-grid">
+        <div class="publishing-overview-item"><span>Scheduled items</span><strong>${escapeHtml(String(counts.scheduled))}</strong></div>
+        <div class="publishing-overview-item"><span>Ready for manual review</span><strong>${escapeHtml(String(counts.ready))}</strong></div>
+        <div class="publishing-overview-item"><span>Draft items</span><strong>${escapeHtml(String(counts.draft))}</strong></div>
+        <div class="publishing-overview-item"><span>Failed / blocked items</span><strong>${escapeHtml(String(counts.failed))}</strong></div>
+        <div class="publishing-overview-item is-wide"><span>Next publish window</span><strong>${escapeHtml(getNextPublishWindow(queue))}</strong></div>
+      </div>
+    </section>
+  `;
+}
+
+function renderRecommendation(recommendation, counts, assetBlockers, checks, escapeHtml) {
+  const chips = [
+    ["Manual publishing readiness", counts.ready + counts.scheduled > 0 ? "Active" : "Needs queue"],
+    ["Content", counts.draft || counts.ready || counts.scheduled ? "Present" : "Empty"],
+    ["Workflow output", recommendation.action.includes("workflow") ? "Available" : "Optional"],
+    ["Channel readiness", Object.values(checks).filter(Boolean).length ? "Connected" : "Needs setup"],
+    ["Approval", counts["needs approval"] ? "Pending" : counts.ready ? "Approved" : "Draft"],
+    ["Automation", counts.scheduled ? "Scheduled" : "Manual"]
+  ];
+
+  return `
+    <section class="card publishing-card" id="publishingRecommendation">
+      <div class="card-head">
+        <div>
+          <div class="setup-kicker">Smart Recommendation</div>
+          <h3>${escapeHtml(recommendation.action)}</h3>
+          <p class="publishing-section-copy">${escapeHtml(recommendation.why)}</p>
+        </div>
+        <span class="card-badge ${assetBlockers.length ? "danger" : "neutral"}">${escapeHtml(assetBlockers.length ? `${assetBlockers.length} blockers` : "Clear")}</span>
+      </div>
+      <div class="publishing-impact-row">
+        ${chips.map(([label, value]) => `
+          <span class="publishing-impact-chip">
+            <strong>${escapeHtml(label)}</strong>
+            <small>${escapeHtml(value)}</small>
+          </span>
+        `).join("")}
+      </div>
+      <div class="publishing-action-row">
+        <button id="publishingOpenQueueBtn" class="btn btn-secondary" type="button">Open Publish Queue</button>
+        <button id="publishingSaveDraftBtn" class="btn btn-secondary" type="button">Save publishing draft</button>
+        <button id="publishingPushAiBtn" class="btn btn-primary" type="button">Send publishing context to AI</button>
+        <button id="publishingAutoPrepareBtn" class="btn btn-secondary" type="button">Auto-prepare publishing plan</button>
+        <button id="publishingAutoStopBtn" class="btn btn-secondary" type="button">Stop Auto Mode</button>
+      </div>
+      <details class="publishing-automation-preview publishing-block-gap">
+        <summary>Automation Preview</summary>
+        <div class="publishing-automation-preview-copy">Automation cannot publish without manual review, confirmation, and backend approval gates.</div>
+        <div class="simple-banner publishing-inline-gap">Auto Mode status: ${escapeHtml(getAutoModeState().status || "idle")}</div>
+        ${asArray(recommendation.externalBlockers).length ? `
+          <div class="simple-banner publishing-block-gap">Cross-system blockers: ${escapeHtml(asArray(recommendation.externalBlockers).map((item) => item.title).join("; "))}</div>
+        ` : ""}
+        ${publishingAutomationState.progress ? `<div class="simple-banner publishing-block-gap">${escapeHtml(publishingAutomationState.progress)}</div>` : ""}
+        ${publishingAutomationState.result ? `<div class="simple-banner publishing-inline-gap">${escapeHtml(publishingAutomationState.result)}</div>` : ""}
+        ${getAutoModeState().status === "waiting_approval" ? `
+          <div class="simple-banner publishing-inline-gap"><strong>Approval needed:</strong> ${escapeHtml(asObject(getAutoModeState().approvalRequiredStep).reason || "Manual approval required.")}</div>
+          <div class="publishing-action-row publishing-inline-gap">
+            <button id="publishingAutoApproveBtn" class="btn btn-secondary" type="button">Approve automation step</button>
+            <button id="publishingAutoSkipBtn" class="btn btn-secondary" type="button">Skip automation step</button>
+          </div>
+        ` : ""}
+      </details>
+      <div class="simple-banner">Opens AI with this context only. <strong>No approval, publishing, or backend execution is performed.</strong></div>
+    </section>
+  `;
 }
 
 function renderFilterRow(filter, queue, escapeHtml) {
   const counts = getStatusCounts(queue);
-  const allCount = queue.length;
+
 
   return `
     <div class="publishing-filter-row">
       ${STATUS_FILTERS.map((status) => {
-        const isActive = filter === status;
-        const count = status === "all" ? allCount : counts[status];
+        const active = filter === status;
+        const count = status === "all" ? queue.length : counts[status];
         return `
-          <button class="publishing-filter-chip${isActive ? " is-active" : ""}" type="button" data-publishing-filter="${escapeHtml(status)}">
-            <span>${escapeHtml(status === "all" ? "All items" : titleCase(status))}</span>
-            <strong>${escapeHtml(String(count))}</strong>
+          <button class="publishing-filter-chip${active ? " is-active" : ""}" type="button" data-publishing-filter="${escapeHtml(status)}">
+            <span>${escapeHtml(status === "all" ? "All" : titleCase(status))}</span>
+            <strong>${escapeHtml(String(count || 0))}</strong>
           </button>
         `;
       }).join("")}
@@ -504,191 +1181,352 @@ function renderFilterRow(filter, queue, escapeHtml) {
   `;
 }
 
-function renderQueueList(items, selectedId, escapeHtml) {
-  if (!items.length) {
-    return `<div class="empty-box">No publishing items match the current view. Adjust the filter or create a new schedule.</div>`;
-  }
+function renderQueue(queue, visibleQueue, selectedId, filter, escapeHtml) {
+  const rows = visibleQueue.length
+    ? visibleQueue.map((item) => `
+      <article class="publishing-queue-row${item.id === selectedId ? " is-active" : ""}" data-publishing-row="${escapeHtml(item.id)}">
+        <button class="publishing-queue-main" type="button" data-publishing-select="${escapeHtml(item.id)}">
+          <span class="publishing-queue-title">${escapeHtml(item.title)}</span>
+          <span class="publishing-queue-meta">${escapeHtml(titleCase(item.channel || "unassigned"))} • ${escapeHtml(item.scheduledFor ? formatDateTime(item.scheduledFor) : "Unscheduled")} • ${escapeHtml(item.source)}</span>
+        </button>
+        <div class="publishing-queue-state">${renderStatusPill(item.status, escapeHtml)}</div>
+        <div class="publishing-queue-actions">
+          <button type="button" data-publishing-action="review" data-publishing-id="${escapeHtml(item.id)}">Review Package</button>
+          <button type="button" data-publishing-action="schedule" data-publishing-id="${escapeHtml(item.id)}">Queue for Manual Publishing</button>
+          <button type="button" data-publishing-action="publish" data-publishing-id="${escapeHtml(item.id)}">Record Manual Completion</button>
+          <button type="button" data-publishing-action="pause" data-publishing-id="${escapeHtml(item.id)}">Pause to draft</button>
+          <button type="button" data-publishing-action="retry" data-publishing-id="${escapeHtml(item.id)}">Retry scheduled item</button>
+        </div>
+      </article>
+    `).join("")
+    : `<div class="empty-box">No publish queue items match this filter. Create or load a draft to start the execution queue.</div>`;
 
   return `
-    <div class="publishing-queue-list">
-      ${items.map((item) => `
-        <button class="publishing-queue-item${item.id === selectedId ? " is-active" : ""}" type="button" data-publishing-select="${escapeHtml(item.id)}">
-          <div class="publishing-queue-head">
-            <div class="publishing-queue-copy">
-              <span class="publishing-queue-title">${escapeHtml(item.title)}</span>
-              <span class="publishing-queue-meta">${escapeHtml(titleCase(item.channel || "unassigned"))} • ${escapeHtml(item.scheduledFor ? formatDateTime(item.scheduledFor) : "No schedule slot yet")}</span>
+    <section class="card publishing-card" id="publishingQueuePanel">
+      <div class="card-head">
+        <div>
+          <div class="setup-kicker">Publish Queue</div>
+          <h3>Queue items and execution actions</h3>
+        </div>
+        <span class="card-badge neutral">${escapeHtml(String(visibleQueue.length))} visible</span>
+      </div>
+      ${renderFilterRow(filter, queue, escapeHtml)}
+      <div class="publishing-queue-list">${rows}</div>
+    </section>
+  `;
+}
+
+function renderBuilder(session, channels, checks, escapeHtml) {
+  return `
+    <section class="card publishing-card" id="publishingBuilderPanel">
+      <div class="card-head">
+        <div>
+          <div class="setup-kicker">Publishing Builder</div>
+          <h3>Draft, validate, and queue manual publishing records</h3>
+        </div>
+        <span class="card-badge neutral">Inline validation</span>
+      </div>
+      <form id="publishingBuilderForm" class="setup-form-grid publishing-builder-form" novalidate>
+        <div class="setup-form-grid setup-form-grid-2">
+          <div class="setup-field-group">
+            <div class="setup-field-head">
+              <label class="setup-label" for="publishingProjectInput">Project</label>
+              <span class="setup-field-state is-optional">Required</span>
             </div>
-            ${renderStatusPill(item.status, escapeHtml)}
+            <input id="publishingProjectInput" name="project" class="setup-input" type="text" value="${escapeHtml(session.form.project)}" placeholder="Project name">
+            ${fieldError(session, "project", escapeHtml)}
           </div>
-          <div class="publishing-queue-foot">
-            <span>${escapeHtml(item.connectorReady ? "Connector ready" : "Connector missing")}</span>
-            <span>${escapeHtml(item.totalAssets ? `${item.totalAssets} linked assets` : "No linked assets yet")}</span>
+          <div class="setup-field-group">
+            <div class="setup-field-head">
+              <label class="setup-label" for="publishingCampaignInput">Campaign</label>
+              <span class="setup-field-state is-optional">Required</span>
+            </div>
+            <input id="publishingCampaignInput" name="campaign" class="setup-input" type="text" value="${escapeHtml(session.form.campaign)}" placeholder="Campaign or launch wave">
+            ${fieldError(session, "campaign", escapeHtml)}
           </div>
-        </button>
-      `).join("")}
+        </div>
+
+        <div class="setup-form-grid setup-form-grid-2">
+          <div class="setup-field-group">
+            <div class="setup-field-head">
+              <label class="setup-label" for="publishingChannelInput">Channel</label>
+              <span class="setup-field-state is-optional">${escapeHtml(checks[toKey(session.form.channel)] ? "Ready" : "Planning")}</span>
+            </div>
+            <select id="publishingChannelInput" name="channel" class="setup-input">
+              <option value="">Choose channel</option>
+              ${channels.map((channel) => `
+                <option value="${escapeHtml(channel)}"${channel === session.form.channel ? " selected" : ""}>${escapeHtml(titleCase(channel))}</option>
+              `).join("")}
+            </select>
+            ${fieldError(session, "channel", escapeHtml)}
+          </div>
+          <div class="setup-field-group">
+            <div class="setup-field-head">
+              <label class="setup-label" for="publishingContentInput">Content item</label>
+              <span class="setup-field-state is-optional">Required</span>
+            </div>
+            <input id="publishingContentInput" name="contentItem" class="setup-input" type="text" value="${escapeHtml(session.form.contentItem)}" placeholder="Caption, email, product update, or workflow output">
+            ${fieldError(session, "contentItem", escapeHtml)}
+          </div>
+        </div>
+
+        <div class="setup-form-grid setup-form-grid-3">
+          <div class="setup-field-group">
+            <div class="setup-field-head">
+              <label class="setup-label" for="publishingDateInput">Publish date</label>
+              <span class="setup-field-state is-optional">Queue for Manual Publishing</span>
+            </div>
+            <input id="publishingDateInput" name="publishDate" class="setup-input" type="date" value="${escapeHtml(session.form.publishDate)}">
+            ${fieldError(session, "publishDate", escapeHtml)}
+          </div>
+          <div class="setup-field-group">
+            <div class="setup-field-head">
+              <label class="setup-label" for="publishingTimeInput">Publish time</label>
+              <span class="setup-field-state is-optional">Slot</span>
+            </div>
+            <input id="publishingTimeInput" name="publishTime" class="setup-input" type="time" value="${escapeHtml(session.form.publishTime)}">
+          </div>
+          <div class="setup-field-group">
+            <div class="setup-field-head">
+              <label class="setup-label" for="publishingApprovalInput">Approval status</label>
+              <span class="setup-field-state is-optional">Gate</span>
+            </div>
+            <select id="publishingApprovalInput" name="approvalStatus" class="setup-input">
+              ${APPROVAL_STATUSES.map((status) => `
+                <option value="${escapeHtml(status)}"${status === session.form.approvalStatus ? " selected" : ""}>${escapeHtml(titleCase(status))}</option>
+              `).join("")}
+            </select>
+            ${fieldError(session, "approvalStatus", escapeHtml)}
+          </div>
+        </div>
+
+        <div class="setup-field-group">
+          <div class="setup-field-head">
+            <label class="setup-label" for="publishingTitleInput">Queue title</label>
+            <span class="setup-field-state is-optional">Optional</span>
+          </div>
+          <input id="publishingTitleInput" name="title" class="setup-input" type="text" value="${escapeHtml(session.form.title)}" placeholder="Operator-facing title">
+        </div>
+
+        <div class="setup-field-group">
+          <div class="setup-field-head">
+            <label class="setup-label" for="publishingNotesInput">Execution notes</label>
+            <span class="setup-field-state is-optional">Context</span>
+          </div>
+          <textarea id="publishingNotesInput" name="notes" class="setup-input setup-textarea" rows="4" placeholder="Approval notes, blockers, manual steps, content references">${escapeHtml(session.form.notes)}</textarea>
+        </div>
+      </form>
+      <div class="publishing-form-actions">
+        <button id="publishingNewItemBtn" class="btn btn-secondary" type="button">New Draft</button>
+        <button id="publishingBuilderSaveBtn" class="btn btn-secondary" type="button">Save publishing draft</button>
+        <button id="publishingScheduleBtn" class="btn btn-primary" type="button">Queue for Manual Publishing</button>
+      </div>
+      ${session.draftMessage ? `<div class="simple-banner">${escapeHtml(session.draftMessage)}</div>` : ""}
+    </section>
+  `;
+}
+
+
+function renderCampaignPackageSummaryRows(summary, escapeHtml) {
+  const campaignPackage = asObject(summary.campaignPackage);
+  const rows = [
+    ["Concept", asString(campaignPackage.concept)],
+    ["Audience", asString(campaignPackage.targetAudience || campaignPackage.target_audience)],
+    ["Offer", asString(campaignPackage.offer)]
+  ].filter(([, value]) => value);
+
+  const groups = [
+    ["Launch phases", asArray(campaignPackage.launchPhases || campaignPackage.launch_phases)],
+    ["Content angles", asArray(campaignPackage.contentAngles || campaignPackage.content_angles)],
+    ["Review blockers", asArray(campaignPackage.missingBlockers || campaignPackage.missing_blockers)],
+    ["Next actions", asArray(campaignPackage.nextActions || campaignPackage.next_actions)]
+  ].filter(([, items]) => items.length);
+
+  if (!rows.length && !groups.length) return "";
+
+  return `
+    <div class="data-stack">
+      ${rows.map(([label, value]) => `<div class="data-row"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong></div>`).join("")}
+      ${groups.map(([label, items]) => `<div class="data-row"><span>${escapeHtml(label)}</span><strong>${escapeHtml(items.slice(0, 3).map((item) => asString(item)).join(" · "))}</strong></div>`).join("")}
+      ${summary.backendPreview ? `<div class="data-row"><span>AI source</span><strong>${escapeHtml(summary.backendSource || "Backend preview")}</strong></div>` : ""}
     </div>
   `;
 }
 
-function renderPreview(previewModel, selectedItem, escapeHtml) {
-  if (!previewModel) {
-    return `<div class="empty-box">Select a publishing item or start a new one to review the channel preview before approval.</div>`;
+
+function renderWorkflowHandoff(handoff, session, escapeHtml) {
+  if (!handoff) {
+    return `
+      <section class="card publishing-card">
+        <div class="card-head">
+          <div>
+            <div class="setup-kicker">Workflow Handoff</div>
+            <h3>No workflow output available</h3>
+          </div>
+          <span class="card-badge neutral">Empty</span>
+        </div>
+        <div class="empty-box">Run or route a workflow into Publishing to load execution-ready output here.</div>
+      </section>
+    `;
   }
 
-  const sourceMeta = [
-    previewModel.primaryProductName ? `Hero product: ${previewModel.primaryProductName}` : "",
-    previewModel.goal ? `Goal: ${previewModel.goal}` : "",
-    previewModel.format ? `Format: ${previewModel.format}` : ""
-  ].filter(Boolean).join(" • ");
-
-  const summaryRows = `
-    <div class="data-stack">
-      <div class="data-row"><span>Channel</span><strong>${escapeHtml(titleCase(previewModel.channel || "unassigned"))}</strong></div>
-      <div class="data-row"><span>Status</span><strong>${escapeHtml(titleCase(selectedItem?.status || "draft"))}</strong></div>
-      <div class="data-row"><span>Schedule</span><strong>${escapeHtml(selectedItem?.scheduledFor ? formatDateTime(selectedItem.scheduledFor) : "Draft / unscheduled")}</strong></div>
-      <div class="data-row"><span>Assets</span><strong>${escapeHtml(String(previewModel.assetCount || 0))}</strong></div>
-    </div>
-  `;
-
-  const assetItems = previewModel.assetPreviewItems.length
-    ? `
-      <div class="publishing-preview-assets">
-        ${previewModel.assetPreviewItems.map((asset) => `
-          <div class="publishing-asset-chip">
-            <strong>${escapeHtml(asset.product_name || asset.product_slug || "Linked asset")}</strong>
-            <span>${escapeHtml(asset.format || asset.goal || asset.category || "Preview linked")}</span>
-          </div>
-        `).join("")}
-      </div>
-    `
-    : `<div class="publishing-preview-note">No channel asset package is attached yet. The preview is using the current schedule details and offer context.</div>`;
-
-  const mockup = previewModel.previewType === "email"
-    ? `
-      <div class="publishing-email-mock">
-        <div class="publishing-email-head">
-          <span>${escapeHtml(titleCase(previewModel.channel))}</span>
-          <strong>${escapeHtml(previewModel.subject)}</strong>
-        </div>
-        <div class="publishing-email-body">
-          <h4>${escapeHtml(previewModel.headline)}</h4>
-          <p>${escapeHtml(previewModel.body)}</p>
-          <button type="button">${escapeHtml(previewModel.cta)}</button>
-        </div>
-      </div>
-    `
-    : `
-      <div class="publishing-social-mock">
-        <div class="publishing-social-head">
-          <span class="publishing-social-badge">${escapeHtml(titleCase(previewModel.channel || "channel"))}</span>
-          <strong>${escapeHtml(previewModel.title)}</strong>
-        </div>
-        <div class="publishing-social-body">
-          <div class="publishing-social-visual">${escapeHtml(previewModel.primaryProductName || "Channel-ready visual slot")}</div>
-          <p>${escapeHtml(previewModel.caption)}</p>
-          <button type="button">${escapeHtml(previewModel.cta)}</button>
-        </div>
-      </div>
-    `;
-
+  const summary = extractHandoffSummary(handoff);
+  const isLoaded = summary.id && summary.id === session.loadedHandoffId;
   return `
-    <div class="publishing-preview-layout">
-      <div class="publishing-preview-stage">
-        ${mockup}
-        ${previewModel.visualPrompt ? `<div class="publishing-preview-note">${escapeHtml(previewModel.visualPrompt)}</div>` : ""}
+    <section class="card publishing-card" id="publishingHandoffPanel">
+      <div class="card-head">
+        <div>
+          <div class="setup-kicker">${escapeHtml(summary.packageLabel || "Workflow Handoff")}</div>
+          <h3>${escapeHtml(summary.title)}</h3>
+          <p class="publishing-section-copy">${escapeHtml(summarizeText(summary.summary, summary.isAiCampaign ? "AI Team campaign package is available for draft loading." : "Workflow output is available for draft loading."))}</p>
+        </div>
+        <span class="card-badge ${isLoaded ? "success" : summary.isAiCampaign ? "warning" : "neutral"}">${escapeHtml(isLoaded ? "Loaded" : summary.isAiCampaign ? "From AI Command" : "Available")}</span>
       </div>
-      <div class="publishing-preview-side">
-        ${summaryRows}
-        ${sourceMeta ? `<div class="publishing-preview-note">${escapeHtml(sourceMeta)}</div>` : ""}
-        ${assetItems}
+      <div class="data-stack">
+        <div class="data-row"><span>Source</span><strong>${escapeHtml(summary.sourceType ? titleCase(summary.sourceType) : titleCase(summary.sourcePage))}</strong></div>
+        <div class="data-row"><span>${escapeHtml(summary.isAiCampaign ? "Campaign" : "Workflow")}</span><strong>${escapeHtml(summary.workflowId || "Not specified")}</strong></div>
+        <div class="data-row"><span>Goal</span><strong>${escapeHtml(summary.goal ? titleCase(summary.goal) : "Not specified")}</strong></div>
+        <div class="data-row"><span>Channel</span><strong>${escapeHtml(summary.channel ? titleCase(summary.channel) : "Not specified")}</strong></div>
       </div>
-    </div>
+      ${summary.isAiCampaign ? renderCampaignPackageSummaryRows(summary, escapeHtml) : ""}
+      <div class="publishing-action-row">
+        <button id="publishingLoadHandoffBtn" class="btn btn-secondary" type="button">${escapeHtml(summary.isAiCampaign ? "Load Campaign Package" : "Load Workflow Output")}</button>
+        ${summary.isAiCampaign ? `<button id="publishingClearAiCommandHandoffBtn" class="btn btn-secondary" type="button">Clear AI Command Handoff</button>` : ""}
+      </div>
+    </section>
   `;
 }
 
 function renderCalendar(queue, escapeHtml) {
-  const scheduledItems = queue
-    .filter((item) => item.scheduledFor)
-    .sort((a, b) => (toDate(a.scheduledFor)?.getTime() || 0) - (toDate(b.scheduledFor)?.getTime() || 0));
+  const now = Date.now();
+  const scheduled = queue.filter((item) => item.scheduledFor);
+  const future = scheduled.filter((item) => toDate(item.scheduledFor)?.getTime() > now);
+  const past = scheduled.filter((item) => toDate(item.scheduledFor)?.getTime() <= now);
 
-  if (!scheduledItems.length) {
-    return `<div class="empty-box">The calendar is still empty. Save a schedule to build the upcoming publishing run sheet.</div>`;
+  if (!future.length && !past.length) {
+    return `
+      <section class="card publishing-card">
+        <div class="card-head">
+          <div>
+            <div class="setup-kicker">Calendar / Timeline Snapshot</div>
+            <h3>No scheduled window</h3>
+          </div>
+          <span class="card-badge neutral">Empty</span>
+        </div>
+        <div class="empty-box">Scheduled publishing items will appear here once timing exists in the queue.</div>
+      </section>
+    `;
   }
 
-  const grouped = scheduledItems.reduce((acc, item) => {
-    const key = toIsoDate(item.scheduledFor);
-    if (!acc[key]) acc[key] = [];
-    acc[key].push(item);
-    return acc;
-  }, {});
+  let panels = "";
+  if (future.length) {
+    panels += `
+      <div class="publishing-calendar-list">
+        ${future.slice(0, 8).map((item) => `
+          <button class="publishing-calendar-row" type="button" data-publishing-select="${escapeHtml(item.id)}">
+            <span>${escapeHtml(formatDate(item.scheduledFor))}</span>
+            <strong>${escapeHtml(formatTime(item.scheduledFor))}</strong>
+            <em>${escapeHtml(item.title)}</em>
+            ${renderStatusPill(item.status, escapeHtml)}
+          </button>
+        `).join("")}
+      </div>
+    `;
+  }
+  if (past.length) {
+    panels += `
+      <div class="publishing-calendar-list publishing-block-gap">
+        <div class="simple-banner publishing-block-gap publishing-past-schedule-warning">Past scheduled items — reschedule required</div>
+        ${past.slice(0, 8).map((item) => `
+          <button class="publishing-calendar-row" type="button" data-publishing-select="${escapeHtml(item.id)}">
+            <span>${escapeHtml(formatDate(item.scheduledFor))}</span>
+            <strong>${escapeHtml(formatTime(item.scheduledFor))}</strong>
+            <em>${escapeHtml(item.title)}</em>
+            ${renderStatusPill(item.status, escapeHtml)}
+          </button>
+        `).join("")}
+      </div>
+    `;
+  }
 
   return `
-    <div class="publishing-calendar-grid">
-      ${Object.keys(grouped).sort().map((day) => `
-        <section class="publishing-day-card">
-          <div class="publishing-day-head">
-            <div>
-              <h4>${escapeHtml(formatDayLabel(day))}</h4>
-              <p>${escapeHtml(grouped[day].length === 1 ? "1 scheduled action" : `${grouped[day].length} scheduled actions`)}</p>
-            </div>
-            <span class="card-badge neutral">${escapeHtml(day)}</span>
-          </div>
-          <div class="publishing-day-list">
-            ${grouped[day].map((item) => `
-              <button class="publishing-calendar-item" type="button" data-publishing-select="${escapeHtml(item.id)}">
-                <span class="publishing-calendar-time">${escapeHtml(formatTimeLabel(item.scheduledFor))}</span>
-                <span class="publishing-calendar-label">${escapeHtml(item.title)}</span>
-                ${renderStatusPill(item.status, escapeHtml)}
-              </button>
-            `).join("")}
-          </div>
-        </section>
-      `).join("")}
-    </div>
+    <section class="card publishing-card">
+      <div class="card-head">
+        <div>
+          <div class="setup-kicker">Calendar / Timeline Snapshot</div>
+          <h3>${future.length ? "Upcoming scheduled items" : "Past scheduled items — reschedule required"}</h3>
+        </div>
+        <span class="card-badge neutral">${escapeHtml(String(future.length || past.length))} ${future.length ? "upcoming" : "past"}</span>
+      </div>
+      ${panels}
+    </section>
   `;
 }
 
-function renderChannelStatus(cards, escapeHtml) {
-  if (!cards.length) {
-    return `<div class="empty-box">Channel health will appear here once publishing connectors or queue items are available.</div>`;
+function renderExecutionResult(queue, escapeHtml) {
+  const latest = queue
+    .filter((item) => item.executedAt || item.status === "failed")
+    .sort((a, b) => (toDate(b.executedAt || b.updatedAt)?.getTime() || 0) - (toDate(a.executedAt || a.updatedAt)?.getTime() || 0))[0];
+  const failed = queue.filter((item) => item.status === "failed");
+
+  if (!latest && !failed.length) {
+    return `
+      <section class="card publishing-card">
+        <div class="card-head">
+          <div>
+            <div class="setup-kicker">Execution Result Area</div>
+            <h3>No publish result yet</h3>
+          </div>
+          <span class="card-badge neutral">Empty</span>
+        </div>
+        <div class="empty-box">Last publish result and failed publish blockers will appear here after execution data exists.</div>
+      </section>
+    `;
   }
 
   return `
-    <div class="publishing-channel-grid">
-      ${cards.map((card) => `
-        <section class="publishing-channel-card">
-          <div class="publishing-channel-head">
-            <div>
-              <h4>${escapeHtml(titleCase(card.channel))}</h4>
-              <p>${escapeHtml(card.connected ? "Connected and eligible" : "Needs connector setup")}</p>
-            </div>
-            ${renderStatusPill(card.summaryStatus, escapeHtml)}
-          </div>
-          <div class="data-stack">
-            <div class="data-row"><span>Queue</span><strong>${escapeHtml(String(card.total))}</strong></div>
-            <div class="data-row"><span>Ready / Published</span><strong>${escapeHtml(`${card.counts.ready} / ${card.counts.published}`)}</strong></div>
-            <div class="data-row"><span>Draft / Failed</span><strong>${escapeHtml(`${card.counts.draft} / ${card.counts.failed}`)}</strong></div>
-          </div>
-          <div class="publishing-preview-note">${escapeHtml(card.issues.join(" • "))}</div>
-        </section>
-      `).join("")}
-    </div>
+    <section class="card publishing-card">
+      <div class="card-head">
+        <div>
+          <div class="setup-kicker">Execution Result Area</div>
+          <h3>${escapeHtml(latest ? latest.title : "Failed publish blockers")}</h3>
+        </div>
+        <span class="card-badge ${badgeTone(latest?.status || "failed")}">${escapeHtml(latest ? titleCase(latest.status) : "Failed")}</span>
+      </div>
+      ${latest ? `
+        <div class="data-stack">
+          <div class="data-row"><span>Last result</span><strong>${escapeHtml(titleCase(latest.status))}</strong></div>
+          <div class="data-row"><span>Executed</span><strong>${escapeHtml(formatDateTime(latest.executedAt, "Not executed"))}</strong></div>
+          <div class="data-row"><span>Channel</span><strong>${escapeHtml(titleCase(latest.channel || "unassigned"))}</strong></div>
+        </div>
+      ` : ""}
+      ${failed.length ? `
+        <div class="publishing-blocker-list">
+          ${failed.map((item) => `
+            <div class="simple-banner">${escapeHtml(item.title)}: ${escapeHtml(normalizeNotes(item.notes).join("; ") || "Failed publish needs review.")}</div>
+          `).join("")}
+        </div>
+      ` : ""}
+    </section>
   `;
 }
 
-function renderActionSummary(selectedItem, checks, escapeHtml) {
-  if (!selectedItem) {
-    return `<div class="empty-box">Select a queue item to approve, publish, fail, or reschedule it from here.</div>`;
-  }
-
+function renderAssetGate(state, escapeHtml) {
+  const assetData = getAssetData(state);
+  const assets = filterAssetCategories(assetData, PUBLISHING_ASSET_KEYS);
+  const blockers = assets.filter((item) => ["Missing", "Needs Review"].includes(item.status));
   return `
-    <div class="data-stack">
-      <div class="data-row"><span>Selected item</span><strong>${escapeHtml(selectedItem.title)}</strong></div>
-      <div class="data-row"><span>Channel</span><strong>${escapeHtml(titleCase(selectedItem.channel))}</strong></div>
-      <div class="data-row"><span>Connector</span><strong>${escapeHtml(checks[selectedItem.channel] ? "Ready" : "Missing")}</strong></div>
-      <div class="data-row"><span>Current state</span><strong>${escapeHtml(titleCase(selectedItem.status))}</strong></div>
-      <div class="data-row"><span>Next slot</span><strong>${escapeHtml(selectedItem.scheduledFor ? formatDateTime(selectedItem.scheduledFor) : "Not scheduled")}</strong></div>
-    </div>
+    <section class="card publishing-card">
+      <div class="card-head">
+        <div>
+          <div class="setup-kicker">Channel & Approval Readiness</div>
+          <h3>Publishing blockers</h3>
+        </div>
+        <span class="card-badge ${blockers.length ? "danger" : "success"}">${escapeHtml(blockers.length ? `${blockers.length} blockers` : "Ready")}</span>
+      </div>
+      ${renderAssetDependencyRows(assetData, PUBLISHING_ASSET_KEYS, escapeHtml, "Publishing library inputs are covered.")}
+      <div class="simple-banner publishing-block-gap">${escapeHtml(getAssetNextAction(assetData, PUBLISHING_ASSET_KEYS))}</div>
+    </section>
   `;
 }
 
@@ -718,72 +1556,44 @@ function bindPublishingWorkspace({
   failPublishingItem,
   render,
   queue,
-  channels
+  handoff
 }) {
+
   const state = getState();
   const projectName = state.context.currentProject || "";
-  const session = ensureSession(projectName, state, channels);
-  const selectedItem = getSelectedItem(queue, session.selectedId);
+  const session = ensureSession(projectName, state);
 
-  Array.from(document.querySelectorAll("[data-publishing-filter]")).forEach((button) => {
-    button.onclick = () => {
-      session.filter = button.getAttribute("data-publishing-filter") || "all";
-      render();
-    };
-  });
+  ensurePublishingAutoModeBinding(getState, navigateTo, render);
 
-  Array.from(document.querySelectorAll("[data-publishing-select]")).forEach((button) => {
-    button.onclick = () => {
-      session.selectedId = button.getAttribute("data-publishing-select") || "";
-      syncFormFromItem(session, getSelectedItem(queue, session.selectedId));
-      render();
-    };
-  });
-
-  const form = $("publishingScheduleForm");
-  if (form) {
-    form.oninput = (event) => {
-      const target = event.target;
-      if (!target?.name) return;
-      session.form[target.name] = target.value || "";
-    };
+  function rerender() {
+    schedulePublishingRender(render);
   }
 
-  const newItemBtn = $("publishingNewItemBtn");
-  if (newItemBtn) {
-    newItemBtn.onclick = () => {
-      resetForm(session, state, channels);
-      render();
-      showMessage?.("New publishing draft opened in the schedule controls.");
-    };
+
+  function selected() {
+    return getSelectedItem(queue, session.selectedId);
   }
 
-  const saveDraftBtn = $("publishingSaveDraftBtn");
-  if (saveDraftBtn) {
-    saveDraftBtn.onclick = async () => {
-      if (!asString(session.form.title).trim()) {
-        showError?.("Add a publishing title before saving the draft.");
-        return;
-      }
+  function saveDraftLocally(message = "Publishing draft saved locally.") {
+    const local = saveLocalDraft(projectName, buildLocalDraftPayload(session, "draft"));
+    session.selectedId = local.id;
+    session.formSourceId = local.id;
+    session.isCreatingNew = false;
+    session.draftMessage = message;
+    showMessage?.(message);
+    return local;
+  }
 
+  async function persistDraft() {
+    const local = saveDraftLocally("Publishing draft saved locally.");
+    if (typeof savePublishingSchedule === "function") {
       const response = await runAndRefresh(
-        () => savePublishingSchedule(projectName, {
-          title: session.form.title,
-          wave_name: session.form.waveName,
-          channel: session.form.channel,
-          scheduled_for: session.form.scheduledDate
-            ? `${session.form.scheduledDate}T${session.form.scheduledTime || "09:00"}:00Z`
-            : "",
-          status: "draft",
-          mode: session.form.mode,
-          offer: session.form.offer,
-          notes: session.form.notes
-        }),
+        () => savePublishingSchedule(projectName, buildSchedulePayload(session, "draft")),
         {
           projectName,
           reloadProjectData,
           showMessage,
-          showError,
+          showError: () => {},
           successMessage: "Publishing draft saved."
         }
       );
@@ -791,40 +1601,105 @@ function bindPublishingWorkspace({
       if (response?.job?.job_id) {
         session.selectedId = response.job.job_id;
         session.formSourceId = response.job.job_id;
-        session.isCreatingNew = false;
+      }
+    }
+    return local;
+  }
+
+  Array.from(document.querySelectorAll("[data-publishing-filter]")).forEach((button) => {
+    button.onclick = () => {
+      session.filter = button.getAttribute("data-publishing-filter") || "all";
+      rerender();
+    };
+  });
+
+  Array.from(document.querySelectorAll("[data-publishing-select]")).forEach((button) => {
+    button.onclick = () => {
+      const itemId = button.getAttribute("data-publishing-select") || "";
+      session.selectedId = itemId;
+      syncFormFromItem(session, getSelectedItem(queue, itemId));
+      rerender();
+    };
+  });
+
+  const form = $("publishingBuilderForm");
+  if (form) {
+    form.oninput = () => {
+      syncSessionForm(session, form);
+      if (Object.keys(session.validation).length) {
+        session.validation = {};
+        rerender();
       }
     };
   }
 
+  const newBtn = $("publishingNewItemBtn");
+  if (newBtn) {
+    newBtn.onclick = () => {
+      resetForm(session, state);
+      showMessage?.("New publishing draft opened.");
+      rerender();
+    };
+  }
+
+  const openQueueBtn = $("publishingOpenQueueBtn");
+  if (openQueueBtn) {
+    openQueueBtn.onclick = () => {
+      document.getElementById("publishingQueuePanel")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    };
+  }
+
+  const saveDraftButtons = [$("publishingSaveDraftBtn"), $("publishingBuilderSaveBtn")].filter(Boolean);
+  saveDraftButtons.forEach((button) => {
+    button.onclick = async () => {
+      syncSessionForm(session, form);
+      if (!validateBuilder(session, "draft")) {
+        rerender();
+        return;
+      }
+      await persistDraft();
+      rerender();
+    };
+  });
+
   const scheduleBtn = $("publishingScheduleBtn");
   if (scheduleBtn) {
     scheduleBtn.onclick = async () => {
-      if (!asString(session.form.title).trim()) {
-        showError?.("Add a publishing title before saving the schedule.");
-        return;
-      }
-      if (!asString(session.form.channel).trim()) {
-        showError?.("Choose a channel before saving the schedule.");
-        return;
-      }
-      if (!asString(session.form.scheduledDate).trim()) {
-        showError?.("Choose a schedule date before saving.");
+      syncSessionForm(session, form);
+      if (!validateBuilder(session, "schedule")) {
+        rerender();
         return;
       }
 
-      const payload = {
-        title: session.form.title,
-        wave_name: session.form.waveName,
-        channel: session.form.channel,
-        scheduled_for: `${session.form.scheduledDate}T${session.form.scheduledTime || "09:00"}:00Z`,
-        status: "scheduled",
-        mode: session.form.mode,
-        offer: session.form.offer,
-        notes: session.form.notes
-      };
+      const current = selected();
+      const payload = buildSchedulePayload(session, "scheduled");
+      if (!current?.localOnly && guardPublishingAssetBlockers(session, assetBlockers, showMessage, "scheduling or rescheduling")) {
+        rerender();
+        return;
+      }
+      if (current?.localOnly) {
+        updateLocalDraft(projectName, current.id, {
+          ...buildLocalDraftPayload(session, "scheduled"),
+          id: current.id
+        });
+        session.draftMessage = "Local publishing draft scheduled in this browser.";
+        showMessage?.(session.draftMessage);
+        rerender();
+        return;
+      }
 
-      const action = selectedItem
-        ? () => reschedulePublishingItem(projectName, selectedItem.jobId, payload)
+      const confirmed = confirmPublishingBackendAction(
+        current
+          ? "Confirm reschedule\n\nAction: Reschedule this publishing item.\n\nThis updates a backend publishing schedule and remains governed by approval rules.\n\nSelect Cancel to keep the current schedule."
+          : "Confirm schedule\n\nAction: Queue this publishing item for manual publishing.\n\nThis creates a backend publishing schedule and remains governed by approval rules.\n\nSelect Cancel to keep this as a draft."
+      );
+      if (!confirmed) {
+        rerender();
+        return;
+      }
+
+      const action = current
+        ? () => reschedulePublishingItem(projectName, current.jobId, payload)
         : () => savePublishingSchedule(projectName, payload);
 
       const response = await runAndRefresh(action, {
@@ -832,98 +1707,337 @@ function bindPublishingWorkspace({
         reloadProjectData,
         showMessage,
         showError,
-        successMessage: selectedItem ? "Publishing item rescheduled." : "Publishing schedule saved."
+        successMessage: current ? "Publishing item scheduled." : "Publishing schedule saved."
       });
 
       if (response?.job?.job_id) {
         session.selectedId = response.job.job_id;
         session.formSourceId = response.job.job_id;
-        session.isCreatingNew = false;
+      } else if (!current) {
+        saveDraftLocally("Backend schedule unavailable; draft kept locally.");
       }
+      rerender();
     };
   }
+
+  Array.from(document.querySelectorAll("[data-publishing-action]")).forEach((button) => {
+    button.onclick = async () => {
+      const itemId = button.getAttribute("data-publishing-id") || "";
+      const action = button.getAttribute("data-publishing-action") || "";
+      const item = getSelectedItem(queue, itemId);
+      if (!item) return;
+
+      session.selectedId = item.id;
+      syncFormFromItem(session, item);
+
+      if (action === "review") {
+        rerender();
+        return;
+      }
+
+      if (action === "schedule") {
+        document.getElementById("publishingBuilderPanel")?.scrollIntoView({ behavior: "smooth", block: "start" });
+        rerender();
+        return;
+      }
+
+      const intent = action === "publish" ? "publish" : action === "retry" ? "retry" : "draft";
+      if (!validateBuilder(session, intent)) {
+        rerender();
+        return;
+      }
+
+      if (item.localOnly) {
+        const nextStatus = action === "pause" ? "draft" : action === "retry" ? "scheduled" : action === "publish" ? "published" : item.status;
+        updateLocalDraft(projectName, item.id, { ...buildLocalDraftPayload(session, nextStatus), id: item.id });
+        session.draftMessage = `Local draft ${action === "publish" ? "marked as manual completion recorded" : action === "pause" ? "paused" : "updated"}.`;
+        showMessage?.(session.draftMessage);
+        rerender();
+        return;
+      }
+
+      if (action === "publish") {
+        if (guardPublishingAssetBlockers(session, assetBlockers, showMessage, "publishing")) {
+          rerender();
+          return;
+        }
+
+        const confirmed = window.confirm(
+          "Final Confirmation Required\n\nAction: Record manual publish completion for this backend job.\n\nThis is a high-risk status update. Confirm that external provider publishing was completed or verified outside this page before recording completion.\n\nThis does not prove live external publishing by itself. Backend approval rules still apply.\n\nSelect Cancel to keep this item in the queue."
+        );
+        if (!confirmed) {
+          rerender();
+          return;
+        }
+        await runAndRefresh(
+          () => publishPublishingItem(projectName, item.jobId, { notes: session.form.notes || item.notes }),
+          { projectName, reloadProjectData, showMessage, showError, successMessage: "Manual publishing completion recorded." }
+        );
+      }
+      if (action === "pause") {
+        const confirmed = confirmPublishingBackendAction(
+          "Confirm pause\n\nAction: Move this backend publishing item back to draft.\n\nThis updates the backend publishing lifecycle state.\n\nSelect Cancel to keep the item unchanged."
+        );
+        if (!confirmed) {
+          rerender();
+          return;
+        }
+
+        await runAndRefresh(
+          () => reschedulePublishingItem(projectName, item.jobId, buildSchedulePayload(session, "draft")),
+          { projectName, reloadProjectData, showMessage, showError, successMessage: "Publishing item paused as a draft.\n\nConfirmation required before execution. Backend approval rules apply." }
+        );
+      }
+      if (action === "retry") {
+        if (guardPublishingAssetBlockers(session, assetBlockers, showMessage, "retrying or rescheduling")) {
+          rerender();
+          return;
+        }
+
+        const confirmed = confirmPublishingBackendAction(
+          "Confirm retry\n\nAction: Retry this backend publishing item in the scheduled queue.\n\nThis updates the backend publishing schedule/lifecycle state and remains governed by approval rules.\n\nSelect Cancel to keep the item unchanged."
+        );
+        if (!confirmed) {
+          rerender();
+          return;
+        }
+
+        await runAndRefresh(
+          () => reschedulePublishingItem(projectName, item.jobId, buildSchedulePayload(session, "scheduled")),
+          { projectName, reloadProjectData, showMessage, showError, successMessage: "Publishing item retried in the scheduled queue.\n\nConfirmation required before execution. Backend approval rules apply." }
+        );
+      }
+      rerender();
+    };
+  });
 
   const approveBtn = $("publishingApproveBtn");
   if (approveBtn) {
     approveBtn.onclick = async () => {
-      if (!selectedItem) {
-        showError?.("Select a publishing item before approving it.");
+      const current = selected();
+      if (!current) {
+        session.validation.contentItem = "Select or save a publishing draft before approval.";
+        rerender();
+        return;
+      }
+      session.form.approvalStatus = "approved";
+      if (current.localOnly) {
+        updateLocalDraft(projectName, current.id, { ...buildLocalDraftPayload(session, "ready"), id: current.id, approvalStatus: "approved" });
+        showMessage?.("Local publishing draft approved.");
+        rerender();
         return;
       }
 
-      await runAndRefresh(
-        () => approvePublishingItem(projectName, selectedItem.jobId, {
-          notes: session.form.notes || selectedItem.notes
-        }),
-        {
-          projectName,
-          reloadProjectData,
-          showMessage,
-          showError,
-          successMessage: "Publishing item approved and marked ready."
-        }
+      const confirmed = confirmPublishingBackendAction(
+        "Confirm publishing readiness\n\nAction: Mark this backend publishing item ready for manual publishing review.\n\nThis does not replace Governance approval or external provider readiness proof.\n\nSelect Cancel to keep the item unchanged."
       );
-    };
-  }
-
-  const publishBtn = $("publishingPublishNowBtn");
-  if (publishBtn) {
-    publishBtn.onclick = async () => {
-      if (!selectedItem) {
-        showError?.("Select a publishing item before marking it published.");
+      if (!confirmed) {
+        rerender();
         return;
       }
-
+      
       await runAndRefresh(
-        () => publishPublishingItem(projectName, selectedItem.jobId, {
-          notes: session.form.notes || selectedItem.notes
-        }),
-        {
-          projectName,
-          reloadProjectData,
-          showMessage,
-          showError,
-          successMessage: "Publishing item marked as published."
-        }
+        () => approvePublishingItem(projectName, current.jobId, { notes: session.form.notes || current.notes }),
+        { projectName, reloadProjectData, showMessage, showError, successMessage: "Publishing item marked ready for manual review." }
       );
+      rerender();
     };
   }
 
   const failBtn = $("publishingFailBtn");
   if (failBtn) {
     failBtn.onclick = async () => {
-      if (!selectedItem) {
-        showError?.("Select a publishing item before marking it failed.");
+      const current = selected();
+      if (!current) {
+        session.validation.contentItem = "Select a publishing item before marking it failed.";
+        rerender();
+        return;
+      }
+      if (current.localOnly) {
+        updateLocalDraft(projectName, current.id, { ...buildLocalDraftPayload(session, "failed"), id: current.id });
+        showMessage?.("Local publishing draft marked failed.");
+        rerender();
+        return;
+      }
+
+      const confirmed = window.confirm("Confirm fail action\n\nAction: Mark this publishing item as failed.\nRisk: This creates a permanent failure record and stops the publishing lifecycle for this item.\nPolicy: Use only when this item cannot proceed and requires explicit failure logging.\n\nSelect Cancel to keep this item in its current state.");
+      if (!confirmed) {
+        rerender();
         return;
       }
 
       await runAndRefresh(
-        () => failPublishingItem(projectName, selectedItem.jobId, {
-          notes: session.form.notes || selectedItem.notes
-        }),
-        {
-          projectName,
-          reloadProjectData,
-          showMessage,
-          showError,
-          successMessage: "Publishing item marked as failed."
-        }
+        () => failPublishingItem(projectName, current.jobId, { notes: session.form.notes || current.notes }),
+        { projectName, reloadProjectData, showMessage, showError, successMessage: "Publishing item marked as failed." }
       );
+      rerender();
     };
   }
 
-  const manageChannelsBtn = $("publishingManageChannelsBtn");
-  if (manageChannelsBtn) {
-    manageChannelsBtn.onclick = () => navigateTo("integrations");
+  const clearAiCommandHandoffBtn = $("publishingClearAiCommandHandoffBtn");
+  if (clearAiCommandHandoffBtn) {
+    clearAiCommandHandoffBtn.onclick = () => {
+      clearAiCommandLocalCampaignHandoff("publishing");
+      session.loadedHandoffId = "";
+      session.draftMessage = "AI Command campaign handoff cleared locally.";
+      saveDraftLocally("AI Command campaign handoff cleared locally.");
+      publishingRoute.render(context);
+    };
+  }
+
+  const loadHandoffBtn = $("publishingLoadHandoffBtn");
+  if (loadHandoffBtn) {
+    loadHandoffBtn.onclick = () => {
+      const summary = extractHandoffSummary(handoff);
+      session.form = {
+        ...session.form,
+        project: firstText(summary.project, session.form.project, projectName),
+        campaign: firstText(summary.campaign, session.form.campaign),
+        channel: toKey(firstText(summary.channel, session.form.channel)),
+        contentItem: firstText(summary.contentItem, summary.summary, session.form.contentItem),
+        title: firstText(summary.title, session.form.title),
+        notes: firstText(summary.summary, session.form.notes)
+      };
+      session.loadedHandoffId = summary.id;
+      session.isCreatingNew = true;
+      session.selectedId = "";
+      session.formSourceId = "";
+      session.validation = {};
+      saveDraftLocally("Workflow output loaded into a local publishing draft.");
+      rerender();
+    };
+  }
+
+  const pushAiBtn = $("publishingPushAiBtn");
+  if (pushAiBtn) {
+    pushAiBtn.onclick = () => {
+      syncSessionForm(session, form);
+      const current = selected();
+      const prompt = buildPublishingAiPrompt(projectName, current, session, handoff);
+      const aiDraft = {
+        projectName,
+        modeId: "operations",
+        lastCommand: prompt,
+        lastResponseTitle: current?.title || session.form.title || "Publishing Execution Review",
+        routeSuggestions: []
+      };
+
+      setSharedAiDraft(projectName, aiDraft);
+      setSharedHandoff(projectName, "ai-command", {
+        source_page: "publishing",
+        destination_page: "ai-command",
+        linked_entity: {
+          entity_type: "publishing_job",
+          entity_id: current?.jobId || session.formSourceId || ""
+        },
+        payload: {
+          prompt,
+          publishing_item_id: current?.jobId || session.formSourceId || "",
+          publishing_title: current?.title || session.form.title || "",
+          draft_context: aiDraft,
+          selection: {
+            status: current?.status || "draft",
+            channel: session.form.channel || current?.channel || "",
+            scheduled_for: buildScheduleTime(session.form) || current?.scheduledFor || "",
+            notes: session.form.notes
+          }
+        },
+        status: "available"
+      });
+      navigateTo("ai-command");
+      showMessage?.("Publishing context sent to AI Command.");
+    };
+  }
+
+  const autoPrepareBtn = $("publishingAutoPrepareBtn");
+  if (autoPrepareBtn) {
+    autoPrepareBtn.onclick = async () => {
+      const plan = buildPublishingAutoModePlan(session);
+      if (!plan.length) {
+        publishingAutomationState.progress = "";
+        publishingAutomationState.result = "No safe publishing preparation steps available.";
+        rerender();
+        return;
+      }
+
+      publishingAutomationState.result = "";
+      publishingAutomationState.progress = `Step 0 / ${plan.length}`;
+      publishingAutomationEnabled = true;
+      ensurePublishingAutoModeBinding(getState, navigateTo, render);
+      rerender();
+      const confirmed = window.confirm(
+        "Confirm Publishing Auto Mode start\n\n" +
+          "Action: Start guided publishing Auto Mode for the current publishing package.\n" +
+          "Risk: This may prepare publishing drafts and handoffs, but must not publish externally or approve Governance decisions without explicit approval.\n\n" +
+          "Select Cancel to stop."
+      );
+      if (!confirmed) return;
+
+      const runResult = await startAutoMode(plan, {
+        mode: "auto_until_approval",
+        context: { getState, navigateTo, projectName },
+        onProgress: ({ index, total, step, result }) => {
+        publishingAutomationState.progress = `Step ${index} / ${total}: ${step.action} (${result.status})`;
+        schedulePublishingRender(render);
+        }
+      });
+
+      publishingAutomationState.result = runResult.status === "success"
+        ? "Auto Prepare Publishing completed."
+        : "Auto Prepare Publishing stopped before completion.";
+      showMessage?.(publishingAutomationState.result);
+      rerender();
+    };
+  }
+
+  const autoStopBtn = $("publishingAutoStopBtn");
+  if (autoStopBtn) {
+    autoStopBtn.onclick = () => {
+      stopAutoMode();
+      showMessage?.("Auto Mode stopped.");
+    };
+  }
+
+  const autoApproveBtn = $("publishingAutoApproveBtn");
+  if (autoApproveBtn) {
+    autoApproveBtn.onclick = async () => {
+      const confirmed = window.confirm(
+        "Confirm publishing gate approval\n\n" +
+          "Action: Approve the current publishing automation gate.\n" +
+          "Risk: This advances the guided publishing state, but does not replace Governance approval for protected actions.\n\n" +
+          "Select Cancel to keep the gate pending."
+      );
+      if (!confirmed) return;
+
+      await approveCurrentGate({ context: { getState, navigateTo, projectName } });
+      showMessage?.("Approval gate accepted.");
+    };
+  }
+
+  const autoSkipBtn = $("publishingAutoSkipBtn");
+  if (autoSkipBtn) {
+    autoSkipBtn.onclick = async () => {
+      const confirmed = window.confirm(
+        "Confirm publishing step skip\n\n" +
+          "Action: Skip the current guided publishing step.\n" +
+          "Risk: Skipping may leave a publishing preparation step incomplete and should be used only when intentionally bypassing it.\n\n" +
+          "Select Cancel to keep the current step active."
+      );
+      if (!confirmed) return;
+
+      await skipCurrentStep({ context: { getState, navigateTo, projectName } });
+      showMessage?.("Gated step skipped.");
+    };
   }
 }
 
 export const publishingRoute = {
   id: "publishing",
+  disableStandardLayout: true,
   meta: {
     eyebrow: "Execute & Grow",
     title: "Publishing",
-    description: "Review, approve, schedule, and control publishing with clear previews and real backend actions."
+    description: "Review, prepare, queue, and record manual publishing status with clear previews and backend-controlled actions."
   },
   template: `
     <section class="page is-active" data-page="publishing">
@@ -947,256 +2061,70 @@ export const publishingRoute = {
   }) {
     const state = getState();
     const projectName = state.context.currentProject || "";
-    const overview = asObject(state.data.overview?.overview);
-    const queue = buildQueue(state);
-    const channels = buildAvailableChannels(state, queue);
-    const session = ensureSession(projectName, state, channels);
-
-    if (!session.selectedId && queue.length) {
-      session.selectedId = queue[0].id;
-      if (!session.formSourceId && !session.isCreatingNew) {
-        syncFormFromItem(session, queue[0]);
-      }
-    }
-
-    const selectedItem = getSelectedItem(queue, session.selectedId);
-    if (selectedItem && session.formSourceId !== selectedItem.id && !session.isCreatingNew) {
-      syncFormFromItem(session, selectedItem);
-    }
-
+    const operations = asObject(state.data.operations);
+    const queue = buildQueue(state, projectName);
+    const session = ensureSession(projectName, state);
     const checks = asObject(state.data.integrations?.readiness?.checks);
-    const visibleQueue = getVisibleQueue(queue, session.filter);
-    const statusCounts = getStatusCounts(queue);
-    const previewModel = buildPreviewModel(state, session, selectedItem);
-    const channelCards = buildChannelCards(state, queue);
+    const channels = buildChannels(state, queue);
+    const handoff = getPublishingHandoff(projectName, operations);
+    const globalBlockers = getReadinessBlockers(state);
     const root = $("publishingRoot");
 
     if (!root) return;
 
+    if (!session.selectedId && queue.length && !session.isCreatingNew) {
+      session.selectedId = queue[0].id;
+      syncFormFromItem(session, queue[0]);
+    }
+
+    const selectedItem = getSelectedItem(queue, session.selectedId);
+    if (selectedItem && selectedItem.id !== session.formSourceId && !session.isCreatingNew) {
+      syncFormFromItem(session, selectedItem);
+    }
+
+
+    const visibleQueue = getVisibleQueue(queue, session.filter);
+    const counts = getStatusCounts(queue);
+    const publishingAssets = filterAssetCategories(getAssetData(state), PUBLISHING_ASSET_KEYS);
+    const assetBlockers = publishingAssets.filter((item) => ["Missing", "Needs Review"].includes(item.status));
+    const recommendation = buildRecommendation({ queue, counts, assetBlockers, checks, handoff, globalBlockers });
+
+
     root.innerHTML = `
-      <div class="publishing-wrapper">
-        <div class="publishing-hero">
-          <div class="publishing-hero-copy">
-            <div class="setup-kicker">Publishing Command Center</div>
-            <h3 class="setup-hero-title">${escapeHtml(projectName ? `${projectName} Publishing` : "Publishing")}</h3>
-            <p class="setup-hero-text">
-              Review the queue, preview the channel payload, approve confidently, and control schedule changes without losing operational clarity.
-            </p>
-            <div class="publishing-status">
-              <div class="setup-status-chip">
-                <span>Ready now</span>
-                <strong>${escapeHtml(String(statusCounts.ready))}</strong>
-              </div>
-              <div class="setup-status-chip">
-                <span>Scheduled</span>
-                <strong>${escapeHtml(String(statusCounts.scheduled))}</strong>
-              </div>
-              <div class="setup-status-chip">
-                <span>Published</span>
-                <strong>${escapeHtml(String(statusCounts.published))}</strong>
-              </div>
-              <div class="setup-status-chip">
-                <span>Failed</span>
-                <strong>${escapeHtml(String(statusCounts.failed))}</strong>
-              </div>
-            </div>
-          </div>
+      ${renderScopedStyles()}
+      ${renderPublishingCommandHeader({ projectName, recommendation, selectedItem, summary: null, queue, blockers: assetBlockers, escapeHtml })}
+      ${renderPublishingWorkflowStrip({ selectedItem, recommendation, blockers: assetBlockers, approvalState: selectedItem?.approvalStatus, escapeHtml })}
+      ${renderPublishingReadinessSummary({ selectedItem, recommendation, blockers: assetBlockers, assetData: publishingAssets, escapeHtml })}
+      <div class="publishing-execution-center">
+        ${renderOverview(counts, queue, escapeHtml)}
+        ${renderRecommendation(recommendation, counts, assetBlockers, checks, escapeHtml)}
 
-          <div class="setup-hero-actions">
-            <button id="publishingManageChannelsBtn" class="btn btn-secondary" type="button">Manage Channels</button>
-            <button id="publishingNewItemBtn" class="btn btn-primary" type="button">New Publishing Item</button>
-          </div>
-        </div>
-
-        <div class="publishing-command-grid">
-          <section class="card">
-            <div class="card-head">
-              <h3>Publish Queue</h3>
-              <span class="card-badge neutral">${escapeHtml(`${visibleQueue.length} visible`)}</span>
-            </div>
-            ${renderFilterRow(session.filter, queue, escapeHtml)}
-            ${renderQueueList(visibleQueue, session.selectedId, escapeHtml)}
-          </section>
-
-          <section class="card">
-            <div class="card-head">
-              <h3>Approval Preview</h3>
-              <span class="card-badge ${getStatusBadgeClass(selectedItem?.status || "draft")}">${escapeHtml(selectedItem ? titleCase(selectedItem.status) : "Draft view")}</span>
-            </div>
-            ${renderPreview(previewModel, selectedItem, escapeHtml)}
-          </section>
-
-          <div class="publishing-side-stack">
-            <section class="card">
+        <div class="publishing-execution-grid">
+          <div class="publishing-main-column">
+            ${renderQueue(queue, visibleQueue, session.selectedId, session.filter, escapeHtml)}
+            ${renderBuilder(session, channels, checks, escapeHtml)}
+            <section class="card publishing-card">
               <div class="card-head">
-                <h3>Schedule Controls</h3>
-                <span class="card-badge neutral">${escapeHtml(selectedItem ? "Editing selected" : "New schedule")}</span>
+                <div>
+                  <div class="setup-kicker">Manual Execution Controls</div>
+                  <h3>${escapeHtml(safeText(selectedItem?.title, "Selected publishing item"))}</h3>
+                </div>
+                <span class="card-badge ${badgeTone(selectedItem?.status || "draft")}">${escapeHtml(selectedItem ? titleCase(selectedItem.status) : "Draft")}</span>
               </div>
-              <form id="publishingScheduleForm" class="setup-form-grid">
-                <div class="setup-field-group">
-                  <div class="setup-field-head">
-                    <label class="setup-label" for="publishingTitleInput">Publishing title</label>
-                    <span class="setup-field-state is-optional">Required</span>
-                  </div>
-                  <input id="publishingTitleInput" name="title" class="setup-input" type="text" value="${escapeHtml(session.form.title)}" placeholder="Wave 1 hero post">
-                  <div class="setup-helper">Use the operating title the queue, preview, and team should all recognize instantly.</div>
-                </div>
-
-                <div class="setup-form-grid setup-form-grid-2">
-                  <div class="setup-field-group">
-                    <div class="setup-field-head">
-                      <label class="setup-label" for="publishingWaveInput">Campaign / wave</label>
-                      <span class="setup-field-state is-optional">Optional</span>
-                    </div>
-                    <input id="publishingWaveInput" name="waveName" class="setup-input" type="text" value="${escapeHtml(session.form.waveName)}" placeholder="wave1_beard">
-                    <div class="setup-helper">If this matches a launch wave, the preview can inherit the existing channel payload automatically.</div>
-                  </div>
-
-                  <div class="setup-field-group">
-                    <div class="setup-field-head">
-                      <label class="setup-label" for="publishingChannelInput">Channel</label>
-                      <span class="setup-field-state is-optional">${escapeHtml(checks[toChannelKey(session.form.channel)] ? "Connected" : "Planning")}</span>
-                    </div>
-                    <select id="publishingChannelInput" name="channel" class="setup-input">
-                      ${channels.map((channel) => `
-                        <option value="${escapeHtml(channel)}"${channel === session.form.channel ? " selected" : ""}>${escapeHtml(titleCase(channel))}</option>
-                      `).join("")}
-                    </select>
-                    <div class="setup-helper">Choose the exact delivery channel. Missing connectors can still be planned, but approval will surface the gap clearly.</div>
-                  </div>
-                </div>
-
-                <div class="setup-form-grid setup-form-grid-2">
-                  <div class="setup-field-group">
-                    <div class="setup-field-head">
-                      <label class="setup-label" for="publishingDateInput">Publish date</label>
-                      <span class="setup-field-state is-optional">Calendar</span>
-                    </div>
-                    <input id="publishingDateInput" name="scheduledDate" class="setup-input" type="date" value="${escapeHtml(session.form.scheduledDate)}">
-                    <div class="setup-helper">This drives the scheduling calendar and operational run sheet.</div>
-                  </div>
-
-                  <div class="setup-field-group">
-                    <div class="setup-field-head">
-                      <label class="setup-label" for="publishingTimeInput">Publish time</label>
-                      <span class="setup-field-state is-optional">Slot</span>
-                    </div>
-                    <input id="publishingTimeInput" name="scheduledTime" class="setup-input" type="time" value="${escapeHtml(session.form.scheduledTime)}">
-                    <div class="setup-helper">Use the intended release time so the team can monitor the queue accurately.</div>
-                  </div>
-                </div>
-
-                <div class="setup-form-grid setup-form-grid-2">
-                  <div class="setup-field-group">
-                    <div class="setup-field-head">
-                      <label class="setup-label" for="publishingModeInput">Mode</label>
-                      <span class="setup-field-state is-optional">Execution</span>
-                    </div>
-                    <select id="publishingModeInput" name="mode" class="setup-input">
-                      ${["manual", "semi_auto", "full_auto"].map((mode) => `
-                        <option value="${escapeHtml(mode)}"${mode === session.form.mode ? " selected" : ""}>${escapeHtml(titleCase(mode))}</option>
-                      `).join("")}
-                    </select>
-                    <div class="setup-helper">Keep manual for human-controlled publishing, or use automation-ready modes as the backend grows.</div>
-                  </div>
-
-                  <div class="setup-field-group">
-                    <div class="setup-field-head">
-                      <label class="setup-label" for="publishingOfferInput">Offer / angle</label>
-                      <span class="setup-field-state is-optional">Commercial focus</span>
-                    </div>
-                    <input id="publishingOfferInput" name="offer" class="setup-input" type="text" value="${escapeHtml(session.form.offer)}" placeholder="Premium beard routine with stronger results">
-                    <div class="setup-helper">Keep the commercial promise visible so scheduling stays aligned with the campaign objective.</div>
-                  </div>
-                </div>
-
-                <div class="setup-field-group">
-                  <div class="setup-field-head">
-                    <label class="setup-label" for="publishingNotesInput">Operator notes</label>
-                    <span class="setup-field-state is-optional">Approval context</span>
-                  </div>
-                  <textarea id="publishingNotesInput" name="notes" class="setup-input setup-textarea" rows="4" placeholder="CTA, review notes, manual publish steps, asset references, or risk notes">${escapeHtml(session.form.notes)}</textarea>
-                  <div class="setup-helper">Use short notes that help an operator understand what matters before approval or publish.</div>
-                </div>
-              </form>
-
-              <div class="publishing-form-actions">
-                <button id="publishingSaveDraftBtn" class="btn btn-secondary" type="button">Save Draft</button>
-                <button id="publishingScheduleBtn" class="btn btn-primary" type="button">${escapeHtml(selectedItem ? "Reschedule Item" : "Save Schedule")}</button>
-              </div>
-            </section>
-
-            <section class="card">
-              <div class="card-head">
-                <h3>Manual Override Actions</h3>
-                <span class="card-badge ${getStatusBadgeClass(selectedItem?.status || "draft")}">${escapeHtml(selectedItem ? titleCase(selectedItem.status) : "Awaiting selection")}</span>
-              </div>
-              ${renderActionSummary(selectedItem, checks, escapeHtml)}
-              <div class="publishing-manual-actions">
-                <button id="publishingApproveBtn" class="quick-action-btn" type="button">
-                  <span class="home-action-title">Approve for publish</span>
-                  <span class="home-action-meta">Move the item into a ready state after preview and review.</span>
-                </button>
-                <button id="publishingPublishNowBtn" class="quick-action-btn" type="button">
-                  <span class="home-action-title">Publish now</span>
-                  <span class="home-action-meta">Record the publish outcome immediately and mark it complete.</span>
-                </button>
-                <button id="publishingFailBtn" class="quick-action-btn" type="button">
-                  <span class="home-action-title">Mark failed</span>
-                  <span class="home-action-meta">Flag the item for intervention if delivery failed or needs recovery.</span>
-                </button>
+              <div class="publishing-action-row">
+                <button id="publishingApproveBtn" class="btn btn-secondary" type="button" title="Prepare publishing readiness review. Confirmation required. Backend approval rules apply.">Mark ready for manual review</button>
+                <button id="publishingFailBtn" class="btn btn-secondary" type="button" title="Request Approval Review or mark as failed. Confirmation required before execution.">Mark publishing item as failed</button>
               </div>
             </section>
           </div>
-        </div>
 
-        <div class="publishing-secondary-grid">
-          <section class="card">
-            <div class="card-head">
-              <h3>Team Ownership</h3>
-              <span class="card-badge neutral">${escapeHtml(titleCase(PUBLISHING_ROLE_DEFAULTS.ownerRole))}</span>
-            </div>
-            ${renderTeamOwnership(state, queue, selectedItem, escapeHtml)}
-          </section>
-
-          ${renderDurableSystemSummary(state.data.operations, escapeHtml, {
-            title: "Durable Publishing Links",
-            kicker: selectedItem ? "Selected Job" : "Shared Backbone",
-            entityType: selectedItem ? "publishing_job" : "",
-            entityId: selectedItem?.jobId || "",
-            emptyText: "Publishing tasks, approvals, jobs, and handoffs will appear here once the shared operations model is loaded."
-          })}
-
-          <section class="card">
-            <div class="card-head">
-              <h3>Publishing Calendar</h3>
-              <span class="card-badge neutral">${escapeHtml(queue.filter((item) => item.scheduledFor).length ? `${queue.filter((item) => item.scheduledFor).length} scheduled` : "No scheduled slots")}</span>
-            </div>
+          <aside class="publishing-side-column">
+            ${renderWorkflowHandoff(handoff, session, escapeHtml)}
             ${renderCalendar(queue, escapeHtml)}
-          </section>
-
-          <section class="card">
-            <div class="card-head">
-              <h3>Channel Status</h3>
-              <span class="card-badge neutral">${escapeHtml(`${channelCards.filter((card) => card.connected).length} connected`)}</span>
-            </div>
-            ${renderChannelStatus(channelCards, escapeHtml)}
-          </section>
+            ${renderExecutionResult(queue, escapeHtml)}
+            ${renderAssetGate(state, escapeHtml)}
+          </aside>
         </div>
-
-        <section class="card">
-          <div class="card-head">
-            <h3>Publishing Snapshot</h3>
-            <span class="card-badge neutral">${escapeHtml(safeText(overview.project_name, projectName || "Project"))}</span>
-          </div>
-          <div class="data-stack">
-            <div class="data-row"><span>Project</span><strong>${escapeHtml(safeText(overview.project_name, projectName || "Not selected"))}</strong></div>
-            <div class="data-row"><span>Market</span><strong>${escapeHtml(safeText(state.context.currentMarket, overview.market || "Not set"))}</strong></div>
-            <div class="data-row"><span>Language</span><strong>${escapeHtml(safeText(state.context.currentLanguage, overview.language || "Not set"))}</strong></div>
-            <div class="data-row"><span>Execution mode</span><strong>${escapeHtml(titleCase(state.context.executionMode || overview.execution_mode || "semi_auto"))}</strong></div>
-            <div class="data-row"><span>Current campaign</span><strong>${escapeHtml(safeText(state.context.activeCampaign, "Not selected"))}</strong></div>
-          </div>
-        </section>
       </div>
     `;
 
@@ -1228,7 +2156,7 @@ export const publishingRoute = {
         failPublishingItem
       }),
       queue,
-      channels
+      handoff
     });
   }
 };

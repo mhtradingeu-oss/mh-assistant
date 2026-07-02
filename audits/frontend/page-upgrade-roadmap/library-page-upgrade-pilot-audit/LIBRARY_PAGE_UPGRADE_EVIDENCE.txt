@@ -1,0 +1,1575 @@
+===== BRANCH =====
+architecture/frontend-consolidation-v1
+
+===== STATUS =====
+?? audits/frontend/page-upgrade-roadmap/library-page-upgrade-pilot-audit/
+
+===== LOG HEAD =====
+a6f9860 Add final page upgrade roadmap
+2cb5f51 Add Control Center legacy asset guard
+b295fad Add CSS legacy cleanup planning audit
+0a21d23 Add publishing helper extraction closeout
+131676b Extract publishing payload helpers
+86bc167 Add auto mode lifecycle registry contract
+590e465 Add auto mode lifecycle registry audit
+a8f3f3a Add workflows behavior contract
+fdf81ef Add workflows runtime ownership audit
+c4dee6f Add publishing shadow compare contract
+
+===== LIBRARY FILE TREE =====
+public/control-center/pages/library/action-panel.js
+public/control-center/pages/library/ai-panel.js
+public/control-center/pages/library/catalog-readiness.js
+public/control-center/pages/library/command-router.js
+public/control-center/pages/library/listener-lifecycle.js
+public/control-center/pages/library/projection-adapter.js
+public/control-center/pages/library/session-store.js
+
+===== LIBRARY ROUTE HEADER / RENDER =====
+1470:    rerender();
+2057:      rerender();
+2070:      rerender();
+2093:      rerender();
+2111:    rerender();
+2198:        await reloadOrRerender();
+2237:        await reloadOrRerender();
+2274:        await reloadOrRerender();
+2315:        await reloadOrRerender();
+2351:        await reloadOrRerender();
+2411:      rerender();
+2434:        rerender();
+2657:          rerender();
+2733:export const libraryRoute = {
+2735:  disableStandardLayout: true,
+2746:  render({
+
+===== LIBRARY IMPORTS =====
+import { renderLibraryActionPanel } from "./library/action-panel.js";
+import { renderLibraryAiPanel } from "./library/ai-panel.js";
+import { normalizeLibraryAsset } from "./library/projection-adapter.js";
+import { normalizeLibrarySession } from "./library/session-store.js";
+import { createLibraryCommand, routeLibraryCommand } from "./library/command-router.js";
+import { mountLibraryListeners } from "./library/listener-lifecycle.js";
+import {
+  AccessKeyError,
+  archiveProjectAsset,
+  deleteProjectAsset,
+  fetchProtectedMediaBlob,
+  refreshProjectLibrary,
+  renameProjectAsset,
+  setProjectAssetSourceOfTruth,
+  updateProjectAssetStatus,
+  uploadProjectAsset
+} from "../api.js";
+import {
+  getAssetCatalog,
+  getCanonicalAssetType,
+  getCategoryReadinessList,
+  getMissingAssetLabels,
+  getAssetStatusTone
+} from "../asset-library.js";
+
+const librarySessionStore = new Map();
+let librarySearchRenderTimer = null;
+const MEDIA_LIBRARY_LOCAL_ASSETS_KEY = "mh-media-library-assets-v1";
+const libraryProtectedUrlCache = new Map();
+const LIBRARY_PAGE_SIZE = 10;
+const libraryProtectedUrlPromiseCache = new Map();
+let disposeLibraryGlobalListeners = null;
+const MAX_CONCURRENT_LIBRARY_THUMB_LOADS = 4;
+const LIBRARY_THUMB_BATCH_LIMIT = 18;
+let libraryThumbLoadsInFlight = 0;
+const libraryThumbLoadQueue = [];
+
+const SMART_CATEGORY_BUCKETS = [
+  { key: "logos", label: "Logos", types: ["logo"] },
+  { key: "product_images", label: "Product Images", types: ["product_photos", "packaging_images"] },
+  { key: "videos", label: "Videos", types: ["product_videos"] },
+  { key: "documents", label: "Documents", types: ["brand_guideline", "partner_docs", "testimonials_reviews", "certificates"] },
+  { key: "legal", label: "Legal", types: ["legal_doc"] },
+  { key: "pricing", label: "Pricing", types: ["pricing_doc", "product_csv"] },
+  { key: "campaign_materials", label: "Campaign Materials", types: ["social_assets", "campaign_assets"] }
+];
+
+const REQUIRED_ASSET_REQUIREMENTS = [
+  {
+    key: "logos",
+    label: "Logos",
+    types: ["logo"],
+    why: "Logos keep brand identity consistent across setup, media generation, and publishing.",
+    uploadType: "logo"
+  },
+  {
+    key: "brand_guidelines",
+    label: "Brand Guidelines",
+    types: ["brand_guideline"],
+    why: "Guidelines prevent off-brand messaging and visual drift in AI outputs.",
+    uploadType: "brand_guideline"
+  },
+  {
+    key: "product_data",
+    label: "Product CSV / Product Data",
+    types: ["product_csv"],
+    why: "Product data anchors facts, variants, and claims for campaign and publishing.",
+    uploadType: "product_csv"
+  },
+  {
+    key: "product_images",
+    label: "Product Images",
+    types: ["product_photos", "packaging_images"],
+    why: "Approved product and packaging visuals are required for high-trust creative production.",
+    uploadType: "product_photos"
+  },
+  {
+    key: "videos",
+    label: "Videos",
+    types: ["product_videos"],
+    why: "Video source assets are required for reels, demos, and cutdowns.",
+    uploadType: "product_videos"
+  },
+  {
+    key: "legal_pricing",
+    label: "Legal / Pricing Documents",
+    types: ["legal_doc", "pricing_doc"],
+    why: "Legal and pricing documents prevent non-compliant copy and invented offers.",
+    uploadType: "legal_doc"
+  },
+  {
+    key: "research_documents",
+    label: "Research Documents",
+    types: ["partner_docs", "testimonials_reviews", "certificates"],
+    why: "Research and proof documents support claims, trust signals, and strategy decisions.",
+    uploadType: "partner_docs"
+  }
+];
+
+const LIBRARY_FOLDERS = [
+  { key: "all_assets", label: "All Assets" },
+  { key: "logos", label: "Logos", types: ["logo"] },
+  { key: "product_data", label: "Product Data", types: ["product_csv"] },
+  { key: "product_images", label: "Product Images", types: ["product_photos"] },
+  { key: "packaging_images", label: "Packaging Images", types: ["packaging_images"] },
+  { key: "videos", label: "Videos", types: ["product_videos"] },
+  { key: "legal_pricing", label: "Legal & Pricing", types: ["legal_doc", "pricing_doc"] },
+  { key: "brand_guidelines", label: "Brand Guidelines", types: ["brand_guideline"] },
+  { key: "research_certificates", label: "Research / Certificates", types: ["partner_docs", "testimonials_reviews", "certificates"] },
+  { key: "uploaded_session", label: "Uploaded This Session" },
+  { key: "source_of_truth", label: "Source of Truth" },
+  { key: "archived", label: "Archived" }
+];
+
+function asArray(value) {
+  return Array.isArray(value) ? value : [];
+}
+
+function asObject(value) {
+  return value && typeof value === "object" ? value : {};
+}
+
+function asString(value) {
+  if (value == null) return "";
+  return String(value);
+}
+
+function isLibraryInteractiveElement(target) {
+  return Boolean(target?.closest?.(
+    "button, a, input, select, textarea, label, option, [role='button'], .library-action-menu, .library-action-dropdown, .library-drop-zone"
+  ));
+}
+
+function bindLibraryControlEventShield(scope) {
+  // No-op by design.
+  // Do not stop events on native controls. Select/input/file controls must
+  // receive pointer/click/input events directly from the browser.
+  return;
+}
+
+function titleCase(value = "") {
+  return asString(value)
+    .replace(/[_-]+/g, " ")
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
+function toKey(value = "") {
+  return asString(value).trim().toLowerCase();
+}
+
+function projectKey(projectName) {
+  return toKey(projectName) || "__default__";
+}
+
+function readManagedMediaAssetMap() {
+  if (typeof window === "undefined") return {};
+  try {
+    const parsed = JSON.parse(window.localStorage?.getItem(MEDIA_LIBRARY_LOCAL_ASSETS_KEY) || "{}");
+    return parsed && typeof parsed === "object" ? parsed : {};
+  } catch (_) {
+    return {};
+  }
+}
+
+function loadLocalManagedMediaAssets(projectName) {
+  const map = readManagedMediaAssetMap();
+  const primary = asArray(map[projectKey(projectName)]);
+  if (primary.length) return primary;
+  if (!toKey(projectName)) {
+    return asArray(map.workspace || map.Workspace || map.__default__);
+  }
+  return primary;
+}
+
+function basename(filePath = "") {
+  const value = asString(filePath);
+  if (!value) return "";
+  const parts = value.split("/");
+  return parts[parts.length - 1] || value;
+}
+
+===== LIBRARY LISTENERS / HANDLERS =====
+9:  archiveProjectAsset,
+10:  deleteProjectAsset,
+12:  refreshProjectLibrary,
+13:  renameProjectAsset,
+16:  uploadProjectAsset
+54:    uploadType: "logo"
+61:    uploadType: "brand_guideline"
+68:    uploadType: "product_csv"
+75:    uploadType: "product_photos"
+82:    uploadType: "product_videos"
+88:    why: "Legal and pricing documents prevent non-compliant copy and invented offers.",
+89:    uploadType: "legal_doc"
+96:    uploadType: "partner_docs"
+110:  { key: "uploaded_session", label: "Uploaded This Session" },
+112:  { key: "archived", label: "Archived" }
+158:    const parsed = JSON.parse(window.localStorage?.getItem(MEDIA_LIBRARY_LOCAL_ASSETS_KEY) || "{}");
+268:    asset.preview_url
+292:  libraryProtectedUrlCache.delete(key);
+329:  const previewUrl = getAssetPreviewUrl(asset);
+330:  const fileName = asString(asset?.filename || asset?.name || basename(previewUrl) || "download");
+332:  if (!requiresProtectedMediaFetch(previewUrl)) {
+334:      objectUrl: previewUrl,
+362:    const { blob, contentType } = await fetchProtectedMediaBlob(previewUrl, Number(options.timeoutMs) || undefined);
+384:      libraryProtectedUrlPromiseCache.delete(cacheKey);
+405:    window.open(objectUrl, "_blank", "noopener,noreferrer");
+410:  const anchor = document.createElement("a");
+413:  document.body.appendChild(anchor);
+430:          const button = event.target.closest?.("[data-copy-asset-path]");
+435:          const value = button.getAttribute("data-copy-asset-path") || "";
+442:            window.prompt("Copy asset path:", value);
+456:            preview_url: fileUrl,
+506:      uploadType: "logo",
+507:      uploading: false,
+526:  Array.from(document.querySelectorAll(".library-action-dropdown.is-open")).forEach((item) => {
+542:  const normalized = getSafeAssetType(selectedValue || session.uploadType);
+545:    throw new Error("Choose a valid upload category.");
+565:  if (!normalized) return "uploaded";
+571:  if (normalized === "uploaded") return "uploaded";
+574:  if (normalized.includes("archiv")) return "archived";
+575:  return "uploaded";
+587:  if (value === "archived") return "Archived";
+647:      "uploaded"
+663:    const previewUrl = merged.preview_url ||
+694:      uploaded_at: merged.uploaded_at || merged.updated_at || merged.created_at || merged.registered_at || "",
+699:      preview_url: previewUrl,
+752:    uploaded_at: asset.updated_at || asset.created_at || null,
+753:    preview_url: firstValidUrl(imageUrl, videoUrl, audioUrl),
+761:    text_preview: promptText || briefText,
+762:    json_preview: payload,
+815:    const existingTs = new Date(existing.uploaded_at || 0).getTime() || 0;
+816:    const candidateTs = new Date(asset.uploaded_at || 0).getTime() || 0;
+828:    if (!asset.uploaded_at) return false;
+829:    const ts = new Date(asset.uploaded_at).getTime();
+834:  const needsReviewAssets = assets.filter((asset) => ["needs_review", "uploaded"].includes(asset.status)).length;
+867:    } else if (statuses.some((value) => value === "missing" || value === "needs_review" || value === "uploaded")) {
+894:    } else if (entries.length && statuses.some((value) => value === "needs_review" || value === "uploaded" || value === "rejected" || value === "archived")) {
+907:      action: status === "missing" ? "upload" : status === "needs_review" ? "review" : "classify"
+918:  const effectiveSelectedStatus = selectedFolderKey === "archived" && selectedStatus === "active"
+919:    ? "archived"
+938:    if (selectedFolderKey === "archived") return statusValue === "archived";
+939:    if (selectedFolderKey === "uploaded_session") {
+953:    const isDeleted = Boolean(asset.deleted || asset.is_deleted);
+961:      ? statusValue !== "archived"
+963:        ? statusValue !== "archived"
+982:    if (sortBy === "updated_asc") return toTimestamp(left.uploaded_at) - toTimestamp(right.uploaded_at);
+984:    return toTimestamp(right.uploaded_at) - toTimestamp(left.uploaded_at);
+998:      if (folder.key === "all_assets") return !Boolean(asset.deleted || asset.is_deleted);
+1000:      if (folder.key === "archived") return statusValue === "archived";
+1001:      if (folder.key === "uploaded_session") return inRecent;
+1018:    asset.preview_url ||
+1044:    asset.preview_url ||
+1052:    return `<div class="empty-box">Select an asset to preview.</div>`;
+1055:  const previewUrl = getAssetPreviewUrl(asset);
+1056:  const protectedPreview = requiresProtectedMediaFetch(previewUrl);
+1058:  if (asset.is_image && asString(asset.image_url || previewUrl).trim()) {
+1061:        <div class="library-preview-frame" data-library-protected-preview data-preview-asset-id="${escapeHtml(asset.id || asset.asset_id || "")}">
+1062:          <div class="library-preview-fallback">Loading protected image preview...</div>
+1068:      <div class="library-preview-frame">
+1069:        <img src="${escapeHtml(asString(asset.image_url || previewUrl))}" alt="${escapeHtml(asset.name)}" class="library-preview-image" onerror="this.closest('.library-preview-frame')?.replaceWith(Object.assign(document.createElement('div'), { className: 'library-preview-fallback', textContent: 'Preview unavailable for this image.' }))">
+1074:  if (asset.is_video && asString(asset.video_url || previewUrl).trim()) {
+1077:        <div class="library-preview-frame" data-library-protected-preview data-preview-asset-id="${escapeHtml(asset.id || asset.asset_id || "")}">
+1078:          <div class="library-preview-fallback">Loading protected video preview...</div>
+1084:      <div class="library-preview-frame">
+1085:        <video class="library-preview-video" controls src="${escapeHtml(asString(asset.video_url || previewUrl))}"></video>
+1090:  if (asset.is_audio && asString(asset.audio_url || previewUrl).trim()) {
+1092:      <div class="library-preview-frame">
+1093:        <audio style="width:100%;max-width:100%;" controls src="${escapeHtml(asString(asset.audio_url || previewUrl))}"></audio>
+1098:  if (asset.is_image && previewUrl) {
+1101:        <div class="library-preview-frame" data-library-protected-preview data-preview-asset-id="${escapeHtml(asset.id || asset.asset_id || "")}">
+1102:          <div class="library-preview-fallback">Loading protected image preview...</div>
+1108:      <div class="library-preview-frame">
+1109:        <img src="${escapeHtml(previewUrl)}" alt="${escapeHtml(asset.name)}" class="library-preview-image" onerror="this.closest('.library-preview-frame')?.replaceWith(Object.assign(document.createElement('div'), { className: 'library-preview-fallback', textContent: 'Preview unavailable for this image.' }))">
+1114:  if (asset.is_video && previewUrl) {
+1117:        <div class="library-preview-frame" data-library-protected-preview data-preview-asset-id="${escapeHtml(asset.id || asset.asset_id || "")}">
+1118:          <div class="library-preview-fallback">Loading protected video preview...</div>
+1124:      <div class="library-preview-frame">
+1125:        <video class="library-preview-video" controls src="${escapeHtml(previewUrl)}"></video>
+1130:  const previewExtension = getPreviewExtensionForAsset(asset);
+1132:  if (isDocumentExtension(previewExtension)) {
+1133:    const previewUrl = getAssetPreviewUrl(asset);
+1134:    const label = toDocumentPreviewLabel(previewExtension);
+1135:    const isPdf = previewExtension === "pdf";
+1136:    const openButton = previewUrl
+1137:      ? `<button class="btn btn-primary" type="button" data-library-open="${escapeHtml(asset.id)}">Open document</button>`
+1140:    if (isPdf && previewUrl && !requiresProtectedMediaFetch(previewUrl)) {
+1142:        <div class="library-pdf-preview">
+1143:          <iframe src="${escapeHtml(previewUrl)}" title="${escapeHtml(asset.name || "PDF preview")}"></iframe>
+1150:        <div class="library-preview-fallback library-document-preview" data-library-protected-preview data-preview-asset-id="${escapeHtml(asset.id || asset.asset_id || "")}">
+1151:          <div class="library-preview-extension">PDF</div>
+1153:          <div class="library-preview-copy">Loading protected PDF preview...</div>
+1159:      <div class="library-preview-fallback library-document-preview">
+1160:        <div class="library-preview-extension">${escapeHtml((previewExtension || "doc").toUpperCase())}</div>
+1162:        <div class="library-preview-copy">Inline preview is not available yet for this document type. You can open the file or send it to AI extraction.</div>
+1163:        <div class="library-document-preview-actions">
+1165:          <button class="btn btn-secondary" type="button" id="libraryAiExtractSelectedDocBtn">Extract with AI</button>
+1172:  if (asset.text_preview) {
+1173:    return `<div class="library-preview-fallback" style="white-space:pre-wrap;overflow-wrap:anywhere;text-align:left;">${escapeHtml(asset.text_preview)}</div>`;
+1176:  const jsonFallback = JSON.stringify(asset.json_preview || asset.media_payload || {}, null, 2);
+1178:    return `<div class="library-preview-fallback" style="white-space:pre-wrap;overflow-wrap:anywhere;text-align:left;">${escapeHtml(jsonFallback)}</div>`;
+1182:    <div class="library-preview-fallback">
+1183:      <div class="library-preview-extension">${escapeHtml((asset.extension || "file").toUpperCase())}</div>
+1184:      <div class="library-preview-copy">Preview not available for this file type.</div>
+1190:  previewNode,
+1196:  if (!previewNode || !asset) {
+1206:    if (!previewNode.isConnected) {
+1210:    const currentId = previewNode.getAttribute("data-preview-asset-id") || "";
+1216:      previewNode.innerHTML = `<img src="${escapeHtml(resolved.objectUrl)}" alt="${escapeHtml(asset.name)}" class="library-preview-image">`;
+1221:      previewNode.innerHTML = `<video class="library-preview-video" controls src="${escapeHtml(resolved.objectUrl)}"></video>`;
+1226:      previewNode.outerHTML = `
+1227:        <div class="library-pdf-preview">
+1228:          <iframe src="${escapeHtml(resolved.objectUrl)}" title="${escapeHtml(asset.name || "PDF preview")}"></iframe>
+1233:    if (!previewNode.isConnected) {
+1241:    previewNode.innerHTML = `<div class="library-preview-fallback">${escapeHtml(message)}</div>`;
+1266:    const image = document.createElement("img");
+1268:    image.alt = alt || asset.name || "Asset preview";
+1285:    showError?.(`Could not load asset preview: ${error.message || "Unknown error."}`);
+1313:    return `Classify the current library assets for ${project}, propose best category keys, and flag items that should be source-of-truth.`;
+1317:    return `For ${project}, find the fastest way to close missing required assets: ${missing}. Give a step-by-step upload priority.`;
+1326:  if (typeof window !== "undefined" && typeof window.prompt === "function") {
+1328:      return Promise.resolve(window.prompt(title, initial));
+1335:    const overlay = document.createElement("div");
+1343:    const modal = document.createElement("div");
+1351:    const heading = document.createElement("div");
+1356:    const input = document.createElement("input");
+1366:    const actions = document.createElement("div");
+1372:    const cancelBtn = document.createElement("button");
+1377:    const submitBtn = document.createElement("button");
+1386:    cancelBtn.onclick = () => {
+1391:    submitBtn.onclick = () => {
+1397:    overlay.onclick = (event) => {
+1423:    document.body.appendChild(overlay);
+1518:    .filter((asset) => asset.uploaded_at)
+1519:    .sort((left, right) => new Date(right.uploaded_at || 0).getTime() - new Date(left.uploaded_at || 0).getTime())
+1574:      const actionLabel = item.action === "upload" ? "Upload" : item.action === "review" ? "Review" : "Classify";
+1589:              data-library-required-action="${escapeHtml(item.action)}"
+1590:              data-library-required-key="${escapeHtml(item.key)}"
+1591:              data-library-upload-type="${escapeHtml(item.uploadType)}"
+1741:        const previewNode = asset.is_image && assetPreviewUrl
+1743:            ? `<div class="library-grid-thumb-shell" data-library-protected-thumb="${escapeHtml(asset.id)}"><div class="library-grid-icon">IMG</div></div>`
+1744:            : `<img class="library-grid-thumb" src="${escapeHtml(assetPreviewUrl)}" alt="${escapeHtml(asset.name)}" onerror="this.replaceWith(Object.assign(document.createElement('div'), { className: 'library-grid-icon', textContent: '${escapeHtml((asset.extension || "file").toUpperCase())}' }))">`
+1748:          <article class="library-grid-card ${session.selectedAssetId === asset.id ? "is-active" : ""}" data-library-grid-select="${escapeHtml(asset.id)}" tabindex="0">
+1749:            <div class="library-grid-preview">${previewNode}</div>
+1771:        <button class="btn btn-secondary btn-sm" type="button" data-library-grid-page="prev"${session.page <= 1 ? " disabled" : ""}>Previous</button>
+1773:        <button class="btn btn-secondary btn-sm" type="button" data-library-grid-page="next"${session.page >= totalPages ? " disabled" : ""}>Next</button>
+1778:  const protectedThumbNodes = Array.from(document.querySelectorAll("[data-library-protected-thumb]"));
+1781:      const leftId = left.getAttribute("data-library-protected-thumb") || "";
+1782:      const rightId = right.getAttribute("data-library-protected-thumb") || "";
+1790:    const assetId = node.getAttribute("data-library-protected-thumb") || "";
+1805:  const previewVisual = $("libraryPreviewVisual");
+1806:  if (previewVisual) {
+1807:    previewVisual.innerHTML = renderPreview(selectedAsset, escapeHtml);
+1809:    const protectedPreviewNode = previewVisual.querySelector("[data-library-protected-preview]");
+1812:        previewNode: protectedPreviewNode,
+1821:  const previewMeta = $("libraryPreviewMeta");
+1822:  if (previewMeta) {
+1823:    previewMeta.innerHTML = selectedAsset
+1844:            <div class="data-row"><span>Uploaded</span><strong>${escapeHtml(formatDate(selectedAsset.uploaded_at))}</strong></div>
+1849:        <div class="library-preview-actions">
+1850:          ${selectedAsset.preview_url ? `<button class="btn btn-primary" type="button" data-library-open="${escapeHtml(selectedAsset.id)}">Open</button>` : `<button class="btn btn-primary" type="button" disabled>Open</button>`}
+1851:          <button class="btn btn-secondary" type="button" data-copy-asset-path="${escapeHtml(selectedAsset.file_path || selectedAsset.preview_url || "")}">Copy Path</button>
+1854:      : `<button class="btn btn-secondary" type="button" data-library-source-truth="${escapeHtml(selectedAsset.id)}">${escapeHtml(selectedAsset.source_of_truth ? "Unsource" : "Source")}</button>
+1855:          <button class="btn btn-secondary" type="button" data-asset-status-action="approved" data-library-asset="${escapeHtml(selectedAsset.id)}" data-asset-id="${escapeHtml(selectedAsset.mutation_id || selectedAsset.asset_id)}">Approve</button>
+1856:          <button class="btn btn-secondary" type="button" data-asset-status-action="needs_review" data-library-asset="${escapeHtml(selectedAsset.id)}" data-asset-id="${escapeHtml(selectedAsset.mutation_id || selectedAsset.asset_id)}">Review</button>
+1857:          <button class="btn btn-secondary" type="button" data-library-rename="${escapeHtml(selectedAsset.id)}" data-asset-id="${escapeHtml(selectedAsset.mutation_id || selectedAsset.asset_id)}">Rename</button>
+1858:          <button class="btn btn-secondary" type="button" data-library-delete="${escapeHtml(selectedAsset.id)}" data-asset-id="${escapeHtml(selectedAsset.mutation_id || selectedAsset.asset_id)}">Delete</button>
+1859:          <button class="btn btn-secondary" type="button" data-library-archive="${escapeHtml(selectedAsset.id)}" data-asset-id="${escapeHtml(selectedAsset.mutation_id || selectedAsset.asset_id)}">Archive</button>`}
+1890:              <span>${escapeHtml(`${toStatusLabel(asset.status)} • ${formatDate(asset.uploaded_at)}`)}</span>
+1895:      : `<div class="empty-box">No recent uploaded or updated assets yet.</div>`;
+1898:  const uploadSummary = $("libraryUploadSummary");
+1899:  if (uploadSummary) {
+1900:    uploadSummary.innerHTML = session.recentUploads.length
+1911:      : `<div class="empty-box">No uploads in this session yet.</div>`;
+1914:  const requiredActionButtons = Array.from(document.querySelectorAll("[data-library-required-action]"));
+1916:    button.onclick = () => {
+1917:      const action = button.getAttribute("data-library-required-action") || "review";
+1918:      const uploadType = button.getAttribute("data-library-upload-type") || "logo";
+1920:      if (action === "upload") {
+1921:        session.uploadType = uploadType;
+1922:        const uploadTypeSelect = $("libraryUploadTypeSelect");
+1923:        if (uploadTypeSelect) uploadTypeSelect.value = uploadType;
+1924:        const uploadInput = $("libraryUploadInput");
+1925:        uploadInput?.click();
+1956:  const selectButtons = Array.from(document.querySelectorAll("[data-library-select]"));
+1958:    button.onclick = (event) => {
+1962:        assetId: button.getAttribute("data-library-select") || ""
+1986:  const selectableRows = Array.from(document.querySelectorAll("[data-library-row-select]"));
+1988:    row.onclick = (event) => {
+1993:      const nextId = row.getAttribute("data-library-row-select") || "";
+2021:      const nextId = row.getAttribute("data-library-row-select") || "";
+2046:  const selectableCards = Array.from(document.querySelectorAll("[data-library-grid-select]"));
+2048:    card.onclick = (event) => {
+2050:      const nextId = card.getAttribute("data-library-grid-select") || "";
+2063:      const nextId = card.getAttribute("data-library-grid-select") || "";
+2074:  const folderButtons = Array.from(document.querySelectorAll("[data-library-folder-select]"));
+2076:    button.onclick = () => {
+2077:      const folderKey = button.getAttribute("data-library-folder-select") || "all_assets";
+2087:          if (value === "archived") {
+2088:            session.selectedStatus = "archived";
+2097:  const viewToggleButtons = Array.from(document.querySelectorAll("[data-library-view-mode]"));
+2099:  button.onclick = () => {
+2100:    const mode = button.getAttribute("data-library-view-mode") || "grid";
+2117:    finderWorkspace.setAttribute("data-library-view-mode", session.viewMode === "grid" ? "grid" : "list");
+2121:  const toolbarUpload = $("libraryToolbarUploadBtn");
+2123:    toolbarUpload.onclick = () => $("libraryUploadInput")?.click();
+2127:    const target = document.querySelector(selector);
+2135:  const toolbarRename = $("libraryToolbarRenameBtn");
+2137:    toolbarRename.onclick = () => triggerToolbarAction("#libraryPreviewMeta [data-library-rename]", "Select an asset to rename.");
+2140:  const toolbarApprove = $("libraryToolbarApproveBtn");
+2142:    toolbarApprove.onclick = () => triggerToolbarAction("#libraryPreviewMeta [data-asset-status-action='approved']", "Select an asset to approve.");
+2145:  const toolbarSource = $("libraryToolbarSourceBtn");
+2147:    toolbarSource.onclick = () => triggerToolbarAction("#libraryPreviewMeta [data-library-source-truth]", "Select an asset first.");
+2150:  const openButtons = Array.from(document.querySelectorAll("[data-library-open]"));
+2152:    button.onclick = async () => {
+2153:      const id = button.getAttribute("data-library-open") || "";
+2154:      dispatchLibraryCommand("open-preview", { assetId: id }, {
+2155:        "open-preview": ({ assetId }) => ({
+2178:  const sourceOfTruthButtons = Array.from(document.querySelectorAll("[data-library-source-truth]"));
+2180:    button.onclick = async () => {
+2188:      const assetId = button.getAttribute("data-library-source-truth") || "";
+2209:  const statusActionButtons = Array.from(document.querySelectorAll("[data-asset-status-action]"));
+2211:    button.onclick = async () => {
+2220:      const id = button.getAttribute("data-library-asset") || "";
+2248:  const archiveButtons = Array.from(document.querySelectorAll("[data-library-archive]"));
+2249:  archiveButtons.forEach((button) => {
+2250:    button.onclick = async () => {
+2258:      const id = button.getAttribute("data-library-archive") || "";
+2272:        await archiveProjectAsset(activeProjectName, assetId, "Archived from Control Center Library.");
+2275:        showMessage?.("Asset archived.");
+2277:        showError?.(error.message || "Failed to archive asset.");
+2282:  const renameButtons = Array.from(document.querySelectorAll("[data-library-rename]"));
+2283:  renameButtons.forEach((button) => {
+2284:    button.onclick = async () => {
+2292:      const id = button.getAttribute("data-library-rename") || "";
+2313:        await renameProjectAsset(activeProjectName, assetId, normalized);
+2316:        showMessage?.("Asset renamed.");
+2318:        showError?.(error.message || "Failed to rename asset.");
+2323:  const deleteButtons = Array.from(document.querySelectorAll("[data-library-delete]"));
+2324:  deleteButtons.forEach((button) => {
+2325:    button.onclick = async () => {
+2333:      const id = button.getAttribute("data-library-delete") || "";
+2342:      if (!confirm("Soft-delete this asset? It will be archived in the registry.")) {
+2347:        await deleteProjectAsset(activeProjectName, assetId, "Soft deleted from Control Center Library.");
+2352:        showMessage?.("Asset deleted (soft delete).");
+2354:        showError?.(error.message || "Failed to delete asset.");
+2359:  const actionToggleButtons = Array.from(document.querySelectorAll(".library-action-toggle"));
+2361:    button.onclick = (event) => {
+2366:      const dropdown = menu?.querySelector(".library-action-dropdown");
+2379:  const pickUploadTypeButtons = Array.from(document.querySelectorAll("[data-library-upload-type]"));
+2381:    button.onclick = () => {
+2382:      const uploadType = button.getAttribute("data-library-upload-type") || "logo";
+2383:      session.uploadType = uploadType;
+2384:      const uploadTypeSelect = $("libraryUploadTypeSelect");
+2385:      if (uploadTypeSelect) {
+2386:        uploadTypeSelect.value = uploadType;
+2388:      showMessage?.(`Upload category set to ${uploadType}.`);
+2392:  const gridPageButtons = Array.from(document.querySelectorAll("[data-library-grid-page]"));
+2394:    button.onclick = (event) => {
+2398:      const action = button.getAttribute("data-library-grid-page");
+2430:        window.clearTimeout(librarySearchRenderTimer);
+2433:      librarySearchRenderTimer = window.setTimeout(() => {
+2439:  const uploadTypeSelect = $("libraryUploadTypeSelect");
+2440:  if (uploadTypeSelect) {
+2441:    uploadTypeSelect.value = session.uploadType;
+2442:    uploadTypeSelect.onchange = (event) => {
+2443:      const uploadType = getSafeAssetType(event.target.value || "logo") || "logo";
+2445:      dispatchLibraryCommand("upload-type-change", { uploadType }, {
+2446:        "upload-type-change": ({ uploadType: nextUploadType }) => ({
+2448:          uploadType: nextUploadType
+2452:      session.uploadType = getSafeAssetType(event.target.value || "logo") || "logo";
+2457:  const uploadInput = $("libraryUploadInput");
+2458:  const uploadBtn = $("libraryUploadBtn");
+2459:  if (dropZone && uploadInput) {
+2461:      const files = Array.from(uploadInput.files || []);
+2468:      if (uploadBtn) {
+2469:        uploadBtn.disabled = session.uploading || files.length === 0;
+2470:        uploadBtn.textContent = session.uploading ? "Uploading..." : "Upload Asset";
+2478:        uploadInput.files = transfer.files;
+2485:    dropZone.onclick = (event) => {
+2493:        uploadInput.click();
+2496:    uploadInput.onchange = () => {
+2499:      const files = Array.from(uploadInput.files || []);
+2501:        showMessage?.(`${files.length} file${files.length === 1 ? "" : "s"} selected for upload.`);
+2507:        dropZone.addEventListener(eventName, (event) => {
+2514:        dropZone.addEventListener(eventName, (event) => {
+2520:      dropZone.addEventListener("drop", (event) => {
+2530:      const picker = document.createElement("input");
+2536:      document.body.appendChild(picker);
+2542:          showMessage?.(`${files.length} file${files.length === 1 ? "" : "s"} selected for upload.`);
+2550:    const chooseFilesBtn = $("libraryChooseFilesBtn");
+2552:      chooseFilesBtn.onclick = (event) => {
+2562:  if (uploadBtn) {
+2563:    uploadBtn.disabled = session.uploading || !Array.from($("libraryUploadInput")?.files || []).length;
+2564:    uploadBtn.textContent = session.uploading ? "Uploading..." : "Upload Asset";
+2565:    uploadBtn.onclick = async () => {
+2569:        showError?.("Select a project before uploading.");
+2573:      if (session.uploading) return;
+2577:        showError?.("Select at least one file to upload.");
+2585:        showError?.(error.message || "Invalid upload category.");
+2589:      const uploaded = [];
+2593:      session.uploading = true;
+2613:            const result = await uploadProjectAsset(activeProjectName, assetType, file);
+2614:            uploaded.push({
+2631:        session.recentUploads = [...uploaded, ...failed, ...session.recentUploads].slice(0, 20);
+2633:        if (uploaded.length && typeof reloadProjectData === "function") {
+2642:        uploadBtn.disabled = session.uploading || !Array.from($("libraryUploadInput")?.files || []).length;
+2643:        uploadBtn.textContent = session.uploading ? "Uploading..." : "Upload Asset";
+2645:        if (uploaded.length && !failed.length) {
+2646:          showMessage?.(`Uploaded ${uploaded.length} file${uploaded.length === 1 ? "" : "s"}.`);
+2647:        } else if (uploaded.length && failed.length) {
+2648:          showError?.(`Uploaded ${uploaded.length} file${uploaded.length === 1 ? "" : "s"}, ${failed.length} failed.`);
+2653:        session.uploading = false;
+2654:        uploadBtn.disabled = session.uploading || !Array.from($("libraryUploadInput")?.files || []).length;
+2655:        uploadBtn.textContent = session.uploading ? "Uploading..." : "Upload Asset";
+2663:  const refreshBtn = $("libraryRefreshScanBtn");
+2664:  if (refreshBtn) {
+2665:    refreshBtn.onclick = async () => {
+2667:        showError?.("Select a project before refreshing.");
+2670:      refreshBtn.disabled = true;
+2672:        await refreshProjectLibrary(projectName);
+2674:        showMessage?.("Library scan refreshed.");
+2676:        showError?.(error.message || "Failed to refresh library scan.");
+2678:        refreshBtn.disabled = false;
+2683:  const classifyBtn = $("libraryAiClassifyBtn");
+2685:    classifyBtn.onclick = () => {
+2693:  const missingBtn = $("libraryAiMissingBtn");
+2695:    missingBtn.onclick = () => {
+2703:  const extractSelectedDocBtn = $("libraryAiExtractSelectedDocBtn");
+2705:    extractSelectedDocBtn.onclick = () => {
+2718:  const extractBtn = $("libraryAiExtractBtn");
+2720:    extractBtn.onclick = () => {
+2795:            <button id="libraryRefreshScanBtn" class="btn btn-secondary" type="button">Refresh</button>
+2812:              <button id="libraryAiClassifyBtn" class="btn btn-secondary" type="button">Classify Assets</button>
+2813:              <button id="libraryAiMissingBtn" class="btn btn-secondary" type="button">Review Missing</button>
+2814:              <button id="libraryAiExtractBtn" class="btn btn-secondary" type="button">Extract Docs</button>
+2817:          <div class="library-upload-grid">
+2822:              <button id="libraryChooseFilesBtn" class="btn btn-secondary btn-sm" type="button">Choose Files</button>
+2825:            <div class="library-upload-controls">
+2826:              <label class="setup-label" for="libraryUploadTypeSelect">Classify upload as</label>
+2829:                  <option value="${escapeHtml(item.asset_type)}"${session.uploadType === item.asset_type ? " selected" : ""}>${escapeHtml(item.display_label || item.label)}</option>
+2832:              <div class="setup-helper">Upload, classify, and route into review and source-of-truth decisions.</div>
+2833:              <button id="libraryUploadBtn" class="btn btn-primary" type="button">Upload Asset</button>
+2844:          <div id="libraryFinderWorkspace" class="library-workspace-grid library-finder-workspace" data-library-view-mode="${escapeHtml(session.viewMode || "grid")}">
+2853:                      <button type="button" class="library-folder-item ${active ? "is-active" : ""}" data-library-folder-select="${escapeHtml(folder.key)}">
+2863:                <button id="libraryToolbarUploadBtn" class="btn btn-secondary" type="button">Upload</button>
+2864:                <button id="libraryToolbarRenameBtn" class="btn btn-secondary" type="button">Rename</button>
+2865:                <button id="libraryToolbarApproveBtn" class="btn btn-secondary" type="button">Approve</button>
+2866:                <button id="libraryToolbarSourceBtn" class="btn btn-secondary" type="button">Source of Truth</button>
+2877:                    <option value="active">Active (non-archived)</option>
+2884:                    <option value="uploaded">Uploaded</option>
+2886:                    <option value="archived">Archived</option>
+2919:                <section class="card library-preview-card">
+2925:                  <div id="libraryPreviewMeta" class="library-preview-meta"></div>
+
+===== LIBRARY MODULE SYMBOLS =====
+
+----- public/control-center/pages/library/action-panel.js -----
+export function renderLibraryActionPanel({ selectedAsset = null, disabled = false } = {}) {
+  const hasSelectedAsset = Boolean(selectedAsset);
+  const assetName = escapePanelHtml(selectedAsset?.name || selectedAsset?.filename || "No asset selected");
+  const status = escapePanelHtml(selectedAsset?.status || "n/a");
+  const sourceLabel = getPanelSourceOfTruth(selectedAsset) ? "Source of truth" : "Not source of truth";
+  const copyPathValue = escapePanelHtml(selectedAsset?.file_path || selectedAsset?.preview_url || "");
+  const copyDisabledAttr = hasSelectedAsset && copyPathValue ? "" : " disabled aria-disabled=\"true\"";
+  const disabledAttr = disabled || !hasSelectedAsset ? " disabled aria-disabled=\"true\"" : "";
+
+  return `
+    <section class="card library-action-panel" data-library-action-panel>
+      <div class="card-head">
+        <div>
+          <p class="eyebrow">Action Panel</p>
+          <h3>Library Operations</h3>
+        </div>
+        <span class="card-badge neutral">Read-only</span>
+      </div>
+      <div class="data-stack">
+        <p class="muted">Selected: ${assetName}</p>
+        <div class="data-row"><span>Status</span><strong>${status}</strong></div>
+        <div class="data-row"><span>Source</span><strong>${sourceLabel}</strong></div>
+        <p class="setup-helper">Actions are disabled until Library command routing is connected.</p>
+        <div class="library-preview-actions">
+          <button class="btn btn-secondary" type="button" data-copy-asset-path="${copyPathValue}"${copyDisabledAttr}>Copy Path</button>
+        </div>
+        <div class="library-preview-actions">
+          <button class="btn btn-secondary" type="button" data-library-command="set-source-of-truth"${disabledAttr}>Set source</button>
+          <button class="btn btn-secondary" type="button" data-library-command="update-status" data-status="approved"${disabledAttr}>Approve</button>
+          <button class="btn btn-secondary" type="button" data-library-command="update-status" data-status="needs_review"${disabledAttr}>Needs review</button>
+          <button class="btn btn-secondary" type="button" data-library-command="archive-asset"${disabledAttr}>Archive</button>
+        </div>
+      </div>
+    </section>
+  `;
+}
+
+function escapePanelHtml(value = "") {
+  return String(value ?? "").replace(/[&<>"']/g, (character) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    "\"": "&quot;",
+    "'": "&#39;"
+  })[character]);
+}
+
+function getPanelSourceOfTruth(asset = {}) {
+  return Boolean(asset?.source_of_truth ?? asset?.sourceOfTruth ?? asset?.is_source_of_truth);
+}
+
+----- public/control-center/pages/library/ai-panel.js -----
+export function renderLibraryAiPanel({ readiness = {}, selectedAsset = null, disabled = false } = {}) {
+  const hasSelectedAsset = Boolean(selectedAsset);
+  const missingCount = escapePanelHtml(readiness?.missingCount || 0);
+  const selectedName = escapePanelHtml(selectedAsset?.name || selectedAsset?.filename || "No selected asset");
+  const readinessScore = escapePanelHtml(readiness?.readinessScore == null ? "n/a" : `${readiness.readinessScore}%`);
+  const disabledAttr = disabled || !hasSelectedAsset ? " disabled aria-disabled=\"true\"" : "";
+
+  return `
+    <section class="card library-ai-panel" data-library-ai-panel>
+      <div class="card-head">
+        <div>
+          <p class="eyebrow">AI Panel</p>
+          <h3>Library AI Assistant</h3>
+        </div>
+        <span class="card-badge neutral">Read-only</span>
+      </div>
+      <div class="data-stack">
+        <p class="muted">Context: ${selectedName}</p>
+        <div class="data-row"><span>Missing categories</span><strong>${missingCount}</strong></div>
+        <div class="data-row"><span>Readiness</span><strong>${readinessScore}</strong></div>
+        <p class="setup-helper">AI actions are disabled until Library command routing is connected.</p>
+        <div class="library-preview-actions">
+          <button class="btn btn-secondary" type="button" data-library-command="send-to-ai"${disabledAttr}>Ask AI about Library</button>
+        </div>
+      </div>
+    </section>
+  `;
+}
+
+function escapePanelHtml(value = "") {
+  return String(value ?? "").replace(/[&<>"']/g, (character) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    "\"": "&quot;",
+    "'": "&#39;"
+  })[character]);
+}
+
+----- public/control-center/pages/library/catalog-readiness.js -----
+export function normalizeRequiredCategories(categories = []) {
+  if (!Array.isArray(categories)) return [];
+  return categories
+    .map((item) => {
+      if (typeof item === "string") {
+        return { id: item, label: item, required: true };
+      }
+
+      return {
+        id: item?.id || item?.key || item?.slug || "",
+        label: item?.label || item?.name || item?.id || "Required asset",
+        required: item?.required !== false,
+        raw: item
+      };
+    })
+    .filter((item) => item.id);
+}
+
+export function summarizeLibraryReadiness({ assets = [], requiredCategories = [] } = {}) {
+  const required = normalizeRequiredCategories(requiredCategories);
+  const assetList = Array.isArray(assets) ? assets : [];
+  const byCategory = new Map();
+
+  assetList.forEach((asset) => {
+    const category = asset?.category || asset?.type || "uncategorized";
+    byCategory.set(category, (byCategory.get(category) || 0) + 1);
+  });
+
+  const missing = required.filter((item) => !byCategory.has(item.id));
+  const complete = required.length ? required.length - missing.length : 0;
+  const readinessScore = required.length
+    ? Math.round((complete / required.length) * 100)
+    : 100;
+
+  return {
+    totalAssets: assetList.length,
+    requiredCount: required.length,
+    completeCount: complete,
+    missingCount: missing.length,
+    readinessScore,
+    missing,
+    byCategory: Object.fromEntries(byCategory)
+  };
+}
+
+export function buildLibraryNextBestAction(readiness = {}) {
+  if (readiness.missingCount > 0) {
+    return {
+      actionId: "upload-missing-required-assets",
+      severity: "high",
+      label: "Upload missing required assets",
+      reason: `${readiness.missingCount} required asset categories are still missing.`,
+      suggestedRouteOrAction: "library-upload"
+    };
+  }
+
+  return {
+    actionId: "review-library-assets",
+    severity: "normal",
+    label: "Review and approve Library assets",
+    reason: "Required asset coverage is available. Review quality and source-of-truth status.",
+    suggestedRouteOrAction: "library-review"
+  };
+}
+
+----- public/control-center/pages/library/command-router.js -----
+const LIBRARY_COMMANDS = Object.freeze({
+  SELECT_ASSET: "select-asset",
+  SET_FILTER: "set-filter",
+  SET_VIEW_MODE: "set-view-mode",
+  SET_PAGE: "set-page",
+  UPLOAD_TYPE_CHANGE: "upload-type-change",
+  OPEN_UPLOAD: "open-upload",
+  REFRESH_LIBRARY: "refresh-library",
+  OPEN_PREVIEW: "open-preview",
+  SET_SOURCE_OF_TRUTH: "set-source-of-truth",
+  UPDATE_STATUS: "update-status",
+  RENAME_ASSET: "rename-asset",
+  ARCHIVE_ASSET: "archive-asset",
+  DELETE_ASSET: "delete-asset",
+  SEND_TO_AI: "send-to-ai"
+});
+
+export function getLibraryCommands() {
+  return LIBRARY_COMMANDS;
+}
+
+export function createLibraryCommand(command, payload = {}) {
+  return {
+    command,
+    payload,
+    createdAt: new Date().toISOString()
+  };
+}
+
+export function isLibraryMutationCommand(command) {
+  return [
+    LIBRARY_COMMANDS.REFRESH_LIBRARY,
+    LIBRARY_COMMANDS.SET_SOURCE_OF_TRUTH,
+    LIBRARY_COMMANDS.UPDATE_STATUS,
+    LIBRARY_COMMANDS.RENAME_ASSET,
+    LIBRARY_COMMANDS.ARCHIVE_ASSET,
+    LIBRARY_COMMANDS.DELETE_ASSET
+  ].includes(command);
+}
+
+export function isLibraryAiCommand(command) {
+  return command === LIBRARY_COMMANDS.SEND_TO_AI;
+}
+
+export function routeLibraryCommand(commandEnvelope, handlers = {}) {
+  const envelope = commandEnvelope || {};
+  const command = envelope.command;
+  const handler = handlers[command];
+
+  if (typeof handler !== "function") {
+    return {
+      handled: false,
+      command,
+      reason: "No handler registered for Library command."
+    };
+  }
+
+  return {
+    handled: true,
+    command,
+    result: handler(envelope.payload || {}, envelope)
+  };
+}
+
+----- public/control-center/pages/library/listener-lifecycle.js -----
+export function createListenerRegistry() {
+  const disposers = [];
+
+  function add(target, type, handler, options) {
+    if (!target || typeof target.addEventListener !== "function" || typeof handler !== "function") {
+      return () => {};
+    }
+
+    target.addEventListener(type, handler, options);
+
+    const dispose = () => {
+      target.removeEventListener(type, handler, options);
+    };
+
+    disposers.push(dispose);
+    return dispose;
+  }
+
+  function disposeAll() {
+    while (disposers.length) {
+      const dispose = disposers.pop();
+      try {
+        dispose();
+      } catch (error) {
+        console.warn("[Library] listener dispose failed", error);
+      }
+    }
+  }
+
+  return {
+    add,
+    disposeAll
+  };
+}
+
+export function mountLibraryListeners({ root, documentRef = document, windowRef = window, handlers = {} } = {}) {
+  const registry = createListenerRegistry();
+
+  if (root && typeof handlers.onRootClick === "function") {
+    registry.add(root, "click", handlers.onRootClick);
+  }
+
+  if (documentRef && typeof handlers.onDocumentClick === "function") {
+    registry.add(documentRef, "click", handlers.onDocumentClick);
+  }
+
+  const documentClickHandlers = Array.isArray(handlers.onDocumentClickHandlers)
+    ? handlers.onDocumentClickHandlers
+    : [];
+
+  documentClickHandlers
+    .filter((handler) => typeof handler === "function")
+    .forEach((handler) => {
+      registry.add(documentRef, "click", handler);
+    });
+
+  const beforeUnloadHandlers = Array.isArray(handlers.onBeforeUnloadHandlers)
+    ? handlers.onBeforeUnloadHandlers
+    : [];
+
+  beforeUnloadHandlers
+    .filter((handler) => typeof handler === "function")
+    .forEach((handler) => {
+      registry.add(windowRef, "beforeunload", handler);
+    });
+
+  if (windowRef && typeof handlers.onBeforeUnload === "function") {
+    registry.add(windowRef, "beforeunload", handlers.onBeforeUnload);
+  }
+
+  return () => registry.disposeAll();
+}
+
+----- public/control-center/pages/library/projection-adapter.js -----
+export function normalizeLibraryAsset(asset = {}) {
+  return {
+    id: asset.id || "",
+    name: asset.name || asset.filename || "Untitled Asset",
+    type: asset.type || asset.mime_type || "unknown",
+    category: asset.category || "uncategorized",
+    status: asset.status || "draft",
+    sourceOfTruth: Boolean(asset.source_of_truth),
+    archived: Boolean(asset.archived),
+    projectId: asset.project_id || null,
+    createdAt: asset.created_at || null,
+    updatedAt: asset.updated_at || null,
+    raw: asset
+  };
+}
+
+export function normalizeLibraryAssets(assets = []) {
+  if (!Array.isArray(assets)) return [];
+  return assets.map(normalizeLibraryAsset);
+}
+
+----- public/control-center/pages/library/session-store.js -----
+const DEFAULT_LIBRARY_SESSION = Object.freeze({
+  selectedAssetId: "",
+  searchQuery: "",
+  typeFilter: "all",
+  statusFilter: "all",
+  sourceFilter: "all",
+  folderFilter: "all",
+  viewMode: "grid",
+  page: 1,
+  pageSize: 24,
+  expandedPanels: Object.freeze({}),
+  uploadInProgress: false
+});
+
+export function createLibrarySession(overrides = {}) {
+  return {
+    ...DEFAULT_LIBRARY_SESSION,
+    ...overrides,
+    expandedPanels: {
+      ...DEFAULT_LIBRARY_SESSION.expandedPanels,
+      ...(overrides.expandedPanels || {})
+    }
+  };
+}
+
+export function normalizeLibrarySession(session = {}) {
+  return createLibrarySession(session);
+}
+
+export function updateLibrarySession(session = {}, patch = {}) {
+  return normalizeLibrarySession({
+    ...session,
+    ...patch,
+    expandedPanels: {
+      ...(session.expandedPanels || {}),
+      ...(patch.expandedPanels || {})
+    }
+  });
+}
+
+export function isLibraryTransientKey(key) {
+  return Object.prototype.hasOwnProperty.call(DEFAULT_LIBRARY_SESSION, key);
+}
+
+===== API LIBRARY FUNCTIONS =====
+846:    assets: payload?.assets || null,
+888:      total_assets: 0,
+889:      assets: []
+1059:  const requiredSections = ["overview", "readiness", "assets"];
+1156:    assets: requiredData.assets,
+1286:export async function fetchAssetCatalog() {
+1288:    "/media-manager/asset-catalog",
+1289:    "Failed to load asset catalog"
+1371:export async function refreshProjectLibrary(projectName) {
+1377:    `/media-manager/project/${encodeURIComponent(projectName)}/library/refresh`,
+1380:    "Failed to refresh project library"
+1384:export async function updateProjectAssetStatus(projectName, assetId, status, note = "") {
+1389:  if (!assetId) {
+1390:    throw new Error("Missing asset id");
+1394:    `/media-manager/project/${encodeURIComponent(projectName)}/assets/${encodeURIComponent(assetId)}/status`,
+1400:    "Failed to update asset status"
+1404:export async function renameProjectAsset(projectName, assetId, name) {
+1409:  if (!assetId) {
+1410:    throw new Error("Missing asset id");
+1415:    throw new Error("Missing asset name");
+1419:    `/media-manager/project/${encodeURIComponent(projectName)}/assets/${encodeURIComponent(assetId)}/rename`,
+1422:    "Failed to rename asset"
+1426:export async function setProjectAssetSourceOfTruth(projectName, assetId, sourceOfTruth) {
+1431:  if (!assetId) {
+1432:    throw new Error("Missing asset id");
+1436:    `/media-manager/project/${encodeURIComponent(projectName)}/assets/${encodeURIComponent(assetId)}/source-of-truth`,
+1438:    { source_of_truth: Boolean(sourceOfTruth) },
+1443:export async function archiveProjectAsset(projectName, assetId, note = "") {
+1448:  if (!assetId) {
+1449:    throw new Error("Missing asset id");
+1453:    `/media-manager/project/${encodeURIComponent(projectName)}/assets/${encodeURIComponent(assetId)}/archive`,
+1456:    "Failed to archive asset"
+1460:export async function deleteProjectAsset(projectName, assetId, note = "") {
+1465:  if (!assetId) {
+1466:    throw new Error("Missing asset id");
+1470:    `/media-manager/project/${encodeURIComponent(projectName)}/assets/${encodeURIComponent(assetId)}/delete`,
+1473:    "Failed to delete asset"
+2222:export async function uploadProjectAsset(projectName, assetType, file) {
+2227:  const normalizedAssetType = String(assetType || "").trim().toLowerCase();
+2229:  if (!normalizedAssetType) {
+2230:    throw new Error("Missing asset type");
+2233:  if (!/^[a-z0-9][a-z0-9_-]{0,63}$/.test(normalizedAssetType)) {
+2234:    throw new Error("Invalid asset type");
+2243:  formData.append("type", normalizedAssetType);
+2249:    "Failed to upload asset"
+
+===== CSS LIBRARY SELECTORS =====
+public/control-center/styles/14-page-standard.css:482:.library-workspace-grid {
+public/control-center/styles/14-page-standard.css:492:.library-workspace-main {
+public/control-center/styles/14-page-standard.css:496:.library-workspace-side {
+public/control-center/styles/14-page-standard.css:505:.library-finder-toolbar {
+public/control-center/styles/14-page-standard.css:522:.library-finder-toolbar .btn {
+public/control-center/styles/14-page-standard.css:531:.library-filter-bar {
+public/control-center/styles/14-page-standard.css:555:.library-filter-field {
+public/control-center/styles/14-page-standard.css:559:.library-filter-field .setup-label {
+public/control-center/styles/14-page-standard.css:571:.library-upload-grid {
+public/control-center/styles/14-page-standard.css:581:.library-drop-zone {
+public/control-center/styles/14-page-standard.css:613:.library-drop-zone:hover,
+public/control-center/styles/14-page-standard.css:614:.library-drop-zone.is-drag-active {
+public/control-center/styles/14-page-standard.css:632:.library-grid-body {
+public/control-center/styles/14-page-standard.css:636:.library-grid-item,
+public/control-center/styles/14-page-standard.css:637:.library-asset-card {
+public/control-center/styles/14-page-standard.css:642:.library-grid-preview {
+public/control-center/styles/14-page-standard.css:647:.library-grid-preview img,
+public/control-center/styles/14-page-standard.css:648:.library-grid-preview video {
+public/control-center/styles/14-page-standard.css:658:.library-preview-card {
+public/control-center/styles/14-page-standard.css:677:.library-preview-image,
+public/control-center/styles/14-page-standard.css:678:.library-preview-video {
+public/control-center/styles/14-page-standard.css:689:  .library-filter-bar {
+public/control-center/styles/14-page-standard.css:694:  .library-upload-grid {
+public/control-center/styles/14-page-standard.css:700:  .library-workspace-grid {
+public/control-center/styles/14-page-standard.css:704:  .library-workspace-side {
+public/control-center/styles/14-page-standard.css:709:  .library-filter-bar {
+public/control-center/styles/14-page-standard.css:719:.library-file-input {
+public/control-center/styles/14-page-standard.css:729:.library-filter-bar,
+public/control-center/styles/14-page-standard.css:730:.library-filter-field,
+public/control-center/styles/14-page-standard.css:731:.library-filter-field *,
+public/control-center/styles/14-page-standard.css:732:.library-upload-grid,
+public/control-center/styles/14-page-standard.css:733:.library-upload-grid *,
+public/control-center/styles/14-page-standard.css:734:.library-drop-zone,
+public/control-center/styles/14-page-standard.css:735:.library-drop-zone *,
+public/control-center/styles/14-page-standard.css:736:.library-finder-toolbar,
+public/control-center/styles/14-page-standard.css:737:.library-finder-toolbar *,
+public/control-center/styles/14-page-standard.css:738:.library-folder-list,
+public/control-center/styles/14-page-standard.css:739:.library-folder-list *,
+public/control-center/styles/14-page-standard.css:740:.library-preview-actions,
+public/control-center/styles/14-page-standard.css:741:.library-preview-actions * {
+public/control-center/styles/14-page-standard.css:746:.library-folder-list {
+public/control-center/styles/14-page-standard.css:754:.library-folder-item {
+public/control-center/styles/14-page-standard.css:777:.library-folder-item small {
+public/control-center/styles/14-page-standard.css:782:.library-folder-item.is-active,
+public/control-center/styles/14-page-standard.css:783:.library-folder-item:hover {
+public/control-center/styles/14-page-standard.css:789:.library-grid-body {
+public/control-center/styles/14-page-standard.css:795:.library-grid-card,
+public/control-center/styles/14-page-standard.css:796:.library-grid-item,
+public/control-center/styles/14-page-standard.css:797:.library-asset-card {
+public/control-center/styles/14-page-standard.css:802:.library-grid-preview {
+public/control-center/styles/14-page-standard.css:814:.library-grid-preview img,
+public/control-center/styles/14-page-standard.css:815:.library-grid-preview video,
+public/control-center/styles/14-page-standard.css:816:.library-grid-thumb {
+public/control-center/styles/14-page-standard.css:822:.library-grid-icon {
+public/control-center/styles/14-page-standard.css:834:.library-preview-image,
+public/control-center/styles/14-page-standard.css:835:.library-preview-video {
+public/control-center/styles/14-page-standard.css:840:.library-drop-zone {
+public/control-center/styles/14-page-standard.css:844:.library-drop-zone .btn,
+public/control-center/styles/14-page-standard.css:850:.library-upload-controls {
+public/control-center/styles/14-page-standard.css:856:.library-upload-controls .setup-helper {
+public/control-center/styles/14-page-standard.css:862:  .library-folder-list {
+public/control-center/styles/14-page-standard.css:866:  .library-grid-body {
+public/control-center/styles/14-page-standard.css:872:  .library-folder-list,
+public/control-center/styles/14-page-standard.css:873:  .library-grid-body {
+public/control-center/styles/14-page-standard.css:879:[data-page="library"] .library-smart-shell {
+public/control-center/styles/14-page-standard.css:886:[data-page="library"] .library-smart-shell > .card {
+public/control-center/styles/14-page-standard.css:892:[data-page="library"] .library-overview-grid,
+public/control-center/styles/14-page-standard.css:893:[data-page="library"] .library-required-grid {
+public/control-center/styles/14-page-standard.css:899:[data-page="library"] .library-upload-grid {
+public/control-center/styles/14-page-standard.css:906:[data-page="library"] .library-drop-zone {
+public/control-center/styles/14-page-standard.css:916:[data-page="library"] .library-drop-zone:hover,
+public/control-center/styles/14-page-standard.css:917:[data-page="library"] .library-drop-zone:focus {
+public/control-center/styles/14-page-standard.css:923:[data-page="library"] .library-action-toolbar {
+public/control-center/styles/14-page-standard.css:930:[data-page="library"] .library-action-toolbar .btn,
+public/control-center/styles/14-page-standard.css:931:[data-page="library"] .library-finder-toolbar .btn {
+public/control-center/styles/14-page-standard.css:936:[data-page="library"] .library-workspace-grid.library-finder-workspace {
+public/control-center/styles/14-page-standard.css:943:[data-page="library"] .library-workspace-main,
+public/control-center/styles/14-page-standard.css:944:[data-page="library"] .library-workspace-side {
+public/control-center/styles/14-page-standard.css:952:[data-page="library"] .library-workspace-side {
+public/control-center/styles/14-page-standard.css:959:[data-page="library"] .library-finder-topbar,
+public/control-center/styles/14-page-standard.css:960:[data-page="library"] .library-finder-toolbar {
+public/control-center/styles/14-page-standard.css:965:[data-page="library"] .library-operating-surface-head {
+public/control-center/styles/14-page-standard.css:970:[data-page="library"] .library-side-stack {
+public/control-center/styles/14-page-standard.css:975:[data-page="library"] .library-preview-meta {
+public/control-center/styles/14-page-standard.css:979:[data-page="library"] .library-panel-mount:empty {
+public/control-center/styles/14-page-standard.css:983:[data-page="library"] .library-inspector-title {
+public/control-center/styles/14-page-standard.css:988:[data-page="library"] .library-inspector-quick {
+public/control-center/styles/14-page-standard.css:994:[data-page="library"] .library-inspector-path {
+public/control-center/styles/14-page-standard.css:1001:[data-page="library"] .library-inspector-more {
+public/control-center/styles/14-page-standard.css:1009:  [data-page="library"] .library-upload-grid,
+public/control-center/styles/14-page-standard.css:1010:  [data-page="library"] .library-workspace-grid.library-finder-workspace {
+public/control-center/styles/14-page-standard.css:1014:  [data-page="library"] .library-workspace-side {
+public/control-center/styles/14-page-standard.css:1021:  [data-page="library"] .library-smart-shell {
+public/control-center/styles/14-page-standard.css:1025:  [data-page="library"] .library-action-toolbar {
+public/control-center/styles/14-page-standard.css:1029:  [data-page="library"] .library-action-toolbar .btn,
+public/control-center/styles/14-page-standard.css:1030:  [data-page="library"] .library-finder-toolbar .btn {
+public/control-center/styles/14-page-standard.css:1034:  [data-page="library"] .library-overview-grid,
+public/control-center/styles/14-page-standard.css:1035:  [data-page="library"] .library-required-grid {
+public/control-center/styles/14-page-standard.css:1045:[data-page="library"] .library-grid-card {
+public/control-center/styles/14-page-standard.css:1055:[data-page="library"] .library-grid-card:hover {
+public/control-center/styles/14-page-standard.css:1061:[data-page="library"] .library-grid-card.is-active {
+public/control-center/styles/14-page-standard.css:1069:[data-page="library"] .library-grid-card.is-active .library-grid-title {
+public/control-center/styles/14-page-standard.css:1073:[data-page="library"] .library-folder-item.is-active {
+public/control-center/styles/14-page-standard.css:1111:[data-page="library"] .library-document-preview {
+public/control-center/styles/14-page-standard.css:1118:[data-page="library"] .library-document-preview-actions {
+public/control-center/styles/14-page-standard.css:1135:[data-page="library"] .library-grid-body {
+public/control-center/styles/14-page-standard.css:1141:[data-page="library"] .library-grid-card {
+public/control-center/styles/14-page-standard.css:1146:[data-page="library"] .library-grid-preview {
+public/control-center/styles/14-page-standard.css:1151:[data-page="library"] .library-grid-title {
+public/control-center/styles/14-page-standard.css:1156:[data-page="library"] .library-grid-meta {
+public/control-center/styles/14-page-standard.css:1160:[data-page="library"] .library-pdf-preview {
+public/control-center/styles/14-page-standard.css:1169:[data-page="library"] .library-pdf-preview iframe {
+public/control-center/legacy/styles.legacy-full.css:695:.library-category-group-head,
+public/control-center/legacy/styles.legacy-full.css:1777:.library-category-groups {
+public/control-center/legacy/styles.legacy-full.css:1791:.library-preview-fallback,
+public/control-center/legacy/styles.legacy-full.css:2162:.library-preview-frame {
+public/control-center/legacy/styles.legacy-full.css:2169:.library-preview-image,
+public/control-center/legacy/styles.legacy-full.css:2170:.library-preview-video {
+public/control-center/legacy/styles.legacy-full.css:2176:.library-link-btn {
+public/control-center/legacy/styles.legacy-full.css:2180:.library-smart-shell {
+public/control-center/legacy/styles.legacy-full.css:2185:.library-overview-grid {
+public/control-center/legacy/styles.legacy-full.css:2191:.library-overview-next-action {
+public/control-center/legacy/styles.legacy-full.css:2208:.library-upload-grid {
+public/control-center/legacy/styles.legacy-full.css:2214:.library-drop-zone {
+public/control-center/legacy/styles.legacy-full.css:2228:.library-drop-zone:hover,
+public/control-center/legacy/styles.legacy-full.css:2229:.library-drop-zone.is-drag-active {
+public/control-center/legacy/styles.legacy-full.css:2234:.library-drop-zone strong {
+public/control-center/legacy/styles.legacy-full.css:2238:.library-drop-zone span {
+public/control-center/legacy/styles.legacy-full.css:2242:.library-drop-zone small {
+public/control-center/legacy/styles.legacy-full.css:2246:.library-upload-controls {
+public/control-center/legacy/styles.legacy-full.css:2252:.library-action-toolbar {
+public/control-center/legacy/styles.legacy-full.css:2258:.library-required-grid {
+public/control-center/legacy/styles.legacy-full.css:2264:.library-required-card {
+public/control-center/legacy/styles.legacy-full.css:2273:.library-required-card h4 {
+public/control-center/legacy/styles.legacy-full.css:2278:.library-required-card p {
+public/control-center/legacy/styles.legacy-full.css:2284:.library-required-card-head {
+public/control-center/legacy/styles.legacy-full.css:2291:.library-required-card-foot {
+public/control-center/legacy/styles.legacy-full.css:2299:.library-preview-actions {
+public/control-center/legacy/styles.legacy-full.css:2306:.library-category-chip-grid {
+public/control-center/legacy/styles.legacy-full.css:2311:.library-category-chip-group {
+public/control-center/legacy/styles.legacy-full.css:2317:.library-category-chip {
+public/control-center/legacy/styles.legacy-full.css:2328:.library-category-chip.is-active {
+public/control-center/legacy/styles.legacy-full.css:2333:.library-category-chip-head {
+public/control-center/legacy/styles.legacy-full.css:2340:.library-category-chip-meta {
+public/control-center/legacy/styles.legacy-full.css:2345:.library-category-chip-used {
+public/control-center/legacy/styles.legacy-full.css:2350:.library-smart-columns {
+public/control-center/legacy/styles.legacy-full.css:2356:.library-missing-card {
+public/control-center/legacy/styles.legacy-full.css:2366:.library-missing-card p {
+public/control-center/legacy/styles.legacy-full.css:2371:.library-missing-card small {
+public/control-center/legacy/styles.legacy-full.css:2375:.library-missing-head {
+public/control-center/legacy/styles.legacy-full.css:2382:.library-ai-actions {
+public/control-center/legacy/styles.legacy-full.css:3156:  .library-overview-grid,
+public/control-center/legacy/styles.legacy-full.css:3157:  .library-ai-actions,
+public/control-center/legacy/styles.legacy-full.css:3158:  .library-required-grid {
+public/control-center/legacy/styles.legacy-full.css:3162:  .library-upload-grid,
+public/control-center/legacy/styles.legacy-full.css:3163:  .library-workspace-grid,
+public/control-center/legacy/styles.legacy-full.css:3164:  .library-smart-columns,
+public/control-center/legacy/styles.legacy-full.css:3165:  .library-category-chip-group {
+public/control-center/legacy/styles.legacy-full.css:3169:  .library-filter-bar {
+public/control-center/legacy/styles.legacy-full.css:3173:  .library-filter-search {
+public/control-center/legacy/styles.legacy-full.css:3403:  .library-overview-grid,
+public/control-center/legacy/styles.legacy-full.css:3404:  .library-ai-actions,
+public/control-center/legacy/styles.legacy-full.css:3405:  .library-required-grid,
+public/control-center/legacy/styles.legacy-full.css:3406:  .library-filter-bar,
+public/control-center/legacy/styles.legacy-full.css:3407:  .library-preview-actions {
+public/control-center/legacy/styles.legacy-full.css:3411:  .library-filter-search {
+public/control-center/legacy/styles.legacy-full.css:3415:  .library-table {
+public/control-center/legacy/styles.legacy-full.css:3539:  .library-table {
+public/control-center/legacy/styles.legacy-full.css:5650:.library-actions {
+public/control-center/legacy/styles.legacy-full.css:5657:.library-action-menu {
+public/control-center/legacy/styles.legacy-full.css:5662:.library-action-toggle {
+public/control-center/legacy/styles.legacy-full.css:5666:.library-action-dropdown {
+public/control-center/legacy/styles.legacy-full.css:5680:.library-action-menu:hover .library-action-dropdown,
+public/control-center/legacy/styles.legacy-full.css:5681:.library-action-menu:focus-within .library-action-dropdown {
+public/control-center/legacy/styles.legacy-full.css:5686:.library-action-dropdown button {
+public/control-center/legacy/styles.legacy-full.css:5699:.library-action-dropdown button:hover {
+public/control-center/legacy/styles.legacy-full.css:5703:.library-action-dropdown button[data-asset-status-action="approved"]:hover {
+public/control-center/legacy/styles.legacy-full.css:5707:.library-action-dropdown button[data-asset-status-action="needs_review"]:hover {
+public/control-center/legacy/styles.legacy-full.css:5711:.library-action-dropdown button[data-asset-status-action="rejected"]:hover {
+public/control-center/legacy/styles.legacy-full.css:5715:.library-action-dropdown button[data-asset-status-action="archived"]:hover {
+public/control-center/legacy/styles.legacy-full.css:6727:.library-smart-shell {
+public/control-center/legacy/styles.legacy-full.css:6731:.library-workspace-grid.library-finder-workspace {
+public/control-center/legacy/styles.legacy-full.css:6738:.library-workspace-main,
+public/control-center/legacy/styles.legacy-full.css:6739:.library-workspace-side {
+public/control-center/legacy/styles.legacy-full.css:6743:.library-finder-topbar {
+public/control-center/legacy/styles.legacy-full.css:6751:.library-finder-sidebar-title {
+public/control-center/legacy/styles.legacy-full.css:6760:.library-folder-list {
+public/control-center/legacy/styles.legacy-full.css:6768:.library-folder-item {
+public/control-center/legacy/styles.legacy-full.css:6784:.library-folder-item small {
+public/control-center/legacy/styles.legacy-full.css:6789:.library-folder-item:hover {
+public/control-center/legacy/styles.legacy-full.css:6793:.library-folder-item.is-active {
+public/control-center/legacy/styles.legacy-full.css:6798:.library-finder-toolbar,
+public/control-center/legacy/styles.legacy-full.css:6799:.library-filter-bar,
+public/control-center/legacy/styles.legacy-full.css:6800:.library-upload-grid,
+public/control-center/legacy/styles.legacy-full.css:6801:.library-action-toolbar {
+public/control-center/legacy/styles.legacy-full.css:6807:.library-finder-toolbar {
+public/control-center/legacy/styles.legacy-full.css:6815:.library-finder-toolbar .btn {
+public/control-center/legacy/styles.legacy-full.css:6821:.library-filter-bar {
+public/control-center/legacy/styles.legacy-full.css:6829:.library-filter-field {
+public/control-center/legacy/styles.legacy-full.css:6836:.library-filter-search {
+public/control-center/legacy/styles.legacy-full.css:6840:.library-filter-field select,
+public/control-center/legacy/styles.legacy-full.css:6841:.library-filter-field input,
+public/control-center/legacy/styles.legacy-full.css:6845:.library-drop-zone,
+public/control-center/legacy/styles.legacy-full.css:6846:.library-upload-controls {
+public/control-center/legacy/styles.legacy-full.css:6852:.library-table-wrap,
+public/control-center/legacy/styles.legacy-full.css:6854:.library-view-toggle {
+public/control-center/legacy/styles.legacy-full.css:6858:.library-finder-workspace[data-library-view-mode="grid"] .library-grid-body {
+public/control-center/legacy/styles.legacy-full.css:6868:.library-grid-card {
+public/control-center/legacy/styles.legacy-full.css:6878:.library-grid-card:hover {
+public/control-center/legacy/styles.legacy-full.css:6883:.library-grid-card.is-active {
+public/control-center/legacy/styles.legacy-full.css:6888:.library-grid-preview,
+public/control-center/legacy/styles.legacy-full.css:6889:.library-grid-thumb-shell {
+public/control-center/legacy/styles.legacy-full.css:6899:.library-grid-thumb {
+public/control-center/legacy/styles.legacy-full.css:6905:.library-grid-icon {
+public/control-center/legacy/styles.legacy-full.css:6911:.library-grid-title {
+public/control-center/legacy/styles.legacy-full.css:6920:.library-grid-meta {
+public/control-center/legacy/styles.legacy-full.css:6930:.library-grid-foot {
+public/control-center/legacy/styles.legacy-full.css:6938:.library-grid-type {
+public/control-center/legacy/styles.legacy-full.css:6944:.library-grid-pagination {
+public/control-center/legacy/styles.legacy-full.css:6956:.library-grid-page-info {
+public/control-center/legacy/styles.legacy-full.css:6961:.library-grid-page-actions {
+public/control-center/legacy/styles.legacy-full.css:6967:.library-workspace-side {
+public/control-center/legacy/styles.legacy-full.css:6974:.library-preview-card {
+public/control-center/legacy/styles.legacy-full.css:6988:.library-preview-card img,
+public/control-center/legacy/styles.legacy-full.css:6989:.library-preview-image {
+public/control-center/legacy/styles.legacy-full.css:7026:.library-preview-actions {
+public/control-center/legacy/styles.legacy-full.css:7033:.library-preview-actions .btn {
+public/control-center/legacy/styles.legacy-full.css:7040:  .library-workspace-grid.library-finder-workspace {
+public/control-center/legacy/styles.legacy-full.css:7044:  .library-workspace-side {
+public/control-center/legacy/styles.legacy-full.css:7051:  .library-filter-bar,
+public/control-center/legacy/styles.legacy-full.css:7052:  .library-upload-grid,
+public/control-center/legacy/styles.legacy-full.css:7053:  .library-preview-actions {
+public/control-center/legacy/styles.legacy-full.css:7057:  .library-filter-search {
+public/control-center/legacy/styles.legacy-full.css:7071:  .library-preview-card img,
+public/control-center/legacy/styles.legacy-full.css:7072:  .library-preview-image {
+public/control-center/legacy/styles.legacy-full.css:7082:[data-page="library"] .library-filter-bar,
+public/control-center/legacy/styles.legacy-full.css:7083:[data-page="library"] .library-filter-field,
+public/control-center/legacy/styles.legacy-full.css:7084:[data-page="library"] .library-upload-grid,
+public/control-center/legacy/styles.legacy-full.css:7085:[data-page="library"] .library-upload-controls,
+public/control-center/legacy/styles.legacy-full.css:7086:[data-page="library"] .library-drop-zone,
+public/control-center/legacy/styles.legacy-full.css:7087:[data-page="library"] .library-action-toolbar {
+public/control-center/legacy/styles.legacy-full.css:7111:[data-page="library"] .library-file-input {
+public/control-center/legacy/styles.legacy-full.css:7129:[data-page="library"] .library-grid-card,
+public/control-center/legacy/styles.legacy-full.css:7130:[data-page="library"] .library-grid-preview,
+public/control-center/legacy/styles.legacy-full.css:7131:[data-page="library"] .library-grid-thumb-shell {
+public/control-center/legacy/styles.legacy-full.css:7136:[data-page="library"] .library-workspace-main {
+public/control-center/legacy/page-standard.legacy-20260508.js:152:    { label: "Classify with AI", description: "Categorize files and propose source-of-truth candidates.", action: "focus-library-classify" },
+public/control-center/legacy/page-standard.legacy-20260508.js:153:    { label: "Review missing assets", description: "Prioritize files blocking campaign and publishing readiness.", action: "focus-library-missing" },
+public/control-center/legacy/page-standard.legacy-20260508.js:344:  "focus-library-classify": "#libraryAiClassifyBtn",
+public/control-center/legacy/page-standard.legacy-20260508.js:345:  "focus-library-missing": "#libraryAiMissingBtn",
+public/control-center/styles/12-pages.css:12:.library-smart-shell,
+public/control-center/styles/12-pages.css:39:.library-action-toolbar,
+public/control-center/styles/12-pages.css:40:.library-preview-actions,
+public/control-center/styles/12-pages.css:54:.library-overview-grid,
+public/control-center/styles/12-pages.css:55:.library-upload-grid,
+public/control-center/styles/12-pages.css:56:.library-required-grid,
+public/control-center/styles/12-pages.css:73:.library-workspace-grid,
+public/control-center/styles/12-pages.css:91:.library-filter-field {
+public/control-center/styles/12-pages.css:98:.library-filter-bar .setup-input,
+public/control-center/styles/12-pages.css:99:.library-filter-bar select {
+public/control-center/styles/12-pages.css:110:.library-preview-copy,
+public/control-center/styles/12-pages.css:111:.library-inspector-path,
+public/control-center/styles/12-pages.css:112:.library-inspector-more {
+public/control-center/styles/12-pages.css:129:.library-finder-toolbar,
+public/control-center/styles/12-pages.css:130:.library-finder-topbar,
+public/control-center/styles/12-pages.css:131:.library-grid-foot,
+public/control-center/styles/12-pages.css:132:.library-grid-pagination,
+public/control-center/styles/12-pages.css:133:.library-grid-page-actions,
+public/control-center/styles/12-pages.css:134:.library-required-card-head,
+public/control-center/styles/12-pages.css:149:.library-workspace-side,
+public/control-center/styles/12-pages.css:155:.library-folder-list,
+public/control-center/styles/12-pages.css:156:.library-filter-bar,
+public/control-center/styles/12-pages.css:157:.library-grid-body,
+public/control-center/styles/12-pages.css:158:.library-preview-copy,
+public/control-center/styles/12-pages.css:170:.library-grid-type,
+public/control-center/styles/12-pages.css:171:.library-grid-meta,
+public/control-center/styles/12-pages.css:172:.library-inspector-path,
+public/control-center/styles/12-pages.css:173:.library-inspector-more,
+public/control-center/styles/12-pages.css:204:.library-drop-zone {
+public/control-center/styles/12-pages.css:214:.library-grid-card,
+public/control-center/styles/12-pages.css:215:.library-required-card,
+public/control-center/styles/12-pages.css:216:.library-preview-card,
+public/control-center/styles/12-pages.css:238:.library-filter-bar {
+public/control-center/styles/12-pages.css:242:.library-action-toolbar {
+public/control-center/styles/12-pages.css:246:.library-grid-page-actions .btn,
+public/control-center/styles/12-pages.css:247:.library-action-toolbar .btn {
+public/control-center/styles/12-pages.css:251:.library-preview-frame {
+public/control-center/styles/12-pages.css:261:.library-preview-image,
+public/control-center/styles/12-pages.css:262:.library-preview-video {
+public/control-center/styles/12-pages.css:268:.library-action-dropdown {
+public/control-center/styles/12-pages.css:280:.library-action-dropdown.is-open {
+public/control-center/styles/12-pages.css:289:  .library-overview-grid,
+public/control-center/styles/12-pages.css:290:  .library-upload-grid,
+public/control-center/styles/12-pages.css:291:  .library-required-grid,
+public/control-center/styles/12-pages.css:308:  .library-workspace-grid,
+public/control-center/styles/12-pages.css:313:  .library-filter-bar {
+public/control-center/styles/12-pages.css:322:  .library-overview-grid,
+public/control-center/styles/12-pages.css:323:  .library-upload-grid,
+public/control-center/styles/12-pages.css:324:  .library-required-grid,
+public/control-center/styles/12-pages.css:337:  .library-filter-bar {
+public/control-center/legacy/styles.legacy-20260508.css:1016:.library-preview-frame {
+public/control-center/legacy/styles.legacy-20260508.css:1023:.library-preview-image,
+public/control-center/legacy/styles.legacy-20260508.css:1024:.library-preview-video {
+public/control-center/legacy/styles.legacy-20260508.css:1030:.library-link-btn {
+public/control-center/legacy/styles.legacy-20260508.css:1034:.library-smart-shell {
+public/control-center/legacy/styles.legacy-20260508.css:1039:.library-overview-grid {
+public/control-center/legacy/styles.legacy-20260508.css:1045:.library-overview-next-action {
+public/control-center/legacy/styles.legacy-20260508.css:1062:.library-upload-grid {
+public/control-center/legacy/styles.legacy-20260508.css:1068:.library-drop-zone {
+public/control-center/legacy/styles.legacy-20260508.css:1082:.library-drop-zone:hover,
+public/control-center/legacy/styles.legacy-20260508.css:1083:.library-drop-zone.is-drag-active {
+public/control-center/legacy/styles.legacy-20260508.css:1088:.library-drop-zone strong {
+public/control-center/legacy/styles.legacy-20260508.css:1092:.library-drop-zone span {
+public/control-center/legacy/styles.legacy-20260508.css:1096:.library-drop-zone small {
+public/control-center/legacy/styles.legacy-20260508.css:1100:.library-upload-controls {
+public/control-center/legacy/styles.legacy-20260508.css:1106:.library-action-toolbar {
+public/control-center/legacy/styles.legacy-20260508.css:1112:.library-required-grid {
+public/control-center/legacy/styles.legacy-20260508.css:1118:.library-required-card {
+public/control-center/legacy/styles.legacy-20260508.css:1127:.library-required-card h4 {
+public/control-center/legacy/styles.legacy-20260508.css:1132:.library-required-card p {
+public/control-center/legacy/styles.legacy-20260508.css:1138:.library-required-card-head {
+public/control-center/legacy/styles.legacy-20260508.css:1145:.library-required-card-foot {
+public/control-center/legacy/styles.legacy-20260508.css:1153:.library-preview-actions {
+public/control-center/legacy/styles.legacy-20260508.css:1160:.library-category-chip-grid {
+public/control-center/legacy/styles.legacy-20260508.css:1165:.library-category-chip-group {
+public/control-center/legacy/styles.legacy-20260508.css:1171:.library-category-chip {
+public/control-center/legacy/styles.legacy-20260508.css:1182:.library-category-chip.is-active {
+public/control-center/legacy/styles.legacy-20260508.css:1187:.library-category-chip-head {
+public/control-center/legacy/styles.legacy-20260508.css:1194:.library-category-chip-meta {
+public/control-center/legacy/styles.legacy-20260508.css:1199:.library-category-chip-used {
+public/control-center/legacy/styles.legacy-20260508.css:1204:.library-smart-columns {
+public/control-center/legacy/styles.legacy-20260508.css:1210:.library-missing-card {
+public/control-center/legacy/styles.legacy-20260508.css:1220:.library-missing-card p {
+public/control-center/legacy/styles.legacy-20260508.css:1225:.library-missing-card small {
+public/control-center/legacy/styles.legacy-20260508.css:1229:.library-missing-head {
+public/control-center/legacy/styles.legacy-20260508.css:1236:.library-ai-actions {
+public/control-center/legacy/styles.legacy-20260508.css:1889:.library-overview-grid,
+public/control-center/legacy/styles.legacy-20260508.css:1890:.library-ai-actions,
+public/control-center/legacy/styles.legacy-20260508.css:1891:.library-required-grid {
+public/control-center/legacy/styles.legacy-20260508.css:1895:.library-upload-grid,
+public/control-center/legacy/styles.legacy-20260508.css:1896:.library-workspace-grid,
+public/control-center/legacy/styles.legacy-20260508.css:1897:.library-smart-columns,
+public/control-center/legacy/styles.legacy-20260508.css:1898:.library-category-chip-group {
+public/control-center/legacy/styles.legacy-20260508.css:1902:.library-filter-bar {
+public/control-center/legacy/styles.legacy-20260508.css:1906:.library-filter-search {
+public/control-center/legacy/styles.legacy-20260508.css:2030:.library-overview-grid,
+public/control-center/legacy/styles.legacy-20260508.css:2031:.library-ai-actions,
+public/control-center/legacy/styles.legacy-20260508.css:2032:.library-required-grid,
+public/control-center/legacy/styles.legacy-20260508.css:2033:.library-filter-bar,
+public/control-center/legacy/styles.legacy-20260508.css:2034:.library-preview-actions {
+public/control-center/legacy/styles.legacy-20260508.css:2038:.library-filter-search {
+public/control-center/legacy/styles.legacy-20260508.css:2042:.library-table {
+public/control-center/legacy/styles.legacy-20260508.css:2112:.library-table {
+public/control-center/legacy/styles.legacy-20260508.css:4155:.library-actions {
+public/control-center/legacy/styles.legacy-20260508.css:4162:.library-action-menu {
+public/control-center/legacy/styles.legacy-20260508.css:4167:.library-action-toggle {
+public/control-center/legacy/styles.legacy-20260508.css:4171:.library-action-dropdown {
+public/control-center/legacy/styles.legacy-20260508.css:4185:.library-action-menu:hover .library-action-dropdown,
+public/control-center/legacy/styles.legacy-20260508.css:4186:.library-action-menu:focus-within .library-action-dropdown {
+public/control-center/legacy/styles.legacy-20260508.css:4191:.library-action-dropdown button {
+public/control-center/legacy/styles.legacy-20260508.css:4204:.library-action-dropdown button:hover {
+public/control-center/legacy/styles.legacy-20260508.css:4208:.library-action-dropdown button[data-asset-status-action="approved"]:hover {
+public/control-center/legacy/styles.legacy-20260508.css:4212:.library-action-dropdown button[data-asset-status-action="needs_review"]:hover {
+public/control-center/legacy/styles.legacy-20260508.css:4216:.library-action-dropdown button[data-asset-status-action="rejected"]:hover {
+public/control-center/legacy/styles.legacy-20260508.css:4220:.library-action-dropdown button[data-asset-status-action="archived"]:hover {
+public/control-center/legacy/styles.legacy-20260508.css:4971:.library-smart-shell {
+public/control-center/legacy/styles.legacy-20260508.css:4975:.library-workspace-grid.library-finder-workspace {
+public/control-center/legacy/styles.legacy-20260508.css:4982:.library-workspace-main,
+public/control-center/legacy/styles.legacy-20260508.css:4983:.library-workspace-side {
+public/control-center/legacy/styles.legacy-20260508.css:4987:.library-finder-topbar {
+public/control-center/legacy/styles.legacy-20260508.css:4995:.library-finder-sidebar-title {
+public/control-center/legacy/styles.legacy-20260508.css:5004:.library-folder-list {
+public/control-center/legacy/styles.legacy-20260508.css:5012:.library-folder-item {
+public/control-center/legacy/styles.legacy-20260508.css:5028:.library-folder-item small {
+public/control-center/legacy/styles.legacy-20260508.css:5033:.library-folder-item:hover {
+public/control-center/legacy/styles.legacy-20260508.css:5037:.library-folder-item.is-active {
+public/control-center/legacy/styles.legacy-20260508.css:5042:.library-finder-toolbar,
+public/control-center/legacy/styles.legacy-20260508.css:5043:.library-filter-bar,
+public/control-center/legacy/styles.legacy-20260508.css:5044:.library-upload-grid,
+public/control-center/legacy/styles.legacy-20260508.css:5045:.library-action-toolbar {
+public/control-center/legacy/styles.legacy-20260508.css:5051:.library-finder-toolbar {
+public/control-center/legacy/styles.legacy-20260508.css:5059:.library-finder-toolbar .btn {
+public/control-center/legacy/styles.legacy-20260508.css:5065:.library-filter-bar {
+public/control-center/legacy/styles.legacy-20260508.css:5073:.library-filter-field {
+public/control-center/legacy/styles.legacy-20260508.css:5080:.library-filter-search {
+public/control-center/legacy/styles.legacy-20260508.css:5084:.library-filter-field select,
+public/control-center/legacy/styles.legacy-20260508.css:5085:.library-filter-field input,
+public/control-center/legacy/styles.legacy-20260508.css:5089:.library-drop-zone,
+public/control-center/legacy/styles.legacy-20260508.css:5090:.library-upload-controls {
+public/control-center/legacy/styles.legacy-20260508.css:5096:.library-table-wrap,
+public/control-center/legacy/styles.legacy-20260508.css:5098:.library-view-toggle {
+public/control-center/legacy/styles.legacy-20260508.css:5102:.library-finder-workspace[data-library-view-mode="grid"] .library-grid-body {
+public/control-center/legacy/styles.legacy-20260508.css:5112:.library-grid-card {
+public/control-center/legacy/styles.legacy-20260508.css:5122:.library-grid-card:hover {
+public/control-center/legacy/styles.legacy-20260508.css:5127:.library-grid-card.is-active {
+public/control-center/legacy/styles.legacy-20260508.css:5132:.library-grid-preview,
+public/control-center/legacy/styles.legacy-20260508.css:5133:.library-grid-thumb-shell {
+public/control-center/legacy/styles.legacy-20260508.css:5143:.library-grid-thumb {
+public/control-center/legacy/styles.legacy-20260508.css:5149:.library-grid-icon {
+public/control-center/legacy/styles.legacy-20260508.css:5155:.library-grid-title {
+public/control-center/legacy/styles.legacy-20260508.css:5164:.library-grid-meta {
+public/control-center/legacy/styles.legacy-20260508.css:5174:.library-grid-foot {
+public/control-center/legacy/styles.legacy-20260508.css:5182:.library-grid-type {
+public/control-center/legacy/styles.legacy-20260508.css:5188:.library-grid-pagination {
+public/control-center/legacy/styles.legacy-20260508.css:5200:.library-grid-page-info {
+public/control-center/legacy/styles.legacy-20260508.css:5205:.library-grid-page-actions {
+public/control-center/legacy/styles.legacy-20260508.css:5211:.library-workspace-side {
+public/control-center/legacy/styles.legacy-20260508.css:5218:.library-preview-card {
+public/control-center/legacy/styles.legacy-20260508.css:5232:.library-preview-card img,
+public/control-center/legacy/styles.legacy-20260508.css:5233:.library-preview-image {
+public/control-center/legacy/styles.legacy-20260508.css:5242:.library-preview-actions {
+public/control-center/legacy/styles.legacy-20260508.css:5249:.library-preview-actions .btn {
+public/control-center/legacy/styles.legacy-20260508.css:5256:.library-workspace-grid.library-finder-workspace {
+public/control-center/legacy/styles.legacy-20260508.css:5260:.library-workspace-side {
+public/control-center/legacy/styles.legacy-20260508.css:5267:.library-filter-bar,
+public/control-center/legacy/styles.legacy-20260508.css:5268:.library-upload-grid,
+public/control-center/legacy/styles.legacy-20260508.css:5269:.library-preview-actions {
+public/control-center/legacy/styles.legacy-20260508.css:5273:.library-filter-search {
+public/control-center/legacy/styles.legacy-20260508.css:5287:.library-preview-card img,
+public/control-center/legacy/styles.legacy-20260508.css:5288:.library-preview-image {
+public/control-center/legacy/styles.legacy-20260508.css:5293:[data-page="library"] .library-filter-bar,
+public/control-center/legacy/styles.legacy-20260508.css:5294:[data-page="library"] .library-filter-field,
+public/control-center/legacy/styles.legacy-20260508.css:5295:[data-page="library"] .library-upload-grid,
+public/control-center/legacy/styles.legacy-20260508.css:5296:[data-page="library"] .library-upload-controls,
+public/control-center/legacy/styles.legacy-20260508.css:5297:[data-page="library"] .library-drop-zone,
+public/control-center/legacy/styles.legacy-20260508.css:5298:[data-page="library"] .library-action-toolbar {
+public/control-center/legacy/styles.legacy-20260508.css:5322:[data-page="library"] .library-file-input {
+public/control-center/legacy/styles.legacy-20260508.css:5340:[data-page="library"] .library-grid-card,
+public/control-center/legacy/styles.legacy-20260508.css:5341:[data-page="library"] .library-grid-preview,
+public/control-center/legacy/styles.legacy-20260508.css:5342:[data-page="library"] .library-grid-thumb-shell {
+public/control-center/legacy/styles.legacy-20260508.css:5347:[data-page="library"] .library-workspace-main {
+public/control-center/styles/08-components-foundation.css:172:.library-category-group-head,
+public/control-center/styles/08-components-foundation.css:344:.library-category-groups {
+public/control-center/styles/08-components-foundation.css:358:.library-preview-fallback,
+
+===== ROADMAP REFERENCE =====
+# Final Page Upgrade Roadmap
+
+## Status
+Planning checkpoint before page upgrade implementation.
+
+## Branch
+architecture/frontend-consolidation-v1
+
+## Baseline
+2cb5f51 Add Control Center legacy asset guard
+
+## Goal
+Upgrade Control Center pages into consistent AI Business Operating System surfaces using:
+- Header
+- Main View
+- Action Panel
+- AI Panel
+
+## Doctrine
+- Audit → Confirm → Decide → Implement.
+- Backend owns operational authority.
+- Frontend projects operational authority.
+- No heavy intelligence in render.
+- No Auto Mode start from render/mount.
+- No legacy CSS/JS relink.
+- One page at a time.
+- Small commits with browser QA.
+
+## Completed foundations
+- Operations loading/refreshing fixed.
+- Route-role fallback authority centralized.
+- Publishing runtime ownership audited.
+- Publishing shadow-compare contract created.
+- Workflows runtime ownership audited.
+- Workflows behavior contract created.
+- Auto Mode lifecycle audited and contracted.
+- Publishing pure helper extraction step 1 completed.
+- CSS legacy cleanup planning completed.
+- Legacy asset accidental-load guard added.
+
+## Upgrade order
+
+### 1. Library
+Purpose:
+- First operating-surface pilot.
+- Convert asset management into Main View + Action Panel + AI Panel.
+- Keep upload/preview/source-of-truth behavior intact.
+
+Allowed:
+- UX/layout improvements.
+- Small helper/module extraction.
+- Action/AI panel skeleton integration if safe.
+
+Not allowed:
+- Backend changes.
+- Destructive action redesign.
+- Asset mutation behavior changes without audit.
+
+### 2. AI Command
+Purpose:
+- Turn AI Workspace from prompt shell into clearer operating room.
+- Must preserve backend projection doctrine.
+
+Requires:
+- AI Command authority audit before implementation.
+
+### 3. Integrations
+Purpose:
+- Continue modular architecture already started.
+- Improve connector operating surface.
+
+Allowed:
+- UX polish and controlled module extraction.
+
+### 4. Media Studio
+Purpose:
+- Reduce largest page risk.
+- Use extraction-readiness audit before code changes.
+
+### 5. Content Studio
+Purpose:
+- Improve production workspace.
+- Audit first due large file size.
+
+### 6. Campaign Studio
+Purpose:
+- Improve campaign planning and readiness workflow.
+- Avoid runtime execution changes.
+
+### 7. Publishing
+Purpose:
+- Continue pure-helper extraction only.
+- No publish/approve/fail redesign until deeper shadow-compare implementation exists.
+
+### 8. Workflows
+Purpose:
+- Keep active light route unless explicit decision changes it.
+- Do not reactivate legacy heavy loop.
+
+### 9. Governance / Settings
+Purpose:
+- Polish clean standalone surfaces.
+- Avoid authority changes.
+
+### 10. Operations Centers
+Purpose:
+- Polish only after already-stable scaffold.
+- Preserve ops-shell custom ownership.
+
+## First implementation target
+Library Page Upgrade Pilot.
+
+## Library pilot success criteria
+- Page loads without console errors.
+- Existing upload behavior preserved.
+- Existing preview behavior preserved.
+- Source-of-truth marker behavior preserved.
+- No backend changes.
+- No data/project mutations beyond normal user actions.
+- No legacy CSS/JS relink.
+- Browser QA passed.
+
+## Next step
+Run Library Page Upgrade Pilot Audit before implementation.

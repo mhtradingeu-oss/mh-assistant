@@ -1,0 +1,327 @@
+63:function filterBySearch(items, search, fields) {
+73:  Array.from(root.querySelectorAll("[data-ops-route]")).forEach((button) => {
+75:      const route = button.getAttribute("data-ops-route") || "home";
+76:      const label = button.getAttribute("data-ops-label") || "item";
+103:  Array.from(root.querySelectorAll("[data-ops-focus]")).forEach((button) => {
+105:      onChange(button.getAttribute("data-ops-focus") || "all");
+111:  Array.from(root.querySelectorAll("[data-ops-select]")).forEach((button) => {
+113:      onSelect(button.getAttribute("data-ops-select") || "");
+119:  Array.from(root.querySelectorAll("[data-ops-ai-open]")).forEach((button) => {
+126:  Array.from(root.querySelectorAll("[data-ops-ai-prompt]")).forEach((button) => {
+128:      const index = Number(button.getAttribute("data-ops-ai-prompt"));
+140:    <div class="ops-focus-tabs">
+143:          class="ops-focus-tab${tab.value === currentValue ? " is-active" : ""}"
+145:          data-ops-focus="${escapeHtml(tab.value)}"
+168:function buildOpsAssistantPrompts(pageKey, projectName, selectedItem, focusLabel) {
+170:  const itemLabel = asString(selectedItem?.title || selectedItem?.name || selectedItem?.message || "the selected item");
+180:        label: "Unblock selected task",
+210:        label: "Review selected queue item",
+211:        preview: "Explain what the selected queue item likely needs next.",
+217:        prompt: `Analyze Queue Center for ${projectLabel} with focus on ${focusLabel}. Identify throughput blockers, queue bottlenecks, and the next operational adjustments.`
+230:        label: "Inspect selected job",
+231:        preview: "Explain what the selected job status implies operationally.",
+245:      preview: "Sort current notifications by severity and action urgency.",
+249:      label: "Review selected alert",
+250:      preview: "Explain what the selected alert means and where to go next.",
+256:      prompt: `Summarize the current operational notification signal for ${projectLabel} with focus on ${focusLabel}. Highlight approvals, provider health, publishing events, and urgent follow-up.`
+272:  const notificationCenter = asObject(ops.notification_center);
+278:  const criticalAlerts = Number(notificationCenter.critical_count || 0);
+279:  const unreadNotifications = Number(notificationCenter.unread_count || 0);
+281:  const providerAlerts = asArray(notificationCenter.provider_disconnect_alerts).length;
+282:  const approvalAlerts = asArray(notificationCenter.approval_pending_alerts).length;
+283:  const publishAlerts = asArray(notificationCenter.publish_alerts).length;
+284:  const claimAlerts = asArray(notificationCenter.claim_risk_alerts).length;
+318:      helper: "Highest priority notifications",
+320:      route: "notification-center"
+323:      label: "Approvals",
+327:      route: "notification-center"
+337:      label: "Providers",
+351:      label: "Inbox",
+353:      helper: "Unread operational notifications",
+355:      route: "notification-center"
+374:          <p class="mhos-os-section-copy">${context.escapeHtml(description)}</p>
+380:          <button class="ops-runtime-signal mhos-os-attention-card mhos-motion-soft" type="button" data-ops-route="${context.escapeHtml(signal.route)}" data-ops-label="${context.escapeHtml(signal.label)}">
+396:      return `<option value="${escapeHtml(value)}"${value === currentValue ? " selected" : ""}>${escapeHtml(`${titleCase(value)} (${item.count})`)}</option>`;
+405:  return `<button class="btn btn-secondary btn-sm" type="button" data-ops-route="${escapeHtml(route)}" data-ops-label="${escapeHtml(asString(item?.title || item?.name || label))}">${escapeHtml(label)}</button>`;
+472:        <button class="btn btn-ghost" type="button" data-ops-ai-open>Open AI Workspace for Review</button>
+485:  selectedItem,
+491:  const projectLabel = projectName || "No project selected";
+494:    session.focus !== "all" ||
+501:    : "No tasks are available for this project yet. Use Refresh or adjust project context to load latest assignments.";
+503:  const selectedSummary = selectedItem
+505:      selectedItem.title || "Task",
+506:      selectedItem.description || "No description.",
+507:      `Assignee: ${selectedItem.assignee || selectedItem.owner || "-"}`,
+508:      `Due: ${formatDateTime(selectedItem.due_at)}`,
+509:      `Priority: ${titleCase(selectedItem.priority || "normal")}`,
+510:      `Status: ${titleCase(selectedItem.status || "open")}`
+512:    : "No task is selected.";
+536:            <button class="btn btn-secondary std-context-btn" type="button" id="taskCenterRefreshBtn">Refresh</button>
+553:                <p class="mhos-os-section-copy">Filter by focus, owner, source, and priority to review task risk quickly.</p>
+555:              <span class="mhos-os-chip ${showLoadingState ? "is-warning" : ""}">${escapeHtml(showLoadingState ? "Refreshing" : `${items.length} visible`)}</span>
+564:            ], session.focus, escapeHtml)}
+567:              <input id="taskCenterSearch" class="command-input" type="text" placeholder="Search tasks, owners, domains..." value="${escapeHtml(session.search)}">
+578:                <tr class="${selectedItem?._opsKey === item._opsKey ? "is-selected" : ""}">
+580:                    <button class="ops-select-link" type="button" data-ops-select="${escapeHtml(item._opsKey)}">
+611:                  <h3 class="mhos-os-panel-title">${escapeHtml(selectedItem?.title || "Select a task")}</h3>
+612:                  <p class="mhos-os-panel-copy">${escapeHtml(selectedItem ? "Review owner, due-state, linked work, and follow-up context." : "Choose a task in the table to inspect details.")}</p>
+615:              ${selectedItem ? `
+618:                    <strong>${escapeHtml(selectedItem.title || "Task")}</strong>
+619:                    <p>${escapeHtml(selectedItem.description || "No task description available.")}</p>
+622:                    { label: "Assignee", value: selectedItem.assignee || selectedItem.owner || "-" },
+623:                    { label: "Owner role", value: titleCase(selectedItem.assignee_role || selectedItem.owner_role || "-") },
+624:                    { label: "Due", value: formatDateTime(selectedItem.due_at) },
+625:                    { label: "Due state", value: titleCase(selectedItem.due_state || "unscheduled") },
+626:                    { label: "Priority", value: titleCase(selectedItem.priority || "normal") },
+627:                    { label: "Source", value: titleCase(selectedItem.source_page || "-") },
+628:                    { label: "Domain", value: titleCase(selectedItem.service_domain || "-") },
+629:                    { label: "Linked entity", value: selectedItem.linked_entity?.label || selectedItem.linked_entity?.entity_type || "-" }
+632:              ` : `<div class="empty-box">No task is selected.</div>`}
+640:                  <p class="mhos-os-panel-copy">Active actions are refresh, copy, route, and AI guidance only. Task mutations remain deferred and disabled until backend policy and mutation safety checks are approved.</p>
+644:                <button class="btn btn-primary" type="button" id="taskCenterRefreshBtnRail">Refresh Task Center</button>
+645:                ${selectedItem ? renderRouteAction(selectedItem, escapeHtml, "Open Owning Workspace") : ""}
+662:                  <p class="mhos-os-panel-copy">Context-only guidance: opens AI with prompt/context only. No task creation, owner assignment, status change, approval, publishing, or backend execution is performed.</p>
+666:                <button class="btn btn-secondary" type="button" data-ops-ai-open>Open AI: Review Task Context</button>
+670:                  <button class="quick-action-btn" type="button" data-ops-ai-prompt="${index}">
+681:    <textarea id="taskCenterSummaryBuffer" hidden>${escapeHtml(selectedSummary)}</textarea>
+693:    focus: "all",
+698:    selectedKey: "",
+707:  items = filterBySearch(items, session.search, ["title", "description", "owner", "assignee", "service_domain"]);
+708:  if (session.focus === "open") items = items.filter((item) => asString(item.status) === "open");
+709:  if (session.focus === "blocked") items = items.filter((item) => asString(item.status) === "blocked");
+710:  if (session.focus === "overdue") items = items.filter((item) => asString(item.due_state) === "overdue");
+711:  if (session.focus === "due_soon") items = items.filter((item) => asString(item.due_state) === "due_soon");
+715:  const selectedItem = items.find((item) => item._opsKey === session.selectedKey) || items[0] || null;
+716:  session.selectedKey = selectedItem?._opsKey || "";
+717:  const prompts = buildOpsAssistantPrompts("task-center", projectName, selectedItem, titleCase(session.focus || "all"));
+727:    selectedItem,
+758:  root.querySelector("#taskCenterRefreshBtn")?.addEventListener("click", refreshTaskCenter);
+759:  root.querySelector("#taskCenterRefreshBtnRail")?.addEventListener("click", refreshTaskCenter);
+760:  root.querySelector("#taskCenterCopySummaryBtn")?.addEventListener("click", async () => {
+762:    const text = buffer?.value || "No task is selected.";
+767:        buffer?.focus();
+769:        document.execCommand("copy");
+773:      context.showError?.("Failed to copy task summary.");
+777:  root.querySelector("#taskCenterCopyHandoffBtn")?.addEventListener("click", async () => {
+795:          buffer.focus();
+797:          document.execCommand("copy");
+802:      context.showError?.("Failed to copy incoming handoff summary.");
+805:  bindOpsFocusButtons(root, (focus) => {
+806:    session.focus = focus || "all";
+809:  bindOpsSelectionButtons(root, (selectedKey) => {
+810:    session.selectedKey = selectedKey;
+813:  root.querySelector("#taskCenterSearch")?.addEventListener("input", (event) => {
+818:    root.querySelector(selector)?.addEventListener("change", (event) => {
+833:  selectedItem,
+838:  const projectLabel = projectName || "No project selected";
+841:    session.focus !== "all" ||
+846:    : "No queue items are available for this project yet. Use Refresh or adjust project context to load current queues.";
+871:        <tr class="${selectedItem?._opsKey === item._opsKey ? "is-selected" : ""}">
+874:            <button class="ops-select-link" type="button" data-ops-select="${escapeHtml(item._opsKey)}">
+907:            <button class="btn btn-secondary std-context-btn" type="button" id="queueCenterRefreshBtnHeader">Refresh</button>
+924:                <p class="mhos-os-section-copy">Review queue pressure by type and status, then route each item to its owning workspace for controlled action.</p>
+926:              <span class="mhos-os-chip ${showLoadingState ? "is-warning" : ""}">${escapeHtml(showLoadingState ? "Refreshing" : `${items.length} visible`)}</span>
+936:            ], session.focus, escapeHtml)}
+939:              <input id="queueCenterSearch" class="command-input" type="text" placeholder="Search queues, items, assignees..." value="${escapeHtml(session.search)}">
+960:                  <h3 class="mhos-os-panel-title">${escapeHtml(selectedItem?.title || "Select a queue item")}</h3>
+961:                  <p class="mhos-os-panel-copy">${escapeHtml(selectedItem ? "Inspect queue type, owner, status, and route target before routing." : "Choose a queue item from the table to inspect details.")}</p>
+964:              ${selectedItem ? `
+967:                    <strong>${escapeHtml(selectedItem.title || "Queue item")}</strong>
+968:                    <p>${escapeHtml(selectedItem.details?.summary || selectedItem.entity_type || "No queue summary available.")}</p>
+971:                    { label: "Queue type", value: titleCase(selectedItem.queue_type || "queue") },
+972:                    { label: "Assignee", value: selectedItem.assignee || "-" },
+973:                    { label: "Priority", value: titleCase(selectedItem.priority || "normal") },
+974:                    { label: "Status", value: titleCase(selectedItem.status || "queued") },
+975:                    { label: "Updated", value: formatDateTime(selectedItem.updated_at || selectedItem.created_at) },
+976:                    { label: "Entity", value: selectedItem.entity_type || "-" }
+979:              ` : `<div class="empty-box">No queue item is selected.</div>`}
+987:                  <p class="mhos-os-panel-copy">Active actions are refresh, route, and AI guidance only. Queue, publishing, approval, and removal mutations remain disabled until backend policy and mutation safety checks are approved.</p>
+991:                <button class="btn btn-primary" type="button" id="queueCenterRefreshBtn">Refresh Queue Center</button>
+992:                ${selectedItem ? renderRouteAction(selectedItem, escapeHtml, "Open Owning Workspace") : ""}
+1015:                  <p class="mhos-os-panel-copy">Context-only guidance: opens AI with prompt/context only. No approve, publish, retry, remove, Governance bypass, or backend execution is performed.</p>
+1019:                <button class="btn btn-secondary" type="button" data-ops-ai-open>Open AI: Review Queue Context</button>
+1023:                  <button class="quick-action-btn" type="button" data-ops-ai-prompt="${index}">
+1043:    focus: "all",
+1046:    selectedKey: "",
+1055:  items = filterBySearch(items, session.search, ["title", "assignee", "queue_type", "status"]);
+1056:  if (session.focus !== "all") items = items.filter((item) => asString(item.queue_type) === session.focus);
+1058:  const selectedItem = items.find((item) => item._opsKey === session.selectedKey) || items[0] || null;
+1059:  session.selectedKey = selectedItem?._opsKey || "";
+1061:  const prompts = buildOpsAssistantPrompts("queue-center", projectName, selectedItem, titleCase(session.focus || "all queues"));
+1069:    selectedItem,
+1099:  root.querySelector("#queueCenterRefreshBtn")?.addEventListener("click", refreshQueueCenter);
+1100:  root.querySelector("#queueCenterRefreshBtnHeader")?.addEventListener("click", refreshQueueCenter);
+1101:  bindOpsFocusButtons(root, (focus) => {
+1102:    session.focus = focus || "all";
+1105:  bindOpsSelectionButtons(root, (selectedKey) => {
+1106:    session.selectedKey = selectedKey;
+1109:  root.querySelector("#queueCenterSearch")?.addEventListener("input", (event) => {
+1114:    root.querySelector(selector)?.addEventListener("change", (event) => {
+1129:  selectedItem,
+1133:  const projectLabel = projectName || "No project selected";
+1136:    session.focus !== "all" ||
+1141:    : "No jobs are available for this project yet. Use Refresh or adjust project context to load current execution state.";
+1161:        <tr class="${selectedItem?._opsKey === item._opsKey ? "is-selected" : ""}">
+1164:            <button class="ops-select-link" type="button" data-ops-select="${escapeHtml(item._opsKey)}">
+1197:            <button class="btn btn-secondary std-context-btn" type="button" id="jobMonitorRefreshBtnHeader">Refresh</button>
+1214:                <p class="mhos-os-section-copy">Filter by job status and kind to review active and failed work without changing lifecycle state.</p>
+1216:              <span class="mhos-os-chip ${showLoadingState ? "is-warning" : ""}">${escapeHtml(showLoadingState ? "Refreshing" : `${items.length} visible`)}</span>
+1224:            ], session.focus, escapeHtml)}
+1227:              <input id="jobMonitorSearch" class="command-input" type="text" placeholder="Search jobs, kinds, owners..." value="${escapeHtml(session.search)}">
+1229:                ${["all", "workflow", "media", "publishing"].map((value) => `<option value="${escapeHtml(value)}"${value === session.kind ? " selected" : ""}>${escapeHtml(titleCase(value))}</option>`).join("")}
+1250:                  <h3 class="mhos-os-panel-title">${escapeHtml(selectedItem?.title || "Select a job")}</h3>
+1251:                  <p class="mhos-os-panel-copy">${escapeHtml(selectedItem ? "Inspect owner, execution health, retry state, and route context before routing." : "Choose a job from the table to inspect details.")}</p>
+1254:              ${selectedItem ? `
+1257:                    <strong>${escapeHtml(selectedItem.title || "Job")}</strong>
+1258:                    <p>${escapeHtml(`Kind: ${titleCase(selectedItem.kind || "job")} • Status: ${titleCase(selectedItem.status || "unknown")}`)}</p>
+1261:                    { label: "Owner", value: selectedItem.owner || "-" },
+1262:                    { label: "Kind", value: titleCase(selectedItem.kind || "job") },
+1263:                    { label: "Retries", value: formatCount(selectedItem.retry_count) },
+1264:                    { label: "Health", value: titleCase(selectedItem.health_state || "unknown") },
+1265:                    { label: "Status", value: titleCase(selectedItem.status || "unknown") },
+1266:                    { label: "Updated", value: formatDateTime(selectedItem.updated_at || selectedItem.created_at) }
+1269:              ` : `<div class="empty-box">No job is selected.</div>`}
+1277:                  <p class="mhos-os-panel-copy">Active actions are refresh, route, and AI guidance only. Job retry, cancel, rerun, delete, worker execution, publishing, and approval mutations remain disabled or destination-owned.</p>
+1281:                <button class="btn btn-primary" type="button" id="jobMonitorRefreshBtn">Refresh Job Monitor</button>
+1282:                ${selectedItem ? renderRouteAction(selectedItem, escapeHtml, "Open Job Owning Context") : ""}
+1310:                  <p class="mhos-os-panel-copy">Context-only guidance: opens AI with prompt/context only. No retry, cancel, rerun, delete, worker trigger, approve, publish, Governance bypass, or backend execution is performed.</p>
+1314:                <button class="btn btn-secondary" type="button" data-ops-ai-open>Open AI: Review Job Context</button>
+1318:                  <button class="quick-action-btn" type="button" data-ops-ai-prompt="${index}">
+1338:    focus: "all",
+1341:    selectedKey: "",
+1350:  items = filterBySearch(items, session.search, ["title", "kind", "status", "owner"]);
+1351:  if (session.focus !== "all") items = items.filter((item) => asString(item.status) === session.focus);
+1353:  const selectedItem = items.find((item) => item._opsKey === session.selectedKey) || items[0] || null;
+1354:  session.selectedKey = selectedItem?._opsKey || "";
+1355:  const prompts = buildOpsAssistantPrompts("job-monitor", projectName, selectedItem, titleCase(session.focus || "all jobs"));
+1363:    selectedItem,
+1392:  root.querySelector("#jobMonitorRefreshBtn")?.addEventListener("click", refreshJobMonitor);
+1393:  root.querySelector("#jobMonitorRefreshBtnHeader")?.addEventListener("click", refreshJobMonitor);
+1394:  bindOpsFocusButtons(root, (focus) => {
+1395:    session.focus = focus || "all";
+1398:  bindOpsSelectionButtons(root, (selectedKey) => {
+1399:    session.selectedKey = selectedKey;
+1402:  root.querySelector("#jobMonitorSearch")?.addEventListener("input", (event) => {
+1407:    root.querySelector(selector)?.addEventListener("change", (event) => {
+1416:function deriveProviderDisconnectAlerts(state, existingAlerts) {
+1427:      message: "Provider readiness check is currently failing.",
+1433:function buildGovernanceApprovalAlerts(summary) {
+1436:    title: asString(item.title) || "Approval pending",
+1437:    message: asString(item.summary) || "Approval requires review.",
+1451:function getGovernanceApprovalId(item) {
+1466:function isGovernanceApprovalItem(item) {
+1472:function isOpenGovernanceApproval(item) {
+1478:  if (!isGovernanceApprovalItem(item) || !isOpenGovernanceApproval(item)) return "";
+1480:  const approvalId = getGovernanceApprovalId(item);
+1485:      <button class="btn btn-secondary" type="button" data-governance-action="refresh">Refresh Governance</button>
+1486:      <button class="btn btn-primary" type="button" data-governance-decision="approved" data-approval-id="${escapeHtml(approvalId)}">Approve</button>
+1487:      <button class="btn btn-secondary" type="button" data-governance-decision="rejected" data-approval-id="${escapeHtml(approvalId)}">Reject</button>
+1488:      <button class="btn btn-secondary" type="button" data-governance-decision="changes_requested" data-approval-id="${escapeHtml(approvalId)}">Request Changes</button>
+1489:      <button class="btn btn-secondary" type="button" data-governance-decision="escalated" data-approval-id="${escapeHtml(approvalId)}">Escalate</button>
+1498:  const notificationCenter = asObject(asObject(state.data.operations).notification_center);
+1500:    focus: "all",
+1503:    selectedKey: "",
+1506:    didAutoRefresh: false,
+1507:    didHydrateGovernanceApprovals: false
+1510:  const providerDisconnectAlerts = deriveProviderDisconnectAlerts(state, notificationCenter.provider_disconnect_alerts);
+1511:  const governanceApprovalAlerts = buildGovernanceApprovalAlerts(asObject(asObject(state.data.governance).summary));
+1512:  const inboxItems = asArray(notificationCenter.notification_items).map((item) => ({
+1521:  const syncAlerts = asArray(notificationCenter.sync_failure_alerts).map((item) => ({ ...item, item_type: "sync" }));
+1522:  const approvalAlerts = (asArray(notificationCenter.approval_pending_alerts).length
+1523:    ? asArray(notificationCenter.approval_pending_alerts)
+1524:    : governanceApprovalAlerts
+1526:  const publishAlerts = asArray(notificationCenter.publish_alerts).map((item) => ({ ...item, item_type: "publish" }));
+1528:  const claimAlerts = asArray(notificationCenter.claim_risk_alerts).map((item) => ({ ...item, item_type: "claim" }));
+1529:  const workflowAlerts = asArray(notificationCenter.workflow_completion_alerts).map((item) => ({ ...item, item_type: "workflow" }));
+1547:  let listItems = session.focus === "inbox" ? inboxList : baseAlerts;
+1548:  if (session.focus === "critical") listItems = baseAlerts.filter((item) => asString(item.severity) === "critical");
+1549:  if (session.focus === "approvals") listItems = approvalAlerts.map((item, index) => ({ ...item, _opsKey: getOpsItemKey(item, index, "approval") }));
+1550:  if (session.focus === "provider") listItems = providerAlerts.map((item, index) => ({ ...item, _opsKey: getOpsItemKey(item, index, "provider") }));
+1552:  listItems = filterBySearch(listItems, session.search, ["title", "message", "source"]);
+1554:  const selectedItem = listItems.find((item) => item._opsKey === session.selectedKey) || listItems[0] || null;
+1555:  session.selectedKey = selectedItem?._opsKey || "";
+1556:  const prompts = buildOpsAssistantPrompts("notification-center", projectName, selectedItem, titleCase(session.focus || "all"));
+1559:  const projectLabel = projectName || "No project selected";
+1562:    session.focus !== "all" ||
+1566:    ? "No notifications match the current filters."
+1567:    : "No notifications are available for this project yet. Use Refresh or adjust project context to load current signals.";
+1586:        <tr class="${selectedItem?._opsKey === item._opsKey ? "is-selected" : ""}">
+1589:            <button class="ops-select-link" type="button" data-ops-select="${escapeHtml(item._opsKey)}">
+1601:    <section class="page is-active" data-page="notification-center">
+1612:              <span class="std-context-chip"><span>Unread Inbox</span><strong>${escapeHtml(formatCount(notificationCenter.unread_count))}</strong></span>
+1613:              <span class="std-context-chip is-danger"><span>Critical</span><strong>${escapeHtml(formatCount(notificationCenter.critical_count))}</strong></span>
+1614:              <span class="std-context-chip is-warning"><span>Approvals</span><strong>${escapeHtml(formatCount(approvalAlerts.length))}</strong></span>
+1619:            <button class="btn btn-secondary std-context-btn" type="button" id="notificationCenterRefreshBtnHeader">Refresh</button>
+1635:                <h3>${escapeHtml(session.focus === "inbox" ? "Notification history and read-state review" : "Operational alert review")}</h3>
+1636:                <p>${escapeHtml(session.focus === "inbox" ? "Review durable inbox history. Mark Read updates read-state only where a backend notification id exists." : "Review route-aware alerts, then inspect the selected signal before routing or follow-up.")}</p>
+1638:              <span class="card-badge ${showLoadingState ? "warning" : "neutral"}">${escapeHtml(showLoadingState ? "Refreshing" : `${listItems.length} visible`)}</span>
+1643:              { value: "critical", label: "Critical", count: formatCount(notificationCenter.critical_count) },
+1644:              { value: "approvals", label: "Approvals", count: formatCount(approvalAlerts.length) },
+1645:              { value: "provider", label: "Provider", count: formatCount(providerAlerts.length) },
+1646:              { value: "inbox", label: "Inbox", count: formatCount(inboxList.length) }
+1647:            ], session.focus, escapeHtml)}
+1650:              <input id="notificationCenterSearch" class="command-input" type="text" placeholder="Search alerts, sources, messages..." value="${escapeHtml(session.search)}">
+1651:              <select id="notificationCenterSeverity" class="sidebar-select">
+1652:                ${["all", "critical", "warning", "success", "info"].map((value) => `<option value="${escapeHtml(value)}"${value === session.severity ? " selected" : ""}>${escapeHtml(titleCase(value))}</option>`).join("")}
+1661:              ["Severity", "Signal", "Source", "Created", "Route"],
+1673:                  <h3>${escapeHtml(selectedItem?.title || "Select a notification")}</h3>
+1674:                  <p>${escapeHtml(selectedItem ? "Review source, severity, timing, and owning route before follow-up." : "Choose an alert or inbox item to inspect details.")}</p>
+1677:              ${selectedItem ? `
+1680:                    <strong>${escapeHtml(selectedItem.title || "Notification")}</strong>
+1681:                    <p>${escapeHtml(selectedItem.message || selectedItem.body || "No notification detail available.")}</p>
+1684:                    { label: "Severity", value: titleCase(selectedItem.severity || "info") },
+1685:                    { label: "Source", value: titleCase(selectedItem.source || selectedItem.item_type || "system") },
+1686:                    { label: "Created", value: formatDateTime(selectedItem.created_at) },
+1687:                    { label: "Route", value: selectedItem.route?.route || selectedItem.route || "-" }
+1690:              ` : `<div class="empty-box">No notification is selected.</div>`}
+1702:                <button class="btn btn-primary" type="button" id="notificationCenterRefreshBtn">Refresh Notification Center</button>
+1703:                ${selectedItem ? renderRouteAction(selectedItem, escapeHtml, "Open Owning Source Page") : ""}
+1704:                ${selectedItem?.notification_id ? `<button class="btn btn-secondary" type="button" data-mark-read="${escapeHtml(selectedItem.notification_id)}" title="Updates notification read-state only. Does not acknowledge, resolve, dismiss, delete, send, approve, publish, or execute.">Mark Read (read-state only)</button>` : ""}
+1706:              ${selectedItem ? renderGovernanceDecisionActions(selectedItem, escapeHtml) : ""}
+1709:                  <strong>${escapeHtml("Approval pending")}</strong>
+1713:                  <strong>${escapeHtml("Provider health")}</strong>
+1738:                <button class="btn btn-secondary" type="button" data-ops-ai-open>Open AI: Review Notification Context</button>
+1742:                  <button class="quick-action-btn" type="button" data-ops-ai-prompt="${index}">
+1780:  root.querySelector("#notificationCenterRefreshBtn")?.addEventListener("click", refreshNotificationCenter);
+1781:  root.querySelector("#notificationCenterRefreshBtnHeader")?.addEventListener("click", refreshNotificationCenter);
+1782:  bindOpsFocusButtons(root, (focus) => {
+1783:    session.focus = focus || "all";
+1786:  bindOpsSelectionButtons(root, (selectedKey) => {
+1787:    session.selectedKey = selectedKey;
+1790:  root.querySelector("#notificationCenterSearch")?.addEventListener("input", (event) => {
+1794:  root.querySelector("#notificationCenterSeverity")?.addEventListener("change", (event) => {
+1798:  Array.from(root.querySelectorAll("[data-mark-read]")).forEach((button) => {
+1800:      const notificationId = button.getAttribute("data-mark-read") || "";
+1811:  Array.from(root.querySelectorAll("[data-governance-action]")).forEach((button) => {
+1813:      const action = button.getAttribute("data-governance-action") || "";
+1841:  Array.from(root.querySelectorAll("[data-governance-decision]")).forEach((button) => {
+1844:      const decision = button.getAttribute("data-governance-decision") || "";
+1846:      if (!approvalId || !decision || !context.decideProjectApproval) {
+1855:        await context.decideProjectApproval(projectName, approvalId, {
+1858:          actor: "notification-center",
+1861:        context.showMessage?.(`Approval ${titleCase(decision)} for ${approvalId}.`);
+1890:    !session.didHydrateGovernanceApprovals &&
+1894:    session.didHydrateGovernanceApprovals = true;
+1898:          const liveApprovalAlerts = buildGovernanceApprovalAlerts(asObject(liveGovernance));
+1899:          if (!liveApprovalAlerts.length) {
+1907:            approval_pending_alerts: liveApprovalAlerts
+1929:  if (!session.didAutoRefresh && projectName && context.fetchProjectNotificationCenter) {
+1930:    session.didAutoRefresh = true;
+1988:        focus: "all",
+1991:        selectedKey: "",
+2036:        focus: "all",
+2039:        selectedKey: "",
+2066:export const notificationCenterRoute = {
+2067:  id: "notification-center",
+2074:  template: `<section class="page is-active" data-page="notification-center"><div class="ops-shell"></div></section>`,
+2084:        focus: "all",
+2087:        selectedKey: "",
+2125:  const notificationCount = asArray(operations.notifications?.items || operations.notifications).length;
+2153:      route: "notification-center",
+2157:      description: "Review notifications, warnings, approvals, and attention signals.",
+2195:                  <p class="mhos-os-section-copy">AI Team can prepare drafts, tasks, workflows, and handoffs. This overview routes work to the owning operations center for review, monitoring, or controlled follow-up.</p>
+2207:                      <button class="btn btn-secondary" type="button" data-ops-route="${context.escapeHtml(center.route)}" data-ops-label="${context.escapeHtml(center.title)}">
+2223:                  <p class="mhos-os-panel-copy">For new operational work, start in AI Team with Operations Lead or Full Team, then route the result to Task Center, Workflows, Queue, or Job Monitor.</p>
+2227:                <button class="btn btn-secondary" type="button" data-ops-route="ai-command" data-ops-label="AI Team">Open AI Team</button>
+2228:                <button class="btn btn-ghost" type="button" data-ops-route="workflows" data-ops-label="Workflows">Open Workflows</button>
+2237:                  <p class="mhos-os-panel-copy">This overview does not execute jobs, mutate tasks, send notifications, approve workflows, mark notifications read, publish, or trigger workers. It only routes to the owning workspace.</p>

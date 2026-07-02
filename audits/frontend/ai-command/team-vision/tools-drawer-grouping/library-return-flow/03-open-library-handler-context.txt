@@ -1,0 +1,51 @@
+  1635	  sessionKey,
+  1636	  updateStatus
+  1637	}) {
+  1638	  if (!root || !session) return;
+  1639	
+  1640	  const drawer = root.querySelector("[data-aicmd-tool-drawer]");
+  1641	
+  1642	  Array.from(root.querySelectorAll("[data-aicmd-tool-drawer-close]")).forEach((btn) => {
+  1643	    btn.onclick = () => closeToolDrawer(drawer);
+  1644	  });
+  1645	
+  1646	  const openLibraryBtn = root.querySelector("[data-aicmd-tool-drawer-open-library]");
+  1647	  if (openLibraryBtn) {
+  1648	    openLibraryBtn.onclick = () => {
+  1649	      // Library Source Bridge workflow
+  1650	      const project = projectName || "__default__";
+  1651	      const drawerSourceSelect = root.querySelector("[data-aicmd-tool-drawer-source-select]");
+  1652	      const selectedSourceType = drawerSourceSelect?.value || "auto";
+  1653	      const mapping = getSourceTypeMapping(selectedSourceType);
+  1654	      const payload = {
+  1655	        type: "library_source_selection",
+  1656	        origin: "ai-command",
+  1657	        returnTarget: "ai-command",
+  1658	        sourceType: selectedSourceType,
+  1659	        libraryFilter: mapping.libraryFilter,
+  1660	        targetSection: "asset-workspace",
+  1661	        created_at: new Date().toISOString()
+  1662	      };
+  1663	      setSharedLibrarySourceBridge(project, payload);
+  1664	      setSharedLibrarySourceBridge("__default__", payload);
+  1665	
+  1666	      const drawerReturnContext = buildAiDrawerReturnContext({
+  1667	        projectName: project,
+  1668	        origin: "ai-command",
+  1669	        drawerOpen: true,
+  1670	        specialistId: drawer?.dataset?.specialistId || "",
+  1671	        modeId: drawer?.dataset?.modeId || "",
+  1672	        toolId: drawer?.dataset?.pendingTool || "",
+  1673	        teamMode: session?.teamMode || "solo",
+  1674	        sourceType: selectedSourceType,
+  1675	        outputType: drawer?.querySelector?.("[data-aicmd-tool-drawer-output-select]")?.value || ""
+  1676	      });
+  1677	      setSharedAiDrawerReturn(project, drawerReturnContext);
+  1678	      setSharedAiDrawerReturn("__default__", drawerReturnContext);
+  1679	      updateStatus?.("Library guide opened. Select an asset, click Use as Source in AI Command, then return to AI Command.");
+  1680	      if (typeof window !== "undefined") {
+  1681	        window.location.hash = "#library";
+  1682	      }
+  1683	    };
+  1684	  }
+  1685	

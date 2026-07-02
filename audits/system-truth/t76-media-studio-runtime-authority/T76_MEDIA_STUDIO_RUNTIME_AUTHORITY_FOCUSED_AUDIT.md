@@ -1,0 +1,1838 @@
+# T76 — Media Studio Runtime Authority Focused Audit
+
+## Status
+Audit-only. No production files changed.
+
+## Scope
+Focused runtime authority review of `public/control-center/pages/media-studio-workspace.js`.
+
+## Why Media Studio Is High Risk
+Media Studio is an active routed creative execution surface. It may include provider-backed generation, media job persistence, approvals, Library handoff, Publishing handoff, task creation, local drafts, and AI prompt improvement. These must be classified before any patch.
+
+## File Summary
+- File: `public/control-center/pages/media-studio-workspace.js`
+- Lines: 3753
+- Imports: 3
+- Render writes: 1
+- Event bindings: 28
+- API imports/calls: 42
+- Generation signals: 286
+- Approval signals: 226
+- Handoff signals: 305
+- Task signals: 20
+- Save/write/storage signals: 115
+- Destructive/execution signals: 205
+- Confirmation signals: 1
+- Access-key signals: 9
+- Navigation signals: 23
+- AI signals: 420
+- Disabled/read-only/draft/provider guard signals: 198
+- Risky terms: 687
+
+## Initial Risk Notes
+- Media Studio contains provider/generation signals. These require exact action-path classification.
+- Media Studio contains approval signals. Approval creation/decision paths must be checked for explicit operator confirmation.
+- Media Studio contains save/local draft/library persistence signals. These must be separated into local draft, backend media job save, and library handoff.
+- Confirmation dialogs exist and must be mapped to exact authority-sensitive actions.
+- Access-key handling exists and must be verified for provider-backed actions.
+
+## Imports
+- L1: `import {`
+- L22: `import {`
+- L26: `import { getSharedHandoff, setSharedAiDraft, setSharedHandoff } from "../shared-context.js";`
+
+## Render Writes
+- L3709: `root.innerHTML = \``
+
+## Event Bindings
+- L2292: `<div class="media-viewer-hint">Tap/click image to expand.</div>`
+- L2875: `form.oninput = () => {`
+- L2885: `button.onclick = () => {`
+- L2893: `button.onclick = () => {`
+- L2905: `startBtn.onclick = () => {`
+- L2915: `button.onclick = async () => {`
+- L2928: `button.onclick = () => {`
+- L2936: `fromHandoffBtn.onclick = () => {`
+- L2955: `improveBtn.onclick = async () => {`
+- L2994: `brandSafeBtn.onclick = async () => {`
+- L3036: `if (germanBtn) germanBtn.onclick = () => { sync(); applyPrompt(adaptGerman(session.form.prompt), "Prompt adapted for German usage."); };`
+- L3039: `if (imageToVideoBtn) imageToVideoBtn.onclick = () => { sync(); applyPrompt(convertImagePromptToVideoBrief(session.form.prompt), "Image prompt converted to video brief."); };`
+- L3042: `if (videoToVoiceBtn) videoToVoiceBtn.onclick = () => { sync(); applyPrompt(convertVideoBriefToVoiceover(session.form.prompt), "Video brief converted to voiceover script."); };`
+- L3045: `if (allFormatsBtn) allFormatsBtn.onclick = () => { sync(); applyPrompt(generateAllFormats(session, state), "All format briefs generated."); };`
+- L3049: `runGenerationBtn.onclick = async () => {`
+- L3056: `loadHandoffBtn.onclick = () => {`
+- L3080: `button.onclick = async () => {`
+- L3141: `approveBtn.onclick = async () => {`
+- L3183: `requestApprovalBtn.onclick = async () => {`
+- L3226: `rejectBtn.onclick = async () => {`
+- L3265: `createTaskBtn.onclick = async () => {`
+- L3308: `sendAiBtn.onclick = () => {`
+- L3343: `sendPublishingBtn.onclick = () => {`
+- L3363: `headerSaveLibraryBtn.onclick = async () => {`
+- L3380: `versionNotes.oninput = () => {`
+- L3386: `button.onclick = () => {`
+- L3396: `button.onclick = async () => {`
+- L3484: `button.onclick = async () => {`
+
+## API Imports / Calls
+- L2: `brandCheckMedia,`
+- L3: `createProjectApproval,`
+- L4: `createProjectHandoff,`
+- L5: `createProjectTask,`
+- L6: `decideProjectApproval,`
+- L7: `fetchProjectOperations,`
+- L8: `generateMediaCampaignPack,`
+- L9: `generateMediaImage,`
+- L10: `generateMediaVideoBrief,`
+- L11: `generateMediaVoiceScript,`
+- L12: `improveMediaPrompt,`
+- L13: `listProjectApprovals,`
+- L14: `listProjectContentItems,`
+- L15: `listProjectEvents,`
+- L16: `listProjectHandoffs,`
+- L17: `listProjectMediaJobs,`
+- L18: `listProjectTasks,`
+- L19: `saveProjectMediaJob,`
+- L20: `isAccessKeyFailure`
+- L580: `listProjectMediaJobs(backendProjectName, { limit: 120 }),`
+- L581: `listProjectContentItems(backendProjectName, { limit: 120 }),`
+- L582: `listProjectTasks(backendProjectName, 120),`
+- L583: `listProjectApprovals(backendProjectName, 120),`
+- L584: `listProjectHandoffs(backendProjectName, { limit: 120 }),`
+- L585: `listProjectEvents(backendProjectName, 120),`
+- L586: `fetchProjectOperations(backendProjectName)`
+- L1094: `const result = await createProjectHandoff(backendProjectName, handoffPayload);`
+- L2697: `const result = await saveProjectMediaJob(backendProjectName, buildMediaPayload(session, status));`
+- L2744: `if (mode === "video") return generateMediaVideoBrief;`
+- L2745: `if (mode === "audio") return generateMediaVoiceScript;`
+- L2746: `if (mode === "multi_format") return generateMediaCampaignPack;`
+- L2747: `return generateMediaImage;`
+- L2839: `const isAuthError = isAccessKeyFailure(error);`
+- L2973: `const result = await improveMediaPrompt(buildGenerationRequestPayload(session));`
+- L2980: `if (isAccessKeyFailure(error)) {`
+- L3012: `const result = await brandCheckMedia(buildGenerationRequestPayload(session));`
+- L3023: `if (isAccessKeyFailure(error)) {`
+- L3168: `await decideProjectApproval(backendProjectName, pendingApproval.id, {`
+- L3197: `await createProjectApproval(backendProjectName, {`
+- L3250: `await decideProjectApproval(backendProjectName, pendingApproval.id, {`
+- L3277: `await createProjectTask(backendProjectName, {`
+- L3540: `await createProjectHandoff(backendProjectName, handoff);`
+
+## Generation Signals
+- L8: `generateMediaCampaignPack,`
+- L9: `generateMediaImage,`
+- L10: `generateMediaVideoBrief,`
+- L11: `generateMediaVoiceScript,`
+- L31: `const MEDIA_MODES = ["image", "video", "voice", "campaign-pack"];`
+- L32: `const MEDIA_STATUSES = ["draft", "prompt_ready", "generating", "needs_review", "approved", "publishing_ready", "sent_to_publishing", "failed"];`
+- L33: `const MEDIA_PREVIEW_STATES = ["provider_not_configured", "generation_error", "prompt_ready", "generated", "saved_to_library", "needs_review", "approved", "publishing_ready", "sent_to_publishing"];`
+- L34: `const OUTPUT_PURPOSES = ["social post", "reel", "ad creative", "marketplace image", "email visual", "website banner"];`
+- L36: `const MEDIA_ASSET_KEYS = ["logo", "brand_guideline", "product_photos", "product_videos", "packaging_images", "social_assets", "campaign_assets"];`
+- L40: `videoRole: "video_lead",`
+- L44: `const MEDIA_ACCESS_KEY_GUIDANCE = "Missing or invalid Control Center access key. Save a valid access key before using provider-backed media generation.";`
+- L50: `bestUse: "When creating hero images, product carousels, ad stills, and marketplace visuals.",`
+- L51: `suggestedPrompt: "Act as Visual Director. Build a high-conversion image brief with composition, camera angle, lighting, text-safe area, and product-first framing."`
+- L54: `id: "video-strategist",`
+- L55: `title: "Video Strategist",`
+- L56: `purpose: "Translate campaign goals into short-form video concepts with strong hooks and pacing.",`
+- L57: `bestUse: "When producing reels, shorts, story cuts, and paid social video variants.",`
+- L58: `suggestedPrompt: "Act as Video Strategist. Convert this brief into a 9:16 short video plan with hook, beat-by-beat storyboard, scene transitions, and CTA timing."`
+- L61: `id: "voice-director",`
+- L62: `title: "Voice Director",`
+- L63: `purpose: "Shape narration tone, rhythm, and script clarity for voice-led content.",`
+- L64: `bestUse: "When writing voiceovers for UGC-style videos, explainers, and promotional reels.",`
+- L65: `suggestedPrompt: "Act as Voice Director. Create a voiceover script with opening hook, scene-aligned narration, cadence notes, and pronunciation guidance."`
+- L166: `if (["prompt_ready", "prompt ready", "ready"].includes(normalized)) return "prompt_ready";`
+- L167: `if (["generating", "running", "processing", "in_progress"].includes(normalized)) return "generating";`
+- L178: `if (status === "prompt_ready" || status === "generating" || status === "needs_review") return "warning";`
+- L269: `function defaultForm(state, mode = "image") {`
+- L278: `format: mode === "video" ? "9:16 reel" : mode === "voice" ? "voiceover script" : "1:1 social image",`
+- L280: `brandStyle: firstText(overview.brand_voice, overview.tone, "Premium, clear, brand-safe"),`
+- L283: `outputPurpose: mode === "video" ? "reel" : "social post",`
+- L296: `mode = "image",`
+- L299: `providerStatus = "prompt_ready",`
+- L302: `provider = "",`
+- L309: `mode: asString(mode || "image"),`
+- L312: `provider_status: MEDIA_PREVIEW_STATES.includes(asString(providerStatus)) ? asString(providerStatus) : "prompt_ready",`
+- L315: `provider: asString(provider),`
+- L334: `mode: firstText(raw.mode, raw.request_type, "image"),`
+- L337: `providerStatus: firstText(raw.provider_status, raw.status, "prompt_ready"),`
+- L340: `provider: firstText(raw.provider),`
+- L350: `mode: firstText(seed.mode, "image"),`
+- L353: `providerStatus: firstText(seed.providerStatus, "prompt_ready"),`
+- L356: `provider: firstText(seed.provider, ""),`
+- L372: `mode: session.form?.mode || session.mode || "image",`
+- L426: `mode: itemObject.mode || "image",`
+- L436: `current.mode = session.form.mode || session.mode || current.mode || "image";`
+- L446: `session.mode = current.mode || session.mode || "image";`
+- L475: `mode: "image",`
+- L476: `form: defaultForm(state, "image"),`
+- L490: `if (mode === "voice") return "audio";`
+- L491: `if (mode === "campaign-pack") return "multi_format";`
+- L492: `return mode || "image";`
+- L496: `return mode === "video" ? MEDIA_ROLE_DEFAULTS.videoRole : MEDIA_ROLE_DEFAULTS.designRole;`
+- L501: `const requestType = toKey(raw.request_type || raw.media_type || raw.mode || "image");`
+- L502: `const mode = requestType === "audio" ? "voice" : requestType === "multi_format" ? "campaign-pack" : requestType || "image";`
+- L506: `mode: MEDIA_MODES.includes(mode) ? mode : "image",`
+- L521: `provider: asString(raw.provider || ""),`
+- L561: `generating: 5,`
+- L562: `prompt_ready: 6,`
+- L717: `session.mode = item.mode || "image";`
+- L719: `mode: item.mode || "image",`
+- L742: `function resetForm(session, state, mode = session.mode || "image") {`
+- L763: `session.mode = session.form.mode || session.mode || "image";`
+- L777: `if (!clean(form.prompt) && intent !== "generate-prompt") errors.prompt = "Prompt or brief is required.";`
+- L796: `\`Brand style: ${form.brandStyle || overview.brand_voice || "premium, clear, brand-safe"}.\`,`
+- L813: `return \`${base}\n\nGerman adaptation: keep the visual brief international, adapt on-image or voiceover language to clear German, preserve brand tone, and avoid literal translations that sound unnatural.\`;`
+- L816: `function convertImagePromptToVideoBrief(prompt) {`
+- L817: `const base = clean(prompt) || "Create a product-focused image concept.";`
+- L818: `return \`${base}\n\nConvert to video brief:\n- Duration: 15-30 seconds\n- Hook in first 2 seconds\n- Shot list with camera moves\n- Product visibility in every key shot\n- Text-safe zones and CTA ending\n- Channel export notes for reels/shorts\`;`
+- L821: `function convertVideoBriefToVoiceover(prompt) {`
+- L822: `const base = clean(prompt) || "Create a short video plan.";`
+- L823: `return \`${base}\n\nConvert to voiceover script:\n- Opening hook line\n- Scene-by-scene narration\n- German-friendly pronunciation notes\n- Timing markers for each scene\n- CTA close with compliant brand tone\`;`
+- L826: `function generateAllFormats(session, state) {`
+- L829: `"Image format brief:",`
+- L832: `"Video format brief:",`
+- L833: `convertImagePromptToVideoBrief(contextPrompt),`
+- L835: `"Voice format brief:",`
+- L836: `convertVideoBriefToVoiceover(contextPrompt),`
+- L839: `\`${contextPrompt}\n\nCampaign pack outputs: image hero, video short, voiceover script, channel cutdowns, and publishing-ready metadata.\``
+- L843: `function buildMediaPayload(session, status = "prompt_ready") {`
+- L844: `const mode = session.form.mode || session.mode || "image";`
+- L863: `provider: mode === "video" ? "video provider pending" : mode === "voice" ? "voice provider pending" : "image provider pending",`
+- L876: `provider_status: version.provider_status,`
+- L879: `provider: version.provider,`
+- L889: `const mode = session.form.mode || session.mode || "image";`
+- L912: `provider: response?.provider,`
+- L915: `image_url: response?.image_url,`
+- L916: `video_url: response?.video_url,`
+- L918: `images: asArray(response?.images),`
+- L919: `videos: asArray(response?.videos),`
+- L921: `video_brief: response?.video_brief,`
+- L922: `voice_script: response?.voice_script,`
+- L932: `provider: response?.provider || "",`
+- L967: `const mediaType = firstText(version?.mode, selectedItem?.mode, session.form.mode, "image");`
+- L988: `url: firstText(payload.url, mediaPreview.imageUrl),`
+- L989: `image_url: mediaPreview.imageUrl,`
+- L990: `video_url: mediaPreview.videoUrl,`
+- L1058: `source_role: selectedItem?.owner_role || ownerRoleForMode(session.form.mode || session.mode || "image"),`
+- L1133: `version.provider_status = "saved_to_library";`
+- L1134: `if (["draft", "prompt_ready"].includes(normalizeStatus(version.readiness_status || "draft", "draft"))) {`
+- L1149: `provider_status: version.provider_status,`
+- L1153: `provider: version.provider || "",`
+- L1160: `function saveDraftToSession(projectName, state, session, status = "prompt_ready") {`
+- L1180: `draftJobs: counts.draft + counts.prompt_ready,`
+- L1192: `action: "Regenerate or repair the failed media job",`
+- L1237: `const imageConnected = capabilityFromOperations(operations, ["image_generation", "image generator", "image_backend"]);`
+- L1238: `const videoConnected = capabilityFromOperations(operations, ["video_generation", "video generator", "video_backend"]);`
+- L1239: `const voiceConnected = capabilityFromOperations(operations, ["voice_generation", "audio_generation", "voice_backend"]);`
+- L1245: `image_generation_backend: imageConnected,`
+- L1246: `video_generation_backend: videoConnected,`
+- L1247: `voice_generation_backend: voiceConnected,`
+- L1256: `const mode = session.mode || session.form?.mode || "image";`
+- L1257: `if (mode === "image" && readiness.image_generation_backend) return "";`
+- L1258: `if (mode === "video" && readiness.video_generation_backend) return "";`
+- L1259: `if (mode === "voice" && readiness.voice_generation_backend) return "";`
+- L1260: `if (mode === "campaign-pack" && readiness.image_generation_backend && readiness.video_generation_backend && readiness.voice_generation_backend) return "";`
+- L1261: `return "Generator backend not connected yet — your prompt/job is ready. Review it, save it as a draft, send it to AI Command, save it to Library, or connect a provider in Integrations before trying real output generation.";`
+- L1447: `.media-status-pill.is-generating {`
+- L1485: `.media-viewer-image-link {`
+- L1491: `.media-viewer-image,`
+- L1492: `.media-viewer-video {`
+- L1606: `clean(payload.image_url) ||`
+- L1607: `clean(payload.video_url) ||`
+- L1609: `asArray(payload.images).length ||`
+- L1610: `asArray(payload.videos).length ||`
+- L1611: `clean(payload.video_brief) ||`
+- L1612: `clean(payload.voice_script) ||`
+- L1613: `asObject(payload.campaign_pack).image_prompt ||`
+- L1614: `asObject(payload.campaign_pack).video_brief ||`
+- L1615: `asObject(payload.campaign_pack).voice_script ||`
+- L1735: `const mode = form.mode || session.mode || selectedItem?.mode || "image";`
+- L1748: `<p class="media-section-copy">Start by choosing Image, Video, Voice, or Campaign Pack. Generate a prompt first, then use Generate Output only when a provider/backend is connected. Save drafts for review, save reusable results to Library, or prepare a Publishing handoff without publishing directly.</p>`
+- L1759: `<span><strong>Mode</strong>${escapeHtml(mode === "campaign-pack" ? "Campaign Pack" : titleCase(mode))}</span>`
+- L1765: `<button id="mediaStartJobBtn" class="btn btn-secondary" type="button" data-new-media-job="image">Start Media Job</button>`
+- L1798: `label: "Generate/Prepare",`
+- L1823: `<nav class="media-workflow-strip" id="mediaWorkflowStrip" aria-label="Media Studio workflow: Brief Source Generate Prepare Review Save to Library Handoff">`
+- L1824: `<div class="media-workflow-title">Brief &rarr; Source &rarr; Generate/Prepare &rarr; Review &rarr; Save to Library &rarr; Handoff</div>`
+- L1865: `["Image generation", "Check API readiness"],`
+- L1866: `["Video", metrics.counts.generating ? "Active" : "Prompt-ready flow"],`
+- L1867: `["Voice", selectedItem?.mode === "voice" ? "Selected" : "Available"],`
+- L1891: `<button id="mediaStartJobBtn" class="btn btn-secondary" type="button" data-new-media-job="image">Start Media Job</button>`
+- L1927: `const mode = session.mode || form.mode || "image";`
+- L1929: `const modeLabel = mode === "campaign-pack" ? "Campaign Pack" : titleCase(mode);`
+- L1935: `<h3>Brief -> Source -> Generate/Prepare -> Review -> Save to Library -> Handoff</h3>`
+- L1936: `<p class="media-section-copy">Choose a media mode, prepare a prompt/job-ready draft, then render with a connected provider or continue safely with review and handoff.</p>`
+- L1942: `<button class="media-mode-tab${item === mode ? " is-active" : ""}" type="button" data-media-mode="${escapeHtml(item)}"${item === "image" || item === "video" ? \` data-new-media-job="${escapeHtml(item)}"\` : ""}>${escapeHtml(item === "campaign-pack" ? "Campaign Pack" : titleCase(item))}</button>`
+- L1947: `Start here: choose Image, Video, Voice, or Campaign Pack. Complete the brief, generate or improve the prompt, then use Generate Output only when a provider/backend is connected. If generation is unavailable or times out, keep the prompt/job-ready draft and continue with review, Library save, AI Command review, or provider setup in Integrations.`
+- L1960: `${renderField({ id: "mediaFormatInput", name: "format", label: "Format", value: form.format, helper: "Examples: 1:1 product image, 9:16 reel, voiceover script, marketplace hero." }, session, escapeHtml)}`
+- L1965: `${renderField({ id: "mediaPromptInput", name: "prompt", label: "Prompt / brief", value: form.prompt, multiline: true, rows: 7, helper: "Use this as the creative brief. If no generation provider is connected, Media Studio keeps it as a prompt/job-ready draft for review, Library save, AI review, or provider handoff." }, session, escapeHtml)}`
+- L1973: `<button id="mediaGeneratePromptBtn" class="btn btn-secondary" type="button">Generate Prompt From Context</button>`
+- L1974: `<button id="mediaRunGenerationBtn" class="btn btn-secondary" type="button">Generate Output</button>`
+- L1993: `<button id="mediaPromptFromContextBtn" class="btn btn-secondary" type="button">Generate from project setup</button>`
+- L1994: `<button id="mediaPromptFromHandoffBtn" class="btn btn-secondary" type="button">Generate from workflow handoff</button>`
+- L1998: `<button id="mediaImageToVideoBtn" class="btn btn-secondary" type="button">Convert image prompt to video brief</button>`
+- L1999: `<button id="mediaVideoToVoiceBtn" class="btn btn-secondary" type="button">Convert video brief to voiceover</button>`
+- L2000: `<button id="mediaGenerateAllFormatsBtn" class="btn btn-secondary" type="button">Generate all formats</button>`
+- L2095: `<button type="button" data-media-action="regenerate" data-media-id="${escapeHtml(item.id)}">Regenerate</button>`
+- L2116: `clean(payload.image_url) ||`
+- L2117: `clean(payload.video_url) ||`
+- L2119: `asArray(payload.images).length ||`
+- L2120: `asArray(payload.videos).length ||`
+- L2121: `clean(payload.video_brief) ||`
+- L2122: `clean(payload.voice_script) ||`
+- L2123: `asObject(payload.campaign_pack).image_prompt ||`
+- L2124: `asObject(payload.campaign_pack).video_brief ||`
+- L2125: `asObject(payload.campaign_pack).voice_script ||`
+- L2206: `function normalizeMediaUrl(url, allowDataImage = false) {`
+- L2209: `if (allowDataImage && /^data:image\//i.test(value)) return value;`
+- L2217: `const firstImage = asObject(asArray(root.images)[0]);`
+- L2218: `const firstVideo = asObject(asArray(root.videos)[0]);`
+- L2221: `const imageUrl = firstText(`
+- L2223: `normalizeMediaUrl(root.image_url, true),`
+- L2224: `normalizeMediaUrl(firstImage.url, true),`
+- L2225: `clean(firstImage.b64_json) ? \`data:image/png;base64,${clean(firstImage.b64_json)}\` : ""`
+- L2228: `const videoUrl = firstText(`
+- L2229: `normalizeMediaUrl(root.video_url),`
+- L2230: `normalizeMediaUrl(firstVideo.url),`
+- L2231: `normalizeMediaUrl(asObject(root.video).url),`
+- L2232: `normalizeMediaUrl(asObject(root.asset).video_url)`
+- L2238: `normalizeMediaUrl(asObject(root.voice).audio_url),`
+- L2243: `if (videoUrl) {`
+- L2244: `detectedType = "video";`
+- L2247: `} else if (imageUrl) {`
+- L2248: `detectedType = "image";`
+- L2253: `imageUrl,`
+- L2254: `videoUrl,`
+- L2276: `const mode = asString(version.mode || selectedItem?.mode || session.form.mode || "image");`
+- L2277: `const stateLabel = asString(version.provider_status || "prompt_ready");`
+- L2279: `const videoBrief = asString(payload.video_brief);`
+- L2280: `const voiceScript = asString(payload.voice_script);`
+- L2283: `let previewBody = \`<div class="media-prompt-box">${escapeHtml("Prompt-ready state. Generate output or switch version to inspect payload.")}</div>\`;`
+- L2285: `if (mode === "image") {`
+- L2286: `previewBody = mediaPreview.imageUrl`
+- L2289: `<a class="media-viewer-image-link" href="${escapeHtml(mediaPreview.imageUrl)}" target="_blank" rel="noopener noreferrer">`
+- L2290: `<img class="media-viewer-image" alt="Generated media preview" src="${escapeHtml(mediaPreview.imageUrl)}">`
+- L2292: `<div class="media-viewer-hint">Tap/click image to expand.</div>`
+- L2295: `: \`<div class="media-prompt-box">${escapeHtml(JSON.stringify(payload, null, 2) || "No image output was returned yet. If the provider is not connected or timed out, keep the prompt/job-ready draft and continue with review, Library save, or provider setup in Integrations.")}</div>\`;`
+- L2298: `if (mode === "video") {`
+- L2299: `if (mediaPreview.videoUrl) {`
+- L2302: `<video class="media-viewer-video" controls preload="metadata" src="${escapeHtml(mediaPreview.videoUrl)}"></video>`
+- L2306: `const lines = parseStructuredList(videoBrief || asString(payload.message));`
+- L2309: `: \`<div class="media-prompt-box">${escapeHtml("No video output or video brief is available yet. Generate or prepare a video brief first; provider-backed video output appears here only when the backend returns a video URL.")}</div>\`;`
+- L2313: `if (mode === "voice") {`
+- L2327: `<div class="media-check-item"><span>Voice tone</span><strong>${escapeHtml(tone)}</strong></div>`
+- L2332: `<div class="media-prompt-box media-block-gap">${escapeHtml(voiceScript || asString(payload.message) || "No voice script or audio output is available yet. Voice mode prepares voiceover scripts/audio outputs only; it does not run IVR, phone calls, or call-center workflows.")}</div>`
+- L2337: `if (mode === "campaign-pack") {`
+- L2340: `<div class="media-check-item"><span>Image prompt</span><strong>${escapeHtml(firstText(campaignPack.image_prompt, "Missing"))}</strong></div>`
+- L2341: `<div class="media-check-item"><span>Video brief</span><strong>${escapeHtml(firstText(campaignPack.video_brief, "Missing"))}</strong></div>`
+- L2342: `<div class="media-check-item"><span>Voice script</span><strong>${escapeHtml(firstText(campaignPack.voice_script, "Missing"))}</strong></div>`
+- L2397: `<strong>${escapeHtml(titleCase(selected?.mode || session.mode || "image"))}</strong>`
+- L2400: `<span>Provider</span>`
+- L2401: `<strong>${escapeHtml(firstText(selected?.provider, "Not set"))}</strong>`
+- L2404: `<span>Provider status</span>`
+- L2405: `<strong>${escapeHtml(titleCase(firstText(selected?.provider_status, "prompt_ready")))}</strong>`
+- L2456: `<button class="btn btn-secondary" type="button" data-media-version-action="regenerate">Regenerate</button>`
+- L2516: `if (mode.includes("video") || mode.includes("reel") || mode.includes("storyboard")) return "video-strategist";`
+- L2517: `if (mode.includes("voice") || mode.includes("audio")) return "voice-director";`
+- L2593: `["image generation backend", readiness.image_generation_backend],`
+- L2594: `["video generation backend", readiness.video_generation_backend],`
+- L2595: `["voice generation backend", readiness.voice_generation_backend],`
+- L2616: `${!readiness.image_generation_backend || !readiness.video_generation_backend || !readiness.voice_generation_backend ? \`<div class="simple-banner media-block-gap">${escapeHtml("Generator backend not connected yet — your prompt/job is ready. Review it, save it as a draft, send it to AI Command, save it to Library, or connect a provider in Integrations before trying real output generation.")}</div>\` : ""}`
+
+## Approval Signals
+- L3: `createProjectApproval,`
+- L6: `decideProjectApproval,`
+- L13: `listProjectApprovals,`
+- L32: `const MEDIA_STATUSES = ["draft", "prompt_ready", "generating", "needs_review", "approved", "publishing_ready", "sent_to_publishing", "failed"];`
+- L33: `const MEDIA_PREVIEW_STATES = ["provider_not_configured", "generation_error", "prompt_ready", "generated", "saved_to_library", "needs_review", "approved", "publishing_ready", "sent_to_publishing"];`
+- L41: `reviewRole: "compliance_reviewer",`
+- L71: `bestUse: "Before approvals and publishing handoff, especially for regulated or claim-sensitive content.",`
+- L85: `bestUse: "Right before preparing a Publishing package for downstream review.",`
+- L86: `suggestedPrompt: "Act as Publishing Assistant. Produce a final publishing handoff summary with readiness status, blockers, approval notes, and channel delivery checklist."`
+- L168: `if (["needs_review", "needs review", "review", "pending_approval"].includes(normalized)) return "needs_review";`
+- L169: `if (["approved", "complete", "completed"].includes(normalized)) return "approved";`
+- L177: `if (status === "approved" || status === "publishing_ready" || status === "sent_to_publishing") return "success";`
+- L178: `if (status === "prompt_ready" || status === "generating" || status === "needs_review") return "warning";`
+- L284: `reviewNotes: "",`
+- L312: `provider_status: MEDIA_PREVIEW_STATES.includes(asString(providerStatus)) ? asString(providerStatus) : "prompt_ready",`
+- L371: `session.versioning = createVersioningState(session.form?.prompt, session.form?.reviewNotes, {`
+- L377: `session.versioning.versions = createVersioningState(session.form?.prompt, session.form?.reviewNotes).versions;`
+- L425: `return createVersioningState(itemObject.prompt || "", itemObject.reviewNotes || "", {`
+- L435: `current.notes = clean(session.form.reviewNotes);`
+- L444: `session.form.reviewNotes = current.notes || "";`
+- L470: `approvals: [],`
+- L520: `approval_state: asString(raw.approval_state || raw.approvalStatus || ""),`
+- L525: `review_role: asString(raw.review_role || MEDIA_ROLE_DEFAULTS.reviewRole),`
+- L531: `preview_history: asArray(raw.preview_history),`
+- L535: `linked_approvals: asArray(raw.linked_approvals),`
+- L537: `reviewNotes: firstText(raw.review_notes, raw.reviewNotes, asArray(raw.comments)[0]?.text),`
+- L559: `approved: 3,`
+- L560: `needs_review: 4,`
+- L583: `listProjectApprovals(backendProjectName, 120),`
+- L593: `approvalsResult,`
+- L605: `const approvals = fulfilledValue(approvalsResult, { items: [] });`
+- L617: `session.approvals = asArray(approvals.items);`
+- L730: `reviewNotes: item.reviewNotes || "",`
+- L808: `return \`${base}\n\nBrand safety guardrails: use approved logo and brand cues only, preserve packaging and product truth, avoid medical or exaggerated claims, keep text legible, and respect platform content policies.\`;`
+- L862: `review_notes: session.form.reviewNotes,`
+- L866: `review_role: MEDIA_ROLE_DEFAULTS.reviewRole,`
+- L939: `function normalizeApprovalStatus(readinessStatus) {`
+- L941: `if (["approved", "publishing_ready", "sent_to_publishing"].includes(normalized)) return "approved";`
+- L942: `if (normalized === "needs_review") return "needs_review";`
+- L957: `if (["publishing_ready", "sent_to_publishing", "approved"].includes(normalizeStatus(readiness.readinessStatus, "draft"))) {`
+- L965: `const mediaPreview = resolvePreviewMedia(payload);`
+- L988: `url: firstText(payload.url, mediaPreview.imageUrl),`
+- L989: `image_url: mediaPreview.imageUrl,`
+- L990: `video_url: mediaPreview.videoUrl,`
+- L991: `audio_url: mediaPreview.audioUrl,`
+- L993: `approval_status: normalizeApprovalStatus(readiness.readinessStatus),`
+- L996: `notes: firstText(version?.notes, session.form.reviewNotes, selectedItem?.reviewNotes),`
+- L1059: `destination_role: MEDIA_ROLE_DEFAULTS.reviewRole,`
+- L1179: `readyAssets: counts.approved + counts.publishing_ready + counts.sent_to_publishing,`
+- L1181: `needsReview: counts.needs_review,`
+- L1193: `why: \`${failed.title} is blocked. Review the prompt and reference asset before routing downstream.\``
+- L1196: `const needsReview = selectedItem?.status === "needs_review" ? selectedItem : null;`
+- L1197: `if (needsReview) {`
+- L1199: `action: "Review selected media package",`
+- L1200: `why: \`${needsReview.title} needs brand and format review before it can become package-ready.\``
+- L1219: `why: "Draft media work exists. Complete prompt, brand style, format, and output purpose before review."`
+- L1224: `why: "No media job is ready yet. Start with a brief, build a brand-safe prompt, then review and prepare a Publishing package."`
+- L1242: `const approvalsConnected = hasBackend || capabilityFromOperations(operations, ["approval", "approvals"]);`
+- L1249: `approval_backend: approvalsConnected,`
+- L1261: `return "Generator backend not connected yet — your prompt/job is ready. Review it, save it as a draft, send it to AI Command, save it to Library, or connect a provider in Integrations before trying real output generation.";`
+- L1400: `.media-preview-title {`
+- L1408: `.media-preview-copy,`
+- L1440: `.media-status-pill.is-approved,`
+- L1445: `.media-status-pill.is-needs-review,`
+- L1596: `if (normalized === "approved") return "Review Ready";`
+- L1640: `detail: "A reference asset is named, but source-of-truth status still needs review."`
+- L1668: `const packageReady = ["publishing_ready", "sent_to_publishing", "approved"].includes(readiness.readinessStatus) && hasOutput;`
+- L1686: `: "Complete the objective, prompt, channel, and format before review."`
+- L1692: `status: isBrandSafe && hasBrandCue ? "Brand guided" : promptText ? "Review brand fit" : "Needs prompt",`
+- L1695: `: "Review brand style, logo fit, product truth, and safe claims."`
+- L1701: `status: packageReady ? "Package ready" : hasOutput ? "Review package" : hasBrief ? "Prepare output" : "Needs brief",`
+- L1704: `: "Output, selected version, and review notes should be checked before handoff."`
+- L1710: `status: needsGovernance ? "Review risk" : "No obvious risk",`
+- L1712: `? "Prepare Governance Review if source, claim, legal, privacy, or pricing risk exists."`
+- L1747: `<h2>Creative preparation, review, and routing workspace</h2>`
+- L1748: `<p class="media-section-copy">Start by choosing Image, Video, Voice, or Campaign Pack. Generate a prompt first, then use Generate Output only when a provider/backend is connected. Save drafts for review, save reusable results to Library, or prepare a Publishing handoff without publishing directly.</p>`
+- L1769: `<button id="mediaSendAiCommandBtn" class="btn btn-secondary" type="button">Open AI Command Review</button>`
+- L1784: `const packageReady = ["publishing_ready", "approved", "sent_to_publishing"].includes(readiness.readinessStatus) && hasOutput;`
+- L1803: `label: "Review",`
+- L1804: `state: ["approved", "publishing_ready", "sent_to_publishing"].includes(readiness.readinessStatus) ? "ready" : hasOutput ? "active" : "missing",`
+- L1815: `detail: handoffPrepared ? "Prepared" : packageReady ? "Package ready" : "Needs review"`
+- L1823: `<nav class="media-workflow-strip" id="mediaWorkflowStrip" aria-label="Media Studio workflow: Brief Source Generate Prepare Review Save to Library Handoff">`
+- L1824: `<div class="media-workflow-title">Brief &rarr; Source &rarr; Generate/Prepare &rarr; Review &rarr; Save to Library &rarr; Handoff</div>`
+- L1854: `<div class="media-overview-item"><span>Needs review</span><strong>${escapeHtml(formatCount(metrics.needsReview))}</strong></div>`
+- L1893: `<button id="mediaSendAiCommandBtn" class="btn btn-secondary" type="button">Open AI Command Review</button>`
+- L1935: `<h3>Brief -> Source -> Generate/Prepare -> Review -> Save to Library -> Handoff</h3>`
+- L1936: `<p class="media-section-copy">Choose a media mode, prepare a prompt/job-ready draft, then render with a connected provider or continue safely with review and handoff.</p>`
+- L1947: `Start here: choose Image, Video, Voice, or Campaign Pack. Complete the brief, generate or improve the prompt, then use Generate Output only when a provider/backend is connected. If generation is unavailable or times out, keep the prompt/job-ready draft and continue with review, Library save, AI Command review, or provider setup in Integrations.`
+- L1965: `${renderField({ id: "mediaPromptInput", name: "prompt", label: "Prompt / brief", value: form.prompt, multiline: true, rows: 7, helper: "Use this as the creative brief. If no generation provider is connected, Media Studio keeps it as a prompt/job-ready draft for review, Library save, AI review, or provider handoff." }, session, escapeHtml)}`
+- L1970: `${renderField({ id: "mediaReviewNotesInput", name: "reviewNotes", label: "Review notes", value: form.reviewNotes, multiline: true, rows: 3, errorKey: "reviewNotes" }, session, escapeHtml)}`
+- L2092: `<button type="button" data-media-action="preview" data-media-id="${escapeHtml(item.id)}">Preview</button>`
+- L2094: `<button type="button" data-media-action="approve" data-media-id="${escapeHtml(item.id)}">Mark Review Ready</button>`
+- L2128: `const publishingReady = ["publishing_ready", "sent_to_publishing", "approved"].includes(readinessStatus) && hasOutput;`
+- L2129: `const approvalStatus = ["approved", "publishing_ready", "sent_to_publishing"].includes(readinessStatus) ? "approved" : "pending";`
+- L2136: `["review state", approvalStatus === "approved"]`
+- L2142: `approvalStatus,`
+- L2150: `if (key === "brand-colors") return item.brandStyle ? "Review" : "Missing";`
+- L2151: `if (key === "logo-fit") return item.brandStyle || item.referenceAsset ? "Review" : "Missing";`
+- L2152: `if (key === "product-visibility") return item.prompt || item.objective ? "Review" : "Missing";`
+- L2154: `if (key === "safe-text-area") return item.prompt ? "Review" : "Missing";`
+- L2155: `if (key === "german-tone") return /german|deutsch/i.test(item.prompt || "") ? "Review" : "Prepare";`
+- L2157: `return "Review";`
+- L2181: `<span>Review state</span>`
+- L2182: `<strong>${escapeHtml(readiness.approvalStatus === "approved" ? "Review Ready" : "Pending")}</strong>`
+- L2188: `${MEDIA_PREVIEW_STATES.map((status) => \``
+- L2215: `function resolvePreviewMedia(payload) {`
+- L2259: `function renderOutputPreviewPanel(session, selectedItem, escapeHtml) {`
+- L2263: `<section class="card media-card" id="mediaOutputPreviewPanel">`
+- L2266: `<div class="setup-kicker">Output Preview</div>`
+- L2278: `const mediaPreview = resolvePreviewMedia(payload);`
+- L2283: `let previewBody = \`<div class="media-prompt-box">${escapeHtml("Prompt-ready state. Generate output or switch version to inspect payload.")}</div>\`;`
+- L2286: `previewBody = mediaPreview.imageUrl`
+- L2289: `<a class="media-viewer-image-link" href="${escapeHtml(mediaPreview.imageUrl)}" target="_blank" rel="noopener noreferrer">`
+- L2290: `<img class="media-viewer-image" alt="Generated media preview" src="${escapeHtml(mediaPreview.imageUrl)}">`
+- L2295: `: \`<div class="media-prompt-box">${escapeHtml(JSON.stringify(payload, null, 2) || "No image output was returned yet. If the provider is not connected or timed out, keep the prompt/job-ready draft and continue with review, Library save, or provider setup in Integrations.")}</div>\`;`
+- L2299: `if (mediaPreview.videoUrl) {`
+- L2300: `previewBody = \``
+- L2302: `<video class="media-viewer-video" controls preload="metadata" src="${escapeHtml(mediaPreview.videoUrl)}"></video>`
+- L2307: `previewBody = lines.length`
+- L2314: `if (mediaPreview.audioUrl) {`
+- L2315: `previewBody = \``
+- L2317: `<audio class="media-viewer-audio" controls preload="metadata" src="${escapeHtml(mediaPreview.audioUrl)}"></audio>`
+- L2325: `previewBody = \``
+- L2338: `previewBody = \``
+- L2350: `<section class="card media-card" id="mediaOutputPreviewPanel">`
+- L2353: `<div class="setup-kicker">Output Preview</div>`
+- L2355: `<p class="media-section-copy">${escapeHtml(firstText(payload.message, \`Detected output type: ${mediaPreview.detectedType}.\`))}</p>`
+- L2359: `${previewBody}`
+- L2454: `<button class="btn btn-secondary" type="button" data-media-version-action="approve">Mark Review Ready</button>`
+- L2466: `function renderReviewPanel(session, selectedItem, escapeHtml) {`
+- L2470: `const notesText = activeNotes || selectedItem?.reviewNotes || asArray(selectedItem?.comments)[0]?.text || "No review notes yet.";`
+- L2471: `const prompt = activePrompt || selectedItem?.prompt || selectedItem?.brief || "Select or save a media job to preview the prompt, brief, and asset notes.";`
+- L2483: `<section class="card media-card" id="mediaReviewPanel">`
+- L2486: `<div class="setup-kicker">Asset Preview / Brand Safety Checklist</div>`
+- L2491: `<span class="media-preview-title">${escapeHtml(selectedItem ? \`${titleCase(selectedItem.mode)} preview / prompt\` : "Preview")}</span>`
+- L2503: `<button id="mediaApproveBtn" class="btn btn-secondary" type="button">Mark Review Ready</button>`
+- L2504: `<button id="mediaRequestApprovalBtn" class="btn btn-secondary" type="button">Request Approval</button>`
+- L2514: `const status = String(selectedItem?.status || selectedItem?.review_status || "").toLowerCase();`
+- L2519: `if (status.includes("ready") || status.includes("review")) return "brand-guardian";`
+- L2537: `<button class="btn btn-secondary" type="button" data-media-specialist-ai="${escapeHtml(specialist.id)}">Open AI Command Review</button>`
+- L2597: `["approval backend", readiness.approval_backend]`
+- L2616: `${!readiness.image_generation_backend || !readiness.video_generation_backend || !readiness.voice_generation_backend ? \`<div class="simple-banner media-block-gap">${escapeHtml("Generator backend not connected yet — your prompt/job is ready. Review it, save it as a draft, send it to AI Command, save it to Library, or connect a provider in Integrations before trying real output generation.")}</div>\` : ""}`
+- L2623: `\`Review this Media Studio job for ${projectName}.\`,`
+- L2632: `\`Review notes: ${session.form.reviewNotes || selectedItem?.reviewNotes || "none"}\``
+- L2673: `notes: firstText(version?.notes, session.form.reviewNotes, source.reviewNotes),`
+- L2740: `return window.confirm(\`${title}\n\n${detail}\n\nAuthority: Media Studio can prepare, save, request review, and hand off media work, but provider generation, approval decisions, task creation, and publishing handoff must be explicitly confirmed by the operator.\n\nSelect Cancel to review before continuing.\`);`
+- L2763: `\`Action: Start provider-backed media generation for ${selectedMode}.\nRisk: This may call a configured AI/media provider and create a new generated output that must be reviewed before approval or publishing.\``
+- L2766: `session.draftMessage = "Media generation cancelled. Prompt remains ready for review.";`
+- L2789: `notes: firstText(response.message, "Generator backend not connected yet — your prompt/job is ready. Review it, save it as a draft, send it to AI Command, save it to Library, or connect a provider in Integrations before trying real output generation."),`
+- L2795: `session.draftMessage = response.message || "Generator backend not connected yet — your prompt/job is ready. Review it, save it as a draft, send it to AI Command, save it to Library, or connect a provider in Integrations before trying real output generation.";`
+- L2806: `readinessStatus: "needs_review",`
+- L2817: `session.form.reviewNotes = [session.form.reviewNotes, response.video_brief].filter(Boolean).join("\n\n").trim();`
+- L2820: `session.form.reviewNotes = [session.form.reviewNotes, response.voice_script].filter(Boolean).join("\n\n").trim();`
+- L2824: `session.form.reviewNotes = [session.form.reviewNotes, packText].filter(Boolean).join("\n\n").trim();`
+- L2827: `session.form.status = "needs_review";`
+- L2833: `status: "needs_review",`
+- L2836: `session.draftMessage = "Generation completed and queued for review.";`
+- L2964: `"Action: Improve this prompt using the media prompt service.\nRisk: This may call a configured AI provider. The result remains review-only and is not published."`
+- L3003: `"Action: Run media brand-safety review for this prompt.\nRisk: This may call a configured AI/provider service. The result remains review-only."`
+- L3087: `if (action === "preview" || action === "edit-prompt") {`
+- L3088: `document.getElementById(action === "preview" ? "mediaReviewPanel" : "mediaGeneratorPanel")?.scrollIntoView({ behavior: "smooth", block: "start" });`
+- L3105: `if (action === "approve") {`
+- L3107: `"Confirm local media approval mark",`
+- L3108: `"Action: Mark this media job as approved/review-ready locally.\nRisk: This does not publish, but it changes readiness status and can influence downstream handoff."`
+- L3112: `session.form.status = "approved";`
+- L3114: `if (currentVersion) currentVersion.readiness_status = "approved";`
+- L3116: `saveDraftToSession(projectName, state, session, "approved");`
+- L3117: `showMessage?.("Media job marked review-ready locally.");`
+- L3123: `"Action: Prepare and send this media package to Publishing.\nRisk: This creates a handoff path for downstream publishing review. It does not publish directly."`
+- L3139: `const approveBtn = document.getElementById("mediaApproveBtn");`
+- L3140: `if (approveBtn) {`
+- L3141: `approveBtn.onclick = async () => {`
+- L3146: `"Confirm media approval decision",`
+- L3147: `"Action: Record this media job as approved/review-ready.\nRisk: If a pending backend approval exists, this may submit an approval decision."`
+- L3151: `session.form.status = "approved";`
+- L3154: `currentVersion.readiness_status = "approved";`
+- L3158: `saveDraftToSession(projectName, state, session, "approved");`
+- L3161: `const pendingApproval = session.approvals.find((approval) =>`
+- L3162: `asString(approval.entity_type) === "media_job" &&`
+- L3163: `asString(approval.entity_id) === asString(item.id) &&`
+- L3164: `asString(approval.status) === "pending"`
+- L3166: `if (pendingApproval) {`
+- L3168: `await decideProjectApproval(backendProjectName, pendingApproval.id, {`
+- L3169: `decision: "approved",`
+- L3170: `note: session.form.reviewNotes || "Marked review-ready in Media Studio.",`
+- L3176: `showMessage?.("Media review state recorded.");`
+- L3181: `const requestApprovalBtn = document.getElementById("mediaRequestApprovalBtn");`
+- L3182: `if (requestApprovalBtn) {`
+- L3183: `requestApprovalBtn.onclick = async () => {`
+- L3187: `"Confirm media approval request",`
+- L3188: `"Action: Request Governance/Compliance review for this media job.\nRisk: This may create a backend approval item for a reviewer."`
+- L3192: `const item = selected() || saveDraftToSession(projectName, state, session, "needs_review");`
+- L3193: `saveDraftToSession(projectName, state, session, "needs_review");`
+- L3197: `await createProjectApproval(backendProjectName, {`
+- L3198: `title: \`Review ${item.title || session.form.title || "media job"}\`,`
+- L3201: `summary: session.form.reviewNotes || "Review media output before publishing handoff.",`
+- L3202: `reviewer_role: MEDIA_ROLE_DEFAULTS.reviewRole,`
+- L3213: `showMessage?.("Review request created.");`
+- L3215: `showMessage?.("Review request kept as local review state.");`
+- L3218: `showMessage?.("Media draft moved to needs review locally.");`
+- L3232: `"Action: Return this media job to draft/revision.\nRisk: If a pending backend approval exists, this may submit a rejection/revision decision."`
+- L3243: `const pendingApproval = session.approvals.find((approval) =>`
+- L3244: `asString(approval.entity_type) === "media_job" &&`
+- L3245: `asString(approval.entity_id) === asString(item.id) &&`
+- L3246: `asString(approval.status) === "pending"`
+- L3248: `if (pendingApproval) {`
+- L3250: `await decideProjectApproval(backendProjectName, pendingApproval.id, {`
+- L3252: `note: session.form.reviewNotes || "Revision requested in Media Studio.",`
+- L3279: `description: session.form.objective || item.brief || "Review prompt, outputs, approval, and publishing readiness.",`
+- L3284: `handoff_roles: [MEDIA_ROLE_DEFAULTS.handoffRole, MEDIA_ROLE_DEFAULTS.reviewRole],`
+- L3316: `lastResponseTitle: item?.title || session.form.title || "Media Studio Review",`
+- L3409: `if (action === "approve") {`
+- L3411: `"Confirm local media approval mark",`
+- L3412: `"Action: Mark this media job as approved/review-ready locally.\nRisk: This does not publish, but it changes readiness status and can influence downstream handoff."`
+- L3416: `session.form.status = "approved";`
+- L3417: `currentVersion.readiness_status = "approved";`
+- L3419: `saveDraftToSession(projectName, state, session, "approved");`
+- L3421: `showMessage?.("Selected version marked review-ready.");`
+- L3457: `"Action: Prepare and send this media package to Publishing.\nRisk: This creates a handoff path for downstream publishing review. It does not publish directly."`
+- L3562: `description: "Run saved image, video, voice, and campaign-pack jobs with prompts, review states, Library saves, and package routing."`
+
+## Handoff Signals
+- L4: `createProjectHandoff,`
+- L16: `listProjectHandoffs,`
+- L25: `} from "../asset-library.js";`
+- L26: `import { getSharedHandoff, setSharedAiDraft, setSharedHandoff } from "../shared-context.js";`
+- L30: `const MEDIA_LIBRARY_LOCAL_ASSETS_KEY = "mh-media-library-assets-v1";`
+- L32: `const MEDIA_STATUSES = ["draft", "prompt_ready", "generating", "needs_review", "approved", "publishing_ready", "sent_to_publishing", "failed"];`
+- L33: `const MEDIA_PREVIEW_STATES = ["provider_not_configured", "generation_error", "prompt_ready", "generated", "saved_to_library", "needs_review", "approved", "publishing_ready", "sent_to_publishing"];`
+- L42: `handoffRole: "publisher"`
+- L71: `bestUse: "Before approvals and publishing handoff, especially for regulated or claim-sensitive content.",`
+- L82: `id: "publishing-assistant",`
+- L83: `title: "Publishing Assistant",`
+- L84: `purpose: "Finalize readiness signals and handoff payload quality before publishing.",`
+- L85: `bestUse: "Right before preparing a Publishing package for downstream review.",`
+- L86: `suggestedPrompt: "Act as Publishing Assistant. Produce a final publishing handoff summary with readiness status, blockers, approval notes, and channel delivery checklist."`
+- L170: `if (["publishing_ready", "publishing ready", "handoff", "ready_for_publishing"].includes(normalized)) return "publishing_ready";`
+- L171: `if (["sent_to_publishing", "sent to publishing", "sent"].includes(normalized)) return "sent_to_publishing";`
+- L177: `if (status === "approved" || status === "publishing_ready" || status === "sent_to_publishing") return "success";`
+- L204: `function readLibraryAssetMap() {`
+- L207: `const parsed = JSON.parse(window.localStorage?.getItem(MEDIA_LIBRARY_LOCAL_ASSETS_KEY) || "{}");`
+- L214: `function writeLibraryAssetMap(map) {`
+- L217: `window.localStorage?.setItem(MEDIA_LIBRARY_LOCAL_ASSETS_KEY, JSON.stringify(map || {}));`
+- L230: `function loadLocalLibraryAssets(projectName) {`
+- L231: `return asArray(readLibraryAssetMap()[projectKey(projectName)]);`
+- L234: `function upsertLocalLibraryAsset(projectName, asset) {`
+- L235: `const map = readLibraryAssetMap();`
+- L239: `id: asString(asset.id || \`media-library-${Date.now()}\`),`
+- L249: `writeLibraryAssetMap(map);`
+- L279: `objective: firstText(overview.primary_goal, overview.goal, "Create publishing-ready media"),`
+- L304: `libraryAssetRef = null,`
+- L317: `library_asset_ref: libraryAssetRef == null ? null : asObject(libraryAssetRef),`
+- L342: `libraryAssetRef: raw.library_asset_ref || null,`
+- L471: `handoffs: [],`
+- L482: `loadedHandoffId: "",`
+- L528: `publishing_job_id: asString(raw.publishing_job_id || ""),`
+- L536: `linked_handoffs: asArray(raw.linked_handoffs),`
+- L557: `publishing_ready: 1,`
+- L558: `sent_to_publishing: 2,`
+- L584: `listProjectHandoffs(backendProjectName, { limit: 120 }),`
+- L594: `handoffsResult,`
+- L606: `const handoffs = fulfilledValue(handoffsResult, { items: [] });`
+- L618: `session.handoffs = asArray(handoffs.items);`
+- L625: `applyInboundHandoff(projectName, session);`
+- L631: `applyInboundHandoff(projectName, session);`
+- L647: `function getInboundHandoff(projectName, session) {`
+- L650: `getSharedHandoff(projectName, "media-studio", operations, "workflows") ||`
+- L651: `getSharedHandoff(projectName, "media-studio", operations, "ai-command") ||`
+- L652: `getSharedHandoff(projectName, "media-studio", operations, "content-studio") ||`
+- L653: `getSharedHandoff(projectName, "media-studio", operations)`
+- L657: `function extractHandoffSummary(handoff) {`
+- L658: `const payload = asObject(handoff?.payload);`
+- L662: `const sourcePage = asString(handoff?.source_page || "workflows");`
+- L674: `handoff?.id ||`
+- L707: `function applyInboundHandoff(projectName, session) {`
+- L708: `const handoff = getInboundHandoff(projectName, session);`
+- L709: `if (!handoff) return;`
+- L710: `const summary = extractHandoffSummary(handoff);`
+- L711: `if (!summary.id || summary.id === session.loadedHandoffId) return;`
+- L712: `session.loadedHandoffId = summary.id;`
+- L792: `\`Create ${form.outputPurpose || "publishing-ready media"} for ${form.product || overview.project_name || "the product"}.\`,`
+- L797: `"Keep product identity accurate, leave safe text area, avoid unsupported claims, and prepare for Publishing handoff."`
+- L803: `return \`${base}\n\nProduction constraints: accurate product identity, clean composition, strong focal hierarchy, channel-safe crop, no unsupported claims, no cluttered text, and enough negative space for publishing copy.\`;`
+- L839: `\`${contextPrompt}\n\nCampaign pack outputs: image hero, video short, voiceover script, channel cutdowns, and publishing-ready metadata.\``
+- L881: `library_asset_ref: version.library_asset_ref || null,`
+- L941: `if (["approved", "publishing_ready", "sent_to_publishing"].includes(normalized)) return "approved";`
+- L946: `function classifyLibraryUsage(session, selectedItem, version, readiness) {`
+- L957: `if (["publishing_ready", "sent_to_publishing", "approved"].includes(normalizeStatus(readiness.readinessStatus, "draft"))) {`
+- L958: `usage.push("publishing");`
+- L963: `function buildLibraryAssetPayload(projectName, session, selectedItem, version) {`
+- L998: `usage: classifyLibraryUsage(session, selectedItem, version, readiness),`
+- L1006: `function findExistingLibrarySave(session, projectName, sourceSignature) {`
+- L1007: `const local = loadLocalLibraryAssets(projectName).find((item) => asString(item.source_signature) === asString(sourceSignature));`
+- L1008: `const backend = asArray(session.handoffs).find((entry) => {`
+- L1010: `const libraryAsset = asObject(payload.library_asset);`
+- L1011: `const routeMatches = asString(entry?.destination_page) === "library" && asString(entry?.source_page) === "media-studio";`
+- L1012: `return routeMatches && asString(libraryAsset.source_signature) === asString(sourceSignature);`
+- L1020: `async function saveVersionToLibrary({`
+- L1031: `session.validation = { ...session.validation, librarySave: "Select a version before saving to Library." };`
+- L1040: `session.validation = { ...session.validation, librarySave: "Version needs prompt or output payload before saving to Library." };`
+- L1045: `const libraryAsset = buildLibraryAssetPayload(projectName, session, selectedItem, version);`
+- L1046: `const existing = findExistingLibrarySave(session, projectName, libraryAsset.source_signature);`
+- L1050: `showMessage?.("Already saved to Library (local reference).");`
+- L1054: `const handoffPayload = {`
+- L1057: `destination_page: "library",`
+- L1061: `destination_service_domain: "library",`
+- L1069: `project: libraryAsset.project,`
+- L1070: `campaign: libraryAsset.campaign,`
+- L1071: `media_type: libraryAsset.media_type,`
+- L1072: `usage: libraryAsset.usage,`
+- L1073: `library_asset: libraryAsset`
+- L1079: `setSharedHandoff(projectName || "__default__", "library", handoffPayload);`
+- L1081: `setSharedHandoff("__default__", "library", handoffPayload);`
+- L1085: `handoff_id: asString(existing.backend?.id || existing.local?.handoff_id || ""),`
+- L1086: `source_signature: libraryAsset.source_signature,`
+- L1089: `status: "saved_to_library"`
+- L1094: `const result = await createProjectHandoff(backendProjectName, handoffPayload);`
+- L1095: `const savedHandoff = asObject(result?.handoff);`
+- L1096: `const savedId = asString(savedHandoff.id || handoffPayload.id);`
+- L1097: `upsertLocalLibraryAsset(projectName, {`
+- L1098: `...libraryAsset,`
+- L1099: `id: savedId || libraryAsset.id,`
+- L1100: `handoff_id: savedId,`
+- L1105: `handoff_id: savedId,`
+- L1106: `source_signature: libraryAsset.source_signature,`
+- L1109: `status: "saved_to_library"`
+- L1111: `session.handoffs = [savedHandoff, ...asArray(session.handoffs).filter((item) => asString(item.id) !== savedId)];`
+- L1112: `showMessage?.(existing.backend ? "Already saved. Library metadata updated." : "Selected version saved to Library.");`
+- L1114: `upsertLocalLibraryAsset(projectName, {`
+- L1115: `...libraryAsset,`
+- L1116: `id: libraryAsset.id,`
+- L1120: `showMessage?.("Library backend unavailable. Saved as local library handoff.");`
+- L1123: `upsertLocalLibraryAsset(projectName, {`
+- L1124: `...libraryAsset,`
+- L1125: `id: libraryAsset.id,`
+- L1129: `showMessage?.("Selected version saved to Library (local handoff).");`
+- L1132: `version.library_asset_ref = reference;`
+- L1133: `version.provider_status = "saved_to_library";`
+- L1135: `version.readiness_status = "publishing_ready";`
+- L1136: `session.form.status = "publishing_ready";`
+- L1138: `session.validation = { ...session.validation, librarySave: "" };`
+- L1140: `saveDraftToSession(projectName, state, session, normalizeStatus(session.form.status || version.readiness_status || "publishing_ready", "publishing_ready"));`
+- L1179: `readyAssets: counts.approved + counts.publishing_ready + counts.sent_to_publishing,`
+- L1183: `publishingReady: counts.publishing_ready,`
+- L1188: `function buildRecommendation(metrics, handoff, selectedItem) {`
+- L1203: `const ready = selectedItem?.status === "publishing_ready" ? selectedItem : null;`
+- L1206: `action: "Prepare Publishing Package",`
+- L1207: `why: \`${ready.title} is ready for a safe Publishing package handoff.\``
+- L1210: `if (handoff) {`
+- L1213: `why: "A workflow handoff is available. Load it into the generator to continue the Workflows -> Media Studio -> package handoff flow."`
+- L1224: `why: "No media job is ready yet. Start with a brief, build a brand-safe prompt, then review and prepare a Publishing package."`
+- L1241: `const publishingConnected = hasBackend || capabilityFromOperations(operations, ["publishing", "handoff"]);`
+- L1248: `publishing_handoff: publishingConnected,`
+- L1261: `return "Generator backend not connected yet — your prompt/job is ready. Review it, save it as a draft, send it to AI Command, save it to Library, or connect a provider in Integrations before trying real output generation.";`
+- L1441: `.media-status-pill.is-publishing-ready {`
+- L1451: `.media-status-pill.is-sent-to-publishing {`
+- L1597: `if (normalized === "publishing_ready") return "Package Ready";`
+- L1598: `if (normalized === "sent_to_publishing") return "Handoff Prepared";`
+- L1620: `function getMediaSourceReadiness(session, selectedItem, handoff) {`
+- L1621: `const hasLibraryRef = Boolean(`
+- L1622: `selectedItem?.library_asset_ref?.handoff_id ||`
+- L1623: `selectedVersionEntry(session)?.library_asset_ref?.handoff_id`
+- L1627: `const hasHandoff = Boolean(handoff);`
+- L1629: `if (hasLibraryRef) {`
+- L1632: `status: "Library source",`
+- L1633: `detail: "Linked Library provenance is available for this package."`
+- L1643: `if (hasHandoff || hasItemSource) {`
+- L1647: `detail: "Inbound or job context exists; attach Library source when claims or product truth matter."`
+- L1653: `detail: "Attach a Library asset or load a source-backed handoff before final package routing."`
+- L1657: `function getMediaReadinessItems(session, selectedItem, handoff) {`
+- L1660: `const source = getMediaSourceReadiness(session, selectedItem, handoff);`
+- L1668: `const packageReady = ["publishing_ready", "sent_to_publishing", "approved"].includes(readiness.readinessStatus) && hasOutput;`
+- L1698: `key: "publishing",`
+- L1699: `label: "Publishing",`
+- L1703: `? "Selected version can be prepared as a Publishing package."`
+- L1704: `: "Output, selected version, and review notes should be checked before handoff."`
+- L1718: `function renderMediaReadinessSummary({ session, selectedItem, handoff, escapeHtml }) {`
+- L1719: `const items = getMediaReadinessItems(session, selectedItem, handoff);`
+- L1733: `function renderMediaCommandHeader({ projectName, session, metrics, selectedItem, handoff, recommendation, escapeHtml }) {`
+- L1740: `const handoffLabel = handoff ? "Brief available" : "No inbound brief";`
+- L1748: `<p class="media-section-copy">Start by choosing Image, Video, Voice, or Campaign Pack. Generate a prompt first, then use Generate Output only when a provider/backend is connected. Save drafts for review, save reusable results to Library, or prepare a Publishing handoff without publishing directly.</p>`
+- L1762: `<span><strong>Brief</strong>${escapeHtml(handoffLabel)}</span>`
+- L1767: `<button id="mediaHeaderSaveLibraryBtn" class="btn btn-secondary" type="button">Save to Library</button>`
+- L1768: `<button id="mediaSendToPublishingBtn" class="btn btn-primary" type="button">Prepare Publishing Package</button>`
+- L1775: `function getMediaWorkflowSteps(session, selectedItem, handoff) {`
+- L1778: `const source = getMediaSourceReadiness(session, selectedItem, handoff);`
+- L1782: `const savedToLibrary = Boolean(version?.library_asset_ref?.handoff_id || selectedItem?.library_asset_ref?.handoff_id);`
+- L1783: `const handoffPrepared = readiness.readinessStatus === "sent_to_publishing";`
+- L1784: `const packageReady = ["publishing_ready", "approved", "sent_to_publishing"].includes(readiness.readinessStatus) && hasOutput;`
+- L1804: `state: ["approved", "publishing_ready", "sent_to_publishing"].includes(readiness.readinessStatus) ? "ready" : hasOutput ? "active" : "missing",`
+- L1808: `label: "Save to Library",`
+- L1809: `state: savedToLibrary ? "ready" : hasOutput || hasBrief ? "active" : "missing",`
+- L1810: `detail: savedToLibrary ? "Library linked" : "Available after draft"`
+- L1813: `label: "Handoff",`
+- L1814: `state: handoffPrepared ? "ready" : packageReady ? "active" : "missing",`
+- L1815: `detail: handoffPrepared ? "Prepared" : packageReady ? "Package ready" : "Needs review"`
+- L1820: `function renderMediaWorkflowStrip({ session, selectedItem, handoff, escapeHtml }) {`
+- L1821: `const steps = getMediaWorkflowSteps(session, selectedItem, handoff);`
+- L1823: `<nav class="media-workflow-strip" id="mediaWorkflowStrip" aria-label="Media Studio workflow: Brief Source Generate Prepare Review Save to Library Handoff">`
+- L1824: `<div class="media-workflow-title">Brief &rarr; Source &rarr; Generate/Prepare &rarr; Review &rarr; Save to Library &rarr; Handoff</div>`
+- L1856: `<div class="media-overview-item"><span>Publishing-ready handoffs</span><strong>${escapeHtml(formatCount(metrics.publishingReady))}</strong></div>`
+- L1862: `function renderRecommendation(recommendation, metrics, selectedItem, handoff, escapeHtml) {`
+- L1868: `["Publishing", metrics.publishingReady ? "Ready" : "Prepare"],`
+- L1869: `["Campaign readiness", handoff ? "Workflow linked" : "Draft first"]`
+- L1894: `<button id="mediaSendToPublishingBtn" class="btn btn-primary" type="button">Prepare Publishing Package</button>`
+- L1935: `<h3>Brief -> Source -> Generate/Prepare -> Review -> Save to Library -> Handoff</h3>`
+- L1936: `<p class="media-section-copy">Choose a media mode, prepare a prompt/job-ready draft, then render with a connected provider or continue safely with review and handoff.</p>`
+- L1947: `Start here: choose Image, Video, Voice, or Campaign Pack. Complete the brief, generate or improve the prompt, then use Generate Output only when a provider/backend is connected. If generation is unavailable or times out, keep the prompt/job-ready draft and continue with review, Library save, AI Command review, or provider setup in Integrations.`
+- L1965: `${renderField({ id: "mediaPromptInput", name: "prompt", label: "Prompt / brief", value: form.prompt, multiline: true, rows: 7, helper: "Use this as the creative brief. If no generation provider is connected, Media Studio keeps it as a prompt/job-ready draft for review, Library save, AI review, or provider handoff." }, session, escapeHtml)}`
+- L1982: `function renderPromptBuilder(session, handoff, escapeHtml) {`
+- L1990: `<span class="card-badge neutral">${escapeHtml(handoff ? "Handoff available" : "Context")}</span>`
+- L1994: `<button id="mediaPromptFromHandoffBtn" class="btn btn-secondary" type="button">Generate from workflow handoff</button>`
+- L2007: `function renderWorkflowHandoff(handoff, session, escapeHtml) {`
+- L2008: `if (!handoff) {`
+- L2023: `const summary = extractHandoffSummary(handoff);`
+- L2024: `const loaded = summary.id && summary.id === session.loadedHandoffId;`
+- L2030: `: "Handoff output is ready to become a media brief.";`
+- L2033: `<section class="card media-card" id="mediaWorkflowHandoff">`
+- L2052: `<button id="mediaLoadHandoffBtn" class="btn btn-secondary" type="button">${escapeHtml(buttonLabel)}</button>`
+- L2069: `<div class="empty-box">Start a media job or load a workflow handoff to create the first prompt-ready draft.</div>`
+- L2096: `<button type="button" data-media-action="send-publishing" data-media-id="${escapeHtml(item.id)}">Prepare Publishing Package</button>`
+- L2128: `const publishingReady = ["publishing_ready", "sent_to_publishing", "approved"].includes(readinessStatus) && hasOutput;`
+- L2129: `const approvalStatus = ["approved", "publishing_ready", "sent_to_publishing"].includes(readinessStatus) ? "approved" : "pending";`
+- L2135: `["package ready", publishingReady],`
+- L2156: `if (key === "publishing-readiness") return item.status === "publishing_ready" || item.status === "sent_to_publishing" ? "Ready" : "Prepare";`
+- L2295: `: \`<div class="media-prompt-box">${escapeHtml(JSON.stringify(payload, null, 2) || "No image output was returned yet. If the provider is not connected or timed out, keep the prompt/job-ready draft and continue with review, Library save, or provider setup in Integrations.")}</div>\`;`
+- L2343: `<div class="media-check-item"><span>Captions/notes</span><strong>${escapeHtml(firstText(campaignPack.channel_notes, campaignPack.publishing_notes, "Missing"))}</strong></div>`
+- L2416: `<span>Library link</span>`
+- L2417: `<strong>${escapeHtml(selected?.library_asset_ref?.handoff_id ? \`Saved (${selected.library_asset_ref.local_only ? "Local" : "Backend"})\` : "Not saved")}</strong>`
+- L2458: `<button class="btn btn-secondary" type="button" data-media-version-action="save-library">Save to Library</button>`
+- L2459: `<button class="btn btn-primary" type="button" data-media-version-action="send-publishing">Prepare Publishing Package</button>`
+- L2461: `${fieldError(session, "librarySave", escapeHtml)}`
+- L2479: `["publishing-readiness", "Publishing readiness"]`
+- L2520: `if (mode.includes("publish") || mode.includes("handoff")) return "publishing-assistant";`
+- L2580: `<h3>Library inputs</h3>`
+- L2584: `${renderAssetDependencyRows(assetData, MEDIA_ASSET_KEYS, escapeHtml, "Media library inputs are covered.")}`
+- L2596: `["publishing handoff", readiness.publishing_handoff],`
+- L2616: `${!readiness.image_generation_backend || !readiness.video_generation_backend || !readiness.voice_generation_backend ? \`<div class="simple-banner media-block-gap">${escapeHtml("Generator backend not connected yet — your prompt/job is ready. Review it, save it as a draft, send it to AI Command, save it to Library, or connect a provider in Integrations before trying real output generation.")}</div>\` : ""}`
+- L2636: `function buildPublishingHandoff(projectName, session, selectedItem) {`
+- L2637: `const source = selectedItem || normalizeMediaItem(buildMediaPayload(session, "publishing_ready"), { context: {} }, "Local draft");`
+- L2642: `destination_page: "publishing",`
+- L2644: `destination_role: MEDIA_ROLE_DEFAULTS.handoffRole,`
+
+## Task Signals
+- L5: `createProjectTask,`
+- L18: `listProjectTasks,`
+- L469: `tasks: [],`
+- L534: `linked_tasks: asArray(raw.linked_tasks),`
+- L582: `listProjectTasks(backendProjectName, 120),`
+- L592: `tasksResult,`
+- L604: `const tasks = fulfilledValue(tasksResult, { items: [] });`
+- L616: `session.tasks = asArray(tasks.items);`
+- L2506: `<button id="mediaCreateTaskBtn" class="btn btn-secondary" type="button">Create Task</button>`
+- L2740: `return window.confirm(\`${title}\n\n${detail}\n\nAuthority: Media Studio can prepare, save, request review, and hand off media work, but provider generation, approval decisions, task creation, and publishing handoff must be explicitly confirmed by the operator.\n\nSelect Cancel to review before continuing.\`);`
+- L3263: `const createTaskBtn = document.getElementById("mediaCreateTaskBtn");`
+- L3264: `if (createTaskBtn) {`
+- L3265: `createTaskBtn.onclick = async () => {`
+- L3269: `"Confirm media task creation",`
+- L3270: `"Action: Create a task linked to this media job.\nRisk: This may create durable work for the media team."`
+- L3277: `await createProjectTask(backendProjectName, {`
+- L3295: `showMessage?.("Task created and linked to the media job.");`
+- L3297: `showMessage?.("Task action kept locally because backend task save is unavailable.");`
+- L3300: `showMessage?.("Create Task needs a backend media job; local draft is preserved.");`
+- L3716: `${session.loading ? \`<div class="empty-box">Loading media jobs, handoffs, approvals, tasks, and event history...</div>\` : ""}`
+
+## Save / Write / Storage Signals
+- L19: `saveProjectMediaJob,`
+- L29: `const MEDIA_LOCAL_DRAFTS_KEY = "mh-media-studio-local-drafts-v1";`
+- L30: `const MEDIA_LIBRARY_LOCAL_ASSETS_KEY = "mh-media-library-assets-v1";`
+- L33: `const MEDIA_PREVIEW_STATES = ["provider_not_configured", "generation_error", "prompt_ready", "generated", "saved_to_library", "needs_review", "approved", "publishing_ready", "sent_to_publishing"];`
+- L44: `const MEDIA_ACCESS_KEY_GUIDANCE = "Missing or invalid Control Center access key. Save a valid access key before using provider-backed media generation.";`
+- L190: `const parsed = JSON.parse(window.localStorage?.getItem(MEDIA_LOCAL_DRAFTS_KEY) || "{}");`
+- L200: `window.localStorage?.setItem(MEDIA_LOCAL_DRAFTS_KEY, JSON.stringify(map || {}));`
+- L207: `const parsed = JSON.parse(window.localStorage?.getItem(MEDIA_LIBRARY_LOCAL_ASSETS_KEY) || "{}");`
+- L217: `window.localStorage?.setItem(MEDIA_LIBRARY_LOCAL_ASSETS_KEY, JSON.stringify(map || {}));`
+- L253: `function saveLocalDraft(projectName, draft) {`
+- L767: `function validateGenerator(session, intent = "save") {`
+- L1006: `function findExistingLibrarySave(session, projectName, sourceSignature) {`
+- L1020: `async function saveVersionToLibrary({`
+- L1031: `session.validation = { ...session.validation, librarySave: "Select a version before saving to Library." };`
+- L1040: `session.validation = { ...session.validation, librarySave: "Version needs prompt or output payload before saving to Library." };`
+- L1046: `const existing = findExistingLibrarySave(session, projectName, libraryAsset.source_signature);`
+- L1050: `showMessage?.("Already saved to Library (local reference).");`
+- L1088: `saved_at: nowIso(),`
+- L1089: `status: "saved_to_library"`
+- L1095: `const savedHandoff = asObject(result?.handoff);`
+- L1096: `const savedId = asString(savedHandoff.id || handoffPayload.id);`
+- L1099: `id: savedId || libraryAsset.id,`
+- L1100: `handoff_id: savedId,`
+- L1105: `handoff_id: savedId,`
+- L1108: `saved_at: nowIso(),`
+- L1109: `status: "saved_to_library"`
+- L1111: `session.handoffs = [savedHandoff, ...asArray(session.handoffs).filter((item) => asString(item.id) !== savedId)];`
+- L1112: `showMessage?.(existing.backend ? "Already saved. Library metadata updated." : "Selected version saved to Library.");`
+- L1120: `showMessage?.("Library backend unavailable. Saved as local library handoff.");`
+- L1129: `showMessage?.("Selected version saved to Library (local handoff).");`
+- L1133: `version.provider_status = "saved_to_library";`
+- L1138: `session.validation = { ...session.validation, librarySave: "" };`
+- L1140: `saveDraftToSession(projectName, state, session, normalizeStatus(session.form.status || version.readiness_status || "publishing_ready", "publishing_ready"));`
+- L1160: `function saveDraftToSession(projectName, state, session, status = "prompt_ready") {`
+- L1162: `const saved = saveLocalDraft(projectName, buildMediaPayload(session, status));`
+- L1163: `const item = normalizeMediaItem(saved, state, "Local draft");`
+- L1168: `session.draftMessage = "Media draft saved locally.";`
+- L1261: `return "Generator backend not connected yet — your prompt/job is ready. Review it, save it as a draft, send it to AI Command, save it to Library, or connect a provider in Integrations before trying real output generation.";`
+- L1748: `<p class="media-section-copy">Start by choosing Image, Video, Voice, or Campaign Pack. Generate a prompt first, then use Generate Output only when a provider/backend is connected. Save drafts for review, save reusable results to Library, or prepare a Publishing handoff without publishing directly.</p>`
+- L1766: `<button id="mediaSaveDraftBtn" class="btn btn-secondary" type="button">Save Draft</button>`
+- L1767: `<button id="mediaHeaderSaveLibraryBtn" class="btn btn-secondary" type="button">Save to Library</button>`
+- L1782: `const savedToLibrary = Boolean(version?.library_asset_ref?.handoff_id || selectedItem?.library_asset_ref?.handoff_id);`
+- L1808: `label: "Save to Library",`
+- L1809: `state: savedToLibrary ? "ready" : hasOutput || hasBrief ? "active" : "missing",`
+- L1810: `detail: savedToLibrary ? "Library linked" : "Available after draft"`
+- L1823: `<nav class="media-workflow-strip" id="mediaWorkflowStrip" aria-label="Media Studio workflow: Brief Source Generate Prepare Review Save to Library Handoff">`
+- L1824: `<div class="media-workflow-title">Brief &rarr; Source &rarr; Generate/Prepare &rarr; Review &rarr; Save to Library &rarr; Handoff</div>`
+- L1892: `<button id="mediaSaveDraftBtn" class="btn btn-secondary" type="button">Save Draft</button>`
+- L1935: `<h3>Brief -> Source -> Generate/Prepare -> Review -> Save to Library -> Handoff</h3>`
+- L1947: `Start here: choose Image, Video, Voice, or Campaign Pack. Complete the brief, generate or improve the prompt, then use Generate Output only when a provider/backend is connected. If generation is unavailable or times out, keep the prompt/job-ready draft and continue with review, Library save, AI Command review, or provider setup in Integrations.`
+- L1965: `${renderField({ id: "mediaPromptInput", name: "prompt", label: "Prompt / brief", value: form.prompt, multiline: true, rows: 7, helper: "Use this as the creative brief. If no generation provider is connected, Media Studio keeps it as a prompt/job-ready draft for review, Library save, AI review, or provider handoff." }, session, escapeHtml)}`
+- L1975: `<button id="mediaSaveBtn" class="btn btn-primary" type="button">Save Draft</button>`
+- L2001: `<button id="mediaSavePromptBtn" class="btn btn-primary" type="button">Save prompt draft</button>`
+- L2097: `<button type="button" data-media-action="save-draft" data-media-id="${escapeHtml(item.id)}">Save draft</button>`
+- L2295: `: \`<div class="media-prompt-box">${escapeHtml(JSON.stringify(payload, null, 2) || "No image output was returned yet. If the provider is not connected or timed out, keep the prompt/job-ready draft and continue with review, Library save, or provider setup in Integrations.")}</div>\`;`
+- L2417: `<strong>${escapeHtml(selected?.library_asset_ref?.handoff_id ? \`Saved (${selected.library_asset_ref.local_only ? "Local" : "Backend"})\` : "Not saved")}</strong>`
+- L2457: `<button class="btn btn-secondary" type="button" data-media-version-action="save-draft">Save as draft</button>`
+- L2458: `<button class="btn btn-secondary" type="button" data-media-version-action="save-library">Save to Library</button>`
+- L2461: `${fieldError(session, "librarySave", escapeHtml)}`
+- L2471: `const prompt = activePrompt || selectedItem?.prompt || selectedItem?.brief || "Select or save a media job to preview the prompt, brief, and asset notes.";`
+- L2536: `<button class="btn btn-secondary" type="button" data-media-specialist-save="${escapeHtml(specialist.id)}">Save Draft</button>`
+- L2616: `${!readiness.image_generation_backend || !readiness.video_generation_backend || !readiness.voice_generation_backend ? \`<div class="simple-banner media-block-gap">${escapeHtml("Generator backend not connected yet — your prompt/job is ready. Review it, save it as a draft, send it to AI Command, save it to Library, or connect a provider in Integrations before trying real output generation.")}</div>\` : ""}`
+- L2690: `const localItem = saveDraftToSession(projectName, state, session, status);`
+- L2692: `showMessage?.("Media draft saved locally.");`
+- L2697: `const result = await saveProjectMediaJob(backendProjectName, buildMediaPayload(session, status));`
+- L2698: `const saved = normalizeMediaItem(result.media_job || result.item || buildMediaPayload(session, status), state);`
+- L2699: `session.items = mergeQueueItems(session.items.filter((item) => item.id !== localItem.id), [saved]);`
+- L2700: `session.selectedId = saved.id || localItem.id;`
+- L2702: `showMessage?.("Media job saved.");`
+- L2703: `return saved;`
+- L2705: `showMessage?.("Backend media save unavailable; draft kept locally.");`
+- L2740: `return window.confirm(\`${title}\n\n${detail}\n\nAuthority: Media Studio can prepare, save, request review, and hand off media work, but provider generation, approval decisions, task creation, and publishing handoff must be explicitly confirmed by the operator.\n\nSelect Cancel to review before continuing.\`);`
+- L2752: `if (!validateGenerator(session, "save")) {`
+- L2773: `saveDraftToSession(projectName, state, session, "generating");`
+- L2789: `notes: firstText(response.message, "Generator backend not connected yet — your prompt/job is ready. Review it, save it as a draft, send it to AI Command, save it to Library, or connect a provider in Integrations before trying real output generation."),`
+- L2794: `saveDraftToSession(projectName, state, session, "prompt_ready");`
+- L2795: `session.draftMessage = response.message || "Generator backend not connected yet — your prompt/job is ready. Review it, save it as a draft, send it to AI Command, save it to Library, or connect a provider in Integrations before trying real output generation.";`
+- L2862: `saveDraftToSession(projectName, state, session, "prompt_ready");`
+- L2913: `const saveButtons = [document.getElementById("mediaSaveDraftBtn"), document.getElementById("mediaSaveBtn"), document.getElementById("mediaSavePromptBtn")].filter(Boolean);`
+- L2914: `saveButtons.forEach((button) => {`
+- L2917: `if (!validateGenerator(session, "save")) {`
+- L3093: `if (action === "save-draft") {`
+- L3094: `saveDraftToSession(projectName, state, session, "draft");`
+- L3095: `showMessage?.("Media job saved as local draft.");`
+- L3101: `saveDraftToSession(projectName, state, session, "prompt_ready");`
+- L3116: `saveDraftToSession(projectName, state, session, "approved");`
+- L3131: `saveDraftToSession(projectName, state, session, "sent_to_publishing");`
+- L3158: `saveDraftToSession(projectName, state, session, "approved");`
+- L3192: `const item = selected() || saveDraftToSession(projectName, state, session, "needs_review");`
+- L3193: `saveDraftToSession(projectName, state, session, "needs_review");`
+- L3240: `saveDraftToSession(projectName, state, session, "draft");`
+- L3274: `const item = selected() || saveDraftToSession(projectName, state, session, "prompt_ready");`
+- L3297: `showMessage?.("Task action kept locally because backend task save is unavailable.");`
+- L3356: `saveDraftToSession(projectName, state, session, "sent_to_publishing");`
+- L3361: `const headerSaveLibraryBtn = document.getElementById("mediaHeaderSaveLibraryBtn");`
+- L3362: `if (headerSaveLibraryBtn) {`
+- L3363: `headerSaveLibraryBtn.onclick = async () => {`
+- L3365: `await saveVersionToLibrary({`
+- L3419: `saveDraftToSession(projectName, state, session, "approved");`
+- L3426: `saveDraftToSession(projectName, state, session, "draft");`
+- L3447: `saveDraftToSession(projectName, state, session, "prompt_ready");`
+- L3450: `if (action === "save-draft") {`
+- L3451: `saveDraftToSession(projectName, state, session, "draft");`
+- L3452: `showMessage?.("Selected version saved as draft.");`
+- L3464: `saveDraftToSession(projectName, state, session, "sent_to_publishing");`
+- L3468: `if (action === "save-library") {`
+- L3469: `await saveVersionToLibrary({`
+- L3483: `Array.from(document.querySelectorAll("[data-media-specialist-use], [data-media-specialist-save], [data-media-specialist-ai]")).forEach((button) => {`
+- L3485: `const id = button.getAttribute("data-media-specialist-use") || button.getAttribute("data-media-specialist-save") || button.getAttribute("data-media-specialist-ai") || "";`
+- L3491: `if (button.hasAttribute("data-media-specialist-save")) {`
+- L3492: `saveDraftToSession(projectName, state, session, "draft");`
+- L3493: `showMessage?.(\`${specialist.title} draft saved locally.\`);`
+- L3543: `showMessage?.("Publishing package handoff kept locally because backend handoff save is unavailable.");`
+- L3562: `description: "Run saved image, video, voice, and campaign-pack jobs with prompts, review states, Library saves, and package routing."`
+- L3620: `<p class="media-section-copy">Start with a brief or handoff. Attach Library assets when needed. Review creative readiness and brand compliance. Save approved assets to Library or prepare handoff to Publishing/Governance. All routing is handoff/review-based and user-triggered. Media Studio does not publish, send, or approve directly.</p>`
+
+## Destructive / Execution Signals
+- L1: `import {`
+- L22: `import {`
+- L26: `import { getSharedHandoff, setSharedAiDraft, setSharedHandoff } from "../shared-context.js";`
+- L32: `const MEDIA_STATUSES = ["draft", "prompt_ready", "generating", "needs_review", "approved", "publishing_ready", "sent_to_publishing", "failed"];`
+- L33: `const MEDIA_PREVIEW_STATES = ["provider_not_configured", "generation_error", "prompt_ready", "generated", "saved_to_library", "needs_review", "approved", "publishing_ready", "sent_to_publishing"];`
+- L42: `handoffRole: "publisher"`
+- L70: `purpose: "Protect brand consistency, legal-safe claims, and publishable creative outputs.",`
+- L71: `bestUse: "Before approvals and publishing handoff, especially for regulated or claim-sensitive content.",`
+- L82: `id: "publishing-assistant",`
+- L83: `title: "Publishing Assistant",`
+- L84: `purpose: "Finalize readiness signals and handoff payload quality before publishing.",`
+- L85: `bestUse: "Right before preparing a Publishing package for downstream review.",`
+- L86: `suggestedPrompt: "Act as Publishing Assistant. Produce a final publishing handoff summary with readiness status, blockers, approval notes, and channel delivery checklist."`
+- L167: `if (["generating", "running", "processing", "in_progress"].includes(normalized)) return "generating";`
+- L170: `if (["publishing_ready", "publishing ready", "handoff", "ready_for_publishing"].includes(normalized)) return "publishing_ready";`
+- L171: `if (["sent_to_publishing", "sent to publishing", "sent"].includes(normalized)) return "sent_to_publishing";`
+- L177: `if (status === "approved" || status === "publishing_ready" || status === "sent_to_publishing") return "success";`
+- L279: `objective: firstText(overview.primary_goal, overview.goal, "Create publishing-ready media"),`
+- L431: `function syncVersionFromForm(session) {`
+- L528: `publishing_job_id: asString(raw.publishing_job_id || ""),`
+- L557: `publishing_ready: 1,`
+- L558: `sent_to_publishing: 2,`
+- L571: `async function loadMediaWorkspace(projectName, backendProjectName, state, session, rerender) {`
+- L628: `session.error = "Backend media data is unavailable. Media Studio is running in local draft mode.";`
+- L715: `function syncFormFromItem(session, item) {`
+- L736: `syncOutputsFromVersioning(session);`
+- L749: `syncOutputsFromVersioning(session);`
+- L757: `function syncSessionForm(session, form) {`
+- L764: `syncVersionFromForm(session);`
+- L792: `\`Create ${form.outputPurpose || "publishing-ready media"} for ${form.product || overview.project_name || "the product"}.\`,`
+- L797: `"Keep product identity accurate, leave safe text area, avoid unsupported claims, and prepare for Publishing handoff."`
+- L803: `return \`${base}\n\nProduction constraints: accurate product identity, clean composition, strong focal hierarchy, channel-safe crop, no unsupported claims, no cluttered text, and enough negative space for publishing copy.\`;`
+- L839: `\`${contextPrompt}\n\nCampaign pack outputs: image hero, video short, voiceover script, channel cutdowns, and publishing-ready metadata.\``
+- L941: `if (["approved", "publishing_ready", "sent_to_publishing"].includes(normalized)) return "approved";`
+- L957: `if (["publishing_ready", "sent_to_publishing", "approved"].includes(normalizeStatus(readiness.readinessStatus, "draft"))) {`
+- L958: `usage.push("publishing");`
+- L1020: `async function saveVersionToLibrary({`
+- L1135: `version.readiness_status = "publishing_ready";`
+- L1136: `session.form.status = "publishing_ready";`
+- L1139: `syncOutputsFromVersioning(session);`
+- L1140: `saveDraftToSession(projectName, state, session, normalizeStatus(session.form.status || version.readiness_status || "publishing_ready", "publishing_ready"));`
+- L1143: `function syncOutputsFromVersioning(session) {`
+- L1161: `syncOutputsFromVersioning(session);`
+- L1179: `readyAssets: counts.approved + counts.publishing_ready + counts.sent_to_publishing,`
+- L1183: `publishingReady: counts.publishing_ready,`
+- L1203: `const ready = selectedItem?.status === "publishing_ready" ? selectedItem : null;`
+- L1206: `action: "Prepare Publishing Package",`
+- L1207: `why: \`${ready.title} is ready for a safe Publishing package handoff.\``
+- L1223: `action: "Start a media job",`
+- L1224: `why: "No media job is ready yet. Start with a brief, build a brand-safe prompt, then review and prepare a Publishing package."`
+- L1241: `const publishingConnected = hasBackend || capabilityFromOperations(operations, ["publishing", "handoff"]);`
+- L1248: `publishing_handoff: publishingConnected,`
+- L1261: `return "Generator backend not connected yet — your prompt/job is ready. Review it, save it as a draft, send it to AI Command, save it to Library, or connect a provider in Integrations before trying real output generation.";`
+- L1284: `align-content: start;`
+- L1441: `.media-status-pill.is-publishing-ready {`
+- L1451: `.media-status-pill.is-sent-to-publishing {`
+- L1560: `align-items: start;`
+- L1565: `align-items: start;`
+- L1597: `if (normalized === "publishing_ready") return "Package Ready";`
+- L1598: `if (normalized === "sent_to_publishing") return "Handoff Prepared";`
+- L1668: `const packageReady = ["publishing_ready", "sent_to_publishing", "approved"].includes(readiness.readinessStatus) && hasOutput;`
+- L1698: `key: "publishing",`
+- L1699: `label: "Publishing",`
+- L1703: `? "Selected version can be prepared as a Publishing package."`
+- L1748: `<p class="media-section-copy">Start by choosing Image, Video, Voice, or Campaign Pack. Generate a prompt first, then use Generate Output only when a provider/backend is connected. Save drafts for review, save reusable results to Library, or prepare a Publishing handoff without publishing directly.</p>`
+- L1765: `<button id="mediaStartJobBtn" class="btn btn-secondary" type="button" data-new-media-job="image">Start Media Job</button>`
+- L1768: `<button id="mediaSendToPublishingBtn" class="btn btn-primary" type="button">Prepare Publishing Package</button>`
+- L1769: `<button id="mediaSendAiCommandBtn" class="btn btn-secondary" type="button">Open AI Command Review</button>`
+- L1783: `const handoffPrepared = readiness.readinessStatus === "sent_to_publishing";`
+- L1784: `const packageReady = ["publishing_ready", "approved", "sent_to_publishing"].includes(readiness.readinessStatus) && hasOutput;`
+- L1790: `detail: hasBrief ? "Brief present" : "Start here"`
+- L1804: `state: ["approved", "publishing_ready", "sent_to_publishing"].includes(readiness.readinessStatus) ? "ready" : hasOutput ? "active" : "missing",`
+- L1856: `<div class="media-overview-item"><span>Publishing-ready handoffs</span><strong>${escapeHtml(formatCount(metrics.publishingReady))}</strong></div>`
+- L1868: `["Publishing", metrics.publishingReady ? "Ready" : "Prepare"],`
+- L1891: `<button id="mediaStartJobBtn" class="btn btn-secondary" type="button" data-new-media-job="image">Start Media Job</button>`
+- L1893: `<button id="mediaSendAiCommandBtn" class="btn btn-secondary" type="button">Open AI Command Review</button>`
+- L1894: `<button id="mediaSendToPublishingBtn" class="btn btn-primary" type="button">Prepare Publishing Package</button>`
+- L1947: `Start here: choose Image, Video, Voice, or Campaign Pack. Complete the brief, generate or improve the prompt, then use Generate Output only when a provider/backend is connected. If generation is unavailable or times out, keep the prompt/job-ready draft and continue with review, Library save, AI Command review, or provider setup in Integrations.`
+- L1974: `<button id="mediaRunGenerationBtn" class="btn btn-secondary" type="button">Generate Output</button>`
+- L2069: `<div class="empty-box">Start a media job or load a workflow handoff to create the first prompt-ready draft.</div>`
+- L2096: `<button type="button" data-media-action="send-publishing" data-media-id="${escapeHtml(item.id)}">Prepare Publishing Package</button>`
+- L2128: `const publishingReady = ["publishing_ready", "sent_to_publishing", "approved"].includes(readinessStatus) && hasOutput;`
+- L2129: `const approvalStatus = ["approved", "publishing_ready", "sent_to_publishing"].includes(readinessStatus) ? "approved" : "pending";`
+- L2135: `["package ready", publishingReady],`
+- L2156: `if (key === "publishing-readiness") return item.status === "publishing_ready" || item.status === "sent_to_publishing" ? "Ready" : "Prepare";`
+- L2332: `<div class="media-prompt-box media-block-gap">${escapeHtml(voiceScript || asString(payload.message) || "No voice script or audio output is available yet. Voice mode prepares voiceover scripts/audio outputs only; it does not run IVR, phone calls, or call-center workflows.")}</div>`
+- L2343: `<div class="media-check-item"><span>Captions/notes</span><strong>${escapeHtml(firstText(campaignPack.channel_notes, campaignPack.publishing_notes, "Missing"))}</strong></div>`
+- L2459: `<button class="btn btn-primary" type="button" data-media-version-action="send-publishing">Prepare Publishing Package</button>`
+- L2479: `["publishing-readiness", "Publishing readiness"]`
+- L2520: `if (mode.includes("publish") || mode.includes("handoff")) return "publishing-assistant";`
+- L2596: `["publishing handoff", readiness.publishing_handoff],`
+- L2616: `${!readiness.image_generation_backend || !readiness.video_generation_backend || !readiness.voice_generation_backend ? \`<div class="simple-banner media-block-gap">${escapeHtml("Generator backend not connected yet — your prompt/job is ready. Review it, save it as a draft, send it to AI Command, save it to Library, or connect a provider in Integrations before trying real output generation.")}</div>\` : ""}`
+- L2636: `function buildPublishingHandoff(projectName, session, selectedItem) {`
+- L2637: `const source = selectedItem || normalizeMediaItem(buildMediaPayload(session, "publishing_ready"), { context: {} }, "Local draft");`
+- L2642: `destination_page: "publishing",`
+- L2646: `destination_service_domain: "publishing",`
+- L2689: `async function persistMediaJob({ backendProjectName, projectName, state, session, status, showMessage }) {`
+- L2727: `function sync() {`
+- L2728: `syncSessionForm(session, form);`
+- L2733: `syncVersionFromForm(session);`
+- L2740: `return window.confirm(\`${title}\n\n${detail}\n\nAuthority: Media Studio can prepare, save, request review, and hand off media work, but provider generation, approval decisions, task creation, and publishing handoff must be explicitly confirmed by the operator.\n\nSelect Cancel to review before continuing.\`);`
+- L2750: `async function runGenerationAction() {`
+- L2751: `sync();`
+- L2763: `\`Action: Start provider-backed media generation for ${selectedMode}.\nRisk: This may call a configured AI/media provider and create a new generated output that must be reviewed before approval or publishing.\``
+- L2789: `notes: firstText(response.message, "Generator backend not connected yet — your prompt/job is ready. Review it, save it as a draft, send it to AI Command, save it to Library, or connect a provider in Integrations before trying real output generation."),`
+- L2793: `syncOutputsFromVersioning(session);`
+- L2795: `session.draftMessage = response.message || "Generator backend not connected yet — your prompt/job is ready. Review it, save it as a draft, send it to AI Command, save it to Library, or connect a provider in Integrations before trying real output generation.";`
+- L2811: `syncOutputsFromVersioning(session);`
+- L2861: `syncOutputsFromVersioning(session);`
+- L2876: `sync();`
+- L2897: `syncFormFromItem(session, item);`
+- L2903: `const startBtn = document.getElementById("mediaStartJobBtn");`
+- L2904: `if (startBtn) {`
+- L2905: `startBtn.onclick = () => {`
+- L2907: `document.getElementById("mediaGeneratorPanel")?.scrollIntoView({ behavior: "smooth", block: "start" });`
+- L2915: `button.onclick = async () => {`
+- L2916: `sync();`
+- L2929: `sync();`
+- L2955: `improveBtn.onclick = async () => {`
+- L2956: `sync();`
+- L2964: `"Action: Improve this prompt using the media prompt service.\nRisk: This may call a configured AI provider. The result remains review-only and is not published."`
+- L2994: `brandSafeBtn.onclick = async () => {`
+- L2995: `sync();`
+- L3003: `"Action: Run media brand-safety review for this prompt.\nRisk: This may call a configured AI/provider service. The result remains review-only."`
+- L3036: `if (germanBtn) germanBtn.onclick = () => { sync(); applyPrompt(adaptGerman(session.form.prompt), "Prompt adapted for German usage."); };`
+- L3039: `if (imageToVideoBtn) imageToVideoBtn.onclick = () => { sync(); applyPrompt(convertImagePromptToVideoBrief(session.form.prompt), "Image prompt converted to video brief."); };`
+- L3042: `if (videoToVoiceBtn) videoToVoiceBtn.onclick = () => { sync(); applyPrompt(convertVideoBriefToVoiceover(session.form.prompt), "Video brief converted to voiceover script."); };`
+- L3045: `if (allFormatsBtn) allFormatsBtn.onclick = () => { sync(); applyPrompt(generateAllFormats(session, state), "All format briefs generated."); };`
+- L3047: `const runGenerationBtn = document.getElementById("mediaRunGenerationBtn");`
+- L3048: `if (runGenerationBtn) {`
+- L3049: `runGenerationBtn.onclick = async () => {`
+- L3050: `await runGenerationAction();`
+- L3080: `button.onclick = async () => {`
+- L3085: `syncFormFromItem(session, item);`
+- L3088: `document.getElementById(action === "preview" ? "mediaReviewPanel" : "mediaGeneratorPanel")?.scrollIntoView({ behavior: "smooth", block: "start" });`
+- L3100: `syncVersionFromForm(session);`
+- L3108: `"Action: Mark this media job as approved/review-ready locally.\nRisk: This does not publish, but it changes readiness status and can influence downstream handoff."`
+- L3115: `syncOutputsFromVersioning(session);`
+- L3120: `if (action === "send-publishing") {`
+- L3122: `"Confirm publishing handoff",`
+- L3123: `"Action: Prepare and send this media package to Publishing.\nRisk: This creates a handoff path for downstream publishing review. It does not publish directly."`
+- L3127: `session.form.status = "sent_to_publishing";`
+- L3129: `if (currentVersion) currentVersion.readiness_status = "sent_to_publishing";`
+- L3130: `syncOutputsFromVersioning(session);`
+- L3131: `saveDraftToSession(projectName, state, session, "sent_to_publishing");`
+- L3132: `sendPublishingHandoff({ projectName, backendProjectName, session, selectedItem: item, navigateTo, showMessage, showError });`
+- L3141: `approveBtn.onclick = async () => {`
+- L3142: `sync();`
+- L3147: `"Action: Record this media job as approved/review-ready.\nRisk: If a pending backend approval exists, this may submit an approval decision."`
+- L3157: `syncOutputsFromVersioning(session);`
+- L3183: `requestApprovalBtn.onclick = async () => {`
+- L3184: `sync();`
+- L3201: `summary: session.form.reviewNotes || "Review media output before publishing handoff.",`
+- L3226: `rejectBtn.onclick = async () => {`
+- L3227: `sync();`
+- L3232: `"Action: Return this media job to draft/revision.\nRisk: If a pending backend approval exists, this may submit a rejection/revision decision."`
+- L3239: `syncOutputsFromVersioning(session);`
+- L3265: `createTaskBtn.onclick = async () => {`
+- L3266: `sync();`
+- L3279: `description: session.form.objective || item.brief || "Review prompt, outputs, approval, and publishing readiness.",`
+- L3306: `const sendAiBtn = document.getElementById("mediaSendAiCommandBtn");`
+- L3307: `if (sendAiBtn) {`
+- L3308: `sendAiBtn.onclick = () => {`
+- L3309: `sync();`
+- L3341: `const sendPublishingBtn = document.getElementById("mediaSendToPublishingBtn");`
+- L3342: `if (sendPublishingBtn) {`
+- L3343: `sendPublishingBtn.onclick = () => {`
+- L3344: `sync();`
+- L3347: `"Confirm publishing handoff",`
+- L3348: `"Action: Prepare and send this media package to Publishing.\nRisk: This creates a downstream publishing handoff. It does not publish directly."`
+- L3352: `session.form.status = "sent_to_publishing";`
+- L3354: `if (currentVersion) currentVersion.readiness_status = "sent_to_publishing";`
+- L3355: `syncOutputsFromVersioning(session);`
+- L3356: `saveDraftToSession(projectName, state, session, "sent_to_publishing");`
+- L3357: `sendPublishingHandoff({ projectName, backendProjectName, session, selectedItem: selected(), navigateTo, showMessage, showError });`
+- L3363: `headerSaveLibraryBtn.onclick = async () => {`
+- L3364: `sync();`
+- L3396: `button.onclick = async () => {`
+- L3397: `sync();`
+- L3412: `"Action: Mark this media job as approved/review-ready locally.\nRisk: This does not publish, but it changes readiness status and can influence downstream handoff."`
+- L3420: `syncOutputsFromVersioning(session);`
+- L3427: `syncOutputsFromVersioning(session);`
+- L3446: `syncOutputsFromVersioning(session);`
+- L3454: `if (action === "send-publishing") {`
+- L3456: `"Confirm publishing handoff",`
+- L3457: `"Action: Prepare and send this media package to Publishing.\nRisk: This creates a handoff path for downstream publishing review. It does not publish directly."`
+- L3461: `session.form.status = "sent_to_publishing";`
+- L3462: `currentVersion.readiness_status = "sent_to_publishing";`
+- L3463: `syncOutputsFromVersioning(session);`
+- L3464: `saveDraftToSession(projectName, state, session, "sent_to_publishing");`
+- L3465: `await sendPublishingHandoff({ projectName, backendProjectName, session, selectedItem: selected(), navigateTo, showMessage, showError });`
+- L3484: `button.onclick = async () => {`
+- L3489: `syncVersionFromForm(session);`
+- L3528: `async function sendPublishingHandoff({ projectName, backendProjectName, session, selectedItem, navigateTo, showMessage, showError }) {`
+- L3529: `const handoff = buildPublishingHandoff(projectName, session, selectedItem);`
+- L3535: `setSharedHandoff(scope, "publishing", handoff);`
+- L3541: `showMessage?.("Publishing package handoff prepared from Media Studio.");`
+- L3543: `showMessage?.("Publishing package handoff kept locally because backend handoff save is unavailable.");`
+- L3546: `showMessage?.("Publishing package handoff prepared locally.");`
+- L3550: `navigateTo("publishing");`
+- L3552: `showError?.(error.message || "Failed to open Publishing.");`
+- L3562: `description: "Run saved image, video, voice, and campaign-pack jobs with prompts, review states, Library saves, and package routing."`
+- L3604: `syncFormFromItem(session, selectedItem);`
+- L3620: `<p class="media-section-copy">Start with a brief or handoff. Attach Library assets when needed. Review creative readiness and brand compliance. Save approved assets to Library or prepare handoff to Publishing/Governance. All routing is handoff/review-based and user-triggered. Media Studio does not publish, send, or approve directly.</p>`
+- L3661: `.filter((item) => ["creative", "publishing"].includes(item.key));`
+
+## Confirmation Signals
+- L2740: `return window.confirm(\`${title}\n\n${detail}\n\nAuthority: Media Studio can prepare, save, request review, and hand off media work, but provider generation, approval decisions, task creation, and publishing handoff must be explicitly confirmed by the operator.\n\nSelect Cancel to review before continuing.\`);`
+
+## Access-Key Signals
+- L20: `isAccessKeyFailure`
+- L44: `const MEDIA_ACCESS_KEY_GUIDANCE = "Missing or invalid Control Center access key. Save a valid access key before using provider-backed media generation.";`
+- L223: `return detail ? \`${MEDIA_ACCESS_KEY_GUIDANCE} (${detail})\` : MEDIA_ACCESS_KEY_GUIDANCE;`
+- L2839: `const isAuthError = isAccessKeyFailure(error);`
+- L2864: `showError?.(MEDIA_ACCESS_KEY_GUIDANCE);`
+- L2980: `if (isAccessKeyFailure(error)) {`
+- L2982: `showError?.(MEDIA_ACCESS_KEY_GUIDANCE);`
+- L3023: `if (isAccessKeyFailure(error)) {`
+- L3025: `showError?.(MEDIA_ACCESS_KEY_GUIDANCE);`
+
+## Navigation Signals
+- L1011: `const routeMatches = asString(entry?.destination_page) === "library" && asString(entry?.source_page) === "media-studio";`
+- L1012: `return routeMatches && asString(libraryAsset.source_signature) === asString(sourceSignature);`
+- L1065: `route: "media-studio",`
+- L2018: `<div class="empty-box">Route content, workflow, or AI context into Media Studio to load a media brief here.</div>`
+- L2650: `route: "media-studio",`
+- L2716: `navigateTo,`
+- L3132: `sendPublishingHandoff({ projectName, backendProjectName, session, selectedItem: item, navigateTo, showMessage, showError });`
+- L3208: `route: "media-studio",`
+- L3286: `route_target: "media-studio",`
+- L3290: `route: "media-studio",`
+- L3317: `routeSuggestions: []`
+- L3336: `navigateTo("ai-command");`
+- L3357: `sendPublishingHandoff({ projectName, backendProjectName, session, selectedItem: selected(), navigateTo, showMessage, showError });`
+- L3465: `await sendPublishingHandoff({ projectName, backendProjectName, session, selectedItem: selected(), navigateTo, showMessage, showError });`
+- L3502: `routeSuggestions: []`
+- L3520: `navigateTo("ai-command");`
+- L3528: `async function sendPublishingHandoff({ projectName, backendProjectName, session, selectedItem, navigateTo, showMessage, showError }) {`
+- L3550: `navigateTo("publishing");`
+- L3556: `export const mediaStudioRoute = {`
+- L3573: `navigateTo,`
+- L3584: `const rerender = () => mediaStudioRoute.render({`
+- L3588: `navigateTo,`
+- L3746: `navigateTo,`
+
+## AI Signals
+- L8: `generateMediaCampaignPack,`
+- L9: `generateMediaImage,`
+- L12: `improveMediaPrompt,`
+- L20: `isAccessKeyFailure`
+- L26: `import { getSharedHandoff, setSharedAiDraft, setSharedHandoff } from "../shared-context.js";`
+- L31: `const MEDIA_MODES = ["image", "video", "voice", "campaign-pack"];`
+- L32: `const MEDIA_STATUSES = ["draft", "prompt_ready", "generating", "needs_review", "approved", "publishing_ready", "sent_to_publishing", "failed"];`
+- L33: `const MEDIA_PREVIEW_STATES = ["provider_not_configured", "generation_error", "prompt_ready", "generated", "saved_to_library", "needs_review", "approved", "publishing_ready", "sent_to_publishing"];`
+- L34: `const OUTPUT_PURPOSES = ["social post", "reel", "ad creative", "marketplace image", "email visual", "website banner"];`
+- L35: `const CHANNELS = ["instagram", "facebook", "tiktok", "youtube", "email", "amazon", "ebay", "website"];`
+- L36: `const MEDIA_ASSET_KEYS = ["logo", "brand_guideline", "product_photos", "product_videos", "packaging_images", "social_assets", "campaign_assets"];`
+- L38: `serviceDomain: "media",`
+- L51: `suggestedPrompt: "Act as Visual Director. Build a high-conversion image brief with composition, camera angle, lighting, text-safe area, and product-first framing."`
+- L56: `purpose: "Translate campaign goals into short-form video concepts with strong hooks and pacing.",`
+- L57: `bestUse: "When producing reels, shorts, story cuts, and paid social video variants.",`
+- L58: `suggestedPrompt: "Act as Video Strategist. Convert this brief into a 9:16 short video plan with hook, beat-by-beat storyboard, scene transitions, and CTA timing."`
+- L64: `bestUse: "When writing voiceovers for UGC-style videos, explainers, and promotional reels.",`
+- L65: `suggestedPrompt: "Act as Voice Director. Create a voiceover script with opening hook, scene-aligned narration, cadence notes, and pronunciation guidance."`
+- L70: `purpose: "Protect brand consistency, legal-safe claims, and publishable creative outputs.",`
+- L71: `bestUse: "Before approvals and publishing handoff, especially for regulated or claim-sensitive content.",`
+- L72: `suggestedPrompt: "Act as Brand Guardian. Audit this draft for logo fit, claim risk, brand color compliance, German tone quality, and platform-safe layout."`
+- L75: `id: "prompt-engineer",`
+- L76: `title: "Prompt Engineer",`
+- L77: `purpose: "Convert rough drafts into model-ready prompts with constraints and reusable structure.",`
+- L78: `bestUse: "When a brief is unclear, too broad, or missing technical constraints for generation.",`
+- L79: `suggestedPrompt: "Act as Prompt Engineer. Rewrite this into a structured generation prompt with objective, constraints, negatives, quality targets, and channel-specific formatting."`
+- L82: `id: "publishing-assistant",`
+- L83: `title: "Publishing Assistant",`
+- L86: `suggestedPrompt: "Act as Publishing Assistant. Produce a final publishing handoff summary with readiness status, blockers, approval notes, and channel delivery checklist."`
+- L166: `if (["prompt_ready", "prompt ready", "ready"].includes(normalized)) return "prompt_ready";`
+- L172: `if (["failed", "blocked", "error", "rejected"].includes(normalized)) return "failed";`
+- L178: `if (status === "prompt_ready" || status === "generating" || status === "needs_review") return "warning";`
+- L179: `if (status === "failed") return "danger";`
+- L222: `const detail = firstText(error?.payload?.message, error?.message);`
+- L223: `return detail ? \`${MEDIA_ACCESS_KEY_GUIDANCE} (${detail})\` : MEDIA_ACCESS_KEY_GUIDANCE;`
+- L275: `campaign: firstText(context.activeCampaign, overview.active_campaign),`
+- L281: `prompt: "",`
+- L297: `prompt = "",`
+- L299: `providerStatus = "prompt_ready",`
+- L310: `prompt: asString(prompt),`
+- L312: `provider_status: MEDIA_PREVIEW_STATES.includes(asString(providerStatus)) ? asString(providerStatus) : "prompt_ready",`
+- L335: `prompt: firstText(raw.prompt, raw.input_prompt),`
+- L337: `providerStatus: firstText(raw.provider_status, raw.status, "prompt_ready"),`
+- L347: `function createVersioningState(seedPrompt = "", seedNotes = "", seed = {}) {`
+- L351: `prompt: clean(seedPrompt),`
+- L353: `providerStatus: firstText(seed.providerStatus, "prompt_ready"),`
+- L371: `session.versioning = createVersioningState(session.form?.prompt, session.form?.reviewNotes, {`
+- L377: `session.versioning.versions = createVersioningState(session.form?.prompt, session.form?.reviewNotes).versions;`
+- L425: `return createVersioningState(itemObject.prompt || "", itemObject.reviewNotes || "", {`
+- L434: `current.prompt = clean(session.form.prompt);`
+- L443: `session.form.prompt = current.prompt || "";`
+- L491: `if (mode === "campaign-pack") return "multi_format";`
+- L499: `function normalizeMediaItem(rawItem, state, source = "Backend media job") {`
+- L502: `const mode = requestType === "audio" ? "voice" : requestType === "multi_format" ? "campaign-pack" : requestType || "image";`
+- L505: `title: firstText(raw.title, raw.name, raw.prompt, \`${titleCase(mode)} media job\`),`
+- L509: `campaign: firstText(raw.campaign, raw.campaign_name, raw.campaign_id, state.context?.activeCampaign),`
+- L515: `prompt: firstText(raw.prompt, raw.generation_prompt),`
+- L526: `service_domain: asString(raw.service_domain || MEDIA_ROLE_DEFAULTS.serviceDomain),`
+- L551: `].sort(compareMediaItems);`
+- L554: `function compareMediaItems(a, b) {`
+- L556: `failed: 0,`
+- L562: `prompt_ready: 6,`
+- L579: `const results = await Promise.allSettled([`
+- L610: `const failedLoads = results.filter((result) => result.status === "rejected").length;`
+- L612: `const backendItems = asArray(mediaJobs.items).map((item) => normalizeMediaItem(item, state));`
+- L613: `const localItems = loadLocalDrafts(projectName).map((item) => normalizeMediaItem(item, state, "Local draft"));`
+- L621: `session.error = failedLoads`
+- L622: `? \`${failedLoads} Media Studio data source${failedLoads === 1 ? "" : "s"} could not be loaded. Available data is still shown.\``
+- L628: `session.error = "Backend media data is unavailable. Media Studio is running in local draft mode.";`
+- L629: `session.items = mergeQueueItems([], loadLocalDrafts(projectName).map((item) => normalizeMediaItem(item, state, "Local draft")));`
+- L651: `getSharedHandoff(projectName, "media-studio", operations, "ai-command") ||`
+- L677: `payload.prompt ||`
+- L692: `campaign: firstText(payload.campaign_name, payload.campaign, output.campaign, output.campaignName),`
+- L695: `objective: firstText(output.goal, output.objective, payload.goal, payload.suggested_media_brief, payload.prompt, contentVersion.prompt),`
+- L696: `prompt: firstText(output.prompt, output.media_prompt, payload.suggested_media_brief, payload.prompt, contentVersion.prompt, draftContext.lastCommand),`
+- L721: `campaign: item.campaign || "",`
+- L727: `prompt: item.prompt || "",`
+- L771: `if (!clean(form.campaign)) errors.campaign = "Campaign is required.";`
+- L777: `if (!clean(form.prompt) && intent !== "generate-prompt") errors.prompt = "Prompt or brief is required.";`
+- L788: `function buildPromptFromContext(state, session) {`
+- L793: `\`Campaign: ${form.campaign || state.context?.activeCampaign || "current campaign"}.\`,`
+- L795: `\`Objective: ${form.objective || overview.primary_goal || "support campaign readiness"}.\`,`
+- L797: `"Keep product identity accurate, leave safe text area, avoid unsupported claims, and prepare for Publishing handoff."`
+- L801: `function improvePrompt(prompt) {`
+- L802: `const base = clean(prompt) || "Create brand-safe campaign media.";`
+- L803: `return \`${base}\n\nProduction constraints: accurate product identity, clean composition, strong focal hierarchy, channel-safe crop, no unsupported claims, no cluttered text, and enough negative space for publishing copy.\`;`
+- L806: `function makeBrandSafe(prompt) {`
+- L807: `const base = clean(prompt) || "Create brand-safe campaign media.";`
+- L808: `return \`${base}\n\nBrand safety guardrails: use approved logo and brand cues only, preserve packaging and product truth, avoid medical or exaggerated claims, keep text legible, and respect platform content policies.\`;`
+- L811: `function adaptGerman(prompt) {`
+- L812: `const base = clean(prompt) || "Create brand-safe campaign media.";`
+- L816: `function convertImagePromptToVideoBrief(prompt) {`
+- L817: `const base = clean(prompt) || "Create a product-focused image concept.";`
+- L821: `function convertVideoBriefToVoiceover(prompt) {`
+- L822: `const base = clean(prompt) || "Create a short video plan.";`
+- L827: `const contextPrompt = clean(session.form.prompt) || buildPromptFromContext(state, session);`
+- L830: `contextPrompt,`
+- L833: `convertImagePromptToVideoBrief(contextPrompt),`
+- L836: `convertVideoBriefToVoiceover(contextPrompt),`
+- L838: `"Campaign pack brief:",`
+- L839: `\`${contextPrompt}\n\nCampaign pack outputs: image hero, video short, voiceover script, channel cutdowns, and publishing-ready metadata.\``
+- L843: `function buildMediaPayload(session, status = "prompt_ready") {`
+- L848: `title: firstText(session.form.title, \`${titleCase(mode)} media for ${session.form.campaign || session.form.project || "campaign"}\`),`
+- L852: `campaign: session.form.campaign,`
+- L858: `prompt: session.form.prompt,`
+- L867: `service_domain: MEDIA_ROLE_DEFAULTS.serviceDomain,`
+- L874: `prompt: version.prompt,`
+- L895: `campaign: session.form.campaign,`
+- L901: `prompt: session.form.prompt,`
+- L923: `campaign_pack: response?.campaign_pack,`
+- L924: `improved_prompt: response?.improved_prompt,`
+- L953: `if (purpose.includes("campaign")) usage.push("campaign");`
+- L960: `return [...new Set(usage.length ? usage : ["campaign"] )];`
+- L968: `const sourceMediaId = firstText(selectedItem?.id, session.formSourceId);`
+- L971: `toKey(sourceMediaId),`
+- L974: `clean(version?.prompt || session.form.prompt)`
+- L981: `campaign: firstText(session.form.campaign, selectedItem?.campaign),`
+- L984: `media_job_id: sourceMediaId,`
+- L986: `prompt: firstText(version?.prompt, session.form.prompt),`
+- L1037: `const hasPrompt = Boolean(clean(version.prompt || session.form.prompt));`
+- L1039: `if (!hasPrompt && !hasPayload) {`
+- L1040: `session.validation = { ...session.validation, librarySave: "Version needs prompt or output payload before saving to Library." };`
+- L1060: `source_service_domain: MEDIA_ROLE_DEFAULTS.serviceDomain,`
+- L1061: `destination_service_domain: "library",`
+- L1070: `campaign: libraryAsset.campaign,`
+- L1075: `status: "available",`
+- L1094: `const result = await createProjectHandoff(backendProjectName, handoffPayload);`
+- L1120: `showMessage?.("Library backend unavailable. Saved as local library handoff.");`
+- L1134: `if (["draft", "prompt_ready"].includes(normalizeStatus(version.readiness_status || "draft", "draft"))) {`
+- L1160: `function saveDraftToSession(projectName, state, session, status = "prompt_ready") {`
+- L1163: `const item = normalizeMediaItem(saved, state, "Local draft");`
+- L1180: `draftJobs: counts.draft + counts.prompt_ready,`
+- L1182: `failed: counts.failed,`
+- L1189: `const failed = selectedItem?.status === "failed" ? selectedItem : null;`
+- L1190: `if (failed) {`
+- L1192: `action: "Regenerate or repair the failed media job",`
+- L1193: `why: \`${failed.title} is blocked. Review the prompt and reference asset before routing downstream.\``
+- L1213: `why: "A workflow handoff is available. Load it into the generator to continue the Workflows -> Media Studio -> package handoff flow."`
+- L1218: `action: "Finish the strongest prompt draft",`
+- L1219: `why: "Draft media work exists. Complete prompt, brand style, format, and output purpose before review."`
+- L1224: `why: "No media job is ready yet. Start with a brief, build a brand-safe prompt, then review and prepare a Publishing package."`
+- L1260: `if (mode === "campaign-pack" && readiness.image_generation_backend && readiness.video_generation_backend && readiness.voice_generation_backend) return "";`
+- L1261: `return "Generator backend not connected yet — your prompt/job is ready. Review it, save it as a draft, send it to AI Command, save it to Library, or connect a provider in Integrations before trying real output generation.";`
+- L1279: `.media-main-column,`
+- L1388: `.media-queue-main {`
+- L1446: `.media-status-pill.is-prompt-ready,`
+- L1455: `.media-status-pill.is-failed {`
+- L1466: `.media-prompt-box {`
+- L1496: `object-fit: contain;`
+- L1613: `asObject(payload.campaign_pack).image_prompt ||`
+- L1614: `asObject(payload.campaign_pack).video_brief ||`
+- L1615: `asObject(payload.campaign_pack).voice_script ||`
+- L1633: `detail: "Linked Library provenance is available for this package."`
+- L1640: `detail: "A reference asset is named, but source-of-truth status still needs review."`
+- L1647: `detail: "Inbound or job context exists; attach Library source when claims or product truth matter."`
+- L1653: `detail: "Attach a Library asset or load a source-backed handoff before final package routing."`
+- L1662: `const promptText = firstText(version?.prompt, form.prompt, selectedItem?.prompt, selectedItem?.brief);`
+- L1663: `const hasBrief = Boolean(promptText || clean(form.objective || selectedItem?.objective));`
+- L1669: `const needsGovernance = source.state === "missing" || /claim|proof|medical|guarantee|legal|privacy|gdpr|discount|pricing/i.test(promptText);`
+- L1677: `detail: source.detail`
+- L1684: `detail: hasBrief && hasFormat`
+- L1686: `: "Complete the objective, prompt, channel, and format before review."`
+- L1691: `state: isBrandSafe && hasBrandCue ? "ready" : promptText ? "warning" : "missing",`
+- L1692: `status: isBrandSafe && hasBrandCue ? "Brand guided" : promptText ? "Review brand fit" : "Needs prompt",`
+- L1693: `detail: isBrandSafe && hasBrandCue`
+- L1695: `: "Review brand style, logo fit, product truth, and safe claims."`
+- L1702: `detail: packageReady`
+- L1711: `detail: needsGovernance`
+- L1712: `? "Prepare Governance Review if source, claim, legal, privacy, or pricing risk exists."`
+- L1713: `: "No obvious governance escalation signal in current prompt context."`
+- L1736: `const campaign = firstText(form.campaign, selectedItem?.campaign, "No campaign");`
+- L1740: `const handoffLabel = handoff ? "Brief available" : "No inbound brief";`
+- L1744: `<div class="media-command-main">`
+- L1748: `<p class="media-section-copy">Start by choosing Image, Video, Voice, or Campaign Pack. Generate a prompt first, then use Generate Output only when a provider/backend is connected. Save drafts for review, save reusable results to Library, or prepare a Publishing handoff without publishing directly.</p>`
+- L1758: `<span><strong>Campaign</strong>${escapeHtml(campaign)}</span>`
+- L1759: `<span><strong>Mode</strong>${escapeHtml(mode === "campaign-pack" ? "Campaign Pack" : titleCase(mode))}</span>`
+- L1769: `<button id="mediaSendAiCommandBtn" class="btn btn-secondary" type="button">Open AI Command Review</button>`
+- L1780: `const hasBrief = Boolean(firstText(version?.prompt, form.prompt, form.objective, selectedItem?.prompt, selectedItem?.brief));`
+- L1790: `detail: hasBrief ? "Brief present" : "Start here"`
+- L1795: `detail: source.status`
+- L1800: `detail: hasOutput ? "Output captured" : hasBrief ? "Prompt ready" : "Needs brief"`
+- L1805: `detail: hasOutput ? displayMediaStatusLabel(readiness.readinessStatus) : "Needs output"`
+- L1810: `detail: savedToLibrary ? "Library linked" : "Available after draft"`
+- L1815: `detail: handoffPrepared ? "Prepared" : packageReady ? "Package ready" : "Needs review"`
+- L1831: `<small>${escapeHtml(step.detail)} · ${escapeHtml(titleCase(step.state))}</small>`
+- L1855: `<div class="media-overview-item"><span>Failed / blocked jobs</span><strong>${escapeHtml(formatCount(metrics.failed))}</strong></div>`
+- L1866: `["Video", metrics.counts.generating ? "Active" : "Prompt-ready flow"],`
+- L1867: `["Voice", selectedItem?.mode === "voice" ? "Selected" : "Available"],`
+- L1869: `["Campaign readiness", handoff ? "Workflow linked" : "Draft first"]`
+- L1893: `<button id="mediaSendAiCommandBtn" class="btn btn-secondary" type="button">Open AI Command Review</button>`
+- L1929: `const modeLabel = mode === "campaign-pack" ? "Campaign Pack" : titleCase(mode);`
+- L1936: `<p class="media-section-copy">Choose a media mode, prepare a prompt/job-ready draft, then render with a connected provider or continue safely with review and handoff.</p>`
+- L1942: `<button class="media-mode-tab${item === mode ? " is-active" : ""}" type="button" data-media-mode="${escapeHtml(item)}"${item === "image" || item === "video" ? \` data-new-media-job="${escapeHtml(item)}"\` : ""}>${escapeHtml(item === "campaign-pack" ? "Campaign Pack" : titleCase(item))}</button>`
+- L1947: `Start here: choose Image, Video, Voice, or Campaign Pack. Complete the brief, generate or improve the prompt, then use Generate Output only when a provider/backend is connected. If generation is unavailable or times out, keep the prompt/job-ready draft and continue with review, Library save, AI Command review, or provider setup in Integrations.`
+- L1953: `${renderField({ id: "mediaCampaignInput", name: "campaign", label: "Campaign", value: form.campaign }, session, escapeHtml)}`
+- L1965: `${renderField({ id: "mediaPromptInput", name: "prompt", label: "Prompt / brief", value: form.prompt, multiline: true, rows: 7, helper: "Use this as the creative brief. If no generation provider is connected, Media Studio keeps it as a prompt/job-ready draft for review, Library save, AI review, or provider handoff." }, session, escapeHtml)}`
+- L1967: `${renderField({ id: "mediaReferenceInput", name: "referenceAsset", label: "Reference asset if available", value: form.referenceAsset, helper: "Use an asset id, filename, or source note already known to the project." }, session, escapeHtml)}`
+- L1973: `<button id="mediaGeneratePromptBtn" class="btn btn-secondary" type="button">Generate Prompt From Context</button>`
+- L1982: `function renderPromptBuilder(session, handoff, escapeHtml) {`
+- L1987: `<div class="setup-kicker">Smart Prompt Intelligence</div>`
+- L1988: `<h3>Prompt operations and format conversion</h3>`
+- L1990: `<span class="card-badge neutral">${escapeHtml(handoff ? "Handoff available" : "Context")}</span>`
+- L1993: `<button id="mediaPromptFromContextBtn" class="btn btn-secondary" type="button">Generate from project setup</button>`
+- L1994: `<button id="mediaPromptFromHandoffBtn" class="btn btn-secondary" type="button">Generate from workflow handoff</button>`
+- L1995: `<button id="mediaImprovePromptBtn" class="btn btn-secondary" type="button">Improve prompt</button>`
+- L1996: `<button id="mediaBrandSafePromptBtn" class="btn btn-secondary" type="button">Make brand-safe</button>`
+- L1997: `<button id="mediaGermanPromptBtn" class="btn btn-secondary" type="button">Adapt to German market</button>`
+- L1998: `<button id="mediaImageToVideoBtn" class="btn btn-secondary" type="button">Convert image prompt to video brief</button>`
+- L2001: `<button id="mediaSavePromptBtn" class="btn btn-primary" type="button">Save prompt draft</button>`
+- L2014: `<h3>No inbound media brief available</h3>`
+- L2018: `<div class="empty-box">Route content, workflow, or AI context into Media Studio to load a media brief here.</div>`
+- L2038: `<p class="media-section-copy">${escapeHtml(summary.brief || summary.prompt || fallbackCopy)}</p>`
+- L2040: `<span class="card-badge ${loaded ? "success" : "neutral"}">${escapeHtml(loaded ? "Loaded" : "Available")}</span>`
+- L2044: `<div class="data-row"><span>Campaign</span><strong>${escapeHtml(summary.campaign || "Not specified")}</strong></div>`
+- L2069: `<div class="empty-box">Start a media job or load a workflow handoff to create the first prompt-ready draft.</div>`
+- L2086: `<button class="media-queue-main" type="button" data-media-select="${escapeHtml(item.id)}">`
+- L2093: `<button type="button" data-media-action="edit-prompt" data-media-id="${escapeHtml(item.id)}">Edit prompt</button>`
+- L2111: `const isBrandSafe = brandCheck.is_brand_safe === true || /brand-safe|brand safe/i.test(current.prompt || "");`
+- L2123: `asObject(payload.campaign_pack).image_prompt ||`
+- L2124: `asObject(payload.campaign_pack).video_brief ||`
+
+## Disabled / Read-only / Draft / Provider Guard Signals
+- L26: `import { getSharedHandoff, setSharedAiDraft, setSharedHandoff } from "../shared-context.js";`
+- L29: `const MEDIA_LOCAL_DRAFTS_KEY = "mh-media-studio-local-drafts-v1";`
+- L32: `const MEDIA_STATUSES = ["draft", "prompt_ready", "generating", "needs_review", "approved", "publishing_ready", "sent_to_publishing", "failed"];`
+- L33: `const MEDIA_PREVIEW_STATES = ["provider_not_configured", "generation_error", "prompt_ready", "generated", "saved_to_library", "needs_review", "approved", "publishing_ready", "sent_to_publishing"];`
+- L68: `id: "brand-guardian",`
+- L69: `title: "Brand Guardian",`
+- L72: `suggestedPrompt: "Act as Brand Guardian. Audit this draft for logo fit, claim risk, brand color compliance, German tone quality, and platform-safe layout."`
+- L77: `purpose: "Convert rough drafts into model-ready prompts with constraints and reusable structure.",`
+- L162: `function normalizeStatus(value, fallback = "draft") {`
+- L165: `if (["requested", "request", "queued", "draft"].includes(normalized)) return "draft";`
+- L172: `if (["failed", "blocked", "error", "rejected"].includes(normalized)) return "failed";`
+- L187: `function readDraftMap() {`
+- L190: `const parsed = JSON.parse(window.localStorage?.getItem(MEDIA_LOCAL_DRAFTS_KEY) || "{}");`
+- L197: `function writeDraftMap(map) {`
+- L200: `window.localStorage?.setItem(MEDIA_LOCAL_DRAFTS_KEY, JSON.stringify(map || {}));`
+- L226: `function loadLocalDrafts(projectName) {`
+- L227: `return asArray(readDraftMap()[projectKey(projectName)]);`
+- L253: `function saveLocalDraft(projectName, draft) {`
+- L254: `const map = readDraftMap();`
+- L256: `const existing = asArray(map[key]).filter((item) => asString(item.id) !== asString(draft.id));`
+- L258: `...asObject(draft),`
+- L259: `id: asString(draft.id || \`local-media-${Date.now()}\`),`
+- L261: `source: "Local draft",`
+- L265: `writeDraftMap(map);`
+- L286: `status: "draft"`
+- L300: `readinessStatus = "draft",`
+- L312: `provider_status: MEDIA_PREVIEW_STATES.includes(asString(providerStatus)) ? asString(providerStatus) : "prompt_ready",`
+- L313: `readiness_status: normalizeStatus(readinessStatus || "draft", "draft"),`
+- L338: `readinessStatus: firstText(raw.readiness_status, raw.status, "draft"),`
+- L354: `readinessStatus: firstText(seed.readinessStatus, "draft"),`
+- L373: `readinessStatus: session.form?.status || "draft"`
+- L427: `readinessStatus: itemObject.status || "draft"`
+- L437: `current.readiness_status = normalizeStatus(session.form.status || current.readiness_status || "draft", "draft");`
+- L445: `session.form.status = normalizeStatus(current.readiness_status || session.form.status || "draft", "draft");`
+- L481: `draftMessage: "",`
+- L519: `status: normalizeStatus(raw.status, "draft"),`
+- L531: `preview_history: asArray(raw.preview_history),`
+- L563: `draft: 7`
+- L613: `const localItems = loadLocalDrafts(projectName).map((item) => normalizeMediaItem(item, state, "Local draft"));`
+- L628: `session.error = "Backend media data is unavailable. Media Studio is running in local draft mode.";`
+- L629: `session.items = mergeQueueItems([], loadLocalDrafts(projectName).map((item) => normalizeMediaItem(item, state, "Local draft")));`
+- L660: `const draftContext = asObject(payload.draft_context);`
+- L669: `payload.draft`
+- L688: `draftContext.lastResponseTitle,`
+- L691: `project: firstText(draftContext.projectName, payload.project, payload.project_name, output.project),`
+- L696: `prompt: firstText(output.prompt, output.media_prompt, payload.suggested_media_brief, payload.prompt, contentVersion.prompt, draftContext.lastCommand),`
+- L732: `status: item.status || "draft"`
+- L747: `readinessStatus: "draft"`
+- L753: `session.draftMessage = "";`
+- L808: `return \`${base}\n\nBrand safety guardrails: use approved logo and brand cues only, preserve packaging and product truth, avoid medical or exaggerated claims, keep text legible, and respect platform content policies.\`;`
+- L940: `const normalized = normalizeStatus(readinessStatus || "draft", "draft");`
+- L943: `return "draft";`
+- L957: `if (["publishing_ready", "sent_to_publishing", "approved"].includes(normalizeStatus(readiness.readinessStatus, "draft"))) {`
+- L965: `const mediaPreview = resolvePreviewMedia(payload);`
+- L988: `url: firstText(payload.url, mediaPreview.imageUrl),`
+- L989: `image_url: mediaPreview.imageUrl,`
+- L990: `video_url: mediaPreview.videoUrl,`
+- L991: `audio_url: mediaPreview.audioUrl,`
+- L999: `status: normalizeStatus(version?.readiness_status || readiness.readinessStatus || "draft", "draft"),`
+- L1134: `if (["draft", "prompt_ready"].includes(normalizeStatus(version.readiness_status || "draft", "draft"))) {`
+- L1140: `saveDraftToSession(projectName, state, session, normalizeStatus(session.form.status || version.readiness_status || "publishing_ready", "publishing_ready"));`
+- L1160: `function saveDraftToSession(projectName, state, session, status = "prompt_ready") {`
+- L1162: `const saved = saveLocalDraft(projectName, buildMediaPayload(session, status));`
+- L1163: `const item = normalizeMediaItem(saved, state, "Local draft");`
+- L1168: `session.draftMessage = "Media draft saved locally.";`
+- L1180: `draftJobs: counts.draft + counts.prompt_ready,`
+- L1193: `why: \`${failed.title} is blocked. Review the prompt and reference asset before routing downstream.\``
+- L1216: `if (metrics.draftJobs) {`
+- L1218: `action: "Finish the strongest prompt draft",`
+- L1219: `why: "Draft media work exists. Complete prompt, brand style, format, and output purpose before review."`
+- L1261: `return "Generator backend not connected yet — your prompt/job is ready. Review it, save it as a draft, send it to AI Command, save it to Library, or connect a provider in Integrations before trying real output generation.";`
+- L1400: `.media-preview-title {`
+- L1408: `.media-preview-copy,`
+- L1595: `const normalized = normalizeStatus(status || "draft", "draft");`
+- L1737: `const status = displayMediaStatusLabel(selectedVersionEntry(session)?.readiness_status || selectedItem?.status || form.status || "draft");`
+- L1748: `<p class="media-section-copy">Start by choosing Image, Video, Voice, or Campaign Pack. Generate a prompt first, then use Generate Output only when a provider/backend is connected. Save drafts for review, save reusable results to Library, or prepare a Publishing handoff without publishing directly.</p>`
+- L1766: `<button id="mediaSaveDraftBtn" class="btn btn-secondary" type="button">Save Draft</button>`
+- L1810: `detail: savedToLibrary ? "Library linked" : "Available after draft"`
+- L1853: `<div class="media-overview-item"><span>Draft media jobs</span><strong>${escapeHtml(formatCount(metrics.draftJobs))}</strong></div>`
+- L1855: `<div class="media-overview-item"><span>Failed / blocked jobs</span><strong>${escapeHtml(formatCount(metrics.failed))}</strong></div>`
+- L1869: `["Campaign readiness", handoff ? "Workflow linked" : "Draft first"]`
+- L1880: `<span class="card-badge ${statusTone(selectedItem?.status || "draft")}">${escapeHtml(selectedItem ? titleCase(selectedItem.status) : "Draft")}</span>`
+- L1892: `<button id="mediaSaveDraftBtn" class="btn btn-secondary" type="button">Save Draft</button>`
+- L1936: `<p class="media-section-copy">Choose a media mode, prepare a prompt/job-ready draft, then render with a connected provider or continue safely with review and handoff.</p>`
+- L1947: `Start here: choose Image, Video, Voice, or Campaign Pack. Complete the brief, generate or improve the prompt, then use Generate Output only when a provider/backend is connected. If generation is unavailable or times out, keep the prompt/job-ready draft and continue with review, Library save, AI Command review, or provider setup in Integrations.`
+- L1965: `${renderField({ id: "mediaPromptInput", name: "prompt", label: "Prompt / brief", value: form.prompt, multiline: true, rows: 7, helper: "Use this as the creative brief. If no generation provider is connected, Media Studio keeps it as a prompt/job-ready draft for review, Library save, AI review, or provider handoff." }, session, escapeHtml)}`
+- L1975: `<button id="mediaSaveBtn" class="btn btn-primary" type="button">Save Draft</button>`
+- L1977: `${session.draftMessage ? \`<div class="simple-banner">${escapeHtml(session.draftMessage)}</div>\` : ""}`
+- L2001: `<button id="mediaSavePromptBtn" class="btn btn-primary" type="button">Save prompt draft</button>`
+- L2069: `<div class="empty-box">Start a media job or load a workflow handoff to create the first prompt-ready draft.</div>`
+- L2092: `<button type="button" data-media-action="preview" data-media-id="${escapeHtml(item.id)}">Preview</button>`
+- L2097: `<button type="button" data-media-action="save-draft" data-media-id="${escapeHtml(item.id)}">Save draft</button>`
+- L2109: `const readinessStatus = normalizeStatus(current.readiness_status || session.form.status || selectedItem?.status || "draft", "draft");`
+- L2188: `${MEDIA_PREVIEW_STATES.map((status) => \``
+- L2215: `function resolvePreviewMedia(payload) {`
+- L2259: `function renderOutputPreviewPanel(session, selectedItem, escapeHtml) {`
+- L2263: `<section class="card media-card" id="mediaOutputPreviewPanel">`
+- L2266: `<div class="setup-kicker">Output Preview</div>`
+- L2278: `const mediaPreview = resolvePreviewMedia(payload);`
+- L2283: `let previewBody = \`<div class="media-prompt-box">${escapeHtml("Prompt-ready state. Generate output or switch version to inspect payload.")}</div>\`;`
+- L2286: `previewBody = mediaPreview.imageUrl`
+- L2289: `<a class="media-viewer-image-link" href="${escapeHtml(mediaPreview.imageUrl)}" target="_blank" rel="noopener noreferrer">`
+- L2290: `<img class="media-viewer-image" alt="Generated media preview" src="${escapeHtml(mediaPreview.imageUrl)}">`
+- L2295: `: \`<div class="media-prompt-box">${escapeHtml(JSON.stringify(payload, null, 2) || "No image output was returned yet. If the provider is not connected or timed out, keep the prompt/job-ready draft and continue with review, Library save, or provider setup in Integrations.")}</div>\`;`
+- L2299: `if (mediaPreview.videoUrl) {`
+- L2300: `previewBody = \``
+- L2302: `<video class="media-viewer-video" controls preload="metadata" src="${escapeHtml(mediaPreview.videoUrl)}"></video>`
+- L2307: `previewBody = lines.length`
+- L2314: `if (mediaPreview.audioUrl) {`
+- L2315: `previewBody = \``
+- L2317: `<audio class="media-viewer-audio" controls preload="metadata" src="${escapeHtml(mediaPreview.audioUrl)}"></audio>`
+- L2325: `previewBody = \``
+- L2338: `previewBody = \``
+- L2350: `<section class="card media-card" id="mediaOutputPreviewPanel">`
+- L2353: `<div class="setup-kicker">Output Preview</div>`
+- L2355: `<p class="media-section-copy">${escapeHtml(firstText(payload.message, \`Detected output type: ${mediaPreview.detectedType}.\`))}</p>`
+- L2357: `<span class="card-badge ${statusTone(normalizeStatus(version.readiness_status || selectedItem?.status || "draft", "draft"))}">${escapeHtml(titleCase(stateLabel))}</span>`
+- L2359: `${previewBody}`
+- L2409: `<strong>${escapeHtml(titleCase(firstText(selected?.readiness_status, "draft")))}</strong>`
+- L2433: `<strong>${escapeHtml(selected?.id ? \`${titleCase(selected.id)} (${titleCase(selected.readiness_status || "draft")})\` : "None")}</strong>`
+- L2437: `<strong>${escapeHtml(previous?.id ? \`${titleCase(previous.id)} (${titleCase(previous.readiness_status || "draft")})\` : "No previous version")}</strong>`
+- L2457: `<button class="btn btn-secondary" type="button" data-media-version-action="save-draft">Save as draft</button>`
+- L2471: `const prompt = activePrompt || selectedItem?.prompt || selectedItem?.brief || "Select or save a media job to preview the prompt, brief, and asset notes.";`
+- L2486: `<div class="setup-kicker">Asset Preview / Brand Safety Checklist</div>`
+- L2489: `<span class="card-badge ${statusTone(normalizeStatus(version?.readiness_status || selectedItem?.status || "draft", "draft"))}">${escapeHtml(displayMediaStatusLabel(version?.readiness_status || selectedItem?.status || "draft"))}</span>`
+- L2491: `<span class="media-preview-title">${escapeHtml(selectedItem ? \`${titleCase(selectedItem.mode)} preview / prompt\` : "Preview")}</span>`
+- L2519: `if (status.includes("ready") || status.includes("review")) return "brand-guardian";`
+- L2536: `<button class="btn btn-secondary" type="button" data-media-specialist-save="${escapeHtml(specialist.id)}">Save Draft</button>`
+- L2616: `${!readiness.image_generation_backend || !readiness.video_generation_backend || !readiness.voice_generation_backend ? \`<div class="simple-banner media-block-gap">${escapeHtml("Generator backend not connected yet — your prompt/job is ready. Review it, save it as a draft, send it to AI Command, save it to Library, or connect a provider in Integrations before trying real output generation.")}</div>\` : ""}`
+- L2637: `const source = selectedItem || normalizeMediaItem(buildMediaPayload(session, "publishing_ready"), { context: {} }, "Local draft");`
+- L2690: `const localItem = saveDraftToSession(projectName, state, session, status);`
+- L2692: `showMessage?.("Media draft saved locally.");`
+- L2705: `showMessage?.("Backend media save unavailable; draft kept locally.");`
+- L2735: `session.draftMessage = message || "";`
+- L2766: `session.draftMessage = "Media generation cancelled. Prompt remains ready for review.";`
+- L2773: `saveDraftToSession(projectName, state, session, "generating");`
+- L2781: `if (response && response.ok === false && response.status === "provider_not_configured") {`
+- L2787: `providerStatus: "provider_not_configured",`
+- L2789: `notes: firstText(response.message, "Generator backend not connected yet — your prompt/job is ready. Review it, save it as a draft, send it to AI Command, save it to Library, or connect a provider in Integrations before trying real output generation."),`
+- L2794: `saveDraftToSession(projectName, state, session, "prompt_ready");`
+- L2795: `session.draftMessage = response.message || "Generator backend not connected yet — your prompt/job is ready. Review it, save it as a draft, send it to AI Command, save it to Library, or connect a provider in Integrations before trying real output generation.";`
+- L2836: `session.draftMessage = "Generation completed and queued for review.";`
+- L2862: `saveDraftToSession(projectName, state, session, "prompt_ready");`
+- L2867: `session.draftMessage = isAuthError`
+- L2868: `? \`${authMessage} Draft kept locally.\``
+- L2869: `: payloadMessage || error?.message || "Generation failed. Draft kept locally.";`
+- L2908: `showMessage?.("New media job draft opened.");`
+- L2913: `const saveButtons = [document.getElementById("mediaSaveDraftBtn"), document.getElementById("mediaSaveBtn"), document.getElementById("mediaSavePromptBtn")].filter(Boolean);`
+- L2939: `session.draftMessage = "No workflow handoff is available.";`
+- L2948: `session.draftMessage = "Prompt generated from workflow handoff.";`
+- L2967: `session.draftMessage = "Prompt improvement cancelled.";`
+- L2974: `if (result && result.ok === false && result.status === "provider_not_configured") {`
+- L3006: `session.draftMessage = "Brand safety check cancelled.";`
+- L3013: `if (result && result.ok === false && result.status === "provider_not_configured") {`
+- L3072: `session.draftMessage = summary.sourcePage === "content-studio"`
+- L3087: `if (action === "preview" || action === "edit-prompt") {`
+- L3088: `document.getElementById(action === "preview" ? "mediaReviewPanel" : "mediaGeneratorPanel")?.scrollIntoView({ behavior: "smooth", block: "start" });`
+- L3093: `if (action === "save-draft") {`
+- L3094: `saveDraftToSession(projectName, state, session, "draft");`
+- L3095: `showMessage?.("Media job saved as local draft.");`
+- L3101: `saveDraftToSession(projectName, state, session, "prompt_ready");`
+- L3116: `saveDraftToSession(projectName, state, session, "approved");`
+- L3131: `saveDraftToSession(projectName, state, session, "sent_to_publishing");`
+- L3158: `saveDraftToSession(projectName, state, session, "approved");`
+- L3192: `const item = selected() || saveDraftToSession(projectName, state, session, "needs_review");`
+- L3193: `saveDraftToSession(projectName, state, session, "needs_review");`
+- L3218: `showMessage?.("Media draft moved to needs review locally.");`
+- L3232: `"Action: Return this media job to draft/revision.\nRisk: If a pending backend approval exists, this may submit a rejection/revision decision."`
+- L3236: `session.form.status = "draft";`
+- L3238: `if (currentVersion) currentVersion.readiness_status = "draft";`
+- L3240: `saveDraftToSession(projectName, state, session, "draft");`
+- L3258: `showMessage?.("Media job returned to draft for revision.");`
+- L3274: `const item = selected() || saveDraftToSession(projectName, state, session, "prompt_ready");`
+- L3300: `showMessage?.("Create Task needs a backend media job; local draft is preserved.");`
+- L3312: `const aiDraft = {`
+- L3319: `setSharedAiDraft(projectName, aiDraft);`
+- L3331: `draft_context: aiDraft,`
+- L3356: `saveDraftToSession(projectName, state, session, "sent_to_publishing");`
+- L3390: `session.draftMessage = \`${titleCase(key)} selected.\`;`
+- L3419: `saveDraftToSession(projectName, state, session, "approved");`
+- L3424: `session.form.status = "draft";`
+- L3425: `currentVersion.readiness_status = "draft";`
+- L3426: `saveDraftToSession(projectName, state, session, "draft");`
+- L3428: `showMessage?.("Selected version rejected and returned to draft.");`
+- L3447: `saveDraftToSession(projectName, state, session, "prompt_ready");`
+- L3448: `showMessage?.("Selected version regenerated as prompt-ready draft.");`
+- L3450: `if (action === "save-draft") {`
+- L3451: `saveDraftToSession(projectName, state, session, "draft");`
+- L3452: `showMessage?.("Selected version saved as draft.");`
+- L3464: `saveDraftToSession(projectName, state, session, "sent_to_publishing");`
+- L3490: `session.draftMessage = \`${specialist.title} prompt added.\`;`
+- L3492: `saveDraftToSession(projectName, state, session, "draft");`
+- L3493: `showMessage?.(\`${specialist.title} draft saved locally.\`);`
+- L3497: `const aiDraft = {`
+- L3504: `setSharedAiDraft(projectName, aiDraft);`
+- L3515: `draft_context: aiDraft,`
+- L3597: `const localItems = loadLocalDrafts(projectName).map((item) => normalizeMediaItem(item, state, "Local draft"));`
+- L3721: `${renderOutputPreviewPanel(session, selectedItem, escapeHtml)}`
+
+## Risky Terms
+- L1: `import {`
+- L2: `brandCheckMedia,`
+- L3: `createProjectApproval,`
+- L4: `createProjectHandoff,`
+- L5: `createProjectTask,`
+- L6: `decideProjectApproval,`
+- L8: `generateMediaCampaignPack,`
+- L9: `generateMediaImage,`
+- L10: `generateMediaVideoBrief,`
+- L11: `generateMediaVoiceScript,`
+- L13: `listProjectApprovals,`
+- L16: `listProjectHandoffs,`
+- L18: `listProjectTasks,`
+- L19: `saveProjectMediaJob,`
+- L22: `import {`
+- L25: `} from "../asset-library.js";`
+- L26: `import { getSharedHandoff, setSharedAiDraft, setSharedHandoff } from "../shared-context.js";`
+- L30: `const MEDIA_LIBRARY_LOCAL_ASSETS_KEY = "mh-media-library-assets-v1";`
+- L32: `const MEDIA_STATUSES = ["draft", "prompt_ready", "generating", "needs_review", "approved", "publishing_ready", "sent_to_publishing", "failed"];`
+- L33: `const MEDIA_PREVIEW_STATES = ["provider_not_configured", "generation_error", "prompt_ready", "generated", "saved_to_library", "needs_review", "approved", "publishing_ready", "sent_to_publishing"];`
+- L41: `reviewRole: "compliance_reviewer",`
+- L42: `handoffRole: "publisher"`
+- L44: `const MEDIA_ACCESS_KEY_GUIDANCE = "Missing or invalid Control Center access key. Save a valid access key before using provider-backed media generation.";`
+- L70: `purpose: "Protect brand consistency, legal-safe claims, and publishable creative outputs.",`
+- L71: `bestUse: "Before approvals and publishing handoff, especially for regulated or claim-sensitive content.",`
+- L82: `id: "publishing-assistant",`
+- L83: `title: "Publishing Assistant",`
+- L84: `purpose: "Finalize readiness signals and handoff payload quality before publishing.",`
+- L85: `bestUse: "Right before preparing a Publishing package for downstream review.",`
+- L86: `suggestedPrompt: "Act as Publishing Assistant. Produce a final publishing handoff summary with readiness status, blockers, approval notes, and channel delivery checklist."`
+- L168: `if (["needs_review", "needs review", "review", "pending_approval"].includes(normalized)) return "needs_review";`
+- L169: `if (["approved", "complete", "completed"].includes(normalized)) return "approved";`
+- L170: `if (["publishing_ready", "publishing ready", "handoff", "ready_for_publishing"].includes(normalized)) return "publishing_ready";`
+- L171: `if (["sent_to_publishing", "sent to publishing", "sent"].includes(normalized)) return "sent_to_publishing";`
+- L177: `if (status === "approved" || status === "publishing_ready" || status === "sent_to_publishing") return "success";`
+- L178: `if (status === "prompt_ready" || status === "generating" || status === "needs_review") return "warning";`
+- L204: `function readLibraryAssetMap() {`
+- L207: `const parsed = JSON.parse(window.localStorage?.getItem(MEDIA_LIBRARY_LOCAL_ASSETS_KEY) || "{}");`
+- L214: `function writeLibraryAssetMap(map) {`
+- L217: `window.localStorage?.setItem(MEDIA_LIBRARY_LOCAL_ASSETS_KEY, JSON.stringify(map || {}));`
+- L230: `function loadLocalLibraryAssets(projectName) {`
+- L231: `return asArray(readLibraryAssetMap()[projectKey(projectName)]);`
+- L234: `function upsertLocalLibraryAsset(projectName, asset) {`
+- L235: `const map = readLibraryAssetMap();`
+- L239: `id: asString(asset.id || \`media-library-${Date.now()}\`),`
+- L249: `writeLibraryAssetMap(map);`
+- L253: `function saveLocalDraft(projectName, draft) {`
+- L279: `objective: firstText(overview.primary_goal, overview.goal, "Create publishing-ready media"),`
+- L284: `reviewNotes: "",`
+- L299: `providerStatus = "prompt_ready",`
+- L302: `provider = "",`
+- L304: `libraryAssetRef = null,`
+- L312: `provider_status: MEDIA_PREVIEW_STATES.includes(asString(providerStatus)) ? asString(providerStatus) : "prompt_ready",`
+- L315: `provider: asString(provider),`
+- L317: `library_asset_ref: libraryAssetRef == null ? null : asObject(libraryAssetRef),`
+- L337: `providerStatus: firstText(raw.provider_status, raw.status, "prompt_ready"),`
+- L340: `provider: firstText(raw.provider),`
+- L342: `libraryAssetRef: raw.library_asset_ref || null,`
+- L353: `providerStatus: firstText(seed.providerStatus, "prompt_ready"),`
+- L356: `provider: firstText(seed.provider, ""),`
+- L371: `session.versioning = createVersioningState(session.form?.prompt, session.form?.reviewNotes, {`
+- L377: `session.versioning.versions = createVersioningState(session.form?.prompt, session.form?.reviewNotes).versions;`
+- L425: `return createVersioningState(itemObject.prompt || "", itemObject.reviewNotes || "", {`
+- L431: `function syncVersionFromForm(session) {`
+- L435: `current.notes = clean(session.form.reviewNotes);`
+- L444: `session.form.reviewNotes = current.notes || "";`
+- L469: `tasks: [],`
+- L470: `approvals: [],`
+- L471: `handoffs: [],`
+- L482: `loadedHandoffId: "",`
+- L520: `approval_state: asString(raw.approval_state || raw.approvalStatus || ""),`
+- L521: `provider: asString(raw.provider || ""),`
+- L525: `review_role: asString(raw.review_role || MEDIA_ROLE_DEFAULTS.reviewRole),`
+- L528: `publishing_job_id: asString(raw.publishing_job_id || ""),`
+- L531: `preview_history: asArray(raw.preview_history),`
+- L534: `linked_tasks: asArray(raw.linked_tasks),`
+- L535: `linked_approvals: asArray(raw.linked_approvals),`
+- L536: `linked_handoffs: asArray(raw.linked_handoffs),`
+- L537: `reviewNotes: firstText(raw.review_notes, raw.reviewNotes, asArray(raw.comments)[0]?.text),`
+- L557: `publishing_ready: 1,`
+- L558: `sent_to_publishing: 2,`
+- L559: `approved: 3,`
+- L560: `needs_review: 4,`
+- L571: `async function loadMediaWorkspace(projectName, backendProjectName, state, session, rerender) {`
+- L582: `listProjectTasks(backendProjectName, 120),`
+- L583: `listProjectApprovals(backendProjectName, 120),`
+- L584: `listProjectHandoffs(backendProjectName, { limit: 120 }),`
+- L592: `tasksResult,`
+- L593: `approvalsResult,`
+- L594: `handoffsResult,`
+- L604: `const tasks = fulfilledValue(tasksResult, { items: [] });`
+- L605: `const approvals = fulfilledValue(approvalsResult, { items: [] });`
+- L606: `const handoffs = fulfilledValue(handoffsResult, { items: [] });`
+- L616: `session.tasks = asArray(tasks.items);`
+- L617: `session.approvals = asArray(approvals.items);`
+- L618: `session.handoffs = asArray(handoffs.items);`
+- L625: `applyInboundHandoff(projectName, session);`
+- L631: `applyInboundHandoff(projectName, session);`
+- L647: `function getInboundHandoff(projectName, session) {`
+- L650: `getSharedHandoff(projectName, "media-studio", operations, "workflows") ||`
+- L651: `getSharedHandoff(projectName, "media-studio", operations, "ai-command") ||`
+- L652: `getSharedHandoff(projectName, "media-studio", operations, "content-studio") ||`
+- L653: `getSharedHandoff(projectName, "media-studio", operations)`
+- L657: `function extractHandoffSummary(handoff) {`
+- L658: `const payload = asObject(handoff?.payload);`
+- L662: `const sourcePage = asString(handoff?.source_page || "workflows");`
+- L674: `handoff?.id ||`
+- L707: `function applyInboundHandoff(projectName, session) {`
+- L708: `const handoff = getInboundHandoff(projectName, session);`
+- L709: `if (!handoff) return;`
+- L710: `const summary = extractHandoffSummary(handoff);`
+- L711: `if (!summary.id || summary.id === session.loadedHandoffId) return;`
+- L712: `session.loadedHandoffId = summary.id;`
+- L715: `function syncFormFromItem(session, item) {`
+- L730: `reviewNotes: item.reviewNotes || "",`
+- L736: `syncOutputsFromVersioning(session);`
+- L749: `syncOutputsFromVersioning(session);`
+- L757: `function syncSessionForm(session, form) {`
+- L764: `syncVersionFromForm(session);`
+- L767: `function validateGenerator(session, intent = "save") {`
+- L777: `if (!clean(form.prompt) && intent !== "generate-prompt") errors.prompt = "Prompt or brief is required.";`
+- L792: `\`Create ${form.outputPurpose || "publishing-ready media"} for ${form.product || overview.project_name || "the product"}.\`,`
+- L797: `"Keep product identity accurate, leave safe text area, avoid unsupported claims, and prepare for Publishing handoff."`
+- L803: `return \`${base}\n\nProduction constraints: accurate product identity, clean composition, strong focal hierarchy, channel-safe crop, no unsupported claims, no cluttered text, and enough negative space for publishing copy.\`;`
+- L808: `return \`${base}\n\nBrand safety guardrails: use approved logo and brand cues only, preserve packaging and product truth, avoid medical or exaggerated claims, keep text legible, and respect platform content policies.\`;`
+- L826: `function generateAllFormats(session, state) {`
+- L839: `\`${contextPrompt}\n\nCampaign pack outputs: image hero, video short, voiceover script, channel cutdowns, and publishing-ready metadata.\``
+- L862: `review_notes: session.form.reviewNotes,`
+- L863: `provider: mode === "video" ? "video provider pending" : mode === "voice" ? "voice provider pending" : "image provider pending",`
+- L866: `review_role: MEDIA_ROLE_DEFAULTS.reviewRole,`
+- L876: `provider_status: version.provider_status,`
+- L879: `provider: version.provider,`
+- L881: `library_asset_ref: version.library_asset_ref || null,`
+- L912: `provider: response?.provider,`
+- L932: `provider: response?.provider || "",`
+- L939: `function normalizeApprovalStatus(readinessStatus) {`
+- L941: `if (["approved", "publishing_ready", "sent_to_publishing"].includes(normalized)) return "approved";`
+- L942: `if (normalized === "needs_review") return "needs_review";`
+- L946: `function classifyLibraryUsage(session, selectedItem, version, readiness) {`
+- L957: `if (["publishing_ready", "sent_to_publishing", "approved"].includes(normalizeStatus(readiness.readinessStatus, "draft"))) {`
+- L958: `usage.push("publishing");`
+- L963: `function buildLibraryAssetPayload(projectName, session, selectedItem, version) {`
+- L965: `const mediaPreview = resolvePreviewMedia(payload);`
+- L988: `url: firstText(payload.url, mediaPreview.imageUrl),`
+- L989: `image_url: mediaPreview.imageUrl,`
+- L990: `video_url: mediaPreview.videoUrl,`
+- L991: `audio_url: mediaPreview.audioUrl,`
+- L993: `approval_status: normalizeApprovalStatus(readiness.readinessStatus),`
+- L996: `notes: firstText(version?.notes, session.form.reviewNotes, selectedItem?.reviewNotes),`
+- L998: `usage: classifyLibraryUsage(session, selectedItem, version, readiness),`
+- L1006: `function findExistingLibrarySave(session, projectName, sourceSignature) {`
+- L1007: `const local = loadLocalLibraryAssets(projectName).find((item) => asString(item.source_signature) === asString(sourceSignature));`
+- L1008: `const backend = asArray(session.handoffs).find((entry) => {`
+- L1010: `const libraryAsset = asObject(payload.library_asset);`
+- L1011: `const routeMatches = asString(entry?.destination_page) === "library" && asString(entry?.source_page) === "media-studio";`
+- L1012: `return routeMatches && asString(libraryAsset.source_signature) === asString(sourceSignature);`
+- L1020: `async function saveVersionToLibrary({`
+- L1031: `session.validation = { ...session.validation, librarySave: "Select a version before saving to Library." };`
+- L1040: `session.validation = { ...session.validation, librarySave: "Version needs prompt or output payload before saving to Library." };`
+- L1045: `const libraryAsset = buildLibraryAssetPayload(projectName, session, selectedItem, version);`
+- L1046: `const existing = findExistingLibrarySave(session, projectName, libraryAsset.source_signature);`
+- L1050: `showMessage?.("Already saved to Library (local reference).");`
+- L1054: `const handoffPayload = {`
+- L1057: `destination_page: "library",`
+- L1059: `destination_role: MEDIA_ROLE_DEFAULTS.reviewRole,`
+- L1061: `destination_service_domain: "library",`
+- L1069: `project: libraryAsset.project,`
+- L1070: `campaign: libraryAsset.campaign,`
+- L1071: `media_type: libraryAsset.media_type,`
+- L1072: `usage: libraryAsset.usage,`
+- L1073: `library_asset: libraryAsset`
+- L1079: `setSharedHandoff(projectName || "__default__", "library", handoffPayload);`
+- L1081: `setSharedHandoff("__default__", "library", handoffPayload);`
+- L1085: `handoff_id: asString(existing.backend?.id || existing.local?.handoff_id || ""),`
+- L1086: `source_signature: libraryAsset.source_signature,`
+- L1088: `saved_at: nowIso(),`
+- L1089: `status: "saved_to_library"`
+- L1094: `const result = await createProjectHandoff(backendProjectName, handoffPayload);`
+- L1095: `const savedHandoff = asObject(result?.handoff);`
+- L1096: `const savedId = asString(savedHandoff.id || handoffPayload.id);`
+- L1097: `upsertLocalLibraryAsset(projectName, {`
+- L1098: `...libraryAsset,`
+- L1099: `id: savedId || libraryAsset.id,`
+- L1100: `handoff_id: savedId,`
+- L1105: `handoff_id: savedId,`
+- L1106: `source_signature: libraryAsset.source_signature,`
+- L1108: `saved_at: nowIso(),`
+- L1109: `status: "saved_to_library"`
+- L1111: `session.handoffs = [savedHandoff, ...asArray(session.handoffs).filter((item) => asString(item.id) !== savedId)];`
+- L1112: `showMessage?.(existing.backend ? "Already saved. Library metadata updated." : "Selected version saved to Library.");`
+- L1114: `upsertLocalLibraryAsset(projectName, {`
+- L1115: `...libraryAsset,`
+- L1116: `id: libraryAsset.id,`
+- L1120: `showMessage?.("Library backend unavailable. Saved as local library handoff.");`
+- L1123: `upsertLocalLibraryAsset(projectName, {`
+- L1124: `...libraryAsset,`
+- L1125: `id: libraryAsset.id,`
+- L1129: `showMessage?.("Selected version saved to Library (local handoff).");`
+- L1132: `version.library_asset_ref = reference;`
+- L1133: `version.provider_status = "saved_to_library";`
+- L1135: `version.readiness_status = "publishing_ready";`
+- L1136: `session.form.status = "publishing_ready";`
+- L1138: `session.validation = { ...session.validation, librarySave: "" };`
+- L1139: `syncOutputsFromVersioning(session);`
+- L1140: `saveDraftToSession(projectName, state, session, normalizeStatus(session.form.status || version.readiness_status || "publishing_ready", "publishing_ready"));`
+- L1143: `function syncOutputsFromVersioning(session) {`
+- L1149: `provider_status: version.provider_status,`
+- L1153: `provider: version.provider || "",`
+- L1160: `function saveDraftToSession(projectName, state, session, status = "prompt_ready") {`
+- L1161: `syncOutputsFromVersioning(session);`
+- L1162: `const saved = saveLocalDraft(projectName, buildMediaPayload(session, status));`
+- L1163: `const item = normalizeMediaItem(saved, state, "Local draft");`
+- L1168: `session.draftMessage = "Media draft saved locally.";`
+- L1179: `readyAssets: counts.approved + counts.publishing_ready + counts.sent_to_publishing,`
+- L1181: `needsReview: counts.needs_review,`
+- L1183: `publishingReady: counts.publishing_ready,`
+- L1188: `function buildRecommendation(metrics, handoff, selectedItem) {`
+- L1192: `action: "Regenerate or repair the failed media job",`
+- L1193: `why: \`${failed.title} is blocked. Review the prompt and reference asset before routing downstream.\``
+- L1196: `const needsReview = selectedItem?.status === "needs_review" ? selectedItem : null;`
+
+## Required Manual Classification
+Before any patch, classify exact user-facing action paths into:
+
+1. Local draft only
+2. Backend media job save
+3. Provider-backed generation
+4. Prompt improvement
+5. Brand check
+6. Approval creation
+7. Approval decision
+8. Task creation
+9. Library handoff / save
+10. Publishing handoff
+11. AI Command handoff
+12. Navigation only
+13. Unknown / needs deeper inspection
+
+## Decision Rule
+- If provider-backed generation can run without explicit operator confirmation or backend guard clarity, create a narrow patch.
+- If approval decision can happen without explicit confirmation, create a narrow patch.
+- If Library/Publishing handoff creates backend records, ensure copy and confirmation are appropriate.
+- If local draft save is only browser storage, no destructive confirmation required.
+- Do not redesign Media Studio in this pass.

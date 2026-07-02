@@ -1,0 +1,76 @@
+  3380	function getAiRoomInitials(specialist) {
+  3381		const id = getAiRoomRoleId(specialist?.id);
+  3382		if (AI_ROOM_ROLE_INITIALS[id]) return AI_ROOM_ROLE_INITIALS[id];
+  3383		return asString(specialist?.label || "AI")
+  3384			.split(/\s+/)
+  3385			.map((part) => part[0])
+  3386			.join("")
+  3387			.slice(0, 2)
+  3388			.toUpperCase() || "AI";
+  3389	}
+  3390	
+  3391	function getAiRoomFlowIndex(session) {
+  3392		const preview = asObject(session.outputPreview);
+  3393		if (session.responseLoading) return 0;
+  3394		if (preview.outputType === "workflow") return 2;
+  3395		if (preview.outputType === "handoff") return 3;
+  3396		if (preview.outputType === "task") return 1;
+  3397		if (preview.outputType) return 2;
+  3398		if (asArray(session.responseHistory).length) return 2;
+  3399		if (asString(session.draftMessage).trim()) return 0;
+  3400		return 0;
+  3401	}
+  3402	
+  3403	function outputTabFromIntent(intent) {
+  3404		const map = {
+  3405			guidance: "draft",
+  3406			preview: "draft",
+  3407			task: "task",
+  3408			workflow: "workflow",
+  3409			handoff: "handoff",
+  3410			export: "export"
+  3411		};
+  3412		return map[asString(intent)] || "draft";
+  3413	}
+  3414	
+  3415	function outputTabFromPreview(preview) {
+  3416		const outputType = asString(preview?.outputType || "");
+  3417		if (outputType === "task") return "task";
+  3418		if (outputType === "workflow") return "workflow";
+  3419		if (outputType === "handoff") return "handoff";
+  3420		return "draft";
+  3421	}
+  3422	
+  3423	function getOutputWorkspaceTab(session) {
+  3424		const requested = asString(session.outputWorkspaceTab || "");
+  3425		if (AI_ROOM_OUTPUT_TABS.some((tab) => tab.id === requested)) return requested;
+  3426		return outputTabFromPreview(asObject(session.outputPreview));
+  3427	}
+  3428	
+  3429	function getToolOutputTypeLabel(tool) {
+  3430		const labels = {
+  3431			guidance: "Draft",
+  3432			task: "Task Draft",
+  3433			workflow: "Draft Workflow",
+  3434			handoff: "Prepare Handoff",
+  3435			media: "Draft"
+  3436		};
+  3437		if (labels[asString(tool.intent)]) return labels[asString(tool.intent)];
+  3438		const firstOutput = asArray(tool.outputTypes)[0];
+  3439		return firstOutput ? titleCase(asString(firstOutput).replace(/[_-]+/g, " ")) : "Draft";
+  3440	}
+  3441	
+  3442	function getToolDestinationRoute(tool, session) {
+  3443		if (tool.route) return asString(tool.route || "workflows");
+  3444		if (session?.teamMode === "team") return tool.intent === "task" ? "task-center" : "workflows";
+  3445		const outputType = tool.intent === "media" ? "guidance" : asString(tool.intent || "guidance");
+  3446		return destinationRouteForSpecialist(session?.modeId || "operations", outputType);
+  3447	}
+  3448	
+  3449	function getToolExecutionStatusLabel(tool) {
+  3450		if (tool.safetyLevel === "confirmation_required") return "Destination confirmation required";
+  3451		if (tool.actionType === "source_required") return "Source required";
+  3452		return "Local preview only";
+  3453	}
+  3454	
+  3455	function getToolSafeActionLabel(tool) {

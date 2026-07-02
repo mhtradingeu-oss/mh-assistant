@@ -1,0 +1,84 @@
+public/control-center/pages/ai-command.js:1:import { bindAiToolDock, getAiToolDockTools } from "./ai-command/tool-dock.js";
+public/control-center/pages/ai-command.js:11:        getSharedHandoff,
+public/control-center/pages/ai-command.js:14:        setSharedHandoff
+public/control-center/pages/ai-command.js:91:                routeHint: "workflows"
+public/control-center/pages/ai-command.js:105:                routeHint: "workflows"
+public/control-center/pages/ai-command.js:144:		cannotDo: ["Publish campaigns directly", "Execute workflows automatically", "Approve content", "Set live budgets"],
+public/control-center/pages/ai-command.js:157:		cannotDo: ["Publish directly", "Approve risky claims", "Invent unsupported facts", "Run workflows automatically"],
+public/control-center/pages/ai-command.js:248:		cannotDo: ["Run workflows without confirmation", "Auto-approve tasks", "Override authority gates", "Execute backend operations directly"],
+public/control-center/pages/ai-command.js:482:		{ id: "open-workflows", label: "Open Workflows / Operations", action: "route", route: "workflows" }
+public/control-center/pages/ai-command.js:514:const AI_COMMAND_LOCAL_DRAFTS_KEY = "mh-ai-command-local-drafts-v1";
+public/control-center/pages/ai-command.js:515:const AI_COMMAND_LOCAL_OUTPUTS_KEY = "mh-ai-command-local-outputs-v1";
+public/control-center/pages/ai-command.js:597:		purpose: "Translate intent into executable workflows and handoffs.",
+public/control-center/pages/ai-command.js:649:			targetPage: "ai-command",
+public/control-center/pages/ai-command.js:660:			targetPage: "workflows",
+public/control-center/pages/ai-command.js:1254:function destinationRouteForSpecialist(specialistId, outputType) {
+public/control-center/pages/ai-command.js:1257:	if (outputType === "workflow") return "workflows";
+public/control-center/pages/ai-command.js:1258:	if (id === "strategist") return outputType === "task" ? "campaign-studio" : "workflows";
+public/control-center/pages/ai-command.js:1266:	if (id === "operations") return outputType === "task" ? "task-center" : "workflows";
+public/control-center/pages/ai-command.js:1267:	if (id === "customer_ops") return outputType === "task" ? "task-center" : "operations-centers";
+public/control-center/pages/ai-command.js:1268:	if (id === "sales_crm") return "workflows";
+public/control-center/pages/ai-command.js:1269:	return "workflows";
+public/control-center/pages/ai-command.js:1283:		"task-center": "Task Center",
+public/control-center/pages/ai-command.js:1285:		workflows: "Workflows"
+public/control-center/pages/ai-command.js:1294:	const route = destinationRouteForSpecialist(specialistId, outputType);
+public/control-center/pages/ai-command.js:1303:		destinationRoute: route,
+public/control-center/pages/ai-command.js:1630:		destinationRoute: outputType === "task" ? "task-center" : "workflows",
+public/control-center/pages/ai-command.js:1665:	lines.push(`Destination: ${routeLabel(output.destinationRoute)}`);
+public/control-center/pages/ai-command.js:2111:	if (!routeSuggestions.length) routeSuggestions.push(routeSuggestion("Workflows", "workflows", "Use Workflows when the task spans multiple execution areas."));
+public/control-center/pages/ai-command.js:2238:	workflows: "Workflows",
+public/control-center/pages/ai-command.js:2245:	"task-center": "Task Center",
+public/control-center/pages/ai-command.js:2260:	workflows: "operations",
+public/control-center/pages/ai-command.js:2267:	"task-center": "operations",
+public/control-center/pages/ai-command.js:2296:	workflow: "workflows",
+public/control-center/pages/ai-command.js:2301:	tasks: "task-center",
+public/control-center/pages/ai-command.js:2366:	const fallbackRoute = sourcePage === "workspace" ? "workflows" : sourcePage;
+public/control-center/pages/ai-command.js:2390:	const destinationRoute = normalizeAiInboundSourcePage(
+public/control-center/pages/ai-command.js:2391:		preview.destinationRoute ||
+public/control-center/pages/ai-command.js:2395:		"workflows"
+public/control-center/pages/ai-command.js:2404:		destinationRoute,
+public/control-center/pages/ai-command.js:2527:	const handoff = getSharedHandoff(projectName, "ai-command", operations);
+public/control-center/pages/ai-command.js:3443:	if (tool.route) return asString(tool.route || "workflows");
+public/control-center/pages/ai-command.js:3444:	if (session?.teamMode === "team") return tool.intent === "task" ? "task-center" : "workflows";
+public/control-center/pages/ai-command.js:3446:	return destinationRouteForSpecialist(session?.modeId || "operations", outputType);
+public/control-center/pages/ai-command.js:3710:	const preferred = destinations.find((item) => !["chat-preview", "composer", "preview", "ai-command"].includes(asString(item)));
+public/control-center/pages/ai-command.js:3712:	return destinationRouteForSpecialist(session?.modeId || "operations", getCanonicalToolIntent(tool));
+public/control-center/pages/ai-command.js:3922:	const destination = routeLabel(preview.destinationRoute || destinationRouteForSpecialist(session.modeId, preview.outputType || "guidance"));
+public/control-center/pages/ai-command.js:4005:	const destination = routeLabel(preview.destinationRoute || destinationRouteForSpecialist(session.modeId, preview.outputType || "guidance"));
+public/control-center/pages/ai-command.js:4024:					<h2>Drafts, tasks, workflows, handoffs</h2>
+public/control-center/pages/ai-command.js:4393:	const destination = routeLabel(destinationRouteForSpecialist(session.modeId, asObject(session.outputPreview).outputType || "guidance"));
+public/control-center/pages/ai-command.js:4518:	id: "ai-command",
+public/control-center/pages/ai-command.js:4526:		<section class="page is-active" data-page="ai-command">
+public/control-center/pages/ai-command.js:4933:		                        source: "ai-command-chat"
+public/control-center/pages/ai-command.js:4972:		                                source: "ai-command-specialist-chat",
+public/control-center/pages/ai-command.js:5029:		                                destinationRoute: asString(routeSuggestion?.route) || destinationRouteForSpecialist(session.modeId, "guidance")
+public/control-center/pages/ai-command.js:5168:					const destination = asString(tool.route || "workflows");
+public/control-center/pages/ai-command.js:5323:				const destination = asString(latestResponse.destinationRoute || destinationRouteForSpecialist(session.modeId, "guidance"));
+public/control-center/pages/ai-command.js:5333:				setSharedHandoff(projectName || "__default__", destination, {
+public/control-center/pages/ai-command.js:5335:					source_page: "ai-command",
+public/control-center/pages/ai-command.js:5416:				const destination = asString(output.destinationRoute || "").trim();
+public/control-center/pages/ai-command.js:5424:					source_page: "ai-command",
+public/control-center/pages/ai-command.js:5442:				setSharedHandoff(projectName || "__default__", destination, handoffRecord);
+public/control-center/shared-context.js:185:    getLatestHandoffFromOperations(operations, "workflows", "ai-command") ||
+public/control-center/shared-context.js:186:    getLatestHandoffFromOperations(operations, "ai-command", "workflows") ||
+public/control-center/shared-context.js:192:export function setSharedHandoff(projectName, destinationPage, handoff) {
+public/control-center/shared-context.js:197:export function getSharedHandoff(projectName, destinationPage, operations, sourcePage = "") {
+public/control-center/pages/operations-centers.js:1:import { getSharedHandoff } from "../shared-context.js";
+public/control-center/pages/operations-centers.js:121:      context.navigateTo("ai-command");
+public/control-center/pages/operations-centers.js:132:      context.navigateTo("ai-command");
+public/control-center/pages/operations-centers.js:172:  if (pageKey === "task-center") {
+public/control-center/pages/operations-centers.js:236:        preview: "Assess execution health across workflows, media, and publishing jobs.",
+public/control-center/pages/operations-centers.js:237:        prompt: `Summarize current execution health for ${projectLabel} across workflows, media, and publishing jobs. Highlight failure clusters, retry patterns, and risk areas.`
+public/control-center/pages/operations-centers.js:517:    <section class="page is-active" data-page="task-center">
+public/control-center/pages/operations-centers.js:717:  const prompts = buildOpsAssistantPrompts("task-center", projectName, selectedItem, titleCase(session.focus || "all"));
+public/control-center/pages/operations-centers.js:718:  const incomingHandoff = getSharedHandoff(projectName, "task-center", ops);
+public/control-center/pages/operations-centers.js:1187:            <p class="std-context-description">Track running, completed, and failed execution across workflows, media, and publishing for ${escapeHtml(projectLabel)}.</p>
+public/control-center/pages/operations-centers.js:1748:  id: "task-center",
+public/control-center/pages/operations-centers.js:1755:  template: `<section class="page is-active" data-page="task-center"><div class="ops-shell"></div></section>`,
+public/control-center/pages/operations-centers.js:1836:    description: "Track running jobs, failures, retries, health state, and execution logs across workflows, media, and publishing."
+public/control-center/pages/operations-centers.js:1941:      route: "task-center",
+public/control-center/pages/operations-centers.js:1994:          description: "Use this page as the routing hub from AI Team drafts, workflows, tasks, and runtime signals into the correct operations workspace.",
+public/control-center/pages/operations-centers.js:2005:                  <p>AI Team can prepare drafts, tasks, workflows, and handoffs. This overview routes the work to the correct operations center for review and monitoring.</p>
+public/control-center/pages/operations-centers.js:2037:                <button class="btn btn-secondary" type="button" data-route="ai-command">Open AI Team</button>
+public/control-center/pages/operations-centers.js:2038:                <button class="btn btn-ghost" type="button" data-route="workflows">Open Workflows</button>
+public/control-center/pages/operations-centers.js:2047:                  <p>This overview does not execute jobs, mutate tasks, send notifications, or approve workflows. It only routes to the owning workspace.</p>

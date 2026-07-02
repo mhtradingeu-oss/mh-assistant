@@ -1,0 +1,1399 @@
+# T116 — Settings Runtime Authority Audit
+
+## Status
+Audit-only. No production files changed.
+
+## Scope
+Focused runtime authority review of `public/control-center/pages/settings.js`.
+
+## Why Settings Is Next
+After Workflows was closed, Settings is the next high-risk active surface from the remaining T88 ranking.
+
+Settings may influence project configuration, governance policy, integrations, credentials, AI behavior, publishing readiness, and operational defaults.
+
+## File Summary
+- File: `public/control-center/pages/settings.js`
+- Lines: 2057
+- Imports: 1
+- Render writes: 5
+- Event bindings: 4
+- Backend/API signals: 289
+- Settings mutation signals: 199
+- Governance/policy signals: 269
+- Integration/credential signals: 45
+- AI signals: 182
+- Handoff signals: 2
+- Confirmation signals: 1
+- Local/session storage signals: 10
+- Navigation signals: 18
+- Disabled/read-only/draft/guard signals: 16
+- Risky terms: 596
+
+## Initial Risk Notes
+- Settings contains save/update/sync/policy/credential signals. Exact durable mutation paths must be classified.
+- Settings may influence Governance/policy behavior. Need verify whether policy sync is local, settings-only, or routed through Governance authority.
+- Settings may reference integrations or credentials. Need confirm no credential mutation happens silently.
+- Confirmation dialogs exist and must be mapped to authority-sensitive settings actions.
+
+## Imports
+- L1: `import {`
+
+## Render Writes
+- L1811: `overviewHost.outerHTML = renderSettingsOverview(buildSummary(session), session, escapeHtml);`
+- L1815: `summaryHost.outerHTML = renderSummary(buildSummary(session), session, escapeHtml);`
+- L1819: `aiHost.outerHTML = renderSettingsAssistant(session, escapeHtml);`
+- L1836: `root.innerHTML = buildPageMarkup(session, context.escapeHtml);`
+- L2033: `root.innerHTML = \``
+
+## Event Bindings
+- L1844: `button.addEventListener("click", async () => {`
+- L1958: `button.addEventListener("click", () => {`
+- L1964: `button.addEventListener("click", () => {`
+- L1987: `control.addEventListener(eventName, () => {`
+
+## Backend / API Signals
+- L2: `fetchProjectGovernancePolicy,`
+- L3: `fetchProjectTeam,`
+- L4: `saveProjectTeam,`
+- L5: `updateProjectGovernancePolicy`
+- L6: `} from "../api.js";`
+- L47: `"Alert when integrations fail",`
+- L111: `service: "Safety & policy review",`
+- L112: `description: "Checks claims, legal risk, and policy-sensitive output."`
+- L118: `description: "Owns defaults, integrations, emergency controls, and final overrides."`
+- L125: `title: "Project Settings",`
+- L179: `backendLabel: "Operating policy is active now and ready for backend persistence",`
+- L189: `path: "operating.actionPolicy",`
+- L190: `label: "Action policy",`
+- L193: `options: ["Recommend only", "Prepare actions with review", "Auto-run trusted actions", "Act unless blocked by policy"]`
+- L211: `title: "AI Settings",`
+- L273: `backendLabel: "Automation routing rules sync into the durable governance policy",`
+- L289: `path: "automation.failurePolicy",`
+- L290: `label: "Automation failure policy",`
+- L306: `backendLabel: "Publishing defaults sync into the durable governance policy",`
+- L350: `backendLabel: "Approval policy syncs into the durable governance and team records",`
+- L434: `path: "team.integrationAccess",`
+- L435: `label: "Who can manage integrations",`
+- L502: `backendLabel: "Sync policy is a safe placeholder until connector-level persistence lands",`
+- L541: `backendLabel: "Notifications are captured here and marked for backend delivery integration",`
+- L579: `title: "Safety & Governance",`
+- L581: `backendLabel: "Governance rules are operational now and marked for backend persistence",`
+- L602: `placeholder: "Flag regulated claims, platform policy risk, and market-specific labeling issues."`
+- L612: `label: "Legal / policy caution notes",`
+- L620: `const SETTINGS_GROUPS = [`
+- L623: `title: "Project Settings",`
+- L629: `title: "AI / Automation Settings",`
+- L636: `description: "Keep approval ownership, publishing permissions, and team-role authority together so governance stays understandable.",`
+- L640: `id: "integration-sync",`
+- L641: `title: "Integration / Sync Settings",`
+- L642: `description: "Review connector refresh behavior, import policy, and alert routing without turning Settings into a sync control center.",`
+- L687: `function extractDurableSettingsSnapshot(governancePolicy = {}, teamModel = {}) {`
+- L688: `const governance = asObject(governancePolicy);`
+- L689: `const bridge = asObject(governance.settings_bridge);`
+- L691: `const snapshot = asObject(team.settings_profile || bridge.form);`
+- L692: `const owners = asObject(governance.approval_owners);`
+- L693: `const rules = asObject(governance.policy_rules);`
+- L706: `actionPolicy: asString(normalized.operating?.actionPolicy || bridge.action_policy)`
+- L738: `function mapSettingsToTeamPayload(form = {}) {`
+- L741: `settings_profile: clone(form),`
+- L742: `settings_status: {`
+- L745: `source: "settings-page",`
+- L758: `function mapSettingsToGovernancePolicy(form = {}) {`
+- L768: `execution_policy: {`
+- L770: `action_policy: asString(operating.actionPolicy)`
+- L772: `policy_rules: {`
+- L777: `auto_escalate_critical_risk: asString(operating.actionPolicy).toLowerCase().includes("blocked"),`
+- L788: `settings_bridge: {`
+- L789: `source: "settings-durable-record",`
+- L794: `action_policy: asString(operating.actionPolicy),`
+- L846: `function mergeSettings(defaults, storedForm) {`
+- L873: `function buildDefaultSettings(state) {`
+- L875: `const connectors = asObject(state?.data?.integrations);`
+- L899: `actionPolicy:`
+- L901: `? "Act unless blocked by policy"`
+- L906: `modeNotes: "Use stronger automation only when approvals, assets, and governance settings are complete."`
+- L922: `"Alert when integrations fail",`
+- L926: `failurePolicy: "Pause and alert",`
+- L951: `integrationAccess: "Admins only",`
+- L958: `canManageIntegrations: false,`
+- L965: `canManageIntegrations: false,`
+- L972: `canManageIntegrations: false,`
+- L979: `canManageIntegrations: false,`
+- L986: `canManageIntegrations: false,`
+- L993: `canManageIntegrations: false,`
+- L1000: `canManageIntegrations: false,`
+- L1007: `canManageIntegrations: false,`
+- L1014: `canManageIntegrations: true,`
+- L1034: `refreshDefaults: "Refresh integrations before daily review, before launch, and after connector failures."`
+- L1051: `complianceAlerts: "Alert on regulated claims, platform policy conflicts, and high-risk launch copy.",`
+- L1060: `const defaults = buildDefaultSettings(state);`
+- L1080: `governancePolicy: null`
+- L1087: `async function loadDurableSettings(session, state, rerender) {`
+- L1095: `const [teamResult, governanceResult] = await Promise.allSettled([`
+- L1096: `fetchProjectTeam(session.projectName),`
+- L1097: `fetchProjectGovernancePolicy(session.projectName)`
+- L1101: `session.governancePolicy = governanceResult.status === "fulfilled" ? asObject(governanceResult.value?.policy || governanceResult.value) : null;`
+- L1103: `const durableSnapshot = extractDurableSettingsSnapshot(session.governancePolicy, session.teamModel);`
+- L1105: `session.form = mergeSettings(buildDefaultSettings(state), durableSnapshot);`
+- L1107: `session.governancePolicy?.updated_at ||`
+- L1108: `session.teamModel?.settings_status?.saved_at ||`
+- L1116: `session.error = error.message || "Failed to load durable settings.";`
+- L1148: `const integrationReady = Boolean(form.sync.frequency && Array.isArray(form.alerts.enabledRules) && form.alerts.enabledRules.length);`
+- L1152: `label: "Governance and approvals",`
+- L1166: `label: "AI and policy safety",`
+- L1173: `label: "Integrations and operations alerts",`
+- L1174: `ready: integrationReady,`
+- L1175: `helper: integrationReady`
+- L1182: `? "Review the top blocker, fix it in this page, then save to sync durable governance and team records."`
+- L1183: `: "Save this configuration, then open Governance to verify policy impact and approval readiness.";`
+- L1213: `if (!form.operating.primaryMode || !form.operating.actionPolicy) {`
+- L1261: `const requiredMark = field.critical ? '<span class="settings-required">Critical</span>' : "";`
+- L1265: `<div class="settings-field-block settings-field-block-span-2">`
+- L1266: `<label class="settings-field-label">${escapeHtml(field.label)} ${requiredMark}</label>`
+- L1267: `<div class="settings-choice-grid">`
+- L1275: `<label class="settings-choice-card">`
+- L1284: `<span class="settings-choice-card-body">`
+- L1299: `<label class="settings-toggle" for="${fieldId}">`
+- L1301: `<span class="settings-field-label">${escapeHtml(field.label)} ${requiredMark}</span>`
+- L1306: `class="settings-toggle-input"`
+- L1310: `<span class="settings-toggle-pill" aria-hidden="true"></span>`
+- L1319: `<div class="settings-field-block">`
+- L1320: `<label class="settings-field-label">${escapeHtml(field.label)} ${requiredMark}</label>`
+- L1321: `<div class="settings-checklist">`
+- L1328: `<label class="settings-chip">`
+- L1347: `<div class="settings-field-block">`
+- L1348: `<label class="settings-field-label" for="${fieldId}">${escapeHtml(field.label)} ${requiredMark}</label>`
+- L1351: `class="settings-control settings-textarea"`
+- L1361: `<div class="settings-field-block">`
+- L1362: `<label class="settings-field-label" for="${fieldId}">${escapeHtml(field.label)} ${requiredMark}</label>`
+- L1363: `<select id="${fieldId}" class="settings-control" data-setting-path="${escapeHtml(field.path)}">`
+- L1371: `<div class="settings-field-block">`
+- L1372: `<label class="settings-field-label" for="${fieldId}">${escapeHtml(field.label)} ${requiredMark}</label>`
+- L1375: `class="settings-control"`
+- L1387: `<div class="settings-role-matrix">`
+- L1388: `<div class="settings-role-matrix-head">`
+- L1390: `<p>Set explicit operating authority for each service lane without leaving the Settings control center.</p>`
+- L1392: `<div class="settings-role-grid">`
+- L1397: `<div class="settings-role-card">`
+- L1398: `<div class="settings-role-card-head">`
+- L1404: `<p class="settings-role-description">${escapeHtml(role.description)}</p>`
+- L1405: `<div class="settings-role-card-grid">`
+- L1406: `<div class="settings-field-block">`
+- L1407: `<label class="settings-field-label" for="team-role-${role.id}-authority">Authority</label>`
+- L1410: `class="settings-control"`
+- L1427: `<label class="settings-toggle settings-toggle-compact" for="team-role-${role.id}-approve">`
+- L1428: `<span class="settings-field-label">Can approve</span>`
+- L1432: `class="settings-toggle-input"`
+- L1436: `<span class="settings-toggle-pill" aria-hidden="true"></span>`
+- L1438: `<label class="settings-toggle settings-toggle-compact" for="team-role-${role.id}-publish">`
+- L1439: `<span class="settings-field-label">Can publish</span>`
+- L1443: `class="settings-toggle-input"`
+- L1447: `<span class="settings-toggle-pill" aria-hidden="true"></span>`
+- L1449: `<label class="settings-toggle settings-toggle-compact" for="team-role-${role.id}-integrations">`
+- L1450: `<span class="settings-field-label">Manage integrations</span>`
+- L1452: `id="team-role-${role.id}-integrations"`
+- L1454: `class="settings-toggle-input"`
+- L1455: `data-setting-path="team.roleMatrix.${escapeHtml(role.id)}.canManageIntegrations"`
+- L1456: `${config.canManageIntegrations ? "checked" : ""}`
+- L1458: `<span class="settings-toggle-pill" aria-hidden="true"></span>`
+- L1460: `<label class="settings-toggle settings-toggle-compact" for="team-role-${role.id}-defaults">`
+- L1461: `<span class="settings-field-label">Change defaults</span>`
+- L1465: `class="settings-toggle-input"`
+- L1469: `<span class="settings-toggle-pill" aria-hidden="true"></span>`
+- L1492: `function buildSettingsPrompts(session) {`
+- L1498: `label: "Summarize settings",`
+- L1500: `prompt: \`Summarize the current settings for ${projectLabel}. Cover project defaults, AI behavior, approvals, permissions, integrations, sync posture, and the main configuration tradeoffs.\``
+- L1504: `preview: "Identify the most important settings gap and the safest next fix.",`
+- L1505: `prompt: \`Review the current settings for ${projectLabel}. Identify the highest-risk configuration gap, starting with ${topRisk}, and explain the safest next fix.\``
+- L1509: `preview: "Advise on AI and automation settings based on current risk and approval posture.",`
+- L1510: `prompt: \`Review the AI, automation, safety, approval, and sync settings for ${projectLabel}. Recommend the best operating posture and what should be tightened or relaxed next.\``
+- L1519: `<article class="settings-section panel" id="settings-group-${group.id}">`
+- L1524: `<p class="settings-section-copy">${escapeHtml(group.description)}</p>`
+- L1527: `<div class="settings-group-grid">`
+- L1529: `<div class="settings-group-block" id="settings-section-${section.id}">`
+- L1530: `<div class="settings-group-head">`
+- L1535: `<span class="settings-badge">${escapeHtml(section.backendLabel)}</span>`
+- L1537: `<div class="settings-fields-grid">`
+- L1550: `function renderSettingsOverview(summary, session, escapeHtml) {`
+- L1554: `: \`<li>No active blockers are visible from current Settings signals.</li>\`;`
+- L1557: `<section class="panel settings-overview std-detail-card mhos-clean-surface">`
+- L1560: `<div class="panel-kicker">Settings operating surface</div>`
+- L1562: `<p class="settings-section-copy">Settings defines durable defaults for Governance, Publishing, AI, Integrations, and Operations. Backend remains the authority for enforcement.</p>`
+- L1566: `<div class="settings-overview-grid">`
+- L1567: `<div class="settings-overview-item">`
+- L1571: `<div class="settings-overview-item">`
+- L1575: `<div class="settings-overview-item">`
+- L1579: `<div class="settings-overview-item">`
+- L1583: `<div class="settings-overview-item">`
+- L1587: `<div class="settings-overview-item">`
+- L1593: `<div class="settings-risk-panel">`
+- L1594: `<div class="settings-risk-head">`
+- L1600: `<div class="governance-rule-list">`
+- L1602: `<div class="governance-rule-item">`
+- L1608: `<ul class="simple-list settings-risk-list">${riskItems}</ul>`
+- L1611: `<div class="governance-policy-block">`
+- L1613: `<p class="governance-copy">${escapeHtml(readiness.nextBestAction)}</p>`
+- L1614: `<div class="settings-actions-buttons std-action-row">`
+- L1615: `<button class="btn btn-secondary" type="button" data-settings-action="focus-section" data-section-id="approval">Review approvals</button>`
+- L1616: `<button class="btn btn-secondary" type="button" data-settings-action="focus-section" data-section-id="publishing">Review publishing</button>`
+- L1617: `<button class="btn btn-secondary" type="button" data-settings-open-ai>Ask AI for guidance</button>`
+- L1624: `function renderSettingsAssistant(session, escapeHtml) {`
+- L1625: `const prompts = buildSettingsPrompts(session);`
+- L1627: `<section class="panel settings-ai-assistant std-ai-panel mhos-clean-surface">`
+- L1630: `<div class="panel-kicker">Settings AI assistant</div>`
+- L1632: `<p class="settings-section-copy">AI provides context and recommendations. Durable changes happen only through explicit Settings and Governance actions.</p>`
+- L1638: `<div class="settings-toolbar">`
+- L1639: `<button class="btn btn-secondary" type="button" data-settings-open-ai>Open AI: Review in AI Workspace</button>`
+- L1643: `<button class="quick-action-btn" type="button" data-settings-ai-prompt="${index}">`
+- L1655: `<article class="settings-section panel" id="settings-section-${section.id}">`
+- L1656: `<div class="panel-header settings-section-header">`
+- L1662: `<div class="settings-section-meta">`
+- L1663: `<span class="settings-badge">${escapeHtml(section.backendLabel)}</span>`
+- L1664: `<button class="btn btn-secondary" type="button" data-settings-action="reset-section" data-section-id="${escapeHtml(section.id)}">`
+- L1669: `<div class="settings-fields-grid">`
+- L1682: `title: "Governance",`
+- L1683: `detail: "Approval ownership, policy rules, and settings bridge state are written into the durable governance policy."`
+- L1694: `title: "Integrations and operations",`
+- L1700: `<aside class="settings-summary panel std-detail-card mhos-clean-surface">`
+- L1704: `<h3>How Settings drives other operating surfaces</h3>`
+- L1709: `<div class="governance-rule-list">`
+- L1711: `<div class="governance-rule-item">`
+- L1718: `<div class="settings-summary-grid">`
+- L1746: `<strong>Status:</strong> ${escapeHtml(formatRelativeTime(session.savedAt))}. Save updates durable team and governance records; backend enforcement remains authoritative.`
+- L1748: `<div class="settings-actions-buttons std-action-row">`
+- L1749: `<button class="btn btn-secondary" type="button" data-settings-action="focus-section" data-section-id="operating">Open operating mode</button>`
+- L1750: `<button class="btn btn-secondary" type="button" data-settings-action="focus-section" data-section-id="sync">Open sync policy</button>`
+- L1751: `<button class="btn btn-secondary" type="button" data-settings-action="open-governance">Open Governance page</button>`
+- L1761: `<section class="settings-actions panel std-action-panel mhos-clean-surface">`
+- L1763: `<div class="settings-actions-copy">`
+- L1764: `<div class="panel-kicker">Settings actions</div>`
+- L1766: `<p>${escapeHtml(dirtyText)}. Saving writes this configuration into durable team and governance records used across the operating system.</p>`
+- L1770: `<strong>Safe execution path:</strong> Review readiness and blockers, update the required section, save once, then validate Governance impact.`
+- L1772: `<div class="settings-actions-buttons std-action-row">`
+- L1773: `<button class="btn btn-primary" type="button" data-settings-action="save-all">Save Settings</button>`
+- L1774: `<button class="btn btn-secondary" type="button" data-settings-action="review-critical">Review Critical Settings</button>`
+- L1775: `<button class="btn btn-secondary" type="button" data-settings-action="restore-defaults">Restore Defaults</button>`
+- L1777: `<div class="settings-actions-buttons std-action-row">`
+- L1778: `<button class="btn btn-secondary" type="button" data-settings-action="focus-section" data-section-id="project">Project defaults</button>`
+- L1779: `<button class="btn btn-secondary" type="button" data-settings-action="focus-section" data-section-id="team">Team permissions</button>`
+- L1780: `<button class="btn btn-secondary" type="button" data-settings-action="focus-section" data-section-id="safety">Safety and governance</button>`
+- L1790: `<section class="page is-active" data-page="settings">`
+- L1791: `<div class="settings-page-surface">`
+- L1792: `<div class="settings-workspace-grid">`
+- L1793: `<div class="settings-main-stack std-main-column mhos-clean-stack">`
+- L1794: `${renderSettingsOverview(summary, session, escapeHtml)}`
+- L1795: `${SETTINGS_GROUPS.map((group) => renderGroupedSection(group, session, escapeHtml)).join("")}`
+- L1797: `<aside class="settings-right-rail std-right-rail mhos-clean-stack">`
+- L1800: `${renderSettingsAssistant(session, escapeHtml)}`
+- L1809: `const overviewHost = root.querySelector(".settings-overview");`
+- L1811: `overviewHost.outerHTML = renderSettingsOverview(buildSummary(session), session, escapeHtml);`
+- L1813: `const summaryHost = root.querySelector(".settings-summary");`
+- L1817: `const aiHost = root.querySelector(".settings-ai-assistant");`
+- L1819: `aiHost.outerHTML = renderSettingsAssistant(session, escapeHtml);`
+- L1824: `const intro = root.querySelector(".settings-actions-copy p");`
+- L1827: `? "Unsaved changes are present. Saving will update the shared durable governance and team records."`
+- L1828: `: "All changes captured. The shared durable governance and team records are in sync.";`
+- L1839: `function bindSettingsActionButtons(context, session) {`
+- L1843: `root.querySelectorAll("[data-settings-action]").forEach((button) => {`
+- L1845: `const action = button.dataset.settingsAction;`
+- L1850: `const governancePayload = mapSettingsToGovernancePolicy(session.form);`
+- L1851: `const teamPayload = mapSettingsToTeamPayload(session.form);`
+- L1853: `const confirmed = window.confirm("Confirm settings save\n\nAction: Save team and governance settings for this project.\nRisk: These settings can affect team roles, approval behavior, publishing readiness, brand safety review, and admin override behavior.\nAuthority: This is a backend-governed durable settings update.\n\nSelect Cancel to review the settings before saving.");`
+- L1859: `saveProjectTeam(session.projectName, teamPayload),`
+- L1860: `updateProjectGovernancePolicy(session.projectName, {`
+- L1861: `actor: "settings-page",`
+- L1862: `...governancePayload`
+- L1866: `await context.createProjectHandoff?.(session.projectName, {`
+- L1867: `source_page: "settings",`
+- L1868: `destination_page: "governance",`
+- L1872: `destination_service_domain: "governance",`
+- L1874: `entity_type: "governance_policy",`
+- L1876: `route: "governance",`
+- L1877: `label: "Governance policy"`
+- L1880: `summary: "Settings updated the shared durable operating policy.",`
+- L1891: `session.governancePolicy = governancePayload;`
+- L1900: `context.showMessage(\`Settings saved for ${session.projectName} and synced into the durable system backbone.\`);`
+- L1902: `context.showError(error.message || "Failed to save durable settings.");`
+- L1912: `context.showMessage("Default settings restored for this project. Review and save when ready.");`
+- L1921: `context.showMessage(\`${titleCase(sectionId)} settings reset to defaults.\`);`
+- L1926: `const target = context.$(\`settings-section-${sectionId}\`) || context.$(\`settings-group-${sectionId}\`);`
+- L1928: `context.showMessage(\`Focused ${titleCase(sectionId)} settings.\`);`
+- L1932: `if (action === "open-governance") {`
+- L1933: `context.navigateTo("governance");`
+- L1943: `context.$(\`settings-section-${firstSection?.id || "project"}\`)?.scrollIntoView({ behavior: "smooth", block: "start" });`
+- L1944: `context.showError("Critical settings still need review. The summary panel shows the current risk list.");`
+- L1946: `context.showMessage("Critical settings look complete. You can save this configuration whenever you’re ready.");`
+- L1953: `function bindSettingsAiButtons(context, session) {`
+- L1957: `root.querySelectorAll("[data-settings-open-ai]").forEach((button) => {`
+- L1963: `root.querySelectorAll("[data-settings-ai-prompt]").forEach((button) => {`
+- L1965: `const prompt = buildSettingsPrompts(session)[Number(button.dataset.settingsAiPrompt)];`
+- L1972: `context.showMessage("Settings prompt added to AI Command.");`
+- L1991: `if (control.type === "checkbox" && control.closest(".settings-checklist")) {`
+- L2008: `bindSettingsActionButtons(context, session);`
+- L2009: `bindSettingsAiButtons(context, session);`
+- L2013: `bindSettingsActionButtons(context, session);`
+
+## Settings Mutation Signals
+- L2: `fetchProjectGovernancePolicy,`
+- L4: `saveProjectTeam,`
+- L5: `updateProjectGovernancePolicy`
+- L46: `"Suggest rewrite when content is weak",`
+- L54: `"Writer",`
+- L73: `id: "writer",`
+- L74: `label: "Writer",`
+- L76: `description: "Develops copy systems, rewrites, and narrative consistency."`
+- L111: `service: "Safety & policy review",`
+- L112: `description: "Checks claims, legal risk, and policy-sensitive output."`
+- L127: `backendLabel: "Project profile fields are ready for backend save",`
+- L179: `backendLabel: "Operating policy is active now and ready for backend persistence",`
+- L189: `path: "operating.actionPolicy",`
+- L190: `label: "Action policy",`
+- L193: `options: ["Recommend only", "Prepare actions with review", "Auto-run trusted actions", "Act unless blocked by policy"]`
+- L212: `description: "Control how the system writes, reasons, creates media, and escalates work that needs human review.",`
+- L273: `backendLabel: "Automation routing rules sync into the durable governance policy",`
+- L289: `path: "automation.failurePolicy",`
+- L290: `label: "Automation failure policy",`
+- L306: `backendLabel: "Publishing defaults sync into the durable governance policy",`
+- L350: `backendLabel: "Approval policy syncs into the durable governance and team records",`
+- L398: `backendLabel: "Permissions are modeled now and ready for future role persistence",`
+- L417: `options: ["Strategists, writers, and designers", "All active operators", "Admins only", "Project owner only"]`
+- L449: `id: "presets",`
+- L450: `title: "Presets & Reusable Defaults",`
+- L452: `backendLabel: "Preset selection is ready now and can upgrade to backend persistence later",`
+- L455: `path: "presets.campaignPreset",`
+- L456: `label: "Campaign presets",`
+- L461: `path: "presets.contentPreset",`
+- L462: `label: "Content presets",`
+- L467: `path: "presets.mediaPreset",`
+- L468: `label: "Media presets",`
+- L473: `path: "presets.seoPreset",`
+- L474: `label: "SEO presets",`
+- L479: `path: "presets.adsPreset",`
+- L480: `label: "Ads test presets",`
+- L485: `path: "presets.approvalPreset",`
+- L486: `label: "Approval presets",`
+- L491: `path: "presets.presetNotes",`
+- L492: `label: "Preset notes",`
+- L499: `id: "sync",`
+- L500: `title: "Sync Rules",`
+- L502: `backendLabel: "Sync policy is a safe placeholder until connector-level persistence lands",`
+- L504: `{ path: "sync.autoSync", label: "Auto sync", type: "toggle" },`
+- L506: `path: "sync.frequency",`
+- L507: `label: "Sync frequency",`
+- L512: `path: "sync.importHistoryPreference",`
+- L518: `path: "sync.retryFailedBehavior",`
+- L519: `label: "Retry failed sync behavior",`
+- L524: `path: "sync.healthCheckFrequency",`
+- L530: `path: "sync.refreshDefaults",`
+- L549: `"Sync failure alerts",`
+- L579: `title: "Safety & Governance",`
+- L581: `backendLabel: "Governance rules are operational now and marked for backend persistence",`
+- L602: `placeholder: "Flag regulated claims, platform policy risk, and market-specific labeling issues."`
+- L612: `label: "Legal / policy caution notes",`
+- L624: `description: "Manage project identity, publishing defaults, and reusable presets without scattering core setup across multiple cards.",`
+- L625: `sectionIds: ["project", "publishing", "presets"]`
+- L636: `description: "Keep approval ownership, publishing permissions, and team-role authority together so governance stays understandable.",`
+- L640: `id: "integration-sync",`
+- L641: `title: "Integration / Sync Settings",`
+- L642: `description: "Review connector refresh behavior, import policy, and alert routing without turning Settings into a sync control center.",`
+- L643: `sectionIds: ["sync", "alerts"]`
+- L662: `return path.split(".").reduce((acc, key) => (acc == null ? undefined : acc[key]), source);`
+- L687: `function extractDurableSettingsSnapshot(governancePolicy = {}, teamModel = {}) {`
+- L688: `const governance = asObject(governancePolicy);`
+- L689: `const bridge = asObject(governance.settings_bridge);`
+- L692: `const owners = asObject(governance.approval_owners);`
+- L693: `const rules = asObject(governance.policy_rules);`
+- L695: `if (!Object.keys(snapshot).length && !Object.keys(owners).length && !Object.keys(rules).length) {`
+- L706: `actionPolicy: asString(normalized.operating?.actionPolicy || bridge.action_policy)`
+- L744: `saved_at: nowIso(),`
+- L758: `function mapSettingsToGovernancePolicy(form = {}) {`
+- L768: `execution_policy: {`
+- L770: `action_policy: asString(operating.actionPolicy)`
+- L772: `policy_rules: {`
+- L777: `auto_escalate_critical_risk: asString(operating.actionPolicy).toLowerCase().includes("blocked"),`
+- L790: `synced_at: nowIso(),`
+- L794: `action_policy: asString(operating.actionPolicy),`
+- L849: `Object.keys(asObject(storedForm)).forEach((sectionId) => {`
+- L899: `actionPolicy:`
+- L901: `? "Act unless blocked by policy"`
+- L906: `modeNotes: "Use stronger automation only when approvals, assets, and governance settings are complete."`
+- L926: `failurePolicy: "Pause and alert",`
+- L946: `roles: ["Strategist", "Writer", "Designer", "Publisher", "Analyst", "Compliance Reviewer", "Admin", "Brand owner"],`
+- L948: `editAccess: "Strategists, writers, and designers",`
+- L955: `authority: "Create and edit",`
+- L961: `writer: {`
+- L962: `authority: "Create and edit",`
+- L969: `authority: "Create and edit",`
+- L976: `authority: "Create and edit",`
+- L990: `authority: "Create and edit",`
+- L1019: `presets: {`
+- L1020: `campaignPreset: "Launch sprint",`
+- L1021: `contentPreset: "Hook-first social",`
+- L1022: `mediaPreset: "Premium product studio",`
+- L1023: `seoPreset: "Opportunity sprint",`
+- L1024: `adsPreset: "Hook test set",`
+- L1025: `approvalPreset: "Balanced launch control",`
+- L1026: `presetNotes: "Use presets as reusable starting systems, not as rigid templates when project context changes."`
+- L1028: `sync: {`
+- L1029: `autoSync: true,`
+- L1038: `"Sync failure alerts",`
+- L1051: `complianceAlerts: "Alert on regulated claims, platform policy conflicts, and high-risk launch copy.",`
+- L1074: `savedAt: null,`
+- L1075: `saveMode: "durable-pending",`
+- L1080: `governancePolicy: null`
+- L1087: `async function loadDurableSettings(session, state, rerender) {`
+- L1095: `const [teamResult, governanceResult] = await Promise.allSettled([`
+- L1097: `fetchProjectGovernancePolicy(session.projectName)`
+- L1101: `session.governancePolicy = governanceResult.status === "fulfilled" ? asObject(governanceResult.value?.policy || governanceResult.value) : null;`
+- L1103: `const durableSnapshot = extractDurableSettingsSnapshot(session.governancePolicy, session.teamModel);`
+- L1106: `session.savedAt =`
+- L1107: `session.governancePolicy?.updated_at ||`
+- L1108: `session.teamModel?.settings_status?.saved_at ||`
+- L1109: `session.teamModel?.updated_at ||`
+- L1111: `session.saveMode = "durable";`
+- L1124: `if (!value) return "Not saved yet";`
+- L1127: `if (!Number.isFinite(timestamp)) return "Not saved yet";`
+- L1132: `if (minutes <= 1) return "Saved just now";`
+- L1133: `if (minutes < 60) return \`Saved ${minutes} min ago\`;`
+- L1136: `if (hours < 24) return \`Saved ${hours} hr ago\`;`
+- L1139: `return \`Saved ${days} day${days === 1 ? "" : "s"} ago\`;`
+- L1148: `const integrationReady = Boolean(form.sync.frequency && Array.isArray(form.alerts.enabledRules) && form.alerts.enabledRules.length);`
+- L1152: `label: "Governance and approvals",`
+- L1166: `label: "AI and policy safety",`
+- L1176: `? "Sync cadence and alert routing are defined for operations visibility."`
+- L1177: `: "Set sync cadence and alert coverage so operations can intervene safely."`
+- L1182: `? "Review the top blocker, fix it in this page, then save to sync durable governance and team records."`
+- L1183: `: "Save this configuration, then open Governance to verify policy impact and approval readiness.";`
+- L1206: `risks.push("Approval ownership is incomplete, which creates ambiguity for reviews and launch decisions.");`
+- L1213: `if (!form.operating.primaryMode || !form.operating.actionPolicy) {`
+- L1230: `risks.push("Alert rules are missing, which reduces visibility into sync failures, approval delays, and provider issues.");`
+- L1244: `syncMode: \`${form.sync.autoSync ? "Auto sync" : "Manual sync"} • ${form.sync.frequency}\`,`
+- L1417: `"Create and edit",`
+- L1499: `preview: "Explain the current project, AI, approval, publishing, and sync posture in one concise review.",`
+- L1500: `prompt: \`Summarize the current settings for ${projectLabel}. Cover project defaults, AI behavior, approvals, permissions, integrations, sync posture, and the main configuration tradeoffs.\``
+- L1510: `prompt: \`Review the AI, automation, safety, approval, and sync settings for ${projectLabel}. Recommend the best operating posture and what should be tightened or relaxed next.\``
+- L1562: `<p class="settings-section-copy">Settings defines durable defaults for Governance, Publishing, AI, Integrations, and Operations. Backend remains the authority for enforcement.</p>`
+- L1564: `<span class="card-badge neutral">${escapeHtml(session.saveMode === "durable" ? "Durable backbone" : session.loading ? "Syncing..." : "Durable pending")}</span>`
+- L1584: `<span>Sync mode</span>`
+- L1585: `<strong>${escapeHtml(summary.syncMode)}</strong>`
+- L1588: `<span>Save status</span>`
+- L1589: `<strong>${escapeHtml(formatRelativeTime(session.savedAt))}</strong>`
+- L1600: `<div class="governance-rule-list">`
+- L1602: `<div class="governance-rule-item">`
+- L1611: `<div class="governance-policy-block">`
+- L1613: `<p class="governance-copy">${escapeHtml(readiness.nextBestAction)}</p>`
+- L1632: `<p class="settings-section-copy">AI provides context and recommendations. Durable changes happen only through explicit Settings and Governance actions.</p>`
+- L1664: `<button class="btn btn-secondary" type="button" data-settings-action="reset-section" data-section-id="${escapeHtml(section.id)}">`
+- L1665: `Reset Section`
+- L1682: `title: "Governance",`
+- L1683: `detail: "Approval ownership, policy rules, and settings bridge state are written into the durable governance policy."`
+- L1695: `detail: "Sync cadence and alert routes determine how quickly teams detect connector or launch risk."`
+- L1709: `<div class="governance-rule-list">`
+- L1711: `<div class="governance-rule-item">`
+- L1736: `<span class="data-label">Sync mode</span>`
+- L1737: `<strong>${escapeHtml(summary.syncMode)}</strong>`
+- L1740: `<span class="data-label">Persistence</span>`
+- L1741: `<strong>${escapeHtml(session.saveMode === "durable" ? "Durable backbone" : session.loading ? "Syncing..." : "Durable pending")}</strong>`
+- L1746: `<strong>Status:</strong> ${escapeHtml(formatRelativeTime(session.savedAt))}. Save updates durable team and governance records; backend enforcement remains authoritative.`
+- L1750: `<button class="btn btn-secondary" type="button" data-settings-action="focus-section" data-section-id="sync">Open sync policy</button>`
+- L1751: `<button class="btn btn-secondary" type="button" data-settings-action="open-governance">Open Governance page</button>`
+- L1758: `const dirtyText = session.dirty ? "Unsaved changes" : "All changes captured";`
+- L1765: `<h3>Execute safe configuration updates</h3>`
+- L1766: `<p>${escapeHtml(dirtyText)}. Saving writes this configuration into durable team and governance records used across the operating system.</p>`
+- L1770: `<strong>Safe execution path:</strong> Review readiness and blockers, update the required section, save once, then validate Governance impact.`
+- L1773: `<button class="btn btn-primary" type="button" data-settings-action="save-all">Save Settings</button>`
+- L1780: `<button class="btn btn-secondary" type="button" data-settings-action="focus-section" data-section-id="safety">Safety and governance</button>`
+- L1827: `? "Unsaved changes are present. Saving will update the shared durable governance and team records."`
+- L1828: `: "All changes captured. The shared durable governance and team records are in sync.";`
+- L1844: `button.addEventListener("click", async () => {`
+- L1848: `if (action === "save-all") {`
+- L1850: `const governancePayload = mapSettingsToGovernancePolicy(session.form);`
+- L1853: `const confirmed = window.confirm("Confirm settings save\n\nAction: Save team and governance settings for this project.\nRisk: These settings can affect team roles, approval behavior, publishing readiness, brand safety review, and admin override behavior.\nAuthority: This is a backend-governed durable settings update.\n\nSelect Cancel to review the settings before saving.");`
+- L1859: `saveProjectTeam(session.projectName, teamPayload),`
+- L1860: `updateProjectGovernancePolicy(session.projectName, {`
+- L1862: `...governancePayload`
+- L1866: `await context.createProjectHandoff?.(session.projectName, {`
+- L1868: `destination_page: "governance",`
+- L1872: `destination_service_domain: "governance",`
+- L1874: `entity_type: "governance_policy",`
+- L1876: `route: "governance",`
+- L1877: `label: "Governance policy"`
+- L1880: `summary: "Settings updated the shared durable operating policy.",`
+- L1883: `saveMode: "durable",`
+- L1889: `session.savedAt = nowIso();`
+- L1890: `session.saveMode = "durable";`
+- L1891: `session.governancePolicy = governancePayload;`
+- L1900: `context.showMessage(\`Settings saved for ${session.projectName} and synced into the durable system backbone.\`);`
+- L1902: `context.showError(error.message || "Failed to save durable settings.");`
+- L1912: `context.showMessage("Default settings restored for this project. Review and save when ready.");`
+- L1916: `if (action === "reset-section" && sectionId) {`
+- L1921: `context.showMessage(\`${titleCase(sectionId)} settings reset to defaults.\`);`
+- L1932: `if (action === "open-governance") {`
+- L1933: `context.navigateTo("governance");`
+- L1946: `context.showMessage("Critical settings look complete. You can save this configuration whenever you’re ready.");`
+- L2023: `description: "Configure project defaults, AI behavior, publishing rules, approvals, sync behavior, and governance."`
+- L2037: `Select a project to configure system defaults, approvals, sync policies, and governance rules.`
+
+## Governance / Policy Signals
+- L2: `fetchProjectGovernancePolicy,`
+- L5: `updateProjectGovernancePolicy`
+- L24: `description: "Automate low-risk work while keeping humans in the loop."`
+- L27: `value: "Approval-First",`
+- L28: `label: "Approval-First",`
+- L39: `description: "Freeze automation and reduce the system to protective operations."`
+- L45: `"Block publishing when assets are missing",`
+- L57: `"Publisher",`
+- L91: `id: "publisher",`
+- L92: `label: "Publisher",`
+- L111: `service: "Safety & policy review",`
+- L112: `description: "Checks claims, legal risk, and policy-sensitive output."`
+- L118: `description: "Owns defaults, integrations, emergency controls, and final overrides."`
+- L164: `options: ["Planning Mode", "Guided Execution", "Semi-Auto", "Approval-First", "Full AI Assist", "Emergency Safe Mode"]`
+- L179: `backendLabel: "Operating policy is active now and ready for backend persistence",`
+- L189: `path: "operating.actionPolicy",`
+- L190: `label: "Action policy",`
+- L193: `options: ["Recommend only", "Prepare actions with review", "Auto-run trusted actions", "Act unless blocked by policy"]`
+- L236: `path: "ai.approvalRequiredMode",`
+- L237: `label: "Approval-required mode",`
+- L240: `options: ["Always", "Only high-risk", "Campaign launch only", "Manual override"]`
+- L249: `path: "ai.claimSafetyMode",`
+- L250: `label: "Claim safety mode",`
+- L273: `backendLabel: "Automation routing rules sync into the durable governance policy",`
+- L289: `path: "automation.failurePolicy",`
+- L290: `label: "Automation failure policy",`
+- L298: `placeholder: "Route SEO gaps into Research, weak ad performance into Ads Manager, and publish blockers into review queues."`
+- L303: `id: "publishing",`
+- L304: `title: "Publishing Defaults",`
+- L306: `backendLabel: "Publishing defaults sync into the durable governance policy",`
+- L309: `path: "publishing.channels",`
+- L310: `label: "Default publishing channels",`
+- L316: `path: "publishing.schedulingBehavior",`
+- L322: `path: "publishing.approvalBeforePublish",`
+- L323: `label: "Approval before publish",`
+- L327: `path: "publishing.namingConvention",`
+- L333: `path: "publishing.contentRouting",`
+- L339: `path: "publishing.campaignOutputs",`
+- L347: `id: "approval",`
+- L348: `title: "Approval Rules",`
+- L350: `backendLabel: "Approval policy syncs into the durable governance and team records",`
+- L353: `path: "approval.contentOwner",`
+- L354: `label: "Content approval owner",`
+- L360: `path: "approval.mediaOwner",`
+- L361: `label: "Media approval owner",`
+- L367: `path: "approval.adsOwner",`
+- L368: `label: "Ads approval owner",`
+- L374: `path: "approval.requirements",`
+- L375: `label: "What requires human approval",`
+- L378: `options: ["All publish actions", "Paid ads", "Medical or product claims", "New campaign launches", "AI-generated media"]`
+- L381: `path: "approval.revisionRules",`
+- L384: `placeholder: "Reject anything with unsupported claims, brand mismatch, or missing route metadata. Two failed reviews escalate."`
+- L387: `path: "approval.escalationNotes",`
+- L390: `placeholder: "Escalate legal-sensitive claims to brand owner and operations lead within one business day."`
+- L410: `options: ["Strategy", "Writing", "Design", "Video", "Publishing", "Ads", "Analytics", "Compliance", "Administration"]`
+- L420: `path: "team.publishAccess",`
+- L421: `label: "Who can publish",`
+- L424: `options: ["Publishers and admins", "Compliance-reviewed publishers", "Admins only", "Project owner only"]`
+- L451: `description: "Give both AI operators and human teams consistent starting points for campaigns, media, SEO, ads, and approvals.",`
+- L485: `path: "presets.approvalPreset",`
+- L486: `label: "Approval presets",`
+- L502: `backendLabel: "Sync policy is a safe placeholder until connector-level persistence lands",`
+- L550: `"Approval pending alerts",`
+- L551: `"Scheduled publish alerts",`
+- L553: `"Claim safety alerts",`
+- L573: `placeholder: "Use immediate alerts for provider disconnects and claim safety issues; batch lower-priority workflow completions."`
+- L579: `title: "Safety & Governance",`
+- L580: `description: "Protect the brand, enforce truth constraints, and make compliance risks visible before the system acts.",`
+- L581: `backendLabel: "Governance rules are operational now and marked for backend persistence",`
+- L583: `{ path: "safety.aiClaimCheck", label: "AI claim check", type: "toggle", critical: true },`
+- L596: `placeholder: "Fake before/after claims, invented medical promises, altered packaging, counterfeit logos."`
+- L602: `placeholder: "Flag regulated claims, platform policy risk, and market-specific labeling issues."`
+- L612: `label: "Legal / policy caution notes",`
+- L614: `placeholder: "Escalate medical, efficacy, or comparative claims for human review before publication."`
+- L624: `description: "Manage project identity, publishing defaults, and reusable presets without scattering core setup across multiple cards.",`
+- L625: `sectionIds: ["project", "publishing", "presets"]`
+- L636: `description: "Keep approval ownership, publishing permissions, and team-role authority together so governance stays understandable.",`
+- L637: `sectionIds: ["approval", "team"]`
+- L642: `description: "Review connector refresh behavior, import policy, and alert routing without turning Settings into a sync control center.",`
+- L687: `function extractDurableSettingsSnapshot(governancePolicy = {}, teamModel = {}) {`
+- L688: `const governance = asObject(governancePolicy);`
+- L689: `const bridge = asObject(governance.settings_bridge);`
+- L692: `const owners = asObject(governance.approval_owners);`
+- L693: `const rules = asObject(governance.policy_rules);`
+- L706: `actionPolicy: asString(normalized.operating?.actionPolicy || bridge.action_policy)`
+- L710: `approvalRequiredMode: asString(normalized.ai?.approvalRequiredMode || bridge.approval_mode),`
+- L711: `claimSafetyMode: asString(normalized.ai?.claimSafetyMode || bridge.claim_safety_mode)`
+- L713: `normalized.publishing = {`
+- L714: `...asObject(normalized.publishing),`
+- L715: `approvalBeforePublish: rules.approval_before_publish ?? normalized.publishing?.approvalBeforePublish`
+- L719: `aiClaimCheck: rules.high_risk_claim_review_required ?? normalized.safety?.aiClaimCheck`
+- L721: `normalized.approval = {`
+- L722: `...asObject(normalized.approval),`
+- L723: `contentOwner: asString(normalized.approval?.contentOwner || owners.content),`
+- L724: `mediaOwner: asString(normalized.approval?.mediaOwner || owners.media),`
+- L725: `adsOwner: asString(normalized.approval?.adsOwner || owners.campaign)`
+- L729: `publishAccess: asString(normalized.team?.publishAccess || owners.publishing),`
+- L758: `function mapSettingsToGovernancePolicy(form = {}) {`
+- L759: `const approval = asObject(form.approval);`
+- L760: `const publishing = asObject(form.publishing);`
+- L768: `execution_policy: {`
+- L770: `action_policy: asString(operating.actionPolicy)`
+- L772: `policy_rules: {`
+- L773: `approval_before_publish: Boolean(publishing.approvalBeforePublish),`
+- L774: `high_risk_claim_review_required: Boolean(safety.aiClaimCheck),`
+- L776: `allow_admin_override: true,`
+- L777: `auto_escalate_critical_risk: asString(operating.actionPolicy).toLowerCase().includes("blocked"),`
+- L778: `freeze_publishing: asString(operating.primaryMode) === "Emergency Safe Mode"`
+- L780: `approval_owners: {`
+- L781: `content: asString(approval.contentOwner) || "Marketing lead",`
+- L782: `media: asString(approval.mediaOwner) || "Creative lead",`
+- L783: `campaign: asString(approval.adsOwner) || "Operations lead",`
+- L784: `publishing: asString(team.publishAccess) || "Publisher",`
+- L786: `overrides: "Admin"`
+- L791: `approval_mode: asString(ai.approvalRequiredMode) || "Only high-risk",`
+- L792: `claim_safety_mode: asString(ai.claimSafetyMode) || "Strict evidence required",`
+- L794: `action_policy: asString(operating.actionPolicy),`
+- L839: `if (normalized === "approval_first" || normalized === "approval first" || normalized === "approval-first") return "Approval-First";`
+- L899: `actionPolicy:`
+- L901: `? "Act unless blocked by policy"`
+- L906: `modeNotes: "Use stronger automation only when approvals, assets, and governance settings are complete."`
+- L912: `approvalRequiredMode: "Only high-risk",`
+- L914: `claimSafetyMode: "Strict evidence required",`
+- L921: `"Block publishing when assets are missing",`
+- L926: `failurePolicy: "Pause and alert",`
+- L929: `publishing: {`
+- L932: `approvalBeforePublish: true,`
+- L937: `approval: {`
+- L941: `requirements: ["Paid ads", "Medical or product claims", "New campaign launches", "AI-generated media"],`
+- L942: `revisionRules: "Reject unsupported claims, brand drift, weak hooks, or missing metadata. Two revisions escalate to the owner.",`
+- L943: `escalationNotes: "Escalate legal-sensitive claims and launch blockers to brand owner plus operations lead."`
+- L946: `roles: ["Strategist", "Writer", "Designer", "Publisher", "Analyst", "Compliance Reviewer", "Admin", "Brand owner"],`
+- L947: `serviceCoverage: ["Strategy", "Writing", "Design", "Publishing", "Analytics", "Compliance", "Administration"],`
+- L949: `publishAccess: "Publishers and admins",`
+- L957: `canPublish: false,`
+- L964: `canPublish: false,`
+- L971: `canPublish: false,`
+- L978: `canPublish: false,`
+- L982: `publisher: {`
+- L983: `authority: "Publish",`
+- L985: `canPublish: true,`
+- L992: `canPublish: false,`
+- L999: `canPublish: false,`
+- L1006: `canPublish: false,`
+- L1013: `canPublish: true,`
+- L1025: `approvalPreset: "Balanced launch control",`
+- L1039: `"Approval pending alerts",`
+- L1041: `"Claim safety alerts"`
+- L1045: `notificationNotes: "Escalate provider disconnects and claim safety alerts immediately; batch lower-risk completions."`
+- L1048: `aiClaimCheck: true,`
+- L1050: `prohibitedOutputs: "No fake testimonials, fake claims, altered packaging, counterfeit logos, or unsupported medical positioning.",`
+- L1051: `complianceAlerts: "Alert on regulated claims, platform policy conflicts, and high-risk launch copy.",`
+- L1053: `legalNotes: "Human review is mandatory for efficacy, comparative, or market-regulated claims."`
+- L1080: `governancePolicy: null`
+- L1095: `const [teamResult, governanceResult] = await Promise.allSettled([`
+- L1097: `fetchProjectGovernancePolicy(session.projectName)`
+- L1101: `session.governancePolicy = governanceResult.status === "fulfilled" ? asObject(governanceResult.value?.policy || governanceResult.value) : null;`
+- L1103: `const durableSnapshot = extractDurableSettingsSnapshot(session.governancePolicy, session.teamModel);`
+- L1107: `session.governancePolicy?.updated_at ||`
+- L1144: `const hasRisks = summary.risks.length > 0;`
+- L1145: `const approvalOwnersReady = Boolean(form.approval.contentOwner && form.approval.mediaOwner && form.approval.adsOwner);`
+- L1146: `const publishingReady = Array.isArray(form.publishing.channels) && form.publishing.channels.length > 0 && Boolean(form.publishing.approvalBeforePublish);`
+- L1147: `const aiSafetyReady = Boolean(form.safety.aiClaimCheck) && !String(form.ai.claimSafetyMode || "").toLowerCase().includes("relaxed");`
+- L1152: `label: "Governance and approvals",`
+- L1153: `ready: approvalOwnersReady,`
+- L1154: `helper: approvalOwnersReady`
+- L1156: `: "Assign approval owners to avoid ambiguous review authority."`
+- L1159: `label: "Publishing and release safety",`
+- L1160: `ready: publishingReady,`
+- L1161: `helper: publishingReady`
+- L1162: `? "Channels are selected and approval-before-publish is active."`
+- L1163: `: "Select channels and confirm approval-before-publish before launch."`
+- L1166: `label: "AI and policy safety",`
+- L1169: `? "Claim checks and safety posture are configured for controlled AI use."`
+- L1170: `: "Tighten claim safety mode and enable AI claim checks."`
+- L1181: `const nextBestAction = hasRisks`
+- L1182: `? "Review the top blocker, fix it in this page, then save to sync durable governance and team records."`
+- L1183: `: "Save this configuration, then open Governance to verify policy impact and approval readiness.";`
+- L1187: `blockers: summary.risks,`
+- L1188: `blockerCount: summary.risks.length,`
+- L1194: `function collectRisks(form) {`
+- L1195: `const risks = [];`
+- L1198: `risks.push("Project identity is incomplete, which weakens routing, summaries, and downstream defaults.");`
+- L1201: `if (!Array.isArray(form.publishing.channels) || !form.publishing.channels.length) {`
+- L1202: `risks.push("No default publishing channels are selected, so campaign output cannot route automatically.");`
+- L1205: `if (!form.approval.contentOwner || !form.approval.mediaOwner || !form.approval.adsOwner) {`
+- L1206: `risks.push("Approval ownership is incomplete, which creates ambiguity for reviews and launch decisions.");`
+- L1209: `if (!Array.isArray(form.approval.requirements) || !form.approval.requirements.length) {`
+- L1210: `risks.push("Human approval triggers are missing, which increases the chance of unsupervised high-risk output.");`
+- L1213: `if (!form.operating.primaryMode || !form.operating.actionPolicy) {`
+- L1214: `risks.push("Operating mode controls are incomplete, so system behavior may drift between planning, execution, and safe mode.");`
+- L1218: `risks.push("Automation rules are not configured, so routing, blocking, and recovery behavior may be inconsistent.");`
+- L1221: `if (!form.safety.aiClaimCheck || String(form.ai.claimSafetyMode).toLowerCase().includes("relaxed")) {`
+- L1222: `risks.push("Claim safety is weakened, so unsupported product or compliance claims may slip into drafts.");`
+- L1225: `if (!form.team.publishAccess || !form.team.defaultsAccess) {`
+- L1226: `risks.push("Permission boundaries are not fully defined for publish access or system-default changes.");`
+- L1230: `risks.push("Alert rules are missing, which reduces visibility into sync failures, approval delays, and provider issues.");`
+- L1233: `return risks;`
+- L1242: `approvalMode: \`${form.ai.approvalRequiredMode} • ${form.approval.requirements.length} human triggers\`,`
+- L1243: `publishingMode: \`${form.publishing.schedulingBehavior} • ${form.publishing.channels.length} channels\`,`
+- L1245: `risks: collectRisks(form)`
+- L1419: `"Publish",`
+- L1438: `<label class="settings-toggle settings-toggle-compact" for="team-role-${role.id}-publish">`
+- L1439: `<span class="settings-field-label">Can publish</span>`
+- L1441: `id="team-role-${role.id}-publish"`
+- L1444: `data-setting-path="team.roleMatrix.${escapeHtml(role.id)}.canPublish"`
+- L1445: `${config.canPublish ? "checked" : ""}`
+- L1495: `const topRisk = summary.risks[0] || "the biggest current configuration gap";`
+- L1499: `preview: "Explain the current project, AI, approval, publishing, and sync posture in one concise review.",`
+- L1500: `prompt: \`Summarize the current settings for ${projectLabel}. Cover project defaults, AI behavior, approvals, permissions, integrations, sync posture, and the main configuration tradeoffs.\``
+- L1503: `label: "Find highest-risk gap",`
+- L1505: `prompt: \`Review the current settings for ${projectLabel}. Identify the highest-risk configuration gap, starting with ${topRisk}, and explain the safest next fix.\``
+- L1509: `preview: "Advise on AI and automation settings based on current risk and approval posture.",`
+- L1510: `prompt: \`Review the AI, automation, safety, approval, and sync settings for ${projectLabel}. Recommend the best operating posture and what should be tightened or relaxed next.\``
+- L1552: `const riskItems = readiness.blockers.length`
+- L1562: `<p class="settings-section-copy">Settings defines durable defaults for Governance, Publishing, AI, Integrations, and Operations. Backend remains the authority for enforcement.</p>`
+- L1576: `<span>Approval mode</span>`
+- L1577: `<strong>${escapeHtml(summary.approvalMode)}</strong>`
+- L1580: `<span>Publishing mode</span>`
+- L1581: `<strong>${escapeHtml(summary.publishingMode)}</strong>`
+- L1593: `<div class="settings-risk-panel">`
+- L1594: `<div class="settings-risk-head">`
+- L1600: `<div class="governance-rule-list">`
+- L1602: `<div class="governance-rule-item">`
+- L1608: `<ul class="simple-list settings-risk-list">${riskItems}</ul>`
+- L1611: `<div class="governance-policy-block">`
+- L1613: `<p class="governance-copy">${escapeHtml(readiness.nextBestAction)}</p>`
+- L1615: `<button class="btn btn-secondary" type="button" data-settings-action="focus-section" data-section-id="approval">Review approvals</button>`
+- L1616: `<button class="btn btn-secondary" type="button" data-settings-action="focus-section" data-section-id="publishing">Review publishing</button>`
+- L1632: `<p class="settings-section-copy">AI provides context and recommendations. Durable changes happen only through explicit Settings and Governance actions.</p>`
+- L1636: `<strong>AI context scope:</strong> configuration readiness, approval ownership, publishing safety, AI posture, and operations routing.`
+- L1682: `title: "Governance",`
+- L1683: `detail: "Approval ownership, policy rules, and settings bridge state are written into the durable governance policy."`
+- L1686: `title: "Publishing",`
+- L1687: `detail: "Channel defaults, scheduling behavior, and approval-before-publish shape outbound execution safety."`
+- L1691: `detail: "Tone, strictness, claim safety, and approval-required mode define AI operating boundaries."`
+- L1695: `detail: "Sync cadence and alert routes determine how quickly teams detect connector or launch risk."`
+- L1709: `<div class="governance-rule-list">`
+- L1711: `<div class="governance-rule-item">`
+- L1728: `<span class="data-label">Approval mode</span>`
+- L1729: `<strong>${escapeHtml(summary.approvalMode)}</strong>`
+- L1732: `<span class="data-label">Publishing mode</span>`
+- L1733: `<strong>${escapeHtml(summary.publishingMode)}</strong>`
+- L1746: `<strong>Status:</strong> ${escapeHtml(formatRelativeTime(session.savedAt))}. Save updates durable team and governance records; backend enforcement remains authoritative.`
+- L1750: `<button class="btn btn-secondary" type="button" data-settings-action="focus-section" data-section-id="sync">Open sync policy</button>`
+- L1751: `<button class="btn btn-secondary" type="button" data-settings-action="open-governance">Open Governance page</button>`
+- L1766: `<p>${escapeHtml(dirtyText)}. Saving writes this configuration into durable team and governance records used across the operating system.</p>`
+- L1770: `<strong>Safe execution path:</strong> Review readiness and blockers, update the required section, save once, then validate Governance impact.`
+- L1780: `<button class="btn btn-secondary" type="button" data-settings-action="focus-section" data-section-id="safety">Safety and governance</button>`
+- L1827: `? "Unsaved changes are present. Saving will update the shared durable governance and team records."`
+- L1828: `: "All changes captured. The shared durable governance and team records are in sync.";`
+- L1850: `const governancePayload = mapSettingsToGovernancePolicy(session.form);`
+- L1853: `const confirmed = window.confirm("Confirm settings save\n\nAction: Save team and governance settings for this project.\nRisk: These settings can affect team roles, approval behavior, publishing readiness, brand safety review, and admin override behavior.\nAuthority: This is a backend-governed durable settings update.\n\nSelect Cancel to review the settings before saving.");`
+- L1860: `updateProjectGovernancePolicy(session.projectName, {`
+- L1862: `...governancePayload`
+- L1868: `destination_page: "governance",`
+- L1872: `destination_service_domain: "governance",`
+- L1874: `entity_type: "governance_policy",`
+- L1876: `route: "governance",`
+- L1877: `label: "Governance policy"`
+- L1880: `summary: "Settings updated the shared durable operating policy.",`
+- L1884: `riskCount: buildSummary(session).risks.length`
+- L1891: `session.governancePolicy = governancePayload;`
+- L1932: `if (action === "open-governance") {`
+- L1933: `context.navigateTo("governance");`
+- L1939: `if (summary.risks.length) {`
+- L1944: `context.showError("Critical settings still need review. The summary panel shows the current risk list.");`
+- L2023: `description: "Configure project defaults, AI behavior, publishing rules, approvals, sync behavior, and governance."`
+- L2037: `Select a project to configure system defaults, approvals, sync policies, and governance rules.`
+
+## Integration / Credential Signals
+- L47: `"Alert when integrations fail",`
+- L118: `description: "Owns defaults, integrations, emergency controls, and final overrides."`
+- L434: `path: "team.integrationAccess",`
+- L435: `label: "Who can manage integrations",`
+- L501: `description: "Control how aggressively the system refreshes connected sources, retries failures, and keeps data current.",`
+- L502: `backendLabel: "Sync policy is a safe placeholder until connector-level persistence lands",`
+- L533: `placeholder: "Refresh connectors before morning review, before campaign launch, and after failed imports."`
+- L541: `backendLabel: "Notifications are captured here and marked for backend delivery integration",`
+- L552: `"Provider disconnect alerts",`
+- L573: `placeholder: "Use immediate alerts for provider disconnects and claim safety issues; batch lower-priority workflow completions."`
+- L640: `id: "integration-sync",`
+- L641: `title: "Integration / Sync Settings",`
+- L642: `description: "Review connector refresh behavior, import policy, and alert routing without turning Settings into a sync control center.",`
+- L859: `function inferChannels(connectors) {`
+- L860: `const checks = asObject(connectors?.readiness?.checks);`
+- L875: `const connectors = asObject(state?.data?.integrations);`
+- L922: `"Alert when integrations fail",`
+- L930: `channels: inferChannels(connectors),`
+- L951: `integrationAccess: "Admins only",`
+- L958: `canManageIntegrations: false,`
+- L965: `canManageIntegrations: false,`
+- L972: `canManageIntegrations: false,`
+- L979: `canManageIntegrations: false,`
+- L986: `canManageIntegrations: false,`
+- L993: `canManageIntegrations: false,`
+- L1000: `canManageIntegrations: false,`
+- L1007: `canManageIntegrations: false,`
+- L1014: `canManageIntegrations: true,`
+- L1034: `refreshDefaults: "Refresh integrations before daily review, before launch, and after connector failures."`
+- L1040: `"Provider disconnect alerts",`
+- L1045: `notificationNotes: "Escalate provider disconnects and claim safety alerts immediately; batch lower-risk completions."`
+- L1148: `const integrationReady = Boolean(form.sync.frequency && Array.isArray(form.alerts.enabledRules) && form.alerts.enabledRules.length);`
+- L1173: `label: "Integrations and operations alerts",`
+- L1174: `ready: integrationReady,`
+- L1175: `helper: integrationReady`
+- L1230: `risks.push("Alert rules are missing, which reduces visibility into sync failures, approval delays, and provider issues.");`
+- L1449: `<label class="settings-toggle settings-toggle-compact" for="team-role-${role.id}-integrations">`
+- L1450: `<span class="settings-field-label">Manage integrations</span>`
+- L1452: `id="team-role-${role.id}-integrations"`
+- L1455: `data-setting-path="team.roleMatrix.${escapeHtml(role.id)}.canManageIntegrations"`
+- L1456: `${config.canManageIntegrations ? "checked" : ""}`
+- L1500: `prompt: \`Summarize the current settings for ${projectLabel}. Cover project defaults, AI behavior, approvals, permissions, integrations, sync posture, and the main configuration tradeoffs.\``
+- L1562: `<p class="settings-section-copy">Settings defines durable defaults for Governance, Publishing, AI, Integrations, and Operations. Backend remains the authority for enforcement.</p>`
+- L1694: `title: "Integrations and operations",`
+- L1695: `detail: "Sync cadence and alert routes determine how quickly teams detect connector or launch risk."`
+
+## AI Signals
+- L19: `description: "Prepare actions and prompt operators step by step."`
+- L32: `value: "Full AI Assist",`
+- L33: `label: "Full AI Assist",`
+- L34: `description: "The system acts aggressively inside approved guardrails."`
+- L44: `"Suggest workflows when campaign is ready",`
+- L47: `"Alert when integrations fail",`
+- L69: `service: "Planning & campaign architecture",`
+- L70: `description: "Shapes priorities, campaign structures, and workflow sequencing."`
+- L99: `service: "Paid testing & optimization",`
+- L112: `description: "Checks claims, legal risk, and policy-sensitive output."`
+- L157: `options: ["Europe/Berlin", "UTC", "America/New_York", "Asia/Dubai", "Europe/London"]`
+- L161: `path: "project.defaultCampaignMode",`
+- L162: `label: "Default campaign mode",`
+- L164: `options: ["Planning Mode", "Guided Execution", "Semi-Auto", "Approval-First", "Full AI Assist", "Emergency Safe Mode"]`
+- L178: `description: "Define how assertively MH Assistant plans, acts, escalates, and protects the project.",`
+- L210: `id: "ai",`
+- L211: `title: "AI Settings",`
+- L213: `backendLabel: "AI orchestration defaults are partially backend-ready",`
+- L216: `path: "ai.tone",`
+- L217: `label: "AI tone / brand tone",`
+- L223: `path: "ai.responseStyle",`
+- L226: `options: ["Structured concise", "Strategic detailed", "Executive summary", "Operator checklist"]`
+- L229: `path: "ai.generationStrictness",`
+- L236: `path: "ai.approvalRequiredMode",`
+- L240: `options: ["Always", "Only high-risk", "Campaign launch only", "Manual override"]`
+- L243: `path: "ai.creativitySafetyBalance",`
+- L244: `label: "AI creativity / safety balance",`
+- L249: `path: "ai.claimSafetyMode",`
+- L250: `label: "Claim safety mode",`
+- L256: `path: "ai.contentGenerationDefaults",`
+- L262: `path: "ai.mediaGenerationDefaults",`
+- L284: `label: "Campaign readiness threshold",`
+- L289: `path: "automation.failurePolicy",`
+- L290: `label: "Automation failure policy",`
+- L313: `options: ["Instagram", "Facebook", "TikTok", "YouTube", "Email", "Website", "Amazon"]`
+- L319: `options: ["Queue for review", "Schedule immediately", "Draft only", "Batch by campaign"]`
+- L330: `placeholder: "market_campaign_channel_assettype_v1"`
+- L336: `placeholder: "Route product launches to social + email, evergreen SEO to website, paid hooks to ads queue."`
+- L339: `path: "publishing.campaignOutputs",`
+- L340: `label: "Campaign output defaults",`
+- L342: `options: ["Organic posts", "Stories", "Reels", "Ads variants", "Landing pages", "Email sequence"]`
+- L371: `options: ["Growth lead", "Brand owner", "Paid media lead", "Operations lead"]`
+- L378: `options: ["All publish actions", "Paid ads", "Medical or product claims", "New campaign launches", "AI-generated media"]`
+- L384: `placeholder: "Reject anything with unsupported claims, brand mismatch, or missing route metadata. Two failed reviews escalate."`
+- L390: `placeholder: "Escalate legal-sensitive claims to brand owner and operations lead within one business day."`
+- L451: `description: "Give both AI operators and human teams consistent starting points for campaigns, media, SEO, ads, and approvals.",`
+- L455: `path: "presets.campaignPreset",`
+- L456: `label: "Campaign presets",`
+- L464: `options: ["Hook-first social", "Editorial authority", "Conversion-first DTC", "SEO education", "Email storytelling"]`
+- L494: `placeholder: "Capture the reusable defaults that AI and operators should inherit when launching new work."`
+- L501: `description: "Control how aggressively the system refreshes connected sources, retries failures, and keeps data current.",`
+- L509: `options: ["Hourly", "Every 6 hours", "Daily", "Manual only"]`
+- L518: `path: "sync.retryFailedBehavior",`
+- L519: `label: "Retry failed sync behavior",`
+- L527: `options: ["Every 15 minutes", "Hourly", "Twice daily", "Daily"]`
+- L533: `placeholder: "Refresh connectors before morning review, before campaign launch, and after failed imports."`
+- L540: `description: "Control which operational events trigger alerts so teams can intervene before failures become launch problems.",`
+- L549: `"Sync failure alerts",`
+- L553: `"Claim safety alerts",`
+- L561: `options: ["In-app only", "In-app + email", "In-app + Slack", "In-app + escalation queue"]`
+- L567: `options: ["Immediate only", "Every 30 minutes", "Hourly", "Twice daily"]`
+- L573: `placeholder: "Use immediate alerts for provider disconnects and claim safety issues; batch lower-priority workflow completions."`
+- L580: `description: "Protect the brand, enforce truth constraints, and make compliance risks visible before the system acts.",`
+- L583: `{ path: "safety.aiClaimCheck", label: "AI claim check", type: "toggle", critical: true },`
+- L596: `placeholder: "Fake before/after claims, invented medical promises, altered packaging, counterfeit logos."`
+- L602: `placeholder: "Flag regulated claims, platform policy risk, and market-specific labeling issues."`
+- L608: `placeholder: "Use approved logo only, maintain premium visual language, reject generic AI product renders."`
+- L614: `placeholder: "Escalate medical, efficacy, or comparative claims for human review before publication."`
+- L628: `id: "ai-automation",`
+- L629: `title: "AI / Automation Settings",`
+- L630: `description: "Control system mode, AI behavior, automation routing, and safety rules in one execution-focused workspace.",`
+- L631: `sectionIds: ["operating", "ai", "automation", "safety"]`
+- L702: `defaultCampaignMode: asString(normalized.project?.defaultCampaignMode || bridge.execution_mode)`
+- L708: `normalized.ai = {`
+- L709: `...asObject(normalized.ai),`
+- L710: `approvalRequiredMode: asString(normalized.ai?.approvalRequiredMode || bridge.approval_mode),`
+- L711: `claimSafetyMode: asString(normalized.ai?.claimSafetyMode || bridge.claim_safety_mode)`
+- L719: `aiClaimCheck: rules.high_risk_claim_review_required ?? normalized.safety?.aiClaimCheck`
+- L725: `adsOwner: asString(normalized.approval?.adsOwner || owners.campaign)`
+- L762: `const ai = asObject(form.ai);`
+- L769: `mode: asString(project.defaultCampaignMode || operating.primaryMode),`
+- L774: `high_risk_claim_review_required: Boolean(safety.aiClaimCheck),`
+- L783: `campaign: asString(approval.adsOwner) || "Operations lead",`
+- L791: `approval_mode: asString(ai.approvalRequiredMode) || "Only high-risk",`
+- L792: `claim_safety_mode: asString(ai.claimSafetyMode) || "Strict evidence required",`
+- L793: `execution_mode: asString(project.defaultCampaignMode || operating.primaryMode),`
+- L816: `return { currency: "AED", timezone: "Asia/Dubai", language: "Arabic" };`
+- L840: `if (normalized === "full_auto" || normalized === "full auto" || normalized === "full-auto" || normalized === "full ai assist") return "Full AI Assist";`
+- L870: `return items.length ? items : ["Instagram", "Website", "Email"];`
+- L894: `defaultCampaignMode: executionMode || "Semi-Auto",`
+- L900: `executionMode === "Full AI Assist"`
+- L908: `ai: {`
+- L914: `claimSafetyMode: "Strict evidence required",`
+- L915: `contentGenerationDefaults: "Respect project language, protect brand truth, and optimize for campaign execution clarity.",`
+- L920: `"Suggest workflows when campaign is ready",`
+- L922: `"Alert when integrations fail",`
+- L926: `failurePolicy: "Pause and alert",`
+- L933: `namingConvention: "market_campaign_channel_assettype_v1",`
+- L934: `contentRouting: "Route launch content to social and email, evergreen content to website, and paid hooks to ads review.",`
+- L935: `campaignOutputs: ["Organic posts", "Reels", "Landing pages", "Email sequence"]`
+- L941: `requirements: ["Paid ads", "Medical or product claims", "New campaign launches", "AI-generated media"],`
+- L942: `revisionRules: "Reject unsupported claims, brand drift, weak hooks, or missing metadata. Two revisions escalate to the owner.",`
+- L943: `escalationNotes: "Escalate legal-sensitive claims and launch blockers to brand owner plus operations lead."`
+- L1020: `campaignPreset: "Launch sprint",`
+- L1032: `retryFailedBehavior: "Retry twice then alert",`
+- L1034: `refreshDefaults: "Refresh integrations before daily review, before launch, and after connector failures."`
+- L1038: `"Sync failure alerts",`
+- L1041: `"Claim safety alerts"`
+- L1043: `deliveryMode: "In-app + email",`
+- L1045: `notificationNotes: "Escalate provider disconnects and claim safety alerts immediately; batch lower-risk completions."`
+- L1048: `aiClaimCheck: true,`
+- L1050: `prohibitedOutputs: "No fake testimonials, fake claims, altered packaging, counterfeit logos, or unsupported medical positioning.",`
+- L1051: `complianceAlerts: "Alert on regulated claims, platform policy conflicts, and high-risk launch copy.",`
+- L1053: `legalNotes: "Human review is mandatory for efficacy, comparative, or market-regulated claims."`
+- L1095: `const [teamResult, governanceResult] = await Promise.allSettled([`
+- L1116: `session.error = error.message || "Failed to load durable settings.";`
+- L1147: `const aiSafetyReady = Boolean(form.safety.aiClaimCheck) && !String(form.ai.claimSafetyMode || "").toLowerCase().includes("relaxed");`
+- L1166: `label: "AI and policy safety",`
+- L1167: `ready: aiSafetyReady,`
+- L1168: `helper: aiSafetyReady`
+- L1169: `? "Claim checks and safety posture are configured for controlled AI use."`
+- L1170: `: "Tighten claim safety mode and enable AI claim checks."`
+- L1202: `risks.push("No default publishing channels are selected, so campaign output cannot route automatically.");`
+- L1221: `if (!form.safety.aiClaimCheck || String(form.ai.claimSafetyMode).toLowerCase().includes("relaxed")) {`
+- L1222: `risks.push("Claim safety is weakened, so unsupported product or compliance claims may slip into drafts.");`
+- L1230: `risks.push("Alert rules are missing, which reduces visibility into sync failures, approval delays, and provider issues.");`
+- L1241: `aiMode: \`${form.ai.tone} • ${form.ai.generationStrictness}\`,`
+- L1242: `approvalMode: \`${form.ai.approvalRequiredMode} • ${form.approval.requirements.length} human triggers\`,`
+- L1492: `function buildSettingsPrompts(session) {`
+- L1499: `preview: "Explain the current project, AI, approval, publishing, and sync posture in one concise review.",`
+- L1500: `prompt: \`Summarize the current settings for ${projectLabel}. Cover project defaults, AI behavior, approvals, permissions, integrations, sync posture, and the main configuration tradeoffs.\``
+- L1505: `prompt: \`Review the current settings for ${projectLabel}. Identify the highest-risk configuration gap, starting with ${topRisk}, and explain the safest next fix.\``
+- L1509: `preview: "Advise on AI and automation settings based on current risk and approval posture.",`
+- L1510: `prompt: \`Review the AI, automation, safety, approval, and sync settings for ${projectLabel}. Recommend the best operating posture and what should be tightened or relaxed next.\``
+- L1557: `<section class="panel settings-overview std-detail-card mhos-clean-surface">`
+- L1562: `<p class="settings-section-copy">Settings defines durable defaults for Governance, Publishing, AI, Integrations, and Operations. Backend remains the authority for enforcement.</p>`
+- L1572: `<span>AI mode</span>`
+- L1573: `<strong>${escapeHtml(summary.aiMode)}</strong>`
+- L1617: `<button class="btn btn-secondary" type="button" data-settings-open-ai>Ask AI for guidance</button>`
+- L1624: `function renderSettingsAssistant(session, escapeHtml) {`
+- L1625: `const prompts = buildSettingsPrompts(session);`
+- L1627: `<section class="panel settings-ai-assistant std-ai-panel mhos-clean-surface">`
+- L1630: `<div class="panel-kicker">Settings AI assistant</div>`
+- L1632: `<p class="settings-section-copy">AI provides context and recommendations. Durable changes happen only through explicit Settings and Governance actions.</p>`
+- L1636: `<strong>AI context scope:</strong> configuration readiness, approval ownership, publishing safety, AI posture, and operations routing.`
+- L1639: `<button class="btn btn-secondary" type="button" data-settings-open-ai>Open AI: Review in AI Workspace</button>`
+- L1642: `${prompts.map((item, index) => \``
+- L1643: `<button class="quick-action-btn" type="button" data-settings-ai-prompt="${index}">`
+- L1683: `detail: "Approval ownership, policy rules, and settings bridge state are written into the durable governance policy."`
+- L1687: `detail: "Channel defaults, scheduling behavior, and approval-before-publish shape outbound execution safety."`
+- L1690: `title: "AI",`
+- L1691: `detail: "Tone, strictness, claim safety, and approval-required mode define AI operating boundaries."`
+- L1695: `detail: "Sync cadence and alert routes determine how quickly teams detect connector or launch risk."`
+- L1700: `<aside class="settings-summary panel std-detail-card mhos-clean-surface">`
+- L1713: `<span>${escapeHtml(item.detail)}</span>`
+- L1724: `<span class="data-label">AI mode</span>`
+- L1725: `<strong>${escapeHtml(summary.aiMode)}</strong>`
+- L1746: `<strong>Status:</strong> ${escapeHtml(formatRelativeTime(session.savedAt))}. Save updates durable team and governance records; backend enforcement remains authoritative.`
+- L1793: `<div class="settings-main-stack std-main-column mhos-clean-stack">`
+- L1797: `<aside class="settings-right-rail std-right-rail mhos-clean-stack">`
+- L1800: `${renderSettingsAssistant(session, escapeHtml)}`
+- L1817: `const aiHost = root.querySelector(".settings-ai-assistant");`
+- L1818: `if (aiHost) {`
+- L1819: `aiHost.outerHTML = renderSettingsAssistant(session, escapeHtml);`
+- L1858: `await Promise.all([`
+- L1866: `await context.createProjectHandoff?.(session.projectName, {`
+- L1871: `source_service_domain: "system",`
+- L1872: `destination_service_domain: "governance",`
+- L1899: `await context.reloadProjectData?.(session.projectName);`
+- L1902: `context.showError(error.message || "Failed to save durable settings.");`
+- L1953: `function bindSettingsAiButtons(context, session) {`
+- L1957: `root.querySelectorAll("[data-settings-open-ai]").forEach((button) => {`
+- L1959: `context.navigateTo("ai-command");`
+- L1963: `root.querySelectorAll("[data-settings-ai-prompt]").forEach((button) => {`
+- L1965: `const prompt = buildSettingsPrompts(session)[Number(button.dataset.settingsAiPrompt)];`
+- L1966: `if (!prompt) return;`
+- L1969: `input.value = prompt.prompt;`
+- L1971: `context.navigateTo("ai-command");`
+- L1972: `context.showMessage("Settings prompt added to AI Command.");`
+- L2009: `bindSettingsAiButtons(context, session);`
+- L2014: `bindSettingsAiButtons(context, session);`
+- L2023: `description: "Configure project defaults, AI behavior, publishing rules, approvals, sync behavior, and governance."`
+
+## Handoff Signals
+- L1866: `await context.createProjectHandoff?.(session.projectName, {`
+- L1868: `destination_page: "governance",`
+
+## Confirmation Signals
+- L1853: `const confirmed = window.confirm("Confirm settings save\n\nAction: Save team and governance settings for this project.\nRisk: These settings can affect team roles, approval behavior, publishing readiness, brand safety review, and admin override behavior.\nAuthority: This is a backend-governed durable settings update.\n\nSelect Cancel to review the settings before saving.");`
+
+## Local / Session Storage Signals
+- L179: `backendLabel: "Operating policy is active now and ready for backend persistence",`
+- L253: `options: ["Strict evidence required", "Brand-safe balanced", "Relaxed draft mode"]`
+- L319: `options: ["Queue for review", "Schedule immediately", "Draft only", "Batch by campaign"]`
+- L398: `backendLabel: "Permissions are modeled now and ready for future role persistence",`
+- L452: `backendLabel: "Preset selection is ready now and can upgrade to backend persistence later",`
+- L502: `backendLabel: "Sync policy is a safe placeholder until connector-level persistence lands",`
+- L581: `backendLabel: "Governance rules are operational now and marked for backend persistence",`
+- L1222: `risks.push("Claim safety is weakened, so unsupported product or compliance claims may slip into drafts.");`
+- L1740: `<span class="data-label">Persistence</span>`
+- L1881: `draft_context: {`
+
+## Navigation Signals
+- L48: `"Route SEO issues into Research/Workflows",`
+- L49: `"Route weak ads into Ads Manager"`
+- L272: `description: "Tell the system what should be suggested, blocked, routed, or escalated when operational conditions change.",`
+- L292: `options: ["Pause and alert", "Retry then route", "Route to operator immediately", "Record only"]`
+- L298: `placeholder: "Route SEO gaps into Research, weak ad performance into Ads Manager, and publish blockers into review queues."`
+- L305: `description: "Set where content goes, how it is routed, and what conditions must be true before anything ships.",`
+- L336: `placeholder: "Route product launches to social + email, evergreen SEO to website, paid hooks to ads queue."`
+- L384: `placeholder: "Reject anything with unsupported claims, brand mismatch, or missing route metadata. Two failed reviews escalate."`
+- L923: `"Route SEO issues into Research/Workflows"`
+- L927: `routingNotes: "Push readiness gaps into workflows, route SEO findings into Research, and send weak ads to Ads Manager."`
+- L934: `contentRouting: "Route launch content to social and email, evergreen content to website, and paid hooks to ads review.",`
+- L1202: `risks.push("No default publishing channels are selected, so campaign output cannot route automatically.");`
+- L1695: `detail: "Sync cadence and alert routes determine how quickly teams detect connector or launch risk."`
+- L1876: `route: "governance",`
+- L1933: `context.navigateTo("governance");`
+- L1959: `context.navigateTo("ai-command");`
+- L1971: `context.navigateTo("ai-command");`
+- L2017: `export const settingsRoute = {`
+
+## Disabled / Read-only / Draft / Guard Signals
+- L34: `description: "The system acts aggressively inside approved guardrails."`
+- L193: `options: ["Recommend only", "Prepare actions with review", "Auto-run trusted actions", "Act unless blocked by policy"]`
+- L253: `options: ["Strict evidence required", "Brand-safe balanced", "Relaxed draft mode"]`
+- L272: `description: "Tell the system what should be suggested, blocked, routed, or escalated when operational conditions change.",`
+- L319: `options: ["Queue for review", "Schedule immediately", "Draft only", "Batch by campaign"]`
+- L375: `label: "What requires human approval",`
+- L398: `backendLabel: "Permissions are modeled now and ready for future role persistence",`
+- L777: `auto_escalate_critical_risk: asString(operating.actionPolicy).toLowerCase().includes("blocked"),`
+- L901: `? "Act unless blocked by policy"`
+- L1218: `risks.push("Automation rules are not configured, so routing, blocking, and recovery behavior may be inconsistent.");`
+- L1222: `risks.push("Claim safety is weakened, so unsupported product or compliance claims may slip into drafts.");`
+- L1499: `preview: "Explain the current project, AI, approval, publishing, and sync posture in one concise review.",`
+- L1504: `preview: "Identify the most important settings gap and the safest next fix.",`
+- L1509: `preview: "Advise on AI and automation settings based on current risk and approval posture.",`
+- L1645: `<span class="home-action-meta">${escapeHtml(item.preview)}</span>`
+- L1881: `draft_context: {`
+
+## Risky Terms
+- L2: `fetchProjectGovernancePolicy,`
+- L4: `saveProjectTeam,`
+- L5: `updateProjectGovernancePolicy`
+- L27: `value: "Approval-First",`
+- L28: `label: "Approval-First",`
+- L32: `value: "Full AI Assist",`
+- L33: `label: "Full AI Assist",`
+- L34: `description: "The system acts aggressively inside approved guardrails."`
+- L39: `description: "Freeze automation and reduce the system to protective operations."`
+- L44: `"Suggest workflows when campaign is ready",`
+- L45: `"Block publishing when assets are missing",`
+- L47: `"Alert when integrations fail",`
+- L57: `"Publisher",`
+- L69: `service: "Planning & campaign architecture",`
+- L70: `description: "Shapes priorities, campaign structures, and workflow sequencing."`
+- L91: `id: "publisher",`
+- L92: `label: "Publisher",`
+- L99: `service: "Paid testing & optimization",`
+- L111: `service: "Safety & policy review",`
+- L112: `description: "Checks claims, legal risk, and policy-sensitive output."`
+- L118: `description: "Owns defaults, integrations, emergency controls, and final overrides."`
+- L125: `title: "Project Settings",`
+- L127: `backendLabel: "Project profile fields are ready for backend save",`
+- L157: `options: ["Europe/Berlin", "UTC", "America/New_York", "Asia/Dubai", "Europe/London"]`
+- L161: `path: "project.defaultCampaignMode",`
+- L162: `label: "Default campaign mode",`
+- L164: `options: ["Planning Mode", "Guided Execution", "Semi-Auto", "Approval-First", "Full AI Assist", "Emergency Safe Mode"]`
+- L179: `backendLabel: "Operating policy is active now and ready for backend persistence",`
+- L189: `path: "operating.actionPolicy",`
+- L190: `label: "Action policy",`
+- L193: `options: ["Recommend only", "Prepare actions with review", "Auto-run trusted actions", "Act unless blocked by policy"]`
+- L210: `id: "ai",`
+- L211: `title: "AI Settings",`
+- L213: `backendLabel: "AI orchestration defaults are partially backend-ready",`
+- L216: `path: "ai.tone",`
+- L217: `label: "AI tone / brand tone",`
+- L223: `path: "ai.responseStyle",`
+- L226: `options: ["Structured concise", "Strategic detailed", "Executive summary", "Operator checklist"]`
+- L229: `path: "ai.generationStrictness",`
+- L236: `path: "ai.approvalRequiredMode",`
+- L237: `label: "Approval-required mode",`
+- L240: `options: ["Always", "Only high-risk", "Campaign launch only", "Manual override"]`
+- L243: `path: "ai.creativitySafetyBalance",`
+- L244: `label: "AI creativity / safety balance",`
+- L249: `path: "ai.claimSafetyMode",`
+- L250: `label: "Claim safety mode",`
+- L256: `path: "ai.contentGenerationDefaults",`
+- L262: `path: "ai.mediaGenerationDefaults",`
+- L273: `backendLabel: "Automation routing rules sync into the durable governance policy",`
+- L284: `label: "Campaign readiness threshold",`
+- L289: `path: "automation.failurePolicy",`
+- L290: `label: "Automation failure policy",`
+- L298: `placeholder: "Route SEO gaps into Research, weak ad performance into Ads Manager, and publish blockers into review queues."`
+- L303: `id: "publishing",`
+- L304: `title: "Publishing Defaults",`
+- L306: `backendLabel: "Publishing defaults sync into the durable governance policy",`
+- L309: `path: "publishing.channels",`
+- L310: `label: "Default publishing channels",`
+- L313: `options: ["Instagram", "Facebook", "TikTok", "YouTube", "Email", "Website", "Amazon"]`
+- L316: `path: "publishing.schedulingBehavior",`
+- L319: `options: ["Queue for review", "Schedule immediately", "Draft only", "Batch by campaign"]`
+- L322: `path: "publishing.approvalBeforePublish",`
+- L323: `label: "Approval before publish",`
+- L327: `path: "publishing.namingConvention",`
+- L330: `placeholder: "market_campaign_channel_assettype_v1"`
+- L333: `path: "publishing.contentRouting",`
+- L336: `placeholder: "Route product launches to social + email, evergreen SEO to website, paid hooks to ads queue."`
+- L339: `path: "publishing.campaignOutputs",`
+- L340: `label: "Campaign output defaults",`
+- L342: `options: ["Organic posts", "Stories", "Reels", "Ads variants", "Landing pages", "Email sequence"]`
+- L347: `id: "approval",`
+- L348: `title: "Approval Rules",`
+- L350: `backendLabel: "Approval policy syncs into the durable governance and team records",`
+- L353: `path: "approval.contentOwner",`
+- L354: `label: "Content approval owner",`
+- L360: `path: "approval.mediaOwner",`
+- L361: `label: "Media approval owner",`
+- L367: `path: "approval.adsOwner",`
+- L368: `label: "Ads approval owner",`
+- L371: `options: ["Growth lead", "Brand owner", "Paid media lead", "Operations lead"]`
+- L374: `path: "approval.requirements",`
+- L375: `label: "What requires human approval",`
+- L378: `options: ["All publish actions", "Paid ads", "Medical or product claims", "New campaign launches", "AI-generated media"]`
+- L381: `path: "approval.revisionRules",`
+- L384: `placeholder: "Reject anything with unsupported claims, brand mismatch, or missing route metadata. Two failed reviews escalate."`
+- L387: `path: "approval.escalationNotes",`
+- L390: `placeholder: "Escalate legal-sensitive claims to brand owner and operations lead within one business day."`
+- L410: `options: ["Strategy", "Writing", "Design", "Video", "Publishing", "Ads", "Analytics", "Compliance", "Administration"]`
+- L420: `path: "team.publishAccess",`
+- L421: `label: "Who can publish",`
+- L424: `options: ["Publishers and admins", "Compliance-reviewed publishers", "Admins only", "Project owner only"]`
+- L434: `path: "team.integrationAccess",`
+- L435: `label: "Who can manage integrations",`
+- L449: `id: "presets",`
+- L450: `title: "Presets & Reusable Defaults",`
+- L451: `description: "Give both AI operators and human teams consistent starting points for campaigns, media, SEO, ads, and approvals.",`
+- L452: `backendLabel: "Preset selection is ready now and can upgrade to backend persistence later",`
+- L455: `path: "presets.campaignPreset",`
+- L456: `label: "Campaign presets",`
+- L461: `path: "presets.contentPreset",`
+- L462: `label: "Content presets",`
+- L464: `options: ["Hook-first social", "Editorial authority", "Conversion-first DTC", "SEO education", "Email storytelling"]`
+- L467: `path: "presets.mediaPreset",`
+- L468: `label: "Media presets",`
+- L473: `path: "presets.seoPreset",`
+- L474: `label: "SEO presets",`
+- L479: `path: "presets.adsPreset",`
+- L480: `label: "Ads test presets",`
+- L485: `path: "presets.approvalPreset",`
+- L486: `label: "Approval presets",`
+- L491: `path: "presets.presetNotes",`
+- L492: `label: "Preset notes",`
+- L494: `placeholder: "Capture the reusable defaults that AI and operators should inherit when launching new work."`
+- L499: `id: "sync",`
+- L500: `title: "Sync Rules",`
+- L501: `description: "Control how aggressively the system refreshes connected sources, retries failures, and keeps data current.",`
+- L502: `backendLabel: "Sync policy is a safe placeholder until connector-level persistence lands",`
+- L504: `{ path: "sync.autoSync", label: "Auto sync", type: "toggle" },`
+- L506: `path: "sync.frequency",`
+- L507: `label: "Sync frequency",`
+- L509: `options: ["Hourly", "Every 6 hours", "Daily", "Manual only"]`
+- L512: `path: "sync.importHistoryPreference",`
+- L518: `path: "sync.retryFailedBehavior",`
+- L519: `label: "Retry failed sync behavior",`
+- L524: `path: "sync.healthCheckFrequency",`
+- L527: `options: ["Every 15 minutes", "Hourly", "Twice daily", "Daily"]`
+- L530: `path: "sync.refreshDefaults",`
+- L533: `placeholder: "Refresh connectors before morning review, before campaign launch, and after failed imports."`
+- L540: `description: "Control which operational events trigger alerts so teams can intervene before failures become launch problems.",`
+- L541: `backendLabel: "Notifications are captured here and marked for backend delivery integration",`
+- L549: `"Sync failure alerts",`
+- L550: `"Approval pending alerts",`
+- L551: `"Scheduled publish alerts",`
+- L552: `"Provider disconnect alerts",`
+- L553: `"Claim safety alerts",`
+- L561: `options: ["In-app only", "In-app + email", "In-app + Slack", "In-app + escalation queue"]`
+- L567: `options: ["Immediate only", "Every 30 minutes", "Hourly", "Twice daily"]`
+- L573: `placeholder: "Use immediate alerts for provider disconnects and claim safety issues; batch lower-priority workflow completions."`
+- L579: `title: "Safety & Governance",`
+- L580: `description: "Protect the brand, enforce truth constraints, and make compliance risks visible before the system acts.",`
+- L581: `backendLabel: "Governance rules are operational now and marked for backend persistence",`
+- L583: `{ path: "safety.aiClaimCheck", label: "AI claim check", type: "toggle", critical: true },`
+- L596: `placeholder: "Fake before/after claims, invented medical promises, altered packaging, counterfeit logos."`
+- L602: `placeholder: "Flag regulated claims, platform policy risk, and market-specific labeling issues."`
+- L608: `placeholder: "Use approved logo only, maintain premium visual language, reject generic AI product renders."`
+- L612: `label: "Legal / policy caution notes",`
+- L614: `placeholder: "Escalate medical, efficacy, or comparative claims for human review before publication."`
+- L620: `const SETTINGS_GROUPS = [`
+- L623: `title: "Project Settings",`
+- L624: `description: "Manage project identity, publishing defaults, and reusable presets without scattering core setup across multiple cards.",`
+- L625: `sectionIds: ["project", "publishing", "presets"]`
+- L628: `id: "ai-automation",`
+- L629: `title: "AI / Automation Settings",`
+- L630: `description: "Control system mode, AI behavior, automation routing, and safety rules in one execution-focused workspace.",`
+- L631: `sectionIds: ["operating", "ai", "automation", "safety"]`
+- L636: `description: "Keep approval ownership, publishing permissions, and team-role authority together so governance stays understandable.",`
+- L637: `sectionIds: ["approval", "team"]`
+- L640: `id: "integration-sync",`
+- L641: `title: "Integration / Sync Settings",`
+- L642: `description: "Review connector refresh behavior, import policy, and alert routing without turning Settings into a sync control center.",`
+- L643: `sectionIds: ["sync", "alerts"]`
+- L662: `return path.split(".").reduce((acc, key) => (acc == null ? undefined : acc[key]), source);`
+- L687: `function extractDurableSettingsSnapshot(governancePolicy = {}, teamModel = {}) {`
+- L688: `const governance = asObject(governancePolicy);`
+- L689: `const bridge = asObject(governance.settings_bridge);`
+- L691: `const snapshot = asObject(team.settings_profile || bridge.form);`
+- L692: `const owners = asObject(governance.approval_owners);`
+- L693: `const rules = asObject(governance.policy_rules);`
+- L695: `if (!Object.keys(snapshot).length && !Object.keys(owners).length && !Object.keys(rules).length) {`
+- L702: `defaultCampaignMode: asString(normalized.project?.defaultCampaignMode || bridge.execution_mode)`
+- L706: `actionPolicy: asString(normalized.operating?.actionPolicy || bridge.action_policy)`
+- L708: `normalized.ai = {`
+- L709: `...asObject(normalized.ai),`
+- L710: `approvalRequiredMode: asString(normalized.ai?.approvalRequiredMode || bridge.approval_mode),`
+- L711: `claimSafetyMode: asString(normalized.ai?.claimSafetyMode || bridge.claim_safety_mode)`
+- L713: `normalized.publishing = {`
+- L714: `...asObject(normalized.publishing),`
+- L715: `approvalBeforePublish: rules.approval_before_publish ?? normalized.publishing?.approvalBeforePublish`
+- L719: `aiClaimCheck: rules.high_risk_claim_review_required ?? normalized.safety?.aiClaimCheck`
+- L721: `normalized.approval = {`
+- L722: `...asObject(normalized.approval),`
+- L723: `contentOwner: asString(normalized.approval?.contentOwner || owners.content),`
+- L724: `mediaOwner: asString(normalized.approval?.mediaOwner || owners.media),`
+- L725: `adsOwner: asString(normalized.approval?.adsOwner || owners.campaign)`
+- L729: `publishAccess: asString(normalized.team?.publishAccess || owners.publishing),`
+- L738: `function mapSettingsToTeamPayload(form = {}) {`
+- L741: `settings_profile: clone(form),`
+- L742: `settings_status: {`
+- L744: `saved_at: nowIso(),`
+- L745: `source: "settings-page",`
+- L758: `function mapSettingsToGovernancePolicy(form = {}) {`
+- L759: `const approval = asObject(form.approval);`
+- L760: `const publishing = asObject(form.publishing);`
+- L762: `const ai = asObject(form.ai);`
+- L768: `execution_policy: {`
+- L769: `mode: asString(project.defaultCampaignMode || operating.primaryMode),`
+- L770: `action_policy: asString(operating.actionPolicy)`
+- L772: `policy_rules: {`
+- L773: `approval_before_publish: Boolean(publishing.approvalBeforePublish),`
+- L774: `high_risk_claim_review_required: Boolean(safety.aiClaimCheck),`
+- L776: `allow_admin_override: true,`
+- L777: `auto_escalate_critical_risk: asString(operating.actionPolicy).toLowerCase().includes("blocked"),`
+- L778: `freeze_publishing: asString(operating.primaryMode) === "Emergency Safe Mode"`
+- L780: `approval_owners: {`
+- L781: `content: asString(approval.contentOwner) || "Marketing lead",`
+- L782: `media: asString(approval.mediaOwner) || "Creative lead",`
+- L783: `campaign: asString(approval.adsOwner) || "Operations lead",`
+- L784: `publishing: asString(team.publishAccess) || "Publisher",`
+- L786: `overrides: "Admin"`
+- L788: `settings_bridge: {`
+- L789: `source: "settings-durable-record",`
+- L790: `synced_at: nowIso(),`
+- L791: `approval_mode: asString(ai.approvalRequiredMode) || "Only high-risk",`
+- L792: `claim_safety_mode: asString(ai.claimSafetyMode) || "Strict evidence required",`
+- L793: `execution_mode: asString(project.defaultCampaignMode || operating.primaryMode),`
+- L794: `action_policy: asString(operating.actionPolicy),`
+- L816: `return { currency: "AED", timezone: "Asia/Dubai", language: "Arabic" };`
+- L839: `if (normalized === "approval_first" || normalized === "approval first" || normalized === "approval-first") return "Approval-First";`
+- L840: `if (normalized === "full_auto" || normalized === "full auto" || normalized === "full-auto" || normalized === "full ai assist") return "Full AI Assist";`
+- L846: `function mergeSettings(defaults, storedForm) {`
+- L849: `Object.keys(asObject(storedForm)).forEach((sectionId) => {`
+- L870: `return items.length ? items : ["Instagram", "Website", "Email"];`
+- L873: `function buildDefaultSettings(state) {`
+- L875: `const connectors = asObject(state?.data?.integrations);`
+- L894: `defaultCampaignMode: executionMode || "Semi-Auto",`
+- L899: `actionPolicy:`
+- L900: `executionMode === "Full AI Assist"`
+- L901: `? "Act unless blocked by policy"`
+- L906: `modeNotes: "Use stronger automation only when approvals, assets, and governance settings are complete."`
+- L908: `ai: {`
+- L912: `approvalRequiredMode: "Only high-risk",`
+- L914: `claimSafetyMode: "Strict evidence required",`
+- L915: `contentGenerationDefaults: "Respect project language, protect brand truth, and optimize for campaign execution clarity.",`
+- L920: `"Suggest workflows when campaign is ready",`
+- L921: `"Block publishing when assets are missing",`
+- L922: `"Alert when integrations fail",`
+- L926: `failurePolicy: "Pause and alert",`
+- L929: `publishing: {`
+- L932: `approvalBeforePublish: true,`
+- L933: `namingConvention: "market_campaign_channel_assettype_v1",`
+- L934: `contentRouting: "Route launch content to social and email, evergreen content to website, and paid hooks to ads review.",`
+- L935: `campaignOutputs: ["Organic posts", "Reels", "Landing pages", "Email sequence"]`
+- L937: `approval: {`
+- L941: `requirements: ["Paid ads", "Medical or product claims", "New campaign launches", "AI-generated media"],`
+- L942: `revisionRules: "Reject unsupported claims, brand drift, weak hooks, or missing metadata. Two revisions escalate to the owner.",`
+- L943: `escalationNotes: "Escalate legal-sensitive claims and launch blockers to brand owner plus operations lead."`
+- L946: `roles: ["Strategist", "Writer", "Designer", "Publisher", "Analyst", "Compliance Reviewer", "Admin", "Brand owner"],`
+- L947: `serviceCoverage: ["Strategy", "Writing", "Design", "Publishing", "Analytics", "Compliance", "Administration"],`
+- L949: `publishAccess: "Publishers and admins",`
+- L951: `integrationAccess: "Admins only",`
+- L957: `canPublish: false,`
+- L958: `canManageIntegrations: false,`
+- L964: `canPublish: false,`
+- L965: `canManageIntegrations: false,`
+- L971: `canPublish: false,`
+- L972: `canManageIntegrations: false,`
+- L978: `canPublish: false,`
+- L979: `canManageIntegrations: false,`
+- L982: `publisher: {`
+- L983: `authority: "Publish",`
+- L985: `canPublish: true,`
+- L986: `canManageIntegrations: false,`
+- L992: `canPublish: false,`
+- L993: `canManageIntegrations: false,`
+- L999: `canPublish: false,`
+- L1000: `canManageIntegrations: false,`
+- L1006: `canPublish: false,`
+- L1007: `canManageIntegrations: false,`
+- L1013: `canPublish: true,`
+- L1014: `canManageIntegrations: true,`
+- L1019: `presets: {`
+- L1020: `campaignPreset: "Launch sprint",`
+- L1021: `contentPreset: "Hook-first social",`
+- L1022: `mediaPreset: "Premium product studio",`
+- L1023: `seoPreset: "Opportunity sprint",`
+- L1024: `adsPreset: "Hook test set",`
+- L1025: `approvalPreset: "Balanced launch control",`
+- L1026: `presetNotes: "Use presets as reusable starting systems, not as rigid templates when project context changes."`
+- L1028: `sync: {`
+- L1029: `autoSync: true,`
+
+## Required Manual Classification
+Before any patch, classify exact Settings paths into:
+
+1. Settings display/read-only
+2. Local/session draft only
+3. Durable Settings save/update
+4. Governance policy sync/update
+5. Integration/credential update
+6. AI prompt/guidance only
+7. Shared handoff only
+8. Reset/delete/clear action
+9. Navigation-only action
+10. Disabled future action
+11. Unknown / needs deeper inspection
+
+## Decision Rule
+- If durable settings/policy/credential mutations exist without confirmation, patch.
+- If Governance policy sync exists, confirm it is explicit and does not bypass Governance authority.
+- If credential/token/API-key mutation exists, require explicit confirmation and safe messaging.
+- If AI guidance is prompt/navigation only, document and close.
+- If actions are local/session/shared-context only, document and close.
+- Do not redesign Settings in this pass.

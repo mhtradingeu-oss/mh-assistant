@@ -25,20 +25,95 @@ const state = {
     registry: null,
     integrations: null,
     activity: null,
-    operations: null
+    operations: null,
+    loadDiagnostics: null,
+    startupStep: "",
+    startupSteps: [],
+    loadingTransitions: [],
+    lastProjectLoad: null
   }
 };
 
 const listeners = new Set();
 
+let isNotifying = false;
+let pendingNotify = false;
+
+function scheduleNotify() {
+  if (typeof queueMicrotask === "function") {
+    queueMicrotask(notify);
+    return;
+  }
+
+  Promise.resolve().then(notify);
+}
+
 function notify() {
-  listeners.forEach((listener) => {
-    try {
-      listener(getState());
-    } catch (error) {
-      console.error("State listener failed:", error);
+  if (isNotifying) {
+    pendingNotify = true;
+    return;
+  }
+
+  isNotifying = true;
+
+  try {
+    listeners.forEach((listener) => {
+      try {
+        listener(getState());
+      } catch (error) {
+        console.error("State listener failed:", error);
+      }
+    });
+  } finally {
+    isNotifying = false;
+
+    if (pendingNotify) {
+      pendingNotify = false;
+      scheduleNotify();
     }
-  });
+  }
+}
+
+function hasShallowChanges(target, patch) {
+  if (!target || typeof target !== "object") {
+    return true;
+  }
+
+  if (!patch || typeof patch !== "object") {
+    return true;
+  }
+
+  return Object.keys(patch).some((key) => target[key] !== patch[key]);
+}
+
+function isContextEmpty() {
+  return (
+    state.context.currentProject === "" &&
+    state.context.currentMarket === "" &&
+    state.context.currentLanguage === "" &&
+    state.context.executionMode === "" &&
+    state.context.activeCampaign === ""
+  );
+}
+
+function isProjectDataEmpty() {
+  return (
+    state.data.overview === null &&
+    state.data.readiness === null &&
+    state.data.assets === null &&
+    state.data.tree === null &&
+    state.data.registry === null &&
+    state.data.integrations === null &&
+    state.data.activity === null &&
+    state.data.operations === null &&
+    state.data.loadDiagnostics === null &&
+    state.data.startupStep === "" &&
+    Array.isArray(state.data.startupSteps) &&
+    state.data.startupSteps.length === 0 &&
+    Array.isArray(state.data.loadingTransitions) &&
+    state.data.loadingTransitions.length === 0 &&
+    state.data.lastProjectLoad === null
+  );
 }
 
 export function getState() {
@@ -58,37 +133,75 @@ export function subscribe(listener) {
 }
 
 export function markInitialized() {
+  if (state.initialized === true) {
+    return;
+  }
+
   state.initialized = true;
   notify();
 }
 
 export function setLoading(value) {
-  state.loading = Boolean(value);
+  const next = Boolean(value);
+
+  if (state.loading === next) {
+    return;
+  }
+
+  state.loading = next;
   notify();
 }
 
 export function setError(message) {
-  state.error = message || "";
+  const next = message || "";
+
+  if (state.error === next) {
+    return;
+  }
+
+  state.error = next;
   notify();
 }
 
 export function clearError() {
+  if (state.error === "") {
+    return;
+  }
+
   state.error = "";
   notify();
 }
 
 export function setProjects(projects) {
-  state.data.projects = Array.isArray(projects) ? projects : [];
+  const next = Array.isArray(projects) ? projects : [];
+
+  if (state.data.projects === next) {
+    return;
+  }
+
+  state.data.projects = next;
   notify();
 }
 
 export function setCurrentProject(projectName) {
-  state.context.currentProject = projectName || "";
+  const next = projectName || "";
+
+  if (state.context.currentProject === next) {
+    return;
+  }
+
+  state.context.currentProject = next;
   notify();
 }
 
 export function setCurrentRoute(route) {
-  state.currentRoute = route || "home";
+  const next = route || "home";
+
+  if (state.currentRoute === next) {
+    return;
+  }
+
+  state.currentRoute = next;
   notify();
 }
 
@@ -99,51 +212,96 @@ export function setProjectContext({
   mode = "",
   campaign = ""
 } = {}) {
-  state.context.currentProject = project;
-  state.context.currentMarket = market;
-  state.context.currentLanguage = language;
-  state.context.executionMode = mode;
-  state.context.activeCampaign = campaign;
+  const patch = {
+    currentProject: project,
+    currentMarket: market,
+    currentLanguage: language,
+    executionMode: mode,
+    activeCampaign: campaign
+  };
+
+  if (!hasShallowChanges(state.context, patch)) {
+    return;
+  }
+
+  state.context = {
+    ...state.context,
+    ...patch
+  };
+
   notify();
 }
 
-export function patchState(section, patch) {
+export function patchState(section, patch, options = {}) {
   if (!section || typeof patch !== "object" || patch == null) {
     return;
   }
 
+  const silent = Boolean(options?.silent);
+
   if (section === "data") {
+    if (!hasShallowChanges(state.data, patch)) {
+      return;
+    }
+
     state.data = {
       ...state.data,
       ...patch
     };
-    notify();
+
+    if (!silent) {
+      notify();
+    }
     return;
   }
 
   if (section === "context") {
+    if (!hasShallowChanges(state.context, patch)) {
+      return;
+    }
+
     state.context = {
       ...state.context,
       ...patch
     };
-    notify();
+
+    if (!silent) {
+      notify();
+    }
     return;
   }
 
   if (typeof state[section] === "object" && state[section] !== null) {
+    if (!hasShallowChanges(state[section], patch)) {
+      return;
+    }
+
     state[section] = {
       ...state[section],
       ...patch
     };
-    notify();
+
+    if (!silent) {
+      notify();
+    }
+    return;
+  }
+
+  if (state[section] === patch) {
     return;
   }
 
   state[section] = patch;
-  notify();
+  if (!silent) {
+    notify();
+  }
 }
 
 export function resetProjectData() {
+  if (isProjectDataEmpty()) {
+    return;
+  }
+
   state.data.overview = null;
   state.data.readiness = null;
   state.data.assets = null;
@@ -152,14 +310,59 @@ export function resetProjectData() {
   state.data.integrations = null;
   state.data.activity = null;
   state.data.operations = null;
+  state.data.loadDiagnostics = null;
+  state.data.startupStep = "";
+  state.data.startupSteps = [];
+  state.data.loadingTransitions = [];
+  state.data.lastProjectLoad = null;
+
   notify();
 }
 
 export function resetContext() {
+  if (isContextEmpty()) {
+    return;
+  }
+
   state.context.currentProject = "";
   state.context.currentMarket = "";
   state.context.currentLanguage = "";
   state.context.executionMode = "";
   state.context.activeCampaign = "";
+
   notify();
+}
+
+
+// ============================================================
+// Runtime state selectors
+// Projection-only helpers. These functions must not mutate state.
+// ============================================================
+
+export function selectCurrentProject(state = getState()) {
+  return String(state?.context?.currentProject || "").trim();
+}
+
+export function selectActiveRoute(state = getState()) {
+  return String(state?.activeRoute || state?.context?.activeRoute || "").trim();
+}
+
+export function selectOperationsSnapshot(state = getState()) {
+  return state?.data?.operations || {};
+}
+
+export function selectProjectPayload(state = getState()) {
+  return state?.data || {};
+}
+
+export function selectSystemHealth(state = getState()) {
+  return state?.systemHealth || state?.data?.system_health || {};
+}
+
+export function selectActiveRoleProjection(state = getState()) {
+  return String(
+    state?.activeRole ||
+    state?.data?.operations?.team_service_model?.active_role ||
+    ""
+  ).trim();
 }

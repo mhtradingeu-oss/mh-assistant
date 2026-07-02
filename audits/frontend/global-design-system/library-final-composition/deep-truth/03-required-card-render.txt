@@ -1,0 +1,66 @@
+
+  const folderCounts = computeFolderCounts(allAssets, session);
+
+  // --- Library Explainer/Onboarding Block ---
+  const explainerBox = $("libraryExplainerBox");
+  if (explainerBox) {
+    explainerBox.innerHTML = `
+      <section class="library-explainer" aria-label="Library source-of-truth workspace explainer">
+        <strong>Library is the source-of-truth workspace for assets, documents, brand files, product files, proof/legal files, and AI source context.</strong>
+        <ol class="library-explainer-steps">
+          <li>Upload or select an asset.</li>
+          <li>Mark important files as <span class="explainer-chip">Source of Truth</span> when needed.</li>
+          <li>Use selected assets in AI Team, Content, Media, Publishing, Governance, and Insights.</li>
+        </ol>
+      </section>
+    `;
+  }
+
+  // --- Taxonomy Chips/Cards ---
+  const taxonomyBox = $("libraryTaxonomyBox");
+  if (taxonomyBox) {
+    taxonomyBox.innerHTML = `
+      <div class="library-taxonomy-chips" aria-label="Library taxonomy">
+        <span class="taxonomy-chip" tabindex="0">Images</span>
+        <span class="taxonomy-chip" tabindex="0">Videos</span>
+        <span class="taxonomy-chip" tabindex="0">Documents</span>
+        <span class="taxonomy-chip" tabindex="0">Brand Assets</span>
+        <span class="taxonomy-chip" tabindex="0">Product Files</span>
+        <span class="taxonomy-chip" tabindex="0">Proof / Legal / Pricing</span>
+        <span class="taxonomy-chip" tabindex="0">Generated Assets</span>
+        <span class="taxonomy-chip source-of-truth" tabindex="0">Source of Truth</span>
+      </div>
+    `;
+  }
+
+  // ...existing code...
+
+  const requiredBox = $("libraryRequiredAssetsGrid");
+  if (requiredBox) {
+    requiredBox.innerHTML = requiredGroups.map((item) => {
+      const tone = item.status === "present" ? "success" : item.status === "missing" ? "danger" : "warning";
+      const actionLabel = item.action === "upload" ? "Upload" : item.action === "review" ? "Review" : "Classify";
+      const statusLabel = item.status === "present" ? "Present" : item.status === "missing" ? "Missing" : "Needs Review";
+      const reasonHint = item.why.length > 84 ? `${item.why.slice(0, 81)}...` : item.why;
+
+      return `
+        <article class="library-required-card">
+          <div class="library-required-card-head">
+            <h4>${escapeHtml(item.label)}</h4>
+            <span class="card-badge ${tone}">${escapeHtml(statusLabel)}</span>
+          </div>
+          <p class="library-required-why">${escapeHtml(reasonHint)}</p>
+          <div class="library-required-card-foot">
+            <small>${escapeHtml(`Files found: ${formatCount(item.totalCount)}`)}</small>
+            <button
+              class="btn btn-secondary btn-sm"
+              type="button"
+              data-library-required-action="${escapeHtml(item.action)}"
+              data-library-required-key="${escapeHtml(item.key)}"
+              data-library-upload-type="${escapeHtml(item.uploadType)}"
+            >${escapeHtml(actionLabel)}</button>
+          </div>
+        </article>
+      `;
+    }).join("");
+  }

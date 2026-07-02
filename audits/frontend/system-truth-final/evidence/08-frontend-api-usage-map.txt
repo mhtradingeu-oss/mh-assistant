@@ -1,0 +1,1602 @@
+# Frontend API Usage Map
+
+public/control-center/asset-library.js:14:      why_it_matters: "Keeps setup, media creation, publishing previews, and AI output visually tied to the right brand.",
+public/control-center/asset-library.js:27:    description: "Brand identity, voice, visual rules, and usage guidance.",
+public/control-center/asset-library.js:85:    purpose: "visual_media",
+public/control-center/asset-library.js:86:    purpose_label: "Visual media",
+public/control-center/asset-library.js:91:    description: "Approved product photography for content, media, ads, and publishing.",
+public/control-center/asset-library.js:99:    asset_type: "product_videos",
+public/control-center/asset-library.js:100:    label: "Product Videos / Produktvideos",
+public/control-center/asset-library.js:101:    purpose: "visual_media",
+public/control-center/asset-library.js:102:    purpose_label: "Visual media",
+public/control-center/asset-library.js:106:    aliases: ["product_video", "product_video_assets", "video"],
+public/control-center/asset-library.js:107:    description: "Approved product videos, demos, UGC clips, and cutdowns.",
+public/control-center/asset-library.js:109:      what_to_upload: "Product demos, UGC clips, reels, explainers, usage videos, and source cutdowns.",
+public/control-center/asset-library.js:110:      why_it_matters: "Media Studio, Content Studio, Campaign Studio, and Publishing use video as creative source material.",
+public/control-center/asset-library.js:149:    purpose: "visual_media",
+public/control-center/asset-library.js:150:    purpose_label: "Visual media",
+public/control-center/asset-library.js:215:  "visual_media",
+public/control-center/runtime/lifecycle/lifecycle-registry.js:230:      // If already cleaned up, run immediately
+public/control-center/runtime/lifecycle/README.md:192:2. Major pages (library.js, integrations.js, workflows.js, publishing.js, etc.)
+public/control-center/runtime/authority/route-role-fallback.js:7:  "video_lead",
+public/control-center/runtime/authority/route-role-fallback.js:20:  "media-studio": ["designer", "video_lead", "compliance_reviewer", "admin"],
+public/control-center/runtime/authority/route-role-fallback.js:21:  publishing: ["publisher", "compliance_reviewer", "admin"],
+public/control-center/runtime/authority/route-role-fallback.js:22:  research: ["strategist", "analyst", "writer", "admin"],
+public/control-center/runtime/authority/route-role-fallback.js:24:  "task-center": ACTIVE_ROUTE_ROLES,
+public/control-center/runtime/authority/route-role-fallback.js:28:  governance: ["compliance_reviewer", "admin", "analyst"],
+public/control-center/runtime/authority/route-role-fallback.js:32:  workflows: ACTIVE_ROUTE_ROLES,
+public/control-center/runtime/authority/route-role-fallback.js:33:  library: ["designer", "video_lead", "publisher", "admin"],
+public/control-center/runtime/authority/authority-projection.js:12: * - mutate governance
+public/control-center/runtime/authority/authority-projection.js:16: * - own workflows
+public/control-center/runtime/authority/authority-projection.js:38:  return safeObject(operations.governance);
+public/control-center/runtime/authority/authority-projection.js:48:  return safeObject(operations.workflow_runs);
+public/control-center/runtime/authority/authority-projection.js:53:  return safeObject(operations.handoffs);
+public/control-center/shared-context.js:10:  video: {
+public/control-center/shared-context.js:12:    libraryFilter: "videos",
+public/control-center/shared-context.js:14:    shortGuideTitle: "Choose a video source",
+public/control-center/shared-context.js:45:  research_proof: {
+public/control-center/shared-context.js:47:    libraryFilter: "research_certificates",
+public/control-center/shared-context.js:49:    shortGuideTitle: "Choose a research/proof document",
+public/control-center/shared-context.js:75:const handoffCache = new Map();
+public/control-center/shared-context.js:146:  const handoffs = asArray(operations?.handoffs?.items);
+public/control-center/shared-context.js:147:  const available = handoffs.filter((item) => {
+public/control-center/shared-context.js:184:  const handoff =
+public/control-center/shared-context.js:185:    getLatestHandoffFromOperations(operations, "workflows", "ai-command") ||
+public/control-center/shared-context.js:186:    getLatestHandoffFromOperations(operations, "ai-command", "workflows") ||
+public/control-center/shared-context.js:189:  return asObject(handoff?.payload?.draft_context);
+public/control-center/shared-context.js:192:export function setSharedHandoff(projectName, destinationPage, handoff) {
+public/control-center/shared-context.js:193:  if (!projectName || !destinationPage || !handoff) return;
+public/control-center/shared-context.js:194:  handoffCache.set(buildKey(projectName, destinationPage), handoff);
+public/control-center/shared-context.js:198:  const cached = handoffCache.get(buildKey(projectName, destinationPage));
+public/control-center/styles/08-components-foundation.css:881:@media (max-width: 1280px) {
+public/control-center/styles/08-components-foundation.css:898:@media (max-width: 760px) {
+public/control-center/styles/08-components-foundation.css:1045:@media (max-width: 1180px) {
+public/control-center/styles/08-components-foundation.css:1059:@media (max-width: 760px) {
+public/control-center/styles/08-components-foundation.css:1244:@media (max-width: 720px) {
+public/control-center/styles/08-components-foundation.css:1328:@media (max-width: 720px) {
+public/control-center/styles/08-components-foundation.css:1404:@media (max-width: 720px) {
+public/control-center/styles/08-components-foundation.css:1415:@media (max-width: 720px) {
+public/control-center/styles/12-pages.css:251:[data-page="governance"] .governance-operating-header {
+public/control-center/styles/12-pages.css:257:[data-page="governance"] .governance-operating-header-main {
+public/control-center/styles/12-pages.css:260:[data-page="governance"] .governance-operating-eyebrow {
+public/control-center/styles/12-pages.css:266:[data-page="governance"] .governance-operating-title {
+public/control-center/styles/12-pages.css:272:[data-page="governance"] .governance-operating-desc {
+public/control-center/styles/12-pages.css:277:[data-page="governance"] .governance-operating-status {
+public/control-center/styles/12-pages.css:281:[data-page="governance"] .governance-executive-summary-grid {
+public/control-center/styles/12-pages.css:285:[data-page="governance"] .governance-summary-ai-boundary .governance-ai-boundary {
+public/control-center/styles/12-pages.css:289:[data-page="governance"] .governance-summary-ai-boundary-note {
+public/control-center/styles/12-pages.css:293:[data-page="governance"] .governance-secondary-panel {
+public/control-center/styles/12-pages.css:299:.governance-evidence-summary {
+public/control-center/styles/12-pages.css:308:.governance-evidence-summary-header {
+public/control-center/styles/12-pages.css:314:.governance-evidence-cards {
+public/control-center/styles/12-pages.css:320:.governance-evidence-card {
+public/control-center/styles/12-pages.css:333:.governance-evidence-card.is-missing {
+public/control-center/styles/12-pages.css:337:.governance-evidence-label {
+public/control-center/styles/12-pages.css:342:.governance-evidence-value {
+public/control-center/styles/12-pages.css:346:.governance-evidence-card.governance-source-warning {
+public/control-center/styles/12-pages.css:354:.governance-evidence-guidance {
+public/control-center/styles/12-pages.css:360:.governance-intake-panel {
+public/control-center/styles/12-pages.css:368:.governance-intake-panel-header {
+public/control-center/styles/12-pages.css:374:.governance-intake-list {
+public/control-center/styles/12-pages.css:379:.governance-intake-item {
+public/control-center/styles/12-pages.css:392:.governance-intake-item.is-missing {
+public/control-center/styles/12-pages.css:396:.governance-intake-label {
+public/control-center/styles/12-pages.css:401:.governance-intake-value {
+public/control-center/styles/12-pages.css:406:.publishing-command-header {
+public/control-center/styles/12-pages.css:420:.publishing-command-header-title {
+public/control-center/styles/12-pages.css:426:.publishing-command-header-context,
+public/control-center/styles/12-pages.css:427:.publishing-command-header-status,
+public/control-center/styles/12-pages.css:428:.publishing-command-header-safety {
+public/control-center/styles/12-pages.css:433:.publishing-command-header-status span,
+public/control-center/styles/12-pages.css:434:.publishing-command-header strong {
+public/control-center/styles/12-pages.css:438:.publishing-command-header-safety {
+public/control-center/styles/12-pages.css:443:.publishing-command-header-actions {
+public/control-center/styles/12-pages.css:450:.publishing-command-header-actions .btn {
+public/control-center/styles/12-pages.css:454:.publishing-workflow-strip {
+public/control-center/styles/12-pages.css:466:.publishing-workflow-step {
+public/control-center/styles/12-pages.css:481:.publishing-workflow-step.is-active,
+public/control-center/styles/12-pages.css:482:.publishing-workflow-step.is-warning {
+public/control-center/styles/12-pages.css:488:.publishing-workflow-step.is-ready {
+public/control-center/styles/12-pages.css:494:.publishing-workflow-step.is-missing {
+public/control-center/styles/12-pages.css:500:.publishing-workflow-step-label {
+public/control-center/styles/12-pages.css:507:.publishing-readiness-summary {
+public/control-center/styles/12-pages.css:517:.publishing-readiness-card {
+public/control-center/styles/12-pages.css:531:.publishing-readiness-card.is-warning {
+public/control-center/styles/12-pages.css:536:.publishing-readiness-card.is-missing {
+public/control-center/styles/12-pages.css:541:.publishing-readiness-card-label {
+public/control-center/styles/12-pages.css:546:.publishing-block-gap {
+public/control-center/styles/12-pages.css:550:.publishing-inline-gap {
+public/control-center/styles/12-pages.css:554:.publishing-automation-preview {
+public/control-center/styles/12-pages.css:563:.publishing-automation-preview summary {
+public/control-center/styles/12-pages.css:569:.publishing-automation-preview-copy {
+public/control-center/styles/12-pages.css:576:.media-production-center .media-card {
+public/control-center/styles/12-pages.css:579:.media-command-header {
+public/control-center/styles/12-pages.css:588:.media-command-main {
+public/control-center/styles/12-pages.css:593:.media-command-main h2 {
+public/control-center/styles/12-pages.css:599:.media-command-next {
+public/control-center/styles/12-pages.css:608:.media-command-next span,
+public/control-center/styles/12-pages.css:609:.media-command-next small {
+public/control-center/styles/12-pages.css:614:.media-command-next strong {
+public/control-center/styles/12-pages.css:618:.media-command-meta,
+public/control-center/styles/12-pages.css:619:.media-command-actions {
+public/control-center/styles/12-pages.css:625:.media-command-meta span {
+public/control-center/styles/12-pages.css:640:.media-command-meta strong {
+public/control-center/styles/12-pages.css:646:.media-workflow-strip {
+public/control-center/styles/12-pages.css:655:.media-workflow-title {
+public/control-center/styles/12-pages.css:661:.media-workflow-list {
+public/control-center/styles/12-pages.css:669:.media-workflow-step {
+public/control-center/styles/12-pages.css:680:.media-workflow-index {
+public/control-center/styles/12-pages.css:692:.media-workflow-copy {
+public/control-center/styles/12-pages.css:697:.media-workflow-copy strong,
+public/control-center/styles/12-pages.css:698:.media-workflow-copy small {
+public/control-center/styles/12-pages.css:703:.media-workflow-copy small {
+public/control-center/styles/12-pages.css:707:.media-workflow-step.is-ready,
+public/control-center/styles/12-pages.css:708:.media-readiness-chip.is-ready,
+public/control-center/styles/12-pages.css:709:.media-compact-row.is-ready,
+public/control-center/styles/12-pages.css:710:.media-state-badge.is-ready {
+public/control-center/styles/12-pages.css:713:.media-workflow-step.is-active,
+public/control-center/styles/12-pages.css:714:.media-readiness-chip.is-active,
+public/control-center/styles/12-pages.css:715:.media-compact-row.is-active,
+public/control-center/styles/12-pages.css:716:.media-state-badge.is-active {
+public/control-center/styles/12-pages.css:719:.media-workflow-step.is-warning,
+public/control-center/styles/12-pages.css:720:.media-readiness-chip.is-warning,
+public/control-center/styles/12-pages.css:721:.media-compact-row.is-warning,
+public/control-center/styles/12-pages.css:722:.media-state-badge.is-warning {
+public/control-center/styles/12-pages.css:725:.media-workflow-step.is-missing,
+public/control-center/styles/12-pages.css:726:.media-readiness-chip.is-missing,
+public/control-center/styles/12-pages.css:727:.media-compact-row.is-missing,
+public/control-center/styles/12-pages.css:728:.media-state-badge.is-missing {
+public/control-center/styles/12-pages.css:731:.media-readiness-summary {
+public/control-center/styles/12-pages.css:736:.media-readiness-chip {
+public/control-center/styles/12-pages.css:746:.media-readiness-chip span,
+public/control-center/styles/12-pages.css:747:.media-readiness-chip small {
+public/control-center/styles/12-pages.css:752:.media-readiness-chip strong {
+public/control-center/styles/12-pages.css:756:.media-rail-card {
+public/control-center/styles/12-pages.css:759:.media-compact-head {
+public/control-center/styles/12-pages.css:762:.media-state-badge {
+public/control-center/styles/12-pages.css:776:.media-compact-list {
+public/control-center/styles/12-pages.css:781:.media-provenance-list.media-compact-list {
+public/control-center/styles/12-pages.css:786:.media-compact-row {
+public/control-center/styles/12-pages.css:795:.media-compact-row span,
+public/control-center/styles/12-pages.css:796:.media-compact-row small {
+public/control-center/styles/12-pages.css:801:.media-compact-row strong {
+public/control-center/styles/12-pages.css:805:.media-rail-note {
+public/control-center/styles/12-pages.css:811:@media (min-width: 980px) {
+public/control-center/styles/12-pages.css:812:  .media-command-main {
+public/control-center/styles/12-pages.css:816:@media (max-width: 720px) {
+public/control-center/styles/12-pages.css:817:  .media-command-header,
+public/control-center/styles/12-pages.css:818:  .media-workflow-strip {
+public/control-center/styles/12-pages.css:821:  .media-command-actions .btn {
+public/control-center/styles/12-pages.css:824:  .media-workflow-list {
+public/control-center/styles/12-pages.css:829:  .media-workflow-step {
+public/control-center/styles/12-pages.css:833:.media-provenance-list {
+public/control-center/styles/12-pages.css:839:.media-readiness-checklist,
+public/control-center/styles/12-pages.css:840:.media-brand-checklist {
+public/control-center/styles/12-pages.css:847:.media-readiness-checklist li strong,
+public/control-center/styles/12-pages.css:848:.media-brand-checklist li strong {
+public/control-center/styles/12-pages.css:851:.media-brand-checklist li strong {
+public/control-center/styles/12-pages.css:854:.media-hint {
+public/control-center/styles/12-pages.css:858:.media-card[aria-label] {
+public/control-center/styles/12-pages.css:862:.content-seo-checklist, .content-governance-checklist {
+public/control-center/styles/12-pages.css:872:.content-governance-checklist li strong {
+public/control-center/styles/12-pages.css:1027:.setup-smart-handoff-actions,
+public/control-center/styles/12-pages.css:1064:.content-handoff-grid,
+public/control-center/styles/12-pages.css:1262:.library-preview-video {
+public/control-center/styles/12-pages.css:1285:@media (max-width: 1280px) {
+public/control-center/styles/12-pages.css:1299:  .content-handoff-grid,
+public/control-center/styles/12-pages.css:1305:@media (max-width: 900px) {
+public/control-center/styles/12-pages.css:1318:@media (max-width: 760px) {
+public/control-center/styles/12-pages.css:1332:  .content-handoff-grid,
+public/control-center/styles/12-pages.css:1382:@media (max-width: 860px) {
+public/control-center/styles/12-pages.css:1416:@media (max-width: 860px) {
+public/control-center/styles/12-pages.css:1509:[data-page="setup"] .setup-smart-handoff-panel .setup-smart-handoff-actions {
+public/control-center/styles/12-pages.css:1524:[data-page="setup"] .setup-smart-handoff-panel,
+public/control-center/styles/12-pages.css:1537:[data-page="setup"] .setup-smart-handoff-panel,
+public/control-center/styles/12-pages.css:1785:[data-page="setup"] .setup-smart-handoff-actions-primary {
+public/control-center/styles/12-pages.css:1789:[data-page="setup"] .setup-smart-handoff-actions-secondary {
+public/control-center/styles/12-pages.css:1811:[data-page="setup"] .setup-smart-handoff-panel .setup-smart-handoff-actions .btn-primary {
+public/control-center/styles/12-pages.css:1815:[data-page="setup"] .setup-smart-handoff-panel .setup-smart-handoff-actions .btn-secondary {
+public/control-center/styles/12-pages.css:1819:[data-page="setup"] .setup-smart-handoff-panel .setup-smart-handoff-actions .btn-ghost {
+public/control-center/styles/12-pages.css:1831:@media (max-width: 1180px) {
+public/control-center/styles/12-pages.css:1844:  [data-page="setup"] .setup-smart-handoff-actions-secondary {
+public/control-center/styles/12-pages.css:1849:@media (max-width: 940px) {
+public/control-center/styles/12-pages.css:1851:  [data-page="setup"] .setup-smart-handoff-panel .setup-smart-handoff-actions {
+public/control-center/styles/12-pages.css:1859:  [data-page="setup"] .setup-smart-handoff-actions-secondary {
+public/control-center/styles/12-pages.css:1868:@media (max-width: 680px) {
+public/control-center/styles/12-pages.css:2243:@media (max-width: 1320px) {
+public/control-center/styles/12-pages.css:2258:@media (max-width: 980px) {
+public/control-center/styles/12-pages.css:2797:@media (max-width: 1180px) {
+public/control-center/styles/12-pages.css:2813:@media (max-width: 900px) {
+public/control-center/styles/12-pages.css:2834:@media (max-width: 680px) {
+public/control-center/styles/12-pages.css:3160:[data-page="settings"] .governance-policy-block {
+public/control-center/styles/12-pages.css:3170:[data-page="settings"] .governance-rule-list {
+public/control-center/styles/12-pages.css:3179:[data-page="settings"] .governance-rule-item {
+public/control-center/styles/12-pages.css:3191:@media (max-width: 1180px) {
+public/control-center/styles/12-pages.css:3201:@media (max-width: 760px) {
+public/control-center/styles/12-pages.css:3212:  [data-page="settings"] .governance-policy-block {
+public/control-center/styles/12-pages.css:3234:@media (prefers-reduced-motion: reduce) {
+public/control-center/styles/12-pages.css:3626:.aicmd-v2-tab-panel.is-context .aicmd-v2-media-status {
+public/control-center/styles/12-pages.css:4506:.aicmd-v2-media-status {
+public/control-center/styles/12-pages.css:4513:.aicmd-v2-media-status-head {
+public/control-center/styles/12-pages.css:4520:.aicmd-v2-media-status-title {
+public/control-center/styles/12-pages.css:4526:.aicmd-v2-media-status-badge {
+public/control-center/styles/12-pages.css:4531:.aicmd-v2-media-status-list {
+public/control-center/styles/12-pages.css:4540:.aicmd-v2-media-status-list li {
+public/control-center/styles/12-pages.css:4550:.aicmd-v2-media-status-list li span {
+public/control-center/styles/12-pages.css:4555:.aicmd-v2-media-status-list li strong {
+public/control-center/styles/12-pages.css:4561:.aicmd-v2-media-status-list li strong.is-available {
+public/control-center/styles/12-pages.css:4565:.aicmd-v2-media-status-list li strong.is-planned {
+public/control-center/styles/12-pages.css:4570:.aicmd-v2-media-status-list li strong.is-draft-ready {
+public/control-center/styles/12-pages.css:4609:@media (max-width: 900px) {
+public/control-center/styles/12-pages.css:4640:  .aicmd-v2-media-status-list li {
+public/control-center/styles/12-pages.css:4840:[data-page="ai-command"] .aicmd-v2-media-status,
+public/control-center/styles/12-pages.css:5297:[data-page="ai-command"] .aicmd-v2-media-status-list {
+public/control-center/styles/12-pages.css:5302:[data-page="ai-command"] .aicmd-v2-media-status-list li {
+public/control-center/styles/12-pages.css:5342:@media (max-width: 1180px) {
+public/control-center/styles/12-pages.css:5353:@media (max-width: 900px) {
+public/control-center/styles/12-pages.css:5377:  [data-page="ai-command"] .aicmd-v2-media-status-list {
+public/control-center/styles/12-pages.css:5382:@media (max-width: 640px) {
+public/control-center/styles/12-pages.css:5499:.aicmd-v2-media-status-list {
+public/control-center/styles/12-pages.css:5503:@media (max-width: 1280px) {
+public/control-center/styles/12-pages.css:5701:[data-page="ai-command"] [data-role="media"] { --role-accent: #f472b6; --role-soft: rgba(244, 114, 182, 0.12); }
+public/control-center/styles/12-pages.css:5702:[data-page="ai-command"] [data-role="video_lead"] { --role-accent: #fb7185; --role-soft: rgba(251, 113, 133, 0.12); }
+public/control-center/styles/12-pages.css:5708:[data-page="ai-command"] [data-role="customer_ops"] { --role-accent: #2dd4bf; --role-soft: rgba(45, 212, 191, 0.12); }
+public/control-center/styles/12-pages.css:5709:[data-page="ai-command"] [data-role="sales_crm"] { --role-accent: #fbbf24; --role-soft: rgba(251, 191, 36, 0.12); }
+public/control-center/styles/12-pages.css:6611:@media (max-width: 1500px) {
+public/control-center/styles/12-pages.css:6659:@media (max-width: 1280px) {
+public/control-center/styles/12-pages.css:6772:@media (max-width: 760px) {
+public/control-center/styles/12-pages.css:6858:@media (max-width: 1700px) {
+public/control-center/styles/12-pages.css:6904:@media (max-width: 1100px) {
+public/control-center/styles/12-pages.css:6921:@media (max-width: 1700px) {
+public/control-center/styles/12-pages.css:6981:@media (max-width: 1180px) {
+public/control-center/styles/12-pages.css:7079:@media (max-width: 900px) {
+public/control-center/styles/12-pages.css:7343:@media (max-width: 920px) {
+public/control-center/styles/12-pages.css:7379:@media (max-width: 920px) {
+public/control-center/styles/12-pages.css:7387:.library-preview-audio {
+public/control-center/styles/12-pages.css:7418:.media-readiness-hint {
+public/control-center/styles/12-pages.css:7423:.media-block-gap {
+public/control-center/styles/12-pages.css:7427:.media-specialists-compact {
+public/control-center/styles/12-pages.css:7432:.media-specialist-primary,
+public/control-center/styles/12-pages.css:7433:.media-specialist-secondary {
+public/control-center/styles/12-pages.css:7442:.media-specialist-primary {
+public/control-center/styles/12-pages.css:7447:.media-specialist-actions {
+public/control-center/styles/12-pages.css:7453:.media-specialists-more {
+public/control-center/styles/12-pages.css:7458:.media-specialists-more summary {
+public/control-center/styles/12-pages.css:7464:.media-specialists-secondary-list {
+public/control-center/styles/12-pages.css:7471:.publishing-past-schedule-warning {
+public/control-center/styles/12-pages.css:7476:[data-page="governance"] .governance-executive-summary-grid {
+public/control-center/styles/12-pages.css:7481:[data-page="governance"] .governance-executive-summary-grid .mhos-executive-summary-item {
+public/control-center/styles/12-pages.css:7487:[data-page="governance"] .governance-executive-summary-grid .mhos-executive-metric-label {
+public/control-center/styles/12-pages.css:7493:[data-page="governance"] .governance-executive-summary-grid .mhos-executive-metric-value {
+public/control-center/styles/12-pages.css:7501:[data-page="governance"] .governance-summary-owner .mhos-executive-metric-value {
+public/control-center/styles/12-pages.css:7505:[data-page="governance"] .governance-summary-ai-boundary .governance-ai-boundary {
+public/control-center/styles/12-pages.css:7511:[data-page="governance"] .governance-summary-ai-boundary-note {
+public/control-center/styles/12-pages.css:7516:[data-page="governance"] .governance-operating-header {
+public/control-center/styles/12-pages.css:7521:[data-page="governance"] .governance-operating-eyebrow {
+public/control-center/styles/12-pages.css:7525:[data-page="governance"] .governance-operating-title {
+public/control-center/styles/12-pages.css:7529:[data-page="governance"] .governance-operating-desc {
+public/control-center/styles/12-pages.css:7534:@media (max-width: 1200px) {
+public/control-center/styles/12-pages.css:7535:  [data-page="governance"] .governance-executive-summary-grid {
+public/control-center/styles/12-pages.css:7540:@media (max-width: 820px) {
+public/control-center/styles/12-pages.css:7541:  [data-page="governance"] .governance-executive-summary-grid {
+public/control-center/styles/12-pages.css:7546:@media (max-width: 560px) {
+public/control-center/styles/12-pages.css:7547:  [data-page="governance"] .governance-executive-summary-grid {
+public/control-center/styles/12-pages.css:7553:[data-page="governance"] .governance-policy-block .governance-policy-grid {
+public/control-center/styles/12-pages.css:7559:[data-page="governance"] .governance-policy-block .settings-toggle {
+public/control-center/styles/12-pages.css:7569:[data-page="governance"] .governance-policy-block .settings-toggle:last-of-type {
+public/control-center/styles/12-pages.css:7573:[data-page="governance"] .governance-policy-block .settings-field-label {
+public/control-center/styles/12-pages.css:7578:[data-page="governance"] .governance-policy-block .settings-toggle-input {
+public/control-center/styles/12-pages.css:7585:[data-page="governance"] .governance-policy-block .settings-toggle-pill {
+public/control-center/styles/12-pages.css:7589:[data-page="governance"] .governance-policy-block .settings-field-block {
+public/control-center/styles/12-pages.css:7593:[data-page="governance"] .governance-policy-block .settings-control {
+public/control-center/styles/12-pages.css:7599:[data-page="governance"] [aria-label="Supporting governance signals"] .governance-overview-grid {
+public/control-center/styles/12-pages.css:7606:[data-page="governance"] [aria-label="Supporting governance signals"] .governance-metric {
+public/control-center/styles/12-pages.css:7615:[data-page="governance"] [aria-label="Supporting governance signals"] .governance-metric span,
+public/control-center/styles/12-pages.css:7616:[data-page="governance"] [aria-label="Supporting governance signals"] .governance-metric small {
+public/control-center/styles/12-pages.css:7623:[data-page="governance"] [aria-label="Supporting governance signals"] .governance-metric strong {
+public/control-center/styles/12-pages.css:7631:[data-page="governance"] [aria-label="Supporting governance signals"] .governance-activity-list {
+public/control-center/styles/12-pages.css:7637:[data-page="governance"] [aria-label="Supporting governance signals"] .governance-activity-item {
+public/control-center/styles/12-pages.css:7646:[data-page="governance"] [aria-label="Supporting governance signals"] .governance-activity-item strong {
+public/control-center/styles/12-pages.css:7652:[data-page="governance"] [aria-label="Supporting governance signals"] .governance-activity-item span {
+public/control-center/styles/12-pages.css:7659:[data-page="governance"] .governance-workspace-grid .ops-table-wrap {
+public/control-center/styles/12-pages.css:7667:[data-page="governance"] .governance-focus-tabs {
+public/control-center/styles/12-pages.css:7675:[data-page="governance"] .governance-focus-tab {
+public/control-center/styles/12-pages.css:7689:[data-page="governance"] .governance-focus-tab strong {
+public/control-center/styles/12-pages.css:7694:[data-page="governance"] .governance-focus-tab span {
+public/control-center/styles/12-pages.css:7704:[data-page="governance"] .governance-focus-tab.is-active {
+public/control-center/styles/12-pages.css:7711:[data-page="governance"] .governance-focus-tab.is-active span {
+public/control-center/styles/12-pages.css:7716:[data-page="governance"] .ops-table {
+public/control-center/styles/12-pages.css:7721:[data-page="governance"] .ops-table th {
+public/control-center/styles/12-pages.css:7730:[data-page="governance"] .ops-table td {
+public/control-center/styles/12-pages.css:7734:[data-page="governance"] .ops-table .empty-box {
+public/control-center/styles/12-pages.css:7742:[data-page="governance"] .std-right-rail .governance-card-list {
+public/control-center/styles/12-pages.css:7748:[data-page="governance"] .std-right-rail .governance-card {
+public/control-center/styles/12-pages.css:7757:[data-page="governance"] .std-right-rail .governance-card-head {
+public/control-center/styles/12-pages.css:7762:[data-page="governance"] .std-right-rail .governance-card h4 {
+public/control-center/styles/12-pages.css:7768:[data-page="governance"] .std-right-rail .workflow-history-list {
+public/control-center/styles/12-pages.css:7774:[data-page="governance"] .std-right-rail .workflow-history-item {
+public/control-center/styles/12-pages.css:7785:[data-page="governance"] .std-right-rail .workflow-history-item strong {
+public/control-center/styles/12-pages.css:7791:[data-page="governance"] .std-right-rail .workflow-history-item span {
+public/control-center/styles/12-pages.css:7797:[data-page="governance"] .std-action-panel .governance-action-stack {
+public/control-center/styles/12-pages.css:7801:[data-page="governance"] .std-action-panel .simple-banner {
+public/control-center/styles/12-pages.css:7808:[data-page="governance"] .std-action-panel .governance-note {
+public/control-center/styles/12-pages.css:7814:[data-page="governance"] .std-action-panel .governance-actions {
+public/control-center/styles/12-pages.css:7820:[data-page="governance"] .std-action-panel .governance-policy-summary-grid {
+public/control-center/styles/12-pages.css:7825:[data-page="governance"] .std-action-panel .governance-policy-block {
+public/control-center/styles/12-pages.css:7830:[data-page="governance"] .std-ai-panel .governance-ai-toolbar {
+public/control-center/styles/12-pages.css:7835:[data-page="governance"] .std-ai-panel .quick-actions {
+public/control-center/styles/12-pages.css:7841:[data-page="governance"] .std-ai-panel .quick-action-btn {
+public/control-center/styles/12-pages.css:7847:@media (max-width: 900px) {
+public/control-center/styles/12-pages.css:7848:  [data-page="governance"] .std-right-rail .workflow-history-item {
+public/control-center/styles/12-pages.css:7854:[data-page="governance"] .governance-workspace-grid .std-main-column > .std-detail-card:first-child .governance-policy-summary-grid {
+public/control-center/styles/12-pages.css:7861:[data-page="governance"] .governance-workspace-grid .std-main-column > .std-detail-card:first-child .governance-policy-block {
+public/control-center/styles/12-pages.css:7870:[data-page="governance"] .governance-workspace-grid .std-main-column > .std-detail-card:first-child .governance-policy-block h4 {
+public/control-center/styles/12-pages.css:7877:[data-page="governance"] .governance-workspace-grid .std-main-column > .std-detail-card:first-child .governance-rule-list {
+public/control-center/styles/12-pages.css:7882:[data-page="governance"] .governance-workspace-grid .std-main-column > .std-detail-card:first-child .governance-rule-item {
+public/control-center/styles/12-pages.css:7891:[data-page="governance"] .governance-workspace-grid .std-main-column > .std-detail-card:first-child .governance-rule-item:last-child {
+public/control-center/styles/12-pages.css:7895:[data-page="governance"] .governance-workspace-grid .std-main-column > .std-detail-card:first-child .governance-rule-item strong {
+public/control-center/styles/12-pages.css:7902:[data-page="governance"] .governance-workspace-grid .std-main-column > .std-detail-card:first-child .governance-rule-item span {
+public/control-center/styles/12-pages.css:7910:[data-page="governance"] .governance-workspace-grid .std-main-column > .std-detail-card:first-child .governance-rule-list:empty::before {
+public/control-center/styles/12-pages.css:7920:[data-page="governance"] .governance-workspace-grid .std-main-column > .std-detail-card:first-child .empty-box,
+public/control-center/styles/12-pages.css:7921:[data-page="governance"] .governance-workspace-grid .std-main-column > .std-detail-card:first-child .simple-banner {
+public/control-center/styles/12-pages.css:7926:[data-page="governance"] .std-action-panel .governance-policy-summary-grid {
+public/control-center/styles/12-pages.css:7933:[data-page="governance"] .std-action-panel .governance-policy-block {
+public/control-center/styles/12-pages.css:7941:[data-page="governance"] .std-action-panel .governance-policy-block h4 {
+public/control-center/styles/12-pages.css:7948:[data-page="governance"] .std-action-panel .governance-rule-list {
+public/control-center/styles/12-pages.css:7953:[data-page="governance"] .std-action-panel .governance-rule-item {
+public/control-center/styles/12-pages.css:7961:[data-page="governance"] .std-action-panel .governance-rule-item:last-child {
+public/control-center/styles/12-pages.css:7965:[data-page="governance"] .std-action-panel .governance-rule-item strong {
+public/control-center/styles/12-pages.css:7970:[data-page="governance"] .std-action-panel .governance-rule-item span {
+public/control-center/styles/12-pages.css:7977:[data-page="governance"] .governance-operating-header > .governance-policy-summary-grid {
+public/control-center/styles/12-pages.css:7984:[data-page="governance"] .governance-operating-header > .governance-policy-summary-grid .governance-policy-block {
+public/control-center/styles/12-pages.css:7992:[data-page="governance"] .governance-operating-header > .governance-policy-summary-grid .governance-policy-block:first-child {
+public/control-center/styles/12-pages.css:7998:[data-page="governance"] .governance-operating-header > .governance-policy-summary-grid .governance-policy-block h4 {
+public/control-center/styles/12-pages.css:8004:[data-page="governance"] .governance-operating-header > .governance-policy-summary-grid .governance-rule-list {
+public/control-center/styles/12-pages.css:8009:[data-page="governance"] .governance-operating-header > .governance-policy-summary-grid .governance-rule-item {
+public/control-center/styles/12-pages.css:8016:[data-page="governance"] .governance-operating-header > .governance-policy-summary-grid .governance-rule-item strong {
+public/control-center/styles/12-pages.css:8021:[data-page="governance"] .governance-operating-header > .governance-policy-summary-grid .governance-rule-item span {
+public/control-center/styles/12-pages.css:8026:[data-page="governance"] .governance-operating-header > .governance-policy-summary-grid .empty-box {
+public/control-center/styles/12-pages.css:8032:[data-page="governance"] .governance-workspace-grid .std-main-column > .std-detail-card:first-child .governance-policy-block:nth-child(2) .governance-rule-list {
+public/control-center/styles/12-pages.css:8036:[data-page="governance"] .governance-workspace-grid .std-main-column > .std-detail-card:first-child .governance-policy-block:nth-child(2) .governance-rule-list::before {
+public/control-center/styles/12-pages.css:8046:[data-page="governance"] .governance-workspace-grid .std-main-column > .std-detail-card:first-child .governance-policy-block:nth-child(2) .governance-rule-list:not(:empty)::before {
+public/control-center/styles/12-pages.css:8050:@media (max-width: 900px) {
+public/control-center/styles/12-pages.css:8051:  [data-page="governance"] .governance-operating-header > .governance-policy-summary-grid {
+public/control-center/styles/12-pages.css:8219:[data-page="workflows"] .wfloop-workbench {
+public/control-center/styles/12-pages.css:8224:[data-page="workflows"] .wfloop-catalog-card {
+public/control-center/styles/12-pages.css:8229:[data-page="workflows"] .wfloop-catalog-purpose {
+public/control-center/styles/12-pages.css:8237:[data-page="workflows"] .wfloop-catalog-chip-row {
+public/control-center/styles/12-pages.css:8242:[data-page="workflows"] .wfloop-catalog-card .btn,
+public/control-center/styles/12-pages.css:8243:[data-page="workflows"] .wfloop-catalog-card button {
+public/control-center/styles/12-pages.css:8249:[data-page="workflows"] .wfloop-session {
+public/control-center/styles/12-pages.css:8253:[data-page="workflows"] .wfloop-session-priority {
+public/control-center/styles/12-pages.css:8257:[data-page="workflows"] .wfloop-field-grid {
+public/control-center/styles/12-pages.css:8261:[data-page="workflows"] .wfloop-preview {
+public/control-center/styles/12-pages.css:8265:[data-page="workflows"] .wfloop-assist {
+public/control-center/styles/12-pages.css:8269:[data-page="workflows"] .mhos-ai-guidance {
+public/control-center/styles/12-pages.css:8273:[data-page="workflows"] .mhos-ai-guidance-title {
+public/control-center/styles/12-pages.css:8277:[data-page="workflows"] .mhos-ai-guidance-copy,
+public/control-center/styles/12-pages.css:8278:[data-page="workflows"] .mhos-ai-guidance-reason {
+public/control-center/styles/12-pages.css:8282:[data-page="workflows"] .mhos-destination-map {
+public/control-center/styles/12-pages.css:8286:[data-page="workflows"] .mhos-destination-item {
+public/control-center/styles/12-pages.css:8292:[data-page="workflows"] .mhos-destination-item:not(.is-active) {
+public/control-center/styles/12-pages.css:8297:[data-page="workflows"] .mhos-destination-item:not(.is-active) .mhos-destination-meta:nth-of-type(n+3) {
+public/control-center/styles/12-pages.css:8301:[data-page="workflows"] .mhos-destination-title {
+public/control-center/styles/12-pages.css:8305:[data-page="workflows"] .mhos-destination-meta {
+public/control-center/styles/12-pages.css:8309:[data-page="workflows"] .wfloop-recent-list,
+public/control-center/styles/12-pages.css:8310:[data-page="workflows"] .wfloop-ops-strip {
+public/control-center/styles/12-pages.css:8314:[data-page="workflows"] .wfloop-ops-strip {
+public/control-center/styles/12-pages.css:8473:  content: "Ask a question, prepare a task, or refine the output before routing.";
+public/control-center/styles/12-pages.css:8546:@media (max-width: 760px) {
+public/control-center/styles/05-ai-layer.css:176:@media (max-width: 760px) {
+public/control-center/styles/04-command-layer.css:101:@media (max-width: 760px) {
+public/control-center/styles/10-topbar-canonical.css:113:@media (max-width: 860px) {
+public/control-center/styles/10-topbar-canonical.css:126:@media (max-width: 760px) {
+public/control-center/styles/13-home-executive.css:845:.home-ai-guidance-panel .mhos-workflow-step,
+public/control-center/styles/13-home-executive.css:859:.home-ai-guidance-panel .mhos-workflow-chain,
+public/control-center/styles/13-home-executive.css:866:.home-ai-guidance-panel .mhos-workflow-step,
+public/control-center/styles/13-home-executive.css:887:@media (max-width: 900px) {
+public/control-center/styles/13-home-executive.css:902:@media (max-width: 640px) {
+public/control-center/styles/13-home-executive.css:956:.home-command-center .home-ai-guidance-panel .mhos-workflow-chain {
+public/control-center/styles/13-home-executive.css:963:.home-command-center .home-ai-guidance-panel .mhos-workflow-step {
+public/control-center/styles/13-home-executive.css:972:.home-command-center .home-ai-guidance-panel .mhos-workflow-step:hover {
+public/control-center/styles/13-home-executive.css:1012:.home-command-center .home-ai-guidance-panel .mhos-workflow-active {
+public/control-center/styles/13-home-executive.css:1043:@media (max-width: 900px) {
+public/control-center/styles/13-home-executive.css:1044:  .home-command-center .home-ai-guidance-panel .mhos-workflow-chain {
+public/control-center/styles/13-home-executive.css:1049:@media (max-width: 640px) {
+public/control-center/styles/13-home-executive.css:1050:  .home-command-center .home-ai-guidance-panel .mhos-workflow-chain {
+public/control-center/styles/13-home-executive.css:1076:.home-command-center .mhos-workflow-chain {
+public/control-center/styles/13-home-executive.css:1086:.home-command-center .mhos-workflow-step {
+public/control-center/styles/13-home-executive.css:1097:.home-command-center .mhos-workflow-step:hover {
+public/control-center/styles/13-home-executive.css:1139:.home-command-center .mhos-workflow-active {
+public/control-center/styles/13-home-executive.css:1173:@media (max-width: 900px) {
+public/control-center/styles/13-home-executive.css:1174:  .home-command-center .mhos-workflow-step {
+public/control-center/styles/13-home-executive.css:1180:@media (max-width: 640px) {
+public/control-center/styles/13-home-executive.css:1181:  .home-command-center .mhos-workflow-step {
+public/control-center/styles/15-clean-operating-layer.css:271:@media (max-width: 900px) {
+public/control-center/styles/15-clean-operating-layer.css:286:@media (max-width: 600px) {
+public/control-center/styles/15-clean-operating-layer.css:757:@media (max-width: 1180px) {
+public/control-center/styles/15-clean-operating-layer.css:763:@media (max-width: 760px) {
+public/control-center/styles/15-clean-operating-layer.css:794:@media (prefers-reduced-motion: reduce) {
+public/control-center/styles/15-clean-operating-layer.css:1116:@media (max-width: 980px) {
+public/control-center/styles/15-clean-operating-layer.css:1135:@media (max-width: 640px) {
+public/control-center/styles/09-operations-centers.css:7:[data-page="task-center"] .ops-shell,
+public/control-center/styles/09-operations-centers.css:8:[data-page="task-center"] .ops-workspace {
+public/control-center/styles/09-operations-centers.css:13:[data-page="task-center"] .ops-layout-grid {
+public/control-center/styles/09-operations-centers.css:21:[data-page="task-center"] .ops-main-column {
+public/control-center/styles/09-operations-centers.css:28:[data-page="task-center"] .ops-right-rail {
+public/control-center/styles/09-operations-centers.css:39:[data-page="task-center"] .panel {
+public/control-center/styles/09-operations-centers.css:43:[data-page="task-center"] .panel-header {
+public/control-center/styles/09-operations-centers.css:47:[data-page="task-center"] .panel-header h3 {
+public/control-center/styles/09-operations-centers.css:51:[data-page="task-center"] .panel-header p {
+public/control-center/styles/09-operations-centers.css:56:[data-page="task-center"] .std-context-ribbon {
+public/control-center/styles/09-operations-centers.css:62:[data-page="task-center"] .std-context-description {
+public/control-center/styles/09-operations-centers.css:66:[data-page="task-center"] .std-context-chip {
+public/control-center/styles/09-operations-centers.css:72:[data-page="task-center"] .std-context-btn {
+public/control-center/styles/09-operations-centers.css:77:[data-page="task-center"] .ops-executive-strip {
+public/control-center/styles/09-operations-centers.css:84:[data-page="task-center"] .ops-executive-strip .panel-header {
+public/control-center/styles/09-operations-centers.css:88:[data-page="task-center"] .ops-executive-strip .panel-kicker {
+public/control-center/styles/09-operations-centers.css:94:[data-page="task-center"] .ops-executive-strip .panel-header h3 {
+public/control-center/styles/09-operations-centers.css:99:[data-page="task-center"] .ops-executive-strip .panel-header p {
+public/control-center/styles/09-operations-centers.css:103:[data-page="task-center"] .ops-executive-strip .card-badge.neutral {
+public/control-center/styles/09-operations-centers.css:110:[data-page="task-center"] .ops-runtime-signal-grid {
+public/control-center/styles/09-operations-centers.css:117:[data-page="task-center"] .ops-runtime-signal {
+public/control-center/styles/09-operations-centers.css:130:[data-page="task-center"] .ops-runtime-signal strong {
+public/control-center/styles/09-operations-centers.css:136:[data-page="task-center"] .ops-runtime-signal small {
+public/control-center/styles/09-operations-centers.css:145:[data-page="task-center"] .ops-runtime-signal .card-badge {
+public/control-center/styles/09-operations-centers.css:151:[data-page="task-center"] .ops-focus-tabs {
+public/control-center/styles/09-operations-centers.css:157:[data-page="task-center"] .ops-focus-tab {
+public/control-center/styles/09-operations-centers.css:170:[data-page="task-center"] .ops-focus-tab strong {
+public/control-center/styles/09-operations-centers.css:175:[data-page="task-center"] .ops-focus-tab span {
+public/control-center/styles/09-operations-centers.css:179:[data-page="task-center"] .ops-focus-tab.is-active {
+public/control-center/styles/09-operations-centers.css:184:[data-page="task-center"] .ops-toolbar {
+public/control-center/styles/09-operations-centers.css:190:[data-page="task-center"] .ops-toolbar .command-input,
+public/control-center/styles/09-operations-centers.css:191:[data-page="task-center"] .ops-toolbar .sidebar-select {
+public/control-center/styles/09-operations-centers.css:197:[data-page="task-center"] .ops-main-column .empty-box {
+public/control-center/styles/09-operations-centers.css:208:[data-page="task-center"] .ops-table-wrap {
+public/control-center/styles/09-operations-centers.css:215:[data-page="task-center"] .ops-table {
+public/control-center/styles/09-operations-centers.css:221:[data-page="task-center"] .ops-table th,
+public/control-center/styles/09-operations-centers.css:222:[data-page="task-center"] .ops-table td {
+public/control-center/styles/09-operations-centers.css:229:[data-page="task-center"] .ops-table th {
+public/control-center/styles/09-operations-centers.css:237:[data-page="task-center"] .ops-table tr.is-selected td {
+public/control-center/styles/09-operations-centers.css:241:[data-page="task-center"] .ops-select-link {
+public/control-center/styles/09-operations-centers.css:252:[data-page="task-center"] .ops-select-link span {
+public/control-center/styles/09-operations-centers.css:257:[data-page="task-center"] .ops-detail-card,
+public/control-center/styles/09-operations-centers.css:258:[data-page="task-center"] .ops-action-panel,
+public/control-center/styles/09-operations-centers.css:259:[data-page="task-center"] .ops-ai-panel {
+public/control-center/styles/09-operations-centers.css:264:[data-page="task-center"] .ops-detail-grid {
+public/control-center/styles/09-operations-centers.css:270:[data-page="task-center"] .ops-detail-card .ops-detail-card {
+public/control-center/styles/09-operations-centers.css:277:[data-page="task-center"] .ops-detail-card .ops-detail-card span {
+public/control-center/styles/09-operations-centers.css:284:[data-page="task-center"] .ops-detail-card .ops-detail-card strong {
+public/control-center/styles/09-operations-centers.css:291:[data-page="task-center"] .ops-action-row {
+public/control-center/styles/09-operations-centers.css:297:[data-page="task-center"] .ops-right-rail .btn {
+public/control-center/styles/09-operations-centers.css:303:[data-page="task-center"] .ops-deferred-list {
+public/control-center/styles/09-operations-centers.css:308:[data-page="task-center"] .ops-deferred-action {
+public/control-center/styles/09-operations-centers.css:314:[data-page="task-center"] .quick-actions {
+public/control-center/styles/09-operations-centers.css:318:[data-page="task-center"] .quick-actions .quick-action-btn {
+public/control-center/styles/09-operations-centers.css:323:[data-page="task-center"] .ops-prompt-title {
+public/control-center/styles/09-operations-centers.css:329:[data-page="task-center"] .ops-prompt-meta {
+public/control-center/styles/09-operations-centers.css:338:@media (max-width: 1180px) {
+public/control-center/styles/09-operations-centers.css:339:  [data-page="task-center"] .ops-layout-grid {
+public/control-center/styles/09-operations-centers.css:343:  [data-page="task-center"] .ops-right-rail {
+public/control-center/styles/09-operations-centers.css:348:  [data-page="task-center"] .ops-toolbar {
+public/control-center/styles/09-operations-centers.css:353:@media (max-width: 820px) {
+public/control-center/styles/09-operations-centers.css:354:  [data-page="task-center"] .ops-focus-tab {
+public/control-center/styles/09-operations-centers.css:358:  [data-page="task-center"] .ops-detail-grid {
+public/control-center/styles/09-operations-centers.css:362:  [data-page="task-center"] .ops-toolbar {
+public/control-center/styles/09-operations-centers.css:739:@media (max-width: 1180px) {
+public/control-center/styles/09-operations-centers.css:750:@media (max-width: 820px) {
+public/control-center/styles/09-operations-centers.css:1145:@media (max-width: 1180px) {
+public/control-center/styles/09-operations-centers.css:1156:@media (max-width: 820px) {
+public/control-center/styles/09-operations-centers.css:1542:@media (max-width: 1180px) {
+public/control-center/styles/09-operations-centers.css:1553:@media (max-width: 820px) {
+public/control-center/styles/mhos-workflow-primitives.css:2:.mhos-workflow-chain {
+public/control-center/styles/mhos-workflow-primitives.css:12:.mhos-workflow-step {
+public/control-center/styles/mhos-workflow-primitives.css:29:.mhos-workflow-step:not(:last-child)::after {
+public/control-center/styles/mhos-workflow-primitives.css:41:.mhos-workflow-active {
+public/control-center/styles/mhos-workflow-primitives.css:49:.mhos-workflow-blocked {
+public/control-center/styles/mhos-workflow-primitives.css:57:.mhos-workflow-handoff {
+public/control-center/styles/mhos-workflow-primitives.css:136:@media (max-width: 900px) {
+public/control-center/styles/mhos-workflow-primitives.css:137:  .mhos-workflow-chain, .mhos-escalation-lane {
+public/control-center/styles/mhos-workflow-primitives.css:142:  .mhos-workflow-step {
+public/control-center/styles/01-reset.css:30::where(img, video, canvas, svg) {
+public/control-center/styles/01-reset.css:34::where(img, video) {
+public/control-center/styles/03-app-shell.css:93:@media (max-width: 1024px) {
+public/control-center/styles/03-app-shell.css:99:@media (max-width: 760px) {
+public/control-center/styles/14-page-standard.css:245:@media (max-width: 980px) {
+public/control-center/styles/14-page-standard.css:261:@media (max-width: 760px) {
+public/control-center/styles/14-page-standard.css:905:@media (max-width: 980px) {
+public/control-center/styles/14-page-standard.css:923:@media (max-width: 760px) {
+public/control-center/styles/14-page-standard.css:934:@media (prefers-reduced-motion: reduce) {
+public/control-center/styles/14-page-standard.css:956:@media (max-width: 1100px) {
+public/control-center/styles/14-page-standard.css:962:@media (max-width: 760px) {
+public/control-center/styles/14-page-standard.css:1368:[data-page="library"] .library-grid-preview video,
+public/control-center/styles/14-page-standard.css:1418:[data-page="library"] .library-preview-video {
+public/control-center/styles/14-page-standard.css:1662:@media (max-width: 1280px) {
+public/control-center/styles/14-page-standard.css:1672:@media (max-width: 1180px) {
+public/control-center/styles/14-page-standard.css:1684:@media (max-width: 1100px) {
+public/control-center/styles/14-page-standard.css:1691:@media (max-width: 980px) {
+public/control-center/styles/14-page-standard.css:1697:@media (max-width: 760px) {
+public/control-center/styles/14-page-standard.css:1708:@media (max-width: 720px) {
+public/control-center/styles/14-page-standard.css:2095:@media (max-width: 920px) {
+public/control-center/styles/14-page-standard.css:2103:@media (max-width: 760px) {
+public/control-center/styles/07-sidebar.css:167:@media (max-width: 1024px) {
+public/control-center/styles/07-sidebar.css:189:@media (max-width: 480px) {
+public/control-center/state.js:43:  if (typeof queueMicrotask === "function") {
+public/control-center/state.js:44:    queueMicrotask(notify);
+public/control-center/pages/publishing.js:11:  const safety = `Publishing prepares channel packages, schedules, and approval-ready handoffs. Final execution remains <strong>confirmation-gated</strong> and governed by <strong>backend approval rules</strong>.`;
+public/control-center/pages/publishing.js:13:    `<button type="button" class="btn btn-secondary" onclick="document.getElementById('publishingBuilderPanel')?.scrollIntoView({behavior:'smooth',block:'start'})">Prepare Publishing Package</button>`,
+public/control-center/pages/publishing.js:14:    `<button type="button" class="btn btn-secondary" onclick="document.getElementById('publishingQueuePanel')?.scrollIntoView({behavior:'smooth',block:'start'})">Open Queue</button>`,
+public/control-center/pages/publishing.js:15:    `<button type="button" class="btn btn-secondary" onclick="document.getElementById('publishingHandoffPanel')?.scrollIntoView({behavior:'smooth',block:'start'})">Review Approval Gate</button>`,
+public/control-center/pages/publishing.js:16:    `<button type="button" class="btn btn-primary" onclick="document.getElementById('publishingPushAiBtn')?.scrollIntoView({behavior:'smooth',block:'start'})">Open AI Review</button>`
+public/control-center/pages/publishing.js:19:    <section class="publishing-command-header" role="region" aria-label="Publishing Command Header">
+public/control-center/pages/publishing.js:20:      <div class="publishing-command-header-title">Publishing Control Workspace</div>
+public/control-center/pages/publishing.js:21:      <div class="publishing-command-header-context">${context}</div>
+public/control-center/pages/publishing.js:22:      <div class="publishing-command-header-status">Status: <strong>${escapeHtml(status)}</strong> &middot; Approval: <strong>${escapeHtml(approval)}</strong></div>
+public/control-center/pages/publishing.js:23:      <div class="publishing-command-header-status">Next: <span>${nextAction}</span></div>
+public/control-center/pages/publishing.js:24:      <div class="publishing-command-header-safety">${safety}</div>
+public/control-center/pages/publishing.js:25:      <div class="publishing-command-header-actions">${actions}</div>
+public/control-center/pages/publishing.js:37:    { key: "handoff", label: "Execution Handoff" }
+public/control-center/pages/publishing.js:45:    handoff: selectedItem?.status === "published" ? "ready" : "missing"
+public/control-center/pages/publishing.js:48:    <nav class="publishing-workflow-strip" aria-label="Publishing Workflow">
+public/control-center/pages/publishing.js:50:        <div class="publishing-workflow-step is-${statusMap[step.key]}" aria-label="${escapeHtml(step.label)}: ${statusMap[step.key]}">
+public/control-center/pages/publishing.js:52:          <span class="publishing-workflow-step-label">${statusMap[step.key]}</span>
+public/control-center/pages/publishing.js:63:    { key: "media", label: "Media", state: assetData?.some(a => a.type === "media" && a.status === "Ready") ? "ready" : "missing" },
+public/control-center/pages/publishing.js:66:    { key: "governance", label: "Governance", state: selectedItem?.governanceStatus === "approved" ? "ready" : "missing" },
+public/control-center/pages/publishing.js:69:  const blockersSummary = blockers && blockers.length ? `<div class="publishing-readiness-card is-warning">${escapeHtml(blockers.length)} blocker(s) present</div>` : "";
+public/control-center/pages/publishing.js:71:    <section class="publishing-readiness-summary" aria-label="Publishing Readiness Summary">
+public/control-center/pages/publishing.js:73:        <div class="publishing-readiness-card is-${r.state}">
+public/control-center/pages/publishing.js:74:          <span class="publishing-readiness-card-label">${escapeHtml(r.label)}</span>
+public/control-center/pages/publishing.js:102:} from "./publishing/publishing-payloads.js";
+public/control-center/pages/publishing.js:104:const publishingSessions = new Map();
+public/control-center/pages/publishing.js:105:const PUBLISHING_LOCAL_DRAFTS_KEY = "mh-publishing-local-drafts-v1";
+public/control-center/pages/publishing.js:115:  "product_videos",
+public/control-center/pages/publishing.js:120:const publishingAutomationState = {
+public/control-center/pages/publishing.js:124:let publishingAutoModeUnsubscribe = null;
+public/control-center/pages/publishing.js:125:let publishingAutoModeControllerReady = false;
+public/control-center/pages/publishing.js:126:let publishingAutomationEnabled = false;
+public/control-center/pages/publishing.js:127:let publishingRenderCallback = null;
+public/control-center/pages/publishing.js:128:let publishingRenderTimer = null;
+public/control-center/pages/publishing.js:132:    publishingRenderCallback = render;
+public/control-center/pages/publishing.js:135:  if (publishingRenderTimer) {
+public/control-center/pages/publishing.js:139:  publishingRenderTimer = window.setTimeout(() => {
+public/control-center/pages/publishing.js:140:    publishingRenderTimer = null;
+public/control-center/pages/publishing.js:142:    if (typeof publishingRenderCallback === "function") {
+public/control-center/pages/publishing.js:143:      publishingRenderCallback();
+public/control-center/pages/publishing.js:149:  publishingRenderCallback = render;
+public/control-center/pages/publishing.js:151:  if (!publishingAutomationEnabled) {
+public/control-center/pages/publishing.js:155:  if (!publishingAutoModeControllerReady) {
+public/control-center/pages/publishing.js:157:    publishingAutoModeControllerReady = true;
+public/control-center/pages/publishing.js:160:  if (publishingAutoModeUnsubscribe) {
+public/control-center/pages/publishing.js:164:  publishingAutoModeUnsubscribe = subscribeAutoMode(() => {
+public/control-center/pages/publishing.js:365:  if (!publishingSessions.has(key)) {
+public/control-center/pages/publishing.js:366:    publishingSessions.set(key, {
+public/control-center/pages/publishing.js:377:  return publishingSessions.get(key);
+public/control-center/pages/publishing.js:568:    "Prepare publishing draft from current project context."
+public/control-center/pages/publishing.js:573:      id: `publishing-prepare-${Date.now()}`,
+public/control-center/pages/publishing.js:574:      type: "prepare_publishing_draft",
+public/control-center/pages/publishing.js:575:      targetPage: "publishing",
+public/control-center/pages/publishing.js:576:      action: "Prepare publishing draft",
+public/control-center/pages/publishing.js:579:        reason: "Prepare a safe publishing draft without executing publish.",
+public/control-center/pages/publishing.js:580:        title: firstText(session.form.title, "Prepared publishing draft")
+public/control-center/pages/publishing.js:585:      id: `publishing-gate-${Date.now()}`,
+public/control-center/pages/publishing.js:587:      targetPage: "publishing",
+public/control-center/pages/publishing.js:610:    errors.approvalStatus = "Approval must be approved before publishing now.";
+public/control-center/pages/publishing.js:619:  return message ? `<div class="publishing-inline-error">${escapeHtml(message)}</div>` : "";
+public/control-center/pages/publishing.js:623:  // Add governance/approval hints for status pills
+public/control-center/pages/publishing.js:632:  return `<span class="publishing-status-pill is-${escapeHtml(statusClass(status))}" ${hint}>${escapeHtml(titleCase(status))}</span>`;
+public/control-center/pages/publishing.js:638:      .publishing-execution-center {
+public/control-center/pages/publishing.js:644:      .publishing-execution-grid {
+public/control-center/pages/publishing.js:650:      .publishing-main-column,
+public/control-center/pages/publishing.js:651:      .publishing-side-column {
+public/control-center/pages/publishing.js:658:      .publishing-card {
+public/control-center/pages/publishing.js:663:      .publishing-overview-grid {
+public/control-center/pages/publishing.js:669:      .publishing-overview-item,
+public/control-center/pages/publishing.js:670:      .publishing-impact-chip {
+public/control-center/pages/publishing.js:678:      .publishing-overview-item span,
+public/control-center/pages/publishing.js:679:      .publishing-impact-chip small {
+public/control-center/pages/publishing.js:686:      .publishing-overview-item strong,
+public/control-center/pages/publishing.js:687:      .publishing-impact-chip strong {
+public/control-center/pages/publishing.js:693:      .publishing-overview-item.is-wide {
+public/control-center/pages/publishing.js:697:      .publishing-impact-row,
+public/control-center/pages/publishing.js:698:      .publishing-action-row,
+public/control-center/pages/publishing.js:699:      .publishing-form-actions,
+public/control-center/pages/publishing.js:700:      .publishing-filter-row {
+public/control-center/pages/publishing.js:707:      .publishing-impact-row {
+public/control-center/pages/publishing.js:711:      .publishing-action-row,
+public/control-center/pages/publishing.js:712:      .publishing-form-actions {
+public/control-center/pages/publishing.js:716:      .publishing-impact-chip {
+public/control-center/pages/publishing.js:720:      .publishing-filter-chip {
+public/control-center/pages/publishing.js:733:      .publishing-filter-chip.is-active {
+public/control-center/pages/publishing.js:739:      .publishing-queue-list,
+public/control-center/pages/publishing.js:740:      .publishing-calendar-list,
+public/control-center/pages/publishing.js:741:      .publishing-blocker-list {
+public/control-center/pages/publishing.js:748:      .publishing-queue-row {
+public/control-center/pages/publishing.js:759:      .publishing-queue-row.is-active {
+public/control-center/pages/publishing.js:764:      .publishing-queue-main,
+public/control-center/pages/publishing.js:765:      .publishing-calendar-row {
+public/control-center/pages/publishing.js:776:      .publishing-queue-title {
+public/control-center/pages/publishing.js:783:      .publishing-queue-meta {
+public/control-center/pages/publishing.js:792:      .publishing-queue-actions {
+public/control-center/pages/publishing.js:798:      .publishing-queue-actions button {
+public/control-center/pages/publishing.js:807:      .publishing-queue-actions button:disabled,
+public/control-center/pages/publishing.js:808:      .publishing-queue-actions button[disabled] {
+public/control-center/pages/publishing.js:816:      .publishing-status-pill {
+public/control-center/pages/publishing.js:829:      .publishing-status-pill.is-ready,
+public/control-center/pages/publishing.js:830:      .publishing-status-pill.is-scheduled {
+public/control-center/pages/publishing.js:834:      .publishing-status-pill.is-published {
+public/control-center/pages/publishing.js:838:      .publishing-status-pill.is-failed {
+public/control-center/pages/publishing.js:842:      .publishing-inline-error {
+public/control-center/pages/publishing.js:849:      .publishing-calendar-row {
+public/control-center/pages/publishing.js:859:      .publishing-calendar-row em {
+public/control-center/pages/publishing.js:867:      @media (min-width: 980px) {
+public/control-center/pages/publishing.js:868:        .publishing-execution-grid {
+public/control-center/pages/publishing.js:873:        .publishing-queue-row {
+public/control-center/pages/publishing.js:878:        .publishing-queue-actions {
+public/control-center/pages/publishing.js:892:function extractHandoffSummary(handoff) {
+public/control-center/pages/publishing.js:893:  const payload = asObject(handoff?.payload);
+public/control-center/pages/publishing.js:897:    id: asString(handoff?.id || payload.workflow_id || payload.prompt || payload.workflow_title),
+public/control-center/pages/publishing.js:898:    sourcePage: asString(handoff?.source_page || "workflows"),
+public/control-center/pages/publishing.js:899:    workflowId: asString(payload.workflow_id),
+public/control-center/pages/publishing.js:900:    title: firstText(output.title, payload.workflow_title, draftContext.lastResponseTitle, "Workflow output"),
+public/control-center/pages/publishing.js:912:    getSharedHandoff(projectName, "publishing", operations, "workflows") ||
+public/control-center/pages/publishing.js:913:    getSharedHandoff(projectName, "publishing", operations, "ai-command") ||
+public/control-center/pages/publishing.js:914:    getSharedHandoff(projectName, "publishing", operations)
+public/control-center/pages/publishing.js:922:function buildRecommendation({ queue, counts, assetBlockers, checks, handoff, globalBlockers }) {
+public/control-center/pages/publishing.js:932:      action: "Retry failed publishing item",
+public/control-center/pages/publishing.js:941:      why: `${ready.title} is approved and ready for execution. Publishing now converts completed workflow output into a live action.`,
+public/control-center/pages/publishing.js:953:  if (handoff) {
+public/control-center/pages/publishing.js:955:      action: "Load workflow output into a draft",
+public/control-center/pages/publishing.js:956:      why: "A workflow handoff is available. Loading it keeps execution moving without inventing backend data.",
+public/control-center/pages/publishing.js:970:    action: connectedCount ? "Create a publishing draft" : "Connect a publishing channel",
+public/control-center/pages/publishing.js:981:    <section class="card publishing-card">
+public/control-center/pages/publishing.js:989:      <div class="publishing-overview-grid">
+public/control-center/pages/publishing.js:990:        <div class="publishing-overview-item"><span>Scheduled items</span><strong>${escapeHtml(String(counts.scheduled))}</strong></div>
+public/control-center/pages/publishing.js:991:        <div class="publishing-overview-item"><span>Ready to publish</span><strong>${escapeHtml(String(counts.ready))}</strong></div>
+public/control-center/pages/publishing.js:992:        <div class="publishing-overview-item"><span>Draft items</span><strong>${escapeHtml(String(counts.draft))}</strong></div>
+public/control-center/pages/publishing.js:993:        <div class="publishing-overview-item"><span>Failed / blocked items</span><strong>${escapeHtml(String(counts.failed))}</strong></div>
+public/control-center/pages/publishing.js:994:        <div class="publishing-overview-item is-wide"><span>Next publish window</span><strong>${escapeHtml(getNextPublishWindow(queue))}</strong></div>
+public/control-center/pages/publishing.js:1004:    ["Workflow output", recommendation.action.includes("workflow") ? "Available" : "Optional"],
+public/control-center/pages/publishing.js:1011:    <section class="card publishing-card" id="publishingRecommendation">
+public/control-center/pages/publishing.js:1016:          <p class="publishing-section-copy">${escapeHtml(recommendation.why)}</p>
+public/control-center/pages/publishing.js:1020:      <div class="publishing-impact-row">
+public/control-center/pages/publishing.js:1022:          <span class="publishing-impact-chip">
+public/control-center/pages/publishing.js:1028:      <div class="publishing-action-row">
+public/control-center/pages/publishing.js:1029:        <button id="publishingOpenQueueBtn" class="btn btn-secondary" type="button">Open Publish Queue</button>
+public/control-center/pages/publishing.js:1030:        <button id="publishingSaveDraftBtn" class="btn btn-secondary" type="button">Save publishing draft</button>
+public/control-center/pages/publishing.js:1031:        <button id="publishingPushAiBtn" class="btn btn-primary" type="button">Send publishing context to AI</button>
+public/control-center/pages/publishing.js:1032:        <button id="publishingAutoPrepareBtn" class="btn btn-secondary" type="button">Auto-prepare publishing plan</button>
+public/control-center/pages/publishing.js:1033:        <button id="publishingAutoStopBtn" class="btn btn-secondary" type="button">Stop Auto Mode</button>
+public/control-center/pages/publishing.js:1035:      <details class="publishing-automation-preview publishing-block-gap">
+public/control-center/pages/publishing.js:1037:        <div class="publishing-automation-preview-copy">Automation cannot publish without manual review, confirmation, and backend approval gates.</div>
+public/control-center/pages/publishing.js:1038:        <div class="simple-banner publishing-inline-gap">Auto Mode status: ${escapeHtml(getAutoModeState().status || "idle")}</div>
+public/control-center/pages/publishing.js:1040:          <div class="simple-banner publishing-block-gap">Cross-system blockers: ${escapeHtml(asArray(recommendation.externalBlockers).map((item) => item.title).join("; "))}</div>
+public/control-center/pages/publishing.js:1042:        ${publishingAutomationState.progress ? `<div class="simple-banner publishing-block-gap">${escapeHtml(publishingAutomationState.progress)}</div>` : ""}
+public/control-center/pages/publishing.js:1043:        ${publishingAutomationState.result ? `<div class="simple-banner publishing-inline-gap">${escapeHtml(publishingAutomationState.result)}</div>` : ""}
+public/control-center/pages/publishing.js:1045:          <div class="simple-banner publishing-inline-gap"><strong>Approval needed:</strong> ${escapeHtml(asObject(getAutoModeState().approvalRequiredStep).reason || "Manual approval required.")}</div>
+public/control-center/pages/publishing.js:1046:          <div class="publishing-action-row publishing-inline-gap">
+public/control-center/pages/publishing.js:1047:            <button id="publishingAutoApproveBtn" class="btn btn-secondary" type="button">Approve automation step</button>
+public/control-center/pages/publishing.js:1048:            <button id="publishingAutoSkipBtn" class="btn btn-secondary" type="button">Skip automation step</button>
+public/control-center/pages/publishing.js:1052:      <div class="simple-banner">Opens AI with this context only. <strong>No approval, publishing, or backend execution is performed.</strong></div>
+public/control-center/pages/publishing.js:1062:    <div class="publishing-filter-row">
+public/control-center/pages/publishing.js:1067:          <button class="publishing-filter-chip${active ? " is-active" : ""}" type="button" data-publishing-filter="${escapeHtml(status)}">
+public/control-center/pages/publishing.js:1080:      <article class="publishing-queue-row${item.id === selectedId ? " is-active" : ""}" data-publishing-row="${escapeHtml(item.id)}">
+public/control-center/pages/publishing.js:1081:        <button class="publishing-queue-main" type="button" data-publishing-select="${escapeHtml(item.id)}">
+public/control-center/pages/publishing.js:1082:          <span class="publishing-queue-title">${escapeHtml(item.title)}</span>
+public/control-center/pages/publishing.js:1083:          <span class="publishing-queue-meta">${escapeHtml(titleCase(item.channel || "unassigned"))} • ${escapeHtml(item.scheduledFor ? formatDateTime(item.scheduledFor) : "Unscheduled")} • ${escapeHtml(item.source)}</span>
+public/control-center/pages/publishing.js:1085:        <div class="publishing-queue-state">${renderStatusPill(item.status, escapeHtml)}</div>
+public/control-center/pages/publishing.js:1086:        <div class="publishing-queue-actions">
+public/control-center/pages/publishing.js:1087:          <button type="button" data-publishing-action="review" data-publishing-id="${escapeHtml(item.id)}">Review Package</button>
+public/control-center/pages/publishing.js:1088:          <button type="button" data-publishing-action="schedule" data-publishing-id="${escapeHtml(item.id)}">Queue for Manual Publishing</button>
+public/control-center/pages/publishing.js:1089:          <button type="button" data-publishing-action="publish" data-publishing-id="${escapeHtml(item.id)}">Prepare Publishing Package</button>
+public/control-center/pages/publishing.js:1090:          <button type="button" data-publishing-action="pause" data-publishing-id="${escapeHtml(item.id)}">Pause to draft</button>
+public/control-center/pages/publishing.js:1091:          <button type="button" data-publishing-action="retry" data-publishing-id="${escapeHtml(item.id)}">Retry scheduled item</button>
+public/control-center/pages/publishing.js:1098:    <section class="card publishing-card" id="publishingQueuePanel">
+public/control-center/pages/publishing.js:1107:      <div class="publishing-queue-list">${rows}</div>
+public/control-center/pages/publishing.js:1114:    <section class="card publishing-card" id="publishingBuilderPanel">
+public/control-center/pages/publishing.js:1122:      <form id="publishingBuilderForm" class="setup-form-grid publishing-builder-form" novalidate>
+public/control-center/pages/publishing.js:1126:              <label class="setup-label" for="publishingProjectInput">Project</label>
+public/control-center/pages/publishing.js:1129:            <input id="publishingProjectInput" name="project" class="setup-input" type="text" value="${escapeHtml(session.form.project)}" placeholder="Project name">
+public/control-center/pages/publishing.js:1134:              <label class="setup-label" for="publishingCampaignInput">Campaign</label>
+public/control-center/pages/publishing.js:1137:            <input id="publishingCampaignInput" name="campaign" class="setup-input" type="text" value="${escapeHtml(session.form.campaign)}" placeholder="Campaign or launch wave">
+public/control-center/pages/publishing.js:1145:              <label class="setup-label" for="publishingChannelInput">Channel</label>
+public/control-center/pages/publishing.js:1148:            <select id="publishingChannelInput" name="channel" class="setup-input">
+public/control-center/pages/publishing.js:1158:              <label class="setup-label" for="publishingContentInput">Content item</label>
+public/control-center/pages/publishing.js:1161:            <input id="publishingContentInput" name="contentItem" class="setup-input" type="text" value="${escapeHtml(session.form.contentItem)}" placeholder="Caption, email, product update, or workflow output">
+public/control-center/pages/publishing.js:1169:              <label class="setup-label" for="publishingDateInput">Publish date</label>
+public/control-center/pages/publishing.js:1172:            <input id="publishingDateInput" name="publishDate" class="setup-input" type="date" value="${escapeHtml(session.form.publishDate)}">
+public/control-center/pages/publishing.js:1177:              <label class="setup-label" for="publishingTimeInput">Publish time</label>
+public/control-center/pages/publishing.js:1180:            <input id="publishingTimeInput" name="publishTime" class="setup-input" type="time" value="${escapeHtml(session.form.publishTime)}">
+public/control-center/pages/publishing.js:1184:              <label class="setup-label" for="publishingApprovalInput">Approval status</label>
+public/control-center/pages/publishing.js:1187:            <select id="publishingApprovalInput" name="approvalStatus" class="setup-input">
+public/control-center/pages/publishing.js:1198:            <label class="setup-label" for="publishingTitleInput">Queue title</label>
+public/control-center/pages/publishing.js:1201:          <input id="publishingTitleInput" name="title" class="setup-input" type="text" value="${escapeHtml(session.form.title)}" placeholder="Operator-facing title">
+public/control-center/pages/publishing.js:1206:            <label class="setup-label" for="publishingNotesInput">Execution notes</label>
+public/control-center/pages/publishing.js:1209:          <textarea id="publishingNotesInput" name="notes" class="setup-input setup-textarea" rows="4" placeholder="Approval notes, blockers, manual steps, content references">${escapeHtml(session.form.notes)}</textarea>
+public/control-center/pages/publishing.js:1212:      <div class="publishing-form-actions">
+public/control-center/pages/publishing.js:1213:        <button id="publishingNewItemBtn" class="btn btn-secondary" type="button">New Draft</button>
+public/control-center/pages/publishing.js:1214:        <button id="publishingBuilderSaveBtn" class="btn btn-secondary" type="button">Save publishing draft</button>
+public/control-center/pages/publishing.js:1215:        <button id="publishingScheduleBtn" class="btn btn-primary" type="button">Queue for Manual Publishing</button>
+public/control-center/pages/publishing.js:1222:function renderWorkflowHandoff(handoff, session, escapeHtml) {
+public/control-center/pages/publishing.js:1223:  if (!handoff) {
+public/control-center/pages/publishing.js:1225:      <section class="card publishing-card">
+public/control-center/pages/publishing.js:1229:            <h3>No workflow output available</h3>
+public/control-center/pages/publishing.js:1233:        <div class="empty-box">Run or route a workflow into Publishing to load execution-ready output here.</div>
+public/control-center/pages/publishing.js:1238:  const summary = extractHandoffSummary(handoff);
+public/control-center/pages/publishing.js:1241:    <section class="card publishing-card" id="publishingHandoffPanel">
+public/control-center/pages/publishing.js:1246:          <p class="publishing-section-copy">${escapeHtml(summarizeText(summary.summary, "Workflow output is available for draft loading."))}</p>
+public/control-center/pages/publishing.js:1252:        <div class="data-row"><span>Workflow</span><strong>${escapeHtml(summary.workflowId || "Not specified")}</strong></div>
+public/control-center/pages/publishing.js:1256:      <div class="publishing-action-row">
+public/control-center/pages/publishing.js:1257:        <button id="publishingLoadHandoffBtn" class="btn btn-secondary" type="button">Load Workflow Output</button>
+public/control-center/pages/publishing.js:1271:      <section class="card publishing-card">
+public/control-center/pages/publishing.js:1279:        <div class="empty-box">Scheduled publishing items will appear here once timing exists in the queue.</div>
+public/control-center/pages/publishing.js:1287:      <div class="publishing-calendar-list">
+public/control-center/pages/publishing.js:1289:          <button class="publishing-calendar-row" type="button" data-publishing-select="${escapeHtml(item.id)}">
+public/control-center/pages/publishing.js:1301:      <div class="publishing-calendar-list publishing-block-gap">
+public/control-center/pages/publishing.js:1302:        <div class="simple-banner publishing-block-gap publishing-past-schedule-warning">Past scheduled items — reschedule required</div>
+public/control-center/pages/publishing.js:1304:          <button class="publishing-calendar-row" type="button" data-publishing-select="${escapeHtml(item.id)}">
+public/control-center/pages/publishing.js:1316:    <section class="card publishing-card">
+public/control-center/pages/publishing.js:1337:      <section class="card publishing-card">
+public/control-center/pages/publishing.js:1351:    <section class="card publishing-card">
+public/control-center/pages/publishing.js:1367:        <div class="publishing-blocker-list">
+public/control-center/pages/publishing.js:1382:    <section class="card publishing-card">
+public/control-center/pages/publishing.js:1391:      <div class="simple-banner publishing-block-gap">${escapeHtml(getAssetNextAction(assetData, PUBLISHING_ASSET_KEYS))}</div>
+public/control-center/pages/publishing.js:1422:  handoff
+public/control-center/pages/publishing.js:1472:  Array.from(document.querySelectorAll("[data-publishing-filter]")).forEach((button) => {
+public/control-center/pages/publishing.js:1474:      session.filter = button.getAttribute("data-publishing-filter") || "all";
+public/control-center/pages/publishing.js:1479:  Array.from(document.querySelectorAll("[data-publishing-select]")).forEach((button) => {
+public/control-center/pages/publishing.js:1481:      const itemId = button.getAttribute("data-publishing-select") || "";
+public/control-center/pages/publishing.js:1488:  const form = $("publishingBuilderForm");
+public/control-center/pages/publishing.js:1499:  const newBtn = $("publishingNewItemBtn");
+public/control-center/pages/publishing.js:1503:      showMessage?.("New publishing draft opened.");
+public/control-center/pages/publishing.js:1508:  const openQueueBtn = $("publishingOpenQueueBtn");
+public/control-center/pages/publishing.js:1511:      document.getElementById("publishingQueuePanel")?.scrollIntoView({ behavior: "smooth", block: "start" });
+public/control-center/pages/publishing.js:1515:  const saveDraftButtons = [$("publishingSaveDraftBtn"), $("publishingBuilderSaveBtn")].filter(Boolean);
+public/control-center/pages/publishing.js:1528:  const scheduleBtn = $("publishingScheduleBtn");
+public/control-center/pages/publishing.js:1544:        session.draftMessage = "Local publishing draft scheduled in this browser.";
+public/control-center/pages/publishing.js:1572:  Array.from(document.querySelectorAll("[data-publishing-action]")).forEach((button) => {
+public/control-center/pages/publishing.js:1574:      const itemId = button.getAttribute("data-publishing-id") || "";
+public/control-center/pages/publishing.js:1575:      const action = button.getAttribute("data-publishing-action") || "";
+public/control-center/pages/publishing.js:1588:        document.getElementById("publishingBuilderPanel")?.scrollIntoView({ behavior: "smooth", block: "start" });
+public/control-center/pages/publishing.js:1610:          "Final Confirmation Required\n\nAction: Publish this item to configured channels.\n\nThis is a high-risk, final step. Please verify channel, source, schedule, and approval status.\n\nPublishing is always confirmation-gated and governed by backend approval rules.\nApproval and governance gates must be satisfied before execution.\n\nSelect Cancel to keep this item in the queue."
+public/control-center/pages/publishing.js:1637:  const approveBtn = $("publishingApproveBtn");
+public/control-center/pages/publishing.js:1642:        session.validation.contentItem = "Select or save a publishing draft before approval.";
+public/control-center/pages/publishing.js:1649:        showMessage?.("Local publishing draft approved.");
+public/control-center/pages/publishing.js:1662:  const failBtn = $("publishingFailBtn");
+public/control-center/pages/publishing.js:1667:        session.validation.contentItem = "Select a publishing item before marking it failed.";
+public/control-center/pages/publishing.js:1673:        showMessage?.("Local publishing draft marked failed.");
+public/control-center/pages/publishing.js:1678:      const confirmed = window.confirm("Confirm fail action\n\nAction: Mark this publishing item as failed.\nRisk: This creates a permanent failure record and stops the publishing lifecycle for this item.\nPolicy: Use only when this item cannot proceed and requires explicit failure logging.\n\nSelect Cancel to keep this item in its current state.");
+public/control-center/pages/publishing.js:1692:  const loadHandoffBtn = $("publishingLoadHandoffBtn");
+public/control-center/pages/publishing.js:1695:      const summary = extractHandoffSummary(handoff);
+public/control-center/pages/publishing.js:1710:      saveDraftLocally("Workflow output loaded into a local publishing draft.");
+public/control-center/pages/publishing.js:1715:  const pushAiBtn = $("publishingPushAiBtn");
+public/control-center/pages/publishing.js:1720:      const prompt = buildPublishingAiPrompt(projectName, current, session, handoff);
+public/control-center/pages/publishing.js:1731:        source_page: "publishing",
+public/control-center/pages/publishing.js:1734:          entity_type: "publishing_job",
+public/control-center/pages/publishing.js:1739:          publishing_item_id: current?.jobId || session.formSourceId || "",
+public/control-center/pages/publishing.js:1740:          publishing_title: current?.title || session.form.title || "",
+public/control-center/pages/publishing.js:1756:  const autoPrepareBtn = $("publishingAutoPrepareBtn");
+public/control-center/pages/publishing.js:1761:        publishingAutomationState.progress = "";
+public/control-center/pages/publishing.js:1762:        publishingAutomationState.result = "No safe publishing preparation steps available.";
+public/control-center/pages/publishing.js:1767:      publishingAutomationState.result = "";
+public/control-center/pages/publishing.js:1768:      publishingAutomationState.progress = `Step 0 / ${plan.length}`;
+public/control-center/pages/publishing.js:1769:      publishingAutomationEnabled = true;
+public/control-center/pages/publishing.js:1777:        publishingAutomationState.progress = `Step ${index} / ${total}: ${step.action} (${result.status})`;
+public/control-center/pages/publishing.js:1782:      publishingAutomationState.result = runResult.status === "success"
+public/control-center/pages/publishing.js:1785:      showMessage?.(publishingAutomationState.result);
+public/control-center/pages/publishing.js:1790:  const autoStopBtn = $("publishingAutoStopBtn");
+public/control-center/pages/publishing.js:1798:  const autoApproveBtn = $("publishingAutoApproveBtn");
+public/control-center/pages/publishing.js:1806:  const autoSkipBtn = $("publishingAutoSkipBtn");
+public/control-center/pages/publishing.js:1815:export const publishingRoute = {
+public/control-center/pages/publishing.js:1816:  id: "publishing",
+public/control-center/pages/publishing.js:1821:    description: "Review, approve, schedule, and control publishing with clear previews and real backend actions."
+public/control-center/pages/publishing.js:1824:    <section class="page is-active" data-page="publishing">
+public/control-center/pages/publishing.js:1825:      <div id="publishingRoot"></div>
+public/control-center/pages/publishing.js:1850:    const handoff = getPublishingHandoff(projectName, operations);
+public/control-center/pages/publishing.js:1852:    const root = $("publishingRoot");
+public/control-center/pages/publishing.js:1869:    const publishingAssets = filterAssetCategories(getAssetData(state), PUBLISHING_ASSET_KEYS);
+public/control-center/pages/publishing.js:1870:    const assetBlockers = publishingAssets.filter((item) => ["Missing", "Needs Review"].includes(item.status));
+public/control-center/pages/publishing.js:1871:    const recommendation = buildRecommendation({ queue, counts, assetBlockers, checks, handoff, globalBlockers });
+public/control-center/pages/publishing.js:1878:      ${renderPublishingReadinessSummary({ selectedItem, recommendation, blockers: assetBlockers, assetData: publishingAssets, escapeHtml })}
+public/control-center/pages/publishing.js:1879:      <div class="publishing-execution-center">
+public/control-center/pages/publishing.js:1883:        <div class="publishing-execution-grid">
+public/control-center/pages/publishing.js:1884:          <div class="publishing-main-column">
+public/control-center/pages/publishing.js:1887:            <section class="card publishing-card">
+public/control-center/pages/publishing.js:1891:                  <h3>${escapeHtml(safeText(selectedItem?.title, "Selected publishing item"))}</h3>
+public/control-center/pages/publishing.js:1895:              <div class="publishing-action-row">
+public/control-center/pages/publishing.js:1896:                <button id="publishingApproveBtn" class="btn btn-secondary" type="button" title="Prepare Governance Review. Confirmation required before execution. Backend approval rules apply.">Mark item ready for publishing</button>
+public/control-center/pages/publishing.js:1897:                <button id="publishingFailBtn" class="btn btn-secondary" type="button" title="Request Approval Review or mark as failed. Confirmation required before execution.">Mark publishing item as failed</button>
+public/control-center/pages/publishing.js:1902:          <aside class="publishing-side-column">
+public/control-center/pages/publishing.js:1903:            ${renderWorkflowHandoff(handoff, session, escapeHtml)}
+public/control-center/pages/publishing.js:1924:      render: () => publishingRoute.render({
+public/control-center/pages/publishing.js:1940:      handoff
+public/control-center/pages/operations-centers.js:2:const taskSessions = new Map();
+public/control-center/pages/operations-centers.js:86:    item?.task_id ||
+public/control-center/pages/operations-centers.js:172:  if (pageKey === "task-center") {
+public/control-center/pages/operations-centers.js:176:        preview: "Review the current task backlog and identify the highest-impact next work.",
+public/control-center/pages/operations-centers.js:177:        prompt: `Review the current task backlog for ${projectLabel}. Prioritize the next work based on blocked items, due-state, ownership, and operational impact.`
+public/control-center/pages/operations-centers.js:180:        label: "Unblock selected task",
+public/control-center/pages/operations-centers.js:181:        preview: "Explain how to unblock the current task and who should act next.",
+public/control-center/pages/operations-centers.js:186:        preview: "Highlight where task load or due-state suggests operational risk.",
+public/control-center/pages/operations-centers.js:197:        prompt: `Identify overdue task risk for ${projectLabel}. Rank the most critical overdue items and explain likely downstream execution impact if unresolved.`
+public/control-center/pages/operations-centers.js:236:        preview: "Assess execution health across workflows, media, and publishing jobs.",
+public/control-center/pages/operations-centers.js:237:        prompt: `Summarize current execution health for ${projectLabel} across workflows, media, and publishing jobs. Highlight failure clusters, retry patterns, and risk areas.`
+public/control-center/pages/operations-centers.js:256:      prompt: `Summarize the current operational notification signal for ${projectLabel} with focus on ${focusLabel}. Highlight approvals, provider health, publishing events, and urgent follow-up.`
+public/control-center/pages/operations-centers.js:269:  const taskCenter = asObject(ops.task_center);
+public/control-center/pages/operations-centers.js:274:  const activeTasks = Number(taskCenter.active_count || taskCenter.open_count || 0);
+public/control-center/pages/operations-centers.js:334:      route: "publishing"
+public/control-center/pages/operations-centers.js:348:      route: "governance"
+public/control-center/pages/operations-centers.js:365:    || "Cross-center runtime health, queue pressure, failures, publishing, governance, and provider signals.";
+public/control-center/pages/operations-centers.js:437:    "Incoming task handoff"
+public/control-center/pages/operations-centers.js:442:    incomingHandoff.payload?.handoff_intent ||
+public/control-center/pages/operations-centers.js:444:    "Review-only handoff prepared by another MH-OS surface."
+public/control-center/pages/operations-centers.js:449:    <section class="panel ops-incoming-handoff mhos-clean-surface">
+public/control-center/pages/operations-centers.js:454:          <p>Review-only context from ${escapeHtml(titleCase(source))}. No durable task is created automatically.</p>
+public/control-center/pages/operations-centers.js:471:        <button class="btn btn-secondary" type="button" id="taskCenterCopyHandoffBtn">Copy Handoff Summary</button>
+public/control-center/pages/operations-centers.js:482:  taskCenter,
+public/control-center/pages/operations-centers.js:500:    ? "No tasks match the current filters."
+public/control-center/pages/operations-centers.js:501:    : "No tasks are available for this project yet. Use Refresh or adjust project context to load latest assignments.";
+public/control-center/pages/operations-centers.js:512:    : "No task is selected.";
+public/control-center/pages/operations-centers.js:517:    <section class="page is-active" data-page="task-center">
+public/control-center/pages/operations-centers.js:525:            <p class="std-context-description">Durable operational tasks with ownership, due-state, linked entities, and route-aware follow-up for ${escapeHtml(projectLabel)}.</p>
+public/control-center/pages/operations-centers.js:527:              <span class="std-context-chip"><span>Total</span><strong>${escapeHtml(formatCount(taskCenter.total))}</strong></span>
+public/control-center/pages/operations-centers.js:528:              <span class="std-context-chip"><span>Open</span><strong>${escapeHtml(formatCount(taskCenter.open_count))}</strong></span>
+public/control-center/pages/operations-centers.js:529:              <span class="std-context-chip is-warning"><span>Blocked</span><strong>${escapeHtml(formatCount(taskCenter.blocked_count))}</strong></span>
+public/control-center/pages/operations-centers.js:530:              <span class="std-context-chip is-danger"><span>Overdue</span><strong>${escapeHtml(formatCount(taskCenter.overdue_count))}</strong></span>
+public/control-center/pages/operations-centers.js:531:              <span class="std-context-chip is-warning"><span>Due Soon</span><strong>${escapeHtml(formatCount(taskCenter.due_soon_count))}</strong></span>
+public/control-center/pages/operations-centers.js:536:            <button class="btn btn-secondary std-context-btn" type="button" id="taskCenterRefreshBtn">Refresh</button>
+public/control-center/pages/operations-centers.js:553:                <p>Filter by focus, owner, source, and priority to inspect task risk quickly.</p>
+public/control-center/pages/operations-centers.js:559:              { value: "all", label: "All Tasks", count: formatCount(taskCenter.total) },
+public/control-center/pages/operations-centers.js:560:              { value: "open", label: "Open", count: formatCount(taskCenter.open_count) },
+public/control-center/pages/operations-centers.js:561:              { value: "blocked", label: "Blocked", count: formatCount(taskCenter.blocked_count) },
+public/control-center/pages/operations-centers.js:562:              { value: "overdue", label: "Overdue", count: formatCount(taskCenter.overdue_count) },
+public/control-center/pages/operations-centers.js:563:              { value: "due_soon", label: "Due Soon", count: formatCount(taskCenter.due_soon_count) }
+public/control-center/pages/operations-centers.js:567:              <input id="taskCenterSearch" class="command-input" type="text" placeholder="Search tasks, owners, domains..." value="${escapeHtml(session.search)}">
+public/control-center/pages/operations-centers.js:568:              <select id="taskCenterPriority" class="sidebar-select">${renderFilterOptions(filters.priorities, session.priority, escapeHtml, "All priorities")}</select>
+public/control-center/pages/operations-centers.js:569:              <select id="taskCenterOwner" class="sidebar-select">${renderFilterOptions(filters.owners, session.owner, escapeHtml, "All owners")}</select>
+public/control-center/pages/operations-centers.js:570:              <select id="taskCenterSource" class="sidebar-select">${renderFilterOptions(filters.source_pages, session.source, escapeHtml, "All sources")}</select>
+public/control-center/pages/operations-centers.js:611:                  <h3>${escapeHtml(selectedItem?.title || "Select a task")}</h3>
+public/control-center/pages/operations-centers.js:612:                  <p>${escapeHtml(selectedItem ? "Review owner, due-state, linked work, and execution context." : "Choose a task in the table to inspect details.")}</p>
+public/control-center/pages/operations-centers.js:619:                    <p>${escapeHtml(selectedItem.description || "No task description available.")}</p>
+public/control-center/pages/operations-centers.js:632:              ` : `<div class="empty-box">No task is selected.</div>`}
+public/control-center/pages/operations-centers.js:644:                <button class="btn btn-primary" type="button" id="taskCenterRefreshBtnRail">Refresh Task Center</button>
+public/control-center/pages/operations-centers.js:646:                <button class="btn btn-secondary" type="button" id="taskCenterCopySummaryBtn">Copy Selected Task Summary</button>
+public/control-center/pages/operations-centers.js:653:                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Delete task (deferred: mutation safety pass)</button>
+public/control-center/pages/operations-centers.js:662:                  <p>Context-only handoff: opens AI with prompt/context only. No approval, publishing, or backend execution is performed.</p>
+public/control-center/pages/operations-centers.js:681:    <textarea id="taskCenterSummaryBuffer" hidden>${escapeHtml(selectedSummary)}</textarea>
+public/control-center/pages/operations-centers.js:690:  const taskCenter = asObject(ops.task_center);
+public/control-center/pages/operations-centers.js:691:  const filters = asObject(taskCenter.filters);
+public/control-center/pages/operations-centers.js:692:  const session = ensureSession(taskSessions, projectName, {
+public/control-center/pages/operations-centers.js:703:  let items = asArray(taskCenter.items).map((item, index) => ({
+public/control-center/pages/operations-centers.js:705:    _opsKey: getOpsItemKey(item, index, "task")
+public/control-center/pages/operations-centers.js:717:  const prompts = buildOpsAssistantPrompts("task-center", projectName, selectedItem, titleCase(session.focus || "all"));
+public/control-center/pages/operations-centers.js:718:  const incomingHandoff = getSharedHandoff(projectName, "task-center", ops);
+public/control-center/pages/operations-centers.js:724:    taskCenter,
+public/control-center/pages/operations-centers.js:735:    if (context.fetchProjectTaskCenter && projectName) {
+public/control-center/pages/operations-centers.js:739:      context.fetchProjectTaskCenter(projectName)
+public/control-center/pages/operations-centers.js:744:          ops.task_center = liveData;
+public/control-center/pages/operations-centers.js:758:  root.querySelector("#taskCenterRefreshBtn")?.addEventListener("click", refreshTaskCenter);
+public/control-center/pages/operations-centers.js:759:  root.querySelector("#taskCenterRefreshBtnRail")?.addEventListener("click", refreshTaskCenter);
+public/control-center/pages/operations-centers.js:760:  root.querySelector("#taskCenterCopySummaryBtn")?.addEventListener("click", async () => {
+public/control-center/pages/operations-centers.js:761:    const buffer = root.querySelector("#taskCenterSummaryBuffer");
+public/control-center/pages/operations-centers.js:762:    const text = buffer?.value || "No task is selected.";
+public/control-center/pages/operations-centers.js:773:      context.showError?.("Failed to copy task summary.");
+public/control-center/pages/operations-centers.js:777:  root.querySelector("#taskCenterCopyHandoffBtn")?.addEventListener("click", async () => {
+public/control-center/pages/operations-centers.js:782:          `Title: ${asString(incomingHandoff.title || incomingHandoff.summary || incomingHandoff.payload?.title || incomingHandoff.payload?.summary || "Incoming task handoff")}`,
+public/control-center/pages/operations-centers.js:783:          `Summary: ${asString(incomingHandoff.description || incomingHandoff.payload?.description || incomingHandoff.payload?.handoff_intent || incomingHandoff.payload?.prompt || "Review-only handoff.")}`,
+public/control-center/pages/operations-centers.js:786:      : "No incoming task handoff.";
+public/control-center/pages/operations-centers.js:792:        const buffer = root.querySelector("#taskCenterSummaryBuffer");
+public/control-center/pages/operations-centers.js:800:      context.showMessage?.("Incoming handoff summary copied.");
+public/control-center/pages/operations-centers.js:802:      context.showError?.("Failed to copy incoming handoff summary.");
+public/control-center/pages/operations-centers.js:813:  root.querySelector("#taskCenterSearch")?.addEventListener("input", (event) => {
+public/control-center/pages/operations-centers.js:817:  [["#taskCenterPriority", "priority"], ["#taskCenterOwner", "owner"], ["#taskCenterSource", "source"]].forEach(([selector, key]) => {
+public/control-center/pages/operations-centers.js:896:            <p class="std-context-description">Workflow, content, media, approval, publishing, and sync queues aligned into one operational queue surface for ${escapeHtml(projectLabel)}.</p>
+public/control-center/pages/operations-centers.js:1015:                  <p>Context-only handoff: opens AI with prompt/context only. No approval, publishing, or backend execution is performed.</p>
+public/control-center/pages/operations-centers.js:1076:    if (context.fetchProjectQueueCenter && projectName) {
+public/control-center/pages/operations-centers.js:1080:      context.fetchProjectQueueCenter(projectName)
+public/control-center/pages/operations-centers.js:1187:            <p class="std-context-description">Track running, completed, and failed execution across workflows, media, and publishing for ${escapeHtml(projectLabel)}.</p>
+public/control-center/pages/operations-centers.js:1229:                ${["all", "workflow", "media", "publishing"].map((value) => `<option value="${escapeHtml(value)}"${value === session.kind ? " selected" : ""}>${escapeHtml(titleCase(value))}</option>`).join("")}
+public/control-center/pages/operations-centers.js:1310:                  <p>Context-only handoff: opens AI with prompt/context only. No approval, publishing, or backend execution is performed.</p>
+public/control-center/pages/operations-centers.js:1369:    if (context.fetchProjectJobMonitor && projectName) {
+public/control-center/pages/operations-centers.js:1373:      context.fetchProjectJobMonitor(projectName)
+public/control-center/pages/operations-centers.js:1462:  const workflowAlerts = asArray(notificationCenter.workflow_completion_alerts).map((item) => ({ ...item, item_type: "workflow" }));
+public/control-center/pages/operations-centers.js:1469:    ...workflowAlerts
+public/control-center/pages/operations-centers.js:1542:            <p class="std-context-description">Route-aware operational alerts for approvals, sync issues, publishing, claim risk, provider health, and workflow completion for ${escapeHtml(projectLabel)}.</p>
+public/control-center/pages/operations-centers.js:1666:                  <p>Context-only handoff: opens AI with prompt/context only. No approval, publishing, or backend execution is performed.</p>
+public/control-center/pages/operations-centers.js:1689:    if (context.fetchProjectNotificationCenter && projectName) {
+public/control-center/pages/operations-centers.js:1693:      context.fetchProjectNotificationCenter(projectName)
+public/control-center/pages/operations-centers.js:1747:export const taskCenterRoute = {
+public/control-center/pages/operations-centers.js:1748:  id: "task-center",
+public/control-center/pages/operations-centers.js:1753:    description: "Manage durable tasks, owners, due dates, priorities, filters, and linked operational entities in one premium execution surface."
+public/control-center/pages/operations-centers.js:1755:  template: `<section class="page is-active" data-page="task-center"><div class="ops-shell"></div></section>`,
+public/control-center/pages/operations-centers.js:1760:    // Render immediately from state as fallback
+public/control-center/pages/operations-centers.js:1765:      if (!projectName || !context.fetchProjectTaskCenter) return;
+public/control-center/pages/operations-centers.js:1766:      context.fetchProjectTaskCenter(projectName)
+public/control-center/pages/operations-centers.js:1770:          ops.task_center = liveData;
+public/control-center/pages/operations-centers.js:1788:    description: "Control workflow, content, media, approval, publishing, and sync queues from one central operations surface."
+public/control-center/pages/operations-centers.js:1798:      if (!projectName || !context.fetchProjectQueueCenter) return;
+public/control-center/pages/operations-centers.js:1810:      context.fetchProjectQueueCenter(projectName)
+public/control-center/pages/operations-centers.js:1836:    description: "Track running jobs, failures, retries, health state, and execution logs across workflows, media, and publishing."
+public/control-center/pages/operations-centers.js:1846:      if (!projectName || !context.fetchProjectJobMonitor) return;
+public/control-center/pages/operations-centers.js:1858:      context.fetchProjectJobMonitor(projectName)
+public/control-center/pages/operations-centers.js:1884:    description: "Review sync failures, pending approvals, publish events, provider disconnects, claim risks, and workflow completion alerts."
+public/control-center/pages/operations-centers.js:1894:      if (!projectName || !context.fetchProjectNotificationCenter) return;
+public/control-center/pages/operations-centers.js:1906:      context.fetchProjectNotificationCenter(projectName)
+public/control-center/pages/operations-centers.js:1934:  const taskCount = asArray(operations.tasks?.items || operations.tasks).length;
+public/control-center/pages/operations-centers.js:1941:      route: "task-center",
+public/control-center/pages/operations-centers.js:1944:      count: taskCount,
+public/control-center/pages/operations-centers.js:1945:      description: "Review generated tasks, owners, priorities, and execution readiness.",
+public/control-center/pages/operations-centers.js:1984:            <span class="std-context-chip"><span>Tasks</span><strong>${context.escapeHtml(formatCount(taskCount))}</strong></span>
+public/control-center/pages/operations-centers.js:1994:          description: "Use this page as the routing hub from AI Team drafts, workflows, tasks, and runtime signals into the correct operations workspace.",
+public/control-center/pages/operations-centers.js:2005:                  <p>AI Team can prepare drafts, tasks, workflows, and handoffs. This overview routes the work to the correct operations center for review and monitoring.</p>
+public/control-center/pages/operations-centers.js:2032:                  <h3>Operations Lead handoff</h3>
+public/control-center/pages/operations-centers.js:2038:                <button class="btn btn-ghost" type="button" data-route="workflows">Open Workflows</button>
+public/control-center/pages/operations-centers.js:2047:                  <p>This overview does not execute jobs, mutate tasks, send notifications, or approve workflows. It only routes to the owning workspace.</p>
+public/control-center/pages/operations-centers.js:2051:                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Planned: create task from draft</button>
+public/control-center/pages/operations-centers.js:2052:                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Planned: execute workflow</button>
+public/control-center/pages/ai-command/tool-dock.js:336:      destinations: ["chat-preview", "campaign-studio", "content-studio", "workflows"],
+public/control-center/pages/ai-command/tool-dock.js:349:      destinations: ["chat-preview", "campaign-studio", "workflows", "publishing"],
+public/control-center/pages/ai-command/tool-dock.js:363:      sourceTypes: ["current_chat", "market_notes", "customer_notes", "insights_report", "library_source", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:388:      destinations: ["chat-preview", "campaign-studio", "content-studio", "workflows", "publishing"],
+public/control-center/pages/ai-command/tool-dock.js:390:      outputTypes: ["funnel_map", "content_needs", "handoff_points", "retention_notes"],
+public/control-center/pages/ai-command/tool-dock.js:391:      template: "Map a funnel for {projectName}. Include awareness, consideration, conversion, retention, content needs, and handoff points."
+public/control-center/pages/ai-command/tool-dock.js:400:      frontendOwnerPage: "workflows",
+public/control-center/pages/ai-command/tool-dock.js:401:      destinations: ["chat-preview", "workflows", "task", "campaign-studio"],
+public/control-center/pages/ai-command/tool-dock.js:417:      destinations: ["chat-preview", "content-studio", "library", "media-studio", "publishing", "compliance"],
+public/control-center/pages/ai-command/tool-dock.js:418:      sourceTypes: ["current_chat", "library_folder", "brand_profile", "product_data", "legal_pricing_docs", "research_proof_docs", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:483:      sourceTypes: ["current_chat", "library_folder", "brand_profile", "product_data", "legal_pricing_docs", "research_proof_docs", "source_of_truth_assets", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:485:      template: "Prepare source context for the next Content Writer task for {projectName}. Ask which source should be used: current chat, Library folder, brand profile, product data, legal/pricing documents, research/proof documents, source-of-truth assets, or manual input."
+public/control-center/pages/ai-command/tool-dock.js:508:      destinations: ["chat-preview", "content-studio", "publishing"],
+public/control-center/pages/ai-command/tool-dock.js:521:      destinations: ["content-studio", "library", "media-studio", "publishing", "compliance", "task", "handoff"],
+public/control-center/pages/ai-command/tool-dock.js:523:      outputTypes: ["content_studio_draft", "library_save", "media_brief", "publishing_package", "compliance_review", "task_preview", "handoff_preview"],
+public/control-center/pages/ai-command/tool-dock.js:527:  media: [
+public/control-center/pages/ai-command/tool-dock.js:535:      frontendOwnerPage: "media-studio",
+public/control-center/pages/ai-command/tool-dock.js:536:      destinations: ["chat-preview", "media-studio", "library", "content-studio", "publishing"],
+public/control-center/pages/ai-command/tool-dock.js:548:      frontendOwnerPage: "media-studio",
+public/control-center/pages/ai-command/tool-dock.js:549:      destinations: ["chat-preview", "media-studio", "library"],
+public/control-center/pages/ai-command/tool-dock.js:561:      frontendOwnerPage: "media-studio",
+public/control-center/pages/ai-command/tool-dock.js:562:      destinations: ["chat-preview", "media-studio", "library"],
+public/control-center/pages/ai-command/tool-dock.js:574:      frontendOwnerPage: "media-studio",
+public/control-center/pages/ai-command/tool-dock.js:575:      destinations: ["chat-preview", "media-studio", "library", "workflows"],
+public/control-center/pages/ai-command/tool-dock.js:587:      frontendOwnerPage: "media-studio",
+public/control-center/pages/ai-command/tool-dock.js:588:      destinations: ["chat-preview", "media-studio", "content-studio", "publishing"],
+public/control-center/pages/ai-command/tool-dock.js:600:      frontendOwnerPage: "media-studio",
+public/control-center/pages/ai-command/tool-dock.js:601:      destinations: ["chat-preview", "media-studio", "governance", "library"],
+public/control-center/pages/ai-command/tool-dock.js:608:  video_lead: [
+public/control-center/pages/ai-command/tool-dock.js:616:      frontendOwnerPage: "media-studio",
+public/control-center/pages/ai-command/tool-dock.js:617:      destinations: ["chat-preview", "media-studio", "content-studio", "publishing"],
+public/control-center/pages/ai-command/tool-dock.js:619:      outputTypes: ["reel_script", "short_video_script", "hook_variants", "overlay_copy"],
+public/control-center/pages/ai-command/tool-dock.js:620:      template: "Write a short-form reel script for {projectName}. Include hook, scene sequence, voiceover, text overlays, CTA, and shot notes."
+public/control-center/pages/ai-command/tool-dock.js:629:      frontendOwnerPage: "media-studio",
+public/control-center/pages/ai-command/tool-dock.js:630:      destinations: ["chat-preview", "media-studio", "library", "publishing"],
+public/control-center/pages/ai-command/tool-dock.js:642:      frontendOwnerPage: "media-studio",
+public/control-center/pages/ai-command/tool-dock.js:643:      destinations: ["chat-preview", "media-studio", "workflows", "library"],
+public/control-center/pages/ai-command/tool-dock.js:649:      id: "voiceover",
+public/control-center/pages/ai-command/tool-dock.js:655:      frontendOwnerPage: "media-studio",
+public/control-center/pages/ai-command/tool-dock.js:656:      destinations: ["chat-preview", "media-studio", "content-studio"],
+public/control-center/pages/ai-command/tool-dock.js:657:      sourceTypes: ["current_chat", "script_draft", "campaign_brief", "brand_voice", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:658:      outputTypes: ["voiceover_script", "audio_direction", "pacing_notes", "tone_variants"],
+public/control-center/pages/ai-command/tool-dock.js:659:      template: "Draft a voiceover script for {projectName}. Include tone, pacing, hook, proof points, and CTA."
+public/control-center/pages/ai-command/tool-dock.js:662:      id: "video-cta",
+public/control-center/pages/ai-command/tool-dock.js:668:      frontendOwnerPage: "media-studio",
+public/control-center/pages/ai-command/tool-dock.js:669:      destinations: ["chat-preview", "media-studio", "publishing", "ads-manager"],
+public/control-center/pages/ai-command/tool-dock.js:670:      sourceTypes: ["current_chat", "campaign_brief", "offer_data", "video_script", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:671:      outputTypes: ["video_cta_options", "soft_cta", "direct_cta", "urgency_cta", "brand_cta"],
+public/control-center/pages/ai-command/tool-dock.js:672:      template: "Create CTA options for a video campaign for {projectName}. Include soft, direct, urgency, and brand-led versions."
+public/control-center/pages/ai-command/tool-dock.js:684:      frontendOwnerPage: "publishing",
+public/control-center/pages/ai-command/tool-dock.js:685:      destinations: ["chat-preview", "publishing", "governance", "content-studio", "media-studio"],
+public/control-center/pages/ai-command/tool-dock.js:686:      sourceTypes: ["content_draft", "media_asset", "publishing_package", "approval_notes", "current_chat", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:687:      outputTypes: ["publishing_readiness_check", "missing_items", "channel_fit_review", "risk_notes"],
+public/control-center/pages/ai-command/tool-dock.js:688:      template: "Review publishing readiness for {projectName}. Check copy, assets, channel fit, schedule, approvals, and missing items. Do not publish."
+public/control-center/pages/ai-command/tool-dock.js:697:      frontendOwnerPage: "publishing",
+public/control-center/pages/ai-command/tool-dock.js:698:      destinations: ["chat-preview", "publishing", "content-studio", "media-studio"],
+public/control-center/pages/ai-command/tool-dock.js:699:      sourceTypes: ["content_draft", "media_asset", "campaign_brief", "channel_notes", "library_source", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:710:      frontendOwnerPage: "publishing",
+public/control-center/pages/ai-command/tool-dock.js:711:      destinations: ["chat-preview", "publishing", "workflows"],
+public/control-center/pages/ai-command/tool-dock.js:712:      sourceTypes: ["publishing_package", "campaign_timeline", "channel_notes", "approval_notes", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:714:      template: "Draft a publishing schedule for {projectName}. Include channels, timing, dependencies, review gates, and next actions."
+public/control-center/pages/ai-command/tool-dock.js:723:      frontendOwnerPage: "publishing",
+public/control-center/pages/ai-command/tool-dock.js:724:      destinations: ["chat-preview", "publishing", "content-studio", "insights"],
+public/control-center/pages/ai-command/tool-dock.js:736:      frontendOwnerPage: "governance",
+public/control-center/pages/ai-command/tool-dock.js:737:      destinations: ["chat-preview", "governance", "publishing", "workflows"],
+public/control-center/pages/ai-command/tool-dock.js:738:      sourceTypes: ["final_copy", "media_asset", "approval_notes", "claim_review", "publishing_package", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:753:      destinations: ["chat-preview", "ads-manager", "content-studio", "governance"],
+public/control-center/pages/ai-command/tool-dock.js:766:      destinations: ["chat-preview", "ads-manager", "content-studio", "governance"],
+public/control-center/pages/ai-command/tool-dock.js:780:      sourceTypes: ["audience_notes", "insights_report", "campaign_brief", "customer_notes", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:792:      destinations: ["chat-preview", "ads-manager", "media-studio", "insights", "workflows"],
+public/control-center/pages/ai-command/tool-dock.js:805:      destinations: ["chat-preview", "ads-manager", "content-studio", "governance"],
+public/control-center/pages/ai-command/tool-dock.js:834:      destinations: ["chat-preview", "insights", "campaign-studio", "workflows"],
+public/control-center/pages/ai-command/tool-dock.js:860:      destinations: ["chat-preview", "insights", "campaign-studio", "workflows"],
+public/control-center/pages/ai-command/tool-dock.js:888:      frontendOwnerPage: "governance",
+public/control-center/pages/ai-command/tool-dock.js:889:      destinations: ["chat-preview", "governance", "content-studio", "publishing"],
+public/control-center/pages/ai-command/tool-dock.js:901:      frontendOwnerPage: "governance",
+public/control-center/pages/ai-command/tool-dock.js:902:      destinations: ["chat-preview", "governance", "content-studio"],
+public/control-center/pages/ai-command/tool-dock.js:914:      frontendOwnerPage: "governance",
+public/control-center/pages/ai-command/tool-dock.js:915:      destinations: ["chat-preview", "governance", "library", "workflows"],
+public/control-center/pages/ai-command/tool-dock.js:916:      sourceTypes: ["content_draft", "claim_list", "product_data", "legal_doc", "research_proof_docs", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:927:      frontendOwnerPage: "governance",
+public/control-center/pages/ai-command/tool-dock.js:928:      destinations: ["chat-preview", "governance", "workflows", "publishing"],
+public/control-center/pages/ai-command/tool-dock.js:929:      sourceTypes: ["workflow_draft", "privacy_policy", "tracking_plan", "data_use_notes", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:931:      template: "Review GDPR/privacy considerations for this content or workflow. Flag consent, tracking, data use, and disclosure risks."
+public/control-center/pages/ai-command/tool-dock.js:940:      frontendOwnerPage: "governance",
+public/control-center/pages/ai-command/tool-dock.js:941:      destinations: ["chat-preview", "governance", "publishing", "workflows"],
+public/control-center/pages/ai-command/tool-dock.js:950:      id: "task-plan",
+public/control-center/pages/ai-command/tool-dock.js:956:      frontendOwnerPage: "workflows",
+public/control-center/pages/ai-command/tool-dock.js:957:      destinations: ["chat-preview", "workflows", "task", "content-studio", "media-studio"],
+public/control-center/pages/ai-command/tool-dock.js:958:      sourceTypes: ["current_chat", "ai_preview", "content_draft", "media_job", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:959:      outputTypes: ["task_plan", "owner_map", "priority_list", "dependency_notes"],
+public/control-center/pages/ai-command/tool-dock.js:960:      template: "Turn this into a task plan for {projectName}. Include owners, priorities, dependencies, risks, and next steps."
+public/control-center/pages/ai-command/tool-dock.js:963:      id: "workflow",
+public/control-center/pages/ai-command/tool-dock.js:969:      frontendOwnerPage: "workflows",
+public/control-center/pages/ai-command/tool-dock.js:970:      destinations: ["chat-preview", "workflows", "task", "handoff"],
+public/control-center/pages/ai-command/tool-dock.js:971:      sourceTypes: ["current_chat", "handoff_summary", "operations_snapshot", "approval_notes", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:972:      outputTypes: ["workflow_draft", "step_sequence", "trigger_notes", "review_gates", "execution_risks"],
+public/control-center/pages/ai-command/tool-dock.js:973:      template: "Draft a workflow for {projectName}. Include steps, triggers, inputs, outputs, owners, review gates, and execution risks."
+public/control-center/pages/ai-command/tool-dock.js:976:      id: "handoff",
+public/control-center/pages/ai-command/tool-dock.js:982:      frontendOwnerPage: "workflows",
+public/control-center/pages/ai-command/tool-dock.js:983:      destinations: ["chat-preview", "handoff", "workflows", "content-studio", "media-studio", "publishing", "governance"],
+public/control-center/pages/ai-command/tool-dock.js:984:      sourceTypes: ["current_chat", "ai_preview", "content_draft", "media_job", "publishing_package", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:985:      outputTypes: ["handoff_summary", "destination_brief", "required_inputs", "review_notes"],
+public/control-center/pages/ai-command/tool-dock.js:986:      template: "Prepare a handoff summary for {projectName}. Include context, destination workspace, owner, required inputs, and review notes."
+public/control-center/pages/ai-command/tool-dock.js:995:      frontendOwnerPage: "workflows",
+public/control-center/pages/ai-command/tool-dock.js:996:      destinations: ["chat-preview", "workflows", "campaign-studio", "publishing"],
+public/control-center/pages/ai-command/tool-dock.js:1008:      frontendOwnerPage: "workflows",
+public/control-center/pages/ai-command/tool-dock.js:1009:      destinations: ["chat-preview", "workflows", "governance", "publishing"],
+public/control-center/pages/ai-command/tool-dock.js:1016:  customer_ops: [
+public/control-center/pages/ai-command/tool-dock.js:1025:      destinations: ["chat-preview", "operations-centers", "task", "governance"],
+public/control-center/pages/ai-command/tool-dock.js:1026:      sourceTypes: ["customer_thread", "support_notes", "policy_doc", "faq_source", "current_chat", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:1028:      template: "Draft a safe customer reply for {projectName}. Do not send it. Include empathy, answer, next step, and escalation note if needed."
+public/control-center/pages/ai-command/tool-dock.js:1038:      destinations: ["chat-preview", "operations-centers", "task", "workflows"],
+public/control-center/pages/ai-command/tool-dock.js:1039:      sourceTypes: ["customer_thread", "support_notes", "order_case_summary", "current_chat", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:1041:      template: "Prepare a ticket draft for {projectName}. Include issue summary, priority, owner, customer impact, and missing information."
+public/control-center/pages/ai-command/tool-dock.js:1051:      destinations: ["chat-preview", "operations-centers", "task", "workflows"],
+public/control-center/pages/ai-command/tool-dock.js:1052:      sourceTypes: ["customer_thread", "sla_policy", "support_notes", "current_chat", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:1054:      template: "Review SLA or response risk for this customer context. Flag urgency, escalation needs, and safe next actions."
+public/control-center/pages/ai-command/tool-dock.js:1064:      destinations: ["chat-preview", "operations-centers", "workflows", "sales-crm-draft"],
+public/control-center/pages/ai-command/tool-dock.js:1065:      sourceTypes: ["customer_thread", "support_notes", "current_chat", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:1067:      template: "Summarize the customer context for {projectName}. Include issue, sentiment, open questions, risk, and next response."
+public/control-center/pages/ai-command/tool-dock.js:1071:  sales_crm: [
+public/control-center/pages/ai-command/tool-dock.js:1079:      frontendOwnerPage: "workflows",
+public/control-center/pages/ai-command/tool-dock.js:1080:      destinations: ["chat-preview", "workflows", "content-studio", "sales-crm-draft"],
+public/control-center/pages/ai-command/tool-dock.js:1083:      template: "Create a sales pitch for {projectName}. Include value proposition, customer pain, proof, offer, CTA, and follow-up note."
+public/control-center/pages/ai-command/tool-dock.js:1092:      frontendOwnerPage: "workflows",
+public/control-center/pages/ai-command/tool-dock.js:1093:      destinations: ["chat-preview", "content-studio", "workflows", "sales-crm-draft"],
+public/control-center/pages/ai-command/tool-dock.js:1105:      frontendOwnerPage: "workflows",
+public/control-center/pages/ai-command/tool-dock.js:1106:      destinations: ["chat-preview", "workflows", "content-studio", "governance"],
+public/control-center/pages/ai-command/tool-dock.js:1118:      frontendOwnerPage: "workflows",
+public/control-center/pages/ai-command/tool-dock.js:1119:      destinations: ["chat-preview", "workflows", "operations-centers", "sales-crm-draft"],
+public/control-center/pages/ai-command/tool-dock.js:1120:      sourceTypes: ["lead_context", "crm_profile_summary", "sales_notes", "customer_notes", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:1267:          Preparation-only: this drawer creates a composer-ready instruction. It does not publish, send, route, create CRM records, run workflows, or mutate backend data.
+public/control-center/pages/ai-command/tool-dock.js:1336:    crm: "CRM",
+public/control-center/pages/ai-command/tool-dock.js:1487:    "- Do not publish, send, route, save, overwrite, create CRM records, or run workflows.",
+public/control-center/pages/ai-command/tool-dock.js:1649:      // Library Source Bridge workflow
+public/control-center/pages/home.js:135:  if (/(publish|schedule|queue)/.test(text)) return "publishing";
+public/control-center/pages/home.js:144:  const tasks = asArray(operations.tasks?.items);
+public/control-center/pages/home.js:171:    { id: "video_lead", name: "Video Lead", fallback: "Queue the next motion and short-form variants." },
+public/control-center/pages/home.js:172:    { id: "publisher", name: "Publisher", fallback: "Prepare publishing packages, schedules, and manual handoffs." },
+public/control-center/pages/home.js:181:    const roleTasks = tasks.filter((item) => asString(item?.owner_role).toLowerCase() === role.id);
+public/control-center/pages/home.js:221:  const learning = asObject(activity.learning);
+public/control-center/pages/home.js:272:  const learningLessons = asArray(learning.system_lessons);
+public/control-center/pages/home.js:273:  const tasks = asArray(operations.tasks?.items);
+public/control-center/pages/home.js:282:  const intelligenceScore = insightsRecommendations.length + learningLessons.length;
+public/control-center/pages/home.js:321:  const pendingTasks = tasks.filter((item) => {
+public/control-center/pages/home.js:337:  const workflowImpact = criticalGaps.length
+public/control-center/pages/home.js:355:  const mediaJobs = asArray(operations.media_jobs?.items);
+public/control-center/pages/home.js:356:  const mediaReadyCount = mediaJobs.filter((item) => statusTone(item?.status) === "success").length;
+public/control-center/pages/home.js:358:  const publishingQueue = asArray(operations.queues?.items).filter((item) =>
+public/control-center/pages/home.js:359:    asString(item.entity_type) === "publishing_job" || asString(item.queue_type) === "publishing"
+public/control-center/pages/home.js:361:  const publishReadyCount = publishingQueue.filter((item) => {
+public/control-center/pages/home.js:496:      workflowImpact,
+public/control-center/pages/home.js:557:        hint: "Notifications, tasks, approvals",
+public/control-center/pages/home.js:592:      mediaReadiness: mediaReadyCount,
+public/control-center/pages/home.js:612:        : "No execution recorded yet — start with a campaign or publishing package to create the first signal.",
+public/control-center/pages/home.js:614:      feedback: asString(learningLessons[0]).trim() || "Connect insights or run a reviewed campaign so the learning engine can capture feedback."
+public/control-center/pages/home.js:704:            ${escapeHtml(dashboard.nextBestAction.workflowImpact)}
+public/control-center/pages/home.js:786:                  <strong>${escapeHtml(formatCount(dashboard.launchSnapshot.mediaReadiness))}</strong>
+public/control-center/pages/home.js:937:              <p class="mhos-workflow-chain-note">Roles represent operational handoffs, not personas.</p>
+public/control-center/pages/home.js:938:              <div class="mhos-workflow-chain">
+public/control-center/pages/home.js:940:                  // Projection-only workflow chain
+public/control-center/pages/home.js:941:                  // Use aiTeamCards as workflow steps for now
+public/control-center/pages/home.js:942:                  const workflowChain = aiTeamCards;
+public/control-center/pages/home.js:943:                  const activeIdx = workflowChain.findIndex(card => card.status === "Active role");
+public/control-center/pages/home.js:944:                  const blockedIdx = workflowChain.findIndex(card => card.status.toLowerCase().includes("blocked"));
+public/control-center/pages/home.js:945:                  return workflowChain.map((card, idx) => {
+public/control-center/pages/home.js:949:                      <div class="mhos-workflow-step${isActive ? ' mhos-workflow-active' : ''}${isBlocked ? ' mhos-workflow-blocked' : ''}" data-role-id="${escapeHtml(card.id)}">
+public/control-center/pages/home.js:957:                        ${isActive ? `<div class="mhos-workflow-handoff" aria-label="Active handoff"></div>` : ""}
+public/control-center/pages/home.js:958:                        ${isBlocked ? `<div class="mhos-workflow-blocked" aria-label="Blocked step"></div>` : ""}
+public/control-center/pages/home.js:1033:        video_lead: `Act as the Video Lead for ${projectLabel}. Review the project context and suggest the next best short-form/video actions. Do not execute anything; prepare guidance only.`,
+public/control-center/pages/home.js:1034:        publisher: `Act as the Publisher for ${projectLabel}. Review publishing readiness, scheduled jobs, blockers, and what must be checked before publishing. Do not execute anything; prepare guidance only.`,
+public/control-center/pages/home.js:1035:        ads_operator: `Act as the Ads Optimizer for ${projectLabel}. Review campaign readiness, channels, and paid media opportunities. Suggest next ad actions safely. Do not execute anything; prepare guidance only.`,
+public/control-center/pages/home.js:1037:        compliance_reviewer: `Act as the Compliance Reviewer for ${projectLabel}. Review launch blockers, claims, approvals, and publishing safety. Tell me what must be checked before release. Do not execute anything; prepare guidance only.`,
+public/control-center/pages/home.js:1038:        admin: `Act as the Operations Lead for ${projectLabel}. Review tasks, blockers, failed jobs, and execution health. Give me the next operational steps. Do not execute anything; prepare guidance only.`
+public/control-center/pages/home.js:1096:      promptLaunchBtn.onclick = () => openAiWithPrompt("Summarize the launch blockers and tell me what must be fixed before publishing.");
+public/control-center/pages/home.js:1101:      promptPlanBtn.onclick = () => openAiWithPrompt("Prepare today's action plan from the current dashboard. Give me prioritized tasks with owners and expected outcomes.");
+public/control-center/pages/home.js:1104:    const aiRoleCards = document.querySelectorAll(".home-ai-team-card, .mhos-specialist, .mhos-workflow-step[data-role-id]");
+public/control-center/pages/ai-command.js:26:        executeProjectAiChat,
+public/control-center/pages/ai-command.js:27:        executeProjectAiGuidance
+public/control-center/pages/ai-command.js:49:                id: "media",
+public/control-center/pages/ai-command.js:53:                routeHint: "media-studio"
+public/control-center/pages/ai-command.js:56:                id: "video_lead",
+public/control-center/pages/ai-command.js:59:                summary: "Short-form video scripts, motion direction, and reel strategy.",
+public/control-center/pages/ai-command.js:60:                routeHint: "media-studio"
+public/control-center/pages/ai-command.js:66:                summary: "Publishing readiness, schedule review, and handoff preparation.",
+public/control-center/pages/ai-command.js:67:                routeHint: "publishing"
+public/control-center/pages/ai-command.js:87:                summary: "Claims review, approvals, safety language, and governance checks.",
+public/control-center/pages/ai-command.js:88:                routeHint: "governance"
+public/control-center/pages/ai-command.js:94:                summary: "Tasks, timelines, handoffs, approvals, and execution plans.",
+public/control-center/pages/ai-command.js:95:                routeHint: "workflows"
+public/control-center/pages/ai-command.js:98:                id: "customer_ops",
+public/control-center/pages/ai-command.js:105:                id: "sales_crm",
+public/control-center/pages/ai-command.js:108:                summary: "Lead qualification, outreach drafts, follow-up cadence, and CRM handoff notes.",
+public/control-center/pages/ai-command.js:109:                routeHint: "workflows"
+public/control-center/pages/ai-command.js:118:	designer: "media",
+public/control-center/pages/ai-command.js:119:	media_director: "media",
+public/control-center/pages/ai-command.js:120:	media_planner: "media",
+public/control-center/pages/ai-command.js:122:	research: "researcher",
+public/control-center/pages/ai-command.js:123:	video_lead: "video_lead",
+public/control-center/pages/ai-command.js:126:	customer_operations: "customer_ops",
+public/control-center/pages/ai-command.js:127:	customer_ops: "customer_ops",
+public/control-center/pages/ai-command.js:128:	support: "customer_ops",
+public/control-center/pages/ai-command.js:129:	sales: "sales_crm",
+public/control-center/pages/ai-command.js:130:	crm: "sales_crm",
+public/control-center/pages/ai-command.js:131:	sales_crm: "sales_crm",
+public/control-center/pages/ai-command.js:148:		cannotDo: ["Publish campaigns directly", "Execute workflows automatically", "Approve content", "Set live budgets"],
+public/control-center/pages/ai-command.js:160:		canHelp: ["Draft captions and hooks", "Write email copy", "Create landing page text", "Prepare publisher handoff", "Suggest message variants"],
+public/control-center/pages/ai-command.js:161:		cannotDo: ["Publish directly", "Approve risky claims", "Invent unsupported facts", "Run workflows automatically"],
+public/control-center/pages/ai-command.js:163:		safetyNote: "Drafts require review before publishing. Cannot approve or publish without confirmation.",
+public/control-center/pages/ai-command.js:167:		id: "media",
+public/control-center/pages/ai-command.js:173:		canHelp: ["Write creative briefs", "Advise on visual direction", "Map format requirements", "Review brand alignment", "Prepare media handoffs"],
+public/control-center/pages/ai-command.js:174:		cannotDo: ["Generate images directly", "Upload assets without review", "Approve without confirmation", "Execute media jobs"],
+public/control-center/pages/ai-command.js:180:		id: "video_lead",
+public/control-center/pages/ai-command.js:184:		summary: "Short-form video scripts, motion direction, and reel strategy.",
+public/control-center/pages/ai-command.js:185:		placeholder: "Ask the Video Lead to write a reel script, map short-form strategy, or outline the next video concept…",
+public/control-center/pages/ai-command.js:186:		canHelp: ["Write video scripts", "Plan short-form strategy", "Define motion direction", "Map video asset requirements", "Prepare video briefs"],
+public/control-center/pages/ai-command.js:187:		cannotDo: ["Generate video directly", "Upload footage without review", "Approve without confirmation", "Run media jobs automatically"],
+public/control-center/pages/ai-command.js:197:		summary: "Publishing readiness, schedule review, and handoff preparation.",
+public/control-center/pages/ai-command.js:198:		placeholder: "Ask the Publisher to review publishing readiness, check scheduling, or prepare a handoff package…",
+public/control-center/pages/ai-command.js:199:		canHelp: ["Review publishing readiness", "Check scheduled jobs", "Prepare handoff packages", "Map publishing dependencies", "Flag pre-publish risks"],
+public/control-center/pages/ai-command.js:200:		cannotDo: ["Publish without explicit approval", "Override schedules", "Bypass governance gates", "Send to live channels directly"],
+public/control-center/pages/ai-command.js:202:		safetyNote: "Publishing always requires explicit approval. No live publishing from AI guidance alone.",
+public/control-center/pages/ai-command.js:236:		summary: "Claims review, approval safety, publishing risk, and governance notes.",
+public/control-center/pages/ai-command.js:237:		placeholder: "Ask the Compliance Reviewer to check claims, approval risks, publishing safety, and governance notes…",
+public/control-center/pages/ai-command.js:238:		canHelp: ["Review marketing claims", "Flag approval risks", "Check publishing safety", "Prepare governance notes", "Identify compliance blockers"],
+public/control-center/pages/ai-command.js:239:		cannotDo: ["Grant approvals directly", "Override governance gates", "Publish on behalf of approvers", "Remove flags without review"],
+public/control-center/pages/ai-command.js:249:		summary: "Tasks, timelines, handoffs, approvals, and execution plans.",
+public/control-center/pages/ai-command.js:250:		placeholder: "Ask the Operations Lead to turn this into tasks, workflow steps, or handoffs…",
+public/control-center/pages/ai-command.js:251:		canHelp: ["Create task plans", "Map execution sequences", "Prepare workflow handoffs", "Review execution health", "Identify operational blockers"],
+public/control-center/pages/ai-command.js:252:		cannotDo: ["Run workflows without confirmation", "Auto-approve tasks", "Override authority gates", "Execute backend operations directly"],
+public/control-center/pages/ai-command.js:254:		safetyNote: "Task plans and handoffs only. Workflow execution requires explicit user confirmation.",
+public/control-center/pages/ai-command.js:258:		id: "customer_ops",
+public/control-center/pages/ai-command.js:262:		summary: "Inbox review, reply drafts, ticket drafts, SLA risk, customer profile context, and escalation routing.",
+public/control-center/pages/ai-command.js:263:		placeholder: "Ask the Customer Operations Lead to summarize a customer thread, draft a safe reply, prepare a ticket draft, check SLA risk, or route an escalation for review…",
+public/control-center/pages/ai-command.js:264:		canHelp: ["Review inbox context", "Summarize customer threads", "Draft safe replies", "Prepare ticket drafts", "Flag SLA and escalation risk"],
+public/control-center/pages/ai-command.js:265:		cannotDo: ["Send customer replies", "Create live tickets", "Change SLA policy", "Escalate without confirmation"],
+public/control-center/pages/ai-command.js:271:		id: "sales_crm",
+public/control-center/pages/ai-command.js:275:		summary: "Lead qualification, outreach drafts, follow-up cadence, CRM profile summaries, and sales handoff notes.",
+public/control-center/pages/ai-command.js:276:		placeholder: "Ask the Sales / CRM Lead to qualify a lead, draft outreach, plan follow-ups, summarize CRM context, or prepare a sales handoff for review…",
+public/control-center/pages/ai-command.js:277:		canHelp: ["Qualify lead context", "Draft outreach", "Plan follow-up sequences", "Summarize CRM profiles", "Prepare sales handoffs"],
+public/control-center/pages/ai-command.js:296:		{ label: "Prepare a Publisher handoff", sub: "Package ready content for review" },
+public/control-center/pages/ai-command.js:299:	media: [
+public/control-center/pages/ai-command.js:303:		{ label: "Prepare a media handoff", sub: "Package direction for the team" }
+public/control-center/pages/ai-command.js:305:	video_lead: [
+public/control-center/pages/ai-command.js:307:		{ label: "Plan short-form content", sub: "Map next 4 video concepts" },
+public/control-center/pages/ai-command.js:309:		{ label: "Map video asset needs", sub: "By platform and format" }
+public/control-center/pages/ai-command.js:312:		{ label: "Review publishing readiness", sub: "Check what is ready to publish" },
+public/control-center/pages/ai-command.js:315:		{ label: "Prepare a handoff package", sub: "For the approver review" }
+public/control-center/pages/ai-command.js:331:		{ label: "Flag publishing risks", sub: "Identify blockers before release" },
+public/control-center/pages/ai-command.js:332:		{ label: "Prepare governance notes", sub: "Document compliance status" },
+public/control-center/pages/ai-command.js:336:		{ label: "Turn this into tasks", sub: "Break down into action items" },
+public/control-center/pages/ai-command.js:337:		{ label: "Draft a workflow handoff", sub: "Prepare for the next owner" },
+public/control-center/pages/ai-command.js:341:	customer_ops: [
+public/control-center/pages/ai-command.js:342:		{ label: "Summarize customer thread", sub: "Capture issue, tone, and next reply" },
+public/control-center/pages/ai-command.js:343:		{ label: "Draft customer reply", sub: "Safe response for review" },
+public/control-center/pages/ai-command.js:347:	sales_crm: [
+public/control-center/pages/ai-command.js:351:		{ label: "Prepare sales handoff", sub: "Route context to operations" }
+public/control-center/pages/ai-command.js:359:	{ label: "Prepare a full handoff sequence", sub: "Strategy, creative, compliance, publishing, ops" },
+public/control-center/pages/ai-command.js:360:	{ label: "Review customer and sales impact", sub: "Customer Ops, Sales / CRM, Operations" }
+public/control-center/pages/ai-command.js:367:	{ id: "draft", title: "Draft", description: "Generate guidance, copy, task, or handoff material." },
+public/control-center/pages/ai-command.js:376:	{ id: "task", label: "Task", helper: "Task-shaped output" },
+public/control-center/pages/ai-command.js:377:	{ id: "workflow", label: "Draft Workflow", helper: "Operating sequence" },
+public/control-center/pages/ai-command.js:378:	{ id: "handoff", label: "Prepare Handoff", helper: "Destination package" },
+public/control-center/pages/ai-command.js:388:	media: "MD",
+public/control-center/pages/ai-command.js:389:	video_lead: "VL",
+public/control-center/pages/ai-command.js:395:	customer_ops: "CO",
+public/control-center/pages/ai-command.js:396:	sales_crm: "SC"
+public/control-center/pages/ai-command.js:401:	media: "designer",
+public/control-center/pages/ai-command.js:416:		summary: "Market, evidence, competitor, and proof research will prepare source packs only."
+public/control-center/pages/ai-command.js:429:		{ id: "launch-plan", label: "Launch Plan", action: "preview", intent: "workflow", template: "Build a launch plan for {project}. Include phases, channels, owners, blockers, and next move." },
+public/control-center/pages/ai-command.js:430:		{ id: "funnel-mapping", label: "Funnel Mapping", action: "preview", intent: "guidance", template: "Map the funnel for {project}. Include awareness, consideration, conversion, retention, and handoff points." },
+public/control-center/pages/ai-command.js:431:		{ id: "prioritize-next-move", label: "Priority Sort", action: "preview", intent: "task", template: "Prioritize the next moves for {project}. Rank by impact, urgency, dependencies, and safest first action." }
+public/control-center/pages/ai-command.js:436:		{ id: "cta-refiner", label: "CTA Refiner", action: "preview", intent: "task", template: "Refine CTA options for {project}. Provide German variants for awareness, consideration, and action stages." },
+public/control-center/pages/ai-command.js:437:		{ id: "publisher-package", label: "Publisher Package", action: "preview", intent: "handoff", template: "Prepare a Publisher handoff for {project}. Include German copy package, CTA, notes, and remaining checks." }
+public/control-center/pages/ai-command.js:439:	media: [
+public/control-center/pages/ai-command.js:440:		{ id: "creative-brief-builder", label: "Creative Brief Builder", action: "preview", intent: "media", template: "Prepare a creative brief for {project}. Include concept, visual rules, subject, brand constraints, and production notes." },
+public/control-center/pages/ai-command.js:442:		{ id: "asset-checklist", label: "Asset Checklist", action: "preview", intent: "task", template: "Create an asset checklist for {project}. List must-have files, missing references, usage context, and priority." },
+public/control-center/pages/ai-command.js:444:		{ id: "open-media-studio", label: "Send to Media Studio", action: "route", route: "media-studio" }
+public/control-center/pages/ai-command.js:446:	video_lead: [
+public/control-center/pages/ai-command.js:447:		{ id: "write-video-hook", label: "Write video hook", action: "preview", intent: "guidance", template: "Write short-form video hooks for {project}. Include 3 opening variants and audience fit." },
+public/control-center/pages/ai-command.js:448:		{ id: "draft-script", label: "Draft script", action: "preview", intent: "guidance", template: "Draft a short-form video script for {project}. Include hook, body, CTA, and visual cues." },
+public/control-center/pages/ai-command.js:449:		{ id: "build-storyboard", label: "Build storyboard", action: "preview", intent: "workflow", template: "Build storyboard beats for {project}. Sequence shots and key transitions." },
+public/control-center/pages/ai-command.js:450:		{ id: "prepare-voiceover", label: "Prepare voiceover", action: "preview", intent: "guidance", template: "Prepare voiceover script options for {project}. Keep clean timing and emphasis notes." },
+public/control-center/pages/ai-command.js:451:		{ id: "map-video-asset-needs", label: "Map video asset needs", action: "preview", intent: "task", template: "Map video asset needs for {project}. Include format, source, and production owner." }
+public/control-center/pages/ai-command.js:454:		{ id: "publishing-checklist", label: "Publishing Checklist", action: "preview", intent: "handoff", template: "Build a publishing checklist for {project}. Include German copy, assets, claims checks, and channel readiness." },
+public/control-center/pages/ai-command.js:455:		{ id: "final-packaging", label: "Final Packaging", action: "preview", intent: "handoff", template: "Prepare a final publishing package for {project}. Include copy, CTA, asset notes, approvals, and destination channel." },
+public/control-center/pages/ai-command.js:457:		{ id: "schedule-draft", label: "Schedule Draft", action: "preview", intent: "workflow", template: "Prepare a publishing schedule draft for {project}. Include channel cadence, dependencies, and review gates." },
+public/control-center/pages/ai-command.js:458:		{ id: "open-publishing", label: "Open Publishing", action: "route", route: "publishing" }
+public/control-center/pages/ai-command.js:463:		{ id: "test-ideas", label: "Test Ideas", action: "preview", intent: "task", template: "Suggest paid test ideas for {project}. Provide hypotheses, segments, creative variables, and measurement notes." },
+public/control-center/pages/ai-command.js:470:		{ id: "opportunity-summary", label: "Opportunity Summary", action: "preview", intent: "task", template: "Summarize SEO and insight opportunities for {project}. Focus on conversion, traffic quality, and content fit." },
+public/control-center/pages/ai-command.js:471:		{ id: "analysis-plan", label: "Analysis Plan", action: "preview", intent: "workflow", template: "Draft an analysis plan for {project}. Define questions, datasets, cadence, and owners." },
+public/control-center/pages/ai-command.js:476:		{ id: "approval-flags", label: "Approval Flags", action: "preview", intent: "task", template: "Check approval risks for {project}. List risk, impact, mitigation, and required owner." },
+public/control-center/pages/ai-command.js:477:		{ id: "safety-checklist", label: "Safety Checklist", action: "preview", intent: "handoff", template: "Prepare a safety checklist for {project}. Include policy checks, evidence required, and approval notes." },
+public/control-center/pages/ai-command.js:478:		{ id: "publish-readiness", label: "Publish Readiness", action: "preview", intent: "handoff", template: "Review publish readiness for {project}. Confirm what needs human approval before release." },
+public/control-center/pages/ai-command.js:479:		{ id: "open-governance", label: "Open Governance", action: "route", route: "governance" }
+public/control-center/pages/ai-command.js:482:		{ id: "timeline-draft", label: "Timeline Draft", action: "preview", intent: "workflow", template: "Draft an execution timeline for {project}. Include milestones, owners, dependencies, and review gates." },
+public/control-center/pages/ai-command.js:483:		{ id: "handoff-routing", label: "Handoff Routing", action: "preview", intent: "handoff", template: "Prepare handoff routing for {project}. Include source, destination, decision gates, and required confirmations." },
+public/control-center/pages/ai-command.js:484:		{ id: "checklist", label: "Checklist", action: "preview", intent: "task", template: "Draft an operational checklist for {project}. Include owners, dependencies, priority, and first action." },
+public/control-center/pages/ai-command.js:486:		{ id: "open-workflows", label: "Open Workflows / Operations", action: "route", route: "workflows" }
+public/control-center/pages/ai-command.js:488:	customer_ops: [
+public/control-center/pages/ai-command.js:489:		{ id: "review-unified-inbox", label: "Review Unified Inbox", action: "preview", intent: "guidance", template: "Review the Unified Inbox readiness for {project}. Summarize visible customer-operation signals, open gaps, and safe next review steps. Do not claim inbox actions happened." },
+public/control-center/pages/ai-command.js:490:		{ id: "summarize-customer-thread", label: "Summarize Customer Thread", action: "preview", intent: "guidance", template: "Summarize this customer thread for {project}. Include customer issue, sentiment, reply goal, missing details, and safe next step." },
+public/control-center/pages/ai-command.js:491:		{ id: "draft-customer-reply", label: "Draft Customer Reply", action: "preview", intent: "guidance", template: "Draft a customer reply for {project}. Keep it helpful, calm, review-ready, and do not claim any operational action has been completed." },
+public/control-center/pages/ai-command.js:492:		{ id: "create-ticket-draft", label: "Create Ticket Draft", action: "preview", intent: "task", template: "Create a ticket draft for {project}. Include issue, priority, owner suggestion, evidence needed, and next safe action." },
+public/control-center/pages/ai-command.js:494:		{ id: "prepare-escalation", label: "Prepare Escalation", action: "preview", intent: "handoff", template: "Prepare an escalation draft for {project}. Include reason, customer impact, owner, confirmation needed, and destination team." },
+public/control-center/pages/ai-command.js:495:		{ id: "customer-profile-snapshot", label: "Customer Profile Snapshot", action: "preview", intent: "guidance", template: "Prepare a customer profile snapshot for {project}. Include known context, purchase/support signals, missing fields, and safe follow-up questions." },
+public/control-center/pages/ai-command.js:496:		{ id: "route-support-sales-ops", label: "Route to Support / Sales / Operations", action: "preview", intent: "handoff", template: "Prepare routing guidance for {project}. Decide whether the customer item belongs with Support, Sales, or Operations, and explain the review gate." }
+public/control-center/pages/ai-command.js:498:	sales_crm: [
+public/control-center/pages/ai-command.js:501:		{ id: "follow-up-sequence", label: "Follow-up Sequence", action: "preview", intent: "workflow", template: "Build a follow-up sequence for {project}. Include timing, message angle, CTA, stop condition, and confirmation requirements." },
+public/control-center/pages/ai-command.js:502:		{ id: "crm-profile-summary", label: "CRM Profile Summary", action: "preview", intent: "guidance", template: "Summarize the CRM profile context for {project}. Include fit, history, open questions, and next sales action without mutating CRM data." },
+public/control-center/pages/ai-command.js:503:		{ id: "pipeline-next-step", label: "Pipeline Next Step", action: "preview", intent: "task", template: "Recommend the pipeline next step for {project}. Include stage, rationale, owner, risk, and required confirmation." },
+public/control-center/pages/ai-command.js:505:		{ id: "influencer-lead-plan", label: "Influencer Lead Plan", action: "preview", intent: "workflow", template: "Prepare an influencer lead plan for {project}. Include target profile, outreach angle, qualification criteria, and handoff path." },
+public/control-center/pages/ai-command.js:506:		{ id: "sales-handoff-draft", label: "Sales Handoff", action: "preview", intent: "handoff", template: "Prepare a sales handoff draft for {project}. Include lead context, recommended next action, owner, and confirmation needed." }
+public/control-center/pages/ai-command.js:527:	{ id: "research", label: "Research" },
+public/control-center/pages/ai-command.js:571:		id: "media",
+public/control-center/pages/ai-command.js:573:		purpose: "Align media formats with channels, cadence, and readiness.",
+public/control-center/pages/ai-command.js:574:		bestUse: "When planning image/video requirements across channels.",
+public/control-center/pages/ai-command.js:575:		suggestedPrompt: "Act as Media Planner and map media needs by platform for this launch cycle."
+public/control-center/pages/ai-command.js:592:		id: "researcher",
+public/control-center/pages/ai-command.js:601:		purpose: "Translate intent into executable workflows and handoffs.",
+public/control-center/pages/ai-command.js:631:		if (/act as the media director/i.test(text)) return "media";
+public/control-center/pages/ai-command.js:632:		if (/act as the video lead/i.test(text)) return "video_lead";
+public/control-center/pages/ai-command.js:638:		if (/act as the customer operations lead|act as customer ops/i.test(text)) return "customer_ops";
+public/control-center/pages/ai-command.js:639:		if (/act as the sales|act as the crm|sales \/ crm lead/i.test(text)) return "sales_crm";
+public/control-center/pages/ai-command.js:648:	const command = humanizeValue(commandText || session?.draftMessage, "Prepare workflow action from AI command.");
+public/control-center/pages/ai-command.js:662:			id: `auto-workflow-${Date.now()}`,
+public/control-center/pages/ai-command.js:663:			type: "prepare_workflow",
+public/control-center/pages/ai-command.js:664:			targetPage: "workflows",
+public/control-center/pages/ai-command.js:665:			action: "Prepare workflow from AI command",
+public/control-center/pages/ai-command.js:668:				reason: "AI command prepared for workflow execution."
+public/control-center/pages/ai-command.js:678:			targetPage: "publishing",
+public/control-center/pages/ai-command.js:682:				reason: "Requires approval gate before external publishing actions."
+public/control-center/pages/ai-command.js:695:	if (/act as the media director/i.test(text)) return "media";
+public/control-center/pages/ai-command.js:696:	if (/act as the video lead/i.test(text)) return "video_lead";
+public/control-center/pages/ai-command.js:702:	if (/act as the customer operations lead|act as customer ops/i.test(text)) return "customer_ops";
+public/control-center/pages/ai-command.js:703:	if (/act as the sales|act as the crm|sales \/ crm lead/i.test(text)) return "sales_crm";
+public/control-center/pages/ai-command.js:784:    "Prepare a handoff summary for:",
+public/control-center/pages/ai-command.js:785:    "Draft a workflow sequence for:",
+public/control-center/pages/ai-command.js:786:    "Draft a task plan for:",
+public/control-center/pages/ai-command.js:855:	return message.includes("insights") || message.includes("learning") || message.includes("not found");
+public/control-center/pages/ai-command.js:869:		overview.publishing_language ||
+public/control-center/pages/ai-command.js:948:			taskMode: "free",
+public/control-center/pages/ai-command.js:949:			taskType: "launch",
+public/control-center/pages/ai-command.js:950:			taskProduct: "",
+public/control-center/pages/ai-command.js:951:			taskChannel: "",
+public/control-center/pages/ai-command.js:959:				learning: null,
+public/control-center/pages/ai-command.js:1081:function getAiResponseBridgeStatus(executeProjectAiGuidanceFn) {
+public/control-center/pages/ai-command.js:1082:	if (typeof executeProjectAiGuidanceFn !== "function") {
+public/control-center/pages/ai-command.js:1191:			"Full Team workflow: Strategist -> Writer -> Media/Video -> Compliance -> Publisher -> Operations.",
+public/control-center/pages/ai-command.js:1206:                `Use ${safeOutputLanguage} only for customer-facing or publishable copy such as captions, ads, emails, landing pages, final campaign text, or publishing packages.`,
+public/control-center/pages/ai-command.js:1261:	if (outputType === "workflow") return "workflows";
+public/control-center/pages/ai-command.js:1262:	if (id === "strategist") return outputType === "task" ? "campaign-studio" : "workflows";
+public/control-center/pages/ai-command.js:1264:	if (id === "media") return "media-studio";
+public/control-center/pages/ai-command.js:1265:	if (id === "video_lead") return "media-studio";
+public/control-center/pages/ai-command.js:1266:	if (id === "publisher") return "publishing";
+public/control-center/pages/ai-command.js:1269:	if (id === "compliance_reviewer") return "governance";
+public/control-center/pages/ai-command.js:1270:	if (id === "operations") return outputType === "task" ? "task-center" : "workflows";
+public/control-center/pages/ai-command.js:1271:	if (id === "customer_ops") return outputType === "task" ? "task-center" : "operations-centers";
+public/control-center/pages/ai-command.js:1272:	if (id === "sales_crm") return "workflows";
+public/control-center/pages/ai-command.js:1273:	return "workflows";
+public/control-center/pages/ai-command.js:1293:                outputType = activeTab === "task"
+public/control-center/pages/ai-command.js:1294:                        ? "task"
+public/control-center/pages/ai-command.js:1295:                        : activeTab === "workflow"
+public/control-center/pages/ai-command.js:1296:                                ? "workflow"
+public/control-center/pages/ai-command.js:1297:                                : activeTab === "handoff"
+public/control-center/pages/ai-command.js:1298:                                        ? "handoff"
+public/control-center/pages/ai-command.js:1302:        const looksTaskLike = /\b(task|tasks|handoff|ticket|tickets|follow-up|follow up|owner|owners|assignee|assigned|due date|priority|priorities|backlog|checklist|next task|action item|action items)\b/.test(text);
+public/control-center/pages/ai-command.js:1303:        const looksWorkflowLike = /\b(workflow|workflows|process|sequence|phase|phases|approval flow|automation|operating loop|step-by-step|steps|dependencies|trigger|review gate|execution flow)\b/.test(text);
+public/control-center/pages/ai-command.js:1305:        const looksMediaLike = /\b(media|visual|creative|image|images|video|reel|storyboard|shot list|asset|assets|design|production|creative direction|voiceover)\b/.test(text);
+public/control-center/pages/ai-command.js:1306:        const looksPublishingLike = /\b(publish|publishing|schedule|channel package|channel payload|approval-ready post|final post|ready to publish|publishing package)\b/.test(text);
+public/control-center/pages/ai-command.js:1307:        const looksGovernanceLike = /\b(compliance|governance|claim|claims|risk|risks|approval|approvals|policy|privacy|legal|safe language|safety review)\b/.test(text);
+public/control-center/pages/ai-command.js:1308:        const looksInsightLike = /\b(insight|insights|seo|keyword|keywords|analytics|performance|traffic|ranking|search intent|metrics|research|competitor|competitors|market research)\b/.test(text);
+public/control-center/pages/ai-command.js:1311:        if (outputType === "handoff" || outputType === "task" || looksTaskLike) {
+public/control-center/pages/ai-command.js:1312:                outputType = "task";
+public/control-center/pages/ai-command.js:1313:                return { outputType, destinationRoute: "task-center" };
+public/control-center/pages/ai-command.js:1316:        if (outputType === "workflow" || looksWorkflowLike) {
+public/control-center/pages/ai-command.js:1317:                outputType = "workflow";
+public/control-center/pages/ai-command.js:1318:                return { outputType, destinationRoute: explicitDestination || "workflows" };
+public/control-center/pages/ai-command.js:1326:        if (/media|video|visual|asset|creative/.test(outputType) || looksMediaLike) {
+public/control-center/pages/ai-command.js:1327:                outputType = "media";
+public/control-center/pages/ai-command.js:1328:                return { outputType, destinationRoute: explicitDestination || "media-studio" };
+public/control-center/pages/ai-command.js:1331:        if (/publishing|publish|schedule/.test(outputType) || looksPublishingLike) {
+public/control-center/pages/ai-command.js:1332:                outputType = "publishing";
+public/control-center/pages/ai-command.js:1333:                return { outputType, destinationRoute: explicitDestination || "publishing" };
+public/control-center/pages/ai-command.js:1336:        if (/governance|compliance|risk|approval/.test(outputType) || looksGovernanceLike) {
+public/control-center/pages/ai-command.js:1337:                outputType = "governance";
+public/control-center/pages/ai-command.js:1338:                return { outputType, destinationRoute: explicitDestination || "governance" };
+public/control-center/pages/ai-command.js:1341:        if (/insight|research|seo|analytics/.test(outputType) || looksInsightLike) {
+public/control-center/pages/ai-command.js:1350:                        destinationRoute: explicitDestination || (session?.teamMode === "team" ? "workflows" : "campaign-studio")
+public/control-center/pages/ai-command.js:1363:		"media-studio": "Media Studio",
+public/control-center/pages/ai-command.js:1364:		publishing: "Publishing",
+public/control-center/pages/ai-command.js:1368:		governance: "Governance",
+public/control-center/pages/ai-command.js:1370:		"task-center": "Task Center",
+public/control-center/pages/ai-command.js:1372:		workflows: "Workflows"
+public/control-center/pages/ai-command.js:1391:		confirmationRequired: outputType === "handoff" || specialistId === "publisher" || specialistId === "compliance_reviewer",
+public/control-center/pages/ai-command.js:1397:		confirmationNote: "Execution, approvals, and publishing require explicit confirmation in the owning workspace."
+public/control-center/pages/ai-command.js:1401:		if (outputType === "task") {
+public/control-center/pages/ai-command.js:1405:				summary: "Strategic task draft prepared with priorities, blockers, and operating sequence.",
+public/control-center/pages/ai-command.js:1412:				nextSafeAction: "Review and refine the task draft before creating durable tasks"
+public/control-center/pages/ai-command.js:1430:			title: outputType === "task" ? "Task: Draft campaign copy" : "Content Guidance: Messaging draft",
+public/control-center/pages/ai-command.js:1434:				"Outcome-led hook direction for a German publishing draft",
+public/control-center/pages/ai-command.js:1448:				"Claims, health, or performance promises need evidence before publishing."
+public/control-center/pages/ai-command.js:1457:			safetyLabel: "Claims require review before publishing. No direct publish action."
+public/control-center/pages/ai-command.js:1461:	if (specialistId === "media") {
+public/control-center/pages/ai-command.js:1464:			outputType: outputType === "guidance" ? "media_brief" : outputType,
+public/control-center/pages/ai-command.js:1473:				"Prompt ideas prepared for image/video planning",
+public/control-center/pages/ai-command.js:1476:			safetyLabel: "No media generation executed. Brief and routing only.",
+public/control-center/pages/ai-command.js:1481:	if (specialistId === "video_lead") {
+public/control-center/pages/ai-command.js:1484:			title: outputType === "task" ? "Task: Video production plan" : "Video Brief: Hook, script, storyboard",
+public/control-center/pages/ai-command.js:1499:			title: outputType === "handoff" ? "Handoff Preview: Publishing package" : "Publishing Draft: Readiness checklist",
+public/control-center/pages/ai-command.js:1509:				"Prepare handoff for publishing review"
+public/control-center/pages/ai-command.js:1519:			title: outputType === "task" ? "Task: Paid test plan" : "Ads Draft: Angles and tests",
+public/control-center/pages/ai-command.js:1547:			title: outputType === "task" ? "Task: Analysis plan" : "Insights Guidance: Signal review",
+public/control-center/pages/ai-command.js:1566:				"Prepare governance notes",
+public/control-center/pages/ai-command.js:1574:	if (specialistId === "customer_ops") {
+public/control-center/pages/ai-command.js:1577:			title: outputType === "task" ? "Ticket Draft: Customer operations follow-up" : "Customer Ops Draft: Thread, reply, and routing",
+public/control-center/pages/ai-command.js:1579:			mainOutput: "Review the customer context, confirm missing details, then route the draft through the owning support, sales, or operations surface.",
+public/control-center/pages/ai-command.js:1581:				"Thank the customer, acknowledge the issue, and confirm the next reviewed support step.",
+public/control-center/pages/ai-command.js:1585:				"Issue summary: customer concern or request captured for review.",
+public/control-center/pages/ai-command.js:1595:				"Summarize the customer thread",
+public/control-center/pages/ai-command.js:1596:				"Draft a safe customer reply",
+public/control-center/pages/ai-command.js:1605:	if (specialistId === "sales_crm") {
+public/control-center/pages/ai-command.js:1608:			title: outputType === "handoff" ? "Sales Handoff" : "Sales / CRM Draft: Lead and outreach plan",
+public/control-center/pages/ai-command.js:1609:			summary: "Sales and CRM draft prepared with lead qualification, outreach direction, follow-up cadence, and pipeline handoff notes.",
+public/control-center/pages/ai-command.js:1630:			nextStep: "Review the lead fit, confirm owner, then route the handoff to operations or the CRM surface.",
+public/control-center/pages/ai-command.js:1635:				"Route sales handoff without mutating CRM data"
+public/control-center/pages/ai-command.js:1643:		if (outputType === "workflow") {
+public/control-center/pages/ai-command.js:1652:					"Stage 4: Destination handoff and confirmation"
+public/control-center/pages/ai-command.js:1659:			title: outputType === "handoff" ? "Handoff Preview: Operations package" : "Operations Draft: Task and handoff plan",
+public/control-center/pages/ai-command.js:1660:			summary: "Operational plan drafted with next tasks, owners, and route.",
+public/control-center/pages/ai-command.js:1662:				"Define immediate tasks",
+public/control-center/pages/ai-command.js:1664:				"Prepare destination handoff context",
+public/control-center/pages/ai-command.js:1667:			safetyLabel: "No workflow run and no backend task creation executed."
+public/control-center/pages/ai-command.js:1682:		task: "task",
+public/control-center/pages/ai-command.js:1683:		workflow: "workflow",
+public/control-center/pages/ai-command.js:1684:		handoff: "handoff"
+public/control-center/pages/ai-command.js:1700:		title: outputType === "workflow" ? "Team Workflow" : `Team ${titleCase(outputType)} Preview`,
+public/control-center/pages/ai-command.js:1711:			"Media / Video: prepare creative direction, asset needs, script, storyboard, or voiceover draft",
+public/control-center/pages/ai-command.js:1714:			"Customer Ops / Sales: add reply, ticket, lead, outreach, or CRM handoff drafts when relevant",
+public/control-center/pages/ai-command.js:1715:			"Operations: convert the reviewed output into safe tasks, workflow draft, or handoff context"
+public/control-center/pages/ai-command.js:1717:		destinationRoute: outputType === "task" ? "task-center" : "workflows",
+public/control-center/pages/ai-command.js:1719:		confirmationNote: "No task, workflow, outreach, customer reply, CRM update, approval, or publishing action is executed from Full Team mode.",
+public/control-center/pages/ai-command.js:1727:		task: "Task",
+public/control-center/pages/ai-command.js:1728:		workflow: "Workflow",
+public/control-center/pages/ai-command.js:1729:		handoff: "Handoff Preview",
+public/control-center/pages/ai-command.js:1730:		media_brief: "Media Brief"
+public/control-center/pages/ai-command.js:1866:	const learning =
+public/control-center/pages/ai-command.js:1867:		asObject(intelligence?.learning) ||
+public/control-center/pages/ai-command.js:1868:		asObject(activity.learning);
+public/control-center/pages/ai-command.js:1873:	const recommendations = asArray(learning.recommendations || insights.recommendations);
+public/control-center/pages/ai-command.js:1938:		learning,
+public/control-center/pages/ai-command.js:1946:		learningPatterns: asObject(learning.learning_patterns || insights.learning_patterns),
+public/control-center/pages/ai-command.js:1947:		aiRecommendations: asObject(learning.ai_recommendations || insights.ai_recommendations),
+public/control-center/pages/ai-command.js:1948:		sourceSummary: asObject(insights.source_summary || learning.source_summary),
+public/control-center/pages/ai-command.js:1951:			Boolean(Object.keys(learning).length)
+public/control-center/pages/ai-command.js:1965:		media: ["media", "design", "visual", "creative brief", "format", "brand", "layout", "image direction", "creative direction", "image", "video", "photo", "asset", "library", "gallery", "footage", "visual assets"],
+public/control-center/pages/ai-command.js:1968:		researcher: ["research", "market trend", "market research", "audience research", "competitor", "positioning gap", "validate", "competitive"],
+public/control-center/pages/ai-command.js:1969:		operations: ["task plan", "workflow", "handoff", "approval", "timeline", "execution plan", "route", "publish", "status", "priority", "priorities", "blocking", "blocker", "readiness", "next", "do next"],
+public/control-center/pages/ai-command.js:1970:		customer_ops: ["customer", "support", "inbox", "ticket", "tickets", "sla", "reply", "thread", "escalation", "complaint", "refund"],
+public/control-center/pages/ai-command.js:1971:		sales_crm: ["lead", "leads", "crm", "sales", "outreach", "follow-up", "follow up", "pipeline", "dealer", "salon", "influencer"]
+public/control-center/pages/ai-command.js:2059:	const bestFormat = aiContext.learningPatterns.best_formats?.label;
+public/control-center/pages/ai-command.js:2060:	const bestPlatform = aiContext.learningPatterns.best_platforms?.label;
+public/control-center/pages/ai-command.js:2073:			top ? `Reuse the pattern from ${extractTopMessage(top)} in the next publishing cycle.` : "Sync social insights to identify winning hooks and formats.",
+public/control-center/pages/ai-command.js:2079:			weak ? `Move ${extractTopMessage(weak)} into a rewrite workflow.` : "Audit current content for posts not converting attention to clicks.",
+public/control-center/pages/ai-command.js:2084:			routeSuggestion("Publishing", "publishing", "Schedule the next batch with stronger timing and approval control."),
+public/control-center/pages/ai-command.js:2135:			? `Paid media live with ${formatCurrency(paid.summary.spend, aiContext.currency)} tracked spend.`
+public/control-center/pages/ai-command.js:2168:			aiContext.criticalGaps.length ? `Critical gaps affecting research quality: ${aiContext.criticalGaps.slice(0, 4).map(normalizeActionLabel).join(", ")}.` : "No major setup gaps blocking research quality.",
+public/control-center/pages/ai-command.js:2169:			aiContext.learningPatterns.best_topics?.label ? `Current system learning: ${aiContext.learningPatterns.best_topics.label}.` : "Learning engine needs more live data."
+public/control-center/pages/ai-command.js:2172:			"Use the missing intelligence list as the research roadmap for what the system cannot see clearly.",
+public/control-center/pages/ai-command.js:2197:		return { title: "Campaign launch task block", owner: "Campaign Studio", steps: ["Define the campaign objective, audience, and offer.", "Choose channels and budget based on current intelligence.", "List required assets and publishing dependencies before launch."] };
+public/control-center/pages/ai-command.js:2200:		return { title: "Content plan task block", owner: "Content Studio", steps: ["Use the strongest content pattern as the starting template.", "Map posts by platform, hook, format, and CTA.", "Route approved items into Publishing for scheduling."] };
+public/control-center/pages/ai-command.js:2203:		return { title: "Content repair task block", owner: "Content Studio", steps: ["Select the weakest items from Insights.", "Rewrite hooks, sharpen CTAs, and adjust format-platform fit.", "Republish only after updated versions are approved."] };
+public/control-center/pages/ai-command.js:2206:		return { title: "Integration recovery task block", owner: "Integrations", steps: ["Reconnect critical analytics and performance feeds first.", "Test each integration after reconnect and sync current data.", "Return to Insights to confirm coverage improves."] };
+public/control-center/pages/ai-command.js:2208:	return { title: "Execution task block", owner: "Workflows", steps: ["Confirm the goal and required output.", "Identify which workspace owns the work.", "Move into the correct page and execute the first step."] };
+public/control-center/pages/ai-command.js:2213:	const taskBlock = buildOperationsTaskBlock(aiContext, message);
+public/control-center/pages/ai-command.js:2218:		routeSuggestions.push(routeSuggestion("Publishing", "publishing", "Schedule or approve if the next step is publishing."));
+public/control-center/pages/ai-command.js:2221:	if (/ads|campaign scale|roas|creative/.test(query)) routeSuggestions.push(routeSuggestion("Ads Manager", "ads-manager", "Review live paid performance and action the next media move."));
+public/control-center/pages/ai-command.js:2222:	if (!routeSuggestions.length) routeSuggestions.push(routeSuggestion("Workflows", "workflows", "Use Workflows when the task spans multiple execution areas."));
+public/control-center/pages/ai-command.js:2225:		summary: "This request is best handled as a structured workflow — moving into the right workspace gets results faster than chat alone.",
+public/control-center/pages/ai-command.js:2234:		nextActions: taskBlock.steps,
+public/control-center/pages/ai-command.js:2236:		taskBlock,
+public/control-center/pages/ai-command.js:2245:		case "media":
+public/control-center/pages/ai-command.js:2251:		case "researcher":
+public/control-center/pages/ai-command.js:2272:	fetchProjectInsights,
+public/control-center/pages/ai-command.js:2273:	fetchProjectLearning,
+public/control-center/pages/ai-command.js:2296:				const [insightsResult, learningResult] = await Promise.allSettled([
+public/control-center/pages/ai-command.js:2297:					fetchProjectInsights(projectName),
+public/control-center/pages/ai-command.js:2298:					fetchProjectLearning(projectName)
+public/control-center/pages/ai-command.js:2301:				const learningMissing = learningResult.status === "rejected" && isMissingIntelligenceError(learningResult.reason);
+public/control-center/pages/ai-command.js:2304:					learningResult.status === "rejected" && !learningMissing ? learningResult.reason?.message : ""
+public/control-center/pages/ai-command.js:2311:					learning: learningResult.status === "fulfilled" ? learningResult.value : (learningMissing ? { project: projectName, generated_at: nowIso(), learning_patterns: {}, recommendations: [] } : null),
+public/control-center/pages/ai-command.js:2346:	"media-studio": "Media Studio",
+public/control-center/pages/ai-command.js:2347:	publishing: "Publishing",
+public/control-center/pages/ai-command.js:2349:	workflows: "Workflows",
+public/control-center/pages/ai-command.js:2354:	governance: "Governance",
+public/control-center/pages/ai-command.js:2356:	"task-center": "Task Center",
+public/control-center/pages/ai-command.js:2360:	research: "Research",
+public/control-center/pages/ai-command.js:2368:	"media-studio": "media",
+public/control-center/pages/ai-command.js:2369:	publishing: "publisher",
+public/control-center/pages/ai-command.js:2371:	workflows: "operations",
+public/control-center/pages/ai-command.js:2372:	library: "media",
+public/control-center/pages/ai-command.js:2376:	governance: "compliance_reviewer",
+public/control-center/pages/ai-command.js:2378:	"task-center": "operations",
+public/control-center/pages/ai-command.js:2382:	research: "seo",
+public/control-center/pages/ai-command.js:2389:	designer: "media",
+public/control-center/pages/ai-command.js:2390:	researcher: "seo",
+public/control-center/pages/ai-command.js:2392:	"customer-ops": "customer_ops",
+public/control-center/pages/ai-command.js:2393:	customer_ops: "customer_ops",
+public/control-center/pages/ai-command.js:2394:	"sales-crm": "sales_crm",
+public/control-center/pages/ai-command.js:2395:	sales_crm: "sales_crm"
+public/control-center/pages/ai-command.js:2401:	media: "media-studio",
+public/control-center/pages/ai-command.js:2402:	"media-studio-workspace": "media-studio",
+public/control-center/pages/ai-command.js:2403:	publish: "publishing",
+public/control-center/pages/ai-command.js:2404:	publisher: "publishing",
+public/control-center/pages/ai-command.js:2407:	workflow: "workflows",
+public/control-center/pages/ai-command.js:2412:	tasks: "task-center",
+public/control-center/pages/ai-command.js:2417:	govern: "governance",
+public/control-center/pages/ai-command.js:2477:	const fallbackRoute = sourcePage === "workspace" ? "workflows" : sourcePage;
+public/control-center/pages/ai-command.js:2500:	const outputType = asString(preview.outputType || preview.output_type || preview.type || "handoff").trim() || "handoff";
+public/control-center/pages/ai-command.js:2506:		"workflows"
+public/control-center/pages/ai-command.js:2513:		title: firstAiInboundText(preview.title, normalized.title, `Inbound handoff from ${normalized.sourceLabel}`),
+public/control-center/pages/ai-command.js:2521:		confirmationNote: firstAiInboundText(preview.confirmationNote, preview.confirmation_note, "Execution, approvals, publishing, CRM updates, customer replies, and workflow runs require explicit confirmation in the owning workspace."),
+public/control-center/pages/ai-command.js:2526:function getAiInboundDurableHandoffId(handoff) {
+public/control-center/pages/ai-command.js:2527:	const payload = asObject(handoff?.payload);
+public/control-center/pages/ai-command.js:2529:		handoff?.id,
+public/control-center/pages/ai-command.js:2530:		handoff?.handoff_id,
+public/control-center/pages/ai-command.js:2531:		handoff?.handoffId,
+public/control-center/pages/ai-command.js:2532:		payload.handoff_id,
+public/control-center/pages/ai-command.js:2533:		payload.handoffId
+public/control-center/pages/ai-command.js:2537:function getAiInboundHandoffId(handoff) {
+public/control-center/pages/ai-command.js:2538:	const durableId = getAiInboundDurableHandoffId(handoff);
+public/control-center/pages/ai-command.js:2540:	if (!handoff) return "";
+public/control-center/pages/ai-command.js:2541:	const payload = asObject(handoff?.payload);
+public/control-center/pages/ai-command.js:2542:	const stablePayloadId = firstAiInboundId(payload.handoff_id, payload.handoffId, payload.id, handoff?.created_at, handoff?.createdAt);
+public/control-center/pages/ai-command.js:2545:		if (!aiInboundHandoffObjectIds.has(handoff)) {
+public/control-center/pages/ai-command.js:2547:			aiInboundHandoffObjectIds.set(handoff, `cached-ai-handoff-${Date.now()}-${aiInboundHandoffCounter}`);
+public/control-center/pages/ai-command.js:2549:		return aiInboundHandoffObjectIds.get(handoff);
+public/control-center/pages/ai-command.js:2551:	return [handoff?.source_page, handoff?.destination_page, payload.prompt, payload.title]
+public/control-center/pages/ai-command.js:2554:		.join("::") || `cached-ai-handoff-${Date.now()}`;
+public/control-center/pages/ai-command.js:2557:function normalizeAiInboundHandoff(handoff, projectName) {
+public/control-center/pages/ai-command.js:2558:	const payload = asObject(handoff?.payload);
+public/control-center/pages/ai-command.js:2559:	const draftContext = firstAiInboundObject(payload.draft_context, payload.draftContext, handoff?.draft_context, handoff?.draftContext);
+public/control-center/pages/ai-command.js:2563:		handoff?.source_page,
+public/control-center/pages/ai-command.js:2564:		handoff?.sourcePage,
+public/control-center/pages/ai-command.js:2591:	)) || `Review this ${sourceLabel} handoff for ${projectLabel}. Identify the right specialist, summarize the context, produce a review-ready draft, and recommend the next safe route. Do not execute publishing, task creation, CRM updates, customer replies, workflow runs, or backend actions.`;
+public/control-center/pages/ai-command.js:2597:		handoff?.title,
+public/control-center/pages/ai-command.js:2598:		`Inbound handoff from ${sourceLabel}`
+public/control-center/pages/ai-command.js:2630:		status: asString(handoff?.status || payload.status || "available"),
+public/control-center/pages/ai-command.js:2631:		note: "Guidance only. No publishing, task creation, CRM updates, customer replies, workflow runs, exports, or backend actions are executed from this handoff."
+public/control-center/pages/ai-command.js:2637:function applyDurableAiHandoff(projectName, operations, session, consumeProjectHandoff, showMessage) {
+public/control-center/pages/ai-command.js:2638:	const handoff = getSharedHandoff(projectName, "ai-command", operations);
+public/control-center/pages/ai-command.js:2639:	const handoffId = getAiInboundHandoffId(handoff);
+public/control-center/pages/ai-command.js:2640:	if (!handoffId || handoffId === asString(session.lastAppliedHandoffId)) return;
+public/control-center/pages/ai-command.js:2642:	const normalized = normalizeAiInboundHandoff(handoff, projectName);
+public/control-center/pages/ai-command.js:2649:		id: handoffId,
+public/control-center/pages/ai-command.js:2681:	session.lastAppliedHandoffId = handoffId;
+public/control-center/pages/ai-command.js:2682:	persistSessionDraft(projectName, session, `Inbound handoff loaded from ${normalized.sourceLabel}`);
+public/control-center/pages/ai-command.js:2684:	const durableHandoffId = getAiInboundDurableHandoffId(handoff);
+public/control-center/pages/ai-command.js:2686:		consumeProjectHandoff?.(projectName, durableHandoffId, { actor: "mh-assistant" }).catch((error) => {
+public/control-center/pages/ai-command.js:2687:			console.warn("Failed to consume AI handoff:", error.message);
+public/control-center/pages/ai-command.js:2690:	showMessage?.(`Inbound handoff loaded from ${normalized.sourceLabel}.`);
+public/control-center/pages/ai-command.js:2700:	executeProjectAiCommand,
+public/control-center/pages/ai-command.js:2705:	if (typeof executeProjectAiCommand !== "function") throw new Error("AI command service is unavailable.");
+public/control-center/pages/ai-command.js:2713:		result = await executeProjectAiCommand(projectName, {
+public/control-center/pages/ai-command.js:2830:	if (aiContext.paid?.summary?.spend != null) caps.push("Paid media briefing");
+public/control-center/pages/ai-command.js:2914:	const isStructured = session.taskMode === "structured";
+public/control-center/pages/ai-command.js:2929:					<button class="ctrl-mode-btn${!isStructured ? " is-active" : ""}" type="button" data-ctrl-task-toggle="free">Free text</button>
+public/control-center/pages/ai-command.js:2930:					<button class="ctrl-mode-btn${isStructured ? " is-active" : ""}" type="button" data-ctrl-task-toggle="structured">Task builder</button>
+public/control-center/pages/ai-command.js:2941:				<div id="ctrlTaskFields" class="ctrl-task-fields${!isStructured ? " is-hidden" : ""}">
+public/control-center/pages/ai-command.js:2942:					<div class="ctrl-task-fields-label">Build a structured task</div>
+public/control-center/pages/ai-command.js:2943:					<div class="ctrl-task-field">
+public/control-center/pages/ai-command.js:2945:						<select id="ctrlTaskType" class="ctrl-task-select">
+public/control-center/pages/ai-command.js:2946:							<option value="launch"${session.taskType === "launch" ? " selected" : ""}>🚀 Launch Campaign</option>
+public/control-center/pages/ai-command.js:2947:							<option value="content"${session.taskType === "content" ? " selected" : ""}>✍️ Generate Content</option>
+public/control-center/pages/ai-command.js:2948:							<option value="analyze"${session.taskType === "analyze" ? " selected" : ""}>📊 Analyze Performance</option>
+public/control-center/pages/ai-command.js:2949:							<option value="fix"${session.taskType === "fix" ? " selected" : ""}>🔧 Fix Readiness</option>
+public/control-center/pages/ai-command.js:2952:					<div class="ctrl-task-field">
+public/control-center/pages/ai-command.js:2954:						<select id="ctrlProductSelect" class="ctrl-task-select">
+public/control-center/pages/ai-command.js:2956:							${productOptions.map((opt) => `<option value="${escapeHtml(opt)}"${session.taskProduct === opt ? " selected" : ""}>${escapeHtml(opt)}</option>`).join("")}
+public/control-center/pages/ai-command.js:2959:					<div class="ctrl-task-field">
+public/control-center/pages/ai-command.js:2961:						<select id="ctrlChannelSelect" class="ctrl-task-select">
+public/control-center/pages/ai-command.js:2963:							${channelOptions.map((ch) => `<option value="${escapeHtml(ch)}"${session.taskChannel === ch ? " selected" : ""}>${escapeHtml(ch)}</option>`).join("")}
+public/control-center/pages/ai-command.js:2966:					<button type="button" id="ctrlBuildTaskBtn" class="ctrl-build-task-btn">Build command from task →</button>
+public/control-center/pages/ai-command.js:3033:	const taskBlock = asObject(response.taskBlock);
+public/control-center/pages/ai-command.js:3079:			${taskBlock.title ? `
+public/control-center/pages/ai-command.js:3081:					<div class="ctrl-response-section-label">Task block — ${escapeHtml(humanizeValue(taskBlock.owner, "System"))}</div>
+public/control-center/pages/ai-command.js:3082:					<div class="ctrl-task-block-name">${escapeHtml(humanizeValue(taskBlock.title))}</div>
+public/control-center/pages/ai-command.js:3084:						${normalizeDisplayList(taskBlock.steps, 6).map((step) => `<div class="ctrl-response-item"><span>${escapeHtml(step)}</span></div>`).join("")}
+public/control-center/pages/ai-command.js:3209:	const patterns = Object.entries(asObject(aiContext.learningPatterns))
+public/control-center/pages/ai-command.js:3339:                task: "task plan",
+public/control-center/pages/ai-command.js:3340:                workflow: "workflow sequence",
+public/control-center/pages/ai-command.js:3341:                handoff: "handoff package"
+public/control-center/pages/ai-command.js:3505:	if (preview.outputType === "workflow") return 2;
+public/control-center/pages/ai-command.js:3506:	if (preview.outputType === "handoff") return 3;
+public/control-center/pages/ai-command.js:3507:	if (preview.outputType === "task") return 1;
+public/control-center/pages/ai-command.js:3518:		task: "task",
+public/control-center/pages/ai-command.js:3519:		workflow: "workflow",
+public/control-center/pages/ai-command.js:3520:		handoff: "handoff",
+public/control-center/pages/ai-command.js:3528:	if (outputType === "task") return "task";
+public/control-center/pages/ai-command.js:3529:	if (outputType === "workflow") return "workflow";
+public/control-center/pages/ai-command.js:3530:	if (outputType === "handoff") return "handoff";
+public/control-center/pages/ai-command.js:3543:		task: "Task Draft",
+public/control-center/pages/ai-command.js:3544:		workflow: "Draft Workflow",
+public/control-center/pages/ai-command.js:3545:		handoff: "Prepare Handoff",
+public/control-center/pages/ai-command.js:3546:		media: "Draft"
+public/control-center/pages/ai-command.js:3554:	if (tool.route) return asString(tool.route || "workflows");
+public/control-center/pages/ai-command.js:3555:	if (session?.teamMode === "team") return tool.intent === "task" ? "task-center" : "workflows";
+public/control-center/pages/ai-command.js:3556:	const outputType = tool.intent === "media" ? "guidance" : asString(tool.intent || "guidance");
+public/control-center/pages/ai-command.js:3567:	if (tool.intent === "workflow") return "Draft";
+public/control-center/pages/ai-command.js:3568:	if (tool.intent === "handoff") return "Prepare";
+public/control-center/pages/ai-command.js:3569:	if (tool.intent === "task") return "Draft";
+public/control-center/pages/ai-command.js:3570:	if (/review|check|compliance|readiness|governance/i.test(asString(tool.label))) return "Review";
+public/control-center/pages/ai-command.js:3613:				<p class="aicmd-room-subtitle mhos-context-description">One specialist or the full team turns requests into review-ready drafts, tasks, and handoffs.</p>
+public/control-center/pages/ai-command.js:3654:			<div class="aicmd-room-flow mhos-workflow-chain" aria-label="AI operating flow">
+public/control-center/pages/ai-command.js:3656:					<div class="aicmd-room-flow-step mhos-workflow-step${index === activeFlowIndex ? " mhos-workflow-active is-active" : ""}${index < activeFlowIndex ? " is-complete" : ""}">
+public/control-center/pages/ai-command.js:3683:			<span>${escapeHtml(safeBridgeStatus.available ? "Executive workflow: strategy, creative, compliance, publishing, customer/sales, then operations." : "Preview tools remain available while chat is guarded.")}</span>
+public/control-center/pages/ai-command.js:3750:						<p class="aicmd-v2-profile-purpose">Coordinates specialists into one review-ready brief, workflow, or handoff.</p>
+public/control-center/pages/ai-command.js:3793:        if (roleId === "media_director" || roleId === "video_lead") return `${label} is preparing creative direction...`;
+public/control-center/pages/ai-command.js:3794:        if (roleId === "operations" || roleId === "customer_ops") return `${label} is preparing your task handoff...`;
+public/control-center/pages/ai-command.js:3797:        if (roleId === "publisher") return `${label} is preparing publishing guidance...`;
+public/control-center/pages/ai-command.js:3809:		? "Team orchestration across strategy, writing, media/video, compliance, publishing, customer operations, sales/CRM, and operations"
+public/control-center/pages/ai-command.js:3836:	if (/workflow|schedule_builder|step_sequence|trigger/.test(haystack)) return "workflow";
+public/control-center/pages/ai-command.js:3837:	if (/handoff|route|destination_brief/.test(haystack)) return "handoff";
+public/control-center/pages/ai-command.js:3838:	if (/task|ticket|checklist|owner_map|priority/.test(haystack)) return "task";
+public/control-center/pages/ai-command.js:3911:					<span class="aicmd-v2-tools-subtitle">Fast specialist actions for the current output. Review-only: prepares drafts, previews, or handoffs without backend execution.</span>
+public/control-center/pages/ai-command.js:3966:		{ label: "GPU video", value: "Coming", className: "is-planned" },
+public/control-center/pages/ai-command.js:4043:						<p class="aicmd-v2-preview-subtitle">Generated content, draft packages, and routed handoffs appear here.</p>
+public/control-center/pages/ai-command.js:4158:					<h2>Drafts, tasks, workflows, handoffs</h2>
+public/control-center/pages/ai-command.js:4165:							<div class="aicmd-room-output-tabs mhos-workflow-chain" role="tablist" aria-label="Output workspace tabs">
+public/control-center/pages/ai-command.js:4169:										class="aicmd-room-output-tab mhos-workflow-step${activeTab === tab.id ? " mhos-workflow-active is-active" : ""}"
+public/control-center/pages/ai-command.js:4235:                                <div class="aicmd-room-planned-note">This is a review-ready preview. Execution, publishing, approvals, CRM updates, and workflow runs happen only in the destination workspace after confirmation.</div>
+public/control-center/pages/ai-command.js:4271:		<section class="aicmd-v2-media-status">
+public/control-center/pages/ai-command.js:4272:			<div class="aicmd-v2-media-status-head">
+public/control-center/pages/ai-command.js:4273:				<h3 class="aicmd-v2-media-status-title">Media, Voice &amp; Chat Capability</h3>
+public/control-center/pages/ai-command.js:4274:				<span class="aicmd-v2-media-status-badge">Honest readiness view</span>
+public/control-center/pages/ai-command.js:4276:			<ul class="aicmd-v2-media-status-list">
+public/control-center/pages/ai-command.js:4279:				<li><span>Native GPU video rendering</span><strong class="is-planned">Requires connected GPU worker</strong></li>
+public/control-center/pages/ai-command.js:4280:				<li><span>Voice script preparation</span><strong class="is-draft-ready">Draft-ready — script only, no audio</strong></li>
+public/control-center/pages/ai-command.js:4284:				<li><span>Realtime voice chat</span><strong class="is-planned">Future — needs provider + bridge</strong></li>
+public/control-center/pages/ai-command.js:4293:        const selectedSpec = isTeam ? { id: "team", label: "Full Team", position: "Team workflow" } : getPhase1SpecialistById(session.modeId);
+public/control-center/pages/ai-command.js:4296:        const selectedModeLabel = isTeam ? "Team workflow" : "Solo specialist";
+public/control-center/pages/ai-command.js:4325:                ? "Chat only. No workflow, task, handoff, approval, publish, CRM, or customer action was created."
+public/control-center/pages/ai-command.js:4413:                                                <span>Home handoff</span>
+public/control-center/pages/ai-command.js:4551:	const scopedContextItems = session.teamMode === "solo" && session.modeId === "customer_ops"
+public/control-center/pages/ai-command.js:4559:		: session.teamMode === "solo" && session.modeId === "sales_crm"
+public/control-center/pages/ai-command.js:4565:				{ label: "Pipeline", value: "Operations handoff", present: true, scoped: true }
+public/control-center/pages/ai-command.js:4605:					<span>Publishing, approval, and workflow runs require your explicit confirmation in the right workspace.</span>
+public/control-center/pages/ai-command.js:4665:		description: "Talk to your AI team, run structured tasks, and turn intelligence into action."
+public/control-center/pages/ai-command.js:4679:			consumeProjectHandoff,
+public/control-center/pages/ai-command.js:4680:			executeProjectAiCommand,
+public/control-center/pages/ai-command.js:4681:			fetchProjectInsights,
+public/control-center/pages/ai-command.js:4682:			fetchProjectLearning,
+public/control-center/pages/ai-command.js:4739:		applyDurableAiHandoff(sessionKey, operations, session, consumeProjectHandoff, showMessage);
+public/control-center/pages/ai-command.js:4744:		const bridgeStatus = getAiResponseBridgeStatus(executeProjectAiChat);
+public/control-center/pages/ai-command.js:5002:		const voiceBtn = $("aicmdV2VoiceBtn");
+public/control-center/pages/ai-command.js:5003:		if (voiceBtn) {
+public/control-center/pages/ai-command.js:5004:			voiceBtn.onclick = () => {
+public/control-center/pages/ai-command.js:5034:					updateStatus("Listening for Arabic voice input.");
+public/control-center/pages/ai-command.js:5097:		                        const result = await executeProjectAiChat(projectName, {
+public/control-center/pages/ai-command.js:5115:		                                safetyInstruction: "Chat only. No task/workflow/handoff/approval/publish/customer/CRM execution.",
+public/control-center/pages/ai-command.js:5200:		                        updateStatus("Specialist reply generated. No workflow/task/handoff was created.");
+public/control-center/pages/ai-command.js:5242:                // Phase 1: converts the current conversation into a task preview. No backend execution.
+public/control-center/pages/ai-command.js:5249:                                        ? `Draft a task plan for: ${value}`
+public/control-center/pages/ai-command.js:5250:                                        : `Draft a task plan for the next best action for ${projectName || "this project"} with ${spec.label}.`;
+public/control-center/pages/ai-command.js:5253:                                        intent: "task",
+public/control-center/pages/ai-command.js:5259:                                updateStatus("Task draft preview prepared from conversation context. Review before creating durable tasks.");

@@ -1,0 +1,56 @@
+  function resetShellScrollContext() {
+    const workspace = $("workspace");
+    if (workspace) {
+      workspace.scrollTop = 0;
+      workspace.scrollLeft = 0;
+    }
+
+    const sidebarNav = document.querySelector(".sidebar-nav");
+    if (sidebarNav) {
+      const activeItem = sidebarNav.querySelector(".nav-item.is-active");
+      if (activeItem && typeof activeItem.scrollIntoView === "function") {
+        activeItem.scrollIntoView({ block: "nearest" });
+      }
+    }
+  }
+
+  window.addEventListener("mh:route-change", (event) => {
+    const route = event?.detail?.route || "home";
+    setCurrentRoute(route);
+    renderCurrentPage();
+    resetShellScrollContext();
+  });
+
+  // Back/Forward support — hashchange fires when the user navigates browser history
+  window.addEventListener("hashchange", () => {
+    const route = (location.hash.slice(1) || "home").trim();
+    if (route && route !== getState().currentRoute) {
+      navigateTo(route);
+    }
+  });
+}
+
+/* =========================
+   PROJECT SWITCHER
+========================= */
+
+function bindProjectSwitcher() {
+  const select = $("projectSwitcher");
+  if (!select) return;
+
+  select.addEventListener("change", async (event) => {
+    const rawProjectName = event.target.value || "";
+
+    if (!rawProjectName) {
+      showError("Please select a valid project.");
+      return;
+    }
+
+    const projectName = getSafeProjectName(rawProjectName);
+
+    if (projectName !== normalizeProjectSlug(rawProjectName)) {
+      showMessage(`Test project ignored. Loading ${projectName}.`);
+    }
+
+    setCurrentProject(projectName);
+    await loadProjectData(projectName);

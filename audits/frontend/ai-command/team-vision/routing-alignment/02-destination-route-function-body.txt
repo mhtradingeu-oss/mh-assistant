@@ -1,0 +1,126 @@
+  1200	                "Reply to the user in the same language as the latest user request.",
+  1201	                "If the user writes Arabic, reply in Arabic. If the user writes English, reply in English. If the user writes German, reply in German.",
+  1202	                `Use ${safeOutputLanguage} only for customer-facing or publishable copy such as captions, ads, emails, landing pages, final campaign text, or publishing packages.`,
+  1203	                "When you include publishable copy, label it clearly as publishable content and keep the explanation in the user chat language.",
+  1204			...teamWorkflowLines,
+  1205			"Return practical guidance and content only.",
+  1206			`When drafting publishable copy, write it in ${safeOutputLanguage}.`,
+  1207			"Never claim actions were executed.",
+  1208			"Never claim publish, approval, deletion, archival, sync, or operational runs happened.",
+  1209			"Deliver a structured, review-ready answer.",
+  1210			"",
+  1211			"User request:",
+  1212			cleanPrompt
+  1213		].join("\n");
+  1214	}
+  1215	
+  1216	function extractGeneratedResponseText(response = {}) {
+  1217		const direct = humanizeValue(
+  1218			response.chat_answer ||
+  1219			response.response_text ||
+  1220			response.content ||
+  1221			response.summary ||
+  1222			response.analysis ||
+  1223			response.title
+  1224		);
+  1225		if (direct) return direct;
+  1226	
+  1227		const bullets = normalizeDisplayList(response.bullets, 6)
+  1228			.map((item) => `- ${item}`)
+  1229			.join("\n");
+  1230	
+  1231		if (bullets) return bullets;
+  1232	
+  1233		const recommendationLine = normalizeDisplayList(response.recommendations, 4)
+  1234			.map((item, index) => `${index + 1}. ${item}`)
+  1235			.join("\n");
+  1236	
+  1237		const findingLine = normalizeDisplayList(response.findings, 4)
+  1238			.map((item) => `- ${item}`)
+  1239			.join("\n");
+  1240	
+  1241		const sectionLine = asArray(response.sections)
+  1242			.map((section) => {
+  1243				const title = humanizeValue(section?.title);
+  1244				const items = normalizeDisplayList(section?.items, 4);
+  1245				if (!items.length) return "";
+  1246				return [title ? `${title}:` : "", ...items.map((item) => `- ${item}`)].filter(Boolean).join("\n");
+  1247			})
+  1248			.filter(Boolean)
+  1249			.join("\n\n");
+  1250	
+  1251		return [recommendationLine, findingLine, sectionLine].filter(Boolean).join("\n\n");
+  1252	}
+  1253	
+  1254	function destinationRouteForSpecialist(specialistId, outputType) {
+  1255		const rawId = getAiRoomRoleId(specialistId || "operations");
+  1256		const id = MODE_ID_ALIASES[rawId] || rawId;
+  1257		if (outputType === "workflow") return "workflows";
+  1258		if (id === "strategist") return outputType === "task" ? "campaign-studio" : "workflows";
+  1259		if (id === "writer") return "content-studio";
+  1260		if (id === "media") return "media-studio";
+  1261		if (id === "video_lead") return "media-studio";
+  1262		if (id === "publisher") return "publishing";
+  1263		if (id === "ads") return "ads-manager";
+  1264		if (id === "analyst") return "insights";
+  1265		if (id === "compliance_reviewer") return "governance";
+  1266		if (id === "operations") return outputType === "task" ? "task-center" : "workflows";
+  1267		if (id === "customer_ops") return outputType === "task" ? "task-center" : "operations-centers";
+  1268		if (id === "sales_crm") return "workflows";
+  1269		return "workflows";
+  1270	}
+  1271	
+  1272	
+  1273	function resolveAiResponseOutputRoute(session, response = {}) {
+  1274	        const activeTab = getOutputWorkspaceTab(session);
+  1275	        const specialistId = getAiRoomRoleId(session?.modeId || "operations");
+  1276	        const text = [
+  1277	                activeTab,
+  1278	                response.outputType,
+  1279	                response.destinationRoute,
+  1280	                response.responseTitle,
+  1281	                response.responseText,
+  1282	                response.prompt
+  1283	        ].map((value) => asString(value).toLowerCase()).join(" ");
+  1284	
+  1285	        let outputType = asString(response.outputType || "");
+  1286	        if (!outputType || outputType === "chat") {
+  1287	                outputType = activeTab === "task" ? "task" : activeTab === "workflow" ? "workflow" : activeTab === "handoff" ? "handoff" : "guidance";
+  1288	        }
+  1289	
+  1290	        const looksTaskLike = /\b(task|handoff|ticket|follow-up|owner|timeline|approval|checklist|next task|assigned|priorities|dependencies|risk)\b/.test(text);
+  1291	
+  1292	        if (
+  1293	                outputType === "handoff" ||
+  1294	                outputType === "task" ||
+  1295	                (["operations", "customer_ops"].includes(specialistId) && looksTaskLike) ||
+  1296	                (session?.teamMode === "team" && looksTaskLike)
+  1297	        ) {
+  1298	                outputType = "task";
+  1299	        }
+  1300	
+  1301	        const destinationRoute = outputType === "task"
+  1302	                ? "task-center"
+  1303	                : asString(response.destinationRoute || destinationRouteForSpecialist(session?.modeId || "operations", outputType));
+  1304	
+  1305	        return { outputType, destinationRoute };
+  1306	}
+  1307	
+  1308	
+  1309	function routeLabel(route) {
+  1310		const labels = {
+  1311			"campaign-studio": "Campaign Studio",
+  1312			"content-studio": "Content Studio",
+  1313			"media-studio": "Media Studio",
+  1314			publishing: "Publishing",
+  1315			"ads-manager": "Ads Manager",
+  1316			insights: "Insights",
+  1317			integrations: "Integrations",
+  1318			governance: "Governance",
+  1319			"operations-centers": "Operations Centers",
+  1320			"task-center": "Task Center",
+  1321			setup: "Setup",
+  1322			workflows: "Workflows"
+  1323		};
+  1324		return labels[route] || titleCase(route);
+  1325	}

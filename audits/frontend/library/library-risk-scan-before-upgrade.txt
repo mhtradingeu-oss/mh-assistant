@@ -1,0 +1,59 @@
+10:  uploadProjectAsset
+413:  window.addEventListener("beforeunload", () => {
+422:  document.addEventListener("click", async (event) => {
+439:  document.addEventListener("click", (event) => {
+461:  document.addEventListener("click", (event) => {
+977:function renderPreview(asset, escapeHtml) {
+1101:      previewNode.innerHTML = `<img src="${escapeHtml(resolved.objectUrl)}" alt="${escapeHtml(asset.name)}" class="library-preview-image">`;
+1106:      previewNode.innerHTML = `<video class="library-preview-video" controls src="${escapeHtml(resolved.objectUrl)}"></video>`;
+1117:    previewNode.innerHTML = `<div class="library-preview-fallback">${escapeHtml(message)}</div>`;
+1148:      node.innerHTML = fallbackMarkup;
+1151:    node.innerHTML = "";
+1155:    node.innerHTML = fallbackMarkup;
+1189:    return `Classify the current library assets for ${project}, propose best category keys, and flag items that should be source-of-truth.`;
+1262:    cancelBtn.onclick = () => {
+1267:    submitBtn.onclick = () => {
+1273:    overlay.onclick = (event) => {
+1408:    overviewBox.innerHTML = `
+1438:    requiredBox.innerHTML = requiredGroups.map((item) => {
+1467:    typeSelect.innerHTML = typeOptions.map((option) => `
+1520:    sourceSelect.innerHTML = sourceOptions.map((option) => `
+1573:    gridBody.innerHTML = paginatedAssets.length
+1606:    gridPagination.innerHTML = `
+1645:    previewVisual.innerHTML = renderPreview(selectedAsset, escapeHtml);
+1661:    previewMeta.innerHTML = selectedAsset
+1692:      : `<button class="btn btn-secondary" type="button" data-library-source-truth="${escapeHtml(selectedAsset.id)}">${escapeHtml(selectedAsset.source_of_truth ? "Unsource" : "Source")}</button>
+1705:    activityBox.innerHTML = recentActivity.length
+1721:    uploadSummary.innerHTML = session.recentUploads.length
+1737:    button.onclick = () => {
+1779:    button.onclick = (event) => {
+1803:    row.onclick = (event) => {
+1855:    card.onclick = (event) => {
+1875:    button.onclick = () => {
+1888:  button.onclick = () => {
+1904:    toolbarUpload.onclick = () => $("libraryUploadInput")?.click();
+1918:    toolbarRename.onclick = () => triggerToolbarAction("#libraryPreviewMeta [data-library-rename]", "Select an asset to rename.");
+1923:    toolbarDelete.onclick = () => triggerToolbarAction("#libraryPreviewMeta [data-library-delete]", "Select an asset to delete.");
+1928:    toolbarApprove.onclick = () => triggerToolbarAction("#libraryPreviewMeta [data-asset-status-action='approved']", "Select an asset to approve.");
+1933:    toolbarSource.onclick = () => triggerToolbarAction("#libraryPreviewMeta [data-library-source-truth]", "Select an asset first.");
+1938:    button.onclick = async () => {
+1957:  const sourceOfTruthButtons = Array.from(document.querySelectorAll("[data-library-source-truth]"));
+1959:    button.onclick = async () => {
+1967:      const assetId = button.getAttribute("data-library-source-truth") || "";
+1990:    button.onclick = async () => {
+2029:    button.onclick = async () => {
+2063:    button.onclick = async () => {
+2104:    button.onclick = async () => {
+2140:    button.onclick = (event) => {
+2160:    button.onclick = () => {
+2173:    button.onclick = (event) => {
+2242:    dropZone.onclick = (event) => {
+2283:      chooseFilesBtn.onclick = (event) => {
+2296:    uploadBtn.onclick = async () => {
+2344:            const result = await uploadProjectAsset(activeProjectName, assetType, file);
+2396:    refreshBtn.onclick = async () => {
+2416:    classifyBtn.onclick = () => {
+2426:    missingBtn.onclick = () => {
+2436:    extractBtn.onclick = () => {
+2502:    root.innerHTML = `
+2547:              <div class="setup-helper">Upload, classify, and route into review and source-of-truth decisions.</div>

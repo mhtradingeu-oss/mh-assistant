@@ -1,0 +1,106 @@
+              <span>${escapeHtml(`${toStatusLabel(asset.status)} • ${formatDate(asset.uploaded_at)}`)}</span>
+            </li>
+          `).join("")}
+        </ul>
+      `
+      : `<div class="empty-box">Recent uploads and updates will appear here after you add or refresh assets.</div>`;
+  }
+
+  const uploadSummary = $("libraryUploadSummary");
+  if (uploadSummary) {
+    uploadSummary.innerHTML = session.recentUploads.length
+      ? `
+        <ul class="simple-list">
+          ${session.recentUploads.slice(0, 5).map((item) => `
+            <li>
+              <strong>${escapeHtml(item.filename)}</strong>
+              <span>${escapeHtml(`${item.asset_type} • ${item.status === "success" ? "Uploaded" : "Failed"}`)}</span>
+            </li>
+          `).join("")}
+        </ul>
+      `
+      : `<div class="empty-box library-upload-empty-state"><strong>No session uploads yet.</strong><span>Choose files, classify them, then upload to add new assets to this Library.</span></div>`;
+  }
+
+  const requiredActionButtons = Array.from(document.querySelectorAll("[data-library-required-action]"));
+  requiredActionButtons.forEach((button) => {
+    button.onclick = () => {
+      const action = button.getAttribute("data-library-required-action") || "review";
+      const uploadType = button.getAttribute("data-library-upload-type") || "logo";
+      const requiredKey = button.getAttribute("data-library-required-key") || "";
+
+      // Always set upload type
+      session.uploadType = uploadType;
+      const uploadTypeSelect = $("libraryUploadTypeSelect");
+      if (uploadTypeSelect) uploadTypeSelect.value = uploadType;
+
+      // Try to find a matching folder/filter for the required asset group
+      let mappedFolder = null;
+      for (const folder of LIBRARY_FOLDERS) {
+        if (folder.key === requiredKey || (folder.types && folder.types.includes(uploadType))) {
+          mappedFolder = folder;
+          break;
+        }
+      }
+
+      if (mappedFolder) {
+        const isReviewAction = action === "review";
+        session.folderKey = mappedFolder.key;
+        session.selectedType = isReviewAction ? "all" : uploadType;
+        session.selectedStatus = isReviewAction ? "active" : session.selectedStatus;
+        session.selectedSource = isReviewAction ? "all" : session.selectedSource;
+        session.searchQuery = isReviewAction ? "" : session.searchQuery;
+        session.page = 1;
+
+        bindLibraryWorkspace({
+          $,
+          projectName,
+          session,
+          assetsData,
+          operations,
+          registry,
+          categoryReadiness,
+          missingRequiredAssets,
+          navigateTo,
+          reloadProjectData,
+          showMessage,
+          showError,
+          escapeHtml
+        });
+
+        const uploadLabel = getLibraryUploadTypeLabel(uploadType);
+
+        if (isReviewAction) {
+          showMessage?.(`Showing ${mappedFolder.label} assets. Select a file, then use the action panel.`);
+          setTimeout(() => {
+            const assetWorkspace = document.getElementById("libraryAssetWorkspace") || document.querySelector('[data-library-section="asset-workspace"]');
+            scrollLibraryTargetIntoView(assetWorkspace);
+          }, 120);
+          return;
+        }
+
+        showMessage?.(`Upload category set to ${uploadLabel}. Choose files, then upload them to this asset group.`);
+        setTimeout(() => {
+          const assetIntake = document.querySelector(".library-actions-card") || document.getElementById("libraryDropZone");
+          const dropZone = document.getElementById("libraryDropZone");
+          scrollLibraryTargetIntoView(assetIntake);
+          if (dropZone && dropZone !== assetIntake) {
+            dropZone.classList.add("is-required-action-target");
+            setTimeout(() => dropZone.classList.remove("is-required-action-target"), 2600);
+          }
+        }, 120);
+        return;
+      } else {
+        showMessage?.(`Upload category set to ${getLibraryUploadTypeLabel(uploadType)}. Matching workspace filter is not available yet.`);
+      }
+
+      if (action === "upload") {
+        const uploadInput = $("libraryUploadInput");
+        uploadInput?.click();
+        return;
+      }
+
+      if (action === "review") {
+        session.selectedStatus = "needs_review";
+        bindLibraryWorkspace({
+          $,

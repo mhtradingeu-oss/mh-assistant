@@ -5,8 +5,68 @@ build/
 coverage/
 .env
 .env.*
+*.env
+!.env.example
 *.log
 .vscode/
 archive/
 logs/
 *.tar.gz
+data/
+*.log
+.env
+
+# ── Encryption master key ────────────────────────────────────────────────────
+# The integration encryption key must NEVER be committed to the repo.
+# It must be set via MH_INTEGRATION_SECRET_KEY env var in production,
+# or kept in data/system/ on the host only.
+data/system/
+
+# ── Integration credential records ──────────────────────────────────────────
+# control-center.json files may contain credentials_encrypted payloads.
+# If the encryption key is also committed, those payloads become plaintext.
+# Keep integration state on-host only.
+data/projects/*/integrations/
+
+# ── Runtime execution artifacts ──────────────────────────────────────────────
+# These are transient runtime outputs, not source-controlled state.
+data/execution/
+data/**/telemetry/
+data/**/assets/backups/
+
+# Runtime-generated queues/results/outputs under data/
+data/**/generated/
+data/**/execution/results/
+data/**/publishing/results/
+data/**/campaign-output/
+data/**/media/queue/
+data/**/ops/queue.json
+data/**/*-queue.json
+
+# ── Atomic-write temporaries & backup artefacts (P1-C) ───────────────────────
+*.tmp
+*.backup
+*.corrupt
+*.bak
+*.bak-*
+
+# ── Local secret / credential files ──────────────────────────────────────────
+*.key.json
+*.secret
+*.secret.json
+*.pem
+*.p12
+*.pfx
+*.crt
+*.cer
+
+# Roo local config
+.roo/
+.roomodes
+.DS_Store
+
+audits/backend/local-terminal-phase0/
+audits/backend/local-terminal-phase0b-dirty-state/
+audits/backend/local-terminal-phase0c-classification/
+audits/backend/local-truth-audit/
+audits/backend/public-alias-compatibility-check.*

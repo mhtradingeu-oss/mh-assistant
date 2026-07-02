@@ -1,0 +1,105 @@
+# Setup Handoff / Button Map
+
+159:    return { tone: "success", label: "Validated" };
+178:function getSetupDraftKey(projectName) {
+182:function loadSetupDraft(projectName) {
+186:    const raw = window.localStorage.getItem(getSetupDraftKey(projectName));
+195:function saveSetupDraft(projectName, data) {
+199:    window.localStorage.setItem(getSetupDraftKey(projectName), JSON.stringify(data));
+206:function clearSetupDraft(projectName) {
+210:    window.localStorage.removeItem(getSetupDraftKey(projectName));
+401:  return "Save setup, then continue to Library or Integrations.";
+702:            <button class="btn btn-ghost" type="button" data-setup-jump-field="${escapeHtml(item.name)}" data-setup-jump-step="${escapeHtml(item.stepId)}">Open field</button>
+740:    const button = form.querySelector(`[data-setup-step="${step.id}"]`);
+747:    if (button) {
+748:      button.classList.remove("is-problem", "is-warning", "is-ready", "is-recommended");
+749:      if (status.tone === "danger") button.classList.add("is-problem");
+750:      if (status.tone === "warning") button.classList.add("is-warning");
+751:      if (status.tone === "success") button.classList.add("is-ready");
+752:      if (recommendedStep.id === step.id) button.classList.add("is-recommended");
+753:      button.setAttribute("data-step-tone", status.tone);
+754:      button.setAttribute("aria-label", `${step.title}. ${step.description}. Status: ${status.label}.`);
+778:  const continueLibraryBtn = document.getElementById("setupContinueLibraryBtn");
+779:  const continueIntegrationsBtn = document.getElementById("setupContinueIntegrationsBtn");
+780:  const continueCampaignBtn = document.getElementById("setupContinueCampaignBtn");
+787:    continueLibraryBtn.textContent = hasMissing ? `Continue to Library (${warningText})` : "Continue to Library";
+792:    continueIntegrationsBtn.textContent = hasMissing ? `Continue to Integrations (${warningText})` : "Continue to Integrations";
+797:    continueCampaignBtn.textContent = hasMissing ? `Continue to Campaign Studio (${warningText})` : "Continue to Campaign Studio";
+811:  navigateTo,
+835:    stepButtons.forEach((button) => {
+836:      const isActive = button.getAttribute("data-setup-step") === stepId;
+837:      button.classList.toggle("is-active", isActive);
+838:      button.setAttribute("aria-current", isActive ? "step" : "false");
+862:  stepButtons.forEach((button) => {
+863:    button.onclick = () => activateStep(button.getAttribute("data-setup-step") || STEP_DEFINITIONS[0].id);
+866:  stepActionButtons.forEach((button) => {
+867:    button.onclick = () => {
+868:      const stepId = button.getAttribute("data-setup-open-step") || STEP_DEFINITIONS[0].id;
+910:    const saved = saveSetupDraft(projectName, values);
+916:  let draftAutoSaveTimer = null;
+918:  const refreshAndPersistDraft = () => {
+924:        setupDraft: {
+933:    if (draftAutoSaveTimer) {
+934:      clearTimeout(draftAutoSaveTimer);
+937:    draftAutoSaveTimer = setTimeout(() => {
+938:      saveSetupDraft(projectName, values);
+944:  form.oninput = refreshAndPersistDraft;
+945:  form.onchange = refreshAndPersistDraft;
+992:  const saveDraftBtn = $("setupSaveDraftBtn");
+993:  if (saveDraftBtn) {
+994:    saveDraftBtn.onclick = () => {
+995:      saveLocal(`Draft saved locally for ${draftKeyName}.`);
+999:  const saveBackendBtn = $("setupSaveBackendBtn");
+1018:        clearSetupDraft(projectName);
+1027:        saveBackendBtn.textContent = "Saved";
+1041:  const resetBtn = $("setupResetDraftBtn");
+1044:      clearSetupDraft(projectName);
+1045:      navigateTo("setup");
+1115:      showMessage?.("AI drafted missing fields. Review and save when ready.");
+1128:      navigateTo("ai-command");
+1133:  const validateNowBtn = $("setupValidateNowBtn");
+1136:      const target = $("setupSaveBackendBtn");
+1143:  const continueLibraryBtn = $("setupContinueLibraryBtn");
+1146:      navigateTo("library");
+1150:  const continueIntegrationsBtn = $("setupContinueIntegrationsBtn");
+1153:      navigateTo("integrations");
+1157:  const continueCampaignBtn = $("setupContinueCampaignBtn");
+1160:      navigateTo("campaign-studio");
+1164:  const reviewMissingBtn = $("setupReviewMissingBtn");
+1180:      showMessage?.(`Reviewing missing setup items (${missing.length}).`);
+1184:  const reviewReadinessBtn = $("setupReviewReadinessBtn");
+1187:      navigateTo("home");
+1290:        <button id="setupApplyTemplateBtn" class="btn btn-secondary" type="button">
+1292:        </button>
+1317:    navigateTo,
+1331:    const draft = loadSetupDraft(projectName);
+1363:    const lastSavedAt = formatUpdatedAt(
+1387:              <button id="setupSaveBackendBtn" class="btn btn-primary" type="button">Save Setup</button>
+1388:              <span class="setup-save-note">Draft is local browser state. Save writes setup to project data.</span>
+1419:              <span class="setup-helper">Updated ${escapeHtml(lastSavedAt)}</span>
+1440:              <button id="setupRecommendedStepBtn" class="btn btn-ghost" type="button" data-setup-open-step="${escapeHtml(getRecommendedStep(values).id)}">
+1442:              </button>
+1449:                  <button class="setup-wizard-step ${index === 0 ? "is-active" : ""}" type="button" data-setup-step="${escapeHtml(step.id)}" role="tab" aria-current="${index === 0 ? "step" : "false"}">
+1455:                  </button>
+1468:                <button id="setupPrevStepBtn" class="btn btn-ghost" type="button">Previous</button>
+1469:                <button id="setupNextStepBtn" class="btn btn-secondary" type="button">Next</button>
+1550:              <button id="setupCompleteNowBtn" class="btn btn-secondary" type="button">Complete now</button>
+1560:                      <button class="btn btn-ghost" type="button" data-setup-jump-field="${escapeHtml(item.name)}" data-setup-jump-step="${escapeHtml(item.stepId)}">Fix now</button>
+1584:              <button id="setupValidateNowBtn" class="btn btn-ghost" type="button">Validate now</button>
+1609:            <button id="setupSmartActionBtn" class="btn btn-secondary" type="button">Run next best action</button>
+1613:            <button id="setupSaveBackendBtnBottom" class="btn btn-ghost" type="button">Save before continuing</button>
+1614:            <button id="setupContinueLibraryBtn" class="btn btn-secondary" type="button">Continue to Library</button>
+1615:            <button id="setupContinueIntegrationsBtn" class="btn btn-secondary" type="button">Continue to Integrations</button>
+1619:              <span class="setup-action-group-label">Continue</span>
+1620:              <button id="setupContinueCampaignBtn" class="btn btn-secondary" type="button">Continue to Campaign Studio</button>
+1624:              <button id="setupAiCommandBtn" class="btn btn-ghost" type="button">Open AI Command with Setup Context</button>
+1625:              <button id="setupReviewMissingBtn" class="btn btn-ghost" type="button">Review missing setup items</button>
+1629:              <button id="setupSaveDraftBtn" class="btn btn-ghost" type="button">Save Draft (Local)</button>
+1630:              <button id="setupResetDraftBtn" class="btn btn-ghost" type="button">Reset Draft</button>
+1644:            <button id="setupAiPositioningBtn" class="btn btn-ghost" type="button">Review positioning</button>
+1645:            <button id="setupAiAudienceBtn" class="btn btn-ghost" type="button">Find missing launch inputs</button>
+1646:            <button id="setupAiToneBtn" class="btn btn-ghost" type="button">Suggest channel priorities</button>
+1647:            <button id="setupAiFillMissingBtn" class="btn btn-secondary" type="button">Prepare setup checklist</button>
+1655:      navigateTo,
+1715:    const saveBottomBtn = $("setupSaveBackendBtnBottom");
+1716:    const saveTopBtn = $("setupSaveBackendBtn");

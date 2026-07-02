@@ -1,0 +1,115 @@
+# AI Auth Route Boundary Map
+
+## Route definitions
+11387:app.get('/media-manager/project/:project/ai/commands', handleListAiCommands);
+11388:app.get('/public/media-manager/project/:project/ai/commands', handleListAiCommands);
+11389:app.get('/media-manager/project/:project/ai/commands/:commandId', handleGetAiCommand);
+11390:app.get('/public/media-manager/project/:project/ai/commands/:commandId', handleGetAiCommand);
+11391:app.post('/media-manager/project/:project/ai/command', handleExecuteAiCommand);
+11392:app.post('/public/media-manager/project/:project/ai/command', handleExecuteAiCommand);
+11399:app.get('/media-manager/project/:project/ai/artifacts', handleListAiArtifacts);
+11400:app.get('/public/media-manager/project/:project/ai/artifacts', handleListAiArtifacts);
+11401:app.get('/media-manager/project/:project/ai/recommendations', handleListAiRecommendations);
+11402:app.get('/public/media-manager/project/:project/ai/recommendations', handleListAiRecommendations);
+11403:app.get('/media-manager/project/:project/ai/memory', handleListAiMemory);
+11404:app.get('/public/media-manager/project/:project/ai/memory', handleListAiMemory);
+
+## Auth / public route signals near AI routes
+      return res.status(400).json({ error: 'Missing assetId.' });
+    }
+
+    const result = mutateProjectAssetRegistry(req.params.project, assetId, (asset, now) => {
+      asset.deleted = true;
+      asset.deleted_at = now;
+      asset.deleted_by = 'control_center';
+      asset.delete_note = note || asset.delete_note || 'Soft deleted from Control Center Library.';
+      asset.status = 'archived';
+      asset.readiness_status = 'archived';
+      asset.review_status = 'archived';
+      asset.archived = true;
+      asset.archived_at = asset.archived_at || now;
+    });
+
+    return res.json({
+      ...result,
+      deleted: true,
+      status: 'archived'
+    });
+  } catch (error) {
+    return sendAssetMutationError(res, error, 'Failed to delete asset.');
+  }
+});
+
+app.delete('/media-manager/project/:project/assets/:assetId', express.json({ limit: '1mb' }), (req, res) => {
+  try {
+    const assetId = String(req.params.assetId || '').trim();
+    const note = String(req.body?.note || '').trim();
+
+    if (!assetId) {
+      return res.status(400).json({ error: 'Missing assetId.' });
+    }
+
+    const result = mutateProjectAssetRegistry(req.params.project, assetId, (asset, now) => {
+      asset.deleted = true;
+      asset.deleted_at = now;
+      asset.deleted_by = 'control_center';
+      asset.delete_note = note || asset.delete_note || 'Soft deleted from Control Center Library.';
+      asset.status = 'archived';
+      asset.readiness_status = 'archived';
+      asset.review_status = 'archived';
+      asset.archived = true;
+      asset.archived_at = asset.archived_at || now;
+    });
+
+    return res.json({
+      ...result,
+      deleted: true,
+      status: 'archived'
+    });
+  } catch (error) {
+    return sendAssetMutationError(res, error, 'Failed to delete asset.');
+  }
+});
+
+app.post('/media-manager/project/:project/library/refresh', (req, res) => {
+  try {
+    return res.json(refreshProjectLibraryRegistry(req.params.project));
+  } catch (error) {
+    return res.status(400).json({
+      error: error.message || 'Failed to refresh project library'
+    });
+  }
+});
+
+app.post('/media-manager/project/:project/setup', (req, res) => {
+  try {
+    return res.json(updateProjectSetup(req.params.project, req.body || {}));
+  } catch (error) {
+    return res.status(400).json({
+      error: error.message || 'Failed to save project setup'
+    });
+  }
+});
+
+app.post('/public/media-manager/project/:project/setup', (req, res) => {
+  try {
+    return res.json(updateProjectSetup(req.params.project, req.body || {}));
+  } catch (error) {
+    return res.status(400).json({
+      error: error.message || 'Failed to save project setup'
+    });
+  }
+});
+
+function handleGetProjectOperations(req, res) {
+  try {
+    return res.json(buildProjectOperationsPayload(req.params.project));
+  } catch (error) {
+    return res.status(400).json({
+
+## API frontend wrappers
+public/control-center/api.js:1553:export async function executeProjectAiCommand(projectName, payload = {}) {
+public/control-center/pages/ai-command.js:2700:	executeProjectAiCommand,
+public/control-center/pages/ai-command.js:2705:	if (typeof executeProjectAiCommand !== "function") throw new Error("AI command service is unavailable.");
+public/control-center/pages/ai-command.js:2713:		result = await executeProjectAiCommand(projectName, {
+public/control-center/pages/ai-command.js:4680:			executeProjectAiCommand,

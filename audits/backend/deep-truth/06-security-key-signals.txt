@@ -1,0 +1,55 @@
+===== SECURITY / KEY / AUTH SIGNALS =====
+runtime/orchestrator-service/server.js:234:    'Authorization',
+runtime/orchestrator-service/server.js:252:const CONTROL_WRITE_KEY_HEADER = 'x-mh-control-key';
+runtime/orchestrator-service/server.js:253:const CONTROL_WRITE_KEY_ENV = 'MH_CONTROL_CENTER_WRITE_KEY';
+runtime/orchestrator-service/server.js:401:      error: `Missing protected write key. Provide ${CONTROL_WRITE_KEY_HEADER} or Authorization: Bearer <key>.`
+runtime/orchestrator-service/server.js:465:      error: `Missing read key. Provide ${CONTROL_WRITE_KEY_HEADER} or Authorization: Bearer <key>.`
+runtime/orchestrator-service/server.js:1120:    control_write_key_configured: {
+runtime/orchestrator-service/server.js:1161:  if (!checks.control_write_key_configured.ok) {
+runtime/orchestrator-service/server.js:1165:  if (checks.integration_secret_key.required && !checks.integration_secret_key.ok) {
+runtime/orchestrator-service/server.js:1175:    protected_write_mode: {
+runtime/orchestrator-service/server.js:1177:      required_key_env: CONTROL_WRITE_KEY_ENV,
+runtime/orchestrator-service/server.js:2564:        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+runtime/orchestrator-service/server.js:6490:  const requiredSources = Object.entries(requiredMap).reduce((acc, [key, candidates]) => {
+runtime/orchestrator-service/server.js:7757:  const missingRequired = requiredFields.filter(key => !fieldSnapshot[key]);
+runtime/orchestrator-service/server.js:13465:    process.env.MH_CONTROL_CENTER_WRITE_KEY ||
+runtime/orchestrator-service/server.js:13478:    `window.__MH_CONTROL_CENTER_WRITE_KEY__ = ${serializedKey};`,
+runtime/orchestrator-service/server.js:16707:          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+runtime/orchestrator-service/server.js:17278:              'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+runtime/orchestrator-service/server.js:21896:        'Authorization':
+runtime/orchestrator-service/lib/ai/providers/openai.js:336:              Authorization: `Bearer ${asString(config.apiKey)}`,
+runtime/orchestrator-service/lib/integrations/providers/ebay.js:9:      Authorization: `Bearer ${accessToken}`,
+runtime/orchestrator-service/lib/integrations/providers/google.js:6:    Authorization: `Bearer ${credentials.accessToken || credentials.refreshToken}`,
+runtime/orchestrator-service/lib/integrations/providers/google.js:139:    Authorization: `Bearer ${ctx.credentials.refreshToken || ctx.credentials.accessToken}`,
+runtime/orchestrator-service/lib/integrations/providers/google.js:187:      Authorization: `Bearer ${token}`
+runtime/orchestrator-service/lib/integrations/providers/google.js:201:        Authorization: `Bearer ${token}`
+runtime/orchestrator-service/lib/integrations/providers/ops.js:10:      Authorization: `Bearer ${ctx.credentials.botToken}`
+runtime/orchestrator-service/lib/integrations/providers/ops.js:89:      Authorization: `Bearer ${ctx.credentials.accessToken}`,
+runtime/orchestrator-service/lib/integrations/providers/ops.js:130:          Authorization: `Bearer ${ctx.credentials.accessToken}`
+runtime/orchestrator-service/lib/integrations/providers/ops.js:177:          Authorization: `Bearer ${ctx.credentials.accessToken}`
+runtime/orchestrator-service/lib/integrations/providers/ops.js:221:      Authorization: `Bearer ${ctx.credentials.accessToken}`
+runtime/orchestrator-service/lib/integrations/providers/tiktok.js:9:      Authorization: `Bearer ${accessToken}`
+runtime/orchestrator-service/lib/integrations/providers/tiktok.js:27:      Authorization: `Bearer ${accessToken}`,
+runtime/orchestrator-service/lib/media/native/providers/adapters/openai-provider-adapter.js:48:            Authorization: `Bearer ${apiKey}`,
+runtime/orchestrator-service/lib/media/native/providers/provider-model-catalog.js:11:    requires_api_key: true,
+runtime/orchestrator-service/lib/media/native/providers/provider-model-catalog.js:23:    requires_api_key: true,
+runtime/orchestrator-service/lib/media/native/providers/provider-model-catalog.js:34:    requires_api_key: true,
+runtime/orchestrator-service/lib/media/native/providers/provider-model-catalog.js:45:    requires_api_key: true,
+runtime/orchestrator-service/lib/media/native/providers/provider-model-catalog.js:56:    requires_api_key: true,
+runtime/orchestrator-service/lib/media/native/providers/provider-model-catalog.js:67:    requires_api_key: true,
+runtime/orchestrator-service/lib/media/native/providers/provider-model-catalog.js:78:    requires_api_key: false,
+runtime/orchestrator-service/lib/media/native/providers/provider-model-catalog.js:89:    requires_api_key: false,
+runtime/orchestrator-service/lib/media/native/providers/provider-model-catalog.js:100:    requires_api_key: false,
+runtime/orchestrator-service/lib/media/native/providers/provider-model-catalog.js:111:    requires_api_key: false,
+runtime/orchestrator-service/lib/media/native/providers/provider-model-catalog.js:122:    requires_api_key: false,
+runtime/orchestrator-service/lib/media/native/providers/provider-model-catalog.js:133:    requires_api_key: false,
+runtime/orchestrator-service/lib/media/native/providers/provider-model-catalog.js:144:    requires_api_key: true,
+runtime/orchestrator-service/lib/media/native/providers/provider-readiness.js:6:  if (!model.requires_api_key) return true;
+runtime/orchestrator-service/lib/media/native/providers/provider-readiness.js:19:    required_env: model.requires_api_key ? model.env_key : '',
+runtime/orchestrator-service/lib/media/native/workers/external-gpu-worker-adapter.js:30:          ...(apiKey ? { Authorization: `Bearer ${apiKey}` } : {})
+runtime/orchestrator-service/lib/media/provider-layer.js:133:            Authorization: `Bearer ${openAiApiKey}`,
+runtime/orchestrator-service/lib/media/provider-layer.js:270:            Authorization: `Bearer ${openAiApiKey}`,
+runtime/orchestrator-service/lib/security/provider-execution-gate.js:21:  REQUIRE_PROVIDER_KEY: "require_provider_key",
+runtime/orchestrator-service/lib/security/runtime-security-enforcement.js:86:  const requiresWriteAuthorization = routeClassification.requiredAccess !== "public";
+runtime/orchestrator-service/lib/security/runtime-security-enforcement.js:87:  if (requiresWriteAuthorization && !hasAuthorizedWriteKey) {
+runtime/orchestrator-service/lib/security/runtime-security-enforcement.js:132:  const controlWriteKeyEnv = String(options.controlWriteKeyEnv || "MH_CONTROL_CENTER_WRITE_KEY").trim();

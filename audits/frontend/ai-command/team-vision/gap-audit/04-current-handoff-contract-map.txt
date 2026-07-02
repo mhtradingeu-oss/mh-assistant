@@ -1,0 +1,159 @@
+public/control-center/pages/ai-command.js:11:        getSharedHandoff,
+public/control-center/pages/ai-command.js:14:        setSharedHandoff
+public/control-center/pages/ai-command.js:651:			payload: {
+public/control-center/pages/ai-command.js:662:			payload: {
+public/control-center/pages/ai-command.js:676:			payload: {
+public/control-center/pages/ai-command.js:1342:		generatedAt: nowIso(),
+public/control-center/pages/ai-command.js:2467:		generatedAt: asString(preview.generatedAt || preview.generated_at || nowIso()),
+public/control-center/pages/ai-command.js:2477:	const payload = asObject(handoff?.payload);
+public/control-center/pages/ai-command.js:2482:		payload.handoff_id,
+public/control-center/pages/ai-command.js:2483:		payload.handoffId
+public/control-center/pages/ai-command.js:2491:	const payload = asObject(handoff?.payload);
+public/control-center/pages/ai-command.js:2492:	const stablePayloadId = firstAiInboundId(payload.handoff_id, payload.handoffId, payload.id, handoff?.created_at, handoff?.createdAt);
+public/control-center/pages/ai-command.js:2501:	return [handoff?.source_page, handoff?.destination_page, payload.prompt, payload.title]
+public/control-center/pages/ai-command.js:2508:	const payload = asObject(handoff?.payload);
+public/control-center/pages/ai-command.js:2509:	const draftContext = firstAiInboundObject(payload.draft_context, payload.draftContext, handoff?.draft_context, handoff?.draftContext);
+public/control-center/pages/ai-command.js:2511:		payload.source_page,
+public/control-center/pages/ai-command.js:2512:		payload.sourcePage,
+public/control-center/pages/ai-command.js:2513:		handoff?.source_page,
+public/control-center/pages/ai-command.js:2515:		draftContext.source_page,
+public/control-center/pages/ai-command.js:2519:	const explicitSpecialist = firstAiInboundId(payload.specialist, payload.specialist_id);
+public/control-center/pages/ai-command.js:2523:		payload.modeId ||
+public/control-center/pages/ai-command.js:2524:		payload.mode_id ||
+public/control-center/pages/ai-command.js:2534:		payload.prompt,
+public/control-center/pages/ai-command.js:2535:		payload.message,
+public/control-center/pages/ai-command.js:2536:		payload.summary,
+public/control-center/pages/ai-command.js:2543:		payload.title,
+public/control-center/pages/ai-command.js:2544:		payload.name,
+public/control-center/pages/ai-command.js:2551:		asAiInboundList(payload.routeSuggestions).length ? payload.routeSuggestions :
+public/control-center/pages/ai-command.js:2552:		asAiInboundList(payload.route_suggestions).length ? payload.route_suggestions :
+public/control-center/pages/ai-command.js:2558:	const teamMode = normalizeAiInboundTeamMode(firstAiInboundId(payload.teamMode, payload.team_mode, draftContext.teamMode, draftContext.team_mode));
+public/control-center/pages/ai-command.js:2563:		payload.outputPreview,
+public/control-center/pages/ai-command.js:2564:		payload.output_preview
+public/control-center/pages/ai-command.js:2577:			source_page: sourcePage,
+public/control-center/pages/ai-command.js:2580:		status: asString(handoff?.status || payload.status || "available"),
+public/control-center/pages/ai-command.js:2588:	const handoff = getSharedHandoff(projectName, "ai-command", operations);
+public/control-center/pages/ai-command.js:2679:		const payload = asObject(error?.payload);
+public/control-center/pages/ai-command.js:2680:		const payloadResponse = asObject(payload?.response);
+public/control-center/pages/ai-command.js:2681:		const payloadCommand = asObject(payload?.command);
+public/control-center/pages/ai-command.js:2682:		const failureReason = asString(payload?.error) || asString(payloadResponse?.error) || asString(error?.message) || "AI provider failed to return output.";
+public/control-center/pages/ai-command.js:2683:		resolvedModeId = asString(payloadCommand?.mode_id) || modeId || session.modeId;
+public/control-center/pages/ai-command.js:2684:		commandId = asString(payloadCommand?.id);
+public/control-center/pages/ai-command.js:2713:		createdAt: asString(result?.command?.created_at) || nowIso(),
+public/control-center/pages/ai-command.js:3326:        preview.generatedAt = nowIso();
+public/control-center/pages/ai-command.js:4034:				<span class="aicmd-v2-preview-chip"><strong>Generated:</strong> ${escapeHtml(formatTime(preview.generatedAt))}</span>
+public/control-center/pages/ai-command.js:4199:	const recentAt = asArray(session.responseHistory)[0]?.generatedAt || preview.generatedAt || "";
+public/control-center/pages/ai-command.js:4329:                                createdAt: item.generatedAt || ""
+public/control-center/pages/ai-command.js:4336:                                createdAt: item.generatedAt || ""
+public/control-center/pages/ai-command.js:4381:                                        <small>${escapeHtml(latestSelected ? formatTime(latestSelected.generatedAt) : "No reply yet")}</small>
+public/control-center/pages/ai-command.js:4412:                                                <span>${escapeHtml(formatTime(latestSelected.generatedAt))}</span>
+public/control-center/pages/ai-command.js:4439:                                                                                <span>${escapeHtml(formatTime(item.generatedAt))}</span>
+public/control-center/pages/ai-command.js:4574:			time: item.generatedAt
+public/control-center/pages/ai-command.js:4580:			time: preview.generatedAt
+public/control-center/pages/ai-command.js:4685:		const payload = asObject(selectProjectPayload(state));
+public/control-center/pages/ai-command.js:4686:		const overview = asObject(payload.overview?.overview || payload.overview);
+public/control-center/pages/ai-command.js:4687:		const readiness = asObject(payload.readiness?.dashboard || payload.readiness);
+public/control-center/pages/ai-command.js:5120:		                                generatedAt: assistantChatMessage.createdAt,
+public/control-center/pages/ai-command.js:5404:		                        preview.generatedAt = latestResponse.generatedAt || nowIso();
+public/control-center/pages/ai-command.js:5436:				setSharedHandoff(projectName || "__default__", destination, {
+public/control-center/pages/ai-command.js:5438:					source_page: "ai-command",
+public/control-center/pages/ai-command.js:5439:					destination_page: destination,
+public/control-center/pages/ai-command.js:5441:					created_at: nowIso(),
+public/control-center/pages/ai-command.js:5442:					payload: {
+public/control-center/pages/ai-command.js:5527:					source_page: "ai-command",
+public/control-center/pages/ai-command.js:5528:					destination_page: destination,
+public/control-center/pages/ai-command.js:5530:					created_at: nowIso(),
+public/control-center/pages/ai-command.js:5531:					payload: {
+public/control-center/pages/ai-command.js:5544:				setSharedAiDraft(projectName || "__default__", handoffRecord.payload.draft_context);
+public/control-center/pages/ai-command.js:5545:				setSharedHandoff(projectName || "__default__", destination, handoffRecord);
+public/control-center/pages/workflows.js:9:  getSharedHandoff,
+public/control-center/pages/workflows.js:11:  setSharedHandoff
+public/control-center/pages/workflows.js:57:    purpose: "Package final channel payloads, approval checks, and publishing queue dependencies.",
+public/control-center/pages/workflows.js:271:function saveLocalDraft(projectName, workflowId, payload) {
+public/control-center/pages/workflows.js:277:    ...asObject(payload),
+public/control-center/pages/workflows.js:385:      lastRunAt: asString(item.created_at),
+public/control-center/pages/workflows.js:390:          createdAt: asString(item.created_at),
+public/control-center/pages/workflows.js:476:    const when = asString(item.executed_at || item.created_at);
+public/control-center/pages/workflows.js:932:  const handoff = getSharedHandoff(projectName, "workflows", operations);
+public/control-center/pages/workflows.js:936:  const payload = asObject(handoff?.payload);
+public/control-center/pages/workflows.js:937:  const fromWorkflowId = asString(payload.workflow_id);
+public/control-center/pages/workflows.js:938:  const modeId = asString(payload?.draft_context?.modeId);
+public/control-center/pages/workflows.js:945:    project: firstNonEmpty(payload?.draft_context?.projectName, session.inputsByWorkflow[workflowId].project),
+public/control-center/pages/workflows.js:946:    campaign: firstNonEmpty(payload?.campaign_name, session.inputsByWorkflow[workflowId].campaign),
+public/control-center/pages/workflows.js:947:    goal: firstNonEmpty(payload?.draft_context?.lastResponseTitle, payload?.workflow_title, session.inputsByWorkflow[workflowId].goal),
+public/control-center/pages/workflows.js:948:    product: firstNonEmpty(payload?.output?.product, session.inputsByWorkflow[workflowId].product),
+public/control-center/pages/workflows.js:949:    channel: firstNonEmpty(payload?.output?.channel, session.inputsByWorkflow[workflowId].channel)
+public/control-center/pages/workflows.js:952:  if (payload.output) {
+public/control-center/pages/workflows.js:954:    run.output = asObject(payload.output);
+public/control-center/pages/workflows.js:1084:    source_page: "workflows",
+public/control-center/pages/workflows.js:1085:    destination_page: "ai-command",
+public/control-center/pages/workflows.js:1086:    payload: {
+public/control-center/pages/workflows.js:1096:  setSharedHandoff(projectName, "ai-command", handoff);
+public/control-center/pages/workflows.js:1186:      run.lastRunAt = asString(result?.run?.created_at) || createdAt;
+public/control-center/pages/workflows.js:1298:        setSharedHandoff(projectName, "workflows", {
+public/control-center/pages/workflows.js:1299:          source_page: "workflows",
+public/control-center/pages/workflows.js:1300:          destination_page: "workflows",
+public/control-center/pages/workflows.js:1301:          payload: {
+public/control-center/pages/workflows.js:1390:      activeRun.lastRunAt = asString(result?.run?.created_at) || createdAt;
+public/control-center/pages/workflows.js:1397:      setSharedHandoff(projectName, "workflows", {
+public/control-center/pages/workflows.js:1398:        source_page: "workflows",
+public/control-center/pages/workflows.js:1399:        destination_page: "workflows",
+public/control-center/pages/workflows.js:1400:        payload: {
+public/control-center/pages/workflows.js:1534:        source_page: "workflows",
+public/control-center/pages/workflows.js:1535:        destination_page: "task-center",
+public/control-center/pages/workflows.js:1539:        payload: {
+public/control-center/pages/workflows.js:1552:        created_at: new Date().toISOString()
+public/control-center/pages/workflows.js:1555:      setSharedHandoff(projectName, "task-center", handoff);
+public/control-center/pages/workflows.js:1579:      setSharedHandoff(projectName, "ai-command", {
+public/control-center/pages/workflows.js:1580:        source_page: "workflows",
+public/control-center/pages/workflows.js:1581:        destination_page: "ai-command",
+public/control-center/pages/workflows.js:1582:        payload: {
+public/control-center/pages/workflows.js:1615:      setSharedHandoff(projectName, "ai-command", {
+public/control-center/pages/workflows.js:1616:        source_page: "workflows",
+public/control-center/pages/workflows.js:1617:        destination_page: "ai-command",
+public/control-center/pages/workflows.js:1618:        payload: {
+public/control-center/pages/workflows.js:1780:    const payload = asObject(selectProjectPayload(state));
+public/control-center/pages/workflows.js:1782:    const overview = asObject(payload.overview?.overview || payload.overview);
+public/control-center/pages/workflows.js:1783:    const readinessRoot = asObject(payload.readiness?.dashboard || payload.readiness);
+public/control-center/pages/workflows.js:2153:                          <span>${escapeHtml(formatDateTime(item.created_at || item.executed_at || nowIso()))}</span>
+public/control-center/pages/workflows.js:2288:            source_page: "workflows",
+public/control-center/pages/workflows.js:2289:            destination_page: "task-center",
+public/control-center/pages/workflows.js:2293:            payload: {
+public/control-center/pages/workflows.js:2299:            created_at: new Date().toISOString()
+public/control-center/pages/workflows.js:2301:          setSharedHandoff(projectName, "task-center", handoff);
+public/control-center/pages/workflows.js:2314:              source_page: "workflows",
+public/control-center/pages/workflows.js:2315:              destination_page: "task-center",
+public/control-center/pages/workflows.js:2319:              payload: {
+public/control-center/pages/workflows.js:2325:              created_at: new Date().toISOString()
+public/control-center/pages/workflows.js:2327:            setSharedHandoff(projectName, "task-center", handoff);
+public/control-center/pages/operations-centers.js:1:import { getSharedHandoff } from "../shared-context.js";
+public/control-center/pages/operations-centers.js:431:  const source = asString(incomingHandoff.source_page || incomingHandoff.sourcePage || "unknown");
+public/control-center/pages/operations-centers.js:435:    incomingHandoff.payload?.title ||
+public/control-center/pages/operations-centers.js:436:    incomingHandoff.payload?.summary ||
+public/control-center/pages/operations-centers.js:441:    incomingHandoff.payload?.description ||
+public/control-center/pages/operations-centers.js:442:    incomingHandoff.payload?.handoff_intent ||
+public/control-center/pages/operations-centers.js:443:    incomingHandoff.payload?.prompt ||
+public/control-center/pages/operations-centers.js:446:  const createdAt = asString(incomingHandoff.created_at || incomingHandoff.generatedAt || incomingHandoff.timestamp || "");
+public/control-center/pages/operations-centers.js:570:              <select id="taskCenterSource" class="sidebar-select">${renderFilterOptions(filters.source_pages, session.source, escapeHtml, "All sources")}</select>
+public/control-center/pages/operations-centers.js:594:                  <td>${escapeHtml(titleCase(item.source_page || "-"))}</td>
+public/control-center/pages/operations-centers.js:627:                    { label: "Source", value: titleCase(selectedItem.source_page || "-") },
+public/control-center/pages/operations-centers.js:714:  if (session.source !== "all") items = items.filter((item) => asString(item.source_page) === session.source);
+public/control-center/pages/operations-centers.js:718:  const incomingHandoff = getSharedHandoff(projectName, "task-center", ops);
+public/control-center/pages/operations-centers.js:781:          `Source: ${asString(incomingHandoff.source_page || incomingHandoff.sourcePage || "unknown")}`,
+public/control-center/pages/operations-centers.js:782:          `Title: ${asString(incomingHandoff.title || incomingHandoff.summary || incomingHandoff.payload?.title || incomingHandoff.payload?.summary || "Incoming task handoff")}`,
+public/control-center/pages/operations-centers.js:783:          `Summary: ${asString(incomingHandoff.description || incomingHandoff.payload?.description || incomingHandoff.payload?.handoff_intent || incomingHandoff.payload?.prompt || "Review-only handoff.")}`,
+public/control-center/pages/operations-centers.js:882:          <td>${escapeHtml(formatDateTime(item.updated_at || item.created_at))}</td>
+public/control-center/pages/operations-centers.js:975:                    { label: "Updated", value: formatDateTime(selectedItem.updated_at || selectedItem.created_at) },
+public/control-center/pages/operations-centers.js:1173:          <td>${escapeHtml(formatDateTime(item.updated_at || item.created_at))}</td>
+public/control-center/pages/operations-centers.js:1266:                    { label: "Updated", value: formatDateTime(selectedItem.updated_at || selectedItem.created_at) }
+public/control-center/pages/operations-centers.js:1452:    created_at: asString(item.created_at),
+public/control-center/pages/operations-centers.js:1528:          <td>${escapeHtml(formatDateTime(item.created_at))}</td>
+public/control-center/pages/operations-centers.js:1619:                    { label: "Created", value: formatDateTime(selectedItem.created_at) },
+public/control-center/shared-context.js:84:export function setSharedAiDrawerReturn(projectName, payload) {
+public/control-center/shared-context.js:85:  if (!projectName || !payload) return;
+public/control-center/shared-context.js:86:  aiDrawerReturnCache.set(buildKey(projectName, "ai-drawer-return"), payload);
+public/control-center/shared-context.js:148:    const destinationMatches = asString(item?.destination_page) === asString(destinationPage);
+public/control-center/shared-context.js:149:    const sourceMatches = !sourcePage || asString(item?.source_page) === asString(sourcePage);
+public/control-center/shared-context.js:189:  return asObject(handoff?.payload?.draft_context);
+public/control-center/shared-context.js:192:export function setSharedHandoff(projectName, destinationPage, handoff) {
+public/control-center/shared-context.js:197:export function getSharedHandoff(projectName, destinationPage, operations, sourcePage = "") {
