@@ -1,0 +1,584 @@
+public/control-center/pages/ai-command.js:90:                summary: "Claims review, approvals, safety language, and governance checks.",
+public/control-center/pages/ai-command.js:153:		safetyNote: "All outputs are guidance and draft only. Execution requires explicit confirmation.",
+public/control-center/pages/ai-command.js:166:		safetyNote: "Drafts require review before publishing. Cannot approve or publish without confirmation.",
+public/control-center/pages/ai-command.js:177:		cannotDo: ["Generate images directly", "Upload assets without review", "Approve without confirmation", "Execute media jobs"],
+public/control-center/pages/ai-command.js:179:		safetyNote: "Direction and briefs only. Media generation requires backend confirmation and explicit action.",
+public/control-center/pages/ai-command.js:190:		cannotDo: ["Generate video directly", "Upload footage without review", "Approve without confirmation", "Run media jobs automatically"],
+public/control-center/pages/ai-command.js:192:		safetyNote: "Scripts and direction only. Video generation requires explicit backend action and approval.",
+public/control-center/pages/ai-command.js:203:		cannotDo: ["Publish without explicit approval", "Override schedules", "Bypass governance gates", "Push to live channels directly"],
+public/control-center/pages/ai-command.js:205:		safetyNote: "Publishing always requires explicit approval. No live publishing from AI guidance alone.",
+public/control-center/pages/ai-command.js:218:		safetyNote: "Ad concepts and copy only. Live ad actions require platform integration and explicit approval.",
+public/control-center/pages/ai-command.js:231:		safetyNote: "Analysis and recommendations only. No direct website or analytics changes.",
+public/control-center/pages/ai-command.js:239:		summary: "Claims review, approval safety, publishing risk, and governance notes.",
+public/control-center/pages/ai-command.js:240:		placeholder: "Ask the Compliance Reviewer to check claims, approval risks, publishing safety, and governance notes…",
+public/control-center/pages/ai-command.js:241:		canHelp: ["Review marketing claims", "Flag approval risks", "Check publishing safety", "Prepare governance notes", "Identify compliance blockers"],
+public/control-center/pages/ai-command.js:242:		cannotDo: ["Grant approvals directly", "Override governance gates", "Publish on behalf of approvers", "Remove flags without review"],
+public/control-center/pages/ai-command.js:244:		safetyNote: "Compliance review is advisory. Approvals always require human confirmation before execution.",
+public/control-center/pages/ai-command.js:255:		cannotDo: ["Run workflows without confirmation", "Auto-approve tasks", "Override authority gates", "Execute backend operations directly"],
+public/control-center/pages/ai-command.js:257:		safetyNote: "Task plans and handoffs only. Workflow execution requires explicit user confirmation.",
+public/control-center/pages/ai-command.js:266:		placeholder: "Ask the Customer Operations Lead to summarize a customer thread, draft a safe reply, prepare a ticket draft, check SLA risk, or route an escalation for review…",
+public/control-center/pages/ai-command.js:267:		canHelp: ["Review inbox context", "Summarize customer threads", "Draft safe replies", "Prepare ticket drafts", "Flag SLA and escalation risk"],
+public/control-center/pages/ai-command.js:268:		cannotDo: ["Send customer replies", "Create live tickets", "Change SLA policy", "Escalate without confirmation"],
+public/control-center/pages/ai-command.js:270:		safetyNote: "Customer operations outputs are drafts only. Sending replies, ticket creation, and escalations require confirmation in the owning surface.",
+public/control-center/pages/ai-command.js:283:		safetyNote: "Sales and CRM outputs are guidance and drafts only. CRM mutations and outreach sends require confirmation in the owning surface.",
+public/control-center/pages/ai-command.js:371:	{ id: "review", title: "Review", description: "Check safety, scope, language, and source." },
+public/control-center/pages/ai-command.js:373:	{ id: "execute", title: "Confirm", description: "Execution stays gated in backend-owned surfaces." },
+public/control-center/pages/ai-command.js:434:		{ id: "prioritize-next-move", label: "Priority Sort", action: "preview", intent: "task", template: "Prioritize the next moves for {project}. Rank by impact, urgency, dependencies, and safest first action." }
+public/control-center/pages/ai-command.js:467:		{ id: "budget-notes", label: "Budget Notes", action: "preview", intent: "guidance", template: "Review budget notes for {project}. Summarize constraints and safe test allocation guidance." },
+public/control-center/pages/ai-command.js:480:		{ id: "safety-checklist", label: "Safety Checklist", action: "preview", intent: "handoff", template: "Prepare a safety checklist for {project}. Include policy checks, evidence required, and approval notes." },
+public/control-center/pages/ai-command.js:486:		{ id: "handoff-routing", label: "Handoff Routing", action: "preview", intent: "handoff", template: "Prepare handoff routing for {project}. Include source, destination, decision gates, and required confirmations." },
+public/control-center/pages/ai-command.js:492:		{ id: "review-unified-inbox", label: "Review Unified Inbox", action: "preview", intent: "guidance", template: "Review the Unified Inbox readiness for {project}. Summarize visible customer-operation signals, open gaps, and safe next review steps. Do not claim inbox actions happened." },
+public/control-center/pages/ai-command.js:493:		{ id: "summarize-customer-thread", label: "Summarize Customer Thread", action: "preview", intent: "guidance", template: "Summarize this customer thread for {project}. Include customer issue, sentiment, reply goal, missing details, and safe next step." },
+public/control-center/pages/ai-command.js:494:		{ id: "draft-customer-reply", label: "Draft Customer Reply", action: "preview", intent: "guidance", template: "Draft a customer reply for {project}. Keep it helpful, calm, review-ready, and do not claim any operational action has been completed." },
+public/control-center/pages/ai-command.js:495:		{ id: "create-ticket-draft", label: "Create Ticket Draft", action: "preview", intent: "task", template: "Create a ticket draft for {project}. Include issue, priority, owner suggestion, evidence needed, and next safe action." },
+public/control-center/pages/ai-command.js:497:		{ id: "prepare-escalation", label: "Prepare Escalation", action: "preview", intent: "handoff", template: "Prepare an escalation draft for {project}. Include reason, customer impact, owner, confirmation needed, and destination team." },
+public/control-center/pages/ai-command.js:498:		{ id: "customer-profile-snapshot", label: "Customer Profile Snapshot", action: "preview", intent: "guidance", template: "Prepare a customer profile snapshot for {project}. Include known context, purchase/support signals, missing fields, and safe follow-up questions." },
+public/control-center/pages/ai-command.js:502:		{ id: "lead-qualification", label: "Lead Qualification", action: "preview", intent: "guidance", template: "Qualify the lead for {project}. Include fit, intent, urgency, missing CRM fields, and the safest next step." },
+public/control-center/pages/ai-command.js:504:		{ id: "follow-up-sequence", label: "Follow-up Sequence", action: "preview", intent: "workflow", template: "Build a follow-up sequence for {project}. Include timing, message angle, CTA, stop condition, and confirmation requirements." },
+public/control-center/pages/ai-command.js:506:		{ id: "pipeline-next-step", label: "Pipeline Next Step", action: "preview", intent: "task", template: "Recommend the pipeline next step for {project}. Include stage, rationale, owner, risk, and required confirmation." },
+public/control-center/pages/ai-command.js:509:		{ id: "sales-handoff-draft", label: "Sales Handoff", action: "preview", intent: "handoff", template: "Prepare a sales handoff draft for {project}. Include lead context, recommended next action, owner, and confirmation needed." }
+public/control-center/pages/ai-command.js:679:			id: `auto-gated-${Date.now()}`,
+public/control-center/pages/ai-command.js:1223:	const safeProject = asString(projectName || "current project").trim();
+public/control-center/pages/ai-command.js:1224:	const safeSpecialist = asString(specialistLabel || "Specialist").trim();
+public/control-center/pages/ai-command.js:1225:	const safeMode = asString(modeLabel || "Solo Specialist").trim();
+public/control-center/pages/ai-command.js:1226:	const safeLanguage = asString(language || "user language").trim();
+public/control-center/pages/ai-command.js:1227:	const safeOutputLanguage = asString(outputLanguage || "German").trim();
+public/control-center/pages/ai-command.js:1228:	const safeMarket = asString(market || "Germany").trim();
+public/control-center/pages/ai-command.js:1229:	const teamWorkflowLines = safeMode === "Full Team"
+public/control-center/pages/ai-command.js:1238:		`Role: ${safeSpecialist}`,
+public/control-center/pages/ai-command.js:1239:		`Project: ${safeProject}`,
+public/control-center/pages/ai-command.js:1240:		`Mode: ${safeMode}`,
+public/control-center/pages/ai-command.js:1241:		`User conversation language: ${safeLanguage}`,
+public/control-center/pages/ai-command.js:1242:		`Publishable output language: ${safeOutputLanguage}`,
+public/control-center/pages/ai-command.js:1243:		`Target market: ${safeMarket}`,
+public/control-center/pages/ai-command.js:1246:                `Use ${safeOutputLanguage} only for customer-facing or publishable copy such as captions, ads, emails, landing pages, final campaign text, or publishing packages.`,
+public/control-center/pages/ai-command.js:1250:		`When drafting publishable copy, write it in ${safeOutputLanguage}.`,
+public/control-center/pages/ai-command.js:1251:		"Never claim actions were executed.",
+public/control-center/pages/ai-command.js:1252:		"Never claim publish, approval, deletion, archival, sync, or operational runs happened.",
+public/control-center/pages/ai-command.js:1253:		"Deliver a structured, review-ready answer.",
+public/control-center/pages/ai-command.js:1346:        const looksGovernanceLike = /\b(compliance|governance|claim|claims|risk|risks|approval|approvals|policy|privacy|legal|safe language|safety review)\b/.test(text);
+public/control-center/pages/ai-command.js:1429:		confirmationRequired: outputType === "handoff" || specialistId === "publisher" || specialistId === "compliance_reviewer",
+public/control-center/pages/ai-command.js:1433:		safetyLabel: "Guidance and draft only. No backend execution.",
+public/control-center/pages/ai-command.js:1435:		confirmationNote: "Execution, approvals, and publishing require explicit confirmation in the owning workspace."
+public/control-center/pages/ai-command.js:1495:			safetyLabel: "Claims require review before publishing. No direct publish action."
+public/control-center/pages/ai-command.js:1514:			safetyLabel: "No media generation executed. Brief and routing only.",
+public/control-center/pages/ai-command.js:1530:			safetyLabel: "Video generation requires configured provider or GPU worker; no execution started."
+public/control-center/pages/ai-command.js:1541:				"Publishing remains gated until channel, approval, and asset readiness are confirmed."
+public/control-center/pages/ai-command.js:1549:			confirmationRequired: true,
+public/control-center/pages/ai-command.js:1550:			safetyLabel: "Confirmation required before publish. No publish action performed."
+public/control-center/pages/ai-command.js:1578:			safetyLabel: "No budget updates or ad launches executed."
+public/control-center/pages/ai-command.js:1592:			safetyLabel: "No analytics mutation or fake metrics. Guidance only."
+public/control-center/pages/ai-command.js:1600:			summary: "Risk review checklist prepared with claims and safety review points.",
+public/control-center/pages/ai-command.js:1603:				"Flag safety and policy risks",
+public/control-center/pages/ai-command.js:1607:			confirmationRequired: true,
+public/control-center/pages/ai-command.js:1608:			safetyLabel: "Compliance review is advisory. Formal approval remains human-governed."
+public/control-center/pages/ai-command.js:1616:			summary: "Customer operations draft prepared with safe reply language, ticket notes, SLA review, and escalation guardrails.",
+public/control-center/pages/ai-command.js:1624:				"Priority: draft priority pending runtime inbox and SLA confirmation.",
+public/control-center/pages/ai-command.js:1629:				"SLA and escalation decisions require confirmation in the owning operations surface."
+public/control-center/pages/ai-command.js:1634:				"Draft a safe customer reply",
+public/control-center/pages/ai-command.js:1638:			confirmationRequired: true,
+public/control-center/pages/ai-command.js:1639:			safetyLabel: "No reply sent, ticket created, SLA changed, or escalation triggered."
+public/control-center/pages/ai-command.js:1666:				"Outreach and follow-ups require confirmation before sending."
+public/control-center/pages/ai-command.js:1675:			confirmationRequired: true,
+public/control-center/pages/ai-command.js:1676:			safetyLabel: "No outreach sent, CRM record changed, follow-up scheduled, or pipeline stage advanced."
+public/control-center/pages/ai-command.js:1690:					"Stage 4: Destination handoff and confirmation"
+public/control-center/pages/ai-command.js:1692:				safetyLabel: "Workflow run is not started. This is a draft preview only."
+public/control-center/pages/ai-command.js:1705:			safetyLabel: "No workflow run and no backend task creation executed."
+public/control-center/pages/ai-command.js:1753:			"Operations: convert the reviewed output into safe tasks, workflow draft, or handoff context"
+public/control-center/pages/ai-command.js:1757:		confirmationNote: "No task, workflow, outreach, customer reply, CRM update, approval, or publishing action is executed from Full Team mode.",
+public/control-center/pages/ai-command.js:1758:		safetyLabel: "Full Team output is a coordinated draft preview only."
+public/control-center/pages/ai-command.js:1791:	lines.push(`Safety: ${humanizeValue(output.safetyLabel)}`);
+public/control-center/pages/ai-command.js:1792:	lines.push(`Confirmation: ${output.confirmationRequired ? "Required before execution" : "Required for execution actions"}`);
+public/control-center/pages/ai-command.js:2554:		safetyLabel: firstAiInboundText(preview.safetyLabel, preview.safety_label, "Guidance and draft only. No backend execution."),
+public/control-center/pages/ai-command.js:2555:		confirmationNote: firstAiInboundText(preview.confirmationNote, preview.confirmation_note, "Execution, approvals, publishing, CRM updates, customer replies, and workflow runs require explicit confirmation in the owning workspace."),
+public/control-center/pages/ai-command.js:2556:		confirmationRequired: preview.confirmationRequired ?? preview.confirmation_required ?? true
+public/control-center/pages/ai-command.js:2625:	)) || `Review this ${sourceLabel} handoff for ${projectLabel}. Identify the right specialist, summarize the context, produce a review-ready draft, and recommend the next safe route. Do not execute publishing, task creation, CRM updates, customer replies, workflow runs, or backend actions.`;
+public/control-center/pages/ai-command.js:3301:                guidance: "review-ready draft",
+public/control-center/pages/ai-command.js:3313:                "Keep it review-ready and do not execute backend actions.",
+public/control-center/pages/ai-command.js:3340:        preview.safetyLabel = preview.safetyLabel || "Conversation converted into a review-ready draft. No backend action executed.";
+public/control-center/pages/ai-command.js:3522:	if (tool.safetyLevel === "confirmation_required") return "Destination confirmation required";
+public/control-center/pages/ai-command.js:3542:	return "Prepare a review-ready output for the selected specialist lane.";
+public/control-center/pages/ai-command.js:3563:	const safeBridgeStatus = bridgeStatus || { available: false };
+public/control-center/pages/ai-command.js:3575:				<p class="aicmd-room-subtitle mhos-context-description">Ask one expert or the full team to prepare strategy, content, analysis, reviews, and destination handoffs. AI prepares and reviews only; sensitive actions stay confirmation-gated in the owning workspace.</p>
+public/control-center/pages/ai-command.js:3578:				<span class="aicmd-v2-chat-bridge ${safeBridgeStatus.available ? "is-available" : "is-unavailable"}">
+public/control-center/pages/ai-command.js:3579:					${escapeHtml(safeBridgeStatus.available ? "Guidance connected" : "Preview guarded")}
+public/control-center/pages/ai-command.js:3634:	const safeBridgeStatus = bridgeStatus || { available: false };
+public/control-center/pages/ai-command.js:3649:			<span>Strategy, writing, creative, compliance, publishing, customer, sales, and operations specialists coordinate one review-ready answer. No workflow, send, publish, approval, or CRM action is executed here.</span>
+public/control-center/pages/ai-command.js:3715:						<p class="aicmd-v2-profile-purpose">Coordinates specialists into one review-ready brief, workflow, or handoff.</p>
+public/control-center/pages/ai-command.js:3759:        if (roleId === "compliance") return `${label} is checking safety and compliance...`;
+public/control-center/pages/ai-command.js:3768:	const safeBridgeStatus = bridgeStatus || { available: false };
+public/control-center/pages/ai-command.js:3787:				<span class="aicmd-room-status-dot${safeBridgeStatus.available ? " is-live" : ""}"></span>
+public/control-center/pages/ai-command.js:3788:				<strong>${escapeHtml(safeBridgeStatus.available ? "Available" : "Preview-safe")}</strong>
+public/control-center/pages/ai-command.js:3824:		template: asString(tool.template || "Prepare a review-ready draft for {projectName}.")
+public/control-center/pages/ai-command.js:3906:			${projectName ? `<div class="aicmd-v2-tools-note">Project context: ${escapeHtml(projectName)}. Tools do not execute, publish, send, approve, save, or mutate records.</div>` : ""}
+public/control-center/pages/ai-command.js:3952:        const safeBridgeStatus = bridgeStatus || { available: false };
+public/control-center/pages/ai-command.js:3970:        const bridgeLabel = safeBridgeStatus.available ? "Chat connected" : "Preview guarded";
+public/control-center/pages/ai-command.js:4014:                                <span class="aicmd-chatfirst-pill ${safeBridgeStatus.available ? "is-available" : "is-planned"}">${escapeHtml(bridgeLabel)}</span>
+public/control-center/pages/ai-command.js:4029:                        <p class="aicmd-chatfirst-tab-note">AI Command prepares guidance, drafts, previews, and handoff context only. Publishing, approvals, CRM updates, workflow runs, customer sends, provider execution, and durable task creation remain confirmation-gated in the owning workspace.</p>
+public/control-center/pages/ai-command.js:4062:        const safeBridgeStatus = bridgeStatus || { available: false };
+public/control-center/pages/ai-command.js:4081:                                <span>${safeBridgeStatus.available ? "Connected" : "Preview guarded"}</span>
+public/control-center/pages/ai-command.js:4083:                                <span>No execution without confirmation</span>
+public/control-center/pages/ai-command.js:4090:	const safeBridgeStatus = bridgeStatus || { available: false };
+public/control-center/pages/ai-command.js:4094:	const bridgeLabel = safeBridgeStatus.available ? "Chat connected" : "Preview guarded";
+public/control-center/pages/ai-command.js:4101:				<p>Chat, draft, review, and prepare handoff context only. Publishing, approvals, CRM updates, workflow runs, external sends, and durable task creation stay confirmation-gated in the owning workspace.</p>
+public/control-center/pages/ai-command.js:4104:				<span class="aicmd-chatfirst-status ${safeBridgeStatus.available ? "is-available" : "is-unavailable"}">${escapeHtml(bridgeLabel)}</span>
+public/control-center/pages/ai-command.js:4133:	const safeBridgeStatus = bridgeStatus || { available: false };
+public/control-center/pages/ai-command.js:4149:				<span class="aicmd-chatfirst-pill ${safeBridgeStatus.available ? "is-available" : "is-planned"}">${escapeHtml(safeBridgeStatus.available ? "Connected" : "Guarded")}</span>
+public/control-center/pages/ai-command.js:4204:        const safeBridgeStatus = bridgeStatus || { available: false, reason: "" };
+public/control-center/pages/ai-command.js:4301:                                        <span>Please wait while a review-ready response is prepared.</span>
+public/control-center/pages/ai-command.js:4337:                { id: "campaign", label: "Campaign", summary: "Build a review-ready campaign with the full AI Team.", enabled: true },
+public/control-center/pages/ai-command.js:4429:        const offer = asString(wizard.offer || "review-ready-offer");
+public/control-center/pages/ai-command.js:4442:        const offerOptions = [["review-ready-offer", "Review-ready offer"], ["discount", "Discount"], ["bundle", "Bundle"], ["premium-value", "Premium value"], ["lead-magnet", "Lead magnet"]];
+public/control-center/pages/ai-command.js:4464:                                                <p>Guide the AI Team from source to preview. Backend workflow execution and destination handoff stay approval-gated.</p>
+public/control-center/pages/ai-command.js:4696:                                <span>Library, campaigns, content, customers, governance, integrations and provider readiness are connected as guarded planning context. Execution stays confirmation-gated.</span>
+public/control-center/pages/ai-command.js:4843:	const safeBridgeStatus = bridgeStatus || { available: false };
+public/control-center/pages/ai-command.js:4853:				<span class="aicmd-chatfirst-pill ${safeBridgeStatus.available ? "is-available" : "is-planned"}">${escapeHtml(safeBridgeStatus.available ? "Chat ready" : "Preview guarded")}</span>
+public/control-center/pages/ai-command.js:4926:			${projectName ? `<p class="aicmd-chatfirst-tab-note">Project context: ${escapeHtml(projectName)}. Tools do not execute, publish, send, approve, save, or mutate records.</p>` : ""}
+public/control-center/pages/ai-command.js:4994:					<div class="aicmd-chatfirst-output-safety">
+public/control-center/pages/ai-command.js:4995:						<strong>${escapeHtml(humanizeValue(preview.safetyLabel, "Guidance only. No backend execution."))}</strong>
+public/control-center/pages/ai-command.js:4996:						<span>${escapeHtml(humanizeValue(preview.confirmationNote, "Execution requires explicit confirmation in the destination workspace."))}</span>
+public/control-center/pages/ai-command.js:5005:				<p class="aicmd-chatfirst-tab-note">This is a review-ready preview. Execution, publishing, approvals, CRM updates, external sends, durable task creation, and workflow runs happen only in the owning destination workspace after confirmation.</p>
+public/control-center/pages/ai-command.js:5018:	const safeBridgeStatus = bridgeStatus || { available: false };
+public/control-center/pages/ai-command.js:5029:				<span class="aicmd-chatfirst-pill">${escapeHtml(safeBridgeStatus.available ? "Chat connected" : "Preview guarded")}</span>
+public/control-center/pages/ai-command.js:5074:	const approval = preview.confirmationRequired ? "Confirmation required" : (preview.outputType ? "Review ready" : "No draft yet");
+public/control-center/pages/ai-command.js:5092:        const safeBridgeStatus = bridgeStatus || { available: false, reason: "" };
+public/control-center/pages/ai-command.js:5124:        const bridgeLabel = safeBridgeStatus.available ? "Connected" : "Preview-safe";
+public/control-center/pages/ai-command.js:5125:        const safetyLine = safeBridgeStatus.available
+public/control-center/pages/ai-command.js:5127:                : "Preview-safe. Chat tools require the protected AI chat route.";
+public/control-center/pages/ai-command.js:5199:                                <span class="aicmd-v2-chat-bridge ${safeBridgeStatus.available ? "is-available" : "is-unavailable"}">${escapeHtml(bridgeLabel)}</span>
+public/control-center/pages/ai-command.js:5202:                        <div class="aicmd-v2-chat-safety">${escapeHtml(safetyLine)}</div>
+public/control-center/pages/ai-command.js:5239:                                                                <small>Please wait while the specialist prepares a review-ready response.</small>
+public/control-center/pages/ai-command.js:5318:						data-aicmdv2-prompt-text="${escapeHtml(p.prompt || `${p.label}. ${p.sub}. Prepare this as a review-ready draft only; do not execute anything.`)}"
+public/control-center/pages/ai-command.js:5356:			{ label: "Escalations", value: "Requires confirmation", present: false, scoped: true },
+public/control-center/pages/ai-command.js:5364:				{ label: "Follow-ups", value: "Requires confirmation", present: false, scoped: true },
+public/control-center/pages/ai-command.js:5389:		<div class="aicmd-v2-safety">
+public/control-center/pages/ai-command.js:5390:			<div class="aicmd-v2-safety-head">
+public/control-center/pages/ai-command.js:5391:				<span class="aicmd-v2-safety-icon">🔒</span>
+public/control-center/pages/ai-command.js:5392:				<span class="aicmd-v2-safety-label">How this workspace operates</span>
+public/control-center/pages/ai-command.js:5394:			<div class="aicmd-v2-safety-rules">
+public/control-center/pages/ai-command.js:5395:				<div class="aicmd-v2-safety-rule">
+public/control-center/pages/ai-command.js:5396:					<span class="aicmd-v2-safety-bullet">●</span>
+public/control-center/pages/ai-command.js:5397:					<span>Guidance only — no execution happens from this workspace without confirmation.</span>
+public/control-center/pages/ai-command.js:5399:				<div class="aicmd-v2-safety-rule">
+public/control-center/pages/ai-command.js:5400:					<span class="aicmd-v2-safety-bullet">●</span>
+public/control-center/pages/ai-command.js:5403:				<div class="aicmd-v2-safety-rule">
+public/control-center/pages/ai-command.js:5404:					<span class="aicmd-v2-safety-bullet">●</span>
+public/control-center/pages/ai-command.js:5405:					<span>Publishing, approval, and workflow runs require your explicit confirmation in the right workspace.</span>
+public/control-center/pages/ai-command.js:5407:				<div class="aicmd-v2-safety-rule">
+public/control-center/pages/ai-command.js:5408:					<span class="aicmd-v2-safety-bullet">●</span>
+public/control-center/pages/ai-command.js:5465:		description: "Talk to your AI team, run structured tasks, and turn intelligence into review-ready plans and routed handoffs."
+public/control-center/pages/ai-command.js:5845:                                        showMessage?.("Product/SKU selector is planned. Current safe options: Library source, uploaded filename context, project context, or manual product details.");
+public/control-center/pages/ai-command.js:6050:                                offer: asString(wizard.offer || "review-ready-offer"),
+public/control-center/pages/ai-command.js:6059:                                                body: `Use ${sourceMeaning}. Produce a review-ready campaign package before any handoff, approval, publishing, sending, CRM update, provider execution, or workflow mutation.`
+public/control-center/pages/ai-command.js:6091:                                safety: "Preview only. No publish, send, CRM mutation, provider execution, workflow mutation, or Governance approval is performed here."
+public/control-center/pages/ai-command.js:6162:                                safety: asObject(body.safety).preview_only
+public/control-center/pages/ai-command.js:6164:                                        : asString(fallbackPreview.safety || "Preview only."),
+public/control-center/pages/ai-command.js:6195:                                const safety = asObject(backendPayload.safety);
+public/control-center/pages/ai-command.js:6196:                                if (!safety.preview_only || !safety.no_backend_mutation_performed || !safety.no_provider_execution_performed) {
+public/control-center/pages/ai-command.js:6197:                                        throw new Error("Backend preview response did not confirm preview-only safety.");
+public/control-center/pages/ai-command.js:6242:                                        safety: preview.safety,
+public/control-center/pages/ai-command.js:6243:                                        safetyLabel: preview.safety,
+public/control-center/pages/ai-command.js:6244:                                        confirmationRequired: true,
+public/control-center/pages/ai-command.js:6245:                                        confirmationNote: "Review and route this campaign package through the owning destination workspace before any publishing, sending, approval, task creation, provider execution, or workflow mutation.",
+public/control-center/pages/ai-command.js:6297:                                safety: "Prepared handoff only. No backend write, publish, send, CRM mutation, provider execution, approval creation, task creation, or workflow mutation was performed.",
+public/control-center/pages/ai-command.js:6330:                        const safeRouteActions = ["media", "publishing"];
+public/control-center/pages/ai-command.js:6332:                        if (safeRouteActions.includes(action)) {
+public/control-center/pages/ai-command.js:6341:                                        safety: handoff.safety
+public/control-center/pages/ai-command.js:6366:                                safety: "Staged review action only. No backend write, publish, send, CRM mutation, provider execution, approval creation, task creation, or workflow mutation was performed."
+public/control-center/pages/ai-command.js:6582:		                                safetyInstruction: "Chat only. No task/workflow/handoff/approval/publish/customer/CRM execution.",
+public/control-center/pages/ai-command.js:6599:		                        const safetyLabel = asString(result?.safety_label || "chat_only");
+public/control-center/pages/ai-command.js:6610:		                                safetyLabel,
+public/control-center/pages/ai-command.js:6617:		                                        safety_label: safetyLabel
+public/control-center/pages/ai-command.js:6643:		                                        safety_label: safetyLabel,
+public/control-center/pages/ai-command.js:6688:                // Phase 1: stages draft locally from conversation context. No backend execution.
+public/control-center/pages/ai-command.js:6709:                // Phase 1: converts the current conversation into a task preview. No backend execution.
+public/control-center/pages/ai-command.js:6846:		// ── RESPONSE ACTIONS (Phase 3 safe actions) ──────────────────
+public/control-center/pages/ai-command.js:6984:		// ── PREVIEW ACTIONS (Phase 2 safe actions) ───────────────────
+public/control-center/pages/ai-command.js:7501:        safeMode: true,
+public/control-center/pages/ai-command.js:7849:    console.warn("AI Router failed safely:", err);
+public/control-center/pages/ai-command.js:7860:function safeTriggerAi(session, aiContext = {}) {
+public/control-center/pages/ai-command.js:7866:    console.warn("AI trigger failed safely:", e);
+public/control-center/pages/ai-command.js:7882:  if (typeof safeTriggerAi !== "function") return;
+public/control-center/pages/ai-command.js:7886:  const decision = safeTriggerAi(session, aiContext);
+public/control-center/pages/ai-command/tool-dock.js:410:    template: "Translate or adapt the selected text for the project target market. Keep the explanation in the user's chat language and prepare only review-ready copy."
+public/control-center/pages/ai-command/tool-dock.js:417:    template: "Improve this draft for clarity, stronger value, better structure, and a cleaner CTA. Keep it safe and review-ready."
+public/control-center/pages/ai-command/tool-dock.js:429:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:434:      template: "Create a campaign plan for {projectName}. Include objective, audience, offer, channels, phases, risks, and next best actions. Keep it review-ready only."
+public/control-center/pages/ai-command/tool-dock.js:442:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:447:      template: "Build a launch plan for {projectName}. Include timeline, required assets, owners, channels, readiness gaps, and safe next actions."
+public/control-center/pages/ai-command/tool-dock.js:455:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:468:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:481:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:494:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:510:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:515:      template: "Use the Content Writer to create a new written output for {projectName}. First ask or infer the output type: company profile, product copy, email, blog article, landing page, contract draft, presentation outline, speech, FAQ, proposal, social post, or ad copy. Ask for sources if needed. Keep it review-ready and do not publish or send anything."
+public/control-center/pages/ai-command/tool-dock.js:523:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:536:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:541:      template: "Translate and localize the current text for {projectName}. Ask for target language and market if missing. Preserve brand tone, adapt CTA and wording for the target audience, and keep the result review-ready."
+public/control-center/pages/ai-command/tool-dock.js:549:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:562:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:575:      safetyLevel: "context_only",
+public/control-center/pages/ai-command/tool-dock.js:588:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:601:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:614:      safetyLevel: "confirmation_required",
+public/control-center/pages/ai-command/tool-dock.js:619:      template: "Prepare safe routing for this Content Writer output for {projectName}. Ask the destination: Content Studio, Save to Library, Prepare Media Brief, Publishing package, Compliance review, Task, or Handoff. Do not route or execute before review."
+public/control-center/pages/ai-command/tool-dock.js:629:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:642:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:655:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:668:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:681:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:694:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:710:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:723:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:736:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:749:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:762:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:778:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:791:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:804:      safetyLevel: "confirmation_required",
+public/control-center/pages/ai-command/tool-dock.js:817:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:830:      safetyLevel: "confirmation_required",
+public/control-center/pages/ai-command/tool-dock.js:834:      outputTypes: ["approval_pack", "risk_summary", "asset_checklist", "confirmation_list"],
+public/control-center/pages/ai-command/tool-dock.js:835:      template: "Prepare an approval package for {projectName}. Include final copy summary, risk notes, assets checklist, and required confirmations."
+public/control-center/pages/ai-command/tool-dock.js:846:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:859:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:872:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:885:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:898:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:914:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:927:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:940:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:953:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:966:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:982:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:986:      outputTypes: ["claims_check", "risk_flags", "proof_requirements", "safe_wording_notes"],
+public/control-center/pages/ai-command/tool-dock.js:990:      id: "safe-rewrite",
+public/control-center/pages/ai-command/tool-dock.js:995:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:999:      outputTypes: ["safe_rewrite", "risk_reduced_copy", "claim_softening", "review_notes"],
+public/control-center/pages/ai-command/tool-dock.js:1000:      template: "Rewrite this content in a safer compliant way. Keep the value clear while reducing unsupported or risky claims."
+public/control-center/pages/ai-command/tool-dock.js:1008:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:1021:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:1034:      safetyLevel: "confirmation_required",
+public/control-center/pages/ai-command/tool-dock.js:1039:      template: "Prepare approval notes for {projectName}. Include risks, required reviewer, unresolved issues, and safe next actions."
+public/control-center/pages/ai-command/tool-dock.js:1050:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:1063:      safetyLevel: "confirmation_required",
+public/control-center/pages/ai-command/tool-dock.js:1076:      safetyLevel: "confirmation_required",
+public/control-center/pages/ai-command/tool-dock.js:1089:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:1093:      outputTypes: ["timeline", "milestones", "blockers", "safe_sequence"],
+public/control-center/pages/ai-command/tool-dock.js:1094:      template: "Create a timeline for {projectName}. Include milestones, blockers, dependencies, and safe sequencing."
+public/control-center/pages/ai-command/tool-dock.js:1102:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:1118:      safetyLevel: "confirmation_required",
+public/control-center/pages/ai-command/tool-dock.js:1123:      template: "Draft a safe customer reply for {projectName}. Do not send it. Include empathy, answer, next step, and escalation note if needed."
+public/control-center/pages/ai-command/tool-dock.js:1131:      safetyLevel: "confirmation_required",
+public/control-center/pages/ai-command/tool-dock.js:1144:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:1148:      outputTypes: ["sla_risk_review", "urgency_flags", "escalation_needs", "safe_next_actions"],
+public/control-center/pages/ai-command/tool-dock.js:1149:      template: "Review SLA or response risk for this customer context. Flag urgency, escalation needs, and safe next actions."
+public/control-center/pages/ai-command/tool-dock.js:1157:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:1173:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:1186:      safetyLevel: "confirmation_required",
+public/control-center/pages/ai-command/tool-dock.js:1199:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:1203:      outputTypes: ["objection_handling", "proof_needed", "safe_answers", "next_action"],
+public/control-center/pages/ai-command/tool-dock.js:1204:      template: "Prepare objection handling for {projectName}. Include likely objections, safe answers, proof needed, and next action."
+public/control-center/pages/ai-command/tool-dock.js:1212:      safetyLevel: "confirmation_required",
+public/control-center/pages/ai-command/tool-dock.js:1290:    "data-aicmd-tool-dock-safety": tool.safetyLevel || "review_only",
+public/control-center/pages/ai-command/tool-dock.js:1304:function renderSmartToolDrawerShell(safe) {
+public/control-center/pages/ai-command/tool-dock.js:1390:            <div class="mhos-tool-drawer-safety" data-aicmd-tool-drawer-safety>Review only</div>
+public/control-center/pages/ai-command/tool-dock.js:1400:          Review-only setup: this drawer creates a composer-ready instruction. Destination choices only frame safe handoff context; they do not publish, send, approve, route externally, create CRM records, run workflows, or mutate backend data.
+public/control-center/pages/ai-command/tool-dock.js:1414:  const safe = typeof escapeHtml === "function"
+public/control-center/pages/ai-command/tool-dock.js:1417:  return renderSmartToolDrawerShell(safe);
+public/control-center/pages/ai-command/tool-dock.js:1421:  const safe = typeof escapeHtml === "function"
+public/control-center/pages/ai-command/tool-dock.js:1428:    <section class="mhos-tool-dock aicmd-tool-dock" aria-label="${safe(label)}">
+public/control-center/pages/ai-command/tool-dock.js:1430:        <span class="mhos-tool-dock-kicker">${safe(label)}</span>
+public/control-center/pages/ai-command/tool-dock.js:1438:            data-aicmd-tool-dock="${safe(tool.id)}"
+public/control-center/pages/ai-command/tool-dock.js:1439:            data-aicmd-tool-dock-label="${safe(tool.label)}"
+public/control-center/pages/ai-command/tool-dock.js:1440:            data-aicmd-tool-dock-icon="${safe(tool.icon)}"
+public/control-center/pages/ai-command/tool-dock.js:1441:            data-aicmd-tool-dock-badge="${safe(tool.badge)}"
+public/control-center/pages/ai-command/tool-dock.js:1442:            data-aicmd-tool-dock-action="${safe(tool.actionType || "guided")}"
+public/control-center/pages/ai-command/tool-dock.js:1443:            data-aicmd-tool-dock-safety="${safe(tool.safetyLevel || "review_only")}"
+public/control-center/pages/ai-command/tool-dock.js:1444:            data-aicmd-tool-dock-owner="${safe(tool.frontendOwnerPage || "ai-command")}"
+public/control-center/pages/ai-command/tool-dock.js:1445:            data-aicmd-tool-dock-destinations="${safe(joinMetaList(getToolMetaList(tool, "destinations", ["chat-preview"])))}"
+public/control-center/pages/ai-command/tool-dock.js:1446:            data-aicmd-tool-dock-sources="${safe(joinMetaList(getToolMetaList(tool, "sourceTypes", ["current_chat"])))}"
+public/control-center/pages/ai-command/tool-dock.js:1447:            data-aicmd-tool-dock-outputs="${safe(joinMetaList(getToolMetaList(tool, "outputTypes", [tool.id || "tool_output"])))}"
+public/control-center/pages/ai-command/tool-dock.js:1448:            data-aicmd-tool-dock-template="${safe(tool.template)}"
+public/control-center/pages/ai-command/tool-dock.js:1449:            title="${safe(tool.template)}"
+public/control-center/pages/ai-command/tool-dock.js:1451:            <span class="mhos-tool-dock-icon" aria-hidden="true">${safe(tool.icon)}</span>
+public/control-center/pages/ai-command/tool-dock.js:1452:            <span class="mhos-tool-dock-label">${safe(tool.label)}</span>
+public/control-center/pages/ai-command/tool-dock.js:1453:            <span class="mhos-tool-dock-badge">${safe(tool.badge)}</span>
+public/control-center/pages/ai-command/tool-dock.js:1458:    ${renderSmartToolDrawerShell(safe)}
+public/control-center/pages/ai-command/tool-dock.js:1513:    const safeValue = escapeHtml(value);
+public/control-center/pages/ai-command/tool-dock.js:1515:    return `<option value="${index === 0 && !values.length ? "" : safeValue}">${escapeHtml(label)}</option>`;
+public/control-center/pages/ai-command/tool-dock.js:1598:    `Create the requested ${output.toLowerCase()} as review-ready content.`,
+public/control-center/pages/ai-command/tool-dock.js:1620:    "- Prepare review-ready output only.",
+public/control-center/pages/ai-command/tool-dock.js:1684:  setDrawerText(drawer, "[data-aicmd-tool-drawer-safety]", humanizeMeta(btn.getAttribute("data-aicmd-tool-dock-safety") || "review_only"));
+public/control-center/pages/publishing.js:11:  const safety = `Publishing prepares channel packages, manual schedule records, and approval-ready handoffs. External publishing requires provider proof; backend status changes remain <strong>confirmation-gated</strong> and governed by <strong>backend approval rules</strong>.`;
+public/control-center/pages/publishing.js:24:      <div class="publishing-command-header-safety">${safety}</div>
+public/control-center/pages/publishing.js:579:        reason: "Prepare a safe publishing draft without executing publish.",
+public/control-center/pages/publishing.js:1144:        <div class="publishing-automation-preview-copy">Automation cannot publish without manual review, confirmation, and backend approval gates.</div>
+public/control-center/pages/publishing.js:1152:          <div class="simple-banner publishing-inline-gap"><strong>Approval needed:</strong> ${escapeHtml(asObject(getAutoModeState().approvalRequiredStep).reason || "Manual approval required.")}</div>
+public/control-center/pages/publishing.js:1863:      const confirmed = window.confirm("Confirm fail action\n\nAction: Mark this publishing item as failed.\nRisk: This creates a permanent failure record and stops the publishing lifecycle for this item.\nPolicy: Use only when this item cannot proceed and requires explicit failure logging.\n\nSelect Cancel to keep this item in its current state.");
+public/control-center/pages/publishing.js:1958:        publishingAutomationState.result = "No safe publishing preparation steps available.";
+public/control-center/pages/publishing.js:2051:    safeText,
+public/control-center/pages/publishing.js:2110:                  <h3>${escapeHtml(safeText(selectedItem?.title, "Selected publishing item"))}</h3>
+public/control-center/pages/publishing.js:2147:        safeText,
+runtime/orchestrator-service/server.js:700:  const safeFilename = path.basename(String(filename || '').trim());
+runtime/orchestrator-service/server.js:702:  return path.join(uploadTarget.dir, safeFilename);
+runtime/orchestrator-service/server.js:852:  // 2. Split extension. Only preserve extensions that are safe (alphanumeric, 1-8 chars).
+runtime/orchestrator-service/server.js:858:  // 3. Normalize stem: replace whitespace and unsafe chars with underscores.
+runtime/orchestrator-service/server.js:891:      const safeName = Date.now() + '_' + sanitizeUploadFilename(file.originalname);
+runtime/orchestrator-service/server.js:892:      cb(null, safeName);
+runtime/orchestrator-service/server.js:1303:  const safeRelativePath = String(relativePath || '').replace(/^\/+/, '');
+runtime/orchestrator-service/server.js:1306:    canonicalPath: safeRelativePath ? path.join(canonicalBase, safeRelativePath) : canonicalBase,
+runtime/orchestrator-service/server.js:1307:    legacyPath: safeRelativePath ? path.join(legacyBase, safeRelativePath) : legacyBase
+runtime/orchestrator-service/server.js:1481:  const safeProject = String(projectName || '').trim().toLowerCase();
+runtime/orchestrator-service/server.js:1482:  const resolution = unifiedDataPathResolver.resolve(safeProject, {
+runtime/orchestrator-service/server.js:1488:    project: safeProject,
+runtime/orchestrator-service/server.js:1496:    canonicalLiveContentDir: path.join(EXECUTION_DIR, 'projects', safeProject, 'content', 'email'),
+runtime/orchestrator-service/server.js:1497:    legacyLiveContentDir: path.join(EXECUTION_DIR, safeProject, 'content', 'email'),
+runtime/orchestrator-service/server.js:1498:    canonicalLiveMediaQueueDir: path.join(EXECUTION_DIR, 'projects', safeProject, 'media', 'queue'),
+runtime/orchestrator-service/server.js:1499:    legacyLiveMediaQueueDir: path.join(EXECUTION_DIR, safeProject, 'media', 'queue')
+runtime/orchestrator-service/server.js:1572:  const safeProject = String(options.projectName || '').trim().toLowerCase();
+runtime/orchestrator-service/server.js:1574:  const contract = getEmailArtifactContract(safeProject, artifactType);
+runtime/orchestrator-service/server.js:1580:    projectName: safeProject,
+runtime/orchestrator-service/server.js:1586:    requestedIdentifier: options.requestedIdentifier || safeProject,
+runtime/orchestrator-service/server.js:1625:  const safeProject = normalizeOptionalProjectSlug(projectName) || getPreferredProjectName();
+runtime/orchestrator-service/server.js:1626:  if (!safeProject) {
+runtime/orchestrator-service/server.js:1632:  return safeProject;
+runtime/orchestrator-service/server.js:1819:  const safeProject = String(projectName || '').trim().toLowerCase();
+runtime/orchestrator-service/server.js:1820:  const telemetryDir = path.join(EXECUTION_DIR, 'projects', safeProject, 'telemetry');
+runtime/orchestrator-service/server.js:1898:    readiness = 'safe_to_audit_phase4';
+runtime/orchestrator-service/server.js:1908:    project: safeProject,
+runtime/orchestrator-service/server.js:2029:  const safeProject = String(projectName || '').trim().toLowerCase();
+runtime/orchestrator-service/server.js:2030:  const contract = getEmailArtifactContract(safeProject, EMAIL_ARTIFACT_TYPES.PREPARE_PACKAGE);
+runtime/orchestrator-service/server.js:2615:  const safeProject = String(projectName || '').trim().toLowerCase();
+runtime/orchestrator-service/server.js:2616:  const emailPaths = getEmailDomainPaths(safeProject);
+runtime/orchestrator-service/server.js:3198:      'Keep key creative elements inside safe zones.',
+runtime/orchestrator-service/server.js:3342:      'Keep music and media usage rights-safe.',
+runtime/orchestrator-service/server.js:3539:      'brand safe',
+runtime/orchestrator-service/server.js:3594:      'Marketplace-safe image guidance',
+runtime/orchestrator-service/server.js:3680:  const safeProject = String(projectName || '').trim().toLowerCase();
+runtime/orchestrator-service/server.js:3681:  const resolution = unifiedDataPathResolver.resolve(safeProject, {
+runtime/orchestrator-service/server.js:3686:    projectName: safeProject,
+runtime/orchestrator-service/server.js:3908:  const safeWaveName = String(waveName || '').toLowerCase();
+runtime/orchestrator-service/server.js:3911:  if (safeWaveName.includes('beard')) {
+runtime/orchestrator-service/server.js:3915:  if (safeWaveName.includes('hair')) {
+runtime/orchestrator-service/server.js:3919:  if (safeWaveName.includes('skin') || safeWaveName.includes('face')) {
+runtime/orchestrator-service/server.js:3985:  const safeProject = String(projectName || '').trim().toLowerCase();
+runtime/orchestrator-service/server.js:3986:  const resolution = unifiedDataPathResolver.resolve(safeProject, {
+runtime/orchestrator-service/server.js:3991:    projectName: safeProject,
+runtime/orchestrator-service/server.js:4160:  const safeTitle = String(title || '').trim();
+runtime/orchestrator-service/server.js:4161:  if (safeTitle) return safeTitle;
+runtime/orchestrator-service/server.js:4163:  const safeWave = String(waveName || '').trim();
+runtime/orchestrator-service/server.js:4164:  const safeChannel = String(channel || '').trim();
+runtime/orchestrator-service/server.js:4166:  if (safeWave && safeChannel) {
+runtime/orchestrator-service/server.js:4167:    return `${safeWave} ${safeChannel}`;
+runtime/orchestrator-service/server.js:4170:  if (safeWave) return safeWave;
+runtime/orchestrator-service/server.js:4171:  if (safeChannel) return `${safeChannel} publish`;
+runtime/orchestrator-service/server.js:4330:  const safeWave = String(waveName || '').trim();
+runtime/orchestrator-service/server.js:4331:  const safeChannel = String(channel || '').trim().toLowerCase();
+runtime/orchestrator-service/server.js:4333:  if (!safeWave || !safeChannel) {
+runtime/orchestrator-service/server.js:4343:    const payload = buildChannelConnectorPayload(projectName, safeWave, safeChannel);
+runtime/orchestrator-service/server.js:4361:  const safeProject = String(projectName || '').trim().toLowerCase();
+runtime/orchestrator-service/server.js:4364:  const existingFilePath = requestedJobId ? getPublishingJobFilePath(safeProject, requestedJobId) : '';
+runtime/orchestrator-service/server.js:4397:  const connectorInfo = tryBuildPublishingConnector(safeProject, waveName, channel, {
+runtime/orchestrator-service/server.js:4420:  return saveScheduledJobRecord(safeProject, {
+runtime/orchestrator-service/server.js:4423:    project: safeProject,
+runtime/orchestrator-service/server.js:4435:    mode: String(input.mode || existing.mode || readExecutionMode(safeProject).mode || 'semi_auto').trim(),
+runtime/orchestrator-service/server.js:4486:  const safeProject = String(projectName || '').trim().toLowerCase();
+runtime/orchestrator-service/server.js:4487:  const resolution = unifiedDataPathResolver.resolve(safeProject, {
+runtime/orchestrator-service/server.js:4492:    projectName: safeProject,
+runtime/orchestrator-service/server.js:4681:  syncPublishingJob(safeProject, job, result);
+runtime/orchestrator-service/server.js:4812:  function safeList(dirPath, group) {
+runtime/orchestrator-service/server.js:4825:    ...safeList(paths.systemDir, 'system'),
+runtime/orchestrator-service/server.js:4826:    ...safeList(paths.blueprintsDir, 'blueprints'),
+runtime/orchestrator-service/server.js:4827:    ...safeList(paths.runbooksDir, 'runbooks')
+runtime/orchestrator-service/server.js:4855:  const safeProject = String(projectName || '').trim().toLowerCase();
+runtime/orchestrator-service/server.js:4856:  const resolution = unifiedDataPathResolver.resolve(safeProject, {
+runtime/orchestrator-service/server.js:4861:    projectName: safeProject,
+runtime/orchestrator-service/server.js:5057:  const safeProject = String(projectName || '').trim().toLowerCase();
+runtime/orchestrator-service/server.js:5058:  const resolution = unifiedDataPathResolver.resolve(safeProject, {
+runtime/orchestrator-service/server.js:5063:    projectName: safeProject,
+runtime/orchestrator-service/server.js:5119:    result.warnings.push('Packaging source is missing for full packaging-safe rendering');
+runtime/orchestrator-service/server.js:5152:  lines.push(`Brand safety is strict.`);
+runtime/orchestrator-service/server.js:5462:  const safeProject = normalizeProjectSlug(projectName);
+runtime/orchestrator-service/server.js:5463:  const resolution = unifiedDataPathResolver.resolve(safeProject, {
+runtime/orchestrator-service/server.js:5488:  const safeProject = normalizeProjectSlug(projectName);
+runtime/orchestrator-service/server.js:5491:    return fs.existsSync(getProjectBasePaths(safeProject).projectFilePath);
+runtime/orchestrator-service/server.js:5609:  const safeFilename = path.basename(String(filename || '').trim());
+runtime/orchestrator-service/server.js:5611:  if (!project || !safeFilename) {
+runtime/orchestrator-service/server.js:5621:        if (!assetFilename || assetFilename !== safeFilename) {
+runtime/orchestrator-service/server.js:5642:      if (!assetFilename || assetFilename !== safeFilename) {
+runtime/orchestrator-service/server.js:5895:  const safeProject = normalizeOptionalProjectSlug(projectName);
+runtime/orchestrator-service/server.js:5896:  if (!safeProject) return 'Project';
+runtime/orchestrator-service/server.js:5899:    const projectData = readJsonFile(getProjectBasePaths(safeProject).projectFilePath, {});
+runtime/orchestrator-service/server.js:5904:      safeProject
+runtime/orchestrator-service/server.js:5907:    return safeProject;
+runtime/orchestrator-service/server.js:5912:  const safeProject = normalizeOptionalProjectSlug(projectName);
+runtime/orchestrator-service/server.js:5913:  if (!safeProject) return '';
+runtime/orchestrator-service/server.js:5916:    const projectData = readJsonFile(getProjectBasePaths(safeProject).projectFilePath, {});
+runtime/orchestrator-service/server.js:6285:  const safeProject = resolved.project;
+runtime/orchestrator-service/server.js:6289:    project: safeProject,
+runtime/orchestrator-service/server.js:6592:  const safeProject = normalizeProjectSlug(projectName);
+runtime/orchestrator-service/server.js:6593:  const paths = getProjectBaselinePaths(safeProject);
+runtime/orchestrator-service/server.js:6619:  const brandProfile = readCanonicalJsonWithLegacyFallback(safeProject, {
+runtime/orchestrator-service/server.js:6623:    fallback: buildDefaultBrandProfile(safeProject, projectData)
+runtime/orchestrator-service/server.js:6626:  const assetsRegistry = readCanonicalJsonWithLegacyFallback(safeProject, {
+runtime/orchestrator-service/server.js:6634:  const sourcesRegistry = readCanonicalJsonWithLegacyFallback(safeProject, {
+runtime/orchestrator-service/server.js:6668:    project: safeProject,
+runtime/orchestrator-service/server.js:6732:  const safeProject = normalizeProjectSlug(projectName);
+runtime/orchestrator-service/server.js:6733:  const paths = getProjectBaselinePaths(safeProject);
+runtime/orchestrator-service/server.js:6734:  const validation = ensureProjectBaselineFiles(safeProject, projectData);
+runtime/orchestrator-service/server.js:6736:  const brandProfile = buildBrandProfileFromProject(safeProject, projectData, existingBrandProfile);
+runtime/orchestrator-service/server.js:6970:  const safeProject = normalizeProjectSlug(projectName);
+runtime/orchestrator-service/server.js:6976:    p => String(p.project_name || '').toLowerCase() === safeProject
+runtime/orchestrator-service/server.js:6983:  const paths = ensureProjectBaseStructure(safeProject);
+runtime/orchestrator-service/server.js:6987:    project_name: safeProject,
+runtime/orchestrator-service/server.js:7027:  const baseline = persistProjectSetupArtifacts(safeProject, projectData);
+runtime/orchestrator-service/server.js:7102:  const safeProject = normalizeProjectSlug(projectName);
+runtime/orchestrator-service/server.js:7107:  if (requestedProjectName && requestedProjectName !== safeProject) {
+runtime/orchestrator-service/server.js:7111:  const paths = getProjectBasePaths(safeProject);
+runtime/orchestrator-service/server.js:7131:    (project) => String(project?.project_name || '').trim().toLowerCase() === safeProject
+runtime/orchestrator-service/server.js:7143:  const baseline = persistProjectSetupArtifacts(safeProject, nextProject);
+runtime/orchestrator-service/server.js:7146:    project: safeProject,
+runtime/orchestrator-service/server.js:7172:  const safeProject = normalizeProjectSlug(projectName);
+runtime/orchestrator-service/server.js:7173:  const paths = getProjectBaselinePaths(safeProject);
+runtime/orchestrator-service/server.js:7214:      logProjectDataMismatch(safeProject, {
+runtime/orchestrator-service/server.js:7238:    project: safeProject,
+runtime/orchestrator-service/server.js:7265:  const safeProject = normalizeProjectSlug(projectName);
+runtime/orchestrator-service/server.js:7267:  const baselineValidation = ensureProjectBaselineFiles(safeProject, projectData);
+runtime/orchestrator-service/server.js:7270:  const missingAssets = reviewProjectMissingAssets(safeProject);
+runtime/orchestrator-service/server.js:7271:  const connectorReadiness = reviewProjectConnectorReadiness(safeProject);
+runtime/orchestrator-service/server.js:7272:  const parityReport = reviewProjectCanonicalParity(safeProject);
+runtime/orchestrator-service/server.js:7273:  const campaigns = listCampaigns(safeProject, { limit: 50 });
+runtime/orchestrator-service/server.js:7274:  const aiMemoryItems = listAiMemory(safeProject, { limit: 20 });
+runtime/orchestrator-service/server.js:7384:    project: safeProject,
+runtime/orchestrator-service/server.js:8720:  const safeProject = normalizeProjectSlug(projectName);
+runtime/orchestrator-service/server.js:8721:  const basePaths = getProjectBasePaths(safeProject);
+runtime/orchestrator-service/server.js:8722:  const brandPaths = getProjectBrandPaths(safeProject);
+runtime/orchestrator-service/server.js:8728:    path.join(LEGACY_BRAND_ASSETS_DIR, safeProject, 'product_csv')
+runtime/orchestrator-service/server.js:8733:    path.join(LEGACY_BRAND_ASSETS_DIR, safeProject, 'products', 'images')
+runtime/orchestrator-service/server.js:8738:    path.join(LEGACY_BRAND_ASSETS_DIR, safeProject, 'products', 'videos')
+runtime/orchestrator-service/server.js:8870:    project: safeProject,
+runtime/orchestrator-service/server.js:8932:  const safeProject = normalizeProjectSlug(projectName);
+runtime/orchestrator-service/server.js:8933:  const basePaths = getProjectBasePaths(safeProject);
+runtime/orchestrator-service/server.js:8942:    ? readJsonFile(assetsRegistryPath, []).map((asset) => normalizeAssetRecord(safeProject, asset))
+runtime/orchestrator-service/server.js:8944:  const scan = buildProjectLibraryFilesystemScan(safeProject);
+runtime/orchestrator-service/server.js:8976:    refreshedAssets.push(normalizeAssetRecord(safeProject, {
+runtime/orchestrator-service/server.js:9000:  const categoryReadiness = buildProjectAssetCategoryReadiness(safeProject, nextAssets, {
+runtime/orchestrator-service/server.js:9005:    project: safeProject,
+runtime/orchestrator-service/server.js:10079:        'Use the cloned draft product for safe content updates before publishing.'
+runtime/orchestrator-service/server.js:10479:  const safeProject = normalizeProjectSlug(projectName);
+runtime/orchestrator-service/server.js:10480:  const paths = getProjectBasePaths(safeProject);
+runtime/orchestrator-service/server.js:10491:    project_name: existing.project_name || safeProject,
+runtime/orchestrator-service/server.js:10512:        if (String(item.project_name || '').toLowerCase() !== safeProject) {
+runtime/orchestrator-service/server.js:11249:      `Keep claims review-ready before external distribution.`
+runtime/orchestrator-service/server.js:11260:      'Compliance-safe proof points'
+runtime/orchestrator-service/server.js:11344:    safety: {
+runtime/orchestrator-service/server.js:11369:      safety: {
+runtime/orchestrator-service/server.js:13813:  const safeFilename = path.basename(filename);
+runtime/orchestrator-service/server.js:13815:  if (!project || !safeFilename || safeFilename !== filename) {
+runtime/orchestrator-service/server.js:13823:    relativePath: path.join('outputs', safeFilename),
+runtime/orchestrator-service/server.js:14162:  const safeProject = String(projectName || '').trim().toLowerCase();
+runtime/orchestrator-service/server.js:14163:  const resolution = unifiedDataPathResolver.resolve(safeProject, {
+runtime/orchestrator-service/server.js:14168:    projectName: safeProject,
+runtime/orchestrator-service/server.js:14248:  const safeName = `${campaignName.replace(/[^a-z0-9_-]/gi, '_').toLowerCase()}.json`;
+runtime/orchestrator-service/server.js:14252:    relativePath: path.join('packages', safeName),
+runtime/orchestrator-service/server.js:14255:    requestedFile: `campaign-execution/packages/${safeName}`
+runtime/orchestrator-service/server.js:14308:  const safeProject = String(projectName || '').trim().toLowerCase();
+runtime/orchestrator-service/server.js:14312:  const resolution = unifiedDataPathResolver.resolve(safeProject, {
+runtime/orchestrator-service/server.js:14317:    projectName: safeProject,
+runtime/orchestrator-service/server.js:14464:  const safeName = campaignName.replace(/[^a-z0-9_-]/gi, '_').toLowerCase();
+runtime/orchestrator-service/server.js:14470:    matcher: new RegExp(`^${safeName}`),
+runtime/orchestrator-service/server.js:14472:    requestedFile: `campaign-finalization/media-jobs/${safeName}*`
+runtime/orchestrator-service/server.js:14479:    matcher: new RegExp(`^${safeName}`),
+runtime/orchestrator-service/server.js:14481:    requestedFile: `campaign-finalization/publish-packages/${safeName}*`
+runtime/orchestrator-service/server.js:14486:    relativePath: path.join('email', `${safeName}.json`),
+runtime/orchestrator-service/server.js:14489:    requestedFile: `campaign-finalization/email/${safeName}.json`
+runtime/orchestrator-service/server.js:14493:    ? fs.readdirSync(mediaDir).filter(x => x.startsWith(safeName))
+runtime/orchestrator-service/server.js:14496:    ? fs.readdirSync(publishDir).filter(x => x.startsWith(safeName))
+runtime/orchestrator-service/server.js:14519:  const safeProject = normalizeProjectSlug(projectName);
+runtime/orchestrator-service/server.js:14520:  const projectRoot = resolveProjectPath(path.join(DATA_DIR, 'projects'), safeProject).projectRoot;
+runtime/orchestrator-service/server.js:14525:    project: safeProject,
+runtime/orchestrator-service/server.js:14533:  const safeAction = String(action || 'execution_action')
+runtime/orchestrator-service/server.js:14538:  const filePath = path.join(directory.logs_dir, `${fileSafeStamp}_${safeAction}.json`);
+runtime/orchestrator-service/server.js:14542:    action: safeAction,
+runtime/orchestrator-service/server.js:14715:    || 'Create a clean brand-safe hero visual with real product focus and premium lighting.'
+runtime/orchestrator-service/server.js:14824:    || 'Create a premium brand-safe visual for campaign execution.'
+runtime/orchestrator-service/server.js:14934:  const safeProject = String(projectName || '').trim().toLowerCase();
+runtime/orchestrator-service/server.js:14935:  const resolution = unifiedDataPathResolver.resolve(safeProject, {
+runtime/orchestrator-service/server.js:14940:    projectName: safeProject,
+runtime/orchestrator-service/server.js:15134:  const safeProject = String(projectName || '').trim().toLowerCase();
+runtime/orchestrator-service/server.js:15135:  const safeCampaign = String(campaignName || '').trim();
+runtime/orchestrator-service/server.js:15136:  const safeChannel = String(channel || '').trim().toLowerCase();
+runtime/orchestrator-service/server.js:15137:  const safeJobId = String(jobId || '').trim();
+runtime/orchestrator-service/server.js:15138:  const safeOperator = String(operator || '').trim();
+runtime/orchestrator-service/server.js:15139:  const safePostUrl = String(postUrl || '').trim();
+runtime/orchestrator-service/server.js:15140:  const safeNotes = String(notes || '').trim();
+runtime/orchestrator-service/server.js:15142:  if (!safeProject) {
+runtime/orchestrator-service/server.js:15147:  if (!safeCampaign) {
+runtime/orchestrator-service/server.js:15152:  if (!safeChannel) {
+runtime/orchestrator-service/server.js:15157:  if (!safeJobId) {
+runtime/orchestrator-service/server.js:15162:  if (!safeOperator) {
+runtime/orchestrator-service/server.js:15167:  if (!safePostUrl) {
+runtime/orchestrator-service/server.js:15173:  const projectPaths = getProjectBasePaths(safeProject);
+runtime/orchestrator-service/server.js:15180:  const mode = readExecutionMode(safeProject);
+runtime/orchestrator-service/server.js:15187:  const campaignSafe = safeCampaign.replace(/[^a-z0-9_-]/gi, '_').toLowerCase();
+runtime/orchestrator-service/server.js:15188:  const executionCampaignPackagePath = path.join(DATA_DIR, 'execution', 'projects', safeProject, 'campaign-execution', 'packages', `${campaignSafe}.json`);
+runtime/orchestrator-service/server.js:15189:  const projectCampaignPackagePath = path.join(DATA_DIR, 'projects', safeProject, 'brand-assets', 'campaign-execution', 'packages', `${campaignSafe}.json`);
+runtime/orchestrator-service/server.js:15190:  const legacyCampaignPackagePath = path.join(LEGACY_BRAND_ASSETS_DIR, safeProject, 'campaign-execution', 'packages', `${campaignSafe}.json`);
+runtime/orchestrator-service/server.js:15210:    project: safeProject,
+runtime/orchestrator-service/server.js:15211:    campaign: safeCampaign,
+runtime/orchestrator-service/server.js:15212:    channel: safeChannel,
+runtime/orchestrator-service/server.js:15213:    job_id: safeJobId,
+runtime/orchestrator-service/server.js:15214:    operator: safeOperator,
+runtime/orchestrator-service/server.js:15216:    post_url: safePostUrl,
+runtime/orchestrator-service/server.js:15217:    notes: safeNotes,
+runtime/orchestrator-service/server.js:15225:    `${campaignSafe}_${safeChannel}_${timestampSafe}.json`
+runtime/orchestrator-service/server.js:15233:    projectName: safeProject,
+runtime/orchestrator-service/server.js:15235:    relativePath: `${safeJobId}.json`,
+runtime/orchestrator-service/server.js:15237:    requestedIdentifier: safeJobId,
+runtime/orchestrator-service/server.js:15238:    requestedFile: `execution-results/${safeJobId}.json`
+runtime/orchestrator-service/server.js:15246:      manual_publish_url: safePostUrl,
+runtime/orchestrator-service/server.js:15247:      manual_publish_operator: safeOperator,
+runtime/orchestrator-service/server.js:15252:      campaign_name: existingResult.campaign_name || safeCampaign,
+runtime/orchestrator-service/server.js:15253:      channel: String(existingResult.channel || safeChannel).trim().toLowerCase(),
+runtime/orchestrator-service/server.js:15256:        ...normalizePublishingNotes(safeNotes)
+runtime/orchestrator-service/server.js:15260:    const execPaths = getExecutionPaths(safeProject);
+runtime/orchestrator-service/server.js:15261:    const legacyExecutionResultPath = path.join(execPaths.legacyResultsDir, `${safeJobId}.json`);
+runtime/orchestrator-service/server.js:15264:      project: safeProject,
+runtime/orchestrator-service/server.js:15267:      identifier: safeJobId,
+runtime/orchestrator-service/server.js:15272:    touchedFiles.push(execPaths.resultsDir ? path.join(execPaths.resultsDir, `${safeJobId}.json`) : executionResultPath);
+runtime/orchestrator-service/server.js:15279:    project: safeProject,
+runtime/orchestrator-service/server.js:15280:    campaign: safeCampaign,
+runtime/orchestrator-service/server.js:15281:    channel: safeChannel,
+runtime/orchestrator-service/server.js:15282:    job_id: safeJobId,
+runtime/orchestrator-service/server.js:15295:  const safeProject = String(projectName || '').trim().toLowerCase();
+runtime/orchestrator-service/server.js:15296:  const job = hydrateScheduledJobRecord(safeProject, getScheduledJobById(safeProject, jobId));
+runtime/orchestrator-service/server.js:15297:  const execPaths = getExecutionPaths(safeProject);
+runtime/orchestrator-service/server.js:15304:    project: safeProject,
+runtime/orchestrator-service/server.js:15309:    mode: String(options.mode || job.mode || readExecutionMode(safeProject).mode || 'semi_auto').trim(),
+runtime/orchestrator-service/server.js:15319:    project: safeProject,
+runtime/orchestrator-service/server.js:15438:  // Use explicit boolean coercion with safe defaults matching DEFAULT_POLICY_RULES:
+runtime/orchestrator-service/server.js:15813:  const safeProjectName = normalizeProjectSlug(projectName);
+runtime/orchestrator-service/server.js:15818:      const registryPath = path.join(DATA_DIR, "projects", safeProjectName, "assets-registry.json");
+runtime/orchestrator-service/server.js:15891:  const safeProject = normalizeProjectSlug(projectName);
+runtime/orchestrator-service/server.js:15892:  const controlCenter = reviewProjectIntegrationControlCenter(safeProject);
+runtime/orchestrator-service/server.js:15894:    projectName: safeProject,
+runtime/orchestrator-service/server.js:15895:    projectPaths: getProjectIntegrationPaths(safeProject),
+runtime/orchestrator-service/server.js:15901:  const safeProject = normalizeProjectSlug(projectName);
+runtime/orchestrator-service/server.js:15902:  const controlCenter = reviewProjectIntegrationControlCenter(safeProject);
+runtime/orchestrator-service/server.js:15904:    projectName: safeProject,
+runtime/orchestrator-service/server.js:15905:    projectPaths: getProjectIntegrationPaths(safeProject),
+runtime/orchestrator-service/server.js:16886:      const safeSlug = String(blogItem.topic || 'blog-image')
+runtime/orchestrator-service/server.js:16891:      const plannedFilename = `${assetId}-${safeSlug}.png`;
+runtime/orchestrator-service/server.js:17366:      const safeSlug = String(emailItem.topic || 'email-image')
+runtime/orchestrator-service/server.js:17371:      const plannedFilename = `${assetId}-${safeSlug}.png`;
+runtime/orchestrator-service/server.js:22343:  const safeProject = normalizeProjectSlug(projectName);
+runtime/orchestrator-service/server.js:22344:  const projectRoot = resolveProjectPath(path.join(DATA_DIR, 'projects'), safeProject).projectRoot;
+runtime/orchestrator-service/server.js:22352:    project: safeProject,
+runtime/orchestrator-service/server.js:22407:  const safeProject = normalizeProjectSlug(projectName);
+runtime/orchestrator-service/server.js:22408:  const store = readPerformanceStore(safeProject);
+runtime/orchestrator-service/server.js:22409:  const schedulerJobs = readSchedulerJobs(safeProject);
+runtime/orchestrator-service/server.js:22420:    project: safeProject,
+runtime/orchestrator-service/server.js:22431:  writePerformanceStore(safeProject, store);
+runtime/orchestrator-service/server.js:22532:  const safeProjectName = normalizeProjectSlug(projectName);
+runtime/orchestrator-service/server.js:22537:      const registryPath = path.join(DATA_DIR, "projects", safeProjectName, "assets-registry.json");
