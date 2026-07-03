@@ -1,0 +1,642 @@
+public/control-center/pages/content-studio-workspace.js:56:  reviewRole: "compliance_reviewer",
+public/control-center/pages/content-studio-workspace.js:114:    purpose: "Validate tone, claims, and compliance before downstream handoffs.",
+public/control-center/pages/content-studio-workspace.js:115:    bestUse: "Before approval or sending drafts to Media Studio or Publishing.",
+public/control-center/pages/content-studio-workspace.js:116:    suggestedPrompt: "Act as Brand Guardian. Audit this draft for brand tone, claim risk, and handoff readiness."
+public/control-center/pages/content-studio-workspace.js:170:    "Select Cancel to review the draft, evidence, and destination before continuing."
+public/control-center/pages/content-studio-workspace.js:200:  if (["needs_review", "needs review", "review", "pending_approval"].includes(normalized)) return "needs_review";
+public/control-center/pages/content-studio-workspace.js:271:    source: "Local draft",
+public/control-center/pages/content-studio-workspace.js:309:    source_signature: asString(asset.source_signature),
+public/control-center/pages/content-studio-workspace.js:314:    const sameSig = next.source_signature && asString(item.source_signature) === next.source_signature;
+public/control-center/pages/content-studio-workspace.js:335:  approvalStatus = "draft",
+public/control-center/pages/content-studio-workspace.js:349:    approval_status: asString(approvalStatus || "draft"),
+public/control-center/pages/content-studio-workspace.js:367:    approvalStatus: firstText(raw.approval_status, "draft"),
+public/control-center/pages/content-studio-workspace.js:384:    approvalStatus: firstText(seed.approvalStatus, "draft"),
+public/control-center/pages/content-studio-workspace.js:487:    approvalStatus: firstText(raw.approval_status, "draft")
+public/control-center/pages/content-studio-workspace.js:508:    approval_status: asString(raw.approval_status || "draft"),
+public/control-center/pages/content-studio-workspace.js:512:    linked_approvals: asArray(raw.linked_approvals),
+public/control-center/pages/content-studio-workspace.js:515:    source: firstText(raw.source, raw.localOnly ? "Local draft" : "Backend"),
+public/control-center/pages/content-studio-workspace.js:554:      approvals: [],
+public/control-center/pages/content-studio-workspace.js:664:    approval_status: firstText(selected?.approval_status, "draft"),
+public/control-center/pages/content-studio-workspace.js:678:      approval_status: version.approval_status,
+public/control-center/pages/content-studio-workspace.js:763:    sourcePage: asString(handoff?.source_page || "workflows"),
+public/control-center/pages/content-studio-workspace.js:776:    approvalStatus: firstText(selectedVersion.approval_status, payload.approval_status, "draft")
+public/control-center/pages/content-studio-workspace.js:804:    const [contentItems, tasks, approvals, handoffs, events, operations] = await Promise.all([
+public/control-center/pages/content-studio-workspace.js:817:    session.approvals = asArray(approvals.items);
+public/control-center/pages/content-studio-workspace.js:1172:            <span class="content-queue-meta">${escapeHtml(modeLabel(item.mode))} • ${escapeHtml(item.channel || "channel")} • ${escapeHtml(item.source || "source")}</span>
+public/control-center/pages/content-studio-workspace.js:1260:      ${handoff ? `<div class="simple-banner" style="margin-top:12px;">Inbound handoff from ${escapeHtml(titleCase(handoff.sourcePage || "workflow"))} is available below.</div>` : ""}
+public/control-center/pages/content-studio-workspace.js:1405:        <div class="content-data-item"><span>Approval status</span><strong>${escapeHtml(titleCase(firstText(selected?.approval_status, "draft")))}</strong></div>
+public/control-center/pages/content-studio-workspace.js:1486:          <p class="content-copy">Source: ${escapeHtml(titleCase(handoff.sourcePage || "workflow"))}</p>
+public/control-center/pages/content-studio-workspace.js:1527:    source_page: "content-studio",
+public/control-center/pages/content-studio-workspace.js:1529:    source_role: CONTENT_ROLE_DEFAULTS.ownerRole,
+public/control-center/pages/content-studio-workspace.js:1531:    source_service_domain: CONTENT_ROLE_DEFAULTS.serviceDomain,
+public/control-center/pages/content-studio-workspace.js:1553:        approval_status: firstText(selected?.approval_status, "draft"),
+public/control-center/pages/content-studio-workspace.js:1570:  const approvalStatus = firstText(selected?.approval_status, selectedItem?.approval_status, "draft");
+public/control-center/pages/content-studio-workspace.js:1574:    source_page: "content-studio",
+public/control-center/pages/content-studio-workspace.js:1576:    source_role: CONTENT_ROLE_DEFAULTS.ownerRole,
+public/control-center/pages/content-studio-workspace.js:1578:    source_service_domain: CONTENT_ROLE_DEFAULTS.serviceDomain,
+public/control-center/pages/content-studio-workspace.js:1591:      approval_status: approvalStatus,
+public/control-center/pages/content-studio-workspace.js:1600:        approval_status: approvalStatus,
+public/control-center/pages/content-studio-workspace.js:1615:  const local = loadLocalLibraryAssets(projectName).find((item) => asString(item.source_signature) === asString(signature));
+public/control-center/pages/content-studio-workspace.js:1619:    return asString(item.destination_page) === "library" && asString(asset.source_signature) === asString(signature);
+public/control-center/pages/content-studio-workspace.js:1664:    source_signature: signature,
+public/control-center/pages/content-studio-workspace.js:1665:    source: "content-studio",
+public/control-center/pages/content-studio-workspace.js:1682:    approval_status: firstText(selected.approval_status, "draft"),
+public/control-center/pages/content-studio-workspace.js:1690:    source_page: "content-studio",
+public/control-center/pages/content-studio-workspace.js:1692:    source_role: CONTENT_ROLE_DEFAULTS.ownerRole,
+public/control-center/pages/content-studio-workspace.js:1694:    source_service_domain: CONTENT_ROLE_DEFAULTS.serviceDomain,
+public/control-center/pages/content-studio-workspace.js:1739:        source_signature: signature,
+public/control-center/pages/content-studio-workspace.js:1752:        source_signature: signature,
+public/control-center/pages/content-studio-workspace.js:1766:      source_signature: signature,
+public/control-center/pages/content-studio-workspace.js:1903:        approvalStatus: firstText(handoff.approvalStatus, "draft"),
+public/control-center/pages/content-studio-workspace.js:1904:        notes: `Loaded from ${titleCase(handoff.sourcePage || "handoff")}.`
+public/control-center/pages/content-studio-workspace.js:1956:              approvalStatus: "needs_review",
+public/control-center/pages/content-studio-workspace.js:1970:              approvalStatus: "draft",
+public/control-center/pages/content-studio-workspace.js:1984:            approvalStatus: "draft",
+public/control-center/pages/content-studio-workspace.js:1998:          approvalStatus: "draft",
+public/control-center/pages/content-studio-workspace.js:2106:        source_page: "content-studio",
+public/control-center/pages/content-studio-workspace.js:2215:          "Confirm content approval mark",
+public/control-center/pages/content-studio-workspace.js:2221:        current.approval_status = "approved";
+public/control-center/pages/content-studio-workspace.js:2235:        current.approval_status = "rejected";
+public/control-center/pages/content-studio-workspace.js:2257:          approvalStatus: "draft",
+public/control-center/pages/content-studio-workspace.js:2326:          source_page: "content-studio",
+public/control-center/pages/content-studio-workspace.js:2406:      let sourceLines = [];
+public/control-center/pages/content-studio-workspace.js:2412:        sourceLines.push(`<div><strong>Source page:</strong> ${escapeHtml(titleCase(handoff.sourcePage || "-"))}</div>`);
+public/control-center/pages/content-studio-workspace.js:2413:        if (handoff.project) sourceLines.push(`<div><strong>Project:</strong> ${escapeHtml(handoff.project)}</div>`);
+public/control-center/pages/content-studio-workspace.js:2414:        if (handoff.campaign) sourceLines.push(`<div><strong>Campaign:</strong> ${escapeHtml(handoff.campaign)}</div>`);
+public/control-center/pages/content-studio-workspace.js:2415:        if (handoff.channel) sourceLines.push(`<div><strong>Channel:</strong> ${escapeHtml(handoff.channel)}</div>`);
+public/control-center/pages/content-studio-workspace.js:2416:        if (handoff.brief) sourceLines.push(`<div><strong>Brief:</strong> ${escapeHtml(handoff.brief.slice(0, 120))}</div>`);
+public/control-center/pages/content-studio-workspace.js:2417:        sourceLines.push(`<div><strong>Handoff type:</strong> ${handoff.id ? "AI/Workflow" : "Unknown"}</div>`);
+public/control-center/pages/content-studio-workspace.js:2419:        sourceLines.push(`<div><strong>Source:</strong> ${escapeHtml(item.source || "-")}</div>`);
+public/control-center/pages/content-studio-workspace.js:2420:        if (item.project) sourceLines.push(`<div><strong>Project:</strong> ${escapeHtml(item.project)}</div>`);
+public/control-center/pages/content-studio-workspace.js:2421:        if (item.campaign) sourceLines.push(`<div><strong>Campaign:</strong> ${escapeHtml(item.campaign)}</div>`);
+public/control-center/pages/content-studio-workspace.js:2422:        if (item.channel) sourceLines.push(`<div><strong>Channel:</strong> ${escapeHtml(item.channel)}</div>`);
+public/control-center/pages/content-studio-workspace.js:2426:        sourceLines.push(`<div><strong>Library asset ref:</strong> ${escapeHtml(item.library_asset_ref.source_signature || "-")}</div>`);
+public/control-center/pages/content-studio-workspace.js:2428:      if (!sourceLines.length) {
+public/control-center/pages/content-studio-workspace.js:2429:        sourceLines.push(`<div>No source context attached yet. Use AI Command or Library to attach source-backed content.</div>`);
+public/control-center/pages/content-studio-workspace.js:2431:      sourceLines.push(`<div class="content-hint content-readiness-hint">Source context helps the reviewer verify claims before routing.</div>`);
+public/control-center/pages/content-studio-workspace.js:2432:      return `<section class="card content-card" aria-label="${ariaLabel}"><div class="card-head"><div><div class="setup-kicker">Source Context</div><h3>Source / Provenance</h3></div></div><div class="content-data-item">${sourceLines.join("")}</div></section>`;
+public/control-center/pages/content-studio-workspace.js:2448:      </ul><div class="content-hint content-readiness-hint">Review these before routing for publishing or governance.</div></section>`;
+public/control-center/pages/content-studio-workspace.js:2453:      const ariaLabel = "Governance risk and approval readiness panel";
+public/control-center/pages/content-studio-workspace.js:2454:      return `<section class="card content-card" aria-label="${ariaLabel}"><div class="card-head"><div><div class="setup-kicker">Governance Risk</div><h3>Approval Readiness</h3></div></div><ul class="content-governance-checklist content-readiness-list">
+public/control-center/pages/content-studio-workspace.js:2456:        <li>Legal/compliance sensitivity?</li>
+public/control-center/pages/content-studio-workspace.js:2476:        ${session.loading ? `<div class="empty-box">Loading content records, approvals, tasks, handoffs, and events...</div>` : ""}
+public/control-center/pages/publishing/publishing-payloads.js:61:    sourcePage: asString(handoff?.source_page || "workflows"),
+public/control-center/pages/publishing/publishing-payloads.js:82:    approval_status: session.form.approvalStatus,
+public/control-center/pages/publishing/publishing-payloads.js:98:    approvalStatus: session.form.approvalStatus,
+public/control-center/pages/publishing/publishing-payloads.js:114:    `Approval: ${titleCase(session.form.approvalStatus || selectedItem?.approvalStatus || "draft")}`,
+public/control-center/pages/publishing.js:9:  const approval = selectedItem?.approvalStatus ? titleCase(selectedItem.approvalStatus) : "Draft";
+public/control-center/pages/publishing.js:11:  const safety = `Publishing prepares channel packages, manual schedule records, and approval-ready handoffs. External publishing requires provider proof; backend status changes remain <strong>confirmation-gated</strong> and governed by <strong>backend approval rules</strong>.`;
+public/control-center/pages/publishing.js:22:      <div class="publishing-command-header-status">Status: <strong>${escapeHtml(status)}</strong> &middot; Approval: <strong>${escapeHtml(approval)}</strong></div>
+public/control-center/pages/publishing.js:24:      <div class="publishing-command-header-safety">${safety}</div>
+public/control-center/pages/publishing.js:30:function renderPublishingWorkflowStrip({ selectedItem, recommendation, blockers, approvalState, escapeHtml }) {
+public/control-center/pages/publishing.js:33:    { key: "source", label: "Source" },
+public/control-center/pages/publishing.js:35:    { key: "approval", label: "Approval" },
+public/control-center/pages/publishing.js:41:    source: selectedItem?.source ? "ready" : "missing",
+public/control-center/pages/publishing.js:43:    approval: selectedItem?.approvalStatus === "approved" ? "ready" : selectedItem?.approvalStatus === "needs approval" ? "warning" : "missing",
+public/control-center/pages/publishing.js:61:    { key: "source", label: "Source", state: selectedItem?.source ? "ready" : "missing" },
+public/control-center/pages/publishing.js:66:    { key: "governance", label: "Governance", state: selectedItem?.governanceStatus === "approved" ? "ready" : "missing" },
+public/control-center/pages/publishing.js:67:    { key: "approval", label: "Approval", state: selectedItem?.approvalStatus === "approved" ? "ready" : selectedItem?.approvalStatus === "needs approval" ? "warning" : "missing" }
+public/control-center/pages/publishing.js:106:const STATUS_FILTERS = ["all", "draft", "ready", "needs approval", "scheduled", "published", "failed"];
+public/control-center/pages/publishing.js:107:const DISPLAY_STATUSES = ["draft", "ready", "needs approval", "scheduled", "published", "failed"];
+public/control-center/pages/publishing.js:109:const APPROVAL_STATUSES = ["draft", "needs approval", "approved"];
+public/control-center/pages/publishing.js:273:  if (["needs approval", "needs_approval", "approval", "pending_approval", "review", "in_review"].includes(normalized)) {
+public/control-center/pages/publishing.js:274:    return "needs approval";
+public/control-center/pages/publishing.js:326:    source: "Local draft",
+public/control-center/pages/publishing.js:357:    approvalStatus: "draft",
+public/control-center/pages/publishing.js:400:function normalizeQueueItem(rawItem, state, source) {
+public/control-center/pages/publishing.js:418:    approvalStatus: status === "ready" ? "approved" : status === "needs approval" ? "needs approval" : "draft",
+public/control-center/pages/publishing.js:424:    source,
+public/control-center/pages/publishing.js:473:    "needs approval": 2,
+public/control-center/pages/publishing.js:531:    approvalStatus: item.approvalStatus || "draft",
+public/control-center/pages/publishing.js:609:  if (intent === "publish" && form.approvalStatus !== "approved") {
+public/control-center/pages/publishing.js:610:    errors.approvalStatus = "Publishing readiness must be approved before recording manual completion.";
+public/control-center/pages/publishing.js:647:  // Add governance/approval hints for status pills
+public/control-center/pages/publishing.js:649:  if (status === "needs approval") {
+public/control-center/pages/publishing.js:652:    hint = "title=\"Prepare Governance Review. Backend approval rules apply.\" aria-label=\"Prepare Governance Review. Backend approval rules apply.\"";
+public/control-center/pages/publishing.js:946:  const sourceType = asString(direct.source_type || payload.source_type || direct.source);
+public/control-center/pages/publishing.js:950:    sourcePage: asString(handoff?.source_page || direct.source || "workflows"),
+public/control-center/pages/publishing.js:957:    backendSource: asString(direct.backend_source || direct.backendSource || payload.backendSource || output.backendSource || ""),
+public/control-center/pages/publishing.js:961:    sourceType,
+public/control-center/pages/publishing.js:1029:  const needsApproval = queue.find((item) => item.status === "needs approval");
+public/control-center/pages/publishing.js:1051:      action: "Review approval queue",
+public/control-center/pages/publishing.js:1052:      why: `${needsApproval.title} needs approval before it can move into the manual publishing queue.`,
+public/control-center/pages/publishing.js:1071:      why: `${draft.title} is not yet executable. Add channel, content, approval, and timing details.`,
+public/control-center/pages/publishing.js:1113:    ["Approval", counts["needs approval"] ? "Pending" : counts.ready ? "Approved" : "Draft"],
+public/control-center/pages/publishing.js:1144:        <div class="publishing-automation-preview-copy">Automation cannot publish without manual review, confirmation, and backend approval gates.</div>
+public/control-center/pages/publishing.js:1151:        ${getAutoModeState().status === "waiting_approval" ? `
+public/control-center/pages/publishing.js:1152:          <div class="simple-banner publishing-inline-gap"><strong>Approval needed:</strong> ${escapeHtml(asObject(getAutoModeState().approvalRequiredStep).reason || "Manual approval required.")}</div>
+public/control-center/pages/publishing.js:1159:      <div class="simple-banner">Opens AI with this context only. <strong>No approval, publishing, or backend execution is performed.</strong></div>
+public/control-center/pages/publishing.js:1190:          <span class="publishing-queue-meta">${escapeHtml(titleCase(item.channel || "unassigned"))} • ${escapeHtml(item.scheduledFor ? formatDateTime(item.scheduledFor) : "Unscheduled")} • ${escapeHtml(item.source)}</span>
+public/control-center/pages/publishing.js:1294:            <select id="publishingApprovalInput" name="approvalStatus" class="setup-input">
+public/control-center/pages/publishing.js:1296:                <option value="${escapeHtml(status)}"${status === session.form.approvalStatus ? " selected" : ""}>${escapeHtml(titleCase(status))}</option>
+public/control-center/pages/publishing.js:1299:            ${fieldError(session, "approvalStatus", escapeHtml)}
+public/control-center/pages/publishing.js:1351:      ${summary.backendPreview ? `<div class="data-row"><span>AI source</span><strong>${escapeHtml(summary.backendSource || "Backend preview")}</strong></div>` : ""}
+public/control-center/pages/publishing.js:1386:        <div class="data-row"><span>Source</span><strong>${escapeHtml(summary.sourceType ? titleCase(summary.sourceType) : titleCase(summary.sourcePage))}</strong></div>
+public/control-center/pages/publishing.js:1693:          ? "Confirm reschedule\n\nAction: Reschedule this publishing item.\n\nThis updates a backend publishing schedule and remains governed by approval rules.\n\nSelect Cancel to keep the current schedule."
+public/control-center/pages/publishing.js:1694:          : "Confirm schedule\n\nAction: Queue this publishing item for manual publishing.\n\nThis creates a backend publishing schedule and remains governed by approval rules.\n\nSelect Cancel to keep this as a draft."
+public/control-center/pages/publishing.js:1766:          "Final Confirmation Required\n\nAction: Record manual publish completion for this backend job.\n\nThis is a high-risk status update. Confirm that external provider publishing was completed or verified outside this page before recording completion.\n\nThis does not prove live external publishing by itself. Backend approval rules still apply.\n\nSelect Cancel to keep this item in the queue."
+public/control-center/pages/publishing.js:1788:          { projectName, reloadProjectData, showMessage, showError, successMessage: "Publishing item paused as a draft.\n\nConfirmation required before execution. Backend approval rules apply." }
+public/control-center/pages/publishing.js:1798:          "Confirm retry\n\nAction: Retry this backend publishing item in the scheduled queue.\n\nThis updates the backend publishing schedule/lifecycle state and remains governed by approval rules.\n\nSelect Cancel to keep the item unchanged."
+public/control-center/pages/publishing.js:1807:          { projectName, reloadProjectData, showMessage, showError, successMessage: "Publishing item retried in the scheduled queue.\n\nConfirmation required before execution. Backend approval rules apply." }
+public/control-center/pages/publishing.js:1819:        session.validation.contentItem = "Select or save a publishing draft before approval.";
+public/control-center/pages/publishing.js:1823:      session.form.approvalStatus = "approved";
+public/control-center/pages/publishing.js:1825:        updateLocalDraft(projectName, current.id, { ...buildLocalDraftPayload(session, "ready"), id: current.id, approvalStatus: "approved" });
+public/control-center/pages/publishing.js:1832:        "Confirm publishing readiness\n\nAction: Mark this backend publishing item ready for manual publishing review.\n\nThis does not replace Governance approval or external provider readiness proof.\n\nSelect Cancel to keep the item unchanged."
+public/control-center/pages/publishing.js:1927:        source_page: "publishing",
+public/control-center/pages/publishing.js:1971:          "Risk: This may prepare publishing drafts and handoffs, but must not publish externally or approve Governance decisions without explicit approval.\n\n" +
+public/control-center/pages/publishing.js:1977:        mode: "auto_until_approval",
+public/control-center/pages/publishing.js:2005:        "Confirm publishing gate approval\n\n" +
+public/control-center/pages/publishing.js:2007:          "Risk: This advances the guided publishing state, but does not replace Governance approval for protected actions.\n\n" +
+public/control-center/pages/publishing.js:2096:      ${renderPublishingWorkflowStrip({ selectedItem, recommendation, blockers: assetBlockers, approvalState: selectedItem?.approvalStatus, escapeHtml })}
+public/control-center/pages/publishing.js:2115:                <button id="publishingApproveBtn" class="btn btn-secondary" type="button" title="Prepare publishing readiness review. Confirmation required. Backend approval rules apply.">Mark ready for manual review</button>
+public/control-center/pages/campaign-studio.js:67:  "ai-command": { role: "admin", domain: "governance" }
+public/control-center/pages/campaign-studio.js:325:    source_page: "campaign-studio",
+public/control-center/pages/campaign-studio.js:425:    source_page: "ai-command",
+public/control-center/pages/campaign-studio.js:447:    "Select Cancel to review the campaign plan, evidence, and destination before continuing."
+public/control-center/pages/campaign-studio.js:467:    source_page: "campaign-studio",
+public/control-center/pages/campaign-studio.js:474:    linked_approvals: [],
+public/control-center/pages/campaign-studio.js:484:    source_page: "campaign-studio",
+public/control-center/pages/campaign-studio.js:486:    source_role: CAMPAIGN_ROLE_DEFAULTS.ownerRole,
+public/control-center/pages/campaign-studio.js:488:    source_service_domain: CAMPAIGN_ROLE_DEFAULTS.serviceDomain,
+public/control-center/pages/campaign-studio.js:682:      title: firstNonEmpty(record.campaign_name, record.title, record.label, "Paid risk"),
+public/control-center/pages/campaign-studio.js:683:      body: firstNonEmpty(record.reason, record.insight, record.summary, record.recommendation, "Performance or setup risk detected.")
+public/control-center/pages/campaign-studio.js:833:      match.rationale = `${match.rationale} Watch for risk: ${item.body}`;
+public/control-center/pages/campaign-studio.js:866:  const approvalBlockers = [];
+public/control-center/pages/campaign-studio.js:894:  if (!checks.website) seoBlockers.push("Website source is not connected yet.");
+public/control-center/pages/campaign-studio.js:898:  if (!values.executionNotes) approvalBlockers.push("Execution notes are missing, which makes approvals harder downstream.");
+public/control-center/pages/campaign-studio.js:899:  if (!values.audiencePrimary || !values.audienceNeed) approvalBlockers.push("Audience framing is incomplete for creative review.");
+public/control-center/pages/campaign-studio.js:900:  if (!values.productAngle) approvalBlockers.push("Product angle needs to be explicit so operators do not improvise.");
+public/control-center/pages/campaign-studio.js:907:    approvalBlockers.length ||
+public/control-center/pages/campaign-studio.js:921:    approvalBlockers,
+public/control-center/pages/campaign-studio.js:929:      approvalBlockers.length
+public/control-center/pages/campaign-studio.js:1065:  const sourceCoverage = asObject(insights.data_coverage);
+public/control-center/pages/campaign-studio.js:1068:  Object.entries(sourceCoverage).forEach(([key, item]) => {
+public/control-center/pages/campaign-studio.js:1376:        source_page: "campaign-studio",
+public/control-center/pages/campaign-studio.js:1388:        source_page: "campaign-studio",
+public/control-center/pages/campaign-studio.js:1390:        source_role: CAMPAIGN_ROLE_DEFAULTS.ownerRole,
+public/control-center/pages/campaign-studio.js:1392:        source_service_domain: CAMPAIGN_ROLE_DEFAULTS.serviceDomain,
+public/control-center/pages/campaign-studio.js:1943:                  helper: "Capture dependencies, packaging notes, approval guidance, or production instructions for the next operator.",
+public/control-center/pages/campaign-studio.js:1993:                  executionReadiness.approvalBlockers,
+public/control-center/pages/media-studio-workspace.js:41:  reviewRole: "compliance_reviewer",
+public/control-center/pages/media-studio-workspace.js:70:    purpose: "Protect brand consistency, legal-safe claims, and publishable creative outputs.",
+public/control-center/pages/media-studio-workspace.js:71:    bestUse: "Before approvals and publishing handoff, especially for regulated or claim-sensitive content.",
+public/control-center/pages/media-studio-workspace.js:72:    suggestedPrompt: "Act as Brand Guardian. Audit this draft for logo fit, claim risk, brand color compliance, German tone quality, and platform-safe layout."
+public/control-center/pages/media-studio-workspace.js:86:    suggestedPrompt: "Act as Publishing Assistant. Produce a final publishing handoff summary with readiness status, blockers, approval notes, and channel delivery checklist."
+public/control-center/pages/media-studio-workspace.js:168:  if (["needs_review", "needs review", "review", "pending_approval"].includes(normalized)) return "needs_review";
+public/control-center/pages/media-studio-workspace.js:240:    source_signature: asString(asset.source_signature),
+public/control-center/pages/media-studio-workspace.js:245:    const sameSignature = nextAsset.source_signature && asString(item.source_signature) === nextAsset.source_signature;
+public/control-center/pages/media-studio-workspace.js:261:    source: "Local draft",
+public/control-center/pages/media-studio-workspace.js:470:      approvals: [],
+public/control-center/pages/media-studio-workspace.js:499:function normalizeMediaItem(rawItem, state, source = "Backend media job") {
+public/control-center/pages/media-studio-workspace.js:520:    approval_state: asString(raw.approval_state || raw.approvalStatus || ""),
+public/control-center/pages/media-studio-workspace.js:535:    linked_approvals: asArray(raw.linked_approvals),
+public/control-center/pages/media-studio-workspace.js:538:    source,
+public/control-center/pages/media-studio-workspace.js:593:      approvalsResult,
+public/control-center/pages/media-studio-workspace.js:605:    const approvals = fulfilledValue(approvalsResult, { items: [] });
+public/control-center/pages/media-studio-workspace.js:617:    session.approvals = asArray(approvals.items);
+public/control-center/pages/media-studio-workspace.js:622:      ? `${failedLoads} Media Studio data source${failedLoads === 1 ? "" : "s"} could not be loaded. Available data is still shown.`
+public/control-center/pages/media-studio-workspace.js:712:  const sourcePage = asString(handoff?.source_page || direct.source || "workflows");
+public/control-center/pages/media-studio-workspace.js:733:  const sourceType = asString(direct.source_type || payload.source_type || direct.source);
+public/control-center/pages/media-studio-workspace.js:744:    sourcePage,
+public/control-center/pages/media-studio-workspace.js:752:    sourceType,
+public/control-center/pages/media-studio-workspace.js:755:    backendSource: asString(direct.backend_source || direct.backendSource || payload.backendSource || output.backendSource || ""),
+public/control-center/pages/media-studio-workspace.js:851:    "Keep product identity accurate, leave safe text area, avoid unsupported claims, and prepare for Publishing handoff."
+public/control-center/pages/media-studio-workspace.js:857:  return `${base}\n\nProduction constraints: accurate product identity, clean composition, strong focal hierarchy, channel-safe crop, no unsupported claims, no cluttered text, and enough negative space for publishing copy.`;
+public/control-center/pages/media-studio-workspace.js:862:  return `${base}\n\nBrand safety guardrails: use approved logo and brand cues only, preserve packaging and product truth, avoid medical or exaggerated claims, keep text legible, and respect platform content policies.`;
+public/control-center/pages/media-studio-workspace.js:1022:  const sourceMediaId = firstText(selectedItem?.id, session.formSourceId);
+public/control-center/pages/media-studio-workspace.js:1023:  const sourceSignature = [
+public/control-center/pages/media-studio-workspace.js:1025:    toKey(sourceMediaId),
+public/control-center/pages/media-studio-workspace.js:1033:    source_signature: sourceSignature,
+public/control-center/pages/media-studio-workspace.js:1038:    media_job_id: sourceMediaId,
+public/control-center/pages/media-studio-workspace.js:1047:    approval_status: normalizeApprovalStatus(readiness.readinessStatus),
+public/control-center/pages/media-studio-workspace.js:1051:    source: "media-studio",
+public/control-center/pages/media-studio-workspace.js:1060:function findExistingLibrarySave(session, projectName, sourceSignature) {
+public/control-center/pages/media-studio-workspace.js:1061:  const local = loadLocalLibraryAssets(projectName).find((item) => asString(item.source_signature) === asString(sourceSignature));
+public/control-center/pages/media-studio-workspace.js:1065:    const routeMatches = asString(entry?.destination_page) === "library" && asString(entry?.source_page) === "media-studio";
+public/control-center/pages/media-studio-workspace.js:1066:    return routeMatches && asString(libraryAsset.source_signature) === asString(sourceSignature);
+public/control-center/pages/media-studio-workspace.js:1100:  const existing = findExistingLibrarySave(session, projectName, libraryAsset.source_signature);
+public/control-center/pages/media-studio-workspace.js:1110:    source_page: "media-studio",
+public/control-center/pages/media-studio-workspace.js:1112:    source_role: selectedItem?.owner_role || ownerRoleForMode(session.form.mode || session.mode || "image"),
+public/control-center/pages/media-studio-workspace.js:1114:    source_service_domain: MEDIA_ROLE_DEFAULTS.serviceDomain,
+public/control-center/pages/media-studio-workspace.js:1140:    source_signature: libraryAsset.source_signature,
+public/control-center/pages/media-studio-workspace.js:1156:        source: "media-studio"
+public/control-center/pages/media-studio-workspace.js:1160:        source_signature: libraryAsset.source_signature,
+public/control-center/pages/media-studio-workspace.js:1172:        source: "media-studio"
+public/control-center/pages/media-studio-workspace.js:1181:      source: "media-studio"
+public/control-center/pages/media-studio-workspace.js:1296:  const approvalsConnected = hasBackend || capabilityFromOperations(operations, ["approval", "approvals"]);
+public/control-center/pages/media-studio-workspace.js:1303:    approval_backend: approvalsConnected,
+public/control-center/pages/media-studio-workspace.js:1680:  const hasItemSource = Boolean(clean(selectedItem?.source));
+public/control-center/pages/media-studio-workspace.js:1686:      status: "Library source",
+public/control-center/pages/media-studio-workspace.js:1694:      detail: "A reference asset is named, but source-of-truth status still needs review."
+public/control-center/pages/media-studio-workspace.js:1701:      detail: "Inbound or job context exists; attach Library source when claims or product truth matter."
+public/control-center/pages/media-studio-workspace.js:1706:    status: "Missing source",
+public/control-center/pages/media-studio-workspace.js:1707:    detail: "Attach a Library asset or load a source-backed handoff before final package routing."
+public/control-center/pages/media-studio-workspace.js:1714:  const source = getMediaSourceReadiness(session, selectedItem, handoff);
+public/control-center/pages/media-studio-workspace.js:1723:  const needsGovernance = source.state === "missing" || /claim|proof|medical|guarantee|legal|privacy|gdpr|discount|pricing/i.test(promptText);
+public/control-center/pages/media-studio-workspace.js:1727:      key: "source",
+public/control-center/pages/media-studio-workspace.js:1729:      state: source.state,
+public/control-center/pages/media-studio-workspace.js:1730:      status: source.status,
+public/control-center/pages/media-studio-workspace.js:1731:      detail: source.detail
+public/control-center/pages/media-studio-workspace.js:1749:        : "Review brand style, logo fit, product truth, and safe claims."
+public/control-center/pages/media-studio-workspace.js:1761:      key: "governance",
+public/control-center/pages/media-studio-workspace.js:1764:      status: needsGovernance ? "Review risk" : "No obvious risk",
+public/control-center/pages/media-studio-workspace.js:1766:        ? "Prepare Governance Review if source, claim, legal, privacy, or pricing risk exists."
+public/control-center/pages/media-studio-workspace.js:1767:        : "No obvious governance escalation signal in current prompt context."
+public/control-center/pages/media-studio-workspace.js:1832:  const source = getMediaSourceReadiness(session, selectedItem, handoff);
+public/control-center/pages/media-studio-workspace.js:1848:      state: source.state,
+public/control-center/pages/media-studio-workspace.js:1849:      detail: source.status
+public/control-center/pages/media-studio-workspace.js:2021:          ${renderField({ id: "mediaReferenceInput", name: "referenceAsset", label: "Reference asset if available", value: form.referenceAsset, helper: "Use an asset id, filename, or source note already known to the project." }, session, escapeHtml)}
+public/control-center/pages/media-studio-workspace.js:2082:      ${summary.backendPreview ? `<div class="data-row"><span>AI source</span><strong>${escapeHtml(summary.backendSource || "Backend preview")}</strong></div>` : ""}
+public/control-center/pages/media-studio-workspace.js:2106:  const isContentBrief = summary.sourcePage === "content-studio";
+public/control-center/pages/media-studio-workspace.js:2126:        <div class="data-row"><span>Source</span><strong>${escapeHtml(titleCase(summary.sourcePage))}</strong></div>
+public/control-center/pages/media-studio-workspace.js:2173:              <span class="media-queue-meta">${escapeHtml(titleCase(item.mode))} • ${escapeHtml(item.channel || "channel")} • ${escapeHtml(item.format || "format")} • ${escapeHtml(item.source)}</span>
+public/control-center/pages/media-studio-workspace.js:2214:  const approvalStatus = ["approved", "publishing_ready", "sent_to_publishing"].includes(readinessStatus) ? "approved" : "pending";
+public/control-center/pages/media-studio-workspace.js:2221:    ["review state", approvalStatus === "approved"]
+public/control-center/pages/media-studio-workspace.js:2227:    approvalStatus,
+public/control-center/pages/media-studio-workspace.js:2267:          <strong>${escapeHtml(readiness.approvalStatus === "approved" ? "Review Ready" : "Pending")}</strong>
+public/control-center/pages/media-studio-workspace.js:2682:    ["approval backend", readiness.approval_backend]
+public/control-center/pages/media-studio-workspace.js:2722:  const source = selectedItem || normalizeMediaItem(buildMediaPayload(session, "publishing_ready"), { context: {} }, "Local draft");
+public/control-center/pages/media-studio-workspace.js:2724:  const readiness = getVersionReadiness(version, session, source);
+public/control-center/pages/media-studio-workspace.js:2726:    source_page: "media-studio",
+public/control-center/pages/media-studio-workspace.js:2728:    source_role: source.owner_role || ownerRoleForMode(source.mode),
+public/control-center/pages/media-studio-workspace.js:2730:    source_service_domain: MEDIA_ROLE_DEFAULTS.serviceDomain,
+public/control-center/pages/media-studio-workspace.js:2734:      entity_id: source.id || session.formSourceId || "",
+public/control-center/pages/media-studio-workspace.js:2736:      label: source.title || session.form.title || "Media job"
+public/control-center/pages/media-studio-workspace.js:2739:      project: source.project || session.form.project || projectName,
+public/control-center/pages/media-studio-workspace.js:2740:      campaign: source.campaign || session.form.campaign,
+public/control-center/pages/media-studio-workspace.js:2741:      channel: source.channel || session.form.channel,
+public/control-center/pages/media-studio-workspace.js:2742:      media_type: source.mode || session.form.mode,
+public/control-center/pages/media-studio-workspace.js:2743:      media_job_id: source.id || session.formSourceId || "",
+public/control-center/pages/media-studio-workspace.js:2744:      prompt: source.prompt || session.form.prompt,
+public/control-center/pages/media-studio-workspace.js:2745:      asset_reference: source.referenceAsset || session.form.referenceAsset,
+public/control-center/pages/media-studio-workspace.js:2748:      title: source.title || session.form.title || "Media handoff",
+public/control-center/pages/media-studio-workspace.js:2751:        mode: version?.mode || source.mode || session.form.mode || "image",
+public/control-center/pages/media-studio-workspace.js:2752:        prompt: version?.prompt || source.prompt || session.form.prompt,
+public/control-center/pages/media-studio-workspace.js:2758:        notes: firstText(version?.notes, session.form.reviewNotes, source.reviewNotes),
+public/control-center/pages/media-studio-workspace.js:2762:        title: source.title || session.form.title || "Media handoff",
+public/control-center/pages/media-studio-workspace.js:2763:        summary: source.brief || session.form.objective || version?.prompt || source.prompt || session.form.prompt,
+public/control-center/pages/media-studio-workspace.js:2764:        channel: source.channel || session.form.channel,
+public/control-center/pages/media-studio-workspace.js:2765:        product: source.product || session.form.product,
+public/control-center/pages/media-studio-workspace.js:2766:        content_item: version?.prompt || source.prompt || session.form.prompt
+public/control-center/pages/media-studio-workspace.js:2825:    return window.confirm(`${title}\n\n${detail}\n\nAuthority: Media Studio can prepare, save, request review, and hand off media work, but provider generation, approval decisions, task creation, and publishing handoff must be explicitly confirmed by the operator.\n\nSelect Cancel to review before continuing.`);
+public/control-center/pages/media-studio-workspace.js:2848:      `Action: Start provider-backed media generation for ${selectedMode}.\nRisk: This may call a configured AI/media provider and create a new generated output that must be reviewed before approval or publishing.`
+public/control-center/pages/media-studio-workspace.js:3087:        "Confirm brand safety check",
+public/control-center/pages/media-studio-workspace.js:3088:        "Action: Run media brand-safety review for this prompt.\nRisk: This may call a configured AI/provider service. The result remains review-only."
+public/control-center/pages/media-studio-workspace.js:3091:        session.draftMessage = "Brand safety check cancelled.";
+public/control-center/pages/media-studio-workspace.js:3104:          ? "Prompt passed brand safety check."
+public/control-center/pages/media-studio-workspace.js:3105:          : "Prompt adjusted for brand safety.";
+public/control-center/pages/media-studio-workspace.js:3168:      session.draftMessage = summary.sourcePage === "content-studio"
+public/control-center/pages/media-studio-workspace.js:3203:          "Confirm local media approval mark",
+public/control-center/pages/media-studio-workspace.js:3242:        "Confirm media approval decision",
+public/control-center/pages/media-studio-workspace.js:3243:        "Action: Record this media job as approved/review-ready.\nRisk: If a pending backend approval exists, this may submit an approval decision."
+public/control-center/pages/media-studio-workspace.js:3257:        const pendingApproval = session.approvals.find((approval) =>
+public/control-center/pages/media-studio-workspace.js:3258:          asString(approval.entity_type) === "media_job" &&
+public/control-center/pages/media-studio-workspace.js:3259:          asString(approval.entity_id) === asString(item.id) &&
+public/control-center/pages/media-studio-workspace.js:3260:          asString(approval.status) === "pending"
+public/control-center/pages/media-studio-workspace.js:3283:        "Confirm media approval request",
+public/control-center/pages/media-studio-workspace.js:3284:        "Action: Request Governance/Compliance review for this media job.\nRisk: This may create a backend approval item for a reviewer."
+public/control-center/pages/media-studio-workspace.js:3328:        "Action: Return this media job to draft/revision.\nRisk: If a pending backend approval exists, this may submit a rejection/revision decision."
+public/control-center/pages/media-studio-workspace.js:3339:        const pendingApproval = session.approvals.find((approval) =>
+public/control-center/pages/media-studio-workspace.js:3340:          asString(approval.entity_type) === "media_job" &&
+public/control-center/pages/media-studio-workspace.js:3341:          asString(approval.entity_id) === asString(item.id) &&
+public/control-center/pages/media-studio-workspace.js:3342:          asString(approval.status) === "pending"
+public/control-center/pages/media-studio-workspace.js:3375:            description: session.form.objective || item.brief || "Review prompt, outputs, approval, and publishing readiness.",
+public/control-center/pages/media-studio-workspace.js:3381:            source_page: "media-studio",
+public/control-center/pages/media-studio-workspace.js:3423:        source_page: "media-studio",
+public/control-center/pages/media-studio-workspace.js:3520:          "Confirm local media approval mark",
+public/control-center/pages/media-studio-workspace.js:3547:            source_version_id: currentVersion.id
+public/control-center/pages/media-studio-workspace.js:3630:          source_page: "media-studio",
+public/control-center/pages/media-studio-workspace.js:3744:              <p class="media-section-copy">Start with a brief or handoff. Attach Library assets when needed. Review creative readiness and brand compliance. Save approved assets to Library or prepare handoff to Publishing/Governance. All routing is handoff/review-based and user-triggered. Media Studio does not publish, send, or approve directly.</p>
+public/control-center/pages/media-studio-workspace.js:3753:      const sourceState = getMediaSourceReadiness(session, selectedItem, handoff);
+public/control-center/pages/media-studio-workspace.js:3755:      if (selectedItem?.source) rows.push(["Source page", titleCase(selectedItem.source)]);
+public/control-center/pages/media-studio-workspace.js:3760:      if (!rows.length && handoff) rows.push(["Inbound handoff", titleCase(handoff.source_page || "Workflow")]);
+public/control-center/pages/media-studio-workspace.js:3761:      if (!rows.length) rows.push(["Source", "No trusted source attached yet"]);
+public/control-center/pages/media-studio-workspace.js:3770:            <span class="media-state-badge is-${escapeHtml(sourceState.state)}">${escapeHtml(sourceState.status)}</span>
+public/control-center/pages/media-studio-workspace.js:3777:          <p class="media-rail-note">${escapeHtml(sourceState.detail)}</p>
+public/control-center/pages/media-studio-workspace.js:3810:        .filter((item) => ["brand", "governance"].includes(item.key));
+public/control-center/pages/media-studio-workspace.js:3816:              <h3>Brand and governance</h3>
+public/control-center/pages/media-studio-workspace.js:3828:          <div class="media-hint media-readiness-hint" aria-label="Governance review guidance">Prepare Governance Review if any risk or compliance concern exists.</div>
+public/control-center/pages/media-studio-workspace.js:3840:        ${session.loading ? `<div class="empty-box">Loading media jobs, handoffs, approvals, tasks, and event history...</div>` : ""}
+public/control-center/pages/ads-manager.js:112:function getSourceValue(sources, keys) {
+public/control-center/pages/ads-manager.js:114:    const source = asObject(sources[key]);
+public/control-center/pages/ads-manager.js:115:    const value = asString(source.value).trim();
+public/control-center/pages/ads-manager.js:123:  const sources = asObject(integrations.sources?.sources);
+public/control-center/pages/ads-manager.js:131:    const primaryConnected = platform.primarySources.filter((key) => Boolean(checks[key] || asObject(sources[key]).value));
+public/control-center/pages/ads-manager.js:132:    const supportConnected = platform.supportSources.filter((key) => Boolean(checks[key] || asObject(sources[key]).value));
+public/control-center/pages/ads-manager.js:146:      ...platform.primarySources.filter((key) => !checks[key] && !asObject(sources[key]).value),
+public/control-center/pages/ads-manager.js:147:      ...platform.supportSources.filter((key) => !checks[key] && !asObject(sources[key]).value)
+public/control-center/pages/ads-manager.js:160:      connectionValue: getSourceValue(sources, [...platform.primarySources, ...platform.supportSources]) || "No platform connection saved",
+public/control-center/pages/ads-manager.js:211:      prompt: `For ${projectName || "this project"}, identify which ad platforms or campaign groups should be paused first based on weak readiness (${weakPlatforms.join(", ") || "none listed"}), missing measurement, and creative risk.`
+public/control-center/pages/ads-manager.js:589:                <strong>Review pacing, creative readiness, and source coverage before preparing the next paid growth move.</strong>
+public/control-center/pages/ads-manager.js:590:                <p class="home-action-meta">AI can prepare a paid growth brief and route context to AI Command. Spend changes, publishing, and campaign launch remain manual or governance-controlled.</p>
+public/control-center/pages/ai-command/tool-dock.js:115:        : "Returned to drawer. No source selected.";
+public/control-center/pages/ai-command/tool-dock.js:139:  sourceType = "",
+public/control-center/pages/ai-command/tool-dock.js:152:    sourceType,
+public/control-center/pages/ai-command/tool-dock.js:166:  sourceType = "",
+public/control-center/pages/ai-command/tool-dock.js:178:    sourceType,
+public/control-center/pages/ai-command/tool-dock.js:182:  // Also set library source bridge context if needed (existing logic)
+public/control-center/pages/ai-command/tool-dock.js:188:  sourceType = "auto",
+public/control-center/pages/ai-command/tool-dock.js:196:  const mapping = getSourceTypeMapping(sourceType || "auto");
+public/control-center/pages/ai-command/tool-dock.js:205:    sourceType,
+public/control-center/pages/ai-command/tool-dock.js:210:    type: "library_source_selection",
+public/control-center/pages/ai-command/tool-dock.js:213:    sourceType,
+public/control-center/pages/ai-command/tool-dock.js:235:function formatSharedAiSource(source = {}) {
+public/control-center/pages/ai-command/tool-dock.js:236:  if (!source || !source.name) return null;
+public/control-center/pages/ai-command/tool-dock.js:237:  const name = source.name || "(no name)";
+public/control-center/pages/ai-command/tool-dock.js:238:  const type = source.asset_type || source.type || "asset";
+public/control-center/pages/ai-command/tool-dock.js:239:  const path = source.file_path || source.filename || source.fileName || "";
+public/control-center/pages/ai-command/tool-dock.js:263:  const source = getSelectedLibrarySource(projectName);
+public/control-center/pages/ai-command/tool-dock.js:264:  if (!source?.name) return "";
+public/control-center/pages/ai-command/tool-dock.js:266:  const name = source.name || source.filename || source.fileName || "Selected Library source";
+public/control-center/pages/ai-command/tool-dock.js:267:  const type = source.asset_type || source.type || source.source_type || "Library asset";
+public/control-center/pages/ai-command/tool-dock.js:268:  const sourceId = source.asset_id || source.id || source.mutation_id || "";
+public/control-center/pages/ai-command/tool-dock.js:269:  const path = source.file_path || source.path || source.filename || source.fileName || "";
+public/control-center/pages/ai-command/tool-dock.js:270:  const preview = truncatePromptText(source.text_preview || source.preview || source.notes || "");
+public/control-center/pages/ai-command/tool-dock.js:271:  const sourceOfTruth = typeof source.source_of_truth === "boolean"
+public/control-center/pages/ai-command/tool-dock.js:272:    ? (source.source_of_truth ? "yes" : "no")
+public/control-center/pages/ai-command/tool-dock.js:273:    : (source.source_of_truth || "");
+public/control-center/pages/ai-command/tool-dock.js:276:    "Selected Library source context:",
+public/control-center/pages/ai-command/tool-dock.js:281:  if (sourceId) lines.push(`- Source id: ${compactSourceReference(sourceId, 80)}.`);
+public/control-center/pages/ai-command/tool-dock.js:283:  if (sourceOfTruth) lines.push(`- Source-of-truth flag: ${sourceOfTruth}.`);
+public/control-center/pages/ai-command/tool-dock.js:286:  lines.push("Use this Library source as trusted context. Do not add unsupported claims.");
+public/control-center/pages/ai-command/tool-dock.js:291:  const warning = drawer?.querySelector?.("[data-aicmd-tool-drawer-source-warning]");
+public/control-center/pages/ai-command/tool-dock.js:298:function sourceMetadataNeedsLibrarySource(rawValue = "") {
+public/control-center/pages/ai-command/tool-dock.js:299:  return /source_of_truth_assets|selected_asset|proof_doc|legal_doc|privacy_policy/i.test(String(rawValue || ""));
+public/control-center/pages/ai-command/tool-dock.js:303:  return drawer?.dataset?.sourceRequired === "true";
+public/control-center/pages/ai-command/tool-dock.js:312:  const source = getSelectedLibrarySource(projectName);
+public/control-center/pages/ai-command/tool-dock.js:313:  if (source?.name) {
+public/control-center/pages/ai-command/tool-dock.js:320:    "This prompt tool needs a trusted Library source first. Choose a source from Library, then return to prepare the composer prompt."
+public/control-center/pages/ai-command/tool-dock.js:327:  const source = getSelectedLibrarySource(projectName);
+public/control-center/pages/ai-command/tool-dock.js:328:  const selectedNode = drawer.querySelector("[data-aicmd-tool-drawer-selected-source]");
+public/control-center/pages/ai-command/tool-dock.js:329:  const sourceInput = drawer.querySelector("[data-aicmd-tool-drawer-source-details]");
+public/control-center/pages/ai-command/tool-dock.js:330:  const sourceSelect = drawer.querySelector("[data-aicmd-tool-drawer-source-select]");
+public/control-center/pages/ai-command/tool-dock.js:332:  if (!source || !source.name) {
+public/control-center/pages/ai-command/tool-dock.js:334:      selectedNode.innerHTML = `<span class=\"mhos-tool-drawer-selected-source-empty\">No trusted Library source selected yet.</span>`;
+public/control-center/pages/ai-command/tool-dock.js:336:    if (sourceInput && !sourceInput.value) {
+public/control-center/pages/ai-command/tool-dock.js:337:      sourceInput.placeholder = "Optional: add source usage notes, audience, angle, or claims to avoid...";
+public/control-center/pages/ai-command/tool-dock.js:343:  // Render compact selected source card
+public/control-center/pages/ai-command/tool-dock.js:344:  const { name, type, path } = formatSharedAiSource(source);
+public/control-center/pages/ai-command/tool-dock.js:347:      <div class=\"mhos-tool-drawer-source-card\">
+public/control-center/pages/ai-command/tool-dock.js:348:        <div class=\"mhos-tool-drawer-source-eyebrow\">Trusted AI context only</div>
+public/control-center/pages/ai-command/tool-dock.js:349:        <div class=\"mhos-tool-drawer-source-main\">${escapeHtml(name)}</div>
+public/control-center/pages/ai-command/tool-dock.js:350:        <div class=\"mhos-tool-drawer-source-meta\">${escapeHtml(type)} · Added from Library · Not approval or publish readiness</div>
+public/control-center/pages/ai-command/tool-dock.js:351:        ${path && path !== name ? `<div class=\"mhos-tool-drawer-source-path\" title=\"${escapeHtml(path)}\">${escapeHtml(path)}</div>` : ""}
+public/control-center/pages/ai-command/tool-dock.js:352:        <div class=\"mhos-tool-drawer-source-actions\">
+public/control-center/pages/ai-command/tool-dock.js:353:          <button type=\"button\" class=\"btn btn-xs\" data-aicmd-tool-drawer-change-source>Change source</button>
+public/control-center/pages/ai-command/tool-dock.js:354:          <button type=\"button\" class=\"btn btn-xs\" data-aicmd-tool-drawer-remove-source>Remove source</button>
+public/control-center/pages/ai-command/tool-dock.js:361:  if (sourceInput && !sourceInput.value) {
+public/control-center/pages/ai-command/tool-dock.js:362:    sourceInput.placeholder = "Optional: add source usage notes, audience, angle, or claims to avoid...";
+public/control-center/pages/ai-command/tool-dock.js:366:  if (sourceSelect) {
+public/control-center/pages/ai-command/tool-dock.js:367:    const libraryOption = Array.from(sourceSelect.options || []).find((option) => {
+public/control-center/pages/ai-command/tool-dock.js:369:      return /library|source|asset|brand|product/i.test(value);
+public/control-center/pages/ai-command/tool-dock.js:371:    if (libraryOption) sourceSelect.value = libraryOption.value;
+public/control-center/pages/ai-command/tool-dock.js:376:    const changeBtn = selectedNode.querySelector('[data-aicmd-tool-drawer-change-source]');
+public/control-center/pages/ai-command/tool-dock.js:382:    const removeBtn = selectedNode.querySelector('[data-aicmd-tool-drawer-remove-source]');
+public/control-center/pages/ai-command/tool-dock.js:387:        if (selectedNode) selectedNode.innerHTML = `<span class=\"mhos-tool-drawer-selected-source-empty\">No trusted Library source selected yet.</span>`;
+public/control-center/pages/ai-command/tool-dock.js:388:        if (sourceInput) sourceInput.placeholder = "Optional: add source usage notes, audience, angle, or claims to avoid...";
+public/control-center/pages/ai-command/tool-dock.js:389:        if (sourceSelect) sourceSelect.value = "";
+public/control-center/pages/ai-command/tool-dock.js:429:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:432:      sourceTypes: ["current_chat", "campaign_notes", "market_notes", "audience_notes", "product_data", "library_source", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:434:      template: "Create a campaign plan for {projectName}. Include objective, audience, offer, channels, phases, risks, and next best actions. Keep it review-ready only."
+public/control-center/pages/ai-command/tool-dock.js:442:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:445:      sourceTypes: ["current_chat", "campaign_brief", "asset_requirements", "timeline_notes", "library_source", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:455:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:458:      sourceTypes: ["current_chat", "market_notes", "customer_notes", "insights_report", "library_source", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:468:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:471:      sourceTypes: ["current_chat", "product_data", "pricing_notes", "proof_points", "library_source", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:473:      template: "Create offer angles for {projectName}. Include value proposition, benefits, proof points, CTA ideas, and risk notes."
+public/control-center/pages/ai-command/tool-dock.js:481:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:484:      sourceTypes: ["current_chat", "campaign_brief", "audience_notes", "content_inventory", "library_source", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:494:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:497:      sourceTypes: ["current_chat", "operations_snapshot", "readiness_gaps", "campaign_notes", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:510:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:512:      destinations: ["chat-preview", "content-studio", "library", "media-studio", "publishing", "compliance"],
+public/control-center/pages/ai-command/tool-dock.js:513:      sourceTypes: ["current_chat", "library_folder", "brand_profile", "product_data", "legal_pricing_docs", "research_proof_docs", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:515:      template: "Use the Content Writer to create a new written output for {projectName}. First ask or infer the output type: company profile, product copy, email, blog article, landing page, contract draft, presentation outline, speech, FAQ, proposal, social post, or ad copy. Ask for sources if needed. Keep it review-ready and do not publish or send anything."
+public/control-center/pages/ai-command/tool-dock.js:523:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:526:      sourceTypes: ["composer_text", "selected_text", "last_response", "current_chat"],
+public/control-center/pages/ai-command/tool-dock.js:536:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:539:      sourceTypes: ["composer_text", "selected_text", "current_chat"],
+public/control-center/pages/ai-command/tool-dock.js:549:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:552:      sourceTypes: ["composer_text", "selected_text", "last_response", "current_chat"],
+public/control-center/pages/ai-command/tool-dock.js:562:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:564:      destinations: ["preview", "content-studio", "compliance"],
+public/control-center/pages/ai-command/tool-dock.js:565:      sourceTypes: ["composer_text", "selected_text", "content_draft", "current_chat"],
+public/control-center/pages/ai-command/tool-dock.js:566:      outputTypes: ["grammar_check", "spelling_check", "tone_check", "readability_check", "cta_check", "claim_risk_check", "seo_check", "compliance_notes"],
+public/control-center/pages/ai-command/tool-dock.js:567:      template: "Check this content for {projectName}. Review grammar, spelling, tone, readability, CTA strength, claim risk, missing proof, SEO weakness, and compliance notes. Return issues, severity, and suggested fixes."
+public/control-center/pages/ai-command/tool-dock.js:570:      id: "sources",
+public/control-center/pages/ai-command/tool-dock.js:574:      actionType: "source_required",
+public/control-center/pages/ai-command/tool-dock.js:575:      safetyLevel: "context_only",
+public/control-center/pages/ai-command/tool-dock.js:578:      sourceTypes: ["current_chat", "library_folder", "brand_profile", "product_data", "legal_pricing_docs", "research_proof_docs", "source_of_truth_assets", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:579:      outputTypes: ["source_bundle", "fact_extraction", "proof_summary", "context_brief"],
+public/control-center/pages/ai-command/tool-dock.js:580:      template: "Prepare source context for the next Content Writer task for {projectName}. Ask which source should be used: current chat, Library folder, brand profile, product data, legal/pricing documents, research/proof documents, source-of-truth assets, or manual input."
+public/control-center/pages/ai-command/tool-dock.js:588:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:591:      sourceTypes: ["topic", "market", "language", "audience", "current_chat", "library_folder"],
+public/control-center/pages/ai-command/tool-dock.js:601:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:604:      sourceTypes: ["existing_content", "composer_text", "content_draft", "current_chat", "library_folder"],
+public/control-center/pages/ai-command/tool-dock.js:606:      template: "Repurpose existing content for {projectName}. Ask or infer the source format and target format: blog to posts, profile to pitch, product page to ad copy, transcript to article, notes to presentation outline, or long text to email sequence."
+public/control-center/pages/ai-command/tool-dock.js:614:      safetyLevel: "confirmation_required",
+public/control-center/pages/ai-command/tool-dock.js:616:      destinations: ["content-studio", "library", "media-studio", "publishing", "compliance", "task", "handoff"],
+public/control-center/pages/ai-command/tool-dock.js:617:      sourceTypes: ["current_draft", "preview", "current_chat"],
+public/control-center/pages/ai-command/tool-dock.js:618:      outputTypes: ["content_studio_draft", "library_save", "media_brief", "publishing_package", "compliance_review", "task_preview", "handoff_preview"],
+public/control-center/pages/ai-command/tool-dock.js:629:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:632:      sourceTypes: ["current_chat", "campaign_brief", "brand_guidelines", "product_images", "reference_asset", "library_source", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:642:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:645:      sourceTypes: ["current_chat", "brand_guidelines", "reference_asset", "campaign_mood", "library_source", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:655:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:658:      sourceTypes: ["current_chat", "visual_brief", "brand_guidelines", "product_data", "reference_asset", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:667:      actionType: "source_required",
+public/control-center/pages/ai-command/tool-dock.js:668:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:671:      sourceTypes: ["current_chat", "campaign_brief", "library_folder", "brand_assets", "product_images", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:681:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:684:      sourceTypes: ["current_chat", "content_draft", "visual_brief", "brand_guidelines", "reference_asset", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:693:      actionType: "source_required",
+public/control-center/pages/ai-command/tool-dock.js:694:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:696:      destinations: ["chat-preview", "media-studio", "governance", "library"],
+public/control-center/pages/ai-command/tool-dock.js:697:      sourceTypes: ["current_chat", "brand_guidelines", "visual_brief", "selected_asset", "library_source", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:698:      outputTypes: ["brand_check_report", "style_risks", "missing_assets", "improvement_actions"],
+public/control-center/pages/ai-command/tool-dock.js:699:      template: "Review the visual direction for brand consistency. Flag risks, missing assets, style mismatches, and improvement actions."
+public/control-center/pages/ai-command/tool-dock.js:710:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:713:      sourceTypes: ["current_chat", "campaign_brief", "content_draft", "product_data", "library_source", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:723:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:726:      sourceTypes: ["current_chat", "script_draft", "visual_brief", "reference_asset", "product_images", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:736:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:739:      sourceTypes: ["current_chat", "storyboard", "visual_brief", "product_data", "production_notes", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:749:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:752:      sourceTypes: ["current_chat", "script_draft", "campaign_brief", "brand_voice", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:762:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:765:      sourceTypes: ["current_chat", "campaign_brief", "offer_data", "video_script", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:778:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:780:      destinations: ["chat-preview", "publishing", "governance", "content-studio", "media-studio"],
+public/control-center/pages/ai-command/tool-dock.js:781:      sourceTypes: ["content_draft", "media_asset", "publishing_package", "approval_notes", "current_chat", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:782:      outputTypes: ["publishing_readiness_check", "missing_items", "channel_fit_review", "risk_notes"],
+public/control-center/pages/ai-command/tool-dock.js:783:      template: "Review publishing readiness for {projectName}. Check copy, assets, channel fit, schedule, approvals, and missing items. Do not publish."
+public/control-center/pages/ai-command/tool-dock.js:791:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:794:      sourceTypes: ["content_draft", "media_asset", "campaign_brief", "channel_notes", "library_source", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:795:      outputTypes: ["channel_pack", "caption_pack", "format_notes", "approval_checklist"],
+public/control-center/pages/ai-command/tool-dock.js:796:      template: "Prepare a channel package for {projectName}. Include caption, hashtags, format notes, asset needs, schedule notes, and approval checklist."
+public/control-center/pages/ai-command/tool-dock.js:804:      safetyLevel: "confirmation_required",
+public/control-center/pages/ai-command/tool-dock.js:807:      sourceTypes: ["publishing_package", "campaign_timeline", "channel_notes", "approval_notes", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:809:      template: "Draft a publishing schedule for {projectName}. Include channels, timing, dependencies, review gates, and next actions."
+public/control-center/pages/ai-command/tool-dock.js:817:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:820:      sourceTypes: ["content_draft", "topic", "market", "channel_notes", "seo_brief", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:825:      id: "approval-pack",
+public/control-center/pages/ai-command/tool-dock.js:829:      actionType: "source_required",
+public/control-center/pages/ai-command/tool-dock.js:830:      safetyLevel: "confirmation_required",
+public/control-center/pages/ai-command/tool-dock.js:831:      frontendOwnerPage: "governance",
+public/control-center/pages/ai-command/tool-dock.js:832:      destinations: ["chat-preview", "governance", "publishing", "workflows"],
+public/control-center/pages/ai-command/tool-dock.js:833:      sourceTypes: ["final_copy", "media_asset", "approval_notes", "claim_review", "publishing_package", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:834:      outputTypes: ["approval_pack", "risk_summary", "asset_checklist", "confirmation_list"],
+public/control-center/pages/ai-command/tool-dock.js:835:      template: "Prepare an approval package for {projectName}. Include final copy summary, risk notes, assets checklist, and required confirmations."
+public/control-center/pages/ai-command/tool-dock.js:846:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:848:      destinations: ["chat-preview", "ads-manager", "content-studio", "governance"],
+public/control-center/pages/ai-command/tool-dock.js:849:      sourceTypes: ["campaign_brief", "audience_notes", "offer_data", "proof_points", "library_source", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:850:      outputTypes: ["ad_angle", "angle_variants", "pain_benefit_map", "compliance_risks"],
+public/control-center/pages/ai-command/tool-dock.js:851:      template: "Create paid ad angles for {projectName}. Include hook, audience pain, benefit, proof, CTA, and compliance risks."
+public/control-center/pages/ai-command/tool-dock.js:859:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:861:      destinations: ["chat-preview", "ads-manager", "content-studio", "governance"],
+public/control-center/pages/ai-command/tool-dock.js:862:      sourceTypes: ["ad_angle", "campaign_brief", "landing_page_copy", "product_data", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:872:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:875:      sourceTypes: ["audience_notes", "insights_report", "campaign_brief", "customer_notes", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:885:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:888:      sourceTypes: ["creative_assets", "campaign_brief", "ad_copy", "performance_notes", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:897:      actionType: "source_required",
+public/control-center/pages/ai-command/tool-dock.js:898:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:900:      destinations: ["chat-preview", "ads-manager", "content-studio", "governance"],
+public/control-center/pages/ai-command/tool-dock.js:901:      sourceTypes: ["ad_copy", "landing_page_copy", "offer_data", "proof_points", "library_source", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:903:      template: "Review ad-to-landing-page message match for {projectName}. Identify gaps, stronger claims, CTA improvements, and trust signals."
+public/control-center/pages/ai-command/tool-dock.js:914:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:917:      sourceTypes: ["topic", "market", "language", "audience", "library_source", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:919:      template: "Create an SEO brief for {projectName}. Include keywords, search intent, content structure, meta ideas, internal links, and risks."
+public/control-center/pages/ai-command/tool-dock.js:926:      actionType: "source_required",
+public/control-center/pages/ai-command/tool-dock.js:927:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:930:      sourceTypes: ["insights_data", "analytics_summary", "performance_notes", "current_chat", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:931:      outputTypes: ["insights_summary", "optimization_actions", "missing_data_notes", "risk_notes"],
+public/control-center/pages/ai-command/tool-dock.js:940:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:943:      sourceTypes: ["topic", "market", "audience", "seo_brief", "library_source", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:952:      actionType: "source_required",
+public/control-center/pages/ai-command/tool-dock.js:953:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:956:      sourceTypes: ["analytics_summary", "performance_notes", "campaign_results", "content_inventory", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:957:      outputTypes: ["performance_review", "wins", "risks", "experiment_recommendations"],
+public/control-center/pages/ai-command/tool-dock.js:958:      template: "Review performance signals for {projectName}. Identify wins, risks, gaps, and recommended next experiments."
+public/control-center/pages/ai-command/tool-dock.js:966:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:969:      sourceTypes: ["content_inventory", "seo_brief", "audience_notes", "competitor_notes", "library_source", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:975:  compliance_reviewer: [
+public/control-center/pages/ai-command/tool-dock.js:977:      id: "claims-check",
+public/control-center/pages/ai-command/tool-dock.js:981:      actionType: "source_required",
+public/control-center/pages/ai-command/tool-dock.js:982:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:983:      frontendOwnerPage: "governance",
+public/control-center/pages/ai-command/tool-dock.js:984:      destinations: ["chat-preview", "governance", "content-studio", "publishing"],
+public/control-center/pages/ai-command/tool-dock.js:985:      sourceTypes: ["content_draft", "claim_list", "proof_doc", "product_data", "legal_doc", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:986:      outputTypes: ["claims_check", "risk_flags", "proof_requirements", "safe_wording_notes"],
+public/control-center/pages/ai-command/tool-dock.js:987:      template: "Review claims for {projectName}. Flag unsupported, risky, health/performance, legal, or approval-sensitive statements."
+public/control-center/pages/ai-command/tool-dock.js:995:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:996:      frontendOwnerPage: "governance",
+public/control-center/pages/ai-command/tool-dock.js:997:      destinations: ["chat-preview", "governance", "content-studio"],
+public/control-center/pages/ai-command/tool-dock.js:998:      sourceTypes: ["content_draft", "claims_check", "legal_doc", "proof_doc", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:999:      outputTypes: ["safe_rewrite", "risk_reduced_copy", "claim_softening", "review_notes"],
+public/control-center/pages/ai-command/tool-dock.js:1000:      template: "Rewrite this content in a safer compliant way. Keep the value clear while reducing unsupported or risky claims."
+public/control-center/pages/ai-command/tool-dock.js:1003:      id: "evidence",
+public/control-center/pages/ai-command/tool-dock.js:1007:      actionType: "source_required",
+public/control-center/pages/ai-command/tool-dock.js:1008:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:1009:      frontendOwnerPage: "governance",
+public/control-center/pages/ai-command/tool-dock.js:1010:      destinations: ["chat-preview", "governance", "library", "workflows"],
+public/control-center/pages/ai-command/tool-dock.js:1011:      sourceTypes: ["content_draft", "claim_list", "product_data", "legal_doc", "research_proof_docs", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:1012:      outputTypes: ["evidence_needed", "required_proof", "recommended_proof", "optional_proof"],
+public/control-center/pages/ai-command/tool-dock.js:1013:      template: "List the evidence needed before this content can be approved or published. Separate required, recommended, and optional proof."
+public/control-center/pages/ai-command/tool-dock.js:1020:      actionType: "source_required",
+public/control-center/pages/ai-command/tool-dock.js:1021:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:1022:      frontendOwnerPage: "governance",
+public/control-center/pages/ai-command/tool-dock.js:1023:      destinations: ["chat-preview", "governance", "workflows", "publishing"],
+public/control-center/pages/ai-command/tool-dock.js:1024:      sourceTypes: ["workflow_draft", "privacy_policy", "tracking_plan", "data_use_notes", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:1025:      outputTypes: ["gdpr_review", "consent_risks", "tracking_notes", "disclosure_requirements"],
+public/control-center/pages/ai-command/tool-dock.js:1026:      template: "Review GDPR/privacy considerations for this content or workflow. Flag consent, tracking, data use, and disclosure risks."
+public/control-center/pages/ai-command/tool-dock.js:1029:      id: "approval-notes",
+public/control-center/pages/ai-command/tool-dock.js:1033:      actionType: "source_required",
+public/control-center/pages/ai-command/tool-dock.js:1034:      safetyLevel: "confirmation_required",
+public/control-center/pages/ai-command/tool-dock.js:1035:      frontendOwnerPage: "governance",
+public/control-center/pages/ai-command/tool-dock.js:1036:      destinations: ["chat-preview", "governance", "publishing", "workflows"],
+public/control-center/pages/ai-command/tool-dock.js:1037:      sourceTypes: ["final_copy", "claims_check", "approval_context", "asset_checklist", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:1038:      outputTypes: ["approval_notes", "risk_summary", "reviewer_requirements", "unresolved_issues"],
+public/control-center/pages/ai-command/tool-dock.js:1039:      template: "Prepare approval notes for {projectName}. Include risks, required reviewer, unresolved issues, and safe next actions."
+public/control-center/pages/ai-command/tool-dock.js:1050:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:1053:      sourceTypes: ["current_chat", "ai_preview", "content_draft", "media_job", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:1055:      template: "Turn this into a task plan for {projectName}. Include owners, priorities, dependencies, risks, and next steps."
+public/control-center/pages/ai-command/tool-dock.js:1063:      safetyLevel: "confirmation_required",
+public/control-center/pages/ai-command/tool-dock.js:1066:      sourceTypes: ["current_chat", "handoff_summary", "operations_snapshot", "approval_notes", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:1067:      outputTypes: ["workflow_draft", "step_sequence", "trigger_notes", "review_gates", "execution_risks"],
+public/control-center/pages/ai-command/tool-dock.js:1068:      template: "Draft a workflow for {projectName}. Include steps, triggers, inputs, outputs, owners, review gates, and execution risks."
+public/control-center/pages/ai-command/tool-dock.js:1076:      safetyLevel: "confirmation_required",
+public/control-center/pages/ai-command/tool-dock.js:1078:      destinations: ["chat-preview", "handoff", "workflows", "content-studio", "media-studio", "publishing", "governance"],
+public/control-center/pages/ai-command/tool-dock.js:1079:      sourceTypes: ["current_chat", "ai_preview", "content_draft", "media_job", "publishing_package", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:1089:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:1092:      sourceTypes: ["current_chat", "project_plan", "campaign_timeline", "dependency_notes", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:1102:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:1104:      destinations: ["chat-preview", "workflows", "governance", "publishing"],
+public/control-center/pages/ai-command/tool-dock.js:1105:      sourceTypes: ["current_chat", "readiness_gaps", "asset_requirements", "approval_notes", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:1106:      outputTypes: ["execution_checklist", "approval_checklist", "asset_checklist", "qa_steps"],
+public/control-center/pages/ai-command/tool-dock.js:1107:      template: "Create an execution checklist for {projectName}. Include required approvals, assets, content, integrations, and QA steps."
+public/control-center/pages/ai-command/tool-dock.js:1118:      safetyLevel: "confirmation_required",
+public/control-center/pages/ai-command/tool-dock.js:1120:      destinations: ["chat-preview", "operations-centers", "task", "governance"],
+public/control-center/pages/ai-command/tool-dock.js:1121:      sourceTypes: ["customer_thread", "support_notes", "policy_doc", "faq_source", "current_chat", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:1131:      safetyLevel: "confirmation_required",
+public/control-center/pages/ai-command/tool-dock.js:1134:      sourceTypes: ["customer_thread", "support_notes", "order_case_summary", "current_chat", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:1144:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:1147:      sourceTypes: ["customer_thread", "sla_policy", "support_notes", "current_chat", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:1148:      outputTypes: ["sla_risk_review", "urgency_flags", "escalation_needs", "safe_next_actions"],
+public/control-center/pages/ai-command/tool-dock.js:1149:      template: "Review SLA or response risk for this customer context. Flag urgency, escalation needs, and safe next actions."
+public/control-center/pages/ai-command/tool-dock.js:1157:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:1160:      sourceTypes: ["customer_thread", "support_notes", "current_chat", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:1162:      template: "Summarize the customer context for {projectName}. Include issue, sentiment, open questions, risk, and next response."
+public/control-center/pages/ai-command/tool-dock.js:1173:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:1176:      sourceTypes: ["lead_context", "sales_notes", "product_data", "offer_data", "proof_points", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:1186:      safetyLevel: "confirmation_required",
+public/control-center/pages/ai-command/tool-dock.js:1189:      sourceTypes: ["lead_context", "meeting_notes", "sales_notes", "offer_data", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:1199:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:1201:      destinations: ["chat-preview", "workflows", "content-studio", "governance"],
+public/control-center/pages/ai-command/tool-dock.js:1202:      sourceTypes: ["lead_context", "sales_notes", "product_data", "proof_points", "objection_notes", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:1212:      safetyLevel: "confirmation_required",
+public/control-center/pages/ai-command/tool-dock.js:1215:      sourceTypes: ["lead_context", "crm_profile_summary", "sales_notes", "customer_notes", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:1216:      outputTypes: ["lead_brief", "fit_summary", "opportunity_notes", "risk_notes", "outreach_recommendation"],
+public/control-center/pages/ai-command/tool-dock.js:1217:      template: "Create a lead brief for {projectName}. Include profile, need, fit, opportunity, risks, and recommended outreach."
+public/control-center/pages/ai-command/tool-dock.js:1282:  const actionType = tool.requiresSelectedSource && !tool.actionType ? "source_required" : (tool.actionType || tool.action || "guided");
+public/control-center/pages/ai-command/tool-dock.js:1290:    "data-aicmd-tool-dock-safety": tool.safetyLevel || "review_only",
+public/control-center/pages/ai-command/tool-dock.js:1293:    "data-aicmd-tool-dock-sources": joinMetaList(getToolMetaList(tool, "sourceTypes", ["current_chat", "library_source", "manual_input"])),
+public/control-center/pages/ai-command/tool-dock.js:1321:          Configure a review-only AI prompt with the right output, trusted source context, and destination handoff before loading it into the composer.
+public/control-center/pages/ai-command/tool-dock.js:1331:            <span class="mhos-tool-drawer-section-label">2. Trusted source / input</span>
+public/control-center/pages/ai-command/tool-dock.js:1332:            <select class="mhos-tool-drawer-select" data-aicmd-tool-drawer-source-select></select>
+public/control-center/pages/ai-command/tool-dock.js:1333:            <div class="mhos-tool-drawer-selected-source" data-aicmd-tool-drawer-selected-source></div>
+public/control-center/pages/ai-command/tool-dock.js:1334:            <div class="mhos-tool-drawer-warning" data-aicmd-tool-drawer-source-warning role="alert" hidden></div>
+public/control-center/pages/ai-command/tool-dock.js:1371:                data-aicmd-tool-drawer-source-details
+public/control-center/pages/ai-command/tool-dock.js:1373:                placeholder="Example: use the selected Library source for facts only, avoid unsupported claims..."
+public/control-center/pages/ai-command/tool-dock.js:1390:            <div class="mhos-tool-drawer-safety" data-aicmd-tool-drawer-safety>Review only</div>
+public/control-center/pages/ai-command/tool-dock.js:1396:          <p data-aicmd-tool-drawer-summary>Choose output, trusted source, destination handoff, language, and tone.</p>
+public/control-center/pages/ai-command/tool-dock.js:1431:        <span class="mhos-tool-dock-copy">Review-only setup · source, output, destination, then load into composer</span>
+public/control-center/pages/ai-command/tool-dock.js:1443:            data-aicmd-tool-dock-safety="${safe(tool.safetyLevel || "review_only")}"
+public/control-center/pages/ai-command/tool-dock.js:1446:            data-aicmd-tool-dock-sources="${safe(joinMetaList(getToolMetaList(tool, "sourceTypes", ["current_chat"])))}"
+public/control-center/pages/ai-command/tool-dock.js:1551:    "- Do not invent certifications, claims, ingredients, prices, guarantees, or statistics without source evidence."
+public/control-center/pages/ai-command/tool-dock.js:1559:  const source = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-source-select]", "Current chat or ask if source is needed");
+public/control-center/pages/ai-command/tool-dock.js:1563:  const sourceDetails = getDrawerFieldValue(drawer, "[data-aicmd-tool-drawer-source-details]");
+public/control-center/pages/ai-command/tool-dock.js:1566:  const sourceInstruction = sourceDetails
+public/control-center/pages/ai-command/tool-dock.js:1567:    ? `${source}. Source details: ${sourceDetails}.`
+public/control-center/pages/ai-command/tool-dock.js:1568:    : `${source}. If the selected source is not available in the current context, ask me to choose, paste, upload, or open the relevant source before producing final content.`;
+public/control-center/pages/ai-command/tool-dock.js:1577:    `- Source/input: ${sourceInstruction}`,
+public/control-center/pages/ai-command/tool-dock.js:1599:    "Use only the available context and selected source details.",
+public/control-center/pages/ai-command/tool-dock.js:1622:    "- Do not make unsupported claims. Mark missing proof clearly."
+public/control-center/pages/ai-command/tool-dock.js:1634:  const source = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-source-select]", "Auto");
+public/control-center/pages/ai-command/tool-dock.js:1638:  const sourceDetails = getDrawerFieldValue(drawer, "[data-aicmd-tool-drawer-source-details]");
+public/control-center/pages/ai-command/tool-dock.js:1642:  if (source !== "Auto" && source !== "Current chat or ask if source is needed") summaryParts.push("Trusted source context selected");
+public/control-center/pages/ai-command/tool-dock.js:1682:    `Prepare a review-only AI prompt for ${btn.getAttribute("data-aicmd-tool-dock-label") || "this tool"}. Choose output, trusted source context, destination handoff, language, and tone before loading it into the composer.`
+public/control-center/pages/ai-command/tool-dock.js:1684:  setDrawerText(drawer, "[data-aicmd-tool-drawer-safety]", humanizeMeta(btn.getAttribute("data-aicmd-tool-dock-safety") || "review_only"));
+public/control-center/pages/ai-command/tool-dock.js:1692:  const hardSourceDefaults = ["current_chat", "market_notes", "customer_notes", "library_source", "manual_input"];
+public/control-center/pages/ai-command/tool-dock.js:1697:  const rawSources = joinMetaList(getToolMetaList(tool, "sourceTypes", []))
+public/control-center/pages/ai-command/tool-dock.js:1698:    || btn.getAttribute("data-aicmd-tool-dock-sources")
+public/control-center/pages/ai-command/tool-dock.js:1703:  drawer.dataset.sourceRequired = actionType === "source_required" || sourceMetadataNeedsLibrarySource(rawSources) ? "true" : "false";
+public/control-center/pages/ai-command/tool-dock.js:1707:  populateDrawerSelect(drawer.querySelector("[data-aicmd-tool-drawer-source-select]"), rawSources, "Choose source / input");
+public/control-center/pages/ai-command/tool-dock.js:1727:  updateStatus?.(`${btn.getAttribute("data-aicmd-tool-dock-label") || "Quick AI tool"} setup opened. Review source and handoff requirements, then prepare the prompt.`);
+public/control-center/pages/ai-command/tool-dock.js:1783:      const drawerSourceSelect = root.querySelector("[data-aicmd-tool-drawer-source-select]");
+public/control-center/pages/ai-command/tool-dock.js:1794:        sourceType: selectedSourceType,
+public/control-center/pages/ai-command/tool-dock.js:1799:        type: "library_source_selection",
+public/control-center/pages/ai-command/tool-dock.js:1802:        sourceType: selectedSourceType,
+public/control-center/pages/ai-command/tool-dock.js:1820:  // Patch drawer population to apply source
+public/control-center/pages/ai-command/tool-dock.js:1832:        updateStatus?.("This prompt tool needs a trusted Library source first. Choose one from Library before continuing.");

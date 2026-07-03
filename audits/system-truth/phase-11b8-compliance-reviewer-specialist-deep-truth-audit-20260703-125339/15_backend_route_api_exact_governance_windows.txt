@@ -1,0 +1,253 @@
+### frontend API governance exact references
+1663:    `/media-manager/project/${encodeURIComponent(projectName)}/approvals`,
+1666:    "Failed to create approval request"
+1677:    `/media-manager/project/${encodeURIComponent(projectName)}/approvals${suffix}`,
+1678:    "Failed to load approvals"
+1682:export async function decideProjectApproval(projectName, approvalId, payload = {}) {
+1687:  if (!approvalId) {
+1688:    throw new Error("Missing approval id");
+1692:    `/media-manager/project/${encodeURIComponent(projectName)}/approvals/${encodeURIComponent(approvalId)}/decision`,
+1695:    "Failed to update approval"
+1713:    `/media-manager/project/${encodeURIComponent(projectName)}/governance${suffix}`,
+1714:    "Failed to load governance summary"
+1724:    `/media-manager/project/${encodeURIComponent(projectName)}/governance/policy`,
+1725:    "Failed to load governance policy"
+1735:    `/media-manager/project/${encodeURIComponent(projectName)}/governance/policy`,
+1738:    "Failed to update governance policy"
+2265:    `/media-manager/project/${encodeURIComponent(projectName)}/handoffs${suffix}`,
+2266:    "Failed to load handoffs"
+2276:    `/media-manager/project/${encodeURIComponent(projectName)}/handoffs`,
+2279:    "Failed to create handoff"
+2283:export async function consumeProjectHandoff(projectName, handoffId, payload = {}) {
+2288:  if (!handoffId) {
+2289:    throw new Error("Missing handoff id");
+2293:    `/media-manager/project/${encodeURIComponent(projectName)}/handoffs/${encodeURIComponent(handoffId)}/consume`,
+2296:    "Failed to consume handoff"
+
+### backend governance route exact references
+31:  riskAlertProvider: riskAlertBuilder,
+56:} = require('./lib/security/governance-mutation-gate');
+1246:    return 'policy_or_config_mismatch';
+1413:    policy: readPolicy
+1445:      policy: {
+1763:    return 'policy_or_config_mismatch';
+1812:      policy_or_config_mismatch: 0,
+1813:      unresolved_risk: 0
+1851:      const cause = classifyFallbackWithParityContext(entry, dualWriteIndex) || 'unresolved_risk';
+1853:        stats.fallback_causes.unresolved_risk += 1;
+1881:      stats.fallback_causes.policy_or_config_mismatch;
+2390:      'Do not invent new ingredients, claims, or visual brand marks.'
+2515:- Do NOT invent ingredients, claims, or decorative brand elements.
+3084:    compliance_notes: [
+3088:      'Avoid misleading claims or non-verifiable promises.'
+3097:  const compliance = buildMetaCompliance(projectName, placement, image);
+3110:    status: compliance.publish_status,
+3119:    compliance
+3196:    compliance_notes: [
+3200:      'Do not make misleading or non-verifiable claims.'
+3210:  const compliance = buildTikTokCompliance(projectName, image);
+3221:    status: compliance.publish_status,
+3240:    compliance
+3341:    compliance_notes: [
+3343:      'Do not rely on claimed third-party content for Shorts over one minute.',
+3345:      'Avoid misleading claims or deceptive packaging presentation.'
+3355:  const compliance = buildYouTubeCompliance(projectName, format, image);
+3375:    status: compliance.publish_status,
+3400:    compliance
+3543:    compliance: {
+3599:    compliance: {
+4117:      'ready_for_manual_handoff',
+6218:  const sharedPolicy = readFileSafe(path.join(PROMPTS_DIR, 'shared-policy.md'));
+6233:    approval_required: mode === 'approval_required',
+6240:        mode === 'approval_required'
+6241:          ? 'Prepare execution summary and request approval.'
+6247:      shared_policy_loaded: sharedPolicy.length > 0,
+6861:      required_assets: ['logo', 'product_photos', 'product_catalog', 'price_list', 'shipping_policy', 'legal_docs'],
+6865:      ai_team_defaults: ['strategist', 'writer', 'designer', 'publisher', 'ads_operator', 'analyst', 'compliance_reviewer'],
+6903:      workspace_priorities: ['setup', 'library', 'content-studio', 'campaign-studio', 'ads-manager', 'governance'],
+6904:      ai_team_defaults: ['strategist', 'writer', 'designer', 'ads_operator', 'publisher', 'compliance_reviewer'],
+7448:    approval_note: normalizeSetupTextValue(asset.approval_note),
+8364:        what_to_upload: 'Brand book, tone guide, design system notes, claim rules, and visual do/dont guidance.',
+8404:      purpose: 'proof_compliance',
+8405:      purpose_label: 'Proof and compliance',
+8409:      aliases: ['legal', 'compliance_doc', 'terms_doc'],
+8410:      description: 'Policies, legal terms, disclaimers, and claim restrictions.',
+8412:        what_to_upload: 'Terms, privacy policy, disclaimers, compliance notes, claim restrictions, and regulated copy rules.',
+8413:        why_it_matters: 'Publishing and AI Command need legal context before release or generated claims.',
+8492:        what_to_upload: 'Packaging photos, label artwork, inserts, box shots, bottle/jar details, and compliance label references.',
+8493:        why_it_matters: 'Media Studio and Publishing need packaging truth for product visuals and compliance checks.',
+8500:      purpose: 'proof_compliance',
+8501:      purpose_label: 'Proof and compliance',
+8516:      purpose: 'proof_compliance',
+8517:      purpose_label: 'Proof and compliance',
+8524:        what_to_upload: 'Certificates, compliance proof, awards, lab reports, or official authorization documents.',
+8525:        why_it_matters: 'Publishing and AI Command can use only approved proof when making trust or compliance claims.',
+8572:    record.approval_status ||
+9538:      riskLevel: 'high',
+9539:      title: 'Publish package execution approval',
+9626:      riskLevel: 'high',
+9627:      title: 'Email package execution approval',
+9714:      riskLevel: 'high',
+9715:      title: 'Media generation approval',
+9795:      riskLevel: 'high',
+9796:      title: 'Ad execution package approval',
+10872:        asset.approval_note = note || asset.approval_note || 'Approved from Control Center Library.';
+11125:      serviceDomain: 'governance',
+11127:      riskLevel: 'medium',
+11128:      title: 'Project setup approval',
+11164:      serviceDomain: 'governance',
+11166:      riskLevel: 'medium',
+11167:      title: 'Project setup approval',
+11215:  const complianceSensitivity = normalizeAiCommandPreviewInput(input.compliance_sensitivity || input.complianceSensitivity, 'Standard review');
+11237:    complianceSensitivity,
+11243:      'Review compliance and approval requirements.',
+11249:      `Keep claims review-ready before external distribution.`
+11263:      'Final approval is required before publishing.',
+11269:      'Request Governance review before release if claims or publishing risk exists.'
+11294:      body: `Audience: ${audience}. Offer: ${offer}. Market: ${market}. Language: ${language}. Format: ${format}. Deadline: ${deadline}. Product focus: ${productFocus}. Compliance: ${complianceSensitivity}.`
+11311:      id: 'compliance_risks',
+11312:      title: 'Compliance risks',
+11340:    compliance_sensitivity: complianceSensitivity,
+11346:      requires_approval_before_publish: true,
+11350:      no_approval_created: true,
+11351:      no_handoff_created: true,
+11502:      serviceDomain: 'governance',
+11504:      riskLevel: 'high',
+11505:      title: 'Team model approval',
+11780:      riskLevel: 'high',
+11781:      title: 'Workflow run approval',
+11853:    riskLevel: 'high',
+11854:    title: 'AI command approval',
+11927:    riskLevel: 'high',
+11928:    title: 'AI chat approval',
+11997:    riskLevel: 'high',
+11998:    title: 'AI guidance approval',
+12065:      riskLevel: 'high',
+12066:      title: 'AI workflow approval',
+12254:      error: error.message || 'Failed to list approvals'
+12261:    const approval = createApproval(req.params.project, req.body || {});
+12263:      approval,
+12268:      error: error.message || 'Failed to create approval'
+12277:      action: 'approvals_decision',
+12278:      entityType: 'approval',
+12279:      entityId: req.params.approvalId,
+12285:    const approval = resolveGovernanceApproval(req.params.project, req.params.approvalId, {
+12294:      approval,
+12299:      error: error.message || 'Failed to update approval'
+12304:app.get('/media-manager/project/:project/approvals', handleListApprovals);
+12305:app.get('/public/media-manager/project/:project/approvals', handleListApprovals);
+12306:app.post('/media-manager/project/:project/approvals', handleCreateApproval);
+12307:app.post('/public/media-manager/project/:project/approvals', handleCreateApproval);
+12308:app.post('/media-manager/project/:project/approvals/:approvalId/decision', handleApprovalDecision);
+12309:app.post('/public/media-manager/project/:project/approvals/:approvalId/decision', handleApprovalDecision);
+12320:      error: error.message || 'Failed to load governance summary'
+12329:      action: 'governance_policy_update',
+12330:      entityType: 'governance_policy',
+12337:    const policy = updateGovernancePolicy(req.params.project, req.body || {}, req.body?.actor || 'operator');
+12340:      policy
+12344:      error: error.message || 'Failed to update governance policy'
+12353:      policy: getGovernancePolicy(req.params.project)
+12357:      error: error.message || 'Failed to load governance policy'
+12362:app.get('/media-manager/project/:project/governance', handleGetGovernance);
+12363:app.get('/public/media-manager/project/:project/governance', handleGetGovernance);
+12364:app.get('/media-manager/project/:project/governance/policy', handleGetGovernancePolicy);
+12365:app.get('/public/media-manager/project/:project/governance/policy', handleGetGovernancePolicy);
+12366:app.post('/media-manager/project/:project/governance/policy', handleUpdateGovernancePolicy);
+12367:app.post('/public/media-manager/project/:project/governance/policy', handleUpdateGovernancePolicy);
+12426:      error: error.message || 'Failed to list handoffs'
+12433:    const handoff = createHandoff(req.params.project, req.body || {});
+12435:      handoff,
+12440:      error: error.message || 'Failed to create handoff'
+12447:    const handoff = consumeHandoff(req.params.project, req.params.handoffId, req.body || {});
+12449:      handoff,
+12454:      error: error.message || 'Failed to consume handoff'
+12459:app.get('/media-manager/project/:project/handoffs', handleListHandoffs);
+12460:app.get('/public/media-manager/project/:project/handoffs', handleListHandoffs);
+12461:app.post('/media-manager/project/:project/handoffs', handleCreateHandoff);
+12462:app.post('/public/media-manager/project/:project/handoffs', handleCreateHandoff);
+12463:app.post('/media-manager/project/:project/handoffs/:handoffId/consume', handleConsumeHandoff);
+12464:app.post('/public/media-manager/project/:project/handoffs/:handoffId/consume', handleConsumeHandoff);
+12538:      serviceDomain: 'governance',
+12540:      riskLevel: 'medium',
+12541:      title: 'Source registry approval',
+12592:      serviceDomain: 'governance',
+12594:      riskLevel: 'medium',
+12595:      title: 'Source registry approval',
+12637:      serviceDomain: 'governance',
+12639:      riskLevel: 'medium',
+12640:      title: 'Source registry approval',
+12676:      serviceDomain: 'governance',
+12678:      riskLevel: 'medium',
+12679:      title: 'Source registry approval',
+12723:  const governanceAction = options?.reconnect ? 'integration_reconnect' : 'integration_connect';
+12725:  const governanceOptions = {
+12727:    action: governanceAction,
+12733:    routeTarget: 'governance',
+12736:    riskLevel: options?.reconnect ? 'high' : 'medium',
+12737:    title: `${req.params.integrationId} ${requestedAction} approval`,
+12740:  const governanceAllowed = options?.reconnect
+12741:    ? enforceGovernanceApprovalLifecycle(req, res, governanceOptions)
+12742:    : enforceGovernanceMutationGate(req, res, governanceOptions);
+12744:  if (!governanceAllowed) {
+12832:  const governanceAction = {
+12839:  const governanceOptions = {
+12841:    action: governanceAction,
+12847:    routeTarget: 'governance',
+12850:    riskLevel: normalizedActionType === 'test' ? 'medium' : 'high',
+12851:    title: `${req.params.integrationId} ${normalizedActionType} approval`,
+12855:  const governanceAllowed = requiresApprovalLifecycle
+12856:    ? enforceGovernanceApprovalLifecycle(req, res, governanceOptions)
+12857:    : enforceGovernanceMutationGate(req, res, governanceOptions);
+12859:  if (!governanceAllowed) {
+13907:      emphasize: ['clarity', 'compliance', 'real product fidelity'],
+13908:      avoid: ['fake claims', 'decorative clutter', 'non-compliant overlays']
+14064:      compliance_notes: [
+14067:        'Keep claims aligned with real product data.',
+14068:        'Avoid unsupported medical or misleading claims.'
+15080:      result.execution_status = 'ready_for_manual_handoff';
+15081:      result.action_type = 'manual_marketplace_handoff';
+15082:      result.notes.push('Marketplace payload is ready for manual listing handoff.');
+15345:    approvalId: options.approvalId || req.body?.approval_id || req.body?.approvalId,
+15357:  appLogger.warn('governance_mutation_denied', {
+15364:    governance_code: decision.code,
+15377:    approvalId: options.approvalId || req.body?.approval_id || req.body?.approvalId,
+15392:    riskLevel: options.riskLevel,
+15399:    if (decision.approval) {
+15400:      req.governanceApproval = decision.approval;
+15423:  const governance = getGovernancePolicy(projectName);
+15424:  // getGovernancePolicy always returns a normalized policy with policy_rules merged
+15425:  // from DEFAULT_POLICY_RULES, so policy_rules is always a fully-populated object.
+15427:  const policyRules = governance && typeof governance === 'object' && governance.policy_rules && typeof governance.policy_rules === 'object'
+15428:    ? governance.policy_rules
+15435:  const approvalSensitiveAction = ['ready', 'publish'].includes(actionKey)
+15440:  //   approval_before_publish → default true (restrictive — approval is required by default)
+15441:  const freezePublishing = typeof policyRules.freeze_publishing === 'boolean'
+15442:    ? policyRules.freeze_publishing
+15443:    : policyRules.freeze_publishing == null ? false : Boolean(policyRules.freeze_publishing);
+15444:  const approvalBeforePublish = typeof policyRules.approval_before_publish === 'boolean'
+15445:    ? policyRules.approval_before_publish
+15446:    : policyRules.approval_before_publish == null ? true : Boolean(policyRules.approval_before_publish);
+15449:    appLogger.warn('governance_blocked', {
+15450:      route: '/governance/publishing',
+15462:      'Publishing is frozen by governance policy. The requested publishing mutation was blocked.',
+15470:  if (approvalSensitiveAction && approvalBeforePublish) {
+15472:      logGovernanceBlock('approval_before_publish', { reason: 'job_id_missing' });
+15474:        'Approval before publish is enabled. This publishing action requires a durable publishing job with an approved governance decision.',
+15477:          rule: 'approval_before_publish'
+15482:    const approval = getLatestPublishingApproval(projectName, jobId);
+15483:    const approvalStatus = String(approval?.status || '').trim().toLowerCase();
+15485:    if (!['approved', 'overridden'].includes(approvalStatus)) {
+15486:      logGovernanceBlock('approval_before_publish', {
+15488:        approval_status: approvalStatus || 'missing'
+15494:          rule: 'approval_before_publish',
+15496:          approval_status: approvalStatus || 'missing'
+17884:          'Generate assets from strategy, then run review -> approval -> media -> publish/send.',
+22444:  riskAlertBuilder
+22450:  riskAlertProvider
+22460:  riskAlertProvider
+23004:      risk_alerts: update.recommendations.alerts,
+
+### backend governance lib files
+runtime/orchestrator-service/lib/customer-operations/contracts/sla-policy-contract.js
+runtime/orchestrator-service/lib/customer-operations/sla/store/sla-policy-store.js
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js
