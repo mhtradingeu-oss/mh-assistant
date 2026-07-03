@@ -1,0 +1,971 @@
+### AI Command strategist definition/routing lines
+38:                id: "strategist",
+42:                routeHint: "campaign-studio"
+144:		id: "strategist",
+146:		position: "Executive Strategy Lead",
+353:		{ label: "Build follow-up sequence", sub: "Multi-step sales cadence" },
+360:	{ label: "What should the executive AI team focus on?", sub: "Strategy, execution, and risk review" },
+362:	{ label: "Prepare a full handoff sequence", sub: "Strategy, creative, compliance, publishing, ops" },
+432:		{ id: "launch-plan", label: "Launch Plan", action: "preview", intent: "workflow", template: "Build a launch plan for {project}. Include phases, channels, owners, blockers, and next move." },
+438:		{ id: "caption-builder", label: "Caption Builder", action: "preview", intent: "guidance", template: "Draft German captions for {project}. Include angle, body, CTA, and platform adaptation notes." },
+443:		{ id: "creative-brief-builder", label: "Creative Brief Builder", action: "preview", intent: "media", template: "Prepare a creative brief for {project}. Include concept, visual rules, subject, brand constraints, and production notes." },
+452:		{ id: "build-storyboard", label: "Build storyboard", action: "preview", intent: "workflow", template: "Build storyboard beats for {project}. Sequence shots and key transitions." },
+457:		{ id: "publishing-checklist", label: "Publishing Checklist", action: "preview", intent: "handoff", template: "Build a publishing checklist for {project}. Include German copy, assets, claims checks, and channel readiness." },
+504:		{ id: "follow-up-sequence", label: "Follow-up Sequence", action: "preview", intent: "workflow", template: "Build a follow-up sequence for {project}. Include timing, message angle, CTA, stop condition, and confirmation requirements." },
+515:	{ icon: "🚀", label: "Launch Campaign", sub: "Build a campaign plan", template: "Build a launch campaign for {project}. Map the channels, offer, phases, and required assets." },
+525:	{ id: "strategy", label: "Strategy" },
+553:		id: "strategist",
+555:		purpose: "Build high-leverage decisions for launch sequencing and channel focus.",
+765:    "Build a launch campaign for:",
+1298:function destinationRouteForSpecialist(specialistId, outputType) {
+1302:	if (id === "strategist") return outputType === "task" ? "campaign-studio" : "workflows";
+1393:        const destinationRoute = explicitDestination || destinationRouteForSpecialist(session?.modeId || "operations", outputType);
+1419:	const route = destinationRouteForSpecialist(specialistId, outputType);
+1438:	if (specialistId === "strategist") {
+1503:			title: "Media Brief: Visual direction draft",
+1514:			safetyLabel: "No media generation executed. Brief and routing only.",
+1522:			title: outputType === "task" ? "Task: Video production plan" : "Video Brief: Hook, script, storyboard",
+1768:		media_brief: "Media Brief"
+2404:	"campaign-studio": "strategist",
+3350:	const commandTypeLabel = COMMAND_TYPES.find((item) => item.id === session.commandType)?.label || "Strategy";
+3389:			command: `Build an integration recovery plan for ${aiContext.projectName || "this project"}. Prioritize connectors by business impact and data coverage gain.`,
+3518:	return destinationRouteForSpecialist(session?.modeId || "operations", outputType);
+3649:			<span>Strategy, writing, creative, compliance, publishing, customer, sales, and operations specialists coordinate one review-ready answer. No workflow, send, publish, approval, or CRM action is executed here.</span>
+3708:		const lanes = ["Strategy", "Content", "Media", "Customer Ops", "Sales / CRM", "Compliance", "Publishing", "Operations"];
+3809:	return destinationRouteForSpecialist(session?.modeId || "operations", getCanonicalToolIntent(tool));
+3960:        const destinationRoute = asString(preview.destinationRoute || destinationRouteForSpecialist(session.modeId, outputType));
+3979:                        const route = destinationRouteForSpecialist(spec.id, "guidance");
+4066:        const destinationRoute = asString(session.outputPreview?.destinationRoute || destinationRouteForSpecialist(session.modeId, outputType));
+4249:                const destinationRoute = asString(message.destinationRoute || preview.destinationRoute || destinationRouteForSpecialist(session.modeId, outputType));
+4337:                { id: "campaign", label: "Campaign", summary: "Build a review-ready campaign with the full AI Team.", enabled: true },
+4459:                        <section class="aicmd-smart-wizard aicmd-smart-wizard-premium" role="dialog" aria-modal="true" aria-label="Campaign Builder">
+4463:                                                <h2>Campaign Builder</h2>
+4473:                                        <span class="is-active">4 Brief</span>
+4670:                                        <small>Strategy, content, media, operations, compliance, customer, campaign and provider-readiness planning.</small>
+4937:	const destination = routeLabel(preview.destinationRoute || destinationRouteForSpecialist(session.modeId, preview.outputType || "guidance"));
+5334:	const destination = routeLabel(destinationRouteForSpecialist(session.modeId, asObject(session.outputPreview).outputType || "guidance"));
+5463:		eyebrow: "AI & Build",
+5968:                                updateStatus("This Smart Action is planned. Campaign Builder is available first.");
+5981:                        persistSessionDraft(sessionKey, session, "Campaign Builder wizard opened");
+5982:                        updateStatus("Campaign Builder opened. 1. Choose source, goal, and channel.");
+6123:                                persistSessionDraft(sessionKey, session, `Campaign Builder ${group} selected`);
+6252:                                persistSessionDraft(sessionKey, session, preview.backendPreview ? "Campaign Builder backend preview prepared" : "Campaign Builder local fallback preview prepared");
+6274:                                source_label: "AI Command Campaign Builder",
+6344:                                persistSessionDraft(sessionKey, session, `${label} prepared from Campaign Builder`);
+6369:                        persistSessionDraft(sessionKey, session, `${label} staged from Campaign Builder`);
+6939:				const destination = asString(latestResponse.destinationRoute || responseRoute.destinationRoute || destinationRouteForSpecialist(session.modeId, responseRoute.outputType || "guidance"));
+7201:        { id: "strategist", label: "Strategist" },
+7492:        loadStrategy: "balanced"
+7618:        cacheStrategy: usage > 50 ? "aggressive" : "normal",
+
+### Campaign Studio strategy surfaces
+1:import { getSharedCampaignRecord, getSharedHandoff, setSharedCampaignRecord, setSharedHandoff } from "../shared-context.js";
+9:const campaignSessions = new Map();
+10:const campaignSaveTimers = new Map();
+18:    roleHint: "Use this wave to introduce the campaign, establish the core promise, and create awareness."
+58:  serviceDomain: "campaign",
+66:  "ads-manager": { role: "ads_operator", domain: "campaign" },
+216:  const campaignName = context.activeCampaign || `${context.currentProject || "Campaign"} Launch`;
+220:  const channels = Array.from(new Set(
+227:    campaignName,
+228:    campaignGoal: overviewData.primary_goal || "Launch",
+229:    campaignType: overviewData.project_type || "Growth campaign",
+237:    channelPlan: channels.join(", "),
+243:    wave1Name: campaignName,
+245:    wave1Channels: channels.slice(0, 3).join(", "),
+248:    wave2Channels: channels.slice(0, 2).join(", "),
+251:    wave3Channels: channels.slice(0, 2).join(", "),
+260:  if (!campaignSessions.has(key)) {
+261:    campaignSessions.set(key, {
+274:    const session = campaignSessions.get(key);
+287:  return campaignSessions.get(key);
+303:        <label class="setup-label" for="campaign-${escapeHtml(name)}">${escapeHtml(label)}</label>
+308:          ? `<textarea id="campaign-${escapeHtml(name)}" name="${escapeHtml(name)}" class="setup-input setup-textarea" rows="${rows}" placeholder="${escapeHtml(placeholder || "")}">${escapeHtml(asString(value))}</textarea>`
+309:          : `<input id="campaign-${escapeHtml(name)}" name="${escapeHtml(name)}" class="setup-input" type="text" value="${escapeHtml(asString(value))}" placeholder="${escapeHtml(placeholder || "")}">`
+320:function syncCampaignStudioBridge(projectName, values) {
+321:  const current = getSharedCampaignRecord(projectName, null);
+322:  setSharedCampaignRecord(projectName, {
+325:    source_page: "campaign-studio",
+326:    name: asString(values?.campaignName),
+327:    objective: asString(values?.campaignGoal),
+329:    channels: asString(values?.channelPlan)
+345:function hydrateValuesFromCampaignRecord(defaults, campaign) {
+346:  const record = asObject(campaign);
+352:    campaignName: asString(formValues.campaignName || record.name || defaults.campaignName),
+353:    campaignGoal: asString(formValues.campaignGoal || record.objective || defaults.campaignGoal),
+355:    channelPlan: asString(formValues.channelPlan || asArray(record.channels).join(", ") || defaults.channelPlan),
+375:  if (key === "channels") return joinPackageList(phase.channels);
+379:function applyAiCampaignHandoff(projectName, operations, session) {
+380:  const handoff = getSharedHandoff(projectName, "campaign-studio", operations, "ai-command");
+381:  const handoffId = asString(handoff?.id || handoff?.updated_at || handoff?.created_at || handoff?.payload?.prompt);
+382:  if (!handoffId || handoffId === asString(session.lastAiHandoffId)) return false;
+384:  const payload = asObject(handoff.payload);
+387:  const pkg = asObject(response.campaignPackage || response.campaign_package || payload.campaignPackage || payload.campaign_package);
+393:    campaignName: firstNonEmpty(pkg.concept, pkg.campaignConcept, response.title, session.values.campaignName),
+394:    campaignGoal: firstNonEmpty(response.summary, pkg.goal, pkg.objective, session.values.campaignGoal),
+399:    channelPlan: firstNonEmpty(joinPackageList(pkg.channels), session.values.channelPlan),
+400:    offerHeadline: firstNonEmpty(pkg.offer, pkg.offerStrategy, pkg.offer_strategy, session.values.offerHeadline),
+404:    wave1Channels: firstNonEmpty(phaseValue(phases, 0, "channels"), session.values.wave1Channels),
+407:    wave2Channels: firstNonEmpty(phaseValue(phases, 1, "channels"), session.values.wave2Channels),
+410:    wave3Channels: firstNonEmpty(phaseValue(phases, 2, "channels"), session.values.wave3Channels),
+415:        ...asArray(pkg.nextActions || pkg.next_actions)
+421:  session.lastAiHandoffId = handoffId;
+422:  setSharedCampaignRecord(projectName, {
+423:    ...(getSharedCampaignRecord(projectName, operations) || {}),
+426:    name: session.values.campaignName,
+427:    objective: session.values.campaignGoal,
+429:    channels: parseList(session.values.channelPlan),
+438:function confirmCampaignStudioAuthorityAction(action, detail = "") {
+442:    `Confirm Campaign Studio action: ${action}`,
+444:    detail || "This action may create or update backend campaign records or route handoffs.",
+447:    "Select Cancel to review the campaign plan, evidence, and destination before continuing."
+453:function buildCampaignRecordPayload(projectName, session) {
+459:    name: asString(values.campaignName || projectName),
+460:    objective: asString(values.campaignGoal),
+462:    channels: asString(values.channelPlan),
+467:    source_page: "campaign-studio",
+474:    linked_approvals: [],
+479:function persistCampaignRouteHandoff({ projectName, session, destinationPage, createProjectHandoff }) {
+483:  const handoff = {
+484:    source_page: "campaign-studio",
+491:      entity_type: "campaign",
+493:      route: "campaign-studio",
+494:      label: asString(session.values.campaignName || projectName)
+497:      campaign_id: session.recordId || "",
+498:      campaign_name: asString(session.values.campaignName || projectName),
+502:      draft_context: buildCampaignRecordPayload(projectName, session)
+506:  if (!confirmCampaignStudioAuthorityAction(
+507:    "Create campaign route handoff",
+508:    `This will create a campaign handoff from Campaign Studio to ${destinationPage} for review and execution preparation.`
+513:  setSharedHandoff(projectName, destinationPage, handoff);
+515:  createProjectHandoff?.(projectName, handoff).catch((error) => {
+516:    console.warn("Failed to persist campaign route handoff:", error.message);
+522:function scheduleCampaignPersistence(projectName, session, saveProjectCampaign) {
+523:  if (!projectName || typeof saveProjectCampaign !== "function") {
+528:  const existing = campaignSaveTimers.get(key);
+535:      ...buildCampaignRecordPayload(projectName, session),
+537:      autosave_note: "Campaign Studio autosave is local/shared-state only. Use Save campaign draft or Save campaign plan for backend persistence."
+539:    setSharedCampaignRecord(projectName, draft);
+542:  campaignSaveTimers.set(key, timer);
+547:    <div class="campaign-studio-empty-state">
+630:    body: "Best publishing window detected from current campaign intelligence."
+671:  asArray(paid.best_campaigns || paid.best_creatives).slice(0, 2).forEach((item) => {
+674:      title: firstNonEmpty(record.campaign_name, record.title, record.label, "Top paid signal"),
+675:      body: firstNonEmpty(record.reason, record.insight, record.summary, record.recommendation, "This campaign is outperforming peers.")
+679:  asArray(paid.weak_campaigns || paid.weak_creatives).slice(0, 2).forEach((item) => {
+682:      title: firstNonEmpty(record.campaign_name, record.title, record.label, "Paid risk"),
+731:      body: "This platform is not operational yet, so campaign execution will be constrained."
+805:          ? "Platform connection exists, so this can be activated once the campaign package is ready."
+821:    rationale: seoOpportunities[0]?.body || "Use website and search support to capture campaign intent beyond social reach."
+826:    rationale: "Campaign decisions will improve materially once attribution and landing behavior are measurable."
+866:  const approvalBlockers = [];
+877:  if (!values.budget) adsBlockers.push("Add a working campaign budget before routing to Ads Manager.");
+887:  if (!values.campaignName || !values.campaignGoal) {
+888:    trackingBlockers.push("Campaign naming and goal framing should be locked before measurement packages are generated.");
+896:  if (!values.offerDetail) seoBlockers.push("Offer detail is too light to brief landing pages and SEO content well.");
+898:  if (!values.executionNotes) approvalBlockers.push("Execution notes are missing, which makes approvals harder downstream.");
+899:  if (!values.audiencePrimary || !values.audienceNeed) approvalBlockers.push("Audience framing is incomplete for creative review.");
+900:  if (!values.productAngle) approvalBlockers.push("Product angle needs to be explicit so operators do not improvise.");
+907:    approvalBlockers.length ||
+921:    approvalBlockers,
+929:      approvalBlockers.length
+933:function buildStrategyGuidance({
+949:      aiRecommendations.campaign_angle,
+955:      "Refine the campaign angle once stronger content and audience learning is available."
+971:    channels: topOrganic || topPaid
+974:    nextAction: firstNonEmpty(
+977:      readinessStatus ? `Readiness status is ${readinessStatus}. Close the top blocker before routing this campaign.` : "",
+993:    const channels = parseList(values[`${wave.key}Channels`]);
+998:    if (!channels.length) missingInputs.push("Wave channels");
+1001:    const status = !missingInputs.length ? "Ready" : (channels.length || focus ? "Needs inputs" : "Blocked");
+1003:    const allocationSuggestion = channels.length
+1004:      ? channels.map((item) => channelLabel(item)).join(", ")
+1024:function buildCampaignModel(state, session, values) {
+1041:  const campaignAssetKeys = [
+1046:    "campaign_assets",
+1050:  const campaignAssetCategories = getCategoryReadinessList(assets)
+1051:    .filter((item) => campaignAssetKeys.includes(item.asset_type));
+1052:  const missingAssets = getMissingAssetLabels(assets, campaignAssetKeys);
+1053:  const requiredAssetTypes = uniqueStrings(campaignAssetCategories.map((item) => item.display_label || item.label || item.asset_type));
+1055:    campaignAssetCategories
+1130:  const strategyGuidance = buildStrategyGuidance({
+1151:    campaignAssetKeys,
+1152:    campaignAssetCategories,
+1153:    assetNextAction: getAssetNextAction(assets, campaignAssetKeys),
+1164:    strategyGuidance,
+1176:      "Connect more intelligence or lock the campaign inputs to tighten the channel recommendation.",
+1182:    <div class="campaign-channel-card-list">
+1184:        <div class="campaign-channel-card">
+1185:          <div class="campaign-channel-head">
+1198:    <div class="campaign-readiness-block">
+1199:      <div class="campaign-readiness-head">
+1251:        showError?.(`Campaign intelligence could not be refreshed: ${session.intelligence.error}`);
+1258:      session.intelligence.error = error?.message || "Failed to load campaign intelligence";
+1264:function bindCampaignStudio({
+1273:  saveProjectCampaign,
+1279:  const durableCampaign = getSharedCampaignRecord(projectName, state.data.operations);
+1280:  if (durableCampaign) {
+1281:    session.recordId = asString(durableCampaign.id || session.recordId);
+1282:    session.values = hydrateValuesFromCampaignRecord(session.values, durableCampaign);
+1284:  applyAiCampaignHandoff(projectName, state.data.operations, session);
+1285:  syncCampaignStudioBridge(projectName, session.values);
+1287:  const form = $("campaignStudioForm");
+1294:      syncCampaignStudioBridge(projectName, session.values);
+1295:      scheduleCampaignPersistence(projectName, session, saveProjectCampaign);
+1299:      // Explicit actions such as Save, Build, Refresh, and route handoffs still
+1304:  const saveBtn = $("campaignSaveDraftBtn");
+1307:      syncCampaignStudioBridge(projectName, session.values);
+1309:      if (!confirmCampaignStudioAuthorityAction(
+1310:        "Save backend campaign draft",
+1311:        `This will save or update the Campaign Studio draft for ${projectName}.`
+1313:        showMessage?.("Campaign draft save cancelled.");
+1318:        const result = await saveProjectCampaign?.(projectName, buildCampaignRecordPayload(projectName, session));
+1319:        if (result?.campaign?.id) {
+1320:          session.recordId = result.campaign.id;
+1321:          setSharedCampaignRecord(projectName, result.campaign);
+1323:        showMessage?.("Campaign draft saved to the shared operating backbone.");
+1325:        showError?.(error.message || "Failed to save campaign plan.");
+1330:  const buildBtn = $("campaignBuildPlanBtn");
+1333:      syncCampaignStudioBridge(projectName, session.values);
+1335:      if (!confirmCampaignStudioAuthorityAction(
+1336:        "Save backend campaign plan",
+1337:        `This will save or update the Campaign Studio plan for ${projectName}.`
+1339:        showMessage?.("Campaign plan save cancelled.");
+1344:        const result = await saveProjectCampaign?.(projectName, {
+1345:          ...buildCampaignRecordPayload(projectName, session),
+1348:        if (result?.campaign?.id) {
+1349:          session.recordId = result.campaign.id;
+1350:          setSharedCampaignRecord(projectName, result.campaign);
+1352:        showMessage?.("Campaign plan saved as a durable shared record.");
+1354:        showError?.(error.message || "Failed to structure the campaign plan.");
+1359:  const askAiBtn = $("campaignAskAiBtn");
+1362:      const prompt = `Build an execution plan for campaign ${session.values.campaignName || "this campaign"} with goal ${session.values.campaignGoal || "launch"}, channels ${session.values.channelPlan || "to be defined"}, and offer ${session.values.offerHeadline || "to be defined"}. Use current project intelligence, readiness blockers, and recommendation signals.`;
+1367:      if (!confirmCampaignStudioAuthorityAction(
+1368:        "Create AI Command campaign handoff",
+1369:        "This will create a campaign handoff from Campaign Studio to AI Command for review and planning support."
+1371:        showMessage?.("AI Command handoff cancelled.");
+1376:        source_page: "campaign-studio",
+1380:          campaign_id: session.recordId || "",
+1381:          campaign_name: session.values.campaignName || projectName,
+1382:          draft_context: buildCampaignRecordPayload(projectName, session)
+1388:        source_page: "campaign-studio",
+1395:          entity_type: "campaign",
+1400:          campaign_id: session.recordId || "",
+1401:          campaign_name: session.values.campaignName || projectName,
+1405:          draft_context: buildCampaignRecordPayload(projectName, session)
+1408:        console.warn("Failed to persist campaign handoff:", error.message);
+1411:      showMessage?.("Campaign context sent to AI Command.");
+1415:  const publishingBtn = $("campaignOpenPublishingBtn");
+1418:      const accepted = persistCampaignRouteHandoff({ projectName, session, destinationPage: "publishing", createProjectHandoff });
+1423:  const assetsBtn = $("campaignReviewAssetsBtn");
+1428:  const contentBtn = $("campaignOpenContentStudioBtn");
+1431:      const accepted = persistCampaignRouteHandoff({ projectName, session, destinationPage: "content-studio", createProjectHandoff });
+1436:  const mediaBtn = $("campaignOpenMediaStudioBtn");
+1439:      const accepted = persistCampaignRouteHandoff({ projectName, session, destinationPage: "media-studio", createProjectHandoff });
+1444:  const adsBtn = $("campaignOpenAdsManagerBtn");
+1447:      const accepted = persistCampaignRouteHandoff({ projectName, session, destinationPage: "ads-manager", createProjectHandoff });
+1452:  const generatePackageBtn = $("campaignGeneratePackageBtn");
+1456:      showMessage?.("Campaign package drafted in this session. Backend export wiring can be connected next.");
+1461:  const dependenciesBtn = $("campaignReviewDependenciesBtn");
+1464:      const model = buildCampaignModel(state, session, session.values);
+1477:  const refreshIntelligenceBtn = $("campaignRefreshIntelligenceBtn");
+1491:      showMessage?.("Refreshing campaign intelligence.");
+1496:export const campaignStudioRoute = {
+1497:  id: "campaign-studio",
+1501:    title: "Campaign Studio",
+1502:    description: "Plan campaign basics, launch waves, channel mix, and required assets in one execution-oriented workspace."
+1505:    <section class="page is-active" data-page="campaign-studio">
+1506:      <div id="campaignStudioRoot"></div>
+1519:    saveProjectCampaign,
+1525:    applyAiCampaignHandoff(projectName, state.data.operations, session);
+1527:    const root = $("campaignStudioRoot");
+1540:      saveProjectCampaign,
+1553:    const model = buildCampaignModel(state, session, values);
+1560:      campaignAssetKeys,
+1572:      strategyGuidance,
+1579:    const activeCampaignLabel = safeText(firstNonEmpty(state.context.activeCampaign, values.campaignName), projectName || "Campaign Studio");
+1596:    const goalLabel = safeText(values.campaignGoal, "Goal pending");
+1597:    const strategistNextAction = safeText(strategyGuidance.nextAction, "Review campaign plan");
+1599:      ? "Current intelligence is shaping campaign direction and readiness."
+1603:      <div class="campaign-studio-wrapper">
+1605:        <section class="mhos-campaign-command-header mhos-context-ribbon" aria-label="Campaign command board">
+1606:          <div class="mhos-campaign-command-main mhos-context-main">
+1607:            <div class="mhos-campaign-kicker-row mhos-context-kicker">
+1608:              <span class="mhos-campaign-kicker mhos-context-kicker">Campaign Command Board</span>
+1609:              <span class="mhos-campaign-state mhos-campaign-state--${readinessTone}">${escapeHtml(executionReadiness.status)}</span>
+1611:            <h2 class="mhos-campaign-title mhos-context-title">${escapeHtml(activeCampaignLabel)}</h2>
+1612:            <p class="mhos-campaign-summary mhos-context-description">${escapeHtml(goalLabel)}</p>
+1613:            <div class="mhos-campaign-context-row mhos-context-chip-row" aria-label="Campaign context">
+1614:              <span class="mhos-campaign-context-item mhos-context-chip">Market <strong class="mhos-campaign-context-value">${escapeHtml(marketLabel)}</strong></span>
+1615:              <span class="mhos-campaign-context-item mhos-context-chip">Product <strong class="mhos-campaign-context-value">${escapeHtml(productLabel)}</strong></span>
+1616:              <span class="mhos-campaign-context-item mhos-context-chip">Budget <strong class="mhos-campaign-context-value">${escapeHtml(budgetLabel)}</strong></span>
+1617:              <span class="mhos-campaign-context-item mhos-context-chip">Window <strong class="mhos-campaign-context-value">${escapeHtml(launchWindowLabel)}</strong></span>
+1621:          <aside class="mhos-campaign-strategist-panel mhos-context-actions mhos-executive-ai-panel" aria-label="Campaign strategist recommendation">
+1622:            <span class="mhos-campaign-panel-label">Strategist next move</span>
+1623:            <strong class="mhos-campaign-panel-action mhos-executive-guidance">${escapeHtml(strategistNextAction)}</strong>
+1624:            <p class="mhos-campaign-panel-copy mhos-executive-guidance">${escapeHtml(strategistMode)}</p>
+1627:          <div class="mhos-campaign-actions mhos-context-actions mhos-executive-action-row" aria-label="Campaign command actions">
+1628:            <button id="campaignRefreshIntelligenceBtn" class="btn btn-secondary mhos-context-action" type="button">Refresh campaign intelligence</button>
+1629:            <button id="campaignSaveDraftBtn" class="btn btn-secondary mhos-context-action" type="button">Save campaign draft</button>
+1630:            <button id="campaignBuildPlanBtn" class="btn btn-primary mhos-context-action" type="button">Save campaign plan</button>
+1633:          <div class="mhos-campaign-operating-summary mhos-executive-summary-grid" aria-label="Campaign operating summary">
+1634:            <article class="mhos-campaign-summary-item mhos-campaign-summary-item--${readinessTone} mhos-executive-summary-item">
+1635:              <span class="mhos-campaign-metric-label mhos-executive-metric-label">Readiness</span>
+1636:              <strong class="mhos-campaign-metric-value mhos-executive-metric-value">${escapeHtml(executionReadiness.status)}</strong>
+1637:              <small class="mhos-campaign-metric-note mhos-executive-metric-note">${escapeHtml(executionReadiness.total ? `${executionReadiness.total} open gate${executionReadiness.total === 1 ? "" : "s"}` : "Launch gates clear")}</small>
+1639:            <article class="mhos-campaign-summary-item mhos-campaign-summary-item--${intelligenceTone} mhos-executive-summary-item">
+1640:              <span class="mhos-campaign-metric-label mhos-executive-metric-label">Intelligence</span>
+1641:              <strong class="mhos-campaign-metric-value mhos-executive-metric-value">${escapeHtml(intelligenceLabel)}</strong>
+1642:              <small class="mhos-campaign-metric-note mhos-executive-metric-note">${escapeHtml(intelligenceError || (hasLiveIntelligence ? "Signals active" : "Projection mode"))}</small>
+1644:            <article class="mhos-campaign-summary-item mhos-campaign-summary-item--${blockerTone} mhos-executive-summary-item">
+1645:              <span class="mhos-campaign-metric-label mhos-executive-metric-label">Blockers</span>
+1646:              <strong class="mhos-campaign-metric-value mhos-executive-metric-value">${escapeHtml(String(executionReadiness.total))}</strong>
+1647:              <small class="mhos-campaign-metric-note mhos-executive-metric-note">${escapeHtml(executionReadiness.total ? "Needs operator attention" : "No open launch blockers")}</small>
+1649:            <article class="mhos-campaign-summary-item mhos-campaign-summary-item--${channelTone} mhos-executive-summary-item">
+1650:              <span class="mhos-campaign-metric-label mhos-executive-metric-label">Channels</span>
+1651:              <strong class="mhos-campaign-metric-value mhos-executive-metric-value">${escapeHtml(channelStateLabel)}</strong>
+1652:              <small class="mhos-campaign-metric-note mhos-executive-metric-note">${escapeHtml(recommendedChannelCount ? `${recommendedChannelCount} AI recommendations` : "Awaiting channel mix")}</small>
+1657:        <div class="campaign-studio-layout">
+1658:          <form id="campaignStudioForm" class="campaign-studio-main">
+1661:                <h3>Campaign Basics</h3>
+1664:              <div class="campaign-section-copy">
+1665:                Lock the core campaign definition first so planning, routing, and AI prompts all reference the same structure.
+1669:                  name: "campaignName",
+1670:                  label: "Campaign name",
+1671:                  value: values.campaignName,
+1677:                  name: "campaignGoal",
+1678:                  label: "Campaign goal",
+1679:                  value: values.campaignGoal,
+1685:                  name: "campaignType",
+1686:                  label: "Campaign type",
+1687:                  value: values.campaignType,
+1696:                  helper: "Primary market or region this campaign is optimized for.",
+1706:                  helper: "When should the campaign start going live?",
+1734:              <div class="campaign-section-copy">
+1742:                  helper: "What product, bundle, or offer family should this campaign push first?",
+1750:                  helper: "Capture the benefit, problem-solution, or proof angle the campaign should repeat.",
+1760:                  placeholder: "Who is this campaign for?",
+1768:                  helper: "The core need the campaign should speak to directly.",
+1777:                  helper: "List the first channels this campaign should activate. The recommendation panel below can help tighten the mix.",
+1815:              <div class="campaign-section-copy">
+1818:              <div class="campaign-wave-grid">
+1820:                  <div class="campaign-wave-card">
+1821:                    <div class="campaign-wave-head">
+1825:                    <div class="campaign-wave-meta">
+1826:                      <div class="campaign-wave-meta-item">
+1830:                      <div class="campaign-wave-meta-item">
+1834:                      <div class="campaign-wave-meta-item">
+1838:                      <div class="campaign-wave-meta-item">
+1845:                        ? `<div class="campaign-wave-callout">Missing inputs: ${escapeHtml(wave.missingInputs.join(", "))}</div>`
+1846:                        : `<div class="campaign-wave-callout is-ready">${escapeHtml(wave.roleHint)}</div>`
+1868:                        label: "Wave channels",
+1870:                        helper: "List the channels this wave should activate or test.",
+1882:                <h3>Campaign Outputs / Readiness</h3>
+1885:              <div class="campaign-section-copy">
+1886:                Review the recommended campaign direction, required assets, and real blockers before sending the plan into downstream work.
+1893:              <div class="campaign-strategy-stack">
+1894:                <div class="campaign-strategy-item">
+1895:                  <span>Recommended campaign angle</span>
+1896:                  <strong>${escapeHtml(strategyGuidance.angle)}</strong>
+1898:                <div class="campaign-strategy-item">
+1900:                  <strong>${escapeHtml(strategyGuidance.offer)}</strong>
+1902:                <div class="campaign-strategy-item">
+1904:                  <strong>${escapeHtml(strategyGuidance.audience)}</strong>
+1906:                <div class="campaign-strategy-item">
+1908:                  <strong>${escapeHtml(strategyGuidance.channels)}</strong>
+1910:                <div class="campaign-strategy-item">
+1912:                  <strong>${escapeHtml(strategyGuidance.nextAction)}</strong>
+1915:              <div class="campaign-recommendation-grid">
+1916:                <div class="campaign-studio-panel-block">
+1917:                  <h4 class="insights-subtitle">Recommended organic channels</h4>
+1920:                <div class="campaign-studio-panel-block">
+1921:                  <h4 class="insights-subtitle">Recommended paid channels</h4>
+1924:                <div class="campaign-studio-panel-block">
+1925:                  <h4 class="insights-subtitle">Recommended support channels</h4>
+1934:                  helper: "Define what must exist before the campaign can execute smoothly across channels and waves.",
+1943:                  helper: "Capture dependencies, packaging notes, approval guidance, or production instructions for the next operator.",
+1949:              <div class="campaign-studio-panel-block">
+1950:                <h4 class="insights-subtitle">Library inputs for campaign planning</h4>
+1951:                ${renderAssetDependencyRows(state.data.assets, campaignAssetKeys, escapeHtml, "Product, pricing, and campaign assets are covered.")}
+1954:              <div class="campaign-readiness-grid">
+1993:                  executionReadiness.approvalBlockers,
+2001:          <aside class="campaign-studio-side">
+2004:                <h3>Campaign AI Assistant</h3>
+2007:              <div class="campaign-section-copy">
+2008:                Send campaign context to AI prefills the current campaign draft and then navigates there. The downstream send actions open the linked workspace with the current campaign context attached.
+2011:                ${renderSummaryItem("Campaign", values.campaignName, escapeHtml)}
+2012:                ${renderSummaryItem("Goal", values.campaignGoal, escapeHtml)}
+2019:                <button id="campaignAskAiBtn" class="quick-action-btn" type="button">
+2020:                  <span class="home-action-title">Send campaign context to AI</span>
+2021:                  <span class="home-action-meta">Prefill AI Command with the current draft, blockers, and campaign context, then open that page.</span>
+2024:              <div class="campaign-routing-grid">
+2025:                <button id="campaignOpenContentStudioBtn" class="quick-action-btn" type="button">
+2027:                  <span class="home-action-meta">Open Content Studio with a campaign handoff attached.</span>
+2029:                <button id="campaignOpenMediaStudioBtn" class="quick-action-btn" type="button">
+2031:                  <span class="home-action-meta">Open Media Studio with a campaign handoff attached.</span>
+2033:                <button id="campaignOpenPublishingBtn" class="quick-action-btn" type="button">
+2035:                  <span class="home-action-meta">Open Publishing with a campaign handoff attached.</span>
+2037:                <button id="campaignOpenAdsManagerBtn" class="quick-action-btn" type="button">
+2039:                  <span class="home-action-meta">Open Ads Manager with a campaign handoff attached.</span>
+2041:                <button id="campaignReviewDependenciesBtn" class="quick-action-btn" type="button">
+2042:                  <span class="home-action-title">Review campaign dependencies</span>
+2045:                <button id="campaignReviewAssetsBtn" class="quick-action-btn" type="button">
+2046:                  <span class="home-action-title">Review campaign assets in Library</span>
+2050:              <div class="campaign-helper-note">${escapeHtml(hasLiveIntelligence ? "Live intelligence is shaping the readiness and channel recommendations on this page." : "This page is still usable without full intelligence; recommendations are falling back to current draft and readiness inputs.")}</div>
+2057:    bindCampaignStudio({
+2065:      saveProjectCampaign,
+
+### Tool Dock current tools
+50:  const drawer = document.querySelector("[data-aicmd-tool-drawer]");
+54:  if (returnContext.toolId) {
+55:    targetButton = findToolButton(root, "data-aicmd-tool-dock", returnContext.toolId)
+56:      || findToolButton(root, "data-aicmdv2-tool", returnContext.toolId);
+60:    targetButton = root.querySelector("[data-aicmd-tool-dock][data-aicmd-tool-dock-action='guided']")
+61:      || root.querySelector("[data-aicmd-tool-dock]")
+62:      || root.querySelector("[data-aicmdv2-tool]");
+69:  const activeDrawer = document.querySelector("[data-aicmd-tool-drawer]");
+78:    const fallbackTool = findToolMetadataById(returnContext.toolId);
+83:        tool: fallbackTool,
+94:      if (returnContext.toolId) activeDrawer.dataset.pendingTool = returnContext.toolId;
+111:    const msg = activeDrawer.querySelector("[data-aicmd-tool-drawer-status]") || document.querySelector("[data-aicmd-tool-drawer-status]");
+137:  toolId = "",
+150:    toolId,
+159:// --- When Open Library is clicked from tool dock, store both bridge and drawer return context ---
+164:  toolId = "",
+176:    toolId,
+203:    toolId: "",
+291:  const warning = drawer?.querySelector?.("[data-aicmd-tool-drawer-source-warning]");
+320:    "This prompt tool needs a trusted Library source first. Choose a source from Library, then return to prepare the composer prompt."
+328:  const selectedNode = drawer.querySelector("[data-aicmd-tool-drawer-selected-source]");
+329:  const sourceInput = drawer.querySelector("[data-aicmd-tool-drawer-source-details]");
+330:  const sourceSelect = drawer.querySelector("[data-aicmd-tool-drawer-source-select]");
+334:      selectedNode.innerHTML = `<span class=\"mhos-tool-drawer-selected-source-empty\">No trusted Library source selected yet.</span>`;
+337:      sourceInput.placeholder = "Optional: add source usage notes, audience, angle, or claims to avoid...";
+347:      <div class=\"mhos-tool-drawer-source-card\">
+348:        <div class=\"mhos-tool-drawer-source-eyebrow\">Trusted AI context only</div>
+349:        <div class=\"mhos-tool-drawer-source-main\">${escapeHtml(name)}</div>
+350:        <div class=\"mhos-tool-drawer-source-meta\">${escapeHtml(type)} · Added from Library · Not approval or publish readiness</div>
+351:        ${path && path !== name ? `<div class=\"mhos-tool-drawer-source-path\" title=\"${escapeHtml(path)}\">${escapeHtml(path)}</div>` : ""}
+352:        <div class=\"mhos-tool-drawer-source-actions\">
+353:          <button type=\"button\" class=\"btn btn-xs\" data-aicmd-tool-drawer-change-source>Change source</button>
+354:          <button type=\"button\" class=\"btn btn-xs\" data-aicmd-tool-drawer-remove-source>Remove source</button>
+362:    sourceInput.placeholder = "Optional: add source usage notes, audience, angle, or claims to avoid...";
+376:    const changeBtn = selectedNode.querySelector('[data-aicmd-tool-drawer-change-source]');
+379:        drawer.querySelector('[data-aicmd-tool-drawer-open-library]')?.click();
+382:    const removeBtn = selectedNode.querySelector('[data-aicmd-tool-drawer-remove-source]');
+387:        if (selectedNode) selectedNode.innerHTML = `<span class=\"mhos-tool-drawer-selected-source-empty\">No trusted Library source selected yet.</span>`;
+388:        if (sourceInput) sourceInput.placeholder = "Optional: add source usage notes, audience, angle, or claims to avoid...";
+401:    label: "Rewrite",
+408:    label: "Translate",
+415:    label: "Improve",
+422:  strategist: [
+424:      id: "campaign-plan",
+426:      label: "Campaign",
+430:      frontendOwnerPage: "campaign-studio",
+431:      destinations: ["chat-preview", "campaign-studio", "content-studio", "workflows"],
+432:      sourceTypes: ["current_chat", "campaign_notes", "market_notes", "audience_notes", "product_data", "library_source", "manual_input"],
+433:      outputTypes: ["campaign_plan", "campaign_brief", "channel_plan", "next_best_actions"],
+434:      template: "Create a campaign plan for {projectName}. Include objective, audience, offer, channels, phases, risks, and next best actions. Keep it review-ready only."
+437:      id: "launch-plan",
+439:      label: "Launch",
+443:      frontendOwnerPage: "campaign-studio",
+444:      destinations: ["chat-preview", "campaign-studio", "workflows", "publishing"],
+445:      sourceTypes: ["current_chat", "campaign_brief", "asset_requirements", "timeline_notes", "library_source", "manual_input"],
+446:      outputTypes: ["launch_plan", "readiness_plan", "timeline", "dependency_map"],
+447:      template: "Build a launch plan for {projectName}. Include timeline, required assets, owners, channels, readiness gaps, and safe next actions."
+450:      id: "audience",
+452:      label: "Audience",
+456:      frontendOwnerPage: "campaign-studio",
+457:      destinations: ["chat-preview", "campaign-studio", "content-studio", "insights"],
+459:      outputTypes: ["audience_map", "segment_notes", "objection_map", "message_angles"],
+460:      template: "Map the target audience for {projectName}. Include segments, needs, objections, buying triggers, and message angles."
+463:      id: "offer",
+465:      label: "Offer",
+469:      frontendOwnerPage: "campaign-studio",
+470:      destinations: ["chat-preview", "campaign-studio", "content-studio", "ads-manager"],
+472:      outputTypes: ["offer_brief", "value_proposition", "proof_points", "cta_options"],
+473:      template: "Create offer angles for {projectName}. Include value proposition, benefits, proof points, CTA ideas, and risk notes."
+478:      label: "Funnel",
+482:      frontendOwnerPage: "campaign-studio",
+483:      destinations: ["chat-preview", "campaign-studio", "content-studio", "workflows", "publishing"],
+484:      sourceTypes: ["current_chat", "campaign_brief", "audience_notes", "content_inventory", "library_source", "manual_input"],
+491:      label: "Priority",
+496:      destinations: ["chat-preview", "workflows", "task", "campaign-studio"],
+497:      sourceTypes: ["current_chat", "operations_snapshot", "readiness_gaps", "campaign_notes", "manual_input"],
+507:      label: "Write",
+520:      label: "Rewrite",
+533:      label: "Translate",
+541:      template: "Translate and localize the current text for {projectName}. Ask for target language and market if missing. Preserve brand tone, adapt CTA and wording for the target audience, and keep the result review-ready."
+546:      label: "Improve",
+559:      label: "Check",
+572:      label: "Sources",
+579:      outputTypes: ["source_bundle", "fact_extraction", "proof_summary", "context_brief"],
+585:      label: "SEO",
+591:      sourceTypes: ["topic", "market", "language", "audience", "current_chat", "library_folder"],
+592:      outputTypes: ["seo_brief", "keyword_clusters", "search_intent_map", "blog_outline", "meta_pack", "faq_ideas", "internal_link_plan", "content_gap_notes"],
+593:      template: "Prepare SEO support for {projectName}. Ask for topic, market, language, and audience if missing. Create keyword ideas, search intent, meta title/description, blog outline, FAQ ideas, internal link ideas, and content gap notes."
+598:      label: "Repurpose",
+611:      label: "Prepare Send-Off",
+618:      outputTypes: ["content_studio_draft", "library_save", "media_brief", "publishing_package", "compliance_review", "task_preview", "handoff_preview"],
+624:      id: "visual-brief",
+626:      label: "Visual Brief",
+632:      sourceTypes: ["current_chat", "campaign_brief", "brand_guidelines", "product_images", "reference_asset", "library_source", "manual_input"],
+633:      outputTypes: ["visual_brief", "creative_direction", "format_brief", "asset_requirements"],
+634:      template: "Prepare a visual brief for {projectName}. Include concept, format, composition, colors, typography, visual mood, required assets, and CTA."
+639:      label: "Moodboard",
+645:      sourceTypes: ["current_chat", "brand_guidelines", "reference_asset", "campaign_mood", "library_source", "manual_input"],
+652:      label: "Image",
+658:      sourceTypes: ["current_chat", "visual_brief", "brand_guidelines", "product_data", "reference_asset", "manual_input"],
+665:      label: "Assets",
+671:      sourceTypes: ["current_chat", "campaign_brief", "library_folder", "brand_assets", "product_images", "manual_input"],
+672:      outputTypes: ["asset_checklist", "missing_assets", "asset_request_brief", "production_requirements"],
+678:      label: "Layout",
+684:      sourceTypes: ["current_chat", "content_draft", "visual_brief", "brand_guidelines", "reference_asset", "manual_input"],
+691:      label: "Brand Check",
+697:      sourceTypes: ["current_chat", "brand_guidelines", "visual_brief", "selected_asset", "library_source", "manual_input"],
+707:      label: "Reel",
+713:      sourceTypes: ["current_chat", "campaign_brief", "content_draft", "product_data", "library_source", "manual_input"],
+720:      label: "Storyboard",
+726:      sourceTypes: ["current_chat", "script_draft", "visual_brief", "reference_asset", "product_images", "manual_input"],
+733:      label: "Shot List",
+739:      sourceTypes: ["current_chat", "storyboard", "visual_brief", "product_data", "production_notes", "manual_input"],
+746:      label: "Voiceover",
+752:      sourceTypes: ["current_chat", "script_draft", "campaign_brief", "brand_voice", "manual_input"],
+759:      label: "Video CTA",
+765:      sourceTypes: ["current_chat", "campaign_brief", "offer_data", "video_script", "manual_input"],
+767:      template: "Create CTA options for a video campaign for {projectName}. Include soft, direct, urgency, and brand-led versions."
+775:      label: "Publish Check",
+788:      label: "Channel Pack",
+794:      sourceTypes: ["content_draft", "media_asset", "campaign_brief", "channel_notes", "library_source", "manual_input"],
+801:      label: "Draft Schedule",
+807:      sourceTypes: ["publishing_package", "campaign_timeline", "channel_notes", "approval_notes", "manual_input"],
+814:      label: "Hashtags",
+820:      sourceTypes: ["content_draft", "topic", "market", "channel_notes", "seo_brief", "manual_input"],
+822:      template: "Suggest hashtags and discoverability tags for {projectName}. Group them by brand, product, audience, niche, and market."
+827:      label: "Governance Review",
+843:      label: "Ad Angle",
+849:      sourceTypes: ["campaign_brief", "audience_notes", "offer_data", "proof_points", "library_source", "manual_input"],
+851:      template: "Create paid ad angles for {projectName}. Include hook, audience pain, benefit, proof, CTA, and compliance risks."
+856:      label: "Ad Copy",
+862:      sourceTypes: ["ad_angle", "campaign_brief", "landing_page_copy", "product_data", "manual_input"],
+869:      label: "Targeting",
+874:      destinations: ["chat-preview", "ads-manager", "insights", "campaign-studio"],
+875:      sourceTypes: ["audience_notes", "insights_report", "campaign_brief", "customer_notes", "manual_input"],
+876:      outputTypes: ["audience_map", "targeting_ideas", "exclusions", "funnel_stage_map"],
+877:      template: "Map targeting ideas for {projectName}. Include audience groups, interests, exclusions, funnel stage, and testing notes."
+882:      label: "Creative",
+888:      sourceTypes: ["creative_assets", "campaign_brief", "ad_copy", "performance_notes", "manual_input"],
+895:      label: "Landing",
+901:      sourceTypes: ["ad_copy", "landing_page_copy", "offer_data", "proof_points", "library_source", "manual_input"],
+909:      id: "seo-brief",
+911:      label: "SEO Brief",
+917:      sourceTypes: ["topic", "market", "language", "audience", "library_source", "manual_input"],
+918:      outputTypes: ["seo_brief", "search_intent_map", "content_structure", "meta_ideas", "internal_links"],
+919:      template: "Create an SEO brief for {projectName}. Include keywords, search intent, content structure, meta ideas, internal links, and risks."
+924:      label: "Insights",
+929:      destinations: ["chat-preview", "insights", "campaign-studio", "workflows"],
+937:      label: "Keywords",
+943:      sourceTypes: ["topic", "market", "audience", "seo_brief", "library_source", "manual_input"],
+945:      template: "Suggest keyword groups for {projectName}. Include commercial, informational, branded, product, and local intent clusters."
+950:      label: "Performance",
+955:      destinations: ["chat-preview", "insights", "campaign-studio", "workflows"],
+956:      sourceTypes: ["analytics_summary", "performance_notes", "campaign_results", "content_inventory", "manual_input"],
+963:      label: "Gaps",
+968:      destinations: ["chat-preview", "insights", "content-studio", "campaign-studio"],
+969:      sourceTypes: ["content_inventory", "seo_brief", "audience_notes", "competitor_notes", "library_source", "manual_input"],
+979:      label: "Claims",
+992:      label: "Safe Rewrite",
+1005:      label: "Evidence",
+1018:      label: "GDPR",
+1031:      label: "Governance Notes",
+1047:      label: "Task Plan",
+1060:      label: "Draft Workflow",
+1073:      label: "Prepare Handoff",
+1080:      outputTypes: ["handoff_summary", "destination_brief", "required_inputs", "review_notes"],
+1086:      label: "Timeline",
+1091:      destinations: ["chat-preview", "workflows", "campaign-studio", "publishing"],
+1092:      sourceTypes: ["current_chat", "project_plan", "campaign_timeline", "dependency_notes", "manual_input"],
+1099:      label: "Checklist",
+1115:      label: "Reply",
+1128:      label: "Draft Ticket",
+1141:      label: "SLA",
+1154:      label: "Summary",
+1170:      label: "Pitch",
+1176:      sourceTypes: ["lead_context", "sales_notes", "product_data", "offer_data", "proof_points", "manual_input"],
+1178:      template: "Create a sales pitch for {projectName}. Include value proposition, customer pain, proof, offer, CTA, and follow-up note."
+1183:      label: "Follow-up",
+1189:      sourceTypes: ["lead_context", "meeting_notes", "sales_notes", "offer_data", "manual_input"],
+1196:      label: "Objection",
+1207:      id: "lead-brief",
+1209:      label: "Lead Brief",
+1216:      outputTypes: ["lead_brief", "fit_summary", "opportunity_notes", "risk_notes", "outreach_recommendation"],
+1217:      template: "Create a lead brief for {projectName}. Include profile, need, fit, opportunity, risks, and recommended outreach."
+1227:  const tools = teamMode === "team"
+1229:      ...TOOL_DOCK_BY_SPECIALIST.strategist.slice(0, 2),
+1235:  return Number.isFinite(limit) ? tools.slice(0, limit) : tools.slice();
+1241:      ...TOOL_DOCK_BY_SPECIALIST.strategist.slice(0, 2),
+1253:    .replace(/\{campaign\}/g, values.campaign || "the active campaign")
+1262:function getToolMetaList(tool = {}, key = "", fallback = []) {
+1263:  const value = tool?.[key];
+1275:function findToolMetadataById(toolId = "") {
+1276:  const id = String(toolId || "").trim();
+1278:  return getAllToolDockTools().find((tool) => tool?.id === id) || null;
+1281:function createToolButtonAdapter(tool = {}) {
+1282:  const actionType = tool.requiresSelectedSource && !tool.actionType ? "source_required" : (tool.actionType || tool.action || "guided");
+1284:    "data-aicmd-tool-dock": tool.id || "tool",
+1285:    "data-aicmd-tool-dock-id": tool.id || "tool",
+1286:    "data-aicmd-tool-dock-label": tool.label || "Smart tool",
+1287:    "data-aicmd-tool-dock-icon": tool.icon || "✦",
+1288:    "data-aicmd-tool-dock-badge": tool.badge || "",
+1289:    "data-aicmd-tool-dock-action": actionType,
+1290:    "data-aicmd-tool-dock-safety": tool.safetyLevel || "review_only",
+1291:    "data-aicmd-tool-dock-owner": tool.frontendOwnerPage || tool.owner || "ai-command",
+1292:    "data-aicmd-tool-dock-destinations": joinMetaList(getToolMetaList(tool, "destinations", tool.route ? [tool.route] : ["chat-preview"])),
+1293:    "data-aicmd-tool-dock-sources": joinMetaList(getToolMetaList(tool, "sourceTypes", ["current_chat", "library_source", "manual_input"])),
+1294:    "data-aicmd-tool-dock-outputs": joinMetaList(getToolMetaList(tool, "outputTypes", [tool.id || "tool_output", "draft", "review_notes"]))
+1306:    <aside class="mhos-tool-drawer" data-aicmd-tool-drawer hidden aria-hidden="true">
+1307:      <div class="mhos-tool-drawer-backdrop" data-aicmd-tool-drawer-close></div>
+1308:      <section class="mhos-tool-drawer-card" role="dialog" aria-modal="true" aria-label="AI prompt tool setup">
+1309:        <div class="mhos-tool-drawer-head">
+1310:          <div class="mhos-tool-drawer-title-block">
+1311:            <span class="mhos-tool-drawer-icon" data-aicmd-tool-drawer-icon>✦</span>
+1313:              <p class="mhos-tool-drawer-kicker" data-aicmd-tool-drawer-action>Quick AI tool</p>
+1314:              <h3 data-aicmd-tool-drawer-title>Quick AI Tool Setup</h3>
+1317:          <button class="mhos-tool-drawer-close" type="button" data-aicmd-tool-drawer-close aria-label="Close tool drawer">×</button>
+1320:        <p class="mhos-tool-drawer-description" data-aicmd-tool-drawer-description>
+1324:        <div class="mhos-tool-drawer-grid">
+1325:          <div class="mhos-tool-drawer-section">
+1326:            <span class="mhos-tool-drawer-section-label">1. Output type</span>
+1327:            <select class="mhos-tool-drawer-select" data-aicmd-tool-drawer-output-select></select>
+1330:          <div class="mhos-tool-drawer-section">
+1331:            <span class="mhos-tool-drawer-section-label">2. Trusted source / input</span>
+1332:            <select class="mhos-tool-drawer-select" data-aicmd-tool-drawer-source-select></select>
+1333:            <div class="mhos-tool-drawer-selected-source" data-aicmd-tool-drawer-selected-source></div>
+1334:            <div class="mhos-tool-drawer-warning" data-aicmd-tool-drawer-source-warning role="alert" hidden></div>
+1337:          <div class="mhos-tool-drawer-section">
+1338:            <span class="mhos-tool-drawer-section-label">3. Destination handoff</span>
+1339:            <select class="mhos-tool-drawer-select" data-aicmd-tool-drawer-destination-select></select>
+1342:          <div class="mhos-tool-drawer-section">
+1343:            <span class="mhos-tool-drawer-section-label">4. Options</span>
+1344:            <div class="mhos-tool-drawer-two-col">
+1345:              <label>
+1347:                <select class="mhos-tool-drawer-select" data-aicmd-tool-drawer-language>
+1353:              </label>
+1354:              <label>
+1356:                <select class="mhos-tool-drawer-select" data-aicmd-tool-drawer-tone>
+1364:              </label>
+1367:            <label class="mhos-tool-drawer-field">
+1370:                class="mhos-tool-drawer-input"
+1371:                data-aicmd-tool-drawer-source-details
+1375:            </label>
+1377:            <label class="mhos-tool-drawer-field">
+1378:              <span>Extra brief</span>
+1380:                class="mhos-tool-drawer-textarea"
+1381:                data-aicmd-tool-drawer-extra-brief
+1383:                placeholder="Add audience, goal, keywords, offer, product, or any must-use information..."
+1385:            </label>
+1388:          <div class="mhos-tool-drawer-section">
+1389:            <span class="mhos-tool-drawer-section-label">Safety</span>
+1390:            <div class="mhos-tool-drawer-safety" data-aicmd-tool-drawer-safety>Review only</div>
+1394:        <div class="mhos-tool-drawer-summary">
+1396:          <p data-aicmd-tool-drawer-summary>Choose output, trusted source, destination handoff, language, and tone.</p>
+1399:        <div class="mhos-tool-drawer-note">
+1403:        <div class="mhos-tool-drawer-actions">
+1404:          <button class="btn btn-secondary" type="button" data-aicmd-tool-drawer-open-library>Choose Library Source</button>
+1405:          <button class="btn btn-primary" type="button" data-aicmd-tool-drawer-use>Prepare Prompt</button>
+1406:          <button class="btn btn-secondary" type="button" data-aicmd-tool-drawer-close>Cancel</button>
+1424:  const tools = getDockTools({ specialistId, teamMode });
+1425:  const label = teamMode === "team" ? "Team guided tools" : "Specialist guided tools";
+1428:    <section class="mhos-tool-dock aicmd-tool-dock" aria-label="${safe(label)}">
+1429:      <div class="mhos-tool-dock-head">
+1430:        <span class="mhos-tool-dock-kicker">${safe(label)}</span>
+1431:        <span class="mhos-tool-dock-copy">Review-only setup · source, output, destination, then load into composer</span>
+1433:      <div class="mhos-tool-dock-list">
+1434:        ${tools.map((tool) => `
+1437:            class="mhos-tool-dock-item"
+1438:            data-aicmd-tool-dock="${safe(tool.id)}"
+1439:            data-aicmd-tool-dock-label="${safe(tool.label)}"
+1440:            data-aicmd-tool-dock-icon="${safe(tool.icon)}"
+1441:            data-aicmd-tool-dock-badge="${safe(tool.badge)}"
+1442:            data-aicmd-tool-dock-action="${safe(tool.actionType || "guided")}"
+1443:            data-aicmd-tool-dock-safety="${safe(tool.safetyLevel || "review_only")}"
+1444:            data-aicmd-tool-dock-owner="${safe(tool.frontendOwnerPage || "ai-command")}"
+1445:            data-aicmd-tool-dock-destinations="${safe(joinMetaList(getToolMetaList(tool, "destinations", ["chat-preview"])))}"
+1446:            data-aicmd-tool-dock-sources="${safe(joinMetaList(getToolMetaList(tool, "sourceTypes", ["current_chat"])))}"
+1447:            data-aicmd-tool-dock-outputs="${safe(joinMetaList(getToolMetaList(tool, "outputTypes", [tool.id || "tool_output"])))}"
+1448:            data-aicmd-tool-dock-template="${safe(tool.template)}"
+1449:            title="${safe(tool.template)}"
+1451:            <span class="mhos-tool-dock-icon" aria-hidden="true">${safe(tool.icon)}</span>
+1452:            <span class="mhos-tool-dock-label">${safe(tool.label)}</span>
+1453:            <span class="mhos-tool-dock-badge">${safe(tool.badge)}</span>
+1514:    const label = humanizeMeta(value || fallbackLabel || "Auto");
+1515:    return `<option value="${index === 0 && !values.length ? "" : safeValue}">${escapeHtml(label)}</option>`;
+1545:    "- Define search intent before writing.",
+1556:  const title = drawer?.querySelector?.("[data-aicmd-tool-drawer-title]")?.textContent || "Smart tool";
+1557:  const action = drawer?.querySelector?.("[data-aicmd-tool-drawer-action]")?.textContent || "Guided";
+1558:  const output = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-output-select]", "Auto / infer from request");
+1559:  const source = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-source-select]", "Current chat or ask if source is needed");
+1560:  const destination = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-destination-select]", "Chat preview");
+1561:  const language = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-language]", "Auto / project language");
+1562:  const tone = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-tone]", "Auto / brand tone");
+1563:  const sourceDetails = getDrawerFieldValue(drawer, "[data-aicmd-tool-drawer-source-details]");
+1564:  const extraBrief = getDrawerFieldValue(drawer, "[data-aicmd-tool-drawer-extra-brief]");
+1572:    `Use the ${title} tool for the active project${projectName ? ` (${projectName})` : ""}.`,
+1592:    lines.push(`- Extra brief: ${extraBrief}.`);
+1630:  const summary = drawer.querySelector("[data-aicmd-tool-drawer-summary]");
+1633:  const output = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-output-select]", "Auto");
+1634:  const source = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-source-select]", "Auto");
+1635:  const destination = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-destination-select]", "Chat preview");
+1636:  const language = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-language]", "Auto language");
+1637:  const tone = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-tone]", "Auto tone");
+1638:  const sourceDetails = getDrawerFieldValue(drawer, "[data-aicmd-tool-drawer-source-details]");
+1639:  const extraBrief = getDrawerFieldValue(drawer, "[data-aicmd-tool-drawer-extra-brief]");
+1647:  if (extraBrief) summaryParts.push("Extra brief added");
+1666:function openToolDrawer({ drawer, btn, tool: explicitTool = null, text, input, session, projectName, persistSessionDraft, sessionKey, updateStatus }) {
+1670:  drawer.dataset.pendingTool = btn.getAttribute("data-aicmd-tool-dock") || "tool";
+1671:  const actionType = btn.getAttribute("data-aicmd-tool-dock-action") || "guided";
+1676:  setDrawerText(drawer, "[data-aicmd-tool-drawer-icon]", btn.getAttribute("data-aicmd-tool-dock-icon") || "✦");
+1677:  setDrawerText(drawer, "[data-aicmd-tool-drawer-title]", btn.getAttribute("data-aicmd-tool-dock-label") || "Smart tool");
+1678:  setDrawerText(drawer, "[data-aicmd-tool-drawer-action]", `${humanizeMeta(actionType)} · ${humanizeMeta(btn.getAttribute("data-aicmd-tool-dock-owner") || "ai-command")}`);
+1681:    "[data-aicmd-tool-drawer-description]",
+1682:    `Prepare a review-only AI prompt for ${btn.getAttribute("data-aicmd-tool-dock-label") || "this tool"}. Choose output, trusted source context, destination handoff, language, and tone before loading it into the composer.`
+1684:  setDrawerText(drawer, "[data-aicmd-tool-drawer-safety]", humanizeMeta(btn.getAttribute("data-aicmd-tool-dock-safety") || "review_only"));
+1686:  const toolId = btn.getAttribute("data-aicmd-tool-dock")
+1687:    || btn.getAttribute("data-aicmd-tool-dock-id")
+1688:    || btn.getAttribute("data-tool-id")
+1690:  const tool = explicitTool || findToolMetadataById(toolId) || {};
+1691:  const hardOutputDefaults = [toolId || "tool_output", "draft", "review_notes"];
+1693:  const hardDestinationDefaults = ["chat-preview", "campaign-studio", "content-studio", "composer"];
+1694:  const rawOutputs = joinMetaList(getToolMetaList(tool, "outputTypes", []))
+1695:    || btn.getAttribute("data-aicmd-tool-dock-outputs")
+1697:  const rawSources = joinMetaList(getToolMetaList(tool, "sourceTypes", []))
+1698:    || btn.getAttribute("data-aicmd-tool-dock-sources")
+1700:  const rawDestinations = joinMetaList(getToolMetaList(tool, "destinations", []))
+1701:    || btn.getAttribute("data-aicmd-tool-dock-destinations")
+1706:  populateDrawerSelect(drawer.querySelector("[data-aicmd-tool-drawer-output-select]"), rawOutputs, "Choose output type");
+1707:  populateDrawerSelect(drawer.querySelector("[data-aicmd-tool-drawer-source-select]"), rawSources, "Choose source / input");
+1708:  populateDrawerSelect(drawer.querySelector("[data-aicmd-tool-drawer-destination-select]"), rawDestinations, "Choose destination handoff");
+1727:  updateStatus?.(`${btn.getAttribute("data-aicmd-tool-dock-label") || "Quick AI tool"} setup opened. Review source and handoff requirements, then prepare the prompt.`);
+1733:  tool = {},
+1742:  const drawer = root?.querySelector?.("[data-aicmd-tool-drawer]");
+1743:  const btn = createToolButtonAdapter(tool);
+1748:    tool,
+1749:    text: template || tool.template || tool.prompt || "",
+1772:  const drawer = root.querySelector("[data-aicmd-tool-drawer]");
+1774:  Array.from(root.querySelectorAll("[data-aicmd-tool-drawer-close]")).forEach((btn) => {
+1778:  const openLibraryBtn = root.querySelector("[data-aicmd-tool-drawer-open-library]");
+1783:      const drawerSourceSelect = root.querySelector("[data-aicmd-tool-drawer-source-select]");
+1792:        toolId: drawer?.dataset?.pendingTool || "",
+1795:        outputType: drawer?.querySelector?.("[data-aicmd-tool-drawer-output-select]")?.value || ""
+1825:  const useBtn = root.querySelector("[data-aicmd-tool-drawer-use]");
+1829:      const label = drawer?.dataset?.pendingTool || "tool";
+1832:        updateStatus?.("This prompt tool needs a trusted Library source first. Choose one from Library before continuing.");
+1840:          campaign: aiContext.campaign,
+1850:        persistSessionDraft(sessionKey, session, `${label} drawer tool loaded`);
+1854:        updateStatus(`${label} prompt prepared in the composer. Review it, then ask or create a preview.`);
+1863:  Array.from(root.querySelectorAll("[data-aicmd-tool-dock]")).forEach((btn) => {
+1865:      const template = btn.getAttribute("data-aicmd-tool-dock-template") || "";
+1866:      const label = btn.getAttribute("data-aicmd-tool-dock") || "tool";
+1867:      const actionType = btn.getAttribute("data-aicmd-tool-dock-action") || "prefill";
+1871:        const tool = findToolMetadataById(label);
+1875:          tool,
+1889:        campaign: aiContext.campaign,
+1898:        persistSessionDraft(sessionKey, session, `${label} dock tool loaded`);
+1902:        updateStatus(`${label} loaded into composer. Review it, then ask or preview.`);
+
+### Workflows/Handoff strategist linkage
+public/control-center/pages/workflows.js:33:    purpose: "Build a launch-ready review sequence across campaign, content, and distribution handoffs.",
+public/control-center/pages/workflows.js:35:    aiModeId: "strategist",
+public/control-center/pages/workflows.js:36:    routeHint: "campaign-studio"
+public/control-center/pages/workflows.js:43:    aiModeId: "writer",
+public/control-center/pages/workflows.js:44:    routeHint: "content-studio"
+public/control-center/pages/workflows.js:49:    purpose: "Prepare media production inputs, format guidance, and downstream handoff steps.",
+public/control-center/pages/workflows.js:51:    aiModeId: "media",
+public/control-center/pages/workflows.js:52:    routeHint: "media-studio"
+public/control-center/pages/workflows.js:59:    aiModeId: "operations",
+public/control-center/pages/workflows.js:60:    routeHint: "publishing"
+public/control-center/pages/workflows.js:67:    aiModeId: "analyst",
+public/control-center/pages/workflows.js:68:    routeHint: "insights"
+public/control-center/pages/workflows.js:75:    aiModeId: "researcher",
+public/control-center/pages/workflows.js:76:    routeHint: "research"
+public/control-center/pages/workflows.js:83:    aiModeId: "operations",
+public/control-center/pages/workflows.js:84:    routeHint: "integrations"
+public/control-center/pages/workflows.js:532:      `Open ${titleCase(workflow.routeHint)} for review handoff.`,
+public/control-center/pages/workflows.js:533:      blockedRequirements.length ? "Resolve blockers before any destination-owned execution." : "Proceed to review handoff."
+public/control-center/pages/workflows.js:539:        label: `Open ${titleCase(workflow.routeHint)}`,
+public/control-center/pages/workflows.js:540:        route: workflow.routeHint,
+public/control-center/pages/workflows.js:541:        reason: `Continue review in ${titleCase(workflow.routeHint)}.`
+public/control-center/pages/workflows.js:558:  if (target === "setup" || target === "campaign-studio") return "launch-campaign";
+public/control-center/pages/workflows.js:588:      title: "Prepare publishing package handoff before distribution",
+public/control-center/pages/workflows.js:611:    prompt: `Refine ${selected.title.toLowerCase()} for reviewed handoff with explicit dependencies and next actions.`
+public/control-center/pages/workflows.js:669:        Safe guided preparation only: navigate, create draft, generate prompt, and create review handoff.
+public/control-center/pages/workflows.js:932:  const handoff = getSharedHandoff(projectName, "workflows", operations);
+public/control-center/pages/workflows.js:933:  const handoffId = asString(handoff?.id);
+public/control-center/pages/workflows.js:934:  if (!handoffId || handoffId === asString(session.lastAppliedHandoffId)) return;
+public/control-center/pages/workflows.js:936:  const payload = asObject(handoff?.payload);
+public/control-center/pages/workflows.js:939:  const modeMapped = WORKFLOW_CATALOG.find((item) => item.aiModeId === modeId)?.id;
+public/control-center/pages/workflows.js:957:    run.source = "handoff";
+public/control-center/pages/workflows.js:962:  session.lastAppliedHandoffId = handoffId;
+public/control-center/pages/workflows.js:964:    console.info("Workflow handoff restored without automatic durable consume; operator-owned surfaces keep handoff lifecycle authority.");
+public/control-center/pages/workflows.js:966:  showMessage?.("Workflow context restored from shared handoff without consuming the durable handoff automatically.");
+public/control-center/pages/workflows.js:1075:    modeId: workflow.aiModeId,
+public/control-center/pages/workflows.js:1083:  const handoff = {
+public/control-center/pages/workflows.js:1085:    destination_page: "ai-command",
+public/control-center/pages/workflows.js:1096:  setSharedHandoff(projectName, "ai-command", handoff);
+public/control-center/pages/workflows.js:1099:    createProjectHandoff(projectName, handoff).catch((error) => {
+public/control-center/pages/workflows.js:1100:      console.warn("Failed to persist workflow-to-ai handoff:", error.message);
+public/control-center/pages/workflows.js:1140:    const workflow = WORKFLOW_CATALOG.find((item) => item.aiModeId === asString(meta.modeId)) || WORKFLOW_CATALOG[0];
+public/control-center/pages/workflows.js:1312:          destination_page: "workflows",
+public/control-center/pages/workflows.js:1317:              modeId: workflow.aiModeId,
+public/control-center/pages/workflows.js:1325:        persistWorkflowDraft(projectName, session, session.selectedWorkflowId, "Local handoff seed created", true);
+public/control-center/pages/workflows.js:1403:        route_target: activeWorkflow.routeHint,
+public/control-center/pages/workflows.js:1425:        destination_page: "workflows",
+public/control-center/pages/workflows.js:1555:        showError?.("Prepare the workflow package before creating a task handoff.");
+public/control-center/pages/workflows.js:1559:      const handoff = {
+public/control-center/pages/workflows.js:1561:        destination_page: "task-center",
+public/control-center/pages/workflows.js:1563:        summary: asString(run.output.summary || "Review-only task handoff prepared from the Workflows operating path."),
+public/control-center/pages/workflows.js:1564:        description: asString(run.output.summary || "Review-only task handoff prepared from the Workflows operating path."),
+public/control-center/pages/workflows.js:1581:      setSharedHandoff(projectName, "task-center", handoff);
+public/control-center/pages/workflows.js:1582:      showMessage?.("Task handoff prepared for review in Task Center.");
+public/control-center/pages/workflows.js:1607:        destination_page: "ai-command",
+public/control-center/pages/workflows.js:1643:        destination_page: "ai-command",
+public/control-center/pages/workflows.js:1668:      const confirmed = window.confirm(`Confirm guided preparation simulation\n\nAction: Simulate ${plan.length} guided automation steps.\nRisk: This can prepare downstream draft or handoff state, but does not publish, approve Governance decisions, or send externally.\n\nSelect Cancel to stop.`);
+public/control-center/pages/workflows.js:1698:      const confirmed = window.confirm("Confirm guided preparation step\n\nAction: Simulate the next preparation step.\nRisk: This can prepare downstream draft or handoff state, but does not publish, approve Governance decisions, or send externally.\n\nSelect Cancel to keep the current state.");
+public/control-center/pages/workflows.js:1735:          "Risk: This may prepare workflow steps and handoffs, but must not publish externally or approve Governance decisions without explicit approval.\n\n" +
+public/control-center/pages/workflows.js:1762:          "Risk: This may continue preparing workflow steps and handoffs from the current state.\n\n" +
+public/control-center/pages/workflows.js:1816:    description: "Prepare structured, repeatable workflow review packages and handoffs for common marketing operations."
+public/control-center/pages/workflows.js:1851:    const destinationRouteByHint = {
+public/control-center/pages/workflows.js:1852:      "campaign-studio": "campaign-studio",
+public/control-center/pages/workflows.js:1885:    function getDestinationLabel(routeHint) {
+public/control-center/pages/workflows.js:1886:      return titleCase(routeHint || "destination");
+public/control-center/pages/workflows.js:1960:      const destinationRoute = destinationRouteByHint[workflow.routeHint] || "workflows";
+public/control-center/pages/workflows.js:1961:      const destinationName = getDestinationLabel(workflow.routeHint);
+public/control-center/pages/workflows.js:1992:              <p class="wfloop-mission">Choose an operating playbook, prepare a review-ready package, and route it safely to the right MH-OS destination.</p>
+public/control-center/pages/workflows.js:2042:                        <span class="wfloop-mini-chip">Destination ${escapeHtml(getDestinationLabel(item.routeHint))}</span>
+public/control-center/pages/workflows.js:2089:                  <p class="wfloop-session-value">${escapeHtml(workflow.title)} package for ${escapeHtml(destinationName)}</p>
+public/control-center/pages/workflows.js:2123:                <pre>${escapeHtml(preparedForSelected?.prompt || "Package will include playbook, purpose, project, campaign, product, channel, goal, and destination context.")}</pre>
+public/control-center/pages/workflows.js:2128:                <p>Safe preparation path only. This surface prepares review context and routes it to the correct destination.</p>
+public/control-center/pages/workflows.js:2129:                <p>Backend workflow run and automation helpers remain preserved, but this active surface stays limited to preparation, review, routing, and destination-owned execution authority.</p>
+public/control-center/pages/workflows.js:2136:                <p class="mhos-ai-guidance-copy">AI prepares structure, sequencing, destination context, and missing-input prompts for review only for ${escapeHtml(workflow.title)}.</p>
+public/control-center/pages/workflows.js:2147:                <div class="mhos-destination-map">
+public/control-center/pages/workflows.js:2148:                  <article class="mhos-destination-item is-active">
+public/control-center/pages/workflows.js:2149:                    <div class="mhos-destination-copy">
+public/control-center/pages/workflows.js:2150:                      <p class="mhos-destination-title">Review in AI Workspace</p>
+public/control-center/pages/workflows.js:2151:                      <p class="mhos-destination-meta"><strong>Type</strong> AI review</p>
+public/control-center/pages/workflows.js:2152:                      <p class="mhos-destination-meta"><strong>Destination context</strong> workflow package prompt, selected workflow, and input state</p>
+public/control-center/pages/workflows.js:2153:                      <p class="mhos-destination-meta"><strong>Status</strong> Safe now</p>
+public/control-center/pages/workflows.js:2155:                    <div class="mhos-destination-actions">
+public/control-center/pages/workflows.js:2160:                  <article class="mhos-destination-item">
+public/control-center/pages/workflows.js:2161:                    <div class="mhos-destination-copy">
+public/control-center/pages/workflows.js:2162:                      <p class="mhos-destination-title">Create/Draft Task</p>
+public/control-center/pages/workflows.js:2163:                      <p class="mhos-destination-meta"><strong>Type</strong> task review handoff</p>
+public/control-center/pages/workflows.js:2164:                      <p class="mhos-destination-meta"><strong>Destination context</strong> selected workflow session title and handoff intent</p>
+public/control-center/pages/workflows.js:2165:                      <p class="mhos-destination-meta"><strong>Status</strong> Safe now</p>
+public/control-center/pages/workflows.js:2167:                    <div class="mhos-destination-actions">
+public/control-center/pages/workflows.js:2172:                  <article class="mhos-destination-item">
+public/control-center/pages/workflows.js:2173:                    <div class="mhos-destination-copy">
+public/control-center/pages/workflows.js:2174:                      <p class="mhos-destination-title">Open Owning Destination</p>
+public/control-center/pages/workflows.js:2175:                      <p class="mhos-destination-meta"><strong>Type</strong> destination navigation</p>
+public/control-center/pages/workflows.js:2176:                      <p class="mhos-destination-meta"><strong>Destination context</strong> route hint, prepared package, and review context</p>
+public/control-center/pages/workflows.js:2177:                      <p class="mhos-destination-meta"><strong>Status</strong> Safe now</p>
+public/control-center/pages/workflows.js:2179:                    <div class="mhos-destination-actions">
+public/control-center/pages/workflows.js:2180:                      <button class="btn btn-ghost btn-sm" type="button" data-wf-open="${escapeHtml(destinationRoute)}">Open ${escapeHtml(destinationName)}</button>
+public/control-center/pages/workflows.js:2184:                  <article class="mhos-destination-item">
+public/control-center/pages/workflows.js:2185:                    <div class="mhos-destination-copy">
+public/control-center/pages/workflows.js:2186:                      <p class="mhos-destination-title">Technical Details</p>
+public/control-center/pages/workflows.js:2187:                      <p class="mhos-destination-meta"><strong>Type</strong> technical disclosure</p>
+public/control-center/pages/workflows.js:2188:                      <p class="mhos-destination-meta"><strong>Destination context</strong> preparation boundary and preserved helper notes</p>
+public/control-center/pages/workflows.js:2189:                      <p class="mhos-destination-meta"><strong>Status</strong> Safe now · Destination tools own execution authority and Governance-gated actions remain protected</p>
+public/control-center/pages/workflows.js:2191:                    <div class="mhos-destination-actions">
+public/control-center/pages/workflows.js:2294:          modeId: activeWorkflow.aiModeId,
+public/control-center/pages/workflows.js:2335:          navigateTo("campaign-studio");
+public/control-center/pages/workflows.js:2342:          const handoff = {
+public/control-center/pages/workflows.js:2344:            destination_page: "task-center",
+public/control-center/pages/workflows.js:2345:            title: asString(stateModel.selectedWorkflow?.name || stateModel.selectedWorkflow?.title || "Workflow task handoff"),
+public/control-center/pages/workflows.js:2346:            summary: asString(stateModel.preparedPackage?.summary || stateModel.packagePreview || "Review-only task handoff prepared from the Workflows operating path."),
+public/control-center/pages/workflows.js:2347:            description: asString(stateModel.preparedPackage?.summary || stateModel.packagePreview || "Review-only task handoff prepared from the Workflows operating path."),
+public/control-center/pages/workflows.js:2351:              handoff_intent: "Prepare task handoff from workflow package.",
+public/control-center/pages/workflows.js:2356:          setSharedHandoff(projectName, "task-center", handoff);
+public/control-center/pages/workflows.js:2359:          stateModel.lastStatusText = "Task Center opened for workflow handoff and tracking.";
+public/control-center/pages/workflows.js:2368:            const handoff = {
+public/control-center/pages/workflows.js:2370:              destination_page: "task-center",
+public/control-center/pages/workflows.js:2371:              title: asString(stateModel.selectedWorkflow?.name || stateModel.selectedWorkflow?.title || "Workflow task handoff"),
+public/control-center/pages/workflows.js:2372:              summary: asString(stateModel.preparedPackage?.summary || stateModel.packagePreview || "Review-only task handoff prepared from the Workflows operating path."),
+public/control-center/pages/workflows.js:2373:              description: asString(stateModel.preparedPackage?.summary || stateModel.packagePreview || "Review-only task handoff prepared from the Workflows operating path."),
+public/control-center/pages/workflows.js:2377:                handoff_intent: "Prepare task handoff from workflow package.",
+public/control-center/pages/workflows.js:2382:            setSharedHandoff(projectName, "task-center", handoff);
+public/control-center/shared-context.js:75:const handoffCache = new Map();
+public/control-center/shared-context.js:145:function getLatestHandoffFromOperations(operations, destinationPage, sourcePage = "") {
+public/control-center/shared-context.js:146:  const handoffs = asArray(operations?.handoffs?.items);
+public/control-center/shared-context.js:147:  const available = handoffs.filter((item) => {
+public/control-center/shared-context.js:148:    const destinationMatches = asString(item?.destination_page) === asString(destinationPage);
+public/control-center/shared-context.js:151:    return destinationMatches && sourceMatches && active;
+public/control-center/shared-context.js:184:  const handoff =
+public/control-center/shared-context.js:189:  return asObject(handoff?.payload?.draft_context);
+public/control-center/shared-context.js:192:export function setSharedHandoff(projectName, destinationPage, handoff) {
+public/control-center/shared-context.js:193:  if (!projectName || !destinationPage || !handoff) return;
+public/control-center/shared-context.js:194:  handoffCache.set(buildKey(projectName, destinationPage), handoff);
+public/control-center/shared-context.js:197:export function getSharedHandoff(projectName, destinationPage, operations, sourcePage = "") {
+public/control-center/shared-context.js:198:  const cached = handoffCache.get(buildKey(projectName, destinationPage));
+public/control-center/shared-context.js:200:  return getLatestHandoffFromOperations(operations, destinationPage, sourcePage);
+public/control-center/api.js:2250:  if (params.destination_page) {
+public/control-center/api.js:2251:    search.set("destination_page", String(params.destination_page));
+public/control-center/api.js:2265:    `/media-manager/project/${encodeURIComponent(projectName)}/handoffs${suffix}`,
+public/control-center/api.js:2266:    "Failed to load handoffs"
+public/control-center/api.js:2276:    `/media-manager/project/${encodeURIComponent(projectName)}/handoffs`,
+public/control-center/api.js:2279:    "Failed to create handoff"
+public/control-center/api.js:2283:export async function consumeProjectHandoff(projectName, handoffId, payload = {}) {
+public/control-center/api.js:2288:  if (!handoffId) {
+public/control-center/api.js:2289:    throw new Error("Missing handoff id");
+public/control-center/api.js:2293:    `/media-manager/project/${encodeURIComponent(projectName)}/handoffs/${encodeURIComponent(handoffId)}/consume`,
+public/control-center/api.js:2296:    "Failed to consume handoff"
+
+### Backend strategist role/mode support
+runtime/orchestrator-service/server.js:6885:    ai_team_defaults: ['strategist', 'writer', 'designer', 'publisher', 'analyst'],
+runtime/orchestrator-service/server.js:6905:      ai_team_defaults: ['strategist', 'writer', 'designer', 'publisher', 'ads_operator', 'analyst', 'compliance_reviewer'],
+runtime/orchestrator-service/server.js:6918:      ai_team_defaults: ['strategist', 'writer', 'designer', 'video_lead', 'publisher', 'analyst'],
+runtime/orchestrator-service/server.js:6931:      ai_team_defaults: ['strategist', 'writer', 'designer', 'publisher', 'analyst'],
+runtime/orchestrator-service/server.js:6944:      ai_team_defaults: ['strategist', 'writer', 'designer', 'ads_operator', 'publisher', 'compliance_reviewer'],
+runtime/orchestrator-service/server.js:6957:      ai_team_defaults: ['strategist', 'writer', 'designer', 'publisher', 'analyst'],
+runtime/orchestrator-service/server.js:6970:      ai_team_defaults: ['strategist', 'writer', 'designer', 'video_lead', 'publisher'],
+runtime/orchestrator-service/server.js:6983:      ai_team_defaults: ['strategist', 'writer', 'designer', 'ads_operator', 'analyst'],
+runtime/orchestrator-service/server.js:6996:      ai_team_defaults: ['strategist', 'writer', 'designer', 'publisher'],
+runtime/orchestrator-service/server.js:16041:    campaignStrategyQueuePath: path.join(projectDir, 'campaign-strategy-queue.json'),
+runtime/orchestrator-service/server.js:17775:    if (command === '/create_campaign_strategy') {
+runtime/orchestrator-service/server.js:17787:      const queuePath = projectPaths.campaignStrategyQueuePath;
+runtime/orchestrator-service/server.js:17853:    if (command === '/review_campaign_strategy') {
+runtime/orchestrator-service/server.js:17861:      const queuePath = resolveLegacyExecutionProjectPaths(projectName).campaignStrategyQueuePath;
+runtime/orchestrator-service/server.js:17889:      const strategyQueuePath = projectPaths.campaignStrategyQueuePath;
+runtime/orchestrator-service/server.js:18562:      const strategyQueuePath = projectPaths.campaignStrategyQueuePath;
+runtime/orchestrator-service/lib/ops/backbone.js:116:    id: 'strategist',
+runtime/orchestrator-service/lib/ops/backbone.js:181:  home: ['strategist', 'analyst', 'admin'],
+runtime/orchestrator-service/lib/ops/backbone.js:182:  'campaign-studio': ['strategist', 'ads_operator', 'admin'],
+runtime/orchestrator-service/lib/ops/backbone.js:183:  'content-studio': ['writer', 'strategist', 'compliance_reviewer', 'admin'],
+runtime/orchestrator-service/lib/ops/backbone.js:186:  research: ['strategist', 'analyst', 'writer', 'admin'],
+runtime/orchestrator-service/lib/ops/backbone.js:188:  'ads-manager': ['ads_operator', 'strategist', 'analyst', 'admin'],
+runtime/orchestrator-service/lib/ops/backbone.js:189:  insights: ['analyst', 'strategist', 'ads_operator', 'admin'],
+runtime/orchestrator-service/lib/ops/backbone.js:199:    owner_role: 'strategist',
+runtime/orchestrator-service/lib/ops/backbone.js:225:    handoff_to: ['analyst', 'strategist'],
+runtime/orchestrator-service/lib/ops/backbone.js:232:    review_role: 'strategist',
+runtime/orchestrator-service/lib/ops/backbone.js:233:    handoff_to: ['strategist', 'writer', 'ads_operator'],
+runtime/orchestrator-service/lib/ops/backbone.js:259:  medium: ['compliance_reviewer', 'strategist'],
+runtime/orchestrator-service/lib/ops/backbone.js:361:  const roleId = normalizeRoleKey(source.role, 'strategist');
+runtime/orchestrator-service/lib/ops/backbone.js:401:    active_role: 'strategist',
+runtime/orchestrator-service/lib/ops/backbone.js:533:  let ownerRole = domain.owner_role || 'strategist';
+runtime/orchestrator-service/lib/ops/backbone.js:1601:        campaign: roleDisplay(team, 'strategist'),
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:8:  getAiModePrompt,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:10:} = require('../ai/provider-config');
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:138:const SPECIALIST_MODE_MAP = {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:139:  strategist: 'campaign',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:189:  const mapped = SPECIALIST_MODE_MAP[specialistId];
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:213:      : specialistId === 'strategist'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:271:function buildSpecialistInstruction(specialistId = "", specialistName = "Specialist") {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:276:    strategist: [
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:279:      "When asked for help, think like a senior strategist and keep the answer practical and decision-oriented."
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:367:  const specialistInstruction = buildSpecialistInstruction(specialistId, specialistName);
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:911:  const modePrompt = getAiModePrompt(classified.resolvedModeId);
+runtime/orchestrator-service/lib/ai/providers/openai.js:2:const { getAiModePrompt } = require('../provider-config');
+runtime/orchestrator-service/lib/ai/providers/openai.js:283:      const modePrompt = getAiModePrompt(input.modeId);
+runtime/orchestrator-service/lib/ai/provider-config.js:98:    campaign_strategist: 'campaign',
+runtime/orchestrator-service/lib/ai/provider-config.js:108:function getAiModePrompt(modeId) {
+runtime/orchestrator-service/lib/ai/provider-config.js:156:  getAiModePrompt,
