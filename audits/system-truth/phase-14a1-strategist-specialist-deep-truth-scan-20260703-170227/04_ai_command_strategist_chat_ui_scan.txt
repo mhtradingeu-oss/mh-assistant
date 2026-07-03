@@ -1,0 +1,1436 @@
+### ai-command imports and specialist definitions
+import {
+        bindAiToolDock,
+        getAiToolDockTools,
+        getSelectedLibrarySource,
+        openAiToolDrawerFromMetadata,
+        openLibrarySourcePickerFromAiCommand,
+        renderAiToolDrawerShell
+} from "./ai-command/tool-dock.js";
+import { getProjectedActiveRole, getProjectedTeamMembers } from "../runtime/authority/authority-projection.js";
+
+import {
+        selectCurrentProject,
+        selectOperationsSnapshot,
+        selectProjectPayload
+} from "../state.js";
+
+import {
+        getSharedHandoff,
+        setSharedAiDraft,
+        setSharedHandoff
+} from "../shared-context.js";
+
+import {
+        getCategoryReadinessList
+} from "../asset-library.js";
+
+import {
+        executeProjectAiChat,
+        executeProjectAiGuidance,
+        generateAiCommandCampaignPreview
+} from "../api.js";
+
+//  AI TEAM DEFINITIONS
+// ============================================================
+
+const MODE_DEFS = [
+        {
+                id: "strategist",
+                label: "Strategist",
+                icon: "🎯",
+                summary: "Campaign concepts, launch plans, channel mix, and offer strategy.",
+                routeHint: "campaign-studio"
+        },
+        {
+                id: "writer",
+                label: "Content Writer",
+                icon: "✍️",
+                summary: "Captions, hooks, scripts, emails, and landing page copy.",
+                routeHint: "content-studio"
+        },
+        {
+                id: "media",
+                label: "Media Director",
+                icon: "🎨",
+                summary: "Visual direction, creative brief, format guidance, and brand consistency.",
+                routeHint: "media-studio"
+        },
+        {
+                id: "video_lead",
+                label: "Video Lead",
+                icon: "🎬",
+                summary: "Short-form video scripts, motion direction, and reel strategy.",
+                routeHint: "media-studio"
+        },
+        {
+                id: "publisher",
+                label: "Publisher",
+                icon: "📤",
+                summary: "Publishing readiness, schedule review, and handoff preparation.",
+                routeHint: "publishing"
+        },
+        {
+                id: "ads",
+                label: "Ads Optimizer",
+                icon: "📣",
+                summary: "Ad concepts, targeting angles, platform copy, and paid strategy.",
+                routeHint: "ads-manager"
+        },
+        {
+                id: "analyst",
+                label: "SEO & Insights Analyst",
+                icon: "📊",
+                summary: "SEO signals, performance data, content insights, and traffic patterns.",
+                routeHint: "insights"
+        },
+        {
+                id: "compliance_reviewer",
+                label: "Compliance Reviewer",
+                icon: "🛡️",
+                summary: "Claims review, approvals, safety language, and governance checks.",
+                routeHint: "governance"
+        },
+        {
+                id: "operations",
+                label: "Operations Lead",
+                icon: "⚙️",
+                summary: "Tasks, timelines, handoffs, approvals, and execution plans.",
+                routeHint: "workflows"
+        },
+        {
+                id: "customer_ops",
+                label: "Customer Operations Lead",
+                icon: "🎧",
+                summary: "Inbox review, reply drafts, ticket drafts, SLA risk, and escalation routing.",
+                routeHint: "operations-centers"
+        },
+        {
+                id: "sales_crm",
+                label: "Sales / CRM Lead",
+                icon: "💼",
+                summary: "Lead qualification, outreach drafts, follow-up cadence, and CRM handoff notes.",
+                routeHint: "workflows"
+        }
+];
+
+// Map legacy mode IDs from older sessions to new team IDs
+const MODE_ID_ALIASES = {
+	executive: "operations",
+	campaign: "strategist",
+	content: "writer",
+	designer: "media",
+	media_director: "media",
+	media_planner: "media",
+	seo: "analyst",
+	research: "researcher",
+	video_lead: "video_lead",
+	publisher: "publisher",
+	compliance_reviewer: "compliance_reviewer",
+	customer_operations: "customer_ops",
+	customer_ops: "customer_ops",
+	support: "customer_ops",
+	sales: "sales_crm",
+	crm: "sales_crm",
+	sales_crm: "sales_crm",
+	admin: "operations"
+};
+
+// ============================================================
+//  PHASE 1: SPECIALIST DEFINITIONS — AI TEAM COMMAND CENTER
+// ============================================================
+
+const SPECIALIST_DEFS = [
+	{
+		id: "strategist",
+		label: "Strategist",
+		position: "Executive Strategy Lead",
+		icon: "🎯",
+		summary: "Campaign concepts, launch plans, channel mix, and offer strategy.",
+		placeholder: "Ask the Strategist to plan a campaign, map launch phases, review channel priorities, or define the offer strategy…",
+		canHelp: ["Draft campaign plans", "Prioritize next actions", "Map launch sequences", "Advise on offer strategy", "Prepare channel briefs"],
+		cannotDo: ["Publish campaigns directly", "Execute workflows automatically", "Approve content", "Set live budgets"],
+		destinations: ["Campaign Studio", "Workflows", "AI Command"],
+		safetyNote: "All outputs are guidance and draft only. Execution requires explicit confirmation.",
+		status: "AI ready"
+	},
+	{
+		id: "writer",
+		label: "Content Writer",
+		position: "Messaging and Content Lead",
+		icon: "✍️",
+		summary: "Captions, hooks, scripts, emails, and landing page copy.",
+		placeholder: "Ask the Content Writer to draft captions, hooks, landing copy, or campaign messages…",
+		canHelp: ["Draft captions and hooks", "Write email copy", "Create landing page text", "Prepare publisher handoff", "Suggest message variants"],
+		cannotDo: ["Publish directly", "Approve risky claims", "Invent unsupported facts", "Run workflows automatically"],
+		destinations: ["Content Studio", "Publishing", "AI Command"],
+		safetyNote: "Drafts require review before publishing. Cannot approve or publish without confirmation.",
+		status: "AI ready"
+	},
+	{
+		id: "media",
+		label: "Media Director",
+		position: "Creative Direction Lead",
+		icon: "🎨",
+		summary: "Visual direction, creative briefs, format guidance, and brand consistency.",
+		placeholder: "Ask the Media Director to define visual direction, prepare a creative brief, or review brand consistency…",
+		canHelp: ["Write creative briefs", "Advise on visual direction", "Map format requirements", "Review brand alignment", "Prepare media handoffs"],
+		cannotDo: ["Generate images directly", "Upload assets without review", "Approve without confirmation", "Execute media jobs"],
+		destinations: ["Asset Library", "Content Studio", "AI Command"],
+		safetyNote: "Direction and briefs only. Media generation requires backend confirmation and explicit action.",
+		status: "AI ready"
+	},
+	{
+		id: "video_lead",
+		label: "Video Lead",
+		position: "Short-Form Video Lead",
+		icon: "🎬",
+		summary: "Short-form video scripts, motion direction, and reel strategy.",
+		placeholder: "Ask the Video Lead to write a reel script, map short-form strategy, or outline the next video concept…",
+		canHelp: ["Write video scripts", "Plan short-form strategy", "Define motion direction", "Map video asset requirements", "Prepare video briefs"],
+		cannotDo: ["Generate video directly", "Upload footage without review", "Approve without confirmation", "Run media jobs automatically"],
+		destinations: ["Asset Library", "Content Studio", "Media Native"],
+		safetyNote: "Scripts and direction only. Video generation requires explicit backend action and approval.",
+		status: "AI ready"
+	},
+	{
+		id: "publisher",
+		label: "Publisher",
+		position: "Publishing Readiness Lead",
+		icon: "📤",
+		summary: "Publishing readiness, schedule review, and handoff preparation.",
+		placeholder: "Ask the Publisher to review publishing readiness, check scheduling, or prepare a handoff package…",
+		canHelp: ["Review publishing readiness", "Check scheduled jobs", "Prepare handoff packages", "Map publishing dependencies", "Flag pre-publish risks"],
+		cannotDo: ["Publish without explicit approval", "Override schedules", "Bypass governance gates", "Push to live channels directly"],
+		destinations: ["Publishing", "Workflows", "AI Command"],
+		safetyNote: "Publishing always requires explicit approval. No live publishing from AI guidance alone.",
+		status: "AI ready"
+	},
+	{
+		id: "ads",
+		label: "Ads Optimizer",
+		position: "Paid Growth Lead",
+		icon: "📢",
+		summary: "Ad concepts, targeting angles, platform copy, and paid strategy.",
+		placeholder: "Ask the Ads Optimizer to draft ad copy, review targeting angles, or plan a paid campaign structure…",
+		canHelp: ["Draft ad concepts and copy", "Review targeting angles", "Plan paid campaign structure", "Suggest creative variants", "Map platform-specific strategy"],
+		cannotDo: ["Launch ads directly", "Set live budgets without review", "Approve spend", "Access ad accounts directly"],
+		destinations: ["Ads Manager", "Integrations", "Campaign Studio"],
+		safetyNote: "Ad concepts and copy only. Live ad actions require platform integration and explicit approval.",
+		status: "AI ready"
+	},
+	{
+		id: "analyst",
+		label: "SEO & Insights Analyst",
+		position: "Search and Insights Lead",
+		icon: "📊",
+		summary: "SEO signals, performance data, content insights, and traffic patterns.",
+		placeholder: "Ask the SEO & Insights Analyst to review performance, suggest SEO improvements, or identify top content patterns…",
+		canHelp: ["Review SEO signals", "Analyze content performance", "Identify traffic patterns", "Suggest keyword improvements", "Map data coverage gaps"],
+		cannotDo: ["Update SEO settings directly", "Edit live website", "Set analytics configurations", "Publish recommendations automatically"],
+		destinations: ["Insights", "Integrations", "Setup"],
+		safetyNote: "Analysis and recommendations only. No direct website or analytics changes.",
+		status: "AI ready"
+	},
+	{
+		id: "compliance_reviewer",
+		label: "Compliance Reviewer",
+		position: "Claims and Governance Lead",
+		icon: "🛡️",
+		summary: "Claims review, approval safety, publishing risk, and governance notes.",
+		placeholder: "Ask the Compliance Reviewer to check claims, approval risks, publishing safety, and governance notes…",
+		canHelp: ["Review marketing claims", "Flag approval risks", "Check publishing safety", "Prepare governance notes", "Identify compliance blockers"],
+		cannotDo: ["Grant approvals directly", "Override governance gates", "Publish on behalf of approvers", "Remove flags without review"],
+		destinations: ["Workflows", "Publishing", "Governance"],
+		safetyNote: "Compliance review is advisory. Approvals always require human confirmation before execution.",
+		status: "AI ready"
+	},
+	{
+		id: "operations",
+		label: "Operations Lead",
+		position: "Execution and Handoff Lead",
+		icon: "⚙️",
+		summary: "Tasks, timelines, handoffs, approvals, and execution plans.",
+		placeholder: "Ask the Operations Lead to turn this into tasks, workflow steps, or handoffs…",
+		canHelp: ["Create task plans", "Map execution sequences", "Prepare workflow handoffs", "Review execution health", "Identify operational blockers"],
+		cannotDo: ["Run workflows without confirmation", "Auto-approve tasks", "Override authority gates", "Execute backend operations directly"],
+		destinations: ["Workflows", "Operations Centers", "AI Command"],
+		safetyNote: "Task plans and handoffs only. Workflow execution requires explicit user confirmation.",
+		status: "AI ready"
+	},
+	{
+		id: "customer_ops",
+		label: "Customer Operations Lead",
+		position: "Customer Experience Operations Lead",
+		icon: "🎧",
+		summary: "Inbox review, reply drafts, ticket drafts, SLA risk, customer profile context, and escalation routing.",
+		placeholder: "Ask the Customer Operations Lead to summarize a customer thread, draft a safe reply, prepare a ticket draft, check SLA risk, or route an escalation for review…",
+		canHelp: ["Review inbox context", "Summarize customer threads", "Draft safe replies", "Prepare ticket drafts", "Flag SLA and escalation risk"],
+		cannotDo: ["Send customer replies", "Create live tickets", "Change SLA policy", "Escalate without confirmation"],
+		destinations: ["Unified Inbox", "Operations Centers", "Integrations"],
+		safetyNote: "Customer operations outputs are drafts only. Sending replies, ticket creation, and escalations require confirmation in the owning surface.",
+		status: "AI ready"
+	},
+	{
+		id: "sales_crm",
+		label: "Sales / CRM Lead",
+		position: "Revenue and CRM Operations Lead",
+		icon: "💼",
+		summary: "Lead qualification, outreach drafts, follow-up cadence, CRM profile summaries, and sales handoff notes.",
+		placeholder: "Ask the Sales / CRM Lead to qualify a lead, draft outreach, plan follow-ups, summarize CRM context, or prepare a sales handoff for review…",
+		canHelp: ["Qualify lead context", "Draft outreach", "Plan follow-up sequences", "Summarize CRM profiles", "Prepare sales handoffs"],
+		cannotDo: ["Send outreach", "Mutate CRM records", "Advance pipeline stages", "Confirm follow-ups without review"],
+		destinations: ["CRM", "Workflows", "Operations Centers"],
+		safetyNote: "Sales and CRM outputs are guidance and drafts only. CRM mutations and outreach sends require confirmation in the owning surface.",
+		status: "AI ready"
+	}
+];
+
+// Role-specific suggested prompt chips (prefill only, no auto-execute)
+const SPECIALIST_SUGGESTED_PROMPTS = {
+	strategist: [
+		{ label: "What should I do next?", sub: "Review priorities and blockers" },
+		{ label: "Draft a campaign brief", sub: "Map objective, audience, and channels" },
+		{ label: "Review launch readiness", sub: "Identify what is blocking launch" },
+		{ label: "Suggest the next campaign move", sub: "Based on current project state" }
+	],
+	writer: [
+		{ label: "Draft campaign captions", sub: "For the active campaign" },
+		{ label: "Write a hook sequence", sub: "3 hook variants to test" },
+		{ label: "Prepare a Publisher handoff", sub: "Package ready content for review" },
+		{ label: "Suggest message variants", sub: "Test different angles and tones" }
+	],
+	media: [
+		{ label: "Write a creative brief", sub: "For the next campaign visual" },
+		{ label: "Review brand consistency", sub: "Flag misaligned assets" },
+		{ label: "Map format requirements", sub: "By platform and campaign phase" },
+		{ label: "Prepare a media handoff", sub: "Package direction for the team" }
+	],
+	video_lead: [
+		{ label: "Write a reel script", sub: "For the current campaign" },
+		{ label: "Plan short-form content", sub: "Map next 4 video concepts" },
+		{ label: "Outline motion direction", sub: "Align visuals with campaign tone" },
+		{ label: "Map video asset needs", sub: "By platform and format" }
+	],
+	publisher: [
+		{ label: "Review publishing readiness", sub: "Check what is ready to publish" },
+		{ label: "Flag pre-publish risks", sub: "Identify what needs review first" },
+		{ label: "Check scheduled jobs", sub: "Review the current queue" },
+		{ label: "Prepare a handoff package", sub: "For the approver review" }
+	],
+	ads: [
+		{ label: "Draft ad concepts", sub: "For the current campaign" },
+		{ label: "Review targeting angles", sub: "Map audience and platform fit" },
+		{ label: "Suggest creative variants", sub: "Test different hooks and CTAs" },
+		{ label: "Plan paid campaign structure", sub: "Objective, audience, creative, budget" }
+	],
+	analyst: [
+		{ label: "Review SEO signals", sub: "Top queries, CTR gaps, weak pages" },
+		{ label: "Analyze content performance", sub: "What is working and what is not" },
+		{ label: "Map data coverage gaps", sub: "Which integrations are missing" },
+		{ label: "Suggest next improvements", sub: "Based on current signals" }
+	],
+	compliance_reviewer: [
+		{ label: "Check claims for approval", sub: "Review all marketing claims" },
+		{ label: "Flag publishing risks", sub: "Identify blockers before release" },
+		{ label: "Prepare governance notes", sub: "Document compliance status" },
+		{ label: "Review approval requirements", sub: "What needs sign-off" }
+	],
+	operations: [
+		{ label: "Turn this into tasks", sub: "Break down into action items" },
+		{ label: "Draft a workflow handoff", sub: "Prepare for the next owner" },
+		{ label: "Review execution health", sub: "Check blockers and failed jobs" },
+		{ label: "Map the next execution steps", sub: "Sequence and prioritize" }
+	],
+	customer_ops: [
+		{ label: "Summarize customer thread", sub: "Capture issue, tone, and next reply" },
+		{ label: "Draft customer reply", sub: "Safe response for review" },
+		{ label: "Check SLA risk", sub: "Flag urgency and escalation path" },
+		{ label: "Prepare escalation", sub: "Route support, sales, or operations" }
+	],
+	sales_crm: [
+		{ label: "Qualify this lead", sub: "Fit, intent, urgency, next step" },
+		{ label: "Draft outreach", sub: "Personalized message for review" },
+		{ label: "Build follow-up sequence", sub: "Multi-step sales cadence" },
+		{ label: "Prepare sales handoff", sub: "Route context to operations" }
+	]
+};
+
+// Full Team mode suggested prompts
+const TEAM_SUGGESTED_PROMPTS = [
+	{ label: "What should the executive AI team focus on?", sub: "Strategy, execution, and risk review" },
+	{ label: "Map the next launch wave", sub: "Strategist to Publisher to Operations" },
+	{ label: "Prepare a full handoff sequence", sub: "Strategy, creative, compliance, publishing, ops" },
+	{ label: "Review customer and sales impact", sub: "Customer Ops, Sales / CRM, Operations" }
+];
+
+const PHASE35_WORKSPACE_TABS = ["chat", "preview", "tools", "context", "history"];
+
+const AI_ROOM_FLOW_STEPS = [
+	{ id: "ask", title: "Ask", description: "Choose a specialist or the full team." },
+	{ id: "draft", title: "Prepare", description: "Create guidance, copy, task, or handoff context." },
+	{ id: "review", title: "Review", description: "Check safety, scope, language, and source." },
+	{ id: "route", title: "Handoff", description: "Open the owning workspace with draft context." },
+	{ id: "execute", title: "Confirm", description: "Execution stays gated in backend-owned surfaces." },
+	{ id: "monitor", title: "Monitor", description: "Track readiness, integrations, and recent activity." }
+];
+
+const AI_ROOM_OUTPUT_TABS = [
+	{ id: "draft", label: "Draft", helper: "Latest draft or guidance preview" },
+	{ id: "task", label: "Task", helper: "Task-shaped output" },
+	{ id: "workflow", label: "Workflow Preview", helper: "Operating sequence" },
+	{ id: "handoff", label: "Handoff Preview", helper: "Destination package" },
+	{ id: "export", label: "Export", helper: "File-ready package" }
+];
+
+const AI_ROOM_TEAM_CHAIN = ["Strategist", "Writer", "Media / Video", "Compliance", "Publisher", "Operations"];
+const AI_ROOM_BUSINESS_BRANCH = ["Customer Ops", "Sales / CRM", "Operations"];
+
+const AI_ROOM_ROLE_INITIALS = {
+	strategist: "ST",
+	writer: "CW",
+	media: "MD",
+	video_lead: "VL",
+	publisher: "PB",
+	ads: "AO",
+	analyst: "SI",
+	compliance_reviewer: "CR",
+	operations: "OL",
+	customer_ops: "CO",
+	sales_crm: "SC"
+};
+
+const AI_ROOM_BACKEND_ROLE_ALIASES = {
+	ads: "ads_operator",
+	media: "designer",
+	compliance_reviewer: "compliance_reviewer"
+};
+
+const AI_ROOM_PLANNED_SPECIALISTS = [
+	{
+		label: "Admin / Governance",
+		initials: "AG",
+		status: "Planned",
+		summary: "Policy, approvals, roles, and audit controls stay destination-owned."
+	},
+	{
+		label: "Researcher",
+		initials: "RS",
+		status: "Planned",
+		summary: "Market, evidence, competitor, and proof research will prepare source packs only."
+	},
+	{
+		label: "Automation Architect",
+		initials: "AA",
+		status: "Planned",
+		summary: "Workflow blueprints and trigger maps will route to Workflows before execution."
+	}
+];
+
+const PHASE35_SPECIALIST_TOOLS = {
+	strategist: [
+		{ id: "campaign-angle-generator", label: "Campaign Angle Generator", action: "preview", intent: "guidance", template: "Generate campaign angles for {project}. Include audience tension, promise, channel fit, and strongest first test." },
+		{ id: "launch-plan", label: "Launch Plan", action: "preview", intent: "workflow", template: "Build a launch plan for {project}. Include phases, channels, owners, blockers, and next move." },
+		{ id: "funnel-mapping", label: "Funnel Mapping", action: "preview", intent: "guidance", template: "Map the funnel for {project}. Include awareness, consideration, conversion, retention, and handoff points." },
+		{ id: "prioritize-next-move", label: "Priority Sort", action: "preview", intent: "task", template: "Prioritize the next moves for {project}. Rank by impact, urgency, dependencies, and safest first action." }
+	],
+	writer: [
+		{ id: "hook-generator", label: "Hook Generator", action: "preview", intent: "guidance", template: "Write 5 German hook variants for {project}. Keep them concise, testable, and suitable for the Germany market." },
+		{ id: "caption-builder", label: "Caption Builder", action: "preview", intent: "guidance", template: "Draft German captions for {project}. Include angle, body, CTA, and platform adaptation notes." },
+		{ id: "cta-refiner", label: "CTA Refiner", action: "preview", intent: "task", template: "Refine CTA options for {project}. Provide German variants for awareness, consideration, and action stages." },
+		{ id: "publisher-package", label: "Publisher Package", action: "preview", intent: "handoff", template: "Prepare a Publisher handoff for {project}. Include German copy package, CTA, notes, and remaining checks." }
+	],
+	media: [
+		{ id: "creative-brief-builder", label: "Creative Brief Builder", action: "preview", intent: "media", template: "Prepare a creative brief for {project}. Include concept, visual rules, subject, brand constraints, and production notes." },
+		{ id: "format-mapper", label: "Format Mapper", action: "preview", intent: "guidance", template: "Map required creative formats for {project}. Include platform, aspect ratio, asset type, and usage context." },
+		{ id: "asset-checklist", label: "Asset Checklist", action: "preview", intent: "task", template: "Create an asset checklist for {project}. List must-have files, missing references, usage context, and priority." },
+		{ id: "visual-direction", label: "Visual Direction", action: "preview", intent: "guidance", template: "Review visual direction for {project}. Identify mismatches, improvements, and required references." },
+		{ id: "open-media-studio", label: "Send prompt to Media Studio", action: "route", route: "media-studio" }
+	],
+	video_lead: [
+		{ id: "write-video-hook", label: "Write video hook", action: "preview", intent: "guidance", template: "Write short-form video hooks for {project}. Include 3 opening variants and audience fit." },
+		{ id: "draft-script", label: "Draft script", action: "preview", intent: "guidance", template: "Draft a short-form video script for {project}. Include hook, body, CTA, and visual cues." },
+		{ id: "build-storyboard", label: "Build storyboard", action: "preview", intent: "workflow", template: "Build storyboard beats for {project}. Sequence shots and key transitions." },
+		{ id: "prepare-voiceover", label: "Prepare voiceover", action: "preview", intent: "guidance", template: "Prepare voiceover script options for {project}. Keep clean timing and emphasis notes." },
+		{ id: "map-video-asset-needs", label: "Map video asset needs", action: "preview", intent: "task", template: "Map video asset needs for {project}. Include format, source, and production owner." }
+	],
+	publisher: [
+		{ id: "publishing-checklist", label: "Publishing Checklist", action: "preview", intent: "handoff", template: "Build a publishing checklist for {project}. Include German copy, assets, claims checks, and channel readiness." },
+		{ id: "final-packaging", label: "Final Packaging", action: "preview", intent: "handoff", template: "Prepare a final publishing package for {project}. Include copy, CTA, asset notes, approvals, and destination channel." },
+		{ id: "channel-formatting", label: "Channel Formatting", action: "preview", intent: "guidance", template: "Format the next output for {project} by channel. Include German copy, limits, CTA, and scheduling notes." },
+		{ id: "schedule-draft", label: "Schedule Draft", action: "preview", intent: "workflow", template: "Prepare a publishing schedule draft for {project}. Include channel cadence, dependencies, and review gates." },
+		{ id: "open-publishing", label: "Open Publishing", action: "route", route: "publishing" }
+	],
+	ads: [
+		{ id: "ad-angle-generator", label: "Ad Angle Generator", action: "preview", intent: "guidance", template: "Draft ad angles for {project}. Include audience problem, value promise, German hook direction, and platform fit." },
+		{ id: "copy-variants", label: "Copy Variants", action: "preview", intent: "guidance", template: "Prepare German ad copy variants for {project}. Include hooks, primary text, CTA, and creative notes." },
+		{ id: "test-ideas", label: "Test Ideas", action: "preview", intent: "task", template: "Suggest paid test ideas for {project}. Provide hypotheses, segments, creative variables, and measurement notes." },
+		{ id: "budget-notes", label: "Budget Notes", action: "preview", intent: "guidance", template: "Review budget notes for {project}. Summarize constraints and safe test allocation guidance." },
+		{ id: "open-ads-manager", label: "Open Ads Manager", action: "route", route: "ads-manager" }
+	],
+	analyst: [
+		{ id: "keyword-intent", label: "Keyword Intent", action: "preview", intent: "guidance", template: "Suggest keyword intent opportunities for {project}. Include Germany-market intent, content mapping, and priority." },
+		{ id: "meta-direction", label: "Meta Direction", action: "preview", intent: "guidance", template: "Prepare meta direction for {project}. Include page angle, title direction, description direction, and CTA intent." },
+		{ id: "opportunity-summary", label: "Opportunity Summary", action: "preview", intent: "task", template: "Summarize SEO and insight opportunities for {project}. Focus on conversion, traffic quality, and content fit." },
+		{ id: "analysis-plan", label: "Analysis Plan", action: "preview", intent: "workflow", template: "Draft an analysis plan for {project}. Define questions, datasets, cadence, and owners." },
+		{ id: "open-insights", label: "Open Insights", action: "route", route: "insights" }
+	],
+	compliance_reviewer: [
+		{ id: "claims-check", label: "Claims Check", action: "preview", intent: "guidance", template: "Review marketing claims for {project}. Flag unsupported, high-risk, or evidence-dependent wording." },
+		{ id: "approval-flags", label: "Approval Flags", action: "preview", intent: "task", template: "Check approval risks for {project}. List risk, impact, mitigation, and required owner." },
+		{ id: "safety-checklist", label: "Safety Checklist", action: "preview", intent: "handoff", template: "Prepare a safety checklist for {project}. Include policy checks, evidence required, and approval notes." },
+		{ id: "publish-readiness", label: "Publish Readiness", action: "preview", intent: "handoff", template: "Review publish readiness for {project}. Confirm what needs human approval before release." },
+		{ id: "open-governance", label: "Open Governance", action: "route", route: "governance" }
+	],
+	operations: [
+		{ id: "timeline-draft", label: "Timeline Draft", action: "preview", intent: "workflow", template: "Draft an execution timeline for {project}. Include milestones, owners, dependencies, and review gates." },
+		{ id: "handoff-routing", label: "Handoff Routing", action: "preview", intent: "handoff", template: "Prepare handoff routing for {project}. Include source, destination, decision gates, and required confirmations." },
+		{ id: "checklist", label: "Checklist", action: "preview", intent: "task", template: "Draft an operational checklist for {project}. Include owners, dependencies, priority, and first action." },
+		{ id: "blocker-review", label: "Blocker Review", action: "preview", intent: "guidance", template: "Review operational blockers for {project}. Prioritize by risk and impact." },
+		{ id: "open-workflows", label: "Open Workflows / Operations", action: "route", route: "workflows" }
+	],
+	customer_ops: [
+		{ id: "review-unified-inbox", label: "Review Unified Inbox", action: "preview", intent: "guidance", template: "Review the Unified Inbox readiness for {project}. Summarize visible customer-operation signals, open gaps, and safe next review steps. Do not claim inbox actions happened." },
+		{ id: "summarize-customer-thread", label: "Summarize Customer Thread", action: "preview", intent: "guidance", template: "Summarize this customer thread for {project}. Include customer issue, sentiment, reply goal, missing details, and safe next step." },
+		{ id: "draft-customer-reply", label: "Draft Customer Reply", action: "preview", intent: "guidance", template: "Draft a customer reply for {project}. Keep it helpful, calm, review-ready, and do not claim any operational action has been completed." },
+		{ id: "create-ticket-draft", label: "Create Ticket Draft", action: "preview", intent: "task", template: "Create a ticket draft for {project}. Include issue, priority, owner suggestion, evidence needed, and next safe action." },
+		{ id: "check-sla-risk", label: "Check SLA Risk", action: "preview", intent: "guidance", template: "Check SLA risk for {project}. Flag urgency, risk level, missing runtime data, and escalation recommendation for review." },
+		{ id: "prepare-escalation", label: "Prepare Escalation", action: "preview", intent: "handoff", template: "Prepare an escalation draft for {project}. Include reason, customer impact, owner, confirmation needed, and destination team." },
+		{ id: "customer-profile-snapshot", label: "Customer Profile Snapshot", action: "preview", intent: "guidance", template: "Prepare a customer profile snapshot for {project}. Include known context, purchase/support signals, missing fields, and safe follow-up questions." },
+		{ id: "route-support-sales-ops", label: "Route to Support / Sales / Operations", action: "preview", intent: "handoff", template: "Prepare routing guidance for {project}. Decide whether the customer item belongs with Support, Sales, or Operations, and explain the review gate." }
+	],
+	sales_crm: [
+		{ id: "lead-qualification", label: "Lead Qualification", action: "preview", intent: "guidance", template: "Qualify the lead for {project}. Include fit, intent, urgency, missing CRM fields, and the safest next step." },
+		{ id: "outreach-draft", label: "Outreach Draft", action: "preview", intent: "guidance", template: "Draft outreach for {project}. Include subject or opener, personalized message, CTA, and review notes before sending." },
+		{ id: "follow-up-sequence", label: "Follow-up Sequence", action: "preview", intent: "workflow", template: "Build a follow-up sequence for {project}. Include timing, message angle, CTA, stop condition, and confirmation requirements." },
+		{ id: "crm-profile-summary", label: "CRM Profile Summary", action: "preview", intent: "guidance", template: "Summarize the CRM profile context for {project}. Include fit, history, open questions, and next sales action without mutating CRM data." },
+		{ id: "pipeline-next-step", label: "Pipeline Next Step", action: "preview", intent: "task", template: "Recommend the pipeline next step for {project}. Include stage, rationale, owner, risk, and required confirmation." },
+		{ id: "dealer-salon-outreach", label: "Dealer / Salon Outreach", action: "preview", intent: "guidance", template: "Draft dealer or salon outreach for {project}. Include positioning, proof needs, offer angle, CTA, and follow-up note." },
+		{ id: "influencer-lead-plan", label: "Influencer Lead Plan", action: "preview", intent: "workflow", template: "Prepare an influencer lead plan for {project}. Include target profile, outreach angle, qualification criteria, and handoff path." },
+		{ id: "sales-handoff-draft", label: "Sales Handoff", action: "preview", intent: "handoff", template: "Prepare a sales handoff draft for {project}. Include lead context, recommended next action, owner, and confirmation needed." }
+	]
+};
+
+// 4 quick-action prompts shown in the composer
+const QUICK_ACTIONS = [
+	{ icon: "🚀", label: "Launch Campaign", sub: "Build a campaign plan", template: "Build a launch campaign for {project}. Map the channels, offer, phases, and required assets." },
+	{ icon: "✍️", label: "Generate Content", sub: "Write hooks, captions & scripts", template: "Generate content for {project}. Create hooks, caption ideas, and a reel script for the next product push." },
+	{ icon: "📊", label: "Analyze Performance", sub: "Review what's working", template: "Analyze current performance for {project}. What content, campaigns, and channels are working best right now?" },
+	{ icon: "🔧", label: "Fix Readiness", sub: "Close critical gaps", template: "What are the critical readiness gaps for {project} and what exactly needs to be done to fix them?" }
+];
+
+
+### ai-command strategist/strategy windows
+36:const MODE_DEFS = [
+38:                id: "strategist",
+39:                label: "Strategist",
+41:                summary: "Campaign concepts, launch plans, channel mix, and offer strategy.",
+42:                routeHint: "campaign-studio"
+49:                routeHint: "content-studio"
+55:                summary: "Visual direction, creative brief, format guidance, and brand consistency.",
+56:                routeHint: "media-studio"
+62:                summary: "Short-form video scripts, motion direction, and reel strategy.",
+63:                routeHint: "media-studio"
+69:                summary: "Publishing readiness, schedule review, and handoff preparation.",
+70:                routeHint: "publishing"
+76:                summary: "Ad concepts, targeting angles, platform copy, and paid strategy.",
+77:                routeHint: "ads-manager"
+84:                routeHint: "insights"
+91:                routeHint: "governance"
+97:                summary: "Tasks, timelines, handoffs, approvals, and execution plans.",
+98:                routeHint: "workflows"
+105:                routeHint: "operations-centers"
+111:                summary: "Lead qualification, outreach drafts, follow-up cadence, and CRM handoff notes.",
+112:                routeHint: "workflows"
+119:	campaign: "strategist",
+139://  PHASE 1: SPECIALIST DEFINITIONS — AI TEAM COMMAND CENTER
+142:const SPECIALIST_DEFS = [
+144:		id: "strategist",
+145:		label: "Strategist",
+146:		position: "Executive Strategy Lead",
+148:		summary: "Campaign concepts, launch plans, channel mix, and offer strategy.",
+149:		placeholder: "Ask the Strategist to plan a campaign, map launch phases, review channel priorities, or define the offer strategy…",
+150:		canHelp: ["Draft campaign plans", "Prioritize next actions", "Map launch sequences", "Advise on offer strategy", "Prepare channel briefs"],
+151:		cannotDo: ["Publish campaigns directly", "Execute workflows automatically", "Approve content", "Set live budgets"],
+153:		safetyNote: "All outputs are guidance and draft only. Execution requires explicit confirmation.",
+162:		placeholder: "Ask the Content Writer to draft captions, hooks, landing copy, or campaign messages…",
+163:		canHelp: ["Draft captions and hooks", "Write email copy", "Create landing page text", "Prepare publisher handoff", "Suggest message variants"],
+164:		cannotDo: ["Publish directly", "Approve risky claims", "Invent unsupported facts", "Run workflows automatically"],
+166:		safetyNote: "Drafts require review before publishing. Cannot approve or publish without confirmation.",
+174:		summary: "Visual direction, creative briefs, format guidance, and brand consistency.",
+175:		placeholder: "Ask the Media Director to define visual direction, prepare a creative brief, or review brand consistency…",
+176:		canHelp: ["Write creative briefs", "Advise on visual direction", "Map format requirements", "Review brand alignment", "Prepare media handoffs"],
+177:		cannotDo: ["Generate images directly", "Upload assets without review", "Approve without confirmation", "Execute media jobs"],
+179:		safetyNote: "Direction and briefs only. Media generation requires backend confirmation and explicit action.",
+187:		summary: "Short-form video scripts, motion direction, and reel strategy.",
+188:		placeholder: "Ask the Video Lead to write a reel script, map short-form strategy, or outline the next video concept…",
+189:		canHelp: ["Write video scripts", "Plan short-form strategy", "Define motion direction", "Map video asset requirements", "Prepare video briefs"],
+190:		cannotDo: ["Generate video directly", "Upload footage without review", "Approve without confirmation", "Run media jobs automatically"],
+192:		safetyNote: "Scripts and direction only. Video generation requires explicit backend action and approval.",
+200:		summary: "Publishing readiness, schedule review, and handoff preparation.",
+201:		placeholder: "Ask the Publisher to review publishing readiness, check scheduling, or prepare a handoff package…",
+202:		canHelp: ["Review publishing readiness", "Check scheduled jobs", "Prepare handoff packages", "Map publishing dependencies", "Flag pre-publish risks"],
+203:		cannotDo: ["Publish without explicit approval", "Override schedules", "Bypass governance gates", "Push to live channels directly"],
+205:		safetyNote: "Publishing always requires explicit approval. No live publishing from AI guidance alone.",
+213:		summary: "Ad concepts, targeting angles, platform copy, and paid strategy.",
+214:		placeholder: "Ask the Ads Optimizer to draft ad copy, review targeting angles, or plan a paid campaign structure…",
+215:		canHelp: ["Draft ad concepts and copy", "Review targeting angles", "Plan paid campaign structure", "Suggest creative variants", "Map platform-specific strategy"],
+216:		cannotDo: ["Launch ads directly", "Set live budgets without review", "Approve spend", "Access ad accounts directly"],
+218:		safetyNote: "Ad concepts and copy only. Live ad actions require platform integration and explicit approval.",
+228:		canHelp: ["Review SEO signals", "Analyze content performance", "Identify traffic patterns", "Suggest keyword improvements", "Map data coverage gaps"],
+229:		cannotDo: ["Update SEO settings directly", "Edit live website", "Set analytics configurations", "Publish recommendations automatically"],
+231:		safetyNote: "Analysis and recommendations only. No direct website or analytics changes.",
+241:		canHelp: ["Review marketing claims", "Flag approval risks", "Check publishing safety", "Prepare governance notes", "Identify compliance blockers"],
+242:		cannotDo: ["Grant approvals directly", "Override governance gates", "Publish on behalf of approvers", "Remove flags without review"],
+244:		safetyNote: "Compliance review is advisory. Approvals always require human confirmation before execution.",
+252:		summary: "Tasks, timelines, handoffs, approvals, and execution plans.",
+253:		placeholder: "Ask the Operations Lead to turn this into tasks, workflow steps, or handoffs…",
+254:		canHelp: ["Create task plans", "Map execution sequences", "Prepare workflow handoffs", "Review execution health", "Identify operational blockers"],
+255:		cannotDo: ["Run workflows without confirmation", "Auto-approve tasks", "Override authority gates", "Execute backend operations directly"],
+257:		safetyNote: "Task plans and handoffs only. Workflow execution requires explicit user confirmation.",
+267:		canHelp: ["Review inbox context", "Summarize customer threads", "Draft safe replies", "Prepare ticket drafts", "Flag SLA and escalation risk"],
+268:		cannotDo: ["Send customer replies", "Create live tickets", "Change SLA policy", "Escalate without confirmation"],
+270:		safetyNote: "Customer operations outputs are drafts only. Sending replies, ticket creation, and escalations require confirmation in the owning surface.",
+278:		summary: "Lead qualification, outreach drafts, follow-up cadence, CRM profile summaries, and sales handoff notes.",
+279:		placeholder: "Ask the Sales / CRM Lead to qualify a lead, draft outreach, plan follow-ups, summarize CRM context, or prepare a sales handoff for review…",
+280:		canHelp: ["Qualify lead context", "Draft outreach", "Plan follow-up sequences", "Summarize CRM profiles", "Prepare sales handoffs"],
+281:		cannotDo: ["Send outreach", "Mutate CRM records", "Advance pipeline stages", "Confirm follow-ups without review"],
+283:		safetyNote: "Sales and CRM outputs are guidance and drafts only. CRM mutations and outreach sends require confirmation in the owning surface.",
+289:const SPECIALIST_SUGGESTED_PROMPTS = {
+290:	strategist: [
+292:		{ label: "Draft a campaign brief", sub: "Map objective, audience, and channels" },
+294:		{ label: "Suggest the next campaign move", sub: "Based on current project state" }
+297:		{ label: "Draft campaign captions", sub: "For the active campaign" },
+299:		{ label: "Prepare a Publisher handoff", sub: "Package ready content for review" },
+303:		{ label: "Write a creative brief", sub: "For the next campaign visual" },
+305:		{ label: "Map format requirements", sub: "By platform and campaign phase" },
+306:		{ label: "Prepare a media handoff", sub: "Package direction for the team" }
+309:		{ label: "Write a reel script", sub: "For the current campaign" },
+311:		{ label: "Outline motion direction", sub: "Align visuals with campaign tone" },
+318:		{ label: "Prepare a handoff package", sub: "For the approver review" }
+321:		{ label: "Draft ad concepts", sub: "For the current campaign" },
+324:		{ label: "Plan paid campaign structure", sub: "Objective, audience, creative, budget" }
+340:		{ label: "Draft a workflow handoff", sub: "Prepare for the next owner" },
+354:		{ label: "Prepare sales handoff", sub: "Route context to operations" }
+360:	{ label: "What should the executive AI team focus on?", sub: "Strategy, execution, and risk review" },
+361:	{ label: "Map the next launch wave", sub: "Strategist to Publisher to Operations" },
+362:	{ label: "Prepare a full handoff sequence", sub: "Strategy, creative, compliance, publishing, ops" },
+370:	{ id: "draft", title: "Prepare", description: "Create guidance, copy, task, or handoff context." },
+381:	{ id: "handoff", label: "Handoff Preview", helper: "Destination package" },
+385:const AI_ROOM_TEAM_CHAIN = ["Strategist", "Writer", "Media / Video", "Compliance", "Publisher", "Operations"];
+389:	strategist: "ST",
+408:const AI_ROOM_PLANNED_SPECIALISTS = [
+429:const PHASE35_SPECIALIST_TOOLS = {
+430:	strategist: [
+431:		{ id: "campaign-angle-generator", label: "Campaign Angle Generator", action: "preview", intent: "guidance", template: "Generate campaign angles for {project}. Include audience tension, promise, channel fit, and strongest first test." },
+433:		{ id: "funnel-mapping", label: "Funnel Mapping", action: "preview", intent: "guidance", template: "Map the funnel for {project}. Include awareness, consideration, conversion, retention, and handoff points." },
+440:		{ id: "publisher-package", label: "Publisher Package", action: "preview", intent: "handoff", template: "Prepare a Publisher handoff for {project}. Include German copy package, CTA, notes, and remaining checks." }
+443:		{ id: "creative-brief-builder", label: "Creative Brief Builder", action: "preview", intent: "media", template: "Prepare a creative brief for {project}. Include concept, visual rules, subject, brand constraints, and production notes." },
+457:		{ id: "publishing-checklist", label: "Publishing Checklist", action: "preview", intent: "handoff", template: "Build a publishing checklist for {project}. Include German copy, assets, claims checks, and channel readiness." },
+458:		{ id: "final-packaging", label: "Final Packaging", action: "preview", intent: "handoff", template: "Prepare a final publishing package for {project}. Include copy, CTA, asset notes, approvals, and destination channel." },
+480:		{ id: "safety-checklist", label: "Safety Checklist", action: "preview", intent: "handoff", template: "Prepare a safety checklist for {project}. Include policy checks, evidence required, and approval notes." },
+481:		{ id: "publish-readiness", label: "Publish Readiness", action: "preview", intent: "handoff", template: "Review publish readiness for {project}. Confirm what needs human approval before release." },
+486:		{ id: "handoff-routing", label: "Handoff Routing", action: "preview", intent: "handoff", template: "Prepare handoff routing for {project}. Include source, destination, decision gates, and required confirmations." },
+497:		{ id: "prepare-escalation", label: "Prepare Escalation", action: "preview", intent: "handoff", template: "Prepare an escalation draft for {project}. Include reason, customer impact, owner, confirmation needed, and destination team." },
+499:		{ id: "route-support-sales-ops", label: "Route to Support / Sales / Operations", action: "preview", intent: "handoff", template: "Prepare routing guidance for {project}. Decide whether the customer item belongs with Support, Sales, or Operations, and explain the review gate." }
+508:		{ id: "influencer-lead-plan", label: "Influencer Lead Plan", action: "preview", intent: "workflow", template: "Prepare an influencer lead plan for {project}. Include target profile, outreach angle, qualification criteria, and handoff path." },
+509:		{ id: "sales-handoff-draft", label: "Sales Handoff", action: "preview", intent: "handoff", template: "Prepare a sales handoff draft for {project}. Include lead context, recommended next action, owner, and confirmation needed." }
+515:	{ icon: "🚀", label: "Launch Campaign", sub: "Build a campaign plan", template: "Build a launch campaign for {project}. Map the channels, offer, phases, and required assets." },
+517:	{ icon: "📊", label: "Analyze Performance", sub: "Review what's working", template: "Analyze current performance for {project}. What content, campaigns, and channels are working best right now?" },
+525:	{ id: "strategy", label: "Strategy" },
+527:	{ id: "campaign", label: "Campaign" },
+538:	{ id: "campaign", label: "Campaign" },
+553:		id: "strategist",
+554:		name: "Strategist",
+557:		suggestedPrompt: "Act as Strategist and propose the next campaign move based on current readiness and integrations."
+562:		purpose: "Transform strategy into high-converting copy and scripts.",
+563:		bestUse: "When campaigns need content batches fast.",
+564:		suggestedPrompt: "Act as Writer and generate content angles for the current project and active campaign."
+570:		bestUse: "When briefs need clear visual standards.",
+571:		suggestedPrompt: "Act as Designer and propose creative directions tied to current campaign goals."
+598:		bestUse: "When strategy needs stronger external evidence.",
+604:		purpose: "Translate intent into executable workflows and handoffs.",
+625:		return SPECIALIST_DEFS.find((s) => s.id === resolvedId) ||
+626:			SPECIALIST_DEFS.find((s) => s.id === "operations") ||
+627:			SPECIALIST_DEFS[0];
+632:		if (/act as the strategist/i.test(text)) return "strategist";
+750:		campaign: asString(context.campaign || "active campaign") || "active campaign"
+753:	return asString(template).replace(/\{(project|projectName|specialist|specialistLabel|campaign)\}/g, (_, token) => tokenMap[token] || "");
+762:    "Prepare a handoff summary for:",
+765:    "Build a launch campaign for:",
+897:	return MODE_DEFS.find((item) => item.id === resolvedId) || MODE_DEFS[0];
+901:	return asString(item.label || item.title || item.page || item.query || item.campaign_name || item.name);
+918:			commandType: "strategy",
+1231:			"Full Team workflow: Strategist -> Writer -> Media/Video -> Compliance -> Publisher -> Operations.",
+1246:                `Use ${safeOutputLanguage} only for customer-facing or publishable copy such as captions, ads, emails, landing pages, final campaign text, or publishing packages.`,
+1302:	if (id === "strategist") return outputType === "task" ? "campaign-studio" : "workflows";
+1336:                                : activeTab === "handoff"
+1337:                                        ? "handoff"
+1341:        const looksTaskLike = /\b(task|tasks|handoff|ticket|tickets|follow-up|follow up|owner|owners|assignee|assigned|due date|priority|priorities|backlog|checklist|next task|action item|action items)\b/.test(text);
+1348:        const looksCampaignLike = /\b(campaign|launch|audience|offer|funnel|positioning|channel mix|campaign brief|go-to-market|go to market)\b/.test(text);
+1350:        if (outputType === "handoff" || outputType === "task" || looksTaskLike) {
+1385:        if (/campaign|strategy|launch/.test(outputType) || looksCampaignLike) {
+1386:                outputType = "campaign";
+1389:                        destinationRoute: explicitDestination || (session?.teamMode === "team" ? "workflows" : "campaign-studio")
+1399:		"campaign-studio": "Campaign Studio",
+1429:		confirmationRequired: outputType === "handoff" || specialistId === "publisher" || specialistId === "compliance_reviewer",
+1438:	if (specialistId === "strategist") {
+1455:			title: `Strategist Guidance: Next operating move`,
+1468:			title: outputType === "task" ? "Task: Draft campaign copy" : "Content Guidance: Messaging draft",
+1502:			outputType: outputType === "guidance" ? "media_brief" : outputType,
+1504:			summary: "Media brief prepared with visual direction, prompt ideas, and required assets.",
+1515:			nextSafeAction: "Open Media Studio to review and refine the brief"
+1537:			title: outputType === "handoff" ? "Handoff Preview: Publishing package" : "Publishing Draft: Readiness checklist",
+1547:				"Prepare handoff for publishing review"
+1646:			title: outputType === "handoff" ? "Sales Handoff" : "Sales / CRM Draft: Lead and outreach plan",
+1647:			summary: "Sales and CRM draft prepared with lead qualification, outreach direction, follow-up cadence, and pipeline handoff notes.",
+1668:			nextStep: "Review the lead fit, confirm owner, then route the handoff to operations or the CRM surface.",
+1673:				"Route sales handoff without mutating CRM data"
+1690:					"Stage 4: Destination handoff and confirmation"
+1697:			title: outputType === "handoff" ? "Handoff Preview: Operations package" : "Operations Draft: Task and handoff plan",
+1702:				"Prepare destination handoff context",
+1722:		handoff: "handoff"
+1741:			"Strategist defines priorities, positioning, launch sequence, and strongest next move",
+1742:			"Writer, Media Director, and Video Lead turn strategy into message, asset, and production drafts",
+1747:			"Strategist: decide priority, offer angle, channel sequence, and launch wave",
+1752:			"Customer Ops / Sales: add reply, ticket, lead, outreach, or CRM handoff drafts when relevant",
+1753:			"Operations: convert the reviewed output into safe tasks, workflow draft, or handoff context"
+1767:		handoff: "Handoff Preview",
+1768:		media_brief: "Media Brief"
+1936:		campaign: state.context.activeCampaign || "Not selected",
+1997:		strategist: ["campaign", "launch campaign", "campaign plan", "marketing campaign", "market entry", "growth plan", "offer strategy", "launch plan"],
+1999:		designer: ["design", "visual", "creative brief", "format", "brand", "layout", "image direction", "creative direction"],
+2000:		media: ["media", "design", "visual", "creative brief", "format", "brand", "layout", "image direction", "creative direction", "image", "video", "photo", "asset", "library", "gallery", "footage", "visual assets"],
+2004:		operations: ["task plan", "workflow", "handoff", "approval", "timeline", "execution plan", "route", "publish", "status", "priority", "priorities", "blocking", "blocker", "readiness", "next", "do next"],
+2014:	const scores = MODE_DEFS.map((mode) => ({
+2067:		title: "Project status briefing",
+2097:		title: "Content intelligence briefing",
+2133:		title: "SEO & traffic briefing",
+2164:	const bestCampaign = asArray(paid.best_campaigns)[0];
+2165:	const weakCampaign = asArray(paid.weak_campaigns)[0];
+2168:		title: "Paid performance briefing",
+2173:			bestCampaign ? `Best campaign: ${extractTopMessage(bestCampaign)}.` : "No winning campaign measured yet.",
+2174:			weakCampaign ? `Weak campaign: ${extractTopMessage(weakCampaign)}.` : "No weak campaign list yet.",
+2185:			weakCampaign ? `Rebuild hook and CTA for ${extractTopMessage(weakCampaign)}.` : "Audit campaign naming and creative mapping.",
+2199:		title: "Research & evidence briefing",
+2231:	if (/launch.*campaign|new campaign/.test(query)) {
+2232:		return { title: "Campaign launch task block", owner: "Campaign Studio", steps: ["Define the campaign objective, audience, and offer.", "Choose channels and budget based on current intelligence.", "List required assets and publishing dependencies before launch."] };
+2250:	if (/campaign/.test(query)) routeSuggestions.push(routeSuggestion("Campaign Studio", "campaign-studio", "Turn this into a structured launch plan."));
+2256:	if (/ads|campaign scale|roas|creative/.test(query)) routeSuggestions.push(routeSuggestion("Ads Manager", "ads-manager", "Review live paid performance and action the next media move."));
+2259:		title: "Operations routing brief",
+2288:		case "strategist":
+2382:	"campaign-studio": "Campaign Studio",
+2400:const AI_INBOUND_SPECIALIST_BY_SOURCE = {
+2404:	"campaign-studio": "strategist",
+2422:const AI_INBOUND_SPECIALIST_ALIASES = {
+2439:	campaign: "campaign-studio",
+2440:	campaigns: "campaign-studio",
+2499:	const legacy = AI_INBOUND_SPECIALIST_ALIASES[raw] || AI_INBOUND_SPECIALIST_ALIASES[asString(value).trim().toLowerCase()] || raw;
+2502:	return SPECIALIST_DEFS.some((item) => item.id === finalId) ? finalId : fallbackId;
+2534:	const outputType = asString(preview.outputType || preview.output_type || preview.type || "handoff").trim() || "handoff";
+2547:		title: firstAiInboundText(preview.title, normalized.title, `Inbound handoff from ${normalized.sourceLabel}`),
+2560:function getAiInboundDurableHandoffId(handoff) {
+2561:	const payload = asObject(handoff?.payload);
+2563:		handoff?.id,
+2564:		handoff?.handoff_id,
+2565:		handoff?.handoffId,
+2566:		payload.handoff_id,
+2567:		payload.handoffId
+2571:function getAiInboundHandoffId(handoff) {
+2572:	const durableId = getAiInboundDurableHandoffId(handoff);
+2574:	if (!handoff) return "";
+2575:	const payload = asObject(handoff?.payload);
+2576:	const stablePayloadId = firstAiInboundId(payload.handoff_id, payload.handoffId, payload.id, handoff?.created_at, handoff?.createdAt);
+2579:		if (!aiInboundHandoffObjectIds.has(handoff)) {
+2581:			aiInboundHandoffObjectIds.set(handoff, `cached-ai-handoff-${Date.now()}-${aiInboundHandoffCounter}`);
+2583:		return aiInboundHandoffObjectIds.get(handoff);
+2585:	return [handoff?.source_page, handoff?.destination_page, payload.prompt, payload.title]
+2588:		.join("::") || `cached-ai-handoff-${Date.now()}`;
+2591:function normalizeAiInboundHandoff(handoff, projectName) {
+2592:	const payload = asObject(handoff?.payload);
+2593:	const draftContext = firstAiInboundObject(payload.draft_context, payload.draftContext, handoff?.draft_context, handoff?.draftContext);
+2597:		handoff?.source_page,
+2598:		handoff?.sourcePage,
+2606:		AI_INBOUND_SPECIALIST_BY_SOURCE[sourcePage] ||
+2625:	)) || `Review this ${sourceLabel} handoff for ${projectLabel}. Identify the right specialist, summarize the context, produce a review-ready draft, and recommend the next safe route. Do not execute publishing, task creation, CRM updates, customer replies, workflow runs, or backend actions.`;
+2631:		handoff?.title,
+2632:		`Inbound handoff from ${sourceLabel}`
+2664:		status: asString(handoff?.status || payload.status || "available"),
+2665:		note: "Guidance only. No publishing, task creation, CRM updates, customer replies, workflow runs, exports, or backend actions are executed from this handoff."
+2672:	const handoff = getSharedHandoff(projectName, "ai-command", operations);
+2673:	const handoffId = getAiInboundHandoffId(handoff);
+2674:	if (!handoffId || handoffId === asString(session.lastAppliedHandoffId)) return;
+2676:	const normalized = normalizeAiInboundHandoff(handoff, projectName);
+2683:		id: handoffId,
+2715:	session.lastAppliedHandoffId = handoffId;
+2716:	persistSessionDraft(projectName, session, `Inbound handoff loaded from ${normalized.sourceLabel}`);
+2718:	const durableHandoffId = getAiInboundDurableHandoffId(handoff);
+2721:			console.warn("Failed to consume AI handoff:", error.message);
+2724:	showMessage?.(`Inbound handoff loaded from ${normalized.sourceLabel}.`);
+2862:	if (aiContext.paid?.summary?.spend != null) caps.push("Paid media briefing");
+2895:					<strong>${escapeHtml(aiContext.campaign || "None")}</strong>
+2922:				${MODE_DEFS.map((agent) => `
+3304:                handoff: "handoff package"
+3350:	const commandTypeLabel = COMMAND_TYPES.find((item) => item.id === session.commandType)?.label || "Strategy";
+3378:			reason: `${aiContext.assetBlockers.length} asset category blocker${aiContext.assetBlockers.length === 1 ? "" : "s"} may reduce content throughput and campaign delivery speed.`,
+3394:	if (!aiContext.campaign || aiContext.campaign === "Not selected") {
+3396:			title: "Define the active campaign operating plan",
+3397:			reason: "A clear campaign context helps every specialist agent generate more precise outputs.",
+3398:			command: `Create a campaign operating brief for ${aiContext.projectName || "this project"} with objective, audience, channels, and first execution wave.`,
+3406:		command: `Generate the next high-impact content wave for ${aiContext.projectName || "this project"} based on current readiness and campaign context.`,
+3424:  const rawId = normalize(value || "strategist");
+3426:  const rawDefinitions = typeof SPECIALIST_DEFS !== "undefined" ? SPECIALIST_DEFS : [];
+3439:    definitions.find((item) => normalize(item?.id || item?.role || item?.key) === "strategist") ||
+3467:	if (preview.outputType === "handoff") return 3;
+3481:		handoff: "handoff",
+3491:	if (outputType === "handoff") return "handoff";
+3506:		handoff: "Handoff Preview",
+3529:	if (tool.intent === "handoff") return "Prepare";
+3539:		.replace(/\{campaign\}/g, "active campaign");
+3575:				<p class="aicmd-room-subtitle mhos-context-description">Ask one expert or the full team to prepare strategy, content, analysis, reviews, and destination handoffs. AI prepares and reviews only; sensitive actions stay confirmation-gated in the owning workspace.</p>
+3635:	const plannedSpecialists = AI_ROOM_PLANNED_SPECIALISTS.map((item) => `
+3649:			<span>Strategy, writing, creative, compliance, publishing, customer, sales, and operations specialists coordinate one review-ready answer. No workflow, send, publish, approval, or CRM action is executed here.</span>
+3673:				${SPECIALIST_DEFS.map((spec) => {
+3708:		const lanes = ["Strategy", "Content", "Media", "Customer Ops", "Sales / CRM", "Compliance", "Publishing", "Operations"];
+3715:						<p class="aicmd-v2-profile-purpose">Coordinates specialists into one review-ready brief, workflow, or handoff.</p>
+3727:	const strengths = asArray(spec.canHelp).slice(0, 3);
+3758:        if (roleId === "operations" || roleId === "customer_ops") return `${label} is preparing your task handoff...`;
+3772:		? "Team orchestration across strategy, writing, media/video, compliance, publishing, customer operations, sales/CRM, and operations"
+3800:	if (/handoff|route|destination_brief/.test(haystack)) return "handoff";
+3874:					<span class="aicmd-v2-tools-subtitle">Prompt tools for structured drafts, source-aware reviews, and destination handoffs. They prepare composer instructions only.</span>
+3971:        const teamIds = ["strategist", "writer", "media", "video_lead", "compliance_reviewer", "operations"];
+3973:                .map((id) => SPECIALIST_DEFS.find((item) => item.id === id))
+4029:                        <p class="aicmd-chatfirst-tab-note">AI Command prepares guidance, drafts, previews, and handoff context only. Publishing, approvals, CRM updates, workflow runs, customer sends, provider execution, and durable task creation remain confirmation-gated in the owning workspace.</p>
+4101:				<p>Chat, draft, review, and prepare handoff context only. Publishing, approvals, CRM updates, workflow runs, external sends, and durable task creation stay confirmation-gated in the owning workspace.</p>
+4169:				${SPECIALIST_DEFS.map((spec) => {
+4188:					${AI_ROOM_PLANNED_SPECIALISTS.map((item) => `
+4312:                                        <span>Ask ${escapeHtml(selectedLabel)} to plan, draft, review, analyze, or prepare a handoff.</span>
+4314:                                                <span>Plan campaign</span>
+4317:                                                <span>Prepare handoff</span>
+4337:                { id: "campaign", label: "Campaign", summary: "Build a review-ready campaign with the full AI Team.", enabled: true },
+4341:                { id: "media", label: "Media", summary: "Create a media brief, storyboard, and production direction.", enabled: false },
+4342:                { id: "publish", label: "Publish", summary: "Prepare publishing checklist and handoff readiness.", enabled: false }
+4378:        const campaignPackage = asObject(packageInput);
+4380:                ["Concept", asString(campaignPackage.concept)],
+4381:                ["Target audience", asString(campaignPackage.targetAudience || campaignPackage.target_audience)],
+4382:                ["Offer", asString(campaignPackage.offer)]
+4386:                ["Launch phases", asArray(campaignPackage.launchPhases || campaignPackage.launch_phases)],
+4387:                ["Content angles", asArray(campaignPackage.contentAngles || campaignPackage.content_angles)],
+4388:                ["Ad angles", asArray(campaignPackage.adAngles || campaignPackage.ad_angles)],
+4389:                ["Required assets", asArray(campaignPackage.requiredAssets || campaignPackage.required_assets)],
+4390:                ["Review blockers", asArray(campaignPackage.missingBlockers || campaignPackage.missing_blockers)],
+4391:                ["Next actions", asArray(campaignPackage.nextActions || campaignPackage.next_actions)]
+4397:                <div class="aicmd-smart-preview-grid aicmd-smart-campaign-package-grid">
+4419:        if (wizard.type !== "campaign" || !wizard.open) return "";
+4464:                                                <p>Guide the AI Team from source to preview. Backend workflow execution and destination handoff stay approval-gated.</p>
+4500:                                                <strong>4. Premium campaign brief</strong>
+4545:                                                        ${renderCampaignPackageMiniPanel(preview.campaignPackage, escapeHtml)}
+4557:                                                                <button type="button" data-aicmd-smart-campaign-action="library">Save to Library</button>
+4558:                                                                <button type="button" data-aicmd-smart-campaign-action="media">Send to Media Studio</button>
+4559:                                                                <button type="button" data-aicmd-smart-campaign-action="governance">Request Governance Review</button>
+4560:                                                                <button type="button" data-aicmd-smart-campaign-action="publishing">Prepare Publishing Handoff</button>
+4561:                                                                <button type="button" data-aicmd-smart-campaign-action="operations">Create Operations Follow-up</button>
+4567:                                                        <span>1. Choose source, goal, and channel. The AI Team will prepare the preview package before any approval or handoff.</span>
+4576:                                                <button class="aicmd-smart-wizard-primary" type="button" data-aicmd-smart-campaign-preview>
+4670:                                        <small>Strategy, content, media, operations, compliance, customer, campaign and provider-readiness planning.</small>
+4675:                                ${SPECIALIST_DEFS.map((spec) => {
+4696:                                <span>Library, campaigns, content, customers, governance, integrations and provider readiness are connected as guarded planning context. Execution stays confirmation-gated.</span>
+4860:				${SPECIALIST_DEFS.map((spec) => {
+4879:				${AI_ROOM_PLANNED_SPECIALISTS.map((item) => `
+4903:					<p>Prompt setup only. Tools prepare composer instructions, source-aware reviews, previews, and handoff context without executing actions.</p>
+4953:					<p>${hasPreview ? "Review the result, then open the destination workspace with draft context." : "Drafts, task previews, workflow previews, and handoff packages appear here after a response or tool setup."}</p>
+5027:					<p>Read-only operating path for chat, draft preparation, review, and destination handoff. Confirmation stays in the owning workspace.</p>
+5126:                ? "Chat only. No workflow run, durable task, external handoff action, approval, publishing action, CRM update, or customer action was created."
+5128:        const emptyBody = "Ask what to do next, draft a campaign asset, review a source, prepare a handoff, or coordinate the full AI team.";
+5144:                : (SPECIALIST_SUGGESTED_PROMPTS[promptModeId] || SPECIALIST_SUGGESTED_PROMPTS.operations);
+5212:                                                <span>Home handoff</span>
+5305:		: (SPECIALIST_SUGGESTED_PROMPTS[promptModeId] || SPECIALIST_SUGGESTED_PROMPTS.operations);
+5365:				{ label: "Pipeline", value: "Operations handoff", present: true, scoped: true }
+5409:					<span>Backend owns authority — AI Command prepares guidance, previews, and handoff context. It does not override execution controls or mutate Operations records.</span>
+5465:		description: "Talk to your AI team, run structured tasks, and turn intelligence into review-ready plans and routed handoffs."
+5716:		// ── TEAM RAIL: SPECIALIST SELECTION ─────────────────────────
+5781:                                return text.includes("source") || text.includes("review") || text.includes("brief") || text.includes("campaign");
+5967:                        if (type !== "campaign") {
+5974:                                type: "campaign",
+6008:                                library: "trusted Library source, approved assets, saved briefs, or validated knowledge",
+6014:                                        label: "Strategist",
+6015:                                        body: `Define the ${goalLabel.toLowerCase()} objective, target segment, market angle, and campaign promise for ${projectLabel}.`
+6023:                                        body: "Prepare creative direction, image/video brief, shot list, format requirements, storyboard/voiceover notes, and asset gaps."
+6031:                                        body: `Prepare publishing readiness for ${channelLabel}: channel checklist, schedule draft, missing approvals, and handoff requirements.`
+6035:                                        body: "Track approval status, destination handoff, follow-up checks, improvement notes, and post-review action ownership."
+6040:                                title: `${goalLabel} campaign for ${projectLabel}`,
+6041:                                summary: `AI Team preview for a ${goalLabel.toLowerCase()} campaign using ${sourceLabel.toLowerCase()} and optimized for ${channelLabel}.`,
+6059:                                                body: `Use ${sourceMeaning}. Produce a review-ready campaign package before any handoff, approval, publishing, sending, CRM update, provider execution, or workflow mutation.`
+6074:                                                label: "Media brief",
+6075:                                                body: "Define hero visual, product framing, scene list, required assets, image/video format, voiceover direction, and Media Studio handoff notes."
+6087:                                                body: "Create a follow-up plan for review status, owner, destination handoff, performance check, improvement loop, and next campaign iteration."
+6131:                        const campaignPackage = asObject(body.campaignPackage || body.campaign_package);
+6133:                                campaignPackage.concept ? { label: "Campaign concept", body: asString(campaignPackage.concept) } : null,
+6134:                                campaignPackage.targetAudience ? { label: "Target audience", body: asString(campaignPackage.targetAudience) } : null,
+6135:                                campaignPackage.offer ? { label: "Offer", body: asString(campaignPackage.offer) } : null,
+6136:                                asArray(campaignPackage.launchPhases).length ? { label: "Launch phases", items: asArray(campaignPackage.launchPhases) } : null,
+6137:                                asArray(campaignPackage.contentAngles).length ? { label: "Content angles", items: asArray(campaignPackage.contentAngles) } : null,
+6138:                                asArray(campaignPackage.adAngles).length ? { label: "Ad angles", items: asArray(campaignPackage.adAngles) } : null,
+6139:                                asArray(campaignPackage.requiredAssets).length ? { label: "Required assets", items: asArray(campaignPackage.requiredAssets) } : null,
+6140:                                asArray(campaignPackage.missingBlockers).length ? { label: "Review blockers", items: asArray(campaignPackage.missingBlockers) } : null,
+6141:                                asArray(campaignPackage.nextActions).length ? { label: "Next actions", items: asArray(campaignPackage.nextActions) } : null
+6146:                                title: asString(body.title || fallbackPreview.title || "AI Team campaign preview"),
+6156:                                audience: asString(body.audience || campaignPackage.targetAudience || fallbackPreview.audience || ""),
+6157:                                offer: asString(body.offer || campaignPackage.offer || fallbackPreview.offer || ""),
+6160:                                campaignPackage,
+6163:                                        ? "Backend preview only. No publish, send, CRM mutation, provider execution, workflow mutation, Governance approval, task creation, or durable handoff was performed."
+6202:                                console.warn("AI Command backend campaign preview fallback", error);
+6212:                Array.from(document.querySelectorAll("[data-aicmd-smart-campaign-preview]")).forEach((btn) => {
+6214:                                updateStatus("Preparing AI Team campaign preview...");
+6218:                                        type: "campaign",
+6223:                                        type: "smart_campaign_preview",
+6224:                                        outputType: "campaign_package",
+6240:                                        campaignPackage: asObject(preview.campaignPackage),
+6245:                                        confirmationNote: "Review and route this campaign package through the owning destination workspace before any publishing, sending, approval, task creation, provider execution, or workflow mutation.",
+6246:                                        nextSafeAction: "Review the campaign package, then send it to Media Studio or Publishing.",
+6253:                                updateStatus(preview.backendPreview ? "Backend AI Team preview prepared. Review before any handoff or approval." : "Local campaign preview prepared because backend preview is unavailable.");
+6254:                                showMessage?.(preview.backendPreview ? "Backend AI Team campaign preview is ready for review." : "Campaign preview is ready using the local fallback.");
+6271:                                id: `campaign_handoff_${Date.now()}`,
+6272:                                type: "ai_command_campaign_handoff",
+6278:                                title: asString(preview.title || "Campaign handoff"),
+6292:                                campaignPackage: asObject(preview.campaignPackage),
+6297:                                safety: "Prepared handoff only. No backend write, publish, send, CRM mutation, provider execution, approval creation, task creation, or workflow mutation was performed.",
+6302:                const storeCampaignReviewHandoff = (handoff) => {
+6304:                                const payload = JSON.stringify(handoff);
+6305:                                window.localStorage?.setItem?.("mh_ai_command_campaign_handoff", payload);
+6306:                                window.localStorage?.setItem?.(`mh_ai_command_handoff_${handoff.destination_route}`, payload);
+6307:                                window.sessionStorage?.setItem?.("mh_ai_command_campaign_handoff", payload);
+6308:                                window.sessionStorage?.setItem?.(`mh_ai_command_handoff_${handoff.destination_route}`, payload);
+6310:                                console.warn("Unable to store AI Command campaign handoff", error);
+6318:                                updateStatus("Generate a campaign preview before choosing a review action.");
+6333:                                const handoff = buildCampaignReviewHandoff(action, preview);
+6334:                                storeCampaignReviewHandoff(handoff);
+6340:                                        handoff,
+6341:                                        safety: handoff.safety
+6345:                                updateStatus(`${label} prepared. Opening ${handoff.destination} for review.`);
+6348:                                if (typeof navigateTo === "function" && handoff.destination_route) {
+6349:                                        navigateTo(handoff.destination_route);
+6353:                                if (typeof context?.navigateTo === "function" && handoff.destination_route) {
+6354:                                        context.navigateTo(handoff.destination_route);
+6375:                Array.from(document.querySelectorAll("[data-aicmd-smart-campaign-action]")).forEach((btn) => {
+6377:                                const action = asString(btn.getAttribute("data-aicmd-smart-campaign-action") || "");
+6504:		// ── ASK SPECIALIST (P0.3.2C1 chat route) ────────────────
+6578:		                                        campaign: aiContext.campaign,
+6582:		                                safetyInstruction: "Chat only. No task/workflow/handoff/approval/publish/customer/CRM execution.",
+6667:		                        updateStatus("Specialist reply generated. No workflow/task/handoff was created.");
+6756:                // Phase 1: converts the current conversation into a handoff preview. No backend write.
+6757:                const handoffBtn = $("aicmdV2HandoffBtn");
+6758:                if (handoffBtn) {
+6759:                        handoffBtn.onclick = () => {
+6763:                                        ? `Prepare a handoff summary for: ${value}`
+6764:                                        : `Prepare a handoff summary from ${spec.label} for the current project state of ${projectName || "this project"}.`;
+6767:                                        intent: "handoff",
+6790:					campaign: aiContext.campaign
+7038:				const handoffRecord = {
+7057:				setSharedAiDraft(projectName || "__default__", handoffRecord.payload.draft_context);
+7058:				setSharedHandoff(projectName || "__default__", destination, handoffRecord);
+7130:        if (session.isHandoff) return "handoff";
+7146:                case "handoff":
+7147:                        return "Preparing handoff";
+7168:            state === "handoff" ? "Finalizing" :
+7182:        isHandoff: state === "handoff",
+7192:            state === "handoff" ? "📦 Handoff" :
+7201:        { id: "strategist", label: "Strategist" },
+7210:        if (state === "thinking" && member.id === "strategist") status = "active";
+7231:            state === "handoff" ? "AI is finalizing output" :
+7271:        handoff: "AI is preparing delivery"
+7317:        handoff: { pulse: 1.0, label: "finalizing output" }
+7332:        handoff: ["finalizing", "packaging", "delivering"]
+7398:        handoff: 800
+7492:        loadStrategy: "balanced"
+7600:        handoff: "finalize_delivery"
+7618:        cacheStrategy: usage > 50 ? "aggressive" : "normal",
+
+### ai-command chat/execution/handoff relevant windows
+18:        getSharedHandoff,
+19:        setSharedAiDraft,
+20:        setSharedHandoff
+28:        executeProjectAiChat,
+29:        executeProjectAiGuidance,
+30:        generateAiCommandCampaignPreview
+153:		safetyNote: "All outputs are guidance and draft only. Execution requires explicit confirmation.",
+166:		safetyNote: "Drafts require review before publishing. Cannot approve or publish without confirmation.",
+177:		cannotDo: ["Generate images directly", "Upload assets without review", "Approve without confirmation", "Execute media jobs"],
+179:		safetyNote: "Direction and briefs only. Media generation requires backend confirmation and explicit action.",
+190:		cannotDo: ["Generate video directly", "Upload footage without review", "Approve without confirmation", "Run media jobs automatically"],
+244:		safetyNote: "Compliance review is advisory. Approvals always require human confirmation before execution.",
+255:		cannotDo: ["Run workflows without confirmation", "Auto-approve tasks", "Override authority gates", "Execute backend operations directly"],
+257:		safetyNote: "Task plans and handoffs only. Workflow execution requires explicit user confirmation.",
+268:		cannotDo: ["Send customer replies", "Create live tickets", "Change SLA policy", "Escalate without confirmation"],
+270:		safetyNote: "Customer operations outputs are drafts only. Sending replies, ticket creation, and escalations require confirmation in the owning surface.",
+283:		safetyNote: "Sales and CRM outputs are guidance and drafts only. CRM mutations and outreach sends require confirmation in the owning surface.",
+366:const PHASE35_WORKSPACE_TABS = ["chat", "preview", "tools", "context", "history"];
+378:	{ id: "draft", label: "Draft", helper: "Latest draft or guidance preview" },
+431:		{ id: "campaign-angle-generator", label: "Campaign Angle Generator", action: "preview", intent: "guidance", template: "Generate campaign angles for {project}. Include audience tension, promise, channel fit, and strongest first test." },
+432:		{ id: "launch-plan", label: "Launch Plan", action: "preview", intent: "workflow", template: "Build a launch plan for {project}. Include phases, channels, owners, blockers, and next move." },
+433:		{ id: "funnel-mapping", label: "Funnel Mapping", action: "preview", intent: "guidance", template: "Map the funnel for {project}. Include awareness, consideration, conversion, retention, and handoff points." },
+434:		{ id: "prioritize-next-move", label: "Priority Sort", action: "preview", intent: "task", template: "Prioritize the next moves for {project}. Rank by impact, urgency, dependencies, and safest first action." }
+437:		{ id: "hook-generator", label: "Hook Generator", action: "preview", intent: "guidance", template: "Write 5 German hook variants for {project}. Keep them concise, testable, and suitable for the Germany market." },
+438:		{ id: "caption-builder", label: "Caption Builder", action: "preview", intent: "guidance", template: "Draft German captions for {project}. Include angle, body, CTA, and platform adaptation notes." },
+439:		{ id: "cta-refiner", label: "CTA Refiner", action: "preview", intent: "task", template: "Refine CTA options for {project}. Provide German variants for awareness, consideration, and action stages." },
+440:		{ id: "publisher-package", label: "Publisher Package", action: "preview", intent: "handoff", template: "Prepare a Publisher handoff for {project}. Include German copy package, CTA, notes, and remaining checks." }
+443:		{ id: "creative-brief-builder", label: "Creative Brief Builder", action: "preview", intent: "media", template: "Prepare a creative brief for {project}. Include concept, visual rules, subject, brand constraints, and production notes." },
+444:		{ id: "format-mapper", label: "Format Mapper", action: "preview", intent: "guidance", template: "Map required creative formats for {project}. Include platform, aspect ratio, asset type, and usage context." },
+445:		{ id: "asset-checklist", label: "Asset Checklist", action: "preview", intent: "task", template: "Create an asset checklist for {project}. List must-have files, missing references, usage context, and priority." },
+446:		{ id: "visual-direction", label: "Visual Direction", action: "preview", intent: "guidance", template: "Review visual direction for {project}. Identify mismatches, improvements, and required references." },
+450:		{ id: "write-video-hook", label: "Write video hook", action: "preview", intent: "guidance", template: "Write short-form video hooks for {project}. Include 3 opening variants and audience fit." },
+451:		{ id: "draft-script", label: "Draft script", action: "preview", intent: "guidance", template: "Draft a short-form video script for {project}. Include hook, body, CTA, and visual cues." },
+452:		{ id: "build-storyboard", label: "Build storyboard", action: "preview", intent: "workflow", template: "Build storyboard beats for {project}. Sequence shots and key transitions." },
+453:		{ id: "prepare-voiceover", label: "Prepare voiceover", action: "preview", intent: "guidance", template: "Prepare voiceover script options for {project}. Keep clean timing and emphasis notes." },
+454:		{ id: "map-video-asset-needs", label: "Map video asset needs", action: "preview", intent: "task", template: "Map video asset needs for {project}. Include format, source, and production owner." }
+457:		{ id: "publishing-checklist", label: "Publishing Checklist", action: "preview", intent: "handoff", template: "Build a publishing checklist for {project}. Include German copy, assets, claims checks, and channel readiness." },
+458:		{ id: "final-packaging", label: "Final Packaging", action: "preview", intent: "handoff", template: "Prepare a final publishing package for {project}. Include copy, CTA, asset notes, approvals, and destination channel." },
+459:		{ id: "channel-formatting", label: "Channel Formatting", action: "preview", intent: "guidance", template: "Format the next output for {project} by channel. Include German copy, limits, CTA, and scheduling notes." },
+460:		{ id: "schedule-draft", label: "Schedule Draft", action: "preview", intent: "workflow", template: "Prepare a publishing schedule draft for {project}. Include channel cadence, dependencies, and review gates." },
+464:		{ id: "ad-angle-generator", label: "Ad Angle Generator", action: "preview", intent: "guidance", template: "Draft ad angles for {project}. Include audience problem, value promise, German hook direction, and platform fit." },
+465:		{ id: "copy-variants", label: "Copy Variants", action: "preview", intent: "guidance", template: "Prepare German ad copy variants for {project}. Include hooks, primary text, CTA, and creative notes." },
+466:		{ id: "test-ideas", label: "Test Ideas", action: "preview", intent: "task", template: "Suggest paid test ideas for {project}. Provide hypotheses, segments, creative variables, and measurement notes." },
+467:		{ id: "budget-notes", label: "Budget Notes", action: "preview", intent: "guidance", template: "Review budget notes for {project}. Summarize constraints and safe test allocation guidance." },
+471:		{ id: "keyword-intent", label: "Keyword Intent", action: "preview", intent: "guidance", template: "Suggest keyword intent opportunities for {project}. Include Germany-market intent, content mapping, and priority." },
+472:		{ id: "meta-direction", label: "Meta Direction", action: "preview", intent: "guidance", template: "Prepare meta direction for {project}. Include page angle, title direction, description direction, and CTA intent." },
+473:		{ id: "opportunity-summary", label: "Opportunity Summary", action: "preview", intent: "task", template: "Summarize SEO and insight opportunities for {project}. Focus on conversion, traffic quality, and content fit." },
+474:		{ id: "analysis-plan", label: "Analysis Plan", action: "preview", intent: "workflow", template: "Draft an analysis plan for {project}. Define questions, datasets, cadence, and owners." },
+478:		{ id: "claims-check", label: "Claims Check", action: "preview", intent: "guidance", template: "Review marketing claims for {project}. Flag unsupported, high-risk, or evidence-dependent wording." },
+479:		{ id: "approval-flags", label: "Approval Flags", action: "preview", intent: "task", template: "Check approval risks for {project}. List risk, impact, mitigation, and required owner." },
+480:		{ id: "safety-checklist", label: "Safety Checklist", action: "preview", intent: "handoff", template: "Prepare a safety checklist for {project}. Include policy checks, evidence required, and approval notes." },
+481:		{ id: "publish-readiness", label: "Publish Readiness", action: "preview", intent: "handoff", template: "Review publish readiness for {project}. Confirm what needs human approval before release." },
+485:		{ id: "timeline-draft", label: "Timeline Draft", action: "preview", intent: "workflow", template: "Draft an execution timeline for {project}. Include milestones, owners, dependencies, and review gates." },
+486:		{ id: "handoff-routing", label: "Handoff Routing", action: "preview", intent: "handoff", template: "Prepare handoff routing for {project}. Include source, destination, decision gates, and required confirmations." },
+487:		{ id: "checklist", label: "Checklist", action: "preview", intent: "task", template: "Draft an operational checklist for {project}. Include owners, dependencies, priority, and first action." },
+488:		{ id: "blocker-review", label: "Blocker Review", action: "preview", intent: "guidance", template: "Review operational blockers for {project}. Prioritize by risk and impact." },
+492:		{ id: "review-unified-inbox", label: "Review Unified Inbox", action: "preview", intent: "guidance", template: "Review the Unified Inbox readiness for {project}. Summarize visible customer-operation signals, open gaps, and safe next review steps. Do not claim inbox actions happened." },
+493:		{ id: "summarize-customer-thread", label: "Summarize Customer Thread", action: "preview", intent: "guidance", template: "Summarize this customer thread for {project}. Include customer issue, sentiment, reply goal, missing details, and safe next step." },
+494:		{ id: "draft-customer-reply", label: "Draft Customer Reply", action: "preview", intent: "guidance", template: "Draft a customer reply for {project}. Keep it helpful, calm, review-ready, and do not claim any operational action has been completed." },
+495:		{ id: "create-ticket-draft", label: "Create Ticket Draft", action: "preview", intent: "task", template: "Create a ticket draft for {project}. Include issue, priority, owner suggestion, evidence needed, and next safe action." },
+496:		{ id: "check-sla-risk", label: "Check SLA Risk", action: "preview", intent: "guidance", template: "Check SLA risk for {project}. Flag urgency, risk level, missing runtime data, and escalation recommendation for review." },
+497:		{ id: "prepare-escalation", label: "Prepare Escalation", action: "preview", intent: "handoff", template: "Prepare an escalation draft for {project}. Include reason, customer impact, owner, confirmation needed, and destination team." },
+498:		{ id: "customer-profile-snapshot", label: "Customer Profile Snapshot", action: "preview", intent: "guidance", template: "Prepare a customer profile snapshot for {project}. Include known context, purchase/support signals, missing fields, and safe follow-up questions." },
+499:		{ id: "route-support-sales-ops", label: "Route to Support / Sales / Operations", action: "preview", intent: "handoff", template: "Prepare routing guidance for {project}. Decide whether the customer item belongs with Support, Sales, or Operations, and explain the review gate." }
+502:		{ id: "lead-qualification", label: "Lead Qualification", action: "preview", intent: "guidance", template: "Qualify the lead for {project}. Include fit, intent, urgency, missing CRM fields, and the safest next step." },
+503:		{ id: "outreach-draft", label: "Outreach Draft", action: "preview", intent: "guidance", template: "Draft outreach for {project}. Include subject or opener, personalized message, CTA, and review notes before sending." },
+504:		{ id: "follow-up-sequence", label: "Follow-up Sequence", action: "preview", intent: "workflow", template: "Build a follow-up sequence for {project}. Include timing, message angle, CTA, stop condition, and confirmation requirements." },
+505:		{ id: "crm-profile-summary", label: "CRM Profile Summary", action: "preview", intent: "guidance", template: "Summarize the CRM profile context for {project}. Include fit, history, open questions, and next sales action without mutating CRM data." },
+506:		{ id: "pipeline-next-step", label: "Pipeline Next Step", action: "preview", intent: "task", template: "Recommend the pipeline next step for {project}. Include stage, rationale, owner, risk, and required confirmation." },
+507:		{ id: "dealer-salon-outreach", label: "Dealer / Salon Outreach", action: "preview", intent: "guidance", template: "Draft dealer or salon outreach for {project}. Include positioning, proof needs, offer angle, CTA, and follow-up note." },
+508:		{ id: "influencer-lead-plan", label: "Influencer Lead Plan", action: "preview", intent: "workflow", template: "Prepare an influencer lead plan for {project}. Include target profile, outreach angle, qualification criteria, and handoff path." },
+509:		{ id: "sales-handoff-draft", label: "Sales Handoff", action: "preview", intent: "handoff", template: "Prepare a sales handoff draft for {project}. Include lead context, recommended next action, owner, and confirmation needed." }
+914:			workspaceTab: "preview",
+1057:function getAiResponseBridgeStatus(executeProjectAiGuidanceFn) {
+1058:	if (typeof executeProjectAiGuidanceFn !== "function") {
+1111:                .replace(/\b(public|private|review-only|preview-only)\b/gi, "")
+1140:        const preview = asObject(session.outputPreview);
+1145:                preview.title ||
+1152:                preview.outputType ? `${formatOutputTypeLabel(preview.outputType)} preview` : "Session"
+1179:                preview: session.outputPreview || null,
+1202:        session.outputPreview = asObject(record.preview);
+1298:function destinationRouteForSpecialist(specialistId, outputType) {
+1301:	if (outputType === "workflow") return "workflows";
+1302:	if (id === "strategist") return outputType === "task" ? "campaign-studio" : "workflows";
+1310:	if (id === "operations") return outputType === "task" ? "task-center" : "workflows";
+1311:	if (id === "customer_ops") return outputType === "task" ? "task-center" : "operations-centers";
+1319:        const explicitDestination = asString(response.destinationRoute || "").trim();
+1323:                response.outputType,
+1324:                response.destinationRoute,
+1330:        let outputType = asString(response.outputType || "").toLowerCase();
+1331:        if (!outputType || outputType === "chat") {
+1332:                outputType = activeTab === "task"
+1350:        if (outputType === "handoff" || outputType === "task" || looksTaskLike) {
+1351:                outputType = "task";
+1352:                return { outputType, destinationRoute: "task-center" };
+1355:        if (outputType === "workflow" || looksWorkflowLike) {
+1356:                outputType = "workflow";
+1357:                return { outputType, destinationRoute: explicitDestination || "workflows" };
+1360:        if (/content|copy|draft|caption|email|blog|article|script/.test(outputType) || looksContentLike) {
+1361:                outputType = "content";
+1362:                return { outputType, destinationRoute: explicitDestination || "content-studio" };
+1365:        if (/media|video|visual|asset|creative/.test(outputType) || looksMediaLike) {
+1366:                outputType = "media";
+1367:                return { outputType, destinationRoute: explicitDestination || "media-studio" };
+1370:        if (/publishing|publish|schedule/.test(outputType) || looksPublishingLike) {
+1371:                outputType = "publishing";
+1372:                return { outputType, destinationRoute: explicitDestination || "publishing" };
+1375:        if (/governance|compliance|risk|approval/.test(outputType) || looksGovernanceLike) {
+1376:                outputType = "governance";
+1377:                return { outputType, destinationRoute: explicitDestination || "governance" };
+1380:        if (/insight|research|seo|analytics/.test(outputType) || looksInsightLike) {
+1381:                outputType = "insight";
+1382:                return { outputType, destinationRoute: explicitDestination || "insights" };
+1385:        if (/campaign|strategy|launch/.test(outputType) || looksCampaignLike) {
+1386:                outputType = "campaign";
+1388:                        outputType,
+1389:                        destinationRoute: explicitDestination || (session?.teamMode === "team" ? "workflows" : "campaign-studio")
+1393:        const destinationRoute = explicitDestination || destinationRouteForSpecialist(session?.modeId || "operations", outputType);
+1394:        return { outputType, destinationRoute };
+1415:function specialistTemplateForOutput({ specialist, outputType, prompt, projectName }) {
+1419:	const route = destinationRouteForSpecialist(specialistId, outputType);
+1423:		outputType,
+1428:		destinationRoute: route,
+1429:		confirmationRequired: outputType === "handoff" || specialistId === "publisher" || specialistId === "compliance_reviewer",
+1432:		status: "draft_preview",
+1435:		confirmationNote: "Execution, approvals, and publishing require explicit confirmation in the owning workspace."
+1439:		if (outputType === "task") {
+1468:			title: outputType === "task" ? "Task: Draft campaign copy" : "Content Guidance: Messaging draft",
+1502:			outputType: outputType === "guidance" ? "media_brief" : outputType,
+1522:			title: outputType === "task" ? "Task: Video production plan" : "Video Brief: Hook, script, storyboard",
+1537:			title: outputType === "handoff" ? "Handoff Preview: Publishing package" : "Publishing Draft: Readiness checklist",
+1549:			confirmationRequired: true,
+1557:			title: outputType === "task" ? "Task: Paid test plan" : "Ads Draft: Angles and tests",
+1585:			title: outputType === "task" ? "Task: Analysis plan" : "Insights Guidance: Signal review",
+1607:			confirmationRequired: true,
+1615:			title: outputType === "task" ? "Ticket Draft: Customer operations follow-up" : "Customer Ops Draft: Thread, reply, and routing",
+1624:				"Priority: draft priority pending runtime inbox and SLA confirmation.",
+1628:				"Unified Inbox is not duplicated here; this is a draft and routing preview only.",
+1629:				"SLA and escalation decisions require confirmation in the owning operations surface."
+1638:			confirmationRequired: true,
+1646:			title: outputType === "handoff" ? "Sales Handoff" : "Sales / CRM Draft: Lead and outreach plan",
+1666:				"Outreach and follow-ups require confirmation before sending."
+1675:			confirmationRequired: true,
+1681:		if (outputType === "workflow") {
+1690:					"Stage 4: Destination handoff and confirmation"
+1692:				safetyLabel: "Workflow run is not started. This is a draft preview only."
+1697:			title: outputType === "handoff" ? "Handoff Preview: Operations package" : "Operations Draft: Task and handoff plan",
+1724:	const outputType = intentToType[intent] || "guidance";
+1728:		outputType,
+1738:		title: outputType === "workflow" ? "Team Workflow" : `Team ${titleCase(outputType)} Preview`,
+1739:		summary: `Full team ${outputType.replace("_", " ")} preview prepared for ${projectName || "current project"}.`,
+1755:		destinationRoute: outputType === "task" ? "task-center" : "workflows",
+1757:		confirmationNote: "No task, workflow, outreach, customer reply, CRM update, approval, or publishing action is executed from Full Team mode.",
+1758:		safetyLabel: "Full Team output is a coordinated draft preview only."
+1762:function formatOutputTypeLabel(outputType) {
+1770:	return labels[outputType] || titleCase(outputType || "guidance");
+1776:		`Output Type: ${formatOutputTypeLabel(output.outputType)}`,
+1778:		`Status: ${humanizeValue(output.status, "draft_preview")}`,
+1790:	lines.push(`Destination: ${routeLabel(output.destinationRoute)}`);
+1792:	lines.push(`Confirmation: ${output.confirmationRequired ? "Required before execution" : "Required for execution actions"}`);
+1826:function buildStructuredPreviewBlocks(preview = {}) {
+1827:        const summary = humanizeValue(preview.summary, "");
+1829:                preview.mainOutput ||
+1830:                preview.output ||
+1831:                preview.generatedOutput ||
+1832:                preview.result ||
+1847:        const bullets = normalizeUniqueDisplayList(preview.bullets, 8)
+1854:        const steps = normalizeUniqueDisplayList(preview.steps, 8)
+1859:        } else if (preview.nextStep) {
+1860:                blocks.push({ label: "Next step", items: [compactPreviewText(preview.nextStep, 280)] });
+2368:	setSharedAiDraft(projectName, {
+2532:	const preview = asObject(rawPreview);
+2533:	if (!Object.keys(preview).length) return null;
+2534:	const outputType = asString(preview.outputType || preview.output_type || preview.type || "handoff").trim() || "handoff";
+2535:	const destinationRoute = normalizeAiInboundSourcePage(
+2536:		preview.destinationRoute ||
+2537:		preview.destination_route ||
+2542:	const specialistId = normalizeAiInboundSpecialistId(preview.specialistId || preview.specialist_id || normalized.suggestedSpecialist, normalized.suggestedSpecialist);
+2545:		...preview,
+2546:		outputType,
+2547:		title: firstAiInboundText(preview.title, normalized.title, `Inbound handoff from ${normalized.sourceLabel}`),
+2548:		summary: firstAiInboundText(preview.summary, preview.description, normalized.prompt),
+2549:		destinationRoute,
+2551:		generatedAt: asString(preview.generatedAt || preview.generated_at || nowIso()),
+2552:		sourcePrompt: firstAiInboundText(preview.sourcePrompt, preview.source_prompt, normalized.prompt),
+2553:		status: asString(preview.status || "draft_preview"),
+2554:		safetyLabel: firstAiInboundText(preview.safetyLabel, preview.safety_label, "Guidance and draft only. No backend execution."),
+2555:		confirmationNote: firstAiInboundText(preview.confirmationNote, preview.confirmation_note, "Execution, approvals, publishing, CRM updates, customer replies, and workflow runs require explicit confirmation in the owning workspace."),
+2556:		confirmationRequired: preview.confirmationRequired ?? preview.confirmation_required ?? true
+2645:		draftContext.output_preview,
+2646:		draftContext.phase2_output_preview,
+2648:		payload.output_preview
+2671:function applyDurableAiHandoff(projectName, operations, session, consumeProjectHandoff, showMessage) {
+2672:	const handoff = getSharedHandoff(projectName, "ai-command", operations);
+2696:			preview: session.outputPreview,
+2703:	setSharedAiDraft(projectName, {
+2720:		consumeProjectHandoff?.(projectName, durableHandoffId, { actor: "mh-assistant" }).catch((error) => {
+2734:	executeProjectAiCommand,
+2739:	if (typeof executeProjectAiCommand !== "function") throw new Error("AI command service is unavailable.");
+2747:		result = await executeProjectAiCommand(projectName, {
+2953:				<span style="font-size:11px;color:var(--color-text-2);">Prefill only — send prompt for preview</span>
+3176:		.filter((msg) => msg.role === "assistant" && asString(msg.response?.outputType || msg.response?.output_type))
+3179:			type: titleCase(asString(msg.response?.outputType || msg.response?.output_type)),
+3298:function buildConversationWorkPrompt(session, outputType, fallbackPrompt = "") {
+3305:        }[outputType] || "work draft";
+3321:        const preview = buildPhase2OutputPreview({
+3329:        preview.sourcePrompt = context.prompt || workPrompt;
+3330:        preview.conversationContext = context.conversationText;
+3333:        // The visible preview should stay clean and user-facing.
+3335:                preview.summary = context.assistantText;
+3336:                preview.mainOutput = context.assistantText;
+3339:        preview.generatedAt = nowIso();
+3340:        preview.safetyLabel = preview.safetyLabel || "Conversation converted into a review-ready draft. No backend action executed.";
+3342:        session.outputPreview = preview;
+3345:        session.workspaceTab = "preview";
+3346:        return preview;
+3464:	const preview = asObject(session.outputPreview);
+3466:	if (preview.outputType === "workflow") return 2;
+3467:	if (preview.outputType === "handoff") return 3;
+3468:	if (preview.outputType === "task") return 1;
+3469:	if (preview.outputType) return 2;
+3478:		preview: "draft",
+3487:function outputTabFromPreview(preview) {
+3488:	const outputType = asString(preview?.outputType || "");
+3489:	if (outputType === "task") return "task";
+3490:	if (outputType === "workflow") return "workflow";
+3491:	if (outputType === "handoff") return "handoff";
+3510:	const firstOutput = asArray(tool.outputTypes)[0];
+3517:	const outputType = tool.intent === "media" ? "guidance" : asString(tool.intent || "guidance");
+3518:	return destinationRouteForSpecialist(session?.modeId || "operations", outputType);
+3522:	if (tool.safetyLevel === "confirmation_required") return "Destination confirmation required";
+3524:	return "Local preview only";
+3575:				<p class="aicmd-room-subtitle mhos-context-description">Ask one expert or the full team to prepare strategy, content, analysis, reviews, and destination handoffs. AI prepares and reviews only; sensitive actions stay confirmation-gated in the owning workspace.</p>
+3797:	const outputs = asArray(tool.outputTypes).join(" ");
+3807:	const preferred = destinations.find((item) => !["chat-preview", "composer", "preview", "ai-command"].includes(asString(item)));
+3809:	return destinationRouteForSpecialist(session?.modeId || "operations", getCanonicalToolIntent(tool));
+3820:		action: "preview",
+3840:		{ id: "preview", label: "Preview", hint: "Draft output" },
+3953:        const preview = asObject(session.outputPreview);
+3958:        const outputType = asString(preview.outputType || "guidance");
+3959:        const outputLabel = preview.outputType ? formatOutputTypeLabel(outputType) : "Guidance";
+3960:        const destinationRoute = asString(preview.destinationRoute || destinationRouteForSpecialist(session.modeId, outputType));
+3961:        const destinationLabel = routeLabel(destinationRoute);
+3966:        const governanceRequired = destinationRoute === "governance" || /approval|claim|compliance|risk|gdpr|review/i.test(`${outputType} ${asString(preview.title)} ${asString(preview.summary)}`);
+3979:                        const route = destinationRouteForSpecialist(spec.id, "guidance");
+4029:                        <p class="aicmd-chatfirst-tab-note">AI Command prepares guidance, drafts, previews, and handoff context only. Publishing, approvals, CRM updates, workflow runs, customer sends, provider execution, and durable task creation remain confirmation-gated in the owning workspace.</p>
+4065:        const outputType = asString(session.outputPreview?.outputType || "Guidance");
+4066:        const destinationRoute = asString(session.outputPreview?.destinationRoute || destinationRouteForSpecialist(session.modeId, outputType));
+4078:                                <span>${escapeHtml(statusLabel)} · ${escapeHtml(routeLabel(destinationRoute))} · ${escapeHtml(outputType)}</span>
+4083:                                <span>No execution without confirmation</span>
+4101:				<p>Chat, draft, review, and prepare handoff context only. Publishing, approvals, CRM updates, workflow runs, external sends, and durable task creation stay confirmation-gated in the owning workspace.</p>
+4236:                                outputType: item.outputType || item.preview?.outputType || "",
+4237:                                destinationRoute: item.destinationRoute || item.preview?.destinationRoute || "",
+4238:                                previewTitle: item.preview?.title || item.responseTitle || "",
+4244:        const preview = asObject(session.outputPreview);
+4248:                const outputType = asString(message.outputType || preview.outputType || "guidance");
+4249:                const destinationRoute = asString(message.destinationRoute || preview.destinationRoute || destinationRouteForSpecialist(session.modeId, outputType));
+4250:                const destination = routeLabel(destinationRoute);
+4253:                        { label: outputType === "task" ? "Create task draft" : "Prepare draft", attr: "data-aicmd-smart-draft" },
+4254:                        { label: `Open ${destination}`, attr: "data-aicmd-smart-route", route: destinationRoute },
+4280:                const previewTitle = asString(message.previewTitle || preview.title || "");
+4288:                                        ${previewTitle && !isUser ? `<strong class="aicmd-chat-output-title">${escapeHtml(previewTitle)}</strong>` : ""}
+4352:                                <span>Choose a guided workflow. The team prepares a preview first.</span>
+4397:                <div class="aicmd-smart-preview-grid aicmd-smart-campaign-package-grid">
+4432:        const preview = asObject(wizard.preview);
+4464:                                                <p>Guide the AI Team from source to preview. Backend workflow execution and destination handoff stay approval-gated.</p>
+4474:                                        <span class="${preview.title ? "is-active" : ""}">5 Preview</span>
+4526:                                        ${preview.title ? `
+4527:                                                <article class="aicmd-smart-preview">
+4528:                                                        <div class="aicmd-smart-preview-head">
+4530:                                                                <strong>${escapeHtml(preview.title)}</strong>
+4531:                                                                <p>${escapeHtml(preview.summary)}</p>
+4534:                                                        <div class="aicmd-smart-preview-meta">
+4535:                                                                <span><strong>Source</strong>${escapeHtml(preview.sourceLabel)}</span>
+4536:                                                                <span><strong>Goal</strong>${escapeHtml(preview.goalLabel || titleCase(preview.goal))}</span>
+4537:                                                                <span><strong>Channel</strong>${escapeHtml(preview.channelLabel || titleCase(preview.channel))}</span>
+4538:                                                                <span><strong>Status</strong>${escapeHtml(preview.backendPreview ? "Backend preview" : "Local fallback")}</span>
+4539:                                                                <span><strong>Market</strong>${escapeHtml(titleCase(preview.market || market))}</span>
+4540:                                                                <span><strong>Language</strong>${escapeHtml(titleCase(preview.language || language))}</span>
+4541:                                                                <span><strong>Format</strong>${escapeHtml(titleCase(preview.format || format))}</span>
+4542:                                                                <span><strong>Deadline</strong>${escapeHtml(titleCase(preview.deadline || deadline))}</span>
+4545:                                                        ${renderCampaignPackageMiniPanel(preview.campaignPackage, escapeHtml)}
+4547:                                                        <div class="aicmd-smart-preview-grid">
+4548:                                                                ${asArray(preview.sections).map((section) => `
+4556:                                                        <div class="aicmd-smart-preview-actions" aria-label="Campaign review actions">
+4567:                                                        <span>1. Choose source, goal, and channel. The AI Team will prepare the preview package before any approval or handoff.</span>
+4573:                                        <span>Review-first flow: generate preview, approve, then hand off to the owning surface. No publish, send, CRM update, provider execution, or workflow mutation happens here.</span>
+4576:                                                <button class="aicmd-smart-wizard-primary" type="button" data-aicmd-smart-campaign-preview>
+4577:                                                        ${preview.title ? "Regenerate AI Team Preview" : "Generate AI Team Preview"}
+4696:                                <span>Library, campaigns, content, customers, governance, integrations and provider readiness are connected as guarded planning context. Execution stays confirmation-gated.</span>
+4903:					<p>Prompt setup only. Tools prepare composer instructions, source-aware reviews, previews, and handoff context without executing actions.</p>
+4932:	const preview = asObject(session.outputPreview);
+4933:	const hasPreview = Boolean(preview.outputType && preview.title);
+4935:	const structuredPreview = hasPreview ? buildStructuredPreviewBlocks(preview) : { blocks: [], compactSummary: "" };
+4937:	const destination = routeLabel(preview.destinationRoute || destinationRouteForSpecialist(session.modeId, preview.outputType || "guidance"));
+4940:		: getPhase1SpecialistById(preview.specialistId || session.modeId);
+4941:	const outputLabel = hasPreview ? formatOutputTypeLabel(preview.outputType) : "Output";
+4953:					<p>${hasPreview ? "Review the result, then open the destination workspace with draft context." : "Drafts, task previews, workflow previews, and handoff packages appear here after a response or tool setup."}</p>
+4980:					<h3>${escapeHtml(humanizeValue(preview.title, "Draft output"))}</h3>
+4981:					<p>${escapeHtml(structuredPreview.compactSummary || humanizeValue(preview.summary, "Guidance preview prepared."))}</p>
+4995:						<strong>${escapeHtml(humanizeValue(preview.safetyLabel, "Guidance only. No backend execution."))}</strong>
+4996:						<span>${escapeHtml(humanizeValue(preview.confirmationNote, "Execution requires explicit confirmation in the destination workspace."))}</span>
+5005:				<p class="aicmd-chatfirst-tab-note">This is a review-ready preview. Execution, publishing, approvals, CRM updates, external sends, durable task creation, and workflow runs happen only in the owning destination workspace after confirmation.</p>
+5009:					<span>Start in the chat composer or open a Tool Drawer prompt to prepare a preview.</span>
+5019:	const preview = asObject(session.outputPreview);
+5042:				<span><strong>Output</strong>${escapeHtml(preview.outputType ? formatOutputTypeLabel(preview.outputType) : "No draft yet")}</span>
+5052:		{ label: "Read preview", value: "AI ready", className: "is-available" },
+5072:	const preview = asObject(session.outputPreview);
+5074:	const approval = preview.confirmationRequired ? "Confirmation required" : (preview.outputType ? "Review ready" : "No draft yet");
+5077:	const recentAt = asArray(session.responseHistory)[0]?.generatedAt || preview.generatedAt || "";
+5334:	const destination = routeLabel(destinationRouteForSpecialist(session.modeId, asObject(session.outputPreview).outputType || "guidance"));
+5335:	const sessionState = session.responseLoading ? "Generating" : (session.outputPreview ? "AI Team preview ready" : (asString(session.draftMessage).trim() ? "Drafting" : "AI ready"));
+5356:			{ label: "Escalations", value: "Requires confirmation", present: false, scoped: true },
+5364:				{ label: "Follow-ups", value: "Requires confirmation", present: false, scoped: true },
+5397:					<span>Guidance only — no execution happens from this workspace without confirmation.</span>
+5405:					<span>Publishing, approval, and workflow runs require your explicit confirmation in the right workspace.</span>
+5409:					<span>Backend owns authority — AI Command prepares guidance, previews, and handoff context. It does not override execution controls or mutate Operations records.</span>
+5418:	const preview = asObject(session.outputPreview);
+5426:		...(preview.outputType ? [{
+5428:			title: preview.title || "Draft preview",
+5429:			body: preview.sourcePrompt || preview.summary || "",
+5430:			time: preview.generatedAt
+5451:				<div class="aicmd-v2-chat-empty">Saved responses and previews appear here during this session.</div>
+5479:			consumeProjectHandoff,
+5480:			executeProjectAiCommand,
+5503:                        const preview = asObject(savedOutput.preview);
+5504:			if (preview.outputType) {
+5505:				session.outputPreview = preview;
+5506:				session.outputWorkspaceTab = outputTabFromPreview(preview);
+5543:		applyDurableAiHandoff(sessionKey, operations, session, consumeProjectHandoff, showMessage);
+5548:		const bridgeStatus = getAiResponseBridgeStatus(executeProjectAiChat);
+5550:			session.workspaceTab = bridgeStatus.available ? "chat" : "preview";
+5554:			session.workspaceTab = bridgeStatus.available ? "chat" : "preview";
+5557:			session.chatFirstTab = asObject(session.outputPreview).outputType ? "output" : "tools";
+5622:                                preview: session.outputPreview,
+5658:                        session.workspaceTab = bridgeStatus.available ? "chat" : "preview";
+5666:                                preview: null,
+5772:				updateStatus("Quick action loaded into composer. Review it, then ask or preview.");
+5840:                                                outputType: asString(session.outputPreview?.outputType || "guidance"),
+5979:                                preview: asObject(currentWizard.preview)
+6041:                                summary: `AI Team preview for a ${goalLabel.toLowerCase()} campaign using ${sourceLabel.toLowerCase()} and optimized for ${channelLabel}.`,
+6121:                                        preview: {}
+6146:                                title: asString(body.title || fallbackPreview.title || "AI Team campaign preview"),
+6162:                                safety: asObject(body.safety).preview_only
+6163:                                        ? "Backend preview only. No publish, send, CRM mutation, provider execution, workflow mutation, Governance approval, task creation, or durable handoff was performed."
+6175:                                const backendPayload = await generateAiCommandCampaignPreview(projectName || "default", {
+6192:                                        throw new Error(asString(backendPayload.message || "Backend preview failed"));
+6196:                                if (!safety.preview_only || !safety.no_backend_mutation_performed || !safety.no_provider_execution_performed) {
+6197:                                        throw new Error("Backend preview response did not confirm preview-only safety.");
+6202:                                console.warn("AI Command backend campaign preview fallback", error);
+6206:                                        backendFallbackReason: asString(error?.message || "Backend preview unavailable")
+6212:                Array.from(document.querySelectorAll("[data-aicmd-smart-campaign-preview]")).forEach((btn) => {
+6214:                                updateStatus("Preparing AI Team campaign preview...");
+6215:                                const preview = await buildCampaignWizardPreviewWithBackendFallback();
+6220:                                        preview
+6223:                                        type: "smart_campaign_preview",
+6224:                                        outputType: "campaign_package",
+6225:                                        destinationRoute: "publishing",
+6226:                                        title: preview.title,
+6227:                                        summary: preview.summary,
+6228:                                        source: preview.source,
+6229:                                        sourceLabel: asString(preview.sourceLabel || ""),
+6230:                                        goal: preview.goal,
+6231:                                        channel: preview.channel,
+6232:                                        market: asString(preview.market || ""),
+6233:                                        language: asString(preview.language || ""),
+6234:                                        format: asString(preview.format || ""),
+6235:                                        deadline: asString(preview.deadline || ""),
+6236:                                        audience: asString(preview.audience || ""),
+6237:                                        offer: asString(preview.offer || ""),
+6238:                                        productFocus: asString(preview.productFocus || ""),
+6239:                                        complianceSensitivity: asString(preview.complianceSensitivity || ""),
+6240:                                        campaignPackage: asObject(preview.campaignPackage),
+6241:                                        sections: preview.sections,
+6242:                                        safety: preview.safety,
+6243:                                        safetyLabel: preview.safety,
+6244:                                        confirmationRequired: true,
+6245:                                        confirmationNote: "Review and route this campaign package through the owning destination workspace before any publishing, sending, approval, task creation, provider execution, or workflow mutation.",
+6247:                                        backendPreview: Boolean(preview.backendPreview),
+6248:                                        backendSource: asString(preview.backendSource || ""),
+6249:                                        backendFallbackReason: asString(preview.backendFallbackReason || "")
+6252:                                persistSessionDraft(sessionKey, session, preview.backendPreview ? "Campaign Builder backend preview prepared" : "Campaign Builder local fallback preview prepared");
+6253:                                updateStatus(preview.backendPreview ? "Backend AI Team preview prepared. Review before any handoff or approval." : "Local campaign preview prepared because backend preview is unavailable.");
+6254:                                showMessage?.(preview.backendPreview ? "Backend AI Team campaign preview is ready for review." : "Campaign preview is ready using the local fallback.");
+6259:                const buildCampaignReviewHandoff = (action, preview) => {
+6260:                        const destinationRoutes = {
+6268:                        const route = destinationRoutes[action] || "";
+6278:                                title: asString(preview.title || "Campaign handoff"),
+6279:                                summary: asString(preview.summary || ""),
+6280:                                source_type: asString(preview.source || ""),
+6281:                                source_label: asString(preview.sourceLabel || preview.source || ""),
+6282:                                goal: asString(preview.goal || ""),
+6283:                                channel: asString(preview.channel || ""),
+6284:                                market: asString(preview.market || ""),
+6285:                                language: asString(preview.language || ""),
+6286:                                format: asString(preview.format || ""),
+6287:                                deadline: asString(preview.deadline || ""),
+6288:                                audience: asString(preview.audience || ""),
+6289:                                offer: asString(preview.offer || ""),
+6290:                                product_focus: asString(preview.productFocus || ""),
+6291:                                compliance_sensitivity: asString(preview.complianceSensitivity || ""),
+6292:                                campaignPackage: asObject(preview.campaignPackage),
+6293:                                sections: asArray(preview.sections),
+6294:                                backend_preview: Boolean(preview.backendPreview),
+6295:                                backend_source: asString(preview.backendSource || ""),
+6296:                                backend_fallback_reason: asString(preview.backendFallbackReason || ""),
+6316:                        const preview = asObject(wizard.preview);
+6317:                        if (!preview.title) {
+6318:                                updateStatus("Generate a campaign preview before choosing a review action.");
+6333:                                const handoff = buildCampaignReviewHandoff(action, preview);
+6553:		                        preview: session.outputPreview,
+6564:		                        const result = await executeProjectAiChat(projectName, {
+6615:		                                        outputType: "chat",
+6630:                                                outputType: response.outputType,
+6631:                                                destinationRoute: asString(routeSuggestion?.route)
+6647:		                                outputType: responseRoute.outputType,
+6649:		                                destinationRoute: responseRoute.destinationRoute
+6657:		                                preview: session.outputPreview,
+6674:		                                preview: session.outputPreview,
+6693:                                const preview = setPreviewFromConversation({
+6699:                                if (!preview) return;
+6700:                                persistSessionDraft(sessionKey, session, "Guidance preview prepared from conversation");
+6702:                                updateStatus("Guidance preview prepared from conversation context.");
+6703:                                showMessage?.(`${specLabel} guidance preview prepared from conversation.`);
+6709:                // Phase 1: converts the current conversation into a task preview. No backend execution.
+6718:                                const preview = setPreviewFromConversation({
+6724:                                if (!preview) return;
+6725:                                persistSessionDraft(sessionKey, session, "Task preview prepared from conversation");
+6726:                                updateStatus("Task draft preview prepared from conversation context. Review before creating durable tasks.");
+6727:                                showMessage?.("Task draft preview prepared from conversation.");
+6741:                                const preview = setPreviewFromConversation({
+6747:                                if (!preview) return;
+6748:                                persistSessionDraft(sessionKey, session, "Workflow preview prepared from conversation");
+6749:                                updateStatus("Workflow draft preview prepared from conversation context. No workflow run started.");
+6750:                                showMessage?.("Workflow draft preview prepared from conversation.");
+6756:                // Phase 1: converts the current conversation into a handoff preview. No backend write.
+6765:                                const preview = setPreviewFromConversation({
+6771:                                if (!preview) return;
+6772:                                persistSessionDraft(sessionKey, session, "Handoff preview prepared from conversation");
+6773:                                updateStatus("Handoff preview prepared from conversation context. Review destination before sending.");
+6774:                                showMessage?.("Handoff preview prepared from conversation.");
+6798:					outputTypes: asArray(tool.outputTypes).length ? tool.outputTypes : [asString(tool.intent || tool.id || "draft").replace(/[^a-z0-9_]+/g, "_")]
+6893:					preview: session.outputPreview,
+6907:		                const preview = setPreviewFromConversation({
+6915:		                        preview.title = latestResponse.responseTitle || preview.title;
+6916:		                        preview.summary = latestResponse.responseText;
+6917:		                        preview.generatedAt = latestResponse.generatedAt || nowIso();
+6921:		                        preview: session.outputPreview,
+6928:		                updateStatus("Conversation converted into a draft preview.");
+6929:		                showMessage?.("Draft preview ready from conversation.");
+6939:				const destination = asString(latestResponse.destinationRoute || responseRoute.destinationRoute || destinationRouteForSpecialist(session.modeId, responseRoute.outputType || "guidance"));
+6948:				setSharedAiDraft(projectName || "__default__", draftContext);
+6949:				setSharedHandoff(projectName || "__default__", destination, {
+6985:		const previewCopyBtn = $("aicmdV2PreviewCopyBtn");
+6986:		if (previewCopyBtn) {
+6987:			previewCopyBtn.onclick = async () => {
+6989:				if (!output.outputType) return;
+7009:		const previewUseBtn = $("aicmdV2PreviewUseBtn");
+7010:		if (previewUseBtn) {
+7011:			previewUseBtn.onclick = () => {
+7013:				if (!output.outputType) return;
+7028:		const previewSendBtn = $("aicmdV2PreviewSendBtn");
+7029:		if (previewSendBtn) {
+7030:			previewSendBtn.onclick = () => {
+7032:				const destination = asString(output.destinationRoute || "").trim();
+7034:					updateStatus("No destination route is available for this preview.");
+7039:					id: `aicmd-preview-${Date.now()}`,
+7051:							routeSuggestions: [{ route: destination, label: routeLabel(destination), reason: "Phase 2 preview destination" }],
+7052:							phase2_output_preview: output
+7057:				setSharedAiDraft(projectName || "__default__", handoffRecord.payload.draft_context);
+7058:				setSharedHandoff(projectName || "__default__", destination, handoffRecord);
+7064:		const previewSaveBtn = $("aicmdV2PreviewSaveBtn");
+7065:		if (previewSaveBtn) {
+7066:			previewSaveBtn.onclick = () => {
+7068:				if (!output.outputType) return;
+7070:					preview: output,
+7079:		const previewReadBtn = $("aicmdV2PreviewReadBtn");
+7080:		if (previewReadBtn) {
+7081:			previewReadBtn.onclick = () => {
+7083:				if (!output.outputType) return;
+7085:					updateStatus("Read preview is not supported in this browser.");
+7088:				const previewText = [humanizeValue(output.title), humanizeValue(output.summary)]
+7091:				const utterance = new SpeechSynthesisUtterance(previewText || "Draft preview ready.");
+7094:				updateStatus("Reading preview locally in browser.");
+7098:		const previewClearBtn = $("aicmdV2PreviewClearBtn");
+7099:		if (previewClearBtn) {
+7100:			previewClearBtn.onclick = () => {

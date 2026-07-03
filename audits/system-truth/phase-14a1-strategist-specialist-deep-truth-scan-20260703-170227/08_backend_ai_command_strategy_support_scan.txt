@@ -1,0 +1,502 @@
+### backend ai command handlers
+runtime/orchestrator-service/server.js:650:      brief: asString(req?.body?.objective || req?.body?.brief || ''),
+runtime/orchestrator-service/server.js:1700:    reel: path.join('content', 'campaigns', 'reel-brief-queue.json'),
+runtime/orchestrator-service/server.js:3029:      format: 'vertical_video_or_reel_brief',
+runtime/orchestrator-service/server.js:3045:      format: 'vertical_video_or_reel_brief',
+runtime/orchestrator-service/server.js:3233:    format: 'short_video_brief',
+runtime/orchestrator-service/server.js:3437:    thumbnail_brief: 'Use the strongest premium product frame with clean focal contrast and readable title alignment.',
+runtime/orchestrator-service/server.js:4157:      'ready_for_manual_handoff',
+runtime/orchestrator-service/server.js:6885:    ai_team_defaults: ['strategist', 'writer', 'designer', 'publisher', 'analyst'],
+runtime/orchestrator-service/server.js:6905:      ai_team_defaults: ['strategist', 'writer', 'designer', 'publisher', 'ads_operator', 'analyst', 'compliance_reviewer'],
+runtime/orchestrator-service/server.js:6918:      ai_team_defaults: ['strategist', 'writer', 'designer', 'video_lead', 'publisher', 'analyst'],
+runtime/orchestrator-service/server.js:6931:      ai_team_defaults: ['strategist', 'writer', 'designer', 'publisher', 'analyst'],
+runtime/orchestrator-service/server.js:6944:      ai_team_defaults: ['strategist', 'writer', 'designer', 'ads_operator', 'publisher', 'compliance_reviewer'],
+runtime/orchestrator-service/server.js:6957:      ai_team_defaults: ['strategist', 'writer', 'designer', 'publisher', 'analyst'],
+runtime/orchestrator-service/server.js:6970:      ai_team_defaults: ['strategist', 'writer', 'designer', 'video_lead', 'publisher'],
+runtime/orchestrator-service/server.js:6982:      workspace_priorities: ['setup', 'library', 'content-studio', 'campaign-studio', 'insights', 'workflows'],
+runtime/orchestrator-service/server.js:6983:      ai_team_defaults: ['strategist', 'writer', 'designer', 'ads_operator', 'analyst'],
+runtime/orchestrator-service/server.js:6996:      ai_team_defaults: ['strategist', 'writer', 'designer', 'publisher'],
+runtime/orchestrator-service/server.js:8580:        what_to_upload: 'Partner briefs, supplier docs, marketplace requirements, distributor notes, and collaboration agreements.',
+runtime/orchestrator-service/server.js:11346:      id: 'media_brief',
+runtime/orchestrator-service/server.js:11347:      title: 'Media brief',
+runtime/orchestrator-service/server.js:11391:      no_handoff_created: true,
+runtime/orchestrator-service/server.js:11392:      no_workflow_run_created: true
+runtime/orchestrator-service/server.js:11408:      message: error.message || 'Failed to build AI Command campaign preview.',
+runtime/orchestrator-service/server.js:11773:      error: error.message || 'Failed to list workflow runs'
+runtime/orchestrator-service/server.js:11778:app.get('/media-manager/project/:project/workflows/runs', handleListWorkflowRuns);
+runtime/orchestrator-service/server.js:11779:app.get('/public/media-manager/project/:project/workflows/runs', handleListWorkflowRuns);
+runtime/orchestrator-service/server.js:11790:      error: error.message || 'Failed to load workflow run'
+runtime/orchestrator-service/server.js:11795:app.get('/media-manager/project/:project/workflows/runs/:runId', handleGetWorkflowRun);
+runtime/orchestrator-service/server.js:11796:app.get('/public/media-manager/project/:project/workflows/runs/:runId', handleGetWorkflowRun);
+runtime/orchestrator-service/server.js:11802:      action: 'workflow_run',
+runtime/orchestrator-service/server.js:11803:      entityType: 'workflow_run',
+runtime/orchestrator-service/server.js:11804:      entityId: req.params.workflowId,
+runtime/orchestrator-service/server.js:11813:      action: 'workflow_run',
+runtime/orchestrator-service/server.js:11814:      entityType: 'workflow_run',
+runtime/orchestrator-service/server.js:11815:      entityId: req.params.workflowId,
+runtime/orchestrator-service/server.js:11817:      routeTarget: 'workflows',
+runtime/orchestrator-service/server.js:11819:      linkedExecutionId: req.params.workflowId,
+runtime/orchestrator-service/server.js:11822:      summary: 'Approval required before workflow execution.'
+runtime/orchestrator-service/server.js:11829:      workflow_id: req.params.workflowId,
+runtime/orchestrator-service/server.js:11842:        type: 'workflow_output',
+runtime/orchestrator-service/server.js:11843:        title: req.body?.title || req.params.workflowId,
+runtime/orchestrator-service/server.js:11846:        source_type: 'workflow_run',
+runtime/orchestrator-service/server.js:11860:      error: error.message || 'Failed to record workflow run'
+runtime/orchestrator-service/server.js:11865:app.post('/media-manager/project/:project/workflows/:workflowId/run', handleRunWorkflow);
+runtime/orchestrator-service/server.js:11866:app.post('/public/media-manager/project/:project/workflows/:workflowId/run', handleRunWorkflow);
+runtime/orchestrator-service/server.js:11868:async function handleExecuteAiCommand(req, res) {
+runtime/orchestrator-service/server.js:11890:    routeTarget: 'workflows',
+runtime/orchestrator-service/server.js:11943:async function handleExecuteAiChat(req, res) {
+runtime/orchestrator-service/server.js:11964:    routeTarget: 'workflows',
+runtime/orchestrator-service/server.js:12013:async function handleExecuteAiGuidance(req, res) {
+runtime/orchestrator-service/server.js:12034:    routeTarget: 'workflows',
+runtime/orchestrator-service/server.js:12087:      action: 'ai_workflow_run',
+runtime/orchestrator-service/server.js:12088:      entityType: 'workflow_run',
+runtime/orchestrator-service/server.js:12089:      entityId: req.params.workflowId,
+runtime/orchestrator-service/server.js:12098:      action: 'ai_workflow_run',
+runtime/orchestrator-service/server.js:12099:      entityType: 'workflow_run',
+runtime/orchestrator-service/server.js:12100:      entityId: req.params.workflowId,
+runtime/orchestrator-service/server.js:12102:      routeTarget: 'workflows',
+runtime/orchestrator-service/server.js:12104:      linkedExecutionId: req.params.workflowId,
+runtime/orchestrator-service/server.js:12106:      title: 'AI workflow approval',
+runtime/orchestrator-service/server.js:12107:      summary: 'Approval required before AI workflow execution.'
+runtime/orchestrator-service/server.js:12114:      req.params.workflowId,
+runtime/orchestrator-service/server.js:12123:      error: error.message || 'Failed to execute AI workflow'
+runtime/orchestrator-service/server.js:12205:app.get('/media-manager/project/:project/ai/commands', handleListAiCommands);
+runtime/orchestrator-service/server.js:12206:app.get('/public/media-manager/project/:project/ai/commands', handleListAiCommands);
+runtime/orchestrator-service/server.js:12207:app.get('/media-manager/project/:project/ai/commands/:commandId', handleGetAiCommand);
+runtime/orchestrator-service/server.js:12208:app.get('/public/media-manager/project/:project/ai/commands/:commandId', handleGetAiCommand);
+runtime/orchestrator-service/server.js:12209:app.post('/media-manager/project/:project/ai/command', handleExecuteAiCommand);
+runtime/orchestrator-service/server.js:12210:app.post('/public/media-manager/project/:project/ai/command', handleExecuteAiCommand);
+runtime/orchestrator-service/server.js:12211:app.post('/media-manager/project/:project/ai/chat', handleExecuteAiChat);
+runtime/orchestrator-service/server.js:12212:app.post('/public/media-manager/project/:project/ai/chat', handleExecuteAiChat);
+runtime/orchestrator-service/server.js:12213:app.post('/media-manager/project/:project/ai/guidance', handleExecuteAiGuidance);
+runtime/orchestrator-service/server.js:12214:app.post('/public/media-manager/project/:project/ai/guidance', handleExecuteAiGuidance);
+runtime/orchestrator-service/server.js:12215:app.post('/media-manager/project/:project/ai/workflows/:workflowId/run', handleExecuteAiWorkflow);
+runtime/orchestrator-service/server.js:12216:app.post('/public/media-manager/project/:project/ai/workflows/:workflowId/run', handleExecuteAiWorkflow);
+runtime/orchestrator-service/server.js:12466:      error: error.message || 'Failed to list handoffs'
+runtime/orchestrator-service/server.js:12473:    const handoff = createHandoff(req.params.project, req.body || {});
+runtime/orchestrator-service/server.js:12475:      handoff,
+runtime/orchestrator-service/server.js:12480:      error: error.message || 'Failed to create handoff'
+runtime/orchestrator-service/server.js:12487:    const handoff = consumeHandoff(req.params.project, req.params.handoffId, req.body || {});
+runtime/orchestrator-service/server.js:12489:      handoff,
+runtime/orchestrator-service/server.js:12494:      error: error.message || 'Failed to consume handoff'
+runtime/orchestrator-service/server.js:12499:app.get('/media-manager/project/:project/handoffs', handleListHandoffs);
+runtime/orchestrator-service/server.js:12500:app.get('/public/media-manager/project/:project/handoffs', handleListHandoffs);
+runtime/orchestrator-service/server.js:12501:app.post('/media-manager/project/:project/handoffs', handleCreateHandoff);
+runtime/orchestrator-service/server.js:12502:app.post('/public/media-manager/project/:project/handoffs', handleCreateHandoff);
+runtime/orchestrator-service/server.js:12503:app.post('/media-manager/project/:project/handoffs/:handoffId/consume', handleConsumeHandoff);
+runtime/orchestrator-service/server.js:12504:app.post('/public/media-manager/project/:project/handoffs/:handoffId/consume', handleConsumeHandoff);
+runtime/orchestrator-service/server.js:15120:      result.execution_status = 'ready_for_manual_handoff';
+runtime/orchestrator-service/server.js:15121:      result.action_type = 'manual_marketplace_handoff';
+runtime/orchestrator-service/server.js:15122:      result.notes.push('Marketplace payload is ready for manual listing handoff.');
+runtime/orchestrator-service/server.js:16041:    campaignStrategyQueuePath: path.join(projectDir, 'campaign-strategy-queue.json'),
+runtime/orchestrator-service/server.js:16216:        video_brief:
+runtime/orchestrator-service/server.js:16587:      item.video_brief =
+runtime/orchestrator-service/server.js:17775:    if (command === '/create_campaign_strategy') {
+runtime/orchestrator-service/server.js:17796:      const strategy = {
+runtime/orchestrator-service/server.js:17797:        strategy_id: `strategy_${Date.now()}`,
+runtime/orchestrator-service/server.js:17805:        offer_strategy: 'clear offer + premium value + direct CTA',
+runtime/orchestrator-service/server.js:17819:          'reel brief'
+runtime/orchestrator-service/server.js:17826:          'reel creative brief'
+runtime/orchestrator-service/server.js:17844:      queue.push(strategy);
+runtime/orchestrator-service/server.js:17849:        result: strategy
+runtime/orchestrator-service/server.js:17853:    if (command === '/review_campaign_strategy') {
+runtime/orchestrator-service/server.js:17854:      const strategyId = args[0];
+runtime/orchestrator-service/server.js:17857:      if (!strategyId || !projectName) {
+runtime/orchestrator-service/server.js:17858:        return res.json({ error: 'Missing strategy id or project name' });
+runtime/orchestrator-service/server.js:17864:        return res.json({ error: 'Campaign strategy queue not found' });
+runtime/orchestrator-service/server.js:17868:      const strategy = queue.find(x => x.strategy_id === strategyId);
+runtime/orchestrator-service/server.js:17870:      if (!strategy) {
+runtime/orchestrator-service/server.js:17871:        return res.json({ error: 'Campaign strategy not found' });
+runtime/orchestrator-service/server.js:17876:        result: strategy
+runtime/orchestrator-service/server.js:17881:      const strategyId = args[0];
+runtime/orchestrator-service/server.js:17884:      if (!strategyId || !projectName) {
+runtime/orchestrator-service/server.js:17885:        return res.json({ error: 'Missing strategy id or project name' });
+runtime/orchestrator-service/server.js:17889:      const strategyQueuePath = projectPaths.campaignStrategyQueuePath;
+runtime/orchestrator-service/server.js:17892:      if (!fs.existsSync(strategyQueuePath)) {
+runtime/orchestrator-service/server.js:17893:        return res.json({ error: 'Campaign strategy queue not found' });
+runtime/orchestrator-service/server.js:17896:      const strategyQueue = JSON.parse(fs.readFileSync(strategyQueuePath, 'utf8'));
+runtime/orchestrator-service/server.js:17897:      const strategy = strategyQueue.find(x => x.strategy_id === strategyId);
+runtime/orchestrator-service/server.js:17899:      if (!strategy) {
+runtime/orchestrator-service/server.js:17900:        return res.json({ error: 'Campaign strategy not found' });
+runtime/orchestrator-service/server.js:17905:        strategy_id: strategy.strategy_id,
+runtime/orchestrator-service/server.js:17913:          reel_briefs: 1,
+runtime/orchestrator-service/server.js:17914:          tiktok_briefs: 1
+runtime/orchestrator-service/server.js:17924:          'Generate assets from strategy, then run review -> approval -> media -> publish/send.',
+runtime/orchestrator-service/server.js:18003:    content_strategy: {
+runtime/orchestrator-service/server.js:18362:    if (command === '/create_intelligence_brief') {
+runtime/orchestrator-service/server.js:18372:        'intelligence/intelligence-brief-queue.json'
+runtime/orchestrator-service/server.js:18378:        id: `intelbrief_${Date.now()}`,
+runtime/orchestrator-service/server.js:18562:      const strategyQueuePath = projectPaths.campaignStrategyQueuePath;
+runtime/orchestrator-service/server.js:18594:      const strategyQueue = JSON.parse(fs.readFileSync(strategyQueuePath, 'utf8'));
+runtime/orchestrator-service/server.js:18601:      const latestStrategy = [...strategyQueue].reverse()[0] || null;
+runtime/orchestrator-service/server.js:18652:          '1 reel brief',
+runtime/orchestrator-service/server.js:18653:          '1 tiktok brief'
+runtime/orchestrator-service/server.js:19010:            video_brief: `Create short-form visual content for ${campaignExec.blog?.topic || 'campaign'} on ${post.platform}.`,
+runtime/orchestrator-service/server.js:23146:app.post('/api/media/generate-video-brief', async (req, res) => {
+runtime/orchestrator-service/server.js:23155:      output: { video_brief: result.video_brief },
+runtime/orchestrator-service/server.js:23164:      video_brief: result.video_brief,
+runtime/orchestrator-service/server.js:23171:      message: error.message || 'Failed to generate video brief'
+runtime/orchestrator-service/lib/insights/learning-engine.js:303:      title: 'Link marketplace sales learnings back into content strategy',
+runtime/orchestrator-service/lib/security/provider-execution-gate.js:37:    match: /openai|anthropic|ai\/command|ai\/chat|improve-prompt|brand-check|generate-voice-script|generate-video-brief|generate-campaign-pack/i,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:41:  workflow_run: { highRisk: true, requiresGovernance: true, requiresApproval: true, freezeSensitive: false },
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:42:  ai_workflow_run: { highRisk: true, requiresGovernance: true, requiresApproval: true, freezeSensitive: false },
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:48:  return /customer-operations|integrations|publishing|governance|approvals|sources|workflows|ai\/workflows/i.test(value);
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:57:  return /ai\/|native-media|api\/media|execute_|generate_media_from_prompt|build_ad_execution_package|integrations|publishing|governance|approvals|sources|workflows/i.test(value);
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:65:    match: /ai\/command|ai\/chat|ai\/guidance|ai\/workflows|openai|anthropic|assistant/i,
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:73:    domain: "workflow_operations",
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:74:    match: /workflow|task|queue|job|notification|handoff|event/i,
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:137:  return /publish|send|provider|integration|native-media|generate|openai|anthropic|workflow|scheduler|woocommerce|email|smtp|twilio|telnyx/i.test(
+runtime/orchestrator-service/lib/security/runtime-security-enforcement.js:10:  /^\/(?:public\/)?media-manager\/project\/[^/]+\/ai\/workflows\/[^/]+\/run(?:\/)?$/i,
+runtime/orchestrator-service/lib/security/runtime-security-enforcement.js:11:  /^\/(?:public\/)?media-manager\/project\/[^/]+\/workflows\/[^/]+\/run(?:\/)?$/i,
+runtime/orchestrator-service/lib/ai/providers/openai.js:246:      executiveBrief: parsed.executiveBrief || parsed.executive_brief || null,
+runtime/orchestrator-service/lib/ai/providers/openai.js:306:              'For outputType "operations_plan", include operationsPlan with tasks, timeline, owners, handoffs, approvals, dependencies.',
+runtime/orchestrator-service/lib/ai/providers/openai.js:307:              'For outputType "executive_brief", include executiveBrief with blockers, priorities, decision, nextBestAction.',
+runtime/orchestrator-service/lib/ai/provider-config.js:26:    outputType: 'executive_brief',
+runtime/orchestrator-service/lib/ai/provider-config.js:35:    purpose: 'campaign concepts, launch plans, channel mix, audience segments, and offer strategy',
+runtime/orchestrator-service/lib/ai/provider-config.js:39:      'Build campaign concepts, launch plans, channel mix, audience segments, offer strategy, launch phases, assets, blockers, and handoffs.',
+runtime/orchestrator-service/lib/ai/provider-config.js:55:    purpose: 'ad concepts, paid media strategy, budget split, targeting angles, and platform ad copy',
+runtime/orchestrator-service/lib/ai/provider-config.js:59:      'Produce ad ideas, paid strategy, targeting angles, budget guidance, and Meta, TikTok, Google, or Facebook ad copy.',
+runtime/orchestrator-service/lib/ai/provider-config.js:85:    purpose: 'tasks, timelines, handoffs, approvals, and execution planning',
+runtime/orchestrator-service/lib/ai/provider-config.js:89:      'Produce task plans, timelines, handoffs, approvals, ownership, and execution plans.',
+runtime/orchestrator-service/lib/ai/provider-config.js:98:    campaign_strategist: 'campaign',
+runtime/orchestrator-service/lib/ops/backbone.js:39:  workflowRuns: 250,
+runtime/orchestrator-service/lib/ops/backbone.js:49:  handoffs: 250
+runtime/orchestrator-service/lib/ops/backbone.js:68:  workflow_runs: {
+runtime/orchestrator-service/lib/ops/backbone.js:74:    intents: ['inspect', 'task', 'workflow', 'campaign', 'content', 'media', 'approval', 'recommendation']
+runtime/orchestrator-service/lib/ops/backbone.js:78:    types: ['ai_response', 'workflow_output', 'recommendation_bundle', 'memory_snapshot']
+runtime/orchestrator-service/lib/ops/backbone.js:85:    scopes: ['project', 'campaign', 'workflow', 'channel', 'audience', 'content'],
+runtime/orchestrator-service/lib/ops/backbone.js:101:  handoffs: {
+runtime/orchestrator-service/lib/ops/backbone.js:106:    categories: ['entity', 'workflow', 'approval', 'sync', 'publish', 'ai_routing', 'system']
+runtime/orchestrator-service/lib/ops/backbone.js:116:    id: 'strategist',
+runtime/orchestrator-service/lib/ops/backbone.js:118:    routes: ['home', 'campaign-studio', 'workflows', 'research', 'insights'],
+runtime/orchestrator-service/lib/ops/backbone.js:120:    actions: ['plan_campaign', 'route_work', 'approve_strategy', 'request_research']
+runtime/orchestrator-service/lib/ops/backbone.js:125:    routes: ['content-studio', 'workflows', 'research'],
+runtime/orchestrator-service/lib/ops/backbone.js:127:    actions: ['draft_content', 'revise_copy', 'handoff_to_review', 'handoff_to_publishing']
+runtime/orchestrator-service/lib/ops/backbone.js:132:    routes: ['media-studio', 'library', 'workflows'],
+runtime/orchestrator-service/lib/ops/backbone.js:134:    actions: ['create_visuals', 'revise_visuals', 'handoff_media']
+runtime/orchestrator-service/lib/ops/backbone.js:139:    routes: ['media-studio', 'library', 'workflows'],
+runtime/orchestrator-service/lib/ops/backbone.js:141:    actions: ['create_video', 'review_video', 'handoff_video']
+runtime/orchestrator-service/lib/ops/backbone.js:146:    routes: ['publishing', 'library', 'workflows'],
+runtime/orchestrator-service/lib/ops/backbone.js:153:    routes: ['ads-manager', 'campaign-studio', 'workflows', 'insights'],
+runtime/orchestrator-service/lib/ops/backbone.js:160:    routes: ['insights', 'research', 'workflows', 'home'],
+runtime/orchestrator-service/lib/ops/backbone.js:174:    routes: ['home', 'settings', 'integrations', 'governance', 'workflows'],
+runtime/orchestrator-service/lib/ops/backbone.js:181:  home: ['strategist', 'analyst', 'admin'],
+runtime/orchestrator-service/lib/ops/backbone.js:182:  'campaign-studio': ['strategist', 'ads_operator', 'admin'],
+runtime/orchestrator-service/lib/ops/backbone.js:183:  'content-studio': ['writer', 'strategist', 'compliance_reviewer', 'admin'],
+runtime/orchestrator-service/lib/ops/backbone.js:186:  research: ['strategist', 'analyst', 'writer', 'admin'],
+runtime/orchestrator-service/lib/ops/backbone.js:188:  'ads-manager': ['ads_operator', 'strategist', 'analyst', 'admin'],
+runtime/orchestrator-service/lib/ops/backbone.js:189:  insights: ['analyst', 'strategist', 'ads_operator', 'admin'],
+runtime/orchestrator-service/lib/ops/backbone.js:191:  workflows: TEAM_ROLE_DEFS.map((role) => role.id),
+runtime/orchestrator-service/lib/ops/backbone.js:199:    owner_role: 'strategist',
+runtime/orchestrator-service/lib/ops/backbone.js:201:    handoff_to: ['writer', 'designer', 'ads_operator', 'analyst'],
+runtime/orchestrator-service/lib/ops/backbone.js:203:    page_permissions: ['campaign-studio', 'workflows', 'insights']
+runtime/orchestrator-service/lib/ops/backbone.js:209:    handoff_to: ['designer', 'video_lead', 'publisher', 'compliance_reviewer'],
+runtime/orchestrator-service/lib/ops/backbone.js:211:    page_permissions: ['content-studio', 'workflows', 'publishing']
+runtime/orchestrator-service/lib/ops/backbone.js:217:    handoff_to: ['publisher', 'ads_operator', 'compliance_reviewer'],
+runtime/orchestrator-service/lib/ops/backbone.js:219:    page_permissions: ['media-studio', 'workflows', 'publishing']
+runtime/orchestrator-service/lib/ops/backbone.js:225:    handoff_to: ['analyst', 'strategist'],
+runtime/orchestrator-service/lib/ops/backbone.js:232:    review_role: 'strategist',
+runtime/orchestrator-service/lib/ops/backbone.js:233:    handoff_to: ['strategist', 'writer', 'ads_operator'],
+runtime/orchestrator-service/lib/ops/backbone.js:235:    page_permissions: ['research', 'workflows', 'insights']
+runtime/orchestrator-service/lib/ops/backbone.js:241:    handoff_to: ['admin'],
+runtime/orchestrator-service/lib/ops/backbone.js:252:  workflow_run: 'research',
+runtime/orchestrator-service/lib/ops/backbone.js:259:  medium: ['compliance_reviewer', 'strategist'],
+runtime/orchestrator-service/lib/ops/backbone.js:361:  const roleId = normalizeRoleKey(source.role, 'strategist');
+runtime/orchestrator-service/lib/ops/backbone.js:395:        page_permissions: ['workflows', 'governance'],
+runtime/orchestrator-service/lib/ops/backbone.js:401:    active_role: 'strategist',
+runtime/orchestrator-service/lib/ops/backbone.js:419:        handoff_to: asArray(domain.handoff_to),
+runtime/orchestrator-service/lib/ops/backbone.js:533:  let ownerRole = domain.owner_role || 'strategist';
+runtime/orchestrator-service/lib/ops/backbone.js:549:    handoff_roles: normalizeStringList(record.handoff_roles).length
+runtime/orchestrator-service/lib/ops/backbone.js:550:      ? normalizeStringList(record.handoff_roles)
+runtime/orchestrator-service/lib/ops/backbone.js:551:      : asArray(domain.handoff_to),
+runtime/orchestrator-service/lib/ops/backbone.js:790:    workflowsPath: path.join(opsDir, 'workflow-runs.json'),
+runtime/orchestrator-service/lib/ops/backbone.js:802:    handoffsPath: path.join(opsDir, 'handoffs.json')
+runtime/orchestrator-service/lib/ops/backbone.js:822:      'workflow_runs',
+runtime/orchestrator-service/lib/ops/backbone.js:831:      'handoffs',
+runtime/orchestrator-service/lib/ops/backbone.js:839:  ensureJsonFile(paths.workflowsPath, []);
+runtime/orchestrator-service/lib/ops/backbone.js:848:  ensureJsonFile(paths.handoffsPath, []);
+runtime/orchestrator-service/lib/ops/backbone.js:917:      'workflow_runs',
+runtime/orchestrator-service/lib/ops/backbone.js:926:      'handoffs',
+runtime/orchestrator-service/lib/ops/backbone.js:982:  if (value.includes('workflow')) return 'workflow';
+runtime/orchestrator-service/lib/ops/backbone.js:985:  if (value.includes('routing') || value.includes('handoff') || value.includes('ai_')) return 'ai_routing';
+runtime/orchestrator-service/lib/ops/backbone.js:1352:    asString(record.brief),
+runtime/orchestrator-service/lib/ops/backbone.js:1389:    asString(record.brief)
+runtime/orchestrator-service/lib/ops/backbone.js:1411:    asString(record.brief),
+runtime/orchestrator-service/lib/ops/backbone.js:1601:        campaign: roleDisplay(team, 'strategist'),
+runtime/orchestrator-service/lib/ops/backbone.js:1855:    linked_handoffs: normalizeStringList(input.linked_handoffs || current.linked_handoffs),
+runtime/orchestrator-service/lib/ops/backbone.js:1966:    brief: asString(input.brief || current.brief),
+runtime/orchestrator-service/lib/ops/backbone.js:1989:    linked_handoffs: normalizeStringList(input.linked_handoffs || current.linked_handoffs),
+runtime/orchestrator-service/lib/ops/backbone.js:2054:  const items = readCollection(paths.workflowsPath);
+runtime/orchestrator-service/lib/ops/backbone.js:2055:  const workflowId = asString(input.workflow_id || input.workflowId || input.workflow_type);
+runtime/orchestrator-service/lib/ops/backbone.js:2057:  if (!workflowId) {
+runtime/orchestrator-service/lib/ops/backbone.js:2058:    throw new Error('Missing workflow_id');
+runtime/orchestrator-service/lib/ops/backbone.js:2068:    workflow_id: workflowId,
+runtime/orchestrator-service/lib/ops/backbone.js:2069:    workflow_type: asString(input.workflow_type || current.workflow_type || workflowId),
+runtime/orchestrator-service/lib/ops/backbone.js:2070:    title: asString(input.title || current.title) || workflowId,
+runtime/orchestrator-service/lib/ops/backbone.js:2087:      current.id ? 'workflow_run_updated' : 'workflow_run_recorded',
+runtime/orchestrator-service/lib/ops/backbone.js:2090:        workflow_id: workflowId,
+runtime/orchestrator-service/lib/ops/backbone.js:2097:  writeCollection(paths.workflowsPath, upsertById(items, run), MAX_ITEMS.workflowRuns);
+runtime/orchestrator-service/lib/ops/backbone.js:2099:    queue_type: 'workflow',
+runtime/orchestrator-service/lib/ops/backbone.js:2100:    entity_type: 'workflow_run',
+runtime/orchestrator-service/lib/ops/backbone.js:2107:    route: inferRouteTarget('workflow_run', run),
+runtime/orchestrator-service/lib/ops/backbone.js:2109:      workflow_id: workflowId,
+runtime/orchestrator-service/lib/ops/backbone.js:2115:    type: current.id ? 'workflow_run_updated' : 'workflow_run_recorded',
+runtime/orchestrator-service/lib/ops/backbone.js:2116:    entity_type: 'workflow_run',
+runtime/orchestrator-service/lib/ops/backbone.js:2119:    summary: `${run.title} was recorded as a durable workflow run.`,
+runtime/orchestrator-service/lib/ops/backbone.js:2122:      workflow_id: workflowId,
+runtime/orchestrator-service/lib/ops/backbone.js:2128:    category: 'workflow',
+runtime/orchestrator-service/lib/ops/backbone.js:2129:    type: 'workflow',
+runtime/orchestrator-service/lib/ops/backbone.js:2150:      entity_type: 'workflow_run',
+runtime/orchestrator-service/lib/ops/backbone.js:2152:      route: inferRouteTarget('workflow_run', run)
+runtime/orchestrator-service/lib/ops/backbone.js:2154:    entity_type: 'workflow_run',
+runtime/orchestrator-service/lib/ops/backbone.js:2417:  return listItems(readCollection(paths.workflowsPath), options);
+runtime/orchestrator-service/lib/ops/backbone.js:2420:function getWorkflowRun(projectName, workflowRunId) {
+runtime/orchestrator-service/lib/ops/backbone.js:2422:  return findById(readCollection(paths.workflowsPath), workflowRunId);
+runtime/orchestrator-service/lib/ops/backbone.js:2467:    workflow_id: asString(input.workflow_id || current.workflow_id),
+runtime/orchestrator-service/lib/ops/backbone.js:2471:    handoff_roles: normalizeStringList(input.handoff_roles || current.handoff_roles || routing.handoff_roles),
+runtime/orchestrator-service/lib/ops/backbone.js:2509:      workflow_id: task.workflow_id,
+runtime/orchestrator-service/lib/ops/backbone.js:2955:  const items = readCollection(paths.handoffsPath);
+runtime/orchestrator-service/lib/ops/backbone.js:2980:  const handoff = {
+runtime/orchestrator-service/lib/ops/backbone.js:2981:    id: asString(current.id) || asString(input.id) || createId('handoff'),
+runtime/orchestrator-service/lib/ops/backbone.js:2983:    type: asString(input.type) || 'route_handoff',
+runtime/orchestrator-service/lib/ops/backbone.js:3005:      current.id ? 'handoff_updated' : 'handoff_created',
+runtime/orchestrator-service/lib/ops/backbone.js:3021:      asString(record.source_page) === handoff.source_page &&
+runtime/orchestrator-service/lib/ops/backbone.js:3022:      asString(record.id) !== handoff.id &&
+runtime/orchestrator-service/lib/ops/backbone.js:3033:      updated_at: handoff.updated_at,
+runtime/orchestrator-service/lib/ops/backbone.js:3034:      history: appendHistory(record, 'handoff_superseded', handoff.created_by, {
+runtime/orchestrator-service/lib/ops/backbone.js:3035:        replaced_by: handoff.id
+runtime/orchestrator-service/lib/ops/backbone.js:3040:  writeCollection(paths.handoffsPath, upsertById(normalizedItems, handoff), MAX_ITEMS.handoffs);
+runtime/orchestrator-service/lib/ops/backbone.js:3044:    type: 'route_handoff_created',
+runtime/orchestrator-service/lib/ops/backbone.js:3045:    entity_type: 'handoff',
+runtime/orchestrator-service/lib/ops/backbone.js:3046:    entity_id: handoff.id,
+runtime/orchestrator-service/lib/ops/backbone.js:3047:    title: `${handoff.source_page || 'system'} to ${handoff.destination_page}`,
+runtime/orchestrator-service/lib/ops/backbone.js:3048:    summary: 'Durable cross-page handoff recorded.',
+runtime/orchestrator-service/lib/ops/backbone.js:3049:    actor: handoff.created_by,
+runtime/orchestrator-service/lib/ops/backbone.js:3051:      source_page: handoff.source_page,
+runtime/orchestrator-service/lib/ops/backbone.js:3052:      destination_page: handoff.destination_page,
+runtime/orchestrator-service/lib/ops/backbone.js:3053:      route_key: handoff.route_key
+runtime/orchestrator-service/lib/ops/backbone.js:3057:  const handoffLinkedEntity = handoff.linked_entity || handoff.source_entity;
+runtime/orchestrator-service/lib/ops/backbone.js:3058:  if (handoffLinkedEntity?.entity_type && handoffLinkedEntity?.entity_id) {
+runtime/orchestrator-service/lib/ops/backbone.js:3059:    updateLinkedEntity(paths.project, handoffLinkedEntity.entity_type, handoffLinkedEntity.entity_id, (record) => {
+runtime/orchestrator-service/lib/ops/backbone.js:3062:        linked_handoffs: [...new Set([handoff.id, ...normalizeStringList(record.linked_handoffs)])],
+runtime/orchestrator-service/lib/ops/backbone.js:3064:        next_owner_role: handoff.destination_role,
+runtime/orchestrator-service/lib/ops/backbone.js:3065:        next_owner_label: handoff.destination_role_label,
+runtime/orchestrator-service/lib/ops/backbone.js:3066:        updated_at: handoff.updated_at,
+runtime/orchestrator-service/lib/ops/backbone.js:3067:        history: appendHistory(record, 'handoff_linked', input.actor || input.created_by, {
+runtime/orchestrator-service/lib/ops/backbone.js:3068:          handoff_id: handoff.id,
+runtime/orchestrator-service/lib/ops/backbone.js:3069:          destination_page: handoff.destination_page
+runtime/orchestrator-service/lib/ops/backbone.js:3073:      if (handoffLinkedEntity.entity_type === 'content_item') {
+runtime/orchestrator-service/lib/ops/backbone.js:3074:        nextRecord.destination = handoff.destination_page;
+runtime/orchestrator-service/lib/ops/backbone.js:3076:          handoff.destination_page === 'publishing'
+runtime/orchestrator-service/lib/ops/backbone.js:3080:          handoff.destination_page === 'publishing'
+runtime/orchestrator-service/lib/ops/backbone.js:3081:            ? 'ready_for_handoff'
+runtime/orchestrator-service/lib/ops/backbone.js:3084:      } else if (handoffLinkedEntity.entity_type === 'media_job') {
+runtime/orchestrator-service/lib/ops/backbone.js:3086:          handoff.destination_page === 'publishing'
+runtime/orchestrator-service/lib/ops/backbone.js:3087:            ? 'ready_for_handoff'
+runtime/orchestrator-service/lib/ops/backbone.js:3096:  return handoff;
+runtime/orchestrator-service/lib/ops/backbone.js:3104:  let items = readCollection(paths.handoffsPath);
+runtime/orchestrator-service/lib/ops/backbone.js:3121:function consumeHandoff(projectName, handoffId, input = {}) {
+runtime/orchestrator-service/lib/ops/backbone.js:3123:  const items = readCollection(paths.handoffsPath);
+runtime/orchestrator-service/lib/ops/backbone.js:3124:  const index = items.findIndex((item) => asString(item.id) === asString(handoffId));
+runtime/orchestrator-service/lib/ops/backbone.js:3138:    history: appendHistory(current, 'handoff_consumed', input.actor, {
+runtime/orchestrator-service/lib/ops/backbone.js:3144:  writeJsonFile(paths.handoffsPath, items);
+runtime/orchestrator-service/lib/ops/backbone.js:3148:    type: 'route_handoff_consumed',
+runtime/orchestrator-service/lib/ops/backbone.js:3149:    entity_type: 'handoff',
+runtime/orchestrator-service/lib/ops/backbone.js:3152:    summary: 'Durable cross-page handoff consumed.',
+runtime/orchestrator-service/lib/ops/backbone.js:3204:      message: 'The publishing item is waiting for operator approval or handoff.',
+runtime/orchestrator-service/lib/ops/backbone.js:3205:      body: 'The publishing item is waiting for operator approval or handoff.',
+runtime/orchestrator-service/lib/ops/backbone.js:3391:  if (normalizedType === 'task') return 'workflows';
+runtime/orchestrator-service/lib/ops/backbone.js:3393:  if (normalizedType === 'workflow_run') return 'workflows';
+runtime/orchestrator-service/lib/ops/backbone.js:3398:  if (normalizedType === 'handoff') return asString(record.destination_page) || 'workflows';
+runtime/orchestrator-service/lib/ops/backbone.js:3466:function buildWorkflowQueueFallback(workflowRuns = []) {
+runtime/orchestrator-service/lib/ops/backbone.js:3467:  return asArray(workflowRuns)
+runtime/orchestrator-service/lib/ops/backbone.js:3471:      queue_type: 'workflow',
+runtime/orchestrator-service/lib/ops/backbone.js:3472:      entity_type: 'workflow_run',
+runtime/orchestrator-service/lib/ops/backbone.js:3474:      title: asString(item.title) || asString(item.workflow_id) || 'Workflow run',
+runtime/orchestrator-service/lib/ops/backbone.js:3479:      route: inferRouteTarget('workflow_run', item),
+runtime/orchestrator-service/lib/ops/backbone.js:3481:        workflow_id: asString(item.workflow_id),
+runtime/orchestrator-service/lib/ops/backbone.js:3532:function buildQueueCenter(queueItems = [], workflowRuns = [], events = []) {
+runtime/orchestrator-service/lib/ops/backbone.js:3534:  const workflowQueue = normalizedQueue.filter((item) => item.queue_type === 'workflow' || item.entity_type === 'workflow_run');
+runtime/orchestrator-service/lib/ops/backbone.js:3535:  const workflowFallback = workflowQueue.length ? workflowQueue : buildWorkflowQueueFallback(workflowRuns);
+runtime/orchestrator-service/lib/ops/backbone.js:3541:    workflow: workflowFallback,
+runtime/orchestrator-service/lib/ops/backbone.js:3578:    workflow_queue: workflowFallback,
+runtime/orchestrator-service/lib/ops/backbone.js:3588:function buildJobEntries(workflowRuns = [], mediaJobs = [], queueItems = []) {
+runtime/orchestrator-service/lib/ops/backbone.js:3589:  const workflowJobs = asArray(workflowRuns).map((item) => ({
+runtime/orchestrator-service/lib/ops/backbone.js:3591:    kind: 'workflow',
+runtime/orchestrator-service/lib/ops/backbone.js:3592:    entity_type: 'workflow_run',
+runtime/orchestrator-service/lib/ops/backbone.js:3594:    title: asString(item.title) || asString(item.workflow_id) || 'Workflow run',
+runtime/orchestrator-service/lib/ops/backbone.js:3596:    route: inferRouteTarget('workflow_run', item),
+runtime/orchestrator-service/lib/ops/backbone.js:3634:  return [...workflowJobs, ...mediaJobItems, ...publishingJobs]
+runtime/orchestrator-service/lib/ops/backbone.js:3649:    .filter((item) => ['workflow', 'publish', 'sync', 'system'].includes(asString(item.category)) || ['workflow_run', 'publishing_job', 'media_job'].includes(asString(item.entity_type)))
+runtime/orchestrator-service/lib/ops/backbone.js:3700:  workflowRuns = [],
+runtime/orchestrator-service/lib/ops/backbone.js:3802:  const workflowCompletionAlerts = asArray(workflowRuns)
+runtime/orchestrator-service/lib/ops/backbone.js:3806:      id: `workflow-${item.id}`,
+runtime/orchestrator-service/lib/ops/backbone.js:3807:      title: asString(item.title) || asString(item.workflow_id) || 'Workflow run',
+runtime/orchestrator-service/lib/ops/backbone.js:3813:      source: 'workflow_completion',
+runtime/orchestrator-service/lib/ops/backbone.js:3814:      entity_type: 'workflow_run',
+runtime/orchestrator-service/lib/ops/backbone.js:3825:    ...workflowCompletionAlerts
+runtime/orchestrator-service/lib/ops/backbone.js:3842:    workflow_completion_alerts: workflowCompletionAlerts,
+runtime/orchestrator-service/lib/ops/backbone.js:3855:  const workflowRuns = readCollection(paths.workflowsPath);
+runtime/orchestrator-service/lib/ops/backbone.js:3864:  const handoffs = readCollection(paths.handoffsPath);
+runtime/orchestrator-service/lib/ops/backbone.js:3870:  const workflowLimit = Number(options.workflowLimit || 8) || 8;
+runtime/orchestrator-service/lib/ops/backbone.js:3878:  const handoffLimit = Number(options.handoffLimit || 12) || 12;
+runtime/orchestrator-service/lib/ops/backbone.js:3894:    handoff_to: asArray(domain.handoff_to).map((roleId) => ({
+runtime/orchestrator-service/lib/ops/backbone.js:3902:  const queueCenter = buildQueueCenter(queueItems, workflowRuns, events);
+runtime/orchestrator-service/lib/ops/backbone.js:3903:  const jobMonitor = buildJobMonitor(buildJobEntries(workflowRuns, mediaJobs, queueItems), events);
+runtime/orchestrator-service/lib/ops/backbone.js:3908:    workflowRuns,
+runtime/orchestrator-service/lib/ops/backbone.js:3959:      handoffs_by_role: asArray(handoffs)
+runtime/orchestrator-service/lib/ops/backbone.js:3989:    workflows: {
+runtime/orchestrator-service/lib/ops/backbone.js:3990:      total_runs: workflowRuns.length,
+runtime/orchestrator-service/lib/ops/backbone.js:3991:      completed_runs: workflowRuns.filter((item) => asString(item.status) === 'completed').length,
+runtime/orchestrator-service/lib/ops/backbone.js:3992:      recent_runs: workflowRuns.slice(0, workflowLimit),
+runtime/orchestrator-service/lib/ops/backbone.js:3993:      items: workflowRuns.slice(0, workflowLimit)
+runtime/orchestrator-service/lib/ops/backbone.js:3995:    workflow_runs: {
+runtime/orchestrator-service/lib/ops/backbone.js:3996:      total: workflowRuns.length,
+runtime/orchestrator-service/lib/ops/backbone.js:3997:      items: workflowRuns.slice(0, workflowLimit)
+runtime/orchestrator-service/lib/ops/backbone.js:4002:      items: aiCommands.slice(0, workflowLimit)
+runtime/orchestrator-service/lib/ops/backbone.js:4039:    handoffs: {
+runtime/orchestrator-service/lib/ops/backbone.js:4040:      total: handoffs.length,
+runtime/orchestrator-service/lib/ops/backbone.js:4041:      available_count: handoffs.filter((item) => asString(item.status) === 'available').length,
+runtime/orchestrator-service/lib/ops/backbone.js:4042:      current: summarizeCurrentHandoffs(handoffs),
+runtime/orchestrator-service/lib/ops/backbone.js:4043:      by_role: asArray(handoffs)
+runtime/orchestrator-service/lib/ops/backbone.js:4055:      items: handoffs.slice(0, handoffLimit)
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:125:  operations: 'workflows'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:129:  executive: 'executive_brief',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:139:  strategist: 'campaign',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:213:      : specialistId === 'strategist'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:218:            ? 'As Operations Lead, return draft checklist/task/workflow steps only; do not execute or claim execution.'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:234:    'Start with one brief sentence in the conversation language, then add a clearly labeled publishable content section in the output language.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:247:    'If the user asks for hooks, captions, scripts, emails, headlines, tasks, workflow steps, or checklists, produce the actual requested items.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:258:    'Do not claim task/workflow/handoff/approval/publish actions were executed.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:259:    'Do not claim task creation, workflow run, handoff creation, or approval creation happened.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:276:    strategist: [
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:278:      "Focus on business strategy, campaign direction, positioning, launch plans, channel mix, and next best action.",
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:279:      "When asked for help, think like a senior strategist and keep the answer practical and decision-oriented."
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:288:      "Focus on visual direction, brand consistency, creative briefs, formats, assets, scenes, and media production guidance.",
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:298:      "Focus on publishing readiness, schedule review, channel fit, final packaging, captions, and handoff preparation.",
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:318:      "Focus on tasks, workflows, ownership, timelines, handoffs, blockers, and operating next steps.",
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:319:      "When asked to turn conversation into work, prepare a task/workflow-ready draft but do not execute it."
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:333:      "Think across strategy, content, media, publishing, ads, SEO, compliance, operations, customer operations, and sales.",
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:391:    '- If the user asks for copy, caption, script, plan, task, workflow, handoff, or route, help prepare it conversationally.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:404:    '- Do not claim that publishing, approval, deletion, sync, CRM update, customer reply, workflow run, export, task creation, handoff creation, or backend action happened.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:540:  if (intent === 'operations') return 'workflows';
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:544:  if (intent === 'workflow') return 'workflows';
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:559:      outputType: 'executive_brief',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:600:      actionType: 'workflow',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:602:      pattern: /\b(task plan|workflow|handoff|approval|approvals|timeline|execution plan|operator|owners?|assign|todo|follow up|route)\b/
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:611:      actionType: selectedMode === 'operations' ? 'workflow' : 'recommendation',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:621:      outputType: OUTPUT_TYPE_BY_MODE[selectedMode] || 'executive_brief'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:627:  let outputType = matchedRule.outputType || OUTPUT_TYPE_BY_MODE[modeId] || 'executive_brief';
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:696:    recent_handoffs: asArray(operations.handoffs?.items).filter((item) => asString(item.destination_page) === 'research').slice(0, 3)
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:843:    record.suggested_handoffs ||
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:851:    offer: humanizeValue(record.offer || record.offerStrategy || record.offer_strategy),
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:910:  const outputType = asString(providerOutput.outputType) || classified.outputType || OUTPUT_TYPE_BY_MODE[classified.resolvedModeId] || 'executive_brief';
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:929:  const executiveBrief = outputType === 'executive_brief'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:930:    ? normalizeStructuredObject(providerOutput.executiveBrief || providerOutput.raw?.executiveBrief || providerOutput.raw?.executive_brief)
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:953:    normalizeRouteSuggestion('workflows', 'Use Workflows when this needs structured repeatable execution.'),
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:967:  const taskBlock = ['workflow', 'task', 'approval'].includes(classified.actionType)
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1019:function buildWorkflowOutput(workflowId, inputs, context) {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1023:  const routeTarget = workflowId === 'generate-ad-strategy'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1025:    : workflowId === 'build-content-plan'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1027:      : workflowId === 'launch-new-campaign'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1029:        : workflowId === 'competitor-research'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1031:          : 'workflows';
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1034:    title: titleCase(workflowId),
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1035:    summary: `${titleCase(workflowId)} prepared for ${campaign} with ${goal} as the primary target and ${audience} as the main audience.`,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1039:      context.summary.recommendations[0] || 'No recommendation stack was available, so the workflow leaned on project settings and operations context.'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1042:      context.summary.recommendations[0] || `Route this workflow output into ${titleCase(routeTarget)} for execution.`,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1047:      `Open ${titleCase(routeTarget)} to action the workflow output.`,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1052:      normalizeRouteSuggestion(routeTarget, 'Primary downstream page for this workflow output.'),
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1161:          scope: classified.intent === 'workflow' ? 'workflow' : 'project',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1188:        if (classified.actionType === 'workflow') {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1190:            workflow_id: 'ai-command-orchestration',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1191:            workflow_type: 'ai_command',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1195:            route_target: 'workflows',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1207:          linkedEntities.push({ entity_type: 'workflow_run', entity_id: run.id, route: 'workflows', label: run.title });
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1222:        let handoff = null;
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1224:          handoff = createHandoff(projectName, {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1261:            handoff ? { entity_type: 'handoff', entity_id: handoff.id, route: classified.routeTarget, label: response.title } : null
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1298:          handoff
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1314:          outputType: failureClassification.outputType || OUTPUT_TYPE_BY_MODE[failureClassification.resolvedModeId] || 'executive_brief'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1455:            created_workflow: false,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1456:            created_handoff: false,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1632:            created_workflow: false,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1633:            created_handoff: false,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1667:                'Create task/workflow/handoff manually only if explicitly approved.'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1719:    executeWorkflow(projectName, workflowId, input = {}) {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1720:      const cleanWorkflowId = asString(workflowId);
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1722:        throw new Error('Missing workflow id');
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1730:        type: 'workflow_output',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1734:        source_type: 'workflow_run',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1736:          workflow_id: cleanWorkflowId,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1744:        workflow_id: cleanWorkflowId,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1745:        workflow_type: cleanWorkflowId,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1747:        source: input.source || 'server-ai-workflow',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1769:          source_type: 'workflow_run',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1778:        scope: 'workflow',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1782:          workflow_id: cleanWorkflowId,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1786:        source_type: 'workflow_run',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1791:      const handoff = createHandoff(projectName, {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1792:        source_page: 'workflows',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1795:          entity_type: 'workflow_run',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1801:          workflow_id: cleanWorkflowId,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1802:          workflow_title: output.title,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1816:        handoff,
+runtime/orchestrator-service/lib/customer-operations/contracts/ticket-contract.js:21:    workflow: {
+runtime/orchestrator-service/lib/customer-operations/contracts/ticket-contract.js:22:      requires_approval: Boolean(input.workflow?.requires_approval || false),
+runtime/orchestrator-service/lib/customer-operations/contracts/ticket-contract.js:23:      approval_state: String(input.workflow?.approval_state || 'not_required')
+runtime/orchestrator-service/lib/customer-operations/contracts/escalation-contract.js:42:    workflow: {
+runtime/orchestrator-service/lib/customer-operations/contracts/escalation-contract.js:44:        input.workflow?.status || 'pending'
+runtime/orchestrator-service/lib/customer-operations/contracts/escalation-contract.js:48:        input.workflow?.requires_human ?? true
+runtime/orchestrator-service/lib/customer-operations/contracts/sla-policy-contract.js:31:      human_handoff_minutes: Number(
+runtime/orchestrator-service/lib/customer-operations/contracts/sla-policy-contract.js:32:        input.escalation?.human_handoff_minutes || 120
+runtime/orchestrator-service/lib/media/native/intelligence/native-media-intelligence.js:12:      ...generated.brief,
+runtime/orchestrator-service/lib/media/native/intelligence/native-media-intelligence.js:21:      brief: generated.brief,
+runtime/orchestrator-service/lib/media/native/intelligence/media-quality-scorer.js:13:  const prompt = asText(plan.prompt || plan.video_brief || plan.voice_script || plan.description);
+runtime/orchestrator-service/lib/media/native/intelligence/media-prompt-intelligence.js:82:  const brief = buildNativeMediaBrief(input);
+runtime/orchestrator-service/lib/media/native/intelligence/media-prompt-intelligence.js:85:    `Media type: ${brief.media_type}`,
+runtime/orchestrator-service/lib/media/native/intelligence/media-prompt-intelligence.js:86:    `Platform: ${brief.platform}`,
+runtime/orchestrator-service/lib/media/native/intelligence/media-prompt-intelligence.js:87:    `Product: ${brief.product_name}`,
+runtime/orchestrator-service/lib/media/native/intelligence/media-prompt-intelligence.js:88:    `Goal: ${brief.campaign_goal}`,
+runtime/orchestrator-service/lib/media/native/intelligence/media-prompt-intelligence.js:89:    `Audience: ${brief.audience}`,
+runtime/orchestrator-service/lib/media/native/intelligence/media-prompt-intelligence.js:90:    `Brand voice: ${brief.brand_voice}`,
+runtime/orchestrator-service/lib/media/native/intelligence/media-prompt-intelligence.js:91:    `Format: ${brief.recommended_format}`,
+runtime/orchestrator-service/lib/media/native/intelligence/media-prompt-intelligence.js:92:    `Duration: ${brief.recommended_duration}`,
+runtime/orchestrator-service/lib/media/native/intelligence/media-prompt-intelligence.js:93:    `Hook: ${brief.hook}`,
+runtime/orchestrator-service/lib/media/native/intelligence/media-prompt-intelligence.js:94:    `Scene beats: ${brief.scene_beats.join(' -> ')}`,
+runtime/orchestrator-service/lib/media/native/intelligence/media-prompt-intelligence.js:95:    `Visual style: ${JSON.stringify(brief.creative_direction.visual_style)}`,
+runtime/orchestrator-service/lib/media/native/intelligence/media-prompt-intelligence.js:96:    `Product rules: ${JSON.stringify(brief.creative_direction.product_rules)}`,
+runtime/orchestrator-service/lib/media/native/intelligence/media-prompt-intelligence.js:97:    `Platform priorities: ${brief.creative_direction.platform_priority.join(', ')}`,
+runtime/orchestrator-service/lib/media/native/intelligence/media-prompt-intelligence.js:98:    `Avoid: ${brief.compliance_avoid.join(', ')}`
+runtime/orchestrator-service/lib/media/native/intelligence/media-prompt-intelligence.js:102:    brief,
+runtime/orchestrator-service/lib/media/native/protocol/worker-job-contract.js:14:    brief: input.brief || {},
+runtime/orchestrator-service/lib/media/native/native-video-runtime.js:8:    prompt: String(payload.prompt || payload.video_brief || ''),
+runtime/orchestrator-service/lib/media/native/native-video-runtime.js:9:    video_brief: String(payload.video_brief || ''),
+runtime/orchestrator-service/lib/media/native/execution/native-runtime-executor.js:35:      type: prepared.brief.media_type,
+runtime/orchestrator-service/lib/media/native/execution/native-runtime-executor.js:38:      platform: prepared.brief.platform,
+runtime/orchestrator-service/lib/media/native/execution/native-runtime-executor.js:39:      product_name: prepared.brief.product_name,
+runtime/orchestrator-service/lib/media/native/execution/native-runtime-executor.js:46:    const renderingEngine = renderingEngines[prepared.brief.media_type] || renderingEngines.video;
+runtime/orchestrator-service/lib/media/native/execution/native-runtime-executor.js:51:          brief: prepared.brief,
+runtime/orchestrator-service/lib/media/native/execution/native-runtime-executor.js:54:          platform: prepared.brief.platform,
+runtime/orchestrator-service/lib/media/native/execution/native-runtime-executor.js:55:          duration: prepared.brief.recommended_duration
+runtime/orchestrator-service/lib/media/native/execution/native-runtime-executor.js:60:          message: `No renderer available for media type: ${prepared.brief.media_type}`
+runtime/orchestrator-service/lib/media/native/execution/native-runtime-executor.js:64:      result_type: prepared.brief.media_type,
+runtime/orchestrator-service/lib/media/native/execution/native-runtime-executor.js:67:      brief: prepared.brief,
+runtime/orchestrator-service/lib/media/native/execution/native-runtime-executor.js:81:      filename: `${prepared.brief.media_type}-output.json`,
+runtime/orchestrator-service/lib/media/native/orchestrator/job-dispatch-orchestrator.js:62:      brief: input.brief || {},
+runtime/orchestrator-service/lib/media/provider-layer.js:311:      systemPrompt: 'You are a short-form video strategist. Return practical production brief text only.',
+runtime/orchestrator-service/lib/media/provider-layer.js:320:        'Create a concise video brief with hook, scene beats, shot notes, pacing, and CTA.'
+runtime/orchestrator-service/lib/media/provider-layer.js:333:      video_brief: asString(result.text)
+runtime/orchestrator-service/lib/media/provider-layer.js:357:        'Input prompt or video brief:',
+runtime/orchestrator-service/lib/media/provider-layer.js:393:        'Return JSON with keys: image_prompt, video_brief, voice_script, channel_notes, publishing_notes.',
+runtime/orchestrator-service/lib/media/provider-layer.js:418:        video_brief: asString(parsed.video_brief),
+
+### route permission catalog AI and workflow surfaces
+46:    domain: "publishing",
+47:    match: /publishing|publish|approval|governance|claim|compliance/i,
+48:    defaultReadScope: "publishing.read",
+49:    defaultWriteScope: "publishing.write",
+65:    match: /ai\/command|ai\/chat|ai\/guidance|ai\/workflows|openai|anthropic|assistant/i,
+174:  if (publicAlias && /customer-operations|publishing|integration|governance|approval|sources/i.test(routePath)) {
