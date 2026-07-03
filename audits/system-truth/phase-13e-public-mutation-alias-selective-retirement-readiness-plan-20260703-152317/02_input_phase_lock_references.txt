@@ -1,0 +1,992 @@
+
+### phase-13-public*
+
+
+### phase-13a-execution-authority-exact-protection-matrix-*
+audits/system-truth/phase-13a-execution-authority-exact-protection-matrix-20260703-144954
+
+===== FILE: audits/system-truth/phase-13a-execution-authority-exact-protection-matrix-20260703-144954/11_EXECUTION_AUTHORITY_EXACT_PROTECTION_MATRIX.md =====
+# Phase 13A — Execution Authority Exact Protection Matrix
+
+## Legend
+
+| Field | Meaning |
+|---|---|
+| Backend route | Exact backend route or primitive |
+| Method | GET/POST/PATCH/PUT/DELETE/local write |
+| Public alias | Whether /public equivalent exists |
+| Frontend caller | Page/API helper that calls it |
+| AI Command reachable | Direct / indirect / no / unknown |
+| Write protection | write key / read key / middleware / unknown |
+| Confirmation gate | frontend confirmation before action |
+| Governance gate | approval/policy requirement |
+| Audit log | explicit action/event logging |
+| Provider execution | actual provider job/external effect |
+| Risk | Low/Medium/High/Critical |
+| Verdict | safe / safe with notes / needs follow-up / blocker |
+
+## Routes to classify after scan review
+
+| Category | Backend route/action | Method | Public alias | Frontend caller | AI Command reachable | Write protection | Confirmation gate | Governance gate | Audit log | Provider execution | Risk | Initial verdict |
+|---|---|---:|---:|---|---|---|---|---|---|---|---|---|
+| Native media | /media-manager/project/:project/native-media/generate | POST | likely yes/no to verify | TBD | TBD | TBD | TBD | TBD | TBD | yes/unknown | Critical | Needs exact proof |
+| Publishing | /media-manager/project/:project/publishing/schedule | POST | yes/no to verify | TBD | TBD | TBD | TBD | TBD | TBD | no/indirect | High | Needs exact proof |
+| Publishing | /media-manager/project/:project/publishing/:jobId/reschedule | POST | yes/no to verify | TBD | TBD | TBD | TBD | TBD | TBD | no/indirect | High | Needs exact proof |
+| Publishing | /media-manager/project/:project/publishing/:jobId/ready | POST | yes/no to verify | TBD | TBD | TBD | TBD | TBD | TBD | no/indirect | Critical | Needs exact proof |
+| Integrations | /media-manager/project/:project/integrations/:integrationId/connect | POST | yes/no to verify | TBD | TBD | TBD | TBD | TBD | TBD | yes/external | Critical | Needs exact proof |
+| Integrations | /media-manager/project/:project/integrations/:integrationId/reconnect | POST | yes/no to verify | TBD | TBD | TBD | TBD | TBD | TBD | yes/external | Critical | Needs exact proof |
+| Integrations | /media-manager/project/:project/integrations/:integrationId/test | POST | yes/no to verify | TBD | TBD | TBD | TBD | TBD | TBD | maybe | High | Needs exact proof |
+| Integrations | /media-manager/project/:project/integrations/:integrationId/sync | POST | yes/no to verify | TBD | TBD | TBD | TBD | TBD | TBD | yes/external | High | Needs exact proof |
+| Integrations | /media-manager/project/:project/integrations/:integrationId/import-history | POST | yes/no to verify | TBD | TBD | TBD | TBD | TBD | TBD | yes/external | High | Needs exact proof |
+| Integrations | /media-manager/project/:project/integrations/:integrationId/disconnect | POST | yes/no to verify | TBD | TBD | TBD | TBD | TBD | TBD | yes/external | Critical | Needs exact proof |
+| Workflow | recordWorkflowRun / workflow route | local/POST | TBD | TBD | TBD | TBD | TBD | TBD | TBD | no | High | Needs exact proof |
+| Task | createTask / task route | local/POST | TBD | TBD | TBD | TBD | TBD | TBD | TBD | no | Medium/High | Needs exact proof |
+| Approval | createApproval / decide approval | local/POST/PATCH | TBD | TBD | TBD | TBD | TBD | TBD | TBD | no | High/Critical | Needs exact proof |
+| Handoff | createHandoff / handoff route | local/POST | TBD | TBD | TBD | TBD | TBD | TBD | TBD | no | Medium/High | Needs exact proof |
+
+===== FILE: audits/system-truth/phase-13a-execution-authority-exact-protection-matrix-20260703-144954/16_PHASE_13A1_FILLED_EXECUTION_AUTHORITY_MATRIX.md =====
+# PHASE 13A.1 — Filled Execution Authority Protection Matrix
+
+## Status
+NEEDS FOLLOW-UP PATCH PLAN — PUBLIC MUTATION ALIASES REQUIRE HARDENING DECISION
+
+## Mode
+Scan evidence classification only.
+
+No production code change.
+
+## Executive Verdict
+
+The scan did not prove an AI Command silent execution path.
+
+However, the backend exposes many `/public/media-manager/...` mutation aliases, including publishing, integrations, AI command, task, approval, handoff, source, workflow, and project setup writes.
+
+The server comments say these public write aliases remain protected by the same centralized write-key middleware as canonical `/media-manager/...` routes, but Phase 13A did not yet prove route-by-route middleware coverage in a machine-checkable matrix.
+
+Therefore this phase should not be locked as PASS. It should be locked as:
+
+NEEDS FOLLOW-UP PATCH PLAN / AUTHORITY HARDENING PLAN
+
+## Evidence Summary
+
+### Confirmed safe
+
+- No production diff.
+- No forbidden diff.
+- Syntax validation passed.
+- AI Command actions are preview / handoff / route oriented.
+- AI Command repeatedly states no execution, no publish, no send, no CRM mutation, no workflow run, no backend action.
+- Frontend public write alias scan did not show direct calls to `/public/media-manager/...` write aliases.
+
+### Confirmed risk surface
+
+Backend public mutation aliases exist for:
+
+- project rename/create/setup/team/template
+- campaigns/content/media jobs
+- workflow run
+- AI command/chat/guidance/workflow run
+- tasks
+- approvals and approval decisions
+- governance policy
+- notifications patch
+- handoffs and handoff consume
+- sources create/delete
+- integrations connect/reconnect/test/sync/import-history/disconnect
+- publishing schedule/reschedule/ready/publish/fail
+
+### Important note
+
+These aliases may be protected by centralized write-key middleware, but Phase 13A should not assume protection without exact route-by-route proof or a dedicated hardening patch.
+
+## Filled Matrix
+
+| Category | Backend route/action | Method | Public alias exists | Frontend direct public alias caller | AI Command direct execution | Write protection proof | Confirmation gate | Governance gate | Audit log | Provider/external effect | Risk | Verdict |
+|---|---|---:|---:|---|---|---|---|---|---|---|---|---|
+| Native media | /media-manager/project/:project/native-media/generate | POST | Not proven in public alias list | Unknown/canonical caller needs proof | No direct AI silent execution proven | Needs exact middleware proof | Needs caller proof | Needs policy proof | Has action logging indicators from Phase 13 | Yes/possible provider job | Critical | Needs follow-up proof |
+| Publishing schedule | /media-manager/project/:project/publishing/schedule | POST | Yes | No direct public caller found | No direct AI silent execution proven | Needs exact middleware proof | Needs caller proof | Needs governance mapping proof | Action logging appears present | External publish indirect/no direct publish | High | Needs hardening plan |
+| Publishing reschedule | /media-manager/project/:project/publishing/:jobId/reschedule | POST | Yes | No direct public caller found | No direct AI silent execution proven | Needs exact middleware proof | Needs caller proof | Needs governance mapping proof | Action logging appears present | External publish indirect/no direct publish | High | Needs hardening plan |
+| Publishing ready | /media-manager/project/:project/publishing/:jobId/ready | POST | Yes | No direct public caller found | No direct AI silent execution proven | Needs exact middleware proof | Needs caller proof | Needs approval mapping proof | Action logging appears present | Can mark ready for publishing | Critical | Needs hardening plan |
+| Publishing publish | /public/media-manager/project/:project/publishing/:jobId/publish | POST | Yes | No direct public caller found | No direct AI silent execution proven | Needs exact middleware proof | Needs caller proof | Must require approval/governance proof | Needs exact proof | Potential live publishing | Critical | Needs hardening / likely future retire public alias |
+| Integrations connect | /media-manager/project/:project/integrations/:integrationId/connect | POST | Yes | No direct public caller found | No direct AI silent execution proven | Needs exact middleware proof | Needs caller proof | Not governance, but critical auth required | Needs exact proof | External connector effect | Critical | Needs hardening plan |
+| Integrations reconnect | /media-manager/project/:project/integrations/:integrationId/reconnect | POST | Yes | No direct public caller found | No direct AI silent execution proven | Needs exact middleware proof | Needs caller proof | Not governance, but critical auth required | Needs exact proof | External connector effect | Critical | Needs hardening plan |
+| Integrations test | /media-manager/project/:project/integrations/:integrationId/test | POST | Yes | No direct public caller found | No direct AI silent execution proven | Needs exact middleware proof | Needs caller proof | N/A or connector policy | Needs exact proof | Possible external ping | High | Needs hardening plan |
+| Integrations sync | /media-manager/project/:project/integrations/:integrationId/sync | POST | Yes | No direct public caller found | No direct AI silent execution proven | Needs exact middleware proof | Needs caller proof | N/A or connector policy | Needs exact proof | External data sync | High | Needs hardening plan |
+| Integrations import history | /media-manager/project/:project/integrations/:integrationId/import-history | POST | Yes | No direct public caller found | No direct AI silent execution proven | Needs exact middleware proof | Needs caller proof | N/A or connector policy | Needs exact proof | External data import | High | Needs hardening plan |
+| Integrations disconnect | /media-manager/project/:project/integrations/:integrationId/disconnect | POST | Yes | No direct public caller found | No direct AI silent execution proven | Needs exact middleware proof | Needs caller proof | N/A or connector policy | Needs exact proof | External connector destructive effect | Critical | Needs hardening plan |
+| Workflow run | /public/media-manager/project/:project/workflows/:workflowId/run and AI workflow run | POST | Yes | Needs exact caller proof | AI Command has workflow preview but no silent run proven | Needs exact middleware proof | Needs caller proof | Needs operations authority proof | Needs exact proof | Internal execution | High/Critical | Needs hardening plan |
+| Task create | /public/media-manager/project/:project/tasks | POST | Yes | Needs exact caller proof | AI Command task previews only; durable creation not proven | Needs exact middleware proof | Needs caller proof | Needs operations owner proof | Needs exact proof | Durable mutation | Medium/High | Needs hardening plan |
+| Approval create | /public/media-manager/project/:project/approvals | POST | Yes | Needs exact caller proof | AI Command advisory only | Needs exact middleware proof | Needs caller proof | Governance owned | Needs exact proof | Durable approval mutation | High | Needs hardening plan |
+| Approval decision | /public/media-manager/project/:project/approvals/:approvalId/decision | POST | Yes | Operations Centers has confirmation UI for decisions | AI Command cannot approve directly based on scan | Needs exact middleware proof | Confirmed in Operations Centers scan | Governance owned | Needs exact proof | Durable approval decision | Critical | Needs hardening plan |
+| Handoff create | /public/media-manager/project/:project/handoffs | POST | Yes | Needs exact caller proof | AI Command handles draft/handoff previews; backend handoff creation needs exact proof | Needs exact middleware proof | Needs caller proof | Destination-owned | Needs exact proof | Durable handoff mutation | Medium/High | Needs hardening plan |
+| Governance policy | /public/media-manager/project/:project/governance/policy | POST | Yes | Needs exact caller proof | AI Command advisory only | Needs exact middleware proof | Needs caller proof | Governance/admin owned | Needs exact proof | Policy mutation | Critical | Needs hardening plan |
+| Notifications patch | /public/media-manager/project/:project/notifications/:notificationId | PATCH | Yes | Operations Centers Mark Read has confirmation/read-state-only wording | No AI direct mutation proven | Needs exact middleware proof | Confirmed for Mark Read path | N/A | Needs exact proof | Durable notification mutation | Medium | Safe with notes / needs proof |
+| Sources create/delete | /public/media-manager/project/:project/sources and /sources/:sourceType | POST/DELETE | Yes | Needs exact caller proof | No AI direct mutation proven | Needs exact middleware proof | Needs caller proof | Source registry authority required | Needs exact proof | Durable source registry mutation/destructive | High/Critical | Needs hardening plan |
+
+## Key Finding
+
+The main risk is not AI Command silent execution.
+
+The main risk is broad legacy `/public/media-manager/...` write alias exposure. Even if protected by write-key middleware, the system needs a dedicated hardening decision:
+
+1. Keep public write aliases temporarily but prove write-key coverage.
+2. Add explicit route retirement headers / warning telemetry.
+3. Move frontend callers to canonical `/media-manager/...` routes if any remain.
+4. Retire or block public mutation aliases in a future patch after compatibility proof.
+5. Ensure publishing/integration/native-media routes have confirmation + audit + governance/owner gates.
+
+## Recommended Next Phase
+
+PHASE 13B — Public Write Alias Protection / Retirement Plan
+
+Mode:
+- PLAN ONLY first
+- NO CODE CHANGE
+
+Then, only after plan approval:
+
+PHASE 13B.1 — Public Write Alias Hardening Patch
+
+Possible tiny patch candidates:
+- add explicit public mutation alias warning telemetry
+- enforce/verify centralized write-key middleware for all public mutation aliases
+- add response headers marking public mutation aliases deprecated
+- block selected highest-risk public aliases only if frontend usage is proven zero
+- keep canonical routes untouched
+
+===== FILE: audits/system-truth/phase-13a-execution-authority-exact-protection-matrix-20260703-144954/PHASE_13A_EXECUTION_AUTHORITY_EXACT_PROTECTION_MATRIX_LOCK.md =====
+# PHASE 13A — Execution Authority Exact Protection Matrix Lock
+
+## Status
+NEEDS FOLLOW-UP PATCH PLAN — PUBLIC MUTATION ALIASES REQUIRE AUTHORITY HARDENING DECISION
+
+## Mode
+Scan only.
+
+No production code change.
+No backend edit.
+No frontend edit.
+No route change.
+No CSS change.
+No delete.
+No implementation.
+
+## Verified
+
+Phase 13A created an exact execution authority protection matrix from scan evidence.
+
+Verified areas:
+
+- native media generation route surface
+- publishing schedule / reschedule / ready / publish route surface
+- integration connect / reconnect / test / sync / import-history / disconnect route surface
+- workflow run write surface
+- task creation write surface
+- approval creation and approval decision surface
+- handoff creation and consume surface
+- governance policy mutation surface
+- notification patch surface
+- source registry create/delete surface
+- AI Command direct execution reachability
+- public write alias exposure
+- frontend public write alias callers
+- no code change / diff guard
+- syntax validation
+
+## Confirmed Safe
+
+- No production diff exists.
+- No forbidden diff exists.
+- Syntax validation passed.
+- AI Command silent execution was not proven.
+- AI Command remains preview / guidance / route / handoff oriented.
+- AI Command does not directly publish, send, approve, run workflows, mutate CRM, create tickets, or execute provider actions.
+- Frontend direct calls to `/public/media-manager/...` write aliases were not found in the Phase 13A scan output.
+- Operations Centers approval decision path has confirmation wording and states it does not publish/send/execute directly.
+
+## Confirmed Risk Surface
+
+The backend exposes many legacy `/public/media-manager/...` mutation aliases, including:
+
+- project rename/create/setup/team/template
+- campaigns/content/media jobs
+- workflow run
+- AI command/chat/guidance/workflow run
+- tasks
+- approvals and approval decisions
+- governance policy
+- notifications patch
+- handoffs and handoff consume
+- sources create/delete
+- integrations connect/reconnect/test/sync/import-history/disconnect
+- publishing schedule/reschedule/ready/publish/fail
+
+## Key Finding
+
+The main risk is not AI Command silent execution.
+
+The main risk is broad legacy `/public/media-manager/...` write alias exposure.
+
+Even if these aliases are intended to be protected by centralized write-key middleware, the system still needs an explicit authority hardening decision before live execution expansion.
+
+## Decision
+
+No code patch is authorized in Phase 13A.
+
+Proceed to a plan-only phase for public write alias protection / retirement.
+
+## Recommended Next Phase
+
+PHASE 13B — Public Write Alias Protection / Retirement Plan
+
+Mode:
+- PLAN ONLY
+- NO CODE CHANGE
+
+Possible future patch candidates after plan approval:
+
+- prove centralized write-key middleware coverage for all public mutation aliases
+- add deprecation / retirement headers to public mutation aliases
+- add warning telemetry for public mutation alias use
+- move any remaining frontend callers to canonical `/media-manager/...` routes
+- retire or block selected highest-risk public mutation aliases only after frontend usage is proven zero
+- keep canonical routes untouched
+
+===== FILE: audits/system-truth/phase-13a-execution-authority-exact-protection-matrix-20260703-144954/PHASE_13A_EXECUTION_AUTHORITY_EXACT_PROTECTION_MATRIX_SUMMARY.md =====
+# PHASE 13A - Execution Authority Exact Protection Matrix Summary
+
+## Status
+NEEDS FOLLOW-UP PATCH PLAN — PUBLIC MUTATION ALIASES REQUIRE AUTHORITY HARDENING DECISION
+
+## Mode
+Scan only.
+
+## No code changes authorized or made.
+
+## Main result
+AI Command silent execution was not proven.
+
+However, broad `/public/media-manager/...` mutation aliases exist across high-risk domains and require a dedicated hardening plan before live execution expansion.
+
+### phase-13b-public-write-alias-protection-retirement-plan-*
+audits/system-truth/phase-13b-public-write-alias-protection-retirement-plan-20260703-145752
+
+===== FILE: audits/system-truth/phase-13b-public-write-alias-protection-retirement-plan-20260703-145752/07_PUBLIC_WRITE_ALIAS_RISK_TIERS_PLAN.md =====
+# Phase 13B — Public Write Alias Risk Tiers
+
+## Tier 0 — Canonical routes
+Canonical `/media-manager/...` mutation routes must remain untouched in the first hardening pass.
+
+Reason:
+- They are the intended backend authority routes.
+- Hardening should target public compatibility aliases first.
+- Breaking canonical routes would risk production functionality.
+
+## Tier 1 — Critical public aliases
+
+These should receive strongest hardening first.
+
+Examples:
+- `/public/media-manager/project/:project/publishing/:jobId/publish`
+- `/public/media-manager/project/:project/publishing/:jobId/ready`
+- `/public/media-manager/project/:project/integrations/:integrationId/connect`
+- `/public/media-manager/project/:project/integrations/:integrationId/reconnect`
+- `/public/media-manager/project/:project/integrations/:integrationId/disconnect`
+- `/public/media-manager/project/:project/governance/policy`
+- `/public/media-manager/project/:project/approvals/:approvalId/decision`
+- `/public/media-manager/project/:project/sources/:sourceType` DELETE
+- `/public/media-manager/project/:project/ai/workflows/:workflowId/run`
+
+Plan:
+- Do not remove blindly.
+- First prove frontend usage is zero.
+- Prove write-key coverage.
+- Add warning telemetry.
+- Add deprecation/retirement headers.
+- Consider blocking only after compatibility proof.
+
+## Tier 2 — High-risk public aliases
+
+Examples:
+- publishing schedule/reschedule/fail
+- integration test/sync/import-history
+- workflow run
+- tasks create
+- approvals create
+- handoffs create/consume
+- sources create
+- media jobs create/patch
+- content/campaign write aliases
+
+Plan:
+- Keep temporarily if compatibility unknown.
+- Add deprecation headers and telemetry.
+- Move callers to canonical routes if any are found.
+- Retire later after zero-use evidence.
+
+## Tier 3 — Medium-risk public aliases
+
+Examples:
+- notification read-state patch
+- setup/team/template/project metadata writes
+
+Plan:
+- Keep temporarily.
+- Add telemetry and deprecation.
+- Confirm UI confirmation gates where applicable.
+
+## Non-goals
+
+- Do not change canonical `/media-manager/...` routes.
+- Do not change AI Command.
+- Do not change frontend routing.
+- Do not remove aliases without proof.
+- Do not introduce live execution.
+
+===== FILE: audits/system-truth/phase-13b-public-write-alias-protection-retirement-plan-20260703-145752/08_PUBLIC_WRITE_ALIAS_RETIREMENT_STRATEGY_PLAN.md =====
+# Phase 13B — Public Write Alias Retirement Strategy
+
+## Strategy
+
+Use staged retirement, not immediate deletion.
+
+## Stage 1 — Evidence and telemetry
+
+- Add explicit deprecation headers to public mutation alias responses.
+- Add warning telemetry or log events when public mutation aliases are used.
+- Keep canonical routes unchanged.
+- Keep behavior unchanged except headers/logging.
+
+## Stage 2 — Caller migration
+
+- If any frontend public alias callers exist, move them to canonical `/media-manager/...`.
+- Re-run direct caller scan.
+- Confirm zero direct frontend calls.
+
+## Stage 3 — Protection proof
+
+- Add or run a machine-checkable guard proving every public mutation alias is covered by write-key middleware.
+- Verify high-risk aliases separately:
+  - publishing publish/ready
+  - integration connect/disconnect
+  - governance policy
+  - approval decision
+  - source delete
+  - AI workflow run
+
+## Stage 4 — Selective retirement
+
+Only after zero caller proof:
+- Return `410 public_alias_retired` for selected Tier 1 public mutation aliases, or
+- Block only the highest-risk aliases first.
+
+## Stage 5 — Full retirement
+
+After stable compatibility window:
+- Retire remaining public mutation aliases.
+- Keep public read aliases only if explicitly needed.
+- Document final canonical route map.
+
+## Safest first patch candidate
+
+PHASE 13B.1 should not block routes yet.
+
+Recommended first patch:
+- Add deprecation headers and warning telemetry for public mutation aliases.
+- Add audit directory proof.
+- No route removal.
+- No canonical route change.
+- No frontend behavior change.
+
+===== FILE: audits/system-truth/phase-13b-public-write-alias-protection-retirement-plan-20260703-145752/09_PHASE_13B1_SAFE_PATCH_CANDIDATE_PLAN.md =====
+# Phase 13B.1 — Safe Patch Candidate Plan
+
+## Recommended patch type
+Tiny backend-only compatibility hardening patch.
+
+## Patch goal
+Make public mutation alias usage visible and explicitly deprecated without breaking compatibility.
+
+## Allowed changes
+
+- Use existing `classifyPublicAliasAccess` / `buildPublicAliasHeaders` if already present.
+- Add or ensure headers on public alias responses:
+  - `X-MH-Public-Alias: true`
+  - `X-MH-Public-Alias-Status: deprecate`
+  - `X-MH-Public-Alias-Recommendation: use-canonical-route`
+- Add server-side warning log for public mutation alias use.
+- Add audit docs and verification script.
+
+## Not allowed
+
+- Do not remove public aliases yet.
+- Do not block canonical routes.
+- Do not change AI Command.
+- Do not change frontend pages.
+- Do not change provider execution.
+- Do not change publishing behavior.
+- Do not change integration behavior.
+- Do not change write-key semantics blindly.
+
+## Required validation
+
+- node --check runtime/orchestrator-service/server.js
+- node --check runtime/orchestrator-service/lib/security/public-alias-compatibility.js
+- node --check runtime/orchestrator-service/lib/security/route-permission-catalog.js
+- grep proof that canonical routes remain
+- grep proof that public aliases remain
+- grep proof that public alias headers/warnings exist
+- diff limited to intended backend security compatibility files plus audit files
+
+## Follow-up after patch
+
+PHASE 13C:
+Public Mutation Alias Write-Key Coverage Proof
+
+PHASE 13D:
+Frontend Caller Migration to Canonical Routes, if any public callers are found
+
+PHASE 13E:
+Selective Retirement of Tier 1 Public Mutation Aliases
+
+===== FILE: audits/system-truth/phase-13b-public-write-alias-protection-retirement-plan-20260703-145752/PHASE_13B_PUBLIC_WRITE_ALIAS_PROTECTION_RETIREMENT_PLAN_LOCK.md =====
+# PHASE 13B — Public Write Alias Protection / Retirement Plan Lock
+
+## Status
+PLAN READY — STAGED HARDENING RECOMMENDED
+
+## Mode
+Plan only.
+
+No production code change.
+No backend edit.
+No frontend edit.
+No route change.
+No CSS change.
+No delete.
+No implementation.
+
+## Input Authority
+
+This plan follows:
+
+- Phase 13 — Backend Execution / Provider / Publishing Authority Deep Audit
+- Phase 13A — Execution Authority Exact Protection Matrix
+
+## Confirmed
+
+Phase 13B created a safe staged protection / retirement plan for legacy `/public/media-manager/...` mutation aliases.
+
+Confirmed:
+
+- Do not remove public mutation aliases blindly.
+- Do not change canonical `/media-manager/...` routes.
+- Do not change AI Command.
+- Do not change frontend routing.
+- Do not introduce live execution.
+- Use staged hardening before any selective retirement.
+
+## Main Finding
+
+The main risk is broad legacy `/public/media-manager/...` mutation alias exposure.
+
+The correct next action is not immediate deletion.
+
+The correct next action is staged hardening:
+
+1. Add deprecation headers.
+2. Add warning telemetry.
+3. Prove write-key coverage.
+4. Migrate frontend callers if any are found.
+5. Retire selected Tier 1 aliases only after zero-use proof.
+
+## Risk Tiers
+
+### Tier 0
+Canonical `/media-manager/...` routes.
+
+Decision:
+- Keep untouched.
+
+### Tier 1
+Critical public aliases, including:
+
+- publishing publish / ready
+- integration connect / reconnect / disconnect
+- governance policy
+- approval decision
+- source delete
+- AI workflow run
+
+Decision:
+- Do not remove blindly.
+- Add visibility first.
+- Prove zero frontend usage and write-key coverage before retirement.
+
+### Tier 2
+High-risk public aliases, including:
+
+- publishing schedule / reschedule / fail
+- integration test / sync / import-history
+- workflow run
+- task create
+- approval create
+- handoff create / consume
+- source create
+- media/content/campaign write aliases
+
+Decision:
+- Keep temporarily.
+- Add telemetry and deprecation.
+- Migrate callers if any exist.
+- Retire later after zero-use proof.
+
+### Tier 3
+Medium-risk public aliases, including:
+
+- notification read-state patch
+- setup/team/template/project metadata writes
+
+Decision:
+- Keep temporarily.
+- Add telemetry and deprecation.
+- Confirm UI confirmation gates where applicable.
+
+## Approved Direction
+
+Staged retirement:
+
+1. Evidence and telemetry
+2. Caller migration
+3. Protection proof
+4. Selective retirement
+5. Full retirement later
+
+## Recommended Next Phase
+
+PHASE 13B.1 — Public Mutation Alias Deprecation Headers / Warning Telemetry Patch
+
+Mode:
+- tiny patch
+- backend compatibility/security only
+- no frontend change
+- no canonical route change
+- no execution behavior change
+
+## Allowed Future Patch Shape
+
+- Add or ensure deprecation headers on public mutation alias responses.
+- Add warning telemetry/logging when public mutation aliases are used.
+- Keep public aliases functional temporarily.
+- Keep canonical routes untouched.
+- No route blocking yet.
+
+## Not Allowed In 13B.1
+
+- Do not remove public aliases.
+- Do not block canonical routes.
+- Do not change AI Command.
+- Do not change frontend pages.
+- Do not change provider execution.
+- Do not change publishing behavior.
+- Do not change integration behavior.
+- Do not change write-key semantics blindly.
+
+===== FILE: audits/system-truth/phase-13b-public-write-alias-protection-retirement-plan-20260703-145752/PHASE_13B_PUBLIC_WRITE_ALIAS_PROTECTION_RETIREMENT_PLAN_SUMMARY.md =====
+# PHASE 13B — Public Write Alias Protection / Retirement Plan Summary
+
+## Status
+PLAN READY — STAGED HARDENING RECOMMENDED
+
+## Mode
+Plan only.
+
+No code changes authorized or made.
+
+## Main finding
+Do not remove public mutation aliases blindly.
+
+Use staged hardening:
+1. deprecation headers
+2. warning telemetry
+3. write-key coverage proof
+4. frontend caller migration if needed
+5. selective retirement only after zero-use proof
+
+## Recommended next phase
+PHASE 13B.1 — Public Mutation Alias Deprecation Headers / Warning Telemetry Patch
+
+Mode:
+- tiny patch
+- backend compatibility/security only
+- no frontend change
+- no canonical route change
+- no execution behavior change
+
+### phase-13b1-public-mutation-alias-deprecation-telemetry-patch-*
+audits/system-truth/phase-13b1-public-mutation-alias-deprecation-telemetry-patch-20260703-150145
+
+===== FILE: audits/system-truth/phase-13b1-public-mutation-alias-deprecation-telemetry-patch-20260703-150145/PHASE_13B1_PUBLIC_MUTATION_ALIAS_DEPRECATION_TELEMETRY_PATCH_LOCK.md =====
+# PHASE 13B.1 — Public Mutation Alias Deprecation Headers / Warning Telemetry Patch Lock
+
+## Status
+PATCH APPLIED SAFELY — PUBLIC MUTATION ALIAS VISIBILITY HARDENING COMPLETE
+
+## Scope
+Tiny backend compatibility/security patch.
+
+## Production file changed
+- runtime/orchestrator-service/server.js
+
+## What changed
+Added middleware that detects mutation requests under:
+
+- /public/media-manager/...
+
+for methods:
+
+- POST
+- PUT
+- PATCH
+- DELETE
+
+and adds deprecation/compatibility headers:
+
+- X-MH-Public-Alias: true
+- X-MH-Public-Alias-Status: deprecate
+- X-MH-Public-Alias-Recommendation: use-canonical-media-manager-route
+- X-MH-Public-Alias-Canonical-Prefix: /media-manager
+
+It also emits server-side warning telemetry:
+
+- [MH][public_mutation_alias_deprecated]
+
+## Confirmed Safe
+- No public alias route was removed.
+- No public alias route was blocked.
+- No canonical /media-manager route was changed.
+- No frontend file was changed.
+- No AI Command file was changed.
+- No provider behavior changed.
+- No publishing behavior changed.
+- No integration behavior changed.
+- No write-key semantics changed.
+- Existing public alias compatibility middleware remains in place.
+- Existing classifyPublicAliasAccess / buildPublicAliasHeaders logic remains in place.
+
+## Validation
+- node --check runtime/orchestrator-service/server.js passed.
+- node --check runtime/orchestrator-service/lib/security/public-alias-compatibility.js passed.
+- node --check runtime/orchestrator-service/lib/security/route-permission-catalog.js passed.
+- frontend syntax spot checks passed.
+- diff limited to runtime/orchestrator-service/server.js plus audit files.
+- canonical routes remain present.
+- public aliases remain present.
+- deprecation headers and warning telemetry block exist.
+
+## Decision
+Lock Phase 13B.1.
+
+## Recommended Next Phase
+PHASE 13C — Public Mutation Alias Write-Key Coverage Proof
+
+Mode:
+- SCAN / TEST ONLY first
+- NO CODE CHANGE
+
+### phase-13c-public-mutation-alias-write-key-coverage-proof-*
+audits/system-truth/phase-13c-public-mutation-alias-write-key-coverage-proof-20260703-150747
+
+===== FILE: audits/system-truth/phase-13c-public-mutation-alias-write-key-coverage-proof-20260703-150747/07_PUBLIC_MUTATION_ALIAS_WRITE_KEY_COVERAGE_MATRIX.md =====
+# Phase 13C — Public Mutation Alias Write-Key Coverage Matrix
+
+## Legend
+
+| Field | Meaning |
+|---|---|
+| Public alias exists | Route exists under /public/media-manager |
+| Phase 13B.1 headers | Middleware detects mutation alias and adds visibility headers |
+| Compatibility classification | classifyPublicAliasAccess applies public alias decision logic |
+| Unauthorized production behavior | Expected outcome without write key in production |
+| Authorized production behavior | Expected outcome with valid write key in production |
+| Canonical route affected | Whether /media-manager canonical route is changed |
+| Verdict | Coverage proof status |
+
+## Matrix
+
+| Category | Public alias/action | Public alias exists | Phase 13B.1 headers | Compatibility classification | Unauthorized production behavior | Authorized production behavior | Canonical route affected | Verdict |
+|---|---|---:|---:|---:|---|---|---:|---|
+| Publishing | publishing ready | yes | yes | yes | 403 route_permission_denied | allowed with deprecated headers | no | Covered by classification proof |
+| Publishing | publishing publish | yes | yes | yes | 403 route_permission_denied | allowed with deprecated headers | no | Covered by classification proof |
+| Publishing | schedule/reschedule/fail | yes | yes | yes | 403 route_permission_denied | allowed with deprecated headers | no | Covered by classification proof |
+| Integrations | connect/reconnect/disconnect | yes | yes | yes | 403 route_permission_denied | allowed with deprecated headers | no | Covered by classification proof |
+| Integrations | test/sync/import-history | yes | yes | yes | 403 route_permission_denied | allowed with deprecated headers | no | Covered by classification proof |
+| Governance | governance policy mutation | yes | yes | yes | 403 route_permission_denied | allowed with deprecated headers | no | Covered by classification proof |
+| Approvals | approval create/decision | yes | yes | yes | 403 route_permission_denied | allowed with deprecated headers | no | Covered by classification proof |
+| Sources | source create/delete | yes | yes | yes | 403 route_permission_denied | allowed with deprecated headers | no | Covered by classification proof |
+| Workflow | workflow run / AI workflow run | yes | yes | yes | 403 route_permission_denied | allowed with deprecated headers | no | Covered by classification proof |
+| Tasks | task create | yes | yes | yes | 403 route_permission_denied | allowed with deprecated headers | no | Covered by classification proof |
+| Handoffs | handoff create/consume | yes | yes | yes | 403 route_permission_denied | allowed with deprecated headers | no | Covered by classification proof |
+| Notifications | notification patch | yes | yes | yes | 403 route_permission_denied | allowed with deprecated headers | no | Covered by classification proof |
+| Project/content/media | project/team/campaign/content/media writes | yes | yes | yes | 403 route_permission_denied in production public mutation | allowed with deprecated headers | no | Covered by classification proof |
+
+## Important boundary
+
+This proof is module-level/static middleware behavior proof.
+
+It does not perform live HTTP requests and does not execute provider/publishing/integration mutations.
+
+That is intentional for scan/test-only safety.
+
+===== FILE: audits/system-truth/phase-13c-public-mutation-alias-write-key-coverage-proof-20260703-150747/PHASE_13C_PUBLIC_MUTATION_ALIAS_WRITE_KEY_COVERAGE_PROOF_LOCK.md =====
+# PHASE 13C — Public Mutation Alias Write-Key Coverage Proof Lock
+
+## Status
+PASS — WRITE-KEY COVERAGE PROVEN AT MODULE / STATIC MIDDLEWARE LEVEL
+
+## Mode
+Scan / test only.
+
+No production code change.
+No backend edit.
+No frontend edit.
+No route change.
+No CSS change.
+No delete.
+No implementation.
+
+## Verified
+
+Phase 13C verified public mutation alias handling after Phase 13B.1.
+
+Verified:
+
+- Phase 13B.1 deprecation telemetry block exists.
+- Existing public alias compatibility middleware remains in place.
+- Canonical `/media-manager/...` mutation routes remain present.
+- Public `/public/media-manager/...` mutation aliases remain present.
+- Public mutation aliases receive Phase 13B.1 deprecation headers.
+- Public mutation aliases are classified by `classifyPublicAliasAccess`.
+- Unauthorized production public mutation aliases are denied with `route_permission_denied`.
+- Authorized production public mutation aliases are allowed only with write-key context.
+- Canonical routes are not treated as public aliases.
+- Frontend direct public mutation alias callers were not found.
+- Frontend mutation callers use canonical `/media-manager/...` routes.
+- Syntax validation passed.
+- No production diff exists.
+
+## Proof Results
+
+Module-level classification tests confirmed:
+
+- canonical mutation route => publicAlias false / canonical
+- public critical publishing ready unauthorized production => blocked
+- public critical publishing ready authorized production => allowed
+- public critical integration disconnect unauthorized production => blocked
+- public critical approval decision unauthorized production => blocked
+- public critical governance policy unauthorized production => blocked
+- public source delete unauthorized production => blocked
+- public read alias => allowed
+
+Static middleware simulation confirmed:
+
+- unauthorized production public mutation alias => 403 route_permission_denied
+- authorized production public mutation alias => 200 next with compatibility/deprecation headers
+- canonical route => no public alias headers
+
+## Important Boundary
+
+This was a scan/test-only proof.
+
+No live HTTP mutation requests were performed.
+No provider/publishing/integration mutation was executed.
+
+## Decision
+
+Lock Phase 13C as PASS.
+
+## Recommended Next Phase
+
+PHASE 13D — Frontend Canonical Route Caller Confirmation / Public Alias Zero-Use Lock
+
+Mode:
+- SCAN ONLY
+- NO CODE CHANGE
+
+Purpose:
+Confirm and lock that frontend callers are canonical, public mutation aliases are not called by Control Center, and public aliases can later be retired safely after a compatibility window.
+
+===== FILE: audits/system-truth/phase-13c-public-mutation-alias-write-key-coverage-proof-20260703-150747/PHASE_13C_PUBLIC_MUTATION_ALIAS_WRITE_KEY_COVERAGE_PROOF_SUMMARY.md =====
+# PHASE 13C — Public Mutation Alias Write-Key Coverage Proof Summary
+
+## Status
+SCAN / TEST GENERATED — AWAITING REVIEW
+
+## Mode
+Scan / test only.
+
+No code changes authorized or made.
+
+## Expected proof target
+
+Public mutation aliases under `/public/media-manager/...` should:
+
+- receive Phase 13B.1 deprecation headers
+- be classified by public alias compatibility logic
+- reject unauthorized production mutations with route permission denied
+- allow authorized production compatibility only when write key is present
+- not affect canonical `/media-manager/...` routes
+
+## Safety boundary
+
+No live HTTP mutation requests were performed.
+
+Tests were module-level and static simulation only.
+
+### phase-13d-frontend-canonical-route-public-alias-zero-use-lock-*
+audits/system-truth/phase-13d-frontend-canonical-route-public-alias-zero-use-lock-20260703-151337
+
+===== FILE: audits/system-truth/phase-13d-frontend-canonical-route-public-alias-zero-use-lock-20260703-151337/09_FRONTEND_PUBLIC_ALIAS_ZERO_USE_CONFIRMATION_MATRIX.md =====
+# Phase 13D — Frontend Public Alias Zero-Use Confirmation Matrix
+
+## Verdict target
+Confirm that Control Center frontend mutation callers use canonical `/media-manager/...` routes and do not call legacy `/public/media-manager/...` mutation aliases.
+
+## Matrix
+
+| Area | Public alias caller found? | Canonical caller found? | Notes | Verdict |
+|---|---:|---:|---|---|
+| API helper layer | TBD from scan | TBD from scan | `public/control-center/api.js` should use `/media-manager/...` | Await review |
+| AI Command | TBD from scan | Uses AI helper imports / preview guards | Should not call `/public/media-manager/...` | Await review |
+| Publishing page | TBD from scan | Should use api.js publishing helpers | No direct public alias expected | Await review |
+| Integrations flows | TBD from scan | Should use api.js integration helpers | No direct public alias expected | Await review |
+| Governance / approvals | TBD from scan | Should use canonical approval/governance helpers | No direct public alias expected | Await review |
+| Tasks / workflows / handoffs | TBD from scan | Should use canonical helpers | No direct public alias expected | Await review |
+| Notifications | TBD from scan | Should use canonical notification helper | No direct public alias expected | Await review |
+| Backend public aliases | Exist | Canonical also exists | Compatibility only; deprecated/telemetry headers present | Await review |
+
+## Lock criteria
+
+PASS if:
+- frontend `/public/media-manager` scan is empty
+- api.js canonical mutation route inventory is present
+- AI Command has no public alias mutation calls
+- backend public aliases remain compatibility-only
+- no production diff exists
+
+===== FILE: audits/system-truth/phase-13d-frontend-canonical-route-public-alias-zero-use-lock-20260703-151337/13_PHASE_13D_REVIEWED_ZERO_USE_MATRIX.md =====
+# PHASE 13D — Reviewed Frontend Public Alias Zero-Use Matrix
+
+## Status
+PASS — FRONTEND PUBLIC MUTATION ALIAS ZERO-USE CONFIRMED
+
+## Mode
+Scan only.
+
+No production code change.
+
+## Confirmed
+
+- No frontend direct `/public/media-manager/...` mutation alias caller was found.
+- No page-level direct public alias fetch was found.
+- `public/control-center/api.js` uses canonical `/media-manager/...` mutation routes.
+- AI Command has no `/public/media-manager/...` direct mutation call.
+- AI Command remains review-ready / preview / confirmation-gated.
+- Backend `/public/media-manager/...` aliases remain present for compatibility only.
+- Phase 13B.1 deprecation headers and warning telemetry remain present.
+- Existing public alias compatibility middleware remains present.
+- No production diff exists.
+- No frontend diff exists.
+- No backend diff exists.
+
+## Reviewed Matrix
+
+| Area | Public alias caller found? | Canonical caller found? | Verdict |
+|---|---:|---:|---|
+| API helper layer | No | Yes | PASS |
+| AI Command | No | Uses canonical helper imports / preview guards | PASS |
+| Publishing page | No direct public alias found | Uses api.js publishing helpers | PASS |
+| Integrations flows | No direct public alias found | Uses api.js integration helpers | PASS |
+| Governance / approvals | No direct public alias found | Uses canonical approval/governance helpers | PASS |
+| Tasks / workflows / handoffs | No direct public alias found | Uses canonical helpers | PASS |
+| Notifications | No direct public alias found | Uses canonical notification helper | PASS |
+| Backend public aliases | Exist intentionally | Canonical also exists | Compatibility-only; deprecated/telemetry headers present |
+
+## Decision
+
+Frontend public mutation alias zero-use is confirmed.
+
+Public mutation aliases can remain as backend compatibility routes during the compatibility window and may be retired later under a separate selective retirement phase.
+
+===== FILE: audits/system-truth/phase-13d-frontend-canonical-route-public-alias-zero-use-lock-20260703-151337/PHASE_13D_FRONTEND_CANONICAL_ROUTE_PUBLIC_ALIAS_ZERO_USE_LOCK.md =====
+# PHASE 13D — Frontend Canonical Route Caller Confirmation / Public Alias Zero-Use Lock
+
+## Status
+PASS — FRONTEND PUBLIC MUTATION ALIAS ZERO-USE CONFIRMED
+
+## Mode
+Scan only.
+
+No production code change.
+No backend edit.
+No frontend edit.
+No route change.
+No CSS change.
+No delete.
+No implementation.
+
+## Verified
+
+Phase 13D confirmed:
+
+- No frontend direct `/public/media-manager/...` mutation alias caller was found.
+- No page-level direct public alias fetch was found.
+- `public/control-center/api.js` uses canonical `/media-manager/...` mutation routes.
+- AI Command has no `/public/media-manager/...` direct mutation call.
+- AI Command remains review-ready / preview / confirmation-gated.
+- Backend `/public/media-manager/...` aliases remain present for compatibility only.
+- Phase 13B.1 deprecation headers and warning telemetry remain present.
+- Existing public alias compatibility middleware remains present.
+- No production diff exists.
+- No frontend diff exists.
+- No backend diff exists.
+- Accidental old audit modification was restored before lock.
+
+## Decision
+
+Frontend public mutation alias zero-use is confirmed.
+
+Public mutation aliases can remain as backend compatibility routes during the compatibility window and may be retired later under a separate selective retirement phase.
+
+## Recommended Next Phase
+
+PHASE 13E — Public Mutation Alias Selective Retirement Readiness Plan
+
+Mode:
+- PLAN ONLY
+- NO CODE CHANGE
+
+Purpose:
+Define exact criteria and safe order for later retiring Tier 1 public mutation aliases without breaking compatibility.
+
+===== FILE: audits/system-truth/phase-13d-frontend-canonical-route-public-alias-zero-use-lock-20260703-151337/PHASE_13D_FRONTEND_CANONICAL_ROUTE_PUBLIC_ALIAS_ZERO_USE_SUMMARY.md =====
+# PHASE 13D — Frontend Canonical Route Caller Confirmation / Public Alias Zero-Use Summary
+
+## Status
+PASS — FRONTEND PUBLIC MUTATION ALIAS ZERO-USE CONFIRMED
+
+## Mode
+Scan only.
+
+No code changes authorized or made.
+
+## Main conclusion
+Control Center frontend uses canonical `/media-manager/...` mutation routes.
+
+Legacy `/public/media-manager/...` mutation aliases are not called directly by the frontend scan and remain backend compatibility routes only, with Phase 13B.1 deprecation headers and telemetry.
+
+## Safety boundary
+No code change.
+No route change.
+No runtime mutation.
+No frontend mutation.
