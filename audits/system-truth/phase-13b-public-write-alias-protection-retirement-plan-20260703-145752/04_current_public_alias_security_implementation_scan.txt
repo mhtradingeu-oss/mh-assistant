@@ -1,0 +1,716 @@
+### server top imports and public alias compatibility usage
+// Deterministic source registry extraction for canonical/legacy compatibility
+function extractSourceRegistryEntries(value) {
+  if (!value || typeof value !== 'object') return {};
+  if (value.sources && typeof value.sources === 'object' && !Array.isArray(value.sources)) {
+    return value.sources;
+  }
+  // Defensive: skip wrapper keys if present
+  const omitKeys = new Set(['updated_at', 'statuses', 'required_sources', 'sources']);
+  return Object.fromEntries(
+    Object.entries(value).filter(([k]) => !omitKeys.has(k))
+  );
+}
+
+const axios = require('axios');
+const crypto = require('crypto');
+const {
+  generateWorkerId,
+  isJobDue,
+  isJobLockExpired,
+  buildSchedulerJobRecord
+} = require('./lib/execution/scheduler-helpers');
+const { createSchedulerStorage } = require('./lib/execution/scheduler-storage');
+const { createExecutionJobBridge } = require('./lib/execution/execution-job-bridge');
+const {
+  toFiniteNumber,
+  normalizeFeedbackMetrics,
+  derivePerformanceStats
+} = require('./lib/execution/performance-metrics');
+const { createPerformanceStorage } = require('./lib/execution/performance-storage');
+const {
+  riskAlertProvider: riskAlertBuilder,
+  buildLearningCandidates
+} = require('./lib/execution/recommendation-builders');
+const { createRecommendationRuntime } = require('./lib/execution/recommendation-runtime');
+const { createLearningPatterns } = require('./lib/execution/learning-patterns');
+const { createIntelligenceLoop } = require('./lib/execution/intelligence-loop');
+const { createSmartSuggestions } = require('./lib/execution/smart-suggestions');
+const { createEconomicCoreAnalytics } = require('../economic-core-analytics');
+const express = require('express');
+const { orchestrationGate } = require('../control-plane/core/orchestration-gate');
+const decisionModeResolver = require('../control-plane/core/decision-mode');
+const {
+  registerAgent,
+  resolveAgent,
+  listAgents
+} = require('../agent-registry/agent-api');
+const mhCortex = require('../mh-cortex');
+const { classifyPublicAliasAccess, buildPublicAliasHeaders } = require("./lib/security/public-alias-compatibility");
+const {
+  createRuntimeSecurityEnforcementMiddleware,
+  buildRoutePermissionDeniedResponse
+} = require('./lib/security/runtime-security-enforcement');
+const {
+  evaluateGovernanceMutationGate,
+  evaluateGovernanceApprovalLifecycle
+} = require('./lib/security/governance-mutation-gate');
+const fs = require('fs');
+const path = require('path');
+const multer = require('multer');
+const FormData = require('form-data');
+const {
+  normalizeCredentials,
+  applyEncryptedCredentials,
+  hasIntegrationSecretKeyConfigured
+} = require('./lib/integrations/token-manager');
+const { UnifiedDataPathResolver } = require('./lib/data/unified-data-path-resolver');
+const { ExecutionArtifactWriterAdapter } = require('./lib/data/execution-artifact-writer-adapter');
+const {
+  createLogger,
+  createConsoleLikeLogger,
+  sanitizeValue,
+  serializeErrorForLog
+} = require('./lib/observability/logger');
+const { createInMemoryRateLimiter } = require('./lib/observability/rate-limit');
+const { executeAdapterAction } = require('./lib/integrations/adapter-manager');
+const { buildHealthState } = require('./lib/integrations/health-manager');
+const {
+  isSupportedProvider,
+  getUnsupportedProviderMessage
+} = require('./lib/integrations/provider-registry');
+const {
+  buildProjectInsightsPayload,
+  buildProjectLearningPayload
+} = require('./lib/insights/ingestion-service');
+const {
+  createMediaProviderLayer
+} = require('./lib/media/provider-layer');
+const {
+  normalizeProjectSlug,
+  resolveProjectPath,
+  isProjectSlugValidationError
+} = require('./lib/security/project-isolation');
+const {
+  STATUS_MODELS,
+  buildOperationsSnapshot,
+  buildGovernanceSummary,
+  readTeamModel,
+  updateTeamModel,
+  getGovernancePolicy,
+  updateGovernancePolicy,
+  upsertCampaign,
+  listCampaigns,
+  getCampaign,
+  upsertContentItem,
+  listContentItems,
+  getContentItem,
+  upsertMediaJob,
+  listMediaJobs,
+  getMediaJob,
+  recordWorkflowRun,
+  createAiArtifact,
+  listAiCommandRecords,
+  getAiCommandRecord,
+  listAiArtifacts,
+  listAiRecommendations,
+  listAiMemory,
+  getWorkflowRun,
+  createTask,
+  listTasks,
+  getTask,
+  createApproval,
+  listApprovals,
+  listNotifications,
+  markNotification,
+  listWorkflowRuns,
+  createHandoff,
+  listHandoffs,
+  consumeHandoff,
+  listEvents,
+  syncPublishingJob
+} = require('./lib/ops/backbone');
+const backboneOps = require('./lib/ops/backbone');
+const resolveGovernanceApproval = backboneOps['decide' + 'Approval'];
+const { createAiOrchestrationService } = require('./lib/ops/ai-orchestrator');
+const {
+  createJobDispatchOrchestrator
+} = require('./lib/media/native/orchestrator/job-dispatch-orchestrator');
+
+const {
+  createCustomerOperationsRuntime
+} = require('./lib/customer-operations/customer-operations-runtime');
+
+const {
+  registerDefaultModels
+} = require('./lib/media/native/models/default-models');
+
+const {
+  listProviderModels,
+  listProviderModelsByMediaType
+} = require('./lib/media/native/providers/provider-model-catalog');
+const {
+  getProviderReadiness
+} = require('./lib/media/native/providers/provider-readiness');
+const {
+  getLocalRenderingCapabilities
+} = require('./lib/media/native/capabilities/local-rendering-capabilities');
+
+const compression = require('compression');
+const helmet = require('helmet');
+const cors = require('cors');
+
+process.on('uncaughtException', (err) => {
+  try {
+    appLogger.error('uncaught_exception', {
+      route: 'process',
+      action: 'uncaught_exception',
+      error: serializeErrorForLog(err)
+    });
+  } catch (_) {
+    console.error('[uncaughtException]', err);
+  }
+  // Allow systemd to restart the process
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason) => {
+  try {
+    appLogger.error('unhandled_rejection', {
+      route: 'process',
+      action: 'unhandled_rejection',
+      error: serializeErrorForLog(reason instanceof Error ? reason : new Error(String(reason)))
+    });
+  } catch (_) {
+    console.error('[unhandledRejection]', reason);
+  }
+});
+
+const customerCenterProjection = require('./lib/customer-operations/projections/customer-center-projection');
+const app = express();
+
+function publicAliasDeprecationHeaders(req, res, next) {
+  try {
+    const expectedKey = String(process.env[CONTROL_WRITE_KEY_ENV] || '').trim();
+    const providedKey = readProvidedControlWriteKey(req);
+    const hasAuthorizedWriteKey = Boolean(expectedKey)
+      && Boolean(providedKey)
+      && controlWriteKeyMatches(expectedKey, providedKey);
+
+    const classification = classifyPublicAliasAccess(req.method, req.path || req.originalUrl || "", {
+      hasAuthorizedWriteKey,
+      productionMode: String(process.env.NODE_ENV || '').trim().toLowerCase() === 'production'
+    });
+    const headers = buildPublicAliasHeaders(classification);
+
+    Object.entries(headers).forEach(([key, value]) => {
+      res.setHeader(key, value);
+    });
+
+    if (classification && classification.publicAlias) {
+      res.setHeader("X-MH-Canonical-Route-Required", "true");
+    }
+
+    if (classification && classification.publicAlias && classification.allowed === false) {
+      if (classification.code === 'route_permission_denied') {
+        return res.status(403).json(buildRoutePermissionDeniedResponse());
+      }
+
+      return res.status(410).json({
+        ok: false,
+        error: "public_alias_retired",
+        message: "This public compatibility route is retired. Use the canonical API route.",
+        canonicalRequired: true,
+        reason: classification.reason
+      });
+    }
+  } catch (error) {
+    res.setHeader("X-MH-Public-Alias-Warning", "classification_failed");
+  }
+
+  return next();
+}
+
+app.use(helmet({
+  contentSecurityPolicy: false // CSP managed separately; avoids breaking existing UI
+}));
+app.use(cors({
+  origin: [
+    /^https:\/\/[a-z0-9-]+\.hairoticmen\.de$/i,
+    /^http:\/\/localhost(:\d+)?$/
+  ],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: [
+    'Content-Type',
+    'Authorization',
+    'x-mh-control-write-key',
+    'x-mh-access-key'
+  ],
+  credentials: true
+}));
+app.use(compression());
+app.use("/public", publicAliasDeprecationHeaders);
+app.use(express.json());
+
+const appLogger = createLogger({
+  service: 'orchestrator-service'
+});
+const runtimeCompatLogger = createConsoleLikeLogger(appLogger, {
+  route: 'runtime',
+  action: 'runtime_log'
+});
+
+### public alias compatibility module
+"use strict";
+
+/**
+ * Public alias compatibility helper for MH-Assistant backend.
+ *
+ * This module is intentionally non-enforcing in BACKEND-P1C.2.
+ * It centralizes environment flag parsing and public alias risk decisions.
+ */
+
+const DEFAULT_BLOCKED_PUBLIC_ALIAS_METHODS = Object.freeze(["POST", "PATCH", "PUT", "DELETE"]);
+
+function normalizeMethod(method) {
+  return String(method || "GET").toUpperCase();
+}
+
+function normalizePath(pathname) {
+  return String(pathname || "");
+}
+
+function isPublicAliasPath(pathname) {
+  return normalizePath(pathname).startsWith("/public/");
+}
+
+function readBooleanEnv(name, fallback = false) {
+  const value = process.env[name];
+  if (value === undefined || value === null || value === "") return fallback;
+  return ["1", "true", "yes", "on", "enabled"].includes(String(value).trim().toLowerCase());
+}
+
+function publicAliasCompatibilityEnabled() {
+  return readBooleanEnv("MH_PUBLIC_ALIAS_COMPATIBILITY", true);
+}
+
+function blockCriticalPublicMutationsEnabled() {
+  return readBooleanEnv("MH_BLOCK_CRITICAL_PUBLIC_MUTATION_ALIASES", false);
+}
+
+function isProductionMode(options = {}) {
+  if (typeof options.productionMode === "boolean") {
+    return options.productionMode;
+  }
+
+  return String(process.env.NODE_ENV || "").trim().toLowerCase() === "production";
+}
+
+function isCriticalPublicAlias(pathname) {
+  const value = normalizePath(pathname);
+  return /customer-operations|integrations|publishing|governance|approvals|sources|workflows|ai\/workflows/i.test(value);
+}
+
+function isMutationMethod(method) {
+  return DEFAULT_BLOCKED_PUBLIC_ALIAS_METHODS.includes(normalizeMethod(method));
+}
+
+function isPublicSensitiveMutationPath(pathname) {
+  const value = normalizePath(pathname);
+  return /ai\/|native-media|api\/media|execute_|generate_media_from_prompt|build_ad_execution_package|integrations|publishing|governance|approvals|sources|workflows/i.test(value);
+}
+
+function classifyPublicAliasAccess(method, pathname, options = {}) {
+  const normalizedMethod = normalizeMethod(method);
+  const normalizedPath = normalizePath(pathname);
+  const publicAlias = isPublicAliasPath(normalizedPath);
+  const mutation = isMutationMethod(normalizedMethod);
+  const critical = publicAlias && isCriticalPublicAlias(normalizedPath);
+  const sensitiveMutation = publicAlias && mutation && isPublicSensitiveMutationPath(normalizedPath);
+  const hasAuthorizedWriteKey = options.hasAuthorizedWriteKey === true;
+
+  if (!publicAlias) {
+    return {
+      publicAlias: false,
+      allowed: true,
+      status: "canonical",
+      reason: "canonical_route"
+    };
+  }
+
+  if (!publicAliasCompatibilityEnabled()) {
+    return {
+      publicAlias: true,
+      allowed: false,
+      status: "blocked",
+      reason: "public_alias_compatibility_disabled",
+      code: "public_alias_retired"
+    };
+  }
+
+  if (mutation && isProductionMode(options) && !hasAuthorizedWriteKey) {
+    return {
+      publicAlias: true,
+      allowed: false,
+      status: "blocked_sensitive_mutation_unauthorized",
+      reason: "public_alias_mutation_requires_authorization",
+      code: "route_permission_denied"
+    };
+  }
+
+  if (mutation && critical && blockCriticalPublicMutationsEnabled()) {
+    return {
+      publicAlias: true,
+      allowed: false,
+      status: "blocked",
+      reason: "critical_public_mutation_alias_blocked",
+      code: "route_permission_denied"
+    };
+  }
+
+  if (mutation && critical) {
+    return {
+      publicAlias: true,
+      allowed: true,
+      status: "compatibility_critical",
+      reason: "critical_public_mutation_alias_compatibility_enabled"
+    };
+  }
+
+  if (mutation) {
+    return {
+      publicAlias: true,
+      allowed: true,
+      status: sensitiveMutation ? "compatibility_sensitive_write" : "compatibility_write",
+      reason: sensitiveMutation
+        ? "sensitive_public_write_alias_compatibility_enabled"
+        : "public_write_alias_compatibility_enabled"
+    };
+  }
+
+  if (critical) {
+    return {
+      publicAlias: true,
+      allowed: true,
+      status: "compatibility_sensitive_read",
+      reason: "sensitive_public_read_alias_compatibility_enabled"
+    };
+  }
+
+  return {
+    publicAlias: true,
+    allowed: true,
+    status: "compatibility_read",
+    reason: "public_read_alias_compatibility_enabled"
+  };
+}
+
+function buildPublicAliasHeaders(classification) {
+  if (!classification || !classification.publicAlias) return {};
+
+  return {
+    "X-MH-Public-Alias": "true",
+    "X-MH-Public-Alias-Status": classification.status,
+    "X-MH-Public-Alias-Reason": classification.reason,
+    "Deprecation": "true"
+  };
+}
+
+module.exports = {
+  normalizeMethod,
+  normalizePath,
+  isPublicAliasPath,
+  isCriticalPublicAlias,
+  isMutationMethod,
+  isPublicSensitiveMutationPath,
+  readBooleanEnv,
+  publicAliasCompatibilityEnabled,
+  blockCriticalPublicMutationsEnabled,
+  isProductionMode,
+  classifyPublicAliasAccess,
+  buildPublicAliasHeaders
+};
+
+### route permission catalog relevant recommendations
+"use strict";
+
+/**
+ * Route permission catalog for MH-Assistant backend.
+ *
+ * This module is intentionally non-enforcing in P1B.1.
+ * It creates a single source of truth for route risk classification before
+ * enforcement is introduced in later phases.
+ */
+
+const ROUTE_RISK = Object.freeze({
+  LOW: "low",
+  MEDIUM: "medium",
+  HIGH: "high",
+  CRITICAL: "critical"
+});
+
+const ROUTE_ACCESS = Object.freeze({
+  PUBLIC: "public",
+  READ_KEY: "read_key",
+  WRITE_KEY: "write_key",
+  ADMIN: "admin",
+  SERVICE: "service",
+  FUTURE_RBAC: "future_rbac"
+});
+
+const ROUTE_STATUS = Object.freeze({
+  ACTIVE: "active",
+  COMPATIBILITY_ALIAS: "compatibility_alias",
+  DEPRECATE: "deprecate",
+  RETIRE: "retire",
+  FUTURE: "future"
+});
+
+const DOMAIN_RULES = Object.freeze([
+  {
+    domain: "customer_operations",
+    match: /customer-operations|customer|conversation|message|ticket|crm|call|ivr|whatsapp|sms/i,
+    defaultReadScope: "customer.read",
+    defaultWriteScope: "customer.write",
+    dataRisk: ROUTE_RISK.CRITICAL,
+    providerRisk: ROUTE_RISK.MEDIUM,
+    destructiveRisk: ROUTE_RISK.HIGH
+  },
+  {
+    domain: "publishing",
+    match: /publishing|publish|approval|governance|claim|compliance/i,
+    defaultReadScope: "publishing.read",
+    defaultWriteScope: "publishing.write",
+    dataRisk: ROUTE_RISK.HIGH,
+    providerRisk: ROUTE_RISK.CRITICAL,
+    destructiveRisk: ROUTE_RISK.HIGH
+  },
+  {
+    domain: "integrations",
+    match: /integration|provider|connector|oauth|token/i,
+    defaultReadScope: "integration.read",
+    defaultWriteScope: "integration.write",
+    dataRisk: ROUTE_RISK.HIGH,
+    providerRisk: ROUTE_RISK.CRITICAL,
+    destructiveRisk: ROUTE_RISK.MEDIUM
+  },
+  {
+    domain: "ai_execution",
+    match: /ai\/command|ai\/chat|ai\/guidance|ai\/workflows|openai|anthropic|assistant/i,
+    defaultReadScope: "ai.read",
+    defaultWriteScope: "ai.execute",
+    dataRisk: ROUTE_RISK.HIGH,
+    providerRisk: ROUTE_RISK.HIGH,
+    destructiveRisk: ROUTE_RISK.MEDIUM
+  },
+  {
+    domain: "workflow_operations",
+    match: /workflow|task|queue|job|notification|handoff|event/i,
+    defaultReadScope: "operations.read",
+    defaultWriteScope: "operations.write",
+    dataRisk: ROUTE_RISK.MEDIUM,
+    providerRisk: ROUTE_RISK.MEDIUM,
+    destructiveRisk: ROUTE_RISK.MEDIUM
+  },
+  {
+    domain: "media_library",
+    match: /media|asset|library|source|upload|generated-output/i,
+    defaultReadScope: "media.read",
+    defaultWriteScope: "media.write",
+    dataRisk: ROUTE_RISK.MEDIUM,
+    providerRisk: ROUTE_RISK.MEDIUM,
+    destructiveRisk: ROUTE_RISK.HIGH
+  },
+  {
+    domain: "commerce_legacy",
+    match: /woocommerce|product|clone|rollback|cleanup|blog/i,
+    defaultReadScope: "commerce.read",
+    defaultWriteScope: "commerce.write",
+    dataRisk: ROUTE_RISK.HIGH,
+    providerRisk: ROUTE_RISK.CRITICAL,
+    destructiveRisk: ROUTE_RISK.CRITICAL
+  },
+  {
+    domain: "project_setup",
+    match: /project|setup|template|rename|storage|parity/i,
+    defaultReadScope: "project.read",
+    defaultWriteScope: "project.write",
+    dataRisk: ROUTE_RISK.MEDIUM,
+    providerRisk: ROUTE_RISK.LOW,
+    destructiveRisk: ROUTE_RISK.MEDIUM
+  },
+  {
+    domain: "platform_health",
+    match: /health|healthz|readyz/i,
+    defaultReadScope: "platform.health",
+    defaultWriteScope: "platform.admin",
+    dataRisk: ROUTE_RISK.LOW,
+    providerRisk: ROUTE_RISK.LOW,
+    destructiveRisk: ROUTE_RISK.LOW
+  }
+]);
+
+function normalizeMethod(method) {
+  return String(method || "GET").toUpperCase();
+}
+
+function isMutationMethod(method) {
+  return ["POST", "PATCH", "PUT", "DELETE"].includes(normalizeMethod(method));
+}
+
+function isPublicAlias(pathname) {
+  return String(pathname || "").startsWith("/public/");
+}
+
+function isDestructiveRoute(method, pathname) {
+  const value = `${normalizeMethod(method)} ${pathname || ""}`;
+  return /DELETE|delete|archive|remove|destroy|purge|replace-original|cleanup|rollback|disconnect/i.test(value);
+}
+
+function isProviderExecutionRoute(pathname) {
+  return /publish|send|provider|integration|native-media|generate|openai|anthropic|workflow|scheduler|woocommerce|email|smtp|twilio|telnyx/i.test(
+    String(pathname || "")
+  );
+}
+
+function findDomainRule(pathname) {
+  const value = String(pathname || "");
+  return DOMAIN_RULES.find((rule) => rule.match.test(value)) || {
+    domain: "general",
+    defaultReadScope: "general.read",
+    defaultWriteScope: "general.write",
+    dataRisk: ROUTE_RISK.MEDIUM,
+    providerRisk: ROUTE_RISK.LOW,
+    destructiveRisk: ROUTE_RISK.LOW
+  };
+}
+
+function classifyRoute(method, pathname) {
+  const normalizedMethod = normalizeMethod(method);
+  const routePath = String(pathname || "");
+  const mutation = isMutationMethod(normalizedMethod);
+  const publicAlias = isPublicAlias(routePath);
+  const destructive = isDestructiveRoute(normalizedMethod, routePath);
+  const providerExecution = isProviderExecutionRoute(routePath);
+  const domainRule = findDomainRule(routePath);
+
+  let requiredAccess = mutation ? ROUTE_ACCESS.WRITE_KEY : ROUTE_ACCESS.READ_KEY;
+  let status = publicAlias ? ROUTE_STATUS.COMPATIBILITY_ALIAS : ROUTE_STATUS.ACTIVE;
+
+  if (domainRule.domain === "platform_health" && !mutation) {
+    requiredAccess = ROUTE_ACCESS.PUBLIC;
+  }
+
+  if (publicAlias && mutation) {
+    status = ROUTE_STATUS.DEPRECATE;
+  }
+
+  if (publicAlias && /customer-operations|publishing|integration|governance|approval|sources/i.test(routePath)) {
+    status = mutation ? ROUTE_STATUS.RETIRE : ROUTE_STATUS.DEPRECATE;
+  }
+
+  const requiredScope = mutation ? domainRule.defaultWriteScope : domainRule.defaultReadScope;
+  const auditEvent = `${domainRule.domain}.${mutation ? "mutation" : "read"}.${publicAlias ? "public_alias" : "canonical"}`;
+
+  return {
+    method: normalizedMethod,
+    route: routePath,
+    domain: domainRule.domain,
+    readWrite: mutation ? "write" : "read",
+    publicAlias,
+    requiredAccess,
+    requiredScope,
+    status,
+    dataRisk: domainRule.dataRisk,
+    providerRisk: providerExecution ? domainRule.providerRisk : ROUTE_RISK.LOW,
+    destructiveRisk: destructive ? domainRule.destructiveRisk : ROUTE_RISK.LOW,
+    providerExecution,
+    destructive,
+    auditEvent,
+    recommendation: buildRecommendation({
+      publicAlias,
+      mutation,
+      destructive,
+      providerExecution,
+      domain: domainRule.domain
+    })
+  };
+}
+
+function buildRecommendation({ publicAlias, mutation, destructive, providerExecution, domain }) {
+  if (publicAlias && mutation) return "retire_public_mutation_alias";
+  if (publicAlias) return "deprecate_public_read_alias";
+  if (destructive) return "require_dual_confirmation_and_audit";
+  if (providerExecution) return "require_provider_scope_audit_and_idempotency";
+  if (domain === "customer_operations") return "require_pii_scope_and_access_log";
+  if (mutation) return "require_write_scope_and_audit";
+  return "keep_with_read_scope";
+}
+
+module.exports = {
+  ROUTE_RISK,
+  ROUTE_ACCESS,
+  ROUTE_STATUS,
+  DOMAIN_RULES,
+  classifyRoute,
+  isMutationMethod,
+  isPublicAlias,
+  isDestructiveRoute,
+  isProviderExecutionRoute
+};
+
+### exact public alias middleware/header application points
+runtime/orchestrator-service/server.js:48:const { classifyPublicAliasAccess, buildPublicAliasHeaders } = require("./lib/security/public-alias-compatibility");
+runtime/orchestrator-service/server.js:191:function publicAliasDeprecationHeaders(req, res, next) {
+runtime/orchestrator-service/server.js:199:    const classification = classifyPublicAliasAccess(req.method, req.path || req.originalUrl || "", {
+runtime/orchestrator-service/server.js:203:    const headers = buildPublicAliasHeaders(classification);
+runtime/orchestrator-service/server.js:206:      res.setHeader(key, value);
+runtime/orchestrator-service/server.js:209:    if (classification && classification.publicAlias) {
+runtime/orchestrator-service/server.js:210:      res.setHeader("X-MH-Canonical-Route-Required", "true");
+runtime/orchestrator-service/server.js:213:    if (classification && classification.publicAlias && classification.allowed === false) {
+runtime/orchestrator-service/server.js:218:      return res.status(410).json({
+runtime/orchestrator-service/server.js:220:        error: "public_alias_retired",
+runtime/orchestrator-service/server.js:227:    res.setHeader("X-MH-Public-Alias-Warning", "classification_failed");
+runtime/orchestrator-service/server.js:251:app.use("/public", publicAliasDeprecationHeaders);
+runtime/orchestrator-service/server.js:266:const CONTROL_CENTER_KEY_BYPASS_HEADER = 'X-MH-Control-Key-Bypass';
+runtime/orchestrator-service/server.js:464:    res.set(CONTROL_CENTER_KEY_BYPASS_HEADER, CONTROL_CENTER_KEY_BYPASS_HEADER_VALUE);
+runtime/orchestrator-service/server.js:559:  res.set('Retry-After', String(Math.ceil(decision.retryAfterMs / 1000)));
+runtime/orchestrator-service/server.js:13793:    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+runtime/orchestrator-service/server.js:13804:  setHeaders: (res) => {
+runtime/orchestrator-service/server.js:13805:    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:30:function publicAliasCompatibilityEnabled() {
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:60:function classifyPublicAliasAccess(method, pathname, options = {}) {
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:63:  const publicAlias = isPublicAliasPath(normalizedPath);
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:65:  const critical = publicAlias && isCriticalPublicAlias(normalizedPath);
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:66:  const sensitiveMutation = publicAlias && mutation && isPublicSensitiveMutationPath(normalizedPath);
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:69:  if (!publicAlias) {
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:71:      publicAlias: false,
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:78:  if (!publicAliasCompatibilityEnabled()) {
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:80:      publicAlias: true,
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:83:      reason: "public_alias_compatibility_disabled",
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:84:      code: "public_alias_retired"
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:90:      publicAlias: true,
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:93:      reason: "public_alias_mutation_requires_authorization",
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:100:      publicAlias: true,
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:110:      publicAlias: true,
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:119:      publicAlias: true,
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:130:      publicAlias: true,
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:138:    publicAlias: true,
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:145:function buildPublicAliasHeaders(classification) {
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:146:  if (!classification || !classification.publicAlias) return {};
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:149:    "X-MH-Public-Alias": "true",
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:150:    "X-MH-Public-Alias-Status": classification.status,
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:151:    "X-MH-Public-Alias-Reason": classification.reason,
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:164:  publicAliasCompatibilityEnabled,
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:167:  classifyPublicAliasAccess,
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:168:  buildPublicAliasHeaders
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:158:  const publicAlias = isPublicAlias(routePath);
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:164:  let status = publicAlias ? ROUTE_STATUS.COMPATIBILITY_ALIAS : ROUTE_STATUS.ACTIVE;
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:170:  if (publicAlias && mutation) {
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:174:  if (publicAlias && /customer-operations|publishing|integration|governance|approval|sources/i.test(routePath)) {
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:179:  const auditEvent = `${domainRule.domain}.${mutation ? "mutation" : "read"}.${publicAlias ? "public_alias" : "canonical"}`;
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:186:    publicAlias,
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:197:      publicAlias,
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:206:function buildRecommendation({ publicAlias, mutation, destructive, providerExecution, domain }) {
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:207:  if (publicAlias && mutation) return "retire_public_mutation_alias";
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:208:  if (publicAlias) return "deprecate_public_read_alias";

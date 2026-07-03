@@ -1,0 +1,85 @@
+### public mutation aliases from backend
+10644:app.post('/public/media-manager/project/:project/rename', express.json({ limit: '1mb' }), handleRenameMediaManagerProject);
+10648:app.post('/public/media-manager/project/:project/apply-template', express.json({ limit: '1mb' }), handleApplyBusinessTemplateToProject);
+10652:app.post('/public/media-manager/projects', express.json({ limit: '1mb' }), handleCreateMediaManagerProject);
+11143:app.post('/public/media-manager/project/:project/setup', (req, res) => {
+11526:app.post('/public/media-manager/project/:project/team', handleUpdateProjectTeam);
+11574:app.post('/public/media-manager/project/:project/campaigns', handleUpsertCampaign);
+11582:app.patch('/public/media-manager/project/:project/campaigns/:campaignId', (req, res) => {
+11639:app.post('/public/media-manager/project/:project/content-items', handleUpsertContentItem);
+11647:app.patch('/public/media-manager/project/:project/content-items/:contentItemId', (req, res) => {
+11705:app.post('/public/media-manager/project/:project/media-jobs', handleUpsertMediaJob);
+11713:app.patch('/public/media-manager/project/:project/media-jobs/:mediaJobId', (req, res) => {
+11826:app.post('/public/media-manager/project/:project/workflows/:workflowId/run', handleRunWorkflow);
+12170:app.post('/public/media-manager/project/:project/ai/command', handleExecuteAiCommand);
+12172:app.post('/public/media-manager/project/:project/ai/chat', handleExecuteAiChat);
+12174:app.post('/public/media-manager/project/:project/ai/guidance', handleExecuteAiGuidance);
+12176:app.post('/public/media-manager/project/:project/ai/workflows/:workflowId/run', handleExecuteAiWorkflow);
+12216:app.post('/public/media-manager/project/:project/tasks', handleCreateTask);
+12307:app.post('/public/media-manager/project/:project/approvals', handleCreateApproval);
+12309:app.post('/public/media-manager/project/:project/approvals/:approvalId/decision', handleApprovalDecision);
+12367:app.post('/public/media-manager/project/:project/governance/policy', handleUpdateGovernancePolicy);
+12399:app.patch('/public/media-manager/project/:project/notifications/:notificationId', (req, res) => {
+12462:app.post('/public/media-manager/project/:project/handoffs', handleCreateHandoff);
+12464:app.post('/public/media-manager/project/:project/handoffs/:handoffId/consume', handleConsumeHandoff);
+12563:app.post('/public/media-manager/project/:project/sources', (req, res) => {
+12656:app.delete('/public/media-manager/project/:project/sources/:sourceType', (req, res) => {
+13272:app.post('/public/media-manager/project/:project/integrations/:integrationId/connect', async (req, res) => {
+13284:app.post('/public/media-manager/project/:project/integrations/:integrationId', async (req, res) => {
+13296:app.post('/public/media-manager/project/:project/integrations/:integrationId/reconnect', async (req, res) => {
+13306:app.post('/public/media-manager/project/:project/integrations/:integrationId/test', async (req, res) => {
+13314:app.post('/public/media-manager/project/:project/integrations/:integrationId/sync', async (req, res) => {
+13322:app.post('/public/media-manager/project/:project/integrations/:integrationId/import-history', async (req, res) => {
+13330:app.post('/public/media-manager/project/:project/integrations/:integrationId/disconnect', async (req, res) => {
+13379:app.post('/public/media-manager/project/:project/publishing/schedule', (req, res) => {
+13461:app.post('/public/media-manager/project/:project/publishing/:jobId/reschedule', (req, res) => {
+13532:app.post('/public/media-manager/project/:project/publishing/:jobId/ready', (req, res) => {
+13606:app.post('/public/media-manager/project/:project/publishing/:jobId/publish', (req, res) => {
+13690:app.post('/public/media-manager/project/:project/publishing/:jobId/fail', (req, res) => {
+
+### public alias security references
+runtime/orchestrator-service/server.js:1:// Deterministic source registry extraction for canonical/legacy compatibility
+runtime/orchestrator-service/server.js:48:const { classifyPublicAliasAccess, buildPublicAliasHeaders } = require("./lib/security/public-alias-compatibility");
+runtime/orchestrator-service/server.js:199:    const classification = classifyPublicAliasAccess(req.method, req.path || req.originalUrl || "", {
+runtime/orchestrator-service/server.js:203:    const headers = buildPublicAliasHeaders(classification);
+runtime/orchestrator-service/server.js:220:        error: "public_alias_retired",
+runtime/orchestrator-service/server.js:221:        message: "This public compatibility route is retired. Use the canonical API route.",
+runtime/orchestrator-service/server.js:13334:// TODO(phase4a): Keep `/public/media-manager/...` write aliases for active frontend compatibility.
+runtime/orchestrator-service/server.js:13335:// They remain protected by the same centralized write-key middleware as `/media-manager/...`.
+runtime/orchestrator-service/node_modules/iconv-lite/encodings/dbcs-data.js:169:      // https://encoding.spec.whatwg.org/#index-big5-pointer), we still do it to increase compatibility with ICU.
+runtime/orchestrator-service/node_modules/qs/test/stringify.js:1030:    t.test('Backward compatibility to RFC 3986', function (st) {
+runtime/orchestrator-service/node_modules/negotiator/index.js:75:// Backwards compatibility
+runtime/orchestrator-service/node_modules/compression/node_modules/negotiator/index.js:74:// Backwards compatibility
+runtime/orchestrator-service/node_modules/axios/dist/axios.js:1446:      // Make message enumerable to maintain backward compatibility
+runtime/orchestrator-service/node_modules/axios/dist/axios.js:4469:  // alias for CanceledError for backward compatibility
+runtime/orchestrator-service/node_modules/axios/dist/esm/axios.js:960:      // Make message enumerable to maintain backward compatibility
+runtime/orchestrator-service/node_modules/axios/dist/esm/axios.js:4244:// alias for CanceledError for backward compatibility
+runtime/orchestrator-service/node_modules/axios/lib/axios.js:62:// alias for CanceledError for backward compatibility
+runtime/orchestrator-service/node_modules/axios/lib/core/AxiosError.js:34:      // Make message enumerable to maintain backward compatibility
+runtime/orchestrator-service/node_modules/readable-stream/lib/_stream_duplex.js:121:    // backward compatibility, the user is explicitly
+runtime/orchestrator-service/node_modules/readable-stream/lib/_stream_readable.js:198:    // backward compatibility, the user is explicitly
+runtime/orchestrator-service/node_modules/readable-stream/lib/_stream_readable.js:299:// backwards compatibility.
+runtime/orchestrator-service/node_modules/readable-stream/lib/_stream_writable.js:632:    // backward compatibility, the user is explicitly
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:4: * Public alias compatibility helper for MH-Assistant backend.
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:7: * It centralizes environment flag parsing and public alias risk decisions.
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:60:function classifyPublicAliasAccess(method, pathname, options = {}) {
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:83:      reason: "public_alias_compatibility_disabled",
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:84:      code: "public_alias_retired"
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:93:      reason: "public_alias_mutation_requires_authorization",
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:103:      reason: "critical_public_mutation_alias_blocked",
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:112:      status: "compatibility_critical",
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:113:      reason: "critical_public_mutation_alias_compatibility_enabled"
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:121:      status: sensitiveMutation ? "compatibility_sensitive_write" : "compatibility_write",
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:123:        ? "sensitive_public_write_alias_compatibility_enabled"
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:124:        : "public_write_alias_compatibility_enabled"
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:132:      status: "compatibility_sensitive_read",
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:133:      reason: "sensitive_public_read_alias_compatibility_enabled"
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:140:    status: "compatibility_read",
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:141:    reason: "public_read_alias_compatibility_enabled"
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:145:function buildPublicAliasHeaders(classification) {
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:167:  classifyPublicAliasAccess,
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:168:  buildPublicAliasHeaders
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:29:  COMPATIBILITY_ALIAS: "compatibility_alias",
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:179:  const auditEvent = `${domainRule.domain}.${mutation ? "mutation" : "read"}.${publicAlias ? "public_alias" : "canonical"}`;
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:207:  if (publicAlias && mutation) return "retire_public_mutation_alias";
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:208:  if (publicAlias) return "deprecate_public_read_alias";
