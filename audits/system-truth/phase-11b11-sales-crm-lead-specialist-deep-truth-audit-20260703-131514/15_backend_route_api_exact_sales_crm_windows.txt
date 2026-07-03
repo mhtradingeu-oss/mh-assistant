@@ -1,0 +1,894 @@
+### frontend API exact sales/crm/customer references
+887:    readiness: payload?.readiness || null,
+938:      readiness: {
+939:        readiness_score: 0,
+1101:  const requiredSections = ["overview", "readiness", "assets"];
+1197:    readiness: requiredData.readiness,
+1544:export async function runProjectWorkflow(projectName, workflowId, payload = {}) {
+1549:  if (!workflowId) {
+1550:    throw new Error("Missing workflow id");
+1554:    `/media-manager/project/${encodeURIComponent(projectName)}/workflows/${encodeURIComponent(workflowId)}/run`,
+1557:    "Failed to record workflow run"
+1561:export async function runProjectAiWorkflow(projectName, workflowId, payload = {}) {
+1566:  if (!workflowId) {
+1567:    throw new Error("Missing workflow id");
+1571:    `/media-manager/project/${encodeURIComponent(projectName)}/ai/workflows/${encodeURIComponent(workflowId)}/run`,
+1574:    "Failed to execute AI workflow"
+1638:    `/media-manager/project/${encodeURIComponent(projectName)}/tasks`,
+1641:    "Failed to create project task"
+1652:    `/media-manager/project/${encodeURIComponent(projectName)}/tasks${suffix}`,
+1653:    "Failed to load project tasks"
+1994:    `/media-manager/project/${encodeURIComponent(projectName)}/task-center`,
+1995:    "Failed to load task center"
+2265:    `/media-manager/project/${encodeURIComponent(projectName)}/handoffs${suffix}`,
+2266:    "Failed to load handoffs"
+2276:    `/media-manager/project/${encodeURIComponent(projectName)}/handoffs`,
+2279:    "Failed to create handoff"
+2283:export async function consumeProjectHandoff(projectName, handoffId, payload = {}) {
+2288:  if (!handoffId) {
+2289:    throw new Error("Missing handoff id");
+2293:    `/media-manager/project/${encodeURIComponent(projectName)}/handoffs/${encodeURIComponent(handoffId)}/consume`,
+2296:    "Failed to consume handoff"
+2362:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/readiness`);
+2366:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/inbox`);
+2370:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/conversations`);
+2373:export async function fetchCustomerConversationDetail(projectName, conversationId) {
+2374:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/conversations/${encodeURIComponent(conversationId)}`);
+2377:export async function fetchCustomerConversationMessages(projectName, conversationId) {
+2378:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/conversations/${encodeURIComponent(conversationId)}/messages`);
+2381:export async function fetchCustomerProfilePreview(projectName, customerId) {
+2382:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/customers/${encodeURIComponent(customerId)}`);
+2386:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/tickets`);
+2390:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/channels`);
+
+### backend exact sales/crm/customer route references
+56:} = require('./lib/security/governance-mutation-gate');
+80:} = require('./lib/integrations/provider-registry');
+87:} = require('./lib/media/provider-layer');
+141:} = require('./lib/customer-operations/customer-operations-runtime');
+150:} = require('./lib/media/native/providers/provider-model-catalog');
+153:} = require('./lib/media/native/providers/provider-readiness');
+188:const customerCenterProjection = require('./lib/customer-operations/projections/customer-center-projection');
+355:  /^\/execute_email_package\/?$/i,
+560:  return sendError(res, {
+612:      provider: asString(req?.body?.provider || req?.body?.media_provider || ''),
+861:  // 4. Collapse repeated underscores/dots, strip leading/trailing punctuation.
+910:  PREPARE_PACKAGE: 'email_prepare_package',
+911:  PREPARED_HTML: 'email_prepared_html',
+912:  PREPARED_PACKAGE: 'email_prepared_package',
+913:  DELIVERY_RECORD: 'email_delivery_record',
+914:  DRAFT_QUEUE: 'email_draft_queue',
+915:  MEDIA_QUEUE: 'email_media_queue'
+954:function sendError(res, {
+968:function sendInvalidProjectSlug(res) {
+969:  return sendError(res, {
+1013:      return sendInvalidProjectSlug(res);
+1028:      return sendInvalidProjectSlug(res);
+1047:      return sendInvalidProjectSlug(res);
+1206:  email: {
+1210:  channels: {
+1211:    legacy: 'channels',
+1212:    canonical: 'channels'
+1480:function getEmailDomainPaths(projectName) {
+1483:    domain: 'email',
+1494:    canonicalEmailDir: path.join(resolution.executionRoot, 'email'),
+1495:    legacyEmailDir: path.join(resolution.legacyRoot, 'email'),
+1496:    canonicalLiveContentDir: path.join(EXECUTION_DIR, 'projects', safeProject, 'content', 'email'),
+1497:    legacyLiveContentDir: path.join(EXECUTION_DIR, safeProject, 'content', 'email'),
+1503:function getEmailArtifactContract(projectName, artifactType) {
+1504:  const paths = getEmailDomainPaths(projectName);
+1510:      relativePath: 'email-prepare-package.json',
+1512:      requestedFile: 'email-prepare-package.json',
+1513:      pathContract: 'execution/projects/<project>/email-prepare-package.json -> brand-assets/<project>/email-prepare-package.json'
+1516:      canonicalBase: paths.canonicalEmailDir,
+1517:      legacyBase: paths.legacyEmailDir,
+1520:      requestedFile: 'email/html/*.html',
+1521:      pathContract: 'execution/projects/<project>/email/html/<package>.html -> brand-assets/<project>/email/html/<package>.html'
+1524:      canonicalBase: paths.canonicalEmailDir,
+1525:      legacyBase: paths.legacyEmailDir,
+1528:      requestedFile: 'email/prepared/*.json',
+1529:      pathContract: 'execution/projects/<project>/email/prepared/<package>.json -> brand-assets/<project>/email/prepared/<package>.json'
+1532:      canonicalBase: paths.canonicalEmailDir,
+1533:      legacyBase: paths.legacyEmailDir,
+1536:      requestedFile: 'email/delivery/*.json',
+1537:      pathContract: 'execution/projects/<project>/email/delivery/<send>.json -> brand-assets/<project>/email/delivery/<send>.json'
+1542:      relativePath: 'email-queue.json',
+1544:      requestedFile: 'content/email/email-queue.json',
+1545:      pathContract: 'execution/projects/<project>/content/email/email-queue.json -> execution/<project>/content/email/email-queue.json'
+1550:      relativePath: 'email-image-queue.json',
+1552:      requestedFile: 'media/queue/email-image-queue.json',
+1553:      pathContract: 'execution/projects/<project>/media/queue/email-image-queue.json -> execution/<project>/media/queue/email-image-queue.json'
+1560:    throw new Error(`Unsupported email artifact contract: ${artifactType}`);
+1571:function resolveEmailReadCandidate(options = {}) {
+1574:  const contract = getEmailArtifactContract(safeProject, artifactType);
+1581:    domain: 'email',
+1594:function readEmailArtifactArray(projectName, artifactType, requestedIdentifier) {
+1595:  const candidate = resolveEmailReadCandidate({
+1607:function writeEmailArtifactArray(projectName, artifactType, data) {
+1608:  const contract = getEmailArtifactContract(projectName, artifactType);
+1635:function readLiveEmailQueue(projectName, requestedIdentifier = 'email-draft-queue') {
+1636:  return readEmailArtifactArray(requireQueueProjectName(projectName), EMAIL_ARTIFACT_TYPES.DRAFT_QUEUE, requestedIdentifier);
+1639:function writeLiveEmailQueue(projectName, queue = []) {
+1640:  return writeEmailArtifactArray(requireQueueProjectName(projectName), EMAIL_ARTIFACT_TYPES.DRAFT_QUEUE, queue);
+1643:function readLiveEmailMediaQueue(projectName, requestedIdentifier = 'email-media-queue') {
+1644:  return readEmailArtifactArray(requireQueueProjectName(projectName), EMAIL_ARTIFACT_TYPES.MEDIA_QUEUE, requestedIdentifier);
+1647:function writeLiveEmailMediaQueue(projectName, queue = []) {
+1648:  return writeEmailArtifactArray(requireQueueProjectName(projectName), EMAIL_ARTIFACT_TYPES.MEDIA_QUEUE, queue);
+1701:  'email',
+1888:  let readiness = 'not_ready';
+1890:    readiness = 'insufficient_data';
+1898:    readiness = 'safe_to_audit_phase4';
+1904:    readiness = 'partial_more_stabilization_needed';
+1925:    readiness
+1997:function evaluateEmailReadiness(projectName) {
+2007:    readiness: {
+2028:function getEmailPreparePaths(projectName) {
+2030:  const contract = getEmailArtifactContract(safeProject, EMAIL_ARTIFACT_TYPES.PREPARE_PACKAGE);
+2064:    provider: renderRequest.result?.provider || renderRequest.provider || null,
+2069:function buildEmailPreparePackage(projectName) {
+2070:  const preparePaths = getEmailPreparePaths(projectName);
+2071:  const readiness = evaluateEmailReadiness(projectName);
+2072:  const rendered = readiness.status !== 'blocked' ? getLatestRenderedOutput(projectName) : null;
+2077:    status: readiness.status,
+2078:    blocking_reasons: readiness.blocking_reasons,
+2079:    warnings: readiness.warnings,
+2080:    checks: readiness.checks,
+2082:    email_asset: {
+2088:      ready_for_send: false
+2094:    domain: 'email',
+2095:    artifactType: 'email_prepare_package',
+2103:function buildEmailHtmlFromPreparePackage(packageData) {
+2104:  const subject = packageData.email_asset.subject || 'Campaign Update';
+2105:  const headline = packageData.email_asset.headline || 'New Campaign Asset';
+2106:  const body = packageData.email_asset.body || '';
+2107:  const cta = packageData.email_asset.cta || 'Learn More';
+2151:function autoPrepareEmailAsset(projectName, rawText = '') {
+2152:  const preparePaths = getEmailPreparePaths(projectName);
+2153:  const packageData = buildEmailPreparePackage(projectName);
+2159:  const subject = extractFlagValue(rawText, 'subject') || packageData.email_asset.subject;
+2160:  const headline = extractFlagValue(rawText, 'headline') || packageData.email_asset.headline;
+2161:  const body = extractFlagValue(rawText, 'body') || packageData.email_asset.body;
+2162:  const cta = extractFlagValue(rawText, 'cta') || packageData.email_asset.cta;
+2167:  packageData.email_asset.subject = subject;
+2168:  packageData.email_asset.headline = headline;
+2169:  packageData.email_asset.body = body;
+2170:  packageData.email_asset.cta = cta;
+2171:  packageData.email_asset.cta_url = ctaUrl;
+2172:  packageData.email_asset.public_image_url = publicImageUrl;
+2174:  packageData.email_asset.html = buildHardenedEmailHtml(packageData);
+2176:  const htmlDir = path.join(preparePaths.legacyBaseDir, 'email', 'html');
+2177:  const preparedDir = path.join(preparePaths.legacyBaseDir, 'email', 'prepared');
+2181:  const packageId = `emailprep_${Date.now()}`;
+2187:    domain: 'email',
+2188:    artifactType: 'email_prepared_html',
+2191:    payload: packageData.email_asset.html,
+2195:  const validation = validateEmailPreparePackage(packageData);
+2203:    packageData.status = 'ready_for_send';
+2204:    packageData.email_asset.ready_for_send = true;
+2207:    packageData.email_asset.ready_for_send = false;
+2212:    domain: 'email',
+2213:    artifactType: 'email_prepared_package',
+2220:    domain: 'email',
+2221:    artifactType: 'email_prepare_package',
+2230:function reviewEmailPreparePackage(projectName) {
+2231:  const prepareFile = resolveEmailReadCandidate({
+2235:    requestedFile: 'email-prepare-package.json'
+2239:    throw new Error('Email prepare package not found');
+2266:function validateEmailPreparePackage(packageData) {
+2270:  const subject = String(packageData.email_asset?.subject || '').trim();
+2271:  const headline = String(packageData.email_asset?.headline || '').trim();
+2272:  const body = String(packageData.email_asset?.body || '').trim();
+2273:  const cta = String(packageData.email_asset?.cta || '').trim();
+2274:  const url = String(packageData.email_asset?.cta_url || '').trim();
+2275:  const html = String(packageData.email_asset?.html || '').trim();
+2276:  const publicImageUrl = String(packageData.email_asset?.public_image_url || '').trim();
+2278:  if (!subject) errors.push('Missing email subject');
+2279:  if (!headline) errors.push('Missing email headline');
+2280:  if (!body) errors.push('Missing email body');
+2308:function buildHardenedEmailHtml(packageData) {
+2309:  const subject = packageData.email_asset.subject;
+2310:  const headline = packageData.email_asset.headline;
+2311:  const body = packageData.email_asset.body;
+2312:  const cta = packageData.email_asset.cta;
+2313:  const ctaUrl = packageData.email_asset.cta_url;
+2314:  const publicImageUrl = packageData.email_asset.public_image_url;
+2588:    throw new Error('No image data returned from provider');
+2603:  provider: 'openai',
+2614:function getEmailDeliveryPaths(projectName) {
+2616:  const emailPaths = getEmailDomainPaths(safeProject);
+2617:  const baseDir = emailPaths.canonicalEmailDir;
+2620:  const legacyBaseDir = emailPaths.legacyEmailDir;
+2641:function getLatestPreparedEmailPackage(projectName) {
+2642:  const preparedDir = resolveEmailReadCandidate({
+2646:    requestedIdentifier: 'latest-prepared-email-package',
+2647:    requestedFile: 'email/prepared/*.json'
+2656:    throw new Error('No prepared email package found');
+2663:function evaluatePreparedEmailForSend(projectName) {
+2664:  const pkg = getLatestPreparedEmailPackage(projectName);
+2668:    status: 'ready_for_send',
+2673:  if (pkg.status !== 'ready_for_send') {
+2675:    result.blocking_reasons.push('Prepared email package is not ready_for_send');
+2680:    result.blocking_reasons.push('Prepared email package validation failed');
+2683:  if (!pkg.email_asset || !pkg.email_asset.html) {
+2685:    result.blocking_reasons.push('Missing email HTML');
+2688:  if (!pkg.email_asset || !pkg.email_asset.public_image_url) {
+2693:  if (!pkg.email_asset || !pkg.email_asset.cta_url) {
+2701:function writeEmailDeliveryRecord(projectName, data) {
+2702:  const paths = getEmailDeliveryPaths(projectName);
+2703:  const deliveryId = `emailsend_${Date.now()}`;
+2715:    domain: 'email',
+2716:    artifactType: 'email_delivery_record',
+2723:async function sendPreparedEmail(projectName, toEmail) {
+2724:  const readiness = evaluatePreparedEmailForSend(projectName);
+2726:  if (readiness.status !== 'ready_for_send') {
+2727:    return writeEmailDeliveryRecord(projectName, {
+2728:      status: 'send_blocked',
+2729:      to_email: toEmail,
+2730:      package_id: readiness.package_id,
+2731:      blocking_reasons: readiness.blocking_reasons
+2735:  const pkg = getLatestPreparedEmailPackage(projectName);
+2739:  // مثل SMTP / WordPress mail bridge / provider API
+2740:  // في هذه النسخة سنحفظ سجلاً آمنًا ونعتبره pending_send إذا لم تربط مزود الإرسال بعد.
+2742:  return writeEmailDeliveryRecord(projectName, {
+2743:    status: 'pending_provider_send',
+2744:    to_email: toEmail,
+2746:    subject: pkg.email_asset.subject,
+2749:    note: 'Prepared and verified. Waiting for provider integration or send bridge.'
+2962:    domain: 'channels',
+2965:  const baseDir = path.join(resolution.activeReadPath, 'channels', 'meta');
+3088:      'Avoid misleading claims or non-verifiable promises.'
+3124:    domain: 'channels',
+3136:    domain: 'channels',
+3141:    requestedFile: 'channels/meta/packages/*.json'
+3157:    domain: 'channels',
+3160:  const baseDir = path.join(resolution.activeReadPath, 'channels');
+3200:      'Do not make misleading or non-verifiable claims.'
+3245:    domain: 'channels',
+3257:    domain: 'channels',
+3262:    requestedFile: 'channels/tiktok/*.json'
+3345:      'Avoid misleading claims or deceptive packaging presentation.'
+3405:    domain: 'channels',
+3417:    domain: 'channels',
+3422:    requestedFile: 'channels/youtube/*.json'
+3438:    domain: 'channels',
+3441:  const baseDir = path.join(resolution.activeReadPath, 'channels');
+3564:    domain: 'channels',
+3619:    domain: 'channels',
+3645:          domain: 'channels',
+3650:          requestedFile: 'channels/marketplace/amazon/*.json'
+3655:          domain: 'channels',
+3660:          requestedFile: 'channels/marketplace/ebay/*.json'
+3822:      'early sales conversion'
+3846:      'email',
+3854:      email: '1x_per_week',
+3942:    channels: ['instagram', 'tiktok', 'facebook', 'email'],
+4116:      'ready_for_manual_send',
+4117:      'ready_for_manual_handoff',
+4120:      'manual_send',
+4189:      channel === 'email'
+4190:        ? 'email'
+4200:    cta: String(input.cta || base.cta || (channel === 'email' ? 'Review email' : 'Shop now')).trim(),
+4646:  if (normalizedChannel === 'email') {
+4746:    channels: []
+4754:    result.channels.push({
+4936:    provider: 'provider_pending',
+5020:  const readiness = context.readiness;
+5031:  if (!readiness.has_logo) {
+5036:  if (assetType === 'ad' || assetType === 'blog_image' || assetType === 'email_hero') {
+5037:    if (!readiness.has_product) {
+5042:    if (!readiness.has_packaging) {
+5112:  if ((assetType === 'ad' || assetType === 'email_hero' || assetType === 'blog_visual') && !truth.product) {
+5117:  if ((assetType === 'ad' || assetType === 'email_hero' || assetType === 'blog_visual') && !truth.packaging) {
+5206:  const readinessCheck = evaluateExecutionReadiness(projectName, assetType);
+5213:    status: readinessCheck.status,
+5214:    mode: readinessCheck.mode,
+5215:    blocking_reasons: readinessCheck.blocking_reasons,
+5216:    warnings: readinessCheck.warnings,
+5312:    readiness: {
+5372:    readiness: context.readiness,
+5679:    readiness: null,
+5711:    payload.errors.readiness = message;
+5721:    readiness: buildProjectControlCenterReadiness,
+6553:  const socialChannels = normalizeSetupListValue(projectData.social_channels || projectData.social_links);
+6574:    social_channels: socialChannels,
+6750:  const socialChannels = normalizeSetupListValue(projectData.social_channels || projectData.social_links);
+6840:    default_channels: ['website', 'instagram', 'facebook'],
+6842:    data_requirements: ['business_profile', 'target_audience', 'offers', 'contact_details'],
+6850:      'connect_primary_channels',
+6860:      default_channels: ['website', 'woocommerce', 'instagram', 'facebook', 'google', 'tiktok'],
+6867:      recommended_integrations: ['woocommerce', 'google', 'meta', 'tiktok', 'email_crm']
+6873:      default_channels: ['instagram', 'tiktok', 'youtube', 'spotify', 'website'],
+6878:      ai_team_defaults: ['strategist', 'writer', 'designer', 'video_lead', 'publisher', 'analyst'],
+6886:      default_channels: ['instagram', 'tiktok', 'google_business', 'website', 'facebook'],
+6899:      default_channels: ['website', 'facebook', 'instagram', 'google', 'crm'],
+6901:      data_requirements: ['properties', 'locations', 'lead_capture', 'viewings', 'buyer_profiles', 'seller_profiles'],
+6903:      workspace_priorities: ['setup', 'library', 'content-studio', 'campaign-studio', 'ads-manager', 'governance'],
+6905:      starter_checklist: ['add_property_data', 'upload_property_media', 'define_lead_flow', 'connect_crm', 'create_listing_campaign'],
+6906:      recommended_integrations: ['website', 'crm', 'google', 'meta', 'email_crm']
+6912:      default_channels: ['website', 'google_business', 'instagram', 'facebook'],
+6914:      data_requirements: ['services', 'pricing_model', 'service_area', 'booking_or_contact_flow'],
+6918:      starter_checklist: ['define_services', 'add_service_area', 'upload_testimonials', 'connect_contact_flow', 'create_offer_campaign'],
+6919:      recommended_integrations: ['website', 'google_business', 'meta', 'email_crm']
+6925:      default_channels: ['instagram', 'tiktok', 'google_business', 'website', 'facebook'],
+6930:      ai_team_defaults: ['strategist', 'writer', 'designer', 'video_lead', 'publisher'],
+6938:      default_channels: ['website', 'linkedin', 'instagram', 'facebook'],
+6940:      data_requirements: ['services', 'case_studies', 'target_segments', 'lead_magnets', 'sales_process'],
+6941:      content_categories: ['case_study', 'thought_leadership', 'services', 'client_results', 'lead_generation'],
+6944:      starter_checklist: ['define_services', 'add_case_studies', 'define_lead_offer', 'connect_crm', 'create_lead_campaign'],
+6945:      recommended_integrations: ['website', 'linkedin', 'meta', 'google', 'crm']
+6951:      default_channels: ['google_business', 'website', 'instagram', 'facebook'],
+6953:      data_requirements: ['opening_hours', 'location', 'offers', 'contact_details', 'reviews'],
+6993:    default_channels: businessTemplate.default_channels,
+7064:    social_channels: normalizeSetupListValue(input.social_channels || input.social_links),
+7309:  const integrationsCompleteness = Number(connectorReadiness.readiness_score || 0);
+7323:    campaign_readiness: campaignReadiness,
+7324:    execution_readiness: executionReadiness,
+7325:    publishing_readiness: publishingReadiness,
+7326:    ai_memory_readiness: aiMemoryReadiness
+7370:  if (domainScores.campaign_readiness < 100) missing.push('campaign_readiness');
+7371:  if (domainScores.execution_readiness < 100) missing.push('execution_readiness');
+7372:  if (domainScores.publishing_readiness < 100) missing.push('publishing_readiness');
+7373:  if (domainScores.ai_memory_readiness < 100) missing.push('ai_memory_readiness');
+7381:  const readinessScore = Math.round((structuralReadinessScore + domainReadinessScore) / 2);
+7386:    readiness_score: readinessScore,
+7387:    structural_readiness_score: structuralReadinessScore,
+7388:    domain_readiness_score: domainReadinessScore,
+7389:    readiness_domains: domainScores,
+7394:    status: readinessScore >= 85 ? 'ready_for_data_upload' : 'needs_input'
+7440:    readiness_status: normalizeSetupTextValue(asset.readiness_status || status) || status,
+7441:    review_status: normalizeSetupTextValue(asset.review_status || asset.readiness_status || status) || status,
+7586:  email: 'smtp',
+7851:// Keys matching this pattern are redacted from provider summary objects before
+7941:    provider_metadata: redactProviderSummaryObject(asPlainObject(normalizedRecord.provider_metadata)),
+7943:    provider_account: redactProviderSummaryObject(asPlainObject(normalizedRecord.provider_account)),
+8039:      status: 'unsupported_provider'
+8093:    const providerResult = await executeAdapterAction({
+8106:      status: providerResult.status,
+8107:      token_expires_at: normalizeTextValue(providerResult.token_expires_at || nextRecord.token_expires_at),
+8108:      permission_scope: normalizeTextValue(providerResult.permission_scope || nextRecord.permission_scope),
+8109:      connection_method: normalizeTextValue(providerResult.connection_method || nextRecord.connection_method),
+8110:      data_scopes: normalizeStringArray(providerResult.data_scopes?.length ? providerResult.data_scopes : nextRecord.data_scopes),
+8111:      read_scopes: normalizeStringArray(providerResult.read_scopes?.length ? providerResult.read_scopes : nextRecord.read_scopes),
+8112:      write_scopes: normalizeStringArray(providerResult.write_scopes?.length ? providerResult.write_scopes : nextRecord.write_scopes),
+8113:      provider_metadata: asPlainObject(providerResult.metadata),
+8114:      provider_account: asPlainObject(providerResult.account),
+8115:      insights_ready: asPlainObject(providerResult.insights_ready),
+8118:      notes: normalizeTextValue(providerResult.notes || nextRecord.notes),
+8119:      health_summary: normalizeTextValue(providerResult.health || ''),
+8120:      health_state: asPlainObject(providerResult.health_state)
+8212:      status: 'unsupported_provider'
+8239:      const providerResult = await executeAdapterAction({
+8250:      nextRecord.status = providerResult.status;
+8251:      nextRecord.token_expires_at = normalizeTextValue(providerResult.token_expires_at || nextRecord.token_expires_at);
+8252:      nextRecord.provider_metadata = asPlainObject(providerResult.metadata);
+8253:      nextRecord.provider_account = asPlainObject(providerResult.account);
+8254:      nextRecord.insights_ready = asPlainObject(providerResult.insights_ready);
+8256:      nextRecord.notes = normalizeTextValue(providerResult.notes || nextRecord.notes);
+8257:      nextRecord.health_summary = normalizeTextValue(providerResult.health || '');
+8258:      nextRecord.health_state = asPlainObject(providerResult.health_state);
+8264:        nextRecord.last_sync_summary = asPlainObject(providerResult.sync_summary);
+8267:        nextRecord.last_sync_summary = asPlainObject(providerResult.sync_summary);
+8331:    category_readiness: categoryReadiness,
+8476:        what_to_upload: 'Campaign banners, ad creative, landing-page assets, email hero files, export packs, and wave-specific files.',
+8570:    record.readiness_status ||
+9018:    category_readiness: categoryReadiness
+9196:    email: hasSource('email'),
+9205:  const readinessScore = Math.round((passedChecks / totalChecks) * 100);
+9210:    readiness_score: readinessScore,
+9391:  const readiness = buildReadinessState();
+9392:  return res.status(readiness.ready ? 200 : 503).json(readiness);
+9395:app.get('/media-manager/project/:project/storage/parity-readiness', (req, res) => {
+9401:      error: error.message || 'Failed to summarize project parity readiness'
+9406:app.get('/public/media-manager/project/:project/storage/parity-readiness', (req, res) => {
+9412:      error: error.message || 'Failed to summarize project parity readiness'
+9417:app.get('/media-manager/storage/parity-readiness', (req, res) => {
+9423:      error: error.message || 'Failed to summarize storage parity readiness'
+9428:app.get('/public/media-manager/storage/parity-readiness', (req, res) => {
+9434:      error: error.message || 'Failed to summarize storage parity readiness'
+9593:    return sendError(res, {
+9601:app.post('/execute_email_package', async (req, res) => {
+9608:      action: 'execute_email_package',
+9610:      entityId: 'execute_email_package',
+9611:      requestedAction: 'provider_send',
+9619:      action: 'execute_email_package',
+9621:      entityId: 'execute_email_package',
+9622:      requestedAction: 'provider_send',
+9625:      linkedExecutionId: 'execute_email_package',
+9627:      title: 'Email package execution approval',
+9628:      summary: 'Approval required before email package execution.'
+9634:      type: 'email',
+9641:      campaign_name: String(req.body?.campaign_name || req.body?.email_package?.campaign_name || '').trim(),
+9648:      ready_for_provider_send: true,
+9652:    const log = writeExecutionBridgeLog(projectName, 'execute_email_package', {
+9657:        ready_for_provider_send: true
+9671:      writeExecutionBridgeLog(logProject, 'execute_email_package', {
+9681:    return sendError(res, {
+9684:      message: error.message || 'Failed to execute email package'
+9762:    return sendError(res, {
+9848:    return sendError(res, {
+10082:    return sendError(res, {
+10197:    return sendError(res, {
+10228:      return sendInvalidProjectSlug(res);
+10231:    return sendError(res, {
+10300:      return sendInvalidProjectSlug(res);
+10324:    return res.sendFile(queryResolution.filePath);
+10328:    return res.status(400).send('Invalid media path');
+10342:    return res.status(404).send('File not found');
+10345:  return res.sendFile(filePath);
+10495:    default_channels: businessTemplate.default_channels,
+10521:          default_channels: updated.default_channels,
+10824:function sendAssetMutationError(res, error, fallbackMessage) {
+10861:      asset.readiness_status = status;
+10891:    return sendAssetMutationError(res, error, 'Failed to update asset status.');
+10921:    return sendAssetMutationError(res, error, 'Failed to rename asset.');
+10974:    return sendAssetMutationError(res, error, 'Failed to reclassify asset.');
+11000:    return sendAssetMutationError(res, error, 'Failed to update source of truth.');
+11015:      asset.readiness_status = 'archived';
+11028:    return sendAssetMutationError(res, error, 'Failed to archive asset.');
+11047:      asset.readiness_status = 'archived';
+11059:    return sendAssetMutationError(res, error, 'Failed to delete asset.');
+11078:      asset.readiness_status = 'archived';
+11090:    return sendAssetMutationError(res, error, 'Failed to delete asset.');
+11108:      action: 'project_setup_mutation',
+11120:      action: 'project_setup_mutation',
+11125:      serviceDomain: 'governance',
+11147:      action: 'project_setup_mutation',
+11159:      action: 'project_setup_mutation',
+11164:      serviceDomain: 'governance',
+11208:  const audience = normalizeAiCommandPreviewInput(input.audience || input.target_audience || input.targetAudience, 'Primary customer segment');
+11239:    channels: [channel],
+11248:      `Use customer pain points and product proof before publishing.`,
+11264:      'Destination owner must confirm execution readiness.'
+11302:        `Caption direction: connect ${sourceLabel} to customer need and proof.`
+11347:      no_backend_mutation_performed: true,
+11348:      no_provider_execution_performed: true,
+11351:      no_handoff_created: true,
+11371:        no_backend_mutation_performed: true,
+11372:        no_provider_execution_performed: true
+11486:      action: 'team_model_mutation',
+11497:      action: 'team_model_mutation',
+11502:      serviceDomain: 'governance',
+11875:      provider: result?.provider?.id || result?.response?.provider || null,
+11948:      provider: result?.provider?.id || null,
+12018:      provider: result?.provider?.id || null,
+12320:      error: error.message || 'Failed to load governance summary'
+12329:      action: 'governance_policy_update',
+12330:      entityType: 'governance_policy',
+12344:      error: error.message || 'Failed to update governance policy'
+12357:      error: error.message || 'Failed to load governance policy'
+12362:app.get('/media-manager/project/:project/governance', handleGetGovernance);
+12363:app.get('/public/media-manager/project/:project/governance', handleGetGovernance);
+12364:app.get('/media-manager/project/:project/governance/policy', handleGetGovernancePolicy);
+12365:app.get('/public/media-manager/project/:project/governance/policy', handleGetGovernancePolicy);
+12366:app.post('/media-manager/project/:project/governance/policy', handleUpdateGovernancePolicy);
+12367:app.post('/public/media-manager/project/:project/governance/policy', handleUpdateGovernancePolicy);
+12426:      error: error.message || 'Failed to list handoffs'
+12433:    const handoff = createHandoff(req.params.project, req.body || {});
+12435:      handoff,
+12440:      error: error.message || 'Failed to create handoff'
+12447:    const handoff = consumeHandoff(req.params.project, req.params.handoffId, req.body || {});
+12449:      handoff,
+12454:      error: error.message || 'Failed to consume handoff'
+12459:app.get('/media-manager/project/:project/handoffs', handleListHandoffs);
+12460:app.get('/public/media-manager/project/:project/handoffs', handleListHandoffs);
+12461:app.post('/media-manager/project/:project/handoffs', handleCreateHandoff);
+12462:app.post('/public/media-manager/project/:project/handoffs', handleCreateHandoff);
+12463:app.post('/media-manager/project/:project/handoffs/:handoffId/consume', handleConsumeHandoff);
+12464:app.post('/public/media-manager/project/:project/handoffs/:handoffId/consume', handleConsumeHandoff);
+12513:      action: 'source_registry_mutation',
+12533:      action: 'source_registry_mutation',
+12538:      serviceDomain: 'governance',
+12567:      action: 'source_registry_mutation',
+12587:      action: 'source_registry_mutation',
+12592:      serviceDomain: 'governance',
+12621:      action: 'source_registry_mutation',
+12632:      action: 'source_registry_mutation',
+12637:      serviceDomain: 'governance',
+12660:      action: 'source_registry_mutation',
+12671:      action: 'source_registry_mutation',
+12676:      serviceDomain: 'governance',
+12710:  if (status === 'unsupported_provider') {
+12723:  const governanceAction = options?.reconnect ? 'integration_reconnect' : 'integration_connect';
+12725:  const governanceOptions = {
+12727:    action: governanceAction,
+12733:    routeTarget: 'governance',
+12738:    summary: `Review ${req.params.integrationId} ${requestedAction} before applying integration credential or provider-state changes.`
+12740:  const governanceAllowed = options?.reconnect
+12741:    ? enforceGovernanceApprovalLifecycle(req, res, governanceOptions)
+12742:    : enforceGovernanceMutationGate(req, res, governanceOptions);
+12744:  if (!governanceAllowed) {
+12832:  const governanceAction = {
+12839:  const governanceOptions = {
+12841:    action: governanceAction,
+12847:    routeTarget: 'governance',
+12852:    summary: `Review ${req.params.integrationId} ${normalizedActionType} before applying integration provider action.`
+12855:  const governanceAllowed = requiresApprovalLifecycle
+12856:    ? enforceGovernanceApprovalLifecycle(req, res, governanceOptions)
+12857:    : enforceGovernanceMutationGate(req, res, governanceOptions);
+12859:  if (!governanceAllowed) {
+12885:const customerOperationsRuntime =
+12893:    const providers = mediaType
+12899:      providers,
+12900:      count: providers.length
+12904:      error: 'Failed to list native media providers',
+12914:      readiness: getProviderReadiness(),
+12919:      error: 'Failed to load native media provider readiness',
+12930:      customerOperationsRuntime.health()
+12934:      error: 'customer_operations_health_failed',
+12943:      customerOperationsRuntime.readiness.snapshot()
+12947:      error: 'customer_operations_readiness_failed',
+12956:      channels:
+12957:        customerOperationsRuntime.channels.list()
+12961:      error: 'customer_operations_channels_failed',
+12971:        customerOperationsRuntime.unifiedInbox.list()
+12975:      error: 'customer_operations_inbox_failed',
+12984:// They do not send customer replies, mutate CRM, create/update tickets, assign conversations,
+12985:// place calls, trigger IVR, send provider messages, or auto-reply.
+12986:function sendCustomerCenterProjection(res, projector) {
+12988:    const runtime = customerOperationsRuntime;
+12996:      error: 'customer_center_projection_failed',
+13002:app.get('/api/projects/:project/customer-operations/readiness', (req, res) => {
+13003:  return sendCustomerCenterProjection(res, (runtime) =>
+13004:    customerCenterProjection.projectCustomerReadiness(runtime)
+13008:app.get('/api/projects/:project/customer-operations/inbox', (req, res) => {
+13009:  return sendCustomerCenterProjection(res, (runtime) =>
+13010:    customerCenterProjection.projectInboxEntries(runtime)
+13014:app.get('/api/projects/:project/customer-operations/conversations', (req, res) => {
+13015:  return sendCustomerCenterProjection(res, (runtime) =>
+13016:    customerCenterProjection.projectConversations(runtime)
+13020:app.get('/api/projects/:project/customer-operations/conversations/:conversationId', (req, res) => {
+13021:  return sendCustomerCenterProjection(res, (runtime) =>
+13022:    customerCenterProjection.projectConversationDetail(runtime, req.params.conversationId)
+13026:app.get('/api/projects/:project/customer-operations/conversations/:conversationId/messages', (req, res) => {
+13027:  return sendCustomerCenterProjection(res, (runtime) =>
+13028:    customerCenterProjection.projectConversationMessages(runtime, req.params.conversationId)
+13032:app.get('/api/projects/:project/customer-operations/customers/:customerId', (req, res) => {
+13033:  return sendCustomerCenterProjection(res, (runtime) =>
+13034:    customerCenterProjection.projectCustomerProfileById(runtime, req.params.customerId)
+13038:app.get('/api/projects/:project/customer-operations/tickets', (req, res) => {
+13039:  return sendCustomerCenterProjection(res, (runtime) =>
+13040:    customerCenterProjection.projectTickets(runtime)
+13044:app.get('/api/projects/:project/customer-operations/channels', (req, res) => {
+13045:  return sendCustomerCenterProjection(res, (runtime) =>
+13046:    customerCenterProjection.projectChannels(runtime)
+13052:  '/media-manager/project/:project/customer-operations/health',
+13057:  '/public/media-manager/project/:project/customer-operations/health',
+13062:  '/media-manager/project/:project/customer-operations/readiness',
+13067:  '/public/media-manager/project/:project/customer-operations/readiness',
+13072:  '/media-manager/project/:project/customer-operations/channels',
+13077:  '/public/media-manager/project/:project/customer-operations/channels',
+13082:  '/media-manager/project/:project/customer-operations/inbox',
+13087:  '/public/media-manager/project/:project/customer-operations/inbox',
+13097:      conversations:
+13098:        customerOperationsRuntime.conversations.list()
+13102:      error: 'customer_operations_conversations_failed',
+13111:      messages:
+13112:        customerOperationsRuntime.messages.list()
+13116:      error: 'customer_operations_messages_failed',
+13125:      customers:
+13126:        customerOperationsRuntime.customers.list()
+13130:      error: 'customer_operations_customers_failed',
+13140:        customerOperationsRuntime.sla.list()
+13144:      error: 'customer_operations_sla_failed',
+13154:        customerOperationsRuntime.escalation.list()
+13158:      error: 'customer_operations_escalations_failed',
+13165:  '/media-manager/project/:project/customer-operations/conversations',
+13170:  '/public/media-manager/project/:project/customer-operations/conversations',
+13175:  '/media-manager/project/:project/customer-operations/messages',
+13180:  '/public/media-manager/project/:project/customer-operations/messages',
+13185:  '/media-manager/project/:project/customer-operations/customers',
+13190:  '/public/media-manager/project/:project/customer-operations/customers',
+13195:  '/media-manager/project/:project/customer-operations/sla',
+13200:  '/public/media-manager/project/:project/customer-operations/sla',
+13205:  '/media-manager/project/:project/customer-operations/escalations',
+13210:  '/public/media-manager/project/:project/customer-operations/escalations',
+13215:app.get('/media-manager/project/:project/native-media/providers', handleGetNativeMediaProviders);
+13216:app.get('/public/media-manager/project/:project/native-media/providers', handleGetNativeMediaProviders);
+13217:app.get('/media-manager/project/:project/native-media/providers/readiness', handleGetNativeMediaProviderReadiness);
+13218:app.get('/public/media-manager/project/:project/native-media/providers/readiness', handleGetNativeMediaProviderReadiness);
+13238:      provider: req.body?.provider || DEFAULT_NATIVE_MEDIA_PROVIDER,
+13794:    return res.type('html').send(body);
+13816:    return res.status(400).send('Missing project or filename');
+13829:    return res.status(404).send('Generated output not found');
+13832:  return res.sendFile(filePath);
+13895:      emphasize: ['offer clarity', 'product visibility', 'CTA readiness'],
+14068:        'Avoid unsupported medical or misleading claims.'
+14140:  function email() {
+14158:    email: email()
+14299:          : normalizedChannel === 'email'
+14328:  const emailDir = path.join(baseDir, 'email');
+14331:  const legacyEmailDir = path.join(legacyBaseDir, 'email');
+14336:  ensureDir(emailDir);
+14340:  ensureDir(legacyEmailDir);
+14346:    emailDir,
+14350:    legacyEmailDir
+14425:function buildCampaignEmailPackage(projectName, campaignName) {
+14426:  const payload = buildChannelExecutionPayload(projectName, campaignName, 'email');
+14429:  const packageId = `campemail_${Date.now()}`;
+14431:    paths.legacyEmailDir,
+14437:  const emailPackage = {
+14441:    channel: 'email',
+14451:    artifactType: 'campaign_email_package',
+14454:    data: emailPackage
+14458:    ...emailPackage,
+14483:  const emailFile = resolveExecutionReadCandidate({
+14486:    relativePath: path.join('email', `${safeName}.json`),
+14489:    requestedFile: `campaign-finalization/email/${safeName}.json`
+14504:    has_email_package: fs.existsSync(emailFile),
+14505:    ready: mediaFiles.length > 0 || publishFiles.length > 0 || fs.existsSync(emailFile)
+14649:function resolveEmailPackageForExecution(projectName, input = {}) {
+14650:  const inlinePackage = input.email_package && typeof input.email_package === 'object'
+14651:    ? input.email_package
+14659:    const error = new Error('Missing email package. Provide email_package or campaign_name');
+14665:  return buildCampaignEmailPackage(projectName, campaignName);
+14668:function buildEmailReadyPayload(emailPackage) {
+14669:  const primaryAsset = emailPackage.primary_asset && typeof emailPackage.primary_asset === 'object'
+14670:    ? emailPackage.primary_asset
+14674:    const error = new Error('Email package does not include a primary channel asset');
+14681:  const campaignName = String(emailPackage.campaign_name || '').trim();
+14844:async function executeEmailPackageRuntime({ project, emailPackage, emailPayload }) {
+14847:    execution_backend: 'canonical_email_runtime',
+14850:    campaign_name: String(emailPackage?.campaign_name || '').trim(),
+14851:    ready_for_provider_send: true,
+14853:      has_subject: Boolean(String(emailPayload?.subject || '').trim()),
+14854:      has_html_body: Boolean(String(emailPayload?.html_body || '').trim())
+14866:    provider: payload?.provider || DEFAULT_NATIVE_MEDIA_PROVIDER,
+14909:    const message = String(campaignPack?.message || 'Ad execution provider is not configured.').trim();
+14920:    execution_backend: 'ad_ai_provider_runtime',
+14927:    provider: campaignPack.provider,
+15071:    if (job.channel === 'email') {
+15072:      result.execution_status = 'ready_for_manual_send';
+15073:      result.action_type = 'manual_send';
+15074:      result.notes.push('Email package is ready for operator-controlled sending.');
+15080:      result.execution_status = 'ready_for_manual_handoff';
+15081:      result.action_type = 'manual_marketplace_handoff';
+15082:      result.notes.push('Marketplace payload is ready for manual listing handoff.');
+15089:    if (job.channel === 'email') {
+15090:      result.execution_status = 'auto_send_pending';
+15091:      result.action_type = 'auto_send';
+15092:      result.notes.push('Full-auto mode enabled. Email send bridge should consume this.');
+15357:  appLogger.warn('governance_mutation_denied', {
+15364:    governance_code: decision.code,
+15400:      req.governanceApproval = decision.approval;
+15423:  const governance = getGovernancePolicy(projectName);
+15427:  const policyRules = governance && typeof governance === 'object' && governance.policy_rules && typeof governance.policy_rules === 'object'
+15428:    ? governance.policy_rules
+15449:    appLogger.warn('governance_blocked', {
+15450:      route: '/governance/publishing',
+15462:      'Publishing is frozen by governance policy. The requested publishing mutation was blocked.',
+15474:        'Approval before publish is enabled. This publishing action requires a durable publishing job with an approved governance decision.',
+15491:        'Approval before publish is enabled. The publishing job is not approved for ready/publish mutation.',
+15627:    } else if (['tiktok', 'youtube', 'email'].includes(item)) {
+15646:  const readiness = reviewProjectReadiness(projectName);
+15654:    readiness.readiness_score || 0,
+15655:    connectorReadiness.readiness_score || 0
+15679:    readiness_score: overallScore,
+15680:    readiness_status: overallStatus,
+15682:      base_readiness: readiness,
+15729:      customer_problem: project.audience_problem,
+15733:      social_channels: Array.isArray(project.social_channels) ? project.social_channels : [],
+15734:      channels: Array.isArray(project.social_channels) ? project.social_channels : [],
+15735:      social_links: Array.isArray(project.social_channels) ? project.social_channels : [],
+15741:      readiness_score: dashboard.readiness_score,
+15742:      readiness_status: dashboard.readiness_status,
+15746:      connector_readiness_score: connectorReadiness.readiness_score
+15840:  const categoryReadiness = missingAssets.category_readiness || buildProjectAssetCategoryReadiness(projectName, assets);
+15849:    category_readiness: categoryReadiness,
+15864:  const readiness = reviewProjectConnectorReadiness(projectName);
+15871:    readiness,
+16023:      return sendError(res, {
+16064:        return sendError(res, {
+16081:        return sendError(res, {
+16098:        return sendError(res, {
+16117:        return sendError(res, {
+16141:          ['content_plan', 'content', 'blog', 'email', 'ads'].includes(t.type)
+16286:   if (command === '/create_email') {
+16289:      const emailDraft = {
+16290:        id: `email_${Date.now()}`,
+16293:        format: 'campaign email',
+16295:        send_goal: 'traffic + conversion',
+16303:      const { data: queue } = readLiveEmailQueue(commandProject, emailDraft.id);
+16304:      queue.push(emailDraft);
+16305:      writeLiveEmailQueue(commandProject, queue);
+16309:        result: emailDraft
+16370:    if (command === '/review_emails') {
+16371:      const { data: queue } = readLiveEmailQueue(commandProject, 'review-emails');
+16454:    if (command === '/approve_email') {
+16457:        return res.json({ error: 'Missing email draft id' });
+16460:      const { data: queue } = readLiveEmailQueue(commandProject, draftId);
+16464:        return res.json({ error: 'Email draft not found' });
+16469:      writeLiveEmailQueue(commandProject, queue);
+16617:  <li>Unpassende Produkte wählen</li>
+16650:    if (command === '/improve_email') {
+16653:        return res.json({ error: 'Missing email draft id' });
+16656:      const { data: queue } = readLiveEmailQueue(commandProject, draftId);
+16660:        return res.json({ error: 'Email draft not found' });
+16664:      item.format = 'campaign email';
+16666:      item.send_goal = 'traffic + conversion';
+16673:      writeLiveEmailQueue(commandProject, queue);
+16759:    if (command === '/execute_email') {
+16762:        return res.json({ error: 'Missing email draft id' });
+16765:      const { data: queue } = readLiveEmailQueue(commandProject, draftId);
+16769:        return res.json({ error: 'Email draft not found' });
+16772:      item.status = 'ready_for_send';
+16774:      writeLiveEmailQueue(commandProject, queue);
+16779:        note: 'Email draft is now ready_for_send. Email connector is the next layer.'
+17310:    if (command === '/review_email_asset') {
+17313:        return res.json({ error: 'Missing email draft id' });
+17316:      const { data: queue } = readLiveEmailQueue(commandProject, draftId);
+17320:        return res.json({ error: 'Email draft not found' });
+17334:          send_goal: item.send_goal || 'traffic + conversion',
+17335:          format: item.format || 'campaign email',
+17336:          ready_for_send: item.status === 'ready_for_send',
+17346:    if (command === '/generate_email_image') {
+17349:        return res.json({ error: 'Missing email draft id' });
+17352:      const { data: emailQueue } = readLiveEmailQueue(commandProject, draftId);
+17353:      const emailItem = emailQueue.find(x => x.id === draftId);
+17355:      if (!emailItem) {
+17356:        return res.json({ error: 'Email draft not found' });
+17361:      fs.mkdirSync(path.join(mediaDir, 'email'), { recursive: true });
+17363:      const { data: mediaQueue } = readLiveEmailMediaQueue(commandProject, draftId);
+17365:      const assetId = `emailimg_${Date.now()}`;
+17366:      const safeSlug = String(emailItem.topic || 'email-image')
+17374:        'email',
+17379:        `Create a premium email hero image for ${emailItem.topic}, focused on luxury men’s grooming, strong masculine branding, refined product presentation, elegant dark premium styling, suitable for a high-conversion campaign email for the German market.`;
+17382:        `${emailItem.topic} – Premium Kampagne von ${commandBrandName}`;
+17386:        type: 'email_hero_image',
+17388:        linked_email_id: emailItem.id,
+17389:        email_subject: emailItem.subject || '',
+17390:        topic: emailItem.topic,
+17395:        style: 'premium masculine campaign email',
+17403:      writeLiveEmailMediaQueue(commandProject, mediaQueue);
+17411:    if (command === '/review_email_media') {
+17414:        return res.json({ error: 'Missing email draft id or asset id' });
+17417:      const { data: mediaQueue } = readLiveEmailMediaQueue(commandProject, ref);
+17423:          .filter(x => x.linked_email_id === ref)
+17430:        return res.json({ error: 'Email media asset not found' });
+17439:    if (command === '/attach_email_image') {
+17442:    return res.json({ error: 'Missing email draft id' });
+17445:  const { data: emailQueue } = readLiveEmailQueue(commandProject, draftId);
+17446:  const emailItem = emailQueue.find(x => x.id === draftId);
+17448:  if (!emailItem) {
+17449:    return res.json({ error: 'Email draft not found' });
+17452:  const { data: mediaQueue } = readLiveEmailMediaQueue(commandProject, draftId);
+17455:    .filter(x => x.linked_email_id === draftId && x.status === 'generated')
+17461:    return res.json({ error: 'No generated email image found' });
+17490:    emailItem.hero_image_asset_id = asset.asset_id;
+17491:    emailItem.hero_image_path = asset.output_path;
+17492:    emailItem.hero_image_url = publicImageUrl;
+17493:    emailItem.hero_image_alt = asset.alt_text;
+17494:    emailItem.hero_image_wp_media_id = mediaId;
+17497:    emailItem.html_body =
+17501:      `<h2 style="margin:0 0 12px 0;color:#111;">${emailItem.subject || ''}</h2>` +
+17502:      `<p style="margin:0 0 16px 0;color:#444;">${emailItem.preheader || ''}</p>` +
+17503:      `<p style="margin:0 0 24px 0;color:#222;line-height:1.6;">${emailItem.body || ''}</p>` +
+17504:      `<a href="${projectWebsiteUrl}" style="display:inline-block;padding:14px 24px;background:#111;color:#fff;text-decoration:none;border-radius:6px;">${emailItem.cta || 'Jetzt entdecken'}</a>` +
+17507:    writeLiveEmailMediaQueue(commandProject, mediaQueue);
+17508:    writeLiveEmailQueue(commandProject, emailQueue);
+17513:        draft_id: emailItem.id,
+17514:        subject: emailItem.subject,
+17515:        hero_image_asset_id: emailItem.hero_image_asset_id,
+17516:        hero_image_url: emailItem.hero_image_url,
+17517:        hero_image_wp_media_id: emailItem.hero_image_wp_media_id,
+17519:        status: emailItem.status
+17524:      error: 'Attach email image failed',
+17530:    if (command === '/generate_email_image_real') {
+17534:        return res.json({ error: 'Missing email draft id or asset id' });
+17537:      const { data: mediaQueue } = readLiveEmailMediaQueue(commandProject, ref);
+17543:          .filter(x => x.linked_email_id === ref)
+17550:        return res.json({ error: 'Email media asset not found' });
+17581:        writeLiveEmailMediaQueue(commandProject, mediaQueue);
+17589:            message: 'Email image generated successfully'
+17595:          error: 'Email image generation failed',
+17601:     if (command === '/send_email_draft') {
+17603:      const toEmail = args[1];
+17606:        return res.json({ error: 'Missing email draft id' });
+17609:      if (!toEmail) {
+17610:        return res.json({ error: 'Missing recipient email' });
+17613:        const { data: emailQueue } = readLiveEmailQueue(commandProject, draftId);
+17614:      const emailItem = emailQueue.find(x => x.id === draftId);
+17616:      if (!emailItem) {
+17617:        return res.json({ error: 'Email draft not found' });
+17620:      if (!emailItem.html_body) {
+17621:        return res.json({ error: 'Email HTML not prepared' });
+17628:            to: toEmail,
+17629:            subject: emailItem.subject,
+17630:            preheader: emailItem.preheader || '',
+17631:            html_body: emailItem.html_body
+17641:        emailItem.status = 'sent';
+17642:        emailItem.sent_to = toEmail;
+17643:        emailItem.sent_at = new Date().toISOString();
+17644:        emailItem.send_result = response.data;
+17646:        writeLiveEmailQueue(commandProject, emailQueue);
+17651:            draft_id: emailItem.id,
+17652:            status: emailItem.status,
+17653:            sent_to: emailItem.sent_to,
+17654:            sent_at: emailItem.sent_at,
+17660:          error: 'Email send failed',
+17687:        primary_goal: 'sales + brand growth',
+17691:          'email',
+17737:      const goal = args.slice(1).join(' ').trim() || 'sales';
+17776:          'email',
+17784:          'email hero image',
+17792:          'sales',
+17799:          'reuse high-performing assets across channels'
+17870:          email: 1,
+17878:          'email follow-up',
+17884:          'Generate assets from strategy, then run review -> approval -> media -> publish/send.',
+17981:      email: "conversion + retention",
+18072:if (command === '/reuse_email_to_social') {
+18073:  const emailId = args[0];
+18075:  if (!emailId) {
+18076:    return res.json({ error: 'Missing email ID' });
+18079:  const { candidate, data: emailQueue } = readLiveEmailQueue(commandProject, emailId);
+18082:    return res.json({ error: 'Email queue not found' });
+18085:  const email = emailQueue.find(e => e.id === emailId);
+18087:  if (!email) {
+18088:    return res.json({ error: 'Email not found' });
+18092:    source: emailId,
+18093:    type: 'email_to_social',
+18095:      caption: email.body,
+18096:      cta: email.cta
+18099:      headline: email.subject,
+18100:      primary_text: email.body,
+18101:      cta: email.cta
+18324:      const goal = args.slice(1).join(' ').trim() || 'sales';
+18400:      email: "conversion"
+18514:      const goal = args.slice(1).join(' ').trim() || 'sales';
+18601:          'email',
+18609:          '1 conversion email',
+18619:          'sales',
+18625:          'send launch email',
+18701:            email: 'conversion + retention',
+18734:          'launch one conversion email',
+18800:    email: {
+
+### backend sales/crm/customer/integration lib files
+runtime/orchestrator-service/lib/customer-operations/README.md
+runtime/orchestrator-service/lib/customer-operations/channels/README.md
+runtime/orchestrator-service/lib/customer-operations/channels/channel-integration-mapper.js
+runtime/orchestrator-service/lib/customer-operations/channels/register-integration-channel.js
+runtime/orchestrator-service/lib/customer-operations/channels/registry/channel-registry-store.js
+runtime/orchestrator-service/lib/customer-operations/channels/registry/default-channels.js
+runtime/orchestrator-service/lib/customer-operations/contracts/README.md
+runtime/orchestrator-service/lib/customer-operations/contracts/conversation-contract.js
+runtime/orchestrator-service/lib/customer-operations/contracts/customer-profile-contract.js
+runtime/orchestrator-service/lib/customer-operations/contracts/escalation-contract.js
+runtime/orchestrator-service/lib/customer-operations/contracts/message-contract.js
+runtime/orchestrator-service/lib/customer-operations/contracts/sla-policy-contract.js
+runtime/orchestrator-service/lib/customer-operations/contracts/ticket-contract.js
+runtime/orchestrator-service/lib/customer-operations/contracts/unified-inbox-contract.js
+runtime/orchestrator-service/lib/customer-operations/conversations/README.md
+runtime/orchestrator-service/lib/customer-operations/conversations/create-integration-session.js
+runtime/orchestrator-service/lib/customer-operations/conversations/messages/message-store.js
+runtime/orchestrator-service/lib/customer-operations/conversations/store/conversation-store.js
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js
+runtime/orchestrator-service/lib/customer-operations/customers/store/customer-profile-store.js
+runtime/orchestrator-service/lib/customer-operations/escalation/store/escalation-store.js
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js
+runtime/orchestrator-service/lib/customer-operations/registry/README.md
+runtime/orchestrator-service/lib/customer-operations/sla/store/sla-policy-store.js
+runtime/orchestrator-service/lib/customer-operations/tickets/README.md
+runtime/orchestrator-service/lib/customer-operations/tickets/store/ticket-store.js
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/register-integration-inbox.js
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/store/unified-inbox-store.js
+runtime/orchestrator-service/lib/integrations/adapter-manager.js
+runtime/orchestrator-service/lib/integrations/audit-log.js
+runtime/orchestrator-service/lib/integrations/health-manager.js
+runtime/orchestrator-service/lib/integrations/http-client.js
+runtime/orchestrator-service/lib/integrations/insights-contract.js
+runtime/orchestrator-service/lib/integrations/provider-registry.js
+runtime/orchestrator-service/lib/integrations/provider-utils.js
+runtime/orchestrator-service/lib/integrations/providers/ebay.js
+runtime/orchestrator-service/lib/integrations/providers/google.js
+runtime/orchestrator-service/lib/integrations/providers/meta.js
+runtime/orchestrator-service/lib/integrations/providers/ops.js
+runtime/orchestrator-service/lib/integrations/providers/shopify.js
+runtime/orchestrator-service/lib/integrations/providers/tiktok.js
+runtime/orchestrator-service/lib/integrations/providers/unsupported.js
+runtime/orchestrator-service/lib/integrations/providers/website.js
+runtime/orchestrator-service/lib/integrations/providers/woocommerce.js
+runtime/orchestrator-service/lib/integrations/storage.js
+runtime/orchestrator-service/lib/integrations/sync-history.js
+runtime/orchestrator-service/lib/integrations/token-manager.js

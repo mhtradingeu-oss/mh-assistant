@@ -1,0 +1,986 @@
+public/control-center/pages/customer-center.js:54:  const [readiness, inbox, conversations, tickets, channels] = await Promise.all([
+public/control-center/pages/customer-center.js:62:  const responses = [readiness, inbox, conversations, tickets, channels];
+public/control-center/pages/customer-center.js:71:      tickets: [],
+public/control-center/pages/customer-center.js:82:  const ticketsData = getPayload(tickets);
+public/control-center/pages/customer-center.js:91:    tickets: asArray(ticketsData?.tickets || ticketsData),
+public/control-center/pages/customer-center.js:101:    ["Send reply", "Locked: Customer Center v1 cannot send external replies or provider messages."],
+public/control-center/pages/customer-center.js:102:    ["Add CRM note", "Locked: CRM writes require a future confirmation gate, role check, and audit log."],
+public/control-center/pages/customer-center.js:103:    ["Update ticket", "Locked: ticket changes are outside this read-only release."],
+public/control-center/pages/customer-center.js:109:    ["Auto-reply", "Locked: autonomous customer replies remain forbidden by default."]
+public/control-center/pages/customer-center.js:114:  return asArray(inbox).filter((entry) => /waiting|open|unread/i.test(`${entry.status || ""} ${entry.sla_status || ""}`)).length;
+public/control-center/pages/customer-center.js:118:  return asArray(items).filter((item) => /risk|breach|late|urgent/i.test(`${item.sla_status || ""} ${item.priority || ""}`)).length;
+public/control-center/pages/customer-center.js:138:          <h3>Server guard is active: no customer data is loaded</h3>
+public/control-center/pages/customer-center.js:144:        <p>This page is intentionally blank while protected customer read routes are disabled. Configure <code>MH_CONTROL_CENTER_WRITE_KEY</code> on the server, restart the service, then reload to show read-only projections.</p>
+public/control-center/pages/customer-center.js:145:        <p>No placeholder customer records are shown. External send, CRM updates, ticket changes, calls, IVR, provider sync, and auto-reply remain locked.</p>
+public/control-center/pages/customer-center.js:151:function renderEmptyState(title, body, nextStep = "Safe next step: verify protected-read readiness, then reload read-only customer projections.") {
+public/control-center/pages/customer-center.js:164:    return renderEmptyState("Inbox is empty in read-only mode", "No inbound customer signals are available for this project right now. This is expected when protected-read data is not connected or no conversations match the current projection.");
+public/control-center/pages/customer-center.js:170:        <strong>${escapeHtml(entry.customer_label || "Masked customer")}</strong>
+public/control-center/pages/customer-center.js:187:        <strong>${escapeHtml(item.customer_label || "Masked customer")}</strong>
+public/control-center/pages/customer-center.js:196:  const tickets = asArray(model?.tickets);
+public/control-center/pages/customer-center.js:197:  if (!tickets.length) {
+public/control-center/pages/customer-center.js:198:    return renderEmptyState("No ticket snapshots available", "Support ticket and SLA records will appear here when the read-only projection includes them. No ticket creation or update is available from this page.");
+public/control-center/pages/customer-center.js:201:  return tickets.slice(0, 6).map((ticket) => `
+public/control-center/pages/customer-center.js:204:        <strong>${escapeHtml(ticket.ticket_id || "Ticket")}</strong>
+public/control-center/pages/customer-center.js:205:        <p>${escapeHtml(ticket.status || "open")} • ${escapeHtml(ticket.sla_status || "unknown SLA")}</p>
+public/control-center/pages/customer-center.js:207:      <span class="card-badge">${escapeHtml(ticket.priority || "normal")}</span>
+public/control-center/pages/customer-center.js:231:    <div class="customer-center-locked-actions" aria-label="Future customer actions locked">
+public/control-center/pages/customer-center.js:233:      <p class="muted">Visible for roadmap clarity only. These customer actions cannot execute here and require future confirmation gates, role permissions, provider readiness, and audit logging.</p>
+public/control-center/pages/customer-center.js:249:  const tickets = asArray(model.tickets);
+public/control-center/pages/customer-center.js:263:        ? "Customer Center is using read-only projections only. Outbound sends, CRM writes, ticket changes, assignments, calls, IVR, and auto-replies remain unavailable."
+public/control-center/pages/customer-center.js:271:          <h2>Loading customer operations…</h2>
+public/control-center/pages/customer-center.js:272:          <p class="muted">Fetching read-only customer projections.</p>
+public/control-center/pages/customer-center.js:283:        <p class="mhos-context-description">Protected-read customer communication surface for inbox visibility, conversation previews, ticket/SLA state, channel readiness, and handoff preparation. No customer execution happens here.</p>
+public/control-center/pages/customer-center.js:286:        <button class="btn btn-secondary" type="button" data-customer-center-action="refresh">Refresh read-only data</button>
+public/control-center/pages/customer-center.js:287:        <button class="btn btn-primary" type="button" data-customer-center-action="ai-handoff">Prepare AI support prompt</button>
+public/control-center/pages/customer-center.js:294:      ${renderMetric("SLA Risk", countSlaRisk([...tickets, ...inbox]), "Review only")}
+public/control-center/pages/customer-center.js:305:        <div class="panel-header"><div><div class="panel-kicker">Execution boundary</div><h3>No direct customer actions</h3></div></div>
+public/control-center/pages/customer-center.js:306:        <p class="muted">This page can review customer context and prepare handoffs. Any future customer-facing action must happen in an owning workflow with confirmation, permissions, and audit logging.</p>
+public/control-center/pages/customer-center.js:314:        <div class="panel-header"><div><div class="panel-kicker">Readiness Locks</div><h3>Read-only customer operations mode</h3></div></div>
+public/control-center/pages/customer-center.js:316:          <article class="ops-list-item"><div><strong>Read-only projections</strong><p>Customer Center can display protected customer snapshots only.</p></div><span class="card-badge">Allowed</span></article>
+public/control-center/pages/customer-center.js:318:          <article class="ops-list-item"><div><strong>CRM / Ticket / Assignment writes</strong><p>CRM notes, ticket updates, review marks, and ownership changes require future confirmation gates.</p></div><span class="card-badge">Locked</span></article>
+public/control-center/pages/customer-center.js:319:          <article class="ops-list-item"><div><strong>Calls / IVR / Auto-reply</strong><p>Voice placement, IVR provider execution, and autonomous replies remain disabled.</p></div><span class="card-badge">Locked</span></article>
+public/control-center/pages/customer-center.js:324:        <div class="panel-header"><div><div class="panel-kicker">Safe Operating Rules</div><h3>Preview-first support workflow</h3></div></div>
+public/control-center/pages/customer-center.js:325:        <p class="muted">Use Customer Center to review, summarize, and prepare handoffs only. Nothing in this page sends a reply, changes CRM, updates tickets, assigns conversations, places calls, triggers IVR, or starts auto-reply.</p>
+public/control-center/pages/customer-center.js:331:        <div class="panel-header"><div><div class="panel-kicker">Unified Inbox</div><h3>Inbound customer signals</h3></div></div>
+public/control-center/pages/customer-center.js:341:        <div class="panel-header"><div><div class="panel-kicker">Tickets / SLA</div><h3>Support state snapshot</h3></div></div>
+public/control-center/pages/customer-center.js:354:        <p class="muted">These buttons prepare navigation/context handoffs only. They do not send customer messages, contact providers, update CRM, change tickets, assign conversations, or mark records reviewed.</p>
+public/control-center/pages/customer-center.js:356:          <button class="btn btn-secondary" type="button" data-customer-center-action="task-handoff">Prepare Task Center handoff</button>
+public/control-center/pages/customer-center.js:357:          <button class="btn btn-secondary" type="button" data-customer-center-action="governance-handoff">Prepare Governance review</button>
+public/control-center/pages/customer-center.js:358:          <button class="btn btn-secondary" type="button" data-customer-center-action="ai-handoff">Prepare AI Command prompt</button>
+public/control-center/pages/customer-center.js:365:        <p class="muted">AI may summarize read-only context, draft response guidance, translate, and suggest next steps for a human handoff. It must not send replies, update CRM, close tickets, assign conversations, place calls, trigger IVR, sync providers, or start auto-reply.</p>
+public/control-center/pages/customer-center.js:375:    "This prepares review context only. It does not send customer messages, update CRM, change tickets, contact providers, or execute AI automatically.",
+public/control-center/pages/customer-center.js:387:  const root = document.querySelector('[data-page="customer-center"]');
+public/control-center/pages/customer-center.js:391:    const button = event.target.closest("[data-customer-center-action]");
+public/control-center/pages/customer-center.js:394:    const action = button.dataset.customerCenterAction;
+public/control-center/pages/customer-center.js:401:    if (action === "ai-handoff") {
+public/control-center/pages/customer-center.js:403:        "Prepare AI Command customer support prompt",
+public/control-center/pages/customer-center.js:409:        source: "customer-center",
+public/control-center/pages/customer-center.js:410:        title: "Customer Center support prompt",
+public/control-center/pages/customer-center.js:411:        prompt: "Review Customer Center read-only state. Summarize customer support risks, draft safe reply guidance, and identify escalation needs. Do not send replies or mutate CRM."
+public/control-center/pages/customer-center.js:418:    if (action === "task-handoff") {
+public/control-center/pages/customer-center.js:420:        "Prepare Task Center customer follow-up handoff",
+public/control-center/pages/customer-center.js:421:        "This will attach Customer Center context and open Task Center for human follow-up planning."
+public/control-center/pages/customer-center.js:425:      context.setSharedHandoff?.("task-center", {
+public/control-center/pages/customer-center.js:426:        source: "customer-center",
+public/control-center/pages/customer-center.js:427:        title: "Customer follow-up task preview",
+public/control-center/pages/customer-center.js:428:        summary: "Review Customer Center state and prepare a human follow-up task. No customer mutation was performed."
+public/control-center/pages/customer-center.js:430:      context.navigateTo?.("task-center");
+public/control-center/pages/customer-center.js:431:      context.showMessage?.("Customer task handoff prepared.");
+public/control-center/pages/customer-center.js:435:    if (action === "governance-handoff") {
+public/control-center/pages/customer-center.js:437:        "Prepare Governance customer communication review",
+public/control-center/pages/customer-center.js:442:      context.setSharedHandoff?.("governance", {
+public/control-center/pages/customer-center.js:443:        source: "customer-center",
+public/control-center/pages/customer-center.js:444:        title: "Customer communication governance review",
+public/control-center/pages/customer-center.js:445:        summary: "Review customer reply/escalation risk before any external response. No send action was performed."
+public/control-center/pages/customer-center.js:447:      context.navigateTo?.("governance");
+public/control-center/pages/customer-center.js:448:      context.showMessage?.("Customer governance handoff prepared.");
+public/control-center/pages/customer-center.js:469:      tickets: [],
+public/control-center/pages/customer-center.js:481:export const customerCenterRoute = {
+public/control-center/pages/customer-center.js:482:  id: "customer-center",
+public/control-center/pages/customer-center.js:487:    description: "Read-only customer operations, inbox visibility, ticket/SLA state, and safe AI handoffs."
+public/control-center/pages/customer-center.js:491:      <section class="page is-active customer-center-page" data-page="customer-center">
+public/control-center/pages/operations-centers.js:172:  if (pageKey === "task-center") {
+public/control-center/pages/operations-centers.js:236:        preview: "Assess execution health across workflows, media, and publishing jobs.",
+public/control-center/pages/operations-centers.js:237:        prompt: `Summarize current execution health for ${projectLabel} across workflows, media, and publishing jobs. Highlight failure clusters, retry patterns, and risk areas.`
+public/control-center/pages/operations-centers.js:256:      prompt: `Summarize the current operational notification signal for ${projectLabel} with focus on ${focusLabel}. Highlight approvals, provider health, publishing events, and urgent follow-up.`
+public/control-center/pages/operations-centers.js:348:      route: "governance"
+public/control-center/pages/operations-centers.js:365:    || "Cross-center runtime health, queue pressure, failures, publishing, governance, and provider signals.";
+public/control-center/pages/operations-centers.js:437:    "Incoming task handoff"
+public/control-center/pages/operations-centers.js:442:    incomingHandoff.payload?.handoff_intent ||
+public/control-center/pages/operations-centers.js:444:    "Review-only handoff prepared by another MH-OS surface."
+public/control-center/pages/operations-centers.js:449:    <section class="panel ops-incoming-handoff mhos-clean-surface">
+public/control-center/pages/operations-centers.js:454:          <p>Review-only context from ${escapeHtml(titleCase(source))}. No durable task is created automatically from this handoff.</p>
+public/control-center/pages/operations-centers.js:517:    <section class="page is-active" data-page="task-center">
+public/control-center/pages/operations-centers.js:524:              <p class="std-context-description mhos-os-subtitle">Review ownership, due-state, linked entities, and safe route-aware follow-up for ${escapeHtml(projectLabel)}.</p>
+public/control-center/pages/operations-centers.js:612:                  <p class="mhos-os-panel-copy">${escapeHtml(selectedItem ? "Review owner, due-state, linked work, and follow-up context." : "Choose a task in the table to inspect details.")}</p>
+public/control-center/pages/operations-centers.js:717:  const prompts = buildOpsAssistantPrompts("task-center", projectName, selectedItem, titleCase(session.focus || "all"));
+public/control-center/pages/operations-centers.js:718:  const incomingHandoff = getSharedHandoff(projectName, "task-center", ops);
+public/control-center/pages/operations-centers.js:782:          `Title: ${asString(incomingHandoff.title || incomingHandoff.summary || incomingHandoff.payload?.title || incomingHandoff.payload?.summary || "Incoming task handoff")}`,
+public/control-center/pages/operations-centers.js:783:          `Summary: ${asString(incomingHandoff.description || incomingHandoff.payload?.description || incomingHandoff.payload?.handoff_intent || incomingHandoff.payload?.prompt || "Review-only handoff.")}`,
+public/control-center/pages/operations-centers.js:786:      : "No incoming task handoff.";
+public/control-center/pages/operations-centers.js:800:      context.showMessage?.("Incoming handoff summary copied.");
+public/control-center/pages/operations-centers.js:802:      context.showError?.("Failed to copy incoming handoff summary.");
+public/control-center/pages/operations-centers.js:1186:              <p class="std-context-description mhos-os-subtitle">Review running, completed, and failed job state across workflows, media, and publishing for ${escapeHtml(projectLabel)} without triggering workers.</p>
+public/control-center/pages/operations-centers.js:1435:    id: `governance-approval-${asString(item.id)}`,
+public/control-center/pages/operations-centers.js:1443:    route: "governance",
+public/control-center/pages/operations-centers.js:1444:    route_label: "governance",
+public/control-center/pages/operations-centers.js:1446:    notification_id: `governance-approval-${asString(item.id)}`,
+public/control-center/pages/operations-centers.js:1459:  if (id.startsWith("governance-approval-")) {
+public/control-center/pages/operations-centers.js:1460:    return id.slice("governance-approval-".length);
+public/control-center/pages/operations-centers.js:1484:    <div class="ops-governance-actions">
+public/control-center/pages/operations-centers.js:1485:      <button class="btn btn-secondary" type="button" data-governance-action="refresh">Refresh Governance</button>
+public/control-center/pages/operations-centers.js:1486:      <button class="btn btn-primary" type="button" data-governance-decision="approved" data-approval-id="${escapeHtml(approvalId)}">Approve</button>
+public/control-center/pages/operations-centers.js:1487:      <button class="btn btn-secondary" type="button" data-governance-decision="rejected" data-approval-id="${escapeHtml(approvalId)}">Reject</button>
+public/control-center/pages/operations-centers.js:1488:      <button class="btn btn-secondary" type="button" data-governance-decision="changes_requested" data-approval-id="${escapeHtml(approvalId)}">Request Changes</button>
+public/control-center/pages/operations-centers.js:1489:      <button class="btn btn-secondary" type="button" data-governance-decision="escalated" data-approval-id="${escapeHtml(approvalId)}">Escalate</button>
+public/control-center/pages/operations-centers.js:1511:  const governanceApprovalAlerts = buildGovernanceApprovalAlerts(asObject(asObject(state.data.governance).summary));
+public/control-center/pages/operations-centers.js:1524:    : governanceApprovalAlerts
+public/control-center/pages/operations-centers.js:1636:                <p class="mhos-os-section-copy">${escapeHtml(session.focus === "inbox" ? "Review durable inbox history. Mark Read updates read-state only where a backend notification id exists." : "Review route-aware alerts, then inspect the selected signal before routing or follow-up.")}</p>
+public/control-center/pages/operations-centers.js:1674:                  <p class="mhos-os-panel-copy">${escapeHtml(selectedItem ? "Review source, severity, timing, and owning route before follow-up." : "Choose an alert or inbox item to inspect details.")}</p>
+public/control-center/pages/operations-centers.js:1698:                  <p class="mhos-os-panel-copy">Active actions are refresh, route, AI guidance, and Mark Read only where supported. Lifecycle controls remain disabled until backend mutation safety checks are approved.</p>
+public/control-center/pages/operations-centers.js:1823:  Array.from(root.querySelectorAll("[data-governance-action]")).forEach((button) => {
+public/control-center/pages/operations-centers.js:1825:      const action = button.getAttribute("data-governance-action") || "";
+public/control-center/pages/operations-centers.js:1836:        const governanceData = asObject(currentState.data.governance);
+public/control-center/pages/operations-centers.js:1841:            governance: {
+public/control-center/pages/operations-centers.js:1842:              ...governanceData,
+public/control-center/pages/operations-centers.js:1849:        context.showError?.(error.message || "Failed to refresh governance approvals.");
+public/control-center/pages/operations-centers.js:1853:  Array.from(root.querySelectorAll("[data-governance-decision]")).forEach((button) => {
+public/control-center/pages/operations-centers.js:1856:      const decision = button.getAttribute("data-governance-decision") || "";
+public/control-center/pages/operations-centers.js:1878:          const governanceData = asObject(currentState.data.governance);
+public/control-center/pages/operations-centers.js:1883:              governance: {
+public/control-center/pages/operations-centers.js:1884:                ...governanceData,
+public/control-center/pages/operations-centers.js:1922:          const governanceData = asObject(currentState.data.governance);
+public/control-center/pages/operations-centers.js:1928:              governance: {
+public/control-center/pages/operations-centers.js:1929:                ...governanceData,
+public/control-center/pages/operations-centers.js:1948:  id: "task-center",
+public/control-center/pages/operations-centers.js:1955:  template: `<section class="page is-active" data-page="task-center"><div class="ops-shell"></div></section>`,
+public/control-center/pages/operations-centers.js:2036:    description: "Review job health, failures, retry risk, and execution logs across workflows, media, and publishing without silent job mutation."
+public/control-center/pages/operations-centers.js:2127:  const root = document.querySelector('[data-page="operations-centers"] .ops-shell');
+public/control-center/pages/operations-centers.js:2141:      route: "task-center",
+public/control-center/pages/operations-centers.js:2175:    <section class="page is-active" data-page="operations-centers">
+public/control-center/pages/operations-centers.js:2196:          description: "Use this page as the routing hub from AI Team drafts, workflows, tasks, and runtime signals into the correct operations workspace.",
+public/control-center/pages/operations-centers.js:2207:                  <p class="mhos-os-section-copy">AI Team can prepare drafts, tasks, workflows, and handoffs. This overview routes work to the owning operations center for review, monitoring, or controlled follow-up.</p>
+public/control-center/pages/operations-centers.js:2234:                  <h3 class="mhos-os-panel-title">Operations Lead handoff</h3>
+public/control-center/pages/operations-centers.js:2240:                <button class="btn btn-ghost" type="button" data-ops-route="workflows" data-ops-label="Workflows">Open Workflows</button>
+public/control-center/pages/operations-centers.js:2249:                  <p class="mhos-os-panel-copy">This overview does not execute jobs, mutate tasks, send notifications, approve workflows, mark notifications read, publish, or trigger workers. It only routes to the owning workspace.</p>
+public/control-center/pages/operations-centers.js:2268:  id: "operations-centers",
+public/control-center/pages/operations-centers.js:2275:  template: `<section class="page is-active" data-page="operations-centers"><div class="ops-shell"></div></section>`,
+public/control-center/pages/governance/dashboard.js:2: * Legacy governance dashboard.
+public/control-center/pages/governance/dashboard.js:5: * The active Governance route is public/control-center/pages/governance.js.
+public/control-center/pages/governance/dashboard.js:7: * This legacy dashboard must not call removed /api/governance/* endpoints if
+public/control-center/pages/governance/dashboard.js:15:  page: "governance/dashboard",
+public/control-center/pages/governance/dashboard.js:16:  message: "Legacy governance dashboard is neutralized. Use the active Governance route instead.",
+public/control-center/pages/governance/dashboard.js:18:    governance: "public/control-center/pages/governance.js"
+public/control-center/pages/governance.js:7:function collectGovernanceEvidence({ selectedItem, projectData, governanceData }) {
+public/control-center/pages/governance.js:23:  const sources = [selectedItem, projectData, governanceData];
+public/control-center/pages/governance.js:77:function renderGovernanceEvidenceSummary({ selectedItem, projectData, governanceData, intakeContext, escapeHtml }) {
+public/control-center/pages/governance.js:78:  const evidence = collectGovernanceEvidence({ selectedItem, projectData, governanceData });
+public/control-center/pages/governance.js:81:    <div class="governance-evidence-summary">
+public/control-center/pages/governance.js:82:      <div class="governance-evidence-summary-header">Evidence Summary</div>
+public/control-center/pages/governance.js:83:      <div class="governance-evidence-cards">
+public/control-center/pages/governance.js:84:        <div class="governance-evidence-card${evidence.source_of_truth.length ? '' : ' is-missing'}">
+public/control-center/pages/governance.js:85:          <span class="governance-evidence-label">Source of Truth</span>
+public/control-center/pages/governance.js:86:          <span class="governance-evidence-value">${evidence.source_of_truth.length ? escapeHtml(asString(evidence.source_of_truth[0])) : "Missing"}</span>
+public/control-center/pages/governance.js:88:        <div class="governance-evidence-card${evidence.legal.length ? '' : ' is-missing'}">
+public/control-center/pages/governance.js:89:          <span class="governance-evidence-label">Legal</span>
+public/control-center/pages/governance.js:90:          <span class="governance-evidence-value">${evidence.legal.length ? escapeHtml(asString(evidence.legal[0])) : "Missing"}</span>
+public/control-center/pages/governance.js:92:        <div class="governance-evidence-card${evidence.pricing.length ? '' : ' is-missing'}">
+public/control-center/pages/governance.js:93:          <span class="governance-evidence-label">Pricing</span>
+public/control-center/pages/governance.js:94:          <span class="governance-evidence-value">${evidence.pricing.length ? escapeHtml(asString(evidence.pricing[0])) : "Missing"}</span>
+public/control-center/pages/governance.js:96:        <div class="governance-evidence-card${evidence.certificate.length ? '' : ' is-missing'}">
+public/control-center/pages/governance.js:97:          <span class="governance-evidence-label">Certificate/Proof</span>
+public/control-center/pages/governance.js:98:          <span class="governance-evidence-value">${evidence.certificate.length ? escapeHtml(asString(evidence.certificate[0])) : evidence.proof.length ? escapeHtml(asString(evidence.proof[0])) : "Missing"}</span>
+public/control-center/pages/governance.js:100:        <div class="governance-evidence-card${evidence.brand.length ? '' : ' is-missing'}">
+public/control-center/pages/governance.js:101:          <span class="governance-evidence-label">Brand Asset</span>
+public/control-center/pages/governance.js:102:          <span class="governance-evidence-value">${evidence.brand.length ? escapeHtml(asString(evidence.brand[0])) : "Missing"}</span>
+public/control-center/pages/governance.js:104:        <div class="governance-evidence-card${evidence.product.length ? '' : ' is-missing'}">
+public/control-center/pages/governance.js:105:          <span class="governance-evidence-label">Product Asset</span>
+public/control-center/pages/governance.js:106:          <span class="governance-evidence-value">${evidence.product.length ? escapeHtml(asString(evidence.product[0])) : "Missing"}</span>
+public/control-center/pages/governance.js:109:      ${!hasEvidence ? `<div class="governance-evidence-card is-missing governance-source-warning">Missing source evidence — attach Library proof before high-risk approval.</div>` : ""}
+public/control-center/pages/governance.js:110:      <div class="governance-evidence-guidance">High-risk Governance decisions should reference source-of-truth evidence, proof assets, or an incoming handoff. Missing evidence should be resolved before approval, rejection, escalation, or override.</div>
+public/control-center/pages/governance.js:116:  // Intake context: { ai, publishing, content, media, workflows, operations, notifications, insights }
+public/control-center/pages/governance.js:122:  if (intakeContext?.workflows) items.push({ label: "Workflows", value: asString(intakeContext.workflows) });
+public/control-center/pages/governance.js:127:    <div class="governance-intake-panel">
+public/control-center/pages/governance.js:128:      <div class="governance-intake-panel-header">Incoming Review Context</div>
+public/control-center/pages/governance.js:129:      <div class="governance-intake-list">
+public/control-center/pages/governance.js:131:          <div class="governance-intake-item"><span class="governance-intake-label">${escapeHtml(item.label)}</span><span class="governance-intake-value">${escapeHtml(item.value)}</span></div>
+public/control-center/pages/governance.js:132:        `).join("") : `<div class="governance-intake-item is-missing">No intake yet</div>`}
+public/control-center/pages/governance.js:144:const governanceSessions = new Map();
+public/control-center/pages/governance.js:231:  if (!governanceSessions.has(key)) {
+public/control-center/pages/governance.js:232:    governanceSessions.set(key, {
+public/control-center/pages/governance.js:241:  return governanceSessions.get(key);
+public/control-center/pages/governance.js:265:      content: asString(approval.contentOwner) || "Marketing lead",
+public/control-center/pages/governance.js:266:      media: asString(approval.mediaOwner) || "Creative lead",
+public/control-center/pages/governance.js:267:      campaign: asString(approval.adsOwner) || "Operations lead",
+public/control-center/pages/governance.js:302:    session.error = error.message || "Failed to load governance console.";
+public/control-center/pages/governance.js:319:    <div class="governance-metric">
+public/control-center/pages/governance.js:330:  const escalationChain = asObject(reviewModel.escalation_chain);
+public/control-center/pages/governance.js:334:      <div class="panel-header"><div><div class="panel-kicker">Review model</div><h3>Ownership and escalation chain</h3></div></div>
+public/control-center/pages/governance.js:335:      <div class="governance-card-list">
+public/control-center/pages/governance.js:337:          <div class="governance-card">
+public/control-center/pages/governance.js:338:            <div class="governance-card-head">
+public/control-center/pages/governance.js:349:        ${Object.entries(escalationChain).map(([risk, roles]) => `
+public/control-center/pages/governance.js:352:            <span>${escapeHtml(asArray(roles).map(titleCase).join(" -> ") || "No escalation path")}</span>
+public/control-center/pages/governance.js:366:    <div class="governance-flag-list">
+public/control-center/pages/governance.js:368:        <div class="governance-flag">
+public/control-center/pages/governance.js:388:    <article class="governance-card">
+public/control-center/pages/governance.js:389:      <div class="governance-card-head">
+public/control-center/pages/governance.js:396:      <div class="governance-meta">
+public/control-center/pages/governance.js:402:      <p class="governance-copy">${escapeHtml(item.summary || "Awaiting review and decision.")}</p>
+public/control-center/pages/governance.js:404:      <textarea id="${escapeHtml(noteId)}" class="setup-input setup-textarea governance-note" rows="3" placeholder="Add a decision reason, change request, or escalation note.">${escapeHtml(item.decision_note || "")}</textarea>
+public/control-center/pages/governance.js:405:      <div class="governance-actions">
+public/control-center/pages/governance.js:406:        <button class="btn btn-primary" type="button" data-governance-decision="approved" data-approval-id="${escapeHtml(item.id)}">Submit Reviewed Approval</button>
+public/control-center/pages/governance.js:407:        <button class="btn btn-secondary" type="button" data-governance-decision="rejected" data-approval-id="${escapeHtml(item.id)}">Submit Rejection Decision</button>
+public/control-center/pages/governance.js:408:        <button class="btn btn-secondary" type="button" data-governance-decision="changes_requested" data-approval-id="${escapeHtml(item.id)}">Request Changes Review</button>
+public/control-center/pages/governance.js:409:        <button class="btn btn-secondary" type="button" data-governance-decision="escalated" data-approval-id="${escapeHtml(item.id)}">Escalate Review</button>
+public/control-center/pages/governance.js:410:        <button class="btn btn-secondary" type="button" data-governance-decision="overridden" data-approval-id="${escapeHtml(item.id)}">Record High-Risk Override</button>
+public/control-center/pages/governance.js:413:        <div class="governance-history">
+public/control-center/pages/governance.js:415:            <div class="governance-history-item">
+public/control-center/pages/governance.js:435:    <article class="governance-card">
+public/control-center/pages/governance.js:436:      <div class="governance-card-head">
+public/control-center/pages/governance.js:443:      <div class="governance-meta">
+public/control-center/pages/governance.js:453:        <div class="governance-actions">
+public/control-center/pages/governance.js:457:            data-governance-request-approval="true"
+public/control-center/pages/governance.js:478:    <div class="governance-timeline">
+public/control-center/pages/governance.js:480:        <div class="governance-timeline-item">
+public/control-center/pages/governance.js:481:          <div class="governance-timeline-dot"></div>
+public/control-center/pages/governance.js:482:          <div class="governance-timeline-copy">
+public/control-center/pages/governance.js:499:    <div class="governance-policy-grid">
+public/control-center/pages/governance.js:500:      <label class="settings-toggle" for="governance-approval-before-publish">
+public/control-center/pages/governance.js:502:        <input id="governance-approval-before-publish" type="checkbox" class="settings-toggle-input" data-governance-policy="approval_before_publish" ${rules.approval_before_publish ? "checked" : ""} />
+public/control-center/pages/governance.js:505:      <label class="settings-toggle" for="governance-claim-review">
+public/control-center/pages/governance.js:507:        <input id="governance-claim-review" type="checkbox" class="settings-toggle-input" data-governance-policy="high_risk_claim_review_required" ${rules.high_risk_claim_review_required ? "checked" : ""} />
+public/control-center/pages/governance.js:510:      <label class="settings-toggle" for="governance-brand-safety">
+public/control-center/pages/governance.js:512:        <input id="governance-brand-safety" type="checkbox" class="settings-toggle-input" data-governance-policy="brand_safety_review_required" ${rules.brand_safety_review_required ? "checked" : ""} />
+public/control-center/pages/governance.js:515:      <label class="settings-toggle" for="governance-auto-escalate">
+public/control-center/pages/governance.js:517:        <input id="governance-auto-escalate" type="checkbox" class="settings-toggle-input" data-governance-policy="auto_escalate_critical_risk" ${rules.auto_escalate_critical_risk ? "checked" : ""} />
+public/control-center/pages/governance.js:520:      <label class="settings-toggle" for="governance-admin-override">
+public/control-center/pages/governance.js:522:        <input id="governance-admin-override" type="checkbox" class="settings-toggle-input" data-governance-policy="allow_admin_override" ${rules.allow_admin_override ? "checked" : ""} />
+public/control-center/pages/governance.js:525:      <label class="settings-toggle" for="governance-freeze-publishing">
+public/control-center/pages/governance.js:527:        <input id="governance-freeze-publishing" type="checkbox" class="settings-toggle-input" data-governance-policy="freeze_publishing" ${rules.freeze_publishing ? "checked" : ""} />
+public/control-center/pages/governance.js:531:        <label class="settings-field-label" for="governance-owner-content">Content owner</label>
+public/control-center/pages/governance.js:532:        <input id="governance-owner-content" class="settings-control" type="text" data-governance-owner="content" value="${escapeHtml(owners.content || "")}" />
+public/control-center/pages/governance.js:535:        <label class="settings-field-label" for="governance-owner-media">Media owner</label>
+public/control-center/pages/governance.js:536:        <input id="governance-owner-media" class="settings-control" type="text" data-governance-owner="media" value="${escapeHtml(owners.media || "")}" />
+public/control-center/pages/governance.js:539:        <label class="settings-field-label" for="governance-owner-publishing">Publishing owner</label>
+public/control-center/pages/governance.js:540:        <input id="governance-owner-publishing" class="settings-control" type="text" data-governance-owner="publishing" value="${escapeHtml(owners.publishing || "")}" />
+public/control-center/pages/governance.js:626:  const escalations = asArray(sections.escalation_queue).map((item) => ({
+public/control-center/pages/governance.js:628:    queue_kind: "escalation",
+public/control-center/pages/governance.js:629:    selected_key: `escalation:${asString(item.entity_id || item.id || item.title)}`,
+public/control-center/pages/governance.js:631:    queue_summary: item.description || item.summary || "Escalated for follow-up.",
+public/control-center/pages/governance.js:639:  return [...approvals, ...claims, ...brand, ...publish, ...escalations];
+public/control-center/pages/governance.js:644:  const itemLabel = asString(selectedItem?.queue_title || selectedItem?.title || "the selected governance item");
+public/control-center/pages/governance.js:647:      label: "Summarize governance state",
+public/control-center/pages/governance.js:648:      preview: "Explain the current approval pressure, risk level, and next governance priority.",
+public/control-center/pages/governance.js:649:      prompt: `Summarize the current governance state for ${projectLabel}. Cover policy pressure, pending approvals, risky claims, brand safety issues, publish blockers, and the next governance priority.`
+public/control-center/pages/governance.js:653:      preview: "Explain the selected governance item and what decision path is safest.",
+public/control-center/pages/governance.js:657:      label: "Find governance gaps",
+public/control-center/pages/governance.js:658:      preview: "Identify the highest-risk governance gaps and what rules or ownership need tightening.",
+public/control-center/pages/governance.js:659:      prompt: `Review Governance for ${projectLabel} with focus on ${focusLabel}. Identify the highest-risk governance gaps, where approval ownership is weak, and what rules need tightening next.`
+public/control-center/pages/governance.js:671:  const escalations = asArray(sections.escalation_queue).length;
+public/control-center/pages/governance.js:677:    blockers.push("Publishing is currently frozen by governance policy.");
+public/control-center/pages/governance.js:685:  if (escalations > 0) {
+public/control-center/pages/governance.js:686:    blockers.push(`${escalations} escalation${escalations === 1 ? " is" : "s are"} open for higher-level review.`);
+public/control-center/pages/governance.js:690:  if (rules.freeze_publishing || escalations > 0) {
+public/control-center/pages/governance.js:696:  let nextBestAction = "Run a governance AI summary, then keep policy owners and rules aligned with live operations.";
+public/control-center/pages/governance.js:698:    nextBestAction = "Review the selected approval, document decision reasoning, and submit a governance decision.";
+public/control-center/pages/governance.js:715:    escalations
+public/control-center/pages/governance.js:720:function governanceRiskRank(value) {
+public/control-center/pages/governance.js:732:    return governanceRiskRank(item.queue_risk) > governanceRiskRank(highest.queue_risk) ? item : highest;
+public/control-center/pages/governance.js:741:  const escalationChain = asObject(summary?.review_model?.escalation_chain);
+public/control-center/pages/governance.js:744:    escalationChain[normalizedRisk] ||
+public/control-center/pages/governance.js:745:    escalationChain.high ||
+public/control-center/pages/governance.js:746:    escalationChain.critical
+public/control-center/pages/governance.js:748:  return roles.length ? roles.map(titleCase).join(" -> ") : "No escalation path";
+public/control-center/pages/governance.js:754:      <section class="page is-active" data-page="governance">
+public/control-center/pages/governance.js:755:        <div class="governance-shell governance-workspace mhos-clean-root mhos-clean-shell">
+public/control-center/pages/governance.js:782:      <section class="page is-active" data-page="governance">
+public/control-center/pages/governance.js:783:        <div class="governance-shell governance-workspace mhos-clean-root mhos-clean-shell">
+public/control-center/pages/governance.js:789:                <p>Preparing the governance operating surface.</p>
+public/control-center/pages/governance.js:801:            <div class="empty-box">Loading governance console...</div>
+public/control-center/pages/governance.js:810:      <section class="page is-active" data-page="governance">
+public/control-center/pages/governance.js:811:        <div class="governance-shell governance-workspace mhos-clean-root mhos-clean-shell">
+public/control-center/pages/governance.js:846:    escalations: queueItems.filter((item) => item.queue_kind === "escalation").length
+public/control-center/pages/governance.js:855:      escalations: "escalation"
+public/control-center/pages/governance.js:877:  const escalationRoute = getGovernanceEscalationRoute(summary, highestRiskValue || "high");
+public/control-center/pages/governance.js:879:  const selectedDecisionKind = titleCase(executiveFocusItem?.queue_kind || "governance");
+public/control-center/pages/governance.js:882:    <section class="page is-active" data-page="governance">
+public/control-center/pages/governance.js:883:      <div class="governance-shell governance-workspace mhos-clean-root mhos-clean-shell">
+public/control-center/pages/governance.js:884:        <section class="panel mhos-executive-surface mhos-context-ribbon governance-operating-header" aria-label="Executive governance command band">
+public/control-center/pages/governance.js:885:          <div class="panel-header mhos-context-main governance-operating-header-main">
+public/control-center/pages/governance.js:887:              <div class="panel-kicker mhos-context-kicker governance-operating-eyebrow">Governance Operating Surface</div>
+public/control-center/pages/governance.js:888:              <h3 class="mhos-context-title governance-operating-title">Governance Command Center for ${escapeHtml(projectName)}</h3>
+public/control-center/pages/governance.js:889:              <p class="mhos-context-description governance-operating-desc">Canonical executive surface for policy authority, approval pressure, escalation, and safe decision routing.</p>
+public/control-center/pages/governance.js:891:            <span class="card-badge neutral governance-operating-status">${escapeHtml(session.loading ? "Refreshing" : "Active")}</span>
+public/control-center/pages/governance.js:894:          <div class="mhos-executive-summary-grid governance-executive-summary-grid" aria-label="Governance executive anchors">
+public/control-center/pages/governance.js:895:            <article class="mhos-executive-summary-item governance-summary-readiness">
+public/control-center/pages/governance.js:900:            <article class="mhos-executive-summary-item governance-summary-approval">
+public/control-center/pages/governance.js:905:            <article class="mhos-executive-summary-item governance-summary-escalation">
+public/control-center/pages/governance.js:907:              <strong class="mhos-executive-metric-value">${escapeHtml(readiness.escalations ? `${readiness.escalations} active` : "Clear")}</strong>
+public/control-center/pages/governance.js:908:              <small class="mhos-executive-metric-note">${escapeHtml(escalationRoute)}</small>
+public/control-center/pages/governance.js:910:            <article class="mhos-executive-summary-item governance-summary-owner">
+public/control-center/pages/governance.js:915:            <article class="mhos-executive-summary-item governance-summary-risk">
+public/control-center/pages/governance.js:920:            <article class="mhos-executive-summary-item governance-summary-ai-boundary">
+public/control-center/pages/governance.js:922:              <strong class="mhos-executive-metric-value governance-ai-boundary">Prepare / Review / Summarize Only</strong>
+public/control-center/pages/governance.js:923:              <small class="mhos-executive-metric-note governance-ai-boundary-note">AI cannot approve or change policy. Human backend decision required.</small>
+public/control-center/pages/governance.js:927:          <div class="governance-policy-summary-grid">
+public/control-center/pages/governance.js:928:            <div class="governance-policy-block mhos-executive-panel">
+public/control-center/pages/governance.js:929:              <h4>Next best governance action</h4>
+public/control-center/pages/governance.js:930:              <p class="governance-copy mhos-executive-guidance">${escapeHtml(readiness.nextBestAction)}</p>
+public/control-center/pages/governance.js:931:              <div class="governance-rule-list">
+public/control-center/pages/governance.js:932:                <div class="governance-rule-item">
+public/control-center/pages/governance.js:936:                <div class="governance-rule-item">
+public/control-center/pages/governance.js:941:              <div class="governance-actions std-action-row">
+public/control-center/pages/governance.js:942:                <button class="btn btn-secondary" type="button" data-governance-focus="all">View Full Queue</button>
+public/control-center/pages/governance.js:943:                <button class="btn btn-secondary" type="button" data-governance-focus="approvals">Open Approvals</button>
+public/control-center/pages/governance.js:944:                <button class="btn btn-secondary" type="button" data-governance-open-ai>Ask AI for Guidance</button>
+public/control-center/pages/governance.js:947:            <div class="governance-policy-block">
+public/control-center/pages/governance.js:949:              <div class="governance-activity-list">
+public/control-center/pages/governance.js:952:                    <div class="governance-activity-item">
+public/control-center/pages/governance.js:957:                  : `<div class="empty-box">No active governance blockers detected.</div>`}
+public/control-center/pages/governance.js:960:            <div class="governance-policy-block">
+public/control-center/pages/governance.js:962:              <div class="governance-rule-list">
+public/control-center/pages/governance.js:963:                <div class="governance-rule-item">
+public/control-center/pages/governance.js:967:                <div class="governance-rule-item">
+public/control-center/pages/governance.js:969:                  <span>${escapeHtml(escalationRoute)}</span>
+public/control-center/pages/governance.js:975:          <div class="governance-actions std-action-row mhos-executive-action-row">
+public/control-center/pages/governance.js:976:            <button class="btn btn-secondary" type="button" data-governance-action="refresh">Refresh Governance Data</button>
+public/control-center/pages/governance.js:977:            <button class="btn btn-secondary" type="button" data-governance-open-ai>Open AI Context</button>
+public/control-center/pages/governance.js:978:            <button class="btn btn-secondary" type="button" data-governance-focus="approvals">Focus Approvals</button>
+public/control-center/pages/governance.js:982:        <section class="panel mhos-clean-surface" aria-label="Supporting governance signals">
+public/control-center/pages/governance.js:990:          <div class="governance-overview-grid">
+public/control-center/pages/governance.js:996:            ${renderMetric("Escalations", asArray(sections.escalation_queue).length, "Higher-level review", escapeHtml)}
+public/control-center/pages/governance.js:998:          <div class="governance-activity-list">
+public/control-center/pages/governance.js:1001:                <div class="governance-activity-item">
+public/control-center/pages/governance.js:1010:        <div class="governance-workspace-grid">
+public/control-center/pages/governance.js:1011:          <div class="governance-action-stack std-main-column mhos-clean-stack">
+public/control-center/pages/governance.js:1020:              <div class="governance-policy-summary-grid">
+public/control-center/pages/governance.js:1021:                <div class="governance-policy-block">
+public/control-center/pages/governance.js:1023:                  <div class="governance-rule-list">
+public/control-center/pages/governance.js:1025:                      <div class="governance-rule-item">
+public/control-center/pages/governance.js:1032:                <div class="governance-policy-block">
+public/control-center/pages/governance.js:1034:                  <div class="governance-rule-list">
+public/control-center/pages/governance.js:1036:                      <div class="governance-rule-item">
+public/control-center/pages/governance.js:1043:                <div class="governance-policy-block">
+public/control-center/pages/governance.js:1047:                <div class="governance-policy-block">
+public/control-center/pages/governance.js:1061:                  <h3>Pending approvals and governance decisions</h3>
+public/control-center/pages/governance.js:1066:              <div class="governance-focus-tabs">
+public/control-center/pages/governance.js:1073:                  ["escalations", "Escalations", focusCounts.escalations]
+public/control-center/pages/governance.js:1075:                  <button class="governance-focus-tab${session.focus === value ? " is-active" : ""}" type="button" data-governance-focus="${escapeHtml(value)}">
+public/control-center/pages/governance.js:1099:                            <button class="governance-select-link" type="button" data-governance-select="${escapeHtml(item.selected_key)}">
+public/control-center/pages/governance.js:1110:                      : `<tr><td colspan="6"><div class="empty-box">No governance items are visible in this focus state.</div></td></tr>`}
+public/control-center/pages/governance.js:1117:          <div class="governance-action-stack std-right-rail mhos-clean-stack">
+public/control-center/pages/governance.js:1122:                <h3>${escapeHtml(selectedItem?.queue_title || "Select a governance item")}</h3>
+public/control-center/pages/governance.js:1123:                  <p>${escapeHtml(selectedItem ? "Review risk, owner, evidence, and linked approval before decision." : "Choose a governance item from the queue to inspect it.")}</p>
+public/control-center/pages/governance.js:1129:                  <div class="governance-selected-summary">
+public/control-center/pages/governance.js:1133:                  <div class="simple-banner"><strong>Authority focus:</strong> ${escapeHtml(selectedItem.queue_owner || authorityOwner)} owns this ${escapeHtml(titleCase(selectedItem.queue_risk || "medium"))} ${escapeHtml(titleCase(selectedItem.queue_kind || "governance"))} review.</div>
+public/control-center/pages/governance.js:1138:                    governanceData: session.summary,
+public/control-center/pages/governance.js:1154:                        intakeContext.workflows = getSharedHandoff(projectName, "workflows", operations)?.payload?.summary;
+public/control-center/pages/governance.js:1162:                  <div class="governance-selected-grid">
+public/control-center/pages/governance.js:1163:                    <div class="governance-selected-item">
+public/control-center/pages/governance.js:1167:                    <div class="governance-selected-item">
+public/control-center/pages/governance.js:1171:                    <div class="governance-selected-item">
+public/control-center/pages/governance.js:1175:                    <div class="governance-selected-item">
+public/control-center/pages/governance.js:1179:                    <div class="governance-selected-item">
+public/control-center/pages/governance.js:1183:                    <div class="governance-selected-item">
+public/control-center/pages/governance.js:1201:                        <div class="governance-activity-list">
+public/control-center/pages/governance.js:1203:                            <div class="governance-activity-item">
+public/control-center/pages/governance.js:1213:                : `<div class="empty-box">No governance item is selected.</div>`
+public/control-center/pages/governance.js:1227:            <div class="governance-action-stack">
+public/control-center/pages/governance.js:1228:              <div class="simple-banner"><strong>Authority boundary:</strong> Governance records reviewed backend decisions and policy gates. It does not publish, send, or execute directly. High-risk decisions require confirmation, evidence review, and backend authority remains enforced.</div>
+public/control-center/pages/governance.js:1230:              <textarea id="governanceDecisionNote" class="setup-input setup-textarea governance-note" rows="4" placeholder="Add a decision reason, change request, or escalation note.">${escapeHtml(selectedItem?.decision_note || "")}</textarea>
+public/control-center/pages/governance.js:1231:              <div class="governance-actions std-action-row">
+public/control-center/pages/governance.js:1232:                <button class="btn btn-secondary" type="button" data-governance-action="refresh">Refresh</button>
+public/control-center/pages/governance.js:1233:                <button class="btn btn-primary" type="button" data-governance-action="save-policy">Save Backend Governance Policy</button>
+public/control-center/pages/governance.js:1234:                <button class="btn btn-secondary" type="button" data-governance-action="sync-settings"${Object.keys(settingsDraft).length ? "" : " disabled"}>Review & Sync Settings-Derived Rules</button>
+public/control-center/pages/governance.js:1238:                      <button class="btn btn-primary" type="button" data-governance-decision="approved" data-approval-id="${escapeHtml(selectedItem.id)}">Submit Reviewed Approval</button>
+public/control-center/pages/governance.js:1239:                      <button class="btn btn-secondary" type="button" data-governance-decision="rejected" data-approval-id="${escapeHtml(selectedItem.id)}">Submit Rejection Decision</button>
+public/control-center/pages/governance.js:1240:                      <button class="btn btn-secondary" type="button" data-governance-decision="changes_requested" data-approval-id="${escapeHtml(selectedItem.id)}">Request Changes Review</button>
+public/control-center/pages/governance.js:1241:                      <button class="btn btn-secondary" type="button" data-governance-decision="escalated" data-approval-id="${escapeHtml(selectedItem.id)}">Escalate Review</button>
+public/control-center/pages/governance.js:1242:                      <button class="btn btn-secondary" type="button" data-governance-decision="overridden" data-approval-id="${escapeHtml(selectedItem.id)}">Record High-Risk Override</button>
+public/control-center/pages/governance.js:1252:                        data-governance-request-approval="true"
+public/control-center/pages/governance.js:1265:              <div class="governance-policy-summary-grid">
+public/control-center/pages/governance.js:1266:                <div class="governance-policy-block">
+public/control-center/pages/governance.js:1268:                  <div class="governance-activity-list">
+public/control-center/pages/governance.js:1271:                        <div class="governance-activity-item">
+public/control-center/pages/governance.js:1279:                <div class="governance-policy-block">
+public/control-center/pages/governance.js:1281:                  <div class="governance-rule-list">
+public/control-center/pages/governance.js:1282:                    ${Object.entries(asObject(summary.review_model?.escalation_chain)).map(([risk, roles]) => `
+public/control-center/pages/governance.js:1283:                      <div class="governance-rule-item">
+public/control-center/pages/governance.js:1285:                        <span>${escapeHtml(asArray(roles).map(titleCase).join(" -> ") || "No escalation path")}</span>
+public/control-center/pages/governance.js:1304:          <div class="simple-banner"><strong>AI guidance scope:</strong> Policy pressure, approval readiness, ownership coverage, risk, and next governance move.</div>
+public/control-center/pages/governance.js:1305:          <div class="governance-ai-toolbar">
+public/control-center/pages/governance.js:1306:            <button class="btn btn-secondary" type="button" data-governance-open-ai>Open AI: Review in AI Workspace</button>
+public/control-center/pages/governance.js:1310:              <button class="quick-action-btn" type="button" data-governance-ai-prompt="${index}">
+public/control-center/pages/governance.js:1331:  Array.from(root.querySelectorAll("[data-governance-decision]")).forEach((button) => {
+public/control-center/pages/governance.js:1334:      const decision = button.getAttribute("data-governance-decision") || "";
+public/control-center/pages/governance.js:1335:      const note = root.querySelector("#governanceDecisionNote")?.value?.trim() || `${titleCase(decision)} from Governance console.`;
+public/control-center/pages/governance.js:1336:      const escalationChain = asObject(session.summary?.review_model?.escalation_chain);
+public/control-center/pages/governance.js:1337:      const escalateTo = asArray(escalationChain.high)[1] || asArray(escalationChain.high)[0] || "admin";
+public/control-center/pages/governance.js:1347:          actor: "governance-console",
+public/control-center/pages/governance.js:1358:  Array.from(root.querySelectorAll("[data-governance-focus]")).forEach((button) => {
+public/control-center/pages/governance.js:1360:      session.focus = button.getAttribute("data-governance-focus") || "all";
+public/control-center/pages/governance.js:1365:  Array.from(root.querySelectorAll("[data-governance-select]")).forEach((button) => {
+public/control-center/pages/governance.js:1367:      session.selectedKey = button.getAttribute("data-governance-select") || "";
+public/control-center/pages/governance.js:1372:  Array.from(root.querySelectorAll("[data-governance-request-approval]")).forEach((button) => {
+public/control-center/pages/governance.js:1391:          requested_by: "governance-console",
+public/control-center/pages/governance.js:1394:          source_page: "governance",
+public/control-center/pages/governance.js:1395:          route_target: "governance"
+public/control-center/pages/governance.js:1397:        context.showMessage("Approval request added to the governance queue.");
+public/control-center/pages/governance.js:1405:  Array.from(root.querySelectorAll("[data-governance-action]")).forEach((button) => {
+public/control-center/pages/governance.js:1407:      const action = button.getAttribute("data-governance-action");
+public/control-center/pages/governance.js:1416:        Array.from(root.querySelectorAll("[data-governance-policy]")).forEach((control) => {
+public/control-center/pages/governance.js:1417:          policyRules[control.getAttribute("data-governance-policy")] = Boolean(control.checked);
+public/control-center/pages/governance.js:1421:        Array.from(root.querySelectorAll("[data-governance-owner]")).forEach((control) => {
+public/control-center/pages/governance.js:1422:          approvalOwners[control.getAttribute("data-governance-owner")] = control.value || "";
+public/control-center/pages/governance.js:1432:            actor: "governance-console",
+public/control-center/pages/governance.js:1439:          context.showError(error.message || "Failed to save governance policy.");
+public/control-center/pages/governance.js:1447:          context.showError("No durable Settings snapshot was found in the governance bridge for this project.");
+public/control-center/pages/governance.js:1451:        const confirmed = window.confirm("Sync Settings-derived rules to Governance policy? This updates durable Governance rules including approval-before-publish, claim review, escalation, owners, override behavior, and policy behavior. Continue only if the Settings snapshot was reviewed.");
+public/control-center/pages/governance.js:1458:            actor: "governance-console",
+public/control-center/pages/governance.js:1470:  Array.from(root.querySelectorAll("[data-governance-open-ai]")).forEach((button) => {
+public/control-center/pages/governance.js:1479:  Array.from(root.querySelectorAll("[data-governance-ai-prompt]")).forEach((button) => {
+public/control-center/pages/governance.js:1481:      const prompt = prompts[Number(button.getAttribute("data-governance-ai-prompt"))];
+public/control-center/pages/governance.js:1490:export const governanceRoute = {
+public/control-center/pages/governance.js:1491:  id: "governance",
+public/control-center/pages/governance.js:1496:    description: "Review backend approvals, policy violations, overrides, escalation, publishing gates, and audit visibility across content, media, campaigns, and publishing."
+public/control-center/pages/governance.js:1498:  template: `<section class="page is-active" data-page="governance"><div class="governance-shell"></div></section>`,
+public/control-center/pages/ai-command.js:20:        setSharedHandoff
+public/control-center/pages/ai-command.js:59:                id: "video_lead",
+public/control-center/pages/ai-command.js:69:                summary: "Publishing readiness, schedule review, and handoff preparation.",
+public/control-center/pages/ai-command.js:90:                summary: "Claims review, approvals, safety language, and governance checks.",
+public/control-center/pages/ai-command.js:91:                routeHint: "governance"
+public/control-center/pages/ai-command.js:97:                summary: "Tasks, timelines, handoffs, approvals, and execution plans.",
+public/control-center/pages/ai-command.js:98:                routeHint: "workflows"
+public/control-center/pages/ai-command.js:101:                id: "customer_ops",
+public/control-center/pages/ai-command.js:104:                summary: "Inbox review, reply drafts, ticket drafts, SLA risk, and escalation routing.",
+public/control-center/pages/ai-command.js:105:                routeHint: "operations-centers"
+public/control-center/pages/ai-command.js:108:                id: "sales_crm",
+public/control-center/pages/ai-command.js:111:                summary: "Lead qualification, outreach drafts, follow-up cadence, and CRM handoff notes.",
+public/control-center/pages/ai-command.js:112:                routeHint: "workflows"
+public/control-center/pages/ai-command.js:126:	video_lead: "video_lead",
+public/control-center/pages/ai-command.js:129:	customer_operations: "customer_ops",
+public/control-center/pages/ai-command.js:130:	customer_ops: "customer_ops",
+public/control-center/pages/ai-command.js:131:	support: "customer_ops",
+public/control-center/pages/ai-command.js:132:	sales: "sales_crm",
+public/control-center/pages/ai-command.js:133:	crm: "sales_crm",
+public/control-center/pages/ai-command.js:134:	sales_crm: "sales_crm",
+public/control-center/pages/ai-command.js:151:		cannotDo: ["Publish campaigns directly", "Execute workflows automatically", "Approve content", "Set live budgets"],
+public/control-center/pages/ai-command.js:153:		safetyNote: "All outputs are guidance and draft only. Execution requires explicit confirmation.",
+public/control-center/pages/ai-command.js:163:		canHelp: ["Draft captions and hooks", "Write email copy", "Create landing page text", "Prepare publisher handoff", "Suggest message variants"],
+public/control-center/pages/ai-command.js:164:		cannotDo: ["Publish directly", "Approve risky claims", "Invent unsupported facts", "Run workflows automatically"],
+public/control-center/pages/ai-command.js:166:		safetyNote: "Drafts require review before publishing. Cannot approve or publish without confirmation.",
+public/control-center/pages/ai-command.js:176:		canHelp: ["Write creative briefs", "Advise on visual direction", "Map format requirements", "Review brand alignment", "Prepare media handoffs"],
+public/control-center/pages/ai-command.js:177:		cannotDo: ["Generate images directly", "Upload assets without review", "Approve without confirmation", "Execute media jobs"],
+public/control-center/pages/ai-command.js:179:		safetyNote: "Direction and briefs only. Media generation requires backend confirmation and explicit action.",
+public/control-center/pages/ai-command.js:183:		id: "video_lead",
+public/control-center/pages/ai-command.js:190:		cannotDo: ["Generate video directly", "Upload footage without review", "Approve without confirmation", "Run media jobs automatically"],
+public/control-center/pages/ai-command.js:200:		summary: "Publishing readiness, schedule review, and handoff preparation.",
+public/control-center/pages/ai-command.js:201:		placeholder: "Ask the Publisher to review publishing readiness, check scheduling, or prepare a handoff package…",
+public/control-center/pages/ai-command.js:202:		canHelp: ["Review publishing readiness", "Check scheduled jobs", "Prepare handoff packages", "Map publishing dependencies", "Flag pre-publish risks"],
+public/control-center/pages/ai-command.js:203:		cannotDo: ["Publish without explicit approval", "Override schedules", "Bypass governance gates", "Push to live channels directly"],
+public/control-center/pages/ai-command.js:239:		summary: "Claims review, approval safety, publishing risk, and governance notes.",
+public/control-center/pages/ai-command.js:240:		placeholder: "Ask the Compliance Reviewer to check claims, approval risks, publishing safety, and governance notes…",
+public/control-center/pages/ai-command.js:241:		canHelp: ["Review marketing claims", "Flag approval risks", "Check publishing safety", "Prepare governance notes", "Identify compliance blockers"],
+public/control-center/pages/ai-command.js:242:		cannotDo: ["Grant approvals directly", "Override governance gates", "Publish on behalf of approvers", "Remove flags without review"],
+public/control-center/pages/ai-command.js:244:		safetyNote: "Compliance review is advisory. Approvals always require human confirmation before execution.",
+public/control-center/pages/ai-command.js:252:		summary: "Tasks, timelines, handoffs, approvals, and execution plans.",
+public/control-center/pages/ai-command.js:253:		placeholder: "Ask the Operations Lead to turn this into tasks, workflow steps, or handoffs…",
+public/control-center/pages/ai-command.js:254:		canHelp: ["Create task plans", "Map execution sequences", "Prepare workflow handoffs", "Review execution health", "Identify operational blockers"],
+public/control-center/pages/ai-command.js:255:		cannotDo: ["Run workflows without confirmation", "Auto-approve tasks", "Override authority gates", "Execute backend operations directly"],
+public/control-center/pages/ai-command.js:257:		safetyNote: "Task plans and handoffs only. Workflow execution requires explicit user confirmation.",
+public/control-center/pages/ai-command.js:261:		id: "customer_ops",
+public/control-center/pages/ai-command.js:265:		summary: "Inbox review, reply drafts, ticket drafts, SLA risk, customer profile context, and escalation routing.",
+public/control-center/pages/ai-command.js:266:		placeholder: "Ask the Customer Operations Lead to summarize a customer thread, draft a safe reply, prepare a ticket draft, check SLA risk, or route an escalation for review…",
+public/control-center/pages/ai-command.js:267:		canHelp: ["Review inbox context", "Summarize customer threads", "Draft safe replies", "Prepare ticket drafts", "Flag SLA and escalation risk"],
+public/control-center/pages/ai-command.js:268:		cannotDo: ["Send customer replies", "Create live tickets", "Change SLA policy", "Escalate without confirmation"],
+public/control-center/pages/ai-command.js:270:		safetyNote: "Customer operations outputs are drafts only. Sending replies, ticket creation, and escalations require confirmation in the owning surface.",
+public/control-center/pages/ai-command.js:274:		id: "sales_crm",
+public/control-center/pages/ai-command.js:278:		summary: "Lead qualification, outreach drafts, follow-up cadence, CRM profile summaries, and sales handoff notes.",
+public/control-center/pages/ai-command.js:279:		placeholder: "Ask the Sales / CRM Lead to qualify a lead, draft outreach, plan follow-ups, summarize CRM context, or prepare a sales handoff for review…",
+public/control-center/pages/ai-command.js:280:		canHelp: ["Qualify lead context", "Draft outreach", "Plan follow-up sequences", "Summarize CRM profiles", "Prepare sales handoffs"],
+public/control-center/pages/ai-command.js:281:		cannotDo: ["Send outreach", "Mutate CRM records", "Advance pipeline stages", "Confirm follow-ups without review"],
+public/control-center/pages/ai-command.js:283:		safetyNote: "Sales and CRM outputs are guidance and drafts only. CRM mutations and outreach sends require confirmation in the owning surface.",
+public/control-center/pages/ai-command.js:299:		{ label: "Prepare a Publisher handoff", sub: "Package ready content for review" },
+public/control-center/pages/ai-command.js:306:		{ label: "Prepare a media handoff", sub: "Package direction for the team" }
+public/control-center/pages/ai-command.js:308:	video_lead: [
+public/control-center/pages/ai-command.js:318:		{ label: "Prepare a handoff package", sub: "For the approver review" }
+public/control-center/pages/ai-command.js:335:		{ label: "Prepare governance notes", sub: "Document compliance status" },
+public/control-center/pages/ai-command.js:340:		{ label: "Draft a workflow handoff", sub: "Prepare for the next owner" },
+public/control-center/pages/ai-command.js:344:	customer_ops: [
+public/control-center/pages/ai-command.js:345:		{ label: "Summarize customer thread", sub: "Capture issue, tone, and next reply" },
+public/control-center/pages/ai-command.js:346:		{ label: "Draft customer reply", sub: "Safe response for review" },
+public/control-center/pages/ai-command.js:347:		{ label: "Check SLA risk", sub: "Flag urgency and escalation path" },
+public/control-center/pages/ai-command.js:348:		{ label: "Prepare escalation", sub: "Route support, sales, or operations" }
+public/control-center/pages/ai-command.js:350:	sales_crm: [
+public/control-center/pages/ai-command.js:351:		{ label: "Qualify this lead", sub: "Fit, intent, urgency, next step" },
+public/control-center/pages/ai-command.js:352:		{ label: "Draft outreach", sub: "Personalized message for review" },
+public/control-center/pages/ai-command.js:353:		{ label: "Build follow-up sequence", sub: "Multi-step sales cadence" },
+public/control-center/pages/ai-command.js:354:		{ label: "Prepare sales handoff", sub: "Route context to operations" }
+public/control-center/pages/ai-command.js:362:	{ label: "Prepare a full handoff sequence", sub: "Strategy, creative, compliance, publishing, ops" },
+public/control-center/pages/ai-command.js:363:	{ label: "Review customer and sales impact", sub: "Customer Ops, Sales / CRM, Operations" }
+public/control-center/pages/ai-command.js:370:	{ id: "draft", title: "Prepare", description: "Create guidance, copy, task, or handoff context." },
+public/control-center/pages/ai-command.js:381:	{ id: "handoff", label: "Handoff Preview", helper: "Destination package" },
+public/control-center/pages/ai-command.js:392:	video_lead: "VL",
+public/control-center/pages/ai-command.js:398:	customer_ops: "CO",
+public/control-center/pages/ai-command.js:399:	sales_crm: "SC"
+public/control-center/pages/ai-command.js:433:		{ id: "funnel-mapping", label: "Funnel Mapping", action: "preview", intent: "guidance", template: "Map the funnel for {project}. Include awareness, consideration, conversion, retention, and handoff points." },
+public/control-center/pages/ai-command.js:440:		{ id: "publisher-package", label: "Publisher Package", action: "preview", intent: "handoff", template: "Prepare a Publisher handoff for {project}. Include German copy package, CTA, notes, and remaining checks." }
+public/control-center/pages/ai-command.js:449:	video_lead: [
+public/control-center/pages/ai-command.js:457:		{ id: "publishing-checklist", label: "Publishing Checklist", action: "preview", intent: "handoff", template: "Build a publishing checklist for {project}. Include German copy, assets, claims checks, and channel readiness." },
+public/control-center/pages/ai-command.js:458:		{ id: "final-packaging", label: "Final Packaging", action: "preview", intent: "handoff", template: "Prepare a final publishing package for {project}. Include copy, CTA, asset notes, approvals, and destination channel." },
+public/control-center/pages/ai-command.js:460:		{ id: "schedule-draft", label: "Schedule Draft", action: "preview", intent: "workflow", template: "Prepare a publishing schedule draft for {project}. Include channel cadence, dependencies, and review gates." },
+public/control-center/pages/ai-command.js:478:		{ id: "claims-check", label: "Claims Check", action: "preview", intent: "guidance", template: "Review marketing claims for {project}. Flag unsupported, high-risk, or evidence-dependent wording." },
+public/control-center/pages/ai-command.js:480:		{ id: "safety-checklist", label: "Safety Checklist", action: "preview", intent: "handoff", template: "Prepare a safety checklist for {project}. Include policy checks, evidence required, and approval notes." },
+public/control-center/pages/ai-command.js:481:		{ id: "publish-readiness", label: "Publish Readiness", action: "preview", intent: "handoff", template: "Review publish readiness for {project}. Confirm what needs human approval before release." },
+public/control-center/pages/ai-command.js:482:		{ id: "open-governance", label: "Open Governance", action: "route", route: "governance" }
+public/control-center/pages/ai-command.js:485:		{ id: "timeline-draft", label: "Timeline Draft", action: "preview", intent: "workflow", template: "Draft an execution timeline for {project}. Include milestones, owners, dependencies, and review gates." },
+public/control-center/pages/ai-command.js:486:		{ id: "handoff-routing", label: "Handoff Routing", action: "preview", intent: "handoff", template: "Prepare handoff routing for {project}. Include source, destination, decision gates, and required confirmations." },
+public/control-center/pages/ai-command.js:489:		{ id: "open-workflows", label: "Open Workflows / Operations", action: "route", route: "workflows" }
+public/control-center/pages/ai-command.js:491:	customer_ops: [
+public/control-center/pages/ai-command.js:492:		{ id: "review-unified-inbox", label: "Review Unified Inbox", action: "preview", intent: "guidance", template: "Review the Unified Inbox readiness for {project}. Summarize visible customer-operation signals, open gaps, and safe next review steps. Do not claim inbox actions happened." },
+public/control-center/pages/ai-command.js:493:		{ id: "summarize-customer-thread", label: "Summarize Customer Thread", action: "preview", intent: "guidance", template: "Summarize this customer thread for {project}. Include customer issue, sentiment, reply goal, missing details, and safe next step." },
+public/control-center/pages/ai-command.js:494:		{ id: "draft-customer-reply", label: "Draft Customer Reply", action: "preview", intent: "guidance", template: "Draft a customer reply for {project}. Keep it helpful, calm, review-ready, and do not claim any operational action has been completed." },
+public/control-center/pages/ai-command.js:495:		{ id: "create-ticket-draft", label: "Create Ticket Draft", action: "preview", intent: "task", template: "Create a ticket draft for {project}. Include issue, priority, owner suggestion, evidence needed, and next safe action." },
+public/control-center/pages/ai-command.js:496:		{ id: "check-sla-risk", label: "Check SLA Risk", action: "preview", intent: "guidance", template: "Check SLA risk for {project}. Flag urgency, risk level, missing runtime data, and escalation recommendation for review." },
+public/control-center/pages/ai-command.js:497:		{ id: "prepare-escalation", label: "Prepare Escalation", action: "preview", intent: "handoff", template: "Prepare an escalation draft for {project}. Include reason, customer impact, owner, confirmation needed, and destination team." },
+public/control-center/pages/ai-command.js:498:		{ id: "customer-profile-snapshot", label: "Customer Profile Snapshot", action: "preview", intent: "guidance", template: "Prepare a customer profile snapshot for {project}. Include known context, purchase/support signals, missing fields, and safe follow-up questions." },
+public/control-center/pages/ai-command.js:499:		{ id: "route-support-sales-ops", label: "Route to Support / Sales / Operations", action: "preview", intent: "handoff", template: "Prepare routing guidance for {project}. Decide whether the customer item belongs with Support, Sales, or Operations, and explain the review gate." }
+public/control-center/pages/ai-command.js:501:	sales_crm: [
+public/control-center/pages/ai-command.js:502:		{ id: "lead-qualification", label: "Lead Qualification", action: "preview", intent: "guidance", template: "Qualify the lead for {project}. Include fit, intent, urgency, missing CRM fields, and the safest next step." },
+public/control-center/pages/ai-command.js:503:		{ id: "outreach-draft", label: "Outreach Draft", action: "preview", intent: "guidance", template: "Draft outreach for {project}. Include subject or opener, personalized message, CTA, and review notes before sending." },
+public/control-center/pages/ai-command.js:504:		{ id: "follow-up-sequence", label: "Follow-up Sequence", action: "preview", intent: "workflow", template: "Build a follow-up sequence for {project}. Include timing, message angle, CTA, stop condition, and confirmation requirements." },
+public/control-center/pages/ai-command.js:505:		{ id: "crm-profile-summary", label: "CRM Profile Summary", action: "preview", intent: "guidance", template: "Summarize the CRM profile context for {project}. Include fit, history, open questions, and next sales action without mutating CRM data." },
+public/control-center/pages/ai-command.js:506:		{ id: "pipeline-next-step", label: "Pipeline Next Step", action: "preview", intent: "task", template: "Recommend the pipeline next step for {project}. Include stage, rationale, owner, risk, and required confirmation." },
+public/control-center/pages/ai-command.js:507:		{ id: "dealer-salon-outreach", label: "Dealer / Salon Outreach", action: "preview", intent: "guidance", template: "Draft dealer or salon outreach for {project}. Include positioning, proof needs, offer angle, CTA, and follow-up note." },
+public/control-center/pages/ai-command.js:508:		{ id: "influencer-lead-plan", label: "Influencer Lead Plan", action: "preview", intent: "workflow", template: "Prepare an influencer lead plan for {project}. Include target profile, outreach angle, qualification criteria, and handoff path." },
+public/control-center/pages/ai-command.js:509:		{ id: "sales-handoff-draft", label: "Sales Handoff", action: "preview", intent: "handoff", template: "Prepare a sales handoff draft for {project}. Include lead context, recommended next action, owner, and confirmation needed." }
+public/control-center/pages/ai-command.js:604:		purpose: "Translate intent into executable workflows and handoffs.",
+public/control-center/pages/ai-command.js:635:		if (/act as the video lead/i.test(text)) return "video_lead";
+public/control-center/pages/ai-command.js:640:		if (/act as the operations lead/i.test(text)) return "operations";
+public/control-center/pages/ai-command.js:641:		if (/act as the customer operations lead|act as customer ops/i.test(text)) return "customer_ops";
+public/control-center/pages/ai-command.js:642:		if (/act as the sales|act as the crm|sales \/ crm lead/i.test(text)) return "sales_crm";
+public/control-center/pages/ai-command.js:667:			targetPage: "workflows",
+public/control-center/pages/ai-command.js:762:    "Prepare a handoff summary for:",
+public/control-center/pages/ai-command.js:1232:			"When the request touches inbox, tickets, leads, outreach, or CRM, include Customer Ops -> Sales/CRM -> Operations.",
+public/control-center/pages/ai-command.js:1245:                "If the user writes Arabic, reply in Arabic. If the user writes English, reply in English. If the user writes German, reply in German.",
+public/control-center/pages/ai-command.js:1246:                `Use ${safeOutputLanguage} only for customer-facing or publishable copy such as captions, ads, emails, landing pages, final campaign text, or publishing packages.`,
+public/control-center/pages/ai-command.js:1301:	if (outputType === "workflow") return "workflows";
+public/control-center/pages/ai-command.js:1302:	if (id === "strategist") return outputType === "task" ? "campaign-studio" : "workflows";
+public/control-center/pages/ai-command.js:1305:	if (id === "video_lead") return "media-studio";
+public/control-center/pages/ai-command.js:1309:	if (id === "compliance_reviewer") return "governance";
+public/control-center/pages/ai-command.js:1310:	if (id === "operations") return outputType === "task" ? "task-center" : "workflows";
+public/control-center/pages/ai-command.js:1311:	if (id === "customer_ops") return outputType === "task" ? "task-center" : "operations-centers";
+public/control-center/pages/ai-command.js:1312:	if (id === "sales_crm") return "workflows";
+public/control-center/pages/ai-command.js:1313:	return "workflows";
+public/control-center/pages/ai-command.js:1336:                                : activeTab === "handoff"
+public/control-center/pages/ai-command.js:1337:                                        ? "handoff"
+public/control-center/pages/ai-command.js:1341:        const looksTaskLike = /\b(task|tasks|handoff|ticket|tickets|follow-up|follow up|owner|owners|assignee|assigned|due date|priority|priorities|backlog|checklist|next task|action item|action items)\b/.test(text);
+public/control-center/pages/ai-command.js:1342:        const looksWorkflowLike = /\b(workflow|workflows|process|sequence|phase|phases|approval flow|automation|operating loop|step-by-step|steps|dependencies|trigger|review gate|execution flow)\b/.test(text);
+public/control-center/pages/ai-command.js:1346:        const looksGovernanceLike = /\b(compliance|governance|claim|claims|risk|risks|approval|approvals|policy|privacy|legal|safe language|safety review)\b/.test(text);
+public/control-center/pages/ai-command.js:1350:        if (outputType === "handoff" || outputType === "task" || looksTaskLike) {
+public/control-center/pages/ai-command.js:1352:                return { outputType, destinationRoute: "task-center" };
+public/control-center/pages/ai-command.js:1357:                return { outputType, destinationRoute: explicitDestination || "workflows" };
+public/control-center/pages/ai-command.js:1375:        if (/governance|compliance|risk|approval/.test(outputType) || looksGovernanceLike) {
+public/control-center/pages/ai-command.js:1376:                outputType = "governance";
+public/control-center/pages/ai-command.js:1377:                return { outputType, destinationRoute: explicitDestination || "governance" };
+public/control-center/pages/ai-command.js:1389:                        destinationRoute: explicitDestination || (session?.teamMode === "team" ? "workflows" : "campaign-studio")
+public/control-center/pages/ai-command.js:1406:		governance: "Governance",
+public/control-center/pages/ai-command.js:1407:		"operations-centers": "Operations Centers",
+public/control-center/pages/ai-command.js:1408:		"task-center": "Task Center",
+public/control-center/pages/ai-command.js:1410:		workflows: "Workflows"
+public/control-center/pages/ai-command.js:1429:		confirmationRequired: outputType === "handoff" || specialistId === "publisher" || specialistId === "compliance_reviewer",
+public/control-center/pages/ai-command.js:1435:		confirmationNote: "Execution, approvals, and publishing require explicit confirmation in the owning workspace."
+public/control-center/pages/ai-command.js:1519:	if (specialistId === "video_lead") {
+public/control-center/pages/ai-command.js:1537:			title: outputType === "handoff" ? "Handoff Preview: Publishing package" : "Publishing Draft: Readiness checklist",
+public/control-center/pages/ai-command.js:1547:				"Prepare handoff for publishing review"
+public/control-center/pages/ai-command.js:1549:			confirmationRequired: true,
+public/control-center/pages/ai-command.js:1589:				"Coverage gaps mapped for follow-up",
+public/control-center/pages/ai-command.js:1604:				"Prepare governance notes",
+public/control-center/pages/ai-command.js:1607:			confirmationRequired: true,
+public/control-center/pages/ai-command.js:1612:	if (specialistId === "customer_ops") {
+public/control-center/pages/ai-command.js:1615:			title: outputType === "task" ? "Ticket Draft: Customer operations follow-up" : "Customer Ops Draft: Thread, reply, and routing",
+public/control-center/pages/ai-command.js:1616:			summary: "Customer operations draft prepared with safe reply language, ticket notes, SLA review, and escalation guardrails.",
+public/control-center/pages/ai-command.js:1617:			mainOutput: "Review the customer context, confirm missing details, then route the draft through the owning support, sales, or operations surface.",
+public/control-center/pages/ai-command.js:1618:			replyDraft: [
+public/control-center/pages/ai-command.js:1619:				"Thank the customer, acknowledge the issue, and confirm the next reviewed support step.",
+public/control-center/pages/ai-command.js:1622:			ticketDraft: [
+public/control-center/pages/ai-command.js:1623:				"Issue summary: customer concern or request captured for review.",
+public/control-center/pages/ai-command.js:1624:				"Priority: draft priority pending runtime inbox and SLA confirmation.",
+public/control-center/pages/ai-command.js:1625:				"Owner: support, sales, or operations to be confirmed before creation."
+public/control-center/pages/ai-command.js:1629:				"SLA and escalation decisions require confirmation in the owning operations surface."
+public/control-center/pages/ai-command.js:1631:			nextStep: "Review the draft, confirm the destination team, then route through support, sales, or operations.",
+public/control-center/pages/ai-command.js:1633:				"Summarize the customer thread",
+public/control-center/pages/ai-command.js:1634:				"Draft a safe customer reply",
+public/control-center/pages/ai-command.js:1635:				"Create ticket draft fields for review",
+public/control-center/pages/ai-command.js:1636:				"Confirm escalation or routing before action"
+public/control-center/pages/ai-command.js:1638:			confirmationRequired: true,
+public/control-center/pages/ai-command.js:1639:			safetyLabel: "No reply sent, ticket created, SLA changed, or escalation triggered."
+public/control-center/pages/ai-command.js:1643:	if (specialistId === "sales_crm") {
+public/control-center/pages/ai-command.js:1646:			title: outputType === "handoff" ? "Sales Handoff" : "Sales / CRM Draft: Lead and outreach plan",
+public/control-center/pages/ai-command.js:1647:			summary: "Sales and CRM draft prepared with lead qualification, outreach direction, follow-up cadence, and pipeline handoff notes.",
+public/control-center/pages/ai-command.js:1648:			mainOutput: "Use this as a sales planning draft. Confirm CRM context and owner before sending outreach or changing pipeline status.",
+public/control-center/pages/ai-command.js:1649:			outreachDraft: [
+public/control-center/pages/ai-command.js:1650:				"Opening: personalized reason for reaching out based on the lead segment.",
+public/control-center/pages/ai-command.js:1657:				"Stop condition: pause when the lead opts out or owner confirms no fit."
+public/control-center/pages/ai-command.js:1665:				"CRM profile and pipeline changes remain outside AI Team.",
+public/control-center/pages/ai-command.js:1666:				"Outreach and follow-ups require confirmation before sending."
+public/control-center/pages/ai-command.js:1668:			nextStep: "Review the lead fit, confirm owner, then route the handoff to operations or the CRM surface.",
+public/control-center/pages/ai-command.js:1671:				"Draft outreach for review",
+public/control-center/pages/ai-command.js:1672:				"Prepare follow-up sequence",
+public/control-center/pages/ai-command.js:1673:				"Route sales handoff without mutating CRM data"
+public/control-center/pages/ai-command.js:1675:			confirmationRequired: true,
+public/control-center/pages/ai-command.js:1676:			safetyLabel: "No outreach sent, CRM record changed, follow-up scheduled, or pipeline stage advanced."
+public/control-center/pages/ai-command.js:1689:					"Stage 3: Compliance/review gate",
+public/control-center/pages/ai-command.js:1690:					"Stage 4: Destination handoff and confirmation"
+public/control-center/pages/ai-command.js:1697:			title: outputType === "handoff" ? "Handoff Preview: Operations package" : "Operations Draft: Task and handoff plan",
+public/control-center/pages/ai-command.js:1702:				"Prepare destination handoff context",
+public/control-center/pages/ai-command.js:1722:		handoff: "handoff"
+public/control-center/pages/ai-command.js:1744:			"Customer Ops and Sales / CRM join when the request touches inbox, tickets, leads, outreach, or CRM"
+public/control-center/pages/ai-command.js:1748:			"Writer: draft hooks, captions, messages, email, or outreach copy",
+public/control-center/pages/ai-command.js:1752:			"Customer Ops / Sales: add reply, ticket, lead, outreach, or CRM handoff drafts when relevant",
+public/control-center/pages/ai-command.js:1753:			"Operations: convert the reviewed output into safe tasks, workflow draft, or handoff context"
+public/control-center/pages/ai-command.js:1755:		destinationRoute: outputType === "task" ? "task-center" : "workflows",
+public/control-center/pages/ai-command.js:1757:		confirmationNote: "No task, workflow, outreach, customer reply, CRM update, approval, or publishing action is executed from Full Team mode.",
+public/control-center/pages/ai-command.js:1767:		handoff: "Handoff Preview",
+public/control-center/pages/ai-command.js:1792:	lines.push(`Confirmation: ${output.confirmationRequired ? "Required before execution" : "Required for execution actions"}`);
+public/control-center/pages/ai-command.js:2004:		operations: ["task plan", "workflow", "handoff", "approval", "timeline", "execution plan", "route", "publish", "status", "priority", "priorities", "blocking", "blocker", "readiness", "next", "do next"],
+public/control-center/pages/ai-command.js:2005:		customer_ops: ["customer", "support", "inbox", "ticket", "tickets", "sla", "reply", "thread", "escalation", "complaint", "refund"],
+public/control-center/pages/ai-command.js:2006:		sales_crm: ["lead", "leads", "crm", "sales", "outreach", "follow-up", "follow up", "pipeline", "dealer", "salon", "influencer"]
+public/control-center/pages/ai-command.js:2113:			top ? `Create a follow-up asset using ${extractTopMessage(top)}'s pattern.` : "Load social insight data before expanding content queue.",
+public/control-center/pages/ai-command.js:2257:	if (!routeSuggestions.length) routeSuggestions.push(routeSuggestion("Workflows", "workflows", "Use Workflows when the task spans multiple execution areas."));
+public/control-center/pages/ai-command.js:2383:	workflows: "Workflows",
+public/control-center/pages/ai-command.js:2388:	governance: "Governance",
+public/control-center/pages/ai-command.js:2389:	"operations-centers": "Operations Centers",
+public/control-center/pages/ai-command.js:2390:	"task-center": "Task Center",
+public/control-center/pages/ai-command.js:2405:	workflows: "operations",
+public/control-center/pages/ai-command.js:2410:	governance: "compliance_reviewer",
+public/control-center/pages/ai-command.js:2411:	"operations-centers": "operations",
+public/control-center/pages/ai-command.js:2412:	"task-center": "operations",
+public/control-center/pages/ai-command.js:2426:	"customer-ops": "customer_ops",
+public/control-center/pages/ai-command.js:2427:	customer_ops: "customer_ops",
+public/control-center/pages/ai-command.js:2428:	"sales-crm": "sales_crm",
+public/control-center/pages/ai-command.js:2429:	sales_crm: "sales_crm"
+public/control-center/pages/ai-command.js:2441:	workflow: "workflows",
+public/control-center/pages/ai-command.js:2444:	operation: "operations-centers",
+public/control-center/pages/ai-command.js:2445:	operations: "operations-centers",
+public/control-center/pages/ai-command.js:2446:	tasks: "task-center",
+public/control-center/pages/ai-command.js:2451:	govern: "governance",
+public/control-center/pages/ai-command.js:2511:	const fallbackRoute = sourcePage === "workspace" ? "workflows" : sourcePage;
+public/control-center/pages/ai-command.js:2534:	const outputType = asString(preview.outputType || preview.output_type || preview.type || "handoff").trim() || "handoff";
+public/control-center/pages/ai-command.js:2540:		"workflows"
+public/control-center/pages/ai-command.js:2547:		title: firstAiInboundText(preview.title, normalized.title, `Inbound handoff from ${normalized.sourceLabel}`),
+public/control-center/pages/ai-command.js:2555:		confirmationNote: firstAiInboundText(preview.confirmationNote, preview.confirmation_note, "Execution, approvals, publishing, CRM updates, customer replies, and workflow runs require explicit confirmation in the owning workspace."),
+public/control-center/pages/ai-command.js:2556:		confirmationRequired: preview.confirmationRequired ?? preview.confirmation_required ?? true
+public/control-center/pages/ai-command.js:2560:function getAiInboundDurableHandoffId(handoff) {
+public/control-center/pages/ai-command.js:2561:	const payload = asObject(handoff?.payload);
+public/control-center/pages/ai-command.js:2563:		handoff?.id,
+public/control-center/pages/ai-command.js:2564:		handoff?.handoff_id,
+public/control-center/pages/ai-command.js:2565:		handoff?.handoffId,
+public/control-center/pages/ai-command.js:2566:		payload.handoff_id,
+public/control-center/pages/ai-command.js:2567:		payload.handoffId
+public/control-center/pages/ai-command.js:2571:function getAiInboundHandoffId(handoff) {
+public/control-center/pages/ai-command.js:2572:	const durableId = getAiInboundDurableHandoffId(handoff);
+public/control-center/pages/ai-command.js:2574:	if (!handoff) return "";
+public/control-center/pages/ai-command.js:2575:	const payload = asObject(handoff?.payload);
+public/control-center/pages/ai-command.js:2576:	const stablePayloadId = firstAiInboundId(payload.handoff_id, payload.handoffId, payload.id, handoff?.created_at, handoff?.createdAt);
+public/control-center/pages/ai-command.js:2579:		if (!aiInboundHandoffObjectIds.has(handoff)) {
+public/control-center/pages/ai-command.js:2581:			aiInboundHandoffObjectIds.set(handoff, `cached-ai-handoff-${Date.now()}-${aiInboundHandoffCounter}`);
+public/control-center/pages/ai-command.js:2583:		return aiInboundHandoffObjectIds.get(handoff);
+public/control-center/pages/ai-command.js:2585:	return [handoff?.source_page, handoff?.destination_page, payload.prompt, payload.title]
+public/control-center/pages/ai-command.js:2588:		.join("::") || `cached-ai-handoff-${Date.now()}`;
+public/control-center/pages/ai-command.js:2591:function normalizeAiInboundHandoff(handoff, projectName) {
+public/control-center/pages/ai-command.js:2592:	const payload = asObject(handoff?.payload);
+public/control-center/pages/ai-command.js:2593:	const draftContext = firstAiInboundObject(payload.draft_context, payload.draftContext, handoff?.draft_context, handoff?.draftContext);
+public/control-center/pages/ai-command.js:2597:		handoff?.source_page,
+public/control-center/pages/ai-command.js:2598:		handoff?.sourcePage,
+public/control-center/pages/ai-command.js:2625:	)) || `Review this ${sourceLabel} handoff for ${projectLabel}. Identify the right specialist, summarize the context, produce a review-ready draft, and recommend the next safe route. Do not execute publishing, task creation, CRM updates, customer replies, workflow runs, or backend actions.`;
+public/control-center/pages/ai-command.js:2631:		handoff?.title,
+public/control-center/pages/ai-command.js:2632:		`Inbound handoff from ${sourceLabel}`
+public/control-center/pages/ai-command.js:2664:		status: asString(handoff?.status || payload.status || "available"),
+public/control-center/pages/ai-command.js:2665:		note: "Guidance only. No publishing, task creation, CRM updates, customer replies, workflow runs, exports, or backend actions are executed from this handoff."
+public/control-center/pages/ai-command.js:2672:	const handoff = getSharedHandoff(projectName, "ai-command", operations);
+public/control-center/pages/ai-command.js:2673:	const handoffId = getAiInboundHandoffId(handoff);
+public/control-center/pages/ai-command.js:2674:	if (!handoffId || handoffId === asString(session.lastAppliedHandoffId)) return;
+public/control-center/pages/ai-command.js:2676:	const normalized = normalizeAiInboundHandoff(handoff, projectName);
+public/control-center/pages/ai-command.js:2683:		id: handoffId,
+public/control-center/pages/ai-command.js:2715:	session.lastAppliedHandoffId = handoffId;
+public/control-center/pages/ai-command.js:2716:	persistSessionDraft(projectName, session, `Inbound handoff loaded from ${normalized.sourceLabel}`);
+public/control-center/pages/ai-command.js:2718:	const durableHandoffId = getAiInboundDurableHandoffId(handoff);
+public/control-center/pages/ai-command.js:2721:			console.warn("Failed to consume AI handoff:", error.message);
+public/control-center/pages/ai-command.js:2724:	showMessage?.(`Inbound handoff loaded from ${normalized.sourceLabel}.`);
+public/control-center/pages/ai-command.js:3304:                handoff: "handoff package"
+public/control-center/pages/ai-command.js:3467:	if (preview.outputType === "handoff") return 3;
+public/control-center/pages/ai-command.js:3481:		handoff: "handoff",
+public/control-center/pages/ai-command.js:3491:	if (outputType === "handoff") return "handoff";
+public/control-center/pages/ai-command.js:3506:		handoff: "Handoff Preview",
+public/control-center/pages/ai-command.js:3515:	if (tool.route) return asString(tool.route || "workflows");
+public/control-center/pages/ai-command.js:3516:	if (session?.teamMode === "team") return tool.intent === "task" ? "task-center" : "workflows";
+public/control-center/pages/ai-command.js:3522:	if (tool.safetyLevel === "confirmation_required") return "Destination confirmation required";
+public/control-center/pages/ai-command.js:3529:	if (tool.intent === "handoff") return "Prepare";
+public/control-center/pages/ai-command.js:3531:	if (/review|check|compliance|readiness|governance/i.test(asString(tool.label))) return "Review";
+public/control-center/pages/ai-command.js:3575:				<p class="aicmd-room-subtitle mhos-context-description">Ask one expert or the full team to prepare strategy, content, analysis, reviews, and destination handoffs. AI prepares and reviews only; sensitive actions stay confirmation-gated in the owning workspace.</p>
+public/control-center/pages/ai-command.js:3649:			<span>Strategy, writing, creative, compliance, publishing, customer, sales, and operations specialists coordinate one review-ready answer. No workflow, send, publish, approval, or CRM action is executed here.</span>
+public/control-center/pages/ai-command.js:3715:						<p class="aicmd-v2-profile-purpose">Coordinates specialists into one review-ready brief, workflow, or handoff.</p>
+public/control-center/pages/ai-command.js:3757:        if (roleId === "media_director" || roleId === "video_lead") return `${label} is preparing creative direction...`;
+public/control-center/pages/ai-command.js:3758:        if (roleId === "operations" || roleId === "customer_ops") return `${label} is preparing your task handoff...`;
+public/control-center/pages/ai-command.js:3772:		? "Team orchestration across strategy, writing, media/video, compliance, publishing, customer operations, sales/CRM, and operations"
+public/control-center/pages/ai-command.js:3800:	if (/handoff|route|destination_brief/.test(haystack)) return "handoff";
+public/control-center/pages/ai-command.js:3801:	if (/task|ticket|checklist|owner_map|priority/.test(haystack)) return "task";
+public/control-center/pages/ai-command.js:3874:					<span class="aicmd-v2-tools-subtitle">Prompt tools for structured drafts, source-aware reviews, and destination handoffs. They prepare composer instructions only.</span>
+public/control-center/pages/ai-command.js:3966:        const governanceRequired = destinationRoute === "governance" || /approval|claim|compliance|risk|gdpr|review/i.test(`${outputType} ${asString(preview.title)} ${asString(preview.summary)}`);
+public/control-center/pages/ai-command.js:3967:        const riskLabel = governanceRequired ? "Review required" : "Low";
+public/control-center/pages/ai-command.js:3968:        const governanceLabel = governanceRequired ? "Governance route" : "Not required";
+public/control-center/pages/ai-command.js:3971:        const teamIds = ["strategist", "writer", "media", "video_lead", "compliance_reviewer", "operations"];
+public/control-center/pages/ai-command.js:3977:                        const complianceWatching = spec.id === "compliance_reviewer" && governanceRequired;
+public/control-center/pages/ai-command.js:4022:                                <span><strong>Governance</strong>${escapeHtml(governanceLabel)}</span>
+public/control-center/pages/ai-command.js:4029:                        <p class="aicmd-chatfirst-tab-note">AI Command prepares guidance, drafts, previews, and handoff context only. Publishing, approvals, CRM updates, workflow runs, customer sends, provider execution, and durable task creation remain confirmation-gated in the owning workspace.</p>
+public/control-center/pages/ai-command.js:4083:                                <span>No execution without confirmation</span>
+public/control-center/pages/ai-command.js:4101:				<p>Chat, draft, review, and prepare handoff context only. Publishing, approvals, CRM updates, workflow runs, external sends, and durable task creation stay confirmation-gated in the owning workspace.</p>
+public/control-center/pages/ai-command.js:4312:                                        <span>Ask ${escapeHtml(selectedLabel)} to plan, draft, review, analyze, or prepare a handoff.</span>
+public/control-center/pages/ai-command.js:4317:                                                <span>Prepare handoff</span>
+public/control-center/pages/ai-command.js:4340:                { id: "lead", label: "Lead", summary: "Prepare lead discovery and outreach workflow drafts.", enabled: false },
+public/control-center/pages/ai-command.js:4342:                { id: "publish", label: "Publish", summary: "Prepare publishing checklist and handoff readiness.", enabled: false }
+public/control-center/pages/ai-command.js:4422:        const goal = asString(wizard.goal || "sales");
+public/control-center/pages/ai-command.js:4428:        const audience = asString(wizard.audience || "target-customers");
+public/control-center/pages/ai-command.js:4435:        const goalOptions = [["sales", "Sales"], ["launch", "Product launch"], ["leads", "Lead generation"], ["awareness", "Awareness"], ["retargeting", "Retargeting"]];
+public/control-center/pages/ai-command.js:4441:        const audienceOptions = [["target-customers", "Target customers"], ["new-buyers", "New buyers"], ["returning-customers", "Returning customers"], ["b2b", "B2B"], ["local", "Local audience"]];
+public/control-center/pages/ai-command.js:4442:        const offerOptions = [["review-ready-offer", "Review-ready offer"], ["discount", "Discount"], ["bundle", "Bundle"], ["premium-value", "Premium value"], ["lead-magnet", "Lead magnet"]];
+public/control-center/pages/ai-command.js:4464:                                                <p>Guide the AI Team from source to preview. Backend workflow execution and destination handoff stay approval-gated.</p>
+public/control-center/pages/ai-command.js:4559:                                                                <button type="button" data-aicmd-smart-campaign-action="governance">Request Governance Review</button>
+public/control-center/pages/ai-command.js:4567:                                                        <span>1. Choose source, goal, and channel. The AI Team will prepare the preview package before any approval or handoff.</span>
+public/control-center/pages/ai-command.js:4670:                                        <small>Strategy, content, media, operations, compliance, customer, campaign and provider-readiness planning.</small>
+public/control-center/pages/ai-command.js:4696:                                <span>Library, campaigns, content, customers, governance, integrations and provider readiness are connected as guarded planning context. Execution stays confirmation-gated.</span>
+public/control-center/pages/ai-command.js:4903:					<p>Prompt setup only. Tools prepare composer instructions, source-aware reviews, previews, and handoff context without executing actions.</p>
+public/control-center/pages/ai-command.js:4953:					<p>${hasPreview ? "Review the result, then open the destination workspace with draft context." : "Drafts, task previews, workflow previews, and handoff packages appear here after a response or tool setup."}</p>
+public/control-center/pages/ai-command.js:4996:						<span>${escapeHtml(humanizeValue(preview.confirmationNote, "Execution requires explicit confirmation in the destination workspace."))}</span>
+public/control-center/pages/ai-command.js:5005:				<p class="aicmd-chatfirst-tab-note">This is a review-ready preview. Execution, publishing, approvals, CRM updates, external sends, durable task creation, and workflow runs happen only in the owning destination workspace after confirmation.</p>
+public/control-center/pages/ai-command.js:5027:					<p>Read-only operating path for chat, draft preparation, review, and destination handoff. Confirmation stays in the owning workspace.</p>
+public/control-center/pages/ai-command.js:5074:	const approval = preview.confirmationRequired ? "Confirmation required" : (preview.outputType ? "Review ready" : "No draft yet");
+public/control-center/pages/ai-command.js:5126:                ? "Chat only. No workflow run, durable task, external handoff action, approval, publishing action, CRM update, or customer action was created."
+public/control-center/pages/ai-command.js:5128:        const emptyBody = "Ask what to do next, draft a campaign asset, review a source, prepare a handoff, or coordinate the full AI team.";
+public/control-center/pages/ai-command.js:5212:                                                <span>Home handoff</span>
+public/control-center/pages/ai-command.js:5228:                                        <span>Latest selected reply</span>
+public/control-center/pages/ai-command.js:5230:                                        <small>${escapeHtml(latestSelected ? formatTime(latestSelected.generatedAt) : "No reply yet")}</small>
+public/control-center/pages/ai-command.js:5351:	const scopedContextItems = session.teamMode === "solo" && session.modeId === "customer_ops"
+public/control-center/pages/ai-command.js:5355:			{ label: "SLA", value: "Safe review only", present: true, scoped: true },
+public/control-center/pages/ai-command.js:5356:			{ label: "Escalations", value: "Requires confirmation", present: false, scoped: true },
+public/control-center/pages/ai-command.js:5359:		: session.teamMode === "solo" && session.modeId === "sales_crm"
+public/control-center/pages/ai-command.js:5364:				{ label: "Follow-ups", value: "Requires confirmation", present: false, scoped: true },
+public/control-center/pages/ai-command.js:5365:				{ label: "Pipeline", value: "Operations handoff", present: true, scoped: true }
+public/control-center/pages/ai-command.js:5397:					<span>Guidance only — no execution happens from this workspace without confirmation.</span>
+public/control-center/pages/ai-command.js:5405:					<span>Publishing, approval, and workflow runs require your explicit confirmation in the right workspace.</span>
+public/control-center/pages/ai-command.js:5409:					<span>Backend owns authority — AI Command prepares guidance, previews, and handoff context. It does not override execution controls or mutate Operations records.</span>
+public/control-center/pages/ai-command.js:5465:		description: "Talk to your AI team, run structured tasks, and turn intelligence into review-ready plans and routed handoffs."
+public/control-center/pages/ai-command.js:5947:                                updateStatus("Voice conversation requires the next provider-backed phase: recording, STT, specialist reply, and TTS playback. Voice dictation is ready now.");
+public/control-center/pages/ai-command.js:5977:                                goal: asString(currentWizard.goal || "sales"),
+public/control-center/pages/ai-command.js:5998:                        const goal = asString(wizard.goal || "sales");
+public/control-center/pages/ai-command.js:6027:                                        body: "Flag unsupported claims, pricing promises, before/after language, evidence gaps, restricted wording, and approval requirements."
+public/control-center/pages/ai-command.js:6031:                                        body: `Prepare publishing readiness for ${channelLabel}: channel checklist, schedule draft, missing approvals, and handoff requirements.`
+public/control-center/pages/ai-command.js:6035:                                        body: "Track approval status, destination handoff, follow-up checks, improvement notes, and post-review action ownership."
+public/control-center/pages/ai-command.js:6049:                                audience: asString(wizard.audience || "target-customers"),
+public/control-center/pages/ai-command.js:6059:                                                body: `Use ${sourceMeaning}. Produce a review-ready campaign package before any handoff, approval, publishing, sending, CRM update, provider execution, or workflow mutation.`
+public/control-center/pages/ai-command.js:6075:                                                body: "Define hero visual, product framing, scene list, required assets, image/video format, voiceover direction, and Media Studio handoff notes."
+public/control-center/pages/ai-command.js:6086:                                                label: "Operations follow-up",
+public/control-center/pages/ai-command.js:6087:                                                body: "Create a follow-up plan for review status, owner, destination handoff, performance check, improvement loop, and next campaign iteration."
+public/control-center/pages/ai-command.js:6163:                                        ? "Backend preview only. No publish, send, CRM mutation, provider execution, workflow mutation, Governance approval, task creation, or durable handoff was performed."
+public/control-center/pages/ai-command.js:6178:                                        goal: asString(wizard.goal || localPreview.goal || "sales"),
+public/control-center/pages/ai-command.js:6244:                                        confirmationRequired: true,
+public/control-center/pages/ai-command.js:6245:                                        confirmationNote: "Review and route this campaign package through the owning destination workspace before any publishing, sending, approval, task creation, provider execution, or workflow mutation.",
+public/control-center/pages/ai-command.js:6253:                                updateStatus(preview.backendPreview ? "Backend AI Team preview prepared. Review before any handoff or approval." : "Local campaign preview prepared because backend preview is unavailable.");
+public/control-center/pages/ai-command.js:6271:                                id: `campaign_handoff_${Date.now()}`,
+public/control-center/pages/ai-command.js:6272:                                type: "ai_command_campaign_handoff",
+public/control-center/pages/ai-command.js:6278:                                title: asString(preview.title || "Campaign handoff"),
+public/control-center/pages/ai-command.js:6297:                                safety: "Prepared handoff only. No backend write, publish, send, CRM mutation, provider execution, approval creation, task creation, or workflow mutation was performed.",
+public/control-center/pages/ai-command.js:6302:                const storeCampaignReviewHandoff = (handoff) => {
+public/control-center/pages/ai-command.js:6304:                                const payload = JSON.stringify(handoff);
+public/control-center/pages/ai-command.js:6305:                                window.localStorage?.setItem?.("mh_ai_command_campaign_handoff", payload);
+public/control-center/pages/ai-command.js:6306:                                window.localStorage?.setItem?.(`mh_ai_command_handoff_${handoff.destination_route}`, payload);
+public/control-center/pages/ai-command.js:6307:                                window.sessionStorage?.setItem?.("mh_ai_command_campaign_handoff", payload);
+public/control-center/pages/ai-command.js:6308:                                window.sessionStorage?.setItem?.(`mh_ai_command_handoff_${handoff.destination_route}`, payload);
+public/control-center/pages/ai-command.js:6310:                                console.warn("Unable to store AI Command campaign handoff", error);
+public/control-center/pages/ai-command.js:6325:                                governance: "Request Governance Review",
+public/control-center/pages/ai-command.js:6333:                                const handoff = buildCampaignReviewHandoff(action, preview);
+public/control-center/pages/ai-command.js:6334:                                storeCampaignReviewHandoff(handoff);
+public/control-center/pages/ai-command.js:6340:                                        handoff,
+public/control-center/pages/ai-command.js:6341:                                        safety: handoff.safety
+public/control-center/pages/ai-command.js:6345:                                updateStatus(`${label} prepared. Opening ${handoff.destination} for review.`);
+public/control-center/pages/ai-command.js:6348:                                if (typeof navigateTo === "function" && handoff.destination_route) {
+public/control-center/pages/ai-command.js:6349:                                        navigateTo(handoff.destination_route);
+public/control-center/pages/ai-command.js:6353:                                if (typeof context?.navigateTo === "function" && handoff.destination_route) {
+public/control-center/pages/ai-command.js:6354:                                        context.navigateTo(handoff.destination_route);
+public/control-center/pages/ai-command.js:6582:		                                safetyInstruction: "Chat only. No task/workflow/handoff/approval/publish/customer/CRM execution.",
+public/control-center/pages/ai-command.js:6628:                                                responseTitle: "Chat reply",
+public/control-center/pages/ai-command.js:6639:		                                responseTitle: "Chat reply",
+public/control-center/pages/ai-command.js:6667:		                        updateStatus("Specialist reply generated. No workflow/task/handoff was created.");
+public/control-center/pages/ai-command.js:6668:		                        showMessage?.("Specialist reply generated.");
+public/control-center/pages/ai-command.js:6671:		                        session.responseError = asString(error?.message || "Failed to generate specialist chat reply.");
+public/control-center/pages/ai-command.js:6756:                // Phase 1: converts the current conversation into a handoff preview. No backend write.
+public/control-center/pages/ai-command.js:6757:                const handoffBtn = $("aicmdV2HandoffBtn");
+public/control-center/pages/ai-command.js:6758:                if (handoffBtn) {
+public/control-center/pages/ai-command.js:6759:                        handoffBtn.onclick = () => {
+public/control-center/pages/ai-command.js:6763:                                        ? `Prepare a handoff summary for: ${value}`
+public/control-center/pages/ai-command.js:6764:                                        : `Prepare a handoff summary from ${spec.label} for the current project state of ${projectName || "this project"}.`;
+public/control-center/pages/ai-command.js:6767:                                        intent: "handoff",
+public/control-center/pages/ai-command.js:6949:				setSharedHandoff(projectName || "__default__", destination, {
+public/control-center/pages/ai-command.js:6974:					updateStatus("Read is not supported in this browser.");
+public/control-center/pages/ai-command.js:7038:				const handoffRecord = {
+public/control-center/pages/ai-command.js:7057:				setSharedAiDraft(projectName || "__default__", handoffRecord.payload.draft_context);
+public/control-center/pages/ai-command.js:7058:				setSharedHandoff(projectName || "__default__", destination, handoffRecord);
+public/control-center/pages/ai-command.js:7085:					updateStatus("Read preview is not supported in this browser.");
+public/control-center/pages/ai-command.js:7130:        if (session.isHandoff) return "handoff";
+public/control-center/pages/ai-command.js:7146:                case "handoff":
+public/control-center/pages/ai-command.js:7147:                        return "Preparing handoff";
+public/control-center/pages/ai-command.js:7168:            state === "handoff" ? "Finalizing" :
+public/control-center/pages/ai-command.js:7182:        isHandoff: state === "handoff",
+public/control-center/pages/ai-command.js:7192:            state === "handoff" ? "📦 Handoff" :
+public/control-center/pages/ai-command.js:7231:            state === "handoff" ? "AI is finalizing output" :
+public/control-center/pages/ai-command.js:7271:        handoff: "AI is preparing delivery"
+public/control-center/pages/ai-command.js:7317:        handoff: { pulse: 1.0, label: "finalizing output" }
+public/control-center/pages/ai-command.js:7332:        handoff: ["finalizing", "packaging", "delivering"]
+public/control-center/pages/ai-command.js:7398:        handoff: 800
+public/control-center/pages/ai-command.js:7600:        handoff: "finalize_delivery"
+public/control-center/pages/ai-command.js:7771:        action: "ai_task_pipeline"
+public/control-center/pages/ai-command.js:7778:        action: "ai_analysis_pipeline"
+public/control-center/pages/ai-command/tool-dock.js:286:  lines.push("Use this Library source as trusted context. Do not add unsupported claims.");
+public/control-center/pages/ai-command/tool-dock.js:406:    id: "translate",
+public/control-center/pages/ai-command/tool-dock.js:408:    label: "Translate",
+public/control-center/pages/ai-command/tool-dock.js:410:    template: "Translate or adapt the selected text for the project target market. Keep the explanation in the user's chat language and prepare only review-ready copy."
+public/control-center/pages/ai-command/tool-dock.js:431:      destinations: ["chat-preview", "campaign-studio", "content-studio", "workflows"],
+public/control-center/pages/ai-command/tool-dock.js:444:      destinations: ["chat-preview", "campaign-studio", "workflows", "publishing"],
+public/control-center/pages/ai-command/tool-dock.js:447:      template: "Build a launch plan for {projectName}. Include timeline, required assets, owners, channels, readiness gaps, and safe next actions."
+public/control-center/pages/ai-command/tool-dock.js:458:      sourceTypes: ["current_chat", "market_notes", "customer_notes", "insights_report", "library_source", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:483:      destinations: ["chat-preview", "campaign-studio", "content-studio", "workflows", "publishing"],
+public/control-center/pages/ai-command/tool-dock.js:485:      outputTypes: ["funnel_map", "content_needs", "handoff_points", "retention_notes"],
+public/control-center/pages/ai-command/tool-dock.js:486:      template: "Map a funnel for {projectName}. Include awareness, consideration, conversion, retention, content needs, and handoff points."
+public/control-center/pages/ai-command/tool-dock.js:495:      frontendOwnerPage: "workflows",
+public/control-center/pages/ai-command/tool-dock.js:496:      destinations: ["chat-preview", "workflows", "task", "campaign-studio"],
+public/control-center/pages/ai-command/tool-dock.js:531:      id: "translate",
+public/control-center/pages/ai-command/tool-dock.js:533:      label: "Translate",
+public/control-center/pages/ai-command/tool-dock.js:540:      outputTypes: ["translation", "localization", "market_adaptation", "cta_localization"],
+public/control-center/pages/ai-command/tool-dock.js:541:      template: "Translate and localize the current text for {projectName}. Ask for target language and market if missing. Preserve brand tone, adapt CTA and wording for the target audience, and keep the result review-ready."
+public/control-center/pages/ai-command/tool-dock.js:593:      template: "Prepare SEO support for {projectName}. Ask for topic, market, language, and audience if missing. Create keyword ideas, search intent, meta title/description, blog outline, FAQ ideas, internal link ideas, and content gap notes."
+public/control-center/pages/ai-command/tool-dock.js:614:      safetyLevel: "confirmation_required",
+public/control-center/pages/ai-command/tool-dock.js:616:      destinations: ["content-studio", "library", "media-studio", "publishing", "compliance", "task", "handoff"],
+public/control-center/pages/ai-command/tool-dock.js:618:      outputTypes: ["content_studio_draft", "library_save", "media_brief", "publishing_package", "compliance_review", "task_preview", "handoff_preview"],
+public/control-center/pages/ai-command/tool-dock.js:670:      destinations: ["chat-preview", "media-studio", "library", "workflows"],
+public/control-center/pages/ai-command/tool-dock.js:696:      destinations: ["chat-preview", "media-studio", "governance", "library"],
+public/control-center/pages/ai-command/tool-dock.js:703:  video_lead: [
+public/control-center/pages/ai-command/tool-dock.js:738:      destinations: ["chat-preview", "media-studio", "workflows", "library"],
+public/control-center/pages/ai-command/tool-dock.js:780:      destinations: ["chat-preview", "publishing", "governance", "content-studio", "media-studio"],
+public/control-center/pages/ai-command/tool-dock.js:804:      safetyLevel: "confirmation_required",
+public/control-center/pages/ai-command/tool-dock.js:806:      destinations: ["chat-preview", "publishing", "workflows"],
+public/control-center/pages/ai-command/tool-dock.js:809:      template: "Draft a publishing schedule for {projectName}. Include channels, timing, dependencies, review gates, and next actions."
+public/control-center/pages/ai-command/tool-dock.js:830:      safetyLevel: "confirmation_required",
+public/control-center/pages/ai-command/tool-dock.js:831:      frontendOwnerPage: "governance",
+public/control-center/pages/ai-command/tool-dock.js:832:      destinations: ["chat-preview", "governance", "publishing", "workflows"],
+public/control-center/pages/ai-command/tool-dock.js:834:      outputTypes: ["approval_pack", "risk_summary", "asset_checklist", "confirmation_list"],
+public/control-center/pages/ai-command/tool-dock.js:835:      template: "Prepare an approval package for {projectName}. Include final copy summary, risk notes, assets checklist, and required confirmations."
+public/control-center/pages/ai-command/tool-dock.js:848:      destinations: ["chat-preview", "ads-manager", "content-studio", "governance"],
+public/control-center/pages/ai-command/tool-dock.js:861:      destinations: ["chat-preview", "ads-manager", "content-studio", "governance"],
+public/control-center/pages/ai-command/tool-dock.js:875:      sourceTypes: ["audience_notes", "insights_report", "campaign_brief", "customer_notes", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:887:      destinations: ["chat-preview", "ads-manager", "media-studio", "insights", "workflows"],
+public/control-center/pages/ai-command/tool-dock.js:900:      destinations: ["chat-preview", "ads-manager", "content-studio", "governance"],
+public/control-center/pages/ai-command/tool-dock.js:929:      destinations: ["chat-preview", "insights", "campaign-studio", "workflows"],
+public/control-center/pages/ai-command/tool-dock.js:955:      destinations: ["chat-preview", "insights", "campaign-studio", "workflows"],
+public/control-center/pages/ai-command/tool-dock.js:983:      frontendOwnerPage: "governance",
+public/control-center/pages/ai-command/tool-dock.js:984:      destinations: ["chat-preview", "governance", "content-studio", "publishing"],
+public/control-center/pages/ai-command/tool-dock.js:987:      template: "Review claims for {projectName}. Flag unsupported, risky, health/performance, legal, or approval-sensitive statements."
+public/control-center/pages/ai-command/tool-dock.js:996:      frontendOwnerPage: "governance",
+public/control-center/pages/ai-command/tool-dock.js:997:      destinations: ["chat-preview", "governance", "content-studio"],
+public/control-center/pages/ai-command/tool-dock.js:1000:      template: "Rewrite this content in a safer compliant way. Keep the value clear while reducing unsupported or risky claims."
+public/control-center/pages/ai-command/tool-dock.js:1009:      frontendOwnerPage: "governance",
+public/control-center/pages/ai-command/tool-dock.js:1010:      destinations: ["chat-preview", "governance", "library", "workflows"],
+public/control-center/pages/ai-command/tool-dock.js:1022:      frontendOwnerPage: "governance",
+public/control-center/pages/ai-command/tool-dock.js:1023:      destinations: ["chat-preview", "governance", "workflows", "publishing"],
+public/control-center/pages/ai-command/tool-dock.js:1034:      safetyLevel: "confirmation_required",
+public/control-center/pages/ai-command/tool-dock.js:1035:      frontendOwnerPage: "governance",
+public/control-center/pages/ai-command/tool-dock.js:1036:      destinations: ["chat-preview", "governance", "publishing", "workflows"],
+public/control-center/pages/ai-command/tool-dock.js:1039:      template: "Prepare approval notes for {projectName}. Include risks, required reviewer, unresolved issues, and safe next actions."
+public/control-center/pages/ai-command/tool-dock.js:1051:      frontendOwnerPage: "workflows",
+public/control-center/pages/ai-command/tool-dock.js:1052:      destinations: ["chat-preview", "workflows", "task", "content-studio", "media-studio"],
+public/control-center/pages/ai-command/tool-dock.js:1063:      safetyLevel: "confirmation_required",
+public/control-center/pages/ai-command/tool-dock.js:1064:      frontendOwnerPage: "workflows",
+public/control-center/pages/ai-command/tool-dock.js:1065:      destinations: ["chat-preview", "workflows", "task", "handoff"],
+public/control-center/pages/ai-command/tool-dock.js:1066:      sourceTypes: ["current_chat", "handoff_summary", "operations_snapshot", "approval_notes", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:1068:      template: "Draft a workflow for {projectName}. Include steps, triggers, inputs, outputs, owners, review gates, and execution risks."
+public/control-center/pages/ai-command/tool-dock.js:1071:      id: "handoff",
+public/control-center/pages/ai-command/tool-dock.js:1076:      safetyLevel: "confirmation_required",
+public/control-center/pages/ai-command/tool-dock.js:1077:      frontendOwnerPage: "workflows",
+public/control-center/pages/ai-command/tool-dock.js:1078:      destinations: ["chat-preview", "handoff", "workflows", "content-studio", "media-studio", "publishing", "governance"],
+public/control-center/pages/ai-command/tool-dock.js:1080:      outputTypes: ["handoff_summary", "destination_brief", "required_inputs", "review_notes"],
+public/control-center/pages/ai-command/tool-dock.js:1081:      template: "Prepare a handoff summary for {projectName}. Include context, destination workspace, owner, required inputs, and review notes."
+public/control-center/pages/ai-command/tool-dock.js:1090:      frontendOwnerPage: "workflows",
+public/control-center/pages/ai-command/tool-dock.js:1091:      destinations: ["chat-preview", "workflows", "campaign-studio", "publishing"],
+public/control-center/pages/ai-command/tool-dock.js:1103:      frontendOwnerPage: "workflows",
+public/control-center/pages/ai-command/tool-dock.js:1104:      destinations: ["chat-preview", "workflows", "governance", "publishing"],
+public/control-center/pages/ai-command/tool-dock.js:1111:  customer_ops: [
+public/control-center/pages/ai-command/tool-dock.js:1113:      id: "reply-draft",
+public/control-center/pages/ai-command/tool-dock.js:1118:      safetyLevel: "confirmation_required",
+public/control-center/pages/ai-command/tool-dock.js:1119:      frontendOwnerPage: "operations-centers",
+public/control-center/pages/ai-command/tool-dock.js:1120:      destinations: ["chat-preview", "operations-centers", "task", "governance"],
+public/control-center/pages/ai-command/tool-dock.js:1121:      sourceTypes: ["customer_thread", "support_notes", "policy_doc", "faq_source", "current_chat", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:1122:      outputTypes: ["reply_draft", "empathetic_response", "next_step_note", "escalation_note"],
+public/control-center/pages/ai-command/tool-dock.js:1123:      template: "Draft a safe customer reply for {projectName}. Do not send it. Include empathy, answer, next step, and escalation note if needed."
+public/control-center/pages/ai-command/tool-dock.js:1126:      id: "ticket",
+public/control-center/pages/ai-command/tool-dock.js:1131:      safetyLevel: "confirmation_required",
+public/control-center/pages/ai-command/tool-dock.js:1132:      frontendOwnerPage: "operations-centers",
+public/control-center/pages/ai-command/tool-dock.js:1133:      destinations: ["chat-preview", "operations-centers", "task", "workflows"],
+public/control-center/pages/ai-command/tool-dock.js:1134:      sourceTypes: ["customer_thread", "support_notes", "order_case_summary", "current_chat", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:1135:      outputTypes: ["ticket_draft", "issue_summary", "priority_note", "missing_information"],
+public/control-center/pages/ai-command/tool-dock.js:1136:      template: "Prepare a ticket draft for {projectName}. Include issue summary, priority, owner, customer impact, and missing information."
+public/control-center/pages/ai-command/tool-dock.js:1139:      id: "sla",
+public/control-center/pages/ai-command/tool-dock.js:1141:      label: "SLA",
+public/control-center/pages/ai-command/tool-dock.js:1145:      frontendOwnerPage: "operations-centers",
+public/control-center/pages/ai-command/tool-dock.js:1146:      destinations: ["chat-preview", "operations-centers", "task", "workflows"],
+public/control-center/pages/ai-command/tool-dock.js:1147:      sourceTypes: ["customer_thread", "sla_policy", "support_notes", "current_chat", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:1148:      outputTypes: ["sla_risk_review", "urgency_flags", "escalation_needs", "safe_next_actions"],
+public/control-center/pages/ai-command/tool-dock.js:1149:      template: "Review SLA or response risk for this customer context. Flag urgency, escalation needs, and safe next actions."
+public/control-center/pages/ai-command/tool-dock.js:1158:      frontendOwnerPage: "operations-centers",
+public/control-center/pages/ai-command/tool-dock.js:1159:      destinations: ["chat-preview", "operations-centers", "workflows", "sales-crm-draft"],
+public/control-center/pages/ai-command/tool-dock.js:1160:      sourceTypes: ["customer_thread", "support_notes", "current_chat", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:1162:      template: "Summarize the customer context for {projectName}. Include issue, sentiment, open questions, risk, and next response."
+public/control-center/pages/ai-command/tool-dock.js:1166:  sales_crm: [
+public/control-center/pages/ai-command/tool-dock.js:1168:      id: "sales-pitch",
+public/control-center/pages/ai-command/tool-dock.js:1174:      frontendOwnerPage: "workflows",
+public/control-center/pages/ai-command/tool-dock.js:1175:      destinations: ["chat-preview", "workflows", "content-studio", "sales-crm-draft"],
+public/control-center/pages/ai-command/tool-dock.js:1176:      sourceTypes: ["lead_context", "sales_notes", "product_data", "offer_data", "proof_points", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:1177:      outputTypes: ["sales_pitch", "value_proposition", "pain_solution_map", "cta_note"],
+public/control-center/pages/ai-command/tool-dock.js:1178:      template: "Create a sales pitch for {projectName}. Include value proposition, customer pain, proof, offer, CTA, and follow-up note."
+public/control-center/pages/ai-command/tool-dock.js:1181:      id: "follow-up",
+public/control-center/pages/ai-command/tool-dock.js:1186:      safetyLevel: "confirmation_required",
+public/control-center/pages/ai-command/tool-dock.js:1187:      frontendOwnerPage: "workflows",
+public/control-center/pages/ai-command/tool-dock.js:1188:      destinations: ["chat-preview", "content-studio", "workflows", "sales-crm-draft"],
+public/control-center/pages/ai-command/tool-dock.js:1189:      sourceTypes: ["lead_context", "meeting_notes", "sales_notes", "offer_data", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:1191:      template: "Draft a sales follow-up for {projectName}. Include context, value reminder, question, CTA, and next step."
+public/control-center/pages/ai-command/tool-dock.js:1200:      frontendOwnerPage: "workflows",
+public/control-center/pages/ai-command/tool-dock.js:1201:      destinations: ["chat-preview", "workflows", "content-studio", "governance"],
+public/control-center/pages/ai-command/tool-dock.js:1202:      sourceTypes: ["lead_context", "sales_notes", "product_data", "proof_points", "objection_notes", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:1207:      id: "lead-brief",
+public/control-center/pages/ai-command/tool-dock.js:1212:      safetyLevel: "confirmation_required",
+public/control-center/pages/ai-command/tool-dock.js:1213:      frontendOwnerPage: "workflows",
+public/control-center/pages/ai-command/tool-dock.js:1214:      destinations: ["chat-preview", "workflows", "operations-centers", "sales-crm-draft"],
+public/control-center/pages/ai-command/tool-dock.js:1215:      sourceTypes: ["lead_context", "crm_profile_summary", "sales_notes", "customer_notes", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:1216:      outputTypes: ["lead_brief", "fit_summary", "opportunity_notes", "risk_notes", "outreach_recommendation"],
+public/control-center/pages/ai-command/tool-dock.js:1217:      template: "Create a lead brief for {projectName}. Include profile, need, fit, opportunity, risks, and recommended outreach."
+public/control-center/pages/ai-command/tool-dock.js:1321:          Configure a review-only AI prompt with the right output, trusted source context, and destination handoff before loading it into the composer.
+public/control-center/pages/ai-command/tool-dock.js:1338:            <span class="mhos-tool-drawer-section-label">3. Destination handoff</span>
+public/control-center/pages/ai-command/tool-dock.js:1373:                placeholder="Example: use the selected Library source for facts only, avoid unsupported claims..."
+public/control-center/pages/ai-command/tool-dock.js:1396:          <p data-aicmd-tool-drawer-summary>Choose output, trusted source, destination handoff, language, and tone.</p>
+public/control-center/pages/ai-command/tool-dock.js:1400:          Review-only setup: this drawer creates a composer-ready instruction. Destination choices only frame safe handoff context; they do not publish, send, approve, route externally, create CRM records, run workflows, or mutate backend data.
+public/control-center/pages/ai-command/tool-dock.js:1469:    crm: "CRM",
+public/control-center/pages/ai-command/tool-dock.js:1600:    "If required facts are missing, ask concise follow-up questions before writing the final version.",
+public/control-center/pages/ai-command/tool-dock.js:1621:    "- Do not publish, send, route, save, overwrite, create CRM records, or run workflows.",
+public/control-center/pages/ai-command/tool-dock.js:1622:    "- Do not make unsupported claims. Mark missing proof clearly."
+public/control-center/pages/ai-command/tool-dock.js:1682:    `Prepare a review-only AI prompt for ${btn.getAttribute("data-aicmd-tool-dock-label") || "this tool"}. Choose output, trusted source context, destination handoff, language, and tone before loading it into the composer.`
+public/control-center/pages/ai-command/tool-dock.js:1692:  const hardSourceDefaults = ["current_chat", "market_notes", "customer_notes", "library_source", "manual_input"];
+public/control-center/pages/ai-command/tool-dock.js:1708:  populateDrawerSelect(drawer.querySelector("[data-aicmd-tool-drawer-destination-select]"), rawDestinations, "Choose destination handoff");
+public/control-center/pages/ai-command/tool-dock.js:1727:  updateStatus?.(`${btn.getAttribute("data-aicmd-tool-dock-label") || "Quick AI tool"} setup opened. Review source and handoff requirements, then prepare the prompt.`);
+public/control-center/api.js:1554:    `/media-manager/project/${encodeURIComponent(projectName)}/workflows/${encodeURIComponent(workflowId)}/run`,
+public/control-center/api.js:1571:    `/media-manager/project/${encodeURIComponent(projectName)}/ai/workflows/${encodeURIComponent(workflowId)}/run`,
+public/control-center/api.js:1713:    `/media-manager/project/${encodeURIComponent(projectName)}/governance${suffix}`,
+public/control-center/api.js:1714:    "Failed to load governance summary"
+public/control-center/api.js:1724:    `/media-manager/project/${encodeURIComponent(projectName)}/governance/policy`,
+public/control-center/api.js:1725:    "Failed to load governance policy"
+public/control-center/api.js:1735:    `/media-manager/project/${encodeURIComponent(projectName)}/governance/policy`,
+public/control-center/api.js:1738:    "Failed to update governance policy"
+public/control-center/api.js:1994:    `/media-manager/project/${encodeURIComponent(projectName)}/task-center`,
+public/control-center/api.js:2265:    `/media-manager/project/${encodeURIComponent(projectName)}/handoffs${suffix}`,
+public/control-center/api.js:2266:    "Failed to load handoffs"
+public/control-center/api.js:2270:export async function createProjectHandoff(projectName, payload = {}) {
+public/control-center/api.js:2276:    `/media-manager/project/${encodeURIComponent(projectName)}/handoffs`,
+public/control-center/api.js:2279:    "Failed to create handoff"
+public/control-center/api.js:2283:export async function consumeProjectHandoff(projectName, handoffId, payload = {}) {
+public/control-center/api.js:2288:  if (!handoffId) {
+public/control-center/api.js:2289:    throw new Error("Missing handoff id");
+public/control-center/api.js:2293:    `/media-manager/project/${encodeURIComponent(projectName)}/handoffs/${encodeURIComponent(handoffId)}/consume`,
+public/control-center/api.js:2296:    "Failed to consume handoff"
+public/control-center/api.js:2362:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/readiness`);
+public/control-center/api.js:2366:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/inbox`);
+public/control-center/api.js:2370:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/conversations`);
+public/control-center/api.js:2374:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/conversations/${encodeURIComponent(conversationId)}`);
+public/control-center/api.js:2378:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/conversations/${encodeURIComponent(conversationId)}/messages`);
+public/control-center/api.js:2381:export async function fetchCustomerProfilePreview(projectName, customerId) {
+public/control-center/api.js:2382:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/customers/${encodeURIComponent(customerId)}`);
+public/control-center/api.js:2386:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/tickets`);
+public/control-center/api.js:2390:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/channels`);
