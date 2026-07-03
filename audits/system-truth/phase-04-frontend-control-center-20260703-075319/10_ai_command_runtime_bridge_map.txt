@@ -1,0 +1,621 @@
+### AI command/team/runtime bridge references
+public/control-center/ai-team-model.js:2:  Canonical AI Team Model
+public/control-center/ai-team-model.js:13:export const AI_TEAM_ROLES = [
+public/control-center/ai-team-model.js:19:    primaryPages: ["home", "campaign-studio", "ai-command"],
+public/control-center/ai-team-model.js:28:    primaryPages: ["content-studio", "campaign-studio", "ai-command"],
+public/control-center/ai-team-model.js:29:    outputTargets: ["content-studio", "governance", "publishing"],
+public/control-center/ai-team-model.js:54:    ownerSummary: "Publishing queue, schedules, manual handoffs, retries, and release readiness.",
+public/control-center/ai-team-model.js:55:    primaryPages: ["publishing", "queue-center", "ai-command"],
+public/control-center/ai-team-model.js:57:    defaultPrompt: "Act as Publisher. Prepare the next publish-ready package and identify missing approvals or queue steps."
+public/control-center/ai-team-model.js:63:    ownerSummary: "Paid media, ad packages, creative testing, budget guidance, and ROAS improvement.",
+public/control-center/ai-team-model.js:90:    ownerSummary: "Claims, approvals, publishing risk, brand safety, governance, and release trust.",
+public/control-center/ai-team-model.js:91:    primaryPages: ["governance", "publishing", "content-studio", "media-studio"],
+public/control-center/ai-team-model.js:92:    outputTargets: ["governance", "publishing", "content-studio", "media-studio"],
+public/control-center/ai-team-model.js:93:    defaultPrompt: "Act as Compliance Reviewer. Flag claims, approval gaps, and publishing risks before release."
+public/control-center/ai-team-model.js:99:    ownerSummary: "Workflows, tasks, queues, jobs, notifications, handoffs, and execution safety.",
+public/control-center/ai-team-model.js:100:    primaryPages: ["workflows", "task-center", "queue-center", "job-monitor", "notifications"],
+public/control-center/ai-team-model.js:101:    outputTargets: ["workflows", "task-center", "queue-center", "job-monitor", "notifications"],
+public/control-center/ai-team-model.js:106:export const AI_PAGE_SPECIALIST_MAP = {
+public/control-center/ai-team-model.js:111:  "ai-command": ["operations_lead", "strategist"],
+public/control-center/ai-team-model.js:112:  workflows: ["operations_lead"],
+public/control-center/ai-team-model.js:120:  governance: ["compliance_reviewer", "operations_lead"],
+public/control-center/ai-team-model.js:129:  return AI_TEAM_ROLES.find((role) => role.id === roleId) || null;
+public/control-center/ai-team-model.js:133:  const ids = AI_PAGE_SPECIALIST_MAP[pageId] || [];
+public/control-center/ai-team-model.js:138:  return getAiRolesForPage(pageId)[0] || AI_TEAM_ROLES[0];
+public/control-center/ui/page-standard.js:8:  "ai-command",
+public/control-center/ui/page-standard.js:9:  "workflows",
+public/control-center/ui/page-standard.js:25:    primary: { label: "Open AI Workspace", route: "ai-command" },
+public/control-center/ui/page-standard.js:49:  "ai-command": {
+public/control-center/ui/page-standard.js:50:    eyebrow: "AI Workspace",
+public/control-center/ui/page-standard.js:51:    title: "AI Workspace",
+public/control-center/ui/page-standard.js:52:    description: "Direct role-aware AI agents, structured tasks, artifacts, and decisions.",
+public/control-center/ui/page-standard.js:53:    primary: { label: "Run Structured Task", action: "focus-ai-send" },
+public/control-center/ui/page-standard.js:54:    secondary: { label: "Open Workflows", route: "workflows" }
+public/control-center/ui/page-standard.js:56:  workflows: {
+public/control-center/ui/page-standard.js:59:    description: "Run repeatable workflows and route outputs into execution.",
+public/control-center/ui/page-standard.js:60:    primary: { label: "Run Workflow", action: "focus-run-workflow" },
+public/control-center/ui/page-standard.js:80:    description: "Manage media jobs, prompt packs, storyboards, and approvals.",
+public/control-center/ui/page-standard.js:102:    primary: { label: "Generate Recommendations", route: "ai-command" },
+public/control-center/ui/page-standard.js:115:    description: "Configure project, AI mode, roles, rules, approvals, and safeguards.",
+public/control-center/ui/page-standard.js:117:    secondary: { label: "Check Governance", route: "governance" }
+public/control-center/ui/page-standard.js:132:  "focus-ai-send": "#aiCommandSendBtn",
+public/control-center/ui/page-standard.js:133:  "focus-run-workflow": "#workflowRunBtn, #workflowRunBtnMain",
+public/control-center/ui/page-standard.js:134:  "focus-build-workflow": "#workflowBuildCustomBtn",
+public/control-center/ui/page-standard.js:135:  "focus-workflow-route": "#workflowPushAiBtn, #workflowPushAiBtnSecondary",
+public/control-center/ui/page-standard.js:142:  "focus-content-approval": "#contentRequestApprovalBtn, #contentApproveBtn",
+public/control-center/ui/page-standard.js:146:  "focus-media-approval": "#mediaRequestApprovalBtn, #mediaApproveBtn",
+public/control-center/ui/page-standard.js:154:  "focus-settings-ai": "[data-settings-ai-prompt], [data-settings-open-ai]",
+public/control-center/ui/page-standard.js:309:    home: "Review blockers and ask AI Workspace for the next best operating plan.",
+public/control-center/ui/page-standard.js:313:    "ai-command": "Run a structured task for the highest-risk blocker.",
+public/control-center/ui/page-standard.js:314:    workflows: "Run the workflow with the strongest launch impact.",
+public/control-center/ui/page-standard.js:365:    context.navigateTo?.("ai-command");
+public/control-center/ui/page-standard.js:366:    context.showMessage?.("AI prompt queued in AI Workspace.");
+public/control-center/ui/page-standard.js:422:        <button type="button" class="btn btn-ghost std-context-btn" id="stdAskAiAction">Ask AI</button>
+public/control-center/ui/page-standard.js:432:      <button type="button" class="btn btn-secondary" id="stdSmartStripBtn">Open AI Workspace</button>
+public/control-center/ui/page-standard.js:485:  context.navigateTo?.("ai-command");
+public/control-center/ui/page-standard.js:486:  context.showMessage?.("AI prompt queued in AI Workspace.");
+public/control-center/ui/page-standard.js:544:    askAiBtn.textContent = "Ask AI";
+public/control-center/system-intelligence.js:48:  handoffPayload = null,
+public/control-center/system-intelligence.js:63:    handoffPayload
+public/control-center/system-intelligence.js:127:  const workflowRuns = asArray(operations.workflows?.items);
+public/control-center/system-intelligence.js:128:  const handoffs = asArray(operations.handoffs?.items);
+public/control-center/system-intelligence.js:132:  const hasWorkflowOutput = workflowRuns.length > 0 || handoffs.some((item) => normalizeText(item?.source_page) === "workflows");
+public/control-center/system-intelligence.js:157:    handoffs
+public/control-center/system-intelligence.js:162:  return asArray(signals.handoffs)
+public/control-center/system-intelligence.js:167:        id: asString(item?.id || payload?.id || payload?.workflow_id),
+public/control-center/system-intelligence.js:171:        title: asString(payload?.workflow_title || payload?.title || payload?.prompt || "Cross-page handoff"),
+public/control-center/system-intelligence.js:192:      relatedPages: ["home", "integrations", "ai-command"]
+public/control-center/system-intelligence.js:224:      relatedPages: ["workflows", "ai-command", "publishing"]
+public/control-center/system-intelligence.js:262:      id: "workflow-output-missing",
+public/control-center/system-intelligence.js:263:      title: "Run a workflow to create cross-page handoff",
+public/control-center/system-intelligence.js:264:      reason: "No workflow output/handoff is currently available for downstream routing.",
+public/control-center/system-intelligence.js:266:      targetPage: "workflows",
+public/control-center/system-intelligence.js:269:      blockerType: "workflow_gap",
+public/control-center/system-intelligence.js:271:      draftPayload: { prompt: "Run the highest-impact workflow and route output to the owning page." },
+public/control-center/system-intelligence.js:272:      relatedPages: ["ai-command", "publishing"]
+public/control-center/system-intelligence.js:287:      handoffPayload: { destination_page: "publishing", status: "available" },
+public/control-center/system-intelligence.js:303:      relatedPages: ["ai-command", "workflows"]
+public/control-center/system-intelligence.js:333:      relatedPages: ["home", "workflows", "ai-command"]
+public/control-center/system-intelligence.js:360:    { key: "workflows", label: "Workflows", ready: signals.hasWorkflowOutput, note: signals.hasWorkflowOutput ? "Output available" : "No output" },
+public/control-center/system-intelligence.js:368:  const handoffs = mapHandoffs(signals);
+public/control-center/system-intelligence.js:386:    targetPage: "ai-command",
+public/control-center/system-intelligence.js:387:    actionLabel: "Open AI Workspace",
+public/control-center/system-intelligence.js:406:    handoffs,
+public/control-center/system-intelligence.js:441:      summary: "Use AI Workspace to review priorities and proceed with the next operating step.",
+public/control-center/system-intelligence.js:442:      targetPage: "ai-command",
+public/control-center/system-intelligence.js:443:      actionLabel: "Open AI Workspace"
+public/control-center/system-intelligence.js:453:      targetPage: "ai-command",
+public/control-center/system-intelligence.js:454:      actionLabel: "Open AI Workspace"
+public/control-center/system-intelligence.js:470:    targetPage: asString(candidate.targetPage || candidate.target_page) || "ai-command",
+public/control-center/system-intelligence.js:471:    actionLabel: asString(candidate.actionLabel || candidate.action_label) || "Open AI Workspace"
+public/control-center/system-intelligence.js:489:  return buildSystemIntelligence(state).handoffs;
+public/control-center/index.html:7:  <meta name="description" content="MH Assistant OS - AI Marketing Operating System">
+public/control-center/index.html:14:  <link rel="stylesheet" href="./styles/04-command-layer.css?v=20260508-command-1">
+public/control-center/index.html:15:  <link rel="stylesheet" href="./styles/05-ai-layer.css?v=20260508-ai-layer-1">
+public/control-center/index.html:19:  <link rel="stylesheet" href="./styles/09-governance.css?v=20260623-governance-owner-1">
+public/control-center/index.html:24:  <link rel="stylesheet" href="./styles/mhos-workflow-primitives.css?v=20260523-workflow-primitives-1">
+public/control-center/index.html:101:          <div class="brand-badge">AI OS</div>
+public/control-center/index.html:117:            <button class="nav-item" data-route="ai-command" data-page="ai-command" type="button">AI Command</button>
+public/control-center/index.html:129:            <button class="nav-item" data-route="workflows" data-page="workflows" type="button">Workflows</button>
+public/control-center/index.html:159:            <button class="nav-item" data-route="governance" data-page="governance" type="button">Governance</button>
+public/control-center/index.html:168:          <button id="openAiBtn" class="btn btn-secondary" data-action="open-ai-command" type="button">
+public/control-center/index.html:169:            Open AI Workspace
+public/control-center/index.html:204:                id="commandToggleBtn"
+public/control-center/index.html:205:                class="btn btn-secondary command-toggle"
+public/control-center/index.html:207:                aria-label="Toggle command bar"
+public/control-center/index.html:225:                AI Workspace
+public/control-center/index.html:235:        <div id="commandBackdrop" class="command-backdrop" aria-hidden="true" hidden></div>
+public/control-center/index.html:237:        <section id="globalCommandBar" class="command-bar" aria-hidden="true" hidden aria-label="Global command bar">
+public/control-center/index.html:238:          <div class="command-bar-left">
+public/control-center/index.html:241:              class="command-input"
+public/control-center/index.html:243:              placeholder="Search pages, assets, campaigns, workflows..."
+public/control-center/index.html:249:          <div class="command-bar-center">
+public/control-center/index.html:252:              class="command-input"
+public/control-center/index.html:255:              aria-label="Quick command"
+public/control-center/index.html:260:          <div class="command-bar-right">
+public/control-center/index.html:262:            <button id="runQuickCommandBtn" class="btn btn-primary" data-action="send-ai-command" type="button">Run</button>
+public/control-center/index.html:369:  <script src="./runtime/command-runtime.js?v=20260510-command-runtime-classic-2"></script>
+public/control-center/index.html:372:    <div id="aiDock" class="ai-dock">
+public/control-center/index.html:375:        class="ai-dock-toggle"
+public/control-center/index.html:380:        <span class="ai-dock-status-dot"></span>
+public/control-center/index.html:381:        <span class="ai-dock-label">MH Assistant</span>
+public/control-center/index.html:382:        <span class="ai-dock-state">Ready</span>
+public/control-center/index.html:387:        class="ai-dock-panel"
+public/control-center/index.html:390:        <header class="ai-dock-header">
+public/control-center/index.html:393:            <p id="aiDockContext">AI operating layer ready.</p>
+public/control-center/index.html:398:            class="ai-dock-close"
+public/control-center/index.html:406:        <div class="ai-dock-body">
+public/control-center/index.html:407:          <div class="ai-dock-section">
+public/control-center/index.html:408:            <span class="ai-dock-section-label">Suggested next step</span>
+public/control-center/index.html:411:              class="ai-dock-suggestion"
+public/control-center/index.html:413:              data-ai-suggestion="Review the current workspace and suggest the next best action."
+public/control-center/index.html:419:              class="ai-dock-suggestion"
+public/control-center/index.html:421:              data-ai-suggestion="Build a smart workflow for the current project."
+public/control-center/index.html:423:              Build AI workflow
+public/control-center/index.html:427:              class="ai-dock-suggestion"
+public/control-center/index.html:429:              data-ai-suggestion="Summarize blockers and operational risks."
+public/control-center/index.html:435:          <div class="ai-dock-section">
+public/control-center/index.html:436:            <span class="ai-dock-section-label">Quick actions</span>
+public/control-center/index.html:438:            <div class="ai-dock-actions">
+public/control-center/index.html:439:              <button class="ai-dock-chip" data-ai-route="campaign-studio">
+public/control-center/index.html:443:              <button class="ai-dock-chip" data-ai-route="content-studio">
+public/control-center/index.html:447:              <button class="ai-dock-chip" data-ai-route="media-studio">
+public/control-center/index.html:451:              <button class="ai-dock-chip" data-ai-route="publishing">
+public/control-center/automation-engine.js:10:  "create_handoff",
+public/control-center/automation-engine.js:12:  "prepare_workflow",
+public/control-center/automation-engine.js:17:  { test: /publish\s*now|go\s*live|send\s*live|execute\s*publish|push\s*live/i, reason: "Publishing requires approval and manual confirmation." },
+public/control-center/automation-engine.js:21:  { test: /approve\s*final\s*asset|final\s*approval/i, reason: "Final approvals require a human decision." },
+public/control-center/automation-engine.js:22:  { test: /spend\s*money|charge|billing|payment|purchase/i, reason: "Spending actions require explicit manual approval." },
+public/control-center/automation-engine.js:23:  { test: /send\s*external|send\s*email|send\s*message|dm\b|sms\b/i, reason: "External sending requires approval." },
+public/control-center/automation-engine.js:24:  { test: /paid\s*ads|launch\s*ads|ad\s*spend|budget/i, reason: "Paid promotion requires approval." },
+public/control-center/automation-engine.js:25:  { test: /credential|api\s*key|secret|token|auth/i, reason: "Credential and provider connection actions require approval." }
+public/control-center/automation-engine.js:69:    approvalRequiredStep: null
+public/control-center/automation-engine.js:77:    mode: ["off", "guided", "auto_until_approval"].includes(normalizeText(parsed.mode))
+public/control-center/automation-engine.js:82:    status: ["idle", "running", "paused", "waiting_approval", "completed", "failed"].includes(normalizeText(parsed.status))
+public/control-center/automation-engine.js:87:    approvalRequiredStep: parsed.approvalRequiredStep == null ? null : asObject(parsed.approvalRequiredStep)
+public/control-center/automation-engine.js:99:    if (state.status === "running" || state.status === "waiting_approval") {
+public/control-center/automation-engine.js:238:      reason: "Publishing actions require manual approval before execution.",
+public/control-center/automation-engine.js:239:      whatWillHappen: "Auto Mode will stop at this step and wait for approval."
+public/control-center/automation-engine.js:251:    const targetPage = asString(rec?.targetPage || "ai-command");
+public/control-center/automation-engine.js:256:      type: "create_handoff",
+public/control-center/automation-engine.js:296:      type: "create_handoff",
+public/control-center/automation-engine.js:298:      action: "Create content-to-media handoff",
+public/control-center/automation-engine.js:307:      type: "create_handoff",
+public/control-center/automation-engine.js:309:      action: "Create media-to-library handoff",
+public/control-center/automation-engine.js:318:      type: "create_handoff",
+public/control-center/automation-engine.js:320:      action: "Create library-to-publishing handoff",
+public/control-center/automation-engine.js:339:  const destination = asString(step?.targetPage || "ai-command");
+public/control-center/automation-engine.js:402:    if (normalizeText(step.type) === "prepare_workflow") {
+public/control-center/automation-engine.js:404:      const handoff = {
+public/control-center/automation-engine.js:406:        destination_page: "workflows",
+public/control-center/automation-engine.js:410:          title: asString(step?.payload?.title || "Prepared workflow draft"),
+public/control-center/automation-engine.js:415:      setSharedHandoff(projectName, "workflows", handoff);
+public/control-center/automation-engine.js:417:        context.createProjectHandoff(projectName, handoff).catch(() => {});
+public/control-center/automation-engine.js:424:      const handoff = {
+public/control-center/automation-engine.js:436:      setSharedHandoff(projectName, "publishing", handoff);
+public/control-center/automation-engine.js:438:        context.createProjectHandoff(projectName, handoff).catch(() => {});
+public/control-center/automation-engine.js:443:    if (normalizeText(step.type) === "create_handoff") {
+public/control-center/automation-engine.js:445:      const handoff = {
+public/control-center/automation-engine.js:460:      setSharedHandoff(projectName, destination, handoff);
+public/control-center/automation-engine.js:462:        context.createProjectHandoff(projectName, handoff).catch(() => {});
+public/control-center/automation-engine.js:535:      autoModeState.status = "waiting_approval";
+public/control-center/automation-engine.js:536:      autoModeState.approvalRequiredStep = {
+public/control-center/automation-engine.js:583:  autoModeState.approvalRequiredStep = null;
+public/control-center/automation-engine.js:609:  const mode = ["guided", "auto_until_approval"].includes(normalizeText(options.mode))
+public/control-center/automation-engine.js:620:  autoModeState.approvalRequiredStep = null;
+public/control-center/automation-engine.js:653:    autoModeState.mode = ["guided", "auto_until_approval"].includes(normalizeText(options.mode))
+public/control-center/automation-engine.js:658:  autoModeState.approvalRequiredStep = null;
+public/control-center/automation-engine.js:669:  autoModeState.approvalRequiredStep = null;
+public/control-center/automation-engine.js:676:  if (autoModeState.status !== "waiting_approval" || !autoModeState.approvalRequiredStep) return getAutoModeState();
+public/control-center/automation-engine.js:678:  const gate = asObject(autoModeState.approvalRequiredStep);
+public/control-center/automation-engine.js:691:  autoModeState.approvalRequiredStep = null;
+public/control-center/automation-engine.js:697:    pushAutoLog("Auto Mode completed after approval gate.", "success");
+public/control-center/automation-engine.js:709:  if (autoModeState.status !== "waiting_approval" || !autoModeState.approvalRequiredStep) return getAutoModeState();
+public/control-center/automation-engine.js:710:  const index = Number(autoModeState.approvalRequiredStep.index) || autoModeState.currentStepIndex;
+public/control-center/automation-engine.js:711:  pushAutoLog(`Skipped step ${index + 1} after approval gate.`, "warning", { stepIndex: index });
+public/control-center/automation-engine.js:713:  autoModeState.approvalRequiredStep = null;
+public/control-center/runtime/command-runtime.js:6:  - command lifecycle
+public/control-center/runtime/command-runtime.js:7:  - command overlay
+public/control-center/runtime/command-runtime.js:8:  - command accessibility
+public/control-center/runtime/command-runtime.js:9:  - command state transitions
+public/control-center/runtime/command-runtime.js:13:  This file is currently a non-active runtime skeleton.
+public/control-center/runtime/command-runtime.js:14:  No production runtime integration has started yet.
+public/control-center/runtime/command-runtime.js:41:  - runtime transitions
+public/control-center/runtime/command-runtime.js:49:  commandBar = null,
+public/control-center/runtime/command-runtime.js:50:  commandBackdrop = null,
+public/control-center/runtime/command-runtime.js:58:    commandBar: {
+public/control-center/runtime/command-runtime.js:59:      exists: Boolean(commandBar),
+public/control-center/runtime/command-runtime.js:60:      hidden: Boolean(commandBar?.hidden),
+public/control-center/runtime/command-runtime.js:61:      ariaHidden: String(commandBar?.getAttribute?.("aria-hidden") || ""),
+public/control-center/runtime/command-runtime.js:62:      className: String(commandBar?.className || "")
+public/control-center/runtime/command-runtime.js:65:    commandBackdrop: {
+public/control-center/runtime/command-runtime.js:66:      exists: Boolean(commandBackdrop),
+public/control-center/runtime/command-runtime.js:67:      hidden: Boolean(commandBackdrop?.hidden),
+public/control-center/runtime/command-runtime.js:68:      ariaHidden: String(commandBackdrop?.getAttribute?.("aria-hidden") || ""),
+public/control-center/runtime/command-runtime.js:69:      className: String(commandBackdrop?.className || "")
+public/control-center/runtime/command-runtime.js:99:  - command-closed
+public/control-center/runtime/command-runtime.js:100:  - command-inline
+public/control-center/runtime/command-runtime.js:101:  - command-overlay
+public/control-center/runtime/command-runtime.js:102:  - command-transitioning
+public/control-center/runtime/RUNTIME_ROADMAP.md:8:- command runtime
+public/control-center/runtime/RUNTIME_ROADMAP.md:9:- AI dock
+public/control-center/runtime/RUNTIME_ROADMAP.md:17:## shell-runtime.js
+public/control-center/runtime/RUNTIME_ROADMAP.md:23:## overlay-runtime.js
+public/control-center/runtime/RUNTIME_ROADMAP.md:29:## command-runtime.js
+public/control-center/runtime/RUNTIME_ROADMAP.md:30:- command palette
+public/control-center/runtime/RUNTIME_ROADMAP.md:31:- AI command lifecycle
+public/control-center/runtime/RUNTIME_ROADMAP.md:33:- command accessibility
+public/control-center/runtime/RUNTIME_ROADMAP.md:35:## route-runtime.js
+public/control-center/runtime/RUNTIME_ROADMAP.md:50:Never rewrite runtime blindly.
+public/control-center/runtime/lifecycle/README.md:192:2. Major pages (library.js, integrations.js, workflows.js, publishing.js, etc.)
+public/control-center/runtime/lifecycle/README.md:207:node --check public/control-center/runtime/lifecycle/lifecycle-registry.js
+public/control-center/runtime/runtime-boundaries.js:4:  command: "global-command-runtime",
+public/control-center/runtime/runtime-boundaries.js:5:  overlays: "overlay-runtime",
+public/control-center/runtime/runtime-boundaries.js:6:  diagnostics: "diagnostics-runtime",
+public/control-center/runtime/runtime-boundaries.js:7:  ai: "ai-runtime",
+public/control-center/runtime/runtime-boundaries.js:8:  startup: "startup-runtime"
+public/control-center/runtime/README.md:4:Gradually decompose the legacy Control Center runtime into isolated operational modules.
+public/control-center/runtime/README.md:12:- command runtime is tightly coupled
+public/control-center/runtime/README.md:16:- runtime and CSS overlap responsibilities
+public/control-center/runtime/README.md:18:This directory will contain the canonical runtime decomposition.
+public/control-center/runtime/README.md:24:## command-runtime.js
+public/control-center/runtime/README.md:26:- command lifecycle
+public/control-center/runtime/README.md:27:- command overlay
+public/control-center/runtime/README.md:28:- command state
+public/control-center/runtime/README.md:30:- command accessibility
+public/control-center/runtime/README.md:31:- command focus management
+public/control-center/runtime/README.md:35:## shell-runtime.js
+public/control-center/runtime/README.md:44:## sidebar-runtime.js
+public/control-center/runtime/README.md:52:## overlay-runtime.js
+public/control-center/runtime/README.md:66:- AI operational actions
+public/control-center/runtime/README.md:68:NO shell runtime ownership.
+public/control-center/runtime/README.md:75:- move multiple runtime systems at once
+public/control-center/runtime/README.md:76:- rewrite runtime behavior blindly
+public/control-center/runtime/README.md:81:- preserve runtime behavior
+public/control-center/runtime/README.md:92:No production runtime extraction has started yet.
+public/control-center/runtime/governance-ai-bridge.js:5:window.__GOVERNANCE_AI__ = {
+public/control-center/runtime/governance-ai-bridge.js:15:      window.__mhGraphLog?.("AI_GOVERNANCE_BLOCK", response);
+public/control-center/runtime/ai-settings-controller.js:2: * PHASE 19 — AI SETTINGS CONTROLLER
+public/control-center/runtime/ai-settings-controller.js:5:window.__AI_SETTINGS__ = {
+public/control-center/runtime/ai-settings-controller.js:30:    console.log("[AI SETTINGS UPDATED]", this);
+public/control-center/runtime/ai-backend-connector.js:2: * PHASE 19 — FRONTEND AI CONNECTOR
+public/control-center/runtime/ai-backend-connector.js:5:window.__AI_BACKEND_BRIDGE__ = {
+public/control-center/runtime/ai-backend-connector.js:7:  async call(command, payload) {
+public/control-center/runtime/ai-backend-connector.js:15:        command,
+public/control-center/runtime/ai-backend-connector.js:23:  workflow(data) {
+public/control-center/runtime/authority/route-role-fallback.js:17:  "ai-command": ACTIVE_ROUTE_ROLES,
+public/control-center/runtime/authority/route-role-fallback.js:28:  governance: ["compliance_reviewer", "admin", "analyst"],
+public/control-center/runtime/authority/route-role-fallback.js:32:  workflows: ACTIVE_ROUTE_ROLES,
+public/control-center/runtime/authority/authority-projection.js:12: * - mutate governance
+public/control-center/runtime/authority/authority-projection.js:15: * - own approvals
+public/control-center/runtime/authority/authority-projection.js:16: * - own workflows
+public/control-center/runtime/authority/authority-projection.js:33:  return safeObject(operations.team_service_model);
+public/control-center/runtime/authority/authority-projection.js:38:  return safeObject(operations.governance);
+public/control-center/runtime/authority/authority-projection.js:43:  return safeObject(operations.approvals);
+public/control-center/runtime/authority/authority-projection.js:48:  return safeObject(operations.workflow_runs);
+public/control-center/runtime/authority/authority-projection.js:53:  return safeObject(operations.handoffs);
+public/control-center/runtime/overlay/OVERLAY_RUNTIME_PLAN.md:9:- command backdrops
+public/control-center/runtime/overlay/OVERLAY_RUNTIME_PLAN.md:22:Confirmed runtime issues:
+public/control-center/runtime/overlay/OVERLAY_RUNTIME_PLAN.md:37:- styles/04-command-layer.css
+public/control-center/runtime/overlay/OVERLAY_RUNTIME_PLAN.md:39:- runtime/command-runtime.js
+public/control-center/runtime/overlay/OVERLAY_RUNTIME_PLAN.md:43:- legacy/11-runtime-safety-overrides.legacy.css
+public/control-center/runtime/overlay/OVERLAY_RUNTIME_PLAN.md:44:- legacy/09-command-legacy-isolation.legacy.css
+public/control-center/runtime/overlay/OVERLAY_RUNTIME_PLAN.md:73:- no runtime rewrites yet
+public/control-center/runtime/mh-runtime-globals.js:1:// public/control-center/runtime/mh-runtime-globals.js
+public/control-center/runtime/mh-runtime-globals.js:57:  w.__mhAIIntercept = function(payload) {
+public/control-center/runtime/mh-runtime-globals.js:58:    return record("FRONTEND_AI_INTENT_CAPTURED", { payload });
+public/control-center/runtime/mh-runtime-globals.js:61:  w.__mhCommand = function(command) {
+public/control-center/runtime/mh-runtime-globals.js:62:    return record("FRONTEND_COMMAND_CAPTURED", { command });
+public/control-center/runtime/mh-runtime-globals.js:73:  w.__MH_BRAIN__ = Object.freeze({
+public/control-center/legacy/11-runtime-safety-overrides.legacy.css:12:  .command-backdrop[aria-hidden="true"],
+public/control-center/legacy/11-runtime-safety-overrides.legacy.css:13:  .app-shell:not(.is-command-open):not(.is-mobile-command-open) .command-backdrop,
+public/control-center/legacy/page-standard.legacy-20260508.js:8:  "ai-command",
+public/control-center/legacy/page-standard.legacy-20260508.js:9:  "workflows",
+public/control-center/legacy/page-standard.legacy-20260508.js:25:    primary: { label: "Open AI Workspace", route: "ai-command" },
+public/control-center/legacy/page-standard.legacy-20260508.js:49:  "ai-command": {
+public/control-center/legacy/page-standard.legacy-20260508.js:50:    eyebrow: "AI Workspace",
+public/control-center/legacy/page-standard.legacy-20260508.js:51:    title: "AI Workspace",
+public/control-center/legacy/page-standard.legacy-20260508.js:52:    description: "Direct role-aware AI agents, structured tasks, artifacts, recommendations, and operating decisions.",
+public/control-center/legacy/page-standard.legacy-20260508.js:53:    primary: { label: "Run Structured Task", action: "focus-ai-send" },
+public/control-center/legacy/page-standard.legacy-20260508.js:54:    secondary: { label: "Open Workflows", route: "workflows" }
+public/control-center/legacy/page-standard.legacy-20260508.js:56:  workflows: {
+public/control-center/legacy/page-standard.legacy-20260508.js:59:    description: "Run repeatable workflows, build custom workflows with AI, and route outputs into the next workspace.",
+public/control-center/legacy/page-standard.legacy-20260508.js:60:    primary: { label: "Run Workflow", action: "focus-run-workflow" },
+public/control-center/legacy/page-standard.legacy-20260508.js:80:    description: "Manage media jobs, prompt packs, storyboards, generated assets, approvals, and publishing handoffs.",
+public/control-center/legacy/page-standard.legacy-20260508.js:94:    description: "Shape ad briefs, variants, audiences, budget suggestions, tracking status, and campaign handoffs.",
+public/control-center/legacy/page-standard.legacy-20260508.js:102:    primary: { label: "Generate Recommendations", route: "ai-command" },
+public/control-center/legacy/page-standard.legacy-20260508.js:115:    description: "Configure project settings, AI mode, roles, publishing rules, approvals, and readiness safeguards.",
+public/control-center/legacy/page-standard.legacy-20260508.js:117:    secondary: { label: "Check Governance", route: "governance" }
+public/control-center/legacy/page-standard.legacy-20260508.js:130:  insights: { previous: "Publishing", next: "AI Command" },
+public/control-center/legacy/page-standard.legacy-20260508.js:131:  "ai-command": { previous: "Insights", next: "Workflows" },
+public/control-center/legacy/page-standard.legacy-20260508.js:132:  workflows: { previous: "AI Command", next: "Ads Manager" },
+public/control-center/legacy/page-standard.legacy-20260508.js:142:    { label: "Ask executive AI", description: "Turn system state into a short action plan.", route: "ai-command" }
+public/control-center/legacy/page-standard.legacy-20260508.js:146:    { label: "Generate positioning with AI", description: "Apply AI suggestions for positioning, audience, and tone.", action: "focus-setup-ai" },
+public/control-center/legacy/page-standard.legacy-20260508.js:152:    { label: "Classify with AI", description: "Categorize files and propose source-of-truth candidates.", action: "focus-library-classify" },
+public/control-center/legacy/page-standard.legacy-20260508.js:159:    { label: "Run sync", description: "Sync connected sources into intelligence and execution workflows.", action: "focus-sync" },
+public/control-center/legacy/page-standard.legacy-20260508.js:160:    { label: "Diagnose with AI", description: "Send connector failures and coverage gaps to AI Command.", action: "focus-integration-ai" }
+public/control-center/legacy/page-standard.legacy-20260508.js:162:  "ai-command": [
+public/control-center/legacy/page-standard.legacy-20260508.js:166:    { label: "Run structured task", description: "Use the command composer for repeatable AI output.", action: "focus-ai-send" }
+public/control-center/legacy/page-standard.legacy-20260508.js:168:  workflows: [
+public/control-center/legacy/page-standard.legacy-20260508.js:169:    { label: "Run workflow", description: "Execute the selected workflow with current project inputs.", action: "focus-run-workflow" },
+public/control-center/legacy/page-standard.legacy-20260508.js:170:    { label: "Build custom workflow with AI", description: "Use AI Workspace to assemble a workflow for the current blocker.", action: "focus-build-workflow" },
+public/control-center/legacy/page-standard.legacy-20260508.js:171:    { label: "View running workflows", description: "Inspect active and recent execution state.", route: "job-monitor" },
+public/control-center/legacy/page-standard.legacy-20260508.js:172:    { label: "Send output forward", description: "Route the latest workflow result into the owning workspace.", action: "focus-workflow-route" }
+public/control-center/legacy/page-standard.legacy-20260508.js:177:    { label: "Create execution package", description: "Prepare handoffs for content, media, paid, and publishing.", action: "focus-campaign-package" },
+public/control-center/legacy/page-standard.legacy-20260508.js:182:    { label: "Rewrite or translate", description: "Record an AI rewrite request for the selected item.", action: "focus-content-ai" },
+public/control-center/legacy/page-standard.legacy-20260508.js:183:    { label: "Approve content", description: "Move selected copy through the review workflow.", action: "focus-content-approval" },
+public/control-center/legacy/page-standard.legacy-20260508.js:187:    { label: "Generate image prompt", description: "Create a media job and attach prompt guidance.", action: "focus-new-media-image" },
+public/control-center/legacy/page-standard.legacy-20260508.js:189:    { label: "Approve media", description: "Move selected creative through review.", action: "focus-media-approval" },
+public/control-center/legacy/page-standard.legacy-20260508.js:195:    { label: "Copy publish payload", description: "Send selected publishing context to AI Command for packaging.", action: "focus-publishing-ai" },
+public/control-center/legacy/page-standard.legacy-20260508.js:205:    { label: "Generate recommendations", description: "Turn performance signals into priorities.", route: "ai-command" },
+public/control-center/legacy/page-standard.legacy-20260508.js:206:    { label: "Record feedback", description: "Preserve what worked and what failed in learning memory.", route: "ai-command" },
+public/control-center/legacy/page-standard.legacy-20260508.js:217:    { label: "Save settings", description: "Persist project, AI, team, publishing, and approval configuration.", action: "focus-save-settings" },
+public/control-center/legacy/page-standard.legacy-20260508.js:218:    { label: "Configure AI mode", description: "Review how autonomous the AI system is allowed to be.", action: "focus-settings-ai" },
+public/control-center/legacy/page-standard.legacy-20260508.js:219:    { label: "Update roles", description: "Inspect team permissions and route access.", action: "focus-settings-roles" },
+public/control-center/legacy/page-standard.legacy-20260508.js:224:const ROUTE_AI = {
+public/control-center/legacy/page-standard.legacy-20260508.js:226:    title: "Executive AI Chief of Staff",
+public/control-center/legacy/page-standard.legacy-20260508.js:235:    description: "Use AI to complete missing fields and sharpen positioning before assets or campaigns begin.",
+public/control-center/legacy/page-standard.legacy-20260508.js:243:    description: "Use AI to classify files, identify missing source-of-truth assets, and extract useful claims.",
+public/control-center/legacy/page-standard.legacy-20260508.js:251:    description: "Use AI to explain failed connectors, data coverage gaps, and sync priorities.",
+public/control-center/legacy/page-standard.legacy-20260508.js:257:  "ai-command": {
+public/control-center/legacy/page-standard.legacy-20260508.js:258:    title: "AI Operations Director",
+public/control-center/legacy/page-standard.legacy-20260508.js:259:    description: "Use structured prompts to delegate work to the right AI role and route artifacts onward.",
+public/control-center/legacy/page-standard.legacy-20260508.js:262:      "Recommend which AI role should handle the highest-risk blocker next."
+public/control-center/legacy/page-standard.legacy-20260508.js:265:  workflows: {
+public/control-center/legacy/page-standard.legacy-20260508.js:267:    description: "Use AI to choose the next workflow, fill inputs, and route the generated output.",
+public/control-center/legacy/page-standard.legacy-20260508.js:269:      "Recommend the next workflow run and explain the expected output.",
+public/control-center/legacy/page-standard.legacy-20260508.js:270:      "Build a custom workflow for the current campaign blocker."
+public/control-center/legacy/page-standard.legacy-20260508.js:275:    description: "Use AI to sequence launch waves and turn readiness gaps into execution steps.",
+public/control-center/legacy/page-standard.legacy-20260508.js:278:      "Generate the next launch wave with dependencies and handoffs."
+public/control-center/legacy/page-standard.legacy-20260508.js:283:    description: "Use AI to draft, rewrite, translate, and prepare platform-specific content.",
+public/control-center/legacy/page-standard.legacy-20260508.js:291:    description: "Use AI to create image prompts, video storyboards, and production-ready media tasks.",
+public/control-center/legacy/page-standard.legacy-20260508.js:299:    description: "Use AI to prioritize the queue, package payloads, and recover failed execution.",
+public/control-center/legacy/page-standard.legacy-20260508.js:307:    description: "Use AI to turn campaign goals into paid briefs, variants, audiences, and budget guidance.",
+public/control-center/legacy/page-standard.legacy-20260508.js:315:    description: "Use AI to explain winners, weak channels, risks, and learning-memory updates.",
+public/control-center/legacy/page-standard.legacy-20260508.js:323:    description: "Use AI to convert trends, competitors, keywords, and audience findings into strategy.",
+public/control-center/legacy/page-standard.legacy-20260508.js:331:    description: "Use AI to review AI mode, roles, publishing safeguards, and production readiness.",
+public/control-center/legacy/page-standard.legacy-20260508.js:334:      "Suggest the best AI automation mode for the current project maturity."
+public/control-center/legacy/page-standard.legacy-20260508.js:350:  "focus-ai-send": "#aiCommandSendBtn",
+public/control-center/legacy/page-standard.legacy-20260508.js:351:  "focus-run-workflow": "#workflowRunBtn, #workflowRunBtnMain",
+public/control-center/legacy/page-standard.legacy-20260508.js:352:  "focus-build-workflow": "#workflowBuildCustomBtn",
+public/control-center/legacy/page-standard.legacy-20260508.js:353:  "focus-workflow-route": "#workflowPushAiBtn, #workflowPushAiBtnSecondary",
+public/control-center/legacy/page-standard.legacy-20260508.js:360:  "focus-content-approval": "#contentRequestApprovalBtn, #contentApproveBtn",
+public/control-center/legacy/page-standard.legacy-20260508.js:364:  "focus-media-approval": "#mediaRequestApprovalBtn, #mediaApproveBtn",
+public/control-center/legacy/page-standard.legacy-20260508.js:372:  "focus-settings-ai": "[data-settings-ai-prompt], [data-settings-open-ai]",
+public/control-center/legacy/page-standard.legacy-20260508.js:437:  return asArray(items).filter((item) => wanted.has(asString(item?.status || item?.execution_status || item?.approval_status || item?.publish_status).toLowerCase())).length;
+public/control-center/legacy/page-standard.legacy-20260508.js:504:  const workflowItems = asArray(ops.workflows?.items || ops.workflow_runs?.items);
+public/control-center/legacy/page-standard.legacy-20260508.js:505:  const aiCommands = asArray(ops.ai_commands?.items);
+public/control-center/legacy/page-standard.legacy-20260508.js:519:    hasBrandProfile: Boolean(overview.brand_profile || overview.brand_assets || overview.brand_voice || overview.brand_name),
+public/control-center/legacy/page-standard.legacy-20260508.js:553:    contentReview: asNumber(ops.content_items?.pending_approval_count, countByStatus(contentItems, ["in_review", "pending"])),
+public/control-center/legacy/page-standard.legacy-20260508.js:559:    workflowTotal: asNumber(ops.workflows?.total_runs ?? ops.workflow_runs?.total, workflowItems.length),
+public/control-center/legacy/page-standard.legacy-20260508.js:560:    workflowCompleted: asNumber(ops.workflows?.completed_runs, countByStatus(workflowItems, ["completed"])),
+public/control-center/legacy/page-standard.legacy-20260508.js:561:    workflowRunning: countByStatus(workflowItems, ["queued", "running"]),
+public/control-center/legacy/page-standard.legacy-20260508.js:562:    workflowFailed: countByStatus(workflowItems, ["failed", "cancelled"]),
+public/control-center/legacy/page-standard.legacy-20260508.js:563:    aiCommandsTotal: asNumber(ops.ai_commands?.total, aiCommands.length),
+public/control-center/legacy/page-standard.legacy-20260508.js:564:    aiCommandsCompleted: asNumber(ops.ai_commands?.completed_count, countByStatus(aiCommands, ["completed"])),
+public/control-center/legacy/page-standard.legacy-20260508.js:580:    savedFindings: asArray(ops.handoffs?.items).filter((item) => asString(item.source_page) === "research").length,
+public/control-center/legacy/page-standard.legacy-20260508.js:581:    teamRoles: asArray(ops.team_service_model?.role_matrix).length || asArray(ops.team?.members).length,
+public/control-center/legacy/page-standard.legacy-20260508.js:582:    approvalsPending: asNumber(ops.approvals?.pending_count, 0),
+public/control-center/legacy/page-standard.legacy-20260508.js:583:    approvalRulesReady: Boolean(ops.governance?.policy_rules),
+public/control-center/legacy/page-standard.legacy-20260508.js:597:      card("AI team", `${m.aiCommandsTotal} commands`, "Role-aware AI work and generated artifacts available to route.", m.aiCommandsTotal ? "success" : "neutral"),
+public/control-center/legacy/page-standard.legacy-20260508.js:603:      card("Brand profile", m.hasBrandProfile ? "Ready" : "Needs input", "Positioning and brand context used by downstream AI.", m.hasBrandProfile ? "success" : "warning"),
+public/control-center/legacy/page-standard.legacy-20260508.js:611:      card("Source of truth", String(m.sourceOfTruthAssets), "Assets marked as authoritative for AI and production workflows.", m.sourceOfTruthAssets ? "success" : "warning")
+public/control-center/legacy/page-standard.legacy-20260508.js:619:    "ai-command": [
+public/control-center/legacy/page-standard.legacy-20260508.js:620:      card("AI agents", String(Math.max(m.teamRoles, 8)), "Role-aware strategy, writing, media, paid, analyst, and operations agents.", "success"),
+public/control-center/legacy/page-standard.legacy-20260508.js:621:      card("Recent commands", String(m.aiCommandsTotal), "Structured and freeform commands recorded by the OS.", m.aiCommandsTotal ? "success" : "neutral"),
+public/control-center/legacy/page-standard.legacy-20260508.js:623:      card("Recommendations", String(m.aiRecommendationsOpen || m.recommendations.length), "AI-suggested actions waiting for operator decision.", m.aiRecommendationsOpen || m.recommendations.length ? "warning" : "neutral")
+public/control-center/legacy/page-standard.legacy-20260508.js:625:    workflows: [
+public/control-center/legacy/page-standard.legacy-20260508.js:626:      card("Workflow catalog", "Available", "Launch, content, campaign, ads, report, and research workflows.", "success"),
+public/control-center/legacy/page-standard.legacy-20260508.js:627:      card("Running workflows", String(m.workflowRunning), "Queued or active workflow runs.", m.workflowRunning ? "warning" : "neutral"),
+public/control-center/legacy/page-standard.legacy-20260508.js:628:      card("Completed workflows", String(m.workflowCompleted), "Workflow outputs available for routing.", m.workflowCompleted ? "success" : "neutral"),
+public/control-center/legacy/page-standard.legacy-20260508.js:629:      card("Failed workflows", String(m.workflowFailed), "Runs requiring diagnosis or retry.", m.workflowFailed ? "danger" : "success")
+public/control-center/legacy/page-standard.legacy-20260508.js:640:      card("In review", String(m.contentReview), "Copy waiting for approval or changes.", m.contentReview ? "warning" : "success"),
+public/control-center/legacy/page-standard.legacy-20260508.js:652:      card("Manual publish ready", String(m.publishingReady), "Items ready for approval or manual release.", m.publishingReady ? "success" : "neutral"),
+public/control-center/legacy/page-standard.legacy-20260508.js:672:      card("Saved findings", String(m.savedFindings), "Research handoffs preserved for downstream work.", m.savedFindings ? "success" : "neutral")
+public/control-center/legacy/page-standard.legacy-20260508.js:676:      card("AI settings", m.aiCommandsTotal ? "In use" : "Configurable", "AI command and automation behavior can be governed here.", "success"),
+public/control-center/legacy/page-standard.legacy-20260508.js:677:      card("Team roles", String(m.teamRoles), "Roles and route permissions available to the operating system.", m.teamRoles ? "success" : "warning"),
+public/control-center/legacy/page-standard.legacy-20260508.js:678:      card("Approval rules", m.approvalRulesReady ? "Configured" : "Default", "Publishing and claim-safety review policy state.", m.approvalRulesReady ? "success" : "warning"),
+public/control-center/legacy/page-standard.legacy-20260508.js:689:      card("Ready", m.projectReadiness >= 80 ? "Ready" : "Not yet", "Setup can support downstream workflows once required inputs are complete.", tone(m.projectReadiness)),
+public/control-center/legacy/page-standard.legacy-20260508.js:696:      card("Next step", m.missingAssets.length ? "Upload required asset" : "Route to Campaign Studio", "Asset workflow continuation.", m.missingAssets.length ? "warning" : "success")
+public/control-center/legacy/page-standard.legacy-20260508.js:703:    "ai-command": [
+public/control-center/legacy/page-standard.legacy-20260508.js:704:      card("Ready", "Composer ready", "AI command composer and role mode are available.", "success"),
+public/control-center/legacy/page-standard.legacy-20260508.js:706:      card("Next step", m.recommendations.length ? "Run recommendation" : "Ask a role agent", "Best AI action for the current state.", m.recommendations.length ? "warning" : "success")
+public/control-center/legacy/page-standard.legacy-20260508.js:708:    workflows: [
+public/control-center/legacy/page-standard.legacy-20260508.js:709:      card("Running", String(m.workflowRunning), "Queued or active workflow runs.", m.workflowRunning ? "warning" : "neutral"),
+public/control-center/legacy/page-standard.legacy-20260508.js:710:      card("Completed", String(m.workflowCompleted), "Finished workflow outputs.", m.workflowCompleted ? "success" : "neutral"),
+public/control-center/legacy/page-standard.legacy-20260508.js:711:      card("Failed", String(m.workflowFailed), "Runs that need retry or inspection.", m.workflowFailed ? "danger" : "success")
+public/control-center/legacy/page-standard.legacy-20260508.js:716:      card("Next step", "Build launch wave", "Prepare the campaign for content, media, paid, and publishing handoffs.", "success")
+public/control-center/legacy/page-standard.legacy-20260508.js:720:      card("Review", String(m.contentReview), "Content needing approval or revision.", m.contentReview ? "warning" : "success"),
+public/control-center/legacy/page-standard.legacy-20260508.js:736:      card("Next step", "Build ad brief", "Prepare variants and budget guidance for Campaign Studio.", "success")
+public/control-center/legacy/page-standard.legacy-20260508.js:750:      card("Needs attention", String(m.approvalsPending), "Pending approvals that may affect policy and publishing.", m.approvalsPending ? "warning" : "success"),
+public/control-center/legacy/page-standard.legacy-20260508.js:758:    card("Next step", firstText([m.recommendations[0]], "Open AI Workspace for guidance"), "Recommended operating move.", m.recommendations.length ? "warning" : "neutral")
+public/control-center/legacy/page-standard.legacy-20260508.js:764:    home: "Review the highest-risk blocker and ask AI Command for an owner-by-owner plan.",
+public/control-center/legacy/page-standard.legacy-20260508.js:766:    library: "Upload the most important missing required asset and classify it with AI.",
+public/control-center/legacy/page-standard.legacy-20260508.js:768:    "ai-command": "Run a structured task for the highest-risk blocker and route the artifact.",
+public/control-center/legacy/page-standard.legacy-20260508.js:769:    workflows: "Run the workflow with the strongest launch impact and send the output forward.",
+public/control-center/legacy/page-standard.legacy-20260508.js:797:      <div class="toolbar std-header-actions" id="stdHeaderActions">
+public/control-center/legacy/page-standard.legacy-20260508.js:859:          <button type="button" class="btn btn-primary std-full-width" id="stdNextBestActionBtn">Send To AI Command</button>
+public/control-center/legacy/page-standard.legacy-20260508.js:862:        <section class="card ai-panel" data-ui-role="ai-panel">
+public/control-center/legacy/page-standard.legacy-20260508.js:865:              <p class="card-label">Contextual AI Agent</p>
+public/control-center/legacy/page-standard.legacy-20260508.js:866:              <h3 id="stdAiTitle">AI assistant</h3>
+public/control-center/legacy/page-standard.legacy-20260508.js:868:            <span class="badge badge-success">AI</span>
+public/control-center/legacy/page-standard.legacy-20260508.js:871:          <div id="stdAiPrompts" class="std-ai-prompts"></div>
+public/control-center/legacy/page-standard.legacy-20260508.js:925:    { label: "Open AI Workspace", route: "ai-command" },
+public/control-center/legacy/page-standard.legacy-20260508.js:956:      { label: "Open Governance", route: "governance" },
+public/control-center/legacy/page-standard.legacy-20260508.js:979:    context.navigateTo("ai-command");
+public/control-center/legacy/page-standard.legacy-20260508.js:980:    context.showMessage?.("AI prompt queued in AI Command.");
+public/control-center/legacy/page-standard.legacy-20260508.js:1038:  const ai = ROUTE_AI[route] || ROUTE_AI.home;
+public/control-center/legacy/page-standard.legacy-20260508.js:1042:      <button type="button" class="btn btn-ghost std-ai-btn" data-std-ai-prompt="${index}">
+public/control-center/legacy/page-standard.legacy-20260508.js:1048:  Array.from(container.querySelectorAll("[data-std-ai-prompt]")).forEach((button) => {
+public/control-center/legacy/page-standard.legacy-20260508.js:1050:      const prompt = ai.prompts[Number(button.getAttribute("data-std-ai-prompt"))] || "";
+public/control-center/legacy/page-standard.legacy-20260508.js:1053:      context.navigateTo("ai-command");
+public/control-center/legacy/page-standard.legacy-20260508.js:1054:      context.showMessage?.("AI prompt queued in AI Command.");
+public/control-center/legacy/page-standard.legacy-20260508.js:1078:    "ai-command": [
+public/control-center/legacy/page-standard.legacy-20260508.js:1079:      { label: "Data used", value: "AI commands, artifacts, recommendations, learning memory" },
+public/control-center/legacy/page-standard.legacy-20260508.js:1082:    workflows: [
+public/control-center/legacy/page-standard.legacy-20260508.js:1083:      { label: "Data used", value: "Workflow catalog, workflow runs, handoffs, job monitor" },
+public/control-center/legacy/page-standard.legacy-20260508.js:1084:      { label: "Run history", value: `${m.workflowCompleted} completed / ${m.workflowFailed} failed` }
+public/control-center/legacy/page-standard.legacy-20260508.js:1091:      { label: "Data used", value: "Content items, approvals, handoffs, AI rewrite requests" },
+public/control-center/legacy/page-standard.legacy-20260508.js:1095:      { label: "Data used", value: "Media jobs, approvals, outputs, preview history" },
+public/control-center/legacy/page-standard.legacy-20260508.js:1116:      { label: "Approval state", value: `${m.approvalsPending} pending approvals` }
+public/control-center/legacy/page-standard.legacy-20260508.js:1165:  if (aiTitle) aiTitle.textContent = "Contextual AI Agent";
+public/control-center/legacy/page-standard.legacy-20260508.js:1166:  if (aiDescription) aiDescription.textContent = "AI assistance is available from AI Workspace.";
+public/control-center/legacy/page-standard.legacy-20260508.js:1168:  if (nextBest) nextBest.textContent = "Open AI Workspace for the next recommended action.";
+public/control-center/legacy/page-standard.legacy-20260508.js:1177:      context.navigateTo("ai-command");
+public/control-center/legacy/page-standard.legacy-20260508.js:1178:      context.showMessage?.("AI Command opened.");
+public/control-center/legacy/09-command-legacy-isolation.legacy.css:4:  Stabilize command layer behavior while legacy styles still exist in styles.css.
+public/control-center/legacy/09-command-legacy-isolation.legacy.css:7:/* Canonical command layer */
+public/control-center/legacy/09-command-legacy-isolation.legacy.css:8:.command-bar {
+public/control-center/legacy/09-command-legacy-isolation.legacy.css:25:  z-index: var(--layer-command) !important;
+public/control-center/legacy/09-command-legacy-isolation.legacy.css:29:.command-backdrop {
+public/control-center/legacy/09-command-legacy-isolation.legacy.css:39:.app-shell.is-command-open .command-backdrop,
+public/control-center/legacy/09-command-legacy-isolation.legacy.css:40:.app-shell.is-mobile-command-open .command-backdrop,
+public/control-center/legacy/09-command-legacy-isolation.legacy.css:41:.command-backdrop.is-visible {
+public/control-center/legacy/09-command-legacy-isolation.legacy.css:50:/* Mobile command behavior */
+public/control-center/legacy/09-command-legacy-isolation.legacy.css:53:  .app-shell.is-mobile-shell:not(.is-mobile-command-open) .command-bar {
+public/control-center/legacy/09-command-legacy-isolation.legacy.css:57:  .app-shell.is-mobile-shell.is-mobile-command-open .command-bar {
+public/control-center/legacy/integrations.monolith-20260508.js:5:const INTEGRATION_DOMAINS = [
+public/control-center/legacy/integrations.monolith-20260508.js:68:        unavailableReason: "Backend provider support is not configured yet.",
+public/control-center/legacy/integrations.monolith-20260508.js:318:        unavailableReason: "Backend provider support is not configured yet.",
+public/control-center/legacy/integrations.monolith-20260508.js:323:        enables: "Campaign sending, lifecycle messages, and email workflow execution.",
+public/control-center/legacy/integrations.monolith-20260508.js:330:          { key: "smtpHost", label: "SMTP host", placeholder: "smtp.provider.com", required: true },
+public/control-center/legacy/integrations.monolith-20260508.js:338:        unavailableReason: "Backend provider support is not configured yet.",
+public/control-center/legacy/integrations.monolith-20260508.js:341:        purpose: "Provider-specific email platform integration for campaigns and audience workflows.",
+public/control-center/legacy/integrations.monolith-20260508.js:346:        primaryField: "providerName",
+public/control-center/legacy/integrations.monolith-20260508.js:348:          { key: "providerName", label: "Provider name", placeholder: "SendGrid / Mailgun / Resend", required: true },
+public/control-center/legacy/integrations.monolith-20260508.js:374:        unavailableReason: "Backend provider support is not configured yet.",
+public/control-center/legacy/integrations.monolith-20260508.js:453:    title: "AI / Automation / Ops Tools",
+public/control-center/legacy/integrations.monolith-20260508.js:454:    description: "Workspace, automation, webhook, and operations tools that keep workflows moving.",
+public/control-center/legacy/integrations.monolith-20260508.js:478:        purpose: "Operational alerting, workflow notifications, and team collaboration handoff.",
+public/control-center/legacy/integrations.monolith-20260508.js:479:        whyItMatters: "Slack can surface sync failures, content approvals, and campaign alerts where the team already works.",
+public/control-center/legacy/integrations.monolith-20260508.js:480:        enables: "Alerts, approvals, sync notifications, and workflow coordination.",
+public/control-center/legacy/integrations.monolith-20260508.js:495:        purpose: "Bot-based operational alerts, approvals, and lightweight workflow execution.",
+public/control-center/legacy/integrations.monolith-20260508.js:496:        whyItMatters: "Telegram can keep MH Assistant responsive when quick approvals or notifications are needed.",
+public/control-center/legacy/integrations.monolith-20260508.js:497:        enables: "Alerts, commands, approval handoff, and ops notifications.",
+public/control-center/legacy/integrations.monolith-20260508.js:499:        permissionScope: "Bot token + chat ID",
+public/control-center/legacy/integrations.monolith-20260508.js:503:          { key: "chatId", label: "Chat ID", placeholder: "Telegram chat ID" },
+public/control-center/legacy/integrations.monolith-20260508.js:529:        purpose: "Automation routing for triggers, syncs, approvals, and external workflow handoffs.",
+public/control-center/legacy/integrations.monolith-20260508.js:530:        whyItMatters: "Automation reduces manual ops work and makes data movement between tools much more reliable.",
+public/control-center/legacy/integrations.monolith-20260508.js:531:        enables: "Workflow automation, triggers, sync jobs, and handoffs.",
+public/control-center/legacy/integrations.monolith-20260508.js:546:        purpose: "Internal system-to-system webhook integration for custom workflows and events.",
+public/control-center/legacy/integrations.monolith-20260508.js:548:        enables: "Custom events, syncs, notifications, and system handoffs.",
+public/control-center/legacy/integrations.monolith-20260508.js:554:          { key: "eventScope", label: "Event scope", placeholder: "events, approvals, syncs" },
+public/control-center/legacy/integrations.monolith-20260508.js:600:  return INTEGRATION_DOMAINS.flatMap((domain) =>
+public/control-center/legacy/integrations.monolith-20260508.js:905:    read: [...new Set(["workflow events", "shared files", ...scopeKeys])],
+public/control-center/legacy/integrations.monolith-20260508.js:1001:    return asString(integration.unavailableReason) || "This integration is unavailable because backend provider support is not configured yet.";
+public/control-center/legacy/integrations.monolith-20260508.js:1009:    return `${integration.label} is connected and ready for provider-level sync actions.`;
+public/control-center/legacy/integrations.monolith-20260508.js:1065:      ? (asString(integration.unavailableReason) || "Backend provider support is not configured yet.")
+public/control-center/legacy/integrations.monolith-20260508.js:1077:  return INTEGRATION_DOMAINS.map((domain) => {
+public/control-center/legacy/integrations.monolith-20260508.js:1166:function buildAISmartRecommendation(domainModels) {
+public/control-center/legacy/integrations.monolith-20260508.js:1288:function renderAISmartRecommendation(rec, escapeHtml) {
+public/control-center/legacy/integrations.monolith-20260508.js:1292:        <div class="ai-smart-rec-healthy-next">
+public/control-center/legacy/integrations.monolith-20260508.js:1293:          <span class="ai-smart-rec-healthy-next-label">Suggested next:</span>
+public/control-center/legacy/integrations.monolith-20260508.js:1299:      : `<p class="ai-smart-rec-healthy-copy">All connectors are active. No additional setup is required right now.</p>`;
+public/control-center/legacy/integrations.monolith-20260508.js:1302:      <section class="card ai-smart-rec ai-smart-rec--healthy">
+public/control-center/legacy/integrations.monolith-20260508.js:1303:        <div class="ai-smart-rec-header">
+public/control-center/legacy/integrations.monolith-20260508.js:1304:          <div class="ai-smart-rec-kicker">
+public/control-center/legacy/integrations.monolith-20260508.js:1305:            <span class="ai-smart-rec-badge success">AI Smart Connect</span>
+public/control-center/legacy/integrations.monolith-20260508.js:1308:          <p class="ai-smart-rec-sub">All critical connectors are active. The system is operating with full launch-critical data coverage.</p>
+public/control-center/legacy/integrations.monolith-20260508.js:1318:    ? `<div class="ai-smart-rec-chips">${impactChips.map((chip) => `<span class="ai-smart-rec-chip">${escapeHtml(chip)}</span>`).join("")}</div>`
+public/control-center/legacy/integrations.monolith-20260508.js:1322:    <section class="card ai-smart-rec">
+public/control-center/legacy/integrations.monolith-20260508.js:1323:      <div class="ai-smart-rec-header">
+public/control-center/legacy/integrations.monolith-20260508.js:1324:        <div class="ai-smart-rec-kicker">
+public/control-center/legacy/integrations.monolith-20260508.js:1325:          <span class="ai-smart-rec-badge ${escapeHtml(priorityTone)}">AI Smart Connect</span>
+public/control-center/legacy/integrations.monolith-20260508.js:1329:        <p class="ai-smart-rec-sub">${escapeHtml(card.whyItMatters)}</p>
+public/control-center/legacy/integrations.monolith-20260508.js:1331:      <div class="ai-smart-rec-body">
+public/control-center/legacy/integrations.monolith-20260508.js:1332:        <div class="ai-smart-rec-connector">
+public/control-center/legacy/integrations.monolith-20260508.js:1333:          <div class="ai-smart-rec-connector-icon">${escapeHtml(card.icon)}</div>
+public/control-center/legacy/integrations.monolith-20260508.js:1334:          <div class="ai-smart-rec-connector-info">
+public/control-center/legacy/integrations.monolith-20260508.js:1340:        <div class="ai-smart-rec-why">
+public/control-center/legacy/integrations.monolith-20260508.js:1341:          <div class="ai-smart-rec-why-top">
+public/control-center/legacy/integrations.monolith-20260508.js:1342:            <span class="ai-smart-rec-why-label">Why this first?</span>
+public/control-center/legacy/integrations.monolith-20260508.js:1348:        <div class="ai-smart-rec-actions">
+public/control-center/legacy/integrations.monolith-20260508.js:1352:          <span class="ai-smart-rec-cta-note">Opens the ${escapeHtml(card.label)} setup drawer and focuses the first required field.</span>
+public/control-center/legacy/integrations.monolith-20260508.js:1400:      meta: "Best next step: attach provider-specific OAuth validation and background sync jobs to the existing integration routes."
+public/control-center/legacy/integrations.monolith-20260508.js:1407:      prompt: "Review all current integrations and tell me which platform or tool I should connect next to improve learning, attribution, and execution fastest."
+public/control-center/legacy/integrations.monolith-20260508.js:1422:      label: "What tools are needed for paid optimization?",
+public/control-center/legacy/integrations.monolith-20260508.js:1423:      prompt: "Review the integrations layer and tell me which tools and data sources are still needed before paid media optimization can be trusted."
+public/control-center/legacy/integrations.monolith-20260508.js:1448:    description: "Email, CRM, and operational messaging connectors that keep lifecycle and team coordination intact.",
+public/control-center/legacy/integrations.monolith-20260508.js:1852:    return `<div class="integration-side-note">${escapeHtml(card.unavailableReason || "Backend provider support is not configured yet.")}</div>`;
+public/control-center/legacy/integrations.monolith-20260508.js:1862:    ${quickConnectLabel && card.statusLabel !== "Connected" ? `<div class="integration-quick-connect-note">OAuth-style quick connect is the recommended path for this provider. Manual fields remain available as fallback.</div>` : ""}
+public/control-center/legacy/integrations.monolith-20260508.js:2152:      id: "marketing-tracking-tools",
+public/control-center/legacy/integrations.monolith-20260508.js:2164:      id: "ai-automation-tools",
+public/control-center/legacy/integrations.monolith-20260508.js:2165:      title: "AI / Automation Tools",
+public/control-center/legacy/integrations.monolith-20260508.js:2166:      description: "Automation and coordination tools that help orchestrate tasks, handoffs, notifications, and AI-assisted operations.",
+public/control-center/legacy/integrations.monolith-20260508.js:2200:          <div class="integration-coverage-meta">Ready for test, sync, and provider-backed actions.</div>
+public/control-center/legacy/integrations.monolith-20260508.js:2412:      showError?.(integration.unavailableReason || "This integration is unavailable because backend provider support is not configured yet.");
+public/control-center/legacy/integrations.monolith-20260508.js:2452:      showError?.(integration.unavailableReason || "This integration is unavailable because backend provider support is not configured yet.");
+public/control-center/legacy/integrations.monolith-20260508.js:2473:      showError?.(integration.unavailableReason || "This integration is unavailable because backend provider support is not configured yet.");
+public/control-center/legacy/integrations.monolith-20260508.js:2531:      navigateTo("ai-command");
+public/control-center/legacy/integrations.monolith-20260508.js:2532:      showMessage?.("Integration review prompt added to AI Command.");
+public/control-center/legacy/integrations.monolith-20260508.js:2589:    const aiRec = buildAISmartRecommendation(domainModels);
+public/control-center/legacy/integrations.monolith-20260508.js:2629:              <span class="integration-system-metric-copy">All providers currently modeled in the control center.</span>
+public/control-center/legacy/integrations.monolith-20260508.js:2634:              <span class="integration-system-metric-copy">Ready for sync, testing, or downstream workflows.</span>
+public/control-center/legacy/integrations.monolith-20260508.js:2661:        ${renderAISmartRecommendation(aiRec, escapeHtml)}
+public/control-center/legacy/integrations.monolith-20260508.js:2670:                  <p class="home-section-copy" style="margin:6px 0 0;">Filter by category or status, search any provider, and move directly into the connector setup workspace.</p>
+public/control-center/legacy/integrations.monolith-20260508.js:2697:                    placeholder="Search connector, provider, or source"
+public/control-center/legacy/integrations.monolith-20260508.js:2762:          <div class="integration-ai-grid">
+public/control-center/legacy/99-legacy-compat.legacy.css:38:.ai-panel,
+public/control-center/legacy/99-legacy-compat.legacy.css:53:/* AI Dock */
+public/control-center/legacy/99-legacy-compat.legacy.css:54:.ai-dock {
+public/control-center/legacy/99-legacy-compat.legacy.css:58:.ai-dock > * {
+public/control-center/legacy/styles.legacy-full.css:299:.command-toggle {
+public/control-center/legacy/styles.legacy-full.css:307:.command-toggle.btn-secondary {
+public/control-center/legacy/styles.legacy-full.css:315:.command-toggle.btn-secondary:hover {
+public/control-center/legacy/styles.legacy-full.css:391:.command-bar {
+public/control-center/legacy/styles.legacy-full.css:407:.command-backdrop {
+public/control-center/legacy/styles.legacy-full.css:411:.command-bar-left,
+public/control-center/legacy/styles.legacy-full.css:412:.command-bar-center,
+public/control-center/legacy/styles.legacy-full.css:413:.command-bar-right {
+public/control-center/legacy/styles.legacy-full.css:422:.command-bar-left {
+public/control-center/legacy/styles.legacy-full.css:426:.command-bar-center {
+public/control-center/legacy/styles.legacy-full.css:430:.command-bar-right {
+public/control-center/legacy/styles.legacy-full.css:434:.command-bar-right .btn {
+public/control-center/legacy/styles.legacy-full.css:438:.command-input {
+public/control-center/legacy/styles.legacy-full.css:476:.std-ai-btn {
+public/control-center/legacy/styles.legacy-full.css:488:.std-ai-btn:hover {
+public/control-center/legacy/styles.legacy-full.css:495:.std-ai-btn:active {
+public/control-center/legacy/styles.legacy-full.css:518:.std-ai-btn {
+public/control-center/legacy/styles.legacy-full.css:560:.home-ai-team-grid {
+public/control-center/legacy/styles.legacy-full.css:582:.home-ai-team-grid,
+public/control-center/legacy/styles.legacy-full.css:594:.ai-panel,
+public/control-center/legacy/styles.legacy-full.css:697:.home-ai-agent-head,
+public/control-center/legacy/styles.legacy-full.css:698:.toolbar {
+public/control-center/legacy/styles.legacy-full.css:773:  .std-ai-prompt,
+public/control-center/legacy/styles.legacy-full.css:987:.setup-wizard-ai-panel {
+public/control-center/legacy/styles.legacy-full.css:995:.setup-wizard-ai-panel h4 {
+public/control-center/legacy/styles.legacy-full.css:1230:.setup-smart-handoff-actions {
+public/control-center/legacy/styles.legacy-full.css:1236:.setup-wizard-ai-list {
+public/control-center/legacy/styles.legacy-full.css:1241:.setup-wizard-ai-item {
+public/control-center/legacy/styles.legacy-full.css:1252:.setup-wizard-ai-item strong {
+public/control-center/legacy/styles.legacy-full.css:1257:.setup-wizard-ai-item p {
+public/control-center/legacy/styles.legacy-full.css:1263:.setup-wizard-ai-actions {
+public/control-center/legacy/styles.legacy-full.css:1290:.setup-v2-toolbar {
+public/control-center/legacy/styles.legacy-full.css:1585:.home-exec-team-grid {
+public/control-center/legacy/styles.legacy-full.css:1591:.home-exec-agent-card {
+public/control-center/legacy/styles.legacy-full.css:1600:.home-exec-agent-summary {
+public/control-center/legacy/styles.legacy-full.css:1774:.std-ai-prompts,
+public/control-center/legacy/styles.legacy-full.css:1792:.home-ai-agent-card,
+public/control-center/legacy/styles.legacy-full.css:2252:.library-action-toolbar {
+public/control-center/legacy/styles.legacy-full.css:2382:.library-ai-actions {
+public/control-center/legacy/styles.legacy-full.css:2980:  .command-bar {
+public/control-center/legacy/styles.legacy-full.css:2985:  .command-bar-right {
+public/control-center/legacy/styles.legacy-full.css:3065:  .command-bar {
+public/control-center/legacy/styles.legacy-full.css:3112:  .setup-v2-toolbar {
+public/control-center/legacy/styles.legacy-full.css:3129:  .setup-smart-handoff-actions {
+public/control-center/legacy/styles.legacy-full.css:3143:  .home-exec-team-grid {
+public/control-center/legacy/styles.legacy-full.css:3157:  .library-ai-actions,
+public/control-center/legacy/styles.legacy-full.css:3299:  .command-toggle {
+public/control-center/legacy/styles.legacy-full.css:3316:  .command-bar {
+public/control-center/legacy/styles.legacy-full.css:3334:  .app-shell.is-mobile-shell.is-mobile-command-open .command-bar {
+public/control-center/legacy/styles.legacy-full.css:3341:  .command-backdrop {
+public/control-center/legacy/styles.legacy-full.css:3352:  .app-shell.is-mobile-shell.is-mobile-command-open .command-backdrop {
+public/control-center/legacy/styles.legacy-full.css:3357:  .command-bar-right {
+public/control-center/legacy/styles.legacy-full.css:3386:  .setup-smart-handoff-actions,
+public/control-center/legacy/styles.legacy-full.css:3389:  .setup-wizard-ai-actions,
+public/control-center/legacy/styles.legacy-full.css:3391:  .home-exec-team-grid,
+public/control-center/legacy/styles.legacy-full.css:3393:  .home-ai-team-grid,
+public/control-center/legacy/styles.legacy-full.css:3404:  .library-ai-actions,
+public/control-center/legacy/styles.legacy-full.css:3419:  .home-exec-team-grid {
+public/control-center/legacy/styles.legacy-full.css:3438:  .home-exec-team-grid,
+public/control-center/legacy/styles.legacy-full.css:3454:  .std-ai-btn,
+public/control-center/legacy/styles.legacy-full.css:3457:  .command-bar-right .btn {
+public/control-center/legacy/styles.legacy-full.css:3464:  .home-exec-agent-card .btn {
+public/control-center/legacy/styles.legacy-full.css:3468:  .setup-wizard-ai-item {
+public/control-center/legacy/styles.legacy-full.css:3476:  .setup-v2-toolbar {
+public/control-center/legacy/styles.legacy-full.css:3498:  .ai-panel,
+public/control-center/legacy/styles.legacy-full.css:3503:  .command-bar-right {
+public/control-center/legacy/styles.legacy-full.css:3523:  .command-toggle {
+public/control-center/legacy/styles.legacy-full.css:3545:     AI TEAM CONTROL ROOM
+public/control-center/legacy/styles.legacy-full.css:3688:  .ctrl-room-team {
+public/control-center/legacy/styles.legacy-full.css:3694:  .ctrl-team-card {
+public/control-center/legacy/styles.legacy-full.css:3709:  .ctrl-team-card:hover {
+public/control-center/legacy/styles.legacy-full.css:3716:  .ctrl-team-card.is-active {
+public/control-center/legacy/styles.legacy-full.css:3721:  .ctrl-team-icon {
+public/control-center/legacy/styles.legacy-full.css:3726:  .ctrl-team-name {
+public/control-center/legacy/styles.legacy-full.css:3735:  .ctrl-team-card.is-active .ctrl-team-name {
+public/control-center/legacy/styles.legacy-full.css:3739:  .ctrl-team-active-dot {
+public/control-center/legacy/styles.legacy-full.css:4054:  .ctrl-chat-stream {
+public/control-center/legacy/styles.legacy-full.css:4139:  .ctrl-msg-agent-icon {
+public/control-center/legacy/styles.legacy-full.css:4152:  .ctrl-msg-ai-body {
+public/control-center/legacy/styles.legacy-full.css:4160:  .ctrl-msg-ai-agent {

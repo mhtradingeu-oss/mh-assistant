@@ -1,0 +1,625 @@
+### api.js exported functions and fetch calls
+15:export class AccessKeyError extends Error {
+34:export class ProjectPayloadError extends Error {
+56:export function setApiBaseUrl(value = "") {
+60:function buildUrl(path = "") {
+64:function persistCanonicalControlKey(key) {
+77:function readControlKeyMeta() {
+121:export function getControlCenterAccessKeyMeta() {
+129:function isMissingReadKeyErrorMessage(message) {
+133:function isAccessKeyRelatedMessage(message) {
+146:export function isAccessKeyFailure(error) {
+170:function isTopLevelErrorPayload(payload) {
+180:function buildResponseDiagnostics(response, requestMeta = {}, payload = null) {
+202:export function isDebugStartupMode() {
+214:function shouldEmitApiRuntimeTrace(stage) {
+241:function emitApiRuntimeTrace(stage, details = {}) {
+246:  if (typeof window === "undefined" || typeof window.dispatchEvent !== "function") {
+251:    window.dispatchEvent(new CustomEvent("mh:control-center-api-trace", {
+268:function buildReadHeaders() {
+284:function buildWriteHeaders() {
+303:async function readResponseText(response, requestMeta = {}) {
+450:function nextFrame() {
+461:async function parseJsonTextSafely(rawText, response, requestMeta = {}, bodyLength = 0) {
+516:async function parseJson(response, fallbackMessage = "Request failed", requestMeta = {}) {
+620:async function fetchWithTimeout(path, init = {}, timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS) {
+663:    const requestPromise = fetch(buildUrl(path), {
+705:async function getJson(path, fallbackMessage, timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS, requestOptions = {}) {
+723:async function sendRawJson(path, method, body, fallbackMessage, timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS) {
+763:async function sendJson(path, method, body, fallbackMessage, timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS) {
+781:async function sendForm(path, formData, fallbackMessage, timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS) {
+806:export async function fetchProtectedMediaBlob(path, timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS) {
+864:function normalizeProjectsPayload(payload) {
+884:function normalizeProjectDashboardPayload(payload) {
+897:function toProjectName(value) {
+907:function createOptionalFallback(projectName, section) {
+962:function toDiagnosticEntry(section, error, required = false) {
+985:function extractRequestAuthDiagnostics(payload = null) {
+997:function extractDashboardSection(payload, section) {
+1008:    err.endpoint = `/media-manager/project/:project (${section})`;
+1013:  err.endpoint = `/media-manager/project/:project (${section})`;
+1022:export async function createMediaManagerProject(payload = {}) {
+1023:  const response = await fetch("/media-manager/projects", {
+1047:export async function fetchProjects() {
+1050:      "/media-manager/projects",
+1071:export async function fetchAllCoreProjectData(projectName) {
+1079:    `/media-manager/project/${encodedProjectName}/startup`,
+1092:    endpoint: `/media-manager/project/${encodedProjectName}`
+1137:          endpoint: "/media-manager/projects",
+1145:          endpoint: "/media-manager/projects",
+1159:    error.endpoint = `/media-manager/project/${encodedProjectName}`;
+1169:      endpoint: String(authProbe?.endpoint || `/media-manager/project/${encodedProjectName}`)
+1295:        patch: optionalPatch,
+1328:export async function fetchAssetCatalog() {
+1330:    "/media-manager/asset-catalog",
+1335:export async function fetchProjectInsights(projectName) {
+1341:    `/api/insights/${encodeURIComponent(projectName)}`,
+1346:export async function fetchProjectLearning(projectName) {
+1352:    `/api/learning/${encodeURIComponent(projectName)}`,
+1357:export async function fetchProjectOperations(projectName) {
+1363:    `/media-manager/project/${encodeURIComponent(projectName)}/operations`,
+1370:export async function applyProjectBusinessTemplate(projectName, projectType) {
+1374:  const response = await fetch(`/media-manager/project/${encodedProjectName}/apply-template`, {
+1400:export async function saveProjectSetup(projectName, payload = {}) {
+1406:    `/media-manager/project/${encodeURIComponent(projectName)}/setup`,
+1413:export async function refreshProjectLibrary(projectName) {
+1419:    `/media-manager/project/${encodeURIComponent(projectName)}/library/refresh`,
+1426:export async function updateProjectAssetStatus(projectName, assetId, status, note = "") {
+1436:    `/media-manager/project/${encodeURIComponent(projectName)}/assets/${encodeURIComponent(assetId)}/status`,
+1446:export async function renameProjectAsset(projectName, assetId, name) {
+1461:    `/media-manager/project/${encodeURIComponent(projectName)}/assets/${encodeURIComponent(assetId)}/rename`,
+1468:export async function setProjectAssetSourceOfTruth(projectName, assetId, sourceOfTruth) {
+1478:    `/media-manager/project/${encodeURIComponent(projectName)}/assets/${encodeURIComponent(assetId)}/source-of-truth`,
+1485:export async function archiveProjectAsset(projectName, assetId, note = "") {
+1495:    `/media-manager/project/${encodeURIComponent(projectName)}/assets/${encodeURIComponent(assetId)}/archive`,
+1502:export async function deleteProjectAsset(projectName, assetId, note = "") {
+1512:    `/media-manager/project/${encodeURIComponent(projectName)}/assets/${encodeURIComponent(assetId)}/delete`,
+1515:    "Failed to delete asset"
+1519:export async function reclassifyProjectAsset(projectName, assetId, assetType, note = "") {
+1534:    `/media-manager/project/${encodeURIComponent(projectName)}/assets/${encodeURIComponent(assetId)}/classification`,
+1544:export async function runProjectWorkflow(projectName, workflowId, payload = {}) {
+1554:    `/media-manager/project/${encodeURIComponent(projectName)}/workflows/${encodeURIComponent(workflowId)}/run`,
+1561:export async function runProjectAiWorkflow(projectName, workflowId, payload = {}) {
+1571:    `/media-manager/project/${encodeURIComponent(projectName)}/ai/workflows/${encodeURIComponent(workflowId)}/run`,
+1578:export async function executeProjectAiCommand(projectName, payload = {}) {
+1584:    `/media-manager/project/${encodeURIComponent(projectName)}/ai/command`,
+1591:export async function executeProjectAiChat(projectName, payload = {}) {
+1597:    `/media-manager/project/${encodeURIComponent(projectName)}/ai/chat`,
+1607:export async function generateAiCommandCampaignPreview(projectName, payload = {}) {
+1610:    `/api/ai-command/project/${encodedProject}/campaign-preview`,
+1618:export async function executeProjectAiGuidance(projectName, payload = {}) {
+1624:    `/media-manager/project/${encodeURIComponent(projectName)}/ai/guidance`,
+1632:export async function createProjectTask(projectName, payload = {}) {
+1638:    `/media-manager/project/${encodeURIComponent(projectName)}/tasks`,
+1645:export async function listProjectTasks(projectName, limit) {
+1652:    `/media-manager/project/${encodeURIComponent(projectName)}/tasks${suffix}`,
+1657:export async function createProjectApproval(projectName, payload = {}) {
+1663:    `/media-manager/project/${encodeURIComponent(projectName)}/approvals`,
+1670:export async function listProjectApprovals(projectName, limit) {
+1677:    `/media-manager/project/${encodeURIComponent(projectName)}/approvals${suffix}`,
+1682:export async function decideProjectApproval(projectName, approvalId, payload = {}) {
+1692:    `/media-manager/project/${encodeURIComponent(projectName)}/approvals/${encodeURIComponent(approvalId)}/decision`,
+1699:export async function fetchProjectGovernance(projectName, params = {}) {
+1713:    `/media-manager/project/${encodeURIComponent(projectName)}/governance${suffix}`,
+1718:export async function fetchProjectGovernancePolicy(projectName) {
+1724:    `/media-manager/project/${encodeURIComponent(projectName)}/governance/policy`,
+1729:export async function updateProjectGovernancePolicy(projectName, payload = {}) {
+1735:    `/media-manager/project/${encodeURIComponent(projectName)}/governance/policy`,
+1742:export async function saveProjectConnectorSource(projectName, sourceType, sourceValue) {
+1756:    `/media-manager/project/${encodeURIComponent(projectName)}/sources`,
+1766:export async function removeProjectConnectorSource(projectName, sourceType) {
+1776:    `/media-manager/project/${encodeURIComponent(projectName)}/sources/${encodeURIComponent(sourceType)}`,
+1783:export async function fetchProjectIntegrationControlCenter(projectName) {
+1789:    `/media-manager/project/${encodeURIComponent(projectName)}/integrations/control-center`,
+1794:export async function connectProjectIntegration(projectName, integrationId, payload = {}) {
+1804:    `/media-manager/project/${encodeURIComponent(projectName)}/integrations/${encodeURIComponent(integrationId)}/connect`,
+1811:export async function reconnectProjectIntegration(projectName, integrationId, payload = {}) {
+1821:    `/media-manager/project/${encodeURIComponent(projectName)}/integrations/${encodeURIComponent(integrationId)}/reconnect`,
+1828:export async function testProjectIntegration(projectName, integrationId, payload = {}) {
+1838:    `/media-manager/project/${encodeURIComponent(projectName)}/integrations/${encodeURIComponent(integrationId)}/test`,
+1845:export async function syncProjectIntegration(projectName, integrationId, payload = {}) {
+1855:    `/media-manager/project/${encodeURIComponent(projectName)}/integrations/${encodeURIComponent(integrationId)}/sync`,
+1862:export async function importProjectIntegrationHistory(projectName, integrationId, payload = {}) {
+1872:    `/media-manager/project/${encodeURIComponent(projectName)}/integrations/${encodeURIComponent(integrationId)}/import-history`,
+1879:export async function disconnectProjectIntegration(projectName, integrationId, payload = {}) {
+1889:    `/media-manager/project/${encodeURIComponent(projectName)}/integrations/${encodeURIComponent(integrationId)}/disconnect`,
+1896:export async function savePublishingSchedule(projectName, payload = {}) {
+1902:    `/media-manager/project/${encodeURIComponent(projectName)}/publishing/schedule`,
+1909:export async function reschedulePublishingItem(projectName, jobId, payload = {}) {
+1919:    `/media-manager/project/${encodeURIComponent(projectName)}/publishing/${encodeURIComponent(jobId)}/reschedule`,
+1926:export async function approvePublishingItem(projectName, jobId, payload = {}) {
+1936:    `/media-manager/project/${encodeURIComponent(projectName)}/publishing/${encodeURIComponent(jobId)}/ready`,
+1943:export async function publishPublishingItem(projectName, jobId, payload = {}) {
+1953:    `/media-manager/project/${encodeURIComponent(projectName)}/publishing/${encodeURIComponent(jobId)}/publish`,
+1960:export async function failPublishingItem(projectName, jobId, payload = {}) {
+1970:    `/media-manager/project/${encodeURIComponent(projectName)}/publishing/${encodeURIComponent(jobId)}/fail`,
+1977:export async function fetchProjectOperationsSchema(projectName) {
+1983:    `/media-manager/project/${encodeURIComponent(projectName)}/operations/schema`,
+1988:export async function fetchProjectTaskCenter(projectName) {
+1994:    `/media-manager/project/${encodeURIComponent(projectName)}/task-center`,
+1999:export async function fetchProjectQueueCenter(projectName) {
+2005:    `/media-manager/project/${encodeURIComponent(projectName)}/queue-center`,
+2010:export async function fetchProjectJobMonitor(projectName) {
+2016:    `/media-manager/project/${encodeURIComponent(projectName)}/job-monitor`,
+2021:export async function fetchProjectNotificationCenter(projectName) {
+2027:    `/media-manager/project/${encodeURIComponent(projectName)}/notification-center`,
+2032:export async function fetchProjectTeam(projectName) {
+2038:    `/media-manager/project/${encodeURIComponent(projectName)}/team`,
+2043:export async function saveProjectTeam(projectName, payload = {}) {
+2049:    `/media-manager/project/${encodeURIComponent(projectName)}/team`,
+2056:export async function listProjectCampaigns(projectName, limit) {
+2064:    `/media-manager/project/${encodeURIComponent(projectName)}/campaigns${suffix}`,
+2069:export async function saveProjectCampaign(projectName, payload = {}) {
+2076:      `/media-manager/project/${encodeURIComponent(projectName)}/campaigns/${encodeURIComponent(payload.id)}`,
+2084:    `/media-manager/project/${encodeURIComponent(projectName)}/campaigns`,
+2091:export async function listProjectContentItems(projectName, params = {}) {
+2109:    `/media-manager/project/${encodeURIComponent(projectName)}/content-items${suffix}`,
+2114:export async function saveProjectContentItem(projectName, payload = {}) {
+2121:      `/media-manager/project/${encodeURIComponent(projectName)}/content-items/${encodeURIComponent(payload.id)}`,
+2129:    `/media-manager/project/${encodeURIComponent(projectName)}/content-items`,
+2136:export async function listProjectMediaJobs(projectName, params = {}) {
+2158:    `/media-manager/project/${encodeURIComponent(projectName)}/media-jobs${suffix}`,
+2163:export async function saveProjectMediaJob(projectName, payload = {}) {
+2170:      `/media-manager/project/${encodeURIComponent(projectName)}/media-jobs/${encodeURIComponent(payload.id)}`,
+2178:    `/media-manager/project/${encodeURIComponent(projectName)}/media-jobs`,
+2185:export async function improveMediaPrompt(payload = {}) {
+2187:    "/api/media/improve-prompt",
+2194:export async function brandCheckMedia(payload = {}) {
+2196:    "/api/media/brand-check",
+2203:export async function generateMediaImage(payload = {}) {
+2205:    "/api/media/generate-image",
+2212:export async function generateMediaVideoBrief(payload = {}) {
+2214:    "/api/media/generate-video-brief",
+2221:export async function generateMediaVoiceScript(payload = {}) {
+2223:    "/api/media/generate-voice-script",
+2230:export async function generateMediaCampaignPack(payload = {}) {
+2232:    "/api/media/generate-campaign-pack",
+2239:export async function listProjectHandoffs(projectName, params = {}) {
+2265:    `/media-manager/project/${encodeURIComponent(projectName)}/handoffs${suffix}`,
+2270:export async function createProjectHandoff(projectName, payload = {}) {
+2276:    `/media-manager/project/${encodeURIComponent(projectName)}/handoffs`,
+2283:export async function consumeProjectHandoff(projectName, handoffId, payload = {}) {
+2293:    `/media-manager/project/${encodeURIComponent(projectName)}/handoffs/${encodeURIComponent(handoffId)}/consume`,
+2300:export async function listProjectEvents(projectName, limit) {
+2308:    `/media-manager/project/${encodeURIComponent(projectName)}/events${suffix}`,
+2313:export async function markProjectNotification(projectName, notificationId, payload = {}) {
+2323:    `/media-manager/project/${encodeURIComponent(projectName)}/notifications/${encodeURIComponent(notificationId)}`,
+2330:export async function uploadProjectAsset(projectName, assetType, file) {
+2361:export async function fetchCustomerOperationsReadiness(projectName) {
+2362:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/readiness`);
+2365:export async function fetchCustomerOperationsInbox(projectName) {
+2366:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/inbox`);
+2369:export async function fetchCustomerConversations(projectName) {
+2370:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/conversations`);
+2373:export async function fetchCustomerConversationDetail(projectName, conversationId) {
+2374:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/conversations/${encodeURIComponent(conversationId)}`);
+2377:export async function fetchCustomerConversationMessages(projectName, conversationId) {
+2378:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/conversations/${encodeURIComponent(conversationId)}/messages`);
+2381:export async function fetchCustomerProfilePreview(projectName, customerId) {
+2382:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/customers/${encodeURIComponent(customerId)}`);
+2385:export async function fetchCustomerTickets(projectName) {
+2386:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/tickets`);
+2389:export async function fetchCustomerChannels(projectName) {
+2390:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/channels`);
+
+### frontend API usage across control-center
+public/control-center/ai-team-model.js:9:  - No publishing.
+public/control-center/ai-team-model.js:20:    outputTargets: ["campaign-studio", "content-studio", "media-studio", "publishing"],
+public/control-center/ai-team-model.js:29:    outputTargets: ["content-studio", "governance", "publishing"],
+public/control-center/ai-team-model.js:38:    outputTargets: ["media-studio", "library", "publishing"],
+public/control-center/ai-team-model.js:46:    primaryPages: ["media-studio", "content-studio", "publishing"],
+public/control-center/ai-team-model.js:47:    outputTargets: ["media-studio", "content-studio", "publishing"],
+public/control-center/ai-team-model.js:51:    id: "publisher",
+public/control-center/ai-team-model.js:54:    ownerSummary: "Publishing queue, schedules, manual handoffs, retries, and release readiness.",
+public/control-center/ai-team-model.js:55:    primaryPages: ["publishing", "queue-center", "ai-command"],
+public/control-center/ai-team-model.js:56:    outputTargets: ["publishing", "queue-center", "insights"],
+public/control-center/ai-team-model.js:57:    defaultPrompt: "Act as Publisher. Prepare the next publish-ready package and identify missing approvals or queue steps."
+public/control-center/ai-team-model.js:90:    ownerSummary: "Claims, approvals, publishing risk, brand safety, governance, and release trust.",
+public/control-center/ai-team-model.js:91:    primaryPages: ["governance", "publishing", "content-studio", "media-studio"],
+public/control-center/ai-team-model.js:92:    outputTargets: ["governance", "publishing", "content-studio", "media-studio"],
+public/control-center/ai-team-model.js:93:    defaultPrompt: "Act as Compliance Reviewer. Flag claims, approval gaps, and publishing risks before release."
+public/control-center/ai-team-model.js:99:    ownerSummary: "Workflows, tasks, queues, jobs, notifications, handoffs, and execution safety.",
+public/control-center/ai-team-model.js:109:  library: ["media_director", "content_writer", "publisher"],
+public/control-center/ai-team-model.js:113:  publishing: ["publisher", "compliance_reviewer"],
+public/control-center/ai-team-model.js:115:  "content-studio": ["content_writer", "compliance_reviewer", "publisher"],
+public/control-center/ai-team-model.js:116:  "media-studio": ["media_director", "video_lead", "publisher"],
+public/control-center/ai-team-model.js:123:  "queue-center": ["operations_lead", "publisher"],
+public/control-center/ui/page-standard.js:13:  "publishing",
+public/control-center/ui/page-standard.js:45:    description: "Connect, test, sync, and diagnose platforms.",
+public/control-center/ui/page-standard.js:46:    primary: { label: "Run Sync", action: "focus-sync" },
+public/control-center/ui/page-standard.js:82:    secondary: { label: "Send To Publishing", route: "publishing" }
+public/control-center/ui/page-standard.js:84:  publishing: {
+public/control-center/ui/page-standard.js:87:    description: "Schedule, approve, retry, and monitor publishing execution.",
+public/control-center/ui/page-standard.js:128:  "focus-connect-platform": "[data-integration-primary='connect'], [data-integration-action='connect'], [data-integration-primary]",
+public/control-center/ui/page-standard.js:129:  "focus-test-connection": "[data-integration-action='test']",
+public/control-center/ui/page-standard.js:130:  "focus-sync": "[data-integration-action='sync'], [data-integration-primary='sync']",
+public/control-center/ui/page-standard.js:147:  "focus-schedule": "#publishingScheduleBtn",
+public/control-center/ui/page-standard.js:148:  "focus-publishing-ai": "#publishingPushAiBtn",
+public/control-center/ui/page-standard.js:149:  "focus-retry-publishing": "#publishingRequeueBtn",
+public/control-center/ui/page-standard.js:202:  if (value.includes("ready") || value.includes("healthy") || value.includes("active") || value.includes("connected") || value.includes("complete")) {
+public/control-center/ui/page-standard.js:247:  const connectedCount = checkKeys.filter((key) => Boolean(checks[key])).length;
+public/control-center/ui/page-standard.js:256:  const connectorScore = asNumber(integrations.readiness_score ?? overview.connector_readiness_score, 0);
+public/control-center/ui/page-standard.js:274:  const systemScore = Math.round((readinessScore + connectorScore) / 2);
+public/control-center/ui/page-standard.js:283:    connectorScore,
+public/control-center/ui/page-standard.js:285:    connectedCount,
+public/control-center/ui/page-standard.js:286:    connectorTotal: checkKeys.length,
+public/control-center/ui/page-standard.js:312:    integrations: "Repair or connect the highest-impact platform, then run sync.",
+public/control-center/ui/page-standard.js:318:    publishing: "Clear failed or ready publishing jobs before scheduling more work.",
+public/control-center/ui/page-standard.js:456:    { label: "Connectors", value: `${metrics.connectedCount}/${metrics.connectorTotal || 0}`, tone: metrics.connectedCount ? "success" : "warning" },
+public/control-center/system-intelligence.js:48:  handoffPayload = null,
+public/control-center/system-intelligence.js:63:    handoffPayload
+public/control-center/system-intelligence.js:128:  const handoffs = asArray(operations.handoffs?.items);
+public/control-center/system-intelligence.js:132:  const hasWorkflowOutput = workflowRuns.length > 0 || handoffs.some((item) => normalizeText(item?.source_page) === "workflows");
+public/control-center/system-intelligence.js:136:  const publishingFailed =
+public/control-center/system-intelligence.js:153:    publishingFailed,
+public/control-center/system-intelligence.js:157:    handoffs
+public/control-center/system-intelligence.js:162:  return asArray(signals.handoffs)
+public/control-center/system-intelligence.js:171:        title: asString(payload?.workflow_title || payload?.title || payload?.prompt || "Cross-page handoff"),
+public/control-center/system-intelligence.js:208:      relatedPages: ["content-studio", "media-studio", "publishing"]
+public/control-center/system-intelligence.js:224:      relatedPages: ["workflows", "ai-command", "publishing"]
+public/control-center/system-intelligence.js:232:      reason: "No content draft is available for downstream media or publishing lanes.",
+public/control-center/system-intelligence.js:240:      relatedPages: ["media-studio", "publishing"]
+public/control-center/system-intelligence.js:248:      reason: "No approved media output exists yet for publishing execution.",
+public/control-center/system-intelligence.js:256:      relatedPages: ["library", "publishing"]
+public/control-center/system-intelligence.js:263:      title: "Run a workflow to create cross-page handoff",
+public/control-center/system-intelligence.js:264:      reason: "No workflow output/handoff is currently available for downstream routing.",
+public/control-center/system-intelligence.js:272:      relatedPages: ["ai-command", "publishing"]
+public/control-center/system-intelligence.js:278:      id: "publishing-not-scheduled",
+public/control-center/system-intelligence.js:279:      title: "Schedule ready output in publishing",
+public/control-center/system-intelligence.js:282:      targetPage: "publishing",
+public/control-center/system-intelligence.js:285:      blockerType: "publishing_gap",
+public/control-center/system-intelligence.js:287:      handoffPayload: { destination_page: "publishing", status: "available" },
+public/control-center/system-intelligence.js:292:  if (signals.publishingFailed) {
+public/control-center/system-intelligence.js:294:      id: "publishing-failed-items",
+public/control-center/system-intelligence.js:295:      title: "Resolve failed publishing blockers",
+public/control-center/system-intelligence.js:298:      targetPage: "publishing",
+public/control-center/system-intelligence.js:301:      blockerType: "publishing_failure",
+public/control-center/system-intelligence.js:318:      relatedPages: ["content-studio", "media-studio", "publishing"]
+public/control-center/system-intelligence.js:352:  const publishingReady = signals.hasPublishingScheduled && !signals.publishingFailed;
+public/control-center/system-intelligence.js:361:    { key: "publishing", label: "Publishing", ready: publishingReady, note: publishingReady ? "Queue ready" : "Needs scheduling" }
+public/control-center/system-intelligence.js:368:  const handoffs = mapHandoffs(signals);
+public/control-center/system-intelligence.js:406:    handoffs,
+public/control-center/system-intelligence.js:489:  return buildSystemIntelligence(state).handoffs;
+public/control-center/index.html:137:            <button class="nav-item" data-route="publishing" data-page="publishing" type="button">Publishing</button>
+public/control-center/index.html:264:            <button id="scheduleBtn" class="btn btn-secondary" data-action="open-publishing" type="button">Schedule</button>
+public/control-center/index.html:451:              <button class="ai-dock-chip" data-ai-route="publishing">
+public/control-center/automation-engine.js:10:  "create_handoff",
+public/control-center/automation-engine.js:13:  "prepare_publishing_draft"
+public/control-center/automation-engine.js:17:  { test: /publish\s*now|go\s*live|send\s*live|execute\s*publish|push\s*live/i, reason: "Publishing requires approval and manual confirmation." },
+public/control-center/automation-engine.js:20:  { test: /disconnect|revoke|unlink/i, reason: "Connection removal is blocked in Auto Mode." },
+public/control-center/automation-engine.js:25:  { test: /credential|api\s*key|secret|token|auth/i, reason: "Credential and provider connection actions require approval." }
+public/control-center/automation-engine.js:231:  if (type === "prepare_publishing_draft") {
+public/control-center/automation-engine.js:235:  if (fingerprint.includes("publishing") && /publish/.test(fingerprint)) {
+public/control-center/automation-engine.js:256:      type: "create_handoff",
+public/control-center/automation-engine.js:296:      type: "create_handoff",
+public/control-center/automation-engine.js:298:      action: "Create content-to-media handoff",
+public/control-center/automation-engine.js:307:      type: "create_handoff",
+public/control-center/automation-engine.js:309:      action: "Create media-to-library handoff",
+public/control-center/automation-engine.js:318:      type: "create_handoff",
+public/control-center/automation-engine.js:319:      targetPage: "publishing",
+public/control-center/automation-engine.js:320:      action: "Create library-to-publishing handoff",
+public/control-center/automation-engine.js:323:        prompt: "Prepare publishing draft with approved content/media and schedule-safe checklist.",
+public/control-center/automation-engine.js:331:export async function runAutomationStep(step, context = {}) {
+public/control-center/automation-engine.js:404:      const handoff = {
+public/control-center/automation-engine.js:415:      setSharedHandoff(projectName, "workflows", handoff);
+public/control-center/automation-engine.js:417:        context.createProjectHandoff(projectName, handoff).catch(() => {});
+public/control-center/automation-engine.js:422:    if (normalizeText(step.type) === "prepare_publishing_draft") {
+public/control-center/automation-engine.js:424:      const handoff = {
+public/control-center/automation-engine.js:426:        destination_page: "publishing",
+public/control-center/automation-engine.js:430:          title: asString(step?.payload?.title || "Prepared publishing draft"),
+public/control-center/automation-engine.js:432:          intent: "prepare_publishing_draft",
+public/control-center/automation-engine.js:436:      setSharedHandoff(projectName, "publishing", handoff);
+public/control-center/automation-engine.js:438:        context.createProjectHandoff(projectName, handoff).catch(() => {});
+public/control-center/automation-engine.js:443:    if (normalizeText(step.type) === "create_handoff") {
+public/control-center/automation-engine.js:445:      const handoff = {
+public/control-center/automation-engine.js:460:      setSharedHandoff(projectName, destination, handoff);
+public/control-center/automation-engine.js:462:        context.createProjectHandoff(projectName, handoff).catch(() => {});
+public/control-center/automation-engine.js:473:export async function runAutomationPlan(plan, options = {}) {
+public/control-center/automation-engine.js:521:async function runAutoModeLoop(options = {}) {
+public/control-center/automation-engine.js:607:export async function startAutoMode(plan, options = {}) {
+public/control-center/automation-engine.js:645:export async function resumeAutoMode(options = {}) {
+public/control-center/automation-engine.js:675:export async function approveCurrentGate(options = {}) {
+public/control-center/automation-engine.js:685:  // Approval means proceed manually for guarded actions; never auto-publish or execute destructive actions.
+public/control-center/automation-engine.js:708:export async function skipCurrentStep(options = {}) {
+public/control-center/runtime/command-runtime.js:39:  - accessibility synchronization
+public/control-center/runtime/command-runtime.js:116:  syncCommandRuntime()
+public/control-center/runtime/lifecycle/README.md:103:  // close connections, reset state, etc.
+public/control-center/runtime/lifecycle/README.md:161:  // custom cleanup: close connections, save state, etc.
+public/control-center/runtime/lifecycle/README.md:162:  api.closeConnection();
+public/control-center/runtime/lifecycle/README.md:192:2. Major pages (library.js, integrations.js, workflows.js, publishing.js, etc.)
+public/control-center/runtime/ai-backend-connector.js:7:  async call(command, payload) {
+public/control-center/runtime/ai-backend-connector.js:9:    const res = await fetch("/ai/execute", {
+public/control-center/runtime/ai-backend-connector.js:27:  publish(data) {
+public/control-center/runtime/authority/route-role-fallback.js:8:  "publisher",
+public/control-center/runtime/authority/route-role-fallback.js:21:  publishing: ["publisher", "compliance_reviewer", "admin"],
+public/control-center/runtime/authority/route-role-fallback.js:33:  library: ["designer", "video_lead", "publisher", "admin"],
+public/control-center/runtime/authority/authority-projection.js:53:  return safeObject(operations.handoffs);
+public/control-center/runtime/overlay/overlay-runtime.js:6:  - Not connected to app.js yet.
+public/control-center/legacy/page-standard.legacy-20260508.js:13:  "publishing",
+public/control-center/legacy/page-standard.legacy-20260508.js:38:    description: "Upload, classify, review, and route source-of-truth assets for campaign, content, media, and publishing.",
+public/control-center/legacy/page-standard.legacy-20260508.js:45:    description: "Connect, test, sync, and diagnose the external platforms that power automation and intelligence.",
+public/control-center/legacy/page-standard.legacy-20260508.js:46:    primary: { label: "Run Sync", action: "focus-sync" },
+public/control-center/legacy/page-standard.legacy-20260508.js:66:    description: "Build launch waves, inspect channel readiness, and package campaign plans for production and publishing.",
+public/control-center/legacy/page-standard.legacy-20260508.js:73:    description: "Create, review, approve, rewrite, translate, and route platform copy into media or publishing.",
+public/control-center/legacy/page-standard.legacy-20260508.js:80:    description: "Manage media jobs, prompt packs, storyboards, generated assets, approvals, and publishing handoffs.",
+public/control-center/legacy/page-standard.legacy-20260508.js:82:    secondary: { label: "Send To Publishing", route: "publishing" }
+public/control-center/legacy/page-standard.legacy-20260508.js:84:  publishing: {
+public/control-center/legacy/page-standard.legacy-20260508.js:87:    description: "Schedule jobs, approve manual publishing, retry failures, and monitor worker execution state.",
+public/control-center/legacy/page-standard.legacy-20260508.js:94:    description: "Shape ad briefs, variants, audiences, budget suggestions, tracking status, and campaign handoffs.",
+public/control-center/legacy/page-standard.legacy-20260508.js:115:    description: "Configure project settings, AI mode, roles, publishing rules, approvals, and readiness safeguards.",
+public/control-center/legacy/page-standard.legacy-20260508.js:129:  publishing: { previous: "Media Studio", next: "Insights" },
+public/control-center/legacy/page-standard.legacy-20260508.js:153:    { label: "Review missing assets", description: "Prioritize files blocking campaign and publishing readiness.", action: "focus-library-missing" },
+public/control-center/legacy/page-standard.legacy-20260508.js:157:    { label: "Connect platform", description: "Open the next recommended connector and add required fields.", action: "focus-connect-platform" },
+public/control-center/legacy/page-standard.legacy-20260508.js:158:    { label: "Test connection", description: "Run a connector health check before relying on the data.", action: "focus-test-connection" },
+public/control-center/legacy/page-standard.legacy-20260508.js:159:    { label: "Run sync", description: "Sync connected sources into intelligence and execution workflows.", action: "focus-sync" },
+public/control-center/legacy/page-standard.legacy-20260508.js:160:    { label: "Diagnose with AI", description: "Send connector failures and coverage gaps to AI Command.", action: "focus-integration-ai" }
+public/control-center/legacy/page-standard.legacy-20260508.js:177:    { label: "Create execution package", description: "Prepare handoffs for content, media, paid, and publishing.", action: "focus-campaign-package" },
+public/control-center/legacy/page-standard.legacy-20260508.js:184:    { label: "Send to Publishing", description: "Route approved content into execution.", route: "publishing" }
+public/control-center/legacy/page-standard.legacy-20260508.js:192:  publishing: [
+public/control-center/legacy/page-standard.legacy-20260508.js:193:    { label: "Schedule job", description: "Create or update the selected publish queue item.", action: "focus-schedule" },
+public/control-center/legacy/page-standard.legacy-20260508.js:195:    { label: "Copy publish payload", description: "Send selected publishing context to AI Command for packaging.", action: "focus-publishing-ai" },
+public/control-center/legacy/page-standard.legacy-20260508.js:196:    { label: "Retry failed jobs", description: "Requeue failed or blocked publishing work.", action: "focus-retry-publishing" }
+public/control-center/legacy/page-standard.legacy-20260508.js:208:    { label: "Improve weak channel", description: "Route weak-channel fixes into content, ads, or publishing.", route: "content-studio" }
+public/control-center/legacy/page-standard.legacy-20260508.js:217:    { label: "Save settings", description: "Persist project, AI, team, publishing, and approval configuration.", action: "focus-save-settings" },
+public/control-center/legacy/page-standard.legacy-20260508.js:246:      "Prioritize missing assets by campaign, media, and publishing impact."
+public/control-center/legacy/page-standard.legacy-20260508.js:251:    description: "Use AI to explain failed connectors, data coverage gaps, and sync priorities.",
+public/control-center/legacy/page-standard.legacy-20260508.js:253:      "Diagnose the current integration gaps and rank what to connect first.",
+public/control-center/legacy/page-standard.legacy-20260508.js:254:      "Create a connector recovery plan for failed or partially configured platforms."
+public/control-center/legacy/page-standard.legacy-20260508.js:277:      "Audit campaign readiness across channels, content, media, paid, and publishing.",
+public/control-center/legacy/page-standard.legacy-20260508.js:278:      "Generate the next launch wave with dependencies and handoffs."
+public/control-center/legacy/page-standard.legacy-20260508.js:297:  publishing: {
+public/control-center/legacy/page-standard.legacy-20260508.js:302:      "Generate a retry plan for failed or blocked publishing jobs."
+public/control-center/legacy/page-standard.legacy-20260508.js:318:      "Turn current insights into campaign, content, ads, and publishing tasks."
+public/control-center/legacy/page-standard.legacy-20260508.js:331:    description: "Use AI to review AI mode, roles, publishing safeguards, and production readiness.",
+public/control-center/legacy/page-standard.legacy-20260508.js:333:      "Review settings for operational risk and recommend what to tighten before publishing.",
+public/control-center/legacy/page-standard.legacy-20260508.js:346:  "focus-connect-platform": "[data-integration-primary='connect'], [data-integration-action='connect'], [data-integration-primary]",
+public/control-center/legacy/page-standard.legacy-20260508.js:347:  "focus-test-connection": "[data-integration-action='test']",
+public/control-center/legacy/page-standard.legacy-20260508.js:348:  "focus-sync": "[data-integration-action='sync'], [data-integration-primary='sync']",
+public/control-center/legacy/page-standard.legacy-20260508.js:365:  "focus-schedule": "#publishingScheduleBtn",
+public/control-center/legacy/page-standard.legacy-20260508.js:366:  "focus-publishing-ai": "#publishingPushAiBtn",
+public/control-center/legacy/page-standard.legacy-20260508.js:367:  "focus-retry-publishing": "#publishingRequeueBtn",
+public/control-center/legacy/page-standard.legacy-20260508.js:437:  return asArray(items).filter((item) => wanted.has(asString(item?.status || item?.execution_status || item?.approval_status || item?.publish_status).toLowerCase())).length;
+public/control-center/legacy/page-standard.legacy-20260508.js:451:  if (t.includes("ready") || t.includes("healthy") || t.includes("active") || t.includes("connected") || t.includes("complete")) return "success";
+public/control-center/legacy/page-standard.legacy-20260508.js:477:  const connected = checkKeys.filter((key) => Boolean(checks[key])).length;
+public/control-center/legacy/page-standard.legacy-20260508.js:478:  const connectedSources = sourceRecords.filter((item) => /connected|active|ok/i.test(textValue(item.value || item.status || item.status_label, ""))).length;
+public/control-center/legacy/page-standard.legacy-20260508.js:507:  const publishingQueue = asArray(ops.queues?.items).filter((item) => asString(item.entity_type) === "publishing_job" || asString(item.queue_type) === "publishing");
+public/control-center/legacy/page-standard.legacy-20260508.js:523:    connectorReadiness: asNumber(integrations.readiness_score ?? overview.connector_readiness_score, 0),
+public/control-center/legacy/page-standard.legacy-20260508.js:529:    connected: Math.max(connected, connectedSources),
+public/control-center/legacy/page-standard.legacy-20260508.js:541:      ...sourceRecords.filter((item) => /fail|error|expired|disconnect/i.test(textValue(item.status || item.status_label || item.health, "")))
+public/control-center/legacy/page-standard.legacy-20260508.js:554:    contentApproved: countByStatus(contentItems, ["approved", "scheduled", "published"]),
+public/control-center/legacy/page-standard.legacy-20260508.js:567:    publishingReady: countByStatus(publishingQueue, ["ready", "manual_publish_ready"]) + scheduled.length,
+public/control-center/legacy/page-standard.legacy-20260508.js:568:    publishingCompleted: countByStatus(publishingQueue, ["published", "completed"]) + completed,
+public/control-center/legacy/page-standard.legacy-20260508.js:569:    publishingFailed: countByStatus(publishingQueue, ["failed"]) + failed,
+public/control-center/legacy/page-standard.legacy-20260508.js:578:    paidTrackingReady: Math.max(connected, connectedSources) > 0 || paidCampaigns.length > 0,
+public/control-center/legacy/page-standard.legacy-20260508.js:580:    savedFindings: asArray(ops.handoffs?.items).filter((item) => asString(item.source_page) === "research").length,
+public/control-center/legacy/page-standard.legacy-20260508.js:595:      card("System health", pct(m.systemScore), "Readiness and connector coverage combined into an executive signal.", tone(m.systemScore)),
+public/control-center/legacy/page-standard.legacy-20260508.js:604:      card("Market / language", `${m.market} / ${m.language}`, "Localization context for copy, campaigns, and publishing.", m.market !== "Not set" && m.language !== "Not set" ? "success" : "warning"),
+public/control-center/legacy/page-standard.legacy-20260508.js:608:      card("Total assets", String(m.assetsTotal), "Files registered for brand, product, content, media, and publishing.", m.assetsTotal ? "success" : "warning"),
+public/control-center/legacy/page-standard.legacy-20260508.js:614:      card("Connected platforms", `${m.connected}/${m.totalChannels || 0}`, "Platforms currently available for data, sync, or execution.", m.connected ? "success" : "warning"),
+public/control-center/legacy/page-standard.legacy-20260508.js:615:      card("Missing platforms", String(Math.max(m.missingConnectors.length, m.totalChannels - m.connected)), "Connections still blocking automation or intelligence coverage.", m.missingConnectors.length ? "warning" : "success"),
+public/control-center/legacy/page-standard.legacy-20260508.js:616:      card("Failed connectors", String(m.failedConnectors.length), "Connectors that need reconnect, test, or credential review.", m.failedConnectors.length ? "danger" : "success"),
+public/control-center/legacy/page-standard.legacy-20260508.js:617:      card("Sync health", m.failed ? "At risk" : "Stable", "Recent execution and sync signals from connected systems.", m.failed ? "warning" : "success")
+public/control-center/legacy/page-standard.legacy-20260508.js:633:      card("Channel readiness", pct(m.connectorReadiness), "Connected channels and integrations available for launch.", tone(m.connectorReadiness)),
+public/control-center/legacy/page-standard.legacy-20260508.js:634:      card("Content readiness", String(m.contentApproved), "Approved, scheduled, or published content items.", m.contentApproved ? "success" : "warning"),
+public/control-center/legacy/page-standard.legacy-20260508.js:636:      card("Publishing readiness", String(m.publishingReady), "Jobs ready or scheduled for execution.", m.publishingReady ? "success" : "neutral")
+public/control-center/legacy/page-standard.legacy-20260508.js:641:      card("Approved content", String(m.contentApproved), "Items ready to route into publishing.", m.contentApproved ? "success" : "warning"),
+public/control-center/legacy/page-standard.legacy-20260508.js:647:      card("Generated assets", String(m.mediaCompleted), "Completed creative jobs available for campaigns or publishing.", m.mediaCompleted ? "success" : "warning"),
+public/control-center/legacy/page-standard.legacy-20260508.js:650:    publishing: [
+public/control-center/legacy/page-standard.legacy-20260508.js:651:      card("Scheduler queue", String(m.scheduled + m.publishingReady), "Queued, ready, or scheduled publishing work.", m.scheduled + m.publishingReady ? "warning" : "neutral"),
+public/control-center/legacy/page-standard.legacy-20260508.js:652:      card("Manual publish ready", String(m.publishingReady), "Items ready for approval or manual release.", m.publishingReady ? "success" : "neutral"),
+public/control-center/legacy/page-standard.legacy-20260508.js:653:      card("Completed jobs", String(m.publishingCompleted), "Publishing executions completed recently.", m.publishingCompleted ? "success" : "neutral"),
+public/control-center/legacy/page-standard.legacy-20260508.js:654:      card("Failed / retryable", String(m.publishingFailed), "Jobs requiring retry, repair, or manual diagnosis.", m.publishingFailed ? "danger" : "success")
+public/control-center/legacy/page-standard.legacy-20260508.js:660:      card("Tracking status", m.paidTrackingReady ? "Ready" : "Needs connection", "Paid and analytics data available for budget decisions.", m.paidTrackingReady ? "success" : "warning")
+public/control-center/legacy/page-standard.legacy-20260508.js:664:      card("Top channels", String(m.connected), "Connected sources that can contribute performance signals.", m.connected ? "success" : "warning"),
+public/control-center/legacy/page-standard.legacy-20260508.js:672:      card("Saved findings", String(m.savedFindings), "Research handoffs preserved for downstream work.", m.savedFindings ? "success" : "neutral")
+public/control-center/legacy/page-standard.legacy-20260508.js:694:      card("Ready", m.missingAssets.length ? "Incomplete" : "Ready", "Required asset categories for production and publishing.", m.missingAssets.length ? "warning" : "success"),
+public/control-center/legacy/page-standard.legacy-20260508.js:699:      card("Ready", m.connected ? "Partially ready" : "Needs connection", "Availability of connected platforms.", m.connected ? "success" : "warning"),
+public/control-center/legacy/page-standard.legacy-20260508.js:701:      card("Next step", m.missingConnectors.length ? "Connect critical platform" : "Run sync", "Best connector action to improve intelligence.", m.missingConnectors.length ? "warning" : "success")
+public/control-center/legacy/page-standard.legacy-20260508.js:714:      card("Ready", m.projectReadiness >= 80 && !m.missingAssets.length ? "Ready" : "Needs inputs", "Campaign quality depends on setup, assets, and connector readiness.", m.projectReadiness >= 80 && !m.missingAssets.length ? "success" : "warning"),
+public/control-center/legacy/page-standard.legacy-20260508.js:715:      card("Needs attention", String(m.missingAssets.length + m.missingConnectors.length), "Asset or connector blockers before execution.", m.missingAssets.length + m.missingConnectors.length ? "warning" : "success"),
+public/control-center/legacy/page-standard.legacy-20260508.js:716:      card("Next step", "Build launch wave", "Prepare the campaign for content, media, paid, and publishing handoffs.", "success")
+public/control-center/legacy/page-standard.legacy-20260508.js:728:    publishing: [
+public/control-center/legacy/page-standard.legacy-20260508.js:730:      card("Failed", String(m.publishingFailed), "Jobs requiring retry or manual recovery.", m.publishingFailed ? "danger" : "success"),
+public/control-center/legacy/page-standard.legacy-20260508.js:731:      card("Worker state", m.publishingFailed ? "Recovery needed" : "Stable", "Execution readiness based on recent publishing state.", m.publishingFailed ? "danger" : "success")
+public/control-center/legacy/page-standard.legacy-20260508.js:750:      card("Needs attention", String(m.approvalsPending), "Pending approvals that may affect policy and publishing.", m.approvalsPending ? "warning" : "success"),
+public/control-center/legacy/page-standard.legacy-20260508.js:767:    integrations: "Connect or repair the highest-impact missing platform, then run a sync.",
+public/control-center/legacy/page-standard.legacy-20260508.js:773:    publishing: "Clear failed or ready jobs before scheduling more work.",
+public/control-center/legacy/page-standard.legacy-20260508.js:775:    insights: "Convert the top recommendation into campaign, content, ads, or publishing work.",
+public/control-center/legacy/page-standard.legacy-20260508.js:943:      { label: "Open Publishing", route: "publishing" }
+public/control-center/legacy/page-standard.legacy-20260508.js:947:      { label: "Open Publishing", route: "publishing" },
+public/control-center/legacy/page-standard.legacy-20260508.js:950:    publishing: [
+public/control-center/legacy/page-standard.legacy-20260508.js:1075:      { label: "Data used", value: "Integration control center, connector readiness, source registry" },
+public/control-center/legacy/page-standard.legacy-20260508.js:1076:      { label: "Coverage", value: `${m.connected}/${m.totalChannels || 0} connected` }
+public/control-center/legacy/page-standard.legacy-20260508.js:1083:      { label: "Data used", value: "Workflow catalog, workflow runs, handoffs, job monitor" },
+public/control-center/legacy/page-standard.legacy-20260508.js:1091:      { label: "Data used", value: "Content items, approvals, handoffs, AI rewrite requests" },
+public/control-center/legacy/page-standard.legacy-20260508.js:1098:    publishing: [
+public/control-center/legacy/page-standard.legacy-20260508.js:1099:      { label: "Data used", value: "Scheduler queue, publishing jobs, execution results, worker status" },
+public/control-center/legacy/page-standard.legacy-20260508.js:1100:      { label: "Queue state", value: `${m.publishingReady} ready / ${m.publishingFailed} failed` }
+public/control-center/legacy/page-standard.legacy-20260508.js:1103:      { label: "Data used", value: "Campaign records, paid insights, tracking connectors" },
+public/control-center/legacy/page-standard.legacy-20260508.js:1107:      { label: "Data used", value: "Project insights, learning memory, connected platform coverage" },
+public/control-center/legacy/integrations.monolith-20260508.js:16:        purpose: "Primary site connection for landing pages, traffic mapping, attribution, and conversion context.",
+public/control-center/legacy/integrations.monolith-20260508.js:17:        whyItMatters: "Without the website source, MH Assistant cannot connect content and campaign activity to real destination performance.",
+public/control-center/legacy/integrations.monolith-20260508.js:34:        purpose: "Store, product, order, and sales sync for WooCommerce-driven projects.",
+public/control-center/legacy/integrations.monolith-20260508.js:36:        enables: "Product sync, order sync, sales signals, and commerce intelligence.",
+public/control-center/legacy/integrations.monolith-20260508.js:54:        enables: "Product sync, order sync, customer sync, and sales reporting.",
+public/control-center/legacy/integrations.monolith-20260508.js:73:        enables: "Listing sync, sales signals, performance by product, and marketplace learning.",
+public/control-center/legacy/integrations.monolith-20260508.js:88:        purpose: "Marketplace listing and commerce signal sync for eBay surfaces.",
+public/control-center/legacy/integrations.monolith-20260508.js:90:        enables: "Listing sync, order sync, product demand signals, and marketplace coverage.",
+public/control-center/legacy/integrations.monolith-20260508.js:105:    description: "Post insights, video performance, engagement, comments, publishing paths, and linked account intelligence.",
+public/control-center/legacy/integrations.monolith-20260508.js:114:        enables: "Post insights, engagement data, comments, publishing support, and ad account linkage.",
+public/control-center/legacy/integrations.monolith-20260508.js:130:        purpose: "Post, reel, and profile insight sync for Instagram business performance.",
+public/control-center/legacy/integrations.monolith-20260508.js:132:        enables: "Post insights, reel insights, engagement, comments, publishing, and business account analytics.",
+public/control-center/legacy/integrations.monolith-20260508.js:148:        purpose: "Video and post insight sync for TikTok creative and audience performance.",
+public/control-center/legacy/integrations.monolith-20260508.js:150:        enables: "Video insights, engagement, comments, profile metrics, and future publishing support.",
+public/control-center/legacy/integrations.monolith-20260508.js:166:        purpose: "Video performance and channel insight sync for long-form or short-form YouTube content.",
+public/control-center/legacy/integrations.monolith-20260508.js:168:        enables: "Video insights, watch metrics, subscriber trends, comments, and publishing context.",
+public/control-center/legacy/integrations.monolith-20260508.js:184:        purpose: "Future-ready business profile insight and publishing connection for LinkedIn surfaces.",
+public/control-center/legacy/integrations.monolith-20260508.js:186:        enables: "Post insights, audience signals, company page analytics, and publishing support.",
+public/control-center/legacy/integrations.monolith-20260508.js:302:          { key: "endpointUrl", label: "Endpoint URL", placeholder: "https://api.brand.com/analytics", required: true },
+public/control-center/legacy/integrations.monolith-20260508.js:312:    description: "Lifecycle messaging, customer records, contact sync, and email campaign infrastructure.",
+public/control-center/legacy/integrations.monolith-20260508.js:343:        enables: "Campaign sends, audience sync, templates, and performance reporting.",
+public/control-center/legacy/integrations.monolith-20260508.js:358:        purpose: "Future-ready newsletter, audience, and campaign sync through Mailchimp.",
+public/control-center/legacy/integrations.monolith-20260508.js:360:        enables: "Audience sync, campaigns, lists, and newsletter reporting.",
+public/control-center/legacy/integrations.monolith-20260508.js:377:        purpose: "Customer record sync for lead, customer, and lifecycle intelligence.",
+public/control-center/legacy/integrations.monolith-20260508.js:378:        whyItMatters: "CRM data helps the system connect campaigns to pipeline, customers, and repeat purchase behavior.",
+public/control-center/legacy/integrations.monolith-20260508.js:379:        enables: "Contact sync, customer sync, lead intelligence, and lifecycle learning.",
+public/control-center/legacy/integrations.monolith-20260508.js:403:        enables: "Spend sync, campaign import, creative performance, and paid optimization.",
+public/control-center/legacy/integrations.monolith-20260508.js:421:        enables: "Spend sync, campaign import, keyword performance, and paid optimization.",
+public/control-center/legacy/integrations.monolith-20260508.js:438:        whyItMatters: "TikTok Ads data helps connect short-form content learning to actual paid outcomes.",
+public/control-center/legacy/integrations.monolith-20260508.js:439:        enables: "Spend sync, campaign import, creative performance, and short-form paid optimization.",
+public/control-center/legacy/integrations.monolith-20260508.js:461:        purpose: "File sync and shared asset operations through Google Drive.",
+public/control-center/legacy/integrations.monolith-20260508.js:463:        enables: "Asset sync, doc sync, shared files, and automation inputs.",
+public/control-center/legacy/integrations.monolith-20260508.js:478:        purpose: "Operational alerting, workflow notifications, and team collaboration handoff.",
+public/control-center/legacy/integrations.monolith-20260508.js:479:        whyItMatters: "Slack can surface sync failures, content approvals, and campaign alerts where the team already works.",
+public/control-center/legacy/integrations.monolith-20260508.js:480:        enables: "Alerts, approvals, sync notifications, and workflow coordination.",
+public/control-center/legacy/integrations.monolith-20260508.js:497:        enables: "Alerts, commands, approval handoff, and ops notifications.",
+public/control-center/legacy/integrations.monolith-20260508.js:514:        enables: "Docs sync, planning sync, task context, and knowledge reuse.",
+public/control-center/legacy/integrations.monolith-20260508.js:529:        purpose: "Automation routing for triggers, syncs, approvals, and external workflow handoffs.",
+public/control-center/legacy/integrations.monolith-20260508.js:531:        enables: "Workflow automation, triggers, sync jobs, and handoffs.",
+public/control-center/legacy/integrations.monolith-20260508.js:548:        enables: "Custom events, syncs, notifications, and system handoffs.",
+public/control-center/legacy/integrations.monolith-20260508.js:554:          { key: "eventScope", label: "Event scope", placeholder: "events, approvals, syncs" },
+public/control-center/legacy/integrations.monolith-20260508.js:743:  if (card.statusLabel === "Token expired") return "Reconnect Now";
+public/control-center/legacy/integrations.monolith-20260508.js:753:    return { action: "sync", label: "Sync Now" };
+public/control-center/legacy/integrations.monolith-20260508.js:756:    return { action: "reconnect", label: getSmartConnectLabel(card) };
+public/control-center/legacy/integrations.monolith-20260508.js:758:  return { action: "connect", label: getSmartConnectLabel(card) };
+public/control-center/legacy/integrations.monolith-20260508.js:847:    { key: "posts", pattern: /post|reel|video|comment|publishing|profile|channel/ },
+public/control-center/legacy/integrations.monolith-20260508.js:865:      write: ["publishing", "audience updates"]
+public/control-center/legacy/integrations.monolith-20260508.js:879:      write: ["catalog sync", "commerce updates"]
+public/control-center/legacy/integrations.monolith-20260508.js:893:      write: ["campaign sends", "audience sync"]
+public/control-center/legacy/integrations.monolith-20260508.js:927:    status: "connected",
+public/control-center/legacy/integrations.monolith-20260508.js:940:    last_sync_at: asString(asObject(sources[integration.sourceKey]).updated_at),
+public/control-center/legacy/integrations.monolith-20260508.js:990:  if (normalized === "connected") return "Connected";
+public/control-center/legacy/integrations.monolith-20260508.js:994:  if (normalized === "not connected" || normalized === "not_connected") return "Not Connected";
+public/control-center/legacy/integrations.monolith-20260508.js:1009:    return `${integration.label} is connected and ready for provider-level sync actions.`;
+public/control-center/legacy/integrations.monolith-20260508.js:1012:    return "Some required connection details are still missing.";
+public/control-center/legacy/integrations.monolith-20260508.js:1015:    return "Reconnect the saved token before importing or syncing new data.";
+public/control-center/legacy/integrations.monolith-20260508.js:1018:    return asString(record.last_error) || "The last action failed. Review the connection inputs and try again.";
+public/control-center/legacy/integrations.monolith-20260508.js:1060:    lastSync: asString(record.last_sync_at),
+public/control-center/legacy/integrations.monolith-20260508.js:1089:    const connectedCount = cards.filter((card) => card.statusLabel === "Connected").length;
+public/control-center/legacy/integrations.monolith-20260508.js:1096:      connectedCount,
+public/control-center/legacy/integrations.monolith-20260508.js:1139:    const connected = cards.filter((card) => card.statusLabel === "Connected").length;
+public/control-center/legacy/integrations.monolith-20260508.js:1141:    const status = connected === cards.length && cards.length
+public/control-center/legacy/integrations.monolith-20260508.js:1143:      : connected || partial
+public/control-center/legacy/integrations.monolith-20260508.js:1150:      meta: `${connected}/${cards.length} connected`
+public/control-center/legacy/integrations.monolith-20260508.js:1174:  // 1. Failed or expired critical connector
+public/control-center/legacy/integrations.monolith-20260508.js:1219:  // Healthy fallback — suggest next optional connector
+public/control-center/legacy/integrations.monolith-20260508.js:1239:    publishing_blocker: ["instagram", "facebook", "tiktok", "youtube", "linkedin"],
+public/control-center/legacy/integrations.monolith-20260508.js:1254:    publishing_blocker: "Publishing blocker",
+public/control-center/legacy/integrations.monolith-20260508.js:1299:      : `<p class="ai-smart-rec-healthy-copy">All connectors are active. No additional setup is required right now.</p>`;
+public/control-center/legacy/integrations.monolith-20260508.js:1308:          <p class="ai-smart-rec-sub">All critical connectors are active. The system is operating with full launch-critical data coverage.</p>
+public/control-center/legacy/integrations.monolith-20260508.js:1332:        <div class="ai-smart-rec-connector">
+public/control-center/legacy/integrations.monolith-20260508.js:1333:          <div class="ai-smart-rec-connector-icon">${escapeHtml(card.icon)}</div>
+public/control-center/legacy/integrations.monolith-20260508.js:1334:          <div class="ai-smart-rec-connector-info">
+public/control-center/legacy/integrations.monolith-20260508.js:1363:  const reconnectNeeded = actionableCards.filter((card) => ["Token expired", "Error"].includes(card.statusLabel));
+public/control-center/legacy/integrations.monolith-20260508.js:1376:  if (reconnectNeeded.length) {
+public/control-center/legacy/integrations.monolith-20260508.js:1378:      title: `Repair ${reconnectNeeded[0].label}`,
+public/control-center/legacy/integrations.monolith-20260508.js:1379:      meta: `${reconnectNeeded[0].label} needs attention before sync and intelligence coverage can be trusted.`
+public/control-center/legacy/integrations.monolith-20260508.js:1386:      meta: `${partial.length} integration${partial.length === 1 ? "" : "s"} have staged values but are not fully connected yet.`
+public/control-center/legacy/integrations.monolith-20260508.js:1400:      meta: "Best next step: attach provider-specific OAuth validation and background sync jobs to the existing integration routes."
+public/control-center/legacy/integrations.monolith-20260508.js:1406:      label: "What should I connect next?",
+public/control-center/legacy/integrations.monolith-20260508.js:1407:      prompt: "Review all current integrations and tell me which platform or tool I should connect next to improve learning, attribution, and execution fastest."
+public/control-center/legacy/integrations.monolith-20260508.js:1411:      prompt: "Identify the critical missing integrations before launch and explain which ones block publishing, analytics, SEO, paid optimization, and conversion intelligence."
+public/control-center/legacy/integrations.monolith-20260508.js:1415:      prompt: "Explain what is missing from the current SEO and Search Console integration coverage and what should be connected or configured next."
+public/control-center/legacy/integrations.monolith-20260508.js:1433:    description: "Website, storefront, and marketplace connectors that prove demand and commerce readiness.",
+public/control-center/legacy/integrations.monolith-20260508.js:1434:    connectorIds: ["website", "woocommerce", "shopify", "amazon", "ebay"]
+public/control-center/legacy/integrations.monolith-20260508.js:1438:    description: "Organic distribution surfaces that supply audience, content, and publishing signals.",
+public/control-center/legacy/integrations.monolith-20260508.js:1439:    connectorIds: ["instagram", "facebook", "tiktok", "youtube", "linkedin"]
+public/control-center/legacy/integrations.monolith-20260508.js:1444:    connectorIds: ["ga4", "search-console", "meta-pixel", "tiktok-pixel", "gtm", "custom-analytics"]
+public/control-center/legacy/integrations.monolith-20260508.js:1448:    description: "Email, CRM, and operational messaging connectors that keep lifecycle and team coordination intact.",
+public/control-center/legacy/integrations.monolith-20260508.js:1449:    connectorIds: ["smtp", "mailer", "mailchimp", "crm", "telegram", "slack", "notion", "zapier-make", "google-drive", "webhook"]
+public/control-center/legacy/integrations.monolith-20260508.js:1453:    description: "Paid media connectors that extend optimization once the core launch stack is stable.",
+public/control-center/legacy/integrations.monolith-20260508.js:1454:    connectorIds: ["meta-ads", "google-ads", "tiktok-ads"]
+public/control-center/legacy/integrations.monolith-20260508.js:1462:    meta.connectorIds.includes(card.id)
+public/control-center/legacy/integrations.monolith-20260508.js:1468:  if (card.statusLabel === "Connected") return "connected";
+public/control-center/legacy/integrations.monolith-20260508.js:1486:  if (statusKey === "connected") {
+public/control-center/legacy/integrations.monolith-20260508.js:1489:      action: card.lastSync ? "test" : "sync"
+public/control-center/legacy/integrations.monolith-20260508.js:1494:    return { label: getSmartConnectLabel(card), action: "reconnect" };
+public/control-center/legacy/integrations.monolith-20260508.js:1501:  return { label: getSmartConnectLabel(card), action: "connect" };
+public/control-center/legacy/integrations.monolith-20260508.js:1546:        connectedCount: groupCards.filter((card) => getConnectorWorkspaceStatus(card) === "connected").length,
+public/control-center/legacy/integrations.monolith-20260508.js:1558:  const connectedIntegrations = cards.filter((card) => getConnectorWorkspaceStatus(card) === "connected").length;
+public/control-center/legacy/integrations.monolith-20260508.js:1559:  const missingRequired = requiredCards.filter((card) => getConnectorWorkspaceStatus(card) !== "connected").length;
+public/control-center/legacy/integrations.monolith-20260508.js:1560:  const failedOrDisconnected = cards.filter((card) => ["failed", "missing"].includes(getConnectorWorkspaceStatus(card))).length;
+public/control-center/legacy/integrations.monolith-20260508.js:1561:  const blockerCount = requiredCards.filter((card) => card.critical && getConnectorWorkspaceStatus(card) !== "connected").length;
+public/control-center/legacy/integrations.monolith-20260508.js:1566:    launchReadinessImpact = `${blockerCount} critical connector${blockerCount === 1 ? "" : "s"} still block reliable launch execution.`;
+public/control-center/legacy/integrations.monolith-20260508.js:1568:    launchReadinessImpact = `${warningCount} required connector${warningCount === 1 ? "" : "s"} still need setup before diagnostics can be trusted.`;
+public/control-center/legacy/integrations.monolith-20260508.js:1569:  } else if (failedOrDisconnected) {
+public/control-center/legacy/integrations.monolith-20260508.js:1570:    launchReadinessImpact = `${failedOrDisconnected} non-critical connector${failedOrDisconnected === 1 ? " is" : "s are"} disconnected or failed and should be repaired after launch blockers.`;
+public/control-center/legacy/integrations.monolith-20260508.js:1575:    connectedIntegrations,
+public/control-center/legacy/integrations.monolith-20260508.js:1577:    failedOrDisconnected,
+public/control-center/legacy/integrations.monolith-20260508.js:1579:    nextRecommendedAction: recommendations.recommendations[0]?.title || "Review connector coverage"
+public/control-center/legacy/integrations.monolith-20260508.js:1606:          .filter((card) => getConnectorWorkspaceStatus(card) !== "connected")
+public/control-center/legacy/integrations.monolith-20260508.js:1618:  if (/(failed|error|disconnect|blocked|expired)/.test(text)) return "danger";
+public/control-center/legacy/integrations.monolith-20260508.js:1620:  if (/(connected|sync|tested|passed|healthy|ready|imported)/.test(text)) return "success";
+public/control-center/legacy/integrations.monolith-20260508.js:1629:    ...asArray(controlCenter.recent_syncs),
+public/control-center/legacy/integrations.monolith-20260508.js:1634:      id: asString(item.id || item.event_id || item.sync_id || `real-${index}`),
+public/control-center/legacy/integrations.monolith-20260508.js:1636:      detail: asString(item.detail || item.notes || item.status || item.result || item.connector || item.integration_id || ""),
+public/control-center/legacy/integrations.monolith-20260508.js:1654:          id: `${card.id}-sync`,
+public/control-center/legacy/integrations.monolith-20260508.js:1655:          title: `${card.label} sync checkpoint`,
+public/control-center/legacy/integrations.monolith-20260508.js:1656:          detail: "Derived from the latest connector sync timestamp.",
+public/control-center/legacy/integrations.monolith-20260508.js:1665:          title: `${card.label} connection test`,
+public/control-center/legacy/integrations.monolith-20260508.js:1666:          detail: "Derived from the latest connector test timestamp.",
+public/control-center/legacy/integrations.monolith-20260508.js:1676:          detail: "Derived from the latest connector import timestamp.",
+public/control-center/legacy/integrations.monolith-20260508.js:1730:          : `<button class="btn btn-secondary" type="button" data-integration-action="sync" data-integration-id="${escapeHtml(card.id)}">Sync</button>`}
+public/control-center/legacy/integrations.monolith-20260508.js:1737:  const countLabel = `${group.connectedCount} connected • ${group.setupCount} needs setup • ${group.failedCount} failed • ${group.missingCount} missing`;
+public/control-center/legacy/integrations.monolith-20260508.js:1774:    return `<div class="empty-box">No integration events yet. Run a connection test or sync to populate recent activity.</div>`;
+public/control-center/legacy/integrations.monolith-20260508.js:1861:    ${card.statusLabel === "Connected" ? `<button class="quick-action-btn" type="button" data-integration-action="sync" data-integration-id="${escapeHtml(card.id)}">Sync Now</button>` : ""}
+public/control-center/legacy/integrations.monolith-20260508.js:1862:    ${quickConnectLabel && card.statusLabel !== "Connected" ? `<div class="integration-quick-connect-note">OAuth-style quick connect is the recommended path for this provider. Manual fields remain available as fallback.</div>` : ""}
+public/control-center/legacy/integrations.monolith-20260508.js:1875:        ? "reconnect"
+public/control-center/legacy/integrations.monolith-20260508.js:1876:        : "connect";
+public/control-center/legacy/integrations.monolith-20260508.js:1885:          <span class="integration-card-meta">Last sync: ${escapeHtml(formatDateTime(card.lastSync))}</span>
+public/control-center/legacy/integrations.monolith-20260508.js:1912:      label: "Step 2: Test connection",
+public/control-center/legacy/integrations.monolith-20260508.js:1914:      meta: stepTwoComplete ? "Connection test checkpoint recorded." : "Run a connection test before activation."
+public/control-center/legacy/integrations.monolith-20260508.js:2026:            <div class="data-row"><span>Last sync</span><strong>${escapeHtml(formatDateTime(card.lastSync))}</strong></div>
+public/control-center/legacy/integrations.monolith-20260508.js:2052:          <h3>Selected connector</h3>
+public/control-center/legacy/integrations.monolith-20260508.js:2053:          <p class="home-section-copy" style="margin:6px 0 0;">Open Smart Connect to configure, test, or reconnect this connector without leaving the overview.</p>
+public/control-center/legacy/integrations.monolith-20260508.js:2078:      <button class="integration-drawer-backdrop" type="button" aria-label="Close connector setup" data-integration-drawer-close="backdrop"></button>
+public/control-center/legacy/integrations.monolith-20260508.js:2118:        <span class="card-badge ${domain.connectedCount === domain.cards.length ? "success" : domain.connectedCount || domain.partialCount ? "warning" : "danger"}">${escapeHtml(`${domain.connectedCount} connected • ${domain.partialCount} partial • ${attentionCount} attention • ${blockedCount} missing`)}</span>
+public/control-center/legacy/integrations.monolith-20260508.js:2129:    connected: cards.filter((card) => card.statusLabel === "Connected").length,
+public/control-center/legacy/integrations.monolith-20260508.js:2142:      description: "Commerce and marketplace connections that support products, orders, revenue signals, and conversion-aware sales intelligence.",
+public/control-center/legacy/integrations.monolith-20260508.js:2148:      description: "Audience and publishing platforms used for organic reach, social engagement, and content performance learning.",
+public/control-center/legacy/integrations.monolith-20260508.js:2166:      description: "Automation and coordination tools that help orchestrate tasks, handoffs, notifications, and AI-assisted operations.",
+public/control-center/legacy/integrations.monolith-20260508.js:2180:  const { connected, notConnected, needsAttention } = section.summary;
+public/control-center/legacy/integrations.monolith-20260508.js:2181:  const tone = notConnected || needsAttention ? (connected ? "warning" : "danger") : "success";
+public/control-center/legacy/integrations.monolith-20260508.js:2183:  const connectedCards = section.cards.filter((card) => card.statusLabel === "Connected");
+public/control-center/legacy/integrations.monolith-20260508.js:2194:        <span class="card-badge ${tone}">${escapeHtml(`${connected} connected • ${notConnected} not connected • ${needsAttention} needs attention`)}</span>
+public/control-center/legacy/integrations.monolith-20260508.js:2199:          <span class="card-badge success">${escapeHtml(String(connected))}</span>
+public/control-center/legacy/integrations.monolith-20260508.js:2200:          <div class="integration-coverage-meta">Ready for test, sync, and provider-backed actions.</div>
+public/control-center/legacy/integrations.monolith-20260508.js:2203:          <strong>Not connected</strong>
+public/control-center/legacy/integrations.monolith-20260508.js:2205:          <div class="integration-coverage-meta">No complete connection record is available yet.</div>
+public/control-center/legacy/integrations.monolith-20260508.js:2216:          ${connectedCards.length ? connectedCards.map((card) => renderIntegrationCard(card, session, escapeHtml)).join("") : `<div class="empty-box">No connected integrations in this group yet.</div>`}
+public/control-center/legacy/integrations.monolith-20260508.js:2228:          ${notConnectedCards.length ? notConnectedCards.map((card) => renderIntegrationCard(card, session, escapeHtml)).join("") : `<div class="empty-box">All integrations in this group already have a connection state.</div>`}
+public/control-center/legacy/integrations.monolith-20260508.js:2243:  connectProjectIntegration,
+public/control-center/legacy/integrations.monolith-20260508.js:2244:  reconnectProjectIntegration,
+public/control-center/legacy/integrations.monolith-20260508.js:2246:  syncProjectIntegration,
+public/control-center/legacy/integrations.monolith-20260508.js:2248:  disconnectProjectIntegration,
+public/control-center/legacy/integrations.monolith-20260508.js:2262:    button.onclick = async () => {
+public/control-center/legacy/integrations.monolith-20260508.js:2316:      ? "Required for a complete connection."
+public/control-center/legacy/integrations.monolith-20260508.js:2401:      connection_method: integration.fields.some(isSecretField) ? "oauth_or_key" : "direct_config",
+public/control-center/legacy/integrations.monolith-20260508.js:2404:      sync_source_registry: shouldSyncLegacySource(integration)
+public/control-center/legacy/integrations.monolith-20260508.js:2408:  async function persistPrimary(integrationId, reconnect = false) {
+public/control-center/legacy/integrations.monolith-20260508.js:2428:      showError?.(`Enter ${primaryField.label.toLowerCase()} before connecting ${integration.label}.`);
+public/control-center/legacy/integrations.monolith-20260508.js:2433:      if (reconnect) {
+public/control-center/legacy/integrations.monolith-20260508.js:2434:        await reconnectProjectIntegration(projectName, integrationId, payload);
+public/control-center/legacy/integrations.monolith-20260508.js:2436:        await connectProjectIntegration(projectName, integrationId, payload);
+public/control-center/legacy/integrations.monolith-20260508.js:2440:      showMessage?.(reconnect ? `${integration.label} reconnected.` : `${integration.label} connected.`);
+public/control-center/legacy/integrations.monolith-20260508.js:2444:      showError?.(error.message || `Failed to connect ${integration.label}.`);
+public/control-center/legacy/integrations.monolith-20260508.js:2448:  async function disconnect(integrationId) {
+public/control-center/legacy/integrations.monolith-20260508.js:2457:      await disconnectProjectIntegration(projectName, integrationId, {
+public/control-center/legacy/integrations.monolith-20260508.js:2458:        notes: `${integration.label} disconnected from the Control Center.`
+public/control-center/legacy/integrations.monolith-20260508.js:2461:      showMessage?.(`${integration.label} disconnected.`);
+public/control-center/legacy/integrations.monolith-20260508.js:2465:      showError?.(error.message || `Failed to disconnect ${integration.label}.`);
+public/control-center/legacy/integrations.monolith-20260508.js:2469:  async function runServerAction(integrationId, type) {
+public/control-center/legacy/integrations.monolith-20260508.js:2480:          notes: `${integration.label} connection test passed from the Control Center.`
+public/control-center/legacy/integrations.monolith-20260508.js:2483:      } else if (type === "sync") {
+public/control-center/legacy/integrations.monolith-20260508.js:2484:        await syncProjectIntegration(projectName, integrationId, {
+public/control-center/legacy/integrations.monolith-20260508.js:2485:          notes: `${integration.label} sync triggered from the Control Center.`
+public/control-center/legacy/integrations.monolith-20260508.js:2487:        showMessage?.(`${integration.label} sync started.`);
+public/control-center/legacy/integrations.monolith-20260508.js:2503:    button.onclick = async () => {
+public/control-center/legacy/integrations.monolith-20260508.js:2507:      if (action === "connect") {
+public/control-center/legacy/integrations.monolith-20260508.js:2511:      if (action === "reconnect") {
+public/control-center/legacy/integrations.monolith-20260508.js:2515:      if (action === "disconnect") {
+public/control-center/legacy/integrations.monolith-20260508.js:2516:        await disconnect(integrationId);
+public/control-center/legacy/integrations.monolith-20260508.js:2554:    description: "Connect, test, sync, import, reconnect, and control the external platforms that power MH Assistant OS."
+public/control-center/legacy/integrations.monolith-20260508.js:2570:    connectProjectIntegration,
+public/control-center/legacy/integrations.monolith-20260508.js:2571:    reconnectProjectIntegration,
+public/control-center/legacy/integrations.monolith-20260508.js:2573:    syncProjectIntegration,

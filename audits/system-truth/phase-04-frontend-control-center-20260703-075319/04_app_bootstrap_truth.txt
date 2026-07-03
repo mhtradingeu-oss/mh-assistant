@@ -1,0 +1,435 @@
+### app.js imports / startup / render / init hints
+3:import {
+7:import {
+12:import {
+13:  initRouter,
+14:  navigateTo,
+15:  renderRouteTemplate,
+16:  getRouteDefinition,
+18:} from "./router.js";
+19:import { applyStandardPageLayout } from "./ui/page-standard.js";
+20:import {
+34:import {
+75:import {
+79:import { getOverlaySnapshot } from "./runtime/overlay/overlay-runtime.js";
+80:import { createLifecycleRegistry } from "./runtime/lifecycle/lifecycle-registry.js";
+81:import { installMhRuntimeGlobals } from "./runtime/mh-runtime-globals.js";
+103:  return appShellLifecycle.addEventListener(target, type, handler, options);
+119:    window.localStorage?.setItem(CONTROL_ACCESS_KEY_STORAGE_KEY, normalized);
+126:    window.__MH_CONTROL_CENTER_READ_KEY__ = normalized;
+127:    window.__MH_CONTROL_CENTER_WRITE_KEY__ = normalized;
+128:    window.__MH_CONTROL_WRITE_KEY__ = normalized;
+129:    window.__MH_CONTROL_CENTER_ACCESS_KEY__ = normalized;
+130:    window.__MH_CONTROL_ACCESS_KEY__ = normalized;
+131:    window.__MH_ACCESS_KEY__ = normalized;
+139:    window.__MH_CONTROL_CENTER_READ_KEY__,
+140:    window.__MH_CONTROL_CENTER_WRITE_KEY__,
+141:    window.__MH_CONTROL_WRITE_KEY__,
+142:    window.__MH_CONTROL_CENTER_ACCESS_KEY__,
+143:    window.__MH_CONTROL_ACCESS_KEY__,
+144:    window.__MH_ACCESS_KEY__
+154:    const canonical = String(window.localStorage?.getItem(CONTROL_ACCESS_KEY_STORAGE_KEY) || "").trim();
+160:      .map((key) => String(window.localStorage?.getItem(key) || "").trim())
+175:    const stored = window.localStorage?.getItem(CONTROL_ROLE_STORAGE_KEY);
+189:function isProtectedControlWriteRequest(input, init = {}) {
+191:    init.method ||
+201:    const base = typeof window !== "undefined" ? window.location.origin : "http://localhost";
+214:  if (typeof window === "undefined" || typeof window.fetch !== "function" || window.fetch.__mhProtectedWriteFetch) {
+218:  const originalFetch = window.fetch.bind(window);
+220:  async function protectedWriteFetch(input, init = {}) {
+221:    if (!isProtectedControlWriteRequest(input, init)) {
+222:      return originalFetch(input, init);
+226:      init.headers ||
+238:      ...init,
+249:  window.fetch = protectedWriteFetch;
+366:    { key: "window.__MH_CONTROL_CENTER_READ_KEY__", value: window.__MH_CONTROL_CENTER_READ_KEY__ },
+367:    { key: "window.__MH_CONTROL_CENTER_WRITE_KEY__", value: window.__MH_CONTROL_CENTER_WRITE_KEY__ },
+368:    { key: "window.__MH_CONTROL_WRITE_KEY__", value: window.__MH_CONTROL_WRITE_KEY__ },
+369:    { key: "window.__MH_CONTROL_CENTER_ACCESS_KEY__", value: window.__MH_CONTROL_CENTER_ACCESS_KEY__ },
+370:    { key: "window.__MH_CONTROL_ACCESS_KEY__", value: window.__MH_CONTROL_ACCESS_KEY__ },
+371:    { key: "window.__MH_ACCESS_KEY__", value: window.__MH_ACCESS_KEY__ }
+496:  navigateTo("home");
+513:    saveBtn.addEventListener("click", async () => {
+540:        navigateTo("home");
+550:    diagBtn.addEventListener("click", async () => {
+558:    testBtn.addEventListener("click", async () => {
+611:    clearBtn.addEventListener("click", () => {
+624:    clearReloadBtn.addEventListener("click", () => {
+630:      window.location.reload();
+635:    closeBtn.addEventListener("click", hideAccessKeyModal);
+638:  modal.addEventListener("click", (e) => {
+642:  modal.addEventListener("keydown", (e) => {
+726:function renderSimpleList(items, emptyText = "No items available.") {
+738:    renderRouteTemplate(route);
+817:  if (startupRuntimeState.manualUnlockActive && token === startupRuntimeState.manualUnlockToken) {
+822:  if (startupRuntimeState.manualUnlockActive && token !== startupRuntimeState.manualUnlockToken) {
+890:  startupRuntimeState.hideLoadingCalled = true;
+891:  startupRuntimeState.hideLoadingReason = reason;
+892:  startupRuntimeState.hideLoadingAt = new Date().toISOString();
+916:const STARTUP_STEPS_STORAGE_KEY = "mh-control-center-startup-steps";
+919:const LAST_STARTUP_ERROR_STORAGE_KEY = "mh-control-center-last-startup-error";
+921:const STARTUP_UNLOCK_STORAGE_KEY = "mh-control-center-startup-unlock";
+933:const startupStepHistory = [];
+937:const startupDiagnostics = {
+950:const startupRuntimeState = {
+951:  startupStartedAtMs: 0,
+969:  initialized: false,
+970:  initReadyAt: "",
+1009:    stage: String(stage || "startup.trace"),
+1010:    token: String(details.token || startupRuntimeState.currentToken || ""),
+1019:function renderStartupRuntimeTrace(cachedPayload = null) {
+1023:    currentProject: startupRuntimeState.currentProject || state.context.currentProject || "",
+1024:    currentToken: startupRuntimeState.currentToken || "",
+1025:    payloadSuccess: Boolean(startupRuntimeState.projectPayloadSuccess),
+1026:    hideLoadingCalled: Boolean(startupRuntimeState.hideLoadingCalled),
+1027:    hideLoadingReason: String(startupRuntimeState.hideLoadingReason || ""),
+1028:    unlocked: Boolean(startupRuntimeState.unlocked),
+1029:    unlockReason: String(startupRuntimeState.unlockReason || ""),
+1030:    lastApiStage: String(startupRuntimeState.lastApiStage || ""),
+1032:    accessKeyBypass: Boolean(startupDiagnostics?.requestAuth?.accessKeyBypass),
+1038:  const panel = $("startupTracePanel");
+1039:  const meta = $("startupTraceMeta");
+1040:  const body = $("startupTraceBody");
+1041:  const unlockBar = $("startupUnlockBar");
+1042:  const unlockText = $("startupUnlockText");
+1044:  const showUnlockBar = Boolean(startupRuntimeState.unlockVisible || startupRuntimeState.unlocked);
+1084:      : "No startup events recorded yet.";
+1094:    unlockText.textContent = startupRuntimeState.unlocked
+1107:    !startupRuntimeState.unlocked &&
+1108:    !startupRuntimeState.unlockVisible
+1117:    currentProject: startupRuntimeState.currentProject || state.context.currentProject || "",
+1118:    currentToken: startupRuntimeState.currentToken || "",
+1119:    payloadSuccess: Boolean(startupRuntimeState.projectPayloadSuccess),
+1120:    payloadSuccessAt: String(startupRuntimeState.payloadSuccessAt || ""),
+1121:    hideLoadingCalled: Boolean(startupRuntimeState.hideLoadingCalled),
+1122:    hideLoadingReason: String(startupRuntimeState.hideLoadingReason || ""),
+1123:    hideLoadingAt: String(startupRuntimeState.hideLoadingAt || ""),
+1124:    unlocked: Boolean(startupRuntimeState.unlocked),
+1125:    unlockReason: String(startupRuntimeState.unlockReason || ""),
+1126:    unlockAt: String(startupRuntimeState.unlockAt || ""),
+1127:    lastApiStage: String(startupRuntimeState.lastApiStage || ""),
+1128:    lastApiMessage: String(startupRuntimeState.lastApiMessage || ""),
+1129:    lastApiEndpoint: String(startupRuntimeState.lastApiEndpoint || ""),
+1131:    accessKeyBypass: Boolean(startupDiagnostics?.requestAuth?.accessKeyBypass),
+1139:  renderStartupRuntimeTrace(payload);
+1153:  runtimeTracePersistTimer = window.setTimeout(() => {
+1168:    const raw = window.localStorage?.getItem(LAST_CLICK_STORAGE_KEY) || "";
+1196:  if (typeof document === "undefined" || window.__mhControlCenterClickDiagnosticInstalled) {
+1200:  document.addEventListener("click", (event) => {
+1222:      renderStartupRuntimeTrace();
+1226:  window.__mhControlCenterClickDiagnosticInstalled = true;
+1231:  if (startupRuntimeState.unlockVisible === nextVisible) {
+1235:  startupRuntimeState.unlockVisible = nextVisible;
+1236:  recordRuntimeTrace(nextVisible ? "startup.unlock.available" : "startup.unlock.hidden", {
+1237:    detail: startupRuntimeState.currentProject || startupRuntimeState.currentToken || "startup"
+1243:    if (typeof window !== "undefined" && window.localStorage) {
+1244:      window.localStorage.setItem(key, value);
+1263:function renderStartupStepDiagnostics() {
+1264:  const latest = startupStepHistory[startupStepHistory.length - 1] || null;
+1267:  const banner = $("startupStepBanner");
+1279:    const lines = startupStepHistory.slice(-10).map((entry) => formatStepEntry(entry));
+1280:    stepsBox.textContent = lines.length ? lines.join("\n") : "No startup steps recorded yet.";
+1288:    startupStep: latest?.step || "",
+1289:    startupSteps: startupStepHistory.slice(-20),
+1299:    step: String(step || "startup.step"),
+1304:  boundedPush(startupStepHistory, entry, STARTUP_HISTORY_LIMIT);
+1305:  safeStorageSet(STARTUP_STEPS_STORAGE_KEY, JSON.stringify(startupStepHistory));
+1310:  renderStartupStepDiagnostics();
+1333:  renderStartupStepDiagnostics();
+1346:  const message = String(error?.message || error || "Unknown startup error").trim();
+1350:    source: String(source || "startup"),
+1357:    source: String(source || "startup"),
+1364:  startupDiagnostics.lastErrorSource = String(source || "startup");
+1365:  startupDiagnostics.lastErrorMessage = message;
+1366:  startupDiagnostics.requestAuth = {
+1373:  recordRuntimeTrace("startup.failure", {
+1374:    detail: `${String(source || "startup")}: ${message}`,
+1381:  const alreadyRecorded = startupDiagnostics.failedEndpoints.some((item) => item.endpoint === endpoint);
+1383:    startupDiagnostics.failedEndpoints.push({
+1392:function renderStartupDiagnosticsText(reason = "") {
+1397:  if (startupDiagnostics.lastErrorSource || startupDiagnostics.lastErrorMessage) {
+1399:      `Last error: ${startupDiagnostics.lastErrorSource || "startup"} - ` +
+1400:      `${startupDiagnostics.lastErrorMessage || "unknown"}`
+1403:  if (startupDiagnostics.failedEndpoints.length) {
+1404:    const endpointRow = startupDiagnostics.failedEndpoints
+1409:  if (startupStepHistory.length) {
+1410:    const recentSteps = startupStepHistory.slice(-6).map((entry) => formatStepEntry(entry)).join(" | ");
+1413:  const requestAuth = startupDiagnostics.requestAuth || {};
+1428:  recordStartupStep("forceHideLoadingOverlay.start", {
+1468:    project: startupRuntimeState.currentProject || getState().context.currentProject || "",
+1469:    token: startupRuntimeState.currentToken || activeProjectLoadToken || ""
+1472:  startupRuntimeState.unlocked = true;
+1473:  startupRuntimeState.unlockReason = reason;
+1474:  startupRuntimeState.unlockAt = payload.at;
+1475:  startupRuntimeState.unlockVisible = true;
+1477:  recordRuntimeTrace("startup.unlock", {
+1484:  recordStartupStep("manualUnlock.start", {
+1488:  startupRuntimeState.manualUnlockActive = reason === "manual-unlock";
+1489:  startupRuntimeState.manualUnlockToken = activeProjectLoadToken;
+1519:  renderStartupRuntimeTrace();
+1523:  ["startupUnlockBtn", "startupTraceUnlockBtn"].forEach((id) => {
+1530:    button.addEventListener("click", () => {
+1597:  showFatalErrorPanel(message, renderStartupDiagnosticsText("access-key-required"));
+1608:    retryBtn.addEventListener("click", () => {
+1609:      window.location.reload();
+1615:    accessKeyBtn.addEventListener("click", () => {
+1622:    clearSavedKeyReloadBtn.addEventListener("click", () => {
+1627:      window.location.reload();
+1643:    text.textContent = message || "Control Center failed to start.";
+1657:  const err = error instanceof Error ? error : new Error(String(error || "Unknown startup failure"));
+1658:  recordStartupStep("startup.fatal", {
+1659:    detail: `${String(source || "startup")}: ${String(err.message || "unknown error")}`
+1664:  hideLoading({ reason: "startup-fatal", force: true });
+1665:  setError(err.message || "Control Center initialization failed");
+1666:  showError(err.message || "Control Center initialization failed");
+1668:    "Control Center could not complete startup.",
+1669:    renderStartupDiagnosticsText(String(source || "startup"))
+1691:  globalLoadingWatchdogTimer = window.setInterval(() => {
+1692:    const startupAgeMs = startupRuntimeState.startupStartedAtMs
+1693:      ? Date.now() - startupRuntimeState.startupStartedAtMs
+1698:    const apiStageAgeMs = startupRuntimeState.lastApiStageAtMs
+1699:      ? Date.now() - startupRuntimeState.lastApiStageAtMs
+1702:      startupRuntimeState.lastApiStage === "response.text.start" ||
+1703:      startupRuntimeState.lastApiStage === "api.response.text.start" ||
+1704:      startupRuntimeState.lastApiStage === "api.response.text.timeout"
+1711:      !startupRuntimeState.responseTextWatchdogUnlocked
+1713:      startupRuntimeState.responseTextWatchdogUnlocked = true;
+1714:      startupRuntimeState.manualUnlockActive = true;
+1715:      startupRuntimeState.manualUnlockToken = activeProjectLoadToken;
+1716:      startupRuntimeState.projectPayloadSuccess = false;
+1717:      startupRuntimeState.payloadSuccessAt = "";
+1734:      void applyRequiredProjectFallback(startupRuntimeState.currentProject || DEFAULT_PROJECT_SLUG, activeProjectLoadToken);
+1737:    if (!startupRuntimeState.unlocked && startupAgeMs >= STARTUP_UNLOCK_TIMEOUT_MS) {
+1752:  if (typeof window === "undefined" || window.__mhControlCenterErrorGuardsInstalled) {
+1756:  window.addEventListener("mh:control-center-api-trace", (event) => {
+1759:    const traceStage = stage.startsWith("api.") ? stage : `api.${stage}`;
+1760:    startupRuntimeState.lastApiStage = String(detail.stage || "");
+1761:    startupRuntimeState.lastApiStageAtMs = Date.now();
+1762:    startupRuntimeState.lastApiMessage = String(detail.message || "");
+1763:    startupRuntimeState.lastApiEndpoint = String(detail.endpoint || "");
+1775:  window.__mhControlCenterErrorGuardsInstalled = true;
+1777:  window.addEventListener("error", (event) => {
+1778:    const startupPhase = !getState().initialized || isLoadingVisible();
+1779:    if (!startupPhase) return;
+1783:    handleStartupFatalError("window.error", err);
+1786:  window.addEventListener("unhandledrejection", (event) => {
+1787:    const startupPhase = !getState().initialized || isLoadingVisible();
+1788:    if (!startupPhase) return;
+1792:    handleStartupFatalError("window.unhandledrejection", err);
+1853:  if (typeof window === "undefined" || !window.localStorage) return;
+1856:    LEGACY_PROJECT_STORAGE_KEYS.forEach((key) => window.localStorage.removeItem(key));
+1861:  if (typeof window === "undefined" || !window.localStorage) return DEFAULT_PROJECT_SLUG;
+1865:      window.localStorage.getItem(PROJECT_STORAGE_KEY) ||
+1866:      LEGACY_PROJECT_STORAGE_KEYS.map((key) => window.localStorage.getItem(key)).find(Boolean) ||
+1872:      window.localStorage.removeItem(PROJECT_STORAGE_KEY);
+1884:  if (typeof window === "undefined" || !window.localStorage) return;
+1890:    window.localStorage.setItem(PROJECT_STORAGE_KEY, normalized);
+1928:function renderTopContext() {
+1950:function renderProjectSwitcher() {
+1996:function renderPlaceholders() {
+2065:function renderCurrentPage() {
+2069:  const routeDef = getRouteDefinition(currentRoute);
+2071:  if (typeof routeDef.render === "function") {
+2072:    const renderResult = routeDef.render({
+2078:      renderSimpleList,
+2079:      navigateTo,
+2119:    if (typeof renderResult === "function") {
+2120:      activeRouteCleanup = renderResult;
+2128:        navigateTo,
+2141:    navigateTo,
+2147:function renderGlobalUi() {
+2148:  renderProjectSwitcher();
+2149:  renderTopContext();
+2154:    await Promise.resolve(renderCurrentPage());
+2156:  } catch (renderError) {
+2157:    console.error(logLabel, renderError);
+2158:    setError(renderError.message || "Failed to render project page");
+2159:    showError(renderError.message || "Failed to render project page");
+2207:  recordRuntimeTrace("fetchProjectWithTimeout.request.start", {
+2232:        startupRuntimeState.lastApiStage === "response.text.start" ||
+2233:        startupRuntimeState.lastApiStage === "api.response.text.start" ||
+2234:        startupRuntimeState.lastApiStage === "api.response.text.timeout"
+2249:      error.endpoint = startupRuntimeState.lastApiEndpoint || "";
+2261:      const lastStage = String(startupRuntimeState.lastApiStage || "");
+2265:        lastStage === "api.response.parse.start"
+2290:      error.endpoint = startupRuntimeState.lastApiEndpoint || "";
+2309:    startupRuntimeState.projectPayloadSuccess = true;
+2310:    startupRuntimeState.payloadSuccessAt = new Date().toISOString();
+2473:  recordStartupStep("loadProjectData.requiredFallback.start", {
+2533:  renderGlobalUi();
+2543:  const startedAt = Number(loadStartedAtMs) || Date.now();
+2544:  const elapsedMs = Math.max(0, Date.now() - startedAt);
+2583:  recordStartupStep("loadProjectData.optional.start", {
+2650:    renderGlobalUi();
+2680:    renderProjectSwitcher();
+2688:    renderProjectSwitcher();
+2710:  startupRuntimeState.currentToken = loadToken;
+2711:  startupRuntimeState.currentProject = safeProjectName;
+2712:  startupRuntimeState.projectPayloadSuccess = false;
+2713:  startupRuntimeState.payloadSuccessAt = "";
+2714:  startupRuntimeState.hideLoadingCalled = false;
+2715:  startupRuntimeState.hideLoadingReason = "";
+2716:  startupRuntimeState.hideLoadingAt = "";
+2717:  startupRuntimeState.unlocked = false;
+2718:  startupRuntimeState.unlockReason = "";
+2719:  startupRuntimeState.unlockAt = "";
+2720:  startupRuntimeState.startupStartedAtMs = Date.now();
+2721:  startupRuntimeState.unlockVisible = false;
+2722:  startupRuntimeState.manualUnlockActive = false;
+2723:  startupRuntimeState.manualUnlockToken = "";
+2724:  startupRuntimeState.responseTextWatchdogUnlocked = false;
+2726:  recordStartupStep("loadProjectData.start", {
+2733:      recordStartupStep("loadProjectData.skip-stale-before-start", {
+2758:      reason: "required-load-start",
+2764:        recordStartupStep("loadProjectData.fetchProjectWithTimeout.start", {
+2800:      recordStartupStep("loadProjectData.payload.validate.start", {
+2812:        startupDiagnostics.requestAuth = {
+2821:      recordStartupStep("loadProjectData.applyPayload.start", {
+2835:      startupRuntimeState.projectPayloadSuccess = true;
+2836:      startupRuntimeState.payloadSuccessAt = new Date().toISOString();
+2850:      recordStartupStep("loadProjectData.renderGlobalUi.start", {
+2855:        renderGlobalUi();
+2856:      } catch (renderGlobalError) {
+2857:        recordStartupFailure("load-project-render-global-ui", renderGlobalError);
+2859:        forceHideLoadingOverlay("render-global-ui-error");
+2860:        const renderMessage = renderGlobalError?.message || "Failed to render global UI.";
+2861:        setError(renderMessage);
+2862:        showError(renderMessage);
+2863:        showFatalErrorPanel(renderMessage, renderStartupDiagnosticsText("renderGlobalUi"));
+2864:        recordStartupStep("loadProjectData.renderGlobalUi.error", {
+2866:          detail: String(renderMessage)
+2870:      recordStartupStep("loadProjectData.renderGlobalUi.done", {
+2875:      recordStartupStep("loadProjectData.safeRenderCurrentPage.start", {
+2880:        const rendered = await safeRenderCurrentPage();
+2881:        if (!rendered) {
+2882:          throw new Error("Failed to render current page.");
+2885:        recordStartupFailure("load-project-safe-render-current-page", pageRenderError);
+2887:        forceHideLoadingOverlay("safe-render-current-page-error");
+2888:        const renderMessage = pageRenderError?.message || "Failed to render current page.";
+2889:        setError(renderMessage);
+2890:        showError(renderMessage);
+2891:        showFatalErrorPanel(renderMessage, renderStartupDiagnosticsText("safeRenderCurrentPage"));
+2894:          detail: String(renderMessage)
+2914:        startupRuntimeState.manualUnlockActive = true;
+2915:        startupRuntimeState.manualUnlockToken = loadToken;
+2916:        startupRuntimeState.responseTextWatchdogUnlocked = true;
+2917:        startupRuntimeState.projectPayloadSuccess = false;
+2918:        startupRuntimeState.payloadSuccessAt = "";
+2950:        renderGlobalUi();
+2978:        renderStartupDiagnosticsText("load-project-data")
+2980:      renderGlobalUi();
+3017:   * The required startup payload renders the page first; optional sections
+3018:   * can be restored later with route-level lazy loading to avoid startup
+3019:   * render pressure.
+3058:  if (typeof document === "undefined" || window.__mhControlCenterDelegatedClickBound) {
+3091:      navigateTo("home");
+3099:        navigateTo("ai-command");
+3107:      navigateTo(targetRoute);
+3114:  document.addEventListener("click", (event) => {
+3129:      navigateTo(routeAttrAllowed);
+3153:  window.__mhControlCenterDelegatedClickBound = true;
+3157:  if (window.__mhRouteListenerBound) return;
+3158:  window.__mhRouteListenerBound = true;
+3181:    renderCurrentPage();
+3185:  // Back/Forward support — hashchange fires when the user navigates browser history
+3190:      navigateTo(route);
+3203:  select.addEventListener("change", async (event) => {
+3229:  if (window.__mhResponsiveUiBound) return;
+3230:window.__mhResponsiveUiBound = true;
+3242:    return window.innerWidth <= MOBILE_BREAKPOINT;
+3246:    return window.innerWidth <= MOBILE_COMPACT_BREAKPOINT;
+3375:  document.addEventListener("click", (event) => {
+3392:  document.addEventListener("keydown", (event) => {
+3513:    window.__MH_COMMAND_RUNTIME__?.getCommandRuntimeSnapshot || fallbackCommandRuntimeSnapshot;
+3543:  const startsWith = candidates.filter((item) => item.haystack.startsWith(query));
+3544:  const includes = candidates.filter((item) => !startsWith.includes(item) && item.haystack.includes(query));
+3545:  const matches = [...startsWith, ...includes];
+3553:    navigateTo(matches[0].route);
+3560:  navigateTo(top[0].route);
+3569:  const compact = window.innerWidth <= 768;
+3603:  navigateTo("ai-command");
+3605:  window.dispatchEvent(new CustomEvent("mh:submit-ai-command", {
+3642:  if (window.__mhCommandOutsideBound) return;
+3643:window.__mhCommandOutsideBound = true;
+3647:  document.addEventListener("click", (event) => {
+3661:  document.addEventListener("keydown", (event) => {
+3668:    commandBar.addEventListener("click", (event) => event.stopPropagation());
+3689:    commandInput.addEventListener("keydown", (event) => {
+3699:    searchInput.addEventListener("keydown", (event) => {
+3719:function initializeAiDock() {
+3720:  if (window.__mhAiDockBound) return;
+3721:window.__mhAiDockBound = true;
+3753:  closeBtn?.addEventListener("click", () => setOpen(false));
+3755:  document.addEventListener("click", (event) => {
+3761:  document.addEventListener("keydown", (event) => {
+3766:    button.addEventListener("click", () => {
+3781:    button.addEventListener("click", () => {
+3784:      navigateTo(route);
+3792:    const route = window.location.hash.replace(/^#/, "") || "home";
+3949:    modal.addEventListener("click", (event) => {
+3953:    modal.querySelector("#executiveNewCloseBtn")?.addEventListener("click", hideExecutiveNewLauncher);
+3964:    modal.querySelector("[data-new-project-cancel]")?.addEventListener("click", () => {
+3969:    projectForm?.addEventListener("submit", async (event) => {
+4002:        navigateTo("setup");
+4011:      button.addEventListener("click", () => {
+4028:        navigateTo(route);
+4046:  if (window.__executiveNewKeyboardBound) return;
+4047:  window.__executiveNewKeyboardBound = true;
+4049:  document.addEventListener("keydown", (event) => {
+4070:      navigateTo("ai-command");
+4102:async function init() {
+4104:    startupRuntimeState.startupStartedAtMs = Date.now();
+4105:    recordStartupStep("init.start");
+4113:    initRouter();
+4115:    const startRoute = (location.hash.slice(1) || "home").trim();
+4116:    setCurrentRoute(startRoute || "home");
+4122:    initializeAiDock();
+4132:      window.__MH_DEV_MODE__ === true ||
+4139:    recordStartupStep("init.initial-render");
+4140:    renderGlobalUi();
+4141:    renderCurrentPage();
+4143:    recordStartupStep("init.loadProjects.start");
+4150:        window.setTimeout(() => resolve(""), INIT_LOAD_PROJECTS_TIMEOUT_MS);
+4155:      recordStartupStep("init.loadProjects.success", { detail: preferredProject || DEFAULT_PROJECT_SLUG });
+4157:      recordStartupStep("init.loadProjects.timeout", { detail: `${INIT_LOAD_PROJECTS_TIMEOUT_MS}ms` });
+4161:    recordStartupStep("init.loadProjectData.start", { detail: preferredProject || DEFAULT_PROJECT_SLUG });
+4163:    recordStartupStep("init.loadProjectData.success", { detail: preferredProject || DEFAULT_PROJECT_SLUG });
+4166:    startupRuntimeState.initialized = true;
+4167:    startupRuntimeState.initReadyAt = new Date().toISOString();
+4169:    window.__mhControlCenterStarted = true;
+4170:    recordStartupStep("init.ready");
+4176:    handleStartupFatalError("init", error);
+4196:    route !== window.__mhLastGlobalUiRoute ||
+4197:    project !== window.__mhLastGlobalUiProject ||
+4198:    (!isEditingFormField && state.loading !== window.__mhLastGlobalUiLoading) ||
+4199:    (!isEditingFormField && state.error !== window.__mhLastGlobalUiError)
+4201:    renderGlobalUi();
+4204:  window.__mhLastGlobalUiRoute = route;
+4205:  window.__mhLastGlobalUiProject = project;
+4206:  window.__mhLastGlobalUiLoading = state.loading;
+4207:  window.__mhLastGlobalUiError = state.error;
+4214:window.addEventListener("DOMContentLoaded", init);
+
+### index.html script/css load order
+8:  <link rel="stylesheet" href="./styles/00-tokens.css?v=20260508-tokens-1">
+9:  <link rel="stylesheet" href="./styles/01-reset.css?v=20260508-reset-1">
+10:  <link rel="stylesheet" href="./styles/02-layer-system.css?v=20260510-loading-overlay-1">
+11:  <link rel="stylesheet" href="./styles/03-app-shell.css?v=20260508-shell-1">
+12:  <link rel="stylesheet" href="./styles/07-sidebar.css?v=20260508-sidebar-2">
+13:  <link rel="stylesheet" href="./styles/10-topbar-canonical.css?v=20260508-topbar-canonical-2">
+14:  <link rel="stylesheet" href="./styles/04-command-layer.css?v=20260508-command-1">
+15:  <link rel="stylesheet" href="./styles/05-ai-layer.css?v=20260508-ai-layer-1">
+16:  <link rel="stylesheet" href="./styles/08-components-foundation.css?v=20260508-components-1">
+17:  <link rel="stylesheet" href="./styles/mhos-action-primitives.css?v=20260523-action-primitives-1">
+18:  <link rel="stylesheet" href="./styles/09-operations-centers.css?v=20260511-task-center-layout-1">
+19:  <link rel="stylesheet" href="./styles/09-governance.css?v=20260623-governance-owner-1">
+20:  <link rel="stylesheet" href="./styles/12-pages.css?v=20260508-pages-1">
+21:  <link rel="stylesheet" href="./styles/13-home-executive.css?v=20260508-home-executive-1">
+22:  <link rel="stylesheet" href="./styles/14-page-standard.css?v=20260510-library-polish-1">
+23:  <link rel="stylesheet" href="./styles/15-clean-operating-layer.css?v=20260514-clean-layer-1">
+24:  <link rel="stylesheet" href="./styles/mhos-workflow-primitives.css?v=20260523-workflow-primitives-1">
+25:  <link rel="stylesheet" href="./styles/mhos-context-primitives.css?v=20260523-context-primitives-1">
+26:  <link rel="stylesheet" href="./styles/mhos-executive-surface-primitives.css?v=20260523-executive-surface-primitives-1">
+276:  <script>
+369:  <script src="./runtime/command-runtime.js?v=20260510-command-runtime-classic-2"></script>
+370:  <script type="module" src="./app.js?v=20260510-interaction-rerender-fix-2"></script>

@@ -1,0 +1,608 @@
+### CSS files
+public/control-center/design-system/DESIGN_SYSTEM_ROADMAP.md
+public/control-center/legacy/06-topbar.legacy.css
+public/control-center/legacy/09-command-legacy-isolation.legacy.css
+public/control-center/legacy/11-runtime-safety-overrides.legacy.css
+public/control-center/legacy/99-legacy-compat.legacy.css
+public/control-center/legacy/integrations.monolith-20260508.js
+public/control-center/legacy/page-standard.legacy-20260508.js
+public/control-center/legacy/styles.legacy-20260508.css
+public/control-center/legacy/styles.legacy-full.css
+public/control-center/styles/00-tokens.css
+public/control-center/styles/01-reset.css
+public/control-center/styles/02-layer-system.css
+public/control-center/styles/03-app-shell.css
+public/control-center/styles/04-command-layer.css
+public/control-center/styles/05-ai-layer.css
+public/control-center/styles/07-sidebar.css
+public/control-center/styles/08-components-foundation.css
+public/control-center/styles/09-governance.css
+public/control-center/styles/09-operations-centers.css
+public/control-center/styles/10-topbar-canonical.css
+public/control-center/styles/12-pages.css
+public/control-center/styles/13-home-executive.css
+public/control-center/styles/14-page-standard.css
+public/control-center/styles/15-clean-operating-layer.css
+public/control-center/styles/integrations/cards.css
+public/control-center/styles/integrations/drawer.css
+public/control-center/styles/integrations/forms.css
+public/control-center/styles/integrations/grid.css
+public/control-center/styles/integrations/layout.css
+public/control-center/styles/integrations/responsive.css
+public/control-center/styles/mhos-action-primitives.css
+public/control-center/styles/mhos-context-primitives.css
+public/control-center/styles/mhos-executive-surface-primitives.css
+public/control-center/styles/mhos-workflow-primitives.css
+
+### class usage / page shell hints
+public/control-center/constants.js:3:export const CONTROL_ACCESS_KEY_STORAGE_KEY = "mh-control-write-key";
+public/control-center/constants.js:7:  "mh-control-center-write-key",
+public/control-center/constants.js:8:  "mh-control-center-read-key",
+public/control-center/constants.js:9:  "mh-control-read-key",
+public/control-center/constants.js:10:  "mh-control-key",
+public/control-center/constants.js:11:  "mh-control-center-key",
+public/control-center/ai-team-model.js:19:    primaryPages: ["home", "campaign-studio", "ai-command"],
+public/control-center/ai-team-model.js:28:    primaryPages: ["content-studio", "campaign-studio", "ai-command"],
+public/control-center/ai-team-model.js:55:    primaryPages: ["publishing", "queue-center", "ai-command"],
+public/control-center/ai-team-model.js:102:    defaultPrompt: "Act as Operations Lead. Convert priorities into executable steps with owners, queues, and next workspace."
+public/control-center/ai-team-model.js:111:  "ai-command": ["operations_lead", "strategist"],
+public/control-center/ui/page-standard.js:8:  "ai-command",
+public/control-center/ui/page-standard.js:25:    primary: { label: "Open AI Workspace", route: "ai-command" },
+public/control-center/ui/page-standard.js:49:  "ai-command": {
+public/control-center/ui/page-standard.js:102:    primary: { label: "Generate Recommendations", route: "ai-command" },
+public/control-center/ui/page-standard.js:313:    "ai-command": "Run a structured task for the highest-risk blocker.",
+public/control-center/ui/page-standard.js:365:    context.navigateTo?.("ai-command");
+public/control-center/ui/page-standard.js:387:    context.showMessage?.("Open the main workspace and select a record before using this action.");
+public/control-center/ui/page-standard.js:397:  const existing = page.querySelector(".std-page-shell");
+public/control-center/ui/page-standard.js:406:  const shell = document.createElement("div");
+public/control-center/ui/page-standard.js:407:  shell.className = "std-page-shell std-page-shell-compact";
+public/control-center/ui/page-standard.js:408:  shell.innerHTML = `
+public/control-center/ui/page-standard.js:409:    <section id="stdContextRibbon" class="std-context-ribbon" data-ui-role="page-context-ribbon">
+public/control-center/ui/page-standard.js:410:      <div class="std-context-main">
+public/control-center/ui/page-standard.js:411:        <div class="std-context-line">
+public/control-center/ui/page-standard.js:412:          <span id="stdPageEyebrow" class="std-context-eyebrow">Control Center</span>
+public/control-center/ui/page-standard.js:413:          <h2 id="stdPageTitle" class="std-context-title">Dashboard</h2>
+public/control-center/ui/page-standard.js:415:        <p id="stdPageDescription" class="std-context-description">Route overview</p>
+public/control-center/ui/page-standard.js:416:        <div id="stdContextMetrics" class="std-context-metrics" aria-label="Page context metrics"></div>
+public/control-center/ui/page-standard.js:419:      <div class="std-context-actions" id="stdHeaderActions">
+public/control-center/ui/page-standard.js:420:        <button type="button" class="btn btn-secondary std-context-btn" id="stdSecondaryAction">Secondary</button>
+public/control-center/ui/page-standard.js:421:        <button type="button" class="btn btn-primary std-context-btn" id="stdPrimaryAction">Primary</button>
+public/control-center/ui/page-standard.js:422:        <button type="button" class="btn btn-ghost std-context-btn" id="stdAskAiAction">Ask AI</button>
+public/control-center/ui/page-standard.js:426:    <section id="stdSmartStrip" class="std-smart-strip std-smart-strip-compact" data-ui-role="smart-strip">
+public/control-center/ui/page-standard.js:427:      <div class="std-smart-strip-copy">
+public/control-center/ui/page-standard.js:428:        <span class="card-label">Smart Next Action</span>
+public/control-center/ui/page-standard.js:430:        <p id="stdSmartStripReason" class="page-subtitle"></p>
+public/control-center/ui/page-standard.js:432:      <button type="button" class="btn btn-secondary" id="stdSmartStripBtn">Open AI Workspace</button>
+public/control-center/ui/page-standard.js:435:    <div id="stdMainContentSlot" class="std-main-content-slot"></div>
+public/control-center/ui/page-standard.js:439:  page.appendChild(shell);
+public/control-center/ui/page-standard.js:441:  const slot = shell.querySelector("#stdMainContentSlot");
+public/control-center/ui/page-standard.js:444:  return shell;
+public/control-center/ui/page-standard.js:462:      <span class="std-context-chip is-${esc(chip.tone)}">
+public/control-center/ui/page-standard.js:485:  context.navigateTo?.("ai-command");
+public/control-center/ui/page-standard.js:516:  const shell = ensureShell(page);
+public/control-center/ui/page-standard.js:521:  const eyebrow = shell.querySelector("#stdPageEyebrow");
+public/control-center/ui/page-standard.js:522:  const title = shell.querySelector("#stdPageTitle");
+public/control-center/ui/page-standard.js:523:  const description = shell.querySelector("#stdPageDescription");
+public/control-center/ui/page-standard.js:524:  const smartTitle = shell.querySelector("#stdSmartStripTitle");
+public/control-center/ui/page-standard.js:525:  const smartReason = shell.querySelector("#stdSmartStripReason");
+public/control-center/ui/page-standard.js:537:  renderContextMetrics(shell.querySelector("#stdContextMetrics"), metrics);
+public/control-center/ui/page-standard.js:539:  bindButton(shell.querySelector("#stdPrimaryAction"), copy.primary, context);
+public/control-center/ui/page-standard.js:540:  bindButton(shell.querySelector("#stdSecondaryAction"), copy.secondary, context);
+public/control-center/ui/page-standard.js:542:  const askAiBtn = shell.querySelector("#stdAskAiAction");
+public/control-center/ui/page-standard.js:551:  const stripBtn = shell.querySelector("#stdSmartStripBtn");
+public/control-center/system-intelligence.js:192:      relatedPages: ["home", "integrations", "ai-command"]
+public/control-center/system-intelligence.js:224:      relatedPages: ["workflows", "ai-command", "publishing"]
+public/control-center/system-intelligence.js:272:      relatedPages: ["ai-command", "publishing"]
+public/control-center/system-intelligence.js:303:      relatedPages: ["ai-command", "workflows"]
+public/control-center/system-intelligence.js:333:      relatedPages: ["home", "workflows", "ai-command"]
+public/control-center/system-intelligence.js:386:    targetPage: "ai-command",
+public/control-center/system-intelligence.js:442:      targetPage: "ai-command",
+public/control-center/system-intelligence.js:453:      targetPage: "ai-command",
+public/control-center/system-intelligence.js:470:    targetPage: asString(candidate.targetPage || candidate.target_page) || "ai-command",
+public/control-center/index.html:11:  <link rel="stylesheet" href="./styles/03-app-shell.css?v=20260508-shell-1">
+public/control-center/index.html:14:  <link rel="stylesheet" href="./styles/04-command-layer.css?v=20260508-command-1">
+public/control-center/index.html:22:  <link rel="stylesheet" href="./styles/14-page-standard.css?v=20260510-library-polish-1">
+public/control-center/index.html:26:  <link rel="stylesheet" href="./styles/mhos-executive-surface-primitives.css?v=20260523-executive-surface-primitives-1">
+public/control-center/index.html:30:  <div id="app" class="app-shell">
+public/control-center/index.html:32:    <div id="sidebarBackdrop" class="sidebar-backdrop" aria-hidden="true" hidden></div>
+public/control-center/index.html:35:    <div id="globalMessage" class="global-message" role="status" aria-live="polite"></div>
+public/control-center/index.html:36:    <div id="globalError" class="global-error" role="alert" aria-live="assertive"></div>
+public/control-center/index.html:39:    <div id="startupStepBanner" class="startup-step-banner" role="status" aria-live="polite" hidden>
+public/control-center/index.html:45:      class="startup-unlock-bar"
+public/control-center/index.html:52:      <button id="startupUnlockBtn" class="btn btn-warning" type="button">Unlock UI</button>
+public/control-center/index.html:57:      class="startup-trace-panel"
+public/control-center/index.html:62:      <div class="startup-trace-head">
+public/control-center/index.html:64:        <button id="startupTraceUnlockBtn" class="btn btn-warning" type="button">Unlock UI</button>
+public/control-center/index.html:66:      <div id="startupTraceMeta" class="startup-trace-meta">Startup trace is idle.</div>
+public/control-center/index.html:67:      <div id="startupTraceBody" class="startup-trace-body">No startup events recorded yet.</div>
+public/control-center/index.html:72:      class="fatal-error-panel"
+public/control-center/index.html:80:      <div id="fatalErrorDetails" class="fatal-error-details">No diagnostics yet.</div>
+public/control-center/index.html:81:      <div id="fatalStartupSteps" class="fatal-startup-steps">No startup steps recorded yet.</div>
+public/control-center/index.html:82:      <div class="fatal-error-actions">
+public/control-center/index.html:83:        <button id="fatalRetryBtn" class="btn btn-primary" type="button">Retry</button>
+public/control-center/index.html:84:        <button id="fatalAccessKeyBtn" class="btn btn-secondary" type="button">Set Access Key</button>
+public/control-center/index.html:89:    <div id="loadingOverlay" class="loading-overlay" aria-hidden="true">
+public/control-center/index.html:90:      <div class="loading-card" role="status" aria-live="polite">
+public/control-center/index.html:91:        <div class="loading-spinner" aria-hidden="true"></div>
+public/control-center/index.html:93:        <p id="loadingText">Please wait while the system loads the workspace.</p>
+public/control-center/index.html:97:    <div class="os-layout">
+public/control-center/index.html:99:      <aside id="sidebarNav" class="sidebar" aria-label="Main navigation">
+public/control-center/index.html:100:        <div class="sidebar-brand">
+public/control-center/index.html:101:          <div class="brand-badge">AI OS</div>
+public/control-center/index.html:106:        <div class="sidebar-project">
+public/control-center/index.html:107:          <label for="projectSwitcher" class="sidebar-label">Current Project</label>
+public/control-center/index.html:108:          <select id="projectSwitcher" class="sidebar-select" aria-label="Current Project">
+public/control-center/index.html:113:        <nav class="sidebar-nav" aria-label="Primary navigation">
+public/control-center/index.html:114:          <div class="nav-group">
+public/control-center/index.html:115:            <div class="nav-group-title">Command</div>
+public/control-center/index.html:116:            <button class="nav-item is-active" data-route="home" data-page="home" type="button">Home</button>
+public/control-center/index.html:117:            <button class="nav-item" data-route="ai-command" data-page="ai-command" type="button">AI Command</button>
+public/control-center/index.html:120:          <div class="nav-group">
+public/control-center/index.html:121:            <div class="nav-group-title">Source &amp; Setup</div>
+public/control-center/index.html:122:            <button class="nav-item" data-route="setup" data-page="setup" type="button">Setup</button>
+public/control-center/index.html:123:            <button class="nav-item" data-route="library" data-page="library" type="button">Library</button>
+public/control-center/index.html:124:            <button class="nav-item" data-route="integrations" data-page="integrations" type="button">Integrations</button>
+public/control-center/index.html:127:          <div class="nav-group">
+public/control-center/index.html:128:            <div class="nav-group-title">Build</div>
+public/control-center/index.html:129:            <button class="nav-item" data-route="workflows" data-page="workflows" type="button">Workflows</button>
+public/control-center/index.html:130:            <button class="nav-item" data-route="campaign-studio" data-page="campaign-studio" type="button">Campaign Studio</button>
+public/control-center/index.html:131:            <button class="nav-item" data-route="content-studio" data-page="content-studio" type="button">Content Studio</button>
+public/control-center/index.html:132:            <button class="nav-item" data-route="media-studio" data-page="media-studio" type="button">Media Studio</button>
+public/control-center/index.html:135:          <div class="nav-group">
+public/control-center/index.html:136:            <div class="nav-group-title">Grow &amp; Intelligence</div>
+public/control-center/index.html:137:            <button class="nav-item" data-route="publishing" data-page="publishing" type="button">Publishing</button>
+public/control-center/index.html:138:            <button class="nav-item" data-route="ads-manager" data-page="ads-manager" type="button">Ads Manager</button>
+public/control-center/index.html:139:            <button class="nav-item" data-route="insights" data-page="insights" type="button">Insights</button>
+public/control-center/index.html:140:            <button class="nav-item" data-route="research" data-page="research" type="button">Research</button>
+public/control-center/index.html:143:          <div class="nav-group">
+public/control-center/index.html:144:            <div class="nav-group-title">Customers</div>
+public/control-center/index.html:145:            <button class="nav-item" data-route="customer-center" data-page="customer-center" type="button">Customer Center</button>
+public/control-center/index.html:148:          <div class="nav-group">
+public/control-center/index.html:149:            <div class="nav-group-title">Operations</div>
+public/control-center/index.html:150:            <button class="nav-item" data-route="operations-centers" data-page="operations-centers" type="button">Operations Overview</button>
+public/control-center/index.html:151:            <button class="nav-item" data-route="task-center" data-page="task-center" type="button">Task Center</button>
+public/control-center/index.html:152:            <button class="nav-item" data-route="queue-center" data-page="queue-center" type="button">Queue Center</button>
+public/control-center/index.html:153:            <button class="nav-item" data-route="job-monitor" data-page="job-monitor" type="button">Job Monitor</button>
+public/control-center/index.html:154:            <button class="nav-item" data-route="notification-center" data-page="notification-center" type="button">Notifications</button>
+public/control-center/index.html:157:          <div class="nav-group">
+public/control-center/index.html:158:            <div class="nav-group-title">Control</div>
+public/control-center/index.html:159:            <button class="nav-item" data-route="governance" data-page="governance" type="button">Governance</button>
+public/control-center/index.html:160:            <button class="nav-item" data-route="settings" data-page="settings" type="button">Settings</button>
+public/control-center/index.html:164:        <div class="sidebar-actions">
+public/control-center/index.html:165:          <button id="refreshAllBtn" class="btn btn-primary" data-action="refresh-project" type="button">
+public/control-center/index.html:168:          <button id="openAiBtn" class="btn btn-secondary" data-action="open-ai-command" type="button">
+public/control-center/index.html:174:      <!-- Main shell -->
+public/control-center/index.html:175:      <div class="main-shell">
+public/control-center/index.html:177:        <header id="topbar" class="topbar" role="banner">
+public/control-center/index.html:180:            class="sidebar-toggle"
+public/control-center/index.html:189:          <div class="topbar-left">
+public/control-center/index.html:190:            <div class="page-context">
+public/control-center/index.html:191:              <span id="pageEyebrow" class="page-eyebrow">Start</span>
+public/control-center/index.html:192:              <h2 id="pageTitle" class="page-title">Home</h2>
+public/control-center/index.html:196:          <div class="topbar-right">
+public/control-center/index.html:197:            <div class="workspace-chip" aria-label="Current workspace">
+public/control-center/index.html:198:              <span class="workspace-dot"></span>
+public/control-center/index.html:202:            <div class="exec-action-cluster" aria-label="Executive actions">
+public/control-center/index.html:204:                id="commandToggleBtn"
+public/control-center/index.html:205:                class="btn btn-secondary command-toggle"
+public/control-center/index.html:207:                aria-label="Toggle command bar"
+public/control-center/index.html:215:                class="btn btn-primary exec-action-btn"
+public/control-center/index.html:222:                class="btn btn-secondary exec-action-btn"
+public/control-center/index.html:230:          <!-- Kept hidden; app.js/page-standard.js may update or read it -->
+public/control-center/index.html:231:          <p id="pageDescription" class="page-description" hidden></p>
+public/control-center/index.html:235:        <div id="commandBackdrop" class="command-backdrop" aria-hidden="true" hidden></div>
+public/control-center/index.html:237:        <section id="globalCommandBar" class="command-bar" aria-hidden="true" hidden aria-label="Global command bar">
+public/control-center/index.html:238:          <div class="command-bar-left">
+public/control-center/index.html:241:              class="command-input"
+public/control-center/index.html:249:          <div class="command-bar-center">
+public/control-center/index.html:252:              class="command-input"
+public/control-center/index.html:255:              aria-label="Quick command"
+public/control-center/index.html:260:          <div class="command-bar-right">
+public/control-center/index.html:261:            <button id="runSearchBtn" class="btn btn-secondary" data-action="search" type="button">Search</button>
+public/control-center/index.html:262:            <button id="runQuickCommandBtn" class="btn btn-primary" data-action="send-ai-command" type="button">Run</button>
+public/control-center/index.html:263:            <button id="newCampaignBtn" class="btn btn-secondary" data-action="open-campaign-studio" type="button">New Campaign</button>
+public/control-center/index.html:264:            <button id="scheduleBtn" class="btn btn-secondary" data-action="open-publishing" type="button">Schedule</button>
+public/control-center/index.html:269:        <main id="workspace" class="workspace page-container" role="main" aria-live="polite">
+public/control-center/index.html:270:          <div id="pageRoot" class="section"></div>
+public/control-center/index.html:329:              window.localStorage.setItem("mh-control-write-key", entered.trim());
+public/control-center/index.html:369:  <script src="./runtime/command-runtime.js?v=20260510-command-runtime-classic-2"></script>
+public/control-center/index.html:372:    <div id="aiDock" class="ai-dock">
+public/control-center/index.html:375:        class="ai-dock-toggle"
+public/control-center/index.html:380:        <span class="ai-dock-status-dot"></span>
+public/control-center/index.html:381:        <span class="ai-dock-label">MH Assistant</span>
+public/control-center/index.html:382:        <span class="ai-dock-state">Ready</span>
+public/control-center/index.html:387:        class="ai-dock-panel"
+public/control-center/index.html:390:        <header class="ai-dock-header">
+public/control-center/index.html:398:            class="ai-dock-close"
+public/control-center/index.html:406:        <div class="ai-dock-body">
+public/control-center/index.html:407:          <div class="ai-dock-section">
+public/control-center/index.html:408:            <span class="ai-dock-section-label">Suggested next step</span>
+public/control-center/index.html:411:              class="ai-dock-suggestion"
+public/control-center/index.html:413:              data-ai-suggestion="Review the current workspace and suggest the next best action."
+public/control-center/index.html:415:              Review current workspace
+public/control-center/index.html:419:              class="ai-dock-suggestion"
+public/control-center/index.html:427:              class="ai-dock-suggestion"
+public/control-center/index.html:435:          <div class="ai-dock-section">
+public/control-center/index.html:436:            <span class="ai-dock-section-label">Quick actions</span>
+public/control-center/index.html:438:            <div class="ai-dock-actions">
+public/control-center/index.html:439:              <button class="ai-dock-chip" data-ai-route="campaign-studio">
+public/control-center/index.html:443:              <button class="ai-dock-chip" data-ai-route="content-studio">
+public/control-center/index.html:447:              <button class="ai-dock-chip" data-ai-route="media-studio">
+public/control-center/index.html:451:              <button class="ai-dock-chip" data-ai-route="publishing">
+public/control-center/automation-engine.js:4:const AUTO_MODE_STORAGE_KEY = "mh-auto-mode-state-v1";
+public/control-center/automation-engine.js:251:    const targetPage = asString(rec?.targetPage || "ai-command");
+public/control-center/automation-engine.js:339:  const destination = asString(step?.targetPage || "ai-command");
+public/control-center/runtime/command-runtime.js:6:  - command lifecycle
+public/control-center/runtime/command-runtime.js:7:  - command overlay
+public/control-center/runtime/command-runtime.js:8:  - command accessibility
+public/control-center/runtime/command-runtime.js:9:  - command state transitions
+public/control-center/runtime/command-runtime.js:49:  commandBar = null,
+public/control-center/runtime/command-runtime.js:50:  commandBackdrop = null,
+public/control-center/runtime/command-runtime.js:58:    commandBar: {
+public/control-center/runtime/command-runtime.js:59:      exists: Boolean(commandBar),
+public/control-center/runtime/command-runtime.js:60:      hidden: Boolean(commandBar?.hidden),
+public/control-center/runtime/command-runtime.js:61:      ariaHidden: String(commandBar?.getAttribute?.("aria-hidden") || ""),
+public/control-center/runtime/command-runtime.js:62:      className: String(commandBar?.className || "")
+public/control-center/runtime/command-runtime.js:65:    commandBackdrop: {
+public/control-center/runtime/command-runtime.js:66:      exists: Boolean(commandBackdrop),
+public/control-center/runtime/command-runtime.js:67:      hidden: Boolean(commandBackdrop?.hidden),
+public/control-center/runtime/command-runtime.js:68:      ariaHidden: String(commandBackdrop?.getAttribute?.("aria-hidden") || ""),
+public/control-center/runtime/command-runtime.js:69:      className: String(commandBackdrop?.className || "")
+public/control-center/runtime/command-runtime.js:76:      className: String(aiDock?.className || ""),
+public/control-center/runtime/command-runtime.js:99:  - command-closed
+public/control-center/runtime/command-runtime.js:100:  - command-inline
+public/control-center/runtime/command-runtime.js:101:  - command-overlay
+public/control-center/runtime/command-runtime.js:102:  - command-transitioning
+public/control-center/runtime/RUNTIME_ROADMAP.md:8:- command runtime
+public/control-center/runtime/RUNTIME_ROADMAP.md:10:- responsive shell
+public/control-center/runtime/RUNTIME_ROADMAP.md:17:## shell-runtime.js
+public/control-center/runtime/RUNTIME_ROADMAP.md:19:- responsive shell
+public/control-center/runtime/RUNTIME_ROADMAP.md:21:- shell classes
+public/control-center/runtime/RUNTIME_ROADMAP.md:25:- modal lifecycle
+public/control-center/runtime/RUNTIME_ROADMAP.md:29:## command-runtime.js
+public/control-center/runtime/RUNTIME_ROADMAP.md:30:- command palette
+public/control-center/runtime/RUNTIME_ROADMAP.md:31:- AI command lifecycle
+public/control-center/runtime/RUNTIME_ROADMAP.md:33:- command accessibility
+public/control-center/runtime/lifecycle/README.md:51:const registry = createLifecycleRegistry('page-library');
+public/control-center/runtime/lifecycle/README.md:53:const registry = createLifecycleRegistry({ name: 'page-library', debug: true });
+public/control-center/runtime/lifecycle/README.md:152:const pageRegistry = createLifecycleRegistry('page-library');
+public/control-center/runtime/lifecycle/lifecycle-registry.js:12: *   const registry = createLifecycleRegistry('page-library');
+public/control-center/runtime/runtime-boundaries.js:2:  shell: "global-app-shell",
+public/control-center/runtime/runtime-boundaries.js:3:  workspace: "dynamic-workspace",
+public/control-center/runtime/runtime-boundaries.js:4:  command: "global-command-runtime",
+public/control-center/runtime/README.md:12:- command runtime is tightly coupled
+public/control-center/runtime/README.md:13:- shell state is distributed
+public/control-center/runtime/README.md:24:## command-runtime.js
+public/control-center/runtime/README.md:26:- command lifecycle
+public/control-center/runtime/README.md:27:- command overlay
+public/control-center/runtime/README.md:28:- command state
+public/control-center/runtime/README.md:30:- command accessibility
+public/control-center/runtime/README.md:31:- command focus management
+public/control-center/runtime/README.md:35:## shell-runtime.js
+public/control-center/runtime/README.md:38:- shell state
+public/control-center/runtime/README.md:39:- responsive shell behavior
+public/control-center/runtime/README.md:40:- mobile shell classes
+public/control-center/runtime/README.md:65:- workspace context rendering
+public/control-center/runtime/README.md:68:NO shell runtime ownership.
+public/control-center/runtime/ai-backend-connector.js:7:  async call(command, payload) {
+public/control-center/runtime/ai-backend-connector.js:15:        command,
+public/control-center/runtime/authority/route-role-fallback.js:17:  "ai-command": ACTIVE_ROUTE_ROLES,
+public/control-center/runtime/overlay/OVERLAY_RUNTIME_PLAN.md:9:- command backdrops
+public/control-center/runtime/overlay/OVERLAY_RUNTIME_PLAN.md:13:- modal coordination
+public/control-center/runtime/overlay/OVERLAY_RUNTIME_PLAN.md:37:- styles/04-command-layer.css
+public/control-center/runtime/overlay/OVERLAY_RUNTIME_PLAN.md:39:- runtime/command-runtime.js
+public/control-center/runtime/overlay/OVERLAY_RUNTIME_PLAN.md:44:- legacy/09-command-legacy-isolation.legacy.css
+public/control-center/runtime/overlay/OVERLAY_RUNTIME_PLAN.md:80:Safe stabilization before shell modernization.
+public/control-center/runtime/overlay/overlay-runtime.js:56:    className: String(element.className || ""),
+public/control-center/runtime/mh-runtime-globals.js:1:// public/control-center/runtime/mh-runtime-globals.js
+public/control-center/runtime/mh-runtime-globals.js:61:  w.__mhCommand = function(command) {
+public/control-center/runtime/mh-runtime-globals.js:62:    return record("FRONTEND_COMMAND_CAPTURED", { command });
+public/control-center/legacy/11-runtime-safety-overrides.legacy.css:12:  .command-backdrop[aria-hidden="true"],
+public/control-center/legacy/11-runtime-safety-overrides.legacy.css:13:  .app-shell:not(.is-command-open):not(.is-mobile-command-open) .command-backdrop,
+public/control-center/legacy/page-standard.legacy-20260508.js:8:  "ai-command",
+public/control-center/legacy/page-standard.legacy-20260508.js:25:    primary: { label: "Open AI Workspace", route: "ai-command" },
+public/control-center/legacy/page-standard.legacy-20260508.js:49:  "ai-command": {
+public/control-center/legacy/page-standard.legacy-20260508.js:59:    description: "Run repeatable workflows, build custom workflows with AI, and route outputs into the next workspace.",
+public/control-center/legacy/page-standard.legacy-20260508.js:102:    primary: { label: "Generate Recommendations", route: "ai-command" },
+public/control-center/legacy/page-standard.legacy-20260508.js:131:  "ai-command": { previous: "Insights", next: "Workflows" },
+public/control-center/legacy/page-standard.legacy-20260508.js:142:    { label: "Ask executive AI", description: "Turn system state into a short action plan.", route: "ai-command" }
+public/control-center/legacy/page-standard.legacy-20260508.js:162:  "ai-command": [
+public/control-center/legacy/page-standard.legacy-20260508.js:166:    { label: "Run structured task", description: "Use the command composer for repeatable AI output.", action: "focus-ai-send" }
+public/control-center/legacy/page-standard.legacy-20260508.js:172:    { label: "Send output forward", description: "Route the latest workflow result into the owning workspace.", action: "focus-workflow-route" }
+public/control-center/legacy/page-standard.legacy-20260508.js:205:    { label: "Generate recommendations", description: "Turn performance signals into priorities.", route: "ai-command" },
+public/control-center/legacy/page-standard.legacy-20260508.js:206:    { label: "Record feedback", description: "Preserve what worked and what failed in learning memory.", route: "ai-command" },
+public/control-center/legacy/page-standard.legacy-20260508.js:257:  "ai-command": {
+public/control-center/legacy/page-standard.legacy-20260508.js:505:  const aiCommands = asArray(ops.ai_commands?.items);
+public/control-center/legacy/page-standard.legacy-20260508.js:563:    aiCommandsTotal: asNumber(ops.ai_commands?.total, aiCommands.length),
+public/control-center/legacy/page-standard.legacy-20260508.js:564:    aiCommandsCompleted: asNumber(ops.ai_commands?.completed_count, countByStatus(aiCommands, ["completed"])),
+public/control-center/legacy/page-standard.legacy-20260508.js:588:function card(label, value, description, status = "neutral") {
+public/control-center/legacy/page-standard.legacy-20260508.js:593:  const cards = {
+public/control-center/legacy/page-standard.legacy-20260508.js:595:      card("System health", pct(m.systemScore), "Readiness and connector coverage combined into an executive signal.", tone(m.systemScore)),
+public/control-center/legacy/page-standard.legacy-20260508.js:596:      card("Automation", m.failed ? "Needs attention" : m.scheduled ? "Active" : "Idle", "Execution and scheduler state across active work.", m.failed ? "danger" : m.scheduled ? "success" : "warning"),
+public/control-center/legacy/page-standard.legacy-20260508.js:597:      card("AI team", `${m.aiCommandsTotal} commands`, "Role-aware AI work and generated artifacts available to route.", m.aiCommandsTotal ? "success" : "neutral"),
+public/control-center/legacy/page-standard.legacy-20260508.js:598:      card("Critical blockers", String(m.criticalAlerts + m.failed + m.missingAssets.length), "Alerts, failed jobs, and missing launch inputs.", m.criticalAlerts + m.failed + m.missingAssets.length ? "warning" : "success")
+public/control-center/legacy/page-standard.legacy-20260508.js:601:      card("Setup completion", pct(m.projectReadiness), "Brand, market, language, audience, and goal readiness.", tone(m.projectReadiness)),
+public/control-center/legacy/page-standard.legacy-20260508.js:602:      card("Missing fields", String(m.setupMissingCount), "Required baseline inputs that still need attention.", m.setupMissingCount ? "warning" : "success"),
+public/control-center/legacy/page-standard.legacy-20260508.js:603:      card("Brand profile", m.hasBrandProfile ? "Ready" : "Needs input", "Positioning and brand context used by downstream AI.", m.hasBrandProfile ? "success" : "warning"),
+public/control-center/legacy/page-standard.legacy-20260508.js:604:      card("Market / language", `${m.market} / ${m.language}`, "Localization context for copy, campaigns, and publishing.", m.market !== "Not set" && m.language !== "Not set" ? "success" : "warning"),
+public/control-center/legacy/page-standard.legacy-20260508.js:605:      card("Currency", m.currency, "Commercial context for offers, ads, and campaign planning.", m.currency !== "Not set" ? "success" : "neutral")
+public/control-center/legacy/page-standard.legacy-20260508.js:608:      card("Total assets", String(m.assetsTotal), "Files registered for brand, product, content, media, and publishing.", m.assetsTotal ? "success" : "warning"),
+public/control-center/legacy/page-standard.legacy-20260508.js:609:      card("Required assets", `${m.readyAssetCount}/${m.requiredAssets || 0}`, "Required categories covered by uploaded or approved assets.", m.missingAssets.length ? "warning" : "success"),
+public/control-center/legacy/page-standard.legacy-20260508.js:610:      card("Missing assets", String(m.missingAssets.length), "Files needed before campaigns can move cleanly to execution.", m.missingAssets.length ? "danger" : "success"),
+public/control-center/legacy/page-standard.legacy-20260508.js:611:      card("Source of truth", String(m.sourceOfTruthAssets), "Assets marked as authoritative for AI and production workflows.", m.sourceOfTruthAssets ? "success" : "warning")
+public/control-center/legacy/page-standard.legacy-20260508.js:614:      card("Connected platforms", `${m.connected}/${m.totalChannels || 0}`, "Platforms currently available for data, sync, or execution.", m.connected ? "success" : "warning"),
+public/control-center/legacy/page-standard.legacy-20260508.js:615:      card("Missing platforms", String(Math.max(m.missingConnectors.length, m.totalChannels - m.connected)), "Connections still blocking automation or intelligence coverage.", m.missingConnectors.length ? "warning" : "success"),
+public/control-center/legacy/page-standard.legacy-20260508.js:616:      card("Failed connectors", String(m.failedConnectors.length), "Connectors that need reconnect, test, or credential review.", m.failedConnectors.length ? "danger" : "success"),
+public/control-center/legacy/page-standard.legacy-20260508.js:617:      card("Sync health", m.failed ? "At risk" : "Stable", "Recent execution and sync signals from connected systems.", m.failed ? "warning" : "success")
+public/control-center/legacy/page-standard.legacy-20260508.js:619:    "ai-command": [
+public/control-center/legacy/page-standard.legacy-20260508.js:620:      card("AI agents", String(Math.max(m.teamRoles, 8)), "Role-aware strategy, writing, media, paid, analyst, and operations agents.", "success"),
+public/control-center/legacy/page-standard.legacy-20260508.js:621:      card("Recent commands", String(m.aiCommandsTotal), "Structured and freeform commands recorded by the OS.", m.aiCommandsTotal ? "success" : "neutral"),
+public/control-center/legacy/page-standard.legacy-20260508.js:622:      card("Artifacts", String(m.aiArtifacts), "Generated outputs ready to inspect or route into workspaces.", m.aiArtifacts ? "success" : "warning"),
+public/control-center/legacy/page-standard.legacy-20260508.js:623:      card("Recommendations", String(m.aiRecommendationsOpen || m.recommendations.length), "AI-suggested actions waiting for operator decision.", m.aiRecommendationsOpen || m.recommendations.length ? "warning" : "neutral")
+public/control-center/legacy/page-standard.legacy-20260508.js:626:      card("Workflow catalog", "Available", "Launch, content, campaign, ads, report, and research workflows.", "success"),
+public/control-center/legacy/page-standard.legacy-20260508.js:627:      card("Running workflows", String(m.workflowRunning), "Queued or active workflow runs.", m.workflowRunning ? "warning" : "neutral"),
+public/control-center/legacy/page-standard.legacy-20260508.js:628:      card("Completed workflows", String(m.workflowCompleted), "Workflow outputs available for routing.", m.workflowCompleted ? "success" : "neutral"),
+public/control-center/legacy/page-standard.legacy-20260508.js:629:      card("Failed workflows", String(m.workflowFailed), "Runs requiring diagnosis or retry.", m.workflowFailed ? "danger" : "success")
+public/control-center/legacy/page-standard.legacy-20260508.js:632:      card("Campaign pipeline", `${m.activeCampaignRecords}/${m.campaignsTotal}`, "Active campaigns compared with total saved campaign records.", m.activeCampaignRecords ? "success" : "warning"),
+public/control-center/legacy/page-standard.legacy-20260508.js:633:      card("Channel readiness", pct(m.connectorReadiness), "Connected channels and integrations available for launch.", tone(m.connectorReadiness)),
+public/control-center/legacy/page-standard.legacy-20260508.js:634:      card("Content readiness", String(m.contentApproved), "Approved, scheduled, or published content items.", m.contentApproved ? "success" : "warning"),
+public/control-center/legacy/page-standard.legacy-20260508.js:635:      card("Media readiness", String(m.mediaCompleted), "Completed visual production jobs available to campaigns.", m.mediaCompleted ? "success" : "warning"),
+public/control-center/legacy/page-standard.legacy-20260508.js:636:      card("Publishing readiness", String(m.publishingReady), "Jobs ready or scheduled for execution.", m.publishingReady ? "success" : "neutral")
+public/control-center/legacy/page-standard.legacy-20260508.js:639:      card("Drafts", String(m.contentDrafts), "Content records still in draft state.", m.contentDrafts ? "warning" : "neutral"),
+public/control-center/legacy/page-standard.legacy-20260508.js:640:      card("In review", String(m.contentReview), "Copy waiting for approval or changes.", m.contentReview ? "warning" : "success"),
+public/control-center/legacy/page-standard.legacy-20260508.js:641:      card("Approved content", String(m.contentApproved), "Items ready to route into publishing.", m.contentApproved ? "success" : "warning"),
+public/control-center/legacy/page-standard.legacy-20260508.js:642:      card("Platform copy", String(m.contentTotal), "Total copy records tracked by Content Studio.", m.contentTotal ? "success" : "neutral")
+public/control-center/legacy/page-standard.legacy-20260508.js:645:      card("Media jobs", String(m.mediaTotal), "Image, video, prompt, and storyboard work tracked by the OS.", m.mediaTotal ? "success" : "neutral"),
+public/control-center/legacy/page-standard.legacy-20260508.js:646:      card("Open jobs", String(m.mediaOpen), "Requested, queued, processing, or review-state media work.", m.mediaOpen ? "warning" : "success"),
+public/control-center/legacy/page-standard.legacy-20260508.js:647:      card("Generated assets", String(m.mediaCompleted), "Completed creative jobs available for campaigns or publishing.", m.mediaCompleted ? "success" : "warning"),
+public/control-center/legacy/page-standard.legacy-20260508.js:648:      card("Failed media", String(m.mediaFailed), "Creative jobs requiring revision or recovery.", m.mediaFailed ? "danger" : "success")
+public/control-center/legacy/page-standard.legacy-20260508.js:651:      card("Scheduler queue", String(m.scheduled + m.publishingReady), "Queued, ready, or scheduled publishing work.", m.scheduled + m.publishingReady ? "warning" : "neutral"),
+public/control-center/legacy/page-standard.legacy-20260508.js:652:      card("Manual publish ready", String(m.publishingReady), "Items ready for approval or manual release.", m.publishingReady ? "success" : "neutral"),
+public/control-center/legacy/page-standard.legacy-20260508.js:653:      card("Completed jobs", String(m.publishingCompleted), "Publishing executions completed recently.", m.publishingCompleted ? "success" : "neutral"),
+public/control-center/legacy/page-standard.legacy-20260508.js:654:      card("Failed / retryable", String(m.publishingFailed), "Jobs requiring retry, repair, or manual diagnosis.", m.publishingFailed ? "danger" : "success")
+public/control-center/legacy/page-standard.legacy-20260508.js:657:      card("Ad briefs", String(m.campaignsTotal), "Campaign records available for paid brief planning.", m.campaignsTotal ? "success" : "warning"),
+public/control-center/legacy/page-standard.legacy-20260508.js:658:      card("Ad variants", String(m.paidCampaigns), "Paid campaign or creative performance records available.", m.paidCampaigns ? "success" : "neutral"),
+public/control-center/legacy/page-standard.legacy-20260508.js:659:      card("Audience segments", m.market, "Market context available for audience planning.", m.market !== "Not set" ? "success" : "warning"),
+public/control-center/legacy/page-standard.legacy-20260508.js:660:      card("Tracking status", m.paidTrackingReady ? "Ready" : "Needs connection", "Paid and analytics data available for budget decisions.", m.paidTrackingReady ? "success" : "warning")
+public/control-center/legacy/page-standard.legacy-20260508.js:663:      card("Performance summary", String(m.recommendations.length), "Optimization recommendations generated from available data.", m.recommendations.length ? "success" : "warning"),
+public/control-center/legacy/page-standard.legacy-20260508.js:664:      card("Top channels", String(m.connected), "Connected sources that can contribute performance signals.", m.connected ? "success" : "warning"),
+public/control-center/legacy/page-standard.legacy-20260508.js:665:      card("Weak channels", String(m.missingConnectors.length + m.weakPaidCampaigns), "Missing or weak sources that limit optimization.", m.missingConnectors.length + m.weakPaidCampaigns ? "warning" : "success"),
+public/control-center/legacy/page-standard.legacy-20260508.js:666:      card("Learning memory", String(m.learningCount), "Reusable lessons captured for future campaign decisions.", m.learningCount ? "success" : "neutral")
+public/control-center/legacy/page-standard.legacy-20260508.js:669:      card("Competitors", String(m.researchFindings), "Saved or generated competitor and market artifacts.", m.researchFindings ? "success" : "neutral"),
+public/control-center/legacy/page-standard.legacy-20260508.js:670:      card("Trends", String(m.recommendations.length), "Opportunity and recommendation signals available for strategy.", m.recommendations.length ? "success" : "warning"),
+public/control-center/legacy/page-standard.legacy-20260508.js:671:      card("Keywords", m.market, "Market context used to create keyword opportunities.", m.market !== "Not set" ? "success" : "warning"),
+public/control-center/legacy/page-standard.legacy-20260508.js:672:      card("Saved findings", String(m.savedFindings), "Research handoffs preserved for downstream work.", m.savedFindings ? "success" : "neutral")
+public/control-center/legacy/page-standard.legacy-20260508.js:675:      card("Project settings", m.currentProject ? "Selected" : "No project", "The active project scope for configuration changes.", m.currentProject ? "success" : "warning"),
+public/control-center/legacy/page-standard.legacy-20260508.js:676:      card("AI settings", m.aiCommandsTotal ? "In use" : "Configurable", "AI command and automation behavior can be governed here.", "success"),
+public/control-center/legacy/page-standard.legacy-20260508.js:677:      card("Team roles", String(m.teamRoles), "Roles and route permissions available to the operating system.", m.teamRoles ? "success" : "warning"),
+public/control-center/legacy/page-standard.legacy-20260508.js:678:      card("Approval rules", m.approvalRulesReady ? "Configured" : "Default", "Publishing and claim-safety review policy state.", m.approvalRulesReady ? "success" : "warning"),
+public/control-center/legacy/page-standard.legacy-20260508.js:679:      card("Security status", titleize(m.securityStatus), "Backbone and configuration status for operational safety.", tone(m.securityStatus))
+public/control-center/legacy/page-standard.legacy-20260508.js:683:  return asArray(cards[route] || cards.home).slice(0, 5);
+public/control-center/legacy/page-standard.legacy-20260508.js:687:  const cards = {
+public/control-center/legacy/page-standard.legacy-20260508.js:689:      card("Ready", m.projectReadiness >= 80 ? "Ready" : "Not yet", "Setup can support downstream workflows once required inputs are complete.", tone(m.projectReadiness)),
+public/control-center/legacy/page-standard.legacy-20260508.js:690:      card("Missing", String(m.setupMissingCount), "Fields or validation items still blocking confidence.", m.setupMissingCount ? "warning" : "success"),
+public/control-center/legacy/page-standard.legacy-20260508.js:691:      card("Next step", m.setupMissingCount ? "Fill gaps" : "Continue to Library", "Recommended setup progression.", m.setupMissingCount ? "warning" : "success")
+public/control-center/legacy/page-standard.legacy-20260508.js:694:      card("Ready", m.missingAssets.length ? "Incomplete" : "Ready", "Required asset categories for production and publishing.", m.missingAssets.length ? "warning" : "success"),
+public/control-center/legacy/page-standard.legacy-20260508.js:695:      card("Missing", String(m.missingAssets.length), "Required asset types still absent or needing review.", m.missingAssets.length ? "danger" : "success"),
+public/control-center/legacy/page-standard.legacy-20260508.js:696:      card("Next step", m.missingAssets.length ? "Upload required asset" : "Route to Campaign Studio", "Asset workflow continuation.", m.missingAssets.length ? "warning" : "success")
+public/control-center/legacy/page-standard.legacy-20260508.js:699:      card("Ready", m.connected ? "Partially ready" : "Needs connection", "Availability of connected platforms.", m.connected ? "success" : "warning"),
+public/control-center/legacy/page-standard.legacy-20260508.js:700:      card("Failed", String(m.failedConnectors.length), "Connectors requiring diagnosis.", m.failedConnectors.length ? "danger" : "success"),
+public/control-center/legacy/page-standard.legacy-20260508.js:701:      card("Next step", m.missingConnectors.length ? "Connect critical platform" : "Run sync", "Best connector action to improve intelligence.", m.missingConnectors.length ? "warning" : "success")
+public/control-center/legacy/page-standard.legacy-20260508.js:703:    "ai-command": [
+public/control-center/legacy/page-standard.legacy-20260508.js:704:      card("Ready", "Composer ready", "AI command composer and role mode are available.", "success"),
+public/control-center/legacy/page-standard.legacy-20260508.js:705:      card("Artifacts", String(m.aiArtifacts), "Generated outputs ready to open or route.", m.aiArtifacts ? "success" : "neutral"),
+public/control-center/legacy/page-standard.legacy-20260508.js:706:      card("Next step", m.recommendations.length ? "Run recommendation" : "Ask a role agent", "Best AI action for the current state.", m.recommendations.length ? "warning" : "success")
+public/control-center/legacy/page-standard.legacy-20260508.js:709:      card("Running", String(m.workflowRunning), "Queued or active workflow runs.", m.workflowRunning ? "warning" : "neutral"),
+public/control-center/legacy/page-standard.legacy-20260508.js:710:      card("Completed", String(m.workflowCompleted), "Finished workflow outputs.", m.workflowCompleted ? "success" : "neutral"),
+public/control-center/legacy/page-standard.legacy-20260508.js:711:      card("Failed", String(m.workflowFailed), "Runs that need retry or inspection.", m.workflowFailed ? "danger" : "success")
+public/control-center/legacy/page-standard.legacy-20260508.js:714:      card("Ready", m.projectReadiness >= 80 && !m.missingAssets.length ? "Ready" : "Needs inputs", "Campaign quality depends on setup, assets, and connector readiness.", m.projectReadiness >= 80 && !m.missingAssets.length ? "success" : "warning"),
+public/control-center/legacy/page-standard.legacy-20260508.js:715:      card("Needs attention", String(m.missingAssets.length + m.missingConnectors.length), "Asset or connector blockers before execution.", m.missingAssets.length + m.missingConnectors.length ? "warning" : "success"),
+public/control-center/legacy/page-standard.legacy-20260508.js:716:      card("Next step", "Build launch wave", "Prepare the campaign for content, media, paid, and publishing handoffs.", "success")
+public/control-center/legacy/page-standard.legacy-20260508.js:719:      card("Draft", String(m.contentDrafts), "Copy waiting for production work.", m.contentDrafts ? "warning" : "neutral"),
+public/control-center/legacy/page-standard.legacy-20260508.js:720:      card("Review", String(m.contentReview), "Content needing approval or revision.", m.contentReview ? "warning" : "success"),
+public/control-center/legacy/page-standard.legacy-20260508.js:721:      card("Next step", m.contentDrafts ? "Generate content" : "Send to Publishing", "Move copy toward approved execution.", m.contentDrafts ? "warning" : "success")
+public/control-center/legacy/page-standard.legacy-20260508.js:724:      card("Open", String(m.mediaOpen), "Media requests still active.", m.mediaOpen ? "warning" : "success"),
+public/control-center/legacy/page-standard.legacy-20260508.js:725:      card("Completed", String(m.mediaCompleted), "Assets ready for use.", m.mediaCompleted ? "success" : "neutral"),
+public/control-center/legacy/page-standard.legacy-20260508.js:726:      card("Next step", m.mediaOpen ? "Review active job" : "Generate media", "Keep creative production moving.", m.mediaOpen ? "warning" : "success")
+public/control-center/legacy/page-standard.legacy-20260508.js:729:      card("Due", String(m.scheduled), "Scheduled jobs waiting for execution.", m.scheduled ? "warning" : "neutral"),
+public/control-center/legacy/page-standard.legacy-20260508.js:730:      card("Failed", String(m.publishingFailed), "Jobs requiring retry or manual recovery.", m.publishingFailed ? "danger" : "success"),
+public/control-center/legacy/page-standard.legacy-20260508.js:731:      card("Worker state", m.publishingFailed ? "Recovery needed" : "Stable", "Execution readiness based on recent publishing state.", m.publishingFailed ? "danger" : "success")
+public/control-center/legacy/page-standard.legacy-20260508.js:734:      card("Paid readiness", m.paidTrackingReady ? "Ready" : "Needs tracking", "Paid planning quality depends on tracking and campaign context.", m.paidTrackingReady ? "success" : "warning"),
+public/control-center/legacy/page-standard.legacy-20260508.js:735:      card("Weak campaigns", String(m.weakPaidCampaigns), "Paid signals that need creative, audience, or budget changes.", m.weakPaidCampaigns ? "warning" : "success"),
+public/control-center/legacy/page-standard.legacy-20260508.js:736:      card("Next step", "Build ad brief", "Prepare variants and budget guidance for Campaign Studio.", "success")
+public/control-center/legacy/page-standard.legacy-20260508.js:739:      card("Ready", m.recommendations.length ? "Recommendations ready" : "Needs signal", "Insights are useful when data and learning memory exist.", m.recommendations.length ? "success" : "warning"),
+public/control-center/legacy/page-standard.legacy-20260508.js:740:      card("Risk alerts", String(m.criticalAlerts), "Critical intelligence or operational warnings.", m.criticalAlerts ? "danger" : "success"),
+public/control-center/legacy/page-standard.legacy-20260508.js:741:      card("Next step", m.recommendations.length ? "Convert to tasks" : "Connect data sources", "Best way to make insights actionable.", m.recommendations.length ? "success" : "warning")
+public/control-center/legacy/page-standard.legacy-20260508.js:744:      card("Saved findings", String(m.savedFindings), "Research routed into downstream work.", m.savedFindings ? "success" : "neutral"),
+public/control-center/legacy/page-standard.legacy-20260508.js:745:      card("Opportunities", String(m.recommendations.length), "Strategy opportunities available from current intelligence.", m.recommendations.length ? "success" : "warning"),
+public/control-center/legacy/page-standard.legacy-20260508.js:746:      card("Next step", "Send insight to Campaign", "Turn market intelligence into positioning or campaign structure.", "success")
+public/control-center/legacy/page-standard.legacy-20260508.js:749:      card("Ready", m.currentProject ? "Project selected" : "Select project", "Settings are scoped to the active project.", m.currentProject ? "success" : "warning"),
+public/control-center/legacy/page-standard.legacy-20260508.js:750:      card("Needs attention", String(m.approvalsPending), "Pending approvals that may affect policy and publishing.", m.approvalsPending ? "warning" : "success"),
+public/control-center/legacy/page-standard.legacy-20260508.js:751:      card("Next step", "Save configuration", "Persist the safest operating posture before execution.", "success")
+public/control-center/legacy/page-standard.legacy-20260508.js:755:  return asArray(cards[route] || [
+public/control-center/legacy/page-standard.legacy-20260508.js:756:    card("Ready", m.systemScore >= 80 ? "Ready" : "Needs attention", "Current route readiness.", tone(m.systemScore)),
+public/control-center/legacy/page-standard.legacy-20260508.js:757:    card("Needs attention", String(m.criticalAlerts + m.failed), "Critical alerts and execution failures.", m.criticalAlerts + m.failed ? "warning" : "success"),
+public/control-center/legacy/page-standard.legacy-20260508.js:758:    card("Next step", firstText([m.recommendations[0]], "Open AI Workspace for guidance"), "Recommended operating move.", m.recommendations.length ? "warning" : "neutral")
+public/control-center/legacy/page-standard.legacy-20260508.js:768:    "ai-command": "Run a structured task for the highest-risk blocker and route the artifact.",
+public/control-center/legacy/page-standard.legacy-20260508.js:784:  const existing = page.querySelector(".std-page-shell");
+public/control-center/legacy/page-standard.legacy-20260508.js:788:  const shell = document.createElement("div");
+public/control-center/legacy/page-standard.legacy-20260508.js:789:  shell.className = "std-page-shell";
+public/control-center/legacy/page-standard.legacy-20260508.js:790:  shell.innerHTML = `
+public/control-center/legacy/page-standard.legacy-20260508.js:791:    <section class="std-page-header" data-ui-role="page-header">
+public/control-center/legacy/page-standard.legacy-20260508.js:792:      <div class="std-page-header-copy">
+public/control-center/legacy/page-standard.legacy-20260508.js:793:        <p class="page-subtitle std-page-eyebrow" id="stdPageEyebrow">Control Center</p>
+public/control-center/legacy/page-standard.legacy-20260508.js:794:        <h2 class="page-title" id="stdPageTitle">Dashboard</h2>
+public/control-center/legacy/page-standard.legacy-20260508.js:795:        <p class="page-subtitle" id="stdPageDescription">Route overview</p>
+public/control-center/legacy/page-standard.legacy-20260508.js:797:      <div class="toolbar std-header-actions" id="stdHeaderActions">
+public/control-center/legacy/page-standard.legacy-20260508.js:798:        <button type="button" class="btn btn-secondary" id="stdSecondaryAction">Secondary</button>
+public/control-center/legacy/page-standard.legacy-20260508.js:799:        <button type="button" class="btn btn-primary" id="stdPrimaryAction">Primary</button>
+public/control-center/legacy/page-standard.legacy-20260508.js:803:    <section class="std-section-block" data-ui-role="page-power-summary">
+public/control-center/legacy/page-standard.legacy-20260508.js:804:      <div class="section-header">
+public/control-center/legacy/page-standard.legacy-20260508.js:806:          <p class="card-label">Page Power Summary</p>
+public/control-center/legacy/page-standard.legacy-20260508.js:809:        <span class="badge badge-success">Capabilities</span>
+public/control-center/legacy/page-standard.legacy-20260508.js:811:      <div class="kpi-grid" id="stdKpiGrid" data-ui-role="kpi-cards"></div>
+public/control-center/legacy/page-standard.legacy-20260508.js:814:    <section class="std-section-block" data-ui-role="current-status">
+public/control-center/legacy/page-standard.legacy-20260508.js:815:      <div class="section-header">
+public/control-center/legacy/page-standard.legacy-20260508.js:817:          <p class="card-label">Current Status</p>
+public/control-center/legacy/page-standard.legacy-20260508.js:820:        <span class="badge" id="stdStatusBadge">Live</span>
+public/control-center/legacy/page-standard.legacy-20260508.js:822:      <div class="dashboard-grid" id="stdStatusGrid" data-ui-role="status-cards"></div>
+public/control-center/legacy/page-standard.legacy-20260508.js:825:    <section class="std-main-grid" data-ui-role="main-dashboard">
+public/control-center/legacy/page-standard.legacy-20260508.js:826:      <section class="std-work-area" data-ui-role="main-work-area">
+public/control-center/legacy/page-standard.legacy-20260508.js:827:        <section class="std-smart-strip" id="stdSmartStrip" data-ui-role="smart-strip" hidden>
+public/control-center/legacy/page-standard.legacy-20260508.js:828:          <div class="std-smart-strip-copy">
+public/control-center/legacy/page-standard.legacy-20260508.js:829:            <span class="card-label">System Intelligence</span>
+public/control-center/legacy/page-standard.legacy-20260508.js:831:            <p id="stdSmartStripReason" class="page-subtitle"></p>
+public/control-center/legacy/page-standard.legacy-20260508.js:833:          <button type="button" class="btn btn-secondary" id="stdSmartStripBtn">Open</button>
+public/control-center/legacy/page-standard.legacy-20260508.js:835:        <div id="stdMainContentSlot" class="std-main-content-slot"></div>
+public/control-center/legacy/page-standard.legacy-20260508.js:838:      <aside class="std-main-right" data-ui-role="route-side-panels">
+public/control-center/legacy/page-standard.legacy-20260508.js:839:        <section class="card std-action-panel" data-ui-role="action-panel">
+public/control-center/legacy/page-standard.legacy-20260508.js:840:          <div class="section-header">
+public/control-center/legacy/page-standard.legacy-20260508.js:842:              <p class="card-label">Power Actions</p>
+public/control-center/legacy/page-standard.legacy-20260508.js:845:            <span class="badge">Actions</span>
+public/control-center/legacy/page-standard.legacy-20260508.js:847:          <div id="stdActionsList" class="std-actions-list"></div>
+public/control-center/legacy/page-standard.legacy-20260508.js:850:        <section class="card action-card" data-ui-role="smart-next-action">
+public/control-center/legacy/page-standard.legacy-20260508.js:851:          <div class="section-header">
+public/control-center/legacy/page-standard.legacy-20260508.js:853:              <p class="card-label">Smart Next Action</p>
+public/control-center/legacy/page-standard.legacy-20260508.js:856:            <span class="badge badge-warning">Priority</span>
+public/control-center/legacy/page-standard.legacy-20260508.js:858:          <p id="stdNextBestAction" class="page-subtitle"></p>
+public/control-center/legacy/page-standard.legacy-20260508.js:859:          <button type="button" class="btn btn-primary std-full-width" id="stdNextBestActionBtn">Send To AI Command</button>
+public/control-center/legacy/page-standard.legacy-20260508.js:862:        <section class="card ai-panel" data-ui-role="ai-panel">
+public/control-center/legacy/page-standard.legacy-20260508.js:863:          <div class="section-header">
+public/control-center/legacy/page-standard.legacy-20260508.js:865:              <p class="card-label">Contextual AI Agent</p>
+public/control-center/legacy/page-standard.legacy-20260508.js:868:            <span class="badge badge-success">AI</span>
+public/control-center/legacy/page-standard.legacy-20260508.js:870:          <p class="page-subtitle" id="stdAiDescription"></p>
+public/control-center/legacy/page-standard.legacy-20260508.js:871:          <div id="stdAiPrompts" class="std-ai-prompts"></div>
+public/control-center/legacy/page-standard.legacy-20260508.js:874:        <details class="card std-advanced-details" data-ui-role="advanced-details">
+public/control-center/legacy/page-standard.legacy-20260508.js:877:            <span class="badge">Advanced</span>
+public/control-center/legacy/page-standard.legacy-20260508.js:879:          <div id="stdAdvancedDetails" class="std-advanced-grid"></div>
+public/control-center/legacy/page-standard.legacy-20260508.js:886:  page.appendChild(shell);
+public/control-center/legacy/page-standard.legacy-20260508.js:888:  const slot = shell.querySelector("#stdMainContentSlot");
+public/control-center/legacy/page-standard.legacy-20260508.js:891:  return shell;
+public/control-center/legacy/page-standard.legacy-20260508.js:898:      <article class="metric-card std-power-card is-${esc(item.status)}">
+public/control-center/legacy/page-standard.legacy-20260508.js:899:        <p class="card-label">${esc(item.label)}</p>
+public/control-center/legacy/page-standard.legacy-20260508.js:900:        <p class="metric-value">${esc(item.value)}</p>
+public/control-center/legacy/page-standard.legacy-20260508.js:901:        <p class="card-description">${esc(item.description)}</p>
+public/control-center/legacy/page-standard.legacy-20260508.js:902:        <span class="badge badge-${esc(item.status)}">${esc(titleize(item.status))}</span>
+public/control-center/legacy/page-standard.legacy-20260508.js:912:      <article class="status-card is-${esc(item.status)}">
+public/control-center/legacy/page-standard.legacy-20260508.js:913:        <p class="card-label">${esc(item.label)}</p>
+public/control-center/legacy/page-standard.legacy-20260508.js:914:        <p class="metric-value">${esc(item.value)}</p>
+public/control-center/legacy/page-standard.legacy-20260508.js:915:        <p class="card-description">${esc(item.description)}</p>
+public/control-center/legacy/page-standard.legacy-20260508.js:916:        <span class="badge badge-${esc(item.status)}">${esc(titleize(item.status))}</span>
+public/control-center/legacy/page-standard.legacy-20260508.js:925:    { label: "Open AI Workspace", route: "ai-command" },
+public/control-center/legacy/page-standard.legacy-20260508.js:979:    context.navigateTo("ai-command");
+public/control-center/legacy/page-standard.legacy-20260508.js:1021:      <button type="button" class="quick-action-btn std-action-btn" data-std-action="${index}">
+public/control-center/legacy/page-standard.legacy-20260508.js:1022:        <span class="home-action-title">${esc(action.label)}</span>
+public/control-center/legacy/page-standard.legacy-20260508.js:1023:        <span class="home-action-meta">${esc(action.description)}</span>
+public/control-center/legacy/page-standard.legacy-20260508.js:1042:      <button type="button" class="btn btn-ghost std-ai-btn" data-std-ai-prompt="${index}">
+public/control-center/legacy/page-standard.legacy-20260508.js:1053:      context.navigateTo("ai-command");
+public/control-center/legacy/page-standard.legacy-20260508.js:1078:    "ai-command": [
+public/control-center/legacy/page-standard.legacy-20260508.js:1079:      { label: "Data used", value: "AI commands, artifacts, recommendations, learning memory" },
+public/control-center/legacy/page-standard.legacy-20260508.js:1127:      <div class="data-row">
+public/control-center/legacy/page-standard.legacy-20260508.js:1143:  const shell = ensureShell(page);
+public/control-center/legacy/page-standard.legacy-20260508.js:1147:  const eyebrow = shell.querySelector("#stdPageEyebrow");
+public/control-center/legacy/page-standard.legacy-20260508.js:1148:  const title = shell.querySelector("#stdPageTitle");
+public/control-center/legacy/page-standard.legacy-20260508.js:1149:  const description = shell.querySelector("#stdPageDescription");
+public/control-center/legacy/page-standard.legacy-20260508.js:1150:  const powerTitle = shell.querySelector("#stdPowerTitle");
+public/control-center/legacy/page-standard.legacy-20260508.js:1151:  const statusTitle = shell.querySelector("#stdStatusTitle");
+public/control-center/legacy/page-standard.legacy-20260508.js:1152:  const actionTitle = shell.querySelector("#stdActionTitle");
+public/control-center/legacy/page-standard.legacy-20260508.js:1153:  const aiTitle = shell.querySelector("#stdAiTitle");
+public/control-center/legacy/page-standard.legacy-20260508.js:1154:  const aiDescription = shell.querySelector("#stdAiDescription");
+public/control-center/legacy/page-standard.legacy-20260508.js:1155:  const nextTitle = shell.querySelector("#stdNextTitle");
+public/control-center/legacy/page-standard.legacy-20260508.js:1156:  const nextBest = shell.querySelector("#stdNextBestAction");
+public/control-center/legacy/page-standard.legacy-20260508.js:1170:  bindHeaderAction(shell.querySelector("#stdPrimaryAction"), copy.primary, context);
+public/control-center/legacy/page-standard.legacy-20260508.js:1171:  bindHeaderAction(shell.querySelector("#stdSecondaryAction"), copy.secondary, context);
+public/control-center/legacy/page-standard.legacy-20260508.js:1173:  const nextBestBtn = shell.querySelector("#stdNextBestActionBtn");
+public/control-center/legacy/page-standard.legacy-20260508.js:1177:      context.navigateTo("ai-command");
+public/control-center/legacy/page-standard.legacy-20260508.js:1182:  renderMetricCards(shell.querySelector("#stdKpiGrid"), [
+public/control-center/legacy/page-standard.legacy-20260508.js:1183:    card("Route", route, "Current workspace is loaded.", "success"),
+public/control-center/legacy/page-standard.legacy-20260508.js:1184:    card("Project", context?.state?.context?.currentProject || "-", "Active project context.", "neutral")
+public/control-center/legacy/page-standard.legacy-20260508.js:1187:  renderStatus(shell.querySelector("#stdStatusGrid"), [
+public/control-center/legacy/page-standard.legacy-20260508.js:1188:    card("Status", "Ready", "Standard layout loaded in lightweight mode.", "success")
+public/control-center/legacy/page-standard.legacy-20260508.js:1191:  const actionsList = shell.querySelector("#stdActionsList");
+public/control-center/legacy/page-standard.legacy-20260508.js:1196:  const aiPrompts = shell.querySelector("#stdAiPrompts");
+public/control-center/legacy/page-standard.legacy-20260508.js:1201:  const advancedDetails = shell.querySelector("#stdAdvancedDetails");
+public/control-center/legacy/page-standard.legacy-20260508.js:1206:  const smartStrip = shell.querySelector("#stdSmartStrip");
+public/control-center/legacy/09-command-legacy-isolation.legacy.css:4:  Stabilize command layer behavior while legacy styles still exist in styles.css.
+public/control-center/legacy/09-command-legacy-isolation.legacy.css:7:/* Canonical command layer */
+public/control-center/legacy/09-command-legacy-isolation.legacy.css:8:.command-bar {
+public/control-center/legacy/09-command-legacy-isolation.legacy.css:25:  z-index: var(--layer-command) !important;
+public/control-center/legacy/09-command-legacy-isolation.legacy.css:29:.command-backdrop {
+public/control-center/legacy/09-command-legacy-isolation.legacy.css:39:.app-shell.is-command-open .command-backdrop,
+public/control-center/legacy/09-command-legacy-isolation.legacy.css:40:.app-shell.is-mobile-command-open .command-backdrop,
+public/control-center/legacy/09-command-legacy-isolation.legacy.css:41:.command-backdrop.is-visible {
+public/control-center/legacy/09-command-legacy-isolation.legacy.css:50:/* Mobile command behavior */
+public/control-center/legacy/09-command-legacy-isolation.legacy.css:53:  .app-shell.is-mobile-shell:not(.is-mobile-command-open) .command-bar {
+public/control-center/legacy/09-command-legacy-isolation.legacy.css:57:  .app-shell.is-mobile-shell.is-mobile-command-open .command-bar {
+public/control-center/legacy/integrations.monolith-20260508.js:88:        purpose: "Marketplace listing and commerce signal sync for eBay surfaces.",
+public/control-center/legacy/integrations.monolith-20260508.js:184:        purpose: "Future-ready business profile insight and publishing connection for LinkedIn surfaces.",
+public/control-center/legacy/integrations.monolith-20260508.js:230:        permissionScope: "Container ID + workspace access",
+public/control-center/legacy/integrations.monolith-20260508.js:234:          { key: "workspaceId", label: "Workspace ID", placeholder: "GTM workspace ID" },
+public/control-center/legacy/integrations.monolith-20260508.js:382:        primaryField: "workspaceId",
+public/control-center/legacy/integrations.monolith-20260508.js:384:          { key: "workspaceId", label: "Workspace / account ID", placeholder: "CRM workspace ID", required: true },
+public/control-center/legacy/integrations.monolith-20260508.js:469:          { key: "workspaceEmail", label: "Workspace email", placeholder: "ops@brand.com" },
+public/control-center/legacy/integrations.monolith-20260508.js:479:        whyItMatters: "Slack can surface sync failures, content approvals, and campaign alerts where the team already works.",
+public/control-center/legacy/integrations.monolith-20260508.js:483:        primaryField: "workspaceId",
+public/control-center/legacy/integrations.monolith-20260508.js:485:          { key: "workspaceId", label: "Workspace ID", placeholder: "Slack workspace ID", required: true },
+public/control-center/legacy/integrations.monolith-20260508.js:497:        enables: "Alerts, commands, approval handoff, and ops notifications.",
+public/control-center/legacy/integrations.monolith-20260508.js:502:          { key: "botName", label: "Bot / workspace name", placeholder: "MH Assistant Ops Bot", required: true },
+public/control-center/legacy/integrations.monolith-20260508.js:517:        primaryField: "workspaceName",
+public/control-center/legacy/integrations.monolith-20260508.js:519:          { key: "workspaceName", label: "Workspace name", placeholder: "Brand Ops Workspace", required: true },
+public/control-center/legacy/integrations.monolith-20260508.js:537:          { key: "workspaceId", label: "Workspace / scenario ID", placeholder: "Zap / Make scenario ID" },
+public/control-center/legacy/integrations.monolith-20260508.js:623:      drawerOpen: false,
+public/control-center/legacy/integrations.monolith-20260508.js:635:  session.drawerOpen = Boolean(integrationId);
+public/control-center/legacy/integrations.monolith-20260508.js:639:  session.drawerOpen = false;
+public/control-center/legacy/integrations.monolith-20260508.js:739:function getSmartConnectLabel(card) {
+public/control-center/legacy/integrations.monolith-20260508.js:740:  if (card.backendSupported === false) return "Open setup";
+public/control-center/legacy/integrations.monolith-20260508.js:741:  if (card.statusLabel === "Connected") return "Manage Connection";
+public/control-center/legacy/integrations.monolith-20260508.js:742:  if (card.statusLabel === "Partial") return "Complete Setup";
+
+### legacy CSS / legacy JS references
+public/control-center/runtime/README.md:4:Gradually decompose the legacy Control Center runtime into isolated operational modules.
+public/control-center/runtime/overlay/OVERLAY_RUNTIME_PLAN.md:41:## High-risk legacy sources
+public/control-center/runtime/overlay/OVERLAY_RUNTIME_PLAN.md:42:- legacy/styles.legacy-full.css
+public/control-center/runtime/overlay/OVERLAY_RUNTIME_PLAN.md:43:- legacy/11-runtime-safety-overrides.legacy.css
+public/control-center/runtime/overlay/OVERLAY_RUNTIME_PLAN.md:44:- legacy/09-command-legacy-isolation.legacy.css
+public/control-center/runtime/overlay/OVERLAY_RUNTIME_PLAN.md:67:- remove legacy overlay conflicts
+public/control-center/legacy/09-command-legacy-isolation.legacy.css:4:  Stabilize command layer behavior while legacy styles still exist in styles.css.
+public/control-center/legacy/integrations.monolith-20260508.js:938:    health_summary: "Connected through the legacy source registry.",
+public/control-center/legacy/integrations.monolith-20260508.js:939:    notes: "This integration is currently inferred from the legacy project source mapping.",
+public/control-center/legacy/integrations.monolith-20260508.js:942:    legacy_source: true
+public/control-center/legacy/99-legacy-compat.legacy.css:5:  ONLY minimal compatibility rules are allowed here.
+public/control-center/legacy/styles.legacy-20260508.css:3:  Generated from legacy/styles.legacy-full.css and reduced to page-specific rules only.
+public/control-center/styles/mhos-executive-surface-primitives.css:108:   - No legacy selectors
+public/control-center/styles/15-clean-operating-layer.css:310:  - No overrides for legacy shared classes (.btn, .card, .panel, etc.).
+public/control-center/styles/01-reset.css:3:  Purpose: predictable rendering baseline without overriding legacy component styles.
+public/control-center/styles/mhos-context-primitives.css:2:   For future context system migration. Do not use on legacy markup. */
+public/control-center/styles/09-governance.css:6: * Do not move or delete legacy Governance CSS from 12-pages.css in this phase.
+public/control-center/api.js:106:      for (const legacyKey of CONTROL_ACCESS_KEY_LEGACY_STORAGE_KEYS) {
+public/control-center/api.js:107:        const legacyValue = String(localStorage.getItem(legacyKey) || "").trim();
+public/control-center/api.js:108:        if (legacyValue) {
+public/control-center/api.js:109:          persistCanonicalControlKey(legacyValue);
+public/control-center/api.js:110:          return { key: legacyValue, source: `localStorage:${legacyKey}` };
+public/control-center/pages/ai-command.js:116:// Map legacy mode IDs from older sessions to new team IDs
+public/control-center/pages/ai-command.js:2499:	const legacy = AI_INBOUND_SPECIALIST_ALIASES[raw] || AI_INBOUND_SPECIALIST_ALIASES[asString(value).trim().toLowerCase()] || raw;
+public/control-center/pages/ai-command.js:2500:	const resolved = MODE_ID_ALIASES[legacy] || MODE_ID_ALIASES[getAiRoomRoleId(legacy)] || getAiRoomRoleId(legacy);
+public/control-center/pages/ai-command.js:6432:					showMessage?.("Voice dictation works in compatible browsers with microphone permission.");
+public/control-center/pages/library.js:676:function normalizeAssets(projectName, assetsData, legacyRegistry, categoryByType, catalog) {
+public/control-center/pages/library.js:680:    legacyRegistry?.assets ||
+public/control-center/pages/library.js:681:    legacyRegistry?.items ||
+public/control-center/pages/library.js:682:    legacyRegistry?.records
+public/control-center/pages/integrations/builders.js:702:    health_summary: "Connected through the legacy source registry.",
+public/control-center/pages/integrations/builders.js:703:    notes: "This integration is currently inferred from the legacy project source mapping.",
+public/control-center/pages/integrations/builders.js:706:    legacy_source: true
+public/control-center/app.js:159:    const legacy = CONTROL_ACCESS_KEY_LEGACY_STORAGE_KEYS
+public/control-center/app.js:163:    if (legacy) {
+public/control-center/app.js:164:      persistCanonicalControlKey(legacy);
+public/control-center/app.js:167:    return legacy;
+public/control-center/app.js:346:    legacySources: [],
+public/control-center/app.js:357:    CONTROL_ACCESS_KEY_LEGACY_STORAGE_KEYS.forEach((legacyKey) => {
+public/control-center/app.js:358:      const value = String(localStorage.getItem(legacyKey) || "").trim();
+public/control-center/app.js:360:        diagnostics.legacySources.push({ key: legacyKey, length: value.length });
+public/control-center/app.js:389:  } else if (diagnostics.legacySources.length) {
+public/control-center/app.js:390:    diagnostics.resolvedSource = `localStorage:${diagnostics.legacySources[0].key}`;
+public/control-center/app.js:402:    `legacy keys with values: ${diagnostics.legacySources.length}`,
+public/control-center/app.js:408:  if (diagnostics.legacySources.length) {
+public/control-center/app.js:410:      "legacy matches: " + diagnostics.legacySources.map((item) => `${item.key}(len=${item.length})`).join(", ")
+public/control-center/app.js:614:        CONTROL_ACCESS_KEY_LEGACY_STORAGE_KEYS.forEach((legacyKey) => localStorage.removeItem(legacyKey));
+public/control-center/app.js:627:        CONTROL_ACCESS_KEY_LEGACY_STORAGE_KEYS.forEach((legacyKey) => localStorage.removeItem(legacyKey));
+public/control-center/app.js:1625:        CONTROL_ACCESS_KEY_LEGACY_STORAGE_KEYS.forEach((legacyKey) => localStorage.removeItem(legacyKey));

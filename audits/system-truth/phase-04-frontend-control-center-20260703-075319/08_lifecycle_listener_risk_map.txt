@@ -1,0 +1,521 @@
+### listeners / intervals / timeouts / observers
+public/control-center/ui/page-standard.js:475:  button.onclick = () => runAction(action, context);
+public/control-center/ui/page-standard.js:545:    askAiBtn.onclick = () => {
+public/control-center/ui/page-standard.js:553:    stripBtn.onclick = () => {
+public/control-center/index.html:318:        retryBtn.addEventListener("click", function () {
+public/control-center/index.html:325:        accessKeyBtn.addEventListener("click", function () {
+public/control-center/index.html:338:      window.addEventListener("error", function (event) {
+public/control-center/index.html:356:      window.addEventListener("unhandledrejection", function (event) {
+public/control-center/automation-engine.js:18:  { test: /\bdelete\b|\bremove\b|\bdestroy\b|\berase\b/i, reason: "Destructive actions are blocked in Auto Mode." },
+public/control-center/automation-engine.js:603:    subscribeAutoMode
+public/control-center/automation-engine.js:734:export function subscribeAutoMode(listener) {
+public/control-center/runtime/RUNTIME_ROADMAP.md:39:- route cleanup
+public/control-center/runtime/lifecycle/README.md:5:The **Lifecycle Registry** provides a safe, reusable foundation for managing frontend listeners, timers, and cleanup operations during page transitions.
+public/control-center/runtime/lifecycle/README.md:15:- **Centralized cleanup** — single call to remove all listeners/timers for a page
+public/control-center/runtime/lifecycle/README.md:17:- **Idempotent operations** — cleanup can be called multiple times without issues
+public/control-center/runtime/lifecycle/README.md:18:- **Error tracking** — collects cleanup errors for debugging
+public/control-center/runtime/lifecycle/README.md:25:- Frontend lifecycle registry is **transient UX cleanup only**
+public/control-center/runtime/lifecycle/README.md:41:- Errors during cleanup are caught and stored, not thrown
+public/control-center/runtime/lifecycle/README.md:42:- After cleanup, registry rejects new active listeners (returns no-ops)
+public/control-center/runtime/lifecycle/README.md:56:### registry.addEventListener(target, type, handler, options)
+public/control-center/runtime/lifecycle/README.md:58:Register an event listener with automatic cleanup.
+public/control-center/runtime/lifecycle/README.md:61:const disposer = registry.addEventListener(document, 'click', handleClick);
+public/control-center/runtime/lifecycle/README.md:62:// Returns a disposer function for manual cleanup if needed
+public/control-center/runtime/lifecycle/README.md:63:// disposer();  // remove listener before full cleanup()
+public/control-center/runtime/lifecycle/README.md:68:Register a timeout with automatic cleanup.
+public/control-center/runtime/lifecycle/README.md:78:Register an interval with automatic cleanup.
+public/control-center/runtime/lifecycle/README.md:88:Register an animation frame callback with automatic cleanup.
+public/control-center/runtime/lifecycle/README.md:102:  console.log('custom cleanup');
+public/control-center/runtime/lifecycle/README.md:107:### registry.cleanup()
+public/control-center/runtime/lifecycle/README.md:112:registry.cleanup();  // idempotent, safe to call multiple times
+public/control-center/runtime/lifecycle/README.md:135:Get errors that occurred during cleanup.
+public/control-center/runtime/lifecycle/README.md:154:pageRegistry.addEventListener(document, 'click', handleClick);
+public/control-center/runtime/lifecycle/README.md:155:pageRegistry.addEventListener(window, 'resize', handleResize);
+public/control-center/runtime/lifecycle/README.md:161:  // custom cleanup: close connections, save state, etc.
+public/control-center/runtime/lifecycle/README.md:166:pageRegistry.cleanup();  // all listeners removed, timers cleared, disposers run
+public/control-center/runtime/lifecycle/README.md:171:The router can call cleanup when transitioning away from a page:
+public/control-center/runtime/lifecycle/README.md:177:  pageRegistry.cleanup();
+public/control-center/runtime/lifecycle/README.md:193:3. Router cleanup hooks
+public/control-center/runtime/lifecycle/README.md:197:- ✓ **Idempotent cleanup** — calling cleanup() multiple times is safe
+public/control-center/runtime/lifecycle/README.md:199:- ✓ **Error resilience** — errors during cleanup are caught and stored
+public/control-center/runtime/lifecycle/lifecycle-registry.js:5: * Enables pages to register cleanup handlers and ensures proper cleanup on route transitions.
+public/control-center/runtime/lifecycle/lifecycle-registry.js:7: * This is a transient UX cleanup mechanism only.
+public/control-center/runtime/lifecycle/lifecycle-registry.js:13: *   registry.addEventListener(document, 'click', handleClick);
+public/control-center/runtime/lifecycle/lifecycle-registry.js:14: *   registry.addTimeout(() => console.log('cleanup'), 5000);
+public/control-center/runtime/lifecycle/lifecycle-registry.js:15: *   registry.addDisposer(() => console.log('custom cleanup'));
+public/control-center/runtime/lifecycle/lifecycle-registry.js:18: *   registry.cleanup();  // removes all listeners, clears timers, runs disposers
+public/control-center/runtime/lifecycle/lifecycle-registry.js:25: * @returns {object} Registry with addEventListener, addTimeout, addInterval, addAnimationFrame, 
+public/control-center/runtime/lifecycle/lifecycle-registry.js:26: *                   addDisposer, cleanup, size, isCleanedUp, getErrors
+public/control-center/runtime/lifecycle/lifecycle-registry.js:49:      typeof target.addEventListener === 'function' ||
+public/control-center/runtime/lifecycle/lifecycle-registry.js:62:     * Add event listener with automatic cleanup on registry cleanup.
+public/control-center/runtime/lifecycle/lifecycle-registry.js:66:     * @param {object} options - addEventListener options (capture, once, passive, etc.)
+public/control-center/runtime/lifecycle/lifecycle-registry.js:67:     * @returns {function} Disposer function for manual removal before cleanup
+public/control-center/runtime/lifecycle/lifecycle-registry.js:69:    addEventListener(target, type, handler, options = {}) {
+public/control-center/runtime/lifecycle/lifecycle-registry.js:79:            `[${options.name}] addEventListener: invalid target`,
+public/control-center/runtime/lifecycle/lifecycle-registry.js:89:            `[${options.name}] addEventListener: invalid handler for type ${type}`
+public/control-center/runtime/lifecycle/lifecycle-registry.js:98:          if (target && typeof target.removeEventListener === 'function') {
+public/control-center/runtime/lifecycle/lifecycle-registry.js:99:            target.removeEventListener(type, handler, options);
+public/control-center/runtime/lifecycle/lifecycle-registry.js:121:        target.addEventListener(type, handler, options);
+public/control-center/runtime/lifecycle/lifecycle-registry.js:125:          phase: 'addEventListener',
+public/control-center/runtime/lifecycle/lifecycle-registry.js:135:     * Add timeout with automatic cleanup.
+public/control-center/runtime/lifecycle/lifecycle-registry.js:154:      const id = setTimeout(callback, delay);
+public/control-center/runtime/lifecycle/lifecycle-registry.js:159:          clearTimeout(id);
+public/control-center/runtime/lifecycle/lifecycle-registry.js:165:     * Add interval with automatic cleanup.
+public/control-center/runtime/lifecycle/lifecycle-registry.js:184:      const id = setInterval(callback, delay);
+public/control-center/runtime/lifecycle/lifecycle-registry.js:189:          clearInterval(id);
+public/control-center/runtime/lifecycle/lifecycle-registry.js:195:     * Add animation frame callback with automatic cleanup.
+public/control-center/runtime/lifecycle/lifecycle-registry.js:224:     * Add a custom disposer function to run on cleanup.
+public/control-center/runtime/lifecycle/lifecycle-registry.js:225:     * Useful for custom cleanup logic beyond listeners/timers.
+public/control-center/runtime/lifecycle/lifecycle-registry.js:226:     * @param {function} disposer - Function to run during cleanup
+public/control-center/runtime/lifecycle/lifecycle-registry.js:238:              phase: 'disposer-post-cleanup',
+public/control-center/runtime/lifecycle/lifecycle-registry.js:257:        // Manual pre-cleanup disposer execution (idempotent)
+public/control-center/runtime/lifecycle/lifecycle-registry.js:281:    cleanup() {
+public/control-center/runtime/lifecycle/lifecycle-registry.js:296:            phase: 'cleanup-listeners',
+public/control-center/runtime/lifecycle/lifecycle-registry.js:307:            clearTimeout(timer.id);
+public/control-center/runtime/lifecycle/lifecycle-registry.js:309:            clearInterval(timer.id);
+public/control-center/runtime/lifecycle/lifecycle-registry.js:314:            phase: 'cleanup-timers',
+public/control-center/runtime/lifecycle/lifecycle-registry.js:328:            phase: 'cleanup-frames',
+public/control-center/runtime/lifecycle/lifecycle-registry.js:345:            phase: 'cleanup-disposers',
+public/control-center/runtime/lifecycle/lifecycle-registry.js:363:     * After cleanup, the registry will not add new active listeners/timers.
+public/control-center/runtime/lifecycle/lifecycle-registry.js:364:     * @returns {boolean} True if cleanup() has been called
+public/control-center/runtime/lifecycle/lifecycle-registry.js:371:     * Get cleanup errors that occurred during cleanup operations.
+public/control-center/runtime/lifecycle/lifecycle-registry.js:393:    addEventListener: () => noopFn,
+public/control-center/runtime/lifecycle/lifecycle-registry.js:398:    cleanup: () => {},
+public/control-center/runtime/overlay/OVERLAY_RUNTIME_PLAN.md:29:- inconsistent overlay cleanup
+public/control-center/legacy/page-standard.legacy-20260508.js:1013:  button.onclick = () => runAction(action, context);
+public/control-center/legacy/page-standard.legacy-20260508.js:1029:    button.onclick = () => {
+public/control-center/legacy/page-standard.legacy-20260508.js:1049:    button.onclick = () => {
+public/control-center/legacy/page-standard.legacy-20260508.js:1175:    nextBestBtn.onclick = () => {
+public/control-center/legacy/integrations.monolith-20260508.js:168:        enables: "Video insights, watch metrics, subscriber trends, comments, and publishing context.",
+public/control-center/legacy/integrations.monolith-20260508.js:2254:    button.onclick = () => {
+public/control-center/legacy/integrations.monolith-20260508.js:2262:    button.onclick = async () => {
+public/control-center/legacy/integrations.monolith-20260508.js:2321:    select.onchange = (event) => {
+public/control-center/legacy/integrations.monolith-20260508.js:2328:    select.onchange = (event) => {
+public/control-center/legacy/integrations.monolith-20260508.js:2342:    button.onclick = () => {
+public/control-center/legacy/integrations.monolith-20260508.js:2503:    button.onclick = async () => {
+public/control-center/legacy/integrations.monolith-20260508.js:2525:    button.onclick = () => {
+public/control-center/legacy/integrations.monolith-20260508.js:2538:      document.removeEventListener("keydown", integrationDrawerEscapeHandler);
+public/control-center/legacy/integrations.monolith-20260508.js:2545:    document.addEventListener("keydown", integrationDrawerEscapeHandler);
+public/control-center/styles/14-page-standard.css:2818:/* LIB-UX-1B — Selected asset AI action cleanup */
+public/control-center/styles/12-pages.css:9101:/* Library final preview/action panel cleanup */
+public/control-center/styles/12-pages.css:11916:/* T185C.3D — final AI Team composer cleanup */
+public/control-center/styles/12-pages.css:12168:/* T185C.4A — final composer icon cleanup */
+public/control-center/router.js:59:export function subscribeRouteChange(handler) {
+public/control-center/router.js:70:      console.warn("Route change subscriber failed:", error?.message || error);
+public/control-center/state.js:123:export function subscribe(listener) {
+public/control-center/api.js:321:        timer = setTimeout(() => {
+public/control-center/api.js:364:              fallbackTimer = setTimeout(() => {
+public/control-center/api.js:374:              clearTimeout(fallbackTimer);
+public/control-center/api.js:445:      clearTimeout(timer);
+public/control-center/api.js:457:    setTimeout(resolve, 0);
+public/control-center/api.js:634:    timer = setTimeout(() => {
+public/control-center/api.js:700:      clearTimeout(timer);
+public/control-center/api.js:1263:    setTimeout(resolve, 750);
+public/control-center/pages/ai-command/tool-dock.js:378:      changeBtn.onclick = () => {
+public/control-center/pages/ai-command/tool-dock.js:384:      removeBtn.onclick = () => {
+public/control-center/pages/ai-command/tool-dock.js:1715:    field.onchange = () => {
+public/control-center/pages/ai-command/tool-dock.js:1775:    btn.onclick = () => closeToolDrawer(drawer);
+public/control-center/pages/ai-command/tool-dock.js:1780:    openLibraryBtn.onclick = () => {
+public/control-center/pages/ai-command/tool-dock.js:1827:    useBtn.onclick = () => {
+public/control-center/pages/ai-command/tool-dock.js:1864:    btn.onclick = () => {
+public/control-center/pages/ai-command/tool-dock.js:1912:    setTimeout(() => tryAutoOpenDrawerAfterLibrary(restoreProjectName), delay);
+public/control-center/pages/campaign-studio.js:530:    clearTimeout(existing);
+public/control-center/pages/campaign-studio.js:533:  const timer = setTimeout(() => {
+public/control-center/pages/campaign-studio.js:1306:    saveBtn.onclick = async () => {
+public/control-center/pages/campaign-studio.js:1332:    buildBtn.onclick = async () => {
+public/control-center/pages/campaign-studio.js:1361:    askAiBtn.onclick = async () => {
+public/control-center/pages/campaign-studio.js:1417:    publishingBtn.onclick = () => {
+public/control-center/pages/campaign-studio.js:1425:    assetsBtn.onclick = () => navigateTo("library");
+public/control-center/pages/campaign-studio.js:1430:    contentBtn.onclick = () => {
+public/control-center/pages/campaign-studio.js:1438:    mediaBtn.onclick = () => {
+public/control-center/pages/campaign-studio.js:1446:    adsBtn.onclick = () => {
+public/control-center/pages/campaign-studio.js:1454:    generatePackageBtn.onclick = () => {
+public/control-center/pages/campaign-studio.js:1463:    dependenciesBtn.onclick = () => {
+public/control-center/pages/campaign-studio.js:1479:    refreshIntelligenceBtn.onclick = () => {
+public/control-center/pages/media-studio-workspace.js:2970:    button.onclick = () => {
+public/control-center/pages/media-studio-workspace.js:2978:    button.onclick = () => {
+public/control-center/pages/media-studio-workspace.js:2990:    startBtn.onclick = () => {
+public/control-center/pages/media-studio-workspace.js:3000:    button.onclick = async () => {
+public/control-center/pages/media-studio-workspace.js:3013:    button.onclick = () => {
+public/control-center/pages/media-studio-workspace.js:3021:    fromHandoffBtn.onclick = () => {
+public/control-center/pages/media-studio-workspace.js:3040:    improveBtn.onclick = async () => {
+public/control-center/pages/media-studio-workspace.js:3079:    brandSafeBtn.onclick = async () => {
+public/control-center/pages/media-studio-workspace.js:3121:  if (germanBtn) germanBtn.onclick = () => { sync(); applyPrompt(adaptGerman(session.form.prompt), "Prompt adapted for German usage."); };
+public/control-center/pages/media-studio-workspace.js:3124:  if (imageToVideoBtn) imageToVideoBtn.onclick = () => { sync(); applyPrompt(convertImagePromptToVideoBrief(session.form.prompt), "Image prompt converted to video brief."); };
+public/control-center/pages/media-studio-workspace.js:3127:  if (videoToVoiceBtn) videoToVoiceBtn.onclick = () => { sync(); applyPrompt(convertVideoBriefToVoiceover(session.form.prompt), "Video brief converted to voiceover script."); };
+public/control-center/pages/media-studio-workspace.js:3130:  if (allFormatsBtn) allFormatsBtn.onclick = () => { sync(); applyPrompt(generateAllFormats(session, state), "All format briefs generated."); };
+public/control-center/pages/media-studio-workspace.js:3134:    runGenerationBtn.onclick = async () => {
+public/control-center/pages/media-studio-workspace.js:3141:    clearAiCommandHandoffBtn.onclick = () => {
+public/control-center/pages/media-studio-workspace.js:3152:    loadHandoffBtn.onclick = () => {
+public/control-center/pages/media-studio-workspace.js:3176:    button.onclick = async () => {
+public/control-center/pages/media-studio-workspace.js:3237:    approveBtn.onclick = async () => {
+public/control-center/pages/media-studio-workspace.js:3279:    requestApprovalBtn.onclick = async () => {
+public/control-center/pages/media-studio-workspace.js:3322:    rejectBtn.onclick = async () => {
+public/control-center/pages/media-studio-workspace.js:3361:    createTaskBtn.onclick = async () => {
+public/control-center/pages/media-studio-workspace.js:3404:    sendAiBtn.onclick = () => {
+public/control-center/pages/media-studio-workspace.js:3445:    sendPublishingBtn.onclick = () => {
+public/control-center/pages/media-studio-workspace.js:3465:    headerSaveLibraryBtn.onclick = async () => {
+public/control-center/pages/media-studio-workspace.js:3495:    button.onclick = () => {
+public/control-center/pages/media-studio-workspace.js:3505:    button.onclick = async () => {
+public/control-center/pages/media-studio-workspace.js:3599:    button.onclick = async () => {
+public/control-center/pages/customer-center.js:390:  root.addEventListener("click", async (event) => {
+public/control-center/pages/operations-centers.js:74:    button.onclick = () => {
+public/control-center/pages/operations-centers.js:104:    button.onclick = () => {
+public/control-center/pages/operations-centers.js:112:    button.onclick = () => {
+public/control-center/pages/operations-centers.js:120:    button.onclick = () => {
+public/control-center/pages/operations-centers.js:127:    button.onclick = () => {
+public/control-center/pages/operations-centers.js:758:  root.querySelector("#taskCenterRefreshBtn")?.addEventListener("click", refreshTaskCenter);
+public/control-center/pages/operations-centers.js:759:  root.querySelector("#taskCenterRefreshBtnRail")?.addEventListener("click", refreshTaskCenter);
+public/control-center/pages/operations-centers.js:760:  root.querySelector("#taskCenterCopySummaryBtn")?.addEventListener("click", async () => {
+public/control-center/pages/operations-centers.js:777:  root.querySelector("#taskCenterCopyHandoffBtn")?.addEventListener("click", async () => {
+public/control-center/pages/operations-centers.js:813:  root.querySelector("#taskCenterSearch")?.addEventListener("input", (event) => {
+public/control-center/pages/operations-centers.js:818:    root.querySelector(selector)?.addEventListener("change", (event) => {
+public/control-center/pages/operations-centers.js:1099:  root.querySelector("#queueCenterRefreshBtn")?.addEventListener("click", refreshQueueCenter);
+public/control-center/pages/operations-centers.js:1100:  root.querySelector("#queueCenterRefreshBtnHeader")?.addEventListener("click", refreshQueueCenter);
+public/control-center/pages/operations-centers.js:1109:  root.querySelector("#queueCenterSearch")?.addEventListener("input", (event) => {
+public/control-center/pages/operations-centers.js:1114:    root.querySelector(selector)?.addEventListener("change", (event) => {
+public/control-center/pages/operations-centers.js:1392:  root.querySelector("#jobMonitorRefreshBtn")?.addEventListener("click", refreshJobMonitor);
+public/control-center/pages/operations-centers.js:1393:  root.querySelector("#jobMonitorRefreshBtnHeader")?.addEventListener("click", refreshJobMonitor);
+public/control-center/pages/operations-centers.js:1402:  root.querySelector("#jobMonitorSearch")?.addEventListener("input", (event) => {
+public/control-center/pages/operations-centers.js:1407:    root.querySelector(selector)?.addEventListener("change", (event) => {
+public/control-center/pages/operations-centers.js:1780:  root.querySelector("#notificationCenterRefreshBtn")?.addEventListener("click", refreshNotificationCenter);
+public/control-center/pages/operations-centers.js:1781:  root.querySelector("#notificationCenterRefreshBtnHeader")?.addEventListener("click", refreshNotificationCenter);
+public/control-center/pages/operations-centers.js:1790:  root.querySelector("#notificationCenterSearch")?.addEventListener("input", (event) => {
+public/control-center/pages/operations-centers.js:1794:  root.querySelector("#notificationCenterSeverity")?.addEventListener("change", (event) => {
+public/control-center/pages/operations-centers.js:1799:    button.onclick = async () => {
+public/control-center/pages/operations-centers.js:1824:    button.onclick = async () => {
+public/control-center/pages/operations-centers.js:1854:    button.onclick = async () => {
+public/control-center/pages/business/dashboard.js:47:      <button onclick='sendAction({type:"ADS", budget:5000})'>
+public/control-center/pages/business/dashboard.js:51:      <button onclick='sendAction({type:"FINANCE", amount:10000})'>
+public/control-center/pages/business/dashboard.js:55:      <button onclick='sendAction({type:"CIVILIZATION"})'>
+public/control-center/pages/research.js:879:    refreshBtn.onclick = () => {
+public/control-center/pages/research.js:906:    button.onclick = () => {
+public/control-center/pages/research.js:912:    button.onclick = async () => {
+public/control-center/pages/research.js:969:    button.onclick = () => {
+public/control-center/pages/research.js:1029:    button.onclick = () => {
+public/control-center/pages/research.js:1065:    saveNoteBtn.onclick = () => {
+public/control-center/pages/research.js:1088:    button.onclick = () => {
+public/control-center/pages/research.js:1108:    saveRecommendationBtn.onclick = () => {
+public/control-center/pages/library/listener-lifecycle.js:4:  // Runtime cleanup plumbing only. Backend authority remains unchanged.
+public/control-center/pages/library/listener-lifecycle.js:8:    return registry.addEventListener(target, type, handler, options);
+public/control-center/pages/library/listener-lifecycle.js:13:    registry.cleanup();
+public/control-center/pages/library/listener-lifecycle.js:14:    const cleanupErrors = registry.getErrors().slice(errorCountBefore);
+public/control-center/pages/library/listener-lifecycle.js:15:    cleanupErrors.forEach((entry) => {
+public/control-center/pages/ai-command.js:616:let aiAutoModeUnsubscribe = null;
+public/control-center/pages/ai-command.js:5639:                        selectEl.onchange = () => loadRecentAiChatSession(selectEl);
+public/control-center/pages/ai-command.js:5683:                        btn.onclick = startCleanAiCommandSession;
+public/control-center/pages/ai-command.js:5688:			settingsBtn.onclick = () => {
+public/control-center/pages/ai-command.js:5695:			btn.onclick = () => {
+public/control-center/pages/ai-command.js:5707:			btn.onclick = () => {
+public/control-center/pages/ai-command.js:5718:                        btn.onclick = () => {
+public/control-center/pages/ai-command.js:5743:			btn.onclick = () => {
+public/control-center/pages/ai-command.js:5754:			btn.onclick = () => {
+public/control-center/pages/ai-command.js:5766:			btn.onclick = () => {
+public/control-center/pages/ai-command.js:5809:                        btn.onclick = () => {
+public/control-center/pages/ai-command.js:5816:                        btn.onclick = () => {
+public/control-center/pages/ai-command.js:5823:                        btn.onclick = () => {
+public/control-center/pages/ai-command.js:5872:                        finalUploadInput.onchange = () => {
+public/control-center/pages/ai-command.js:5908:                        btn.onclick = () => {
+public/control-center/pages/ai-command.js:5916:                document.addEventListener("click", (event) => {
+public/control-center/pages/ai-command.js:5933:                        btn.onclick = () => {
+public/control-center/pages/ai-command.js:5946:                        btn.onclick = () => {
+public/control-center/pages/ai-command.js:6096:                        btn.onclick = () => {
+public/control-center/pages/ai-command.js:6103:                        btn.onclick = closeSmartActionWizard;
+public/control-center/pages/ai-command.js:6107:                        backdrop.onclick = (event) => {
+public/control-center/pages/ai-command.js:6113:                        btn.onclick = () => {
+public/control-center/pages/ai-command.js:6213:                        btn.onclick = async () => {
+public/control-center/pages/ai-command.js:6376:                        btn.onclick = () => {
+public/control-center/pages/ai-command.js:6407:			voiceLangBtn.onclick = () => {
+public/control-center/pages/ai-command.js:6426:			voiceBtn.onclick = () => {
+public/control-center/pages/ai-command.js:6507:		        askBtn.onclick = async () => {
+public/control-center/pages/ai-command.js:6691:                        prepareBtn.onclick = () => {
+public/control-center/pages/ai-command.js:6712:                        draftTaskBtn.onclick = () => {
+public/control-center/pages/ai-command.js:6735:                        draftWorkflowBtn.onclick = () => {
+public/control-center/pages/ai-command.js:6759:                        handoffBtn.onclick = () => {
+public/control-center/pages/ai-command.js:6780:			btn.onclick = () => {
+public/control-center/pages/ai-command.js:6822:			saveBtn.onclick = () => {
+public/control-center/pages/ai-command.js:6833:			clearBtn.onclick = () => {
+public/control-center/pages/ai-command.js:6851:		        responseContinueBtn.onclick = () => {
+public/control-center/pages/ai-command.js:6859:			responseCopyBtn.onclick = async () => {
+public/control-center/pages/ai-command.js:6877:			responseUseBtn.onclick = () => {
+public/control-center/pages/ai-command.js:6890:			responseSaveBtn.onclick = () => {
+public/control-center/pages/ai-command.js:6905:		        responseConvertBtn.onclick = () => {
+public/control-center/pages/ai-command.js:6936:			responseSendBtn.onclick = () => {
+public/control-center/pages/ai-command.js:6971:			responseReadBtn.onclick = () => {
+public/control-center/pages/ai-command.js:6987:			previewCopyBtn.onclick = async () => {
+public/control-center/pages/ai-command.js:7011:			previewUseBtn.onclick = () => {
+public/control-center/pages/ai-command.js:7030:			previewSendBtn.onclick = () => {
+public/control-center/pages/ai-command.js:7066:			previewSaveBtn.onclick = () => {
+public/control-center/pages/ai-command.js:7081:			previewReadBtn.onclick = () => {
+public/control-center/pages/ai-command.js:7100:			previewClearBtn.onclick = () => {
+public/control-center/pages/library.js:1577:    const cleanup = () => {
+public/control-center/pages/library.js:1581:    cancelBtn.onclick = () => {
+public/control-center/pages/library.js:1582:      cleanup();
+public/control-center/pages/library.js:1586:    submitBtn.onclick = () => {
+public/control-center/pages/library.js:1588:      cleanup();
+public/control-center/pages/library.js:1592:    overlay.onclick = (event) => {
+public/control-center/pages/library.js:1594:        cleanup();
+public/control-center/pages/library.js:1669:  setTimeout(() => target.classList.remove(highlightClass), 2600);
+public/control-center/pages/library.js:1872:    typeSelect.onchange = (event) => {
+public/control-center/pages/library.js:1903:    statusSelect.onchange = (event) => {
+public/control-center/pages/library.js:1939:    sourceSelect.onchange = (event) => {
+public/control-center/pages/library.js:1970:    sortSelect.onchange = (event) => {
+public/control-center/pages/library.js:2179:      useBtn.onclick = () => {
+public/control-center/pages/library.js:2257:    button.onclick = () => {
+public/control-center/pages/library.js:2310:          setTimeout(() => {
+public/control-center/pages/library.js:2319:        setTimeout(() => {
+public/control-center/pages/library.js:2325:            setTimeout(() => dropZone.classList.remove("is-required-action-target"), 2600);
+public/control-center/pages/library.js:2368:    button.onclick = (event) => {
+public/control-center/pages/library.js:2401:    row.onclick = (event) => {
+public/control-center/pages/library.js:2465:    card.onclick = (event) => {
+public/control-center/pages/library.js:2497:    input.onchange = (event) => {
+public/control-center/pages/library.js:2512:    input.onclick = (event) => {
+public/control-center/pages/library.js:2519:    selectVisibleButton.onclick = (event) => {
+public/control-center/pages/library.js:2540:    clearSelectionButton.onclick = (event) => {
+public/control-center/pages/library.js:2551:    button.onclick = () => {
+public/control-center/pages/library.js:2574:  button.onclick = () => {
+public/control-center/pages/library.js:2598:    toolbarUpload.onclick = () => $("libraryUploadInput")?.click();
+public/control-center/pages/library.js:2603:    button.onclick = async () => {
+public/control-center/pages/library.js:2631:    button.onclick = async () => {
+public/control-center/pages/library.js:2671:    button.onclick = async () => {
+public/control-center/pages/library.js:2710:    button.onclick = async () => {
+public/control-center/pages/library.js:2776:    button.onclick = async () => {
+public/control-center/pages/library.js:2810:    button.onclick = async () => {
+public/control-center/pages/library.js:2851:    button.onclick = async () => {
+public/control-center/pages/library.js:2887:    button.onclick = (event) => {
+public/control-center/pages/library.js:2907:    button.onclick = () => {
+public/control-center/pages/library.js:2920:    button.onclick = (event) => {
+public/control-center/pages/library.js:2956:        window.clearTimeout(librarySearchRenderTimer);
+public/control-center/pages/library.js:2959:      librarySearchRenderTimer = window.setTimeout(() => {
+public/control-center/pages/library.js:2974:    uploadTypeSelect.onchange = (event) => {
+public/control-center/pages/library.js:3017:    dropZone.onclick = (event) => {
+public/control-center/pages/library.js:3028:    uploadInput.onchange = () => {
+public/control-center/pages/library.js:3039:        dropZone.addEventListener(eventName, (event) => {
+public/control-center/pages/library.js:3046:        dropZone.addEventListener(eventName, (event) => {
+public/control-center/pages/library.js:3052:      dropZone.addEventListener("drop", (event) => {
+public/control-center/pages/library.js:3070:      picker.onchange = () => {
+public/control-center/pages/library.js:3084:      chooseFilesBtn.onclick = (event) => {
+public/control-center/pages/library.js:3097:    uploadBtn.onclick = async () => {
+public/control-center/pages/library.js:3210:    refreshBtn.onclick = async () => {
+public/control-center/pages/library.js:3238:    classifyBtn.onclick = () => {
+public/control-center/pages/library.js:3248:    missingBtn.onclick = () => {
+public/control-center/pages/library.js:3258:    extractSelectedDocBtn.onclick = () => {
+public/control-center/pages/library.js:3273:    extractBtn.onclick = () => {
+public/control-center/pages/library.js:3288:    sendToAiBtn.onclick = () => {
+public/control-center/pages/library.js:3349:    setTimeout(() => {
+public/control-center/pages/library.js:3355:          backBtn.onclick = () => {
+public/control-center/pages/library.js:3363:          dismissBtn.onclick = () => {
+public/control-center/pages/library.js:3373:    setTimeout(() => {
+public/control-center/pages/library.js:3379:          setTimeout(() => assetWorkspace.classList.remove("is-source-target"), 2000);
+public/control-center/pages/home.js:1101:      nextBtn.onclick = () => {
+public/control-center/pages/home.js:1111:      askNextActionBtn.onclick = () => openAiWithPrompt(`Explain this next best action and give me the exact steps: ${dashboard.nextBestAction.recommendation}`);
+public/control-center/pages/home.js:1115:    if (operationsBtn) operationsBtn.onclick = () => openRoute("operations-centers");
+public/control-center/pages/home.js:1118:    if (aiTeamBtn) aiTeamBtn.onclick = () => openRoute("ai-command");
+public/control-center/pages/home.js:1120:    if (fullAiTeamBtn) fullAiTeamBtn.onclick = () => openRoute("ai-command");
+public/control-center/pages/home.js:1123:    if (quickCampaignBtn) quickCampaignBtn.onclick = () => openRoute("campaign-studio");
+public/control-center/pages/home.js:1126:    if (quickAssetBtn) quickAssetBtn.onclick = () => openRoute("library");
+public/control-center/pages/home.js:1129:    if (quickReadinessBtn) quickReadinessBtn.onclick = () => openRoute("setup");
+public/control-center/pages/home.js:1133:      quickAiBtn.onclick = () => openAiWithPrompt(dashboard.nextBestAction.recommendation);
+public/control-center/pages/home.js:1138:      promptNextBtn.onclick = () => openAiWithPrompt("What should I do next for this project? Prioritize the answer based on readiness, blockers, campaign state, and recent activity.");
+public/control-center/pages/home.js:1143:      promptReadinessBtn.onclick = () => openAiWithPrompt("Why is readiness low? Explain the missing integrations, assets, failed jobs, and readiness gaps in simple steps.");
+public/control-center/pages/home.js:1148:      promptLaunchBtn.onclick = () => openAiWithPrompt("Summarize the launch blockers and tell me what must be fixed before publishing.");
+public/control-center/pages/home.js:1153:      promptPlanBtn.onclick = () => openAiWithPrompt("Prepare today's action plan from the current dashboard. Give me prioritized tasks with owners and expected outcomes.");
+public/control-center/pages/home.js:1160:      card.onclick = () => handleAiRoleClick(roleId, roleName);
+public/control-center/pages/insights.js:964:    button.onclick = () => {
+public/control-center/pages/insights.js:970:    button.onclick = () => {
+public/control-center/pages/insights.js:1007:    button.onclick = () => {
+public/control-center/pages/insights.js:1450:    root.querySelector("#insightsRefreshBtn")?.addEventListener("click", () => {
+public/control-center/pages/content-studio-workspace.js:1856:    button.onclick = () => {
+public/control-center/pages/content-studio-workspace.js:1864:    button.onclick = () => {
+public/control-center/pages/content-studio-workspace.js:1875:    loadHandoffBtn.onclick = () => {
+public/control-center/pages/content-studio-workspace.js:1913:    generateBtn.onclick = async () => {
+public/control-center/pages/content-studio-workspace.js:2011:    improveBtn.onclick = () => {
+public/control-center/pages/content-studio-workspace.js:2027:    translateBtn.onclick = async () => {
+public/control-center/pages/content-studio-workspace.js:2073:    saveBtn.onclick = async () => {
+public/control-center/pages/content-studio-workspace.js:2087:    sendAiBtn.onclick = () => {
+public/control-center/pages/content-studio-workspace.js:2128:    sendMediaBtn.onclick = async () => {
+public/control-center/pages/content-studio-workspace.js:2160:    sendPublishingBtn.onclick = async () => {
+public/control-center/pages/content-studio-workspace.js:2191:    button.onclick = () => {
+public/control-center/pages/content-studio-workspace.js:2200:    button.onclick = async () => {
+public/control-center/pages/content-studio-workspace.js:2287:    button.onclick = async () => {
+public/control-center/pages/governance.js:1332:    button.onclick = async () => {
+public/control-center/pages/governance.js:1359:    button.onclick = () => {
+public/control-center/pages/governance.js:1366:    button.onclick = () => {
+public/control-center/pages/governance.js:1373:    button.onclick = async () => {
+public/control-center/pages/governance.js:1406:    button.onclick = async () => {
+public/control-center/pages/governance.js:1471:    button.onclick = () => {
+public/control-center/pages/governance.js:1480:    button.onclick = () => {
+public/control-center/pages/governance/dashboard.js:53:      <button onclick='sendAction({type:"ADS", budget:3000})'>
+public/control-center/pages/governance/dashboard.js:57:      <button onclick='sendAction({type:"FINANCE", amount:2000})'>
+public/control-center/pages/governance/dashboard.js:61:      <button onclick='sendAction({type:"CIVILIZATION"})'>
+public/control-center/pages/integrations.js:202:        enables: "Video insights, watch metrics, subscriber trends, comments, and publishing context.",
+public/control-center/pages/integrations.js:1276:    button.onclick = () => {
+public/control-center/pages/integrations.js:1286:    button.onclick = async () => {
+public/control-center/pages/integrations.js:1347:    select.onchange = (event) => {
+public/control-center/pages/integrations.js:1354:    select.onchange = (event) => {
+public/control-center/pages/integrations.js:1368:    button.onclick = () => {
+public/control-center/pages/integrations.js:1377:    button.onclick = () => {
+public/control-center/pages/integrations.js:1645:    button.onclick = async () => {
+public/control-center/pages/integrations.js:1667:    button.onclick = () => {
+public/control-center/pages/integrations.js:1680:      document.removeEventListener("keydown", integrationDrawerEscapeHandler);
+public/control-center/pages/integrations.js:1689:    document.addEventListener("keydown", integrationDrawerEscapeHandler);
+public/control-center/pages/setup.js:775:    completeNowBtn.onclick = () => {
+public/control-center/pages/setup.js:914:    button.onclick = () => activateStep(button.getAttribute("data-setup-step") || STEP_DEFINITIONS[0].id);
+public/control-center/pages/setup.js:918:    button.onclick = () => {
+public/control-center/pages/setup.js:928:    prevBtn.onclick = () => {
+public/control-center/pages/setup.js:936:    nextBtn.onclick = () => {
+public/control-center/pages/setup.js:985:      clearTimeout(draftAutoSaveTimer);
+public/control-center/pages/setup.js:988:    draftAutoSaveTimer = setTimeout(() => {
+public/control-center/pages/setup.js:996:  form.onchange = refreshAndPersistDraft;
+public/control-center/pages/setup.js:1004:    window.setTimeout(() => {
+public/control-center/pages/setup.js:1016:  setupRoot.onclick = (event) => {
+public/control-center/pages/setup.js:1029:    window.setTimeout(() => {
+public/control-center/pages/setup.js:1045:    saveDraftBtn.onclick = () => {
+public/control-center/pages/setup.js:1052:    saveBackendBtn.onclick = async () => {
+public/control-center/pages/setup.js:1099:        window.setTimeout(() => {
+public/control-center/pages/setup.js:1110:    resetBtn.onclick = () => {
+public/control-center/pages/setup.js:1121:    aiPositioningBtn.onclick = () => {
+public/control-center/pages/setup.js:1134:    aiAudienceBtn.onclick = () => {
+public/control-center/pages/setup.js:1147:    aiToneBtn.onclick = () => {
+public/control-center/pages/setup.js:1160:    aiFillBtn.onclick = () => {
+public/control-center/pages/setup.js:1188:    aiCommandBtn.onclick = () => {
+public/control-center/pages/setup.js:1202:    validateNowBtn.onclick = () => {
+public/control-center/pages/setup.js:1212:    continueLibraryBtn.onclick = () => {
+public/control-center/pages/setup.js:1219:    continueIntegrationsBtn.onclick = () => {
+public/control-center/pages/setup.js:1226:    continueCampaignBtn.onclick = () => {
+public/control-center/pages/setup.js:1233:    reviewMissingBtn.onclick = () => {
+public/control-center/pages/setup.js:1253:    reviewReadinessBtn.onclick = () => {
+public/control-center/pages/setup.js:1260:    smartActionBtn.onclick = () => {
+public/control-center/pages/setup.js:1756:      templateApplyBtn.onclick = async () => {
+public/control-center/pages/setup.js:1804:      saveBottomBtn.onclick = () => saveTopBtn.click();
+public/control-center/pages/publishing.js:13:    `<button type="button" class="btn btn-secondary" onclick="document.getElementById('publishingBuilderPanel')?.scrollIntoView({behavior:'smooth',block:'start'})">Prepare Publishing Package</button>`,
+public/control-center/pages/publishing.js:14:    `<button type="button" class="btn btn-secondary" onclick="document.getElementById('publishingQueuePanel')?.scrollIntoView({behavior:'smooth',block:'start'})">Open Queue</button>`,
+public/control-center/pages/publishing.js:15:    `<button type="button" class="btn btn-secondary" onclick="document.getElementById('publishingHandoffPanel')?.scrollIntoView({behavior:'smooth',block:'start'})">Review Approval Gate</button>`,
+public/control-center/pages/publishing.js:16:    `<button type="button" class="btn btn-primary" onclick="document.getElementById('publishingPushAiBtn')?.scrollIntoView({behavior:'smooth',block:'start'})">Open AI Review</button>`
+public/control-center/pages/publishing.js:96:  subscribeAutoMode
+public/control-center/pages/publishing.js:124:let publishingAutoModeUnsubscribe = null;
+public/control-center/pages/publishing.js:139:  publishingRenderTimer = window.setTimeout(() => {
+public/control-center/pages/publishing.js:160:  if (publishingAutoModeUnsubscribe) {
+public/control-center/pages/publishing.js:164:  publishingAutoModeUnsubscribe = subscribeAutoMode(() => {
+public/control-center/pages/publishing.js:1610:    button.onclick = () => {
+public/control-center/pages/publishing.js:1617:    button.onclick = () => {
+public/control-center/pages/publishing.js:1638:    newBtn.onclick = () => {
+public/control-center/pages/publishing.js:1647:    openQueueBtn.onclick = () => {
+public/control-center/pages/publishing.js:1654:    button.onclick = async () => {
+public/control-center/pages/publishing.js:1667:    scheduleBtn.onclick = async () => {
+public/control-center/pages/publishing.js:1724:    button.onclick = async () => {
+public/control-center/pages/publishing.js:1816:    approveBtn.onclick = async () => {
+public/control-center/pages/publishing.js:1849:    failBtn.onclick = async () => {
+public/control-center/pages/publishing.js:1879:    clearAiCommandHandoffBtn.onclick = () => {
+public/control-center/pages/publishing.js:1890:    loadHandoffBtn.onclick = () => {
+public/control-center/pages/publishing.js:1913:    pushAiBtn.onclick = () => {
+public/control-center/pages/publishing.js:1954:    autoPrepareBtn.onclick = async () => {
+public/control-center/pages/publishing.js:1995:    autoStopBtn.onclick = () => {
+public/control-center/pages/publishing.js:2003:    autoApproveBtn.onclick = async () => {
+public/control-center/pages/publishing.js:2019:    autoSkipBtn.onclick = async () => {
+public/control-center/pages/workflows.js:24:  subscribeAutoMode,
+public/control-center/pages/workflows.js:109:let workflowAutoModeUnsubscribe = null;
+public/control-center/pages/workflows.js:1118:  window.addEventListener("mh:submit-workflow", async (event) => {
+public/control-center/pages/workflows.js:1235:    if (workflowAutoModeUnsubscribe) workflowAutoModeUnsubscribe();
+public/control-center/pages/workflows.js:1236:    workflowAutoModeUnsubscribe = subscribeAutoMode(() => {
+public/control-center/pages/workflows.js:1275:    workflowTypeSelect.onchange = () => {
+public/control-center/pages/workflows.js:1285:    saveDraftBtn.onclick = () => {
+public/control-center/pages/workflows.js:1294:    clearDraftBtn.onclick = () => {
+public/control-center/pages/workflows.js:1306:    loadAiStateBtn.onclick = () => {
+public/control-center/pages/workflows.js:1454:  if (runBtn) runBtn.onclick = () => runWorkflow(session.selectedWorkflowId);
+public/control-center/pages/workflows.js:1456:  if (runBtnMain) runBtnMain.onclick = () => runWorkflow(session.selectedWorkflowId);
+public/control-center/pages/workflows.js:1460:    startRecommendedBtn.onclick = () => {
+public/control-center/pages/workflows.js:1468:    saveRecommendedBtn.onclick = () => {
+public/control-center/pages/workflows.js:1480:    sendRecommendedAiBtn.onclick = () => {
+public/control-center/pages/workflows.js:1499:    button.onclick = () => runWorkflow(button.getAttribute("data-wf-catalog-run") || session.selectedWorkflowId);
+public/control-center/pages/workflows.js:1503:    button.onclick = () => {
+public/control-center/pages/workflows.js:1513:    button.onclick = () => {
+public/control-center/pages/workflows.js:1533:    pushAiBtn.onclick = () => {
+public/control-center/pages/workflows.js:1549:  if (pushAiSecondaryBtn) pushAiSecondaryBtn.onclick = pushAiBtn?.onclick || null;
+public/control-center/pages/workflows.js:1553:    saveTaskBtn.onclick = () => {
+public/control-center/pages/workflows.js:1589:    recommendBtn.onclick = () => {
+public/control-center/pages/workflows.js:1625:    customBtn.onclick = () => {
+public/control-center/pages/workflows.js:1661:    fullAutomationBtn.onclick = async () => {
+public/control-center/pages/workflows.js:1690:    stepAutomationBtn.onclick = async () => {
+public/control-center/pages/workflows.js:1723:    autoStartBtn.onclick = async () => {
+public/control-center/pages/workflows.js:1727:      if (workflowAutoModeUnsubscribe) workflowAutoModeUnsubscribe();
+public/control-center/pages/workflows.js:1728:      workflowAutoModeUnsubscribe = subscribeAutoMode(() => {
+public/control-center/pages/workflows.js:1750:    autoPauseBtn.onclick = () => {
+public/control-center/pages/workflows.js:1758:    autoResumeBtn.onclick = async () => {
+public/control-center/pages/workflows.js:1773:    autoStopBtn.onclick = () => {
+public/control-center/pages/workflows.js:1781:    autoApproveBtn.onclick = async () => {
+public/control-center/pages/workflows.js:1796:    autoSkipBtn.onclick = async () => {
+public/control-center/pages/workflows.js:2227:        workflowType.onchange = () => {
+public/control-center/pages/workflows.js:2250:        button.onclick = () => {
+public/control-center/pages/workflows.js:2317:      if (heroPrepareBtn) heroPrepareBtn.onclick = prepareCurrentWorkflow;
+public/control-center/pages/workflows.js:2320:        button.onclick = openAiWorkspace;
+public/control-center/pages/workflows.js:2324:      if (prepareBtn) prepareBtn.onclick = prepareCurrentWorkflow;
+public/control-center/pages/workflows.js:2327:      if (aiBtn) aiBtn.onclick = openAiWorkspace;
+public/control-center/pages/workflows.js:2331:        campaignBtn.onclick = () => {
+public/control-center/pages/workflows.js:2341:        tasksBtn.onclick = () => {
+public/control-center/pages/workflows.js:2365:        button.onclick = () => {
+public/control-center/pages/workflows.js:2394:        techBtn.onclick = () => {
+public/control-center/pages/settings.js:476:        options: ["Opportunity sprint", "Evergreen pillar", "Product category SEO", "Localized market SEO", "Technical cleanup"]
+public/control-center/pages/settings.js:1844:    button.addEventListener("click", async () => {
+public/control-center/pages/settings.js:1958:    button.addEventListener("click", () => {
+public/control-center/pages/settings.js:1964:    button.addEventListener("click", () => {
+public/control-center/pages/settings.js:1987:    control.addEventListener(eventName, () => {
+public/control-center/pages/ads-manager.js:261:    button.onclick = () => {
+public/control-center/pages/ads-manager.js:277:    publishingBtn.onclick = () => navigateTo("publishing");
+public/control-center/pages/ads-manager.js:282:    libraryBtn.onclick = () => navigateTo("library");
+public/control-center/app.js:31:  subscribe,
+public/control-center/app.js:103:  return appShellLifecycle.addEventListener(target, type, handler, options);
+public/control-center/app.js:513:    saveBtn.addEventListener("click", async () => {
+public/control-center/app.js:550:    diagBtn.addEventListener("click", async () => {
+public/control-center/app.js:558:    testBtn.addEventListener("click", async () => {
+public/control-center/app.js:611:    clearBtn.addEventListener("click", () => {
+public/control-center/app.js:624:    clearReloadBtn.addEventListener("click", () => {
+public/control-center/app.js:635:    closeBtn.addEventListener("click", hideAccessKeyModal);
+public/control-center/app.js:638:  modal.addEventListener("click", (e) => {
+public/control-center/app.js:642:  modal.addEventListener("keydown", (e) => {
+public/control-center/app.js:659:    setTimeout(() => input.focus(), 50);
+public/control-center/app.js:786:    clearTimeout(messageTimer);
+public/control-center/app.js:789:  messageTimer = setTimeout(() => {
+public/control-center/app.js:1150:    clearTimeout(runtimeTracePersistTimer);
+public/control-center/app.js:1153:  runtimeTracePersistTimer = window.setTimeout(() => {
+public/control-center/app.js:1200:  document.addEventListener("click", (event) => {
+public/control-center/app.js:1530:    button.addEventListener("click", () => {
+public/control-center/app.js:1608:    retryBtn.addEventListener("click", () => {
+public/control-center/app.js:1615:    accessKeyBtn.addEventListener("click", () => {
+public/control-center/app.js:1622:    clearSavedKeyReloadBtn.addEventListener("click", () => {
+public/control-center/app.js:1691:  globalLoadingWatchdogTimer = window.setInterval(() => {
+public/control-center/app.js:1756:  window.addEventListener("mh:control-center-api-trace", (event) => {
+public/control-center/app.js:1777:  window.addEventListener("error", (event) => {
+public/control-center/app.js:1786:  window.addEventListener("unhandledrejection", (event) => {
+public/control-center/app.js:2054:  const cleanup = activeRouteCleanup;
+public/control-center/app.js:2059:    cleanup();
+public/control-center/app.js:2061:    console.warn("[Route] cleanup failed", error);
+public/control-center/app.js:2189:    timer = setTimeout(() => {
+public/control-center/app.js:2199:      clearTimeout(timer);
+public/control-center/app.js:2218:    hardTimeoutTimer = setTimeout(() => {
+public/control-center/app.js:2228:    responseTextWatchdogTimer = setTimeout(() => {
+public/control-center/app.js:2256:    parseWatchdogTimer = setInterval(() => {
+public/control-center/app.js:2366:      clearTimeout(hardTimeoutTimer);
+public/control-center/app.js:2369:      clearTimeout(responseTextWatchdogTimer);
+public/control-center/app.js:2372:      clearInterval(parseWatchdogTimer);
+public/control-center/app.js:2547:  setTimeout(() => {
+public/control-center/app.js:3114:  document.addEventListener("click", (event) => {
+public/control-center/app.js:3186:  // Register with lifecycle registry for proper cleanup on route changes
+public/control-center/app.js:3203:  select.addEventListener("change", async (event) => {
+public/control-center/app.js:3335:    toggleBtn.onclick = (event) => {
+public/control-center/app.js:3348:    backdrop.onclick = closeSidebar;
+public/control-center/app.js:3352:    commandToggleBtn.onclick = (event) => {
+public/control-center/app.js:3369:    commandBackdrop.onclick = () => {
+public/control-center/app.js:3375:  document.addEventListener("click", (event) => {
+public/control-center/app.js:3392:  document.addEventListener("keydown", (event) => {
+public/control-center/app.js:3402:  // These ensure proper cleanup on route changes
+public/control-center/app.js:3410:  addAppShellListener(window, "orientationchange", syncCompactShellState);
+public/control-center/app.js:3593:  setTimeout(() => commandInput?.focus(), 40);
+public/control-center/app.js:3647:  document.addEventListener("click", (event) => {
+public/control-center/app.js:3661:  document.addEventListener("keydown", (event) => {
+public/control-center/app.js:3668:    commandBar.addEventListener("click", (event) => event.stopPropagation());
+public/control-center/app.js:3689:    commandInput.addEventListener("keydown", (event) => {
+public/control-center/app.js:3699:    searchInput.addEventListener("keydown", (event) => {
+public/control-center/app.js:3740:  toggle.onclick = (event) => {
+public/control-center/app.js:3753:  closeBtn?.addEventListener("click", () => setOpen(false));
+public/control-center/app.js:3755:  document.addEventListener("click", (event) => {

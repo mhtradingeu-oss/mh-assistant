@@ -1,0 +1,1123 @@
+### write/mutation/action words in frontend
+public/control-center/constants.js:3:export const CONTROL_ACCESS_KEY_STORAGE_KEY = "mh-control-write-key";
+public/control-center/constants.js:7:  "mh-control-center-write-key",
+public/control-center/ai-team-model.js:9:  - No publishing.
+public/control-center/ai-team-model.js:18:    ownerSummary: "Campaign planning, positioning, launch decisions, and next best action.",
+public/control-center/ai-team-model.js:20:    outputTargets: ["campaign-studio", "content-studio", "media-studio", "publishing"],
+public/control-center/ai-team-model.js:24:    id: "content_writer",
+public/control-center/ai-team-model.js:29:    outputTargets: ["content-studio", "governance", "publishing"],
+public/control-center/ai-team-model.js:38:    outputTargets: ["media-studio", "library", "publishing"],
+public/control-center/ai-team-model.js:46:    primaryPages: ["media-studio", "content-studio", "publishing"],
+public/control-center/ai-team-model.js:47:    outputTargets: ["media-studio", "content-studio", "publishing"],
+public/control-center/ai-team-model.js:51:    id: "publisher",
+public/control-center/ai-team-model.js:54:    ownerSummary: "Publishing queue, schedules, manual handoffs, retries, and release readiness.",
+public/control-center/ai-team-model.js:55:    primaryPages: ["publishing", "queue-center", "ai-command"],
+public/control-center/ai-team-model.js:56:    outputTargets: ["publishing", "queue-center", "insights"],
+public/control-center/ai-team-model.js:57:    defaultPrompt: "Act as Publisher. Prepare the next publish-ready package and identify missing approvals or queue steps."
+public/control-center/ai-team-model.js:84:    defaultPrompt: "Act as Researcher. Find the strongest market, competitor, and audience insights for this project."
+public/control-center/ai-team-model.js:90:    ownerSummary: "Claims, approvals, publishing risk, brand safety, governance, and release trust.",
+public/control-center/ai-team-model.js:91:    primaryPages: ["governance", "publishing", "content-studio", "media-studio"],
+public/control-center/ai-team-model.js:92:    outputTargets: ["governance", "publishing", "content-studio", "media-studio"],
+public/control-center/ai-team-model.js:93:    defaultPrompt: "Act as Compliance Reviewer. Flag claims, approval gaps, and publishing risks before release."
+public/control-center/ai-team-model.js:99:    ownerSummary: "Workflows, tasks, queues, jobs, notifications, handoffs, and execution safety.",
+public/control-center/ai-team-model.js:109:  library: ["media_director", "content_writer", "publisher"],
+public/control-center/ai-team-model.js:113:  publishing: ["publisher", "compliance_reviewer"],
+public/control-center/ai-team-model.js:114:  "campaign-studio": ["strategist", "content_writer", "media_director", "ads_optimizer"],
+public/control-center/ai-team-model.js:115:  "content-studio": ["content_writer", "compliance_reviewer", "publisher"],
+public/control-center/ai-team-model.js:116:  "media-studio": ["media_director", "video_lead", "publisher"],
+public/control-center/ai-team-model.js:123:  "queue-center": ["operations_lead", "publisher"],
+public/control-center/ui/page-standard.js:13:  "publishing",
+public/control-center/ui/page-standard.js:31:    description: "Brand, market, audience, goals, and validation inputs.",
+public/control-center/ui/page-standard.js:32:    primary: { label: "Save Setup", action: "focus-save" },
+public/control-center/ui/page-standard.js:39:    primary: { label: "Upload Assets", action: "focus-upload" },
+public/control-center/ui/page-standard.js:45:    description: "Connect, test, sync, and diagnose platforms.",
+public/control-center/ui/page-standard.js:46:    primary: { label: "Run Sync", action: "focus-sync" },
+public/control-center/ui/page-standard.js:52:    description: "Direct role-aware AI agents, structured tasks, artifacts, and decisions.",
+public/control-center/ui/page-standard.js:60:    primary: { label: "Run Workflow", action: "focus-run-workflow" },
+public/control-center/ui/page-standard.js:67:    primary: { label: "Build Campaign", action: "focus-save-campaign" },
+public/control-center/ui/page-standard.js:73:    description: "Create, review, approve, rewrite, translate, and route copy.",
+public/control-center/ui/page-standard.js:74:    primary: { label: "Generate Content", action: "focus-generate-content" },
+public/control-center/ui/page-standard.js:81:    primary: { label: "Generate Media", action: "focus-generate-media" },
+public/control-center/ui/page-standard.js:82:    secondary: { label: "Send To Publishing", route: "publishing" }
+public/control-center/ui/page-standard.js:84:  publishing: {
+public/control-center/ui/page-standard.js:87:    description: "Schedule, approve, retry, and monitor publishing execution.",
+public/control-center/ui/page-standard.js:88:    primary: { label: "Schedule Job", action: "focus-schedule" },
+public/control-center/ui/page-standard.js:95:    primary: { label: "Suggest Budget", action: "focus-save-budget" },
+public/control-center/ui/page-standard.js:109:    primary: { label: "Run Research", action: "focus-run-research" },
+public/control-center/ui/page-standard.js:116:    primary: { label: "Save Settings", action: "focus-save-settings" },
+public/control-center/ui/page-standard.js:122:  "focus-save": "#setupSaveBackendBtn",
+public/control-center/ui/page-standard.js:125:  "focus-upload": "#libraryUploadBtn",
+public/control-center/ui/page-standard.js:128:  "focus-connect-platform": "[data-integration-primary='connect'], [data-integration-action='connect'], [data-integration-primary]",
+public/control-center/ui/page-standard.js:129:  "focus-test-connection": "[data-integration-action='test']",
+public/control-center/ui/page-standard.js:130:  "focus-sync": "[data-integration-action='sync'], [data-integration-primary='sync']",
+public/control-center/ui/page-standard.js:133:  "focus-run-workflow": "#workflowRunBtn, #workflowRunBtnMain",
+public/control-center/ui/page-standard.js:136:  "focus-save-campaign": "#campaignBuildPlanBtn",
+public/control-center/ui/page-standard.js:139:  "focus-generate-content": "#contentAiRewriteBtn, #contentSaveBtn",
+public/control-center/ui/page-standard.js:141:  "focus-content-ai": "#contentAiRewriteBtn",
+public/control-center/ui/page-standard.js:143:  "focus-generate-media": "[data-new-media-job], #mediaSaveBtn",
+public/control-center/ui/page-standard.js:147:  "focus-schedule": "#publishingScheduleBtn",
+public/control-center/ui/page-standard.js:148:  "focus-publishing-ai": "#publishingPushAiBtn",
+public/control-center/ui/page-standard.js:149:  "focus-retry-publishing": "#publishingRequeueBtn",
+public/control-center/ui/page-standard.js:150:  "focus-save-budget": "#adsManagerOpenPublishingBtn, #adsTotalBudgetInput",
+public/control-center/ui/page-standard.js:151:  "focus-run-research": "#researchRefreshBtn",
+public/control-center/ui/page-standard.js:152:  "focus-save-research": "#researchSaveFindingBtn, #researchSaveRecommendationBtn",
+public/control-center/ui/page-standard.js:153:  "focus-save-settings": "[data-settings-action='save-all']",
+public/control-center/ui/page-standard.js:202:  if (value.includes("ready") || value.includes("healthy") || value.includes("active") || value.includes("connected") || value.includes("complete")) {
+public/control-center/ui/page-standard.js:247:  const connectedCount = checkKeys.filter((key) => Boolean(checks[key])).length;
+public/control-center/ui/page-standard.js:249:  const scheduledJobs = asArray(activity.scheduled_jobs);
+public/control-center/ui/page-standard.js:256:  const connectorScore = asNumber(integrations.readiness_score ?? overview.connector_readiness_score, 0);
+public/control-center/ui/page-standard.js:274:  const systemScore = Math.round((readinessScore + connectorScore) / 2);
+public/control-center/ui/page-standard.js:281:    market: asString(overview.market || state.context?.currentMarket || "-"),
+public/control-center/ui/page-standard.js:283:    connectorScore,
+public/control-center/ui/page-standard.js:285:    connectedCount,
+public/control-center/ui/page-standard.js:286:    connectorTotal: checkKeys.length,
+public/control-center/ui/page-standard.js:287:    scheduledJobs: scheduledJobs.length,
+public/control-center/ui/page-standard.js:310:    setup: "Complete missing setup fields and save the project foundation.",
+public/control-center/ui/page-standard.js:312:    integrations: "Repair or connect the highest-impact platform, then run sync.",
+public/control-center/ui/page-standard.js:316:    "content-studio": "Generate or approve the next content item.",
+public/control-center/ui/page-standard.js:317:    "media-studio": "Create the missing media job or approve ready creative.",
+public/control-center/ui/page-standard.js:318:    publishing: "Clear failed or ready publishing jobs before scheduling more work.",
+public/control-center/ui/page-standard.js:319:    "ads-manager": "Build the paid brief and generate variants.",
+public/control-center/ui/page-standard.js:321:    research: "Save the strongest market finding and send it to Campaign Studio.",
+public/control-center/ui/page-standard.js:350:function runAction(action, context) {
+public/control-center/ui/page-standard.js:406:  const shell = document.createElement("div");
+public/control-center/ui/page-standard.js:456:    { label: "Connectors", value: `${metrics.connectedCount}/${metrics.connectorTotal || 0}`, tone: metrics.connectedCount ? "success" : "warning" },
+public/control-center/ui/page-standard.js:475:  button.onclick = () => runAction(action, context);
+public/control-center/system-intelligence.js:37:function createRecommendation({
+public/control-center/system-intelligence.js:48:  handoffPayload = null,
+public/control-center/system-intelligence.js:63:    handoffPayload
+public/control-center/system-intelligence.js:128:  const handoffs = asArray(operations.handoffs?.items);
+public/control-center/system-intelligence.js:131:  const hasMediaApproved = mediaJobs.some((item) => ["approved", "completed", "success", "ready"].includes(normalizeText(item?.status)));
+public/control-center/system-intelligence.js:132:  const hasWorkflowOutput = workflowRuns.length > 0 || handoffs.some((item) => normalizeText(item?.source_page) === "workflows");
+public/control-center/system-intelligence.js:134:  const scheduledJobs = asArray(activity.scheduled_jobs);
+public/control-center/system-intelligence.js:136:  const publishingFailed =
+public/control-center/system-intelligence.js:140:  const hasPublishingScheduled = scheduledJobs.length > 0 || queueItems.some((item) => ["scheduled", "queued"].includes(normalizeText(item?.status)));
+public/control-center/system-intelligence.js:153:    publishingFailed,
+public/control-center/system-intelligence.js:157:    handoffs
+public/control-center/system-intelligence.js:162:  return asArray(signals.handoffs)
+public/control-center/system-intelligence.js:171:        title: asString(payload?.workflow_title || payload?.title || payload?.prompt || "Cross-page handoff"),
+public/control-center/system-intelligence.js:181:    recommendations.push(createRecommendation({
+public/control-center/system-intelligence.js:197:    recommendations.push(createRecommendation({
+public/control-center/system-intelligence.js:208:      relatedPages: ["content-studio", "media-studio", "publishing"]
+public/control-center/system-intelligence.js:213:    recommendations.push(createRecommendation({
+public/control-center/system-intelligence.js:224:      relatedPages: ["workflows", "ai-command", "publishing"]
+public/control-center/system-intelligence.js:229:    recommendations.push(createRecommendation({
+public/control-center/system-intelligence.js:232:      reason: "No content draft is available for downstream media or publishing lanes.",
+public/control-center/system-intelligence.js:240:      relatedPages: ["media-studio", "publishing"]
+public/control-center/system-intelligence.js:245:    recommendations.push(createRecommendation({
+public/control-center/system-intelligence.js:247:      title: "Generate and approve media assets",
+public/control-center/system-intelligence.js:248:      reason: "No approved media output exists yet for publishing execution.",
+public/control-center/system-intelligence.js:255:      draftPayload: { prompt: "Create media variants and mark at least one execution-ready version." },
+public/control-center/system-intelligence.js:256:      relatedPages: ["library", "publishing"]
+public/control-center/system-intelligence.js:261:    recommendations.push(createRecommendation({
+public/control-center/system-intelligence.js:263:      title: "Run a workflow to create cross-page handoff",
+public/control-center/system-intelligence.js:264:      reason: "No workflow output/handoff is currently available for downstream routing.",
+public/control-center/system-intelligence.js:272:      relatedPages: ["ai-command", "publishing"]
+public/control-center/system-intelligence.js:277:    recommendations.push(createRecommendation({
+public/control-center/system-intelligence.js:278:      id: "publishing-not-scheduled",
+public/control-center/system-intelligence.js:279:      title: "Schedule ready output in publishing",
+public/control-center/system-intelligence.js:280:      reason: "Content/media readiness exists but nothing is scheduled yet.",
+public/control-center/system-intelligence.js:282:      targetPage: "publishing",
+public/control-center/system-intelligence.js:285:      blockerType: "publishing_gap",
+public/control-center/system-intelligence.js:287:      handoffPayload: { destination_page: "publishing", status: "available" },
+public/control-center/system-intelligence.js:292:  if (signals.publishingFailed) {
+public/control-center/system-intelligence.js:293:    recommendations.push(createRecommendation({
+public/control-center/system-intelligence.js:294:      id: "publishing-failed-items",
+public/control-center/system-intelligence.js:295:      title: "Resolve failed publishing blockers",
+public/control-center/system-intelligence.js:298:      targetPage: "publishing",
+public/control-center/system-intelligence.js:301:      blockerType: "publishing_failure",
+public/control-center/system-intelligence.js:308:    recommendations.push(createRecommendation({
+public/control-center/system-intelligence.js:318:      relatedPages: ["content-studio", "media-studio", "publishing"]
+public/control-center/system-intelligence.js:323:    recommendations.push(createRecommendation({
+public/control-center/system-intelligence.js:352:  const publishingReady = signals.hasPublishingScheduled && !signals.publishingFailed;
+public/control-center/system-intelligence.js:359:    { key: "media", label: "Media Studio", ready: mediaReady, note: mediaReady ? "Approved media" : "No approved media" },
+public/control-center/system-intelligence.js:361:    { key: "publishing", label: "Publishing", ready: publishingReady, note: publishingReady ? "Queue ready" : "Needs scheduling" }
+public/control-center/system-intelligence.js:368:  const handoffs = mapHandoffs(signals);
+public/control-center/system-intelligence.js:381:  const fallback = createRecommendation({
+public/control-center/system-intelligence.js:394:    generatedAt: new Date().toISOString(),
+public/control-center/system-intelligence.js:406:    handoffs,
+public/control-center/system-intelligence.js:489:  return buildSystemIntelligence(state).handoffs;
+public/control-center/index.html:137:            <button class="nav-item" data-route="publishing" data-page="publishing" type="button">Publishing</button>
+public/control-center/index.html:230:          <!-- Kept hidden; app.js/page-standard.js may update or read it -->
+public/control-center/index.html:261:            <button id="runSearchBtn" class="btn btn-secondary" data-action="search" type="button">Search</button>
+public/control-center/index.html:262:            <button id="runQuickCommandBtn" class="btn btn-primary" data-action="send-ai-command" type="button">Run</button>
+public/control-center/index.html:264:            <button id="scheduleBtn" class="btn btn-secondary" data-action="open-publishing" type="button">Schedule</button>
+public/control-center/index.html:282:        overlay.classList.remove("is-visible");
+public/control-center/index.html:329:              window.localStorage.setItem("mh-control-write-key", entered.trim());
+public/control-center/index.html:356:      window.addEventListener("unhandledrejection", function (event) {
+public/control-center/index.html:362:          : String(reason || "Unhandled startup rejection");
+public/control-center/index.html:369:  <script src="./runtime/command-runtime.js?v=20260510-command-runtime-classic-2"></script>
+public/control-center/index.html:451:              <button class="ai-dock-chip" data-ai-route="publishing">
+public/control-center/automation-engine.js:8:  "create_draft",
+public/control-center/automation-engine.js:9:  "save_local_draft",
+public/control-center/automation-engine.js:10:  "create_handoff",
+public/control-center/automation-engine.js:11:  "generate_prompt",
+public/control-center/automation-engine.js:13:  "prepare_publishing_draft"
+public/control-center/automation-engine.js:17:  { test: /publish\s*now|go\s*live|send\s*live|execute\s*publish|push\s*live/i, reason: "Publishing requires approval and manual confirmation." },
+public/control-center/automation-engine.js:18:  { test: /\bdelete\b|\bremove\b|\bdestroy\b|\berase\b/i, reason: "Destructive actions are blocked in Auto Mode." },
+public/control-center/automation-engine.js:19:  { test: /\boverwrite\b|\breplace\b|\btruncate\b/i, reason: "Overwrite actions are blocked in Auto Mode." },
+public/control-center/automation-engine.js:20:  { test: /disconnect|revoke|unlink/i, reason: "Connection removal is blocked in Auto Mode." },
+public/control-center/automation-engine.js:21:  { test: /approve\s*final\s*asset|final\s*approval/i, reason: "Final approvals require a human decision." },
+public/control-center/automation-engine.js:25:  { test: /credential|api\s*key|secret|token|auth/i, reason: "Credential and provider connection actions require approval." }
+public/control-center/automation-engine.js:32:  runToken: 0
+public/control-center/automation-engine.js:82:    status: ["idle", "running", "paused", "waiting_approval", "completed", "failed"].includes(normalizeText(parsed.status))
+public/control-center/automation-engine.js:99:    if (state.status === "running" || state.status === "waiting_approval") {
+public/control-center/automation-engine.js:186:function createStep({
+public/control-center/automation-engine.js:226:        whatWillHappen: `${action} is not executed automatically. A human must approve the next move.`
+public/control-center/automation-engine.js:231:  if (type === "prepare_publishing_draft") {
+public/control-center/automation-engine.js:235:  if (fingerprint.includes("publishing") && /publish/.test(fingerprint)) {
+public/control-center/automation-engine.js:253:    const prompt = asString(rec?.draftPayload?.prompt || `Plan and execute: ${asString(rec?.title)}`);
+public/control-center/automation-engine.js:255:    return createStep({
+public/control-center/automation-engine.js:256:      type: "create_handoff",
+public/control-center/automation-engine.js:284:    createStep({
+public/control-center/automation-engine.js:285:      type: "create_draft",
+public/control-center/automation-engine.js:295:    createStep({
+public/control-center/automation-engine.js:296:      type: "create_handoff",
+public/control-center/automation-engine.js:298:      action: "Create content-to-media handoff",
+public/control-center/automation-engine.js:306:    createStep({
+public/control-center/automation-engine.js:307:      type: "create_handoff",
+public/control-center/automation-engine.js:309:      action: "Create media-to-library handoff",
+public/control-center/automation-engine.js:312:        prompt: "Save approved media as managed library assets.",
+public/control-center/automation-engine.js:317:    createStep({
+public/control-center/automation-engine.js:318:      type: "create_handoff",
+public/control-center/automation-engine.js:319:      targetPage: "publishing",
+public/control-center/automation-engine.js:320:      action: "Create library-to-publishing handoff",
+public/control-center/automation-engine.js:323:        prompt: "Prepare publishing draft with approved content/media and schedule-safe checklist.",
+public/control-center/automation-engine.js:331:export async function runAutomationStep(step, context = {}) {
+public/control-center/automation-engine.js:349:    if (normalizeText(step.type) === "generate_prompt") {
+public/control-center/automation-engine.js:357:        updatedAt: new Date().toISOString()
+public/control-center/automation-engine.js:359:      return { status: "success", reason: "Prompt generated.", step };
+public/control-center/automation-engine.js:362:    if (normalizeText(step.type) === "save_local_draft") {
+public/control-center/automation-engine.js:370:          intent: "save_local_draft",
+public/control-center/automation-engine.js:378:    if (normalizeText(step.type) === "create_draft") {
+public/control-center/automation-engine.js:396:      if (typeof context.createProjectHandoff === "function") {
+public/control-center/automation-engine.js:397:        context.createProjectHandoff(projectName, draftPayload).catch(() => {});
+public/control-center/automation-engine.js:399:      return { status: "success", reason: "Draft created.", step };
+public/control-center/automation-engine.js:404:      const handoff = {
+public/control-center/automation-engine.js:415:      setSharedHandoff(projectName, "workflows", handoff);
+public/control-center/automation-engine.js:416:      if (typeof context.createProjectHandoff === "function") {
+public/control-center/automation-engine.js:417:        context.createProjectHandoff(projectName, handoff).catch(() => {});
+public/control-center/automation-engine.js:422:    if (normalizeText(step.type) === "prepare_publishing_draft") {
+public/control-center/automation-engine.js:424:      const handoff = {
+public/control-center/automation-engine.js:426:        destination_page: "publishing",
+public/control-center/automation-engine.js:430:          title: asString(step?.payload?.title || "Prepared publishing draft"),
+public/control-center/automation-engine.js:432:          intent: "prepare_publishing_draft",
+public/control-center/automation-engine.js:436:      setSharedHandoff(projectName, "publishing", handoff);
+public/control-center/automation-engine.js:437:      if (typeof context.createProjectHandoff === "function") {
+public/control-center/automation-engine.js:438:        context.createProjectHandoff(projectName, handoff).catch(() => {});
+public/control-center/automation-engine.js:443:    if (normalizeText(step.type) === "create_handoff") {
+public/control-center/automation-engine.js:445:      const handoff = {
+public/control-center/automation-engine.js:460:      setSharedHandoff(projectName, destination, handoff);
+public/control-center/automation-engine.js:461:      if (typeof context.createProjectHandoff === "function") {
+public/control-center/automation-engine.js:462:        context.createProjectHandoff(projectName, handoff).catch(() => {});
+public/control-center/automation-engine.js:464:      return { status: "success", reason: "Handoff created.", step };
+public/control-center/automation-engine.js:467:    return { status: "skipped", reason: "No runnable action for step type.", step };
+public/control-center/automation-engine.js:473:export async function runAutomationPlan(plan, options = {}) {
+public/control-center/automation-engine.js:488:    const result = await runAutomationStep(step, options.context || {});
+public/control-center/automation-engine.js:521:async function runAutoModeLoop(options = {}) {
+public/control-center/automation-engine.js:524:  const activeToken = autoModeRuntime.runToken;
+public/control-center/automation-engine.js:527:    if (activeToken !== autoModeRuntime.runToken) return getAutoModeState();
+public/control-center/automation-engine.js:528:    if (autoModeState.status !== "running") return getAutoModeState();
+public/control-center/automation-engine.js:554:    const result = await runAutomationStep(step, context);
+public/control-center/automation-engine.js:589:export function createAutoModeController(state, context = {}) {
+public/control-center/automation-engine.js:600:    approveCurrentGate,
+public/control-center/automation-engine.js:607:export async function startAutoMode(plan, options = {}) {
+public/control-center/automation-engine.js:613:  autoModeRuntime.runToken += 1;
+public/control-center/automation-engine.js:618:  autoModeState.status = "running";
+public/control-center/automation-engine.js:633:  return runAutoModeLoop(options);
+public/control-center/automation-engine.js:637:  if (autoModeState.status !== "running") return getAutoModeState();
+public/control-center/automation-engine.js:638:  autoModeRuntime.runToken += 1;
+public/control-center/automation-engine.js:645:export async function resumeAutoMode(options = {}) {
+public/control-center/automation-engine.js:650:  autoModeRuntime.runToken += 1;
+public/control-center/automation-engine.js:657:  autoModeState.status = "running";
+public/control-center/automation-engine.js:661:  return runAutoModeLoop(options);
+public/control-center/automation-engine.js:665:  autoModeRuntime.runToken += 1;
+public/control-center/automation-engine.js:675:export async function approveCurrentGate(options = {}) {
+public/control-center/automation-engine.js:685:  // Approval means proceed manually for guarded actions; never auto-publish or execute destructive actions.
+public/control-center/automation-engine.js:702:  autoModeRuntime.runToken += 1;
+public/control-center/automation-engine.js:703:  autoModeState.status = "running";
+public/control-center/automation-engine.js:705:  return runAutoModeLoop(options);
+public/control-center/automation-engine.js:708:export async function skipCurrentStep(options = {}) {
+public/control-center/automation-engine.js:724:  autoModeRuntime.runToken += 1;
+public/control-center/automation-engine.js:725:  autoModeState.status = "running";
+public/control-center/automation-engine.js:727:  return runAutoModeLoop(options);
+public/control-center/automation-engine.js:738:    autoModeListeners.delete(listener);
+public/control-center/runtime/command-runtime.js:13:  This file is currently a non-active runtime skeleton.
+public/control-center/runtime/command-runtime.js:14:  No production runtime integration has started yet.
+public/control-center/runtime/command-runtime.js:39:  - accessibility synchronization
+public/control-center/runtime/command-runtime.js:41:  - runtime transitions
+public/control-center/runtime/command-runtime.js:116:  syncCommandRuntime()
+public/control-center/runtime/RUNTIME_ROADMAP.md:8:- command runtime
+public/control-center/runtime/RUNTIME_ROADMAP.md:17:## shell-runtime.js
+public/control-center/runtime/RUNTIME_ROADMAP.md:23:## overlay-runtime.js
+public/control-center/runtime/RUNTIME_ROADMAP.md:29:## command-runtime.js
+public/control-center/runtime/RUNTIME_ROADMAP.md:35:## route-runtime.js
+public/control-center/runtime/RUNTIME_ROADMAP.md:50:Never rewrite runtime blindly.
+public/control-center/runtime/lifecycle/README.md:15:- **Centralized cleanup** — single call to remove all listeners/timers for a page
+public/control-center/runtime/lifecycle/README.md:29:- Registry does not create, modify, or delete UI elements
+public/control-center/runtime/lifecycle/README.md:42:- After cleanup, registry rejects new active listeners (returns no-ops)
+public/control-center/runtime/lifecycle/README.md:46:### createLifecycleRegistry(nameOrOptions)
+public/control-center/runtime/lifecycle/README.md:51:const registry = createLifecycleRegistry('page-library');
+public/control-center/runtime/lifecycle/README.md:53:const registry = createLifecycleRegistry({ name: 'page-library', debug: true });
+public/control-center/runtime/lifecycle/README.md:63:// disposer();  // remove listener before full cleanup()
+public/control-center/runtime/lifecycle/README.md:92:  // render update
+public/control-center/runtime/lifecycle/README.md:103:  // close connections, reset state, etc.
+public/control-center/runtime/lifecycle/README.md:109:Remove all listeners, clear all timers, cancel animation frames, and run all disposers.
+public/control-center/runtime/lifecycle/README.md:152:const pageRegistry = createLifecycleRegistry('page-library');
+public/control-center/runtime/lifecycle/README.md:161:  // custom cleanup: close connections, save state, etc.
+public/control-center/runtime/lifecycle/README.md:166:pageRegistry.cleanup();  // all listeners removed, timers cleared, disposers run
+public/control-center/runtime/lifecycle/README.md:183:- ✓ Module created: `lifecycle-registry.js`
+public/control-center/runtime/lifecycle/README.md:192:2. Major pages (library.js, integrations.js, workflows.js, publishing.js, etc.)
+public/control-center/runtime/lifecycle/README.md:207:node --check public/control-center/runtime/lifecycle/lifecycle-registry.js
+public/control-center/runtime/lifecycle/lifecycle-registry.js:12: *   const registry = createLifecycleRegistry('page-library');
+public/control-center/runtime/lifecycle/lifecycle-registry.js:18: *   registry.cleanup();  // removes all listeners, clears timers, runs disposers
+public/control-center/runtime/lifecycle/lifecycle-registry.js:28:function createLifecycleRegistry(nameOrOptions = 'lifecycle-registry') {
+public/control-center/runtime/lifecycle/lifecycle-registry.js:38:  const disposers = [];      // {fn, run}
+public/control-center/runtime/lifecycle/lifecycle-registry.js:98:          if (target && typeof target.removeEventListener === 'function') {
+public/control-center/runtime/lifecycle/lifecycle-registry.js:99:            target.removeEventListener(type, handler, options);
+public/control-center/runtime/lifecycle/lifecycle-registry.js:224:     * Add a custom disposer function to run on cleanup.
+public/control-center/runtime/lifecycle/lifecycle-registry.js:226:     * @param {function} disposer - Function to run during cleanup
+public/control-center/runtime/lifecycle/lifecycle-registry.js:230:      // If already cleaned up, run immediately
+public/control-center/runtime/lifecycle/lifecycle-registry.js:254:      disposers.push({ fn: disposer, run: false });
+public/control-center/runtime/lifecycle/lifecycle-registry.js:261:          if (!entry.run) {
+public/control-center/runtime/lifecycle/lifecycle-registry.js:262:            entry.run = true;
+public/control-center/runtime/lifecycle/lifecycle-registry.js:278:     * Clean up all listeners, timers, animation frames, and run disposers.
+public/control-center/runtime/lifecycle/lifecycle-registry.js:338:          if (!disposer.run) {
+public/control-center/runtime/lifecycle/lifecycle-registry.js:339:            disposer.run = true;
+public/control-center/runtime/lifecycle/lifecycle-registry.js:387: * @returns {object} No-op registry with same API as createLifecycleRegistry
+public/control-center/runtime/lifecycle/lifecycle-registry.js:389:function createNoopLifecycleRegistry() {
+public/control-center/runtime/lifecycle/lifecycle-registry.js:408:    createLifecycleRegistry,
+public/control-center/runtime/lifecycle/lifecycle-registry.js:409:    createNoopLifecycleRegistry
+public/control-center/runtime/lifecycle/lifecycle-registry.js:413:export { createLifecycleRegistry, createNoopLifecycleRegistry };
+public/control-center/runtime/runtime-boundaries.js:4:  command: "global-command-runtime",
+public/control-center/runtime/runtime-boundaries.js:5:  overlays: "overlay-runtime",
+public/control-center/runtime/runtime-boundaries.js:6:  diagnostics: "diagnostics-runtime",
+public/control-center/runtime/runtime-boundaries.js:7:  ai: "ai-runtime",
+public/control-center/runtime/runtime-boundaries.js:8:  startup: "startup-runtime"
+public/control-center/runtime/README.md:4:Gradually decompose the legacy Control Center runtime into isolated operational modules.
+public/control-center/runtime/README.md:12:- command runtime is tightly coupled
+public/control-center/runtime/README.md:16:- runtime and CSS overlap responsibilities
+public/control-center/runtime/README.md:18:This directory will contain the canonical runtime decomposition.
+public/control-center/runtime/README.md:24:## command-runtime.js
+public/control-center/runtime/README.md:35:## shell-runtime.js
+public/control-center/runtime/README.md:44:## sidebar-runtime.js
+public/control-center/runtime/README.md:52:## overlay-runtime.js
+public/control-center/runtime/README.md:68:NO shell runtime ownership.
+public/control-center/runtime/README.md:75:- move multiple runtime systems at once
+public/control-center/runtime/README.md:76:- rewrite runtime behavior blindly
+public/control-center/runtime/README.md:81:- preserve runtime behavior
+public/control-center/runtime/README.md:92:No production runtime extraction has started yet.
+public/control-center/runtime/ai-backend-connector.js:7:  async call(command, payload) {
+public/control-center/runtime/ai-backend-connector.js:9:    const res = await fetch("/ai/execute", {
+public/control-center/runtime/ai-backend-connector.js:27:  publish(data) {
+public/control-center/runtime/ai-backend-connector.js:31:  approve(data) {
+public/control-center/runtime/authority/route-role-fallback.js:5:  "writer",
+public/control-center/runtime/authority/route-role-fallback.js:8:  "publisher",
+public/control-center/runtime/authority/route-role-fallback.js:19:  "content-studio": ["writer", "strategist", "compliance_reviewer", "admin"],
+public/control-center/runtime/authority/route-role-fallback.js:21:  publishing: ["publisher", "compliance_reviewer", "admin"],
+public/control-center/runtime/authority/route-role-fallback.js:22:  research: ["strategist", "analyst", "writer", "admin"],
+public/control-center/runtime/authority/route-role-fallback.js:33:  library: ["designer", "video_lead", "publisher", "admin"],
+public/control-center/runtime/authority/authority-projection.js:14: * - generate authority
+public/control-center/runtime/authority/authority-projection.js:48:  return safeObject(operations.workflow_runs);
+public/control-center/runtime/authority/authority-projection.js:53:  return safeObject(operations.handoffs);
+public/control-center/runtime/overlay/OVERLAY_RUNTIME_PLAN.md:22:Confirmed runtime issues:
+public/control-center/runtime/overlay/OVERLAY_RUNTIME_PLAN.md:27:- direct style mutation in app.js
+public/control-center/runtime/overlay/OVERLAY_RUNTIME_PLAN.md:39:- runtime/command-runtime.js
+public/control-center/runtime/overlay/OVERLAY_RUNTIME_PLAN.md:43:- legacy/11-runtime-safety-overrides.legacy.css
+public/control-center/runtime/overlay/OVERLAY_RUNTIME_PLAN.md:66:- remove duplicate overlay logic
+public/control-center/runtime/overlay/OVERLAY_RUNTIME_PLAN.md:67:- remove legacy overlay conflicts
+public/control-center/runtime/overlay/OVERLAY_RUNTIME_PLAN.md:73:- no runtime rewrites yet
+public/control-center/runtime/overlay/overlay-runtime.js:6:  - Not connected to app.js yet.
+public/control-center/runtime/overlay/overlay-runtime.js:8:  - No DOM mutation unless called explicitly.
+public/control-center/runtime/overlay/overlay-runtime.js:16:export function markOverlayVisible(element) {
+public/control-center/runtime/overlay/overlay-runtime.js:31:export function markOverlayHidden(element) {
+public/control-center/runtime/overlay/overlay-runtime.js:34:  element.classList.remove("is-visible");
+public/control-center/runtime/overlay/overlay-runtime.js:69:  return markOverlayHidden(getOverlayElement(id, root));
+public/control-center/runtime/overlay/overlay-runtime.js:73:  return markOverlayVisible(getOverlayElement(id, root));
+public/control-center/runtime/mh-runtime-globals.js:1:// public/control-center/runtime/mh-runtime-globals.js
+public/control-center/runtime/mh-runtime-globals.js:3:// Backend orchestrator remains the single decision authority.
+public/control-center/runtime/mh-runtime-globals.js:17:      can_execute: false,
+public/control-center/runtime/mh-runtime-globals.js:43:  // Compatibility no-op bridges. These must never execute or decide.
+public/control-center/legacy/page-standard.legacy-20260508.js:13:  "publishing",
+public/control-center/legacy/page-standard.legacy-20260508.js:31:    description: "Complete the brand, market, audience, and validation inputs that make the rest of the OS reliable.",
+public/control-center/legacy/page-standard.legacy-20260508.js:32:    primary: { label: "Save Setup", action: "focus-save" },
+public/control-center/legacy/page-standard.legacy-20260508.js:38:    description: "Upload, classify, review, and route source-of-truth assets for campaign, content, media, and publishing.",
+public/control-center/legacy/page-standard.legacy-20260508.js:39:    primary: { label: "Upload Assets", action: "focus-upload" },
+public/control-center/legacy/page-standard.legacy-20260508.js:45:    description: "Connect, test, sync, and diagnose the external platforms that power automation and intelligence.",
+public/control-center/legacy/page-standard.legacy-20260508.js:46:    primary: { label: "Run Sync", action: "focus-sync" },
+public/control-center/legacy/page-standard.legacy-20260508.js:52:    description: "Direct role-aware AI agents, structured tasks, artifacts, recommendations, and operating decisions.",
+public/control-center/legacy/page-standard.legacy-20260508.js:60:    primary: { label: "Run Workflow", action: "focus-run-workflow" },
+public/control-center/legacy/page-standard.legacy-20260508.js:66:    description: "Build launch waves, inspect channel readiness, and package campaign plans for production and publishing.",
+public/control-center/legacy/page-standard.legacy-20260508.js:67:    primary: { label: "Build Campaign", action: "focus-save-campaign" },
+public/control-center/legacy/page-standard.legacy-20260508.js:73:    description: "Create, review, approve, rewrite, translate, and route platform copy into media or publishing.",
+public/control-center/legacy/page-standard.legacy-20260508.js:74:    primary: { label: "Generate Content", action: "focus-generate-content" },
+public/control-center/legacy/page-standard.legacy-20260508.js:80:    description: "Manage media jobs, prompt packs, storyboards, generated assets, approvals, and publishing handoffs.",
+public/control-center/legacy/page-standard.legacy-20260508.js:81:    primary: { label: "Generate Media", action: "focus-generate-media" },
+public/control-center/legacy/page-standard.legacy-20260508.js:82:    secondary: { label: "Send To Publishing", route: "publishing" }
+public/control-center/legacy/page-standard.legacy-20260508.js:84:  publishing: {
+public/control-center/legacy/page-standard.legacy-20260508.js:87:    description: "Schedule jobs, approve manual publishing, retry failures, and monitor worker execution state.",
+public/control-center/legacy/page-standard.legacy-20260508.js:88:    primary: { label: "Schedule Job", action: "focus-schedule" },
+public/control-center/legacy/page-standard.legacy-20260508.js:94:    description: "Shape ad briefs, variants, audiences, budget suggestions, tracking status, and campaign handoffs.",
+public/control-center/legacy/page-standard.legacy-20260508.js:95:    primary: { label: "Suggest Budget", action: "focus-save-budget" },
+public/control-center/legacy/page-standard.legacy-20260508.js:109:    primary: { label: "Run Competitor Research", action: "focus-run-research" },
+public/control-center/legacy/page-standard.legacy-20260508.js:115:    description: "Configure project settings, AI mode, roles, publishing rules, approvals, and readiness safeguards.",
+public/control-center/legacy/page-standard.legacy-20260508.js:116:    primary: { label: "Save Settings", action: "focus-save-settings" },
+public/control-center/legacy/page-standard.legacy-20260508.js:129:  publishing: { previous: "Media Studio", next: "Insights" },
+public/control-center/legacy/page-standard.legacy-20260508.js:140:    { label: "Open setup priorities", description: "Check the foundation before running another campaign wave.", route: "setup" },
+public/control-center/legacy/page-standard.legacy-20260508.js:147:    { label: "Validate readiness", description: "Save setup and refresh readiness before continuing.", action: "focus-save" },
+public/control-center/legacy/page-standard.legacy-20260508.js:151:    { label: "Upload assets", description: "Add source files, product visuals, documents, or campaign packs.", action: "focus-upload" },
+public/control-center/legacy/page-standard.legacy-20260508.js:153:    { label: "Review missing assets", description: "Prioritize files blocking campaign and publishing readiness.", action: "focus-library-missing" },
+public/control-center/legacy/page-standard.legacy-20260508.js:154:    { label: "Send to Campaign Studio", description: "Use approved assets as campaign inputs.", route: "campaign-studio" }
+public/control-center/legacy/page-standard.legacy-20260508.js:157:    { label: "Connect platform", description: "Open the next recommended connector and add required fields.", action: "focus-connect-platform" },
+public/control-center/legacy/page-standard.legacy-20260508.js:158:    { label: "Test connection", description: "Run a connector health check before relying on the data.", action: "focus-test-connection" },
+public/control-center/legacy/page-standard.legacy-20260508.js:159:    { label: "Run sync", description: "Sync connected sources into intelligence and execution workflows.", action: "focus-sync" },
+public/control-center/legacy/page-standard.legacy-20260508.js:160:    { label: "Diagnose with AI", description: "Send connector failures and coverage gaps to AI Command.", action: "focus-integration-ai" }
+public/control-center/legacy/page-standard.legacy-20260508.js:163:    { label: "Ask Strategist", description: "Plan campaign priorities and launch sequencing.", prompt: "Act as the Strategist. Review current project readiness and propose the next campaign decision." },
+public/control-center/legacy/page-standard.legacy-20260508.js:169:    { label: "Run workflow", description: "Execute the selected workflow with current project inputs.", action: "focus-run-workflow" },
+public/control-center/legacy/page-standard.legacy-20260508.js:171:    { label: "View running workflows", description: "Inspect active and recent execution state.", route: "job-monitor" },
+public/control-center/legacy/page-standard.legacy-20260508.js:175:    { label: "Build campaign", description: "Generate or update the campaign plan and launch wave.", action: "focus-save-campaign" },
+public/control-center/legacy/page-standard.legacy-20260508.js:177:    { label: "Create execution package", description: "Prepare handoffs for content, media, paid, and publishing.", action: "focus-campaign-package" },
+public/control-center/legacy/page-standard.legacy-20260508.js:181:    { label: "Generate content", description: "Create or update the selected content record.", action: "focus-new-content" },
+public/control-center/legacy/page-standard.legacy-20260508.js:182:    { label: "Rewrite or translate", description: "Record an AI rewrite request for the selected item.", action: "focus-content-ai" },
+public/control-center/legacy/page-standard.legacy-20260508.js:184:    { label: "Send to Publishing", description: "Route approved content into execution.", route: "publishing" }
+public/control-center/legacy/page-standard.legacy-20260508.js:190:    { label: "Save to Library", description: "Route approved media assets back to the asset source.", route: "library" }
+public/control-center/legacy/page-standard.legacy-20260508.js:192:  publishing: [
+public/control-center/legacy/page-standard.legacy-20260508.js:193:    { label: "Schedule job", description: "Create or update the selected publish queue item.", action: "focus-schedule" },
+public/control-center/legacy/page-standard.legacy-20260508.js:195:    { label: "Copy publish payload", description: "Send selected publishing context to AI Command for packaging.", action: "focus-publishing-ai" },
+public/control-center/legacy/page-standard.legacy-20260508.js:196:    { label: "Retry failed jobs", description: "Requeue failed or blocked publishing work.", action: "focus-retry-publishing" }
+public/control-center/legacy/page-standard.legacy-20260508.js:201:    { label: "Suggest budget", description: "Review budget inputs and paid readiness before launch.", action: "focus-save-budget" },
+public/control-center/legacy/page-standard.legacy-20260508.js:208:    { label: "Improve weak channel", description: "Route weak-channel fixes into content, ads, or publishing.", route: "content-studio" }
+public/control-center/legacy/page-standard.legacy-20260508.js:211:    { label: "Run competitor research", description: "Refresh market and competitor intelligence.", action: "focus-run-research" },
+public/control-center/legacy/page-standard.legacy-20260508.js:212:    { label: "Find keywords", description: "Build a search opportunity list from market context.", prompt: "Find keyword and audience opportunities for the active market. Prioritize campaign-ready angles." },
+public/control-center/legacy/page-standard.legacy-20260508.js:213:    { label: "Save finding", description: "Capture the selected market insight for reuse.", action: "focus-save-research" },
+public/control-center/legacy/page-standard.legacy-20260508.js:217:    { label: "Save settings", description: "Persist project, AI, team, publishing, and approval configuration.", action: "focus-save-settings" },
+public/control-center/legacy/page-standard.legacy-20260508.js:246:      "Prioritize missing assets by campaign, media, and publishing impact."
+public/control-center/legacy/page-standard.legacy-20260508.js:251:    description: "Use AI to explain failed connectors, data coverage gaps, and sync priorities.",
+public/control-center/legacy/page-standard.legacy-20260508.js:253:      "Diagnose the current integration gaps and rank what to connect first.",
+public/control-center/legacy/page-standard.legacy-20260508.js:254:      "Create a connector recovery plan for failed or partially configured platforms."
+public/control-center/legacy/page-standard.legacy-20260508.js:267:    description: "Use AI to choose the next workflow, fill inputs, and route the generated output.",
+public/control-center/legacy/page-standard.legacy-20260508.js:269:      "Recommend the next workflow run and explain the expected output.",
+public/control-center/legacy/page-standard.legacy-20260508.js:277:      "Audit campaign readiness across channels, content, media, paid, and publishing.",
+public/control-center/legacy/page-standard.legacy-20260508.js:278:      "Generate the next launch wave with dependencies and handoffs."
+public/control-center/legacy/page-standard.legacy-20260508.js:283:    description: "Use AI to draft, rewrite, translate, and prepare platform-specific content.",
+public/control-center/legacy/page-standard.legacy-20260508.js:286:      "Rewrite the selected draft for clarity, compliance, and conversion."
+public/control-center/legacy/page-standard.legacy-20260508.js:291:    description: "Use AI to create image prompts, video storyboards, and production-ready media tasks.",
+public/control-center/legacy/page-standard.legacy-20260508.js:297:  publishing: {
+public/control-center/legacy/page-standard.legacy-20260508.js:301:      "Prioritize the scheduler queue by urgency, readiness, and campaign impact.",
+public/control-center/legacy/page-standard.legacy-20260508.js:302:      "Generate a retry plan for failed or blocked publishing jobs."
+public/control-center/legacy/page-standard.legacy-20260508.js:315:    description: "Use AI to explain winners, weak channels, risks, and learning-memory updates.",
+public/control-center/legacy/page-standard.legacy-20260508.js:318:      "Turn current insights into campaign, content, ads, and publishing tasks."
+public/control-center/legacy/page-standard.legacy-20260508.js:325:      "Summarize the top market opportunities and evidence gaps for this project.",
+public/control-center/legacy/page-standard.legacy-20260508.js:326:      "Translate saved findings into campaign-ready positioning and content angles."
+public/control-center/legacy/page-standard.legacy-20260508.js:331:    description: "Use AI to review AI mode, roles, publishing safeguards, and production readiness.",
+public/control-center/legacy/page-standard.legacy-20260508.js:333:      "Review settings for operational risk and recommend what to tighten before publishing.",
+public/control-center/legacy/page-standard.legacy-20260508.js:340:  "focus-save": "#setupSaveBackendBtn",
+public/control-center/legacy/page-standard.legacy-20260508.js:343:  "focus-upload": "#libraryUploadBtn",
+public/control-center/legacy/page-standard.legacy-20260508.js:346:  "focus-connect-platform": "[data-integration-primary='connect'], [data-integration-action='connect'], [data-integration-primary]",
+public/control-center/legacy/page-standard.legacy-20260508.js:347:  "focus-test-connection": "[data-integration-action='test']",
+public/control-center/legacy/page-standard.legacy-20260508.js:348:  "focus-sync": "[data-integration-action='sync'], [data-integration-primary='sync']",
+public/control-center/legacy/page-standard.legacy-20260508.js:351:  "focus-run-workflow": "#workflowRunBtn, #workflowRunBtnMain",
+public/control-center/legacy/page-standard.legacy-20260508.js:354:  "focus-save-campaign": "#campaignBuildPlanBtn",
+public/control-center/legacy/page-standard.legacy-20260508.js:357:  "focus-generate-content": "#contentAiRewriteBtn, #contentSaveBtn",
+public/control-center/legacy/page-standard.legacy-20260508.js:359:  "focus-content-ai": "#contentAiRewriteBtn",
+public/control-center/legacy/page-standard.legacy-20260508.js:361:  "focus-generate-media": "[data-new-media-job], #mediaSaveBtn",
+public/control-center/legacy/page-standard.legacy-20260508.js:365:  "focus-schedule": "#publishingScheduleBtn",
+public/control-center/legacy/page-standard.legacy-20260508.js:366:  "focus-publishing-ai": "#publishingPushAiBtn",
+public/control-center/legacy/page-standard.legacy-20260508.js:367:  "focus-retry-publishing": "#publishingRequeueBtn",
+public/control-center/legacy/page-standard.legacy-20260508.js:368:  "focus-save-budget": "#adsManagerOpenPublishingBtn, #adsTotalBudgetInput",
+public/control-center/legacy/page-standard.legacy-20260508.js:369:  "focus-run-research": "#researchRefreshBtn",
+public/control-center/legacy/page-standard.legacy-20260508.js:370:  "focus-save-research": "#researchSaveFindingBtn, #researchSaveRecommendationBtn",
+public/control-center/legacy/page-standard.legacy-20260508.js:371:  "focus-save-settings": "[data-settings-action='save-all']",
+public/control-center/legacy/page-standard.legacy-20260508.js:437:  return asArray(items).filter((item) => wanted.has(asString(item?.status || item?.execution_status || item?.approval_status || item?.publish_status).toLowerCase())).length;
+public/control-center/legacy/page-standard.legacy-20260508.js:451:  if (t.includes("ready") || t.includes("healthy") || t.includes("active") || t.includes("connected") || t.includes("complete")) return "success";
+public/control-center/legacy/page-standard.legacy-20260508.js:477:  const connected = checkKeys.filter((key) => Boolean(checks[key])).length;
+public/control-center/legacy/page-standard.legacy-20260508.js:478:  const connectedSources = sourceRecords.filter((item) => /connected|active|ok/i.test(textValue(item.value || item.status || item.status_label, ""))).length;
+public/control-center/legacy/page-standard.legacy-20260508.js:479:  const scheduled = asArray(activity.scheduled_jobs);
+public/control-center/legacy/page-standard.legacy-20260508.js:504:  const workflowItems = asArray(ops.workflows?.items || ops.workflow_runs?.items);
+public/control-center/legacy/page-standard.legacy-20260508.js:507:  const publishingQueue = asArray(ops.queues?.items).filter((item) => asString(item.entity_type) === "publishing_job" || asString(item.queue_type) === "publishing");
+public/control-center/legacy/page-standard.legacy-20260508.js:516:    market: firstText([overview.market, state.context?.currentMarket], "Not set"),
+public/control-center/legacy/page-standard.legacy-20260508.js:523:    connectorReadiness: asNumber(integrations.readiness_score ?? overview.connector_readiness_score, 0),
+public/control-center/legacy/page-standard.legacy-20260508.js:524:    activeCampaigns: new Set([...scheduled, ...executions].map((x) => asString(x.wave_name).trim()).filter(Boolean)).size,
+public/control-center/legacy/page-standard.legacy-20260508.js:525:    scheduled: scheduled.length,
+public/control-center/legacy/page-standard.legacy-20260508.js:529:    connected: Math.max(connected, connectedSources),
+public/control-center/legacy/page-standard.legacy-20260508.js:541:      ...sourceRecords.filter((item) => /fail|error|expired|disconnect/i.test(textValue(item.status || item.status_label || item.health, "")))
+public/control-center/legacy/page-standard.legacy-20260508.js:554:    contentApproved: countByStatus(contentItems, ["approved", "scheduled", "published"]),
+public/control-center/legacy/page-standard.legacy-20260508.js:559:    workflowTotal: asNumber(ops.workflows?.total_runs ?? ops.workflow_runs?.total, workflowItems.length),
+public/control-center/legacy/page-standard.legacy-20260508.js:560:    workflowCompleted: asNumber(ops.workflows?.completed_runs, countByStatus(workflowItems, ["completed"])),
+public/control-center/legacy/page-standard.legacy-20260508.js:561:    workflowRunning: countByStatus(workflowItems, ["queued", "running"]),
+public/control-center/legacy/page-standard.legacy-20260508.js:567:    publishingReady: countByStatus(publishingQueue, ["ready", "manual_publish_ready"]) + scheduled.length,
+public/control-center/legacy/page-standard.legacy-20260508.js:568:    publishingCompleted: countByStatus(publishingQueue, ["published", "completed"]) + completed,
+public/control-center/legacy/page-standard.legacy-20260508.js:569:    publishingFailed: countByStatus(publishingQueue, ["failed"]) + failed,
+public/control-center/legacy/page-standard.legacy-20260508.js:578:    paidTrackingReady: Math.max(connected, connectedSources) > 0 || paidCampaigns.length > 0,
+public/control-center/legacy/page-standard.legacy-20260508.js:579:    researchFindings: aiArtifacts.filter((item) => /research|competitor|market|keyword/i.test(textValue(item.type || item.title || item.summary, ""))).length,
+public/control-center/legacy/page-standard.legacy-20260508.js:580:    savedFindings: asArray(ops.handoffs?.items).filter((item) => asString(item.source_page) === "research").length,
+public/control-center/legacy/page-standard.legacy-20260508.js:595:      card("System health", pct(m.systemScore), "Readiness and connector coverage combined into an executive signal.", tone(m.systemScore)),
+public/control-center/legacy/page-standard.legacy-20260508.js:596:      card("Automation", m.failed ? "Needs attention" : m.scheduled ? "Active" : "Idle", "Execution and scheduler state across active work.", m.failed ? "danger" : m.scheduled ? "success" : "warning"),
+public/control-center/legacy/page-standard.legacy-20260508.js:597:      card("AI team", `${m.aiCommandsTotal} commands`, "Role-aware AI work and generated artifacts available to route.", m.aiCommandsTotal ? "success" : "neutral"),
+public/control-center/legacy/page-standard.legacy-20260508.js:601:      card("Setup completion", pct(m.projectReadiness), "Brand, market, language, audience, and goal readiness.", tone(m.projectReadiness)),
+public/control-center/legacy/page-standard.legacy-20260508.js:604:      card("Market / language", `${m.market} / ${m.language}`, "Localization context for copy, campaigns, and publishing.", m.market !== "Not set" && m.language !== "Not set" ? "success" : "warning"),
+public/control-center/legacy/page-standard.legacy-20260508.js:608:      card("Total assets", String(m.assetsTotal), "Files registered for brand, product, content, media, and publishing.", m.assetsTotal ? "success" : "warning"),
+public/control-center/legacy/page-standard.legacy-20260508.js:609:      card("Required assets", `${m.readyAssetCount}/${m.requiredAssets || 0}`, "Required categories covered by uploaded or approved assets.", m.missingAssets.length ? "warning" : "success"),
+public/control-center/legacy/page-standard.legacy-20260508.js:611:      card("Source of truth", String(m.sourceOfTruthAssets), "Assets marked as authoritative for AI and production workflows.", m.sourceOfTruthAssets ? "success" : "warning")
+public/control-center/legacy/page-standard.legacy-20260508.js:614:      card("Connected platforms", `${m.connected}/${m.totalChannels || 0}`, "Platforms currently available for data, sync, or execution.", m.connected ? "success" : "warning"),
+public/control-center/legacy/page-standard.legacy-20260508.js:615:      card("Missing platforms", String(Math.max(m.missingConnectors.length, m.totalChannels - m.connected)), "Connections still blocking automation or intelligence coverage.", m.missingConnectors.length ? "warning" : "success"),
+public/control-center/legacy/page-standard.legacy-20260508.js:616:      card("Failed connectors", String(m.failedConnectors.length), "Connectors that need reconnect, test, or credential review.", m.failedConnectors.length ? "danger" : "success"),
+public/control-center/legacy/page-standard.legacy-20260508.js:617:      card("Sync health", m.failed ? "At risk" : "Stable", "Recent execution and sync signals from connected systems.", m.failed ? "warning" : "success")
+public/control-center/legacy/page-standard.legacy-20260508.js:623:      card("Recommendations", String(m.aiRecommendationsOpen || m.recommendations.length), "AI-suggested actions waiting for operator decision.", m.aiRecommendationsOpen || m.recommendations.length ? "warning" : "neutral")
+public/control-center/legacy/page-standard.legacy-20260508.js:627:      card("Running workflows", String(m.workflowRunning), "Queued or active workflow runs.", m.workflowRunning ? "warning" : "neutral"),
+public/control-center/legacy/page-standard.legacy-20260508.js:632:      card("Campaign pipeline", `${m.activeCampaignRecords}/${m.campaignsTotal}`, "Active campaigns compared with total saved campaign records.", m.activeCampaignRecords ? "success" : "warning"),
+public/control-center/legacy/page-standard.legacy-20260508.js:633:      card("Channel readiness", pct(m.connectorReadiness), "Connected channels and integrations available for launch.", tone(m.connectorReadiness)),
+public/control-center/legacy/page-standard.legacy-20260508.js:634:      card("Content readiness", String(m.contentApproved), "Approved, scheduled, or published content items.", m.contentApproved ? "success" : "warning"),
+public/control-center/legacy/page-standard.legacy-20260508.js:636:      card("Publishing readiness", String(m.publishingReady), "Jobs ready or scheduled for execution.", m.publishingReady ? "success" : "neutral")
+public/control-center/legacy/page-standard.legacy-20260508.js:641:      card("Approved content", String(m.contentApproved), "Items ready to route into publishing.", m.contentApproved ? "success" : "warning"),
+public/control-center/legacy/page-standard.legacy-20260508.js:647:      card("Generated assets", String(m.mediaCompleted), "Completed creative jobs available for campaigns or publishing.", m.mediaCompleted ? "success" : "warning"),
+public/control-center/legacy/page-standard.legacy-20260508.js:650:    publishing: [
+public/control-center/legacy/page-standard.legacy-20260508.js:651:      card("Scheduler queue", String(m.scheduled + m.publishingReady), "Queued, ready, or scheduled publishing work.", m.scheduled + m.publishingReady ? "warning" : "neutral"),
+public/control-center/legacy/page-standard.legacy-20260508.js:652:      card("Manual publish ready", String(m.publishingReady), "Items ready for approval or manual release.", m.publishingReady ? "success" : "neutral"),
+public/control-center/legacy/page-standard.legacy-20260508.js:653:      card("Completed jobs", String(m.publishingCompleted), "Publishing executions completed recently.", m.publishingCompleted ? "success" : "neutral"),
+public/control-center/legacy/page-standard.legacy-20260508.js:654:      card("Failed / retryable", String(m.publishingFailed), "Jobs requiring retry, repair, or manual diagnosis.", m.publishingFailed ? "danger" : "success")
+public/control-center/legacy/page-standard.legacy-20260508.js:659:      card("Audience segments", m.market, "Market context available for audience planning.", m.market !== "Not set" ? "success" : "warning"),
+public/control-center/legacy/page-standard.legacy-20260508.js:660:      card("Tracking status", m.paidTrackingReady ? "Ready" : "Needs connection", "Paid and analytics data available for budget decisions.", m.paidTrackingReady ? "success" : "warning")
+public/control-center/legacy/page-standard.legacy-20260508.js:663:      card("Performance summary", String(m.recommendations.length), "Optimization recommendations generated from available data.", m.recommendations.length ? "success" : "warning"),
+public/control-center/legacy/page-standard.legacy-20260508.js:664:      card("Top channels", String(m.connected), "Connected sources that can contribute performance signals.", m.connected ? "success" : "warning"),
+public/control-center/legacy/page-standard.legacy-20260508.js:666:      card("Learning memory", String(m.learningCount), "Reusable lessons captured for future campaign decisions.", m.learningCount ? "success" : "neutral")
+public/control-center/legacy/page-standard.legacy-20260508.js:669:      card("Competitors", String(m.researchFindings), "Saved or generated competitor and market artifacts.", m.researchFindings ? "success" : "neutral"),
+public/control-center/legacy/page-standard.legacy-20260508.js:671:      card("Keywords", m.market, "Market context used to create keyword opportunities.", m.market !== "Not set" ? "success" : "warning"),
+public/control-center/legacy/page-standard.legacy-20260508.js:672:      card("Saved findings", String(m.savedFindings), "Research handoffs preserved for downstream work.", m.savedFindings ? "success" : "neutral")
+public/control-center/legacy/page-standard.legacy-20260508.js:694:      card("Ready", m.missingAssets.length ? "Incomplete" : "Ready", "Required asset categories for production and publishing.", m.missingAssets.length ? "warning" : "success"),
+public/control-center/legacy/page-standard.legacy-20260508.js:699:      card("Ready", m.connected ? "Partially ready" : "Needs connection", "Availability of connected platforms.", m.connected ? "success" : "warning"),
+public/control-center/legacy/page-standard.legacy-20260508.js:701:      card("Next step", m.missingConnectors.length ? "Connect critical platform" : "Run sync", "Best connector action to improve intelligence.", m.missingConnectors.length ? "warning" : "success")
+public/control-center/legacy/page-standard.legacy-20260508.js:709:      card("Running", String(m.workflowRunning), "Queued or active workflow runs.", m.workflowRunning ? "warning" : "neutral"),
+public/control-center/legacy/page-standard.legacy-20260508.js:714:      card("Ready", m.projectReadiness >= 80 && !m.missingAssets.length ? "Ready" : "Needs inputs", "Campaign quality depends on setup, assets, and connector readiness.", m.projectReadiness >= 80 && !m.missingAssets.length ? "success" : "warning"),
+public/control-center/legacy/page-standard.legacy-20260508.js:715:      card("Needs attention", String(m.missingAssets.length + m.missingConnectors.length), "Asset or connector blockers before execution.", m.missingAssets.length + m.missingConnectors.length ? "warning" : "success"),
+public/control-center/legacy/page-standard.legacy-20260508.js:716:      card("Next step", "Build launch wave", "Prepare the campaign for content, media, paid, and publishing handoffs.", "success")
+public/control-center/legacy/page-standard.legacy-20260508.js:721:      card("Next step", m.contentDrafts ? "Generate content" : "Send to Publishing", "Move copy toward approved execution.", m.contentDrafts ? "warning" : "success")
+public/control-center/legacy/page-standard.legacy-20260508.js:728:    publishing: [
+public/control-center/legacy/page-standard.legacy-20260508.js:729:      card("Due", String(m.scheduled), "Scheduled jobs waiting for execution.", m.scheduled ? "warning" : "neutral"),
+public/control-center/legacy/page-standard.legacy-20260508.js:730:      card("Failed", String(m.publishingFailed), "Jobs requiring retry or manual recovery.", m.publishingFailed ? "danger" : "success"),
+public/control-center/legacy/page-standard.legacy-20260508.js:731:      card("Worker state", m.publishingFailed ? "Recovery needed" : "Stable", "Execution readiness based on recent publishing state.", m.publishingFailed ? "danger" : "success")
+public/control-center/legacy/page-standard.legacy-20260508.js:744:      card("Saved findings", String(m.savedFindings), "Research routed into downstream work.", m.savedFindings ? "success" : "neutral"),
+public/control-center/legacy/page-standard.legacy-20260508.js:746:      card("Next step", "Send insight to Campaign", "Turn market intelligence into positioning or campaign structure.", "success")
+public/control-center/legacy/page-standard.legacy-20260508.js:750:      card("Needs attention", String(m.approvalsPending), "Pending approvals that may affect policy and publishing.", m.approvalsPending ? "warning" : "success"),
+public/control-center/legacy/page-standard.legacy-20260508.js:765:    setup: "Complete missing setup fields, save, then continue to the Library.",
+public/control-center/legacy/page-standard.legacy-20260508.js:767:    integrations: "Connect or repair the highest-impact missing platform, then run a sync.",
+public/control-center/legacy/page-standard.legacy-20260508.js:771:    "content-studio": "Generate or approve the next content item and send it to Publishing.",
+public/control-center/legacy/page-standard.legacy-20260508.js:772:    "media-studio": "Create the missing prompt pack or storyboard, then approve media for use.",
+public/control-center/legacy/page-standard.legacy-20260508.js:773:    publishing: "Clear failed or ready jobs before scheduling more work.",
+public/control-center/legacy/page-standard.legacy-20260508.js:774:    "ads-manager": "Build an ad brief, generate variants, and return the plan to Campaign Studio.",
+public/control-center/legacy/page-standard.legacy-20260508.js:775:    insights: "Convert the top recommendation into campaign, content, ads, or publishing work.",
+public/control-center/legacy/page-standard.legacy-20260508.js:776:    research: "Save the strongest market finding and send it to Campaign Studio.",
+public/control-center/legacy/page-standard.legacy-20260508.js:788:  const shell = document.createElement("div");
+public/control-center/legacy/page-standard.legacy-20260508.js:943:      { label: "Open Publishing", route: "publishing" }
+public/control-center/legacy/page-standard.legacy-20260508.js:947:      { label: "Open Publishing", route: "publishing" },
+public/control-center/legacy/page-standard.legacy-20260508.js:950:    publishing: [
+public/control-center/legacy/page-standard.legacy-20260508.js:973:function runAction(action, context) {
+public/control-center/legacy/page-standard.legacy-20260508.js:1013:  button.onclick = () => runAction(action, context);
+public/control-center/legacy/page-standard.legacy-20260508.js:1031:      runAction(action, context);
+public/control-center/legacy/page-standard.legacy-20260508.js:1075:      { label: "Data used", value: "Integration control center, connector readiness, source registry" },
+public/control-center/legacy/page-standard.legacy-20260508.js:1076:      { label: "Coverage", value: `${m.connected}/${m.totalChannels || 0} connected` }
+public/control-center/legacy/page-standard.legacy-20260508.js:1083:      { label: "Data used", value: "Workflow catalog, workflow runs, handoffs, job monitor" },
+public/control-center/legacy/page-standard.legacy-20260508.js:1091:      { label: "Data used", value: "Content items, approvals, handoffs, AI rewrite requests" },
+public/control-center/legacy/page-standard.legacy-20260508.js:1098:    publishing: [
+public/control-center/legacy/page-standard.legacy-20260508.js:1099:      { label: "Data used", value: "Scheduler queue, publishing jobs, execution results, worker status" },
+public/control-center/legacy/page-standard.legacy-20260508.js:1100:      { label: "Queue state", value: `${m.publishingReady} ready / ${m.publishingFailed} failed` }
+public/control-center/legacy/page-standard.legacy-20260508.js:1103:      { label: "Data used", value: "Campaign records, paid insights, tracking connectors" },
+public/control-center/legacy/page-standard.legacy-20260508.js:1107:      { label: "Data used", value: "Project insights, learning memory, connected platform coverage" },
+public/control-center/legacy/page-standard.legacy-20260508.js:1111:      { label: "Data used", value: "Research artifacts, saved findings, opportunities, market context" },
+public/control-center/legacy/page-standard.legacy-20260508.js:1112:      { label: "Saved findings", value: String(m.savedFindings) }
+public/control-center/legacy/integrations.monolith-20260508.js:16:        purpose: "Primary site connection for landing pages, traffic mapping, attribution, and conversion context.",
+public/control-center/legacy/integrations.monolith-20260508.js:17:        whyItMatters: "Without the website source, MH Assistant cannot connect content and campaign activity to real destination performance.",
+public/control-center/legacy/integrations.monolith-20260508.js:34:        purpose: "Store, product, order, and sales sync for WooCommerce-driven projects.",
+public/control-center/legacy/integrations.monolith-20260508.js:36:        enables: "Product sync, order sync, sales signals, and commerce intelligence.",
+public/control-center/legacy/integrations.monolith-20260508.js:38:        permissionScope: "Store URL + API consumer key/secret",
+public/control-center/legacy/integrations.monolith-20260508.js:43:          { key: "consumerKey", label: "Consumer key", placeholder: "ck_...", type: "password" },
+public/control-center/legacy/integrations.monolith-20260508.js:44:          { key: "consumerSecret", label: "Consumer secret", placeholder: "cs_...", type: "password" }
+public/control-center/legacy/integrations.monolith-20260508.js:54:        enables: "Product sync, order sync, customer sync, and sales reporting.",
+public/control-center/legacy/integrations.monolith-20260508.js:72:        whyItMatters: "Amazon data gives MH Assistant direct product demand and marketplace sales feedback.",
+public/control-center/legacy/integrations.monolith-20260508.js:73:        enables: "Listing sync, sales signals, performance by product, and marketplace learning.",
+public/control-center/legacy/integrations.monolith-20260508.js:88:        purpose: "Marketplace listing and commerce signal sync for eBay surfaces.",
+public/control-center/legacy/integrations.monolith-20260508.js:90:        enables: "Listing sync, order sync, product demand signals, and marketplace coverage.",
+public/control-center/legacy/integrations.monolith-20260508.js:105:    description: "Post insights, video performance, engagement, comments, publishing paths, and linked account intelligence.",
+public/control-center/legacy/integrations.monolith-20260508.js:114:        enables: "Post insights, engagement data, comments, publishing support, and ad account linkage.",
+public/control-center/legacy/integrations.monolith-20260508.js:130:        purpose: "Post, reel, and profile insight sync for Instagram business performance.",
+public/control-center/legacy/integrations.monolith-20260508.js:132:        enables: "Post insights, reel insights, engagement, comments, publishing, and business account analytics.",
+public/control-center/legacy/integrations.monolith-20260508.js:148:        purpose: "Video and post insight sync for TikTok creative and audience performance.",
+public/control-center/legacy/integrations.monolith-20260508.js:150:        enables: "Video insights, engagement, comments, profile metrics, and future publishing support.",
+public/control-center/legacy/integrations.monolith-20260508.js:166:        purpose: "Video performance and channel insight sync for long-form or short-form YouTube content.",
+public/control-center/legacy/integrations.monolith-20260508.js:168:        enables: "Video insights, watch metrics, subscriber trends, comments, and publishing context.",
+public/control-center/legacy/integrations.monolith-20260508.js:184:        purpose: "Future-ready business profile insight and publishing connection for LinkedIn surfaces.",
+public/control-center/legacy/integrations.monolith-20260508.js:186:        enables: "Post insights, audience signals, company page analytics, and publishing support.",
+public/control-center/legacy/integrations.monolith-20260508.js:312:    description: "Lifecycle messaging, customer records, contact sync, and email campaign infrastructure.",
+public/control-center/legacy/integrations.monolith-20260508.js:343:        enables: "Campaign sends, audience sync, templates, and performance reporting.",
+public/control-center/legacy/integrations.monolith-20260508.js:358:        purpose: "Future-ready newsletter, audience, and campaign sync through Mailchimp.",
+public/control-center/legacy/integrations.monolith-20260508.js:360:        enables: "Audience sync, campaigns, lists, and newsletter reporting.",
+public/control-center/legacy/integrations.monolith-20260508.js:377:        purpose: "Customer record sync for lead, customer, and lifecycle intelligence.",
+public/control-center/legacy/integrations.monolith-20260508.js:378:        whyItMatters: "CRM data helps the system connect campaigns to pipeline, customers, and repeat purchase behavior.",
+public/control-center/legacy/integrations.monolith-20260508.js:379:        enables: "Contact sync, customer sync, lead intelligence, and lifecycle learning.",
+public/control-center/legacy/integrations.monolith-20260508.js:403:        enables: "Spend sync, campaign import, creative performance, and paid optimization.",
+public/control-center/legacy/integrations.monolith-20260508.js:420:        whyItMatters: "Google Ads data shows which search or demand-capture campaigns actually generate efficient traffic and revenue.",
+public/control-center/legacy/integrations.monolith-20260508.js:421:        enables: "Spend sync, campaign import, keyword performance, and paid optimization.",
+public/control-center/legacy/integrations.monolith-20260508.js:438:        whyItMatters: "TikTok Ads data helps connect short-form content learning to actual paid outcomes.",
+public/control-center/legacy/integrations.monolith-20260508.js:439:        enables: "Spend sync, campaign import, creative performance, and short-form paid optimization.",
+public/control-center/legacy/integrations.monolith-20260508.js:461:        purpose: "File sync and shared asset operations through Google Drive.",
+public/control-center/legacy/integrations.monolith-20260508.js:463:        enables: "Asset sync, doc sync, shared files, and automation inputs.",
+public/control-center/legacy/integrations.monolith-20260508.js:478:        purpose: "Operational alerting, workflow notifications, and team collaboration handoff.",
+public/control-center/legacy/integrations.monolith-20260508.js:479:        whyItMatters: "Slack can surface sync failures, content approvals, and campaign alerts where the team already works.",
+public/control-center/legacy/integrations.monolith-20260508.js:480:        enables: "Alerts, approvals, sync notifications, and workflow coordination.",
+public/control-center/legacy/integrations.monolith-20260508.js:497:        enables: "Alerts, commands, approval handoff, and ops notifications.",
+public/control-center/legacy/integrations.monolith-20260508.js:514:        enables: "Docs sync, planning sync, task context, and knowledge reuse.",
+public/control-center/legacy/integrations.monolith-20260508.js:529:        purpose: "Automation routing for triggers, syncs, approvals, and external workflow handoffs.",
+public/control-center/legacy/integrations.monolith-20260508.js:531:        enables: "Workflow automation, triggers, sync jobs, and handoffs.",
+public/control-center/legacy/integrations.monolith-20260508.js:548:        enables: "Custom events, syncs, notifications, and system handoffs.",
+public/control-center/legacy/integrations.monolith-20260508.js:554:          { key: "eventScope", label: "Event scope", placeholder: "events, approvals, syncs" },
+public/control-center/legacy/integrations.monolith-20260508.js:743:  if (card.statusLabel === "Token expired") return "Reconnect Now";
+public/control-center/legacy/integrations.monolith-20260508.js:753:    return { action: "sync", label: "Sync Now" };
+public/control-center/legacy/integrations.monolith-20260508.js:756:    return { action: "reconnect", label: getSmartConnectLabel(card) };
+public/control-center/legacy/integrations.monolith-20260508.js:758:  return { action: "connect", label: getSmartConnectLabel(card) };
+public/control-center/legacy/integrations.monolith-20260508.js:779:  delete session.drafts[integrationId];
+public/control-center/legacy/integrations.monolith-20260508.js:847:    { key: "posts", pattern: /post|reel|video|comment|publishing|profile|channel/ },
+public/control-center/legacy/integrations.monolith-20260508.js:865:      write: ["publishing", "audience updates"]
+public/control-center/legacy/integrations.monolith-20260508.js:873:        write: ["webhooks", "site updates"]
+public/control-center/legacy/integrations.monolith-20260508.js:879:      write: ["catalog sync", "commerce updates"]
+public/control-center/legacy/integrations.monolith-20260508.js:886:      write: ["tracking updates"]
+public/control-center/legacy/integrations.monolith-20260508.js:893:      write: ["campaign sends", "audience sync"]
+public/control-center/legacy/integrations.monolith-20260508.js:900:      write: ["budget changes", "campaign updates"]
+public/control-center/legacy/integrations.monolith-20260508.js:906:    write: ["automation triggers", "notifications"]
+public/control-center/legacy/integrations.monolith-20260508.js:927:    status: "connected",
+public/control-center/legacy/integrations.monolith-20260508.js:935:    write_scopes: accessModel.write,
+public/control-center/legacy/integrations.monolith-20260508.js:940:    last_sync_at: asString(asObject(sources[integration.sourceKey]).updated_at),
+public/control-center/legacy/integrations.monolith-20260508.js:941:    updated_at: asString(asObject(sources[integration.sourceKey]).updated_at),
+public/control-center/legacy/integrations.monolith-20260508.js:990:  if (normalized === "connected") return "Connected";
+public/control-center/legacy/integrations.monolith-20260508.js:994:  if (normalized === "not connected" || normalized === "not_connected") return "Not Connected";
+public/control-center/legacy/integrations.monolith-20260508.js:1009:    return `${integration.label} is connected and ready for provider-level sync actions.`;
+public/control-center/legacy/integrations.monolith-20260508.js:1012:    return "Some required connection details are still missing.";
+public/control-center/legacy/integrations.monolith-20260508.js:1015:    return "Reconnect the saved token before importing or syncing new data.";
+public/control-center/legacy/integrations.monolith-20260508.js:1018:    return asString(record.last_error) || "The last action failed. Review the connection inputs and try again.";
+public/control-center/legacy/integrations.monolith-20260508.js:1056:    writeScopes: asArray(record.write_scopes).length ? asArray(record.write_scopes) : accessModel.write,
+public/control-center/legacy/integrations.monolith-20260508.js:1060:    lastSync: asString(record.last_sync_at),
+public/control-center/legacy/integrations.monolith-20260508.js:1068:      : "Credentials are saved server-side and only masked status returns to the UI."),
+public/control-center/legacy/integrations.monolith-20260508.js:1089:    const connectedCount = cards.filter((card) => card.statusLabel === "Connected").length;
+public/control-center/legacy/integrations.monolith-20260508.js:1096:      connectedCount,
+public/control-center/legacy/integrations.monolith-20260508.js:1139:    const connected = cards.filter((card) => card.statusLabel === "Connected").length;
+public/control-center/legacy/integrations.monolith-20260508.js:1141:    const status = connected === cards.length && cards.length
+public/control-center/legacy/integrations.monolith-20260508.js:1143:      : connected || partial
+public/control-center/legacy/integrations.monolith-20260508.js:1150:      meta: `${connected}/${cards.length} connected`
+public/control-center/legacy/integrations.monolith-20260508.js:1174:  // 1. Failed or expired critical connector
+public/control-center/legacy/integrations.monolith-20260508.js:1219:  // Healthy fallback — suggest next optional connector
+public/control-center/legacy/integrations.monolith-20260508.js:1239:    publishing_blocker: ["instagram", "facebook", "tiktok", "youtube", "linkedin"],
+public/control-center/legacy/integrations.monolith-20260508.js:1254:    publishing_blocker: "Publishing blocker",
+public/control-center/legacy/integrations.monolith-20260508.js:1299:      : `<p class="ai-smart-rec-healthy-copy">All connectors are active. No additional setup is required right now.</p>`;
+public/control-center/legacy/integrations.monolith-20260508.js:1308:          <p class="ai-smart-rec-sub">All critical connectors are active. The system is operating with full launch-critical data coverage.</p>
+public/control-center/legacy/integrations.monolith-20260508.js:1332:        <div class="ai-smart-rec-connector">
+public/control-center/legacy/integrations.monolith-20260508.js:1333:          <div class="ai-smart-rec-connector-icon">${escapeHtml(card.icon)}</div>
+public/control-center/legacy/integrations.monolith-20260508.js:1334:          <div class="ai-smart-rec-connector-info">
+public/control-center/legacy/integrations.monolith-20260508.js:1363:  const reconnectNeeded = actionableCards.filter((card) => ["Token expired", "Error"].includes(card.statusLabel));
+public/control-center/legacy/integrations.monolith-20260508.js:1376:  if (reconnectNeeded.length) {
+public/control-center/legacy/integrations.monolith-20260508.js:1378:      title: `Repair ${reconnectNeeded[0].label}`,
+public/control-center/legacy/integrations.monolith-20260508.js:1379:      meta: `${reconnectNeeded[0].label} needs attention before sync and intelligence coverage can be trusted.`
+public/control-center/legacy/integrations.monolith-20260508.js:1386:      meta: `${partial.length} integration${partial.length === 1 ? "" : "s"} have staged values but are not fully connected yet.`
+public/control-center/legacy/integrations.monolith-20260508.js:1400:      meta: "Best next step: attach provider-specific OAuth validation and background sync jobs to the existing integration routes."
+public/control-center/legacy/integrations.monolith-20260508.js:1406:      label: "What should I connect next?",
+public/control-center/legacy/integrations.monolith-20260508.js:1407:      prompt: "Review all current integrations and tell me which platform or tool I should connect next to improve learning, attribution, and execution fastest."
+
+### direct storage/local authority hints
+public/control-center/constants.js:5:// Legacy keys are read-only fallbacks to preserve older browser state.
+public/control-center/ui/page-standard.js:237:  const data = asObject(state.data);
+public/control-center/ui/page-standard.js:278:    project: asString(state.context?.currentProject || overview.project_name || "-"),
+public/control-center/ui/page-standard.js:279:    route: asString(state.context?.currentRoute || ""),
+public/control-center/ui/page-standard.js:280:    campaign: asString(state.context?.activeCampaign || "-"),
+public/control-center/ui/page-standard.js:281:    market: asString(overview.market || state.context?.currentMarket || "-"),
+public/control-center/ui/page-standard.js:342:  const projectName = asString(state.context?.currentProject).trim() || "this project";
+public/control-center/ui/page-standard.js:343:  const activeCampaign = asString(state.context?.activeCampaign).trim() || "the active campaign";
+public/control-center/ui/page-standard.js:372:    const project = state.context?.currentProject;
+public/control-center/index.html:319:          window.location.reload();
+public/control-center/index.html:327:            var entered = window.prompt("Paste Control Center access key:", "");
+public/control-center/index.html:329:              window.localStorage.setItem("mh-control-write-key", entered.trim());
+public/control-center/index.html:330:              window.location.reload();
+public/control-center/index.html:333:            // Ignore localStorage errors in restricted contexts.
+public/control-center/index.html:338:      window.addEventListener("error", function (event) {
+public/control-center/index.html:339:        if (window.__mhControlCenterStarted) return;
+public/control-center/index.html:356:      window.addEventListener("unhandledrejection", function (event) {
+public/control-center/index.html:357:        if (window.__mhControlCenterStarted) return;
+public/control-center/automation-engine.js:95:    const raw = window.sessionStorage?.getItem(AUTO_MODE_STORAGE_KEY);
+public/control-center/automation-engine.js:99:    if (state.status === "running" || state.status === "waiting_approval") {
+public/control-center/automation-engine.js:100:      state.status = "paused";
+public/control-center/automation-engine.js:101:      state.enabled = false;
+public/control-center/automation-engine.js:102:      state.mode = "off";
+public/control-center/automation-engine.js:103:      state.logs = [
+public/control-center/automation-engine.js:104:        ...state.logs,
+public/control-center/automation-engine.js:121:    window.sessionStorage?.setItem(AUTO_MODE_STORAGE_KEY, JSON.stringify(state));
+public/control-center/runtime/control-plane-settings.js:5:window.__CONTROL_PLANE_SETTINGS__ = {
+public/control-center/runtime/control-plane-settings.js:13:    if (window.__mhLog) {
+public/control-center/runtime/control-plane-settings.js:14:      window.__mhLog("CONTROL_PLANE_MODE_CHANGE", { mode });
+public/control-center/runtime/control-plane-settings.js:17:    if (window.__CONTROL_PLANE__) {
+public/control-center/runtime/control-plane-settings.js:18:      window.__CONTROL_PLANE__.setMode(mode);
+public/control-center/runtime/command-runtime.js:123:window.__MH_COMMAND_RUNTIME__ = {
+public/control-center/runtime/lifecycle/README.md:41:- Errors during cleanup are caught and stored, not thrown
+public/control-center/runtime/lifecycle/README.md:199:- ✓ **Error resilience** — errors during cleanup are caught and stored
+public/control-center/runtime/governance-ai-bridge.js:5:window.__GOVERNANCE_AI__ = {
+public/control-center/runtime/governance-ai-bridge.js:13:      window.__mhLog?.("GOVERNANCE_BLOCK", response);
+public/control-center/runtime/governance-ai-bridge.js:15:      window.__mhGraphLog?.("AI_GOVERNANCE_BLOCK", response);
+public/control-center/runtime/ai-settings-controller.js:5:window.__AI_SETTINGS__ = {
+public/control-center/runtime/ai-backend-connector.js:5:window.__AI_BACKEND_BRIDGE__ = {
+public/control-center/runtime/authority/authority-projection.js:28:  return safeObject(state.operations);
+public/control-center/runtime/authority/authority-projection.js:86:    state.activeRole ||
+public/control-center/legacy/page-standard.legacy-20260508.js:87:    description: "Schedule jobs, approve manual publishing, retry failures, and monitor worker execution state.",
+public/control-center/legacy/page-standard.legacy-20260508.js:171:    { label: "View running workflows", description: "Inspect active and recent execution state.", route: "job-monitor" },
+public/control-center/legacy/page-standard.legacy-20260508.js:194:    { label: "Run worker once", description: "Open job monitoring for worker and execution state.", route: "job-monitor" },
+public/control-center/legacy/page-standard.legacy-20260508.js:310:      "Suggest budget allocation from the current paid readiness and tracking state."
+public/control-center/legacy/page-standard.legacy-20260508.js:463:  const overview = asObject(state.data.overview?.overview);
+public/control-center/legacy/page-standard.legacy-20260508.js:464:  const readiness = asObject(state.data.readiness?.dashboard);
+public/control-center/legacy/page-standard.legacy-20260508.js:465:  const readinessRoot = asObject(state.data.readiness);
+public/control-center/legacy/page-standard.legacy-20260508.js:467:  const integrations = asObject(state.data.integrations?.readiness);
+public/control-center/legacy/page-standard.legacy-20260508.js:468:  const integrationRoot = asObject(state.data.integrations);
+public/control-center/legacy/page-standard.legacy-20260508.js:469:  const ops = asObject(state.data.operations);
+public/control-center/legacy/page-standard.legacy-20260508.js:470:  const activity = asObject(state.data.activity);
+public/control-center/legacy/page-standard.legacy-20260508.js:471:  const assetsData = asObject(state.data.assets);
+public/control-center/legacy/page-standard.legacy-20260508.js:514:    currentProject: asString(state.context?.currentProject),
+public/control-center/legacy/page-standard.legacy-20260508.js:515:    activeCampaign: asString(state.context?.activeCampaign),
+public/control-center/legacy/page-standard.legacy-20260508.js:516:    market: firstText([overview.market, state.context?.currentMarket], "Not set"),
+public/control-center/legacy/page-standard.legacy-20260508.js:639:      card("Drafts", String(m.contentDrafts), "Content records still in draft state.", m.contentDrafts ? "warning" : "neutral"),
+public/control-center/legacy/page-standard.legacy-20260508.js:678:      card("Approval rules", m.approvalRulesReady ? "Configured" : "Default", "Publishing and claim-safety review policy state.", m.approvalRulesReady ? "success" : "warning"),
+public/control-center/legacy/page-standard.legacy-20260508.js:706:      card("Next step", m.recommendations.length ? "Run recommendation" : "Ask a role agent", "Best AI action for the current state.", m.recommendations.length ? "warning" : "success")
+public/control-center/legacy/page-standard.legacy-20260508.js:731:      card("Worker state", m.publishingFailed ? "Recovery needed" : "Stable", "Execution readiness based on recent publishing state.", m.publishingFailed ? "danger" : "success")
+public/control-center/legacy/page-standard.legacy-20260508.js:966:  const projectName = asString(context.state.context.currentProject).trim() || "this project";
+public/control-center/legacy/page-standard.legacy-20260508.js:967:  const activeCampaign = asString(context.state.context.activeCampaign).trim() || "the active campaign";
+public/control-center/legacy/page-standard.legacy-20260508.js:990:    const project = context.state.context.currentProject;
+public/control-center/legacy/integrations.monolith-20260508.js:9:    description: "Commercial infrastructure, storefronts, product data, orders, and conversion-aware commerce signals.",
+public/control-center/legacy/integrations.monolith-20260508.js:40:        primaryField: "storeUrl",
+public/control-center/legacy/integrations.monolith-20260508.js:42:          { key: "storeUrl", label: "Store URL", placeholder: "https://brand.com", required: true },
+public/control-center/legacy/integrations.monolith-20260508.js:52:        purpose: "Future-ready Shopify storefront integration for products, orders, and sales intelligence.",
+public/control-center/legacy/integrations.monolith-20260508.js:57:        primaryField: "storeDomain",
+public/control-center/legacy/integrations.monolith-20260508.js:59:          { key: "storeDomain", label: "Store domain", placeholder: "brand.myshopify.com", required: true },
+public/control-center/legacy/integrations.monolith-20260508.js:61:          { key: "storeId", label: "Store ID", placeholder: "Shopify store ID" }
+public/control-center/legacy/integrations.monolith-20260508.js:89:        whyItMatters: "eBay extends commerce intelligence beyond the owned store and helps the system learn external demand patterns.",
+public/control-center/legacy/integrations.monolith-20260508.js:96:          { key: "storeUrl", label: "Store URL", placeholder: "https://ebay.com/usr/brand" },
+public/control-center/legacy/integrations.monolith-20260508.js:679:  return asObject(state.data?.overview?.overview);
+public/control-center/legacy/integrations.monolith-20260508.js:699:  if (integration.id === "woocommerce" && field.key === "storeUrl") {
+public/control-center/legacy/integrations.monolith-20260508.js:820:  return asObject(asObject(state.data?.integrations).control_center);
+public/control-center/legacy/integrations.monolith-20260508.js:828:  return asObject(asObject(asObject(state.data?.integrations).sources).sources);
+public/control-center/legacy/integrations.monolith-20260508.js:1433:    description: "Website, storefront, and marketplace connectors that prove demand and commerce readiness.",
+public/control-center/legacy/integrations.monolith-20260508.js:2018:            Sensitive credentials are stored server-side only. Leave password fields blank to keep the current saved value.
+public/control-center/legacy/integrations.monolith-20260508.js:2095:  window.requestAnimationFrame(() => {
+public/control-center/legacy/integrations.monolith-20260508.js:2228:          ${notConnectedCards.length ? notConnectedCards.map((card) => renderIntegrationCard(card, session, escapeHtml)).join("") : `<div class="empty-box">All integrations in this group already have a connection state.</div>`}
+public/control-center/legacy/integrations.monolith-20260508.js:2578:    const projectName = state.context.currentProject || "";
+public/control-center/legacy/integrations.monolith-20260508.js:2707:                : `<div class="empty-box">No connectors match the current filters. Clear one filter to restore the launch connector list.</div>`}
+public/control-center/legacy/styles.legacy-full.css:884:.setup-field-state.is-ready {
+public/control-center/legacy/styles.legacy-full.css:888:.setup-field-state.is-missing {
+public/control-center/legacy/styles.legacy-full.css:6089:   Prevent topbar / command bar overlap and restore clean scroll
+public/control-center/legacy/styles.legacy-20260508.css:116:.setup-field-state.is-ready {
+public/control-center/legacy/styles.legacy-20260508.css:120:.setup-field-state.is-missing {
+public/control-center/styles/15-clean-operating-layer.css:447::where(.mhos-clean-surface.is-selected, .mhos-clean-surface[aria-selected="true"], .mhos-clean-state.is-selected, .mhos-clean-readiness-item.is-selected, .mhos-clean-blocker.is-selected, .mhos-clean-next-step.is-selected) {
+public/control-center/styles/15-clean-operating-layer.css:708::where(.mhos-clean-state.is-empty) {
+public/control-center/styles/15-clean-operating-layer.css:712::where(.mhos-clean-state.is-loading) {
+public/control-center/styles/15-clean-operating-layer.css:717::where(.mhos-clean-state.is-error) {
+public/control-center/styles/15-clean-operating-layer.css:722::where(.mhos-clean-state.is-ready, .mhos-clean-state.is-success, .mhos-clean-state.is-completed) {
+public/control-center/styles/15-clean-operating-layer.css:727::where(.mhos-clean-state.is-info) {
+public/control-center/styles/15-clean-operating-layer.css:732::where(.mhos-clean-state.is-warning) {
+public/control-center/styles/15-clean-operating-layer.css:737::where(.mhos-clean-state.is-danger, .mhos-clean-state.is-failed) {
+public/control-center/styles/15-clean-operating-layer.css:742::where(.mhos-clean-state.is-blocked) {
+public/control-center/styles/15-clean-operating-layer.css:747::where(.mhos-clean-state.is-pending) {
+public/control-center/styles/15-clean-operating-layer.css:752::where(.mhos-clean-state.is-running) {
+public/control-center/styles/08-components-foundation.css:80:/* Inspector AI source guide (restored) */
+public/control-center/styles/12-pages.css:1360:.setup-field-state.is-missing,
+public/control-center/styles/12-pages.css:1365:.setup-field-state.is-ready {
+public/control-center/styles/12-pages.css:11556:   Purpose: restore premium ChatGPT-like density after older/newer CSS layer conflicts.
+public/control-center/router.js:231:    window.dispatchEvent(
+public/control-center/state.js:1:// public/control-center/state.js
+public/control-center/state.js:91:    state.context.currentProject === "" &&
+public/control-center/state.js:92:    state.context.currentMarket === "" &&
+public/control-center/state.js:93:    state.context.currentLanguage === "" &&
+public/control-center/state.js:94:    state.context.executionMode === "" &&
+public/control-center/state.js:95:    state.context.activeCampaign === ""
+public/control-center/state.js:101:    state.data.overview === null &&
+public/control-center/state.js:102:    state.data.readiness === null &&
+public/control-center/state.js:103:    state.data.assets === null &&
+public/control-center/state.js:104:    state.data.tree === null &&
+public/control-center/state.js:105:    state.data.registry === null &&
+public/control-center/state.js:106:    state.data.integrations === null &&
+public/control-center/state.js:107:    state.data.activity === null &&
+public/control-center/state.js:108:    state.data.operations === null &&
+public/control-center/state.js:109:    state.data.loadDiagnostics === null &&
+public/control-center/state.js:110:    state.data.startupStep === "" &&
+public/control-center/state.js:111:    Array.isArray(state.data.startupSteps) &&
+public/control-center/state.js:112:    state.data.startupSteps.length === 0 &&
+public/control-center/state.js:113:    Array.isArray(state.data.loadingTransitions) &&
+public/control-center/state.js:114:    state.data.loadingTransitions.length === 0 &&
+public/control-center/state.js:115:    state.data.lastProjectLoad === null
+public/control-center/state.js:136:  if (state.initialized === true) {
+public/control-center/state.js:140:  state.initialized = true;
+public/control-center/state.js:147:  if (state.loading === next) {
+public/control-center/state.js:151:  state.loading = next;
+public/control-center/state.js:158:  if (state.error === next) {
+public/control-center/state.js:162:  state.error = next;
+public/control-center/state.js:167:  if (state.error === "") {
+public/control-center/state.js:171:  state.error = "";
+public/control-center/state.js:178:  if (state.data.projects === next) {
+public/control-center/state.js:182:  state.data.projects = next;
+public/control-center/state.js:189:  if (state.context.currentProject === next) {
+public/control-center/state.js:193:  state.context.currentProject = next;
+public/control-center/state.js:200:  if (state.currentRoute === next) {
+public/control-center/state.js:204:  state.currentRoute = next;
+public/control-center/state.js:223:  if (!hasShallowChanges(state.context, patch)) {
+public/control-center/state.js:227:  state.context = {
+public/control-center/state.js:228:    ...state.context,
+public/control-center/state.js:243:    if (!hasShallowChanges(state.data, patch)) {
+public/control-center/state.js:247:    state.data = {
+public/control-center/state.js:248:      ...state.data,
+public/control-center/state.js:259:    if (!hasShallowChanges(state.context, patch)) {
+public/control-center/state.js:263:    state.context = {
+public/control-center/state.js:264:      ...state.context,
+public/control-center/state.js:305:  state.data.overview = null;
+public/control-center/state.js:306:  state.data.readiness = null;
+public/control-center/state.js:307:  state.data.assets = null;
+public/control-center/state.js:308:  state.data.tree = null;
+public/control-center/state.js:309:  state.data.registry = null;
+public/control-center/state.js:310:  state.data.integrations = null;
+public/control-center/state.js:311:  state.data.activity = null;
+public/control-center/state.js:312:  state.data.operations = null;
+public/control-center/state.js:313:  state.data.loadDiagnostics = null;
+public/control-center/state.js:314:  state.data.startupStep = "";
+public/control-center/state.js:315:  state.data.startupSteps = [];
+public/control-center/state.js:316:  state.data.loadingTransitions = [];
+public/control-center/state.js:317:  state.data.lastProjectLoad = null;
+public/control-center/state.js:327:  state.context.currentProject = "";
+public/control-center/state.js:328:  state.context.currentMarket = "";
+public/control-center/state.js:329:  state.context.currentLanguage = "";
+public/control-center/state.js:330:  state.context.executionMode = "";
+public/control-center/state.js:331:  state.context.activeCampaign = "";
+public/control-center/state.js:339:// Projection-only helpers. These functions must not mutate state.
+public/control-center/api.js:69:    if (typeof localStorage !== "undefined") {
+public/control-center/api.js:70:      localStorage.setItem(CONTROL_ACCESS_KEY_STORAGE_KEY, normalized);
+public/control-center/api.js:83:        { source: "window.__MH_CONTROL_CENTER_READ_KEY__", value: window.__MH_CONTROL_CENTER_READ_KEY__ },
+public/control-center/api.js:84:        { source: "window.__MH_CONTROL_CENTER_WRITE_KEY__", value: window.__MH_CONTROL_CENTER_WRITE_KEY__ },
+public/control-center/api.js:85:        { source: "window.__MH_CONTROL_WRITE_KEY__", value: window.__MH_CONTROL_WRITE_KEY__ },
+public/control-center/api.js:86:        { source: "window.__MH_CONTROL_CENTER_ACCESS_KEY__", value: window.__MH_CONTROL_CENTER_ACCESS_KEY__ },
+public/control-center/api.js:87:        { source: "window.__MH_CONTROL_ACCESS_KEY__", value: window.__MH_CONTROL_ACCESS_KEY__ },
+public/control-center/api.js:88:        { source: "window.__MH_ACCESS_KEY__", value: window.__MH_ACCESS_KEY__ }
+public/control-center/api.js:100:    if (typeof localStorage !== "undefined") {
+public/control-center/api.js:101:      const canonical = String(localStorage.getItem(CONTROL_ACCESS_KEY_STORAGE_KEY) || "").trim();
+public/control-center/api.js:103:        return { key: canonical, source: `localStorage:${CONTROL_ACCESS_KEY_STORAGE_KEY}` };
+public/control-center/api.js:107:        const legacyValue = String(localStorage.getItem(legacyKey) || "").trim();
+public/control-center/api.js:110:          return { key: legacyValue, source: `localStorage:${legacyKey}` };
+public/control-center/api.js:208:    return new URLSearchParams(window.location.search).get("debugStartup") === "1";
+public/control-center/api.js:246:  if (typeof window === "undefined" || typeof window.dispatchEvent !== "function") {
+public/control-center/api.js:251:    window.dispatchEvent(new CustomEvent("mh:control-center-api-trace", {
+public/control-center/pages/ai-command/tool-dock.js:159:// --- When Open Library is clicked from tool dock, store both bridge and drawer return context ---
+public/control-center/pages/ai-command/tool-dock.js:169:  // Build and store drawer return context
+public/control-center/pages/ai-command/tool-dock.js:229:    window.location.hash = "#library";
+public/control-center/pages/ai-command/tool-dock.js:1815:        window.location.hash = "#library";
+public/control-center/pages/ai-command/tool-dock.js:1909:  // --- Ensure drawer is restored after navigation from Library ---
+public/control-center/pages/ai-command/tool-dock.js:1910:  const restoreProjectName = projectName || "__default__";
+public/control-center/pages/ai-command/tool-dock.js:1912:    setTimeout(() => tryAutoOpenDrawerAfterLibrary(restoreProjectName), delay);
+public/control-center/pages/campaign-studio.js:208:  const overviewData = asObject(state.data.overview?.overview);
+public/control-center/pages/campaign-studio.js:209:  const readiness = asObject(state.data.readiness?.dashboard);
+public/control-center/pages/campaign-studio.js:210:  const assets = asObject(state.data.assets);
+public/control-center/pages/campaign-studio.js:211:  const activity = asObject(state.data.activity);
+public/control-center/pages/campaign-studio.js:212:  const context = asObject(state.context);
+public/control-center/pages/campaign-studio.js:439:  if (typeof window === "undefined" || typeof window.confirm !== "function") return true;
+public/control-center/pages/campaign-studio.js:450:  return window.confirm(message);
+public/control-center/pages/campaign-studio.js:572:  const activity = asObject(state.data.activity);
+public/control-center/pages/campaign-studio.js:573:  const overview = asObject(state.data.overview);
+public/control-center/pages/campaign-studio.js:1025:  const overviewBlock = asObject(state.data.overview);
+public/control-center/pages/campaign-studio.js:1027:  const readinessRoot = asObject(state.data.readiness);
+public/control-center/pages/campaign-studio.js:1029:  const integrations = asObject(state.data.integrations);
+public/control-center/pages/campaign-studio.js:1030:  const activity = asObject(state.data.activity);
+public/control-center/pages/campaign-studio.js:1031:  const assets = asObject(state.data.assets);
+public/control-center/pages/campaign-studio.js:1277:  const projectName = state.context.currentProject || "";
+public/control-center/pages/campaign-studio.js:1279:  const durableCampaign = getSharedCampaignRecord(projectName, state.data.operations);
+public/control-center/pages/campaign-studio.js:1284:  applyAiCampaignHandoff(projectName, state.data.operations, session);
+public/control-center/pages/campaign-studio.js:1523:    const projectName = state.context.currentProject || "";
+public/control-center/pages/campaign-studio.js:1525:    applyAiCampaignHandoff(projectName, state.data.operations, session);
+public/control-center/pages/campaign-studio.js:1579:    const activeCampaignLabel = safeText(firstNonEmpty(state.context.activeCampaign, values.campaignName), projectName || "Campaign Studio");
+public/control-center/pages/campaign-studio.js:1951:                ${renderAssetDependencyRows(state.data.assets, campaignAssetKeys, escapeHtml, "Product, pricing, and campaign assets are covered.")}
+public/control-center/pages/media-studio-workspace.js:151:  return firstText(state.context?.currentProject, state.data.overview?.overview?.project_name, "Workspace");
+public/control-center/pages/media-studio-workspace.js:155:  return firstText(state.context?.currentProject, state.data.overview?.overview?.project_name);
+public/control-center/pages/media-studio-workspace.js:159:  return asObject(state.data.assets);
+public/control-center/pages/media-studio-workspace.js:190:    const parsed = JSON.parse(window.localStorage?.getItem(MEDIA_LOCAL_DRAFTS_KEY) || "{}");
+public/control-center/pages/media-studio-workspace.js:200:    window.localStorage?.setItem(MEDIA_LOCAL_DRAFTS_KEY, JSON.stringify(map || {}));
+public/control-center/pages/media-studio-workspace.js:207:    const parsed = JSON.parse(window.localStorage?.getItem(MEDIA_LIBRARY_LOCAL_ASSETS_KEY) || "{}");
+public/control-center/pages/media-studio-workspace.js:217:    window.localStorage?.setItem(MEDIA_LIBRARY_LOCAL_ASSETS_KEY, JSON.stringify(map || {}));
+public/control-center/pages/media-studio-workspace.js:270:  const context = asObject(state.context);
+public/control-center/pages/media-studio-workspace.js:271:  const overview = asObject(state.data.overview?.overview);
+public/control-center/pages/media-studio-workspace.js:508:    project: firstText(raw.project, raw.project_name, state.context?.currentProject),
+public/control-center/pages/media-studio-workspace.js:509:    campaign: firstText(raw.campaign, raw.campaign_name, raw.campaign_id, state.context?.activeCampaign),
+public/control-center/pages/media-studio-workspace.js:654:  for (const storage of [window.sessionStorage, window.localStorage]) {
+public/control-center/pages/media-studio-workspace.js:680:  for (const storage of [window.sessionStorage, window.localStorage]) {
+public/control-center/pages/media-studio-workspace.js:843:  const overview = asObject(state.data.overview?.overview);
+public/control-center/pages/media-studio-workspace.js:847:    `Campaign: ${form.campaign || state.context?.activeCampaign || "current campaign"}.`,
+public/control-center/pages/media-studio-workspace.js:2368:  let previewBody = `<div class="media-prompt-box">${escapeHtml("Prompt-ready state. Generate output or switch version to inspect payload.")}</div>`;
+public/control-center/pages/media-studio-workspace.js:2825:    return window.confirm(`${title}\n\n${detail}\n\nAuthority: Media Studio can prepare, save, request review, and hand off media work, but provider generation, approval decisions, task creation, and publishing handoff must be explicitly confirmed by the operator.\n\nSelect Cancel to review before continuing.`);
+public/control-center/pages/media-studio-workspace.js:3311:          showMessage?.("Review request kept as local review state.");
+public/control-center/pages/customer-center.js:379:  if (typeof window === "undefined" || typeof window.confirm !== "function") {
+public/control-center/pages/customer-center.js:383:  return window.confirm(message);
+public/control-center/pages/customer-center.js:411:        prompt: "Review Customer Center read-only state. Summarize customer support risks, draft safe reply guidance, and identify escalation needs. Do not send replies or mutate CRM."
+public/control-center/pages/customer-center.js:500:  window.__mhCustomerCenterRefresh = loadAndRenderCustomerCenter;
+public/control-center/pages/customer-center.js:501:  window.__mhAttachCustomerCenterHandlers = attachCustomerCenterHandlers;
+public/control-center/pages/operations-centers.js:264:  return asObject(asObject(state.data).operations);
+public/control-center/pages/operations-centers.js:689:  const ops = asObject(state.data.operations);
+public/control-center/pages/operations-centers.js:1041:  const queueCenter = asObject(asObject(state.data.operations).queue_center);
+public/control-center/pages/operations-centers.js:1141:    : "No jobs are available for this project yet. Use Refresh or adjust project context to load current execution state.";
+public/control-center/pages/operations-centers.js:1214:                <p class="mhos-os-section-copy">Filter by job status and kind to review active and failed work without changing lifecycle state.</p>
+public/control-center/pages/operations-centers.js:1336:  const jobMonitor = asObject(asObject(state.data.operations).job_monitor);
+public/control-center/pages/operations-centers.js:1419:  const integrations = asObject(state.data.integrations);
+public/control-center/pages/operations-centers.js:1498:  const notificationCenter = asObject(asObject(state.data.operations).notification_center);
+public/control-center/pages/operations-centers.js:1511:  const governanceApprovalAlerts = buildGovernanceApprovalAlerts(asObject(asObject(state.data.governance).summary));
+public/control-center/pages/operations-centers.js:1803:      const confirmed = window.confirm(
+public/control-center/pages/operations-centers.js:1863:      const confirmed = window.confirm(`Confirm Governance decision\n\nAction: ${titleCase(decision)} approval ${approvalId}.\nRisk: This updates a durable Governance approval record. It does not publish, send, or execute anything directly.\n\nSelect Cancel to review before deciding.`);
+public/control-center/pages/operations-centers.js:2084:    description: "Review alerts, unread inbox state, approvals, provider health, publishing, claim risks, and workflow completion signals with Mark Read limited to notification read-state."
+public/control-center/pages/operations-centers.js:2131:  const projectName = asString(state.activeProject || state.projectName || state.currentProject || "current project");
+public/control-center/pages/operations-centers.js:2132:  const operations = asObject(asObject(state.data).operations);
+public/control-center/pages/business/dashboard.js:32:      ${renderMetric("AI Brain", state.econ.brain)}
+public/control-center/pages/business/dashboard.js:35:      ${renderMetric("Economy", state.econ.economy)}
+public/control-center/pages/business/dashboard.js:38:      ${renderMetric("Governance", state.gov)}
+public/control-center/pages/business/dashboard.js:42:        ${JSON.stringify(state.civ, null, 2)}
+public/control-center/pages/research.js:77:  const operations = asObject(state.data.operations);
+public/control-center/pages/research.js:282:  const overviewBlock = asObject(state.data.overview);
+public/control-center/pages/research.js:284:  const readiness = asObject(state.data.readiness);
+public/control-center/pages/research.js:285:  const integrations = asObject(state.data.integrations);
+public/control-center/pages/research.js:286:  const activity = asObject(state.data.activity);
+public/control-center/pages/research.js:842:  if (typeof window === "undefined" || typeof window.confirm !== "function") return true;
+public/control-center/pages/research.js:843:  return window.confirm(
+public/control-center/pages/research.js:875:  const projectName = state.context.currentProject || "";
+public/control-center/pages/research.js:1156:    const projectName = state.context.currentProject || "";
+public/control-center/pages/research.js:1210:          { label: "Region", value: item.region || safeText(state.context.currentMarket, "Global") }
+public/control-center/pages/ai-command.js:15:} from "../state.js";
+public/control-center/pages/ai-command.js:962:		const raw = window.localStorage?.getItem(AI_COMMAND_LOCAL_DRAFTS_KEY) || "{}";
+public/control-center/pages/ai-command.js:973:		window.localStorage?.setItem(AI_COMMAND_LOCAL_DRAFTS_KEY, JSON.stringify(map || {}));
+public/control-center/pages/ai-command.js:1006:		session.draftStatus = `Draft restored ${formatTime(localDraft.updatedAt)}`;
+public/control-center/pages/ai-command.js:1025:		const raw = window.localStorage?.getItem(AI_COMMAND_LOCAL_OUTPUTS_KEY) || "{}";
+public/control-center/pages/ai-command.js:1036:		window.localStorage?.setItem(AI_COMMAND_LOCAL_OUTPUTS_KEY, JSON.stringify(map || {}));
+public/control-center/pages/ai-command.js:1074:                const raw = window.localStorage?.getItem(AI_COMMAND_CHAT_SESSIONS_KEY) || "{}";
+public/control-center/pages/ai-command.js:1085:                window.localStorage?.setItem(AI_COMMAND_CHAT_SESSIONS_KEY, JSON.stringify(map || {}));
+public/control-center/pages/ai-command.js:1886:	const overviewBlock = asObject(state.data.overview);
+public/control-center/pages/ai-command.js:1888:	const readiness = asObject(state.data.readiness);
+public/control-center/pages/ai-command.js:1890:	const connectors = asObject(state.data.integrations);
+public/control-center/pages/ai-command.js:1892:	const activity = asObject(state.data.activity);
+public/control-center/pages/ai-command.js:1893:	const assets = asObject(state.data.assets);
+public/control-center/pages/ai-command.js:1933:		projectName: state.context.currentProject || "",
+public/control-center/pages/ai-command.js:1934:		market: state.context.currentMarket || overview.market || "",
+public/control-center/pages/ai-command.js:1935:		language: state.context.currentLanguage || overview.language || "",
+public/control-center/pages/ai-command.js:1936:		campaign: state.context.activeCampaign || "Not selected",
+public/control-center/pages/ai-command.js:1937:		executionMode: state.context.executionMode || overview.execution_mode || "",
+public/control-center/pages/ai-command.js:2255:	if (/reconnect|connect|integration|tool|sync/.test(query)) routeSuggestions.push(routeSuggestion("Integrations", "integrations", "Reconnect data sources and restore intelligence coverage."));
+public/control-center/pages/ai-command.js:2321:	const needsDashboard = !state.data.overview || !state.data.readiness || !state.data.integrations || !state.data.activity;
+public/control-center/pages/ai-command.js:3134:				<span style="font-size:11px;color:var(--color-text-2);">${session.history.length} logged · click to restore</span>
+public/control-center/pages/ai-command.js:3159:					<div class="ctrl-empty-box">Commands you send appear here. Click any to restore and re-run.</div>
+public/control-center/pages/ai-command.js:5349:		{ label: "Operations", value: state.data.operations ? "Snapshot available" : "No operations snapshot", present: Boolean(state.data.operations) }
+public/control-center/pages/ai-command.js:6302:                const storeCampaignReviewHandoff = (handoff) => {
+public/control-center/pages/ai-command.js:6305:                                window.localStorage?.setItem?.("mh_ai_command_campaign_handoff", payload);
+public/control-center/pages/ai-command.js:6306:                                window.localStorage?.setItem?.(`mh_ai_command_handoff_${handoff.destination_route}`, payload);
+public/control-center/pages/ai-command.js:6307:                                window.sessionStorage?.setItem?.("mh_ai_command_campaign_handoff", payload);
+public/control-center/pages/ai-command.js:6308:                                window.sessionStorage?.setItem?.(`mh_ai_command_handoff_${handoff.destination_route}`, payload);
+public/control-center/pages/ai-command.js:6310:                                console.warn("Unable to store AI Command campaign handoff", error);
+public/control-center/pages/ai-command.js:6334:                                storeCampaignReviewHandoff(handoff);
+public/control-center/pages/ai-command.js:6428:					? (window.SpeechRecognition || window.webkitSpeechRecognition)
+public/control-center/pages/library.js:33:import { normalizeLibrarySession } from "./library/session-store.js";
+public/control-center/pages/library.js:215:    const parsed = JSON.parse(window.localStorage?.getItem(MEDIA_LIBRARY_LOCAL_ASSETS_KEY) || "{}");
+public/control-center/pages/library.js:481:    window.open(objectUrl, "_blank", "noopener,noreferrer");
+public/control-center/pages/library.js:518:            window.prompt("Copy asset path:", value);
+public/control-center/pages/library.js:597:function dispatchLibraryCommand(command, payload = {}, handlers = {}) {
+public/control-center/pages/library.js:1521:  if (typeof window !== "undefined" && typeof window.prompt === "function") {
+public/control-center/pages/library.js:1523:      return Promise.resolve(window.prompt(title, initial));
+public/control-center/pages/library.js:1634:    const style = window.getComputedStyle ? window.getComputedStyle(node) : null;
+public/control-center/pages/library.js:1652:    && typeof window.matchMedia === "function"
+public/control-center/pages/library.js:1653:    && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+public/control-center/pages/library.js:1873:      dispatchLibraryCommand("set-filter", {
+public/control-center/pages/library.js:1904:      dispatchLibraryCommand("set-filter", {
+public/control-center/pages/library.js:1940:      dispatchLibraryCommand("set-filter", {
+public/control-center/pages/library.js:1971:      dispatchLibraryCommand("set-filter", {
+public/control-center/pages/library.js:2371:      dispatchLibraryCommand("select-asset", {
+public/control-center/pages/library.js:2409:      dispatchLibraryCommand("select-asset", { assetId: nextId }, {
+public/control-center/pages/library.js:2438:      dispatchLibraryCommand("select-asset", { assetId: nextId }, {
+public/control-center/pages/library.js:2469:      dispatchLibraryCommand("select-asset", { assetId: nextId }, {
+public/control-center/pages/library.js:2484:      dispatchLibraryCommand("select-asset", { assetId: nextId }, {
+public/control-center/pages/library.js:2554:      dispatchLibraryCommand("set-filter", {
+public/control-center/pages/library.js:2577:    dispatchLibraryCommand("set-view-mode", {
+public/control-center/pages/library.js:2605:      dispatchLibraryCommand("open-preview", { assetId: id }, {
+public/control-center/pages/library.js:2648:        `Confirm Source of Truth change\n\nAction: ${nextSourceTruthState ? "Set this asset as Source of Truth" : "Remove this asset from Source of Truth"}.\nAsset: ${asset.name || asset.filename || assetId}\nRisk: Source of Truth assets can influence AI context, content claims, publishing readiness, and downstream review decisions.\n\nSelect Cancel to keep the current authority state.`
+public/control-center/pages/library.js:2740:      const confirmed = window.confirm(
+public/control-center/pages/library.js:2931:      dispatchLibraryCommand("set-page", { page: nextPage }, {
+public/control-center/pages/library.js:2945:      dispatchLibraryCommand("set-filter", {
+public/control-center/pages/library.js:2956:        window.clearTimeout(librarySearchRenderTimer);
+public/control-center/pages/library.js:2959:      librarySearchRenderTimer = window.setTimeout(() => {
+public/control-center/pages/library.js:2977:      dispatchLibraryCommand("upload-type-change", { uploadType }, {
+public/control-center/pages/library.js:3216:        `Confirm Library backend refresh\n\nAction: Refresh the backend Library scan for this project.\nRisk: This may rescan project assets and update Library visibility/readiness from backend state. It does not delete, publish, or approve anything.\n\nSelect Cancel to keep the current Library view.`
+public/control-center/pages/library.js:3325:    const projectName = state.context.currentProject || "";
+public/control-center/pages/library.js:3384:    const registry = asObject(state.data.registry);
+public/control-center/pages/library.js:3385:    const baseAssetsData = Array.isArray(state.data.assets) ? { assets: state.data.assets } : asObject(state.data.assets);
+public/control-center/pages/library.js:3392:    const operations = asObject(state.data.operations);
+public/control-center/pages/home.js:17:} from "../state.js";
+public/control-center/pages/home.js:303:  const overview = asObject(state.data.overview);
+public/control-center/pages/home.js:304:  const readiness = asObject(state.data.readiness);
+public/control-center/pages/home.js:305:  const integrations = asObject(state.data.integrations);
+public/control-center/pages/home.js:306:  const activity = asObject(state.data.activity);
+public/control-center/pages/home.js:307:  const assets = asObject(state.data.assets);
+public/control-center/pages/home.js:403:    asString(state.context.activeCampaign) ||
+public/control-center/pages/home.js:679:      executionMode: compact(state.context.executionMode || overviewData.execution_mode, "Not set"),
+public/control-center/pages/insights.js:220:    sources: asObject(state.data.integrations?.sources?.sources),
+public/control-center/pages/insights.js:221:    checks: asObject(state.data.integrations?.readiness?.checks)
+public/control-center/pages/insights.js:226:  const activity = asObject(state.data.activity);
+public/control-center/pages/insights.js:227:  const overview = asObject(state.data.overview);
+public/control-center/pages/insights.js:352:  const activity = asObject(state.data.activity);
+public/control-center/pages/insights.js:693:  const projectName = state.context.currentProject || "this project";
+public/control-center/pages/insights.js:955:  if (typeof window === "undefined" || typeof window.confirm !== "function") {
+public/control-center/pages/insights.js:959:  return window.confirm(message);
+public/control-center/pages/insights.js:1079:    const projectName = state.context.currentProject || "";
+public/control-center/pages/insights.js:1081:    const overview = asObject(state.data.overview?.overview);
+public/control-center/pages/content-studio-workspace.js:162:  if (typeof window === "undefined" || typeof window.confirm !== "function") return true;
+public/control-center/pages/content-studio-workspace.js:173:  return window.confirm(message);
+public/control-center/pages/content-studio-workspace.js:227:  const context = asObject(state.context);
+public/control-center/pages/content-studio-workspace.js:228:  const overview = asObject(state.data.overview?.overview);
+public/control-center/pages/content-studio-workspace.js:247:    const parsed = JSON.parse(window.localStorage?.getItem(CONTENT_LOCAL_DRAFTS_KEY) || "{}");
+public/control-center/pages/content-studio-workspace.js:257:    window.localStorage?.setItem(CONTENT_LOCAL_DRAFTS_KEY, JSON.stringify(map || {}));
+public/control-center/pages/content-studio-workspace.js:284:    const parsed = JSON.parse(window.localStorage?.getItem(CONTENT_LIBRARY_LOCAL_ASSETS_KEY) || "{}");
+public/control-center/pages/content-studio-workspace.js:294:    window.localStorage?.setItem(CONTENT_LIBRARY_LOCAL_ASSETS_KEY, JSON.stringify(map || {}));
+public/control-center/pages/content-studio-workspace.js:1807:  const assetData = asObject(state.data?.assets);
+public/control-center/pages/content-studio-workspace.js:2371:    const projectName = firstText(state.context?.currentProject);
+public/control-center/pages/integrations/cards.js:7:  No global state.
+public/control-center/pages/integrations/builders.js:178:    description: "Website, storefront, and marketplace connectors that prove demand and commerce readiness.",
+public/control-center/pages/integrations/drawer.js:374:            Sensitive credentials are stored server-side only.
+public/control-center/pages/governance.js:196:    return "Submit reviewed Governance decision? This records a backend reviewed decision and may update linked queues or review state. It does not publish or execute directly.";
+public/control-center/pages/governance.js:199:  return "Submit reviewed Governance decision? This records a backend reviewed decision and may update linked queues or review state. It does not publish or execute directly.";
+public/control-center/pages/governance.js:203:  if (typeof window === "undefined" || typeof window.confirm !== "function") return true;
+public/control-center/pages/governance.js:204:  return window.confirm(getDecisionConfirmationMessage(decision));
+public/control-center/pages/governance.js:208:  if (typeof window === "undefined" || typeof window.confirm !== "function") return true;
+public/control-center/pages/governance.js:214:  return window.confirm(
+public/control-center/pages/governance.js:1017:                  <p>Rules, owners, and Settings bridge state.</p>
+public/control-center/pages/governance.js:1110:                      : `<tr><td colspan="6"><div class="empty-box">No governance items are visible in this focus state.</div></td></tr>`}
+public/control-center/pages/governance.js:1425:        const confirmed = window.confirm("Confirm backend Governance policy save\n\nAction: Save durable Governance policy rules for this project.\nRisk: These rules can affect approvals, publishing readiness, brand safety review, admin override behavior, and freeze-publishing behavior.\nAuthority: This is a backend-governed durable policy update.\n\nSelect Cancel to review the policy settings before saving.");
+public/control-center/pages/governance.js:1451:        const confirmed = window.confirm("Sync Settings-derived rules to Governance policy? This updates durable Governance rules including approval-before-publish, claim review, escalation, owners, override behavior, and policy behavior. Continue only if the Settings snapshot was reviewed.");
+public/control-center/pages/integrations.js:43:    description: "Commercial infrastructure, storefronts, product data, orders, and conversion-aware commerce signals.",
+public/control-center/pages/integrations.js:74:        primaryField: "storeUrl",
+public/control-center/pages/integrations.js:76:          { key: "storeUrl", label: "Store URL", placeholder: "https://brand.com", required: true },
+public/control-center/pages/integrations.js:86:        purpose: "Future-ready Shopify storefront integration for products, orders, and sales intelligence.",
+public/control-center/pages/integrations.js:91:        primaryField: "storeDomain",
+public/control-center/pages/integrations.js:93:          { key: "storeDomain", label: "Store domain", placeholder: "brand.myshopify.com", required: true },
+public/control-center/pages/integrations.js:95:          { key: "storeId", label: "Store ID", placeholder: "Shopify store ID" }
+public/control-center/pages/integrations.js:123:        whyItMatters: "eBay extends commerce intelligence beyond the owned store and helps the system learn external demand patterns.",
+public/control-center/pages/integrations.js:130:          { key: "storeUrl", label: "Store URL", placeholder: "https://ebay.com/usr/brand" },
+public/control-center/pages/integrations.js:660:      restoreFocusIntegrationId: "",
+public/control-center/pages/integrations.js:661:      restoreScrollState: null,
+public/control-center/pages/integrations.js:673:  const style = window.getComputedStyle(element);
+public/control-center/pages/integrations.js:726:    top: Number(window.scrollY || window.pageYOffset || 0)
+public/control-center/pages/integrations.js:730:function restoreIntegrationsScrollState(scrollState) {
+public/control-center/pages/integrations.js:746:  window.scrollTo({ top: safeTop, behavior: "auto" });
+public/control-center/pages/integrations.js:763:  session.restoreFocusIntegrationId = closedIntegrationId;
+public/control-center/pages/integrations.js:764:  session.restoreScrollState = session.drawerOriginScrollState || captureIntegrationsScrollState();
+public/control-center/pages/integrations.js:771:function restoreConnectorContext(session) {
+public/control-center/pages/integrations.js:776:  const targetIntegrationId = asString(session.restoreFocusIntegrationId || session.selectedIntegrationId);
+public/control-center/pages/integrations.js:777:  const restoreState = session.restoreScrollState;
+public/control-center/pages/integrations.js:779:  if (!targetIntegrationId && !restoreState) {
+public/control-center/pages/integrations.js:783:  session.restoreFocusIntegrationId = "";
+public/control-center/pages/integrations.js:784:  session.restoreScrollState = null;
+public/control-center/pages/integrations.js:786:  window.requestAnimationFrame(() => {
+public/control-center/pages/integrations.js:787:    restoreIntegrationsScrollState(restoreState);
+public/control-center/pages/integrations.js:839:  return asObject(state.data?.overview?.overview);
+public/control-center/pages/integrations.js:859:  if (integration.id === "woocommerce" && field.key === "storeUrl") {
+public/control-center/pages/integrations.js:984:  return asObject(asObject(state.data?.integrations).control_center);
+public/control-center/pages/integrations.js:992:  return asObject(asObject(asObject(state.data?.integrations).sources).sources);
+public/control-center/pages/integrations.js:1130:    const savedStoreUrl = asString(asObject(record.config).storeUrl).trim();
+public/control-center/pages/integrations.js:1133:        fieldKey: "storeUrl",
+public/control-center/pages/integrations.js:1246:  window.requestAnimationFrame(() => {
+public/control-center/pages/integrations.js:1497:    const confirmed = window.confirm(
+public/control-center/pages/integrations.js:1552:    const confirmed = window.confirm(`Confirm integration disconnect\n\nAction: Disconnect ${integration.label} from the current project.\nRisk: This can stop data sync, attribution, learning signals, and automation inputs for this connector.\nAuthority: This is a backend-governed integration state update.\n\nSelect Cancel to keep the integration connected.`);
+public/control-center/pages/integrations.js:1594:      const confirmed = window.confirm(`Confirm integration ${actionLabel}\n\nAction: Run ${actionLabel} for ${integration.label}.\nRisk: This may start backend jobs, provider reads, imports, or data refresh operations for this connector.\nAuthority: This action remains backend-governed and may require Governance approval.\n\nSelect Cancel to stop this action.`);
+public/control-center/pages/integrations.js:1723:    const projectName = state.context.currentProject || "";
+public/control-center/pages/integrations.js:1893:                : `<div class="empty-box">No connectors match the current filters. Clear one filter to restore the launch connector list.</div>`}
+public/control-center/pages/integrations.js:2003:    restoreConnectorContext(session);
+public/control-center/pages/setup.js:3:import { patchState } from "../state.js";
+public/control-center/pages/setup.js:23:    description: "Define the project identity, type, website, and launch window.",
+public/control-center/pages/setup.js:202:  if (typeof window === "undefined" || !window.localStorage) return null;
+public/control-center/pages/setup.js:205:    const raw = window.localStorage.getItem(getSetupDraftKey(projectName));
+public/control-center/pages/setup.js:215:  if (typeof window === "undefined" || !window.localStorage) return false;
+public/control-center/pages/setup.js:218:    window.localStorage.setItem(getSetupDraftKey(projectName), JSON.stringify(data));
+public/control-center/pages/setup.js:226:  if (typeof window === "undefined" || !window.localStorage) return false;
+public/control-center/pages/setup.js:229:    window.localStorage.removeItem(getSetupDraftKey(projectName));
+public/control-center/pages/setup.js:237:  const overviewData = asObject(state.data.overview?.overview);
+public/control-center/pages/setup.js:238:  const readinessDashboard = asObject(state.data.readiness?.dashboard);
+public/control-center/pages/setup.js:239:  const context = asObject(state.context);
+public/control-center/pages/setup.js:1004:    window.setTimeout(() => {
+public/control-center/pages/setup.js:1029:    window.setTimeout(() => {
+public/control-center/pages/setup.js:1063:      const confirmed = typeof window === "undefined" || typeof window.confirm !== "function"
+public/control-center/pages/setup.js:1065:        : window.confirm(
+public/control-center/pages/setup.js:1099:        window.setTimeout(() => {
+public/control-center/pages/setup.js:1391:    const overviewData = asObject(state.data.overview?.overview);
+public/control-center/pages/setup.js:1392:    const readiness = asObject(state.data.readiness);
+public/control-center/pages/setup.js:1394:    const integrations = asObject(state.data.integrations);
+public/control-center/pages/setup.js:1395:    const assets = asObject(state.data.assets);
+public/control-center/pages/setup.js:1397:    const projectName = state.context.currentProject || overviewData.project_name || "";
+public/control-center/pages/setup.js:1767:        const confirmed = window.confirm(
+public/control-center/pages/publishing.js:139:  publishingRenderTimer = window.setTimeout(() => {
+public/control-center/pages/publishing.js:297:    const parsed = JSON.parse(window.localStorage?.getItem(PUBLISHING_LOCAL_DRAFTS_KEY) || "{}");
+public/control-center/pages/publishing.js:307:    window.localStorage?.setItem(PUBLISHING_LOCAL_DRAFTS_KEY, JSON.stringify(map || {}));
+public/control-center/pages/publishing.js:345:  const context = asObject(state.context);
+public/control-center/pages/publishing.js:346:  const overview = asObject(state.data.overview?.overview);
+public/control-center/pages/publishing.js:392:  const context = asObject(state.context);
+public/control-center/pages/publishing.js:410:    project: firstText(raw.project, raw.project_name, state.context?.currentProject),
+public/control-center/pages/publishing.js:411:    campaign: firstText(raw.campaign, raw.campaign_name, raw.wave_name, raw.waveName, state.context?.activeCampaign),
+public/control-center/pages/publishing.js:433:  const activity = asObject(state.data.activity);
+public/control-center/pages/publishing.js:487:  const checks = asObject(state.data.integrations?.readiness?.checks);
+public/control-center/pages/publishing.js:637:  if (typeof window === "undefined" || typeof window.confirm !== "function") return true;
+public/control-center/pages/publishing.js:638:  return window.confirm(message);
+public/control-center/pages/publishing.js:973:  for (const storage of [window.sessionStorage, window.localStorage]) {
+public/control-center/pages/publishing.js:999:  for (const storage of [window.sessionStorage, window.localStorage]) {
+public/control-center/pages/publishing.js:1023:  return asObject(state.data.assets);
+public/control-center/pages/publishing.js:1563:  const projectName = state.context.currentProject || "";
+public/control-center/pages/publishing.js:1765:        const confirmed = window.confirm(
+public/control-center/pages/publishing.js:1779:          "Confirm pause\n\nAction: Move this backend publishing item back to draft.\n\nThis updates the backend publishing lifecycle state.\n\nSelect Cancel to keep the item unchanged."
+public/control-center/pages/publishing.js:1863:      const confirmed = window.confirm("Confirm fail action\n\nAction: Mark this publishing item as failed.\nRisk: This creates a permanent failure record and stops the publishing lifecycle for this item.\nPolicy: Use only when this item cannot proceed and requires explicit failure logging.\n\nSelect Cancel to keep this item in its current state.");
+public/control-center/pages/publishing.js:1968:      const confirmed = window.confirm(
+public/control-center/pages/publishing.js:2004:      const confirmed = window.confirm(
+public/control-center/pages/publishing.js:2020:      const confirmed = window.confirm(
+public/control-center/pages/publishing.js:2063:    const projectName = state.context.currentProject || "";
+public/control-center/pages/publishing.js:2064:    const operations = asObject(state.data.operations);
+public/control-center/pages/publishing.js:2067:    const checks = asObject(state.data.integrations?.readiness?.checks);
+public/control-center/pages/workflows.js:5:} from "../state.js";
+public/control-center/pages/workflows.js:81:    purpose: "Prioritize integration recovery actions that restore readiness and automation reliability.",
+public/control-center/pages/workflows.js:193:  const context = asObject(state.context);
+public/control-center/pages/workflows.js:194:  const overview = asObject(state.data.overview?.overview);
+public/control-center/pages/workflows.js:195:  const activity = asObject(state.data.activity);
+public/control-center/pages/workflows.js:251:    const raw = window.localStorage?.getItem(WORKFLOW_LOCAL_DRAFTS_KEY) || "{}";
+public/control-center/pages/workflows.js:262:    window.localStorage?.setItem(WORKFLOW_LOCAL_DRAFTS_KEY, JSON.stringify(map || {}));
+public/control-center/pages/workflows.js:299:      session.draftStatus = `Draft restored ${formatDateTime(draft.updatedAt)}`;
+public/control-center/pages/workflows.js:403:  const dashboard = asObject(session.intelligence.dashboard || state.data);
+public/control-center/pages/workflows.js:404:  const overviewBlock = asObject(dashboard.overview || state.data.overview);
+public/control-center/pages/workflows.js:406:  const readinessRoot = asObject(dashboard.readiness || state.data.readiness);
+public/control-center/pages/workflows.js:408:  const integrations = asObject(dashboard.integrations || state.data.integrations);
+public/control-center/pages/workflows.js:409:  const assets = asObject(dashboard.assets || state.data.assets);
+public/control-center/pages/workflows.js:410:  const activity = asObject(dashboard.activity || state.data.activity);
+public/control-center/pages/workflows.js:436:    projectName: firstNonEmpty(state.context.currentProject, overview.project_name),
+public/control-center/pages/workflows.js:437:    campaignName: firstNonEmpty(state.context.activeCampaign),
+public/control-center/pages/workflows.js:964:    console.info("Workflow handoff restored without automatic durable consume; operator-owned surfaces keep handoff lifecycle authority.");
+public/control-center/pages/workflows.js:966:  showMessage?.("Workflow context restored from shared handoff without consuming the durable handoff automatically.");
+public/control-center/pages/workflows.js:994:  const needsDashboard = !state.data.overview || !state.data.readiness || !state.data.integrations || !state.data.activity;
+public/control-center/pages/workflows.js:1118:  window.addEventListener("mh:submit-workflow", async (event) => {
+public/control-center/pages/workflows.js:1138:    const projectName = state.context.currentProject || "";
+public/control-center/pages/workflows.js:1139:    const session = ensureSession(projectName, createDefaultInputs(state), state.data.operations);
+public/control-center/pages/workflows.js:1147:      campaign: firstNonEmpty(session.inputsByWorkflow[workflow.id].campaign, state.context.activeCampaign),
+public/control-center/pages/workflows.js:1148:      product: firstNonEmpty(session.inputsByWorkflow[workflow.id].product, state.context.currentProject)
+public/control-center/pages/workflows.js:1173:      const confirmed = window.confirm(
+public/control-center/pages/workflows.js:1242:  const projectName = state.context.currentProject || "";
+public/control-center/pages/workflows.js:1243:  const session = ensureSession(projectName, createDefaultInputs(state), state.data.operations);
+public/control-center/pages/workflows.js:1248:  const aiDraft = asObject(getSharedAiDraft(projectName, state.data.operations));
+public/control-center/pages/workflows.js:1335:        campaign: firstNonEmpty(session.inputsByWorkflow[session.selectedWorkflowId].campaign, state.context.activeCampaign),
+public/control-center/pages/workflows.js:1336:        product: firstNonEmpty(session.inputsByWorkflow[session.selectedWorkflowId].product, state.context.currentProject),
+public/control-center/pages/workflows.js:1346:  if (typeof window === "undefined" || typeof window.confirm !== "function") return true;
+public/control-center/pages/workflows.js:1348:  return window.confirm(
+public/control-center/pages/workflows.js:1668:      const confirmed = window.confirm(`Confirm guided preparation simulation\n\nAction: Simulate ${plan.length} guided automation steps.\nRisk: This can prepare downstream draft or handoff state, but does not publish, approve Governance decisions, or send externally.\n\nSelect Cancel to stop.`);
+public/control-center/pages/workflows.js:1698:      const confirmed = window.confirm("Confirm guided preparation step\n\nAction: Simulate the next preparation step.\nRisk: This can prepare downstream draft or handoff state, but does not publish, approve Governance decisions, or send externally.\n\nSelect Cancel to keep the current state.");
+public/control-center/pages/workflows.js:1732:      const confirmed = window.confirm(
+public/control-center/pages/workflows.js:1759:      const confirmed = window.confirm(
+public/control-center/pages/workflows.js:1762:          "Risk: This may continue preparing workflow steps and handoffs from the current state.\n\n" +
+public/control-center/pages/workflows.js:1782:      const confirmed = window.confirm(
+public/control-center/pages/workflows.js:1797:      const confirmed = window.confirm(
+public/control-center/pages/workflows.js:1832:    const campaignName = asString(state.context.activeCampaign || "");
+public/control-center/pages/workflows.js:1833:    const executionMode = asString(state.context.executionMode || "");
+public/control-center/pages/settings.js:846:function mergeSettings(defaults, storedForm) {
+public/control-center/pages/settings.js:849:  Object.keys(asObject(storedForm)).forEach((sectionId) => {
+public/control-center/pages/settings.js:852:      ...asObject(storedForm[sectionId])
+public/control-center/pages/settings.js:1775:        <button class="btn btn-secondary" type="button" data-settings-action="restore-defaults">Restore Defaults</button>
+public/control-center/pages/settings.js:1853:          const confirmed = window.confirm("Confirm settings save\n\nAction: Save team and governance settings for this project.\nRisk: These settings can affect team roles, approval behavior, publishing readiness, brand safety review, and admin override behavior.\nAuthority: This is a backend-governed durable settings update.\n\nSelect Cancel to review the settings before saving.");
+public/control-center/pages/settings.js:1907:      if (action === "restore-defaults") {
+public/control-center/pages/settings.js:1912:        context.showMessage("Default settings restored for this project. Review and save when ready.");

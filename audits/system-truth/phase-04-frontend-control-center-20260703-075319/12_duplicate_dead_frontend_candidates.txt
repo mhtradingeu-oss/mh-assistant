@@ -1,0 +1,375 @@
+### duplicate basenames inside public/control-center
+README.md
+dashboard.js
+
+### legacy folder content
+public/control-center/legacy/06-topbar.legacy.css
+public/control-center/legacy/09-command-legacy-isolation.legacy.css
+public/control-center/legacy/11-runtime-safety-overrides.legacy.css
+public/control-center/legacy/99-legacy-compat.legacy.css
+public/control-center/legacy/integrations.monolith-20260508.js
+public/control-center/legacy/page-standard.legacy-20260508.js
+public/control-center/legacy/styles.legacy-20260508.css
+public/control-center/legacy/styles.legacy-full.css
+
+### possible unused/dead words
+public/control-center/constants.js:5:// Legacy keys are read-only fallbacks to preserve older browser state.
+public/control-center/ui/page-standard.js:172:function asNumber(value, fallback = 0) {
+public/control-center/ui/page-standard.js:174:  return Number.isFinite(parsed) ? parsed : fallback;
+public/control-center/ui/page-standard.js:308:  const fallback = {
+public/control-center/ui/page-standard.js:325:  return recommendation || fallback[route] || fallback.home;
+public/control-center/ui/page-standard.js:328:function resolveFreshNextAction(context, fallbackAction = "") {
+public/control-center/ui/page-standard.js:334:    return next || fallbackAction;
+public/control-center/ui/page-standard.js:336:    return fallbackAction;
+public/control-center/system-intelligence.js:381:  const fallback = createRecommendation({
+public/control-center/system-intelligence.js:399:    nextBestAction: recommendations[0] || fallback,
+public/control-center/index.html:243:              placeholder="Search pages, assets, campaigns, workflows..."
+public/control-center/index.html:254:              placeholder="Talk to the system: e.g. build a launch campaign for Germany"
+public/control-center/runtime/README.md:4:Gradually decompose the legacy Control Center runtime into isolated operational modules.
+public/control-center/runtime/README.md:15:- responsive ownership is duplicated
+public/control-center/runtime/overlay/OVERLAY_RUNTIME_PLAN.md:24:- duplicated visibility logic
+public/control-center/runtime/overlay/OVERLAY_RUNTIME_PLAN.md:41:## High-risk legacy sources
+public/control-center/runtime/overlay/OVERLAY_RUNTIME_PLAN.md:42:- legacy/styles.legacy-full.css
+public/control-center/runtime/overlay/OVERLAY_RUNTIME_PLAN.md:43:- legacy/11-runtime-safety-overrides.legacy.css
+public/control-center/runtime/overlay/OVERLAY_RUNTIME_PLAN.md:44:- legacy/09-command-legacy-isolation.legacy.css
+public/control-center/runtime/overlay/OVERLAY_RUNTIME_PLAN.md:66:- remove duplicate overlay logic
+public/control-center/runtime/overlay/OVERLAY_RUNTIME_PLAN.md:67:- remove legacy overlay conflicts
+public/control-center/legacy/page-standard.legacy-20260508.js:390:function asNumber(value, fallback = 0) {
+public/control-center/legacy/page-standard.legacy-20260508.js:392:  return Number.isFinite(parsed) ? parsed : fallback;
+public/control-center/legacy/page-standard.legacy-20260508.js:413:function textValue(value, fallback = "-") {
+public/control-center/legacy/page-standard.legacy-20260508.js:414:  if (value == null || value === "") return fallback;
+public/control-center/legacy/page-standard.legacy-20260508.js:416:    return asString(value) || fallback;
+public/control-center/legacy/page-standard.legacy-20260508.js:419:    return value.map((item) => textValue(item, "")).filter(Boolean).join(", ") || fallback;
+public/control-center/legacy/page-standard.legacy-20260508.js:422:    return textValue(value.title || value.label || value.name || value.action || value.summary || value.description || value.status, fallback);
+public/control-center/legacy/page-standard.legacy-20260508.js:424:  return fallback;
+public/control-center/legacy/page-standard.legacy-20260508.js:427:function firstText(values, fallback = "-") {
+public/control-center/legacy/page-standard.legacy-20260508.js:432:  return fallback;
+public/control-center/legacy/09-command-legacy-isolation.legacy.css:4:  Stabilize command layer behavior while legacy styles still exist in styles.css.
+public/control-center/legacy/integrations.monolith-20260508.js:24:          { key: "url", label: "Website URL", placeholder: "https://brand.com", required: true },
+public/control-center/legacy/integrations.monolith-20260508.js:25:          { key: "apiKey", label: "API key", placeholder: "Website API key", type: "password" },
+public/control-center/legacy/integrations.monolith-20260508.js:26:          { key: "webhookUrl", label: "Webhook URL", placeholder: "https://brand.com/webhooks/mh", required: false }
+public/control-center/legacy/integrations.monolith-20260508.js:42:          { key: "storeUrl", label: "Store URL", placeholder: "https://brand.com", required: true },
+public/control-center/legacy/integrations.monolith-20260508.js:43:          { key: "consumerKey", label: "Consumer key", placeholder: "ck_...", type: "password" },
+public/control-center/legacy/integrations.monolith-20260508.js:44:          { key: "consumerSecret", label: "Consumer secret", placeholder: "cs_...", type: "password" }
+public/control-center/legacy/integrations.monolith-20260508.js:59:          { key: "storeDomain", label: "Store domain", placeholder: "brand.myshopify.com", required: true },
+public/control-center/legacy/integrations.monolith-20260508.js:60:          { key: "adminToken", label: "Admin token", placeholder: "shpat_...", type: "password" },
+public/control-center/legacy/integrations.monolith-20260508.js:61:          { key: "storeId", label: "Store ID", placeholder: "Shopify store ID" }
+public/control-center/legacy/integrations.monolith-20260508.js:78:          { key: "merchantId", label: "Merchant ID", placeholder: "Amazon merchant ID", required: true },
+public/control-center/legacy/integrations.monolith-20260508.js:79:          { key: "sellerUrl", label: "Store URL", placeholder: "https://amazon.com/shops/brand" },
+public/control-center/legacy/integrations.monolith-20260508.js:80:          { key: "accessToken", label: "Access token", placeholder: "Amazon access token", type: "password" }
+public/control-center/legacy/integrations.monolith-20260508.js:95:          { key: "sellerId", label: "Seller ID", placeholder: "eBay seller ID", required: true },
+public/control-center/legacy/integrations.monolith-20260508.js:96:          { key: "storeUrl", label: "Store URL", placeholder: "https://ebay.com/usr/brand" },
+public/control-center/legacy/integrations.monolith-20260508.js:97:          { key: "accessToken", label: "Access token", placeholder: "eBay access token", type: "password" }
+public/control-center/legacy/integrations.monolith-20260508.js:120:          { key: "pageUrl", label: "Page URL", placeholder: "https://facebook.com/brand", required: true },
+public/control-center/legacy/integrations.monolith-20260508.js:121:          { key: "pageId", label: "Page ID", placeholder: "Facebook page ID", required: false },
+public/control-center/legacy/integrations.monolith-20260508.js:122:          { key: "accessToken", label: "Access token", placeholder: "Facebook access token", type: "password" }
+public/control-center/legacy/integrations.monolith-20260508.js:138:          { key: "profileUrl", label: "Profile URL", placeholder: "https://instagram.com/brand", required: true },
+public/control-center/legacy/integrations.monolith-20260508.js:139:          { key: "businessAccountId", label: "Business account ID", placeholder: "Instagram business account ID" },
+public/control-center/legacy/integrations.monolith-20260508.js:140:          { key: "accessToken", label: "Access token", placeholder: "Instagram access token", type: "password" }
+public/control-center/legacy/integrations.monolith-20260508.js:156:          { key: "profileUrl", label: "Profile URL", placeholder: "https://tiktok.com/@brand", required: true },
+public/control-center/legacy/integrations.monolith-20260508.js:157:          { key: "accountId", label: "Account ID", placeholder: "TikTok business account ID" },
+public/control-center/legacy/integrations.monolith-20260508.js:158:          { key: "accessToken", label: "Access token", placeholder: "TikTok access token", type: "password" }
+public/control-center/legacy/integrations.monolith-20260508.js:174:          { key: "channelUrl", label: "Channel URL", placeholder: "https://youtube.com/@brand", required: true },
+public/control-center/legacy/integrations.monolith-20260508.js:175:          { key: "channelId", label: "Channel ID", placeholder: "YouTube channel ID" },
+public/control-center/legacy/integrations.monolith-20260508.js:176:          { key: "accessToken", label: "Access token", placeholder: "YouTube OAuth token", type: "password" }
+public/control-center/legacy/integrations.monolith-20260508.js:191:          { key: "companyUrl", label: "Company URL", placeholder: "https://linkedin.com/company/brand", required: true },
+public/control-center/legacy/integrations.monolith-20260508.js:192:          { key: "companyId", label: "Company ID", placeholder: "LinkedIn company ID" },
+public/control-center/legacy/integrations.monolith-20260508.js:193:          { key: "accessToken", label: "Access token", placeholder: "LinkedIn OAuth token", type: "password" }
+public/control-center/legacy/integrations.monolith-20260508.js:216:          { key: "propertyId", label: "GA4 property ID", placeholder: "GA4 property ID", required: true },
+public/control-center/legacy/integrations.monolith-20260508.js:217:          { key: "measurementId", label: "Measurement ID", placeholder: "G-XXXXXXXXXX" },
+public/control-center/legacy/integrations.monolith-20260508.js:218:          { key: "accessToken", label: "Access token", placeholder: "GA4 access token", type: "password" }
+public/control-center/legacy/integrations.monolith-20260508.js:233:          { key: "containerId", label: "Container ID", placeholder: "GTM-XXXXXXX", required: true },
+public/control-center/legacy/integrations.monolith-20260508.js:234:          { key: "workspaceId", label: "Workspace ID", placeholder: "GTM workspace ID" },
+public/control-center/legacy/integrations.monolith-20260508.js:235:          { key: "accessToken", label: "Access token", placeholder: "GTM access token", type: "password" }
+public/control-center/legacy/integrations.monolith-20260508.js:250:          { key: "pixelId", label: "Pixel ID", placeholder: "Meta pixel ID", required: true },
+public/control-center/legacy/integrations.monolith-20260508.js:251:          { key: "adAccountId", label: "Ad account ID", placeholder: "act_123..." },
+public/control-center/legacy/integrations.monolith-20260508.js:252:          { key: "accessToken", label: "Access token", placeholder: "Meta access token", type: "password" }
+public/control-center/legacy/integrations.monolith-20260508.js:267:          { key: "pixelId", label: "Pixel ID", placeholder: "TikTok pixel ID", required: true },
+public/control-center/legacy/integrations.monolith-20260508.js:268:          { key: "accountId", label: "Account ID", placeholder: "TikTok Ads account ID" },
+public/control-center/legacy/integrations.monolith-20260508.js:269:          { key: "accessToken", label: "Access token", placeholder: "TikTok token", type: "password" }
+public/control-center/legacy/integrations.monolith-20260508.js:285:          { key: "propertyUrl", label: "Property URL", placeholder: "https://brand.com", required: true },
+public/control-center/legacy/integrations.monolith-20260508.js:286:          { key: "siteDomain", label: "Domain property", placeholder: "sc-domain:brand.com" },
+public/control-center/legacy/integrations.monolith-20260508.js:287:          { key: "accessToken", label: "Access token", placeholder: "Search Console token", type: "password" }
+public/control-center/legacy/integrations.monolith-20260508.js:302:          { key: "endpointUrl", label: "Endpoint URL", placeholder: "https://api.brand.com/analytics", required: true },
+public/control-center/legacy/integrations.monolith-20260508.js:303:          { key: "clientId", label: "Client ID", placeholder: "Analytics client ID" },
+public/control-center/legacy/integrations.monolith-20260508.js:304:          { key: "accessToken", label: "Access token", placeholder: "API token", type: "password" }
+public/control-center/legacy/integrations.monolith-20260508.js:329:          { key: "senderEmail", label: "Sender email", placeholder: "support@brand.com", required: true },
+public/control-center/legacy/integrations.monolith-20260508.js:330:          { key: "smtpHost", label: "SMTP host", placeholder: "smtp.provider.com", required: true },
+public/control-center/legacy/integrations.monolith-20260508.js:331:          { key: "smtpPort", label: "SMTP port", placeholder: "587" }
+public/control-center/legacy/integrations.monolith-20260508.js:348:          { key: "providerName", label: "Provider name", placeholder: "SendGrid / Mailgun / Resend", required: true },
+public/control-center/legacy/integrations.monolith-20260508.js:349:          { key: "apiKey", label: "API key", placeholder: "Mailer API key", type: "password" },
+public/control-center/legacy/integrations.monolith-20260508.js:350:          { key: "senderDomain", label: "Sender domain", placeholder: "brand.com" }
+public/control-center/legacy/integrations.monolith-20260508.js:365:          { key: "audienceId", label: "Audience ID", placeholder: "Mailchimp audience ID", required: true },
+public/control-center/legacy/integrations.monolith-20260508.js:366:          { key: "apiKey", label: "API key", placeholder: "Mailchimp API key", type: "password" },
+public/control-center/legacy/integrations.monolith-20260508.js:367:          { key: "serverPrefix", label: "Server prefix", placeholder: "us1" }
+public/control-center/legacy/integrations.monolith-20260508.js:384:          { key: "workspaceId", label: "Workspace / account ID", placeholder: "CRM workspace ID", required: true },
+public/control-center/legacy/integrations.monolith-20260508.js:385:          { key: "apiKey", label: "API key", placeholder: "CRM API key", type: "password" },
+public/control-center/legacy/integrations.monolith-20260508.js:386:          { key: "pipelineId", label: "Pipeline ID", placeholder: "Primary pipeline ID" }
+public/control-center/legacy/integrations.monolith-20260508.js:409:          { key: "adAccountId", label: "Ad account ID", placeholder: "act_123456789", required: true },
+public/control-center/legacy/integrations.monolith-20260508.js:410:          { key: "businessId", label: "Business ID", placeholder: "Meta business ID" },
+public/control-center/legacy/integrations.monolith-20260508.js:411:          { key: "accessToken", label: "Access token", placeholder: "Meta ads token", type: "password" }
+public/control-center/legacy/integrations.monolith-20260508.js:427:          { key: "customerId", label: "Customer ID", placeholder: "123-456-7890", required: true },
+public/control-center/legacy/integrations.monolith-20260508.js:428:          { key: "managerId", label: "Manager / MCC ID", placeholder: "Google Ads MCC ID" },
+public/control-center/legacy/integrations.monolith-20260508.js:429:          { key: "refreshToken", label: "Refresh token", placeholder: "Google Ads refresh token", type: "password" }
+public/control-center/legacy/integrations.monolith-20260508.js:444:          { key: "advertiserId", label: "Advertiser ID", placeholder: "TikTok advertiser ID", required: true },
+public/control-center/legacy/integrations.monolith-20260508.js:445:          { key: "accountScope", label: "Account scope", placeholder: "Region / business scope" },
+public/control-center/legacy/integrations.monolith-20260508.js:446:          { key: "accessToken", label: "Access token", placeholder: "TikTok ads token", type: "password" }
+public/control-center/legacy/integrations.monolith-20260508.js:468:          { key: "folderId", label: "Folder ID", placeholder: "Google Drive folder ID", required: true },
+public/control-center/legacy/integrations.monolith-20260508.js:469:          { key: "workspaceEmail", label: "Workspace email", placeholder: "ops@brand.com" },
+public/control-center/legacy/integrations.monolith-20260508.js:470:          { key: "accessToken", label: "Access token", placeholder: "Drive OAuth token", type: "password" }
+public/control-center/legacy/integrations.monolith-20260508.js:485:          { key: "workspaceId", label: "Workspace ID", placeholder: "Slack workspace ID", required: true },
+public/control-center/legacy/integrations.monolith-20260508.js:486:          { key: "channelId", label: "Channel ID", placeholder: "Channel ID for alerts" },
+public/control-center/legacy/integrations.monolith-20260508.js:487:          { key: "botToken", label: "Bot token", placeholder: "xoxb-...", type: "password" }
+public/control-center/legacy/integrations.monolith-20260508.js:502:          { key: "botName", label: "Bot / workspace name", placeholder: "MH Assistant Ops Bot", required: true },
+public/control-center/legacy/integrations.monolith-20260508.js:503:          { key: "chatId", label: "Chat ID", placeholder: "Telegram chat ID" },
+public/control-center/legacy/integrations.monolith-20260508.js:504:          { key: "botToken", label: "Bot token", placeholder: "Telegram bot token", type: "password" }
+public/control-center/legacy/integrations.monolith-20260508.js:519:          { key: "workspaceName", label: "Workspace name", placeholder: "Brand Ops Workspace", required: true },
+public/control-center/legacy/integrations.monolith-20260508.js:520:          { key: "databaseId", label: "Database ID", placeholder: "Primary Notion database ID" },
+public/control-center/legacy/integrations.monolith-20260508.js:521:          { key: "accessToken", label: "Integration token", placeholder: "Notion token", type: "password" }
+public/control-center/legacy/integrations.monolith-20260508.js:536:          { key: "endpointUrl", label: "Webhook / scenario URL", placeholder: "https://hooks.zapier.com/...", required: true },
+public/control-center/legacy/integrations.monolith-20260508.js:537:          { key: "workspaceId", label: "Workspace / scenario ID", placeholder: "Zap / Make scenario ID" },
+public/control-center/legacy/integrations.monolith-20260508.js:538:          { key: "secretKey", label: "Secret key", placeholder: "Automation secret", type: "password" }
+public/control-center/legacy/integrations.monolith-20260508.js:553:          { key: "webhookUrl", label: "Webhook URL", placeholder: "https://ops.brand.com/webhook", required: true },
+public/control-center/legacy/integrations.monolith-20260508.js:554:          { key: "eventScope", label: "Event scope", placeholder: "events, approvals, syncs" },
+public/control-center/legacy/integrations.monolith-20260508.js:555:          { key: "secretKey", label: "Secret key", placeholder: "Webhook secret", type: "password" }
+public/control-center/legacy/integrations.monolith-20260508.js:938:    health_summary: "Connected through the legacy source registry.",
+public/control-center/legacy/integrations.monolith-20260508.js:939:    notes: "This integration is currently inferred from the legacy project source mapping.",
+public/control-center/legacy/integrations.monolith-20260508.js:942:    legacy_source: true
+public/control-center/legacy/integrations.monolith-20260508.js:986:function normalizeStatusLabel(statusLabel, fallback = "Not Connected") {
+public/control-center/legacy/integrations.monolith-20260508.js:996:  return fallback;
+public/control-center/legacy/integrations.monolith-20260508.js:1219:  // Healthy fallback — suggest next optional connector
+public/control-center/legacy/integrations.monolith-20260508.js:1838:        placeholder="${escapeHtml(field.placeholder || "")}"
+public/control-center/legacy/integrations.monolith-20260508.js:1862:    ${quickConnectLabel && card.statusLabel !== "Connected" ? `<div class="integration-quick-connect-note">OAuth-style quick connect is the recommended path for this provider. Manual fields remain available as fallback.</div>` : ""}
+public/control-center/legacy/integrations.monolith-20260508.js:2697:                    placeholder="Search connector, provider, or source"
+public/control-center/legacy/styles.legacy-full.css:1791:.library-preview-fallback,
+public/control-center/legacy/styles.legacy-full.css:3804:  .ctrl-composer-textarea::placeholder {
+public/control-center/legacy/styles.legacy-20260508.css:3:  Generated from legacy/styles.legacy-full.css and reduced to page-specific rules only.
+public/control-center/legacy/styles.legacy-20260508.css:2378:.ctrl-composer-textarea::placeholder {
+public/control-center/styles/mhos-executive-surface-primitives.css:108:   - No legacy selectors
+public/control-center/styles/15-clean-operating-layer.css:310:  - No overrides for legacy shared classes (.btn, .card, .panel, etc.).
+public/control-center/styles/01-reset.css:3:  Purpose: predictable rendering baseline without overriding legacy component styles.
+public/control-center/styles/14-page-standard.css:2649:/* LIB-FINAL-2B — Hide empty Library overview placeholder */
+public/control-center/styles/08-components-foundation.css:730:.library-preview-fallback,
+public/control-center/styles/08-components-foundation.css:1516:/* MH-OS Smart Tool Drawer — static source placeholder */
+public/control-center/styles/mhos-context-primitives.css:2:   For future context system migration. Do not use on legacy markup. */
+public/control-center/styles/12-pages.css:3339:[data-page="settings"] .settings-control::placeholder,
+public/control-center/styles/12-pages.css:3340:[data-page="settings"] .settings-textarea::placeholder {
+public/control-center/styles/12-pages.css:4212:.aicmd-v2-textarea::placeholder {
+public/control-center/styles/12-pages.css:7730:.aicmd-chatgpt-textarea::placeholder {
+public/control-center/styles/12-pages.css:7873:.library-preview-text-fallback {
+public/control-center/styles/12-pages.css:9050:[data-page="ai-command"] .aicmd-v2-textarea.aicmd-chatgpt-textarea::placeholder {
+public/control-center/styles/12-pages.css:9174:[data-page="library"] #libraryPreviewVisual .library-preview-fallback,
+public/control-center/styles/12-pages.css:9340:  [data-page="library"] #libraryPreviewVisual .library-preview-fallback,
+public/control-center/styles/12-pages.css:9865:[data-page="ai-command"] .aicmd-chatfirst-textarea::placeholder {
+public/control-center/styles/12-pages.css:10605:[data-page="ai-command"] .aicmd-chatgpt-stage .aicmd-chatfirst-textarea::placeholder {
+public/control-center/styles/12-pages.css:10863:[data-page="ai-command"] .aicmd-chatgpt-stage .aicmd-chatfirst-textarea::placeholder {
+public/control-center/styles/12-pages.css:11426:[data-page="ai-command"] .aicmd-final-textarea::placeholder {
+public/control-center/styles/09-governance.css:6: * Do not move or delete legacy Governance CSS from 12-pages.css in this phase.
+public/control-center/components/COMPONENT_ARCHITECTURE.md:39:- duplicate UI ownership
+public/control-center/components/COMPONENT_ARCHITECTURE.md:40:- duplicate component logic
+public/control-center/router.js:29:} from "./runtime/authority/route-role-fallback.js";
+public/control-center/asset-library.js:293:  const fallback = FALLBACK_ASSET_CATEGORIES.find((item) => item.asset_type === category.asset_type) || {};
+public/control-center/asset-library.js:294:  const merged = { ...fallback, ...asObject(category) };
+public/control-center/asset-library.js:296:    ...asObject(fallback.guidance),
+public/control-center/api.js:106:      for (const legacyKey of CONTROL_ACCESS_KEY_LEGACY_STORAGE_KEYS) {
+public/control-center/api.js:107:        const legacyValue = String(localStorage.getItem(legacyKey) || "").trim();
+public/control-center/api.js:108:        if (legacyValue) {
+public/control-center/api.js:109:          persistCanonicalControlKey(legacyValue);
+public/control-center/api.js:110:          return { key: legacyValue, source: `localStorage:${legacyKey}` };
+public/control-center/api.js:184:  const accessKeyBypass = String(response?.headers?.get?.("x-mh-control-key-bypass") || "")
+public/control-center/api.js:229:    normalized === "api.response.json.fallback.done" ||
+public/control-center/api.js:230:    normalized === "api.response.json.fallback.error" ||
+public/control-center/api.js:231:    normalized === "api.response.json.fallback.timeout" ||
+public/control-center/api.js:360:          let fallbackTimer = null;
+public/control-center/api.js:361:          const fallbackPayload = await Promise.race([
+public/control-center/api.js:364:              fallbackTimer = setTimeout(() => {
+public/control-center/api.js:365:                const fallbackTimeoutError = new Error(`JSON fallback timed out after ${timeoutMs}ms.`);
+public/control-center/api.js:366:                fallbackTimeoutError.endpoint = endpoint;
+public/control-center/api.js:367:                fallbackTimeoutError.isTimeout = true;
+public/control-center/api.js:368:                fallbackTimeoutError.parseStage = "api.response.json.fallback.timeout";
+public/control-center/api.js:369:                reject(fallbackTimeoutError);
+public/control-center/api.js:373:            if (fallbackTimer) {
+public/control-center/api.js:374:              clearTimeout(fallbackTimer);
+public/control-center/api.js:378:          const fallbackBodyLength = JSON.stringify(fallbackPayload || null).length;
+public/control-center/api.js:380:          emitApiRuntimeTrace("api.response.json.fallback.done", {
+public/control-center/api.js:384:            bodyLength: fallbackBodyLength,
+public/control-center/api.js:389:            mode: "json-fallback",
+public/control-center/api.js:390:            payload: fallbackPayload,
+public/control-center/api.js:391:            bodyLength: fallbackBodyLength,
+public/control-center/api.js:392:            parseStage: "api.response.json.fallback.done"
+public/control-center/api.js:394:        } catch (fallbackError) {
+public/control-center/api.js:395:          const fallbackParseStage = fallbackError?.isTimeout
+public/control-center/api.js:396:            ? "api.response.json.fallback.timeout"
+public/control-center/api.js:397:            : "api.response.json.fallback.error";
+public/control-center/api.js:399:          emitApiRuntimeTrace("api.response.json.fallback.error", {
+public/control-center/api.js:404:            message: fallbackError?.message || "JSON fallback failed"
+public/control-center/api.js:415:            parseStage: fallbackParseStage,
+public/control-center/api.js:516:async function parseJson(response, fallbackMessage = "Request failed", requestMeta = {}) {
+public/control-center/api.js:523:  if (bodyReadResult?.mode === "json-fallback") {
+public/control-center/api.js:525:    parseStage = String(bodyReadResult.parseStage || "api.response.json.fallback.done");
+public/control-center/api.js:553:      `${fallbackMessage} (${response.status})`;
+public/control-center/api.js:577:    const message = String(payload.error || fallbackMessage);
+public/control-center/api.js:705:async function getJson(path, fallbackMessage, timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS, requestOptions = {}) {
+public/control-center/api.js:712:  return parseJson(response, fallbackMessage, {
+public/control-center/api.js:723:async function sendRawJson(path, method, body, fallbackMessage, timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS) {
+public/control-center/api.js:738:      const parseError = new Error(fallbackMessage || "Response was not valid JSON.");
+public/control-center/api.js:752:    const message = String(payload?.error || payload?.message || fallbackMessage || "Request failed").trim();
+public/control-center/api.js:763:async function sendJson(path, method, body, fallbackMessage, timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS) {
+public/control-center/api.js:771:  return parseJson(response, fallbackMessage, {
+public/control-center/api.js:781:async function sendForm(path, formData, fallbackMessage, timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS) {
+public/control-center/api.js:796:  return parseJson(response, fallbackMessage, {
+public/control-center/api.js:1057:    console.warn("Using fallback projects list:", error.message);
+public/control-center/api.js:1062:      fallback: true
+public/control-center/api.js:1129:        const fallbackProjects = await fetchProjects();
+public/control-center/api.js:1130:        const fallbackItems = Array.isArray(fallbackProjects?.items) ? fallbackProjects.items : [];
+public/control-center/api.js:1131:        const projectExists = fallbackItems.some((item) => {
+public/control-center/api.js:1143:      } catch (fallbackError) {
+public/control-center/api.js:1150:          message: String(fallbackError?.message || "Failed to verify project fallback")
+public/control-center/pages/ai-command/tool-dock.js:14:function moveFocusOutOfDrawer(drawer, fallbackTarget = null) {
+public/control-center/pages/ai-command/tool-dock.js:19:    if (fallbackTarget && typeof fallbackTarget.focus === "function") {
+public/control-center/pages/ai-command/tool-dock.js:20:      fallbackTarget.focus({ preventScroll: true });
+public/control-center/pages/ai-command/tool-dock.js:78:    const fallbackTool = findToolMetadataById(returnContext.toolId);
+public/control-center/pages/ai-command/tool-dock.js:79:    if (fallbackTool) {
+public/control-center/pages/ai-command/tool-dock.js:82:        btn: createToolButtonAdapter(fallbackTool),
+public/control-center/pages/ai-command/tool-dock.js:83:        tool: fallbackTool,
+public/control-center/pages/ai-command/tool-dock.js:84:        text: fallbackTool.template || "",
+public/control-center/pages/ai-command/tool-dock.js:337:      sourceInput.placeholder = "Optional: add source usage notes, audience, angle, or claims to avoid...";
+public/control-center/pages/ai-command/tool-dock.js:360:  // Set placeholder for Source Details if empty
+public/control-center/pages/ai-command/tool-dock.js:362:    sourceInput.placeholder = "Optional: add source usage notes, audience, angle, or claims to avoid...";
+public/control-center/pages/ai-command/tool-dock.js:388:        if (sourceInput) sourceInput.placeholder = "Optional: add source usage notes, audience, angle, or claims to avoid...";
+public/control-center/pages/ai-command/tool-dock.js:1262:function getToolMetaList(tool = {}, key = "", fallback = []) {
+public/control-center/pages/ai-command/tool-dock.js:1266:  return fallback;
+public/control-center/pages/ai-command/tool-dock.js:1373:                placeholder="Example: use the selected Library source for facts only, avoid unsupported claims..."
+public/control-center/pages/ai-command/tool-dock.js:1383:                placeholder="Add audience, goal, keywords, offer, product, or any must-use information..."
+public/control-center/pages/ai-command/tool-dock.js:1500:function populateDrawerSelect(select, rawValue = "", fallbackLabel = "Auto") {
+public/control-center/pages/ai-command/tool-dock.js:1510:  const options = values.length ? values : [String(fallbackLabel || "Auto").trim() || "Auto"];
+public/control-center/pages/ai-command/tool-dock.js:1514:    const label = humanizeMeta(value || fallbackLabel || "Auto");
+public/control-center/pages/ai-command/tool-dock.js:1519:function getSelectedLabel(drawer, selector, fallback = "Auto") {
+public/control-center/pages/ai-command/tool-dock.js:1521:  if (!select || !select.value) return fallback;
+public/control-center/pages/ai-command/tool-dock.js:1658:function closeToolDrawer(drawer, fallbackTarget = null) {
+public/control-center/pages/ai-command/tool-dock.js:1659:  moveFocusOutOfDrawer(drawer, fallbackTarget);
+public/control-center/pages/publishing/publishing-payloads.js:49:function summarizeText(value, fallback = "No content payload available yet.") {
+public/control-center/pages/publishing/publishing-payloads.js:51:  if (!text) return fallback;
+public/control-center/pages/home/render-sections.js:98:          <p>${escapeHtml(agent.summary || agent.fallback || "Ready to support the project.")}</p>
+public/control-center/pages/campaign-studio.js:83:function toNumber(value, fallback = null) {
+public/control-center/pages/campaign-studio.js:85:  return Number.isFinite(parsed) ? parsed : fallback;
+public/control-center/pages/campaign-studio.js:157:function readableValue(value, fallback = "") {
+public/control-center/pages/campaign-studio.js:158:  if (value == null) return fallback;
+public/control-center/pages/campaign-studio.js:159:  if (typeof value === "string") return value.trim() === "[object Object]" ? fallback : value.trim();
+public/control-center/pages/campaign-studio.js:161:  if (Array.isArray(value)) return uniqueStrings(value.map((item) => readableValue(item))).join(", ") || fallback;
+public/control-center/pages/campaign-studio.js:173:    fallback
+public/control-center/pages/campaign-studio.js:295:  placeholder,
+public/control-center/pages/campaign-studio.js:308:          ? `<textarea id="campaign-${escapeHtml(name)}" name="${escapeHtml(name)}" class="setup-input setup-textarea" rows="${rows}" placeholder="${escapeHtml(placeholder || "")}">${escapeHtml(asString(value))}</textarea>`
+public/control-center/pages/campaign-studio.js:309:          : `<input id="campaign-${escapeHtml(name)}" name="${escapeHtml(name)}" class="setup-input" type="text" value="${escapeHtml(asString(value))}" placeholder="${escapeHtml(placeholder || "")}">`
+public/control-center/pages/campaign-studio.js:1673:                  placeholder: "Spring launch wave 1",
+public/control-center/pages/campaign-studio.js:1681:                  placeholder: "Launch, sales growth, lead generation...",
+public/control-center/pages/campaign-studio.js:1689:                  placeholder: "Product launch, seasonal push, retention sprint...",
+public/control-center/pages/campaign-studio.js:1697:                  placeholder: "Germany",
+public/control-center/pages/campaign-studio.js:1707:                  placeholder: "2026-05-01",
+public/control-center/pages/campaign-studio.js:1715:                  placeholder: "2026-05-21",
+public/control-center/pages/campaign-studio.js:1723:                  placeholder: "5000",
+public/control-center/pages/campaign-studio.js:1743:                  placeholder: "Primary hero product",
+public/control-center/pages/campaign-studio.js:1751:                  placeholder: "Why this product matters now",
+public/control-center/pages/campaign-studio.js:1760:                  placeholder: "Who is this campaign for?",
+public/control-center/pages/campaign-studio.js:1769:                  placeholder: "What problem are we solving?",
+public/control-center/pages/campaign-studio.js:1778:                  placeholder: "instagram, facebook, email",
+public/control-center/pages/campaign-studio.js:1786:                  placeholder: "Premium grooming with stronger routine results",
+public/control-center/pages/campaign-studio.js:1795:                  placeholder: "What makes the offer persuasive?",
+public/control-center/pages/campaign-studio.js:1804:                  placeholder: "Warm prospect",
+public/control-center/pages/campaign-studio.js:1854:                        placeholder: wave.index === 1 ? "Launch wave" : wave.index === 2 ? "Education wave" : "Conversion wave",
+public/control-center/pages/campaign-studio.js:1862:                        placeholder: wave.index === 1 ? "Awareness, announcement, validation..." : wave.index === 2 ? "Proof, education, comparison..." : "Offer push, urgency, retargeting...",
+public/control-center/pages/campaign-studio.js:1871:                        placeholder: wave.allocationSuggestion,
+public/control-center/pages/campaign-studio.js:1935:                  placeholder: "logo, product images, pricing doc, offer banner...",
+public/control-center/pages/campaign-studio.js:1944:                  placeholder: "Anything the execution team must know",
+public/control-center/pages/media-studio-workspace.js:162:function normalizeStatus(value, fallback = "draft") {
+public/control-center/pages/media-studio-workspace.js:164:  if (!normalized) return fallback;
+public/control-center/pages/media-studio-workspace.js:173:  return fallback;
+public/control-center/pages/media-studio-workspace.js:389:  const fallback = versioning.versions[versioning.versions.length - 1];
+public/control-center/pages/media-studio-workspace.js:390:  versioning.selectedVersionId = fallback?.id || "v1";
+public/control-center/pages/media-studio-workspace.js:391:  return fallback;
+public/control-center/pages/media-studio-workspace.js:450:function safeJsonParse(value, fallback = {}) {
+public/control-center/pages/media-studio-workspace.js:454:    return parsed && typeof parsed === "object" ? parsed : fallback;
+public/control-center/pages/media-studio-workspace.js:456:    return fallback;
+public/control-center/pages/media-studio-workspace.js:599:    const fulfilledValue = (result, fallback) =>
+public/control-center/pages/media-studio-workspace.js:600:      result?.status === "fulfilled" ? result.value : fallback;
+public/control-center/pages/media-studio-workspace.js:1982:  const fallback = getGeneratorFallbackMessage(session, backendProjectName);
+public/control-center/pages/media-studio-workspace.js:1999:      ${fallback ? `<div class="simple-banner">${escapeHtml(fallback)}</div>` : ""}
+public/control-center/pages/media-studio-workspace.js:2109:  const fallbackCopy = summary.isAiCampaign
+public/control-center/pages/media-studio-workspace.js:2121:          <p class="media-section-copy">${escapeHtml(summary.brief || summary.prompt || fallbackCopy)}</p>
+public/control-center/pages/media-studio-workspace.js:2284:function parseStructuredList(text, fallbackPrefix = "-") {
+public/control-center/pages/media-studio-workspace.js:2288:  return lines.length ? lines.map((line) => `${fallbackPrefix} ${line}`) : [];
+public/control-center/pages/customer-center.js:145:        <p>No placeholder customer records are shown. External send, CRM updates, ticket changes, calls, IVR, provider sync, and auto-reply remain locked.</p>
+public/control-center/pages/operations-centers.js:567:              <input id="taskCenterSearch" class="command-input" type="text" placeholder="Search tasks, owners, domains..." value="${escapeHtml(session.search)}">
+public/control-center/pages/operations-centers.js:939:              <input id="queueCenterSearch" class="command-input" type="text" placeholder="Search queues, items, assignees..." value="${escapeHtml(session.search)}">
+public/control-center/pages/operations-centers.js:1015:                  <p class="mhos-os-panel-copy">Context-only guidance: opens AI with prompt/context only. No approve, publish, retry, remove, Governance bypass, or backend execution is performed.</p>
+public/control-center/pages/operations-centers.js:1227:              <input id="jobMonitorSearch" class="command-input" type="text" placeholder="Search jobs, kinds, owners..." value="${escapeHtml(session.search)}">
+public/control-center/pages/operations-centers.js:1310:                  <p class="mhos-os-panel-copy">Context-only guidance: opens AI with prompt/context only. No retry, cancel, rerun, delete, worker trigger, approve, publish, Governance bypass, or backend execution is performed.</p>
+public/control-center/pages/operations-centers.js:1650:              <input id="notificationCenterSearch" class="command-input" type="text" placeholder="Search alerts, sources, messages..." value="${escapeHtml(session.search)}">
+public/control-center/pages/operations-centers.js:1734:                  <p class="mhos-os-panel-copy">Context-only guidance: opens AI with prompt/context only. No mark-read, acknowledge, resolve, dismiss, delete, send, approve, publish, Governance bypass, or backend execution is performed.</p>
+public/control-center/pages/operations-centers.js:1960:    // Render immediately from state as fallback
+public/control-center/pages/research.js:46:function toNumber(value, fallback = null) {
+public/control-center/pages/research.js:48:  return Number.isFinite(parsed) ? parsed : fallback;
+public/control-center/pages/research.js:93:function compactText(value, maxWords = 18, fallback = "") {
+public/control-center/pages/research.js:95:  if (!text) return fallback;
+public/control-center/pages/research.js:101:function joinPreview(values, fallback, maxItems = 3) {
+public/control-center/pages/research.js:103:  return items.length ? items.join(" • ") : fallback;
+public/control-center/pages/research.js:130:function getFirstPath(sources, paths, fallback = null) {
+public/control-center/pages/research.js:141:  return fallback;
+public/control-center/pages/research.js:198:function normalizeRecords(values, fallbackType = "signal") {
+public/control-center/pages/research.js:206:            type: fallbackType
+public/control-center/pages/research.js:234:          type: firstNonEmpty(record.type, record.category, fallbackType),
+public/control-center/pages/research.js:1452:              <input id="researchNoteTitle" class="setup-input" type="text" placeholder="Finding title" value="${escapeHtml(session.noteDraft.title)}" />
+public/control-center/pages/research.js:1453:              <textarea id="researchNoteBody" class="setup-input setup-textarea" rows="5" placeholder="Capture the key observation, implication, or market signal...">${escapeHtml(session.noteDraft.body)}</textarea>
+public/control-center/pages/research.js:1454:              <input id="researchNoteTags" class="setup-input" type="text" placeholder="Tags, comma separated" value="${escapeHtml(session.noteDraft.tags)}" />
+public/control-center/pages/ai-command.js:116:// Map legacy mode IDs from older sessions to new team IDs
+public/control-center/pages/ai-command.js:149:		placeholder: "Ask the Strategist to plan a campaign, map launch phases, review channel priorities, or define the offer strategy…",
+public/control-center/pages/ai-command.js:162:		placeholder: "Ask the Content Writer to draft captions, hooks, landing copy, or campaign messages…",
+public/control-center/pages/ai-command.js:175:		placeholder: "Ask the Media Director to define visual direction, prepare a creative brief, or review brand consistency…",
+public/control-center/pages/ai-command.js:188:		placeholder: "Ask the Video Lead to write a reel script, map short-form strategy, or outline the next video concept…",
+public/control-center/pages/ai-command.js:201:		placeholder: "Ask the Publisher to review publishing readiness, check scheduling, or prepare a handoff package…",
+public/control-center/pages/ai-command.js:214:		placeholder: "Ask the Ads Optimizer to draft ad copy, review targeting angles, or plan a paid campaign structure…",
+public/control-center/pages/ai-command.js:227:		placeholder: "Ask the SEO & Insights Analyst to review performance, suggest SEO improvements, or identify top content patterns…",
+public/control-center/pages/ai-command.js:240:		placeholder: "Ask the Compliance Reviewer to check claims, approval risks, publishing safety, and governance notes…",
+public/control-center/pages/ai-command.js:253:		placeholder: "Ask the Operations Lead to turn this into tasks, workflow steps, or handoffs…",
+public/control-center/pages/ai-command.js:266:		placeholder: "Ask the Customer Operations Lead to summarize a customer thread, draft a safe reply, prepare a ticket draft, check SLA risk, or route an escalation for review…",
+public/control-center/pages/ai-command.js:279:		placeholder: "Ask the Sales / CRM Lead to qualify a lead, draft outreach, plan follow-ups, summarize CRM context, or prepare a sales handoff for review…",
+public/control-center/pages/ai-command.js:707:function humanizeValue(value, fallback = "") {
+public/control-center/pages/ai-command.js:708:	if (value == null) return fallback;
+public/control-center/pages/ai-command.js:711:		return clean === "[object Object]" ? fallback : clean;
+public/control-center/pages/ai-command.js:717:		return value.map((item) => humanizeValue(item)).filter(Boolean).join("; ") || fallback;
+public/control-center/pages/ai-command.js:739:			.join("; ") || fallback;
+public/control-center/pages/ai-command.js:741:	return fallback;
+public/control-center/pages/ai-command.js:788:  // Remove accidental duplicate "X for: X for:" fragments anywhere.
+public/control-center/pages/ai-command.js:790:    const duplicate = `${prefix} ${prefix}`;
+public/control-center/pages/ai-command.js:791:    while (text.includes(duplicate)) {
+public/control-center/pages/ai-command.js:792:      text = text.replace(duplicate, prefix);
+public/control-center/pages/ai-command.js:817:function toNumber(value, fallback = null) {
+public/control-center/pages/ai-command.js:818:	if (value == null || value === "") return fallback;
+public/control-center/pages/ai-command.js:820:	return Number.isFinite(parsed) ? parsed : fallback;
+public/control-center/pages/ai-command.js:1101:function summarizeAiCommandSessionIntent(value = "", fallback = "Session") {
+public/control-center/pages/ai-command.js:1107:        if (!text) return fallback;
+public/control-center/pages/ai-command.js:1592:			safetyLabel: "No analytics mutation or fake metrics. Guidance only."
+public/control-center/pages/ai-command.js:1628:				"Unified Inbox is not duplicated here; this is a draft and routing preview only.",
+public/control-center/pages/ai-command.js:2496:function normalizeAiInboundSpecialistId(value, fallback = "operations") {
+public/control-center/pages/ai-command.js:2497:	const fallbackId = MODE_ID_ALIASES[getAiRoomRoleId(fallback)] || getAiRoomRoleId(fallback);
+public/control-center/pages/ai-command.js:2498:	const raw = getAiRoomRoleId(value || fallbackId);
+public/control-center/pages/ai-command.js:2499:	const legacy = AI_INBOUND_SPECIALIST_ALIASES[raw] || AI_INBOUND_SPECIALIST_ALIASES[asString(value).trim().toLowerCase()] || raw;
+public/control-center/pages/ai-command.js:2500:	const resolved = MODE_ID_ALIASES[legacy] || MODE_ID_ALIASES[getAiRoomRoleId(legacy)] || getAiRoomRoleId(legacy);
+public/control-center/pages/ai-command.js:2502:	return SPECIALIST_DEFS.some((item) => item.id === finalId) ? finalId : fallbackId;
+public/control-center/pages/ai-command.js:2511:	const fallbackRoute = sourcePage === "workspace" ? "workflows" : sourcePage;
+public/control-center/pages/ai-command.js:2512:	const fallbackLabel = sourceLabel || routeLabel(fallbackRoute);
+public/control-center/pages/ai-command.js:2517:		const route = normalizeAiInboundSourcePage(rawRoute || stringRoute || fallbackRoute);
+public/control-center/pages/ai-command.js:2518:		const label = firstAiInboundText(record.label, record.title, record.name) || routeLabel(route) || fallbackLabel;
+public/control-center/pages/ai-command.js:2525:		route: fallbackRoute,
+public/control-center/pages/ai-command.js:2526:		label: fallbackLabel,
+public/control-center/pages/ai-command.js:2527:		reason: `Return to ${fallbackLabel} after AI Team review.`
+public/control-center/pages/ai-command.js:2831:    const fallback =
+public/control-center/pages/ai-command.js:2838:      ...fallback,
+public/control-center/pages/ai-command.js:2840:      name: asString(member.name || fallback.name || member.role || "AI Specialist"),
+public/control-center/pages/ai-command.js:2841:      role: asString(member.role || fallback.role || id),
+public/control-center/pages/ai-command.js:2842:      purpose: asString(member.purpose || member.description || fallback.purpose || "Support the current operating context."),
+public/control-center/pages/ai-command.js:2843:      bestUse: asString(member.bestUse || member.best_use || fallback.bestUse || "Use when this specialist owns the next step."),
+public/control-center/pages/ai-command.js:3246:function buildConversationWorkContext(session, fallbackPrompt = "") {
+public/control-center/pages/ai-command.js:3267:                fallbackPrompt ||
+public/control-center/pages/ai-command.js:3298:function buildConversationWorkPrompt(session, outputType, fallbackPrompt = "") {
+public/control-center/pages/ai-command.js:3299:        const context = buildConversationWorkContext(session, fallbackPrompt);

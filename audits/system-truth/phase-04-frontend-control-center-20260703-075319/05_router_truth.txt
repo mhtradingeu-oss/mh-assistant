@@ -1,0 +1,278 @@
+### router.js route registration / navigation
+1:// public/control-center/router.js
+3:import { homeRoute } from "./pages/home.js";
+4:import { aiCommandRoute } from "./pages/ai-command.js";
+5:import { campaignStudioRoute } from "./pages/campaign-studio.js";
+6:import { contentStudioRoute } from "./pages/content-studio-workspace.js";
+7:import { mediaStudioRoute } from "./pages/media-studio-workspace.js";
+8:import { publishingRoute } from "./pages/publishing.js";
+9:import { adsManagerRoute } from "./pages/ads-manager.js";
+10:import { insightsRoute } from "./pages/insights.js";
+11:import { researchRoute } from "./pages/research.js";
+12:import { workflowsRoute } from "./pages/workflows.js";
+19:} from "./pages/operations-centers.js";
+20:import { setupRoute } from "./pages/setup.js";
+21:import { libraryRoute } from "./pages/library.js";
+22:import { integrationsRoute } from "./pages/integrations.js";
+23:import { customerCenterRoute } from "./pages/customer-center.js";
+24:import { settingsRoute } from "./pages/settings.js";
+25:import { governanceRoute } from "./pages/governance.js";
+29:} from "./runtime/authority/route-role-fallback.js";
+31:const routeRegistry = {
+55:let routeAccessResolver = null;
+57:const routeChangeSubscribers = new Set();
+61:  routeChangeSubscribers.add(handler);
+62:  return () => routeChangeSubscribers.delete(handler);
+65:function notifyRouteChange(route) {
+66:  routeChangeSubscribers.forEach((handler) => {
+68:      handler(route);
+77:  return document.getElementById("pageRoot");
+80:function getFallbackRoute(route) {
+82:    id: route,
+89:      <section class="page is-active">
+90:        <div class="page-grid">
+92:            <div class="empty-box">Unknown route: ${route}</div>
+108:function getAccessDeniedRoute(route, reason = "") {
+109:  const detail = reason || `Route "${route}" is not available for the current role.`;
+115:      description: "This workspace route is blocked by role access rules."
+118:      <section class="page is-active" data-page="access-denied">
+119:        <div class="page-grid">
+123:              <h3 class="access-denied-title">Route blocked: ${escapeHtmlMin(route)}</h3>
+126:                To access this page, use the <strong>Role</strong> selector in the top bar and switch to a permitted role.
+137:function normalizeRouteAccessResult(result, route) {
+141:      reason: result ? "" : `Access to ${route} is restricted.`
+158:function getDefaultRouteAccess(route) {
+159:  return getFallbackRouteAccess(route, DEFAULT_ROLE, { useDefaultRoleMessage: true });
+162:function getRouteAccess(route) {
+163:  if (typeof routeAccessResolver !== "function") {
+164:    return getDefaultRouteAccess(route);
+168:    return normalizeRouteAccessResult(routeAccessResolver(route), route);
+170:    return getDefaultRouteAccess(route);
+174:function updatePageHeader(route) {
+175:  const routeDef = getRouteDefinition(route);
+176:  const meta = routeDef.meta;
+178:  const eyebrow = document.getElementById("pageEyebrow");
+179:  const title = document.getElementById("pageTitle");
+180:  const description = document.getElementById("pageDescription");
+187:function updateActiveNav(route) {
+188:  const navItems = Array.from(document.querySelectorAll(".nav-item[data-route]"));
+191:    const itemRoute = item.getAttribute("data-route");
+192:    item.classList.toggle("is-active", itemRoute === route);
+196:export function getRouteDefinition(route) {
+197:  const access = getRouteAccess(route);
+199:    return getAccessDeniedRoute(route, access.reason);
+202:  return routeRegistry[route] || getFallbackRoute(route);
+206:  routeAccessResolver = typeof resolver === "function" ? resolver : null;
+209:export function renderRouteTemplate(route) {
+213:  const routeDef = getRouteDefinition(route);
+214:  root.innerHTML = routeDef.template;
+216:  updatePageHeader(route);
+217:  updateActiveNav(route);
+220:export function navigateTo(route, emit = true) {
+221:  renderRouteTemplate(route);
+222:  notifyRouteChange(route);
+224:  // Sync browser URL — setting the same hash value does not re-fire hashchange
+225:  const newHash = `#${route}`;
+226:  if (typeof location !== "undefined" && location.hash !== newHash) {
+227:    location.hash = newHash;
+231:    window.dispatchEvent(
+232:      new CustomEvent("mh:route-change", {
+233:        detail: { route }
+240:  renderRouteTemplate("home");
+
+### page imports/usages in router/app
+public/control-center/router.js:1:// public/control-center/router.js
+public/control-center/router.js:3:import { homeRoute } from "./pages/home.js";
+public/control-center/router.js:4:import { aiCommandRoute } from "./pages/ai-command.js";
+public/control-center/router.js:5:import { campaignStudioRoute } from "./pages/campaign-studio.js";
+public/control-center/router.js:6:import { contentStudioRoute } from "./pages/content-studio-workspace.js";
+public/control-center/router.js:7:import { mediaStudioRoute } from "./pages/media-studio-workspace.js";
+public/control-center/router.js:8:import { publishingRoute } from "./pages/publishing.js";
+public/control-center/router.js:9:import { adsManagerRoute } from "./pages/ads-manager.js";
+public/control-center/router.js:10:import { insightsRoute } from "./pages/insights.js";
+public/control-center/router.js:11:import { researchRoute } from "./pages/research.js";
+public/control-center/router.js:12:import { workflowsRoute } from "./pages/workflows.js";
+public/control-center/router.js:19:} from "./pages/operations-centers.js";
+public/control-center/router.js:20:import { setupRoute } from "./pages/setup.js";
+public/control-center/router.js:21:import { libraryRoute } from "./pages/library.js";
+public/control-center/router.js:22:import { integrationsRoute } from "./pages/integrations.js";
+public/control-center/router.js:23:import { customerCenterRoute } from "./pages/customer-center.js";
+public/control-center/router.js:24:import { settingsRoute } from "./pages/settings.js";
+public/control-center/router.js:25:import { governanceRoute } from "./pages/governance.js";
+public/control-center/router.js:29:} from "./runtime/authority/route-role-fallback.js";
+public/control-center/router.js:31:const routeRegistry = {
+public/control-center/router.js:55:let routeAccessResolver = null;
+public/control-center/router.js:57:const routeChangeSubscribers = new Set();
+public/control-center/router.js:61:  routeChangeSubscribers.add(handler);
+public/control-center/router.js:62:  return () => routeChangeSubscribers.delete(handler);
+public/control-center/router.js:65:function notifyRouteChange(route) {
+public/control-center/router.js:66:  routeChangeSubscribers.forEach((handler) => {
+public/control-center/router.js:68:      handler(route);
+public/control-center/router.js:80:function getFallbackRoute(route) {
+public/control-center/router.js:82:    id: route,
+public/control-center/router.js:92:            <div class="empty-box">Unknown route: ${route}</div>
+public/control-center/router.js:108:function getAccessDeniedRoute(route, reason = "") {
+public/control-center/router.js:109:  const detail = reason || `Route "${route}" is not available for the current role.`;
+public/control-center/router.js:115:      description: "This workspace route is blocked by role access rules."
+public/control-center/router.js:123:              <h3 class="access-denied-title">Route blocked: ${escapeHtmlMin(route)}</h3>
+public/control-center/router.js:137:function normalizeRouteAccessResult(result, route) {
+public/control-center/router.js:141:      reason: result ? "" : `Access to ${route} is restricted.`
+public/control-center/router.js:158:function getDefaultRouteAccess(route) {
+public/control-center/router.js:159:  return getFallbackRouteAccess(route, DEFAULT_ROLE, { useDefaultRoleMessage: true });
+public/control-center/router.js:162:function getRouteAccess(route) {
+public/control-center/router.js:163:  if (typeof routeAccessResolver !== "function") {
+public/control-center/router.js:164:    return getDefaultRouteAccess(route);
+public/control-center/router.js:168:    return normalizeRouteAccessResult(routeAccessResolver(route), route);
+public/control-center/router.js:170:    return getDefaultRouteAccess(route);
+public/control-center/router.js:174:function updatePageHeader(route) {
+public/control-center/router.js:175:  const routeDef = getRouteDefinition(route);
+public/control-center/router.js:176:  const meta = routeDef.meta;
+public/control-center/router.js:187:function updateActiveNav(route) {
+public/control-center/router.js:188:  const navItems = Array.from(document.querySelectorAll(".nav-item[data-route]"));
+public/control-center/router.js:191:    const itemRoute = item.getAttribute("data-route");
+public/control-center/router.js:192:    item.classList.toggle("is-active", itemRoute === route);
+public/control-center/router.js:196:export function getRouteDefinition(route) {
+public/control-center/router.js:197:  const access = getRouteAccess(route);
+public/control-center/router.js:199:    return getAccessDeniedRoute(route, access.reason);
+public/control-center/router.js:202:  return routeRegistry[route] || getFallbackRoute(route);
+public/control-center/router.js:206:  routeAccessResolver = typeof resolver === "function" ? resolver : null;
+public/control-center/router.js:209:export function renderRouteTemplate(route) {
+public/control-center/router.js:213:  const routeDef = getRouteDefinition(route);
+public/control-center/router.js:214:  root.innerHTML = routeDef.template;
+public/control-center/router.js:216:  updatePageHeader(route);
+public/control-center/router.js:217:  updateActiveNav(route);
+public/control-center/router.js:220:export function navigateTo(route, emit = true) {
+public/control-center/router.js:221:  renderRouteTemplate(route);
+public/control-center/router.js:222:  notifyRouteChange(route);
+public/control-center/router.js:225:  const newHash = `#${route}`;
+public/control-center/router.js:232:      new CustomEvent("mh:route-change", {
+public/control-center/router.js:233:        detail: { route }
+public/control-center/router.js:240:  renderRouteTemplate("home");
+public/control-center/app.js:10:} from "./runtime/authority/route-role-fallback.js";
+public/control-center/app.js:15:  renderRouteTemplate,
+public/control-center/app.js:18:} from "./router.js";
+public/control-center/app.js:94:// Manages global listeners (resize, orientation, route change, navigation)
+public/control-center/app.js:95:// Cleaned up on route changes to prevent listener accumulation
+public/control-center/app.js:98:// Helper function to register app shell listeners with the registry
+public/control-center/app.js:252:function resolveRouteAccess(route) {
+public/control-center/app.js:254:  const routePermissions = getProjectedRoutePermissions({ operations });
+public/control-center/app.js:257:  const explicitRule = routePermissions.find((item) => item?.route === route);
+public/control-center/app.js:260:    return getFallbackRouteAccess(route, activeRole);
+public/control-center/app.js:272:      : `Route "${route}" requires one of: [${allowedRoles.join(", ")}]. ` +
+public/control-center/app.js:298:        static routes or logged to the console.
+public/control-center/app.js:726:function renderSimpleList(items, emptyText = "No items available.") {
+public/control-center/app.js:732:function ensureRouteDom(route) {
+public/control-center/app.js:736:  const page = pageRoot.querySelector(`.page[data-page="${route}"]`);
+public/control-center/app.js:738:    renderRouteTemplate(route);
+public/control-center/app.js:1019:function renderStartupRuntimeTrace(cachedPayload = null) {
+public/control-center/app.js:1139:  renderStartupRuntimeTrace(payload);
+public/control-center/app.js:1186:    payload.dataRoute ? `route=${payload.dataRoute}` : "",
+public/control-center/app.js:1202:      ? event.target.closest("button, a, [data-route], [data-page], [data-action], input, select, textarea") || event.target
+public/control-center/app.js:1215:      dataRoute: String(element.getAttribute("data-route") || ""),
+public/control-center/app.js:1222:      renderStartupRuntimeTrace();
+public/control-center/app.js:1263:function renderStartupStepDiagnostics() {
+public/control-center/app.js:1310:  renderStartupStepDiagnostics();
+public/control-center/app.js:1333:  renderStartupStepDiagnostics();
+public/control-center/app.js:1392:function renderStartupDiagnosticsText(reason = "") {
+public/control-center/app.js:1519:  renderStartupRuntimeTrace();
+public/control-center/app.js:1597:  showFatalErrorPanel(message, renderStartupDiagnosticsText("access-key-required"));
+public/control-center/app.js:1669:    renderStartupDiagnosticsText(String(source || "startup"))
+public/control-center/app.js:1928:function renderTopContext() {
+public/control-center/app.js:1950:function renderProjectSwitcher() {
+public/control-center/app.js:1996:function renderPlaceholders() {
+public/control-center/app.js:2065:function renderCurrentPage() {
+public/control-center/app.js:2069:  const routeDef = getRouteDefinition(currentRoute);
+public/control-center/app.js:2071:  if (typeof routeDef.render === "function") {
+public/control-center/app.js:2072:    const renderResult = routeDef.render({
+public/control-center/app.js:2078:      renderSimpleList,
+public/control-center/app.js:2119:    if (typeof renderResult === "function") {
+public/control-center/app.js:2120:      activeRouteCleanup = renderResult;
+public/control-center/app.js:2124:    if (!routeDef.disableStandardLayout) {
+public/control-center/app.js:2126:        route: currentRoute,
+public/control-center/app.js:2139:    route: currentRoute,
+public/control-center/app.js:2147:function renderGlobalUi() {
+public/control-center/app.js:2148:  renderProjectSwitcher();
+public/control-center/app.js:2149:  renderTopContext();
+public/control-center/app.js:2154:    await Promise.resolve(renderCurrentPage());
+public/control-center/app.js:2156:  } catch (renderError) {
+public/control-center/app.js:2157:    console.error(logLabel, renderError);
+public/control-center/app.js:2158:    setError(renderError.message || "Failed to render project page");
+public/control-center/app.js:2159:    showError(renderError.message || "Failed to render project page");
+public/control-center/app.js:2533:  renderGlobalUi();
+public/control-center/app.js:2650:    renderGlobalUi();
+public/control-center/app.js:2680:    renderProjectSwitcher();
+public/control-center/app.js:2688:    renderProjectSwitcher();
+public/control-center/app.js:2850:      recordStartupStep("loadProjectData.renderGlobalUi.start", {
+public/control-center/app.js:2855:        renderGlobalUi();
+public/control-center/app.js:2856:      } catch (renderGlobalError) {
+public/control-center/app.js:2857:        recordStartupFailure("load-project-render-global-ui", renderGlobalError);
+public/control-center/app.js:2860:        const renderMessage = renderGlobalError?.message || "Failed to render global UI.";
+public/control-center/app.js:2861:        setError(renderMessage);
+public/control-center/app.js:2862:        showError(renderMessage);
+public/control-center/app.js:2863:        showFatalErrorPanel(renderMessage, renderStartupDiagnosticsText("renderGlobalUi"));
+public/control-center/app.js:2864:        recordStartupStep("loadProjectData.renderGlobalUi.error", {
+public/control-center/app.js:2866:          detail: String(renderMessage)
+public/control-center/app.js:2870:      recordStartupStep("loadProjectData.renderGlobalUi.done", {
+public/control-center/app.js:2888:        const renderMessage = pageRenderError?.message || "Failed to render current page.";
+public/control-center/app.js:2889:        setError(renderMessage);
+public/control-center/app.js:2890:        showError(renderMessage);
+public/control-center/app.js:2891:        showFatalErrorPanel(renderMessage, renderStartupDiagnosticsText("safeRenderCurrentPage"));
+public/control-center/app.js:2894:          detail: String(renderMessage)
+public/control-center/app.js:2950:        renderGlobalUi();
+public/control-center/app.js:2978:        renderStartupDiagnosticsText("load-project-data")
+public/control-center/app.js:2980:      renderGlobalUi();
+public/control-center/app.js:3018:   * can be restored later with route-level lazy loading to avoid startup
+public/control-center/app.js:3050:    const route = item.getAttribute("data-route") || labeledRoute;
+public/control-center/app.js:3051:    if (!route) return;
+public/control-center/app.js:3052:    item.setAttribute("data-route", route);
+public/control-center/app.js:3053:    item.setAttribute("data-page", route);
+public/control-center/app.js:3116:      ? event.target.closest("button, a, [data-route], [data-page], [data-action]")
+public/control-center/app.js:3122:    const routeAttr = String(candidate.getAttribute("data-route") || "").trim();
+public/control-center/app.js:3124:    const clickedNavItem = Boolean(candidate.closest(".nav-item[data-route], [data-shell-route], [data-global-route]"));
+public/control-center/app.js:3125:    const routeAttrAllowed = clickedNavItem ? (routeAttr || pageAttr) : routeAttr;
+public/control-center/app.js:3127:    if (routeAttrAllowed) {
+public/control-center/app.js:3129:      navigateTo(routeAttrAllowed);
+public/control-center/app.js:3176:  // Register route change listener with lifecycle registry
+public/control-center/app.js:3177:  // Handles shell-level route change (different from page content)
+public/control-center/app.js:3178:  addAppShellListener(window, "mh:route-change", (event) => {
+public/control-center/app.js:3179:    const route = event?.detail?.route || "home";
+public/control-center/app.js:3180:    setCurrentRoute(route);
+public/control-center/app.js:3181:    renderCurrentPage();
+public/control-center/app.js:3186:  // Register with lifecycle registry for proper cleanup on route changes
+public/control-center/app.js:3188:    const route = (location.hash.slice(1) || "home").trim();
+public/control-center/app.js:3189:    if (route && route !== getState().currentRoute) {
+public/control-center/app.js:3190:      navigateTo(route);
+public/control-center/app.js:3376:    const clickedNavItem = event.target.closest(".nav-item[data-route]");
+public/control-center/app.js:3402:  // These ensure proper cleanup on route changes
+public/control-center/app.js:3528:    showError("Enter a route, page name, or keyword to search.");
+public/control-center/app.js:3532:  const navItems = Array.from(document.querySelectorAll(".nav-item[data-route]"));
+public/control-center/app.js:3534:    const route = item.getAttribute("data-route") || "";
+public/control-center/app.js:3537:      route,
+public/control-center/app.js:3539:      haystack: `${route} ${label}`.toLowerCase()
+public/control-center/app.js:3548:    showError(`No route matches "${query}".`);
+public/control-center/app.js:3553:    navigateTo(matches[0].route);
+public/control-center/app.js:3560:  navigateTo(top[0].route);
+public/control-center/app.js:3780:  Array.from(document.querySelectorAll("[data-ai-route]")).forEach((button) => {
+public/control-center/app.js:3782:      const route = button.getAttribute("data-ai-route");
+public/control-center/app.js:3783:      if (!route) return;
+public/control-center/app.js:3784:      navigateTo(route);
+public/control-center/app.js:3792:    const route = window.location.hash.replace(/^#/, "") || "home";
+public/control-center/app.js:3795:      context.textContent = `Current workspace: ${route}`;
+public/control-center/app.js:3801:  // Updates dock to reflect current route context
+public/control-center/app.js:3886:          data-new-route="setup"
+public/control-center/app.js:3895:        <button class="executive-new-option" type="button" data-new-route="campaign-studio" data-new-prompt="Create a campaign plan for the current project. Ask me the required questions step by step.">
+public/control-center/app.js:3901:        <button class="executive-new-option" type="button" data-new-route="content-studio" data-new-prompt="Create a blog post workflow for the current project. Ask for topic, audience, language, SEO goal, and call to action.">
+public/control-center/app.js:3907:        <button class="executive-new-option" type="button" data-new-route="media-studio" data-new-prompt="Create a media generation workflow. Ask for format, platform, product, style, language, and assets needed.">
+public/control-center/app.js:3913:        <button class="executive-new-option" type="button" data-new-route="publishing" data-new-prompt="Prepare a publishing workflow. Ask what content should be reviewed, approved, scheduled, or published.">
+public/control-center/app.js:3919:        <button class="executive-new-option" type="button" data-new-route="governance" data-new-prompt="Create an approval request. Ask what needs approval, risk level, reviewer, and decision deadline.">
+public/control-center/app.js:3925:        <button class="executive-new-option" type="button" data-new-route="workflows" data-new-prompt="Build a custom workflow for the current project. Ask what outcome I want and what inputs are available.">
+public/control-center/app.js:4010:    Array.from(modal.querySelectorAll("[data-new-route]")).forEach((button) => {
+public/control-center/app.js:4023:        const route = button.getAttribute("data-new-route") || "ai-command";
+public/control-center/app.js:4028:        navigateTo(route);
+public/control-center/app.js:4114:    // Restore the route from the URL hash on refresh or deep-link
+public/control-center/app.js:4140:    renderGlobalUi();
+public/control-center/app.js:4141:    renderCurrentPage();
+public/control-center/app.js:4184:  const route = String(state.currentRoute || "home");
+public/control-center/app.js:4196:    route !== window.__mhLastGlobalUiRoute ||
+public/control-center/app.js:4201:    renderGlobalUi();
+public/control-center/app.js:4204:  window.__mhLastGlobalUiRoute = route;
