@@ -1,0 +1,264 @@
+### settings top role definitions
+  }
+];
+
+const AUTOMATION_RULE_OPTIONS = [
+  "Suggest workflows when campaign is ready",
+  "Block publishing when assets are missing",
+  "Suggest rewrite when content is weak",
+  "Alert when integrations fail",
+  "Route SEO issues into Research/Workflows",
+  "Route weak ads into Ads Manager"
+];
+
+const TEAM_ROLE_OPTIONS = [
+  "Strategist",
+  "Writer",
+  "Designer",
+  "Video Lead",
+  "Publisher",
+  "Ads Operator",
+  "Analyst",
+  "Compliance Reviewer",
+  "Admin",
+  "Brand owner"
+];
+
+const TEAM_ROLE_MATRIX = [
+  {
+    id: "strategist",
+    label: "Strategist",
+    service: "Planning & campaign architecture",
+    description: "Shapes priorities, campaign structures, and workflow sequencing."
+  },
+  {
+    id: "writer",
+    label: "Writer",
+    service: "Messaging & content generation",
+    description: "Develops copy systems, rewrites, and narrative consistency."
+  },
+  {
+    id: "designer",
+    label: "Designer",
+    service: "Static creative & brand expression",
+    description: "Owns visual quality, layout intent, and asset polish."
+  },
+  {
+    id: "videoLead",
+    label: "Video Lead",
+    service: "Motion creative & video delivery",
+    description: "Directs short-form and long-form motion output standards."
+  },
+  {
+    id: "publisher",
+    label: "Publisher",
+    service: "Distribution & release operations",
+    description: "Controls schedules, queues, and final outbound execution."
+  },
+  {
+    id: "adsOperator",
+    label: "Ads Operator",
+    service: "Paid testing & optimization",
+    description: "Manages variants, spend tests, and escalation into Ads Manager."
+  },
+  {
+    id: "analyst",
+    label: "Analyst",
+    service: "Measurement & performance review",
+    description: "Reads signals, monitors readiness, and flags weak performance."
+  },
+  {
+    id: "complianceReviewer",
+    label: "Compliance Reviewer",
+    service: "Safety & policy review",
+    description: "Checks claims, legal risk, and policy-sensitive output."
+  },
+  {
+    id: "admin",
+    label: "Admin",
+    service: "System control & escalation ownership",
+    description: "Owns defaults, integrations, emergency controls, and final overrides."
+  }
+];
+
+const SECTION_DEFINITIONS = [
+  {
+    id: "project",
+    title: "Project Settings",
+
+### settings default role profile
+      channels: inferChannels(connectors),
+      schedulingBehavior: "Queue for review",
+      approvalBeforePublish: true,
+      namingConvention: "market_campaign_channel_assettype_v1",
+      contentRouting: "Route launch content to social and email, evergreen content to website, and paid hooks to ads review.",
+      campaignOutputs: ["Organic posts", "Reels", "Landing pages", "Email sequence"]
+    },
+    approval: {
+      contentOwner: "Marketing lead",
+      mediaOwner: "Creative lead",
+      adsOwner: "Growth lead",
+      requirements: ["Paid ads", "Medical or product claims", "New campaign launches", "AI-generated media"],
+      revisionRules: "Reject unsupported claims, brand drift, weak hooks, or missing metadata. Two revisions escalate to the owner.",
+      escalationNotes: "Escalate legal-sensitive claims and launch blockers to brand owner plus operations lead."
+    },
+    team: {
+      roles: ["Strategist", "Writer", "Designer", "Publisher", "Analyst", "Compliance Reviewer", "Admin", "Brand owner"],
+      serviceCoverage: ["Strategy", "Writing", "Design", "Publishing", "Analytics", "Compliance", "Administration"],
+      editAccess: "Strategists, writers, and designers",
+      publishAccess: "Publishers and admins",
+      approveAccess: "Compliance reviewers and admins",
+      integrationAccess: "Admins only",
+      defaultsAccess: "Admins only",
+      roleMatrix: {
+        strategist: {
+          authority: "Create and edit",
+          canApprove: false,
+          canPublish: false,
+          canManageIntegrations: false,
+          canChangeDefaults: false
+        },
+        writer: {
+          authority: "Create and edit",
+          canApprove: false,
+          canPublish: false,
+          canManageIntegrations: false,
+          canChangeDefaults: false
+        },
+        designer: {
+          authority: "Create and edit",
+          canApprove: false,
+          canPublish: false,
+          canManageIntegrations: false,
+          canChangeDefaults: false
+        },
+        videoLead: {
+          authority: "Create and edit",
+          canApprove: false,
+          canPublish: false,
+          canManageIntegrations: false,
+          canChangeDefaults: false
+        },
+        publisher: {
+          authority: "Publish",
+          canApprove: false,
+          canPublish: true,
+          canManageIntegrations: false,
+          canChangeDefaults: false
+        },
+        adsOperator: {
+          authority: "Create and edit",
+          canApprove: false,
+          canPublish: false,
+          canManageIntegrations: false,
+          canChangeDefaults: false
+        },
+        analyst: {
+          authority: "Assist only",
+          canApprove: false,
+          canPublish: false,
+          canManageIntegrations: false,
+          canChangeDefaults: false
+        },
+        complianceReviewer: {
+          authority: "Approve",
+          canApprove: true,
+          canPublish: false,
+          canManageIntegrations: false,
+          canChangeDefaults: false
+        },
+        admin: {
+          authority: "Admin control",
+          canApprove: true,
+          canPublish: true,
+          canManageIntegrations: true,
+          canChangeDefaults: true
+        }
+      }
+    },
+    presets: {
+      campaignPreset: "Launch sprint",
+
+### ai-command alias blocks - must not change
+
+// Map legacy mode IDs from older sessions to new team IDs
+const MODE_ID_ALIASES = {
+	executive: "operations",
+	campaign: "strategist",
+	content: "writer",
+	designer: "media",
+	media_director: "media",
+	media_planner: "media",
+	seo: "analyst",
+	research: "researcher",
+	video_lead: "video_lead",
+	publisher: "publisher",
+	compliance_reviewer: "compliance_reviewer",
+	customer_operations: "customer_ops",
+	customer_ops: "customer_ops",
+	support: "customer_ops",
+	sales: "sales_crm",
+	crm: "sales_crm",
+	sales_crm: "sales_crm",
+	admin: "operations"
+};
+
+// ============================================================
+//  PHASE 1: SPECIALIST DEFINITIONS — AI TEAM COMMAND CENTER
+// ============================================================
+	customer_ops: "CO",
+	sales_crm: "SC"
+};
+
+const AI_ROOM_BACKEND_ROLE_ALIASES = {
+	ads: "ads_operator",
+	media: "designer",
+	compliance_reviewer: "compliance_reviewer"
+};
+
+### route-role-fallback - must not change
+const DEFAULT_ROLE = "admin";
+
+const ACTIVE_ROUTE_ROLES = [
+  "strategist",
+  "writer",
+  "designer",
+  "video_lead",
+  "publisher",
+  "ads_operator",
+  "analyst",
+  "compliance_reviewer",
+  "admin"
+];
+
+const DEFAULT_ROUTE_ROLE_ACCESS = {
+  home: ["strategist", "analyst", "admin"],
+  "ai-command": ACTIVE_ROUTE_ROLES,
+  "campaign-studio": ["strategist", "ads_operator", "admin"],
+  "content-studio": ["writer", "strategist", "compliance_reviewer", "admin"],
+  "media-studio": ["designer", "video_lead", "compliance_reviewer", "admin"],
+  publishing: ["publisher", "compliance_reviewer", "admin"],
+  research: ["strategist", "analyst", "writer", "admin"],
+  setup: ACTIVE_ROUTE_ROLES,
+  "task-center": ACTIVE_ROUTE_ROLES,
+  "queue-center": ACTIVE_ROUTE_ROLES,
+  "job-monitor": ACTIVE_ROUTE_ROLES,
+  "notification-center": ACTIVE_ROUTE_ROLES,
+  governance: ["compliance_reviewer", "admin", "analyst"],
+  "ads-manager": ["ads_operator", "strategist", "analyst", "admin"],
+  insights: ["analyst", "strategist", "ads_operator", "admin"],
+  integrations: ["admin"],
+  workflows: ACTIVE_ROUTE_ROLES,
+  library: ["designer", "video_lead", "publisher", "admin"],
+  settings: ["admin"]
+};
+
+function buildBlockedReason(route, allowedRoles, activeRole, useDefaultRoleMessage = false) {
+  const rolesStr = allowedRoles.join(", ");
+  if (useDefaultRoleMessage) {
+    return (
+      `Route "${route}" requires one of: [${rolesStr}]. ` +
+      `Default role is "${activeRole}". Use the Role selector in the top bar to switch.`
+    );
+  }
+
