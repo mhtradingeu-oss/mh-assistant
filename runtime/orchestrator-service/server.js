@@ -187,6 +187,46 @@ process.on('unhandledRejection', (reason) => {
 
 const customerCenterProjection = require('./lib/customer-operations/projections/customer-center-projection');
 const app = express();
+/**
+ * PHASE 13B.1 public mutation alias deprecation telemetry
+ *
+ * Compatibility-only hardening:
+ * - does not block requests
+ * - does not remove public aliases
+ * - does not change canonical /media-manager routes
+ * - does not change write-key semantics
+ * - adds response headers and warning telemetry for public mutation aliases
+ */
+const PUBLIC_MUTATION_ALIAS_METHODS_PHASE_13B1 = new Set(["POST", "PUT", "PATCH", "DELETE"]);
+
+function isPublicMutationAliasRequestPhase13B1(req) {
+  const method = String(req?.method || "").toUpperCase();
+  const requestPath = String(req?.path || req?.originalUrl || "");
+  return PUBLIC_MUTATION_ALIAS_METHODS_PHASE_13B1.has(method) &&
+    requestPath.startsWith("/public/media-manager/");
+}
+
+function applyPublicMutationAliasDeprecationTelemetry(req, res, next) {
+  if (isPublicMutationAliasRequestPhase13B1(req)) {
+    res.setHeader("X-MH-Public-Alias", "true");
+    res.setHeader("X-MH-Public-Alias-Status", "deprecate");
+    res.setHeader("X-MH-Public-Alias-Recommendation", "use-canonical-media-manager-route");
+    res.setHeader("X-MH-Public-Alias-Canonical-Prefix", "/media-manager");
+
+    console.warn("[MH][public_mutation_alias_deprecated]", JSON.stringify({
+      method: req.method,
+      path: req.path || req.originalUrl || "",
+      recommendation: "use-canonical-media-manager-route",
+      compatibility: "temporary",
+      blocking: false
+    }));
+  }
+
+  return next();
+}
+
+app.use(applyPublicMutationAliasDeprecationTelemetry);
+
 
 function publicAliasDeprecationHeaders(req, res, next) {
   try {
