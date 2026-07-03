@@ -1,0 +1,1303 @@
+public/control-center/pages/ai-command.js:149:		placeholder: "Ask the Strategist to plan a campaign, map launch phases, review channel priorities, or define the offer strategy…",
+public/control-center/pages/ai-command.js:153:		safetyNote: "All outputs are guidance and draft only. Execution requires explicit confirmation.",
+public/control-center/pages/ai-command.js:162:		placeholder: "Ask the Content Writer to draft captions, hooks, landing copy, or campaign messages…",
+public/control-center/pages/ai-command.js:175:		placeholder: "Ask the Media Director to define visual direction, prepare a creative brief, or review brand consistency…",
+public/control-center/pages/ai-command.js:179:		safetyNote: "Direction and briefs only. Media generation requires backend confirmation and explicit action.",
+public/control-center/pages/ai-command.js:188:		placeholder: "Ask the Video Lead to write a reel script, map short-form strategy, or outline the next video concept…",
+public/control-center/pages/ai-command.js:192:		safetyNote: "Scripts and direction only. Video generation requires explicit backend action and approval.",
+public/control-center/pages/ai-command.js:201:		placeholder: "Ask the Publisher to review publishing readiness, check scheduling, or prepare a handoff package…",
+public/control-center/pages/ai-command.js:205:		safetyNote: "Publishing always requires explicit approval. No live publishing from AI guidance alone.",
+public/control-center/pages/ai-command.js:214:		placeholder: "Ask the Ads Optimizer to draft ad copy, review targeting angles, or plan a paid campaign structure…",
+public/control-center/pages/ai-command.js:227:		placeholder: "Ask the SEO & Insights Analyst to review performance, suggest SEO improvements, or identify top content patterns…",
+public/control-center/pages/ai-command.js:240:		placeholder: "Ask the Compliance Reviewer to check claims, approval risks, publishing safety, and governance notes…",
+public/control-center/pages/ai-command.js:253:		placeholder: "Ask the Operations Lead to turn this into tasks, workflow steps, or handoffs…",
+public/control-center/pages/ai-command.js:257:		safetyNote: "Task plans and handoffs only. Workflow execution requires explicit user confirmation.",
+public/control-center/pages/ai-command.js:265:		summary: "Inbox review, reply drafts, ticket drafts, SLA risk, customer profile context, and escalation routing.",
+public/control-center/pages/ai-command.js:266:		placeholder: "Ask the Customer Operations Lead to summarize a customer thread, draft a safe reply, prepare a ticket draft, check SLA risk, or route an escalation for review…",
+public/control-center/pages/ai-command.js:278:		summary: "Lead qualification, outreach drafts, follow-up cadence, CRM profile summaries, and sales handoff notes.",
+public/control-center/pages/ai-command.js:279:		placeholder: "Ask the Sales / CRM Lead to qualify a lead, draft outreach, plan follow-ups, summarize CRM context, or prepare a sales handoff for review…",
+public/control-center/pages/ai-command.js:280:		canHelp: ["Qualify lead context", "Draft outreach", "Plan follow-up sequences", "Summarize CRM profiles", "Prepare sales handoffs"],
+public/control-center/pages/ai-command.js:329:		{ label: "Map data coverage gaps", sub: "Which integrations are missing" },
+public/control-center/pages/ai-command.js:445:		{ id: "asset-checklist", label: "Asset Checklist", action: "preview", intent: "task", template: "Create an asset checklist for {project}. List must-have files, missing references, usage context, and priority." },
+public/control-center/pages/ai-command.js:453:		{ id: "prepare-voiceover", label: "Prepare voiceover", action: "preview", intent: "guidance", template: "Prepare voiceover script options for {project}. Keep clean timing and emphasis notes." },
+public/control-center/pages/ai-command.js:493:		{ id: "summarize-customer-thread", label: "Summarize Customer Thread", action: "preview", intent: "guidance", template: "Summarize this customer thread for {project}. Include customer issue, sentiment, reply goal, missing details, and safe next step." },
+public/control-center/pages/ai-command.js:496:		{ id: "check-sla-risk", label: "Check SLA Risk", action: "preview", intent: "guidance", template: "Check SLA risk for {project}. Flag urgency, risk level, missing runtime data, and escalation recommendation for review." },
+public/control-center/pages/ai-command.js:498:		{ id: "customer-profile-snapshot", label: "Customer Profile Snapshot", action: "preview", intent: "guidance", template: "Prepare a customer profile snapshot for {project}. Include known context, purchase/support signals, missing fields, and safe follow-up questions." },
+public/control-center/pages/ai-command.js:502:		{ id: "lead-qualification", label: "Lead Qualification", action: "preview", intent: "guidance", template: "Qualify the lead for {project}. Include fit, intent, urgency, missing CRM fields, and the safest next step." },
+public/control-center/pages/ai-command.js:505:		{ id: "crm-profile-summary", label: "CRM Profile Summary", action: "preview", intent: "guidance", template: "Summarize the CRM profile context for {project}. Include fit, history, open questions, and next sales action without mutating CRM data." },
+public/control-center/pages/ai-command.js:508:		{ id: "influencer-lead-plan", label: "Influencer Lead Plan", action: "preview", intent: "workflow", template: "Prepare an influencer lead plan for {project}. Include target profile, outreach angle, qualification criteria, and handoff path." },
+public/control-center/pages/ai-command.js:707:function humanizeValue(value, fallback = "") {
+public/control-center/pages/ai-command.js:708:	if (value == null) return fallback;
+public/control-center/pages/ai-command.js:711:		return clean === "[object Object]" ? fallback : clean;
+public/control-center/pages/ai-command.js:717:		return value.map((item) => humanizeValue(item)).filter(Boolean).join("; ") || fallback;
+public/control-center/pages/ai-command.js:739:			.join("; ") || fallback;
+public/control-center/pages/ai-command.js:741:	return fallback;
+public/control-center/pages/ai-command.js:817:function toNumber(value, fallback = null) {
+public/control-center/pages/ai-command.js:818:	if (value == null || value === "") return fallback;
+public/control-center/pages/ai-command.js:820:	return Number.isFinite(parsed) ? parsed : fallback;
+public/control-center/pages/ai-command.js:1061:			reason: "AI response guidance bridge is not connected yet (API function unavailable)."
+public/control-center/pages/ai-command.js:1101:function summarizeAiCommandSessionIntent(value = "", fallback = "Session") {
+public/control-center/pages/ai-command.js:1107:        if (!text) return fallback;
+public/control-center/pages/ai-command.js:1344:        const looksMediaLike = /\b(media|visual|creative|image|images|video|reel|storyboard|shot list|asset|assets|design|production|creative direction|voiceover)\b/.test(text);
+public/control-center/pages/ai-command.js:1512:				"Required assets and missing assets listed"
+public/control-center/pages/ai-command.js:1617:			mainOutput: "Review the customer context, confirm missing details, then route the draft through the owning support, sales, or operations surface.",
+public/control-center/pages/ai-command.js:1665:				"CRM profile and pipeline changes remain outside AI Team.",
+public/control-center/pages/ai-command.js:1670:				"Qualify fit, intent, urgency, and missing fields",
+public/control-center/pages/ai-command.js:1749:			"Media / Video: prepare creative direction, asset needs, script, storyboard, or voiceover draft",
+public/control-center/pages/ai-command.js:1912:	const missingIntegrations = [];
+public/control-center/pages/ai-command.js:1916:			missingIntegrations.push({
+public/control-center/pages/ai-command.js:1918:				status: asString(item?.status) || "missing",
+public/control-center/pages/ai-command.js:1944:		missingIntegrations,
+public/control-center/pages/ai-command.js:2055:		notes.push("Paid platform reporting not connected — ROAS guidance is limited.");
+public/control-center/pages/ai-command.js:2071:			aiContext.missingIntegrations.length ? `Missing intelligence: ${aiContext.missingIntegrations.slice(0, 4).map((item) => item.label).join(", ")}.` : "Intelligence coverage is solid.",
+public/control-center/pages/ai-command.js:2075:			topRecommendation ? `${topRecommendation.title}: ${topRecommendation.action}` : "Connect missing integrations to produce better recommendations.",
+public/control-center/pages/ai-command.js:2083:			routeSuggestion("Setup", "setup", "Close missing project basics, goals, and audience inputs."),
+public/control-center/pages/ai-command.js:2087:		missingData: buildMissingDataNotes(aiContext, "executive")
+public/control-center/pages/ai-command.js:2122:		missingData: buildMissingDataNotes(aiContext, "content")
+public/control-center/pages/ai-command.js:2158:		missingData: buildMissingDataNotes(aiContext, "seo")
+public/control-center/pages/ai-command.js:2171:			: "Paid reporting not connected — connect Meta Ads, Google Ads, or TikTok Ads.",
+public/control-center/pages/ai-command.js:2176:			paid.summary?.roas != null ? `Current ROAS: ${Number(paid.summary.roas).toFixed(2)}x.` : "ROAS not available yet."
+public/control-center/pages/ai-command.js:2193:		missingData: buildMissingDataNotes(aiContext, "ads")
+public/control-center/pages/ai-command.js:2202:			aiContext.missingIntegrations.length ? `Missing intelligence: ${aiContext.missingIntegrations.map((item) => item.label).join(", ")}.` : "Main intelligence lanes are structurally connected.",
+public/control-center/pages/ai-command.js:2207:			"Use the missing intelligence list as the research roadmap for what the system cannot see clearly.",
+public/control-center/pages/ai-command.js:2213:			"Reconnect missing analytics, SEO, and paid feeds to improve evidence quality.",
+public/control-center/pages/ai-command.js:2221:		missingData: [
+public/control-center/pages/ai-command.js:2240:	if (/reconnect|missing tools|missing integrations/.test(query)) {
+public/control-center/pages/ai-command.js:2263:			aiContext.missingIntegrations.length ? "Intelligence coverage gaps may reduce execution quality." : "Core intelligence is available for routing."
+public/control-center/pages/ai-command.js:2272:		missingData: buildMissingDataNotes(aiContext, "content")
+public/control-center/pages/ai-command.js:2496:function normalizeAiInboundSpecialistId(value, fallback = "operations") {
+public/control-center/pages/ai-command.js:2497:	const fallbackId = MODE_ID_ALIASES[getAiRoomRoleId(fallback)] || getAiRoomRoleId(fallback);
+public/control-center/pages/ai-command.js:2498:	const raw = getAiRoomRoleId(value || fallbackId);
+public/control-center/pages/ai-command.js:2502:	return SPECIALIST_DEFS.some((item) => item.id === finalId) ? finalId : fallbackId;
+public/control-center/pages/ai-command.js:2511:	const fallbackRoute = sourcePage === "workspace" ? "workflows" : sourcePage;
+public/control-center/pages/ai-command.js:2512:	const fallbackLabel = sourceLabel || routeLabel(fallbackRoute);
+public/control-center/pages/ai-command.js:2517:		const route = normalizeAiInboundSourcePage(rawRoute || stringRoute || fallbackRoute);
+public/control-center/pages/ai-command.js:2518:		const label = firstAiInboundText(record.label, record.title, record.name) || routeLabel(route) || fallbackLabel;
+public/control-center/pages/ai-command.js:2525:		route: fallbackRoute,
+public/control-center/pages/ai-command.js:2526:		label: fallbackLabel,
+public/control-center/pages/ai-command.js:2527:		reason: `Return to ${fallbackLabel} after AI Team review.`
+public/control-center/pages/ai-command.js:2739:	if (typeof executeProjectAiCommand !== "function") throw new Error("AI command service is unavailable.");
+public/control-center/pages/ai-command.js:2776:			missingData: [],
+public/control-center/pages/ai-command.js:2831:    const fallback =
+public/control-center/pages/ai-command.js:2838:      ...fallback,
+public/control-center/pages/ai-command.js:2840:      name: asString(member.name || fallback.name || member.role || "AI Specialist"),
+public/control-center/pages/ai-command.js:2841:      role: asString(member.role || fallback.role || id),
+public/control-center/pages/ai-command.js:2842:      purpose: asString(member.purpose || member.description || fallback.purpose || "Support the current operating context."),
+public/control-center/pages/ai-command.js:2843:      bestUse: asString(member.bestUse || member.best_use || fallback.bestUse || "Use when this specialist owns the next step."),
+public/control-center/pages/ai-command.js:3246:function buildConversationWorkContext(session, fallbackPrompt = "") {
+public/control-center/pages/ai-command.js:3267:                fallbackPrompt ||
+public/control-center/pages/ai-command.js:3298:function buildConversationWorkPrompt(session, outputType, fallbackPrompt = "") {
+public/control-center/pages/ai-command.js:3299:        const context = buildConversationWorkContext(session, fallbackPrompt);
+public/control-center/pages/ai-command.js:3319:function setPreviewFromConversation({ session, intent, fallbackPrompt, projectName }) {
+public/control-center/pages/ai-command.js:3320:        const workPrompt = buildConversationWorkPrompt(session, intent, fallbackPrompt);
+public/control-center/pages/ai-command.js:3328:        const context = buildConversationWorkContext(session, fallbackPrompt);
+public/control-center/pages/ai-command.js:3379:			command: `Create an asset unblock plan for ${aiContext.projectName || "this project"}. List missing files, priority, and where each is needed.`,
+public/control-center/pages/ai-command.js:3384:	if (aiContext.missingIntegrations.length || aiContext.connectorIssues.length) {
+public/control-center/pages/ai-command.js:3385:		const impacted = aiContext.missingIntegrations.length + aiContext.connectorIssues.length;
+public/control-center/pages/ai-command.js:3578:				<span class="aicmd-v2-chat-bridge ${safeBridgeStatus.available ? "is-available" : "is-unavailable"}">
+public/control-center/pages/ai-command.js:3635:	const plannedSpecialists = AI_ROOM_PLANNED_SPECIALISTS.map((item) => `
+public/control-center/pages/ai-command.js:3636:		<div class="aicmd-room-member aicmd-room-member-planned" aria-disabled="true">
+public/control-center/pages/ai-command.js:3637:			<span class="aicmd-room-member-avatar" aria-hidden="true">${escapeHtml(item.initials)}</span>
+public/control-center/pages/ai-command.js:3687:							<span class="aicmd-room-member-avatar" aria-hidden="true">${escapeHtml(getAiRoomInitials(spec))}</span>
+public/control-center/pages/ai-command.js:3698:			<div class="aicmd-room-planned-specialists" aria-label="Additional specialists planned">
+public/control-center/pages/ai-command.js:3699:				<span class="aicmd-room-planned-title">Planned lanes, not active specialists</span>
+public/control-center/pages/ai-command.js:3700:				${plannedSpecialists}
+public/control-center/pages/ai-command.js:3710:			<div class="aicmd-v2-profile aicmd-v2-team-profile">
+public/control-center/pages/ai-command.js:3711:				<div class="aicmd-v2-profile-header">
+public/control-center/pages/ai-command.js:3712:					<span class="aicmd-v2-profile-icon">Team</span>
+public/control-center/pages/ai-command.js:3714:						<h2 class="aicmd-v2-profile-title">Full AI Team</h2>
+public/control-center/pages/ai-command.js:3715:						<p class="aicmd-v2-profile-purpose">Coordinates specialists into one review-ready brief, workflow, or handoff.</p>
+public/control-center/pages/ai-command.js:3729:		<div class="aicmd-v2-profile">
+public/control-center/pages/ai-command.js:3730:			<div class="aicmd-v2-profile-header">
+public/control-center/pages/ai-command.js:3731:				<span class="aicmd-v2-profile-icon">${spec.icon}</span>
+public/control-center/pages/ai-command.js:3733:					<h2 class="aicmd-v2-profile-title">${escapeHtml(spec.label)}</h2>
+public/control-center/pages/ai-command.js:3734:					<p class="aicmd-v2-profile-purpose">${escapeHtml(spec.position ? `${spec.position}. ${spec.summary}` : spec.summary)}</p>
+public/control-center/pages/ai-command.js:3774:	const avatarLabel = isTeam ? "Team" : getAiRoomInitials(spec);
+public/control-center/pages/ai-command.js:3779:			<div class="aicmd-room-active-avatar" aria-hidden="true">${escapeHtml(avatarLabel)}</div>
+public/control-center/pages/ai-command.js:3989:                                        <span class="aicmd-chatfirst-specialist-avatar" aria-hidden="true">${escapeHtml(getAiRoomInitials(spec))}</span>
+public/control-center/pages/ai-command.js:4014:                                <span class="aicmd-chatfirst-pill ${safeBridgeStatus.available ? "is-available" : "is-planned"}">${escapeHtml(bridgeLabel)}</span>
+public/control-center/pages/ai-command.js:4104:				<span class="aicmd-chatfirst-status ${safeBridgeStatus.available ? "is-available" : "is-unavailable"}">${escapeHtml(bridgeLabel)}</span>
+public/control-center/pages/ai-command.js:4149:				<span class="aicmd-chatfirst-pill ${safeBridgeStatus.available ? "is-available" : "is-planned"}">${escapeHtml(safeBridgeStatus.available ? "Connected" : "Guarded")}</span>
+public/control-center/pages/ai-command.js:4179:							<span class="aicmd-chatfirst-specialist-avatar" aria-hidden="true">${escapeHtml(getAiRoomInitials(spec))}</span>
+public/control-center/pages/ai-command.js:4187:				<div class="aicmd-chatfirst-planned-list" aria-label="Planned specialists">
+public/control-center/pages/ai-command.js:4189:						<div class="aicmd-chatfirst-specialist-option is-planned" aria-disabled="true">
+public/control-center/pages/ai-command.js:4190:							<span class="aicmd-chatfirst-specialist-avatar" aria-hidden="true">${escapeHtml(item.initials)}</span>
+public/control-center/pages/ai-command.js:4221:        const fallbackMessages = !selectedMessages.length && selectedResponses.length
+public/control-center/pages/ai-command.js:4243:        const conversationMessages = session.isFreshAiChatSession ? [] : (selectedMessages.length ? selectedMessages : fallbackMessages);
+public/control-center/pages/ai-command.js:4330:                voice: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h2M8 7v10M12 4v16M16 7v10M20 12h-2"/></svg>'
+public/control-center/pages/ai-command.js:4338:                { id: "write", label: "Write", summary: "Prepare documents, copy, agreements, or presentation drafts.", enabled: false },
+public/control-center/pages/ai-command.js:4339:                { id: "offer", label: "Offer", summary: "Shape a product offer from pricing, market, and audience context.", enabled: false },
+public/control-center/pages/ai-command.js:4340:                { id: "lead", label: "Lead", summary: "Prepare lead discovery and outreach workflow drafts.", enabled: false },
+public/control-center/pages/ai-command.js:4341:                { id: "media", label: "Media", summary: "Create a media brief, storyboard, and production direction.", enabled: false },
+public/control-center/pages/ai-command.js:4342:                { id: "publish", label: "Publish", summary: "Prepare publishing checklist and handoff readiness.", enabled: false }
+public/control-center/pages/ai-command.js:4357:                                                class="aicmd-smart-action${action.enabled ? "" : " is-planned"}"
+public/control-center/pages/ai-command.js:4360:                                                ${action.enabled ? "" : "disabled"}
+public/control-center/pages/ai-command.js:4390:                ["Review blockers", asArray(campaignPackage.missingBlockers || campaignPackage.missing_blockers)],
+public/control-center/pages/ai-command.js:4538:                                                                <span><strong>Status</strong>${escapeHtml(preview.backendPreview ? "Backend preview" : "Local fallback")}</span>
+public/control-center/pages/ai-command.js:4667:                                <span class="aicmd-final-team-avatar">AI</span>
+public/control-center/pages/ai-command.js:4684:                                                        <span class="aicmd-final-team-avatar">${escapeHtml(getAiRoomInitials(spec))}</span>
+public/control-center/pages/ai-command.js:4714:        const voiceLanguageMode = asString(session.voiceLanguageMode || "auto").toLowerCase();
+public/control-center/pages/ai-command.js:4715:        const voiceLanguageLabel = voiceLanguageMode === "ar"
+public/control-center/pages/ai-command.js:4717:                : voiceLanguageMode === "en"
+public/control-center/pages/ai-command.js:4719:                        : voiceLanguageMode === "de"
+public/control-center/pages/ai-command.js:4735:                                                placeholder="Ask anything"
+public/control-center/pages/ai-command.js:4744:                                        <button id="aicmdV2VoiceLangBtn" class="aicmd-final-pill-btn aicmd-final-voice-lang-btn" type="button" title="Voice language" hidden aria-hidden="true">Mic: ${escapeHtml(voiceLanguageLabel)}</button>
+public/control-center/pages/ai-command.js:4745:                                        <button id="aicmdV2VoiceBtn" class="aicmd-final-icon-btn" type="button" title="Start voice dictation">${getAiCommandUiIcon("mic")}</button>
+public/control-center/pages/ai-command.js:4746:                                        <button class="aicmd-final-voice-btn" type="button" data-aicmd-final-voice-conversation title="Voice conversation roadmap" hidden aria-hidden="true">${getAiCommandUiIcon("voice")}</button>
+public/control-center/pages/ai-command.js:4747:                                        <button id="aicmdV2AskBtn" class="aicmd-chatfirst-send aicmd-final-send" type="button" ${isGenerating ? "disabled" : ""} title="Ask AI Team">
+public/control-center/pages/ai-command.js:4853:				<span class="aicmd-chatfirst-pill ${safeBridgeStatus.available ? "is-available" : "is-planned"}">${escapeHtml(safeBridgeStatus.available ? "Chat ready" : "Preview guarded")}</span>
+public/control-center/pages/ai-command.js:4869:							<span class="aicmd-chatfirst-specialist-avatar" aria-hidden="true">${escapeHtml(getAiRoomInitials(spec))}</span>
+public/control-center/pages/ai-command.js:4878:			<div class="aicmd-chatfirst-planned-grid" aria-label="Planned specialists">
+public/control-center/pages/ai-command.js:4880:					<div class="aicmd-chatfirst-team-card is-planned" aria-disabled="true">
+public/control-center/pages/ai-command.js:4881:						<span class="aicmd-chatfirst-specialist-avatar" aria-hidden="true">${escapeHtml(item.initials)}</span>
+public/control-center/pages/ai-command.js:4996:						<span>${escapeHtml(humanizeValue(preview.confirmationNote, "Execution requires explicit confirmation in the destination workspace."))}</span>
+public/control-center/pages/ai-command.js:5053:		{ label: "Voice input", value: "Coming", className: "is-planned" },
+public/control-center/pages/ai-command.js:5054:		{ label: "Team chat", value: bridgeStatus.available ? "AI ready" : "Coming", className: bridgeStatus.available ? "is-available" : "is-planned" },
+public/control-center/pages/ai-command.js:5055:		{ label: "Media gen", value: "Coming", className: "is-planned" },
+public/control-center/pages/ai-command.js:5056:		{ label: "GPU video", value: "Coming", className: "is-planned" },
+public/control-center/pages/ai-command.js:5057:		{ label: "Image prompt generation", value: providerConfigured ? "Provider may be ready" : "Provider dependent", className: providerConfigured ? "is-available" : "is-planned" }
+public/control-center/pages/ai-command.js:5171:        const fallbackSelectedResponses = !selectedMessages.length && selectedResponses.length
+public/control-center/pages/ai-command.js:5190:        const conversationMessages = selectedMessages.length ? selectedMessages : fallbackSelectedResponses;
+public/control-center/pages/ai-command.js:5199:                                <span class="aicmd-v2-chat-bridge ${safeBridgeStatus.available ? "is-available" : "is-unavailable"}">${escapeHtml(bridgeLabel)}</span>
+public/control-center/pages/ai-command.js:5259:                                                <span class="aicmd-room-response-avatar">${escapeHtml(selectedRoleId === "team" ? "Team" : getAiRoomInitials({ id: selectedRoleId, label: selectedLabel }))}</span>
+public/control-center/pages/ai-command.js:5578:		const setPreviewFromIntent = (intent, fallbackPrompt = "", options = {}) => {
+public/control-center/pages/ai-command.js:5579:			const value = asString(input?.value || session.draftMessage || fallbackPrompt || "").trim();
+public/control-center/pages/ai-command.js:5785:                                updateStatus("Tool Drawer is not available on this surface yet.");
+public/control-center/pages/ai-command.js:5797:                                updateStatus("Source menu is not available yet.");
+public/control-center/pages/ai-command.js:5804:                        updateStatus(open ? `${reason} opened. Choose temporary file context, trusted Library source, planned product context, or current project context.` : `${reason} closed.`);
+public/control-center/pages/ai-command.js:5844:                                        updateStatus("Direct product/SKU source selection is planned. Use a trusted Library source or paste product details for now.");
+public/control-center/pages/ai-command.js:5845:                                        showMessage?.("Product/SKU selector is planned. Current safe options: Library source, uploaded filename context, project context, or manual product details.");
+public/control-center/pages/ai-command.js:5898:                                updateStatus("AI Team selector is not available yet.");
+public/control-center/pages/ai-command.js:5936:                                        updateStatus("AI Team context is not available yet.");
+public/control-center/pages/ai-command.js:5945:                Array.from(document.querySelectorAll("[data-aicmd-final-voice-conversation]")).forEach((btn) => {
+public/control-center/pages/ai-command.js:5948:                                showMessage?.("Voice dictation is ready. Full voice conversation will be implemented as the next provider-backed voice mode.");
+public/control-center/pages/ai-command.js:5968:                                updateStatus("This Smart Action is planned. Campaign Builder is available first.");
+public/control-center/pages/ai-command.js:6023:                                        body: "Prepare creative direction, image/video brief, shot list, format requirements, storyboard/voiceover notes, and asset gaps."
+public/control-center/pages/ai-command.js:6031:                                        body: `Prepare publishing readiness for ${channelLabel}: channel checklist, schedule draft, missing approvals, and handoff requirements.`
+public/control-center/pages/ai-command.js:6067:                                                body: `Shape the offer around verified ${sourceLabel.toLowerCase()} information. If pricing, discount, stock, competitor, or claim evidence is missing, mark it as a review blocker.`
+public/control-center/pages/ai-command.js:6075:                                                body: "Define hero visual, product framing, scene list, required assets, image/video format, voiceover direction, and Media Studio handoff notes."
+public/control-center/pages/ai-command.js:6129:                function normalizeBackendCampaignPreview(payload = {}, fallbackPreview = {}) {
+public/control-center/pages/ai-command.js:6140:                                asArray(campaignPackage.missingBlockers).length ? { label: "Review blockers", items: asArray(campaignPackage.missingBlockers) } : null,
+public/control-center/pages/ai-command.js:6145:                                ...asObject(fallbackPreview),
+public/control-center/pages/ai-command.js:6146:                                title: asString(body.title || fallbackPreview.title || "AI Team campaign preview"),
+public/control-center/pages/ai-command.js:6147:                                summary: asString(body.summary || fallbackPreview.summary || ""),
+public/control-center/pages/ai-command.js:6148:                                source: asString(body.source_type || body.source || fallbackPreview.source || ""),
+public/control-center/pages/ai-command.js:6149:                                sourceLabel: asString(body.source_label || fallbackPreview.sourceLabel || fallbackPreview.source || ""),
+public/control-center/pages/ai-command.js:6150:                                goal: asString(body.goal || fallbackPreview.goal || ""),
+public/control-center/pages/ai-command.js:6151:                                channel: asString(body.channel || fallbackPreview.channel || ""),
+public/control-center/pages/ai-command.js:6152:                                market: asString(body.market || fallbackPreview.market || ""),
+public/control-center/pages/ai-command.js:6153:                                language: asString(body.language || fallbackPreview.language || ""),
+public/control-center/pages/ai-command.js:6154:                                format: asString(body.format || fallbackPreview.format || ""),
+public/control-center/pages/ai-command.js:6155:                                deadline: asString(body.deadline || fallbackPreview.deadline || ""),
+public/control-center/pages/ai-command.js:6156:                                audience: asString(body.audience || campaignPackage.targetAudience || fallbackPreview.audience || ""),
+public/control-center/pages/ai-command.js:6157:                                offer: asString(body.offer || campaignPackage.offer || fallbackPreview.offer || ""),
+public/control-center/pages/ai-command.js:6158:                                productFocus: asString(body.product_focus || body.productFocus || fallbackPreview.productFocus || ""),
+public/control-center/pages/ai-command.js:6159:                                complianceSensitivity: asString(body.compliance_sensitivity || body.complianceSensitivity || fallbackPreview.complianceSensitivity || ""),
+public/control-center/pages/ai-command.js:6164:                                        : asString(fallbackPreview.safety || "Preview only."),
+public/control-center/pages/ai-command.js:6202:                                console.warn("AI Command backend campaign preview fallback", error);
+public/control-center/pages/ai-command.js:6206:                                        backendFallbackReason: asString(error?.message || "Backend preview unavailable")
+public/control-center/pages/ai-command.js:6249:                                        backendFallbackReason: asString(preview.backendFallbackReason || "")
+public/control-center/pages/ai-command.js:6252:                                persistSessionDraft(sessionKey, session, preview.backendPreview ? "Campaign Builder backend preview prepared" : "Campaign Builder local fallback preview prepared");
+public/control-center/pages/ai-command.js:6253:                                updateStatus(preview.backendPreview ? "Backend AI Team preview prepared. Review before any handoff or approval." : "Local campaign preview prepared because backend preview is unavailable.");
+public/control-center/pages/ai-command.js:6254:                                showMessage?.(preview.backendPreview ? "Backend AI Team campaign preview is ready for review." : "Campaign preview is ready using the local fallback.");
+public/control-center/pages/ai-command.js:6296:                                backend_fallback_reason: asString(preview.backendFallbackReason || ""),
+public/control-center/pages/ai-command.js:6399:			        if (sendBtn && !sendBtn.disabled) {
+public/control-center/pages/ai-command.js:6405:		const voiceLangBtn = $("aicmdV2VoiceLangBtn");
+public/control-center/pages/ai-command.js:6406:		if (voiceLangBtn) {
+public/control-center/pages/ai-command.js:6407:			voiceLangBtn.onclick = () => {
+public/control-center/pages/ai-command.js:6408:				const current = asString(session.voiceLanguageMode || "auto").toLowerCase();
+public/control-center/pages/ai-command.js:6417:				session.voiceLanguageMode = next;
+public/control-center/pages/ai-command.js:6424:		const voiceBtn = $("aicmdV2VoiceBtn");
+public/control-center/pages/ai-command.js:6425:		if (voiceBtn) {
+public/control-center/pages/ai-command.js:6426:			voiceBtn.onclick = () => {
+public/control-center/pages/ai-command.js:6427:				const SpeechRecognitionCtor = typeof window !== "undefined"
+public/control-center/pages/ai-command.js:6428:					? (window.SpeechRecognition || window.webkitSpeechRecognition)
+public/control-center/pages/ai-command.js:6430:				if (!SpeechRecognitionCtor) {
+public/control-center/pages/ai-command.js:6431:					updateStatus("Voice dictation is ready, but browser speech recognition is not available in this environment yet.");
+public/control-center/pages/ai-command.js:6437:					const recognition = new SpeechRecognitionCtor();
+public/control-center/pages/ai-command.js:6438:					const voiceLanguage = (() => {
+public/control-center/pages/ai-command.js:6439:                                                const selectedVoiceLanguage = asString(session.voiceLanguageMode || "auto").toLowerCase();
+public/control-center/pages/ai-command.js:6455:                                        recognition.lang = voiceLanguage;
+public/control-center/pages/ai-command.js:6458:					let voiceTranscriptCaptured = false;
+public/control-center/pages/ai-command.js:6466:						updateStatus("Speech ended. Processing voice input...");
+public/control-center/pages/ai-command.js:6477:						voiceTranscriptCaptured = true;
+public/control-center/pages/ai-command.js:6492:                                                if (!voiceTranscriptCaptured) {
+public/control-center/pages/ai-command.js:6497:                                        updateStatus(`Listening for voice dictation (${voiceLanguage}).`);
+public/control-center/pages/ai-command.js:6526:		                        showMessage?.("AI chat route is not connected yet.");
+public/control-center/pages/ai-command.js:6692:                                const fallback = asString(input?.value || session.draftMessage || "").trim();
+public/control-center/pages/ai-command.js:6696:                                        fallbackPrompt: fallback,
+public/control-center/pages/ai-command.js:6715:                                const fallback = value
+public/control-center/pages/ai-command.js:6721:                                        fallbackPrompt: fallback,
+public/control-center/pages/ai-command.js:6738:                                const fallback = value
+public/control-center/pages/ai-command.js:6744:                                        fallbackPrompt: fallback,
+public/control-center/pages/ai-command.js:6762:                                const fallback = value
+public/control-center/pages/ai-command.js:6768:                                        fallbackPrompt: fallback,
+public/control-center/pages/ai-command.js:6814:					updateStatus("Smart tool drawer is unavailable. Refresh AI Command and try again.");
+public/control-center/pages/ai-command.js:6867:						updateStatus("Clipboard is not available in this browser context.");
+public/control-center/pages/ai-command.js:6870:					updateStatus("Copy failed. Clipboard access may be blocked.");
+public/control-center/pages/ai-command.js:6906:		                const fallback = latestResponse?.prompt || asString(input?.value || session.draftMessage || "");
+public/control-center/pages/ai-command.js:6910:		                        fallbackPrompt: fallback,
+public/control-center/pages/ai-command.js:7001:						updateStatus("Clipboard is not available in this browser context.");
+public/control-center/pages/ai-command.js:7004:					updateStatus("Copy failed. Clipboard access may be blocked.");
+public/control-center/pages/ai-command.js:7254:            <span class="aicmd-team-avatar">${member.label}</span>
+public/control-center/pages/ai-command.js:7458:        uiConsistency: "locked"
+public/control-center/pages/ai-command.js:7543:        stability: "locked"
+public/control-center/pages/ai-command/tool-dock.js:14:function moveFocusOutOfDrawer(drawer, fallbackTarget = null) {
+public/control-center/pages/ai-command/tool-dock.js:19:    if (fallbackTarget && typeof fallbackTarget.focus === "function") {
+public/control-center/pages/ai-command/tool-dock.js:20:      fallbackTarget.focus({ preventScroll: true });
+public/control-center/pages/ai-command/tool-dock.js:78:    const fallbackTool = findToolMetadataById(returnContext.toolId);
+public/control-center/pages/ai-command/tool-dock.js:79:    if (fallbackTool) {
+public/control-center/pages/ai-command/tool-dock.js:82:        btn: createToolButtonAdapter(fallbackTool),
+public/control-center/pages/ai-command/tool-dock.js:83:        tool: fallbackTool,
+public/control-center/pages/ai-command/tool-dock.js:84:        text: fallbackTool.template || "",
+public/control-center/pages/ai-command/tool-dock.js:337:      sourceInput.placeholder = "Optional: add source usage notes, audience, angle, or claims to avoid...";
+public/control-center/pages/ai-command/tool-dock.js:360:  // Set placeholder for Source Details if empty
+public/control-center/pages/ai-command/tool-dock.js:362:    sourceInput.placeholder = "Optional: add source usage notes, audience, angle, or claims to avoid...";
+public/control-center/pages/ai-command/tool-dock.js:388:        if (sourceInput) sourceInput.placeholder = "Optional: add source usage notes, audience, angle, or claims to avoid...";
+public/control-center/pages/ai-command/tool-dock.js:499:      template: "Prioritize the next best actions for {projectName}. Separate urgent, important, blocked, and later work."
+public/control-center/pages/ai-command/tool-dock.js:513:      sourceTypes: ["current_chat", "library_folder", "brand_profile", "product_data", "legal_pricing_docs", "research_proof_docs", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:514:      outputTypes: ["company_profile", "product_copy", "email", "blog_article", "landing_page", "contract_draft", "presentation_outline", "speech", "faq", "proposal", "social_post", "ad_copy"],
+public/control-center/pages/ai-command/tool-dock.js:515:      template: "Use the Content Writer to create a new written output for {projectName}. First ask or infer the output type: company profile, product copy, email, blog article, landing page, contract draft, presentation outline, speech, FAQ, proposal, social post, or ad copy. Ask for sources if needed. Keep it review-ready and do not publish or send anything."
+public/control-center/pages/ai-command/tool-dock.js:541:      template: "Translate and localize the current text for {projectName}. Ask for target language and market if missing. Preserve brand tone, adapt CTA and wording for the target audience, and keep the result review-ready."
+public/control-center/pages/ai-command/tool-dock.js:567:      template: "Check this content for {projectName}. Review grammar, spelling, tone, readability, CTA strength, claim risk, missing proof, SEO weakness, and compliance notes. Return issues, severity, and suggested fixes."
+public/control-center/pages/ai-command/tool-dock.js:578:      sourceTypes: ["current_chat", "library_folder", "brand_profile", "product_data", "legal_pricing_docs", "research_proof_docs", "source_of_truth_assets", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:580:      template: "Prepare source context for the next Content Writer task for {projectName}. Ask which source should be used: current chat, Library folder, brand profile, product data, legal/pricing documents, research/proof documents, source-of-truth assets, or manual input."
+public/control-center/pages/ai-command/tool-dock.js:593:      template: "Prepare SEO support for {projectName}. Ask for topic, market, language, and audience if missing. Create keyword ideas, search intent, meta title/description, blog outline, FAQ ideas, internal link ideas, and content gap notes."
+public/control-center/pages/ai-command/tool-dock.js:605:      outputTypes: ["blog_to_social", "profile_to_pitch", "product_to_ad_copy", "transcript_to_article", "notes_to_presentation", "long_text_to_email_sequence"],
+public/control-center/pages/ai-command/tool-dock.js:606:      template: "Repurpose existing content for {projectName}. Ask or infer the source format and target format: blog to posts, profile to pitch, product page to ad copy, transcript to article, notes to presentation outline, or long text to email sequence."
+public/control-center/pages/ai-command/tool-dock.js:672:      outputTypes: ["asset_checklist", "missing_assets", "asset_request_brief", "production_requirements"],
+public/control-center/pages/ai-command/tool-dock.js:673:      template: "Create an asset checklist for {projectName}. Include logos, product shots, lifestyle images, certificates, icons, testimonials, and missing assets."
+public/control-center/pages/ai-command/tool-dock.js:698:      outputTypes: ["brand_check_report", "style_risks", "missing_assets", "improvement_actions"],
+public/control-center/pages/ai-command/tool-dock.js:699:      template: "Review the visual direction for brand consistency. Flag risks, missing assets, style mismatches, and improvement actions."
+public/control-center/pages/ai-command/tool-dock.js:715:      template: "Write a short-form reel script for {projectName}. Include hook, scene sequence, voiceover, text overlays, CTA, and shot notes."
+public/control-center/pages/ai-command/tool-dock.js:744:      id: "voiceover",
+public/control-center/pages/ai-command/tool-dock.js:752:      sourceTypes: ["current_chat", "script_draft", "campaign_brief", "brand_voice", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:753:      outputTypes: ["voiceover_script", "audio_direction", "pacing_notes", "tone_variants"],
+public/control-center/pages/ai-command/tool-dock.js:754:      template: "Draft a voiceover script for {projectName}. Include tone, pacing, hook, proof points, and CTA."
+public/control-center/pages/ai-command/tool-dock.js:782:      outputTypes: ["publishing_readiness_check", "missing_items", "channel_fit_review", "risk_notes"],
+public/control-center/pages/ai-command/tool-dock.js:783:      template: "Review publishing readiness for {projectName}. Check copy, assets, channel fit, schedule, approvals, and missing items. Do not publish."
+public/control-center/pages/ai-command/tool-dock.js:931:      outputTypes: ["insights_summary", "optimization_actions", "missing_data_notes", "risk_notes"],
+public/control-center/pages/ai-command/tool-dock.js:932:      template: "Summarize insights for {projectName}. Include what is working, what is weak, missing data, and next optimization actions."
+public/control-center/pages/ai-command/tool-dock.js:970:      outputTypes: ["content_gap_report", "missing_topics", "missing_pages", "priority_actions"],
+public/control-center/pages/ai-command/tool-dock.js:971:      template: "Identify content gaps for {projectName}. Include missing pages, missing topics, weak funnel stages, and priority actions."
+public/control-center/pages/ai-command/tool-dock.js:1135:      outputTypes: ["ticket_draft", "issue_summary", "priority_note", "missing_information"],
+public/control-center/pages/ai-command/tool-dock.js:1136:      template: "Prepare a ticket draft for {projectName}. Include issue summary, priority, owner, customer impact, and missing information."
+public/control-center/pages/ai-command/tool-dock.js:1215:      sourceTypes: ["lead_context", "crm_profile_summary", "sales_notes", "customer_notes", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:1217:      template: "Create a lead brief for {projectName}. Include profile, need, fit, opportunity, risks, and recommended outreach."
+public/control-center/pages/ai-command/tool-dock.js:1262:function getToolMetaList(tool = {}, key = "", fallback = []) {
+public/control-center/pages/ai-command/tool-dock.js:1266:  return fallback;
+public/control-center/pages/ai-command/tool-dock.js:1373:                placeholder="Example: use the selected Library source for facts only, avoid unsupported claims..."
+public/control-center/pages/ai-command/tool-dock.js:1383:                placeholder="Add audience, goal, keywords, offer, product, or any must-use information..."
+public/control-center/pages/ai-command/tool-dock.js:1500:function populateDrawerSelect(select, rawValue = "", fallbackLabel = "Auto") {
+public/control-center/pages/ai-command/tool-dock.js:1510:  const options = values.length ? values : [String(fallbackLabel || "Auto").trim() || "Auto"];
+public/control-center/pages/ai-command/tool-dock.js:1514:    const label = humanizeMeta(value || fallbackLabel || "Auto");
+public/control-center/pages/ai-command/tool-dock.js:1519:function getSelectedLabel(drawer, selector, fallback = "Auto") {
+public/control-center/pages/ai-command/tool-dock.js:1521:  if (!select || !select.value) return fallback;
+public/control-center/pages/ai-command/tool-dock.js:1568:    : `${source}. If the selected source is not available in the current context, ask me to choose, paste, upload, or open the relevant source before producing final content.`;
+public/control-center/pages/ai-command/tool-dock.js:1600:    "If required facts are missing, ask concise follow-up questions before writing the final version.",
+public/control-center/pages/ai-command/tool-dock.js:1622:    "- Do not make unsupported claims. Mark missing proof clearly."
+public/control-center/pages/ai-command/tool-dock.js:1658:function closeToolDrawer(drawer, fallbackTarget = null) {
+public/control-center/pages/ai-command/tool-dock.js:1659:  moveFocusOutOfDrawer(drawer, fallbackTarget);
+public/control-center/pages/home.js:32:function asNumber(value, fallback = 0) {
+public/control-center/pages/home.js:34:  return Number.isFinite(parsed) ? parsed : fallback;
+public/control-center/pages/home.js:51:    text.includes("blocked") ||
+public/control-center/pages/home.js:53:    text.includes("missing")
+public/control-center/pages/home.js:94:function humanizeStatus(value, fallback = "Unknown") {
+public/control-center/pages/home.js:96:  if (!raw) return fallback;
+public/control-center/pages/home.js:125:function compact(value, fallback = "-") {
+public/control-center/pages/home.js:127:  return text || fallback;
+public/control-center/pages/home.js:130:function humanizeExecutiveAction(value, fallback = "Next executive action") {
+public/control-center/pages/home.js:132:  if (!raw) return fallback;
+public/control-center/pages/home.js:147:    "library": "Prepare missing brand assets",
+public/control-center/pages/home.js:158:function compactModuleState(value, fallback = "Not enabled yet") {
+public/control-center/pages/home.js:160:  if (!text) return fallback;
+public/control-center/pages/home.js:161:  if (/planned\/partial|planned|not ready|partial/i.test(text)) {
+public/control-center/pages/home.js:162:    return fallback;
+public/control-center/pages/home.js:182:      meta: asArray(blockers.assets).length ? `${formatCount(asArray(blockers.assets).length)} missing asset groups` : "Assets ready for next step",
+public/control-center/pages/home.js:188:      meta: asArray(blockers.integrations).length ? `${formatCount(asArray(blockers.integrations).length)} integrations missing` : "Core integrations connected",
+public/control-center/pages/home.js:261:        fallback: asString(
+public/control-center/pages/home.js:268:    { id: "strategist", name: "Strategist", fallback: "Align campaign priorities and launch sequencing." },
+public/control-center/pages/home.js:269:    { id: "writer", name: "Content Writer", fallback: "Prepare high-conversion messaging for active channels." },
+public/control-center/pages/home.js:270:    { id: "designer", name: "Media Director", fallback: "Polish visual direction and creative consistency." },
+public/control-center/pages/home.js:271:    { id: "video_lead", name: "Video Lead", fallback: "Queue the next motion and short-form variants." },
+public/control-center/pages/home.js:272:    { id: "publisher", name: "Publisher", fallback: "Prepare publishing packages, schedules, and manual handoffs." },
+public/control-center/pages/home.js:273:    { id: "ads_operator", name: "Ads Optimizer", fallback: "Optimize paid testing, creative variants, and budget decisions." },
+public/control-center/pages/home.js:274:    { id: "analyst", name: "SEO & Insights Analyst", fallback: "Read weak signals and recommend measurable improvements." },
+public/control-center/pages/home.js:275:    { id: "compliance_reviewer", name: "Compliance Reviewer", fallback: "Review claims, approvals, and publish safety before release." },
+public/control-center/pages/home.js:276:    { id: "admin", name: "Operations Lead", fallback: "Clear blockers and keep execution flow healthy." }
+public/control-center/pages/home.js:296:        ? asString(latest.title || latest.summary || latest.action || role.fallback)
+public/control-center/pages/home.js:297:        : role.fallback
+public/control-center/pages/home.js:355:  const missingIntegrations = asArray(integrations.readiness?.missing).map((item) => humanizeStatus(item)).filter(Boolean);
+public/control-center/pages/home.js:358:  const missingAssetLabels = [
+public/control-center/pages/home.js:359:    ...asArray(assets.missing_assets?.assets),
+public/control-center/pages/home.js:360:    ...asArray(assets.missing_assets?.missing),
+public/control-center/pages/home.js:361:    ...asArray(assets.missing_assets?.blockers),
+public/control-center/pages/home.js:363:      .filter((item) => item?.required !== false && ["missing", "needs review"].includes(asString(item.status).toLowerCase()))
+public/control-center/pages/home.js:366:  const missingAssets = dedupe(missingAssetLabels).map((item) => humanizeStatus(item));
+public/control-center/pages/home.js:385:  const fallbackAction =
+public/control-center/pages/home.js:392:  const rawNextAction = asString(recommendations[0]).trim() || fallbackAction;
+public/control-center/pages/home.js:472:    ...asArray(readinessData.missing),
+public/control-center/pages/home.js:473:    ...asArray(readiness.missing_fields)
+public/control-center/pages/home.js:536:    integrations: missingIntegrations,
+public/control-center/pages/home.js:537:    assets: missingAssets,
+public/control-center/pages/home.js:702:      missingRequiredData: totalBlockers,
+public/control-center/pages/home.js:703:      missingDataList: dedupe([
+public/control-center/pages/home.js:779:          ? `${formatCount(dashboard.blockers.assets.length)} missing asset groups need preparation.`
+public/control-center/pages/home.js:1143:      promptReadinessBtn.onclick = () => openAiWithPrompt("Why is readiness low? Explain the missing integrations, assets, failed jobs, and readiness gaps in simple steps.");
+public/control-center/pages/settings.js:45:  "Block publishing when assets are missing",
+public/control-center/pages/settings.js:127:    backendLabel: "Project profile fields are ready for backend save",
+public/control-center/pages/settings.js:129:      { path: "project.projectName", label: "Project name", type: "text", critical: true, placeholder: "project-name" },
+public/control-center/pages/settings.js:130:      { path: "project.brandName", label: "Brand name", type: "text", critical: true, placeholder: "Brand name" },
+public/control-center/pages/settings.js:159:      { path: "project.website", label: "Website", type: "url", critical: true, placeholder: "https://brand.com" },
+public/control-center/pages/settings.js:193:        options: ["Recommend only", "Prepare actions with review", "Auto-run trusted actions", "Act unless blocked by policy"]
+public/control-center/pages/settings.js:205:        placeholder: "Describe when the system can escalate, pause, or shift to a more defensive operating posture."
+public/control-center/pages/settings.js:259:        placeholder: "Short-form hooks first, German market language, product-truth protected."
+public/control-center/pages/settings.js:265:        placeholder: "Use approved brand colors, real packaging, premium masculine mood, no invented labels."
+public/control-center/pages/settings.js:272:    description: "Tell the system what should be suggested, blocked, routed, or escalated when operational conditions change.",
+public/control-center/pages/settings.js:298:        placeholder: "Route SEO gaps into Research, weak ad performance into Ads Manager, and publish blockers into review queues."
+public/control-center/pages/settings.js:330:        placeholder: "market_campaign_channel_assettype_v1"
+public/control-center/pages/settings.js:336:        placeholder: "Route product launches to social + email, evergreen SEO to website, paid hooks to ads queue."
+public/control-center/pages/settings.js:375:        label: "What requires human approval",
+public/control-center/pages/settings.js:384:        placeholder: "Reject anything with unsupported claims, brand mismatch, or missing route metadata. Two failed reviews escalate."
+public/control-center/pages/settings.js:390:        placeholder: "Escalate legal-sensitive claims to brand owner and operations lead within one business day."
+public/control-center/pages/settings.js:494:        placeholder: "Capture the reusable defaults that AI and operators should inherit when launching new work."
+public/control-center/pages/settings.js:502:    backendLabel: "Sync policy is a safe placeholder until connector-level persistence lands",
+public/control-center/pages/settings.js:533:        placeholder: "Refresh connectors before morning review, before campaign launch, and after failed imports."
+public/control-center/pages/settings.js:573:        placeholder: "Use immediate alerts for provider disconnects and claim safety issues; batch lower-priority workflow completions."
+public/control-center/pages/settings.js:589:        placeholder: "Never invent product benefits, ingredients, results, packaging, or certifications."
+public/control-center/pages/settings.js:596:        placeholder: "Fake before/after claims, invented medical promises, altered packaging, counterfeit logos."
+public/control-center/pages/settings.js:602:        placeholder: "Flag regulated claims, platform policy risk, and market-specific labeling issues."
+public/control-center/pages/settings.js:608:        placeholder: "Use approved logo only, maintain premium visual language, reject generic AI product renders."
+public/control-center/pages/settings.js:614:        placeholder: "Escalate medical, efficacy, or comparative claims for human review before publication."
+public/control-center/pages/settings.js:691:  const snapshot = asObject(team.settings_profile || bridge.form);
+public/control-center/pages/settings.js:741:    settings_profile: clone(form),
+public/control-center/pages/settings.js:748:    project_profile: {
+public/control-center/pages/settings.js:777:      auto_escalate_critical_risk: asString(operating.actionPolicy).toLowerCase().includes("blocked"),
+public/control-center/pages/settings.js:822:function normalizeLanguage(value, fallback = "English") {
+public/control-center/pages/settings.js:830:  return fallback;
+public/control-center/pages/settings.js:901:          ? "Act unless blocked by policy"
+public/control-center/pages/settings.js:921:        "Block publishing when assets are missing",
+public/control-center/pages/settings.js:942:      revisionRules: "Reject unsupported claims, brand drift, weak hooks, or missing metadata. Two revisions escalate to the owner.",
+public/control-center/pages/settings.js:1210:    risks.push("Human approval triggers are missing, which increases the chance of unsupervised high-risk output.");
+public/control-center/pages/settings.js:1230:    risks.push("Alert rules are missing, which reduces visibility into sync failures, approval delays, and provider issues.");
+public/control-center/pages/settings.js:1353:          placeholder="${escapeHtml(field.placeholder || "")}"
+public/control-center/pages/settings.js:1378:        placeholder="${escapeHtml(field.placeholder || "")}"
+public/control-center/pages/customer-center.js:46:  return /protected read routes are disabled/i.test(message);
+public/control-center/pages/customer-center.js:50:  return asString(value?.error || value?.message || value || "Protected read routes are disabled.");
+public/control-center/pages/customer-center.js:75:      disabledActions: buildDisabledActions()
+public/control-center/pages/customer-center.js:95:    disabledActions: buildDisabledActions()
+public/control-center/pages/customer-center.js:102:    ["Add CRM note", "Locked: CRM writes require a future confirmation gate, role check, and audit log."],
+public/control-center/pages/customer-center.js:103:    ["Update ticket", "Locked: ticket changes are outside this read-only release."],
+public/control-center/pages/customer-center.js:104:    ["Assign conversation", "Locked: assignment changes require a future workflow owner and audit trail."],
+public/control-center/pages/customer-center.js:144:        <p>This page is intentionally blank while protected customer read routes are disabled. Configure <code>MH_CONTROL_CENTER_WRITE_KEY</code> on the server, restart the service, then reload to show read-only projections.</p>
+public/control-center/pages/customer-center.js:145:        <p>No placeholder customer records are shown. External send, CRM updates, ticket changes, calls, IVR, provider sync, and auto-reply remain locked.</p>
+public/control-center/pages/customer-center.js:151:function renderEmptyState(title, body, nextStep = "Safe next step: verify protected-read readiness, then reload read-only customer projections.") {
+public/control-center/pages/customer-center.js:164:    return renderEmptyState("Inbox is empty in read-only mode", "No inbound customer signals are available for this project right now. This is expected when protected-read data is not connected or no conversations match the current projection.");
+public/control-center/pages/customer-center.js:181:    return renderEmptyState("No conversation previews available", "Masked conversation context will appear here after read-only projections return conversations. Customer identity and message content stay masked or truncated by default.");
+public/control-center/pages/customer-center.js:198:    return renderEmptyState("No ticket snapshots available", "Support ticket and SLA records will appear here when the read-only projection includes them. No ticket creation or update is available from this page.");
+public/control-center/pages/customer-center.js:215:    return renderEmptyState("No channel readiness records", "Provider readiness for email, social messaging, CRM, voice, and IVR will appear here when configured. Send and provider execution remain locked.");
+public/control-center/pages/customer-center.js:222:        <p>${escapeHtml(channel.blocked_reason || "Read-only projection only.")}</p>
+public/control-center/pages/customer-center.js:224:      <span class="card-badge">${channel.external_send_ready ? "Send ready" : "Send locked"}</span>
+public/control-center/pages/customer-center.js:231:    <div class="customer-center-locked-actions" aria-label="Future customer actions locked">
+public/control-center/pages/customer-center.js:232:      <div class="panel-kicker">Execution actions locked</div>
+public/control-center/pages/customer-center.js:233:      <p class="muted">Visible for roadmap clarity only. These customer actions cannot execute here and require future confirmation gates, role permissions, provider readiness, and audit logging.</p>
+public/control-center/pages/customer-center.js:236:          <button class="btn btn-ghost" type="button" disabled title="${escapeHtml(reason)}">
+public/control-center/pages/customer-center.js:261:      ? "Customer Center could not load the current read-only projection. Customer execution actions remain unavailable."
+public/control-center/pages/customer-center.js:263:        ? "Customer Center is using read-only projections only. Outbound sends, CRM writes, ticket changes, assignments, calls, IVR, and auto-replies remain unavailable."
+public/control-center/pages/customer-center.js:264:        : "Customer Center will request protected read-only projections when the page initializes. No outbound or mutation action is available.";
+public/control-center/pages/customer-center.js:272:          <p class="muted">Fetching read-only customer projections.</p>
+public/control-center/pages/customer-center.js:286:        <button class="btn btn-secondary" type="button" data-customer-center-action="refresh">Refresh read-only data</button>
+public/control-center/pages/customer-center.js:295:      ${renderMetric("Channels", channels.length || "0", "Send locked")}
+public/control-center/pages/customer-center.js:317:          <article class="ops-list-item"><div><strong>External send</strong><p>Replies, social messages, SMS, and provider sends are unavailable here.</p></div><span class="card-badge">Locked</span></article>
+public/control-center/pages/customer-center.js:318:          <article class="ops-list-item"><div><strong>CRM / Ticket / Assignment writes</strong><p>CRM notes, ticket updates, review marks, and ownership changes require future confirmation gates.</p></div><span class="card-badge">Locked</span></article>
+public/control-center/pages/customer-center.js:319:          <article class="ops-list-item"><div><strong>Calls / IVR / Auto-reply</strong><p>Voice placement, IVR provider execution, and autonomous replies remain disabled.</p></div><span class="card-badge">Locked</span></article>
+public/control-center/pages/customer-center.js:360:        ${renderDisabledActions(model.disabledActions)}
+public/control-center/pages/customer-center.js:365:        <p class="muted">AI may summarize read-only context, draft response guidance, translate, and suggest next steps for a human handoff. It must not send replies, update CRM, close tickets, assign conversations, place calls, trigger IVR, sync providers, or start auto-reply.</p>
+public/control-center/pages/customer-center.js:397:      context.showMessage?.("Customer Center read-only data refreshed.");
+public/control-center/pages/customer-center.js:404:        "This will attach a read-only Customer Center prompt and open AI Command for review."
+public/control-center/pages/customer-center.js:411:        prompt: "Review Customer Center read-only state. Summarize customer support risks, draft safe reply guidance, and identify escalation needs. Do not send replies or mutate CRM."
+public/control-center/pages/customer-center.js:473:      disabledActions: buildDisabledActions()
+public/control-center/pages/workflows.js:175:  if (["failed", "error", "errored", "cancelled", "blocked"].includes(normalized)) return "failed";
+public/control-center/pages/workflows.js:218:    blockedRequirements: [],
+public/control-center/pages/workflows.js:387:      blockedRequirements: asArray(output.blockedRequirements || output.blocked_requirements),
+public/control-center/pages/workflows.js:416:  const missingIntegrations = uniqueStrings([
+public/control-center/pages/workflows.js:423:  const missingAssets = uniqueStrings([
+public/control-center/pages/workflows.js:424:    ...asArray(assets.missing_assets?.missing),
+public/control-center/pages/workflows.js:425:    ...asArray(assets.missing_assets?.required_asset_types)
+public/control-center/pages/workflows.js:446:    missingIntegrations,
+public/control-center/pages/workflows.js:447:    missingAssets,
+public/control-center/pages/workflows.js:485:function getBlockedRequirements(workflow, inputs, context) {
+public/control-center/pages/workflows.js:486:  const blocked = [];
+public/control-center/pages/workflows.js:487:  const missingRequired = workflow.requiredInputs.filter((field) => !asString(inputs[field]).trim());
+public/control-center/pages/workflows.js:488:  if (missingRequired.length) {
+public/control-center/pages/workflows.js:489:    blocked.push(`Missing required inputs: ${missingRequired.map(titleCase).join(", ")}`);
+public/control-center/pages/workflows.js:492:  if (workflow.id === "prepare-publishing-package" && context.missingAssets.length) {
+public/control-center/pages/workflows.js:493:    blocked.push(`Missing assets: ${context.missingAssets.slice(0, 4).join(", ")}`);
+public/control-center/pages/workflows.js:496:  if (workflow.id === "generate-report" && context.missingIntegrations.length) {
+public/control-center/pages/workflows.js:497:    blocked.push(`Data coverage gaps: ${context.missingIntegrations.slice(0, 3).join(", ")}`);
+public/control-center/pages/workflows.js:500:  if (workflow.id === "fix-integrations" && !context.missingIntegrations.length) {
+public/control-center/pages/workflows.js:501:    blocked.push("No integration gaps detected. Use this workflow only if connectors are unstable.");
+public/control-center/pages/workflows.js:504:  return blocked;
+public/control-center/pages/workflows.js:517:    context.missingIntegrations.length ? `Missing integrations: ${context.missingIntegrations.join(", ")}` : "Missing integrations: none",
+public/control-center/pages/workflows.js:518:    context.missingAssets.length ? `Missing assets: ${context.missingAssets.join(", ")}` : "Missing assets: none"
+public/control-center/pages/workflows.js:525:  const blockedRequirements = getBlockedRequirements(workflow, inputs, context);
+public/control-center/pages/workflows.js:533:      blockedRequirements.length ? "Resolve blockers before any destination-owned execution." : "Proceed to review handoff."
+public/control-center/pages/workflows.js:535:    blockedRequirements,
+public/control-center/pages/workflows.js:575:  if (context.missingIntegrations.length) {
+public/control-center/pages/workflows.js:579:      reason: `${context.missingIntegrations.length} integration gap${context.missingIntegrations.length === 1 ? "" : "s"} can block automation and report quality.`,
+public/control-center/pages/workflows.js:585:  if (context.missingAssets.length) {
+public/control-center/pages/workflows.js:589:      reason: `${context.missingAssets.length} asset requirement${context.missingAssets.length === 1 ? "" : "s"} are still missing and can block final publishing.`,
+public/control-center/pages/workflows.js:591:      prompt: "Prepare a publishing package checklist with missing assets and approval dependencies."
+public/control-center/pages/workflows.js:628:        <article class="wfexec-stat"><span>Failed / blocked</span><strong>${escapeHtml(String(metrics.failed))}</strong></article>
+public/control-center/pages/workflows.js:793:          <input id="wfexecInputProject" class="wfexec-input" data-wf-input="project" type="text" value="${escapeHtml(inputs.project || "")}" placeholder="Current project">
+public/control-center/pages/workflows.js:797:          <input id="wfexecInputCampaign" class="wfexec-input" data-wf-input="campaign" type="text" value="${escapeHtml(inputs.campaign || "")}" placeholder="Campaign name">
+public/control-center/pages/workflows.js:801:          <input id="wfexecInputProduct" class="wfexec-input" data-wf-input="product" type="text" value="${escapeHtml(inputs.product || "")}" placeholder="Product or offer">
+public/control-center/pages/workflows.js:805:          <input id="wfexecInputChannel" class="wfexec-input" data-wf-input="channel" type="text" value="${escapeHtml(inputs.channel || "")}" placeholder="Channel or channel set">
+public/control-center/pages/workflows.js:809:          <input id="wfexecInputGoal" class="wfexec-input" data-wf-input="goal" type="text" value="${escapeHtml(inputs.goal || "")}" placeholder="Outcome goal">
+public/control-center/pages/workflows.js:833:          const blocked = getBlockedRequirements(workflow, inputs, context);
+public/control-center/pages/workflows.js:834:          const ready = blocked.length === 0;
+public/control-center/pages/workflows.js:843:              <div class="wfexec-required"><strong>Readiness status:</strong> ${escapeHtml(ready ? "Ready to prepare" : blocked[0])}</div>
+public/control-center/pages/workflows.js:858:function renderExecutionSection(run, workflow, blockedRequirements, escapeHtml) {
+public/control-center/pages/workflows.js:876:      ${blockedRequirements.length ? `
+public/control-center/pages/workflows.js:878:          <strong>Blocked requirements</strong>
+public/control-center/pages/workflows.js:879:          <ul>${blockedRequirements.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
+public/control-center/pages/workflows.js:910:  blockedRequirements,
+public/control-center/pages/workflows.js:924:          ${renderExecutionSection(run, workflow, blockedRequirements, escapeHtml)}
+public/control-center/pages/workflows.js:1056:    context.missingIntegrations.length ? `Missing integrations: ${context.missingIntegrations.join(", ")}` : "Missing integrations: none",
+public/control-center/pages/workflows.js:1057:    context.missingAssets.length ? `Missing assets: ${context.missingAssets.join(", ")}` : "Missing assets: none"
+public/control-center/pages/workflows.js:1109:  const missing = workflow.requiredInputs.filter((field) => !asString(inputs[field]).trim());
+public/control-center/pages/workflows.js:1110:  if (!missing.length) return "";
+public/control-center/pages/workflows.js:1111:  return `Please complete: ${missing.map(titleCase).join(", ")}.`;
+public/control-center/pages/workflows.js:1202:      run.blockedRequirements = asArray(output.blockedRequirements || output.blocked_requirements);
+public/control-center/pages/workflows.js:1419:      activeRun.blockedRequirements = asArray(safeOutput.blockedRequirements || safeOutput.blocked_requirements);
+public/control-center/pages/workflows.js:1443:        blockedRequirements: ["Preparation failed. Review inputs and retry."],
+public/control-center/pages/workflows.js:1446:      activeRun.blockedRequirements = asArray(activeRun.output.blockedRequirements);
+public/control-center/pages/workflows.js:1596:        `Missing integrations: ${contextModel.missingIntegrations.join(", ") || "none"}`,
+public/control-center/pages/workflows.js:1597:        `Missing assets: ${contextModel.missingAssets.join(", ") || "none"}`
+public/control-center/pages/workflows.js:1906:      const missing = getMissingInputs(workflow, inputs);
+public/control-center/pages/workflows.js:1918:          status: missing.length ? "active" : "complete",
+public/control-center/pages/workflows.js:1919:          copy: missing.length ? `${missing.length} missing` : "Complete"
+public/control-center/pages/workflows.js:1923:          status: missing.length ? "blocked" : hasPrepared ? "complete" : "pending",
+public/control-center/pages/workflows.js:1952:      if (status === "blocked") return "is-danger";
+public/control-center/pages/workflows.js:1959:      const missing = getMissingInputs(workflow, inputs);
+public/control-center/pages/workflows.js:1966:      const sessionStatus = missing.length
+public/control-center/pages/workflows.js:1967:        ? `Context incomplete (${missing.length} missing)`
+public/control-center/pages/workflows.js:1972:      const nextAction = missing.length
+public/control-center/pages/workflows.js:1973:        ? `Complete ${titleCase(missing[0])}.`
+public/control-center/pages/workflows.js:2056:                <span class="card-badge ${missing.length ? "warning" : "success"}">${escapeHtml(sessionStatus)}</span>
+public/control-center/pages/workflows.js:2059:              <div class="wfloop-session-priority ${missing.length ? "is-warning" : "is-ready"}">
+public/control-center/pages/workflows.js:2061:                <p><strong>Missing:</strong> ${escapeHtml(missing.map(titleCase).join(", ") || "None")}</p>
+public/control-center/pages/workflows.js:2074:                  <input id="wfLightProject" class="setup-input" type="text" value="${escapeHtml(inputs.project || "")}" placeholder="Current project">
+public/control-center/pages/workflows.js:2078:                  <input id="wfLightCampaign" class="setup-input" type="text" value="${escapeHtml(inputs.campaign || "")}" placeholder="Campaign name">
+public/control-center/pages/workflows.js:2082:                  <input id="wfLightGoal" class="setup-input" type="text" value="${escapeHtml(inputs.goal || "")}" placeholder="Workflow goal">
+public/control-center/pages/workflows.js:2101:                  <p class="wfloop-session-value">${escapeHtml(missing.map(titleCase).join(", ") || "None")}</p>
+public/control-center/pages/workflows.js:2136:                <p class="mhos-ai-guidance-copy">AI prepares structure, sequencing, destination context, and missing-input prompts for review only for ${escapeHtml(workflow.title)}.</p>
+public/control-center/pages/workflows.js:2137:                <p class="mhos-ai-guidance-reason">Remaining gaps: ${escapeHtml(missing.map(titleCase).join(", ") || "No missing inputs")}. Safest next step: ${escapeHtml(nextAction)}</p>
+public/control-center/pages/workflows.js:2262:        const missingFields = getMissingInputs(activeWorkflow, activeInputs);
+public/control-center/pages/workflows.js:2263:        if (missingFields.length) {
+public/control-center/pages/workflows.js:2265:          stateModel.lastStatusText = `Preparation blocked. Missing: ${missingFields.map(titleCase).join(", ")}.`;
+public/control-center/pages/integrations.js:58:          { key: "url", label: "Website URL", placeholder: "https://brand.com", required: true },
+public/control-center/pages/integrations.js:59:          { key: "apiKey", label: "API key", placeholder: "Website API key", type: "password" },
+public/control-center/pages/integrations.js:60:          { key: "webhookUrl", label: "Webhook URL", placeholder: "https://brand.com/webhooks/mh", required: false }
+public/control-center/pages/integrations.js:76:          { key: "storeUrl", label: "Store URL", placeholder: "https://brand.com", required: true },
+public/control-center/pages/integrations.js:77:          { key: "consumerKey", label: "Consumer key", placeholder: "ck_...", type: "password" },
+public/control-center/pages/integrations.js:78:          { key: "consumerSecret", label: "Consumer secret", placeholder: "cs_...", type: "password" }
+public/control-center/pages/integrations.js:93:          { key: "storeDomain", label: "Store domain", placeholder: "brand.myshopify.com", required: true },
+public/control-center/pages/integrations.js:94:          { key: "adminToken", label: "Admin token", placeholder: "shpat_...", type: "password" },
+public/control-center/pages/integrations.js:95:          { key: "storeId", label: "Store ID", placeholder: "Shopify store ID" }
+public/control-center/pages/integrations.js:102:        unavailableReason: "Backend provider support is not configured yet.",
+public/control-center/pages/integrations.js:112:          { key: "merchantId", label: "Merchant ID", placeholder: "Amazon merchant ID", required: true },
+public/control-center/pages/integrations.js:113:          { key: "sellerUrl", label: "Store URL", placeholder: "https://amazon.com/shops/brand" },
+public/control-center/pages/integrations.js:114:          { key: "accessToken", label: "Access token", placeholder: "Amazon access token", type: "password" }
+public/control-center/pages/integrations.js:129:          { key: "sellerId", label: "Seller ID", placeholder: "eBay seller ID", required: true },
+public/control-center/pages/integrations.js:130:          { key: "storeUrl", label: "Store URL", placeholder: "https://ebay.com/usr/brand" },
+public/control-center/pages/integrations.js:131:          { key: "accessToken", label: "Access token", placeholder: "eBay access token", type: "password" }
+public/control-center/pages/integrations.js:154:          { key: "pageUrl", label: "Page URL", placeholder: "https://facebook.com/brand", required: true },
+public/control-center/pages/integrations.js:155:          { key: "pageId", label: "Page ID", placeholder: "Facebook page ID", required: false },
+public/control-center/pages/integrations.js:156:          { key: "accessToken", label: "Access token", placeholder: "Facebook access token", type: "password" }
+public/control-center/pages/integrations.js:164:        purpose: "Post, reel, and profile insight sync for Instagram business performance.",
+public/control-center/pages/integrations.js:170:        primaryField: "profileUrl",
+public/control-center/pages/integrations.js:172:          { key: "profileUrl", label: "Profile URL", placeholder: "https://instagram.com/brand", required: true },
+public/control-center/pages/integrations.js:173:          { key: "businessAccountId", label: "Business account ID", placeholder: "Instagram business account ID" },
+public/control-center/pages/integrations.js:174:          { key: "accessToken", label: "Access token", placeholder: "Instagram access token", type: "password" }
+public/control-center/pages/integrations.js:184:        enables: "Video insights, engagement, comments, profile metrics, and future publishing support.",
+public/control-center/pages/integrations.js:188:        primaryField: "profileUrl",
+public/control-center/pages/integrations.js:190:          { key: "profileUrl", label: "Profile URL", placeholder: "https://tiktok.com/@brand", required: true },
+public/control-center/pages/integrations.js:191:          { key: "accountId", label: "Account ID", placeholder: "TikTok business account ID" },
+public/control-center/pages/integrations.js:192:          { key: "accessToken", label: "Access token", placeholder: "TikTok access token", type: "password" }
+public/control-center/pages/integrations.js:208:          { key: "channelUrl", label: "Channel URL", placeholder: "https://youtube.com/@brand", required: true },
+public/control-center/pages/integrations.js:209:          { key: "channelId", label: "Channel ID", placeholder: "YouTube channel ID" },
+public/control-center/pages/integrations.js:210:          { key: "accessToken", label: "Access token", placeholder: "YouTube OAuth token", type: "password" }
+public/control-center/pages/integrations.js:218:        purpose: "Future-ready business profile insight and publishing connection for LinkedIn surfaces.",
+public/control-center/pages/integrations.js:225:          { key: "companyUrl", label: "Company URL", placeholder: "https://linkedin.com/company/brand", required: true },
+public/control-center/pages/integrations.js:226:          { key: "companyId", label: "Company ID", placeholder: "LinkedIn company ID" },
+public/control-center/pages/integrations.js:227:          { key: "accessToken", label: "Access token", placeholder: "LinkedIn OAuth token", type: "password" }
+public/control-center/pages/integrations.js:250:          { key: "propertyId", label: "GA4 property ID", placeholder: "GA4 property ID", required: true },
+public/control-center/pages/integrations.js:251:          { key: "measurementId", label: "Measurement ID", placeholder: "G-XXXXXXXXXX" },
+public/control-center/pages/integrations.js:252:          { key: "accessToken", label: "Access token", placeholder: "GA4 access token", type: "password" }
+public/control-center/pages/integrations.js:267:          { key: "containerId", label: "Container ID", placeholder: "GTM-XXXXXXX", required: true },
+public/control-center/pages/integrations.js:268:          { key: "workspaceId", label: "Workspace ID", placeholder: "GTM workspace ID" },
+public/control-center/pages/integrations.js:269:          { key: "accessToken", label: "Access token", placeholder: "GTM access token", type: "password" }
+public/control-center/pages/integrations.js:284:          { key: "pixelId", label: "Pixel ID", placeholder: "Meta pixel ID", required: true },
+public/control-center/pages/integrations.js:285:          { key: "adAccountId", label: "Ad account ID", placeholder: "act_123..." },
+public/control-center/pages/integrations.js:286:          { key: "accessToken", label: "Access token", placeholder: "Meta access token", type: "password" }
+public/control-center/pages/integrations.js:301:          { key: "pixelId", label: "Pixel ID", placeholder: "TikTok pixel ID", required: true },
+public/control-center/pages/integrations.js:302:          { key: "accountId", label: "Account ID", placeholder: "TikTok Ads account ID" },
+public/control-center/pages/integrations.js:303:          { key: "accessToken", label: "Access token", placeholder: "TikTok token", type: "password" }
+public/control-center/pages/integrations.js:319:          { key: "propertyUrl", label: "Property URL", placeholder: "https://brand.com", required: true },
+public/control-center/pages/integrations.js:320:          { key: "siteDomain", label: "Domain property", placeholder: "sc-domain:brand.com" },
+public/control-center/pages/integrations.js:321:          { key: "accessToken", label: "Access token", placeholder: "Search Console token", type: "password" }
+public/control-center/pages/integrations.js:336:          { key: "endpointUrl", label: "Endpoint URL", placeholder: "https://api.brand.com/analytics", required: true },
+public/control-center/pages/integrations.js:337:          { key: "clientId", label: "Client ID", placeholder: "Analytics client ID" },
+public/control-center/pages/integrations.js:338:          { key: "accessToken", label: "Access token", placeholder: "API token", type: "password" }
+public/control-center/pages/integrations.js:352:        unavailableReason: "Backend provider support is not configured yet.",
+public/control-center/pages/integrations.js:363:          { key: "senderEmail", label: "Sender email", placeholder: "support@brand.com", required: true },
+public/control-center/pages/integrations.js:364:          { key: "smtpHost", label: "SMTP host", placeholder: "smtp.provider.com", required: true },
+public/control-center/pages/integrations.js:365:          { key: "smtpPort", label: "SMTP port", placeholder: "587" }
+public/control-center/pages/integrations.js:372:        unavailableReason: "Backend provider support is not configured yet.",
+public/control-center/pages/integrations.js:382:          { key: "providerName", label: "Provider name", placeholder: "SendGrid / Mailgun / Resend", required: true },
+public/control-center/pages/integrations.js:383:          { key: "apiKey", label: "API key", placeholder: "Mailer API key", type: "password" },
+public/control-center/pages/integrations.js:384:          { key: "senderDomain", label: "Sender domain", placeholder: "brand.com" }
+public/control-center/pages/integrations.js:399:          { key: "audienceId", label: "Audience ID", placeholder: "Mailchimp audience ID", required: true },
+public/control-center/pages/integrations.js:400:          { key: "apiKey", label: "API key", placeholder: "Mailchimp API key", type: "password" },
+public/control-center/pages/integrations.js:401:          { key: "serverPrefix", label: "Server prefix", placeholder: "us1" }
+public/control-center/pages/integrations.js:408:        unavailableReason: "Backend provider support is not configured yet.",
+public/control-center/pages/integrations.js:418:          { key: "workspaceId", label: "Workspace / account ID", placeholder: "CRM workspace ID", required: true },
+public/control-center/pages/integrations.js:419:          { key: "apiKey", label: "API key", placeholder: "CRM API key", type: "password" },
+public/control-center/pages/integrations.js:420:          { key: "pipelineId", label: "Pipeline ID", placeholder: "Primary pipeline ID" }
+public/control-center/pages/integrations.js:443:          { key: "adAccountId", label: "Ad account ID", placeholder: "act_123456789", required: true },
+public/control-center/pages/integrations.js:444:          { key: "businessId", label: "Business ID", placeholder: "Meta business ID" },
+public/control-center/pages/integrations.js:445:          { key: "accessToken", label: "Access token", placeholder: "Meta ads token", type: "password" }
+public/control-center/pages/integrations.js:461:          { key: "customerId", label: "Customer ID", placeholder: "123-456-7890", required: true },
+public/control-center/pages/integrations.js:462:          { key: "managerId", label: "Manager / MCC ID", placeholder: "Google Ads MCC ID" },
+public/control-center/pages/integrations.js:463:          { key: "refreshToken", label: "Refresh token", placeholder: "Google Ads refresh token", type: "password" }
+public/control-center/pages/integrations.js:478:          { key: "advertiserId", label: "Advertiser ID", placeholder: "TikTok advertiser ID", required: true },
+public/control-center/pages/integrations.js:479:          { key: "accountScope", label: "Account scope", placeholder: "Region / business scope" },
+public/control-center/pages/integrations.js:480:          { key: "accessToken", label: "Access token", placeholder: "TikTok ads token", type: "password" }
+public/control-center/pages/integrations.js:502:          { key: "folderId", label: "Folder ID", placeholder: "Google Drive folder ID", required: true },
+public/control-center/pages/integrations.js:503:          { key: "workspaceEmail", label: "Workspace email", placeholder: "ops@brand.com" },
+public/control-center/pages/integrations.js:504:          { key: "accessToken", label: "Access token", placeholder: "Drive OAuth token", type: "password" }
+public/control-center/pages/integrations.js:519:          { key: "workspaceId", label: "Workspace ID", placeholder: "Slack workspace ID", required: true },
+public/control-center/pages/integrations.js:520:          { key: "channelId", label: "Channel ID", placeholder: "Channel ID for alerts" },
+public/control-center/pages/integrations.js:521:          { key: "botToken", label: "Bot token", placeholder: "xoxb-...", type: "password" }
+public/control-center/pages/integrations.js:536:          { key: "botName", label: "Bot / workspace name", placeholder: "MH Assistant Ops Bot", required: true },
+public/control-center/pages/integrations.js:537:          { key: "chatId", label: "Chat ID", placeholder: "Telegram chat ID" },
+public/control-center/pages/integrations.js:538:          { key: "botToken", label: "Bot token", placeholder: "Telegram bot token", type: "password" }
+public/control-center/pages/integrations.js:553:          { key: "workspaceName", label: "Workspace name", placeholder: "Brand Ops Workspace", required: true },
+public/control-center/pages/integrations.js:554:          { key: "databaseId", label: "Database ID", placeholder: "Primary Notion database ID" },
+public/control-center/pages/integrations.js:555:          { key: "accessToken", label: "Integration token", placeholder: "Notion token", type: "password" }
+public/control-center/pages/integrations.js:570:          { key: "endpointUrl", label: "Webhook / scenario URL", placeholder: "https://hooks.zapier.com/...", required: true },
+public/control-center/pages/integrations.js:571:          { key: "workspaceId", label: "Workspace / scenario ID", placeholder: "Zap / Make scenario ID" },
+public/control-center/pages/integrations.js:572:          { key: "secretKey", label: "Secret key", placeholder: "Automation secret", type: "password" }
+public/control-center/pages/integrations.js:587:          { key: "webhookUrl", label: "Webhook URL", placeholder: "https://ops.brand.com/webhook", required: true },
+public/control-center/pages/integrations.js:588:          { key: "eventScope", label: "Event scope", placeholder: "events, approvals, syncs" },
+public/control-center/pages/integrations.js:589:          { key: "secretKey", label: "Secret key", placeholder: "Webhook secret", type: "password" }
+public/control-center/pages/integrations.js:1011:    { key: "posts", pattern: /post|reel|video|comment|publishing|profile|channel/ },
+public/control-center/pages/integrations.js:1140:  const missingRequired = integration.fields
+public/control-center/pages/integrations.js:1144:  if (!missingRequired.length) {
+public/control-center/pages/integrations.js:1149:    fieldKey: missingRequired[0].key,
+public/control-center/pages/integrations.js:1172:function normalizeStatusLabel(statusLabel, fallback = "Not Connected") {
+public/control-center/pages/integrations.js:1175:  if (normalized === "unavailable") return "Unavailable";
+public/control-center/pages/integrations.js:1180:  if (normalized === "not connected" || normalized === "not_connected") return "Not Connected";
+public/control-center/pages/integrations.js:1182:  return fallback;
+public/control-center/pages/integrations.js:1187:    return asString(integration.unavailableReason) || "This integration is unavailable because backend provider support is not configured yet.";
+public/control-center/pages/integrations.js:1198:    return "Some required connection details are still missing.";
+public/control-center/pages/integrations.js:1241:    field.required && card.missingRequired.includes(field.label)
+public/control-center/pages/integrations.js:1298:      if (action === "unavailable") {
+public/control-center/pages/integrations.js:1476:      showError?.(integration.unavailableReason || "This integration is unavailable because backend provider support is not configured yet.");
+public/control-center/pages/integrations.js:1548:      showError?.(integration.unavailableReason || "This integration is unavailable because backend provider support is not configured yet.");
+public/control-center/pages/integrations.js:1574:      showError?.(integration.unavailableReason || "This integration is unavailable because backend provider support is not configured yet.");
+public/control-center/pages/integrations.js:1806:              <strong>${escapeHtml(String(overview.missingRequired))}</strong>
+public/control-center/pages/integrations.js:1837:                    <p><strong>Risk if missing:</strong> ${escapeHtml(aiRec.reasonLabel)} remains unresolved.</p>
+public/control-center/pages/integrations.js:1873:                    <option value="missing" ${session.statusFilter === "missing" ? "selected" : ""}>Missing</option>
+public/control-center/pages/integrations.js:1883:                    placeholder="Search connector, provider, or source"
+public/control-center/api.js:130:  return /missing\s+read\s+key/i.test(String(message || ""));
+public/control-center/api.js:139:  return /missing\s+(?:protected\s+write\s+key|read\s+key|control\s+center\s+access\s+key)/i.test(normalized)
+public/control-center/api.js:229:    normalized === "api.response.json.fallback.done" ||
+public/control-center/api.js:230:    normalized === "api.response.json.fallback.error" ||
+public/control-center/api.js:231:    normalized === "api.response.json.fallback.timeout" ||
+public/control-center/api.js:360:          let fallbackTimer = null;
+public/control-center/api.js:361:          const fallbackPayload = await Promise.race([
+public/control-center/api.js:364:              fallbackTimer = setTimeout(() => {
+public/control-center/api.js:365:                const fallbackTimeoutError = new Error(`JSON fallback timed out after ${timeoutMs}ms.`);
+public/control-center/api.js:366:                fallbackTimeoutError.endpoint = endpoint;
+public/control-center/api.js:367:                fallbackTimeoutError.isTimeout = true;
+public/control-center/api.js:368:                fallbackTimeoutError.parseStage = "api.response.json.fallback.timeout";
+public/control-center/api.js:369:                reject(fallbackTimeoutError);
+public/control-center/api.js:373:            if (fallbackTimer) {
+public/control-center/api.js:374:              clearTimeout(fallbackTimer);
+public/control-center/api.js:378:          const fallbackBodyLength = JSON.stringify(fallbackPayload || null).length;
+public/control-center/api.js:380:          emitApiRuntimeTrace("api.response.json.fallback.done", {
+public/control-center/api.js:384:            bodyLength: fallbackBodyLength,
+public/control-center/api.js:389:            mode: "json-fallback",
+public/control-center/api.js:390:            payload: fallbackPayload,
+public/control-center/api.js:391:            bodyLength: fallbackBodyLength,
+public/control-center/api.js:392:            parseStage: "api.response.json.fallback.done"
+public/control-center/api.js:394:        } catch (fallbackError) {
+public/control-center/api.js:395:          const fallbackParseStage = fallbackError?.isTimeout
+public/control-center/api.js:396:            ? "api.response.json.fallback.timeout"
+public/control-center/api.js:397:            : "api.response.json.fallback.error";
+public/control-center/api.js:399:          emitApiRuntimeTrace("api.response.json.fallback.error", {
+public/control-center/api.js:404:            message: fallbackError?.message || "JSON fallback failed"
+public/control-center/api.js:415:            parseStage: fallbackParseStage,
+public/control-center/api.js:516:async function parseJson(response, fallbackMessage = "Request failed", requestMeta = {}) {
+public/control-center/api.js:523:  if (bodyReadResult?.mode === "json-fallback") {
+public/control-center/api.js:525:    parseStage = String(bodyReadResult.parseStage || "api.response.json.fallback.done");
+public/control-center/api.js:553:      `${fallbackMessage} (${response.status})`;
+public/control-center/api.js:577:    const message = String(payload.error || fallbackMessage);
+public/control-center/api.js:705:async function getJson(path, fallbackMessage, timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS, requestOptions = {}) {
+public/control-center/api.js:712:  return parseJson(response, fallbackMessage, {
+public/control-center/api.js:723:async function sendRawJson(path, method, body, fallbackMessage, timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS) {
+public/control-center/api.js:738:      const parseError = new Error(fallbackMessage || "Response was not valid JSON.");
+public/control-center/api.js:752:    const message = String(payload?.error || payload?.message || fallbackMessage || "Request failed").trim();
+public/control-center/api.js:763:async function sendJson(path, method, body, fallbackMessage, timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS) {
+public/control-center/api.js:771:  return parseJson(response, fallbackMessage, {
+public/control-center/api.js:781:async function sendForm(path, formData, fallbackMessage, timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS) {
+public/control-center/api.js:796:  return parseJson(response, fallbackMessage, {
+public/control-center/api.js:941:        missing: []
+public/control-center/api.js:1057:    console.warn("Using fallback projects list:", error.message);
+public/control-center/api.js:1062:      fallback: true
+public/control-center/api.js:1129:        const fallbackProjects = await fetchProjects();
+public/control-center/api.js:1130:        const fallbackItems = Array.isArray(fallbackProjects?.items) ? fallbackProjects.items : [];
+public/control-center/api.js:1131:        const projectExists = fallbackItems.some((item) => {
+public/control-center/api.js:1143:      } catch (fallbackError) {
+public/control-center/api.js:1150:          message: String(fallbackError?.message || "Failed to verify project fallback")
+public/control-center/api.js:2223:    "/api/media/generate-voice-script",
+public/control-center/api.js:2226:    "Failed to generate voice script"
+runtime/orchestrator-service/server.js:316:    blocked: productionMode && bypassFlags.length > 0,
+runtime/orchestrator-service/server.js:323:  if (!result.blocked) {
+runtime/orchestrator-service/server.js:329:    `Production startup blocked: bypass environment flags are not allowed in production (${flagList})`
+runtime/orchestrator-service/server.js:404:      error: `Protected write routes are disabled until ${CONTROL_WRITE_KEY_ENV} is configured on the server.`
+runtime/orchestrator-service/server.js:471:      error: `Protected read routes are disabled until ${CONTROL_WRITE_KEY_ENV} is configured on the server.`
+runtime/orchestrator-service/server.js:929:function sanitizeErrorMessage(rawMessage, fallbackMessage) {
+runtime/orchestrator-service/server.js:930:  const fallback = String(fallbackMessage || 'Request failed').trim() || 'Request failed';
+runtime/orchestrator-service/server.js:933:    return fallback;
+runtime/orchestrator-service/server.js:938:function getErrorStatusCode(error, fallbackStatus = 500) {
+runtime/orchestrator-service/server.js:940:    error?.statusCode || error?.status || error?.response?.status || fallbackStatus
+runtime/orchestrator-service/server.js:944:    return fallbackStatus;
+runtime/orchestrator-service/server.js:948:    return fallbackStatus;
+runtime/orchestrator-service/server.js:1173:  const missingRequiredEnv = [];
+runtime/orchestrator-service/server.js:1175:    missingRequiredEnv.push(CONTROL_WRITE_KEY_ENV);
+runtime/orchestrator-service/server.js:1179:    missingRequiredEnv.push('MH_INTEGRATION_SECRET_KEY');
+runtime/orchestrator-service/server.js:1193:    missing_required_env: missingRequiredEnv
+runtime/orchestrator-service/server.js:1249:  if (telemetryEntry.legacy_fallback_hit) {
+runtime/orchestrator-service/server.js:1253:  return 'artifact_missing';
+runtime/orchestrator-service/server.js:1377:    legacy_fallback_hit: legacyHit,
+runtime/orchestrator-service/server.js:1385:      legacy_fallback_read: !!readPolicy.legacyFallbackRead
+runtime/orchestrator-service/server.js:1389:  telemetryEntry.fallback_reason = classifyImmediateFallbackReason(telemetryEntry);
+runtime/orchestrator-service/server.js:1450:        legacyFallbackRead: !!resolution.featureFlags.legacy_fallback_read,
+runtime/orchestrator-service/server.js:1493:    fallbackRoot: resolution.legacyRoot,
+runtime/orchestrator-service/server.js:1509:      legacyBase: paths.fallbackRoot,
+runtime/orchestrator-service/server.js:1758:  if (!readEntry || readEntry.selected_root !== 'legacy' || !readEntry.legacy_fallback_hit) {
+runtime/orchestrator-service/server.js:1785:        return 'missing_canonical_write';
+runtime/orchestrator-service/server.js:1805:    fallback_hit_count: 0,
+runtime/orchestrator-service/server.js:1806:    fallback_rate: 0,
+runtime/orchestrator-service/server.js:1807:    fallback_causes: {
+runtime/orchestrator-service/server.js:1811:      missing_canonical_write: 0,
+runtime/orchestrator-service/server.js:1848:    if (entry.selected_root === 'legacy' && entry.legacy_fallback_hit) {
+runtime/orchestrator-service/server.js:1849:      stats.fallback_hit_count += 1;
+runtime/orchestrator-service/server.js:1852:      if (!Object.prototype.hasOwnProperty.call(stats.fallback_causes, cause)) {
+runtime/orchestrator-service/server.js:1853:        stats.fallback_causes.unresolved_risk += 1;
+runtime/orchestrator-service/server.js:1855:        stats.fallback_causes[cause] += 1;
+runtime/orchestrator-service/server.js:1862:  let fallbackHits = 0;
+runtime/orchestrator-service/server.js:1869:    stats.fallback_rate = stats.read_events > 0
+runtime/orchestrator-service/server.js:1870:      ? Number((stats.fallback_hit_count / stats.read_events).toFixed(4))
+runtime/orchestrator-service/server.js:1875:    fallbackHits += stats.fallback_hit_count;
+runtime/orchestrator-service/server.js:1876:    historicalFallbacks += stats.fallback_causes.historical_artifact;
+runtime/orchestrator-service/server.js:1877:    unresolvedStructuralMismatches += stats.fallback_causes.structural_mismatch;
+runtime/orchestrator-service/server.js:1879:      stats.fallback_causes.parity_gap +
+runtime/orchestrator-service/server.js:1880:      stats.fallback_causes.missing_canonical_write +
+runtime/orchestrator-service/server.js:1881:      stats.fallback_causes.policy_or_config_mismatch;
+runtime/orchestrator-service/server.js:1885:  const fallbackRate = totalReads > 0 ? fallbackHits / totalReads : 0;
+runtime/orchestrator-service/server.js:1886:  const historicalFallbackRate = fallbackHits > 0 ? historicalFallbacks / fallbackHits : 0;
+runtime/orchestrator-service/server.js:1893:    fallbackRate <= 0.15 &&
+runtime/orchestrator-service/server.js:1901:    fallbackRate <= 0.4 &&
+runtime/orchestrator-service/server.js:1917:      fallback_hit_count: fallbackHits,
+runtime/orchestrator-service/server.js:1919:      fallback_rate: Number(fallbackRate.toFixed(4)),
+runtime/orchestrator-service/server.js:1920:      fallback_historical_rate: Number(historicalFallbackRate.toFixed(4)),
+runtime/orchestrator-service/server.js:1945:    fallback_hit_count: 0,
+runtime/orchestrator-service/server.js:1953:    aggregate.fallback_hit_count += summary.totals.fallback_hit_count;
+runtime/orchestrator-service/server.js:1962:  aggregate.fallback_rate = totalReads > 0
+runtime/orchestrator-service/server.js:1963:    ? Number((aggregate.fallback_hit_count / totalReads).toFixed(4))
+runtime/orchestrator-service/server.js:2016:    result.status = 'blocked';
+runtime/orchestrator-service/server.js:2072:  const rendered = readiness.status !== 'blocked' ? getLatestRenderedOutput(projectName) : null;
+runtime/orchestrator-service/server.js:2155:  if (packageData.status === 'blocked') {
+runtime/orchestrator-service/server.js:2535:    throw new Error('OPENAI_API_KEY is missing');
+runtime/orchestrator-service/server.js:2606:  fidelity_mode: 'real_asset_locked',
+runtime/orchestrator-service/server.js:2607:  product_locked: true,
+runtime/orchestrator-service/server.js:2608:  logo_locked: true
+runtime/orchestrator-service/server.js:2674:    result.status = 'blocked';
+runtime/orchestrator-service/server.js:2679:    result.status = 'blocked';
+runtime/orchestrator-service/server.js:2684:    result.status = 'blocked';
+runtime/orchestrator-service/server.js:2689:    result.status = 'blocked';
+runtime/orchestrator-service/server.js:2694:    result.status = 'blocked';
+runtime/orchestrator-service/server.js:2728:      status: 'send_blocked',
+runtime/orchestrator-service/server.js:2737:  // TODO:
+runtime/orchestrator-service/server.js:2754:    throw new Error('WooCommerce environment variables are missing');
+runtime/orchestrator-service/server.js:2887:    missing_size: [],
+runtime/orchestrator-service/server.js:2888:    missing_images: [],
+runtime/orchestrator-service/server.js:2900:      summary.missing_size.push(product.product_slug);
+runtime/orchestrator-service/server.js:2904:      summary.missing_images.push(product.product_slug);
+runtime/orchestrator-service/server.js:4106:function normalizePublishingJobStatus(value, fallback = 'draft') {
+runtime/orchestrator-service/server.js:4109:  if (!normalized) return fallback;
+runtime/orchestrator-service/server.js:4129:  if (['failed', 'error', 'blocked', 'rejected'].includes(normalized)) return 'failed';
+runtime/orchestrator-service/server.js:4131:  return fallback;
+runtime/orchestrator-service/server.js:4355:      connector_error: error.message || 'Connector payload unavailable'
+runtime/orchestrator-service/server.js:4418:  const fallbackStatus = scheduledFor ? 'scheduled' : 'draft';
+runtime/orchestrator-service/server.js:4430:    status: normalizePublishingJobStatus(input.status, existing.status || fallbackStatus),
+runtime/orchestrator-service/server.js:5032:    result.status = 'blocked';
+runtime/orchestrator-service/server.js:5049:    result.mode = 'blocked';
+runtime/orchestrator-service/server.js:5108:    result.status = 'blocked';
+runtime/orchestrator-service/server.js:5114:    result.warnings.push('Product source is missing for full-fidelity visual generation');
+runtime/orchestrator-service/server.js:5119:    result.warnings.push('Packaging source is missing for full packaging-safe rendering');
+runtime/orchestrator-service/server.js:5123:    result.mode = 'blocked';
+runtime/orchestrator-service/server.js:5309:    brand_profile_available: Object.keys(brandProfile).length > 0,
+runtime/orchestrator-service/server.js:5390:function readJsonFile(filePath, fallback = []) {
+runtime/orchestrator-service/server.js:5392:    if (!fs.existsSync(filePath)) return fallback;
+runtime/orchestrator-service/server.js:5394:    if (!raw) return fallback;
+runtime/orchestrator-service/server.js:5397:    console.warn(`[server] readJsonFile: non-fatal read/parse error for ${filePath}, returning fallback. Error: ${err.message}`);
+runtime/orchestrator-service/server.js:5398:    return fallback;
+runtime/orchestrator-service/server.js:5474:    brandProfilePath: path.join(baseDir, 'brand-profile.json'),
+runtime/orchestrator-service/server.js:5537:  const profileProjects = listProjectNamesWithProfiles();
+runtime/orchestrator-service/server.js:5539:  const allNames = uniqueValues([...profileProjects, ...legacyProjects]);
+runtime/orchestrator-service/server.js:5546:      has_project_profile: profileProjects.includes(name),
+runtime/orchestrator-service/server.js:5551:    if (a.has_project_profile !== b.has_project_profile) {
+runtime/orchestrator-service/server.js:5552:      return a.has_project_profile ? -1 : 1;
+runtime/orchestrator-service/server.js:5563:    preferred_project: (items.find((item) => item.has_project_profile) || items[0] || null)?.name || ''
+runtime/orchestrator-service/server.js:5672:      has_project_profile: hasProfile,
+runtime/orchestrator-service/server.js:5707:    const message = 'Project profile not found';
+runtime/orchestrator-service/server.js:6162:    if (!signal || signal.fallback) return null;
+runtime/orchestrator-service/server.js:6314:    brandProfilePath: path.join(resolved.projectRoot, 'brand-profile.json'),
+runtime/orchestrator-service/server.js:6329:    brandProfilePath: path.join(base.brandAssetsDir, 'brand-profile.json'),
+runtime/orchestrator-service/server.js:6385:  const fallback = options.fallback;
+runtime/orchestrator-service/server.js:6389:  const canonicalValue = canonicalExists ? normalize(readJsonFile(canonicalPath, fallback)) : null;
+runtime/orchestrator-service/server.js:6397:    const legacyValue = normalize(readJsonFile(legacyPath, fallback));
+runtime/orchestrator-service/server.js:6426:      reason: 'canonical_missing_migrated_from_legacy',
+runtime/orchestrator-service/server.js:6440:  writeJsonFile(canonicalPath, fallback);
+runtime/orchestrator-service/server.js:6442:    value: fallback,
+runtime/orchestrator-service/server.js:6458:  return 'missing';
+runtime/orchestrator-service/server.js:6464:  if (explicitStatus !== 'missing') {
+runtime/orchestrator-service/server.js:6469:    return 'missing';
+runtime/orchestrator-service/server.js:6513:    const fallbackValue = candidates
+runtime/orchestrator-service/server.js:6517:    const entry = foundEntry || (fallbackValue ? { value: fallbackValue } : {});
+runtime/orchestrator-service/server.js:6522:      value: normalizeSetupTextValue(entry.value || fallbackValue),
+runtime/orchestrator-service/server.js:6542:    statuses: ['missing', 'connected', 'verified', 'outdated'],
+runtime/orchestrator-service/server.js:6560:    tone: projectData.tone || projectData.brand_voice || '',
+runtime/orchestrator-service/server.js:6561:    brand_voice: projectData.brand_voice || '',
+runtime/orchestrator-service/server.js:6620:    domain: 'brand-profile',
+runtime/orchestrator-service/server.js:6623:    fallback: buildDefaultBrandProfile(safeProject, projectData)
+runtime/orchestrator-service/server.js:6630:    fallback: [],
+runtime/orchestrator-service/server.js:6638:    fallback: buildSourceOfTruthRegistry({}),
+runtime/orchestrator-service/server.js:6675:      brand_profile: {
+runtime/orchestrator-service/server.js:6788:    brand_profile_path: paths.brandProfilePath,
+runtime/orchestrator-service/server.js:6841:    required_assets: ['logo', 'brand_profile', 'hero_images', 'legal_info'],
+runtime/orchestrator-service/server.js:6842:    data_requirements: ['business_profile', 'target_audience', 'offers', 'contact_details'],
+runtime/orchestrator-service/server.js:6847:      'complete_project_profile',
+runtime/orchestrator-service/server.js:6875:      data_requirements: ['artist_profile', 'songs', 'albums', 'events', 'booking_info', 'press_bio'],
+runtime/orchestrator-service/server.js:6879:      starter_checklist: ['complete_artist_profile', 'upload_press_photos', 'add_music_links', 'define_fan_audience', 'create_release_campaign'],
+runtime/orchestrator-service/server.js:6900:      required_assets: ['logo', 'property_photos', 'property_documents', 'location_media', 'agent_profile'],
+runtime/orchestrator-service/server.js:6901:      data_requirements: ['properties', 'locations', 'lead_capture', 'viewings', 'buyer_profiles', 'seller_profiles'],
+runtime/orchestrator-service/server.js:7059:    tone: normalizeSetupTextValue(input.tone || input.brand_voice),
+runtime/orchestrator-service/server.js:7079:    brand_voice: normalizeSetupTextValue(input.brand_voice),
+runtime/orchestrator-service/server.js:7179:      domain: 'brand_profile',
+runtime/orchestrator-service/server.js:7231:      fallback_in_use: !canonicalExists && legacyExists
+runtime/orchestrator-service/server.js:7236:  const fallbackDependencies = checks.filter((item) => item.fallback_in_use).length;
+runtime/orchestrator-service/server.js:7241:    fallback_dependencies: fallbackDependencies,
+runtime/orchestrator-service/server.js:7244:    recommendation: fallbackDependencies > 0 || mismatches > 0
+runtime/orchestrator-service/server.js:7245:      ? 'Reduce fallback dependencies by keeping canonical files in sync before disabling legacy reads.'
+runtime/orchestrator-service/server.js:7270:  const missingAssets = reviewProjectMissingAssets(safeProject);
+runtime/orchestrator-service/server.js:7303:  const assetBlockers = Array.isArray(missingAssets.blockers) ? missingAssets.blockers.length : 0;
+runtime/orchestrator-service/server.js:7304:  const requiredAssetCount = Array.isArray(missingAssets.required_asset_types) ? missingAssets.required_asset_types.length : 0;
+runtime/orchestrator-service/server.js:7319:    brand_profile_completeness: brandProfileCompleteness,
+runtime/orchestrator-service/server.js:7345:    has_brand_profile: baselineValidation.required_files.brand_profile.exists,
+runtime/orchestrator-service/server.js:7360:  const missing = [];
+runtime/orchestrator-service/server.js:7362:  if (!checks.has_website_url) missing.push('website_url');
+runtime/orchestrator-service/server.js:7363:  if (!checks.has_market) missing.push('market');
+runtime/orchestrator-service/server.js:7364:  if (!checks.has_language) missing.push('language');
+runtime/orchestrator-service/server.js:7365:  if (!checks.has_project_type) missing.push('project_type');
+runtime/orchestrator-service/server.js:7366:  if (domainScores.brand_profile_completeness < 100) missing.push('brand_profile_incomplete');
+runtime/orchestrator-service/server.js:7367:  if (domainScores.source_of_truth_completeness < 100) missing.push('source_of_truth_incomplete');
+runtime/orchestrator-service/server.js:7368:  if (domainScores.assets_completeness < 100) missing.push('assets_incomplete');
+runtime/orchestrator-service/server.js:7369:  if (domainScores.integrations_completeness < 100) missing.push('integrations_incomplete');
+runtime/orchestrator-service/server.js:7370:  if (domainScores.campaign_readiness < 100) missing.push('campaign_readiness');
+runtime/orchestrator-service/server.js:7371:  if (domainScores.execution_readiness < 100) missing.push('execution_readiness');
+runtime/orchestrator-service/server.js:7372:  if (domainScores.publishing_readiness < 100) missing.push('publishing_readiness');
+runtime/orchestrator-service/server.js:7373:  if (domainScores.ai_memory_readiness < 100) missing.push('ai_memory_readiness');
+runtime/orchestrator-service/server.js:7391:    missing,
+runtime/orchestrator-service/server.js:7422:    || (normalizeSetupTextValue(asset.exists) === 'false' ? 'missing' : 'connected');
+runtime/orchestrator-service/server.js:7718:function mergeIntegrationConfig(existing = {}, incoming = {}) {
+runtime/orchestrator-service/server.js:7723:  Object.entries(asPlainObject(incoming)).forEach(([key, value]) => {
+runtime/orchestrator-service/server.js:7733:function mergeIntegrationCredentials(existing = {}, incoming = {}) {
+runtime/orchestrator-service/server.js:7738:  Object.entries(asPlainObject(incoming)).forEach(([key, value]) => {
+runtime/orchestrator-service/server.js:7775:  const missingRequired = requiredFields.filter(key => !fieldSnapshot[key]);
+runtime/orchestrator-service/server.js:7798:    missingRequired.length === 0 &&
+runtime/orchestrator-service/server.js:7833:    missing_required: missingRequired,
+runtime/orchestrator-service/server.js:7920:    missing_required: status.missing_required,
+runtime/orchestrator-service/server.js:8039:      status: 'unsupported_provider'
+runtime/orchestrator-service/server.js:8124:    const fallbackStatus = determineIntegrationStatus({
+runtime/orchestrator-service/server.js:8136:            : fallbackStatus === 'connected'
+runtime/orchestrator-service/server.js:8138:              : fallbackStatus,
+runtime/orchestrator-service/server.js:8148:              : fallbackStatus === 'connected'
+runtime/orchestrator-service/server.js:8150:                : fallbackStatus,
+runtime/orchestrator-service/server.js:8212:      status: 'unsupported_provider'
+runtime/orchestrator-service/server.js:8317:  const missing = categoryReadiness.categories
+runtime/orchestrator-service/server.js:8329:    missing,
+runtime/orchestrator-service/server.js:8362:      description: 'Brand identity, voice, visual rules, and usage guidance.',
+runtime/orchestrator-service/server.js:8596:  if (['needs_review', 'review', 'blocked', 'rejected'].includes(explicitStatus)) {
+runtime/orchestrator-service/server.js:8756:    missing_product_name_rows: 0,
+runtime/orchestrator-service/server.js:8757:    missing_image_folder_rows: 0,
+runtime/orchestrator-service/server.js:8760:    missing_product_rows: []
+runtime/orchestrator-service/server.js:8799:          csvValidation.missing_product_name_rows += 1;
+runtime/orchestrator-service/server.js:8802:          csvValidation.missing_image_folder_rows += 1;
+runtime/orchestrator-service/server.js:8819:        csvValidation.missing_product_rows.push({
+runtime/orchestrator-service/server.js:8833:  const missingImageFolders = csvValidation.missing_product_rows
+runtime/orchestrator-service/server.js:8895:        missing_product_name_rows: csvValidation.missing_product_name_rows,
+runtime/orchestrator-service/server.js:8896:        missing_image_folder_rows: csvValidation.missing_image_folder_rows
+runtime/orchestrator-service/server.js:8902:      folders_missing_front_image: foldersMissingFront.length,
+runtime/orchestrator-service/server.js:8903:      missing_front_folders: foldersMissingFront,
+runtime/orchestrator-service/server.js:8906:      csv_products_missing_front: csvValidation.missing_product_rows.length,
+runtime/orchestrator-service/server.js:8907:      csv_missing_front_folders: missingImageFolders,
+runtime/orchestrator-service/server.js:8910:      missing_product_rows: csvValidation.missing_product_rows,
+runtime/orchestrator-service/server.js:8913:          ? (csvValidation.missing_product_rows.length ? 'Needs Review' : (csvValidation.matched_product_rows.length ? 'Uploaded' : 'Missing'))
+runtime/orchestrator-service/server.js:8917:        `Missing images for ${csvValidation.missing_product_rows.length} CSV product(s).`,
+runtime/orchestrator-service/server.js:8983:      status: fs.existsSync(filePath) ? 'connected' : 'missing',
+runtime/orchestrator-service/server.js:9010:    missing_images: scan.product_photos?.csv_missing_front_folders || [],
+runtime/orchestrator-service/server.js:9058:      needsReviewCount = Number(metrics.csv_products_missing_front || 0) > 0 ? 1 : 0;
+runtime/orchestrator-service/server.js:9104:          ? `Upload missing product front images. Currently matched ${filesystemScan.product_photos?.csv_products_matched_front || 0} of ${filesystemScan.product_photos?.csv_products_total || 0}.`
+runtime/orchestrator-service/server.js:9122:    missing: 0,
+runtime/orchestrator-service/server.js:9202:  const missing = Object.keys(checks).filter(key => !checks[key]);
+runtime/orchestrator-service/server.js:9212:    missing,
+runtime/orchestrator-service/server.js:9213:    status: missing.length ? 'connectors_incomplete' : 'connectors_ready'
+runtime/orchestrator-service/server.js:10824:function sendAssetMutationError(res, error, fallbackMessage) {
+runtime/orchestrator-service/server.js:10827:    error: error?.message || fallbackMessage,
+runtime/orchestrator-service/server.js:10836:    error: fallbackMessage,
+runtime/orchestrator-service/server.js:11183:function normalizeAiCommandPreviewInput(value, fallback = '') {
+runtime/orchestrator-service/server.js:11184:  return String(value || fallback || '').trim();
+runtime/orchestrator-service/server.js:11262:    missingBlockers: [
+runtime/orchestrator-service/server.js:11313:      items: campaignPackage.missingBlockers
+runtime/orchestrator-service/server.js:11346:      requires_approval_before_publish: true,
+runtime/orchestrator-service/server.js:12710:  if (status === 'unsupported_provider') {
+runtime/orchestrator-service/server.js:12982:// Canonical Control Center Customer Operations read-only projection routes.
+runtime/orchestrator-service/server.js:13334:// TODO(phase4a): Keep `/public/media-manager/...` write aliases for active frontend compatibility.
+runtime/orchestrator-service/server.js:13819:  // Use canonical-first candidate resolution with fallback instrumentation
+runtime/orchestrator-service/server.js:14033:  function makeBlock(type, fallbackGoal) {
+runtime/orchestrator-service/server.js:14037:    const goal = map.goal || fallbackGoal;
+runtime/orchestrator-service/server.js:14296:      fallback_prompt_pack:
+runtime/orchestrator-service/server.js:14311:  // the required fallback for existing HAIROTICMEN dry-run packages.
+runtime/orchestrator-service/server.js:14875:    const failureMessage = String(submission?.message || dispatchResult?.error || 'Native media execution runtime is not available.').trim();
+runtime/orchestrator-service/server.js:14895:    const error = new Error('Unable to execute ad package: prompt data is missing.');
+runtime/orchestrator-service/server.js:15449:    appLogger.warn('governance_blocked', {
+runtime/orchestrator-service/server.js:15462:      'Publishing is frozen by governance policy. The requested publishing mutation was blocked.',
+runtime/orchestrator-service/server.js:15472:      logGovernanceBlock('approval_before_publish', { reason: 'job_id_missing' });
+runtime/orchestrator-service/server.js:15488:        approval_status: approvalStatus || 'missing'
+runtime/orchestrator-service/server.js:15496:          approval_status: approvalStatus || 'missing'
+runtime/orchestrator-service/server.js:15605:  const missingAssets = reviewProjectMissingAssets(projectName);
+runtime/orchestrator-service/server.js:15612:  const assetMissing = missingAssets.blockers || missingAssets.missing || [];
+runtime/orchestrator-service/server.js:15613:  const connectorMissing = connectorReadiness.missing || [];
+runtime/orchestrator-service/server.js:15647:  const missingAssets = reviewProjectMissingAssets(projectName);
+runtime/orchestrator-service/server.js:15683:      assets: missingAssets,
+runtime/orchestrator-service/server.js:15718:      brand_voice: project.brand_voice,
+runtime/orchestrator-service/server.js:15838:  const missingAssets = reviewProjectMissingAssets(projectName);
+runtime/orchestrator-service/server.js:15840:  const categoryReadiness = missingAssets.category_readiness || buildProjectAssetCategoryReadiness(projectName, assets);
+runtime/orchestrator-service/server.js:15857:    missing_assets: missingAssets,
+runtime/orchestrator-service/server.js:16000:    profilePath: path.join(projectDir, 'project-profile.json'),
+runtime/orchestrator-service/server.js:16891:      const plannedFilename = `${assetId}-${safeSlug}.png`;
+runtime/orchestrator-service/server.js:16892:      const plannedOutputPath = path.join(
+runtime/orchestrator-service/server.js:16895:        plannedFilename
+runtime/orchestrator-service/server.js:16910:        output_path: plannedOutputPath,
+runtime/orchestrator-service/server.js:16911:        filename: plannedFilename,
+runtime/orchestrator-service/server.js:17371:      const plannedFilename = `${assetId}-${safeSlug}.png`;
+runtime/orchestrator-service/server.js:17372:      const plannedOutputPath = path.join(
+runtime/orchestrator-service/server.js:17375:        plannedFilename
+runtime/orchestrator-service/server.js:17396:        output_path: plannedOutputPath,
+runtime/orchestrator-service/server.js:17397:        filename: plannedFilename,
+runtime/orchestrator-service/server.js:17666:    if (command === '/create_project_profile') {
+runtime/orchestrator-service/server.js:17677:      const profilePath = projectPaths.profilePath;
+runtime/orchestrator-service/server.js:17679:      const profile = {
+runtime/orchestrator-service/server.js:17707:      fs.writeFileSync(profilePath, JSON.stringify(profile, null, 2), 'utf8');
+runtime/orchestrator-service/server.js:17711:        result: profile
+runtime/orchestrator-service/server.js:17715:    if (command === '/review_project_profile') {
+runtime/orchestrator-service/server.js:17721:      const profilePath = resolveLegacyExecutionProjectPaths(projectName).profilePath;
+runtime/orchestrator-service/server.js:17723:      if (!fs.existsSync(profilePath)) {
+runtime/orchestrator-service/server.js:17724:        return res.json({ error: 'Project profile not found' });
+runtime/orchestrator-service/server.js:17727:      const profile = JSON.parse(fs.readFileSync(profilePath, 'utf8'));
+runtime/orchestrator-service/server.js:17731:        result: profile
+runtime/orchestrator-service/server.js:17746:      const profilePath = projectPaths.profilePath;
+runtime/orchestrator-service/server.js:17749:      if (!fs.existsSync(profilePath)) {
+runtime/orchestrator-service/server.js:17750:        return res.json({ error: 'Project profile not found' });
+runtime/orchestrator-service/server.js:17753:      const profile = JSON.parse(fs.readFileSync(profilePath, 'utf8'));
+runtime/orchestrator-service/server.js:17761:        market: profile.market || 'Germany',
+runtime/orchestrator-service/server.js:17762:        language: profile.language || 'de',
+runtime/orchestrator-service/server.js:17763:        target_audience: profile.target_audience || 'to be refined',
+runtime/orchestrator-service/server.js:17766:        channel_mix: profile.channel_priority || [],
+runtime/orchestrator-service/server.js:17767:        content_pillars: profile.content_pillars || [],
+runtime/orchestrator-service/server.js:17868:        planned_assets: {
+runtime/orchestrator-service/server.js:17896:if (command === '/enrich_project_profile') {
+runtime/orchestrator-service/server.js:17903:  const profilePath = resolveLegacyExecutionProjectPaths(projectName).profilePath;
+runtime/orchestrator-service/server.js:17905:  if (!fs.existsSync(profilePath)) {
+runtime/orchestrator-service/server.js:17906:    return res.json({ error: 'Project profile not found' });
+runtime/orchestrator-service/server.js:17909:  const profile = JSON.parse(fs.readFileSync(profilePath, 'utf8'));
+runtime/orchestrator-service/server.js:17912:    ...profile,
+runtime/orchestrator-service/server.js:18008:  fs.writeFileSync(profilePath, JSON.stringify(enrichedProfile, null, 2), 'utf8');
+runtime/orchestrator-service/server.js:18521:      const profilePath = projectPaths.profilePath;
+runtime/orchestrator-service/server.js:18549:      if (!fs.existsSync(profilePath)) {
+runtime/orchestrator-service/server.js:18550:        return res.json({ error: 'Project profile not found' });
+runtime/orchestrator-service/server.js:18553:      const profile = JSON.parse(fs.readFileSync(profilePath, 'utf8'));
+runtime/orchestrator-service/server.js:18573:          market: profile.market || 'Germany',
+runtime/orchestrator-service/server.js:18574:          language: profile.language || 'de',
+runtime/orchestrator-service/server.js:18575:          primary_goal: profile.primary_goal || goal,
+runtime/orchestrator-service/server.js:18576:          brand_tone: profile.brand_tone || '',
+runtime/orchestrator-service/server.js:18577:          audience_segments: profile.audience_segments || [],
+runtime/orchestrator-service/server.js:18578:          core_problems: profile.core_problems || [],
+runtime/orchestrator-service/server.js:18579:          desired_outcomes: profile.desired_outcomes || [],
+runtime/orchestrator-service/server.js:18580:          objections: profile.objections || []
+runtime/orchestrator-service/server.js:18599:        recommended_channel_priorities: profile.channel_priority || [
+runtime/orchestrator-service/server.js:19247:        domain: 'brand-profile',
+runtime/orchestrator-service/server.js:19258:      const profilePath = path.join(brandDir, 'brand-profile.json');
+runtime/orchestrator-service/server.js:19301:      fs.writeFileSync(profilePath, JSON.stringify(brandProfile, null, 2), 'utf8');
+runtime/orchestrator-service/server.js:19317:        domain: 'brand-profile',
+runtime/orchestrator-service/server.js:19320:      const profilePath = path.join(resolution.activeReadPath, 'brand-profile.json');
+runtime/orchestrator-service/server.js:19322:      if (!fs.existsSync(profilePath)) {
+runtime/orchestrator-service/server.js:19323:        return res.json({ error: 'Brand profile not found' });
+runtime/orchestrator-service/server.js:19326:      const brandProfile = JSON.parse(fs.readFileSync(profilePath, 'utf8'));
+runtime/orchestrator-service/server.js:19342:        domain: 'brand-profile',
+runtime/orchestrator-service/server.js:19345:      const profilePath = path.join(resolution.activeWritePath, 'brand-profile.json');
+runtime/orchestrator-service/server.js:19347:      if (!fs.existsSync(profilePath)) {
+runtime/orchestrator-service/server.js:19348:        return res.json({ error: 'Brand profile not found' });
+runtime/orchestrator-service/server.js:19351:      const brandProfile = JSON.parse(fs.readFileSync(profilePath, 'utf8'));
+runtime/orchestrator-service/server.js:19370:      fs.writeFileSync(profilePath, JSON.stringify(brandProfile, null, 2), 'utf8');
+runtime/orchestrator-service/server.js:19387:        domain: 'brand-profile',
+runtime/orchestrator-service/server.js:19390:      const profilePath = path.join(resolution.activeWritePath, 'brand-profile.json');
+runtime/orchestrator-service/server.js:19392:      if (!fs.existsSync(profilePath)) {
+runtime/orchestrator-service/server.js:19393:        return res.json({ error: 'Brand profile not found' });
+runtime/orchestrator-service/server.js:19396:      const brandProfile = JSON.parse(fs.readFileSync(profilePath, 'utf8'));
+runtime/orchestrator-service/server.js:19410:      fs.writeFileSync(profilePath, JSON.stringify(brandProfile, null, 2), 'utf8');
+runtime/orchestrator-service/server.js:19435:    return res.json({ error: 'WooCommerce environment variables are missing' });
+runtime/orchestrator-service/server.js:21675:if (command === '/review_project_missing_assets') {
+runtime/orchestrator-service/server.js:21687:      error: 'Failed to review project missing assets',
+runtime/orchestrator-service/server.js:21812:if (command === '/review_project_missing_priorities') {
+runtime/orchestrator-service/server.js:21824:      error: 'Failed to review project missing priorities',
+runtime/orchestrator-service/server.js:22178:        message: 'WordPress environment variables are missing'
+runtime/orchestrator-service/server.js:22565:      missing_assets: full.assets?.missing_assets || null,
+runtime/orchestrator-service/server.js:22569:        missing: startupAssets.filter((asset) => asset?.exists === false).length
+runtime/orchestrator-service/server.js:22789:      job.locked_at = lockTimestamp;
+runtime/orchestrator-service/server.js:22790:      job.locked_by = workerId;
+runtime/orchestrator-service/server.js:22797:    // Phase 2: execute locked jobs and update status
+runtime/orchestrator-service/server.js:22799:      if (job.status !== 'running' || job.locked_by !== workerId) continue;
+runtime/orchestrator-service/server.js:22808:        job.locked_at = null;
+runtime/orchestrator-service/server.js:22809:        job.locked_by = null;
+runtime/orchestrator-service/server.js:22851:        job.locked_at = null;
+runtime/orchestrator-service/server.js:22852:        job.locked_by = null;
+runtime/orchestrator-service/server.js:23136:app.post('/api/media/generate-voice-script', async (req, res) => {
+runtime/orchestrator-service/server.js:23145:      output: { voice_script: result.voice_script },
+runtime/orchestrator-service/server.js:23154:      voice_script: result.voice_script,
+runtime/orchestrator-service/server.js:23161:      message: error.message || 'Failed to generate voice script'
+runtime/orchestrator-service/lib/insights/learning-engine.js:13:function toNumber(value, fallback = null) {
+runtime/orchestrator-service/lib/insights/learning-engine.js:15:    return fallback;
+runtime/orchestrator-service/lib/insights/learning-engine.js:18:  return Number.isFinite(parsed) ? parsed : fallback;
+runtime/orchestrator-service/lib/insights/learning-engine.js:27:function compactWords(value, fallback = 'Untitled pattern') {
+runtime/orchestrator-service/lib/insights/learning-engine.js:35:  return words.length ? words.join(' ') : fallback;
+runtime/orchestrator-service/lib/insights/learning-engine.js:86:function summarizeBestEntry(map, fallback, options = {}) {
+runtime/orchestrator-service/lib/insights/learning-engine.js:97:      label: fallback,
+runtime/orchestrator-service/lib/insights/learning-engine.js:205:  if ((coverage.social_insights?.status || '') === 'missing') {
+runtime/orchestrator-service/lib/insights/learning-engine.js:315:      evidence: 'The website intelligence lane is still partial or missing.',
+runtime/orchestrator-service/lib/insights/learning-engine.js:326:      evidence: 'One or more social insight sources are still missing or only partially synced.',
+runtime/orchestrator-service/lib/insights/ingestion-service.js:19:function toNumber(value, fallback = null) {
+runtime/orchestrator-service/lib/insights/ingestion-service.js:21:    return fallback;
+runtime/orchestrator-service/lib/insights/ingestion-service.js:24:  return Number.isFinite(parsed) ? parsed : fallback;
+runtime/orchestrator-service/lib/insights/ingestion-service.js:328:          why_it_worked: item.media_type ? `Engagement is coming through an ${item.media_type} format.` : '',
+runtime/orchestrator-service/lib/insights/ingestion-service.js:559:        label = 'Traffic present, conversion missing';
+runtime/orchestrator-service/lib/insights/ingestion-service.js:949:    return 'missing';
+runtime/orchestrator-service/lib/security/provider-execution-gate.js:37:    match: /openai|anthropic|ai\/command|ai\/chat|improve-prompt|brand-check|generate-voice-script|generate-video-brief|generate-campaign-pack/i,
+runtime/orchestrator-service/lib/security/provider-execution-gate.js:144:    reason = "blocked_until_configured";
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:14:  message: "This backend action requires governance approval before execution."
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:20:  code: "governance_policy_blocked",
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:21:  message: "This backend action is blocked by the active governance policy."
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:110:function asBoolean(value, fallback) {
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:115:    return fallback;
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:184:    decision: responsePayload.code === "governance_policy_blocked" ? "policy_blocked" : "approval_required",
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:331:    message: "This backend action requires governance approval before execution.",
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:513:      "policy_blocked_for_admin_mutation",
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:587:      "policy_unavailable_secure_default",
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:608:      "missing_approval_selector",
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:621:      "missing_approved_governance_decision",
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:24:function readBooleanEnv(name, fallback = false) {
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:26:  if (value === undefined || value === null || value === "") return fallback;
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:82:      status: "blocked",
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:83:      reason: "public_alias_compatibility_disabled",
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:92:      status: "blocked_sensitive_mutation_unauthorized",
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:102:      status: "blocked",
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:103:      reason: "critical_public_mutation_alias_blocked",
+runtime/orchestrator-service/lib/security/runtime-security-enforcement.js:91:      reason: "missing_route_authorization",
+runtime/orchestrator-service/lib/integrations/http-client.js:32:function buildProviderError(provider, error, fallbackMessage = 'Provider request failed') {
+runtime/orchestrator-service/lib/integrations/http-client.js:35:      message: fallbackMessage,
+runtime/orchestrator-service/lib/integrations/http-client.js:46:      `${fallbackMessage} (${error.response.status})`;
+runtime/orchestrator-service/lib/integrations/http-client.js:65:    message: error.message || fallbackMessage
+runtime/orchestrator-service/lib/integrations/http-client.js:69:function buildResponseError(provider, response, fallbackMessage = 'Provider request failed') {
+runtime/orchestrator-service/lib/integrations/http-client.js:76:  }, fallbackMessage);
+runtime/orchestrator-service/lib/integrations/providers/unsupported.js:4:    error.status = 'unsupported_provider';
+runtime/orchestrator-service/lib/integrations/providers/meta.js:47:async function fetchInstagramAccount(accessToken, businessAccountId, profileUrl) {
+runtime/orchestrator-service/lib/integrations/providers/meta.js:50:      fields: 'id,username,name,followers_count,media_count,profile_picture_url'
+runtime/orchestrator-service/lib/integrations/providers/meta.js:64:    if (!profileUrl || profileUrl.toLowerCase().includes(String(account.username || '').toLowerCase())) {
+runtime/orchestrator-service/lib/integrations/providers/meta.js:151:    firstNonEmpty(ctx.config.profileUrl, ctx.primaryValue)
+runtime/orchestrator-service/lib/integrations/providers/meta.js:161:      profile: {
+runtime/orchestrator-service/lib/integrations/providers/meta.js:187:    firstNonEmpty(ctx.config.profileUrl, ctx.primaryValue)
+runtime/orchestrator-service/lib/integrations/providers/ops.js:224:  const error = buildResponseError('linkedin', response, 'LinkedIn profile lookup failed');
+runtime/orchestrator-service/lib/integrations/providers/ops.js:232:    health: 'LinkedIn profile access validated successfully.',
+runtime/orchestrator-service/lib/integrations/providers/ops.js:236:      profile: response.data
+runtime/orchestrator-service/lib/integrations/providers/tiktok.js:47:      fields: 'open_id,display_name,bio_description,profile_deep_link,avatar_url,follower_count,following_count,likes_count,video_count'
+runtime/orchestrator-service/lib/integrations/providers/tiktok.js:59:      profile: user
+runtime/orchestrator-service/lib/integrations/providers/tiktok.js:70:      name: user.display_name || firstNonEmpty(ctx.config.profileUrl, ctx.primaryValue)
+runtime/orchestrator-service/lib/integrations/token-manager.js:25: *    the file key will fail to decrypt. Rotate the key only during a planned
+runtime/orchestrator-service/lib/integrations/provider-utils.js:32:  const missing = fields.filter(field => !asString(values[field]));
+runtime/orchestrator-service/lib/integrations/provider-utils.js:34:  if (missing.length) {
+runtime/orchestrator-service/lib/integrations/provider-utils.js:36:    throw new Error(`${prefix}: ${missing.join(', ')}`);
+runtime/orchestrator-service/lib/integrations/adapter-manager.js:16:function normalizeProviderResult(result = {}, fallbackStatus = 'connected') {
+runtime/orchestrator-service/lib/integrations/adapter-manager.js:18:    status: asString(result.status || fallbackStatus).toLowerCase() || fallbackStatus,
+runtime/orchestrator-service/lib/integrations/storage.js:24: * readJsonFile — safe read with silent fallback.
+runtime/orchestrator-service/lib/integrations/storage.js:25: * Suitable for optional/non-critical reads where missing or bad data should
+runtime/orchestrator-service/lib/integrations/storage.js:29:function readJsonFile(filePath, fallback = {}) {
+runtime/orchestrator-service/lib/integrations/storage.js:32:      return fallback;
+runtime/orchestrator-service/lib/integrations/storage.js:37:      return fallback;
+runtime/orchestrator-service/lib/integrations/storage.js:42:    console.warn(`[storage] readJsonFile: non-fatal read/parse error for ${filePath}, returning fallback. Error: ${err.message}`);
+runtime/orchestrator-service/lib/integrations/storage.js:43:    return fallback;
+runtime/orchestrator-service/lib/execution/performance-metrics.js:3:function toFiniteNumber(value, fallback = 0) {
+runtime/orchestrator-service/lib/execution/performance-metrics.js:5:  return Number.isFinite(parsed) ? parsed : fallback;
+runtime/orchestrator-service/lib/execution/scheduler-helpers.js:18:  if (!job.locked_at) return false;
+runtime/orchestrator-service/lib/execution/scheduler-helpers.js:19:  const lockedAt = new Date(job.locked_at).getTime();
+runtime/orchestrator-service/lib/execution/scheduler-helpers.js:20:  return !isNaN(lockedAt) && (Date.now() - lockedAt) > lockTimeoutMs;
+runtime/orchestrator-service/lib/execution/scheduler-helpers.js:55:    locked_at: null,
+runtime/orchestrator-service/lib/execution/scheduler-helpers.js:56:    locked_by: null,
+runtime/orchestrator-service/lib/execution/execution-job-bridge.js:76:        : payload.publish_package?.assets?.[0]?.fallback_prompt_pack;
+runtime/orchestrator-service/lib/execution/execution-job-bridge.js:108:        execution_backend: 'fallback_media_mock',
+runtime/orchestrator-service/lib/ai/providers/openai.js:13:function humanizeValue(value, fallback = '') {
+runtime/orchestrator-service/lib/ai/providers/openai.js:14:  if (value == null) return fallback;
+runtime/orchestrator-service/lib/ai/providers/openai.js:17:    return clean === '[object Object]' ? fallback : clean;
+runtime/orchestrator-service/lib/ai/providers/openai.js:23:    return value.map((item) => humanizeValue(item)).filter(Boolean).join('; ') || fallback;
+runtime/orchestrator-service/lib/ai/providers/openai.js:46:      .join('; ') || fallback;
+runtime/orchestrator-service/lib/ai/providers/openai.js:48:  return fallback;
+runtime/orchestrator-service/lib/ai/providers/openai.js:247:      missingData: compactList(parsed.missingData || parsed.missing_data || parsed.blockers, 8),
+runtime/orchestrator-service/lib/ai/providers/openai.js:270:    missingData: [],
+runtime/orchestrator-service/lib/ai/providers/openai.js:294:              'Use the supplied project context, market, brand voice, readiness blockers, integrations, learning, and research notes.',
+runtime/orchestrator-service/lib/ai/providers/openai.js:295:              'Be specific to the supplied project context and avoid generic placeholder text.',
+runtime/orchestrator-service/lib/ai/providers/openai.js:302:              'For outputType "campaign_package", include campaignPackage with concept, targetAudience, offer, products, channels, launchPhases, contentAngles, adAngles, requiredAssets, missingBlockers, nextActions, suggestedHandoffs.',
+runtime/orchestrator-service/lib/ai/providers/openai.js:409:        missingData: normalized.missingData,
+runtime/orchestrator-service/lib/ai/provider-config.js:6:function toPositiveInt(value, fallback) {
+runtime/orchestrator-service/lib/ai/provider-config.js:9:    return fallback;
+runtime/orchestrator-service/lib/ai/provider-config.js:141:    throw createProviderConfigError('OPENAI_API_KEY is missing for AI command execution', {
+runtime/orchestrator-service/lib/ops/backbone.js:18:// Any governance file that is missing policy_rules (or missing individual keys)
+runtime/orchestrator-service/lib/ops/backbone.js:54:    statuses: ['draft', 'planned', 'active', 'paused', 'completed', 'archived'],
+runtime/orchestrator-service/lib/ops/backbone.js:93:    statuses: ['open', 'queued', 'in_progress', 'blocked', 'completed', 'cancelled'],
+runtime/orchestrator-service/lib/ops/backbone.js:94:    lifecycle: ['open', 'active', 'blocked', 'done', 'closed'],
+runtime/orchestrator-service/lib/ops/backbone.js:292:function asReadableString(value, fallback = '') {
+runtime/orchestrator-service/lib/ops/backbone.js:293:  if (value == null) return fallback;
+runtime/orchestrator-service/lib/ops/backbone.js:296:    return clean === '[object Object]' ? fallback : clean;
+runtime/orchestrator-service/lib/ops/backbone.js:300:    return value.map((item) => asReadableString(item)).filter(Boolean).join('; ') || fallback;
+runtime/orchestrator-service/lib/ops/backbone.js:308:  return fallback;
+runtime/orchestrator-service/lib/ops/backbone.js:311:function asBoolean(value, fallback = false) {
+runtime/orchestrator-service/lib/ops/backbone.js:317:    return fallback;
+runtime/orchestrator-service/lib/ops/backbone.js:329:  return fallback;
+runtime/orchestrator-service/lib/ops/backbone.js:332:function normalizeRoleKey(value, fallback = '') {
+runtime/orchestrator-service/lib/ops/backbone.js:333:  return asString(value).toLowerCase().replace(/[^a-z0-9]+/g, '_') || fallback;
+runtime/orchestrator-service/lib/ops/backbone.js:598:function normalizeCommentEntry(input = {}, fallbackActor = 'mh-assistant') {
+runtime/orchestrator-service/lib/ops/backbone.js:610:    author: asString(source.author || source.actor || source.created_by) || fallbackActor,
+runtime/orchestrator-service/lib/ops/backbone.js:615:function normalizeCommentList(value, fallbackActor = 'mh-assistant') {
+runtime/orchestrator-service/lib/ops/backbone.js:623:    .map((item) => normalizeCommentEntry(item, fallbackActor))
+runtime/orchestrator-service/lib/ops/backbone.js:627:function appendCommentList(current = [], additions = [], fallbackActor = 'mh-assistant', maxItems = 50) {
+runtime/orchestrator-service/lib/ops/backbone.js:629:    ...normalizeCommentList(additions, fallbackActor),
+runtime/orchestrator-service/lib/ops/backbone.js:630:    ...normalizeCommentList(current, fallbackActor)
+runtime/orchestrator-service/lib/ops/backbone.js:636:function normalizeRequestList(value, fallbackActor = 'mh-assistant') {
+runtime/orchestrator-service/lib/ops/backbone.js:657:        requested_by: asString(source.requested_by || source.actor) || fallbackActor,
+runtime/orchestrator-service/lib/ops/backbone.js:664:function appendRequestList(current = [], additions = [], fallbackActor = 'mh-assistant', maxItems = 25) {
+runtime/orchestrator-service/lib/ops/backbone.js:666:    ...normalizeRequestList(additions, fallbackActor),
+runtime/orchestrator-service/lib/ops/backbone.js:667:    ...normalizeRequestList(current, fallbackActor)
+runtime/orchestrator-service/lib/ops/backbone.js:671:function normalizeRevisionEntry(input = {}, fallbackActor = 'mh-assistant') {
+runtime/orchestrator-service/lib/ops/backbone.js:681:    actor: asString(source.actor || source.author || source.created_by) || fallbackActor
+runtime/orchestrator-service/lib/ops/backbone.js:685:function normalizeRevisionList(value, fallbackActor = 'mh-assistant') {
+runtime/orchestrator-service/lib/ops/backbone.js:687:    .map((item) => normalizeRevisionEntry(item, fallbackActor))
+runtime/orchestrator-service/lib/ops/backbone.js:691:function normalizeOutputVersionEntry(input = {}, fallbackActor = 'mh-assistant') {
+runtime/orchestrator-service/lib/ops/backbone.js:703:    actor: asString(source.actor || source.author || source.created_by) || fallbackActor
+runtime/orchestrator-service/lib/ops/backbone.js:707:function normalizeOutputVersionList(value, fallbackActor = 'mh-assistant') {
+runtime/orchestrator-service/lib/ops/backbone.js:709:    .map((item) => normalizeOutputVersionEntry(item, fallbackActor))
+runtime/orchestrator-service/lib/ops/backbone.js:713:function normalizePreviewHistoryEntry(input = {}, fallbackActor = 'mh-assistant') {
+runtime/orchestrator-service/lib/ops/backbone.js:727:    actor: asString(source.actor || source.author || source.created_by) || fallbackActor
+runtime/orchestrator-service/lib/ops/backbone.js:731:function appendPreviewHistory(current = [], additions = [], fallbackActor = 'mh-assistant', maxItems = 30) {
+runtime/orchestrator-service/lib/ops/backbone.js:739:    ...list.map((item) => normalizePreviewHistoryEntry(item, fallbackActor)).filter(Boolean),
+runtime/orchestrator-service/lib/ops/backbone.js:854:      semi_auto_requires_approval: true,
+runtime/orchestrator-service/lib/ops/backbone.js:1196: *  - Any missing policy_rules key is filled from DEFAULT_POLICY_RULES
+runtime/orchestrator-service/lib/ops/backbone.js:1205:  // If policy_rules is not a plain object (missing, null, array, string, etc.)
+runtime/orchestrator-service/lib/ops/backbone.js:1460:      message: 'Publishing item has no schedule locked.'
+runtime/orchestrator-service/lib/ops/backbone.js:2464:      status === 'completed' ? 'done' : status === 'blocked' ? 'blocked' : ['queued', 'in_progress'].includes(status) ? 'active' : 'open'
+runtime/orchestrator-service/lib/ops/backbone.js:3172:    throw new Error('Publishing job missing job_id');
+runtime/orchestrator-service/lib/ops/backbone.js:3340:  if (['blocked', 'failed', 'escalated', 'critical'].includes(normalized)) return 0;
+runtime/orchestrator-service/lib/ops/backbone.js:3361:  return 'upcoming';
+runtime/orchestrator-service/lib/ops/backbone.js:3452:    blocked_count: items.filter((item) => item.status === 'blocked').length,
+runtime/orchestrator-service/lib/ops/backbone.js:4020:      blocked_count: tasks.filter((item) => asString(item.status) === 'blocked').length,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:43:function humanizeValue(value, fallback = '') {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:44:  if (value == null) return fallback;
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:47:    return clean === '[object Object]' ? fallback : clean;
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:53:    return value.map((item) => humanizeValue(item)).filter(Boolean).join('; ') || fallback;
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:80:      .join('; ') || fallback;
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:82:  return fallback;
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:164:  // Publishing/content output language: explicit override > project/market/setup language > fallback
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:406:    '- Never pretend to have used tools that are not connected in this chat route.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:670:    if (status && !['missing', 'error', 'disconnected', 'false'].includes(status)) {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:695:    missing_signals: compactList(readinessDashboard.missing || readiness.missing || insights.missing_signals, 5),
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:858:    missingBlockers: normalizeReadableList(record.missingBlockers || record.missing_blockers || record.blockers, 8),
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:957:  const missingData = [
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:958:    ...normalizeReadableList(providerOutput.missingData, 8),
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:959:    ...context.research.missing_signals
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1006:    missingData,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1313:          missingData: [],
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1661:            missingData: response.missingData,
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:41:      legacy_fallback_read: parseBooleanFlag(
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:97:      fallback_reads: 0,
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:135:      legacyFallbackRead: !!featureFlags.legacy_fallback_read,
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:177:        fallbackUsed: !!decision.fallbackUsed,
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:189:      fallbackUsed: !!decision.fallbackUsed,
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:213:        fallbackUsed: false,
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:226:          ? 'media-project-profile-present'
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:227:          : 'media-legacy-fallback-no-project-profile',
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:228:        fallbackUsed: !hasProjectProfile,
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:242:          fallbackUsed: false,
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:250:        reason: 'media-intelligence-canonical-read-disabled',
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:251:        fallbackUsed: false,
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:274:        fallbackUsed: false,
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:281:    let fallbackUsed = false;
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:289:      if (!fs.existsSync(activeReadPath) && this.featureFlags.legacy_fallback_read) {
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:291:        fallbackUsed = true;
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:292:        reasonParts.push('legacy-fallback-read-used');
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:295:      reasonParts.push('execution-canonical-read-disabled');
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:308:      reasonParts.push('execution-canonical-write-disabled');
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:320:      fallbackUsed,
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:376:    if (entry.fallbackUsed) {
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:377:      this.telemetry.fallback_reads += 1;
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:390:      `[UnifiedDataPathResolver] project=${entry.project} domain=${entry.domain} op=${entry.operation} mode=${entry.mode} read=${entry.activeReadPath} write=${entry.activeWritePath} fallback=${entry.fallbackUsed ? 'yes' : 'no'} reason=${entry.reason}`
+runtime/orchestrator-service/lib/customer-operations/customers/store/customer-profile-store.js:5:} = require('../../contracts/customer-profile-contract');
+runtime/orchestrator-service/lib/customer-operations/customers/store/customer-profile-store.js:10:  const profile = createCustomerProfileContract(input);
+runtime/orchestrator-service/lib/customer-operations/customers/store/customer-profile-store.js:12:  if (!profile.customer_id) {
+runtime/orchestrator-service/lib/customer-operations/customers/store/customer-profile-store.js:16:  customers.set(profile.customer_id, profile);
+runtime/orchestrator-service/lib/customer-operations/customers/store/customer-profile-store.js:18:  return profile;
+runtime/orchestrator-service/lib/customer-operations/contracts/ticket-contract.js:22:      requires_approval: Boolean(input.workflow?.requires_approval || false),
+runtime/orchestrator-service/lib/customer-operations/contracts/customer-profile-contract.js:7:    profile: {
+runtime/orchestrator-service/lib/customer-operations/contracts/customer-profile-contract.js:8:      display_name: String(input.profile?.display_name || ''),
+runtime/orchestrator-service/lib/customer-operations/contracts/customer-profile-contract.js:9:      email: String(input.profile?.email || ''),
+runtime/orchestrator-service/lib/customer-operations/contracts/customer-profile-contract.js:10:      phone: String(input.profile?.phone || ''),
+runtime/orchestrator-service/lib/customer-operations/contracts/customer-profile-contract.js:11:      company: String(input.profile?.company || ''),
+runtime/orchestrator-service/lib/customer-operations/contracts/customer-profile-contract.js:12:      language: String(input.profile?.language || 'en')
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:8:const customerProfileStore = require('./customers/store/customer-profile-store');
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:129:          voice: false,
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:14:function maskIdentifier(value, fallback = 'customer') {
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:16:  if (!text) return fallback;
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:55:    voice_ready: Boolean(provider.voice || capabilities.voice),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:61:      ...(provider.voice || capabilities.voice ? [] : ['Voice provider execution is not ready.']),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:64:      'External send is locked for Customer Center v1.'
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:67:      'Customer Center read model is preview-first and read-only.',
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:150:function projectCustomerProfile(profile = {}) {
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:151:  const profileData = profile.profile || {};
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:152:  const channels = profile.channels || {};
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:153:  const crm = profile.crm || {};
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:156:    customer_id: asString(profile.customer_id),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:157:    display_label: maskIdentifier(profileData.email || profile.customer_id || 'customer'),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:158:    masked_email: maskIdentifier(profileData.email || ''),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:164:    recent_issue_summary: truncate(profile.recent_issue_summary || ''),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:165:    sentiment_summary: truncate(profile.sentiment_summary || ''),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:166:    lifetime_context_summary: truncate(profile.lifetime_context_summary || ''),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:167:    privacy_flags: ['customer_profile_masked']
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:211:  const profile = typeof runtime.customers?.get === 'function' ? runtime.customers.get(customerId) : null;
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:212:  return profile ? projectCustomerProfile(profile) : null;
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:218:  const fallbackChannels = channels.length ? channels : [
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:222:    { channel_id: 'voice', provider: 'not-configured', type: 'voice' },
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:226:  return fallbackChannels.map((channel) => ({
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:233:    voice_ready: Boolean(channel.capabilities?.voice || capabilities.voice),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:237:    blocked_reason: 'External send, voice, IVR, and CRM mutation are locked for Customer Center v1.'
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js:57:      customer_profiles_ready: Boolean(capabilities.customers),
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js:72:        voice: Boolean(channel.capabilities?.voice),
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js:83:      requires_confirmation_for_actions: true
+runtime/orchestrator-service/lib/customer-operations/channels/channel-integration-mapper.js:15:      voice: false,
+runtime/orchestrator-service/lib/customer-operations/channels/channel-integration-mapper.js:27:      voice: false,
+runtime/orchestrator-service/lib/customer-operations/channels/channel-integration-mapper.js:39:      voice: false,
+runtime/orchestrator-service/lib/customer-operations/channels/channel-integration-mapper.js:51:      voice: false,
+runtime/orchestrator-service/lib/customer-operations/channels/channel-integration-mapper.js:63:      voice: false,
+runtime/orchestrator-service/lib/customer-operations/channels/channel-integration-mapper.js:75:      voice: false,
+runtime/orchestrator-service/lib/customer-operations/channels/channel-integration-mapper.js:87:      voice: false,
+runtime/orchestrator-service/lib/customer-operations/channels/channel-integration-mapper.js:118:    enabled: asString(providerResult.status || 'connected') !== 'disabled',
+runtime/orchestrator-service/lib/customer-operations/channels/channel-integration-mapper.js:124:      supports_voice: Boolean(base.capabilities.voice)
+runtime/orchestrator-service/lib/customer-operations/channels/registry/default-channels.js:32:    enabled: false,
+runtime/orchestrator-service/lib/customer-operations/channels/registry/default-channels.js:40:    channel_id: 'voice',
+runtime/orchestrator-service/lib/customer-operations/channels/registry/default-channels.js:42:    enabled: false,
+runtime/orchestrator-service/lib/customer-operations/channels/registry/default-channels.js:44:      voice: true,
+runtime/orchestrator-service/lib/customer-operations/channels/registry/channel-registry-store.js:21:      voice: Boolean(input.capabilities?.voice),
+runtime/orchestrator-service/lib/media/native/capabilities/local-rendering-capabilities.js:42:      voice_chat: hasPython && hasFfmpeg
+runtime/orchestrator-service/lib/media/native/intelligence/native-media-intelligence.js:19:        brand_voice_audio: knowledge.brandVoiceAudioGuide?.version || 'unknown'
+runtime/orchestrator-service/lib/media/native/intelligence/media-quality-scorer.js:13:  const prompt = asText(plan.prompt || plan.video_brief || plan.voice_script || plan.description);
+runtime/orchestrator-service/lib/media/native/intelligence/media-prompt-intelligence.js:5:function asText(value, fallback = '') {
+runtime/orchestrator-service/lib/media/native/intelligence/media-prompt-intelligence.js:6:  return String(value == null ? fallback : value).trim();
+runtime/orchestrator-service/lib/media/native/intelligence/media-prompt-intelligence.js:41:  const brandVoice = asText(input.brand_voice || input.tone, 'premium, clear, trustworthy');
+runtime/orchestrator-service/lib/media/native/intelligence/media-prompt-intelligence.js:60:    brand_voice: brandVoice,
+runtime/orchestrator-service/lib/media/native/intelligence/media-prompt-intelligence.js:72:    audio_direction: knowledge.brandVoiceAudioGuide?.voice_style || {},
+runtime/orchestrator-service/lib/media/native/intelligence/media-prompt-intelligence.js:90:    `Brand voice: ${brief.brand_voice}`,
+runtime/orchestrator-service/lib/media/native/intelligence/media-knowledge-loader.js:8:function readJsonSafe(fileName, fallback = {}) {
+runtime/orchestrator-service/lib/media/native/intelligence/media-knowledge-loader.js:13:    return fallback;
+runtime/orchestrator-service/lib/media/native/intelligence/media-knowledge-loader.js:20:    brandVoiceAudioGuide: readJsonSafe('brand-voice-audio-guide.json'),
+runtime/orchestrator-service/lib/media/native/intelligence/media-knowledge-loader.js:24:    voiceToneProfiles: readJsonSafe('voice-tone-profiles.json', { profiles: {} }),
+runtime/orchestrator-service/lib/media/native/providers/provider-model-catalog.js:140:    media_type: 'voice_chat',
+runtime/orchestrator-service/lib/media/native/providers/provider-model-catalog.js:141:    category: 'realtime-voice',
+runtime/orchestrator-service/lib/media/native/providers/provider-model-catalog.js:146:    notes: 'OpenAI realtime voice provider target. Exact model/version depends on API availability.'
+runtime/orchestrator-service/lib/media/native/providers/adapters/openai-provider-adapter.js:22:        status: 'missing_api_key',
+runtime/orchestrator-service/lib/media/native/providers/adapters/openai-provider-adapter.js:33:        status: 'missing_prompt',
+runtime/orchestrator-service/lib/media/native/providers/adapters/openai-provider-adapter.js:79:      media_type: 'voice_chat',
+runtime/orchestrator-service/lib/media/native/providers/adapters/openai-provider-adapter.js:81:      message: 'Realtime voice execution adapter is registered but not implemented yet.'
+runtime/orchestrator-service/lib/media/native/providers/provider-readiness.js:20:    status: isConfigured(model, env) ? 'ready' : 'missing_credentials'
+runtime/orchestrator-service/lib/media/native/providers/router/provider-execution-router-demo.js:10:    media_type: 'voice_chat',
+runtime/orchestrator-service/lib/media/native/providers/router/provider-execution-router-demo.js:11:    prompt: 'Start realtime voice session placeholder'
+runtime/orchestrator-service/lib/media/native/providers/router/provider-execution-router-demo.js:22:  const missingProviderCheck = await router.execute({
+runtime/orchestrator-service/lib/media/native/providers/router/provider-execution-router-demo.js:30:    openai_voice_check: openAiImageDryCheck,
+runtime/orchestrator-service/lib/media/native/providers/router/provider-execution-router-demo.js:32:    missing_provider_check: missingProviderCheck
+runtime/orchestrator-service/lib/media/native/providers/router/provider-execution-router.js:22:          status: 'missing_adapter',
+runtime/orchestrator-service/lib/media/native/providers/router/provider-execution-router.js:31:      if (mediaType === 'voice_chat') {
+runtime/orchestrator-service/lib/media/native/providers/router/provider-execution-router.js:52:      status: 'missing_adapter',
+runtime/orchestrator-service/lib/media/native/native-audio-runtime.js:8:    prompt: String(payload.prompt || payload.voice_script || ''),
+runtime/orchestrator-service/lib/media/native/native-audio-runtime.js:9:    voice_script: String(payload.voice_script || ''),
+runtime/orchestrator-service/lib/media/native/models/default-models.js:20:      media_type: 'voice_chat',
+runtime/orchestrator-service/lib/media/native/models/default-models.js:21:      category: 'realtime-voice',
+runtime/orchestrator-service/lib/media/native/models/default-models.js:81:      media_type: 'voice_chat',
+runtime/orchestrator-service/lib/media/native/native-engine-registry.js:6:const { createNativeVoiceChatRuntime } = require('./native-voice-chat-runtime');
+runtime/orchestrator-service/lib/media/native/native-engine-registry.js:13:    voiceChat: createNativeVoiceChatRuntime(options)
+runtime/orchestrator-service/lib/media/native/native-voice-chat-runtime.js:5:    type: 'voice_chat',
+runtime/orchestrator-service/lib/media/native/native-voice-chat-runtime.js:14:      runtime: 'native-voice-chat-runtime'
+runtime/orchestrator-service/lib/media/native/native-voice-chat-runtime.js:21:    id: 'native-voice-chat',
+runtime/orchestrator-service/lib/media/native/native-voice-chat-runtime.js:22:    type: 'voice_chat',
+runtime/orchestrator-service/lib/media/native/execution/native-runtime-demo.js:18:    brand_voice: 'premium, clean, trustworthy',
+runtime/orchestrator-service/lib/media/native/execution/native-runtime-executor.js:59:          status: 'missing_renderer',
+runtime/orchestrator-service/lib/media/native/provider-bridge.js:11:    if (type === 'audio' || type === 'voice') return nativeRegistry.audio;
+runtime/orchestrator-service/lib/media/native/provider-bridge.js:12:    if (type === 'voice_chat') return nativeRegistry.voiceChat;
+runtime/orchestrator-service/lib/media/native/rendering/rendering-voice-chat-adapter.js:6:    engine: 'native-voice-chat-renderer',
+runtime/orchestrator-service/lib/media/native/rendering/rendering-voice-chat-adapter.js:8:    output_type: 'voice_chat',
+runtime/orchestrator-service/lib/media/native/rendering/rendering-voice-chat-adapter.js:9:    message: 'Native voice chat rendering engine is not connected yet.',
+runtime/orchestrator-service/lib/media/native/rendering/rendering-voice-chat-adapter.js:21:    id: 'native-voice-chat-renderer',
+runtime/orchestrator-service/lib/media/native/rendering/rendering-voice-chat-adapter.js:22:    type: 'voice_chat',
+runtime/orchestrator-service/lib/media/native/rendering/rendering-image-adapter.js:9:    message: 'Native image rendering engine is not connected yet.',
+runtime/orchestrator-service/lib/media/native/rendering/rendering-audio-adapter.js:9:    message: 'Native audio rendering engine is not connected yet.',
+runtime/orchestrator-service/lib/media/native/rendering/rendering-audio-adapter.js:13:      voice_script: request.voice_script || '',
+runtime/orchestrator-service/lib/media/native/rendering/rendering-engine-registry.js:6:const { createVoiceChatRenderingAdapter } = require('./rendering-voice-chat-adapter');
+runtime/orchestrator-service/lib/media/native/rendering/rendering-engine-registry.js:13:    voice_chat: createVoiceChatRenderingAdapter(options)
+runtime/orchestrator-service/lib/media/native/rendering/rendering-video-adapter.js:9:    message: 'Native video rendering engine is not connected yet.',
+runtime/orchestrator-service/lib/media/provider-layer.js:3:const PROVIDER_NOT_CONFIGURED_MESSAGE = 'Generator backend not connected yet — prompt/job is ready.';
+runtime/orchestrator-service/lib/media/provider-layer.js:47:function safeJsonParse(text, fallback = {}) {
+runtime/orchestrator-service/lib/media/provider-layer.js:50:    return parsed && typeof parsed === 'object' ? parsed : fallback;
+runtime/orchestrator-service/lib/media/provider-layer.js:52:    return fallback;
+runtime/orchestrator-service/lib/media/provider-layer.js:56:function normalizeOpenAiError(error, fallbackMessage) {
+runtime/orchestrator-service/lib/media/provider-layer.js:61:    fallbackMessage;
+runtime/orchestrator-service/lib/media/provider-layer.js:63:  const wrapped = new Error(providerMessage || fallbackMessage);
+runtime/orchestrator-service/lib/media/provider-layer.js:82:  const voiceProvider = firstText(env.MEDIA_VOICE_PROVIDER, 'openai').toLowerCase();
+runtime/orchestrator-service/lib/media/provider-layer.js:100:    voiceProvider: {
+runtime/orchestrator-service/lib/media/provider-layer.js:101:      id: voiceProvider,
+runtime/orchestrator-service/lib/media/provider-layer.js:102:      configured: voiceProvider === 'elevenlabs' ? Boolean(elevenLabsApiKey) : openAiConfigured
+runtime/orchestrator-service/lib/media/provider-layer.js:346:    if (!availability.voiceProvider.configured) {
+runtime/orchestrator-service/lib/media/provider-layer.js:351:      systemPrompt: 'You are a voice director. Return only a voiceover script with scene timing markers.',
+runtime/orchestrator-service/lib/media/provider-layer.js:355:        `Format: ${firstText(payload.format, 'short-form video voiceover')}`,
+runtime/orchestrator-service/lib/media/provider-layer.js:360:        'Generate a usable voice script with hook, timed beats, and close CTA.'
+runtime/orchestrator-service/lib/media/provider-layer.js:373:      voice_script: asString(result.text)
+runtime/orchestrator-service/lib/media/provider-layer.js:393:        'Return JSON with keys: image_prompt, video_brief, voice_script, channel_notes, publishing_notes.',
+runtime/orchestrator-service/lib/media/provider-layer.js:419:        voice_script: asString(parsed.voice_script),

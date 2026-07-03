@@ -1,0 +1,580 @@
+### destination route resolution
+public/control-center/pages/ai-command.js:42:                routeHint: "campaign-studio"
+public/control-center/pages/ai-command.js:49:                routeHint: "content-studio"
+public/control-center/pages/ai-command.js:56:                routeHint: "media-studio"
+public/control-center/pages/ai-command.js:63:                routeHint: "media-studio"
+public/control-center/pages/ai-command.js:70:                routeHint: "publishing"
+public/control-center/pages/ai-command.js:77:                routeHint: "ads-manager"
+public/control-center/pages/ai-command.js:83:                summary: "SEO signals, performance data, content insights, and traffic patterns.",
+public/control-center/pages/ai-command.js:84:                routeHint: "insights"
+public/control-center/pages/ai-command.js:90:                summary: "Claims review, approvals, safety language, and governance checks.",
+public/control-center/pages/ai-command.js:91:                routeHint: "governance"
+public/control-center/pages/ai-command.js:98:                routeHint: "workflows"
+public/control-center/pages/ai-command.js:105:                routeHint: "operations-centers"
+public/control-center/pages/ai-command.js:112:                routeHint: "workflows"
+public/control-center/pages/ai-command.js:151:		cannotDo: ["Publish campaigns directly", "Execute workflows automatically", "Approve content", "Set live budgets"],
+public/control-center/pages/ai-command.js:164:		cannotDo: ["Publish directly", "Approve risky claims", "Invent unsupported facts", "Run workflows automatically"],
+public/control-center/pages/ai-command.js:166:		safetyNote: "Drafts require review before publishing. Cannot approve or publish without confirmation.",
+public/control-center/pages/ai-command.js:201:		placeholder: "Ask the Publisher to review publishing readiness, check scheduling, or prepare a handoff package…",
+public/control-center/pages/ai-command.js:202:		canHelp: ["Review publishing readiness", "Check scheduled jobs", "Prepare handoff packages", "Map publishing dependencies", "Flag pre-publish risks"],
+public/control-center/pages/ai-command.js:203:		cannotDo: ["Publish without explicit approval", "Override schedules", "Bypass governance gates", "Push to live channels directly"],
+public/control-center/pages/ai-command.js:205:		safetyNote: "Publishing always requires explicit approval. No live publishing from AI guidance alone.",
+public/control-center/pages/ai-command.js:226:		summary: "SEO signals, performance data, content insights, and traffic patterns.",
+public/control-center/pages/ai-command.js:239:		summary: "Claims review, approval safety, publishing risk, and governance notes.",
+public/control-center/pages/ai-command.js:240:		placeholder: "Ask the Compliance Reviewer to check claims, approval risks, publishing safety, and governance notes…",
+public/control-center/pages/ai-command.js:241:		canHelp: ["Review marketing claims", "Flag approval risks", "Check publishing safety", "Prepare governance notes", "Identify compliance blockers"],
+public/control-center/pages/ai-command.js:242:		cannotDo: ["Grant approvals directly", "Override governance gates", "Publish on behalf of approvers", "Remove flags without review"],
+public/control-center/pages/ai-command.js:255:		cannotDo: ["Run workflows without confirmation", "Auto-approve tasks", "Override authority gates", "Execute backend operations directly"],
+public/control-center/pages/ai-command.js:315:		{ label: "Review publishing readiness", sub: "Check what is ready to publish" },
+public/control-center/pages/ai-command.js:334:		{ label: "Flag publishing risks", sub: "Identify blockers before release" },
+public/control-center/pages/ai-command.js:335:		{ label: "Prepare governance notes", sub: "Document compliance status" },
+public/control-center/pages/ai-command.js:362:	{ label: "Prepare a full handoff sequence", sub: "Strategy, creative, compliance, publishing, ops" },
+public/control-center/pages/ai-command.js:447:		{ id: "open-media-studio", label: "Send prompt to Media Studio", action: "route", route: "media-studio" }
+public/control-center/pages/ai-command.js:457:		{ id: "publishing-checklist", label: "Publishing Checklist", action: "preview", intent: "handoff", template: "Build a publishing checklist for {project}. Include German copy, assets, claims checks, and channel readiness." },
+public/control-center/pages/ai-command.js:458:		{ id: "final-packaging", label: "Final Packaging", action: "preview", intent: "handoff", template: "Prepare a final publishing package for {project}. Include copy, CTA, asset notes, approvals, and destination channel." },
+public/control-center/pages/ai-command.js:460:		{ id: "schedule-draft", label: "Schedule Draft", action: "preview", intent: "workflow", template: "Prepare a publishing schedule draft for {project}. Include channel cadence, dependencies, and review gates." },
+public/control-center/pages/ai-command.js:461:		{ id: "open-publishing", label: "Open Publishing", action: "route", route: "publishing" }
+public/control-center/pages/ai-command.js:468:		{ id: "open-ads-manager", label: "Open Ads Manager", action: "route", route: "ads-manager" }
+public/control-center/pages/ai-command.js:475:		{ id: "open-insights", label: "Open Insights", action: "route", route: "insights" }
+public/control-center/pages/ai-command.js:482:		{ id: "open-governance", label: "Open Governance", action: "route", route: "governance" }
+public/control-center/pages/ai-command.js:489:		{ id: "open-workflows", label: "Open Workflows / Operations", action: "route", route: "workflows" }
+public/control-center/pages/ai-command.js:604:		purpose: "Translate intent into executable workflows and handoffs.",
+public/control-center/pages/ai-command.js:638:		if (/act as the seo|act as the insights analyst/i.test(text)) return "analyst";
+public/control-center/pages/ai-command.js:667:			targetPage: "workflows",
+public/control-center/pages/ai-command.js:681:			targetPage: "publishing",
+public/control-center/pages/ai-command.js:685:				reason: "Requires approval gate before external publishing actions."
+public/control-center/pages/ai-command.js:831:	return message.includes("insights") || message.includes("learning") || message.includes("not found");
+public/control-center/pages/ai-command.js:845:		overview.publishing_language ||
+public/control-center/pages/ai-command.js:934:				insights: null,
+public/control-center/pages/ai-command.js:1246:                `Use ${safeOutputLanguage} only for customer-facing or publishable copy such as captions, ads, emails, landing pages, final campaign text, or publishing packages.`,
+public/control-center/pages/ai-command.js:1298:function destinationRouteForSpecialist(specialistId, outputType) {
+public/control-center/pages/ai-command.js:1301:	if (outputType === "workflow") return "workflows";
+public/control-center/pages/ai-command.js:1302:	if (id === "strategist") return outputType === "task" ? "campaign-studio" : "workflows";
+public/control-center/pages/ai-command.js:1303:	if (id === "writer") return "content-studio";
+public/control-center/pages/ai-command.js:1304:	if (id === "media") return "media-studio";
+public/control-center/pages/ai-command.js:1305:	if (id === "video_lead") return "media-studio";
+public/control-center/pages/ai-command.js:1306:	if (id === "publisher") return "publishing";
+public/control-center/pages/ai-command.js:1307:	if (id === "ads") return "ads-manager";
+public/control-center/pages/ai-command.js:1308:	if (id === "analyst") return "insights";
+public/control-center/pages/ai-command.js:1309:	if (id === "compliance_reviewer") return "governance";
+public/control-center/pages/ai-command.js:1310:	if (id === "operations") return outputType === "task" ? "task-center" : "workflows";
+public/control-center/pages/ai-command.js:1311:	if (id === "customer_ops") return outputType === "task" ? "task-center" : "operations-centers";
+public/control-center/pages/ai-command.js:1312:	if (id === "sales_crm") return "workflows";
+public/control-center/pages/ai-command.js:1313:	return "workflows";
+public/control-center/pages/ai-command.js:1316:function resolveAiResponseOutputRoute(session, response = {}) {
+public/control-center/pages/ai-command.js:1342:        const looksWorkflowLike = /\b(workflow|workflows|process|sequence|phase|phases|approval flow|automation|operating loop|step-by-step|steps|dependencies|trigger|review gate|execution flow)\b/.test(text);
+public/control-center/pages/ai-command.js:1345:        const looksPublishingLike = /\b(publish|publishing|schedule|channel package|channel payload|approval-ready post|final post|ready to publish|publishing package)\b/.test(text);
+public/control-center/pages/ai-command.js:1346:        const looksGovernanceLike = /\b(compliance|governance|claim|claims|risk|risks|approval|approvals|policy|privacy|legal|safe language|safety review)\b/.test(text);
+public/control-center/pages/ai-command.js:1347:        const looksInsightLike = /\b(insight|insights|seo|keyword|keywords|analytics|performance|traffic|ranking|search intent|metrics|research|competitor|competitors|market research)\b/.test(text);
+public/control-center/pages/ai-command.js:1352:                return { outputType, destinationRoute: "task-center" };
+public/control-center/pages/ai-command.js:1357:                return { outputType, destinationRoute: explicitDestination || "workflows" };
+public/control-center/pages/ai-command.js:1362:                return { outputType, destinationRoute: explicitDestination || "content-studio" };
+public/control-center/pages/ai-command.js:1367:                return { outputType, destinationRoute: explicitDestination || "media-studio" };
+public/control-center/pages/ai-command.js:1370:        if (/publishing|publish|schedule/.test(outputType) || looksPublishingLike) {
+public/control-center/pages/ai-command.js:1371:                outputType = "publishing";
+public/control-center/pages/ai-command.js:1372:                return { outputType, destinationRoute: explicitDestination || "publishing" };
+public/control-center/pages/ai-command.js:1375:        if (/governance|compliance|risk|approval/.test(outputType) || looksGovernanceLike) {
+public/control-center/pages/ai-command.js:1376:                outputType = "governance";
+public/control-center/pages/ai-command.js:1377:                return { outputType, destinationRoute: explicitDestination || "governance" };
+public/control-center/pages/ai-command.js:1382:                return { outputType, destinationRoute: explicitDestination || "insights" };
+public/control-center/pages/ai-command.js:1389:                        destinationRoute: explicitDestination || (session?.teamMode === "team" ? "workflows" : "campaign-studio")
+public/control-center/pages/ai-command.js:1393:        const destinationRoute = explicitDestination || destinationRouteForSpecialist(session?.modeId || "operations", outputType);
+public/control-center/pages/ai-command.js:1399:		"campaign-studio": "Campaign Studio",
+public/control-center/pages/ai-command.js:1400:		"content-studio": "Content Studio",
+public/control-center/pages/ai-command.js:1401:		"media-studio": "Media Studio",
+public/control-center/pages/ai-command.js:1402:		publishing: "Publishing",
+public/control-center/pages/ai-command.js:1403:		"ads-manager": "Ads Manager",
+public/control-center/pages/ai-command.js:1404:		insights: "Insights",
+public/control-center/pages/ai-command.js:1406:		governance: "Governance",
+public/control-center/pages/ai-command.js:1407:		"operations-centers": "Operations Centers",
+public/control-center/pages/ai-command.js:1408:		"task-center": "Task Center",
+public/control-center/pages/ai-command.js:1410:		workflows: "Workflows"
+public/control-center/pages/ai-command.js:1419:	const route = destinationRouteForSpecialist(specialistId, outputType);
+public/control-center/pages/ai-command.js:1435:		confirmationNote: "Execution, approvals, and publishing require explicit confirmation in the owning workspace."
+public/control-center/pages/ai-command.js:1472:				"Outcome-led hook direction for a German publishing draft",
+public/control-center/pages/ai-command.js:1486:				"Claims, health, or performance promises need evidence before publishing."
+public/control-center/pages/ai-command.js:1495:			safetyLabel: "Claims require review before publishing. No direct publish action."
+public/control-center/pages/ai-command.js:1547:				"Prepare handoff for publishing review"
+public/control-center/pages/ai-command.js:1604:				"Prepare governance notes",
+public/control-center/pages/ai-command.js:1755:		destinationRoute: outputType === "task" ? "task-center" : "workflows",
+public/control-center/pages/ai-command.js:1757:		confirmationNote: "No task, workflow, outreach, customer reply, CRM update, approval, or publishing action is executed from Full Team mode.",
+public/control-center/pages/ai-command.js:1896:	const insights =
+public/control-center/pages/ai-command.js:1897:		asObject(intelligence?.insights) ||
+public/control-center/pages/ai-command.js:1898:		asObject(activity.insights) ||
+public/control-center/pages/ai-command.js:1899:		asObject(activity.marketing_insights) ||
+public/control-center/pages/ai-command.js:1900:		asObject(activity.performance_insights);
+public/control-center/pages/ai-command.js:1905:	const coverage = asObject(insights.data_coverage);
+public/control-center/pages/ai-command.js:1908:	const recommendations = asArray(learning.recommendations || insights.recommendations);
+public/control-center/pages/ai-command.js:1972:		insights,
+public/control-center/pages/ai-command.js:1975:		topContent: asArray(insights.best_performing_content),
+public/control-center/pages/ai-command.js:1976:		weakContent: asArray(insights.underperforming_content),
+public/control-center/pages/ai-command.js:1977:		website: asObject(insights.website),
+public/control-center/pages/ai-command.js:1978:		seo: asObject(insights.seo),
+public/control-center/pages/ai-command.js:1979:		paid: asObject(insights.paid),
+public/control-center/pages/ai-command.js:1980:		social: asObject(insights.social),
+public/control-center/pages/ai-command.js:1981:		learningPatterns: asObject(learning.learning_patterns || insights.learning_patterns),
+public/control-center/pages/ai-command.js:1982:		aiRecommendations: asObject(learning.ai_recommendations || insights.ai_recommendations),
+public/control-center/pages/ai-command.js:1983:		sourceSummary: asObject(insights.source_summary || learning.source_summary),
+public/control-center/pages/ai-command.js:1985:			Boolean(Object.keys(insights).length) ||
+public/control-center/pages/ai-command.js:2002:		analyst: ["seo", "keyword", "keywords", "query", "search", "meta", "blog topic", "search intent", "ranking", "analytics", "performance", "traffic", "insights", "metrics"],
+public/control-center/pages/ai-command.js:2045:		notes.push("Load project insights to unlock live intelligence guidance.");
+public/control-center/pages/ai-command.js:2048:	if (lane === "content" && asString(coverage.social_insights?.status) !== "covered") {
+public/control-center/pages/ai-command.js:2085:			routeSuggestion("Insights", "insights", "Review performance signals and the recommendation stack.")
+public/control-center/pages/ai-command.js:2108:			top ? `Reuse the pattern from ${extractTopMessage(top)} in the next publishing cycle.` : "Sync social insights to identify winning hooks and formats.",
+public/control-center/pages/ai-command.js:2118:			routeSuggestion("Content Studio", "content-studio", "Rewrite weak posts and turn winning patterns into new drafts."),
+public/control-center/pages/ai-command.js:2119:			routeSuggestion("Publishing", "publishing", "Schedule the next batch with stronger timing and approval control."),
+public/control-center/pages/ai-command.js:2120:			routeSuggestion("Insights", "insights", "Compare top and weak content performance.")
+public/control-center/pages/ai-command.js:2154:			routeSuggestion("Insights", "insights", "Review search and website performance together."),
+public/control-center/pages/ai-command.js:2189:			routeSuggestion("Ads Manager", "ads-manager", "Review pacing, creative mapping, and paid operating view."),
+public/control-center/pages/ai-command.js:2191:			routeSuggestion("Insights", "insights", "Compare paid vs organic and website results.")
+public/control-center/pages/ai-command.js:2219:			routeSuggestion("Insights", "insights", "See where evidence is strong and where it is thin.")
+public/control-center/pages/ai-command.js:2232:		return { title: "Campaign launch task block", owner: "Campaign Studio", steps: ["Define the campaign objective, audience, and offer.", "Choose channels and budget based on current intelligence.", "List required assets and publishing dependencies before launch."] };
+public/control-center/pages/ai-command.js:2250:	if (/campaign/.test(query)) routeSuggestions.push(routeSuggestion("Campaign Studio", "campaign-studio", "Turn this into a structured launch plan."));
+public/control-center/pages/ai-command.js:2252:		routeSuggestions.push(routeSuggestion("Content Studio", "content-studio", "Draft, rewrite, or prepare the requested content outputs."));
+public/control-center/pages/ai-command.js:2253:		routeSuggestions.push(routeSuggestion("Publishing", "publishing", "Schedule or approve if the next step is publishing."));
+public/control-center/pages/ai-command.js:2256:	if (/ads|campaign scale|roas|creative/.test(query)) routeSuggestions.push(routeSuggestion("Ads Manager", "ads-manager", "Review live paid performance and action the next media move."));
+public/control-center/pages/ai-command.js:2257:	if (!routeSuggestions.length) routeSuggestions.push(routeSuggestion("Workflows", "workflows", "Use Workflows when the task spans multiple execution areas."));
+public/control-center/pages/ai-command.js:2331:				const [insightsResult, learningResult] = await Promise.allSettled([
+public/control-center/pages/ai-command.js:2335:				const insightsMissing = insightsResult.status === "rejected" && isMissingIntelligenceError(insightsResult.reason);
+public/control-center/pages/ai-command.js:2338:					insightsResult.status === "rejected" && !insightsMissing ? insightsResult.reason?.message : "",
+public/control-center/pages/ai-command.js:2345:					insights: insightsResult.status === "fulfilled" ? insightsResult.value : (insightsMissing ? { project: projectName, generated_at: nowIso(), data_coverage: {} } : null),
+public/control-center/pages/ai-command.js:2379:	"content-studio": "Content Studio",
+public/control-center/pages/ai-command.js:2380:	"media-studio": "Media Studio",
+public/control-center/pages/ai-command.js:2381:	publishing: "Publishing",
+public/control-center/pages/ai-command.js:2382:	"campaign-studio": "Campaign Studio",
+public/control-center/pages/ai-command.js:2383:	workflows: "Workflows",
+public/control-center/pages/ai-command.js:2385:	insights: "Insights",
+public/control-center/pages/ai-command.js:2388:	governance: "Governance",
+public/control-center/pages/ai-command.js:2389:	"operations-centers": "Operations Centers",
+public/control-center/pages/ai-command.js:2390:	"task-center": "Task Center",
+public/control-center/pages/ai-command.js:2391:	"queue-center": "Queue Center",
+public/control-center/pages/ai-command.js:2392:	"job-monitor": "Job Monitor",
+public/control-center/pages/ai-command.js:2395:	"ads-manager": "Ads Manager",
+public/control-center/pages/ai-command.js:2401:	"content-studio": "writer",
+public/control-center/pages/ai-command.js:2402:	"media-studio": "media",
+public/control-center/pages/ai-command.js:2403:	publishing: "publisher",
+public/control-center/pages/ai-command.js:2404:	"campaign-studio": "strategist",
+public/control-center/pages/ai-command.js:2405:	workflows: "operations",
+public/control-center/pages/ai-command.js:2407:	insights: "seo",
+public/control-center/pages/ai-command.js:2410:	governance: "compliance_reviewer",
+public/control-center/pages/ai-command.js:2411:	"operations-centers": "operations",
+public/control-center/pages/ai-command.js:2412:	"task-center": "operations",
+public/control-center/pages/ai-command.js:2413:	"queue-center": "operations",
+public/control-center/pages/ai-command.js:2414:	"job-monitor": "operations",
+public/control-center/pages/ai-command.js:2417:	"ads-manager": "ads",
+public/control-center/pages/ai-command.js:2433:	content: "content-studio",
+public/control-center/pages/ai-command.js:2434:	"content-studio-workspace": "content-studio",
+public/control-center/pages/ai-command.js:2435:	media: "media-studio",
+public/control-center/pages/ai-command.js:2436:	"media-studio-workspace": "media-studio",
+public/control-center/pages/ai-command.js:2437:	publish: "publishing",
+public/control-center/pages/ai-command.js:2438:	publisher: "publishing",
+public/control-center/pages/ai-command.js:2439:	campaign: "campaign-studio",
+public/control-center/pages/ai-command.js:2440:	campaigns: "campaign-studio",
+public/control-center/pages/ai-command.js:2441:	workflow: "workflows",
+public/control-center/pages/ai-command.js:2444:	operation: "operations-centers",
+public/control-center/pages/ai-command.js:2445:	operations: "operations-centers",
+public/control-center/pages/ai-command.js:2446:	tasks: "task-center",
+public/control-center/pages/ai-command.js:2447:	queue: "queue-center",
+public/control-center/pages/ai-command.js:2448:	jobs: "job-monitor",
+public/control-center/pages/ai-command.js:2449:	notifications: "notification-center",
+public/control-center/pages/ai-command.js:2451:	govern: "governance",
+public/control-center/pages/ai-command.js:2511:	const fallbackRoute = sourcePage === "workspace" ? "workflows" : sourcePage;
+public/control-center/pages/ai-command.js:2525:		route: fallbackRoute,
+public/control-center/pages/ai-command.js:2540:		"workflows"
+public/control-center/pages/ai-command.js:2555:		confirmationNote: firstAiInboundText(preview.confirmationNote, preview.confirmation_note, "Execution, approvals, publishing, CRM updates, customer replies, and workflow runs require explicit confirmation in the owning workspace."),
+public/control-center/pages/ai-command.js:2585:	return [handoff?.source_page, handoff?.destination_page, payload.prompt, payload.title]
+public/control-center/pages/ai-command.js:2595:		payload.source_page,
+public/control-center/pages/ai-command.js:2597:		handoff?.source_page,
+public/control-center/pages/ai-command.js:2599:		draftContext.source_page,
+public/control-center/pages/ai-command.js:2625:	)) || `Review this ${sourceLabel} handoff for ${projectLabel}. Identify the right specialist, summarize the context, produce a review-ready draft, and recommend the next safe route. Do not execute publishing, task creation, CRM updates, customer replies, workflow runs, or backend actions.`;
+public/control-center/pages/ai-command.js:2661:			source_page: sourcePage,
+public/control-center/pages/ai-command.js:2665:		note: "Guidance only. No publishing, task creation, CRM updates, customer replies, workflow runs, exports, or backend actions are executed from this handoff."
+public/control-center/pages/ai-command.js:2992:			route: asString(record.route || record.destination || record.page),
+public/control-center/pages/ai-command.js:3515:	if (tool.route) return asString(tool.route || "workflows");
+public/control-center/pages/ai-command.js:3516:	if (session?.teamMode === "team") return tool.intent === "task" ? "task-center" : "workflows";
+public/control-center/pages/ai-command.js:3518:	return destinationRouteForSpecialist(session?.modeId || "operations", outputType);
+public/control-center/pages/ai-command.js:3531:	if (/review|check|compliance|readiness|governance/i.test(asString(tool.label))) return "Review";
+public/control-center/pages/ai-command.js:3649:			<span>Strategy, writing, creative, compliance, publishing, customer, sales, and operations specialists coordinate one review-ready answer. No workflow, send, publish, approval, or CRM action is executed here.</span>
+public/control-center/pages/ai-command.js:3760:        if (roleId === "seo") return `${label} is reviewing insights and signals...`;
+public/control-center/pages/ai-command.js:3761:        if (roleId === "publisher") return `${label} is preparing publishing guidance...`;
+public/control-center/pages/ai-command.js:3772:		? "Team orchestration across strategy, writing, media/video, compliance, publishing, customer operations, sales/CRM, and operations"
+public/control-center/pages/ai-command.js:3809:	return destinationRouteForSpecialist(session?.modeId || "operations", getCanonicalToolIntent(tool));
+public/control-center/pages/ai-command.js:3822:		route: getCanonicalToolRoute(tool, session),
+public/control-center/pages/ai-command.js:3960:        const destinationRoute = asString(preview.destinationRoute || destinationRouteForSpecialist(session.modeId, outputType));
+public/control-center/pages/ai-command.js:3966:        const governanceRequired = destinationRoute === "governance" || /approval|claim|compliance|risk|gdpr|review/i.test(`${outputType} ${asString(preview.title)} ${asString(preview.summary)}`);
+public/control-center/pages/ai-command.js:3967:        const riskLabel = governanceRequired ? "Review required" : "Low";
+public/control-center/pages/ai-command.js:3968:        const governanceLabel = governanceRequired ? "Governance route" : "Not required";
+public/control-center/pages/ai-command.js:3977:                        const complianceWatching = spec.id === "compliance_reviewer" && governanceRequired;
+public/control-center/pages/ai-command.js:3979:                        const route = destinationRouteForSpecialist(spec.id, "guidance");
+public/control-center/pages/ai-command.js:4022:                                <span><strong>Governance</strong>${escapeHtml(governanceLabel)}</span>
+public/control-center/pages/ai-command.js:4066:        const destinationRoute = asString(session.outputPreview?.destinationRoute || destinationRouteForSpecialist(session.modeId, outputType));
+public/control-center/pages/ai-command.js:4249:                const destinationRoute = asString(message.destinationRoute || preview.destinationRoute || destinationRouteForSpecialist(session.modeId, outputType));
+public/control-center/pages/ai-command.js:4254:                        { label: `Open ${destination}`, attr: "data-aicmd-smart-route", route: destinationRoute },
+public/control-center/pages/ai-command.js:4342:                { id: "publish", label: "Publish", summary: "Prepare publishing checklist and handoff readiness.", enabled: false }
+public/control-center/pages/ai-command.js:4436:        const channelOptions = [["social", "Social"], ["email", "Email"], ["website", "Website"], ["ads", "Ads"], ["publishing", "Publishing package"]];
+public/control-center/pages/ai-command.js:4559:                                                                <button type="button" data-aicmd-smart-campaign-action="governance">Request Governance Review</button>
+public/control-center/pages/ai-command.js:4560:                                                                <button type="button" data-aicmd-smart-campaign-action="publishing">Prepare Publishing Handoff</button>
+public/control-center/pages/ai-command.js:4696:                                <span>Library, campaigns, content, customers, governance, integrations and provider readiness are connected as guarded planning context. Execution stays confirmation-gated.</span>
+public/control-center/pages/ai-command.js:4937:	const destination = routeLabel(preview.destinationRoute || destinationRouteForSpecialist(session.modeId, preview.outputType || "guidance"));
+public/control-center/pages/ai-command.js:5005:				<p class="aicmd-chatfirst-tab-note">This is a review-ready preview. Execution, publishing, approvals, CRM updates, external sends, durable task creation, and workflow runs happen only in the owning destination workspace after confirmation.</p>
+public/control-center/pages/ai-command.js:5126:                ? "Chat only. No workflow run, durable task, external handoff action, approval, publishing action, CRM update, or customer action was created."
+public/control-center/pages/ai-command.js:5334:	const destination = routeLabel(destinationRouteForSpecialist(session.modeId, asObject(session.outputPreview).outputType || "guidance"));
+public/control-center/pages/ai-command.js:6031:                                        body: `Prepare publishing readiness for ${channelLabel}: channel checklist, schedule draft, missing approvals, and handoff requirements.`
+public/control-center/pages/ai-command.js:6059:                                                body: `Use ${sourceMeaning}. Produce a review-ready campaign package before any handoff, approval, publishing, sending, CRM update, provider execution, or workflow mutation.`
+public/control-center/pages/ai-command.js:6071:                                                body: "Create a hook, short social caption, long caption/email variant, CTA, landing-page angle, and reusable message notes in the configured publishing language."
+public/control-center/pages/ai-command.js:6225:                                        destinationRoute: "publishing",
+public/control-center/pages/ai-command.js:6245:                                        confirmationNote: "Review and route this campaign package through the owning destination workspace before any publishing, sending, approval, task creation, provider execution, or workflow mutation.",
+public/control-center/pages/ai-command.js:6261:                                media: "media-studio",
+public/control-center/pages/ai-command.js:6262:                                publishing: "publishing"
+public/control-center/pages/ai-command.js:6266:                                publishing: "Publishing"
+public/control-center/pages/ai-command.js:6277:                                destination_route: route,
+public/control-center/pages/ai-command.js:6325:                                governance: "Request Governance Review",
+public/control-center/pages/ai-command.js:6326:                                publishing: "Prepare Publishing Handoff",
+public/control-center/pages/ai-command.js:6330:                        const safeRouteActions = ["media", "publishing"];
+public/control-center/pages/ai-command.js:6625:                                        const responseRoute = resolveAiResponseOutputRoute(session, {
+public/control-center/pages/ai-command.js:6938:				const responseRoute = resolveAiResponseOutputRoute(session, latestResponse);
+public/control-center/pages/ai-command.js:6939:				const destination = asString(latestResponse.destinationRoute || responseRoute.destinationRoute || destinationRouteForSpecialist(session.modeId, responseRoute.outputType || "guidance"));
+public/control-center/pages/ai-command.js:6945:					routeSuggestions: [{ route: destination, label: routeLabel(destination), reason: "Specialist response destination" }],
+public/control-center/pages/ai-command.js:6951:					source_page: "ai-command",
+public/control-center/pages/ai-command.js:6952:					destination_page: destination,
+public/control-center/pages/ai-command.js:7040:					source_page: "ai-command",
+public/control-center/pages/ai-command.js:7041:					destination_page: destination,
+public/control-center/pages/ai-command.js:7051:							routeSuggestions: [{ route: destination, label: routeLabel(destination), reason: "Phase 2 preview destination" }],
+public/control-center/pages/ai-command.js:7756:        route: "idle",
+public/control-center/pages/ai-command.js:7763:        route: "command",
+public/control-center/pages/ai-command.js:7770:        route: "action",
+public/control-center/pages/ai-command.js:7777:        route: "analysis",
+public/control-center/pages/ai-command.js:7783:      route: "chat",
+public/control-center/pages/ai-command/tool-dock.js:430:      frontendOwnerPage: "campaign-studio",
+public/control-center/pages/ai-command/tool-dock.js:431:      destinations: ["chat-preview", "campaign-studio", "content-studio", "workflows"],
+public/control-center/pages/ai-command/tool-dock.js:443:      frontendOwnerPage: "campaign-studio",
+public/control-center/pages/ai-command/tool-dock.js:444:      destinations: ["chat-preview", "campaign-studio", "workflows", "publishing"],
+public/control-center/pages/ai-command/tool-dock.js:456:      frontendOwnerPage: "campaign-studio",
+public/control-center/pages/ai-command/tool-dock.js:457:      destinations: ["chat-preview", "campaign-studio", "content-studio", "insights"],
+public/control-center/pages/ai-command/tool-dock.js:458:      sourceTypes: ["current_chat", "market_notes", "customer_notes", "insights_report", "library_source", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:469:      frontendOwnerPage: "campaign-studio",
+public/control-center/pages/ai-command/tool-dock.js:470:      destinations: ["chat-preview", "campaign-studio", "content-studio", "ads-manager"],
+public/control-center/pages/ai-command/tool-dock.js:482:      frontendOwnerPage: "campaign-studio",
+public/control-center/pages/ai-command/tool-dock.js:483:      destinations: ["chat-preview", "campaign-studio", "content-studio", "workflows", "publishing"],
+public/control-center/pages/ai-command/tool-dock.js:495:      frontendOwnerPage: "workflows",
+public/control-center/pages/ai-command/tool-dock.js:496:      destinations: ["chat-preview", "workflows", "task", "campaign-studio"],
+public/control-center/pages/ai-command/tool-dock.js:511:      frontendOwnerPage: "content-studio",
+public/control-center/pages/ai-command/tool-dock.js:512:      destinations: ["chat-preview", "content-studio", "library", "media-studio", "publishing", "compliance"],
+public/control-center/pages/ai-command/tool-dock.js:524:      frontendOwnerPage: "ai-command",
+public/control-center/pages/ai-command/tool-dock.js:525:      destinations: ["composer", "content-studio"],
+public/control-center/pages/ai-command/tool-dock.js:537:      frontendOwnerPage: "content-studio",
+public/control-center/pages/ai-command/tool-dock.js:538:      destinations: ["composer", "content-studio"],
+public/control-center/pages/ai-command/tool-dock.js:550:      frontendOwnerPage: "ai-command",
+public/control-center/pages/ai-command/tool-dock.js:551:      destinations: ["composer", "content-studio"],
+public/control-center/pages/ai-command/tool-dock.js:563:      frontendOwnerPage: "ai-command",
+public/control-center/pages/ai-command/tool-dock.js:564:      destinations: ["preview", "content-studio", "compliance"],
+public/control-center/pages/ai-command/tool-dock.js:576:      frontendOwnerPage: "library",
+public/control-center/pages/ai-command/tool-dock.js:577:      destinations: ["library", "ai-command", "content-studio"],
+public/control-center/pages/ai-command/tool-dock.js:589:      frontendOwnerPage: "content-studio",
+public/control-center/pages/ai-command/tool-dock.js:590:      destinations: ["content-studio", "insights", "library"],
+public/control-center/pages/ai-command/tool-dock.js:602:      frontendOwnerPage: "content-studio",
+public/control-center/pages/ai-command/tool-dock.js:603:      destinations: ["chat-preview", "content-studio", "publishing"],
+public/control-center/pages/ai-command/tool-dock.js:615:      frontendOwnerPage: "ai-command",
+public/control-center/pages/ai-command/tool-dock.js:616:      destinations: ["content-studio", "library", "media-studio", "publishing", "compliance", "task", "handoff"],
+public/control-center/pages/ai-command/tool-dock.js:618:      outputTypes: ["content_studio_draft", "library_save", "media_brief", "publishing_package", "compliance_review", "task_preview", "handoff_preview"],
+public/control-center/pages/ai-command/tool-dock.js:630:      frontendOwnerPage: "media-studio",
+public/control-center/pages/ai-command/tool-dock.js:631:      destinations: ["chat-preview", "media-studio", "library", "content-studio", "publishing"],
+public/control-center/pages/ai-command/tool-dock.js:643:      frontendOwnerPage: "media-studio",
+public/control-center/pages/ai-command/tool-dock.js:644:      destinations: ["chat-preview", "media-studio", "library"],
+public/control-center/pages/ai-command/tool-dock.js:656:      frontendOwnerPage: "media-studio",
+public/control-center/pages/ai-command/tool-dock.js:657:      destinations: ["chat-preview", "media-studio", "library"],
+public/control-center/pages/ai-command/tool-dock.js:669:      frontendOwnerPage: "media-studio",
+public/control-center/pages/ai-command/tool-dock.js:670:      destinations: ["chat-preview", "media-studio", "library", "workflows"],
+public/control-center/pages/ai-command/tool-dock.js:682:      frontendOwnerPage: "media-studio",
+public/control-center/pages/ai-command/tool-dock.js:683:      destinations: ["chat-preview", "media-studio", "content-studio", "publishing"],
+public/control-center/pages/ai-command/tool-dock.js:695:      frontendOwnerPage: "media-studio",
+public/control-center/pages/ai-command/tool-dock.js:696:      destinations: ["chat-preview", "media-studio", "governance", "library"],
+public/control-center/pages/ai-command/tool-dock.js:711:      frontendOwnerPage: "media-studio",
+public/control-center/pages/ai-command/tool-dock.js:712:      destinations: ["chat-preview", "media-studio", "content-studio", "publishing"],
+public/control-center/pages/ai-command/tool-dock.js:724:      frontendOwnerPage: "media-studio",
+public/control-center/pages/ai-command/tool-dock.js:725:      destinations: ["chat-preview", "media-studio", "library", "publishing"],
+public/control-center/pages/ai-command/tool-dock.js:737:      frontendOwnerPage: "media-studio",
+public/control-center/pages/ai-command/tool-dock.js:738:      destinations: ["chat-preview", "media-studio", "workflows", "library"],
+public/control-center/pages/ai-command/tool-dock.js:750:      frontendOwnerPage: "media-studio",
+public/control-center/pages/ai-command/tool-dock.js:751:      destinations: ["chat-preview", "media-studio", "content-studio"],
+public/control-center/pages/ai-command/tool-dock.js:763:      frontendOwnerPage: "media-studio",
+public/control-center/pages/ai-command/tool-dock.js:764:      destinations: ["chat-preview", "media-studio", "publishing", "ads-manager"],
+public/control-center/pages/ai-command/tool-dock.js:779:      frontendOwnerPage: "publishing",
+public/control-center/pages/ai-command/tool-dock.js:780:      destinations: ["chat-preview", "publishing", "governance", "content-studio", "media-studio"],
+public/control-center/pages/ai-command/tool-dock.js:781:      sourceTypes: ["content_draft", "media_asset", "publishing_package", "approval_notes", "current_chat", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:782:      outputTypes: ["publishing_readiness_check", "missing_items", "channel_fit_review", "risk_notes"],
+public/control-center/pages/ai-command/tool-dock.js:783:      template: "Review publishing readiness for {projectName}. Check copy, assets, channel fit, schedule, approvals, and missing items. Do not publish."
+public/control-center/pages/ai-command/tool-dock.js:792:      frontendOwnerPage: "publishing",
+public/control-center/pages/ai-command/tool-dock.js:793:      destinations: ["chat-preview", "publishing", "content-studio", "media-studio"],
+public/control-center/pages/ai-command/tool-dock.js:805:      frontendOwnerPage: "publishing",
+public/control-center/pages/ai-command/tool-dock.js:806:      destinations: ["chat-preview", "publishing", "workflows"],
+public/control-center/pages/ai-command/tool-dock.js:807:      sourceTypes: ["publishing_package", "campaign_timeline", "channel_notes", "approval_notes", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:809:      template: "Draft a publishing schedule for {projectName}. Include channels, timing, dependencies, review gates, and next actions."
+public/control-center/pages/ai-command/tool-dock.js:818:      frontendOwnerPage: "publishing",
+public/control-center/pages/ai-command/tool-dock.js:819:      destinations: ["chat-preview", "publishing", "content-studio", "insights"],
+public/control-center/pages/ai-command/tool-dock.js:831:      frontendOwnerPage: "governance",
+public/control-center/pages/ai-command/tool-dock.js:832:      destinations: ["chat-preview", "governance", "publishing", "workflows"],
+public/control-center/pages/ai-command/tool-dock.js:833:      sourceTypes: ["final_copy", "media_asset", "approval_notes", "claim_review", "publishing_package", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:847:      frontendOwnerPage: "ads-manager",
+public/control-center/pages/ai-command/tool-dock.js:848:      destinations: ["chat-preview", "ads-manager", "content-studio", "governance"],
+public/control-center/pages/ai-command/tool-dock.js:860:      frontendOwnerPage: "ads-manager",
+public/control-center/pages/ai-command/tool-dock.js:861:      destinations: ["chat-preview", "ads-manager", "content-studio", "governance"],
+public/control-center/pages/ai-command/tool-dock.js:873:      frontendOwnerPage: "ads-manager",
+public/control-center/pages/ai-command/tool-dock.js:874:      destinations: ["chat-preview", "ads-manager", "insights", "campaign-studio"],
+public/control-center/pages/ai-command/tool-dock.js:875:      sourceTypes: ["audience_notes", "insights_report", "campaign_brief", "customer_notes", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:886:      frontendOwnerPage: "ads-manager",
+public/control-center/pages/ai-command/tool-dock.js:887:      destinations: ["chat-preview", "ads-manager", "media-studio", "insights", "workflows"],
+public/control-center/pages/ai-command/tool-dock.js:899:      frontendOwnerPage: "ads-manager",
+public/control-center/pages/ai-command/tool-dock.js:900:      destinations: ["chat-preview", "ads-manager", "content-studio", "governance"],
+public/control-center/pages/ai-command/tool-dock.js:915:      frontendOwnerPage: "insights",
+public/control-center/pages/ai-command/tool-dock.js:916:      destinations: ["chat-preview", "insights", "content-studio", "library"],
+public/control-center/pages/ai-command/tool-dock.js:922:      id: "insights",
+public/control-center/pages/ai-command/tool-dock.js:928:      frontendOwnerPage: "insights",
+public/control-center/pages/ai-command/tool-dock.js:929:      destinations: ["chat-preview", "insights", "campaign-studio", "workflows"],
+public/control-center/pages/ai-command/tool-dock.js:930:      sourceTypes: ["insights_data", "analytics_summary", "performance_notes", "current_chat", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:931:      outputTypes: ["insights_summary", "optimization_actions", "missing_data_notes", "risk_notes"],
+public/control-center/pages/ai-command/tool-dock.js:932:      template: "Summarize insights for {projectName}. Include what is working, what is weak, missing data, and next optimization actions."
+public/control-center/pages/ai-command/tool-dock.js:941:      frontendOwnerPage: "insights",
+public/control-center/pages/ai-command/tool-dock.js:942:      destinations: ["chat-preview", "insights", "content-studio", "library"],
+public/control-center/pages/ai-command/tool-dock.js:954:      frontendOwnerPage: "insights",
+public/control-center/pages/ai-command/tool-dock.js:955:      destinations: ["chat-preview", "insights", "campaign-studio", "workflows"],
+public/control-center/pages/ai-command/tool-dock.js:967:      frontendOwnerPage: "insights",
+public/control-center/pages/ai-command/tool-dock.js:968:      destinations: ["chat-preview", "insights", "content-studio", "campaign-studio"],
+public/control-center/pages/ai-command/tool-dock.js:983:      frontendOwnerPage: "governance",
+public/control-center/pages/ai-command/tool-dock.js:984:      destinations: ["chat-preview", "governance", "content-studio", "publishing"],
+public/control-center/pages/ai-command/tool-dock.js:996:      frontendOwnerPage: "governance",
+public/control-center/pages/ai-command/tool-dock.js:997:      destinations: ["chat-preview", "governance", "content-studio"],
+public/control-center/pages/ai-command/tool-dock.js:1009:      frontendOwnerPage: "governance",
+public/control-center/pages/ai-command/tool-dock.js:1010:      destinations: ["chat-preview", "governance", "library", "workflows"],
+public/control-center/pages/ai-command/tool-dock.js:1022:      frontendOwnerPage: "governance",
+public/control-center/pages/ai-command/tool-dock.js:1023:      destinations: ["chat-preview", "governance", "workflows", "publishing"],
+public/control-center/pages/ai-command/tool-dock.js:1035:      frontendOwnerPage: "governance",
+public/control-center/pages/ai-command/tool-dock.js:1036:      destinations: ["chat-preview", "governance", "publishing", "workflows"],
+public/control-center/pages/ai-command/tool-dock.js:1051:      frontendOwnerPage: "workflows",
+public/control-center/pages/ai-command/tool-dock.js:1052:      destinations: ["chat-preview", "workflows", "task", "content-studio", "media-studio"],
+public/control-center/pages/ai-command/tool-dock.js:1064:      frontendOwnerPage: "workflows",
+public/control-center/pages/ai-command/tool-dock.js:1065:      destinations: ["chat-preview", "workflows", "task", "handoff"],
+public/control-center/pages/ai-command/tool-dock.js:1077:      frontendOwnerPage: "workflows",
+public/control-center/pages/ai-command/tool-dock.js:1078:      destinations: ["chat-preview", "handoff", "workflows", "content-studio", "media-studio", "publishing", "governance"],
+public/control-center/pages/ai-command/tool-dock.js:1079:      sourceTypes: ["current_chat", "ai_preview", "content_draft", "media_job", "publishing_package", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:1090:      frontendOwnerPage: "workflows",
+public/control-center/pages/ai-command/tool-dock.js:1091:      destinations: ["chat-preview", "workflows", "campaign-studio", "publishing"],
+public/control-center/pages/ai-command/tool-dock.js:1103:      frontendOwnerPage: "workflows",
+public/control-center/pages/ai-command/tool-dock.js:1104:      destinations: ["chat-preview", "workflows", "governance", "publishing"],
+public/control-center/pages/ai-command/tool-dock.js:1119:      frontendOwnerPage: "operations-centers",
+public/control-center/pages/ai-command/tool-dock.js:1120:      destinations: ["chat-preview", "operations-centers", "task", "governance"],
+public/control-center/pages/ai-command/tool-dock.js:1132:      frontendOwnerPage: "operations-centers",
+public/control-center/pages/ai-command/tool-dock.js:1133:      destinations: ["chat-preview", "operations-centers", "task", "workflows"],
+public/control-center/pages/ai-command/tool-dock.js:1145:      frontendOwnerPage: "operations-centers",
+public/control-center/pages/ai-command/tool-dock.js:1146:      destinations: ["chat-preview", "operations-centers", "task", "workflows"],
+public/control-center/pages/ai-command/tool-dock.js:1158:      frontendOwnerPage: "operations-centers",
+public/control-center/pages/ai-command/tool-dock.js:1159:      destinations: ["chat-preview", "operations-centers", "workflows", "sales-crm-draft"],
+public/control-center/pages/ai-command/tool-dock.js:1174:      frontendOwnerPage: "workflows",
+public/control-center/pages/ai-command/tool-dock.js:1175:      destinations: ["chat-preview", "workflows", "content-studio", "sales-crm-draft"],
+public/control-center/pages/ai-command/tool-dock.js:1187:      frontendOwnerPage: "workflows",
+public/control-center/pages/ai-command/tool-dock.js:1188:      destinations: ["chat-preview", "content-studio", "workflows", "sales-crm-draft"],
+public/control-center/pages/ai-command/tool-dock.js:1200:      frontendOwnerPage: "workflows",
+public/control-center/pages/ai-command/tool-dock.js:1201:      destinations: ["chat-preview", "workflows", "content-studio", "governance"],
+public/control-center/pages/ai-command/tool-dock.js:1213:      frontendOwnerPage: "workflows",
+public/control-center/pages/ai-command/tool-dock.js:1214:      destinations: ["chat-preview", "workflows", "operations-centers", "sales-crm-draft"],
+public/control-center/pages/ai-command/tool-dock.js:1291:    "data-aicmd-tool-dock-owner": tool.frontendOwnerPage || tool.owner || "ai-command",
+public/control-center/pages/ai-command/tool-dock.js:1400:          Review-only setup: this drawer creates a composer-ready instruction. Destination choices only frame safe handoff context; they do not publish, send, approve, route externally, create CRM records, run workflows, or mutate backend data.
+public/control-center/pages/ai-command/tool-dock.js:1444:            data-aicmd-tool-dock-owner="${safe(tool.frontendOwnerPage || "ai-command")}"
+public/control-center/pages/ai-command/tool-dock.js:1621:    "- Do not publish, send, route, save, overwrite, create CRM records, or run workflows.",
+public/control-center/pages/ai-command/tool-dock.js:1693:  const hardDestinationDefaults = ["chat-preview", "campaign-studio", "content-studio", "composer"];
+public/control-center/router.js:5:import { campaignStudioRoute } from "./pages/campaign-studio.js";
+public/control-center/router.js:6:import { contentStudioRoute } from "./pages/content-studio-workspace.js";
+public/control-center/router.js:7:import { mediaStudioRoute } from "./pages/media-studio-workspace.js";
+public/control-center/router.js:8:import { publishingRoute } from "./pages/publishing.js";
+public/control-center/router.js:9:import { adsManagerRoute } from "./pages/ads-manager.js";
+public/control-center/router.js:10:import { insightsRoute } from "./pages/insights.js";
+public/control-center/router.js:12:import { workflowsRoute } from "./pages/workflows.js";
+public/control-center/router.js:19:} from "./pages/operations-centers.js";
+public/control-center/router.js:25:import { governanceRoute } from "./pages/governance.js";
+public/control-center/router.js:34:  [workflowsRoute.id]: workflowsRoute,
+public/control-center/router.js:43:  [publishingRoute.id]: publishingRoute,
+public/control-center/router.js:45:  [insightsRoute.id]: insightsRoute,
+public/control-center/router.js:52:  [governanceRoute.id]: governanceRoute
+public/control-center/router.js:92:            <div class="empty-box">Unknown route: ${route}</div>
+public/control-center/shared-context.js:148:    const destinationMatches = asString(item?.destination_page) === asString(destinationPage);
+public/control-center/shared-context.js:149:    const sourceMatches = !sourcePage || asString(item?.source_page) === asString(sourcePage);
+public/control-center/shared-context.js:185:    getLatestHandoffFromOperations(operations, "workflows", "ai-command") ||
+public/control-center/shared-context.js:186:    getLatestHandoffFromOperations(operations, "ai-command", "workflows") ||
+
+### page to AI team map
+public/control-center/ai-team-model.js:9:  - No publishing.
+public/control-center/ai-team-model.js:19:    primaryPages: ["home", "campaign-studio", "ai-command"],
+public/control-center/ai-team-model.js:20:    outputTargets: ["campaign-studio", "content-studio", "media-studio", "publishing"],
+public/control-center/ai-team-model.js:28:    primaryPages: ["content-studio", "campaign-studio", "ai-command"],
+public/control-center/ai-team-model.js:29:    outputTargets: ["content-studio", "governance", "publishing"],
+public/control-center/ai-team-model.js:37:    primaryPages: ["media-studio", "library", "campaign-studio"],
+public/control-center/ai-team-model.js:38:    outputTargets: ["media-studio", "library", "publishing"],
+public/control-center/ai-team-model.js:46:    primaryPages: ["media-studio", "content-studio", "publishing"],
+public/control-center/ai-team-model.js:47:    outputTargets: ["media-studio", "content-studio", "publishing"],
+public/control-center/ai-team-model.js:55:    primaryPages: ["publishing", "queue-center", "ai-command"],
+public/control-center/ai-team-model.js:56:    outputTargets: ["publishing", "queue-center", "insights"],
+public/control-center/ai-team-model.js:64:    primaryPages: ["ads-manager", "campaign-studio", "insights"],
+public/control-center/ai-team-model.js:65:    outputTargets: ["ads-manager", "campaign-studio", "insights"],
+public/control-center/ai-team-model.js:69:    id: "seo_insights_analyst",
+public/control-center/ai-team-model.js:73:    primaryPages: ["insights", "research", "home"],
+public/control-center/ai-team-model.js:74:    outputTargets: ["insights", "campaign-studio", "content-studio", "ads-manager"],
+public/control-center/ai-team-model.js:82:    primaryPages: ["research", "setup", "campaign-studio"],
+public/control-center/ai-team-model.js:83:    outputTargets: ["research", "setup", "campaign-studio", "content-studio"],
+public/control-center/ai-team-model.js:84:    defaultPrompt: "Act as Researcher. Find the strongest market, competitor, and audience insights for this project."
+public/control-center/ai-team-model.js:90:    ownerSummary: "Claims, approvals, publishing risk, brand safety, governance, and release trust.",
+public/control-center/ai-team-model.js:91:    primaryPages: ["governance", "publishing", "content-studio", "media-studio"],
+public/control-center/ai-team-model.js:92:    outputTargets: ["governance", "publishing", "content-studio", "media-studio"],
+public/control-center/ai-team-model.js:93:    defaultPrompt: "Act as Compliance Reviewer. Flag claims, approval gaps, and publishing risks before release."
+public/control-center/ai-team-model.js:99:    ownerSummary: "Workflows, tasks, queues, jobs, notifications, handoffs, and execution safety.",
+public/control-center/ai-team-model.js:100:    primaryPages: ["workflows", "task-center", "queue-center", "job-monitor", "notifications"],
+public/control-center/ai-team-model.js:101:    outputTargets: ["workflows", "task-center", "queue-center", "job-monitor", "notifications"],
+public/control-center/ai-team-model.js:107:  home: ["strategist", "operations_lead", "seo_insights_analyst"],
+public/control-center/ai-team-model.js:110:  integrations: ["operations_lead", "seo_insights_analyst"],
+public/control-center/ai-team-model.js:111:  "ai-command": ["operations_lead", "strategist"],
+public/control-center/ai-team-model.js:112:  workflows: ["operations_lead"],
+public/control-center/ai-team-model.js:113:  publishing: ["publisher", "compliance_reviewer"],
+public/control-center/ai-team-model.js:114:  "campaign-studio": ["strategist", "content_writer", "media_director", "ads_optimizer"],
+public/control-center/ai-team-model.js:115:  "content-studio": ["content_writer", "compliance_reviewer", "publisher"],
+public/control-center/ai-team-model.js:116:  "media-studio": ["media_director", "video_lead", "publisher"],
+public/control-center/ai-team-model.js:117:  "ads-manager": ["ads_optimizer", "seo_insights_analyst", "compliance_reviewer"],
+public/control-center/ai-team-model.js:118:  insights: ["seo_insights_analyst", "strategist"],
+public/control-center/ai-team-model.js:120:  governance: ["compliance_reviewer", "operations_lead"],
+public/control-center/ai-team-model.js:122:  "task-center": ["operations_lead"],
+public/control-center/ai-team-model.js:123:  "queue-center": ["operations_lead", "publisher"],
+public/control-center/ai-team-model.js:124:  "job-monitor": ["operations_lead", "media_director"],
+public/control-center/ai-team-model.js:125:  notifications: ["operations_lead"]
+public/control-center/runtime/authority/route-role-fallback.js:17:  "ai-command": ACTIVE_ROUTE_ROLES,
+public/control-center/runtime/authority/route-role-fallback.js:18:  "campaign-studio": ["strategist", "ads_operator", "admin"],
+public/control-center/runtime/authority/route-role-fallback.js:19:  "content-studio": ["writer", "strategist", "compliance_reviewer", "admin"],
+public/control-center/runtime/authority/route-role-fallback.js:20:  "media-studio": ["designer", "video_lead", "compliance_reviewer", "admin"],
+public/control-center/runtime/authority/route-role-fallback.js:21:  publishing: ["publisher", "compliance_reviewer", "admin"],
+public/control-center/runtime/authority/route-role-fallback.js:24:  "task-center": ACTIVE_ROUTE_ROLES,
+public/control-center/runtime/authority/route-role-fallback.js:25:  "queue-center": ACTIVE_ROUTE_ROLES,
+public/control-center/runtime/authority/route-role-fallback.js:26:  "job-monitor": ACTIVE_ROUTE_ROLES,
+public/control-center/runtime/authority/route-role-fallback.js:28:  governance: ["compliance_reviewer", "admin", "analyst"],
+public/control-center/runtime/authority/route-role-fallback.js:29:  "ads-manager": ["ads_operator", "strategist", "analyst", "admin"],
+public/control-center/runtime/authority/route-role-fallback.js:30:  insights: ["analyst", "strategist", "ads_operator", "admin"],
+public/control-center/runtime/authority/route-role-fallback.js:32:  workflows: ACTIVE_ROUTE_ROLES,
+public/control-center/runtime/authority/authority-projection.js:12: * - mutate governance
+public/control-center/runtime/authority/authority-projection.js:16: * - own workflows
+public/control-center/runtime/authority/authority-projection.js:38:  return safeObject(operations.governance);
+public/control-center/pages/settings.js:44:  "Suggest workflows when campaign is ready",
+public/control-center/pages/settings.js:45:  "Block publishing when assets are missing",
+public/control-center/pages/settings.js:273:    backendLabel: "Automation routing rules sync into the durable governance policy",
+public/control-center/pages/settings.js:303:    id: "publishing",
+public/control-center/pages/settings.js:306:    backendLabel: "Publishing defaults sync into the durable governance policy",
+public/control-center/pages/settings.js:309:        path: "publishing.channels",
+public/control-center/pages/settings.js:310:        label: "Default publishing channels",
+public/control-center/pages/settings.js:316:        path: "publishing.schedulingBehavior",
+public/control-center/pages/settings.js:322:        path: "publishing.approvalBeforePublish",
+public/control-center/pages/settings.js:327:        path: "publishing.namingConvention",
+public/control-center/pages/settings.js:333:        path: "publishing.contentRouting",
+public/control-center/pages/settings.js:339:        path: "publishing.campaignOutputs",
+public/control-center/pages/settings.js:350:    backendLabel: "Approval policy syncs into the durable governance and team records",
+public/control-center/pages/settings.js:624:    description: "Manage project identity, publishing defaults, and reusable presets without scattering core setup across multiple cards.",
+public/control-center/pages/settings.js:625:    sectionIds: ["project", "publishing", "presets"]
+public/control-center/pages/settings.js:636:    description: "Keep approval ownership, publishing permissions, and team-role authority together so governance stays understandable.",
+public/control-center/pages/settings.js:687:function extractDurableSettingsSnapshot(governancePolicy = {}, teamModel = {}) {
+public/control-center/pages/settings.js:688:  const governance = asObject(governancePolicy);
+public/control-center/pages/settings.js:689:  const bridge = asObject(governance.settings_bridge);
+public/control-center/pages/settings.js:692:  const owners = asObject(governance.approval_owners);
+public/control-center/pages/settings.js:693:  const rules = asObject(governance.policy_rules);
+public/control-center/pages/settings.js:713:  normalized.publishing = {
+public/control-center/pages/settings.js:714:    ...asObject(normalized.publishing),
+public/control-center/pages/settings.js:715:    approvalBeforePublish: rules.approval_before_publish ?? normalized.publishing?.approvalBeforePublish
+public/control-center/pages/settings.js:729:    publishAccess: asString(normalized.team?.publishAccess || owners.publishing),
+public/control-center/pages/settings.js:760:  const publishing = asObject(form.publishing);
+public/control-center/pages/settings.js:773:      approval_before_publish: Boolean(publishing.approvalBeforePublish),
+public/control-center/pages/settings.js:778:      freeze_publishing: asString(operating.primaryMode) === "Emergency Safe Mode"
+public/control-center/pages/settings.js:784:      publishing: asString(team.publishAccess) || "Publisher",
+public/control-center/pages/settings.js:906:      modeNotes: "Use stronger automation only when approvals, assets, and governance settings are complete."
+public/control-center/pages/settings.js:920:        "Suggest workflows when campaign is ready",
+public/control-center/pages/settings.js:921:        "Block publishing when assets are missing",
+public/control-center/pages/settings.js:927:      routingNotes: "Push readiness gaps into workflows, route SEO findings into Research, and send weak ads to Ads Manager."
+public/control-center/pages/settings.js:929:    publishing: {
+public/control-center/pages/settings.js:1080:    governancePolicy: null
+public/control-center/pages/settings.js:1095:    const [teamResult, governanceResult] = await Promise.allSettled([
+public/control-center/pages/settings.js:1101:    session.governancePolicy = governanceResult.status === "fulfilled" ? asObject(governanceResult.value?.policy || governanceResult.value) : null;
+public/control-center/pages/settings.js:1103:    const durableSnapshot = extractDurableSettingsSnapshot(session.governancePolicy, session.teamModel);
+public/control-center/pages/settings.js:1107:        session.governancePolicy?.updated_at ||
+public/control-center/pages/settings.js:1146:  const publishingReady = Array.isArray(form.publishing.channels) && form.publishing.channels.length > 0 && Boolean(form.publishing.approvalBeforePublish);
+public/control-center/pages/settings.js:1160:      ready: publishingReady,
+public/control-center/pages/settings.js:1161:      helper: publishingReady
+public/control-center/pages/settings.js:1182:    ? "Review the top blocker, fix it in this page, then save to sync durable governance and team records."
+public/control-center/pages/settings.js:1201:  if (!Array.isArray(form.publishing.channels) || !form.publishing.channels.length) {
+public/control-center/pages/settings.js:1202:    risks.push("No default publishing channels are selected, so campaign output cannot route automatically.");
+public/control-center/pages/settings.js:1243:    publishingMode: `${form.publishing.schedulingBehavior} • ${form.publishing.channels.length} channels`,
+public/control-center/pages/settings.js:1499:      preview: "Explain the current project, AI, approval, publishing, and sync posture in one concise review.",
+public/control-center/pages/settings.js:1581:          <strong>${escapeHtml(summary.publishingMode)}</strong>
+public/control-center/pages/settings.js:1600:        <div class="governance-rule-list">
+public/control-center/pages/settings.js:1602:            <div class="governance-rule-item">
+public/control-center/pages/settings.js:1611:      <div class="governance-policy-block">
+public/control-center/pages/settings.js:1613:        <p class="governance-copy">${escapeHtml(readiness.nextBestAction)}</p>
+public/control-center/pages/settings.js:1616:          <button class="btn btn-secondary" type="button" data-settings-action="focus-section" data-section-id="publishing">Review publishing</button>
+public/control-center/pages/settings.js:1636:        <strong>AI context scope:</strong> configuration readiness, approval ownership, publishing safety, AI posture, and operations routing.
+public/control-center/pages/settings.js:1683:      detail: "Approval ownership, policy rules, and settings bridge state are written into the durable governance policy."
+public/control-center/pages/settings.js:1709:      <div class="governance-rule-list">
+public/control-center/pages/settings.js:1711:          <div class="governance-rule-item">
+public/control-center/pages/settings.js:1733:          <strong>${escapeHtml(summary.publishingMode)}</strong>
+public/control-center/pages/settings.js:1746:        <strong>Status:</strong> ${escapeHtml(formatRelativeTime(session.savedAt))}. Save updates durable team and governance records; backend enforcement remains authoritative.
+public/control-center/pages/settings.js:1751:        <button class="btn btn-secondary" type="button" data-settings-action="open-governance">Open Governance page</button>
+public/control-center/pages/settings.js:1766:          <p>${escapeHtml(dirtyText)}. Saving writes this configuration into durable team and governance records used across the operating system.</p>
+public/control-center/pages/settings.js:1780:        <button class="btn btn-secondary" type="button" data-settings-action="focus-section" data-section-id="safety">Safety and governance</button>
+public/control-center/pages/settings.js:1827:      ? "Unsaved changes are present. Saving will update the shared durable governance and team records."
+public/control-center/pages/settings.js:1828:      : "All changes captured. The shared durable governance and team records are in sync.";
+public/control-center/pages/settings.js:1850:          const governancePayload = mapSettingsToGovernancePolicy(session.form);
+public/control-center/pages/settings.js:1853:          const confirmed = window.confirm("Confirm settings save\n\nAction: Save team and governance settings for this project.\nRisk: These settings can affect team roles, approval behavior, publishing readiness, brand safety review, and admin override behavior.\nAuthority: This is a backend-governed durable settings update.\n\nSelect Cancel to review the settings before saving.");
+public/control-center/pages/settings.js:1862:              ...governancePayload
+public/control-center/pages/settings.js:1868:            destination_page: "governance",
+public/control-center/pages/settings.js:1872:            destination_service_domain: "governance",
+public/control-center/pages/settings.js:1874:              entity_type: "governance_policy",
+public/control-center/pages/settings.js:1876:              route: "governance",
+public/control-center/pages/settings.js:1891:          session.governancePolicy = governancePayload;
+public/control-center/pages/settings.js:1932:      if (action === "open-governance") {
+public/control-center/pages/settings.js:1933:        context.navigateTo("governance");
+public/control-center/pages/settings.js:1959:      context.navigateTo("ai-command");
+public/control-center/pages/settings.js:1971:      context.navigateTo("ai-command");
+public/control-center/pages/settings.js:2023:    description: "Configure project defaults, AI behavior, publishing rules, approvals, sync behavior, and governance."
+public/control-center/pages/settings.js:2037:              Select a project to configure system defaults, approvals, sync policies, and governance rules.
+public/control-center/pages/settings.js:2062: * but they must not call removed /api/ai-control/* or /api/governance/* routes.
+public/control-center/pages/settings.js:2076:      governance: {
+public/control-center/pages/settings.js:2107:  return buildLegacySettingsHookResponse("governance", "loadAudit");
+public/control-center/pages/settings.js:2111:  return buildLegacySettingsHookResponse("governance", "process", {
+public/control-center/pages/settings.js:2117:  return buildLegacySettingsHookResponse("governance", "live");
+public/control-center/pages/home.js:200:      meta: launch.campaignReadiness === "Ready" ? "Execution path looks clear" : "Resolve blockers before publishing",
+public/control-center/pages/home.js:233:  if (/(campaign|launch wave|brief)/.test(text)) return "campaign-studio";
+public/control-center/pages/home.js:234:  if (/(publish|schedule|queue)/.test(text)) return "publishing";
+public/control-center/pages/home.js:235:  if (/(ad|budget|paid)/.test(text)) return "ads-manager";
+public/control-center/pages/home.js:236:  if (/(content|copy)/.test(text)) return "content-studio";
+public/control-center/pages/home.js:237:  if (/(job|operation)/.test(text)) return "operations-centers";
+public/control-center/pages/home.js:238:  return "ai-command";
+public/control-center/pages/home.js:243:  const notifications = asArray(operations.notifications?.items);
+public/control-center/pages/home.js:272:    { id: "publisher", name: "Publisher", fallback: "Prepare publishing packages, schedules, and manual handoffs." },
+public/control-center/pages/home.js:280:    const roleNotifications = notifications.filter((item) => asString(item?.owner_role).toLowerCase() === role.id);
+public/control-center/pages/home.js:320:  const insights = asObject(activity.insights);
+public/control-center/pages/home.js:322:  const notifications = asArray(operations.notifications?.items);
+public/control-center/pages/home.js:350:  const unreadNotifications = notifications.filter((item) => !item?.read_at);
+public/control-center/pages/home.js:371:  const insightsRecommendations = asArray(insights.recommendations);
+public/control-center/pages/home.js:382:  const intelligenceScore = insightsRecommendations.length + learningLessons.length;
+public/control-center/pages/home.js:459:  const publishingQueue = asArray(operations.queues?.items).filter((item) =>
+public/control-center/pages/home.js:460:    asString(item.entity_type) === "publishing_job" || asString(item.queue_type) === "publishing"
+public/control-center/pages/home.js:462:  const publishReadyCount = publishingQueue.filter((item) => {
+public/control-center/pages/home.js:525:    ...notifications.slice(0, 8).map((item) => ({
+public/control-center/pages/home.js:563:          summary: `${formatCount(pendingApprovals.length)} approvals pending, ${formatCount(failedExecutions.length)} escalations, ${formatCount(unreadNotifications.length)} notifications, system score ${formatPercent(systemScore)}.`
+public/control-center/pages/home.js:574:    primaryActionLabel: nextActionRoute === "ai-command" ? "Prepare AI Guidance" : `Open ${humanizeStatus(nextActionRoute)} Workspace`,
+public/control-center/pages/home.js:595:      buttonLabel: nextActionRoute === "ai-command" ? "Prepare AI Guidance" : `Open ${humanizeStatus(nextActionRoute)} Workspace`,
+public/control-center/pages/home.js:713:        : "No execution recorded yet — start with a campaign or publishing package to create the first signal.",
+public/control-center/pages/home.js:714:      recommendation: asString(recommendations[0]).trim() || asString(insightsRecommendations[0]).trim() || "Ask Executive AI to generate the next best action from readiness, blockers, and recent activity.",
+public/control-center/pages/home.js:715:      feedback: asString(learningLessons[0]).trim() || "Connect insights or run a reviewed campaign so the learning engine can capture feedback."
+public/control-center/pages/home.js:720:      notifications: unreadNotifications.length,
+public/control-center/pages/home.js:841:              <strong class="mhos-os-brief-value">${escapeHtml(dashboard.nextBestAction.route === "ai-command" ? "AI Guidance" : humanizeStatus(dashboard.nextBestAction.route))}</strong>
+public/control-center/pages/home.js:865:                <span class="mhos-os-chip">No approval, publishing, sending, or record changes here</span>
+public/control-center/pages/home.js:1075:      navigateTo("ai-command");
+public/control-center/pages/home.js:1087:        publisher: `Act as the Publisher for ${projectLabel}. Review publishing readiness, scheduled jobs, blockers, and what must be checked before publishing. Do not execute anything; prepare guidance only.`,
+public/control-center/pages/home.js:1090:        compliance_reviewer: `Act as the Compliance Reviewer for ${projectLabel}. Review launch blockers, claims, approvals, and publishing safety. Tell me what must be checked before release. Do not execute anything; prepare guidance only.`,
+public/control-center/pages/home.js:1102:        if (dashboard.nextBestAction.route === "ai-command") {
+public/control-center/pages/home.js:1115:    if (operationsBtn) operationsBtn.onclick = () => openRoute("operations-centers");
+public/control-center/pages/home.js:1118:    if (aiTeamBtn) aiTeamBtn.onclick = () => openRoute("ai-command");
+public/control-center/pages/home.js:1120:    if (fullAiTeamBtn) fullAiTeamBtn.onclick = () => openRoute("ai-command");
+public/control-center/pages/home.js:1123:    if (quickCampaignBtn) quickCampaignBtn.onclick = () => openRoute("campaign-studio");
+public/control-center/pages/home.js:1148:      promptLaunchBtn.onclick = () => openAiWithPrompt("Summarize the launch blockers and tell me what must be fixed before publishing.");

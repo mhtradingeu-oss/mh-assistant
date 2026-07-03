@@ -1,0 +1,1171 @@
+### AI Command team definitions
+36:const MODE_DEFS = [
+38:                id: "strategist",
+39:                label: "Strategist",
+41:                summary: "Campaign concepts, launch plans, channel mix, and offer strategy.",
+45:                id: "writer",
+46:                label: "Content Writer",
+48:                summary: "Captions, hooks, scripts, emails, and landing page copy.",
+52:                id: "media",
+53:                label: "Media Director",
+55:                summary: "Visual direction, creative brief, format guidance, and brand consistency.",
+59:                id: "video_lead",
+60:                label: "Video Lead",
+62:                summary: "Short-form video scripts, motion direction, and reel strategy.",
+66:                id: "publisher",
+67:                label: "Publisher",
+69:                summary: "Publishing readiness, schedule review, and handoff preparation.",
+73:                id: "ads",
+74:                label: "Ads Optimizer",
+76:                summary: "Ad concepts, targeting angles, platform copy, and paid strategy.",
+80:                id: "analyst",
+81:                label: "SEO & Insights Analyst",
+83:                summary: "SEO signals, performance data, content insights, and traffic patterns.",
+87:                id: "compliance_reviewer",
+88:                label: "Compliance Reviewer",
+90:                summary: "Claims review, approvals, safety language, and governance checks.",
+94:                id: "operations",
+95:                label: "Operations Lead",
+97:                summary: "Tasks, timelines, handoffs, approvals, and execution plans.",
+101:                id: "customer_ops",
+102:                label: "Customer Operations Lead",
+104:                summary: "Inbox review, reply drafts, ticket drafts, SLA risk, and escalation routing.",
+108:                id: "sales_crm",
+109:                label: "Sales / CRM Lead",
+111:                summary: "Lead qualification, outreach drafts, follow-up cadence, and CRM handoff notes.",
+117:const MODE_ID_ALIASES = {
+142:const SPECIALIST_DEFS = [
+144:		id: "strategist",
+145:		label: "Strategist",
+146:		position: "Executive Strategy Lead",
+148:		summary: "Campaign concepts, launch plans, channel mix, and offer strategy.",
+150:		canHelp: ["Draft campaign plans", "Prioritize next actions", "Map launch sequences", "Advise on offer strategy", "Prepare channel briefs"],
+151:		cannotDo: ["Publish campaigns directly", "Execute workflows automatically", "Approve content", "Set live budgets"],
+152:		destinations: ["Campaign Studio", "Workflows", "AI Command"],
+153:		safetyNote: "All outputs are guidance and draft only. Execution requires explicit confirmation.",
+154:		status: "AI ready"
+157:		id: "writer",
+158:		label: "Content Writer",
+159:		position: "Messaging and Content Lead",
+161:		summary: "Captions, hooks, scripts, emails, and landing page copy.",
+163:		canHelp: ["Draft captions and hooks", "Write email copy", "Create landing page text", "Prepare publisher handoff", "Suggest message variants"],
+164:		cannotDo: ["Publish directly", "Approve risky claims", "Invent unsupported facts", "Run workflows automatically"],
+165:		destinations: ["Content Studio", "Publishing", "AI Command"],
+166:		safetyNote: "Drafts require review before publishing. Cannot approve or publish without confirmation.",
+167:		status: "AI ready"
+170:		id: "media",
+171:		label: "Media Director",
+172:		position: "Creative Direction Lead",
+174:		summary: "Visual direction, creative briefs, format guidance, and brand consistency.",
+176:		canHelp: ["Write creative briefs", "Advise on visual direction", "Map format requirements", "Review brand alignment", "Prepare media handoffs"],
+177:		cannotDo: ["Generate images directly", "Upload assets without review", "Approve without confirmation", "Execute media jobs"],
+178:		destinations: ["Asset Library", "Content Studio", "AI Command"],
+179:		safetyNote: "Direction and briefs only. Media generation requires backend confirmation and explicit action.",
+180:		status: "AI ready"
+183:		id: "video_lead",
+184:		label: "Video Lead",
+185:		position: "Short-Form Video Lead",
+187:		summary: "Short-form video scripts, motion direction, and reel strategy.",
+189:		canHelp: ["Write video scripts", "Plan short-form strategy", "Define motion direction", "Map video asset requirements", "Prepare video briefs"],
+190:		cannotDo: ["Generate video directly", "Upload footage without review", "Approve without confirmation", "Run media jobs automatically"],
+191:		destinations: ["Asset Library", "Content Studio", "Media Native"],
+192:		safetyNote: "Scripts and direction only. Video generation requires explicit backend action and approval.",
+193:		status: "AI ready"
+196:		id: "publisher",
+197:		label: "Publisher",
+198:		position: "Publishing Readiness Lead",
+200:		summary: "Publishing readiness, schedule review, and handoff preparation.",
+202:		canHelp: ["Review publishing readiness", "Check scheduled jobs", "Prepare handoff packages", "Map publishing dependencies", "Flag pre-publish risks"],
+203:		cannotDo: ["Publish without explicit approval", "Override schedules", "Bypass governance gates", "Push to live channels directly"],
+204:		destinations: ["Publishing", "Workflows", "AI Command"],
+205:		safetyNote: "Publishing always requires explicit approval. No live publishing from AI guidance alone.",
+206:		status: "AI ready"
+209:		id: "ads",
+210:		label: "Ads Optimizer",
+211:		position: "Paid Growth Lead",
+213:		summary: "Ad concepts, targeting angles, platform copy, and paid strategy.",
+215:		canHelp: ["Draft ad concepts and copy", "Review targeting angles", "Plan paid campaign structure", "Suggest creative variants", "Map platform-specific strategy"],
+216:		cannotDo: ["Launch ads directly", "Set live budgets without review", "Approve spend", "Access ad accounts directly"],
+217:		destinations: ["Ads Manager", "Integrations", "Campaign Studio"],
+218:		safetyNote: "Ad concepts and copy only. Live ad actions require platform integration and explicit approval.",
+219:		status: "AI ready"
+222:		id: "analyst",
+223:		label: "SEO & Insights Analyst",
+224:		position: "Search and Insights Lead",
+226:		summary: "SEO signals, performance data, content insights, and traffic patterns.",
+228:		canHelp: ["Review SEO signals", "Analyze content performance", "Identify traffic patterns", "Suggest keyword improvements", "Map data coverage gaps"],
+229:		cannotDo: ["Update SEO settings directly", "Edit live website", "Set analytics configurations", "Publish recommendations automatically"],
+230:		destinations: ["Insights", "Integrations", "Setup"],
+231:		safetyNote: "Analysis and recommendations only. No direct website or analytics changes.",
+232:		status: "AI ready"
+235:		id: "compliance_reviewer",
+236:		label: "Compliance Reviewer",
+237:		position: "Claims and Governance Lead",
+239:		summary: "Claims review, approval safety, publishing risk, and governance notes.",
+241:		canHelp: ["Review marketing claims", "Flag approval risks", "Check publishing safety", "Prepare governance notes", "Identify compliance blockers"],
+242:		cannotDo: ["Grant approvals directly", "Override governance gates", "Publish on behalf of approvers", "Remove flags without review"],
+243:		destinations: ["Workflows", "Publishing", "Governance"],
+244:		safetyNote: "Compliance review is advisory. Approvals always require human confirmation before execution.",
+245:		status: "AI ready"
+248:		id: "operations",
+249:		label: "Operations Lead",
+250:		position: "Execution and Handoff Lead",
+252:		summary: "Tasks, timelines, handoffs, approvals, and execution plans.",
+254:		canHelp: ["Create task plans", "Map execution sequences", "Prepare workflow handoffs", "Review execution health", "Identify operational blockers"],
+255:		cannotDo: ["Run workflows without confirmation", "Auto-approve tasks", "Override authority gates", "Execute backend operations directly"],
+256:		destinations: ["Workflows", "Operations Centers", "AI Command"],
+257:		safetyNote: "Task plans and handoffs only. Workflow execution requires explicit user confirmation.",
+258:		status: "AI ready"
+261:		id: "customer_ops",
+262:		label: "Customer Operations Lead",
+263:		position: "Customer Experience Operations Lead",
+265:		summary: "Inbox review, reply drafts, ticket drafts, SLA risk, customer profile context, and escalation routing.",
+267:		canHelp: ["Review inbox context", "Summarize customer threads", "Draft safe replies", "Prepare ticket drafts", "Flag SLA and escalation risk"],
+268:		cannotDo: ["Send customer replies", "Create live tickets", "Change SLA policy", "Escalate without confirmation"],
+269:		destinations: ["Unified Inbox", "Operations Centers", "Integrations"],
+270:		safetyNote: "Customer operations outputs are drafts only. Sending replies, ticket creation, and escalations require confirmation in the owning surface.",
+271:		status: "AI ready"
+274:		id: "sales_crm",
+275:		label: "Sales / CRM Lead",
+276:		position: "Revenue and CRM Operations Lead",
+278:		summary: "Lead qualification, outreach drafts, follow-up cadence, CRM profile summaries, and sales handoff notes.",
+280:		canHelp: ["Qualify lead context", "Draft outreach", "Plan follow-up sequences", "Summarize CRM profiles", "Prepare sales handoffs"],
+281:		cannotDo: ["Send outreach", "Mutate CRM records", "Advance pipeline stages", "Confirm follow-ups without review"],
+282:		destinations: ["CRM", "Workflows", "Operations Centers"],
+283:		safetyNote: "Sales and CRM outputs are guidance and drafts only. CRM mutations and outreach sends require confirmation in the owning surface.",
+284:		status: "AI ready"
+291:		{ label: "What should I do next?", sub: "Review priorities and blockers" },
+292:		{ label: "Draft a campaign brief", sub: "Map objective, audience, and channels" },
+293:		{ label: "Review launch readiness", sub: "Identify what is blocking launch" },
+294:		{ label: "Suggest the next campaign move", sub: "Based on current project state" }
+297:		{ label: "Draft campaign captions", sub: "For the active campaign" },
+298:		{ label: "Write a hook sequence", sub: "3 hook variants to test" },
+299:		{ label: "Prepare a Publisher handoff", sub: "Package ready content for review" },
+300:		{ label: "Suggest message variants", sub: "Test different angles and tones" }
+303:		{ label: "Write a creative brief", sub: "For the next campaign visual" },
+304:		{ label: "Review brand consistency", sub: "Flag misaligned assets" },
+305:		{ label: "Map format requirements", sub: "By platform and campaign phase" },
+306:		{ label: "Prepare a media handoff", sub: "Package direction for the team" }
+309:		{ label: "Write a reel script", sub: "For the current campaign" },
+310:		{ label: "Plan short-form content", sub: "Map next 4 video concepts" },
+311:		{ label: "Outline motion direction", sub: "Align visuals with campaign tone" },
+312:		{ label: "Map video asset needs", sub: "By platform and format" }
+315:		{ label: "Review publishing readiness", sub: "Check what is ready to publish" },
+316:		{ label: "Flag pre-publish risks", sub: "Identify what needs review first" },
+317:		{ label: "Check scheduled jobs", sub: "Review the current queue" },
+318:		{ label: "Prepare a handoff package", sub: "For the approver review" }
+321:		{ label: "Draft ad concepts", sub: "For the current campaign" },
+322:		{ label: "Review targeting angles", sub: "Map audience and platform fit" },
+323:		{ label: "Suggest creative variants", sub: "Test different hooks and CTAs" },
+324:		{ label: "Plan paid campaign structure", sub: "Objective, audience, creative, budget" }
+327:		{ label: "Review SEO signals", sub: "Top queries, CTR gaps, weak pages" },
+328:		{ label: "Analyze content performance", sub: "What is working and what is not" },
+329:		{ label: "Map data coverage gaps", sub: "Which integrations are missing" },
+330:		{ label: "Suggest next improvements", sub: "Based on current signals" }
+333:		{ label: "Check claims for approval", sub: "Review all marketing claims" },
+334:		{ label: "Flag publishing risks", sub: "Identify blockers before release" },
+335:		{ label: "Prepare governance notes", sub: "Document compliance status" },
+336:		{ label: "Review approval requirements", sub: "What needs sign-off" }
+339:		{ label: "Turn this into tasks", sub: "Break down into action items" },
+340:		{ label: "Draft a workflow handoff", sub: "Prepare for the next owner" },
+341:		{ label: "Review execution health", sub: "Check blockers and failed jobs" },
+342:		{ label: "Map the next execution steps", sub: "Sequence and prioritize" }
+345:		{ label: "Summarize customer thread", sub: "Capture issue, tone, and next reply" },
+346:		{ label: "Draft customer reply", sub: "Safe response for review" },
+347:		{ label: "Check SLA risk", sub: "Flag urgency and escalation path" },
+348:		{ label: "Prepare escalation", sub: "Route support, sales, or operations" }
+351:		{ label: "Qualify this lead", sub: "Fit, intent, urgency, next step" },
+352:		{ label: "Draft outreach", sub: "Personalized message for review" },
+353:		{ label: "Build follow-up sequence", sub: "Multi-step sales cadence" },
+354:		{ label: "Prepare sales handoff", sub: "Route context to operations" }
+360:	{ label: "What should the executive AI team focus on?", sub: "Strategy, execution, and risk review" },
+361:	{ label: "Map the next launch wave", sub: "Strategist to Publisher to Operations" },
+362:	{ label: "Prepare a full handoff sequence", sub: "Strategy, creative, compliance, publishing, ops" },
+363:	{ label: "Review customer and sales impact", sub: "Customer Ops, Sales / CRM, Operations" }
+378:	{ id: "draft", label: "Draft", helper: "Latest draft or guidance preview" },
+379:	{ id: "task", label: "Task", helper: "Task-shaped output" },
+380:	{ id: "workflow", label: "Workflow Preview", helper: "Operating sequence" },
+381:	{ id: "handoff", label: "Handoff Preview", helper: "Destination package" },
+382:	{ id: "export", label: "Export", helper: "File-ready package" }
+410:		label: "Admin / Governance",
+412:		status: "Planned",
+413:		summary: "Policy, approvals, roles, and audit controls stay destination-owned."
+416:		label: "Researcher",
+418:		status: "Planned",
+419:		summary: "Market, evidence, competitor, and proof research will prepare source packs only."
+422:		label: "Automation Architect",
+424:		status: "Planned",
+425:		summary: "Workflow blueprints and trigger maps will route to Workflows before execution."
+431:		{ id: "campaign-angle-generator", label: "Campaign Angle Generator", action: "preview", intent: "guidance", template: "Generate campaign angles for {project}. Include audience tension, promise, channel fit, and strongest first test." },
+432:		{ id: "launch-plan", label: "Launch Plan", action: "preview", intent: "workflow", template: "Build a launch plan for {project}. Include phases, channels, owners, blockers, and next move." },
+433:		{ id: "funnel-mapping", label: "Funnel Mapping", action: "preview", intent: "guidance", template: "Map the funnel for {project}. Include awareness, consideration, conversion, retention, and handoff points." },
+434:		{ id: "prioritize-next-move", label: "Priority Sort", action: "preview", intent: "task", template: "Prioritize the next moves for {project}. Rank by impact, urgency, dependencies, and safest first action." }
+437:		{ id: "hook-generator", label: "Hook Generator", action: "preview", intent: "guidance", template: "Write 5 German hook variants for {project}. Keep them concise, testable, and suitable for the Germany market." },
+438:		{ id: "caption-builder", label: "Caption Builder", action: "preview", intent: "guidance", template: "Draft German captions for {project}. Include angle, body, CTA, and platform adaptation notes." },
+439:		{ id: "cta-refiner", label: "CTA Refiner", action: "preview", intent: "task", template: "Refine CTA options for {project}. Provide German variants for awareness, consideration, and action stages." },
+440:		{ id: "publisher-package", label: "Publisher Package", action: "preview", intent: "handoff", template: "Prepare a Publisher handoff for {project}. Include German copy package, CTA, notes, and remaining checks." }
+443:		{ id: "creative-brief-builder", label: "Creative Brief Builder", action: "preview", intent: "media", template: "Prepare a creative brief for {project}. Include concept, visual rules, subject, brand constraints, and production notes." },
+444:		{ id: "format-mapper", label: "Format Mapper", action: "preview", intent: "guidance", template: "Map required creative formats for {project}. Include platform, aspect ratio, asset type, and usage context." },
+445:		{ id: "asset-checklist", label: "Asset Checklist", action: "preview", intent: "task", template: "Create an asset checklist for {project}. List must-have files, missing references, usage context, and priority." },
+446:		{ id: "visual-direction", label: "Visual Direction", action: "preview", intent: "guidance", template: "Review visual direction for {project}. Identify mismatches, improvements, and required references." },
+447:		{ id: "open-media-studio", label: "Send prompt to Media Studio", action: "route", route: "media-studio" }
+450:		{ id: "write-video-hook", label: "Write video hook", action: "preview", intent: "guidance", template: "Write short-form video hooks for {project}. Include 3 opening variants and audience fit." },
+451:		{ id: "draft-script", label: "Draft script", action: "preview", intent: "guidance", template: "Draft a short-form video script for {project}. Include hook, body, CTA, and visual cues." },
+452:		{ id: "build-storyboard", label: "Build storyboard", action: "preview", intent: "workflow", template: "Build storyboard beats for {project}. Sequence shots and key transitions." },
+453:		{ id: "prepare-voiceover", label: "Prepare voiceover", action: "preview", intent: "guidance", template: "Prepare voiceover script options for {project}. Keep clean timing and emphasis notes." },
+454:		{ id: "map-video-asset-needs", label: "Map video asset needs", action: "preview", intent: "task", template: "Map video asset needs for {project}. Include format, source, and production owner." }
+457:		{ id: "publishing-checklist", label: "Publishing Checklist", action: "preview", intent: "handoff", template: "Build a publishing checklist for {project}. Include German copy, assets, claims checks, and channel readiness." },
+458:		{ id: "final-packaging", label: "Final Packaging", action: "preview", intent: "handoff", template: "Prepare a final publishing package for {project}. Include copy, CTA, asset notes, approvals, and destination channel." },
+459:		{ id: "channel-formatting", label: "Channel Formatting", action: "preview", intent: "guidance", template: "Format the next output for {project} by channel. Include German copy, limits, CTA, and scheduling notes." },
+460:		{ id: "schedule-draft", label: "Schedule Draft", action: "preview", intent: "workflow", template: "Prepare a publishing schedule draft for {project}. Include channel cadence, dependencies, and review gates." },
+461:		{ id: "open-publishing", label: "Open Publishing", action: "route", route: "publishing" }
+464:		{ id: "ad-angle-generator", label: "Ad Angle Generator", action: "preview", intent: "guidance", template: "Draft ad angles for {project}. Include audience problem, value promise, German hook direction, and platform fit." },
+465:		{ id: "copy-variants", label: "Copy Variants", action: "preview", intent: "guidance", template: "Prepare German ad copy variants for {project}. Include hooks, primary text, CTA, and creative notes." },
+466:		{ id: "test-ideas", label: "Test Ideas", action: "preview", intent: "task", template: "Suggest paid test ideas for {project}. Provide hypotheses, segments, creative variables, and measurement notes." },
+467:		{ id: "budget-notes", label: "Budget Notes", action: "preview", intent: "guidance", template: "Review budget notes for {project}. Summarize constraints and safe test allocation guidance." },
+468:		{ id: "open-ads-manager", label: "Open Ads Manager", action: "route", route: "ads-manager" }
+471:		{ id: "keyword-intent", label: "Keyword Intent", action: "preview", intent: "guidance", template: "Suggest keyword intent opportunities for {project}. Include Germany-market intent, content mapping, and priority." },
+472:		{ id: "meta-direction", label: "Meta Direction", action: "preview", intent: "guidance", template: "Prepare meta direction for {project}. Include page angle, title direction, description direction, and CTA intent." },
+473:		{ id: "opportunity-summary", label: "Opportunity Summary", action: "preview", intent: "task", template: "Summarize SEO and insight opportunities for {project}. Focus on conversion, traffic quality, and content fit." },
+474:		{ id: "analysis-plan", label: "Analysis Plan", action: "preview", intent: "workflow", template: "Draft an analysis plan for {project}. Define questions, datasets, cadence, and owners." },
+475:		{ id: "open-insights", label: "Open Insights", action: "route", route: "insights" }
+478:		{ id: "claims-check", label: "Claims Check", action: "preview", intent: "guidance", template: "Review marketing claims for {project}. Flag unsupported, high-risk, or evidence-dependent wording." },
+479:		{ id: "approval-flags", label: "Approval Flags", action: "preview", intent: "task", template: "Check approval risks for {project}. List risk, impact, mitigation, and required owner." },
+480:		{ id: "safety-checklist", label: "Safety Checklist", action: "preview", intent: "handoff", template: "Prepare a safety checklist for {project}. Include policy checks, evidence required, and approval notes." },
+481:		{ id: "publish-readiness", label: "Publish Readiness", action: "preview", intent: "handoff", template: "Review publish readiness for {project}. Confirm what needs human approval before release." },
+482:		{ id: "open-governance", label: "Open Governance", action: "route", route: "governance" }
+485:		{ id: "timeline-draft", label: "Timeline Draft", action: "preview", intent: "workflow", template: "Draft an execution timeline for {project}. Include milestones, owners, dependencies, and review gates." },
+486:		{ id: "handoff-routing", label: "Handoff Routing", action: "preview", intent: "handoff", template: "Prepare handoff routing for {project}. Include source, destination, decision gates, and required confirmations." },
+487:		{ id: "checklist", label: "Checklist", action: "preview", intent: "task", template: "Draft an operational checklist for {project}. Include owners, dependencies, priority, and first action." },
+488:		{ id: "blocker-review", label: "Blocker Review", action: "preview", intent: "guidance", template: "Review operational blockers for {project}. Prioritize by risk and impact." },
+489:		{ id: "open-workflows", label: "Open Workflows / Operations", action: "route", route: "workflows" }
+492:		{ id: "review-unified-inbox", label: "Review Unified Inbox", action: "preview", intent: "guidance", template: "Review the Unified Inbox readiness for {project}. Summarize visible customer-operation signals, open gaps, and safe next review steps. Do not claim inbox actions happened." },
+493:		{ id: "summarize-customer-thread", label: "Summarize Customer Thread", action: "preview", intent: "guidance", template: "Summarize this customer thread for {project}. Include customer issue, sentiment, reply goal, missing details, and safe next step." },
+494:		{ id: "draft-customer-reply", label: "Draft Customer Reply", action: "preview", intent: "guidance", template: "Draft a customer reply for {project}. Keep it helpful, calm, review-ready, and do not claim any operational action has been completed." },
+495:		{ id: "create-ticket-draft", label: "Create Ticket Draft", action: "preview", intent: "task", template: "Create a ticket draft for {project}. Include issue, priority, owner suggestion, evidence needed, and next safe action." },
+496:		{ id: "check-sla-risk", label: "Check SLA Risk", action: "preview", intent: "guidance", template: "Check SLA risk for {project}. Flag urgency, risk level, missing runtime data, and escalation recommendation for review." },
+497:		{ id: "prepare-escalation", label: "Prepare Escalation", action: "preview", intent: "handoff", template: "Prepare an escalation draft for {project}. Include reason, customer impact, owner, confirmation needed, and destination team." },
+498:		{ id: "customer-profile-snapshot", label: "Customer Profile Snapshot", action: "preview", intent: "guidance", template: "Prepare a customer profile snapshot for {project}. Include known context, purchase/support signals, missing fields, and safe follow-up questions." },
+499:		{ id: "route-support-sales-ops", label: "Route to Support / Sales / Operations", action: "preview", intent: "handoff", template: "Prepare routing guidance for {project}. Decide whether the customer item belongs with Support, Sales, or Operations, and explain the review gate." }
+502:		{ id: "lead-qualification", label: "Lead Qualification", action: "preview", intent: "guidance", template: "Qualify the lead for {project}. Include fit, intent, urgency, missing CRM fields, and the safest next step." },
+503:		{ id: "outreach-draft", label: "Outreach Draft", action: "preview", intent: "guidance", template: "Draft outreach for {project}. Include subject or opener, personalized message, CTA, and review notes before sending." },
+504:		{ id: "follow-up-sequence", label: "Follow-up Sequence", action: "preview", intent: "workflow", template: "Build a follow-up sequence for {project}. Include timing, message angle, CTA, stop condition, and confirmation requirements." },
+505:		{ id: "crm-profile-summary", label: "CRM Profile Summary", action: "preview", intent: "guidance", template: "Summarize the CRM profile context for {project}. Include fit, history, open questions, and next sales action without mutating CRM data." },
+506:		{ id: "pipeline-next-step", label: "Pipeline Next Step", action: "preview", intent: "task", template: "Recommend the pipeline next step for {project}. Include stage, rationale, owner, risk, and required confirmation." },
+507:		{ id: "dealer-salon-outreach", label: "Dealer / Salon Outreach", action: "preview", intent: "guidance", template: "Draft dealer or salon outreach for {project}. Include positioning, proof needs, offer angle, CTA, and follow-up note." },
+508:		{ id: "influencer-lead-plan", label: "Influencer Lead Plan", action: "preview", intent: "workflow", template: "Prepare an influencer lead plan for {project}. Include target profile, outreach angle, qualification criteria, and handoff path." },
+509:		{ id: "sales-handoff-draft", label: "Sales Handoff", action: "preview", intent: "handoff", template: "Prepare a sales handoff draft for {project}. Include lead context, recommended next action, owner, and confirmation needed." }
+515:	{ icon: "🚀", label: "Launch Campaign", sub: "Build a campaign plan", template: "Build a launch campaign for {project}. Map the channels, offer, phases, and required assets." },
+516:	{ icon: "✍️", label: "Generate Content", sub: "Write hooks, captions & scripts", template: "Generate content for {project}. Create hooks, caption ideas, and a reel script for the next product push." },
+517:	{ icon: "📊", label: "Analyze Performance", sub: "Review what's working", template: "Analyze current performance for {project}. What content, campaigns, and channels are working best right now?" },
+518:	{ icon: "🔧", label: "Fix Readiness", sub: "Close critical gaps", template: "What are the critical readiness gaps for {project} and what exactly needs to be done to fix them?" }
+525:	{ id: "strategy", label: "Strategy" },
+526:	{ id: "content", label: "Content" },
+527:	{ id: "campaign", label: "Campaign" },
+528:	{ id: "integration", label: "Integration" },
+529:	{ id: "asset", label: "Asset" },
+530:	{ id: "research", label: "Research" },
+531:	{ id: "report", label: "Report" },
+532:	{ id: "automation", label: "Automation" }
+536:	{ id: "current-project", label: "Current project" },
+537:	{ id: "selected-context", label: "Selected page/context" },
+538:	{ id: "campaign", label: "Campaign" },
+539:	{ id: "product", label: "Product" }
+553:		id: "strategist",
+560:		id: "writer",
+574:		id: "media",
+581:		id: "ads",
+588:		id: "analyst",
+602:		id: "operations",
+932:				status: "idle",
+1425:		summary: "Guidance prepared for review.",
+1432:		status: "draft_preview",
+1443:				summary: "Strategic task draft prepared with priorities, blockers, and operating sequence.",
+1456:			summary: `Priority guidance prepared from: ${promptSnippet}`,
+1469:			summary: "Content draft prepared with hooks, captions, CTA flow, and review checkpoint.",
+1504:			summary: "Media brief prepared with visual direction, prompt ideas, and required assets.",
+1523:			summary: "Video draft prepared with hook, script structure, and storyboard flow.",
+1538:			summary: "Publishing checklist and schedule draft prepared.",
+1558:			summary: "Ad angle and audience testing draft prepared for review.",
+1586:			summary: "Analysis plan prepared with key signals, coverage gaps, and next checks.",
+1600:			summary: "Risk review checklist prepared with claims and safety review points.",
+1616:			summary: "Customer operations draft prepared with safe reply language, ticket notes, SLA review, and escalation guardrails.",
+1623:				"Issue summary: customer concern or request captured for review.",
+1647:			summary: "Sales and CRM draft prepared with lead qualification, outreach direction, follow-up cadence, and pipeline handoff notes.",
+1685:				summary: "Workflow draft prepared with stage owners and checkpoints.",
+1698:			summary: "Operational plan drafted with next tasks, owners, and route.",
+1715:		? { id: "operations", label: "Full Team" }
+1739:		summary: `Full team ${outputType.replace("_", " ")} preview prepared for ${projectName || "current project"}.`,
+1844:                blocks.push({ label: "Main output", items: mainLines });
+1851:                blocks.push({ label: "Details", items: bullets });
+1858:                blocks.push({ label: "Next steps", items: steps, ordered: true });
+1860:                blocks.push({ label: "Next step", items: [compactPreviewText(preview.nextStep, 280)] });
+1917:				label: titleCase(key),
+1918:				status: asString(item?.status) || "missing",
+1927:			label: titleCase(record.integration_id),
+1928:			status: record.status_label || record.status,
+1962:				label: item.display_label || item.label || item.asset_type
+1968:				label: item.display_label || item.label || item.asset_type,
+1969:				status: item.status
+2068:		summary: summaryParts.join(" ") || "Project is loaded. Complete integrations to unlock stronger AI guidance.",
+2098:		summary: top
+2134:		summary: seo.summary?.impressions != null
+2169:		summary: paid.summary?.spend != null
+2200:		summary: "The system has enough operating context to highlight where better evidence would improve decision quality.",
+2260:		summary: "This request is best handled as a structured workflow — moving into the right workspace gets results faster than chat alone.",
+2312:		session.intelligence = { ...session.intelligence, status: "error", error: "Select a project to load AI intelligence." };
+2326:		status: "loading",
+2343:					status: "ready",
+2352:				session.intelligence = { ...session.intelligence, project: projectName, status: "error", error: error.message || "Failed to load live intelligence", loadingPromise: null };
+2526:		label: fallbackLabel,
+2548:		summary: firstAiInboundText(preview.summary, preview.description, normalized.prompt),
+2553:		status: asString(preview.status || "draft_preview"),
+2664:		status: asString(handoff?.status || payload.status || "available"),
+2770:			status: "failed",
+2772:			summary: failureReason,
+2991:			label: humanizeValue(record.label || record.title || record.route || item),
+3252:                ? { id: "team", label: "Full Team" }
+3290:                summary: summaryParts.join("\n\n"),
+3748:                ? { label: "Full AI Team" }
+3839:		{ id: "chat", label: "Chat", hint: bridgeStatus.available ? "Connected" : "Guarded" },
+3840:		{ id: "preview", label: "Preview", hint: "Draft output" },
+3841:		{ id: "tools", label: "Tools", hint: "Role actions" },
+3842:		{ id: "context", label: "Context", hint: "Live state" },
+3843:		{ id: "history", label: "History", hint: "Saved outputs" }
+3956:                ? { id: "team", label: "Full AI Team", summary: "Multi-specialist review", position: "AI Team" }
+4064:        const spec = isTeam ? { label: "Full AI Team" } : getPhase1SpecialistById(session.modeId);
+4206:        const selectedSpec = isTeam ? { id: "team", label: "Full Team" } : getPhase1SpecialistById(session.modeId);
+4252:                        { label: "Continue", attr: "data-aicmd-smart-continue" },
+4253:                        { label: outputType === "task" ? "Create task draft" : "Prepare draft", attr: "data-aicmd-smart-draft" },
+4254:                        { label: `Open ${destination}`, attr: "data-aicmd-smart-route", route: destinationRoute },
+4255:                        { label: "Ask Compliance", attr: "data-aicmd-smart-compliance" }
+4337:                { id: "campaign", label: "Campaign", summary: "Build a review-ready campaign with the full AI Team.", enabled: true },
+4338:                { id: "write", label: "Write", summary: "Prepare documents, copy, agreements, or presentation drafts.", enabled: false },
+4339:                { id: "offer", label: "Offer", summary: "Shape a product offer from pricing, market, and audience context.", enabled: false },
+4340:                { id: "lead", label: "Lead", summary: "Prepare lead discovery and outreach workflow drafts.", enabled: false },
+4341:                { id: "media", label: "Media", summary: "Create a media brief, storyboard, and production direction.", enabled: false },
+4342:                { id: "publish", label: "Publish", summary: "Prepare publishing checklist and handoff readiness.", enabled: false }
+4801:		{ id: "tools", label: "Tools" },
+4802:		{ id: "output", label: "Output" },
+4803:		{ id: "flow", label: "Flow" }
+4939:		? { id: "team", label: "Full Team" }
+5052:		{ label: "Read preview", value: "AI ready", className: "is-available" },
+5053:		{ label: "Voice input", value: "Coming", className: "is-planned" },
+5054:		{ label: "Team chat", value: bridgeStatus.available ? "AI ready" : "Coming", className: bridgeStatus.available ? "is-available" : "is-planned" },
+5055:		{ label: "Media gen", value: "Coming", className: "is-planned" },
+5056:		{ label: "GPU video", value: "Coming", className: "is-planned" },
+5057:		{ label: "Image prompt generation", value: providerConfigured ? "Provider may be ready" : "Provider dependent", className: providerConfigured ? "is-available" : "is-planned" }
+5094:        const selectedSpec = isTeam ? { id: "team", label: "Full Team", position: "Team workflow" } : getPhase1SpecialistById(session.modeId);
+5259:                                                <span class="aicmd-room-response-avatar">${escapeHtml(selectedRoleId === "team" ? "Team" : getAiRoomInitials({ id: selectedRoleId, label: selectedLabel }))}</span>
+5333:	const specialist = session.teamMode === "team" ? { label: "Full Team" } : getPhase1SpecialistById(session.modeId);
+5337:		{ label: "Project", value: projectName || "Not selected", present: Boolean(projectName) },
+5338:		{ label: "Specialist", value: specialist.label || "Specialist", present: true },
+5339:		{ label: "Market", value: languagePlan.market, present: true },
+5340:		{ label: "Conversation language", value: languagePlan.conversationLanguage, present: true },
+5341:		{ label: "Publishing language", value: languagePlan.publishLanguage, present: true },
+5342:		{ label: "Mode", value: session.teamMode === "team" ? "Full Team" : "Solo Specialist", present: true },
+5343:		{ label: "Destination", value: destination, present: Boolean(destination) },
+5344:		{ label: "Session state", value: sessionState, present: true },
+5345:		{ label: "Readiness", value: readiness != null ? `${readiness}/100` : "No readiness data", present: readiness != null },
+5346:		{ label: "Integrations", value: aiContext.coverageTotal > 0 ? `${aiContext.coveredCount}/${aiContext.coverageTotal} connected` : "No coverage data", present: aiContext.coveredCount > 0 },
+5347:		{ label: "Library context", value: getSelectedLibrarySource(projectName)?.name ? "Trusted source selected" : "No source selected", present: Boolean(getSelectedLibrarySource(projectName)?.name) },
+5348:		{ label: "Approved assets", value: aiContext.approvedAssets.length ? `${aiContext.approvedAssets.length} ready` : "No approved assets", present: aiContext.approvedAssets.length > 0 },
+5349:		{ label: "Operations", value: state.data.operations ? "Snapshot available" : "No operations snapshot", present: Boolean(state.data.operations) }
+5353:			{ label: "Open conversations", value: "Snapshot / requires runtime surface", present: false, scoped: true },
+5354:			{ label: "Tickets", value: "Draft / monitored in Operations", present: true, scoped: true },
+5355:			{ label: "SLA", value: "Safe review only", present: true, scoped: true },
+5356:			{ label: "Escalations", value: "Requires confirmation", present: false, scoped: true },
+5357:			{ label: "Channels", value: "Managed in Integrations", present: true, scoped: true }
+5361:				{ label: "Leads", value: "Discovery / qualification", present: true, scoped: true },
+5362:				{ label: "CRM", value: "Profile context", present: true, scoped: true },
+5363:				{ label: "Outreach", value: "Draft only", present: true, scoped: true },
+5364:				{ label: "Follow-ups", value: "Requires confirmation", present: false, scoped: true },
+5365:				{ label: "Pipeline", value: "Operations handoff", present: true, scoped: true }
+6014:                                        label: "Strategist",
+6018:                                        label: "Writer",
+6022:                                        label: "Media / Video",
+6026:                                        label: "Compliance",
+6030:                                        label: "Publisher",
+6034:                                        label: "Operations",
+6041:                                summary: `AI Team preview for a ${goalLabel.toLowerCase()} campaign using ${sourceLabel.toLowerCase()} and optimized for ${channelLabel}.`,
+6058:                                                label: "Campaign summary",
+6062:                                                label: "Audience and objective",
+6066:                                                label: "Offer angle",
+6070:                                                label: "Copy package",
+6074:                                                label: "Media brief",
+6078:                                                label: "Compliance risks",
+6082:                                                label: "Publishing checklist",
+6086:                                                label: "Operations follow-up",
+6133:                                campaignPackage.concept ? { label: "Campaign concept", body: asString(campaignPackage.concept) } : null,
+6134:                                campaignPackage.targetAudience ? { label: "Target audience", body: asString(campaignPackage.targetAudience) } : null,
+6135:                                campaignPackage.offer ? { label: "Offer", body: asString(campaignPackage.offer) } : null,
+6136:                                asArray(campaignPackage.launchPhases).length ? { label: "Launch phases", items: asArray(campaignPackage.launchPhases) } : null,
+6137:                                asArray(campaignPackage.contentAngles).length ? { label: "Content angles", items: asArray(campaignPackage.contentAngles) } : null,
+6138:                                asArray(campaignPackage.adAngles).length ? { label: "Ad angles", items: asArray(campaignPackage.adAngles) } : null,
+6139:                                asArray(campaignPackage.requiredAssets).length ? { label: "Required assets", items: asArray(campaignPackage.requiredAssets) } : null,
+6140:                                asArray(campaignPackage.missingBlockers).length ? { label: "Review blockers", items: asArray(campaignPackage.missingBlockers) } : null,
+6141:                                asArray(campaignPackage.nextActions).length ? { label: "Next actions", items: asArray(campaignPackage.nextActions) } : null
+6147:                                summary: asString(body.summary || fallbackPreview.summary || ""),
+6177:                                        source_label: asString(localPreview.sourceLabel || wizard.source || "Project"),
+6227:                                        summary: preview.summary,
+6274:                                source_label: "AI Command Campaign Builder",
+6279:                                summary: asString(preview.summary || ""),
+6281:                                source_label: asString(preview.sourceLabel || preview.source || ""),
+6531:		                        ? { id: "team", label: "Full Team" }
+6612:		                                        status: "completed",
+6617:		                                        safety_label: safetyLabel
+6643:		                                        safety_label: safetyLabel,
+6796:					destinations: asArray(tool.destinations).length ? tool.destinations : [getToolDestinationRoute(tool, session)],
+6945:					routeSuggestions: [{ route: destination, label: routeLabel(destination), reason: "Specialist response destination" }],
+6953:					status: "available",
+6960:							summary: latestResponse.responseText
+7042:					status: "available",
+7051:							routeSuggestions: [{ route: destination, label: routeLabel(destination), reason: "Phase 2 preview destination" }],
+7164:        label:
+7201:        { id: "strategist", label: "Strategist" },
+7202:        { id: "writer", label: "Writer" },
+7203:        { id: "media", label: "Media" },
+7204:        { id: "operations", label: "Operations" }
+7242:        label: live.signal,
+7312:        idle: { pulse: 0.2, label: "standby" },
+7313:        thinking: { pulse: 0.9, label: "deep processing" },
+7314:        searching: { pulse: 0.7, label: "retrieving context" },
+7315:        analysing: { pulse: 0.8, label: "analytical mode" },
+7316:        composing: { pulse: 0.95, label: "creative generation" },
+7317:        handoff: { pulse: 1.0, label: "finalizing output" }
+7531:    status: "ready",
+7582:        status: Object.values(health).every(Boolean) ? "healthy" : "recovering",
+
+### AI team model
+/*
+  Canonical AI Team Model
+  Source of truth for MH Assistant Control Center.
+
+  Phase 1 rule:
+  - Read-only model.
+  - No backend calls.
+  - No automation.
+  - No publishing.
+  - No execution side effects.
+*/
+
+export const AI_TEAM_ROLES = [
+  {
+    id: "strategist",
+    label: "Strategist",
+    icon: "🎯",
+    ownerSummary: "Campaign planning, positioning, launch decisions, and next best action.",
+    primaryPages: ["home", "campaign-studio", "ai-command"],
+    outputTargets: ["campaign-studio", "content-studio", "media-studio", "publishing"],
+    defaultPrompt: "Act as Strategist. Review the current project state and recommend the highest-impact next move."
+  },
+  {
+    id: "content_writer",
+    label: "Content Writer",
+    icon: "✍️",
+    ownerSummary: "Copy, captions, product text, emails, scripts, and landing page content.",
+    primaryPages: ["content-studio", "campaign-studio", "ai-command"],
+    outputTargets: ["content-studio", "governance", "publishing"],
+    defaultPrompt: "Act as Content Writer. Create high-converting content based on the current campaign and project context."
+  },
+  {
+    id: "media_director",
+    label: "Media Director",
+    icon: "🎨",
+    ownerSummary: "Visual direction, brand assets, image quality, creative briefs, and media readiness.",
+    primaryPages: ["media-studio", "library", "campaign-studio"],
+    outputTargets: ["media-studio", "library", "publishing"],
+    defaultPrompt: "Act as Media Director. Review available assets and define the strongest visual direction."
+  },
+  {
+    id: "video_lead",
+    label: "Video Lead",
+    icon: "🎬",
+    ownerSummary: "Short-form video, motion content, video briefs, scripts, and platform formats.",
+    primaryPages: ["media-studio", "content-studio", "publishing"],
+    outputTargets: ["media-studio", "content-studio", "publishing"],
+    defaultPrompt: "Act as Video Lead. Plan the next short-form video package for the active campaign."
+  },
+  {
+    id: "publisher",
+    label: "Publisher",
+    icon: "📤",
+    ownerSummary: "Publishing queue, schedules, manual handoffs, retries, and release readiness.",
+    primaryPages: ["publishing", "queue-center", "ai-command"],
+    outputTargets: ["publishing", "queue-center", "insights"],
+    defaultPrompt: "Act as Publisher. Prepare the next publish-ready package and identify missing approvals or queue steps."
+  },
+  {
+    id: "ads_optimizer",
+    label: "Ads Optimizer",
+    icon: "📢",
+    ownerSummary: "Paid media, ad packages, creative testing, budget guidance, and ROAS improvement.",
+    primaryPages: ["ads-manager", "campaign-studio", "insights"],
+    outputTargets: ["ads-manager", "campaign-studio", "insights"],
+    defaultPrompt: "Act as Ads Optimizer. Build a paid testing plan based on current readiness and performance signals."
+  },
+  {
+    id: "seo_insights_analyst",
+    label: "SEO & Insights Analyst",
+    icon: "📊",
+    ownerSummary: "Search, performance, weak signals, learning patterns, and measurable optimization.",
+    primaryPages: ["insights", "research", "home"],
+    outputTargets: ["insights", "campaign-studio", "content-studio", "ads-manager"],
+    defaultPrompt: "Act as SEO & Insights Analyst. Identify what is working, what is weak, and what action should happen next."
+  },
+  {
+    id: "researcher",
+    label: "Researcher",
+    icon: "🔬",
+    ownerSummary: "Market research, competitors, audience intelligence, and positioning evidence.",
+    primaryPages: ["research", "setup", "campaign-studio"],
+    outputTargets: ["research", "setup", "campaign-studio", "content-studio"],
+    defaultPrompt: "Act as Researcher. Find the strongest market, competitor, and audience insights for this project."
+  },
+  {
+    id: "compliance_reviewer",
+    label: "Compliance Reviewer",
+    icon: "🛡️",
+    ownerSummary: "Claims, approvals, publishing risk, brand safety, governance, and release trust.",
+    primaryPages: ["governance", "publishing", "content-studio", "media-studio"],
+    outputTargets: ["governance", "publishing", "content-studio", "media-studio"],
+    defaultPrompt: "Act as Compliance Reviewer. Flag claims, approval gaps, and publishing risks before release."
+  },
+  {
+    id: "operations_lead",
+    label: "Operations Lead",
+    icon: "⚙️",
+    ownerSummary: "Workflows, tasks, queues, jobs, notifications, handoffs, and execution safety.",
+    primaryPages: ["workflows", "task-center", "queue-center", "job-monitor", "notifications"],
+    outputTargets: ["workflows", "task-center", "queue-center", "job-monitor", "notifications"],
+    defaultPrompt: "Act as Operations Lead. Convert priorities into executable steps with owners, queues, and next workspace."
+  }
+];
+
+export const AI_PAGE_SPECIALIST_MAP = {
+  home: ["strategist", "operations_lead", "seo_insights_analyst"],
+  setup: ["strategist", "researcher", "compliance_reviewer"],
+  library: ["media_director", "content_writer", "publisher"],
+  integrations: ["operations_lead", "seo_insights_analyst"],
+  "ai-command": ["operations_lead", "strategist"],
+  workflows: ["operations_lead"],
+  publishing: ["publisher", "compliance_reviewer"],
+  "campaign-studio": ["strategist", "content_writer", "media_director", "ads_optimizer"],
+  "content-studio": ["content_writer", "compliance_reviewer", "publisher"],
+  "media-studio": ["media_director", "video_lead", "publisher"],
+  "ads-manager": ["ads_optimizer", "seo_insights_analyst", "compliance_reviewer"],
+  insights: ["seo_insights_analyst", "strategist"],
+  research: ["researcher", "strategist"],
+  governance: ["compliance_reviewer", "operations_lead"],
+  settings: ["operations_lead", "compliance_reviewer"],
+  "task-center": ["operations_lead"],
+  "queue-center": ["operations_lead", "publisher"],
+  "job-monitor": ["operations_lead", "media_director"],
+  notifications: ["operations_lead"]
+};
+
+export function getAiTeamRole(roleId) {
+  return AI_TEAM_ROLES.find((role) => role.id === roleId) || null;
+}
+
+export function getAiRolesForPage(pageId) {
+  const ids = AI_PAGE_SPECIALIST_MAP[pageId] || [];
+  return ids.map(getAiTeamRole).filter(Boolean);
+}
+
+export function getPrimaryAiRoleForPage(pageId) {
+  return getAiRolesForPage(pageId)[0] || AI_TEAM_ROLES[0];
+}
+
+### authority role fallback
+const DEFAULT_ROLE = "admin";
+
+const ACTIVE_ROUTE_ROLES = [
+  "strategist",
+  "writer",
+  "designer",
+  "video_lead",
+  "publisher",
+  "ads_operator",
+  "analyst",
+  "compliance_reviewer",
+  "admin"
+];
+
+const DEFAULT_ROUTE_ROLE_ACCESS = {
+  home: ["strategist", "analyst", "admin"],
+  "ai-command": ACTIVE_ROUTE_ROLES,
+  "campaign-studio": ["strategist", "ads_operator", "admin"],
+  "content-studio": ["writer", "strategist", "compliance_reviewer", "admin"],
+  "media-studio": ["designer", "video_lead", "compliance_reviewer", "admin"],
+  publishing: ["publisher", "compliance_reviewer", "admin"],
+  research: ["strategist", "analyst", "writer", "admin"],
+  setup: ACTIVE_ROUTE_ROLES,
+  "task-center": ACTIVE_ROUTE_ROLES,
+  "queue-center": ACTIVE_ROUTE_ROLES,
+  "job-monitor": ACTIVE_ROUTE_ROLES,
+  "notification-center": ACTIVE_ROUTE_ROLES,
+  governance: ["compliance_reviewer", "admin", "analyst"],
+  "ads-manager": ["ads_operator", "strategist", "analyst", "admin"],
+  insights: ["analyst", "strategist", "ads_operator", "admin"],
+  integrations: ["admin"],
+  workflows: ACTIVE_ROUTE_ROLES,
+  library: ["designer", "video_lead", "publisher", "admin"],
+  settings: ["admin"]
+};
+
+function buildBlockedReason(route, allowedRoles, activeRole, useDefaultRoleMessage = false) {
+  const rolesStr = allowedRoles.join(", ");
+  if (useDefaultRoleMessage) {
+    return (
+      `Route "${route}" requires one of: [${rolesStr}]. ` +
+      `Default role is "${activeRole}". Use the Role selector in the top bar to switch.`
+    );
+  }
+
+  return (
+    `Route "${route}" requires one of: [${rolesStr}]. ` +
+    `Your current role is "${activeRole}". ` +
+    `Use the Role selector in the top bar to switch roles for internal testing.`
+  );
+}
+
+function getFallbackRouteAccess(route, activeRole = DEFAULT_ROLE, options = {}) {
+  const allowedRoles = DEFAULT_ROUTE_ROLE_ACCESS[route];
+  if (!Array.isArray(allowedRoles)) {
+    return { allowed: true, reason: "" };
+  }
+
+  const normalizedRole = String(activeRole || "").trim().toLowerCase() || DEFAULT_ROLE;
+  const allowed = allowedRoles.includes(normalizedRole);
+  return {
+    allowed,
+    reason: allowed
+      ? ""
+      : buildBlockedReason(route, allowedRoles, normalizedRole, options.useDefaultRoleMessage === true)
+  };
+}
+
+export {
+  ACTIVE_ROUTE_ROLES,
+  DEFAULT_ROLE,
+  DEFAULT_ROUTE_ROLE_ACCESS,
+  getFallbackRouteAccess
+};
+### projected active role / team members references
+public/control-center/ai-team-model.js:13:export const AI_TEAM_ROLES = [
+public/control-center/ai-team-model.js:18:    ownerSummary: "Campaign planning, positioning, launch decisions, and next best action.",
+public/control-center/ai-team-model.js:19:    primaryPages: ["home", "campaign-studio", "ai-command"],
+public/control-center/ai-team-model.js:20:    outputTargets: ["campaign-studio", "content-studio", "media-studio", "publishing"],
+public/control-center/ai-team-model.js:27:    ownerSummary: "Copy, captions, product text, emails, scripts, and landing page content.",
+public/control-center/ai-team-model.js:28:    primaryPages: ["content-studio", "campaign-studio", "ai-command"],
+public/control-center/ai-team-model.js:29:    outputTargets: ["content-studio", "governance", "publishing"],
+public/control-center/ai-team-model.js:36:    ownerSummary: "Visual direction, brand assets, image quality, creative briefs, and media readiness.",
+public/control-center/ai-team-model.js:37:    primaryPages: ["media-studio", "library", "campaign-studio"],
+public/control-center/ai-team-model.js:38:    outputTargets: ["media-studio", "library", "publishing"],
+public/control-center/ai-team-model.js:45:    ownerSummary: "Short-form video, motion content, video briefs, scripts, and platform formats.",
+public/control-center/ai-team-model.js:46:    primaryPages: ["media-studio", "content-studio", "publishing"],
+public/control-center/ai-team-model.js:47:    outputTargets: ["media-studio", "content-studio", "publishing"],
+public/control-center/ai-team-model.js:54:    ownerSummary: "Publishing queue, schedules, manual handoffs, retries, and release readiness.",
+public/control-center/ai-team-model.js:55:    primaryPages: ["publishing", "queue-center", "ai-command"],
+public/control-center/ai-team-model.js:56:    outputTargets: ["publishing", "queue-center", "insights"],
+public/control-center/ai-team-model.js:63:    ownerSummary: "Paid media, ad packages, creative testing, budget guidance, and ROAS improvement.",
+public/control-center/ai-team-model.js:64:    primaryPages: ["ads-manager", "campaign-studio", "insights"],
+public/control-center/ai-team-model.js:65:    outputTargets: ["ads-manager", "campaign-studio", "insights"],
+public/control-center/ai-team-model.js:72:    ownerSummary: "Search, performance, weak signals, learning patterns, and measurable optimization.",
+public/control-center/ai-team-model.js:73:    primaryPages: ["insights", "research", "home"],
+public/control-center/ai-team-model.js:74:    outputTargets: ["insights", "campaign-studio", "content-studio", "ads-manager"],
+public/control-center/ai-team-model.js:81:    ownerSummary: "Market research, competitors, audience intelligence, and positioning evidence.",
+public/control-center/ai-team-model.js:82:    primaryPages: ["research", "setup", "campaign-studio"],
+public/control-center/ai-team-model.js:83:    outputTargets: ["research", "setup", "campaign-studio", "content-studio"],
+public/control-center/ai-team-model.js:90:    ownerSummary: "Claims, approvals, publishing risk, brand safety, governance, and release trust.",
+public/control-center/ai-team-model.js:91:    primaryPages: ["governance", "publishing", "content-studio", "media-studio"],
+public/control-center/ai-team-model.js:92:    outputTargets: ["governance", "publishing", "content-studio", "media-studio"],
+public/control-center/ai-team-model.js:99:    ownerSummary: "Workflows, tasks, queues, jobs, notifications, handoffs, and execution safety.",
+public/control-center/ai-team-model.js:100:    primaryPages: ["workflows", "task-center", "queue-center", "job-monitor", "notifications"],
+public/control-center/ai-team-model.js:101:    outputTargets: ["workflows", "task-center", "queue-center", "job-monitor", "notifications"],
+public/control-center/ai-team-model.js:128:export function getAiTeamRole(roleId) {
+public/control-center/ai-team-model.js:129:  return AI_TEAM_ROLES.find((role) => role.id === roleId) || null;
+public/control-center/ai-team-model.js:138:  return getAiRolesForPage(pageId)[0] || AI_TEAM_ROLES[0];
+public/control-center/ui/page-standard.js:52:    description: "Direct role-aware AI agents, structured tasks, artifacts, and decisions.",
+public/control-center/ui/page-standard.js:115:    description: "Configure project, AI mode, roles, rules, approvals, and safeguards.",
+public/control-center/ui/page-standard.js:155:  "focus-settings-roles": "[data-settings-action='review-critical']",
+public/control-center/ui/page-standard.js:409:    <section id="stdContextRibbon" class="std-context-ribbon" data-ui-role="page-context-ribbon">
+public/control-center/ui/page-standard.js:426:    <section id="stdSmartStrip" class="std-smart-strip std-smart-strip-compact" data-ui-role="smart-strip">
+public/control-center/runtime/authority/route-role-fallback.js:38:  const rolesStr = allowedRoles.join(", ");
+public/control-center/runtime/authority/route-role-fallback.js:41:      `Route "${route}" requires one of: [${rolesStr}]. ` +
+public/control-center/runtime/authority/route-role-fallback.js:42:      `Default role is "${activeRole}". Use the Role selector in the top bar to switch.`
+public/control-center/runtime/authority/route-role-fallback.js:47:    `Route "${route}" requires one of: [${rolesStr}]. ` +
+public/control-center/runtime/authority/route-role-fallback.js:48:    `Your current role is "${activeRole}". ` +
+public/control-center/runtime/authority/route-role-fallback.js:49:    `Use the Role selector in the top bar to switch roles for internal testing.`
+public/control-center/runtime/authority/authority-projection.js:71:export function getProjectedTeamMembers(state = {}) {
+public/control-center/runtime/authority/authority-projection.js:81:export function getProjectedActiveRole(state = {}) {
+public/control-center/runtime/authority/authority-projection.js:85:    model.active_role ||
+public/control-center/components/guide-box.js:21:    <aside class="mhos-guide-box mhos-guide-box-tone-${escapeHtml(tone)}" role="region" aria-label="${safeTitle}">
+public/control-center/router.js:29:} from "./runtime/authority/route-role-fallback.js";
+public/control-center/router.js:109:  const detail = reason || `Route "${route}" is not available for the current role.`;
+public/control-center/router.js:115:      description: "This workspace route is blocked by role access rules."
+public/control-center/router.js:126:                To access this page, use the <strong>Role</strong> selector in the top bar and switch to a permitted role.
+public/control-center/state.js:365:    state?.data?.operations?.team_service_model?.active_role ||
+public/control-center/pages/ai-command/tool-dock.js:86:          modeId: returnContext.modeId || returnContext.specialistId || "",
+public/control-center/pages/ai-command/tool-dock.js:95:      if (returnContext.specialistId) activeDrawer.dataset.specialistId = returnContext.specialistId;
+public/control-center/pages/ai-command/tool-dock.js:135:  specialistId = "",
+public/control-center/pages/ai-command/tool-dock.js:148:    specialistId,
+public/control-center/pages/ai-command/tool-dock.js:162:  specialistId = "",
+public/control-center/pages/ai-command/tool-dock.js:174:    specialistId,
+public/control-center/pages/ai-command/tool-dock.js:190:  specialistId = "",
+public/control-center/pages/ai-command/tool-dock.js:201:    specialistId,
+public/control-center/pages/ai-command/tool-dock.js:1222:function getSpecialistTools(specialistId = "") {
+public/control-center/pages/ai-command/tool-dock.js:1223:  return TOOL_DOCK_BY_SPECIALIST[specialistId] || TOOL_DOCK_BY_SPECIALIST.operations;
+public/control-center/pages/ai-command/tool-dock.js:1226:export function getAiToolDockTools({ specialistId = "", teamMode = "solo", limit = 9 } = {}) {
+public/control-center/pages/ai-command/tool-dock.js:1233:    : getSpecialistTools(specialistId);
+public/control-center/pages/ai-command/tool-dock.js:1238:function getDockTools({ specialistId = "", teamMode = "solo" } = {}) {
+public/control-center/pages/ai-command/tool-dock.js:1247:  return getSpecialistTools(specialistId).slice(0, 9);
+public/control-center/pages/ai-command/tool-dock.js:1254:    .replace(/\{specialistLabel\}/g, values.specialistLabel || "the active specialist");
+public/control-center/pages/ai-command/tool-dock.js:1308:      <section class="mhos-tool-drawer-card" role="dialog" aria-modal="true" aria-label="AI prompt tool setup">
+public/control-center/pages/ai-command/tool-dock.js:1334:            <div class="mhos-tool-drawer-warning" data-aicmd-tool-drawer-source-warning role="alert" hidden></div>
+public/control-center/pages/ai-command/tool-dock.js:1420:export function renderAiToolDock({ projectName = "", specialistId = "", teamMode = "solo", escapeHtml }) {
+public/control-center/pages/ai-command/tool-dock.js:1424:  const tools = getDockTools({ specialistId, teamMode });
+public/control-center/pages/ai-command/tool-dock.js:1672:  drawer.dataset.specialistId = session?.modeId || "";
+public/control-center/pages/ai-command/tool-dock.js:1765:  specialistLabel = "",
+public/control-center/pages/ai-command/tool-dock.js:1790:        specialistId: drawer?.dataset?.specialistId || "",
+public/control-center/pages/ai-command/tool-dock.js:1841:          specialistLabel: session.teamMode === "team" ? "Full Team" : specialistLabel || "active specialist"
+public/control-center/pages/ai-command/tool-dock.js:1890:        specialistLabel: session.teamMode === "team" ? "Full Team" : specialistLabel || "active specialist"
+public/control-center/pages/home/render-sections.js:93:          <button class="home-ai-team-card" type="button" data-role-id="${escapeHtml(agent.id || "")}" title="Prepare ${escapeHtml(agent.name)} guidance in AI Command">
+public/control-center/pages/campaign-studio.js:18:    roleHint: "Use this wave to introduce the campaign, establish the core promise, and create awareness."
+public/control-center/pages/campaign-studio.js:25:    roleHint: "Use this wave to reinforce trust, deepen understanding, and turn interest into intent."
+public/control-center/pages/campaign-studio.js:32:    roleHint: "Use this wave to push the strongest offer, close objections, and convert active intent."
+public/control-center/pages/campaign-studio.js:63:  "content-studio": { role: "writer", domain: "content" },
+public/control-center/pages/campaign-studio.js:64:  "media-studio": { role: "designer", domain: "media" },
+public/control-center/pages/campaign-studio.js:65:  publishing: { role: "publisher", domain: "publishing" },
+public/control-center/pages/campaign-studio.js:66:  "ads-manager": { role: "ads_operator", domain: "campaign" },
+public/control-center/pages/campaign-studio.js:67:  "ai-command": { role: "admin", domain: "governance" }
+public/control-center/pages/campaign-studio.js:118:      <div class="data-row"><span>Owner role</span><strong>${escapeHtml(titleCase(CAMPAIGN_ROLE_DEFAULTS.ownerRole))}</strong></div>
+public/control-center/pages/campaign-studio.js:120:      <div class="data-row"><span>Route map</span><strong>${escapeHtml(`Content ${titleCase(CAMPAIGN_ROUTE_ROLES["content-studio"].role)} • Media ${titleCase(CAMPAIGN_ROUTE_ROLES["media-studio"].role)} • Publishing ${titleCase(CAMPAIGN_ROUTE_ROLES.publishing.role)} • Ads ${titleCase(CAMPAIGN_ROUTE_ROLES["ads-manager"].role)}`)}</strong></div>
+public/control-center/pages/campaign-studio.js:469:    owner_role: CAMPAIGN_ROLE_DEFAULTS.ownerRole,
+public/control-center/pages/campaign-studio.js:470:    review_role: CAMPAIGN_ROLE_DEFAULTS.reviewRole,
+public/control-center/pages/campaign-studio.js:486:    source_role: CAMPAIGN_ROLE_DEFAULTS.ownerRole,
+public/control-center/pages/campaign-studio.js:487:    destination_role: destination.role,
+public/control-center/pages/campaign-studio.js:499:      owner_role: CAMPAIGN_ROLE_DEFAULTS.ownerRole,
+public/control-center/pages/campaign-studio.js:500:      review_role: CAMPAIGN_ROLE_DEFAULTS.reviewRole,
+public/control-center/pages/campaign-studio.js:1390:        source_role: CAMPAIGN_ROLE_DEFAULTS.ownerRole,
+public/control-center/pages/campaign-studio.js:1391:        destination_role: CAMPAIGN_ROUTE_ROLES["ai-command"].role,
+public/control-center/pages/campaign-studio.js:1402:          owner_role: CAMPAIGN_ROLE_DEFAULTS.ownerRole,
+public/control-center/pages/campaign-studio.js:1403:          review_role: CAMPAIGN_ROLE_DEFAULTS.reviewRole,
+public/control-center/pages/campaign-studio.js:1831:                        <span>Suggested role</span>
+public/control-center/pages/campaign-studio.js:1846:                        : `<div class="campaign-wave-callout is-ready">${escapeHtml(wave.roleHint)}</div>`
+public/control-center/pages/media-studio-workspace.js:524:    owner_role: asString(raw.owner_role || ownerRoleForMode(mode)),
+public/control-center/pages/media-studio-workspace.js:525:    review_role: asString(raw.review_role || MEDIA_ROLE_DEFAULTS.reviewRole),
+public/control-center/pages/media-studio-workspace.js:919:    owner_role: ownerRoleForMode(mode),
+public/control-center/pages/media-studio-workspace.js:920:    review_role: MEDIA_ROLE_DEFAULTS.reviewRole,
+public/control-center/pages/media-studio-workspace.js:1112:    source_role: selectedItem?.owner_role || ownerRoleForMode(session.form.mode || session.mode || "image"),
+public/control-center/pages/media-studio-workspace.js:1113:    destination_role: MEDIA_ROLE_DEFAULTS.reviewRole,
+public/control-center/pages/media-studio-workspace.js:1418:      .media-specialist-grid,
+public/control-center/pages/media-studio-workspace.js:1426:      .media-specialist-card {
+public/control-center/pages/media-studio-workspace.js:1626:        .media-specialist-grid {
+public/control-center/pages/media-studio-workspace.js:1879:      <ol class="media-workflow-list" role="list">
+public/control-center/pages/media-studio-workspace.js:1881:          <li class="media-workflow-step is-${escapeHtml(step.state)}" role="listitem">
+public/control-center/pages/media-studio-workspace.js:1994:      <div class="media-mode-tabs" role="tablist" aria-label="Media generation mode">
+public/control-center/pages/media-studio-workspace.js:2609:function renderSpecialistCard(specialist, escapeHtml, { primary = false } = {}) {
+public/control-center/pages/media-studio-workspace.js:2610:  if (!specialist) return "";
+public/control-center/pages/media-studio-workspace.js:2613:    <article class="media-specialist-card ${primary ? "media-specialist-primary" : "media-specialist-secondary"}">
+public/control-center/pages/media-studio-workspace.js:2615:        <p class="card-label">${primary ? "Recommended specialist" : "Specialist"}</p>
+public/control-center/pages/media-studio-workspace.js:2616:        <h4>${escapeHtml(specialist.label || specialist.name || "Media specialist")}</h4>
+public/control-center/pages/media-studio-workspace.js:2617:        <p>${escapeHtml(specialist.description || specialist.summary || "Use this specialist to improve the media brief.")}</p>
+public/control-center/pages/media-studio-workspace.js:2619:      <div class="media-specialist-actions">
+public/control-center/pages/media-studio-workspace.js:2620:        <button class="btn btn-secondary" type="button" data-media-specialist-use="${escapeHtml(specialist.id)}">Apply to Brief</button>
+public/control-center/pages/media-studio-workspace.js:2621:        <button class="btn btn-secondary" type="button" data-media-specialist-save="${escapeHtml(specialist.id)}">Save Draft</button>
+public/control-center/pages/media-studio-workspace.js:2622:        <button class="btn btn-secondary" type="button" data-media-specialist-ai="${escapeHtml(specialist.id)}">Open AI Command Review</button>
+public/control-center/pages/media-studio-workspace.js:2629:  const specialists = Array.isArray(SPECIALISTS) ? SPECIALISTS : [];
+public/control-center/pages/media-studio-workspace.js:2630:  if (!specialists.length) return "";
+public/control-center/pages/media-studio-workspace.js:2633:  const recommended = specialists.find((specialist) => specialist.id === recommendedId) || specialists[0];
+public/control-center/pages/media-studio-workspace.js:2634:  const others = specialists.filter((specialist) => specialist.id !== recommended.id);
+public/control-center/pages/media-studio-workspace.js:2637:    <section class="card media-card media-specialists-compact" aria-label="AI media specialists">
+public/control-center/pages/media-studio-workspace.js:2647:        <details class="media-specialists-more">
+public/control-center/pages/media-studio-workspace.js:2648:          <summary>More specialists</summary>
+public/control-center/pages/media-studio-workspace.js:2649:          <div class="media-specialists-secondary-list">
+public/control-center/pages/media-studio-workspace.js:2650:            ${others.map((specialist) => renderSpecialistCard(specialist, escapeHtml, { primary: false })).join("")}
+public/control-center/pages/media-studio-workspace.js:2728:    source_role: source.owner_role || ownerRoleForMode(source.mode),
+public/control-center/pages/media-studio-workspace.js:2729:    destination_role: MEDIA_ROLE_DEFAULTS.handoffRole,
+public/control-center/pages/media-studio-workspace.js:3298:            reviewer_role: MEDIA_ROLE_DEFAULTS.reviewRole,
+public/control-center/pages/media-studio-workspace.js:3376:            owner_role: item.owner_role || ownerRoleForMode(item.mode),
+public/control-center/pages/media-studio-workspace.js:3377:            assignee_role: item.owner_role || ownerRoleForMode(item.mode),
+public/control-center/pages/media-studio-workspace.js:3380:            handoff_roles: [MEDIA_ROLE_DEFAULTS.handoffRole, MEDIA_ROLE_DEFAULTS.reviewRole],
+public/control-center/pages/media-studio-workspace.js:3598:  Array.from(document.querySelectorAll("[data-media-specialist-use], [data-media-specialist-save], [data-media-specialist-ai]")).forEach((button) => {
+public/control-center/pages/media-studio-workspace.js:3600:      const id = button.getAttribute("data-media-specialist-use") || button.getAttribute("data-media-specialist-save") || button.getAttribute("data-media-specialist-ai") || "";
+public/control-center/pages/media-studio-workspace.js:3601:      const specialist = SPECIALISTS.find((item) => item.id === id);
+public/control-center/pages/media-studio-workspace.js:3602:      if (!specialist) return;
+public/control-center/pages/media-studio-workspace.js:3603:      session.form.prompt = [specialist.suggestedPrompt, session.form.prompt].filter(Boolean).join("\n\n");
+public/control-center/pages/media-studio-workspace.js:3605:      session.draftMessage = `${specialist.title} prompt added.`;
+public/control-center/pages/media-studio-workspace.js:3606:      if (button.hasAttribute("data-media-specialist-save")) {
+public/control-center/pages/media-studio-workspace.js:3608:        showMessage?.(`${specialist.title} draft saved locally.`);
+public/control-center/pages/media-studio-workspace.js:3610:      if (button.hasAttribute("data-media-specialist-ai")) {
+public/control-center/pages/media-studio-workspace.js:3612:          "Confirm AI Command specialist handoff",
+public/control-center/pages/media-studio-workspace.js:3613:          `Action: Send ${specialist.title} media context to AI Command for review and planning support.\nRisk: This attaches shared AI handoff context and navigates to AI Command. It does not publish, approve, run provider generation, or create backend tasks.`
+public/control-center/pages/media-studio-workspace.js:3625:          lastResponseTitle: `${specialist.title} Assist`,
+public/control-center/pages/media-studio-workspace.js:3638:            title: `${specialist.title} Assist`,
+public/control-center/pages/media-studio-workspace.js:3645:        showMessage?.(`${specialist.title} prompt opened in AI Command.`);
+public/control-center/pages/media-studio-workspace.js:3794:          <div class="media-compact-list" role="list">
+public/control-center/pages/media-studio-workspace.js:3796:              <div class="media-compact-row is-${escapeHtml(item.state)}" role="listitem">
+public/control-center/pages/media-studio-workspace.js:3819:          <div class="media-compact-list" role="list">
+public/control-center/pages/media-studio-workspace.js:3821:              <div class="media-compact-row is-${escapeHtml(item.state)}" role="listitem">
+public/control-center/pages/customer-center.js:102:    ["Add CRM note", "Locked: CRM writes require a future confirmation gate, role check, and audit log."],
+public/control-center/pages/customer-center.js:233:      <p class="muted">Visible for roadmap clarity only. These customer actions cannot execute here and require future confirmation gates, role permissions, provider readiness, and audit logging.</p>
+public/control-center/pages/operations-centers.js:587:                    <span>${escapeHtml(titleCase(item.assignee_role || item.owner_role || "-"))}</span>
+public/control-center/pages/operations-centers.js:623:                    { label: "Owner role", value: titleCase(selectedItem.assignee_role || selectedItem.owner_role || "-") },
+public/control-center/pages/operations-centers.js:713:  if (session.owner !== "all") items = items.filter((item) => asString(item.owner_role) === session.owner);
+public/control-center/pages/research.js:78:  const handoffsByRole = asObject(operations.handoffs?.by_role);
+public/control-center/pages/research.js:79:  const approvalsByRole = asObject(operations.approvals?.by_reviewer_role);
+public/control-center/pages/research.js:84:      <div class="data-row"><span>Owner role</span><strong>${escapeHtml(titleCase(RESEARCH_ROLE_DEFAULTS.ownerRole))}</strong></div>
+public/control-center/pages/research.js:941:          source_role: RESEARCH_ROLE_DEFAULTS.ownerRole,
+public/control-center/pages/research.js:942:          destination_role: ACTION_ROUTES.ai.destinationRole,
+public/control-center/pages/research.js:996:        source_role: RESEARCH_ROLE_DEFAULTS.ownerRole,
+public/control-center/pages/research.js:997:        destination_role: action.destinationRole,
+public/control-center/pages/research.js:1005:          owner_role: RESEARCH_ROLE_DEFAULTS.ownerRole,
+public/control-center/pages/research.js:1006:          review_role: RESEARCH_ROLE_DEFAULTS.reviewRole,
+public/control-center/pages/ai-command.js:9:import { getProjectedActiveRole, getProjectedTeamMembers } from "../runtime/authority/authority-projection.js";
+public/control-center/pages/ai-command.js:369:	{ id: "ask", title: "Ask", description: "Choose a specialist or the full team." },
+public/control-center/pages/ai-command.js:413:		summary: "Policy, approvals, roles, and audit controls stay destination-owned."
+public/control-center/pages/ai-command.js:748:		specialist: asString(context.specialistLabel || "Specialist") || "Specialist",
+public/control-center/pages/ai-command.js:749:		specialistLabel: asString(context.specialistLabel || "Specialist") || "Specialist",
+public/control-center/pages/ai-command.js:753:	return asString(template).replace(/\{(project|projectName|specialist|specialistLabel|campaign)\}/g, (_, token) => tokenMap[token] || "");
+public/control-center/pages/ai-command.js:1135:        const specialist = getAiCommandSessionSpecialistLabel(session);
+public/control-center/pages/ai-command.js:1139:        const latestUser = messages.slice().reverse().find((message) => asString(message.role) === "user");
+public/control-center/pages/ai-command.js:1156:        return `${specialist} · ${intent} · ${time}`.slice(0, 80);
+public/control-center/pages/ai-command.js:1221:function buildSpecialistChatPrompt({ prompt, specialistLabel, modeLabel, projectName, language, outputLanguage, market }) {
+public/control-center/pages/ai-command.js:1224:	const safeSpecialist = asString(specialistLabel || "Specialist").trim();
+public/control-center/pages/ai-command.js:1233:			"Name the specialist owner for each next action and destination."
+public/control-center/pages/ai-command.js:1298:function destinationRouteForSpecialist(specialistId, outputType) {
+public/control-center/pages/ai-command.js:1299:	const rawId = getAiRoomRoleId(specialistId || "operations");
+public/control-center/pages/ai-command.js:1318:        const specialistId = getAiRoomRoleId(session?.modeId || "operations");
+public/control-center/pages/ai-command.js:1415:function specialistTemplateForOutput({ specialist, outputType, prompt, projectName }) {
+public/control-center/pages/ai-command.js:1418:	const specialistId = asString(specialist?.id || "operations");
+public/control-center/pages/ai-command.js:1419:	const route = destinationRouteForSpecialist(specialistId, outputType);
+public/control-center/pages/ai-command.js:1422:		specialistId,
+public/control-center/pages/ai-command.js:1429:		confirmationRequired: outputType === "handoff" || specialistId === "publisher" || specialistId === "compliance_reviewer",
+public/control-center/pages/ai-command.js:1438:	if (specialistId === "strategist") {
+public/control-center/pages/ai-command.js:1465:	if (specialistId === "writer") {
+public/control-center/pages/ai-command.js:1499:	if (specialistId === "media") {
+public/control-center/pages/ai-command.js:1519:	if (specialistId === "video_lead") {
+public/control-center/pages/ai-command.js:1534:	if (specialistId === "publisher") {
+public/control-center/pages/ai-command.js:1554:	if (specialistId === "ads") {
+public/control-center/pages/ai-command.js:1582:	if (specialistId === "analyst") {
+public/control-center/pages/ai-command.js:1596:	if (specialistId === "compliance_reviewer") {
+public/control-center/pages/ai-command.js:1612:	if (specialistId === "customer_ops") {
+public/control-center/pages/ai-command.js:1643:	if (specialistId === "sales_crm") {
+public/control-center/pages/ai-command.js:1680:	if (specialistId === "operations") {
+public/control-center/pages/ai-command.js:1714:	const specialist = teamMode
+public/control-center/pages/ai-command.js:1726:	const base = specialistTemplateForOutput({
+public/control-center/pages/ai-command.js:1727:		specialist,
+public/control-center/pages/ai-command.js:1737:		specialistId: "team",
+public/control-center/pages/ai-command.js:1773:function buildPreviewText(output, specialistLabel) {
+public/control-center/pages/ai-command.js:1777:		`Specialist: ${specialistLabel}`,
+public/control-center/pages/ai-command.js:2507:	return ["team", "full-team", "fullteam", "multi-specialist", "team-mode"].includes(clean) ? "team" : "solo";
+public/control-center/pages/ai-command.js:2542:	const specialistId = normalizeAiInboundSpecialistId(preview.specialistId || preview.specialist_id || normalized.suggestedSpecialist, normalized.suggestedSpecialist);
+public/control-center/pages/ai-command.js:2550:		specialistId,
+public/control-center/pages/ai-command.js:2603:	const explicitSpecialist = firstAiInboundId(payload.specialist, payload.specialist_id);
+public/control-center/pages/ai-command.js:2609:		draftContext.specialist ||
+public/control-center/pages/ai-command.js:2610:		draftContext.specialist_id ||
+public/control-center/pages/ai-command.js:2625:	)) || `Review this ${sourceLabel} handoff for ${projectLabel}. Identify the right specialist, summarize the context, produce a review-ready draft, and recommend the next safe route. Do not execute publishing, task creation, CRM updates, customer replies, workflow runs, or backend actions.`;
+public/control-center/pages/ai-command.js:2786:		role: "user",
+public/control-center/pages/ai-command.js:2795:		role: "assistant",
+public/control-center/pages/ai-command.js:2824:  const projectedMembers = getProjectedTeamMembers(state);
+public/control-center/pages/ai-command.js:2825:  const activeRole = asString(getProjectedActiveRole(state)).toLowerCase();
+public/control-center/pages/ai-command.js:2830:    const id = asString(member.role || member.id).toLowerCase();
+public/control-center/pages/ai-command.js:2840:      name: asString(member.name || fallback.name || member.role || "AI Specialist"),
+public/control-center/pages/ai-command.js:2841:      role: asString(member.role || fallback.role || id),
+public/control-center/pages/ai-command.js:2843:      bestUse: asString(member.bestUse || member.best_use || fallback.bestUse || "Use when this specialist owns the next step."),
+public/control-center/pages/ai-command.js:2920:			<div class="ctrl-room-section-label">Choose your AI specialist</div>
+public/control-center/pages/ai-command.js:3078:				<div class="ctrl-empty-body">Choose a specialist above, pick a suggested prompt, or write your own command and hit Send.</div>
+public/control-center/pages/ai-command.js:3085:		if (message.role === "user") {
+public/control-center/pages/ai-command.js:3176:		.filter((msg) => msg.role === "assistant" && asString(msg.response?.outputType || msg.response?.output_type))
+public/control-center/pages/ai-command.js:3239:	return asArray(session.messages).slice().reverse().find((item) => item.role === "user") || null;
+public/control-center/pages/ai-command.js:3243:	return asArray(session.messages).slice().reverse().find((item) => item.role === "assistant") || null;
+public/control-center/pages/ai-command.js:3251:        const specialist = session.teamMode === "team"
+public/control-center/pages/ai-command.js:3257:                        const role = asString(message.role || "");
+public/control-center/pages/ai-command.js:3258:                        const label = role === "user"
+public/control-center/pages/ai-command.js:3260:                                : asString(message.specialistLabel || specialist.label || "Specialist");
+public/control-center/pages/ai-command.js:3282:                assistantText ? `Latest specialist answer: ${assistantText}` : "",
+public/control-center/pages/ai-command.js:3291:                specialistId: specialist.id || session.modeId,
+public/control-center/pages/ai-command.js:3292:                specialistLabel: specialist.label || "Specialist",
+public/control-center/pages/ai-command.js:3311:                `Specialist: ${context.specialistLabel}`,
+public/control-center/pages/ai-command.js:3397:			reason: "A clear campaign context helps every specialist agent generate more precise outputs.",
+public/control-center/pages/ai-command.js:3437:      normalize(item?.id || item?.role || item?.key || item?.name) === requestedId
+public/control-center/pages/ai-command.js:3439:    definitions.find((item) => normalize(item?.id || item?.role || item?.key) === "strategist") ||
+public/control-center/pages/ai-command.js:3452:function getAiRoomInitials(specialist) {
+public/control-center/pages/ai-command.js:3453:	const id = getAiRoomRoleId(specialist?.id);
+public/control-center/pages/ai-command.js:3455:	return asString(specialist?.label || "AI")
+public/control-center/pages/ai-command.js:3542:	return "Prepare a review-ready output for the selected specialist lane.";
+public/control-center/pages/ai-command.js:3640:				<span class="aicmd-room-member-role">${escapeHtml(item.status)} - destination-owned authority</span>
+public/control-center/pages/ai-command.js:3649:			<span>Strategy, writing, creative, compliance, publishing, customer, sales, and operations specialists coordinate one review-ready answer. No workflow, send, publish, approval, or CRM action is executed here.</span>
+public/control-center/pages/ai-command.js:3663:			<div class="aicmd-v2-team-toggle aicmd-room-mode-switch" role="group" aria-label="AI team mode">
+public/control-center/pages/ai-command.js:3674:					const roleId = getAiRoomRoleId(spec.id);
+public/control-center/pages/ai-command.js:3678:					const roleLine = `${isActive ? "Active now" : (spec.status || "AI ready")} - ${spec.position || spec.label || "Specialist"}`;
+public/control-center/pages/ai-command.js:3683:							data-aicmdv2-specialist="${escapeHtml(spec.id)}"
+public/control-center/pages/ai-command.js:3684:							data-role="${escapeHtml(roleId)}"
+public/control-center/pages/ai-command.js:3690:								<span class="aicmd-room-member-role">${escapeHtml(roleLine)}</span>
+public/control-center/pages/ai-command.js:3698:			<div class="aicmd-room-planned-specialists" aria-label="Additional specialists planned">
+public/control-center/pages/ai-command.js:3699:				<span class="aicmd-room-planned-title">Planned lanes, not active specialists</span>
+public/control-center/pages/ai-command.js:3715:						<p class="aicmd-v2-profile-purpose">Coordinates specialists into one review-ready brief, workflow, or handoff.</p>
+public/control-center/pages/ai-command.js:3726:	const specialistTools = getAiToolDockTools({ specialistId: spec.id, teamMode: "solo", limit: 3 });
+public/control-center/pages/ai-command.js:3739:				${specialistTools.slice(0, 3).map((tool) => `<span class="aicmd-v2-strength-chip is-tool">${escapeHtml(tool.label)}</span>`).join("")}
+public/control-center/pages/ai-command.js:3751:        const label = asString(spec?.label || "AI specialist");
+public/control-center/pages/ai-command.js:3755:        const roleId = getAiRoomRoleId(session.modeId);
+public/control-center/pages/ai-command.js:3756:        if (roleId === "content_writer") return `${label} is drafting your content...`;
+public/control-center/pages/ai-command.js:3757:        if (roleId === "media_director" || roleId === "video_lead") return `${label} is preparing creative direction...`;
+public/control-center/pages/ai-command.js:3758:        if (roleId === "operations" || roleId === "customer_ops") return `${label} is preparing your task handoff...`;
+public/control-center/pages/ai-command.js:3759:        if (roleId === "compliance") return `${label} is checking safety and compliance...`;
+public/control-center/pages/ai-command.js:3760:        if (roleId === "seo") return `${label} is reviewing insights and signals...`;
+public/control-center/pages/ai-command.js:3761:        if (roleId === "publisher") return `${label} is preparing publishing guidance...`;
+public/control-center/pages/ai-command.js:3771:	const roleLine = isTeam
+public/control-center/pages/ai-command.js:3778:		<div class="aicmd-room-conversation-head" data-role="${escapeHtml(isTeam ? "team" : getAiRoomRoleId(spec.id))}">
+public/control-center/pages/ai-command.js:3783:				<p>${escapeHtml(roleLine)}</p>
+public/control-center/pages/ai-command.js:3831:		specialistId: toolModeId,
+public/control-center/pages/ai-command.js:3847:		<div class="aicmd-v2-tabs" role="tablist" aria-label="AI workspace tabs">
+public/control-center/pages/ai-command.js:3853:					role="tab"
+public/control-center/pages/ai-command.js:3866:	const specialistLabel = session.teamMode === "team" ? "Full Team" : getPhase1SpecialistById(session.modeId)?.label || "Specialist";
+public/control-center/pages/ai-command.js:3867:	const roleId = session.teamMode === "team" ? "team" : getAiRoomRoleId(session.modeId);
+public/control-center/pages/ai-command.js:3870:		<section class="aicmd-v2-tools aicmd-room-tools" data-role="${escapeHtml(roleId)}">
+public/control-center/pages/ai-command.js:3873:					<h3 class="aicmd-v2-tools-title">${escapeHtml(specialistLabel)} Tool Drawer</h3>
+public/control-center/pages/ai-command.js:3956:                ? { id: "team", label: "Full AI Team", summary: "Multi-specialist review", position: "AI Team" }
+public/control-center/pages/ai-command.js:3988:                                <div class="aicmd-chatfirst-team-card${active ? " is-active" : ""}${teamActive ? " is-team-active" : ""}" data-role="${escapeHtml(getAiRoomRoleId(spec.id))}">
+public/control-center/pages/ai-command.js:3989:                                        <span class="aicmd-chatfirst-specialist-avatar" aria-hidden="true">${escapeHtml(getAiRoomInitials(spec))}</span>
+public/control-center/pages/ai-command.js:4012:                                        <p>Active specialist, source grounding, destination, risk, and execution lock in one compact command strip.</p>
+public/control-center/pages/ai-command.js:4026:                        <div class="aicmd-chatfirst-specialist-grid ${AI_UX_SIMPLE_MODE ? 'aicmd-simple-hide-team' : ''}" aria-label="Live AI team lanes">
+public/control-center/pages/ai-command.js:4142:				<div class="aicmd-chatfirst-mode-toggle" role="group" aria-label="AI team mode">
+public/control-center/pages/ai-command.js:4163:		<details class="aicmd-chatfirst-specialist-select">
+public/control-center/pages/ai-command.js:4168:			<div class="aicmd-chatfirst-specialist-menu" role="list">
+public/control-center/pages/ai-command.js:4173:							class="aicmd-chatfirst-specialist-option${isActive ? " is-active" : ""}"
+public/control-center/pages/ai-command.js:4175:							data-aicmdv2-specialist="${escapeHtml(spec.id)}"
+public/control-center/pages/ai-command.js:4176:							data-role="${escapeHtml(getAiRoomRoleId(spec.id))}"
+public/control-center/pages/ai-command.js:4179:							<span class="aicmd-chatfirst-specialist-avatar" aria-hidden="true">${escapeHtml(getAiRoomInitials(spec))}</span>
+public/control-center/pages/ai-command.js:4182:								<small>${escapeHtml(spec.position || spec.summary || "AI ready specialist")}</small>
+public/control-center/pages/ai-command.js:4187:				<div class="aicmd-chatfirst-planned-list" aria-label="Planned specialists">
+public/control-center/pages/ai-command.js:4189:						<div class="aicmd-chatfirst-specialist-option is-planned" aria-disabled="true">
+public/control-center/pages/ai-command.js:4190:							<span class="aicmd-chatfirst-specialist-avatar" aria-hidden="true">${escapeHtml(item.initials)}</span>
+public/control-center/pages/ai-command.js:4211:                const role = asString(message.role || "");
+public/control-center/pages/ai-command.js:4212:                const messageRoleId = getAiRoomRoleId(message.specialistId || message.modeId || "");
+public/control-center/pages/ai-command.js:4213:                if (role === "user") return isTeam ? message.teamMode === "team" || messageRoleId === "team" : messageRoleId === selectedRoleId;
+public/control-center/pages/ai-command.js:4214:                if (role === "assistant") return isTeam ? messageRoleId === "team" : messageRoleId === selectedRoleId;
+public/control-center/pages/ai-command.js:4218:                const producerId = getAiRoomRoleId(item.specialistId || "");
+public/control-center/pages/ai-command.js:4224:                                role: "user",
+public/control-center/pages/ai-command.js:4225:                                specialistId: item.specialistId || selectedRoleId,
+public/control-center/pages/ai-command.js:4226:                                specialistLabel: "You",
+public/control-center/pages/ai-command.js:4231:                                role: "assistant",
+public/control-center/pages/ai-command.js:4232:                                specialistId: item.specialistId || selectedRoleId,
+public/control-center/pages/ai-command.js:4233:                                specialistLabel: item.specialistLabel || selectedLabel,
+public/control-center/pages/ai-command.js:4247:                if (asString(message.role || "") !== "assistant") return "";
+public/control-center/pages/ai-command.js:4275:                const role = asString(message.role || "");
+public/control-center/pages/ai-command.js:4276:                const isUser = role === "user";
+public/control-center/pages/ai-command.js:4277:                const label = isUser ? "You" : asString(message.specialistLabel || selectedLabel || "Specialist");
+public/control-center/pages/ai-command.js:4299:                                <div class="aicmd-chatfirst-loading" role="status">
+public/control-center/pages/ai-command.js:4459:                        <section class="aicmd-smart-wizard aicmd-smart-wizard-premium" role="dialog" aria-modal="true" aria-label="Campaign Builder">
+public/control-center/pages/ai-command.js:4659:                                <span>Select the specialist or route the request to the full coordinated business AI team.</span>
+public/control-center/pages/ai-command.js:4674:                        <div class="aicmd-final-team-menu-grid" role="list" aria-label="AI specialists">
+public/control-center/pages/ai-command.js:4681:                                                        data-aicmdv2-specialist="${escapeHtml(spec.id)}"
+public/control-center/pages/ai-command.js:4682:                                                        data-role="${escapeHtml(getAiRoomRoleId(spec.id))}"
+public/control-center/pages/ai-command.js:4687:                                                                <small>${escapeHtml(spec.position || spec.summary || "AI ready specialist")}</small>
+public/control-center/pages/ai-command.js:4706:        const roleId = isTeam ? "team" : getAiRoomRoleId(spec.id);
+public/control-center/pages/ai-command.js:4724:                <div class="aicmd-chatfirst-composer aicmd-final-composer" data-role="${escapeHtml(roleId)}">
+public/control-center/pages/ai-command.js:4738:                                        <button class="aicmd-final-pill-btn" type="button" data-aicmd-final-specialist title="Active specialist">
+public/control-center/pages/ai-command.js:4810:		<nav class="aicmd-chatfirst-tabs" role="tablist" aria-label="AI Command secondary tabs">
+public/control-center/pages/ai-command.js:4816:					role="tab"
+public/control-center/pages/ai-command.js:4851:					<p>Choose an active specialist or keep Full Team review. Planned lanes are visible but not active runtime specialists.</p>
+public/control-center/pages/ai-command.js:4855:			<div class="aicmd-chatfirst-mode-toggle" role="group" aria-label="AI team mode">
+public/control-center/pages/ai-command.js:4859:			<div class="aicmd-chatfirst-specialist-grid ${AI_UX_SIMPLE_MODE ? 'aicmd-simple-hide-team' : ''}">
+public/control-center/pages/ai-command.js:4866:							data-aicmdv2-specialist="${escapeHtml(spec.id)}"
+public/control-center/pages/ai-command.js:4867:							data-role="${escapeHtml(getAiRoomRoleId(spec.id))}"
+public/control-center/pages/ai-command.js:4869:							<span class="aicmd-chatfirst-specialist-avatar" aria-hidden="true">${escapeHtml(getAiRoomInitials(spec))}</span>
+public/control-center/pages/ai-command.js:4878:			<div class="aicmd-chatfirst-planned-grid" aria-label="Planned specialists">
+public/control-center/pages/ai-command.js:4881:						<span class="aicmd-chatfirst-specialist-avatar" aria-hidden="true">${escapeHtml(item.initials)}</span>
+public/control-center/pages/ai-command.js:4895:	const specialistLabel = session.teamMode === "team" ? "Full Team" : getPhase1SpecialistById(session.modeId)?.label || "Specialist";
+public/control-center/pages/ai-command.js:4896:	const roleId = session.teamMode === "team" ? "team" : getAiRoomRoleId(session.modeId);
+public/control-center/pages/ai-command.js:4899:		<div class="aicmd-chatfirst-tools-tab" data-role="${escapeHtml(roleId)}">
+public/control-center/pages/ai-command.js:4902:					<h2>${escapeHtml(specialistLabel)} Tools</h2>
+public/control-center/pages/ai-command.js:4938:	const specialist = session.teamMode === "team"
+public/control-center/pages/ai-command.js:4940:		: getPhase1SpecialistById(preview.specialistId || session.modeId);
+public/control-center/pages/ai-command.js:4958:				<div class="aicmd-chatfirst-output-tabs" role="tablist" aria-label="Output workspace tabs">
+public/control-center/pages/ai-command.js:4964:							role="tab"
+public/control-center/pages/ai-command.js:4976:					<span><strong>Specialist</strong>${escapeHtml(specialist.label || "Specialist")}</span>
+public/control-center/pages/ai-command.js:5097:        const selectedModeLabel = isTeam ? "Team workflow" : "Solo specialist";
+public/control-center/pages/ai-command.js:5101:                const role = asString(message.role || "");
+public/control-center/pages/ai-command.js:5102:                const messageRoleId = getAiRoomRoleId(message.specialistId || message.modeId || "");
+public/control-center/pages/ai-command.js:5103:                if (role === "user") {
+public/control-center/pages/ai-command.js:5106:                if (role === "assistant") {
+public/control-center/pages/ai-command.js:5113:                const producerId = getAiRoomRoleId(item.specialistId || "");
+public/control-center/pages/ai-command.js:5118:                const producerId = getAiRoomRoleId(item.specialistId || "");
+public/control-center/pages/ai-command.js:5130:        const bridgeSpecialistId = getAiRoomRoleId(bridgeContext.specialistId || "");
+public/control-center/pages/ai-command.js:5133:                bridgeContext.specialistLabel &&
+public/control-center/pages/ai-command.js:5137:                specialistId: session.modeId,
+public/control-center/pages/ai-command.js:5153:                const role = asString(message.role || "");
+public/control-center/pages/ai-command.js:5154:                const isUser = role === "user";
+public/control-center/pages/ai-command.js:5155:                const label = isUser ? "You" : asString(message.specialistLabel || selectedLabel || "Specialist");
+public/control-center/pages/ai-command.js:5174:                                role: "user",
+public/control-center/pages/ai-command.js:5175:                                specialistId: item.specialistId || selectedRoleId,
+public/control-center/pages/ai-command.js:5176:                                specialistLabel: "You",
+public/control-center/pages/ai-command.js:5181:                                role: "assistant",
+public/control-center/pages/ai-command.js:5182:                                specialistId: item.specialistId || selectedRoleId,
+public/control-center/pages/ai-command.js:5183:                                specialistLabel: item.specialistLabel || selectedLabel,
+public/control-center/pages/ai-command.js:5197:                                        <p class="aicmd-v2-chat-subtitle">Focused chat with the active AI. Other specialist replies remain available in shared room history.</p>
+public/control-center/pages/ai-command.js:5213:                                                <strong>${escapeHtml("Specialist context loaded from Home: " + bridgeContext.specialistLabel)}</strong>
+public/control-center/pages/ai-command.js:5218:                                        <span>Selected specialist</span>
+public/control-center/pages/ai-command.js:5229:                                        <strong>${escapeHtml(latestSelected?.specialistLabel || selectedLabel)}</strong>
+public/control-center/pages/ai-command.js:5235:                                                <div class="aicmd-v2-chat-loading aicmd-room-typing-indicator" role="status" aria-live="polite">
+public/control-center/pages/ai-command.js:5239:                                                                <small>Please wait while the specialist prepares a review-ready response.</small>
+public/control-center/pages/ai-command.js:5251:                                        <strong>Start with the selected specialist</strong>
+public/control-center/pages/ai-command.js:5257:                                <article class="aicmd-v2-chat-card aicmd-room-response-card is-selected-output" data-role="${escapeHtml(selectedRoleId)}">
+public/control-center/pages/ai-command.js:5260:                                                <span><strong>${escapeHtml(latestSelected.specialistLabel || selectedLabel)}</strong></span>
+public/control-center/pages/ai-command.js:5262:                                                <span class="aicmd-room-producer-chip">Selected specialist output</span>
+public/control-center/pages/ai-command.js:5278:                                                <span>${sharedResponses.length} recent specialist repl${sharedResponses.length === 1 ? "y" : "ies"}</span>
+public/control-center/pages/ai-command.js:5282:                                                        const producerId = getAiRoomRoleId(item.specialistId || "");
+public/control-center/pages/ai-command.js:5283:                                                        const producerLabel = item.specialistLabel || "Specialist";
+public/control-center/pages/ai-command.js:5285:                                                                <article class="aicmd-room-shared-history-item" data-role="${escapeHtml(producerId)}">
+public/control-center/pages/ai-command.js:5333:	const specialist = session.teamMode === "team" ? { label: "Full Team" } : getPhase1SpecialistById(session.modeId);
+public/control-center/pages/ai-command.js:5338:		{ label: "Specialist", value: specialist.label || "Specialist", present: true },
+public/control-center/pages/ai-command.js:5422:			title: item.responseTitle || item.specialistLabel || "Specialist response",
+public/control-center/pages/ai-command.js:5526:					specialistId: detectedSpecialist,
+public/control-center/pages/ai-command.js:5527:					specialistLabel: bridgeSpecialist?.label || titleCase(detectedSpecialist),
+public/control-center/pages/ai-command.js:5717:		Array.from(document.querySelectorAll("[data-aicmdv2-specialist]")).forEach((btn) => {
+public/control-center/pages/ai-command.js:5719:                                const specId = btn.getAttribute("data-aicmdv2-specialist") || "operations";
+public/control-center/pages/ai-command.js:5838:                                                specialistId: session.modeId,
+public/control-center/pages/ai-command.js:5907:                Array.from(document.querySelectorAll("[data-aicmd-final-specialist]")).forEach((btn) => {
+public/control-center/pages/ai-command.js:5920:                                target.closest("[data-aicmd-final-specialist]") ||
+public/control-center/pages/ai-command.js:5947:                                updateStatus("Voice conversation requires the next provider-backed phase: recording, STT, specialist reply, and TTS playback. Voice dictation is ready now.");
+public/control-center/pages/ai-command.js:5958:                        specialistLabel: session.teamMode === "team" ? "Full Team" : getPhase1SpecialistById(session.modeId)?.label,
+public/control-center/pages/ai-command.js:6530:		                const specialist = session.teamMode === "team"
+public/control-center/pages/ai-command.js:6536:		                        role: "user",
+public/control-center/pages/ai-command.js:6537:		                        modeId: specialist.id || session.modeId,
+public/control-center/pages/ai-command.js:6538:		                        specialistId: specialist.id || session.modeId,
+public/control-center/pages/ai-command.js:6539:		                        specialistLabel: "You",
+public/control-center/pages/ai-command.js:6566:		                                specialistId: specialist.id || session.modeId,
+public/control-center/pages/ai-command.js:6567:		                                specialistName: specialist.label || "Specialist",
+public/control-center/pages/ai-command.js:6583:		                                source: "ai-command-specialist-chat",
+public/control-center/pages/ai-command.js:6602:		                                role: "assistant",
+public/control-center/pages/ai-command.js:6603:		                                modeId: specialist.id || session.modeId,
+public/control-center/pages/ai-command.js:6604:		                                specialistId: specialist.id || session.modeId,
+public/control-center/pages/ai-command.js:6605:		                                specialistLabel: specialist.label || "Specialist",
+public/control-center/pages/ai-command.js:6636:		                                specialistId: specialist.id || session.modeId,
+public/control-center/pages/ai-command.js:6637:		                                specialistLabel: specialist.label || "Specialist",
+public/control-center/pages/ai-command.js:6671:		                        session.responseError = asString(error?.message || "Failed to generate specialist chat reply.");
+public/control-center/pages/ai-command.js:6789:					specialistLabel: session.teamMode === "team" ? "Full Team" : getPhase1SpecialistById(session.modeId)?.label,
+public/control-center/pages/ai-command.js:6853:		                updateStatus("Continue from the Composer. The selected specialist is still active.");
+public/control-center/pages/ai-command.js:6942:					modeId: latestResponse.specialistId || session.modeId,
+public/control-center/pages/ai-command.js:6944:					lastResponseTitle: latestResponse.responseTitle || "Generated specialist response",
+public/control-center/pages/ai-command.js:6990:				const specialistLabel = session.teamMode === "team"
+public/control-center/pages/ai-command.js:6992:					: getPhase1SpecialistById(output.specialistId || session.modeId).label;
+public/control-center/pages/ai-command.js:6993:				const text = buildPreviewText(output, specialistLabel);
+public/control-center/pages/ai-command.js:7014:				const specialistLabel = session.teamMode === "team"
+public/control-center/pages/ai-command.js:7016:					: getPhase1SpecialistById(output.specialistId || session.modeId).label;
+public/control-center/pages/ai-command.js:7017:				const text = buildPreviewText(output, specialistLabel);
+public/control-center/pages/ai-command.js:7048:							modeId: output.specialistId || session.modeId,
+public/control-center/pages/ai-command.js:7128:        if (session.isSelecting) return "selecting_specialist";
+public/control-center/pages/ai-command.js:7142:                case "selecting_specialist":
+public/control-center/pages/ai-command.js:7143:                        return "Selecting specialist";
+public/control-center/pages/ai-command.js:7284:    if (last.role === "user") return "understanding";
+public/control-center/pages/ai-command.js:7285:    if (last.role === "assistant") return "responding";
+public/control-center/pages/library.js:187:    "button, a, input, select, textarea, label, option, [role='button'], .library-action-menu, .library-action-dropdown, .library-drop-zone"
+public/control-center/pages/library.js:3455:            <div id="libraryDropZone" class="library-drop-zone" role="button" tabindex="0">
+public/control-center/pages/home.js:10:  getProjectedActiveRole,
+public/control-center/pages/home.js:11:  getProjectedTeamMembers
+public/control-center/pages/home.js:224:  return aiTeamCards.find((card) => card.status === "Active role") || aiTeamCards[0] || null;
+public/control-center/pages/home.js:247:  const projectedMembers = getProjectedTeamMembers(state);
+public/control-center/pages/home.js:249:    getProjectedActiveRole(state)
+public/control-center/pages/home.js:252:  const roles = projectedMembers.length
+public/control-center/pages/home.js:254:        id: asString(member.role || member.id).toLowerCase(),
+public/control-center/pages/home.js:257:          member.role ||
+public/control-center/pages/home.js:279:  return roles.map((role) => {
+public/control-center/pages/home.js:280:    const roleNotifications = notifications.filter((item) => asString(item?.owner_role).toLowerCase() === role.id);
+public/control-center/pages/home.js:281:    const roleTasks = tasks.filter((item) => asString(item?.owner_role).toLowerCase() === role.id);
+public/control-center/pages/home.js:282:    const roleApprovals = approvals.filter((item) => asString(item?.reviewer_role).toLowerCase() === role.id);
+public/control-center/pages/home.js:284:    const latest = roleNotifications[0] || roleTasks[0] || roleApprovals[0] || null;
+public/control-center/pages/home.js:289:      ...role,
+public/control-center/pages/home.js:292:        role.id === projectedActiveRole
+public/control-center/pages/home.js:293:          ? "Active role"
+public/control-center/pages/home.js:296:        ? asString(latest.title || latest.summary || latest.action || role.fallback)
+public/control-center/pages/home.js:297:        : role.fallback
+public/control-center/pages/home.js:573:      : "Select a project to see readiness, blockers, the next action, and the right AI specialist.",
+public/control-center/pages/home.js:1009:                <button class="quick-action-btn mhos-motion-soft" type="button" data-role-id="${escapeHtml(recommendedSpecialist.id)}">
+public/control-center/pages/home.js:1080:    const handleAiRoleClick = (roleId, roleName) => {
+public/control-center/pages/home.js:1082:      const rolePrompts = {
+public/control-center/pages/home.js:1094:      const prompt = rolePrompts[roleId] || `Act as the ${roleName} specialist for ${projectLabel}. Review the current project context and recommend the next best actions. Do not execute anything; prepare guidance only.`;
+public/control-center/pages/home.js:1096:      showMessage?.(`${roleName} context prepared in AI Command.`);
+public/control-center/pages/home.js:1156:    const aiRoleCards = document.querySelectorAll(".home-ai-team-card, .mhos-specialist, .mhos-workflow-step[data-role-id]");
+public/control-center/pages/home.js:1158:      const roleId = card.getAttribute("data-role-id");
+public/control-center/pages/home.js:1159:      const roleName = card.querySelector("strong")?.textContent || "AI Specialist";
+public/control-center/pages/home.js:1160:      card.onclick = () => handleAiRoleClick(roleId, roleName);
+public/control-center/pages/content-studio-workspace.js:666:    owner_role: CONTENT_ROLE_DEFAULTS.ownerRole,
+public/control-center/pages/content-studio-workspace.js:667:    review_role: CONTENT_ROLE_DEFAULTS.reviewRole,
+public/control-center/pages/content-studio-workspace.js:1529:    source_role: CONTENT_ROLE_DEFAULTS.ownerRole,
+public/control-center/pages/content-studio-workspace.js:1530:    destination_role: CONTENT_ROLE_DEFAULTS.mediaRole,
+public/control-center/pages/content-studio-workspace.js:1576:    source_role: CONTENT_ROLE_DEFAULTS.ownerRole,
+public/control-center/pages/content-studio-workspace.js:1577:    destination_role: CONTENT_ROLE_DEFAULTS.handoffRole,
+public/control-center/pages/content-studio-workspace.js:1692:    source_role: CONTENT_ROLE_DEFAULTS.ownerRole,
+public/control-center/pages/content-studio-workspace.js:1693:    destination_role: CONTENT_ROLE_DEFAULTS.reviewRole,
+public/control-center/pages/integrations/drawer.js:429:        role="dialog"
+public/control-center/pages/governance.js:349:        ${Object.entries(escalationChain).map(([risk, roles]) => `
+public/control-center/pages/governance.js:352:            <span>${escapeHtml(asArray(roles).map(titleCase).join(" -> ") || "No escalation path")}</span>
+public/control-center/pages/governance.js:743:  const roles = asArray(
+public/control-center/pages/governance.js:748:  return roles.length ? roles.map(titleCase).join(" -> ") : "No escalation path";
+public/control-center/pages/governance.js:1282:                    ${Object.entries(asObject(summary.review_model?.escalation_chain)).map(([risk, roles]) => `
+public/control-center/pages/governance.js:1285:                        <span>${escapeHtml(asArray(roles).map(titleCase).join(" -> ") || "No escalation path")}</span>
+public/control-center/pages/governance.js:1390:          reviewer_role: "compliance_reviewer",
+public/control-center/pages/setup.js:1523:            <div class="setup-smart-step-list" role="tablist" aria-label="Setup wizard steps">
+public/control-center/pages/setup.js:1527:                  <button class="setup-wizard-step ${index === 0 ? "is-active" : ""}" type="button" data-setup-step="${escapeHtml(step.id)}" role="tab" aria-current="${index === 0 ? "step" : "false"}">
+public/control-center/pages/publishing.js:19:    <section class="publishing-command-header" role="region" aria-label="Publishing Command Header">
+public/control-center/pages/workflows.js:1570:          owner_role: "admin",
+public/control-center/pages/workflows.js:1571:          assignee_role: "admin",
+public/control-center/pages/settings.js:398:    backendLabel: "Permissions are modeled now and ready for future role persistence",
+public/control-center/pages/settings.js:401:        path: "team.roles",
+public/control-center/pages/settings.js:636:    description: "Keep approval ownership, publishing permissions, and team-role authority together so governance stays understandable.",
+public/control-center/pages/settings.js:730:    roles: Array.isArray(normalized.team?.roles)
+public/control-center/pages/settings.js:731:      ? normalized.team.roles
+public/control-center/pages/settings.js:732:      : asArray(team.members).map((member) => titleCase(member.role)).filter(Boolean)
+public/control-center/pages/settings.js:740:    active_role: "admin",
+public/control-center/pages/settings.js:746:      owner_role: "admin"
+public/control-center/pages/settings.js:946:      roles: ["Strategist", "Writer", "Designer", "Publisher", "Analyst", "Compliance Reviewer", "Admin", "Brand owner"],
+public/control-center/pages/settings.js:953:      roleMatrix: {
+public/control-center/pages/settings.js:1387:    <div class="settings-role-matrix">
+public/control-center/pages/settings.js:1388:      <div class="settings-role-matrix-head">
+public/control-center/pages/settings.js:1389:        <h4>Team services / role matrix</h4>
+public/control-center/pages/settings.js:1392:      <div class="settings-role-grid">
+public/control-center/pages/settings.js:1393:        ${TEAM_ROLE_MATRIX.map((role) => {
+public/control-center/pages/settings.js:1394:          const config = asObject(getPathValue(session.form, `team.roleMatrix.${role.id}`));
+public/control-center/pages/settings.js:1397:            <div class="settings-role-card">
+public/control-center/pages/settings.js:1398:              <div class="settings-role-card-head">
+public/control-center/pages/settings.js:1400:                  <strong>${escapeHtml(role.label)}</strong>
+public/control-center/pages/settings.js:1401:                  <span>${escapeHtml(role.service)}</span>
+public/control-center/pages/settings.js:1404:              <p class="settings-role-description">${escapeHtml(role.description)}</p>
+public/control-center/pages/settings.js:1405:              <div class="settings-role-card-grid">
+public/control-center/pages/settings.js:1407:                  <label class="settings-field-label" for="team-role-${role.id}-authority">Authority</label>
+public/control-center/pages/settings.js:1409:                    id="team-role-${role.id}-authority"
+public/control-center/pages/settings.js:1411:                    data-setting-path="team.roleMatrix.${escapeHtml(role.id)}.authority"
+public/control-center/pages/settings.js:1427:                <label class="settings-toggle settings-toggle-compact" for="team-role-${role.id}-approve">
+public/control-center/pages/settings.js:1430:                    id="team-role-${role.id}-approve"
+public/control-center/pages/settings.js:1433:                    data-setting-path="team.roleMatrix.${escapeHtml(role.id)}.canApprove"
+public/control-center/pages/settings.js:1438:                <label class="settings-toggle settings-toggle-compact" for="team-role-${role.id}-publish">
+public/control-center/pages/settings.js:1441:                    id="team-role-${role.id}-publish"
+public/control-center/pages/settings.js:1444:                    data-setting-path="team.roleMatrix.${escapeHtml(role.id)}.canPublish"
+public/control-center/pages/settings.js:1449:                <label class="settings-toggle settings-toggle-compact" for="team-role-${role.id}-integrations">
+public/control-center/pages/settings.js:1452:                    id="team-role-${role.id}-integrations"
+public/control-center/pages/settings.js:1455:                    data-setting-path="team.roleMatrix.${escapeHtml(role.id)}.canManageIntegrations"
+public/control-center/pages/settings.js:1460:                <label class="settings-toggle settings-toggle-compact" for="team-role-${role.id}-defaults">
+public/control-center/pages/settings.js:1463:                    id="team-role-${role.id}-defaults"
+public/control-center/pages/settings.js:1466:                    data-setting-path="team.roleMatrix.${escapeHtml(role.id)}.canChangeDefaults"
+public/control-center/pages/settings.js:1853:          const confirmed = window.confirm("Confirm settings save\n\nAction: Save team and governance settings for this project.\nRisk: These settings can affect team roles, approval behavior, publishing readiness, brand safety review, and admin override behavior.\nAuthority: This is a backend-governed durable settings update.\n\nSelect Cancel to review the settings before saving.");
+public/control-center/pages/settings.js:1869:            source_role: "admin",
+public/control-center/pages/settings.js:1870:            destination_role: "compliance_reviewer",
+public/control-center/app.js:4:  getProjectedActiveRole,
+public/control-center/app.js:10:} from "./runtime/authority/route-role-fallback.js";
+public/control-center/app.js:111:const CONTROL_ROLE_STORAGE_KEY = "mh-control-role";
+public/control-center/app.js:182:  const stateRole = getProjectedActiveRole({ operations, activeRole: state.activeRole });
+public/control-center/app.js:263:  const allowedRoles = Array.isArray(explicitRule.roles)
+public/control-center/app.js:264:    ? explicitRule.roles.map((item) => String(item || "").trim().toLowerCase())
+public/control-center/app.js:273:        `Your current role is "${activeRole}". ` +
+public/control-center/app.js:274:        `Use the Role selector in the top bar to switch roles for internal testing.`
+public/control-center/app.js:289:  modal.setAttribute("role", "dialog");
+public/control-center/app.js:710:function formatRoleLabel(role) {
+public/control-center/app.js:711:  const normalized = String(role || "").trim().toLowerCase();
+public/control-center/app.js:1944:  const roleBadge = $("mobileRoleBadge");
+public/control-center/app.js:1945:  if (roleBadge) {
+public/control-center/app.js:1946:    roleBadge.textContent = formatRoleLabel(getActiveRole());
+public/control-center/app.js:3814:  modal.setAttribute("role", "dialog");

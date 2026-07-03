@@ -1,0 +1,1386 @@
+public/control-center/pages/ai-command.js:8:} from "./ai-command/tool-dock.js";
+public/control-center/pages/ai-command.js:28:        executeProjectAiChat,
+public/control-center/pages/ai-command.js:29:        executeProjectAiGuidance,
+public/control-center/pages/ai-command.js:30:        generateAiCommandCampaignPreview
+public/control-center/pages/ai-command.js:66:                id: "publisher",
+public/control-center/pages/ai-command.js:70:                routeHint: "publishing"
+public/control-center/pages/ai-command.js:87:                id: "compliance_reviewer",
+public/control-center/pages/ai-command.js:90:                summary: "Claims review, approvals, safety language, and governance checks.",
+public/control-center/pages/ai-command.js:94:                id: "operations",
+public/control-center/pages/ai-command.js:97:                summary: "Tasks, timelines, handoffs, approvals, and execution plans.",
+public/control-center/pages/ai-command.js:101:                id: "customer_ops",
+public/control-center/pages/ai-command.js:105:                routeHint: "operations-centers"
+public/control-center/pages/ai-command.js:108:                id: "sales_crm",
+public/control-center/pages/ai-command.js:118:	executive: "operations",
+public/control-center/pages/ai-command.js:127:	publisher: "publisher",
+public/control-center/pages/ai-command.js:128:	compliance_reviewer: "compliance_reviewer",
+public/control-center/pages/ai-command.js:129:	customer_operations: "customer_ops",
+public/control-center/pages/ai-command.js:130:	customer_ops: "customer_ops",
+public/control-center/pages/ai-command.js:131:	support: "customer_ops",
+public/control-center/pages/ai-command.js:132:	sales: "sales_crm",
+public/control-center/pages/ai-command.js:133:	crm: "sales_crm",
+public/control-center/pages/ai-command.js:134:	sales_crm: "sales_crm",
+public/control-center/pages/ai-command.js:135:	admin: "operations"
+public/control-center/pages/ai-command.js:163:		canHelp: ["Draft captions and hooks", "Write email copy", "Create landing page text", "Prepare publisher handoff", "Suggest message variants"],
+public/control-center/pages/ai-command.js:166:		safetyNote: "Drafts require review before publishing. Cannot approve or publish without confirmation.",
+public/control-center/pages/ai-command.js:192:		safetyNote: "Scripts and direction only. Video generation requires explicit backend action and approval.",
+public/control-center/pages/ai-command.js:196:		id: "publisher",
+public/control-center/pages/ai-command.js:201:		placeholder: "Ask the Publisher to review publishing readiness, check scheduling, or prepare a handoff package…",
+public/control-center/pages/ai-command.js:202:		canHelp: ["Review publishing readiness", "Check scheduled jobs", "Prepare handoff packages", "Map publishing dependencies", "Flag pre-publish risks"],
+public/control-center/pages/ai-command.js:203:		cannotDo: ["Publish without explicit approval", "Override schedules", "Bypass governance gates", "Push to live channels directly"],
+public/control-center/pages/ai-command.js:205:		safetyNote: "Publishing always requires explicit approval. No live publishing from AI guidance alone.",
+public/control-center/pages/ai-command.js:218:		safetyNote: "Ad concepts and copy only. Live ad actions require platform integration and explicit approval.",
+public/control-center/pages/ai-command.js:235:		id: "compliance_reviewer",
+public/control-center/pages/ai-command.js:239:		summary: "Claims review, approval safety, publishing risk, and governance notes.",
+public/control-center/pages/ai-command.js:240:		placeholder: "Ask the Compliance Reviewer to check claims, approval risks, publishing safety, and governance notes…",
+public/control-center/pages/ai-command.js:241:		canHelp: ["Review marketing claims", "Flag approval risks", "Check publishing safety", "Prepare governance notes", "Identify compliance blockers"],
+public/control-center/pages/ai-command.js:242:		cannotDo: ["Grant approvals directly", "Override governance gates", "Publish on behalf of approvers", "Remove flags without review"],
+public/control-center/pages/ai-command.js:248:		id: "operations",
+public/control-center/pages/ai-command.js:252:		summary: "Tasks, timelines, handoffs, approvals, and execution plans.",
+public/control-center/pages/ai-command.js:255:		cannotDo: ["Run workflows without confirmation", "Auto-approve tasks", "Override authority gates", "Execute backend operations directly"],
+public/control-center/pages/ai-command.js:261:		id: "customer_ops",
+public/control-center/pages/ai-command.js:270:		safetyNote: "Customer operations outputs are drafts only. Sending replies, ticket creation, and escalations require confirmation in the owning surface.",
+public/control-center/pages/ai-command.js:274:		id: "sales_crm",
+public/control-center/pages/ai-command.js:278:		summary: "Lead qualification, outreach drafts, follow-up cadence, CRM profile summaries, and sales handoff notes.",
+public/control-center/pages/ai-command.js:279:		placeholder: "Ask the Sales / CRM Lead to qualify a lead, draft outreach, plan follow-ups, summarize CRM context, or prepare a sales handoff for review…",
+public/control-center/pages/ai-command.js:280:		canHelp: ["Qualify lead context", "Draft outreach", "Plan follow-up sequences", "Summarize CRM profiles", "Prepare sales handoffs"],
+public/control-center/pages/ai-command.js:314:	publisher: [
+public/control-center/pages/ai-command.js:315:		{ label: "Review publishing readiness", sub: "Check what is ready to publish" },
+public/control-center/pages/ai-command.js:316:		{ label: "Flag pre-publish risks", sub: "Identify what needs review first" },
+public/control-center/pages/ai-command.js:332:	compliance_reviewer: [
+public/control-center/pages/ai-command.js:333:		{ label: "Check claims for approval", sub: "Review all marketing claims" },
+public/control-center/pages/ai-command.js:334:		{ label: "Flag publishing risks", sub: "Identify blockers before release" },
+public/control-center/pages/ai-command.js:335:		{ label: "Prepare governance notes", sub: "Document compliance status" },
+public/control-center/pages/ai-command.js:336:		{ label: "Review approval requirements", sub: "What needs sign-off" }
+public/control-center/pages/ai-command.js:338:	operations: [
+public/control-center/pages/ai-command.js:344:	customer_ops: [
+public/control-center/pages/ai-command.js:348:		{ label: "Prepare escalation", sub: "Route support, sales, or operations" }
+public/control-center/pages/ai-command.js:350:	sales_crm: [
+public/control-center/pages/ai-command.js:353:		{ label: "Build follow-up sequence", sub: "Multi-step sales cadence" },
+public/control-center/pages/ai-command.js:354:		{ label: "Prepare sales handoff", sub: "Route context to operations" }
+public/control-center/pages/ai-command.js:362:	{ label: "Prepare a full handoff sequence", sub: "Strategy, creative, compliance, publishing, ops" },
+public/control-center/pages/ai-command.js:363:	{ label: "Review customer and sales impact", sub: "Customer Ops, Sales / CRM, Operations" }
+public/control-center/pages/ai-command.js:369:	{ id: "ask", title: "Ask", description: "Choose a specialist or the full team." },
+public/control-center/pages/ai-command.js:393:	publisher: "PB",
+public/control-center/pages/ai-command.js:396:	compliance_reviewer: "CR",
+public/control-center/pages/ai-command.js:397:	operations: "OL",
+public/control-center/pages/ai-command.js:398:	customer_ops: "CO",
+public/control-center/pages/ai-command.js:399:	sales_crm: "SC"
+public/control-center/pages/ai-command.js:405:	compliance_reviewer: "compliance_reviewer"
+public/control-center/pages/ai-command.js:413:		summary: "Policy, approvals, roles, and audit controls stay destination-owned."
+public/control-center/pages/ai-command.js:440:		{ id: "publisher-package", label: "Publisher Package", action: "preview", intent: "handoff", template: "Prepare a Publisher handoff for {project}. Include German copy package, CTA, notes, and remaining checks." }
+public/control-center/pages/ai-command.js:456:	publisher: [
+public/control-center/pages/ai-command.js:457:		{ id: "publishing-checklist", label: "Publishing Checklist", action: "preview", intent: "handoff", template: "Build a publishing checklist for {project}. Include German copy, assets, claims checks, and channel readiness." },
+public/control-center/pages/ai-command.js:458:		{ id: "final-packaging", label: "Final Packaging", action: "preview", intent: "handoff", template: "Prepare a final publishing package for {project}. Include copy, CTA, asset notes, approvals, and destination channel." },
+public/control-center/pages/ai-command.js:460:		{ id: "schedule-draft", label: "Schedule Draft", action: "preview", intent: "workflow", template: "Prepare a publishing schedule draft for {project}. Include channel cadence, dependencies, and review gates." },
+public/control-center/pages/ai-command.js:461:		{ id: "open-publishing", label: "Open Publishing", action: "route", route: "publishing" }
+public/control-center/pages/ai-command.js:477:	compliance_reviewer: [
+public/control-center/pages/ai-command.js:479:		{ id: "approval-flags", label: "Approval Flags", action: "preview", intent: "task", template: "Check approval risks for {project}. List risk, impact, mitigation, and required owner." },
+public/control-center/pages/ai-command.js:480:		{ id: "safety-checklist", label: "Safety Checklist", action: "preview", intent: "handoff", template: "Prepare a safety checklist for {project}. Include policy checks, evidence required, and approval notes." },
+public/control-center/pages/ai-command.js:481:		{ id: "publish-readiness", label: "Publish Readiness", action: "preview", intent: "handoff", template: "Review publish readiness for {project}. Confirm what needs human approval before release." },
+public/control-center/pages/ai-command.js:484:	operations: [
+public/control-center/pages/ai-command.js:491:	customer_ops: [
+public/control-center/pages/ai-command.js:494:		{ id: "draft-customer-reply", label: "Draft Customer Reply", action: "preview", intent: "guidance", template: "Draft a customer reply for {project}. Keep it helpful, calm, review-ready, and do not claim any operational action has been completed." },
+public/control-center/pages/ai-command.js:499:		{ id: "route-support-sales-ops", label: "Route to Support / Sales / Operations", action: "preview", intent: "handoff", template: "Prepare routing guidance for {project}. Decide whether the customer item belongs with Support, Sales, or Operations, and explain the review gate." }
+public/control-center/pages/ai-command.js:501:	sales_crm: [
+public/control-center/pages/ai-command.js:505:		{ id: "crm-profile-summary", label: "CRM Profile Summary", action: "preview", intent: "guidance", template: "Summarize the CRM profile context for {project}. Include fit, history, open questions, and next sales action without mutating CRM data." },
+public/control-center/pages/ai-command.js:509:		{ id: "sales-handoff-draft", label: "Sales Handoff", action: "preview", intent: "handoff", template: "Prepare a sales handoff draft for {project}. Include lead context, recommended next action, owner, and confirmation needed." }
+public/control-center/pages/ai-command.js:521:const AI_COMMAND_LOCAL_DRAFTS_KEY = "mh-ai-command-local-drafts-v1";
+public/control-center/pages/ai-command.js:522:const AI_COMMAND_LOCAL_OUTPUTS_KEY = "mh-ai-command-local-outputs-v1";
+public/control-center/pages/ai-command.js:602:		id: "operations",
+public/control-center/pages/ai-command.js:626:			SPECIALIST_DEFS.find((s) => s.id === "operations") ||
+public/control-center/pages/ai-command.js:636:		if (/act as the publisher/i.test(text)) return "publisher";
+public/control-center/pages/ai-command.js:639:		if (/act as the compliance reviewer/i.test(text)) return "compliance_reviewer";
+public/control-center/pages/ai-command.js:640:		if (/act as the operations lead/i.test(text)) return "operations";
+public/control-center/pages/ai-command.js:641:		if (/act as the customer operations lead|act as customer ops/i.test(text)) return "customer_ops";
+public/control-center/pages/ai-command.js:642:		if (/act as the sales|act as the crm|sales \/ crm lead/i.test(text)) return "sales_crm";
+public/control-center/pages/ai-command.js:645:		if (classified.resolvedModeId && classified.resolvedModeId !== "operations") {
+public/control-center/pages/ai-command.js:656:			targetPage: "ai-command",
+public/control-center/pages/ai-command.js:677:	if (/publish\s*now|send\s*external|paid\s*ads|final\s*approval/i.test(command)) {
+public/control-center/pages/ai-command.js:680:			type: "publish_now",
+public/control-center/pages/ai-command.js:681:			targetPage: "publishing",
+public/control-center/pages/ai-command.js:685:				reason: "Requires approval gate before external publishing actions."
+public/control-center/pages/ai-command.js:748:		specialist: asString(context.specialistLabel || "Specialist") || "Specialist",
+public/control-center/pages/ai-command.js:749:		specialistLabel: asString(context.specialistLabel || "Specialist") || "Specialist",
+public/control-center/pages/ai-command.js:753:	return asString(template).replace(/\{(project|projectName|specialist|specialistLabel|campaign)\}/g, (_, token) => tokenMap[token] || "");
+public/control-center/pages/ai-command.js:845:		overview.publishing_language ||
+public/control-center/pages/ai-command.js:846:		overview.publish_language ||
+public/control-center/pages/ai-command.js:851:	const publishLanguage = configuredPublishLanguage || "German";
+public/control-center/pages/ai-command.js:861:		publishLanguage,
+public/control-center/pages/ai-command.js:912:			modeId: "operations",
+public/control-center/pages/ai-command.js:1057:function getAiResponseBridgeStatus(executeProjectAiGuidanceFn) {
+public/control-center/pages/ai-command.js:1058:	if (typeof executeProjectAiGuidanceFn !== "function") {
+public/control-center/pages/ai-command.js:1135:        const specialist = getAiCommandSessionSpecialistLabel(session);
+public/control-center/pages/ai-command.js:1156:        return `${specialist} · ${intent} · ${time}`.slice(0, 80);
+public/control-center/pages/ai-command.js:1198:        session.modeId = asString(record.modeId || session.modeId || "operations");
+public/control-center/pages/ai-command.js:1221:function buildSpecialistChatPrompt({ prompt, specialistLabel, modeLabel, projectName, language, outputLanguage, market }) {
+public/control-center/pages/ai-command.js:1224:	const safeSpecialist = asString(specialistLabel || "Specialist").trim();
+public/control-center/pages/ai-command.js:1233:			"Name the specialist owner for each next action and destination."
+public/control-center/pages/ai-command.js:1246:                `Use ${safeOutputLanguage} only for customer-facing or publishable copy such as captions, ads, emails, landing pages, final campaign text, or publishing packages.`,
+public/control-center/pages/ai-command.js:1247:                "When you include publishable copy, label it clearly as publishable content and keep the explanation in the user chat language.",
+public/control-center/pages/ai-command.js:1250:		`When drafting publishable copy, write it in ${safeOutputLanguage}.`,
+public/control-center/pages/ai-command.js:1252:		"Never claim publish, approval, deletion, archival, sync, or operational runs happened.",
+public/control-center/pages/ai-command.js:1298:function destinationRouteForSpecialist(specialistId, outputType) {
+public/control-center/pages/ai-command.js:1299:	const rawId = getAiRoomRoleId(specialistId || "operations");
+public/control-center/pages/ai-command.js:1306:	if (id === "publisher") return "publishing";
+public/control-center/pages/ai-command.js:1309:	if (id === "compliance_reviewer") return "governance";
+public/control-center/pages/ai-command.js:1310:	if (id === "operations") return outputType === "task" ? "task-center" : "workflows";
+public/control-center/pages/ai-command.js:1311:	if (id === "customer_ops") return outputType === "task" ? "task-center" : "operations-centers";
+public/control-center/pages/ai-command.js:1312:	if (id === "sales_crm") return "workflows";
+public/control-center/pages/ai-command.js:1318:        const specialistId = getAiRoomRoleId(session?.modeId || "operations");
+public/control-center/pages/ai-command.js:1342:        const looksWorkflowLike = /\b(workflow|workflows|process|sequence|phase|phases|approval flow|automation|operating loop|step-by-step|steps|dependencies|trigger|review gate|execution flow)\b/.test(text);
+public/control-center/pages/ai-command.js:1345:        const looksPublishingLike = /\b(publish|publishing|schedule|channel package|channel payload|approval-ready post|final post|ready to publish|publishing package)\b/.test(text);
+public/control-center/pages/ai-command.js:1346:        const looksGovernanceLike = /\b(compliance|governance|claim|claims|risk|risks|approval|approvals|policy|privacy|legal|safe language|safety review)\b/.test(text);
+public/control-center/pages/ai-command.js:1370:        if (/publishing|publish|schedule/.test(outputType) || looksPublishingLike) {
+public/control-center/pages/ai-command.js:1371:                outputType = "publishing";
+public/control-center/pages/ai-command.js:1372:                return { outputType, destinationRoute: explicitDestination || "publishing" };
+public/control-center/pages/ai-command.js:1375:        if (/governance|compliance|risk|approval/.test(outputType) || looksGovernanceLike) {
+public/control-center/pages/ai-command.js:1393:        const destinationRoute = explicitDestination || destinationRouteForSpecialist(session?.modeId || "operations", outputType);
+public/control-center/pages/ai-command.js:1402:		publishing: "Publishing",
+public/control-center/pages/ai-command.js:1407:		"operations-centers": "Operations Centers",
+public/control-center/pages/ai-command.js:1415:function specialistTemplateForOutput({ specialist, outputType, prompt, projectName }) {
+public/control-center/pages/ai-command.js:1418:	const specialistId = asString(specialist?.id || "operations");
+public/control-center/pages/ai-command.js:1419:	const route = destinationRouteForSpecialist(specialistId, outputType);
+public/control-center/pages/ai-command.js:1422:		specialistId,
+public/control-center/pages/ai-command.js:1429:		confirmationRequired: outputType === "handoff" || specialistId === "publisher" || specialistId === "compliance_reviewer",
+public/control-center/pages/ai-command.js:1435:		confirmationNote: "Execution, approvals, and publishing require explicit confirmation in the owning workspace."
+public/control-center/pages/ai-command.js:1438:	if (specialistId === "strategist") {
+public/control-center/pages/ai-command.js:1465:	if (specialistId === "writer") {
+public/control-center/pages/ai-command.js:1472:				"Outcome-led hook direction for a German publishing draft",
+public/control-center/pages/ai-command.js:1485:				"Use Arabic freely in the conversation; publishable copy should be reviewed in German.",
+public/control-center/pages/ai-command.js:1486:				"Claims, health, or performance promises need evidence before publishing."
+public/control-center/pages/ai-command.js:1495:			safetyLabel: "Claims require review before publishing. No direct publish action."
+public/control-center/pages/ai-command.js:1499:	if (specialistId === "media") {
+public/control-center/pages/ai-command.js:1519:	if (specialistId === "video_lead") {
+public/control-center/pages/ai-command.js:1530:			safetyLabel: "Video generation requires configured provider or GPU worker; no execution started."
+public/control-center/pages/ai-command.js:1534:	if (specialistId === "publisher") {
+public/control-center/pages/ai-command.js:1541:				"Publishing remains gated until channel, approval, and asset readiness are confirmed."
+public/control-center/pages/ai-command.js:1545:				"Draft publish schedule by channel",
+public/control-center/pages/ai-command.js:1546:				"Flag approval dependencies",
+public/control-center/pages/ai-command.js:1547:				"Prepare handoff for publishing review"
+public/control-center/pages/ai-command.js:1550:			safetyLabel: "Confirmation required before publish. No publish action performed."
+public/control-center/pages/ai-command.js:1554:	if (specialistId === "ads") {
+public/control-center/pages/ai-command.js:1582:	if (specialistId === "analyst") {
+public/control-center/pages/ai-command.js:1596:	if (specialistId === "compliance_reviewer") {
+public/control-center/pages/ai-command.js:1608:			safetyLabel: "Compliance review is advisory. Formal approval remains human-governed."
+public/control-center/pages/ai-command.js:1612:	if (specialistId === "customer_ops") {
+public/control-center/pages/ai-command.js:1615:			title: outputType === "task" ? "Ticket Draft: Customer operations follow-up" : "Customer Ops Draft: Thread, reply, and routing",
+public/control-center/pages/ai-command.js:1616:			summary: "Customer operations draft prepared with safe reply language, ticket notes, SLA review, and escalation guardrails.",
+public/control-center/pages/ai-command.js:1617:			mainOutput: "Review the customer context, confirm missing details, then route the draft through the owning support, sales, or operations surface.",
+public/control-center/pages/ai-command.js:1625:				"Owner: support, sales, or operations to be confirmed before creation."
+public/control-center/pages/ai-command.js:1629:				"SLA and escalation decisions require confirmation in the owning operations surface."
+public/control-center/pages/ai-command.js:1631:			nextStep: "Review the draft, confirm the destination team, then route through support, sales, or operations.",
+public/control-center/pages/ai-command.js:1643:	if (specialistId === "sales_crm") {
+public/control-center/pages/ai-command.js:1648:			mainOutput: "Use this as a sales planning draft. Confirm CRM context and owner before sending outreach or changing pipeline status.",
+public/control-center/pages/ai-command.js:1668:			nextStep: "Review the lead fit, confirm owner, then route the handoff to operations or the CRM surface.",
+public/control-center/pages/ai-command.js:1673:				"Route sales handoff without mutating CRM data"
+public/control-center/pages/ai-command.js:1680:	if (specialistId === "operations") {
+public/control-center/pages/ai-command.js:1705:			safetyLabel: "No workflow run and no backend task creation executed."
+public/control-center/pages/ai-command.js:1714:	const specialist = teamMode
+public/control-center/pages/ai-command.js:1715:		? { id: "operations", label: "Full Team" }
+public/control-center/pages/ai-command.js:1726:	const base = specialistTemplateForOutput({
+public/control-center/pages/ai-command.js:1727:		specialist,
+public/control-center/pages/ai-command.js:1737:		specialistId: "team",
+public/control-center/pages/ai-command.js:1743:			"Compliance and Publisher verify claims, approvals, formatting, and release readiness",
+public/control-center/pages/ai-command.js:1750:			"Compliance: flag claims, evidence needs, policy risks, and approval gates",
+public/control-center/pages/ai-command.js:1751:			"Publisher: package channel-ready copy, assets, schedule notes, and publish checks",
+public/control-center/pages/ai-command.js:1757:		confirmationNote: "No task, workflow, outreach, customer reply, CRM update, approval, or publishing action is executed from Full Team mode.",
+public/control-center/pages/ai-command.js:1773:function buildPreviewText(output, specialistLabel) {
+public/control-center/pages/ai-command.js:1777:		`Specialist: ${specialistLabel}`,
+public/control-center/pages/ai-command.js:1875:		const providerMatch = /openai|replicate|stability|runway|elevenlabs|anthropic/.test(integrationId);
+public/control-center/pages/ai-command.js:1877:		return providerMatch && readyState;
+public/control-center/pages/ai-command.js:2004:		operations: ["task plan", "workflow", "handoff", "approval", "timeline", "execution plan", "route", "publish", "status", "priority", "priorities", "blocking", "blocker", "readiness", "next", "do next"],
+public/control-center/pages/ai-command.js:2005:		customer_ops: ["customer", "support", "inbox", "ticket", "tickets", "sla", "reply", "thread", "escalation", "complaint", "refund"],
+public/control-center/pages/ai-command.js:2006:		sales_crm: ["lead", "leads", "crm", "sales", "outreach", "follow-up", "follow up", "pipeline", "dealer", "salon", "influencer"]
+public/control-center/pages/ai-command.js:2019:	const top = scores[0] || { modeId: selectedModeId || "operations" };
+public/control-center/pages/ai-command.js:2021:	const actionRouting = /launch|build|reconnect|connect|improve|create|fix|route|plan|publish/.test(query);
+public/control-center/pages/ai-command.js:2024:		resolvedModeId: top.modeId || selectedModeId || "operations",
+public/control-center/pages/ai-command.js:2108:			top ? `Reuse the pattern from ${extractTopMessage(top)} in the next publishing cycle.` : "Sync social insights to identify winning hooks and formats.",
+public/control-center/pages/ai-command.js:2119:			routeSuggestion("Publishing", "publishing", "Schedule the next batch with stronger timing and approval control."),
+public/control-center/pages/ai-command.js:2232:		return { title: "Campaign launch task block", owner: "Campaign Studio", steps: ["Define the campaign objective, audience, and offer.", "Choose channels and budget based on current intelligence.", "List required assets and publishing dependencies before launch."] };
+public/control-center/pages/ai-command.js:2238:		return { title: "Content repair task block", owner: "Content Studio", steps: ["Select the weakest items from Insights.", "Rewrite hooks, sharpen CTAs, and adjust format-platform fit.", "Republish only after updated versions are approved."] };
+public/control-center/pages/ai-command.js:2253:		routeSuggestions.push(routeSuggestion("Publishing", "publishing", "Schedule or approve if the next step is publishing."));
+public/control-center/pages/ai-command.js:2290:		case "operations":
+public/control-center/pages/ai-command.js:2381:	publishing: "Publishing",
+public/control-center/pages/ai-command.js:2389:	"operations-centers": "Operations Centers",
+public/control-center/pages/ai-command.js:2403:	publishing: "publisher",
+public/control-center/pages/ai-command.js:2405:	workflows: "operations",
+public/control-center/pages/ai-command.js:2408:	integrations: "operations",
+public/control-center/pages/ai-command.js:2409:	settings: "operations",
+public/control-center/pages/ai-command.js:2410:	governance: "compliance_reviewer",
+public/control-center/pages/ai-command.js:2411:	"operations-centers": "operations",
+public/control-center/pages/ai-command.js:2412:	"task-center": "operations",
+public/control-center/pages/ai-command.js:2413:	"queue-center": "operations",
+public/control-center/pages/ai-command.js:2414:	"job-monitor": "operations",
+public/control-center/pages/ai-command.js:2415:	"notification-center": "operations",
+public/control-center/pages/ai-command.js:2418:	setup: "operations",
+public/control-center/pages/ai-command.js:2419:	workspace: "operations"
+public/control-center/pages/ai-command.js:2425:	compliance: "compliance_reviewer",
+public/control-center/pages/ai-command.js:2426:	"customer-ops": "customer_ops",
+public/control-center/pages/ai-command.js:2427:	customer_ops: "customer_ops",
+public/control-center/pages/ai-command.js:2428:	"sales-crm": "sales_crm",
+public/control-center/pages/ai-command.js:2429:	sales_crm: "sales_crm"
+public/control-center/pages/ai-command.js:2437:	publish: "publishing",
+public/control-center/pages/ai-command.js:2438:	publisher: "publishing",
+public/control-center/pages/ai-command.js:2444:	operation: "operations-centers",
+public/control-center/pages/ai-command.js:2445:	operations: "operations-centers",
+public/control-center/pages/ai-command.js:2496:function normalizeAiInboundSpecialistId(value, fallback = "operations") {
+public/control-center/pages/ai-command.js:2507:	return ["team", "full-team", "fullteam", "multi-specialist", "team-mode"].includes(clean) ? "team" : "solo";
+public/control-center/pages/ai-command.js:2542:	const specialistId = normalizeAiInboundSpecialistId(preview.specialistId || preview.specialist_id || normalized.suggestedSpecialist, normalized.suggestedSpecialist);
+public/control-center/pages/ai-command.js:2550:		specialistId,
+public/control-center/pages/ai-command.js:2555:		confirmationNote: firstAiInboundText(preview.confirmationNote, preview.confirmation_note, "Execution, approvals, publishing, CRM updates, customer replies, and workflow runs require explicit confirmation in the owning workspace."),
+public/control-center/pages/ai-command.js:2603:	const explicitSpecialist = firstAiInboundId(payload.specialist, payload.specialist_id);
+public/control-center/pages/ai-command.js:2609:		draftContext.specialist ||
+public/control-center/pages/ai-command.js:2610:		draftContext.specialist_id ||
+public/control-center/pages/ai-command.js:2613:		"operations",
+public/control-center/pages/ai-command.js:2614:		"operations"
+public/control-center/pages/ai-command.js:2625:	)) || `Review this ${sourceLabel} handoff for ${projectLabel}. Identify the right specialist, summarize the context, produce a review-ready draft, and recommend the next safe route. Do not execute publishing, task creation, CRM updates, customer replies, workflow runs, or backend actions.`;
+public/control-center/pages/ai-command.js:2665:		note: "Guidance only. No publishing, task creation, CRM updates, customer replies, workflow runs, exports, or backend actions are executed from this handoff."
+public/control-center/pages/ai-command.js:2671:function applyDurableAiHandoff(projectName, operations, session, consumeProjectHandoff, showMessage) {
+public/control-center/pages/ai-command.js:2672:	const handoff = getSharedHandoff(projectName, "ai-command", operations);
+public/control-center/pages/ai-command.js:2766:		const failureReason = asString(payload?.error) || asString(payloadResponse?.error) || asString(error?.message) || "AI provider failed to return output.";
+public/control-center/pages/ai-command.js:2774:			nextActions: ["Check AI provider configuration and retry."],
+public/control-center/pages/ai-command.js:2833:      AGENT_CARDS.find((agent) => agent.id === "operations") ||
+public/control-center/pages/ai-command.js:2843:      bestUse: asString(member.bestUse || member.best_use || fallback.bestUse || "Use when this specialist owns the next step."),
+public/control-center/pages/ai-command.js:2920:			<div class="ctrl-room-section-label">Choose your AI specialist</div>
+public/control-center/pages/ai-command.js:3008:					<span>${escapeHtml(asString(response.error) || asString(response.summary) || "AI provider error.")}</span>
+public/control-center/pages/ai-command.js:3078:				<div class="ctrl-empty-body">Choose a specialist above, pick a suggested prompt, or write your own command and hit Send.</div>
+public/control-center/pages/ai-command.js:3251:        const specialist = session.teamMode === "team"
+public/control-center/pages/ai-command.js:3260:                                : asString(message.specialistLabel || specialist.label || "Specialist");
+public/control-center/pages/ai-command.js:3282:                assistantText ? `Latest specialist answer: ${assistantText}` : "",
+public/control-center/pages/ai-command.js:3291:                specialistId: specialist.id || session.modeId,
+public/control-center/pages/ai-command.js:3292:                specialistLabel: specialist.label || "Specialist",
+public/control-center/pages/ai-command.js:3311:                `Specialist: ${context.specialistLabel}`,
+public/control-center/pages/ai-command.js:3397:			reason: "A clear campaign context helps every specialist agent generate more precise outputs.",
+public/control-center/pages/ai-command.js:3446:	return asString(value || "operations")
+public/control-center/pages/ai-command.js:3449:		.replace(/[^a-z0-9_]+/g, "_") || "operations";
+public/control-center/pages/ai-command.js:3452:function getAiRoomInitials(specialist) {
+public/control-center/pages/ai-command.js:3453:	const id = getAiRoomRoleId(specialist?.id);
+public/control-center/pages/ai-command.js:3455:	return asString(specialist?.label || "AI")
+public/control-center/pages/ai-command.js:3518:	return destinationRouteForSpecialist(session?.modeId || "operations", outputType);
+public/control-center/pages/ai-command.js:3531:	if (/review|check|compliance|readiness|governance/i.test(asString(tool.label))) return "Review";
+public/control-center/pages/ai-command.js:3542:	return "Prepare a review-ready output for the selected specialist lane.";
+public/control-center/pages/ai-command.js:3612:					<strong>${escapeHtml(languagePlan.publishLanguage)}</strong>
+public/control-center/pages/ai-command.js:3649:			<span>Strategy, writing, creative, compliance, publishing, customer, sales, and operations specialists coordinate one review-ready answer. No workflow, send, publish, approval, or CRM action is executed here.</span>
+public/control-center/pages/ai-command.js:3683:							data-aicmdv2-specialist="${escapeHtml(spec.id)}"
+public/control-center/pages/ai-command.js:3698:			<div class="aicmd-room-planned-specialists" aria-label="Additional specialists planned">
+public/control-center/pages/ai-command.js:3699:				<span class="aicmd-room-planned-title">Planned lanes, not active specialists</span>
+public/control-center/pages/ai-command.js:3715:						<p class="aicmd-v2-profile-purpose">Coordinates specialists into one review-ready brief, workflow, or handoff.</p>
+public/control-center/pages/ai-command.js:3726:	const specialistTools = getAiToolDockTools({ specialistId: spec.id, teamMode: "solo", limit: 3 });
+public/control-center/pages/ai-command.js:3739:				${specialistTools.slice(0, 3).map((tool) => `<span class="aicmd-v2-strength-chip is-tool">${escapeHtml(tool.label)}</span>`).join("")}
+public/control-center/pages/ai-command.js:3751:        const label = asString(spec?.label || "AI specialist");
+public/control-center/pages/ai-command.js:3758:        if (roleId === "operations" || roleId === "customer_ops") return `${label} is preparing your task handoff...`;
+public/control-center/pages/ai-command.js:3759:        if (roleId === "compliance") return `${label} is checking safety and compliance...`;
+public/control-center/pages/ai-command.js:3761:        if (roleId === "publisher") return `${label} is preparing publishing guidance...`;
+public/control-center/pages/ai-command.js:3772:		? "Team orchestration across strategy, writing, media/video, compliance, publishing, customer operations, sales/CRM, and operations"
+public/control-center/pages/ai-command.js:3807:	const preferred = destinations.find((item) => !["chat-preview", "composer", "preview", "ai-command"].includes(asString(item)));
+public/control-center/pages/ai-command.js:3809:	return destinationRouteForSpecialist(session?.modeId || "operations", getCanonicalToolIntent(tool));
+public/control-center/pages/ai-command.js:3831:		specialistId: toolModeId,
+public/control-center/pages/ai-command.js:3866:	const specialistLabel = session.teamMode === "team" ? "Full Team" : getPhase1SpecialistById(session.modeId)?.label || "Specialist";
+public/control-center/pages/ai-command.js:3873:					<h3 class="aicmd-v2-tools-title">${escapeHtml(specialistLabel)} Tool Drawer</h3>
+public/control-center/pages/ai-command.js:3906:			${projectName ? `<div class="aicmd-v2-tools-note">Project context: ${escapeHtml(projectName)}. Tools do not execute, publish, send, approve, save, or mutate records.</div>` : ""}
+public/control-center/pages/ai-command.js:3914:        const outputLanguage = asString(languagePlan.publishLanguage || languagePlan.outputLanguage || "German").trim() || "German";
+public/control-center/pages/ai-command.js:3956:                ? { id: "team", label: "Full AI Team", summary: "Multi-specialist review", position: "AI Team" }
+public/control-center/pages/ai-command.js:3966:        const governanceRequired = destinationRoute === "governance" || /approval|claim|compliance|risk|gdpr|review/i.test(`${outputType} ${asString(preview.title)} ${asString(preview.summary)}`);
+public/control-center/pages/ai-command.js:3971:        const teamIds = ["strategist", "writer", "media", "video_lead", "compliance_reviewer", "operations"];
+public/control-center/pages/ai-command.js:3977:                        const complianceWatching = spec.id === "compliance_reviewer" && governanceRequired;
+public/control-center/pages/ai-command.js:3982:                                : complianceWatching
+public/control-center/pages/ai-command.js:3989:                                        <span class="aicmd-chatfirst-specialist-avatar" aria-hidden="true">${escapeHtml(getAiRoomInitials(spec))}</span>
+public/control-center/pages/ai-command.js:4012:                                        <p>Active specialist, source grounding, destination, risk, and execution lock in one compact command strip.</p>
+public/control-center/pages/ai-command.js:4026:                        <div class="aicmd-chatfirst-specialist-grid ${AI_UX_SIMPLE_MODE ? 'aicmd-simple-hide-team' : ''}" aria-label="Live AI team lanes">
+public/control-center/pages/ai-command.js:4029:                        <p class="aicmd-chatfirst-tab-note">AI Command prepares guidance, drafts, previews, and handoff context only. Publishing, approvals, CRM updates, workflow runs, customer sends, provider execution, and durable task creation remain confirmation-gated in the owning workspace.</p>
+public/control-center/pages/ai-command.js:4101:				<p>Chat, draft, review, and prepare handoff context only. Publishing, approvals, CRM updates, workflow runs, external sends, and durable task creation stay confirmation-gated in the owning workspace.</p>
+public/control-center/pages/ai-command.js:4163:		<details class="aicmd-chatfirst-specialist-select">
+public/control-center/pages/ai-command.js:4168:			<div class="aicmd-chatfirst-specialist-menu" role="list">
+public/control-center/pages/ai-command.js:4173:							class="aicmd-chatfirst-specialist-option${isActive ? " is-active" : ""}"
+public/control-center/pages/ai-command.js:4175:							data-aicmdv2-specialist="${escapeHtml(spec.id)}"
+public/control-center/pages/ai-command.js:4179:							<span class="aicmd-chatfirst-specialist-avatar" aria-hidden="true">${escapeHtml(getAiRoomInitials(spec))}</span>
+public/control-center/pages/ai-command.js:4182:								<small>${escapeHtml(spec.position || spec.summary || "AI ready specialist")}</small>
+public/control-center/pages/ai-command.js:4187:				<div class="aicmd-chatfirst-planned-list" aria-label="Planned specialists">
+public/control-center/pages/ai-command.js:4189:						<div class="aicmd-chatfirst-specialist-option is-planned" aria-disabled="true">
+public/control-center/pages/ai-command.js:4190:							<span class="aicmd-chatfirst-specialist-avatar" aria-hidden="true">${escapeHtml(item.initials)}</span>
+public/control-center/pages/ai-command.js:4212:                const messageRoleId = getAiRoomRoleId(message.specialistId || message.modeId || "");
+public/control-center/pages/ai-command.js:4218:                const producerId = getAiRoomRoleId(item.specialistId || "");
+public/control-center/pages/ai-command.js:4225:                                specialistId: item.specialistId || selectedRoleId,
+public/control-center/pages/ai-command.js:4226:                                specialistLabel: "You",
+public/control-center/pages/ai-command.js:4232:                                specialistId: item.specialistId || selectedRoleId,
+public/control-center/pages/ai-command.js:4233:                                specialistLabel: item.specialistLabel || selectedLabel,
+public/control-center/pages/ai-command.js:4255:                        { label: "Ask Compliance", attr: "data-aicmd-smart-compliance" }
+public/control-center/pages/ai-command.js:4277:                const label = isUser ? "You" : asString(message.specialistLabel || selectedLabel || "Specialist");
+public/control-center/pages/ai-command.js:4342:                { id: "publish", label: "Publish", summary: "Prepare publishing checklist and handoff readiness.", enabled: false }
+public/control-center/pages/ai-command.js:4422:        const goal = asString(wizard.goal || "sales");
+public/control-center/pages/ai-command.js:4431:        const complianceSensitivity = asString(wizard.complianceSensitivity || "standard-review");
+public/control-center/pages/ai-command.js:4435:        const goalOptions = [["sales", "Sales"], ["launch", "Product launch"], ["leads", "Lead generation"], ["awareness", "Awareness"], ["retargeting", "Retargeting"]];
+public/control-center/pages/ai-command.js:4436:        const channelOptions = [["social", "Social"], ["email", "Email"], ["website", "Website"], ["ads", "Ads"], ["publishing", "Publishing package"]];
+public/control-center/pages/ai-command.js:4444:        const complianceOptions = [["standard-review", "Standard review"], ["claims-sensitive", "Claims sensitive"], ["pricing-sensitive", "Pricing sensitive"], ["regulated", "Regulated"], ["low-risk", "Low risk"]];
+public/control-center/pages/ai-command.js:4464:                                                <p>Guide the AI Team from source to preview. Backend workflow execution and destination handoff stay approval-gated.</p>
+public/control-center/pages/ai-command.js:4523:                                                        ${complianceOptions.map(([value, label]) => optionButton("complianceSensitivity", value, label, complianceSensitivity)).join("")}
+public/control-center/pages/ai-command.js:4560:                                                                <button type="button" data-aicmd-smart-campaign-action="publishing">Prepare Publishing Handoff</button>
+public/control-center/pages/ai-command.js:4561:                                                                <button type="button" data-aicmd-smart-campaign-action="operations">Create Operations Follow-up</button>
+public/control-center/pages/ai-command.js:4567:                                                        <span>1. Choose source, goal, and channel. The AI Team will prepare the preview package before any approval or handoff.</span>
+public/control-center/pages/ai-command.js:4573:                                        <span>Review-first flow: generate preview, approve, then hand off to the owning surface. No publish, send, CRM update, provider execution, or workflow mutation happens here.</span>
+public/control-center/pages/ai-command.js:4659:                                <span>Select the specialist or route the request to the full coordinated business AI team.</span>
+public/control-center/pages/ai-command.js:4670:                                        <small>Strategy, content, media, operations, compliance, customer, campaign and provider-readiness planning.</small>
+public/control-center/pages/ai-command.js:4674:                        <div class="aicmd-final-team-menu-grid" role="list" aria-label="AI specialists">
+public/control-center/pages/ai-command.js:4681:                                                        data-aicmdv2-specialist="${escapeHtml(spec.id)}"
+public/control-center/pages/ai-command.js:4687:                                                                <small>${escapeHtml(spec.position || spec.summary || "AI ready specialist")}</small>
+public/control-center/pages/ai-command.js:4696:                                <span>Library, campaigns, content, customers, governance, integrations and provider readiness are connected as guarded planning context. Execution stays confirmation-gated.</span>
+public/control-center/pages/ai-command.js:4738:                                        <button class="aicmd-final-pill-btn" type="button" data-aicmd-final-specialist title="Active specialist">
+public/control-center/pages/ai-command.js:4851:					<p>Choose an active specialist or keep Full Team review. Planned lanes are visible but not active runtime specialists.</p>
+public/control-center/pages/ai-command.js:4859:			<div class="aicmd-chatfirst-specialist-grid ${AI_UX_SIMPLE_MODE ? 'aicmd-simple-hide-team' : ''}">
+public/control-center/pages/ai-command.js:4866:							data-aicmdv2-specialist="${escapeHtml(spec.id)}"
+public/control-center/pages/ai-command.js:4869:							<span class="aicmd-chatfirst-specialist-avatar" aria-hidden="true">${escapeHtml(getAiRoomInitials(spec))}</span>
+public/control-center/pages/ai-command.js:4878:			<div class="aicmd-chatfirst-planned-grid" aria-label="Planned specialists">
+public/control-center/pages/ai-command.js:4881:						<span class="aicmd-chatfirst-specialist-avatar" aria-hidden="true">${escapeHtml(item.initials)}</span>
+public/control-center/pages/ai-command.js:4895:	const specialistLabel = session.teamMode === "team" ? "Full Team" : getPhase1SpecialistById(session.modeId)?.label || "Specialist";
+public/control-center/pages/ai-command.js:4902:					<h2>${escapeHtml(specialistLabel)} Tools</h2>
+public/control-center/pages/ai-command.js:4926:			${projectName ? `<p class="aicmd-chatfirst-tab-note">Project context: ${escapeHtml(projectName)}. Tools do not execute, publish, send, approve, save, or mutate records.</p>` : ""}
+public/control-center/pages/ai-command.js:4938:	const specialist = session.teamMode === "team"
+public/control-center/pages/ai-command.js:4940:		: getPhase1SpecialistById(preview.specialistId || session.modeId);
+public/control-center/pages/ai-command.js:4974:					<span><strong>Language</strong>${escapeHtml(languagePlan.publishLanguage)}</span>
+public/control-center/pages/ai-command.js:4976:					<span><strong>Specialist</strong>${escapeHtml(specialist.label || "Specialist")}</span>
+public/control-center/pages/ai-command.js:5005:				<p class="aicmd-chatfirst-tab-note">This is a review-ready preview. Execution, publishing, approvals, CRM updates, external sends, durable task creation, and workflow runs happen only in the owning destination workspace after confirmation.</p>
+public/control-center/pages/ai-command.js:5050:	const providerConfigured = isProviderLikelyConfigured(aiContext);
+public/control-center/pages/ai-command.js:5057:		{ label: "Image prompt generation", value: providerConfigured ? "Provider may be ready" : "Provider dependent", className: providerConfigured ? "is-available" : "is-planned" }
+public/control-center/pages/ai-command.js:5074:	const approval = preview.confirmationRequired ? "Confirmation required" : (preview.outputType ? "Review ready" : "No draft yet");
+public/control-center/pages/ai-command.js:5083:			<div><span>Approval</span><strong>${escapeHtml(approval)}</strong></div>
+public/control-center/pages/ai-command.js:5097:        const selectedModeLabel = isTeam ? "Team workflow" : "Solo specialist";
+public/control-center/pages/ai-command.js:5102:                const messageRoleId = getAiRoomRoleId(message.specialistId || message.modeId || "");
+public/control-center/pages/ai-command.js:5113:                const producerId = getAiRoomRoleId(item.specialistId || "");
+public/control-center/pages/ai-command.js:5118:                const producerId = getAiRoomRoleId(item.specialistId || "");
+public/control-center/pages/ai-command.js:5126:                ? "Chat only. No workflow run, durable task, external handoff action, approval, publishing action, CRM update, or customer action was created."
+public/control-center/pages/ai-command.js:5130:        const bridgeSpecialistId = getAiRoomRoleId(bridgeContext.specialistId || "");
+public/control-center/pages/ai-command.js:5133:                bridgeContext.specialistLabel &&
+public/control-center/pages/ai-command.js:5137:                specialistId: session.modeId,
+public/control-center/pages/ai-command.js:5144:                : (SPECIALIST_SUGGESTED_PROMPTS[promptModeId] || SPECIALIST_SUGGESTED_PROMPTS.operations);
+public/control-center/pages/ai-command.js:5155:                const label = isUser ? "You" : asString(message.specialistLabel || selectedLabel || "Specialist");
+public/control-center/pages/ai-command.js:5175:                                specialistId: item.specialistId || selectedRoleId,
+public/control-center/pages/ai-command.js:5176:                                specialistLabel: "You",
+public/control-center/pages/ai-command.js:5182:                                specialistId: item.specialistId || selectedRoleId,
+public/control-center/pages/ai-command.js:5183:                                specialistLabel: item.specialistLabel || selectedLabel,
+public/control-center/pages/ai-command.js:5197:                                        <p class="aicmd-v2-chat-subtitle">Focused chat with the active AI. Other specialist replies remain available in shared room history.</p>
+public/control-center/pages/ai-command.js:5213:                                                <strong>${escapeHtml("Specialist context loaded from Home: " + bridgeContext.specialistLabel)}</strong>
+public/control-center/pages/ai-command.js:5218:                                        <span>Selected specialist</span>
+public/control-center/pages/ai-command.js:5229:                                        <strong>${escapeHtml(latestSelected?.specialistLabel || selectedLabel)}</strong>
+public/control-center/pages/ai-command.js:5239:                                                                <small>Please wait while the specialist prepares a review-ready response.</small>
+public/control-center/pages/ai-command.js:5251:                                        <strong>Start with the selected specialist</strong>
+public/control-center/pages/ai-command.js:5260:                                                <span><strong>${escapeHtml(latestSelected.specialistLabel || selectedLabel)}</strong></span>
+public/control-center/pages/ai-command.js:5262:                                                <span class="aicmd-room-producer-chip">Selected specialist output</span>
+public/control-center/pages/ai-command.js:5278:                                                <span>${sharedResponses.length} recent specialist repl${sharedResponses.length === 1 ? "y" : "ies"}</span>
+public/control-center/pages/ai-command.js:5282:                                                        const producerId = getAiRoomRoleId(item.specialistId || "");
+public/control-center/pages/ai-command.js:5283:                                                        const producerLabel = item.specialistLabel || "Specialist";
+public/control-center/pages/ai-command.js:5305:		: (SPECIALIST_SUGGESTED_PROMPTS[promptModeId] || SPECIALIST_SUGGESTED_PROMPTS.operations);
+public/control-center/pages/ai-command.js:5333:	const specialist = session.teamMode === "team" ? { label: "Full Team" } : getPhase1SpecialistById(session.modeId);
+public/control-center/pages/ai-command.js:5338:		{ label: "Specialist", value: specialist.label || "Specialist", present: true },
+public/control-center/pages/ai-command.js:5341:		{ label: "Publishing language", value: languagePlan.publishLanguage, present: true },
+public/control-center/pages/ai-command.js:5349:		{ label: "Operations", value: state.data.operations ? "Snapshot available" : "No operations snapshot", present: Boolean(state.data.operations) }
+public/control-center/pages/ai-command.js:5351:	const scopedContextItems = session.teamMode === "solo" && session.modeId === "customer_ops"
+public/control-center/pages/ai-command.js:5359:		: session.teamMode === "solo" && session.modeId === "sales_crm"
+public/control-center/pages/ai-command.js:5405:					<span>Publishing, approval, and workflow runs require your explicit confirmation in the right workspace.</span>
+public/control-center/pages/ai-command.js:5422:			title: item.responseTitle || item.specialistLabel || "Specialist response",
+public/control-center/pages/ai-command.js:5460:	id: "ai-command",
+public/control-center/pages/ai-command.js:5468:		<section class="page is-active" data-page="ai-command">
+public/control-center/pages/ai-command.js:5526:					specialistId: detectedSpecialist,
+public/control-center/pages/ai-command.js:5527:					specialistLabel: bridgeSpecialist?.label || titleCase(detectedSpecialist),
+public/control-center/pages/ai-command.js:5542:		const operations = asObject(selectOperationsSnapshot(state));
+public/control-center/pages/ai-command.js:5543:		applyDurableAiHandoff(sessionKey, operations, session, consumeProjectHandoff, showMessage);
+public/control-center/pages/ai-command.js:5548:		const bridgeStatus = getAiResponseBridgeStatus(executeProjectAiChat);
+public/control-center/pages/ai-command.js:5717:		Array.from(document.querySelectorAll("[data-aicmdv2-specialist]")).forEach((btn) => {
+public/control-center/pages/ai-command.js:5719:                                const specId = btn.getAttribute("data-aicmdv2-specialist") || "operations";
+public/control-center/pages/ai-command.js:5838:                                                specialistId: session.modeId,
+public/control-center/pages/ai-command.js:5907:                Array.from(document.querySelectorAll("[data-aicmd-final-specialist]")).forEach((btn) => {
+public/control-center/pages/ai-command.js:5920:                                target.closest("[data-aicmd-final-specialist]") ||
+public/control-center/pages/ai-command.js:5947:                                updateStatus("Voice conversation requires the next provider-backed phase: recording, STT, specialist reply, and TTS playback. Voice dictation is ready now.");
+public/control-center/pages/ai-command.js:5948:                                showMessage?.("Voice dictation is ready. Full voice conversation will be implemented as the next provider-backed voice mode.");
+public/control-center/pages/ai-command.js:5958:                        specialistLabel: session.teamMode === "team" ? "Full Team" : getPhase1SpecialistById(session.modeId)?.label,
+public/control-center/pages/ai-command.js:5977:                                goal: asString(currentWizard.goal || "sales"),
+public/control-center/pages/ai-command.js:5998:                        const goal = asString(wizard.goal || "sales");
+public/control-center/pages/ai-command.js:6027:                                        body: "Flag unsupported claims, pricing promises, before/after language, evidence gaps, restricted wording, and approval requirements."
+public/control-center/pages/ai-command.js:6031:                                        body: `Prepare publishing readiness for ${channelLabel}: channel checklist, schedule draft, missing approvals, and handoff requirements.`
+public/control-center/pages/ai-command.js:6035:                                        body: "Track approval status, destination handoff, follow-up checks, improvement notes, and post-review action ownership."
+public/control-center/pages/ai-command.js:6052:                                complianceSensitivity: asString(wizard.complianceSensitivity || "standard-review"),
+public/control-center/pages/ai-command.js:6059:                                                body: `Use ${sourceMeaning}. Produce a review-ready campaign package before any handoff, approval, publishing, sending, CRM update, provider execution, or workflow mutation.`
+public/control-center/pages/ai-command.js:6071:                                                body: "Create a hook, short social caption, long caption/email variant, CTA, landing-page angle, and reusable message notes in the configured publishing language."
+public/control-center/pages/ai-command.js:6079:                                                body: "Review claims, proof, pricing language, guarantees, sensitive wording, platform policy risk, and required Governance approval before external use."
+public/control-center/pages/ai-command.js:6083:                                                body: `Prepare ${channelLabel} readiness: asset status, copy status, approval status, schedule suggestion, channel dependencies, and final reviewer.`
+public/control-center/pages/ai-command.js:6091:                                safety: "Preview only. No publish, send, CRM mutation, provider execution, workflow mutation, or Governance approval is performed here."
+public/control-center/pages/ai-command.js:6159:                                complianceSensitivity: asString(body.compliance_sensitivity || body.complianceSensitivity || fallbackPreview.complianceSensitivity || ""),
+public/control-center/pages/ai-command.js:6163:                                        ? "Backend preview only. No publish, send, CRM mutation, provider execution, workflow mutation, Governance approval, task creation, or durable handoff was performed."
+public/control-center/pages/ai-command.js:6175:                                const backendPayload = await generateAiCommandCampaignPreview(projectName || "default", {
+public/control-center/pages/ai-command.js:6178:                                        goal: asString(wizard.goal || localPreview.goal || "sales"),
+public/control-center/pages/ai-command.js:6188:                                        compliance_sensitivity: asString(wizard.complianceSensitivity || localPreview.complianceSensitivity || "")
+public/control-center/pages/ai-command.js:6196:                                if (!safety.preview_only || !safety.no_backend_mutation_performed || !safety.no_provider_execution_performed) {
+public/control-center/pages/ai-command.js:6225:                                        destinationRoute: "publishing",
+public/control-center/pages/ai-command.js:6239:                                        complianceSensitivity: asString(preview.complianceSensitivity || ""),
+public/control-center/pages/ai-command.js:6245:                                        confirmationNote: "Review and route this campaign package through the owning destination workspace before any publishing, sending, approval, task creation, provider execution, or workflow mutation.",
+public/control-center/pages/ai-command.js:6253:                                updateStatus(preview.backendPreview ? "Backend AI Team preview prepared. Review before any handoff or approval." : "Local campaign preview prepared because backend preview is unavailable.");
+public/control-center/pages/ai-command.js:6262:                                publishing: "publishing"
+public/control-center/pages/ai-command.js:6266:                                publishing: "Publishing"
+public/control-center/pages/ai-command.js:6273:                                source: "ai-command",
+public/control-center/pages/ai-command.js:6291:                                compliance_sensitivity: asString(preview.complianceSensitivity || ""),
+public/control-center/pages/ai-command.js:6297:                                safety: "Prepared handoff only. No backend write, publish, send, CRM mutation, provider execution, approval creation, task creation, or workflow mutation was performed.",
+public/control-center/pages/ai-command.js:6326:                                publishing: "Prepare Publishing Handoff",
+public/control-center/pages/ai-command.js:6327:                                operations: "Create Operations Follow-up"
+public/control-center/pages/ai-command.js:6330:                        const safeRouteActions = ["media", "publishing"];
+public/control-center/pages/ai-command.js:6366:                                safety: "Staged review action only. No backend write, publish, send, CRM mutation, provider execution, approval creation, task creation, or workflow mutation was performed."
+public/control-center/pages/ai-command.js:6446:                                                const outputLanguage = asString(languagePlan.outputLanguage || languagePlan.publishLanguage || "").toLowerCase();
+public/control-center/pages/ai-command.js:6530:		                const specialist = session.teamMode === "team"
+public/control-center/pages/ai-command.js:6537:		                        modeId: specialist.id || session.modeId,
+public/control-center/pages/ai-command.js:6538:		                        specialistId: specialist.id || session.modeId,
+public/control-center/pages/ai-command.js:6539:		                        specialistLabel: "You",
+public/control-center/pages/ai-command.js:6543:		                        source: "ai-command-chat"
+public/control-center/pages/ai-command.js:6564:		                        const result = await executeProjectAiChat(projectName, {
+public/control-center/pages/ai-command.js:6566:		                                specialistId: specialist.id || session.modeId,
+public/control-center/pages/ai-command.js:6567:		                                specialistName: specialist.label || "Specialist",
+public/control-center/pages/ai-command.js:6573:		                                outputLanguage: languagePlan.publishLanguage,
+public/control-center/pages/ai-command.js:6575:		                                marketLanguage: languagePlan.publishLanguage,
+public/control-center/pages/ai-command.js:6582:		                                safetyInstruction: "Chat only. No task/workflow/handoff/approval/publish/customer/CRM execution.",
+public/control-center/pages/ai-command.js:6583:		                                source: "ai-command-specialist-chat",
+public/control-center/pages/ai-command.js:6603:		                                modeId: specialist.id || session.modeId,
+public/control-center/pages/ai-command.js:6604:		                                specialistId: specialist.id || session.modeId,
+public/control-center/pages/ai-command.js:6605:		                                specialistLabel: specialist.label || "Specialist",
+public/control-center/pages/ai-command.js:6616:		                                        provider: result?.provider,
+public/control-center/pages/ai-command.js:6636:		                                specialistId: specialist.id || session.modeId,
+public/control-center/pages/ai-command.js:6637:		                                specialistLabel: specialist.label || "Specialist",
+public/control-center/pages/ai-command.js:6644:		                                        provider: result?.provider
+public/control-center/pages/ai-command.js:6671:		                        session.responseError = asString(error?.message || "Failed to generate specialist chat reply.");
+public/control-center/pages/ai-command.js:6749:                                updateStatus("Workflow draft preview prepared from conversation context. No workflow run started.");
+public/control-center/pages/ai-command.js:6789:					specialistLabel: session.teamMode === "team" ? "Full Team" : getPhase1SpecialistById(session.modeId)?.label,
+public/control-center/pages/ai-command.js:6853:		                updateStatus("Continue from the Composer. The selected specialist is still active.");
+public/control-center/pages/ai-command.js:6942:					modeId: latestResponse.specialistId || session.modeId,
+public/control-center/pages/ai-command.js:6944:					lastResponseTitle: latestResponse.responseTitle || "Generated specialist response",
+public/control-center/pages/ai-command.js:6951:					source_page: "ai-command",
+public/control-center/pages/ai-command.js:6990:				const specialistLabel = session.teamMode === "team"
+public/control-center/pages/ai-command.js:6992:					: getPhase1SpecialistById(output.specialistId || session.modeId).label;
+public/control-center/pages/ai-command.js:6993:				const text = buildPreviewText(output, specialistLabel);
+public/control-center/pages/ai-command.js:7014:				const specialistLabel = session.teamMode === "team"
+public/control-center/pages/ai-command.js:7016:					: getPhase1SpecialistById(output.specialistId || session.modeId).label;
+public/control-center/pages/ai-command.js:7017:				const text = buildPreviewText(output, specialistLabel);
+public/control-center/pages/ai-command.js:7040:					source_page: "ai-command",
+public/control-center/pages/ai-command.js:7048:							modeId: output.specialistId || session.modeId,
+public/control-center/pages/ai-command.js:7128:        if (session.isSelecting) return "selecting_specialist";
+public/control-center/pages/ai-command.js:7142:                case "selecting_specialist":
+public/control-center/pages/ai-command.js:7143:                        return "Selecting specialist";
+public/control-center/pages/ai-command.js:7204:        { id: "operations", label: "Operations" }
+public/control-center/pages/ai-command.js:7513:        provider: "abstracted",
+public/control-center/api.js:893:    operations: payload?.operations || null
+public/control-center/api.js:947:  if (section === "operations") {
+public/control-center/api.js:1178:        "operations",
+public/control-center/api.js:1203:    operations: createOptionalFallback(safeProjectName, "operations"),
+public/control-center/api.js:1225:      section: "operations",
+public/control-center/api.js:1244:    operations: createOptionalFallback(safeProjectName, "operations")
+public/control-center/api.js:1249:      section: "operations",
+public/control-center/api.js:1363:    `/media-manager/project/${encodeURIComponent(projectName)}/operations`,
+public/control-center/api.js:1364:    "Failed to load project operations",
+public/control-center/api.js:1557:    "Failed to record workflow run"
+public/control-center/api.js:1591:export async function executeProjectAiChat(projectName, payload = {}) {
+public/control-center/api.js:1607:export async function generateAiCommandCampaignPreview(projectName, payload = {}) {
+public/control-center/api.js:1610:    `/api/ai-command/project/${encodedProject}/campaign-preview`,
+public/control-center/api.js:1618:export async function executeProjectAiGuidance(projectName, payload = {}) {
+public/control-center/api.js:1663:    `/media-manager/project/${encodeURIComponent(projectName)}/approvals`,
+public/control-center/api.js:1666:    "Failed to create approval request"
+public/control-center/api.js:1677:    `/media-manager/project/${encodeURIComponent(projectName)}/approvals${suffix}`,
+public/control-center/api.js:1678:    "Failed to load approvals"
+public/control-center/api.js:1682:export async function decideProjectApproval(projectName, approvalId, payload = {}) {
+public/control-center/api.js:1687:  if (!approvalId) {
+public/control-center/api.js:1688:    throw new Error("Missing approval id");
+public/control-center/api.js:1692:    `/media-manager/project/${encodeURIComponent(projectName)}/approvals/${encodeURIComponent(approvalId)}/decision`,
+public/control-center/api.js:1695:    "Failed to update approval"
+public/control-center/api.js:1902:    `/media-manager/project/${encodeURIComponent(projectName)}/publishing/schedule`,
+public/control-center/api.js:1905:    "Failed to save publishing schedule"
+public/control-center/api.js:1919:    `/media-manager/project/${encodeURIComponent(projectName)}/publishing/${encodeURIComponent(jobId)}/reschedule`,
+public/control-center/api.js:1922:    "Failed to reschedule publishing item"
+public/control-center/api.js:1936:    `/media-manager/project/${encodeURIComponent(projectName)}/publishing/${encodeURIComponent(jobId)}/ready`,
+public/control-center/api.js:1939:    "Failed to approve publishing item"
+public/control-center/api.js:1943:export async function publishPublishingItem(projectName, jobId, payload = {}) {
+public/control-center/api.js:1953:    `/media-manager/project/${encodeURIComponent(projectName)}/publishing/${encodeURIComponent(jobId)}/publish`,
+public/control-center/api.js:1956:    "Failed to publish item"
+public/control-center/api.js:1970:    `/media-manager/project/${encodeURIComponent(projectName)}/publishing/${encodeURIComponent(jobId)}/fail`,
+public/control-center/api.js:1973:    "Failed to mark publishing item as failed"
+public/control-center/api.js:1983:    `/media-manager/project/${encodeURIComponent(projectName)}/operations/schema`,
+public/control-center/api.js:1984:    "Failed to load operations schema"
+public/control-center/api.js:2362:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/readiness`);
+public/control-center/api.js:2366:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/inbox`);
+public/control-center/api.js:2370:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/conversations`);
+public/control-center/api.js:2374:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/conversations/${encodeURIComponent(conversationId)}`);
+public/control-center/api.js:2378:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/conversations/${encodeURIComponent(conversationId)}/messages`);
+public/control-center/api.js:2382:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/customers/${encodeURIComponent(customerId)}`);
+public/control-center/api.js:2386:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/tickets`);
+public/control-center/api.js:2390:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/channels`);
+runtime/orchestrator-service/server.js:80:} = require('./lib/integrations/provider-registry');
+runtime/orchestrator-service/server.js:87:} = require('./lib/media/provider-layer');
+runtime/orchestrator-service/server.js:141:} = require('./lib/customer-operations/customer-operations-runtime');
+runtime/orchestrator-service/server.js:150:} = require('./lib/media/native/providers/provider-model-catalog');
+runtime/orchestrator-service/server.js:153:} = require('./lib/media/native/providers/provider-readiness');
+runtime/orchestrator-service/server.js:188:const customerCenterProjection = require('./lib/customer-operations/projections/customer-center-projection');
+runtime/orchestrator-service/server.js:347:  /^\/publish-clone\/[^/]+\/?$/i,
+runtime/orchestrator-service/server.js:350:  /^\/publish-blog\/[^/]+\/?$/i,
+runtime/orchestrator-service/server.js:354:  /^\/execute_publish_package\/?$/i,
+runtime/orchestrator-service/server.js:612:      provider: asString(req?.body?.provider || req?.body?.media_provider || ''),
+runtime/orchestrator-service/server.js:641:      operations: buildProjectOperationsPayload(projectName)
+runtime/orchestrator-service/server.js:1202:  publishing: {
+runtime/orchestrator-service/server.js:1204:    canonical: 'publishing'
+runtime/orchestrator-service/server.js:1236:    canonical: 'publishing/results'
+runtime/orchestrator-service/server.js:1703:  'publishing',
+runtime/orchestrator-service/server.js:2064:    provider: renderRequest.result?.provider || renderRequest.provider || null,
+runtime/orchestrator-service/server.js:2588:    throw new Error('No image data returned from provider');
+runtime/orchestrator-service/server.js:2603:  provider: 'openai',
+runtime/orchestrator-service/server.js:2739:  // مثل SMTP / WordPress mail bridge / provider API
+runtime/orchestrator-service/server.js:2743:    status: 'pending_provider_send',
+runtime/orchestrator-service/server.js:2749:    note: 'Prepared and verified. Waiting for provider integration or send bridge.'
+runtime/orchestrator-service/server.js:2884:    published_count: 0,
+runtime/orchestrator-service/server.js:2893:    if (product.status === 'publish') summary.published_count += 1;
+runtime/orchestrator-service/server.js:3084:    compliance_notes: [
+runtime/orchestrator-service/server.js:3090:    publish_status: imageInfo ? 'ready_for_publish' : 'needs_manual_review'
+runtime/orchestrator-service/server.js:3097:  const compliance = buildMetaCompliance(projectName, placement, image);
+runtime/orchestrator-service/server.js:3110:    status: compliance.publish_status,
+runtime/orchestrator-service/server.js:3119:    compliance
+runtime/orchestrator-service/server.js:3196:    compliance_notes: [
+runtime/orchestrator-service/server.js:3202:    publish_status: imageInfo ? 'ready_for_production' : 'needs_manual_review'
+runtime/orchestrator-service/server.js:3210:  const compliance = buildTikTokCompliance(projectName, image);
+runtime/orchestrator-service/server.js:3221:    status: compliance.publish_status,
+runtime/orchestrator-service/server.js:3240:    compliance
+runtime/orchestrator-service/server.js:3341:    compliance_notes: [
+runtime/orchestrator-service/server.js:3347:    publish_status: imageInfo ? 'ready_for_publish' : 'needs_manual_review'
+runtime/orchestrator-service/server.js:3355:  const compliance = buildYouTubeCompliance(projectName, format, image);
+runtime/orchestrator-service/server.js:3375:    status: compliance.publish_status,
+runtime/orchestrator-service/server.js:3400:    compliance
+runtime/orchestrator-service/server.js:3543:    compliance: {
+runtime/orchestrator-service/server.js:3599:    compliance: {
+runtime/orchestrator-service/server.js:3781:    if (status !== 'publish' || !slug || !name || !stableKey) {
+runtime/orchestrator-service/server.js:3822:      'early sales conversion'
+runtime/orchestrator-service/server.js:3837:      published_count: launchReadyProducts.length,
+runtime/orchestrator-service/server.js:3987:    domain: 'publishing',
+runtime/orchestrator-service/server.js:3992:    domain: 'publishing',
+runtime/orchestrator-service/server.js:3995:    requestedIdentifier: 'publishing-root',
+runtime/orchestrator-service/server.js:3996:    requestedFile: 'publishing'
+runtime/orchestrator-service/server.js:4057:    domain: 'publishing',
+runtime/orchestrator-service/server.js:4058:    artifactType: 'publishing_connector_payload',
+runtime/orchestrator-service/server.js:4093:    domain: 'publishing',
+runtime/orchestrator-service/server.js:4094:    artifactType: 'publishing_scheduler_job',
+runtime/orchestrator-service/server.js:4111:  if (['queued', 'queue', 'scheduled', 'pending', 'pending_publish'].includes(normalized)) return 'scheduled';
+runtime/orchestrator-service/server.js:4115:      'ready_for_manual_publish',
+runtime/orchestrator-service/server.js:4119:      'manual_publish',
+runtime/orchestrator-service/server.js:4126:  if (['published', 'completed', 'complete', 'success', 'done', 'sent', 'live'].includes(normalized)) {
+runtime/orchestrator-service/server.js:4127:    return 'published';
+runtime/orchestrator-service/server.js:4171:  if (safeChannel) return `${safeChannel} publish`;
+runtime/orchestrator-service/server.js:4315:    domain: 'publishing',
+runtime/orchestrator-service/server.js:4316:    artifactType: 'publishing_scheduler_job',
+runtime/orchestrator-service/server.js:4445:    domain: 'publishing',
+runtime/orchestrator-service/server.js:4450:    requestedFile: 'publishing/scheduler/*.json'
+runtime/orchestrator-service/server.js:4571:    recommendations.push('rewrite copy in natural German for German-market publishing');
+runtime/orchestrator-service/server.js:4936:    provider: 'provider_pending',
+runtime/orchestrator-service/server.js:5681:    operations: null,
+runtime/orchestrator-service/server.js:5713:    payload.errors.operations = message;
+runtime/orchestrator-service/server.js:5723:    operations: buildProjectOperationsPayload
+runtime/orchestrator-service/server.js:6233:    approval_required: mode === 'approval_required',
+runtime/orchestrator-service/server.js:6240:        mode === 'approval_required'
+runtime/orchestrator-service/server.js:6241:          ? 'Prepare execution summary and request approval.'
+runtime/orchestrator-service/server.js:6296:    publishingDir: path.join(baseDir, 'publishing'),
+runtime/orchestrator-service/server.js:6334:    aiCommandsPath: path.join(opsDir, 'ai-commands.json'),
+runtime/orchestrator-service/server.js:6606:    paths.publishingDir,
+runtime/orchestrator-service/server.js:6722:      publishing: { path: paths.publishingDir, exists: fs.existsSync(paths.publishingDir) },
+runtime/orchestrator-service/server.js:6806:    paths.publishingDir,
+runtime/orchestrator-service/server.js:6844:    workspace_priorities: ['setup', 'library', 'content-studio', 'campaign-studio', 'publishing'],
+runtime/orchestrator-service/server.js:6845:    ai_team_defaults: ['strategist', 'writer', 'designer', 'publisher', 'analyst'],
+runtime/orchestrator-service/server.js:6864:      workspace_priorities: ['setup', 'library', 'campaign-studio', 'content-studio', 'media-studio', 'publishing', 'insights'],
+runtime/orchestrator-service/server.js:6865:      ai_team_defaults: ['strategist', 'writer', 'designer', 'publisher', 'ads_operator', 'analyst', 'compliance_reviewer'],
+runtime/orchestrator-service/server.js:6867:      recommended_integrations: ['woocommerce', 'google', 'meta', 'tiktok', 'email_crm']
+runtime/orchestrator-service/server.js:6877:      workspace_priorities: ['setup', 'library', 'media-studio', 'content-studio', 'campaign-studio', 'publishing'],
+runtime/orchestrator-service/server.js:6878:      ai_team_defaults: ['strategist', 'writer', 'designer', 'video_lead', 'publisher', 'analyst'],
+runtime/orchestrator-service/server.js:6890:      workspace_priorities: ['setup', 'library', 'media-studio', 'content-studio', 'publishing', 'insights'],
+runtime/orchestrator-service/server.js:6891:      ai_team_defaults: ['strategist', 'writer', 'designer', 'publisher', 'analyst'],
+runtime/orchestrator-service/server.js:6899:      default_channels: ['website', 'facebook', 'instagram', 'google', 'crm'],
+runtime/orchestrator-service/server.js:6904:      ai_team_defaults: ['strategist', 'writer', 'designer', 'ads_operator', 'publisher', 'compliance_reviewer'],
+runtime/orchestrator-service/server.js:6905:      starter_checklist: ['add_property_data', 'upload_property_media', 'define_lead_flow', 'connect_crm', 'create_listing_campaign'],
+runtime/orchestrator-service/server.js:6906:      recommended_integrations: ['website', 'crm', 'google', 'meta', 'email_crm']
+runtime/orchestrator-service/server.js:6916:      workspace_priorities: ['setup', 'library', 'content-studio', 'campaign-studio', 'publishing'],
+runtime/orchestrator-service/server.js:6917:      ai_team_defaults: ['strategist', 'writer', 'designer', 'publisher', 'analyst'],
+runtime/orchestrator-service/server.js:6919:      recommended_integrations: ['website', 'google_business', 'meta', 'email_crm']
+runtime/orchestrator-service/server.js:6929:      workspace_priorities: ['setup', 'library', 'media-studio', 'publishing', 'campaign-studio'],
+runtime/orchestrator-service/server.js:6930:      ai_team_defaults: ['strategist', 'writer', 'designer', 'video_lead', 'publisher'],
+runtime/orchestrator-service/server.js:6940:      data_requirements: ['services', 'case_studies', 'target_segments', 'lead_magnets', 'sales_process'],
+runtime/orchestrator-service/server.js:6944:      starter_checklist: ['define_services', 'add_case_studies', 'define_lead_offer', 'connect_crm', 'create_lead_campaign'],
+runtime/orchestrator-service/server.js:6945:      recommended_integrations: ['website', 'linkedin', 'meta', 'google', 'crm']
+runtime/orchestrator-service/server.js:6955:      workspace_priorities: ['setup', 'library', 'content-studio', 'publishing', 'insights'],
+runtime/orchestrator-service/server.js:6956:      ai_team_defaults: ['strategist', 'writer', 'designer', 'publisher'],
+runtime/orchestrator-service/server.js:7012:      publishing: paths.publishingDir,
+runtime/orchestrator-service/server.js:7312:  const publishingReadiness = fs.existsSync(paths.publishingDir) ? 100 : 0;
+runtime/orchestrator-service/server.js:7325:    publishing_readiness: publishingReadiness,
+runtime/orchestrator-service/server.js:7336:    has_publishing_dir: fs.existsSync(paths.publishingDir),
+runtime/orchestrator-service/server.js:7372:  if (domainScores.publishing_readiness < 100) missing.push('publishing_readiness');
+runtime/orchestrator-service/server.js:7448:    approval_note: normalizeSetupTextValue(asset.approval_note),
+runtime/orchestrator-service/server.js:7851:// Keys matching this pattern are redacted from provider summary objects before
+runtime/orchestrator-service/server.js:7941:    provider_metadata: redactProviderSummaryObject(asPlainObject(normalizedRecord.provider_metadata)),
+runtime/orchestrator-service/server.js:7943:    provider_account: redactProviderSummaryObject(asPlainObject(normalizedRecord.provider_account)),
+runtime/orchestrator-service/server.js:8039:      status: 'unsupported_provider'
+runtime/orchestrator-service/server.js:8093:    const providerResult = await executeAdapterAction({
+runtime/orchestrator-service/server.js:8106:      status: providerResult.status,
+runtime/orchestrator-service/server.js:8107:      token_expires_at: normalizeTextValue(providerResult.token_expires_at || nextRecord.token_expires_at),
+runtime/orchestrator-service/server.js:8108:      permission_scope: normalizeTextValue(providerResult.permission_scope || nextRecord.permission_scope),
+runtime/orchestrator-service/server.js:8109:      connection_method: normalizeTextValue(providerResult.connection_method || nextRecord.connection_method),
+runtime/orchestrator-service/server.js:8110:      data_scopes: normalizeStringArray(providerResult.data_scopes?.length ? providerResult.data_scopes : nextRecord.data_scopes),
+runtime/orchestrator-service/server.js:8111:      read_scopes: normalizeStringArray(providerResult.read_scopes?.length ? providerResult.read_scopes : nextRecord.read_scopes),
+runtime/orchestrator-service/server.js:8112:      write_scopes: normalizeStringArray(providerResult.write_scopes?.length ? providerResult.write_scopes : nextRecord.write_scopes),
+runtime/orchestrator-service/server.js:8113:      provider_metadata: asPlainObject(providerResult.metadata),
+runtime/orchestrator-service/server.js:8114:      provider_account: asPlainObject(providerResult.account),
+runtime/orchestrator-service/server.js:8115:      insights_ready: asPlainObject(providerResult.insights_ready),
+runtime/orchestrator-service/server.js:8118:      notes: normalizeTextValue(providerResult.notes || nextRecord.notes),
+runtime/orchestrator-service/server.js:8119:      health_summary: normalizeTextValue(providerResult.health || ''),
+runtime/orchestrator-service/server.js:8120:      health_state: asPlainObject(providerResult.health_state)
+runtime/orchestrator-service/server.js:8212:      status: 'unsupported_provider'
+runtime/orchestrator-service/server.js:8239:      const providerResult = await executeAdapterAction({
+runtime/orchestrator-service/server.js:8250:      nextRecord.status = providerResult.status;
+runtime/orchestrator-service/server.js:8251:      nextRecord.token_expires_at = normalizeTextValue(providerResult.token_expires_at || nextRecord.token_expires_at);
+runtime/orchestrator-service/server.js:8252:      nextRecord.provider_metadata = asPlainObject(providerResult.metadata);
+runtime/orchestrator-service/server.js:8253:      nextRecord.provider_account = asPlainObject(providerResult.account);
+runtime/orchestrator-service/server.js:8254:      nextRecord.insights_ready = asPlainObject(providerResult.insights_ready);
+runtime/orchestrator-service/server.js:8256:      nextRecord.notes = normalizeTextValue(providerResult.notes || nextRecord.notes);
+runtime/orchestrator-service/server.js:8257:      nextRecord.health_summary = normalizeTextValue(providerResult.health || '');
+runtime/orchestrator-service/server.js:8258:      nextRecord.health_state = asPlainObject(providerResult.health_state);
+runtime/orchestrator-service/server.js:8264:        nextRecord.last_sync_summary = asPlainObject(providerResult.sync_summary);
+runtime/orchestrator-service/server.js:8267:        nextRecord.last_sync_summary = asPlainObject(providerResult.sync_summary);
+runtime/orchestrator-service/server.js:8349:        why_it_matters: 'Keeps setup, media creation, publishing previews, and AI output visually tied to the right brand.',
+runtime/orchestrator-service/server.js:8404:      purpose: 'proof_compliance',
+runtime/orchestrator-service/server.js:8405:      purpose_label: 'Proof and compliance',
+runtime/orchestrator-service/server.js:8409:      aliases: ['legal', 'compliance_doc', 'terms_doc'],
+runtime/orchestrator-service/server.js:8412:        what_to_upload: 'Terms, privacy policy, disclaimers, compliance notes, claim restrictions, and regulated copy rules.',
+runtime/orchestrator-service/server.js:8426:      description: 'Approved product photography for content, media, ads, and publishing.',
+runtime/orchestrator-service/server.js:8492:        what_to_upload: 'Packaging photos, label artwork, inserts, box shots, bottle/jar details, and compliance label references.',
+runtime/orchestrator-service/server.js:8493:        why_it_matters: 'Media Studio and Publishing need packaging truth for product visuals and compliance checks.',
+runtime/orchestrator-service/server.js:8500:      purpose: 'proof_compliance',
+runtime/orchestrator-service/server.js:8501:      purpose_label: 'Proof and compliance',
+runtime/orchestrator-service/server.js:8516:      purpose: 'proof_compliance',
+runtime/orchestrator-service/server.js:8517:      purpose_label: 'Proof and compliance',
+runtime/orchestrator-service/server.js:8524:        what_to_upload: 'Certificates, compliance proof, awards, lab reports, or official authorization documents.',
+runtime/orchestrator-service/server.js:8525:        why_it_matters: 'Publishing and AI Command can use only approved proof when making trust or compliance claims.',
+runtime/orchestrator-service/server.js:8572:    record.approval_status ||
+runtime/orchestrator-service/server.js:9513:app.post('/execute_publish_package', async (req, res) => {
+runtime/orchestrator-service/server.js:9520:      action: 'execute_publish_package',
+runtime/orchestrator-service/server.js:9522:      entityId: 'execute_publish_package',
+runtime/orchestrator-service/server.js:9523:      requestedAction: 'publish',
+runtime/orchestrator-service/server.js:9531:      action: 'execute_publish_package',
+runtime/orchestrator-service/server.js:9533:      entityId: 'execute_publish_package',
+runtime/orchestrator-service/server.js:9534:      requestedAction: 'publish',
+runtime/orchestrator-service/server.js:9535:      routeTarget: 'publishing',
+runtime/orchestrator-service/server.js:9536:      serviceDomain: 'publishing',
+runtime/orchestrator-service/server.js:9537:      linkedExecutionId: 'execute_publish_package',
+runtime/orchestrator-service/server.js:9539:      title: 'Publish package execution approval',
+runtime/orchestrator-service/server.js:9540:      summary: 'Approval required before publishing package execution.'
+runtime/orchestrator-service/server.js:9546:      type: 'publish',
+runtime/orchestrator-service/server.js:9553:      campaign_name: String(req.body?.campaign_name || req.body?.publish_package?.campaign_name || '').trim(),
+runtime/orchestrator-service/server.js:9563:    const log = writeExecutionBridgeLog(projectName, 'execute_publish_package', {
+runtime/orchestrator-service/server.js:9583:      writeExecutionBridgeLog(logProject, 'execute_publish_package', {
+runtime/orchestrator-service/server.js:9596:      message: error.message || 'Failed to execute publish package'
+runtime/orchestrator-service/server.js:9611:      requestedAction: 'provider_send',
+runtime/orchestrator-service/server.js:9622:      requestedAction: 'provider_send',
+runtime/orchestrator-service/server.js:9623:      routeTarget: 'publishing',
+runtime/orchestrator-service/server.js:9624:      serviceDomain: 'publishing',
+runtime/orchestrator-service/server.js:9627:      title: 'Email package execution approval',
+runtime/orchestrator-service/server.js:9648:      ready_for_provider_send: true,
+runtime/orchestrator-service/server.js:9657:        ready_for_provider_send: true
+runtime/orchestrator-service/server.js:9715:      title: 'Media generation approval',
+runtime/orchestrator-service/server.js:9796:      title: 'Ad execution package approval',
+runtime/orchestrator-service/server.js:10079:        'Use the cloned draft product for safe content updates before publishing.'
+runtime/orchestrator-service/server.js:10194:        'Review the updated draft clone in WooCommerce before any publish action.'
+runtime/orchestrator-service/server.js:10872:        asset.approval_note = note || asset.approval_note || 'Approved from Control Center Library.';
+runtime/orchestrator-service/server.js:11128:      title: 'Project setup approval',
+runtime/orchestrator-service/server.js:11167:      title: 'Project setup approval',
+runtime/orchestrator-service/server.js:11215:  const complianceSensitivity = normalizeAiCommandPreviewInput(input.compliance_sensitivity || input.complianceSensitivity, 'Standard review');
+runtime/orchestrator-service/server.js:11237:    complianceSensitivity,
+runtime/orchestrator-service/server.js:11242:      'Create media and publishing assets.',
+runtime/orchestrator-service/server.js:11243:      'Review compliance and approval requirements.',
+runtime/orchestrator-service/server.js:11248:      `Use customer pain points and product proof before publishing.`,
+runtime/orchestrator-service/server.js:11263:      'Final approval is required before publishing.',
+runtime/orchestrator-service/server.js:11269:      'Request Governance review before release if claims or publishing risk exists.'
+runtime/orchestrator-service/server.js:11278:        destination: 'publishing',
+runtime/orchestrator-service/server.js:11280:        reason: 'Turn the campaign package into a publishing draft.'
+runtime/orchestrator-service/server.js:11294:      body: `Audience: ${audience}. Offer: ${offer}. Market: ${market}. Language: ${language}. Format: ${format}. Deadline: ${deadline}. Product focus: ${productFocus}. Compliance: ${complianceSensitivity}.`
+runtime/orchestrator-service/server.js:11311:      id: 'compliance_risks',
+runtime/orchestrator-service/server.js:11316:      id: 'publishing_checklist',
+runtime/orchestrator-service/server.js:11340:    compliance_sensitivity: complianceSensitivity,
+runtime/orchestrator-service/server.js:11346:      requires_approval_before_publish: true,
+runtime/orchestrator-service/server.js:11348:      no_provider_execution_performed: true,
+runtime/orchestrator-service/server.js:11350:      no_approval_created: true,
+runtime/orchestrator-service/server.js:11372:        no_provider_execution_performed: true
+runtime/orchestrator-service/server.js:11378:app.post('/api/ai-command/project/:project/campaign-preview', handleAiCommandCampaignPreviewOnly);
+runtime/orchestrator-service/server.js:11386:      error: error.message || 'Failed to build project operations payload'
+runtime/orchestrator-service/server.js:11391:app.get('/media-manager/project/:project/operations', handleGetProjectOperations);
+runtime/orchestrator-service/server.js:11392:app.get('/public/media-manager/project/:project/operations', handleGetProjectOperations);
+runtime/orchestrator-service/server.js:11466:app.get('/media-manager/project/:project/operations/schema', handleGetOperationsSchema);
+runtime/orchestrator-service/server.js:11467:app.get('/public/media-manager/project/:project/operations/schema', handleGetOperationsSchema);
+runtime/orchestrator-service/server.js:11505:      title: 'Team model approval',
+runtime/orchestrator-service/server.js:11548:      operations: buildProjectOperationsPayload(req.params.project)
+runtime/orchestrator-service/server.js:11613:      operations: buildProjectOperationsPayload(req.params.project)
+runtime/orchestrator-service/server.js:11679:      operations: buildProjectOperationsPayload(req.params.project)
+runtime/orchestrator-service/server.js:11733:      error: error.message || 'Failed to list workflow runs'
+runtime/orchestrator-service/server.js:11750:      error: error.message || 'Failed to load workflow run'
+runtime/orchestrator-service/server.js:11781:      title: 'Workflow run approval',
+runtime/orchestrator-service/server.js:11816:      operations: buildProjectOperationsPayload(req.params.project)
+runtime/orchestrator-service/server.js:11820:      error: error.message || 'Failed to record workflow run'
+runtime/orchestrator-service/server.js:11830:  const source = String(req.body?.source || 'ai-command').trim();
+runtime/orchestrator-service/server.js:11854:    title: 'AI command approval',
+runtime/orchestrator-service/server.js:11861:    route: 'ai-command',
+runtime/orchestrator-service/server.js:11871:      route: 'ai-command',
+runtime/orchestrator-service/server.js:11875:      provider: result?.provider?.id || result?.response?.provider || null,
+runtime/orchestrator-service/server.js:11880:      operations: buildProjectOperationsPayload(req.params.project)
+runtime/orchestrator-service/server.js:11892:      route: 'ai-command',
+runtime/orchestrator-service/server.js:11905:  const specialistId = String(req.body?.specialistId || req.body?.specialist_id || 'specialist').trim().toLowerCase();
+runtime/orchestrator-service/server.js:11911:    entityId: specialistId,
+runtime/orchestrator-service/server.js:11922:    entityId: specialistId,
+runtime/orchestrator-service/server.js:11926:    linkedExecutionId: specialistId,
+runtime/orchestrator-service/server.js:11928:    title: 'AI chat approval',
+runtime/orchestrator-service/server.js:11938:    specialist_id: specialistId
+runtime/orchestrator-service/server.js:11948:      provider: result?.provider?.id || null,
+runtime/orchestrator-service/server.js:11949:      specialist_id: result?.specialist?.id || specialistId
+runtime/orchestrator-service/server.js:11975:  const specialistId = String(req.body?.specialistId || req.body?.specialist_id || 'specialist').trim().toLowerCase();
+runtime/orchestrator-service/server.js:11981:    entityId: specialistId,
+runtime/orchestrator-service/server.js:11992:    entityId: specialistId,
+runtime/orchestrator-service/server.js:11996:    linkedExecutionId: specialistId,
+runtime/orchestrator-service/server.js:11998:    title: 'AI guidance approval',
+runtime/orchestrator-service/server.js:12008:    specialist_id: specialistId
+runtime/orchestrator-service/server.js:12018:      provider: result?.provider?.id || null,
+runtime/orchestrator-service/server.js:12019:      specialist_id: result?.specialist?.id || specialistId
+runtime/orchestrator-service/server.js:12066:      title: 'AI workflow approval',
+runtime/orchestrator-service/server.js:12079:      operations: buildProjectOperationsPayload(req.params.project)
+runtime/orchestrator-service/server.js:12204:      operations: buildProjectOperationsPayload(req.params.project)
+runtime/orchestrator-service/server.js:12254:      error: error.message || 'Failed to list approvals'
+runtime/orchestrator-service/server.js:12261:    const approval = createApproval(req.params.project, req.body || {});
+runtime/orchestrator-service/server.js:12263:      approval,
+runtime/orchestrator-service/server.js:12264:      operations: buildProjectOperationsPayload(req.params.project)
+runtime/orchestrator-service/server.js:12268:      error: error.message || 'Failed to create approval'
+runtime/orchestrator-service/server.js:12277:      action: 'approvals_decision',
+runtime/orchestrator-service/server.js:12278:      entityType: 'approval',
+runtime/orchestrator-service/server.js:12279:      entityId: req.params.approvalId,
+runtime/orchestrator-service/server.js:12285:    const approval = resolveGovernanceApproval(req.params.project, req.params.approvalId, {
+runtime/orchestrator-service/server.js:12294:      approval,
+runtime/orchestrator-service/server.js:12295:      operations: buildProjectOperationsPayload(req.params.project)
+runtime/orchestrator-service/server.js:12299:      error: error.message || 'Failed to update approval'
+runtime/orchestrator-service/server.js:12304:app.get('/media-manager/project/:project/approvals', handleListApprovals);
+runtime/orchestrator-service/server.js:12305:app.get('/public/media-manager/project/:project/approvals', handleListApprovals);
+runtime/orchestrator-service/server.js:12306:app.post('/media-manager/project/:project/approvals', handleCreateApproval);
+runtime/orchestrator-service/server.js:12307:app.post('/public/media-manager/project/:project/approvals', handleCreateApproval);
+runtime/orchestrator-service/server.js:12308:app.post('/media-manager/project/:project/approvals/:approvalId/decision', handleApprovalDecision);
+runtime/orchestrator-service/server.js:12309:app.post('/public/media-manager/project/:project/approvals/:approvalId/decision', handleApprovalDecision);
+runtime/orchestrator-service/server.js:12391:      operations: buildProjectOperationsPayload(req.params.project)
+runtime/orchestrator-service/server.js:12404:      operations: buildProjectOperationsPayload(req.params.project)
+runtime/orchestrator-service/server.js:12436:      operations: buildProjectOperationsPayload(req.params.project)
+runtime/orchestrator-service/server.js:12450:      operations: buildProjectOperationsPayload(req.params.project)
+runtime/orchestrator-service/server.js:12541:      title: 'Source registry approval',
+runtime/orchestrator-service/server.js:12595:      title: 'Source registry approval',
+runtime/orchestrator-service/server.js:12640:      title: 'Source registry approval',
+runtime/orchestrator-service/server.js:12679:      title: 'Source registry approval',
+runtime/orchestrator-service/server.js:12710:  if (status === 'unsupported_provider') {
+runtime/orchestrator-service/server.js:12737:    title: `${req.params.integrationId} ${requestedAction} approval`,
+runtime/orchestrator-service/server.js:12738:    summary: `Review ${req.params.integrationId} ${requestedAction} before applying integration credential or provider-state changes.`
+runtime/orchestrator-service/server.js:12851:    title: `${req.params.integrationId} ${normalizedActionType} approval`,
+runtime/orchestrator-service/server.js:12852:    summary: `Review ${req.params.integrationId} ${normalizedActionType} before applying integration provider action.`
+runtime/orchestrator-service/server.js:12893:    const providers = mediaType
+runtime/orchestrator-service/server.js:12899:      providers,
+runtime/orchestrator-service/server.js:12900:      count: providers.length
+runtime/orchestrator-service/server.js:12904:      error: 'Failed to list native media providers',
+runtime/orchestrator-service/server.js:12919:      error: 'Failed to load native media provider readiness',
+runtime/orchestrator-service/server.js:12934:      error: 'customer_operations_health_failed',
+runtime/orchestrator-service/server.js:12947:      error: 'customer_operations_readiness_failed',
+runtime/orchestrator-service/server.js:12961:      error: 'customer_operations_channels_failed',
+runtime/orchestrator-service/server.js:12975:      error: 'customer_operations_inbox_failed',
+runtime/orchestrator-service/server.js:12985:// place calls, trigger IVR, send provider messages, or auto-reply.
+runtime/orchestrator-service/server.js:13002:app.get('/api/projects/:project/customer-operations/readiness', (req, res) => {
+runtime/orchestrator-service/server.js:13008:app.get('/api/projects/:project/customer-operations/inbox', (req, res) => {
+runtime/orchestrator-service/server.js:13014:app.get('/api/projects/:project/customer-operations/conversations', (req, res) => {
+runtime/orchestrator-service/server.js:13020:app.get('/api/projects/:project/customer-operations/conversations/:conversationId', (req, res) => {
+runtime/orchestrator-service/server.js:13026:app.get('/api/projects/:project/customer-operations/conversations/:conversationId/messages', (req, res) => {
+runtime/orchestrator-service/server.js:13032:app.get('/api/projects/:project/customer-operations/customers/:customerId', (req, res) => {
+runtime/orchestrator-service/server.js:13038:app.get('/api/projects/:project/customer-operations/tickets', (req, res) => {
+runtime/orchestrator-service/server.js:13044:app.get('/api/projects/:project/customer-operations/channels', (req, res) => {
+runtime/orchestrator-service/server.js:13052:  '/media-manager/project/:project/customer-operations/health',
+runtime/orchestrator-service/server.js:13057:  '/public/media-manager/project/:project/customer-operations/health',
+runtime/orchestrator-service/server.js:13062:  '/media-manager/project/:project/customer-operations/readiness',
+runtime/orchestrator-service/server.js:13067:  '/public/media-manager/project/:project/customer-operations/readiness',
+runtime/orchestrator-service/server.js:13072:  '/media-manager/project/:project/customer-operations/channels',
+runtime/orchestrator-service/server.js:13077:  '/public/media-manager/project/:project/customer-operations/channels',
+runtime/orchestrator-service/server.js:13082:  '/media-manager/project/:project/customer-operations/inbox',
+runtime/orchestrator-service/server.js:13087:  '/public/media-manager/project/:project/customer-operations/inbox',
+runtime/orchestrator-service/server.js:13102:      error: 'customer_operations_conversations_failed',
+runtime/orchestrator-service/server.js:13116:      error: 'customer_operations_messages_failed',
+runtime/orchestrator-service/server.js:13130:      error: 'customer_operations_customers_failed',
+runtime/orchestrator-service/server.js:13144:      error: 'customer_operations_sla_failed',
+runtime/orchestrator-service/server.js:13158:      error: 'customer_operations_escalations_failed',
+runtime/orchestrator-service/server.js:13165:  '/media-manager/project/:project/customer-operations/conversations',
+runtime/orchestrator-service/server.js:13170:  '/public/media-manager/project/:project/customer-operations/conversations',
+runtime/orchestrator-service/server.js:13175:  '/media-manager/project/:project/customer-operations/messages',
+runtime/orchestrator-service/server.js:13180:  '/public/media-manager/project/:project/customer-operations/messages',
+runtime/orchestrator-service/server.js:13185:  '/media-manager/project/:project/customer-operations/customers',
+runtime/orchestrator-service/server.js:13190:  '/public/media-manager/project/:project/customer-operations/customers',
+runtime/orchestrator-service/server.js:13195:  '/media-manager/project/:project/customer-operations/sla',
+runtime/orchestrator-service/server.js:13200:  '/public/media-manager/project/:project/customer-operations/sla',
+runtime/orchestrator-service/server.js:13205:  '/media-manager/project/:project/customer-operations/escalations',
+runtime/orchestrator-service/server.js:13210:  '/public/media-manager/project/:project/customer-operations/escalations',
+runtime/orchestrator-service/server.js:13215:app.get('/media-manager/project/:project/native-media/providers', handleGetNativeMediaProviders);
+runtime/orchestrator-service/server.js:13216:app.get('/public/media-manager/project/:project/native-media/providers', handleGetNativeMediaProviders);
+runtime/orchestrator-service/server.js:13217:app.get('/media-manager/project/:project/native-media/providers/readiness', handleGetNativeMediaProviderReadiness);
+runtime/orchestrator-service/server.js:13218:app.get('/public/media-manager/project/:project/native-media/providers/readiness', handleGetNativeMediaProviderReadiness);
+runtime/orchestrator-service/server.js:13238:      provider: req.body?.provider || DEFAULT_NATIVE_MEDIA_PROVIDER,
+runtime/orchestrator-service/server.js:13336:app.post('/media-manager/project/:project/publishing/schedule', (req, res) => {
+runtime/orchestrator-service/server.js:13340:      action: 'publishing_schedule',
+runtime/orchestrator-service/server.js:13341:      entityType: 'publishing_job',
+runtime/orchestrator-service/server.js:13369:    logCriticalFailure('publishing_schedule', req, error, {
+runtime/orchestrator-service/server.js:13373:      error: error.message || 'Failed to save publishing schedule',
+runtime/orchestrator-service/server.js:13379:app.post('/public/media-manager/project/:project/publishing/schedule', (req, res) => {
+runtime/orchestrator-service/server.js:13383:      action: 'publishing_schedule',
+runtime/orchestrator-service/server.js:13384:      entityType: 'publishing_job',
+runtime/orchestrator-service/server.js:13412:    logCriticalFailure('publishing_schedule', req, error, {
+runtime/orchestrator-service/server.js:13416:      error: error.message || 'Failed to save publishing schedule',
+runtime/orchestrator-service/server.js:13422:app.post('/media-manager/project/:project/publishing/:jobId/reschedule', (req, res) => {
+runtime/orchestrator-service/server.js:13426:      action: 'publishing_reschedule',
+runtime/orchestrator-service/server.js:13427:      entityType: 'publishing_job',
+runtime/orchestrator-service/server.js:13455:      error: error.message || 'Failed to reschedule publishing item',
+runtime/orchestrator-service/server.js:13461:app.post('/public/media-manager/project/:project/publishing/:jobId/reschedule', (req, res) => {
+runtime/orchestrator-service/server.js:13465:      action: 'publishing_reschedule',
+runtime/orchestrator-service/server.js:13466:      entityType: 'publishing_job',
+runtime/orchestrator-service/server.js:13494:      error: error.message || 'Failed to reschedule publishing item',
+runtime/orchestrator-service/server.js:13500:app.post('/media-manager/project/:project/publishing/:jobId/ready', (req, res) => {
+runtime/orchestrator-service/server.js:13504:      action: 'publishing_ready',
+runtime/orchestrator-service/server.js:13505:      entityType: 'publishing_job',
+runtime/orchestrator-service/server.js:13526:      error: error.message || 'Failed to approve publishing item',
+runtime/orchestrator-service/server.js:13532:app.post('/public/media-manager/project/:project/publishing/:jobId/ready', (req, res) => {
+runtime/orchestrator-service/server.js:13536:      action: 'publishing_ready',
+runtime/orchestrator-service/server.js:13537:      entityType: 'publishing_job',
+runtime/orchestrator-service/server.js:13558:      error: error.message || 'Failed to approve publishing item',
+runtime/orchestrator-service/server.js:13564:app.post('/media-manager/project/:project/publishing/:jobId/publish', (req, res) => {
+runtime/orchestrator-service/server.js:13568:      action: 'publishing_publish',
+runtime/orchestrator-service/server.js:13569:      entityType: 'publishing_job',
+runtime/orchestrator-service/server.js:13571:      requestedAction: 'publish'
+runtime/orchestrator-service/server.js:13576:    assertPublishingMutationAllowed(req.params.project, 'publish', {
+runtime/orchestrator-service/server.js:13578:      status: 'published'
+runtime/orchestrator-service/server.js:13581:      status: 'published',
+runtime/orchestrator-service/server.js:13585:      execution_status: 'published',
+runtime/orchestrator-service/server.js:13586:      action_type: 'manual_publish_complete',
+runtime/orchestrator-service/server.js:13595:    logCriticalFailure('publishing_publish', req, error, {
+runtime/orchestrator-service/server.js:13600:      error: error.message || 'Failed to publish item',
+runtime/orchestrator-service/server.js:13606:app.post('/public/media-manager/project/:project/publishing/:jobId/publish', (req, res) => {
+runtime/orchestrator-service/server.js:13610:      action: 'publishing_publish',
+runtime/orchestrator-service/server.js:13611:      entityType: 'publishing_job',
+runtime/orchestrator-service/server.js:13613:      requestedAction: 'publish'
+runtime/orchestrator-service/server.js:13618:    assertPublishingMutationAllowed(req.params.project, 'publish', {
+runtime/orchestrator-service/server.js:13620:      status: 'published'
+runtime/orchestrator-service/server.js:13623:      status: 'published',
+runtime/orchestrator-service/server.js:13627:      execution_status: 'published',
+runtime/orchestrator-service/server.js:13628:      action_type: 'manual_publish_complete',
+runtime/orchestrator-service/server.js:13637:    logCriticalFailure('publishing_publish', req, error, {
+runtime/orchestrator-service/server.js:13642:      error: error.message || 'Failed to publish item',
+runtime/orchestrator-service/server.js:13648:app.post('/media-manager/project/:project/publishing/:jobId/fail', (req, res) => {
+runtime/orchestrator-service/server.js:13652:      action: 'publishing_fail',
+runtime/orchestrator-service/server.js:13653:      entityType: 'publishing_job',
+runtime/orchestrator-service/server.js:13670:      action_type: 'manual_publish_failed',
+runtime/orchestrator-service/server.js:13679:    logCriticalFailure('publishing_fail', req, error, {
+runtime/orchestrator-service/server.js:13684:      error: error.message || 'Failed to mark publishing item as failed',
+runtime/orchestrator-service/server.js:13690:app.post('/public/media-manager/project/:project/publishing/:jobId/fail', (req, res) => {
+runtime/orchestrator-service/server.js:13694:      action: 'publishing_fail',
+runtime/orchestrator-service/server.js:13695:      entityType: 'publishing_job',
+runtime/orchestrator-service/server.js:13712:      action_type: 'manual_publish_failed',
+runtime/orchestrator-service/server.js:13721:    logCriticalFailure('publishing_fail', req, error, {
+runtime/orchestrator-service/server.js:13726:      error: error.message || 'Failed to mark publishing item as failed',
+runtime/orchestrator-service/server.js:13907:      emphasize: ['clarity', 'compliance', 'real product fidelity'],
+runtime/orchestrator-service/server.js:14064:      compliance_notes: [
+runtime/orchestrator-service/server.js:14327:  const publishDir = path.join(baseDir, 'publish-packages');
+runtime/orchestrator-service/server.js:14330:  const legacyPublishDir = path.join(legacyBaseDir, 'publish-packages');
+runtime/orchestrator-service/server.js:14335:  ensureDir(publishDir);
+runtime/orchestrator-service/server.js:14345:    publishDir,
+runtime/orchestrator-service/server.js:14393:  const packageId = `publish_${Date.now()}`;
+runtime/orchestrator-service/server.js:14405:    ready_for_publish: payload.assets.length > 0,
+runtime/orchestrator-service/server.js:14413:    artifactType: 'campaign_publish_package',
+runtime/orchestrator-service/server.js:14474:  const publishDir = resolveExecutionReadCandidate({
+runtime/orchestrator-service/server.js:14477:    relativePath: 'publish-packages',
+runtime/orchestrator-service/server.js:14481:    requestedFile: `campaign-finalization/publish-packages/${safeName}*`
+runtime/orchestrator-service/server.js:14495:  const publishFiles = fs.existsSync(publishDir)
+runtime/orchestrator-service/server.js:14496:    ? fs.readdirSync(publishDir).filter(x => x.startsWith(safeName))
+runtime/orchestrator-service/server.js:14503:    publish_packages_count: publishFiles.length,
+runtime/orchestrator-service/server.js:14505:    ready: mediaFiles.length > 0 || publishFiles.length > 0 || fs.existsSync(emailFile)
+runtime/orchestrator-service/server.js:14583:  const inlinePackage = input.publish_package && typeof input.publish_package === 'object'
+runtime/orchestrator-service/server.js:14584:    ? input.publish_package
+runtime/orchestrator-service/server.js:14593:    const error = new Error('Missing publish package. Provide publish_package or campaign_name + channel');
+runtime/orchestrator-service/server.js:14602:function buildSocialExecutionPayload(publishPackage) {
+runtime/orchestrator-service/server.js:14603:  const assets = assertExecutionPackageAssets(publishPackage, 'publish package');
+runtime/orchestrator-service/server.js:14604:  const channel = String(publishPackage.channel || '').trim().toLowerCase();
+runtime/orchestrator-service/server.js:14610:    || `${String(primaryAsset.product_name || publishPackage.campaign_name || 'Campaign').trim()} update`;
+runtime/orchestrator-service/server.js:14828:async function executePublishPackageRuntime({ project, publishPackage, socialPayload }) {
+runtime/orchestrator-service/server.js:14831:    execution_backend: 'canonical_publish_runtime',
+runtime/orchestrator-service/server.js:14834:    campaign_name: String(publishPackage?.campaign_name || '').trim(),
+runtime/orchestrator-service/server.js:14851:    ready_for_provider_send: true,
+runtime/orchestrator-service/server.js:14866:    provider: payload?.provider || DEFAULT_NATIVE_MEDIA_PROVIDER,
+runtime/orchestrator-service/server.js:14909:    const message = String(campaignPack?.message || 'Ad execution provider is not configured.').trim();
+runtime/orchestrator-service/server.js:14920:    execution_backend: 'ad_ai_provider_runtime',
+runtime/orchestrator-service/server.js:14927:    provider: campaignPack.provider,
+runtime/orchestrator-service/server.js:15023:    domain: 'publishing',
+runtime/orchestrator-service/server.js:15027:    requestedFile: `publishing/scheduler/${jobId}.json`
+runtime/orchestrator-service/server.js:15045:    assertPublishingMutationAllowed(projectName, 'publish', {
+runtime/orchestrator-service/server.js:15047:      status: 'published'
+runtime/orchestrator-service/server.js:15066:    external_publish: normalizedMode !== 'semi_auto',
+runtime/orchestrator-service/server.js:15076:      result.execution_status = 'ready_for_manual_publish';
+runtime/orchestrator-service/server.js:15077:      result.action_type = 'manual_publish';
+runtime/orchestrator-service/server.js:15078:      result.notes.push('Social payload is ready for operator-controlled publishing.');
+runtime/orchestrator-service/server.js:15094:      result.execution_status = 'auto_publish_pending';
+runtime/orchestrator-service/server.js:15095:      result.action_type = 'auto_publish';
+runtime/orchestrator-service/server.js:15096:      result.notes.push('Full-auto mode enabled. Social publish adapter should consume this.');
+runtime/orchestrator-service/server.js:15112:    artifactType: 'publishing_execution_result',
+runtime/orchestrator-service/server.js:15182:    const error = new Error('Manual publish recording is allowed only in semi_auto mode.');
+runtime/orchestrator-service/server.js:15206:  const manualPublishDir = path.join(projectPaths.executionDir, 'manual-publish');
+runtime/orchestrator-service/server.js:15215:    published_at: nowIso,
+runtime/orchestrator-service/server.js:15218:    external_publish: false,
+runtime/orchestrator-service/server.js:15219:    manual_publish: true,
+runtime/orchestrator-service/server.js:15245:      manual_publish_recorded: true,
+runtime/orchestrator-service/server.js:15246:      manual_publish_url: safePostUrl,
+runtime/orchestrator-service/server.js:15247:      manual_publish_operator: safeOperator,
+runtime/orchestrator-service/server.js:15248:      manual_publish_recorded_at: nowIso,
+runtime/orchestrator-service/server.js:15249:      final_status: 'manually_published',
+runtime/orchestrator-service/server.js:15250:      manual_publish: true,
+runtime/orchestrator-service/server.js:15251:      external_publish: false,
+runtime/orchestrator-service/server.js:15266:      artifactType: 'publishing_execution_result',
+runtime/orchestrator-service/server.js:15275:    warnings.push('Execution result file not found for job_id. Manual publish record saved without execution-result update.');
+runtime/orchestrator-service/server.js:15283:    manual_publish_recorded: true,
+runtime/orchestrator-service/server.js:15284:    external_publish: false,
+runtime/orchestrator-service/server.js:15285:    manual_publish: true,
+runtime/orchestrator-service/server.js:15321:    artifactType: 'publishing_execution_result',
+runtime/orchestrator-service/server.js:15345:    approvalId: options.approvalId || req.body?.approval_id || req.body?.approvalId,
+runtime/orchestrator-service/server.js:15377:    approvalId: options.approvalId || req.body?.approval_id || req.body?.approvalId,
+runtime/orchestrator-service/server.js:15399:    if (decision.approval) {
+runtime/orchestrator-service/server.js:15400:      req.governanceApproval = decision.approval;
+runtime/orchestrator-service/server.js:15412:      String(item?.entity_type || '').trim() === 'publishing_job'
+runtime/orchestrator-service/server.js:15433:  const freezeSensitiveAction = ['schedule', 'reschedule', 'ready', 'publish'].includes(actionKey)
+runtime/orchestrator-service/server.js:15434:    || ['ready', 'published'].includes(requestedStatus);
+runtime/orchestrator-service/server.js:15435:  const approvalSensitiveAction = ['ready', 'publish'].includes(actionKey)
+runtime/orchestrator-service/server.js:15436:    || ['ready', 'published'].includes(requestedStatus);
+runtime/orchestrator-service/server.js:15439:  //   freeze_publishing  → default false (permissive — freeze is opt-in)
+runtime/orchestrator-service/server.js:15440:  //   approval_before_publish → default true (restrictive — approval is required by default)
+runtime/orchestrator-service/server.js:15441:  const freezePublishing = typeof policyRules.freeze_publishing === 'boolean'
+runtime/orchestrator-service/server.js:15442:    ? policyRules.freeze_publishing
+runtime/orchestrator-service/server.js:15443:    : policyRules.freeze_publishing == null ? false : Boolean(policyRules.freeze_publishing);
+runtime/orchestrator-service/server.js:15444:  const approvalBeforePublish = typeof policyRules.approval_before_publish === 'boolean'
+runtime/orchestrator-service/server.js:15445:    ? policyRules.approval_before_publish
+runtime/orchestrator-service/server.js:15446:    : policyRules.approval_before_publish == null ? true : Boolean(policyRules.approval_before_publish);
+runtime/orchestrator-service/server.js:15450:      route: '/governance/publishing',
+runtime/orchestrator-service/server.js:15460:    logGovernanceBlock('freeze_publishing');
+runtime/orchestrator-service/server.js:15462:      'Publishing is frozen by governance policy. The requested publishing mutation was blocked.',
+runtime/orchestrator-service/server.js:15465:        rule: 'freeze_publishing'
+runtime/orchestrator-service/server.js:15470:  if (approvalSensitiveAction && approvalBeforePublish) {
+runtime/orchestrator-service/server.js:15472:      logGovernanceBlock('approval_before_publish', { reason: 'job_id_missing' });
+runtime/orchestrator-service/server.js:15474:        'Approval before publish is enabled. This publishing action requires a durable publishing job with an approved governance decision.',
+runtime/orchestrator-service/server.js:15477:          rule: 'approval_before_publish'
+runtime/orchestrator-service/server.js:15482:    const approval = getLatestPublishingApproval(projectName, jobId);
+runtime/orchestrator-service/server.js:15483:    const approvalStatus = String(approval?.status || '').trim().toLowerCase();
+runtime/orchestrator-service/server.js:15485:    if (!['approved', 'overridden'].includes(approvalStatus)) {
+runtime/orchestrator-service/server.js:15486:      logGovernanceBlock('approval_before_publish', {
+runtime/orchestrator-service/server.js:15488:        approval_status: approvalStatus || 'missing'
+runtime/orchestrator-service/server.js:15491:        'Approval before publish is enabled. The publishing job is not approved for ready/publish mutation.',
+runtime/orchestrator-service/server.js:15494:          rule: 'approval_before_publish',
+runtime/orchestrator-service/server.js:15496:          approval_status: approvalStatus || 'missing'
+runtime/orchestrator-service/server.js:16722:      item.status = 'ready_for_publish';
+runtime/orchestrator-service/server.js:16729:        note: 'Post draft is now ready_for_publish. Social publishing connector is the next layer.'
+runtime/orchestrator-service/server.js:16748:      item.status = 'ready_for_publish';
+runtime/orchestrator-service/server.js:16755:        note: 'Blog draft is now ready_for_publish. Website/blog publishing connector is the next layer.'
+runtime/orchestrator-service/server.js:16782:if (command === '/publish_blog') {
+runtime/orchestrator-service/server.js:16789:    `http://localhost:${PORT}/publish-blog/${draftId}?project=${encodeURIComponent(commandProject)}`,
+runtime/orchestrator-service/server.js:17046:  if (!blogItem || !blogItem.published_post_id) {
+runtime/orchestrator-service/server.js:17047:    return res.json({ error: 'Blog not published or not found' });
+runtime/orchestrator-service/server.js:17082:      `${process.env.WP_BASE_URL}/posts/${blogItem.published_post_id}`,
+runtime/orchestrator-service/server.js:17099:    asset.attached_post_id = blogItem.published_post_id;
+runtime/orchestrator-service/server.js:17122:        post_id: blogItem.published_post_id,
+runtime/orchestrator-service/server.js:17139:    if (command === '/enhance_published_blog') {
+runtime/orchestrator-service/server.js:17151:      if (!blogItem || !blogItem.published_post_id) {
+runtime/orchestrator-service/server.js:17161:        const postId = blogItem.published_post_id;
+runtime/orchestrator-service/server.js:17272:    if (command === '/review_published_blog') {
+runtime/orchestrator-service/server.js:17294:          published_post_id: blogItem.published_post_id || null,
+runtime/orchestrator-service/server.js:17687:        primary_goal: 'sales + brand growth',
+runtime/orchestrator-service/server.js:17737:      const goal = args.slice(1).join(' ').trim() || 'sales';
+runtime/orchestrator-service/server.js:17792:          'sales',
+runtime/orchestrator-service/server.js:17884:          'Generate assets from strategy, then run review -> approval -> media -> publish/send.',
+runtime/orchestrator-service/server.js:18324:      const goal = args.slice(1).join(' ').trim() || 'sales';
+runtime/orchestrator-service/server.js:18514:      const goal = args.slice(1).join(' ').trim() || 'sales';
+runtime/orchestrator-service/server.js:18619:          'sales',
+runtime/orchestrator-service/server.js:18624:          'publish landing/product/blog asset',
+runtime/orchestrator-service/server.js:18733:          'publish one authority blog',
+runtime/orchestrator-service/server.js:18735:          'publish three social assets',
+runtime/orchestrator-service/server.js:19088:    if (command === '/campaign_publish_blog') {
+runtime/orchestrator-service/server.js:19115:          `http://localhost:${PORT}/publish-blog/${blogId}?project=${encodeURIComponent(commandProject)}`
+runtime/orchestrator-service/server.js:19118:        campaignExec.controlled_publish = campaignExec.controlled_publish || {};
+runtime/orchestrator-service/server.js:19119:        campaignExec.controlled_publish.blog = {
+runtime/orchestrator-service/server.js:19120:          status: 'published',
+runtime/orchestrator-service/server.js:19123:          published_at: new Date().toISOString()
+runtime/orchestrator-service/server.js:19134:          result: campaignExec.controlled_publish.blog
+runtime/orchestrator-service/server.js:19138:          error: 'Campaign blog publish failed',
+runtime/orchestrator-service/server.js:19179:        campaignExec.controlled_publish = campaignExec.controlled_publish || {};
+runtime/orchestrator-service/server.js:19180:        campaignExec.controlled_publish.email = {
+runtime/orchestrator-service/server.js:19196:          result: campaignExec.controlled_publish.email
+runtime/orchestrator-service/server.js:19206:    if (command === '/campaign_review_publish_state') {
+runtime/orchestrator-service/server.js:19231:          controlled_publish: campaignExec.controlled_publish || {},
+runtime/orchestrator-service/server.js:19233:            blog: campaignExec.controlled_publish?.blog?.status || 'not_published',
+runtime/orchestrator-service/server.js:19234:            email: campaignExec.controlled_publish?.email?.status || 'not_sent'
+runtime/orchestrator-service/server.js:21121:if (command === '/build_campaign_publish_package') {
+runtime/orchestrator-service/server.js:21138:      error: 'Failed to build campaign publish package',
+runtime/orchestrator-service/server.js:21287:if (command === '/record_manual_publish') {
+runtime/orchestrator-service/server.js:21298:      error: 'Missing required args. Usage: /record_manual_publish <project> <campaign> <channel> <job_id> <operator> <post_url> [notes...]'
+runtime/orchestrator-service/server.js:21307:      error: 'Failed to record manual publish',
+runtime/orchestrator-service/server.js:21962:app.post('/publish-clone/:cloneId', async (req, res) => {
+runtime/orchestrator-service/server.js:21965:    assertPublishingMutationAllowed(projectName, 'publish', {
+runtime/orchestrator-service/server.js:21966:      status: 'published'
+runtime/orchestrator-service/server.js:21973:        status: 'publish'
+runtime/orchestrator-service/server.js:21983:    const publishedProduct = response.data;
+runtime/orchestrator-service/server.js:21986:      mode: 'publish_clone',
+runtime/orchestrator-service/server.js:21987:      product_id: publishedProduct.id,
+runtime/orchestrator-service/server.js:21988:      name: publishedProduct.name,
+runtime/orchestrator-service/server.js:21989:      status: publishedProduct.status,
+runtime/orchestrator-service/server.js:21990:      permalink: publishedProduct.permalink,
+runtime/orchestrator-service/server.js:21993:        'This action published a draft product. Original product was not modified.'
+runtime/orchestrator-service/server.js:21996:    logCriticalFailure('publish_clone', req, error, {
+runtime/orchestrator-service/server.js:22000:      error: sanitizeErrorPayloadForClient(error.response?.data || error.message) || 'Failed to publish clone product'
+runtime/orchestrator-service/server.js:22008:    assertPublishingMutationAllowed(projectName, 'publish', {
+runtime/orchestrator-service/server.js:22009:      status: 'published'
+runtime/orchestrator-service/server.js:22049:      status: 'publish'
+runtime/orchestrator-service/server.js:22141:app.post('/publish-blog/:draftId', async (req, res) => {
+runtime/orchestrator-service/server.js:22144:    assertPublishingMutationAllowed(projectName, 'publish', {
+runtime/orchestrator-service/server.js:22145:      status: 'published'
+runtime/orchestrator-service/server.js:22193:        status: 'publish'
+runtime/orchestrator-service/server.js:22203:        message: `WordPress publish failed with status ${response.status}`
+runtime/orchestrator-service/server.js:22207:    item.status = 'published';
+runtime/orchestrator-service/server.js:22208:    item.published_post_id = data.id || null;
+runtime/orchestrator-service/server.js:22211:    item.date_published = data.date || '';
+runtime/orchestrator-service/server.js:22233:      note: 'Blog published successfully'
+runtime/orchestrator-service/server.js:22236:    logCriticalFailure('publish_blog', req, err, {
+runtime/orchestrator-service/server.js:22242:      message: 'Failed to publish blog draft'
+runtime/orchestrator-service/server.js:22250:    assertPublishingMutationAllowed(projectName, 'publish', {
+runtime/orchestrator-service/server.js:22251:      status: 'published'
+runtime/orchestrator-service/server.js:22279:      status: backupData.status || 'publish'
+runtime/orchestrator-service/server.js:22318:const SCHEDULER_VALID_JOB_TYPES = Object.freeze(['publish', 'email', 'media', 'ads']);
+runtime/orchestrator-service/server.js:22378:  const publishPackage = payload.publish_package && typeof payload.publish_package === 'object'
+runtime/orchestrator-service/server.js:22379:    ? payload.publish_package
+runtime/orchestrator-service/server.js:22381:  const assets = Array.isArray(publishPackage.assets) ? publishPackage.assets : [];
+runtime/orchestrator-service/server.js:22387:      || publishPackage.campaign_id
+runtime/orchestrator-service/server.js:22587:    operations: {
+runtime/orchestrator-service/server.js:23019:    if (!result.ok && result.status === 'provider_not_configured') {
+runtime/orchestrator-service/server.js:23033:      provider: result.provider,
+runtime/orchestrator-service/server.js:23049:    if (!result.ok && result.status === 'provider_not_configured') {
+runtime/orchestrator-service/server.js:23063:      provider: result.provider,
+runtime/orchestrator-service/server.js:23079:    if (!result.ok && result.status === 'provider_not_configured') {
+runtime/orchestrator-service/server.js:23092:      provider: result.provider,
+runtime/orchestrator-service/server.js:23109:    if (!result.ok && result.status === 'provider_not_configured') {
+runtime/orchestrator-service/server.js:23122:      provider: result.provider,
+runtime/orchestrator-service/server.js:23139:    if (!result.ok && result.status === 'provider_not_configured') {
+runtime/orchestrator-service/server.js:23152:      provider: result.provider,
+runtime/orchestrator-service/server.js:23169:    if (!result.ok && result.status === 'provider_not_configured') {
+runtime/orchestrator-service/server.js:23182:      provider: result.provider,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:10:} = require('../ai/provider-config');
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:15:} = require('../ai/provider-registry');
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:125:  operations: 'workflows'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:135:  operations: 'operations_plan'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:144:  publisher: 'operations',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:148:  compliance_reviewer: 'operations',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:149:  operations: 'operations',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:177:// Backward-compatible alias — now resolves publishing/output language
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:188:  const specialistId = asString(input.specialistId || input.specialist_id).toLowerCase();
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:189:  const mapped = SPECIALIST_MODE_MAP[specialistId];
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:195:  const specialistId = asString(input.specialistId || input.specialist_id || 'specialist').toLowerCase();
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:196:  const specialistName = asString(input.specialistName || input.specialist_name || specialistId || 'Specialist');
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:206:    'Guidance-only response. Do not execute operations. Do not claim execution happened.'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:209:  const specialistInstruction = specialistId === 'writer'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:211:    : specialistId === 'video_lead'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:213:      : specialistId === 'strategist'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:215:        : specialistId === 'compliance_reviewer'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:216:          ? 'As Compliance Reviewer, return concrete risks, safer wording replacements, and approval notes.'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:217:          : specialistId === 'operations'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:219:            : 'Produce concrete specialist chat output, not a high-level summary.';
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:222:    `Guidance-only live specialist chat response for MH Assistant OS.`,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:223:    `Specialist ID: ${specialistId || 'specialist'}`,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:224:    `Specialist name: ${specialistName}`,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:227:    `Output/publishing language (language for publishable content, copy, hooks, captions, scripts): ${outputLanguage}`,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:230:    'You are answering inside a live specialist chat.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:231:    'Answer the user directly as the selected specialist.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:233:    'If publishable content uses a different output language, do not make the entire answer that output language.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:234:    'Start with one brief sentence in the conversation language, then add a clearly labeled publishable content section in the output language.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:239:      ? `Generate all publishable content (hooks, captions, scripts, emails, copy, headlines) in ${outputLanguage} because that is the project publishing language.`
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:240:      : 'Generate publishable content in the same language as your conversation.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:242:      ? `When the output language differs from the conversation language, label the publishable section clearly, for example: "${outputLanguage} hooks for the ${market || outputLanguage} market:".`
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:244:    'If the user explicitly requests a different output language, use that language for publishable content instead.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:255:    'The next-step suggestion must be in the conversation language, not the publishing/output language, unless they are the same.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:257:    specialistInstruction,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:258:    'Do not claim task/workflow/handoff/approval/publish actions were executed.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:259:    'Do not claim task creation, workflow run, handoff creation, or approval creation happened.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:260:    'Do not claim approvals were granted.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:261:    'Do not claim operations were run.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:271:function buildSpecialistInstruction(specialistId = "", specialistName = "Specialist") {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:272:  const id = asString(specialistId || "").toLowerCase();
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:273:  const name = asString(specialistName || "Specialist");
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:296:    publisher: [
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:298:      "Focus on publishing readiness, schedule review, channel fit, final packaging, captions, and handoff preparation.",
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:299:      "When asked about posting or publishing, prepare safe publish-ready guidance without claiming anything was published."
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:311:    compliance: [
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:313:      "Focus on approval safety, claims review, legal/compliance risk, disclaimers, and governance boundaries.",
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:314:      "When asked to approve or publish, do not approve automatically; prepare review guidance only."
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:316:    operations: [
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:321:    customer_ops: [
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:326:    sales: [
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:333:      "Think across strategy, content, media, publishing, ads, SEO, compliance, operations, customer operations, and sales.",
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:334:      "Coordinate specialists and recommend who should handle the next step, but do not execute backend actions."
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:341:    "Be conversational, helpful, and safe. Prepare work only when requested; do not claim backend actions were executed."
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:350:  const specialistId = asString(input.specialistId || input.specialist_id || 'specialist').toLowerCase();
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:351:  const specialistName = asString(input.specialistName || input.specialist_name || specialistId || 'Specialist');
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:361:    const author = asString(message.specialistLabel || message.author || message.name || role);
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:367:  const specialistInstruction = buildSpecialistInstruction(specialistId, specialistName);
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:370:    'Chat-only live specialist conversation for MH Assistant OS.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:371:    `Specialist ID: ${specialistId || 'specialist'}`,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:372:    `Specialist name: ${specialistName}`,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:379:    '- Be a natural chat partner first, like ChatGPT, but with your specialist expertise.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:383:    '- If publishable content uses a different output language, put only that publishable section in the output language under a clear label.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:384:    '- MANDATORY FORMAT when conversation language differs from publishable output language: first write one short opening sentence in the conversation language.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:385:    '- Then write a section titled exactly: Publishable content — {outputLanguage}: and put the publishable copy there only.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:386:    '- Then write a final section titled Next step in the conversation language, not the publishable output language.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:388:    '- Do not make the whole answer the publishable output language unless the user wrote in that language.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:393:    '- You may suggest another specialist or page, but do not claim that anything was transferred automatically.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:399:      ? `When producing publishable content, write the publishable content in ${outputLanguage}.`
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:400:      : 'Use the conversation language for publishable content unless the user asks otherwise.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:404:    '- Do not claim that publishing, approval, deletion, sync, CRM update, customer reply, workflow run, export, task creation, handoff creation, or backend action happened.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:408:    specialistInstruction,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:417:function extractChatProviderText(providerOutput = {}) {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:418:  const provider = asObject(providerOutput);
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:419:  const raw = asObject(provider.raw);
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:422:    provider.chat_answer,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:424:    provider.content,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:425:    provider.text,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:426:    provider.output,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:427:    provider.message,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:428:    provider.summary,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:475:function extractGuidanceProviderText(providerOutput = {}, response = {}) {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:476:  const provider = asObject(providerOutput);
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:477:  const raw = asObject(provider.raw);
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:480:    provider.content,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:481:    provider.summary,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:482:    provider.text,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:483:    provider.output,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:484:    provider.message,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:503:function extractGuidanceChatAnswer(providerOutput = {}, response = {}) {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:504:  const provider = asObject(providerOutput);
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:505:  const raw = asObject(provider.raw);
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:508:    provider.chat_answer,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:510:    provider.content,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:511:    provider.text,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:512:    provider.output,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:513:    provider.message,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:514:    provider.summary,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:540:  if (intent === 'operations') return 'workflows';
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:543:  if (intent === 'approval') return 'governance';
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:598:      intent: 'operations',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:599:      modeId: 'operations',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:601:      outputType: 'operations_plan',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:602:      pattern: /\b(task plan|workflow|handoff|approval|approvals|timeline|execution plan|operator|owners?|assign|todo|follow up|route)\b/
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:609:      intent: selectedMode === 'operations' ? 'operations' : selectedMode,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:611:      actionType: selectedMode === 'operations' ? 'workflow' : 'recommendation',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:629:  if (matches(/\b(approve|approval|review)\b/) && !['ads', 'content', 'campaign'].includes(intent)) {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:630:    intent = 'approval';
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:631:    actionType = 'approval';
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:632:    modeId = modeId || 'operations';
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:633:    outputType = 'operations_plan';
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:634:  } else if (matches(/\b(task|todo|follow up|assign)\b/) && intent === 'operations') {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:660:    names.add(humanizeValue(record.integration_id || record.source_key || record.provider_account?.name || record.name));
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:682:  const operations = asObject(deps.buildOperations(projectName));
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:696:    recent_handoffs: asArray(operations.handoffs?.items).filter((item) => asString(item.destination_page) === 'research').slice(0, 3)
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:705:    operations,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:844:    ['content-studio', 'media-studio', 'publishing', 'ads-manager'],
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:890:function buildResponseFromContext(command, context, classified, providerOutput = {}) {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:904:  const providerRecommendations = normalizeReadableList(providerOutput.recommendations, 8);
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:905:  const recommendations = providerRecommendations.length
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:906:    ? providerRecommendations
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:909:  const content = humanizeValue(providerOutput.content || providerOutput.summary);
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:910:  const outputType = asString(providerOutput.outputType) || classified.outputType || OUTPUT_TYPE_BY_MODE[classified.resolvedModeId] || 'executive_brief';
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:912:  const analysis = humanizeValue(providerOutput.analysis) || summaryBits.join(' ');
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:913:  const adIdeas = outputType === 'ad_ideas' ? normalizeAdIdeas(providerOutput.adIdeas || providerOutput.raw?.adIdeas || providerOutput.raw?.ad_ideas, content) : [];
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:915:    ? normalizeCampaignPackage(providerOutput.campaignPackage || providerOutput.raw?.campaignPackage || providerOutput.raw?.campaign_package, context)
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:918:    ? normalizeContentPack(providerOutput.contentPack || providerOutput.raw?.contentPack || providerOutput.raw?.content_pack)
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:921:    ? normalizeStructuredObject(providerOutput.seoPlan || providerOutput.raw?.seoPlan || providerOutput.raw?.seo_plan)
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:924:    ? normalizeStructuredObject(providerOutput.researchReport || providerOutput.raw?.researchReport || providerOutput.raw?.research_report)
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:926:  const operationsPlan = outputType === 'operations_plan'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:927:    ? normalizeStructuredObject(providerOutput.operationsPlan || providerOutput.raw?.operationsPlan || providerOutput.raw?.operations_plan)
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:930:    ? normalizeStructuredObject(providerOutput.executiveBrief || providerOutput.raw?.executiveBrief || providerOutput.raw?.executive_brief)
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:932:  const providerNextActions = normalizeReadableList(providerOutput.nextActions, 8);
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:935:    ...(providerNextActions.length ? providerNextActions : structuredNextActions),
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:936:    ...(providerNextActions.length || structuredNextActions.length ? [] : context.summary.next_best_actions.slice(0, 2)),
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:937:    ...(providerNextActions.length || structuredNextActions.length || !context.summary.asset_blockers?.length
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:943:    ...normalizeProviderRouteSuggestions(providerOutput.routeSuggestions),
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:949:        normalizeRouteSuggestion('publishing', 'Schedule approved launch content.'),
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:956:  const findings = normalizeReadableList(providerOutput.findings, 8);
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:958:    ...normalizeReadableList(providerOutput.missingData, 8),
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:961:  const title = humanizeValue(providerOutput.title) ||
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:963:  const summary = humanizeValue(providerOutput.summary) ||
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:967:  const taskBlock = ['workflow', 'task', 'approval'].includes(classified.actionType)
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:970:      owner: classified.resolvedModeId === 'operations' ? 'Operations Planner' : 'mh-assistant',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:974:        'Create approval only if execution changes publishing, spend, or sensitive settings.'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1001:    operationsPlan,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1003:    provider: asString(providerOutput.provider),
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1004:    model: asString(providerOutput.model),
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1005:    usage: asObject(providerOutput.usage),
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1039:      context.summary.recommendations[0] || 'No recommendation stack was available, so the workflow leaned on project settings and operations context.'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1044:      `Use tasks or approvals if human follow-through is required.`
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1077:      let providerConfig = null;
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1081:          route: 'ai-command',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1084:          source: asString(input.source) || 'ai-command',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1090:        providerConfig = resolveAiProviderConfig(process.env);
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1092:        if (!isAiProviderSupported(providerConfig.provider)) {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1094:            `Unsupported AI provider "${providerConfig.provider}". Supported providers: ${listAiProviders().join(', ')}`,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1098:              provider: providerConfig.provider
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1103:        assertAiProviderConfig(providerConfig);
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1104:        const provider = getAiProvider(providerConfig.provider, { logger });
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1105:        if (!provider) {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1106:          throw createProviderConfigError(`AI provider adapter is not registered for "${providerConfig.provider}"`, {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1109:            provider: providerConfig.provider
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1113:        logger.info('ai_provider_call_started', {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1114:          route: 'ai-command',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1115:          provider: providerConfig.provider,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1116:          model: providerConfig.model,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1120:        const providerOutput = await provider.execute({
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1126:          config: providerConfig
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1128:        const response = buildResponseFromContext(command, context, classified, providerOutput);
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1140:            provider: {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1141:              id: providerOutput.provider,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1142:              model: providerOutput.model,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1143:              usage: providerOutput.usage
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1190:            workflow_id: 'ai-command-orchestration',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1193:            source: 'ai-command',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1210:        if (classified.actionType === 'approval') {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1211:          const approval = createApproval(projectName, {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1212:            title: `${response.title} approval`,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1219:          linkedEntities.push({ entity_type: 'approval', entity_id: approval.id, route: 'governance', label: approval.title });
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1225:            source_page: 'ai-command',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1254:          source: input.source || 'ai-command',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1270:          route: 'ai-command',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1273:          provider: response.provider,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1280:          provider: {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1281:            id: response.provider,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1323:          source: input.source || 'ai-command',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1332:          route: 'ai-command',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1335:          provider: providerConfig?.provider || null,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1336:          model: providerConfig?.model || null,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1345:          provider: providerConfig?.provider || null,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1365:      const specialistId = asString(input.specialistId || input.specialist_id || 'specialist').toLowerCase();
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1366:      const specialistName = asString(input.specialistName || input.specialist_name || specialistId || 'Specialist');
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1374:      let providerConfig = null;
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1381:          specialist_id: specialistId,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1386:        providerConfig = resolveAiProviderConfig(process.env);
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1388:        if (!isAiProviderSupported(providerConfig.provider)) {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1390:            `Unsupported AI provider "${providerConfig.provider}". Supported providers: ${listAiProviders().join(', ')}`,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1394:              provider: providerConfig.provider
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1399:        assertAiProviderConfig(providerConfig);
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1400:        const provider = getAiProvider(providerConfig.provider, { logger });
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1401:        if (!provider) {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1402:          throw createProviderConfigError(`AI provider adapter is not registered for "${providerConfig.provider}"`, {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1405:            provider: providerConfig.provider
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1409:        logger.info('ai_chat_provider_call_started', {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1411:          provider: providerConfig.provider,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1412:          model: providerConfig.model,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1416:        const providerOutput = await provider.execute({
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1423:            specialist_id: specialistId,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1424:            specialist_name: specialistName,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1431:          config: providerConfig
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1434:        let responseText = extractChatProviderText(providerOutput);
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1436:          throw new Error('AI chat provider returned no response text');
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1444:          specialist: {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1445:            id: specialistId,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1446:            name: specialistName,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1457:            created_approval: false,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1458:            published: false,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1461:            mutated_operations: false,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1462:            sent_customer_reply: false,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1463:            mutated_crm: false,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1466:          provider: {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1467:            id: asString(providerOutput.provider || providerConfig.provider),
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1468:            model: asString(providerOutput.model || providerConfig.model),
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1469:            usage: asObject(providerOutput.usage)
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1485:          provider: chatPayload.provider.id,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1486:          model: chatPayload.provider.model,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1487:          specialist_id: specialistId
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1496:          provider: providerConfig?.provider || null,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1497:          model: providerConfig?.model || null,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1498:          specialist_id: specialistId,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1513:          provider: providerConfig?.provider || null,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1527:      const specialistId = asString(input.specialistId || input.specialist_id || 'specialist').toLowerCase();
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1528:      const specialistName = asString(input.specialistName || input.specialist_name || specialistId || 'Specialist');
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1538:      let providerConfig = null;
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1545:          specialist_id: specialistId,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1550:        providerConfig = resolveAiProviderConfig(process.env);
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1552:        if (!isAiProviderSupported(providerConfig.provider)) {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1554:            `Unsupported AI provider "${providerConfig.provider}". Supported providers: ${listAiProviders().join(', ')}`,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1558:              provider: providerConfig.provider
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1563:        assertAiProviderConfig(providerConfig);
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1564:        const provider = getAiProvider(providerConfig.provider, { logger });
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1565:        if (!provider) {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1566:          throw createProviderConfigError(`AI provider adapter is not registered for "${providerConfig.provider}"`, {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1569:            provider: providerConfig.provider
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1573:        logger.info('ai_guidance_provider_call_started', {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1575:          provider: providerConfig.provider,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1576:          model: providerConfig.model,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1580:        const providerOutput = await provider.execute({
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1587:            specialist_id: specialistId,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1588:            specialist_name: specialistName,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1596:          config: providerConfig
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1599:        const response = buildResponseFromContext(request, context, classified, providerOutput);
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1600:        const chatAnswer = extractGuidanceChatAnswer(providerOutput, response);
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1601:        const responseText = chatAnswer || extractGuidanceProviderText(providerOutput, response);
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1620:          specialist: {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1621:            id: specialistId,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1622:            name: specialistName,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1634:            created_approval: false,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1635:            published: false,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1638:            mutated_operations: false
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1640:          provider: {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1641:            id: asString(providerOutput.provider || providerConfig.provider),
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1642:            model: asString(providerOutput.model || providerConfig.model),
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1643:            usage: asObject(providerOutput.usage)
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1663:              owner: specialistName,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1676:          provider: guidancePayload.provider.id,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1677:          model: guidancePayload.provider.model,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1678:          specialist_id: specialistId
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1687:          provider: providerConfig?.provider || null,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1688:          model: providerConfig?.model || null,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1689:          specialist_id: specialistId,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1704:          specialist: {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1705:            id: specialistId,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1706:            name: specialistName,
+runtime/orchestrator-service/lib/ai/provider-registry.js:1:const { createOpenAiProvider } = require('./providers/openai');
+runtime/orchestrator-service/lib/ai/provider-registry.js:12:function getAiProvider(providerId, options = {}) {
+runtime/orchestrator-service/lib/ai/provider-registry.js:13:  const normalizedProvider = asString(providerId);
+runtime/orchestrator-service/lib/ai/provider-registry.js:23:function isAiProviderSupported(providerId) {
+runtime/orchestrator-service/lib/ai/provider-registry.js:24:  return Boolean(PROVIDER_FACTORIES[asString(providerId)]);
+runtime/orchestrator-service/lib/ai/providers/openai.js:2:const { getAiModePrompt } = require('../provider-config');
+runtime/orchestrator-service/lib/ai/providers/openai.js:245:      operationsPlan: parsed.operationsPlan || parsed.operations_plan || null,
+runtime/orchestrator-service/lib/ai/providers/openai.js:268:    operationsPlan: null,
+runtime/orchestrator-service/lib/ai/providers/openai.js:296:              'Return actionable marketing output, not a process description, unless the command asks for operations.',
+runtime/orchestrator-service/lib/ai/providers/openai.js:306:              'For outputType "operations_plan", include operationsPlan with tasks, timeline, owners, handoffs, approvals, dependencies.',
+runtime/orchestrator-service/lib/ai/providers/openai.js:343:        const providerCode = asString(error?.response?.data?.error?.code).toLowerCase();
+runtime/orchestrator-service/lib/ai/providers/openai.js:344:        const providerMessage =
+runtime/orchestrator-service/lib/ai/providers/openai.js:345:          providerCode === 'invalid_api_key'
+runtime/orchestrator-service/lib/ai/providers/openai.js:352:        const providerError = new Error(`OpenAI provider failed: ${providerMessage}`);
+runtime/orchestrator-service/lib/ai/providers/openai.js:353:        providerError.code = 'OPENAI_PROVIDER_FAILED';
+runtime/orchestrator-service/lib/ai/providers/openai.js:354:        providerError.statusCode = Number(error?.response?.status) || 502;
+runtime/orchestrator-service/lib/ai/providers/openai.js:355:        providerError.provider = 'openai';
+runtime/orchestrator-service/lib/ai/providers/openai.js:356:        providerError.details = {
+runtime/orchestrator-service/lib/ai/providers/openai.js:360:        throw providerError;
+runtime/orchestrator-service/lib/ai/providers/openai.js:368:        emptyError.provider = 'openai';
+runtime/orchestrator-service/lib/ai/providers/openai.js:377:        emptyContentError.provider = 'openai';
+runtime/orchestrator-service/lib/ai/providers/openai.js:381:      logger.info?.('ai_provider_response_ready', {
+runtime/orchestrator-service/lib/ai/providers/openai.js:382:        route: 'ai-command',
+runtime/orchestrator-service/lib/ai/providers/openai.js:383:        provider: 'openai',
+runtime/orchestrator-service/lib/ai/providers/openai.js:389:        provider: 'openai',
+runtime/orchestrator-service/lib/ai/providers/openai.js:407:        operationsPlan: normalized.operationsPlan,
+runtime/orchestrator-service/lib/ai/provider-config.js:15:  const error = new Error(String(message || 'AI provider configuration is invalid'));
+runtime/orchestrator-service/lib/ai/provider-config.js:83:  operations: {
+runtime/orchestrator-service/lib/ai/provider-config.js:85:    purpose: 'tasks, timelines, handoffs, approvals, and execution planning',
+runtime/orchestrator-service/lib/ai/provider-config.js:86:    outputType: 'operations_plan',
+runtime/orchestrator-service/lib/ai/provider-config.js:89:      'Produce task plans, timelines, handoffs, approvals, ownership, and execution plans.',
+runtime/orchestrator-service/lib/ai/provider-config.js:100:    ads_specialist: 'ads',
+runtime/orchestrator-service/lib/ai/provider-config.js:101:    seo_specialist: 'seo',
+runtime/orchestrator-service/lib/ai/provider-config.js:103:    operations_planner: 'operations'
+runtime/orchestrator-service/lib/ai/provider-config.js:114:  const provider = asString(env.MH_AI_PROVIDER || env.AI_PROVIDER || 'openai').toLowerCase();
+runtime/orchestrator-service/lib/ai/provider-config.js:121:    provider,
+runtime/orchestrator-service/lib/ai/provider-config.js:131:  const provider = asString(config.provider).toLowerCase();
+runtime/orchestrator-service/lib/ai/provider-config.js:133:  if (!provider) {
+runtime/orchestrator-service/lib/ai/provider-config.js:134:    throw createProviderConfigError('AI provider is not configured', {
+runtime/orchestrator-service/lib/ai/provider-config.js:140:  if (provider === 'openai' && !asString(config.apiKey)) {
+runtime/orchestrator-service/lib/ai/provider-config.js:144:      provider
