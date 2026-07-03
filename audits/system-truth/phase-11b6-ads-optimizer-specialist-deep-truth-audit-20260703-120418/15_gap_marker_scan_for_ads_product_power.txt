@@ -1,0 +1,892 @@
+public/control-center/pages/ai-command.js:5:        openAiToolDrawerFromMetadata,
+public/control-center/pages/ai-command.js:73:                id: "ads",
+public/control-center/pages/ai-command.js:74:                label: "Ads Optimizer",
+public/control-center/pages/ai-command.js:76:                summary: "Ad concepts, targeting angles, platform copy, and paid strategy.",
+public/control-center/pages/ai-command.js:77:                routeHint: "ads-manager"
+public/control-center/pages/ai-command.js:149:		placeholder: "Ask the Strategist to plan a campaign, map launch phases, review channel priorities, or define the offer strategy…",
+public/control-center/pages/ai-command.js:151:		cannotDo: ["Publish campaigns directly", "Execute workflows automatically", "Approve content", "Set live budgets"],
+public/control-center/pages/ai-command.js:153:		safetyNote: "All outputs are guidance and draft only. Execution requires explicit confirmation.",
+public/control-center/pages/ai-command.js:162:		placeholder: "Ask the Content Writer to draft captions, hooks, landing copy, or campaign messages…",
+public/control-center/pages/ai-command.js:175:		placeholder: "Ask the Media Director to define visual direction, prepare a creative brief, or review brand consistency…",
+public/control-center/pages/ai-command.js:179:		safetyNote: "Direction and briefs only. Media generation requires backend confirmation and explicit action.",
+public/control-center/pages/ai-command.js:188:		placeholder: "Ask the Video Lead to write a reel script, map short-form strategy, or outline the next video concept…",
+public/control-center/pages/ai-command.js:192:		safetyNote: "Scripts and direction only. Video generation requires explicit backend action and approval.",
+public/control-center/pages/ai-command.js:201:		placeholder: "Ask the Publisher to review publishing readiness, check scheduling, or prepare a handoff package…",
+public/control-center/pages/ai-command.js:205:		safetyNote: "Publishing always requires explicit approval. No live publishing from AI guidance alone.",
+public/control-center/pages/ai-command.js:209:		id: "ads",
+public/control-center/pages/ai-command.js:210:		label: "Ads Optimizer",
+public/control-center/pages/ai-command.js:213:		summary: "Ad concepts, targeting angles, platform copy, and paid strategy.",
+public/control-center/pages/ai-command.js:214:		placeholder: "Ask the Ads Optimizer to draft ad copy, review targeting angles, or plan a paid campaign structure…",
+public/control-center/pages/ai-command.js:215:		canHelp: ["Draft ad concepts and copy", "Review targeting angles", "Plan paid campaign structure", "Suggest creative variants", "Map platform-specific strategy"],
+public/control-center/pages/ai-command.js:216:		cannotDo: ["Launch ads directly", "Set live budgets without review", "Approve spend", "Access ad accounts directly"],
+public/control-center/pages/ai-command.js:218:		safetyNote: "Ad concepts and copy only. Live ad actions require platform integration and explicit approval.",
+public/control-center/pages/ai-command.js:227:		placeholder: "Ask the SEO & Insights Analyst to review performance, suggest SEO improvements, or identify top content patterns…",
+public/control-center/pages/ai-command.js:240:		placeholder: "Ask the Compliance Reviewer to check claims, approval risks, publishing safety, and governance notes…",
+public/control-center/pages/ai-command.js:253:		placeholder: "Ask the Operations Lead to turn this into tasks, workflow steps, or handoffs…",
+public/control-center/pages/ai-command.js:257:		safetyNote: "Task plans and handoffs only. Workflow execution requires explicit user confirmation.",
+public/control-center/pages/ai-command.js:266:		placeholder: "Ask the Customer Operations Lead to summarize a customer thread, draft a safe reply, prepare a ticket draft, check SLA risk, or route an escalation for review…",
+public/control-center/pages/ai-command.js:267:		canHelp: ["Review inbox context", "Summarize customer threads", "Draft safe replies", "Prepare ticket drafts", "Flag SLA and escalation risk"],
+public/control-center/pages/ai-command.js:279:		placeholder: "Ask the Sales / CRM Lead to qualify a lead, draft outreach, plan follow-ups, summarize CRM context, or prepare a sales handoff for review…",
+public/control-center/pages/ai-command.js:305:		{ label: "Map format requirements", sub: "By platform and campaign phase" },
+public/control-center/pages/ai-command.js:312:		{ label: "Map video asset needs", sub: "By platform and format" }
+public/control-center/pages/ai-command.js:320:	ads: [
+public/control-center/pages/ai-command.js:322:		{ label: "Review targeting angles", sub: "Map audience and platform fit" },
+public/control-center/pages/ai-command.js:323:		{ label: "Suggest creative variants", sub: "Test different hooks and CTAs" },
+public/control-center/pages/ai-command.js:324:		{ label: "Plan paid campaign structure", sub: "Objective, audience, creative, budget" }
+public/control-center/pages/ai-command.js:327:		{ label: "Review SEO signals", sub: "Top queries, CTR gaps, weak pages" },
+public/control-center/pages/ai-command.js:394:	ads: "AO",
+public/control-center/pages/ai-command.js:403:	ads: "ads_operator",
+public/control-center/pages/ai-command.js:438:		{ id: "caption-builder", label: "Caption Builder", action: "preview", intent: "guidance", template: "Draft German captions for {project}. Include angle, body, CTA, and platform adaptation notes." },
+public/control-center/pages/ai-command.js:444:		{ id: "format-mapper", label: "Format Mapper", action: "preview", intent: "guidance", template: "Map required creative formats for {project}. Include platform, aspect ratio, asset type, and usage context." },
+public/control-center/pages/ai-command.js:463:	ads: [
+public/control-center/pages/ai-command.js:464:		{ id: "ad-angle-generator", label: "Ad Angle Generator", action: "preview", intent: "guidance", template: "Draft ad angles for {project}. Include audience problem, value promise, German hook direction, and platform fit." },
+public/control-center/pages/ai-command.js:465:		{ id: "copy-variants", label: "Copy Variants", action: "preview", intent: "guidance", template: "Prepare German ad copy variants for {project}. Include hooks, primary text, CTA, and creative notes." },
+public/control-center/pages/ai-command.js:466:		{ id: "test-ideas", label: "Test Ideas", action: "preview", intent: "task", template: "Suggest paid test ideas for {project}. Provide hypotheses, segments, creative variables, and measurement notes." },
+public/control-center/pages/ai-command.js:467:		{ id: "budget-notes", label: "Budget Notes", action: "preview", intent: "guidance", template: "Review budget notes for {project}. Summarize constraints and safe test allocation guidance." },
+public/control-center/pages/ai-command.js:468:		{ id: "open-ads-manager", label: "Open Ads Manager", action: "route", route: "ads-manager" }
+public/control-center/pages/ai-command.js:472:		{ id: "meta-direction", label: "Meta Direction", action: "preview", intent: "guidance", template: "Prepare meta direction for {project}. Include page angle, title direction, description direction, and CTA intent." },
+public/control-center/pages/ai-command.js:578:		suggestedPrompt: "Act as Media Planner and map media needs by platform for this launch cycle."
+public/control-center/pages/ai-command.js:581:		id: "ads",
+public/control-center/pages/ai-command.js:583:		purpose: "Optimize paid opportunities, creative testing, and budget decisions.",
+public/control-center/pages/ai-command.js:584:		bestUse: "When preparing or fixing paid performance.",
+public/control-center/pages/ai-command.js:585:		suggestedPrompt: "Act as Ads Specialist and propose paid experiments based on current readiness and data coverage."
+public/control-center/pages/ai-command.js:637:		if (/act as the ads optimizer|act as the ads operator/i.test(text)) return "ads";
+public/control-center/pages/ai-command.js:677:	if (/publish\s*now|send\s*external|paid\s*ads|final\s*approval/i.test(command)) {
+public/control-center/pages/ai-command.js:707:function humanizeValue(value, fallback = "") {
+public/control-center/pages/ai-command.js:708:	if (value == null) return fallback;
+public/control-center/pages/ai-command.js:711:		return clean === "[object Object]" ? fallback : clean;
+public/control-center/pages/ai-command.js:717:		return value.map((item) => humanizeValue(item)).filter(Boolean).join("; ") || fallback;
+public/control-center/pages/ai-command.js:739:			.join("; ") || fallback;
+public/control-center/pages/ai-command.js:741:	return fallback;
+public/control-center/pages/ai-command.js:817:function toNumber(value, fallback = null) {
+public/control-center/pages/ai-command.js:818:	if (value == null || value === "") return fallback;
+public/control-center/pages/ai-command.js:820:	return Number.isFinite(parsed) ? parsed : fallback;
+public/control-center/pages/ai-command.js:895:function getModeMeta(id) {
+public/control-center/pages/ai-command.js:1061:			reason: "AI response guidance bridge is not connected yet (API function unavailable)."
+public/control-center/pages/ai-command.js:1101:function summarizeAiCommandSessionIntent(value = "", fallback = "Session") {
+public/control-center/pages/ai-command.js:1107:        if (!text) return fallback;
+public/control-center/pages/ai-command.js:1232:			"When the request touches inbox, tickets, leads, outreach, or CRM, include Customer Ops -> Sales/CRM -> Operations.",
+public/control-center/pages/ai-command.js:1246:                `Use ${safeOutputLanguage} only for customer-facing or publishable copy such as captions, ads, emails, landing pages, final campaign text, or publishing packages.`,
+public/control-center/pages/ai-command.js:1307:	if (id === "ads") return "ads-manager";
+public/control-center/pages/ai-command.js:1403:		"ads-manager": "Ads Manager",
+public/control-center/pages/ai-command.js:1507:				"Confirm platform formats before routing to Media Studio."
+public/control-center/pages/ai-command.js:1554:	if (specialistId === "ads") {
+public/control-center/pages/ai-command.js:1570:				"Keep budget, launch, and live ad changes inside Ads Manager.",
+public/control-center/pages/ai-command.js:1574:				"Primary ad angle draft",
+public/control-center/pages/ai-command.js:1578:			safetyLabel: "No budget updates or ad launches executed."
+public/control-center/pages/ai-command.js:1744:			"Customer Ops and Sales / CRM join when the request touches inbox, tickets, leads, outreach, or CRM"
+public/control-center/pages/ai-command.js:1979:		paid: asObject(insights.paid),
+public/control-center/pages/ai-command.js:2001:		ads: ["ad ideas", "ad copy", "facebook ads", "meta ads", "tiktok ads", "google ads", "cta", "paid", "targeting angle", "ad creative"],
+public/control-center/pages/ai-command.js:2006:		sales_crm: ["lead", "leads", "crm", "sales", "outreach", "follow-up", "follow up", "pipeline", "dealer", "salon", "influencer"]
+public/control-center/pages/ai-command.js:2054:	if (lane === "ads" && asString(coverage.paid_ads?.status) !== "covered") {
+public/control-center/pages/ai-command.js:2055:		notes.push("Paid platform reporting not connected — ROAS guidance is limited.");
+public/control-center/pages/ai-command.js:2095:	const bestPlatform = aiContext.learningPatterns.best_platforms?.label;
+public/control-center/pages/ai-command.js:2099:			? `${extractTopMessage(top)} is the strongest measured content item right now${top.platform ? ` on ${titleCase(top.platform)}` : ""}.`
+public/control-center/pages/ai-command.js:2105:			bestPlatform && bestPlatform !== "No platform pattern yet" ? `Best platform: ${bestPlatform}.` : "No clear platform winner yet."
+public/control-center/pages/ai-command.js:2109:			weak ? `Rewrite ${extractTopMessage(weak)} with a stronger hook and better platform fit.` : null,
+public/control-center/pages/ai-command.js:2139:			lowCtr ? `CTR opportunity: ${extractTopMessage(lowCtr)} has visibility but weak click-through.` : "No low-CTR list yet.",
+public/control-center/pages/ai-command.js:2144:			lowCtr ? `Improve title and SERP message for ${extractTopMessage(lowCtr)}.` : "Connect Search Console to unlock CTR analysis.",
+public/control-center/pages/ai-command.js:2163:	const paid = aiContext.paid;
+public/control-center/pages/ai-command.js:2164:	const bestCampaign = asArray(paid.best_campaigns)[0];
+public/control-center/pages/ai-command.js:2165:	const weakCampaign = asArray(paid.weak_campaigns)[0];
+public/control-center/pages/ai-command.js:2166:	const bestCreative = asArray(paid.best_creatives)[0];
+public/control-center/pages/ai-command.js:2169:		summary: paid.summary?.spend != null
+public/control-center/pages/ai-command.js:2170:			? `Paid media live with ${formatCurrency(paid.summary.spend, aiContext.currency)} tracked spend.`
+public/control-center/pages/ai-command.js:2171:			: "Paid reporting not connected — connect Meta Ads, Google Ads, or TikTok Ads.",
+public/control-center/pages/ai-command.js:2176:			paid.summary?.roas != null ? `Current ROAS: ${Number(paid.summary.roas).toFixed(2)}x.` : "ROAS not available yet."
+public/control-center/pages/ai-command.js:2179:			bestCampaign ? `Scale ${extractTopMessage(bestCampaign)} only after validating strong CTR and ROAS.` : "Connect paid platforms before making scale decisions.",
+public/control-center/pages/ai-command.js:2181:			aiContext.recommendations.find((item) => item.domain === "paid")?.action || ""
+public/control-center/pages/ai-command.js:2184:			bestCreative ? `Reuse the creative pattern behind ${extractTopMessage(bestCreative)}.` : "Sync paid data before scaling any creative.",
+public/control-center/pages/ai-command.js:2186:			"Tie paid decisions to conversion and revenue signal — not just clicks."
+public/control-center/pages/ai-command.js:2189:			routeSuggestion("Ads Manager", "ads-manager", "Review pacing, creative mapping, and paid operating view."),
+public/control-center/pages/ai-command.js:2190:			routeSuggestion("Integrations", "integrations", "Connect or reconnect paid reporting platforms."),
+public/control-center/pages/ai-command.js:2191:			routeSuggestion("Insights", "insights", "Compare paid vs organic and website results.")
+public/control-center/pages/ai-command.js:2193:		missingData: buildMissingDataNotes(aiContext, "ads")
+public/control-center/pages/ai-command.js:2213:			"Reconnect missing analytics, SEO, and paid feeds to improve evidence quality.",
+public/control-center/pages/ai-command.js:2223:			...buildMissingDataNotes(aiContext, "ads"),
+public/control-center/pages/ai-command.js:2232:		return { title: "Campaign launch task block", owner: "Campaign Studio", steps: ["Define the campaign objective, audience, and offer.", "Choose channels and budget based on current intelligence.", "List required assets and publishing dependencies before launch."] };
+public/control-center/pages/ai-command.js:2235:		return { title: "Content plan task block", owner: "Content Studio", steps: ["Use the strongest content pattern as the starting template.", "Map posts by platform, hook, format, and CTA.", "Route approved items into Publishing for scheduling."] };
+public/control-center/pages/ai-command.js:2238:		return { title: "Content repair task block", owner: "Content Studio", steps: ["Select the weakest items from Insights.", "Rewrite hooks, sharpen CTAs, and adjust format-platform fit.", "Republish only after updated versions are approved."] };
+public/control-center/pages/ai-command.js:2256:	if (/ads|campaign scale|roas|creative/.test(query)) routeSuggestions.push(routeSuggestion("Ads Manager", "ads-manager", "Review live paid performance and action the next media move."));
+public/control-center/pages/ai-command.js:2284:		case "ads":
+public/control-center/pages/ai-command.js:2395:	"ads-manager": "Ads Manager",
+public/control-center/pages/ai-command.js:2417:	"ads-manager": "ads",
+public/control-center/pages/ai-command.js:2496:function normalizeAiInboundSpecialistId(value, fallback = "operations") {
+public/control-center/pages/ai-command.js:2497:	const fallbackId = MODE_ID_ALIASES[getAiRoomRoleId(fallback)] || getAiRoomRoleId(fallback);
+public/control-center/pages/ai-command.js:2498:	const raw = getAiRoomRoleId(value || fallbackId);
+public/control-center/pages/ai-command.js:2502:	return SPECIALIST_DEFS.some((item) => item.id === finalId) ? finalId : fallbackId;
+public/control-center/pages/ai-command.js:2511:	const fallbackRoute = sourcePage === "workspace" ? "workflows" : sourcePage;
+public/control-center/pages/ai-command.js:2512:	const fallbackLabel = sourceLabel || routeLabel(fallbackRoute);
+public/control-center/pages/ai-command.js:2517:		const route = normalizeAiInboundSourcePage(rawRoute || stringRoute || fallbackRoute);
+public/control-center/pages/ai-command.js:2518:		const label = firstAiInboundText(record.label, record.title, record.name) || routeLabel(route) || fallbackLabel;
+public/control-center/pages/ai-command.js:2525:		route: fallbackRoute,
+public/control-center/pages/ai-command.js:2526:		label: fallbackLabel,
+public/control-center/pages/ai-command.js:2527:		reason: `Return to ${fallbackLabel} after AI Team review.`
+public/control-center/pages/ai-command.js:2739:	if (typeof executeProjectAiCommand !== "function") throw new Error("AI command service is unavailable.");
+public/control-center/pages/ai-command.js:2831:    const fallback =
+public/control-center/pages/ai-command.js:2838:      ...fallback,
+public/control-center/pages/ai-command.js:2840:      name: asString(member.name || fallback.name || member.role || "AI Specialist"),
+public/control-center/pages/ai-command.js:2841:      role: asString(member.role || fallback.role || id),
+public/control-center/pages/ai-command.js:2842:      purpose: asString(member.purpose || member.description || fallback.purpose || "Support the current operating context."),
+public/control-center/pages/ai-command.js:2843:      bestUse: asString(member.bestUse || member.best_use || fallback.bestUse || "Use when this specialist owns the next step."),
+public/control-center/pages/ai-command.js:2862:	if (aiContext.paid?.summary?.spend != null) caps.push("Paid media briefing");
+public/control-center/pages/ai-command.js:3084:		const mode = getModeMeta(message.modeId);
+public/control-center/pages/ai-command.js:3140:							const mode = getModeMeta(entry.modeId);
+public/control-center/pages/ai-command.js:3173:		.filter(([, val]) => val && val.label && val.label !== "No format pattern yet" && val.label !== "No platform pattern yet")
+public/control-center/pages/ai-command.js:3246:function buildConversationWorkContext(session, fallbackPrompt = "") {
+public/control-center/pages/ai-command.js:3267:                fallbackPrompt ||
+public/control-center/pages/ai-command.js:3298:function buildConversationWorkPrompt(session, outputType, fallbackPrompt = "") {
+public/control-center/pages/ai-command.js:3299:        const context = buildConversationWorkContext(session, fallbackPrompt);
+public/control-center/pages/ai-command.js:3319:function setPreviewFromConversation({ session, intent, fallbackPrompt, projectName }) {
+public/control-center/pages/ai-command.js:3320:        const workPrompt = buildConversationWorkPrompt(session, intent, fallbackPrompt);
+public/control-center/pages/ai-command.js:3328:        const context = buildConversationWorkContext(session, fallbackPrompt);
+public/control-center/pages/ai-command.js:3578:				<span class="aicmd-v2-chat-bridge ${safeBridgeStatus.available ? "is-available" : "is-unavailable"}">
+public/control-center/pages/ai-command.js:3635:	const plannedSpecialists = AI_ROOM_PLANNED_SPECIALISTS.map((item) => `
+public/control-center/pages/ai-command.js:3636:		<div class="aicmd-room-member aicmd-room-member-planned" aria-disabled="true">
+public/control-center/pages/ai-command.js:3698:			<div class="aicmd-room-planned-specialists" aria-label="Additional specialists planned">
+public/control-center/pages/ai-command.js:3699:				<span class="aicmd-room-planned-title">Planned lanes, not active specialists</span>
+public/control-center/pages/ai-command.js:3700:				${plannedSpecialists}
+public/control-center/pages/ai-command.js:3813:	const sourceMeta = asArray(tool.sourceTypes).join(" ");
+public/control-center/pages/ai-command.js:3814:	return tool.actionType === "source_required" || /source_of_truth_assets|selected_asset|proof_doc|legal_doc|privacy_policy/i.test(sourceMeta);
+public/control-center/pages/ai-command.js:4014:                                <span class="aicmd-chatfirst-pill ${safeBridgeStatus.available ? "is-available" : "is-planned"}">${escapeHtml(bridgeLabel)}</span>
+public/control-center/pages/ai-command.js:4104:				<span class="aicmd-chatfirst-status ${safeBridgeStatus.available ? "is-available" : "is-unavailable"}">${escapeHtml(bridgeLabel)}</span>
+public/control-center/pages/ai-command.js:4149:				<span class="aicmd-chatfirst-pill ${safeBridgeStatus.available ? "is-available" : "is-planned"}">${escapeHtml(safeBridgeStatus.available ? "Connected" : "Guarded")}</span>
+public/control-center/pages/ai-command.js:4187:				<div class="aicmd-chatfirst-planned-list" aria-label="Planned specialists">
+public/control-center/pages/ai-command.js:4189:						<div class="aicmd-chatfirst-specialist-option is-planned" aria-disabled="true">
+public/control-center/pages/ai-command.js:4221:        const fallbackMessages = !selectedMessages.length && selectedResponses.length
+public/control-center/pages/ai-command.js:4243:        const conversationMessages = session.isFreshAiChatSession ? [] : (selectedMessages.length ? selectedMessages : fallbackMessages);
+public/control-center/pages/ai-command.js:4338:                { id: "write", label: "Write", summary: "Prepare documents, copy, agreements, or presentation drafts.", enabled: false },
+public/control-center/pages/ai-command.js:4339:                { id: "offer", label: "Offer", summary: "Shape a product offer from pricing, market, and audience context.", enabled: false },
+public/control-center/pages/ai-command.js:4340:                { id: "lead", label: "Lead", summary: "Prepare lead discovery and outreach workflow drafts.", enabled: false },
+public/control-center/pages/ai-command.js:4341:                { id: "media", label: "Media", summary: "Create a media brief, storyboard, and production direction.", enabled: false },
+public/control-center/pages/ai-command.js:4342:                { id: "publish", label: "Publish", summary: "Prepare publishing checklist and handoff readiness.", enabled: false }
+public/control-center/pages/ai-command.js:4357:                                                class="aicmd-smart-action${action.enabled ? "" : " is-planned"}"
+public/control-center/pages/ai-command.js:4360:                                                ${action.enabled ? "" : "disabled"}
+public/control-center/pages/ai-command.js:4435:        const goalOptions = [["sales", "Sales"], ["launch", "Product launch"], ["leads", "Lead generation"], ["awareness", "Awareness"], ["retargeting", "Retargeting"]];
+public/control-center/pages/ai-command.js:4436:        const channelOptions = [["social", "Social"], ["email", "Email"], ["website", "Website"], ["ads", "Ads"], ["publishing", "Publishing package"]];
+public/control-center/pages/ai-command.js:4439:        const formatOptions = [["mixed", "Mixed package"], ["image", "Image"], ["video", "Video"], ["email", "Email"], ["landing", "Landing page"], ["ads", "Ads"]];
+public/control-center/pages/ai-command.js:4538:                                                                <span><strong>Status</strong>${escapeHtml(preview.backendPreview ? "Backend preview" : "Local fallback")}</span>
+public/control-center/pages/ai-command.js:4735:                                                placeholder="Ask anything"
+public/control-center/pages/ai-command.js:4747:                                        <button id="aicmdV2AskBtn" class="aicmd-chatfirst-send aicmd-final-send" type="button" ${isGenerating ? "disabled" : ""} title="Ask AI Team">
+public/control-center/pages/ai-command.js:4853:				<span class="aicmd-chatfirst-pill ${safeBridgeStatus.available ? "is-available" : "is-planned"}">${escapeHtml(safeBridgeStatus.available ? "Chat ready" : "Preview guarded")}</span>
+public/control-center/pages/ai-command.js:4878:			<div class="aicmd-chatfirst-planned-grid" aria-label="Planned specialists">
+public/control-center/pages/ai-command.js:4880:					<div class="aicmd-chatfirst-team-card is-planned" aria-disabled="true">
+public/control-center/pages/ai-command.js:4996:						<span>${escapeHtml(humanizeValue(preview.confirmationNote, "Execution requires explicit confirmation in the destination workspace."))}</span>
+public/control-center/pages/ai-command.js:5053:		{ label: "Voice input", value: "Coming", className: "is-planned" },
+public/control-center/pages/ai-command.js:5054:		{ label: "Team chat", value: bridgeStatus.available ? "AI ready" : "Coming", className: bridgeStatus.available ? "is-available" : "is-planned" },
+public/control-center/pages/ai-command.js:5055:		{ label: "Media gen", value: "Coming", className: "is-planned" },
+public/control-center/pages/ai-command.js:5056:		{ label: "GPU video", value: "Coming", className: "is-planned" },
+public/control-center/pages/ai-command.js:5057:		{ label: "Image prompt generation", value: providerConfigured ? "Provider may be ready" : "Provider dependent", className: providerConfigured ? "is-available" : "is-planned" }
+public/control-center/pages/ai-command.js:5171:        const fallbackSelectedResponses = !selectedMessages.length && selectedResponses.length
+public/control-center/pages/ai-command.js:5190:        const conversationMessages = selectedMessages.length ? selectedMessages : fallbackSelectedResponses;
+public/control-center/pages/ai-command.js:5199:                                <span class="aicmd-v2-chat-bridge ${safeBridgeStatus.available ? "is-available" : "is-unavailable"}">${escapeHtml(bridgeLabel)}</span>
+public/control-center/pages/ai-command.js:5361:				{ label: "Leads", value: "Discovery / qualification", present: true, scoped: true },
+public/control-center/pages/ai-command.js:5578:		const setPreviewFromIntent = (intent, fallbackPrompt = "", options = {}) => {
+public/control-center/pages/ai-command.js:5579:			const value = asString(input?.value || session.draftMessage || fallbackPrompt || "").trim();
+public/control-center/pages/ai-command.js:5804:                        updateStatus(open ? `${reason} opened. Choose temporary file context, trusted Library source, planned product context, or current project context.` : `${reason} closed.`);
+public/control-center/pages/ai-command.js:5844:                                        updateStatus("Direct product/SKU source selection is planned. Use a trusted Library source or paste product details for now.");
+public/control-center/pages/ai-command.js:5845:                                        showMessage?.("Product/SKU selector is planned. Current safe options: Library source, uploaded filename context, project context, or manual product details.");
+public/control-center/pages/ai-command.js:5968:                                updateStatus("This Smart Action is planned. Campaign Builder is available first.");
+public/control-center/pages/ai-command.js:6079:                                                body: "Review claims, proof, pricing language, guarantees, sensitive wording, platform policy risk, and required Governance approval before external use."
+public/control-center/pages/ai-command.js:6129:                function normalizeBackendCampaignPreview(payload = {}, fallbackPreview = {}) {
+public/control-center/pages/ai-command.js:6145:                                ...asObject(fallbackPreview),
+public/control-center/pages/ai-command.js:6146:                                title: asString(body.title || fallbackPreview.title || "AI Team campaign preview"),
+public/control-center/pages/ai-command.js:6147:                                summary: asString(body.summary || fallbackPreview.summary || ""),
+public/control-center/pages/ai-command.js:6148:                                source: asString(body.source_type || body.source || fallbackPreview.source || ""),
+public/control-center/pages/ai-command.js:6149:                                sourceLabel: asString(body.source_label || fallbackPreview.sourceLabel || fallbackPreview.source || ""),
+public/control-center/pages/ai-command.js:6150:                                goal: asString(body.goal || fallbackPreview.goal || ""),
+public/control-center/pages/ai-command.js:6151:                                channel: asString(body.channel || fallbackPreview.channel || ""),
+public/control-center/pages/ai-command.js:6152:                                market: asString(body.market || fallbackPreview.market || ""),
+public/control-center/pages/ai-command.js:6153:                                language: asString(body.language || fallbackPreview.language || ""),
+public/control-center/pages/ai-command.js:6154:                                format: asString(body.format || fallbackPreview.format || ""),
+public/control-center/pages/ai-command.js:6155:                                deadline: asString(body.deadline || fallbackPreview.deadline || ""),
+public/control-center/pages/ai-command.js:6156:                                audience: asString(body.audience || campaignPackage.targetAudience || fallbackPreview.audience || ""),
+public/control-center/pages/ai-command.js:6157:                                offer: asString(body.offer || campaignPackage.offer || fallbackPreview.offer || ""),
+public/control-center/pages/ai-command.js:6158:                                productFocus: asString(body.product_focus || body.productFocus || fallbackPreview.productFocus || ""),
+public/control-center/pages/ai-command.js:6159:                                complianceSensitivity: asString(body.compliance_sensitivity || body.complianceSensitivity || fallbackPreview.complianceSensitivity || ""),
+public/control-center/pages/ai-command.js:6164:                                        : asString(fallbackPreview.safety || "Preview only."),
+public/control-center/pages/ai-command.js:6202:                                console.warn("AI Command backend campaign preview fallback", error);
+public/control-center/pages/ai-command.js:6206:                                        backendFallbackReason: asString(error?.message || "Backend preview unavailable")
+public/control-center/pages/ai-command.js:6249:                                        backendFallbackReason: asString(preview.backendFallbackReason || "")
+public/control-center/pages/ai-command.js:6252:                                persistSessionDraft(sessionKey, session, preview.backendPreview ? "Campaign Builder backend preview prepared" : "Campaign Builder local fallback preview prepared");
+public/control-center/pages/ai-command.js:6253:                                updateStatus(preview.backendPreview ? "Backend AI Team preview prepared. Review before any handoff or approval." : "Local campaign preview prepared because backend preview is unavailable.");
+public/control-center/pages/ai-command.js:6254:                                showMessage?.(preview.backendPreview ? "Backend AI Team campaign preview is ready for review." : "Campaign preview is ready using the local fallback.");
+public/control-center/pages/ai-command.js:6296:                                backend_fallback_reason: asString(preview.backendFallbackReason || ""),
+public/control-center/pages/ai-command.js:6399:			        if (sendBtn && !sendBtn.disabled) {
+public/control-center/pages/ai-command.js:6526:		                        showMessage?.("AI chat route is not connected yet.");
+public/control-center/pages/ai-command.js:6692:                                const fallback = asString(input?.value || session.draftMessage || "").trim();
+public/control-center/pages/ai-command.js:6696:                                        fallbackPrompt: fallback,
+public/control-center/pages/ai-command.js:6715:                                const fallback = value
+public/control-center/pages/ai-command.js:6721:                                        fallbackPrompt: fallback,
+public/control-center/pages/ai-command.js:6738:                                const fallback = value
+public/control-center/pages/ai-command.js:6744:                                        fallbackPrompt: fallback,
+public/control-center/pages/ai-command.js:6762:                                const fallback = value
+public/control-center/pages/ai-command.js:6768:                                        fallbackPrompt: fallback,
+public/control-center/pages/ai-command.js:6801:				const opened = openAiToolDrawerFromMetadata({
+public/control-center/pages/ai-command.js:6814:					updateStatus("Smart tool drawer is unavailable. Refresh AI Command and try again.");
+public/control-center/pages/ai-command.js:6906:		                const fallback = latestResponse?.prompt || asString(input?.value || session.draftMessage || "");
+public/control-center/pages/ai-command.js:6910:		                        fallbackPrompt: fallback,
+public/control-center/pages/ai-command/tool-dock.js:14:function moveFocusOutOfDrawer(drawer, fallbackTarget = null) {
+public/control-center/pages/ai-command/tool-dock.js:19:    if (fallbackTarget && typeof fallbackTarget.focus === "function") {
+public/control-center/pages/ai-command/tool-dock.js:20:      fallbackTarget.focus({ preventScroll: true });
+public/control-center/pages/ai-command/tool-dock.js:78:    const fallbackTool = findToolMetadataById(returnContext.toolId);
+public/control-center/pages/ai-command/tool-dock.js:79:    if (fallbackTool) {
+public/control-center/pages/ai-command/tool-dock.js:82:        btn: createToolButtonAdapter(fallbackTool),
+public/control-center/pages/ai-command/tool-dock.js:83:        tool: fallbackTool,
+public/control-center/pages/ai-command/tool-dock.js:84:        text: fallbackTool.template || "",
+public/control-center/pages/ai-command/tool-dock.js:298:function sourceMetadataNeedsLibrarySource(rawValue = "") {
+public/control-center/pages/ai-command/tool-dock.js:337:      sourceInput.placeholder = "Optional: add source usage notes, audience, angle, or claims to avoid...";
+public/control-center/pages/ai-command/tool-dock.js:360:  // Set placeholder for Source Details if empty
+public/control-center/pages/ai-command/tool-dock.js:362:    sourceInput.placeholder = "Optional: add source usage notes, audience, angle, or claims to avoid...";
+public/control-center/pages/ai-command/tool-dock.js:388:        if (sourceInput) sourceInput.placeholder = "Optional: add source usage notes, audience, angle, or claims to avoid...";
+public/control-center/pages/ai-command/tool-dock.js:470:      destinations: ["chat-preview", "campaign-studio", "content-studio", "ads-manager"],
+public/control-center/pages/ai-command/tool-dock.js:515:      template: "Use the Content Writer to create a new written output for {projectName}. First ask or infer the output type: company profile, product copy, email, blog article, landing page, contract draft, presentation outline, speech, FAQ, proposal, social post, or ad copy. Ask for sources if needed. Keep it review-ready and do not publish or send anything."
+public/control-center/pages/ai-command/tool-dock.js:527:      outputTypes: ["professional_rewrite", "shorter_rewrite", "simpler_rewrite", "persuasive_rewrite", "premium_rewrite", "platform_specific_rewrite"],
+public/control-center/pages/ai-command/tool-dock.js:528:      template: "Rewrite the current text for {projectName}. Keep the meaning, improve clarity, structure, and tone. Offer variants such as professional, shorter, simpler, more persuasive, premium, or platform-specific. Do not publish anything."
+public/control-center/pages/ai-command/tool-dock.js:606:      template: "Repurpose existing content for {projectName}. Ask or infer the source format and target format: blog to posts, profile to pitch, product page to ad copy, transcript to article, notes to presentation outline, or long text to email sequence."
+public/control-center/pages/ai-command/tool-dock.js:764:      destinations: ["chat-preview", "media-studio", "publishing", "ads-manager"],
+public/control-center/pages/ai-command/tool-dock.js:821:      outputTypes: ["hashtag_pack", "discoverability_tags", "platform_tag_groups", "market_tags"],
+public/control-center/pages/ai-command/tool-dock.js:839:  ads: [
+public/control-center/pages/ai-command/tool-dock.js:847:      frontendOwnerPage: "ads-manager",
+public/control-center/pages/ai-command/tool-dock.js:848:      destinations: ["chat-preview", "ads-manager", "content-studio", "governance"],
+public/control-center/pages/ai-command/tool-dock.js:851:      template: "Create paid ad angles for {projectName}. Include hook, audience pain, benefit, proof, CTA, and compliance risks."
+public/control-center/pages/ai-command/tool-dock.js:860:      frontendOwnerPage: "ads-manager",
+public/control-center/pages/ai-command/tool-dock.js:861:      destinations: ["chat-preview", "ads-manager", "content-studio", "governance"],
+public/control-center/pages/ai-command/tool-dock.js:864:      template: "Draft paid ad copy variants for {projectName}. Include primary text, headline, CTA, and angle notes."
+public/control-center/pages/ai-command/tool-dock.js:867:      id: "targeting",
+public/control-center/pages/ai-command/tool-dock.js:873:      frontendOwnerPage: "ads-manager",
+public/control-center/pages/ai-command/tool-dock.js:874:      destinations: ["chat-preview", "ads-manager", "insights", "campaign-studio"],
+public/control-center/pages/ai-command/tool-dock.js:876:      outputTypes: ["audience_map", "targeting_ideas", "exclusions", "funnel_stage_map"],
+public/control-center/pages/ai-command/tool-dock.js:877:      template: "Map targeting ideas for {projectName}. Include audience groups, interests, exclusions, funnel stage, and testing notes."
+public/control-center/pages/ai-command/tool-dock.js:886:      frontendOwnerPage: "ads-manager",
+public/control-center/pages/ai-command/tool-dock.js:887:      destinations: ["chat-preview", "ads-manager", "media-studio", "insights", "workflows"],
+public/control-center/pages/ai-command/tool-dock.js:899:      frontendOwnerPage: "ads-manager",
+public/control-center/pages/ai-command/tool-dock.js:900:      destinations: ["chat-preview", "ads-manager", "content-studio", "governance"],
+public/control-center/pages/ai-command/tool-dock.js:1257:function joinMetaList(value = []) {
+public/control-center/pages/ai-command/tool-dock.js:1262:function getToolMetaList(tool = {}, key = "", fallback = []) {
+public/control-center/pages/ai-command/tool-dock.js:1265:  if (typeof value === "string" && value.trim()) return getMetaValues(value);
+public/control-center/pages/ai-command/tool-dock.js:1266:  return fallback;
+public/control-center/pages/ai-command/tool-dock.js:1275:function findToolMetadataById(toolId = "") {
+public/control-center/pages/ai-command/tool-dock.js:1292:    "data-aicmd-tool-dock-destinations": joinMetaList(getToolMetaList(tool, "destinations", tool.route ? [tool.route] : ["chat-preview"])),
+public/control-center/pages/ai-command/tool-dock.js:1293:    "data-aicmd-tool-dock-sources": joinMetaList(getToolMetaList(tool, "sourceTypes", ["current_chat", "library_source", "manual_input"])),
+public/control-center/pages/ai-command/tool-dock.js:1294:    "data-aicmd-tool-dock-outputs": joinMetaList(getToolMetaList(tool, "outputTypes", [tool.id || "tool_output", "draft", "review_notes"]))
+public/control-center/pages/ai-command/tool-dock.js:1373:                placeholder="Example: use the selected Library source for facts only, avoid unsupported claims..."
+public/control-center/pages/ai-command/tool-dock.js:1383:                placeholder="Add audience, goal, keywords, offer, product, or any must-use information..."
+public/control-center/pages/ai-command/tool-dock.js:1445:            data-aicmd-tool-dock-destinations="${safe(joinMetaList(getToolMetaList(tool, "destinations", ["chat-preview"])))}"
+public/control-center/pages/ai-command/tool-dock.js:1446:            data-aicmd-tool-dock-sources="${safe(joinMetaList(getToolMetaList(tool, "sourceTypes", ["current_chat"])))}"
+public/control-center/pages/ai-command/tool-dock.js:1447:            data-aicmd-tool-dock-outputs="${safe(joinMetaList(getToolMetaList(tool, "outputTypes", [tool.id || "tool_output"])))}"
+public/control-center/pages/ai-command/tool-dock.js:1462:function humanizeMeta(value = "") {
+public/control-center/pages/ai-command/tool-dock.js:1493:function getMetaValues(rawValue = "") {
+public/control-center/pages/ai-command/tool-dock.js:1500:function populateDrawerSelect(select, rawValue = "", fallbackLabel = "Auto") {
+public/control-center/pages/ai-command/tool-dock.js:1510:  const options = values.length ? values : [String(fallbackLabel || "Auto").trim() || "Auto"];
+public/control-center/pages/ai-command/tool-dock.js:1514:    const label = humanizeMeta(value || fallbackLabel || "Auto");
+public/control-center/pages/ai-command/tool-dock.js:1519:function getSelectedLabel(drawer, selector, fallback = "Auto") {
+public/control-center/pages/ai-command/tool-dock.js:1521:  if (!select || !select.value) return fallback;
+public/control-center/pages/ai-command/tool-dock.js:1522:  return humanizeMeta(select.value);
+public/control-center/pages/ai-command/tool-dock.js:1658:function closeToolDrawer(drawer, fallbackTarget = null) {
+public/control-center/pages/ai-command/tool-dock.js:1659:  moveFocusOutOfDrawer(drawer, fallbackTarget);
+public/control-center/pages/ai-command/tool-dock.js:1678:  setDrawerText(drawer, "[data-aicmd-tool-drawer-action]", `${humanizeMeta(actionType)} · ${humanizeMeta(btn.getAttribute("data-aicmd-tool-dock-owner") || "ai-command")}`);
+public/control-center/pages/ai-command/tool-dock.js:1684:  setDrawerText(drawer, "[data-aicmd-tool-drawer-safety]", humanizeMeta(btn.getAttribute("data-aicmd-tool-dock-safety") || "review_only"));
+public/control-center/pages/ai-command/tool-dock.js:1690:  const tool = explicitTool || findToolMetadataById(toolId) || {};
+public/control-center/pages/ai-command/tool-dock.js:1694:  const rawOutputs = joinMetaList(getToolMetaList(tool, "outputTypes", []))
+public/control-center/pages/ai-command/tool-dock.js:1696:    || joinMetaList(hardOutputDefaults);
+public/control-center/pages/ai-command/tool-dock.js:1697:  const rawSources = joinMetaList(getToolMetaList(tool, "sourceTypes", []))
+public/control-center/pages/ai-command/tool-dock.js:1699:    || joinMetaList(hardSourceDefaults);
+public/control-center/pages/ai-command/tool-dock.js:1700:  const rawDestinations = joinMetaList(getToolMetaList(tool, "destinations", []))
+public/control-center/pages/ai-command/tool-dock.js:1702:    || joinMetaList(hardDestinationDefaults);
+public/control-center/pages/ai-command/tool-dock.js:1703:  drawer.dataset.sourceRequired = actionType === "source_required" || sourceMetadataNeedsLibrarySource(rawSources) ? "true" : "false";
+public/control-center/pages/ai-command/tool-dock.js:1731:export function openAiToolDrawerFromMetadata({
+public/control-center/pages/ai-command/tool-dock.js:1871:        const tool = findToolMetadataById(label);
+public/control-center/pages/ads-manager.js:1:const adsManagerSessions = new Map();
+public/control-center/pages/ads-manager.js:6:    label: "Meta Ads",
+public/control-center/pages/ads-manager.js:13:    label: "Google Ads",
+public/control-center/pages/ads-manager.js:14:    primarySources: ["google_ads", "google", "website"],
+public/control-center/pages/ads-manager.js:20:    label: "TikTok Ads",
+public/control-center/pages/ads-manager.js:47:function toNumber(value, fallback = 0) {
+public/control-center/pages/ads-manager.js:49:  return Number.isFinite(parsed) ? parsed : fallback;
+public/control-center/pages/ads-manager.js:94:    spendToDate: "",
+public/control-center/pages/ads-manager.js:104:  if (!adsManagerSessions.has(key)) {
+public/control-center/pages/ads-manager.js:105:    adsManagerSessions.set(key, {
+public/control-center/pages/ads-manager.js:109:  return adsManagerSessions.get(key);
+public/control-center/pages/ads-manager.js:121:function buildPlatformCards(state, budgetTotal) {
+public/control-center/pages/ads-manager.js:130:  return PLATFORM_DEFS.map((platform) => {
+public/control-center/pages/ads-manager.js:131:    const primaryConnected = platform.primarySources.filter((key) => Boolean(checks[key] || asObject(sources[key]).value));
+public/control-center/pages/ads-manager.js:132:    const supportConnected = platform.supportSources.filter((key) => Boolean(checks[key] || asObject(sources[key]).value));
+public/control-center/pages/ads-manager.js:134:      .filter((item) => platform.primarySources.includes(asString(item.channel).trim().toLowerCase()))
+public/control-center/pages/ads-manager.js:146:      ...platform.primarySources.filter((key) => !checks[key] && !asObject(sources[key]).value),
+public/control-center/pages/ads-manager.js:147:      ...platform.supportSources.filter((key) => !checks[key] && !asObject(sources[key]).value)
+public/control-center/pages/ads-manager.js:158:      ...platform,
+public/control-center/pages/ads-manager.js:160:      connectionValue: getSourceValue(sources, [...platform.primarySources, ...platform.supportSources]) || "No platform connection saved",
+public/control-center/pages/ads-manager.js:161:      readinessScore: Math.round(((primaryConnected.length * 2) + supportConnected.length) / ((platform.primarySources.length * 2) + platform.supportSources.length) * 100),
+public/control-center/pages/ads-manager.js:165:      recommendedBudget: budgetTotal * platform.allocationShare
+public/control-center/pages/ads-manager.js:170:function buildCreativeMappings(platformCards, state) {
+public/control-center/pages/ads-manager.js:176:  return platformCards.map((platform) => {
+public/control-center/pages/ads-manager.js:177:    const relevantJobs = scheduledJobs.filter((item) => platform.primarySources.includes(asString(item.channel).trim().toLowerCase()));
+public/control-center/pages/ads-manager.js:186:    const nextNeed = platform.id === "tiktok" || platform.id === "google"
+public/control-center/pages/ads-manager.js:191:      platform: platform.label,
+public/control-center/pages/ads-manager.js:194:      creativeSet: platform.creativeCoverage.length ? platform.creativeCoverage.join(", ") : "No dedicated creative package yet",
+public/control-center/pages/ads-manager.js:200:function buildActionPrompts({ projectName, platformCards, spendValue, metrics }) {
+public/control-center/pages/ads-manager.js:201:  const weakPlatforms = platformCards.filter((item) => item.status !== "Operational").map((item) => item.label);
+public/control-center/pages/ads-manager.js:202:  const strongPlatforms = platformCards.filter((item) => item.status === "Operational").map((item) => item.label);
+public/control-center/pages/ads-manager.js:207:      prompt: `Review the paid media setup for ${projectName || "this project"}. Use current strong platforms (${strongPlatforms.join(", ") || "none identified"}) and recommend which campaigns to scale, what budget to move, and which creatives to duplicate.`
+public/control-center/pages/ads-manager.js:210:      label: "Pause weak spend",
+public/control-center/pages/ads-manager.js:211:      prompt: `For ${projectName || "this project"}, identify which ad platforms or campaign groups should be paused first based on weak readiness (${weakPlatforms.join(", ") || "none listed"}), missing measurement, and creative risk.`
+public/control-center/pages/ads-manager.js:215:      prompt: `Build a pacing recovery plan for ${projectName || "this project"} using spend to date ${spendValue || "not entered"}, CTR ${metrics.ctr || "not entered"}, CPC ${metrics.cpc || "not entered"}, CPA ${metrics.cpa || "not entered"}, and ROAS ${metrics.roas || "not entered"}.`
+public/control-center/pages/ads-manager.js:219:      prompt: `Create an ad creative refresh brief for ${projectName || "this project"} based on current asset coverage and platform mix. Prioritize the next creatives needed for Meta, Google, TikTok, and Amazon.`
+public/control-center/pages/ads-manager.js:224:function renderBudgetField({ id, name, label, value, helper, placeholder, escapeHtml }) {
+public/control-center/pages/ads-manager.js:231:      <input id="${escapeHtml(id)}" name="${escapeHtml(name)}" class="setup-input" type="text" value="${escapeHtml(value)}" placeholder="${escapeHtml(placeholder || "")}">
+public/control-center/pages/ads-manager.js:249:  const form = $("adsManagerBudgetForm");
+public/control-center/pages/ads-manager.js:259:  const aiButtons = Array.from(document.querySelectorAll("[data-ads-prompt]"));
+public/control-center/pages/ads-manager.js:262:      const index = Number(button.getAttribute("data-ads-prompt"));
+public/control-center/pages/ads-manager.js:275:  const publishingBtn = $("adsManagerOpenPublishingBtn");
+public/control-center/pages/ads-manager.js:280:  const libraryBtn = $("adsManagerOpenLibraryBtn");
+public/control-center/pages/ads-manager.js:286:export const adsManagerRoute = {
+public/control-center/pages/ads-manager.js:287:  id: "ads-manager",
+public/control-center/pages/ads-manager.js:292:    description: "Plan budgets, assess pacing, review platform readiness, and manage paid media decisions from one ad-ops workspace."
+public/control-center/pages/ads-manager.js:295:    <section class="page is-active" data-page="ads-manager">
+public/control-center/pages/ads-manager.js:296:      <div id="adsManagerRoot"></div>
+public/control-center/pages/ads-manager.js:315:    const spendToDate = asString(values.spendToDate).trim() === "" ? null : toNumber(values.spendToDate, 0);
+public/control-center/pages/ads-manager.js:316:    const platformCards = buildPlatformCards(state, totalBudget);
+public/control-center/pages/ads-manager.js:317:    const creativeMappings = buildCreativeMappings(platformCards, state);
+public/control-center/pages/ads-manager.js:318:    const connectedPlatforms = platformCards.filter((item) => item.status !== "Blocked").length;
+public/control-center/pages/ads-manager.js:319:    const operationalPlatforms = platformCards.filter((item) => item.status === "Operational").length;
+public/control-center/pages/ads-manager.js:321:    const plannedSpendToDate = totalBudget ? totalBudget * monthProgress : 0;
+public/control-center/pages/ads-manager.js:322:    const pacingDelta = spendToDate == null ? null : spendToDate - plannedSpendToDate;
+public/control-center/pages/ads-manager.js:323:    const pacingStatus = spendToDate == null
+public/control-center/pages/ads-manager.js:324:      ? "Awaiting spend feed"
+public/control-center/pages/ads-manager.js:328:          ? "Overspending"
+public/control-center/pages/ads-manager.js:329:          : "Underspending";
+public/control-center/pages/ads-manager.js:332:      platformCards,
+public/control-center/pages/ads-manager.js:333:      spendValue: values.spendToDate,
+public/control-center/pages/ads-manager.js:341:    const root = $("adsManagerRoot");
+public/control-center/pages/ads-manager.js:345:      <div class="ads-manager-wrapper">
+public/control-center/pages/ads-manager.js:346:        <div class="ads-manager-hero">
+public/control-center/pages/ads-manager.js:347:          <div class="ads-manager-hero-copy">
+public/control-center/pages/ads-manager.js:351:              Use this workspace to set the working budget, check pacing, understand channel readiness, map creatives to platforms, and decide what to scale or pause next.
+public/control-center/pages/ads-manager.js:353:            <div class="ads-manager-status">
+public/control-center/pages/ads-manager.js:374:            <button id="adsManagerOpenLibraryBtn" class="btn btn-secondary" type="button">Navigate: Open Library Workspace</button>
+public/control-center/pages/ads-manager.js:375:            <button id="adsManagerOpenPublishingBtn" class="btn btn-primary" type="button">Navigate: Open Publishing Workspace</button>
+public/control-center/pages/ads-manager.js:379:        <div class="ads-manager-layout">
+public/control-center/pages/ads-manager.js:380:          <div class="ads-manager-main">
+public/control-center/pages/ads-manager.js:386:              <form id="adsManagerBudgetForm" class="setup-form-grid setup-form-grid-2">
+public/control-center/pages/ads-manager.js:388:                  id: "adsTotalBudgetInput",
+public/control-center/pages/ads-manager.js:390:                  label: "Total budget",
+public/control-center/pages/ads-manager.js:392:                  helper: "Use one working number for the current paid media plan, even if later split by platform.",
+public/control-center/pages/ads-manager.js:393:                  placeholder: "8000",
+public/control-center/pages/ads-manager.js:397:                  id: "adsDailyBudgetInput",
+public/control-center/pages/ads-manager.js:399:                  label: "Daily budget",
+public/control-center/pages/ads-manager.js:402:                  placeholder: "260",
+public/control-center/pages/ads-manager.js:406:                  id: "adsSpendInput",
+public/control-center/pages/ads-manager.js:407:                  name: "spendToDate",
+public/control-center/pages/ads-manager.js:409:                  value: values.spendToDate,
+public/control-center/pages/ads-manager.js:410:                  helper: "Enter live spend when available. Leave blank if no ad platform feed is connected yet.",
+public/control-center/pages/ads-manager.js:411:                  placeholder: "1900",
+public/control-center/pages/ads-manager.js:414:                <div class="ads-budget-summary">
+public/control-center/pages/ads-manager.js:417:                    <strong>${escapeHtml(totalBudget && spendToDate != null ? formatCurrency(Math.max(totalBudget - spendToDate, 0), currency) : "-")}</strong>
+public/control-center/pages/ads-manager.js:421:                    <strong>${escapeHtml(totalBudget ? formatCurrency(plannedSpendToDate, currency) : "-")}</strong>
+public/control-center/pages/ads-manager.js:438:                <span class="card-badge ${pacingStatus === "On pace" ? "success" : pacingStatus === "Awaiting spend feed" ? "neutral" : "warning"}">${escapeHtml(pacingStatus)}</span>
+public/control-center/pages/ads-manager.js:440:              <div class="ads-pacing-grid">
+public/control-center/pages/ads-manager.js:447:                  <strong>${escapeHtml(spendToDate == null ? "-" : formatCurrency(spendToDate, currency))}</strong>
+public/control-center/pages/ads-manager.js:451:                  <strong>${escapeHtml(totalBudget ? formatCurrency(plannedSpendToDate, currency) : "-")}</strong>
+public/control-center/pages/ads-manager.js:455:                  <strong>${escapeHtml(spendToDate == null ? "-" : formatCurrency(Math.abs(pacingDelta), currency))}</strong>
+public/control-center/pages/ads-manager.js:458:              <div class="ads-helper-copy">
+public/control-center/pages/ads-manager.js:460:                  spendToDate == null
+public/control-center/pages/ads-manager.js:461:                    ? escapeHtml("No live spend feed is connected yet. This section becomes operational as soon as the team enters working spend or a future ad platform connector provides live numbers.")
+public/control-center/pages/ads-manager.js:462:                    : escapeHtml(`The current plan is ${pacingStatus.toLowerCase()}. Use this to decide whether to accelerate spend, slow pacing, or reallocate budget across platforms.`)
+public/control-center/pages/ads-manager.js:470:                <span class="card-badge neutral">${escapeHtml(`${platformCards.length} platforms`)}</span>
+public/control-center/pages/ads-manager.js:472:              <div class="ads-platform-grid">
+public/control-center/pages/ads-manager.js:473:                ${platformCards.map((platform) => `
+public/control-center/pages/ads-manager.js:474:                  <div class="ads-platform-card">
+public/control-center/pages/ads-manager.js:475:                    <div class="ads-platform-head">
+public/control-center/pages/ads-manager.js:477:                        <h4>${escapeHtml(platform.label)}</h4>
+public/control-center/pages/ads-manager.js:478:                        <p>${escapeHtml(platform.connectionValue)}</p>
+public/control-center/pages/ads-manager.js:480:                      <span class="card-badge ${platform.status === "Operational" ? "success" : platform.status === "Blocked" ? "danger" : "warning"}">${escapeHtml(platform.status)}</span>
+public/control-center/pages/ads-manager.js:483:                      <div class="data-row"><span>Readiness</span><strong>${escapeHtml(formatPercent(platform.readinessScore))}</strong></div>
+public/control-center/pages/ads-manager.js:484:                      <div class="data-row"><span>Recommended budget</span><strong>${escapeHtml(totalBudget ? formatCurrency(platform.recommendedBudget, currency) : "-")}</strong></div>
+public/control-center/pages/ads-manager.js:485:                      <div class="data-row"><span>Wave mapping</span><strong>${escapeHtml(platform.activeWaves[0] || "No active wave")}</strong></div>
+public/control-center/pages/ads-manager.js:487:                    <div class="ads-platform-note">
+public/control-center/pages/ads-manager.js:488:                      ${escapeHtml(platform.missing.length ? `Missing: ${platform.missing.map(titleCase).join(", ")}` : "No immediate setup blockers in the current plan.")}
+public/control-center/pages/ads-manager.js:500:              <div class="ads-creative-list">
+public/control-center/pages/ads-manager.js:502:                  <div class="ads-creative-item">
+public/control-center/pages/ads-manager.js:503:                    <div class="ads-creative-head">
+public/control-center/pages/ads-manager.js:505:                        <strong>${escapeHtml(item.platform)}</strong>
+public/control-center/pages/ads-manager.js:510:                    <div class="ads-creative-copy">${escapeHtml(item.creativeSet)}</div>
+public/control-center/pages/ads-manager.js:511:                    <div class="ads-creative-next">${escapeHtml(`Next: ${item.nextNeed}`)}</div>
+public/control-center/pages/ads-manager.js:518:          <aside class="ads-manager-side">
+public/control-center/pages/ads-manager.js:526:                  id: "adsCtrInput",
+public/control-center/pages/ads-manager.js:528:                  label: "CTR",
+public/control-center/pages/ads-manager.js:530:                  helper: "Click-through rate from the live platform dashboard, if available.",
+public/control-center/pages/ads-manager.js:531:                  placeholder: "2.4",
+public/control-center/pages/ads-manager.js:535:                  id: "adsCpcInput",
+public/control-center/pages/ads-manager.js:537:                  label: "CPC",
+public/control-center/pages/ads-manager.js:540:                  placeholder: "0.75",
+public/control-center/pages/ads-manager.js:544:                  id: "adsCpaInput",
+public/control-center/pages/ads-manager.js:549:                  placeholder: "18.00",
+public/control-center/pages/ads-manager.js:553:                  id: "adsRoasInput",
+public/control-center/pages/ads-manager.js:555:                  label: "ROAS",
+public/control-center/pages/ads-manager.js:557:                  helper: "Return on ad spend as a simple multiple.",
+public/control-center/pages/ads-manager.js:558:                  placeholder: "2.8",
+public/control-center/pages/ads-manager.js:562:              <div class="ads-metric-grid">
+public/control-center/pages/ads-manager.js:564:                  <span class="data-label">CTR</span>
+public/control-center/pages/ads-manager.js:568:                  <span class="data-label">CPC</span>
+public/control-center/pages/ads-manager.js:576:                  <span class="data-label">ROAS</span>
+public/control-center/pages/ads-manager.js:589:                <strong>Review pacing, creative readiness, and source coverage before preparing the next paid growth move.</strong>
+public/control-center/pages/ads-manager.js:590:                <p class="home-action-meta">AI can prepare a paid growth brief and route context to AI Command. Spend changes, publishing, and campaign launch remain manual or governance-controlled.</p>
+public/control-center/pages/ads-manager.js:593:              <div class="ads-prompt-list">
+public/control-center/pages/ads-manager.js:595:                  <button class="quick-action-btn" type="button" data-ads-prompt="${index}">
+public/control-center/pages/ads-manager.js:612:      render: () => adsManagerRoute.render({
+public/control-center/pages/campaign-studio.js:31:    defaultRole: "Conversion and retargeting",
+public/control-center/pages/campaign-studio.js:38:  facebook: "Facebook",
+public/control-center/pages/campaign-studio.js:39:  tiktok: "TikTok",
+public/control-center/pages/campaign-studio.js:44:  google: "Google",
+public/control-center/pages/campaign-studio.js:45:  google_ads: "Google Ads",
+public/control-center/pages/campaign-studio.js:46:  meta: "Meta Ads",
+public/control-center/pages/campaign-studio.js:48:  ads: "Paid Media",
+public/control-center/pages/campaign-studio.js:56:const PAID_KEYS = ["meta", "google", "google_ads", "tiktok", "facebook", "instagram"];
+public/control-center/pages/campaign-studio.js:66:  "ads-manager": { role: "ads_operator", domain: "campaign" },
+public/control-center/pages/campaign-studio.js:83:function toNumber(value, fallback = null) {
+public/control-center/pages/campaign-studio.js:85:  return Number.isFinite(parsed) ? parsed : fallback;
+public/control-center/pages/campaign-studio.js:120:      <div class="data-row"><span>Route map</span><strong>${escapeHtml(`Content ${titleCase(CAMPAIGN_ROUTE_ROLES["content-studio"].role)} • Media ${titleCase(CAMPAIGN_ROUTE_ROLES["media-studio"].role)} • Publishing ${titleCase(CAMPAIGN_ROUTE_ROLES.publishing.role)} • Ads ${titleCase(CAMPAIGN_ROUTE_ROLES["ads-manager"].role)}`)}</strong></div>
+public/control-center/pages/campaign-studio.js:157:function readableValue(value, fallback = "") {
+public/control-center/pages/campaign-studio.js:158:  if (value == null) return fallback;
+public/control-center/pages/campaign-studio.js:159:  if (typeof value === "string") return value.trim() === "[object Object]" ? fallback : value.trim();
+public/control-center/pages/campaign-studio.js:161:  if (Array.isArray(value)) return uniqueStrings(value.map((item) => readableValue(item))).join(", ") || fallback;
+public/control-center/pages/campaign-studio.js:173:    fallback
+public/control-center/pages/campaign-studio.js:242:    budget: "5000",
+public/control-center/pages/campaign-studio.js:250:    wave3Focus: "Offer push and retargeting",
+public/control-center/pages/campaign-studio.js:295:  placeholder,
+public/control-center/pages/campaign-studio.js:308:          ? `<textarea id="campaign-${escapeHtml(name)}" name="${escapeHtml(name)}" class="setup-input setup-textarea" rows="${rows}" placeholder="${escapeHtml(placeholder || "")}">${escapeHtml(asString(value))}</textarea>`
+public/control-center/pages/campaign-studio.js:309:          : `<input id="campaign-${escapeHtml(name)}" name="${escapeHtml(name)}" class="setup-input" type="text" value="${escapeHtml(asString(value))}" placeholder="${escapeHtml(placeholder || "")}">`
+public/control-center/pages/campaign-studio.js:338:    budget: asString(values?.budget),
+public/control-center/pages/campaign-studio.js:357:    budget: asString(formValues.budget || record.budget || defaults.budget)
+public/control-center/pages/campaign-studio.js:446:    "Authority: This does not publish, send externally, schedule ads, or approve anything automatically.",
+public/control-center/pages/campaign-studio.js:465:    budget: asString(values.budget),
+public/control-center/pages/campaign-studio.js:660:  const paid = asObject(insights.paid);
+public/control-center/pages/campaign-studio.js:662:  const summary = asObject(paid.summary || paid.overview || paid);
+public/control-center/pages/campaign-studio.js:667:      body: `ROAS ${summary.roas != null ? Number(summary.roas).toFixed(2) : "-"} • CTR ${summary.ctr != null ? formatPercent(summary.ctr, 1) : "-"} • CPA ${summary.cpa != null ? formatCurrency(summary.cpa) : "-"}`
+public/control-center/pages/campaign-studio.js:671:  asArray(paid.best_campaigns || paid.best_creatives).slice(0, 2).forEach((item) => {
+public/control-center/pages/campaign-studio.js:674:      title: firstNonEmpty(record.campaign_name, record.title, record.label, "Top paid signal"),
+public/control-center/pages/campaign-studio.js:679:  asArray(paid.weak_campaigns || paid.weak_creatives).slice(0, 2).forEach((item) => {
+public/control-center/pages/campaign-studio.js:695:    const key = asString(asObject(item).platform || asObject(item).channel).trim().toLowerCase();
+public/control-center/pages/campaign-studio.js:701:    const key = asString(asObject(item).platform || asObject(item).channel).trim().toLowerCase();
+public/control-center/pages/campaign-studio.js:731:      body: "This platform is not operational yet, so campaign execution will be constrained."
+public/control-center/pages/campaign-studio.js:746:      title: "No weak platform flagged yet",
+public/control-center/pages/campaign-studio.js:757:function buildChannelMix({ strongestPlatforms, weakPlatforms, connectedChannels, checks, paidSignals, seoOpportunities, recommendations }) {
+public/control-center/pages/campaign-studio.js:759:  const paid = [];
+public/control-center/pages/campaign-studio.js:782:  if (paidSignals.length) {
+public/control-center/pages/campaign-studio.js:783:    paidSignals.slice(0, 3).forEach((item) => {
+public/control-center/pages/campaign-studio.js:785:        ? "Google Ads"
+public/control-center/pages/campaign-studio.js:787:          ? "TikTok Ads"
+public/control-center/pages/campaign-studio.js:788:          : "Meta Ads";
+public/control-center/pages/campaign-studio.js:790:      paid.push({
+public/control-center/pages/campaign-studio.js:798:  if (!paid.length) {
+public/control-center/pages/campaign-studio.js:799:    ["meta", "google_ads", "tiktok"].forEach((item) => {
+public/control-center/pages/campaign-studio.js:801:      paid.push({
+public/control-center/pages/campaign-studio.js:806:          : "Useful paid lever, but it still needs platform connection or performance feedback."
+public/control-center/pages/campaign-studio.js:847:    paid: uniqueBy(paid, (item) => item.label).slice(0, 3),
+public/control-center/pages/campaign-studio.js:863:  const adsBlockers = [];
+public/control-center/pages/campaign-studio.js:877:  if (!values.budget) adsBlockers.push("Add a working campaign budget before routing to Ads Manager.");
+public/control-center/pages/campaign-studio.js:878:  if (!channelMix.paid.length) adsBlockers.push("No paid channel recommendation is strong enough yet.");
+public/control-center/pages/campaign-studio.js:880:    adsBlockers.push("No paid media platform is connected.");
+public/control-center/pages/campaign-studio.js:882:  if (!values.offerHeadline) adsBlockers.push("Offer headline is still too incomplete for ad packaging.");
+public/control-center/pages/campaign-studio.js:885:    trackingBlockers.push("Website, analytics, or ecommerce tracking is not connected.");
+public/control-center/pages/campaign-studio.js:894:  if (!checks.website) seoBlockers.push("Website source is not connected yet.");
+public/control-center/pages/campaign-studio.js:904:    adsBlockers.length ||
+public/control-center/pages/campaign-studio.js:918:    adsBlockers,
+public/control-center/pages/campaign-studio.js:926:      adsBlockers.length +
+public/control-center/pages/campaign-studio.js:945:  const topPaid = channelMix.paid[0];
+public/control-center/pages/campaign-studio.js:960:      recommendations.find((item) => item.domain === "paid")?.action,
+public/control-center/pages/campaign-studio.js:972:      ? `${topOrganic ? `${topOrganic.label} first` : ""}${topOrganic && topPaid ? " • " : ""}${topPaid ? `${topPaid.label} as paid support` : ""}`
+public/control-center/pages/campaign-studio.js:986:    ...channelMix.paid.map((item) => item.label.toLowerCase()),
+public/control-center/pages/campaign-studio.js:1011:        : "Retargeting creative, urgency variants, CTA refresh";
+public/control-center/pages/campaign-studio.js:1099:  const platformSignals = buildPlatformSignals({
+public/control-center/pages/campaign-studio.js:1110:  const paidSignals = collectPaidSignals(insights);
+public/control-center/pages/campaign-studio.js:1112:    strongestPlatforms: platformSignals.strongest,
+public/control-center/pages/campaign-studio.js:1113:    weakPlatforms: platformSignals.weak,
+public/control-center/pages/campaign-studio.js:1116:    paidSignals,
+public/control-center/pages/campaign-studio.js:1135:    strongestPlatforms: platformSignals.strongest,
+public/control-center/pages/campaign-studio.js:1156:    platformSignals,
+public/control-center/pages/campaign-studio.js:1161:    paidSignals,
+public/control-center/pages/campaign-studio.js:1346:          status: "planned"
+public/control-center/pages/campaign-studio.js:1444:  const adsBtn = $("campaignOpenAdsManagerBtn");
+public/control-center/pages/campaign-studio.js:1445:  if (adsBtn) {
+public/control-center/pages/campaign-studio.js:1446:    adsBtn.onclick = () => {
+public/control-center/pages/campaign-studio.js:1447:      const accepted = persistCampaignRouteHandoff({ projectName, session, destinationPage: "ads-manager", createProjectHandoff });
+public/control-center/pages/campaign-studio.js:1448:      if (accepted) navigateTo("ads-manager");
+public/control-center/pages/campaign-studio.js:1564:      platformSignals,
+public/control-center/pages/campaign-studio.js:1569:      paidSignals,
+public/control-center/pages/campaign-studio.js:1584:    const recommendedChannelCount = channelMix.organic.length + channelMix.paid.length + channelMix.support.length;
+public/control-center/pages/campaign-studio.js:1591:    const budgetValue = formatCurrency(values.budget, overviewData.currency || "USD");
+public/control-center/pages/campaign-studio.js:1592:    const budgetLabel = budgetValue === "-" ? "Budget pending" : budgetValue;
+public/control-center/pages/campaign-studio.js:1616:              <span class="mhos-campaign-context-item mhos-context-chip">Budget <strong class="mhos-campaign-context-value">${escapeHtml(budgetLabel)}</strong></span>
+public/control-center/pages/campaign-studio.js:1673:                  placeholder: "Spring launch wave 1",
+public/control-center/pages/campaign-studio.js:1681:                  placeholder: "Launch, sales growth, lead generation...",
+public/control-center/pages/campaign-studio.js:1689:                  placeholder: "Product launch, seasonal push, retention sprint...",
+public/control-center/pages/campaign-studio.js:1697:                  placeholder: "Germany",
+public/control-center/pages/campaign-studio.js:1707:                  placeholder: "2026-05-01",
+public/control-center/pages/campaign-studio.js:1715:                  placeholder: "2026-05-21",
+public/control-center/pages/campaign-studio.js:1719:                  name: "budget",
+public/control-center/pages/campaign-studio.js:1721:                  value: values.budget,
+public/control-center/pages/campaign-studio.js:1722:                  helper: "Use one working budget number even if later split by channel.",
+public/control-center/pages/campaign-studio.js:1723:                  placeholder: "5000",
+public/control-center/pages/campaign-studio.js:1743:                  placeholder: "Primary hero product",
+public/control-center/pages/campaign-studio.js:1751:                  placeholder: "Why this product matters now",
+public/control-center/pages/campaign-studio.js:1760:                  placeholder: "Who is this campaign for?",
+public/control-center/pages/campaign-studio.js:1769:                  placeholder: "What problem are we solving?",
+public/control-center/pages/campaign-studio.js:1778:                  placeholder: "instagram, facebook, email",
+public/control-center/pages/campaign-studio.js:1786:                  placeholder: "Premium grooming with stronger routine results",
+public/control-center/pages/campaign-studio.js:1795:                  placeholder: "What makes the offer persuasive?",
+public/control-center/pages/campaign-studio.js:1804:                  placeholder: "Warm prospect",
+public/control-center/pages/campaign-studio.js:1854:                        placeholder: wave.index === 1 ? "Launch wave" : wave.index === 2 ? "Education wave" : "Conversion wave",
+public/control-center/pages/campaign-studio.js:1862:                        placeholder: wave.index === 1 ? "Awareness, announcement, validation..." : wave.index === 2 ? "Proof, education, comparison..." : "Offer push, urgency, retargeting...",
+public/control-center/pages/campaign-studio.js:1871:                        placeholder: wave.allocationSuggestion,
+public/control-center/pages/campaign-studio.js:1921:                  <h4 class="insights-subtitle">Recommended paid channels</h4>
+public/control-center/pages/campaign-studio.js:1922:                  ${renderChannelRecommendationCards(channelMix.paid, escapeHtml)}
+public/control-center/pages/campaign-studio.js:1935:                  placeholder: "logo, product images, pricing doc, offer banner...",
+public/control-center/pages/campaign-studio.js:1944:                  placeholder: "Anything the execution team must know",
+public/control-center/pages/campaign-studio.js:1975:                  executionReadiness.adsBlockers,
+public/control-center/pages/campaign-studio.js:2016:                ${renderSummaryItem("Budget", formatCurrency(values.budget, overviewData.currency || "USD"), escapeHtml)}
+public/control-center/api.js:77:function readControlKeyMeta() {
+public/control-center/api.js:121:export function getControlCenterAccessKeyMeta() {
+public/control-center/api.js:122:  const keyMeta = readControlKeyMeta();
+public/control-center/api.js:124:    key: String(keyMeta?.key || ""),
+public/control-center/api.js:125:    source: String(keyMeta?.source || "none")
+public/control-center/api.js:180:function buildResponseDiagnostics(response, requestMeta = {}, payload = null) {
+public/control-center/api.js:181:  const endpoint = String(response?.url || requestMeta?.endpoint || "");
+public/control-center/api.js:189:    keyPresent: Boolean(requestMeta?.keyPresent),
+public/control-center/api.js:190:    keySource: String(requestMeta?.keySource || "none"),
+public/control-center/api.js:191:    authHeaderPresent: Boolean(requestMeta?.authHeaderPresent),
+public/control-center/api.js:197:    bodyLength: Number(requestMeta?.bodyLength || 0),
+public/control-center/api.js:198:    parseStage: String(requestMeta?.parseStage || "")
+public/control-center/api.js:229:    normalized === "api.response.json.fallback.done" ||
+public/control-center/api.js:230:    normalized === "api.response.json.fallback.error" ||
+public/control-center/api.js:231:    normalized === "api.response.json.fallback.timeout" ||
+public/control-center/api.js:270:  const keyMeta = readControlKeyMeta();
+public/control-center/api.js:272:  if (keyMeta.key) {
+public/control-center/api.js:273:    headers["x-mh-control-key"] = keyMeta.key;
+public/control-center/api.js:274:    headers.Authorization = `Bearer ${keyMeta.key}`;
+public/control-center/api.js:279:    keyPresent: Boolean(keyMeta.key),
+public/control-center/api.js:280:    keySource: keyMeta.source
+public/control-center/api.js:289:  const keyMeta = readControlKeyMeta();
+public/control-center/api.js:291:  if (keyMeta.key) {
+public/control-center/api.js:292:    headers["x-mh-control-key"] = keyMeta.key;
+public/control-center/api.js:293:    headers.Authorization = `Bearer ${keyMeta.key}`;
+public/control-center/api.js:298:    keyPresent: Boolean(keyMeta.key),
+public/control-center/api.js:299:    keySource: keyMeta.source
+public/control-center/api.js:303:async function readResponseText(response, requestMeta = {}) {
+public/control-center/api.js:304:  const endpoint = String(response?.url || requestMeta?.endpoint || "");
+public/control-center/api.js:305:  const timeoutMs = Math.max(1, Number(requestMeta?.responseTextTimeoutMs) || DEFAULT_RESPONSE_TEXT_TIMEOUT_MS);
+public/control-center/api.js:360:          let fallbackTimer = null;
+public/control-center/api.js:361:          const fallbackPayload = await Promise.race([
+public/control-center/api.js:364:              fallbackTimer = setTimeout(() => {
+public/control-center/api.js:365:                const fallbackTimeoutError = new Error(`JSON fallback timed out after ${timeoutMs}ms.`);
+public/control-center/api.js:366:                fallbackTimeoutError.endpoint = endpoint;
+public/control-center/api.js:367:                fallbackTimeoutError.isTimeout = true;
+public/control-center/api.js:368:                fallbackTimeoutError.parseStage = "api.response.json.fallback.timeout";
+public/control-center/api.js:369:                reject(fallbackTimeoutError);
+public/control-center/api.js:373:            if (fallbackTimer) {
+public/control-center/api.js:374:              clearTimeout(fallbackTimer);
+public/control-center/api.js:378:          const fallbackBodyLength = JSON.stringify(fallbackPayload || null).length;
+public/control-center/api.js:380:          emitApiRuntimeTrace("api.response.json.fallback.done", {
+public/control-center/api.js:384:            bodyLength: fallbackBodyLength,
+public/control-center/api.js:389:            mode: "json-fallback",
+public/control-center/api.js:390:            payload: fallbackPayload,
+public/control-center/api.js:391:            bodyLength: fallbackBodyLength,
+public/control-center/api.js:392:            parseStage: "api.response.json.fallback.done"
+public/control-center/api.js:394:        } catch (fallbackError) {
+public/control-center/api.js:395:          const fallbackParseStage = fallbackError?.isTimeout
+public/control-center/api.js:396:            ? "api.response.json.fallback.timeout"
+public/control-center/api.js:397:            : "api.response.json.fallback.error";
+public/control-center/api.js:399:          emitApiRuntimeTrace("api.response.json.fallback.error", {
+public/control-center/api.js:404:            message: fallbackError?.message || "JSON fallback failed"
+public/control-center/api.js:408:            keyPresent: Boolean(requestMeta?.keyPresent),
+public/control-center/api.js:409:            keySource: String(requestMeta?.keySource || "none"),
+public/control-center/api.js:410:            authHeaderPresent: Boolean(requestMeta?.authHeaderPresent),
+public/control-center/api.js:415:            parseStage: fallbackParseStage,
+public/control-center/api.js:422:        keyPresent: Boolean(requestMeta?.keyPresent),
+public/control-center/api.js:423:        keySource: String(requestMeta?.keySource || "none"),
+public/control-center/api.js:424:        authHeaderPresent: Boolean(requestMeta?.authHeaderPresent),
+public/control-center/api.js:461:async function parseJsonTextSafely(rawText, response, requestMeta = {}, bodyLength = 0) {
+public/control-center/api.js:462:  const endpoint = response?.url || requestMeta?.endpoint || "";
+public/control-center/api.js:464:  const parseTimeoutMs = Math.max(1, Number(requestMeta?.parseTimeoutMs) || DEFAULT_PARSE_TIMEOUT_MS);
+public/control-center/api.js:475:  // This helps the startup UI/watchdogs update before parsing large payloads.
+public/control-center/api.js:503:      keyPresent: Boolean(requestMeta?.keyPresent),
+public/control-center/api.js:504:      keySource: String(requestMeta?.keySource || "none"),
+public/control-center/api.js:505:      authHeaderPresent: Boolean(requestMeta?.authHeaderPresent),
+public/control-center/api.js:516:async function parseJson(response, fallbackMessage = "Request failed", requestMeta = {}) {
+public/control-center/api.js:521:  const bodyReadResult = await readResponseText(response, requestMeta);
+public/control-center/api.js:523:  if (bodyReadResult?.mode === "json-fallback") {
+public/control-center/api.js:525:    parseStage = String(bodyReadResult.parseStage || "api.response.json.fallback.done");
+public/control-center/api.js:535:      payload = await parseJsonTextSafely(rawText, response, requestMeta, bodyLength);
+public/control-center/api.js:544:    ...requestMeta,
+public/control-center/api.js:553:      `${fallbackMessage} (${response.status})`;
+public/control-center/api.js:577:    const message = String(payload.error || fallbackMessage);
+public/control-center/api.js:705:async function getJson(path, fallbackMessage, timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS, requestOptions = {}) {
+public/control-center/api.js:712:  return parseJson(response, fallbackMessage, {
+public/control-center/api.js:723:async function sendRawJson(path, method, body, fallbackMessage, timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS) {
+public/control-center/api.js:738:      const parseError = new Error(fallbackMessage || "Response was not valid JSON.");
+public/control-center/api.js:752:    const message = String(payload?.error || payload?.message || fallbackMessage || "Request failed").trim();
+public/control-center/api.js:763:async function sendJson(path, method, body, fallbackMessage, timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS) {
+public/control-center/api.js:771:  return parseJson(response, fallbackMessage, {
+public/control-center/api.js:781:async function sendForm(path, formData, fallbackMessage, timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS) {
+public/control-center/api.js:783:  const keyMeta = readControlKeyMeta();
+public/control-center/api.js:785:  if (keyMeta.key) {
+public/control-center/api.js:786:    headers["x-mh-control-key"] = keyMeta.key;
+public/control-center/api.js:787:    headers.Authorization = `Bearer ${keyMeta.key}`;
+public/control-center/api.js:796:  return parseJson(response, fallbackMessage, {
+public/control-center/api.js:799:    keySource: keyMeta.source,
+public/control-center/api.js:1057:    console.warn("Using fallback projects list:", error.message);
+public/control-center/api.js:1062:      fallback: true
+public/control-center/api.js:1129:        const fallbackProjects = await fetchProjects();
+public/control-center/api.js:1130:        const fallbackItems = Array.isArray(fallbackProjects?.items) ? fallbackProjects.items : [];
+public/control-center/api.js:1131:        const projectExists = fallbackItems.some((item) => {
+public/control-center/api.js:1143:      } catch (fallbackError) {
+public/control-center/api.js:1150:          message: String(fallbackError?.message || "Failed to verify project fallback")
+public/control-center/automation-engine.js:17:  { test: /publish\s*now|go\s*live|send\s*live|execute\s*publish|push\s*live/i, reason: "Publishing requires approval and manual confirmation." },
+public/control-center/automation-engine.js:22:  { test: /spend\s*money|charge|billing|payment|purchase/i, reason: "Spending actions require explicit manual approval." },
+public/control-center/automation-engine.js:23:  { test: /send\s*external|send\s*email|send\s*message|dm\b|sms\b/i, reason: "External sending requires approval." },
+public/control-center/automation-engine.js:24:  { test: /paid\s*ads|launch\s*ads|ad\s*spend|budget/i, reason: "Paid promotion requires approval." },
+public/control-center/automation-engine.js:62:    enabled: false,
+runtime/orchestrator-service/server.js:404:      error: `Protected write routes are disabled until ${CONTROL_WRITE_KEY_ENV} is configured on the server.`
+runtime/orchestrator-service/server.js:471:      error: `Protected read routes are disabled until ${CONTROL_WRITE_KEY_ENV} is configured on the server.`
+runtime/orchestrator-service/server.js:929:function sanitizeErrorMessage(rawMessage, fallbackMessage) {
+runtime/orchestrator-service/server.js:930:  const fallback = String(fallbackMessage || 'Request failed').trim() || 'Request failed';
+runtime/orchestrator-service/server.js:933:    return fallback;
+runtime/orchestrator-service/server.js:938:function getErrorStatusCode(error, fallbackStatus = 500) {
+runtime/orchestrator-service/server.js:940:    error?.statusCode || error?.status || error?.response?.status || fallbackStatus
+runtime/orchestrator-service/server.js:944:    return fallbackStatus;
+runtime/orchestrator-service/server.js:948:    return fallbackStatus;
+runtime/orchestrator-service/server.js:1249:  if (telemetryEntry.legacy_fallback_hit) {
+runtime/orchestrator-service/server.js:1377:    legacy_fallback_hit: legacyHit,
+runtime/orchestrator-service/server.js:1385:      legacy_fallback_read: !!readPolicy.legacyFallbackRead
+runtime/orchestrator-service/server.js:1389:  telemetryEntry.fallback_reason = classifyImmediateFallbackReason(telemetryEntry);
+runtime/orchestrator-service/server.js:1450:        legacyFallbackRead: !!resolution.featureFlags.legacy_fallback_read,
+runtime/orchestrator-service/server.js:1493:    fallbackRoot: resolution.legacyRoot,
+runtime/orchestrator-service/server.js:1509:      legacyBase: paths.fallbackRoot,
+runtime/orchestrator-service/server.js:1657:    ads: path.join('content', 'ads', 'ad-queue.json'),
+runtime/orchestrator-service/server.js:1758:  if (!readEntry || readEntry.selected_root !== 'legacy' || !readEntry.legacy_fallback_hit) {
+runtime/orchestrator-service/server.js:1805:    fallback_hit_count: 0,
+runtime/orchestrator-service/server.js:1806:    fallback_rate: 0,
+runtime/orchestrator-service/server.js:1807:    fallback_causes: {
+runtime/orchestrator-service/server.js:1848:    if (entry.selected_root === 'legacy' && entry.legacy_fallback_hit) {
+runtime/orchestrator-service/server.js:1849:      stats.fallback_hit_count += 1;
+runtime/orchestrator-service/server.js:1852:      if (!Object.prototype.hasOwnProperty.call(stats.fallback_causes, cause)) {
+runtime/orchestrator-service/server.js:1853:        stats.fallback_causes.unresolved_risk += 1;
+runtime/orchestrator-service/server.js:1855:        stats.fallback_causes[cause] += 1;
+runtime/orchestrator-service/server.js:1860:  let totalReads = 0;
+runtime/orchestrator-service/server.js:1862:  let fallbackHits = 0;
+runtime/orchestrator-service/server.js:1869:    stats.fallback_rate = stats.read_events > 0
+runtime/orchestrator-service/server.js:1870:      ? Number((stats.fallback_hit_count / stats.read_events).toFixed(4))
+runtime/orchestrator-service/server.js:1873:    totalReads += stats.read_events;
+runtime/orchestrator-service/server.js:1875:    fallbackHits += stats.fallback_hit_count;
+runtime/orchestrator-service/server.js:1876:    historicalFallbacks += stats.fallback_causes.historical_artifact;
+runtime/orchestrator-service/server.js:1877:    unresolvedStructuralMismatches += stats.fallback_causes.structural_mismatch;
+runtime/orchestrator-service/server.js:1879:      stats.fallback_causes.parity_gap +
+runtime/orchestrator-service/server.js:1880:      stats.fallback_causes.missing_canonical_write +
+runtime/orchestrator-service/server.js:1881:      stats.fallback_causes.policy_or_config_mismatch;
+runtime/orchestrator-service/server.js:1884:  const canonicalHitRate = totalReads > 0 ? canonicalHits / totalReads : 0;
+runtime/orchestrator-service/server.js:1885:  const fallbackRate = totalReads > 0 ? fallbackHits / totalReads : 0;
+runtime/orchestrator-service/server.js:1886:  const historicalFallbackRate = fallbackHits > 0 ? historicalFallbacks / fallbackHits : 0;
+runtime/orchestrator-service/server.js:1889:  if (totalReads === 0) {
+runtime/orchestrator-service/server.js:1893:    fallbackRate <= 0.15 &&
+runtime/orchestrator-service/server.js:1901:    fallbackRate <= 0.4 &&
+runtime/orchestrator-service/server.js:1915:      read_events: totalReads,
+runtime/orchestrator-service/server.js:1917:      fallback_hit_count: fallbackHits,
+runtime/orchestrator-service/server.js:1919:      fallback_rate: Number(fallbackRate.toFixed(4)),
+runtime/orchestrator-service/server.js:1920:      fallback_historical_rate: Number(historicalFallbackRate.toFixed(4)),
+runtime/orchestrator-service/server.js:1945:    fallback_hit_count: 0,
+runtime/orchestrator-service/server.js:1953:    aggregate.fallback_hit_count += summary.totals.fallback_hit_count;
+runtime/orchestrator-service/server.js:1958:  const totalReads = aggregate.read_events;
+runtime/orchestrator-service/server.js:1959:  aggregate.canonical_hit_rate = totalReads > 0
+runtime/orchestrator-service/server.js:1960:    ? Number((aggregate.canonical_hit_count / totalReads).toFixed(4))
+runtime/orchestrator-service/server.js:1962:  aggregate.fallback_rate = totalReads > 0
+runtime/orchestrator-service/server.js:1963:    ? Number((aggregate.fallback_hit_count / totalReads).toFixed(4))
+runtime/orchestrator-service/server.js:2527:Create a realistic, premium, cinematic, marketing-grade visual that supports the campaign objective while preserving the exact product identity.
+runtime/orchestrator-service/server.js:2737:  // TODO:
+runtime/orchestrator-service/server.js:2960:function getMetaExecutionPaths(projectName) {
+runtime/orchestrator-service/server.js:2977:function getMetaPlacementRules(placement) {
+runtime/orchestrator-service/server.js:2980:      platform: 'instagram',
+runtime/orchestrator-service/server.js:2988:      platform: 'instagram',
+runtime/orchestrator-service/server.js:2996:      platform: 'facebook',
+runtime/orchestrator-service/server.js:3004:      platform: 'facebook',
+runtime/orchestrator-service/server.js:3016:function buildMetaIntelligence(projectName, placement, goal) {
+runtime/orchestrator-service/server.js:3017:  const placementRules = getMetaPlacementRules(placement);
+runtime/orchestrator-service/server.js:3020:    throw new Error('Unsupported Meta placement');
+runtime/orchestrator-service/server.js:3035:function buildMetaCaption(projectName, placement, goal) {
+runtime/orchestrator-service/server.js:3036:  const rules = getMetaPlacementRules(placement);
+runtime/orchestrator-service/server.js:3037:  const intelligence = buildMetaIntelligence(projectName, placement, goal);
+runtime/orchestrator-service/server.js:3069:function buildMetaCompliance(projectName, placement, imageInfo) {
+runtime/orchestrator-service/server.js:3070:  const rules = getMetaPlacementRules(placement);
+runtime/orchestrator-service/server.js:3073:    throw new Error('Unsupported Meta placement');
+runtime/orchestrator-service/server.js:3079:    platform: rules.platform,
+runtime/orchestrator-service/server.js:3087:      'Keep messaging platform-appropriate and visually clear.',
+runtime/orchestrator-service/server.js:3094:function buildMetaPackage(projectName, placement, goal) {
+runtime/orchestrator-service/server.js:3095:  const metaPaths = getMetaExecutionPaths(projectName);
+runtime/orchestrator-service/server.js:3097:  const compliance = buildMetaCompliance(projectName, placement, image);
+runtime/orchestrator-service/server.js:3098:  const content = buildMetaCaption(projectName, placement, goal);
+runtime/orchestrator-service/server.js:3133:function reviewLatestMetaPackage(projectName) {
+runtime/orchestrator-service/server.js:3150:    throw new Error('No Meta packages found');
+runtime/orchestrator-service/server.js:3175:function buildTikTokIntelligence(projectName, goal) {
+runtime/orchestrator-service/server.js:3178:    platform: 'tiktok',
+runtime/orchestrator-service/server.js:3187:function buildTikTokCompliance(projectName, imageInfo) {
+runtime/orchestrator-service/server.js:3190:    platform: 'tiktok',
+runtime/orchestrator-service/server.js:3206:function buildTikTokPackage(projectName, goal) {
+runtime/orchestrator-service/server.js:3209:  const intelligence = buildTikTokIntelligence(projectName, goal);
+runtime/orchestrator-service/server.js:3210:  const compliance = buildTikTokCompliance(projectName, image);
+runtime/orchestrator-service/server.js:3254:function reviewLatestTikTokPackage(projectName) {
+runtime/orchestrator-service/server.js:3271:    throw new Error('No TikTok packages found');
+runtime/orchestrator-service/server.js:3280:      platform: 'youtube',
+runtime/orchestrator-service/server.js:3287:      platform: 'youtube',
+runtime/orchestrator-service/server.js:3307:    platform: 'youtube',
+runtime/orchestrator-service/server.js:3321:      : 'CTR-first via title-thumbnail fit, then watch-time support through structure.',
+runtime/orchestrator-service/server.js:3335:    platform: 'youtube',
+runtime/orchestrator-service/server.js:3462:      platform: 'amazon',
+runtime/orchestrator-service/server.js:3474:      platform: 'ebay',
+runtime/orchestrator-service/server.js:4106:function normalizePublishingJobStatus(value, fallback = 'draft') {
+runtime/orchestrator-service/server.js:4109:  if (!normalized) return fallback;
+runtime/orchestrator-service/server.js:4131:  return fallback;
+runtime/orchestrator-service/server.js:4355:      connector_error: error.message || 'Connector payload unavailable'
+runtime/orchestrator-service/server.js:4418:  const fallbackStatus = scheduledFor ? 'scheduled' : 'draft';
+runtime/orchestrator-service/server.js:4430:    status: normalizePublishingJobStatus(input.status, existing.status || fallbackStatus),
+runtime/orchestrator-service/server.js:4792:      recommendation: 'Prioritize posts with higher saves, clicks, CTR, and conversions. Reduce weak CTA variants.',
+runtime/orchestrator-service/server.js:5390:function readJsonFile(filePath, fallback = []) {
+runtime/orchestrator-service/server.js:5392:    if (!fs.existsSync(filePath)) return fallback;
+runtime/orchestrator-service/server.js:5394:    if (!raw) return fallback;
+runtime/orchestrator-service/server.js:5397:    console.warn(`[server] readJsonFile: non-fatal read/parse error for ${filePath}, returning fallback. Error: ${err.message}`);
+runtime/orchestrator-service/server.js:5398:    return fallback;
+runtime/orchestrator-service/server.js:5948:    text.includes('ads') ||
+runtime/orchestrator-service/server.js:6162:    if (!signal || signal.fallback) return null;
+runtime/orchestrator-service/server.js:6304:    uploadsDir: path.join(baseDir, 'uploads'),
+runtime/orchestrator-service/server.js:6385:  const fallback = options.fallback;
+runtime/orchestrator-service/server.js:6389:  const canonicalValue = canonicalExists ? normalize(readJsonFile(canonicalPath, fallback)) : null;
+runtime/orchestrator-service/server.js:6397:    const legacyValue = normalize(readJsonFile(legacyPath, fallback));
+runtime/orchestrator-service/server.js:6440:  writeJsonFile(canonicalPath, fallback);
+runtime/orchestrator-service/server.js:6442:    value: fallback,
+runtime/orchestrator-service/server.js:6513:    const fallbackValue = candidates
+runtime/orchestrator-service/server.js:6517:    const entry = foundEntry || (fallbackValue ? { value: fallbackValue } : {});
+runtime/orchestrator-service/server.js:6522:      value: normalizeSetupTextValue(entry.value || fallbackValue),
+runtime/orchestrator-service/server.js:6614:    paths.uploadsDir,
+runtime/orchestrator-service/server.js:6623:    fallback: buildDefaultBrandProfile(safeProject, projectData)
+runtime/orchestrator-service/server.js:6630:    fallback: [],
+runtime/orchestrator-service/server.js:6638:    fallback: buildSourceOfTruthRegistry({}),
+runtime/orchestrator-service/server.js:6814:    paths.uploadsDir
+runtime/orchestrator-service/server.js:6865:      ai_team_defaults: ['strategist', 'writer', 'designer', 'publisher', 'ads_operator', 'analyst', 'compliance_reviewer'],
+runtime/orchestrator-service/server.js:6903:      workspace_priorities: ['setup', 'library', 'content-studio', 'campaign-studio', 'ads-manager', 'governance'],
+runtime/orchestrator-service/server.js:6904:      ai_team_defaults: ['strategist', 'writer', 'designer', 'ads_operator', 'publisher', 'compliance_reviewer'],
+runtime/orchestrator-service/server.js:6943:      ai_team_defaults: ['strategist', 'writer', 'designer', 'ads_operator', 'analyst'],
+runtime/orchestrator-service/server.js:7020:      uploads: paths.uploadsDir
+runtime/orchestrator-service/server.js:7231:      fallback_in_use: !canonicalExists && legacyExists
+runtime/orchestrator-service/server.js:7236:  const fallbackDependencies = checks.filter((item) => item.fallback_in_use).length;
+runtime/orchestrator-service/server.js:7241:    fallback_dependencies: fallbackDependencies,
+runtime/orchestrator-service/server.js:7244:    recommendation: fallbackDependencies > 0 || mismatches > 0
+runtime/orchestrator-service/server.js:7245:      ? 'Reduce fallback dependencies by keeping canonical files in sync before disabling legacy reads.'
+runtime/orchestrator-service/server.js:7344:    has_uploads_dir: fs.existsSync(paths.uploadsDir),
+runtime/orchestrator-service/server.js:8124:    const fallbackStatus = determineIntegrationStatus({
+runtime/orchestrator-service/server.js:8136:            : fallbackStatus === 'connected'
+runtime/orchestrator-service/server.js:8138:              : fallbackStatus,
+runtime/orchestrator-service/server.js:8148:              : fallbackStatus === 'connected'
+runtime/orchestrator-service/server.js:8150:                : fallbackStatus,
+runtime/orchestrator-service/server.js:8426:      description: 'Approved product photography for content, media, ads, and publishing.',
+runtime/orchestrator-service/server.js:9236:    'uploads': base.uploadsDir
+runtime/orchestrator-service/server.js:9339:    uploads: base.uploadsDir
+runtime/orchestrator-service/server.js:9792:      routeTarget: 'ads-manager',
+runtime/orchestrator-service/server.js:9803:      type: 'ads',
+runtime/orchestrator-service/server.js:9829:      budget_suggestion: bridgeResult.budget_suggestion,
+runtime/orchestrator-service/server.js:10716:function getProjectAssetsRegistryMeta(projectName) {
+runtime/orchestrator-service/server.js:10762:  const { project, registryPath } = getProjectAssetsRegistryMeta(projectName);
+runtime/orchestrator-service/server.js:10824:function sendAssetMutationError(res, error, fallbackMessage) {
+runtime/orchestrator-service/server.js:10827:    error: error?.message || fallbackMessage,
+runtime/orchestrator-service/server.js:10836:    error: fallbackMessage,
+runtime/orchestrator-service/server.js:11183:function normalizeAiCommandPreviewInput(value, fallback = '') {
+runtime/orchestrator-service/server.js:11184:  return String(value || fallback || '').trim();
+runtime/orchestrator-service/server.js:11346:      requires_approval_before_publish: true,
+runtime/orchestrator-service/server.js:13240:      platform: req.body?.platform || '',
+runtime/orchestrator-service/server.js:13334:// TODO(phase4a): Keep `/public/media-manager/...` write aliases for active frontend compatibility.
+runtime/orchestrator-service/server.js:13819:  // Use canonical-first candidate resolution with fallback instrumentation
+runtime/orchestrator-service/server.js:14033:  function makeBlock(type, fallbackGoal) {
+runtime/orchestrator-service/server.js:14037:    const goal = map.goal || fallbackGoal;
+runtime/orchestrator-service/server.js:14296:      fallback_prompt_pack:
+runtime/orchestrator-service/server.js:14310:  // canonical reads are preferred when present, with legacy brand-assets as
+runtime/orchestrator-service/server.js:14311:  // the required fallback for existing HAIROTICMEN dry-run packages.
+runtime/orchestrator-service/server.js:14626:    platform_specific_payload: {
+runtime/orchestrator-service/server.js:14797:  const budgetSuggestion = {
+runtime/orchestrator-service/server.js:14798:    daily_budget: Number(input.daily_budget || 45),
+runtime/orchestrator-service/server.js:14800:    rationale: `Starter budget based on ${products.length} product(s) in campaign package.`
+runtime/orchestrator-service/server.js:14808:    budget_suggestion: budgetSuggestion
+runtime/orchestrator-service/server.js:14868:    platform: payload?.platform || '',
+runtime/orchestrator-service/server.js:14904:    channel: payload?.channel || payload?.platform || 'multi-channel',
+runtime/orchestrator-service/server.js:14926:    budget_suggestion: adPackage.budget_suggestion,
+runtime/orchestrator-service/server.js:16141:          ['content_plan', 'content', 'blog', 'email', 'ads'].includes(t.type)
+runtime/orchestrator-service/server.js:16159:        platform: 'instagram',
+runtime/orchestrator-service/server.js:16175:          `Create a premium social media image for ${topic}, focused on masculine grooming, luxury styling, dark elegant brand mood, high-end product presentation, suitable for Instagram and Facebook feed.`,
+runtime/orchestrator-service/server.js:16313:    if (command === '/create_ads') {
+runtime/orchestrator-service/server.js:16325:      const queuePath = getLegacyContentQueuePath(commandProject, 'ads');
+runtime/orchestrator-service/server.js:16337:       if (command === '/review_ads') {
+runtime/orchestrator-service/server.js:16338:      const queuePath = getLegacyContentQueuePath(commandProject, 'ads');
+runtime/orchestrator-service/server.js:16385:      const queuePath = getLegacyContentQueuePath(commandProject, 'ads');
+runtime/orchestrator-service/server.js:16483:      const queuePath = getLegacyContentQueuePath(commandProject, 'ads');
+runtime/orchestrator-service/server.js:16546:        `Create a premium social creative for ${item.topic}, suitable for Instagram and Facebook, masculine luxury grooming aesthetic, clean composition, strong product focus, elegant contrast, Germany-market premium brand feel.`;
+runtime/orchestrator-service/server.js:16687:      const queuePath = getLegacyContentQueuePath(commandProject, 'ads');
+runtime/orchestrator-service/server.js:16703:        note: 'Ad draft is now ready_for_launch. External Meta launch connector is the next layer.'
+runtime/orchestrator-service/server.js:16891:      const plannedFilename = `${assetId}-${safeSlug}.png`;
+runtime/orchestrator-service/server.js:16892:      const plannedOutputPath = path.join(
+runtime/orchestrator-service/server.js:16895:        plannedFilename
+runtime/orchestrator-service/server.js:16910:        output_path: plannedOutputPath,
+runtime/orchestrator-service/server.js:16911:        filename: plannedFilename,
+runtime/orchestrator-service/server.js:17371:      const plannedFilename = `${assetId}-${safeSlug}.png`;
+runtime/orchestrator-service/server.js:17372:      const plannedOutputPath = path.join(
+runtime/orchestrator-service/server.js:17375:        plannedFilename
+runtime/orchestrator-service/server.js:17396:        output_path: plannedOutputPath,
+runtime/orchestrator-service/server.js:17397:        filename: plannedFilename,
+runtime/orchestrator-service/server.js:17694:          'meta_ads',
+runtime/orchestrator-service/server.js:17790:          'CTR',
+runtime/orchestrator-service/server.js:17793:          'ROAS'
+runtime/orchestrator-service/server.js:17868:        planned_assets: {
+runtime/orchestrator-service/server.js:17872:          meta_ads: 2,
+runtime/orchestrator-service/server.js:17980:      facebook: "mixed + retargeting",
+runtime/orchestrator-service/server.js:17983:      meta_ads: "testing + scaling"
+runtime/orchestrator-service/server.js:18043:        platform: 'instagram',
+runtime/orchestrator-service/server.js:18049:        platform: 'facebook',
+runtime/orchestrator-service/server.js:18158:          'ad angles',
+runtime/orchestrator-service/server.js:18163:          'Meta Ad Library',
+runtime/orchestrator-service/server.js:18164:          'TikTok Creative Center',
+runtime/orchestrator-service/server.js:18165:          'Google Search competitors',
+runtime/orchestrator-service/server.js:18208:          'Google Trends',
+runtime/orchestrator-service/server.js:18209:          'TikTok Creative Center',
+runtime/orchestrator-service/server.js:18210:          'Instagram/TikTok trend observation'
+runtime/orchestrator-service/server.js:18217:          'platform fit'
+runtime/orchestrator-service/server.js:18270:        source_recommendation: 'Google Ads Keyword Planner',
+runtime/orchestrator-service/server.js:18309:        source_recommendation: 'TikTok Creative Center + platform validation',
+runtime/orchestrator-service/server.js:18348:          'recommended ad angles'
+runtime/orchestrator-service/server.js:18396:    platform_fit: {
+runtime/orchestrator-service/server.js:18604:          'meta_ads',
+runtime/orchestrator-service/server.js:18617:          'CTR',
+runtime/orchestrator-service/server.js:18620:          'ROAS'
+runtime/orchestrator-service/server.js:18627:          'launch paid ads',
+runtime/orchestrator-service/server.js:18674:    if (command === '/recommend_platform_priorities') {
+runtime/orchestrator-service/server.js:18698:          platform_fit: {
+runtime/orchestrator-service/server.js:18700:            facebook: 'retargeting + mixed audience content',
+runtime/orchestrator-service/server.js:18703:            meta_ads: 'testing + scale'
+runtime/orchestrator-service/server.js:18736:          'test two ad angles',
+runtime/orchestrator-service/server.js:18737:          'monitor CTR and strongest hook'
+runtime/orchestrator-service/server.js:18808:        platform: 'instagram',
+runtime/orchestrator-service/server.js:18814:        platform: 'facebook',
+runtime/orchestrator-service/server.js:18821:    ads: [
+runtime/orchestrator-service/server.js:18868:      const adQueuePath = getLegacyContentQueuePath(campaignProject, 'ads');
+runtime/orchestrator-service/server.js:18956:            platform: post.platform || 'instagram',
+runtime/orchestrator-service/server.js:18966:            visual_format: post.platform === 'instagram' ? 'feed post / reel support' : 'social post',
+runtime/orchestrator-service/server.js:18967:            aspect_ratio: post.platform === 'instagram' ? '4:5 or 9:16' : '1:1',
+runtime/orchestrator-service/server.js:18969:            creative_prompt: `Create a premium ${post.platform} creative for ${campaignExec.blog?.topic || 'campaign'}, masculine luxury grooming style.`,
+runtime/orchestrator-service/server.js:18970:            video_brief: `Create short-form visual content for ${campaignExec.blog?.topic || 'campaign'} on ${post.platform}.`,
+runtime/orchestrator-service/server.js:18980:      if (Array.isArray(campaignExec.ads)) {
+runtime/orchestrator-service/server.js:18981:        for (const ad of campaignExec.ads) {
+runtime/orchestrator-service/server.js:19009:          platform: 'instagram_reel',
+runtime/orchestrator-service/server.js:20224:    const result = buildMetaPackage(projectName, placement, goal);
+runtime/orchestrator-service/server.js:20231:      error: 'Failed to generate Meta package',
+runtime/orchestrator-service/server.js:20245:    const result = reviewLatestMetaPackage(projectName);
+runtime/orchestrator-service/server.js:20252:      error: 'Failed to review Meta package',
+runtime/orchestrator-service/server.js:20266:    const result = buildTikTokPackage(projectName, goal);
+runtime/orchestrator-service/server.js:20270:      error: 'Failed to generate TikTok package',
+runtime/orchestrator-service/server.js:20284:    const result = reviewLatestTikTokPackage(projectName);
+runtime/orchestrator-service/server.js:20288:      error: 'Failed to review TikTok package',
+runtime/orchestrator-service/server.js:22318:const SCHEDULER_VALID_JOB_TYPES = Object.freeze(['publish', 'email', 'media', 'ads']);

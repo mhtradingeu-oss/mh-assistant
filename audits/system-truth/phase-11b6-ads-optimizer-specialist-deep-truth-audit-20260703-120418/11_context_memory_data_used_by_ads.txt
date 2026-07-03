@@ -1,0 +1,960 @@
+public/control-center/pages/ai-command.js:4:        getSelectedLibrarySource,
+public/control-center/pages/ai-command.js:6:        openLibrarySourcePickerFromAiCommand,
+public/control-center/pages/ai-command.js:12:        selectCurrentProject,
+public/control-center/pages/ai-command.js:13:        selectOperationsSnapshot,
+public/control-center/pages/ai-command.js:14:        selectProjectPayload
+public/control-center/pages/ai-command.js:25:} from "../asset-library.js";
+public/control-center/pages/ai-command.js:42:                routeHint: "campaign-studio"
+public/control-center/pages/ai-command.js:49:                routeHint: "content-studio"
+public/control-center/pages/ai-command.js:52:                id: "media",
+public/control-center/pages/ai-command.js:55:                summary: "Visual direction, creative brief, format guidance, and brand consistency.",
+public/control-center/pages/ai-command.js:56:                routeHint: "media-studio"
+public/control-center/pages/ai-command.js:63:                routeHint: "media-studio"
+public/control-center/pages/ai-command.js:69:                summary: "Publishing readiness, schedule review, and handoff preparation.",
+public/control-center/pages/ai-command.js:73:                id: "ads",
+public/control-center/pages/ai-command.js:76:                summary: "Ad concepts, targeting angles, platform copy, and paid strategy.",
+public/control-center/pages/ai-command.js:77:                routeHint: "ads-manager"
+public/control-center/pages/ai-command.js:83:                summary: "SEO signals, performance data, content insights, and traffic patterns.",
+public/control-center/pages/ai-command.js:90:                summary: "Claims review, approvals, safety language, and governance checks.",
+public/control-center/pages/ai-command.js:91:                routeHint: "governance"
+public/control-center/pages/ai-command.js:97:                summary: "Tasks, timelines, handoffs, approvals, and execution plans.",
+public/control-center/pages/ai-command.js:119:	campaign: "strategist",
+public/control-center/pages/ai-command.js:120:	content: "writer",
+public/control-center/pages/ai-command.js:121:	designer: "media",
+public/control-center/pages/ai-command.js:122:	media_director: "media",
+public/control-center/pages/ai-command.js:123:	media_planner: "media",
+public/control-center/pages/ai-command.js:149:		placeholder: "Ask the Strategist to plan a campaign, map launch phases, review channel priorities, or define the offer strategy…",
+public/control-center/pages/ai-command.js:150:		canHelp: ["Draft campaign plans", "Prioritize next actions", "Map launch sequences", "Advise on offer strategy", "Prepare channel briefs"],
+public/control-center/pages/ai-command.js:151:		cannotDo: ["Publish campaigns directly", "Execute workflows automatically", "Approve content", "Set live budgets"],
+public/control-center/pages/ai-command.js:162:		placeholder: "Ask the Content Writer to draft captions, hooks, landing copy, or campaign messages…",
+public/control-center/pages/ai-command.js:170:		id: "media",
+public/control-center/pages/ai-command.js:174:		summary: "Visual direction, creative briefs, format guidance, and brand consistency.",
+public/control-center/pages/ai-command.js:175:		placeholder: "Ask the Media Director to define visual direction, prepare a creative brief, or review brand consistency…",
+public/control-center/pages/ai-command.js:176:		canHelp: ["Write creative briefs", "Advise on visual direction", "Map format requirements", "Review brand alignment", "Prepare media handoffs"],
+public/control-center/pages/ai-command.js:177:		cannotDo: ["Generate images directly", "Upload assets without review", "Approve without confirmation", "Execute media jobs"],
+public/control-center/pages/ai-command.js:178:		destinations: ["Asset Library", "Content Studio", "AI Command"],
+public/control-center/pages/ai-command.js:190:		cannotDo: ["Generate video directly", "Upload footage without review", "Approve without confirmation", "Run media jobs automatically"],
+public/control-center/pages/ai-command.js:191:		destinations: ["Asset Library", "Content Studio", "Media Native"],
+public/control-center/pages/ai-command.js:192:		safetyNote: "Scripts and direction only. Video generation requires explicit backend action and approval.",
+public/control-center/pages/ai-command.js:200:		summary: "Publishing readiness, schedule review, and handoff preparation.",
+public/control-center/pages/ai-command.js:201:		placeholder: "Ask the Publisher to review publishing readiness, check scheduling, or prepare a handoff package…",
+public/control-center/pages/ai-command.js:202:		canHelp: ["Review publishing readiness", "Check scheduled jobs", "Prepare handoff packages", "Map publishing dependencies", "Flag pre-publish risks"],
+public/control-center/pages/ai-command.js:203:		cannotDo: ["Publish without explicit approval", "Override schedules", "Bypass governance gates", "Push to live channels directly"],
+public/control-center/pages/ai-command.js:205:		safetyNote: "Publishing always requires explicit approval. No live publishing from AI guidance alone.",
+public/control-center/pages/ai-command.js:209:		id: "ads",
+public/control-center/pages/ai-command.js:213:		summary: "Ad concepts, targeting angles, platform copy, and paid strategy.",
+public/control-center/pages/ai-command.js:214:		placeholder: "Ask the Ads Optimizer to draft ad copy, review targeting angles, or plan a paid campaign structure…",
+public/control-center/pages/ai-command.js:215:		canHelp: ["Draft ad concepts and copy", "Review targeting angles", "Plan paid campaign structure", "Suggest creative variants", "Map platform-specific strategy"],
+public/control-center/pages/ai-command.js:216:		cannotDo: ["Launch ads directly", "Set live budgets without review", "Approve spend", "Access ad accounts directly"],
+public/control-center/pages/ai-command.js:218:		safetyNote: "Ad concepts and copy only. Live ad actions require platform integration and explicit approval.",
+public/control-center/pages/ai-command.js:226:		summary: "SEO signals, performance data, content insights, and traffic patterns.",
+public/control-center/pages/ai-command.js:227:		placeholder: "Ask the SEO & Insights Analyst to review performance, suggest SEO improvements, or identify top content patterns…",
+public/control-center/pages/ai-command.js:228:		canHelp: ["Review SEO signals", "Analyze content performance", "Identify traffic patterns", "Suggest keyword improvements", "Map data coverage gaps"],
+public/control-center/pages/ai-command.js:229:		cannotDo: ["Update SEO settings directly", "Edit live website", "Set analytics configurations", "Publish recommendations automatically"],
+public/control-center/pages/ai-command.js:231:		safetyNote: "Analysis and recommendations only. No direct website or analytics changes.",
+public/control-center/pages/ai-command.js:239:		summary: "Claims review, approval safety, publishing risk, and governance notes.",
+public/control-center/pages/ai-command.js:240:		placeholder: "Ask the Compliance Reviewer to check claims, approval risks, publishing safety, and governance notes…",
+public/control-center/pages/ai-command.js:241:		canHelp: ["Review marketing claims", "Flag approval risks", "Check publishing safety", "Prepare governance notes", "Identify compliance blockers"],
+public/control-center/pages/ai-command.js:242:		cannotDo: ["Grant approvals directly", "Override governance gates", "Publish on behalf of approvers", "Remove flags without review"],
+public/control-center/pages/ai-command.js:252:		summary: "Tasks, timelines, handoffs, approvals, and execution plans.",
+public/control-center/pages/ai-command.js:267:		canHelp: ["Review inbox context", "Summarize customer threads", "Draft safe replies", "Prepare ticket drafts", "Flag SLA and escalation risk"],
+public/control-center/pages/ai-command.js:292:		{ label: "Draft a campaign brief", sub: "Map objective, audience, and channels" },
+public/control-center/pages/ai-command.js:293:		{ label: "Review launch readiness", sub: "Identify what is blocking launch" },
+public/control-center/pages/ai-command.js:294:		{ label: "Suggest the next campaign move", sub: "Based on current project state" }
+public/control-center/pages/ai-command.js:297:		{ label: "Draft campaign captions", sub: "For the active campaign" },
+public/control-center/pages/ai-command.js:299:		{ label: "Prepare a Publisher handoff", sub: "Package ready content for review" },
+public/control-center/pages/ai-command.js:302:	media: [
+public/control-center/pages/ai-command.js:303:		{ label: "Write a creative brief", sub: "For the next campaign visual" },
+public/control-center/pages/ai-command.js:304:		{ label: "Review brand consistency", sub: "Flag misaligned assets" },
+public/control-center/pages/ai-command.js:305:		{ label: "Map format requirements", sub: "By platform and campaign phase" },
+public/control-center/pages/ai-command.js:306:		{ label: "Prepare a media handoff", sub: "Package direction for the team" }
+public/control-center/pages/ai-command.js:309:		{ label: "Write a reel script", sub: "For the current campaign" },
+public/control-center/pages/ai-command.js:310:		{ label: "Plan short-form content", sub: "Map next 4 video concepts" },
+public/control-center/pages/ai-command.js:311:		{ label: "Outline motion direction", sub: "Align visuals with campaign tone" },
+public/control-center/pages/ai-command.js:315:		{ label: "Review publishing readiness", sub: "Check what is ready to publish" },
+public/control-center/pages/ai-command.js:320:	ads: [
+public/control-center/pages/ai-command.js:321:		{ label: "Draft ad concepts", sub: "For the current campaign" },
+public/control-center/pages/ai-command.js:322:		{ label: "Review targeting angles", sub: "Map audience and platform fit" },
+public/control-center/pages/ai-command.js:323:		{ label: "Suggest creative variants", sub: "Test different hooks and CTAs" },
+public/control-center/pages/ai-command.js:324:		{ label: "Plan paid campaign structure", sub: "Objective, audience, creative, budget" }
+public/control-center/pages/ai-command.js:328:		{ label: "Analyze content performance", sub: "What is working and what is not" },
+public/control-center/pages/ai-command.js:329:		{ label: "Map data coverage gaps", sub: "Which integrations are missing" },
+public/control-center/pages/ai-command.js:333:		{ label: "Check claims for approval", sub: "Review all marketing claims" },
+public/control-center/pages/ai-command.js:335:		{ label: "Prepare governance notes", sub: "Document compliance status" },
+public/control-center/pages/ai-command.js:336:		{ label: "Review approval requirements", sub: "What needs sign-off" }
+public/control-center/pages/ai-command.js:362:	{ label: "Prepare a full handoff sequence", sub: "Strategy, creative, compliance, publishing, ops" },
+public/control-center/pages/ai-command.js:371:	{ id: "review", title: "Review", description: "Check safety, scope, language, and source." },
+public/control-center/pages/ai-command.js:374:	{ id: "monitor", title: "Monitor", description: "Track readiness, integrations, and recent activity." }
+public/control-center/pages/ai-command.js:391:	media: "MD",
+public/control-center/pages/ai-command.js:394:	ads: "AO",
+public/control-center/pages/ai-command.js:403:	ads: "ads_operator",
+public/control-center/pages/ai-command.js:404:	media: "designer",
+public/control-center/pages/ai-command.js:413:		summary: "Policy, approvals, roles, and audit controls stay destination-owned."
+public/control-center/pages/ai-command.js:419:		summary: "Market, evidence, competitor, and proof research will prepare source packs only."
+public/control-center/pages/ai-command.js:431:		{ id: "campaign-angle-generator", label: "Campaign Angle Generator", action: "preview", intent: "guidance", template: "Generate campaign angles for {project}. Include audience tension, promise, channel fit, and strongest first test." },
+public/control-center/pages/ai-command.js:437:		{ id: "hook-generator", label: "Hook Generator", action: "preview", intent: "guidance", template: "Write 5 German hook variants for {project}. Keep them concise, testable, and suitable for the Germany market." },
+public/control-center/pages/ai-command.js:442:	media: [
+public/control-center/pages/ai-command.js:443:		{ id: "creative-brief-builder", label: "Creative Brief Builder", action: "preview", intent: "media", template: "Prepare a creative brief for {project}. Include concept, visual rules, subject, brand constraints, and production notes." },
+public/control-center/pages/ai-command.js:444:		{ id: "format-mapper", label: "Format Mapper", action: "preview", intent: "guidance", template: "Map required creative formats for {project}. Include platform, aspect ratio, asset type, and usage context." },
+public/control-center/pages/ai-command.js:447:		{ id: "open-media-studio", label: "Send prompt to Media Studio", action: "route", route: "media-studio" }
+public/control-center/pages/ai-command.js:454:		{ id: "map-video-asset-needs", label: "Map video asset needs", action: "preview", intent: "task", template: "Map video asset needs for {project}. Include format, source, and production owner." }
+public/control-center/pages/ai-command.js:457:		{ id: "publishing-checklist", label: "Publishing Checklist", action: "preview", intent: "handoff", template: "Build a publishing checklist for {project}. Include German copy, assets, claims checks, and channel readiness." },
+public/control-center/pages/ai-command.js:458:		{ id: "final-packaging", label: "Final Packaging", action: "preview", intent: "handoff", template: "Prepare a final publishing package for {project}. Include copy, CTA, asset notes, approvals, and destination channel." },
+public/control-center/pages/ai-command.js:463:	ads: [
+public/control-center/pages/ai-command.js:465:		{ id: "copy-variants", label: "Copy Variants", action: "preview", intent: "guidance", template: "Prepare German ad copy variants for {project}. Include hooks, primary text, CTA, and creative notes." },
+public/control-center/pages/ai-command.js:466:		{ id: "test-ideas", label: "Test Ideas", action: "preview", intent: "task", template: "Suggest paid test ideas for {project}. Provide hypotheses, segments, creative variables, and measurement notes." },
+public/control-center/pages/ai-command.js:467:		{ id: "budget-notes", label: "Budget Notes", action: "preview", intent: "guidance", template: "Review budget notes for {project}. Summarize constraints and safe test allocation guidance." },
+public/control-center/pages/ai-command.js:468:		{ id: "open-ads-manager", label: "Open Ads Manager", action: "route", route: "ads-manager" }
+public/control-center/pages/ai-command.js:471:		{ id: "keyword-intent", label: "Keyword Intent", action: "preview", intent: "guidance", template: "Suggest keyword intent opportunities for {project}. Include Germany-market intent, content mapping, and priority." },
+public/control-center/pages/ai-command.js:473:		{ id: "opportunity-summary", label: "Opportunity Summary", action: "preview", intent: "task", template: "Summarize SEO and insight opportunities for {project}. Focus on conversion, traffic quality, and content fit." },
+public/control-center/pages/ai-command.js:478:		{ id: "claims-check", label: "Claims Check", action: "preview", intent: "guidance", template: "Review marketing claims for {project}. Flag unsupported, high-risk, or evidence-dependent wording." },
+public/control-center/pages/ai-command.js:479:		{ id: "approval-flags", label: "Approval Flags", action: "preview", intent: "task", template: "Check approval risks for {project}. List risk, impact, mitigation, and required owner." },
+public/control-center/pages/ai-command.js:480:		{ id: "safety-checklist", label: "Safety Checklist", action: "preview", intent: "handoff", template: "Prepare a safety checklist for {project}. Include policy checks, evidence required, and approval notes." },
+public/control-center/pages/ai-command.js:481:		{ id: "publish-readiness", label: "Publish Readiness", action: "preview", intent: "handoff", template: "Review publish readiness for {project}. Confirm what needs human approval before release." },
+public/control-center/pages/ai-command.js:482:		{ id: "open-governance", label: "Open Governance", action: "route", route: "governance" }
+public/control-center/pages/ai-command.js:486:		{ id: "handoff-routing", label: "Handoff Routing", action: "preview", intent: "handoff", template: "Prepare handoff routing for {project}. Include source, destination, decision gates, and required confirmations." },
+public/control-center/pages/ai-command.js:492:		{ id: "review-unified-inbox", label: "Review Unified Inbox", action: "preview", intent: "guidance", template: "Review the Unified Inbox readiness for {project}. Summarize visible customer-operation signals, open gaps, and safe next review steps. Do not claim inbox actions happened." },
+public/control-center/pages/ai-command.js:515:	{ icon: "🚀", label: "Launch Campaign", sub: "Build a campaign plan", template: "Build a launch campaign for {project}. Map the channels, offer, phases, and required assets." },
+public/control-center/pages/ai-command.js:516:	{ icon: "✍️", label: "Generate Content", sub: "Write hooks, captions & scripts", template: "Generate content for {project}. Create hooks, caption ideas, and a reel script for the next product push." },
+public/control-center/pages/ai-command.js:517:	{ icon: "📊", label: "Analyze Performance", sub: "Review what's working", template: "Analyze current performance for {project}. What content, campaigns, and channels are working best right now?" },
+public/control-center/pages/ai-command.js:518:	{ icon: "🔧", label: "Fix Readiness", sub: "Close critical gaps", template: "What are the critical readiness gaps for {project} and what exactly needs to be done to fix them?" }
+public/control-center/pages/ai-command.js:526:	{ id: "content", label: "Content" },
+public/control-center/pages/ai-command.js:527:	{ id: "campaign", label: "Campaign" },
+public/control-center/pages/ai-command.js:538:	{ id: "campaign", label: "Campaign" },
+public/control-center/pages/ai-command.js:539:	{ id: "product", label: "Product" }
+public/control-center/pages/ai-command.js:543:	"Launch readiness",
+public/control-center/pages/ai-command.js:557:		suggestedPrompt: "Act as Strategist and propose the next campaign move based on current readiness and integrations."
+public/control-center/pages/ai-command.js:563:		bestUse: "When campaigns need content batches fast.",
+public/control-center/pages/ai-command.js:564:		suggestedPrompt: "Act as Writer and generate content angles for the current project and active campaign."
+public/control-center/pages/ai-command.js:569:		purpose: "Define creative direction, visual hierarchy, and asset guidance.",
+public/control-center/pages/ai-command.js:571:		suggestedPrompt: "Act as Designer and propose creative directions tied to current campaign goals."
+public/control-center/pages/ai-command.js:574:		id: "media",
+public/control-center/pages/ai-command.js:576:		purpose: "Align media formats with channels, cadence, and readiness.",
+public/control-center/pages/ai-command.js:578:		suggestedPrompt: "Act as Media Planner and map media needs by platform for this launch cycle."
+public/control-center/pages/ai-command.js:581:		id: "ads",
+public/control-center/pages/ai-command.js:583:		purpose: "Optimize paid opportunities, creative testing, and budget decisions.",
+public/control-center/pages/ai-command.js:584:		bestUse: "When preparing or fixing paid performance.",
+public/control-center/pages/ai-command.js:585:		suggestedPrompt: "Act as Ads Specialist and propose paid experiments based on current readiness and data coverage."
+public/control-center/pages/ai-command.js:591:		bestUse: "When you need evidence-backed recommendations.",
+public/control-center/pages/ai-command.js:597:		purpose: "Strengthen decisions with market, competitor, and audience insight.",
+public/control-center/pages/ai-command.js:599:		suggestedPrompt: "Act as Researcher and identify high-confidence market opportunities for this project."
+public/control-center/pages/ai-command.js:633:		if (/act as the content writer/i.test(text)) return "writer";
+public/control-center/pages/ai-command.js:634:		if (/act as the media director/i.test(text)) return "media";
+public/control-center/pages/ai-command.js:637:		if (/act as the ads optimizer|act as the ads operator/i.test(text)) return "ads";
+public/control-center/pages/ai-command.js:677:	if (/publish\s*now|send\s*external|paid\s*ads|final\s*approval/i.test(command)) {
+public/control-center/pages/ai-command.js:685:				reason: "Requires approval gate before external publishing actions."
+public/control-center/pages/ai-command.js:750:		campaign: asString(context.campaign || "active campaign") || "active campaign"
+public/control-center/pages/ai-command.js:753:	return asString(template).replace(/\{(project|projectName|specialist|specialistLabel|campaign)\}/g, (_, token) => tokenMap[token] || "");
+public/control-center/pages/ai-command.js:765:    "Build a launch campaign for:",
+public/control-center/pages/ai-command.js:766:    "Generate content for:",
+public/control-center/pages/ai-command.js:768:    "Fix readiness for:"
+public/control-center/pages/ai-command.js:840:function getWorkspaceLanguagePlan(aiContext = {}) {
+public/control-center/pages/ai-command.js:841:	const overview = asObject(aiContext.overview);
+public/control-center/pages/ai-command.js:842:	const rawMarket = asString(aiContext.market || overview.market || "").trim();
+public/control-center/pages/ai-command.js:843:	const market = rawMarket || "Germany";
+public/control-center/pages/ai-command.js:848:		overview.market_language ||
+public/control-center/pages/ai-command.js:862:		market
+public/control-center/pages/ai-command.js:901:	return asString(item.label || item.title || item.page || item.query || item.campaign_name || item.name);
+public/control-center/pages/ai-command.js:1114:        const source = compact || text;
+public/control-center/pages/ai-command.js:1115:        return source.length > 38 ? `${source.slice(0, 35).trim()}...` : source;
+public/control-center/pages/ai-command.js:1149:                latestUser?.content ||
+public/control-center/pages/ai-command.js:1221:function buildSpecialistChatPrompt({ prompt, specialistLabel, modeLabel, projectName, language, outputLanguage, market }) {
+public/control-center/pages/ai-command.js:1228:	const safeMarket = asString(market || "Germany").trim();
+public/control-center/pages/ai-command.js:1232:			"When the request touches inbox, tickets, leads, outreach, or CRM, include Customer Ops -> Sales/CRM -> Operations.",
+public/control-center/pages/ai-command.js:1243:		`Target market: ${safeMarket}`,
+public/control-center/pages/ai-command.js:1246:                `Use ${safeOutputLanguage} only for customer-facing or publishable copy such as captions, ads, emails, landing pages, final campaign text, or publishing packages.`,
+public/control-center/pages/ai-command.js:1247:                "When you include publishable copy, label it clearly as publishable content and keep the explanation in the user chat language.",
+public/control-center/pages/ai-command.js:1249:		"Return practical guidance and content only.",
+public/control-center/pages/ai-command.js:1252:		"Never claim publish, approval, deletion, archival, sync, or operational runs happened.",
+public/control-center/pages/ai-command.js:1264:		response.content ||
+public/control-center/pages/ai-command.js:1277:	const recommendationLine = normalizeDisplayList(response.recommendations, 4)
+public/control-center/pages/ai-command.js:1302:	if (id === "strategist") return outputType === "task" ? "campaign-studio" : "workflows";
+public/control-center/pages/ai-command.js:1303:	if (id === "writer") return "content-studio";
+public/control-center/pages/ai-command.js:1304:	if (id === "media") return "media-studio";
+public/control-center/pages/ai-command.js:1305:	if (id === "video_lead") return "media-studio";
+public/control-center/pages/ai-command.js:1307:	if (id === "ads") return "ads-manager";
+public/control-center/pages/ai-command.js:1309:	if (id === "compliance_reviewer") return "governance";
+public/control-center/pages/ai-command.js:1342:        const looksWorkflowLike = /\b(workflow|workflows|process|sequence|phase|phases|approval flow|automation|operating loop|step-by-step|steps|dependencies|trigger|review gate|execution flow)\b/.test(text);
+public/control-center/pages/ai-command.js:1343:        const looksContentLike = /\b(content|caption|captions|post|posts|email|blog|article|copy|headline|landing page|script|message|cta|product copy|social post)\b/.test(text);
+public/control-center/pages/ai-command.js:1344:        const looksMediaLike = /\b(media|visual|creative|image|images|video|reel|storyboard|shot list|asset|assets|design|production|creative direction|voiceover)\b/.test(text);
+public/control-center/pages/ai-command.js:1345:        const looksPublishingLike = /\b(publish|publishing|schedule|channel package|channel payload|approval-ready post|final post|ready to publish|publishing package)\b/.test(text);
+public/control-center/pages/ai-command.js:1346:        const looksGovernanceLike = /\b(compliance|governance|claim|claims|risk|risks|approval|approvals|policy|privacy|legal|safe language|safety review)\b/.test(text);
+public/control-center/pages/ai-command.js:1347:        const looksInsightLike = /\b(insight|insights|seo|keyword|keywords|analytics|performance|traffic|ranking|search intent|metrics|research|competitor|competitors|market research)\b/.test(text);
+public/control-center/pages/ai-command.js:1348:        const looksCampaignLike = /\b(campaign|launch|audience|offer|funnel|positioning|channel mix|campaign brief|go-to-market|go to market)\b/.test(text);
+public/control-center/pages/ai-command.js:1360:        if (/content|copy|draft|caption|email|blog|article|script/.test(outputType) || looksContentLike) {
+public/control-center/pages/ai-command.js:1361:                outputType = "content";
+public/control-center/pages/ai-command.js:1362:                return { outputType, destinationRoute: explicitDestination || "content-studio" };
+public/control-center/pages/ai-command.js:1365:        if (/media|video|visual|asset|creative/.test(outputType) || looksMediaLike) {
+public/control-center/pages/ai-command.js:1366:                outputType = "media";
+public/control-center/pages/ai-command.js:1367:                return { outputType, destinationRoute: explicitDestination || "media-studio" };
+public/control-center/pages/ai-command.js:1375:        if (/governance|compliance|risk|approval/.test(outputType) || looksGovernanceLike) {
+public/control-center/pages/ai-command.js:1376:                outputType = "governance";
+public/control-center/pages/ai-command.js:1377:                return { outputType, destinationRoute: explicitDestination || "governance" };
+public/control-center/pages/ai-command.js:1385:        if (/campaign|strategy|launch/.test(outputType) || looksCampaignLike) {
+public/control-center/pages/ai-command.js:1386:                outputType = "campaign";
+public/control-center/pages/ai-command.js:1389:                        destinationRoute: explicitDestination || (session?.teamMode === "team" ? "workflows" : "campaign-studio")
+public/control-center/pages/ai-command.js:1399:		"campaign-studio": "Campaign Studio",
+public/control-center/pages/ai-command.js:1400:		"content-studio": "Content Studio",
+public/control-center/pages/ai-command.js:1401:		"media-studio": "Media Studio",
+public/control-center/pages/ai-command.js:1403:		"ads-manager": "Ads Manager",
+public/control-center/pages/ai-command.js:1405:		integrations: "Integrations",
+public/control-center/pages/ai-command.js:1406:		governance: "Governance",
+public/control-center/pages/ai-command.js:1431:		sourcePrompt: promptSnippet,
+public/control-center/pages/ai-command.js:1435:		confirmationNote: "Execution, approvals, and publishing require explicit confirmation in the owning workspace."
+public/control-center/pages/ai-command.js:1458:				"Strategic priorities aligned to current readiness",
+public/control-center/pages/ai-command.js:1468:			title: outputType === "task" ? "Task: Draft campaign copy" : "Content Guidance: Messaging draft",
+public/control-center/pages/ai-command.js:1499:	if (specialistId === "media") {
+public/control-center/pages/ai-command.js:1502:			outputType: outputType === "guidance" ? "media_brief" : outputType,
+public/control-center/pages/ai-command.js:1506:				"Define the hero subject, composition, lighting, and brand guardrails before production.",
+public/control-center/pages/ai-command.js:1510:				"Visual direction and brand constraints summarized",
+public/control-center/pages/ai-command.js:1514:			safetyLabel: "No media generation executed. Brief and routing only.",
+public/control-center/pages/ai-command.js:1522:			title: outputType === "task" ? "Task: Video production plan" : "Video Brief: Hook, script, storyboard",
+public/control-center/pages/ai-command.js:1528:				"Route to Media Studio for production planning"
+public/control-center/pages/ai-command.js:1540:				"Final copy should be German for the Germany market unless a destination overrides it.",
+public/control-center/pages/ai-command.js:1541:				"Publishing remains gated until channel, approval, and asset readiness are confirmed."
+public/control-center/pages/ai-command.js:1544:				"Validate asset and copy readiness",
+public/control-center/pages/ai-command.js:1546:				"Flag approval dependencies",
+public/control-center/pages/ai-command.js:1554:	if (specialistId === "ads") {
+public/control-center/pages/ai-command.js:1570:				"Keep budget, launch, and live ad changes inside Ads Manager.",
+public/control-center/pages/ai-command.js:1576:				"Platform-specific copy recommendations"
+public/control-center/pages/ai-command.js:1578:			safetyLabel: "No budget updates or ad launches executed."
+public/control-center/pages/ai-command.js:1588:				"Signals to check: readiness, channel performance, data coverage",
+public/control-center/pages/ai-command.js:1604:				"Prepare governance notes",
+public/control-center/pages/ai-command.js:1608:			safetyLabel: "Compliance review is advisory. Formal approval remains human-governed."
+public/control-center/pages/ai-command.js:1688:					"Stage 2: Specialist draft production",
+public/control-center/pages/ai-command.js:1700:				"Define immediate tasks",
+public/control-center/pages/ai-command.js:1742:			"Writer, Media Director, and Video Lead turn strategy into message, asset, and production drafts",
+public/control-center/pages/ai-command.js:1743:			"Compliance and Publisher verify claims, approvals, formatting, and release readiness",
+public/control-center/pages/ai-command.js:1744:			"Customer Ops and Sales / CRM join when the request touches inbox, tickets, leads, outreach, or CRM"
+public/control-center/pages/ai-command.js:1749:			"Media / Video: prepare creative direction, asset needs, script, storyboard, or voiceover draft",
+public/control-center/pages/ai-command.js:1750:			"Compliance: flag claims, evidence needs, policy risks, and approval gates",
+public/control-center/pages/ai-command.js:1757:		confirmationNote: "No task, workflow, outreach, customer reply, CRM update, approval, or publishing action is executed from Full Team mode.",
+public/control-center/pages/ai-command.js:1768:		media_brief: "Media Brief"
+public/control-center/pages/ai-command.js:1782:		`Source Prompt: ${humanizeValue(output.sourcePrompt)}`,
+public/control-center/pages/ai-command.js:1828:        const sourceText = humanizeValue(
+public/control-center/pages/ai-command.js:1837:        const compactSummary = compactPreviewText(sourceText || summary, 420);
+public/control-center/pages/ai-command.js:1840:        const mainLines = splitPreviewLines(sourceText || summary, 14)
+public/control-center/pages/ai-command.js:1870:function isProviderLikelyConfigured(aiContext) {
+public/control-center/pages/ai-command.js:1871:	const records = asObject(aiContext?.controlCenter?.records);
+public/control-center/pages/ai-command.js:1888:	const readiness = asObject(state.data.readiness);
+public/control-center/pages/ai-command.js:1889:	const readinessDashboard = asObject(readiness.dashboard);
+public/control-center/pages/ai-command.js:1890:	const connectors = asObject(state.data.integrations);
+public/control-center/pages/ai-command.js:1899:		asObject(activity.marketing_insights) ||
+public/control-center/pages/ai-command.js:1908:	const recommendations = asArray(learning.recommendations || insights.recommendations);
+public/control-center/pages/ai-command.js:1909:	const nextBestActions = asArray(overviewBlock.next_best_actions || readinessDashboard.next_best_actions);
+public/control-center/pages/ai-command.js:1910:	const criticalGaps = asArray(readinessDashboard.priorities?.critical || readiness.priorities?.critical);
+public/control-center/pages/ai-command.js:1911:	const importantGaps = asArray(readinessDashboard.priorities?.important || readiness.priorities?.important);
+public/control-center/pages/ai-command.js:1919:				integrations: asArray(item?.integrations)
+public/control-center/pages/ai-command.js:1934:		market: state.context.currentMarket || overview.market || "",
+public/control-center/pages/ai-command.js:1936:		campaign: state.context.activeCampaign || "Not selected",
+public/control-center/pages/ai-command.js:1939:		readinessScore: toNumber(readinessDashboard.readiness_score ?? overview.readiness_score),
+public/control-center/pages/ai-command.js:1940:		readinessStatus: asString(readinessDashboard.readiness_status || overview.readiness_status || "unknown"),
+public/control-center/pages/ai-command.js:1951:		readiness,
+public/control-center/pages/ai-command.js:1952:		readinessDashboard,
+public/control-center/pages/ai-command.js:1964:		assetBlockers: assetCategories
+public/control-center/pages/ai-command.js:1974:		recommendations,
+public/control-center/pages/ai-command.js:1975:		topContent: asArray(insights.best_performing_content),
+public/control-center/pages/ai-command.js:1976:		weakContent: asArray(insights.underperforming_content),
+public/control-center/pages/ai-command.js:1979:		paid: asObject(insights.paid),
+public/control-center/pages/ai-command.js:1982:		aiRecommendations: asObject(learning.ai_recommendations || insights.ai_recommendations),
+public/control-center/pages/ai-command.js:1983:		sourceSummary: asObject(insights.source_summary || learning.source_summary),
+public/control-center/pages/ai-command.js:1997:		strategist: ["campaign", "launch campaign", "campaign plan", "marketing campaign", "market entry", "growth plan", "offer strategy", "launch plan"],
+public/control-center/pages/ai-command.js:1998:		writer: ["content", "post", "caption", "blog", "script", "email", "landing page section", "reel script", "copy", "write", "hooks"],
+public/control-center/pages/ai-command.js:1999:		designer: ["design", "visual", "creative brief", "format", "brand", "layout", "image direction", "creative direction"],
+public/control-center/pages/ai-command.js:2000:		media: ["media", "design", "visual", "creative brief", "format", "brand", "layout", "image direction", "creative direction", "image", "video", "photo", "asset", "library", "gallery", "footage", "visual assets"],
+public/control-center/pages/ai-command.js:2001:		ads: ["ad ideas", "ad copy", "facebook ads", "meta ads", "tiktok ads", "google ads", "cta", "paid", "targeting angle", "ad creative"],
+public/control-center/pages/ai-command.js:2003:		researcher: ["research", "market trend", "market research", "audience research", "competitor", "positioning gap", "validate", "competitive"],
+public/control-center/pages/ai-command.js:2004:		operations: ["task plan", "workflow", "handoff", "approval", "timeline", "execution plan", "route", "publish", "status", "priority", "priorities", "blocking", "blocker", "readiness", "next", "do next"],
+public/control-center/pages/ai-command.js:2006:		sales_crm: ["lead", "leads", "crm", "sales", "outreach", "follow-up", "follow up", "pipeline", "dealer", "salon", "influencer"]
+public/control-center/pages/ai-command.js:2041:function buildMissingDataNotes(aiContext, lane) {
+public/control-center/pages/ai-command.js:2043:	const coverage = aiContext.coverage;
+public/control-center/pages/ai-command.js:2048:	if (lane === "content" && asString(coverage.social_insights?.status) !== "covered") {
+public/control-center/pages/ai-command.js:2054:	if (lane === "ads" && asString(coverage.paid_ads?.status) !== "covered") {
+public/control-center/pages/ai-command.js:2055:		notes.push("Paid platform reporting not connected — ROAS guidance is limited.");
+public/control-center/pages/ai-command.js:2060:function buildExecutiveResponse(aiContext) {
+public/control-center/pages/ai-command.js:2061:	const topRecommendation = aiContext.recommendations[0];
+public/control-center/pages/ai-command.js:2063:	if (aiContext.readinessScore != null) summaryParts.push(`Readiness is ${aiContext.readinessScore}/100 (${aiContext.readinessStatus || "in progress"}).`);
+public/control-center/pages/ai-command.js:2064:	if (aiContext.criticalGaps.length) summaryParts.push(`${aiContext.criticalGaps.length} critical gaps are open.`);
+public/control-center/pages/ai-command.js:2065:	if (aiContext.recommendations.length) summaryParts.push(`${aiContext.recommendations.length} recommendations available.`);
+public/control-center/pages/ai-command.js:2068:		summary: summaryParts.join(" ") || "Project is loaded. Complete integrations to unlock stronger AI guidance.",
+public/control-center/pages/ai-command.js:2070:			aiContext.criticalGaps.length ? `Critical gaps: ${aiContext.criticalGaps.slice(0, 4).map(normalizeActionLabel).join(", ")}.` : "No critical readiness gaps flagged.",
+public/control-center/pages/ai-command.js:2071:			aiContext.missingIntegrations.length ? `Missing intelligence: ${aiContext.missingIntegrations.slice(0, 4).map((item) => item.label).join(", ")}.` : "Intelligence coverage is solid.",
+public/control-center/pages/ai-command.js:2074:		recommendations: [
+public/control-center/pages/ai-command.js:2075:			topRecommendation ? `${topRecommendation.title}: ${topRecommendation.action}` : "Connect missing integrations to produce better recommendations.",
+public/control-center/pages/ai-command.js:2076:			...aiContext.recommendations.slice(1, 3).map((item) => `${item.title}: ${item.action}`)
+public/control-center/pages/ai-command.js:2079:			...aiContext.nextBestActions.slice(0, 4).map((item) => `Resolve ${normalizeActionLabel(item)}.`),
+public/control-center/pages/ai-command.js:2080:			...(aiContext.connectorIssues[0] ? [`Fix ${aiContext.connectorIssues[0].label}: ${aiContext.connectorIssues[0].reason}.`] : [])
+public/control-center/pages/ai-command.js:2084:			routeSuggestion("Integrations", "integrations", "Reconnect data sources and improve intelligence coverage."),
+public/control-center/pages/ai-command.js:2087:		missingData: buildMissingDataNotes(aiContext, "executive")
+public/control-center/pages/ai-command.js:2091:function buildContentResponse(aiContext) {
+public/control-center/pages/ai-command.js:2092:	const top = aiContext.topContent[0];
+public/control-center/pages/ai-command.js:2093:	const weak = aiContext.weakContent[0];
+public/control-center/pages/ai-command.js:2094:	const bestFormat = aiContext.learningPatterns.best_formats?.label;
+public/control-center/pages/ai-command.js:2095:	const bestPlatform = aiContext.learningPatterns.best_platforms?.label;
+public/control-center/pages/ai-command.js:2099:			? `${extractTopMessage(top)} is the strongest measured content item right now${top.platform ? ` on ${titleCase(top.platform)}` : ""}.`
+public/control-center/pages/ai-command.js:2100:			: "Not enough post-level data yet to rank content winners.",
+public/control-center/pages/ai-command.js:2103:			weak ? `Weakest item: ${extractTopMessage(weak)}.` : "No weak content list yet.",
+public/control-center/pages/ai-command.js:2107:		recommendations: [
+public/control-center/pages/ai-command.js:2113:			top ? `Create a follow-up asset using ${extractTopMessage(top)}'s pattern.` : "Load social insight data before expanding content queue.",
+public/control-center/pages/ai-command.js:2114:			weak ? `Move ${extractTopMessage(weak)} into a rewrite workflow.` : "Audit current content for posts not converting attention to clicks.",
+public/control-center/pages/ai-command.js:2118:			routeSuggestion("Content Studio", "content-studio", "Rewrite weak posts and turn winning patterns into new drafts."),
+public/control-center/pages/ai-command.js:2119:			routeSuggestion("Publishing", "publishing", "Schedule the next batch with stronger timing and approval control."),
+public/control-center/pages/ai-command.js:2120:			routeSuggestion("Insights", "insights", "Compare top and weak content performance.")
+public/control-center/pages/ai-command.js:2122:		missingData: buildMissingDataNotes(aiContext, "content")
+public/control-center/pages/ai-command.js:2126:function buildSeoResponse(aiContext) {
+public/control-center/pages/ai-command.js:2127:	const seo = aiContext.seo;
+public/control-center/pages/ai-command.js:2128:	const website = aiContext.website;
+public/control-center/pages/ai-command.js:2143:		recommendations: [
+public/control-center/pages/ai-command.js:2146:			aiContext.recommendations.find((item) => item.domain === "seo")?.action || ""
+public/control-center/pages/ai-command.js:2149:			topQuery ? `Expand content around ${extractTopMessage(topQuery)}.` : "Reconnect Search Console before making SEO roadmap decisions.",
+public/control-center/pages/ai-command.js:2155:			routeSuggestion("Integrations", "integrations", "Reconnect GA4 or Search Console."),
+public/control-center/pages/ai-command.js:2158:		missingData: buildMissingDataNotes(aiContext, "seo")
+public/control-center/pages/ai-command.js:2162:function buildAdsResponse(aiContext) {
+public/control-center/pages/ai-command.js:2163:	const paid = aiContext.paid;
+public/control-center/pages/ai-command.js:2164:	const bestCampaign = asArray(paid.best_campaigns)[0];
+public/control-center/pages/ai-command.js:2165:	const weakCampaign = asArray(paid.weak_campaigns)[0];
+public/control-center/pages/ai-command.js:2166:	const bestCreative = asArray(paid.best_creatives)[0];
+public/control-center/pages/ai-command.js:2169:		summary: paid.summary?.spend != null
+public/control-center/pages/ai-command.js:2170:			? `Paid media live with ${formatCurrency(paid.summary.spend, aiContext.currency)} tracked spend.`
+public/control-center/pages/ai-command.js:2173:			bestCampaign ? `Best campaign: ${extractTopMessage(bestCampaign)}.` : "No winning campaign measured yet.",
+public/control-center/pages/ai-command.js:2174:			weakCampaign ? `Weak campaign: ${extractTopMessage(weakCampaign)}.` : "No weak campaign list yet.",
+public/control-center/pages/ai-command.js:2175:			bestCreative ? `Best creative: ${extractTopMessage(bestCreative)}.` : "No creative breakdown yet.",
+public/control-center/pages/ai-command.js:2176:			paid.summary?.roas != null ? `Current ROAS: ${Number(paid.summary.roas).toFixed(2)}x.` : "ROAS not available yet."
+public/control-center/pages/ai-command.js:2178:		recommendations: [
+public/control-center/pages/ai-command.js:2179:			bestCampaign ? `Scale ${extractTopMessage(bestCampaign)} only after validating strong CTR and ROAS.` : "Connect paid platforms before making scale decisions.",
+public/control-center/pages/ai-command.js:2181:			aiContext.recommendations.find((item) => item.domain === "paid")?.action || ""
+public/control-center/pages/ai-command.js:2184:			bestCreative ? `Reuse the creative pattern behind ${extractTopMessage(bestCreative)}.` : "Sync paid data before scaling any creative.",
+public/control-center/pages/ai-command.js:2185:			weakCampaign ? `Rebuild hook and CTA for ${extractTopMessage(weakCampaign)}.` : "Audit campaign naming and creative mapping.",
+public/control-center/pages/ai-command.js:2186:			"Tie paid decisions to conversion and revenue signal — not just clicks."
+public/control-center/pages/ai-command.js:2189:			routeSuggestion("Ads Manager", "ads-manager", "Review pacing, creative mapping, and paid operating view."),
+public/control-center/pages/ai-command.js:2190:			routeSuggestion("Integrations", "integrations", "Connect or reconnect paid reporting platforms."),
+public/control-center/pages/ai-command.js:2191:			routeSuggestion("Insights", "insights", "Compare paid vs organic and website results.")
+public/control-center/pages/ai-command.js:2193:		missingData: buildMissingDataNotes(aiContext, "ads")
+public/control-center/pages/ai-command.js:2197:function buildResearchResponse(aiContext) {
+public/control-center/pages/ai-command.js:2202:			aiContext.missingIntegrations.length ? `Missing intelligence: ${aiContext.missingIntegrations.map((item) => item.label).join(", ")}.` : "Main intelligence lanes are structurally connected.",
+public/control-center/pages/ai-command.js:2203:			aiContext.criticalGaps.length ? `Critical gaps affecting research quality: ${aiContext.criticalGaps.slice(0, 4).map(normalizeActionLabel).join(", ")}.` : "No major setup gaps blocking research quality.",
+public/control-center/pages/ai-command.js:2204:			aiContext.learningPatterns.best_topics?.label ? `Current system learning: ${aiContext.learningPatterns.best_topics.label}.` : "Learning engine needs more live data."
+public/control-center/pages/ai-command.js:2206:		recommendations: [
+public/control-center/pages/ai-command.js:2209:			"Prioritize integrations that unlock attribution and performance evidence over vanity metrics."
+public/control-center/pages/ai-command.js:2212:			"Review Setup and tighten goals, audience, competitor, and market assumptions.",
+public/control-center/pages/ai-command.js:2213:			"Reconnect missing analytics, SEO, and paid feeds to improve evidence quality.",
+public/control-center/pages/ai-command.js:2218:			routeSuggestion("Integrations", "integrations", "Increase data coverage and reduce blind spots."),
+public/control-center/pages/ai-command.js:2222:			...buildMissingDataNotes(aiContext, "seo"),
+public/control-center/pages/ai-command.js:2223:			...buildMissingDataNotes(aiContext, "ads"),
+public/control-center/pages/ai-command.js:2224:			...buildMissingDataNotes(aiContext, "content")
+public/control-center/pages/ai-command.js:2229:function buildOperationsTaskBlock(aiContext, message) {
+public/control-center/pages/ai-command.js:2231:	if (/launch.*campaign|new campaign/.test(query)) {
+public/control-center/pages/ai-command.js:2232:		return { title: "Campaign launch task block", owner: "Campaign Studio", steps: ["Define the campaign objective, audience, and offer.", "Choose channels and budget based on current intelligence.", "List required assets and publishing dependencies before launch."] };
+public/control-center/pages/ai-command.js:2234:	if (/content plan|7-day/.test(query)) {
+public/control-center/pages/ai-command.js:2235:		return { title: "Content plan task block", owner: "Content Studio", steps: ["Use the strongest content pattern as the starting template.", "Map posts by platform, hook, format, and CTA.", "Route approved items into Publishing for scheduling."] };
+public/control-center/pages/ai-command.js:2237:	if (/weak post|improve content/.test(query)) {
+public/control-center/pages/ai-command.js:2240:	if (/reconnect|missing tools|missing integrations/.test(query)) {
+public/control-center/pages/ai-command.js:2246:function buildOperationsResponse(aiContext, message) {
+public/control-center/pages/ai-command.js:2248:	const taskBlock = buildOperationsTaskBlock(aiContext, message);
+public/control-center/pages/ai-command.js:2250:	if (/campaign/.test(query)) routeSuggestions.push(routeSuggestion("Campaign Studio", "campaign-studio", "Turn this into a structured launch plan."));
+public/control-center/pages/ai-command.js:2251:	if (/content|post/.test(query)) {
+public/control-center/pages/ai-command.js:2252:		routeSuggestions.push(routeSuggestion("Content Studio", "content-studio", "Draft, rewrite, or prepare the requested content outputs."));
+public/control-center/pages/ai-command.js:2255:	if (/reconnect|connect|integration|tool|sync/.test(query)) routeSuggestions.push(routeSuggestion("Integrations", "integrations", "Reconnect data sources and restore intelligence coverage."));
+public/control-center/pages/ai-command.js:2256:	if (/ads|campaign scale|roas|creative/.test(query)) routeSuggestions.push(routeSuggestion("Ads Manager", "ads-manager", "Review live paid performance and action the next media move."));
+public/control-center/pages/ai-command.js:2262:			aiContext.criticalGaps.length ? `Unresolved critical gaps: ${aiContext.criticalGaps.slice(0, 3).map(normalizeActionLabel).join(", ")}.` : "No critical gap is blocking this operation.",
+public/control-center/pages/ai-command.js:2263:			aiContext.missingIntegrations.length ? "Intelligence coverage gaps may reduce execution quality." : "Core intelligence is available for routing."
+public/control-center/pages/ai-command.js:2265:		recommendations: [
+public/control-center/pages/ai-command.js:2267:			aiContext.recommendations[0]?.action || "Use the current recommendation stack to choose the first high-impact step."
+public/control-center/pages/ai-command.js:2272:		missingData: buildMissingDataNotes(aiContext, "content")
+public/control-center/pages/ai-command.js:2276:function buildResponseForMode(aiContext, classified, message) {
+public/control-center/pages/ai-command.js:2280:		case "media":
+public/control-center/pages/ai-command.js:2281:			return buildContentResponse(aiContext);
+public/control-center/pages/ai-command.js:2283:			return buildSeoResponse(aiContext);
+public/control-center/pages/ai-command.js:2284:		case "ads":
+public/control-center/pages/ai-command.js:2285:			return buildAdsResponse(aiContext);
+public/control-center/pages/ai-command.js:2287:			return buildResearchResponse(aiContext);
+public/control-center/pages/ai-command.js:2289:			return buildOperationsResponse(aiContext, message);
+public/control-center/pages/ai-command.js:2293:				? buildOperationsResponse(aiContext, message)
+public/control-center/pages/ai-command.js:2294:				: buildExecutiveResponse(aiContext);
+public/control-center/pages/ai-command.js:2307:	fetchProjectInsights,
+public/control-center/pages/ai-command.js:2308:	fetchProjectLearning,
+public/control-center/pages/ai-command.js:2321:	const needsDashboard = !state.data.overview || !state.data.readiness || !state.data.integrations || !state.data.activity;
+public/control-center/pages/ai-command.js:2332:					fetchProjectInsights(projectName),
+public/control-center/pages/ai-command.js:2333:					fetchProjectLearning(projectName)
+public/control-center/pages/ai-command.js:2346:					learning: learningResult.status === "fulfilled" ? learningResult.value : (learningMissing ? { project: projectName, generated_at: nowIso(), learning_patterns: {}, recommendations: [] } : null),
+public/control-center/pages/ai-command.js:2379:	"content-studio": "Content Studio",
+public/control-center/pages/ai-command.js:2380:	"media-studio": "Media Studio",
+public/control-center/pages/ai-command.js:2382:	"campaign-studio": "Campaign Studio",
+public/control-center/pages/ai-command.js:2384:	library: "Library",
+public/control-center/pages/ai-command.js:2386:	integrations: "Integrations",
+public/control-center/pages/ai-command.js:2388:	governance: "Governance",
+public/control-center/pages/ai-command.js:2395:	"ads-manager": "Ads Manager",
+public/control-center/pages/ai-command.js:2401:	"content-studio": "writer",
+public/control-center/pages/ai-command.js:2402:	"media-studio": "media",
+public/control-center/pages/ai-command.js:2404:	"campaign-studio": "strategist",
+public/control-center/pages/ai-command.js:2406:	library: "media",
+public/control-center/pages/ai-command.js:2408:	integrations: "operations",
+public/control-center/pages/ai-command.js:2410:	governance: "compliance_reviewer",
+public/control-center/pages/ai-command.js:2417:	"ads-manager": "ads",
+public/control-center/pages/ai-command.js:2423:	designer: "media",
+public/control-center/pages/ai-command.js:2433:	content: "content-studio",
+public/control-center/pages/ai-command.js:2434:	"content-studio-workspace": "content-studio",
+public/control-center/pages/ai-command.js:2435:	media: "media-studio",
+public/control-center/pages/ai-command.js:2436:	"media-studio-workspace": "media-studio",
+public/control-center/pages/ai-command.js:2439:	campaign: "campaign-studio",
+public/control-center/pages/ai-command.js:2440:	campaigns: "campaign-studio",
+public/control-center/pages/ai-command.js:2442:	asset: "library",
+public/control-center/pages/ai-command.js:2443:	"asset-library": "library",
+public/control-center/pages/ai-command.js:2450:	integration: "integrations",
+public/control-center/pages/ai-command.js:2451:	govern: "governance",
+public/control-center/pages/ai-command.js:2510:function normalizeAiInboundRouteSuggestions(rawSuggestions, sourcePage, sourceLabel) {
+public/control-center/pages/ai-command.js:2511:	const fallbackRoute = sourcePage === "workspace" ? "workflows" : sourcePage;
+public/control-center/pages/ai-command.js:2512:	const fallbackLabel = sourceLabel || routeLabel(fallbackRoute);
+public/control-center/pages/ai-command.js:2539:		normalized.sourcePage ||
+public/control-center/pages/ai-command.js:2547:		title: firstAiInboundText(preview.title, normalized.title, `Inbound handoff from ${normalized.sourceLabel}`),
+public/control-center/pages/ai-command.js:2552:		sourcePrompt: firstAiInboundText(preview.sourcePrompt, preview.source_prompt, normalized.prompt),
+public/control-center/pages/ai-command.js:2555:		confirmationNote: firstAiInboundText(preview.confirmationNote, preview.confirmation_note, "Execution, approvals, publishing, CRM updates, customer replies, and workflow runs require explicit confirmation in the owning workspace."),
+public/control-center/pages/ai-command.js:2585:	return [handoff?.source_page, handoff?.destination_page, payload.prompt, payload.title]
+public/control-center/pages/ai-command.js:2594:	const sourcePage = normalizeAiInboundSourcePage(firstAiInboundId(
+public/control-center/pages/ai-command.js:2595:		payload.source_page,
+public/control-center/pages/ai-command.js:2596:		payload.sourcePage,
+public/control-center/pages/ai-command.js:2597:		handoff?.source_page,
+public/control-center/pages/ai-command.js:2598:		handoff?.sourcePage,
+public/control-center/pages/ai-command.js:2599:		draftContext.source_page,
+public/control-center/pages/ai-command.js:2600:		draftContext.sourcePage
+public/control-center/pages/ai-command.js:2602:	const sourceLabel = AI_INBOUND_SOURCE_LABELS[sourcePage] || routeLabel(sourcePage) || "Workspace";
+public/control-center/pages/ai-command.js:2606:		AI_INBOUND_SPECIALIST_BY_SOURCE[sourcePage] ||
+public/control-center/pages/ai-command.js:2625:	)) || `Review this ${sourceLabel} handoff for ${projectLabel}. Identify the right specialist, summarize the context, produce a review-ready draft, and recommend the next safe route. Do not execute publishing, task creation, CRM updates, customer replies, workflow runs, or backend actions.`;
+public/control-center/pages/ai-command.js:2632:		`Inbound handoff from ${sourceLabel}`
+public/control-center/pages/ai-command.js:2639:		sourcePage,
+public/control-center/pages/ai-command.js:2640:		sourceLabel
+public/control-center/pages/ai-command.js:2651:		sourcePage,
+public/control-center/pages/ai-command.js:2652:		sourceLabel,
+public/control-center/pages/ai-command.js:2661:			source_page: sourcePage,
+public/control-center/pages/ai-command.js:2662:			sourcePage
+public/control-center/pages/ai-command.js:2684:		sourcePage: normalized.sourcePage,
+public/control-center/pages/ai-command.js:2685:		sourceLabel: normalized.sourceLabel,
+public/control-center/pages/ai-command.js:2716:	persistSessionDraft(projectName, session, `Inbound handoff loaded from ${normalized.sourceLabel}`);
+public/control-center/pages/ai-command.js:2724:	showMessage?.(`Inbound handoff loaded from ${normalized.sourceLabel}.`);
+public/control-center/pages/ai-command.js:2729:	aiContext,
+public/control-center/pages/ai-command.js:2733:	source,
+public/control-center/pages/ai-command.js:2750:			source,
+public/control-center/pages/ai-command.js:2753:				categories: aiContext.assetCategories,
+public/control-center/pages/ai-command.js:2754:				approved_assets: aiContext.approvedAssets,
+public/control-center/pages/ai-command.js:2755:				blockers: aiContext.assetBlockers
+public/control-center/pages/ai-command.js:2788:		content: cleanCommand,
+public/control-center/pages/ai-command.js:2790:		source
+public/control-center/pages/ai-command.js:2798:		source: "durable-ai-response",
+public/control-center/pages/ai-command.js:2807:		source,
+public/control-center/pages/ai-command.js:2814:	syncAiWorkflowBridge({ projectName: aiContext.projectName, modeId: resolvedModeId, command: cleanCommand, response });
+public/control-center/pages/ai-command.js:2849:function renderControlRoomHeader(aiContext, session, intelligenceStatus, escapeHtml) {
+public/control-center/pages/ai-command.js:2850:	const projectLabel = aiContext.projectName || "No project selected";
+public/control-center/pages/ai-command.js:2851:	const readinessLabel = aiContext.readinessScore != null ? `${aiContext.readinessScore}/100` : "--";
+public/control-center/pages/ai-command.js:2852:	const coverageLabel = aiContext.coverageTotal > 0 ? `${aiContext.coveredCount}/${aiContext.coverageTotal}` : "--";
+public/control-center/pages/ai-command.js:2858:	if (aiContext.projectName) caps.push("Campaign planning");
+public/control-center/pages/ai-command.js:2859:	if (aiContext.hasLiveIntelligence) caps.push("Performance analysis");
+public/control-center/pages/ai-command.js:2860:	if (aiContext.recommendations.length) caps.push(`${aiContext.recommendations.length} recommendations ready`);
+public/control-center/pages/ai-command.js:2861:	if (aiContext.topContent.length) caps.push("Content intelligence");
+public/control-center/pages/ai-command.js:2862:	if (aiContext.paid?.summary?.spend != null) caps.push("Paid media briefing");
+public/control-center/pages/ai-command.js:2863:	if (aiContext.seo?.summary?.impressions != null) caps.push("SEO analysis");
+public/control-center/pages/ai-command.js:2887:					<strong>${escapeHtml(readinessLabel)}</strong>
+public/control-center/pages/ai-command.js:2895:					<strong>${escapeHtml(aiContext.campaign || "None")}</strong>
+public/control-center/pages/ai-command.js:2897:				${aiContext.market ? `<div class="ctrl-room-ctx-chip"><span>Market</span><strong>${escapeHtml(aiContext.market)}</strong></div>` : ""}
+public/control-center/pages/ai-command.js:2947:function renderSuggestedPromptsSection(aiContext, session, escapeHtml) {
+public/control-center/pages/ai-command.js:2948:	const projectLabel = aiContext.projectName || "this project";
+public/control-center/pages/ai-command.js:2986:	const recommendations = normalizeDisplayList(response.recommendations, 4);
+public/control-center/pages/ai-command.js:2997:	const hasContent = title || summary || findings.length || recommendations.length || nextActions.length;
+public/control-center/pages/ai-command.js:3024:			${recommendations.length ? `
+public/control-center/pages/ai-command.js:3028:						${recommendations.map((item) => `<div class="ctrl-response-item"><span>${escapeHtml(item)}</span></div>`).join("")}
+public/control-center/pages/ai-command.js:3089:						<div class="ctrl-msg-user-text">${escapeHtml(message.content)}</div>
+public/control-center/pages/ai-command.js:3146:									<div class="ctrl-recent-content">
+public/control-center/pages/ai-command.js:3170:function renderArtifactsPanel(aiContext, session, escapeHtml) {
+public/control-center/pages/ai-command.js:3171:	const recommendations = aiContext.recommendations.slice(0, 4);
+public/control-center/pages/ai-command.js:3172:	const patterns = Object.entries(asObject(aiContext.learningPatterns))
+public/control-center/pages/ai-command.js:3185:	const hasContent = recommendations.length || patterns.length || artifacts.length;
+public/control-center/pages/ai-command.js:3191:				<span style="font-size:11px;color:var(--color-text-2);">${recommendations.length} rec${recommendations.length !== 1 ? "s" : ""} · ${patterns.length} patterns</span>
+public/control-center/pages/ai-command.js:3206:						${recommendations.map((rec) => {
+public/control-center/pages/ai-command.js:3261:                        const content = asString(message.content || message.text || message.responseText || "").trim();
+public/control-center/pages/ai-command.js:3262:                        return content ? `${label}: ${content}` : "";
+public/control-center/pages/ai-command.js:3268:                latestUser?.content ||
+public/control-center/pages/ai-command.js:3275:                latestAssistant?.content ||
+public/control-center/pages/ai-command.js:3329:        preview.sourcePrompt = context.prompt || workPrompt;
+public/control-center/pages/ai-command.js:3365:function buildSmartRecommendation(aiContext) {
+public/control-center/pages/ai-command.js:3366:	if (aiContext.criticalGaps.length) {
+public/control-center/pages/ai-command.js:3368:			title: "Close critical readiness gaps before scale",
+public/control-center/pages/ai-command.js:3369:			reason: `${aiContext.criticalGaps.length} critical setup gap${aiContext.criticalGaps.length === 1 ? "" : "s"} can block launch quality and downstream automation reliability.`,
+public/control-center/pages/ai-command.js:3370:			command: `Review the critical readiness gaps for ${aiContext.projectName || "this project"} and produce a fix plan with owners, order, and dependencies.`,
+public/control-center/pages/ai-command.js:3371:			chips: buildImpactChips(["Launch readiness", "Campaign", "Automation"])
+public/control-center/pages/ai-command.js:3375:	if (aiContext.assetBlockers.length) {
+public/control-center/pages/ai-command.js:3378:			reason: `${aiContext.assetBlockers.length} asset category blocker${aiContext.assetBlockers.length === 1 ? "" : "s"} may reduce content throughput and campaign delivery speed.`,
+public/control-center/pages/ai-command.js:3379:			command: `Create an asset unblock plan for ${aiContext.projectName || "this project"}. List missing files, priority, and where each is needed.`,
+public/control-center/pages/ai-command.js:3384:	if (aiContext.missingIntegrations.length || aiContext.connectorIssues.length) {
+public/control-center/pages/ai-command.js:3385:		const impacted = aiContext.missingIntegrations.length + aiContext.connectorIssues.length;
+public/control-center/pages/ai-command.js:3389:			command: `Build an integration recovery plan for ${aiContext.projectName || "this project"}. Prioritize connectors by business impact and data coverage gain.`,
+public/control-center/pages/ai-command.js:3390:			chips: buildImpactChips(["Integrations", "Automation", "Launch readiness"])
+public/control-center/pages/ai-command.js:3394:	if (!aiContext.campaign || aiContext.campaign === "Not selected") {
+public/control-center/pages/ai-command.js:3396:			title: "Define the active campaign operating plan",
+public/control-center/pages/ai-command.js:3397:			reason: "A clear campaign context helps every specialist agent generate more precise outputs.",
+public/control-center/pages/ai-command.js:3398:			command: `Create a campaign operating brief for ${aiContext.projectName || "this project"} with objective, audience, channels, and first execution wave.`,
+public/control-center/pages/ai-command.js:3399:			chips: buildImpactChips(["Campaign", "Content", "Launch readiness"])
+public/control-center/pages/ai-command.js:3404:		title: "Generate next content wave from current signals",
+public/control-center/pages/ai-command.js:3405:		reason: "Core readiness is stable enough to move into output generation and optimization.",
+public/control-center/pages/ai-command.js:3406:		command: `Generate the next high-impact content wave for ${aiContext.projectName || "this project"} based on current readiness and campaign context.`,
+public/control-center/pages/ai-command.js:3507:		media: "Draft"
+public/control-center/pages/ai-command.js:3517:	const outputType = tool.intent === "media" ? "guidance" : asString(tool.intent || "guidance");
+public/control-center/pages/ai-command.js:3523:	if (tool.actionType === "source_required") return "Source required";
+public/control-center/pages/ai-command.js:3531:	if (/review|check|compliance|readiness|governance/i.test(asString(tool.label))) return "Review";
+public/control-center/pages/ai-command.js:3539:		.replace(/\{campaign\}/g, "active campaign");
+public/control-center/pages/ai-command.js:3562:function renderPhase1Header(session, projectName, aiContext, bridgeStatus, escapeHtml) {
+public/control-center/pages/ai-command.js:3566:	const languagePlan = getWorkspaceLanguagePlan(aiContext);
+public/control-center/pages/ai-command.js:3568:	const readinessLabel = aiContext.readinessScore != null ? `${aiContext.readinessScore}/100` : "Pending";
+public/control-center/pages/ai-command.js:3575:				<p class="aicmd-room-subtitle mhos-context-description">Ask one expert or the full team to prepare strategy, content, analysis, reviews, and destination handoffs. AI prepares and reviews only; sensitive actions stay confirmation-gated in the owning workspace.</p>
+public/control-center/pages/ai-command.js:3608:					<strong>${escapeHtml(languagePlan.market)}</strong>
+public/control-center/pages/ai-command.js:3616:					<strong>${escapeHtml(readinessLabel)}</strong>
+public/control-center/pages/ai-command.js:3649:			<span>Strategy, writing, creative, compliance, publishing, customer, sales, and operations specialists coordinate one review-ready answer. No workflow, send, publish, approval, or CRM action is executed here.</span>
+public/control-center/pages/ai-command.js:3756:        if (roleId === "content_writer") return `${label} is drafting your content...`;
+public/control-center/pages/ai-command.js:3757:        if (roleId === "media_director" || roleId === "video_lead") return `${label} is preparing creative direction...`;
+public/control-center/pages/ai-command.js:3772:		? "Team orchestration across strategy, writing, media/video, compliance, publishing, customer operations, sales/CRM, and operations"
+public/control-center/pages/ai-command.js:3813:	const sourceMeta = asArray(tool.sourceTypes).join(" ");
+public/control-center/pages/ai-command.js:3814:	return tool.actionType === "source_required" || /source_of_truth_assets|selected_asset|proof_doc|legal_doc|privacy_policy/i.test(sourceMeta);
+public/control-center/pages/ai-command.js:3864:function renderPhase35ToolsPanel(session, projectName, aiContext, escapeHtml) {
+public/control-center/pages/ai-command.js:3874:					<span class="aicmd-v2-tools-subtitle">Prompt tools for structured drafts, source-aware reviews, and destination handoffs. They prepare composer instructions only.</span>
+public/control-center/pages/ai-command.js:3911:function renderLanguageMarketStrip(aiContext, escapeHtml) {
+public/control-center/pages/ai-command.js:3912:        const languagePlan = getWorkspaceLanguagePlan(aiContext);
+public/control-center/pages/ai-command.js:3915:        const market = asString(languagePlan.market || "Germany").trim() || "Germany";
+public/control-center/pages/ai-command.js:3918:                <div class="aicmd-language-market-strip aicmd-text-only-chip-strip" aria-label="Language and market context">
+public/control-center/pages/ai-command.js:3921:                        <span>${escapeHtml(market)}</span>
+public/control-center/pages/ai-command.js:3927:	const source = getSelectedLibrarySource(projectName);
+public/control-center/pages/ai-command.js:3928:	if (!source) return "";
+public/control-center/pages/ai-command.js:3929:	const name = asString(source.name || source.filename || source.fileName || "Selected Library source");
+public/control-center/pages/ai-command.js:3931:	const type = asString(source.asset_type || source.type || source.source_type || "Library asset");
+public/control-center/pages/ai-command.js:3932:	const sourceOfTruth = typeof source.source_of_truth === "boolean"
+public/control-center/pages/ai-command.js:3933:		? (source.source_of_truth ? "Source of truth" : "")
+public/control-center/pages/ai-command.js:3934:		: asString(source.source_of_truth || "");
+public/control-center/pages/ai-command.js:3935:	const status = asString(source.review_status || source.status_label || source.status || "");
+public/control-center/pages/ai-command.js:3936:	const meta = [type, sourceOfTruth, status]
+public/control-center/pages/ai-command.js:3943:		<div class="aicmd-main-source-indicator" title="${escapeHtml(name)}">
+public/control-center/pages/ai-command.js:3951:function renderAiCommandIntelligenceLayer({ session, projectName, aiContext, bridgeStatus, escapeHtml }) {
+public/control-center/pages/ai-command.js:3962:        const source = getSelectedLibrarySource(projectName || aiContext?.projectName || "");
+public/control-center/pages/ai-command.js:3963:        const sourceLabel = source
+public/control-center/pages/ai-command.js:3964:                ? asString(source.name || source.filename || source.fileName || "Trusted source")
+public/control-center/pages/ai-command.js:3965:                : "No Library source selected";
+public/control-center/pages/ai-command.js:3966:        const governanceRequired = destinationRoute === "governance" || /approval|claim|compliance|risk|gdpr|review/i.test(`${outputType} ${asString(preview.title)} ${asString(preview.summary)}`);
+public/control-center/pages/ai-command.js:3967:        const riskLabel = governanceRequired ? "Review required" : "Low";
+public/control-center/pages/ai-command.js:3968:        const governanceLabel = governanceRequired ? "Governance route" : "Not required";
+public/control-center/pages/ai-command.js:3971:        const teamIds = ["strategist", "writer", "media", "video_lead", "compliance_reviewer", "operations"];
+public/control-center/pages/ai-command.js:3977:                        const complianceWatching = spec.id === "compliance_reviewer" && governanceRequired;
+public/control-center/pages/ai-command.js:4012:                                        <p>Active specialist, source grounding, destination, risk, and execution lock in one compact command strip.</p>
+public/control-center/pages/ai-command.js:4022:                                <span><strong>Governance</strong>${escapeHtml(governanceLabel)}</span>
+public/control-center/pages/ai-command.js:4023:                                <span><strong>Source</strong>${escapeHtml(sourceLabel)}</span>
+public/control-center/pages/ai-command.js:4029:                        <p class="aicmd-chatfirst-tab-note">AI Command prepares guidance, drafts, previews, and handoff context only. Publishing, approvals, CRM updates, workflow runs, customer sends, provider execution, and durable task creation remain confirmation-gated in the owning workspace.</p>
+public/control-center/pages/ai-command.js:4034:function renderAiCommandChatFirstShell({ session, projectName, aiContext, bridgeStatus, escapeHtml }) {
+public/control-center/pages/ai-command.js:4044:                                        ${renderAiCommandChatWindow({ session, projectName, aiContext, bridgeStatus, escapeHtml })}
+public/control-center/pages/ai-command.js:4101:				<p>Chat, draft, review, and prepare handoff context only. Publishing, approvals, CRM updates, workflow runs, external sends, and durable task creation stay confirmation-gated in the owning workspace.</p>
+public/control-center/pages/ai-command.js:4122:function renderAiCommandChatWindow({ session, projectName, aiContext, bridgeStatus, escapeHtml }) {
+public/control-center/pages/ai-command.js:4125:			${renderAiCommandChatTopbar({ session, projectName, aiContext, bridgeStatus, escapeHtml })}
+public/control-center/pages/ai-command.js:4127:			${renderAiCommandChatComposer({ session, aiContext, escapeHtml })}
+public/control-center/pages/ai-command.js:4132:function renderAiCommandChatTopbar({ session, projectName, aiContext, bridgeStatus, escapeHtml }) {
+public/control-center/pages/ai-command.js:4134:	const source = getSelectedLibrarySource(projectName || aiContext?.projectName || "");
+public/control-center/pages/ai-command.js:4135:	const sourceLabel = source?.name || source?.filename || source?.fileName || "";
+public/control-center/pages/ai-command.js:4150:				<button id="aicmdV2SourceBtnTopbar" class="aicmd-chatfirst-icon-control" type="button" data-aicmd-chatfirst-source title="${escapeHtml(sourceLabel ? `Trusted source: ${sourceLabel}` : "1. Choose source through Tool Drawer / Library")}">
+public/control-center/pages/ai-command.js:4151:					Source${sourceLabel ? `: ${escapeHtml(asString(sourceLabel).slice(0, 36))}` : ""}
+public/control-center/pages/ai-command.js:4227:                                content: item.prompt || "",
+public/control-center/pages/ai-command.js:4234:                                content: item.responseText || "",
+public/control-center/pages/ai-command.js:4279:                const content = asString(message.content || message.text || message.responseText || "");
+public/control-center/pages/ai-command.js:4289:                                        <p>${escapeHtml(content)}</p>
+public/control-center/pages/ai-command.js:4314:                                                <span>Plan campaign</span>
+public/control-center/pages/ai-command.js:4315:                                                <span>Draft content</span>
+public/control-center/pages/ai-command.js:4316:                                                <span>Review source</span>
+public/control-center/pages/ai-command.js:4328:                source: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M5 8h14M5 16h14"/></svg>',
+public/control-center/pages/ai-command.js:4337:                { id: "campaign", label: "Campaign", summary: "Build a review-ready campaign with the full AI Team.", enabled: true },
+public/control-center/pages/ai-command.js:4339:                { id: "offer", label: "Offer", summary: "Shape a product offer from pricing, market, and audience context.", enabled: false },
+public/control-center/pages/ai-command.js:4341:                { id: "media", label: "Media", summary: "Create a media brief, storyboard, and production direction.", enabled: false },
+public/control-center/pages/ai-command.js:4342:                { id: "publish", label: "Publish", summary: "Prepare publishing checklist and handoff readiness.", enabled: false }
+public/control-center/pages/ai-command.js:4378:        const campaignPackage = asObject(packageInput);
+public/control-center/pages/ai-command.js:4380:                ["Concept", asString(campaignPackage.concept)],
+public/control-center/pages/ai-command.js:4381:                ["Target audience", asString(campaignPackage.targetAudience || campaignPackage.target_audience)],
+public/control-center/pages/ai-command.js:4382:                ["Offer", asString(campaignPackage.offer)]
+public/control-center/pages/ai-command.js:4386:                ["Launch phases", asArray(campaignPackage.launchPhases || campaignPackage.launch_phases)],
+public/control-center/pages/ai-command.js:4387:                ["Content angles", asArray(campaignPackage.contentAngles || campaignPackage.content_angles)],
+public/control-center/pages/ai-command.js:4388:                ["Ad angles", asArray(campaignPackage.adAngles || campaignPackage.ad_angles)],
+public/control-center/pages/ai-command.js:4389:                ["Required assets", asArray(campaignPackage.requiredAssets || campaignPackage.required_assets)],
+public/control-center/pages/ai-command.js:4390:                ["Review blockers", asArray(campaignPackage.missingBlockers || campaignPackage.missing_blockers)],
+public/control-center/pages/ai-command.js:4391:                ["Next actions", asArray(campaignPackage.nextActions || campaignPackage.next_actions)]
+public/control-center/pages/ai-command.js:4397:                <div class="aicmd-smart-preview-grid aicmd-smart-campaign-package-grid">
+public/control-center/pages/ai-command.js:4419:        if (wizard.type !== "campaign" || !wizard.open) return "";
+public/control-center/pages/ai-command.js:4421:        const source = asString(wizard.source || "project");
+public/control-center/pages/ai-command.js:4424:        const market = asString(wizard.market || "germany");
+public/control-center/pages/ai-command.js:4430:        const productFocus = asString(wizard.productFocus || "selected-product");
+public/control-center/pages/ai-command.js:4434:        const sourceOptions = [["project", "Project context"], ["product", "Product"], ["library", "Library source"], ["upload", "Uploaded source"]];
+public/control-center/pages/ai-command.js:4435:        const goalOptions = [["sales", "Sales"], ["launch", "Product launch"], ["leads", "Lead generation"], ["awareness", "Awareness"], ["retargeting", "Retargeting"]];
+public/control-center/pages/ai-command.js:4436:        const channelOptions = [["social", "Social"], ["email", "Email"], ["website", "Website"], ["ads", "Ads"], ["publishing", "Publishing package"]];
+public/control-center/pages/ai-command.js:4437:        const marketOptions = [["germany", "Germany"], ["eu", "EU"], ["mena", "MENA"], ["global", "Global"]];
+public/control-center/pages/ai-command.js:4439:        const formatOptions = [["mixed", "Mixed package"], ["image", "Image"], ["video", "Video"], ["email", "Email"], ["landing", "Landing page"], ["ads", "Ads"]];
+public/control-center/pages/ai-command.js:4443:        const productFocusOptions = [["selected-product", "Selected product"], ["hero-product", "Hero product"], ["bundle", "Bundle"], ["service", "Service"], ["brand", "Brand"]];
+public/control-center/pages/ai-command.js:4464:                                                <p>Guide the AI Team from source to preview. Backend workflow execution and destination handoff stay approval-gated.</p>
+public/control-center/pages/ai-command.js:4479:                                                <strong>1. Choose source</strong>
+public/control-center/pages/ai-command.js:4481:                                                        ${sourceOptions.map(([value, label]) => optionButton("source", value, label, source)).join("")}
+public/control-center/pages/ai-command.js:4500:                                                <strong>4. Premium campaign brief</strong>
+public/control-center/pages/ai-command.js:4502:                                                        ${marketOptions.map(([value, label]) => optionButton("market", value, label, market)).join("")}
+public/control-center/pages/ai-command.js:4520:                                                        ${productFocusOptions.map(([value, label]) => optionButton("productFocus", value, label, productFocus)).join("")}
+public/control-center/pages/ai-command.js:4535:                                                                <span><strong>Source</strong>${escapeHtml(preview.sourceLabel)}</span>
+public/control-center/pages/ai-command.js:4539:                                                                <span><strong>Market</strong>${escapeHtml(titleCase(preview.market || market))}</span>
+public/control-center/pages/ai-command.js:4545:                                                        ${renderCampaignPackageMiniPanel(preview.campaignPackage, escapeHtml)}
+public/control-center/pages/ai-command.js:4557:                                                                <button type="button" data-aicmd-smart-campaign-action="library">Save to Library</button>
+public/control-center/pages/ai-command.js:4558:                                                                <button type="button" data-aicmd-smart-campaign-action="media">Send to Media Studio</button>
+public/control-center/pages/ai-command.js:4559:                                                                <button type="button" data-aicmd-smart-campaign-action="governance">Request Governance Review</button>
+public/control-center/pages/ai-command.js:4560:                                                                <button type="button" data-aicmd-smart-campaign-action="publishing">Prepare Publishing Handoff</button>
+public/control-center/pages/ai-command.js:4561:                                                                <button type="button" data-aicmd-smart-campaign-action="operations">Create Operations Follow-up</button>
+public/control-center/pages/ai-command.js:4567:                                                        <span>1. Choose source, goal, and channel. The AI Team will prepare the preview package before any approval or handoff.</span>
+public/control-center/pages/ai-command.js:4576:                                                <button class="aicmd-smart-wizard-primary" type="button" data-aicmd-smart-campaign-preview>
+public/control-center/pages/ai-command.js:4605:function renderAiCommandComposerAttachments({ session, aiContext, escapeHtml }) {
+public/control-center/pages/ai-command.js:4606:        const projectName = aiContext?.projectName || "";
+public/control-center/pages/ai-command.js:4607:        const source = getSelectedLibrarySource(projectName);
+public/control-center/pages/ai-command.js:4631:        if (source?.name || source?.filename || source?.fileName) {
+public/control-center/pages/ai-command.js:4632:                const name = source.name || source.filename || source.fileName || "Library source";
+public/control-center/pages/ai-command.js:4633:                const type = source.asset_type || source.type || source.source_type || "Library";
+public/control-center/pages/ai-command.js:4635:                        <span class="aicmd-final-attachment-chip is-library" title="${escapeHtml(name)}">
+public/control-center/pages/ai-command.js:4636:                                <strong>Library</strong>
+public/control-center/pages/ai-command.js:4670:                                        <small>Strategy, content, media, operations, compliance, customer, campaign and provider-readiness planning.</small>
+public/control-center/pages/ai-command.js:4694:                        <div class="aicmd-final-team-readiness">
+public/control-center/pages/ai-command.js:4696:                                <span>Library, campaigns, content, customers, governance, integrations and provider readiness are connected as guarded planning context. Execution stays confirmation-gated.</span>
+public/control-center/pages/ai-command.js:4702:function renderAiCommandChatComposer({ session, aiContext, escapeHtml }) {
+public/control-center/pages/ai-command.js:4728:                                ${renderAiCommandComposerAttachments({ session, aiContext, escapeHtml })}
+public/control-center/pages/ai-command.js:4754:                        <div class="aicmd-final-source-menu" data-aicmd-final-source-menu data-aicmd-final-dropzone hidden aria-hidden="true">
+public/control-center/pages/ai-command.js:4757:                                <button type="button" class="aicmd-final-source-option" data-aicmd-final-source-option="upload">
+public/control-center/pages/ai-command.js:4761:                                <button type="button" class="aicmd-final-source-option" data-aicmd-final-source-option="library">
+public/control-center/pages/ai-command.js:4762:                                        <strong>Choose trusted Library source</strong>
+public/control-center/pages/ai-command.js:4763:                                        <span>Open Library, select a saved source, then return it as guarded AI context.</span>
+public/control-center/pages/ai-command.js:4765:                                <button type="button" class="aicmd-final-source-option" data-aicmd-final-source-option="product">
+public/control-center/pages/ai-command.js:4767:                                        <span>Planned direct selector. For now, use Library source or paste product details.</span>
+public/control-center/pages/ai-command.js:4769:                                <button type="button" class="aicmd-final-source-option" data-aicmd-final-source-option="project">
+public/control-center/pages/ai-command.js:4790:                                ${renderLanguageMarketStrip(aiContext, escapeHtml)}
+public/control-center/pages/ai-command.js:4826:function renderAiCommandSecondaryTabPanel({ session, projectName, aiContext, bridgeStatus, escapeHtml }) {
+public/control-center/pages/ai-command.js:4830:		? renderAiCommandToolsTab({ session, projectName, aiContext, escapeHtml })
+public/control-center/pages/ai-command.js:4832:			? renderAiCommandOutputTab({ session, aiContext, escapeHtml })
+public/control-center/pages/ai-command.js:4833:			: renderAiCommandFlowTab({ session, aiContext, bridgeStatus, escapeHtml });
+public/control-center/pages/ai-command.js:4893:function renderAiCommandToolsTab({ session, projectName, aiContext, escapeHtml }) {
+public/control-center/pages/ai-command.js:4903:					<p>Prompt setup only. Tools prepare composer instructions, source-aware reviews, previews, and handoff context without executing actions.</p>
+public/control-center/pages/ai-command.js:4931:function renderAiCommandOutputTab({ session, aiContext, escapeHtml }) {
+public/control-center/pages/ai-command.js:4936:	const languagePlan = getWorkspaceLanguagePlan(aiContext);
+public/control-center/pages/ai-command.js:4973:					<span><strong>Market</strong>${escapeHtml(languagePlan.market)}</span>
+public/control-center/pages/ai-command.js:5005:				<p class="aicmd-chatfirst-tab-note">This is a review-ready preview. Execution, publishing, approvals, CRM updates, external sends, durable task creation, and workflow runs happen only in the owning destination workspace after confirmation.</p>
+public/control-center/pages/ai-command.js:5016:function renderAiCommandFlowTab({ session, aiContext, bridgeStatus, escapeHtml }) {
+public/control-center/pages/ai-command.js:5020:	const readiness = aiContext.readinessScore != null ? `${aiContext.readinessScore}/100` : "No score";
+public/control-center/pages/ai-command.js:5041:				<span><strong>Readiness</strong>${escapeHtml(readiness)}</span>
+public/control-center/pages/ai-command.js:5049:function renderPhase35ReadinessStrip(aiContext, bridgeStatus, escapeHtml) {
+public/control-center/pages/ai-command.js:5050:	const providerConfigured = isProviderLikelyConfigured(aiContext);
+public/control-center/pages/ai-command.js:5051:	const readinessItems = [
+public/control-center/pages/ai-command.js:5061:		<section class="aicmd-v2-readiness-strip">
+public/control-center/pages/ai-command.js:5062:			${readinessItems.map((item) => `
+public/control-center/pages/ai-command.js:5063:				<span class="aicmd-v2-readiness-chip ${item.className}">
+public/control-center/pages/ai-command.js:5071:function renderAiRoomStatusStrip(aiContext, session, bridgeStatus, escapeHtml) {
+public/control-center/pages/ai-command.js:5073:	const readiness = aiContext.readinessScore != null ? `${aiContext.readinessScore}/100` : "No score";
+public/control-center/pages/ai-command.js:5074:	const approval = preview.confirmationRequired ? "Confirmation required" : (preview.outputType ? "Review ready" : "No draft yet");
+public/control-center/pages/ai-command.js:5076:	const integrations = aiContext.coverageTotal > 0 ? `${aiContext.coveredCount}/${aiContext.coverageTotal}` : "0 active";
+public/control-center/pages/ai-command.js:5082:			<div><span>Readiness</span><strong>${escapeHtml(readiness)}</strong></div>
+public/control-center/pages/ai-command.js:5083:			<div><span>Approval</span><strong>${escapeHtml(approval)}</strong></div>
+public/control-center/pages/ai-command.js:5085:			<div><span>Active integrations</span><strong>${escapeHtml(integrations)}</strong></div>
+public/control-center/pages/ai-command.js:5126:                ? "Chat only. No workflow run, durable task, external handoff action, approval, publishing action, CRM update, or customer action was created."
+public/control-center/pages/ai-command.js:5128:        const emptyBody = "Ask what to do next, draft a campaign asset, review a source, prepare a handoff, or coordinate the full AI team.";
+public/control-center/pages/ai-command.js:5132:                bridgeContext.source &&
+public/control-center/pages/ai-command.js:5149:        const inboundSourceLabel = asString(inbound.sourceLabel || "");
+public/control-center/pages/ai-command.js:5157:                const content = asString(message.content || message.text || message.responseText || "");
+public/control-center/pages/ai-command.js:5165:                                        <p>${escapeHtml(content)}</p>
+public/control-center/pages/ai-command.js:5177:                                content: item.prompt || "",
+public/control-center/pages/ai-command.js:5184:                                content: item.responseText || "",
+public/control-center/pages/ai-command.js:5329:function renderPhase1ContextPanel(state, session, aiContext, escapeHtml) {
+public/control-center/pages/ai-command.js:5330:	const projectName = aiContext.projectName;
+public/control-center/pages/ai-command.js:5331:	const readiness = aiContext.readinessScore;
+public/control-center/pages/ai-command.js:5332:	const languagePlan = getWorkspaceLanguagePlan(aiContext);
+public/control-center/pages/ai-command.js:5339:		{ label: "Market", value: languagePlan.market, present: true },
+public/control-center/pages/ai-command.js:5345:		{ label: "Readiness", value: readiness != null ? `${readiness}/100` : "No readiness data", present: readiness != null },
+public/control-center/pages/ai-command.js:5346:		{ label: "Integrations", value: aiContext.coverageTotal > 0 ? `${aiContext.coveredCount}/${aiContext.coverageTotal} connected` : "No coverage data", present: aiContext.coveredCount > 0 },
+public/control-center/pages/ai-command.js:5347:		{ label: "Library context", value: getSelectedLibrarySource(projectName)?.name ? "Trusted source selected" : "No source selected", present: Boolean(getSelectedLibrarySource(projectName)?.name) },
+public/control-center/pages/ai-command.js:5348:		{ label: "Approved assets", value: aiContext.approvedAssets.length ? `${aiContext.approvedAssets.length} ready` : "No approved assets", present: aiContext.approvedAssets.length > 0 },
+public/control-center/pages/ai-command.js:5361:				{ label: "Leads", value: "Discovery / qualification", present: true, scoped: true },
+public/control-center/pages/ai-command.js:5401:					<span>Drafts are not execution — prepared content stays local until you act on it.</span>
+public/control-center/pages/ai-command.js:5405:					<span>Publishing, approval, and workflow runs require your explicit confirmation in the right workspace.</span>
+public/control-center/pages/ai-command.js:5429:			body: preview.sourcePrompt || preview.summary || "",
+public/control-center/pages/ai-command.js:5481:			fetchProjectInsights,
+public/control-center/pages/ai-command.js:5482:			fetchProjectLearning,
+public/control-center/pages/ai-command.js:5487:		const projectName = asString(selectCurrentProject(state) || "");
+public/control-center/pages/ai-command.js:5525:					source: "Home",
+public/control-center/pages/ai-command.js:5539:		const payload = asObject(selectProjectPayload(state));
+public/control-center/pages/ai-command.js:5541:		const readiness = asObject(payload.readiness?.dashboard || payload.readiness);
+public/control-center/pages/ai-command.js:5542:		const operations = asObject(selectOperationsSnapshot(state));
+public/control-center/pages/ai-command.js:5544:		const readinessScore = readiness.readiness_score ?? overview.readiness_score ?? null;
+public/control-center/pages/ai-command.js:5547:		const aiContext = buildUnifiedAiContext(state, session.intelligence);
+public/control-center/pages/ai-command.js:5566:			aiContext,
+public/control-center/pages/ai-command.js:5722:                                const shouldReplaceRoleDraft = Boolean(previousBridgeContext.source) ||
+public/control-center/pages/ai-command.js:5781:                                return text.includes("source") || text.includes("review") || text.includes("brief") || text.includes("campaign");
+public/control-center/pages/ai-command.js:5790:                        updateStatus(`${reason} opened. Choose a tool or source-aware action.`);
+public/control-center/pages/ai-command.js:5794:                const finalSourceMenu = document.querySelector("[data-aicmd-final-source-menu]");
+public/control-center/pages/ai-command.js:5804:                        updateStatus(open ? `${reason} opened. Choose temporary file context, trusted Library source, planned product context, or current project context.` : `${reason} closed.`);
+public/control-center/pages/ai-command.js:5815:                Array.from(document.querySelectorAll("[data-aicmd-chatfirst-source]")).forEach((btn) => {
+public/control-center/pages/ai-command.js:5822:                Array.from(document.querySelectorAll("[data-aicmd-final-source-option]")).forEach((btn) => {
+public/control-center/pages/ai-command.js:5824:                                const option = asString(btn.getAttribute("data-aicmd-final-source-option") || "").trim();
+public/control-center/pages/ai-command.js:5832:                                        updateStatus("Choose files to stage as temporary chat context. AI Command does not upload or persist file content here.");
+public/control-center/pages/ai-command.js:5833:                                } else if (option === "library") {
+public/control-center/pages/ai-command.js:5834:                                        openLibrarySourcePickerFromAiCommand({
+public/control-center/pages/ai-command.js:5836:                                                sourceType: "auto",
+public/control-center/pages/ai-command.js:5843:                                } else if (option === "product") {
+public/control-center/pages/ai-command.js:5844:                                        updateStatus("Direct product/SKU source selection is planned. Use a trusted Library source or paste product details for now.");
+public/control-center/pages/ai-command.js:5845:                                        showMessage?.("Product/SKU selector is planned. Current safe options: Library source, uploaded filename context, project context, or manual product details.");
+public/control-center/pages/ai-command.js:5865:                        showMessage?.(`${label} attached to AI Command: ${names.join(", ")}. Persistent upload/source storage will be connected in the dedicated source phase.`);
+public/control-center/pages/ai-command.js:5957:                        aiContext,
+public/control-center/pages/ai-command.js:5967:                        if (type !== "campaign") {
+public/control-center/pages/ai-command.js:5974:                                type: "campaign",
+public/control-center/pages/ai-command.js:5976:                                source: asString(currentWizard.source || "project"),
+public/control-center/pages/ai-command.js:5982:                        updateStatus("Campaign Builder opened. 1. Choose source, goal, and channel.");
+public/control-center/pages/ai-command.js:5997:                        const source = asString(wizard.source || "project");
+public/control-center/pages/ai-command.js:6003:                        const sourceLabel = titleCase(source);
+public/control-center/pages/ai-command.js:6005:                        const sourceMeaning = {
+public/control-center/pages/ai-command.js:6006:                                project: "current project context, language plan, brand state, and existing workspace signals",
+public/control-center/pages/ai-command.js:6007:                                product: "selected product details, offer notes, pricing evidence, and product readiness",
+public/control-center/pages/ai-command.js:6008:                                library: "trusted Library source, approved assets, saved briefs, or validated knowledge",
+public/control-center/pages/ai-command.js:6009:                                upload: "uploaded source material after user review and attachment"
+public/control-center/pages/ai-command.js:6010:                        }[source] || "selected source context";
+public/control-center/pages/ai-command.js:6015:                                        body: `Define the ${goalLabel.toLowerCase()} objective, target segment, market angle, and campaign promise for ${projectLabel}.`
+public/control-center/pages/ai-command.js:6023:                                        body: "Prepare creative direction, image/video brief, shot list, format requirements, storyboard/voiceover notes, and asset gaps."
+public/control-center/pages/ai-command.js:6027:                                        body: "Flag unsupported claims, pricing promises, before/after language, evidence gaps, restricted wording, and approval requirements."
+public/control-center/pages/ai-command.js:6031:                                        body: `Prepare publishing readiness for ${channelLabel}: channel checklist, schedule draft, missing approvals, and handoff requirements.`
+public/control-center/pages/ai-command.js:6035:                                        body: "Track approval status, destination handoff, follow-up checks, improvement notes, and post-review action ownership."
+public/control-center/pages/ai-command.js:6040:                                title: `${goalLabel} campaign for ${projectLabel}`,
+public/control-center/pages/ai-command.js:6041:                                summary: `AI Team preview for a ${goalLabel.toLowerCase()} campaign using ${sourceLabel.toLowerCase()} and optimized for ${channelLabel}.`,
+public/control-center/pages/ai-command.js:6042:                                source,
+public/control-center/pages/ai-command.js:6045:                                market: asString(wizard.market || "germany"),
+public/control-center/pages/ai-command.js:6051:                                productFocus: asString(wizard.productFocus || "selected-product"),
+public/control-center/pages/ai-command.js:6053:                                sourceLabel,
+public/control-center/pages/ai-command.js:6059:                                                body: `Use ${sourceMeaning}. Produce a review-ready campaign package before any handoff, approval, publishing, sending, CRM update, provider execution, or workflow mutation.`
+public/control-center/pages/ai-command.js:6067:                                                body: `Shape the offer around verified ${sourceLabel.toLowerCase()} information. If pricing, discount, stock, competitor, or claim evidence is missing, mark it as a review blocker.`
+public/control-center/pages/ai-command.js:6075:                                                body: "Define hero visual, product framing, scene list, required assets, image/video format, voiceover direction, and Media Studio handoff notes."
+public/control-center/pages/ai-command.js:6079:                                                body: "Review claims, proof, pricing language, guarantees, sensitive wording, platform policy risk, and required Governance approval before external use."
+public/control-center/pages/ai-command.js:6083:                                                body: `Prepare ${channelLabel} readiness: asset status, copy status, approval status, schedule suggestion, channel dependencies, and final reviewer.`
+public/control-center/pages/ai-command.js:6087:                                                body: "Create a follow-up plan for review status, owner, destination handoff, performance check, improvement loop, and next campaign iteration."
+public/control-center/pages/ai-command.js:6091:                                safety: "Preview only. No publish, send, CRM mutation, provider execution, workflow mutation, or Governance approval is performed here."
+public/control-center/pages/ai-command.js:6131:                        const campaignPackage = asObject(body.campaignPackage || body.campaign_package);
+public/control-center/pages/ai-command.js:6133:                                campaignPackage.concept ? { label: "Campaign concept", body: asString(campaignPackage.concept) } : null,
+public/control-center/pages/ai-command.js:6134:                                campaignPackage.targetAudience ? { label: "Target audience", body: asString(campaignPackage.targetAudience) } : null,
+public/control-center/pages/ai-command.js:6135:                                campaignPackage.offer ? { label: "Offer", body: asString(campaignPackage.offer) } : null,
+public/control-center/pages/ai-command.js:6136:                                asArray(campaignPackage.launchPhases).length ? { label: "Launch phases", items: asArray(campaignPackage.launchPhases) } : null,
+public/control-center/pages/ai-command.js:6137:                                asArray(campaignPackage.contentAngles).length ? { label: "Content angles", items: asArray(campaignPackage.contentAngles) } : null,
+public/control-center/pages/ai-command.js:6138:                                asArray(campaignPackage.adAngles).length ? { label: "Ad angles", items: asArray(campaignPackage.adAngles) } : null,
+public/control-center/pages/ai-command.js:6139:                                asArray(campaignPackage.requiredAssets).length ? { label: "Required assets", items: asArray(campaignPackage.requiredAssets) } : null,
+public/control-center/pages/ai-command.js:6140:                                asArray(campaignPackage.missingBlockers).length ? { label: "Review blockers", items: asArray(campaignPackage.missingBlockers) } : null,
+public/control-center/pages/ai-command.js:6141:                                asArray(campaignPackage.nextActions).length ? { label: "Next actions", items: asArray(campaignPackage.nextActions) } : null
+public/control-center/pages/ai-command.js:6146:                                title: asString(body.title || fallbackPreview.title || "AI Team campaign preview"),
+public/control-center/pages/ai-command.js:6148:                                source: asString(body.source_type || body.source || fallbackPreview.source || ""),
+public/control-center/pages/ai-command.js:6149:                                sourceLabel: asString(body.source_label || fallbackPreview.sourceLabel || fallbackPreview.source || ""),
+public/control-center/pages/ai-command.js:6152:                                market: asString(body.market || fallbackPreview.market || ""),
+public/control-center/pages/ai-command.js:6156:                                audience: asString(body.audience || campaignPackage.targetAudience || fallbackPreview.audience || ""),
+public/control-center/pages/ai-command.js:6157:                                offer: asString(body.offer || campaignPackage.offer || fallbackPreview.offer || ""),
+public/control-center/pages/ai-command.js:6158:                                productFocus: asString(body.product_focus || body.productFocus || fallbackPreview.productFocus || ""),
+public/control-center/pages/ai-command.js:6160:                                campaignPackage,
+public/control-center/pages/ai-command.js:6163:                                        ? "Backend preview only. No publish, send, CRM mutation, provider execution, workflow mutation, Governance approval, task creation, or durable handoff was performed."
+public/control-center/pages/ai-command.js:6166:                                backendSource: asString(body.source || "backend_ai_team")
+public/control-center/pages/ai-command.js:6176:                                        source_type: asString(wizard.source || localPreview.source || "project"),
+public/control-center/pages/ai-command.js:6177:                                        source_label: asString(localPreview.sourceLabel || wizard.source || "Project"),
+public/control-center/pages/ai-command.js:6183:                                        market: asString(wizard.market || localPreview.market || ""),
+public/control-center/pages/ai-command.js:6187:                                        product_focus: asString(wizard.productFocus || localPreview.productFocus || ""),
+public/control-center/pages/ai-command.js:6202:                                console.warn("AI Command backend campaign preview fallback", error);
+public/control-center/pages/ai-command.js:6212:                Array.from(document.querySelectorAll("[data-aicmd-smart-campaign-preview]")).forEach((btn) => {
+public/control-center/pages/ai-command.js:6214:                                updateStatus("Preparing AI Team campaign preview...");
+public/control-center/pages/ai-command.js:6218:                                        type: "campaign",
+public/control-center/pages/ai-command.js:6223:                                        type: "smart_campaign_preview",
+public/control-center/pages/ai-command.js:6224:                                        outputType: "campaign_package",
+public/control-center/pages/ai-command.js:6228:                                        source: preview.source,
+public/control-center/pages/ai-command.js:6229:                                        sourceLabel: asString(preview.sourceLabel || ""),
+public/control-center/pages/ai-command.js:6232:                                        market: asString(preview.market || ""),
+public/control-center/pages/ai-command.js:6238:                                        productFocus: asString(preview.productFocus || ""),
+public/control-center/pages/ai-command.js:6240:                                        campaignPackage: asObject(preview.campaignPackage),
+public/control-center/pages/ai-command.js:6245:                                        confirmationNote: "Review and route this campaign package through the owning destination workspace before any publishing, sending, approval, task creation, provider execution, or workflow mutation.",
+public/control-center/pages/ai-command.js:6246:                                        nextSafeAction: "Review the campaign package, then send it to Media Studio or Publishing.",
+public/control-center/pages/ai-command.js:6253:                                updateStatus(preview.backendPreview ? "Backend AI Team preview prepared. Review before any handoff or approval." : "Local campaign preview prepared because backend preview is unavailable.");
+public/control-center/pages/ai-command.js:6254:                                showMessage?.(preview.backendPreview ? "Backend AI Team campaign preview is ready for review." : "Campaign preview is ready using the local fallback.");
+public/control-center/pages/ai-command.js:6261:                                media: "media-studio",
+public/control-center/pages/ai-command.js:6265:                                media: "Media Studio",
+public/control-center/pages/ai-command.js:6271:                                id: `campaign_handoff_${Date.now()}`,
+public/control-center/pages/ai-command.js:6272:                                type: "ai_command_campaign_handoff",
+public/control-center/pages/ai-command.js:6273:                                source: "ai-command",
+public/control-center/pages/ai-command.js:6274:                                source_label: "AI Command Campaign Builder",
+public/control-center/pages/ai-command.js:6280:                                source_type: asString(preview.source || ""),
+public/control-center/pages/ai-command.js:6281:                                source_label: asString(preview.sourceLabel || preview.source || ""),
+public/control-center/pages/ai-command.js:6284:                                market: asString(preview.market || ""),
+public/control-center/pages/ai-command.js:6290:                                product_focus: asString(preview.productFocus || ""),
+public/control-center/pages/ai-command.js:6292:                                campaignPackage: asObject(preview.campaignPackage),
+public/control-center/pages/ai-command.js:6295:                                backend_source: asString(preview.backendSource || ""),
+public/control-center/pages/ai-command.js:6297:                                safety: "Prepared handoff only. No backend write, publish, send, CRM mutation, provider execution, approval creation, task creation, or workflow mutation was performed.",
+public/control-center/pages/ai-command.js:6305:                                window.localStorage?.setItem?.("mh_ai_command_campaign_handoff", payload);
+public/control-center/pages/ai-command.js:6307:                                window.sessionStorage?.setItem?.("mh_ai_command_campaign_handoff", payload);
+public/control-center/pages/ai-command.js:6310:                                console.warn("Unable to store AI Command campaign handoff", error);
+public/control-center/pages/ai-command.js:6318:                                updateStatus("Generate a campaign preview before choosing a review action.");
+public/control-center/pages/ai-command.js:6323:                                library: "Save to Library",
+public/control-center/pages/ai-command.js:6324:                                media: "Send to Media Studio",
+public/control-center/pages/ai-command.js:6325:                                governance: "Request Governance Review",
+public/control-center/pages/ai-command.js:6330:                        const safeRouteActions = ["media", "publishing"];
+public/control-center/pages/ai-command.js:6366:                                safety: "Staged review action only. No backend write, publish, send, CRM mutation, provider execution, approval creation, task creation, or workflow mutation was performed."
+public/control-center/pages/ai-command.js:6375:                Array.from(document.querySelectorAll("[data-aicmd-smart-campaign-action]")).forEach((btn) => {
+public/control-center/pages/ai-command.js:6377:                                const action = asString(btn.getAttribute("data-aicmd-smart-campaign-action") || "");
+public/control-center/pages/ai-command.js:6445:                                                const languagePlan = getWorkspaceLanguagePlan?.(aiContext) || {};
+public/control-center/pages/ai-command.js:6518:                                        __AI_RUNTIME_TICK(session, aiContext);
+public/control-center/pages/ai-command.js:6541:		                        content: value,
+public/control-center/pages/ai-command.js:6543:		                        source: "ai-command-chat"
+public/control-center/pages/ai-command.js:6563:		                        const languagePlan = getWorkspaceLanguagePlan(aiContext);
+public/control-center/pages/ai-command.js:6574:		                                market: languagePlan.market,
+public/control-center/pages/ai-command.js:6575:		                                marketLanguage: languagePlan.publishLanguage,
+public/control-center/pages/ai-command.js:6578:		                                        campaign: aiContext.campaign,
+public/control-center/pages/ai-command.js:6579:		                                        readinessScore: aiContext.readinessScore,
+public/control-center/pages/ai-command.js:6580:		                                        readinessSummary: aiContext.summary
+public/control-center/pages/ai-command.js:6582:		                                safetyInstruction: "Chat only. No task/workflow/handoff/approval/publish/customer/CRM execution.",
+public/control-center/pages/ai-command.js:6583:		                                source: "ai-command-specialist-chat",
+public/control-center/pages/ai-command.js:6592:		                                content: response?.content
+public/control-center/pages/ai-command.js:6607:		                                content: responseText,
+public/control-center/pages/ai-command.js:6609:		                                source: "ai-chat-response",
+public/control-center/pages/ai-command.js:6614:		                                        content: responseText,
+public/control-center/pages/ai-command.js:6790:					campaign: aiContext.campaign
+public/control-center/pages/ai-command.js:6795:					actionType: tool.requiresSelectedSource ? "source_required" : (tool.actionType || "guided"),
+public/control-center/pages/ai-command.js:6797:					sourceTypes: asArray(tool.sourceTypes).length ? tool.sourceTypes : ["current_chat"],
+public/control-center/pages/ai-command.js:6951:					source_page: "ai-command",
+public/control-center/pages/ai-command.js:7040:					source_page: "ai-command",
+public/control-center/pages/ai-command.js:7045:						prompt: output.sourcePrompt,
+public/control-center/pages/ai-command.js:7049:							lastCommand: output.sourcePrompt || "",
+public/control-center/pages/ai-command.js:7114:				fetchProjectInsights,
+public/control-center/pages/ai-command.js:7115:				fetchProjectLearning,
+public/control-center/pages/ai-command.js:7203:        { id: "media", label: "Media" },
+public/control-center/pages/ai-command.js:7212:        if (state === "searching" && member.id === "media") status = "active";
+public/control-center/pages/ai-command.js:7303:    if (state === "composing") return "creative";
+public/control-center/pages/ai-command.js:7316:        composing: { pulse: 0.95, label: "creative generation" },
+public/control-center/pages/ai-command.js:7421:            state === "composing" ? "creative" :
+public/control-center/pages/ai-command.js:7478:    environment: "production",
+public/control-center/pages/ai-command.js:7541:        stage: "production",
+public/control-center/pages/ai-command.js:7646:  write(session, value, source = "unknown") {
+public/control-center/pages/ai-command.js:7653:    session._lastInputSource = source;
+public/control-center/pages/ai-command.js:7676:  write(session, value, source = "unknown") {
+public/control-center/pages/ai-command.js:7682:    session.draftMessage = source === "system" ? "" : clean;
+public/control-center/pages/ai-command.js:7683:    session._stateSource = String(source || "unknown").toUpperCase();
+public/control-center/pages/ai-command.js:7693:  source(session) {
+public/control-center/pages/ai-command.js:7734:  analyze(session, aiContext) {
+public/control-center/pages/ai-command.js:7750:  decide(session, aiContext) {
+public/control-center/pages/ai-command.js:7752:    const intent = this.analyze(session, aiContext);
+public/control-center/pages/ai-command.js:7796:  execute(session, aiContext) {
+public/control-center/pages/ai-command.js:7798:    const decision = AiCommandBrain.decide(session, aiContext);
+public/control-center/pages/ai-command.js:7818:      session.taskType = "content";
+public/control-center/pages/ai-command.js:7837:function triggerAiRouter(session, aiContext = {}) {
+public/control-center/pages/ai-command.js:7842:    const decision = AiCommandRouter.execute(session, aiContext);
+public/control-center/pages/ai-command.js:7860:function safeTriggerAi(session, aiContext = {}) {
+public/control-center/pages/ai-command.js:7864:    return triggerAiRouter(session, aiContext);
+public/control-center/pages/ai-command.js:7879:function __AI_RUNTIME_TICK(session, aiContext = {}) {
+public/control-center/pages/ai-command.js:7886:  const decision = safeTriggerAi(session, aiContext);
+public/control-center/pages/ads-manager.js:1:const adsManagerSessions = new Map();
+public/control-center/pages/ads-manager.js:14:    primarySources: ["google_ads", "google", "website"],
+public/control-center/pages/ads-manager.js:94:    spendToDate: "",
+public/control-center/pages/ads-manager.js:104:  if (!adsManagerSessions.has(key)) {
+public/control-center/pages/ads-manager.js:105:    adsManagerSessions.set(key, {
+public/control-center/pages/ads-manager.js:109:  return adsManagerSessions.get(key);
+public/control-center/pages/ads-manager.js:112:function getSourceValue(sources, keys) {
+public/control-center/pages/ads-manager.js:114:    const source = asObject(sources[key]);
+public/control-center/pages/ads-manager.js:115:    const value = asString(source.value).trim();
+public/control-center/pages/ads-manager.js:121:function buildPlatformCards(state, budgetTotal) {
+public/control-center/pages/ads-manager.js:122:  const integrations = asObject(state.data.integrations);
+public/control-center/pages/ads-manager.js:123:  const sources = asObject(integrations.sources?.sources);
+public/control-center/pages/ads-manager.js:124:  const checks = asObject(integrations.readiness?.checks);
+public/control-center/pages/ads-manager.js:131:    const primaryConnected = platform.primarySources.filter((key) => Boolean(checks[key] || asObject(sources[key]).value));
+public/control-center/pages/ads-manager.js:132:    const supportConnected = platform.supportSources.filter((key) => Boolean(checks[key] || asObject(sources[key]).value));
+public/control-center/pages/ads-manager.js:146:      ...platform.primarySources.filter((key) => !checks[key] && !asObject(sources[key]).value),
+public/control-center/pages/ads-manager.js:147:      ...platform.supportSources.filter((key) => !checks[key] && !asObject(sources[key]).value)
+public/control-center/pages/ads-manager.js:151:      assetTypes.has("product_image") ? "Static creative" : "",
+public/control-center/pages/ads-manager.js:152:      assetTypes.has("product_video") ? "Video creative" : "",
+public/control-center/pages/ads-manager.js:160:      connectionValue: getSourceValue(sources, [...platform.primarySources, ...platform.supportSources]) || "No platform connection saved",
+public/control-center/pages/ads-manager.js:161:      readinessScore: Math.round(((primaryConnected.length * 2) + supportConnected.length) / ((platform.primarySources.length * 2) + platform.supportSources.length) * 100),
+public/control-center/pages/ads-manager.js:164:      creativeCoverage: coverage,
+public/control-center/pages/ads-manager.js:165:      recommendedBudget: budgetTotal * platform.allocationShare
+public/control-center/pages/ads-manager.js:180:    if (assetTypes.has("product_video") && assetTypes.has("product_image")) {
+public/control-center/pages/ads-manager.js:182:    } else if (assetTypes.has("product_image") || assetTypes.has("product_video")) {
+public/control-center/pages/ads-manager.js:187:      ? (assetTypes.has("product_video") ? "Refresh hooks and landing copy" : "Add video creative")
+public/control-center/pages/ads-manager.js:188:      : (assetTypes.has("product_image") ? "Build conversion variants" : "Add static creative set");
+public/control-center/pages/ads-manager.js:194:      creativeSet: platform.creativeCoverage.length ? platform.creativeCoverage.join(", ") : "No dedicated creative package yet",
+public/control-center/pages/ads-manager.js:200:function buildActionPrompts({ projectName, platformCards, spendValue, metrics }) {
+public/control-center/pages/ads-manager.js:207:      prompt: `Review the paid media setup for ${projectName || "this project"}. Use current strong platforms (${strongPlatforms.join(", ") || "none identified"}) and recommend which campaigns to scale, what budget to move, and which creatives to duplicate.`
+public/control-center/pages/ads-manager.js:210:      label: "Pause weak spend",
+public/control-center/pages/ads-manager.js:211:      prompt: `For ${projectName || "this project"}, identify which ad platforms or campaign groups should be paused first based on weak readiness (${weakPlatforms.join(", ") || "none listed"}), missing measurement, and creative risk.`
+public/control-center/pages/ads-manager.js:215:      prompt: `Build a pacing recovery plan for ${projectName || "this project"} using spend to date ${spendValue || "not entered"}, CTR ${metrics.ctr || "not entered"}, CPC ${metrics.cpc || "not entered"}, CPA ${metrics.cpa || "not entered"}, and ROAS ${metrics.roas || "not entered"}.`
+public/control-center/pages/ads-manager.js:219:      prompt: `Create an ad creative refresh brief for ${projectName || "this project"} based on current asset coverage and platform mix. Prioritize the next creatives needed for Meta, Google, TikTok, and Amazon.`
+public/control-center/pages/ads-manager.js:249:  const form = $("adsManagerBudgetForm");
+public/control-center/pages/ads-manager.js:259:  const aiButtons = Array.from(document.querySelectorAll("[data-ads-prompt]"));
+public/control-center/pages/ads-manager.js:262:      const index = Number(button.getAttribute("data-ads-prompt"));
+public/control-center/pages/ads-manager.js:271:      showMessage?.("Paid media prompt added to AI Command.");
+public/control-center/pages/ads-manager.js:275:  const publishingBtn = $("adsManagerOpenPublishingBtn");
+public/control-center/pages/ads-manager.js:280:  const libraryBtn = $("adsManagerOpenLibraryBtn");
+public/control-center/pages/ads-manager.js:281:  if (libraryBtn) {
+public/control-center/pages/ads-manager.js:282:    libraryBtn.onclick = () => navigateTo("library");
+public/control-center/pages/ads-manager.js:286:export const adsManagerRoute = {
+public/control-center/pages/ads-manager.js:287:  id: "ads-manager",
+public/control-center/pages/ads-manager.js:292:    description: "Plan budgets, assess pacing, review platform readiness, and manage paid media decisions from one ad-ops workspace."
+public/control-center/pages/ads-manager.js:295:    <section class="page is-active" data-page="ads-manager">
+public/control-center/pages/ads-manager.js:296:      <div id="adsManagerRoot"></div>
+public/control-center/pages/ads-manager.js:315:    const spendToDate = asString(values.spendToDate).trim() === "" ? null : toNumber(values.spendToDate, 0);
+public/control-center/pages/ads-manager.js:317:    const creativeMappings = buildCreativeMappings(platformCards, state);
+public/control-center/pages/ads-manager.js:322:    const pacingDelta = spendToDate == null ? null : spendToDate - plannedSpendToDate;
+public/control-center/pages/ads-manager.js:323:    const pacingStatus = spendToDate == null
+public/control-center/pages/ads-manager.js:324:      ? "Awaiting spend feed"
+public/control-center/pages/ads-manager.js:328:          ? "Overspending"
+public/control-center/pages/ads-manager.js:329:          : "Underspending";
+public/control-center/pages/ads-manager.js:333:      spendValue: values.spendToDate,
+public/control-center/pages/ads-manager.js:341:    const root = $("adsManagerRoot");
+public/control-center/pages/ads-manager.js:345:      <div class="ads-manager-wrapper">
+public/control-center/pages/ads-manager.js:346:        <div class="ads-manager-hero">
+public/control-center/pages/ads-manager.js:347:          <div class="ads-manager-hero-copy">
+public/control-center/pages/ads-manager.js:351:              Use this workspace to set the working budget, check pacing, understand channel readiness, map creatives to platforms, and decide what to scale or pause next.
+public/control-center/pages/ads-manager.js:353:            <div class="ads-manager-status">
+public/control-center/pages/ads-manager.js:374:            <button id="adsManagerOpenLibraryBtn" class="btn btn-secondary" type="button">Navigate: Open Library Workspace</button>
+public/control-center/pages/ads-manager.js:375:            <button id="adsManagerOpenPublishingBtn" class="btn btn-primary" type="button">Navigate: Open Publishing Workspace</button>
+public/control-center/pages/ads-manager.js:379:        <div class="ads-manager-layout">
+public/control-center/pages/ads-manager.js:380:          <div class="ads-manager-main">
+public/control-center/pages/ads-manager.js:386:              <form id="adsManagerBudgetForm" class="setup-form-grid setup-form-grid-2">
+public/control-center/pages/ads-manager.js:388:                  id: "adsTotalBudgetInput",
+public/control-center/pages/ads-manager.js:390:                  label: "Total budget",
+public/control-center/pages/ads-manager.js:392:                  helper: "Use one working number for the current paid media plan, even if later split by platform.",
+public/control-center/pages/ads-manager.js:397:                  id: "adsDailyBudgetInput",
+public/control-center/pages/ads-manager.js:399:                  label: "Daily budget",
+public/control-center/pages/ads-manager.js:401:                  helper: "This is the daily cap the team should use while operating campaigns.",
+public/control-center/pages/ads-manager.js:406:                  id: "adsSpendInput",
+public/control-center/pages/ads-manager.js:407:                  name: "spendToDate",
+public/control-center/pages/ads-manager.js:409:                  value: values.spendToDate,
+public/control-center/pages/ads-manager.js:410:                  helper: "Enter live spend when available. Leave blank if no ad platform feed is connected yet.",
+public/control-center/pages/ads-manager.js:414:                <div class="ads-budget-summary">
+public/control-center/pages/ads-manager.js:417:                    <strong>${escapeHtml(totalBudget && spendToDate != null ? formatCurrency(Math.max(totalBudget - spendToDate, 0), currency) : "-")}</strong>
+public/control-center/pages/ads-manager.js:424:                    <span class="data-label">Current market</span>
+public/control-center/pages/ads-manager.js:425:                    <strong>${escapeHtml(safeText(state.context.currentMarket, overview.market || "Not set"))}</strong>
+public/control-center/pages/ads-manager.js:438:                <span class="card-badge ${pacingStatus === "On pace" ? "success" : pacingStatus === "Awaiting spend feed" ? "neutral" : "warning"}">${escapeHtml(pacingStatus)}</span>
+public/control-center/pages/ads-manager.js:440:              <div class="ads-pacing-grid">
+public/control-center/pages/ads-manager.js:447:                  <strong>${escapeHtml(spendToDate == null ? "-" : formatCurrency(spendToDate, currency))}</strong>
+public/control-center/pages/ads-manager.js:455:                  <strong>${escapeHtml(spendToDate == null ? "-" : formatCurrency(Math.abs(pacingDelta), currency))}</strong>
+public/control-center/pages/ads-manager.js:458:              <div class="ads-helper-copy">
+public/control-center/pages/ads-manager.js:460:                  spendToDate == null
+public/control-center/pages/ads-manager.js:461:                    ? escapeHtml("No live spend feed is connected yet. This section becomes operational as soon as the team enters working spend or a future ad platform connector provides live numbers.")
+public/control-center/pages/ads-manager.js:462:                    : escapeHtml(`The current plan is ${pacingStatus.toLowerCase()}. Use this to decide whether to accelerate spend, slow pacing, or reallocate budget across platforms.`)
+public/control-center/pages/ads-manager.js:472:              <div class="ads-platform-grid">
+public/control-center/pages/ads-manager.js:474:                  <div class="ads-platform-card">
+public/control-center/pages/ads-manager.js:475:                    <div class="ads-platform-head">
+public/control-center/pages/ads-manager.js:483:                      <div class="data-row"><span>Readiness</span><strong>${escapeHtml(formatPercent(platform.readinessScore))}</strong></div>
+public/control-center/pages/ads-manager.js:484:                      <div class="data-row"><span>Recommended budget</span><strong>${escapeHtml(totalBudget ? formatCurrency(platform.recommendedBudget, currency) : "-")}</strong></div>
+public/control-center/pages/ads-manager.js:487:                    <div class="ads-platform-note">
+public/control-center/pages/ads-manager.js:488:                      ${escapeHtml(platform.missing.length ? `Missing: ${platform.missing.map(titleCase).join(", ")}` : "No immediate setup blockers in the current plan.")}
+public/control-center/pages/ads-manager.js:500:              <div class="ads-creative-list">
+public/control-center/pages/ads-manager.js:501:                ${creativeMappings.map((item) => `
+public/control-center/pages/ads-manager.js:502:                  <div class="ads-creative-item">
+public/control-center/pages/ads-manager.js:503:                    <div class="ads-creative-head">
+public/control-center/pages/ads-manager.js:510:                    <div class="ads-creative-copy">${escapeHtml(item.creativeSet)}</div>
+public/control-center/pages/ads-manager.js:511:                    <div class="ads-creative-next">${escapeHtml(`Next: ${item.nextNeed}`)}</div>
+public/control-center/pages/ads-manager.js:518:          <aside class="ads-manager-side">
+public/control-center/pages/ads-manager.js:526:                  id: "adsCtrInput",
+public/control-center/pages/ads-manager.js:535:                  id: "adsCpcInput",
+public/control-center/pages/ads-manager.js:544:                  id: "adsCpaInput",
+public/control-center/pages/ads-manager.js:548:                  helper: "Average acquisition cost for the current campaign window.",
+public/control-center/pages/ads-manager.js:553:                  id: "adsRoasInput",
+public/control-center/pages/ads-manager.js:555:                  label: "ROAS",
+public/control-center/pages/ads-manager.js:557:                  helper: "Return on ad spend as a simple multiple.",
+public/control-center/pages/ads-manager.js:562:              <div class="ads-metric-grid">
+public/control-center/pages/ads-manager.js:576:                  <span class="data-label">ROAS</span>
+public/control-center/pages/ads-manager.js:589:                <strong>Review pacing, creative readiness, and source coverage before preparing the next paid growth move.</strong>
+public/control-center/pages/ads-manager.js:590:                <p class="home-action-meta">AI can prepare a paid growth brief and route context to AI Command. Spend changes, publishing, and campaign launch remain manual or governance-controlled.</p>
+public/control-center/pages/ads-manager.js:593:              <div class="ads-prompt-list">
+public/control-center/pages/ads-manager.js:595:                  <button class="quick-action-btn" type="button" data-ads-prompt="${index}">
+public/control-center/pages/ads-manager.js:612:      render: () => adsManagerRoute.render({

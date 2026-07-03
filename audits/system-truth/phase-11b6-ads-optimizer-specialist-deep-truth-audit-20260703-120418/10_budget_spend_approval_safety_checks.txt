@@ -1,0 +1,189 @@
+public/control-center/pages/ai-command.js:90:                summary: "Claims review, approvals, safety language, and governance checks.",
+public/control-center/pages/ai-command.js:91:                routeHint: "governance"
+public/control-center/pages/ai-command.js:151:		cannotDo: ["Publish campaigns directly", "Execute workflows automatically", "Approve content", "Set live budgets"],
+public/control-center/pages/ai-command.js:153:		safetyNote: "All outputs are guidance and draft only. Execution requires explicit confirmation.",
+public/control-center/pages/ai-command.js:166:		safetyNote: "Drafts require review before publishing. Cannot approve or publish without confirmation.",
+public/control-center/pages/ai-command.js:177:		cannotDo: ["Generate images directly", "Upload assets without review", "Approve without confirmation", "Execute media jobs"],
+public/control-center/pages/ai-command.js:179:		safetyNote: "Direction and briefs only. Media generation requires backend confirmation and explicit action.",
+public/control-center/pages/ai-command.js:190:		cannotDo: ["Generate video directly", "Upload footage without review", "Approve without confirmation", "Run media jobs automatically"],
+public/control-center/pages/ai-command.js:203:		cannotDo: ["Publish without explicit approval", "Override schedules", "Bypass governance gates", "Push to live channels directly"],
+public/control-center/pages/ai-command.js:205:		safetyNote: "Publishing always requires explicit approval. No live publishing from AI guidance alone.",
+public/control-center/pages/ai-command.js:216:		cannotDo: ["Launch ads directly", "Set live budgets without review", "Approve spend", "Access ad accounts directly"],
+public/control-center/pages/ai-command.js:218:		safetyNote: "Ad concepts and copy only. Live ad actions require platform integration and explicit approval.",
+public/control-center/pages/ai-command.js:239:		summary: "Claims review, approval safety, publishing risk, and governance notes.",
+public/control-center/pages/ai-command.js:240:		placeholder: "Ask the Compliance Reviewer to check claims, approval risks, publishing safety, and governance notes…",
+public/control-center/pages/ai-command.js:241:		canHelp: ["Review marketing claims", "Flag approval risks", "Check publishing safety", "Prepare governance notes", "Identify compliance blockers"],
+public/control-center/pages/ai-command.js:242:		cannotDo: ["Grant approvals directly", "Override governance gates", "Publish on behalf of approvers", "Remove flags without review"],
+public/control-center/pages/ai-command.js:244:		safetyNote: "Compliance review is advisory. Approvals always require human confirmation before execution.",
+public/control-center/pages/ai-command.js:255:		cannotDo: ["Run workflows without confirmation", "Auto-approve tasks", "Override authority gates", "Execute backend operations directly"],
+public/control-center/pages/ai-command.js:257:		safetyNote: "Task plans and handoffs only. Workflow execution requires explicit user confirmation.",
+public/control-center/pages/ai-command.js:268:		cannotDo: ["Send customer replies", "Create live tickets", "Change SLA policy", "Escalate without confirmation"],
+public/control-center/pages/ai-command.js:270:		safetyNote: "Customer operations outputs are drafts only. Sending replies, ticket creation, and escalations require confirmation in the owning surface.",
+public/control-center/pages/ai-command.js:283:		safetyNote: "Sales and CRM outputs are guidance and drafts only. CRM mutations and outreach sends require confirmation in the owning surface.",
+public/control-center/pages/ai-command.js:324:		{ label: "Plan paid campaign structure", sub: "Objective, audience, creative, budget" }
+public/control-center/pages/ai-command.js:335:		{ label: "Prepare governance notes", sub: "Document compliance status" },
+public/control-center/pages/ai-command.js:373:	{ id: "execute", title: "Confirm", description: "Execution stays gated in backend-owned surfaces." },
+public/control-center/pages/ai-command.js:467:		{ id: "budget-notes", label: "Budget Notes", action: "preview", intent: "guidance", template: "Review budget notes for {project}. Summarize constraints and safe test allocation guidance." },
+public/control-center/pages/ai-command.js:482:		{ id: "open-governance", label: "Open Governance", action: "route", route: "governance" }
+public/control-center/pages/ai-command.js:486:		{ id: "handoff-routing", label: "Handoff Routing", action: "preview", intent: "handoff", template: "Prepare handoff routing for {project}. Include source, destination, decision gates, and required confirmations." },
+public/control-center/pages/ai-command.js:497:		{ id: "prepare-escalation", label: "Prepare Escalation", action: "preview", intent: "handoff", template: "Prepare an escalation draft for {project}. Include reason, customer impact, owner, confirmation needed, and destination team." },
+public/control-center/pages/ai-command.js:504:		{ id: "follow-up-sequence", label: "Follow-up Sequence", action: "preview", intent: "workflow", template: "Build a follow-up sequence for {project}. Include timing, message angle, CTA, stop condition, and confirmation requirements." },
+public/control-center/pages/ai-command.js:506:		{ id: "pipeline-next-step", label: "Pipeline Next Step", action: "preview", intent: "task", template: "Recommend the pipeline next step for {project}. Include stage, rationale, owner, risk, and required confirmation." },
+public/control-center/pages/ai-command.js:509:		{ id: "sales-handoff-draft", label: "Sales Handoff", action: "preview", intent: "handoff", template: "Prepare a sales handoff draft for {project}. Include lead context, recommended next action, owner, and confirmation needed." }
+public/control-center/pages/ai-command.js:583:		purpose: "Optimize paid opportunities, creative testing, and budget decisions.",
+public/control-center/pages/ai-command.js:679:			id: `auto-gated-${Date.now()}`,
+public/control-center/pages/ai-command.js:1309:	if (id === "compliance_reviewer") return "governance";
+public/control-center/pages/ai-command.js:1346:        const looksGovernanceLike = /\b(compliance|governance|claim|claims|risk|risks|approval|approvals|policy|privacy|legal|safe language|safety review)\b/.test(text);
+public/control-center/pages/ai-command.js:1375:        if (/governance|compliance|risk|approval/.test(outputType) || looksGovernanceLike) {
+public/control-center/pages/ai-command.js:1376:                outputType = "governance";
+public/control-center/pages/ai-command.js:1377:                return { outputType, destinationRoute: explicitDestination || "governance" };
+public/control-center/pages/ai-command.js:1406:		governance: "Governance",
+public/control-center/pages/ai-command.js:1429:		confirmationRequired: outputType === "handoff" || specialistId === "publisher" || specialistId === "compliance_reviewer",
+public/control-center/pages/ai-command.js:1435:		confirmationNote: "Execution, approvals, and publishing require explicit confirmation in the owning workspace."
+public/control-center/pages/ai-command.js:1541:				"Publishing remains gated until channel, approval, and asset readiness are confirmed."
+public/control-center/pages/ai-command.js:1549:			confirmationRequired: true,
+public/control-center/pages/ai-command.js:1570:				"Keep budget, launch, and live ad changes inside Ads Manager.",
+public/control-center/pages/ai-command.js:1578:			safetyLabel: "No budget updates or ad launches executed."
+public/control-center/pages/ai-command.js:1604:				"Prepare governance notes",
+public/control-center/pages/ai-command.js:1607:			confirmationRequired: true,
+public/control-center/pages/ai-command.js:1624:				"Priority: draft priority pending runtime inbox and SLA confirmation.",
+public/control-center/pages/ai-command.js:1629:				"SLA and escalation decisions require confirmation in the owning operations surface."
+public/control-center/pages/ai-command.js:1638:			confirmationRequired: true,
+public/control-center/pages/ai-command.js:1666:				"Outreach and follow-ups require confirmation before sending."
+public/control-center/pages/ai-command.js:1675:			confirmationRequired: true,
+public/control-center/pages/ai-command.js:1690:					"Stage 4: Destination handoff and confirmation"
+public/control-center/pages/ai-command.js:1757:		confirmationNote: "No task, workflow, outreach, customer reply, CRM update, approval, or publishing action is executed from Full Team mode.",
+public/control-center/pages/ai-command.js:1792:	lines.push(`Confirmation: ${output.confirmationRequired ? "Required before execution" : "Required for execution actions"}`);
+public/control-center/pages/ai-command.js:2232:		return { title: "Campaign launch task block", owner: "Campaign Studio", steps: ["Define the campaign objective, audience, and offer.", "Choose channels and budget based on current intelligence.", "List required assets and publishing dependencies before launch."] };
+public/control-center/pages/ai-command.js:2388:	governance: "Governance",
+public/control-center/pages/ai-command.js:2410:	governance: "compliance_reviewer",
+public/control-center/pages/ai-command.js:2451:	govern: "governance",
+public/control-center/pages/ai-command.js:2555:		confirmationNote: firstAiInboundText(preview.confirmationNote, preview.confirmation_note, "Execution, approvals, publishing, CRM updates, customer replies, and workflow runs require explicit confirmation in the owning workspace."),
+public/control-center/pages/ai-command.js:2556:		confirmationRequired: preview.confirmationRequired ?? preview.confirmation_required ?? true
+public/control-center/pages/ai-command.js:3522:	if (tool.safetyLevel === "confirmation_required") return "Destination confirmation required";
+public/control-center/pages/ai-command.js:3531:	if (/review|check|compliance|readiness|governance/i.test(asString(tool.label))) return "Review";
+public/control-center/pages/ai-command.js:3575:				<p class="aicmd-room-subtitle mhos-context-description">Ask one expert or the full team to prepare strategy, content, analysis, reviews, and destination handoffs. AI prepares and reviews only; sensitive actions stay confirmation-gated in the owning workspace.</p>
+public/control-center/pages/ai-command.js:3966:        const governanceRequired = destinationRoute === "governance" || /approval|claim|compliance|risk|gdpr|review/i.test(`${outputType} ${asString(preview.title)} ${asString(preview.summary)}`);
+public/control-center/pages/ai-command.js:3967:        const riskLabel = governanceRequired ? "Review required" : "Low";
+public/control-center/pages/ai-command.js:3968:        const governanceLabel = governanceRequired ? "Governance route" : "Not required";
+public/control-center/pages/ai-command.js:3977:                        const complianceWatching = spec.id === "compliance_reviewer" && governanceRequired;
+public/control-center/pages/ai-command.js:4022:                                <span><strong>Governance</strong>${escapeHtml(governanceLabel)}</span>
+public/control-center/pages/ai-command.js:4029:                        <p class="aicmd-chatfirst-tab-note">AI Command prepares guidance, drafts, previews, and handoff context only. Publishing, approvals, CRM updates, workflow runs, customer sends, provider execution, and durable task creation remain confirmation-gated in the owning workspace.</p>
+public/control-center/pages/ai-command.js:4083:                                <span>No execution without confirmation</span>
+public/control-center/pages/ai-command.js:4101:				<p>Chat, draft, review, and prepare handoff context only. Publishing, approvals, CRM updates, workflow runs, external sends, and durable task creation stay confirmation-gated in the owning workspace.</p>
+public/control-center/pages/ai-command.js:4464:                                                <p>Guide the AI Team from source to preview. Backend workflow execution and destination handoff stay approval-gated.</p>
+public/control-center/pages/ai-command.js:4559:                                                                <button type="button" data-aicmd-smart-campaign-action="governance">Request Governance Review</button>
+public/control-center/pages/ai-command.js:4696:                                <span>Library, campaigns, content, customers, governance, integrations and provider readiness are connected as guarded planning context. Execution stays confirmation-gated.</span>
+public/control-center/pages/ai-command.js:4996:						<span>${escapeHtml(humanizeValue(preview.confirmationNote, "Execution requires explicit confirmation in the destination workspace."))}</span>
+public/control-center/pages/ai-command.js:5005:				<p class="aicmd-chatfirst-tab-note">This is a review-ready preview. Execution, publishing, approvals, CRM updates, external sends, durable task creation, and workflow runs happen only in the owning destination workspace after confirmation.</p>
+public/control-center/pages/ai-command.js:5074:	const approval = preview.confirmationRequired ? "Confirmation required" : (preview.outputType ? "Review ready" : "No draft yet");
+public/control-center/pages/ai-command.js:5356:			{ label: "Escalations", value: "Requires confirmation", present: false, scoped: true },
+public/control-center/pages/ai-command.js:5364:				{ label: "Follow-ups", value: "Requires confirmation", present: false, scoped: true },
+public/control-center/pages/ai-command.js:5397:					<span>Guidance only — no execution happens from this workspace without confirmation.</span>
+public/control-center/pages/ai-command.js:5405:					<span>Publishing, approval, and workflow runs require your explicit confirmation in the right workspace.</span>
+public/control-center/pages/ai-command.js:6244:                                        confirmationRequired: true,
+public/control-center/pages/ai-command.js:6245:                                        confirmationNote: "Review and route this campaign package through the owning destination workspace before any publishing, sending, approval, task creation, provider execution, or workflow mutation.",
+public/control-center/pages/ai-command.js:6325:                                governance: "Request Governance Review",
+public/control-center/pages/ai-command/tool-dock.js:614:      safetyLevel: "confirmation_required",
+public/control-center/pages/ai-command/tool-dock.js:696:      destinations: ["chat-preview", "media-studio", "governance", "library"],
+public/control-center/pages/ai-command/tool-dock.js:780:      destinations: ["chat-preview", "publishing", "governance", "content-studio", "media-studio"],
+public/control-center/pages/ai-command/tool-dock.js:804:      safetyLevel: "confirmation_required",
+public/control-center/pages/ai-command/tool-dock.js:830:      safetyLevel: "confirmation_required",
+public/control-center/pages/ai-command/tool-dock.js:831:      frontendOwnerPage: "governance",
+public/control-center/pages/ai-command/tool-dock.js:832:      destinations: ["chat-preview", "governance", "publishing", "workflows"],
+public/control-center/pages/ai-command/tool-dock.js:834:      outputTypes: ["approval_pack", "risk_summary", "asset_checklist", "confirmation_list"],
+public/control-center/pages/ai-command/tool-dock.js:835:      template: "Prepare an approval package for {projectName}. Include final copy summary, risk notes, assets checklist, and required confirmations."
+public/control-center/pages/ai-command/tool-dock.js:848:      destinations: ["chat-preview", "ads-manager", "content-studio", "governance"],
+public/control-center/pages/ai-command/tool-dock.js:861:      destinations: ["chat-preview", "ads-manager", "content-studio", "governance"],
+public/control-center/pages/ai-command/tool-dock.js:900:      destinations: ["chat-preview", "ads-manager", "content-studio", "governance"],
+public/control-center/pages/ai-command/tool-dock.js:983:      frontendOwnerPage: "governance",
+public/control-center/pages/ai-command/tool-dock.js:984:      destinations: ["chat-preview", "governance", "content-studio", "publishing"],
+public/control-center/pages/ai-command/tool-dock.js:996:      frontendOwnerPage: "governance",
+public/control-center/pages/ai-command/tool-dock.js:997:      destinations: ["chat-preview", "governance", "content-studio"],
+public/control-center/pages/ai-command/tool-dock.js:1009:      frontendOwnerPage: "governance",
+public/control-center/pages/ai-command/tool-dock.js:1010:      destinations: ["chat-preview", "governance", "library", "workflows"],
+public/control-center/pages/ai-command/tool-dock.js:1022:      frontendOwnerPage: "governance",
+public/control-center/pages/ai-command/tool-dock.js:1023:      destinations: ["chat-preview", "governance", "workflows", "publishing"],
+public/control-center/pages/ai-command/tool-dock.js:1034:      safetyLevel: "confirmation_required",
+public/control-center/pages/ai-command/tool-dock.js:1035:      frontendOwnerPage: "governance",
+public/control-center/pages/ai-command/tool-dock.js:1036:      destinations: ["chat-preview", "governance", "publishing", "workflows"],
+public/control-center/pages/ai-command/tool-dock.js:1063:      safetyLevel: "confirmation_required",
+public/control-center/pages/ai-command/tool-dock.js:1076:      safetyLevel: "confirmation_required",
+public/control-center/pages/ai-command/tool-dock.js:1078:      destinations: ["chat-preview", "handoff", "workflows", "content-studio", "media-studio", "publishing", "governance"],
+public/control-center/pages/ai-command/tool-dock.js:1104:      destinations: ["chat-preview", "workflows", "governance", "publishing"],
+public/control-center/pages/ai-command/tool-dock.js:1118:      safetyLevel: "confirmation_required",
+public/control-center/pages/ai-command/tool-dock.js:1120:      destinations: ["chat-preview", "operations-centers", "task", "governance"],
+public/control-center/pages/ai-command/tool-dock.js:1131:      safetyLevel: "confirmation_required",
+public/control-center/pages/ai-command/tool-dock.js:1186:      safetyLevel: "confirmation_required",
+public/control-center/pages/ai-command/tool-dock.js:1201:      destinations: ["chat-preview", "workflows", "content-studio", "governance"],
+public/control-center/pages/ai-command/tool-dock.js:1212:      safetyLevel: "confirmation_required",
+public/control-center/automation-engine.js:17:  { test: /publish\s*now|go\s*live|send\s*live|execute\s*publish|push\s*live/i, reason: "Publishing requires approval and manual confirmation." },
+public/control-center/automation-engine.js:22:  { test: /spend\s*money|charge|billing|payment|purchase/i, reason: "Spending actions require explicit manual approval." },
+public/control-center/automation-engine.js:24:  { test: /paid\s*ads|launch\s*ads|ad\s*spend|budget/i, reason: "Paid promotion requires approval." },
+public/control-center/automation-engine.js:238:      reason: "Publishing actions require manual approval before execution.",
+public/control-center/automation-engine.js:719:    pushAutoLog("Auto Mode completed after skipping gated step.", "success");
+public/control-center/pages/ads-manager.js:121:function buildPlatformCards(state, budgetTotal) {
+public/control-center/pages/ads-manager.js:165:      recommendedBudget: budgetTotal * platform.allocationShare
+public/control-center/pages/ads-manager.js:207:      prompt: `Review the paid media setup for ${projectName || "this project"}. Use current strong platforms (${strongPlatforms.join(", ") || "none identified"}) and recommend which campaigns to scale, what budget to move, and which creatives to duplicate.`
+public/control-center/pages/ads-manager.js:292:    description: "Plan budgets, assess pacing, review platform readiness, and manage paid media decisions from one ad-ops workspace."
+public/control-center/pages/ads-manager.js:351:              Use this workspace to set the working budget, check pacing, understand channel readiness, map creatives to platforms, and decide what to scale or pause next.
+public/control-center/pages/ads-manager.js:390:                  label: "Total budget",
+public/control-center/pages/ads-manager.js:399:                  label: "Daily budget",
+public/control-center/pages/ads-manager.js:414:                <div class="ads-budget-summary">
+public/control-center/pages/ads-manager.js:462:                    : escapeHtml(`The current plan is ${pacingStatus.toLowerCase()}. Use this to decide whether to accelerate spend, slow pacing, or reallocate budget across platforms.`)
+public/control-center/pages/ads-manager.js:484:                      <div class="data-row"><span>Recommended budget</span><strong>${escapeHtml(totalBudget ? formatCurrency(platform.recommendedBudget, currency) : "-")}</strong></div>
+public/control-center/pages/ads-manager.js:557:                  helper: "Return on ad spend as a simple multiple.",
+public/control-center/pages/ads-manager.js:590:                <p class="home-action-meta">AI can prepare a paid growth brief and route context to AI Command. Spend changes, publishing, and campaign launch remain manual or governance-controlled.</p>
+runtime/orchestrator-service/server.js:56:} = require('./lib/security/governance-mutation-gate');
+runtime/orchestrator-service/server.js:6903:      workspace_priorities: ['setup', 'library', 'content-studio', 'campaign-studio', 'ads-manager', 'governance'],
+runtime/orchestrator-service/server.js:9829:      budget_suggestion: bridgeResult.budget_suggestion,
+runtime/orchestrator-service/server.js:11125:      serviceDomain: 'governance',
+runtime/orchestrator-service/server.js:11164:      serviceDomain: 'governance',
+runtime/orchestrator-service/server.js:11502:      serviceDomain: 'governance',
+runtime/orchestrator-service/server.js:12320:      error: error.message || 'Failed to load governance summary'
+runtime/orchestrator-service/server.js:12329:      action: 'governance_policy_update',
+runtime/orchestrator-service/server.js:12330:      entityType: 'governance_policy',
+runtime/orchestrator-service/server.js:12344:      error: error.message || 'Failed to update governance policy'
+runtime/orchestrator-service/server.js:12357:      error: error.message || 'Failed to load governance policy'
+runtime/orchestrator-service/server.js:12362:app.get('/media-manager/project/:project/governance', handleGetGovernance);
+runtime/orchestrator-service/server.js:12363:app.get('/public/media-manager/project/:project/governance', handleGetGovernance);
+runtime/orchestrator-service/server.js:12364:app.get('/media-manager/project/:project/governance/policy', handleGetGovernancePolicy);
+runtime/orchestrator-service/server.js:12365:app.get('/public/media-manager/project/:project/governance/policy', handleGetGovernancePolicy);
+runtime/orchestrator-service/server.js:12366:app.post('/media-manager/project/:project/governance/policy', handleUpdateGovernancePolicy);
+runtime/orchestrator-service/server.js:12367:app.post('/public/media-manager/project/:project/governance/policy', handleUpdateGovernancePolicy);
+runtime/orchestrator-service/server.js:12538:      serviceDomain: 'governance',
+runtime/orchestrator-service/server.js:12592:      serviceDomain: 'governance',
+runtime/orchestrator-service/server.js:12637:      serviceDomain: 'governance',
+runtime/orchestrator-service/server.js:12676:      serviceDomain: 'governance',
+runtime/orchestrator-service/server.js:12723:  const governanceAction = options?.reconnect ? 'integration_reconnect' : 'integration_connect';
+runtime/orchestrator-service/server.js:12725:  const governanceOptions = {
+runtime/orchestrator-service/server.js:12727:    action: governanceAction,
+runtime/orchestrator-service/server.js:12733:    routeTarget: 'governance',
+runtime/orchestrator-service/server.js:12740:  const governanceAllowed = options?.reconnect
+runtime/orchestrator-service/server.js:12741:    ? enforceGovernanceApprovalLifecycle(req, res, governanceOptions)
+runtime/orchestrator-service/server.js:12742:    : enforceGovernanceMutationGate(req, res, governanceOptions);
+runtime/orchestrator-service/server.js:12744:  if (!governanceAllowed) {
+runtime/orchestrator-service/server.js:12832:  const governanceAction = {
+runtime/orchestrator-service/server.js:12839:  const governanceOptions = {
+runtime/orchestrator-service/server.js:12841:    action: governanceAction,
+runtime/orchestrator-service/server.js:12847:    routeTarget: 'governance',
+runtime/orchestrator-service/server.js:12855:  const governanceAllowed = requiresApprovalLifecycle
+runtime/orchestrator-service/server.js:12856:    ? enforceGovernanceApprovalLifecycle(req, res, governanceOptions)
+runtime/orchestrator-service/server.js:12857:    : enforceGovernanceMutationGate(req, res, governanceOptions);
+runtime/orchestrator-service/server.js:12859:  if (!governanceAllowed) {
+runtime/orchestrator-service/server.js:14797:  const budgetSuggestion = {
+runtime/orchestrator-service/server.js:14798:    daily_budget: Number(input.daily_budget || 45),
+runtime/orchestrator-service/server.js:14800:    rationale: `Starter budget based on ${products.length} product(s) in campaign package.`
+runtime/orchestrator-service/server.js:14808:    budget_suggestion: budgetSuggestion
+runtime/orchestrator-service/server.js:14926:    budget_suggestion: adPackage.budget_suggestion,
+runtime/orchestrator-service/server.js:15357:  appLogger.warn('governance_mutation_denied', {
+runtime/orchestrator-service/server.js:15364:    governance_code: decision.code,
+runtime/orchestrator-service/server.js:15400:      req.governanceApproval = decision.approval;
+runtime/orchestrator-service/server.js:15423:  const governance = getGovernancePolicy(projectName);
+runtime/orchestrator-service/server.js:15427:  const policyRules = governance && typeof governance === 'object' && governance.policy_rules && typeof governance.policy_rules === 'object'
+runtime/orchestrator-service/server.js:15428:    ? governance.policy_rules
+runtime/orchestrator-service/server.js:15449:    appLogger.warn('governance_blocked', {
+runtime/orchestrator-service/server.js:15450:      route: '/governance/publishing',
+runtime/orchestrator-service/server.js:15462:      'Publishing is frozen by governance policy. The requested publishing mutation was blocked.',
+runtime/orchestrator-service/server.js:15474:        'Approval before publish is enabled. This publishing action requires a durable publishing job with an approved governance decision.',
+runtime/orchestrator-service/server.js:18627:          'launch paid ads',
