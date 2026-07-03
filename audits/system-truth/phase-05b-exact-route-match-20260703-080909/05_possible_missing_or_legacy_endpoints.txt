@@ -1,0 +1,398 @@
+NO_BACKEND_MATCH_FOUND :: /media-manager/project/${encodeURIComponent(projectName)}/tasks${suffix} :: public/control-center/api.js:1652
+NO_BACKEND_MATCH_FOUND :: /media-manager/project/${encodeURIComponent(projectName)}/approvals${suffix} :: public/control-center/api.js:1677
+NO_BACKEND_MATCH_FOUND :: /media-manager/project/${encodeURIComponent(projectName)}/governance${suffix} :: public/control-center/api.js:1713
+NO_BACKEND_MATCH_FOUND :: /media-manager/project/${encodeURIComponent(projectName)}/campaigns${suffix} :: public/control-center/api.js:2064
+NO_BACKEND_MATCH_FOUND :: /media-manager/project/${encodeURIComponent(projectName)}/content-items${suffix} :: public/control-center/api.js:2109
+NO_BACKEND_MATCH_FOUND :: /media-manager/project/${encodeURIComponent(projectName)}/media-jobs${suffix} :: public/control-center/api.js:2158
+NO_BACKEND_MATCH_FOUND :: /media-manager/project/${encodeURIComponent(projectName)}/handoffs${suffix} :: public/control-center/api.js:2265
+NO_BACKEND_MATCH_FOUND :: /media-manager/project/${encodeURIComponent(projectName)}/events${suffix} :: public/control-center/api.js:2308
+NO_BACKEND_MATCH_FOUND :: ;
+    throw new Error(message);
+  }
+
+  return data;
+}
+
+
+export async function fetchProjects() {
+  try {
+    const payload = await getJson(
+      "/media-manager/projects",
+      "Failed to load projects",
+      12000
+    );
+
+    return normalizeProjectsPayload(payload);
+  } catch (error) {
+    console.warn("Using fallback projects list:", error.message);
+
+    return {
+      items: [],
+      preferredProject: "",
+      fallback: true
+    };
+  }
+}
+
+/* =========================
+   CORE PROJECT DATA
+========================= */
+
+export async function fetchAllCoreProjectData(projectName) {
+  const safeProjectName = toProjectName(projectName);
+  const encodedProjectName = encodeURIComponent(safeProjectName);
+
+  const requiredDiagnostics = [];
+  const optionalDiagnostics = [];
+
+  const requiredDashboardPromise = getJson(
+     :: public/control-center/api.js:1039
+NO_BACKEND_MATCH_FOUND :: probe /media-manager/projects: status=${requestResult.status || "request-failed"} auth=${requestResult.authMode} :: public/control-center/app.js:422
+NO_BACKEND_MATCH_FOUND :: );
+    }
+  }
+
+  return lines.join("\n");
+}
+
+async function runAccessKeyDiagnosticProbe(inputValue = "") {
+  const diagnostics = collectAccessKeyDiagnostics();
+  const latestInputKey = getCurrentAccessKeyInputValue();
+  const explicitInputKey = String(inputValue || "").trim();
+  const inputKey = latestInputKey || explicitInputKey;
+  const key = inputKey || (diagnostics.canonicalValuePresent
+    ? String(localStorage.getItem("mh-control-write-key") || "").trim()
+    : (diagnostics.resolvedKeyPresent ? getControlWriteKey() : ""));
+
+  if (!key) {
+    return {
+      diagnostics,
+      type: "error",
+      text: formatAccessKeyDiagnostics(diagnostics, {
+        status: 0,
+        authMode: "none",
+        message: "No key available from input/runtime/localStorage"
+      })
+    };
+  }
+
+  try {
+    const response = await fetch("/media-manager/projects", {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+        "x-mh-control-key": key,
+        Authorization:  :: public/control-center/app.js:425
+NO_BACKEND_MATCH_FOUND :: );
+}
+
+
+
+function bindAccessKeyPanel(modal) {
+  const input = modal.querySelector("#accessKeyInput");
+  const saveBtn = modal.querySelector("#accessKeySaveBtn");
+  const testBtn = modal.querySelector("#accessKeyTestBtn");
+  const diagBtn = modal.querySelector("#accessKeyDiagBtn");
+  const clearBtn = modal.querySelector("#accessKeyClearBtn");
+  const clearReloadBtn = modal.querySelector("#accessKeyClearReloadBtn");
+  const closeBtn = modal.querySelector("#accessKeyCloseBtn");
+
+  if (saveBtn) {
+    saveBtn.addEventListener("click", async () => {
+      const val = getCurrentAccessKeyInputValue();
+      if (!val) {
+        setAccessKeyStatus("No key entered.", "error");
+        return;
+      }
+
+      try {
+        localStorage.setItem("mh-control-write-key", val);
+        localStorage.setItem(CONTROL_ACCESS_KEY_STORAGE_KEY, val);
+        const persisted = String(localStorage.getItem("mh-control-write-key") || "").trim();
+        if (persisted !== val) {
+          setAccessKeyStatus("Failed to save access key to localStorage.", "error");
+          return;
+        }
+
+        setRuntimeControlKey(val);
+      } catch (_) {
+        setAccessKeyStatus("Failed to save access key to localStorage.", "error");
+        return;
+      }
+
+      setAccessKeyStatus("Key saved to mh-control-write-key. Reloading...", "success");
+      updateAccessKeyButton();
+
+      try {
+        const retryProject = ["hairo", "ticmen"].join("");
+        navigateTo("home");
+        await loadProjectData(retryProject);
+        hideAccessKeyModal();
+      } catch (error) {
+        setAccessKeyStatus(error?.message || "Key saved, but project load failed.", "error");
+      }
+    });
+  }
+
+  if (diagBtn) {
+    diagBtn.addEventListener("click", async () => {
+      setAccessKeyStatus("Running access-key diagnostic…", "info");
+      const result = await runAccessKeyDiagnosticProbe(input?.value || "");
+      setAccessKeyStatus(result.text, result.type);
+    });
+  }
+
+  if (testBtn) {
+    testBtn.addEventListener("click", async () => {
+      setAccessKeyStatus("Testing…", "info");
+      const inputVal = (input?.value || "").trim();
+      let storedVal = "";
+      try {
+        storedVal = String(localStorage.getItem(CONTROL_ACCESS_KEY_STORAGE_KEY) || "").trim();
+        if (!storedVal) {
+          storedVal = CONTROL_ACCESS_KEY_LEGACY_STORAGE_KEYS
+            .map((key) => String(localStorage.getItem(key) || "").trim())
+            .find(Boolean) || "";
+        }
+      } catch (_) {}
+      const keyToTest = inputVal || storedVal;
+      if (!keyToTest) {
+        setAccessKeyStatus("No key to test. Enter a key or save one first.", "error");
+        return;
+      }
+      try {
+        const response = await fetch("/media-manager/projects", {
+          method: "GET",
+          headers: {
+            "Accept": "application/json",
+            "x-mh-control-key": keyToTest
+          }
+        });
+        if (response.ok) {
+          setAccessKeyStatus("Valid key — loading front page and project…", "success");
+
+          try {
+            if (inputVal) {
+              setRuntimeControlKey(inputVal);
+              try {
+                localStorage.setItem(CONTROL_ACCESS_KEY_STORAGE_KEY, inputVal);
+              } catch (_) {}
+              updateAccessKeyButton();
+            }
+            await refreshProjectsAfterKeyUpdate();
+            setAccessKeyStatus("Valid key and project loaded.", "success");
+          } catch (error) {
+            setAccessKeyStatus(error?.message || "Valid key, but project load failed.", "error");
+          }
+        } else if (response.status === 401 || response.status === 403) {
+          setAccessKeyStatus("Invalid key — access denied (" + response.status + ").", "error");
+        } else {
+          setAccessKeyStatus("Endpoint responded with " + response.status + ".", "warn");
+        }
+      } catch (_) {
+        setAccessKeyStatus("Request failed — check server connection.", "error");
+      }
+    });
+  }
+
+  if (clearBtn) {
+    clearBtn.addEventListener("click", () => {
+      try {
+        localStorage.removeItem(CONTROL_ACCESS_KEY_STORAGE_KEY);
+        CONTROL_ACCESS_KEY_LEGACY_STORAGE_KEYS.forEach((legacyKey) => localStorage.removeItem(legacyKey));
+      } catch (_) {}
+      setRuntimeControlKey("");
+      if (input) input.value = "";
+      setAccessKeyStatus("Key cleared. Reads will now fail with missing-key errors.", "warn");
+      updateAccessKeyButton();
+    });
+  }
+
+  if (clearReloadBtn) {
+    clearReloadBtn.addEventListener("click", () => {
+      try {
+        localStorage.removeItem(CONTROL_ACCESS_KEY_STORAGE_KEY);
+        CONTROL_ACCESS_KEY_LEGACY_STORAGE_KEYS.forEach((legacyKey) => localStorage.removeItem(legacyKey));
+      } catch (_) {}
+      setRuntimeControlKey("");
+      window.location.reload();
+    });
+  }
+
+  if (closeBtn) {
+    closeBtn.addEventListener("click", hideAccessKeyModal);
+  }
+
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal) hideAccessKeyModal();
+  });
+
+  modal.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") hideAccessKeyModal();
+  });
+}
+
+function showAccessKeyModal() {
+  let modal = document.getElementById("accessKeyModal");
+  if (!modal) {
+    modal = createAccessKeyModal();
+    document.body.appendChild(modal);
+    bindAccessKeyPanel(modal);
+  }
+  document.body.classList.add("is-executive-new-open");
+  modal.classList.add("is-visible");
+  const input = document.getElementById("accessKeyInput");
+  if (input) {
+    input.value = "";
+    setTimeout(() => input.focus(), 50);
+  }
+}
+
+function hideAccessKeyModal() {
+  const modal = document.getElementById("accessKeyModal");
+  if (modal) modal.classList.remove("is-visible");
+}
+
+function updateAccessKeyButton() {
+  const btn = document.getElementById("accessKeyBtn");
+  if (!btn) return;
+  const hasKey = !!getControlWriteKey();
+  btn.textContent = hasKey ? "Key: Active ✓" : "Set Access Key";
+  btn.classList.toggle("btn-key-active", hasKey);
+  btn.classList.toggle("btn-key-missing", !hasKey);
+}
+
+function injectAccessKeyButton() {
+  // Access key management moved out of the global header.
+  updateAccessKeyButton();
+}
+
+/* =========================
+   ROLE SWITCHER
+========================= */
+
+function injectRoleSwitcher() {
+  // Role switching belongs in System/Settings, not the global header.
+}
+
+
+
+function $(id) {
+  return document.getElementById(id);
+}
+
+function escapeHtml(value) {
+  return String(value == null ? "" : value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function safeText(value, fallback = "-") {
+  if (value == null || value === "") return fallback;
+  return String(value);
+}
+
+function formatRoleLabel(role) {
+  const normalized = String(role || "").trim().toLowerCase();
+  if (!normalized) return "Admin";
+  return normalized
+    .split("_")
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
+function setText(id, value, fallback = "-") {
+  const el = $(id);
+  if (el) {
+    el.textContent = safeText(value, fallback);
+  }
+}
+
+function renderSimpleList(items, emptyText = "No items available.") {
+  return items.length
+    ?  :: public/control-center/app.js:498
+NO_BACKEND_MATCH_FOUND :: ;
+}
+
+async function applyRequiredProjectFallback(projectName, loadToken = "", fallbackDetails = null) {
+  recordStartupStep("loadProjectData.requiredFallback.start", {
+    token: loadToken,
+    detail: projectName
+  });
+
+  let fallback = fallbackDetails;
+
+  if (!fallback) {
+    try {
+      const projectsResult = await fetchProjects();
+      const items = Array.isArray(projectsResult?.items) ? projectsResult.items : [];
+      const projectExists = items.some((item) => {
+        const name = typeof item === "string" ? item : item?.name;
+        return String(name || "").trim() === projectName;
+      });
+
+      fallback = {
+        endpoint: "/media-manager/projects",
+        verified: true,
+        projectExists,
+        projectName,
+        warning: "Project details are still syncing."
+      };
+    } catch (fallbackError) {
+      fallback = {
+        endpoint: "/media-manager/projects",
+        verified: false,
+        projectExists: false,
+        projectName,
+        warning: "Project details are still syncing.",
+        message: String(fallbackError?.message || "Failed to verify project fallback")
+      };
+    }
+  }
+
+  const fallbackProjectName = fallback?.projectExists
+    ? getSafeProjectName(projectName || DEFAULT_PROJECT_SLUG)
+    : DEFAULT_PROJECT_SLUG;
+
+  setCurrentProject(fallbackProjectName);
+  setStoredProjectName(fallbackProjectName);
+  setProjectContext({
+    project: fallbackProjectName,
+    market: "",
+    language: "",
+    mode: "",
+    campaign: "Not selected yet"
+  });
+
+  patchState("data", {
+    loadDiagnostics: {
+      ...(getState().data?.loadDiagnostics || {}),
+      requiredFallback: fallback
+    }
+  });
+
+  setError("Project details are still syncing.");
+  showError("Project details are still syncing.");
+  showMessage("Project details are still syncing.");
+
+  renderGlobalUi();
+  await safeRenderCurrentPage("[LOAD_PROJECT_REQUIRED_FALLBACK_RENDER]");
+
+  recordStartupStep("loadProjectData.requiredFallback.done", {
+    token: loadToken,
+    detail:  :: public/control-center/app.js:2469
+CHECK_LEGACY_OR_DEV_ONLY :: /api/governance/state :: public/control-center/pages/business/dashboard.js:10
+CHECK_LEGACY_OR_DEV_ONLY :: /api/ai-control/dashboard :: public/control-center/pages/business/dashboard.js:11
+CHECK_LEGACY_OR_DEV_ONLY :: /api/governance/audit :: public/control-center/pages/business/dashboard.js:12
+CHECK_LEGACY_OR_DEV_ONLY :: /api/governance/process :: public/control-center/pages/business/dashboard.js:66
+CHECK_LEGACY_OR_DEV_ONLY :: /api/governance/state :: public/control-center/pages/governance/dashboard.js:8
+CHECK_LEGACY_OR_DEV_ONLY :: /api/governance/audit :: public/control-center/pages/governance/dashboard.js:13
+CHECK_LEGACY_OR_DEV_ONLY :: /api/governance/process :: public/control-center/pages/governance/dashboard.js:18
+CHECK_LEGACY_OR_DEV_ONLY :: /api/ai-control/dashboard :: public/control-center/pages/settings.js:2064
+CHECK_LEGACY_OR_DEV_ONLY :: /api/ai-control/update :: public/control-center/pages/settings.js:2074
+CHECK_LEGACY_OR_DEV_ONLY :: /api/governance/audit :: public/control-center/pages/settings.js:2097
+CHECK_LEGACY_OR_DEV_ONLY :: /api/governance/process :: public/control-center/pages/settings.js:2103
+CHECK_LEGACY_OR_DEV_ONLY :: /api/governance/state :: public/control-center/pages/settings.js:2116
