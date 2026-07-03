@@ -1,0 +1,140 @@
+### Governance helper bodies
+  }
+
+  if (!approvalId) {
+    throw new Error("Missing approval id");
+  }
+
+  return sendJson(
+    `/media-manager/project/${encodeURIComponent(projectName)}/approvals/${encodeURIComponent(approvalId)}/decision`,
+    "POST",
+    payload,
+    "Failed to update approval"
+  );
+}
+
+export async function fetchProjectGovernance(projectName, params = {}) {
+  if (!projectName) {
+    throw new Error("Missing project name");
+  }
+
+  const search = new URLSearchParams();
+
+  if (params.timeline_limit) {
+    search.set("timeline_limit", String(params.timeline_limit));
+  }
+
+  const suffix = search.toString() ? `?${search.toString()}` : "";
+
+  return getJson(
+    `/media-manager/project/${encodeURIComponent(projectName)}/governance${suffix}`,
+    "Failed to load governance summary"
+  );
+}
+
+export async function fetchProjectGovernancePolicy(projectName) {
+  if (!projectName) {
+    throw new Error("Missing project name");
+  }
+
+  return getJson(
+    `/media-manager/project/${encodeURIComponent(projectName)}/governance/policy`,
+    "Failed to load governance policy"
+  );
+}
+
+export async function updateProjectGovernancePolicy(projectName, payload = {}) {
+  if (!projectName) {
+    throw new Error("Missing project name");
+  }
+
+  return sendJson(
+    `/media-manager/project/${encodeURIComponent(projectName)}/governance/policy`,
+    "POST",
+    payload,
+    "Failed to update governance policy"
+  );
+}
+
+export async function saveProjectConnectorSource(projectName, sourceType, sourceValue) {
+  if (!projectName) {
+    throw new Error("Missing project name");
+  }
+
+### AI helper bodies
+
+export async function runProjectAiWorkflow(projectName, workflowId, payload = {}) {
+  if (!projectName) {
+    throw new Error("Missing project name");
+  }
+
+  if (!workflowId) {
+    throw new Error("Missing workflow id");
+  }
+
+  return sendJson(
+    `/media-manager/project/${encodeURIComponent(projectName)}/ai/workflows/${encodeURIComponent(workflowId)}/run`,
+    "POST",
+    payload,
+    "Failed to execute AI workflow"
+  );
+}
+
+export async function executeProjectAiCommand(projectName, payload = {}) {
+  if (!projectName) {
+    throw new Error("Missing project name");
+  }
+
+  return sendJson(
+    `/media-manager/project/${encodeURIComponent(projectName)}/ai/command`,
+    "POST",
+    payload,
+    "Failed to execute AI command"
+  );
+}
+
+export async function executeProjectAiChat(projectName, payload = {}) {
+  if (!projectName) {
+    throw new Error("Missing project name");
+  }
+
+  return sendRawJson(
+    `/media-manager/project/${encodeURIComponent(projectName)}/ai/chat`,
+    "POST",
+    payload,
+    "Failed to request AI chat",
+    AI_GUIDANCE_REQUEST_TIMEOUT_MS
+  );
+}
+
+
+
+export async function generateAiCommandCampaignPreview(projectName, payload = {}) {
+  const encodedProject = encodeURIComponent(String(projectName || "").trim() || "default");
+  return sendRawJson(
+    `/api/ai-command/project/${encodedProject}/campaign-preview`,
+    "POST",
+    payload,
+    "Failed to generate AI Command campaign preview",
+    AI_GUIDANCE_REQUEST_TIMEOUT_MS
+  );
+}
+
+export async function executeProjectAiGuidance(projectName, payload = {}) {
+  if (!projectName) {
+    throw new Error("Missing project name");
+  }
+
+  return sendRawJson(
+    `/media-manager/project/${encodeURIComponent(projectName)}/ai/guidance`,
+    "POST",
+    payload,
+    "Failed to request AI guidance",
+    AI_GUIDANCE_REQUEST_TIMEOUT_MS
+  );
+}
+
+export async function createProjectTask(projectName, payload = {}) {
+  if (!projectName) {
+    throw new Error("Missing project name");
+  }

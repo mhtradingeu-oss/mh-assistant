@@ -1,0 +1,90 @@
+### router imports and registry
+// public/control-center/router.js
+
+import { homeRoute } from "./pages/home.js";
+import { aiCommandRoute } from "./pages/ai-command.js";
+import { campaignStudioRoute } from "./pages/campaign-studio.js";
+import { contentStudioRoute } from "./pages/content-studio-workspace.js";
+import { mediaStudioRoute } from "./pages/media-studio-workspace.js";
+import { publishingRoute } from "./pages/publishing.js";
+import { adsManagerRoute } from "./pages/ads-manager.js";
+import { insightsRoute } from "./pages/insights.js";
+import { researchRoute } from "./pages/research.js";
+import { workflowsRoute } from "./pages/workflows.js";
+import {
+  taskCenterRoute,
+  queueCenterRoute,
+  jobMonitorRoute,
+  notificationCenterRoute,
+  operationsCentersRoute
+} from "./pages/operations-centers.js";
+import { setupRoute } from "./pages/setup.js";
+import { libraryRoute } from "./pages/library.js";
+import { integrationsRoute } from "./pages/integrations.js";
+import { customerCenterRoute } from "./pages/customer-center.js";
+import { settingsRoute } from "./pages/settings.js";
+import { governanceRoute } from "./pages/governance.js";
+import {
+  DEFAULT_ROLE,
+  getFallbackRouteAccess
+} from "./runtime/authority/route-role-fallback.js";
+
+const routeRegistry = {
+  [homeRoute.id]: homeRoute,
+  [aiCommandRoute.id]: aiCommandRoute,
+  [workflowsRoute.id]: workflowsRoute,
+  [operationsCentersRoute.id]: operationsCentersRoute,
+  [taskCenterRoute.id]: taskCenterRoute,
+  [queueCenterRoute.id]: queueCenterRoute,
+  [jobMonitorRoute.id]: jobMonitorRoute,
+  [notificationCenterRoute.id]: notificationCenterRoute,
+  [campaignStudioRoute.id]: campaignStudioRoute,
+  [contentStudioRoute.id]: contentStudioRoute,
+  [mediaStudioRoute.id]: mediaStudioRoute,
+  [publishingRoute.id]: publishingRoute,
+  [adsManagerRoute.id]: adsManagerRoute,
+  [insightsRoute.id]: insightsRoute,
+  [researchRoute.id]: researchRoute,
+  [setupRoute.id]: setupRoute,
+  [libraryRoute.id]: libraryRoute,
+  [customerCenterRoute.id]: customerCenterRoute,
+  [integrationsRoute.id]: integrationsRoute,
+  [settingsRoute.id]: settingsRoute,
+  [governanceRoute.id]: governanceRoute
+};
+
+let routeAccessResolver = null;
+
+const routeChangeSubscribers = new Set();
+
+export function subscribeRouteChange(handler) {
+  if (typeof handler !== "function") return () => {};
+  routeChangeSubscribers.add(handler);
+  return () => routeChangeSubscribers.delete(handler);
+}
+
+function notifyRouteChange(route) {
+  routeChangeSubscribers.forEach((handler) => {
+    try {
+      handler(route);
+    } catch (error) {
+      console.warn("Route change subscriber failed:", error?.message || error);
+
+### active governance route export
+138:  createProjectApproval,
+139:  decideProjectApproval,
+140:  fetchProjectGovernance,
+141:  updateProjectGovernancePolicy
+297:    session.summary = await fetchProjectGovernance(projectName, {
+1344:        await decideProjectApproval(projectName, approvalId, {
+1384:        await createProjectApproval(projectName, {
+1431:          await updateProjectGovernancePolicy(projectName, {
+1457:          await updateProjectGovernancePolicy(projectName, {
+1490:export const governanceRoute = {
+1491:  id: "governance",
+
+### dead dashboard exports/imports
+public/control-center/pages/business/dashboard.js:22:async function initBusinessUI() {
+public/control-center/pages/business/dashboard.js:76:initBusinessUI();
+public/control-center/pages/governance/dashboard.js:33:async function initGovernanceDashboard() {
+public/control-center/pages/governance/dashboard.js:70:initGovernanceDashboard();

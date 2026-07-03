@@ -1,0 +1,189 @@
+### settings.js imports
+import {
+  fetchProjectGovernancePolicy,
+  fetchProjectTeam,
+  saveProjectTeam,
+  updateProjectGovernancePolicy
+} from "../api.js";
+
+const sessions = new Map();
+
+const OPERATING_MODE_OPTIONS = [
+  {
+    value: "Planning Mode",
+    label: "Planning Mode",
+    description: "Recommend, prioritize, and prepare work without taking action."
+  },
+  {
+    value: "Guided Execution",
+    label: "Guided Execution",
+    description: "Prepare actions and prompt operators step by step."
+  },
+  {
+    value: "Semi-Auto",
+    label: "Semi-Auto",
+    description: "Automate low-risk work while keeping humans in the loop."
+  },
+  {
+    value: "Approval-First",
+    label: "Approval-First",
+    description: "Everything important queues for human review before execution."
+  },
+  {
+    value: "Full AI Assist",
+    label: "Full AI Assist",
+    description: "The system acts aggressively inside approved guardrails."
+  },
+  {
+    value: "Emergency Safe Mode",
+    label: "Emergency Safe Mode",
+    description: "Freeze automation and reduce the system to protective operations."
+  }
+];
+
+const AUTOMATION_RULE_OPTIONS = [
+  "Suggest workflows when campaign is ready",
+  "Block publishing when assets are missing",
+  "Suggest rewrite when content is weak",
+  "Alert when integrations fail",
+  "Route SEO issues into Research/Workflows",
+  "Route weak ads into Ads Manager"
+];
+
+const TEAM_ROLE_OPTIONS = [
+  "Strategist",
+  "Writer",
+  "Designer",
+  "Video Lead",
+  "Publisher",
+  "Ads Operator",
+  "Analyst",
+  "Compliance Reviewer",
+  "Admin",
+  "Brand owner"
+];
+
+const TEAM_ROLE_MATRIX = [
+  {
+    id: "strategist",
+    label: "Strategist",
+    service: "Planning & campaign architecture",
+    description: "Shapes priorities, campaign structures, and workflow sequencing."
+  },
+  {
+    id: "writer",
+    label: "Writer",
+    service: "Messaging & content generation",
+    description: "Develops copy systems, rewrites, and narrative consistency."
+  },
+  {
+    id: "designer",
+    label: "Designer",
+
+### settings.js stale hook region
+  meta: {
+    eyebrow: "System",
+    title: "Settings",
+    description: "Configure project defaults, AI behavior, publishing rules, approvals, sync behavior, and governance."
+  },
+  template: `<section class="page is-active" data-page="settings"><div class="settings-page-surface"></div></section>`,
+  render(context) {
+    const state = context.getState();
+    const projectName = state?.context?.currentProject;
+
+    if (!projectName) {
+      const root = context.$("pageRoot");
+      if (!root) return;
+      root.innerHTML = `
+        <section class="page is-active" data-page="settings">
+          <div class="panel panel-span-2">
+            <div class="empty-box">
+              Select a project to configure system defaults, approvals, sync policies, and governance rules.
+            </div>
+          </div>
+        </section>
+      `;
+      return;
+    }
+
+    const session = ensureSession(state);
+    replacePage(context, session);
+    bindFormEvents(context, session);
+
+    if (!session.loaded && !session.loading) {
+      loadDurableSettings(session, state, () => {
+        replacePage(context, session);
+        bindFormEvents(context, session);
+      });
+    }
+  }
+};
+
+/**
+ * ⚡ AI CONTROL CENTER CONNECTION LAYER
+ */
+
+async function loadAIControlCenter() {
+
+  const res = await fetch("/api/ai-control/dashboard");
+  const data = await res.json();
+
+  console.log("🧠 AI CONTROL CENTER DATA:", data);
+
+  return data;
+}
+
+async function updateAIControl(payload) {
+
+  const res = await fetch("/api/ai-control/update", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(payload)
+  });
+
+  return res.json();
+}
+
+// Example hooks for UI
+window.__AI_CONTROL_CENTER__ = {
+  load: loadAIControlCenter,
+  update: updateAIControl
+};
+
+/**
+ * ⚖️ GOVERNANCE UI INTEGRATION LAYER
+ */
+
+async function loadGovernanceState() {
+
+  const res = await fetch("/api/governance/audit");
+  return await res.json();
+}
+
+async function processGovernanceAction(action) {
+
+  const res = await fetch("/api/governance/process", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(action)
+  });
+
+  return await res.json();
+}
+
+async function loadGovernanceLiveState() {
+
+  const res = await fetch("/api/governance/state");
+  return await res.json();
+}
+
+// 🌐 GLOBAL GOVERNANCE UI HOOKS
+window.__GOVERNANCE_CENTER__ = {
+  loadAudit: loadGovernanceState,
+  process: processGovernanceAction,
+  live: loadGovernanceLiveState
+};
