@@ -1,0 +1,722 @@
+### frontend API exact operations/workflow/task/handoff references
+20:    this.status = diagnostics?.status || null;
+28:      status: this.status,
+39:    this.status = diagnostics?.status || null;
+47:      status: this.status,
+82:      const runtimeKeyCandidates = [
+91:      for (const candidate of runtimeKeyCandidates) {
+155:  const status = Number(error?.status ?? error?.diagnostics?.status ?? error?.payload?.status ?? NaN);
+163:  if ((status === 401 || status === 403) && isAccessKeyRelatedMessage(message)) {
+182:  const status = Number.isFinite(response?.status) ? Number(response.status) : null;
+194:    status,
+257:        status: Number.isFinite(details.status) ? Number(details.status) : null,
+312:    status: response?.status,
+333:      status: response?.status,
+351:        status: response?.status,
+382:            status: response?.status,
+401:            status: response?.status,
+412:            status: Number.isFinite(response?.status) ? Number(response.status) : null,
+426:        status: Number.isFinite(response?.status) ? Number(response.status) : null,
+436:      status: response?.status,
+468:    status: response?.status,
+485:      status: response?.status,
+495:      status: response?.status,
+507:      status: Number.isFinite(response?.status) ? Number(response.status) : null,
+553:      `${fallbackMessage} (${response.status})`;
+560:    error.status = diagnostics.status;
+568:      status: diagnostics.status,
+584:    error.status = diagnostics.status;
+592:      status: diagnostics.status,
+608:        status: diagnostics.status,
+673:      status: response?.status,
+739:      parseError.status = response.status;
+741:        status: response.ok ? "failed" : "error",
+754:    error.status = response.status;
+836:    const message = String(payload?.error || rawText || `Failed to load protected file (${response.status}).`).trim();
+839:    if (response.status === 401 || response.status === 403 || /read key|access key|invalid.*key/.test(lowerMessage)) {
+841:        status: response.status,
+893:    operations: payload?.operations || null
+913:      scheduled_jobs: [],
+947:  if (section === "operations") {
+963:  const status = error?.status || null;
+964:  const isOptionalNotFound = !required && status === 404 && (section === "insights" || section === "learning");
+975:    status,
+1039:    const message = data?.details || data?.error || `Failed to create project (${response.status})`;
+1113:    if (result.status === "fulfilled") {
+1178:        "operations",
+1203:    operations: createOptionalFallback(safeProjectName, "operations"),
+1225:      section: "operations",
+1244:    operations: createOptionalFallback(safeProjectName, "operations")
+1249:      section: "operations",
+1270:        if (result.status === "fulfilled") {
+1363:    `/media-manager/project/${encodeURIComponent(projectName)}/operations`,
+1364:    "Failed to load project operations",
+1392:    const message = data?.details || data?.error || `Failed to apply project template (${response.status})`;
+1426:export async function updateProjectAssetStatus(projectName, assetId, status, note = "") {
+1436:    `/media-manager/project/${encodeURIComponent(projectName)}/assets/${encodeURIComponent(assetId)}/status`,
+1439:      status: String(status || "").trim().toLowerCase(),
+1442:    "Failed to update asset status"
+1544:export async function runProjectWorkflow(projectName, workflowId, payload = {}) {
+1549:  if (!workflowId) {
+1550:    throw new Error("Missing workflow id");
+1554:    `/media-manager/project/${encodeURIComponent(projectName)}/workflows/${encodeURIComponent(workflowId)}/run`,
+1557:    "Failed to record workflow run"
+1561:export async function runProjectAiWorkflow(projectName, workflowId, payload = {}) {
+1566:  if (!workflowId) {
+1567:    throw new Error("Missing workflow id");
+1571:    `/media-manager/project/${encodeURIComponent(projectName)}/ai/workflows/${encodeURIComponent(workflowId)}/run`,
+1574:    "Failed to execute AI workflow"
+1578:export async function executeProjectAiCommand(projectName, payload = {}) {
+1587:    "Failed to execute AI command"
+1591:export async function executeProjectAiChat(projectName, payload = {}) {
+1618:export async function executeProjectAiGuidance(projectName, payload = {}) {
+1638:    `/media-manager/project/${encodeURIComponent(projectName)}/tasks`,
+1641:    "Failed to create project task"
+1652:    `/media-manager/project/${encodeURIComponent(projectName)}/tasks${suffix}`,
+1653:    "Failed to load project tasks"
+1663:    `/media-manager/project/${encodeURIComponent(projectName)}/approvals`,
+1666:    "Failed to create approval request"
+1677:    `/media-manager/project/${encodeURIComponent(projectName)}/approvals${suffix}`,
+1678:    "Failed to load approvals"
+1682:export async function decideProjectApproval(projectName, approvalId, payload = {}) {
+1687:  if (!approvalId) {
+1688:    throw new Error("Missing approval id");
+1692:    `/media-manager/project/${encodeURIComponent(projectName)}/approvals/${encodeURIComponent(approvalId)}/decision`,
+1695:    "Failed to update approval"
+1713:    `/media-manager/project/${encodeURIComponent(projectName)}/governance${suffix}`,
+1714:    "Failed to load governance summary"
+1724:    `/media-manager/project/${encodeURIComponent(projectName)}/governance/policy`,
+1725:    "Failed to load governance policy"
+1735:    `/media-manager/project/${encodeURIComponent(projectName)}/governance/policy`,
+1738:    "Failed to update governance policy"
+1909:export async function reschedulePublishingItem(projectName, jobId, payload = {}) {
+1914:  if (!jobId) {
+1915:    throw new Error("Missing job id");
+1919:    `/media-manager/project/${encodeURIComponent(projectName)}/publishing/${encodeURIComponent(jobId)}/reschedule`,
+1926:export async function approvePublishingItem(projectName, jobId, payload = {}) {
+1931:  if (!jobId) {
+1932:    throw new Error("Missing job id");
+1936:    `/media-manager/project/${encodeURIComponent(projectName)}/publishing/${encodeURIComponent(jobId)}/ready`,
+1943:export async function publishPublishingItem(projectName, jobId, payload = {}) {
+1948:  if (!jobId) {
+1949:    throw new Error("Missing job id");
+1953:    `/media-manager/project/${encodeURIComponent(projectName)}/publishing/${encodeURIComponent(jobId)}/publish`,
+1960:export async function failPublishingItem(projectName, jobId, payload = {}) {
+1965:  if (!jobId) {
+1966:    throw new Error("Missing job id");
+1970:    `/media-manager/project/${encodeURIComponent(projectName)}/publishing/${encodeURIComponent(jobId)}/fail`,
+1983:    `/media-manager/project/${encodeURIComponent(projectName)}/operations/schema`,
+1984:    "Failed to load operations schema"
+1994:    `/media-manager/project/${encodeURIComponent(projectName)}/task-center`,
+1995:    "Failed to load task center"
+2005:    `/media-manager/project/${encodeURIComponent(projectName)}/queue-center`,
+2006:    "Failed to load queue center"
+2016:    `/media-manager/project/${encodeURIComponent(projectName)}/job-monitor`,
+2017:    "Failed to load job monitor"
+2158:    `/media-manager/project/${encodeURIComponent(projectName)}/media-jobs${suffix}`,
+2159:    "Failed to load media jobs"
+2170:      `/media-manager/project/${encodeURIComponent(projectName)}/media-jobs/${encodeURIComponent(payload.id)}`,
+2173:      "Failed to update media job"
+2178:    `/media-manager/project/${encodeURIComponent(projectName)}/media-jobs`,
+2181:    "Failed to create media job"
+2199:    "Failed to run media brand check"
+2258:  if (params.status) {
+2259:    search.set("status", String(params.status));
+2265:    `/media-manager/project/${encodeURIComponent(projectName)}/handoffs${suffix}`,
+2266:    "Failed to load handoffs"
+2270:export async function createProjectHandoff(projectName, payload = {}) {
+2276:    `/media-manager/project/${encodeURIComponent(projectName)}/handoffs`,
+2279:    "Failed to create handoff"
+2283:export async function consumeProjectHandoff(projectName, handoffId, payload = {}) {
+2288:  if (!handoffId) {
+2289:    throw new Error("Missing handoff id");
+2293:    `/media-manager/project/${encodeURIComponent(projectName)}/handoffs/${encodeURIComponent(handoffId)}/consume`,
+2296:    "Failed to consume handoff"
+2323:    `/media-manager/project/${encodeURIComponent(projectName)}/notifications/${encodeURIComponent(notificationId)}`,
+2362:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/readiness`);
+2366:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/inbox`);
+2370:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/conversations`);
+2374:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/conversations/${encodeURIComponent(conversationId)}`);
+2378:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/conversations/${encodeURIComponent(conversationId)}/messages`);
+2382:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/customers/${encodeURIComponent(customerId)}`);
+2386:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/tickets`);
+2390:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/channels`);
+
+### backend exact operations/workflow/task/handoff route references
+8:  const omitKeys = new Set(['updated_at', 'statuses', 'required_sources', 'sources']);
+23:const { createExecutionJobBridge } = require('./lib/execution/execution-job-bridge');
+34:const { createRecommendationRuntime } = require('./lib/execution/recommendation-runtime');
+52:} = require('./lib/security/runtime-security-enforcement');
+56:} = require('./lib/security/governance-mutation-gate');
+75:const { executeAdapterAction } = require('./lib/integrations/adapter-manager');
+137:} = require('./lib/media/native/orchestrator/job-dispatch-orchestrator');
+141:} = require('./lib/customer-operations/customer-operations-runtime');
+188:const customerCenterProjection = require('./lib/customer-operations/projections/customer-center-projection');
+215:        return res.status(403).json(buildRoutePermissionDeniedResponse());
+218:      return res.status(410).json({
+257:const runtimeCompatLogger = createConsoleLikeLogger(appLogger, {
+258:  route: 'runtime',
+259:  action: 'runtime_log'
+332:  error.statusCode = 500;
+341:  /^\/task\/?$/i,
+354:  /^\/execute_publish_package\/?$/i,
+355:  /^\/execute_email_package\/?$/i,
+358:  /^\/schedule_execution_job\/?$/i,
+359:  /^\/run_scheduler_worker_once\/?$/i
+403:    return res.status(503).json({
+410:    return res.status(401).json({
+416:    return res.status(403).json({
+443:  /^\/scheduler_queue\/?$/i,
+470:    return res.status(503).json({
+477:    return res.status(401).json({
+483:    return res.status(403).json({
+493:const runtimeSecurityEnforcement = createRuntimeSecurityEnforcementMiddleware({
+500:app.use(runtimeSecurityEnforcement);
+556:    retryAfterMs: decision.retryAfterMs
+559:  res.set('Retry-After', String(Math.ceil(decision.retryAfterMs / 1000)));
+561:    statusCode: 429,
+563:    message: 'Too many requests. Please retry shortly.'
+569:const unifiedDataPathResolver = new UnifiedDataPathResolver({ logger: runtimeCompatLogger });
+572:  logger: runtimeCompatLogger
+590:  status = 'needs_review'
+595:  const mediaJobId = asString(req?.body?.media_job_id || req?.body?.id || '');
+607:      title: asString(req?.body?.title || `${requestType} media job`),
+611:      status,
+640:      media_job: mediaJob,
+641:      operations: buildProjectOperationsPayload(projectName)
+914:  DRAFT_QUEUE: 'email_draft_queue',
+915:  MEDIA_QUEUE: 'email_media_queue'
+920:  'executed',
+939:  const statusCandidate = Number(
+940:    error?.statusCode || error?.status || error?.response?.status || fallbackStatus
+943:  if (!Number.isFinite(statusCandidate)) {
+947:  if (statusCandidate < 400 || statusCandidate > 599) {
+951:  return statusCandidate;
+955:  statusCode = 500,
+959:  return res.status(statusCode).json({
+970:    statusCode: 400,
+1072:    statusCode: getErrorStatusCode(error, 500),
+1498:    canonicalLiveMediaQueueDir: path.join(EXECUTION_DIR, 'projects', safeProject, 'media', 'queue'),
+1499:    legacyLiveMediaQueueDir: path.join(EXECUTION_DIR, safeProject, 'media', 'queue')
+1542:      relativePath: 'email-queue.json',
+1544:      requestedFile: 'content/email/email-queue.json',
+1545:      pathContract: 'execution/projects/<project>/content/email/email-queue.json -> execution/<project>/content/email/email-queue.json'
+1550:      relativePath: 'email-image-queue.json',
+1552:      requestedFile: 'media/queue/email-image-queue.json',
+1553:      pathContract: 'execution/projects/<project>/media/queue/email-image-queue.json -> execution/<project>/media/queue/email-image-queue.json'
+1628:      statusCode: 400,
+1635:function readLiveEmailQueue(projectName, requestedIdentifier = 'email-draft-queue') {
+1639:function writeLiveEmailQueue(projectName, queue = []) {
+1640:  return writeEmailArtifactArray(requireQueueProjectName(projectName), EMAIL_ARTIFACT_TYPES.DRAFT_QUEUE, queue);
+1643:function readLiveEmailMediaQueue(projectName, requestedIdentifier = 'email-media-queue') {
+1647:function writeLiveEmailMediaQueue(projectName, queue = []) {
+1648:  return writeEmailArtifactArray(requireQueueProjectName(projectName), EMAIL_ARTIFACT_TYPES.MEDIA_QUEUE, queue);
+1655:function getLegacyContentQueuePath(projectName, queueType) {
+1656:  const queueMap = {
+1657:    ads: path.join('content', 'ads', 'ad-queue.json'),
+1658:    social: path.join('content', 'social', 'post-queue.json'),
+1659:    blog: path.join('content', 'blog', 'blog-queue.json'),
+1660:    reel: path.join('content', 'campaigns', 'reel-brief-queue.json'),
+1661:    tasks: path.join('tasks', 'task-board.json')
+1663:  const relativePath = queueMap[queueType];
+1666:    throw new Error(`Unknown content queue type: ${queueType}`);
+1669:  const queuePath = path.join(getLegacyExecutionRoot(projectName), relativePath);
+1670:  ensureJsonFile(queuePath, []);
+1671:  return queuePath;
+1674:function readLegacyContentQueue(projectName, queueType) {
+1675:  return readJsonFile(getLegacyContentQueuePath(projectName, queueType), []);
+1678:function writeLegacyContentQueue(projectName, queueType, queue = []) {
+1679:  writeJsonFile(getLegacyContentQueuePath(projectName, queueType), Array.isArray(queue) ? queue : []);
+1695:  const queuePath = path.join(getProjectMediaDir(projectName), 'queue', 'blog-image-queue.json');
+1696:  ensureJsonFile(queuePath, []);
+1697:  return queuePath;
+1775:        (item) => item.root === 'canonical' && item.status === 'success'
+1778:        (item) => item.root === 'canonical' && item.status === 'failed'
+1781:        (item) => item.root === 'legacy' && item.status === 'success'
+2004:    status: 'ready',
+2016:    result.status = 'blocked';
+2021:    result.status = 'needs_prepare';
+2048:  if (!renderRequest || renderRequest.status !== 'completed') {
+2072:  const rendered = readiness.status !== 'blocked' ? getLatestRenderedOutput(projectName) : null;
+2077:    status: readiness.status,
+2155:  if (packageData.status === 'blocked') {
+2203:    packageData.status = 'ready_for_send';
+2206:    packageData.status = 'needs_manual_review';
+2533:async function executeProviderRender(projectName) {
+2540:  if (!renderRequest || renderRequest.status !== 'render_ready') {
+2668:    status: 'ready_for_send',
+2673:  if (pkg.status !== 'ready_for_send') {
+2674:    result.status = 'blocked';
+2679:    result.status = 'blocked';
+2684:    result.status = 'blocked';
+2689:    result.status = 'blocked';
+2694:    result.status = 'blocked';
+2726:  if (readiness.status !== 'ready_for_send') {
+2728:      status: 'send_blocked',
+2743:    status: 'pending_provider_send',
+2802:    status: product?.status || null,
+2813:    status: product?.status || null,
+2873:      status: x.status
+2893:    if (product.status === 'publish') summary.published_count += 1;
+2894:    if (product.status === 'draft') summary.draft_count += 1;
+3090:    publish_status: imageInfo ? 'ready_for_publish' : 'needs_manual_review'
+3110:    status: compliance.publish_status,
+3202:    publish_status: imageInfo ? 'ready_for_production' : 'needs_manual_review'
+3221:    status: compliance.publish_status,
+3347:    publish_status: imageInfo ? 'ready_for_publish' : 'needs_manual_review'
+3375:    status: compliance.publish_status,
+3523:    status: 'ready_for_listing_build',
+3553:      listing_status: 'ready_for_listing_build',
+3587:    status: 'ready_for_listing_build',
+3608:      listing_status: 'ready_for_listing_build',
+3776:    const status = String(product.status || '').trim().toLowerCase();
+3781:    if (status !== 'publish' || !slug || !name || !stableKey) {
+3840:      validation_status: launchReadyProducts.length ? 'ready' : 'no_launch_ready_products'
+3928:    status: p.status || null,
+4072:    status: 'scheduled'
+4077:  const jobId = `sched_${Date.now()}`;
+4078:  const job = {
+4079:    job_id: jobId,
+4085:    status: 'scheduled',
+4090:  const filePath = path.join(paths.legacySchedulerDir, `${jobId}.json`);
+4094:    artifactType: 'publishing_scheduler_job',
+4095:    identifier: jobId,
+4097:    data: job
+4101:    ...job,
+4111:  if (['queued', 'queue', 'scheduled', 'pending', 'pending_publish'].includes(normalized)) return 'scheduled';
+4117:      'ready_for_manual_handoff',
+4254:function getPublishingJobFilePath(projectName, jobId) {
+4256:  return path.join(paths.legacySchedulerDir, `${String(jobId || '').trim()}.json`);
+4259:function hydrateScheduledJobRecord(projectName, job) {
+4260:  const rawJob = job && typeof job === 'object' ? { ...job } : {};
+4285:    job_id: String(rawJob.job_id || '').trim(),
+4292:    status: normalizePublishingJobStatus(
+4293:      rawJob.status,
+4307:function saveScheduledJobRecord(projectName, job) {
+4308:  const hydrated = hydrateScheduledJobRecord(projectName, job);
+4309:  const filePath = getPublishingJobFilePath(projectName, hydrated.job_id);
+4316:    artifactType: 'publishing_scheduler_job',
+4317:    identifier: hydrated.job_id,
+4362:  const requestedJobId = String(input.job_id || '').trim().replace(/[^a-z0-9_-]/gi, '');
+4368:    throw new Error('Scheduled job not found');
+4417:  const jobId = hasExisting ? existing.job_id : (requestedJobId || `sched_${Date.now()}`);
+4422:    job_id: jobId,
+4430:    status: normalizePublishingJobStatus(input.status, existing.status || fallbackStatus),
+4449:    requestedIdentifier: 'scheduled-jobs-list',
+4467:function updateScheduledJobRecord(projectName, jobId, updates = {}) {
+4470:    job_id: jobId
+4476:function updateScheduledJobStatus(projectName, jobId, status) {
+4478:    jobId,
+4479:    status
+4481:  return updateScheduledJobRecord(projectName, jobId, {
+4482:    status
+4681:  syncPublishingJob(safeProject, job, result);
+4805:    runbooksDir: path.join(baseDir, 'runbooks')
+4827:    ...safeList(paths.runbooksDir, 'runbooks')
+4869:  const jobsDir = path.join(baseDir, 'jobs');
+4872:  const legacyJobsDir = path.join(legacyBaseDir, 'jobs');
+4877:  ensureDir(jobsDir);
+4887:    jobsDir,
+4898:  const jobsDir = resolveExecutionReadCandidate({
+4901:    relativePath: 'jobs',
+4904:    requestedIdentifier: 'latest-generation-job',
+4905:    requestedFile: 'generated/jobs/*.json'
+4908:  const files = fs.readdirSync(jobsDir)
+4914:    throw new Error('No generation jobs found');
+4917:  const latestPath = path.join(jobsDir, files[0]);
+4921:function buildRenderRequestFromJob(projectName, job) {
+4925:  const outputPath = job.suggested_output_path ||
+4926:    path.join(paths.legacyOutputsDir, `${renderId}_${job.asset_type}.png`);
+4931:    job_id: job.job_id,
+4932:    asset_type: job.asset_type,
+4933:    goal: job.goal,
+4935:    status: 'render_ready',
+4937:    source_of_truth: job.source_of_truth,
+4938:    guardrails: job.guardrails,
+4939:    allowed_transformations: job.allowed_transformations,
+4940:    final_generation_prompt: job.final_generation_prompt,
+4946:  const job = getLatestGenerationJob(projectName);
+4947:  const request = buildRenderRequestFromJob(projectName, job);
+4987:function markRenderResult(projectName, renderId, status, resultData = {}) {
+5003:  renderRequest.status = status;
+5010:    artifactType: 'render_status_record',
+5025:    status: 'allowed',
+5032:    result.status = 'blocked';
+5038:      result.status = 'allowed_with_constraints';
+5043:      result.status = 'allowed_with_constraints';
+5071:  const jobsDir = path.join(baseDir, 'jobs');
+5073:  const legacyJobsDir = path.join(legacyBaseDir, 'jobs');
+5077:  ensureDir(jobsDir);
+5085:    jobsDir,
+5101:    status: 'ready_for_generation',
+5108:    result.status = 'blocked';
+5113:    result.status = 'restricted_generation';
+5118:    result.status = 'restricted_generation';
+5171:  const jobId = `gen_${Date.now()}`;
+5172:  const outputFilename = `${jobId}_${assetType}.json`;
+5175:  const job = {
+5176:    job_id: jobId,
+5181:    status: eligibility.status,
+5189:    suggested_output_path: path.join(outputPaths.legacyOutputsDir, `${jobId}_${assetType}.png`)
+5195:    artifactType: 'generation_job_record',
+5196:    identifier: jobId,
+5198:    data: job
+5201:  return job;
+5213:    status: readinessCheck.status,
+5254:  const activeAssets = registry.filter(item => item.status === 'active');
+5681:    operations: null,
+5713:    payload.errors.operations = message;
+5723:    operations: buildProjectOperationsPayload
+5779:      route: '/task',
+5880:  error.statusCode = 400;
+5975:    text.includes('status') ||
+6121:  if (text.includes('jojoba')) enrichment.ingredients.push('jojoba oil');
+6149:function resolveAgentRegistrySignal({ message = '', taskType = '' } = {}) {
+6155:      task: message,
+6157:      taskType,
+6158:      type: taskType,
+6159:      intent: taskType
+6178:function selectAgent(taskType) {
+6179:  switch (taskType) {
+6199:  const taskId = `task_${Date.now()}`;
+6201:  const taskType = detectTaskType(message);
+6203:  const agent = selectAgent(taskType);
+6225:    task_id: taskId,
+6230:    task_type: taskType,
+6233:    approval_required: mode === 'approval_required',
+6238:      summary: `Task classified as ${taskType} for project ${project}.`,
+6240:        mode === 'approval_required'
+6241:          ? 'Prepare execution summary and request approval.'
+6254:    task_id: taskId,
+6259:    task_type: taskType,
+6463:  const explicitStatus = normalizeSourceStatus(entry.status);
+6518:    const status = computeSourceStatus(entry);
+6521:      status,
+6542:    statuses: ['missing', 'connected', 'verified', 'outdated'],
+6746:      status: 'connected'
+6757:      status: 'connected'
+6779:      status: 'connected'
+6903:      workspace_priorities: ['setup', 'library', 'content-studio', 'campaign-studio', 'ads-manager', 'governance'],
+6942:      workspace_priorities: ['setup', 'library', 'content-studio', 'campaign-studio', 'insights', 'workflows'],
+7005:    status: 'initialized',
+7075:    status: normalizeSetupTextValue(input.project_status || input.status),
+7297:    .filter((entry) => ['connected', 'verified'].includes(normalizeSourceStatus(entry?.status)))
+7394:    status: readinessScore >= 85 ? 'ready_for_data_upload' : 'needs_input'
+7421:  const status = normalizeSetupTextValue(asset.status)
+7439:    status,
+7440:    readiness_status: normalizeSetupTextValue(asset.readiness_status || status) || status,
+7441:    review_status: normalizeSetupTextValue(asset.review_status || asset.readiness_status || status) || status,
+7448:    approval_note: normalizeSetupTextValue(asset.approval_note),
+7485:    status: 'connected'
+7524:    status: 'connected'
+7786:  const explicitStatus = normalizeTextValue(record.status).toLowerCase();
+7788:  let statusKey = 'not_connected';
+7791:    statusKey = 'token_expired';
+7793:    statusKey = 'error';
+7795:    statusKey = 'not_connected';
+7801:    statusKey = 'connected';
+7803:    statusKey = 'partial';
+7806:  const statusLabelMap = {
+7817:    if (statusKey === 'connected') {
+7821:    } else if (statusKey === 'partial') {
+7823:    } else if (statusKey === 'token_expired') {
+7825:    } else if (statusKey === 'error') {
+7831:    status: statusKey,
+7832:    status_label: statusLabelMap[statusKey] || 'Not Connected',
+7902:  const status = determineIntegrationStatus(normalizedRecord);
+7904:    status: status.status,
+7906:    health_summary: status.health_summary
+7912:    status: status.status,
+7913:    status_label: status.status_label,
+7920:    missing_required: status.missing_required,
+7937:    health_summary: status.health_summary,
+7964:      status: 'connected',
+8003:    connected: all.filter(item => item.status === 'connected').length,
+8004:    partial: all.filter(item => item.status === 'partial').length,
+8005:    error: all.filter(item => item.status === 'error').length,
+8006:    token_expired: all.filter(item => item.status === 'token_expired').length,
+8007:    not_connected: all.filter(item => item.status === 'not_connected').length
+8039:      status: 'unsupported_provider'
+8093:    const providerResult = await executeAdapterAction({
+8106:      status: providerResult.status,
+8123:    const statusFromError = normalizeTextValue(error.status);
+8127:    }).status;
+8131:      status:
+8132:        statusFromError === 'token_expired'
+8134:          : statusFromError === 'reconnect_required'
+8143:        status:
+8144:          statusFromError === 'token_expired'
+8146:            : statusFromError === 'reconnect_required'
+8160:      status: normalizeTextValue(error.status || nextRecord.status)
+8173:    ['connected', 'partial'].includes(String(nextRecord.status || '').toLowerCase())
+8185:function assertIntegrationReadyForAction(record = {}, actionLabel = 'run this action') {
+8186:  const status = determineIntegrationStatus(record);
+8188:  if (status.status === 'not_connected') {
+8192:  if (status.status === 'partial') {
+8196:  if (status.status === 'token_expired') {
+8201:async function runProjectIntegrationAction(projectName, integrationId, actionType, payload = {}) {
+8212:      status: 'unsupported_provider'
+8230:    nextRecord.status = 'not_connected';
+8239:      const providerResult = await executeAdapterAction({
+8250:      nextRecord.status = providerResult.status;
+8272:      nextRecord.status =
+8273:        normalizeTextValue(error.status) === 'token_expired'
+8275:          : normalizeTextValue(error.status) === 'reconnect_required'
+8282:        status: nextRecord.status,
+8318:    .filter(item => item.required && item.status === 'Missing')
+8321:    .filter(item => item.required && ['Missing', 'Needs Review'].includes(item.status))
+8332:    status: blockers.length ? 'asset_blockers' : 'assets_ready'
+8570:    record.readiness_status ||
+8571:    record.review_status ||
+8572:    record.approval_status ||
+8573:    record.status ||
+8609:  const queue = [rootDir];
+8612:  while (queue.length) {
+8613:    const current = queue.shift();
+8620:          queue.push(fullPath);
+8885:      status: projectProductDataFiles.concat(mirrorProductDataFiles).length > 0 ? 'Uploaded' : 'Missing',
+8911:      status:
+8924:      status: productVideoFiles.length ? 'Uploaded' : 'Missing',
+8983:      status: fs.existsSync(filePath) ? 'connected' : 'missing',
+9028:    const statuses = matchingAssets.map(asset => getAssetCategoryStatus(asset, projectName));
+9029:    let status =
+9032:        : statuses.includes('Approved')
+9034:          : statuses.includes('Uploaded')
+9039:    let uploadedCount = statuses.filter(value => value === 'Uploaded').length;
+9040:    let approvedCount = statuses.filter(value => value === 'Approved').length;
+9041:    let needsReviewCount = statuses.filter(value => value === 'Needs Review').length;
+9046:      status = metrics.status || status;
+9048:      uploadedCount = status === 'Uploaded' ? Math.max(1, count) : 0;
+9050:      needsReviewCount = status === 'Needs Review' ? Math.max(1, count) : 0;
+9054:      status = metrics.status || status;
+9062:    const blocker = item.required && ['Missing', 'Needs Review'].includes(status);
+9086:      status,
+9103:        item.asset_type === 'product_photos' && status === 'Needs Review'
+9105:          : status === 'Missing'
+9107:          : status === 'Needs Review'
+9109:            : status === 'Uploaded'
+9116:    const key = item.status.toLowerCase().replace(/\s+/g, '_');
+9129:  const nextCategory = categories.find(item => item.status === 'Missing') ||
+9130:    categories.find(item => item.status === 'Needs Review') ||
+9131:    categories.find(item => item.status === 'Uploaded') ||
+9183:      const status = normalizeSourceStatus(source.status);
+9184:      return ['connected', 'verified'].includes(status) && Boolean(normalizeSetupTextValue(source.value));
+9213:    status: missing.length ? 'connectors_incomplete' : 'connectors_ready'
+9376:    status: 'ok',
+9384:    status: 'ok',
+9392:  return res.status(readiness.ready ? 200 : 503).json(readiness);
+9400:    return res.status(500).json({
+9411:    return res.status(500).json({
+9422:    return res.status(500).json({
+9433:    return res.status(500).json({
+9439:app.post('/task', (req, res) => {
+9468:    const tasks = readLegacyContentQueue(projectName, 'tasks');
+9470:    const pending = tasks.filter(t => t.status === 'pending');
+9474:      today_tasks: pending.slice(0, 5)
+9484:    const tasks = readLegacyContentQueue(projectName, 'tasks');
+9486:    const next = tasks.find(t => t.status === 'pending');
+9490:      next_task: next || null
+9513:app.post('/execute_publish_package', async (req, res) => {
+9520:      action: 'execute_publish_package',
+9522:      entityId: 'execute_publish_package',
+9531:      action: 'execute_publish_package',
+9533:      entityId: 'execute_publish_package',
+9537:      linkedExecutionId: 'execute_publish_package',
+9539:      title: 'Publish package execution approval',
+9545:    const bridgeResult = await executeJobBridge({
+9559:      runtime_result: bridgeResult.runtime_result,
+9563:    const log = writeExecutionBridgeLog(projectName, 'execute_publish_package', {
+9564:      status: bridgeResult.execution_state,
+9579:    const statusCode = getErrorStatusCode(error, 400);
+9583:      writeExecutionBridgeLog(logProject, 'execute_publish_package', {
+9584:        status: 'failed',
+9594:      statusCode,
+9596:      message: error.message || 'Failed to execute publish package'
+9601:app.post('/execute_email_package', async (req, res) => {
+9608:      action: 'execute_email_package',
+9610:      entityId: 'execute_email_package',
+9619:      action: 'execute_email_package',
+9621:      entityId: 'execute_email_package',
+9625:      linkedExecutionId: 'execute_email_package',
+9627:      title: 'Email package execution approval',
+9633:    const bridgeResult = await executeJobBridge({
+9647:      runtime_result: bridgeResult.runtime_result,
+9652:    const log = writeExecutionBridgeLog(projectName, 'execute_email_package', {
+9653:      status: bridgeResult.execution_state,
+9667:    const statusCode = getErrorStatusCode(error, 400);
+9671:      writeExecutionBridgeLog(logProject, 'execute_email_package', {
+9672:        status: 'failed',
+9682:      statusCode,
+9684:      message: error.message || 'Failed to execute email package'
+9715:      title: 'Media generation approval',
+9721:    const bridgeResult = await executeJobBridge({
+9728:      status: bridgeResult.execution_state,
+9744:      runtime_result: bridgeResult.runtime_result,
+9748:    const statusCode = getErrorStatusCode(error, 400);
+9753:        status: 'failed',
+9763:      statusCode,
+9796:      title: 'Ad execution package approval',
+9802:    const bridgeResult = await executeJobBridge({
+9809:      status: bridgeResult.execution_state,
+9830:      runtime_result: bridgeResult.runtime_result,
+9834:    const statusCode = getErrorStatusCode(error, 400);
+9839:        status: 'failed',
+9849:      statusCode,
+10037:      status: 'draft',
+10074:        status: clonedProduct.status,
+10083:      statusCode: getErrorStatusCode(error, 502),
+10164:      status: 'draft'
+10187:        status: updatedClone.status,
+10198:      statusCode: getErrorStatusCode(error, 502),
+10232:      statusCode: 400,
+10245:      return res.status(400).json({
+10277:          status: 'active',
+10302:    return res.status(500).json({
+10328:    return res.status(400).send('Invalid media path');
+10342:    return res.status(404).send('File not found');
+10444:    return res.status(400).json({
+10451:    return res.status(400).json({
+10469:    return res.status(notFound ? 404 : conflict ? 409 : 500).json({
+10551:    return res.status(400).json({
+10568:    return res.status(notFound ? 404 : 500).json({
+10605:    return res.status(400).json({
+10620:    return res.status(201).json({
+10630:    return res.status(duplicate ? 409 : 500).json({
+10678:    return res.status(400).json({
+10688:    return res.status(400).json({
+10698:    return res.status(400).json({
+10708:    return res.status(400).json({
+10765:    throw Object.assign(new Error('Missing asset id.'), { statusCode: 400 });
+10770:      statusCode: 404,
+10802:      statusCode: 404,
+10825:  const statusCode = Number(error?.statusCode || 0);
+10831:  if (statusCode >= 400 && statusCode < 600) {
+10832:    return res.status(statusCode).json(payload);
+10835:  return res.status(500).json({
+10841:app.post('/media-manager/project/:project/assets/:assetId/status', express.json({ limit: '1mb' }), (req, res) => {
+10844:    const status = String(req.body?.status || '').trim().toLowerCase();
+10849:      return res.status(400).json({ error: 'Missing assetId.' });
+10852:    if (!allowed.has(status)) {
+10853:      return res.status(400).json({
+10854:        error: 'Invalid status.',
+10860:      asset.status = status;
+10861:      asset.readiness_status = status;
+10862:      asset.review_status = status;
+10863:      asset.needs_review = status === 'needs_review';
+10864:      asset.approved = status === 'approved';
+10865:      asset.rejected = status === 'rejected';
+10866:      asset.archived = status === 'archived';
+10870:      if (status === 'approved') {
+10872:        asset.approval_note = note || asset.approval_note || 'Approved from Control Center Library.';
+10875:      if (status === 'rejected') {
+10880:      if (status === 'archived') {
+10888:      status
+10891:    return sendAssetMutationError(res, error, 'Failed to update asset status.');
+10901:      return res.status(400).json({ error: 'Missing assetId.' });
+10905:      return res.status(400).json({ error: 'Missing asset name.' });
+10932:      return res.status(400).json({ error: 'Missing assetId.' });
+10936:      return res.status(400).json({ error: 'Missing asset_type.' });
+10943:      return res.status(400).json({
+10953:        error.statusCode = 409;
+10985:      return res.status(400).json({ error: 'Missing assetId.' });
+11010:      return res.status(400).json({ error: 'Missing assetId.' });
+11014:      asset.status = 'archived';
+11015:      asset.readiness_status = 'archived';
+11016:      asset.review_status = 'archived';
+11025:      status: 'archived'
+11038:      return res.status(400).json({ error: 'Missing assetId.' });
+11046:      asset.status = 'archived';
+11047:      asset.readiness_status = 'archived';
+11048:      asset.review_status = 'archived';
+11056:      status: 'archived'
+11069:      return res.status(400).json({ error: 'Missing assetId.' });
+11077:      asset.status = 'archived';
+11078:      asset.readiness_status = 'archived';
+11079:      asset.review_status = 'archived';
+11087:      status: 'archived'
+11098:    return res.status(400).json({
+11125:      serviceDomain: 'governance',
+11128:      title: 'Project setup approval',
+11137:    return res.status(400).json({
+11164:      serviceDomain: 'governance',
+11167:      title: 'Project setup approval',
+11176:    return res.status(400).json({
+11243:      'Review compliance and approval requirements.',
+11263:      'Final approval is required before publishing.',
+11346:      requires_approval_before_publish: true,
+11349:      no_task_created: true,
+11350:      no_approval_created: true,
+11351:      no_handoff_created: true,
+11352:      no_workflow_run_created: true
+11365:    return res.status(500).json({
+11385:    return res.status(400).json({
+11386:      error: error.message || 'Failed to build project operations payload'
+11391:app.get('/media-manager/project/:project/operations', handleGetProjectOperations);
+11392:app.get('/public/media-manager/project/:project/operations', handleGetProjectOperations);
+11399:      task_center: snapshot.task_center || {}
+11402:    return res.status(400).json({
+11403:      error: error.message || 'Failed to build task center payload'
+11413:      queue_center: snapshot.queue_center || {}
+11416:    return res.status(400).json({
+11417:      error: error.message || 'Failed to build queue center payload'
+11427:      job_monitor: snapshot.job_monitor || {}
+11430:    return res.status(400).json({
+11431:      error: error.message || 'Failed to build job monitor payload'
+11444:    return res.status(400).json({
+
+### backend operations/workflow/task lib files
+runtime/orchestrator-service/lib/customer-operations/README.md
+runtime/orchestrator-service/lib/customer-operations/channels/README.md
+runtime/orchestrator-service/lib/customer-operations/channels/channel-integration-mapper.js
+runtime/orchestrator-service/lib/customer-operations/channels/register-integration-channel.js
+runtime/orchestrator-service/lib/customer-operations/channels/registry/channel-registry-store.js
+runtime/orchestrator-service/lib/customer-operations/channels/registry/default-channels.js
+runtime/orchestrator-service/lib/customer-operations/contracts/README.md
+runtime/orchestrator-service/lib/customer-operations/contracts/conversation-contract.js
+runtime/orchestrator-service/lib/customer-operations/contracts/customer-profile-contract.js
+runtime/orchestrator-service/lib/customer-operations/contracts/escalation-contract.js
+runtime/orchestrator-service/lib/customer-operations/contracts/message-contract.js
+runtime/orchestrator-service/lib/customer-operations/contracts/sla-policy-contract.js
+runtime/orchestrator-service/lib/customer-operations/contracts/ticket-contract.js
+runtime/orchestrator-service/lib/customer-operations/contracts/unified-inbox-contract.js
+runtime/orchestrator-service/lib/customer-operations/conversations/README.md
+runtime/orchestrator-service/lib/customer-operations/conversations/create-integration-session.js
+runtime/orchestrator-service/lib/customer-operations/conversations/messages/message-store.js
+runtime/orchestrator-service/lib/customer-operations/conversations/store/conversation-store.js
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js
+runtime/orchestrator-service/lib/customer-operations/customers/store/customer-profile-store.js
+runtime/orchestrator-service/lib/customer-operations/escalation/store/escalation-store.js
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js
+runtime/orchestrator-service/lib/customer-operations/registry/README.md
+runtime/orchestrator-service/lib/customer-operations/sla/store/sla-policy-store.js
+runtime/orchestrator-service/lib/customer-operations/tickets/README.md
+runtime/orchestrator-service/lib/customer-operations/tickets/store/ticket-store.js
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/register-integration-inbox.js
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/store/unified-inbox-store.js
+runtime/orchestrator-service/lib/data/execution-artifact-writer-adapter.js
+runtime/orchestrator-service/lib/execution/execution-job-bridge.js
+runtime/orchestrator-service/lib/execution/intelligence-loop.js
+runtime/orchestrator-service/lib/execution/learning-patterns.js
+runtime/orchestrator-service/lib/execution/performance-metrics.js
+runtime/orchestrator-service/lib/execution/performance-storage.js
+runtime/orchestrator-service/lib/execution/recommendation-builders.js
+runtime/orchestrator-service/lib/execution/recommendation-runtime.js
+runtime/orchestrator-service/lib/execution/scheduler-helpers.js
+runtime/orchestrator-service/lib/execution/scheduler-storage.js
+runtime/orchestrator-service/lib/execution/smart-suggestions.js
+runtime/orchestrator-service/lib/integrations/providers/ops.js
+runtime/orchestrator-service/lib/media/native/execution/README.md
+runtime/orchestrator-service/lib/media/native/execution/native-runtime-controller.js
+runtime/orchestrator-service/lib/media/native/execution/native-runtime-demo.js
+runtime/orchestrator-service/lib/media/native/execution/native-runtime-executor.js
+runtime/orchestrator-service/lib/media/native/lifecycle/job-lifecycle-manager.js
+runtime/orchestrator-service/lib/media/native/lifecycle/job-state-store.js
+runtime/orchestrator-service/lib/media/native/media-job-queue.js
+runtime/orchestrator-service/lib/media/native/orchestrator/job-dispatch-orchestrator.js
+runtime/orchestrator-service/lib/media/native/protocol/worker-job-contract.js
+runtime/orchestrator-service/lib/media/native/providers/router/provider-execution-router-demo.js
+runtime/orchestrator-service/lib/media/native/providers/router/provider-execution-router.js
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js
+runtime/orchestrator-service/lib/ops/backbone.js
+runtime/orchestrator-service/lib/security/provider-execution-gate.js

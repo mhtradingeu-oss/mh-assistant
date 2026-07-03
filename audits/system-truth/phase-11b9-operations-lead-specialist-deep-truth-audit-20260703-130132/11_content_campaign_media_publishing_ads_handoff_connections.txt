@@ -1,0 +1,1332 @@
+public/control-center/pages/content-studio-workspace.js:3:  createProjectHandoff,
+public/control-center/pages/content-studio-workspace.js:16:import { getSharedHandoff, setSharedAiDraft, setSharedHandoff } from "../shared-context.js";
+public/control-center/pages/content-studio-workspace.js:55:  ownerRole: "writer",
+public/control-center/pages/content-studio-workspace.js:58:  handoffRole: "publisher"
+public/control-center/pages/content-studio-workspace.js:67:    suggestedPrompt: "Act as Content Strategist. Build a priority content plan by channel with hooks, outcomes, and handoff order."
+public/control-center/pages/content-studio-workspace.js:114:    purpose: "Validate tone, claims, and compliance before downstream handoffs.",
+public/control-center/pages/content-studio-workspace.js:115:    bestUse: "Before approval or sending drafts to Media Studio or Publishing.",
+public/control-center/pages/content-studio-workspace.js:116:    suggestedPrompt: "Act as Brand Guardian. Audit this draft for brand tone, claim risk, and handoff readiness."
+public/control-center/pages/content-studio-workspace.js:167:    detail || "This action may create or update backend Content Studio records, AI drafts, or handoffs.",
+public/control-center/pages/content-studio-workspace.js:200:  if (["needs_review", "needs review", "review", "pending_approval"].includes(normalized)) return "needs_review";
+public/control-center/pages/content-studio-workspace.js:202:  if (["sent_to_media", "sent to media", "media_handoff", "media handoff"].includes(normalized)) return "sent_to_media";
+public/control-center/pages/content-studio-workspace.js:203:  if (["sent_to_publishing", "sent to publishing", "publishing_handoff", "publishing handoff"].includes(normalized)) return "sent_to_publishing";
+public/control-center/pages/content-studio-workspace.js:335:  approvalStatus = "draft",
+public/control-center/pages/content-studio-workspace.js:349:    approval_status: asString(approvalStatus || "draft"),
+public/control-center/pages/content-studio-workspace.js:367:    approvalStatus: firstText(raw.approval_status, "draft"),
+public/control-center/pages/content-studio-workspace.js:384:    approvalStatus: firstText(seed.approvalStatus, "draft"),
+public/control-center/pages/content-studio-workspace.js:487:    approvalStatus: firstText(raw.approval_status, "draft")
+public/control-center/pages/content-studio-workspace.js:508:    approval_status: asString(raw.approval_status || "draft"),
+public/control-center/pages/content-studio-workspace.js:511:    linked_tasks: asArray(raw.linked_tasks),
+public/control-center/pages/content-studio-workspace.js:512:    linked_approvals: asArray(raw.linked_approvals),
+public/control-center/pages/content-studio-workspace.js:513:    linked_handoffs: asArray(raw.linked_handoffs),
+public/control-center/pages/content-studio-workspace.js:553:      tasks: [],
+public/control-center/pages/content-studio-workspace.js:554:      approvals: [],
+public/control-center/pages/content-studio-workspace.js:555:      handoffs: [],
+public/control-center/pages/content-studio-workspace.js:557:      operations: null,
+public/control-center/pages/content-studio-workspace.js:635:  if (!clean(form.brief) && intent !== "load-handoff") errors.brief = "Main prompt / brief is required.";
+public/control-center/pages/content-studio-workspace.js:664:    approval_status: firstText(selected?.approval_status, "draft"),
+public/control-center/pages/content-studio-workspace.js:666:    owner_role: CONTENT_ROLE_DEFAULTS.ownerRole,
+public/control-center/pages/content-studio-workspace.js:678:      approval_status: version.approval_status,
+public/control-center/pages/content-studio-workspace.js:757:function buildInboundSummary(handoff) {
+public/control-center/pages/content-studio-workspace.js:758:  const payload = asObject(handoff?.payload);
+public/control-center/pages/content-studio-workspace.js:762:    id: asString(handoff?.id || payload.id || payload.workflow_id || payload.content_item_id),
+public/control-center/pages/content-studio-workspace.js:763:    sourcePage: asString(handoff?.source_page || "workflows"),
+public/control-center/pages/content-studio-workspace.js:776:    approvalStatus: firstText(selectedVersion.approval_status, payload.approval_status, "draft")
+public/control-center/pages/content-studio-workspace.js:781:  const operations = session.operations || {};
+public/control-center/pages/content-studio-workspace.js:783:    getSharedHandoff(projectName, "content-studio", operations, "workflows") ||
+public/control-center/pages/content-studio-workspace.js:784:    getSharedHandoff(projectName, "content-studio", operations, "ai-command") ||
+public/control-center/pages/content-studio-workspace.js:785:    getSharedHandoff(projectName, "content-studio", operations)
+public/control-center/pages/content-studio-workspace.js:790:  const handoff = getInboundHandoff(projectName, session);
+public/control-center/pages/content-studio-workspace.js:791:  if (!handoff) return;
+public/control-center/pages/content-studio-workspace.js:792:  const summary = buildInboundSummary(handoff);
+public/control-center/pages/content-studio-workspace.js:804:    const [contentItems, tasks, approvals, handoffs, events, operations] = await Promise.all([
+public/control-center/pages/content-studio-workspace.js:816:    session.tasks = asArray(tasks.items);
+public/control-center/pages/content-studio-workspace.js:817:    session.approvals = asArray(approvals.items);
+public/control-center/pages/content-studio-workspace.js:818:    session.handoffs = asArray(handoffs.items);
+public/control-center/pages/content-studio-workspace.js:820:    session.operations = operations || null;
+public/control-center/pages/content-studio-workspace.js:851:      why: "A clear first draft unlocks versioning, review, and downstream media/publishing handoffs."
+public/control-center/pages/content-studio-workspace.js:878:    why: "Higher-quality prompt context improves draft quality and handoff readiness."
+public/control-center/pages/content-studio-workspace.js:914:      .content-handoff-grid {
+public/control-center/pages/content-studio-workspace.js:994:      .content-queue-list,
+public/control-center/pages/content-studio-workspace.js:1000:      .content-queue-item,
+public/control-center/pages/content-studio-workspace.js:1012:      .content-queue-item {
+public/control-center/pages/content-studio-workspace.js:1016:      .content-queue-item.is-active {
+public/control-center/pages/content-studio-workspace.js:1021:      .content-queue-title {
+public/control-center/pages/content-studio-workspace.js:1027:      .content-queue-meta,
+public/control-center/pages/content-studio-workspace.js:1082:        .content-handoff-grid {
+public/control-center/pages/content-studio-workspace.js:1119:    ["Media handoff", selectedItem?.status === "approved" || selectedItem?.status === "sent_to_media" ? "Ready" : "Prepare"],
+public/control-center/pages/content-studio-workspace.js:1168:      <div class="content-queue-list">
+public/control-center/pages/content-studio-workspace.js:1170:          <button class="content-queue-item${item.id === session.selectedId ? " is-active" : ""}" type="button" data-content-select="${escapeHtml(item.id)}">
+public/control-center/pages/content-studio-workspace.js:1171:            <span class="content-queue-title">${escapeHtml(item.title || "Untitled")}</span>
+public/control-center/pages/content-studio-workspace.js:1172:            <span class="content-queue-meta">${escapeHtml(modeLabel(item.mode))} • ${escapeHtml(item.channel || "channel")} • ${escapeHtml(item.source || "source")}</span>
+public/control-center/pages/content-studio-workspace.js:1181:function renderComposer(session, state, handoff, escapeHtml) {
+public/control-center/pages/content-studio-workspace.js:1260:      ${handoff ? `<div class="simple-banner" style="margin-top:12px;">Inbound handoff from ${escapeHtml(titleCase(handoff.sourcePage || "workflow"))} is available below.</div>` : ""}
+public/control-center/pages/content-studio-workspace.js:1405:        <div class="content-data-item"><span>Approval status</span><strong>${escapeHtml(titleCase(firstText(selected?.approval_status, "draft")))}</strong></div>
+public/control-center/pages/content-studio-workspace.js:1464:function renderInboundHandoff(handoff, session, escapeHtml) {
+public/control-center/pages/content-studio-workspace.js:1465:  if (!handoff) {
+public/control-center/pages/content-studio-workspace.js:1471:            <h3>No inbound handoff available</h3>
+public/control-center/pages/content-studio-workspace.js:1485:          <h3>${escapeHtml(firstText(handoff.title, "Inbound content context"))}</h3>
+public/control-center/pages/content-studio-workspace.js:1486:          <p class="content-copy">Source: ${escapeHtml(titleCase(handoff.sourcePage || "workflow"))}</p>
+public/control-center/pages/content-studio-workspace.js:1490:      <div class="content-handoff-grid">
+public/control-center/pages/content-studio-workspace.js:1491:        <div class="content-data-item"><span>Project</span><strong>${escapeHtml(firstText(handoff.project, "-"))}</strong></div>
+public/control-center/pages/content-studio-workspace.js:1492:        <div class="content-data-item"><span>Campaign</span><strong>${escapeHtml(firstText(handoff.campaign, "-"))}</strong></div>
+public/control-center/pages/content-studio-workspace.js:1493:        <div class="content-data-item"><span>Channel</span><strong>${escapeHtml(firstText(handoff.channel, "-"))}</strong></div>
+public/control-center/pages/content-studio-workspace.js:1494:        <div class="content-data-item"><span>Type</span><strong>${escapeHtml(modeLabel(firstText(handoff.mode, "social-post")))}</strong></div>
+public/control-center/pages/content-studio-workspace.js:1496:      <div class="content-text-box" style="margin-top:10px;">${escapeHtml(firstText(handoff.brief, handoff.contentBody, "No handoff brief text."))}</div>
+public/control-center/pages/content-studio-workspace.js:1529:    source_role: CONTENT_ROLE_DEFAULTS.ownerRole,
+public/control-center/pages/content-studio-workspace.js:1553:        approval_status: firstText(selected?.approval_status, "draft"),
+public/control-center/pages/content-studio-workspace.js:1570:  const approvalStatus = firstText(selected?.approval_status, selectedItem?.approval_status, "draft");
+public/control-center/pages/content-studio-workspace.js:1576:    source_role: CONTENT_ROLE_DEFAULTS.ownerRole,
+public/control-center/pages/content-studio-workspace.js:1577:    destination_role: CONTENT_ROLE_DEFAULTS.handoffRole,
+public/control-center/pages/content-studio-workspace.js:1591:      approval_status: approvalStatus,
+public/control-center/pages/content-studio-workspace.js:1600:        approval_status: approvalStatus,
+public/control-center/pages/content-studio-workspace.js:1607:      title: firstText(selectedItem?.title, session.form.title, "Content handoff")
+public/control-center/pages/content-studio-workspace.js:1616:  const backend = asArray(session.handoffs).find((item) => {
+public/control-center/pages/content-studio-workspace.js:1682:    approval_status: firstText(selected.approval_status, "draft"),
+public/control-center/pages/content-studio-workspace.js:1688:  const handoff = {
+public/control-center/pages/content-studio-workspace.js:1692:    source_role: CONTENT_ROLE_DEFAULTS.ownerRole,
+public/control-center/pages/content-studio-workspace.js:1714:    "Create Library handoff",
+public/control-center/pages/content-studio-workspace.js:1715:    "This will create a Content Studio to Library handoff for review and asset preparation."
+public/control-center/pages/content-studio-workspace.js:1717:    showMessage?.("Library handoff cancelled.");
+public/control-center/pages/content-studio-workspace.js:1721:  setSharedHandoff(projectName || "__default__", "library", handoff);
+public/control-center/pages/content-studio-workspace.js:1723:    setSharedHandoff("__default__", "library", handoff);
+public/control-center/pages/content-studio-workspace.js:1728:      const result = await createProjectHandoff(projectName, handoff);
+public/control-center/pages/content-studio-workspace.js:1729:      const saved = asObject(result?.handoff);
+public/control-center/pages/content-studio-workspace.js:1730:      const handoffId = asString(saved.id || handoff.id);
+public/control-center/pages/content-studio-workspace.js:1733:        id: handoffId || libraryAsset.id,
+public/control-center/pages/content-studio-workspace.js:1734:        handoff_id: handoffId,
+public/control-center/pages/content-studio-workspace.js:1738:        handoff_id: handoffId,
+public/control-center/pages/content-studio-workspace.js:1751:        handoff_id: "",
+public/control-center/pages/content-studio-workspace.js:1756:      showMessage?.("Library backend unavailable. Saved as local library handoff.");
+public/control-center/pages/content-studio-workspace.js:1765:      handoff_id: "",
+public/control-center/pages/content-studio-workspace.js:1770:    showMessage?.("Content draft saved to Library (local handoff).");
+public/control-center/pages/content-studio-workspace.js:1776:async function sendHandoff({ projectName, handoff, session, showMessage, failMessage, successMessage, localMessage }) {
+public/control-center/pages/content-studio-workspace.js:1778:    "Create Content Studio handoff",
+public/control-center/pages/content-studio-workspace.js:1779:    `This will create a Content Studio handoff to ${handoff.destination_page || "the selected workspace"} for review.`
+public/control-center/pages/content-studio-workspace.js:1781:    showMessage?.("Content Studio handoff cancelled.");
+public/control-center/pages/content-studio-workspace.js:1785:  setSharedHandoff(projectName || "__default__", handoff.destination_page, handoff);
+public/control-center/pages/content-studio-workspace.js:1787:    setSharedHandoff("__default__", handoff.destination_page, handoff);
+public/control-center/pages/content-studio-workspace.js:1792:      await createProjectHandoff(projectName, handoff);
+public/control-center/pages/content-studio-workspace.js:1814:          <h3>Library dependency gate</h3>
+public/control-center/pages/content-studio-workspace.js:1828:  handoff,
+public/control-center/pages/content-studio-workspace.js:1876:      if (!handoff) {
+public/control-center/pages/content-studio-workspace.js:1877:        session.draftMessage = "No inbound handoff is available.";
+public/control-center/pages/content-studio-workspace.js:1883:        mode: firstText(handoff.mode, session.form.mode, "social-post"),
+public/control-center/pages/content-studio-workspace.js:1884:        project: firstText(handoff.project, session.form.project, projectName),
+public/control-center/pages/content-studio-workspace.js:1885:        campaign: firstText(handoff.campaign, session.form.campaign),
+public/control-center/pages/content-studio-workspace.js:1886:        product: firstText(handoff.product, session.form.product),
+public/control-center/pages/content-studio-workspace.js:1887:        channel: firstText(handoff.channel, session.form.channel),
+public/control-center/pages/content-studio-workspace.js:1888:        language: firstText(handoff.language, session.form.language),
+public/control-center/pages/content-studio-workspace.js:1889:        tone: firstText(handoff.tone, session.form.tone),
+public/control-center/pages/content-studio-workspace.js:1890:        objective: firstText(handoff.objective, session.form.objective),
+public/control-center/pages/content-studio-workspace.js:1891:        brief: firstText(handoff.brief, handoff.contentBody, session.form.brief),
+public/control-center/pages/content-studio-workspace.js:1892:        title: firstText(handoff.title, session.form.title),
+public/control-center/pages/content-studio-workspace.js:1893:        status: normalizeStatus(handoff.readinessStatus || "draft", "draft")
+public/control-center/pages/content-studio-workspace.js:1898:        outputContent: firstText(handoff.contentBody),
+public/control-center/pages/content-studio-workspace.js:1903:        approvalStatus: firstText(handoff.approvalStatus, "draft"),
+public/control-center/pages/content-studio-workspace.js:1904:        notes: `Loaded from ${titleCase(handoff.sourcePage || "handoff")}.`
+public/control-center/pages/content-studio-workspace.js:1956:              approvalStatus: "needs_review",
+public/control-center/pages/content-studio-workspace.js:1960:            session.draftMessage = "Draft generated and queued for review.";
+public/control-center/pages/content-studio-workspace.js:1970:              approvalStatus: "draft",
+public/control-center/pages/content-studio-workspace.js:1984:            approvalStatus: "draft",
+public/control-center/pages/content-studio-workspace.js:1998:          approvalStatus: "draft",
+public/control-center/pages/content-studio-workspace.js:2092:        "Create AI Command content handoff",
+public/control-center/pages/content-studio-workspace.js:2093:        "This will attach shared AI handoff context and navigate to AI Command for review and planning support. It does not publish, approve, send externally, or create backend tasks."
+public/control-center/pages/content-studio-workspace.js:2105:      setSharedHandoff(projectName || "__default__", "ai-command", {
+public/control-center/pages/content-studio-workspace.js:2135:      const handoffPayload = buildMediaHandoff(projectName, session, selectedItem);
+public/control-center/pages/content-studio-workspace.js:2138:        handoff: handoffPayload,
+public/control-center/pages/content-studio-workspace.js:2141:        failMessage: "Design brief kept locally because backend handoff save is unavailable.",
+public/control-center/pages/content-studio-workspace.js:2167:      const handoffPayload = buildPublishingHandoff(projectName, session, selectedItem);
+public/control-center/pages/content-studio-workspace.js:2170:        handoff: handoffPayload,
+public/control-center/pages/content-studio-workspace.js:2173:        failMessage: "Publishing handoff kept locally because backend save is unavailable.",
+public/control-center/pages/content-studio-workspace.js:2174:        successMessage: "Publishing handoff created.",
+public/control-center/pages/content-studio-workspace.js:2175:        localMessage: "Publishing handoff created locally."
+public/control-center/pages/content-studio-workspace.js:2215:          "Confirm content approval mark",
+public/control-center/pages/content-studio-workspace.js:2221:        current.approval_status = "approved";
+public/control-center/pages/content-studio-workspace.js:2235:        current.approval_status = "rejected";
+public/control-center/pages/content-studio-workspace.js:2257:          approvalStatus: "draft",
+public/control-center/pages/content-studio-workspace.js:2308:          "Create AI Command agent handoff",
+public/control-center/pages/content-studio-workspace.js:2309:          `This will attach ${agent.title} shared AI handoff context and navigate to AI Command for review and planning support. It does not publish, approve, send externally, or create backend tasks.`
+public/control-center/pages/content-studio-workspace.js:2325:        setSharedHandoff(projectName || "__default__", "ai-command", {
+public/control-center/pages/content-studio-workspace.js:2408:      // Prefer inbound handoff, then selectedItem, then session.form
+public/control-center/pages/content-studio-workspace.js:2409:      const handoff = inboundSummary;
+public/control-center/pages/content-studio-workspace.js:2411:      if (handoff) {
+public/control-center/pages/content-studio-workspace.js:2412:        sourceLines.push(`<div><strong>Source page:</strong> ${escapeHtml(titleCase(handoff.sourcePage || "-"))}</div>`);
+public/control-center/pages/content-studio-workspace.js:2413:        if (handoff.project) sourceLines.push(`<div><strong>Project:</strong> ${escapeHtml(handoff.project)}</div>`);
+public/control-center/pages/content-studio-workspace.js:2414:        if (handoff.campaign) sourceLines.push(`<div><strong>Campaign:</strong> ${escapeHtml(handoff.campaign)}</div>`);
+public/control-center/pages/content-studio-workspace.js:2415:        if (handoff.channel) sourceLines.push(`<div><strong>Channel:</strong> ${escapeHtml(handoff.channel)}</div>`);
+public/control-center/pages/content-studio-workspace.js:2416:        if (handoff.brief) sourceLines.push(`<div><strong>Brief:</strong> ${escapeHtml(handoff.brief.slice(0, 120))}</div>`);
+public/control-center/pages/content-studio-workspace.js:2417:        sourceLines.push(`<div><strong>Handoff type:</strong> ${handoff.id ? "AI/Workflow" : "Unknown"}</div>`);
+public/control-center/pages/content-studio-workspace.js:2448:      </ul><div class="content-hint content-readiness-hint">Review these before routing for publishing or governance.</div></section>`;
+public/control-center/pages/content-studio-workspace.js:2453:      const ariaLabel = "Governance risk and approval readiness panel";
+public/control-center/pages/content-studio-workspace.js:2454:      return `<section class="card content-card" aria-label="${ariaLabel}"><div class="card-head"><div><div class="setup-kicker">Governance Risk</div><h3>Approval Readiness</h3></div></div><ul class="content-governance-checklist content-readiness-list">
+public/control-center/pages/content-studio-workspace.js:2465:    // No direct publish/approve/send labels found in action rows; all routing is review/handoff-based.
+public/control-center/pages/content-studio-workspace.js:2476:        ${session.loading ? `<div class="empty-box">Loading content records, approvals, tasks, handoffs, and events...</div>` : ""}
+public/control-center/pages/content-studio-workspace.js:2498:      handoff: inboundSummary,
+public/control-center/pages/campaign-studio.js:1:import { getSharedCampaignRecord, getSharedHandoff, setSharedCampaignRecord, setSharedHandoff } from "../shared-context.js";
+public/control-center/pages/campaign-studio.js:59:  ownerRole: "strategist",
+public/control-center/pages/campaign-studio.js:67:  "ai-command": { role: "admin", domain: "governance" }
+public/control-center/pages/campaign-studio.js:118:      <div class="data-row"><span>Owner role</span><strong>${escapeHtml(titleCase(CAMPAIGN_ROLE_DEFAULTS.ownerRole))}</strong></div>
+public/control-center/pages/campaign-studio.js:119:      <div class="data-row"><span>Review owner</span><strong>${escapeHtml(titleCase(CAMPAIGN_ROLE_DEFAULTS.reviewRole))}</strong></div>
+public/control-center/pages/campaign-studio.js:121:      <div class="data-row"><span>Readiness</span><strong>${escapeHtml(model.executionReadiness.status)}</strong></div>
+public/control-center/pages/campaign-studio.js:219:  const scheduledJobs = asArray(activity.scheduled_jobs);
+public/control-center/pages/campaign-studio.js:253:    executionNotes: asArray(readiness.next_best_actions).join("; ")
+public/control-center/pages/campaign-studio.js:379:function applyAiCampaignHandoff(projectName, operations, session) {
+public/control-center/pages/campaign-studio.js:380:  const handoff = getSharedHandoff(projectName, "campaign-studio", operations, "ai-command");
+public/control-center/pages/campaign-studio.js:381:  const handoffId = asString(handoff?.id || handoff?.updated_at || handoff?.created_at || handoff?.payload?.prompt);
+public/control-center/pages/campaign-studio.js:382:  if (!handoffId || handoffId === asString(session.lastAiHandoffId)) return false;
+public/control-center/pages/campaign-studio.js:384:  const payload = asObject(handoff.payload);
+public/control-center/pages/campaign-studio.js:412:    executionNotes: firstNonEmpty(
+public/control-center/pages/campaign-studio.js:417:      session.values.executionNotes
+public/control-center/pages/campaign-studio.js:421:  session.lastAiHandoffId = handoffId;
+public/control-center/pages/campaign-studio.js:423:    ...(getSharedCampaignRecord(projectName, operations) || {}),
+public/control-center/pages/campaign-studio.js:444:    detail || "This action may create or update backend campaign records or route handoffs.",
+public/control-center/pages/campaign-studio.js:468:    owner: "Strategist",
+public/control-center/pages/campaign-studio.js:469:    owner_role: CAMPAIGN_ROLE_DEFAULTS.ownerRole,
+public/control-center/pages/campaign-studio.js:473:    linked_tasks: [],
+public/control-center/pages/campaign-studio.js:474:    linked_approvals: [],
+public/control-center/pages/campaign-studio.js:479:function persistCampaignRouteHandoff({ projectName, session, destinationPage, createProjectHandoff }) {
+public/control-center/pages/campaign-studio.js:483:  const handoff = {
+public/control-center/pages/campaign-studio.js:486:    source_role: CAMPAIGN_ROLE_DEFAULTS.ownerRole,
+public/control-center/pages/campaign-studio.js:499:      owner_role: CAMPAIGN_ROLE_DEFAULTS.ownerRole,
+public/control-center/pages/campaign-studio.js:507:    "Create campaign route handoff",
+public/control-center/pages/campaign-studio.js:508:    `This will create a campaign handoff from Campaign Studio to ${destinationPage} for review and execution preparation.`
+public/control-center/pages/campaign-studio.js:513:  setSharedHandoff(projectName, destinationPage, handoff);
+public/control-center/pages/campaign-studio.js:515:  createProjectHandoff?.(projectName, handoff).catch((error) => {
+public/control-center/pages/campaign-studio.js:516:    console.warn("Failed to persist campaign route handoff:", error.message);
+public/control-center/pages/campaign-studio.js:719:      body: `${count} weak-content signals suggest the format or execution needs adjustment.`
+public/control-center/pages/campaign-studio.js:731:      body: "This platform is not operational yet, so campaign execution will be constrained."
+public/control-center/pages/campaign-studio.js:739:        body: "Currently connected and available for execution, but richer performance data is still needed."
+public/control-center/pages/campaign-studio.js:776:          ? "Connected inside the current system, so this channel can support launch execution."
+public/control-center/pages/campaign-studio.js:866:  const approvalBlockers = [];
+public/control-center/pages/campaign-studio.js:898:  if (!values.executionNotes) approvalBlockers.push("Execution notes are missing, which makes approvals harder downstream.");
+public/control-center/pages/campaign-studio.js:899:  if (!values.audiencePrimary || !values.audienceNeed) approvalBlockers.push("Audience framing is incomplete for creative review.");
+public/control-center/pages/campaign-studio.js:900:  if (!values.productAngle) approvalBlockers.push("Product angle needs to be explicit so operators do not improvise.");
+public/control-center/pages/campaign-studio.js:907:    approvalBlockers.length ||
+public/control-center/pages/campaign-studio.js:921:    approvalBlockers,
+public/control-center/pages/campaign-studio.js:929:      approvalBlockers.length
+public/control-center/pages/campaign-studio.js:978:      "Use the current blockers and recommendations to choose the next highest-impact execution step."
+public/control-center/pages/campaign-studio.js:1064:  const scheduledJobs = asArray(activity.scheduled_jobs);
+public/control-center/pages/campaign-studio.js:1120:  const executionReadiness = buildExecutionReadiness({
+public/control-center/pages/campaign-studio.js:1163:    executionReadiness,
+public/control-center/pages/campaign-studio.js:1274:  createProjectHandoff
+public/control-center/pages/campaign-studio.js:1279:  const durableCampaign = getSharedCampaignRecord(projectName, state.data.operations);
+public/control-center/pages/campaign-studio.js:1284:  applyAiCampaignHandoff(projectName, state.data.operations, session);
+public/control-center/pages/campaign-studio.js:1299:      // Explicit actions such as Save, Build, Refresh, and route handoffs still
+public/control-center/pages/campaign-studio.js:1362:      const prompt = `Build an execution plan for campaign ${session.values.campaignName || "this campaign"} with goal ${session.values.campaignGoal || "launch"}, channels ${session.values.channelPlan || "to be defined"}, and offer ${session.values.offerHeadline || "to be defined"}. Use current project intelligence, readiness blockers, and recommendation signals.`;
+public/control-center/pages/campaign-studio.js:1368:        "Create AI Command campaign handoff",
+public/control-center/pages/campaign-studio.js:1369:        "This will create a campaign handoff from Campaign Studio to AI Command for review and planning support."
+public/control-center/pages/campaign-studio.js:1371:        showMessage?.("AI Command handoff cancelled.");
+public/control-center/pages/campaign-studio.js:1375:      setSharedHandoff(projectName, "ai-command", {
+public/control-center/pages/campaign-studio.js:1387:      createProjectHandoff?.(projectName, {
+public/control-center/pages/campaign-studio.js:1390:        source_role: CAMPAIGN_ROLE_DEFAULTS.ownerRole,
+public/control-center/pages/campaign-studio.js:1402:          owner_role: CAMPAIGN_ROLE_DEFAULTS.ownerRole,
+public/control-center/pages/campaign-studio.js:1408:        console.warn("Failed to persist campaign handoff:", error.message);
+public/control-center/pages/campaign-studio.js:1418:      const accepted = persistCampaignRouteHandoff({ projectName, session, destinationPage: "publishing", createProjectHandoff });
+public/control-center/pages/campaign-studio.js:1431:      const accepted = persistCampaignRouteHandoff({ projectName, session, destinationPage: "content-studio", createProjectHandoff });
+public/control-center/pages/campaign-studio.js:1439:      const accepted = persistCampaignRouteHandoff({ projectName, session, destinationPage: "media-studio", createProjectHandoff });
+public/control-center/pages/campaign-studio.js:1447:      const accepted = persistCampaignRouteHandoff({ projectName, session, destinationPage: "ads-manager", createProjectHandoff });
+public/control-center/pages/campaign-studio.js:1465:      if (model.executionReadiness.missingIntegrations.length) {
+public/control-center/pages/campaign-studio.js:1469:      if (model.executionReadiness.missingAssets.length) {
+public/control-center/pages/campaign-studio.js:1502:    description: "Plan campaign basics, launch waves, channel mix, and required assets in one execution-oriented workspace."
+public/control-center/pages/campaign-studio.js:1520:    createProjectHandoff
+public/control-center/pages/campaign-studio.js:1525:    applyAiCampaignHandoff(projectName, state.data.operations, session);
+public/control-center/pages/campaign-studio.js:1541:      createProjectHandoff
+public/control-center/pages/campaign-studio.js:1571:      executionReadiness,
+public/control-center/pages/campaign-studio.js:1582:    const readinessTone = executionReadiness.total ? "warning" : "success";
+public/control-center/pages/campaign-studio.js:1583:    const blockerTone = executionReadiness.total ? "warning" : "success";
+public/control-center/pages/campaign-studio.js:1609:              <span class="mhos-campaign-state mhos-campaign-state--${readinessTone}">${escapeHtml(executionReadiness.status)}</span>
+public/control-center/pages/campaign-studio.js:1636:              <strong class="mhos-campaign-metric-value mhos-executive-metric-value">${escapeHtml(executionReadiness.status)}</strong>
+public/control-center/pages/campaign-studio.js:1637:              <small class="mhos-campaign-metric-note mhos-executive-metric-note">${escapeHtml(executionReadiness.total ? `${executionReadiness.total} open gate${executionReadiness.total === 1 ? "" : "s"}` : "Launch gates clear")}</small>
+public/control-center/pages/campaign-studio.js:1646:              <strong class="mhos-campaign-metric-value mhos-executive-metric-value">${escapeHtml(String(executionReadiness.total))}</strong>
+public/control-center/pages/campaign-studio.js:1647:              <small class="mhos-campaign-metric-note mhos-executive-metric-note">${escapeHtml(executionReadiness.total ? "Needs operator attention" : "No open launch blockers")}</small>
+public/control-center/pages/campaign-studio.js:1672:                  helper: "Use the shared name operators, AI, execution packages, and reporting should all reference.",
+public/control-center/pages/campaign-studio.js:1688:                  helper: "Use the operational framing the team should align around across planning and execution.",
+public/control-center/pages/campaign-studio.js:1816:                Plan each wave separately so launch, education, and conversion work stay clear before routing into execution workspaces.
+public/control-center/pages/campaign-studio.js:1883:                <span class="card-badge ${executionReadiness.total ? "warning" : "success"}">${escapeHtml(executionReadiness.status)}</span>
+public/control-center/pages/campaign-studio.js:1911:                  <span>Recommended next action</span>
+public/control-center/pages/campaign-studio.js:1940:                  name: "executionNotes",
+public/control-center/pages/campaign-studio.js:1942:                  value: values.executionNotes,
+public/control-center/pages/campaign-studio.js:1943:                  helper: "Capture dependencies, packaging notes, approval guidance, or production instructions for the next operator.",
+public/control-center/pages/campaign-studio.js:1944:                  placeholder: "Anything the execution team must know",
+public/control-center/pages/campaign-studio.js:1957:                  executionReadiness.missingAssets.map((item) => titleCase(item)),
+public/control-center/pages/campaign-studio.js:1963:                  executionReadiness.missingIntegrations.map((item) => `${item.title}: ${item.body}`),
+public/control-center/pages/campaign-studio.js:1969:                  executionReadiness.publishingBlockers,
+public/control-center/pages/campaign-studio.js:1975:                  executionReadiness.adsBlockers,
+public/control-center/pages/campaign-studio.js:1981:                  executionReadiness.trackingBlockers,
+public/control-center/pages/campaign-studio.js:1987:                  executionReadiness.seoBlockers,
+public/control-center/pages/campaign-studio.js:1993:                  executionReadiness.approvalBlockers,
+public/control-center/pages/campaign-studio.js:2027:                  <span class="home-action-meta">Open Content Studio with a campaign handoff attached.</span>
+public/control-center/pages/campaign-studio.js:2031:                  <span class="home-action-meta">Open Media Studio with a campaign handoff attached.</span>
+public/control-center/pages/campaign-studio.js:2035:                  <span class="home-action-meta">Open Publishing with a campaign handoff attached.</span>
+public/control-center/pages/campaign-studio.js:2039:                  <span class="home-action-meta">Open Ads Manager with a campaign handoff attached.</span>
+public/control-center/pages/campaign-studio.js:2047:                  <span class="home-action-meta">Navigation only. Review missing assets before execution starts.</span>
+public/control-center/pages/campaign-studio.js:2066:      createProjectHandoff,
+public/control-center/pages/media-studio-workspace.js:4:  createProjectHandoff,
+public/control-center/pages/media-studio-workspace.js:26:import { getSharedHandoff, setSharedAiDraft, setSharedHandoff } from "../shared-context.js";
+public/control-center/pages/media-studio-workspace.js:42:  handoffRole: "publisher"
+public/control-center/pages/media-studio-workspace.js:71:    bestUse: "Before approvals and publishing handoff, especially for regulated or claim-sensitive content.",
+public/control-center/pages/media-studio-workspace.js:84:    purpose: "Finalize readiness signals and handoff payload quality before publishing.",
+public/control-center/pages/media-studio-workspace.js:86:    suggestedPrompt: "Act as Publishing Assistant. Produce a final publishing handoff summary with readiness status, blockers, approval notes, and channel delivery checklist."
+public/control-center/pages/media-studio-workspace.js:165:  if (["requested", "request", "queued", "draft"].includes(normalized)) return "draft";
+public/control-center/pages/media-studio-workspace.js:168:  if (["needs_review", "needs review", "review", "pending_approval"].includes(normalized)) return "needs_review";
+public/control-center/pages/media-studio-workspace.js:170:  if (["publishing_ready", "publishing ready", "handoff", "ready_for_publishing"].includes(normalized)) return "publishing_ready";
+public/control-center/pages/media-studio-workspace.js:469:      tasks: [],
+public/control-center/pages/media-studio-workspace.js:470:      approvals: [],
+public/control-center/pages/media-studio-workspace.js:471:      handoffs: [],
+public/control-center/pages/media-studio-workspace.js:473:      operations: null,
+public/control-center/pages/media-studio-workspace.js:495:function ownerRoleForMode(mode) {
+public/control-center/pages/media-studio-workspace.js:499:function normalizeMediaItem(rawItem, state, source = "Backend media job") {
+public/control-center/pages/media-studio-workspace.js:504:    id: firstText(raw.id, raw.media_job_id, raw.job_id),
+public/control-center/pages/media-studio-workspace.js:505:    title: firstText(raw.title, raw.name, raw.prompt, `${titleCase(mode)} media job`),
+public/control-center/pages/media-studio-workspace.js:520:    approval_state: asString(raw.approval_state || raw.approvalStatus || ""),
+public/control-center/pages/media-studio-workspace.js:523:    owner: asString(raw.owner || ""),
+public/control-center/pages/media-studio-workspace.js:524:    owner_role: asString(raw.owner_role || ownerRoleForMode(mode)),
+public/control-center/pages/media-studio-workspace.js:528:    publishing_job_id: asString(raw.publishing_job_id || ""),
+public/control-center/pages/media-studio-workspace.js:534:    linked_tasks: asArray(raw.linked_tasks),
+public/control-center/pages/media-studio-workspace.js:535:    linked_approvals: asArray(raw.linked_approvals),
+public/control-center/pages/media-studio-workspace.js:536:    linked_handoffs: asArray(raw.linked_handoffs),
+public/control-center/pages/media-studio-workspace.js:592:      tasksResult,
+public/control-center/pages/media-studio-workspace.js:593:      approvalsResult,
+public/control-center/pages/media-studio-workspace.js:594:      handoffsResult,
+public/control-center/pages/media-studio-workspace.js:596:      operationsResult
+public/control-center/pages/media-studio-workspace.js:604:    const tasks = fulfilledValue(tasksResult, { items: [] });
+public/control-center/pages/media-studio-workspace.js:605:    const approvals = fulfilledValue(approvalsResult, { items: [] });
+public/control-center/pages/media-studio-workspace.js:606:    const handoffs = fulfilledValue(handoffsResult, { items: [] });
+public/control-center/pages/media-studio-workspace.js:608:    const operations = fulfilledValue(operationsResult, null);
+public/control-center/pages/media-studio-workspace.js:616:    session.tasks = asArray(tasks.items);
+public/control-center/pages/media-studio-workspace.js:617:    session.approvals = asArray(approvals.items);
+public/control-center/pages/media-studio-workspace.js:618:    session.handoffs = asArray(handoffs.items);
+public/control-center/pages/media-studio-workspace.js:620:    session.operations = operations || null;
+public/control-center/pages/media-studio-workspace.js:650:    `mh_ai_command_handoff_${destinationRoute}`,
+public/control-center/pages/media-studio-workspace.js:651:    "mh_ai_command_campaign_handoff"
+public/control-center/pages/media-studio-workspace.js:662:        if (type === "ai_command_campaign_handoff" && (!route || route === destinationRoute)) {
+public/control-center/pages/media-studio-workspace.js:666:        console.warn("Unable to read AI Command campaign handoff", error);
+public/control-center/pages/media-studio-workspace.js:676:    `mh_ai_command_handoff_${destinationRoute}`,
+public/control-center/pages/media-studio-workspace.js:677:    "mh_ai_command_campaign_handoff"
+public/control-center/pages/media-studio-workspace.js:685:        console.warn("Unable to clear AI Command campaign handoff", error);
+public/control-center/pages/media-studio-workspace.js:696:  const operations = session.operations || {};
+public/control-center/pages/media-studio-workspace.js:698:    getSharedHandoff(projectName, "media-studio", operations, "workflows") ||
+public/control-center/pages/media-studio-workspace.js:699:    getSharedHandoff(projectName, "media-studio", operations, "ai-command") ||
+public/control-center/pages/media-studio-workspace.js:700:    getSharedHandoff(projectName, "media-studio", operations, "content-studio") ||
+public/control-center/pages/media-studio-workspace.js:701:    getSharedHandoff(projectName, "media-studio", operations)
+public/control-center/pages/media-studio-workspace.js:705:function extractHandoffSummary(handoff) {
+public/control-center/pages/media-studio-workspace.js:706:  const direct = asObject(handoff);
+public/control-center/pages/media-studio-workspace.js:707:  const payload = asObject(handoff?.payload);
+public/control-center/pages/media-studio-workspace.js:710:  const isAiCampaign = asString(direct.type || payload.type) === "ai_command_campaign_handoff";
+public/control-center/pages/media-studio-workspace.js:712:  const sourcePage = asString(handoff?.source_page || direct.source || "workflows");
+public/control-center/pages/media-studio-workspace.js:716:    payload.workflow_title,
+public/control-center/pages/media-studio-workspace.js:728:    "Workflow handoff is available for media preparation."
+public/control-center/pages/media-studio-workspace.js:738:      handoff?.id ||
+public/control-center/pages/media-studio-workspace.js:739:      payload.workflow_id ||
+public/control-center/pages/media-studio-workspace.js:741:      payload.workflow_title ||
+public/control-center/pages/media-studio-workspace.js:745:    workflowId: asString(payload.workflow_id || direct.id),
+public/control-center/pages/media-studio-workspace.js:762:  const handoff = getInboundHandoff(projectName, session);
+public/control-center/pages/media-studio-workspace.js:763:  if (!handoff) return;
+public/control-center/pages/media-studio-workspace.js:764:  const summary = extractHandoffSummary(handoff);
+public/control-center/pages/media-studio-workspace.js:851:    "Keep product identity accurate, leave safe text area, avoid unsupported claims, and prepare for Publishing handoff."
+public/control-center/pages/media-studio-workspace.js:919:    owner_role: ownerRoleForMode(mode),
+public/control-center/pages/media-studio-workspace.js:945:    media_job_id: session.formSourceId || session.selectedId || "",
+public/control-center/pages/media-studio-workspace.js:1038:    media_job_id: sourceMediaId,
+public/control-center/pages/media-studio-workspace.js:1047:    approval_status: normalizeApprovalStatus(readiness.readinessStatus),
+public/control-center/pages/media-studio-workspace.js:1062:  const backend = asArray(session.handoffs).find((entry) => {
+public/control-center/pages/media-studio-workspace.js:1108:  const handoffPayload = {
+public/control-center/pages/media-studio-workspace.js:1112:    source_role: selectedItem?.owner_role || ownerRoleForMode(session.form.mode || session.mode || "image"),
+public/control-center/pages/media-studio-workspace.js:1117:      entity_type: "media_job",
+public/control-center/pages/media-studio-workspace.js:1133:  setSharedHandoff(projectName || "__default__", "library", handoffPayload);
+public/control-center/pages/media-studio-workspace.js:1135:    setSharedHandoff("__default__", "library", handoffPayload);
+public/control-center/pages/media-studio-workspace.js:1139:    handoff_id: asString(existing.backend?.id || existing.local?.handoff_id || ""),
+public/control-center/pages/media-studio-workspace.js:1148:      const result = await createProjectHandoff(backendProjectName, handoffPayload);
+public/control-center/pages/media-studio-workspace.js:1149:      const savedHandoff = asObject(result?.handoff);
+public/control-center/pages/media-studio-workspace.js:1150:      const savedId = asString(savedHandoff.id || handoffPayload.id);
+public/control-center/pages/media-studio-workspace.js:1154:        handoff_id: savedId,
+public/control-center/pages/media-studio-workspace.js:1159:        handoff_id: savedId,
+public/control-center/pages/media-studio-workspace.js:1165:      session.handoffs = [savedHandoff, ...asArray(session.handoffs).filter((item) => asString(item.id) !== savedId)];
+public/control-center/pages/media-studio-workspace.js:1174:      showMessage?.("Library backend unavailable. Saved as local library handoff.");
+public/control-center/pages/media-studio-workspace.js:1183:    showMessage?.("Selected version saved to Library (local handoff).");
+public/control-center/pages/media-studio-workspace.js:1242:function buildRecommendation(metrics, handoff, selectedItem) {
+public/control-center/pages/media-studio-workspace.js:1246:      action: "Regenerate or repair the failed media job",
+public/control-center/pages/media-studio-workspace.js:1261:      why: `${ready.title} is ready for a safe Publishing package handoff.`
+public/control-center/pages/media-studio-workspace.js:1264:  if (handoff) {
+public/control-center/pages/media-studio-workspace.js:1266:      action: handoff && extractHandoffSummary(handoff).isAiCampaign ? "Load AI Team campaign brief" : "Load workflow media brief",
+public/control-center/pages/media-studio-workspace.js:1267:      why: handoff && extractHandoffSummary(handoff).isAiCampaign ? "An AI Team campaign package is available. Load it as the creative brief before preparing media assets." : "A workflow handoff is available. Load it into the generator to continue the Workflows -> Media Studio -> package handoff flow."
+public/control-center/pages/media-studio-workspace.js:1277:    action: "Start a media job",
+public/control-center/pages/media-studio-workspace.js:1278:    why: "No media job is ready yet. Start with a brief, build a brand-safe prompt, then review and prepare a Publishing package."
+public/control-center/pages/media-studio-workspace.js:1282:function capabilityFromOperations(operations, hints = []) {
+public/control-center/pages/media-studio-workspace.js:1283:  const text = clean(JSON.stringify(asObject(operations))).toLowerCase();
+public/control-center/pages/media-studio-workspace.js:1290:  const operations = session.operations;
+public/control-center/pages/media-studio-workspace.js:1291:  const imageConnected = capabilityFromOperations(operations, ["image_generation", "image generator", "image_backend"]);
+public/control-center/pages/media-studio-workspace.js:1292:  const videoConnected = capabilityFromOperations(operations, ["video_generation", "video generator", "video_backend"]);
+public/control-center/pages/media-studio-workspace.js:1293:  const voiceConnected = capabilityFromOperations(operations, ["voice_generation", "audio_generation", "voice_backend"]);
+public/control-center/pages/media-studio-workspace.js:1295:  const publishingConnected = hasBackend || capabilityFromOperations(operations, ["publishing", "handoff"]);
+public/control-center/pages/media-studio-workspace.js:1296:  const approvalsConnected = hasBackend || capabilityFromOperations(operations, ["approval", "approvals"]);
+public/control-center/pages/media-studio-workspace.js:1302:    publishing_handoff: publishingConnected,
+public/control-center/pages/media-studio-workspace.js:1303:    approval_backend: approvalsConnected,
+public/control-center/pages/media-studio-workspace.js:1315:  return "Generator backend not connected yet — your prompt/job is ready. Review it, save it as a draft, send it to AI Command, save it to Library, or connect a provider in Integrations before trying real output generation.";
+public/control-center/pages/media-studio-workspace.js:1382:      .media-queue-actions {
+public/control-center/pages/media-studio-workspace.js:1417:      .media-queue-list,
+public/control-center/pages/media-studio-workspace.js:1425:      .media-queue-row,
+public/control-center/pages/media-studio-workspace.js:1437:      .media-queue-row.is-active {
+public/control-center/pages/media-studio-workspace.js:1442:      .media-queue-main {
+public/control-center/pages/media-studio-workspace.js:1453:      .media-queue-title,
+public/control-center/pages/media-studio-workspace.js:1461:      .media-queue-meta,
+public/control-center/pages/media-studio-workspace.js:1468:      .media-queue-actions button {
+public/control-center/pages/media-studio-workspace.js:1478:      .media-queue-actions button:hover {
+public/control-center/pages/media-studio-workspace.js:1617:        .media-queue-row {
+public/control-center/pages/media-studio-workspace.js:1622:        .media-queue-actions {
+public/control-center/pages/media-studio-workspace.js:1674:function getMediaSourceReadiness(session, selectedItem, handoff) {
+public/control-center/pages/media-studio-workspace.js:1676:    selectedItem?.library_asset_ref?.handoff_id ||
+public/control-center/pages/media-studio-workspace.js:1677:    selectedVersionEntry(session)?.library_asset_ref?.handoff_id
+public/control-center/pages/media-studio-workspace.js:1681:  const hasHandoff = Boolean(handoff);
+public/control-center/pages/media-studio-workspace.js:1701:      detail: "Inbound or job context exists; attach Library source when claims or product truth matter."
+public/control-center/pages/media-studio-workspace.js:1707:    detail: "Attach a Library asset or load a source-backed handoff before final package routing."
+public/control-center/pages/media-studio-workspace.js:1711:function getMediaReadinessItems(session, selectedItem, handoff) {
+public/control-center/pages/media-studio-workspace.js:1714:  const source = getMediaSourceReadiness(session, selectedItem, handoff);
+public/control-center/pages/media-studio-workspace.js:1758:        : "Output, selected version, and review notes should be checked before handoff."
+public/control-center/pages/media-studio-workspace.js:1761:      key: "governance",
+public/control-center/pages/media-studio-workspace.js:1767:        : "No obvious governance escalation signal in current prompt context."
+public/control-center/pages/media-studio-workspace.js:1772:function renderMediaReadinessSummary({ session, selectedItem, handoff, escapeHtml }) {
+public/control-center/pages/media-studio-workspace.js:1773:  const items = getMediaReadinessItems(session, selectedItem, handoff);
+public/control-center/pages/media-studio-workspace.js:1787:function renderMediaCommandHeader({ projectName, session, metrics, selectedItem, handoff, recommendation, escapeHtml }) {
+public/control-center/pages/media-studio-workspace.js:1792:  const packageCount = `${formatCount(metrics.total)} jobs/assets`;
+public/control-center/pages/media-studio-workspace.js:1794:  const handoffLabel = handoff ? "Brief available" : "No inbound brief";
+public/control-center/pages/media-studio-workspace.js:1802:          <p class="media-section-copy">Start by choosing Image, Video, Voice, or Campaign Pack. Generate a prompt first, then use Generate Output only when a provider/backend is connected. Save drafts for review, save reusable results to Library, or prepare a Publishing handoff without publishing directly.</p>
+public/control-center/pages/media-studio-workspace.js:1816:        <span><strong>Brief</strong>${escapeHtml(handoffLabel)}</span>
+public/control-center/pages/media-studio-workspace.js:1819:        <button id="mediaStartJobBtn" class="btn btn-secondary" type="button" data-new-media-job="image">Start Media Job</button>
+public/control-center/pages/media-studio-workspace.js:1829:function getMediaWorkflowSteps(session, selectedItem, handoff) {
+public/control-center/pages/media-studio-workspace.js:1832:  const source = getMediaSourceReadiness(session, selectedItem, handoff);
+public/control-center/pages/media-studio-workspace.js:1836:  const savedToLibrary = Boolean(version?.library_asset_ref?.handoff_id || selectedItem?.library_asset_ref?.handoff_id);
+public/control-center/pages/media-studio-workspace.js:1837:  const handoffPrepared = readiness.readinessStatus === "sent_to_publishing";
+public/control-center/pages/media-studio-workspace.js:1868:      state: handoffPrepared ? "ready" : packageReady ? "active" : "missing",
+public/control-center/pages/media-studio-workspace.js:1869:      detail: handoffPrepared ? "Prepared" : packageReady ? "Package ready" : "Needs review"
+public/control-center/pages/media-studio-workspace.js:1874:function renderMediaWorkflowStrip({ session, selectedItem, handoff, escapeHtml }) {
+public/control-center/pages/media-studio-workspace.js:1875:  const steps = getMediaWorkflowSteps(session, selectedItem, handoff);
+public/control-center/pages/media-studio-workspace.js:1877:    <nav class="media-workflow-strip" id="mediaWorkflowStrip" aria-label="Media Studio workflow: Brief Source Generate Prepare Review Save to Library Handoff">
+public/control-center/pages/media-studio-workspace.js:1878:      <div class="media-workflow-title">Brief &rarr; Source &rarr; Generate/Prepare &rarr; Review &rarr; Save to Library &rarr; Handoff</div>
+public/control-center/pages/media-studio-workspace.js:1879:      <ol class="media-workflow-list" role="list">
+public/control-center/pages/media-studio-workspace.js:1881:          <li class="media-workflow-step is-${escapeHtml(step.state)}" role="listitem">
+public/control-center/pages/media-studio-workspace.js:1882:            <span class="media-workflow-index">${escapeHtml(String(index + 1))}</span>
+public/control-center/pages/media-studio-workspace.js:1883:            <span class="media-workflow-copy">
+public/control-center/pages/media-studio-workspace.js:1902:        <span class="card-badge neutral">${escapeHtml(formatCount(metrics.total))} jobs/assets</span>
+public/control-center/pages/media-studio-workspace.js:1905:        <div class="media-overview-item"><span>Total media jobs/assets</span><strong>${escapeHtml(formatCount(metrics.total))}</strong></div>
+public/control-center/pages/media-studio-workspace.js:1907:        <div class="media-overview-item"><span>Draft media jobs</span><strong>${escapeHtml(formatCount(metrics.draftJobs))}</strong></div>
+public/control-center/pages/media-studio-workspace.js:1909:        <div class="media-overview-item"><span>Failed / blocked jobs</span><strong>${escapeHtml(formatCount(metrics.failed))}</strong></div>
+public/control-center/pages/media-studio-workspace.js:1910:        <div class="media-overview-item"><span>Publishing-ready handoffs</span><strong>${escapeHtml(formatCount(metrics.publishingReady))}</strong></div>
+public/control-center/pages/media-studio-workspace.js:1916:function renderRecommendation(recommendation, metrics, selectedItem, handoff, escapeHtml) {
+public/control-center/pages/media-studio-workspace.js:1923:    ["Campaign readiness", handoff ? "Workflow linked" : "Draft first"]
+public/control-center/pages/media-studio-workspace.js:1945:        <button id="mediaStartJobBtn" class="btn btn-secondary" type="button" data-new-media-job="image">Start Media Job</button>
+public/control-center/pages/media-studio-workspace.js:1990:          <p class="media-section-copy">Choose a media mode, prepare a prompt/job-ready draft, then render with a connected provider or continue safely with review and handoff.</p>
+public/control-center/pages/media-studio-workspace.js:1996:          <button class="media-mode-tab${item === mode ? " is-active" : ""}" type="button" data-media-mode="${escapeHtml(item)}"${item === "image" || item === "video" ? ` data-new-media-job="${escapeHtml(item)}"` : ""}>${escapeHtml(item === "campaign-pack" ? "Campaign Pack" : titleCase(item))}</button>
+public/control-center/pages/media-studio-workspace.js:2001:            Start here: choose Image, Video, Voice, or Campaign Pack. Complete the brief, generate or improve the prompt, then use Generate Output only when a provider/backend is connected. If generation is unavailable or times out, keep the prompt/job-ready draft and continue with review, Library save, AI Command review, or provider setup in Integrations.
+public/control-center/pages/media-studio-workspace.js:2019:        ${renderField({ id: "mediaPromptInput", name: "prompt", label: "Prompt / brief", value: form.prompt, multiline: true, rows: 7, helper: "Use this as the creative brief. If no generation provider is connected, Media Studio keeps it as a prompt/job-ready draft for review, Library save, AI review, or provider handoff." }, session, escapeHtml)}
+public/control-center/pages/media-studio-workspace.js:2022:          ${renderField({ id: "mediaTitleInput", name: "title", label: "Job title", value: form.title, helper: "Optional operator-facing queue title." }, session, escapeHtml)}
+public/control-center/pages/media-studio-workspace.js:2036:function renderPromptBuilder(session, handoff, escapeHtml) {
+public/control-center/pages/media-studio-workspace.js:2042:          <h3>Prompt operations and format conversion</h3>
+public/control-center/pages/media-studio-workspace.js:2044:        <span class="card-badge neutral">${escapeHtml(handoff ? "Handoff available" : "Context")}</span>
+public/control-center/pages/media-studio-workspace.js:2048:        <button id="mediaPromptFromHandoffBtn" class="btn btn-secondary" type="button">${escapeHtml(handoff && extractHandoffSummary(handoff).isAiCampaign ? "Load AI Team Campaign Brief" : "Generate from workflow handoff")}</button>
+public/control-center/pages/media-studio-workspace.js:2088:function renderWorkflowHandoff(handoff, session, escapeHtml) {
+public/control-center/pages/media-studio-workspace.js:2089:  if (!handoff) {
+public/control-center/pages/media-studio-workspace.js:2099:        <div class="empty-box">Route content, workflow, or AI context into Media Studio to load a media brief here.</div>
+public/control-center/pages/media-studio-workspace.js:2104:  const summary = extractHandoffSummary(handoff);
+public/control-center/pages/media-studio-workspace.js:2150:            <h3>No media jobs yet</h3>
+public/control-center/pages/media-studio-workspace.js:2154:        <div class="empty-box">Start a media job or load a workflow handoff to create the first prompt-ready draft.</div>
+public/control-center/pages/media-studio-workspace.js:2164:          <h3>Production queue</h3>
+public/control-center/pages/media-studio-workspace.js:2168:      <div class="media-queue-list">
+public/control-center/pages/media-studio-workspace.js:2170:          <article class="media-queue-row${item.id === session.selectedId ? " is-active" : ""}">
+public/control-center/pages/media-studio-workspace.js:2171:            <button class="media-queue-main" type="button" data-media-select="${escapeHtml(item.id)}">
+public/control-center/pages/media-studio-workspace.js:2172:              <span class="media-queue-title">${escapeHtml(item.title)}</span>
+public/control-center/pages/media-studio-workspace.js:2173:              <span class="media-queue-meta">${escapeHtml(titleCase(item.mode))} • ${escapeHtml(item.channel || "channel")} • ${escapeHtml(item.format || "format")} • ${escapeHtml(item.source)}</span>
+public/control-center/pages/media-studio-workspace.js:2176:            <div class="media-queue-actions">
+public/control-center/pages/media-studio-workspace.js:2214:  const approvalStatus = ["approved", "publishing_ready", "sent_to_publishing"].includes(readinessStatus) ? "approved" : "pending";
+public/control-center/pages/media-studio-workspace.js:2221:    ["review state", approvalStatus === "approved"]
+public/control-center/pages/media-studio-workspace.js:2227:    approvalStatus,
+public/control-center/pages/media-studio-workspace.js:2234:  if (!item) return "Needs job";
+public/control-center/pages/media-studio-workspace.js:2267:          <strong>${escapeHtml(readiness.approvalStatus === "approved" ? "Review Ready" : "Pending")}</strong>
+public/control-center/pages/media-studio-workspace.js:2380:      : `<div class="media-prompt-box">${escapeHtml(JSON.stringify(payload, null, 2) || "No image output was returned yet. If the provider is not connected or timed out, keep the prompt/job-ready draft and continue with review, Library save, or provider setup in Integrations.")}</div>`;
+public/control-center/pages/media-studio-workspace.js:2417:        <div class="media-prompt-box media-block-gap">${escapeHtml(voiceScript || asString(payload.message) || "No voice script or audio output is available yet. Voice mode prepares voiceover scripts/audio outputs only; it does not run IVR, phone calls, or call-center workflows.")}</div>
+public/control-center/pages/media-studio-workspace.js:2502:          <strong>${escapeHtml(selected?.library_asset_ref?.handoff_id ? `Saved (${selected.library_asset_ref.local_only ? "Local" : "Backend"})` : "Not saved")}</strong>
+public/control-center/pages/media-studio-workspace.js:2556:  const prompt = activePrompt || selectedItem?.prompt || selectedItem?.brief || "Select or save a media job to preview the prompt, brief, and asset notes.";
+public/control-center/pages/media-studio-workspace.js:2572:          <h3>${escapeHtml(selectedItem?.title || "No selected media job")}</h3>
+public/control-center/pages/media-studio-workspace.js:2605:  if (mode.includes("publish") || mode.includes("handoff")) return "publishing-assistant";
+public/control-center/pages/media-studio-workspace.js:2681:    ["publishing handoff", readiness.publishing_handoff],
+public/control-center/pages/media-studio-workspace.js:2682:    ["approval backend", readiness.approval_backend]
+public/control-center/pages/media-studio-workspace.js:2689:          <h3>Generation and workflow connectivity</h3>
+public/control-center/pages/media-studio-workspace.js:2701:      ${!readiness.image_generation_backend || !readiness.video_generation_backend || !readiness.voice_generation_backend ? `<div class="simple-banner media-block-gap">${escapeHtml("Generator backend not connected yet — your prompt/job is ready. Review it, save it as a draft, send it to AI Command, save it to Library, or connect a provider in Integrations before trying real output generation.")}</div>` : ""}
+public/control-center/pages/media-studio-workspace.js:2708:    `Review this Media Studio job for ${projectName}.`,
+public/control-center/pages/media-studio-workspace.js:2728:    source_role: source.owner_role || ownerRoleForMode(source.mode),
+public/control-center/pages/media-studio-workspace.js:2729:    destination_role: MEDIA_ROLE_DEFAULTS.handoffRole,
+public/control-center/pages/media-studio-workspace.js:2733:      entity_type: "media_job",
+public/control-center/pages/media-studio-workspace.js:2736:      label: source.title || session.form.title || "Media job"
+public/control-center/pages/media-studio-workspace.js:2743:      media_job_id: source.id || session.formSourceId || "",
+public/control-center/pages/media-studio-workspace.js:2748:      title: source.title || session.form.title || "Media handoff",
+public/control-center/pages/media-studio-workspace.js:2762:        title: source.title || session.form.title || "Media handoff",
+public/control-center/pages/media-studio-workspace.js:2783:    const saved = normalizeMediaItem(result.media_job || result.item || buildMediaPayload(session, status), state);
+public/control-center/pages/media-studio-workspace.js:2787:    showMessage?.("Media job saved.");
+public/control-center/pages/media-studio-workspace.js:2800:  handoff,
+public/control-center/pages/media-studio-workspace.js:2825:    return window.confirm(`${title}\n\n${detail}\n\nAuthority: Media Studio can prepare, save, request review, and hand off media work, but provider generation, approval decisions, task creation, and publishing handoff must be explicitly confirmed by the operator.\n\nSelect Cancel to review before continuing.`);
+public/control-center/pages/media-studio-workspace.js:2848:      `Action: Start provider-backed media generation for ${selectedMode}.\nRisk: This may call a configured AI/media provider and create a new generated output that must be reviewed before approval or publishing.`
+public/control-center/pages/media-studio-workspace.js:2874:          notes: firstText(response.message, "Generator backend not connected yet — your prompt/job is ready. Review it, save it as a draft, send it to AI Command, save it to Library, or connect a provider in Integrations before trying real output generation."),
+public/control-center/pages/media-studio-workspace.js:2880:        session.draftMessage = response.message || "Generator backend not connected yet — your prompt/job is ready. Review it, save it as a draft, send it to AI Command, save it to Library, or connect a provider in Integrations before trying real output generation.";
+public/control-center/pages/media-studio-workspace.js:2921:      session.draftMessage = "Generation completed and queued for review.";
+public/control-center/pages/media-studio-workspace.js:2993:      showMessage?.("New media job draft opened.");
+public/control-center/pages/media-studio-workspace.js:3022:      const summary = handoff ? extractHandoffSummary(handoff) : null;
+public/control-center/pages/media-studio-workspace.js:3024:        session.draftMessage = "No workflow handoff is available.";
+public/control-center/pages/media-studio-workspace.js:3033:      session.draftMessage = "Prompt generated from workflow handoff.";
+public/control-center/pages/media-studio-workspace.js:3153:      const summary = extractHandoffSummary(handoff);
+public/control-center/pages/media-studio-workspace.js:3191:        showMessage?.("Media job saved as local draft.");
+public/control-center/pages/media-studio-workspace.js:3203:          "Confirm local media approval mark",
+public/control-center/pages/media-studio-workspace.js:3204:          "Action: Mark this media job as approved/review-ready locally.\nRisk: This does not publish, but it changes readiness status and can influence downstream handoff."
+public/control-center/pages/media-studio-workspace.js:3213:        showMessage?.("Media job marked review-ready locally.");
+public/control-center/pages/media-studio-workspace.js:3218:          "Confirm publishing handoff",
+public/control-center/pages/media-studio-workspace.js:3219:          "Action: Prepare and send this media package to Publishing.\nRisk: This creates a handoff path for downstream publishing review. It does not publish directly."
+public/control-center/pages/media-studio-workspace.js:3242:        "Confirm media approval decision",
+public/control-center/pages/media-studio-workspace.js:3243:        "Action: Record this media job as approved/review-ready.\nRisk: If a pending backend approval exists, this may submit an approval decision."
+public/control-center/pages/media-studio-workspace.js:3257:        const pendingApproval = session.approvals.find((approval) =>
+public/control-center/pages/media-studio-workspace.js:3258:          asString(approval.entity_type) === "media_job" &&
+public/control-center/pages/media-studio-workspace.js:3259:          asString(approval.entity_id) === asString(item.id) &&
+public/control-center/pages/media-studio-workspace.js:3260:          asString(approval.status) === "pending"
+public/control-center/pages/media-studio-workspace.js:3283:        "Confirm media approval request",
+public/control-center/pages/media-studio-workspace.js:3284:        "Action: Request Governance/Compliance review for this media job.\nRisk: This may create a backend approval item for a reviewer."
+public/control-center/pages/media-studio-workspace.js:3294:            title: `Review ${item.title || session.form.title || "media job"}`,
+public/control-center/pages/media-studio-workspace.js:3295:            entity_type: "media_job",
+public/control-center/pages/media-studio-workspace.js:3297:            summary: session.form.reviewNotes || "Review media output before publishing handoff.",
+public/control-center/pages/media-studio-workspace.js:3302:              entity_type: "media_job",
+public/control-center/pages/media-studio-workspace.js:3305:              label: item.title || session.form.title || "Media job"
+public/control-center/pages/media-studio-workspace.js:3328:        "Action: Return this media job to draft/revision.\nRisk: If a pending backend approval exists, this may submit a rejection/revision decision."
+public/control-center/pages/media-studio-workspace.js:3339:        const pendingApproval = session.approvals.find((approval) =>
+public/control-center/pages/media-studio-workspace.js:3340:          asString(approval.entity_type) === "media_job" &&
+public/control-center/pages/media-studio-workspace.js:3341:          asString(approval.entity_id) === asString(item.id) &&
+public/control-center/pages/media-studio-workspace.js:3342:          asString(approval.status) === "pending"
+public/control-center/pages/media-studio-workspace.js:3354:      showMessage?.("Media job returned to draft for revision.");
+public/control-center/pages/media-studio-workspace.js:3365:        "Confirm media task creation",
+public/control-center/pages/media-studio-workspace.js:3366:        "Action: Create a task linked to this media job.\nRisk: This may create durable work for the media team."
+public/control-center/pages/media-studio-workspace.js:3374:            title: `Complete media job ${item.title || session.form.title || "media job"}`,
+public/control-center/pages/media-studio-workspace.js:3375:            description: session.form.objective || item.brief || "Review prompt, outputs, approval, and publishing readiness.",
+public/control-center/pages/media-studio-workspace.js:3376:            owner_role: item.owner_role || ownerRoleForMode(item.mode),
+public/control-center/pages/media-studio-workspace.js:3377:            assignee_role: item.owner_role || ownerRoleForMode(item.mode),
+public/control-center/pages/media-studio-workspace.js:3380:            handoff_roles: [MEDIA_ROLE_DEFAULTS.handoffRole, MEDIA_ROLE_DEFAULTS.reviewRole],
+public/control-center/pages/media-studio-workspace.js:3384:              entity_type: "media_job",
+public/control-center/pages/media-studio-workspace.js:3387:              label: item.title || session.form.title || "Media job"
+public/control-center/pages/media-studio-workspace.js:3391:          showMessage?.("Task created and linked to the media job.");
+public/control-center/pages/media-studio-workspace.js:3393:          showMessage?.("Task action kept locally because backend task save is unavailable.");
+public/control-center/pages/media-studio-workspace.js:3396:        showMessage?.("Create Task needs a backend media job; local draft is preserved.");
+public/control-center/pages/media-studio-workspace.js:3409:        "Confirm AI Command media handoff",
+public/control-center/pages/media-studio-workspace.js:3410:        "Action: Send this media context to AI Command for review and planning support.\nRisk: This attaches shared AI handoff context and navigates to AI Command. It does not publish, approve, run provider generation, or create backend tasks."
+public/control-center/pages/media-studio-workspace.js:3422:      setSharedHandoff(projectName, "ai-command", {
+public/control-center/pages/media-studio-workspace.js:3426:          entity_type: "media_job",
+public/control-center/pages/media-studio-workspace.js:3431:          media_job_id: item?.id || session.formSourceId || "",
+public/control-center/pages/media-studio-workspace.js:3449:        "Confirm publishing handoff",
+public/control-center/pages/media-studio-workspace.js:3450:        "Action: Prepare and send this media package to Publishing.\nRisk: This creates a downstream publishing handoff. It does not publish directly."
+public/control-center/pages/media-studio-workspace.js:3470:        "Action: Save this media version as a Library handoff.\nRisk: This may create a durable Library handoff record for review and reuse. It does not publish directly."
+public/control-center/pages/media-studio-workspace.js:3520:          "Confirm local media approval mark",
+public/control-center/pages/media-studio-workspace.js:3521:          "Action: Mark this media job as approved/review-ready locally.\nRisk: This does not publish, but it changes readiness status and can influence downstream handoff."
+public/control-center/pages/media-studio-workspace.js:3565:          "Confirm publishing handoff",
+public/control-center/pages/media-studio-workspace.js:3566:          "Action: Prepare and send this media package to Publishing.\nRisk: This creates a handoff path for downstream publishing review. It does not publish directly."
+public/control-center/pages/media-studio-workspace.js:3580:          "Action: Save this selected version as a Library handoff.\nRisk: This may create a durable Library handoff record for review and reuse. It does not publish directly."
+public/control-center/pages/media-studio-workspace.js:3612:          "Confirm AI Command specialist handoff",
+public/control-center/pages/media-studio-workspace.js:3613:          `Action: Send ${specialist.title} media context to AI Command for review and planning support.\nRisk: This attaches shared AI handoff context and navigates to AI Command. It does not publish, approve, run provider generation, or create backend tasks.`
+public/control-center/pages/media-studio-workspace.js:3629:        setSharedHandoff(projectName, "ai-command", {
+public/control-center/pages/media-studio-workspace.js:3633:            entity_type: "media_job",
+public/control-center/pages/media-studio-workspace.js:3653:  const handoff = buildPublishingHandoff(projectName, session, selectedItem);
+public/control-center/pages/media-studio-workspace.js:3654:  const handoffScopes = new Set([asString(projectName)]);
+public/control-center/pages/media-studio-workspace.js:3656:    handoffScopes.add("__default__");
+public/control-center/pages/media-studio-workspace.js:3658:  handoffScopes.forEach((scope) => {
+public/control-center/pages/media-studio-workspace.js:3659:    setSharedHandoff(scope, "publishing", handoff);
+public/control-center/pages/media-studio-workspace.js:3664:      await createProjectHandoff(backendProjectName, handoff);
+public/control-center/pages/media-studio-workspace.js:3665:      showMessage?.("Publishing package handoff prepared from Media Studio.");
+public/control-center/pages/media-studio-workspace.js:3667:      showMessage?.("Publishing package handoff kept locally because backend handoff save is unavailable.");
+public/control-center/pages/media-studio-workspace.js:3670:    showMessage?.("Publishing package handoff prepared locally.");
+public/control-center/pages/media-studio-workspace.js:3686:    description: "Run saved image, video, voice, and campaign-pack jobs with prompts, review states, Library saves, and package routing."
+public/control-center/pages/media-studio-workspace.js:3731:    const handoff = getInboundHandoff(projectName, session);
+public/control-center/pages/media-studio-workspace.js:3733:    const recommendation = buildRecommendation(metrics, handoff, selectedItem);
+public/control-center/pages/media-studio-workspace.js:3744:              <p class="media-section-copy">Start with a brief or handoff. Attach Library assets when needed. Review creative readiness and brand compliance. Save approved assets to Library or prepare handoff to Publishing/Governance. All routing is handoff/review-based and user-triggered. Media Studio does not publish, send, or approve directly.</p>
+public/control-center/pages/media-studio-workspace.js:3753:      const sourceState = getMediaSourceReadiness(session, selectedItem, handoff);
+public/control-center/pages/media-studio-workspace.js:3756:      if (selectedItem?.library_asset_ref?.handoff_id) rows.push(["Library asset", selectedItem.library_asset_ref.handoff_id]);
+public/control-center/pages/media-studio-workspace.js:3760:      if (!rows.length && handoff) rows.push(["Inbound handoff", titleCase(handoff.source_page || "Workflow")]);
+public/control-center/pages/media-studio-workspace.js:3784:      const readinessItems = getMediaReadinessItems(session, selectedItem, handoff)
+public/control-center/pages/media-studio-workspace.js:3809:      const readinessItems = getMediaReadinessItems(session, selectedItem, handoff)
+public/control-center/pages/media-studio-workspace.js:3810:        .filter((item) => ["brand", "governance"].includes(item.key));
+public/control-center/pages/media-studio-workspace.js:3816:              <h3>Brand and governance</h3>
+public/control-center/pages/media-studio-workspace.js:3836:        ${renderMediaCommandHeader({ projectName, session, metrics, selectedItem, handoff, recommendation, escapeHtml })}
+public/control-center/pages/media-studio-workspace.js:3837:        ${renderMediaWorkflowStrip({ session, selectedItem, handoff, escapeHtml })}
+public/control-center/pages/media-studio-workspace.js:3838:        ${renderMediaReadinessSummary({ session, selectedItem, handoff, escapeHtml })}
+public/control-center/pages/media-studio-workspace.js:3840:        ${session.loading ? `<div class="empty-box">Loading media jobs, handoffs, approvals, tasks, and event history...</div>` : ""}
+public/control-center/pages/media-studio-workspace.js:3844:            ${renderPromptBuilder(session, handoff, escapeHtml)}
+public/control-center/pages/media-studio-workspace.js:3852:            ${renderWorkflowHandoff(handoff, session, escapeHtml)}
+public/control-center/pages/media-studio-workspace.js:3869:      handoff,
+public/control-center/pages/publishing/publishing-payloads.js:55:function extractHandoffSummary(handoff) {
+public/control-center/pages/publishing/publishing-payloads.js:56:  const payload = asObject(handoff?.payload);
+public/control-center/pages/publishing/publishing-payloads.js:60:    id: asString(handoff?.id || payload.workflow_id || payload.prompt || payload.workflow_title),
+public/control-center/pages/publishing/publishing-payloads.js:61:    sourcePage: asString(handoff?.source_page || "workflows"),
+public/control-center/pages/publishing/publishing-payloads.js:62:    workflowId: asString(payload.workflow_id),
+public/control-center/pages/publishing/publishing-payloads.js:63:    title: firstText(output.title, payload.workflow_title, draftContext.lastResponseTitle, "Workflow output"),
+public/control-center/pages/publishing/publishing-payloads.js:82:    approval_status: session.form.approvalStatus,
+public/control-center/pages/publishing/publishing-payloads.js:98:    approvalStatus: session.form.approvalStatus,
+public/control-center/pages/publishing/publishing-payloads.js:105:export function buildPublishingAiPrompt(projectName, selectedItem, session, handoff) {
+public/control-center/pages/publishing/publishing-payloads.js:106:  const handoffSummary = handoff ? extractHandoffSummary(handoff) : null;
+public/control-center/pages/publishing/publishing-payloads.js:108:    `Review this publishing execution plan for ${projectName || "the current project"}.`,
+public/control-center/pages/publishing/publishing-payloads.js:114:    `Approval: ${titleCase(session.form.approvalStatus || selectedItem?.approvalStatus || "draft")}`,
+public/control-center/pages/publishing/publishing-payloads.js:115:    handoffSummary ? `Workflow handoff: ${handoffSummary.title} - ${summarizeText(handoffSummary.summary)}` : "Workflow handoff: none",
+public/control-center/pages/publishing.js:2:function renderPublishingCommandHeader({ projectName, recommendation, selectedItem, summary, queue, blockers, escapeHtml }) {
+public/control-center/pages/publishing.js:9:  const approval = selectedItem?.approvalStatus ? titleCase(selectedItem.approvalStatus) : "Draft";
+public/control-center/pages/publishing.js:10:  const nextAction = recommendation?.action ? escapeHtml(recommendation.action) : "Review queue";
+public/control-center/pages/publishing.js:11:  const safety = `Publishing prepares channel packages, manual schedule records, and approval-ready handoffs. External publishing requires provider proof; backend status changes remain <strong>confirmation-gated</strong> and governed by <strong>backend approval rules</strong>.`;
+public/control-center/pages/publishing.js:22:      <div class="publishing-command-header-status">Status: <strong>${escapeHtml(status)}</strong> &middot; Approval: <strong>${escapeHtml(approval)}</strong></div>
+public/control-center/pages/publishing.js:30:function renderPublishingWorkflowStrip({ selectedItem, recommendation, blockers, approvalState, escapeHtml }) {
+public/control-center/pages/publishing.js:35:    { key: "approval", label: "Approval" },
+public/control-center/pages/publishing.js:37:    { key: "handoff", label: "Manual Completion Handoff" }
+public/control-center/pages/publishing.js:43:    approval: selectedItem?.approvalStatus === "approved" ? "ready" : selectedItem?.approvalStatus === "needs approval" ? "warning" : "missing",
+public/control-center/pages/publishing.js:45:    handoff: selectedItem?.status === "published" ? "ready" : "missing"
+public/control-center/pages/publishing.js:48:    <nav class="publishing-workflow-strip" aria-label="Publishing Workflow">
+public/control-center/pages/publishing.js:50:        <div class="publishing-workflow-step is-${statusMap[step.key]}" aria-label="${escapeHtml(step.label)}: ${statusMap[step.key]}">
+public/control-center/pages/publishing.js:52:          <span class="publishing-workflow-step-label">${statusMap[step.key]}</span>
+public/control-center/pages/publishing.js:66:    { key: "governance", label: "Governance", state: selectedItem?.governanceStatus === "approved" ? "ready" : "missing" },
+public/control-center/pages/publishing.js:67:    { key: "approval", label: "Approval", state: selectedItem?.approvalStatus === "approved" ? "ready" : selectedItem?.approvalStatus === "needs approval" ? "warning" : "missing" }
+public/control-center/pages/publishing.js:82:import { getSharedHandoff, setSharedAiDraft, setSharedHandoff } from "../shared-context.js";
+public/control-center/pages/publishing.js:106:const STATUS_FILTERS = ["all", "draft", "ready", "needs approval", "scheduled", "published", "failed"];
+public/control-center/pages/publishing.js:107:const DISPLAY_STATUSES = ["draft", "ready", "needs approval", "scheduled", "published", "failed"];
+public/control-center/pages/publishing.js:109:const APPROVAL_STATUSES = ["draft", "needs approval", "approved"];
+public/control-center/pages/publishing.js:273:  if (["needs approval", "needs_approval", "approval", "pending_approval", "review", "in_review"].includes(normalized)) {
+public/control-center/pages/publishing.js:274:    return "needs approval";
+public/control-center/pages/publishing.js:276:  if (["scheduled", "queued", "queue", "pending", "pending_publish"].includes(normalized)) return "scheduled";
+public/control-center/pages/publishing.js:357:    approvalStatus: "draft",
+public/control-center/pages/publishing.js:404:  const status = normalizeStatus(raw.execution_status || raw.status, scheduledFor ? "scheduled" : "draft");
+public/control-center/pages/publishing.js:407:    id: firstText(raw.job_id, raw.execution_id, raw.id),
+public/control-center/pages/publishing.js:408:    jobId: firstText(raw.job_id, raw.execution_id, raw.id),
+public/control-center/pages/publishing.js:418:    approvalStatus: status === "ready" ? "approved" : status === "needs approval" ? "needs approval" : "draft",
+public/control-center/pages/publishing.js:420:    rawStatus: firstText(raw.execution_status, raw.status),
+public/control-center/pages/publishing.js:434:  const results = asArray(activity.execution_results)
+public/control-center/pages/publishing.js:440:    const jobId = firstText(result.job_id, result.execution_id);
+public/control-center/pages/publishing.js:441:    if (jobId && !latestResultByJob.has(jobId)) latestResultByJob.set(jobId, result);
+public/control-center/pages/publishing.js:444:  const scheduledItems = asArray(activity.scheduled_jobs).map((job) => {
+public/control-center/pages/publishing.js:445:    const latest = latestResultByJob.get(asString(job.job_id));
+public/control-center/pages/publishing.js:448:        ...asObject(job),
+public/control-center/pages/publishing.js:450:        preview: asObject(latest?.preview || job.preview || job.connector_preview)
+public/control-center/pages/publishing.js:453:      latest ? "Scheduled job + result" : "Scheduled job"
+public/control-center/pages/publishing.js:457:  const knownIds = new Set(scheduledItems.map((item) => item.jobId));
+public/control-center/pages/publishing.js:459:    .filter((result) => !knownIds.has(firstText(result.job_id, result.execution_id)))
+public/control-center/pages/publishing.js:473:    "needs approval": 2,
+public/control-center/pages/publishing.js:486:function buildChannels(state, queue) {
+public/control-center/pages/publishing.js:491:      ...queue.map((item) => item.channel),
+public/control-center/pages/publishing.js:497:function getStatusCounts(queue) {
+public/control-center/pages/publishing.js:499:    acc[status] = queue.filter((item) => item.status === status).length;
+public/control-center/pages/publishing.js:504:function getVisibleQueue(queue, filter) {
+public/control-center/pages/publishing.js:505:  if (!filter || filter === "all") return queue;
+public/control-center/pages/publishing.js:506:  return queue.filter((item) => item.status === filter);
+public/control-center/pages/publishing.js:509:function getSelectedItem(queue, selectedId) {
+public/control-center/pages/publishing.js:510:  return queue.find((item) => item.id === selectedId) || null;
+public/control-center/pages/publishing.js:513:function getNextPublishWindow(queue) {
+public/control-center/pages/publishing.js:514:  const next = queue
+public/control-center/pages/publishing.js:531:    approvalStatus: item.approvalStatus || "draft",
+public/control-center/pages/publishing.js:591:        reason: "This records a manual publishing completion only after review; external provider execution requires separate proof."
+public/control-center/pages/publishing.js:609:  if (intent === "publish" && form.approvalStatus !== "approved") {
+public/control-center/pages/publishing.js:610:    errors.approvalStatus = "Publishing readiness must be approved before recording manual completion.";
+public/control-center/pages/publishing.js:647:  // Add governance/approval hints for status pills
+public/control-center/pages/publishing.js:649:  if (status === "needs approval") {
+public/control-center/pages/publishing.js:650:    hint = "title=\"Request Approval Review. Confirmation required before execution.\" aria-label=\"Request Approval Review. Confirmation required before execution.\"";
+public/control-center/pages/publishing.js:652:    hint = "title=\"Prepare Governance Review. Backend approval rules apply.\" aria-label=\"Prepare Governance Review. Backend approval rules apply.\"";
+public/control-center/pages/publishing.js:654:    hint = "title=\"Confirmation required before execution.\" aria-label=\"Confirmation required before execution.\"";
+public/control-center/pages/publishing.js:662:      .publishing-execution-center {
+public/control-center/pages/publishing.js:668:      .publishing-execution-grid {
+public/control-center/pages/publishing.js:769:      /* Publishing queue dark contrast correction */
+public/control-center/pages/publishing.js:770:      .publishing-queue-list,
+public/control-center/pages/publishing.js:779:      .publishing-queue-row {
+public/control-center/pages/publishing.js:790:      .publishing-queue-row.is-active {
+public/control-center/pages/publishing.js:795:      .publishing-queue-main,
+public/control-center/pages/publishing.js:807:      .publishing-queue-title {
+public/control-center/pages/publishing.js:815:      .publishing-queue-meta {
+public/control-center/pages/publishing.js:824:      .publishing-queue-actions {
+public/control-center/pages/publishing.js:831:      .publishing-queue-actions button {
+public/control-center/pages/publishing.js:843:      .publishing-queue-actions button:focus-visible,
+public/control-center/pages/publishing.js:844:      .publishing-queue-main:focus-visible,
+public/control-center/pages/publishing.js:851:      .publishing-queue-actions button:disabled,
+public/control-center/pages/publishing.js:852:      .publishing-queue-actions button[disabled] {
+public/control-center/pages/publishing.js:913:        .publishing-execution-grid {
+public/control-center/pages/publishing.js:918:        .publishing-queue-row {
+public/control-center/pages/publishing.js:923:        .publishing-queue-actions {
+public/control-center/pages/publishing.js:937:function extractHandoffSummary(handoff) {
+public/control-center/pages/publishing.js:938:  const direct = asObject(handoff);
+public/control-center/pages/publishing.js:939:  const payload = asObject(handoff?.payload);
+public/control-center/pages/publishing.js:942:  const isAiCampaign = asString(direct.type || payload.type) === "ai_command_campaign_handoff";
+public/control-center/pages/publishing.js:949:    id: asString(direct.id || handoff?.id || payload.workflow_id || payload.prompt || payload.workflow_title),
+public/control-center/pages/publishing.js:950:    sourcePage: asString(handoff?.source_page || direct.source || "workflows"),
+public/control-center/pages/publishing.js:951:    workflowId: asString(payload.workflow_id || direct.id),
+public/control-center/pages/publishing.js:952:    title: firstText(direct.title, output.title, payload.workflow_title, draftContext.lastResponseTitle, isAiCampaign ? "AI Team Campaign Handoff" : "Workflow output"),
+public/control-center/pages/publishing.js:969:    `mh_ai_command_handoff_${destinationRoute}`,
+public/control-center/pages/publishing.js:970:    "mh_ai_command_campaign_handoff"
+public/control-center/pages/publishing.js:981:        if (type === "ai_command_campaign_handoff" && (!route || route === destinationRoute)) {
+public/control-center/pages/publishing.js:985:        console.warn("Unable to read AI Command campaign handoff", error);
+public/control-center/pages/publishing.js:995:    `mh_ai_command_handoff_${destinationRoute}`,
+public/control-center/pages/publishing.js:996:    "mh_ai_command_campaign_handoff"
+public/control-center/pages/publishing.js:1004:        console.warn("Unable to clear AI Command campaign handoff", error);
+public/control-center/pages/publishing.js:1011:function getPublishingHandoff(projectName, operations) {
+public/control-center/pages/publishing.js:1016:    getSharedHandoff(projectName, "publishing", operations, "workflows") ||
+public/control-center/pages/publishing.js:1017:    getSharedHandoff(projectName, "publishing", operations, "ai-command") ||
+public/control-center/pages/publishing.js:1018:    getSharedHandoff(projectName, "publishing", operations)
+public/control-center/pages/publishing.js:1026:function buildRecommendation({ queue, counts, assetBlockers, checks, handoff, globalBlockers }) {
+public/control-center/pages/publishing.js:1027:  const failed = queue.find((item) => item.status === "failed");
+public/control-center/pages/publishing.js:1028:  const ready = queue.find((item) => item.status === "ready");
+public/control-center/pages/publishing.js:1029:  const needsApproval = queue.find((item) => item.status === "needs approval");
+public/control-center/pages/publishing.js:1030:  const draft = queue.find((item) => item.status === "draft");
+public/control-center/pages/publishing.js:1045:      why: `${ready.title} is approved for a backend readiness update. Record manual completion only after external execution is verified.`,
+public/control-center/pages/publishing.js:1051:      action: "Review approval queue",
+public/control-center/pages/publishing.js:1052:      why: `${needsApproval.title} needs approval before it can move into the manual publishing queue.`,
+public/control-center/pages/publishing.js:1057:  if (handoff) {
+public/control-center/pages/publishing.js:1058:    const handoffSummary = extractHandoffSummary(handoff);
+public/control-center/pages/publishing.js:1060:      action: handoffSummary.isAiCampaign ? "Load campaign package into a draft" : "Load workflow output into a draft",
+public/control-center/pages/publishing.js:1061:      why: handoffSummary.isAiCampaign
+public/control-center/pages/publishing.js:1063:        : "A workflow handoff is available. Loading it keeps execution moving without inventing backend data.",
+public/control-center/pages/publishing.js:1071:      why: `${draft.title} is not yet executable. Add channel, content, approval, and timing details.`,
+public/control-center/pages/publishing.js:1079:      ? "No queue item is ready. Start with a draft and save it locally until it can be scheduled."
+public/control-center/pages/publishing.js:1080:      : "Channel readiness is missing. Publishing can prepare drafts, but live execution needs a connected destination.",
+public/control-center/pages/publishing.js:1086:function renderOverview(counts, queue, escapeHtml) {
+public/control-center/pages/publishing.js:1094:        <span class="card-badge neutral">${escapeHtml(String(queue.length))} items</span>
+public/control-center/pages/publishing.js:1101:        <div class="publishing-overview-item is-wide"><span>Next publish window</span><strong>${escapeHtml(getNextPublishWindow(queue))}</strong></div>
+public/control-center/pages/publishing.js:1109:    ["Manual publishing readiness", counts.ready + counts.scheduled > 0 ? "Active" : "Needs queue"],
+public/control-center/pages/publishing.js:1111:    ["Workflow output", recommendation.action.includes("workflow") ? "Available" : "Optional"],
+public/control-center/pages/publishing.js:1113:    ["Approval", counts["needs approval"] ? "Pending" : counts.ready ? "Approved" : "Draft"],
+public/control-center/pages/publishing.js:1144:        <div class="publishing-automation-preview-copy">Automation cannot publish without manual review, confirmation, and backend approval gates.</div>
+public/control-center/pages/publishing.js:1151:        ${getAutoModeState().status === "waiting_approval" ? `
+public/control-center/pages/publishing.js:1152:          <div class="simple-banner publishing-inline-gap"><strong>Approval needed:</strong> ${escapeHtml(asObject(getAutoModeState().approvalRequiredStep).reason || "Manual approval required.")}</div>
+public/control-center/pages/publishing.js:1159:      <div class="simple-banner">Opens AI with this context only. <strong>No approval, publishing, or backend execution is performed.</strong></div>
+public/control-center/pages/publishing.js:1164:function renderFilterRow(filter, queue, escapeHtml) {
+public/control-center/pages/publishing.js:1165:  const counts = getStatusCounts(queue);
+public/control-center/pages/publishing.js:1172:        const count = status === "all" ? queue.length : counts[status];
+public/control-center/pages/publishing.js:1184:function renderQueue(queue, visibleQueue, selectedId, filter, escapeHtml) {
+public/control-center/pages/publishing.js:1187:      <article class="publishing-queue-row${item.id === selectedId ? " is-active" : ""}" data-publishing-row="${escapeHtml(item.id)}">
+public/control-center/pages/publishing.js:1188:        <button class="publishing-queue-main" type="button" data-publishing-select="${escapeHtml(item.id)}">
+public/control-center/pages/publishing.js:1189:          <span class="publishing-queue-title">${escapeHtml(item.title)}</span>
+public/control-center/pages/publishing.js:1190:          <span class="publishing-queue-meta">${escapeHtml(titleCase(item.channel || "unassigned"))} • ${escapeHtml(item.scheduledFor ? formatDateTime(item.scheduledFor) : "Unscheduled")} • ${escapeHtml(item.source)}</span>
+public/control-center/pages/publishing.js:1192:        <div class="publishing-queue-state">${renderStatusPill(item.status, escapeHtml)}</div>
+public/control-center/pages/publishing.js:1193:        <div class="publishing-queue-actions">
+public/control-center/pages/publishing.js:1202:    : `<div class="empty-box">No publish queue items match this filter. Create or load a draft to start the execution queue.</div>`;
+public/control-center/pages/publishing.js:1209:          <h3>Queue items and execution actions</h3>
+public/control-center/pages/publishing.js:1213:      ${renderFilterRow(filter, queue, escapeHtml)}
+public/control-center/pages/publishing.js:1214:      <div class="publishing-queue-list">${rows}</div>
+public/control-center/pages/publishing.js:1225:          <h3>Draft, validate, and queue manual publishing records</h3>
+public/control-center/pages/publishing.js:1268:            <input id="publishingContentInput" name="contentItem" class="setup-input" type="text" value="${escapeHtml(session.form.contentItem)}" placeholder="Caption, email, product update, or workflow output">
+public/control-center/pages/publishing.js:1294:            <select id="publishingApprovalInput" name="approvalStatus" class="setup-input">
+public/control-center/pages/publishing.js:1296:                <option value="${escapeHtml(status)}"${status === session.form.approvalStatus ? " selected" : ""}>${escapeHtml(titleCase(status))}</option>
+public/control-center/pages/publishing.js:1299:            ${fieldError(session, "approvalStatus", escapeHtml)}
+public/control-center/pages/publishing.js:1357:function renderWorkflowHandoff(handoff, session, escapeHtml) {
+public/control-center/pages/publishing.js:1358:  if (!handoff) {
+public/control-center/pages/publishing.js:1364:            <h3>No workflow output available</h3>
+public/control-center/pages/publishing.js:1368:        <div class="empty-box">Run or route a workflow into Publishing to load execution-ready output here.</div>
+public/control-center/pages/publishing.js:1373:  const summary = extractHandoffSummary(handoff);
+public/control-center/pages/publishing.js:1387:        <div class="data-row"><span>${escapeHtml(summary.isAiCampaign ? "Campaign" : "Workflow")}</span><strong>${escapeHtml(summary.workflowId || "Not specified")}</strong></div>
+public/control-center/pages/publishing.js:1400:function renderCalendar(queue, escapeHtml) {
+public/control-center/pages/publishing.js:1402:  const scheduled = queue.filter((item) => item.scheduledFor);
+public/control-center/pages/publishing.js:1416:        <div class="empty-box">Scheduled publishing items will appear here once timing exists in the queue.</div>
+public/control-center/pages/publishing.js:1466:function renderExecutionResult(queue, escapeHtml) {
+public/control-center/pages/publishing.js:1467:  const latest = queue
+public/control-center/pages/publishing.js:1470:  const failed = queue.filter((item) => item.status === "failed");
+public/control-center/pages/publishing.js:1482:        <div class="empty-box">Last publish result and failed publish blockers will appear here after execution data exists.</div>
+public/control-center/pages/publishing.js:1558:  queue,
+public/control-center/pages/publishing.js:1559:  handoff
+public/control-center/pages/publishing.js:1574:    return getSelectedItem(queue, session.selectedId);
+public/control-center/pages/publishing.js:1601:      if (response?.job?.job_id) {
+public/control-center/pages/publishing.js:1602:        session.selectedId = response.job.job_id;
+public/control-center/pages/publishing.js:1603:        session.formSourceId = response.job.job_id;
+public/control-center/pages/publishing.js:1620:      syncFormFromItem(session, getSelectedItem(queue, itemId));
+public/control-center/pages/publishing.js:1693:          ? "Confirm reschedule\n\nAction: Reschedule this publishing item.\n\nThis updates a backend publishing schedule and remains governed by approval rules.\n\nSelect Cancel to keep the current schedule."
+public/control-center/pages/publishing.js:1694:          : "Confirm schedule\n\nAction: Queue this publishing item for manual publishing.\n\nThis creates a backend publishing schedule and remains governed by approval rules.\n\nSelect Cancel to keep this as a draft."
+public/control-center/pages/publishing.js:1702:        ? () => reschedulePublishingItem(projectName, current.jobId, payload)
+public/control-center/pages/publishing.js:1713:      if (response?.job?.job_id) {
+public/control-center/pages/publishing.js:1714:        session.selectedId = response.job.job_id;
+public/control-center/pages/publishing.js:1715:        session.formSourceId = response.job.job_id;
+public/control-center/pages/publishing.js:1727:      const item = getSelectedItem(queue, itemId);
+public/control-center/pages/publishing.js:1766:          "Final Confirmation Required\n\nAction: Record manual publish completion for this backend job.\n\nThis is a high-risk status update. Confirm that external provider publishing was completed or verified outside this page before recording completion.\n\nThis does not prove live external publishing by itself. Backend approval rules still apply.\n\nSelect Cancel to keep this item in the queue."
+public/control-center/pages/publishing.js:1773:          () => publishPublishingItem(projectName, item.jobId, { notes: session.form.notes || item.notes }),
+public/control-center/pages/publishing.js:1787:          () => reschedulePublishingItem(projectName, item.jobId, buildSchedulePayload(session, "draft")),
+public/control-center/pages/publishing.js:1788:          { projectName, reloadProjectData, showMessage, showError, successMessage: "Publishing item paused as a draft.\n\nConfirmation required before execution. Backend approval rules apply." }
+public/control-center/pages/publishing.js:1798:          "Confirm retry\n\nAction: Retry this backend publishing item in the scheduled queue.\n\nThis updates the backend publishing schedule/lifecycle state and remains governed by approval rules.\n\nSelect Cancel to keep the item unchanged."
+public/control-center/pages/publishing.js:1806:          () => reschedulePublishingItem(projectName, item.jobId, buildSchedulePayload(session, "scheduled")),
+public/control-center/pages/publishing.js:1807:          { projectName, reloadProjectData, showMessage, showError, successMessage: "Publishing item retried in the scheduled queue.\n\nConfirmation required before execution. Backend approval rules apply." }
+public/control-center/pages/publishing.js:1819:        session.validation.contentItem = "Select or save a publishing draft before approval.";
+public/control-center/pages/publishing.js:1823:      session.form.approvalStatus = "approved";
+public/control-center/pages/publishing.js:1825:        updateLocalDraft(projectName, current.id, { ...buildLocalDraftPayload(session, "ready"), id: current.id, approvalStatus: "approved" });
+public/control-center/pages/publishing.js:1832:        "Confirm publishing readiness\n\nAction: Mark this backend publishing item ready for manual publishing review.\n\nThis does not replace Governance approval or external provider readiness proof.\n\nSelect Cancel to keep the item unchanged."
+public/control-center/pages/publishing.js:1840:        () => approvePublishingItem(projectName, current.jobId, { notes: session.form.notes || current.notes }),
+public/control-center/pages/publishing.js:1870:        () => failPublishingItem(projectName, current.jobId, { notes: session.form.notes || current.notes }),
+public/control-center/pages/publishing.js:1882:      session.draftMessage = "AI Command campaign handoff cleared locally.";
+public/control-center/pages/publishing.js:1883:      saveDraftLocally("AI Command campaign handoff cleared locally.");
+public/control-center/pages/publishing.js:1891:      const summary = extractHandoffSummary(handoff);
+public/control-center/pages/publishing.js:1916:      const prompt = buildPublishingAiPrompt(projectName, current, session, handoff);
+public/control-center/pages/publishing.js:1919:        modeId: "operations",
+public/control-center/pages/publishing.js:1926:      setSharedHandoff(projectName, "ai-command", {
+public/control-center/pages/publishing.js:1930:          entity_type: "publishing_job",
+public/control-center/pages/publishing.js:1931:          entity_id: current?.jobId || session.formSourceId || ""
+public/control-center/pages/publishing.js:1935:          publishing_item_id: current?.jobId || session.formSourceId || "",
+public/control-center/pages/publishing.js:1971:          "Risk: This may prepare publishing drafts and handoffs, but must not publish externally or approve Governance decisions without explicit approval.\n\n" +
+public/control-center/pages/publishing.js:1977:        mode: "auto_until_approval",
+public/control-center/pages/publishing.js:2005:        "Confirm publishing gate approval\n\n" +
+public/control-center/pages/publishing.js:2007:          "Risk: This advances the guided publishing state, but does not replace Governance approval for protected actions.\n\n" +
+public/control-center/pages/publishing.js:2040:    description: "Review, prepare, queue, and record manual publishing status with clear previews and backend-controlled actions."
+public/control-center/pages/publishing.js:2064:    const operations = asObject(state.data.operations);
+public/control-center/pages/publishing.js:2065:    const queue = buildQueue(state, projectName);
+public/control-center/pages/publishing.js:2068:    const channels = buildChannels(state, queue);
+public/control-center/pages/publishing.js:2069:    const handoff = getPublishingHandoff(projectName, operations);
+public/control-center/pages/publishing.js:2075:    if (!session.selectedId && queue.length && !session.isCreatingNew) {
+public/control-center/pages/publishing.js:2076:      session.selectedId = queue[0].id;
+public/control-center/pages/publishing.js:2077:      syncFormFromItem(session, queue[0]);
+public/control-center/pages/publishing.js:2080:    const selectedItem = getSelectedItem(queue, session.selectedId);
+public/control-center/pages/publishing.js:2086:    const visibleQueue = getVisibleQueue(queue, session.filter);
+public/control-center/pages/publishing.js:2087:    const counts = getStatusCounts(queue);
+public/control-center/pages/publishing.js:2090:    const recommendation = buildRecommendation({ queue, counts, assetBlockers, checks, handoff, globalBlockers });
+public/control-center/pages/publishing.js:2095:      ${renderPublishingCommandHeader({ projectName, recommendation, selectedItem, summary: null, queue, blockers: assetBlockers, escapeHtml })}
+public/control-center/pages/publishing.js:2096:      ${renderPublishingWorkflowStrip({ selectedItem, recommendation, blockers: assetBlockers, approvalState: selectedItem?.approvalStatus, escapeHtml })}
+public/control-center/pages/publishing.js:2098:      <div class="publishing-execution-center">
+public/control-center/pages/publishing.js:2099:        ${renderOverview(counts, queue, escapeHtml)}
+public/control-center/pages/publishing.js:2102:        <div class="publishing-execution-grid">
+public/control-center/pages/publishing.js:2104:            ${renderQueue(queue, visibleQueue, session.selectedId, session.filter, escapeHtml)}
+public/control-center/pages/publishing.js:2115:                <button id="publishingApproveBtn" class="btn btn-secondary" type="button" title="Prepare publishing readiness review. Confirmation required. Backend approval rules apply.">Mark ready for manual review</button>
+public/control-center/pages/publishing.js:2116:                <button id="publishingFailBtn" class="btn btn-secondary" type="button" title="Request Approval Review or mark as failed. Confirmation required before execution.">Mark publishing item as failed</button>
+public/control-center/pages/publishing.js:2122:            ${renderWorkflowHandoff(handoff, session, escapeHtml)}
+public/control-center/pages/publishing.js:2123:            ${renderCalendar(queue, escapeHtml)}
+public/control-center/pages/publishing.js:2124:            ${renderExecutionResult(queue, escapeHtml)}
+public/control-center/pages/publishing.js:2158:      queue,
+public/control-center/pages/publishing.js:2159:      handoff
+public/control-center/pages/ads-manager.js:128:  const scheduledJobs = asArray(activity.scheduled_jobs);
+public/control-center/pages/ads-manager.js:174:  const scheduledJobs = asArray(activity.scheduled_jobs);
+public/control-center/pages/ads-manager.js:590:                <p class="home-action-meta">AI can prepare a paid growth brief and route context to AI Command. Spend changes, publishing, and campaign launch remain manual or governance-controlled.</p>
+public/control-center/pages/governance/dashboard.js:2: * Legacy governance dashboard.
+public/control-center/pages/governance/dashboard.js:5: * The active Governance route is public/control-center/pages/governance.js.
+public/control-center/pages/governance/dashboard.js:7: * This legacy dashboard must not call removed /api/governance/* endpoints if
+public/control-center/pages/governance/dashboard.js:15:  page: "governance/dashboard",
+public/control-center/pages/governance/dashboard.js:16:  message: "Legacy governance dashboard is neutralized. Use the active Governance route instead.",
+public/control-center/pages/governance/dashboard.js:18:    governance: "public/control-center/pages/governance.js"
+public/control-center/pages/governance/dashboard.js:23:    "decideProjectApproval(projectName, approvalId, payload)",
+public/control-center/pages/governance.js:7:function collectGovernanceEvidence({ selectedItem, projectData, governanceData }) {
+public/control-center/pages/governance.js:23:  const sources = [selectedItem, projectData, governanceData];
+public/control-center/pages/governance.js:77:function renderGovernanceEvidenceSummary({ selectedItem, projectData, governanceData, intakeContext, escapeHtml }) {
+public/control-center/pages/governance.js:78:  const evidence = collectGovernanceEvidence({ selectedItem, projectData, governanceData });
+public/control-center/pages/governance.js:81:    <div class="governance-evidence-summary">
+public/control-center/pages/governance.js:82:      <div class="governance-evidence-summary-header">Evidence Summary</div>
+public/control-center/pages/governance.js:83:      <div class="governance-evidence-cards">
+public/control-center/pages/governance.js:84:        <div class="governance-evidence-card${evidence.source_of_truth.length ? '' : ' is-missing'}">
+public/control-center/pages/governance.js:85:          <span class="governance-evidence-label">Source of Truth</span>
+public/control-center/pages/governance.js:86:          <span class="governance-evidence-value">${evidence.source_of_truth.length ? escapeHtml(asString(evidence.source_of_truth[0])) : "Missing"}</span>
+public/control-center/pages/governance.js:88:        <div class="governance-evidence-card${evidence.legal.length ? '' : ' is-missing'}">
+public/control-center/pages/governance.js:89:          <span class="governance-evidence-label">Legal</span>
+public/control-center/pages/governance.js:90:          <span class="governance-evidence-value">${evidence.legal.length ? escapeHtml(asString(evidence.legal[0])) : "Missing"}</span>
+public/control-center/pages/governance.js:92:        <div class="governance-evidence-card${evidence.pricing.length ? '' : ' is-missing'}">
+public/control-center/pages/governance.js:93:          <span class="governance-evidence-label">Pricing</span>
+public/control-center/pages/governance.js:94:          <span class="governance-evidence-value">${evidence.pricing.length ? escapeHtml(asString(evidence.pricing[0])) : "Missing"}</span>
+public/control-center/pages/governance.js:96:        <div class="governance-evidence-card${evidence.certificate.length ? '' : ' is-missing'}">
+public/control-center/pages/governance.js:97:          <span class="governance-evidence-label">Certificate/Proof</span>
+public/control-center/pages/governance.js:98:          <span class="governance-evidence-value">${evidence.certificate.length ? escapeHtml(asString(evidence.certificate[0])) : evidence.proof.length ? escapeHtml(asString(evidence.proof[0])) : "Missing"}</span>
+public/control-center/pages/governance.js:100:        <div class="governance-evidence-card${evidence.brand.length ? '' : ' is-missing'}">
+public/control-center/pages/governance.js:101:          <span class="governance-evidence-label">Brand Asset</span>
+public/control-center/pages/governance.js:102:          <span class="governance-evidence-value">${evidence.brand.length ? escapeHtml(asString(evidence.brand[0])) : "Missing"}</span>
+public/control-center/pages/governance.js:104:        <div class="governance-evidence-card${evidence.product.length ? '' : ' is-missing'}">
+public/control-center/pages/governance.js:105:          <span class="governance-evidence-label">Product Asset</span>
+public/control-center/pages/governance.js:106:          <span class="governance-evidence-value">${evidence.product.length ? escapeHtml(asString(evidence.product[0])) : "Missing"}</span>
+public/control-center/pages/governance.js:109:      ${!hasEvidence ? `<div class="governance-evidence-card is-missing governance-source-warning">Missing source evidence — attach Library proof before high-risk approval.</div>` : ""}
+public/control-center/pages/governance.js:110:      <div class="governance-evidence-guidance">High-risk Governance decisions should reference source-of-truth evidence, proof assets, or an incoming handoff. Missing evidence should be resolved before approval, rejection, escalation, or override.</div>
+public/control-center/pages/governance.js:116:  // Intake context: { ai, publishing, content, media, workflows, operations, notifications, insights }
+public/control-center/pages/governance.js:122:  if (intakeContext?.workflows) items.push({ label: "Workflows", value: asString(intakeContext.workflows) });
+public/control-center/pages/governance.js:123:  if (intakeContext?.operations) items.push({ label: "Operations", value: asString(intakeContext.operations) });
+public/control-center/pages/governance.js:127:    <div class="governance-intake-panel">
+public/control-center/pages/governance.js:128:      <div class="governance-intake-panel-header">Incoming Review Context</div>
+public/control-center/pages/governance.js:129:      <div class="governance-intake-list">
+public/control-center/pages/governance.js:131:          <div class="governance-intake-item"><span class="governance-intake-label">${escapeHtml(item.label)}</span><span class="governance-intake-value">${escapeHtml(item.value)}</span></div>
+public/control-center/pages/governance.js:132:        `).join("") : `<div class="governance-intake-item is-missing">No intake yet</div>`}
+public/control-center/pages/governance.js:144:const governanceSessions = new Map();
+public/control-center/pages/governance.js:187:  if (["approval", "approved", "approve"].includes(normalized)) {
+public/control-center/pages/governance.js:188:    return "Submit reviewed approval decision? This records a backend Governance decision and may affect downstream readiness where policy gates apply. It does not publish, send, or execute directly.";
+public/control-center/pages/governance.js:192:    return "Record high-risk override decision? This records a backend Governance override. It may unblock downstream gated actions where policy allows override. Continue only after verifying source evidence, risk, owner, and reason.";
+public/control-center/pages/governance.js:196:    return "Submit reviewed Governance decision? This records a backend reviewed decision and may update linked queues or review state. It does not publish or execute directly.";
+public/control-center/pages/governance.js:199:  return "Submit reviewed Governance decision? This records a backend reviewed decision and may update linked queues or review state. It does not publish or execute directly.";
+public/control-center/pages/governance.js:216:      "Create Governance approval request?",
+public/control-center/pages/governance.js:218:      `Action: Create a backend approval request for ${itemTitle}.`,
+public/control-center/pages/governance.js:222:      "Authority: This creates a durable Governance queue item for review. It does not approve, reject, publish, send, or execute directly.",
+public/control-center/pages/governance.js:224:      "Select Cancel to review evidence and ownership before continuing."
+public/control-center/pages/governance.js:231:  if (!governanceSessions.has(key)) {
+public/control-center/pages/governance.js:232:    governanceSessions.set(key, {
+public/control-center/pages/governance.js:241:  return governanceSessions.get(key);
+public/control-center/pages/governance.js:249:  const approval = asObject(settings.approval);
+public/control-center/pages/governance.js:257:      approval_before_publish: Boolean(publishing.approvalBeforePublish),
+public/control-center/pages/governance.js:264:    approval_owners: {
+public/control-center/pages/governance.js:265:      content: asString(approval.contentOwner) || "Marketing lead",
+public/control-center/pages/governance.js:266:      media: asString(approval.mediaOwner) || "Creative lead",
+public/control-center/pages/governance.js:267:      campaign: asString(approval.adsOwner) || "Operations lead",
+public/control-center/pages/governance.js:275:      approval_mode: asString(ai.approvalRequiredMode) || "Only high-risk",
+public/control-center/pages/governance.js:277:      approval_before_publish: Boolean(publishing.approvalBeforePublish)
+public/control-center/pages/governance.js:283:  return asArray(summary?.sections?.approval_queue).find((item) =>
+public/control-center/pages/governance.js:302:    session.error = error.message || "Failed to load governance console.";
+public/control-center/pages/governance.js:319:    <div class="governance-metric">
+public/control-center/pages/governance.js:329:  const ownership = asObject(reviewModel.ownership);
+public/control-center/pages/governance.js:335:      <div class="governance-card-list">
+public/control-center/pages/governance.js:336:        ${Object.entries(ownership).map(([key, value]) => `
+public/control-center/pages/governance.js:337:          <div class="governance-card">
+public/control-center/pages/governance.js:338:            <div class="governance-card-head">
+public/control-center/pages/governance.js:348:      <div class="workflow-history-list">
+public/control-center/pages/governance.js:350:          <div class="workflow-history-item">
+public/control-center/pages/governance.js:366:    <div class="governance-flag-list">
+public/control-center/pages/governance.js:368:        <div class="governance-flag">
+public/control-center/pages/governance.js:388:    <article class="governance-card">
+public/control-center/pages/governance.js:389:      <div class="governance-card-head">
+public/control-center/pages/governance.js:391:          <div class="panel-kicker">${escapeHtml(titleCase(item.entity_type || "approval"))}</div>
+public/control-center/pages/governance.js:396:      <div class="governance-meta">
+public/control-center/pages/governance.js:402:      <p class="governance-copy">${escapeHtml(item.summary || "Awaiting review and decision.")}</p>
+public/control-center/pages/governance.js:403:      ${renderFlagList(flags, "No extra policy flags were attached to this approval.", escapeHtml)}
+public/control-center/pages/governance.js:404:      <textarea id="${escapeHtml(noteId)}" class="setup-input setup-textarea governance-note" rows="3" placeholder="Add a decision reason, change request, or escalation note.">${escapeHtml(item.decision_note || "")}</textarea>
+public/control-center/pages/governance.js:405:      <div class="governance-actions">
+public/control-center/pages/governance.js:406:        <button class="btn btn-primary" type="button" data-governance-decision="approved" data-approval-id="${escapeHtml(item.id)}">Submit Reviewed Approval</button>
+public/control-center/pages/governance.js:407:        <button class="btn btn-secondary" type="button" data-governance-decision="rejected" data-approval-id="${escapeHtml(item.id)}">Submit Rejection Decision</button>
+public/control-center/pages/governance.js:408:        <button class="btn btn-secondary" type="button" data-governance-decision="changes_requested" data-approval-id="${escapeHtml(item.id)}">Request Changes Review</button>
+public/control-center/pages/governance.js:409:        <button class="btn btn-secondary" type="button" data-governance-decision="escalated" data-approval-id="${escapeHtml(item.id)}">Escalate Review</button>
+public/control-center/pages/governance.js:410:        <button class="btn btn-secondary" type="button" data-governance-decision="overridden" data-approval-id="${escapeHtml(item.id)}">Record High-Risk Override</button>
+public/control-center/pages/governance.js:413:        <div class="governance-history">
+public/control-center/pages/governance.js:415:            <div class="governance-history-item">
+public/control-center/pages/governance.js:426:function renderReviewCard(item, type, escapeHtml, approval) {
+public/control-center/pages/governance.js:435:    <article class="governance-card">
+public/control-center/pages/governance.js:436:      <div class="governance-card-head">
+public/control-center/pages/governance.js:441:        <span class="card-badge ${approval ? "warning" : "neutral"}">${escapeHtml(approval ? "In approval queue" : "Not requested")}</span>
+public/control-center/pages/governance.js:443:      <div class="governance-meta">
+public/control-center/pages/governance.js:448:      ${approval ? `
+public/control-center/pages/governance.js:450:          <strong>Linked approval:</strong> ${escapeHtml(approval.title || approval.id)} • ${escapeHtml(titleCase(approval.status))}
+public/control-center/pages/governance.js:453:        <div class="governance-actions">
+public/control-center/pages/governance.js:457:            data-governance-request-approval="true"
+public/control-center/pages/governance.js:478:    <div class="governance-timeline">
+public/control-center/pages/governance.js:480:        <div class="governance-timeline-item">
+public/control-center/pages/governance.js:481:          <div class="governance-timeline-dot"></div>
+public/control-center/pages/governance.js:482:          <div class="governance-timeline-copy">
+public/control-center/pages/governance.js:496:  const owners = asObject(policy.approval_owners);
+public/control-center/pages/governance.js:499:    <div class="governance-policy-grid">
+public/control-center/pages/governance.js:500:      <label class="settings-toggle" for="governance-approval-before-publish">
+public/control-center/pages/governance.js:501:        <span class="settings-field-label">Require approval before publishing mutations</span>
+public/control-center/pages/governance.js:502:        <input id="governance-approval-before-publish" type="checkbox" class="settings-toggle-input" data-governance-policy="approval_before_publish" ${rules.approval_before_publish ? "checked" : ""} />
+public/control-center/pages/governance.js:505:      <label class="settings-toggle" for="governance-claim-review">
+public/control-center/pages/governance.js:507:        <input id="governance-claim-review" type="checkbox" class="settings-toggle-input" data-governance-policy="high_risk_claim_review_required" ${rules.high_risk_claim_review_required ? "checked" : ""} />
+public/control-center/pages/governance.js:510:      <label class="settings-toggle" for="governance-brand-safety">
+public/control-center/pages/governance.js:512:        <input id="governance-brand-safety" type="checkbox" class="settings-toggle-input" data-governance-policy="brand_safety_review_required" ${rules.brand_safety_review_required ? "checked" : ""} />
+public/control-center/pages/governance.js:515:      <label class="settings-toggle" for="governance-auto-escalate">
+public/control-center/pages/governance.js:517:        <input id="governance-auto-escalate" type="checkbox" class="settings-toggle-input" data-governance-policy="auto_escalate_critical_risk" ${rules.auto_escalate_critical_risk ? "checked" : ""} />
+public/control-center/pages/governance.js:520:      <label class="settings-toggle" for="governance-admin-override">
+public/control-center/pages/governance.js:522:        <input id="governance-admin-override" type="checkbox" class="settings-toggle-input" data-governance-policy="allow_admin_override" ${rules.allow_admin_override ? "checked" : ""} />
+public/control-center/pages/governance.js:525:      <label class="settings-toggle" for="governance-freeze-publishing">
+public/control-center/pages/governance.js:527:        <input id="governance-freeze-publishing" type="checkbox" class="settings-toggle-input" data-governance-policy="freeze_publishing" ${rules.freeze_publishing ? "checked" : ""} />
+public/control-center/pages/governance.js:531:        <label class="settings-field-label" for="governance-owner-content">Content owner</label>
+public/control-center/pages/governance.js:532:        <input id="governance-owner-content" class="settings-control" type="text" data-governance-owner="content" value="${escapeHtml(owners.content || "")}" />
+public/control-center/pages/governance.js:535:        <label class="settings-field-label" for="governance-owner-media">Media owner</label>
+public/control-center/pages/governance.js:536:        <input id="governance-owner-media" class="settings-control" type="text" data-governance-owner="media" value="${escapeHtml(owners.media || "")}" />
+public/control-center/pages/governance.js:539:        <label class="settings-field-label" for="governance-owner-publishing">Publishing owner</label>
+public/control-center/pages/governance.js:540:        <input id="governance-owner-publishing" class="settings-control" type="text" data-governance-owner="publishing" value="${escapeHtml(owners.publishing || "")}" />
+public/control-center/pages/governance.js:556:  const approvals = asArray(sections.approval_queue).map((item) => ({
+public/control-center/pages/governance.js:558:    queue_kind: "approval",
+public/control-center/pages/governance.js:559:    selected_key: `approval:${asString(item.id)}`,
+public/control-center/pages/governance.js:560:    queue_title: item.title || "Approval item",
+public/control-center/pages/governance.js:561:    queue_summary: item.summary || "Awaiting review and decision.",
+public/control-center/pages/governance.js:562:    queue_status: item.status || "pending",
+public/control-center/pages/governance.js:563:    queue_risk: item.risk_level || "medium",
+public/control-center/pages/governance.js:564:    queue_owner: item.reviewer || item.requested_for || "Operator",
+public/control-center/pages/governance.js:565:    queue_created: item.created_at,
+public/control-center/pages/governance.js:566:    queue_flags: [
+public/control-center/pages/governance.js:572:    linked_approval: item
+public/control-center/pages/governance.js:576:    const approval = findApprovalForEntity(summary, item.entity_type, item.entity_id);
+public/control-center/pages/governance.js:579:      queue_kind: "claim",
+public/control-center/pages/governance.js:581:      queue_title: item.title || "Claim review item",
+public/control-center/pages/governance.js:582:      queue_summary: asArray(item.claim_flags).map((flag) => flag.message).join(" | ") || "No claim issues detected.",
+public/control-center/pages/governance.js:583:      queue_status: approval?.status || item.status || "open",
+public/control-center/pages/governance.js:584:      queue_risk: asArray(item.claim_flags)[0]?.severity || "medium",
+public/control-center/pages/governance.js:585:      queue_owner: approval?.reviewer || "Compliance Reviewer",
+public/control-center/pages/governance.js:586:      queue_created: approval?.created_at || item.updated_at || item.created_at,
+public/control-center/pages/governance.js:587:      queue_flags: asArray(item.claim_flags),
+public/control-center/pages/governance.js:588:      linked_approval: approval
+public/control-center/pages/governance.js:593:    const approval = findApprovalForEntity(summary, item.entity_type, item.entity_id);
+public/control-center/pages/governance.js:596:      queue_kind: "brand",
+public/control-center/pages/governance.js:598:      queue_title: item.title || "Brand safety review",
+public/control-center/pages/governance.js:599:      queue_summary: asArray(item.brand_safety_flags).map((flag) => flag.message).join(" | ") || "No brand issues detected.",
+public/control-center/pages/governance.js:600:      queue_status: approval?.status || item.status || "open",
+public/control-center/pages/governance.js:601:      queue_risk: asArray(item.brand_safety_flags)[0]?.severity || "medium",
+public/control-center/pages/governance.js:602:      queue_owner: approval?.reviewer || "Brand Reviewer",
+public/control-center/pages/governance.js:603:      queue_created: approval?.created_at || item.updated_at || item.created_at,
+public/control-center/pages/governance.js:604:      queue_flags: asArray(item.brand_safety_flags),
+public/control-center/pages/governance.js:605:      linked_approval: approval
+public/control-center/pages/governance.js:610:    const approval = findApprovalForEntity(summary, "publishing_job", item.entity_id);
+public/control-center/pages/governance.js:613:      queue_kind: "publish",
+public/control-center/pages/governance.js:615:      queue_title: item.title || "Publish guardrail",
+public/control-center/pages/governance.js:616:      queue_summary: asArray(item.publish_guardrails).map((flag) => flag.message).join(" | ") || "No publish blockers detected.",
+public/control-center/pages/governance.js:617:      queue_status: approval?.status || item.status || "open",
+public/control-center/pages/governance.js:618:      queue_risk: asArray(item.publish_guardrails)[0]?.severity || "medium",
+public/control-center/pages/governance.js:619:      queue_owner: approval?.reviewer || "Publishing Reviewer",
+public/control-center/pages/governance.js:620:      queue_created: approval?.created_at || item.updated_at || item.created_at,
+public/control-center/pages/governance.js:621:      queue_flags: asArray(item.publish_guardrails),
+public/control-center/pages/governance.js:622:      linked_approval: approval
+public/control-center/pages/governance.js:626:  const escalations = asArray(sections.escalation_queue).map((item) => ({
+public/control-center/pages/governance.js:628:    queue_kind: "escalation",
+public/control-center/pages/governance.js:630:    queue_title: item.title || "Escalation item",
+public/control-center/pages/governance.js:631:    queue_summary: item.description || item.summary || "Escalated for follow-up.",
+public/control-center/pages/governance.js:632:    queue_status: item.status || "open",
+public/control-center/pages/governance.js:633:    queue_risk: "high",
+public/control-center/pages/governance.js:634:    queue_owner: item.assignee || item.owner || item.reviewer || "Admin",
+public/control-center/pages/governance.js:635:    queue_created: item.updated_at || item.created_at,
+public/control-center/pages/governance.js:636:    queue_flags: []
+public/control-center/pages/governance.js:639:  return [...approvals, ...claims, ...brand, ...publish, ...escalations];
+public/control-center/pages/governance.js:644:  const itemLabel = asString(selectedItem?.queue_title || selectedItem?.title || "the selected governance item");
+public/control-center/pages/governance.js:647:      label: "Summarize governance state",
+public/control-center/pages/governance.js:648:      preview: "Explain the current approval pressure, risk level, and next governance priority.",
+public/control-center/pages/governance.js:649:      prompt: `Summarize the current governance state for ${projectLabel}. Cover policy pressure, pending approvals, risky claims, brand safety issues, publish blockers, and the next governance priority.`
+public/control-center/pages/governance.js:653:      preview: "Explain the selected governance item and what decision path is safest.",
+public/control-center/pages/governance.js:657:      label: "Find governance gaps",
+public/control-center/pages/governance.js:658:      preview: "Identify the highest-risk governance gaps and what rules or ownership need tightening.",
+public/control-center/pages/governance.js:659:      prompt: `Review Governance for ${projectLabel} with focus on ${focusLabel}. Identify the highest-risk governance gaps, where approval ownership is weak, and what rules need tightening next.`
+public/control-center/pages/governance.js:664:function buildReadinessSnapshot(summary, queueItems, selectedItem) {
+public/control-center/pages/governance.js:668:  const owners = asObject(policy.approval_owners);
+public/control-center/pages/governance.js:669:  const approvals = asArray(sections.approval_queue).length;
+public/control-center/pages/governance.js:671:  const escalations = asArray(sections.escalation_queue).length;
+public/control-center/pages/governance.js:673:  const ownerCoverage = Object.values(owners).filter((value) => asString(value).trim()).length;
+public/control-center/pages/governance.js:677:    blockers.push("Publishing is currently frozen by governance policy.");
+public/control-center/pages/governance.js:679:  if (approvals > 0) {
+public/control-center/pages/governance.js:680:    blockers.push(`${approvals} approval item${approvals === 1 ? " is" : "s are"} waiting for a decision.`);
+public/control-center/pages/governance.js:696:  let nextBestAction = "Run a governance AI summary, then keep policy owners and rules aligned with live operations.";
+public/control-center/pages/governance.js:697:  if (selectedItem?.queue_kind === "approval") {
+public/control-center/pages/governance.js:698:    nextBestAction = "Review the selected approval, document decision reasoning, and submit a governance decision.";
+public/control-center/pages/governance.js:699:  } else if (approvals > 0) {
+public/control-center/pages/governance.js:702:    nextBestAction = "Inspect policy violations and request approvals where review is still missing.";
+public/control-center/pages/governance.js:711:    ownerCoverage,
+public/control-center/pages/governance.js:712:    totalQueue: queueItems.length,
+public/control-center/pages/governance.js:713:    approvals,
+public/control-center/pages/governance.js:720:function governanceRiskRank(value) {
+public/control-center/pages/governance.js:729:function findHighestRiskQueueItem(queueItems) {
+public/control-center/pages/governance.js:730:  return asArray(queueItems).reduce((highest, item) => {
+public/control-center/pages/governance.js:732:    return governanceRiskRank(item.queue_risk) > governanceRiskRank(highest.queue_risk) ? item : highest;
+public/control-center/pages/governance.js:736:function firstConfiguredOwner(owners) {
+public/control-center/pages/governance.js:737:  return Object.values(asObject(owners)).map(asString).find((value) => value.trim()) || "";
+public/control-center/pages/governance.js:754:      <section class="page is-active" data-page="governance">
+public/control-center/pages/governance.js:755:        <div class="governance-shell governance-workspace mhos-clean-root mhos-clean-shell">
+public/control-center/pages/governance.js:761:                <p>Governance operating surface for approvals, policy pressure, and decision routing.</p>
+public/control-center/pages/governance.js:773:            <div class="empty-box">Select a project to review approvals, policy violations, overrides, and audit history.</div>
+public/control-center/pages/governance.js:782:      <section class="page is-active" data-page="governance">
+public/control-center/pages/governance.js:783:        <div class="governance-shell governance-workspace mhos-clean-root mhos-clean-shell">
+public/control-center/pages/governance.js:789:                <p>Preparing the governance operating surface.</p>
+public/control-center/pages/governance.js:801:            <div class="empty-box">Loading governance console...</div>
+public/control-center/pages/governance.js:810:      <section class="page is-active" data-page="governance">
+public/control-center/pages/governance.js:811:        <div class="governance-shell governance-workspace mhos-clean-root mhos-clean-shell">
+public/control-center/pages/governance.js:839:  const queueItems = buildDecisionQueue(summary);
+public/control-center/pages/governance.js:841:    all: queueItems.length,
+public/control-center/pages/governance.js:842:    approvals: queueItems.filter((item) => item.queue_kind === "approval").length,
+public/control-center/pages/governance.js:843:    claims: queueItems.filter((item) => item.queue_kind === "claim").length,
+public/control-center/pages/governance.js:844:    brand: queueItems.filter((item) => item.queue_kind === "brand").length,
+public/control-center/pages/governance.js:845:    publish: queueItems.filter((item) => item.queue_kind === "publish").length,
+public/control-center/pages/governance.js:846:    escalations: queueItems.filter((item) => item.queue_kind === "escalation").length
+public/control-center/pages/governance.js:848:  let visibleQueue = queueItems;
+public/control-center/pages/governance.js:851:      approvals: "approval",
+public/control-center/pages/governance.js:857:    visibleQueue = queueItems.filter((item) => item.queue_kind === focusMap[session.focus]);
+public/control-center/pages/governance.js:864:  const owners = asObject(policy.approval_owners);
+public/control-center/pages/governance.js:867:  const readiness = buildReadinessSnapshot(summary, queueItems, selectedItem);
+public/control-center/pages/governance.js:868:  const highestRiskItem = findHighestRiskQueueItem(queueItems);
+public/control-center/pages/governance.js:871:    asString(executiveFocusItem?.queue_owner) ||
+public/control-center/pages/governance.js:872:    firstConfiguredOwner(owners) ||
+public/control-center/pages/governance.js:873:    "Governance owner";
+public/control-center/pages/governance.js:874:  const highestRiskValue = asString(highestRiskItem?.queue_risk || executiveFocusItem?.queue_risk);
+public/control-center/pages/governance.js:878:  const selectedDecisionLabel = asString(executiveFocusItem?.queue_title || "No selected decision");
+public/control-center/pages/governance.js:879:  const selectedDecisionKind = titleCase(executiveFocusItem?.queue_kind || "governance");
+public/control-center/pages/governance.js:882:    <section class="page is-active" data-page="governance">
+public/control-center/pages/governance.js:883:      <div class="governance-shell governance-workspace mhos-clean-root mhos-clean-shell">
+public/control-center/pages/governance.js:884:        <section class="panel mhos-executive-surface mhos-context-ribbon governance-operating-header" aria-label="Executive governance command band">
+public/control-center/pages/governance.js:885:          <div class="panel-header mhos-context-main governance-operating-header-main">
+public/control-center/pages/governance.js:887:              <div class="panel-kicker mhos-context-kicker governance-operating-eyebrow">Governance Operating Surface</div>
+public/control-center/pages/governance.js:888:              <h3 class="mhos-context-title governance-operating-title">Governance Command Center for ${escapeHtml(projectName)}</h3>
+public/control-center/pages/governance.js:889:              <p class="mhos-context-description governance-operating-desc">Canonical executive surface for policy authority, approval pressure, escalation, and safe decision routing.</p>
+public/control-center/pages/governance.js:891:            <span class="card-badge neutral governance-operating-status">${escapeHtml(session.loading ? "Refreshing" : "Active")}</span>
+public/control-center/pages/governance.js:894:          <div class="mhos-executive-summary-grid governance-executive-summary-grid" aria-label="Governance executive anchors">
+public/control-center/pages/governance.js:895:            <article class="mhos-executive-summary-item governance-summary-readiness">
+public/control-center/pages/governance.js:900:            <article class="mhos-executive-summary-item governance-summary-approval">
+public/control-center/pages/governance.js:902:              <strong class="mhos-executive-metric-value">${escapeHtml(asString(readiness.approvals))}</strong>
+public/control-center/pages/governance.js:903:              <small class="mhos-executive-metric-note">${escapeHtml(readiness.approvals ? "Awaiting governed decision" : "No approval queue pressure")}</small>
+public/control-center/pages/governance.js:905:            <article class="mhos-executive-summary-item governance-summary-escalation">
+public/control-center/pages/governance.js:910:            <article class="mhos-executive-summary-item governance-summary-owner">
+public/control-center/pages/governance.js:915:            <article class="mhos-executive-summary-item governance-summary-risk">
+public/control-center/pages/governance.js:920:            <article class="mhos-executive-summary-item governance-summary-ai-boundary">
+public/control-center/pages/governance.js:922:              <strong class="mhos-executive-metric-value governance-ai-boundary">Prepare / Review / Summarize Only</strong>
+public/control-center/pages/governance.js:923:              <small class="mhos-executive-metric-note governance-ai-boundary-note">AI cannot approve or change policy. Human backend decision required.</small>
+public/control-center/pages/governance.js:927:          <div class="governance-policy-summary-grid">
+public/control-center/pages/governance.js:928:            <div class="governance-policy-block mhos-executive-panel">
+public/control-center/pages/governance.js:929:              <h4>Next best governance action</h4>
+public/control-center/pages/governance.js:930:              <p class="governance-copy mhos-executive-guidance">${escapeHtml(readiness.nextBestAction)}</p>
+public/control-center/pages/governance.js:931:              <div class="governance-rule-list">
+public/control-center/pages/governance.js:932:                <div class="governance-rule-item">
+public/control-center/pages/governance.js:936:                <div class="governance-rule-item">
+public/control-center/pages/governance.js:941:              <div class="governance-actions std-action-row">
+public/control-center/pages/governance.js:942:                <button class="btn btn-secondary" type="button" data-governance-focus="all">View Full Queue</button>
+public/control-center/pages/governance.js:943:                <button class="btn btn-secondary" type="button" data-governance-focus="approvals">Open Approvals</button>
+public/control-center/pages/governance.js:944:                <button class="btn btn-secondary" type="button" data-governance-open-ai>Ask AI for Guidance</button>
+public/control-center/pages/governance.js:947:            <div class="governance-policy-block">
+public/control-center/pages/governance.js:949:              <div class="governance-activity-list">
+public/control-center/pages/governance.js:952:                    <div class="governance-activity-item">
+public/control-center/pages/governance.js:957:                  : `<div class="empty-box">No active governance blockers detected.</div>`}
+public/control-center/pages/governance.js:960:            <div class="governance-policy-block">
+public/control-center/pages/governance.js:961:              <h4>Safe execution path</h4>
+public/control-center/pages/governance.js:962:              <div class="governance-rule-list">
+public/control-center/pages/governance.js:963:                <div class="governance-rule-item">
+public/control-center/pages/governance.js:965:                  <span>${escapeHtml(readiness.approvals ? "Review queued approvals" : "No queued approvals")}</span>
+public/control-center/pages/governance.js:967:                <div class="governance-rule-item">
+public/control-center/pages/governance.js:975:          <div class="governance-actions std-action-row mhos-executive-action-row">
+public/control-center/pages/governance.js:976:            <button class="btn btn-secondary" type="button" data-governance-action="refresh">Refresh Governance Data</button>
+public/control-center/pages/governance.js:977:            <button class="btn btn-secondary" type="button" data-governance-open-ai>Open AI Context</button>
+public/control-center/pages/governance.js:978:            <button class="btn btn-secondary" type="button" data-governance-focus="approvals">Focus Approvals</button>
+public/control-center/pages/governance.js:982:        <section class="panel mhos-clean-surface" aria-label="Supporting governance signals">
+public/control-center/pages/governance.js:990:          <div class="governance-overview-grid">
+public/control-center/pages/governance.js:991:            ${renderMetric("Approval Queue", asArray(sections.approval_queue).length, "Awaiting decision", escapeHtml)}
+public/control-center/pages/governance.js:996:            ${renderMetric("Escalations", asArray(sections.escalation_queue).length, "Higher-level review", escapeHtml)}
+public/control-center/pages/governance.js:998:          <div class="governance-activity-list">
+public/control-center/pages/governance.js:1001:                <div class="governance-activity-item">
+public/control-center/pages/governance.js:1010:        <div class="governance-workspace-grid">
+public/control-center/pages/governance.js:1011:          <div class="governance-action-stack std-main-column mhos-clean-stack">
+public/control-center/pages/governance.js:1017:                  <p>Rules, owners, and Settings bridge state.</p>
+public/control-center/pages/governance.js:1020:              <div class="governance-policy-summary-grid">
+public/control-center/pages/governance.js:1021:                <div class="governance-policy-block">
+public/control-center/pages/governance.js:1023:                  <div class="governance-rule-list">
+public/control-center/pages/governance.js:1025:                      <div class="governance-rule-item">
+public/control-center/pages/governance.js:1032:                <div class="governance-policy-block">
+public/control-center/pages/governance.js:1033:                  <h4>Approval owners</h4>
+public/control-center/pages/governance.js:1034:                  <div class="governance-rule-list">
+public/control-center/pages/governance.js:1035:                    ${Object.entries(owners).map(([key, value]) => `
+public/control-center/pages/governance.js:1036:                      <div class="governance-rule-item">
+public/control-center/pages/governance.js:1043:                <div class="governance-policy-block">
+public/control-center/pages/governance.js:1047:                <div class="governance-policy-block">
+public/control-center/pages/governance.js:1051:                    <strong>Settings bridge:</strong> ${escapeHtml(settingsBridge.source || "Not synced")} • approval mode ${escapeHtml(settingsBridge.approval_mode || "unknown")} • claim mode ${escapeHtml(settingsBridge.claim_safety_mode || "unknown")} • synced ${escapeHtml(settingsBridge.synced_at ? formatDateTime(settingsBridge.synced_at) : "not yet")}
+public/control-center/pages/governance.js:1060:                  <div class="panel-kicker">Decision queue</div>
+public/control-center/pages/governance.js:1061:                  <h3>Pending approvals and governance decisions</h3>
+public/control-center/pages/governance.js:1062:                  <p>Inspect risk, owner, status, and decision focus.</p>
+public/control-center/pages/governance.js:1066:              <div class="governance-focus-tabs">
+public/control-center/pages/governance.js:1069:                  ["approvals", "Approvals", focusCounts.approvals],
+public/control-center/pages/governance.js:1075:                  <button class="governance-focus-tab${session.focus === value ? " is-active" : ""}" type="button" data-governance-focus="${escapeHtml(value)}">
+public/control-center/pages/governance.js:1097:                          <td><span class="card-badge neutral">${escapeHtml(titleCase(item.queue_kind || "item"))}</span></td>
+public/control-center/pages/governance.js:1099:                            <button class="governance-select-link" type="button" data-governance-select="${escapeHtml(item.selected_key)}">
+public/control-center/pages/governance.js:1100:                              <strong>${escapeHtml(item.queue_title)}</strong>
+public/control-center/pages/governance.js:1101:                              <span>${escapeHtml(item.queue_summary)}</span>
+public/control-center/pages/governance.js:1104:                          <td><span class="card-badge ${severityClass(item.queue_risk)}">${escapeHtml(titleCase(item.queue_risk || "medium"))}</span></td>
+public/control-center/pages/governance.js:1105:                          <td>${escapeHtml(item.queue_owner || "-")}</td>
+public/control-center/pages/governance.js:1106:                          <td><span class="card-badge ${severityClass(item.queue_status)}">${escapeHtml(titleCase(item.queue_status || "open"))}</span></td>
+public/control-center/pages/governance.js:1107:                          <td>${escapeHtml(formatDateTime(item.queue_created))}</td>
+public/control-center/pages/governance.js:1110:                      : `<tr><td colspan="6"><div class="empty-box">No governance items are visible in this focus state.</div></td></tr>`}
+public/control-center/pages/governance.js:1117:          <div class="governance-action-stack std-right-rail mhos-clean-stack">
+public/control-center/pages/governance.js:1122:                <h3>${escapeHtml(selectedItem?.queue_title || "Select a governance item")}</h3>
+public/control-center/pages/governance.js:1123:                  <p>${escapeHtml(selectedItem ? "Review risk, owner, evidence, and linked approval before decision." : "Choose a governance item from the queue to inspect it.")}</p>
+public/control-center/pages/governance.js:1129:                  <div class="governance-selected-summary">
+public/control-center/pages/governance.js:1130:                    <strong>${escapeHtml(selectedItem.queue_title)}</strong>
+public/control-center/pages/governance.js:1131:                    <p>${escapeHtml(selectedItem.queue_summary)}</p>
+public/control-center/pages/governance.js:1133:                  <div class="simple-banner"><strong>Authority focus:</strong> ${escapeHtml(selectedItem.queue_owner || authorityOwner)} owns this ${escapeHtml(titleCase(selectedItem.queue_risk || "medium"))} ${escapeHtml(titleCase(selectedItem.queue_kind || "governance"))} review.</div>
+public/control-center/pages/governance.js:1138:                    governanceData: session.summary,
+public/control-center/pages/governance.js:1145:                    const operations = session.summary?.operations;
+public/control-center/pages/governance.js:1150:                        intakeContext.ai = (typeof getSharedAiDraft === "function") ? getSharedAiDraft(projectName, operations)?.summary : undefined;
+public/control-center/pages/governance.js:1151:                        intakeContext.publishing = getSharedHandoff(projectName, "publishing", operations)?.payload?.summary;
+public/control-center/pages/governance.js:1152:                        intakeContext.content = getSharedHandoff(projectName, "content-studio", operations)?.payload?.summary;
+public/control-center/pages/governance.js:1153:                        intakeContext.media = getSharedHandoff(projectName, "media-studio", operations)?.payload?.summary;
+public/control-center/pages/governance.js:1154:                        intakeContext.workflows = getSharedHandoff(projectName, "workflows", operations)?.payload?.summary;
+public/control-center/pages/governance.js:1155:                        intakeContext.operations = getSharedHandoff(projectName, "operations", operations)?.payload?.summary;
+public/control-center/pages/governance.js:1156:                        intakeContext.notifications = getSharedHandoff(projectName, "notifications", operations)?.payload?.summary;
+public/control-center/pages/governance.js:1157:                        intakeContext.insights = getSharedHandoff(projectName, "insights", operations)?.payload?.summary;
+public/control-center/pages/governance.js:1162:                  <div class="governance-selected-grid">
+public/control-center/pages/governance.js:1163:                    <div class="governance-selected-item">
+public/control-center/pages/governance.js:1165:                      <strong>${escapeHtml(titleCase(selectedItem.queue_kind || "item"))}</strong>
+public/control-center/pages/governance.js:1167:                    <div class="governance-selected-item">
+public/control-center/pages/governance.js:1169:                      <strong>${escapeHtml(titleCase(selectedItem.queue_risk || "medium"))}</strong>
+public/control-center/pages/governance.js:1171:                    <div class="governance-selected-item">
+public/control-center/pages/governance.js:1173:                      <strong>${escapeHtml(selectedItem.queue_owner || "-")}</strong>
+public/control-center/pages/governance.js:1175:                    <div class="governance-selected-item">
+public/control-center/pages/governance.js:1177:                      <strong>${escapeHtml(titleCase(selectedItem.queue_status || "open"))}</strong>
+public/control-center/pages/governance.js:1179:                    <div class="governance-selected-item">
+public/control-center/pages/governance.js:1183:                    <div class="governance-selected-item">
+public/control-center/pages/governance.js:1185:                      <strong>${escapeHtml(formatDateTime(selectedItem.queue_created))}</strong>
+public/control-center/pages/governance.js:1188:                  ${renderFlagList(asArray(selectedItem.queue_flags), "No policy flags were attached to this item.", escapeHtml)}
+public/control-center/pages/governance.js:1190:                    selectedItem.linked_approval
+public/control-center/pages/governance.js:1193:                          <strong>Linked approval:</strong> ${escapeHtml(selectedItem.linked_approval.title || selectedItem.linked_approval.id)} • ${escapeHtml(titleCase(selectedItem.linked_approval.status || "pending"))}
+public/control-center/pages/governance.js:1201:                        <div class="governance-activity-list">
+public/control-center/pages/governance.js:1203:                            <div class="governance-activity-item">
+public/control-center/pages/governance.js:1213:                : `<div class="empty-box">No governance item is selected.</div>`
+public/control-center/pages/governance.js:1224:                <p>Backend-authoritative decisions only. Approval actions mutate durable approval records and appear only for real queued approvals.</p>
+public/control-center/pages/governance.js:1227:            <div class="governance-action-stack">
+public/control-center/pages/governance.js:1229:              <div class="simple-banner"><strong>Safe execution path:</strong> Review selected context, verify evidence, add rationale, submit one reviewed Governance decision, then refresh and validate queue impact.</div>
+public/control-center/pages/governance.js:1230:              <textarea id="governanceDecisionNote" class="setup-input setup-textarea governance-note" rows="4" placeholder="Add a decision reason, change request, or escalation note.">${escapeHtml(selectedItem?.decision_note || "")}</textarea>
+public/control-center/pages/governance.js:1231:              <div class="governance-actions std-action-row">
+public/control-center/pages/governance.js:1232:                <button class="btn btn-secondary" type="button" data-governance-action="refresh">Refresh</button>
+public/control-center/pages/governance.js:1233:                <button class="btn btn-primary" type="button" data-governance-action="save-policy">Save Backend Governance Policy</button>
+public/control-center/pages/governance.js:1234:                <button class="btn btn-secondary" type="button" data-governance-action="sync-settings"${Object.keys(settingsDraft).length ? "" : " disabled"}>Review & Sync Settings-Derived Rules</button>
+public/control-center/pages/governance.js:1236:                  selectedItem?.queue_kind === "approval"
+public/control-center/pages/governance.js:1238:                      <button class="btn btn-primary" type="button" data-governance-decision="approved" data-approval-id="${escapeHtml(selectedItem.id)}">Submit Reviewed Approval</button>
+public/control-center/pages/governance.js:1239:                      <button class="btn btn-secondary" type="button" data-governance-decision="rejected" data-approval-id="${escapeHtml(selectedItem.id)}">Submit Rejection Decision</button>
+public/control-center/pages/governance.js:1240:                      <button class="btn btn-secondary" type="button" data-governance-decision="changes_requested" data-approval-id="${escapeHtml(selectedItem.id)}">Request Changes Review</button>
+public/control-center/pages/governance.js:1241:                      <button class="btn btn-secondary" type="button" data-governance-decision="escalated" data-approval-id="${escapeHtml(selectedItem.id)}">Escalate Review</button>
+public/control-center/pages/governance.js:1242:                      <button class="btn btn-secondary" type="button" data-governance-decision="overridden" data-approval-id="${escapeHtml(selectedItem.id)}">Record High-Risk Override</button>
+public/control-center/pages/governance.js:1247:                  selectedItem && selectedItem.queue_kind !== "approval" && !selectedItem.linked_approval
+public/control-center/pages/governance.js:1252:                        data-governance-request-approval="true"
+public/control-center/pages/governance.js:1255:                        data-title="${escapeHtml(selectedItem.queue_title || "Governance review")}"
+public/control-center/pages/governance.js:1256:                        data-risk="${escapeHtml(selectedItem.queue_risk || "medium")}"
+public/control-center/pages/governance.js:1257:                        data-summary="${escapeHtml(selectedItem.queue_summary || "Governance review requested.")}"
+public/control-center/pages/governance.js:1265:              <div class="governance-policy-summary-grid">
+public/control-center/pages/governance.js:1266:                <div class="governance-policy-block">
+public/control-center/pages/governance.js:1268:                  <div class="governance-activity-list">
+public/control-center/pages/governance.js:1271:                        <div class="governance-activity-item">
+public/control-center/pages/governance.js:1279:                <div class="governance-policy-block">
+public/control-center/pages/governance.js:1281:                  <div class="governance-rule-list">
+public/control-center/pages/governance.js:1283:                      <div class="governance-rule-item">
+public/control-center/pages/governance.js:1304:          <div class="simple-banner"><strong>AI guidance scope:</strong> Policy pressure, approval readiness, ownership coverage, risk, and next governance move.</div>
+public/control-center/pages/governance.js:1305:          <div class="governance-ai-toolbar">
+public/control-center/pages/governance.js:1306:            <button class="btn btn-secondary" type="button" data-governance-open-ai>Open AI: Review in AI Workspace</button>
+public/control-center/pages/governance.js:1310:              <button class="quick-action-btn" type="button" data-governance-ai-prompt="${index}">
+public/control-center/pages/governance.js:1331:  Array.from(root.querySelectorAll("[data-governance-decision]")).forEach((button) => {
+public/control-center/pages/governance.js:1333:      const approvalId = button.getAttribute("data-approval-id") || "";
+public/control-center/pages/governance.js:1334:      const decision = button.getAttribute("data-governance-decision") || "";
+public/control-center/pages/governance.js:1335:      const note = root.querySelector("#governanceDecisionNote")?.value?.trim() || `${titleCase(decision)} from Governance console.`;
+public/control-center/pages/governance.js:1344:        await decideProjectApproval(projectName, approvalId, {
+public/control-center/pages/governance.js:1347:          actor: "governance-console",
+public/control-center/pages/governance.js:1350:        context.showMessage(`Approval ${titleCase(decision)} for ${approvalId}.`);
+public/control-center/pages/governance.js:1353:        context.showError(error.message || "Failed to update approval.");
+public/control-center/pages/governance.js:1358:  Array.from(root.querySelectorAll("[data-governance-focus]")).forEach((button) => {
+public/control-center/pages/governance.js:1360:      session.focus = button.getAttribute("data-governance-focus") || "all";
+public/control-center/pages/governance.js:1365:  Array.from(root.querySelectorAll("[data-governance-select]")).forEach((button) => {
+public/control-center/pages/governance.js:1367:      session.selectedKey = button.getAttribute("data-governance-select") || "";
+public/control-center/pages/governance.js:1372:  Array.from(root.querySelectorAll("[data-governance-request-approval]")).forEach((button) => {
+public/control-center/pages/governance.js:1383:        const ownership = asObject(session.summary?.review_model?.ownership);
+public/control-center/pages/governance.js:1387:          title: `${title} approval`,
+public/control-center/pages/governance.js:1389:          reviewer: ownership.compliance || "Compliance Reviewer",
+public/control-center/pages/governance.js:1391:          requested_by: "governance-console",
+public/control-center/pages/governance.js:1392:          requested_for: ownership.compliance || "Compliance Reviewer",
+public/control-center/pages/governance.js:1394:          source_page: "governance",
+public/control-center/pages/governance.js:1395:          route_target: "governance"
+public/control-center/pages/governance.js:1397:        context.showMessage("Approval request added to the governance queue.");
+public/control-center/pages/governance.js:1400:        context.showError(error.message || "Failed to request approval.");
+public/control-center/pages/governance.js:1405:  Array.from(root.querySelectorAll("[data-governance-action]")).forEach((button) => {
+public/control-center/pages/governance.js:1407:      const action = button.getAttribute("data-governance-action");
+public/control-center/pages/governance.js:1416:        Array.from(root.querySelectorAll("[data-governance-policy]")).forEach((control) => {
+public/control-center/pages/governance.js:1417:          policyRules[control.getAttribute("data-governance-policy")] = Boolean(control.checked);
+public/control-center/pages/governance.js:1420:        const approvalOwners = {};
+public/control-center/pages/governance.js:1421:        Array.from(root.querySelectorAll("[data-governance-owner]")).forEach((control) => {
+public/control-center/pages/governance.js:1422:          approvalOwners[control.getAttribute("data-governance-owner")] = control.value || "";
+public/control-center/pages/governance.js:1425:        const confirmed = window.confirm("Confirm backend Governance policy save\n\nAction: Save durable Governance policy rules for this project.\nRisk: These rules can affect approvals, publishing readiness, brand safety review, admin override behavior, and freeze-publishing behavior.\nAuthority: This is a backend-governed durable policy update.\n\nSelect Cancel to review the policy settings before saving.");
+public/control-center/pages/governance.js:1432:            actor: "governance-console",
+public/control-center/pages/governance.js:1434:            approval_owners: approvalOwners
+public/control-center/pages/governance.js:1439:          context.showError(error.message || "Failed to save governance policy.");
+public/control-center/pages/governance.js:1447:          context.showError("No durable Settings snapshot was found in the governance bridge for this project.");
+public/control-center/pages/governance.js:1451:        const confirmed = window.confirm("Sync Settings-derived rules to Governance policy? This updates durable Governance rules including approval-before-publish, claim review, escalation, owners, override behavior, and policy behavior. Continue only if the Settings snapshot was reviewed.");
+public/control-center/pages/governance.js:1458:            actor: "governance-console",
+public/control-center/pages/governance.js:1470:  Array.from(root.querySelectorAll("[data-governance-open-ai]")).forEach((button) => {
+public/control-center/pages/governance.js:1476:  const queueItems = buildDecisionQueue(asObject(session.summary));
+public/control-center/pages/governance.js:1477:  const selectedItem = queueItems.find((item) => item.selected_key === session.selectedKey) || queueItems[0] || null;
+public/control-center/pages/governance.js:1479:  Array.from(root.querySelectorAll("[data-governance-ai-prompt]")).forEach((button) => {
+public/control-center/pages/governance.js:1481:      const prompt = prompts[Number(button.getAttribute("data-governance-ai-prompt"))];
+public/control-center/pages/governance.js:1490:export const governanceRoute = {
+public/control-center/pages/governance.js:1491:  id: "governance",
+public/control-center/pages/governance.js:1496:    description: "Review backend approvals, policy violations, overrides, escalation, publishing gates, and audit visibility across content, media, campaigns, and publishing."
+public/control-center/pages/governance.js:1498:  template: `<section class="page is-active" data-page="governance"><div class="governance-shell"></div></section>`,
+public/control-center/pages/ai-command/tool-dock.js:350:        <div class=\"mhos-tool-drawer-source-meta\">${escapeHtml(type)} · Added from Library · Not approval or publish readiness</div>
+public/control-center/pages/ai-command/tool-dock.js:431:      destinations: ["chat-preview", "campaign-studio", "content-studio", "workflows"],
+public/control-center/pages/ai-command/tool-dock.js:444:      destinations: ["chat-preview", "campaign-studio", "workflows", "publishing"],
+public/control-center/pages/ai-command/tool-dock.js:446:      outputTypes: ["launch_plan", "readiness_plan", "timeline", "dependency_map"],
+public/control-center/pages/ai-command/tool-dock.js:447:      template: "Build a launch plan for {projectName}. Include timeline, required assets, owners, channels, readiness gaps, and safe next actions."
+public/control-center/pages/ai-command/tool-dock.js:483:      destinations: ["chat-preview", "campaign-studio", "content-studio", "workflows", "publishing"],
+public/control-center/pages/ai-command/tool-dock.js:485:      outputTypes: ["funnel_map", "content_needs", "handoff_points", "retention_notes"],
+public/control-center/pages/ai-command/tool-dock.js:486:      template: "Map a funnel for {projectName}. Include awareness, consideration, conversion, retention, content needs, and handoff points."
+public/control-center/pages/ai-command/tool-dock.js:495:      frontendOwnerPage: "workflows",
+public/control-center/pages/ai-command/tool-dock.js:496:      destinations: ["chat-preview", "workflows", "task", "campaign-studio"],
+public/control-center/pages/ai-command/tool-dock.js:497:      sourceTypes: ["current_chat", "operations_snapshot", "readiness_gaps", "campaign_notes", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:580:      template: "Prepare source context for the next Content Writer task for {projectName}. Ask which source should be used: current chat, Library folder, brand profile, product data, legal/pricing documents, research/proof documents, source-of-truth assets, or manual input."
+public/control-center/pages/ai-command/tool-dock.js:616:      destinations: ["content-studio", "library", "media-studio", "publishing", "compliance", "task", "handoff"],
+public/control-center/pages/ai-command/tool-dock.js:618:      outputTypes: ["content_studio_draft", "library_save", "media_brief", "publishing_package", "compliance_review", "task_preview", "handoff_preview"],
+public/control-center/pages/ai-command/tool-dock.js:670:      destinations: ["chat-preview", "media-studio", "library", "workflows"],
+public/control-center/pages/ai-command/tool-dock.js:696:      destinations: ["chat-preview", "media-studio", "governance", "library"],
+public/control-center/pages/ai-command/tool-dock.js:738:      destinations: ["chat-preview", "media-studio", "workflows", "library"],
+public/control-center/pages/ai-command/tool-dock.js:780:      destinations: ["chat-preview", "publishing", "governance", "content-studio", "media-studio"],
+public/control-center/pages/ai-command/tool-dock.js:781:      sourceTypes: ["content_draft", "media_asset", "publishing_package", "approval_notes", "current_chat", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:783:      template: "Review publishing readiness for {projectName}. Check copy, assets, channel fit, schedule, approvals, and missing items. Do not publish."
+public/control-center/pages/ai-command/tool-dock.js:795:      outputTypes: ["channel_pack", "caption_pack", "format_notes", "approval_checklist"],
+public/control-center/pages/ai-command/tool-dock.js:796:      template: "Prepare a channel package for {projectName}. Include caption, hashtags, format notes, asset needs, schedule notes, and approval checklist."
+public/control-center/pages/ai-command/tool-dock.js:806:      destinations: ["chat-preview", "publishing", "workflows"],
+public/control-center/pages/ai-command/tool-dock.js:807:      sourceTypes: ["publishing_package", "campaign_timeline", "channel_notes", "approval_notes", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:808:      outputTypes: ["schedule_builder", "calendar_slot_options", "dependency_notes", "review_gates"],
+public/control-center/pages/ai-command/tool-dock.js:809:      template: "Draft a publishing schedule for {projectName}. Include channels, timing, dependencies, review gates, and next actions."
+public/control-center/pages/ai-command/tool-dock.js:825:      id: "approval-pack",
+public/control-center/pages/ai-command/tool-dock.js:831:      frontendOwnerPage: "governance",
+public/control-center/pages/ai-command/tool-dock.js:832:      destinations: ["chat-preview", "governance", "publishing", "workflows"],
+public/control-center/pages/ai-command/tool-dock.js:833:      sourceTypes: ["final_copy", "media_asset", "approval_notes", "claim_review", "publishing_package", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:834:      outputTypes: ["approval_pack", "risk_summary", "asset_checklist", "confirmation_list"],
+public/control-center/pages/ai-command/tool-dock.js:835:      template: "Prepare an approval package for {projectName}. Include final copy summary, risk notes, assets checklist, and required confirmations."
+public/control-center/pages/ai-command/tool-dock.js:848:      destinations: ["chat-preview", "ads-manager", "content-studio", "governance"],
+public/control-center/pages/ai-command/tool-dock.js:861:      destinations: ["chat-preview", "ads-manager", "content-studio", "governance"],
+public/control-center/pages/ai-command/tool-dock.js:887:      destinations: ["chat-preview", "ads-manager", "media-studio", "insights", "workflows"],
+public/control-center/pages/ai-command/tool-dock.js:890:      template: "Create a creative testing plan for {projectName}. Include hypotheses, variants, success signals, and next actions."
+public/control-center/pages/ai-command/tool-dock.js:900:      destinations: ["chat-preview", "ads-manager", "content-studio", "governance"],
+public/control-center/pages/ai-command/tool-dock.js:929:      destinations: ["chat-preview", "insights", "campaign-studio", "workflows"],
+public/control-center/pages/ai-command/tool-dock.js:955:      destinations: ["chat-preview", "insights", "campaign-studio", "workflows"],
+public/control-center/pages/ai-command/tool-dock.js:983:      frontendOwnerPage: "governance",
+public/control-center/pages/ai-command/tool-dock.js:984:      destinations: ["chat-preview", "governance", "content-studio", "publishing"],
+public/control-center/pages/ai-command/tool-dock.js:987:      template: "Review claims for {projectName}. Flag unsupported, risky, health/performance, legal, or approval-sensitive statements."
+public/control-center/pages/ai-command/tool-dock.js:996:      frontendOwnerPage: "governance",
+public/control-center/pages/ai-command/tool-dock.js:997:      destinations: ["chat-preview", "governance", "content-studio"],
+public/control-center/pages/ai-command/tool-dock.js:1009:      frontendOwnerPage: "governance",
+public/control-center/pages/ai-command/tool-dock.js:1010:      destinations: ["chat-preview", "governance", "library", "workflows"],
+public/control-center/pages/ai-command/tool-dock.js:1022:      frontendOwnerPage: "governance",
+public/control-center/pages/ai-command/tool-dock.js:1023:      destinations: ["chat-preview", "governance", "workflows", "publishing"],
+public/control-center/pages/ai-command/tool-dock.js:1024:      sourceTypes: ["workflow_draft", "privacy_policy", "tracking_plan", "data_use_notes", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:1026:      template: "Review GDPR/privacy considerations for this content or workflow. Flag consent, tracking, data use, and disclosure risks."
+public/control-center/pages/ai-command/tool-dock.js:1029:      id: "approval-notes",
+public/control-center/pages/ai-command/tool-dock.js:1035:      frontendOwnerPage: "governance",
+public/control-center/pages/ai-command/tool-dock.js:1036:      destinations: ["chat-preview", "governance", "publishing", "workflows"],
+public/control-center/pages/ai-command/tool-dock.js:1037:      sourceTypes: ["final_copy", "claims_check", "approval_context", "asset_checklist", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:1038:      outputTypes: ["approval_notes", "risk_summary", "reviewer_requirements", "unresolved_issues"],
+public/control-center/pages/ai-command/tool-dock.js:1039:      template: "Prepare approval notes for {projectName}. Include risks, required reviewer, unresolved issues, and safe next actions."
+public/control-center/pages/ai-command/tool-dock.js:1043:  operations: [
+public/control-center/pages/ai-command/tool-dock.js:1045:      id: "task-plan",
+public/control-center/pages/ai-command/tool-dock.js:1051:      frontendOwnerPage: "workflows",
+public/control-center/pages/ai-command/tool-dock.js:1052:      destinations: ["chat-preview", "workflows", "task", "content-studio", "media-studio"],
+public/control-center/pages/ai-command/tool-dock.js:1053:      sourceTypes: ["current_chat", "ai_preview", "content_draft", "media_job", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:1054:      outputTypes: ["task_plan", "owner_map", "priority_list", "dependency_notes"],
+public/control-center/pages/ai-command/tool-dock.js:1055:      template: "Turn this into a task plan for {projectName}. Include owners, priorities, dependencies, risks, and next steps."
+public/control-center/pages/ai-command/tool-dock.js:1058:      id: "workflow",
+public/control-center/pages/ai-command/tool-dock.js:1064:      frontendOwnerPage: "workflows",
+public/control-center/pages/ai-command/tool-dock.js:1065:      destinations: ["chat-preview", "workflows", "task", "handoff"],
+public/control-center/pages/ai-command/tool-dock.js:1066:      sourceTypes: ["current_chat", "handoff_summary", "operations_snapshot", "approval_notes", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:1067:      outputTypes: ["workflow_draft", "step_sequence", "trigger_notes", "review_gates", "execution_risks"],
+public/control-center/pages/ai-command/tool-dock.js:1068:      template: "Draft a workflow for {projectName}. Include steps, triggers, inputs, outputs, owners, review gates, and execution risks."
+public/control-center/pages/ai-command/tool-dock.js:1071:      id: "handoff",
+public/control-center/pages/ai-command/tool-dock.js:1077:      frontendOwnerPage: "workflows",
+public/control-center/pages/ai-command/tool-dock.js:1078:      destinations: ["chat-preview", "handoff", "workflows", "content-studio", "media-studio", "publishing", "governance"],
+public/control-center/pages/ai-command/tool-dock.js:1079:      sourceTypes: ["current_chat", "ai_preview", "content_draft", "media_job", "publishing_package", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:1080:      outputTypes: ["handoff_summary", "destination_brief", "required_inputs", "review_notes"],
+public/control-center/pages/ai-command/tool-dock.js:1081:      template: "Prepare a handoff summary for {projectName}. Include context, destination workspace, owner, required inputs, and review notes."
+public/control-center/pages/ai-command/tool-dock.js:1090:      frontendOwnerPage: "workflows",
+public/control-center/pages/ai-command/tool-dock.js:1091:      destinations: ["chat-preview", "workflows", "campaign-studio", "publishing"],
+public/control-center/pages/ai-command/tool-dock.js:1092:      sourceTypes: ["current_chat", "project_plan", "campaign_timeline", "dependency_notes", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:1103:      frontendOwnerPage: "workflows",
+public/control-center/pages/ai-command/tool-dock.js:1104:      destinations: ["chat-preview", "workflows", "governance", "publishing"],
+public/control-center/pages/ai-command/tool-dock.js:1105:      sourceTypes: ["current_chat", "readiness_gaps", "asset_requirements", "approval_notes", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:1106:      outputTypes: ["execution_checklist", "approval_checklist", "asset_checklist", "qa_steps"],
+public/control-center/pages/ai-command/tool-dock.js:1107:      template: "Create an execution checklist for {projectName}. Include required approvals, assets, content, integrations, and QA steps."
+public/control-center/pages/ai-command/tool-dock.js:1119:      frontendOwnerPage: "operations-centers",
+public/control-center/pages/ai-command/tool-dock.js:1120:      destinations: ["chat-preview", "operations-centers", "task", "governance"],
+public/control-center/pages/ai-command/tool-dock.js:1132:      frontendOwnerPage: "operations-centers",
+public/control-center/pages/ai-command/tool-dock.js:1133:      destinations: ["chat-preview", "operations-centers", "task", "workflows"],
+public/control-center/pages/ai-command/tool-dock.js:1136:      template: "Prepare a ticket draft for {projectName}. Include issue summary, priority, owner, customer impact, and missing information."
+public/control-center/pages/ai-command/tool-dock.js:1145:      frontendOwnerPage: "operations-centers",
+public/control-center/pages/ai-command/tool-dock.js:1146:      destinations: ["chat-preview", "operations-centers", "task", "workflows"],
+public/control-center/pages/ai-command/tool-dock.js:1149:      template: "Review SLA or response risk for this customer context. Flag urgency, escalation needs, and safe next actions."
+public/control-center/pages/ai-command/tool-dock.js:1158:      frontendOwnerPage: "operations-centers",
+public/control-center/pages/ai-command/tool-dock.js:1159:      destinations: ["chat-preview", "operations-centers", "workflows", "sales-crm-draft"],
+public/control-center/pages/ai-command/tool-dock.js:1174:      frontendOwnerPage: "workflows",
+public/control-center/pages/ai-command/tool-dock.js:1175:      destinations: ["chat-preview", "workflows", "content-studio", "sales-crm-draft"],
+public/control-center/pages/ai-command/tool-dock.js:1187:      frontendOwnerPage: "workflows",
+public/control-center/pages/ai-command/tool-dock.js:1188:      destinations: ["chat-preview", "content-studio", "workflows", "sales-crm-draft"],
+public/control-center/pages/ai-command/tool-dock.js:1200:      frontendOwnerPage: "workflows",
+public/control-center/pages/ai-command/tool-dock.js:1201:      destinations: ["chat-preview", "workflows", "content-studio", "governance"],
+public/control-center/pages/ai-command/tool-dock.js:1204:      template: "Prepare objection handling for {projectName}. Include likely objections, safe answers, proof needed, and next action."
+public/control-center/pages/ai-command/tool-dock.js:1213:      frontendOwnerPage: "workflows",
+public/control-center/pages/ai-command/tool-dock.js:1214:      destinations: ["chat-preview", "workflows", "operations-centers", "sales-crm-draft"],
+public/control-center/pages/ai-command/tool-dock.js:1223:  return TOOL_DOCK_BY_SPECIALIST[specialistId] || TOOL_DOCK_BY_SPECIALIST.operations;
+public/control-center/pages/ai-command/tool-dock.js:1231:      ...TOOL_DOCK_BY_SPECIALIST.operations.slice(0, 2)
+public/control-center/pages/ai-command/tool-dock.js:1243:      ...TOOL_DOCK_BY_SPECIALIST.operations.slice(0, 2)
+public/control-center/pages/ai-command/tool-dock.js:1291:    "data-aicmd-tool-dock-owner": tool.frontendOwnerPage || tool.owner || "ai-command",
+public/control-center/pages/ai-command/tool-dock.js:1321:          Configure a review-only AI prompt with the right output, trusted source context, and destination handoff before loading it into the composer.
+public/control-center/pages/ai-command/tool-dock.js:1338:            <span class="mhos-tool-drawer-section-label">3. Destination handoff</span>
+public/control-center/pages/ai-command/tool-dock.js:1396:          <p data-aicmd-tool-drawer-summary>Choose output, trusted source, destination handoff, language, and tone.</p>
+public/control-center/pages/ai-command/tool-dock.js:1400:          Review-only setup: this drawer creates a composer-ready instruction. Destination choices only frame safe handoff context; they do not publish, send, approve, route externally, create CRM records, run workflows, or mutate backend data.
+public/control-center/pages/ai-command/tool-dock.js:1444:            data-aicmd-tool-dock-owner="${safe(tool.frontendOwnerPage || "ai-command")}"
+public/control-center/pages/ai-command/tool-dock.js:1621:    "- Do not publish, send, route, save, overwrite, create CRM records, or run workflows.",
+public/control-center/pages/ai-command/tool-dock.js:1678:  setDrawerText(drawer, "[data-aicmd-tool-drawer-action]", `${humanizeMeta(actionType)} · ${humanizeMeta(btn.getAttribute("data-aicmd-tool-dock-owner") || "ai-command")}`);
+public/control-center/pages/ai-command/tool-dock.js:1682:    `Prepare a review-only AI prompt for ${btn.getAttribute("data-aicmd-tool-dock-label") || "this tool"}. Choose output, trusted source context, destination handoff, language, and tone before loading it into the composer.`
+public/control-center/pages/ai-command/tool-dock.js:1708:  populateDrawerSelect(drawer.querySelector("[data-aicmd-tool-drawer-destination-select]"), rawDestinations, "Choose destination handoff");
+public/control-center/pages/ai-command/tool-dock.js:1727:  updateStatus?.(`${btn.getAttribute("data-aicmd-tool-dock-label") || "Quick AI tool"} setup opened. Review source and handoff requirements, then prepare the prompt.`);
+public/control-center/pages/ai-command/tool-dock.js:1781:      // Library Source Bridge workflow
