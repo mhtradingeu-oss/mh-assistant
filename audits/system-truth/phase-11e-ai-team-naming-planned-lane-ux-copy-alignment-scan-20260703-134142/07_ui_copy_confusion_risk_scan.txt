@@ -1,0 +1,346 @@
+public/control-center/pages/ai-command.js:154:		status: "AI ready"
+public/control-center/pages/ai-command.js:167:		status: "AI ready"
+public/control-center/pages/ai-command.js:180:		status: "AI ready"
+public/control-center/pages/ai-command.js:193:		status: "AI ready"
+public/control-center/pages/ai-command.js:206:		status: "AI ready"
+public/control-center/pages/ai-command.js:219:		status: "AI ready"
+public/control-center/pages/ai-command.js:232:		status: "AI ready"
+public/control-center/pages/ai-command.js:245:		status: "AI ready"
+public/control-center/pages/ai-command.js:258:		status: "AI ready"
+public/control-center/pages/ai-command.js:271:		status: "AI ready"
+public/control-center/pages/ai-command.js:284:		status: "AI ready"
+public/control-center/pages/ai-command.js:410:		label: "Admin / Governance",
+public/control-center/pages/ai-command.js:413:		summary: "Policy, approvals, roles, and audit controls stay destination-owned."
+public/control-center/pages/ai-command.js:416:		label: "Researcher",
+public/control-center/pages/ai-command.js:422:		label: "Automation Architect",
+public/control-center/pages/ai-command.js:596:		name: "Researcher",
+public/control-center/pages/ai-command.js:599:		suggestedPrompt: "Act as Researcher and identify high-confidence market opportunities for this project."
+public/control-center/pages/ai-command.js:1060:			available: false,
+public/control-center/pages/ai-command.js:1061:			reason: "AI response guidance bridge is not connected yet (API function unavailable)."
+public/control-center/pages/ai-command.js:1066:		available: true,
+public/control-center/pages/ai-command.js:1096:        if (session.teamMode === "team") return "Full AI Team";
+public/control-center/pages/ai-command.js:1139:        const latestUser = messages.slice().reverse().find((message) => asString(message.role) === "user");
+public/control-center/pages/ai-command.js:2041:function buildMissingDataNotes(aiContext, lane) {
+public/control-center/pages/ai-command.js:2048:	if (lane === "content" && asString(coverage.social_insights?.status) !== "covered") {
+public/control-center/pages/ai-command.js:2051:	if (lane === "seo" && asString(coverage.seo_search_console?.status) !== "covered") {
+public/control-center/pages/ai-command.js:2054:	if (lane === "ads" && asString(coverage.paid_ads?.status) !== "covered") {
+public/control-center/pages/ai-command.js:2065:	if (aiContext.recommendations.length) summaryParts.push(`${aiContext.recommendations.length} recommendations available.`);
+public/control-center/pages/ai-command.js:2135:			? `${formatCompactNumber(seo.summary.impressions)} impressions tracked. SEO lane is ready for prioritization.`
+public/control-center/pages/ai-command.js:2176:			paid.summary?.roas != null ? `Current ROAS: ${Number(paid.summary.roas).toFixed(2)}x.` : "ROAS not available yet."
+public/control-center/pages/ai-command.js:2202:			aiContext.missingIntegrations.length ? `Missing intelligence: ${aiContext.missingIntegrations.map((item) => item.label).join(", ")}.` : "Main intelligence lanes are structurally connected.",
+public/control-center/pages/ai-command.js:2263:			aiContext.missingIntegrations.length ? "Intelligence coverage gaps may reduce execution quality." : "Core intelligence is available for routing."
+public/control-center/pages/ai-command.js:2664:		status: asString(handoff?.status || payload.status || "available"),
+public/control-center/pages/ai-command.js:2720:		consumeProjectHandoff?.(projectName, durableHandoffId, { actor: "mh-assistant" }).catch((error) => {
+public/control-center/pages/ai-command.js:2739:	if (typeof executeProjectAiCommand !== "function") throw new Error("AI command service is unavailable.");
+public/control-center/pages/ai-command.js:2751:			actor: "mh-assistant",
+public/control-center/pages/ai-command.js:2786:		role: "user",
+public/control-center/pages/ai-command.js:2794:		id: `msg-assistant-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+public/control-center/pages/ai-command.js:2795:		role: "assistant",
+public/control-center/pages/ai-command.js:2830:    const id = asString(member.role || member.id).toLowerCase();
+public/control-center/pages/ai-command.js:2832:      AGENT_CARDS.find((agent) => agent.id === id) ||
+public/control-center/pages/ai-command.js:2833:      AGENT_CARDS.find((agent) => agent.id === "operations") ||
+public/control-center/pages/ai-command.js:2840:      name: asString(member.name || fallback.name || member.role || "AI Specialist"),
+public/control-center/pages/ai-command.js:2841:      role: asString(member.role || fallback.role || id),
+public/control-center/pages/ai-command.js:2922:				${MODE_DEFS.map((agent) => `
+public/control-center/pages/ai-command.js:2924:						class="ctrl-team-card${agent.id === session.modeId ? " is-active" : ""}"
+public/control-center/pages/ai-command.js:2926:						data-ctrl-mode="${escapeHtml(agent.id)}"
+public/control-center/pages/ai-command.js:2927:						title="${escapeHtml(agent.summary)}"
+public/control-center/pages/ai-command.js:2929:						<span class="ctrl-team-icon">${agent.icon}</span>
+public/control-center/pages/ai-command.js:2930:						<span class="ctrl-team-name">${escapeHtml(agent.label)}</span>
+public/control-center/pages/ai-command.js:2931:						${agent.id === session.modeId ? `<span class="ctrl-team-active-dot"></span>` : ""}
+public/control-center/pages/ai-command.js:3085:		if (message.role === "user") {
+public/control-center/pages/ai-command.js:3097:				<div class="ctrl-msg-agent-icon" title="${escapeHtml(mode.label)}">${mode.icon}</div>
+public/control-center/pages/ai-command.js:3099:					<div class="ctrl-msg-ai-agent">${escapeHtml(mode.label)} · ${escapeHtml(formatTime(message.createdAt))}</div>
+public/control-center/pages/ai-command.js:3145:									<span class="ctrl-recent-agent">${mode.icon}</span>
+public/control-center/pages/ai-command.js:3176:		.filter((msg) => msg.role === "assistant" && asString(msg.response?.outputType || msg.response?.output_type))
+public/control-center/pages/ai-command.js:3239:	return asArray(session.messages).slice().reverse().find((item) => item.role === "user") || null;
+public/control-center/pages/ai-command.js:3243:	return asArray(session.messages).slice().reverse().find((item) => item.role === "assistant") || null;
+public/control-center/pages/ai-command.js:3257:                        const role = asString(message.role || "");
+public/control-center/pages/ai-command.js:3258:                        const label = role === "user"
+public/control-center/pages/ai-command.js:3274:        const assistantText = asString(
+public/control-center/pages/ai-command.js:3282:                assistantText ? `Latest specialist answer: ${assistantText}` : "",
+public/control-center/pages/ai-command.js:3288:                assistantText,
+public/control-center/pages/ai-command.js:3332:        // Keep raw conversation context available internally, but do not show it as the main output.
+public/control-center/pages/ai-command.js:3334:        if (context.assistantText) {
+public/control-center/pages/ai-command.js:3335:                preview.summary = context.assistantText;
+public/control-center/pages/ai-command.js:3336:                preview.mainOutput = context.assistantText;
+public/control-center/pages/ai-command.js:3397:			reason: "A clear campaign context helps every specialist agent generate more precise outputs.",
+public/control-center/pages/ai-command.js:3437:      normalize(item?.id || item?.role || item?.key || item?.name) === requestedId
+public/control-center/pages/ai-command.js:3439:    definitions.find((item) => normalize(item?.id || item?.role || item?.key) === "strategist") ||
+public/control-center/pages/ai-command.js:3542:	return "Prepare a review-ready output for the selected specialist lane.";
+public/control-center/pages/ai-command.js:3563:	const safeBridgeStatus = bridgeStatus || { available: false };
+public/control-center/pages/ai-command.js:3565:	const activeSpecialist = session.teamMode === "team" ? "Full AI Team" : getPhase1SpecialistById(session.modeId)?.label || "Specialist";
+public/control-center/pages/ai-command.js:3578:				<span class="aicmd-v2-chat-bridge ${safeBridgeStatus.available ? "is-available" : "is-unavailable"}">
+public/control-center/pages/ai-command.js:3579:					${escapeHtml(safeBridgeStatus.available ? "Guidance connected" : "Preview guarded")}
+public/control-center/pages/ai-command.js:3634:	const safeBridgeStatus = bridgeStatus || { available: false };
+public/control-center/pages/ai-command.js:3635:	const plannedSpecialists = AI_ROOM_PLANNED_SPECIALISTS.map((item) => `
+public/control-center/pages/ai-command.js:3636:		<div class="aicmd-room-member aicmd-room-member-planned" aria-disabled="true">
+public/control-center/pages/ai-command.js:3640:				<span class="aicmd-room-member-role">${escapeHtml(item.status)} - destination-owned authority</span>
+public/control-center/pages/ai-command.js:3663:			<div class="aicmd-v2-team-toggle aicmd-room-mode-switch" role="group" aria-label="AI team mode">
+public/control-center/pages/ai-command.js:3674:					const roleId = getAiRoomRoleId(spec.id);
+public/control-center/pages/ai-command.js:3678:					const roleLine = `${isActive ? "Active now" : (spec.status || "AI ready")} - ${spec.position || spec.label || "Specialist"}`;
+public/control-center/pages/ai-command.js:3684:							data-role="${escapeHtml(roleId)}"
+public/control-center/pages/ai-command.js:3690:								<span class="aicmd-room-member-role">${escapeHtml(roleLine)}</span>
+public/control-center/pages/ai-command.js:3698:			<div class="aicmd-room-planned-specialists" aria-label="Additional specialists planned">
+public/control-center/pages/ai-command.js:3699:				<span class="aicmd-room-planned-title">Planned lanes, not active specialists</span>
+public/control-center/pages/ai-command.js:3700:				${plannedSpecialists}
+public/control-center/pages/ai-command.js:3708:		const lanes = ["Strategy", "Content", "Media", "Customer Ops", "Sales / CRM", "Compliance", "Publishing", "Operations"];
+public/control-center/pages/ai-command.js:3714:						<h2 class="aicmd-v2-profile-title">Full AI Team</h2>
+public/control-center/pages/ai-command.js:3719:					${lanes.map((lane) => `<span class="aicmd-v2-strength-chip">${escapeHtml(lane)}</span>`).join("")}
+public/control-center/pages/ai-command.js:3748:                ? { label: "Full AI Team" }
+public/control-center/pages/ai-command.js:3755:        const roleId = getAiRoomRoleId(session.modeId);
+public/control-center/pages/ai-command.js:3756:        if (roleId === "content_writer") return `${label} is drafting your content...`;
+public/control-center/pages/ai-command.js:3757:        if (roleId === "media_director" || roleId === "video_lead") return `${label} is preparing creative direction...`;
+public/control-center/pages/ai-command.js:3758:        if (roleId === "operations" || roleId === "customer_ops") return `${label} is preparing your task handoff...`;
+public/control-center/pages/ai-command.js:3759:        if (roleId === "compliance") return `${label} is checking safety and compliance...`;
+public/control-center/pages/ai-command.js:3760:        if (roleId === "seo") return `${label} is reviewing insights and signals...`;
+public/control-center/pages/ai-command.js:3761:        if (roleId === "publisher") return `${label} is preparing publishing guidance...`;
+public/control-center/pages/ai-command.js:3768:	const safeBridgeStatus = bridgeStatus || { available: false };
+public/control-center/pages/ai-command.js:3770:	const title = isTeam ? "Full AI Team" : spec.label;
+public/control-center/pages/ai-command.js:3771:	const roleLine = isTeam
+public/control-center/pages/ai-command.js:3778:		<div class="aicmd-room-conversation-head" data-role="${escapeHtml(isTeam ? "team" : getAiRoomRoleId(spec.id))}">
+public/control-center/pages/ai-command.js:3783:				<p>${escapeHtml(roleLine)}</p>
+public/control-center/pages/ai-command.js:3787:				<span class="aicmd-room-status-dot${safeBridgeStatus.available ? " is-live" : ""}"></span>
+public/control-center/pages/ai-command.js:3788:				<strong>${escapeHtml(safeBridgeStatus.available ? "Available" : "Preview-safe")}</strong>
+public/control-center/pages/ai-command.js:3839:		{ id: "chat", label: "Chat", hint: bridgeStatus.available ? "Connected" : "Guarded" },
+public/control-center/pages/ai-command.js:3847:		<div class="aicmd-v2-tabs" role="tablist" aria-label="AI workspace tabs">
+public/control-center/pages/ai-command.js:3853:					role="tab"
+public/control-center/pages/ai-command.js:3867:	const roleId = session.teamMode === "team" ? "team" : getAiRoomRoleId(session.modeId);
+public/control-center/pages/ai-command.js:3870:		<section class="aicmd-v2-tools aicmd-room-tools" data-role="${escapeHtml(roleId)}">
+public/control-center/pages/ai-command.js:3952:        const safeBridgeStatus = bridgeStatus || { available: false };
+public/control-center/pages/ai-command.js:3956:                ? { id: "team", label: "Full AI Team", summary: "Multi-specialist review", position: "AI Team" }
+public/control-center/pages/ai-command.js:3970:        const bridgeLabel = safeBridgeStatus.available ? "Chat connected" : "Preview guarded";
+public/control-center/pages/ai-command.js:3985:                                                ? "Team lane"
+public/control-center/pages/ai-command.js:3986:                                                : "AI ready";
+public/control-center/pages/ai-command.js:3988:                                <div class="aicmd-chatfirst-team-card${active ? " is-active" : ""}${teamActive ? " is-team-active" : ""}" data-role="${escapeHtml(getAiRoomRoleId(spec.id))}">
+public/control-center/pages/ai-command.js:4014:                                <span class="aicmd-chatfirst-pill ${safeBridgeStatus.available ? "is-available" : "is-planned"}">${escapeHtml(bridgeLabel)}</span>
+public/control-center/pages/ai-command.js:4026:                        <div class="aicmd-chatfirst-specialist-grid ${AI_UX_SIMPLE_MODE ? 'aicmd-simple-hide-team' : ''}" aria-label="Live AI team lanes">
+public/control-center/pages/ai-command.js:4036:                ? "Full AI Team"
+public/control-center/pages/ai-command.js:4062:        const safeBridgeStatus = bridgeStatus || { available: false };
+public/control-center/pages/ai-command.js:4064:        const spec = isTeam ? { label: "Full AI Team" } : getPhase1SpecialistById(session.modeId);
+public/control-center/pages/ai-command.js:4081:                                <span>${safeBridgeStatus.available ? "Connected" : "Preview guarded"}</span>
+public/control-center/pages/ai-command.js:4090:	const safeBridgeStatus = bridgeStatus || { available: false };
+public/control-center/pages/ai-command.js:4092:		? "Full AI Team"
+public/control-center/pages/ai-command.js:4094:	const bridgeLabel = safeBridgeStatus.available ? "Chat connected" : "Preview guarded";
+public/control-center/pages/ai-command.js:4104:				<span class="aicmd-chatfirst-status ${safeBridgeStatus.available ? "is-available" : "is-unavailable"}">${escapeHtml(bridgeLabel)}</span>
+public/control-center/pages/ai-command.js:4133:	const safeBridgeStatus = bridgeStatus || { available: false };
+public/control-center/pages/ai-command.js:4142:				<div class="aicmd-chatfirst-mode-toggle" role="group" aria-label="AI team mode">
+public/control-center/pages/ai-command.js:4149:				<span class="aicmd-chatfirst-pill ${safeBridgeStatus.available ? "is-available" : "is-planned"}">${escapeHtml(safeBridgeStatus.available ? "Connected" : "Guarded")}</span>
+public/control-center/pages/ai-command.js:4166:				<strong>${escapeHtml(isTeam ? "Full AI Team" : activeSpec?.label || "Specialist")}</strong>
+public/control-center/pages/ai-command.js:4168:			<div class="aicmd-chatfirst-specialist-menu" role="list">
+public/control-center/pages/ai-command.js:4176:							data-role="${escapeHtml(getAiRoomRoleId(spec.id))}"
+public/control-center/pages/ai-command.js:4182:								<small>${escapeHtml(spec.position || spec.summary || "AI ready specialist")}</small>
+public/control-center/pages/ai-command.js:4187:				<div class="aicmd-chatfirst-planned-list" aria-label="Planned specialists">
+public/control-center/pages/ai-command.js:4189:						<div class="aicmd-chatfirst-specialist-option is-planned" aria-disabled="true">
+public/control-center/pages/ai-command.js:4204:        const safeBridgeStatus = bridgeStatus || { available: false, reason: "" };
+public/control-center/pages/ai-command.js:4211:                const role = asString(message.role || "");
+public/control-center/pages/ai-command.js:4213:                if (role === "user") return isTeam ? message.teamMode === "team" || messageRoleId === "team" : messageRoleId === selectedRoleId;
+public/control-center/pages/ai-command.js:4214:                if (role === "assistant") return isTeam ? messageRoleId === "team" : messageRoleId === selectedRoleId;
+public/control-center/pages/ai-command.js:4224:                                role: "user",
+public/control-center/pages/ai-command.js:4231:                                role: "assistant",
+public/control-center/pages/ai-command.js:4247:                if (asString(message.role || "") !== "assistant") return "";
+public/control-center/pages/ai-command.js:4275:                const role = asString(message.role || "");
+public/control-center/pages/ai-command.js:4276:                const isUser = role === "user";
+public/control-center/pages/ai-command.js:4282:                        <div class="aicmd-chatfirst-message ${isUser ? "is-user" : "is-assistant"}">
+public/control-center/pages/ai-command.js:4299:                                <div class="aicmd-chatfirst-loading" role="status">
+public/control-center/pages/ai-command.js:4338:                { id: "write", label: "Write", summary: "Prepare documents, copy, agreements, or presentation drafts.", enabled: false },
+public/control-center/pages/ai-command.js:4339:                { id: "offer", label: "Offer", summary: "Shape a product offer from pricing, market, and audience context.", enabled: false },
+public/control-center/pages/ai-command.js:4340:                { id: "lead", label: "Lead", summary: "Prepare lead discovery and outreach workflow drafts.", enabled: false },
+public/control-center/pages/ai-command.js:4341:                { id: "media", label: "Media", summary: "Create a media brief, storyboard, and production direction.", enabled: false },
+public/control-center/pages/ai-command.js:4342:                { id: "publish", label: "Publish", summary: "Prepare publishing checklist and handoff readiness.", enabled: false }
+public/control-center/pages/ai-command.js:4357:                                                class="aicmd-smart-action${action.enabled ? "" : " is-planned"}"
+public/control-center/pages/ai-command.js:4360:                                                ${action.enabled ? "" : "disabled"}
+public/control-center/pages/ai-command.js:4459:                        <section class="aicmd-smart-wizard aicmd-smart-wizard-premium" role="dialog" aria-modal="true" aria-label="Campaign Builder">
+public/control-center/pages/ai-command.js:4669:                                        <strong>Full AI Team</strong>
+public/control-center/pages/ai-command.js:4674:                        <div class="aicmd-final-team-menu-grid" role="list" aria-label="AI specialists">
+public/control-center/pages/ai-command.js:4682:                                                        data-role="${escapeHtml(getAiRoomRoleId(spec.id))}"
+public/control-center/pages/ai-command.js:4687:                                                                <small>${escapeHtml(spec.position || spec.summary || "AI ready specialist")}</small>
+public/control-center/pages/ai-command.js:4705:        const specLabel = isTeam ? "Full AI Team" : spec.label;
+public/control-center/pages/ai-command.js:4706:        const roleId = isTeam ? "team" : getAiRoomRoleId(spec.id);
+public/control-center/pages/ai-command.js:4724:                <div class="aicmd-chatfirst-composer aicmd-final-composer" data-role="${escapeHtml(roleId)}">
+public/control-center/pages/ai-command.js:4747:                                        <button id="aicmdV2AskBtn" class="aicmd-chatfirst-send aicmd-final-send" type="button" ${isGenerating ? "disabled" : ""} title="Ask AI Team">
+public/control-center/pages/ai-command.js:4810:		<nav class="aicmd-chatfirst-tabs" role="tablist" aria-label="AI Command secondary tabs">
+public/control-center/pages/ai-command.js:4816:					role="tab"
+public/control-center/pages/ai-command.js:4843:	const safeBridgeStatus = bridgeStatus || { available: false };
+public/control-center/pages/ai-command.js:4851:					<p>Choose an active specialist or keep Full Team review. Planned lanes are visible but not active runtime specialists.</p>
+public/control-center/pages/ai-command.js:4853:				<span class="aicmd-chatfirst-pill ${safeBridgeStatus.available ? "is-available" : "is-planned"}">${escapeHtml(safeBridgeStatus.available ? "Chat ready" : "Preview guarded")}</span>
+public/control-center/pages/ai-command.js:4855:			<div class="aicmd-chatfirst-mode-toggle" role="group" aria-label="AI team mode">
+public/control-center/pages/ai-command.js:4867:							data-role="${escapeHtml(getAiRoomRoleId(spec.id))}"
+public/control-center/pages/ai-command.js:4878:			<div class="aicmd-chatfirst-planned-grid" aria-label="Planned specialists">
+public/control-center/pages/ai-command.js:4880:					<div class="aicmd-chatfirst-team-card is-planned" aria-disabled="true">
+public/control-center/pages/ai-command.js:4896:	const roleId = session.teamMode === "team" ? "team" : getAiRoomRoleId(session.modeId);
+public/control-center/pages/ai-command.js:4899:		<div class="aicmd-chatfirst-tools-tab" data-role="${escapeHtml(roleId)}">
+public/control-center/pages/ai-command.js:4958:				<div class="aicmd-chatfirst-output-tabs" role="tablist" aria-label="Output workspace tabs">
+public/control-center/pages/ai-command.js:4964:							role="tab"
+public/control-center/pages/ai-command.js:5018:	const safeBridgeStatus = bridgeStatus || { available: false };
+public/control-center/pages/ai-command.js:5029:				<span class="aicmd-chatfirst-pill">${escapeHtml(safeBridgeStatus.available ? "Chat connected" : "Preview guarded")}</span>
+public/control-center/pages/ai-command.js:5052:		{ label: "Read preview", value: "AI ready", className: "is-available" },
+public/control-center/pages/ai-command.js:5053:		{ label: "Voice input", value: "Coming", className: "is-planned" },
+public/control-center/pages/ai-command.js:5054:		{ label: "Team chat", value: bridgeStatus.available ? "AI ready" : "Coming", className: bridgeStatus.available ? "is-available" : "is-planned" },
+public/control-center/pages/ai-command.js:5055:		{ label: "Media gen", value: "Coming", className: "is-planned" },
+public/control-center/pages/ai-command.js:5056:		{ label: "GPU video", value: "Coming", className: "is-planned" },
+public/control-center/pages/ai-command.js:5057:		{ label: "Image prompt generation", value: providerConfigured ? "Provider may be ready" : "Provider dependent", className: providerConfigured ? "is-available" : "is-planned" }
+public/control-center/pages/ai-command.js:5075:	const connectedTools = bridgeStatus.available ? "Guidance bridge" : "Preview tools";
+public/control-center/pages/ai-command.js:5092:        const safeBridgeStatus = bridgeStatus || { available: false, reason: "" };
+public/control-center/pages/ai-command.js:5101:                const role = asString(message.role || "");
+public/control-center/pages/ai-command.js:5103:                if (role === "user") {
+public/control-center/pages/ai-command.js:5106:                if (role === "assistant") {
+public/control-center/pages/ai-command.js:5124:        const bridgeLabel = safeBridgeStatus.available ? "Connected" : "Preview-safe";
+public/control-center/pages/ai-command.js:5125:        const safetyLine = safeBridgeStatus.available
+public/control-center/pages/ai-command.js:5153:                const role = asString(message.role || "");
+public/control-center/pages/ai-command.js:5154:                const isUser = role === "user";
+public/control-center/pages/ai-command.js:5159:                        <div class="aicmd-room-chat-message ${isUser ? "is-user" : "is-assistant"}">
+public/control-center/pages/ai-command.js:5160:                                <div class="aicmd-room-chat-bubble ${isUser ? "is-user" : "is-assistant"}">
+public/control-center/pages/ai-command.js:5174:                                role: "user",
+public/control-center/pages/ai-command.js:5181:                                role: "assistant",
+public/control-center/pages/ai-command.js:5197:                                        <p class="aicmd-v2-chat-subtitle">Focused chat with the active AI. Other specialist replies remain available in shared room history.</p>
+public/control-center/pages/ai-command.js:5199:                                <span class="aicmd-v2-chat-bridge ${safeBridgeStatus.available ? "is-available" : "is-unavailable"}">${escapeHtml(bridgeLabel)}</span>
+public/control-center/pages/ai-command.js:5235:                                                <div class="aicmd-v2-chat-loading aicmd-room-typing-indicator" role="status" aria-live="polite">
+public/control-center/pages/ai-command.js:5257:                                <article class="aicmd-v2-chat-card aicmd-room-response-card is-selected-output" data-role="${escapeHtml(selectedRoleId)}">
+public/control-center/pages/ai-command.js:5285:                                                                <article class="aicmd-room-shared-history-item" data-role="${escapeHtml(producerId)}">
+public/control-center/pages/ai-command.js:5335:	const sessionState = session.responseLoading ? "Generating" : (session.outputPreview ? "AI Team preview ready" : (asString(session.draftMessage).trim() ? "Drafting" : "AI ready"));
+public/control-center/pages/ai-command.js:5349:		{ label: "Operations", value: state.data.operations ? "Snapshot available" : "No operations snapshot", present: Boolean(state.data.operations) }
+public/control-center/pages/ai-command.js:5550:			session.workspaceTab = bridgeStatus.available ? "chat" : "preview";
+public/control-center/pages/ai-command.js:5554:			session.workspaceTab = bridgeStatus.available ? "chat" : "preview";
+public/control-center/pages/ai-command.js:5658:                        session.workspaceTab = bridgeStatus.available ? "chat" : "preview";
+public/control-center/pages/ai-command.js:5785:                                updateStatus("Tool Drawer is not available on this surface yet.");
+public/control-center/pages/ai-command.js:5797:                                updateStatus("Source menu is not available yet.");
+public/control-center/pages/ai-command.js:5804:                        updateStatus(open ? `${reason} opened. Choose temporary file context, trusted Library source, planned product context, or current project context.` : `${reason} closed.`);
+public/control-center/pages/ai-command.js:5844:                                        updateStatus("Direct product/SKU source selection is planned. Use a trusted Library source or paste product details for now.");
+public/control-center/pages/ai-command.js:5845:                                        showMessage?.("Product/SKU selector is planned. Current safe options: Library source, uploaded filename context, project context, or manual product details.");
+public/control-center/pages/ai-command.js:5898:                                updateStatus("AI Team selector is not available yet.");
+public/control-center/pages/ai-command.js:5936:                                        updateStatus("AI Team context is not available yet.");
+public/control-center/pages/ai-command.js:5968:                                updateStatus("This Smart Action is planned. Campaign Builder is available first.");
+public/control-center/pages/ai-command.js:6206:                                        backendFallbackReason: asString(error?.message || "Backend preview unavailable")
+public/control-center/pages/ai-command.js:6253:                                updateStatus(preview.backendPreview ? "Backend AI Team preview prepared. Review before any handoff or approval." : "Local campaign preview prepared because backend preview is unavailable.");
+public/control-center/pages/ai-command.js:6399:			        if (sendBtn && !sendBtn.disabled) {
+public/control-center/pages/ai-command.js:6431:					updateStatus("Voice dictation is ready, but browser speech recognition is not available in this environment yet.");
+public/control-center/pages/ai-command.js:6521:		                if (!bridgeStatus.available) {
+public/control-center/pages/ai-command.js:6536:		                        role: "user",
+public/control-center/pages/ai-command.js:6584:		                                actor: "mh-assistant"
+public/control-center/pages/ai-command.js:6600:		                        const assistantChatMessage = {
+public/control-center/pages/ai-command.js:6601:		                                id: `chat-assistant-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+public/control-center/pages/ai-command.js:6602:		                                role: "assistant",
+public/control-center/pages/ai-command.js:6621:		                        session.messages.push(assistantChatMessage);
+public/control-center/pages/ai-command.js:6638:		                                generatedAt: assistantChatMessage.createdAt,
+public/control-center/pages/ai-command.js:6814:					updateStatus("Smart tool drawer is unavailable. Refresh AI Command and try again.");
+public/control-center/pages/ai-command.js:6867:						updateStatus("Clipboard is not available in this browser context.");
+public/control-center/pages/ai-command.js:6953:					status: "available",
+public/control-center/pages/ai-command.js:7001:						updateStatus("Clipboard is not available in this browser context.");
+public/control-center/pages/ai-command.js:7034:					updateStatus("No destination route is available for this preview.");
+public/control-center/pages/ai-command.js:7042:					status: "available",
+public/control-center/pages/ai-command.js:7149:                        return "AI ready";
+public/control-center/pages/ai-command.js:7274:    return experienceMap[state] || "AI ready";
+public/control-center/pages/ai-command.js:7284:    if (last.role === "user") return "understanding";
+public/control-center/pages/ai-command.js:7285:    if (last.role === "assistant") return "responding";
+public/control-center/pages/ai-command.js:7426:        personality: "assistant-adaptive"
+public/control-center/pages/home.js:117:  if (!Number.isFinite(stamp)) return "Not available";
+public/control-center/pages/home.js:161:  if (/planned\/partial|planned|not ready|partial/i.test(text)) {
+public/control-center/pages/home.js:224:  return aiTeamCards.find((card) => card.status === "Active role") || aiTeamCards[0] || null;
+public/control-center/pages/home.js:252:  const roles = projectedMembers.length
+public/control-center/pages/home.js:254:        id: asString(member.role || member.id).toLowerCase(),
+public/control-center/pages/home.js:257:          member.role ||
+public/control-center/pages/home.js:259:          "AI Specialist"
+public/control-center/pages/home.js:279:  return roles.map((role) => {
+public/control-center/pages/home.js:280:    const roleNotifications = notifications.filter((item) => asString(item?.owner_role).toLowerCase() === role.id);
+public/control-center/pages/home.js:281:    const roleTasks = tasks.filter((item) => asString(item?.owner_role).toLowerCase() === role.id);
+public/control-center/pages/home.js:282:    const roleApprovals = approvals.filter((item) => asString(item?.reviewer_role).toLowerCase() === role.id);
+public/control-center/pages/home.js:284:    const latest = roleNotifications[0] || roleTasks[0] || roleApprovals[0] || null;
+public/control-center/pages/home.js:289:      ...role,
+public/control-center/pages/home.js:292:        role.id === projectedActiveRole
+public/control-center/pages/home.js:293:          ? "Active role"
+public/control-center/pages/home.js:296:        ? asString(latest.title || latest.summary || latest.action || role.fallback)
+public/control-center/pages/home.js:297:        : role.fallback
+public/control-center/pages/home.js:725:      nextSchedule: nextScheduled ? formatRelativeDate(nextScheduled.scheduled_for || nextScheduled.updated_at) : "Not available",
+public/control-center/pages/home.js:726:      lastExecution: latestExecution ? formatRelativeDate(latestExecution.executed_at || latestExecution.updated_at) : "Not available"
+public/control-center/pages/home.js:954:                <p class="mhos-os-panel-copy">No detailed blockers are currently available for this project.</p>
+public/control-center/pages/home.js:1000:                <p class="mhos-os-kicker">Recommended AI Specialist</p>
+public/control-center/pages/home.js:1009:                <button class="quick-action-btn mhos-motion-soft" type="button" data-role-id="${escapeHtml(recommendedSpecialist.id)}">
+public/control-center/pages/home.js:1080:    const handleAiRoleClick = (roleId, roleName) => {
+public/control-center/pages/home.js:1082:      const rolePrompts = {
+public/control-center/pages/home.js:1094:      const prompt = rolePrompts[roleId] || `Act as the ${roleName} specialist for ${projectLabel}. Review the current project context and recommend the next best actions. Do not execute anything; prepare guidance only.`;
+public/control-center/pages/home.js:1096:      showMessage?.(`${roleName} context prepared in AI Command.`);
+public/control-center/pages/home.js:1156:    const aiRoleCards = document.querySelectorAll(".home-ai-team-card, .mhos-specialist, .mhos-workflow-step[data-role-id]");
+public/control-center/pages/home.js:1158:      const roleId = card.getAttribute("data-role-id");
+public/control-center/pages/home.js:1159:      const roleName = card.querySelector("strong")?.textContent || "AI Specialist";
+public/control-center/pages/home.js:1160:      card.onclick = () => handleAiRoleClick(roleId, roleName);
+public/control-center/pages/home/render-sections.js:75:            ${renderBadge(item.tone || "neutral", item.when || "Not available", escapeHtml)}
+public/control-center/pages/home/render-sections.js:87:    return `<p class="home-empty-note">AI team status is not available yet. AI Command can still prepare guidance for the next action.</p>`;
+public/control-center/pages/home/render-sections.js:92:      ${safeCards.map((agent) => `
+public/control-center/pages/home/render-sections.js:93:          <button class="home-ai-team-card" type="button" data-role-id="${escapeHtml(agent.id || "")}" title="Prepare ${escapeHtml(agent.name)} guidance in AI Command">
+public/control-center/pages/home/render-sections.js:95:            <strong>${escapeHtml(agent.name)}</strong>
+public/control-center/pages/home/render-sections.js:96:            ${renderBadge(agent.tone || "neutral", agent.status || "Idle", escapeHtml)}
+public/control-center/pages/home/render-sections.js:98:          <p>${escapeHtml(agent.summary || agent.fallback || "Ready to support the project.")}</p>
+public/control-center/pages/settings.js:61:  "Admin",
+public/control-center/pages/settings.js:116:    label: "Admin",
+public/control-center/pages/settings.js:199:        options: ["Admin", "Brand owner", "Operations lead", "Compliance Reviewer"]
+public/control-center/pages/settings.js:397:    description: "Define who can operate the system, who can approve output, who runs each service lane, and who can change the machine itself.",
+public/control-center/pages/settings.js:398:    backendLabel: "Permissions are modeled now and ready for future role persistence",
+public/control-center/pages/settings.js:401:        path: "team.roles",
+public/control-center/pages/settings.js:410:        options: ["Strategy", "Writing", "Design", "Video", "Publishing", "Ads", "Analytics", "Compliance", "Administration"]
+public/control-center/pages/settings.js:417:        options: ["Strategists, writers, and designers", "All active operators", "Admins only", "Project owner only"]
+public/control-center/pages/settings.js:424:        options: ["Publishers and admins", "Compliance-reviewed publishers", "Admins only", "Project owner only"]
+public/control-center/pages/settings.js:431:        options: ["Compliance reviewers and admins", "Brand owner", "Admins only", "Project owner only"]
+public/control-center/pages/settings.js:437:        options: ["Admins only", "Admins and operators", "Operations lead", "Project owner only"]
+public/control-center/pages/settings.js:444:        options: ["Admins only", "Project owner only", "Brand owner and admins", "Operations lead"]
+public/control-center/pages/settings.js:636:    description: "Keep approval ownership, publishing permissions, and team-role authority together so governance stays understandable.",
+public/control-center/pages/settings.js:730:    roles: Array.isArray(normalized.team?.roles)
+public/control-center/pages/settings.js:731:      ? normalized.team.roles
+public/control-center/pages/settings.js:732:      : asArray(team.members).map((member) => titleCase(member.role)).filter(Boolean)
+public/control-center/pages/settings.js:740:    active_role: "admin",
+public/control-center/pages/settings.js:746:      owner_role: "admin"
+public/control-center/pages/settings.js:786:      overrides: "Admin"
+public/control-center/pages/settings.js:905:      emergencyOwner: "Admin",
+public/control-center/pages/settings.js:946:      roles: ["Strategist", "Writer", "Designer", "Publisher", "Analyst", "Compliance Reviewer", "Admin", "Brand owner"],
+public/control-center/pages/settings.js:947:      serviceCoverage: ["Strategy", "Writing", "Design", "Publishing", "Analytics", "Compliance", "Administration"],
+public/control-center/pages/settings.js:951:      integrationAccess: "Admins only",
+public/control-center/pages/settings.js:952:      defaultsAccess: "Admins only",
+public/control-center/pages/settings.js:953:      roleMatrix: {
+public/control-center/pages/settings.js:1011:          authority: "Admin control",
+public/control-center/pages/settings.js:1387:    <div class="settings-role-matrix">
+public/control-center/pages/settings.js:1388:      <div class="settings-role-matrix-head">
+public/control-center/pages/settings.js:1389:        <h4>Team services / role matrix</h4>
+public/control-center/pages/settings.js:1390:        <p>Set explicit operating authority for each service lane without leaving the Settings control center.</p>
+public/control-center/pages/settings.js:1392:      <div class="settings-role-grid">
+public/control-center/pages/settings.js:1393:        ${TEAM_ROLE_MATRIX.map((role) => {
+public/control-center/pages/settings.js:1394:          const config = asObject(getPathValue(session.form, `team.roleMatrix.${role.id}`));
+public/control-center/pages/settings.js:1397:            <div class="settings-role-card">
+public/control-center/pages/settings.js:1398:              <div class="settings-role-card-head">
+public/control-center/pages/settings.js:1400:                  <strong>${escapeHtml(role.label)}</strong>
+public/control-center/pages/settings.js:1401:                  <span>${escapeHtml(role.service)}</span>
+public/control-center/pages/settings.js:1404:              <p class="settings-role-description">${escapeHtml(role.description)}</p>
+public/control-center/pages/settings.js:1405:              <div class="settings-role-card-grid">
+public/control-center/pages/settings.js:1407:                  <label class="settings-field-label" for="team-role-${role.id}-authority">Authority</label>
+public/control-center/pages/settings.js:1409:                    id="team-role-${role.id}-authority"
+public/control-center/pages/settings.js:1411:                    data-setting-path="team.roleMatrix.${escapeHtml(role.id)}.authority"
+public/control-center/pages/settings.js:1420:                        "Admin control"
+public/control-center/pages/settings.js:1427:                <label class="settings-toggle settings-toggle-compact" for="team-role-${role.id}-approve">
+public/control-center/pages/settings.js:1430:                    id="team-role-${role.id}-approve"
+public/control-center/pages/settings.js:1433:                    data-setting-path="team.roleMatrix.${escapeHtml(role.id)}.canApprove"
+public/control-center/pages/settings.js:1438:                <label class="settings-toggle settings-toggle-compact" for="team-role-${role.id}-publish">
+public/control-center/pages/settings.js:1441:                    id="team-role-${role.id}-publish"
+public/control-center/pages/settings.js:1444:                    data-setting-path="team.roleMatrix.${escapeHtml(role.id)}.canPublish"
+public/control-center/pages/settings.js:1449:                <label class="settings-toggle settings-toggle-compact" for="team-role-${role.id}-integrations">
+public/control-center/pages/settings.js:1452:                    id="team-role-${role.id}-integrations"
+public/control-center/pages/settings.js:1455:                    data-setting-path="team.roleMatrix.${escapeHtml(role.id)}.canManageIntegrations"
+public/control-center/pages/settings.js:1460:                <label class="settings-toggle settings-toggle-compact" for="team-role-${role.id}-defaults">
+public/control-center/pages/settings.js:1463:                    id="team-role-${role.id}-defaults"
+public/control-center/pages/settings.js:1466:                    data-setting-path="team.roleMatrix.${escapeHtml(role.id)}.canChangeDefaults"
+public/control-center/pages/settings.js:1627:    <section class="panel settings-ai-assistant std-ai-panel mhos-clean-surface">
+public/control-center/pages/settings.js:1630:          <div class="panel-kicker">Settings AI assistant</div>
+public/control-center/pages/settings.js:1817:  const aiHost = root.querySelector(".settings-ai-assistant");
+public/control-center/pages/settings.js:1853:          const confirmed = window.confirm("Confirm settings save\n\nAction: Save team and governance settings for this project.\nRisk: These settings can affect team roles, approval behavior, publishing readiness, brand safety review, and admin override behavior.\nAuthority: This is a backend-governed durable settings update.\n\nSelect Cancel to review the settings before saving.");
+public/control-center/pages/settings.js:1869:            source_role: "admin",
+public/control-center/pages/settings.js:1870:            destination_role: "compliance_reviewer",
+public/control-center/ai-team-model.js:39:    defaultPrompt: "Act as Media Director. Review available assets and define the strongest visual direction."
+public/control-center/ai-team-model.js:79:    label: "Researcher",
+public/control-center/ai-team-model.js:84:    defaultPrompt: "Act as Researcher. Find the strongest market, competitor, and audience insights for this project."
+public/control-center/ai-team-model.js:128:export function getAiTeamRole(roleId) {
+public/control-center/ai-team-model.js:129:  return AI_TEAM_ROLES.find((role) => role.id === roleId) || null;
+public/control-center/runtime/authority/route-role-fallback.js:38:  const rolesStr = allowedRoles.join(", ");
+public/control-center/runtime/authority/route-role-fallback.js:41:      `Route "${route}" requires one of: [${rolesStr}]. ` +
+public/control-center/runtime/authority/route-role-fallback.js:42:      `Default role is "${activeRole}". Use the Role selector in the top bar to switch.`
+public/control-center/runtime/authority/route-role-fallback.js:47:    `Route "${route}" requires one of: [${rolesStr}]. ` +
+public/control-center/runtime/authority/route-role-fallback.js:48:    `Your current role is "${activeRole}". ` +
+public/control-center/runtime/authority/route-role-fallback.js:49:    `Use the Role selector in the top bar to switch roles for internal testing.`
+public/control-center/runtime/authority/authority-projection.js:85:    model.active_role ||

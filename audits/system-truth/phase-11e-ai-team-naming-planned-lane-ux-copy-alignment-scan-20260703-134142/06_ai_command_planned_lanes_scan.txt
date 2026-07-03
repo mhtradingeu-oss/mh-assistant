@@ -1,0 +1,149 @@
+### planned specialists definitions
+408:const AI_ROOM_PLANNED_SPECIALISTS = [
+410:		label: "Admin / Governance",
+416:		label: "Researcher",
+422:		label: "Automation Architect",
+596:		name: "Researcher",
+599:		suggestedPrompt: "Act as Researcher and identify high-confidence market opportunities for this project."
+3635:	const plannedSpecialists = AI_ROOM_PLANNED_SPECIALISTS.map((item) => `
+3636:		<div class="aicmd-room-member aicmd-room-member-planned" aria-disabled="true">
+3698:			<div class="aicmd-room-planned-specialists" aria-label="Additional specialists planned">
+3699:				<span class="aicmd-room-planned-title">Planned lanes, not active specialists</span>
+3700:				${plannedSpecialists}
+4014:                                <span class="aicmd-chatfirst-pill ${safeBridgeStatus.available ? "is-available" : "is-planned"}">${escapeHtml(bridgeLabel)}</span>
+4149:				<span class="aicmd-chatfirst-pill ${safeBridgeStatus.available ? "is-available" : "is-planned"}">${escapeHtml(safeBridgeStatus.available ? "Connected" : "Guarded")}</span>
+4187:				<div class="aicmd-chatfirst-planned-list" aria-label="Planned specialists">
+4188:					${AI_ROOM_PLANNED_SPECIALISTS.map((item) => `
+4189:						<div class="aicmd-chatfirst-specialist-option is-planned" aria-disabled="true">
+4338:                { id: "write", label: "Write", summary: "Prepare documents, copy, agreements, or presentation drafts.", enabled: false },
+4339:                { id: "offer", label: "Offer", summary: "Shape a product offer from pricing, market, and audience context.", enabled: false },
+4340:                { id: "lead", label: "Lead", summary: "Prepare lead discovery and outreach workflow drafts.", enabled: false },
+4341:                { id: "media", label: "Media", summary: "Create a media brief, storyboard, and production direction.", enabled: false },
+4342:                { id: "publish", label: "Publish", summary: "Prepare publishing checklist and handoff readiness.", enabled: false }
+4357:                                                class="aicmd-smart-action${action.enabled ? "" : " is-planned"}"
+4851:					<p>Choose an active specialist or keep Full Team review. Planned lanes are visible but not active runtime specialists.</p>
+4853:				<span class="aicmd-chatfirst-pill ${safeBridgeStatus.available ? "is-available" : "is-planned"}">${escapeHtml(safeBridgeStatus.available ? "Chat ready" : "Preview guarded")}</span>
+4878:			<div class="aicmd-chatfirst-planned-grid" aria-label="Planned specialists">
+4879:				${AI_ROOM_PLANNED_SPECIALISTS.map((item) => `
+4880:					<div class="aicmd-chatfirst-team-card is-planned" aria-disabled="true">
+5053:		{ label: "Voice input", value: "Coming", className: "is-planned" },
+5054:		{ label: "Team chat", value: bridgeStatus.available ? "AI ready" : "Coming", className: bridgeStatus.available ? "is-available" : "is-planned" },
+5055:		{ label: "Media gen", value: "Coming", className: "is-planned" },
+5056:		{ label: "GPU video", value: "Coming", className: "is-planned" },
+5057:		{ label: "Image prompt generation", value: providerConfigured ? "Provider may be ready" : "Provider dependent", className: providerConfigured ? "is-available" : "is-planned" }
+5804:                        updateStatus(open ? `${reason} opened. Choose temporary file context, trusted Library source, planned product context, or current project context.` : `${reason} closed.`);
+5844:                                        updateStatus("Direct product/SKU source selection is planned. Use a trusted Library source or paste product details for now.");
+5845:                                        showMessage?.("Product/SKU selector is planned. Current safe options: Library source, uploaded filename context, project context, or manual product details.");
+5968:                                updateStatus("This Smart Action is planned. Campaign Builder is available first.");
+
+### planned lanes exact context
+};
+
+const AI_ROOM_BACKEND_ROLE_ALIASES = {
+	ads: "ads_operator",
+	media: "designer",
+	compliance_reviewer: "compliance_reviewer"
+};
+
+const AI_ROOM_PLANNED_SPECIALISTS = [
+	{
+		label: "Admin / Governance",
+		initials: "AG",
+		status: "Planned",
+		summary: "Policy, approvals, roles, and audit controls stay destination-owned."
+	},
+	{
+		label: "Researcher",
+		initials: "RS",
+		status: "Planned",
+		summary: "Market, evidence, competitor, and proof research will prepare source packs only."
+	},
+	{
+		label: "Automation Architect",
+		initials: "AA",
+		status: "Planned",
+		summary: "Workflow blueprints and trigger maps will route to Workflows before execution."
+	}
+];
+
+const PHASE35_SPECIALIST_TOOLS = {
+	strategist: [
+
+			</div>
+		</header>
+	`;
+}
+
+function renderPhase1TeamRail(session, bridgeStatus, escapeHtml) {
+	const safeBridgeStatus = bridgeStatus || { available: false };
+	const plannedSpecialists = AI_ROOM_PLANNED_SPECIALISTS.map((item) => `
+		<div class="aicmd-room-member aicmd-room-member-planned" aria-disabled="true">
+			<span class="aicmd-room-member-avatar" aria-hidden="true">${escapeHtml(item.initials)}</span>
+			<span class="aicmd-room-member-copy">
+				<span class="aicmd-v2-spec-name">${escapeHtml(item.label)}</span>
+				<span class="aicmd-room-member-role">${escapeHtml(item.status)} - destination-owned authority</span>
+				<span class="aicmd-v2-spec-summary">${escapeHtml(item.summary)}</span>
+			</span>
+			<span class="aicmd-room-member-indicator" aria-hidden="true"></span>
+		</div>
+	`).join("");
+	const teamBanner = session.teamMode === "team" ? `
+		<div class="aicmd-room-team-mode-card">
+			<strong>Full Team Review</strong>
+			<span>Strategy, writing, creative, compliance, publishing, customer, sales, and operations specialists coordinate one review-ready answer. No workflow, send, publish, approval, or CRM action is executed here.</span>
+			${renderAiRoomTeamChain(escapeHtml)}
+		</div>
+	` : "";
+
+	return `
+		<aside class="aicmd-v2-left aicmd-room-team-panel">
+			<div class="aicmd-room-panel-head">
+				<div>
+					<span class="aicmd-room-panel-kicker">AI Team</span>
+					<strong>Choose the expert</strong>
+				</div>
+				<span class="aicmd-room-online-pill">Review-ready</span>
+			</div>
+			<div class="aicmd-v2-team-toggle aicmd-room-mode-switch" role="group" aria-label="AI team mode">
+				<button class="aicmd-v2-toggle-btn${session.teamMode !== "team" ? " is-active" : ""}" type="button" data-aicmdv2-team-mode="solo">
+					Ask Specialist
+				</button>
+				<button class="aicmd-v2-toggle-btn${session.teamMode === "team" ? " is-active" : ""}" type="button" data-aicmdv2-team-mode="team">
+					Full Team
+				</button>
+			</div>
+			${teamBanner}
+			<div class="aicmd-v2-team-rail aicmd-room-member-list">
+				${SPECIALIST_DEFS.map((spec) => {
+					const roleId = getAiRoomRoleId(spec.id);
+					const isActive = spec.id === session.modeId && session.teamMode === "solo";
+					const isTeamActive = session.teamMode === "team";
+					const specialization = asString(spec.summary).replace(/\.$/, "");
+					const roleLine = `${isActive ? "Active now" : (spec.status || "AI ready")} - ${spec.position || spec.label || "Specialist"}`;
+					return `
+						<button
+							class="aicmd-v2-spec-btn aicmd-room-member${isActive ? " is-active" : ""}${isTeamActive ? " is-team-active" : ""}"
+							type="button"
+							data-aicmdv2-specialist="${escapeHtml(spec.id)}"
+							data-role="${escapeHtml(roleId)}"
+							title="${escapeHtml(spec.summary)}"
+						>
+							<span class="aicmd-room-member-avatar" aria-hidden="true">${escapeHtml(getAiRoomInitials(spec))}</span>
+							<span class="aicmd-room-member-copy">
+								<span class="aicmd-v2-spec-name">${escapeHtml(spec.label)}</span>
+								<span class="aicmd-room-member-role">${escapeHtml(roleLine)}</span>
+								<span class="aicmd-v2-spec-summary">${escapeHtml(specialization)}</span>
+							</span>
+							<span class="aicmd-room-member-indicator" aria-hidden="true"></span>
+						</button>
+					`;
+				}).join("")}
+			</div>
+			<div class="aicmd-room-planned-specialists" aria-label="Additional specialists planned">
+				<span class="aicmd-room-planned-title">Planned lanes, not active specialists</span>
+				${plannedSpecialists}
+			</div>
+		</aside>
+	`;
+}
+
