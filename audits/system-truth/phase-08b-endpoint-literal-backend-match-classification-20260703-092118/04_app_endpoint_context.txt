@@ -1,0 +1,213 @@
+}
+
+async function runAccessKeyDiagnosticProbe(inputValue = "") {
+  const diagnostics = collectAccessKeyDiagnostics();
+  const latestInputKey = getCurrentAccessKeyInputValue();
+  const explicitInputKey = String(inputValue || "").trim();
+  const inputKey = latestInputKey || explicitInputKey;
+  const key = inputKey || (diagnostics.canonicalValuePresent
+    ? String(localStorage.getItem("mh-control-write-key") || "").trim()
+    : (diagnostics.resolvedKeyPresent ? getControlWriteKey() : ""));
+
+  if (!key) {
+    return {
+      diagnostics,
+      type: "error",
+      text: formatAccessKeyDiagnostics(diagnostics, {
+        status: 0,
+        authMode: "none",
+        message: "No key available from input/runtime/localStorage"
+      })
+    };
+  }
+
+  try {
+    const response = await fetch("/media-manager/projects", {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+        "x-mh-control-key": key,
+        Authorization: `Bearer ${key}`
+      }
+    });
+
+    const text = formatAccessKeyDiagnostics(diagnostics, {
+      status: response.status,
+      authMode: "x-mh-control-key + Authorization",
+      message: response.ok ? "ok" : "not-ok"
+    });
+
+    return {
+      diagnostics,
+      type: response.ok ? "success" : (response.status === 401 || response.status === 403 ? "error" : "warn"),
+      text
+    };
+  } catch (error) {
+    return {
+      diagnostics,
+      type: "error",
+      text: formatAccessKeyDiagnostics(diagnostics, {
+        status: 0,
+        authMode: "x-mh-control-key + Authorization",
+        message: error?.message || "request failed"
+      })
+    };
+  }
+}
+
+async function refreshProjectsAfterKeyUpdate(preferredProjectName = "") {
+  const preferred = await loadProjects();
+  const state = getState();
+  const items = Array.isArray(state.data.projects) ? state.data.projects : [];
+
+  const requested = getSafeProjectName(preferredProjectName, "");
+  const requestedExists = requested && projectExistsInList(requested, items);
+  const projectToLoad = requestedExists ? requested : getSafeProjectName(preferred || DEFAULT_PROJECT_SLUG);
+
+  navigateTo("home");
+  await loadProjectData(projectToLoad);
+  showMessage(`Loaded project: ${projectToLoad}`);
+}
+
+
+
+function bindAccessKeyPanel(modal) {
+  const input = modal.querySelector("#accessKeyInput");
+  const saveBtn = modal.querySelector("#accessKeySaveBtn");
+  const testBtn = modal.querySelector("#accessKeyTestBtn");
+  const diagBtn = modal.querySelector("#accessKeyDiagBtn");
+  const clearBtn = modal.querySelector("#accessKeyClearBtn");
+  const clearReloadBtn = modal.querySelector("#accessKeyClearReloadBtn");
+  const closeBtn = modal.querySelector("#accessKeyCloseBtn");
+
+  if (saveBtn) {
+    saveBtn.addEventListener("click", async () => {
+      const val = getCurrentAccessKeyInputValue();
+      if (!val) {
+        setAccessKeyStatus("No key entered.", "error");
+        return;
+      }
+
+      try {
+        localStorage.setItem("mh-control-write-key", val);
+        localStorage.setItem(CONTROL_ACCESS_KEY_STORAGE_KEY, val);
+        const persisted = String(localStorage.getItem("mh-control-write-key") || "").trim();
+        if (persisted !== val) {
+          setAccessKeyStatus("Failed to save access key to localStorage.", "error");
+          return;
+        }
+
+        setRuntimeControlKey(val);
+      } catch (_) {
+        setAccessKeyStatus("Failed to save access key to localStorage.", "error");
+        return;
+      }
+
+      setAccessKeyStatus("Key saved to mh-control-write-key. Reloading...", "success");
+      updateAccessKeyButton();
+
+      try {
+        const retryProject = ["hairo", "ticmen"].join("");
+        navigateTo("home");
+        await loadProjectData(retryProject);
+        hideAccessKeyModal();
+      } catch (error) {
+        setAccessKeyStatus(error?.message || "Key saved, but project load failed.", "error");
+      }
+    });
+  }
+
+  if (diagBtn) {
+    diagBtn.addEventListener("click", async () => {
+      setAccessKeyStatus("Running access-key diagnostic…", "info");
+      const result = await runAccessKeyDiagnosticProbe(input?.value || "");
+      setAccessKeyStatus(result.text, result.type);
+    });
+  }
+
+  if (testBtn) {
+    testBtn.addEventListener("click", async () => {
+      setAccessKeyStatus("Testing…", "info");
+      const inputVal = (input?.value || "").trim();
+      let storedVal = "";
+      try {
+        storedVal = String(localStorage.getItem(CONTROL_ACCESS_KEY_STORAGE_KEY) || "").trim();
+        if (!storedVal) {
+          storedVal = CONTROL_ACCESS_KEY_LEGACY_STORAGE_KEYS
+            .map((key) => String(localStorage.getItem(key) || "").trim())
+            .find(Boolean) || "";
+        }
+      } catch (_) {}
+      const keyToTest = inputVal || storedVal;
+      if (!keyToTest) {
+        setAccessKeyStatus("No key to test. Enter a key or save one first.", "error");
+        return;
+      }
+      try {
+        const response = await fetch("/media-manager/projects", {
+          method: "GET",
+          headers: {
+            "Accept": "application/json",
+            "x-mh-control-key": keyToTest
+          }
+        });
+        if (response.ok) {
+          setAccessKeyStatus("Valid key — loading front page and project…", "success");
+
+          try {
+            if (inputVal) {
+              setRuntimeControlKey(inputVal);
+              try {
+                localStorage.setItem(CONTROL_ACCESS_KEY_STORAGE_KEY, inputVal);
+
+    : [];
+
+  if (!optionalFailures.length) {
+    return "";
+  }
+
+  const labels = optionalFailures.map((entry) => String(entry?.section || "optional").trim()).filter(Boolean);
+  const unique = Array.from(new Set(labels));
+
+  return `Loaded required project data. Optional sections unavailable: ${unique.join(", ")}.`;
+}
+
+async function applyRequiredProjectFallback(projectName, loadToken = "", fallbackDetails = null) {
+  recordStartupStep("loadProjectData.requiredFallback.start", {
+    token: loadToken,
+    detail: projectName
+  });
+
+  let fallback = fallbackDetails;
+
+  if (!fallback) {
+    try {
+      const projectsResult = await fetchProjects();
+      const items = Array.isArray(projectsResult?.items) ? projectsResult.items : [];
+      const projectExists = items.some((item) => {
+        const name = typeof item === "string" ? item : item?.name;
+        return String(name || "").trim() === projectName;
+      });
+
+      fallback = {
+        endpoint: "/media-manager/projects",
+        verified: true,
+        projectExists,
+        projectName,
+        warning: "Project details are still syncing."
+      };
+    } catch (fallbackError) {
+      fallback = {
+        endpoint: "/media-manager/projects",
+        verified: false,
+        projectExists: false,
+        projectName,
+        warning: "Project details are still syncing.",
+        message: String(fallbackError?.message || "Failed to verify project fallback")
+      };
+    }
+  }
+
+  const fallbackProjectName = fallback?.projectExists
+    ? getSafeProjectName(projectName || DEFAULT_PROJECT_SLUG)
+    : DEFAULT_PROJECT_SLUG;
