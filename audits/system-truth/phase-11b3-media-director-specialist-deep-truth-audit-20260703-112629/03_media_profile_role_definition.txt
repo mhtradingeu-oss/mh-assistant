@@ -1,0 +1,666 @@
+### AI Command top definitions
+import {
+        bindAiToolDock,
+        getAiToolDockTools,
+        getSelectedLibrarySource,
+        openAiToolDrawerFromMetadata,
+        openLibrarySourcePickerFromAiCommand,
+        renderAiToolDrawerShell
+} from "./ai-command/tool-dock.js";
+import { getProjectedActiveRole, getProjectedTeamMembers } from "../runtime/authority/authority-projection.js";
+
+import {
+        selectCurrentProject,
+        selectOperationsSnapshot,
+        selectProjectPayload
+} from "../state.js";
+
+import {
+        getSharedHandoff,
+        setSharedAiDraft,
+        setSharedHandoff
+} from "../shared-context.js";
+
+import {
+        getCategoryReadinessList
+} from "../asset-library.js";
+
+import {
+        executeProjectAiChat,
+        executeProjectAiGuidance,
+        generateAiCommandCampaignPreview
+} from "../api.js";
+
+//  AI TEAM DEFINITIONS
+// ============================================================
+
+const MODE_DEFS = [
+        {
+                id: "strategist",
+                label: "Strategist",
+                icon: "🎯",
+                summary: "Campaign concepts, launch plans, channel mix, and offer strategy.",
+                routeHint: "campaign-studio"
+        },
+        {
+                id: "writer",
+                label: "Content Writer",
+                icon: "✍️",
+                summary: "Captions, hooks, scripts, emails, and landing page copy.",
+                routeHint: "content-studio"
+        },
+        {
+                id: "media",
+                label: "Media Director",
+                icon: "🎨",
+                summary: "Visual direction, creative brief, format guidance, and brand consistency.",
+                routeHint: "media-studio"
+        },
+        {
+                id: "video_lead",
+                label: "Video Lead",
+                icon: "🎬",
+                summary: "Short-form video scripts, motion direction, and reel strategy.",
+                routeHint: "media-studio"
+        },
+        {
+                id: "publisher",
+                label: "Publisher",
+                icon: "📤",
+                summary: "Publishing readiness, schedule review, and handoff preparation.",
+                routeHint: "publishing"
+        },
+        {
+                id: "ads",
+                label: "Ads Optimizer",
+                icon: "📣",
+                summary: "Ad concepts, targeting angles, platform copy, and paid strategy.",
+                routeHint: "ads-manager"
+        },
+        {
+                id: "analyst",
+                label: "SEO & Insights Analyst",
+                icon: "📊",
+                summary: "SEO signals, performance data, content insights, and traffic patterns.",
+                routeHint: "insights"
+        },
+        {
+                id: "compliance_reviewer",
+                label: "Compliance Reviewer",
+                icon: "🛡️",
+                summary: "Claims review, approvals, safety language, and governance checks.",
+                routeHint: "governance"
+        },
+        {
+                id: "operations",
+                label: "Operations Lead",
+                icon: "⚙️",
+                summary: "Tasks, timelines, handoffs, approvals, and execution plans.",
+                routeHint: "workflows"
+        },
+        {
+                id: "customer_ops",
+                label: "Customer Operations Lead",
+                icon: "🎧",
+                summary: "Inbox review, reply drafts, ticket drafts, SLA risk, and escalation routing.",
+                routeHint: "operations-centers"
+        },
+        {
+                id: "sales_crm",
+                label: "Sales / CRM Lead",
+                icon: "💼",
+                summary: "Lead qualification, outreach drafts, follow-up cadence, and CRM handoff notes.",
+                routeHint: "workflows"
+        }
+];
+
+// Map legacy mode IDs from older sessions to new team IDs
+const MODE_ID_ALIASES = {
+	executive: "operations",
+	campaign: "strategist",
+	content: "writer",
+	designer: "media",
+	media_director: "media",
+	media_planner: "media",
+	seo: "analyst",
+	research: "researcher",
+	video_lead: "video_lead",
+	publisher: "publisher",
+	compliance_reviewer: "compliance_reviewer",
+	customer_operations: "customer_ops",
+	customer_ops: "customer_ops",
+	support: "customer_ops",
+	sales: "sales_crm",
+	crm: "sales_crm",
+	sales_crm: "sales_crm",
+	admin: "operations"
+};
+
+// ============================================================
+//  PHASE 1: SPECIALIST DEFINITIONS — AI TEAM COMMAND CENTER
+// ============================================================
+
+const SPECIALIST_DEFS = [
+	{
+		id: "strategist",
+		label: "Strategist",
+		position: "Executive Strategy Lead",
+		icon: "🎯",
+		summary: "Campaign concepts, launch plans, channel mix, and offer strategy.",
+		placeholder: "Ask the Strategist to plan a campaign, map launch phases, review channel priorities, or define the offer strategy…",
+		canHelp: ["Draft campaign plans", "Prioritize next actions", "Map launch sequences", "Advise on offer strategy", "Prepare channel briefs"],
+		cannotDo: ["Publish campaigns directly", "Execute workflows automatically", "Approve content", "Set live budgets"],
+		destinations: ["Campaign Studio", "Workflows", "AI Command"],
+		safetyNote: "All outputs are guidance and draft only. Execution requires explicit confirmation.",
+		status: "AI ready"
+	},
+	{
+		id: "writer",
+		label: "Content Writer",
+		position: "Messaging and Content Lead",
+		icon: "✍️",
+		summary: "Captions, hooks, scripts, emails, and landing page copy.",
+		placeholder: "Ask the Content Writer to draft captions, hooks, landing copy, or campaign messages…",
+		canHelp: ["Draft captions and hooks", "Write email copy", "Create landing page text", "Prepare publisher handoff", "Suggest message variants"],
+		cannotDo: ["Publish directly", "Approve risky claims", "Invent unsupported facts", "Run workflows automatically"],
+		destinations: ["Content Studio", "Publishing", "AI Command"],
+		safetyNote: "Drafts require review before publishing. Cannot approve or publish without confirmation.",
+		status: "AI ready"
+	},
+	{
+		id: "media",
+		label: "Media Director",
+		position: "Creative Direction Lead",
+		icon: "🎨",
+		summary: "Visual direction, creative briefs, format guidance, and brand consistency.",
+		placeholder: "Ask the Media Director to define visual direction, prepare a creative brief, or review brand consistency…",
+		canHelp: ["Write creative briefs", "Advise on visual direction", "Map format requirements", "Review brand alignment", "Prepare media handoffs"],
+		cannotDo: ["Generate images directly", "Upload assets without review", "Approve without confirmation", "Execute media jobs"],
+		destinations: ["Asset Library", "Content Studio", "AI Command"],
+		safetyNote: "Direction and briefs only. Media generation requires backend confirmation and explicit action.",
+		status: "AI ready"
+	},
+	{
+		id: "video_lead",
+		label: "Video Lead",
+		position: "Short-Form Video Lead",
+		icon: "🎬",
+		summary: "Short-form video scripts, motion direction, and reel strategy.",
+		placeholder: "Ask the Video Lead to write a reel script, map short-form strategy, or outline the next video concept…",
+		canHelp: ["Write video scripts", "Plan short-form strategy", "Define motion direction", "Map video asset requirements", "Prepare video briefs"],
+		cannotDo: ["Generate video directly", "Upload footage without review", "Approve without confirmation", "Run media jobs automatically"],
+		destinations: ["Asset Library", "Content Studio", "Media Native"],
+		safetyNote: "Scripts and direction only. Video generation requires explicit backend action and approval.",
+		status: "AI ready"
+	},
+	{
+		id: "publisher",
+		label: "Publisher",
+		position: "Publishing Readiness Lead",
+		icon: "📤",
+		summary: "Publishing readiness, schedule review, and handoff preparation.",
+		placeholder: "Ask the Publisher to review publishing readiness, check scheduling, or prepare a handoff package…",
+		canHelp: ["Review publishing readiness", "Check scheduled jobs", "Prepare handoff packages", "Map publishing dependencies", "Flag pre-publish risks"],
+		cannotDo: ["Publish without explicit approval", "Override schedules", "Bypass governance gates", "Push to live channels directly"],
+		destinations: ["Publishing", "Workflows", "AI Command"],
+		safetyNote: "Publishing always requires explicit approval. No live publishing from AI guidance alone.",
+		status: "AI ready"
+	},
+	{
+		id: "ads",
+		label: "Ads Optimizer",
+		position: "Paid Growth Lead",
+		icon: "📢",
+		summary: "Ad concepts, targeting angles, platform copy, and paid strategy.",
+		placeholder: "Ask the Ads Optimizer to draft ad copy, review targeting angles, or plan a paid campaign structure…",
+		canHelp: ["Draft ad concepts and copy", "Review targeting angles", "Plan paid campaign structure", "Suggest creative variants", "Map platform-specific strategy"],
+		cannotDo: ["Launch ads directly", "Set live budgets without review", "Approve spend", "Access ad accounts directly"],
+		destinations: ["Ads Manager", "Integrations", "Campaign Studio"],
+		safetyNote: "Ad concepts and copy only. Live ad actions require platform integration and explicit approval.",
+		status: "AI ready"
+	},
+	{
+		id: "analyst",
+		label: "SEO & Insights Analyst",
+		position: "Search and Insights Lead",
+		icon: "📊",
+		summary: "SEO signals, performance data, content insights, and traffic patterns.",
+		placeholder: "Ask the SEO & Insights Analyst to review performance, suggest SEO improvements, or identify top content patterns…",
+		canHelp: ["Review SEO signals", "Analyze content performance", "Identify traffic patterns", "Suggest keyword improvements", "Map data coverage gaps"],
+		cannotDo: ["Update SEO settings directly", "Edit live website", "Set analytics configurations", "Publish recommendations automatically"],
+		destinations: ["Insights", "Integrations", "Setup"],
+		safetyNote: "Analysis and recommendations only. No direct website or analytics changes.",
+		status: "AI ready"
+	},
+	{
+		id: "compliance_reviewer",
+		label: "Compliance Reviewer",
+		position: "Claims and Governance Lead",
+		icon: "🛡️",
+		summary: "Claims review, approval safety, publishing risk, and governance notes.",
+		placeholder: "Ask the Compliance Reviewer to check claims, approval risks, publishing safety, and governance notes…",
+		canHelp: ["Review marketing claims", "Flag approval risks", "Check publishing safety", "Prepare governance notes", "Identify compliance blockers"],
+		cannotDo: ["Grant approvals directly", "Override governance gates", "Publish on behalf of approvers", "Remove flags without review"],
+		destinations: ["Workflows", "Publishing", "Governance"],
+		safetyNote: "Compliance review is advisory. Approvals always require human confirmation before execution.",
+		status: "AI ready"
+	},
+	{
+		id: "operations",
+		label: "Operations Lead",
+		position: "Execution and Handoff Lead",
+		icon: "⚙️",
+		summary: "Tasks, timelines, handoffs, approvals, and execution plans.",
+		placeholder: "Ask the Operations Lead to turn this into tasks, workflow steps, or handoffs…",
+		canHelp: ["Create task plans", "Map execution sequences", "Prepare workflow handoffs", "Review execution health", "Identify operational blockers"],
+		cannotDo: ["Run workflows without confirmation", "Auto-approve tasks", "Override authority gates", "Execute backend operations directly"],
+		destinations: ["Workflows", "Operations Centers", "AI Command"],
+		safetyNote: "Task plans and handoffs only. Workflow execution requires explicit user confirmation.",
+		status: "AI ready"
+	},
+	{
+		id: "customer_ops",
+		label: "Customer Operations Lead",
+		position: "Customer Experience Operations Lead",
+		icon: "🎧",
+		summary: "Inbox review, reply drafts, ticket drafts, SLA risk, customer profile context, and escalation routing.",
+		placeholder: "Ask the Customer Operations Lead to summarize a customer thread, draft a safe reply, prepare a ticket draft, check SLA risk, or route an escalation for review…",
+		canHelp: ["Review inbox context", "Summarize customer threads", "Draft safe replies", "Prepare ticket drafts", "Flag SLA and escalation risk"],
+		cannotDo: ["Send customer replies", "Create live tickets", "Change SLA policy", "Escalate without confirmation"],
+		destinations: ["Unified Inbox", "Operations Centers", "Integrations"],
+		safetyNote: "Customer operations outputs are drafts only. Sending replies, ticket creation, and escalations require confirmation in the owning surface.",
+		status: "AI ready"
+	},
+	{
+		id: "sales_crm",
+		label: "Sales / CRM Lead",
+		position: "Revenue and CRM Operations Lead",
+		icon: "💼",
+		summary: "Lead qualification, outreach drafts, follow-up cadence, CRM profile summaries, and sales handoff notes.",
+		placeholder: "Ask the Sales / CRM Lead to qualify a lead, draft outreach, plan follow-ups, summarize CRM context, or prepare a sales handoff for review…",
+		canHelp: ["Qualify lead context", "Draft outreach", "Plan follow-up sequences", "Summarize CRM profiles", "Prepare sales handoffs"],
+		cannotDo: ["Send outreach", "Mutate CRM records", "Advance pipeline stages", "Confirm follow-ups without review"],
+		destinations: ["CRM", "Workflows", "Operations Centers"],
+		safetyNote: "Sales and CRM outputs are guidance and drafts only. CRM mutations and outreach sends require confirmation in the owning surface.",
+		status: "AI ready"
+	}
+];
+
+// Role-specific suggested prompt chips (prefill only, no auto-execute)
+const SPECIALIST_SUGGESTED_PROMPTS = {
+	strategist: [
+		{ label: "What should I do next?", sub: "Review priorities and blockers" },
+		{ label: "Draft a campaign brief", sub: "Map objective, audience, and channels" },
+		{ label: "Review launch readiness", sub: "Identify what is blocking launch" },
+		{ label: "Suggest the next campaign move", sub: "Based on current project state" }
+	],
+	writer: [
+		{ label: "Draft campaign captions", sub: "For the active campaign" },
+		{ label: "Write a hook sequence", sub: "3 hook variants to test" },
+		{ label: "Prepare a Publisher handoff", sub: "Package ready content for review" },
+		{ label: "Suggest message variants", sub: "Test different angles and tones" }
+	],
+	media: [
+		{ label: "Write a creative brief", sub: "For the next campaign visual" },
+		{ label: "Review brand consistency", sub: "Flag misaligned assets" },
+		{ label: "Map format requirements", sub: "By platform and campaign phase" },
+		{ label: "Prepare a media handoff", sub: "Package direction for the team" }
+	],
+	video_lead: [
+		{ label: "Write a reel script", sub: "For the current campaign" },
+		{ label: "Plan short-form content", sub: "Map next 4 video concepts" },
+		{ label: "Outline motion direction", sub: "Align visuals with campaign tone" },
+		{ label: "Map video asset needs", sub: "By platform and format" }
+	],
+	publisher: [
+		{ label: "Review publishing readiness", sub: "Check what is ready to publish" },
+		{ label: "Flag pre-publish risks", sub: "Identify what needs review first" },
+		{ label: "Check scheduled jobs", sub: "Review the current queue" },
+		{ label: "Prepare a handoff package", sub: "For the approver review" }
+	],
+	ads: [
+		{ label: "Draft ad concepts", sub: "For the current campaign" },
+		{ label: "Review targeting angles", sub: "Map audience and platform fit" },
+		{ label: "Suggest creative variants", sub: "Test different hooks and CTAs" },
+		{ label: "Plan paid campaign structure", sub: "Objective, audience, creative, budget" }
+	],
+	analyst: [
+		{ label: "Review SEO signals", sub: "Top queries, CTR gaps, weak pages" },
+		{ label: "Analyze content performance", sub: "What is working and what is not" },
+		{ label: "Map data coverage gaps", sub: "Which integrations are missing" },
+		{ label: "Suggest next improvements", sub: "Based on current signals" }
+	],
+	compliance_reviewer: [
+		{ label: "Check claims for approval", sub: "Review all marketing claims" },
+		{ label: "Flag publishing risks", sub: "Identify blockers before release" },
+		{ label: "Prepare governance notes", sub: "Document compliance status" },
+		{ label: "Review approval requirements", sub: "What needs sign-off" }
+	],
+	operations: [
+		{ label: "Turn this into tasks", sub: "Break down into action items" },
+		{ label: "Draft a workflow handoff", sub: "Prepare for the next owner" },
+		{ label: "Review execution health", sub: "Check blockers and failed jobs" },
+		{ label: "Map the next execution steps", sub: "Sequence and prioritize" }
+	],
+	customer_ops: [
+		{ label: "Summarize customer thread", sub: "Capture issue, tone, and next reply" },
+		{ label: "Draft customer reply", sub: "Safe response for review" },
+		{ label: "Check SLA risk", sub: "Flag urgency and escalation path" },
+		{ label: "Prepare escalation", sub: "Route support, sales, or operations" }
+	],
+	sales_crm: [
+		{ label: "Qualify this lead", sub: "Fit, intent, urgency, next step" },
+		{ label: "Draft outreach", sub: "Personalized message for review" },
+		{ label: "Build follow-up sequence", sub: "Multi-step sales cadence" },
+		{ label: "Prepare sales handoff", sub: "Route context to operations" }
+	]
+};
+
+// Full Team mode suggested prompts
+const TEAM_SUGGESTED_PROMPTS = [
+	{ label: "What should the executive AI team focus on?", sub: "Strategy, execution, and risk review" },
+	{ label: "Map the next launch wave", sub: "Strategist to Publisher to Operations" },
+	{ label: "Prepare a full handoff sequence", sub: "Strategy, creative, compliance, publishing, ops" },
+	{ label: "Review customer and sales impact", sub: "Customer Ops, Sales / CRM, Operations" }
+];
+
+const PHASE35_WORKSPACE_TABS = ["chat", "preview", "tools", "context", "history"];
+
+const AI_ROOM_FLOW_STEPS = [
+	{ id: "ask", title: "Ask", description: "Choose a specialist or the full team." },
+	{ id: "draft", title: "Prepare", description: "Create guidance, copy, task, or handoff context." },
+	{ id: "review", title: "Review", description: "Check safety, scope, language, and source." },
+	{ id: "route", title: "Handoff", description: "Open the owning workspace with draft context." },
+	{ id: "execute", title: "Confirm", description: "Execution stays gated in backend-owned surfaces." },
+	{ id: "monitor", title: "Monitor", description: "Track readiness, integrations, and recent activity." }
+];
+
+const AI_ROOM_OUTPUT_TABS = [
+	{ id: "draft", label: "Draft", helper: "Latest draft or guidance preview" },
+	{ id: "task", label: "Task", helper: "Task-shaped output" },
+	{ id: "workflow", label: "Workflow Preview", helper: "Operating sequence" },
+	{ id: "handoff", label: "Handoff Preview", helper: "Destination package" },
+	{ id: "export", label: "Export", helper: "File-ready package" }
+];
+
+const AI_ROOM_TEAM_CHAIN = ["Strategist", "Writer", "Media / Video", "Compliance", "Publisher", "Operations"];
+const AI_ROOM_BUSINESS_BRANCH = ["Customer Ops", "Sales / CRM", "Operations"];
+
+const AI_ROOM_ROLE_INITIALS = {
+	strategist: "ST",
+	writer: "CW",
+	media: "MD",
+	video_lead: "VL",
+	publisher: "PB",
+	ads: "AO",
+	analyst: "SI",
+	compliance_reviewer: "CR",
+	operations: "OL",
+	customer_ops: "CO",
+	sales_crm: "SC"
+};
+
+const AI_ROOM_BACKEND_ROLE_ALIASES = {
+	ads: "ads_operator",
+	media: "designer",
+	compliance_reviewer: "compliance_reviewer"
+};
+
+const AI_ROOM_PLANNED_SPECIALISTS = [
+	{
+		label: "Admin / Governance",
+		initials: "AG",
+		status: "Planned",
+		summary: "Policy, approvals, roles, and audit controls stay destination-owned."
+	},
+	{
+		label: "Researcher",
+		initials: "RS",
+		status: "Planned",
+		summary: "Market, evidence, competitor, and proof research will prepare source packs only."
+	},
+	{
+		label: "Automation Architect",
+		initials: "AA",
+		status: "Planned",
+		summary: "Workflow blueprints and trigger maps will route to Workflows before execution."
+	}
+];
+
+const PHASE35_SPECIALIST_TOOLS = {
+	strategist: [
+		{ id: "campaign-angle-generator", label: "Campaign Angle Generator", action: "preview", intent: "guidance", template: "Generate campaign angles for {project}. Include audience tension, promise, channel fit, and strongest first test." },
+		{ id: "launch-plan", label: "Launch Plan", action: "preview", intent: "workflow", template: "Build a launch plan for {project}. Include phases, channels, owners, blockers, and next move." },
+		{ id: "funnel-mapping", label: "Funnel Mapping", action: "preview", intent: "guidance", template: "Map the funnel for {project}. Include awareness, consideration, conversion, retention, and handoff points." },
+		{ id: "prioritize-next-move", label: "Priority Sort", action: "preview", intent: "task", template: "Prioritize the next moves for {project}. Rank by impact, urgency, dependencies, and safest first action." }
+	],
+	writer: [
+		{ id: "hook-generator", label: "Hook Generator", action: "preview", intent: "guidance", template: "Write 5 German hook variants for {project}. Keep them concise, testable, and suitable for the Germany market." },
+		{ id: "caption-builder", label: "Caption Builder", action: "preview", intent: "guidance", template: "Draft German captions for {project}. Include angle, body, CTA, and platform adaptation notes." },
+		{ id: "cta-refiner", label: "CTA Refiner", action: "preview", intent: "task", template: "Refine CTA options for {project}. Provide German variants for awareness, consideration, and action stages." },
+		{ id: "publisher-package", label: "Publisher Package", action: "preview", intent: "handoff", template: "Prepare a Publisher handoff for {project}. Include German copy package, CTA, notes, and remaining checks." }
+	],
+	media: [
+		{ id: "creative-brief-builder", label: "Creative Brief Builder", action: "preview", intent: "media", template: "Prepare a creative brief for {project}. Include concept, visual rules, subject, brand constraints, and production notes." },
+		{ id: "format-mapper", label: "Format Mapper", action: "preview", intent: "guidance", template: "Map required creative formats for {project}. Include platform, aspect ratio, asset type, and usage context." },
+		{ id: "asset-checklist", label: "Asset Checklist", action: "preview", intent: "task", template: "Create an asset checklist for {project}. List must-have files, missing references, usage context, and priority." },
+		{ id: "visual-direction", label: "Visual Direction", action: "preview", intent: "guidance", template: "Review visual direction for {project}. Identify mismatches, improvements, and required references." },
+		{ id: "open-media-studio", label: "Send prompt to Media Studio", action: "route", route: "media-studio" }
+	],
+	video_lead: [
+		{ id: "write-video-hook", label: "Write video hook", action: "preview", intent: "guidance", template: "Write short-form video hooks for {project}. Include 3 opening variants and audience fit." },
+		{ id: "draft-script", label: "Draft script", action: "preview", intent: "guidance", template: "Draft a short-form video script for {project}. Include hook, body, CTA, and visual cues." },
+		{ id: "build-storyboard", label: "Build storyboard", action: "preview", intent: "workflow", template: "Build storyboard beats for {project}. Sequence shots and key transitions." },
+		{ id: "prepare-voiceover", label: "Prepare voiceover", action: "preview", intent: "guidance", template: "Prepare voiceover script options for {project}. Keep clean timing and emphasis notes." },
+		{ id: "map-video-asset-needs", label: "Map video asset needs", action: "preview", intent: "task", template: "Map video asset needs for {project}. Include format, source, and production owner." }
+	],
+	publisher: [
+		{ id: "publishing-checklist", label: "Publishing Checklist", action: "preview", intent: "handoff", template: "Build a publishing checklist for {project}. Include German copy, assets, claims checks, and channel readiness." },
+		{ id: "final-packaging", label: "Final Packaging", action: "preview", intent: "handoff", template: "Prepare a final publishing package for {project}. Include copy, CTA, asset notes, approvals, and destination channel." },
+		{ id: "channel-formatting", label: "Channel Formatting", action: "preview", intent: "guidance", template: "Format the next output for {project} by channel. Include German copy, limits, CTA, and scheduling notes." },
+		{ id: "schedule-draft", label: "Schedule Draft", action: "preview", intent: "workflow", template: "Prepare a publishing schedule draft for {project}. Include channel cadence, dependencies, and review gates." },
+		{ id: "open-publishing", label: "Open Publishing", action: "route", route: "publishing" }
+	],
+	ads: [
+		{ id: "ad-angle-generator", label: "Ad Angle Generator", action: "preview", intent: "guidance", template: "Draft ad angles for {project}. Include audience problem, value promise, German hook direction, and platform fit." },
+		{ id: "copy-variants", label: "Copy Variants", action: "preview", intent: "guidance", template: "Prepare German ad copy variants for {project}. Include hooks, primary text, CTA, and creative notes." },
+		{ id: "test-ideas", label: "Test Ideas", action: "preview", intent: "task", template: "Suggest paid test ideas for {project}. Provide hypotheses, segments, creative variables, and measurement notes." },
+		{ id: "budget-notes", label: "Budget Notes", action: "preview", intent: "guidance", template: "Review budget notes for {project}. Summarize constraints and safe test allocation guidance." },
+		{ id: "open-ads-manager", label: "Open Ads Manager", action: "route", route: "ads-manager" }
+	],
+	analyst: [
+		{ id: "keyword-intent", label: "Keyword Intent", action: "preview", intent: "guidance", template: "Suggest keyword intent opportunities for {project}. Include Germany-market intent, content mapping, and priority." },
+		{ id: "meta-direction", label: "Meta Direction", action: "preview", intent: "guidance", template: "Prepare meta direction for {project}. Include page angle, title direction, description direction, and CTA intent." },
+		{ id: "opportunity-summary", label: "Opportunity Summary", action: "preview", intent: "task", template: "Summarize SEO and insight opportunities for {project}. Focus on conversion, traffic quality, and content fit." },
+		{ id: "analysis-plan", label: "Analysis Plan", action: "preview", intent: "workflow", template: "Draft an analysis plan for {project}. Define questions, datasets, cadence, and owners." },
+		{ id: "open-insights", label: "Open Insights", action: "route", route: "insights" }
+	],
+	compliance_reviewer: [
+		{ id: "claims-check", label: "Claims Check", action: "preview", intent: "guidance", template: "Review marketing claims for {project}. Flag unsupported, high-risk, or evidence-dependent wording." },
+		{ id: "approval-flags", label: "Approval Flags", action: "preview", intent: "task", template: "Check approval risks for {project}. List risk, impact, mitigation, and required owner." },
+		{ id: "safety-checklist", label: "Safety Checklist", action: "preview", intent: "handoff", template: "Prepare a safety checklist for {project}. Include policy checks, evidence required, and approval notes." },
+		{ id: "publish-readiness", label: "Publish Readiness", action: "preview", intent: "handoff", template: "Review publish readiness for {project}. Confirm what needs human approval before release." },
+		{ id: "open-governance", label: "Open Governance", action: "route", route: "governance" }
+	],
+	operations: [
+		{ id: "timeline-draft", label: "Timeline Draft", action: "preview", intent: "workflow", template: "Draft an execution timeline for {project}. Include milestones, owners, dependencies, and review gates." },
+		{ id: "handoff-routing", label: "Handoff Routing", action: "preview", intent: "handoff", template: "Prepare handoff routing for {project}. Include source, destination, decision gates, and required confirmations." },
+		{ id: "checklist", label: "Checklist", action: "preview", intent: "task", template: "Draft an operational checklist for {project}. Include owners, dependencies, priority, and first action." },
+		{ id: "blocker-review", label: "Blocker Review", action: "preview", intent: "guidance", template: "Review operational blockers for {project}. Prioritize by risk and impact." },
+		{ id: "open-workflows", label: "Open Workflows / Operations", action: "route", route: "workflows" }
+	],
+	customer_ops: [
+		{ id: "review-unified-inbox", label: "Review Unified Inbox", action: "preview", intent: "guidance", template: "Review the Unified Inbox readiness for {project}. Summarize visible customer-operation signals, open gaps, and safe next review steps. Do not claim inbox actions happened." },
+		{ id: "summarize-customer-thread", label: "Summarize Customer Thread", action: "preview", intent: "guidance", template: "Summarize this customer thread for {project}. Include customer issue, sentiment, reply goal, missing details, and safe next step." },
+		{ id: "draft-customer-reply", label: "Draft Customer Reply", action: "preview", intent: "guidance", template: "Draft a customer reply for {project}. Keep it helpful, calm, review-ready, and do not claim any operational action has been completed." },
+		{ id: "create-ticket-draft", label: "Create Ticket Draft", action: "preview", intent: "task", template: "Create a ticket draft for {project}. Include issue, priority, owner suggestion, evidence needed, and next safe action." },
+		{ id: "check-sla-risk", label: "Check SLA Risk", action: "preview", intent: "guidance", template: "Check SLA risk for {project}. Flag urgency, risk level, missing runtime data, and escalation recommendation for review." },
+		{ id: "prepare-escalation", label: "Prepare Escalation", action: "preview", intent: "handoff", template: "Prepare an escalation draft for {project}. Include reason, customer impact, owner, confirmation needed, and destination team." },
+		{ id: "customer-profile-snapshot", label: "Customer Profile Snapshot", action: "preview", intent: "guidance", template: "Prepare a customer profile snapshot for {project}. Include known context, purchase/support signals, missing fields, and safe follow-up questions." },
+		{ id: "route-support-sales-ops", label: "Route to Support / Sales / Operations", action: "preview", intent: "handoff", template: "Prepare routing guidance for {project}. Decide whether the customer item belongs with Support, Sales, or Operations, and explain the review gate." }
+	],
+	sales_crm: [
+		{ id: "lead-qualification", label: "Lead Qualification", action: "preview", intent: "guidance", template: "Qualify the lead for {project}. Include fit, intent, urgency, missing CRM fields, and the safest next step." },
+		{ id: "outreach-draft", label: "Outreach Draft", action: "preview", intent: "guidance", template: "Draft outreach for {project}. Include subject or opener, personalized message, CTA, and review notes before sending." },
+		{ id: "follow-up-sequence", label: "Follow-up Sequence", action: "preview", intent: "workflow", template: "Build a follow-up sequence for {project}. Include timing, message angle, CTA, stop condition, and confirmation requirements." },
+		{ id: "crm-profile-summary", label: "CRM Profile Summary", action: "preview", intent: "guidance", template: "Summarize the CRM profile context for {project}. Include fit, history, open questions, and next sales action without mutating CRM data." },
+		{ id: "pipeline-next-step", label: "Pipeline Next Step", action: "preview", intent: "task", template: "Recommend the pipeline next step for {project}. Include stage, rationale, owner, risk, and required confirmation." },
+		{ id: "dealer-salon-outreach", label: "Dealer / Salon Outreach", action: "preview", intent: "guidance", template: "Draft dealer or salon outreach for {project}. Include positioning, proof needs, offer angle, CTA, and follow-up note." },
+		{ id: "influencer-lead-plan", label: "Influencer Lead Plan", action: "preview", intent: "workflow", template: "Prepare an influencer lead plan for {project}. Include target profile, outreach angle, qualification criteria, and handoff path." },
+		{ id: "sales-handoff-draft", label: "Sales Handoff", action: "preview", intent: "handoff", template: "Prepare a sales handoff draft for {project}. Include lead context, recommended next action, owner, and confirmation needed." }
+	]
+};
+
+// 4 quick-action prompts shown in the composer
+const QUICK_ACTIONS = [
+	{ icon: "🚀", label: "Launch Campaign", sub: "Build a campaign plan", template: "Build a launch campaign for {project}. Map the channels, offer, phases, and required assets." },
+	{ icon: "✍️", label: "Generate Content", sub: "Write hooks, captions & scripts", template: "Generate content for {project}. Create hooks, caption ideas, and a reel script for the next product push." },
+	{ icon: "📊", label: "Analyze Performance", sub: "Review what's working", template: "Analyze current performance for {project}. What content, campaigns, and channels are working best right now?" },
+	{ icon: "🔧", label: "Fix Readiness", sub: "Close critical gaps", template: "What are the critical readiness gaps for {project} and what exactly needs to be done to fix them?" }
+];
+
+const AI_COMMAND_LOCAL_DRAFTS_KEY = "mh-ai-command-local-drafts-v1";
+const AI_COMMAND_LOCAL_OUTPUTS_KEY = "mh-ai-command-local-outputs-v1";
+
+const COMMAND_TYPES = [
+	{ id: "strategy", label: "Strategy" },
+	{ id: "content", label: "Content" },
+	{ id: "campaign", label: "Campaign" },
+	{ id: "integration", label: "Integration" },
+	{ id: "asset", label: "Asset" },
+	{ id: "research", label: "Research" },
+	{ id: "report", label: "Report" },
+	{ id: "automation", label: "Automation" }
+];
+
+const TARGET_TYPES = [
+	{ id: "current-project", label: "Current project" },
+	{ id: "selected-context", label: "Selected page/context" },
+	{ id: "campaign", label: "Campaign" },
+	{ id: "product", label: "Product" }
+];
+
+const IMPACT_CHIP_LABELS = [
+	"Launch readiness",
+	"Content",
+	"Campaign",
+	"Integrations",
+	"Assets",
+	"Automation"
+];
+
+const AGENT_CARDS = [
+	{
+		id: "strategist",
+		name: "Strategist",
+		purpose: "Build high-leverage decisions for launch sequencing and channel focus.",
+		bestUse: "When priorities compete and you need the best next move.",
+		suggestedPrompt: "Act as Strategist and propose the next campaign move based on current readiness and integrations."
+	},
+	{
+		id: "writer",
+		name: "Writer",
+		purpose: "Transform strategy into high-converting copy and scripts.",
+		bestUse: "When campaigns need content batches fast.",
+		suggestedPrompt: "Act as Writer and generate content angles for the current project and active campaign."
+	},
+	{
+		id: "designer",
+		name: "Designer",
+		purpose: "Define creative direction, visual hierarchy, and asset guidance.",
+		bestUse: "When briefs need clear visual standards.",
+		suggestedPrompt: "Act as Designer and propose creative directions tied to current campaign goals."
+	},
+	{
+		id: "media",
+		name: "Media Planner",
+		purpose: "Align media formats with channels, cadence, and readiness.",
+		bestUse: "When planning image/video requirements across channels.",
+		suggestedPrompt: "Act as Media Planner and map media needs by platform for this launch cycle."
+	},
+	{
+		id: "ads",
+		name: "Ads Specialist",
+		purpose: "Optimize paid opportunities, creative testing, and budget decisions.",
+		bestUse: "When preparing or fixing paid performance.",
+		suggestedPrompt: "Act as Ads Specialist and propose paid experiments based on current readiness and data coverage."
+	},
+	{
+		id: "analyst",
+		name: "Analyst",
+		purpose: "Turn multi-channel signals into prioritized actions.",
+		bestUse: "When you need evidence-backed recommendations.",
+		suggestedPrompt: "Act as Analyst and summarize what is working, what is weak, and what to do next."
+	},
+	{
+		id: "researcher",
+		name: "Researcher",
+		purpose: "Strengthen decisions with market, competitor, and audience insight.",
+		bestUse: "When strategy needs stronger external evidence.",
+		suggestedPrompt: "Act as Researcher and identify high-confidence market opportunities for this project."
+	},
+	{
+		id: "operations",
+		name: "Operations Assistant",
+		purpose: "Translate intent into executable workflows and handoffs.",
+		bestUse: "When actions span multiple pages and teams.",
+		suggestedPrompt: "Act as Operations Assistant and convert priorities into a practical execution sequence."
+	}
+];
+
+const aiSessions = new Map();
+const AI_COMMAND_CHAT_SESSIONS_KEY = "mh_ai_command_chat_sessions_v1";
+const aiInboundHandoffObjectIds = typeof WeakMap !== "undefined" ? new WeakMap() : null;
+let aiInboundHandoffCounter = 0;
+let lastRenderContext = null;
+let aiCommandBridgeRegistered = false;
+let aiAutoModeUnsubscribe = null;
+const aiAutomationState = {
+	progress: "",
+	result: ""
+};
+
+function buildAutoPlanFromCommand(commandText, session) {
+	function getSpecialistById(id) {
+		const resolvedId = MODE_ID_ALIASES[id] || id;
+		return SPECIALIST_DEFS.find((s) => s.id === resolvedId) ||
+			SPECIALIST_DEFS.find((s) => s.id === "operations") ||
+			SPECIALIST_DEFS[0];
+	}
+
+	function detectSpecialistFromBridgePrompt(prompt) {
+		const text = asString(prompt);
+		if (/act as the strategist/i.test(text)) return "strategist";
+		if (/act as the content writer/i.test(text)) return "writer";
+		if (/act as the media director/i.test(text)) return "media";
+		if (/act as the video lead/i.test(text)) return "video_lead";
+		if (/act as the publisher/i.test(text)) return "publisher";
+		if (/act as the ads optimizer|act as the ads operator/i.test(text)) return "ads";
+		if (/act as the seo|act as the insights analyst/i.test(text)) return "analyst";
+		if (/act as the compliance reviewer/i.test(text)) return "compliance_reviewer";
+		if (/act as the operations lead/i.test(text)) return "operations";
+
+### Media-specific lines
+52:                id: "media",
+53:                label: "Media Director",
+55:                summary: "Visual direction, creative brief, format guidance, and brand consistency.",
+170:		id: "media",
+171:		label: "Media Director",
+172:		position: "Creative Direction Lead",
+174:		summary: "Visual direction, creative briefs, format guidance, and brand consistency.",
+175:		placeholder: "Ask the Media Director to define visual direction, prepare a creative brief, or review brand consistency…",
+176:		canHelp: ["Write creative briefs", "Advise on visual direction", "Map format requirements", "Review brand alignment", "Prepare media handoffs"],
+303:		{ label: "Write a creative brief", sub: "For the next campaign visual" },
+304:		{ label: "Review brand consistency", sub: "Flag misaligned assets" },
+305:		{ label: "Map format requirements", sub: "By platform and campaign phase" },
+306:		{ label: "Prepare a media handoff", sub: "Package direction for the team" }
+443:		{ id: "creative-brief-builder", label: "Creative Brief Builder", action: "preview", intent: "media", template: "Prepare a creative brief for {project}. Include concept, visual rules, subject, brand constraints, and production notes." },
+444:		{ id: "format-mapper", label: "Format Mapper", action: "preview", intent: "guidance", template: "Map required creative formats for {project}. Include platform, aspect ratio, asset type, and usage context." },
+445:		{ id: "asset-checklist", label: "Asset Checklist", action: "preview", intent: "task", template: "Create an asset checklist for {project}. List must-have files, missing references, usage context, and priority." },
+446:		{ id: "visual-direction", label: "Visual Direction", action: "preview", intent: "guidance", template: "Review visual direction for {project}. Identify mismatches, improvements, and required references." },
+571:		suggestedPrompt: "Act as Designer and propose creative directions tied to current campaign goals."
+574:		id: "media",
+578:		suggestedPrompt: "Act as Media Planner and map media needs by platform for this launch cycle."
+1504:			summary: "Media brief prepared with visual direction, prompt ideas, and required assets.",
+4341:                { id: "media", label: "Media", summary: "Create a media brief, storyboard, and production direction.", enabled: false },
+7203:        { id: "media", label: "Media" },
