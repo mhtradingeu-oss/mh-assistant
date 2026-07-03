@@ -2056,68 +2056,67 @@ export const settingsRoute = {
 };
 
 /**
- * ⚡ AI CONTROL CENTER CONNECTION LAYER
+ * Legacy global compatibility hooks.
+ *
+ * These globals are preserved so older console/debug integrations do not crash,
+ * but they must not call removed /api/ai-control/* or /api/governance/* routes.
+ *
+ * Canonical runtime authority now lives in project-scoped api.js helpers and the
+ * active Governance route. Backend authority remains unchanged.
  */
+function buildLegacySettingsHookResponse(scope, action, details = {}) {
+  return {
+    ok: false,
+    neutralized: true,
+    legacy: true,
+    scope,
+    action,
+    message: "Legacy settings global hook is neutralized. Use canonical project-scoped Control Center APIs instead.",
+    canonical: {
+      governance: {
+        read: "fetchProjectGovernance(projectName)",
+        policy_read: "fetchProjectGovernancePolicy(projectName)",
+        policy_update: "updateProjectGovernancePolicy(projectName, payload)"
+      },
+      ai: {
+        command: "executeProjectAiCommand(projectName, payload)",
+        chat: "executeProjectAiChat(projectName, payload)",
+        guidance: "executeProjectAiGuidance(projectName, payload)"
+      }
+    },
+    details
+  };
+}
 
 async function loadAIControlCenter() {
-
-  const res = await fetch("/api/ai-control/dashboard");
-  const data = await res.json();
-
-  console.log("🧠 AI CONTROL CENTER DATA:", data);
-
-  return data;
+  return buildLegacySettingsHookResponse("ai-control", "load");
 }
 
 async function updateAIControl(payload) {
-
-  const res = await fetch("/api/ai-control/update", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(payload)
+  return buildLegacySettingsHookResponse("ai-control", "update", {
+    payloadReceived: Boolean(payload)
   });
-
-  return res.json();
 }
 
-// Example hooks for UI
 window.__AI_CONTROL_CENTER__ = {
   load: loadAIControlCenter,
   update: updateAIControl
 };
 
-/**
- * ⚖️ GOVERNANCE UI INTEGRATION LAYER
- */
-
 async function loadGovernanceState() {
-
-  const res = await fetch("/api/governance/audit");
-  return await res.json();
+  return buildLegacySettingsHookResponse("governance", "loadAudit");
 }
 
 async function processGovernanceAction(action) {
-
-  const res = await fetch("/api/governance/process", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(action)
+  return buildLegacySettingsHookResponse("governance", "process", {
+    actionReceived: Boolean(action)
   });
-
-  return await res.json();
 }
 
 async function loadGovernanceLiveState() {
-
-  const res = await fetch("/api/governance/state");
-  return await res.json();
+  return buildLegacySettingsHookResponse("governance", "live");
 }
 
-// 🌐 GLOBAL GOVERNANCE UI HOOKS
 window.__GOVERNANCE_CENTER__ = {
   loadAudit: loadGovernanceState,
   process: processGovernanceAction,
