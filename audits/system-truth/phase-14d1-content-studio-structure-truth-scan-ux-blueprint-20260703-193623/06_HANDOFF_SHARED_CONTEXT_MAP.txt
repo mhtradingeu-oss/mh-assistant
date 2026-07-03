@@ -1,0 +1,464 @@
+### shared-context functions
+public/control-center/shared-context.js:148:    const destinationMatches = asString(item?.destination_page) === asString(destinationPage);
+public/control-center/shared-context.js:149:    const sourceMatches = !sourcePage || asString(item?.source_page) === asString(sourcePage);
+public/control-center/shared-context.js:157:export function setSharedCampaignRecord(projectName, campaign) {
+public/control-center/shared-context.js:162:export function getSharedCampaignRecord(projectName, operations) {
+public/control-center/shared-context.js:192:export function setSharedHandoff(projectName, destinationPage, handoff) {
+public/control-center/shared-context.js:197:export function getSharedHandoff(projectName, destinationPage, operations, sourcePage = "") {
+public/control-center/pages/ai-command.js:18:        getSharedHandoff,
+public/control-center/pages/ai-command.js:20:        setSharedHandoff
+public/control-center/pages/ai-command.js:2585:	return [handoff?.source_page, handoff?.destination_page, payload.prompt, payload.title]
+public/control-center/pages/ai-command.js:2595:		payload.source_page,
+public/control-center/pages/ai-command.js:2597:		handoff?.source_page,
+public/control-center/pages/ai-command.js:2599:		draftContext.source_page,
+public/control-center/pages/ai-command.js:2661:			source_page: sourcePage,
+public/control-center/pages/ai-command.js:2671:function applyDurableAiHandoff(projectName, operations, session, consumeProjectHandoff, showMessage) {
+public/control-center/pages/ai-command.js:2672:	const handoff = getSharedHandoff(projectName, "ai-command", operations);
+public/control-center/pages/ai-command.js:2720:		consumeProjectHandoff?.(projectName, durableHandoffId, { actor: "mh-assistant" }).catch((error) => {
+public/control-center/pages/ai-command.js:5479:			consumeProjectHandoff,
+public/control-center/pages/ai-command.js:5543:		applyDurableAiHandoff(sessionKey, operations, session, consumeProjectHandoff, showMessage);
+public/control-center/pages/ai-command.js:6949:				setSharedHandoff(projectName || "__default__", destination, {
+public/control-center/pages/ai-command.js:6951:					source_page: "ai-command",
+public/control-center/pages/ai-command.js:6952:					destination_page: destination,
+public/control-center/pages/ai-command.js:7040:					source_page: "ai-command",
+public/control-center/pages/ai-command.js:7041:					destination_page: destination,
+public/control-center/pages/ai-command.js:7058:				setSharedHandoff(projectName || "__default__", destination, handoffRecord);
+public/control-center/pages/campaign-studio.js:1:import { getSharedCampaignRecord, getSharedHandoff, setSharedCampaignRecord, setSharedHandoff } from "../shared-context.js";
+public/control-center/pages/campaign-studio.js:321:  const current = getSharedCampaignRecord(projectName, null);
+public/control-center/pages/campaign-studio.js:322:  setSharedCampaignRecord(projectName, {
+public/control-center/pages/campaign-studio.js:325:    source_page: "campaign-studio",
+public/control-center/pages/campaign-studio.js:380:  const handoff = getSharedHandoff(projectName, "campaign-studio", operations, "ai-command");
+public/control-center/pages/campaign-studio.js:422:  setSharedCampaignRecord(projectName, {
+public/control-center/pages/campaign-studio.js:423:    ...(getSharedCampaignRecord(projectName, operations) || {}),
+public/control-center/pages/campaign-studio.js:425:    source_page: "ai-command",
+public/control-center/pages/campaign-studio.js:467:    source_page: "campaign-studio",
+public/control-center/pages/campaign-studio.js:479:function persistCampaignRouteHandoff({ projectName, session, destinationPage, createProjectHandoff }) {
+public/control-center/pages/campaign-studio.js:484:    source_page: "campaign-studio",
+public/control-center/pages/campaign-studio.js:485:    destination_page: destinationPage,
+public/control-center/pages/campaign-studio.js:486:    source_role: CAMPAIGN_ROLE_DEFAULTS.ownerRole,
+public/control-center/pages/campaign-studio.js:487:    destination_role: destination.role,
+public/control-center/pages/campaign-studio.js:513:  setSharedHandoff(projectName, destinationPage, handoff);
+public/control-center/pages/campaign-studio.js:515:  createProjectHandoff?.(projectName, handoff).catch((error) => {
+public/control-center/pages/campaign-studio.js:539:    setSharedCampaignRecord(projectName, draft);
+public/control-center/pages/campaign-studio.js:1274:  createProjectHandoff
+public/control-center/pages/campaign-studio.js:1279:  const durableCampaign = getSharedCampaignRecord(projectName, state.data.operations);
+public/control-center/pages/campaign-studio.js:1321:          setSharedCampaignRecord(projectName, result.campaign);
+public/control-center/pages/campaign-studio.js:1350:          setSharedCampaignRecord(projectName, result.campaign);
+public/control-center/pages/campaign-studio.js:1375:      setSharedHandoff(projectName, "ai-command", {
+public/control-center/pages/campaign-studio.js:1376:        source_page: "campaign-studio",
+public/control-center/pages/campaign-studio.js:1377:        destination_page: "ai-command",
+public/control-center/pages/campaign-studio.js:1387:      createProjectHandoff?.(projectName, {
+public/control-center/pages/campaign-studio.js:1388:        source_page: "campaign-studio",
+public/control-center/pages/campaign-studio.js:1389:        destination_page: "ai-command",
+public/control-center/pages/campaign-studio.js:1390:        source_role: CAMPAIGN_ROLE_DEFAULTS.ownerRole,
+public/control-center/pages/campaign-studio.js:1391:        destination_role: CAMPAIGN_ROUTE_ROLES["ai-command"].role,
+public/control-center/pages/campaign-studio.js:1418:      const accepted = persistCampaignRouteHandoff({ projectName, session, destinationPage: "publishing", createProjectHandoff });
+public/control-center/pages/campaign-studio.js:1431:      const accepted = persistCampaignRouteHandoff({ projectName, session, destinationPage: "content-studio", createProjectHandoff });
+public/control-center/pages/campaign-studio.js:1439:      const accepted = persistCampaignRouteHandoff({ projectName, session, destinationPage: "media-studio", createProjectHandoff });
+public/control-center/pages/campaign-studio.js:1447:      const accepted = persistCampaignRouteHandoff({ projectName, session, destinationPage: "ads-manager", createProjectHandoff });
+public/control-center/pages/campaign-studio.js:1520:    createProjectHandoff
+public/control-center/pages/campaign-studio.js:1541:      createProjectHandoff
+public/control-center/pages/campaign-studio.js:2163:      createProjectHandoff,
+public/control-center/pages/content-studio-workspace.js:3:  createProjectHandoff,
+public/control-center/pages/content-studio-workspace.js:16:import { getSharedHandoff, setSharedAiDraft, setSharedHandoff } from "../shared-context.js";
+public/control-center/pages/content-studio-workspace.js:763:    sourcePage: asString(handoff?.source_page || "workflows"),
+public/control-center/pages/content-studio-workspace.js:783:    getSharedHandoff(projectName, "content-studio", operations, "workflows") ||
+public/control-center/pages/content-studio-workspace.js:784:    getSharedHandoff(projectName, "content-studio", operations, "ai-command") ||
+public/control-center/pages/content-studio-workspace.js:785:    getSharedHandoff(projectName, "content-studio", operations)
+public/control-center/pages/content-studio-workspace.js:1527:    source_page: "content-studio",
+public/control-center/pages/content-studio-workspace.js:1528:    destination_page: "media-studio",
+public/control-center/pages/content-studio-workspace.js:1529:    source_role: CONTENT_ROLE_DEFAULTS.ownerRole,
+public/control-center/pages/content-studio-workspace.js:1530:    destination_role: CONTENT_ROLE_DEFAULTS.mediaRole,
+public/control-center/pages/content-studio-workspace.js:1574:    source_page: "content-studio",
+public/control-center/pages/content-studio-workspace.js:1575:    destination_page: "publishing",
+public/control-center/pages/content-studio-workspace.js:1576:    source_role: CONTENT_ROLE_DEFAULTS.ownerRole,
+public/control-center/pages/content-studio-workspace.js:1577:    destination_role: CONTENT_ROLE_DEFAULTS.handoffRole,
+public/control-center/pages/content-studio-workspace.js:1619:    return asString(item.destination_page) === "library" && asString(asset.source_signature) === asString(signature);
+public/control-center/pages/content-studio-workspace.js:1690:    source_page: "content-studio",
+public/control-center/pages/content-studio-workspace.js:1691:    destination_page: "library",
+public/control-center/pages/content-studio-workspace.js:1692:    source_role: CONTENT_ROLE_DEFAULTS.ownerRole,
+public/control-center/pages/content-studio-workspace.js:1693:    destination_role: CONTENT_ROLE_DEFAULTS.reviewRole,
+public/control-center/pages/content-studio-workspace.js:1721:  setSharedHandoff(projectName || "__default__", "library", handoff);
+public/control-center/pages/content-studio-workspace.js:1723:    setSharedHandoff("__default__", "library", handoff);
+public/control-center/pages/content-studio-workspace.js:1728:      const result = await createProjectHandoff(projectName, handoff);
+public/control-center/pages/content-studio-workspace.js:1779:    `This will create a Content Studio handoff to ${handoff.destination_page || "the selected workspace"} for review.`
+public/control-center/pages/content-studio-workspace.js:1785:  setSharedHandoff(projectName || "__default__", handoff.destination_page, handoff);
+public/control-center/pages/content-studio-workspace.js:1787:    setSharedHandoff("__default__", handoff.destination_page, handoff);
+public/control-center/pages/content-studio-workspace.js:1792:      await createProjectHandoff(projectName, handoff);
+public/control-center/pages/content-studio-workspace.js:2105:      setSharedHandoff(projectName || "__default__", "ai-command", {
+public/control-center/pages/content-studio-workspace.js:2106:        source_page: "content-studio",
+public/control-center/pages/content-studio-workspace.js:2107:        destination_page: "ai-command",
+public/control-center/pages/content-studio-workspace.js:2325:        setSharedHandoff(projectName || "__default__", "ai-command", {
+public/control-center/pages/content-studio-workspace.js:2326:          source_page: "content-studio",
+public/control-center/pages/content-studio-workspace.js:2327:          destination_page: "ai-command",
+public/control-center/pages/customer-center.js:425:      context.setSharedHandoff?.("task-center", {
+public/control-center/pages/customer-center.js:442:      context.setSharedHandoff?.("governance", {
+public/control-center/pages/governance.js:1149:                      if (typeof getSharedHandoff === "function") {
+public/control-center/pages/governance.js:1151:                        intakeContext.publishing = getSharedHandoff(projectName, "publishing", operations)?.payload?.summary;
+public/control-center/pages/governance.js:1152:                        intakeContext.content = getSharedHandoff(projectName, "content-studio", operations)?.payload?.summary;
+public/control-center/pages/governance.js:1153:                        intakeContext.media = getSharedHandoff(projectName, "media-studio", operations)?.payload?.summary;
+public/control-center/pages/governance.js:1154:                        intakeContext.workflows = getSharedHandoff(projectName, "workflows", operations)?.payload?.summary;
+public/control-center/pages/governance.js:1155:                        intakeContext.operations = getSharedHandoff(projectName, "operations", operations)?.payload?.summary;
+public/control-center/pages/governance.js:1156:                        intakeContext.notifications = getSharedHandoff(projectName, "notifications", operations)?.payload?.summary;
+public/control-center/pages/governance.js:1157:                        intakeContext.insights = getSharedHandoff(projectName, "insights", operations)?.payload?.summary;
+public/control-center/pages/governance.js:1394:          source_page: "governance",
+public/control-center/pages/insights.js:1:import { setSharedHandoff } from "../shared-context.js";
+public/control-center/pages/insights.js:962:function bindInsightsActions({ $, navigateTo, showMessage, prompts, projectName, createProjectHandoff }) {
+public/control-center/pages/insights.js:981:        setSharedHandoff(projectName, route, {
+public/control-center/pages/insights.js:982:          source_page: "insights",
+public/control-center/pages/insights.js:983:          destination_page: route,
+public/control-center/pages/insights.js:1025:          source_page: "insights",
+public/control-center/pages/insights.js:1026:          destination_page: "ai-command",
+public/control-center/pages/insights.js:1042:        setSharedHandoff(projectName, "ai-command", handoff);
+public/control-center/pages/insights.js:1043:        createProjectHandoff?.(projectName, handoff).catch((error) => {
+public/control-center/pages/insights.js:1076:    createProjectHandoff
+public/control-center/pages/insights.js:1447:      createProjectHandoff
+public/control-center/pages/insights.js:1464:          createProjectHandoff
+public/control-center/pages/insights.js:1482:          createProjectHandoff
+public/control-center/pages/insights.js:1497:        createProjectHandoff
+public/control-center/pages/insights.js:1524:            createProjectHandoff
+public/control-center/pages/insights.js:1540:            createProjectHandoff
+public/control-center/pages/library.js:867:    .filter((item) => asString(item?.destination_page) === "library" && asString(item?.source_page) === "media-studio")
+public/control-center/pages/media-studio-workspace.js:4:  createProjectHandoff,
+public/control-center/pages/media-studio-workspace.js:26:import { getSharedHandoff, setSharedAiDraft, setSharedHandoff } from "../shared-context.js";
+public/control-center/pages/media-studio-workspace.js:698:    getSharedHandoff(projectName, "media-studio", operations, "workflows") ||
+public/control-center/pages/media-studio-workspace.js:699:    getSharedHandoff(projectName, "media-studio", operations, "ai-command") ||
+public/control-center/pages/media-studio-workspace.js:700:    getSharedHandoff(projectName, "media-studio", operations, "content-studio") ||
+public/control-center/pages/media-studio-workspace.js:701:    getSharedHandoff(projectName, "media-studio", operations)
+public/control-center/pages/media-studio-workspace.js:712:  const sourcePage = asString(handoff?.source_page || direct.source || "workflows");
+public/control-center/pages/media-studio-workspace.js:1065:    const routeMatches = asString(entry?.destination_page) === "library" && asString(entry?.source_page) === "media-studio";
+public/control-center/pages/media-studio-workspace.js:1110:    source_page: "media-studio",
+public/control-center/pages/media-studio-workspace.js:1111:    destination_page: "library",
+public/control-center/pages/media-studio-workspace.js:1112:    source_role: selectedItem?.owner_role || ownerRoleForMode(session.form.mode || session.mode || "image"),
+public/control-center/pages/media-studio-workspace.js:1113:    destination_role: MEDIA_ROLE_DEFAULTS.reviewRole,
+public/control-center/pages/media-studio-workspace.js:1133:  setSharedHandoff(projectName || "__default__", "library", handoffPayload);
+public/control-center/pages/media-studio-workspace.js:1135:    setSharedHandoff("__default__", "library", handoffPayload);
+public/control-center/pages/media-studio-workspace.js:1148:      const result = await createProjectHandoff(backendProjectName, handoffPayload);
+public/control-center/pages/media-studio-workspace.js:2726:    source_page: "media-studio",
+public/control-center/pages/media-studio-workspace.js:2727:    destination_page: "publishing",
+public/control-center/pages/media-studio-workspace.js:2728:    source_role: source.owner_role || ownerRoleForMode(source.mode),
+public/control-center/pages/media-studio-workspace.js:2729:    destination_role: MEDIA_ROLE_DEFAULTS.handoffRole,
+public/control-center/pages/media-studio-workspace.js:3381:            source_page: "media-studio",
+public/control-center/pages/media-studio-workspace.js:3422:      setSharedHandoff(projectName, "ai-command", {
+public/control-center/pages/media-studio-workspace.js:3423:        source_page: "media-studio",
+public/control-center/pages/media-studio-workspace.js:3424:        destination_page: "ai-command",
+public/control-center/pages/media-studio-workspace.js:3629:        setSharedHandoff(projectName, "ai-command", {
+public/control-center/pages/media-studio-workspace.js:3630:          source_page: "media-studio",
+public/control-center/pages/media-studio-workspace.js:3631:          destination_page: "ai-command",
+public/control-center/pages/media-studio-workspace.js:3659:    setSharedHandoff(scope, "publishing", handoff);
+public/control-center/pages/media-studio-workspace.js:3664:      await createProjectHandoff(backendProjectName, handoff);
+public/control-center/pages/media-studio-workspace.js:3760:      if (!rows.length && handoff) rows.push(["Inbound handoff", titleCase(handoff.source_page || "Workflow")]);
+public/control-center/pages/operations-centers.js:1:import { getSharedHandoff } from "../shared-context.js";
+public/control-center/pages/operations-centers.js:431:  const source = asString(incomingHandoff.source_page || incomingHandoff.sourcePage || "unknown");
+public/control-center/pages/operations-centers.js:570:              <select id="taskCenterSource" class="sidebar-select">${renderFilterOptions(filters.source_pages, session.source, escapeHtml, "All sources")}</select>
+public/control-center/pages/operations-centers.js:594:                  <td>${escapeHtml(titleCase(item.source_page || "-"))}</td>
+public/control-center/pages/operations-centers.js:627:                    { label: "Source", value: titleCase(selectedItem.source_page || "-") },
+public/control-center/pages/operations-centers.js:714:  if (session.source !== "all") items = items.filter((item) => asString(item.source_page) === session.source);
+public/control-center/pages/operations-centers.js:718:  const incomingHandoff = getSharedHandoff(projectName, "task-center", ops);
+public/control-center/pages/operations-centers.js:781:          `Source: ${asString(incomingHandoff.source_page || incomingHandoff.sourcePage || "unknown")}`,
+public/control-center/pages/publishing.js:82:import { getSharedHandoff, setSharedAiDraft, setSharedHandoff } from "../shared-context.js";
+public/control-center/pages/publishing.js:950:    sourcePage: asString(handoff?.source_page || direct.source || "workflows"),
+public/control-center/pages/publishing.js:1016:    getSharedHandoff(projectName, "publishing", operations, "workflows") ||
+public/control-center/pages/publishing.js:1017:    getSharedHandoff(projectName, "publishing", operations, "ai-command") ||
+public/control-center/pages/publishing.js:1018:    getSharedHandoff(projectName, "publishing", operations)
+public/control-center/pages/publishing.js:1926:      setSharedHandoff(projectName, "ai-command", {
+public/control-center/pages/publishing.js:1927:        source_page: "publishing",
+public/control-center/pages/publishing.js:1928:        destination_page: "ai-command",
+public/control-center/pages/research.js:1:import { setSharedHandoff } from "../shared-context.js";
+public/control-center/pages/research.js:869:  createProjectHandoff,
+public/control-center/pages/research.js:924:        setSharedHandoff(projectName, "ai-command", {
+public/control-center/pages/research.js:925:          source_page: "research",
+public/control-center/pages/research.js:926:          destination_page: "ai-command",
+public/control-center/pages/research.js:938:        createProjectHandoff?.(projectName, {
+public/control-center/pages/research.js:939:          source_page: "research",
+public/control-center/pages/research.js:940:          destination_page: "ai-command",
+public/control-center/pages/research.js:941:          source_role: RESEARCH_ROLE_DEFAULTS.ownerRole,
+public/control-center/pages/research.js:942:          destination_role: ACTION_ROUTES.ai.destinationRole,
+public/control-center/pages/research.js:994:        source_page: "research",
+public/control-center/pages/research.js:995:        destination_page: action.route,
+public/control-center/pages/research.js:996:        source_role: RESEARCH_ROLE_DEFAULTS.ownerRole,
+public/control-center/pages/research.js:997:        destination_role: action.destinationRole,
+public/control-center/pages/research.js:1010:      setSharedHandoff(projectName, action.route, handoff);
+public/control-center/pages/research.js:1011:      createProjectHandoff?.(projectName, handoff).catch((error) => {
+public/control-center/pages/research.js:1153:    createProjectHandoff
+public/control-center/pages/research.js:1171:      createProjectHandoff
+public/control-center/pages/research.js:1635:      createProjectHandoff,
+public/control-center/pages/settings.js:1866:          await context.createProjectHandoff?.(session.projectName, {
+public/control-center/pages/settings.js:1867:            source_page: "settings",
+public/control-center/pages/settings.js:1868:            destination_page: "governance",
+public/control-center/pages/settings.js:1869:            source_role: "admin",
+public/control-center/pages/settings.js:1870:            destination_role: "compliance_reviewer",
+public/control-center/pages/workflows.js:9:  getSharedHandoff,
+public/control-center/pages/workflows.js:11:  setSharedHandoff
+public/control-center/pages/workflows.js:931:function applyDurableWorkflowHandoff({ projectName, session, operations, consumeProjectHandoff, showMessage }) {
+public/control-center/pages/workflows.js:932:  const handoff = getSharedHandoff(projectName, "workflows", operations);
+public/control-center/pages/workflows.js:963:  if (typeof consumeProjectHandoff === "function") {
+public/control-center/pages/workflows.js:1068:  createProjectHandoff,
+public/control-center/pages/workflows.js:1084:    source_page: "workflows",
+public/control-center/pages/workflows.js:1085:    destination_page: "ai-command",
+public/control-center/pages/workflows.js:1096:  setSharedHandoff(projectName, "ai-command", handoff);
+public/control-center/pages/workflows.js:1098:  if (allowPersistent && typeof createProjectHandoff === "function") {
+public/control-center/pages/workflows.js:1099:    createProjectHandoff(projectName, handoff).catch((error) => {
+public/control-center/pages/workflows.js:1230:  createProjectHandoff,
+public/control-center/pages/workflows.js:1234:    createAutoModeController(getState, { getState, navigateTo, createProjectHandoff });
+public/control-center/pages/workflows.js:1310:        setSharedHandoff(projectName, "workflows", {
+public/control-center/pages/workflows.js:1311:          source_page: "workflows",
+public/control-center/pages/workflows.js:1312:          destination_page: "workflows",
+public/control-center/pages/workflows.js:1423:      setSharedHandoff(projectName, "workflows", {
+public/control-center/pages/workflows.js:1424:        source_page: "workflows",
+public/control-center/pages/workflows.js:1425:        destination_page: "workflows",
+public/control-center/pages/workflows.js:1491:        createProjectHandoff,
+public/control-center/pages/workflows.js:1524:        createProjectHandoff,
+public/control-center/pages/workflows.js:1541:        createProjectHandoff,
+public/control-center/pages/workflows.js:1560:        source_page: "workflows",
+public/control-center/pages/workflows.js:1561:        destination_page: "task-center",
+public/control-center/pages/workflows.js:1581:      setSharedHandoff(projectName, "task-center", handoff);
+public/control-center/pages/workflows.js:1605:      setSharedHandoff(projectName, "ai-command", {
+public/control-center/pages/workflows.js:1606:        source_page: "workflows",
+public/control-center/pages/workflows.js:1607:        destination_page: "ai-command",
+public/control-center/pages/workflows.js:1641:      setSharedHandoff(projectName, "ai-command", {
+public/control-center/pages/workflows.js:1642:        source_page: "workflows",
+public/control-center/pages/workflows.js:1643:        destination_page: "ai-command",
+public/control-center/pages/workflows.js:1675:        context: { getState, navigateTo, createProjectHandoff, projectName },
+public/control-center/pages/workflows.js:1704:        context: { getState, navigateTo, createProjectHandoff, projectName },
+public/control-center/pages/workflows.js:1726:      createAutoModeController(getState, { getState, navigateTo, createProjectHandoff });
+public/control-center/pages/workflows.js:1742:        context: { getState, navigateTo, createProjectHandoff, projectName }
+public/control-center/pages/workflows.js:1766:      await resumeAutoMode({ context: { getState, navigateTo, createProjectHandoff, projectName } });
+public/control-center/pages/workflows.js:1789:      await approveCurrentGate({ context: { getState, navigateTo, createProjectHandoff, projectName } });
+public/control-center/pages/workflows.js:1804:      await skipCurrentStep({ context: { getState, navigateTo, createProjectHandoff, projectName } });
+public/control-center/pages/workflows.js:2343:            source_page: "workflows",
+public/control-center/pages/workflows.js:2344:            destination_page: "task-center",
+public/control-center/pages/workflows.js:2356:          setSharedHandoff(projectName, "task-center", handoff);
+public/control-center/pages/workflows.js:2369:              source_page: "workflows",
+public/control-center/pages/workflows.js:2370:              destination_page: "task-center",
+public/control-center/pages/workflows.js:2382:            setSharedHandoff(projectName, "task-center", handoff);
+public/control-center/pages/ai-command.js:18:        getSharedHandoff,
+public/control-center/pages/ai-command.js:20:        setSharedHandoff
+public/control-center/pages/ai-command.js:2585:	return [handoff?.source_page, handoff?.destination_page, payload.prompt, payload.title]
+public/control-center/pages/ai-command.js:2595:		payload.source_page,
+public/control-center/pages/ai-command.js:2597:		handoff?.source_page,
+public/control-center/pages/ai-command.js:2599:		draftContext.source_page,
+public/control-center/pages/ai-command.js:2661:			source_page: sourcePage,
+public/control-center/pages/ai-command.js:2671:function applyDurableAiHandoff(projectName, operations, session, consumeProjectHandoff, showMessage) {
+public/control-center/pages/ai-command.js:2672:	const handoff = getSharedHandoff(projectName, "ai-command", operations);
+public/control-center/pages/ai-command.js:2720:		consumeProjectHandoff?.(projectName, durableHandoffId, { actor: "mh-assistant" }).catch((error) => {
+public/control-center/pages/ai-command.js:5479:			consumeProjectHandoff,
+public/control-center/pages/ai-command.js:5543:		applyDurableAiHandoff(sessionKey, operations, session, consumeProjectHandoff, showMessage);
+public/control-center/pages/ai-command.js:6949:				setSharedHandoff(projectName || "__default__", destination, {
+public/control-center/pages/ai-command.js:6951:					source_page: "ai-command",
+public/control-center/pages/ai-command.js:6952:					destination_page: destination,
+public/control-center/pages/ai-command.js:7040:					source_page: "ai-command",
+public/control-center/pages/ai-command.js:7041:					destination_page: destination,
+public/control-center/pages/ai-command.js:7058:				setSharedHandoff(projectName || "__default__", destination, handoffRecord);
+public/control-center/pages/campaign-studio.js:1:import { getSharedCampaignRecord, getSharedHandoff, setSharedCampaignRecord, setSharedHandoff } from "../shared-context.js";
+public/control-center/pages/campaign-studio.js:321:  const current = getSharedCampaignRecord(projectName, null);
+public/control-center/pages/campaign-studio.js:322:  setSharedCampaignRecord(projectName, {
+public/control-center/pages/campaign-studio.js:325:    source_page: "campaign-studio",
+public/control-center/pages/campaign-studio.js:380:  const handoff = getSharedHandoff(projectName, "campaign-studio", operations, "ai-command");
+public/control-center/pages/campaign-studio.js:422:  setSharedCampaignRecord(projectName, {
+public/control-center/pages/campaign-studio.js:423:    ...(getSharedCampaignRecord(projectName, operations) || {}),
+public/control-center/pages/campaign-studio.js:425:    source_page: "ai-command",
+public/control-center/pages/campaign-studio.js:467:    source_page: "campaign-studio",
+public/control-center/pages/campaign-studio.js:479:function persistCampaignRouteHandoff({ projectName, session, destinationPage, createProjectHandoff }) {
+public/control-center/pages/campaign-studio.js:484:    source_page: "campaign-studio",
+public/control-center/pages/campaign-studio.js:485:    destination_page: destinationPage,
+public/control-center/pages/campaign-studio.js:486:    source_role: CAMPAIGN_ROLE_DEFAULTS.ownerRole,
+public/control-center/pages/campaign-studio.js:487:    destination_role: destination.role,
+public/control-center/pages/campaign-studio.js:513:  setSharedHandoff(projectName, destinationPage, handoff);
+public/control-center/pages/campaign-studio.js:515:  createProjectHandoff?.(projectName, handoff).catch((error) => {
+public/control-center/pages/campaign-studio.js:539:    setSharedCampaignRecord(projectName, draft);
+public/control-center/pages/campaign-studio.js:1274:  createProjectHandoff
+public/control-center/pages/campaign-studio.js:1279:  const durableCampaign = getSharedCampaignRecord(projectName, state.data.operations);
+public/control-center/pages/campaign-studio.js:1321:          setSharedCampaignRecord(projectName, result.campaign);
+public/control-center/pages/campaign-studio.js:1350:          setSharedCampaignRecord(projectName, result.campaign);
+public/control-center/pages/campaign-studio.js:1375:      setSharedHandoff(projectName, "ai-command", {
+public/control-center/pages/campaign-studio.js:1376:        source_page: "campaign-studio",
+public/control-center/pages/campaign-studio.js:1377:        destination_page: "ai-command",
+public/control-center/pages/campaign-studio.js:1387:      createProjectHandoff?.(projectName, {
+public/control-center/pages/campaign-studio.js:1388:        source_page: "campaign-studio",
+public/control-center/pages/campaign-studio.js:1389:        destination_page: "ai-command",
+public/control-center/pages/campaign-studio.js:1390:        source_role: CAMPAIGN_ROLE_DEFAULTS.ownerRole,
+public/control-center/pages/campaign-studio.js:1391:        destination_role: CAMPAIGN_ROUTE_ROLES["ai-command"].role,
+public/control-center/pages/campaign-studio.js:1418:      const accepted = persistCampaignRouteHandoff({ projectName, session, destinationPage: "publishing", createProjectHandoff });
+public/control-center/pages/campaign-studio.js:1431:      const accepted = persistCampaignRouteHandoff({ projectName, session, destinationPage: "content-studio", createProjectHandoff });
+public/control-center/pages/campaign-studio.js:1439:      const accepted = persistCampaignRouteHandoff({ projectName, session, destinationPage: "media-studio", createProjectHandoff });
+public/control-center/pages/campaign-studio.js:1447:      const accepted = persistCampaignRouteHandoff({ projectName, session, destinationPage: "ads-manager", createProjectHandoff });
+public/control-center/pages/campaign-studio.js:1520:    createProjectHandoff
+public/control-center/pages/campaign-studio.js:1541:      createProjectHandoff
+public/control-center/pages/campaign-studio.js:2163:      createProjectHandoff,
+public/control-center/pages/content-studio-workspace.js:3:  createProjectHandoff,
+public/control-center/pages/content-studio-workspace.js:16:import { getSharedHandoff, setSharedAiDraft, setSharedHandoff } from "../shared-context.js";
+public/control-center/pages/content-studio-workspace.js:763:    sourcePage: asString(handoff?.source_page || "workflows"),
+public/control-center/pages/content-studio-workspace.js:783:    getSharedHandoff(projectName, "content-studio", operations, "workflows") ||
+public/control-center/pages/content-studio-workspace.js:784:    getSharedHandoff(projectName, "content-studio", operations, "ai-command") ||
+public/control-center/pages/content-studio-workspace.js:785:    getSharedHandoff(projectName, "content-studio", operations)
+public/control-center/pages/content-studio-workspace.js:1527:    source_page: "content-studio",
+public/control-center/pages/content-studio-workspace.js:1528:    destination_page: "media-studio",
+public/control-center/pages/content-studio-workspace.js:1529:    source_role: CONTENT_ROLE_DEFAULTS.ownerRole,
+public/control-center/pages/content-studio-workspace.js:1530:    destination_role: CONTENT_ROLE_DEFAULTS.mediaRole,
+public/control-center/pages/content-studio-workspace.js:1574:    source_page: "content-studio",
+public/control-center/pages/content-studio-workspace.js:1575:    destination_page: "publishing",
+public/control-center/pages/content-studio-workspace.js:1576:    source_role: CONTENT_ROLE_DEFAULTS.ownerRole,
+public/control-center/pages/content-studio-workspace.js:1577:    destination_role: CONTENT_ROLE_DEFAULTS.handoffRole,
+public/control-center/pages/content-studio-workspace.js:1619:    return asString(item.destination_page) === "library" && asString(asset.source_signature) === asString(signature);
+public/control-center/pages/content-studio-workspace.js:1690:    source_page: "content-studio",
+public/control-center/pages/content-studio-workspace.js:1691:    destination_page: "library",
+public/control-center/pages/content-studio-workspace.js:1692:    source_role: CONTENT_ROLE_DEFAULTS.ownerRole,
+public/control-center/pages/content-studio-workspace.js:1693:    destination_role: CONTENT_ROLE_DEFAULTS.reviewRole,
+public/control-center/pages/content-studio-workspace.js:1721:  setSharedHandoff(projectName || "__default__", "library", handoff);
+public/control-center/pages/content-studio-workspace.js:1723:    setSharedHandoff("__default__", "library", handoff);
+public/control-center/pages/content-studio-workspace.js:1728:      const result = await createProjectHandoff(projectName, handoff);
+public/control-center/pages/content-studio-workspace.js:1779:    `This will create a Content Studio handoff to ${handoff.destination_page || "the selected workspace"} for review.`
+public/control-center/pages/content-studio-workspace.js:1785:  setSharedHandoff(projectName || "__default__", handoff.destination_page, handoff);
+public/control-center/pages/content-studio-workspace.js:1787:    setSharedHandoff("__default__", handoff.destination_page, handoff);
+public/control-center/pages/content-studio-workspace.js:1792:      await createProjectHandoff(projectName, handoff);
+public/control-center/pages/content-studio-workspace.js:2105:      setSharedHandoff(projectName || "__default__", "ai-command", {
+public/control-center/pages/content-studio-workspace.js:2106:        source_page: "content-studio",
+public/control-center/pages/content-studio-workspace.js:2107:        destination_page: "ai-command",
+public/control-center/pages/content-studio-workspace.js:2325:        setSharedHandoff(projectName || "__default__", "ai-command", {
+public/control-center/pages/content-studio-workspace.js:2326:          source_page: "content-studio",
+public/control-center/pages/content-studio-workspace.js:2327:          destination_page: "ai-command",
+public/control-center/pages/customer-center.js:425:      context.setSharedHandoff?.("task-center", {
+public/control-center/pages/customer-center.js:442:      context.setSharedHandoff?.("governance", {
+public/control-center/pages/governance.js:1149:                      if (typeof getSharedHandoff === "function") {
+public/control-center/pages/governance.js:1151:                        intakeContext.publishing = getSharedHandoff(projectName, "publishing", operations)?.payload?.summary;
+public/control-center/pages/governance.js:1152:                        intakeContext.content = getSharedHandoff(projectName, "content-studio", operations)?.payload?.summary;
+public/control-center/pages/governance.js:1153:                        intakeContext.media = getSharedHandoff(projectName, "media-studio", operations)?.payload?.summary;
+public/control-center/pages/governance.js:1154:                        intakeContext.workflows = getSharedHandoff(projectName, "workflows", operations)?.payload?.summary;
+public/control-center/pages/governance.js:1155:                        intakeContext.operations = getSharedHandoff(projectName, "operations", operations)?.payload?.summary;
+public/control-center/pages/governance.js:1156:                        intakeContext.notifications = getSharedHandoff(projectName, "notifications", operations)?.payload?.summary;
+public/control-center/pages/governance.js:1157:                        intakeContext.insights = getSharedHandoff(projectName, "insights", operations)?.payload?.summary;
+public/control-center/pages/governance.js:1394:          source_page: "governance",
+public/control-center/pages/insights.js:1:import { setSharedHandoff } from "../shared-context.js";
+public/control-center/pages/insights.js:962:function bindInsightsActions({ $, navigateTo, showMessage, prompts, projectName, createProjectHandoff }) {
+public/control-center/pages/insights.js:981:        setSharedHandoff(projectName, route, {
+public/control-center/pages/insights.js:982:          source_page: "insights",
+public/control-center/pages/insights.js:983:          destination_page: route,
+public/control-center/pages/insights.js:1025:          source_page: "insights",
+public/control-center/pages/insights.js:1026:          destination_page: "ai-command",
+public/control-center/pages/insights.js:1042:        setSharedHandoff(projectName, "ai-command", handoff);
+public/control-center/pages/insights.js:1043:        createProjectHandoff?.(projectName, handoff).catch((error) => {
+public/control-center/pages/insights.js:1076:    createProjectHandoff
+public/control-center/pages/insights.js:1447:      createProjectHandoff
+public/control-center/pages/insights.js:1464:          createProjectHandoff
+public/control-center/pages/insights.js:1482:          createProjectHandoff
+public/control-center/pages/insights.js:1497:        createProjectHandoff
+public/control-center/pages/insights.js:1524:            createProjectHandoff
+public/control-center/pages/insights.js:1540:            createProjectHandoff
+public/control-center/pages/library.js:867:    .filter((item) => asString(item?.destination_page) === "library" && asString(item?.source_page) === "media-studio")
+public/control-center/pages/media-studio-workspace.js:4:  createProjectHandoff,
+public/control-center/pages/media-studio-workspace.js:26:import { getSharedHandoff, setSharedAiDraft, setSharedHandoff } from "../shared-context.js";
+public/control-center/pages/media-studio-workspace.js:698:    getSharedHandoff(projectName, "media-studio", operations, "workflows") ||
+public/control-center/pages/media-studio-workspace.js:699:    getSharedHandoff(projectName, "media-studio", operations, "ai-command") ||
+public/control-center/pages/media-studio-workspace.js:700:    getSharedHandoff(projectName, "media-studio", operations, "content-studio") ||
+public/control-center/pages/media-studio-workspace.js:701:    getSharedHandoff(projectName, "media-studio", operations)
+public/control-center/pages/media-studio-workspace.js:712:  const sourcePage = asString(handoff?.source_page || direct.source || "workflows");
+public/control-center/pages/media-studio-workspace.js:1065:    const routeMatches = asString(entry?.destination_page) === "library" && asString(entry?.source_page) === "media-studio";
+public/control-center/pages/media-studio-workspace.js:1110:    source_page: "media-studio",
+public/control-center/pages/media-studio-workspace.js:1111:    destination_page: "library",
+public/control-center/pages/media-studio-workspace.js:1112:    source_role: selectedItem?.owner_role || ownerRoleForMode(session.form.mode || session.mode || "image"),
+public/control-center/pages/media-studio-workspace.js:1113:    destination_role: MEDIA_ROLE_DEFAULTS.reviewRole,
+public/control-center/pages/media-studio-workspace.js:1133:  setSharedHandoff(projectName || "__default__", "library", handoffPayload);
+public/control-center/pages/media-studio-workspace.js:1135:    setSharedHandoff("__default__", "library", handoffPayload);
+public/control-center/pages/media-studio-workspace.js:1148:      const result = await createProjectHandoff(backendProjectName, handoffPayload);
+public/control-center/pages/media-studio-workspace.js:2726:    source_page: "media-studio",
+public/control-center/pages/media-studio-workspace.js:2727:    destination_page: "publishing",
+public/control-center/pages/media-studio-workspace.js:2728:    source_role: source.owner_role || ownerRoleForMode(source.mode),
+public/control-center/pages/media-studio-workspace.js:2729:    destination_role: MEDIA_ROLE_DEFAULTS.handoffRole,
+public/control-center/pages/media-studio-workspace.js:3381:            source_page: "media-studio",
+public/control-center/pages/media-studio-workspace.js:3422:      setSharedHandoff(projectName, "ai-command", {
+public/control-center/pages/media-studio-workspace.js:3423:        source_page: "media-studio",
+public/control-center/pages/media-studio-workspace.js:3424:        destination_page: "ai-command",
+public/control-center/pages/media-studio-workspace.js:3629:        setSharedHandoff(projectName, "ai-command", {
+public/control-center/pages/media-studio-workspace.js:3630:          source_page: "media-studio",
+public/control-center/pages/media-studio-workspace.js:3631:          destination_page: "ai-command",
+public/control-center/pages/media-studio-workspace.js:3659:    setSharedHandoff(scope, "publishing", handoff);
+public/control-center/pages/media-studio-workspace.js:3664:      await createProjectHandoff(backendProjectName, handoff);
+public/control-center/pages/media-studio-workspace.js:3760:      if (!rows.length && handoff) rows.push(["Inbound handoff", titleCase(handoff.source_page || "Workflow")]);
+public/control-center/pages/operations-centers.js:1:import { getSharedHandoff } from "../shared-context.js";
+public/control-center/pages/operations-centers.js:431:  const source = asString(incomingHandoff.source_page || incomingHandoff.sourcePage || "unknown");
+public/control-center/pages/operations-centers.js:570:              <select id="taskCenterSource" class="sidebar-select">${renderFilterOptions(filters.source_pages, session.source, escapeHtml, "All sources")}</select>
+public/control-center/pages/operations-centers.js:594:                  <td>${escapeHtml(titleCase(item.source_page || "-"))}</td>
+public/control-center/pages/operations-centers.js:627:                    { label: "Source", value: titleCase(selectedItem.source_page || "-") },
+public/control-center/pages/operations-centers.js:714:  if (session.source !== "all") items = items.filter((item) => asString(item.source_page) === session.source);
+public/control-center/pages/operations-centers.js:718:  const incomingHandoff = getSharedHandoff(projectName, "task-center", ops);
+public/control-center/pages/operations-centers.js:781:          `Source: ${asString(incomingHandoff.source_page || incomingHandoff.sourcePage || "unknown")}`,
+public/control-center/pages/publishing.js:82:import { getSharedHandoff, setSharedAiDraft, setSharedHandoff } from "../shared-context.js";
+public/control-center/pages/publishing.js:950:    sourcePage: asString(handoff?.source_page || direct.source || "workflows"),
+public/control-center/pages/publishing.js:1016:    getSharedHandoff(projectName, "publishing", operations, "workflows") ||
+public/control-center/pages/publishing.js:1017:    getSharedHandoff(projectName, "publishing", operations, "ai-command") ||
+public/control-center/pages/publishing.js:1018:    getSharedHandoff(projectName, "publishing", operations)
+public/control-center/pages/publishing.js:1926:      setSharedHandoff(projectName, "ai-command", {
+public/control-center/pages/publishing.js:1927:        source_page: "publishing",
+public/control-center/pages/publishing.js:1928:        destination_page: "ai-command",
+public/control-center/pages/publishing/publishing-payloads.js:61:    sourcePage: asString(handoff?.source_page || "workflows"),
+public/control-center/pages/research.js:1:import { setSharedHandoff } from "../shared-context.js";
+public/control-center/pages/research.js:869:  createProjectHandoff,
+public/control-center/pages/research.js:924:        setSharedHandoff(projectName, "ai-command", {
+public/control-center/pages/research.js:925:          source_page: "research",
+public/control-center/pages/research.js:926:          destination_page: "ai-command",
+public/control-center/pages/research.js:938:        createProjectHandoff?.(projectName, {
+public/control-center/pages/research.js:939:          source_page: "research",
+public/control-center/pages/research.js:940:          destination_page: "ai-command",
+public/control-center/pages/research.js:941:          source_role: RESEARCH_ROLE_DEFAULTS.ownerRole,
+public/control-center/pages/research.js:942:          destination_role: ACTION_ROUTES.ai.destinationRole,
+public/control-center/pages/research.js:994:        source_page: "research",
+public/control-center/pages/research.js:995:        destination_page: action.route,
+public/control-center/pages/research.js:996:        source_role: RESEARCH_ROLE_DEFAULTS.ownerRole,
+public/control-center/pages/research.js:997:        destination_role: action.destinationRole,
+public/control-center/pages/research.js:1010:      setSharedHandoff(projectName, action.route, handoff);
+public/control-center/pages/research.js:1011:      createProjectHandoff?.(projectName, handoff).catch((error) => {
+public/control-center/pages/research.js:1153:    createProjectHandoff
+public/control-center/pages/research.js:1171:      createProjectHandoff
+public/control-center/pages/research.js:1635:      createProjectHandoff,
+public/control-center/pages/settings.js:1866:          await context.createProjectHandoff?.(session.projectName, {
+public/control-center/pages/settings.js:1867:            source_page: "settings",
+public/control-center/pages/settings.js:1868:            destination_page: "governance",
+public/control-center/pages/settings.js:1869:            source_role: "admin",
+public/control-center/pages/settings.js:1870:            destination_role: "compliance_reviewer",
+public/control-center/pages/workflows.js:9:  getSharedHandoff,
+public/control-center/pages/workflows.js:11:  setSharedHandoff
+public/control-center/pages/workflows.js:931:function applyDurableWorkflowHandoff({ projectName, session, operations, consumeProjectHandoff, showMessage }) {
+public/control-center/pages/workflows.js:932:  const handoff = getSharedHandoff(projectName, "workflows", operations);
+public/control-center/pages/workflows.js:963:  if (typeof consumeProjectHandoff === "function") {
+public/control-center/pages/workflows.js:1068:  createProjectHandoff,
+public/control-center/pages/workflows.js:1084:    source_page: "workflows",
+public/control-center/pages/workflows.js:1085:    destination_page: "ai-command",
+public/control-center/pages/workflows.js:1096:  setSharedHandoff(projectName, "ai-command", handoff);
+public/control-center/pages/workflows.js:1098:  if (allowPersistent && typeof createProjectHandoff === "function") {
+public/control-center/pages/workflows.js:1099:    createProjectHandoff(projectName, handoff).catch((error) => {
+public/control-center/pages/workflows.js:1230:  createProjectHandoff,
+public/control-center/pages/workflows.js:1234:    createAutoModeController(getState, { getState, navigateTo, createProjectHandoff });
+public/control-center/pages/workflows.js:1310:        setSharedHandoff(projectName, "workflows", {
+public/control-center/pages/workflows.js:1311:          source_page: "workflows",
+public/control-center/pages/workflows.js:1312:          destination_page: "workflows",
+public/control-center/pages/workflows.js:1423:      setSharedHandoff(projectName, "workflows", {
+public/control-center/pages/workflows.js:1424:        source_page: "workflows",
+public/control-center/pages/workflows.js:1425:        destination_page: "workflows",
+public/control-center/pages/workflows.js:1491:        createProjectHandoff,
+public/control-center/pages/workflows.js:1524:        createProjectHandoff,
+public/control-center/pages/workflows.js:1541:        createProjectHandoff,
+public/control-center/pages/workflows.js:1560:        source_page: "workflows",
+public/control-center/pages/workflows.js:1561:        destination_page: "task-center",
+public/control-center/pages/workflows.js:1581:      setSharedHandoff(projectName, "task-center", handoff);
+public/control-center/pages/workflows.js:1605:      setSharedHandoff(projectName, "ai-command", {
+public/control-center/pages/workflows.js:1606:        source_page: "workflows",
+public/control-center/pages/workflows.js:1607:        destination_page: "ai-command",
+public/control-center/pages/workflows.js:1641:      setSharedHandoff(projectName, "ai-command", {
+public/control-center/pages/workflows.js:1642:        source_page: "workflows",
+public/control-center/pages/workflows.js:1643:        destination_page: "ai-command",
+public/control-center/pages/workflows.js:1675:        context: { getState, navigateTo, createProjectHandoff, projectName },
+public/control-center/pages/workflows.js:1704:        context: { getState, navigateTo, createProjectHandoff, projectName },
+public/control-center/pages/workflows.js:1726:      createAutoModeController(getState, { getState, navigateTo, createProjectHandoff });
+public/control-center/pages/workflows.js:1742:        context: { getState, navigateTo, createProjectHandoff, projectName }
+public/control-center/pages/workflows.js:1766:      await resumeAutoMode({ context: { getState, navigateTo, createProjectHandoff, projectName } });
+public/control-center/pages/workflows.js:1789:      await approveCurrentGate({ context: { getState, navigateTo, createProjectHandoff, projectName } });
+public/control-center/pages/workflows.js:1804:      await skipCurrentStep({ context: { getState, navigateTo, createProjectHandoff, projectName } });
+public/control-center/pages/workflows.js:2343:            source_page: "workflows",
+public/control-center/pages/workflows.js:2344:            destination_page: "task-center",
+public/control-center/pages/workflows.js:2356:          setSharedHandoff(projectName, "task-center", handoff);
+public/control-center/pages/workflows.js:2369:              source_page: "workflows",
+public/control-center/pages/workflows.js:2370:              destination_page: "task-center",
+public/control-center/pages/workflows.js:2382:            setSharedHandoff(projectName, "task-center", handoff);
+
+### content-studio handoff occurrences

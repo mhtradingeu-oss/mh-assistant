@@ -1,0 +1,657 @@
+### content-studio related files
+public/control-center/pages/content-studio-workspace.js
+runtime/orchestrator-service/lib/data/execution-artifact-writer-adapter.js
+
+### content-studio route/string map
+public/control-center/ai-team-model.js:20:    outputTargets: ["campaign-studio", "content-studio", "media-studio", "publishing"],
+public/control-center/ai-team-model.js:24:    id: "content_writer",
+public/control-center/ai-team-model.js:25:    label: "Content Writer",
+public/control-center/ai-team-model.js:28:    primaryPages: ["content-studio", "campaign-studio", "ai-command"],
+public/control-center/ai-team-model.js:29:    outputTargets: ["content-studio", "governance", "publishing"],
+public/control-center/ai-team-model.js:30:    defaultPrompt: "Act as Content Writer. Create high-converting content based on the current campaign and project context."
+public/control-center/ai-team-model.js:46:    primaryPages: ["media-studio", "content-studio", "publishing"],
+public/control-center/ai-team-model.js:47:    outputTargets: ["media-studio", "content-studio", "publishing"],
+public/control-center/ai-team-model.js:69:    id: "seo_insights_analyst",
+public/control-center/ai-team-model.js:70:    label: "SEO & Insights Analyst",
+public/control-center/ai-team-model.js:74:    outputTargets: ["insights", "campaign-studio", "content-studio", "ads-manager"],
+public/control-center/ai-team-model.js:75:    defaultPrompt: "Act as SEO & Insights Analyst. Identify what is working, what is weak, and what action should happen next."
+public/control-center/ai-team-model.js:83:    outputTargets: ["research", "setup", "campaign-studio", "content-studio"],
+public/control-center/ai-team-model.js:91:    primaryPages: ["governance", "publishing", "content-studio", "media-studio"],
+public/control-center/ai-team-model.js:92:    outputTargets: ["governance", "publishing", "content-studio", "media-studio"],
+public/control-center/ai-team-model.js:107:  home: ["strategist", "operations_lead", "seo_insights_analyst"],
+public/control-center/ai-team-model.js:109:  library: ["media_director", "content_writer", "publisher"],
+public/control-center/ai-team-model.js:110:  integrations: ["operations_lead", "seo_insights_analyst"],
+public/control-center/ai-team-model.js:114:  "campaign-studio": ["strategist", "content_writer", "media_director", "ads_optimizer"],
+public/control-center/ai-team-model.js:115:  "content-studio": ["content_writer", "compliance_reviewer", "publisher"],
+public/control-center/ai-team-model.js:117:  "ads-manager": ["ads_optimizer", "seo_insights_analyst", "compliance_reviewer"],
+public/control-center/ai-team-model.js:118:  insights: ["seo_insights_analyst", "strategist"],
+public/control-center/ui/page-standard.js:11:  "content-studio",
+public/control-center/ui/page-standard.js:68:    secondary: { label: "Send To Content", route: "content-studio" }
+public/control-center/ui/page-standard.js:70:  "content-studio": {
+public/control-center/ui/page-standard.js:72:    title: "Content Production Hub",
+public/control-center/ui/page-standard.js:316:    "content-studio": "Generate or approve the next content item.",
+public/control-center/system-intelligence.js:208:      relatedPages: ["content-studio", "media-studio", "publishing"]
+public/control-center/system-intelligence.js:234:      targetPage: "content-studio",
+public/control-center/system-intelligence.js:235:      actionLabel: "Open Content Studio",
+public/control-center/system-intelligence.js:288:      relatedPages: ["content-studio", "media-studio"]
+public/control-center/system-intelligence.js:318:      relatedPages: ["content-studio", "media-studio", "publishing"]
+public/control-center/system-intelligence.js:358:    { key: "content", label: "Content Studio", ready: contentReady, note: contentReady ? "Drafts available" : "No drafts" },
+public/control-center/automation-engine.js:286:      targetPage: "content-studio",
+public/control-center/automation-engine.js:302:        source_page: "content-studio"
+public/control-center/runtime/authority/route-role-fallback.js:5:  "writer",
+public/control-center/runtime/authority/route-role-fallback.js:19:  "content-studio": ["writer", "strategist", "compliance_reviewer", "admin"],
+public/control-center/runtime/authority/route-role-fallback.js:22:  research: ["strategist", "analyst", "writer", "admin"],
+public/control-center/legacy/page-standard.legacy-20260508.js:11:  "content-studio",
+public/control-center/legacy/page-standard.legacy-20260508.js:68:    secondary: { label: "Send To Content Studio", route: "content-studio" }
+public/control-center/legacy/page-standard.legacy-20260508.js:70:  "content-studio": {
+public/control-center/legacy/page-standard.legacy-20260508.js:72:    title: "Content Production Hub",
+public/control-center/legacy/page-standard.legacy-20260508.js:126:  "campaign-studio": { previous: "Integrations", next: "Content Studio" },
+public/control-center/legacy/page-standard.legacy-20260508.js:127:  "content-studio": { previous: "Campaign Studio", next: "Media Studio" },
+public/control-center/legacy/page-standard.legacy-20260508.js:128:  "media-studio": { previous: "Content Studio", next: "Publishing" },
+public/control-center/legacy/page-standard.legacy-20260508.js:164:    { label: "Ask Writer", description: "Turn strategy into platform-ready copy tasks.", prompt: "Act as the Writer. Build content tasks from the active campaign and current performance signals." },
+public/control-center/legacy/page-standard.legacy-20260508.js:178:    { label: "Send to Content Studio", description: "Move campaign strategy into production copy.", route: "content-studio" }
+public/control-center/legacy/page-standard.legacy-20260508.js:180:  "content-studio": [
+public/control-center/legacy/page-standard.legacy-20260508.js:208:    { label: "Improve weak channel", description: "Route weak-channel fixes into content, ads, or publishing.", route: "content-studio" }
+public/control-center/legacy/page-standard.legacy-20260508.js:281:  "content-studio": {
+public/control-center/legacy/page-standard.legacy-20260508.js:604:      card("Market / language", `${m.market} / ${m.language}`, "Localization context for copy, campaigns, and publishing.", m.market !== "Not set" && m.language !== "Not set" ? "success" : "warning"),
+public/control-center/legacy/page-standard.legacy-20260508.js:638:    "content-studio": [
+public/control-center/legacy/page-standard.legacy-20260508.js:642:      card("Platform copy", String(m.contentTotal), "Total copy records tracked by Content Studio.", m.contentTotal ? "success" : "neutral")
+public/control-center/legacy/page-standard.legacy-20260508.js:718:    "content-studio": [
+public/control-center/legacy/page-standard.legacy-20260508.js:770:    "campaign-studio": "Build the next launch wave and route the package to Content Studio.",
+public/control-center/legacy/page-standard.legacy-20260508.js:771:    "content-studio": "Generate or approve the next content item and send it to Publishing.",
+public/control-center/legacy/page-standard.legacy-20260508.js:941:      { label: "Open Content Studio", route: "content-studio" },
+public/control-center/legacy/page-standard.legacy-20260508.js:1090:    "content-studio": [
+public/control-center/legacy/integrations.monolith-20260508.js:277:        purpose: "Search performance, queries, clicks, CTR, impressions, and SEO opportunity intelligence.",
+public/control-center/legacy/integrations.monolith-20260508.js:279:        enables: "Queries, clicks, CTR, positions, top pages, and SEO opportunity analysis.",
+public/control-center/legacy/integrations.monolith-20260508.js:513:        whyItMatters: "Notion can hold reusable knowledge the system references for campaigns, SEO, and content execution.",
+public/control-center/legacy/integrations.monolith-20260508.js:848:    { key: "insights", pattern: /insight|engagement|watch|audience|query|ctr|position|seo|analytics|performance/ },
+public/control-center/legacy/integrations.monolith-20260508.js:885:      read: [...new Set(["traffic", "events", "conversions", "seo", ...scopeKeys])],
+public/control-center/legacy/integrations.monolith-20260508.js:1118:      label: "SEO / Search Console",
+public/control-center/legacy/integrations.monolith-20260508.js:1411:      prompt: "Identify the critical missing integrations before launch and explain which ones block publishing, analytics, SEO, paid optimization, and conversion intelligence."
+public/control-center/legacy/integrations.monolith-20260508.js:1414:      label: "Why is SEO intelligence incomplete?",
+public/control-center/legacy/integrations.monolith-20260508.js:1415:      prompt: "Explain what is missing from the current SEO and Search Console integration coverage and what should be connected or configured next."
+public/control-center/router.js:6:import { contentStudioRoute } from "./pages/content-studio-workspace.js";
+public/control-center/asset-library.js:30:      why_it_matters: "Gives Setup, Content Studio, Media Studio, and AI Command the guardrails they need.",
+public/control-center/asset-library.js:31:      used_in: ["Setup", "Campaign Studio", "Content Studio", "Media Studio", "AI Command"]
+public/control-center/asset-library.js:46:      why_it_matters: "Campaign Studio, Content Studio, Publishing, and AI Command need accurate product facts.",
+public/control-center/asset-library.js:47:      used_in: ["Campaign Studio", "Content Studio", "Publishing", "AI Command"]
+public/control-center/asset-library.js:79:      used_in: ["Content Studio", "Publishing", "AI Command"]
+public/control-center/asset-library.js:94:      why_it_matters: "Content Studio, Media Studio, Campaign Studio, and Publishing need real product visuals.",
+public/control-center/asset-library.js:95:      used_in: ["Campaign Studio", "Content Studio", "Media Studio", "Publishing", "AI Command"]
+public/control-center/asset-library.js:110:      why_it_matters: "Media Studio, Content Studio, Campaign Studio, and Publishing use video as creative source material.",
+public/control-center/asset-library.js:111:      used_in: ["Campaign Studio", "Content Studio", "Media Studio", "Publishing", "AI Command"]
+public/control-center/asset-library.js:126:      why_it_matters: "Content Studio, Media Studio, Campaign Studio, and Publishing can reuse proven channel assets.",
+public/control-center/asset-library.js:127:      used_in: ["Campaign Studio", "Content Studio", "Media Studio", "Publishing", "AI Command"]
+public/control-center/asset-library.js:143:      used_in: ["Campaign Studio", "Content Studio", "Media Studio", "Publishing", "AI Command"]
+public/control-center/asset-library.js:174:      why_it_matters: "Content Studio, Campaign Studio, Publishing, and AI Command need trusted proof points.",
+public/control-center/asset-library.js:175:      used_in: ["Campaign Studio", "Content Studio", "Publishing", "AI Command"]
+public/control-center/asset-library.js:191:      used_in: ["Content Studio", "Publishing", "AI Command"]
+public/control-center/pages/ai-command/tool-dock.js:431:      destinations: ["chat-preview", "campaign-studio", "content-studio", "workflows"],
+public/control-center/pages/ai-command/tool-dock.js:457:      destinations: ["chat-preview", "campaign-studio", "content-studio", "insights"],
+public/control-center/pages/ai-command/tool-dock.js:470:      destinations: ["chat-preview", "campaign-studio", "content-studio", "ads-manager"],
+public/control-center/pages/ai-command/tool-dock.js:483:      destinations: ["chat-preview", "campaign-studio", "content-studio", "workflows", "publishing"],
+public/control-center/pages/ai-command/tool-dock.js:503:  writer: [
+public/control-center/pages/ai-command/tool-dock.js:511:      frontendOwnerPage: "content-studio",
+public/control-center/pages/ai-command/tool-dock.js:512:      destinations: ["chat-preview", "content-studio", "library", "media-studio", "publishing", "compliance"],
+public/control-center/pages/ai-command/tool-dock.js:515:      template: "Use the Content Writer to create a new written output for {projectName}. First ask or infer the output type: company profile, product copy, email, blog article, landing page, contract draft, presentation outline, speech, FAQ, proposal, social post, or ad copy. Ask for sources if needed. Keep it review-ready and do not publish or send anything."
+public/control-center/pages/ai-command/tool-dock.js:525:      destinations: ["composer", "content-studio"],
+public/control-center/pages/ai-command/tool-dock.js:537:      frontendOwnerPage: "content-studio",
+public/control-center/pages/ai-command/tool-dock.js:538:      destinations: ["composer", "content-studio"],
+public/control-center/pages/ai-command/tool-dock.js:540:      outputTypes: ["translation", "localization", "market_adaptation", "cta_localization"],
+public/control-center/pages/ai-command/tool-dock.js:551:      destinations: ["composer", "content-studio"],
+public/control-center/pages/ai-command/tool-dock.js:564:      destinations: ["preview", "content-studio", "compliance"],
+public/control-center/pages/ai-command/tool-dock.js:566:      outputTypes: ["grammar_check", "spelling_check", "tone_check", "readability_check", "cta_check", "claim_risk_check", "seo_check", "compliance_notes"],
+public/control-center/pages/ai-command/tool-dock.js:567:      template: "Check this content for {projectName}. Review grammar, spelling, tone, readability, CTA strength, claim risk, missing proof, SEO weakness, and compliance notes. Return issues, severity, and suggested fixes."
+public/control-center/pages/ai-command/tool-dock.js:577:      destinations: ["library", "ai-command", "content-studio"],
+public/control-center/pages/ai-command/tool-dock.js:580:      template: "Prepare source context for the next Content Writer task for {projectName}. Ask which source should be used: current chat, Library folder, brand profile, product data, legal/pricing documents, research/proof documents, source-of-truth assets, or manual input."
+public/control-center/pages/ai-command/tool-dock.js:583:      id: "seo",
+public/control-center/pages/ai-command/tool-dock.js:585:      label: "SEO",
+public/control-center/pages/ai-command/tool-dock.js:589:      frontendOwnerPage: "content-studio",
+public/control-center/pages/ai-command/tool-dock.js:590:      destinations: ["content-studio", "insights", "library"],
+public/control-center/pages/ai-command/tool-dock.js:592:      outputTypes: ["seo_brief", "keyword_clusters", "search_intent_map", "blog_outline", "meta_pack", "faq_ideas", "internal_link_plan", "content_gap_notes"],
+public/control-center/pages/ai-command/tool-dock.js:593:      template: "Prepare SEO support for {projectName}. Ask for topic, market, language, and audience if missing. Create keyword ideas, search intent, meta title/description, blog outline, FAQ ideas, internal link ideas, and content gap notes."
+public/control-center/pages/ai-command/tool-dock.js:602:      frontendOwnerPage: "content-studio",
+public/control-center/pages/ai-command/tool-dock.js:603:      destinations: ["chat-preview", "content-studio", "publishing"],
+public/control-center/pages/ai-command/tool-dock.js:616:      destinations: ["content-studio", "library", "media-studio", "publishing", "compliance", "task", "handoff"],
+public/control-center/pages/ai-command/tool-dock.js:619:      template: "Prepare safe routing for this Content Writer output for {projectName}. Ask the destination: Content Studio, Save to Library, Prepare Media Brief, Publishing package, Compliance review, Task, or Handoff. Do not route or execute before review."
+public/control-center/pages/ai-command/tool-dock.js:631:      destinations: ["chat-preview", "media-studio", "library", "content-studio", "publishing"],
+public/control-center/pages/ai-command/tool-dock.js:683:      destinations: ["chat-preview", "media-studio", "content-studio", "publishing"],
+public/control-center/pages/ai-command/tool-dock.js:712:      destinations: ["chat-preview", "media-studio", "content-studio", "publishing"],
+public/control-center/pages/ai-command/tool-dock.js:751:      destinations: ["chat-preview", "media-studio", "content-studio"],
+public/control-center/pages/ai-command/tool-dock.js:780:      destinations: ["chat-preview", "publishing", "governance", "content-studio", "media-studio"],
+public/control-center/pages/ai-command/tool-dock.js:793:      destinations: ["chat-preview", "publishing", "content-studio", "media-studio"],
+public/control-center/pages/ai-command/tool-dock.js:815:      badge: "SEO",
+public/control-center/pages/ai-command/tool-dock.js:819:      destinations: ["chat-preview", "publishing", "content-studio", "insights"],
+public/control-center/pages/ai-command/tool-dock.js:820:      sourceTypes: ["content_draft", "topic", "market", "channel_notes", "seo_brief", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:848:      destinations: ["chat-preview", "ads-manager", "content-studio", "governance"],
+public/control-center/pages/ai-command/tool-dock.js:861:      destinations: ["chat-preview", "ads-manager", "content-studio", "governance"],
+public/control-center/pages/ai-command/tool-dock.js:900:      destinations: ["chat-preview", "ads-manager", "content-studio", "governance"],
+public/control-center/pages/ai-command/tool-dock.js:909:      id: "seo-brief",
+public/control-center/pages/ai-command/tool-dock.js:911:      label: "SEO Brief",
+public/control-center/pages/ai-command/tool-dock.js:916:      destinations: ["chat-preview", "insights", "content-studio", "library"],
+public/control-center/pages/ai-command/tool-dock.js:918:      outputTypes: ["seo_brief", "search_intent_map", "content_structure", "meta_ideas", "internal_links"],
+public/control-center/pages/ai-command/tool-dock.js:919:      template: "Create an SEO brief for {projectName}. Include keywords, search intent, content structure, meta ideas, internal links, and risks."
+public/control-center/pages/ai-command/tool-dock.js:938:      badge: "SEO",
+public/control-center/pages/ai-command/tool-dock.js:942:      destinations: ["chat-preview", "insights", "content-studio", "library"],
+public/control-center/pages/ai-command/tool-dock.js:943:      sourceTypes: ["topic", "market", "audience", "seo_brief", "library_source", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:968:      destinations: ["chat-preview", "insights", "content-studio", "campaign-studio"],
+public/control-center/pages/ai-command/tool-dock.js:969:      sourceTypes: ["content_inventory", "seo_brief", "audience_notes", "competitor_notes", "library_source", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:984:      destinations: ["chat-preview", "governance", "content-studio", "publishing"],
+public/control-center/pages/ai-command/tool-dock.js:997:      destinations: ["chat-preview", "governance", "content-studio"],
+public/control-center/pages/ai-command/tool-dock.js:1052:      destinations: ["chat-preview", "workflows", "task", "content-studio", "media-studio"],
+public/control-center/pages/ai-command/tool-dock.js:1078:      destinations: ["chat-preview", "handoff", "workflows", "content-studio", "media-studio", "publishing", "governance"],
+public/control-center/pages/ai-command/tool-dock.js:1175:      destinations: ["chat-preview", "workflows", "content-studio", "sales-crm-draft"],
+public/control-center/pages/ai-command/tool-dock.js:1188:      destinations: ["chat-preview", "content-studio", "workflows", "sales-crm-draft"],
+public/control-center/pages/ai-command/tool-dock.js:1201:      destinations: ["chat-preview", "workflows", "content-studio", "governance"],
+public/control-center/pages/ai-command/tool-dock.js:1230:      ...TOOL_DOCK_BY_SPECIALIST.writer.slice(0, 2),
+public/control-center/pages/ai-command/tool-dock.js:1242:      ...TOOL_DOCK_BY_SPECIALIST.writer.slice(0, 2),
+public/control-center/pages/ai-command/tool-dock.js:1468:    seo: "SEO",
+public/control-center/pages/ai-command/tool-dock.js:1483:    .replace(/\bSeo\b/g, "SEO")
+public/control-center/pages/ai-command/tool-dock.js:1533:    value.includes("seo") ||
+public/control-center/pages/ai-command/tool-dock.js:1543:    "SEO quality rules:",
+public/control-center/pages/ai-command/tool-dock.js:1544:    "- Start with a clear SEO title/H1.",
+public/control-center/pages/ai-command/tool-dock.js:1693:  const hardDestinationDefaults = ["chat-preview", "campaign-studio", "content-studio", "composer"];
+public/control-center/pages/campaign-studio.js:43:  seo: "SEO",
+public/control-center/pages/campaign-studio.js:63:  "content-studio": { role: "writer", domain: "content" },
+public/control-center/pages/campaign-studio.js:120:      <div class="data-row"><span>Route map</span><strong>${escapeHtml(`Content ${titleCase(CAMPAIGN_ROUTE_ROLES["content-studio"].role)} • Media ${titleCase(CAMPAIGN_ROUTE_ROLES["media-studio"].role)} • Publishing ${titleCase(CAMPAIGN_ROUTE_ROLES.publishing.role)} • Ads ${titleCase(CAMPAIGN_ROUTE_ROLES["ads-manager"].role)}`)}</strong></div>
+public/control-center/pages/campaign-studio.js:635:  const seo = asObject(insights.seo);
+public/control-center/pages/campaign-studio.js:637:    ...asArray(seo.opportunities),
+public/control-center/pages/campaign-studio.js:638:    ...asArray(seo.recommendations),
+public/control-center/pages/campaign-studio.js:639:    ...asArray(seo.ctr_opportunities),
+public/control-center/pages/campaign-studio.js:640:    ...asArray(seo.top_queries)
+public/control-center/pages/campaign-studio.js:647:        body: "SEO opportunity detected from connected search or website data."
+public/control-center/pages/campaign-studio.js:653:      title: firstNonEmpty(record.query, record.page, record.title, record.label, "SEO opportunity"),
+public/control-center/pages/campaign-studio.js:757:function buildChannelMix({ strongestPlatforms, weakPlatforms, connectedChannels, checks, paidSignals, seoOpportunities, recommendations }) {
+public/control-center/pages/campaign-studio.js:819:    label: "SEO / Landing Pages",
+public/control-center/pages/campaign-studio.js:820:    confidence: seoOpportunities.length ? "High" : (checks.website ? "Medium" : "Low"),
+public/control-center/pages/campaign-studio.js:821:    rationale: seoOpportunities[0]?.body || "Use website and search support to capture campaign intent beyond social reach."
+public/control-center/pages/campaign-studio.js:859:  seoOpportunities,
+public/control-center/pages/campaign-studio.js:865:  const seoBlockers = [];
+public/control-center/pages/campaign-studio.js:894:  if (!checks.website) seoBlockers.push("Website source is not connected yet.");
+public/control-center/pages/campaign-studio.js:895:  if (!seoOpportunities.length) seoBlockers.push("No search opportunity feed is loaded yet.");
+public/control-center/pages/campaign-studio.js:896:  if (!values.offerDetail) seoBlockers.push("Offer detail is too light to brief landing pages and SEO content well.");
+public/control-center/pages/campaign-studio.js:906:    seoBlockers.length ||
+public/control-center/pages/campaign-studio.js:920:    seoBlockers,
+public/control-center/pages/campaign-studio.js:928:      seoBlockers.length +
+public/control-center/pages/campaign-studio.js:1109:  const seoOpportunities = collectSeoOpportunities(insights);
+public/control-center/pages/campaign-studio.js:1117:    seoOpportunities,
+public/control-center/pages/campaign-studio.js:1127:    seoOpportunities,
+public/control-center/pages/campaign-studio.js:1160:    seoOpportunities,
+public/control-center/pages/campaign-studio.js:1431:      const accepted = persistCampaignRouteHandoff({ projectName, session, destinationPage: "content-studio", createProjectHandoff });
+public/control-center/pages/campaign-studio.js:1432:      if (accepted) navigateTo("content-studio");
+public/control-center/pages/campaign-studio.js:1568:      seoOpportunities,
+public/control-center/pages/campaign-studio.js:1736:                    <li><strong>Writer / Content Studio</strong>: Campaign objective, audience map, offer angles, and message priorities.</li>
+public/control-center/pages/campaign-studio.js:2083:                  "SEO blockers",
+public/control-center/pages/campaign-studio.js:2084:                  executionReadiness.seoBlockers,
+public/control-center/pages/campaign-studio.js:2086:                  "SEO support is not currently blocked."
+public/control-center/pages/campaign-studio.js:2123:                  <span class="home-action-title">Send to Content Studio</span>
+public/control-center/pages/campaign-studio.js:2124:                  <span class="home-action-meta">Open Content Studio with a campaign handoff attached.</span>
+public/control-center/pages/media-studio-workspace.js:700:    getSharedHandoff(projectName, "media-studio", operations, "content-studio") ||
+public/control-center/pages/media-studio-workspace.js:2106:  const isContentBrief = summary.sourcePage === "content-studio";
+public/control-center/pages/media-studio-workspace.js:2112:      ? "Content Studio output is ready to become a design brief."
+public/control-center/pages/media-studio-workspace.js:3168:      session.draftMessage = summary.sourcePage === "content-studio"
+public/control-center/pages/research.js:7:  content: { route: "content-studio", label: "Content Studio", destinationRole: "writer", destinationDomain: "content" },
+public/control-center/pages/research.js:8:  seo: { route: "workflows", label: "SEO Workflow", destinationRole: "strategist", destinationDomain: "research" },
+public/control-center/pages/research.js:361:      contentStyle: firstNonEmpty(meta.content_style, meta.editorial_style, "Content style not classified"),
+public/control-center/pages/research.js:424:  const seoSource = asObject(getFirstPath(researchSources, ["seo"], {}));
+public/control-center/pages/research.js:427:      seoSource.opportunities,
+public/control-center/pages/research.js:428:      seoSource.recommendations,
+public/control-center/pages/research.js:429:      seoSource.keywords,
+public/control-center/pages/research.js:430:      seoSource.top_queries,
+public/control-center/pages/research.js:431:      seoSource.queries,
+public/control-center/pages/research.js:432:      getFirstPath(researchSources, ["keyword_research", "seo.keywords"], [])
+public/control-center/pages/research.js:450:      seoSource.long_tail_ideas,
+public/control-center/pages/research.js:451:      seoSource.long_tail_keywords,
+public/control-center/pages/research.js:452:      seoSource.query_expansions
+public/control-center/pages/research.js:458:      seoSource.content_themes,
+public/control-center/pages/research.js:459:      seoSource.themes,
+public/control-center/pages/research.js:467:      seoSource.missing_clusters,
+public/control-center/pages/research.js:468:      seoSource.content_gaps,
+public/control-center/pages/research.js:475:      seoSource.top_pages_to_optimize,
+public/control-center/pages/research.js:476:      seoSource.pages_to_optimize,
+public/control-center/pages/research.js:477:      seoSource.ctr_opportunities,
+public/control-center/pages/research.js:478:      seoSource.ranking_opportunities
+public/control-center/pages/research.js:521:      type: /buy|best|price|near me|for/i.test(item.keyword) ? "seo" : "content",
+public/control-center/pages/research.js:532:    if (type.includes("seo") || type.includes("keyword")) lane = "seo";
+public/control-center/pages/research.js:544:        lane === "seo" ? ACTION_ROUTES.seo :
+public/control-center/pages/research.js:565:    !keywordRecords.length ? "Keyword and SEO research" : "",
+public/control-center/pages/research.js:585:      body: firstNonEmpty(item.value, "SEO opportunity surfaced from current query intelligence."),
+public/control-center/pages/research.js:586:      tags: ["seo", item.intent.toLowerCase()],
+public/control-center/pages/research.js:587:      source: "SEO intelligence"
+public/control-center/pages/research.js:595:    keywordRecords.length && "SEO and keyword research",
+public/control-center/pages/research.js:600:  const seoOpportunityScore = Math.min(
+public/control-center/pages/research.js:633:    seoOpportunityScore,
+public/control-center/pages/research.js:723:      preview: "Executive summary across competitors, audience, market, SEO, offers, risks, and next strategic decisions.",
+public/control-center/pages/research.js:724:      prompt: `Summarize the current research intelligence for ${projectLabel}. Cover competitor signals, audience needs, market momentum, SEO opportunities, product angles, risks, and the next three strategic decisions.`
+public/control-center/pages/research.js:739:      label: "Identify SEO opportunities",
+public/control-center/pages/research.js:740:      modeId: "seo",
+public/control-center/pages/research.js:742:      prompt: `Review the research and identify the best SEO opportunities for ${projectLabel}. Start with ${topKeyword} and recommend target topics, landing pages, clusters, and low-competition long-tail ideas.`
+public/control-center/pages/research.js:979:            : target === "seo"
+public/control-center/pages/research.js:980:              ? `Build an SEO workflow for ${projectName || "this project"} from the current research page. Focus on keyword clusters, missing landing pages, long-tail ideas, and content clusters.`
+public/control-center/pages/research.js:1293:                label: "SEO opportunity level",
+public/control-center/pages/research.js:1294:                value: formatPercent(model.seoOpportunityScore, 0),
+public/control-center/pages/research.js:1354:              <div class="research-seo-column">
+public/control-center/pages/research.js:1358:              <div class="research-seo-column">
+public/control-center/pages/research.js:1388:              <p class="research-section-copy">Audience needs, buying intent, search openings, and keyword evidence that can support content, SEO, ads, or campaign decisions.</p>
+public/control-center/pages/research.js:1426:              <div class="research-seo-column">
+public/control-center/pages/research.js:1432:              <div class="research-seo-column">
+public/control-center/pages/research.js:1558:                        "Once competitor, audience, SEO, or product signals arrive, the page will turn them into short-term and growth-oriented opportunities automatically.",
+public/control-center/pages/research.js:1559:                        ["short-term wins", "SEO opportunities", "ad tests"],
+public/control-center/pages/research.js:1566:              <div class="research-seo-column">
+public/control-center/pages/research.js:1590:              <div class="research-seo-column">
+public/control-center/pages/research.js:1594:                  <button class="quick-action-btn" type="button" data-research-route="content">Route to Content Studio</button>
+public/control-center/pages/research.js:1595:                  <button class="quick-action-btn" type="button" data-research-route="seo">Route to SEO Workflow</button>
+public/control-center/pages/ai-command.js:45:                id: "writer",
+public/control-center/pages/ai-command.js:46:                label: "Content Writer",
+public/control-center/pages/ai-command.js:49:                routeHint: "content-studio"
+public/control-center/pages/ai-command.js:81:                label: "SEO & Insights Analyst",
+public/control-center/pages/ai-command.js:83:                summary: "SEO signals, performance data, content insights, and traffic patterns.",
+public/control-center/pages/ai-command.js:120:	content: "writer",
+public/control-center/pages/ai-command.js:124:	seo: "analyst",
+public/control-center/pages/ai-command.js:157:		id: "writer",
+public/control-center/pages/ai-command.js:158:		label: "Content Writer",
+public/control-center/pages/ai-command.js:162:		placeholder: "Ask the Content Writer to draft captions, hooks, landing copy, or campaign messages…",
+public/control-center/pages/ai-command.js:165:		destinations: ["Content Studio", "Publishing", "AI Command"],
+public/control-center/pages/ai-command.js:178:		destinations: ["Asset Library", "Content Studio", "AI Command"],
+public/control-center/pages/ai-command.js:191:		destinations: ["Asset Library", "Content Studio", "Media Native"],
+public/control-center/pages/ai-command.js:223:		label: "SEO & Insights Analyst",
+public/control-center/pages/ai-command.js:226:		summary: "SEO signals, performance data, content insights, and traffic patterns.",
+public/control-center/pages/ai-command.js:227:		placeholder: "Ask the SEO & Insights Analyst to review performance, suggest SEO improvements, or identify top content patterns…",
+public/control-center/pages/ai-command.js:228:		canHelp: ["Review SEO signals", "Analyze content performance", "Identify traffic patterns", "Suggest keyword improvements", "Map data coverage gaps"],
+public/control-center/pages/ai-command.js:229:		cannotDo: ["Update SEO settings directly", "Edit live website", "Set analytics configurations", "Publish recommendations automatically"],
+public/control-center/pages/ai-command.js:296:	writer: [
+public/control-center/pages/ai-command.js:327:		{ label: "Review SEO signals", sub: "Top queries, CTR gaps, weak pages" },
+public/control-center/pages/ai-command.js:385:const AI_ROOM_TEAM_CHAIN = ["Strategist", "Writer", "Media / Video", "Compliance", "Publisher", "Operations"];
+public/control-center/pages/ai-command.js:390:	writer: "CW",
+public/control-center/pages/ai-command.js:436:	writer: [
+public/control-center/pages/ai-command.js:473:		{ id: "opportunity-summary", label: "Opportunity Summary", action: "preview", intent: "task", template: "Summarize SEO and insight opportunities for {project}. Focus on conversion, traffic quality, and content fit." },
+public/control-center/pages/ai-command.js:560:		id: "writer",
+public/control-center/pages/ai-command.js:561:		name: "Writer",
+public/control-center/pages/ai-command.js:564:		suggestedPrompt: "Act as Writer and generate content angles for the current project and active campaign."
+public/control-center/pages/ai-command.js:633:		if (/act as the content writer/i.test(text)) return "writer";
+public/control-center/pages/ai-command.js:638:		if (/act as the seo|act as the insights analyst/i.test(text)) return "analyst";
+public/control-center/pages/ai-command.js:1231:			"Full Team workflow: Strategist -> Writer -> Media/Video -> Compliance -> Publisher -> Operations.",
+public/control-center/pages/ai-command.js:1303:	if (id === "writer") return "content-studio";
+public/control-center/pages/ai-command.js:1347:        const looksInsightLike = /\b(insight|insights|seo|keyword|keywords|analytics|performance|traffic|ranking|search intent|metrics|research|competitor|competitors|market research)\b/.test(text);
+public/control-center/pages/ai-command.js:1362:                return { outputType, destinationRoute: explicitDestination || "content-studio" };
+public/control-center/pages/ai-command.js:1380:        if (/insight|research|seo|analytics/.test(outputType) || looksInsightLike) {
+public/control-center/pages/ai-command.js:1400:		"content-studio": "Content Studio",
+public/control-center/pages/ai-command.js:1465:	if (specialistId === "writer") {
+public/control-center/pages/ai-command.js:1488:			nextStep: "Send this package to Content Studio or Publisher after review.",
+public/control-center/pages/ai-command.js:1493:				"Route to Content Studio for refinement"
+public/control-center/pages/ai-command.js:1742:			"Writer, Media Director, and Video Lead turn strategy into message, asset, and production drafts",
+public/control-center/pages/ai-command.js:1748:			"Writer: draft hooks, captions, messages, email, or outreach copy",
+public/control-center/pages/ai-command.js:1978:		seo: asObject(insights.seo),
+public/control-center/pages/ai-command.js:1998:		writer: ["content", "post", "caption", "blog", "script", "email", "landing page section", "reel script", "copy", "write", "hooks"],
+public/control-center/pages/ai-command.js:2002:		analyst: ["seo", "keyword", "keywords", "query", "search", "meta", "blog topic", "search intent", "ranking", "analytics", "performance", "traffic", "insights", "metrics"],
+public/control-center/pages/ai-command.js:2051:	if (lane === "seo" && asString(coverage.seo_search_console?.status) !== "covered") {
+public/control-center/pages/ai-command.js:2052:		notes.push("Search Console not synced — SEO guidance is limited.");
+public/control-center/pages/ai-command.js:2118:			routeSuggestion("Content Studio", "content-studio", "Rewrite weak posts and turn winning patterns into new drafts."),
+public/control-center/pages/ai-command.js:2127:	const seo = aiContext.seo;
+public/control-center/pages/ai-command.js:2129:	const topQuery = asArray(seo.top_queries)[0];
+public/control-center/pages/ai-command.js:2130:	const lowCtr = asArray(seo.low_ctr_pages)[0];
+public/control-center/pages/ai-command.js:2133:		title: "SEO & traffic briefing",
+public/control-center/pages/ai-command.js:2134:		summary: seo.summary?.impressions != null
+public/control-center/pages/ai-command.js:2135:			? `${formatCompactNumber(seo.summary.impressions)} impressions tracked. SEO lane is ready for prioritization.`
+public/control-center/pages/ai-command.js:2136:			: "SEO visibility not live — connect Search Console to unlock guidance.",
+public/control-center/pages/ai-command.js:2146:			aiContext.recommendations.find((item) => item.domain === "seo")?.action || ""
+public/control-center/pages/ai-command.js:2149:			topQuery ? `Expand content around ${extractTopMessage(topQuery)}.` : "Reconnect Search Console before making SEO roadmap decisions.",
+public/control-center/pages/ai-command.js:2158:		missingData: buildMissingDataNotes(aiContext, "seo")
+public/control-center/pages/ai-command.js:2213:			"Reconnect missing analytics, SEO, and paid feeds to improve evidence quality.",
+public/control-center/pages/ai-command.js:2222:			...buildMissingDataNotes(aiContext, "seo"),
+public/control-center/pages/ai-command.js:2235:		return { title: "Content plan task block", owner: "Content Studio", steps: ["Use the strongest content pattern as the starting template.", "Map posts by platform, hook, format, and CTA.", "Route approved items into Publishing for scheduling."] };
+public/control-center/pages/ai-command.js:2238:		return { title: "Content repair task block", owner: "Content Studio", steps: ["Select the weakest items from Insights.", "Rewrite hooks, sharpen CTAs, and adjust format-platform fit.", "Republish only after updated versions are approved."] };
+public/control-center/pages/ai-command.js:2252:		routeSuggestions.push(routeSuggestion("Content Studio", "content-studio", "Draft, rewrite, or prepare the requested content outputs."));
+public/control-center/pages/ai-command.js:2278:		case "writer":
+public/control-center/pages/ai-command.js:2379:	"content-studio": "Content Studio",
+public/control-center/pages/ai-command.js:2401:	"content-studio": "writer",
+public/control-center/pages/ai-command.js:2407:	insights: "seo",
+public/control-center/pages/ai-command.js:2416:	research: "seo",
+public/control-center/pages/ai-command.js:2424:	researcher: "seo",
+public/control-center/pages/ai-command.js:2433:	content: "content-studio",
+public/control-center/pages/ai-command.js:2434:	"content-studio-workspace": "content-studio",
+public/control-center/pages/ai-command.js:2863:	if (aiContext.seo?.summary?.impressions != null) caps.push("SEO analysis");
+public/control-center/pages/ai-command.js:3756:        if (roleId === "content_writer") return `${label} is drafting your content...`;
+public/control-center/pages/ai-command.js:3760:        if (roleId === "seo") return `${label} is reviewing insights and signals...`;
+public/control-center/pages/ai-command.js:3971:        const teamIds = ["strategist", "writer", "media", "video_lead", "compliance_reviewer", "operations"];
+public/control-center/pages/ai-command.js:4942:	const routeActionLabel = destination === "Content Studio"
+public/control-center/pages/ai-command.js:4943:		? "Open Content Studio Handoff"
+public/control-center/pages/ai-command.js:6018:                                        label: "Writer",
+public/control-center/pages/ai-command.js:7202:        { id: "writer", label: "Writer" },
+public/control-center/pages/ai-command.js:7211:        if (state === "composing" && member.id === "writer") status = "active";
+public/control-center/pages/ai-command.js:7681:    // StateKernel is the ONLY direct writer to draftMessage.
+public/control-center/pages/home.js:236:  if (/(content|copy)/.test(text)) return "content-studio";
+public/control-center/pages/home.js:269:    { id: "writer", name: "Content Writer", fallback: "Prepare high-conversion messaging for active channels." },
+public/control-center/pages/home.js:274:    { id: "analyst", name: "SEO & Insights Analyst", fallback: "Read weak signals and recommend measurable improvements." },
+public/control-center/pages/home.js:1084:        writer: `Act as the Content Writer for ${projectLabel}. Review the current project context and suggest the next best writing actions, messaging angles, and content priorities. Do not execute anything; prepare guidance only.`,
+public/control-center/pages/home.js:1089:        analyst: `Act as the SEO & Insights Analyst for ${projectLabel}. Review readiness, signals, gaps, and recent activity. Tell me what data matters most and what to improve next. Do not execute anything; prepare guidance only.`,
+public/control-center/pages/insights.js:40:    id: "seo",
+public/control-center/pages/insights.js:41:    label: "SEO / Search",
+public/control-center/pages/insights.js:42:    type: "seo",
+public/control-center/pages/insights.js:273:  if (platform.type === "seo") {
+public/control-center/pages/insights.js:274:    return normalizeSummary(asObject(feeds.seo));
+public/control-center/pages/insights.js:382:  const seoSummary = normalizeSummary(asObject(feeds.seo));
+public/control-center/pages/insights.js:412:  const seoVisibility = seoSummary.impressions != null
+public/control-center/pages/insights.js:413:    ? `${formatCompact(seoSummary.impressions)} impressions`
+public/control-center/pages/insights.js:456:        label: "SEO visibility",
+public/control-center/pages/insights.js:457:        value: seoVisibility,
+public/control-center/pages/insights.js:462:      ? "The Insight Engine is structurally ready, but live performance feeds are still sparse. Connect social insights, website analytics, SEO, and paid platforms to unlock real learning."
+public/control-center/pages/insights.js:463:      : "This workspace is blending the currently available social, website, SEO, and paid signals into one optimization layer so the system can learn what to scale, what to fix, and what to reuse."
+public/control-center/pages/insights.js:571:  const seo = asObject(feeds.seo);
+public/control-center/pages/insights.js:572:  const summary = normalizeSummary(seo);
+public/control-center/pages/insights.js:577:    topQueries: asArray(seo.top_queries || seo.queries),
+public/control-center/pages/insights.js:578:    topPages: asArray(seo.top_pages || seo.pages),
+public/control-center/pages/insights.js:579:    ctrOpportunities: asArray(seo.low_ctr_pages || seo.ctr_opportunities),
+public/control-center/pages/insights.js:580:    rankingOpportunities: asArray(seo.opportunities || seo.ranking_opportunities || seo.content_themes)
+public/control-center/pages/insights.js:604:function buildLearningEngine(contentItems, platformCards, websiteIntel, seoIntel, paidIntel, connections) {
+public/control-center/pages/insights.js:678:  if (!seoIntel.connected) {
+public/control-center/pages/insights.js:691:function buildOptimizationPanel(state, platformCards, websiteIntel, seoIntel, paidIntel, measuredTop, weakItems, learning) {
+public/control-center/pages/insights.js:730:  if (seoIntel.connected && !seoIntel.hasData) {
+public/control-center/pages/insights.js:733:      meta: "SEO is structurally expected here, but top queries, CTR, and ranking opportunities are still missing.",
+public/control-center/pages/insights.js:757:      prompt: `Review all available insights for ${projectName} and tell me the highest-impact improvement to make next across content, publishing, SEO, paid media, and website conversion.`
+public/control-center/pages/insights.js:768:      label: "What SEO opportunities are most valuable?",
+public/control-center/pages/insights.js:769:      prompt: `Review the SEO and Search Console signals for ${projectName}. Tell me the most valuable query, page, and CTR opportunities to act on next.`
+public/control-center/pages/insights.js:1089:      seo: asObject(insightRoot.seo || insightRoot.search_console || {}),
+public/control-center/pages/insights.js:1105:    const seoIntel = buildSeoIntelligence(feeds, connections);
+public/control-center/pages/insights.js:1107:    const learning = buildLearningEngine(contentItems, platformCards, websiteIntel, seoIntel, paidIntel, connections);
+public/control-center/pages/insights.js:1108:    const optimization = buildOptimizationPanel(state, platformCards, websiteIntel, seoIntel, paidIntel, topContent, weakContent, learning);
+public/control-center/pages/insights.js:1133:        title: "SEO / Search",
+public/control-center/pages/insights.js:1134:        status: seoIntel.connected ? (seoIntel.hasData ? "Live SEO" : "Waiting for feed") : "Not connected",
+public/control-center/pages/insights.js:1135:        tone: seoIntel.connected ? (seoIntel.hasData ? "success" : "warning") : "danger",
+public/control-center/pages/insights.js:1137:          { label: "Clicks", value: formatCompact(seoIntel.summary.clicks) },
+public/control-center/pages/insights.js:1138:          { label: "CTR", value: formatPercent(seoIntel.summary.ctr, 2) }
+public/control-center/pages/insights.js:1140:        note: seoIntel.topQueries[0]?.title || seoIntel.ctrOpportunities[0]?.title || "Query, page, and CTR opportunity signals will appear here when Search Console data is available."
+public/control-center/pages/insights.js:1169:            Identify what changed, what needs attention, and the next safest action across content, website, SEO, and paid performance.
+public/control-center/pages/insights.js:1193:              <span class="data-label">SEO feed</span>
+public/control-center/pages/insights.js:1194:              <strong>${escapeHtml(seoIntel.connected ? (seoIntel.hasData ? "Live" : "Waiting") : "Missing")}</strong>
+public/control-center/pages/insights.js:1302:                  <h4 class="insights-subtitle">SEO / paid weak signals</h4>
+public/control-center/pages/insights.js:1304:                    seoIntel.hasData || paidIntel.hasData
+public/control-center/pages/insights.js:1307:                            ...seoIntel.ctrOpportunities,
+public/control-center/pages/insights.js:1308:                            ...seoIntel.rankingOpportunities,
+public/control-center/pages/insights.js:1314:                        ) || `<div class="empty-box">No SEO or paid weakness list yet.</div>`
+public/control-center/pages/insights.js:1316:                          "No SEO or paid weakness feed yet",
+public/control-center/pages/insights.js:1318:                          seoIntel.connected || paidIntel.connected,
+public/control-center/pages/insights.js:1374:            <button class="btn btn-secondary" type="button" data-insights-route="content-studio">Open Content Studio</button>
+public/control-center/pages/insights.js:1386:            Compare the main channels side by side, then review the current website, SEO, and paid signal without opening separate summary panels.
+public/control-center/pages/content-studio-workspace.js:19:const CONTENT_LOCAL_DRAFTS_KEY = "mh-content-studio-local-drafts-v1";
+public/control-center/pages/content-studio-workspace.js:55:  ownerRole: "writer",
+public/control-center/pages/content-studio-workspace.js:70:    id: "copywriter",
+public/control-center/pages/content-studio-workspace.js:71:    title: "Copywriter",
+public/control-center/pages/content-studio-workspace.js:74:    suggestedPrompt: "Act as Copywriter. Produce high-conversion copy with a strong hook, body value stack, and clear CTA."
+public/control-center/pages/content-studio-workspace.js:77:    id: "seo-writer",
+public/control-center/pages/content-studio-workspace.js:78:    title: "SEO Writer",
+public/control-center/pages/content-studio-workspace.js:81:    suggestedPrompt: "Act as SEO Writer. Produce an SEO-structured draft with intent match, metadata, headings, and semantic coverage."
+public/control-center/pages/content-studio-workspace.js:84:    id: "social-writer",
+public/control-center/pages/content-studio-workspace.js:85:    title: "Social Media Writer",
+public/control-center/pages/content-studio-workspace.js:88:    suggestedPrompt: "Act as Social Media Writer. Write platform-native content variants with hook lines, scroll-stopping openings, and CTA endings."
+public/control-center/pages/content-studio-workspace.js:91:    id: "email-writer",
+public/control-center/pages/content-studio-workspace.js:92:    title: "Email Writer",
+public/control-center/pages/content-studio-workspace.js:95:    suggestedPrompt: "Act as Email Writer. Generate subject, preheader, and body with clear structure, benefit-led copy, and CTA clarity."
+public/control-center/pages/content-studio-workspace.js:98:    id: "script-writer",
+public/control-center/pages/content-studio-workspace.js:99:    title: "Script Writer",
+public/control-center/pages/content-studio-workspace.js:102:    suggestedPrompt: "Act as Script Writer. Create a short-form script with opening hook, scene beats, voiceover-friendly lines, and CTA close."
+public/control-center/pages/content-studio-workspace.js:105:    id: "marketplace-copywriter",
+public/control-center/pages/content-studio-workspace.js:106:    title: "Marketplace Copywriter",
+public/control-center/pages/content-studio-workspace.js:109:    suggestedPrompt: "Act as Marketplace Copywriter. Draft title, bullet points, and description focused on conversion while keeping product truth."
+public/control-center/pages/content-studio-workspace.js:165:    `Confirm Content Studio action: ${action}`,
+public/control-center/pages/content-studio-workspace.js:167:    detail || "This action may create or update backend Content Studio records, AI drafts, or handoffs.",
+public/control-center/pages/content-studio-workspace.js:683:    actor: "content-studio"
+public/control-center/pages/content-studio-workspace.js:710:    `This will save or update a Content Studio draft for ${projectName}.`
+public/control-center/pages/content-studio-workspace.js:783:    getSharedHandoff(projectName, "content-studio", operations, "workflows") ||
+public/control-center/pages/content-studio-workspace.js:784:    getSharedHandoff(projectName, "content-studio", operations, "ai-command") ||
+public/control-center/pages/content-studio-workspace.js:785:    getSharedHandoff(projectName, "content-studio", operations)
+public/control-center/pages/content-studio-workspace.js:825:    session.error = "Backend content data unavailable. Content Studio is running in local draft mode.";
+public/control-center/pages/content-studio-workspace.js:1100:          <h3>Smart Content Production Center</h3>
+public/control-center/pages/content-studio-workspace.js:1121:    ["SEO", ["blog-draft"].includes(selectedItem?.mode) ? "Priority" : "Optional"],
+public/control-center/pages/content-studio-workspace.js:1475:        <div class="empty-box">Run AI Command or Workflows and route output to Content Studio to prefill the composer.</div>
+public/control-center/pages/content-studio-workspace.js:1527:    source_page: "content-studio",
+public/control-center/pages/content-studio-workspace.js:1536:      route: "content-studio",
+public/control-center/pages/content-studio-workspace.js:1563:    actor: "content-studio"
+public/control-center/pages/content-studio-workspace.js:1574:    source_page: "content-studio",
+public/control-center/pages/content-studio-workspace.js:1583:      route: "content-studio",
+public/control-center/pages/content-studio-workspace.js:1610:    actor: "content-studio"
+public/control-center/pages/content-studio-workspace.js:1665:    source: "content-studio",
+public/control-center/pages/content-studio-workspace.js:1690:    source_page: "content-studio",
+public/control-center/pages/content-studio-workspace.js:1699:      route: "content-studio",
+public/control-center/pages/content-studio-workspace.js:1710:    actor: "content-studio"
+public/control-center/pages/content-studio-workspace.js:1715:    "This will create a Content Studio to Library handoff for review and asset preparation."
+public/control-center/pages/content-studio-workspace.js:1778:    "Create Content Studio handoff",
+public/control-center/pages/content-studio-workspace.js:1779:    `This will create a Content Studio handoff to ${handoff.destination_page || "the selected workspace"} for review.`
+public/control-center/pages/content-studio-workspace.js:1781:    showMessage?.("Content Studio handoff cancelled.");
+public/control-center/pages/content-studio-workspace.js:1927:          "This will send the current brief to the AI command backend and create a review draft inside Content Studio."
+public/control-center/pages/content-studio-workspace.js:1937:            route_target: "content-studio",
+public/control-center/pages/content-studio-workspace.js:1938:            actor: "content-studio"
+public/control-center/pages/content-studio-workspace.js:2046:        `This will send the current Content Studio brief to the AI command backend for ${language} adaptation.`
+public/control-center/pages/content-studio-workspace.js:2056:          route_target: "content-studio",
+public/control-center/pages/content-studio-workspace.js:2057:          actor: "content-studio"
+public/control-center/pages/content-studio-workspace.js:2106:        source_page: "content-studio",
+public/control-center/pages/content-studio-workspace.js:2326:          source_page: "content-studio",
+public/control-center/pages/content-studio-workspace.js:2350:  id: "content-studio",
+public/control-center/pages/content-studio-workspace.js:2354:    title: "Content Studio",
+public/control-center/pages/content-studio-workspace.js:2358:    <section class="page is-active" data-page="content-studio">
+public/control-center/pages/content-studio-workspace.js:2435:    // --- SEO Checklist Panel ---
+public/control-center/pages/content-studio-workspace.js:2437:      const ariaLabel = "SEO Checklist panel";
+public/control-center/pages/content-studio-workspace.js:2439:      return `<section class="card content-card" aria-label="${ariaLabel}"><div class="card-head"><div><div class="setup-kicker">SEO Checklist</div><h3>SEO Readiness Guidance</h3></div></div><ul class="content-seo-checklist content-readiness-list">
+public/control-center/pages/integrations/builders.js:36:      label: "SEO / Search Console",
+public/control-center/pages/integrations/builders.js:156:      prompt: "Identify the critical missing integrations before launch and explain which ones block publishing, analytics, SEO, paid optimization, and conversion intelligence."
+public/control-center/pages/integrations/builders.js:159:      label: "Why is SEO intelligence incomplete?",
+public/control-center/pages/integrations/builders.js:160:      prompt: "Explain what is missing from the current SEO and Search Console integration coverage and what should be connected or configured next."
+public/control-center/pages/governance.js:120:  if (intakeContext?.content) items.push({ label: "Content Studio", value: asString(intakeContext.content) });
+public/control-center/pages/governance.js:1152:                        intakeContext.content = getSharedHandoff(projectName, "content-studio", operations)?.payload?.summary;
+public/control-center/pages/integrations.js:311:        purpose: "Search performance, queries, clicks, CTR, impressions, and SEO opportunity intelligence.",
+public/control-center/pages/integrations.js:313:        enables: "Queries, clicks, CTR, positions, top pages, and SEO opportunity analysis.",
+public/control-center/pages/integrations.js:547:        whyItMatters: "Notion can hold reusable knowledge the system references for campaigns, SEO, and content execution.",
+public/control-center/pages/integrations.js:1012:    { key: "insights", pattern: /insight|engagement|watch|audience|query|ctr|position|seo|analytics|performance/ },
+public/control-center/pages/integrations.js:1049:      read: [...new Set(["traffic", "events", "conversions", "seo", ...scopeKeys])],
+public/control-center/pages/setup.js:35:    description: "Set localization defaults inherited by campaign and content pages.",
+public/control-center/pages/setup.js:79:  market: "Controls localization and market-specific execution assumptions.",
+public/control-center/pages/setup.js:93:  market: "Controls regional assumptions, audience context, and localization.",
+public/control-center/pages/setup.js:335:function getSetupLocalizationStatus(values) {
+public/control-center/pages/setup.js:645:  const localizationStatus = getSetupLocalizationStatus(values);
+public/control-center/pages/setup.js:717:    { id: "setupLocalizationStatus", value: localizationStatus },
+public/control-center/pages/setup.js:1412:    const localizationStatus = getSetupLocalizationStatus(values);
+public/control-center/pages/setup.js:1577:                <p class="home-section-copy">Localization defaults used by planning and publishing.</p>
+public/control-center/pages/workflows.js:43:    aiModeId: "writer",
+public/control-center/pages/workflows.js:44:    routeHint: "content-studio"
+public/control-center/pages/workflows.js:556:  if (target === "content-studio") return "create-content-plan";
+public/control-center/pages/workflows.js:1853:      "content-studio": "content-studio",
+public/control-center/pages/settings.js:48:  "Route SEO issues into Research/Workflows",
+public/control-center/pages/settings.js:54:  "Writer",
+public/control-center/pages/settings.js:73:    id: "writer",
+public/control-center/pages/settings.js:74:    label: "Writer",
+public/control-center/pages/settings.js:220:        options: ["Premium expert", "Direct operator", "Warm advisor", "Luxury editorial", "Performance-focused"]
+public/control-center/pages/settings.js:298:        placeholder: "Route SEO gaps into Research, weak ad performance into Ads Manager, and publish blockers into review queues."
+public/control-center/pages/settings.js:336:        placeholder: "Route product launches to social + email, evergreen SEO to website, paid hooks to ads queue."
+public/control-center/pages/settings.js:417:        options: ["Strategists, writers, and media directors", "All active operators", "Admins only", "Project owner only"]
+public/control-center/pages/settings.js:451:    description: "Give both AI operators and human teams consistent starting points for campaigns, media, SEO, ads, and approvals.",
+public/control-center/pages/settings.js:464:        options: ["Hook-first social", "Editorial authority", "Conversion-first DTC", "SEO education", "Email storytelling"]
+public/control-center/pages/settings.js:470:        options: ["Premium product studio", "Lifestyle performance", "UGC-inspired clean", "Brand-safe editorial", "Minimal ecommerce"]
+public/control-center/pages/settings.js:473:        path: "presets.seoPreset",
+public/control-center/pages/settings.js:474:        label: "SEO presets",
+public/control-center/pages/settings.js:476:        options: ["Opportunity sprint", "Evergreen pillar", "Product category SEO", "Localized market SEO", "Technical cleanup"]
+public/control-center/pages/settings.js:923:        "Route SEO issues into Research/Workflows"
+public/control-center/pages/settings.js:927:      routingNotes: "Push readiness gaps into workflows, route SEO findings into Research, and send weak ads to Ads Manager."
+public/control-center/pages/settings.js:946:      roles: ["Strategist", "Writer", "Media Director", "Publisher", "Analyst", "Compliance Reviewer", "Operations Lead / Admin", "Brand owner"],
+public/control-center/pages/settings.js:948:      editAccess: "Strategists, writers, and media directors",
+public/control-center/pages/settings.js:961:        writer: {
+public/control-center/pages/settings.js:1023:      seoPreset: "Opportunity sprint",
+public/control-center/app.js:3901:        <button class="executive-new-option" type="button" data-new-route="content-studio" data-new-prompt="Create a blog post workflow for the current project. Ask for topic, audience, language, SEO goal, and call to action.">
+public/control-center/app.js:3904:          <span>Blog, captions, landing copy, SEO content.</span>
+runtime/orchestrator-service/server.js:67:const { ExecutionArtifactWriterAdapter } = require('./lib/data/execution-artifact-writer-adapter');
+runtime/orchestrator-service/server.js:610:const executionArtifactWriter = new ExecutionArtifactWriterAdapter({
+runtime/orchestrator-service/server.js:2132:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:2225:  executionArtifactWriter.writeText({
+runtime/orchestrator-service/server.js:2250:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:2258:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:2633:  executionArtifactWriter.writeBuffer({
+runtime/orchestrator-service/server.js:2753:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:3162:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:3283:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:3443:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:3602:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:3657:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:3915:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:3993:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:4095:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:4131:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:4353:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:4649:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:4713:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:4759:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:4992:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:5047:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:5232:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:6884:    workspace_priorities: ['setup', 'library', 'content-studio', 'campaign-studio', 'publishing'],
+runtime/orchestrator-service/server.js:6885:    ai_team_defaults: ['strategist', 'writer', 'designer', 'publisher', 'analyst'],
+runtime/orchestrator-service/server.js:6904:      workspace_priorities: ['setup', 'library', 'campaign-studio', 'content-studio', 'media-studio', 'publishing', 'insights'],
+runtime/orchestrator-service/server.js:6905:      ai_team_defaults: ['strategist', 'writer', 'designer', 'publisher', 'ads_operator', 'analyst', 'compliance_reviewer'],
+runtime/orchestrator-service/server.js:6917:      workspace_priorities: ['setup', 'library', 'media-studio', 'content-studio', 'campaign-studio', 'publishing'],
+runtime/orchestrator-service/server.js:6918:      ai_team_defaults: ['strategist', 'writer', 'designer', 'video_lead', 'publisher', 'analyst'],
+runtime/orchestrator-service/server.js:6930:      workspace_priorities: ['setup', 'library', 'media-studio', 'content-studio', 'publishing', 'insights'],
+runtime/orchestrator-service/server.js:6931:      ai_team_defaults: ['strategist', 'writer', 'designer', 'publisher', 'analyst'],
+runtime/orchestrator-service/server.js:6943:      workspace_priorities: ['setup', 'library', 'content-studio', 'campaign-studio', 'ads-manager', 'governance'],
+runtime/orchestrator-service/server.js:6944:      ai_team_defaults: ['strategist', 'writer', 'designer', 'ads_operator', 'publisher', 'compliance_reviewer'],
+runtime/orchestrator-service/server.js:6956:      workspace_priorities: ['setup', 'library', 'content-studio', 'campaign-studio', 'publishing'],
+runtime/orchestrator-service/server.js:6957:      ai_team_defaults: ['strategist', 'writer', 'designer', 'publisher', 'analyst'],
+runtime/orchestrator-service/server.js:6970:      ai_team_defaults: ['strategist', 'writer', 'designer', 'video_lead', 'publisher'],
+runtime/orchestrator-service/server.js:6982:      workspace_priorities: ['setup', 'library', 'content-studio', 'campaign-studio', 'insights', 'workflows'],
+runtime/orchestrator-service/server.js:6983:      ai_team_defaults: ['strategist', 'writer', 'designer', 'ads_operator', 'analyst'],
+runtime/orchestrator-service/server.js:6995:      workspace_priorities: ['setup', 'library', 'content-studio', 'publishing', 'insights'],
+runtime/orchestrator-service/server.js:6996:      ai_team_defaults: ['strategist', 'writer', 'designer', 'publisher'],
+runtime/orchestrator-service/server.js:8405:        why_it_matters: 'Gives Setup, Content Studio, Media Studio, and AI Command the guardrails they need.',
+runtime/orchestrator-service/server.js:8406:        used_in: ['Setup', 'Campaign Studio', 'Content Studio', 'Media Studio', 'AI Command']
+runtime/orchestrator-service/server.js:8421:        why_it_matters: 'Campaign Studio, Content Studio, Publishing, and AI Command need accurate product facts.',
+runtime/orchestrator-service/server.js:8422:        used_in: ['Campaign Studio', 'Content Studio', 'Publishing', 'AI Command']
+runtime/orchestrator-service/server.js:8454:        used_in: ['Content Studio', 'Publishing', 'AI Command']
+runtime/orchestrator-service/server.js:8469:        why_it_matters: 'Content Studio, Media Studio, Campaign Studio, and Publishing need real product visuals.',
+runtime/orchestrator-service/server.js:8470:        used_in: ['Campaign Studio', 'Content Studio', 'Media Studio', 'Publishing', 'AI Command']
+runtime/orchestrator-service/server.js:8485:        why_it_matters: 'Media Studio, Content Studio, Campaign Studio, and Publishing use video as creative source material.',
+runtime/orchestrator-service/server.js:8486:        used_in: ['Campaign Studio', 'Content Studio', 'Media Studio', 'Publishing', 'AI Command']
+runtime/orchestrator-service/server.js:8501:        why_it_matters: 'Content Studio, Media Studio, Campaign Studio, and Publishing can reuse proven channel assets.',
+runtime/orchestrator-service/server.js:8502:        used_in: ['Campaign Studio', 'Content Studio', 'Media Studio', 'Publishing', 'AI Command']
+runtime/orchestrator-service/server.js:8518:        used_in: ['Campaign Studio', 'Content Studio', 'Media Studio', 'Publishing', 'AI Command']
+runtime/orchestrator-service/server.js:8549:        why_it_matters: 'Content Studio, Campaign Studio, Publishing, and AI Command need trusted proof points.',
+runtime/orchestrator-service/server.js:8550:        used_in: ['Campaign Studio', 'Content Studio', 'Publishing', 'AI Command']
+runtime/orchestrator-service/server.js:8566:        used_in: ['Content Studio', 'Publishing', 'AI Command']
+runtime/orchestrator-service/server.js:9938:        seo_title_suggestion: `${product.name} | ${brandName}`,
+runtime/orchestrator-service/server.js:9991:        seo_title: `${cleanName} | ${brandName}`,
+runtime/orchestrator-service/server.js:10149:      seo_title: `${cleanName} | ${brandName}`,
+runtime/orchestrator-service/server.js:14272:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:14414:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:14450:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:14488:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:15027:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:15149:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:15303:    executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:15358:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:16242:        seo_title: `${topic} | ${commandBrandName}`,
+runtime/orchestrator-service/server.js:16613:      item.seo_title = `${item.topic} | ${commandBrandName}`;
+runtime/orchestrator-service/server.js:16641:        `Create a premium editorial blog image for ${item.topic}, focused on modern German men’s grooming, refined masculine styling, clean grooming tools, premium hair and beard care aesthetic, suitable as a featured image for a luxury grooming brand.`;
+runtime/orchestrator-service/server.js:16890:          seo_title: item.seo_title || '',
+runtime/orchestrator-service/server.js:16949:        style: 'premium masculine editorial',
+runtime/orchestrator-service/server.js:18022:      blog: "SEO + authority",
+runtime/orchestrator-service/server.js:18439:      blog: "SEO deep guide",
+runtime/orchestrator-service/server.js:18648:          '1 SEO article',
+runtime/orchestrator-service/server.js:18742:            blog: 'SEO + authority',
+runtime/orchestrator-service/server.js:18940:          seo_title: `${campaignExec.blog.title} | ${campaignBrandName}`,
+runtime/orchestrator-service/server.js:18959:          featured_image_prompt: `Create a premium editorial blog image for ${campaignExec.blog.topic}, masculine grooming, luxury brand style, clear premium composition.`,
+runtime/orchestrator-service/server.js:19315:          secondary_style: 'luxury editorial'
+runtime/orchestrator-service/server.js:22118:      seo_note:
+runtime/orchestrator-service/server.js:22119:        'Original permalink was preserved. Content was updated on the original product to keep SEO continuity.',
+runtime/orchestrator-service/lib/insights/learning-engine.js:175:function buildSystemLessons({ contentItems, coverage, website, seo, paid, topContent, weakContent }) {
+runtime/orchestrator-service/lib/insights/learning-engine.js:189:  if (seo.summary.impressions != null && seo.summary.ctr != null && seo.summary.ctr < 2) {
+runtime/orchestrator-service/lib/insights/learning-engine.js:236:  seo,
+runtime/orchestrator-service/lib/insights/learning-engine.js:277:  if (seo.summary.impressions != null && seo.summary.impressions > 0 && seo.summary.ctr != null && seo.summary.ctr < 2) {
+runtime/orchestrator-service/lib/insights/learning-engine.js:279:      domain: 'seo',
+runtime/orchestrator-service/lib/insights/learning-engine.js:282:      evidence: `SEO visibility exists at ${seo.summary.impressions} impressions, but CTR is only ${seo.summary.ctr.toFixed(2)}%.`,
+runtime/orchestrator-service/lib/insights/learning-engine.js:351:    seo_improvements: filterDomain('seo'),
+runtime/orchestrator-service/lib/insights/learning-engine.js:368:        prompt: `Review the latest learning patterns and recommendations for ${projectName}. Tell me the next highest-impact optimization across content, SEO, publishing, paid media, and website conversion.`
+runtime/orchestrator-service/lib/insights/learning-engine.js:379:        label: 'What SEO opportunities matter most?',
+runtime/orchestrator-service/lib/insights/learning-engine.js:380:        prompt: `Use the latest SEO intelligence for ${projectName} to identify the highest-value query, page, and CTR opportunities to act on next.`
+runtime/orchestrator-service/lib/insights/learning-engine.js:405:  const seo = asObject(feeds.seo);
+runtime/orchestrator-service/lib/insights/learning-engine.js:447:    seo,
+runtime/orchestrator-service/lib/insights/learning-engine.js:459:    seo,
+runtime/orchestrator-service/lib/insights/ingestion-service.js:731:      ? 'Use the highest-impression, lowest-CTR pages to prioritize SEO title and meta updates.'
+runtime/orchestrator-service/lib/insights/ingestion-service.js:965:    seo_search_console: {
+runtime/orchestrator-service/lib/insights/ingestion-service.js:984:function buildCrossPlatformComparison({ social, website, seo, paid }) {
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1027:      platform: 'SEO / Search Console',
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1028:      performance_level: asString(seo.summary?.performance_level),
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1029:      strongest_metric: asString(seo.summary?.strongest_metric),
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1030:      weakest_metric: asString(seo.summary?.weakest_metric),
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1031:      trend_direction: asString(seo.summary?.trend_direction),
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1032:      recommendation: asString(seo.summary?.recommendation)
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1077:function buildExecutiveOverview({ social, website, seo, paid, marketplace, coverage, controlCenter }) {
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1096:    seo.summary?.clicks,
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1130:    seo_visibility_summary: seo.summary?.impressions != null
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1131:      ? `${seo.summary.impressions} impressions`
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1132:      : 'SEO feed not live yet',
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1154:  const seo = aggregateSeoData(snapshots, historyByIntegration);
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1170:      seo,
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1188:      seo,
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1197:      seo,
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1203:    seo,
+runtime/orchestrator-service/lib/integrations/insights-contract.js:21:  if (/seo|query|position|search/.test(scopeText)) return 'seo';
+runtime/orchestrator-service/lib/integrations/insights-contract.js:44:    seo_rows: asArray(payload.rows || payload.queries),
+runtime/orchestrator-service/lib/integrations/providers/google.js:323:      scope: 'seo',
+runtime/orchestrator-service/lib/integrations/providers/google.js:331:    readScopes: ['seo', 'queries', 'pages'],
+runtime/orchestrator-service/lib/integrations/providers/google.js:366:      scope: 'seo',
+runtime/orchestrator-service/lib/integrations/providers/google.js:375:    readScopes: ['seo', 'queries', 'pages']
+runtime/orchestrator-service/lib/ai/providers/openai.js:243:      seoPlan: parsed.seoPlan || parsed.seo_plan || null,
+runtime/orchestrator-service/lib/ai/providers/openai.js:266:    seoPlan: null,
+runtime/orchestrator-service/lib/ai/providers/openai.js:304:              'For outputType "seo_plan", include seoPlan with keywords, searchIntent, blogTopics, landingPageSeo, metaTitle, metaDescription.',
+runtime/orchestrator-service/lib/ai/providers/openai.js:405:        seoPlan: normalized.seoPlan,
+runtime/orchestrator-service/lib/ai/provider-config.js:63:  seo: {
+runtime/orchestrator-service/lib/ai/provider-config.js:64:    label: 'SEO Specialist',
+runtime/orchestrator-service/lib/ai/provider-config.js:65:    purpose: 'keywords, blog topics, landing page SEO, search intent, and meta title or description',
+runtime/orchestrator-service/lib/ai/provider-config.js:66:    outputType: 'seo_plan',
+runtime/orchestrator-service/lib/ai/provider-config.js:68:      'You are the SEO Specialist mode for MH Assistant OS.',
+runtime/orchestrator-service/lib/ai/provider-config.js:69:      'Produce keyword plans, blog topics, landing page SEO, search intent mapping, and metadata.',
+runtime/orchestrator-service/lib/ai/provider-config.js:101:    seo_specialist: 'seo',
+runtime/orchestrator-service/lib/ops/backbone.js:82:    route_targets: ['campaign-studio', 'content-studio', 'media-studio', 'publishing', 'ads-manager', 'task-center', 'governance']
+runtime/orchestrator-service/lib/ops/backbone.js:123:    id: 'writer',
+runtime/orchestrator-service/lib/ops/backbone.js:124:    label: 'Writer',
+runtime/orchestrator-service/lib/ops/backbone.js:125:    routes: ['content-studio', 'workflows', 'research'],
+runtime/orchestrator-service/lib/ops/backbone.js:167:    routes: ['governance', 'content-studio', 'media-studio', 'publishing'],
+runtime/orchestrator-service/lib/ops/backbone.js:183:  'content-studio': ['writer', 'strategist', 'compliance_reviewer', 'admin'],
+runtime/orchestrator-service/lib/ops/backbone.js:186:  research: ['strategist', 'analyst', 'writer', 'admin'],
+runtime/orchestrator-service/lib/ops/backbone.js:201:    handoff_to: ['writer', 'designer', 'ads_operator', 'analyst'],
+runtime/orchestrator-service/lib/ops/backbone.js:207:    owner_role: 'writer',
+runtime/orchestrator-service/lib/ops/backbone.js:210:    route_target: 'content-studio',
+runtime/orchestrator-service/lib/ops/backbone.js:211:    page_permissions: ['content-studio', 'workflows', 'publishing']
+runtime/orchestrator-service/lib/ops/backbone.js:233:    handoff_to: ['strategist', 'writer', 'ads_operator'],
+runtime/orchestrator-service/lib/ops/backbone.js:519:  if (routeTarget === 'content-studio') return 'content';
+runtime/orchestrator-service/lib/ops/backbone.js:1602:        content: roleDisplay(team, 'writer'),
+runtime/orchestrator-service/lib/ops/backbone.js:1642:    role: asString(item.owner_role || item.review_role || 'writer'),
+runtime/orchestrator-service/lib/ops/backbone.js:1644:    route: 'content-studio',
+runtime/orchestrator-service/lib/ops/backbone.js:3394:  if (normalizedType === 'content_item') return 'content-studio';
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:121:  content: 'content-studio',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:123:  seo: 'insights',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:133:  seo: 'seo_plan',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:140:  writer: 'content',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:146:  analyst: 'seo',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:209:  const specialistInstruction = specialistId === 'writer'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:210:    ? 'As Content Writer, return actual copy now: hooks, captions, CTA lines, emails, scripts, and landing copy. Never answer with only a description of what the copy could be.'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:281:    writer: [
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:306:    seo: [
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:308:      "Focus on SEO, keyword intent, insights, performance analysis, content opportunities, and search visibility.",
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:333:      "Think across strategy, content, media, publishing, ads, SEO, compliance, operations, customer operations, and sales.",
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:470:    'الخطوة التالية: راجع النص داخل Content Studio قبل النشر.'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:537:  if (intent === 'content') return 'content-studio';
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:538:  if (intent === 'seo') return 'insights';
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:584:      intent: 'seo',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:585:      modeId: 'seo',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:587:      outputType: 'seo_plan',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:588:      pattern: /\b(seo|keywords?|blog topics?|meta title|meta description|search intent|search|ranking|serp|landing page seo)\b/
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:844:    ['content-studio', 'media-studio', 'publishing', 'ads-manager'],
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:920:  const seoPlan = outputType === 'seo_plan'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:921:    ? normalizeStructuredObject(providerOutput.seoPlan || providerOutput.raw?.seoPlan || providerOutput.raw?.seo_plan)
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:947:        normalizeRouteSuggestion('content-studio', 'Turn campaign angles into draft content.'),
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:999:    seoPlan,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1026:      ? 'content-studio'
+runtime/orchestrator-service/lib/data/execution-artifact-writer-adapter.js:64:class ExecutionArtifactWriterAdapter {
+runtime/orchestrator-service/lib/data/execution-artifact-writer-adapter.js:70:      throw new Error('ExecutionArtifactWriterAdapter requires a resolver instance');
+runtime/orchestrator-service/lib/data/execution-artifact-writer-adapter.js:97:  writeDual(params = {}, writer) {
+runtime/orchestrator-service/lib/data/execution-artifact-writer-adapter.js:156:        writer(target.targetPath, params.payload, params.encoding);
+runtime/orchestrator-service/lib/data/execution-artifact-writer-adapter.js:231:        `[ExecutionArtifactWriterAdapter] failed to persist telemetry: ${error.message}`
+runtime/orchestrator-service/lib/data/execution-artifact-writer-adapter.js:236:      `[ExecutionArtifactWriterAdapter] project=${result.project} domain=${result.domain} artifact=${result.artifact_type} id=${result.identifier || 'n/a'} canonical=${result.canonical_path} legacy=${result.legacy_path} statuses=${result.writes.map((entry) => `${entry.root}:${entry.status}`).join(',')}`
+runtime/orchestrator-service/lib/data/execution-artifact-writer-adapter.js:242:  ExecutionArtifactWriterAdapter

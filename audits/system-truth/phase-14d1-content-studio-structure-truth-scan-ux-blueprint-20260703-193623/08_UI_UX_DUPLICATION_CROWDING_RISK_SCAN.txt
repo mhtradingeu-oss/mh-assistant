@@ -1,0 +1,502 @@
+### cards/sections/buttons density map
+CONTENT_FILE=public/control-center/pages/content-studio-workspace.js
+
+sections/cards/buttons/forms/listeners:
+58:  handoffRole: "publisher"
+65:    purpose: "Plan message angles and format mix that moves campaign readiness quickly.",
+67:    suggestedPrompt: "Act as Content Strategist. Build a priority content plan by channel with hooks, outcomes, and handoff order."
+114:    purpose: "Validate tone, claims, and compliance before downstream handoffs.",
+115:    bestUse: "Before approval or sending drafts to Media Studio or Publishing.",
+116:    suggestedPrompt: "Act as Brand Guardian. Audit this draft for brand tone, claim risk, and handoff readiness."
+167:    detail || "This action may create or update backend Content Studio records, AI drafts, or handoffs.",
+200:  if (["needs_review", "needs review", "review", "pending_approval"].includes(normalized)) return "needs_review";
+202:  if (["sent_to_media", "sent to media", "media_handoff", "media handoff"].includes(normalized)) return "sent_to_media";
+203:  if (["sent_to_publishing", "sent to publishing", "publishing_handoff", "publishing handoff"].includes(normalized)) return "sent_to_publishing";
+334:  readinessStatus = "draft",
+335:  approvalStatus = "draft",
+348:    readiness_status: normalizeStatus(readinessStatus || "draft", "draft"),
+349:    approval_status: asString(approvalStatus || "draft"),
+366:    readinessStatus: firstText(raw.readiness_status, raw.status, "draft"),
+367:    approvalStatus: firstText(raw.approval_status, "draft"),
+383:    readinessStatus: firstText(seed.readinessStatus, "draft"),
+384:    approvalStatus: firstText(seed.approvalStatus, "draft"),
+404:      readinessStatus: session.form?.status || "draft"
+452:  selected.readiness_status = normalizeStatus(session.form.status || selected.readiness_status || "draft", "draft");
+463:  session.form.status = normalizeStatus(selected.readiness_status || session.form.status || "draft", "draft");
+486:    readinessStatus: firstText(raw.status, "draft"),
+487:    approvalStatus: firstText(raw.approval_status, "draft")
+508:    approval_status: asString(raw.approval_status || "draft"),
+512:    linked_approvals: asArray(raw.linked_approvals),
+513:    linked_handoffs: asArray(raw.linked_handoffs),
+554:      approvals: [],
+555:      handoffs: [],
+607:    readinessStatus: "draft"
+635:  if (!clean(form.brief) && intent !== "load-handoff") errors.brief = "Main prompt / brief is required.";
+664:    approval_status: firstText(selected?.approval_status, "draft"),
+677:      readiness_status: version.readiness_status,
+678:      approval_status: version.approval_status,
+738:  const statusChanged = Boolean(previous && clean(previous.readiness_status) !== clean(selected?.readiness_status));
+757:function buildInboundSummary(handoff) {
+758:  const payload = asObject(handoff?.payload);
+762:    id: asString(handoff?.id || payload.id || payload.workflow_id || payload.content_item_id),
+763:    sourcePage: asString(handoff?.source_page || "workflows"),
+775:    readinessStatus: firstText(selectedVersion.readiness_status, payload.readiness_status, "draft"),
+776:    approvalStatus: firstText(selectedVersion.approval_status, payload.approval_status, "draft")
+790:  const handoff = getInboundHandoff(projectName, session);
+791:  if (!handoff) return;
+792:  const summary = buildInboundSummary(handoff);
+804:    const [contentItems, tasks, approvals, handoffs, events, operations] = await Promise.all([
+817:    session.approvals = asArray(approvals.items);
+818:    session.handoffs = asArray(handoffs.items);
+851:      why: "A clear first draft unlocks versioning, review, and downstream media/publishing handoffs."
+858:      why: "Review decisions reduce production delay and move content into executable lanes."
+878:    why: "Higher-quality prompt context improves draft quality and handoff readiness."
+912:      .content-preview-grid,
+914:      .content-handoff-grid {
+950:      .content-mode-tabs,
+952:      .content-version-tabs,
+960:      .content-mode-tab,
+961:      .content-version-tab {
+971:      .content-mode-tab.is-active,
+972:      .content-version-tab.is-active {
+1039:      .content-preview-social,
+1040:      .content-preview-email,
+1041:      .content-preview-marketplace,
+1042:      .content-preview-ad,
+1043:      .content-preview-script,
+1044:      .content-preview-blog {
+1052:      .content-preview-social .headline,
+1053:      .content-preview-blog .headline,
+1054:      .content-preview-email .headline,
+1055:      .content-preview-marketplace .headline,
+1056:      .content-preview-ad .headline,
+1057:      .content-preview-script .headline {
+1063:      .content-preview-script .scene,
+1064:      .content-preview-marketplace .bullet,
+1065:      .content-preview-blog .section,
+1066:      .content-preview-email .segment,
+1067:      .content-preview-ad .segment {
+1080:        .content-preview-grid,
+1082:        .content-handoff-grid {
+1096:    <section class="card content-card">
+1097:      <div class="card-head">
+1102:        <span class="card-badge neutral">${escapeHtml(formatCount(metrics.total))} drafts</span>
+1118:    ["Campaign readiness", selectedItem ? "Active" : "Initialize"],
+1119:    ["Media handoff", selectedItem?.status === "approved" || selectedItem?.status === "sent_to_media" ? "Ready" : "Prepare"],
+1128:    <section class="card content-card">
+1129:      <div class="card-head">
+1135:        <span class="card-badge ${statusTone(normalizeStatus(selectedItem?.status || "draft", "draft"))}">${escapeHtml(titleCase(selectedItem?.status || "draft"))}</span>
+1147:      <section class="card content-card">
+1148:        <div class="card-head">
+1160:    <section class="card content-card">
+1161:      <div class="card-head">
+1166:        <span class="card-badge neutral">${escapeHtml(formatCount(session.items.length))} visible</span>
+1170:          <button class="content-queue-item${item.id === session.selectedId ? " is-active" : ""}" type="button" data-content-select="${escapeHtml(item.id)}">
+1173:            <span class="card-badge ${statusTone(item.status)}" style="margin-top:8px;display:inline-flex;">${escapeHtml(titleCase(item.status))}</span>
+1181:function renderComposer(session, state, handoff, escapeHtml) {
+1184:    <button class="content-mode-tab${form.mode === mode ? " is-active" : ""}" type="button" data-content-mode="${escapeHtml(mode)}">${escapeHtml(modeLabel(mode))}</button>
+1188:    <section class="card content-card" id="contentComposerPanel">
+1189:      <div class="card-head">
+1194:        <span class="card-badge ${statusTone(normalizeStatus(form.status || "draft", "draft"))}">${escapeHtml(titleCase(form.status || "draft"))}</span>
+1197:      <div class="content-mode-tabs">${modeTabs}</div>
+1198:      <form id="contentComposerForm" class="content-composer-form">
+1199:        <div class="content-preview-grid">
+1251:        <button id="contentGenerateDraftBtn" class="btn btn-primary" type="button">Generate Draft</button>
+1252:        <button id="contentImproveBtn" class="btn btn-secondary" type="button">Improve</button>
+1253:        <button id="contentTranslateBtn" class="btn btn-secondary" type="button">Translate / Adapt</button>
+1254:        <button id="contentSaveDraftBtn" class="btn btn-secondary" type="button">Save Draft</button>
+1255:        <button id="contentSendMediaBtn" class="btn btn-secondary" type="button">Send Design Brief to Media Studio</button>
+1256:        <button id="contentSendPublishingBtn" class="btn btn-secondary" type="button">Send to Publishing</button>
+1257:        <button id="contentSendAiBtn" class="btn btn-secondary" type="button">Open AI: Send Context to AI Workspace</button>
+1260:      ${handoff ? `<div class="simple-banner" style="margin-top:12px;">Inbound handoff from ${escapeHtml(titleCase(handoff.sourcePage || "workflow"))} is available below.</div>` : ""}
+1266:function previewPost(content, escapeHtml) {
+1268:    <div class="content-preview-social">
+1275:function previewScript(content, escapeHtml) {
+1281:    <div class="content-preview-script">
+1290:function previewBlog(content, escapeHtml) {
+1296:    <div class="content-preview-blog">
+1305:function previewEmail(content, escapeHtml) {
+1311:    <div class="content-preview-email">
+1320:function previewMarketplace(content, escapeHtml) {
+1326:    <div class="content-preview-marketplace">
+1335:function previewAd(content, escapeHtml) {
+1341:    <div class="content-preview-ad">
+1355:  let body = previewPost(content, escapeHtml);
+1356:  if (["reel-script", "video-script"].includes(mode)) body = previewScript(content, escapeHtml);
+1357:  if (mode === "blog-draft") body = previewBlog(content, escapeHtml);
+1358:  if (mode === "email") body = previewEmail(content, escapeHtml);
+1359:  if (mode === "marketplace-copy") body = previewMarketplace(content, escapeHtml);
+1360:  if (mode === "ad-copy") body = previewAd(content, escapeHtml);
+1363:    <section class="card content-card" id="contentPreviewPanel">
+1364:      <div class="card-head">
+1370:        <span class="card-badge ${statusTone(normalizeStatus(selected?.readiness_status || session.form.status || "draft", "draft"))}">${escapeHtml(titleCase(selected?.readiness_status || session.form.status || "draft"))}</span>
+1383:    <section class="card content-card" id="contentVersioningPanel">
+1384:      <div class="card-head">
+1389:        <span class="card-badge neutral">${escapeHtml(selected?.id ? `${titleCase(selected.id)} selected` : "No version")}</span>
+1392:      <div class="content-version-tabs">
+1394:          <button class="content-version-tab${selected?.id === version.id ? " is-active" : ""}" type="button" data-content-version="${escapeHtml(version.id)}">${escapeHtml(titleCase(version.id))}</button>
+1404:        <div class="content-data-item"><span>Readiness status</span><strong>${escapeHtml(titleCase(firstText(selected?.readiness_status, "draft")))}</strong></div>
+1405:        <div class="content-data-item"><span>Approval status</span><strong>${escapeHtml(titleCase(firstText(selected?.approval_status, "draft")))}</strong></div>
+1410:        <button class="btn btn-secondary" type="button" data-content-version-action="compare-toggle">${escapeHtml(versioning.compareMode ? "Hide Compare" : "Compare version")}</button>
+1424:        <button class="btn btn-secondary" type="button" data-content-version-action="approve">Approve</button>
+1425:        <button class="btn btn-secondary" type="button" data-content-version-action="reject">Reject</button>
+1426:        <button class="btn btn-secondary" type="button" data-content-version-action="regenerate">Regenerate</button>
+1427:        <button class="btn btn-secondary" type="button" data-content-version-action="save-draft">Save Draft</button>
+1428:        <button class="btn btn-secondary" type="button" data-content-version-action="save-library">Save to Library</button>
+1437:    <section class="card content-card" id="contentAgentsPanel">
+1438:      <div class="card-head">
+1443:        <span class="card-badge neutral">${escapeHtml(formatCount(WRITING_AGENTS.length))} agents</span>
+1453:              <button class="btn btn-secondary" type="button" data-content-agent-use="${escapeHtml(agent.id)}">Use Prompt</button>
+1454:              <button class="btn btn-secondary" type="button" data-content-agent-save="${escapeHtml(agent.id)}">Save Draft</button>
+1455:              <button class="btn btn-secondary" type="button" data-content-agent-ai="${escapeHtml(agent.id)}">Send to AI Workspace</button>
+1464:function renderInboundHandoff(handoff, session, escapeHtml) {
+1465:  if (!handoff) {
+1467:      <section class="card content-card" id="contentHandoffPanel">
+1468:        <div class="card-head">
+1471:            <h3>No inbound handoff available</h3>
+1473:          <span class="card-badge neutral">Empty</span>
+1481:    <section class="card content-card" id="contentHandoffPanel">
+1482:      <div class="card-head">
+1485:          <h3>${escapeHtml(firstText(handoff.title, "Inbound content context"))}</h3>
+1486:          <p class="content-copy">Source: ${escapeHtml(titleCase(handoff.sourcePage || "workflow"))}</p>
+1488:        <span class="card-badge success">Available</span>
+1490:      <div class="content-handoff-grid">
+1491:        <div class="content-data-item"><span>Project</span><strong>${escapeHtml(firstText(handoff.project, "-"))}</strong></div>
+1492:        <div class="content-data-item"><span>Campaign</span><strong>${escapeHtml(firstText(handoff.campaign, "-"))}</strong></div>
+1493:        <div class="content-data-item"><span>Channel</span><strong>${escapeHtml(firstText(handoff.channel, "-"))}</strong></div>
+1494:        <div class="content-data-item"><span>Type</span><strong>${escapeHtml(modeLabel(firstText(handoff.mode, "social-post")))}</strong></div>
+1496:      <div class="content-text-box" style="margin-top:10px;">${escapeHtml(firstText(handoff.brief, handoff.contentBody, "No handoff brief text."))}</div>
+1498:        <button id="contentLoadHandoffBtn" class="btn btn-secondary" type="button">Load into Composer</button>
+1523:  const readinessStatus = normalizeStatus(firstText(selected?.readiness_status, session.form.status, selectedItem?.status), "draft");
+1552:        readiness_status: readinessStatus,
+1553:        approval_status: firstText(selected?.approval_status, "draft"),
+1560:      readiness_status: readinessStatus
+1569:  const readinessStatus = normalizeStatus(firstText(selected?.readiness_status, session.form.status, selectedItem?.status), "draft");
+1570:  const approvalStatus = firstText(selected?.approval_status, selectedItem?.approval_status, "draft");
+1577:    destination_role: CONTENT_ROLE_DEFAULTS.handoffRole,
+1590:      readiness_status: readinessStatus,
+1591:      approval_status: approvalStatus,
+1599:        readiness_status: readinessStatus,
+1600:        approval_status: approvalStatus,
+1607:      title: firstText(selectedItem?.title, session.form.title, "Content handoff")
+1616:  const backend = asArray(session.handoffs).find((item) => {
+1681:    readiness_status: normalizeStatus(selected.readiness_status || "draft", "draft"),
+1682:    approval_status: firstText(selected.approval_status, "draft"),
+1688:  const handoff = {
+1714:    "Create Library handoff",
+1715:    "This will create a Content Studio to Library handoff for review and asset preparation."
+1717:    showMessage?.("Library handoff cancelled.");
+1721:  setSharedHandoff(projectName || "__default__", "library", handoff);
+1723:    setSharedHandoff("__default__", "library", handoff);
+1728:      const result = await createProjectHandoff(projectName, handoff);
+1729:      const saved = asObject(result?.handoff);
+1730:      const handoffId = asString(saved.id || handoff.id);
+1733:        id: handoffId || libraryAsset.id,
+1734:        handoff_id: handoffId,
+1738:        handoff_id: handoffId,
+1751:        handoff_id: "",
+1756:      showMessage?.("Library backend unavailable. Saved as local library handoff.");
+1765:      handoff_id: "",
+1770:    showMessage?.("Content draft saved to Library (local handoff).");
+1776:async function sendHandoff({ projectName, handoff, session, showMessage, failMessage, successMessage, localMessage }) {
+1778:    "Create Content Studio handoff",
+1779:    `This will create a Content Studio handoff to ${handoff.destination_page || "the selected workspace"} for review.`
+1781:    showMessage?.("Content Studio handoff cancelled.");
+1785:  setSharedHandoff(projectName || "__default__", handoff.destination_page, handoff);
+1787:    setSharedHandoff("__default__", handoff.destination_page, handoff);
+1792:      await createProjectHandoff(projectName, handoff);
+1810:    <section class="card content-card">
+1811:      <div class="card-head">
+1816:        <span class="card-badge neutral">Assets</span>
+1828:  handoff,
+1876:      if (!handoff) {
+1877:        session.draftMessage = "No inbound handoff is available.";
+1883:        mode: firstText(handoff.mode, session.form.mode, "social-post"),
+1884:        project: firstText(handoff.project, session.form.project, projectName),
+1885:        campaign: firstText(handoff.campaign, session.form.campaign),
+1886:        product: firstText(handoff.product, session.form.product),
+1887:        channel: firstText(handoff.channel, session.form.channel),
+1888:        language: firstText(handoff.language, session.form.language),
+1889:        tone: firstText(handoff.tone, session.form.tone),
+1890:        objective: firstText(handoff.objective, session.form.objective),
+1891:        brief: firstText(handoff.brief, handoff.contentBody, session.form.brief),
+1892:        title: firstText(handoff.title, session.form.title),
+1893:        status: normalizeStatus(handoff.readinessStatus || "draft", "draft")
+1898:        outputContent: firstText(handoff.contentBody),
+1902:        readinessStatus: session.form.status,
+1903:        approvalStatus: firstText(handoff.approvalStatus, "draft"),
+1904:        notes: `Loaded from ${titleCase(handoff.sourcePage || "handoff")}.`
+1955:              readinessStatus: "needs_review",
+1956:              approvalStatus: "needs_review",
+1969:              readinessStatus: "prompt_ready",
+1970:              approvalStatus: "draft",
+1983:            readinessStatus: "prompt_ready",
+1984:            approvalStatus: "draft",
+1997:          readinessStatus: "prompt_ready",
+1998:          approvalStatus: "draft",
+2092:        "Create AI Command content handoff",
+2093:        "This will attach shared AI handoff context and navigate to AI Command for review and planning support. It does not publish, approve, send externally, or create backend tasks."
+2135:      const handoffPayload = buildMediaHandoff(projectName, session, selectedItem);
+2138:        handoff: handoffPayload,
+2141:        failMessage: "Design brief kept locally because backend handoff save is unavailable.",
+2148:          selectedVersion.readiness_status = "sent_to_media";
+2167:      const handoffPayload = buildPublishingHandoff(projectName, session, selectedItem);
+2170:        handoff: handoffPayload,
+2173:        failMessage: "Publishing handoff kept locally because backend save is unavailable.",
+2174:        successMessage: "Publishing handoff created.",
+2175:        localMessage: "Publishing handoff created locally."
+2180:          selectedVersion.readiness_status = "sent_to_publishing";
+2215:          "Confirm content approval mark",
+2216:          "This will mark the selected content version as approved/review-ready and may save that readiness state to the backend."
+2220:        current.readiness_status = "approved";
+2221:        current.approval_status = "approved";
+2230:          "This will return the selected content version to draft/revision and may save that readiness state to the backend."
+2234:        current.readiness_status = "draft";
+2235:        current.approval_status = "rejected";
+2256:          readinessStatus: "prompt_ready",
+2257:          approvalStatus: "draft",
+2273:        await persistContentRecord({ projectName, state, session, status: normalizeStatus(session.form.status || current.readiness_status || "draft", "draft"), showMessage });
+2279:        await persistContentRecord({ projectName, state, session, status: normalizeStatus(session.form.status || current.readiness_status || "draft", "draft"), showMessage });
+2308:          "Create AI Command agent handoff",
+2309:          `This will attach ${agent.title} shared AI handoff context and navigate to AI Command for review and planning support. It does not publish, approve, send externally, or create backend tasks.`
+2358:    <section class="page is-active" data-page="content-studio">
+2407:      let ariaLabel = "Source context panel";
+2408:      // Prefer inbound handoff, then selectedItem, then session.form
+2409:      const handoff = inboundSummary;
+2411:      if (handoff) {
+2412:        sourceLines.push(`<div><strong>Source page:</strong> ${escapeHtml(titleCase(handoff.sourcePage || "-"))}</div>`);
+2413:        if (handoff.project) sourceLines.push(`<div><strong>Project:</strong> ${escapeHtml(handoff.project)}</div>`);
+2414:        if (handoff.campaign) sourceLines.push(`<div><strong>Campaign:</strong> ${escapeHtml(handoff.campaign)}</div>`);
+2415:        if (handoff.channel) sourceLines.push(`<div><strong>Channel:</strong> ${escapeHtml(handoff.channel)}</div>`);
+2416:        if (handoff.brief) sourceLines.push(`<div><strong>Brief:</strong> ${escapeHtml(handoff.brief.slice(0, 120))}</div>`);
+2417:        sourceLines.push(`<div><strong>Handoff type:</strong> ${handoff.id ? "AI/Workflow" : "Unknown"}</div>`);
+2431:      sourceLines.push(`<div class="content-hint content-readiness-hint">Source context helps the reviewer verify claims before routing.</div>`);
+2432:      return `<section class="card content-card" aria-label="${ariaLabel}"><div class="card-head"><div><div class="setup-kicker">Source Context</div><h3>Source / Provenance</h3></div></div><div class="content-data-item">${sourceLines.join("")}</div></section>`;
+2437:      const ariaLabel = "SEO Checklist panel";
+2439:      return `<section class="card content-card" aria-label="${ariaLabel}"><div class="card-head"><div><div class="setup-kicker">SEO Checklist</div><h3>SEO Readiness Guidance</h3></div></div><ul class="content-seo-checklist content-readiness-list">
+2448:      </ul><div class="content-hint content-readiness-hint">Review these before routing for publishing or governance.</div></section>`;
+2453:      const ariaLabel = "Governance risk and approval readiness panel";
+2454:      return `<section class="card content-card" aria-label="${ariaLabel}"><div class="card-head"><div><div class="setup-kicker">Governance Risk</div><h3>Approval Readiness</h3></div></div><ul class="content-governance-checklist content-readiness-list">
+2461:      </ul><div class="content-hint content-readiness-hint">Prepare Governance Review before publishing or campaign use.</div></section>`;
+2465:    // No direct publish/approve/send labels found in action rows; all routing is review/handoff-based.
+2467:    root.innerHTML = `
+2476:        ${session.loading ? `<div class="empty-box">Loading content records, approvals, tasks, handoffs, and events...</div>` : ""}
+2498:      handoff: inboundSummary,
+
+### possible duplicate content areas
+public/control-center/pages/ai-command/tool-dock.js:514:      outputTypes: ["company_profile", "product_copy", "email", "blog_article", "landing_page", "contract_draft", "presentation_outline", "speech", "faq", "proposal", "social_post", "ad_copy"],
+public/control-center/pages/ai-command/tool-dock.js:515:      template: "Use the Content Writer to create a new written output for {projectName}. First ask or infer the output type: company profile, product copy, email, blog article, landing page, contract draft, presentation outline, speech, FAQ, proposal, social post, or ad copy. Ask for sources if needed. Keep it review-ready and do not publish or send anything."
+public/control-center/pages/ai-command/tool-dock.js:592:      outputTypes: ["seo_brief", "keyword_clusters", "search_intent_map", "blog_outline", "meta_pack", "faq_ideas", "internal_link_plan", "content_gap_notes"],
+public/control-center/pages/ai-command/tool-dock.js:593:      template: "Prepare SEO support for {projectName}. Ask for topic, market, language, and audience if missing. Create keyword ideas, search intent, meta title/description, blog outline, FAQ ideas, internal link ideas, and content gap notes."
+public/control-center/pages/ai-command/tool-dock.js:605:      outputTypes: ["blog_to_social", "profile_to_pitch", "product_to_ad_copy", "transcript_to_article", "notes_to_presentation", "long_text_to_email_sequence"],
+public/control-center/pages/ai-command/tool-dock.js:606:      template: "Repurpose existing content for {projectName}. Ask or infer the source format and target format: blog to posts, profile to pitch, product page to ad copy, transcript to article, notes to presentation outline, or long text to email sequence."
+public/control-center/pages/ai-command/tool-dock.js:619:      template: "Prepare safe routing for this Content Writer output for {projectName}. Ask the destination: Content Studio, Save to Library, Prepare Media Brief, Publishing package, Compliance review, Task, or Handoff. Do not route or execute before review."
+public/control-center/pages/ai-command/tool-dock.js:727:      outputTypes: ["storyboard", "scene_plan", "caption_plan", "asset_requirements"],
+public/control-center/pages/ai-command/tool-dock.js:728:      template: "Create a storyboard for {projectName}. Include scenes, camera direction, motion, captions, assets needed, and CTA."
+public/control-center/pages/ai-command/tool-dock.js:795:      outputTypes: ["channel_pack", "caption_pack", "format_notes", "approval_checklist"],
+public/control-center/pages/ai-command/tool-dock.js:796:      template: "Prepare a channel package for {projectName}. Include caption, hashtags, format notes, asset needs, schedule notes, and approval checklist."
+public/control-center/pages/ai-command/tool-dock.js:864:      template: "Draft paid ad copy variants for {projectName}. Include primary text, headline, CTA, and angle notes."
+public/control-center/pages/ai-command/tool-dock.js:1532:  return value.includes("blog") ||
+public/control-center/pages/campaign-studio.js:47:  blog: "Blog",
+public/control-center/pages/campaign-studio.js:1736:                    <li><strong>Writer / Content Studio</strong>: Campaign objective, audience map, offer angles, and message priorities.</li>
+public/control-center/pages/campaign-studio.js:2123:                  <span class="home-action-title">Send to Content Studio</span>
+public/control-center/pages/campaign-studio.js:2124:                  <span class="home-action-meta">Open Content Studio with a campaign handoff attached.</span>
+public/control-center/pages/media-studio-workspace.js:2112:      ? "Content Studio output is ready to become a design brief."
+public/control-center/pages/research.js:7:  content: { route: "content-studio", label: "Content Studio", destinationRole: "writer", destinationDomain: "content" },
+public/control-center/pages/research.js:1594:                  <button class="quick-action-btn" type="button" data-research-route="content">Route to Content Studio</button>
+public/control-center/pages/ai-command.js:162:		placeholder: "Ask the Content Writer to draft captions, hooks, landing copy, or campaign messages…",
+public/control-center/pages/ai-command.js:163:		canHelp: ["Draft captions and hooks", "Write email copy", "Create landing page text", "Prepare publisher handoff", "Suggest message variants"],
+public/control-center/pages/ai-command.js:165:		destinations: ["Content Studio", "Publishing", "AI Command"],
+public/control-center/pages/ai-command.js:178:		destinations: ["Asset Library", "Content Studio", "AI Command"],
+public/control-center/pages/ai-command.js:191:		destinations: ["Asset Library", "Content Studio", "Media Native"],
+public/control-center/pages/ai-command.js:214:		placeholder: "Ask the Ads Optimizer to draft ad copy, review targeting angles, or plan a paid campaign structure…",
+public/control-center/pages/ai-command.js:297:		{ label: "Draft campaign captions", sub: "For the active campaign" },
+public/control-center/pages/ai-command.js:438:		{ id: "caption-builder", label: "Caption Builder", action: "preview", intent: "guidance", template: "Draft German captions for {project}. Include angle, body, CTA, and platform adaptation notes." },
+public/control-center/pages/ai-command.js:465:		{ id: "copy-variants", label: "Copy Variants", action: "preview", intent: "guidance", template: "Prepare German ad copy variants for {project}. Include hooks, primary text, CTA, and creative notes." },
+public/control-center/pages/ai-command.js:516:	{ icon: "✍️", label: "Generate Content", sub: "Write hooks, captions & scripts", template: "Generate content for {project}. Create hooks, caption ideas, and a reel script for the next product push." },
+public/control-center/pages/ai-command.js:1246:                `Use ${safeOutputLanguage} only for customer-facing or publishable copy such as captions, ads, emails, landing pages, final campaign text, or publishing packages.`,
+public/control-center/pages/ai-command.js:1343:        const looksContentLike = /\b(content|caption|captions|post|posts|email|blog|article|copy|headline|landing page|script|message|cta|product copy|social post)\b/.test(text);
+public/control-center/pages/ai-command.js:1360:        if (/content|copy|draft|caption|email|blog|article|script/.test(outputType) || looksContentLike) {
+public/control-center/pages/ai-command.js:1400:		"content-studio": "Content Studio",
+public/control-center/pages/ai-command.js:1469:			summary: "Content draft prepared with hooks, captions, CTA flow, and review checkpoint.",
+public/control-center/pages/ai-command.js:1475:			captions: [
+public/control-center/pages/ai-command.js:1477:				"German caption version should keep the CTA direct and easy to approve."
+public/control-center/pages/ai-command.js:1488:			nextStep: "Send this package to Content Studio or Publisher after review.",
+public/control-center/pages/ai-command.js:1491:				"Draft captions with CTA",
+public/control-center/pages/ai-command.js:1493:				"Route to Content Studio for refinement"
+public/control-center/pages/ai-command.js:1748:			"Writer: draft hooks, captions, messages, email, or outreach copy",
+public/control-center/pages/ai-command.js:1998:		writer: ["content", "post", "caption", "blog", "script", "email", "landing page section", "reel script", "copy", "write", "hooks"],
+public/control-center/pages/ai-command.js:2001:		ads: ["ad ideas", "ad copy", "facebook ads", "meta ads", "tiktok ads", "google ads", "cta", "paid", "targeting angle", "ad creative"],
+public/control-center/pages/ai-command.js:2002:		analyst: ["seo", "keyword", "keywords", "query", "search", "meta", "blog topic", "search intent", "ranking", "analytics", "performance", "traffic", "insights", "metrics"],
+public/control-center/pages/ai-command.js:2118:			routeSuggestion("Content Studio", "content-studio", "Rewrite weak posts and turn winning patterns into new drafts."),
+public/control-center/pages/ai-command.js:2235:		return { title: "Content plan task block", owner: "Content Studio", steps: ["Use the strongest content pattern as the starting template.", "Map posts by platform, hook, format, and CTA.", "Route approved items into Publishing for scheduling."] };
+public/control-center/pages/ai-command.js:2238:		return { title: "Content repair task block", owner: "Content Studio", steps: ["Select the weakest items from Insights.", "Rewrite hooks, sharpen CTAs, and adjust format-platform fit.", "Republish only after updated versions are approved."] };
+public/control-center/pages/ai-command.js:2252:		routeSuggestions.push(routeSuggestion("Content Studio", "content-studio", "Draft, rewrite, or prepare the requested content outputs."));
+public/control-center/pages/ai-command.js:2379:	"content-studio": "Content Studio",
+public/control-center/pages/ai-command.js:4942:	const routeActionLabel = destination === "Content Studio"
+public/control-center/pages/ai-command.js:4943:		? "Open Content Studio Handoff"
+public/control-center/pages/ai-command.js:6019:                                        body: `Prepare ${channelLabel.toLowerCase()} copy variants: hook, short caption, primary CTA, email or landing adaptation, and review notes.`
+public/control-center/pages/ai-command.js:6071:                                                body: "Create a hook, short social caption, long caption/email variant, CTA, landing-page angle, and reusable message notes in the configured publishing language."
+public/control-center/pages/insights.js:1374:            <button class="btn btn-secondary" type="button" data-insights-route="content-studio">Open Content Studio</button>
+public/control-center/pages/content-studio-workspace.js:24:  "caption",
+public/control-center/pages/content-studio-workspace.js:27:  "blog-draft",
+public/control-center/pages/content-studio-workspace.js:35:  caption: "Caption",
+public/control-center/pages/content-studio-workspace.js:38:  "blog-draft": "Blog Draft",
+public/control-center/pages/content-studio-workspace.js:80:    bestUse: "When creating blog drafts and landing content for organic traffic.",
+public/control-center/pages/content-studio-workspace.js:165:    `Confirm Content Studio action: ${action}`,
+public/control-center/pages/content-studio-workspace.js:167:    detail || "This action may create or update backend Content Studio records, AI drafts, or handoffs.",
+public/control-center/pages/content-studio-workspace.js:219:  if (mode === "blog-draft") return "blog";
+public/control-center/pages/content-studio-workspace.js:709:    "Save backend content draft",
+public/control-center/pages/content-studio-workspace.js:710:    `This will save or update a Content Studio draft for ${projectName}.`
+public/control-center/pages/content-studio-workspace.js:825:    session.error = "Backend content data unavailable. Content Studio is running in local draft mode.";
+public/control-center/pages/content-studio-workspace.js:1044:      .content-preview-blog {
+public/control-center/pages/content-studio-workspace.js:1053:      .content-preview-blog .headline,
+public/control-center/pages/content-studio-workspace.js:1065:      .content-preview-blog .section,
+public/control-center/pages/content-studio-workspace.js:1100:          <h3>Smart Content Production Center</h3>
+public/control-center/pages/content-studio-workspace.js:1105:        <div class="content-overview-item"><span>Total content drafts</span><strong>${escapeHtml(formatCount(metrics.total))}</strong></div>
+public/control-center/pages/content-studio-workspace.js:1121:    ["SEO", ["blog-draft"].includes(selectedItem?.mode) ? "Priority" : "Optional"],
+public/control-center/pages/content-studio-workspace.js:1122:    ["Social", ["social-post", "caption", "reel-script"].includes(selectedItem?.mode) ? "Focused" : "Available"],
+public/control-center/pages/content-studio-workspace.js:1296:    <div class="content-preview-blog">
+public/control-center/pages/content-studio-workspace.js:1357:  if (mode === "blog-draft") body = previewBlog(content, escapeHtml);
+public/control-center/pages/content-studio-workspace.js:1475:        <div class="empty-box">Run AI Command or Workflows and route output to Content Studio to prefill the composer.</div>
+public/control-center/pages/content-studio-workspace.js:1556:      script_caption_copy: contentBody,
+public/control-center/pages/content-studio-workspace.js:1595:        caption_body_script: body,
+public/control-center/pages/content-studio-workspace.js:1603:      caption: body,
+public/control-center/pages/content-studio-workspace.js:1626:  if (mode === "blog-draft") return "blog";
+public/control-center/pages/content-studio-workspace.js:1715:    "This will create a Content Studio to Library handoff for review and asset preparation."
+public/control-center/pages/content-studio-workspace.js:1778:    "Create Content Studio handoff",
+public/control-center/pages/content-studio-workspace.js:1779:    `This will create a Content Studio handoff to ${handoff.destination_page || "the selected workspace"} for review.`
+public/control-center/pages/content-studio-workspace.js:1781:    showMessage?.("Content Studio handoff cancelled.");
+public/control-center/pages/content-studio-workspace.js:1927:          "This will send the current brief to the AI command backend and create a review draft inside Content Studio."
+public/control-center/pages/content-studio-workspace.js:2046:        `This will send the current Content Studio brief to the AI command backend for ${language} adaptation.`
+public/control-center/pages/content-studio-workspace.js:2268:          "Confirm content draft save",
+public/control-center/pages/content-studio-workspace.js:2299:          "This will save the agent-assisted content draft. If a backend project is selected, it may update the backend content record."
+public/control-center/pages/content-studio-workspace.js:2354:    title: "Content Studio",
+public/control-center/pages/governance.js:120:  if (intakeContext?.content) items.push({ label: "Content Studio", value: asString(intakeContext.content) });
+public/control-center/pages/publishing.js:413:    contentItem: firstText(raw.content_item, raw.contentItem, raw.content_id, preview.content_item, preview.caption, preview.body),
+public/control-center/ai-team-model.js:27:    ownerSummary: "Copy, captions, product text, emails, scripts, and landing page content.",
+public/control-center/ui/page-standard.js:72:    title: "Content Production Hub",
+public/control-center/system-intelligence.js:231:      title: "Create the first content draft",
+public/control-center/system-intelligence.js:232:      reason: "No content draft is available for downstream media or publishing lanes.",
+public/control-center/system-intelligence.js:235:      actionLabel: "Open Content Studio",
+public/control-center/system-intelligence.js:239:      draftPayload: { prompt: "Generate an initial multi-channel content draft from the campaign brief." },
+public/control-center/system-intelligence.js:358:    { key: "content", label: "Content Studio", ready: contentReady, note: contentReady ? "Drafts available" : "No drafts" },
+public/control-center/automation-engine.js:287:      action: "Create content draft",
+public/control-center/automation-engine.js:290:        prompt: "Create a conversion-ready content draft from campaign context and current blockers.",
+public/control-center/automation-engine.js:301:        prompt: "Prepare media generation plan from content draft.",
+public/control-center/legacy/page-standard.legacy-20260508.js:68:    secondary: { label: "Send To Content Studio", route: "content-studio" }
+public/control-center/legacy/page-standard.legacy-20260508.js:72:    title: "Content Production Hub",
+public/control-center/legacy/page-standard.legacy-20260508.js:126:  "campaign-studio": { previous: "Integrations", next: "Content Studio" },
+public/control-center/legacy/page-standard.legacy-20260508.js:128:  "media-studio": { previous: "Content Studio", next: "Publishing" },
+public/control-center/legacy/page-standard.legacy-20260508.js:178:    { label: "Send to Content Studio", description: "Move campaign strategy into production copy.", route: "content-studio" }
+public/control-center/legacy/page-standard.legacy-20260508.js:642:      card("Platform copy", String(m.contentTotal), "Total copy records tracked by Content Studio.", m.contentTotal ? "success" : "neutral")
+public/control-center/legacy/page-standard.legacy-20260508.js:770:    "campaign-studio": "Build the next launch wave and route the package to Content Studio.",
+public/control-center/legacy/page-standard.legacy-20260508.js:941:      { label: "Open Content Studio", route: "content-studio" },
+public/control-center/asset-library.js:30:      why_it_matters: "Gives Setup, Content Studio, Media Studio, and AI Command the guardrails they need.",
+public/control-center/asset-library.js:31:      used_in: ["Setup", "Campaign Studio", "Content Studio", "Media Studio", "AI Command"]
+public/control-center/asset-library.js:46:      why_it_matters: "Campaign Studio, Content Studio, Publishing, and AI Command need accurate product facts.",
+public/control-center/asset-library.js:47:      used_in: ["Campaign Studio", "Content Studio", "Publishing", "AI Command"]
+public/control-center/asset-library.js:79:      used_in: ["Content Studio", "Publishing", "AI Command"]
+public/control-center/asset-library.js:94:      why_it_matters: "Content Studio, Media Studio, Campaign Studio, and Publishing need real product visuals.",
+public/control-center/asset-library.js:95:      used_in: ["Campaign Studio", "Content Studio", "Media Studio", "Publishing", "AI Command"]
+public/control-center/asset-library.js:110:      why_it_matters: "Media Studio, Content Studio, Campaign Studio, and Publishing use video as creative source material.",
+public/control-center/asset-library.js:111:      used_in: ["Campaign Studio", "Content Studio", "Media Studio", "Publishing", "AI Command"]
+public/control-center/asset-library.js:125:      what_to_upload: "Organic post images, story frames, reels, thumbnails, channel templates, and caption references.",
+public/control-center/asset-library.js:126:      why_it_matters: "Content Studio, Media Studio, Campaign Studio, and Publishing can reuse proven channel assets.",
+public/control-center/asset-library.js:127:      used_in: ["Campaign Studio", "Content Studio", "Media Studio", "Publishing", "AI Command"]
+public/control-center/asset-library.js:143:      used_in: ["Campaign Studio", "Content Studio", "Media Studio", "Publishing", "AI Command"]
+public/control-center/asset-library.js:174:      why_it_matters: "Content Studio, Campaign Studio, Publishing, and AI Command need trusted proof points.",
+public/control-center/asset-library.js:175:      used_in: ["Campaign Studio", "Content Studio", "Publishing", "AI Command"]
+public/control-center/asset-library.js:191:      used_in: ["Content Studio", "Publishing", "AI Command"]
+public/control-center/pages/ai-command/tool-dock.js:514:      outputTypes: ["company_profile", "product_copy", "email", "blog_article", "landing_page", "contract_draft", "presentation_outline", "speech", "faq", "proposal", "social_post", "ad_copy"],
+public/control-center/pages/ai-command/tool-dock.js:515:      template: "Use the Content Writer to create a new written output for {projectName}. First ask or infer the output type: company profile, product copy, email, blog article, landing page, contract draft, presentation outline, speech, FAQ, proposal, social post, or ad copy. Ask for sources if needed. Keep it review-ready and do not publish or send anything."
+public/control-center/pages/ai-command/tool-dock.js:592:      outputTypes: ["seo_brief", "keyword_clusters", "search_intent_map", "blog_outline", "meta_pack", "faq_ideas", "internal_link_plan", "content_gap_notes"],
+public/control-center/pages/ai-command/tool-dock.js:593:      template: "Prepare SEO support for {projectName}. Ask for topic, market, language, and audience if missing. Create keyword ideas, search intent, meta title/description, blog outline, FAQ ideas, internal link ideas, and content gap notes."
+public/control-center/pages/ai-command/tool-dock.js:605:      outputTypes: ["blog_to_social", "profile_to_pitch", "product_to_ad_copy", "transcript_to_article", "notes_to_presentation", "long_text_to_email_sequence"],
+public/control-center/pages/ai-command/tool-dock.js:606:      template: "Repurpose existing content for {projectName}. Ask or infer the source format and target format: blog to posts, profile to pitch, product page to ad copy, transcript to article, notes to presentation outline, or long text to email sequence."
+public/control-center/pages/ai-command/tool-dock.js:619:      template: "Prepare safe routing for this Content Writer output for {projectName}. Ask the destination: Content Studio, Save to Library, Prepare Media Brief, Publishing package, Compliance review, Task, or Handoff. Do not route or execute before review."
+public/control-center/pages/ai-command/tool-dock.js:727:      outputTypes: ["storyboard", "scene_plan", "caption_plan", "asset_requirements"],
+public/control-center/pages/ai-command/tool-dock.js:728:      template: "Create a storyboard for {projectName}. Include scenes, camera direction, motion, captions, assets needed, and CTA."
+public/control-center/pages/ai-command/tool-dock.js:795:      outputTypes: ["channel_pack", "caption_pack", "format_notes", "approval_checklist"],
+public/control-center/pages/ai-command/tool-dock.js:796:      template: "Prepare a channel package for {projectName}. Include caption, hashtags, format notes, asset needs, schedule notes, and approval checklist."
+public/control-center/pages/ai-command/tool-dock.js:864:      template: "Draft paid ad copy variants for {projectName}. Include primary text, headline, CTA, and angle notes."
+public/control-center/pages/ai-command/tool-dock.js:1532:  return value.includes("blog") ||
+public/control-center/pages/campaign-studio.js:47:  blog: "Blog",
+public/control-center/pages/campaign-studio.js:1736:                    <li><strong>Writer / Content Studio</strong>: Campaign objective, audience map, offer angles, and message priorities.</li>
+public/control-center/pages/campaign-studio.js:2123:                  <span class="home-action-title">Send to Content Studio</span>
+public/control-center/pages/campaign-studio.js:2124:                  <span class="home-action-meta">Open Content Studio with a campaign handoff attached.</span>
+public/control-center/pages/media-studio-workspace.js:2112:      ? "Content Studio output is ready to become a design brief."
+public/control-center/pages/research.js:7:  content: { route: "content-studio", label: "Content Studio", destinationRole: "writer", destinationDomain: "content" },
+public/control-center/pages/research.js:1594:                  <button class="quick-action-btn" type="button" data-research-route="content">Route to Content Studio</button>
+public/control-center/pages/ai-command.js:162:		placeholder: "Ask the Content Writer to draft captions, hooks, landing copy, or campaign messages…",
+public/control-center/pages/ai-command.js:163:		canHelp: ["Draft captions and hooks", "Write email copy", "Create landing page text", "Prepare publisher handoff", "Suggest message variants"],
+public/control-center/pages/ai-command.js:165:		destinations: ["Content Studio", "Publishing", "AI Command"],
+public/control-center/pages/ai-command.js:178:		destinations: ["Asset Library", "Content Studio", "AI Command"],
+public/control-center/pages/ai-command.js:191:		destinations: ["Asset Library", "Content Studio", "Media Native"],
+public/control-center/pages/ai-command.js:214:		placeholder: "Ask the Ads Optimizer to draft ad copy, review targeting angles, or plan a paid campaign structure…",
+public/control-center/pages/ai-command.js:297:		{ label: "Draft campaign captions", sub: "For the active campaign" },
+public/control-center/pages/ai-command.js:438:		{ id: "caption-builder", label: "Caption Builder", action: "preview", intent: "guidance", template: "Draft German captions for {project}. Include angle, body, CTA, and platform adaptation notes." },
+public/control-center/pages/ai-command.js:465:		{ id: "copy-variants", label: "Copy Variants", action: "preview", intent: "guidance", template: "Prepare German ad copy variants for {project}. Include hooks, primary text, CTA, and creative notes." },
+public/control-center/pages/ai-command.js:516:	{ icon: "✍️", label: "Generate Content", sub: "Write hooks, captions & scripts", template: "Generate content for {project}. Create hooks, caption ideas, and a reel script for the next product push." },
+public/control-center/pages/ai-command.js:1246:                `Use ${safeOutputLanguage} only for customer-facing or publishable copy such as captions, ads, emails, landing pages, final campaign text, or publishing packages.`,
+public/control-center/pages/ai-command.js:1343:        const looksContentLike = /\b(content|caption|captions|post|posts|email|blog|article|copy|headline|landing page|script|message|cta|product copy|social post)\b/.test(text);
+public/control-center/pages/ai-command.js:1360:        if (/content|copy|draft|caption|email|blog|article|script/.test(outputType) || looksContentLike) {
+public/control-center/pages/ai-command.js:1400:		"content-studio": "Content Studio",
+public/control-center/pages/ai-command.js:1469:			summary: "Content draft prepared with hooks, captions, CTA flow, and review checkpoint.",
+public/control-center/pages/ai-command.js:1475:			captions: [
+public/control-center/pages/ai-command.js:1477:				"German caption version should keep the CTA direct and easy to approve."
+public/control-center/pages/ai-command.js:1488:			nextStep: "Send this package to Content Studio or Publisher after review.",
+public/control-center/pages/ai-command.js:1491:				"Draft captions with CTA",
+public/control-center/pages/ai-command.js:1493:				"Route to Content Studio for refinement"
+public/control-center/pages/ai-command.js:1748:			"Writer: draft hooks, captions, messages, email, or outreach copy",
+public/control-center/pages/ai-command.js:1998:		writer: ["content", "post", "caption", "blog", "script", "email", "landing page section", "reel script", "copy", "write", "hooks"],
+public/control-center/pages/ai-command.js:2001:		ads: ["ad ideas", "ad copy", "facebook ads", "meta ads", "tiktok ads", "google ads", "cta", "paid", "targeting angle", "ad creative"],
+public/control-center/pages/ai-command.js:2002:		analyst: ["seo", "keyword", "keywords", "query", "search", "meta", "blog topic", "search intent", "ranking", "analytics", "performance", "traffic", "insights", "metrics"],
+public/control-center/pages/ai-command.js:2118:			routeSuggestion("Content Studio", "content-studio", "Rewrite weak posts and turn winning patterns into new drafts."),
+public/control-center/pages/ai-command.js:2235:		return { title: "Content plan task block", owner: "Content Studio", steps: ["Use the strongest content pattern as the starting template.", "Map posts by platform, hook, format, and CTA.", "Route approved items into Publishing for scheduling."] };
+public/control-center/pages/ai-command.js:2238:		return { title: "Content repair task block", owner: "Content Studio", steps: ["Select the weakest items from Insights.", "Rewrite hooks, sharpen CTAs, and adjust format-platform fit.", "Republish only after updated versions are approved."] };
+public/control-center/pages/ai-command.js:2252:		routeSuggestions.push(routeSuggestion("Content Studio", "content-studio", "Draft, rewrite, or prepare the requested content outputs."));
+public/control-center/pages/ai-command.js:2379:	"content-studio": "Content Studio",
+public/control-center/pages/ai-command.js:4942:	const routeActionLabel = destination === "Content Studio"
+public/control-center/pages/ai-command.js:4943:		? "Open Content Studio Handoff"
+public/control-center/pages/ai-command.js:6019:                                        body: `Prepare ${channelLabel.toLowerCase()} copy variants: hook, short caption, primary CTA, email or landing adaptation, and review notes.`
+public/control-center/pages/ai-command.js:6071:                                                body: "Create a hook, short social caption, long caption/email variant, CTA, landing-page angle, and reusable message notes in the configured publishing language."
+public/control-center/pages/insights.js:1374:            <button class="btn btn-secondary" type="button" data-insights-route="content-studio">Open Content Studio</button>
+public/control-center/pages/content-studio-workspace.js:24:  "caption",
+public/control-center/pages/content-studio-workspace.js:27:  "blog-draft",
+public/control-center/pages/content-studio-workspace.js:35:  caption: "Caption",
+public/control-center/pages/content-studio-workspace.js:38:  "blog-draft": "Blog Draft",
+public/control-center/pages/content-studio-workspace.js:80:    bestUse: "When creating blog drafts and landing content for organic traffic.",
+public/control-center/pages/content-studio-workspace.js:165:    `Confirm Content Studio action: ${action}`,
+public/control-center/pages/content-studio-workspace.js:167:    detail || "This action may create or update backend Content Studio records, AI drafts, or handoffs.",
+public/control-center/pages/content-studio-workspace.js:219:  if (mode === "blog-draft") return "blog";
+public/control-center/pages/content-studio-workspace.js:709:    "Save backend content draft",
+public/control-center/pages/content-studio-workspace.js:710:    `This will save or update a Content Studio draft for ${projectName}.`
+public/control-center/pages/content-studio-workspace.js:825:    session.error = "Backend content data unavailable. Content Studio is running in local draft mode.";
+public/control-center/pages/content-studio-workspace.js:1044:      .content-preview-blog {
+public/control-center/pages/content-studio-workspace.js:1053:      .content-preview-blog .headline,
+public/control-center/pages/content-studio-workspace.js:1065:      .content-preview-blog .section,
+public/control-center/pages/content-studio-workspace.js:1100:          <h3>Smart Content Production Center</h3>
+public/control-center/pages/content-studio-workspace.js:1105:        <div class="content-overview-item"><span>Total content drafts</span><strong>${escapeHtml(formatCount(metrics.total))}</strong></div>
+public/control-center/pages/content-studio-workspace.js:1121:    ["SEO", ["blog-draft"].includes(selectedItem?.mode) ? "Priority" : "Optional"],
+public/control-center/pages/content-studio-workspace.js:1122:    ["Social", ["social-post", "caption", "reel-script"].includes(selectedItem?.mode) ? "Focused" : "Available"],
+public/control-center/pages/content-studio-workspace.js:1296:    <div class="content-preview-blog">
+public/control-center/pages/content-studio-workspace.js:1357:  if (mode === "blog-draft") body = previewBlog(content, escapeHtml);
+public/control-center/pages/content-studio-workspace.js:1475:        <div class="empty-box">Run AI Command or Workflows and route output to Content Studio to prefill the composer.</div>
+public/control-center/pages/content-studio-workspace.js:1556:      script_caption_copy: contentBody,
+public/control-center/pages/content-studio-workspace.js:1595:        caption_body_script: body,
+public/control-center/pages/content-studio-workspace.js:1603:      caption: body,
+public/control-center/pages/content-studio-workspace.js:1626:  if (mode === "blog-draft") return "blog";
+public/control-center/pages/content-studio-workspace.js:1715:    "This will create a Content Studio to Library handoff for review and asset preparation."
+public/control-center/pages/content-studio-workspace.js:1778:    "Create Content Studio handoff",
+public/control-center/pages/content-studio-workspace.js:1779:    `This will create a Content Studio handoff to ${handoff.destination_page || "the selected workspace"} for review.`
+public/control-center/pages/content-studio-workspace.js:1781:    showMessage?.("Content Studio handoff cancelled.");
+public/control-center/pages/content-studio-workspace.js:1927:          "This will send the current brief to the AI command backend and create a review draft inside Content Studio."
+public/control-center/pages/content-studio-workspace.js:2046:        `This will send the current Content Studio brief to the AI command backend for ${language} adaptation.`
+public/control-center/pages/content-studio-workspace.js:2268:          "Confirm content draft save",
+public/control-center/pages/content-studio-workspace.js:2299:          "This will save the agent-assisted content draft. If a backend project is selected, it may update the backend content record."
+public/control-center/pages/content-studio-workspace.js:2354:    title: "Content Studio",
+public/control-center/pages/governance.js:120:  if (intakeContext?.content) items.push({ label: "Content Studio", value: asString(intakeContext.content) });
+public/control-center/pages/publishing.js:413:    contentItem: firstText(raw.content_item, raw.contentItem, raw.content_id, preview.content_item, preview.caption, preview.body),
+public/control-center/app.js:3901:        <button class="executive-new-option" type="button" data-new-route="content-studio" data-new-prompt="Create a blog post workflow for the current project. Ask for topic, audience, language, SEO goal, and call to action.">
+public/control-center/app.js:3904:          <span>Blog, captions, landing copy, SEO content.</span>
