@@ -1,0 +1,356 @@
+13:        selectOperationsSnapshot,
+48:                summary: "Captions, hooks, scripts, emails, and landing page copy.",
+59:                id: "video_lead",
+62:                summary: "Short-form video scripts, motion direction, and reel strategy.",
+126:	video_lead: "video_lead",
+161:		summary: "Captions, hooks, scripts, emails, and landing page copy.",
+183:		id: "video_lead",
+187:		summary: "Short-form video scripts, motion direction, and reel strategy.",
+188:		placeholder: "Ask the Video Lead to write a reel script, map short-form strategy, or outline the next video concept…",
+189:		canHelp: ["Write video scripts", "Plan short-form strategy", "Define motion direction", "Map video asset requirements", "Prepare video briefs"],
+190:		cannotDo: ["Generate video directly", "Upload footage without review", "Approve without confirmation", "Run media jobs automatically"],
+308:	video_lead: [
+309:		{ label: "Write a reel script", sub: "For the current campaign" },
+310:		{ label: "Plan short-form content", sub: "Map next 4 video concepts" },
+311:		{ label: "Outline motion direction", sub: "Align visuals with campaign tone" },
+312:		{ label: "Map video asset needs", sub: "By platform and format" }
+369:	{ id: "ask", title: "Ask", description: "Choose a specialist or the full team." },
+370:	{ id: "draft", title: "Prepare", description: "Create guidance, copy, task, or handoff context." },
+371:	{ id: "review", title: "Review", description: "Check safety, scope, language, and source." },
+372:	{ id: "route", title: "Handoff", description: "Open the owning workspace with draft context." },
+373:	{ id: "execute", title: "Confirm", description: "Execution stays gated in backend-owned surfaces." },
+374:	{ id: "monitor", title: "Monitor", description: "Track readiness, integrations, and recent activity." }
+392:	video_lead: "VL",
+449:	video_lead: [
+450:		{ id: "write-video-hook", label: "Write video hook", action: "preview", intent: "guidance", template: "Write short-form video hooks for {project}. Include 3 opening variants and audience fit." },
+451:		{ id: "draft-script", label: "Draft script", action: "preview", intent: "guidance", template: "Draft a short-form video script for {project}. Include hook, body, CTA, and visual cues." },
+452:		{ id: "build-storyboard", label: "Build storyboard", action: "preview", intent: "workflow", template: "Build storyboard beats for {project}. Sequence shots and key transitions." },
+453:		{ id: "prepare-voiceover", label: "Prepare voiceover", action: "preview", intent: "guidance", template: "Prepare voiceover script options for {project}. Keep clean timing and emphasis notes." },
+454:		{ id: "map-video-asset-needs", label: "Map video asset needs", action: "preview", intent: "task", template: "Map video asset needs for {project}. Include format, source, and production owner." }
+472:		{ id: "meta-direction", label: "Meta Direction", action: "preview", intent: "guidance", template: "Prepare meta direction for {project}. Include page angle, title direction, description direction, and CTA intent." },
+498:		{ id: "customer-profile-snapshot", label: "Customer Profile Snapshot", action: "preview", intent: "guidance", template: "Prepare a customer profile snapshot for {project}. Include known context, purchase/support signals, missing fields, and safe follow-up questions." },
+516:	{ icon: "✍️", label: "Generate Content", sub: "Write hooks, captions & scripts", template: "Generate content for {project}. Create hooks, caption ideas, and a reel script for the next product push." },
+562:		purpose: "Transform strategy into high-converting copy and scripts.",
+577:		bestUse: "When planning image/video requirements across channels.",
+635:		if (/act as the video lead/i.test(text)) return "video_lead";
+724:			value.description ||
+1298:function destinationRouteForSpecialist(specialistId, outputType) {
+1305:	if (id === "video_lead") return "media-studio";
+1316:function resolveAiResponseOutputRoute(session, response = {}) {
+1343:        const looksContentLike = /\b(content|caption|captions|post|posts|email|blog|article|copy|headline|landing page|script|message|cta|product copy|social post)\b/.test(text);
+1344:        const looksMediaLike = /\b(media|visual|creative|image|images|video|reel|storyboard|shot list|asset|assets|design|production|creative direction|voiceover)\b/.test(text);
+1360:        if (/content|copy|draft|caption|email|blog|article|script/.test(outputType) || looksContentLike) {
+1365:        if (/media|video|visual|asset|creative/.test(outputType) || looksMediaLike) {
+1393:        const destinationRoute = explicitDestination || destinationRouteForSpecialist(session?.modeId || "operations", outputType);
+1415:function specialistTemplateForOutput({ specialist, outputType, prompt, projectName }) {
+1419:	const route = destinationRouteForSpecialist(specialistId, outputType);
+1485:				"Use Arabic freely in the conversation; publishable copy should be reviewed in German.",
+1511:				"Prompt ideas prepared for image/video planning",
+1519:	if (specialistId === "video_lead") {
+1522:			title: outputType === "task" ? "Task: Video production plan" : "Video Brief: Hook, script, storyboard",
+1523:			summary: "Video draft prepared with hook, script structure, and storyboard flow.",
+1526:				"Write short-form script outline",
+1527:				"Outline storyboard beats",
+1530:			safetyLabel: "Video generation requires configured provider or GPU worker; no execution started."
+1712:function buildPhase2OutputPreview({ intent, session, prompt, projectName }) {
+1726:	const base = specialistTemplateForOutput({
+1749:			"Media / Video: prepare creative direction, asset needs, script, storyboard, or voiceover draft",
+1875:		const providerMatch = /openai|replicate|stability|runway|elevenlabs|anthropic/.test(integrationId);
+1877:		return providerMatch && readyState;
+1998:		writer: ["content", "post", "caption", "blog", "script", "email", "landing page section", "reel script", "copy", "write", "hooks"],
+2000:		media: ["media", "design", "visual", "creative brief", "format", "brand", "layout", "image direction", "creative direction", "image", "video", "photo", "asset", "library", "gallery", "footage", "visual assets"],
+2145:			weakPage ? `Tighten intent match and CTA on ${extractTopMessage(weakPage)}.` : "Review page titles and meta descriptions on priority pages.",
+2276:function buildResponseForMode(aiContext, classified, message) {
+2519:		const reason = firstAiInboundText(record.reason, record.summary, record.description) || `Return to ${label} after AI Team review.`;
+2548:		summary: firstAiInboundText(preview.summary, preview.description, normalized.prompt),
+2766:		const failureReason = asString(payload?.error) || asString(payloadResponse?.error) || asString(error?.message) || "AI provider failed to return output.";
+2774:			nextActions: ["Check AI provider configuration and retry."],
+2842:      purpose: asString(member.purpose || member.description || fallback.purpose || "Support the current operating context."),
+3008:					<span>${escapeHtml(asString(response.error) || asString(response.summary) || "AI provider error.")}</span>
+3209:							const recAction = humanizeValue(r.action || r.recommendation || r.summary || r.description || "");
+3321:        const preview = buildPhase2OutputPreview({
+3518:	return destinationRouteForSpecialist(session?.modeId || "operations", outputType);
+3575:				<p class="aicmd-room-subtitle mhos-context-description">Ask one expert or the full team to prepare strategy, content, analysis, reviews, and destination handoffs. AI prepares and reviews only; sensitive actions stay confirmation-gated in the owning workspace.</p>
+3625:						<small>${escapeHtml(step.description)}</small>
+3757:        if (roleId === "media_director" || roleId === "video_lead") return `${label} is preparing creative direction...`;
+3772:		? "Team orchestration across strategy, writing, media/video, compliance, publishing, customer operations, sales/CRM, and operations"
+3809:	return destinationRouteForSpecialist(session?.modeId || "operations", getCanonicalToolIntent(tool));
+3960:        const destinationRoute = asString(preview.destinationRoute || destinationRouteForSpecialist(session.modeId, outputType));
+3971:        const teamIds = ["strategist", "writer", "media", "video_lead", "compliance_reviewer", "operations"];
+3979:                        const route = destinationRouteForSpecialist(spec.id, "guidance");
+4029:                        <p class="aicmd-chatfirst-tab-note">AI Command prepares guidance, drafts, previews, and handoff context only. Publishing, approvals, CRM updates, workflow runs, customer sends, provider execution, and durable task creation remain confirmation-gated in the owning workspace.</p>
+4066:        const destinationRoute = asString(session.outputPreview?.destinationRoute || destinationRouteForSpecialist(session.modeId, outputType));
+4249:                const destinationRoute = asString(message.destinationRoute || preview.destinationRoute || destinationRouteForSpecialist(session.modeId, outputType));
+4341:                { id: "media", label: "Media", summary: "Create a media brief, storyboard, and production direction.", enabled: false },
+4439:        const formatOptions = [["mixed", "Mixed package"], ["image", "Image"], ["video", "Video"], ["email", "Email"], ["landing", "Landing page"], ["ads", "Ads"]];
+4573:                                        <span>Review-first flow: generate preview, approve, then hand off to the owning surface. No publish, send, CRM update, provider execution, or workflow mutation happens here.</span>
+4670:                                        <small>Strategy, content, media, operations, compliance, customer, campaign and provider-readiness planning.</small>
+4696:                                <span>Library, campaigns, content, customers, governance, integrations and provider readiness are connected as guarded planning context. Execution stays confirmation-gated.</span>
+4782:                                                title="${escapeHtml(tool.description || tool.label || "Prepare prompt tool")}"
+4937:	const destination = routeLabel(preview.destinationRoute || destinationRouteForSpecialist(session.modeId, preview.outputType || "guidance"));
+5036:						<small>${escapeHtml(step.description)}</small>
+5050:	const providerConfigured = isProviderLikelyConfigured(aiContext);
+5056:		{ label: "GPU video", value: "Coming", className: "is-planned" },
+5057:		{ label: "Image prompt generation", value: providerConfigured ? "Provider may be ready" : "Provider dependent", className: providerConfigured ? "is-available" : "is-planned" }
+5334:	const destination = routeLabel(destinationRouteForSpecialist(session.modeId, asObject(session.outputPreview).outputType || "guidance"));
+5349:		{ label: "Operations", value: state.data.operations ? "Snapshot available" : "No operations snapshot", present: Boolean(state.data.operations) }
+5353:			{ label: "Open conversations", value: "Snapshot / requires runtime surface", present: false, scoped: true },
+5465:		description: "Talk to your AI team, run structured tasks, and turn intelligence into review-ready plans and routed handoffs."
+5542:		const operations = asObject(selectOperationsSnapshot(state));
+5593:			session.outputPreview = buildPhase2OutputPreview({
+5947:                                updateStatus("Voice conversation requires the next provider-backed phase: recording, STT, specialist reply, and TTS playback. Voice dictation is ready now.");
+5948:                                showMessage?.("Voice dictation is ready. Full voice conversation will be implemented as the next provider-backed voice mode.");
+6023:                                        body: "Prepare creative direction, image/video brief, shot list, format requirements, storyboard/voiceover notes, and asset gaps."
+6059:                                                body: `Use ${sourceMeaning}. Produce a review-ready campaign package before any handoff, approval, publishing, sending, CRM update, provider execution, or workflow mutation.`
+6075:                                                body: "Define hero visual, product framing, scene list, required assets, image/video format, voiceover direction, and Media Studio handoff notes."
+6091:                                safety: "Preview only. No publish, send, CRM mutation, provider execution, workflow mutation, or Governance approval is performed here."
+6163:                                        ? "Backend preview only. No publish, send, CRM mutation, provider execution, workflow mutation, Governance approval, task creation, or durable handoff was performed."
+6196:                                if (!safety.preview_only || !safety.no_backend_mutation_performed || !safety.no_provider_execution_performed) {
+6245:                                        confirmationNote: "Review and route this campaign package through the owning destination workspace before any publishing, sending, approval, task creation, provider execution, or workflow mutation.",
+6297:                                safety: "Prepared handoff only. No backend write, publish, send, CRM mutation, provider execution, approval creation, task creation, or workflow mutation was performed.",
+6366:                                safety: "Staged review action only. No backend write, publish, send, CRM mutation, provider execution, approval creation, task creation, or workflow mutation was performed."
+6458:					let voiceTranscriptCaptured = false;
+6472:						const transcript = asString(event?.results?.[0]?.[0]?.transcript || "").trim();
+6473:						if (!transcript) {
+6474:							updateStatus("Voice input returned no transcript. Try again and speak clearly after pressing the microphone.");
+6477:						voiceTranscriptCaptured = true;
+6478:						setAiComposerValue(session, input, transcript);
+6480:							input.value = transcript;
+6492:                                                if (!voiceTranscriptCaptured) {
+6616:		                                        provider: result?.provider,
+6625:                                        const responseRoute = resolveAiResponseOutputRoute(session, {
+6644:		                                        provider: result?.provider
+6938:				const responseRoute = resolveAiResponseOutputRoute(session, latestResponse);
+6939:				const destination = asString(latestResponse.destinationRoute || responseRoute.destinationRoute || destinationRouteForSpecialist(session.modeId, responseRoute.outputType || "guidance"));
+7243:        description: flow.readable,
+7298:function getAiEmotionalUx(session) {
+7414:function getAiEmotionalContext(session) {
+7433:    const emotion = getAiEmotionalContext(session);
+7438:        emotion,
+7513:        provider: "abstracted",
+
+			nextSafeAction: "Open Media Studio to review and refine the brief"
+		};
+	}
+
+	if (specialistId === "video_lead") {
+		return {
+			...base,
+			title: outputType === "task" ? "Task: Video production plan" : "Video Brief: Hook, script, storyboard",
+			summary: "Video draft prepared with hook, script structure, and storyboard flow.",
+			steps: [
+				"Draft opening hook and audience angle",
+				"Write short-form script outline",
+				"Outline storyboard beats",
+				"Route to Media Studio for production planning"
+			],
+			safetyLabel: "Video generation requires configured provider or GPU worker; no execution started."
+		};
+	}
+
+	if (specialistId === "publisher") {
+		return {
+			...base,
+			title: outputType === "handoff" ? "Handoff Preview: Publishing package" : "Publishing Draft: Readiness checklist",
+			summary: "Publishing checklist and schedule draft prepared.",
+			notes: [
+				"Final copy should be German for the Germany market unless a destination overrides it.",
+				"Publishing remains gated until channel, approval, and asset readiness are confirmed."
+			],
+			steps: [
+				"Validate asset and copy readiness",
+				"Draft publish schedule by channel",
+				"Flag approval dependencies",
+				"Prepare handoff for publishing review"
+			],
+			confirmationRequired: true,
+			safetyLabel: "Confirmation required before publish. No publish action performed."
+		};
+	}
+
+	if (specialistId === "ads") {
+		return {
+			...base,
+			title: outputType === "task" ? "Task: Paid test plan" : "Ads Draft: Angles and tests",
+			summary: "Ad angle and audience testing draft prepared for review.",
+			hooks: [
+				"German problem-led ad hook",
+				"German outcome-led ad hook",
+				"German objection-led ad hook"
+			],
+			ctas: [
+				"Jetzt testen",
+
+}
+
+function buildPhase2OutputPreview({ intent, session, prompt, projectName }) {
+	const teamMode = session.teamMode === "team";
+	const specialist = teamMode
+		? { id: "operations", label: "Full Team" }
+		: getPhase1SpecialistById(session.modeId);
+
+	const intentToType = {
+		guidance: "guidance",
+		task: "task",
+		workflow: "workflow",
+		handoff: "handoff"
+	};
+	const outputType = intentToType[intent] || "guidance";
+
+	const base = specialistTemplateForOutput({
+		specialist,
+		outputType,
+		prompt,
+		projectName
+	});
+
+	if (!teamMode) return base;
+
+	return {
+		...base,
+		specialistId: "team",
+		title: outputType === "workflow" ? "Team Workflow" : `Team ${titleCase(outputType)} Preview`,
+		summary: `Full team ${outputType.replace("_", " ")} preview prepared for ${projectName || "current project"}.`,
+		bullets: [
+			"Strategist defines priorities, positioning, launch sequence, and strongest next move",
+			"Writer, Media Director, and Video Lead turn strategy into message, asset, and production drafts",
+			"Compliance and Publisher verify claims, approvals, formatting, and release readiness",
+			"Customer Ops and Sales / CRM join when the request touches inbox, tickets, leads, outreach, or CRM"
+		],
+		steps: [
+			"Strategist: decide priority, offer angle, channel sequence, and launch wave",
+			"Writer: draft hooks, captions, messages, email, or outreach copy",
+			"Media / Video: prepare creative direction, asset needs, script, storyboard, or voiceover draft",
+			"Compliance: flag claims, evidence needs, policy risks, and approval gates",
+			"Publisher: package channel-ready copy, assets, schedule notes, and publish checks",
+			"Customer Ops / Sales: add reply, ticket, lead, outreach, or CRM handoff drafts when relevant",
+			"Operations: convert the reviewed output into safe tasks, workflow draft, or handoff context"
+		],
+		destinationRoute: outputType === "task" ? "task-center" : "workflows",
+		nextSafeAction: "Review the team draft, confirm owners, then route draft context to the destination workspace",
+		confirmationNote: "No task, workflow, outreach, customer reply, CRM update, approval, or publishing action is executed from Full Team mode.",
+		safetyLabel: "Full Team output is a coordinated draft preview only."
+	};
+}
+
+function formatOutputTypeLabel(outputType) {
+	const labels = {
+		guidance: "Guidance",
+		task: "Task",
+		workflow: "Workflow",
+		handoff: "Handoff Preview",
+		media_brief: "Media Brief"
+	};
+	return labels[outputType] || titleCase(outputType || "guidance");
+}
+
+function buildPreviewText(output, specialistLabel) {
+	if (!output) return "";
+	const lines = [
+
+}
+
+function getLastAssistantMessage(session) {
+	return asArray(session.messages).slice().reverse().find((item) => item.role === "assistant") || null;
+}
+
+function buildConversationWorkContext(session, fallbackPrompt = "") {
+        const messages = asArray(session.messages).slice(-12);
+        const latestUser = getLastUserMessage(session);
+        const latestAssistant = getLastAssistantMessage(session);
+        const latestResponse = asArray(session.responseHistory)[0] || null;
+        const specialist = session.teamMode === "team"
+                ? { id: "team", label: "Full Team" }
+                : getPhase1SpecialistById(session.modeId);
+
+        const conversationLines = messages
+                .map((message) => {
+                        const role = asString(message.role || "");
+                        const label = role === "user"
+                                ? "User"
+                                : asString(message.specialistLabel || specialist.label || "Specialist");
+                        const content = asString(message.content || message.text || message.responseText || "").trim();
+                        return content ? `${label}: ${content}` : "";
+                })
+                .filter(Boolean);
+
+        const prompt = asString(
+                fallbackPrompt ||
+                latestUser?.content ||
+                latestResponse?.prompt ||
+                session.draftMessage ||
+                ""
+        ).trim();
+
+        const assistantText = asString(
+                latestAssistant?.content ||
+                latestResponse?.responseText ||
+                ""
+        ).trim();
+
+        const summaryParts = [
+                prompt ? `User request: ${prompt}` : "",
+                assistantText ? `Latest specialist answer: ${assistantText}` : "",
+                conversationLines.length ? `Conversation context:\n${conversationLines.join("\n")}` : ""
+        ].filter(Boolean);
+
+        return {
+                prompt,
+                assistantText,
+                conversationText: conversationLines.join("\n"),
+                summary: summaryParts.join("\n\n"),
+                specialistId: specialist.id || session.modeId,
+                specialistLabel: specialist.label || "Specialist",
+                teamMode: session.teamMode,
+                latestResponse
+        };
+}
+
+function buildConversationWorkPrompt(session, outputType, fallbackPrompt = "") {
+        const context = buildConversationWorkContext(session, fallbackPrompt);
+        const typeLabel = {
+                guidance: "review-ready draft",
+                task: "task plan",
+                workflow: "workflow sequence",
+                handoff: "handoff package"
+        }[outputType] || "work draft";
+
+        const basePrompt = context.summary || context.prompt || `Prepare a ${typeLabel}.`;
+
+        return [
+                `Convert this AI Team conversation into a ${typeLabel}.`,
+                `Specialist: ${context.specialistLabel}`,
+                "Use the conversation context, not only the composer text.",
+                "Keep it review-ready and do not execute backend actions.",
+                "",
+                basePrompt
+        ].join("\n");
+}
+
+function setPreviewFromConversation({ session, intent, fallbackPrompt, projectName }) {
+        const workPrompt = buildConversationWorkPrompt(session, intent, fallbackPrompt);
+        const preview = buildPhase2OutputPreview({
+                intent,
+                session,
+                prompt: workPrompt,
+                projectName
+        });
+
+        const context = buildConversationWorkContext(session, fallbackPrompt);
+        preview.sourcePrompt = context.prompt || workPrompt;
+        preview.conversationContext = context.conversationText;
+
+        // Keep raw conversation context available internally, but do not show it as the main output.
+        // The visible preview should stay clean and user-facing.
+        if (context.assistantText) {
+                preview.summary = context.assistantText;
+                preview.mainOutput = context.assistantText;
+        }
+
+        preview.generatedAt = nowIso();
+        preview.safetyLabel = preview.safetyLabel || "Conversation converted into a review-ready draft. No backend action executed.";
+
+        session.outputPreview = preview;
+        session.outputWorkspaceTab = outputTabFromIntent(intent);
+        session.activeOutputTab = session.outputWorkspaceTab;
+        session.workspaceTab = "preview";

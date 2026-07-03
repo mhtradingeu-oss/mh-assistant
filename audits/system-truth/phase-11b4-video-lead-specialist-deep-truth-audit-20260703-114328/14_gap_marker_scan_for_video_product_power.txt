@@ -1,0 +1,1542 @@
+public/control-center/pages/ai-command.js:30:        generateAiCommandCampaignPreview
+public/control-center/pages/ai-command.js:59:                id: "video_lead",
+public/control-center/pages/ai-command.js:60:                label: "Video Lead",
+public/control-center/pages/ai-command.js:62:                summary: "Short-form video scripts, motion direction, and reel strategy.",
+public/control-center/pages/ai-command.js:126:	video_lead: "video_lead",
+public/control-center/pages/ai-command.js:149:		placeholder: "Ask the Strategist to plan a campaign, map launch phases, review channel priorities, or define the offer strategy…",
+public/control-center/pages/ai-command.js:162:		placeholder: "Ask the Content Writer to draft captions, hooks, landing copy, or campaign messages…",
+public/control-center/pages/ai-command.js:175:		placeholder: "Ask the Media Director to define visual direction, prepare a creative brief, or review brand consistency…",
+public/control-center/pages/ai-command.js:179:		safetyNote: "Direction and briefs only. Media generation requires backend confirmation and explicit action.",
+public/control-center/pages/ai-command.js:183:		id: "video_lead",
+public/control-center/pages/ai-command.js:184:		label: "Video Lead",
+public/control-center/pages/ai-command.js:185:		position: "Short-Form Video Lead",
+public/control-center/pages/ai-command.js:187:		summary: "Short-form video scripts, motion direction, and reel strategy.",
+public/control-center/pages/ai-command.js:188:		placeholder: "Ask the Video Lead to write a reel script, map short-form strategy, or outline the next video concept…",
+public/control-center/pages/ai-command.js:189:		canHelp: ["Write video scripts", "Plan short-form strategy", "Define motion direction", "Map video asset requirements", "Prepare video briefs"],
+public/control-center/pages/ai-command.js:190:		cannotDo: ["Generate video directly", "Upload footage without review", "Approve without confirmation", "Run media jobs automatically"],
+public/control-center/pages/ai-command.js:192:		safetyNote: "Scripts and direction only. Video generation requires explicit backend action and approval.",
+public/control-center/pages/ai-command.js:201:		placeholder: "Ask the Publisher to review publishing readiness, check scheduling, or prepare a handoff package…",
+public/control-center/pages/ai-command.js:214:		placeholder: "Ask the Ads Optimizer to draft ad copy, review targeting angles, or plan a paid campaign structure…",
+public/control-center/pages/ai-command.js:227:		placeholder: "Ask the SEO & Insights Analyst to review performance, suggest SEO improvements, or identify top content patterns…",
+public/control-center/pages/ai-command.js:240:		placeholder: "Ask the Compliance Reviewer to check claims, approval risks, publishing safety, and governance notes…",
+public/control-center/pages/ai-command.js:253:		placeholder: "Ask the Operations Lead to turn this into tasks, workflow steps, or handoffs…",
+public/control-center/pages/ai-command.js:266:		placeholder: "Ask the Customer Operations Lead to summarize a customer thread, draft a safe reply, prepare a ticket draft, check SLA risk, or route an escalation for review…",
+public/control-center/pages/ai-command.js:279:		placeholder: "Ask the Sales / CRM Lead to qualify a lead, draft outreach, plan follow-ups, summarize CRM context, or prepare a sales handoff for review…",
+public/control-center/pages/ai-command.js:288:// Role-specific suggested prompt chips (prefill only, no auto-execute)
+public/control-center/pages/ai-command.js:308:	video_lead: [
+public/control-center/pages/ai-command.js:309:		{ label: "Write a reel script", sub: "For the current campaign" },
+public/control-center/pages/ai-command.js:310:		{ label: "Plan short-form content", sub: "Map next 4 video concepts" },
+public/control-center/pages/ai-command.js:311:		{ label: "Outline motion direction", sub: "Align visuals with campaign tone" },
+public/control-center/pages/ai-command.js:312:		{ label: "Map video asset needs", sub: "By platform and format" }
+public/control-center/pages/ai-command.js:358:// Full Team mode suggested prompts
+public/control-center/pages/ai-command.js:392:	video_lead: "VL",
+public/control-center/pages/ai-command.js:445:		{ id: "asset-checklist", label: "Asset Checklist", action: "preview", intent: "task", template: "Create an asset checklist for {project}. List must-have files, missing references, usage context, and priority." },
+public/control-center/pages/ai-command.js:446:		{ id: "visual-direction", label: "Visual Direction", action: "preview", intent: "guidance", template: "Review visual direction for {project}. Identify mismatches, improvements, and required references." },
+public/control-center/pages/ai-command.js:447:		{ id: "open-media-studio", label: "Send prompt to Media Studio", action: "route", route: "media-studio" }
+public/control-center/pages/ai-command.js:449:	video_lead: [
+public/control-center/pages/ai-command.js:450:		{ id: "write-video-hook", label: "Write video hook", action: "preview", intent: "guidance", template: "Write short-form video hooks for {project}. Include 3 opening variants and audience fit." },
+public/control-center/pages/ai-command.js:451:		{ id: "draft-script", label: "Draft script", action: "preview", intent: "guidance", template: "Draft a short-form video script for {project}. Include hook, body, CTA, and visual cues." },
+public/control-center/pages/ai-command.js:452:		{ id: "build-storyboard", label: "Build storyboard", action: "preview", intent: "workflow", template: "Build storyboard beats for {project}. Sequence shots and key transitions." },
+public/control-center/pages/ai-command.js:453:		{ id: "prepare-voiceover", label: "Prepare voiceover", action: "preview", intent: "guidance", template: "Prepare voiceover script options for {project}. Keep clean timing and emphasis notes." },
+public/control-center/pages/ai-command.js:454:		{ id: "map-video-asset-needs", label: "Map video asset needs", action: "preview", intent: "task", template: "Map video asset needs for {project}. Include format, source, and production owner." }
+public/control-center/pages/ai-command.js:513:// 4 quick-action prompts shown in the composer
+public/control-center/pages/ai-command.js:516:	{ icon: "✍️", label: "Generate Content", sub: "Write hooks, captions & scripts", template: "Generate content for {project}. Create hooks, caption ideas, and a reel script for the next product push." },
+public/control-center/pages/ai-command.js:564:		suggestedPrompt: "Act as Writer and generate content angles for the current project and active campaign."
+public/control-center/pages/ai-command.js:577:		bestUse: "When planning image/video requirements across channels.",
+public/control-center/pages/ai-command.js:630:	function detectSpecialistFromBridgePrompt(prompt) {
+public/control-center/pages/ai-command.js:631:		const text = asString(prompt);
+public/control-center/pages/ai-command.js:635:		if (/act as the video lead/i.test(text)) return "video_lead";
+public/control-center/pages/ai-command.js:654:			id: `auto-generate-${Date.now()}`,
+public/control-center/pages/ai-command.js:655:			type: "generate_prompt",
+public/control-center/pages/ai-command.js:657:			action: "Generate prompt from AI command",
+public/control-center/pages/ai-command.js:659:				prompt: command,
+public/control-center/pages/ai-command.js:670:				prompt: command,
+public/control-center/pages/ai-command.js:684:				prompt: command,
+public/control-center/pages/ai-command.js:707:function humanizeValue(value, fallback = "") {
+public/control-center/pages/ai-command.js:708:	if (value == null) return fallback;
+public/control-center/pages/ai-command.js:711:		return clean === "[object Object]" ? fallback : clean;
+public/control-center/pages/ai-command.js:717:		return value.map((item) => humanizeValue(item)).filter(Boolean).join("; ") || fallback;
+public/control-center/pages/ai-command.js:739:			.join("; ") || fallback;
+public/control-center/pages/ai-command.js:741:	return fallback;
+public/control-center/pages/ai-command.js:817:function toNumber(value, fallback = null) {
+public/control-center/pages/ai-command.js:818:	if (value == null || value === "") return fallback;
+public/control-center/pages/ai-command.js:820:	return Number.isFinite(parsed) ? parsed : fallback;
+public/control-center/pages/ai-command.js:997:	if (localDraft.prompt) {
+public/control-center/pages/ai-command.js:998:		StateKernel.write(session, asString(localDraft.prompt), "input");
+public/control-center/pages/ai-command.js:1005:	if (localDraft.prompt || localDraft.updatedAt) {
+public/control-center/pages/ai-command.js:1013:		prompt: session.draftMessage,
+public/control-center/pages/ai-command.js:1061:			reason: "AI response guidance bridge is not connected yet (API function unavailable)."
+public/control-center/pages/ai-command.js:1101:function summarizeAiCommandSessionIntent(value = "", fallback = "Session") {
+public/control-center/pages/ai-command.js:1107:        if (!text) return fallback;
+public/control-center/pages/ai-command.js:1148:                latestResponse.prompt ||
+public/control-center/pages/ai-command.js:1221:function buildSpecialistChatPrompt({ prompt, specialistLabel, modeLabel, projectName, language, outputLanguage, market }) {
+public/control-center/pages/ai-command.js:1222:	const cleanPrompt = asString(prompt).trim();
+public/control-center/pages/ai-command.js:1305:	if (id === "video_lead") return "media-studio";
+public/control-center/pages/ai-command.js:1327:                response.prompt
+public/control-center/pages/ai-command.js:1344:        const looksMediaLike = /\b(media|visual|creative|image|images|video|reel|storyboard|shot list|asset|assets|design|production|creative direction|voiceover)\b/.test(text);
+public/control-center/pages/ai-command.js:1365:        if (/media|video|visual|asset|creative/.test(outputType) || looksMediaLike) {
+public/control-center/pages/ai-command.js:1415:function specialistTemplateForOutput({ specialist, outputType, prompt, projectName }) {
+public/control-center/pages/ai-command.js:1416:	const cleanPrompt = asString(prompt).trim();
+public/control-center/pages/ai-command.js:1417:	const promptSnippet = cleanPrompt || `Project request for ${projectName || "current project"}`;
+public/control-center/pages/ai-command.js:1430:		generatedAt: nowIso(),
+public/control-center/pages/ai-command.js:1431:		sourcePrompt: promptSnippet,
+public/control-center/pages/ai-command.js:1456:			summary: `Priority guidance prepared from: ${promptSnippet}`,
+public/control-center/pages/ai-command.js:1485:				"Use Arabic freely in the conversation; publishable copy should be reviewed in German.",
+public/control-center/pages/ai-command.js:1504:			summary: "Media brief prepared with visual direction, prompt ideas, and required assets.",
+public/control-center/pages/ai-command.js:1511:				"Prompt ideas prepared for image/video planning",
+public/control-center/pages/ai-command.js:1514:			safetyLabel: "No media generation executed. Brief and routing only.",
+public/control-center/pages/ai-command.js:1519:	if (specialistId === "video_lead") {
+public/control-center/pages/ai-command.js:1522:			title: outputType === "task" ? "Task: Video production plan" : "Video Brief: Hook, script, storyboard",
+public/control-center/pages/ai-command.js:1523:			summary: "Video draft prepared with hook, script structure, and storyboard flow.",
+public/control-center/pages/ai-command.js:1527:				"Outline storyboard beats",
+public/control-center/pages/ai-command.js:1530:			safetyLabel: "Video generation requires configured provider or GPU worker; no execution started."
+public/control-center/pages/ai-command.js:1712:function buildPhase2OutputPreview({ intent, session, prompt, projectName }) {
+public/control-center/pages/ai-command.js:1729:		prompt,
+public/control-center/pages/ai-command.js:1742:			"Writer, Media Director, and Video Lead turn strategy into message, asset, and production drafts",
+public/control-center/pages/ai-command.js:1749:			"Media / Video: prepare creative direction, asset needs, script, storyboard, or voiceover draft",
+public/control-center/pages/ai-command.js:1831:                preview.generatedOutput ||
+public/control-center/pages/ai-command.js:1875:		const providerMatch = /openai|replicate|stability|runway|elevenlabs|anthropic/.test(integrationId);
+public/control-center/pages/ai-command.js:1877:		return providerMatch && readyState;
+public/control-center/pages/ai-command.js:1998:		writer: ["content", "post", "caption", "blog", "script", "email", "landing page section", "reel script", "copy", "write", "hooks"],
+public/control-center/pages/ai-command.js:2000:		media: ["media", "design", "visual", "creative brief", "format", "brand", "layout", "image direction", "creative direction", "image", "video", "photo", "asset", "library", "gallery", "footage", "visual assets"],
+public/control-center/pages/ai-command.js:2055:		notes.push("Paid platform reporting not connected — ROAS guidance is limited.");
+public/control-center/pages/ai-command.js:2171:			: "Paid reporting not connected — connect Meta Ads, Google Ads, or TikTok Ads.",
+public/control-center/pages/ai-command.js:2345:					insights: insightsResult.status === "fulfilled" ? insightsResult.value : (insightsMissing ? { project: projectName, generated_at: nowIso(), data_coverage: {} } : null),
+public/control-center/pages/ai-command.js:2346:					learning: learningResult.status === "fulfilled" ? learningResult.value : (learningMissing ? { project: projectName, generated_at: nowIso(), learning_patterns: {}, recommendations: [] } : null),
+public/control-center/pages/ai-command.js:2496:function normalizeAiInboundSpecialistId(value, fallback = "operations") {
+public/control-center/pages/ai-command.js:2497:	const fallbackId = MODE_ID_ALIASES[getAiRoomRoleId(fallback)] || getAiRoomRoleId(fallback);
+public/control-center/pages/ai-command.js:2498:	const raw = getAiRoomRoleId(value || fallbackId);
+public/control-center/pages/ai-command.js:2502:	return SPECIALIST_DEFS.some((item) => item.id === finalId) ? finalId : fallbackId;
+public/control-center/pages/ai-command.js:2511:	const fallbackRoute = sourcePage === "workspace" ? "workflows" : sourcePage;
+public/control-center/pages/ai-command.js:2512:	const fallbackLabel = sourceLabel || routeLabel(fallbackRoute);
+public/control-center/pages/ai-command.js:2517:		const route = normalizeAiInboundSourcePage(rawRoute || stringRoute || fallbackRoute);
+public/control-center/pages/ai-command.js:2518:		const label = firstAiInboundText(record.label, record.title, record.name) || routeLabel(route) || fallbackLabel;
+public/control-center/pages/ai-command.js:2525:		route: fallbackRoute,
+public/control-center/pages/ai-command.js:2526:		label: fallbackLabel,
+public/control-center/pages/ai-command.js:2527:		reason: `Return to ${fallbackLabel} after AI Team review.`
+public/control-center/pages/ai-command.js:2548:		summary: firstAiInboundText(preview.summary, preview.description, normalized.prompt),
+public/control-center/pages/ai-command.js:2551:		generatedAt: asString(preview.generatedAt || preview.generated_at || nowIso()),
+public/control-center/pages/ai-command.js:2552:		sourcePrompt: firstAiInboundText(preview.sourcePrompt, preview.source_prompt, normalized.prompt),
+public/control-center/pages/ai-command.js:2585:	return [handoff?.source_page, handoff?.destination_page, payload.prompt, payload.title]
+public/control-center/pages/ai-command.js:2617:	const prompt = normalizeAiComposerPrompt(firstAiInboundText(
+public/control-center/pages/ai-command.js:2618:		payload.prompt,
+public/control-center/pages/ai-command.js:2621:		draftContext.prompt,
+public/control-center/pages/ai-command.js:2654:		prompt,
+public/control-center/pages/ai-command.js:2677:	/* AI_WRITE */ StateKernel.write(session, normalized.prompt, "ai");
+public/control-center/pages/ai-command.js:2678:	/* composerText_FROZEN */ normalized.prompt;
+public/control-center/pages/ai-command.js:2708:		lastCommand: normalized.prompt,
+public/control-center/pages/ai-command.js:2739:	if (typeof executeProjectAiCommand !== "function") throw new Error("AI command service is unavailable.");
+public/control-center/pages/ai-command.js:2766:		const failureReason = asString(payload?.error) || asString(payloadResponse?.error) || asString(error?.message) || "AI provider failed to return output.";
+public/control-center/pages/ai-command.js:2774:			nextActions: ["Check AI provider configuration and retry."],
+public/control-center/pages/ai-command.js:2831:    const fallback =
+public/control-center/pages/ai-command.js:2838:      ...fallback,
+public/control-center/pages/ai-command.js:2840:      name: asString(member.name || fallback.name || member.role || "AI Specialist"),
+public/control-center/pages/ai-command.js:2841:      role: asString(member.role || fallback.role || id),
+public/control-center/pages/ai-command.js:2842:      purpose: asString(member.purpose || member.description || fallback.purpose || "Support the current operating context."),
+public/control-center/pages/ai-command.js:2843:      bestUse: asString(member.bestUse || member.best_use || fallback.bestUse || "Use when this specialist owns the next step."),
+public/control-center/pages/ai-command.js:2864:	caps.push("Content generation", "Research & competitor analysis", "Execution routing");
+public/control-center/pages/ai-command.js:2952:				<h3 style="margin:0;font-size:14px;font-weight:600;color:var(--color-text-0);">Suggested prompts</h3>
+public/control-center/pages/ai-command.js:2953:				<span style="font-size:11px;color:var(--color-text-2);">Prefill only — send prompt for preview</span>
+public/control-center/pages/ai-command.js:2956:				<div class="ctrl-prompts-grid">
+public/control-center/pages/ai-command.js:2959:							class="ctrl-prompt-btn"
+public/control-center/pages/ai-command.js:2964:							<span class="ctrl-prompt-icon">${action.icon}</span>
+public/control-center/pages/ai-command.js:2966:								<span class="ctrl-prompt-label">${escapeHtml(action.label)}</span>
+public/control-center/pages/ai-command.js:2967:								<span class="ctrl-prompt-sub">${escapeHtml(action.sub)}</span>
+public/control-center/pages/ai-command.js:3008:					<span>${escapeHtml(asString(response.error) || asString(response.summary) || "AI provider error.")}</span>
+public/control-center/pages/ai-command.js:3078:				<div class="ctrl-empty-body">Choose a specialist above, pick a suggested prompt, or write your own command and hit Send.</div>
+public/control-center/pages/ai-command.js:3246:function buildConversationWorkContext(session, fallbackPrompt = "") {
+public/control-center/pages/ai-command.js:3266:        const prompt = asString(
+public/control-center/pages/ai-command.js:3267:                fallbackPrompt ||
+public/control-center/pages/ai-command.js:3269:                latestResponse?.prompt ||
+public/control-center/pages/ai-command.js:3281:                prompt ? `User request: ${prompt}` : "",
+public/control-center/pages/ai-command.js:3287:                prompt,
+public/control-center/pages/ai-command.js:3298:function buildConversationWorkPrompt(session, outputType, fallbackPrompt = "") {
+public/control-center/pages/ai-command.js:3299:        const context = buildConversationWorkContext(session, fallbackPrompt);
+public/control-center/pages/ai-command.js:3307:        const basePrompt = context.summary || context.prompt || `Prepare a ${typeLabel}.`;
+public/control-center/pages/ai-command.js:3319:function setPreviewFromConversation({ session, intent, fallbackPrompt, projectName }) {
+public/control-center/pages/ai-command.js:3320:        const workPrompt = buildConversationWorkPrompt(session, intent, fallbackPrompt);
+public/control-center/pages/ai-command.js:3324:                prompt: workPrompt,
+public/control-center/pages/ai-command.js:3328:        const context = buildConversationWorkContext(session, fallbackPrompt);
+public/control-center/pages/ai-command.js:3329:        preview.sourcePrompt = context.prompt || workPrompt;
+public/control-center/pages/ai-command.js:3339:        preview.generatedAt = nowIso();
+public/control-center/pages/ai-command.js:3349:function buildCommandEnvelope(session, prompt) {
+public/control-center/pages/ai-command.js:3354:	return `${asString(prompt).trim()}\n\nCommand type: ${commandTypeLabel}\nTarget: ${targetLine}`;
+public/control-center/pages/ai-command.js:3397:			reason: "A clear campaign context helps every specialist agent generate more precise outputs.",
+public/control-center/pages/ai-command.js:3405:		reason: "Core readiness is stable enough to move into output generation and optimization.",
+public/control-center/pages/ai-command.js:3578:				<span class="aicmd-v2-chat-bridge ${safeBridgeStatus.available ? "is-available" : "is-unavailable"}">
+public/control-center/pages/ai-command.js:3635:	const plannedSpecialists = AI_ROOM_PLANNED_SPECIALISTS.map((item) => `
+public/control-center/pages/ai-command.js:3636:		<div class="aicmd-room-member aicmd-room-member-planned" aria-disabled="true">
+public/control-center/pages/ai-command.js:3698:			<div class="aicmd-room-planned-specialists" aria-label="Additional specialists planned">
+public/control-center/pages/ai-command.js:3699:				<span class="aicmd-room-planned-title">Planned lanes, not active specialists</span>
+public/control-center/pages/ai-command.js:3700:				${plannedSpecialists}
+public/control-center/pages/ai-command.js:3757:        if (roleId === "media_director" || roleId === "video_lead") return `${label} is preparing creative direction...`;
+public/control-center/pages/ai-command.js:3772:		? "Team orchestration across strategy, writing, media/video, compliance, publishing, customer operations, sales/CRM, and operations"
+public/control-center/pages/ai-command.js:3876:				<span class="aicmd-v2-tools-count">${tools.length} prompt tools</span>
+public/control-center/pages/ai-command.js:3971:        const teamIds = ["strategist", "writer", "media", "video_lead", "compliance_reviewer", "operations"];
+public/control-center/pages/ai-command.js:4014:                                <span class="aicmd-chatfirst-pill ${safeBridgeStatus.available ? "is-available" : "is-planned"}">${escapeHtml(bridgeLabel)}</span>
+public/control-center/pages/ai-command.js:4029:                        <p class="aicmd-chatfirst-tab-note">AI Command prepares guidance, drafts, previews, and handoff context only. Publishing, approvals, CRM updates, workflow runs, customer sends, provider execution, and durable task creation remain confirmation-gated in the owning workspace.</p>
+public/control-center/pages/ai-command.js:4104:				<span class="aicmd-chatfirst-status ${safeBridgeStatus.available ? "is-available" : "is-unavailable"}">${escapeHtml(bridgeLabel)}</span>
+public/control-center/pages/ai-command.js:4149:				<span class="aicmd-chatfirst-pill ${safeBridgeStatus.available ? "is-available" : "is-planned"}">${escapeHtml(safeBridgeStatus.available ? "Connected" : "Guarded")}</span>
+public/control-center/pages/ai-command.js:4187:				<div class="aicmd-chatfirst-planned-list" aria-label="Planned specialists">
+public/control-center/pages/ai-command.js:4189:						<div class="aicmd-chatfirst-specialist-option is-planned" aria-disabled="true">
+public/control-center/pages/ai-command.js:4221:        const fallbackMessages = !selectedMessages.length && selectedResponses.length
+public/control-center/pages/ai-command.js:4227:                                content: item.prompt || "",
+public/control-center/pages/ai-command.js:4228:                                createdAt: item.generatedAt || ""
+public/control-center/pages/ai-command.js:4235:                                createdAt: item.generatedAt || "",
+public/control-center/pages/ai-command.js:4243:        const conversationMessages = session.isFreshAiChatSession ? [] : (selectedMessages.length ? selectedMessages : fallbackMessages);
+public/control-center/pages/ai-command.js:4338:                { id: "write", label: "Write", summary: "Prepare documents, copy, agreements, or presentation drafts.", enabled: false },
+public/control-center/pages/ai-command.js:4339:                { id: "offer", label: "Offer", summary: "Shape a product offer from pricing, market, and audience context.", enabled: false },
+public/control-center/pages/ai-command.js:4340:                { id: "lead", label: "Lead", summary: "Prepare lead discovery and outreach workflow drafts.", enabled: false },
+public/control-center/pages/ai-command.js:4341:                { id: "media", label: "Media", summary: "Create a media brief, storyboard, and production direction.", enabled: false },
+public/control-center/pages/ai-command.js:4342:                { id: "publish", label: "Publish", summary: "Prepare publishing checklist and handoff readiness.", enabled: false }
+public/control-center/pages/ai-command.js:4357:                                                class="aicmd-smart-action${action.enabled ? "" : " is-planned"}"
+public/control-center/pages/ai-command.js:4360:                                                ${action.enabled ? "" : "disabled"}
+public/control-center/pages/ai-command.js:4435:        const goalOptions = [["sales", "Sales"], ["launch", "Product launch"], ["leads", "Lead generation"], ["awareness", "Awareness"], ["retargeting", "Retargeting"]];
+public/control-center/pages/ai-command.js:4439:        const formatOptions = [["mixed", "Mixed package"], ["image", "Image"], ["video", "Video"], ["email", "Email"], ["landing", "Landing page"], ["ads", "Ads"]];
+public/control-center/pages/ai-command.js:4538:                                                                <span><strong>Status</strong>${escapeHtml(preview.backendPreview ? "Backend preview" : "Local fallback")}</span>
+public/control-center/pages/ai-command.js:4566:                                                        <strong>Ready to generate</strong>
+public/control-center/pages/ai-command.js:4573:                                        <span>Review-first flow: generate preview, approve, then hand off to the owning surface. No publish, send, CRM update, provider execution, or workflow mutation happens here.</span>
+public/control-center/pages/ai-command.js:4577:                                                        ${preview.title ? "Regenerate AI Team Preview" : "Generate AI Team Preview"}
+public/control-center/pages/ai-command.js:4670:                                        <small>Strategy, content, media, operations, compliance, customer, campaign and provider-readiness planning.</small>
+public/control-center/pages/ai-command.js:4696:                                <span>Library, campaigns, content, customers, governance, integrations and provider readiness are connected as guarded planning context. Execution stays confirmation-gated.</span>
+public/control-center/pages/ai-command.js:4735:                                                placeholder="Ask anything"
+public/control-center/pages/ai-command.js:4747:                                        <button id="aicmdV2AskBtn" class="aicmd-chatfirst-send aicmd-final-send" type="button" ${isGenerating ? "disabled" : ""} title="Ask AI Team">
+public/control-center/pages/ai-command.js:4782:                                                title="${escapeHtml(tool.description || tool.label || "Prepare prompt tool")}"
+public/control-center/pages/ai-command.js:4853:				<span class="aicmd-chatfirst-pill ${safeBridgeStatus.available ? "is-available" : "is-planned"}">${escapeHtml(safeBridgeStatus.available ? "Chat ready" : "Preview guarded")}</span>
+public/control-center/pages/ai-command.js:4878:			<div class="aicmd-chatfirst-planned-grid" aria-label="Planned specialists">
+public/control-center/pages/ai-command.js:4880:					<div class="aicmd-chatfirst-team-card is-planned" aria-disabled="true">
+public/control-center/pages/ai-command.js:4905:				<span class="aicmd-chatfirst-pill">${tools.length} prompt tools</span>
+public/control-center/pages/ai-command.js:5009:					<span>Start in the chat composer or open a Tool Drawer prompt to prepare a preview.</span>
+public/control-center/pages/ai-command.js:5050:	const providerConfigured = isProviderLikelyConfigured(aiContext);
+public/control-center/pages/ai-command.js:5053:		{ label: "Voice input", value: "Coming", className: "is-planned" },
+public/control-center/pages/ai-command.js:5054:		{ label: "Team chat", value: bridgeStatus.available ? "AI ready" : "Coming", className: bridgeStatus.available ? "is-available" : "is-planned" },
+public/control-center/pages/ai-command.js:5055:		{ label: "Media gen", value: "Coming", className: "is-planned" },
+public/control-center/pages/ai-command.js:5056:		{ label: "GPU video", value: "Coming", className: "is-planned" },
+public/control-center/pages/ai-command.js:5057:		{ label: "Image prompt generation", value: providerConfigured ? "Provider may be ready" : "Provider dependent", className: providerConfigured ? "is-available" : "is-planned" }
+public/control-center/pages/ai-command.js:5077:	const recentAt = asArray(session.responseHistory)[0]?.generatedAt || preview.generatedAt || "";
+public/control-center/pages/ai-command.js:5141:        const promptModeId = MODE_ID_ALIASES[getAiRoomRoleId(session.modeId)] || getAiRoomRoleId(session.modeId);
+public/control-center/pages/ai-command.js:5144:                : (SPECIALIST_SUGGESTED_PROMPTS[promptModeId] || SPECIALIST_SUGGESTED_PROMPTS.operations);
+public/control-center/pages/ai-command.js:5171:        const fallbackSelectedResponses = !selectedMessages.length && selectedResponses.length
+public/control-center/pages/ai-command.js:5177:                                content: item.prompt || "",
+public/control-center/pages/ai-command.js:5178:                                createdAt: item.generatedAt || ""
+public/control-center/pages/ai-command.js:5185:                                createdAt: item.generatedAt || ""
+public/control-center/pages/ai-command.js:5190:        const conversationMessages = selectedMessages.length ? selectedMessages : fallbackSelectedResponses;
+public/control-center/pages/ai-command.js:5199:                                <span class="aicmd-v2-chat-bridge ${safeBridgeStatus.available ? "is-available" : "is-unavailable"}">${escapeHtml(bridgeLabel)}</span>
+public/control-center/pages/ai-command.js:5230:                                        <small>${escapeHtml(latestSelected ? formatTime(latestSelected.generatedAt) : "No reply yet")}</small>
+public/control-center/pages/ai-command.js:5261:                                                <span>${escapeHtml(formatTime(latestSelected.generatedAt))}</span>
+public/control-center/pages/ai-command.js:5288:                                                                                <span>${escapeHtml(formatTime(item.generatedAt))}</span>
+public/control-center/pages/ai-command.js:5302:	const promptModeId = MODE_ID_ALIASES[getAiRoomRoleId(session.modeId)] || getAiRoomRoleId(session.modeId);
+public/control-center/pages/ai-command.js:5303:	const prompts = session.teamMode === "team"
+public/control-center/pages/ai-command.js:5305:		: (SPECIALIST_SUGGESTED_PROMPTS[promptModeId] || SPECIALIST_SUGGESTED_PROMPTS.operations);
+public/control-center/pages/ai-command.js:5307:		<div class="aicmd-v2-prompts">
+public/control-center/pages/ai-command.js:5308:			<div class="aicmd-v2-prompts-head">
+public/control-center/pages/ai-command.js:5309:				<span class="aicmd-v2-prompts-label">Ask next</span>
+public/control-center/pages/ai-command.js:5310:				<span class="aicmd-v2-prompts-hint">Prefills only - review the wording, then ask the AI</span>
+public/control-center/pages/ai-command.js:5312:			<div class="aicmd-v2-prompts-grid">
+public/control-center/pages/ai-command.js:5313:				${prompts.map((p, idx) => `
+public/control-center/pages/ai-command.js:5315:						class="aicmd-v2-prompt-chip"
+public/control-center/pages/ai-command.js:5317:						data-aicmdv2-prompt="${idx}"
+public/control-center/pages/ai-command.js:5318:						data-aicmdv2-prompt-text="${escapeHtml(p.prompt || `${p.label}. ${p.sub}. Prepare this as a review-ready draft only; do not execute anything.`)}"
+public/control-center/pages/ai-command.js:5320:						<span class="aicmd-v2-prompt-chip-label">${escapeHtml(p.label)}</span>
+public/control-center/pages/ai-command.js:5321:						<span class="aicmd-v2-prompt-chip-sub">${escapeHtml(p.sub)}</span>
+public/control-center/pages/ai-command.js:5423:			body: item.prompt || item.responseText || "",
+public/control-center/pages/ai-command.js:5424:			time: item.generatedAt
+public/control-center/pages/ai-command.js:5430:			time: preview.generatedAt
+public/control-center/pages/ai-command.js:5446:							<p>${escapeHtml(humanizeValue(item.body, "No prompt recorded."))}</p>
+public/control-center/pages/ai-command.js:5515:		// Consume prompt set by home.js handleAiRoleClick via quickCommandInput.
+public/control-center/pages/ai-command.js:5534:			persistSessionDraft(sessionKey, session, detectedSpecialist ? "Specialist context loaded from Home" : "AI prompt loaded from workspace");
+public/control-center/pages/ai-command.js:5578:		const setPreviewFromIntent = (intent, fallbackPrompt = "", options = {}) => {
+public/control-center/pages/ai-command.js:5579:			const value = asString(input?.value || session.draftMessage || fallbackPrompt || "").trim();
+public/control-center/pages/ai-command.js:5596:				prompt: value,
+public/control-center/pages/ai-command.js:5753:		Array.from(document.querySelectorAll("[data-aicmdv2-prompt]")).forEach((btn) => {
+public/control-center/pages/ai-command.js:5755:				const text = asString(btn.getAttribute("data-aicmdv2-prompt-text") || "");
+public/control-center/pages/ai-command.js:5759:				persistSessionDraft(sessionKey, session, "Suggested prompt loaded — review and send when ready");
+public/control-center/pages/ai-command.js:5760:				updateStatus("Suggested prompt loaded into composer. Review it, then Ask AI Team or Draft.");
+public/control-center/pages/ai-command.js:5804:                        updateStatus(open ? `${reason} opened. Choose temporary file context, trusted Library source, planned product context, or current project context.` : `${reason} closed.`);
+public/control-center/pages/ai-command.js:5844:                                        updateStatus("Direct product/SKU source selection is planned. Use a trusted Library source or paste product details for now.");
+public/control-center/pages/ai-command.js:5845:                                        showMessage?.("Product/SKU selector is planned. Current safe options: Library source, uploaded filename context, project context, or manual product details.");
+public/control-center/pages/ai-command.js:5947:                                updateStatus("Voice conversation requires the next provider-backed phase: recording, STT, specialist reply, and TTS playback. Voice dictation is ready now.");
+public/control-center/pages/ai-command.js:5948:                                showMessage?.("Voice dictation is ready. Full voice conversation will be implemented as the next provider-backed voice mode.");
+public/control-center/pages/ai-command.js:5968:                                updateStatus("This Smart Action is planned. Campaign Builder is available first.");
+public/control-center/pages/ai-command.js:6023:                                        body: "Prepare creative direction, image/video brief, shot list, format requirements, storyboard/voiceover notes, and asset gaps."
+public/control-center/pages/ai-command.js:6059:                                                body: `Use ${sourceMeaning}. Produce a review-ready campaign package before any handoff, approval, publishing, sending, CRM update, provider execution, or workflow mutation.`
+public/control-center/pages/ai-command.js:6075:                                                body: "Define hero visual, product framing, scene list, required assets, image/video format, voiceover direction, and Media Studio handoff notes."
+public/control-center/pages/ai-command.js:6091:                                safety: "Preview only. No publish, send, CRM mutation, provider execution, workflow mutation, or Governance approval is performed here."
+public/control-center/pages/ai-command.js:6129:                function normalizeBackendCampaignPreview(payload = {}, fallbackPreview = {}) {
+public/control-center/pages/ai-command.js:6145:                                ...asObject(fallbackPreview),
+public/control-center/pages/ai-command.js:6146:                                title: asString(body.title || fallbackPreview.title || "AI Team campaign preview"),
+public/control-center/pages/ai-command.js:6147:                                summary: asString(body.summary || fallbackPreview.summary || ""),
+public/control-center/pages/ai-command.js:6148:                                source: asString(body.source_type || body.source || fallbackPreview.source || ""),
+public/control-center/pages/ai-command.js:6149:                                sourceLabel: asString(body.source_label || fallbackPreview.sourceLabel || fallbackPreview.source || ""),
+public/control-center/pages/ai-command.js:6150:                                goal: asString(body.goal || fallbackPreview.goal || ""),
+public/control-center/pages/ai-command.js:6151:                                channel: asString(body.channel || fallbackPreview.channel || ""),
+public/control-center/pages/ai-command.js:6152:                                market: asString(body.market || fallbackPreview.market || ""),
+public/control-center/pages/ai-command.js:6153:                                language: asString(body.language || fallbackPreview.language || ""),
+public/control-center/pages/ai-command.js:6154:                                format: asString(body.format || fallbackPreview.format || ""),
+public/control-center/pages/ai-command.js:6155:                                deadline: asString(body.deadline || fallbackPreview.deadline || ""),
+public/control-center/pages/ai-command.js:6156:                                audience: asString(body.audience || campaignPackage.targetAudience || fallbackPreview.audience || ""),
+public/control-center/pages/ai-command.js:6157:                                offer: asString(body.offer || campaignPackage.offer || fallbackPreview.offer || ""),
+public/control-center/pages/ai-command.js:6158:                                productFocus: asString(body.product_focus || body.productFocus || fallbackPreview.productFocus || ""),
+public/control-center/pages/ai-command.js:6159:                                complianceSensitivity: asString(body.compliance_sensitivity || body.complianceSensitivity || fallbackPreview.complianceSensitivity || ""),
+public/control-center/pages/ai-command.js:6163:                                        ? "Backend preview only. No publish, send, CRM mutation, provider execution, workflow mutation, Governance approval, task creation, or durable handoff was performed."
+public/control-center/pages/ai-command.js:6164:                                        : asString(fallbackPreview.safety || "Preview only."),
+public/control-center/pages/ai-command.js:6175:                                const backendPayload = await generateAiCommandCampaignPreview(projectName || "default", {
+public/control-center/pages/ai-command.js:6196:                                if (!safety.preview_only || !safety.no_backend_mutation_performed || !safety.no_provider_execution_performed) {
+public/control-center/pages/ai-command.js:6202:                                console.warn("AI Command backend campaign preview fallback", error);
+public/control-center/pages/ai-command.js:6206:                                        backendFallbackReason: asString(error?.message || "Backend preview unavailable")
+public/control-center/pages/ai-command.js:6245:                                        confirmationNote: "Review and route this campaign package through the owning destination workspace before any publishing, sending, approval, task creation, provider execution, or workflow mutation.",
+public/control-center/pages/ai-command.js:6249:                                        backendFallbackReason: asString(preview.backendFallbackReason || "")
+public/control-center/pages/ai-command.js:6252:                                persistSessionDraft(sessionKey, session, preview.backendPreview ? "Campaign Builder backend preview prepared" : "Campaign Builder local fallback preview prepared");
+public/control-center/pages/ai-command.js:6253:                                updateStatus(preview.backendPreview ? "Backend AI Team preview prepared. Review before any handoff or approval." : "Local campaign preview prepared because backend preview is unavailable.");
+public/control-center/pages/ai-command.js:6254:                                showMessage?.(preview.backendPreview ? "Backend AI Team campaign preview is ready for review." : "Campaign preview is ready using the local fallback.");
+public/control-center/pages/ai-command.js:6296:                                backend_fallback_reason: asString(preview.backendFallbackReason || ""),
+public/control-center/pages/ai-command.js:6297:                                safety: "Prepared handoff only. No backend write, publish, send, CRM mutation, provider execution, approval creation, task creation, or workflow mutation was performed.",
+public/control-center/pages/ai-command.js:6366:                                safety: "Staged review action only. No backend write, publish, send, CRM mutation, provider execution, approval creation, task creation, or workflow mutation was performed."
+public/control-center/pages/ai-command.js:6399:			        if (sendBtn && !sendBtn.disabled) {
+public/control-center/pages/ai-command.js:6526:		                        showMessage?.("AI chat route is not connected yet.");
+public/control-center/pages/ai-command.js:6616:		                                        provider: result?.provider,
+public/control-center/pages/ai-command.js:6627:                                                prompt: value,
+public/control-center/pages/ai-command.js:6635:		                                prompt: value,
+public/control-center/pages/ai-command.js:6638:		                                generatedAt: assistantChatMessage.createdAt,
+public/control-center/pages/ai-command.js:6644:		                                        provider: result?.provider
+public/control-center/pages/ai-command.js:6667:		                        updateStatus("Specialist reply generated. No workflow/task/handoff was created.");
+public/control-center/pages/ai-command.js:6668:		                        showMessage?.("Specialist reply generated.");
+public/control-center/pages/ai-command.js:6671:		                        session.responseError = asString(error?.message || "Failed to generate specialist chat reply.");
+public/control-center/pages/ai-command.js:6692:                                const fallback = asString(input?.value || session.draftMessage || "").trim();
+public/control-center/pages/ai-command.js:6696:                                        fallbackPrompt: fallback,
+public/control-center/pages/ai-command.js:6715:                                const fallback = value
+public/control-center/pages/ai-command.js:6721:                                        fallbackPrompt: fallback,
+public/control-center/pages/ai-command.js:6738:                                const fallback = value
+public/control-center/pages/ai-command.js:6744:                                        fallbackPrompt: fallback,
+public/control-center/pages/ai-command.js:6762:                                const fallback = value
+public/control-center/pages/ai-command.js:6768:                                        fallbackPrompt: fallback,
+public/control-center/pages/ai-command.js:6814:					updateStatus("Smart tool drawer is unavailable. Refresh AI Command and try again.");
+public/control-center/pages/ai-command.js:6906:		                const fallback = latestResponse?.prompt || asString(input?.value || session.draftMessage || "");
+public/control-center/pages/ai-command.js:6910:		                        fallbackPrompt: fallback,
+public/control-center/pages/ai-command.js:6917:		                        preview.generatedAt = latestResponse.generatedAt || nowIso();
+public/control-center/pages/ai-command.js:6943:					lastCommand: latestResponse.prompt || "",
+public/control-center/pages/ai-command.js:6956:						prompt: latestResponse.prompt,
+public/control-center/pages/ai-command.js:7045:						prompt: output.sourcePrompt,
+public/control-center/pages/ai-command.js:7298:function getAiEmotionalUx(session) {
+public/control-center/pages/ai-command.js:7316:        composing: { pulse: 0.95, label: "creative generation" },
+public/control-center/pages/ai-command.js:7414:function getAiEmotionalContext(session) {
+public/control-center/pages/ai-command.js:7433:    const emotion = getAiEmotionalContext(session);
+public/control-center/pages/ai-command.js:7438:        emotion,
+public/control-center/pages/ai-command.js:7513:        provider: "abstracted",
+public/control-center/pages/ai-command.js:7599:        composing: "generate_output",
+public/control-center/pages/ai-command.js:7743:      isActionRequest: /create|build|generate|fix|update|deploy/.test(draft),
+public/control-center/pages/ai-command/tool-dock.js:14:function moveFocusOutOfDrawer(drawer, fallbackTarget = null) {
+public/control-center/pages/ai-command/tool-dock.js:19:    if (fallbackTarget && typeof fallbackTarget.focus === "function") {
+public/control-center/pages/ai-command/tool-dock.js:20:      fallbackTarget.focus({ preventScroll: true });
+public/control-center/pages/ai-command/tool-dock.js:78:    const fallbackTool = findToolMetadataById(returnContext.toolId);
+public/control-center/pages/ai-command/tool-dock.js:79:    if (fallbackTool) {
+public/control-center/pages/ai-command/tool-dock.js:82:        btn: createToolButtonAdapter(fallbackTool),
+public/control-center/pages/ai-command/tool-dock.js:83:        tool: fallbackTool,
+public/control-center/pages/ai-command/tool-dock.js:84:        text: fallbackTool.template || "",
+public/control-center/pages/ai-command/tool-dock.js:320:    "This prompt tool needs a trusted Library source first. Choose a source from Library, then return to prepare the composer prompt."
+public/control-center/pages/ai-command/tool-dock.js:337:      sourceInput.placeholder = "Optional: add source usage notes, audience, angle, or claims to avoid...";
+public/control-center/pages/ai-command/tool-dock.js:360:  // Set placeholder for Source Details if empty
+public/control-center/pages/ai-command/tool-dock.js:362:    sourceInput.placeholder = "Optional: add source usage notes, audience, angle, or claims to avoid...";
+public/control-center/pages/ai-command/tool-dock.js:388:        if (sourceInput) sourceInput.placeholder = "Optional: add source usage notes, audience, angle, or claims to avoid...";
+public/control-center/pages/ai-command/tool-dock.js:632:      sourceTypes: ["current_chat", "campaign_brief", "brand_guidelines", "product_images", "reference_asset", "library_source", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:645:      sourceTypes: ["current_chat", "brand_guidelines", "reference_asset", "campaign_mood", "library_source", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:646:      outputTypes: ["moodboard_direction", "style_notes", "reference_list", "brand_alignment_notes"],
+public/control-center/pages/ai-command/tool-dock.js:647:      template: "Define a moodboard direction for {projectName}. Include visual references, atmosphere, color feel, texture, layout mood, and brand alignment."
+public/control-center/pages/ai-command/tool-dock.js:650:      id: "image-prompt",
+public/control-center/pages/ai-command/tool-dock.js:658:      sourceTypes: ["current_chat", "visual_brief", "brand_guidelines", "product_data", "reference_asset", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:659:      outputTypes: ["image_prompt", "prompt_variants", "negative_prompt", "style_prompt"],
+public/control-center/pages/ai-command/tool-dock.js:660:      template: "Create image generation prompts for {projectName}. Include scene, subject, lighting, style, composition, negative constraints, and brand notes."
+public/control-center/pages/ai-command/tool-dock.js:684:      sourceTypes: ["current_chat", "content_draft", "visual_brief", "brand_guidelines", "reference_asset", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:703:  video_lead: [
+public/control-center/pages/ai-command/tool-dock.js:705:      id: "reel-script",
+public/control-center/pages/ai-command/tool-dock.js:714:      outputTypes: ["reel_script", "short_video_script", "hook_variants", "overlay_copy"],
+public/control-center/pages/ai-command/tool-dock.js:715:      template: "Write a short-form reel script for {projectName}. Include hook, scene sequence, voiceover, text overlays, CTA, and shot notes."
+public/control-center/pages/ai-command/tool-dock.js:718:      id: "storyboard",
+public/control-center/pages/ai-command/tool-dock.js:726:      sourceTypes: ["current_chat", "script_draft", "visual_brief", "reference_asset", "product_images", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:727:      outputTypes: ["storyboard", "scene_plan", "caption_plan", "asset_requirements"],
+public/control-center/pages/ai-command/tool-dock.js:728:      template: "Create a storyboard for {projectName}. Include scenes, camera direction, motion, captions, assets needed, and CTA."
+public/control-center/pages/ai-command/tool-dock.js:739:      sourceTypes: ["current_chat", "storyboard", "visual_brief", "product_data", "production_notes", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:741:      template: "Create a shot list for {projectName}. Include product shots, lifestyle shots, closeups, transitions, and required props."
+public/control-center/pages/ai-command/tool-dock.js:744:      id: "voiceover",
+public/control-center/pages/ai-command/tool-dock.js:753:      outputTypes: ["voiceover_script", "audio_direction", "pacing_notes", "tone_variants"],
+public/control-center/pages/ai-command/tool-dock.js:754:      template: "Draft a voiceover script for {projectName}. Include tone, pacing, hook, proof points, and CTA."
+public/control-center/pages/ai-command/tool-dock.js:757:      id: "video-cta",
+public/control-center/pages/ai-command/tool-dock.js:765:      sourceTypes: ["current_chat", "campaign_brief", "offer_data", "video_script", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:766:      outputTypes: ["video_cta_options", "soft_cta", "direct_cta", "urgency_cta", "brand_cta"],
+public/control-center/pages/ai-command/tool-dock.js:767:      template: "Create CTA options for a video campaign for {projectName}. Include soft, direct, urgency, and brand-led versions."
+public/control-center/pages/ai-command/tool-dock.js:1190:      outputTypes: ["follow_up_email", "follow_up_sequence", "value_reminder", "next_step_prompt"],
+public/control-center/pages/ai-command/tool-dock.js:1262:function getToolMetaList(tool = {}, key = "", fallback = []) {
+public/control-center/pages/ai-command/tool-dock.js:1266:  return fallback;
+public/control-center/pages/ai-command/tool-dock.js:1308:      <section class="mhos-tool-drawer-card" role="dialog" aria-modal="true" aria-label="AI prompt tool setup">
+public/control-center/pages/ai-command/tool-dock.js:1321:          Configure a review-only AI prompt with the right output, trusted source context, and destination handoff before loading it into the composer.
+public/control-center/pages/ai-command/tool-dock.js:1373:                placeholder="Example: use the selected Library source for facts only, avoid unsupported claims..."
+public/control-center/pages/ai-command/tool-dock.js:1383:                placeholder="Add audience, goal, keywords, offer, product, or any must-use information..."
+public/control-center/pages/ai-command/tool-dock.js:1500:function populateDrawerSelect(select, rawValue = "", fallbackLabel = "Auto") {
+public/control-center/pages/ai-command/tool-dock.js:1510:  const options = values.length ? values : [String(fallbackLabel || "Auto").trim() || "Auto"];
+public/control-center/pages/ai-command/tool-dock.js:1514:    const label = humanizeMeta(value || fallbackLabel || "Auto");
+public/control-center/pages/ai-command/tool-dock.js:1519:function getSelectedLabel(drawer, selector, fallback = "Auto") {
+public/control-center/pages/ai-command/tool-dock.js:1521:  if (!select || !select.value) return fallback;
+public/control-center/pages/ai-command/tool-dock.js:1658:function closeToolDrawer(drawer, fallbackTarget = null) {
+public/control-center/pages/ai-command/tool-dock.js:1659:  moveFocusOutOfDrawer(drawer, fallbackTarget);
+public/control-center/pages/ai-command/tool-dock.js:1682:    `Prepare a review-only AI prompt for ${btn.getAttribute("data-aicmd-tool-dock-label") || "this tool"}. Choose output, trusted source context, destination handoff, language, and tone before loading it into the composer.`
+public/control-center/pages/ai-command/tool-dock.js:1727:  updateStatus?.(`${btn.getAttribute("data-aicmd-tool-dock-label") || "Quick AI tool"} setup opened. Review source and handoff requirements, then prepare the prompt.`);
+public/control-center/pages/ai-command/tool-dock.js:1749:    text: template || tool.template || tool.prompt || "",
+public/control-center/pages/ai-command/tool-dock.js:1832:        updateStatus?.("This prompt tool needs a trusted Library source first. Choose one from Library before continuing.");
+public/control-center/pages/ai-command/tool-dock.js:1854:        updateStatus(`${label} prompt prepared in the composer. Review it, then ask or create a preview.`);
+public/control-center/pages/media-studio-workspace.js:8:  generateMediaCampaignPack,
+public/control-center/pages/media-studio-workspace.js:9:  generateMediaImage,
+public/control-center/pages/media-studio-workspace.js:10:  generateMediaVideoBrief,
+public/control-center/pages/media-studio-workspace.js:11:  generateMediaVoiceScript,
+public/control-center/pages/media-studio-workspace.js:31:const MEDIA_MODES = ["image", "video", "voice", "campaign-pack"];
+public/control-center/pages/media-studio-workspace.js:32:const MEDIA_STATUSES = ["draft", "prompt_ready", "generating", "needs_review", "approved", "publishing_ready", "sent_to_publishing", "failed"];
+public/control-center/pages/media-studio-workspace.js:33:const MEDIA_PREVIEW_STATES = ["provider_not_configured", "generation_error", "prompt_ready", "generated", "saved_to_library", "needs_review", "approved", "publishing_ready", "sent_to_publishing"];
+public/control-center/pages/media-studio-workspace.js:34:const OUTPUT_PURPOSES = ["social post", "reel", "ad creative", "marketplace image", "email visual", "website banner"];
+public/control-center/pages/media-studio-workspace.js:36:const MEDIA_ASSET_KEYS = ["logo", "brand_guideline", "product_photos", "product_videos", "packaging_images", "social_assets", "campaign_assets"];
+public/control-center/pages/media-studio-workspace.js:40:  videoRole: "video_lead",
+public/control-center/pages/media-studio-workspace.js:44:const MEDIA_ACCESS_KEY_GUIDANCE = "Missing or invalid Control Center access key. Save a valid access key before using provider-backed media generation.";
+public/control-center/pages/media-studio-workspace.js:51:    suggestedPrompt: "Act as Visual Director. Build a high-conversion image brief with composition, camera angle, lighting, text-safe area, and product-first framing."
+public/control-center/pages/media-studio-workspace.js:54:    id: "video-strategist",
+public/control-center/pages/media-studio-workspace.js:56:    purpose: "Translate campaign goals into short-form video concepts with strong hooks and pacing.",
+public/control-center/pages/media-studio-workspace.js:57:    bestUse: "When producing reels, shorts, story cuts, and paid social video variants.",
+public/control-center/pages/media-studio-workspace.js:58:    suggestedPrompt: "Act as Video Strategist. Convert this brief into a 9:16 short video plan with hook, beat-by-beat storyboard, scene transitions, and CTA timing."
+public/control-center/pages/media-studio-workspace.js:64:    bestUse: "When writing voiceovers for UGC-style videos, explainers, and promotional reels.",
+public/control-center/pages/media-studio-workspace.js:65:    suggestedPrompt: "Act as Voice Director. Create a voiceover script with opening hook, scene-aligned narration, cadence notes, and pronunciation guidance."
+public/control-center/pages/media-studio-workspace.js:75:    id: "prompt-engineer",
+public/control-center/pages/media-studio-workspace.js:77:    purpose: "Convert rough drafts into model-ready prompts with constraints and reusable structure.",
+public/control-center/pages/media-studio-workspace.js:78:    bestUse: "When a brief is unclear, too broad, or missing technical constraints for generation.",
+public/control-center/pages/media-studio-workspace.js:79:    suggestedPrompt: "Act as Prompt Engineer. Rewrite this into a structured generation prompt with objective, constraints, negatives, quality targets, and channel-specific formatting."
+public/control-center/pages/media-studio-workspace.js:162:function normalizeStatus(value, fallback = "draft") {
+public/control-center/pages/media-studio-workspace.js:164:  if (!normalized) return fallback;
+public/control-center/pages/media-studio-workspace.js:166:  if (["prompt_ready", "prompt ready", "ready"].includes(normalized)) return "prompt_ready";
+public/control-center/pages/media-studio-workspace.js:173:  return fallback;
+public/control-center/pages/media-studio-workspace.js:178:  if (status === "prompt_ready" || status === "generating" || status === "needs_review") return "warning";
+public/control-center/pages/media-studio-workspace.js:278:    format: mode === "video" ? "9:16 reel" : mode === "voice" ? "voiceover script" : "1:1 social image",
+public/control-center/pages/media-studio-workspace.js:281:    prompt: "",
+public/control-center/pages/media-studio-workspace.js:282:    referenceAsset: "",
+public/control-center/pages/media-studio-workspace.js:283:    outputPurpose: mode === "video" ? "reel" : "social post",
+public/control-center/pages/media-studio-workspace.js:297:  prompt = "",
+public/control-center/pages/media-studio-workspace.js:299:  providerStatus = "prompt_ready",
+public/control-center/pages/media-studio-workspace.js:302:  provider = "",
+public/control-center/pages/media-studio-workspace.js:310:    prompt: asString(prompt),
+public/control-center/pages/media-studio-workspace.js:312:    provider_status: MEDIA_PREVIEW_STATES.includes(asString(providerStatus)) ? asString(providerStatus) : "prompt_ready",
+public/control-center/pages/media-studio-workspace.js:315:    provider: asString(provider),
+public/control-center/pages/media-studio-workspace.js:335:    prompt: firstText(raw.prompt, raw.input_prompt),
+public/control-center/pages/media-studio-workspace.js:337:    providerStatus: firstText(raw.provider_status, raw.status, "prompt_ready"),
+public/control-center/pages/media-studio-workspace.js:340:    provider: firstText(raw.provider),
+public/control-center/pages/media-studio-workspace.js:351:    prompt: clean(seedPrompt),
+public/control-center/pages/media-studio-workspace.js:353:    providerStatus: firstText(seed.providerStatus, "prompt_ready"),
+public/control-center/pages/media-studio-workspace.js:356:    provider: firstText(seed.provider, ""),
+public/control-center/pages/media-studio-workspace.js:371:    session.versioning = createVersioningState(session.form?.prompt, session.form?.reviewNotes, {
+public/control-center/pages/media-studio-workspace.js:377:    session.versioning.versions = createVersioningState(session.form?.prompt, session.form?.reviewNotes).versions;
+public/control-center/pages/media-studio-workspace.js:389:  const fallback = versioning.versions[versioning.versions.length - 1];
+public/control-center/pages/media-studio-workspace.js:390:  versioning.selectedVersionId = fallback?.id || "v1";
+public/control-center/pages/media-studio-workspace.js:391:  return fallback;
+public/control-center/pages/media-studio-workspace.js:425:  return createVersioningState(itemObject.prompt || "", itemObject.reviewNotes || "", {
+public/control-center/pages/media-studio-workspace.js:434:  current.prompt = clean(session.form.prompt);
+public/control-center/pages/media-studio-workspace.js:443:  session.form.prompt = current.prompt || "";
+public/control-center/pages/media-studio-workspace.js:450:function safeJsonParse(value, fallback = {}) {
+public/control-center/pages/media-studio-workspace.js:454:    return parsed && typeof parsed === "object" ? parsed : fallback;
+public/control-center/pages/media-studio-workspace.js:456:    return fallback;
+public/control-center/pages/media-studio-workspace.js:478:      generationOutputs: [],
+public/control-center/pages/media-studio-workspace.js:490:  if (mode === "voice") return "audio";
+public/control-center/pages/media-studio-workspace.js:496:  return mode === "video" ? MEDIA_ROLE_DEFAULTS.videoRole : MEDIA_ROLE_DEFAULTS.designRole;
+public/control-center/pages/media-studio-workspace.js:502:  const mode = requestType === "audio" ? "voice" : requestType === "multi_format" ? "campaign-pack" : requestType || "image";
+public/control-center/pages/media-studio-workspace.js:505:    title: firstText(raw.title, raw.name, raw.prompt, `${titleCase(mode)} media job`),
+public/control-center/pages/media-studio-workspace.js:515:    prompt: firstText(raw.prompt, raw.generation_prompt),
+public/control-center/pages/media-studio-workspace.js:517:    referenceAsset: firstText(raw.reference_asset, raw.referenceAsset, raw.asset_id),
+public/control-center/pages/media-studio-workspace.js:521:    provider: asString(raw.provider || ""),
+public/control-center/pages/media-studio-workspace.js:562:    prompt_ready: 6,
+public/control-center/pages/media-studio-workspace.js:599:    const fulfilledValue = (result, fallback) =>
+public/control-center/pages/media-studio-workspace.js:600:      result?.status === "fulfilled" ? result.value : fallback;
+public/control-center/pages/media-studio-workspace.js:628:    session.error = "Backend media data is unavailable. Media Studio is running in local draft mode.";
+public/control-center/pages/media-studio-workspace.js:726:    payload.prompt,
+public/control-center/pages/media-studio-workspace.js:740:      payload.prompt ||
+public/control-center/pages/media-studio-workspace.js:781:    prompt: item.prompt || "",
+public/control-center/pages/media-studio-workspace.js:782:    referenceAsset: item.referenceAsset || asArray(item.asset_lineage)[0] || "",
+public/control-center/pages/media-studio-workspace.js:788:  session.generationOutputs = asArray(item.outputs);
+public/control-center/pages/media-studio-workspace.js:831:  if (!clean(form.prompt) && intent !== "generate-prompt") errors.prompt = "Prompt or brief is required.";
+public/control-center/pages/media-studio-workspace.js:855:function improvePrompt(prompt) {
+public/control-center/pages/media-studio-workspace.js:856:  const base = clean(prompt) || "Create brand-safe campaign media.";
+public/control-center/pages/media-studio-workspace.js:860:function makeBrandSafe(prompt) {
+public/control-center/pages/media-studio-workspace.js:861:  const base = clean(prompt) || "Create brand-safe campaign media.";
+public/control-center/pages/media-studio-workspace.js:865:function adaptGerman(prompt) {
+public/control-center/pages/media-studio-workspace.js:866:  const base = clean(prompt) || "Create brand-safe campaign media.";
+public/control-center/pages/media-studio-workspace.js:867:  return `${base}\n\nGerman adaptation: keep the visual brief international, adapt on-image or voiceover language to clear German, preserve brand tone, and avoid literal translations that sound unnatural.`;
+public/control-center/pages/media-studio-workspace.js:870:function convertImagePromptToVideoBrief(prompt) {
+public/control-center/pages/media-studio-workspace.js:871:  const base = clean(prompt) || "Create a product-focused image concept.";
+public/control-center/pages/media-studio-workspace.js:872:  return `${base}\n\nConvert to video brief:\n- Duration: 15-30 seconds\n- Hook in first 2 seconds\n- Shot list with camera moves\n- Product visibility in every key shot\n- Text-safe zones and CTA ending\n- Channel export notes for reels/shorts`;
+public/control-center/pages/media-studio-workspace.js:875:function convertVideoBriefToVoiceover(prompt) {
+public/control-center/pages/media-studio-workspace.js:876:  const base = clean(prompt) || "Create a short video plan.";
+public/control-center/pages/media-studio-workspace.js:877:  return `${base}\n\nConvert to voiceover script:\n- Opening hook line\n- Scene-by-scene narration\n- German-friendly pronunciation notes\n- Timing markers for each scene\n- CTA close with compliant brand tone`;
+public/control-center/pages/media-studio-workspace.js:880:function generateAllFormats(session, state) {
+public/control-center/pages/media-studio-workspace.js:881:  const contextPrompt = clean(session.form.prompt) || buildPromptFromContext(state, session);
+public/control-center/pages/media-studio-workspace.js:893:    `${contextPrompt}\n\nCampaign pack outputs: image hero, video short, voiceover script, channel cutdowns, and publishing-ready metadata.`
+public/control-center/pages/media-studio-workspace.js:897:function buildMediaPayload(session, status = "prompt_ready") {
+public/control-center/pages/media-studio-workspace.js:912:    prompt: session.form.prompt,
+public/control-center/pages/media-studio-workspace.js:914:    reference_asset: session.form.referenceAsset,
+public/control-center/pages/media-studio-workspace.js:917:    provider: mode === "video" ? "video provider pending" : mode === "voice" ? "voice provider pending" : "image provider pending",
+public/control-center/pages/media-studio-workspace.js:918:    model: "backend generation pending",
+public/control-center/pages/media-studio-workspace.js:923:    asset_lineage: clean(session.form.referenceAsset) ? [session.form.referenceAsset] : [],
+public/control-center/pages/media-studio-workspace.js:924:    outputs: asArray(session.generationOutputs),
+public/control-center/pages/media-studio-workspace.js:928:      prompt: version.prompt,
+public/control-center/pages/media-studio-workspace.js:930:      provider_status: version.provider_status,
+public/control-center/pages/media-studio-workspace.js:933:      provider: version.provider,
+public/control-center/pages/media-studio-workspace.js:955:    prompt: session.form.prompt,
+public/control-center/pages/media-studio-workspace.js:958:    reference_asset: session.form.referenceAsset
+public/control-center/pages/media-studio-workspace.js:966:    provider: response?.provider,
+public/control-center/pages/media-studio-workspace.js:970:    video_url: response?.video_url,
+public/control-center/pages/media-studio-workspace.js:971:    audio_url: response?.audio_url,
+public/control-center/pages/media-studio-workspace.js:973:    videos: asArray(response?.videos),
+public/control-center/pages/media-studio-workspace.js:974:    audio: response?.audio,
+public/control-center/pages/media-studio-workspace.js:975:    video_brief: response?.video_brief,
+public/control-center/pages/media-studio-workspace.js:978:    improved_prompt: response?.improved_prompt,
+public/control-center/pages/media-studio-workspace.js:986:    provider: response?.provider || "",
+public/control-center/pages/media-studio-workspace.js:1028:    clean(version?.prompt || session.form.prompt)
+public/control-center/pages/media-studio-workspace.js:1040:    prompt: firstText(version?.prompt, session.form.prompt),
+public/control-center/pages/media-studio-workspace.js:1044:    video_url: mediaPreview.videoUrl,
+public/control-center/pages/media-studio-workspace.js:1045:    audio_url: mediaPreview.audioUrl,
+public/control-center/pages/media-studio-workspace.js:1091:  const hasPrompt = Boolean(clean(version.prompt || session.form.prompt));
+public/control-center/pages/media-studio-workspace.js:1094:    session.validation = { ...session.validation, librarySave: "Version needs prompt or output payload before saving to Library." };
+public/control-center/pages/media-studio-workspace.js:1104:    showMessage?.("Already saved to Library (local reference).");
+public/control-center/pages/media-studio-workspace.js:1138:  let reference = {
+public/control-center/pages/media-studio-workspace.js:1158:      reference = {
+public/control-center/pages/media-studio-workspace.js:1174:      showMessage?.("Library backend unavailable. Saved as local library handoff.");
+public/control-center/pages/media-studio-workspace.js:1186:  version.library_asset_ref = reference;
+public/control-center/pages/media-studio-workspace.js:1187:  version.provider_status = "saved_to_library";
+public/control-center/pages/media-studio-workspace.js:1188:  if (["draft", "prompt_ready"].includes(normalizeStatus(version.readiness_status || "draft", "draft"))) {
+public/control-center/pages/media-studio-workspace.js:1199:  session.generationOutputs = asArray(versioning.versions).map((version) => ({
+public/control-center/pages/media-studio-workspace.js:1203:      provider_status: version.provider_status,
+public/control-center/pages/media-studio-workspace.js:1207:    provider: version.provider || "",
+public/control-center/pages/media-studio-workspace.js:1214:function saveDraftToSession(projectName, state, session, status = "prompt_ready") {
+public/control-center/pages/media-studio-workspace.js:1234:    draftJobs: counts.draft + counts.prompt_ready,
+public/control-center/pages/media-studio-workspace.js:1246:      action: "Regenerate or repair the failed media job",
+public/control-center/pages/media-studio-workspace.js:1247:      why: `${failed.title} is blocked. Review the prompt and reference asset before routing downstream.`
+public/control-center/pages/media-studio-workspace.js:1272:      action: "Finish the strongest prompt draft",
+public/control-center/pages/media-studio-workspace.js:1273:      why: "Draft media work exists. Complete prompt, brand style, format, and output purpose before review."
+public/control-center/pages/media-studio-workspace.js:1278:    why: "No media job is ready yet. Start with a brief, build a brand-safe prompt, then review and prepare a Publishing package."
+public/control-center/pages/media-studio-workspace.js:1291:  const imageConnected = capabilityFromOperations(operations, ["image_generation", "image generator", "image_backend"]);
+public/control-center/pages/media-studio-workspace.js:1292:  const videoConnected = capabilityFromOperations(operations, ["video_generation", "video generator", "video_backend"]);
+public/control-center/pages/media-studio-workspace.js:1293:  const voiceConnected = capabilityFromOperations(operations, ["voice_generation", "audio_generation", "voice_backend"]);
+public/control-center/pages/media-studio-workspace.js:1299:    image_generation_backend: imageConnected,
+public/control-center/pages/media-studio-workspace.js:1300:    video_generation_backend: videoConnected,
+public/control-center/pages/media-studio-workspace.js:1301:    voice_generation_backend: voiceConnected,
+public/control-center/pages/media-studio-workspace.js:1311:  if (mode === "image" && readiness.image_generation_backend) return "";
+public/control-center/pages/media-studio-workspace.js:1312:  if (mode === "video" && readiness.video_generation_backend) return "";
+public/control-center/pages/media-studio-workspace.js:1313:  if (mode === "voice" && readiness.voice_generation_backend) return "";
+public/control-center/pages/media-studio-workspace.js:1314:  if (mode === "campaign-pack" && readiness.image_generation_backend && readiness.video_generation_backend && readiness.voice_generation_backend) return "";
+public/control-center/pages/media-studio-workspace.js:1315:  return "Generator backend not connected yet — your prompt/job is ready. Review it, save it as a draft, send it to AI Command, save it to Library, or connect a provider in Integrations before trying real output generation.";
+public/control-center/pages/media-studio-workspace.js:1500:      .media-status-pill.is-prompt-ready,
+public/control-center/pages/media-studio-workspace.js:1520:      .media-prompt-box {
+public/control-center/pages/media-studio-workspace.js:1546:      .media-viewer-video {
+public/control-center/pages/media-studio-workspace.js:1555:      .media-viewer-audio {
+public/control-center/pages/media-studio-workspace.js:1661:    clean(payload.video_url) ||
+public/control-center/pages/media-studio-workspace.js:1662:    clean(payload.audio_url) ||
+public/control-center/pages/media-studio-workspace.js:1664:    asArray(payload.videos).length ||
+public/control-center/pages/media-studio-workspace.js:1665:    clean(payload.video_brief) ||
+public/control-center/pages/media-studio-workspace.js:1667:    asObject(payload.campaign_pack).image_prompt ||
+public/control-center/pages/media-studio-workspace.js:1668:    asObject(payload.campaign_pack).video_brief ||
+public/control-center/pages/media-studio-workspace.js:1679:  const hasReference = Boolean(clean(session.form?.referenceAsset || selectedItem?.referenceAsset));
+public/control-center/pages/media-studio-workspace.js:1694:      detail: "A reference asset is named, but source-of-truth status still needs review."
+public/control-center/pages/media-studio-workspace.js:1716:  const promptText = firstText(version?.prompt, form.prompt, selectedItem?.prompt, selectedItem?.brief);
+public/control-center/pages/media-studio-workspace.js:1717:  const hasBrief = Boolean(promptText || clean(form.objective || selectedItem?.objective));
+public/control-center/pages/media-studio-workspace.js:1720:  const hasBrandCue = Boolean(clean(form.brandStyle || selectedItem?.brandStyle || selectedItem?.referenceAsset || form.referenceAsset));
+public/control-center/pages/media-studio-workspace.js:1723:  const needsGovernance = source.state === "missing" || /claim|proof|medical|guarantee|legal|privacy|gdpr|discount|pricing/i.test(promptText);
+public/control-center/pages/media-studio-workspace.js:1740:        : "Complete the objective, prompt, channel, and format before review."
+public/control-center/pages/media-studio-workspace.js:1745:      state: isBrandSafe && hasBrandCue ? "ready" : promptText ? "warning" : "missing",
+public/control-center/pages/media-studio-workspace.js:1746:      status: isBrandSafe && hasBrandCue ? "Brand guided" : promptText ? "Review brand fit" : "Needs prompt",
+public/control-center/pages/media-studio-workspace.js:1748:        ? "Brand style or reference cues are present."
+public/control-center/pages/media-studio-workspace.js:1767:        : "No obvious governance escalation signal in current prompt context."
+public/control-center/pages/media-studio-workspace.js:1802:          <p class="media-section-copy">Start by choosing Image, Video, Voice, or Campaign Pack. Generate a prompt first, then use Generate Output only when a provider/backend is connected. Save drafts for review, save reusable results to Library, or prepare a Publishing handoff without publishing directly.</p>
+public/control-center/pages/media-studio-workspace.js:1834:  const hasBrief = Boolean(firstText(version?.prompt, form.prompt, form.objective, selectedItem?.prompt, selectedItem?.brief));
+public/control-center/pages/media-studio-workspace.js:1919:    ["Image generation", "Check API readiness"],
+public/control-center/pages/media-studio-workspace.js:1982:  const fallback = getGeneratorFallbackMessage(session, backendProjectName);
+public/control-center/pages/media-studio-workspace.js:1990:          <p class="media-section-copy">Choose a media mode, prepare a prompt/job-ready draft, then render with a connected provider or continue safely with review and handoff.</p>
+public/control-center/pages/media-studio-workspace.js:1994:      <div class="media-mode-tabs" role="tablist" aria-label="Media generation mode">
+public/control-center/pages/media-studio-workspace.js:1996:          <button class="media-mode-tab${item === mode ? " is-active" : ""}" type="button" data-media-mode="${escapeHtml(item)}"${item === "image" || item === "video" ? ` data-new-media-job="${escapeHtml(item)}"` : ""}>${escapeHtml(item === "campaign-pack" ? "Campaign Pack" : titleCase(item))}</button>
+public/control-center/pages/media-studio-workspace.js:1999:      ${fallback ? `<div class="simple-banner">${escapeHtml(fallback)}</div>` : ""}
+public/control-center/pages/media-studio-workspace.js:2001:            Start here: choose Image, Video, Voice, or Campaign Pack. Complete the brief, generate or improve the prompt, then use Generate Output only when a provider/backend is connected. If generation is unavailable or times out, keep the prompt/job-ready draft and continue with review, Library save, AI Command review, or provider setup in Integrations.
+public/control-center/pages/media-studio-workspace.js:2014:          ${renderField({ id: "mediaFormatInput", name: "format", label: "Format", value: form.format, helper: "Examples: 1:1 product image, 9:16 reel, voiceover script, marketplace hero." }, session, escapeHtml)}
+public/control-center/pages/media-studio-workspace.js:2019:        ${renderField({ id: "mediaPromptInput", name: "prompt", label: "Prompt / brief", value: form.prompt, multiline: true, rows: 7, helper: "Use this as the creative brief. If no generation provider is connected, Media Studio keeps it as a prompt/job-ready draft for review, Library save, AI review, or provider handoff." }, session, escapeHtml)}
+public/control-center/pages/media-studio-workspace.js:2021:          ${renderField({ id: "mediaReferenceInput", name: "referenceAsset", label: "Reference asset if available", value: form.referenceAsset, helper: "Use an asset id, filename, or source note already known to the project." }, session, escapeHtml)}
+public/control-center/pages/media-studio-workspace.js:2049:        <button id="mediaImprovePromptBtn" class="btn btn-secondary" type="button">Improve prompt</button>
+public/control-center/pages/media-studio-workspace.js:2052:        <button id="mediaImageToVideoBtn" class="btn btn-secondary" type="button">Convert image prompt to video brief</button>
+public/control-center/pages/media-studio-workspace.js:2053:        <button id="mediaVideoToVoiceBtn" class="btn btn-secondary" type="button">Convert video brief to voiceover</button>
+public/control-center/pages/media-studio-workspace.js:2055:        <button id="mediaSavePromptBtn" class="btn btn-primary" type="button">Save prompt draft</button>
+public/control-center/pages/media-studio-workspace.js:2109:  const fallbackCopy = summary.isAiCampaign
+public/control-center/pages/media-studio-workspace.js:2121:          <p class="media-section-copy">${escapeHtml(summary.brief || summary.prompt || fallbackCopy)}</p>
+public/control-center/pages/media-studio-workspace.js:2154:        <div class="empty-box">Start a media job or load a workflow handoff to create the first prompt-ready draft.</div>
+public/control-center/pages/media-studio-workspace.js:2178:              <button type="button" data-media-action="edit-prompt" data-media-id="${escapeHtml(item.id)}">Edit prompt</button>
+public/control-center/pages/media-studio-workspace.js:2180:              <button type="button" data-media-action="regenerate" data-media-id="${escapeHtml(item.id)}">Regenerate</button>
+public/control-center/pages/media-studio-workspace.js:2196:  const isBrandSafe = brandCheck.is_brand_safe === true || /brand-safe|brand safe/i.test(current.prompt || "");
+public/control-center/pages/media-studio-workspace.js:2202:    clean(payload.video_url) ||
+public/control-center/pages/media-studio-workspace.js:2203:    clean(payload.audio_url) ||
+public/control-center/pages/media-studio-workspace.js:2205:    asArray(payload.videos).length ||
+public/control-center/pages/media-studio-workspace.js:2206:    clean(payload.video_brief) ||
+public/control-center/pages/media-studio-workspace.js:2208:    asObject(payload.campaign_pack).image_prompt ||
+public/control-center/pages/media-studio-workspace.js:2209:    asObject(payload.campaign_pack).video_brief ||
+public/control-center/pages/media-studio-workspace.js:2236:  if (key === "logo-fit") return item.brandStyle || item.referenceAsset ? "Review" : "Missing";
+public/control-center/pages/media-studio-workspace.js:2237:  if (key === "product-visibility") return item.prompt || item.objective ? "Review" : "Missing";
+public/control-center/pages/media-studio-workspace.js:2239:  if (key === "safe-text-area") return item.prompt ? "Review" : "Missing";
+public/control-center/pages/media-studio-workspace.js:2240:  if (key === "german-tone") return /german|deutsch/i.test(item.prompt || "") ? "Review" : "Prepare";
+public/control-center/pages/media-studio-workspace.js:2284:function parseStructuredList(text, fallbackPrefix = "-") {
+public/control-center/pages/media-studio-workspace.js:2288:  return lines.length ? lines.map((line) => `${fallbackPrefix} ${line}`) : [];
+public/control-center/pages/media-studio-workspace.js:2303:  const firstVideo = asObject(asArray(root.videos)[0]);
+public/control-center/pages/media-studio-workspace.js:2304:  const audioObject = asObject(root.audio);
+public/control-center/pages/media-studio-workspace.js:2313:  const videoUrl = firstText(
+public/control-center/pages/media-studio-workspace.js:2314:    normalizeMediaUrl(root.video_url),
+public/control-center/pages/media-studio-workspace.js:2316:    normalizeMediaUrl(asObject(root.video).url),
+public/control-center/pages/media-studio-workspace.js:2317:    normalizeMediaUrl(asObject(root.asset).video_url)
+public/control-center/pages/media-studio-workspace.js:2320:  const audioUrl = firstText(
+public/control-center/pages/media-studio-workspace.js:2321:    normalizeMediaUrl(root.audio_url),
+public/control-center/pages/media-studio-workspace.js:2322:    normalizeMediaUrl(audioObject.url),
+public/control-center/pages/media-studio-workspace.js:2323:    normalizeMediaUrl(asObject(root.voice).audio_url),
+public/control-center/pages/media-studio-workspace.js:2324:    normalizeMediaUrl(asObject(root.asset).audio_url)
+public/control-center/pages/media-studio-workspace.js:2328:  if (videoUrl) {
+public/control-center/pages/media-studio-workspace.js:2329:    detectedType = "video";
+public/control-center/pages/media-studio-workspace.js:2330:  } else if (audioUrl) {
+public/control-center/pages/media-studio-workspace.js:2331:    detectedType = "audio";
+public/control-center/pages/media-studio-workspace.js:2339:    videoUrl,
+public/control-center/pages/media-studio-workspace.js:2340:    audioUrl
+public/control-center/pages/media-studio-workspace.js:2362:  const stateLabel = asString(version.provider_status || "prompt_ready");
+public/control-center/pages/media-studio-workspace.js:2364:  const videoBrief = asString(payload.video_brief);
+public/control-center/pages/media-studio-workspace.js:2368:  let previewBody = `<div class="media-prompt-box">${escapeHtml("Prompt-ready state. Generate output or switch version to inspect payload.")}</div>`;
+public/control-center/pages/media-studio-workspace.js:2380:      : `<div class="media-prompt-box">${escapeHtml(JSON.stringify(payload, null, 2) || "No image output was returned yet. If the provider is not connected or timed out, keep the prompt/job-ready draft and continue with review, Library save, or provider setup in Integrations.")}</div>`;
+public/control-center/pages/media-studio-workspace.js:2383:  if (mode === "video") {
+public/control-center/pages/media-studio-workspace.js:2384:    if (mediaPreview.videoUrl) {
+public/control-center/pages/media-studio-workspace.js:2387:          <video class="media-viewer-video" controls preload="metadata" src="${escapeHtml(mediaPreview.videoUrl)}"></video>
+public/control-center/pages/media-studio-workspace.js:2391:      const lines = parseStructuredList(videoBrief || asString(payload.message));
+public/control-center/pages/media-studio-workspace.js:2393:        ? `<div class="media-prompt-box">${escapeHtml(lines.join("\n"))}</div>`
+public/control-center/pages/media-studio-workspace.js:2394:        : `<div class="media-prompt-box">${escapeHtml("No video output or video brief is available yet. Generate or prepare a video brief first; provider-backed video output appears here only when the backend returns a video URL.")}</div>`;
+public/control-center/pages/media-studio-workspace.js:2399:    if (mediaPreview.audioUrl) {
+public/control-center/pages/media-studio-workspace.js:2402:          <audio class="media-viewer-audio" controls preload="metadata" src="${escapeHtml(mediaPreview.audioUrl)}"></audio>
+public/control-center/pages/media-studio-workspace.js:2417:        <div class="media-prompt-box media-block-gap">${escapeHtml(voiceScript || asString(payload.message) || "No voice script or audio output is available yet. Voice mode prepares voiceover scripts/audio outputs only; it does not run IVR, phone calls, or call-center workflows.")}</div>
+public/control-center/pages/media-studio-workspace.js:2425:        <div class="media-check-item"><span>Image prompt</span><strong>${escapeHtml(firstText(campaignPack.image_prompt, "Missing"))}</strong></div>
+public/control-center/pages/media-studio-workspace.js:2426:        <div class="media-check-item"><span>Video brief</span><strong>${escapeHtml(firstText(campaignPack.video_brief, "Missing"))}</strong></div>
+public/control-center/pages/media-studio-workspace.js:2430:      <div class="media-prompt-box media-block-gap">${escapeHtml(JSON.stringify(campaignPack, null, 2) || "Campaign pack payload is not available yet.")}</div>
+public/control-center/pages/media-studio-workspace.js:2453:  const comparePromptChanged = Boolean(previous && clean(previous.prompt) !== clean(selected?.prompt));
+public/control-center/pages/media-studio-workspace.js:2486:          <strong>${escapeHtml(firstText(selected?.provider, "Not set"))}</strong>
+public/control-center/pages/media-studio-workspace.js:2490:          <strong>${escapeHtml(titleCase(firstText(selected?.provider_status, "prompt_ready")))}</strong>
+public/control-center/pages/media-studio-workspace.js:2498:          <strong>${escapeHtml(formatCount(clean(selected?.prompt).length))} chars</strong>
+public/control-center/pages/media-studio-workspace.js:2541:        <button class="btn btn-secondary" type="button" data-media-version-action="regenerate">Regenerate</button>
+public/control-center/pages/media-studio-workspace.js:2553:  const activePrompt = clean(version?.prompt);
+public/control-center/pages/media-studio-workspace.js:2556:  const prompt = activePrompt || selectedItem?.prompt || selectedItem?.brief || "Select or save a media job to preview the prompt, brief, and asset notes.";
+public/control-center/pages/media-studio-workspace.js:2576:      <span class="media-preview-title">${escapeHtml(selectedItem ? `${titleCase(selectedItem.mode)} preview / prompt` : "Preview")}</span>
+public/control-center/pages/media-studio-workspace.js:2577:      <div class="media-prompt-box">${escapeHtml(prompt)}</div>
+public/control-center/pages/media-studio-workspace.js:2586:      <div class="media-prompt-box media-block-gap">${escapeHtml(notesText)}</div>
+public/control-center/pages/media-studio-workspace.js:2601:  if (mode.includes("video") || mode.includes("reel") || mode.includes("storyboard")) return "video-strategist";
+public/control-center/pages/media-studio-workspace.js:2602:  if (mode.includes("voice") || mode.includes("audio")) return "voice-director";
+public/control-center/pages/media-studio-workspace.js:2603:  if (mode.includes("campaign") || mode.includes("pack")) return "prompt-engineer";
+public/control-center/pages/media-studio-workspace.js:2678:    ["image generation backend", readiness.image_generation_backend],
+public/control-center/pages/media-studio-workspace.js:2679:    ["video generation backend", readiness.video_generation_backend],
+public/control-center/pages/media-studio-workspace.js:2680:    ["voice generation backend", readiness.voice_generation_backend],
+public/control-center/pages/media-studio-workspace.js:2701:      ${!readiness.image_generation_backend || !readiness.video_generation_backend || !readiness.voice_generation_backend ? `<div class="simple-banner media-block-gap">${escapeHtml("Generator backend not connected yet — your prompt/job is ready. Review it, save it as a draft, send it to AI Command, save it to Library, or connect a provider in Integrations before trying real output generation.")}</div>` : ""}
+public/control-center/pages/media-studio-workspace.js:2716:    `Prompt: ${session.form.prompt || selectedItem?.prompt || "not set"}`,
+public/control-center/pages/media-studio-workspace.js:2744:      prompt: source.prompt || session.form.prompt,
+public/control-center/pages/media-studio-workspace.js:2745:      asset_reference: source.referenceAsset || session.form.referenceAsset,
+public/control-center/pages/media-studio-workspace.js:2752:        prompt: version?.prompt || source.prompt || session.form.prompt,
+public/control-center/pages/media-studio-workspace.js:2754:        library_asset_reference: version?.library_asset_ref || null,
+public/control-center/pages/media-studio-workspace.js:2756:        provider_status: firstText(version?.provider_status, "prompt_ready"),
+public/control-center/pages/media-studio-workspace.js:2763:        summary: source.brief || session.form.objective || version?.prompt || source.prompt || session.form.prompt,
+public/control-center/pages/media-studio-workspace.js:2766:        content_item: version?.prompt || source.prompt || session.form.prompt
+public/control-center/pages/media-studio-workspace.js:2790:    showMessage?.("Backend media save unavailable; draft kept locally.");
+public/control-center/pages/media-studio-workspace.js:2817:    session.form.prompt = value;
+public/control-center/pages/media-studio-workspace.js:2825:    return window.confirm(`${title}\n\n${detail}\n\nAuthority: Media Studio can prepare, save, request review, and hand off media work, but provider generation, approval decisions, task creation, and publishing handoff must be explicitly confirmed by the operator.\n\nSelect Cancel to review before continuing.`);
+public/control-center/pages/media-studio-workspace.js:2828:  function generationApiForMode(mode) {
+public/control-center/pages/media-studio-workspace.js:2829:    if (mode === "video") return generateMediaVideoBrief;
+public/control-center/pages/media-studio-workspace.js:2830:    if (mode === "audio") return generateMediaVoiceScript;
+public/control-center/pages/media-studio-workspace.js:2831:    if (mode === "multi_format") return generateMediaCampaignPack;
+public/control-center/pages/media-studio-workspace.js:2832:    return generateMediaImage;
+public/control-center/pages/media-studio-workspace.js:2842:    const promptUsed = clean(session.form.prompt);
+public/control-center/pages/media-studio-workspace.js:2847:      "Confirm media generation",
+public/control-center/pages/media-studio-workspace.js:2848:      `Action: Start provider-backed media generation for ${selectedMode}.\nRisk: This may call a configured AI/media provider and create a new generated output that must be reviewed before approval or publishing.`
+public/control-center/pages/media-studio-workspace.js:2851:      session.draftMessage = "Media generation cancelled. Prompt remains ready for review.";
+public/control-center/pages/media-studio-workspace.js:2861:    const callApi = generationApiForMode(activeRequestType);
+public/control-center/pages/media-studio-workspace.js:2866:      if (response && response.ok === false && response.status === "provider_not_configured") {
+public/control-center/pages/media-studio-workspace.js:2867:        session.form.status = "prompt_ready";
+public/control-center/pages/media-studio-workspace.js:2870:          prompt: promptUsed,
+public/control-center/pages/media-studio-workspace.js:2872:          providerStatus: "provider_not_configured",
+public/control-center/pages/media-studio-workspace.js:2873:          readinessStatus: "prompt_ready",
+public/control-center/pages/media-studio-workspace.js:2874:          notes: firstText(response.message, "Generator backend not connected yet — your prompt/job is ready. Review it, save it as a draft, send it to AI Command, save it to Library, or connect a provider in Integrations before trying real output generation."),
+public/control-center/pages/media-studio-workspace.js:2875:          provider: response.provider || "",
+public/control-center/pages/media-studio-workspace.js:2879:        saveDraftToSession(projectName, state, session, "prompt_ready");
+public/control-center/pages/media-studio-workspace.js:2880:        session.draftMessage = response.message || "Generator backend not connected yet — your prompt/job is ready. Review it, save it as a draft, send it to AI Command, save it to Library, or connect a provider in Integrations before trying real output generation.";
+public/control-center/pages/media-studio-workspace.js:2888:        prompt: promptUsed,
+public/control-center/pages/media-studio-workspace.js:2890:        providerStatus: "generated",
+public/control-center/pages/media-studio-workspace.js:2893:        provider: response?.provider || "",
+public/control-center/pages/media-studio-workspace.js:2898:      if (response?.improved_prompt) {
+public/control-center/pages/media-studio-workspace.js:2899:        session.form.prompt = response.improved_prompt;
+public/control-center/pages/media-studio-workspace.js:2901:      if (response?.video_brief) {
+public/control-center/pages/media-studio-workspace.js:2902:        session.form.reviewNotes = [session.form.reviewNotes, response.video_brief].filter(Boolean).join("\n\n").trim();
+public/control-center/pages/media-studio-workspace.js:2926:      session.form.status = "prompt_ready";
+public/control-center/pages/media-studio-workspace.js:2929:        prompt: promptUsed,
+public/control-center/pages/media-studio-workspace.js:2936:            : firstText(error?.payload?.code, error?.code, "generation_error")
+public/control-center/pages/media-studio-workspace.js:2938:        providerStatus: "generation_error",
+public/control-center/pages/media-studio-workspace.js:2943:        provider: "",
+public/control-center/pages/media-studio-workspace.js:2947:      saveDraftToSession(projectName, state, session, "prompt_ready");
+public/control-center/pages/media-studio-workspace.js:3006:      await persistMediaJob({ backendProjectName, projectName, state, session, status: "prompt_ready", showMessage });
+public/control-center/pages/media-studio-workspace.js:3011:  const generateContextButtons = [document.getElementById("mediaGeneratePromptBtn"), document.getElementById("mediaPromptFromContextBtn")].filter(Boolean);
+public/control-center/pages/media-studio-workspace.js:3012:  generateContextButtons.forEach((button) => {
+public/control-center/pages/media-studio-workspace.js:3015:      applyPrompt(buildPromptFromContext(state, session), "Prompt generated from project context.");
+public/control-center/pages/media-studio-workspace.js:3028:      session.form.prompt = firstText(summary.prompt, summary.brief, session.form.prompt);
+public/control-center/pages/media-studio-workspace.js:3033:      session.draftMessage = "Prompt generated from workflow handoff.";
+public/control-center/pages/media-studio-workspace.js:3042:      if (!clean(session.form.prompt)) {
+public/control-center/pages/media-studio-workspace.js:3043:        session.validation = { ...session.validation, prompt: "Prompt is required." };
+public/control-center/pages/media-studio-workspace.js:3048:        "Confirm prompt improvement",
+public/control-center/pages/media-studio-workspace.js:3049:        "Action: Improve this prompt using the media prompt service.\nRisk: This may call a configured AI provider. The result remains review-only and is not published."
+public/control-center/pages/media-studio-workspace.js:3059:        if (result && result.ok === false && result.status === "provider_not_configured") {
+public/control-center/pages/media-studio-workspace.js:3060:          applyPrompt(improvePrompt(session.form.prompt), result.message || "Prompt improved locally.");
+public/control-center/pages/media-studio-workspace.js:3063:        applyPrompt(result.improved_prompt || improvePrompt(session.form.prompt), "Prompt improved.");
+public/control-center/pages/media-studio-workspace.js:3068:          applyPrompt(improvePrompt(session.form.prompt), `${authMessage} Prompt improved locally.`);
+public/control-center/pages/media-studio-workspace.js:3072:        applyPrompt(improvePrompt(session.form.prompt), "Prompt improved locally.");
+public/control-center/pages/media-studio-workspace.js:3081:      if (!clean(session.form.prompt)) {
+public/control-center/pages/media-studio-workspace.js:3082:        session.validation = { ...session.validation, prompt: "Prompt is required." };
+public/control-center/pages/media-studio-workspace.js:3088:        "Action: Run media brand-safety review for this prompt.\nRisk: This may call a configured AI/provider service. The result remains review-only."
+public/control-center/pages/media-studio-workspace.js:3098:        if (result && result.ok === false && result.status === "provider_not_configured") {
+public/control-center/pages/media-studio-workspace.js:3099:          applyPrompt(makeBrandSafe(session.form.prompt), result.message || "Prompt made brand-safe locally.");
+public/control-center/pages/media-studio-workspace.js:3102:        const safePrompt = result?.brand_check?.is_brand_safe ? session.form.prompt : makeBrandSafe(session.form.prompt);
+public/control-center/pages/media-studio-workspace.js:3111:          applyPrompt(makeBrandSafe(session.form.prompt), `${authMessage} Prompt made brand-safe locally.`);
+public/control-center/pages/media-studio-workspace.js:3115:        applyPrompt(makeBrandSafe(session.form.prompt), "Prompt made brand-safe locally.");
+public/control-center/pages/media-studio-workspace.js:3121:  if (germanBtn) germanBtn.onclick = () => { sync(); applyPrompt(adaptGerman(session.form.prompt), "Prompt adapted for German usage."); };
+public/control-center/pages/media-studio-workspace.js:3124:  if (imageToVideoBtn) imageToVideoBtn.onclick = () => { sync(); applyPrompt(convertImagePromptToVideoBrief(session.form.prompt), "Image prompt converted to video brief."); };
+public/control-center/pages/media-studio-workspace.js:3126:  const videoToVoiceBtn = document.getElementById("mediaVideoToVoiceBtn");
+public/control-center/pages/media-studio-workspace.js:3127:  if (videoToVoiceBtn) videoToVoiceBtn.onclick = () => { sync(); applyPrompt(convertVideoBriefToVoiceover(session.form.prompt), "Video brief converted to voiceover script."); };
+public/control-center/pages/media-studio-workspace.js:3130:  if (allFormatsBtn) allFormatsBtn.onclick = () => { sync(); applyPrompt(generateAllFormats(session, state), "All format briefs generated."); };
+public/control-center/pages/media-studio-workspace.js:3161:        prompt: firstText(summary.prompt, summary.brief, summary.copy, session.form.prompt),
+public/control-center/pages/media-studio-workspace.js:3183:      if (action === "preview" || action === "edit-prompt") {
+public/control-center/pages/media-studio-workspace.js:3194:      if (action === "regenerate") {
+public/control-center/pages/media-studio-workspace.js:3195:        session.form.prompt = improvePrompt(session.form.prompt);
+public/control-center/pages/media-studio-workspace.js:3197:        saveDraftToSession(projectName, state, session, "prompt_ready");
+public/control-center/pages/media-studio-workspace.js:3198:        showMessage?.("Regeneration prompt prepared. No generation backend was invoked.");
+public/control-center/pages/media-studio-workspace.js:3251:        currentVersion.provider_status = currentVersion.provider_status || "generated";
+public/control-center/pages/media-studio-workspace.js:3370:      const item = selected() || saveDraftToSession(projectName, state, session, "prompt_ready");
+public/control-center/pages/media-studio-workspace.js:3375:            description: session.form.objective || item.brief || "Review prompt, outputs, approval, and publishing readiness.",
+public/control-center/pages/media-studio-workspace.js:3379:            responsibility: item.mode === "video" ? "video_production" : "creative_production",
+public/control-center/pages/media-studio-workspace.js:3393:          showMessage?.("Task action kept locally because backend task save is unavailable.");
+public/control-center/pages/media-studio-workspace.js:3407:      const prompt = buildAiPrompt(projectName, session, item);
+public/control-center/pages/media-studio-workspace.js:3410:        "Action: Send this media context to AI Command for review and planning support.\nRisk: This attaches shared AI handoff context and navigates to AI Command. It does not publish, approve, run provider generation, or create backend tasks."
+public/control-center/pages/media-studio-workspace.js:3417:        lastCommand: prompt,
+public/control-center/pages/media-studio-workspace.js:3430:          prompt,
+public/control-center/pages/media-studio-workspace.js:3434:          media: buildMediaPayload(session, item?.status || "prompt_ready")
+public/control-center/pages/media-studio-workspace.js:3527:        currentVersion.provider_status = currentVersion.provider_status || "generated";
+public/control-center/pages/media-studio-workspace.js:3539:      if (action === "regenerate") {
+public/control-center/pages/media-studio-workspace.js:3540:        session.form.prompt = improvePrompt(currentVersion.prompt || session.form.prompt);
+public/control-center/pages/media-studio-workspace.js:3541:        session.form.status = "prompt_ready";
+public/control-center/pages/media-studio-workspace.js:3544:          prompt: session.form.prompt,
+public/control-center/pages/media-studio-workspace.js:3546:            message: "Regenerated from selected version prompt.",
+public/control-center/pages/media-studio-workspace.js:3549:          providerStatus: "prompt_ready",
+public/control-center/pages/media-studio-workspace.js:3550:          readinessStatus: "prompt_ready",
+public/control-center/pages/media-studio-workspace.js:3551:          notes: "Regenerated from selected version.",
+public/control-center/pages/media-studio-workspace.js:3552:          provider: currentVersion.provider || "",
+public/control-center/pages/media-studio-workspace.js:3556:        saveDraftToSession(projectName, state, session, "prompt_ready");
+public/control-center/pages/media-studio-workspace.js:3557:        showMessage?.("Selected version regenerated as prompt-ready draft.");
+public/control-center/pages/media-studio-workspace.js:3603:      session.form.prompt = [specialist.suggestedPrompt, session.form.prompt].filter(Boolean).join("\n\n");
+public/control-center/pages/media-studio-workspace.js:3605:      session.draftMessage = `${specialist.title} prompt added.`;
+public/control-center/pages/media-studio-workspace.js:3613:          `Action: Send ${specialist.title} media context to AI Command for review and planning support.\nRisk: This attaches shared AI handoff context and navigates to AI Command. It does not publish, approve, run provider generation, or create backend tasks.`
+public/control-center/pages/media-studio-workspace.js:3620:        const prompt = buildAiPrompt(projectName, session, selected());
+public/control-center/pages/media-studio-workspace.js:3624:          lastCommand: prompt,
+public/control-center/pages/media-studio-workspace.js:3637:            prompt,
+public/control-center/pages/media-studio-workspace.js:3640:            media: buildMediaPayload(session, session.form.status || "prompt_ready")
+public/control-center/pages/media-studio-workspace.js:3645:        showMessage?.(`${specialist.title} prompt opened in AI Command.`);
+public/control-center/pages/media-studio-workspace.js:3667:      showMessage?.("Publishing package handoff kept locally because backend handoff save is unavailable.");
+public/control-center/pages/media-studio-workspace.js:3686:    description: "Run saved image, video, voice, and campaign-pack jobs with prompts, review states, Library saves, and package routing."
+public/control-center/pages/media-studio-workspace.js:3759:      if (session.form?.referenceAsset) rows.push(["Reference", session.form.referenceAsset]);
+public/control-center/pages/library.js:66:  product_videos: "Product Videos",
+public/control-center/pages/library.js:93:  { key: "videos", label: "Videos", types: ["product_videos"] },
+public/control-center/pages/library.js:105:    why: "Logos keep brand identity consistent across setup, media generation, and publishing.",
+public/control-center/pages/library.js:130:    key: "videos",
+public/control-center/pages/library.js:132:    types: ["product_videos"],
+public/control-center/pages/library.js:133:    why: "Video source assets are required for reels, demos, and cutdowns.",
+public/control-center/pages/library.js:134:    uploadType: "product_videos"
+public/control-center/pages/library.js:152:function getCleanLibraryTypeLabel(type, fallback = "") {
+public/control-center/pages/library.js:154:  return LIBRARY_UPLOAD_TYPE_LABELS[key] || String(fallback || key || "Asset").trim();
+public/control-center/pages/library.js:163:  { key: "videos", label: "Videos", types: ["product_videos"] },
+public/control-center/pages/library.js:346:    || asset.video_url
+public/control-center/pages/library.js:347:    || asset.audio_url
+public/control-center/pages/library.js:477:    contentType.startsWith("video/") ||
+public/control-center/pages/library.js:518:            window.prompt("Copy asset path:", value);
+public/control-center/pages/library.js:778:      is_video: isVideoExtension(extension),
+public/control-center/pages/library.js:779:      is_audio: ["mp3", "wav", "m4a", "ogg"].includes(extension)
+public/control-center/pages/library.js:788:  if (mediaType === "video") return "generated_media";
+public/control-center/pages/library.js:790:  if (asset.video_brief) return "video_brief";
+public/control-center/pages/library.js:792:  if (asset.prompt && !asset.image_url && !asset.video_url && !asset.audio_url) return "prompt_asset";
+public/control-center/pages/library.js:794:  return "generated_media";
+public/control-center/pages/library.js:802:  const videoUrl = asString(asset.video_url || payload.video_url || asObject(asArray(payload.videos)[0]).url);
+public/control-center/pages/library.js:803:  const audioUrl = asString(asset.audio_url || payload.audio_url || asObject(payload.audio).url);
+public/control-center/pages/library.js:804:  const promptText = asString(asset.prompt || payload.prompt);
+public/control-center/pages/library.js:805:  const briefText = asString(payload.video_brief || payload.voice_script || payload.message || asset.notes);
+public/control-center/pages/library.js:809:    video_url: videoUrl,
+public/control-center/pages/library.js:810:    audio_url: audioUrl,
+public/control-center/pages/library.js:811:    video_brief: payload.video_brief,
+public/control-center/pages/library.js:830:    preview_url: firstValidUrl(imageUrl, videoUrl, audioUrl),
+public/control-center/pages/library.js:831:    extension: imageUrl ? "image" : videoUrl ? "video" : audioUrl ? "audio" : "json",
+public/control-center/pages/library.js:833:    is_video: Boolean(videoUrl),
+public/control-center/pages/library.js:834:    is_audio: Boolean(audioUrl),
+public/control-center/pages/library.js:836:    video_url: videoUrl,
+public/control-center/pages/library.js:837:    audio_url: audioUrl,
+public/control-center/pages/library.js:838:    text_preview: promptText || briefText,
+public/control-center/pages/library.js:1046:      || (selectedSource === "generated-media" && asset.kind === "managed_media" && ["generated_media", "prompt_asset", "video_brief", "voice_script", "campaign_pack"].includes(asset.asset_type))
+public/control-center/pages/library.js:1145:    ? `<button class="btn btn-secondary" type="button" data-copy-asset-path="${escapeHtml(filePath)}"${filePath ? "" : " disabled aria-disabled=\"true\""}>Copy path</button>`
+public/control-center/pages/library.js:1150:      <button class="btn btn-primary" type="button" data-library-open="${assetId}"${assetId ? "" : " disabled aria-disabled=\"true\""}>${escapeHtml(openLabel)}</button>
+public/control-center/pages/library.js:1152:      <button class="btn btn-secondary" type="button" data-library-command="send-to-ai"${assetId ? "" : " disabled aria-disabled=\"true\""}>Prepare AI review</button>
+public/control-center/pages/library.js:1166:    <div class="library-preview-fallback library-document-preview library-preview-capability-card">
+public/control-center/pages/library.js:1193:          <div class="library-preview-fallback">Loading protected image preview...</div>
+public/control-center/pages/library.js:1200:        <img src="${escapeHtml(asString(asset.image_url || previewUrl))}" alt="${escapeHtml(asset.name)}" class="library-preview-image" onerror="this.closest('.library-preview-frame')?.replaceWith(Object.assign(document.createElement('div'), { className: 'library-preview-fallback', textContent: 'Preview unavailable for this image.' }))">
+public/control-center/pages/library.js:1205:  if (asset.is_video && asString(asset.video_url || previewUrl).trim()) {
+public/control-center/pages/library.js:1209:          <div class="library-preview-fallback">Loading protected video preview...</div>
+public/control-center/pages/library.js:1216:        <video class="library-preview-video" controls src="${escapeHtml(asString(asset.video_url || previewUrl))}"></video>
+public/control-center/pages/library.js:1221:  if (asset.is_audio && asString(asset.audio_url || previewUrl).trim()) {
+public/control-center/pages/library.js:1224:        <audio class="library-preview-audio" controls src="${escapeHtml(asString(asset.audio_url || previewUrl))}"></audio>
+public/control-center/pages/library.js:1233:          <div class="library-preview-fallback">Loading protected image preview...</div>
+public/control-center/pages/library.js:1240:        <img src="${escapeHtml(previewUrl)}" alt="${escapeHtml(asset.name)}" class="library-preview-image" onerror="this.closest('.library-preview-frame')?.replaceWith(Object.assign(document.createElement('div'), { className: 'library-preview-fallback', textContent: 'Preview unavailable for this image.' }))">
+public/control-center/pages/library.js:1245:  if (asset.is_video && previewUrl) {
+public/control-center/pages/library.js:1249:          <div class="library-preview-fallback">Loading protected video preview...</div>
+public/control-center/pages/library.js:1256:        <video class="library-preview-video" controls src="${escapeHtml(previewUrl)}"></video>
+public/control-center/pages/library.js:1278:        <div class="library-preview-fallback library-document-preview" data-library-protected-preview data-preview-asset-id="${escapeHtml(asset.id || asset.asset_id || "")}">
+public/control-center/pages/library.js:1290:          <div class="library-preview-fallback library-preview-text-fallback library-preview-text-card">
+public/control-center/pages/library.js:1299:          <div class="library-preview-fallback library-document-preview library-preview-capability-card" data-library-protected-preview data-preview-asset-id="${escapeHtml(asset.id || asset.asset_id || "")}">
+public/control-center/pages/library.js:1323:      <div class="library-preview-fallback library-document-preview">
+public/control-center/pages/library.js:1334:    return `<div class="library-preview-fallback library-preview-text-fallback">${escapeHtml(asset.text_preview)}</div>`;
+public/control-center/pages/library.js:1339:    return `<div class="library-preview-fallback library-preview-text-fallback">${escapeHtml(jsonFallback)}</div>`;
+public/control-center/pages/library.js:1391:        <div class="library-preview-fallback library-preview-text-fallback library-preview-text-card">
+public/control-center/pages/library.js:1411:    if (asset.is_video) {
+public/control-center/pages/library.js:1412:      previewNode.innerHTML = `<video class="library-preview-video" controls src="${escapeHtml(resolved.objectUrl)}"></video>`;
+public/control-center/pages/library.js:1430:      : `Preview unavailable: ${error.message || "Could not load this file."}`;
+public/control-center/pages/library.js:1432:    previewNode.innerHTML = `<div class="library-preview-fallback">${escapeHtml(message)}</div>`;
+public/control-center/pages/library.js:1446:  fallbackMarkup,
+public/control-center/pages/library.js:1463:      node.innerHTML = fallbackMarkup;
+public/control-center/pages/library.js:1470:    node.innerHTML = fallbackMarkup;
+public/control-center/pages/library.js:1515:  return `Extract key facts from these library documents for ${project}: ${docs}. Return compliance notes, pricing references, and campaign-usable claims.`;
+public/control-center/pages/library.js:1518:function promptForTextInput(title, initialValue = "") {
+public/control-center/pages/library.js:1521:  if (typeof window !== "undefined" && typeof window.prompt === "function") {
+public/control-center/pages/library.js:1523:      return Promise.resolve(window.prompt(title, initial));
+public/control-center/pages/library.js:1525:      // Fall through to custom modal when prompt is blocked.
+public/control-center/pages/library.js:1653:    && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+public/control-center/pages/library.js:1789:    { value: "generated-media", label: "Generated Media" },
+public/control-center/pages/library.js:1870:    typeSelect.removeAttribute("disabled");
+public/control-center/pages/library.js:1937:    sourceSelect.removeAttribute("disabled");
+public/control-center/pages/library.js:2015:          <small>Change or clear filters to select this asset again. Current actions stay disabled until a visible asset is selected.</small>
+public/control-center/pages/library.js:2017:        <button class="btn btn-secondary btn-sm" type="button" disabled aria-disabled="true">Prepare AI review</button>
+public/control-center/pages/library.js:2025:        <button class="btn btn-secondary btn-sm" type="button" disabled aria-disabled="true">Prepare AI review</button>
+public/control-center/pages/library.js:2037:        <button class="btn btn-secondary btn-sm" type="button" data-library-select-visible="${allPageSelected ? "clear-page" : "select-page"}"${paginatedAssets.length ? "" : " disabled"}>${allPageSelected ? "Unselect current page" : "Select current page"}</button>
+public/control-center/pages/library.js:2038:        <button class="btn btn-secondary btn-sm" type="button" data-library-clear-selection${session.selectedAssetIds.length ? "" : " disabled"}>Clear selection</button>
+public/control-center/pages/library.js:2039:        <button class="btn btn-secondary btn-sm" type="button" disabled aria-disabled="true" title="Batch Library mutations need an explicit backend contract.">Batch actions unavailable</button>
+public/control-center/pages/library.js:2089:        <button class="btn btn-secondary btn-sm" type="button" data-library-grid-page="prev"${session.page <= 1 ? " disabled" : ""}>Previous</button>
+public/control-center/pages/library.js:2091:        <button class="btn btn-secondary btn-sm" type="button" data-library-grid-page="next"${session.page >= totalPages ? " disabled" : ""}>Next</button>
+public/control-center/pages/library.js:2118:      fallbackMarkup: `<div class="library-grid-icon">${escapeHtml((asset.extension || "file").toUpperCase())}</div>`,
+public/control-center/pages/library.js:2171:      // fallback: try to find in grid
+public/control-center/pages/library.js:2210:      disabled: false
+public/control-center/pages/library.js:2219:      disabled: false
+public/control-center/pages/library.js:2827:      const nextName = await promptForTextInput("Rename asset", asset.name || "");
+public/control-center/pages/library.js:3001:        uploadBtn.disabled = session.uploading || files.length === 0;
+public/control-center/pages/library.js:3095:    uploadBtn.disabled = session.uploading || !Array.from($("libraryUploadInput")?.files || []).length;
+public/control-center/pages/library.js:3187:        uploadBtn.disabled = session.uploading || !Array.from($("libraryUploadInput")?.files || []).length;
+public/control-center/pages/library.js:3199:        uploadBtn.disabled = session.uploading || !Array.from($("libraryUploadInput")?.files || []).length;
+public/control-center/pages/library.js:3223:      refreshBtn.disabled = true;
+public/control-center/pages/library.js:3231:        refreshBtn.disabled = false;
+public/control-center/pages/library.js:3267:      showMessage?.("Document extraction prompt prepared. Review extracted claims before use.");
+public/control-center/pages/library.js:3281:      showMessage?.("Document extraction prompt prepared. Review extracted claims before use.");
+public/control-center/pages/library.js:3287:    if (sendToAiBtn.disabled) return;
+public/control-center/pages/library.js:3542:                  <input id="librarySearchInput" class="setup-input" type="text" placeholder="Search by name, path, type, or usage" />
+public/control-center/asset-library.js:26:    aliases: ["brand_guidelines", "brand_guide", "brand_reference_doc"],
+public/control-center/asset-library.js:78:      why_it_matters: "Publishing and AI Command need legal context before release or generated claims.",
+public/control-center/asset-library.js:99:    asset_type: "product_videos",
+public/control-center/asset-library.js:100:    label: "Product Videos / Produktvideos",
+public/control-center/asset-library.js:106:    aliases: ["product_video", "product_video_assets", "video"],
+public/control-center/asset-library.js:107:    description: "Approved product videos, demos, UGC clips, and cutdowns.",
+public/control-center/asset-library.js:109:      what_to_upload: "Product demos, UGC clips, reels, explainers, usage videos, and source cutdowns.",
+public/control-center/asset-library.js:110:      why_it_matters: "Media Studio, Content Studio, Campaign Studio, and Publishing use video as creative source material.",
+public/control-center/asset-library.js:123:    description: "Organic social creative, post visuals, reels, stories, and channel-ready source assets.",
+public/control-center/asset-library.js:125:      what_to_upload: "Organic post images, story frames, reels, thumbnails, channel templates, and caption references.",
+public/control-center/asset-library.js:155:    description: "Packaging photos, labels, inserts, and box or bottle references.",
+public/control-center/asset-library.js:157:      what_to_upload: "Packaging photos, label artwork, inserts, box shots, bottle/jar details, and compliance label references.",
+public/control-center/asset-library.js:293:  const fallback = FALLBACK_ASSET_CATEGORIES.find((item) => item.asset_type === category.asset_type) || {};
+public/control-center/asset-library.js:294:  const merged = { ...fallback, ...asObject(category) };
+public/control-center/asset-library.js:296:    ...asObject(fallback.guidance),
+public/control-center/api.js:229:    normalized === "api.response.json.fallback.done" ||
+public/control-center/api.js:230:    normalized === "api.response.json.fallback.error" ||
+public/control-center/api.js:231:    normalized === "api.response.json.fallback.timeout" ||
+public/control-center/api.js:360:          let fallbackTimer = null;
+public/control-center/api.js:361:          const fallbackPayload = await Promise.race([
+public/control-center/api.js:364:              fallbackTimer = setTimeout(() => {
+public/control-center/api.js:365:                const fallbackTimeoutError = new Error(`JSON fallback timed out after ${timeoutMs}ms.`);
+public/control-center/api.js:366:                fallbackTimeoutError.endpoint = endpoint;
+public/control-center/api.js:367:                fallbackTimeoutError.isTimeout = true;
+public/control-center/api.js:368:                fallbackTimeoutError.parseStage = "api.response.json.fallback.timeout";
+public/control-center/api.js:369:                reject(fallbackTimeoutError);
+public/control-center/api.js:373:            if (fallbackTimer) {
+public/control-center/api.js:374:              clearTimeout(fallbackTimer);
+public/control-center/api.js:378:          const fallbackBodyLength = JSON.stringify(fallbackPayload || null).length;
+public/control-center/api.js:380:          emitApiRuntimeTrace("api.response.json.fallback.done", {
+public/control-center/api.js:384:            bodyLength: fallbackBodyLength,
+public/control-center/api.js:389:            mode: "json-fallback",
+public/control-center/api.js:390:            payload: fallbackPayload,
+public/control-center/api.js:391:            bodyLength: fallbackBodyLength,
+public/control-center/api.js:392:            parseStage: "api.response.json.fallback.done"
+public/control-center/api.js:394:        } catch (fallbackError) {
+public/control-center/api.js:395:          const fallbackParseStage = fallbackError?.isTimeout
+public/control-center/api.js:396:            ? "api.response.json.fallback.timeout"
+public/control-center/api.js:397:            : "api.response.json.fallback.error";
+public/control-center/api.js:399:          emitApiRuntimeTrace("api.response.json.fallback.error", {
+public/control-center/api.js:404:            message: fallbackError?.message || "JSON fallback failed"
+public/control-center/api.js:415:            parseStage: fallbackParseStage,
+public/control-center/api.js:516:async function parseJson(response, fallbackMessage = "Request failed", requestMeta = {}) {
+public/control-center/api.js:523:  if (bodyReadResult?.mode === "json-fallback") {
+public/control-center/api.js:525:    parseStage = String(bodyReadResult.parseStage || "api.response.json.fallback.done");
+public/control-center/api.js:553:      `${fallbackMessage} (${response.status})`;
+public/control-center/api.js:577:    const message = String(payload.error || fallbackMessage);
+public/control-center/api.js:705:async function getJson(path, fallbackMessage, timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS, requestOptions = {}) {
+public/control-center/api.js:712:  return parseJson(response, fallbackMessage, {
+public/control-center/api.js:723:async function sendRawJson(path, method, body, fallbackMessage, timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS) {
+public/control-center/api.js:738:      const parseError = new Error(fallbackMessage || "Response was not valid JSON.");
+public/control-center/api.js:752:    const message = String(payload?.error || payload?.message || fallbackMessage || "Request failed").trim();
+public/control-center/api.js:763:async function sendJson(path, method, body, fallbackMessage, timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS) {
+public/control-center/api.js:771:  return parseJson(response, fallbackMessage, {
+public/control-center/api.js:781:async function sendForm(path, formData, fallbackMessage, timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS) {
+public/control-center/api.js:796:  return parseJson(response, fallbackMessage, {
+public/control-center/api.js:1057:    console.warn("Using fallback projects list:", error.message);
+public/control-center/api.js:1062:      fallback: true
+public/control-center/api.js:1129:        const fallbackProjects = await fetchProjects();
+public/control-center/api.js:1130:        const fallbackItems = Array.isArray(fallbackProjects?.items) ? fallbackProjects.items : [];
+public/control-center/api.js:1131:        const projectExists = fallbackItems.some((item) => {
+public/control-center/api.js:1143:      } catch (fallbackError) {
+public/control-center/api.js:1150:          message: String(fallbackError?.message || "Failed to verify project fallback")
+public/control-center/api.js:1607:export async function generateAiCommandCampaignPreview(projectName, payload = {}) {
+public/control-center/api.js:1613:    "Failed to generate AI Command campaign preview",
+public/control-center/api.js:2187:    "/api/media/improve-prompt",
+public/control-center/api.js:2190:    "Failed to improve media prompt"
+public/control-center/api.js:2203:export async function generateMediaImage(payload = {}) {
+public/control-center/api.js:2205:    "/api/media/generate-image",
+public/control-center/api.js:2208:    "Failed to generate image"
+public/control-center/api.js:2212:export async function generateMediaVideoBrief(payload = {}) {
+public/control-center/api.js:2214:    "/api/media/generate-video-brief",
+public/control-center/api.js:2217:    "Failed to generate video brief"
+public/control-center/api.js:2221:export async function generateMediaVoiceScript(payload = {}) {
+public/control-center/api.js:2223:    "/api/media/generate-voice-script",
+public/control-center/api.js:2226:    "Failed to generate voice script"
+public/control-center/api.js:2230:export async function generateMediaCampaignPack(payload = {}) {
+public/control-center/api.js:2232:    "/api/media/generate-campaign-pack",
+public/control-center/api.js:2235:    "Failed to generate campaign pack"
+runtime/orchestrator-service/server.js:17:  generateWorkerId,
+runtime/orchestrator-service/server.js:80:} = require('./lib/integrations/provider-registry');
+runtime/orchestrator-service/server.js:87:} = require('./lib/media/provider-layer');
+runtime/orchestrator-service/server.js:150:} = require('./lib/media/native/providers/provider-model-catalog');
+runtime/orchestrator-service/server.js:153:} = require('./lib/media/native/providers/provider-readiness');
+runtime/orchestrator-service/server.js:353:  /^\/generate_optimization_recommendations\/?$/i,
+runtime/orchestrator-service/server.js:356:  /^\/generate_media_from_prompt\/?$/i,
+runtime/orchestrator-service/server.js:404:      error: `Protected write routes are disabled until ${CONTROL_WRITE_KEY_ENV} is configured on the server.`
+runtime/orchestrator-service/server.js:437:  /^\/generated-output\//i,
+runtime/orchestrator-service/server.js:471:      error: `Protected read routes are disabled until ${CONTROL_WRITE_KEY_ENV} is configured on the server.`
+runtime/orchestrator-service/server.js:596:  const prompt = asString(req?.body?.prompt || '');
+runtime/orchestrator-service/server.js:609:      prompt,
+runtime/orchestrator-service/server.js:612:      provider: asString(req?.body?.provider || req?.body?.media_provider || ''),
+runtime/orchestrator-service/server.js:652:    reference: 'reference_source',
+runtime/orchestrator-service/server.js:653:    video: 'video_source'
+runtime/orchestrator-service/server.js:903:const PROMPTS_DIR = path.join(BASE_DIR, 'prompts');
+runtime/orchestrator-service/server.js:929:function sanitizeErrorMessage(rawMessage, fallbackMessage) {
+runtime/orchestrator-service/server.js:930:  const fallback = String(fallbackMessage || 'Request failed').trim() || 'Request failed';
+runtime/orchestrator-service/server.js:933:    return fallback;
+runtime/orchestrator-service/server.js:938:function getErrorStatusCode(error, fallbackStatus = 500) {
+runtime/orchestrator-service/server.js:940:    error?.statusCode || error?.status || error?.response?.status || fallbackStatus
+runtime/orchestrator-service/server.js:944:    return fallbackStatus;
+runtime/orchestrator-service/server.js:948:    return fallbackStatus;
+runtime/orchestrator-service/server.js:981:  /^\/generated-output\/([^/?#]+)/i
+runtime/orchestrator-service/server.js:1198:  generated: {
+runtime/orchestrator-service/server.js:1199:    legacy: 'generated',
+runtime/orchestrator-service/server.js:1200:    canonical: 'generated'
+runtime/orchestrator-service/server.js:1249:  if (telemetryEntry.legacy_fallback_hit) {
+runtime/orchestrator-service/server.js:1377:    legacy_fallback_hit: legacyHit,
+runtime/orchestrator-service/server.js:1385:      legacy_fallback_read: !!readPolicy.legacyFallbackRead
+runtime/orchestrator-service/server.js:1389:  telemetryEntry.fallback_reason = classifyImmediateFallbackReason(telemetryEntry);
+runtime/orchestrator-service/server.js:1450:        legacyFallbackRead: !!resolution.featureFlags.legacy_fallback_read,
+runtime/orchestrator-service/server.js:1493:    fallbackRoot: resolution.legacyRoot,
+runtime/orchestrator-service/server.js:1509:      legacyBase: paths.fallbackRoot,
+runtime/orchestrator-service/server.js:1660:    reel: path.join('content', 'campaigns', 'reel-brief-queue.json'),
+runtime/orchestrator-service/server.js:1702:  'generated',
+runtime/orchestrator-service/server.js:1758:  if (!readEntry || readEntry.selected_root !== 'legacy' || !readEntry.legacy_fallback_hit) {
+runtime/orchestrator-service/server.js:1805:    fallback_hit_count: 0,
+runtime/orchestrator-service/server.js:1806:    fallback_rate: 0,
+runtime/orchestrator-service/server.js:1807:    fallback_causes: {
+runtime/orchestrator-service/server.js:1848:    if (entry.selected_root === 'legacy' && entry.legacy_fallback_hit) {
+runtime/orchestrator-service/server.js:1849:      stats.fallback_hit_count += 1;
+runtime/orchestrator-service/server.js:1852:      if (!Object.prototype.hasOwnProperty.call(stats.fallback_causes, cause)) {
+runtime/orchestrator-service/server.js:1853:        stats.fallback_causes.unresolved_risk += 1;
+runtime/orchestrator-service/server.js:1855:        stats.fallback_causes[cause] += 1;
+runtime/orchestrator-service/server.js:1862:  let fallbackHits = 0;
+runtime/orchestrator-service/server.js:1869:    stats.fallback_rate = stats.read_events > 0
+runtime/orchestrator-service/server.js:1870:      ? Number((stats.fallback_hit_count / stats.read_events).toFixed(4))
+runtime/orchestrator-service/server.js:1875:    fallbackHits += stats.fallback_hit_count;
+runtime/orchestrator-service/server.js:1876:    historicalFallbacks += stats.fallback_causes.historical_artifact;
+runtime/orchestrator-service/server.js:1877:    unresolvedStructuralMismatches += stats.fallback_causes.structural_mismatch;
+runtime/orchestrator-service/server.js:1879:      stats.fallback_causes.parity_gap +
+runtime/orchestrator-service/server.js:1880:      stats.fallback_causes.missing_canonical_write +
+runtime/orchestrator-service/server.js:1881:      stats.fallback_causes.policy_or_config_mismatch;
+runtime/orchestrator-service/server.js:1885:  const fallbackRate = totalReads > 0 ? fallbackHits / totalReads : 0;
+runtime/orchestrator-service/server.js:1886:  const historicalFallbackRate = fallbackHits > 0 ? historicalFallbacks / fallbackHits : 0;
+runtime/orchestrator-service/server.js:1893:    fallbackRate <= 0.15 &&
+runtime/orchestrator-service/server.js:1901:    fallbackRate <= 0.4 &&
+runtime/orchestrator-service/server.js:1909:    generated_at: new Date().toISOString(),
+runtime/orchestrator-service/server.js:1917:      fallback_hit_count: fallbackHits,
+runtime/orchestrator-service/server.js:1919:      fallback_rate: Number(fallbackRate.toFixed(4)),
+runtime/orchestrator-service/server.js:1920:      fallback_historical_rate: Number(historicalFallbackRate.toFixed(4)),
+runtime/orchestrator-service/server.js:1945:    fallback_hit_count: 0,
+runtime/orchestrator-service/server.js:1953:    aggregate.fallback_hit_count += summary.totals.fallback_hit_count;
+runtime/orchestrator-service/server.js:1962:  aggregate.fallback_rate = totalReads > 0
+runtime/orchestrator-service/server.js:1963:    ? Number((aggregate.fallback_hit_count / totalReads).toFixed(4))
+runtime/orchestrator-service/server.js:1967:    generated_at: new Date().toISOString(),
+runtime/orchestrator-service/server.js:1977:    domain: 'generated',
+runtime/orchestrator-service/server.js:1982:    requestedFile: 'generated/outputs/*.{png,jpg,jpeg,webp}'
+runtime/orchestrator-service/server.js:2064:    provider: renderRequest.result?.provider || renderRequest.provider || null,
+runtime/orchestrator-service/server.js:2076:    generated_at: new Date().toISOString(),
+runtime/orchestrator-service/server.js:2263:  return `http://46.62.173.30/generated-output/${projectName}/${filename}`;
+runtime/orchestrator-service/server.js:2355:    domain: 'generated',
+runtime/orchestrator-service/server.js:2360:    requestedFile: 'generated/renders/*.json'
+runtime/orchestrator-service/server.js:2447:      hook: `${productName} is ideal for promotional conversion-focused campaigns.`,
+runtime/orchestrator-service/server.js:2459:    reel: {
+runtime/orchestrator-service/server.js:2463:      format: 'reel / short video',
+runtime/orchestrator-service/server.js:2475:      hook: `${productName} is suitable for barbershops, resellers, and partner promotion use cases.`,
+runtime/orchestrator-service/server.js:2491:${renderRequest.final_generation_prompt}
+runtime/orchestrator-service/server.js:2507:- Use the provided logo image EXACTLY as the real logo reference.
+runtime/orchestrator-service/server.js:2562:  form.append('prompt', finalPrompt);
+runtime/orchestrator-service/server.js:2588:    throw new Error('No image data returned from provider');
+runtime/orchestrator-service/server.js:2595:    domain: 'generated',
+runtime/orchestrator-service/server.js:2596:    artifactType: 'generated_output_image',
+runtime/orchestrator-service/server.js:2603:  provider: 'openai',
+runtime/orchestrator-service/server.js:2737:  // TODO:
+runtime/orchestrator-service/server.js:2739:  // مثل SMTP / WordPress mail bridge / provider API
+runtime/orchestrator-service/server.js:2743:    status: 'pending_provider_send',
+runtime/orchestrator-service/server.js:2749:    note: 'Prepared and verified. Waiting for provider integration or send bridge.'
+runtime/orchestrator-service/server.js:2925:    domain: 'generated',
+runtime/orchestrator-service/server.js:2930:    domain: 'generated',
+runtime/orchestrator-service/server.js:2934:    requestedIdentifier: 'latest-generated-image',
+runtime/orchestrator-service/server.js:2947:    throw new Error('No generated image output found');
+runtime/orchestrator-service/server.js:2955:    public_url: `http://46.62.173.30/generated-output/${projectName}/${latest}`
+runtime/orchestrator-service/server.js:2987:    instagram_reel: {
+runtime/orchestrator-service/server.js:2989:      format: 'vertical_video_or_reel_brief',
+runtime/orchestrator-service/server.js:3003:    facebook_reel: {
+runtime/orchestrator-service/server.js:3005:      format: 'vertical_video_or_reel_brief',
+runtime/orchestrator-service/server.js:3039:  const headline = placement.includes('reel')
+runtime/orchestrator-service/server.js:3043:  const body = placement.includes('reel')
+runtime/orchestrator-service/server.js:3108:    generated_at: new Date().toISOString(),
+runtime/orchestrator-service/server.js:3193:    format: 'short_video_brief',
+runtime/orchestrator-service/server.js:3197:      'Use the image as creative reference only for short-form video production.',
+runtime/orchestrator-service/server.js:3219:    generated_at: new Date().toISOString(),
+runtime/orchestrator-service/server.js:3222:    reference_image_path: image.path,
+runtime/orchestrator-service/server.js:3235:      'Shot 4: CTA end frame'
+runtime/orchestrator-service/server.js:3286:    video: {
+runtime/orchestrator-service/server.js:3288:      format: 'video',
+runtime/orchestrator-service/server.js:3344:      'Use clear thumbnail-title alignment for standard videos.',
+runtime/orchestrator-service/server.js:3366:    : `This video package is designed for ${goal} using approved brand-controlled creative, with emphasis on product credibility, premium presentation, and visual trust.`;
+runtime/orchestrator-service/server.js:3373:    generated_at: new Date().toISOString(),
+runtime/orchestrator-service/server.js:3376:    reference_image_path: image.path,
+runtime/orchestrator-service/server.js:3381:      ? 'Here is what premium brand-controlled creative looks like in motion.'
+runtime/orchestrator-service/server.js:3382:      : 'In this video, discover how premium visual execution changes brand perception.',
+runtime/orchestrator-service/server.js:3521:    generated_at: new Date().toISOString(),
+runtime/orchestrator-service/server.js:3524:    reference_image_path: image.path,
+runtime/orchestrator-service/server.js:3585:    generated_at: new Date().toISOString(),
+runtime/orchestrator-service/server.js:3588:    reference_image_path: image.path,
+runtime/orchestrator-service/server.js:3818:    generated_at: new Date().toISOString(),
+runtime/orchestrator-service/server.js:3932:    prompt_pack: p.prompt_pack || {},
+runtime/orchestrator-service/server.js:3939:    generated_at: new Date().toISOString(),
+runtime/orchestrator-service/server.js:4030:    generated_at: new Date().toISOString(),
+runtime/orchestrator-service/server.js:4106:function normalizePublishingJobStatus(value, fallback = 'draft') {
+runtime/orchestrator-service/server.js:4109:  if (!normalized) return fallback;
+runtime/orchestrator-service/server.js:4131:  return fallback;
+runtime/orchestrator-service/server.js:4204:    visual_prompt: String(input.visual_prompt || base.visual_prompt || '').trim(),
+runtime/orchestrator-service/server.js:4233:      visual_prompt: channelAsset.visual_prompt || '',
+runtime/orchestrator-service/server.js:4355:      connector_error: error.message || 'Connector payload unavailable'
+runtime/orchestrator-service/server.js:4418:  const fallbackStatus = scheduledFor ? 'scheduled' : 'draft';
+runtime/orchestrator-service/server.js:4430:    status: normalizePublishingJobStatus(input.status, existing.status || fallbackStatus),
+runtime/orchestrator-service/server.js:4857:    domain: 'generated',
+runtime/orchestrator-service/server.js:4862:    domain: 'generated',
+runtime/orchestrator-service/server.js:4865:    requestedIdentifier: 'generated-root',
+runtime/orchestrator-service/server.js:4866:    requestedFile: 'generated'
+runtime/orchestrator-service/server.js:4868:  const legacyBaseDir = path.join(resolution.legacyRoot, 'generated');
+runtime/orchestrator-service/server.js:4900:    domain: 'generated',
+runtime/orchestrator-service/server.js:4904:    requestedIdentifier: 'latest-generation-job',
+runtime/orchestrator-service/server.js:4905:    requestedFile: 'generated/jobs/*.json'
+runtime/orchestrator-service/server.js:4914:    throw new Error('No generation jobs found');
+runtime/orchestrator-service/server.js:4936:    provider: 'provider_pending',
+runtime/orchestrator-service/server.js:4940:    final_generation_prompt: job.final_generation_prompt,
+runtime/orchestrator-service/server.js:4954:    domain: 'generated',
+runtime/orchestrator-service/server.js:4966:    domain: 'generated',
+runtime/orchestrator-service/server.js:4971:    requestedFile: 'generated/renders/*.json'
+runtime/orchestrator-service/server.js:4990:    domain: 'generated',
+runtime/orchestrator-service/server.js:4994:    requestedFile: `generated/renders/${renderId}.json`
+runtime/orchestrator-service/server.js:5009:    domain: 'generated',
+runtime/orchestrator-service/server.js:5059:    domain: 'generated',
+runtime/orchestrator-service/server.js:5064:    domain: 'generated',
+runtime/orchestrator-service/server.js:5067:    requestedIdentifier: 'generated-root',
+runtime/orchestrator-service/server.js:5068:    requestedFile: 'generated'
+runtime/orchestrator-service/server.js:5070:  const legacyBaseDir = path.join(resolution.legacyRoot, 'generated');
+runtime/orchestrator-service/server.js:5101:    status: 'ready_for_generation',
+runtime/orchestrator-service/server.js:5109:    result.blocking_reasons.push('Logo source is required for generation');
+runtime/orchestrator-service/server.js:5113:    result.status = 'restricted_generation';
+runtime/orchestrator-service/server.js:5114:    result.warnings.push('Product source is missing for full-fidelity visual generation');
+runtime/orchestrator-service/server.js:5118:    result.status = 'restricted_generation';
+runtime/orchestrator-service/server.js:5159:  if (execution.source_of_truth.references.length > 0) {
+runtime/orchestrator-service/server.js:5180:    generated_at: new Date().toISOString(),
+runtime/orchestrator-service/server.js:5188:    final_generation_prompt: buildGenerationPrompt(projectName, assetType, goal),
+runtime/orchestrator-service/server.js:5194:    domain: 'generated',
+runtime/orchestrator-service/server.js:5195:    artifactType: 'generation_job_record',
+runtime/orchestrator-service/server.js:5207:  const promptPackage = generateBrandControlledPrompt(projectName, assetType, goal);
+runtime/orchestrator-service/server.js:5221:      references: truth.references.map(item => item.source_url || item.local_path || item.filename).filter(Boolean)
+runtime/orchestrator-service/server.js:5225:    final_prompt: promptPackage.final_prompt
+runtime/orchestrator-service/server.js:5239:    generated_at: new Date().toISOString(),
+runtime/orchestrator-service/server.js:5261:  const references = activeAssets.filter(
+runtime/orchestrator-service/server.js:5262:    item => item.use_as_reference_only === true
+runtime/orchestrator-service/server.js:5269:    references,
+runtime/orchestrator-service/server.js:5316:      reference_count: sourceOfTruth.references.length
+runtime/orchestrator-service/server.js:5320:  const contextPath = path.join(paths.baseDir, 'prompt-engine-context.json');
+runtime/orchestrator-service/server.js:5326:function generateBrandControlledPrompt(projectName, assetType, goal) {
+runtime/orchestrator-service/server.js:5363:  if (truth.references.length) {
+runtime/orchestrator-service/server.js:5371:    generated_at: new Date().toISOString(),
+runtime/orchestrator-service/server.js:5373:    final_prompt: lines.join(' ')
+runtime/orchestrator-service/server.js:5390:function readJsonFile(filePath, fallback = []) {
+runtime/orchestrator-service/server.js:5392:    if (!fs.existsSync(filePath)) return fallback;
+runtime/orchestrator-service/server.js:5394:    if (!raw) return fallback;
+runtime/orchestrator-service/server.js:5397:    console.warn(`[server] readJsonFile: non-fatal read/parse error for ${filePath}, returning fallback. Error: ${err.message}`);
+runtime/orchestrator-service/server.js:5398:    return fallback;
+runtime/orchestrator-service/server.js:5452:    reference: 'reference_source',
+runtime/orchestrator-service/server.js:5453:    reference_source: 'reference_source',
+runtime/orchestrator-service/server.js:5454:    video: 'video_source',
+runtime/orchestrator-service/server.js:5455:    video_source: 'video_source'
+runtime/orchestrator-service/server.js:5478:    referenceDir: path.join(baseDir, 'reference'),
+runtime/orchestrator-service/server.js:5479:    videoDir: path.join(baseDir, 'video')
+runtime/orchestrator-service/server.js:5575:  const result = ['logo', 'product', 'packaging', 'reference', 'video'].map(type => {
+runtime/orchestrator-service/server.js:5741:  if (assetRole === 'reference_source') return paths.referenceDir;
+runtime/orchestrator-service/server.js:5742:  if (assetRole === 'video_source') return paths.videoDir;
+runtime/orchestrator-service/server.js:5952:    text.includes('promotion') ||
+runtime/orchestrator-service/server.js:6103:    emotional_triggers: []
+runtime/orchestrator-service/server.js:6139:  enrichment.emotional_triggers = [
+runtime/orchestrator-service/server.js:6162:    if (!signal || signal.fallback) return null;
+runtime/orchestrator-service/server.js:6210:  const promptFileMap = {
+runtime/orchestrator-service/server.js:6220:    path.join(PROMPTS_DIR, promptFileMap[agent] || 'orchestrator.md')
+runtime/orchestrator-service/server.js:6248:      agent_prompt_loaded: agentPrompt.length > 0,
+runtime/orchestrator-service/server.js:6385:  const fallback = options.fallback;
+runtime/orchestrator-service/server.js:6389:  const canonicalValue = canonicalExists ? normalize(readJsonFile(canonicalPath, fallback)) : null;
+runtime/orchestrator-service/server.js:6397:    const legacyValue = normalize(readJsonFile(legacyPath, fallback));
+runtime/orchestrator-service/server.js:6440:  writeJsonFile(canonicalPath, fallback);
+runtime/orchestrator-service/server.js:6442:    value: fallback,
+runtime/orchestrator-service/server.js:6513:    const fallbackValue = candidates
+runtime/orchestrator-service/server.js:6517:    const entry = foundEntry || (fallbackValue ? { value: fallbackValue } : {});
+runtime/orchestrator-service/server.js:6522:      value: normalizeSetupTextValue(entry.value || fallbackValue),
+runtime/orchestrator-service/server.js:6531:  // Deterministic: allow explicit updated_at, do not generate new timestamp unless not provided
+runtime/orchestrator-service/server.js:6623:    fallback: buildDefaultBrandProfile(safeProject, projectData)
+runtime/orchestrator-service/server.js:6630:    fallback: [],
+runtime/orchestrator-service/server.js:6638:    fallback: buildSourceOfTruthRegistry({}),
+runtime/orchestrator-service/server.js:6874:      required_assets: ['artist_photos', 'logo_or_signature', 'press_kit', 'music_links', 'video_clips'],
+runtime/orchestrator-service/server.js:6876:      content_categories: ['song_release', 'behind_the_scenes', 'live_events', 'fan_engagement', 'press_updates'],
+runtime/orchestrator-service/server.js:6878:      ai_team_defaults: ['strategist', 'writer', 'designer', 'video_lead', 'publisher', 'analyst'],
+runtime/orchestrator-service/server.js:6930:      ai_team_defaults: ['strategist', 'writer', 'designer', 'video_lead', 'publisher'],
+runtime/orchestrator-service/server.js:6941:      content_categories: ['case_study', 'thought_leadership', 'services', 'client_results', 'lead_generation'],
+runtime/orchestrator-service/server.js:7231:      fallback_in_use: !canonicalExists && legacyExists
+runtime/orchestrator-service/server.js:7236:  const fallbackDependencies = checks.filter((item) => item.fallback_in_use).length;
+runtime/orchestrator-service/server.js:7239:    generated_at: new Date().toISOString(),
+runtime/orchestrator-service/server.js:7241:    fallback_dependencies: fallbackDependencies,
+runtime/orchestrator-service/server.js:7244:    recommendation: fallbackDependencies > 0 || mismatches > 0
+runtime/orchestrator-service/server.js:7245:      ? 'Reduce fallback dependencies by keeping canonical files in sync before disabling legacy reads.'
+runtime/orchestrator-service/server.js:7851:// Keys matching this pattern are redacted from provider summary objects before
+runtime/orchestrator-service/server.js:7941:    provider_metadata: redactProviderSummaryObject(asPlainObject(normalizedRecord.provider_metadata)),
+runtime/orchestrator-service/server.js:7943:    provider_account: redactProviderSummaryObject(asPlainObject(normalizedRecord.provider_account)),
+runtime/orchestrator-service/server.js:8039:      status: 'unsupported_provider'
+runtime/orchestrator-service/server.js:8093:    const providerResult = await executeAdapterAction({
+runtime/orchestrator-service/server.js:8106:      status: providerResult.status,
+runtime/orchestrator-service/server.js:8107:      token_expires_at: normalizeTextValue(providerResult.token_expires_at || nextRecord.token_expires_at),
+runtime/orchestrator-service/server.js:8108:      permission_scope: normalizeTextValue(providerResult.permission_scope || nextRecord.permission_scope),
+runtime/orchestrator-service/server.js:8109:      connection_method: normalizeTextValue(providerResult.connection_method || nextRecord.connection_method),
+runtime/orchestrator-service/server.js:8110:      data_scopes: normalizeStringArray(providerResult.data_scopes?.length ? providerResult.data_scopes : nextRecord.data_scopes),
+runtime/orchestrator-service/server.js:8111:      read_scopes: normalizeStringArray(providerResult.read_scopes?.length ? providerResult.read_scopes : nextRecord.read_scopes),
+runtime/orchestrator-service/server.js:8112:      write_scopes: normalizeStringArray(providerResult.write_scopes?.length ? providerResult.write_scopes : nextRecord.write_scopes),
+runtime/orchestrator-service/server.js:8113:      provider_metadata: asPlainObject(providerResult.metadata),
+runtime/orchestrator-service/server.js:8114:      provider_account: asPlainObject(providerResult.account),
+runtime/orchestrator-service/server.js:8115:      insights_ready: asPlainObject(providerResult.insights_ready),
+runtime/orchestrator-service/server.js:8118:      notes: normalizeTextValue(providerResult.notes || nextRecord.notes),
+runtime/orchestrator-service/server.js:8119:      health_summary: normalizeTextValue(providerResult.health || ''),
+runtime/orchestrator-service/server.js:8120:      health_state: asPlainObject(providerResult.health_state)
+runtime/orchestrator-service/server.js:8124:    const fallbackStatus = determineIntegrationStatus({
+runtime/orchestrator-service/server.js:8136:            : fallbackStatus === 'connected'
+runtime/orchestrator-service/server.js:8138:              : fallbackStatus,
+runtime/orchestrator-service/server.js:8148:              : fallbackStatus === 'connected'
+runtime/orchestrator-service/server.js:8150:                : fallbackStatus,
+runtime/orchestrator-service/server.js:8212:      status: 'unsupported_provider'
+runtime/orchestrator-service/server.js:8239:      const providerResult = await executeAdapterAction({
+runtime/orchestrator-service/server.js:8250:      nextRecord.status = providerResult.status;
+runtime/orchestrator-service/server.js:8251:      nextRecord.token_expires_at = normalizeTextValue(providerResult.token_expires_at || nextRecord.token_expires_at);
+runtime/orchestrator-service/server.js:8252:      nextRecord.provider_metadata = asPlainObject(providerResult.metadata);
+runtime/orchestrator-service/server.js:8253:      nextRecord.provider_account = asPlainObject(providerResult.account);
+runtime/orchestrator-service/server.js:8254:      nextRecord.insights_ready = asPlainObject(providerResult.insights_ready);
+runtime/orchestrator-service/server.js:8256:      nextRecord.notes = normalizeTextValue(providerResult.notes || nextRecord.notes);
+runtime/orchestrator-service/server.js:8257:      nextRecord.health_summary = normalizeTextValue(providerResult.health || '');
+runtime/orchestrator-service/server.js:8258:      nextRecord.health_state = asPlainObject(providerResult.health_state);
+runtime/orchestrator-service/server.js:8264:        nextRecord.last_sync_summary = asPlainObject(providerResult.sync_summary);
+runtime/orchestrator-service/server.js:8267:        nextRecord.last_sync_summary = asPlainObject(providerResult.sync_summary);
+runtime/orchestrator-service/server.js:8361:      aliases: ['brand_guidelines', 'brand_guide', 'brand_reference_doc'],
+runtime/orchestrator-service/server.js:8413:        why_it_matters: 'Publishing and AI Command need legal context before release or generated claims.',
+runtime/orchestrator-service/server.js:8434:      asset_type: 'product_videos',
+runtime/orchestrator-service/server.js:8435:      label: 'Product Videos / Produktvideos',
+runtime/orchestrator-service/server.js:8441:      aliases: ['product_video', 'product_video_assets', 'video'],
+runtime/orchestrator-service/server.js:8442:      description: 'Approved product videos, demos, UGC clips, and cutdowns.',
+runtime/orchestrator-service/server.js:8444:        what_to_upload: 'Product demos, UGC clips, reels, explainers, usage videos, and source cutdowns.',
+runtime/orchestrator-service/server.js:8445:        why_it_matters: 'Media Studio, Content Studio, Campaign Studio, and Publishing use video as creative source material.',
+runtime/orchestrator-service/server.js:8458:      description: 'Organic social creative, post visuals, reels, stories, and channel-ready source assets.',
+runtime/orchestrator-service/server.js:8460:        what_to_upload: 'Organic post images, story frames, reels, thumbnails, channel templates, and captions references.',
+runtime/orchestrator-service/server.js:8490:      description: 'Packaging photos, labels, inserts, and box or bottle references.',
+runtime/orchestrator-service/server.js:8492:        what_to_upload: 'Packaging photos, label artwork, inserts, box shots, bottle/jar details, and compliance label references.',
+runtime/orchestrator-service/server.js:8736:    path.join(brandPaths.baseDir, 'products', 'videos'),
+runtime/orchestrator-service/server.js:8737:    path.join(brandPaths.legacyBaseDir, 'products', 'videos'),
+runtime/orchestrator-service/server.js:8738:    path.join(LEGACY_BRAND_ASSETS_DIR, safeProject, 'products', 'videos')
+runtime/orchestrator-service/server.js:8862:      asset_type: 'product_videos',
+runtime/orchestrator-service/server.js:8865:      scan_source: 'brand_products_videos_recursive'
+runtime/orchestrator-service/server.js:8871:    generated_at: new Date().toISOString(),
+runtime/orchestrator-service/server.js:8876:      brand_product_videos: brandProductVideoDirs
+runtime/orchestrator-service/server.js:8918:        `Detected ${frontFolderNames.length} image folder(s) with front.png and ${extraImageFolders.length} extra folder(s) not referenced by the CSV.`
+runtime/orchestrator-service/server.js:8922:    product_videos: {
+runtime/orchestrator-service/server.js:8945:  const managedTypes = new Set(['product_csv', 'product_photos', 'product_videos']);
+runtime/orchestrator-service/server.js:9611:      requestedAction: 'provider_send',
+runtime/orchestrator-service/server.js:9622:      requestedAction: 'provider_send',
+runtime/orchestrator-service/server.js:9648:      ready_for_provider_send: true,
+runtime/orchestrator-service/server.js:9657:        ready_for_provider_send: true
+runtime/orchestrator-service/server.js:9689:app.post('/generate_media_from_prompt', async (req, res) => {
+runtime/orchestrator-service/server.js:9696:      action: 'generate_media_from_prompt',
+runtime/orchestrator-service/server.js:9698:      entityId: 'generate_media_from_prompt',
+runtime/orchestrator-service/server.js:9699:      requestedAction: 'generate',
+runtime/orchestrator-service/server.js:9707:      action: 'generate_media_from_prompt',
+runtime/orchestrator-service/server.js:9709:      entityId: 'generate_media_from_prompt',
+runtime/orchestrator-service/server.js:9710:      requestedAction: 'generate',
+runtime/orchestrator-service/server.js:9713:      linkedExecutionId: 'generate_media_from_prompt',
+runtime/orchestrator-service/server.js:9715:      title: 'Media generation approval',
+runtime/orchestrator-service/server.js:9716:      summary: 'Approval required before media generation from prompt.'
+runtime/orchestrator-service/server.js:9727:    const log = writeExecutionBridgeLog(projectName, 'generate_media_from_prompt', {
+runtime/orchestrator-service/server.js:9730:        has_image_prompt: Boolean(bridgeResult.image_prompt),
+runtime/orchestrator-service/server.js:9731:        scene_count: Number(bridgeResult.scene_count || 0),
+runtime/orchestrator-service/server.js:9742:      image_prompt: bridgeResult.image_prompt,
+runtime/orchestrator-service/server.js:9743:      scene_count: bridgeResult.scene_count,
+runtime/orchestrator-service/server.js:9752:      writeExecutionBridgeLog(logProject, 'generate_media_from_prompt', {
+runtime/orchestrator-service/server.js:9765:      message: error.message || 'Failed to generate media from prompt'
+runtime/orchestrator-service/server.js:10275:          use_as_source_of_truth: uploadTarget.assetRole !== 'reference_source',
+runtime/orchestrator-service/server.js:10276:          use_as_reference_only: uploadTarget.assetRole === 'reference_source',
+runtime/orchestrator-service/server.js:10824:function sendAssetMutationError(res, error, fallbackMessage) {
+runtime/orchestrator-service/server.js:10827:    error: error?.message || fallbackMessage,
+runtime/orchestrator-service/server.js:10836:    error: fallbackMessage,
+runtime/orchestrator-service/server.js:11183:function normalizeAiCommandPreviewInput(value, fallback = '') {
+runtime/orchestrator-service/server.js:11184:  return String(value || fallback || '').trim();
+runtime/orchestrator-service/server.js:11343:    generated_at: now,
+runtime/orchestrator-service/server.js:11348:      no_provider_execution_performed: true,
+runtime/orchestrator-service/server.js:11372:        no_provider_execution_performed: true
+runtime/orchestrator-service/server.js:11875:      provider: result?.provider?.id || result?.response?.provider || null,
+runtime/orchestrator-service/server.js:11948:      provider: result?.provider?.id || null,
+runtime/orchestrator-service/server.js:12018:      provider: result?.provider?.id || null,
+runtime/orchestrator-service/server.js:12710:  if (status === 'unsupported_provider') {
+runtime/orchestrator-service/server.js:12738:    summary: `Review ${req.params.integrationId} ${requestedAction} before applying integration credential or provider-state changes.`
+runtime/orchestrator-service/server.js:12852:    summary: `Review ${req.params.integrationId} ${normalizedActionType} before applying integration provider action.`
+runtime/orchestrator-service/server.js:12893:    const providers = mediaType
+runtime/orchestrator-service/server.js:12899:      providers,
+runtime/orchestrator-service/server.js:12900:      count: providers.length
+runtime/orchestrator-service/server.js:12904:      error: 'Failed to list native media providers',
+runtime/orchestrator-service/server.js:12919:      error: 'Failed to load native media provider readiness',
+runtime/orchestrator-service/server.js:12985:// place calls, trigger IVR, send provider messages, or auto-reply.
+runtime/orchestrator-service/server.js:13215:app.get('/media-manager/project/:project/native-media/providers', handleGetNativeMediaProviders);
+runtime/orchestrator-service/server.js:13216:app.get('/public/media-manager/project/:project/native-media/providers', handleGetNativeMediaProviders);
+runtime/orchestrator-service/server.js:13217:app.get('/media-manager/project/:project/native-media/providers/readiness', handleGetNativeMediaProviderReadiness);
+runtime/orchestrator-service/server.js:13218:app.get('/public/media-manager/project/:project/native-media/providers/readiness', handleGetNativeMediaProviderReadiness);
+runtime/orchestrator-service/server.js:13225:    action: 'native_media_generate',
+runtime/orchestrator-service/server.js:13227:    entityId: String(req.body?.media_job_id || req.body?.id || 'native_media_generate').trim(),
+runtime/orchestrator-service/server.js:13228:    requestedAction: 'generate'
+runtime/orchestrator-service/server.js:13238:      provider: req.body?.provider || DEFAULT_NATIVE_MEDIA_PROVIDER,
+runtime/orchestrator-service/server.js:13241:      prompt: req.body?.prompt || '',
+runtime/orchestrator-service/server.js:13254:      error: 'native_media_generation_failed',
+runtime/orchestrator-service/server.js:13260:app.post('/media-manager/project/:project/native-media/generate', handleNativeMediaGenerate);
+runtime/orchestrator-service/server.js:13334:// TODO(phase4a): Keep `/public/media-manager/...` write aliases for active frontend compatibility.
+runtime/orchestrator-service/server.js:13810:app.get('/generated-output/:project/:filename', (req, res) => {
+runtime/orchestrator-service/server.js:13819:  // Use canonical-first candidate resolution with fallback instrumentation
+runtime/orchestrator-service/server.js:13822:    domain: 'generated',
+runtime/orchestrator-service/server.js:14033:  function makeBlock(type, fallbackGoal) {
+runtime/orchestrator-service/server.js:14037:    const goal = map.goal || fallbackGoal;
+runtime/orchestrator-service/server.js:14045:      visual_prompt:
+runtime/orchestrator-service/server.js:14054:      video_prompt:
+runtime/orchestrator-service/server.js:14055:        `Create a short-form ${type} video concept for ${productName}. ` +
+runtime/orchestrator-service/server.js:14078:    reel: makeBlock('reel', 'attention'),
+runtime/orchestrator-service/server.js:14084:  const pp = product.prompt_pack || {};
+runtime/orchestrator-service/server.js:14093:      visual_prompt: b.visual_prompt,
+runtime/orchestrator-service/server.js:14100:    const r = pp.reel || {};
+runtime/orchestrator-service/server.js:14103:      video_prompt: r.video_prompt,
+runtime/orchestrator-service/server.js:14115:    const r = pp.reel || {};
+runtime/orchestrator-service/server.js:14119:      video_prompt: r.video_prompt,
+runtime/orchestrator-service/server.js:14135:      visual_prompt: m.visual_prompt,
+runtime/orchestrator-service/server.js:14147:      visual_prompt: b.visual_prompt
+runtime/orchestrator-service/server.js:14206:  const generatedAt = new Date().toISOString();
+runtime/orchestrator-service/server.js:14212:    generated_at: generatedAt,
+runtime/orchestrator-service/server.js:14221:      prompt_pack: product.prompt_pack || {},
+runtime/orchestrator-service/server.js:14277:    generated_at: new Date().toISOString(),
+runtime/orchestrator-service/server.js:14284:    const promptPack = product.prompt_pack || {};
+runtime/orchestrator-service/server.js:14296:      fallback_prompt_pack:
+runtime/orchestrator-service/server.js:14298:          ? promptPack.marketplace || null
+runtime/orchestrator-service/server.js:14300:          ? promptPack.branding || null
+runtime/orchestrator-service/server.js:14301:          : promptPack.branding || null
+runtime/orchestrator-service/server.js:14311:  // the required fallback for existing HAIROTICMEN dry-run packages.
+runtime/orchestrator-service/server.js:14369:    generated_at: new Date().toISOString(),
+runtime/orchestrator-service/server.js:14404:    generated_at: new Date().toISOString(),
+runtime/orchestrator-service/server.js:14442:    generated_at: new Date().toISOString(),
+runtime/orchestrator-service/server.js:14642:        video_prompt: String(channelAsset.video_prompt || channelAsset.visual_prompt || '').trim(),
+runtime/orchestrator-service/server.js:14705:function buildMediaGenerationMock(promptPack = {}, input = {}) {
+runtime/orchestrator-service/server.js:14706:  const source = promptPack && typeof promptPack === 'object' ? promptPack : {};
+runtime/orchestrator-service/server.js:14708:  const reel = source.reel && typeof source.reel === 'object' ? source.reel : {};
+runtime/orchestrator-service/server.js:14712:    input.image_prompt
+runtime/orchestrator-service/server.js:14713:    || branding.visual_prompt
+runtime/orchestrator-service/server.js:14714:    || feature.visual_prompt
+runtime/orchestrator-service/server.js:14717:  const videoScript = [
+runtime/orchestrator-service/server.js:14718:    String(reel.hook || branding.hook || 'Start with a direct hook for the target audience.').trim(),
+runtime/orchestrator-service/server.js:14719:    String(reel.video_prompt || 'Show product usage with a clear before/after context and one main benefit.').trim(),
+runtime/orchestrator-service/server.js:14720:    String(reel.cta || branding.cta || 'End with a clear CTA and brand tag.').trim()
+runtime/orchestrator-service/server.js:14724:    image_prompt: imagePrompt,
+runtime/orchestrator-service/server.js:14725:    video_script: videoScript,
+runtime/orchestrator-service/server.js:14726:    scene_breakdown: [
+runtime/orchestrator-service/server.js:14728:        scene: 1,
+runtime/orchestrator-service/server.js:14731:        direction: String(reel.hook || branding.hook || 'Open with audience pain or aspiration.').trim()
+runtime/orchestrator-service/server.js:14734:        scene: 2,
+runtime/orchestrator-service/server.js:14737:        direction: String(reel.video_prompt || feature.video_prompt || imagePrompt).trim()
+runtime/orchestrator-service/server.js:14740:        scene: 3,
+runtime/orchestrator-service/server.js:14743:        direction: String(reel.cta || branding.cta || 'Close with CTA and brand recall.').trim()
+runtime/orchestrator-service/server.js:14778:  const promptPack = primary.prompt_pack && typeof primary.prompt_pack === 'object'
+runtime/orchestrator-service/server.js:14779:    ? primary.prompt_pack
+runtime/orchestrator-service/server.js:14781:  const offer = promptPack.offer && typeof promptPack.offer === 'object' ? promptPack.offer : {};
+runtime/orchestrator-service/server.js:14782:  const branding = promptPack.branding && typeof promptPack.branding === 'object' ? promptPack.branding : {};
+runtime/orchestrator-service/server.js:14812:function deriveMediaExecutionPrompt(promptPack = {}, input = {}) {
+runtime/orchestrator-service/server.js:14813:  const source = promptPack && typeof promptPack === 'object' ? promptPack : {};
+runtime/orchestrator-service/server.js:14815:  const reel = source.reel && typeof source.reel === 'object' ? source.reel : {};
+runtime/orchestrator-service/server.js:14819:    input.prompt
+runtime/orchestrator-service/server.js:14820:    || input.image_prompt
+runtime/orchestrator-service/server.js:14821:    || branding.visual_prompt
+runtime/orchestrator-service/server.js:14822:    || feature.visual_prompt
+runtime/orchestrator-service/server.js:14823:    || reel.video_prompt
+runtime/orchestrator-service/server.js:14851:    ready_for_provider_send: true,
+runtime/orchestrator-service/server.js:14859:async function executeMediaGenerationRuntime({ project, payload, promptPack }) {
+runtime/orchestrator-service/server.js:14862:  const prompt = deriveMediaExecutionPrompt(promptPack, payload || {});
+runtime/orchestrator-service/server.js:14866:    provider: payload?.provider || DEFAULT_NATIVE_MEDIA_PROVIDER,
+runtime/orchestrator-service/server.js:14869:    prompt,
+runtime/orchestrator-service/server.js:14886:    image_prompt: prompt,
+runtime/orchestrator-service/server.js:14887:    scene_count: 1,
+runtime/orchestrator-service/server.js:14893:  const basePrompt = String(payload?.prompt || adPackage?.ad_copy || adPackage?.headline || '').trim();
+runtime/orchestrator-service/server.js:14895:    const error = new Error('Unable to execute ad package: prompt data is missing.');
+runtime/orchestrator-service/server.js:14901:  const campaignPack = await mediaProviderLayer.generateCampaignPack({
+runtime/orchestrator-service/server.js:14902:    prompt: basePrompt,
+runtime/orchestrator-service/server.js:14909:    const message = String(campaignPack?.message || 'Ad execution provider is not configured.').trim();
+runtime/orchestrator-service/server.js:14916:  const generated = campaignPack.campaign_pack || {};
+runtime/orchestrator-service/server.js:14920:    execution_backend: 'ad_ai_provider_runtime',
+runtime/orchestrator-service/server.js:14922:    ad_copy: String(generated.channel_notes || adPackage.ad_copy || '').trim(),
+runtime/orchestrator-service/server.js:14923:    headline: String(generated.image_prompt || adPackage.headline || '').trim(),
+runtime/orchestrator-service/server.js:14927:    provider: campaignPack.provider,
+runtime/orchestrator-service/server.js:14929:    generated_campaign_pack: generated
+runtime/orchestrator-service/server.js:15706:    generated_at: new Date().toISOString(),
+runtime/orchestrator-service/server.js:15778:  const videosRoot = path.join(productsRoot, 'videos');
+runtime/orchestrator-service/server.js:15782:  const videos = listFilesRecursiveSafe(videosRoot, file => /\.(mp4|mov)$/i.test(file));
+runtime/orchestrator-service/server.js:15788:    videos_root: videosRoot,
+runtime/orchestrator-service/server.js:15795:    videos: videos.map(file_path => ({
+runtime/orchestrator-service/server.js:15806:      videos: videos.length,
+runtime/orchestrator-service/server.js:15845:    generated_at: new Date().toISOString(),
+runtime/orchestrator-service/server.js:15869:    generated_at: new Date().toISOString(),
+runtime/orchestrator-service/server.js:15883:    generated_at: new Date().toISOString(),
+runtime/orchestrator-service/server.js:15937:      generated_at: new Date().toISOString(),
+runtime/orchestrator-service/server.js:15945:        generated_at: insights.generated_at,
+runtime/orchestrator-service/server.js:15955:        generated_at: new Date().toISOString(),
+runtime/orchestrator-service/server.js:15961:    generated_at: new Date().toISOString(),
+runtime/orchestrator-service/server.js:16174:        creative_prompt:
+runtime/orchestrator-service/server.js:16176:        video_brief:
+runtime/orchestrator-service/server.js:16177:          `Short-form social video for ${topic}: start with a strong visual hook, show premium product or grooming moment, reinforce confidence and routine, finish with CTA Jetzt entdecken.`
+runtime/orchestrator-service/server.js:16226:        external_reference_suggestions: [
+runtime/orchestrator-service/server.js:16227:          'Use one high-authority grooming or dermatology reference if relevant',
+runtime/orchestrator-service/server.js:16228:          'Use one standards/reference source only when it improves trust'
+runtime/orchestrator-service/server.js:16230:        featured_image_prompt:
+runtime/orchestrator-service/server.js:16542:      item.visual_format = 'feed post / reel support';
+runtime/orchestrator-service/server.js:16545:      item.creative_prompt =
+runtime/orchestrator-service/server.js:16547:      item.video_brief =
+runtime/orchestrator-service/server.js:16548:        `Create a short-form reel for ${item.topic}: start with a hook in the first 2 seconds, show the grooming transformation or product moment, reinforce premium positioning, end with CTA Jetzt entdecken.`;
+runtime/orchestrator-service/server.js:16597:      item.external_reference_suggestions = [
+runtime/orchestrator-service/server.js:16600:      item.featured_image_prompt =
+runtime/orchestrator-service/server.js:16820:          featured_image_prompt: item.featured_image_prompt || '',
+runtime/orchestrator-service/server.js:16824:          media_ready: Boolean(item.featured_image_prompt && item.featured_image_alt)
+runtime/orchestrator-service/server.js:16856:          featured_image_prompt: item.featured_image_prompt || '',
+runtime/orchestrator-service/server.js:16859:          external_reference_suggestions: item.external_reference_suggestions || []
+runtime/orchestrator-service/server.js:16863:       if (command === '/generate_blog_image') {
+runtime/orchestrator-service/server.js:16891:      const plannedFilename = `${assetId}-${safeSlug}.png`;
+runtime/orchestrator-service/server.js:16892:      const plannedOutputPath = path.join(
+runtime/orchestrator-service/server.js:16895:        plannedFilename
+runtime/orchestrator-service/server.js:16905:        prompt: blogItem.featured_image_prompt || '',
+runtime/orchestrator-service/server.js:16910:        output_path: plannedOutputPath,
+runtime/orchestrator-service/server.js:16911:        filename: plannedFilename,
+runtime/orchestrator-service/server.js:16913:        media_ready: Boolean(blogItem.featured_image_prompt && blogItem.featured_image_alt)
+runtime/orchestrator-service/server.js:16956:if (command === '/generate_image_real') {
+runtime/orchestrator-service/server.js:16980:  if (!asset.prompt) {
+runtime/orchestrator-service/server.js:16981:    return res.json({ error: 'Missing prompt in asset' });
+runtime/orchestrator-service/server.js:16988:      'https://api.openai.com/v1/images/generations',
+runtime/orchestrator-service/server.js:16991:        prompt: asset.prompt,
+runtime/orchestrator-service/server.js:17007:    asset.status = 'generated';
+runtime/orchestrator-service/server.js:17008:    asset.generated_at = new Date().toISOString();
+runtime/orchestrator-service/server.js:17022:        message: 'Image generated successfully'
+runtime/orchestrator-service/server.js:17028:      error: 'Image generation failed',
+runtime/orchestrator-service/server.js:17057:  if (!asset || asset.status !== 'generated') {
+runtime/orchestrator-service/server.js:17058:    return res.json({ error: 'No generated image found for this blog' });
+runtime/orchestrator-service/server.js:17346:    if (command === '/generate_email_image') {
+runtime/orchestrator-service/server.js:17371:      const plannedFilename = `${assetId}-${safeSlug}.png`;
+runtime/orchestrator-service/server.js:17372:      const plannedOutputPath = path.join(
+runtime/orchestrator-service/server.js:17375:        plannedFilename
+runtime/orchestrator-service/server.js:17378:      const prompt =
+runtime/orchestrator-service/server.js:17391:        prompt,
+runtime/orchestrator-service/server.js:17396:        output_path: plannedOutputPath,
+runtime/orchestrator-service/server.js:17397:        filename: plannedFilename,
+runtime/orchestrator-service/server.js:17454:  const generatedAssets = mediaQueue
+runtime/orchestrator-service/server.js:17455:    .filter(x => x.linked_email_id === draftId && x.status === 'generated')
+runtime/orchestrator-service/server.js:17458:  const asset = generatedAssets[0];
+runtime/orchestrator-service/server.js:17461:    return res.json({ error: 'No generated email image found' });
+runtime/orchestrator-service/server.js:17530:    if (command === '/generate_email_image_real') {
+runtime/orchestrator-service/server.js:17553:      if (!asset.prompt) {
+runtime/orchestrator-service/server.js:17554:        return res.json({ error: 'Missing prompt in asset' });
+runtime/orchestrator-service/server.js:17559:          'https://api.openai.com/v1/images/generations',
+runtime/orchestrator-service/server.js:17562:            prompt: asset.prompt,
+runtime/orchestrator-service/server.js:17578:        asset.status = 'generated';
+runtime/orchestrator-service/server.js:17579:        asset.generated_at = new Date().toISOString();
+runtime/orchestrator-service/server.js:17589:            message: 'Email image generated successfully'
+runtime/orchestrator-service/server.js:17595:          error: 'Email image generation failed',
+runtime/orchestrator-service/server.js:17779:          'reel brief'
+runtime/orchestrator-service/server.js:17786:          'reel creative brief'
+runtime/orchestrator-service/server.js:17868:        planned_assets: {
+runtime/orchestrator-service/server.js:17873:          reel_briefs: 1,
+runtime/orchestrator-service/server.js:17881:          'reel/tiktok support'
+runtime/orchestrator-service/server.js:17979:      instagram: "visual + reels + transformation",
+runtime/orchestrator-service/server.js:18054:    reel: {
+runtime/orchestrator-service/server.js:18111:if (command === '/generate_reel_from_blog') {
+runtime/orchestrator-service/server.js:18118:  const reel = {
+runtime/orchestrator-service/server.js:18121:    scenes: [
+runtime/orchestrator-service/server.js:18122:      'problem scene',
+runtime/orchestrator-service/server.js:18131:    result: reel
+runtime/orchestrator-service/server.js:18612:          '1 reel brief',
+runtime/orchestrator-service/server.js:18699:            instagram: 'visual storytelling + reels + hooks',
+runtime/orchestrator-service/server.js:18785:    status: 'generated',
+runtime/orchestrator-service/server.js:18829:    reel: {
+runtime/orchestrator-service/server.js:18835:    media_prompts: [
+runtime/orchestrator-service/server.js:18869:      const reelQueuePath = getLegacyContentQueuePath(campaignProject, 'reel');
+runtime/orchestrator-service/server.js:18876:      const reelQueue = JSON.parse(fs.readFileSync(reelQueuePath, 'utf8'));
+runtime/orchestrator-service/server.js:18889:        reel_id: null
+runtime/orchestrator-service/server.js:18916:          external_reference_suggestions: [
+runtime/orchestrator-service/server.js:18919:          featured_image_prompt: `Create a premium editorial blog image for ${campaignExec.blog.topic}, masculine grooming, luxury brand style, clear premium composition.`,
+runtime/orchestrator-service/server.js:18966:            visual_format: post.platform === 'instagram' ? 'feed post / reel support' : 'social post',
+runtime/orchestrator-service/server.js:18969:            creative_prompt: `Create a premium ${post.platform} creative for ${campaignExec.blog?.topic || 'campaign'}, masculine luxury grooming style.`,
+runtime/orchestrator-service/server.js:18970:            video_brief: `Create short-form visual content for ${campaignExec.blog?.topic || 'campaign'} on ${post.platform}.`,
+runtime/orchestrator-service/server.js:19004:      if (campaignExec.reel) {
+runtime/orchestrator-service/server.js:19005:        const reelBrief = {
+runtime/orchestrator-service/server.js:19006:          id: `reel_${Date.now() + 2}`,
+runtime/orchestrator-service/server.js:19007:          topic: campaignExec.blog?.topic || 'campaign reel',
+runtime/orchestrator-service/server.js:19009:          platform: 'instagram_reel',
+runtime/orchestrator-service/server.js:19010:          hook: campaignExec.reel.hook || '',
+runtime/orchestrator-service/server.js:19011:          scene_plan: [
+runtime/orchestrator-service/server.js:19022:          script: campaignExec.reel.script || '',
+runtime/orchestrator-service/server.js:19023:          cta: campaignExec.reel.cta || 'Jetzt starten',
+runtime/orchestrator-service/server.js:19029:        reelQueue.push(reelBrief);
+runtime/orchestrator-service/server.js:19030:        created.reel_id = reelBrief.id;
+runtime/orchestrator-service/server.js:19037:      fs.writeFileSync(reelQueuePath, JSON.stringify(reelQueue, null, 2), 'utf8');
+runtime/orchestrator-service/server.js:19110:        return res.json({ error: 'No generated blog asset linked to this campaign' });
+runtime/orchestrator-service/server.js:19167:        return res.json({ error: 'No generated email asset linked to this campaign' });
+runtime/orchestrator-service/server.js:19255:      fs.mkdirSync(path.join(brandDir, 'references'), { recursive: true });
+runtime/orchestrator-service/server.js:19256:      fs.mkdirSync(path.join(brandDir, 'video'), { recursive: true });
+runtime/orchestrator-service/server.js:19266:        reference_assets: [],
+runtime/orchestrator-service/server.js:19267:        video_assets: [],
+runtime/orchestrator-service/server.js:19287:            'random logo generation',
+runtime/orchestrator-service/server.js:19292:        prompt_constraints: {
+runtime/orchestrator-service/server.js:19353:      brandProfile.prompt_constraints = {
+runtime/orchestrator-service/server.js:19487:        use_as_reference_only: false,
+runtime/orchestrator-service/server.js:19556:      error: 'Invalid asset type. Allowed: product, logo, packaging, reference, video'
+runtime/orchestrator-service/server.js:19600:    use_as_source_of_truth: assetRole !== 'reference_source',
+runtime/orchestrator-service/server.js:19601:    use_as_reference_only: assetRole === 'reference_source',
+runtime/orchestrator-service/server.js:19614:if (command === '/register_reference_link') {
+runtime/orchestrator-service/server.js:19620:    return res.json({ error: 'Missing project name, reference type, or URL' });
+runtime/orchestrator-service/server.js:19626:      error: 'Invalid type. Allowed: reference, video, product, logo, packaging'
+runtime/orchestrator-service/server.js:19636:      item.source_type === 'reference_link' &&
+runtime/orchestrator-service/server.js:19651:  const isReferenceOnly = assetRole === 'reference_source' || assetRole === 'video_source';
+runtime/orchestrator-service/server.js:19656:    source_type: 'reference_link',
+runtime/orchestrator-service/server.js:19660:    use_as_reference_only: isReferenceOnly,
+runtime/orchestrator-service/server.js:19689:    reference_only_assets: 0
+runtime/orchestrator-service/server.js:19700:    if (item.use_as_reference_only) summary.reference_only_assets += 1;
+runtime/orchestrator-service/server.js:19713:if (command === '/build_prompt_engine_context') {
+runtime/orchestrator-service/server.js:19728:      error: 'Failed to build prompt engine context',
+runtime/orchestrator-service/server.js:19733:if (command === '/review_prompt_guardrails') {
+runtime/orchestrator-service/server.js:19759:          references: context.source_of_truth.references.length
+runtime/orchestrator-service/server.js:19765:      error: 'Failed to review prompt guardrails',
+runtime/orchestrator-service/server.js:19770:if (command === '/generate_brand_controlled_prompt') {
+runtime/orchestrator-service/server.js:19780:    const result = generateBrandControlledPrompt(projectName, assetType, goal);
+runtime/orchestrator-service/server.js:19787:      error: 'Failed to generate brand controlled prompt',
+runtime/orchestrator-service/server.js:19864:if (command === '/generate_ad_visual') {
+runtime/orchestrator-service/server.js:19880:      error: 'Failed to generate ad visual job',
+runtime/orchestrator-service/server.js:19885:if (command === '/generate_email_hero') {
+runtime/orchestrator-service/server.js:19901:      error: 'Failed to generate email hero job',
+runtime/orchestrator-service/server.js:19906:if (command === '/generate_blog_visual') {
+runtime/orchestrator-service/server.js:19922:      error: 'Failed to generate blog visual job',
+runtime/orchestrator-service/server.js:19927:if (command === '/review_generation_job') {
+runtime/orchestrator-service/server.js:19942:      return res.json({ error: 'No generation jobs found' });
+runtime/orchestrator-service/server.js:19954:      error: 'Failed to review generation job',
+runtime/orchestrator-service/server.js:20025:if (command === '/render_generation_job') {
+runtime/orchestrator-service/server.js:20214:if (command === '/generate_meta_package') {
+runtime/orchestrator-service/server.js:20231:      error: 'Failed to generate Meta package',
+runtime/orchestrator-service/server.js:20257:if (command === '/generate_tiktok_package') {
+runtime/orchestrator-service/server.js:20270:      error: 'Failed to generate TikTok package',
+runtime/orchestrator-service/server.js:20294:if (command === '/generate_youtube_package') {
+runtime/orchestrator-service/server.js:20308:      error: 'Failed to generate YouTube package',
+runtime/orchestrator-service/server.js:20331:if (command === '/generate_marketplace_package') {
+runtime/orchestrator-service/server.js:20348:      error: 'Failed to generate marketplace package',
+runtime/orchestrator-service/server.js:20809:if (command === '/build_product_prompt_pack') {
+runtime/orchestrator-service/server.js:20829:    const promptPack = buildProductPromptPack(product);
+runtime/orchestrator-service/server.js:20830:    product.prompt_pack = promptPack;
+runtime/orchestrator-service/server.js:20840:        prompt_pack: promptPack
+runtime/orchestrator-service/server.js:20845:      error: 'Failed to build product prompt pack',
+runtime/orchestrator-service/server.js:20850:if (command === '/bulk_build_product_prompt_packs') {
+runtime/orchestrator-service/server.js:20864:      product.prompt_pack = buildProductPromptPack(product);
+runtime/orchestrator-service/server.js:20875:        prompt_packs_built: count
+runtime/orchestrator-service/server.js:20880:      error: 'Failed to bulk build product prompt packs',
+runtime/orchestrator-service/server.js:20885:if (command === '/review_product_prompt_pack') {
+runtime/orchestrator-service/server.js:20902:        prompt_pack: product.prompt_pack || null
+runtime/orchestrator-service/server.js:20907:      error: 'Failed to review product prompt pack',
+runtime/orchestrator-service/server.js:22216:      item.featured_image_prompt && item.featured_image_alt
+runtime/orchestrator-service/server.js:22231:        item.featured_image_prompt && item.featured_image_alt
+runtime/orchestrator-service/server.js:22464:  generateOptimizationRecommendations
+runtime/orchestrator-service/server.js:22482:  generateOptimizationRecommendations,
+runtime/orchestrator-service/server.js:22501:  generateOptimizationRecommendations
+runtime/orchestrator-service/server.js:22561:      generated_at: full.assets?.generated_at || new Date().toISOString(),
+runtime/orchestrator-service/server.js:22670:      result_reference: {
+runtime/orchestrator-service/server.js:22772:    const workerId = generateWorkerId(crypto);
+runtime/orchestrator-service/server.js:22816:          result_reference: result
+runtime/orchestrator-service/server.js:22860:          result_reference: {
+runtime/orchestrator-service/server.js:22988:app.post('/generate_optimization_recommendations', (req, res) => {
+runtime/orchestrator-service/server.js:23011:      message: error.message || 'Failed to generate optimization recommendations'
+runtime/orchestrator-service/server.js:23016:app.post('/api/media/improve-prompt', async (req, res) => {
+runtime/orchestrator-service/server.js:23019:    if (!result.ok && result.status === 'provider_not_configured') {
+runtime/orchestrator-service/server.js:23025:      output: { improved_prompt: result.improved_prompt },
+runtime/orchestrator-service/server.js:23026:      status: 'prompt_ready'
+runtime/orchestrator-service/server.js:23031:      status: 'prompt_ready',
+runtime/orchestrator-service/server.js:23032:      improved_prompt: result.improved_prompt,
+runtime/orchestrator-service/server.js:23033:      provider: result.provider,
+runtime/orchestrator-service/server.js:23041:      message: error.message || 'Failed to improve media prompt'
+runtime/orchestrator-service/server.js:23049:    if (!result.ok && result.status === 'provider_not_configured') {
+runtime/orchestrator-service/server.js:23063:      provider: result.provider,
+runtime/orchestrator-service/server.js:23076:app.post('/api/media/generate-image', async (req, res) => {
+runtime/orchestrator-service/server.js:23078:    const result = await mediaProviderLayer.generateImage(req.body || {});
+runtime/orchestrator-service/server.js:23079:    if (!result.ok && result.status === 'provider_not_configured') {
+runtime/orchestrator-service/server.js:23092:      provider: result.provider,
+runtime/orchestrator-service/server.js:23101:      message: error.message || 'Failed to generate image'
+runtime/orchestrator-service/server.js:23106:app.post('/api/media/generate-video-brief', async (req, res) => {
+runtime/orchestrator-service/server.js:23108:    const result = await mediaProviderLayer.generateVideoBrief(req.body || {});
+runtime/orchestrator-service/server.js:23109:    if (!result.ok && result.status === 'provider_not_configured') {
+runtime/orchestrator-service/server.js:23114:      requestType: 'video',
+runtime/orchestrator-service/server.js:23115:      output: { video_brief: result.video_brief },
+runtime/orchestrator-service/server.js:23122:      provider: result.provider,
+runtime/orchestrator-service/server.js:23124:      video_brief: result.video_brief,
+runtime/orchestrator-service/server.js:23131:      message: error.message || 'Failed to generate video brief'
+runtime/orchestrator-service/server.js:23136:app.post('/api/media/generate-voice-script', async (req, res) => {
+runtime/orchestrator-service/server.js:23138:    const result = await mediaProviderLayer.generateVoiceScript(req.body || {});
+runtime/orchestrator-service/server.js:23139:    if (!result.ok && result.status === 'provider_not_configured') {
+runtime/orchestrator-service/server.js:23144:      requestType: 'audio',
+runtime/orchestrator-service/server.js:23152:      provider: result.provider,
+runtime/orchestrator-service/server.js:23161:      message: error.message || 'Failed to generate voice script'
+runtime/orchestrator-service/server.js:23166:app.post('/api/media/generate-campaign-pack', async (req, res) => {
+runtime/orchestrator-service/server.js:23168:    const result = await mediaProviderLayer.generateCampaignPack(req.body || {});
+runtime/orchestrator-service/server.js:23169:    if (!result.ok && result.status === 'provider_not_configured') {
+runtime/orchestrator-service/server.js:23182:      provider: result.provider,
+runtime/orchestrator-service/server.js:23191:      message: error.message || 'Failed to generate campaign pack'
