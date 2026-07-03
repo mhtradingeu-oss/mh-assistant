@@ -1,0 +1,339 @@
+### api.js around low-level fetch
+async function fetchWithTimeout(path, init = {}, timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS) {
+  const normalizedTimeoutMs = Math.max(1, Number(timeoutMs) || DEFAULT_REQUEST_TIMEOUT_MS);
+  const controller = typeof AbortController === "function" ? new AbortController() : null;
+
+  const createTimeoutError = () => {
+    const timeoutError = new Error(`Request timed out after ${normalizedTimeoutMs}ms: ${path}`);
+    timeoutError.endpoint = path;
+    timeoutError.isTimeout = true;
+    timeoutError.parseStage = "request";
+    return timeoutError;
+  };
+
+  let timer = null;
+  const timeoutPromise = new Promise((_, reject) => {
+    timer = setTimeout(() => {
+      if (controller) {
+        try {
+          controller.abort();
+        } catch (_) {}
+      }
+
+      const timeoutError = createTimeoutError();
+
+      emitApiRuntimeTrace("request.timeout", {
+        endpoint: buildUrl(path),
+        method: String(init?.method || "GET").toUpperCase(),
+        timeoutMs: normalizedTimeoutMs,
+        message: timeoutError.message
+      });
+
+      reject(timeoutError);
+    }, normalizedTimeoutMs);
+  });
+
+  const method = String(init?.method || "GET").toUpperCase();
+
+  emitApiRuntimeTrace("request.start", {
+    endpoint: buildUrl(path),
+    method,
+    timeoutMs: normalizedTimeoutMs
+  });
+
+  try {
+    const requestPromise = fetch(buildUrl(path), {
+      ...init,
+      signal: controller ? controller.signal : init.signal
+    });
+
+    const response = await Promise.race([requestPromise, timeoutPromise]);
+
+    emitApiRuntimeTrace("request.response", {
+      endpoint: response?.url || buildUrl(path),
+      method,
+      status: response?.status,
+      contentType: response?.headers?.get?.("content-type") || ""
+    });
+
+    return response;
+  } catch (error) {
+    if (error?.isTimeout) {
+      throw error;
+    }
+
+    if (error?.name === "AbortError") {
+      throw createTimeoutError();
+    }
+
+    if (error && typeof error === "object" && !error.endpoint) {
+      error.endpoint = path;
+    }
+
+
+### api.js around create/fetch projects
+  if (value != null) {
+    return value;
+  }
+
+  const panelError = payload?.errors?.[section];
+
+  if (panelError) {
+    const err = new Error(`Failed to load ${section}: ${panelError}`);
+    err.endpoint = `/media-manager/project/:project (${section})`;
+    throw err;
+  }
+
+  const err = new Error(`Missing ${section} payload`);
+  err.endpoint = `/media-manager/project/:project (${section})`;
+  throw err;
+}
+
+/* =========================
+   PROJECTS
+========================= */
+
+
+export async function createMediaManagerProject(payload = {}) {
+  const response = await fetch("/media-manager/projects", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Accept": "application/json",
+      ...(typeof getRuntimeControlHeaders === "function" ? getRuntimeControlHeaders() : {})
+    },
+    body: JSON.stringify(payload)
+  });
+
+  let data = {};
+  try {
+    data = await response.json();
+  } catch (_) {}
+
+  if (!response.ok) {
+    const message = data?.details || data?.error || `Failed to create project (${response.status})`;
+    throw new Error(message);
+  }
+
+  return data;
+}
+
+
+export async function fetchProjects() {
+  try {
+    const payload = await getJson(
+      "/media-manager/projects",
+      "Failed to load projects",
+      12000
+    );
+
+    return normalizeProjectsPayload(payload);
+  } catch (error) {
+    console.warn("Using fallback projects list:", error.message);
+
+    return {
+      items: [],
+      preferredProject: "",
+      fallback: true
+    };
+  }
+}
+
+/* =========================
+   CORE PROJECT DATA
+========================= */
+
+
+### api.js around apply template
+
+  return getJson(
+    `/api/learning/${encodeURIComponent(projectName)}`,
+    "Failed to load project learning"
+  );
+}
+
+export async function fetchProjectOperations(projectName) {
+  if (!projectName) {
+    throw new Error("Missing project name");
+  }
+
+  return getJson(
+    `/media-manager/project/${encodeURIComponent(projectName)}/operations`,
+    "Failed to load project operations",
+    15000
+  );
+}
+
+
+export async function applyProjectBusinessTemplate(projectName, projectType) {
+  const safeProjectName = toProjectName(projectName);
+  const encodedProjectName = encodeURIComponent(safeProjectName);
+
+  const response = await fetch(`/media-manager/project/${encodedProjectName}/apply-template`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Accept": "application/json",
+      ...(typeof getRuntimeControlHeaders === "function" ? getRuntimeControlHeaders() : {})
+    },
+    body: JSON.stringify({
+      project_type: projectType
+    })
+  });
+
+  let data = {};
+  try {
+    data = await response.json();
+  } catch (_) {}
+
+  if (!response.ok) {
+    const message = data?.details || data?.error || `Failed to apply project template (${response.status})`;
+    throw new Error(message);
+  }
+
+
+### app.js around project loading fetch 454
+  if (requestResult) {
+    lines.push(
+      `probe /media-manager/projects: status=${requestResult.status || "request-failed"} auth=${requestResult.authMode}`
+    );
+    if (requestResult.message) {
+      lines.push(`probe message: ${requestResult.message}`);
+    }
+  }
+
+  return lines.join("\n");
+}
+
+async function runAccessKeyDiagnosticProbe(inputValue = "") {
+  const diagnostics = collectAccessKeyDiagnostics();
+  const latestInputKey = getCurrentAccessKeyInputValue();
+  const explicitInputKey = String(inputValue || "").trim();
+  const inputKey = latestInputKey || explicitInputKey;
+  const key = inputKey || (diagnostics.canonicalValuePresent
+    ? String(localStorage.getItem("mh-control-write-key") || "").trim()
+    : (diagnostics.resolvedKeyPresent ? getControlWriteKey() : ""));
+
+  if (!key) {
+    return {
+      diagnostics,
+      type: "error",
+      text: formatAccessKeyDiagnostics(diagnostics, {
+        status: 0,
+        authMode: "none",
+        message: "No key available from input/runtime/localStorage"
+      })
+    };
+  }
+
+  try {
+    const response = await fetch("/media-manager/projects", {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+        "x-mh-control-key": key,
+        Authorization: `Bearer ${key}`
+      }
+    });
+
+    const text = formatAccessKeyDiagnostics(diagnostics, {
+      status: response.status,
+      authMode: "x-mh-control-key + Authorization",
+      message: response.ok ? "ok" : "not-ok"
+    });
+
+    return {
+      diagnostics,
+      type: response.ok ? "success" : (response.status === 401 || response.status === 403 ? "error" : "warn"),
+      text
+    };
+  } catch (error) {
+    return {
+      diagnostics,
+      type: "error",
+      text: formatAccessKeyDiagnostics(diagnostics, {
+        status: 0,
+        authMode: "x-mh-control-key + Authorization",
+        message: error?.message || "request failed"
+      })
+    };
+  }
+}
+
+async function refreshProjectsAfterKeyUpdate(preferredProjectName = "") {
+  const preferred = await loadProjects();
+  const state = getState();
+  const items = Array.isArray(state.data.projects) ? state.data.projects : [];
+
+### app.js around project reload fetch 576
+        navigateTo("home");
+        await loadProjectData(retryProject);
+        hideAccessKeyModal();
+      } catch (error) {
+        setAccessKeyStatus(error?.message || "Key saved, but project load failed.", "error");
+      }
+    });
+  }
+
+  if (diagBtn) {
+    diagBtn.addEventListener("click", async () => {
+      setAccessKeyStatus("Running access-key diagnostic…", "info");
+      const result = await runAccessKeyDiagnosticProbe(input?.value || "");
+      setAccessKeyStatus(result.text, result.type);
+    });
+  }
+
+  if (testBtn) {
+    testBtn.addEventListener("click", async () => {
+      setAccessKeyStatus("Testing…", "info");
+      const inputVal = (input?.value || "").trim();
+      let storedVal = "";
+      try {
+        storedVal = String(localStorage.getItem(CONTROL_ACCESS_KEY_STORAGE_KEY) || "").trim();
+        if (!storedVal) {
+          storedVal = CONTROL_ACCESS_KEY_LEGACY_STORAGE_KEYS
+            .map((key) => String(localStorage.getItem(key) || "").trim())
+            .find(Boolean) || "";
+        }
+      } catch (_) {}
+      const keyToTest = inputVal || storedVal;
+      if (!keyToTest) {
+        setAccessKeyStatus("No key to test. Enter a key or save one first.", "error");
+        return;
+      }
+      try {
+        const response = await fetch("/media-manager/projects", {
+          method: "GET",
+          headers: {
+            "Accept": "application/json",
+            "x-mh-control-key": keyToTest
+          }
+        });
+        if (response.ok) {
+          setAccessKeyStatus("Valid key — loading front page and project…", "success");
+
+          try {
+            if (inputVal) {
+              setRuntimeControlKey(inputVal);
+              try {
+                localStorage.setItem(CONTROL_ACCESS_KEY_STORAGE_KEY, inputVal);
+              } catch (_) {}
+              updateAccessKeyButton();
+            }
+            await refreshProjectsAfterKeyUpdate();
+            setAccessKeyStatus("Valid key and project loaded.", "success");
+          } catch (error) {
+            setAccessKeyStatus(error?.message || "Valid key, but project load failed.", "error");
+          }
+        } else if (response.status === 401 || response.status === 403) {
+          setAccessKeyStatus("Invalid key — access denied (" + response.status + ").", "error");
+        } else {
+          setAccessKeyStatus("Endpoint responded with " + response.status + ".", "warn");
+        }
+      } catch (_) {
+        setAccessKeyStatus("Request failed — check server connection.", "error");
+      }
+    });
+  }
+
+  if (clearBtn) {

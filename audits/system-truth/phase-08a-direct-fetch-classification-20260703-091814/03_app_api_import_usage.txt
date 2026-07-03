@@ -1,0 +1,100 @@
+// public/control-center/app.js
+
+import {
+  getProjectedActiveRole,
+  getProjectedRoutePermissions
+} from "./runtime/authority/authority-projection.js";
+import {
+  ACTIVE_ROUTE_ROLES,
+  getFallbackRouteAccess
+} from "./runtime/authority/route-role-fallback.js";
+
+import {
+  initRouter,
+  navigateTo,
+  renderRouteTemplate,
+  getRouteDefinition,
+  setRouteAccessResolver
+} from "./router.js";
+import { applyStandardPageLayout } from "./ui/page-standard.js";
+import {
+  getState,
+  setProjects,
+  setCurrentProject,
+  setCurrentRoute,
+  setProjectContext,
+  patchState,
+  setLoading,
+  setError,
+  clearError,
+  markInitialized,
+  subscribe,
+  resetProjectData
+} from "./state.js";
+import {
+  setApiBaseUrl,
+  isDebugStartupMode,
+  AccessKeyError,
+  fetchProjects,
+  createMediaManagerProject,
+  fetchAllCoreProjectData,
+  fetchProjectInsights,
+  fetchProjectLearning,
+  fetchProjectGovernance,
+  fetchProjectOperations,
+  saveProjectSetup,
+  executeProjectAiCommand,
+  saveProjectConnectorSource,
+  removeProjectConnectorSource,
+  fetchProjectIntegrationControlCenter,
+  connectProjectIntegration,
+  reconnectProjectIntegration,
+  testProjectIntegration,
+  syncProjectIntegration,
+  importProjectIntegrationHistory,
+  disconnectProjectIntegration,
+  runProjectWorkflow,
+  runProjectAiWorkflow,
+  createProjectTask,
+  createProjectApproval,
+  decideProjectApproval,
+  saveProjectCampaign,
+  createProjectHandoff,
+  consumeProjectHandoff,
+  markProjectNotification,
+  savePublishingSchedule,
+  reschedulePublishingItem,
+  approvePublishingItem,
+  publishPublishingItem,
+  failPublishingItem,
+  fetchProjectTaskCenter,
+  fetchProjectQueueCenter,
+  fetchProjectJobMonitor,
+  fetchProjectNotificationCenter
+} from "./api.js";
+import {
+  CONTROL_ACCESS_KEY_STORAGE_KEY,
+  CONTROL_ACCESS_KEY_LEGACY_STORAGE_KEYS
+} from "./constants.js";
+import { getOverlaySnapshot } from "./runtime/overlay/overlay-runtime.js";
+import { createLifecycleRegistry } from "./runtime/lifecycle/lifecycle-registry.js";
+import { installMhRuntimeGlobals } from "./runtime/mh-runtime-globals.js";
+
+/* =========================
+   CONFIG
+========================= */
+
+setApiBaseUrl("");
+
+/* =========================
+   APP SHELL LIFECYCLE REGISTRY
+
+public/control-center/app.js:38:  fetchProjects,
+public/control-center/app.js:39:  createMediaManagerProject,
+public/control-center/app.js:74:} from "./api.js";
+public/control-center/app.js:2482:      const projectsResult = await fetchProjects();
+public/control-center/app.js:2670:    const result = await fetchProjects();
+public/control-center/app.js:3996:        const result = await createMediaManagerProject(payload);
+public/control-center/api.js:1022:export async function createMediaManagerProject(payload = {}) {
+public/control-center/api.js:1047:export async function fetchProjects() {
+public/control-center/api.js:1129:        const fallbackProjects = await fetchProjects();
