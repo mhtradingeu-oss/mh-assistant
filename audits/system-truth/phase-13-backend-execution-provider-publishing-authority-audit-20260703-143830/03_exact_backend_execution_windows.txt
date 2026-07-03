@@ -1,0 +1,437 @@
+### Native media/provider route area
+  '/public/media-manager/project/:project/customer-operations/customers',
+  handleCustomerOperationsCustomers
+);
+
+app.get(
+  '/media-manager/project/:project/customer-operations/sla',
+  handleCustomerOperationsSla
+);
+
+app.get(
+  '/public/media-manager/project/:project/customer-operations/sla',
+  handleCustomerOperationsSla
+);
+
+app.get(
+  '/media-manager/project/:project/customer-operations/escalations',
+  handleCustomerOperationsEscalations
+);
+
+app.get(
+  '/public/media-manager/project/:project/customer-operations/escalations',
+  handleCustomerOperationsEscalations
+);
+
+
+app.get('/media-manager/project/:project/native-media/providers', handleGetNativeMediaProviders);
+app.get('/public/media-manager/project/:project/native-media/providers', handleGetNativeMediaProviders);
+app.get('/media-manager/project/:project/native-media/providers/readiness', handleGetNativeMediaProviderReadiness);
+app.get('/public/media-manager/project/:project/native-media/providers/readiness', handleGetNativeMediaProviderReadiness);
+
+async function handleNativeMediaGenerate(req, res) {
+  registerDefaultModels();
+
+  if (!enforceGovernanceMutationGate(req, res, {
+    projectName: req.params.project,
+    action: 'native_media_generate',
+    entityType: 'media_job',
+    entityId: String(req.body?.media_job_id || req.body?.id || 'native_media_generate').trim(),
+    requestedAction: 'generate'
+  })) {
+    return;
+  }
+
+  try {
+    const orchestrator = createJobDispatchOrchestrator();
+
+    const result = await orchestrator.dispatch({
+      media_type: req.body?.media_type || req.body?.type || 'image',
+      provider: req.body?.provider || DEFAULT_NATIVE_MEDIA_PROVIDER,
+      project: req.params.project,
+      platform: req.body?.platform || '',
+      prompt: req.body?.prompt || '',
+      priority: req.body?.priority || 'normal'
+    });
+
+    return res.json({
+      success: true,
+      project: req.params.project,
+      runtime: 'mh-os-native-media-runtime',
+      result
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      error: 'native_media_generation_failed',
+      message: error.message
+    });
+  }
+}
+
+app.post('/media-manager/project/:project/native-media/generate', handleNativeMediaGenerate);
+
+
+
+app.get('/public/media-manager/project/:project/integrations/control-center', handleGetProjectIntegrationControlCenter);
+
+app.post('/media-manager/project/:project/integrations/:integrationId/connect', async (req, res) => {
+  await handleConnectProjectIntegration(req, res, {
+    reconnect: false
+  });
+});
+
+### Integration write route area
+app.post('/media-manager/project/:project/native-media/generate', handleNativeMediaGenerate);
+
+
+
+app.get('/public/media-manager/project/:project/integrations/control-center', handleGetProjectIntegrationControlCenter);
+
+app.post('/media-manager/project/:project/integrations/:integrationId/connect', async (req, res) => {
+  await handleConnectProjectIntegration(req, res, {
+    reconnect: false
+  });
+});
+
+app.post('/public/media-manager/project/:project/integrations/:integrationId/connect', async (req, res) => {
+  await handleConnectProjectIntegration(req, res, {
+    reconnect: false
+  });
+});
+
+app.post('/media-manager/project/:project/integrations/:integrationId', async (req, res) => {
+  await handleConnectProjectIntegration(req, res, {
+    reconnect: false
+  });
+});
+
+app.post('/public/media-manager/project/:project/integrations/:integrationId', async (req, res) => {
+  await handleConnectProjectIntegration(req, res, {
+    reconnect: false
+  });
+});
+
+app.post('/media-manager/project/:project/integrations/:integrationId/reconnect', async (req, res) => {
+  await handleConnectProjectIntegration(req, res, {
+    reconnect: true
+  });
+});
+
+app.post('/public/media-manager/project/:project/integrations/:integrationId/reconnect', async (req, res) => {
+  await handleConnectProjectIntegration(req, res, {
+    reconnect: true
+  });
+});
+
+app.post('/media-manager/project/:project/integrations/:integrationId/test', async (req, res) => {
+  await handleProjectIntegrationAction(req, res, 'test');
+});
+
+app.post('/public/media-manager/project/:project/integrations/:integrationId/test', async (req, res) => {
+  await handleProjectIntegrationAction(req, res, 'test');
+});
+
+app.post('/media-manager/project/:project/integrations/:integrationId/sync', async (req, res) => {
+  await handleProjectIntegrationAction(req, res, 'sync');
+});
+
+app.post('/public/media-manager/project/:project/integrations/:integrationId/sync', async (req, res) => {
+  await handleProjectIntegrationAction(req, res, 'sync');
+});
+
+app.post('/media-manager/project/:project/integrations/:integrationId/import-history', async (req, res) => {
+  await handleProjectIntegrationAction(req, res, 'import-history');
+});
+
+app.post('/public/media-manager/project/:project/integrations/:integrationId/import-history', async (req, res) => {
+  await handleProjectIntegrationAction(req, res, 'import-history');
+});
+
+app.post('/media-manager/project/:project/integrations/:integrationId/disconnect', async (req, res) => {
+  await handleProjectIntegrationAction(req, res, 'disconnect');
+});
+
+app.post('/public/media-manager/project/:project/integrations/:integrationId/disconnect', async (req, res) => {
+  await handleProjectIntegrationAction(req, res, 'disconnect');
+});
+
+// TODO(phase4a): Keep `/public/media-manager/...` write aliases for active frontend compatibility.
+// They remain protected by the same centralized write-key middleware as `/media-manager/...`.
+
+### Publishing write route area
+app.post('/public/media-manager/project/:project/integrations/:integrationId/disconnect', async (req, res) => {
+  await handleProjectIntegrationAction(req, res, 'disconnect');
+});
+
+// TODO(phase4a): Keep `/public/media-manager/...` write aliases for active frontend compatibility.
+// They remain protected by the same centralized write-key middleware as `/media-manager/...`.
+app.post('/media-manager/project/:project/publishing/schedule', (req, res) => {
+  try {
+    if (!enforceGovernanceMutationGate(req, res, {
+      projectName: req.params.project,
+      action: 'publishing_schedule',
+      entityType: 'publishing_job',
+      entityId: 'schedule',
+      requestedAction: 'schedule'
+    })) {
+      return;
+    }
+
+    assertPublishingMutationAllowed(req.params.project, 'schedule', {
+      status: req.body?.status
+    });
+    const result = upsertScheduledJob(req.params.project, {
+      title: req.body?.title,
+      wave_name: req.body?.wave_name,
+      channel: req.body?.channel,
+      scheduled_for: req.body?.scheduled_for,
+      status: req.body?.status,
+      mode: req.body?.mode,
+      offer: req.body?.offer,
+      notes: req.body?.notes,
+      preview: req.body?.preview
+    }, {
+      createIfMissing: true
+    });
+
+    return res.json({
+      job: result
+    });
+  } catch (error) {
+    logCriticalFailure('publishing_schedule', req, error, {
+      project: req.params.project
+    });
+    return res.status(error.statusCode || 400).json({
+      error: error.message || 'Failed to save publishing schedule',
+      details: error.details || undefined
+    });
+  }
+});
+
+app.post('/public/media-manager/project/:project/publishing/schedule', (req, res) => {
+  try {
+    if (!enforceGovernanceMutationGate(req, res, {
+      projectName: req.params.project,
+      action: 'publishing_schedule',
+      entityType: 'publishing_job',
+      entityId: 'schedule',
+      requestedAction: 'schedule'
+    })) {
+      return;
+    }
+
+    assertPublishingMutationAllowed(req.params.project, 'schedule', {
+      status: req.body?.status
+    });
+    const result = upsertScheduledJob(req.params.project, {
+      title: req.body?.title,
+      wave_name: req.body?.wave_name,
+      channel: req.body?.channel,
+      scheduled_for: req.body?.scheduled_for,
+      status: req.body?.status,
+      mode: req.body?.mode,
+      offer: req.body?.offer,
+      notes: req.body?.notes,
+      preview: req.body?.preview
+    }, {
+      createIfMissing: true
+    });
+
+    return res.json({
+      job: result
+    });
+  } catch (error) {
+    logCriticalFailure('publishing_schedule', req, error, {
+      project: req.params.project
+    });
+    return res.status(error.statusCode || 400).json({
+      error: error.message || 'Failed to save publishing schedule',
+      details: error.details || undefined
+    });
+  }
+});
+
+app.post('/media-manager/project/:project/publishing/:jobId/reschedule', (req, res) => {
+  try {
+    if (!enforceGovernanceMutationGate(req, res, {
+      projectName: req.params.project,
+      action: 'publishing_reschedule',
+      entityType: 'publishing_job',
+      entityId: req.params.jobId,
+      requestedAction: 'reschedule'
+    })) {
+      return;
+    }
+
+    assertPublishingMutationAllowed(req.params.project, 'reschedule', {
+      jobId: req.params.jobId,
+      status: req.body?.status || 'scheduled'
+    });
+    const result = updateScheduledJobRecord(req.params.project, req.params.jobId, {
+      title: req.body?.title,
+      wave_name: req.body?.wave_name,
+      channel: req.body?.channel,
+      scheduled_for: req.body?.scheduled_for,
+      status: req.body?.status || 'scheduled',
+      mode: req.body?.mode,
+      offer: req.body?.offer,
+      notes: req.body?.notes,
+      preview: req.body?.preview
+    });
+
+    return res.json({
+      job: result
+    });
+  } catch (error) {
+    return res.status(error.statusCode || 400).json({
+      error: error.message || 'Failed to reschedule publishing item',
+      details: error.details || undefined
+    });
+  }
+});
+
+app.post('/public/media-manager/project/:project/publishing/:jobId/reschedule', (req, res) => {
+  try {
+    if (!enforceGovernanceMutationGate(req, res, {
+      projectName: req.params.project,
+      action: 'publishing_reschedule',
+      entityType: 'publishing_job',
+      entityId: req.params.jobId,
+      requestedAction: 'reschedule'
+    })) {
+      return;
+    }
+
+    assertPublishingMutationAllowed(req.params.project, 'reschedule', {
+      jobId: req.params.jobId,
+      status: req.body?.status || 'scheduled'
+    });
+    const result = updateScheduledJobRecord(req.params.project, req.params.jobId, {
+      title: req.body?.title,
+      wave_name: req.body?.wave_name,
+      channel: req.body?.channel,
+      scheduled_for: req.body?.scheduled_for,
+      status: req.body?.status || 'scheduled',
+      mode: req.body?.mode,
+      offer: req.body?.offer,
+      notes: req.body?.notes,
+      preview: req.body?.preview
+    });
+
+    return res.json({
+      job: result
+    });
+  } catch (error) {
+    return res.status(error.statusCode || 400).json({
+      error: error.message || 'Failed to reschedule publishing item',
+      details: error.details || undefined
+    });
+  }
+});
+
+app.post('/media-manager/project/:project/publishing/:jobId/ready', (req, res) => {
+  try {
+    if (!enforceGovernanceMutationGate(req, res, {
+      projectName: req.params.project,
+      action: 'publishing_ready',
+      entityType: 'publishing_job',
+      entityId: req.params.jobId,
+      requestedAction: 'ready'
+    })) {
+      return;
+    }
+
+    assertPublishingMutationAllowed(req.params.project, 'ready', {
+      jobId: req.params.jobId,
+      status: 'ready'
+    });
+    const job = updateScheduledJobRecord(req.params.project, req.params.jobId, {
+      status: 'ready',
+      notes: req.body?.notes
+    });
+
+    return res.json({
+      job
+    });
+  } catch (error) {
+    return res.status(error.statusCode || 400).json({
+      error: error.message || 'Failed to approve publishing item',
+      details: error.details || undefined
+    });
+  }
+});
+
+app.post('/public/media-manager/project/:project/publishing/:jobId/ready', (req, res) => {
+  try {
+    if (!enforceGovernanceMutationGate(req, res, {
+      projectName: req.params.project,
+      action: 'publishing_ready',
+      entityType: 'publishing_job',
+      entityId: req.params.jobId,
+      requestedAction: 'ready'
+    })) {
+      return;
+    }
+
+    assertPublishingMutationAllowed(req.params.project, 'ready', {
+      jobId: req.params.jobId,
+      status: 'ready'
+    });
+    const job = updateScheduledJobRecord(req.params.project, req.params.jobId, {
+      status: 'ready',
+      notes: req.body?.notes
+    });
+
+    return res.json({
+      job
+    });
+  } catch (error) {
+    return res.status(error.statusCode || 400).json({
+      error: error.message || 'Failed to approve publishing item',
+      details: error.details || undefined
+    });
+
+### Search around workflow/task/approval/handoff write routes
+runtime/orchestrator-service/server.js:110:  recordWorkflowRun,
+runtime/orchestrator-service/server.js:118:  createTask,
+runtime/orchestrator-service/server.js:121:  createApproval,
+runtime/orchestrator-service/server.js:126:  createHandoff,
+runtime/orchestrator-service/server.js:9439:app.post('/task', (req, res) => {
+runtime/orchestrator-service/server.js:11788:    const run = recordWorkflowRun(req.params.project, {
+runtime/orchestrator-service/server.js:11825:app.post('/media-manager/project/:project/workflows/:workflowId/run', handleRunWorkflow);
+runtime/orchestrator-service/server.js:11826:app.post('/public/media-manager/project/:project/workflows/:workflowId/run', handleRunWorkflow);
+runtime/orchestrator-service/server.js:12175:app.post('/media-manager/project/:project/ai/workflows/:workflowId/run', handleExecuteAiWorkflow);
+runtime/orchestrator-service/server.js:12176:app.post('/public/media-manager/project/:project/ai/workflows/:workflowId/run', handleExecuteAiWorkflow);
+runtime/orchestrator-service/server.js:12201:    const task = createTask(req.params.project, req.body || {});
+runtime/orchestrator-service/server.js:12215:app.post('/media-manager/project/:project/tasks', handleCreateTask);
+runtime/orchestrator-service/server.js:12216:app.post('/public/media-manager/project/:project/tasks', handleCreateTask);
+runtime/orchestrator-service/server.js:12261:    const approval = createApproval(req.params.project, req.body || {});
+runtime/orchestrator-service/server.js:12306:app.post('/media-manager/project/:project/approvals', handleCreateApproval);
+runtime/orchestrator-service/server.js:12307:app.post('/public/media-manager/project/:project/approvals', handleCreateApproval);
+runtime/orchestrator-service/server.js:12308:app.post('/media-manager/project/:project/approvals/:approvalId/decision', handleApprovalDecision);
+runtime/orchestrator-service/server.js:12309:app.post('/public/media-manager/project/:project/approvals/:approvalId/decision', handleApprovalDecision);
+runtime/orchestrator-service/server.js:12433:    const handoff = createHandoff(req.params.project, req.body || {});
+runtime/orchestrator-service/server.js:12461:app.post('/media-manager/project/:project/handoffs', handleCreateHandoff);
+runtime/orchestrator-service/server.js:12462:app.post('/public/media-manager/project/:project/handoffs', handleCreateHandoff);
+runtime/orchestrator-service/server.js:12463:app.post('/media-manager/project/:project/handoffs/:handoffId/consume', handleConsumeHandoff);
+runtime/orchestrator-service/server.js:12464:app.post('/public/media-manager/project/:project/handoffs/:handoffId/consume', handleConsumeHandoff);
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:22:  createTask,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:23:  recordWorkflowRun,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:24:  createApproval,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:25:  createHandoff
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1175:          const task = createTask(projectName, {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1189:          const run = recordWorkflowRun(projectName, {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1211:          const approval = createApproval(projectName, {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1224:          handoff = createHandoff(projectName, {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1743:      const run = recordWorkflowRun(projectName, {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1791:      const handoff = createHandoff(projectName, {
+runtime/orchestrator-service/lib/ops/backbone.js:2052:function recordWorkflowRun(projectName, input = {}) {
+runtime/orchestrator-service/lib/ops/backbone.js:2425:function createTask(projectName, input = {}) {
+runtime/orchestrator-service/lib/ops/backbone.js:2567:function createApproval(projectName, input = {}) {
+runtime/orchestrator-service/lib/ops/backbone.js:2919:    createTask(paths.project, {
+runtime/orchestrator-service/lib/ops/backbone.js:2953:function createHandoff(projectName, input = {}) {
+runtime/orchestrator-service/lib/ops/backbone.js:4084:  recordWorkflowRun,
+runtime/orchestrator-service/lib/ops/backbone.js:4096:  createTask,
+runtime/orchestrator-service/lib/ops/backbone.js:4099:  createApproval,
+runtime/orchestrator-service/lib/ops/backbone.js:4106:  createHandoff,

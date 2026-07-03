@@ -1,0 +1,361 @@
+### route permission catalog full
+"use strict";
+
+/**
+ * Route permission catalog for MH-Assistant backend.
+ *
+ * This module is intentionally non-enforcing in P1B.1.
+ * It creates a single source of truth for route risk classification before
+ * enforcement is introduced in later phases.
+ */
+
+const ROUTE_RISK = Object.freeze({
+  LOW: "low",
+  MEDIUM: "medium",
+  HIGH: "high",
+  CRITICAL: "critical"
+});
+
+const ROUTE_ACCESS = Object.freeze({
+  PUBLIC: "public",
+  READ_KEY: "read_key",
+  WRITE_KEY: "write_key",
+  ADMIN: "admin",
+  SERVICE: "service",
+  FUTURE_RBAC: "future_rbac"
+});
+
+const ROUTE_STATUS = Object.freeze({
+  ACTIVE: "active",
+  COMPATIBILITY_ALIAS: "compatibility_alias",
+  DEPRECATE: "deprecate",
+  RETIRE: "retire",
+  FUTURE: "future"
+});
+
+const DOMAIN_RULES = Object.freeze([
+  {
+    domain: "customer_operations",
+    match: /customer-operations|customer|conversation|message|ticket|crm|call|ivr|whatsapp|sms/i,
+    defaultReadScope: "customer.read",
+    defaultWriteScope: "customer.write",
+    dataRisk: ROUTE_RISK.CRITICAL,
+    providerRisk: ROUTE_RISK.MEDIUM,
+    destructiveRisk: ROUTE_RISK.HIGH
+  },
+  {
+    domain: "publishing",
+    match: /publishing|publish|approval|governance|claim|compliance/i,
+    defaultReadScope: "publishing.read",
+    defaultWriteScope: "publishing.write",
+    dataRisk: ROUTE_RISK.HIGH,
+    providerRisk: ROUTE_RISK.CRITICAL,
+    destructiveRisk: ROUTE_RISK.HIGH
+  },
+  {
+    domain: "integrations",
+    match: /integration|provider|connector|oauth|token/i,
+    defaultReadScope: "integration.read",
+    defaultWriteScope: "integration.write",
+    dataRisk: ROUTE_RISK.HIGH,
+    providerRisk: ROUTE_RISK.CRITICAL,
+    destructiveRisk: ROUTE_RISK.MEDIUM
+  },
+  {
+    domain: "ai_execution",
+    match: /ai\/command|ai\/chat|ai\/guidance|ai\/workflows|openai|anthropic|assistant/i,
+    defaultReadScope: "ai.read",
+    defaultWriteScope: "ai.execute",
+    dataRisk: ROUTE_RISK.HIGH,
+    providerRisk: ROUTE_RISK.HIGH,
+    destructiveRisk: ROUTE_RISK.MEDIUM
+  },
+  {
+    domain: "workflow_operations",
+    match: /workflow|task|queue|job|notification|handoff|event/i,
+    defaultReadScope: "operations.read",
+    defaultWriteScope: "operations.write",
+    dataRisk: ROUTE_RISK.MEDIUM,
+    providerRisk: ROUTE_RISK.MEDIUM,
+    destructiveRisk: ROUTE_RISK.MEDIUM
+  },
+  {
+    domain: "media_library",
+    match: /media|asset|library|source|upload|generated-output/i,
+    defaultReadScope: "media.read",
+    defaultWriteScope: "media.write",
+    dataRisk: ROUTE_RISK.MEDIUM,
+    providerRisk: ROUTE_RISK.MEDIUM,
+    destructiveRisk: ROUTE_RISK.HIGH
+  },
+  {
+    domain: "commerce_legacy",
+    match: /woocommerce|product|clone|rollback|cleanup|blog/i,
+    defaultReadScope: "commerce.read",
+    defaultWriteScope: "commerce.write",
+    dataRisk: ROUTE_RISK.HIGH,
+    providerRisk: ROUTE_RISK.CRITICAL,
+    destructiveRisk: ROUTE_RISK.CRITICAL
+  },
+  {
+    domain: "project_setup",
+    match: /project|setup|template|rename|storage|parity/i,
+    defaultReadScope: "project.read",
+    defaultWriteScope: "project.write",
+    dataRisk: ROUTE_RISK.MEDIUM,
+    providerRisk: ROUTE_RISK.LOW,
+    destructiveRisk: ROUTE_RISK.MEDIUM
+  },
+  {
+    domain: "platform_health",
+    match: /health|healthz|readyz/i,
+    defaultReadScope: "platform.health",
+    defaultWriteScope: "platform.admin",
+    dataRisk: ROUTE_RISK.LOW,
+    providerRisk: ROUTE_RISK.LOW,
+    destructiveRisk: ROUTE_RISK.LOW
+  }
+]);
+
+function normalizeMethod(method) {
+  return String(method || "GET").toUpperCase();
+}
+
+function isMutationMethod(method) {
+  return ["POST", "PATCH", "PUT", "DELETE"].includes(normalizeMethod(method));
+}
+
+function isPublicAlias(pathname) {
+  return String(pathname || "").startsWith("/public/");
+}
+
+function isDestructiveRoute(method, pathname) {
+  const value = `${normalizeMethod(method)} ${pathname || ""}`;
+  return /DELETE|delete|archive|remove|destroy|purge|replace-original|cleanup|rollback|disconnect/i.test(value);
+}
+
+function isProviderExecutionRoute(pathname) {
+  return /publish|send|provider|integration|native-media|generate|openai|anthropic|workflow|scheduler|woocommerce|email|smtp|twilio|telnyx/i.test(
+    String(pathname || "")
+  );
+}
+
+function findDomainRule(pathname) {
+  const value = String(pathname || "");
+  return DOMAIN_RULES.find((rule) => rule.match.test(value)) || {
+    domain: "general",
+    defaultReadScope: "general.read",
+    defaultWriteScope: "general.write",
+    dataRisk: ROUTE_RISK.MEDIUM,
+    providerRisk: ROUTE_RISK.LOW,
+    destructiveRisk: ROUTE_RISK.LOW
+  };
+}
+
+function classifyRoute(method, pathname) {
+  const normalizedMethod = normalizeMethod(method);
+  const routePath = String(pathname || "");
+  const mutation = isMutationMethod(normalizedMethod);
+  const publicAlias = isPublicAlias(routePath);
+  const destructive = isDestructiveRoute(normalizedMethod, routePath);
+  const providerExecution = isProviderExecutionRoute(routePath);
+  const domainRule = findDomainRule(routePath);
+
+  let requiredAccess = mutation ? ROUTE_ACCESS.WRITE_KEY : ROUTE_ACCESS.READ_KEY;
+  let status = publicAlias ? ROUTE_STATUS.COMPATIBILITY_ALIAS : ROUTE_STATUS.ACTIVE;
+
+  if (domainRule.domain === "platform_health" && !mutation) {
+    requiredAccess = ROUTE_ACCESS.PUBLIC;
+  }
+
+  if (publicAlias && mutation) {
+    status = ROUTE_STATUS.DEPRECATE;
+  }
+
+  if (publicAlias && /customer-operations|publishing|integration|governance|approval|sources/i.test(routePath)) {
+    status = mutation ? ROUTE_STATUS.RETIRE : ROUTE_STATUS.DEPRECATE;
+  }
+
+  const requiredScope = mutation ? domainRule.defaultWriteScope : domainRule.defaultReadScope;
+  const auditEvent = `${domainRule.domain}.${mutation ? "mutation" : "read"}.${publicAlias ? "public_alias" : "canonical"}`;
+
+  return {
+    method: normalizedMethod,
+    route: routePath,
+    domain: domainRule.domain,
+    readWrite: mutation ? "write" : "read",
+    publicAlias,
+    requiredAccess,
+    requiredScope,
+    status,
+    dataRisk: domainRule.dataRisk,
+    providerRisk: providerExecution ? domainRule.providerRisk : ROUTE_RISK.LOW,
+    destructiveRisk: destructive ? domainRule.destructiveRisk : ROUTE_RISK.LOW,
+    providerExecution,
+    destructive,
+    auditEvent,
+    recommendation: buildRecommendation({
+      publicAlias,
+      mutation,
+      destructive,
+      providerExecution,
+      domain: domainRule.domain
+    })
+  };
+}
+
+function buildRecommendation({ publicAlias, mutation, destructive, providerExecution, domain }) {
+  if (publicAlias && mutation) return "retire_public_mutation_alias";
+  if (publicAlias) return "deprecate_public_read_alias";
+  if (destructive) return "require_dual_confirmation_and_audit";
+  if (providerExecution) return "require_provider_scope_audit_and_idempotency";
+  if (domain === "customer_operations") return "require_pii_scope_and_access_log";
+  if (mutation) return "require_write_scope_and_audit";
+  return "keep_with_read_scope";
+}
+
+module.exports = {
+  ROUTE_RISK,
+  ROUTE_ACCESS,
+  ROUTE_STATUS,
+  DOMAIN_RULES,
+  classifyRoute,
+  isMutationMethod,
+  isPublicAlias,
+  isDestructiveRoute,
+  isProviderExecutionRoute
+};
+
+### where route permission catalog is used
+runtime/orchestrator-service/server.js:150:} = require('./lib/media/native/providers/provider-model-catalog');
+runtime/orchestrator-service/server.js:431:  /^\/(?:public\/)?media-manager\/asset-catalog\/?$/i,
+runtime/orchestrator-service/server.js:670:    const { catalog_item, target_dir } = getTargetFolderForAssetType(project, canonicalType);
+runtime/orchestrator-service/server.js:673:      mode: 'project_catalog',
+runtime/orchestrator-service/server.js:676:      target_folder: catalog_item.target_folder,
+runtime/orchestrator-service/server.js:677:      catalog_item,
+runtime/orchestrator-service/server.js:6861:      required_assets: ['logo', 'product_photos', 'product_catalog', 'price_list', 'shipping_policy', 'legal_docs'],
+runtime/orchestrator-service/server.js:9025:  const catalog = getAssetTypeCatalog();
+runtime/orchestrator-service/server.js:9026:  const categories = catalog.map(item => {
+runtime/orchestrator-service/server.js:9152:  const catalog = getAssetTypeCatalog();
+runtime/orchestrator-service/server.js:9157:    upload_mapping: catalog.map(item => ({
+runtime/orchestrator-service/server.js:9218:  const catalog = getAssetTypeCatalog();
+runtime/orchestrator-service/server.js:9220:  const item = catalog.find(x => x.asset_type === canonicalType);
+runtime/orchestrator-service/server.js:9245:    catalog_item: item,
+runtime/orchestrator-service/server.js:9262:  const { catalog_item, target_dir } = getTargetFolderForAssetType(projectName, assetType);
+runtime/orchestrator-service/server.js:9277:    target_folder: catalog_item.target_folder,
+runtime/orchestrator-service/server.js:10662:app.get('/media-manager/asset-catalog', (req, res) => {
+runtime/orchestrator-service/server.js:10664:    asset_catalog: getAssetTypeCatalog()
+runtime/orchestrator-service/server.js:10668:app.get('/public/media-manager/asset-catalog', (req, res) => {
+runtime/orchestrator-service/server.js:10670:    asset_catalog: getAssetTypeCatalog()
+runtime/orchestrator-service/server.js:10940:    const catalogItem = getAssetTypeCatalog().find((item) => item.asset_type === canonicalType);
+runtime/orchestrator-service/server.js:10942:    if (!canonicalType || !catalogItem) {
+runtime/orchestrator-service/server.js:10962:      asset.category_label = catalogItem.category || catalogItem.label || asset.category_label || '';
+runtime/orchestrator-service/server.js:15848:    asset_catalog: getAssetTypeCatalog(),
+runtime/orchestrator-service/server.js:21692:if (command === '/list_asset_type_catalog') {
+runtime/orchestrator-service/server.js:21698:      error: 'Failed to list asset type catalog',
+runtime/orchestrator-service/server.js:22563:      asset_catalog: Array.isArray(full.assets?.asset_catalog) ? full.assets.asset_catalog : [],
+runtime/orchestrator-service/lib/security/provider-execution-gate.js:4: * Provider execution gate catalog for MH-Assistant backend.
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:4: * Route permission catalog for MH-Assistant backend.
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:11:const ROUTE_RISK = Object.freeze({
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:18:const ROUTE_ACCESS = Object.freeze({
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:27:const ROUTE_STATUS = Object.freeze({
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:41:    dataRisk: ROUTE_RISK.CRITICAL,
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:42:    providerRisk: ROUTE_RISK.MEDIUM,
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:43:    destructiveRisk: ROUTE_RISK.HIGH
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:50:    dataRisk: ROUTE_RISK.HIGH,
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:51:    providerRisk: ROUTE_RISK.CRITICAL,
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:52:    destructiveRisk: ROUTE_RISK.HIGH
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:59:    dataRisk: ROUTE_RISK.HIGH,
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:60:    providerRisk: ROUTE_RISK.CRITICAL,
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:61:    destructiveRisk: ROUTE_RISK.MEDIUM
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:68:    dataRisk: ROUTE_RISK.HIGH,
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:69:    providerRisk: ROUTE_RISK.HIGH,
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:70:    destructiveRisk: ROUTE_RISK.MEDIUM
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:77:    dataRisk: ROUTE_RISK.MEDIUM,
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:78:    providerRisk: ROUTE_RISK.MEDIUM,
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:79:    destructiveRisk: ROUTE_RISK.MEDIUM
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:86:    dataRisk: ROUTE_RISK.MEDIUM,
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:87:    providerRisk: ROUTE_RISK.MEDIUM,
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:88:    destructiveRisk: ROUTE_RISK.HIGH
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:95:    dataRisk: ROUTE_RISK.HIGH,
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:96:    providerRisk: ROUTE_RISK.CRITICAL,
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:97:    destructiveRisk: ROUTE_RISK.CRITICAL
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:104:    dataRisk: ROUTE_RISK.MEDIUM,
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:105:    providerRisk: ROUTE_RISK.LOW,
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:106:    destructiveRisk: ROUTE_RISK.MEDIUM
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:113:    dataRisk: ROUTE_RISK.LOW,
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:114:    providerRisk: ROUTE_RISK.LOW,
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:115:    destructiveRisk: ROUTE_RISK.LOW
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:148:    dataRisk: ROUTE_RISK.MEDIUM,
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:149:    providerRisk: ROUTE_RISK.LOW,
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:150:    destructiveRisk: ROUTE_RISK.LOW
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:154:function classifyRoute(method, pathname) {
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:163:  let requiredAccess = mutation ? ROUTE_ACCESS.WRITE_KEY : ROUTE_ACCESS.READ_KEY;
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:164:  let status = publicAlias ? ROUTE_STATUS.COMPATIBILITY_ALIAS : ROUTE_STATUS.ACTIVE;
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:167:    requiredAccess = ROUTE_ACCESS.PUBLIC;
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:171:    status = ROUTE_STATUS.DEPRECATE;
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:175:    status = mutation ? ROUTE_STATUS.RETIRE : ROUTE_STATUS.DEPRECATE;
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:191:    providerRisk: providerExecution ? domainRule.providerRisk : ROUTE_RISK.LOW,
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:192:    destructiveRisk: destructive ? domainRule.destructiveRisk : ROUTE_RISK.LOW,
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:217:  ROUTE_RISK,
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:218:  ROUTE_ACCESS,
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:219:  ROUTE_STATUS,
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:221:  classifyRoute,
+runtime/orchestrator-service/lib/security/runtime-security-enforcement.js:3:const { classifyRoute } = require("./route-permission-catalog");
+runtime/orchestrator-service/lib/security/runtime-security-enforcement.js:73:  const routeClassification = classifyRoute(method, routePath);
+runtime/orchestrator-service/lib/integrations/providers/woocommerce.js:59:    writeScopes: ['catalog sync'],
+runtime/orchestrator-service/lib/integrations/providers/shopify.js:74:    writeScopes: ['catalog sync'],
+runtime/orchestrator-service/lib/media/native/providers/provider-readiness.js:3:const { listProviderModels } = require('./provider-model-catalog');
+public/control-center/legacy/page-standard.legacy-20260508.js:626:      card("Workflow catalog", "Available", "Launch, content, campaign, ads, report, and research workflows.", "success"),
+public/control-center/legacy/page-standard.legacy-20260508.js:1083:      { label: "Data used", value: "Workflow catalog, workflow runs, handoffs, job monitor" },
+public/control-center/legacy/integrations.monolith-20260508.js:53:        whyItMatters: "Shopify unlocks product catalogs, order flow, and conversion insights for commerce-first projects.",
+public/control-center/legacy/integrations.monolith-20260508.js:879:      write: ["catalog sync", "commerce updates"]
+public/control-center/asset-library.js:317:  const direct = asArray(assetsData.asset_catalog);
+public/control-center/asset-library.js:318:  const nested = asArray(assetsData.missing_assets?.asset_catalog);
+public/control-center/asset-library.js:319:  const catalog = direct.length ? direct : nested.length ? nested : FALLBACK_ASSET_CATEGORIES;
+public/control-center/asset-library.js:320:  return catalog.map((item) => normalizeAssetCategory(item));
+public/control-center/asset-library.js:323:export function getCanonicalAssetType(assetType, catalog = FALLBACK_ASSET_CATEGORIES) {
+public/control-center/asset-library.js:327:  for (const item of catalog.map((entry) => normalizeAssetCategory(entry))) {
+public/control-center/asset-library.js:337:  const catalog = getAssetCatalog(assetsData);
+public/control-center/asset-library.js:338:  const matching = assets.filter((asset) => getCanonicalAssetType(getAssetTypeValue(asset), catalog) === category.asset_type);
+public/control-center/asset-library.js:356:  const catalog = getAssetCatalog(assetsData);
+public/control-center/asset-library.js:369:        getCanonicalAssetType(getAssetTypeValue(asset), catalog) === normalized.asset_type
+public/control-center/asset-library.js:386:  return catalog.map((category) => {
+public/control-center/asset-library.js:388:    const count = assetItems.filter((asset) => getCanonicalAssetType(getAssetTypeValue(asset), catalog) === category.asset_type).length;
+public/control-center/api.js:1330:    "/media-manager/asset-catalog",
+public/control-center/api.js:1331:    "Failed to load asset catalog"
+public/control-center/pages/library.js:618:function getUploadAssetType(session, catalog, selectedValue) {
+public/control-center/pages/library.js:620:  const valid = new Set(asArray(catalog).map((item) => item.asset_type));
+public/control-center/pages/library.js:676:function normalizeAssets(projectName, assetsData, legacyRegistry, categoryByType, catalog) {
+public/control-center/pages/library.js:677:  const catalogMap = new Map(asArray(catalog).map((item) => [item.asset_type, item]));
+public/control-center/pages/library.js:705:    const canonicalType = getCanonicalAssetType(rawType, catalog);
+public/control-center/pages/library.js:710:    const catalogItem = catalogMap.get(canonicalType) || {};
+public/control-center/pages/library.js:765:      type_label: catalogItem.display_label || catalogItem.label || titleCase(canonicalType || "asset"),
+public/control-center/pages/library.js:770:      used_in: asArray(merged.used_in || catalogItem.guidance?.used_in || ["Library"]),
+public/control-center/pages/library.js:1718:  const catalog = getAssetCatalog(assetsData);
+public/control-center/pages/library.js:1728:    ...normalizeAssets(projectName, workspaceAssetsData, registry, categoryByType, catalog)
+public/control-center/pages/library.js:1779:    ...catalog
+public/control-center/pages/library.js:2967:    const catalog = getAssetCatalog(assetsData);
+public/control-center/pages/library.js:2968:    uploadTypeSelect.innerHTML = catalog.map((item) => {
+public/control-center/pages/library.js:3115:        assetType = getUploadAssetType(session, catalog, $("libraryUploadTypeSelect")?.value);
+public/control-center/pages/integrations.js:87:        whyItMatters: "Shopify unlocks product catalogs, order flow, and conversion insights for commerce-first projects.",
+public/control-center/pages/integrations.js:1043:      write: ["catalog sync", "commerce updates"]
+public/control-center/pages/workflows.js:829:      <div class="wfexec-catalog-grid">
+public/control-center/pages/workflows.js:836:            <article class="wfexec-catalog-card${workflow.id === session.selectedWorkflowId ? " is-active" : ""}">
+public/control-center/pages/workflows.js:837:              <div class="wfexec-catalog-top">
+public/control-center/pages/workflows.js:845:                <button class="wfexec-btn wfexec-btn-primary" type="button" data-wf-catalog-run="${escapeHtml(workflow.id)}">Prepare</button>
+public/control-center/pages/workflows.js:846:                <button class="wfexec-btn wfexec-btn-ghost" type="button" data-wf-catalog-save="${escapeHtml(workflow.id)}">Save Draft</button>
+public/control-center/pages/workflows.js:847:                <button class="wfexec-btn wfexec-btn-secondary" type="button" data-wf-catalog-ai="${escapeHtml(workflow.id)}">Open in AI Command</button>
+public/control-center/pages/workflows.js:849:              ${run.lastRunAt ? `<div class="wfexec-catalog-meta">Last prepared ${escapeHtml(formatDateTime(run.lastRunAt))}</div>` : ""}
+public/control-center/pages/workflows.js:1498:  Array.from(document.querySelectorAll("[data-wf-catalog-run]")).forEach((button) => {
+public/control-center/pages/workflows.js:1499:    button.onclick = () => runWorkflow(button.getAttribute("data-wf-catalog-run") || session.selectedWorkflowId);
+public/control-center/pages/workflows.js:1502:  Array.from(document.querySelectorAll("[data-wf-catalog-save]")).forEach((button) => {
+public/control-center/pages/workflows.js:1504:      const workflowId = button.getAttribute("data-wf-catalog-save") || session.selectedWorkflowId;
+public/control-center/pages/workflows.js:1512:  Array.from(document.querySelectorAll("[data-wf-catalog-ai]")).forEach((button) => {
+public/control-center/pages/workflows.js:1514:      const workflowId = button.getAttribute("data-wf-catalog-ai") || session.selectedWorkflowId;
+public/control-center/pages/workflows.js:2024:            <article class="wfloop-zone wfloop-catalog card">
+public/control-center/pages/workflows.js:2029:              <div class="wfloop-catalog-list">
+public/control-center/pages/workflows.js:2035:                    <article class="wfloop-catalog-card${item.id === workflow.id ? " is-active" : ""}">
+public/control-center/pages/workflows.js:2036:                      <div class="wfloop-catalog-head">
+public/control-center/pages/workflows.js:2040:                      <p class="wfloop-catalog-purpose">${escapeHtml(compactText(item.purpose, 74))}</p>
+public/control-center/pages/workflows.js:2041:                      <div class="wfloop-catalog-chip-row">
