@@ -1,0 +1,68 @@
+6400:			                sendBtn.click?.();
+
+                        }
+
+                        session.outputPreview = {
+                                ...asObject(session.outputPreview),
+                                stagedAction: action,
+                                stagedActionLabel: label,
+                                safety: "Staged review action only. No backend write, publish, send, CRM mutation, provider execution, approval creation, task creation, or workflow mutation was performed."
+                        };
+
+                        persistSessionDraft(sessionKey, session, `${label} staged from Campaign Builder`);
+                        updateStatus(`${label} staged. Backend authority contract must be verified before this action is connected.`);
+                        showMessage?.(`${label} staged for review. No external action was executed.`);
+                        aiCommandRoute.render(context);
+                };
+
+                Array.from(document.querySelectorAll("[data-aicmd-smart-campaign-action]")).forEach((btn) => {
+                        btn.onclick = () => {
+                                const action = asString(btn.getAttribute("data-aicmd-smart-campaign-action") || "");
+                                stageCampaignReviewAction(action);
+                        };
+                });
+
+if (input) {
+			input.oninput = () => {
+				InputController.write(session, input.value, "textarea") || "";
+				/* composerText_FROZEN */ session.draftMessage;
+				persistSessionDraft(sessionKey, session, "Draft auto-saved locally");
+			};
+
+			input.onkeydown = (event) => {
+			        if (event.key !== "Enter") return;
+
+			        if (event.shiftKey) {
+			                return;
+			        }
+
+			        event.preventDefault();
+
+			        const sendBtn = $("aicmdV2AskBtn");
+			        if (sendBtn && !sendBtn.disabled) {
+			                sendBtn.click?.();
+			        }
+			};
+		}
+
+		const voiceLangBtn = $("aicmdV2VoiceLangBtn");
+		if (voiceLangBtn) {
+			voiceLangBtn.onclick = () => {
+				const current = asString(session.voiceLanguageMode || "auto").toLowerCase();
+				const next = current === "auto"
+					? "ar"
+					: current === "ar"
+						? "en"
+						: current === "en"
+							? "de"
+							: "auto";
+
+				session.voiceLanguageMode = next;
+				persistSessionDraft(sessionKey, session, `Voice language set to ${next.toUpperCase()}`);
+				updateStatus(`Voice language set to ${next === "auto" ? "Auto" : next.toUpperCase()}.`);
+				aiCommandRoute.render(context);
+			};
+		}
+
+		const voiceBtn = $("aicmdV2VoiceBtn");
+		if (voiceBtn) {

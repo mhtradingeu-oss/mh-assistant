@@ -1,0 +1,97 @@
+### timers/listeners/observers
+5916:                document.addEventListener("click", (event) => {
+
+### direct network calls
+
+### destructive/publish verbs
+41:                summary: "Campaign concepts, launch plans, channel mix, and offer strategy.",
+73:                id: "ads",
+77:                routeHint: "ads-manager"
+148:		summary: "Campaign concepts, launch plans, channel mix, and offer strategy.",
+149:		placeholder: "Ask the Strategist to plan a campaign, map launch phases, review channel priorities, or define the offer strategy…",
+150:		canHelp: ["Draft campaign plans", "Prioritize next actions", "Map launch sequences", "Advise on offer strategy", "Prepare channel briefs"],
+209:		id: "ads",
+216:		cannotDo: ["Launch ads directly", "Set live budgets without review", "Approve spend", "Access ad accounts directly"],
+267:		canHelp: ["Review inbox context", "Summarize customer threads", "Draft safe replies", "Prepare ticket drafts", "Flag SLA and escalation risk"],
+283:		safetyNote: "Sales and CRM outputs are guidance and drafts only. CRM mutations and outreach sends require confirmation in the owning surface.",
+293:		{ label: "Review launch readiness", sub: "Identify what is blocking launch" },
+320:	ads: [
+361:	{ label: "Map the next launch wave", sub: "Strategist to Publisher to Operations" },
+394:	ads: "AO",
+403:	ads: "ads_operator",
+432:		{ id: "launch-plan", label: "Launch Plan", action: "preview", intent: "workflow", template: "Build a launch plan for {project}. Include phases, channels, owners, blockers, and next move." },
+463:	ads: [
+468:		{ id: "open-ads-manager", label: "Open Ads Manager", action: "route", route: "ads-manager" }
+503:		{ id: "outreach-draft", label: "Outreach Draft", action: "preview", intent: "guidance", template: "Draft outreach for {project}. Include subject or opener, personalized message, CTA, and review notes before sending." },
+515:	{ icon: "🚀", label: "Launch Campaign", sub: "Build a campaign plan", template: "Build a launch campaign for {project}. Map the channels, offer, phases, and required assets." },
+555:		purpose: "Build high-leverage decisions for launch sequencing and channel focus.",
+578:		suggestedPrompt: "Act as Media Planner and map media needs by platform for this launch cycle."
+581:		id: "ads",
+637:		if (/act as the ads optimizer|act as the ads operator/i.test(text)) return "ads";
+677:	if (/publish\s*now|send\s*external|paid\s*ads|final\s*approval/i.test(command)) {
+765:    "Build a launch campaign for:",
+925:			taskType: "launch",
+1232:			"When the request touches inbox, tickets, leads, outreach, or CRM, include Customer Ops -> Sales/CRM -> Operations.",
+1246:                `Use ${safeOutputLanguage} only for customer-facing or publishable copy such as captions, ads, emails, landing pages, final campaign text, or publishing packages.`,
+1307:	if (id === "ads") return "ads-manager";
+1348:        const looksCampaignLike = /\b(campaign|launch|audience|offer|funnel|positioning|channel mix|campaign brief|go-to-market|go to market)\b/.test(text);
+1385:        if (/campaign|strategy|launch/.test(outputType) || looksCampaignLike) {
+1403:		"ads-manager": "Ads Manager",
+1554:	if (specialistId === "ads") {
+1570:				"Keep budget, launch, and live ad changes inside Ads Manager.",
+1578:			safetyLabel: "No budget updates or ad launches executed."
+1648:			mainOutput: "Use this as a sales planning draft. Confirm CRM context and owner before sending outreach or changing pipeline status.",
+1661:				"Can I send more details?",
+1666:				"Outreach and follow-ups require confirmation before sending."
+1741:			"Strategist defines priorities, positioning, launch sequence, and strongest next move",
+1744:			"Customer Ops and Sales / CRM join when the request touches inbox, tickets, leads, outreach, or CRM"
+1747:			"Strategist: decide priority, offer angle, channel sequence, and launch wave",
+1997:		strategist: ["campaign", "launch campaign", "campaign plan", "marketing campaign", "market entry", "growth plan", "offer strategy", "launch plan"],
+2001:		ads: ["ad ideas", "ad copy", "facebook ads", "meta ads", "tiktok ads", "google ads", "cta", "paid", "targeting angle", "ad creative"],
+2006:		sales_crm: ["lead", "leads", "crm", "sales", "outreach", "follow-up", "follow up", "pipeline", "dealer", "salon", "influencer"]
+2021:	const actionRouting = /launch|build|reconnect|connect|improve|create|fix|route|plan|publish/.test(query);
+2054:	if (lane === "ads" && asString(coverage.paid_ads?.status) !== "covered") {
+2189:			routeSuggestion("Ads Manager", "ads-manager", "Review pacing, creative mapping, and paid operating view."),
+2193:		missingData: buildMissingDataNotes(aiContext, "ads")
+2223:			...buildMissingDataNotes(aiContext, "ads"),
+2231:	if (/launch.*campaign|new campaign/.test(query)) {
+2232:		return { title: "Campaign launch task block", owner: "Campaign Studio", steps: ["Define the campaign objective, audience, and offer.", "Choose channels and budget based on current intelligence.", "List required assets and publishing dependencies before launch."] };
+2250:	if (/campaign/.test(query)) routeSuggestions.push(routeSuggestion("Campaign Studio", "campaign-studio", "Turn this into a structured launch plan."));
+2256:	if (/ads|campaign scale|roas|creative/.test(query)) routeSuggestions.push(routeSuggestion("Ads Manager", "ads-manager", "Review live paid performance and action the next media move."));
+2284:		case "ads":
+2395:	"ads-manager": "Ads Manager",
+2417:	"ads-manager": "ads",
+2953:				<span style="font-size:11px;color:var(--color-text-2);">Prefill only — send prompt for preview</span>
+3159:					<div class="ctrl-empty-box">Commands you send appear here. Click any to restore and re-run.</div>
+3369:			reason: `${aiContext.criticalGaps.length} critical setup gap${aiContext.criticalGaps.length === 1 ? "" : "s"} can block launch quality and downstream automation reliability.`,
+3649:			<span>Strategy, writing, creative, compliance, publishing, customer, sales, and operations specialists coordinate one review-ready answer. No workflow, send, publish, approval, or CRM action is executed here.</span>
+3906:			${projectName ? `<div class="aicmd-v2-tools-note">Project context: ${escapeHtml(projectName)}. Tools do not execute, publish, send, approve, save, or mutate records.</div>` : ""}
+4029:                        <p class="aicmd-chatfirst-tab-note">AI Command prepares guidance, drafts, previews, and handoff context only. Publishing, approvals, CRM updates, workflow runs, customer sends, provider execution, and durable task creation remain confirmation-gated in the owning workspace.</p>
+4101:				<p>Chat, draft, review, and prepare handoff context only. Publishing, approvals, CRM updates, workflow runs, external sends, and durable task creation stay confirmation-gated in the owning workspace.</p>
+4386:                ["Launch phases", asArray(campaignPackage.launchPhases || campaignPackage.launch_phases)],
+4435:        const goalOptions = [["sales", "Sales"], ["launch", "Product launch"], ["leads", "Lead generation"], ["awareness", "Awareness"], ["retargeting", "Retargeting"]];
+4436:        const channelOptions = [["social", "Social"], ["email", "Email"], ["website", "Website"], ["ads", "Ads"], ["publishing", "Publishing package"]];
+4439:        const formatOptions = [["mixed", "Mixed package"], ["image", "Image"], ["video", "Video"], ["email", "Email"], ["landing", "Landing page"], ["ads", "Ads"]];
+4440:        const deadlineOptions = [["standard", "Standard"], ["urgent", "Urgent"], ["launch-week", "Launch week"], ["evergreen", "Evergreen"]];
+4573:                                        <span>Review-first flow: generate preview, approve, then hand off to the owning surface. No publish, send, CRM update, provider execution, or workflow mutation happens here.</span>
+4747:                                        <button id="aicmdV2AskBtn" class="aicmd-chatfirst-send aicmd-final-send" type="button" ${isGenerating ? "disabled" : ""} title="Ask AI Team">
+4926:			${projectName ? `<p class="aicmd-chatfirst-tab-note">Project context: ${escapeHtml(projectName)}. Tools do not execute, publish, send, approve, save, or mutate records.</p>` : ""}
+5005:				<p class="aicmd-chatfirst-tab-note">This is a review-ready preview. Execution, publishing, approvals, CRM updates, external sends, durable task creation, and workflow runs happen only in the owning destination workspace after confirmation.</p>
+5361:				{ label: "Leads", value: "Discovery / qualification", present: true, scoped: true },
+5704:		// Legacy workspace tab handler removed from Final Room v1 shell.
+5759:				persistSessionDraft(sessionKey, session, "Suggested prompt loaded — review and send when ready");
+5886:                                finalDropzone.classList.remove("is-dragging");
+5890:                                finalDropzone.classList.remove("is-dragging");
+6059:                                                body: `Use ${sourceMeaning}. Produce a review-ready campaign package before any handoff, approval, publishing, sending, CRM update, provider execution, or workflow mutation.`
+6091:                                safety: "Preview only. No publish, send, CRM mutation, provider execution, workflow mutation, or Governance approval is performed here."
+6136:                                asArray(campaignPackage.launchPhases).length ? { label: "Launch phases", items: asArray(campaignPackage.launchPhases) } : null,
+6163:                                        ? "Backend preview only. No publish, send, CRM mutation, provider execution, workflow mutation, Governance approval, task creation, or durable handoff was performed."
+6245:                                        confirmationNote: "Review and route this campaign package through the owning destination workspace before any publishing, sending, approval, task creation, provider execution, or workflow mutation.",
+6246:                                        nextSafeAction: "Review the campaign package, then send it to Media Studio or Publishing.",
+6297:                                safety: "Prepared handoff only. No backend write, publish, send, CRM mutation, provider execution, approval creation, task creation, or workflow mutation was performed.",
+6366:                                safety: "Staged review action only. No backend write, publish, send, CRM mutation, provider execution, approval creation, task creation, or workflow mutation was performed."
+6398:			        const sendBtn = $("aicmdV2AskBtn");
+6399:			        if (sendBtn && !sendBtn.disabled) {
+6400:			                sendBtn.click?.();
+6773:                                updateStatus("Handoff preview prepared from conversation context. Review destination before sending.");
+7810:      session.taskType = "launch";

@@ -1,0 +1,151 @@
+948:			responseLoading: false,
+1208:        session.responseLoading = false;
+3465:	if (session.responseLoading) return 0;
+3562:function renderPhase1Header(session, projectName, aiContext, bridgeStatus, escapeHtml) {
+3563:	const safeBridgeStatus = bridgeStatus || { available: false };
+3633:function renderPhase1TeamRail(session, bridgeStatus, escapeHtml) {
+3634:	const safeBridgeStatus = bridgeStatus || { available: false };
+3766:function renderAiRoomConversationHeader(session, bridgeStatus, escapeHtml) {
+3768:	const safeBridgeStatus = bridgeStatus || { available: false };
+3837:function renderPhase35WorkspaceTabs(session, bridgeStatus, escapeHtml) {
+3839:		{ id: "chat", label: "Chat", hint: bridgeStatus.available ? "Connected" : "Guarded" },
+3951:function renderAiCommandIntelligenceLayer({ session, projectName, aiContext, bridgeStatus, escapeHtml }) {
+3952:        const safeBridgeStatus = bridgeStatus || { available: false };
+4034:function renderAiCommandChatFirstShell({ session, projectName, aiContext, bridgeStatus, escapeHtml }) {
+4041:                        ${renderAiCommandCompactHeader({ session, projectName, bridgeStatus, escapeHtml })}
+4044:                                        ${renderAiCommandChatWindow({ session, projectName, aiContext, bridgeStatus, escapeHtml })}
+4053:                                        ${renderAiCommandMinimalContext({ session, bridgeStatus, escapeHtml })}
+4061:function renderAiCommandMinimalContext({ session, bridgeStatus, escapeHtml }) {
+4062:        const safeBridgeStatus = bridgeStatus || { available: false };
+4089:function renderAiCommandCompactHeader({ session, projectName, bridgeStatus, escapeHtml }) {
+4090:	const safeBridgeStatus = bridgeStatus || { available: false };
+4122:function renderAiCommandChatWindow({ session, projectName, aiContext, bridgeStatus, escapeHtml }) {
+4125:			${renderAiCommandChatTopbar({ session, projectName, aiContext, bridgeStatus, escapeHtml })}
+4126:			${renderAiCommandChatMessages({ session, bridgeStatus, escapeHtml })}
+4132:function renderAiCommandChatTopbar({ session, projectName, aiContext, bridgeStatus, escapeHtml }) {
+4133:	const safeBridgeStatus = bridgeStatus || { available: false };
+4203:function renderAiCommandChatMessages({ session, bridgeStatus, escapeHtml }) {
+4204:        const safeBridgeStatus = bridgeStatus || { available: false, reason: "" };
+4298:                        ${session.responseLoading ? `
+4707:        const isGenerating = Boolean(session.responseLoading);
+4747:                                        <button id="aicmdV2AskBtn" class="aicmd-chatfirst-send aicmd-final-send" type="button" ${isGenerating ? "disabled" : ""} title="Ask AI Team">
+4826:function renderAiCommandSecondaryTabPanel({ session, projectName, aiContext, bridgeStatus, escapeHtml }) {
+4833:			: renderAiCommandFlowTab({ session, aiContext, bridgeStatus, escapeHtml });
+4842:function renderAiCommandTeamTab({ session, bridgeStatus, escapeHtml }) {
+4843:	const safeBridgeStatus = bridgeStatus || { available: false };
+5016:function renderAiCommandFlowTab({ session, aiContext, bridgeStatus, escapeHtml }) {
+5018:	const safeBridgeStatus = bridgeStatus || { available: false };
+5049:function renderPhase35ReadinessStrip(aiContext, bridgeStatus, escapeHtml) {
+5054:		{ label: "Team chat", value: bridgeStatus.available ? "AI ready" : "Coming", className: bridgeStatus.available ? "is-available" : "is-planned" },
+5071:function renderAiRoomStatusStrip(aiContext, session, bridgeStatus, escapeHtml) {
+5075:	const connectedTools = bridgeStatus.available ? "Guidance bridge" : "Preview tools";
+5091:function renderPhase3SpecialistConversation(session, bridgeStatus, escapeHtml) {
+5092:        const safeBridgeStatus = bridgeStatus || { available: false, reason: "" };
+5234:                        ${session.responseLoading ? `
+5335:	const sessionState = session.responseLoading ? "Generating" : (session.outputPreview ? "AI Team preview ready" : (asString(session.draftMessage).trim() ? "Drafting" : "AI ready"));
+5548:		const bridgeStatus = getAiResponseBridgeStatus(executeProjectAiChat);
+5550:			session.workspaceTab = bridgeStatus.available ? "chat" : "preview";
+5554:			session.workspaceTab = bridgeStatus.available ? "chat" : "preview";
+5567:			bridgeStatus,
+5657:                        session.responseLoading = false;
+5658:                        session.workspaceTab = bridgeStatus.available ? "chat" : "preview";
+6398:			        const sendBtn = $("aicmdV2AskBtn");
+6505:		const askBtn = $("aicmdV2AskBtn");
+6521:		                if (!bridgeStatus.available) {
+6522:		                        session.responseLoading = false;
+6523:		                        session.responseError = bridgeStatus.reason;
+6525:		                        updateStatus(bridgeStatus.reason);
+6550:		                session.responseLoading = true;
+6564:		                        const result = await executeProjectAiChat(projectName, {
+6582:		                                safetyInstruction: "Chat only. No task/workflow/handoff/approval/publish/customer/CRM execution.",
+6653:		                        session.responseLoading = false;
+6670:		                        session.responseLoading = false;
+7124:        if (session.responseLoading) return "thinking";
+7447:        isActive: session.responseLoading || false,
+
+		                        teamMode: session.teamMode,
+		                        content: value,
+		                        createdAt: nowIso(),
+		                        source: "ai-command-chat"
+		                };
+
+		                session.messages.push(userChatMessage);
+		                session.messages = session.messages.slice(-40);
+		                /* SYSTEM_RESET */ StateKernel.write(session, "", "system");
+		                /* composerText_FROZEN */ '';
+		                session.responseLoading = true;
+
+		                saveLocalOutput(sessionKey, {
+		                        preview: session.outputPreview,
+		                        messages: session.messages,
+		                        responses: session.responseHistory,
+		                        modeId: session.modeId,
+		                        teamMode: session.teamMode
+		                });
+
+		                aiCommandRoute.render(context);
+
+		                try {
+		                        const languagePlan = getWorkspaceLanguagePlan(aiContext);
+		                        const result = await executeProjectAiChat(projectName, {
+		                                project: projectName,
+		                                specialistId: specialist.id || session.modeId,
+		                                specialistName: specialist.label || "Specialist",
+		                                mode: session.teamMode === "team" ? "team" : "solo",
+		                                request: value,
+		                                message: value,
+		                                messages: session.messages.slice(-12),
+		                                language: languagePlan.conversationLanguage === "Auto" ? "Auto - follow the latest user message language" : languagePlan.conversationLanguage,
+		                                outputLanguage: languagePlan.publishLanguage,
+		                                market: languagePlan.market,
+		                                marketLanguage: languagePlan.publishLanguage,
+		                                contextSummary: {
+		                                        projectName,
+		                                        campaign: aiContext.campaign,
+		                                        readinessScore: aiContext.readinessScore,
+		                                        readinessSummary: aiContext.summary
+		                                },
+		                                safetyInstruction: "Chat only. No task/workflow/handoff/approval/publish/customer/CRM execution.",
+		                                source: "ai-command-specialist-chat",
+		                                actor: "mh-assistant"
+		                        });
+
+		                        const response = asObject(result?.response);
+		                        const responseText = extractGeneratedResponseText({
+		                                ...response,
+		                                chat_answer: result?.chat_answer,
+		                                response_text: result?.response_text,
+		                                content: response?.content
+		                        });
+
+		                        if (!responseText) {
+		                                throw new Error("AI chat route returned no response text.");
+		                        }
+
+		                        const safetyLabel = asString(result?.safety_label || "chat_only");
+		                        const assistantChatMessage = {
+		                                id: `chat-assistant-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+		                                role: "assistant",
+		                                modeId: specialist.id || session.modeId,
+		                                specialistId: specialist.id || session.modeId,
+		                                specialistLabel: specialist.label || "Specialist",
+		                                teamMode: session.teamMode,
+		                                content: responseText,
+		                                createdAt: asString(result?.timestamp) || nowIso(),
+		                                source: "ai-chat-response",
+		                                safetyLabel,
+		                                response: {
+		                                        status: "completed",
+		                                        chat_answer: responseText,
+		                                        content: responseText,
+		                                        outputType: "chat",
+		                                        provider: result?.provider,
+		                                        safety_label: safetyLabel
+		                                }
+		                        };
+
+		                        session.messages.push(assistantChatMessage);
+		                        session.messages = session.messages.slice(-40);
+
+		                        const routeSuggestion = asArray(response.routeSuggestions || result?.routeSuggestions)[0];
+                                        const responseRoute = resolveAiResponseOutputRoute(session, {

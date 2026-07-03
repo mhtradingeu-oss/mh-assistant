@@ -1,0 +1,591 @@
+### imports/top
+import {
+        bindAiToolDock,
+        getAiToolDockTools,
+        getSelectedLibrarySource,
+        openAiToolDrawerFromMetadata,
+        openLibrarySourcePickerFromAiCommand,
+        renderAiToolDrawerShell
+} from "./ai-command/tool-dock.js";
+import { getProjectedActiveRole, getProjectedTeamMembers } from "../runtime/authority/authority-projection.js";
+
+import {
+        selectCurrentProject,
+        selectOperationsSnapshot,
+        selectProjectPayload
+} from "../state.js";
+
+import {
+        getSharedHandoff,
+        setSharedAiDraft,
+        setSharedHandoff
+} from "../shared-context.js";
+
+import {
+        getCategoryReadinessList
+} from "../asset-library.js";
+
+import {
+        executeProjectAiChat,
+        executeProjectAiGuidance,
+        generateAiCommandCampaignPreview
+} from "../api.js";
+
+//  AI TEAM DEFINITIONS
+// ============================================================
+
+const MODE_DEFS = [
+        {
+                id: "strategist",
+                label: "Strategist",
+                icon: "🎯",
+                summary: "Campaign concepts, launch plans, channel mix, and offer strategy.",
+                routeHint: "campaign-studio"
+        },
+        {
+                id: "writer",
+                label: "Content Writer",
+                icon: "✍️",
+                summary: "Captions, hooks, scripts, emails, and landing page copy.",
+                routeHint: "content-studio"
+        },
+        {
+                id: "media",
+                label: "Media Director",
+                icon: "🎨",
+                summary: "Visual direction, creative brief, format guidance, and brand consistency.",
+                routeHint: "media-studio"
+        },
+        {
+                id: "video_lead",
+                label: "Video Lead",
+                icon: "🎬",
+                summary: "Short-form video scripts, motion direction, and reel strategy.",
+                routeHint: "media-studio"
+        },
+        {
+                id: "publisher",
+                label: "Publisher",
+                icon: "📤",
+                summary: "Publishing readiness, schedule review, and handoff preparation.",
+                routeHint: "publishing"
+        },
+        {
+                id: "ads",
+                label: "Ads Optimizer",
+                icon: "📣",
+                summary: "Ad concepts, targeting angles, platform copy, and paid strategy.",
+                routeHint: "ads-manager"
+        },
+        {
+                id: "analyst",
+                label: "SEO & Insights Analyst",
+                icon: "📊",
+                summary: "SEO signals, performance data, content insights, and traffic patterns.",
+                routeHint: "insights"
+        },
+        {
+                id: "compliance_reviewer",
+                label: "Compliance Reviewer",
+                icon: "🛡️",
+                summary: "Claims review, approvals, safety language, and governance checks.",
+                routeHint: "governance"
+        },
+        {
+                id: "operations",
+                label: "Operations Lead",
+                icon: "⚙️",
+                summary: "Tasks, timelines, handoffs, approvals, and execution plans.",
+                routeHint: "workflows"
+        },
+        {
+                id: "customer_ops",
+                label: "Customer Operations Lead",
+                icon: "🎧",
+                summary: "Inbox review, reply drafts, ticket drafts, SLA risk, and escalation routing.",
+                routeHint: "operations-centers"
+        },
+        {
+                id: "sales_crm",
+                label: "Sales / CRM Lead",
+                icon: "💼",
+                summary: "Lead qualification, outreach drafts, follow-up cadence, and CRM handoff notes.",
+                routeHint: "workflows"
+        }
+];
+
+// Map legacy mode IDs from older sessions to new team IDs
+const MODE_ID_ALIASES = {
+	executive: "operations",
+	campaign: "strategist",
+	content: "writer",
+	designer: "media",
+	media_director: "media",
+	media_planner: "media",
+	seo: "analyst",
+	research: "researcher",
+	video_lead: "video_lead",
+	publisher: "publisher",
+	compliance_reviewer: "compliance_reviewer",
+	customer_operations: "customer_ops",
+	customer_ops: "customer_ops",
+	support: "customer_ops",
+	sales: "sales_crm",
+	crm: "sales_crm",
+	sales_crm: "sales_crm",
+	admin: "operations"
+};
+
+// ============================================================
+//  PHASE 1: SPECIALIST DEFINITIONS — AI TEAM COMMAND CENTER
+// ============================================================
+
+### explicit ask / safe activation context
+						updateStatus("Voice dictation started. Speak now.");
+					};
+					recognition.onspeechstart = () => {
+						updateStatus("Speech detected. Listening...");
+					};
+					recognition.onspeechend = () => {
+						updateStatus("Speech ended. Processing voice input...");
+					};
+					recognition.onnomatch = () => {
+						updateStatus("Voice was heard but no clear text was recognized. Try again closer to the microphone.");
+					};
+					recognition.onresult = (event) => {
+						const transcript = asString(event?.results?.[0]?.[0]?.transcript || "").trim();
+						if (!transcript) {
+							updateStatus("Voice input returned no transcript. Try again and speak clearly after pressing the microphone.");
+							return;
+						}
+						voiceTranscriptCaptured = true;
+						setAiComposerValue(session, input, transcript);
+						if (input) {
+							input.value = transcript;
+							input.focus();
+						}
+						persistSessionDraft(sessionKey, session, "Voice input captured");
+						updateStatus("Voice dictation captured in composer.");
+					};
+                                        recognition.onerror = (event) => {
+                                                console.warn("[AI_COMMAND_VOICE_ERROR]", event);
+                                                const errorName = asString(event?.error || event?.name || "unknown");
+                                                updateStatus(`Voice dictation stopped: ${errorName}. Try again or check microphone input.`.trim());
+                                        };
+                                        recognition.onend = () => {
+                                                if (!voiceTranscriptCaptured) {
+                                                        updateStatus("Voice dictation ended. If no text appeared, try again and speak clearly after pressing the microphone.");
+                                                }
+                                        };
+                                        recognition.start();
+                                        updateStatus(`Listening for voice dictation (${voiceLanguage}).`);
+				} catch (_) {
+					updateStatus("Voice dictation could not start in this browser.");
+				}
+			};
+		}
+
+		// ── ASK SPECIALIST (P0.3.2C1 chat route) ────────────────
+		const askBtn = $("aicmdV2AskBtn");
+		if (askBtn) {
+		        askBtn.onclick = async () => {
+		                const value = asString(input?.value || session.draftMessage || "").trim();
+		                if (!value) {
+		                        updateStatus("Please write your message in the composer first.");
+		                        input?.focus?.();
+		                        return;
+		                }
+
+		                session.responseError = "";
+                                // PHASE 3 SAFE AI ACTIVATION: run decision engine only on explicit Ask.
+                                if (typeof __AI_RUNTIME_TICK === "function") {
+                                        __AI_RUNTIME_TICK(session, aiContext);
+                                }
+
+		                if (!bridgeStatus.available) {
+		                        session.responseLoading = false;
+		                        session.responseError = bridgeStatus.reason;
+		                        aiCommandRoute.render(context);
+		                        updateStatus(bridgeStatus.reason);
+		                        showMessage?.("AI chat route is not connected yet.");
+		                        return;
+		                }
+
+		                const specialist = session.teamMode === "team"
+		                        ? { id: "team", label: "Full Team" }
+		                        : getPhase1SpecialistById(session.modeId);
+
+		                const userChatMessage = {
+		                        id: `chat-user-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+		                        role: "user",
+		                        modeId: specialist.id || session.modeId,
+		                        specialistId: specialist.id || session.modeId,
+		                        specialistLabel: "You",
+		                        teamMode: session.teamMode,
+		                        content: value,
+		                        createdAt: nowIso(),
+		                        source: "ai-command-chat"
+		                };
+
+		                session.messages.push(userChatMessage);
+		                session.messages = session.messages.slice(-40);
+		                /* SYSTEM_RESET */ StateKernel.write(session, "", "system");
+		                /* composerText_FROZEN */ '';
+		                session.responseLoading = true;
+
+		                saveLocalOutput(sessionKey, {
+		                        preview: session.outputPreview,
+		                        messages: session.messages,
+		                        responses: session.responseHistory,
+
+### autonomous decision engine context
+// ===== T179 OBSERVABILITY LAYER =====
+
+function getAiSystemObservability() {
+    return {
+        health: "monitoring",
+        logs: "enabled",
+        metrics: "active",
+        alerts: "configured"
+    };
+}
+
+
+// ===== T180 SELF HEALING ENGINE =====
+
+function getAiSelfHealingState(session) {
+    const health = {
+        ui: true,
+        engine: true,
+        state: getAiThinkingState(session) !== null
+    };
+
+    return {
+        status: Object.values(health).every(Boolean) ? "healthy" : "recovering",
+        autoFix: true,
+        lastCheck: Date.now()
+    };
+}
+
+
+// ===== T180 AUTONOMOUS DECISION ENGINE =====
+
+function getAiAutonomousDecision(session) {
+    const state = getAiThinkingState(session);
+
+    const decisionMap = {
+        idle: "await_input",
+        thinking: "analyze_deep",
+        searching: "fetch_context",
+        analysing: "evaluate_options",
+        composing: "generate_output",
+        handoff: "finalize_delivery"
+    };
+
+    return {
+        action: decisionMap[state] || "standby",
+        confidence: 0.92,
+        autonomous: true
+    };
+}
+
+
+// ===== T180 SELF OPTIMIZATION LOOP =====
+
+function getAiSelfOptimization(session) {
+    const usage = session?.messages?.length || 0;
+
+    return {
+        performanceMode: usage > 20 ? "optimized" : "standard",
+        cacheStrategy: usage > 50 ? "aggressive" : "normal",
+        learningEnabled: true
+    };
+}
+
+
+// ===== T180 GLOBAL ADAPTIVE ENGINE =====
+
+function getAiAdaptiveBehavior(session) {
+    const region = session?.region || "global";
+    const state = getAiThinkingState(session);
+
+    return {
+        region,
+        tone: region === "EU" ? "formal" : "balanced",
+        behaviorMode: state === "thinking" ? "deep_focus" : "responsive",
+        adaptive: true
+    };
+}
+
+
+
+// =====================================
+// INPUT GOVERNOR LAYER (PHASE 1.3 STEP 2)
+// SINGLE SOURCE OF INPUT AUTHORITY
+// =====================================
+
+const InputController = {
+  write(session, value, source = "unknown") {
+    const clean = String(value || "").trim();
+
+    // ONLY ONE TRUE SOURCE
+    StateKernel.write(session, clean, "input");
+
+    // log for debugging only
+    session._lastInputSource = source;
+    session._lastInputAt = Date.now();
+
+    return clean;
+  },
+
+  clear(session) {
+    /* SYSTEM_RESET */ StateKernel.write(session, "", "system");
+    session._lastInputSource = "clear";
+  },
+
+  read(session) {
+    return StateKernel.read(session);
+  }
+};
+
+
+
+// ===============================
+// PHASE 1.2 — STATE CONTROLLER CORE
+// ===============================
+
+const StateKernel = {
+  write(session, value, source = "unknown") {
+    if (!session) return "";
+
+    const clean = String(value || "").trim();
+
+    // StateKernel is the ONLY direct writer to draftMessage.
+    session.draftMessage = source === "system" ? "" : clean;
+    session._stateSource = String(source || "unknown").toUpperCase();
+    session._lastWriteAt = Date.now();
+
+    return session.draftMessage;
+  },
+
+  read(session) {
+    return session?.draftMessage || "";
+  },
+
+  source(session) {
+    return session?._stateSource || "UNKNOWN";
+  }
+};
+
+
+
+// ===============================
+// STATE READER LAYER (PHASE 1.2 STEP 6)
+// ===============================
+const StateReader = {
+  read(session) {
+    return StateKernel.read(session);
+  },
+
+  readDraft(session) {
+    return StateKernel.read(session);
+  }
+};
+
+
+// ===============================
+// UI STATE ABSTRACTION LAYER (PHASE 1.2 FINAL)
+// ===============================
+const UIState = {
+  getDraft(session) {
+    return StateReader.read(session);
+  },
+
+  getText(session) {
+    return StateReader.read(session);
+  }
+};
+
+
+// =====================================
+// PHASE 2 — AI COMMAND INTELLIGENCE CORE
+// =====================================
+
+const AiCommandBrain = {
+
+  analyze(session, aiContext) {
+
+    const draft = (UIState?.getDraft?.(session) || "").toLowerCase();
+
+    const intent = {
+      hasText: draft.length > 0,
+      isEmpty: draft.length === 0,
+      isCommand: draft.startsWith("/"),
+      isQuestion: draft.includes("?"),
+      isActionRequest: /create|build|generate|fix|update|deploy/.test(draft),
+      isAnalysisRequest: /analyze|review|audit|check/.test(draft),
+    };
+
+    return intent;
+  },
+
+  decide(session, aiContext) {
+
+    const intent = this.analyze(session, aiContext);
+
+    if (intent.isEmpty) {
+      return {
+        route: "idle",
+        action: "show_suggestions"
+      };
+    }
+
+    if (intent.isCommand) {
+      return {
+        route: "command",
+        action: "execute_command_flow"
+      };
+    }
+
+    if (intent.isActionRequest) {
+      return {
+        route: "action",
+        action: "ai_task_pipeline"
+      };
+    }
+
+    if (intent.isAnalysisRequest) {
+      return {
+        route: "analysis",
+        action: "ai_analysis_pipeline"
+      };
+    }
+
+    return {
+      route: "chat",
+      action: "standard_ai_response"
+    };
+  }
+};
+
+
+// =====================================
+// PHASE 2 — AI COMMAND ROUTER (BRIDGE LAYER)
+// =====================================
+
+const AiCommandRouter = {
+
+  execute(session, aiContext) {
+
+    const decision = AiCommandBrain.decide(session, aiContext);
+
+    // attach decision to session (UI bridge)
+    session.aiRoute = decision.route;
+    session.aiAction = decision.action;
+
+    // map to UI system
+    if (decision.route === "analysis") {
+      session.taskType = "analyze";
+    }
+
+    if (decision.route === "action") {
+      session.taskType = "launch";
+    }
+
+    if (decision.route === "command") {
+      session.taskType = "fix";
+    }
+
+    if (decision.route === "chat") {
+      session.taskType = "content";
+    }
+
+    if (decision.route === "idle") {
+      session.routeSuggestions = ["Ask me anything", "Run analysis", "Generate plan"];
+    }
+
+    session._lastRouteAt = Date.now();
+
+    return decision;
+  }
+};
+
+
+// =====================================
+// PHASE 2 — EXECUTION ACTIVATION LAYER
+// =====================================
+
+// AUTO TRIGGER AI ROUTER ON STATE WRITE
+function triggerAiRouter(session, aiContext = {}) {
+  try {
+    if (typeof AiCommandBrain === "undefined") return;
+    if (typeof AiCommandRouter === "undefined") return;
+
+    const decision = AiCommandRouter.execute(session, aiContext);
+
+    session._lastAiDecision = decision;
+    session._aiActiveRoute = decision.route;
+    return decision;
+
+  } catch (err) {
+    console.warn("AI Router failed safely:", err);
+  }
+}
+
+
+
+// =====================================
+// PHASE 2 — AUTO AI ACTIVATION PATCH
+// =====================================
+
+// SAFE AUTO TRIGGER WRAPPER
+function safeTriggerAi(session, aiContext = {}) {
+  if (typeof triggerAiRouter !== "function") return;
+
+  try {
+    return triggerAiRouter(session, aiContext);
+  } catch (e) {
+    console.warn("AI trigger failed safely:", e);
+  }
+}
+
+
+
+
+
+// =====================================
+// PHASE 3 — LIVE AI SYSTEM ACTIVATION
+// =====================================
+
+// CORE AUTO AI INJECTION POINT
+function __AI_RUNTIME_TICK(session, aiContext = {}) {
+
+  // SAFE GUARDS
+  if (typeof safeTriggerAi !== "function") return;
+  if (!session) return;
+
+  // EXECUTE AI DECISION ENGINE ONCE
+  const decision = safeTriggerAi(session, aiContext);
+
+  if (decision) {
+    session._liveAiRoute = decision.route;
+    session._liveAiAction = decision.action;
+  }
+
+  // MARK LIVE STATE
+  session._aiLive = true;
+  session._aiLastTick = Date.now();
+}
+
+
+### backend/helper call area
+28:        executeProjectAiChat,
+29:        executeProjectAiGuidance,
+1057:function getAiResponseBridgeStatus(executeProjectAiGuidanceFn) {
+1058:	if (typeof executeProjectAiGuidanceFn !== "function") {
+2734:	executeProjectAiCommand,
+2739:	if (typeof executeProjectAiCommand !== "function") throw new Error("AI command service is unavailable.");
+2747:		result = await executeProjectAiCommand(projectName, {
+5480:			executeProjectAiCommand,
+5548:		const bridgeStatus = getAiResponseBridgeStatus(executeProjectAiChat);
+6564:		                        const result = await executeProjectAiChat(projectName, {

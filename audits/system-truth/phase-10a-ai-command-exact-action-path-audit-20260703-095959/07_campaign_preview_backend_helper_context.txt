@@ -1,0 +1,84 @@
+public/control-center/pages/ai-command.js:30:        generateAiCommandCampaignPreview
+public/control-center/pages/ai-command.js:4538:                                                                <span><strong>Status</strong>${escapeHtml(preview.backendPreview ? "Backend preview" : "Local fallback")}</span>
+public/control-center/pages/ai-command.js:6162:                                safety: asObject(body.safety).preview_only
+public/control-center/pages/ai-command.js:6165:                                backendPreview: true,
+public/control-center/pages/ai-command.js:6175:                                const backendPayload = await generateAiCommandCampaignPreview(projectName || "default", {
+public/control-center/pages/ai-command.js:6196:                                if (!safety.preview_only || !safety.no_backend_mutation_performed || !safety.no_provider_execution_performed) {
+public/control-center/pages/ai-command.js:6205:                                        backendPreview: false,
+public/control-center/pages/ai-command.js:6247:                                        backendPreview: Boolean(preview.backendPreview),
+public/control-center/pages/ai-command.js:6252:                                persistSessionDraft(sessionKey, session, preview.backendPreview ? "Campaign Builder backend preview prepared" : "Campaign Builder local fallback preview prepared");
+public/control-center/pages/ai-command.js:6253:                                updateStatus(preview.backendPreview ? "Backend AI Team preview prepared. Review before any handoff or approval." : "Local campaign preview prepared because backend preview is unavailable.");
+public/control-center/pages/ai-command.js:6254:                                showMessage?.(preview.backendPreview ? "Backend AI Team campaign preview is ready for review." : "Campaign preview is ready using the local fallback.");
+public/control-center/pages/ai-command.js:6294:                                backend_preview: Boolean(preview.backendPreview),
+public/control-center/api.js:1607:export async function generateAiCommandCampaignPreview(projectName, payload = {}) {
+runtime/orchestrator-service/server.js:11325:    preview_only: true,
+runtime/orchestrator-service/server.js:11345:      preview_only: true,
+runtime/orchestrator-service/server.js:11347:      no_backend_mutation_performed: true,
+runtime/orchestrator-service/server.js:11348:      no_provider_execution_performed: true,
+runtime/orchestrator-service/server.js:11370:        preview_only: true,
+runtime/orchestrator-service/server.js:11371:        no_backend_mutation_performed: true,
+runtime/orchestrator-service/server.js:11372:        no_provider_execution_performed: true
+
+                                source: asString(body.source_type || body.source || fallbackPreview.source || ""),
+                                sourceLabel: asString(body.source_label || fallbackPreview.sourceLabel || fallbackPreview.source || ""),
+                                goal: asString(body.goal || fallbackPreview.goal || ""),
+                                channel: asString(body.channel || fallbackPreview.channel || ""),
+                                market: asString(body.market || fallbackPreview.market || ""),
+                                language: asString(body.language || fallbackPreview.language || ""),
+                                format: asString(body.format || fallbackPreview.format || ""),
+                                deadline: asString(body.deadline || fallbackPreview.deadline || ""),
+                                audience: asString(body.audience || campaignPackage.targetAudience || fallbackPreview.audience || ""),
+                                offer: asString(body.offer || campaignPackage.offer || fallbackPreview.offer || ""),
+                                productFocus: asString(body.product_focus || body.productFocus || fallbackPreview.productFocus || ""),
+                                complianceSensitivity: asString(body.compliance_sensitivity || body.complianceSensitivity || fallbackPreview.complianceSensitivity || ""),
+                                campaignPackage,
+                                sections: asArray(body.sections).length ? asArray(body.sections) : packageSections,
+                                safety: asObject(body.safety).preview_only
+                                        ? "Backend preview only. No publish, send, CRM mutation, provider execution, workflow mutation, Governance approval, task creation, or durable handoff was performed."
+                                        : asString(fallbackPreview.safety || "Preview only."),
+                                backendPreview: true,
+                                backendSource: asString(body.source || "backend_ai_team")
+                        };
+                }
+
+                async function buildCampaignWizardPreviewWithBackendFallback() {
+                        const localPreview = buildCampaignWizardPreview();
+                        const wizard = getAiCommandSmartWizard(session);
+
+                        try {
+                                const backendPayload = await generateAiCommandCampaignPreview(projectName || "default", {
+                                        source_type: asString(wizard.source || localPreview.source || "project"),
+                                        source_label: asString(localPreview.sourceLabel || wizard.source || "Project"),
+                                        goal: asString(wizard.goal || localPreview.goal || "sales"),
+                                        channel: asString(wizard.channel || localPreview.channel || "social"),
+                                        title: asString(localPreview.title || ""),
+                                        audience: asString(wizard.audience || localPreview.audience || ""),
+                                        offer: asString(wizard.offer || localPreview.offer || ""),
+                                        market: asString(wizard.market || localPreview.market || ""),
+                                        language: asString(wizard.language || localPreview.language || ""),
+                                        format: asString(wizard.format || localPreview.format || ""),
+                                        deadline: asString(wizard.deadline || localPreview.deadline || ""),
+                                        product_focus: asString(wizard.productFocus || localPreview.productFocus || ""),
+                                        compliance_sensitivity: asString(wizard.complianceSensitivity || localPreview.complianceSensitivity || "")
+                                });
+
+                                if (asObject(backendPayload).ok === false) {
+                                        throw new Error(asString(backendPayload.message || "Backend preview failed"));
+                                }
+
+                                const safety = asObject(backendPayload.safety);
+                                if (!safety.preview_only || !safety.no_backend_mutation_performed || !safety.no_provider_execution_performed) {
+                                        throw new Error("Backend preview response did not confirm preview-only safety.");
+                                }
+
+                                return normalizeBackendCampaignPreview(backendPayload, localPreview);
+                        } catch (error) {
+                                console.warn("AI Command backend campaign preview fallback", error);
+                                return {
+                                        ...localPreview,
+                                        backendPreview: false,
+                                        backendFallbackReason: asString(error?.message || "Backend preview unavailable")
+                                };
+                        }
+                }
+

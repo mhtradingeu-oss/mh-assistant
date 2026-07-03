@@ -1,0 +1,250 @@
+1450:				nextSafeAction: "Review and refine the task draft before creating durable tasks"
+1703:				"Review before creating durable records"
+2572:	const durableId = getAiInboundDurableHandoffId(handoff);
+2573:	if (durableId) return durableId;
+2718:	const durableHandoffId = getAiInboundDurableHandoffId(handoff);
+2719:	if (durableHandoffId) {
+2720:		consumeProjectHandoff?.(projectName, durableHandoffId, { actor: "mh-assistant" }).catch((error) => {
+2727:async function submitDurableCommand({
+2747:		result = await executeProjectAiCommand(projectName, {
+2798:		source: "durable-ai-response",
+4029:                        <p class="aicmd-chatfirst-tab-note">AI Command prepares guidance, drafts, previews, and handoff context only. Publishing, approvals, CRM updates, workflow runs, customer sends, provider execution, and durable task creation remain confirmation-gated in the owning workspace.</p>
+4101:				<p>Chat, draft, review, and prepare handoff context only. Publishing, approvals, CRM updates, workflow runs, external sends, and durable task creation stay confirmation-gated in the owning workspace.</p>
+5005:				<p class="aicmd-chatfirst-tab-note">This is a review-ready preview. Execution, publishing, approvals, CRM updates, external sends, durable task creation, and workflow runs happen only in the owning destination workspace after confirmation.</p>
+5126:                ? "Chat only. No workflow run, durable task, external handoff action, approval, publishing action, CRM update, or customer action was created."
+6163:                                        ? "Backend preview only. No publish, send, CRM mutation, provider execution, workflow mutation, Governance approval, task creation, or durable handoff was performed."
+6726:                                updateStatus("Task draft preview prepared from conversation context. Review before creating durable tasks.");
+
+	session.teamMode = normalized.teamMode || "solo";
+	session.routeSuggestions = normalized.routeSuggestions;
+	session.inboundHandoff = {
+		id: handoffId,
+		sourcePage: normalized.sourcePage,
+		sourceLabel: normalized.sourceLabel,
+		title: normalized.title,
+		routeSuggestions: normalized.routeSuggestions
+	};
+	session.bridgeContext = null;
+
+	if (normalized.outputPreview) {
+		session.outputPreview = normalized.outputPreview;
+		session.outputWorkspaceTab = outputTabFromPreview(normalized.outputPreview);
+		session.activeOutputTab = session.outputWorkspaceTab;
+		saveLocalOutput(projectName, {
+			preview: session.outputPreview,
+			responses: session.responseHistory,
+			modeId: session.modeId,
+			teamMode: session.teamMode
+		});
+	}
+
+	setSharedAiDraft(projectName, {
+		...normalized.draftContext,
+		projectName,
+		modeId: normalized.suggestedSpecialist,
+		teamMode: normalized.teamMode,
+		lastCommand: normalized.prompt,
+		lastResponseTitle: normalized.title,
+		routeSuggestions: normalized.routeSuggestions,
+		inboundHandoff: session.inboundHandoff,
+		updatedAt: nowIso()
+	});
+
+	session.lastAppliedHandoffId = handoffId;
+	persistSessionDraft(projectName, session, `Inbound handoff loaded from ${normalized.sourceLabel}`);
+
+	const durableHandoffId = getAiInboundDurableHandoffId(handoff);
+	if (durableHandoffId) {
+		consumeProjectHandoff?.(projectName, durableHandoffId, { actor: "mh-assistant" }).catch((error) => {
+			console.warn("Failed to consume AI handoff:", error.message);
+		});
+	}
+	showMessage?.(`Inbound handoff loaded from ${normalized.sourceLabel}.`);
+}
+
+async function submitDurableCommand({
+	projectName,
+	aiContext,
+	session,
+	command,
+	modeId,
+	source,
+	executeProjectAiCommand,
+	reloadProjectData
+}) {
+	const cleanCommand = asString(command).trim();
+	if (!cleanCommand) return { accepted: false, failed: false };
+	if (typeof executeProjectAiCommand !== "function") throw new Error("AI command service is unavailable.");
+
+	let result = null;
+	let response = {};
+	let resolvedModeId = modeId || session.modeId;
+	let commandId = "";
+
+	try {
+		result = await executeProjectAiCommand(projectName, {
+			command: cleanCommand,
+			mode_id: modeId || session.modeId,
+			source,
+			actor: "mh-assistant",
+			asset_context: {
+				categories: aiContext.assetCategories,
+				approved_assets: aiContext.approvedAssets,
+				blockers: aiContext.assetBlockers
+			}
+		});
+		response = asObject(result?.response);
+		const classification = asObject(result?.command?.classification);
+		resolvedModeId = asString(classification.resolvedModeId) || asString(result?.command?.mode_id) || modeId || session.modeId;
+		commandId = asString(result?.command?.id);
+	} catch (error) {
+		const payload = asObject(error?.payload);
+		const payloadResponse = asObject(payload?.response);
+		const payloadCommand = asObject(payload?.command);
+		const failureReason = asString(payload?.error) || asString(payloadResponse?.error) || asString(error?.message) || "AI provider failed to return output.";
+		resolvedModeId = asString(payloadCommand?.mode_id) || modeId || session.modeId;
+		commandId = asString(payloadCommand?.id);
+		response = {
+			status: "failed",
+			title: "Command failed",
+			summary: failureReason,
+			findings: [failureReason],
+			nextActions: ["Check AI provider configuration and retry."],
+			routeSuggestions: [],
+			missingData: [],
+			error: failureReason
+		};
+	}
+
+	const createdAt = nowIso();
+	session.modeId = resolvedModeId;
+
+	session.messages.push({
+		id: `msg-user-${Date.now()}`,
+		role: "user",
+		modeId: resolvedModeId,
+		content: cleanCommand,
+		createdAt,
+		source
+	});
+
+	session.messages.push({
+		id: `msg-assistant-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+		role: "assistant",
+		modeId: resolvedModeId,
+		createdAt: asString(result?.command?.created_at) || nowIso(),
+		source: "durable-ai-response",
+		response
+	});
+
+	session.history.unshift({
+		id: commandId || `history-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+		modeId: resolvedModeId,
+		command: cleanCommand,
+		createdAt,
+		source,
+		responseTitle: response.title || (response.status === "failed" ? "Command failed" : ""),
+		failed: asString(response.status).toLowerCase() === "failed"
+	});
+	session.history = session.history.slice(0, 14);
+	/* SYSTEM_RESET */ StateKernel.write(session, "", "system");
+
+	syncAiWorkflowBridge({ projectName: aiContext.projectName, modeId: resolvedModeId, command: cleanCommand, response });
+	await reloadProjectData?.(projectName);
+	return { accepted: true, failed: asString(response.status).toLowerCase() === "failed" };
+}
+
+// ============================================================
+//  RENDER: CONTROL ROOM HEADER
+// ============================================================
+
+function buildProjectedAgentCards(state) {
+  const projectedMembers = getProjectedTeamMembers(state);
+  const activeRole = asString(getProjectedActiveRole(state)).toLowerCase();
+
+  if (!projectedMembers.length) return AGENT_CARDS;
+
+  return projectedMembers.map((member) => {
+    const id = asString(member.role || member.id).toLowerCase();
+    const fallback =
+      AGENT_CARDS.find((agent) => agent.id === id) ||
+      AGENT_CARDS.find((agent) => agent.id === "operations") ||
+      AGENT_CARDS[0] ||
+      {};
+
+    return {
+      ...fallback,
+      id,
+      name: asString(member.name || fallback.name || member.role || "AI Specialist"),
+      role: asString(member.role || fallback.role || id),
+      purpose: asString(member.purpose || member.description || fallback.purpose || "Support the current operating context."),
+      bestUse: asString(member.bestUse || member.best_use || fallback.bestUse || "Use when this specialist owns the next step."),
+      active: id === activeRole
+    };
+
+	const state = getState();
+	const needsDashboard = !state.data.overview || !state.data.readiness || !state.data.integrations || !state.data.activity;
+
+	session.intelligence = {
+		...current,
+		project: projectName,
+		status: "loading",
+		error: "",
+		loadingPromise: (async () => {
+			try {
+				if (needsDashboard) await reloadProjectData(projectName);
+				const [insightsResult, learningResult] = await Promise.allSettled([
+					fetchProjectInsights(projectName),
+					fetchProjectLearning(projectName)
+				]);
+				const insightsMissing = insightsResult.status === "rejected" && isMissingIntelligenceError(insightsResult.reason);
+				const learningMissing = learningResult.status === "rejected" && isMissingIntelligenceError(learningResult.reason);
+				const intelligenceErrors = [
+					insightsResult.status === "rejected" && !insightsMissing ? insightsResult.reason?.message : "",
+					learningResult.status === "rejected" && !learningMissing ? learningResult.reason?.message : ""
+				].filter(Boolean);
+				session.intelligence = {
+					project: projectName,
+					status: "ready",
+					dashboard: getState().data,
+					insights: insightsResult.status === "fulfilled" ? insightsResult.value : (insightsMissing ? { project: projectName, generated_at: nowIso(), data_coverage: {} } : null),
+					learning: learningResult.status === "fulfilled" ? learningResult.value : (learningMissing ? { project: projectName, generated_at: nowIso(), learning_patterns: {}, recommendations: [] } : null),
+					error: intelligenceErrors[0] || "",
+					loadedAt: nowIso(),
+					loadingPromise: null
+				};
+			} catch (error) {
+				session.intelligence = { ...session.intelligence, project: projectName, status: "error", error: error.message || "Failed to load live intelligence", loadingPromise: null };
+			} finally {
+				rerender();
+			}
+		})()
+	};
+
+	rerender();
+	return session.intelligence.loadingPromise;
+}
+
+// ============================================================
+//  COMMAND SUBMISSION
+// ============================================================
+
+function syncAiWorkflowBridge({ projectName, modeId, command, response }) {
+	setSharedAiDraft(projectName, {
+		projectName: projectName || "",
+		modeId: modeId || "",
+		lastCommand: asString(command),
+		lastResponseTitle: asString(response?.title),
+		routeSuggestions: asArray(response?.routeSuggestions),
+		updatedAt: nowIso()
+	});
+}
+
+const AI_INBOUND_SOURCE_LABELS = {
+	"content-studio": "Content Studio",
+	"media-studio": "Media Studio",
+	publishing: "Publishing",
+	"campaign-studio": "Campaign Studio",
+	workflows: "Workflows",
+	library: "Library",
+	insights: "Insights",

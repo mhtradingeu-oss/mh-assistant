@@ -1,0 +1,399 @@
+28:        executeProjectAiChat,
+29:        executeProjectAiGuidance,
+66:                id: "publisher",
+67:                label: "Publisher",
+69:                summary: "Publishing readiness, schedule review, and handoff preparation.",
+70:                routeHint: "publishing"
+73:                id: "ads",
+74:                label: "Ads Optimizer",
+77:                routeHint: "ads-manager"
+90:                summary: "Claims review, approvals, safety language, and governance checks.",
+91:                routeHint: "governance"
+98:                routeHint: "workflows"
+112:                routeHint: "workflows"
+127:	publisher: "publisher",
+149:		placeholder: "Ask the Strategist to plan a campaign, map launch phases, review channel priorities, or define the offer strategy…",
+151:		cannotDo: ["Publish campaigns directly", "Execute workflows automatically", "Approve content", "Set live budgets"],
+152:		destinations: ["Campaign Studio", "Workflows", "AI Command"],
+162:		placeholder: "Ask the Content Writer to draft captions, hooks, landing copy, or campaign messages…",
+163:		canHelp: ["Draft captions and hooks", "Write email copy", "Create landing page text", "Prepare publisher handoff", "Suggest message variants"],
+164:		cannotDo: ["Publish directly", "Approve risky claims", "Invent unsupported facts", "Run workflows automatically"],
+165:		destinations: ["Content Studio", "Publishing", "AI Command"],
+166:		safetyNote: "Drafts require review before publishing. Cannot approve or publish without confirmation.",
+175:		placeholder: "Ask the Media Director to define visual direction, prepare a creative brief, or review brand consistency…",
+179:		safetyNote: "Direction and briefs only. Media generation requires backend confirmation and explicit action.",
+188:		placeholder: "Ask the Video Lead to write a reel script, map short-form strategy, or outline the next video concept…",
+190:		cannotDo: ["Generate video directly", "Upload footage without review", "Approve without confirmation", "Run media jobs automatically"],
+192:		safetyNote: "Scripts and direction only. Video generation requires explicit backend action and approval.",
+196:		id: "publisher",
+197:		label: "Publisher",
+198:		position: "Publishing Readiness Lead",
+200:		summary: "Publishing readiness, schedule review, and handoff preparation.",
+201:		placeholder: "Ask the Publisher to review publishing readiness, check scheduling, or prepare a handoff package…",
+202:		canHelp: ["Review publishing readiness", "Check scheduled jobs", "Prepare handoff packages", "Map publishing dependencies", "Flag pre-publish risks"],
+203:		cannotDo: ["Publish without explicit approval", "Override schedules", "Bypass governance gates", "Push to live channels directly"],
+204:		destinations: ["Publishing", "Workflows", "AI Command"],
+205:		safetyNote: "Publishing always requires explicit approval. No live publishing from AI guidance alone.",
+209:		id: "ads",
+210:		label: "Ads Optimizer",
+214:		placeholder: "Ask the Ads Optimizer to draft ad copy, review targeting angles, or plan a paid campaign structure…",
+216:		cannotDo: ["Launch ads directly", "Set live budgets without review", "Approve spend", "Access ad accounts directly"],
+217:		destinations: ["Ads Manager", "Integrations", "Campaign Studio"],
+227:		placeholder: "Ask the SEO & Insights Analyst to review performance, suggest SEO improvements, or identify top content patterns…",
+229:		cannotDo: ["Update SEO settings directly", "Edit live website", "Set analytics configurations", "Publish recommendations automatically"],
+237:		position: "Claims and Governance Lead",
+239:		summary: "Claims review, approval safety, publishing risk, and governance notes.",
+240:		placeholder: "Ask the Compliance Reviewer to check claims, approval risks, publishing safety, and governance notes…",
+241:		canHelp: ["Review marketing claims", "Flag approval risks", "Check publishing safety", "Prepare governance notes", "Identify compliance blockers"],
+242:		cannotDo: ["Grant approvals directly", "Override governance gates", "Publish on behalf of approvers", "Remove flags without review"],
+243:		destinations: ["Workflows", "Publishing", "Governance"],
+253:		placeholder: "Ask the Operations Lead to turn this into tasks, workflow steps, or handoffs…",
+254:		canHelp: ["Create task plans", "Map execution sequences", "Prepare workflow handoffs", "Review execution health", "Identify operational blockers"],
+255:		cannotDo: ["Run workflows without confirmation", "Auto-approve tasks", "Override authority gates", "Execute backend operations directly"],
+256:		destinations: ["Workflows", "Operations Centers", "AI Command"],
+257:		safetyNote: "Task plans and handoffs only. Workflow execution requires explicit user confirmation.",
+266:		placeholder: "Ask the Customer Operations Lead to summarize a customer thread, draft a safe reply, prepare a ticket draft, check SLA risk, or route an escalation for review…",
+267:		canHelp: ["Review inbox context", "Summarize customer threads", "Draft safe replies", "Prepare ticket drafts", "Flag SLA and escalation risk"],
+279:		placeholder: "Ask the Sales / CRM Lead to qualify a lead, draft outreach, plan follow-ups, summarize CRM context, or prepare a sales handoff for review…",
+282:		destinations: ["CRM", "Workflows", "Operations Centers"],
+288:// Role-specific suggested prompt chips (prefill only, no auto-execute)
+299:		{ label: "Prepare a Publisher handoff", sub: "Package ready content for review" },
+314:	publisher: [
+315:		{ label: "Review publishing readiness", sub: "Check what is ready to publish" },
+316:		{ label: "Flag pre-publish risks", sub: "Identify what needs review first" },
+320:	ads: [
+334:		{ label: "Flag publishing risks", sub: "Identify blockers before release" },
+335:		{ label: "Prepare governance notes", sub: "Document compliance status" },
+340:		{ label: "Draft a workflow handoff", sub: "Prepare for the next owner" },
+361:	{ label: "Map the next launch wave", sub: "Strategist to Publisher to Operations" },
+362:	{ label: "Prepare a full handoff sequence", sub: "Strategy, creative, compliance, publishing, ops" },
+369:	{ id: "ask", title: "Ask", description: "Choose a specialist or the full team." },
+373:	{ id: "execute", title: "Confirm", description: "Execution stays gated in backend-owned surfaces." },
+380:	{ id: "workflow", label: "Workflow Preview", helper: "Operating sequence" },
+385:const AI_ROOM_TEAM_CHAIN = ["Strategist", "Writer", "Media / Video", "Compliance", "Publisher", "Operations"];
+393:	publisher: "PB",
+394:	ads: "AO",
+403:	ads: "ads_operator",
+410:		label: "Admin / Governance",
+425:		summary: "Workflow blueprints and trigger maps will route to Workflows before execution."
+432:		{ id: "launch-plan", label: "Launch Plan", action: "preview", intent: "workflow", template: "Build a launch plan for {project}. Include phases, channels, owners, blockers, and next move." },
+440:		{ id: "publisher-package", label: "Publisher Package", action: "preview", intent: "handoff", template: "Prepare a Publisher handoff for {project}. Include German copy package, CTA, notes, and remaining checks." }
+452:		{ id: "build-storyboard", label: "Build storyboard", action: "preview", intent: "workflow", template: "Build storyboard beats for {project}. Sequence shots and key transitions." },
+456:	publisher: [
+457:		{ id: "publishing-checklist", label: "Publishing Checklist", action: "preview", intent: "handoff", template: "Build a publishing checklist for {project}. Include German copy, assets, claims checks, and channel readiness." },
+458:		{ id: "final-packaging", label: "Final Packaging", action: "preview", intent: "handoff", template: "Prepare a final publishing package for {project}. Include copy, CTA, asset notes, approvals, and destination channel." },
+460:		{ id: "schedule-draft", label: "Schedule Draft", action: "preview", intent: "workflow", template: "Prepare a publishing schedule draft for {project}. Include channel cadence, dependencies, and review gates." },
+461:		{ id: "open-publishing", label: "Open Publishing", action: "route", route: "publishing" }
+463:	ads: [
+468:		{ id: "open-ads-manager", label: "Open Ads Manager", action: "route", route: "ads-manager" }
+474:		{ id: "analysis-plan", label: "Analysis Plan", action: "preview", intent: "workflow", template: "Draft an analysis plan for {project}. Define questions, datasets, cadence, and owners." },
+481:		{ id: "publish-readiness", label: "Publish Readiness", action: "preview", intent: "handoff", template: "Review publish readiness for {project}. Confirm what needs human approval before release." },
+482:		{ id: "open-governance", label: "Open Governance", action: "route", route: "governance" }
+485:		{ id: "timeline-draft", label: "Timeline Draft", action: "preview", intent: "workflow", template: "Draft an execution timeline for {project}. Include milestones, owners, dependencies, and review gates." },
+489:		{ id: "open-workflows", label: "Open Workflows / Operations", action: "route", route: "workflows" }
+504:		{ id: "follow-up-sequence", label: "Follow-up Sequence", action: "preview", intent: "workflow", template: "Build a follow-up sequence for {project}. Include timing, message angle, CTA, stop condition, and confirmation requirements." },
+508:		{ id: "influencer-lead-plan", label: "Influencer Lead Plan", action: "preview", intent: "workflow", template: "Prepare an influencer lead plan for {project}. Include target profile, outreach angle, qualification criteria, and handoff path." },
+532:	{ id: "automation", label: "Automation" }
+581:		id: "ads",
+582:		name: "Ads Specialist",
+585:		suggestedPrompt: "Act as Ads Specialist and propose paid experiments based on current readiness and data coverage."
+604:		purpose: "Translate intent into executable workflows and handoffs.",
+636:		if (/act as the publisher/i.test(text)) return "publisher";
+637:		if (/act as the ads optimizer|act as the ads operator/i.test(text)) return "ads";
+651:	const command = humanizeValue(commandText || session?.draftMessage, "Prepare workflow action from AI command.");
+654:			id: `auto-generate-${Date.now()}`,
+660:				title: "AI command auto plan"
+665:			id: `auto-workflow-${Date.now()}`,
+666:			type: "prepare_workflow",
+667:			targetPage: "workflows",
+668:			action: "Prepare workflow from AI command",
+671:				reason: "AI command prepared for workflow execution."
+677:	if (/publish\s*now|send\s*external|paid\s*ads|final\s*approval/i.test(command)) {
+679:			id: `auto-gated-${Date.now()}`,
+680:			type: "publish_now",
+681:			targetPage: "publishing",
+682:			action: "Publish now to external channels",
+685:				reason: "Requires approval gate before external publishing actions."
+763:    "Draft a workflow sequence for:",
+844:	const configuredPublishLanguage = asString(
+845:		overview.publishing_language ||
+846:		overview.publish_language ||
+851:	const publishLanguage = configuredPublishLanguage || "German";
+861:		publishLanguage,
+1057:function getAiResponseBridgeStatus(executeProjectAiGuidanceFn) {
+1058:	if (typeof executeProjectAiGuidanceFn !== "function") {
+1229:	const teamWorkflowLines = safeMode === "Full Team"
+1231:			"Full Team workflow: Strategist -> Writer -> Media/Video -> Compliance -> Publisher -> Operations.",
+1232:			"When the request touches inbox, tickets, leads, outreach, or CRM, include Customer Ops -> Sales/CRM -> Operations.",
+1242:		`Publishable output language: ${safeOutputLanguage}`,
+1246:                `Use ${safeOutputLanguage} only for customer-facing or publishable copy such as captions, ads, emails, landing pages, final campaign text, or publishing packages.`,
+1247:                "When you include publishable copy, label it clearly as publishable content and keep the explanation in the user chat language.",
+1248:		...teamWorkflowLines,
+1250:		`When drafting publishable copy, write it in ${safeOutputLanguage}.`,
+1251:		"Never claim actions were executed.",
+1252:		"Never claim publish, approval, deletion, archival, sync, or operational runs happened.",
+1301:	if (outputType === "workflow") return "workflows";
+1302:	if (id === "strategist") return outputType === "task" ? "campaign-studio" : "workflows";
+1306:	if (id === "publisher") return "publishing";
+1307:	if (id === "ads") return "ads-manager";
+1309:	if (id === "compliance_reviewer") return "governance";
+1310:	if (id === "operations") return outputType === "task" ? "task-center" : "workflows";
+1312:	if (id === "sales_crm") return "workflows";
+1313:	return "workflows";
+1334:                        : activeTab === "workflow"
+1335:                                ? "workflow"
+1342:        const looksWorkflowLike = /\b(workflow|workflows|process|sequence|phase|phases|approval flow|automation|operating loop|step-by-step|steps|dependencies|trigger|review gate|execution flow)\b/.test(text);
+1345:        const looksPublishingLike = /\b(publish|publishing|schedule|channel package|channel payload|approval-ready post|final post|ready to publish|publishing package)\b/.test(text);
+1346:        const looksGovernanceLike = /\b(compliance|governance|claim|claims|risk|risks|approval|approvals|policy|privacy|legal|safe language|safety review)\b/.test(text);
+1355:        if (outputType === "workflow" || looksWorkflowLike) {
+1356:                outputType = "workflow";
+1357:                return { outputType, destinationRoute: explicitDestination || "workflows" };
+1370:        if (/publishing|publish|schedule/.test(outputType) || looksPublishingLike) {
+1371:                outputType = "publishing";
+1372:                return { outputType, destinationRoute: explicitDestination || "publishing" };
+1375:        if (/governance|compliance|risk|approval/.test(outputType) || looksGovernanceLike) {
+1376:                outputType = "governance";
+1377:                return { outputType, destinationRoute: explicitDestination || "governance" };
+1389:                        destinationRoute: explicitDestination || (session?.teamMode === "team" ? "workflows" : "campaign-studio")
+1402:		publishing: "Publishing",
+1403:		"ads-manager": "Ads Manager",
+1406:		governance: "Governance",
+1410:		workflows: "Workflows"
+1429:		confirmationRequired: outputType === "handoff" || specialistId === "publisher" || specialistId === "compliance_reviewer",
+1433:		safetyLabel: "Guidance and draft only. No backend execution.",
+1435:		confirmationNote: "Execution, approvals, and publishing require explicit confirmation in the owning workspace."
+1448:					"Route execution draft to Campaign Studio or Workflows"
+1472:				"Outcome-led hook direction for a German publishing draft",
+1485:				"Use Arabic freely in the conversation; publishable copy should be reviewed in German.",
+1486:				"Claims, health, or performance promises need evidence before publishing."
+1488:			nextStep: "Send this package to Content Studio or Publisher after review.",
+1495:			safetyLabel: "Claims require review before publishing. No direct publish action."
+1514:			safetyLabel: "No media generation executed. Brief and routing only.",
+1534:	if (specialistId === "publisher") {
+1537:			title: outputType === "handoff" ? "Handoff Preview: Publishing package" : "Publishing Draft: Readiness checklist",
+1538:			summary: "Publishing checklist and schedule draft prepared.",
+1541:				"Publishing remains gated until channel, approval, and asset readiness are confirmed."
+1545:				"Draft publish schedule by channel",
+1547:				"Prepare handoff for publishing review"
+1550:			safetyLabel: "Confirmation required before publish. No publish action performed."
+1554:	if (specialistId === "ads") {
+1557:			title: outputType === "task" ? "Task: Paid test plan" : "Ads Draft: Angles and tests",
+1570:				"Keep budget, launch, and live ad changes inside Ads Manager.",
+1578:			safetyLabel: "No budget updates or ad launches executed."
+1604:				"Prepare governance notes",
+1605:				"Route to Governance for formal review"
+1639:			safetyLabel: "No reply sent, ticket created, SLA changed, or escalation triggered."
+1681:		if (outputType === "workflow") {
+1684:				title: "Workflow: Operating sequence",
+1685:				summary: "Workflow draft prepared with stage owners and checkpoints.",
+1692:				safetyLabel: "Workflow run is not started. This is a draft preview only."
+1705:			safetyLabel: "No workflow run and no backend task creation executed."
+1721:		workflow: "workflow",
+1738:		title: outputType === "workflow" ? "Team Workflow" : `Team ${titleCase(outputType)} Preview`,
+1743:			"Compliance and Publisher verify claims, approvals, formatting, and release readiness",
+1744:			"Customer Ops and Sales / CRM join when the request touches inbox, tickets, leads, outreach, or CRM"
+1751:			"Publisher: package channel-ready copy, assets, schedule notes, and publish checks",
+1753:			"Operations: convert the reviewed output into safe tasks, workflow draft, or handoff context"
+1755:		destinationRoute: outputType === "task" ? "task-center" : "workflows",
+1757:		confirmationNote: "No task, workflow, outreach, customer reply, CRM update, approval, or publishing action is executed from Full Team mode.",
+1766:		workflow: "Workflow",
+2001:		ads: ["ad ideas", "ad copy", "facebook ads", "meta ads", "tiktok ads", "google ads", "cta", "paid", "targeting angle", "ad creative"],
+2004:		operations: ["task plan", "workflow", "handoff", "approval", "timeline", "execution plan", "route", "publish", "status", "priority", "priorities", "blocking", "blocker", "readiness", "next", "do next"],
+2006:		sales_crm: ["lead", "leads", "crm", "sales", "outreach", "follow-up", "follow up", "pipeline", "dealer", "salon", "influencer"]
+2021:	const actionRouting = /launch|build|reconnect|connect|improve|create|fix|route|plan|publish/.test(query);
+2054:	if (lane === "ads" && asString(coverage.paid_ads?.status) !== "covered") {
+2108:			top ? `Reuse the pattern from ${extractTopMessage(top)} in the next publishing cycle.` : "Sync social insights to identify winning hooks and formats.",
+2114:			weak ? `Move ${extractTopMessage(weak)} into a rewrite workflow.` : "Audit current content for posts not converting attention to clicks.",
+2119:			routeSuggestion("Publishing", "publishing", "Schedule the next batch with stronger timing and approval control."),
+2162:function buildAdsResponse(aiContext) {
+2171:			: "Paid reporting not connected — connect Meta Ads, Google Ads, or TikTok Ads.",
+2189:			routeSuggestion("Ads Manager", "ads-manager", "Review pacing, creative mapping, and paid operating view."),
+2193:		missingData: buildMissingDataNotes(aiContext, "ads")
+2223:			...buildMissingDataNotes(aiContext, "ads"),
+2232:		return { title: "Campaign launch task block", owner: "Campaign Studio", steps: ["Define the campaign objective, audience, and offer.", "Choose channels and budget based on current intelligence.", "List required assets and publishing dependencies before launch."] };
+2235:		return { title: "Content plan task block", owner: "Content Studio", steps: ["Use the strongest content pattern as the starting template.", "Map posts by platform, hook, format, and CTA.", "Route approved items into Publishing for scheduling."] };
+2238:		return { title: "Content repair task block", owner: "Content Studio", steps: ["Select the weakest items from Insights.", "Rewrite hooks, sharpen CTAs, and adjust format-platform fit.", "Republish only after updated versions are approved."] };
+2243:	return { title: "Execution task block", owner: "Workflows", steps: ["Confirm the goal and required output.", "Identify which workspace owns the work.", "Move into the correct page and review the first step in the owning workspace."] };
+2253:		routeSuggestions.push(routeSuggestion("Publishing", "publishing", "Schedule or approve if the next step is publishing."));
+2256:	if (/ads|campaign scale|roas|creative/.test(query)) routeSuggestions.push(routeSuggestion("Ads Manager", "ads-manager", "Review live paid performance and action the next media move."));
+2257:	if (!routeSuggestions.length) routeSuggestions.push(routeSuggestion("Workflows", "workflows", "Use Workflows when the task spans multiple execution areas."));
+2260:		summary: "This request is best handled as a structured workflow — moving into the right workspace gets results faster than chat alone.",
+2284:		case "ads":
+2285:			return buildAdsResponse(aiContext);
+2367:function syncAiWorkflowBridge({ projectName, modeId, command, response }) {
+2381:	publishing: "Publishing",
+2383:	workflows: "Workflows",
+2388:	governance: "Governance",
+2395:	"ads-manager": "Ads Manager",
+2403:	publishing: "publisher",
+2405:	workflows: "operations",
+2410:	governance: "compliance_reviewer",
+2417:	"ads-manager": "ads",
+2437:	publish: "publishing",
+2438:	publisher: "publishing",
+2441:	workflow: "workflows",
+2451:	govern: "governance",
+2511:	const fallbackRoute = sourcePage === "workspace" ? "workflows" : sourcePage;
+2540:		"workflows"
+2554:		safetyLabel: firstAiInboundText(preview.safetyLabel, preview.safety_label, "Guidance and draft only. No backend execution."),
+2555:		confirmationNote: firstAiInboundText(preview.confirmationNote, preview.confirmation_note, "Execution, approvals, publishing, CRM updates, customer replies, and workflow runs require explicit confirmation in the owning workspace."),
+2625:	)) || `Review this ${sourceLabel} handoff for ${projectLabel}. Identify the right specialist, summarize the context, produce a review-ready draft, and recommend the next safe route. Do not execute publishing, task creation, CRM updates, customer replies, workflow runs, or backend actions.`;
+2665:		note: "Guidance only. No publishing, task creation, CRM updates, customer replies, workflow runs, exports, or backend actions are executed from this handoff."
+2734:	executeProjectAiCommand,
+2739:	if (typeof executeProjectAiCommand !== "function") throw new Error("AI command service is unavailable.");
+2747:		result = await executeProjectAiCommand(projectName, {
+2814:	syncAiWorkflowBridge({ projectName: aiContext.projectName, modeId: resolvedModeId, command: cleanCommand, response });
+3303:                workflow: "workflow sequence",
+3313:                "Keep it review-ready and do not execute backend actions.",
+3340:        preview.safetyLabel = preview.safetyLabel || "Conversation converted into a review-ready draft. No backend action executed.";
+3369:			reason: `${aiContext.criticalGaps.length} critical setup gap${aiContext.criticalGaps.length === 1 ? "" : "s"} can block launch quality and downstream automation reliability.`,
+3388:			reason: `${impacted} integration signal${impacted === 1 ? "" : "s"} need attention before relying on full automation and optimization loops.`,
+3466:	if (preview.outputType === "workflow") return 2;
+3480:		workflow: "workflow",
+3490:	if (outputType === "workflow") return "workflow";
+3505:		workflow: "Workflow Preview",
+3515:	if (tool.route) return asString(tool.route || "workflows");
+3516:	if (session?.teamMode === "team") return tool.intent === "task" ? "task-center" : "workflows";
+3528:	if (tool.intent === "workflow") return "Draft";
+3531:	if (/review|check|compliance|readiness|governance/i.test(asString(tool.label))) return "Review";
+3575:				<p class="aicmd-room-subtitle mhos-context-description">Ask one expert or the full team to prepare strategy, content, analysis, reviews, and destination handoffs. AI prepares and reviews only; sensitive actions stay confirmation-gated in the owning workspace.</p>
+3612:					<strong>${escapeHtml(languagePlan.publishLanguage)}</strong>
+3620:			<div class="aicmd-room-flow mhos-workflow-chain" aria-label="AI operating flow">
+3622:					<div class="aicmd-room-flow-step mhos-workflow-step${index === activeFlowIndex ? " mhos-workflow-active is-active" : ""}${index < activeFlowIndex ? " is-complete" : ""}">
+3649:			<span>Strategy, writing, creative, compliance, publishing, customer, sales, and operations specialists coordinate one review-ready answer. No workflow, send, publish, approval, or CRM action is executed here.</span>
+3665:					Ask Specialist
+3708:		const lanes = ["Strategy", "Content", "Media", "Customer Ops", "Sales / CRM", "Compliance", "Publishing", "Operations"];
+3715:						<p class="aicmd-v2-profile-purpose">Coordinates specialists into one review-ready brief, workflow, or handoff.</p>
+3761:        if (roleId === "publisher") return `${label} is preparing publishing guidance...`;
+3772:		? "Team orchestration across strategy, writing, media/video, compliance, publishing, customer operations, sales/CRM, and operations"
+3799:	if (/workflow|schedule_builder|step_sequence|trigger/.test(haystack)) return "workflow";
+3906:			${projectName ? `<div class="aicmd-v2-tools-note">Project context: ${escapeHtml(projectName)}. Tools do not execute, publish, send, approve, save, or mutate records.</div>` : ""}
+3914:        const outputLanguage = asString(languagePlan.publishLanguage || languagePlan.outputLanguage || "German").trim() || "German";
+3966:        const governanceRequired = destinationRoute === "governance" || /approval|claim|compliance|risk|gdpr|review/i.test(`${outputType} ${asString(preview.title)} ${asString(preview.summary)}`);
+3967:        const riskLabel = governanceRequired ? "Review required" : "Low";
+3968:        const governanceLabel = governanceRequired ? "Governance route" : "Not required";
+3977:                        const complianceWatching = spec.id === "compliance_reviewer" && governanceRequired;
+4022:                                <span><strong>Governance</strong>${escapeHtml(governanceLabel)}</span>
+4029:                        <p class="aicmd-chatfirst-tab-note">AI Command prepares guidance, drafts, previews, and handoff context only. Publishing, approvals, CRM updates, workflow runs, customer sends, provider execution, and durable task creation remain confirmation-gated in the owning workspace.</p>
+4101:				<p>Chat, draft, review, and prepare handoff context only. Publishing, approvals, CRM updates, workflow runs, external sends, and durable task creation stay confirmation-gated in the owning workspace.</p>
+4255:                        { label: "Ask Compliance", attr: "data-aicmd-smart-compliance" }
+4312:                                        <span>Ask ${escapeHtml(selectedLabel)} to plan, draft, review, analyze, or prepare a handoff.</span>
+4340:                { id: "lead", label: "Lead", summary: "Prepare lead discovery and outreach workflow drafts.", enabled: false },
+4342:                { id: "publish", label: "Publish", summary: "Prepare publishing checklist and handoff readiness.", enabled: false }
+4352:                                <span>Choose a guided workflow. The team prepares a preview first.</span>
+4435:        const goalOptions = [["sales", "Sales"], ["launch", "Product launch"], ["leads", "Lead generation"], ["awareness", "Awareness"], ["retargeting", "Retargeting"]];
+4436:        const channelOptions = [["social", "Social"], ["email", "Email"], ["website", "Website"], ["ads", "Ads"], ["publishing", "Publishing package"]];
+4439:        const formatOptions = [["mixed", "Mixed package"], ["image", "Image"], ["video", "Video"], ["email", "Email"], ["landing", "Landing page"], ["ads", "Ads"]];
+4464:                                                <p>Guide the AI Team from source to preview. Backend workflow execution and destination handoff stay approval-gated.</p>
+4538:                                                                <span><strong>Status</strong>${escapeHtml(preview.backendPreview ? "Backend preview" : "Local fallback")}</span>
+4559:                                                                <button type="button" data-aicmd-smart-campaign-action="governance">Request Governance Review</button>
+4560:                                                                <button type="button" data-aicmd-smart-campaign-action="publishing">Prepare Publishing Handoff</button>
+4573:                                        <span>Review-first flow: generate preview, approve, then hand off to the owning surface. No publish, send, CRM update, provider execution, or workflow mutation happens here.</span>
+4696:                                <span>Library, campaigns, content, customers, governance, integrations and provider readiness are connected as guarded planning context. Execution stays confirmation-gated.</span>
+4714:        const voiceLanguageMode = asString(session.voiceLanguageMode || "auto").toLowerCase();
+4735:                                                placeholder="Ask anything"
+4747:                                        <button id="aicmdV2AskBtn" class="aicmd-chatfirst-send aicmd-final-send" type="button" ${isGenerating ? "disabled" : ""} title="Ask AI Team">
+4926:			${projectName ? `<p class="aicmd-chatfirst-tab-note">Project context: ${escapeHtml(projectName)}. Tools do not execute, publish, send, approve, save, or mutate records.</p>` : ""}
+4944:		: destination === "Publishing"
+4945:			? "Open Publishing Handoff"
+4953:					<p>${hasPreview ? "Review the result, then open the destination workspace with draft context." : "Drafts, task previews, workflow previews, and handoff packages appear here after a response or tool setup."}</p>
+4974:					<span><strong>Language</strong>${escapeHtml(languagePlan.publishLanguage)}</span>
+4995:						<strong>${escapeHtml(humanizeValue(preview.safetyLabel, "Guidance only. No backend execution."))}</strong>
+5005:				<p class="aicmd-chatfirst-tab-note">This is a review-ready preview. Execution, publishing, approvals, CRM updates, external sends, durable task creation, and workflow runs happen only in the owning destination workspace after confirmation.</p>
+5094:        const selectedSpec = isTeam ? { id: "team", label: "Full Team", position: "Team workflow" } : getPhase1SpecialistById(session.modeId);
+5097:        const selectedModeLabel = isTeam ? "Team workflow" : "Solo specialist";
+5126:                ? "Chat only. No workflow run, durable task, external handoff action, approval, publishing action, CRM update, or customer action was created."
+5128:        const emptyBody = "Ask what to do next, draft a campaign asset, review a source, prepare a handoff, or coordinate the full AI team.";
+5309:				<span class="aicmd-v2-prompts-label">Ask next</span>
+5318:						data-aicmdv2-prompt-text="${escapeHtml(p.prompt || `${p.label}. ${p.sub}. Prepare this as a review-ready draft only; do not execute anything.`)}"
+5341:		{ label: "Publishing language", value: languagePlan.publishLanguage, present: true },
+5361:				{ label: "Leads", value: "Discovery / qualification", present: true, scoped: true },
+5405:					<span>Publishing, approval, and workflow runs require your explicit confirmation in the right workspace.</span>
+5480:			executeProjectAiCommand,
+5548:		const bridgeStatus = getAiResponseBridgeStatus(executeProjectAiChat);
+5731:                                        StateKernel.write(session, `Act as the ${spec?.label || titleCase(specId)} for ${projectName}. Review the project context and suggest the next best actions. Do not execute anything; prepare guidance only.`, "ai");
+5760:				updateStatus("Suggested prompt loaded into composer. Review it, then Ask AI Team or Draft.");
+5836:                                                sourceType: "auto",
+6030:                                        label: "Publisher",
+6031:                                        body: `Prepare publishing readiness for ${channelLabel}: channel checklist, schedule draft, missing approvals, and handoff requirements.`
+6059:                                                body: `Use ${sourceMeaning}. Produce a review-ready campaign package before any handoff, approval, publishing, sending, CRM update, provider execution, or workflow mutation.`
+6063:                                                body: `Primary objective: ${goalLabel}. Define the audience, buying trigger, objection, proof point, and conversion path for ${projectLabel}.`
+6071:                                                body: "Create a hook, short social caption, long caption/email variant, CTA, landing-page angle, and reusable message notes in the configured publishing language."
+6079:                                                body: "Review claims, proof, pricing language, guarantees, sensitive wording, platform policy risk, and required Governance approval before external use."
+6082:                                                label: "Publishing checklist",
+6091:                                safety: "Preview only. No publish, send, CRM mutation, provider execution, workflow mutation, or Governance approval is performed here."
+6163:                                        ? "Backend preview only. No publish, send, CRM mutation, provider execution, workflow mutation, Governance approval, task creation, or durable handoff was performed."
+6165:                                backendPreview: true,
+6166:                                backendSource: asString(body.source || "backend_ai_team")
+6175:                                const backendPayload = await generateAiCommandCampaignPreview(projectName || "default", {
+6191:                                if (asObject(backendPayload).ok === false) {
+6192:                                        throw new Error(asString(backendPayload.message || "Backend preview failed"));
+6195:                                const safety = asObject(backendPayload.safety);
+6196:                                if (!safety.preview_only || !safety.no_backend_mutation_performed || !safety.no_provider_execution_performed) {
+6200:                                return normalizeBackendCampaignPreview(backendPayload, localPreview);
+6202:                                console.warn("AI Command backend campaign preview fallback", error);
+6205:                                        backendPreview: false,
+6206:                                        backendFallbackReason: asString(error?.message || "Backend preview unavailable")
+6225:                                        destinationRoute: "publishing",
+6245:                                        confirmationNote: "Review and route this campaign package through the owning destination workspace before any publishing, sending, approval, task creation, provider execution, or workflow mutation.",
+6246:                                        nextSafeAction: "Review the campaign package, then send it to Media Studio or Publishing.",
+6247:                                        backendPreview: Boolean(preview.backendPreview),
+6248:                                        backendSource: asString(preview.backendSource || ""),
+6249:                                        backendFallbackReason: asString(preview.backendFallbackReason || "")
+6252:                                persistSessionDraft(sessionKey, session, preview.backendPreview ? "Campaign Builder backend preview prepared" : "Campaign Builder local fallback preview prepared");
+6253:                                updateStatus(preview.backendPreview ? "Backend AI Team preview prepared. Review before any handoff or approval." : "Local campaign preview prepared because backend preview is unavailable.");
+6254:                                showMessage?.(preview.backendPreview ? "Backend AI Team campaign preview is ready for review." : "Campaign preview is ready using the local fallback.");
+6262:                                publishing: "publishing"
+6266:                                publishing: "Publishing"
+6294:                                backend_preview: Boolean(preview.backendPreview),
+6295:                                backend_source: asString(preview.backendSource || ""),
+6296:                                backend_fallback_reason: asString(preview.backendFallbackReason || ""),
+6297:                                safety: "Prepared handoff only. No backend write, publish, send, CRM mutation, provider execution, approval creation, task creation, or workflow mutation was performed.",
+6325:                                governance: "Request Governance Review",
+6326:                                publishing: "Prepare Publishing Handoff",
+6330:                        const safeRouteActions = ["media", "publishing"];
+6346:                                showMessage?.(`${label} prepared. No external action was executed.`);
+6366:                                safety: "Staged review action only. No backend write, publish, send, CRM mutation, provider execution, approval creation, task creation, or workflow mutation was performed."
+6371:                        showMessage?.(`${label} staged for review. No external action was executed.`);
+6386:				persistSessionDraft(sessionKey, session, "Draft auto-saved locally");
+6398:			        const sendBtn = $("aicmdV2AskBtn");
+6408:				const current = asString(session.voiceLanguageMode || "auto").toLowerCase();
+6409:				const next = current === "auto"
+6415:							: "auto";
+6419:				updateStatus(`Voice language set to ${next === "auto" ? "Auto" : next.toUpperCase()}.`);
+6439:                                                const selectedVoiceLanguage = asString(session.voiceLanguageMode || "auto").toLowerCase();
+6446:                                                const outputLanguage = asString(languagePlan.outputLanguage || languagePlan.publishLanguage || "").toLowerCase();
+6505:		const askBtn = $("aicmdV2AskBtn");
+6516:                                // PHASE 3 SAFE AI ACTIVATION: run decision engine only on explicit Ask.
+6564:		                        const result = await executeProjectAiChat(projectName, {
+6573:		                                outputLanguage: languagePlan.publishLanguage,
+6575:		                                marketLanguage: languagePlan.publishLanguage,
+6582:		                                safetyInstruction: "Chat only. No task/workflow/handoff/approval/publish/customer/CRM execution.",
+6667:		                        updateStatus("Specialist reply generated. No workflow/task/handoff was created.");
+6688:                // Phase 1: stages draft locally from conversation context. No backend execution.
+6709:                // Phase 1: converts the current conversation into a task preview. No backend execution.
+6733:                const draftWorkflowBtn = $("aicmdV2DraftWorkflowBtn");
+6734:                if (draftWorkflowBtn) {
+6735:                        draftWorkflowBtn.onclick = () => {
+6739:                                        ? `Draft a workflow sequence for: ${value}`
+6740:                                        : `Draft a workflow sequence for ${projectName || "this project"} with ${spec.label}.`;
+6743:                                        intent: "workflow",
+6748:                                persistSessionDraft(sessionKey, session, "Workflow preview prepared from conversation");
+6749:                                updateStatus("Workflow draft preview prepared from conversation context. No workflow run started.");
+6750:                                showMessage?.("Workflow draft preview prepared from conversation.");
+6756:                // Phase 1: converts the current conversation into a handoff preview. No backend write.
+7532:    mode: "automated"
+7553:        scaling: "auto",
+7583:        autoFix: true,
+7589:// ===== T180 AUTONOMOUS DECISION ENGINE =====
+7606:        autonomous: true
+7764:        action: "execute_command_flow"
+7796:  execute(session, aiContext) {
+7822:      session.routeSuggestions = ["Ask me anything", "Run analysis", "Generate plan"];
+7837:function triggerAiRouter(session, aiContext = {}) {
+7842:    const decision = AiCommandRouter.execute(session, aiContext);
+7859:// SAFE AUTO TRIGGER WRAPPER
+7861:  if (typeof triggerAiRouter !== "function") return;
+7864:    return triggerAiRouter(session, aiContext);
+7866:    console.warn("AI trigger failed safely:", e);
+7881:  // SAFE GUARDS

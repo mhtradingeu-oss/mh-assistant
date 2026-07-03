@@ -1,0 +1,198 @@
+                                                const errorName = asString(event?.error || event?.name || "unknown");
+                                                updateStatus(`Voice dictation stopped: ${errorName}. Try again or check microphone input.`.trim());
+                                        };
+                                        recognition.onend = () => {
+                                                if (!voiceTranscriptCaptured) {
+                                                        updateStatus("Voice dictation ended. If no text appeared, try again and speak clearly after pressing the microphone.");
+                                                }
+                                        };
+                                        recognition.start();
+                                        updateStatus(`Listening for voice dictation (${voiceLanguage}).`);
+				} catch (_) {
+					updateStatus("Voice dictation could not start in this browser.");
+				}
+			};
+		}
+
+		// ── ASK SPECIALIST (P0.3.2C1 chat route) ────────────────
+		const askBtn = $("aicmdV2AskBtn");
+		if (askBtn) {
+		        askBtn.onclick = async () => {
+		                const value = asString(input?.value || session.draftMessage || "").trim();
+		                if (!value) {
+		                        updateStatus("Please write your message in the composer first.");
+		                        input?.focus?.();
+		                        return;
+		                }
+
+		                session.responseError = "";
+                                // PHASE 3 SAFE AI ACTIVATION: run decision engine only on explicit Ask.
+                                if (typeof __AI_RUNTIME_TICK === "function") {
+                                        __AI_RUNTIME_TICK(session, aiContext);
+                                }
+
+		                if (!bridgeStatus.available) {
+		                        session.responseLoading = false;
+		                        session.responseError = bridgeStatus.reason;
+		                        aiCommandRoute.render(context);
+		                        updateStatus(bridgeStatus.reason);
+		                        showMessage?.("AI chat route is not connected yet.");
+		                        return;
+		                }
+
+		                const specialist = session.teamMode === "team"
+		                        ? { id: "team", label: "Full Team" }
+		                        : getPhase1SpecialistById(session.modeId);
+
+		                const userChatMessage = {
+		                        id: `chat-user-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+		                        role: "user",
+		                        modeId: specialist.id || session.modeId,
+		                        specialistId: specialist.id || session.modeId,
+		                        specialistLabel: "You",
+		                        teamMode: session.teamMode,
+		                        content: value,
+		                        createdAt: nowIso(),
+		                        source: "ai-command-chat"
+		                };
+
+		                session.messages.push(userChatMessage);
+		                session.messages = session.messages.slice(-40);
+		                /* SYSTEM_RESET */ StateKernel.write(session, "", "system");
+		                /* composerText_FROZEN */ '';
+		                session.responseLoading = true;
+
+		                saveLocalOutput(sessionKey, {
+		                        preview: session.outputPreview,
+		                        messages: session.messages,
+		                        responses: session.responseHistory,
+		                        modeId: session.modeId,
+		                        teamMode: session.teamMode
+		                });
+
+		                aiCommandRoute.render(context);
+
+		                try {
+		                        const languagePlan = getWorkspaceLanguagePlan(aiContext);
+		                        const result = await executeProjectAiChat(projectName, {
+		                                project: projectName,
+		                                specialistId: specialist.id || session.modeId,
+		                                specialistName: specialist.label || "Specialist",
+		                                mode: session.teamMode === "team" ? "team" : "solo",
+		                                request: value,
+		                                message: value,
+		                                messages: session.messages.slice(-12),
+		                                language: languagePlan.conversationLanguage === "Auto" ? "Auto - follow the latest user message language" : languagePlan.conversationLanguage,
+		                                outputLanguage: languagePlan.publishLanguage,
+		                                market: languagePlan.market,
+		                                marketLanguage: languagePlan.publishLanguage,
+		                                contextSummary: {
+		                                        projectName,
+		                                        campaign: aiContext.campaign,
+		                                        readinessScore: aiContext.readinessScore,
+		                                        readinessSummary: aiContext.summary
+		                                },
+		                                safetyInstruction: "Chat only. No task/workflow/handoff/approval/publish/customer/CRM execution.",
+		                                source: "ai-command-specialist-chat",
+		                                actor: "mh-assistant"
+		                        });
+
+		                        const response = asObject(result?.response);
+		                        const responseText = extractGeneratedResponseText({
+		                                ...response,
+		                                chat_answer: result?.chat_answer,
+		                                response_text: result?.response_text,
+		                                content: response?.content
+		                        });
+
+		                        if (!responseText) {
+		                                throw new Error("AI chat route returned no response text.");
+		                        }
+
+		                        const safetyLabel = asString(result?.safety_label || "chat_only");
+		                        const assistantChatMessage = {
+		                                id: `chat-assistant-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+		                                role: "assistant",
+		                                modeId: specialist.id || session.modeId,
+		                                specialistId: specialist.id || session.modeId,
+		                                specialistLabel: specialist.label || "Specialist",
+		                                teamMode: session.teamMode,
+		                                content: responseText,
+		                                createdAt: asString(result?.timestamp) || nowIso(),
+		                                source: "ai-chat-response",
+		                                safetyLabel,
+		                                response: {
+		                                        status: "completed",
+		                                        chat_answer: responseText,
+		                                        content: responseText,
+		                                        outputType: "chat",
+		                                        provider: result?.provider,
+		                                        safety_label: safetyLabel
+		                                }
+		                        };
+
+		                        session.messages.push(assistantChatMessage);
+		                        session.messages = session.messages.slice(-40);
+
+		                        const routeSuggestion = asArray(response.routeSuggestions || result?.routeSuggestions)[0];
+                                        const responseRoute = resolveAiResponseOutputRoute(session, {
+                                                ...response,
+                                                prompt: value,
+                                                responseTitle: "Chat reply",
+                                                responseText,
+                                                outputType: response.outputType,
+                                                destinationRoute: asString(routeSuggestion?.route)
+                                        });
+		                        session.responseHistory.unshift({
+		                                id: `resp-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+		                                prompt: value,
+		                                specialistId: specialist.id || session.modeId,
+		                                specialistLabel: specialist.label || "Specialist",
+		                                generatedAt: assistantChatMessage.createdAt,
+		                                responseTitle: "Chat reply",
+		                                responseText,
+		                                responseRaw: {
+		                                        ...response,
+		                                        safety_label: safetyLabel,
+		                                        provider: result?.provider
+		                                },
+		                                teamMode: session.teamMode,
+		                                outputType: responseRoute.outputType,
+
+		                                destinationRoute: responseRoute.destinationRoute
+		                        });
+
+		                        session.responseHistory = session.responseHistory.slice(0, 12);
+		                        session.responseLoading = false;
+		                        session.responseError = "";
+
+		                        saveLocalOutput(sessionKey, {
+		                                preview: session.outputPreview,
+		                                messages: session.messages,
+		                                responses: session.responseHistory,
+		                                modeId: session.modeId,
+		                                teamMode: session.teamMode
+		                });
+
+		                        saveAiChatSession(sessionKey, session);
+
+                                aiCommandRoute.render(context);
+		                        updateStatus("Specialist reply generated. No workflow/task/handoff was created.");
+		                        showMessage?.("Specialist reply generated.");
+		                } catch (error) {
+		                        session.responseLoading = false;
+		                        session.responseError = asString(error?.message || "Failed to generate specialist chat reply.");
+
+		                        saveLocalOutput(sessionKey, {
+		                                preview: session.outputPreview,
+		                                messages: session.messages,
+		                                responses: session.responseHistory,
+		                                modeId: session.modeId,
+		                                teamMode: session.teamMode
+		                });
+
+		                        aiCommandRoute.render(context);
+		                        updateStatus(session.responseError);
+		                }
+		        };
+		}

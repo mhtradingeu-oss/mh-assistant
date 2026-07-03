@@ -1,0 +1,95 @@
+public/control-center/automation-engine.js:28:const autoModeListeners = new Set();
+public/control-center/automation-engine.js:30:const autoModeRuntime = {
+public/control-center/automation-engine.js:125:let autoModeState = readPersistedAutoModeState();
+public/control-center/automation-engine.js:128:  autoModeState.logs = [
+public/control-center/automation-engine.js:129:    ...asArray(autoModeState.logs),
+public/control-center/automation-engine.js:140:  persistAutoModeState(autoModeState);
+public/control-center/automation-engine.js:141:  const snapshot = clone(autoModeState);
+public/control-center/automation-engine.js:142:  autoModeListeners.forEach((listener) => {
+public/control-center/automation-engine.js:151:    ...asObject(autoModeRuntime.context),
+public/control-center/automation-engine.js:203:export function isSafeAction(step) {
+public/control-center/automation-engine.js:216:function gateForStep(step) {
+public/control-center/automation-engine.js:246:export function buildAutomationPlan(state) {
+public/control-center/automation-engine.js:276:  return buildAutomationPlan(state).filter((step) => step.priority === "critical");
+public/control-center/automation-engine.js:332:  const safe = isSafeAction(step);
+public/control-center/automation-engine.js:479:    if (!isSafeAction(step)) {
+public/control-center/automation-engine.js:522:  const steps = asArray(autoModeState.currentPlan);
+public/control-center/automation-engine.js:524:  const activeToken = autoModeRuntime.runToken;
+public/control-center/automation-engine.js:526:  while (autoModeState.currentStepIndex < steps.length) {
+public/control-center/automation-engine.js:527:    if (activeToken !== autoModeRuntime.runToken) return getAutoModeState();
+public/control-center/automation-engine.js:528:    if (autoModeState.status !== "running") return getAutoModeState();
+public/control-center/automation-engine.js:530:    const index = autoModeState.currentStepIndex;
+public/control-center/automation-engine.js:532:    const gate = gateForStep(step);
+public/control-center/automation-engine.js:535:      autoModeState.status = "waiting_approval";
+public/control-center/automation-engine.js:536:      autoModeState.approvalRequiredStep = {
+public/control-center/automation-engine.js:547:    if (!isSafeAction(step)) {
+public/control-center/automation-engine.js:549:      autoModeState.currentStepIndex = index + 1;
+public/control-center/automation-engine.js:555:    autoModeState.currentStepIndex = index + 1;
+public/control-center/automation-engine.js:563:      autoModeState.status = "failed";
+public/control-center/automation-engine.js:564:      autoModeState.enabled = false;
+public/control-center/automation-engine.js:565:      autoModeState.mode = "off";
+public/control-center/automation-engine.js:570:    if (autoModeState.mode === "guided" && autoModeState.currentStepIndex < steps.length) {
+public/control-center/automation-engine.js:571:      autoModeState.status = "paused";
+public/control-center/automation-engine.js:580:  autoModeState.status = "completed";
+public/control-center/automation-engine.js:581:  autoModeState.enabled = false;
+public/control-center/automation-engine.js:582:  autoModeState.mode = "off";
+public/control-center/automation-engine.js:583:  autoModeState.approvalRequiredStep = null;
+public/control-center/automation-engine.js:589:export function createAutoModeController(state, context = {}) {
+public/control-center/automation-engine.js:590:  autoModeRuntime.context = {
+public/control-center/automation-engine.js:596:    startAutoMode,
+public/control-center/automation-engine.js:600:    approveCurrentGate,
+public/control-center/automation-engine.js:601:    skipCurrentStep,
+public/control-center/automation-engine.js:607:export async function startAutoMode(plan, options = {}) {
+public/control-center/automation-engine.js:613:  autoModeRuntime.runToken += 1;
+public/control-center/automation-engine.js:614:  autoModeState.enabled = true;
+public/control-center/automation-engine.js:615:  autoModeState.mode = mode;
+public/control-center/automation-engine.js:616:  autoModeState.currentPlan = steps;
+public/control-center/automation-engine.js:617:  autoModeState.currentStepIndex = 0;
+public/control-center/automation-engine.js:618:  autoModeState.status = "running";
+public/control-center/automation-engine.js:619:  autoModeState.lastRunAt = nowIso();
+public/control-center/automation-engine.js:620:  autoModeState.approvalRequiredStep = null;
+public/control-center/automation-engine.js:625:    autoModeState.status = "failed";
+public/control-center/automation-engine.js:626:    autoModeState.enabled = false;
+public/control-center/automation-engine.js:627:    autoModeState.mode = "off";
+public/control-center/automation-engine.js:637:  if (autoModeState.status !== "running") return getAutoModeState();
+public/control-center/automation-engine.js:638:  autoModeRuntime.runToken += 1;
+public/control-center/automation-engine.js:639:  autoModeState.status = "paused";
+public/control-center/automation-engine.js:646:  if (!["paused", "idle", "failed"].includes(autoModeState.status)) return getAutoModeState();
+public/control-center/automation-engine.js:647:  if (!asArray(autoModeState.currentPlan).length) return getAutoModeState();
+public/control-center/automation-engine.js:648:  if (autoModeState.currentStepIndex >= autoModeState.currentPlan.length) return getAutoModeState();
+public/control-center/automation-engine.js:650:  autoModeRuntime.runToken += 1;
+public/control-center/automation-engine.js:651:  autoModeState.enabled = true;
+public/control-center/automation-engine.js:652:  if (autoModeState.mode === "off") {
+public/control-center/automation-engine.js:653:    autoModeState.mode = ["guided", "auto_until_approval"].includes(normalizeText(options.mode))
+public/control-center/automation-engine.js:657:  autoModeState.status = "running";
+public/control-center/automation-engine.js:658:  autoModeState.approvalRequiredStep = null;
+public/control-center/automation-engine.js:665:  autoModeRuntime.runToken += 1;
+public/control-center/automation-engine.js:666:  autoModeState.enabled = false;
+public/control-center/automation-engine.js:667:  autoModeState.mode = "off";
+public/control-center/automation-engine.js:668:  autoModeState.status = "idle";
+public/control-center/automation-engine.js:669:  autoModeState.approvalRequiredStep = null;
+public/control-center/automation-engine.js:675:export async function approveCurrentGate(options = {}) {
+public/control-center/automation-engine.js:676:  if (autoModeState.status !== "waiting_approval" || !autoModeState.approvalRequiredStep) return getAutoModeState();
+public/control-center/automation-engine.js:678:  const gate = asObject(autoModeState.approvalRequiredStep);
+public/control-center/automation-engine.js:690:  autoModeState.currentStepIndex = Math.max(0, Number(gate.index) + 1);
+public/control-center/automation-engine.js:691:  autoModeState.approvalRequiredStep = null;
+public/control-center/automation-engine.js:693:  if (autoModeState.currentStepIndex >= autoModeState.currentPlan.length) {
+public/control-center/automation-engine.js:694:    autoModeState.status = "completed";
+public/control-center/automation-engine.js:695:    autoModeState.enabled = false;
+public/control-center/automation-engine.js:696:    autoModeState.mode = "off";
+public/control-center/automation-engine.js:702:  autoModeRuntime.runToken += 1;
+public/control-center/automation-engine.js:703:  autoModeState.status = "running";
+public/control-center/automation-engine.js:708:export async function skipCurrentStep(options = {}) {
+public/control-center/automation-engine.js:709:  if (autoModeState.status !== "waiting_approval" || !autoModeState.approvalRequiredStep) return getAutoModeState();
+public/control-center/automation-engine.js:710:  const index = Number(autoModeState.approvalRequiredStep.index) || autoModeState.currentStepIndex;
+public/control-center/automation-engine.js:712:  autoModeState.currentStepIndex = Math.max(0, index + 1);
+public/control-center/automation-engine.js:713:  autoModeState.approvalRequiredStep = null;
+public/control-center/automation-engine.js:715:  if (autoModeState.currentStepIndex >= autoModeState.currentPlan.length) {
+public/control-center/automation-engine.js:716:    autoModeState.status = "completed";
+public/control-center/automation-engine.js:717:    autoModeState.enabled = false;
+public/control-center/automation-engine.js:718:    autoModeState.mode = "off";
+public/control-center/automation-engine.js:724:  autoModeRuntime.runToken += 1;
+public/control-center/automation-engine.js:725:  autoModeState.status = "running";
+public/control-center/automation-engine.js:731:  return clone(autoModeState);
+public/control-center/automation-engine.js:736:  autoModeListeners.add(listener);
+public/control-center/automation-engine.js:738:    autoModeListeners.delete(listener);
