@@ -1,0 +1,52 @@
+### scan for public mutation alias deprecation telemetry hits
+./audits/system-truth/phase-13c-public-mutation-alias-write-key-coverage-proof-20260703-150747/04_static_write_key_access_coverage_scan.txt:153:runtime/orchestrator-service/server.js:216:    console.warn("[MH][public_mutation_alias_deprecated]", JSON.stringify({
+./audits/system-truth/phase-13c-public-mutation-alias-write-key-coverage-proof-20260703-150747/02_phase_13b1_patch_presence_proof.txt:10:216:    console.warn("[MH][public_mutation_alias_deprecated]", JSON.stringify({
+./audits/system-truth/phase-13b1-public-mutation-alias-deprecation-telemetry-patch-20260703-150145/PHASE_13B1_PUBLIC_MUTATION_ALIAS_DEPRECATION_TELEMETRY_PATCH_REPORT.md:33:- [MH][public_mutation_alias_deprecated]
+./audits/system-truth/phase-13b1-public-mutation-alias-deprecation-telemetry-patch-20260703-150145/04_post_patch_source_proof.txt:10:216:    console.warn("[MH][public_mutation_alias_deprecated]", JSON.stringify({
+./audits/system-truth/phase-13b1-public-mutation-alias-deprecation-telemetry-patch-20260703-150145/06_diff_scope_guard.txt:46:+    console.warn("[MH][public_mutation_alias_deprecated]", JSON.stringify({
+./audits/system-truth/phase-13b1-public-mutation-alias-deprecation-telemetry-patch-20260703-150145/PHASE_13B1_PUBLIC_MUTATION_ALIAS_DEPRECATION_TELEMETRY_PATCH_LOCK.md:33:- [MH][public_mutation_alias_deprecated]
+./audits/system-truth/phase-13d-frontend-canonical-route-public-alias-zero-use-lock-20260703-151337/08_backend_public_alias_compatibility_boundary_scan.txt:43:216:    console.warn("[MH][public_mutation_alias_deprecated]", JSON.stringify({
+./audits/system-truth/phase-13d-frontend-canonical-route-public-alias-zero-use-lock-20260703-151337/02_input_phase_lock_references.txt:114:- [MH][public_mutation_alias_deprecated]
+./audits/system-truth/phase-13e-public-mutation-alias-selective-retirement-readiness-plan-20260703-152317/03_current_public_mutation_alias_inventory.txt:95:runtime/orchestrator-service/server.js:216:    console.warn("[MH][public_mutation_alias_deprecated]", JSON.stringify({
+./audits/system-truth/phase-13e-public-mutation-alias-selective-retirement-readiness-plan-20260703-152317/02_input_phase_lock_references.txt:662:- [MH][public_mutation_alias_deprecated]
+./audits/system-truth/phase-13f-public-alias-telemetry-observation-zero-hit-review-20260703-153447/00_PHASE_13F_SCOPE.md:26:- [MH][public_mutation_alias_deprecated]
+./audits/system-truth/phase-13f-public-alias-telemetry-observation-zero-hit-review-20260703-153447/00_PHASE_13F_SCOPE.md:27:- public_mutation_alias_deprecated
+./audits/system-truth/phase-13f-public-alias-telemetry-observation-zero-hit-review-20260703-153447/02_input_phase_lock_references.txt:38:- [MH][public_mutation_alias_deprecated]
+./audits/system-truth/phase-13f-public-alias-telemetry-observation-zero-hit-review-20260703-153447/03_telemetry_implementation_presence_proof.txt:5:216:    console.warn("[MH][public_mutation_alias_deprecated]", JSON.stringify({
+./runtime/orchestrator-service/server.js:216:    console.warn("[MH][public_mutation_alias_deprecated]", JSON.stringify({
+
+### scan for X-MH-Public-Alias headers outside implementation/audits
+./runtime/orchestrator-service/server.js:209:function applyPublicMutationAliasDeprecationTelemetry(req, res, next) {
+./runtime/orchestrator-service/server.js:211:    res.setHeader("X-MH-Public-Alias", "true");
+./runtime/orchestrator-service/server.js:212:    res.setHeader("X-MH-Public-Alias-Status", "deprecate");
+./runtime/orchestrator-service/server.js:213:    res.setHeader("X-MH-Public-Alias-Recommendation", "use-canonical-media-manager-route");
+./runtime/orchestrator-service/server.js:214:    res.setHeader("X-MH-Public-Alias-Canonical-Prefix", "/media-manager");
+./runtime/orchestrator-service/server.js:228:app.use(applyPublicMutationAliasDeprecationTelemetry);
+./runtime/orchestrator-service/server.js:231:function publicAliasDeprecationHeaders(req, res, next) {
+./runtime/orchestrator-service/server.js:250:      res.setHeader("X-MH-Canonical-Route-Required", "true");
+./runtime/orchestrator-service/server.js:267:    res.setHeader("X-MH-Public-Alias-Warning", "classification_failed");
+./runtime/orchestrator-service/server.js:291:app.use("/public", publicAliasDeprecationHeaders);
+./runtime/orchestrator-service/lib/security/public-alias-compatibility.js:149:    "X-MH-Public-Alias": "true",
+./runtime/orchestrator-service/lib/security/public-alias-compatibility.js:150:    "X-MH-Public-Alias-Status": classification.status,
+./runtime/orchestrator-service/lib/security/public-alias-compatibility.js:151:    "X-MH-Public-Alias-Reason": classification.reason,
+./runtime/orchestrator-service/lib/security/public-alias-compatibility.js:152:    "Deprecation": "true"
+
+### scan for public alias denied/retired markers outside implementation/audits
+./runtime/orchestrator-service/server.js:254:      if (classification.code === 'route_permission_denied') {
+./runtime/orchestrator-service/server.js:260:        error: "public_alias_retired",
+./runtime/orchestrator-service/lib/security/public-alias-compatibility.js:84:      code: "public_alias_retired"
+./runtime/orchestrator-service/lib/security/public-alias-compatibility.js:92:      status: "blocked_sensitive_mutation_unauthorized",
+./runtime/orchestrator-service/lib/security/public-alias-compatibility.js:93:      reason: "public_alias_mutation_requires_authorization",
+./runtime/orchestrator-service/lib/security/public-alias-compatibility.js:94:      code: "route_permission_denied"
+./runtime/orchestrator-service/lib/security/public-alias-compatibility.js:103:      reason: "critical_public_mutation_alias_blocked",
+./runtime/orchestrator-service/lib/security/public-alias-compatibility.js:104:      code: "route_permission_denied"
+./runtime/orchestrator-service/lib/security/public-alias-compatibility.js:113:      reason: "critical_public_mutation_alias_compatibility_enabled"
+./runtime/orchestrator-service/lib/security/runtime-security-enforcement.js:63:    code: "route_permission_denied",
+./scripts/backend/check-public-alias-hardening.js:47:    "route_permission_denied",
+./scripts/backend/check-public-alias-hardening.js:48:    "Unauthorized public mutation must use route_permission_denied code"
+./scripts/backend/check-public-alias-hardening.js:93:    code: "route_permission_denied",
+./scripts/backend/check-public-alias-compatibility.js:35:    if (classification.reason === "public_alias_compatibility_disabled" || classification.code === "public_alias_retired") {
+./scripts/backend/check-production-profile-hardening.js:99:  assert.strictEqual(publicAliasDecision.code, "route_permission_denied", "public alias block should preserve authorization denial");
+
+### scan for public media-manager access traces outside source/audits
+./control-center-cleanup-audit-2026-05-04T14-02-03-904Z.json:455:      "body_sample": "<!doctype html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>AI Marketing & Launch Control Center</title>\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <link rel=\"stylesheet\" href=\"/public/media-manager.css\">\n</head>\n<body>\n  <div class=\"app-shell\">\n    <div i"

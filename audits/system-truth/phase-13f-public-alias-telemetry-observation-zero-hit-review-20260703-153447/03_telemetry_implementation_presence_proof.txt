@@ -1,0 +1,23 @@
+### Phase 13B.1 telemetry implementation
+209:function applyPublicMutationAliasDeprecationTelemetry(req, res, next) {
+213:    res.setHeader("X-MH-Public-Alias-Recommendation", "use-canonical-media-manager-route");
+214:    res.setHeader("X-MH-Public-Alias-Canonical-Prefix", "/media-manager");
+216:    console.warn("[MH][public_mutation_alias_deprecated]", JSON.stringify({
+228:app.use(applyPublicMutationAliasDeprecationTelemetry);
+
+### public alias classification implementation
+runtime/orchestrator-service/server.js:48:const { classifyPublicAliasAccess, buildPublicAliasHeaders } = require("./lib/security/public-alias-compatibility");
+runtime/orchestrator-service/server.js:231:function publicAliasDeprecationHeaders(req, res, next) {
+runtime/orchestrator-service/server.js:239:    const classification = classifyPublicAliasAccess(req.method, req.path || req.originalUrl || "", {
+runtime/orchestrator-service/server.js:243:    const headers = buildPublicAliasHeaders(classification);
+runtime/orchestrator-service/server.js:254:      if (classification.code === 'route_permission_denied') {
+runtime/orchestrator-service/server.js:260:        error: "public_alias_retired",
+runtime/orchestrator-service/server.js:291:app.use("/public", publicAliasDeprecationHeaders);
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:60:function classifyPublicAliasAccess(method, pathname, options = {}) {
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:84:      code: "public_alias_retired"
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:93:      reason: "public_alias_mutation_requires_authorization",
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:94:      code: "route_permission_denied"
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:104:      code: "route_permission_denied"
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:145:function buildPublicAliasHeaders(classification) {
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:167:  classifyPublicAliasAccess,
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:168:  buildPublicAliasHeaders
