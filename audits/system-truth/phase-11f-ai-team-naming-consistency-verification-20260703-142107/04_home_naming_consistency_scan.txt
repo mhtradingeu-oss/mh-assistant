@@ -1,0 +1,103 @@
+### Home AI team cards and role prompts
+public/control-center/pages/home.js:270:    { id: "designer", name: "Media Director", fallback: "Polish visual direction and creative consistency." },
+public/control-center/pages/home.js:273:    { id: "ads_operator", name: "Ads Optimizer", fallback: "Optimize paid testing, creative variants, and budget decisions." },
+public/control-center/pages/home.js:276:    { id: "admin", name: "Operations Lead", fallback: "Clear blockers and keep execution flow healthy." }
+public/control-center/pages/home.js:1009:                <button class="quick-action-btn mhos-motion-soft" type="button" data-role-id="${escapeHtml(recommendedSpecialist.id)}">
+public/control-center/pages/home.js:1082:      const rolePrompts = {
+public/control-center/pages/home.js:1083:        strategist: `Act as the Strategist for ${projectLabel}. Review readiness, blockers, campaign state, and next best action. Give me the highest-impact strategic moves. Do not execute anything; prepare guidance only.`,
+public/control-center/pages/home.js:1084:        writer: `Act as the Content Writer for ${projectLabel}. Review the current project context and suggest the next best writing actions, messaging angles, and content priorities. Do not execute anything; prepare guidance only.`,
+public/control-center/pages/home.js:1085:        designer: `Act as the Media Director for ${projectLabel}. Review the visual/asset readiness and suggest the next best creative actions. Do not execute anything; prepare guidance only.`,
+public/control-center/pages/home.js:1086:        video_lead: `Act as the Video Lead for ${projectLabel}. Review the project context and suggest the next best short-form/video actions. Do not execute anything; prepare guidance only.`,
+public/control-center/pages/home.js:1087:        publisher: `Act as the Publisher for ${projectLabel}. Review publishing readiness, scheduled jobs, blockers, and what must be checked before publishing. Do not execute anything; prepare guidance only.`,
+public/control-center/pages/home.js:1088:        ads_operator: `Act as the Ads Optimizer for ${projectLabel}. Review campaign readiness, channels, and paid media opportunities. Suggest next ad actions safely. Do not execute anything; prepare guidance only.`,
+public/control-center/pages/home.js:1089:        analyst: `Act as the SEO & Insights Analyst for ${projectLabel}. Review readiness, signals, gaps, and recent activity. Tell me what data matters most and what to improve next. Do not execute anything; prepare guidance only.`,
+public/control-center/pages/home.js:1090:        compliance_reviewer: `Act as the Compliance Reviewer for ${projectLabel}. Review launch blockers, claims, approvals, and publishing safety. Tell me what must be checked before release. Do not execute anything; prepare guidance only.`,
+public/control-center/pages/home.js:1091:        admin: `Act as the Operations Lead for ${projectLabel}. Review tasks, blockers, failed jobs, and execution health. Give me the next operational steps. Do not execute anything; prepare guidance only.`
+public/control-center/pages/home.js:1094:      const prompt = rolePrompts[roleId] || `Act as the ${roleName} specialist for ${projectLabel}. Review the current project context and recommend the next best actions. Do not execute anything; prepare guidance only.`;
+public/control-center/pages/home.js:1156:    const aiRoleCards = document.querySelectorAll(".home-ai-team-card, .mhos-specialist, .mhos-workflow-step[data-role-id]");
+public/control-center/pages/home.js:1158:      const roleId = card.getAttribute("data-role-id");
+public/control-center/pages/home/render-sections.js:93:          <button class="home-ai-team-card" type="button" data-role-id="${escapeHtml(agent.id || "")}" title="Prepare ${escapeHtml(agent.name)} guidance in AI Command">
+public/control-center/pages/home/render-sections.js:94:          <div class="home-ai-team-card-head">
+
+### Home AI team exact card context
+  const projectedActiveRole = asString(
+    getProjectedActiveRole(state)
+  ).toLowerCase();
+
+  const roles = projectedMembers.length
+    ? projectedMembers.map((member) => ({
+        id: asString(member.role || member.id).toLowerCase(),
+        name: asString(
+          member.name ||
+          member.role ||
+          member.id ||
+          "AI Specialist"
+        ),
+        fallback: asString(
+          member.description ||
+          member.summary ||
+          "Ready to support this project."
+        )
+      }))
+    : [
+    { id: "strategist", name: "Strategist", fallback: "Align campaign priorities and launch sequencing." },
+    { id: "writer", name: "Content Writer", fallback: "Prepare high-conversion messaging for active channels." },
+    { id: "designer", name: "Media Director", fallback: "Polish visual direction and creative consistency." },
+    { id: "video_lead", name: "Video Lead", fallback: "Queue the next motion and short-form variants." },
+    { id: "publisher", name: "Publisher", fallback: "Prepare publishing packages, schedules, and manual handoffs." },
+    { id: "ads_operator", name: "Ads Optimizer", fallback: "Optimize paid testing, creative variants, and budget decisions." },
+    { id: "analyst", name: "SEO & Insights Analyst", fallback: "Read weak signals and recommend measurable improvements." },
+    { id: "compliance_reviewer", name: "Compliance Reviewer", fallback: "Review claims, approvals, and publish safety before release." },
+    { id: "admin", name: "Operations Lead", fallback: "Clear blockers and keep execution flow healthy." }
+  ];
+
+  return roles.map((role) => {
+    const roleNotifications = notifications.filter((item) => asString(item?.owner_role).toLowerCase() === role.id);
+    const roleTasks = tasks.filter((item) => asString(item?.owner_role).toLowerCase() === role.id);
+    const roleApprovals = approvals.filter((item) => asString(item?.reviewer_role).toLowerCase() === role.id);
+
+### Home AI role prompt exact context
+
+
+    const handleAiRoleClick = (roleId, roleName) => {
+      const projectLabel = dashboard.projectName || "this project";
+      const rolePrompts = {
+        strategist: `Act as the Strategist for ${projectLabel}. Review readiness, blockers, campaign state, and next best action. Give me the highest-impact strategic moves. Do not execute anything; prepare guidance only.`,
+        writer: `Act as the Content Writer for ${projectLabel}. Review the current project context and suggest the next best writing actions, messaging angles, and content priorities. Do not execute anything; prepare guidance only.`,
+        designer: `Act as the Media Director for ${projectLabel}. Review the visual/asset readiness and suggest the next best creative actions. Do not execute anything; prepare guidance only.`,
+        video_lead: `Act as the Video Lead for ${projectLabel}. Review the project context and suggest the next best short-form/video actions. Do not execute anything; prepare guidance only.`,
+        publisher: `Act as the Publisher for ${projectLabel}. Review publishing readiness, scheduled jobs, blockers, and what must be checked before publishing. Do not execute anything; prepare guidance only.`,
+        ads_operator: `Act as the Ads Optimizer for ${projectLabel}. Review campaign readiness, channels, and paid media opportunities. Suggest next ad actions safely. Do not execute anything; prepare guidance only.`,
+        analyst: `Act as the SEO & Insights Analyst for ${projectLabel}. Review readiness, signals, gaps, and recent activity. Tell me what data matters most and what to improve next. Do not execute anything; prepare guidance only.`,
+        compliance_reviewer: `Act as the Compliance Reviewer for ${projectLabel}. Review launch blockers, claims, approvals, and publishing safety. Tell me what must be checked before release. Do not execute anything; prepare guidance only.`,
+        admin: `Act as the Operations Lead for ${projectLabel}. Review tasks, blockers, failed jobs, and execution health. Give me the next operational steps. Do not execute anything; prepare guidance only.`
+      };
+
+      const prompt = rolePrompts[roleId] || `Act as the ${roleName} specialist for ${projectLabel}. Review the current project context and recommend the next best actions. Do not execute anything; prepare guidance only.`;
+      openAiWithPrompt(prompt);
+      showMessage?.(`${roleName} context prepared in AI Command.`);
+
+### Home render section context
+
+export function renderAiTeamCards(cards, escapeHtml) {
+  const safeCards = asArray(cards).slice(0, 7);
+
+  if (!safeCards.length) {
+    return `<p class="home-empty-note">AI team status is not available yet. AI Command can still prepare guidance for the next action.</p>`;
+  }
+
+  return `
+    <div class="home-ai-team-grid">
+      ${safeCards.map((agent) => `
+          <button class="home-ai-team-card" type="button" data-role-id="${escapeHtml(agent.id || "")}" title="Prepare ${escapeHtml(agent.name)} guidance in AI Command">
+          <div class="home-ai-team-card-head">
+            <strong>${escapeHtml(agent.name)}</strong>
+            ${renderBadge(agent.tone || "neutral", agent.status || "Idle", escapeHtml)}
+          </div>
+          <p>${escapeHtml(agent.summary || agent.fallback || "Ready to support the project.")}</p>
+          </button>
+      `).join("")}
+    </div>
+  `;
+}
+

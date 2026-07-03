@@ -1,0 +1,184 @@
+### AI Command canonical active specialists
+36:const MODE_DEFS = [
+52:                id: "media",
+53:                label: "Media Director",
+73:                id: "ads",
+74:                label: "Ads Optimizer",
+94:                id: "operations",
+95:                label: "Operations Lead",
+101:                id: "customer_ops",
+102:                label: "Customer Operations Lead",
+108:                id: "sales_crm",
+109:                label: "Sales / CRM Lead",
+117:const MODE_ID_ALIASES = {
+142:const SPECIALIST_DEFS = [
+170:		id: "media",
+171:		label: "Media Director",
+209:		id: "ads",
+210:		label: "Ads Optimizer",
+248:		id: "operations",
+249:		label: "Operations Lead",
+261:		id: "customer_ops",
+262:		label: "Customer Operations Lead",
+274:		id: "sales_crm",
+275:		label: "Sales / CRM Lead",
+408:const AI_ROOM_PLANNED_SPECIALISTS = [
+410:		label: "Admin / Governance",
+416:		label: "Researcher",
+422:		label: "Automation Architect",
+574:		id: "media",
+581:		id: "ads",
+596:		name: "Researcher",
+599:		suggestedPrompt: "Act as Researcher and identify high-confidence market opportunities for this project."
+602:		id: "operations",
+1715:		? { id: "operations", label: "Full Team" }
+3635:	const plannedSpecialists = AI_ROOM_PLANNED_SPECIALISTS.map((item) => `
+4188:					${AI_ROOM_PLANNED_SPECIALISTS.map((item) => `
+4341:                { id: "media", label: "Media", summary: "Create a media brief, storyboard, and production direction.", enabled: false },
+4879:				${AI_ROOM_PLANNED_SPECIALISTS.map((item) => `
+7203:        { id: "media", label: "Media" },
+7204:        { id: "operations", label: "Operations" }
+
+### AI Command active definitions exact context
+// ============================================================
+
+const MODE_DEFS = [
+        {
+                id: "strategist",
+                label: "Strategist",
+                icon: "🎯",
+                summary: "Campaign concepts, launch plans, channel mix, and offer strategy.",
+                routeHint: "campaign-studio"
+        },
+        {
+                id: "writer",
+                label: "Content Writer",
+                icon: "✍️",
+                summary: "Captions, hooks, scripts, emails, and landing page copy.",
+                routeHint: "content-studio"
+        },
+        {
+                id: "media",
+                label: "Media Director",
+                icon: "🎨",
+                summary: "Visual direction, creative brief, format guidance, and brand consistency.",
+                routeHint: "media-studio"
+        },
+        {
+                id: "video_lead",
+                label: "Video Lead",
+                icon: "🎬",
+                summary: "Short-form video scripts, motion direction, and reel strategy.",
+                routeHint: "media-studio"
+        },
+        {
+                id: "publisher",
+                label: "Publisher",
+                icon: "📤",
+                summary: "Publishing readiness, schedule review, and handoff preparation.",
+                routeHint: "publishing"
+        },
+        {
+                id: "ads",
+                label: "Ads Optimizer",
+                icon: "📣",
+                summary: "Ad concepts, targeting angles, platform copy, and paid strategy.",
+                routeHint: "ads-manager"
+        },
+        {
+                id: "analyst",
+                label: "SEO & Insights Analyst",
+                icon: "📊",
+                summary: "SEO signals, performance data, content insights, and traffic patterns.",
+                routeHint: "insights"
+        },
+        {
+                id: "compliance_reviewer",
+                label: "Compliance Reviewer",
+                icon: "🛡️",
+                summary: "Claims review, approvals, safety language, and governance checks.",
+                routeHint: "governance"
+        },
+        {
+                id: "operations",
+                label: "Operations Lead",
+                icon: "⚙️",
+                summary: "Tasks, timelines, handoffs, approvals, and execution plans.",
+                routeHint: "workflows"
+        },
+        {
+                id: "customer_ops",
+                label: "Customer Operations Lead",
+                icon: "🎧",
+                summary: "Inbox review, reply drafts, ticket drafts, SLA risk, and escalation routing.",
+                routeHint: "operations-centers"
+        },
+        {
+                id: "sales_crm",
+                label: "Sales / CRM Lead",
+                icon: "💼",
+                summary: "Lead qualification, outreach drafts, follow-up cadence, and CRM handoff notes.",
+                routeHint: "workflows"
+        }
+];
+
+
+### AI Command aliases exact context
+
+// Map legacy mode IDs from older sessions to new team IDs
+const MODE_ID_ALIASES = {
+	executive: "operations",
+	campaign: "strategist",
+	content: "writer",
+	designer: "media",
+	media_director: "media",
+	media_planner: "media",
+	seo: "analyst",
+	research: "researcher",
+	video_lead: "video_lead",
+	publisher: "publisher",
+	compliance_reviewer: "compliance_reviewer",
+	customer_operations: "customer_ops",
+	customer_ops: "customer_ops",
+	support: "customer_ops",
+	sales: "sales_crm",
+	crm: "sales_crm",
+	sales_crm: "sales_crm",
+	admin: "operations"
+};
+
+// ============================================================
+//  PHASE 1: SPECIALIST DEFINITIONS — AI TEAM COMMAND CENTER
+// ============================================================
+
+### AI Command planned lanes exact context
+const AI_ROOM_PLANNED_SPECIALISTS = [
+	{
+		label: "Admin / Governance",
+		initials: "AG",
+		status: "Planned",
+		summary: "Policy, approvals, roles, and audit controls stay destination-owned."
+	},
+	{
+		label: "Researcher",
+		initials: "RS",
+		status: "Planned",
+		summary: "Market, evidence, competitor, and proof research will prepare source packs only."
+	},
+	{
+		label: "Automation Architect",
+		initials: "AA",
+		status: "Planned",
+		summary: "Workflow blueprints and trigger maps will route to Workflows before execution."
+	}
+
+### AI Command backend role aliases exact context
+	customer_ops: "CO",
+	sales_crm: "SC"
+};
+
+const AI_ROOM_BACKEND_ROLE_ALIASES = {
+	ads: "ads_operator",
+	media: "designer",
+	compliance_reviewer: "compliance_reviewer"
+};

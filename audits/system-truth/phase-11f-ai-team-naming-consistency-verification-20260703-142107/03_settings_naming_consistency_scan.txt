@@ -1,0 +1,250 @@
+### Settings role options and role matrix
+52:const TEAM_ROLE_OPTIONS = [
+55:  "Media Director",
+58:  "Ads Optimizer",
+61:  "Operations Lead / Admin",
+65:const TEAM_ROLE_MATRIX = [
+80:    label: "Media Director",
+98:    label: "Ads Optimizer",
+116:    label: "Operations Lead / Admin Authority",
+404:        options: TEAM_ROLE_OPTIONS
+410:        options: ["Strategy", "Writing", "Media Direction", "Video", "Publishing", "Ads", "Analytics", "Compliance", "Operations / Administration"]
+946:      roles: ["Strategist", "Writer", "Media Director", "Publisher", "Analyst", "Compliance Reviewer", "Operations Lead / Admin", "Brand owner"],
+947:      serviceCoverage: ["Strategy", "Writing", "Media Direction", "Publishing", "Analytics", "Compliance", "Operations / Administration"],
+1011:          authority: "Operations / admin control",
+1393:        ${TEAM_ROLE_MATRIX.map((role) => {
+1420:                        "Admin control"
+
+### Settings exact top role area
+  }
+];
+
+const AUTOMATION_RULE_OPTIONS = [
+  "Suggest workflows when campaign is ready",
+  "Block publishing when assets are missing",
+  "Suggest rewrite when content is weak",
+  "Alert when integrations fail",
+  "Route SEO issues into Research/Workflows",
+  "Route weak ads into Ads Manager"
+];
+
+const TEAM_ROLE_OPTIONS = [
+  "Strategist",
+  "Writer",
+  "Media Director",
+  "Video Lead",
+  "Publisher",
+  "Ads Optimizer",
+  "Analyst",
+  "Compliance Reviewer",
+  "Operations Lead / Admin",
+  "Brand owner"
+];
+
+const TEAM_ROLE_MATRIX = [
+  {
+    id: "strategist",
+    label: "Strategist",
+    service: "Planning & campaign architecture",
+    description: "Shapes priorities, campaign structures, and workflow sequencing."
+  },
+  {
+    id: "writer",
+    label: "Writer",
+    service: "Messaging & content generation",
+    description: "Develops copy systems, rewrites, and narrative consistency."
+  },
+  {
+    id: "designer",
+    label: "Media Director",
+    service: "Creative direction & brand expression",
+    description: "Owns visual direction, format quality, brand consistency, and asset polish."
+  },
+  {
+    id: "videoLead",
+    label: "Video Lead",
+    service: "Motion creative & video delivery",
+    description: "Directs short-form and long-form motion output standards."
+  },
+  {
+    id: "publisher",
+    label: "Publisher",
+    service: "Distribution & release operations",
+    description: "Controls schedules, queues, and final outbound execution."
+  },
+  {
+    id: "adsOperator",
+    label: "Ads Optimizer",
+    service: "Paid testing & optimization",
+    description: "Prepares paid testing guidance, creative variants, and safe escalation into Ads Manager."
+  },
+  {
+    id: "analyst",
+    label: "Analyst",
+    service: "Measurement & performance review",
+    description: "Reads signals, monitors readiness, and flags weak performance."
+  },
+  {
+    id: "complianceReviewer",
+    label: "Compliance Reviewer",
+    service: "Safety & policy review",
+    description: "Checks claims, legal risk, and policy-sensitive output."
+  },
+  {
+    id: "admin",
+    label: "Operations Lead / Admin Authority",
+    service: "System control & operations escalation",
+    description: "Owns defaults, integrations, emergency controls, operations escalation, and final governed overrides."
+  }
+];
+
+const SECTION_DEFINITIONS = [
+  {
+    id: "project",
+    title: "Project Settings",
+
+### Settings team section options
+        placeholder: "Escalate legal-sensitive claims to brand owner and operations lead within one business day."
+      }
+    ]
+  },
+  {
+    id: "team",
+    title: "Team Permissions",
+    description: "Define who can operate the system, who can approve output, who runs each service lane, and who can change the machine itself.",
+    backendLabel: "Permissions are modeled now and ready for future role persistence",
+    fields: [
+      {
+        path: "team.roles",
+        label: "Roles / access levels",
+        type: "checklist",
+        options: TEAM_ROLE_OPTIONS
+      },
+      {
+        path: "team.serviceCoverage",
+        label: "Active team services",
+        type: "checklist",
+        options: ["Strategy", "Writing", "Media Direction", "Video", "Publishing", "Ads", "Analytics", "Compliance", "Operations / Administration"]
+      },
+      {
+        path: "team.editAccess",
+        label: "Who can edit",
+        type: "select",
+        critical: true,
+        options: ["Strategists, writers, and media directors", "All active operators", "Admins only", "Project owner only"]
+      },
+      {
+        path: "team.publishAccess",
+        label: "Who can publish",
+        type: "select",
+        critical: true,
+        options: ["Publishers and admins", "Compliance-reviewed publishers", "Admins only", "Project owner only"]
+      },
+      {
+        path: "team.approveAccess",
+        label: "Who can approve",
+        type: "select",
+        critical: true,
+        options: ["Compliance reviewers and admins", "Brand owner", "Admins only", "Project owner only"]
+      },
+      {
+        path: "team.integrationAccess",
+        label: "Who can manage integrations",
+        type: "select",
+        options: ["Admins only", "Admins and operators", "Operations lead", "Project owner only"]
+      },
+      {
+        path: "team.defaultsAccess",
+        label: "Who can change system defaults",
+        type: "select",
+        critical: true,
+        options: ["Admins only", "Project owner only", "Brand owner and admins", "Operations lead"]
+      }
+
+### Settings default profile
+      campaignOutputs: ["Organic posts", "Reels", "Landing pages", "Email sequence"]
+    },
+    approval: {
+      contentOwner: "Marketing lead",
+      mediaOwner: "Creative lead",
+      adsOwner: "Growth lead",
+      requirements: ["Paid ads", "Medical or product claims", "New campaign launches", "AI-generated media"],
+      revisionRules: "Reject unsupported claims, brand drift, weak hooks, or missing metadata. Two revisions escalate to the owner.",
+      escalationNotes: "Escalate legal-sensitive claims and launch blockers to brand owner plus operations lead."
+    },
+    team: {
+      roles: ["Strategist", "Writer", "Media Director", "Publisher", "Analyst", "Compliance Reviewer", "Operations Lead / Admin", "Brand owner"],
+      serviceCoverage: ["Strategy", "Writing", "Media Direction", "Publishing", "Analytics", "Compliance", "Operations / Administration"],
+      editAccess: "Strategists, writers, and media directors",
+      publishAccess: "Publishers and admins",
+      approveAccess: "Compliance reviewers and admins",
+      integrationAccess: "Admins only",
+      defaultsAccess: "Admins only",
+      roleMatrix: {
+        strategist: {
+          authority: "Create and edit",
+          canApprove: false,
+          canPublish: false,
+          canManageIntegrations: false,
+          canChangeDefaults: false
+        },
+        writer: {
+          authority: "Create and edit",
+          canApprove: false,
+          canPublish: false,
+          canManageIntegrations: false,
+          canChangeDefaults: false
+        },
+        designer: {
+          authority: "Create and edit",
+          canApprove: false,
+          canPublish: false,
+          canManageIntegrations: false,
+          canChangeDefaults: false
+        },
+        videoLead: {
+          authority: "Create and edit",
+          canApprove: false,
+          canPublish: false,
+          canManageIntegrations: false,
+          canChangeDefaults: false
+        },
+        publisher: {
+          authority: "Publish",
+          canApprove: false,
+          canPublish: true,
+          canManageIntegrations: false,
+          canChangeDefaults: false
+        },
+        adsOperator: {
+          authority: "Create and edit",
+          canApprove: false,
+          canPublish: false,
+          canManageIntegrations: false,
+          canChangeDefaults: false
+        },
+        analyst: {
+          authority: "Assist only",
+          canApprove: false,
+          canPublish: false,
+          canManageIntegrations: false,
+          canChangeDefaults: false
+        },
+        complianceReviewer: {
+          authority: "Approve",
+          canApprove: true,
+          canPublish: false,
+          canManageIntegrations: false,
+          canChangeDefaults: false
+        },
+        admin: {
+          authority: "Operations / admin control",
+          canApprove: true,
+          canPublish: true,
+          canManageIntegrations: true,
+          canChangeDefaults: true
+        }
+      }
+    },
+    presets: {
+      campaignPreset: "Launch sprint",
