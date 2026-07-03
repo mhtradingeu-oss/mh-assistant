@@ -1,0 +1,112 @@
+===== API EXPORTS =====
+15:export class AccessKeyError extends Error {
+34:export class ProjectPayloadError extends Error {
+56:export function setApiBaseUrl(value = "") {
+60:function buildUrl(path = "") {
+64:function persistCanonicalControlKey(key) {
+77:function readControlKeyMeta() {
+121:export function getControlCenterAccessKeyMeta() {
+129:function isMissingReadKeyErrorMessage(message) {
+133:function isAccessKeyRelatedMessage(message) {
+146:export function isAccessKeyFailure(error) {
+170:function isTopLevelErrorPayload(payload) {
+180:function buildResponseDiagnostics(response, requestMeta = {}, payload = null) {
+202:export function isDebugStartupMode() {
+214:function shouldEmitApiRuntimeTrace(stage) {
+241:function emitApiRuntimeTrace(stage, details = {}) {
+268:function buildReadHeaders() {
+284:function buildWriteHeaders() {
+303:async function readResponseText(response, requestMeta = {}) {
+450:function nextFrame() {
+461:async function parseJsonTextSafely(rawText, response, requestMeta = {}, bodyLength = 0) {
+516:async function parseJson(response, fallbackMessage = "Request failed", requestMeta = {}) {
+620:async function fetchWithTimeout(path, init = {}, timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS) {
+705:async function getJson(path, fallbackMessage, timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS, requestOptions = {}) {
+723:async function sendRawJson(path, method, body, fallbackMessage, timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS) {
+763:async function sendJson(path, method, body, fallbackMessage, timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS) {
+781:async function sendForm(path, formData, fallbackMessage, timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS) {
+806:export async function fetchProtectedMediaBlob(path, timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS) {
+864:function normalizeProjectsPayload(payload) {
+884:function normalizeProjectDashboardPayload(payload) {
+897:function toProjectName(value) {
+907:function createOptionalFallback(projectName, section) {
+962:function toDiagnosticEntry(section, error, required = false) {
+985:function extractRequestAuthDiagnostics(payload = null) {
+997:function extractDashboardSection(payload, section) {
+1022:export async function createMediaManagerProject(payload = {}) {
+1047:export async function fetchProjects() {
+1071:export async function fetchAllCoreProjectData(projectName) {
+1328:export async function fetchAssetCatalog() {
+1335:export async function fetchProjectInsights(projectName) {
+1346:export async function fetchProjectLearning(projectName) {
+1357:export async function fetchProjectOperations(projectName) {
+1370:export async function applyProjectBusinessTemplate(projectName, projectType) {
+1400:export async function saveProjectSetup(projectName, payload = {}) {
+1413:export async function refreshProjectLibrary(projectName) {
+1426:export async function updateProjectAssetStatus(projectName, assetId, status, note = "") {
+1446:export async function renameProjectAsset(projectName, assetId, name) {
+1468:export async function setProjectAssetSourceOfTruth(projectName, assetId, sourceOfTruth) {
+1485:export async function archiveProjectAsset(projectName, assetId, note = "") {
+1502:export async function deleteProjectAsset(projectName, assetId, note = "") {
+1519:export async function reclassifyProjectAsset(projectName, assetId, assetType, note = "") {
+1544:export async function runProjectWorkflow(projectName, workflowId, payload = {}) {
+1561:export async function runProjectAiWorkflow(projectName, workflowId, payload = {}) {
+1578:export async function executeProjectAiCommand(projectName, payload = {}) {
+1591:export async function executeProjectAiChat(projectName, payload = {}) {
+1607:export async function generateAiCommandCampaignPreview(projectName, payload = {}) {
+1618:export async function executeProjectAiGuidance(projectName, payload = {}) {
+1632:export async function createProjectTask(projectName, payload = {}) {
+1645:export async function listProjectTasks(projectName, limit) {
+1657:export async function createProjectApproval(projectName, payload = {}) {
+1670:export async function listProjectApprovals(projectName, limit) {
+1682:export async function decideProjectApproval(projectName, approvalId, payload = {}) {
+1699:export async function fetchProjectGovernance(projectName, params = {}) {
+1718:export async function fetchProjectGovernancePolicy(projectName) {
+1729:export async function updateProjectGovernancePolicy(projectName, payload = {}) {
+1742:export async function saveProjectConnectorSource(projectName, sourceType, sourceValue) {
+1766:export async function removeProjectConnectorSource(projectName, sourceType) {
+1783:export async function fetchProjectIntegrationControlCenter(projectName) {
+1794:export async function connectProjectIntegration(projectName, integrationId, payload = {}) {
+1811:export async function reconnectProjectIntegration(projectName, integrationId, payload = {}) {
+1828:export async function testProjectIntegration(projectName, integrationId, payload = {}) {
+1845:export async function syncProjectIntegration(projectName, integrationId, payload = {}) {
+1862:export async function importProjectIntegrationHistory(projectName, integrationId, payload = {}) {
+1879:export async function disconnectProjectIntegration(projectName, integrationId, payload = {}) {
+1896:export async function savePublishingSchedule(projectName, payload = {}) {
+1909:export async function reschedulePublishingItem(projectName, jobId, payload = {}) {
+1926:export async function approvePublishingItem(projectName, jobId, payload = {}) {
+1943:export async function publishPublishingItem(projectName, jobId, payload = {}) {
+1960:export async function failPublishingItem(projectName, jobId, payload = {}) {
+1977:export async function fetchProjectOperationsSchema(projectName) {
+1988:export async function fetchProjectTaskCenter(projectName) {
+1999:export async function fetchProjectQueueCenter(projectName) {
+2010:export async function fetchProjectJobMonitor(projectName) {
+2021:export async function fetchProjectNotificationCenter(projectName) {
+2032:export async function fetchProjectTeam(projectName) {
+2043:export async function saveProjectTeam(projectName, payload = {}) {
+2056:export async function listProjectCampaigns(projectName, limit) {
+2069:export async function saveProjectCampaign(projectName, payload = {}) {
+2091:export async function listProjectContentItems(projectName, params = {}) {
+2114:export async function saveProjectContentItem(projectName, payload = {}) {
+2136:export async function listProjectMediaJobs(projectName, params = {}) {
+2163:export async function saveProjectMediaJob(projectName, payload = {}) {
+2185:export async function improveMediaPrompt(payload = {}) {
+2194:export async function brandCheckMedia(payload = {}) {
+2203:export async function generateMediaImage(payload = {}) {
+2212:export async function generateMediaVideoBrief(payload = {}) {
+2221:export async function generateMediaVoiceScript(payload = {}) {
+2230:export async function generateMediaCampaignPack(payload = {}) {
+2239:export async function listProjectHandoffs(projectName, params = {}) {
+2270:export async function createProjectHandoff(projectName, payload = {}) {
+2283:export async function consumeProjectHandoff(projectName, handoffId, payload = {}) {
+2300:export async function listProjectEvents(projectName, limit) {
+2313:export async function markProjectNotification(projectName, notificationId, payload = {}) {
+2330:export async function uploadProjectAsset(projectName, assetType, file) {
+2361:export async function fetchCustomerOperationsReadiness(projectName) {
+2365:export async function fetchCustomerOperationsInbox(projectName) {
+2369:export async function fetchCustomerConversations(projectName) {
+2373:export async function fetchCustomerConversationDetail(projectName, conversationId) {
+2377:export async function fetchCustomerConversationMessages(projectName, conversationId) {
+2381:export async function fetchCustomerProfilePreview(projectName, customerId) {
+2385:export async function fetchCustomerTickets(projectName) {
+2389:export async function fetchCustomerChannels(projectName) {
