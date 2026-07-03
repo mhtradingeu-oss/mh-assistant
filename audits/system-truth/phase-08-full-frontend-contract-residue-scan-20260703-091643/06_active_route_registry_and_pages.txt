@@ -1,0 +1,172 @@
+### router imports and route registry
+// public/control-center/router.js
+
+import { homeRoute } from "./pages/home.js";
+import { aiCommandRoute } from "./pages/ai-command.js";
+import { campaignStudioRoute } from "./pages/campaign-studio.js";
+import { contentStudioRoute } from "./pages/content-studio-workspace.js";
+import { mediaStudioRoute } from "./pages/media-studio-workspace.js";
+import { publishingRoute } from "./pages/publishing.js";
+import { adsManagerRoute } from "./pages/ads-manager.js";
+import { insightsRoute } from "./pages/insights.js";
+import { researchRoute } from "./pages/research.js";
+import { workflowsRoute } from "./pages/workflows.js";
+import {
+  taskCenterRoute,
+  queueCenterRoute,
+  jobMonitorRoute,
+  notificationCenterRoute,
+  operationsCentersRoute
+} from "./pages/operations-centers.js";
+import { setupRoute } from "./pages/setup.js";
+import { libraryRoute } from "./pages/library.js";
+import { integrationsRoute } from "./pages/integrations.js";
+import { customerCenterRoute } from "./pages/customer-center.js";
+import { settingsRoute } from "./pages/settings.js";
+import { governanceRoute } from "./pages/governance.js";
+import {
+  DEFAULT_ROLE,
+  getFallbackRouteAccess
+} from "./runtime/authority/route-role-fallback.js";
+
+const routeRegistry = {
+  [homeRoute.id]: homeRoute,
+  [aiCommandRoute.id]: aiCommandRoute,
+  [workflowsRoute.id]: workflowsRoute,
+  [operationsCentersRoute.id]: operationsCentersRoute,
+  [taskCenterRoute.id]: taskCenterRoute,
+  [queueCenterRoute.id]: queueCenterRoute,
+  [jobMonitorRoute.id]: jobMonitorRoute,
+  [notificationCenterRoute.id]: notificationCenterRoute,
+  [campaignStudioRoute.id]: campaignStudioRoute,
+  [contentStudioRoute.id]: contentStudioRoute,
+  [mediaStudioRoute.id]: mediaStudioRoute,
+  [publishingRoute.id]: publishingRoute,
+  [adsManagerRoute.id]: adsManagerRoute,
+  [insightsRoute.id]: insightsRoute,
+  [researchRoute.id]: researchRoute,
+  [setupRoute.id]: setupRoute,
+  [libraryRoute.id]: libraryRoute,
+  [customerCenterRoute.id]: customerCenterRoute,
+  [integrationsRoute.id]: integrationsRoute,
+  [settingsRoute.id]: settingsRoute,
+  [governanceRoute.id]: governanceRoute
+};
+
+let routeAccessResolver = null;
+
+const routeChangeSubscribers = new Set();
+
+export function subscribeRouteChange(handler) {
+  if (typeof handler !== "function") return () => {};
+  routeChangeSubscribers.add(handler);
+  return () => routeChangeSubscribers.delete(handler);
+}
+
+function notifyRouteChange(route) {
+  routeChangeSubscribers.forEach((handler) => {
+    try {
+      handler(route);
+    } catch (error) {
+      console.warn("Route change subscriber failed:", error?.message || error);
+    }
+  });
+}
+
+
+function getPageRoot() {
+  return document.getElementById("pageRoot");
+}
+
+function getFallbackRoute(route) {
+  return {
+    id: route,
+    meta: {
+      eyebrow: "System",
+      title: "Page",
+      description: "Workspace view"
+    },
+    template: `
+      <section class="page is-active">
+        <div class="page-grid">
+
+### index scripts
+8:  <link rel="stylesheet" href="./styles/00-tokens.css?v=20260508-tokens-1">
+9:  <link rel="stylesheet" href="./styles/01-reset.css?v=20260508-reset-1">
+10:  <link rel="stylesheet" href="./styles/02-layer-system.css?v=20260510-loading-overlay-1">
+11:  <link rel="stylesheet" href="./styles/03-app-shell.css?v=20260508-shell-1">
+12:  <link rel="stylesheet" href="./styles/07-sidebar.css?v=20260508-sidebar-2">
+13:  <link rel="stylesheet" href="./styles/10-topbar-canonical.css?v=20260508-topbar-canonical-2">
+14:  <link rel="stylesheet" href="./styles/04-command-layer.css?v=20260508-command-1">
+15:  <link rel="stylesheet" href="./styles/05-ai-layer.css?v=20260508-ai-layer-1">
+16:  <link rel="stylesheet" href="./styles/08-components-foundation.css?v=20260508-components-1">
+17:  <link rel="stylesheet" href="./styles/mhos-action-primitives.css?v=20260523-action-primitives-1">
+18:  <link rel="stylesheet" href="./styles/09-operations-centers.css?v=20260511-task-center-layout-1">
+19:  <link rel="stylesheet" href="./styles/09-governance.css?v=20260623-governance-owner-1">
+20:  <link rel="stylesheet" href="./styles/12-pages.css?v=20260508-pages-1">
+21:  <link rel="stylesheet" href="./styles/13-home-executive.css?v=20260508-home-executive-1">
+22:  <link rel="stylesheet" href="./styles/14-page-standard.css?v=20260510-library-polish-1">
+23:  <link rel="stylesheet" href="./styles/15-clean-operating-layer.css?v=20260514-clean-layer-1">
+24:  <link rel="stylesheet" href="./styles/mhos-workflow-primitives.css?v=20260523-workflow-primitives-1">
+25:  <link rel="stylesheet" href="./styles/mhos-context-primitives.css?v=20260523-context-primitives-1">
+26:  <link rel="stylesheet" href="./styles/mhos-executive-surface-primitives.css?v=20260523-executive-surface-primitives-1">
+116:            <button class="nav-item is-active" data-route="home" data-page="home" type="button">Home</button>
+117:            <button class="nav-item" data-route="ai-command" data-page="ai-command" type="button">AI Command</button>
+122:            <button class="nav-item" data-route="setup" data-page="setup" type="button">Setup</button>
+123:            <button class="nav-item" data-route="library" data-page="library" type="button">Library</button>
+124:            <button class="nav-item" data-route="integrations" data-page="integrations" type="button">Integrations</button>
+129:            <button class="nav-item" data-route="workflows" data-page="workflows" type="button">Workflows</button>
+130:            <button class="nav-item" data-route="campaign-studio" data-page="campaign-studio" type="button">Campaign Studio</button>
+131:            <button class="nav-item" data-route="content-studio" data-page="content-studio" type="button">Content Studio</button>
+132:            <button class="nav-item" data-route="media-studio" data-page="media-studio" type="button">Media Studio</button>
+137:            <button class="nav-item" data-route="publishing" data-page="publishing" type="button">Publishing</button>
+138:            <button class="nav-item" data-route="ads-manager" data-page="ads-manager" type="button">Ads Manager</button>
+139:            <button class="nav-item" data-route="insights" data-page="insights" type="button">Insights</button>
+140:            <button class="nav-item" data-route="research" data-page="research" type="button">Research</button>
+145:            <button class="nav-item" data-route="customer-center" data-page="customer-center" type="button">Customer Center</button>
+150:            <button class="nav-item" data-route="operations-centers" data-page="operations-centers" type="button">Operations Overview</button>
+151:            <button class="nav-item" data-route="task-center" data-page="task-center" type="button">Task Center</button>
+152:            <button class="nav-item" data-route="queue-center" data-page="queue-center" type="button">Queue Center</button>
+153:            <button class="nav-item" data-route="job-monitor" data-page="job-monitor" type="button">Job Monitor</button>
+154:            <button class="nav-item" data-route="notification-center" data-page="notification-center" type="button">Notifications</button>
+159:            <button class="nav-item" data-route="governance" data-page="governance" type="button">Governance</button>
+160:            <button class="nav-item" data-route="settings" data-page="settings" type="button">Settings</button>
+276:  <script>
+369:  <script src="./runtime/command-runtime.js?v=20260510-command-runtime-classic-2"></script>
+370:  <script type="module" src="./app.js?v=20260510-interaction-rerender-fix-2"></script>
+
+### page files
+public/control-center/pages/ads-manager.js
+public/control-center/pages/ai-command.js
+public/control-center/pages/ai-command/tool-dock.js
+public/control-center/pages/business/dashboard.js
+public/control-center/pages/campaign-studio.js
+public/control-center/pages/content-studio-workspace.js
+public/control-center/pages/customer-center.js
+public/control-center/pages/governance.js
+public/control-center/pages/governance/dashboard.js
+public/control-center/pages/home.js
+public/control-center/pages/home/render-sections.js
+public/control-center/pages/insights.js
+public/control-center/pages/integrations.js
+public/control-center/pages/integrations/builders.js
+public/control-center/pages/integrations/cards.js
+public/control-center/pages/integrations/diagnostics.js
+public/control-center/pages/integrations/drawer.js
+public/control-center/pages/integrations/render.js
+public/control-center/pages/integrations/utils.js
+public/control-center/pages/library.js
+public/control-center/pages/library/action-panel.js
+public/control-center/pages/library/ai-panel.js
+public/control-center/pages/library/command-router.js
+public/control-center/pages/library/listener-lifecycle.js
+public/control-center/pages/library/projection-adapter.js
+public/control-center/pages/library/session-store.js
+public/control-center/pages/media-studio-workspace.js
+public/control-center/pages/operations-centers.js
+public/control-center/pages/publishing.js
+public/control-center/pages/publishing/publishing-payloads.js
+public/control-center/pages/research.js
+public/control-center/pages/settings.js
+public/control-center/pages/setup.js
+public/control-center/pages/workflows.js
