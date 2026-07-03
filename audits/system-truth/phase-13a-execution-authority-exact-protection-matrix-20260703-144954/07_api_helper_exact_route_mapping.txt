@@ -1,0 +1,486 @@
+### api.js full route helper scan
+303:async function readResponseText(response, requestMeta = {}) {
+461:async function parseJsonTextSafely(rawText, response, requestMeta = {}, bodyLength = 0) {
+474:  // Give the browser one frame before heavy synchronous JSON parsing.
+516:async function parseJson(response, fallbackMessage = "Request failed", requestMeta = {}) {
+620:async function fetchWithTimeout(path, init = {}, timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS) {
+705:async function getJson(path, fallbackMessage, timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS, requestOptions = {}) {
+723:async function sendRawJson(path, method, body, fallbackMessage, timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS) {
+763:async function sendJson(path, method, body, fallbackMessage, timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS) {
+781:async function sendForm(path, formData, fallbackMessage, timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS) {
+791:    method: "POST",
+806:export async function fetchProtectedMediaBlob(path, timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS) {
+891:    connectors: payload?.connectors || null,
+913:      scheduled_jobs: [],
+935:  if (section === "connectors") {
+1022:export async function createMediaManagerProject(payload = {}) {
+1024:    method: "POST",
+1047:export async function fetchProjects() {
+1071:export async function fetchAllCoreProjectData(projectName) {
+1141:          warning: projectExists ? "Project details are still syncing." : "Project not found in projects index."
+1149:          warning: "Project details are still syncing.",
+1181:        "connectors",
+1201:    connectors: requiredDashboardPayload?.connectors || createOptionalFallback(safeProjectName, "connectors"),
+1221:      section: "connectors",
+1222:      load: (dashboardPromise) => dashboardPromise.then((payload) => extractDashboardSection(payload, "connectors"))
+1243:    connectors: requiredDashboardPayload?.connectors || createOptionalFallback(safeProjectName, "connectors"),
+1309:  normalized.connectors = normalized.connectors || basePayload.connectors || {};
+1328:export async function fetchAssetCatalog() {
+1335:export async function fetchProjectInsights(projectName) {
+1346:export async function fetchProjectLearning(projectName) {
+1357:export async function fetchProjectOperations(projectName) {
+1370:export async function applyProjectBusinessTemplate(projectName, projectType) {
+1375:    method: "POST",
+1400:export async function saveProjectSetup(projectName, payload = {}) {
+1407:    "POST",
+1413:export async function refreshProjectLibrary(projectName) {
+1420:    "POST",
+1426:export async function updateProjectAssetStatus(projectName, assetId, status, note = "") {
+1437:    "POST",
+1446:export async function renameProjectAsset(projectName, assetId, name) {
+1462:    "POST",
+1468:export async function setProjectAssetSourceOfTruth(projectName, assetId, sourceOfTruth) {
+1479:    "POST",
+1485:export async function archiveProjectAsset(projectName, assetId, note = "") {
+1496:    "POST",
+1502:export async function deleteProjectAsset(projectName, assetId, note = "") {
+1513:    "POST",
+1519:export async function reclassifyProjectAsset(projectName, assetId, assetType, note = "") {
+1535:    "PATCH",
+1544:export async function runProjectWorkflow(projectName, workflowId, payload = {}) {
+1549:  if (!workflowId) {
+1550:    throw new Error("Missing workflow id");
+1554:    `/media-manager/project/${encodeURIComponent(projectName)}/workflows/${encodeURIComponent(workflowId)}/run`,
+1555:    "POST",
+1557:    "Failed to record workflow run"
+1561:export async function runProjectAiWorkflow(projectName, workflowId, payload = {}) {
+1566:  if (!workflowId) {
+1567:    throw new Error("Missing workflow id");
+1571:    `/media-manager/project/${encodeURIComponent(projectName)}/ai/workflows/${encodeURIComponent(workflowId)}/run`,
+1572:    "POST",
+1574:    "Failed to execute AI workflow"
+1578:export async function executeProjectAiCommand(projectName, payload = {}) {
+1585:    "POST",
+1591:export async function executeProjectAiChat(projectName, payload = {}) {
+1598:    "POST",
+1607:export async function generateAiCommandCampaignPreview(projectName, payload = {}) {
+1611:    "POST",
+1618:export async function executeProjectAiGuidance(projectName, payload = {}) {
+1625:    "POST",
+1632:export async function createProjectTask(projectName, payload = {}) {
+1638:    `/media-manager/project/${encodeURIComponent(projectName)}/tasks`,
+1639:    "POST",
+1641:    "Failed to create project task"
+1645:export async function listProjectTasks(projectName, limit) {
+1652:    `/media-manager/project/${encodeURIComponent(projectName)}/tasks${suffix}`,
+1653:    "Failed to load project tasks"
+1657:export async function createProjectApproval(projectName, payload = {}) {
+1663:    `/media-manager/project/${encodeURIComponent(projectName)}/approvals`,
+1664:    "POST",
+1666:    "Failed to create approval request"
+1670:export async function listProjectApprovals(projectName, limit) {
+1677:    `/media-manager/project/${encodeURIComponent(projectName)}/approvals${suffix}`,
+1678:    "Failed to load approvals"
+1682:export async function decideProjectApproval(projectName, approvalId, payload = {}) {
+1687:  if (!approvalId) {
+1688:    throw new Error("Missing approval id");
+1692:    `/media-manager/project/${encodeURIComponent(projectName)}/approvals/${encodeURIComponent(approvalId)}/decision`,
+1693:    "POST",
+1695:    "Failed to update approval"
+1699:export async function fetchProjectGovernance(projectName, params = {}) {
+1718:export async function fetchProjectGovernancePolicy(projectName) {
+1729:export async function updateProjectGovernancePolicy(projectName, payload = {}) {
+1736:    "POST",
+1742:export async function saveProjectConnectorSource(projectName, sourceType, sourceValue) {
+1757:    "POST",
+1762:    "Failed to save project connector"
+1766:export async function removeProjectConnectorSource(projectName, sourceType) {
+1777:    "DELETE",
+1779:    "Failed to remove project connector"
+1783:export async function fetchProjectIntegrationControlCenter(projectName) {
+1789:    `/media-manager/project/${encodeURIComponent(projectName)}/integrations/control-center`,
+1790:    "Failed to load integration control center"
+1794:export async function connectProjectIntegration(projectName, integrationId, payload = {}) {
+1799:  if (!integrationId) {
+1800:    throw new Error("Missing integration id");
+1804:    `/media-manager/project/${encodeURIComponent(projectName)}/integrations/${encodeURIComponent(integrationId)}/connect`,
+1805:    "POST",
+1807:    "Failed to connect integration"
+1811:export async function reconnectProjectIntegration(projectName, integrationId, payload = {}) {
+1816:  if (!integrationId) {
+1817:    throw new Error("Missing integration id");
+1821:    `/media-manager/project/${encodeURIComponent(projectName)}/integrations/${encodeURIComponent(integrationId)}/reconnect`,
+1822:    "POST",
+1824:    "Failed to reconnect integration"
+1828:export async function testProjectIntegration(projectName, integrationId, payload = {}) {
+1833:  if (!integrationId) {
+1834:    throw new Error("Missing integration id");
+1838:    `/media-manager/project/${encodeURIComponent(projectName)}/integrations/${encodeURIComponent(integrationId)}/test`,
+1839:    "POST",
+1841:    "Failed to test integration"
+1845:export async function syncProjectIntegration(projectName, integrationId, payload = {}) {
+1850:  if (!integrationId) {
+1851:    throw new Error("Missing integration id");
+1855:    `/media-manager/project/${encodeURIComponent(projectName)}/integrations/${encodeURIComponent(integrationId)}/sync`,
+1856:    "POST",
+1858:    "Failed to sync integration"
+1862:export async function importProjectIntegrationHistory(projectName, integrationId, payload = {}) {
+1867:  if (!integrationId) {
+1868:    throw new Error("Missing integration id");
+1872:    `/media-manager/project/${encodeURIComponent(projectName)}/integrations/${encodeURIComponent(integrationId)}/import-history`,
+1873:    "POST",
+1875:    "Failed to import integration history"
+1879:export async function disconnectProjectIntegration(projectName, integrationId, payload = {}) {
+1884:  if (!integrationId) {
+1885:    throw new Error("Missing integration id");
+1889:    `/media-manager/project/${encodeURIComponent(projectName)}/integrations/${encodeURIComponent(integrationId)}/disconnect`,
+1890:    "POST",
+1892:    "Failed to disconnect integration"
+1896:export async function savePublishingSchedule(projectName, payload = {}) {
+1902:    `/media-manager/project/${encodeURIComponent(projectName)}/publishing/schedule`,
+1903:    "POST",
+1905:    "Failed to save publishing schedule"
+1909:export async function reschedulePublishingItem(projectName, jobId, payload = {}) {
+1919:    `/media-manager/project/${encodeURIComponent(projectName)}/publishing/${encodeURIComponent(jobId)}/reschedule`,
+1920:    "POST",
+1922:    "Failed to reschedule publishing item"
+1926:export async function approvePublishingItem(projectName, jobId, payload = {}) {
+1936:    `/media-manager/project/${encodeURIComponent(projectName)}/publishing/${encodeURIComponent(jobId)}/ready`,
+1937:    "POST",
+1939:    "Failed to approve publishing item"
+1943:export async function publishPublishingItem(projectName, jobId, payload = {}) {
+1953:    `/media-manager/project/${encodeURIComponent(projectName)}/publishing/${encodeURIComponent(jobId)}/publish`,
+1954:    "POST",
+1960:export async function failPublishingItem(projectName, jobId, payload = {}) {
+1970:    `/media-manager/project/${encodeURIComponent(projectName)}/publishing/${encodeURIComponent(jobId)}/fail`,
+1971:    "POST",
+1973:    "Failed to mark publishing item as failed"
+1977:export async function fetchProjectOperationsSchema(projectName) {
+1988:export async function fetchProjectTaskCenter(projectName) {
+1994:    `/media-manager/project/${encodeURIComponent(projectName)}/task-center`,
+1995:    "Failed to load task center"
+1999:export async function fetchProjectQueueCenter(projectName) {
+2010:export async function fetchProjectJobMonitor(projectName) {
+2021:export async function fetchProjectNotificationCenter(projectName) {
+2032:export async function fetchProjectTeam(projectName) {
+2043:export async function saveProjectTeam(projectName, payload = {}) {
+2050:    "POST",
+2056:export async function listProjectCampaigns(projectName, limit) {
+2069:export async function saveProjectCampaign(projectName, payload = {}) {
+2077:      "PATCH",
+2085:    "POST",
+2091:export async function listProjectContentItems(projectName, params = {}) {
+2114:export async function saveProjectContentItem(projectName, payload = {}) {
+2122:      "PATCH",
+2130:    "POST",
+2136:export async function listProjectMediaJobs(projectName, params = {}) {
+2163:export async function saveProjectMediaJob(projectName, payload = {}) {
+2171:      "PATCH",
+2179:    "POST",
+2185:export async function improveMediaPrompt(payload = {}) {
+2188:    "POST",
+2194:export async function brandCheckMedia(payload = {}) {
+2197:    "POST",
+2203:export async function generateMediaImage(payload = {}) {
+2206:    "POST",
+2212:export async function generateMediaVideoBrief(payload = {}) {
+2215:    "POST",
+2221:export async function generateMediaVoiceScript(payload = {}) {
+2224:    "POST",
+2230:export async function generateMediaCampaignPack(payload = {}) {
+2233:    "POST",
+2239:export async function listProjectHandoffs(projectName, params = {}) {
+2265:    `/media-manager/project/${encodeURIComponent(projectName)}/handoffs${suffix}`,
+2266:    "Failed to load handoffs"
+2270:export async function createProjectHandoff(projectName, payload = {}) {
+2276:    `/media-manager/project/${encodeURIComponent(projectName)}/handoffs`,
+2277:    "POST",
+2279:    "Failed to create handoff"
+2283:export async function consumeProjectHandoff(projectName, handoffId, payload = {}) {
+2288:  if (!handoffId) {
+2289:    throw new Error("Missing handoff id");
+2293:    `/media-manager/project/${encodeURIComponent(projectName)}/handoffs/${encodeURIComponent(handoffId)}/consume`,
+2294:    "POST",
+2296:    "Failed to consume handoff"
+2300:export async function listProjectEvents(projectName, limit) {
+2313:export async function markProjectNotification(projectName, notificationId, payload = {}) {
+2324:    "PATCH",
+2330:export async function uploadProjectAsset(projectName, assetType, file) {
+2361:export async function fetchCustomerOperationsReadiness(projectName) {
+2362:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/readiness`);
+2365:export async function fetchCustomerOperationsInbox(projectName) {
+2366:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/inbox`);
+2369:export async function fetchCustomerConversations(projectName) {
+2370:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/conversations`);
+2373:export async function fetchCustomerConversationDetail(projectName, conversationId) {
+2374:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/conversations/${encodeURIComponent(conversationId)}`);
+2377:export async function fetchCustomerConversationMessages(projectName, conversationId) {
+2378:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/conversations/${encodeURIComponent(conversationId)}/messages`);
+2381:export async function fetchCustomerProfilePreview(projectName, customerId) {
+2382:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/customers/${encodeURIComponent(customerId)}`);
+2385:export async function fetchCustomerTickets(projectName) {
+2386:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/tickets`);
+2389:export async function fetchCustomerChannels(projectName) {
+2390:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/channels`);
+
+### api.js exact beginning
+// public/control-center/api.js
+
+import {
+  CONTROL_ACCESS_KEY_STORAGE_KEY,
+  CONTROL_ACCESS_KEY_LEGACY_STORAGE_KEYS
+} from "./constants.js";
+
+let API_BASE_URL = "";
+const DEFAULT_REQUEST_TIMEOUT_MS = 20000;
+const AI_GUIDANCE_REQUEST_TIMEOUT_MS = 90000;
+const DEFAULT_RESPONSE_TEXT_TIMEOUT_MS = 20000;
+const DEFAULT_PARSE_TIMEOUT_MS = 2000;
+const REQUIRED_PROJECT_RESPONSE_TEXT_TIMEOUT_MS = 3000;
+
+export class AccessKeyError extends Error {
+  constructor(message, diagnostics = {}) {
+    super(String(message || "Project data requires a valid access key."));
+    this.name = "AccessKeyError";
+    this.code = "ACCESS_KEY_ERROR";
+    this.status = diagnostics?.status || null;
+    this.endpoint = String(diagnostics?.endpoint || "");
+    this.payload = diagnostics?.payload ?? null;
+    this.diagnostics = {
+      keyPresent: Boolean(diagnostics?.keyPresent),
+      keySource: String(diagnostics?.keySource || "none"),
+      authHeaderPresent: Boolean(diagnostics?.authHeaderPresent),
+      endpoint: this.endpoint,
+      status: this.status,
+      contentType: String(diagnostics?.contentType || "")
+    };
+  }
+}
+
+export class ProjectPayloadError extends Error {
+  constructor(message, diagnostics = {}) {
+    super(String(message || "Project response was received but could not be processed."));
+    this.name = "ProjectPayloadError";
+    this.code = "PROJECT_PAYLOAD_ERROR";
+    this.status = diagnostics?.status || null;
+    this.endpoint = String(diagnostics?.endpoint || "");
+    this.payload = diagnostics?.payload ?? null;
+    this.diagnostics = {
+      keyPresent: Boolean(diagnostics?.keyPresent),
+      keySource: String(diagnostics?.keySource || "none"),
+      authHeaderPresent: Boolean(diagnostics?.authHeaderPresent),
+      endpoint: this.endpoint,
+      status: this.status,
+      contentType: String(diagnostics?.contentType || ""),
+      bodyLength: Number(diagnostics?.bodyLength || 0),
+      parseStage: String(diagnostics?.parseStage || ""),
+      responseSnippet: String(diagnostics?.responseSnippet || "")
+    };
+  }
+}
+
+export function setApiBaseUrl(value = "") {
+  API_BASE_URL = value || "";
+}
+
+function buildUrl(path = "") {
+  return `${API_BASE_URL}${path}`;
+}
+
+function persistCanonicalControlKey(key) {
+  const normalized = String(key || "").trim();
+  if (!normalized) return;
+
+  try {
+    if (typeof localStorage !== "undefined") {
+      localStorage.setItem(CONTROL_ACCESS_KEY_STORAGE_KEY, normalized);
+    }
+  } catch (_) {
+    // Ignore storage access errors in restricted contexts
+  }
+}
+
+function readControlKeyMeta() {
+  const empty = { key: "", source: "none" };
+
+  try {
+    if (typeof window !== "undefined") {
+      const runtimeKeyCandidates = [
+        { source: "window.__MH_CONTROL_CENTER_READ_KEY__", value: window.__MH_CONTROL_CENTER_READ_KEY__ },
+        { source: "window.__MH_CONTROL_CENTER_WRITE_KEY__", value: window.__MH_CONTROL_CENTER_WRITE_KEY__ },
+        { source: "window.__MH_CONTROL_WRITE_KEY__", value: window.__MH_CONTROL_WRITE_KEY__ },
+        { source: "window.__MH_CONTROL_CENTER_ACCESS_KEY__", value: window.__MH_CONTROL_CENTER_ACCESS_KEY__ },
+        { source: "window.__MH_CONTROL_ACCESS_KEY__", value: window.__MH_CONTROL_ACCESS_KEY__ },
+        { source: "window.__MH_ACCESS_KEY__", value: window.__MH_ACCESS_KEY__ }
+      ];
+
+      for (const candidate of runtimeKeyCandidates) {
+        const normalized = String(candidate.value || "").trim();
+        if (normalized) {
+          persistCanonicalControlKey(normalized);
+          return { key: normalized, source: candidate.source };
+        }
+      }
+    }
+
+    if (typeof localStorage !== "undefined") {
+      const canonical = String(localStorage.getItem(CONTROL_ACCESS_KEY_STORAGE_KEY) || "").trim();
+      if (canonical) {
+        return { key: canonical, source: `localStorage:${CONTROL_ACCESS_KEY_STORAGE_KEY}` };
+      }
+
+      for (const legacyKey of CONTROL_ACCESS_KEY_LEGACY_STORAGE_KEYS) {
+        const legacyValue = String(localStorage.getItem(legacyKey) || "").trim();
+        if (legacyValue) {
+          persistCanonicalControlKey(legacyValue);
+          return { key: legacyValue, source: `localStorage:${legacyKey}` };
+        }
+      }
+    }
+  } catch (_) {
+    // Ignore storage access errors in restricted contexts
+  }
+
+  return empty;
+}
+
+export function getControlCenterAccessKeyMeta() {
+  const keyMeta = readControlKeyMeta();
+  return {
+    key: String(keyMeta?.key || ""),
+    source: String(keyMeta?.source || "none")
+  };
+}
+
+function isMissingReadKeyErrorMessage(message) {
+  return /missing\s+read\s+key/i.test(String(message || ""));
+}
+
+function isAccessKeyRelatedMessage(message) {
+  const normalized = String(message || "").toLowerCase();
+  if (!normalized) {
+    return false;
+  }
+
+  return /missing\s+(?:protected\s+write\s+key|read\s+key|control\s+center\s+access\s+key)/i.test(normalized)
+    || /invalid\s+(?:protected\s+write\s+key|read\s+key|access\s+key)/i.test(normalized)
+    || /access\s+key/i.test(normalized)
+    || /write\s+key/i.test(normalized)
+    || /read\s+key/i.test(normalized);
+}
+
+export function isAccessKeyFailure(error) {
+  if (!error) {
+    return false;
+  }
+
+  if (error instanceof AccessKeyError) {
+    return true;
+  }
+
+  const status = Number(error?.status ?? error?.diagnostics?.status ?? error?.payload?.status ?? NaN);
+  const message = String(
+    error?.message
+      || error?.payload?.error
+      || error?.payload?.message
+      || ""
+  );
+
+  if ((status === 401 || status === 403) && isAccessKeyRelatedMessage(message)) {
+    return true;
+  }
+
+  return isAccessKeyRelatedMessage(message);
+}
+
+function isTopLevelErrorPayload(payload) {
+  return Boolean(
+    payload &&
+    typeof payload === "object" &&
+    !Array.isArray(payload) &&
+    typeof payload.error === "string" &&
+    payload.error.trim()
+  );
+}
+
+function buildResponseDiagnostics(response, requestMeta = {}, payload = null) {
+  const endpoint = String(response?.url || requestMeta?.endpoint || "");
+  const status = Number.isFinite(response?.status) ? Number(response.status) : null;
+  const contentType = String(response?.headers?.get?.("content-type") || "");
+  const accessKeyBypass = String(response?.headers?.get?.("x-mh-control-key-bypass") || "")
+    .trim()
+    .toLowerCase() === "temporary";
+
+  return {
+    keyPresent: Boolean(requestMeta?.keyPresent),
+    keySource: String(requestMeta?.keySource || "none"),
+    authHeaderPresent: Boolean(requestMeta?.authHeaderPresent),
+    accessKeyBypass,
+    endpoint,
+    status,
+    contentType,
+    payload,
+    bodyLength: Number(requestMeta?.bodyLength || 0),
+    parseStage: String(requestMeta?.parseStage || "")
+  };
+}
+
+export function isDebugStartupMode() {
+  if (typeof window === "undefined") {
+    return false;
+  }
+
+  try {
+    return new URLSearchParams(window.location.search).get("debugStartup") === "1";
+  } catch (_) {
+    return false;
+  }
+}
+
+function shouldEmitApiRuntimeTrace(stage) {
+  const normalized = String(stage || "");
+
+  // Keep watchdog-critical and error traces in normal mode.
+  // Verbose request traces are emitted only when ?debugStartup=1.
+  if (
+    normalized === "response.text.start" ||
+    normalized === "response.text.done" ||
+    normalized === "response.text.error" ||
+    normalized === "api.response.text.start" ||
+    normalized === "api.response.text.done" ||
+    normalized === "api.response.text.timeout" ||
+    normalized === "api.response.parse.start" ||
+    normalized === "api.response.parse.done" ||
+    normalized === "api.response.parse.error" ||
+    normalized === "api.response.json.fallback.done" ||
+    normalized === "api.response.json.fallback.error" ||
+    normalized === "api.response.json.fallback.timeout" ||
+    normalized === "request.timeout" ||
+    normalized === "request.error"
+  ) {
+    return true;
+  }
+
+  return isDebugStartupMode();
+}
+
+function emitApiRuntimeTrace(stage, details = {}) {
+  if (!shouldEmitApiRuntimeTrace(stage)) {
+    return;
+  }
+
+  if (typeof window === "undefined" || typeof window.dispatchEvent !== "function") {
+    return;
+  }
+
+  try {
+    window.dispatchEvent(new CustomEvent("mh:control-center-api-trace", {
+      detail: {
+        at: new Date().toISOString(),
+        stage: String(stage || "api.trace"),
+        endpoint: String(details.endpoint || ""),
+        method: String(details.method || "GET"),
+        status: Number.isFinite(details.status) ? Number(details.status) : null,
+        contentType: String(details.contentType || ""),
+        message: String(details.message || ""),
+        bodyLength: Number(details.bodyLength || 0),

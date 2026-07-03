@@ -1,0 +1,782 @@
+### Native media exact window
+  '/public/media-manager/project/:project/customer-operations/escalations',
+  handleCustomerOperationsEscalations
+);
+
+
+app.get('/media-manager/project/:project/native-media/providers', handleGetNativeMediaProviders);
+app.get('/public/media-manager/project/:project/native-media/providers', handleGetNativeMediaProviders);
+app.get('/media-manager/project/:project/native-media/providers/readiness', handleGetNativeMediaProviderReadiness);
+app.get('/public/media-manager/project/:project/native-media/providers/readiness', handleGetNativeMediaProviderReadiness);
+
+async function handleNativeMediaGenerate(req, res) {
+  registerDefaultModels();
+
+  if (!enforceGovernanceMutationGate(req, res, {
+    projectName: req.params.project,
+    action: 'native_media_generate',
+    entityType: 'media_job',
+    entityId: String(req.body?.media_job_id || req.body?.id || 'native_media_generate').trim(),
+    requestedAction: 'generate'
+  })) {
+    return;
+  }
+
+  try {
+    const orchestrator = createJobDispatchOrchestrator();
+
+    const result = await orchestrator.dispatch({
+      media_type: req.body?.media_type || req.body?.type || 'image',
+      provider: req.body?.provider || DEFAULT_NATIVE_MEDIA_PROVIDER,
+      project: req.params.project,
+      platform: req.body?.platform || '',
+      prompt: req.body?.prompt || '',
+      priority: req.body?.priority || 'normal'
+    });
+
+    return res.json({
+      success: true,
+      project: req.params.project,
+      runtime: 'mh-os-native-media-runtime',
+      result
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      error: 'native_media_generation_failed',
+      message: error.message
+    });
+  }
+}
+
+app.post('/media-manager/project/:project/native-media/generate', handleNativeMediaGenerate);
+
+
+
+app.get('/public/media-manager/project/:project/integrations/control-center', handleGetProjectIntegrationControlCenter);
+
+
+### Integration exact window
+app.post('/media-manager/project/:project/native-media/generate', handleNativeMediaGenerate);
+
+
+
+app.get('/public/media-manager/project/:project/integrations/control-center', handleGetProjectIntegrationControlCenter);
+
+app.post('/media-manager/project/:project/integrations/:integrationId/connect', async (req, res) => {
+  await handleConnectProjectIntegration(req, res, {
+    reconnect: false
+  });
+});
+
+app.post('/public/media-manager/project/:project/integrations/:integrationId/connect', async (req, res) => {
+  await handleConnectProjectIntegration(req, res, {
+    reconnect: false
+  });
+});
+
+app.post('/media-manager/project/:project/integrations/:integrationId', async (req, res) => {
+  await handleConnectProjectIntegration(req, res, {
+    reconnect: false
+  });
+});
+
+app.post('/public/media-manager/project/:project/integrations/:integrationId', async (req, res) => {
+  await handleConnectProjectIntegration(req, res, {
+    reconnect: false
+  });
+});
+
+app.post('/media-manager/project/:project/integrations/:integrationId/reconnect', async (req, res) => {
+  await handleConnectProjectIntegration(req, res, {
+    reconnect: true
+  });
+});
+
+app.post('/public/media-manager/project/:project/integrations/:integrationId/reconnect', async (req, res) => {
+  await handleConnectProjectIntegration(req, res, {
+    reconnect: true
+  });
+});
+
+app.post('/media-manager/project/:project/integrations/:integrationId/test', async (req, res) => {
+  await handleProjectIntegrationAction(req, res, 'test');
+});
+
+app.post('/public/media-manager/project/:project/integrations/:integrationId/test', async (req, res) => {
+  await handleProjectIntegrationAction(req, res, 'test');
+});
+
+app.post('/media-manager/project/:project/integrations/:integrationId/sync', async (req, res) => {
+  await handleProjectIntegrationAction(req, res, 'sync');
+});
+
+app.post('/public/media-manager/project/:project/integrations/:integrationId/sync', async (req, res) => {
+  await handleProjectIntegrationAction(req, res, 'sync');
+});
+
+app.post('/media-manager/project/:project/integrations/:integrationId/import-history', async (req, res) => {
+  await handleProjectIntegrationAction(req, res, 'import-history');
+});
+
+app.post('/public/media-manager/project/:project/integrations/:integrationId/import-history', async (req, res) => {
+  await handleProjectIntegrationAction(req, res, 'import-history');
+});
+
+app.post('/media-manager/project/:project/integrations/:integrationId/disconnect', async (req, res) => {
+  await handleProjectIntegrationAction(req, res, 'disconnect');
+});
+
+app.post('/public/media-manager/project/:project/integrations/:integrationId/disconnect', async (req, res) => {
+  await handleProjectIntegrationAction(req, res, 'disconnect');
+});
+
+// TODO(phase4a): Keep `/public/media-manager/...` write aliases for active frontend compatibility.
+// They remain protected by the same centralized write-key middleware as `/media-manager/...`.
+
+### Publishing exact window
+app.post('/public/media-manager/project/:project/integrations/:integrationId/disconnect', async (req, res) => {
+  await handleProjectIntegrationAction(req, res, 'disconnect');
+});
+
+// TODO(phase4a): Keep `/public/media-manager/...` write aliases for active frontend compatibility.
+// They remain protected by the same centralized write-key middleware as `/media-manager/...`.
+app.post('/media-manager/project/:project/publishing/schedule', (req, res) => {
+  try {
+    if (!enforceGovernanceMutationGate(req, res, {
+      projectName: req.params.project,
+      action: 'publishing_schedule',
+      entityType: 'publishing_job',
+      entityId: 'schedule',
+      requestedAction: 'schedule'
+    })) {
+      return;
+    }
+
+    assertPublishingMutationAllowed(req.params.project, 'schedule', {
+      status: req.body?.status
+    });
+    const result = upsertScheduledJob(req.params.project, {
+      title: req.body?.title,
+      wave_name: req.body?.wave_name,
+      channel: req.body?.channel,
+      scheduled_for: req.body?.scheduled_for,
+      status: req.body?.status,
+      mode: req.body?.mode,
+      offer: req.body?.offer,
+      notes: req.body?.notes,
+      preview: req.body?.preview
+    }, {
+      createIfMissing: true
+    });
+
+    return res.json({
+      job: result
+    });
+  } catch (error) {
+    logCriticalFailure('publishing_schedule', req, error, {
+      project: req.params.project
+    });
+    return res.status(error.statusCode || 400).json({
+      error: error.message || 'Failed to save publishing schedule',
+      details: error.details || undefined
+    });
+  }
+});
+
+app.post('/public/media-manager/project/:project/publishing/schedule', (req, res) => {
+  try {
+    if (!enforceGovernanceMutationGate(req, res, {
+      projectName: req.params.project,
+      action: 'publishing_schedule',
+      entityType: 'publishing_job',
+      entityId: 'schedule',
+      requestedAction: 'schedule'
+    })) {
+      return;
+    }
+
+    assertPublishingMutationAllowed(req.params.project, 'schedule', {
+      status: req.body?.status
+    });
+    const result = upsertScheduledJob(req.params.project, {
+      title: req.body?.title,
+      wave_name: req.body?.wave_name,
+      channel: req.body?.channel,
+      scheduled_for: req.body?.scheduled_for,
+      status: req.body?.status,
+      mode: req.body?.mode,
+      offer: req.body?.offer,
+      notes: req.body?.notes,
+      preview: req.body?.preview
+    }, {
+      createIfMissing: true
+    });
+
+    return res.json({
+      job: result
+    });
+  } catch (error) {
+    logCriticalFailure('publishing_schedule', req, error, {
+      project: req.params.project
+    });
+    return res.status(error.statusCode || 400).json({
+      error: error.message || 'Failed to save publishing schedule',
+      details: error.details || undefined
+    });
+  }
+});
+
+app.post('/media-manager/project/:project/publishing/:jobId/reschedule', (req, res) => {
+  try {
+    if (!enforceGovernanceMutationGate(req, res, {
+      projectName: req.params.project,
+      action: 'publishing_reschedule',
+      entityType: 'publishing_job',
+      entityId: req.params.jobId,
+      requestedAction: 'reschedule'
+    })) {
+      return;
+    }
+
+    assertPublishingMutationAllowed(req.params.project, 'reschedule', {
+      jobId: req.params.jobId,
+      status: req.body?.status || 'scheduled'
+    });
+    const result = updateScheduledJobRecord(req.params.project, req.params.jobId, {
+      title: req.body?.title,
+      wave_name: req.body?.wave_name,
+      channel: req.body?.channel,
+      scheduled_for: req.body?.scheduled_for,
+      status: req.body?.status || 'scheduled',
+      mode: req.body?.mode,
+      offer: req.body?.offer,
+      notes: req.body?.notes,
+      preview: req.body?.preview
+    });
+
+    return res.json({
+      job: result
+    });
+  } catch (error) {
+    return res.status(error.statusCode || 400).json({
+      error: error.message || 'Failed to reschedule publishing item',
+      details: error.details || undefined
+    });
+  }
+});
+
+app.post('/public/media-manager/project/:project/publishing/:jobId/reschedule', (req, res) => {
+  try {
+    if (!enforceGovernanceMutationGate(req, res, {
+      projectName: req.params.project,
+      action: 'publishing_reschedule',
+      entityType: 'publishing_job',
+      entityId: req.params.jobId,
+      requestedAction: 'reschedule'
+    })) {
+      return;
+    }
+
+    assertPublishingMutationAllowed(req.params.project, 'reschedule', {
+      jobId: req.params.jobId,
+      status: req.body?.status || 'scheduled'
+    });
+    const result = updateScheduledJobRecord(req.params.project, req.params.jobId, {
+      title: req.body?.title,
+      wave_name: req.body?.wave_name,
+      channel: req.body?.channel,
+      scheduled_for: req.body?.scheduled_for,
+      status: req.body?.status || 'scheduled',
+      mode: req.body?.mode,
+      offer: req.body?.offer,
+      notes: req.body?.notes,
+      preview: req.body?.preview
+    });
+
+    return res.json({
+      job: result
+    });
+  } catch (error) {
+    return res.status(error.statusCode || 400).json({
+      error: error.message || 'Failed to reschedule publishing item',
+      details: error.details || undefined
+    });
+  }
+});
+
+app.post('/media-manager/project/:project/publishing/:jobId/ready', (req, res) => {
+  try {
+    if (!enforceGovernanceMutationGate(req, res, {
+      projectName: req.params.project,
+      action: 'publishing_ready',
+      entityType: 'publishing_job',
+      entityId: req.params.jobId,
+      requestedAction: 'ready'
+    })) {
+      return;
+    }
+
+    assertPublishingMutationAllowed(req.params.project, 'ready', {
+      jobId: req.params.jobId,
+      status: 'ready'
+    });
+    const job = updateScheduledJobRecord(req.params.project, req.params.jobId, {
+      status: 'ready',
+      notes: req.body?.notes
+    });
+
+    return res.json({
+      job
+    });
+  } catch (error) {
+    return res.status(error.statusCode || 400).json({
+      error: error.message || 'Failed to approve publishing item',
+      details: error.details || undefined
+    });
+  }
+});
+
+app.post('/public/media-manager/project/:project/publishing/:jobId/ready', (req, res) => {
+  try {
+    if (!enforceGovernanceMutationGate(req, res, {
+      projectName: req.params.project,
+      action: 'publishing_ready',
+      entityType: 'publishing_job',
+      entityId: req.params.jobId,
+      requestedAction: 'ready'
+    })) {
+      return;
+    }
+
+    assertPublishingMutationAllowed(req.params.project, 'ready', {
+      jobId: req.params.jobId,
+      status: 'ready'
+    });
+    const job = updateScheduledJobRecord(req.params.project, req.params.jobId, {
+      status: 'ready',
+      notes: req.body?.notes
+    });
+
+    return res.json({
+      job
+    });
+  } catch (error) {
+    return res.status(error.statusCode || 400).json({
+      error: error.message || 'Failed to approve publishing item',
+      details: error.details || undefined
+    });
+
+### Nearby middleware / public alias comments
+8:  const omitKeys = new Set(['updated_at', 'statuses', 'required_sources', 'sources']);
+14:const axios = require('axios');
+15:const crypto = require('crypto');
+21:} = require('./lib/execution/scheduler-helpers');
+22:const { createSchedulerStorage } = require('./lib/execution/scheduler-storage');
+23:const { createExecutionJobBridge } = require('./lib/execution/execution-job-bridge');
+28:} = require('./lib/execution/performance-metrics');
+29:const { createPerformanceStorage } = require('./lib/execution/performance-storage');
+33:} = require('./lib/execution/recommendation-builders');
+34:const { createRecommendationRuntime } = require('./lib/execution/recommendation-runtime');
+35:const { createLearningPatterns } = require('./lib/execution/learning-patterns');
+36:const { createIntelligenceLoop } = require('./lib/execution/intelligence-loop');
+37:const { createSmartSuggestions } = require('./lib/execution/smart-suggestions');
+38:const { createEconomicCoreAnalytics } = require('../economic-core-analytics');
+39:const express = require('express');
+40:const { orchestrationGate } = require('../control-plane/core/orchestration-gate');
+41:const decisionModeResolver = require('../control-plane/core/decision-mode');
+46:} = require('../agent-registry/agent-api');
+47:const mhCortex = require('../mh-cortex');
+48:const { classifyPublicAliasAccess, buildPublicAliasHeaders } = require("./lib/security/public-alias-compatibility");
+52:} = require('./lib/security/runtime-security-enforcement');
+56:} = require('./lib/security/governance-mutation-gate');
+57:const fs = require('fs');
+58:const path = require('path');
+59:const multer = require('multer');
+60:const FormData = require('form-data');
+65:} = require('./lib/integrations/token-manager');
+66:const { UnifiedDataPathResolver } = require('./lib/data/unified-data-path-resolver');
+67:const { ExecutionArtifactWriterAdapter } = require('./lib/data/execution-artifact-writer-adapter');
+73:} = require('./lib/observability/logger');
+74:const { createInMemoryRateLimiter } = require('./lib/observability/rate-limit');
+75:const { executeAdapterAction } = require('./lib/integrations/adapter-manager');
+76:const { buildHealthState } = require('./lib/integrations/health-manager');
+80:} = require('./lib/integrations/provider-registry');
+84:} = require('./lib/insights/ingestion-service');
+87:} = require('./lib/media/provider-layer');
+92:} = require('./lib/security/project-isolation');
+131:} = require('./lib/ops/backbone');
+132:const backboneOps = require('./lib/ops/backbone');
+134:const { createAiOrchestrationService } = require('./lib/ops/ai-orchestrator');
+137:} = require('./lib/media/native/orchestrator/job-dispatch-orchestrator');
+141:} = require('./lib/customer-operations/customer-operations-runtime');
+145:} = require('./lib/media/native/models/default-models');
+150:} = require('./lib/media/native/providers/provider-model-catalog');
+153:} = require('./lib/media/native/providers/provider-readiness');
+156:} = require('./lib/media/native/capabilities/local-rendering-capabilities');
+158:const compression = require('compression');
+159:const helmet = require('helmet');
+160:const cors = require('cors');
+188:const customerCenterProjection = require('./lib/customer-operations/projections/customer-center-projection');
+245:    'x-mh-control-write-key',
+369:  return /^\/(?:public\/)?media-manager\//.test(requestPath)
+396:function requireProtectedControlWriteKey(req, res, next) {
+427:app.use(requireProtectedControlWriteKey);
+430:  /^\/(?:public\/)?media-manager\/projects\/?$/i,
+431:  /^\/(?:public\/)?media-manager\/asset-catalog\/?$/i,
+432:  /^\/(?:public\/)?media-manager\/project\//i,
+433:  /^\/(?:public\/)?media-manager\/storage\//i,
+458:function requireProtectedReadKey(req, res, next) {
+491:app.use(requireProtectedReadKey);
+977:  /^\/(?:public\/)?media-manager\/project\/([^/?#]+)/i,
+1135:      required: true
+1139:      required: true,
+1144:      required: true,
+1149:      required: true,
+1168:    required: integrationSecretRequired,
+1178:  if (checks.integration_secret_key.required && !checks.integration_secret_key.ok) {
+1182:  const ready = Object.values(checks).every((check) => !check.required || check.ok);
+1190:      required_key_env: CONTROL_WRITE_KEY_ENV,
+1193:    missing_required_env: missingRequiredEnv
+1624:function requireQueueProjectName(projectName) {
+1636:  return readEmailArtifactArray(requireQueueProjectName(projectName), EMAIL_ARTIFACT_TYPES.DRAFT_QUEUE, requestedIdentifier);
+1640:  return writeEmailArtifactArray(requireQueueProjectName(projectName), EMAIL_ARTIFACT_TYPES.DRAFT_QUEUE, queue);
+1644:  return readEmailArtifactArray(requireQueueProjectName(projectName), EMAIL_ARTIFACT_TYPES.MEDIA_QUEUE, requestedIdentifier);
+1648:  return writeEmailArtifactArray(requireQueueProjectName(projectName), EMAIL_ARTIFACT_TYPES.MEDIA_QUEUE, queue);
+1652:  return resolveProjectPath(EXECUTION_DIR, requireQueueProjectName(projectName)).projectRoot;
+3546:        white_background_required: true,
+3547:        product_fill_requirement: '>=85%',
+5109:    result.blocking_reasons.push('Logo source is required for generation');
+5873:function requireProjectContext(req, options = {}) {
+6151:    const registry = require('../agent-registry');
+6233:    approval_required: mode === 'approval_required',
+6240:        mode === 'approval_required'
+6364:      route: '/media-manager/project/:project/setup',
+6374:      route: '/media-manager/project/:project/setup',
+6498:  const requiredMap = {
+6508:  const requiredSources = Object.entries(requiredMap).reduce((acc, [key, candidates]) => {
+6544:    required_sources: requiredSources
+6670:    required_files: {
+6718:    required_folders: {
+6841:    required_assets: ['logo', 'brand_profile', 'hero_images', 'legal_info'],
+6842:    data_requirements: ['business_profile', 'target_audience', 'offers', 'contact_details'],
+6861:      required_assets: ['logo', 'product_photos', 'product_catalog', 'price_list', 'shipping_policy', 'legal_docs'],
+6862:      data_requirements: ['products', 'inventory', 'offers', 'shipping', 'payment_methods', 'marketplaces'],
+6874:      required_assets: ['artist_photos', 'logo_or_signature', 'press_kit', 'music_links', 'video_clips'],
+6875:      data_requirements: ['artist_profile', 'songs', 'albums', 'events', 'booking_info', 'press_bio'],
+6887:      required_assets: ['logo', 'salon_photos', 'service_menu', 'price_list', 'before_after_media'],
+6888:      data_requirements: ['services', 'staff', 'booking_info', 'location', 'offers', 'reviews'],
+6900:      required_assets: ['logo', 'property_photos', 'property_documents', 'location_media', 'agent_profile'],
+6901:      data_requirements: ['properties', 'locations', 'lead_capture', 'viewings', 'buyer_profiles', 'seller_profiles'],
+6913:      required_assets: ['logo', 'service_list', 'case_studies', 'testimonials'],
+6914:      data_requirements: ['services', 'pricing_model', 'service_area', 'booking_or_contact_flow'],
+6926:      required_assets: ['logo', 'menu', 'food_photos', 'location_photos', 'offers'],
+6927:      data_requirements: ['menu_items', 'opening_hours', 'location', 'reservation_or_ordering', 'delivery_options'],
+6939:      required_assets: ['logo', 'case_studies', 'services_deck', 'client_testimonials'],
+6940:      data_requirements: ['services', 'case_studies', 'target_segments', 'lead_magnets', 'sales_process'],
+6952:      required_assets: ['logo', 'location_photos', 'service_or_product_list', 'reviews'],
+6953:      data_requirements: ['opening_hours', 'location', 'offers', 'contact_details', 'reviews'],
+6994:    required_assets: businessTemplate.required_assets,
+6995:    data_requirements: businessTemplate.data_requirements,
+7293:  const requiredSourceEntries = sourceRegistry.required_sources && typeof sourceRegistry.required_sources === 'object'
+7294:    ? Object.values(sourceRegistry.required_sources)
+7296:  const sourceCompleteCount = requiredSourceEntries
+7299:  const sourceOfTruthCompleteness = requiredSourceEntries.length
+7300:    ? Math.round((sourceCompleteCount / requiredSourceEntries.length) * 100)
+7304:  const requiredAssetCount = Array.isArray(missingAssets.required_asset_types) ? missingAssets.required_asset_types.length : 0;
+7305:  const assetsCompleteness = requiredAssetCount
+7306:    ? Math.max(0, Math.round(((requiredAssetCount - assetBlockers) / requiredAssetCount) * 100))
+7345:    has_brand_profile: baselineValidation.required_files.brand_profile.exists,
+7346:    has_assets_registry: baselineValidation.required_files.assets_registry.exists,
+7347:    has_source_of_truth_registry: baselineValidation.required_files.source_of_truth_registry.exists,
+7348:    has_integrations_registry: baselineValidation.required_files.integrations_registry.exists,
+7349:    has_ai_commands: baselineValidation.required_files.ai_commands.exists,
+7350:    has_ai_artifacts: baselineValidation.required_files.ai_artifacts.exists,
+7351:    has_ai_recommendations: baselineValidation.required_files.ai_recommendations.exists,
+7352:    has_ai_memory: baselineValidation.required_files.ai_memory.exists,
+7353:    has_integration_control_center: baselineValidation.required_files.integrations.exists,
+7773:  const requiredFields = normalizeStringArray(record.required_fields);
+7775:  const missingRequired = requiredFields.filter(key => !fieldSnapshot[key]);
+7799:    (!record.requires_credentials || hasCredentials)
+7822:      healthSummary = 'Some connection data is saved, but required setup is still incomplete.';
+7833:    missing_required: missingRequired,
+7888:    required_fields: normalizeStringArray(record.required_fields),
+7898:    requires_credentials: Boolean(record.requires_credentials),
+7919:    required_fields: normalizedRecord.required_fields,
+7920:    missing_required: status.missing_required,
+7927:    requires_credentials: normalizedRecord.requires_credentials,
+8065:    required_fields: normalizeStringArray(payload.required_fields || existing.required_fields),
+8072:    requires_credentials:
+8073:      payload.requires_credentials == null
+8074:        ? Boolean(existing.requires_credentials || normalizeStringArray(payload.auth_fields).length)
+8075:        : Boolean(payload.requires_credentials),
+8134:          : statusFromError === 'reconnect_required'
+8146:            : statusFromError === 'reconnect_required'
+8193:    throw new Error(`Finish the required connection details before you ${actionLabel}.`);
+8275:          : normalizeTextValue(error.status) === 'reconnect_required'
+8311:  const required = getAssetTypeCatalog()
+8312:    .filter(item => item.required)
+8318:    .filter(item => item.required && item.status === 'Missing')
+8321:    .filter(item => item.required && ['Missing', 'Needs Review'].includes(item.status))
+8327:    required_asset_types: required,
+8342:      required: true,
+8358:      required: true,
+8374:      required: true,
+8390:      required: true,
+8406:      required: true,
+8422:      required: true,
+8438:      required: true,
+8454:      required: true,
+8470:      required: true,
+8486:      required: true,
+8502:      required: true,
+8518:      required: true,
+8534:      required: true,
+8540:        what_to_upload: 'Partner briefs, supplier docs, marketplace requirements, distributor notes, and collaboration agreements.',
+9062:    const blocker = item.required && ['Missing', 'Needs Review'].includes(status);
+9079:      required: item.required,
+9162:      required: item.required,
+9395:app.get('/media-manager/project/:project/storage/parity-readiness', (req, res) => {
+9406:app.get('/public/media-manager/project/:project/storage/parity-readiness', (req, res) => {
+9417:app.get('/media-manager/storage/parity-readiness', (req, res) => {
+9428:app.get('/public/media-manager/storage/parity-readiness', (req, res) => {
+9467:    const projectName = requireProjectContext(req);
+9483:    const projectName = requireProjectContext(req);
+9517:    projectName = requireProjectContext(req, { allowFallback: false });
+9540:      summary: 'Approval required before publishing package execution.'
+9605:    projectName = requireProjectContext(req, { allowFallback: false });
+9628:      summary: 'Approval required before email package execution.'
+9693:    projectName = requireProjectContext(req, { allowFallback: false });
+9716:      summary: 'Approval required before media generation from prompt.'
+9774:    projectName = requireProjectContext(req, { allowFallback: false });
+9797:      summary: 'Approval required before building an ad execution package.'
+9993:      review_required: true,
+10008:    const projectName = requireProjectContext(req);
+10077:      review_required: true,
+10192:      review_required: true,
+10496:    required_assets: businessTemplate.required_assets,
+10497:    data_requirements: businessTemplate.data_requirements,
+10522:          required_assets: updated.required_assets,
+10523:          data_requirements: updated.data_requirements,
+10642:app.post('/media-manager/project/:project/rename', express.json({ limit: '1mb' }), handleRenameMediaManagerProject);
+10644:app.post('/public/media-manager/project/:project/rename', express.json({ limit: '1mb' }), handleRenameMediaManagerProject);
+10646:app.post('/media-manager/project/:project/apply-template', express.json({ limit: '1mb' }), handleApplyBusinessTemplateToProject);
+10648:app.post('/public/media-manager/project/:project/apply-template', express.json({ limit: '1mb' }), handleApplyBusinessTemplateToProject);
+10650:app.post('/media-manager/projects', express.json({ limit: '1mb' }), handleCreateMediaManagerProject);
+10652:app.post('/public/media-manager/projects', express.json({ limit: '1mb' }), handleCreateMediaManagerProject);
+10654:app.get('/media-manager/projects', (req, res) => {
+10658:app.get('/public/media-manager/projects', (req, res) => {
+10662:app.get('/media-manager/asset-catalog', (req, res) => {
+10668:app.get('/public/media-manager/asset-catalog', (req, res) => {
+10674:app.get('/media-manager/project/:project/startup', (req, res) => {
+10684:app.get('/public/media-manager/project/:project/startup', (req, res) => {
+10694:app.get('/media-manager/project/:project', (req, res) => {
+10704:app.get('/public/media-manager/project/:project', (req, res) => {
+10841:app.post('/media-manager/project/:project/assets/:assetId/status', express.json({ limit: '1mb' }), (req, res) => {
+10895:app.post('/media-manager/project/:project/assets/:assetId/rename', express.json({ limit: '1mb' }), (req, res) => {
+10925:app.patch('/media-manager/project/:project/assets/:assetId/classification', express.json({ limit: '1mb' }), (req, res) => {
+10979:app.post('/media-manager/project/:project/assets/:assetId/source-of-truth', express.json({ limit: '1mb' }), (req, res) => {
+11004:app.post('/media-manager/project/:project/assets/:assetId/archive', express.json({ limit: '1mb' }), (req, res) => {
+11032:app.post('/media-manager/project/:project/assets/:assetId/delete', express.json({ limit: '1mb' }), (req, res) => {
+11063:app.delete('/media-manager/project/:project/assets/:assetId', express.json({ limit: '1mb' }), (req, res) => {
+11094:app.post('/media-manager/project/:project/library/refresh', (req, res) => {
+11104:app.post('/media-manager/project/:project/setup', (req, res) => {
+11129:      summary: 'Approval required before authority-impacting project setup changes.',
+11143:app.post('/public/media-manager/project/:project/setup', (req, res) => {
+11168:      summary: 'Approval required before authority-impacting project setup changes.',
+11243:      'Review compliance and approval requirements.',
+11256:    requiredAssets: [
+11263:      'Final approval is required before publishing.',
+11308:      items: campaignPackage.requiredAssets
+11346:      requires_approval_before_publish: true,
+11391:app.get('/media-manager/project/:project/operations', handleGetProjectOperations);
+11392:app.get('/public/media-manager/project/:project/operations', handleGetProjectOperations);
+11450:app.get('/media-manager/project/:project/task-center', handleGetTaskCenter);
+11451:app.get('/public/media-manager/project/:project/task-center', handleGetTaskCenter);
+11452:app.get('/media-manager/project/:project/queue-center', handleGetQueueCenter);
+11453:app.get('/public/media-manager/project/:project/queue-center', handleGetQueueCenter);
+11454:app.get('/media-manager/project/:project/job-monitor', handleGetJobMonitor);
+11455:app.get('/public/media-manager/project/:project/job-monitor', handleGetJobMonitor);
+11456:app.get('/media-manager/project/:project/notification-center', handleGetNotificationCenter);
+11457:app.get('/public/media-manager/project/:project/notification-center', handleGetNotificationCenter);
+11466:app.get('/media-manager/project/:project/operations/schema', handleGetOperationsSchema);
+11467:app.get('/public/media-manager/project/:project/operations/schema', handleGetOperationsSchema);
+11506:      summary: 'Approval required before team model changes.',
+11523:app.get('/media-manager/project/:project/team', handleGetProjectTeam);
+11524:app.get('/public/media-manager/project/:project/team', handleGetProjectTeam);
+11525:app.post('/media-manager/project/:project/team', handleUpdateProjectTeam);
+11526:app.post('/public/media-manager/project/:project/team', handleUpdateProjectTeam);
+11571:app.get('/media-manager/project/:project/campaigns', handleListCampaigns);
+11572:app.get('/public/media-manager/project/:project/campaigns', handleListCampaigns);
+11573:app.post('/media-manager/project/:project/campaigns', handleUpsertCampaign);
+11574:app.post('/public/media-manager/project/:project/campaigns', handleUpsertCampaign);
+11575:app.patch('/media-manager/project/:project/campaigns/:campaignId', (req, res) => {
+11582:app.patch('/public/media-manager/project/:project/campaigns/:campaignId', (req, res) => {
+11589:app.get('/media-manager/project/:project/campaigns/:campaignId', handleGetCampaign);
+11590:app.get('/public/media-manager/project/:project/campaigns/:campaignId', handleGetCampaign);
+11636:app.get('/media-manager/project/:project/content-items', handleListContentItems);
+11637:app.get('/public/media-manager/project/:project/content-items', handleListContentItems);
+11638:app.post('/media-manager/project/:project/content-items', handleUpsertContentItem);
+11639:app.post('/public/media-manager/project/:project/content-items', handleUpsertContentItem);
+11640:app.patch('/media-manager/project/:project/content-items/:contentItemId', (req, res) => {
+11647:app.patch('/public/media-manager/project/:project/content-items/:contentItemId', (req, res) => {
+11654:app.get('/media-manager/project/:project/content-items/:contentItemId', handleGetContentItem);
+11655:app.get('/public/media-manager/project/:project/content-items/:contentItemId', handleGetContentItem);
+11702:app.get('/media-manager/project/:project/media-jobs', handleListMediaJobs);
+11703:app.get('/public/media-manager/project/:project/media-jobs', handleListMediaJobs);
+11704:app.post('/media-manager/project/:project/media-jobs', handleUpsertMediaJob);
+11705:app.post('/public/media-manager/project/:project/media-jobs', handleUpsertMediaJob);
+11706:app.patch('/media-manager/project/:project/media-jobs/:mediaJobId', (req, res) => {
+11713:app.patch('/public/media-manager/project/:project/media-jobs/:mediaJobId', (req, res) => {
+11720:app.get('/media-manager/project/:project/media-jobs/:mediaJobId', handleGetMediaJob);
+11721:app.get('/public/media-manager/project/:project/media-jobs/:mediaJobId', handleGetMediaJob);
+11738:app.get('/media-manager/project/:project/workflows/runs', handleListWorkflowRuns);
+11739:app.get('/public/media-manager/project/:project/workflows/runs', handleListWorkflowRuns);
+11755:app.get('/media-manager/project/:project/workflows/runs/:runId', handleGetWorkflowRun);
+11756:app.get('/public/media-manager/project/:project/workflows/runs/:runId', handleGetWorkflowRun);
+11782:      summary: 'Approval required before workflow execution.'
+11825:app.post('/media-manager/project/:project/workflows/:workflowId/run', handleRunWorkflow);
+11826:app.post('/public/media-manager/project/:project/workflows/:workflowId/run', handleRunWorkflow);
+11855:    summary: 'Approval required before AI command execution.'
+11929:    summary: 'Approval required before AI chat execution.'
+11999:    summary: 'Approval required before AI guidance execution.'
+12067:      summary: 'Approval required before AI workflow execution.'
+12165:app.get('/media-manager/project/:project/ai/commands', handleListAiCommands);
+12166:app.get('/public/media-manager/project/:project/ai/commands', handleListAiCommands);
+12167:app.get('/media-manager/project/:project/ai/commands/:commandId', handleGetAiCommand);
+12168:app.get('/public/media-manager/project/:project/ai/commands/:commandId', handleGetAiCommand);
+12169:app.post('/media-manager/project/:project/ai/command', handleExecuteAiCommand);
+12170:app.post('/public/media-manager/project/:project/ai/command', handleExecuteAiCommand);
+12171:app.post('/media-manager/project/:project/ai/chat', handleExecuteAiChat);
+12172:app.post('/public/media-manager/project/:project/ai/chat', handleExecuteAiChat);
+12173:app.post('/media-manager/project/:project/ai/guidance', handleExecuteAiGuidance);
+12174:app.post('/public/media-manager/project/:project/ai/guidance', handleExecuteAiGuidance);
+12175:app.post('/media-manager/project/:project/ai/workflows/:workflowId/run', handleExecuteAiWorkflow);
+12176:app.post('/public/media-manager/project/:project/ai/workflows/:workflowId/run', handleExecuteAiWorkflow);
+12177:app.get('/media-manager/project/:project/ai/artifacts', handleListAiArtifacts);
+12178:app.get('/public/media-manager/project/:project/ai/artifacts', handleListAiArtifacts);
+12179:app.get('/media-manager/project/:project/ai/recommendations', handleListAiRecommendations);
+12180:app.get('/public/media-manager/project/:project/ai/recommendations', handleListAiRecommendations);
+12181:app.get('/media-manager/project/:project/ai/memory', handleListAiMemory);
+12182:app.get('/public/media-manager/project/:project/ai/memory', handleListAiMemory);
+12213:app.get('/media-manager/project/:project/tasks', handleListTasks);
+12214:app.get('/public/media-manager/project/:project/tasks', handleListTasks);
+12215:app.post('/media-manager/project/:project/tasks', handleCreateTask);
+12216:app.post('/public/media-manager/project/:project/tasks', handleCreateTask);
+12217:app.get('/media-manager/project/:project/tasks/:taskId', (req, res) => {
+12230:app.get('/public/media-manager/project/:project/tasks/:taskId', (req, res) => {
+12304:app.get('/media-manager/project/:project/approvals', handleListApprovals);
+12305:app.get('/public/media-manager/project/:project/approvals', handleListApprovals);
+12306:app.post('/media-manager/project/:project/approvals', handleCreateApproval);
+12307:app.post('/public/media-manager/project/:project/approvals', handleCreateApproval);
+12308:app.post('/media-manager/project/:project/approvals/:approvalId/decision', handleApprovalDecision);
+12309:app.post('/public/media-manager/project/:project/approvals/:approvalId/decision', handleApprovalDecision);
+12362:app.get('/media-manager/project/:project/governance', handleGetGovernance);
+12363:app.get('/public/media-manager/project/:project/governance', handleGetGovernance);
+12364:app.get('/media-manager/project/:project/governance/policy', handleGetGovernancePolicy);
+12365:app.get('/public/media-manager/project/:project/governance/policy', handleGetGovernancePolicy);
+12366:app.post('/media-manager/project/:project/governance/policy', handleUpdateGovernancePolicy);
+12367:app.post('/public/media-manager/project/:project/governance/policy', handleUpdateGovernancePolicy);
+12384:app.get('/media-manager/project/:project/notifications', handleListNotifications);
+12385:app.get('/public/media-manager/project/:project/notifications', handleListNotifications);
+12386:app.patch('/media-manager/project/:project/notifications/:notificationId', (req, res) => {
+12399:app.patch('/public/media-manager/project/:project/notifications/:notificationId', (req, res) => {
+12459:app.get('/media-manager/project/:project/handoffs', handleListHandoffs);
+12460:app.get('/public/media-manager/project/:project/handoffs', handleListHandoffs);
+12461:app.post('/media-manager/project/:project/handoffs', handleCreateHandoff);
+12462:app.post('/public/media-manager/project/:project/handoffs', handleCreateHandoff);
+12463:app.post('/media-manager/project/:project/handoffs/:handoffId/consume', handleConsumeHandoff);
+12464:app.post('/public/media-manager/project/:project/handoffs/:handoffId/consume', handleConsumeHandoff);
+12481:app.get('/media-manager/project/:project/events', handleListEvents);
+12482:app.get('/public/media-manager/project/:project/events', handleListEvents);
+12509:app.post('/media-manager/project/:project/sources', (req, res) => {
+12542:      summary: 'Approval required before source registry changes.',
+12563:app.post('/public/media-manager/project/:project/sources', (req, res) => {
+12596:      summary: 'Approval required before source registry changes.',
+12617:app.delete('/media-manager/project/:project/sources/:sourceType', (req, res) => {
+12641:      summary: 'Approval required before source registry deletion.',
+12656:app.delete('/public/media-manager/project/:project/sources/:sourceType', (req, res) => {
+12680:      summary: 'Approval required before source registry deletion.',
+12713:  if (status === 'reconnect_required') {
+12757:      required_fields: connectionPayload?.required_fields,
+12766:      requires_credentials: connectionPayload?.requires_credentials,
+12821:    required_fields: ['storeUrl'],
+12822:    requires_credentials: true,
+12854:  const requiresApprovalLifecycle = ['sync', 'import-history', 'disconnect'].includes(normalizedActionType);
+12855:  const governanceAllowed = requiresApprovalLifecycle
+12888:app.get('/media-manager/project/:project/integrations/control-center', handleGetProjectIntegrationControlCenter);
+13052:  '/media-manager/project/:project/customer-operations/health',
+13057:  '/public/media-manager/project/:project/customer-operations/health',
+13062:  '/media-manager/project/:project/customer-operations/readiness',
+13067:  '/public/media-manager/project/:project/customer-operations/readiness',
+13072:  '/media-manager/project/:project/customer-operations/channels',
+13077:  '/public/media-manager/project/:project/customer-operations/channels',
+13082:  '/media-manager/project/:project/customer-operations/inbox',
+13087:  '/public/media-manager/project/:project/customer-operations/inbox',
+13165:  '/media-manager/project/:project/customer-operations/conversations',
+13170:  '/public/media-manager/project/:project/customer-operations/conversations',
+13175:  '/media-manager/project/:project/customer-operations/messages',
+13180:  '/public/media-manager/project/:project/customer-operations/messages',
+13185:  '/media-manager/project/:project/customer-operations/customers',
+13190:  '/public/media-manager/project/:project/customer-operations/customers',
+13195:  '/media-manager/project/:project/customer-operations/sla',
+13200:  '/public/media-manager/project/:project/customer-operations/sla',
+13205:  '/media-manager/project/:project/customer-operations/escalations',
+13210:  '/public/media-manager/project/:project/customer-operations/escalations',
+13215:app.get('/media-manager/project/:project/native-media/providers', handleGetNativeMediaProviders);
+13216:app.get('/public/media-manager/project/:project/native-media/providers', handleGetNativeMediaProviders);
+13217:app.get('/media-manager/project/:project/native-media/providers/readiness', handleGetNativeMediaProviderReadiness);
+13218:app.get('/public/media-manager/project/:project/native-media/providers/readiness', handleGetNativeMediaProviderReadiness);
+13260:app.post('/media-manager/project/:project/native-media/generate', handleNativeMediaGenerate);
+13264:app.get('/public/media-manager/project/:project/integrations/control-center', handleGetProjectIntegrationControlCenter);
+13266:app.post('/media-manager/project/:project/integrations/:integrationId/connect', async (req, res) => {
+13272:app.post('/public/media-manager/project/:project/integrations/:integrationId/connect', async (req, res) => {
+13278:app.post('/media-manager/project/:project/integrations/:integrationId', async (req, res) => {
+13284:app.post('/public/media-manager/project/:project/integrations/:integrationId', async (req, res) => {
+13290:app.post('/media-manager/project/:project/integrations/:integrationId/reconnect', async (req, res) => {
+13296:app.post('/public/media-manager/project/:project/integrations/:integrationId/reconnect', async (req, res) => {
+13302:app.post('/media-manager/project/:project/integrations/:integrationId/test', async (req, res) => {
+13306:app.post('/public/media-manager/project/:project/integrations/:integrationId/test', async (req, res) => {
+13310:app.post('/media-manager/project/:project/integrations/:integrationId/sync', async (req, res) => {
+13314:app.post('/public/media-manager/project/:project/integrations/:integrationId/sync', async (req, res) => {
+13318:app.post('/media-manager/project/:project/integrations/:integrationId/import-history', async (req, res) => {
+13322:app.post('/public/media-manager/project/:project/integrations/:integrationId/import-history', async (req, res) => {
+13326:app.post('/media-manager/project/:project/integrations/:integrationId/disconnect', async (req, res) => {
+13330:app.post('/public/media-manager/project/:project/integrations/:integrationId/disconnect', async (req, res) => {
+13334:// TODO(phase4a): Keep `/public/media-manager/...` write aliases for active frontend compatibility.
+13335:// They remain protected by the same centralized write-key middleware as `/media-manager/...`.
+13336:app.post('/media-manager/project/:project/publishing/schedule', (req, res) => {
+13379:app.post('/public/media-manager/project/:project/publishing/schedule', (req, res) => {
+13422:app.post('/media-manager/project/:project/publishing/:jobId/reschedule', (req, res) => {
+13461:app.post('/public/media-manager/project/:project/publishing/:jobId/reschedule', (req, res) => {
+13500:app.post('/media-manager/project/:project/publishing/:jobId/ready', (req, res) => {
+13532:app.post('/public/media-manager/project/:project/publishing/:jobId/ready', (req, res) => {
+13564:app.post('/media-manager/project/:project/publishing/:jobId/publish', (req, res) => {
+13606:app.post('/public/media-manager/project/:project/publishing/:jobId/publish', (req, res) => {
+13648:app.post('/media-manager/project/:project/publishing/:jobId/fail', (req, res) => {
+13690:app.post('/public/media-manager/project/:project/publishing/:jobId/fail', (req, res) => {
+13732:app.get('/media-manager', (req, res) => {
+13736:app.get('/media-manager/', (req, res) => {
+14311:  // the required fallback for existing HAIROTICMEN dry-run packages.
+15086:      result.notes.push('Unknown channel type. Manual review required.');
+15440:  //   approval_before_publish → default true (restrictive — approval is required by default)
+15474:        'Approval before publish is enabled. This publishing action requires a durable publishing job with an approved governance decision.',
+15614:  const requiredAssetTypes = new Set(getAssetTypeCatalog().filter(item => item.required).map(item => item.asset_type));
+15617:    if (requiredAssetTypes.has(item)) {
+16985:    const axios = require('axios');
+21298:      error: 'Missing required args. Usage: /record_manual_publish <project> <campaign> <channel> <job_id> <operator> <post_url> [notes...]'
+21964:    const projectName = requireProjectContext(req);
+22007:    const projectName = requireProjectContext(req);
+22143:    const projectName = requireProjectContext(req);
+22249:    const projectName = requireProjectContext(req);
+22600:    projectName = requireProjectContext(req, { allowFallback: false });
+22692:    const projectName = requireProjectContext(req, { allowFallback: false });
+22771:    projectName = requireProjectContext(req, { allowFallback: false });
+22899:    const projectName = requireProjectContext(req, { allowFallback: false });
+22925:    const required = ['impressions', 'clicks', 'engagement', 'conversions', 'revenue'];
+22926:    for (const key of required) {
+22928:        const err = new Error(`metrics.${key} is required`);
+22971:    const projectName = requireProjectContext(req, { allowFallback: false });
+22990:    const projectName = requireProjectContext(req, { allowFallback: false });
+23198:    const projectName = requireProjectContext(req, { allowFallback: false });
+23252:if (require.main === module) {

@@ -1,0 +1,63 @@
+### Native media routes
+12890:function handleGetNativeMediaProviders(req, res) {
+12910:function handleGetNativeMediaProviderReadiness(req, res) {
+13215:app.get('/media-manager/project/:project/native-media/providers', handleGetNativeMediaProviders);
+13216:app.get('/public/media-manager/project/:project/native-media/providers', handleGetNativeMediaProviders);
+13217:app.get('/media-manager/project/:project/native-media/providers/readiness', handleGetNativeMediaProviderReadiness);
+13218:app.get('/public/media-manager/project/:project/native-media/providers/readiness', handleGetNativeMediaProviderReadiness);
+13220:async function handleNativeMediaGenerate(req, res) {
+13260:app.post('/media-manager/project/:project/native-media/generate', handleNativeMediaGenerate);
+
+### Publishing routes
+4094:    artifactType: 'publishing_scheduler_job',
+4316:    artifactType: 'publishing_scheduler_job',
+4450:    requestedFile: 'publishing/scheduler/*.json'
+13336:app.post('/media-manager/project/:project/publishing/schedule', (req, res) => {
+13340:      action: 'publishing_schedule',
+13369:    logCriticalFailure('publishing_schedule', req, error, {
+13379:app.post('/public/media-manager/project/:project/publishing/schedule', (req, res) => {
+13383:      action: 'publishing_schedule',
+13412:    logCriticalFailure('publishing_schedule', req, error, {
+13422:app.post('/media-manager/project/:project/publishing/:jobId/reschedule', (req, res) => {
+13426:      action: 'publishing_reschedule',
+13461:app.post('/public/media-manager/project/:project/publishing/:jobId/reschedule', (req, res) => {
+13465:      action: 'publishing_reschedule',
+13500:app.post('/media-manager/project/:project/publishing/:jobId/ready', (req, res) => {
+13504:      action: 'publishing_ready',
+13532:app.post('/public/media-manager/project/:project/publishing/:jobId/ready', (req, res) => {
+13536:      action: 'publishing_ready',
+15027:    requestedFile: `publishing/scheduler/${jobId}.json`
+
+### Integration routes
+12695:function handleGetProjectIntegrationControlCenter(req, res) {
+12888:app.get('/media-manager/project/:project/integrations/control-center', handleGetProjectIntegrationControlCenter);
+13264:app.get('/public/media-manager/project/:project/integrations/control-center', handleGetProjectIntegrationControlCenter);
+13266:app.post('/media-manager/project/:project/integrations/:integrationId/connect', async (req, res) => {
+13272:app.post('/public/media-manager/project/:project/integrations/:integrationId/connect', async (req, res) => {
+13290:app.post('/media-manager/project/:project/integrations/:integrationId/reconnect', async (req, res) => {
+13296:app.post('/public/media-manager/project/:project/integrations/:integrationId/reconnect', async (req, res) => {
+13302:app.post('/media-manager/project/:project/integrations/:integrationId/test', async (req, res) => {
+13306:app.post('/public/media-manager/project/:project/integrations/:integrationId/test', async (req, res) => {
+13310:app.post('/media-manager/project/:project/integrations/:integrationId/sync', async (req, res) => {
+13314:app.post('/public/media-manager/project/:project/integrations/:integrationId/sync', async (req, res) => {
+13318:app.post('/media-manager/project/:project/integrations/:integrationId/import-history', async (req, res) => {
+13322:app.post('/public/media-manager/project/:project/integrations/:integrationId/import-history', async (req, res) => {
+13326:app.post('/media-manager/project/:project/integrations/:integrationId/disconnect', async (req, res) => {
+13330:app.post('/public/media-manager/project/:project/integrations/:integrationId/disconnect', async (req, res) => {
+
+### Workflow/task/approval/handoff backend write primitives
+runtime/orchestrator-service/server.js:11788:    const run = recordWorkflowRun(req.params.project, {
+runtime/orchestrator-service/server.js:12201:    const task = createTask(req.params.project, req.body || {});
+runtime/orchestrator-service/server.js:12261:    const approval = createApproval(req.params.project, req.body || {});
+runtime/orchestrator-service/server.js:12433:    const handoff = createHandoff(req.params.project, req.body || {});
+runtime/orchestrator-service/lib/ops/backbone.js:2052:function recordWorkflowRun(projectName, input = {}) {
+runtime/orchestrator-service/lib/ops/backbone.js:2425:function createTask(projectName, input = {}) {
+runtime/orchestrator-service/lib/ops/backbone.js:2567:function createApproval(projectName, input = {}) {
+runtime/orchestrator-service/lib/ops/backbone.js:2919:    createTask(paths.project, {
+runtime/orchestrator-service/lib/ops/backbone.js:2953:function createHandoff(projectName, input = {}) {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1175:          const task = createTask(projectName, {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1189:          const run = recordWorkflowRun(projectName, {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1211:          const approval = createApproval(projectName, {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1224:          handoff = createHandoff(projectName, {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1743:      const run = recordWorkflowRun(projectName, {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1791:      const handoff = createHandoff(projectName, {
