@@ -1,0 +1,145 @@
+/**
+ * Legacy autonomous business dashboard.
+ *
+ * This file is intentionally preserved as a non-active legacy artifact.
+ * It is not registered by the Control Center router and must not call removed
+ * /api/governance/* or /api/ai-control/* endpoints if opened directly.
+ *
+ * Active runtime authority lives in router-registered pages and canonical api.js
+ * project-scoped helpers.
+ */
+
+const legacyBusinessDashboardState = {
+  ok: false,
+  neutralized: true,
+  legacy: true,
+  page: "business/dashboard",
+  message: "Legacy autonomous business dashboard is neutralized. Use active Control Center routes instead.",
+  canonicalRoutes: {
+    governance: "public/control-center/pages/governance.js",
+    aiCommand: "public/control-center/pages/ai-command.js",
+    settings: "public/control-center/pages/settings.js"
+  }
+};
+
+function renderLegacyBusinessDashboardNotice() {
+  if (typeof document === "undefined" || !document.body) {
+    return legacyBusinessDashboardState;
+  }
+
+  document.body.innerHTML = `
+    <main style="font-family: Arial, sans-serif; padding: 24px; background: #0f172a; color: #fff; min-height: 100vh;">
+      <h1>Legacy Business Dashboard Neutralized</h1>
+      <p>This inactive legacy dashboard no longer calls removed backend endpoints.</p>
+      <pre style="background: #111827; padding: 16px; overflow: auto;">${JSON.stringify(legacyBusinessDashboardState, null, 2)}</pre>
+    </main>
+  `;
+
+  return legacyBusinessDashboardState;
+}
+
+if (typeof window !== "undefined") {
+  window.__LEGACY_BUSINESS_DASHBOARD__ = {
+    state: legacyBusinessDashboardState,
+    render: renderLegacyBusinessDashboardNotice
+  };
+}
+
+/**
+ * Legacy governance dashboard.
+ *
+ * This file is intentionally preserved as a non-active legacy artifact.
+ * The active Governance route is public/control-center/pages/governance.js.
+ *
+ * This legacy dashboard must not call removed /api/governance/* endpoints if
+ * opened directly.
+ */
+
+const legacyGovernanceDashboardState = {
+  ok: false,
+  neutralized: true,
+  legacy: true,
+  page: "governance/dashboard",
+  message: "Legacy governance dashboard is neutralized. Use the active Governance route instead.",
+  canonicalRoutes: {
+    governance: "public/control-center/pages/governance.js"
+  },
+  canonicalHelpers: [
+    "fetchProjectGovernance(projectName)",
+    "createProjectApproval(projectName, payload)",
+    "decideProjectApproval(projectName, approvalId, payload)",
+    "updateProjectGovernancePolicy(projectName, payload)"
+  ]
+};
+
+function renderLegacyGovernanceDashboardNotice() {
+  if (typeof document === "undefined" || !document.body) {
+    return legacyGovernanceDashboardState;
+  }
+
+  document.body.innerHTML = `
+    <main style="font-family: Arial, sans-serif; padding: 24px; min-height: 100vh;">
+      <h1>Legacy Governance Dashboard Neutralized</h1>
+      <p>This inactive legacy dashboard no longer calls removed Governance endpoints.</p>
+      <pre style="background: #f3f4f6; padding: 16px; overflow: auto;">${JSON.stringify(legacyGovernanceDashboardState, null, 2)}</pre>
+    </main>
+  `;
+
+  return legacyGovernanceDashboardState;
+}
+
+if (typeof window !== "undefined") {
+  window.__LEGACY_GOVERNANCE_DASHBOARD__ = {
+    state: legacyGovernanceDashboardState,
+    render: renderLegacyGovernanceDashboardNotice
+  };
+}
+
+/**
+ * Legacy AI backend connector skeleton.
+ *
+ * This file is intentionally preserved for compatibility but is not loaded by
+ * index.html. It must not call removed legacy AI execute routes.
+ *
+ * Active AI runtime authority lives in project-scoped api.js helpers:
+ * - executeProjectAiCommand(projectName, payload)
+ * - executeProjectAiChat(projectName, payload)
+ * - executeProjectAiGuidance(projectName, payload)
+ */
+
+function buildLegacyAiBridgeResponse(command, payload) {
+  return {
+    ok: false,
+    neutralized: true,
+    legacy: true,
+    bridge: "__AI_BACKEND_BRIDGE__",
+    command,
+    message: "Legacy AI backend bridge is neutralized. Use canonical project-scoped AI helpers instead.",
+    canonical: {
+      command: "executeProjectAiCommand(projectName, payload)",
+      chat: "executeProjectAiChat(projectName, payload)",
+      guidance: "executeProjectAiGuidance(projectName, payload)"
+    },
+    payloadReceived: Boolean(payload)
+  };
+}
+
+if (typeof window !== "undefined") {
+  window.__AI_BACKEND_BRIDGE__ = {
+    async call(command, payload) {
+      return buildLegacyAiBridgeResponse(command, payload);
+    },
+
+    workflow(data) {
+      return this.call("WORKFLOW", data);
+    },
+
+    publish(data) {
+      return this.call("PUBLISH", data);
+    },
+
+    approve(data) {
+      return this.call("APPROVE", data);
+    }
+  };
+}

@@ -1,0 +1,109 @@
+// public/control-center/router.js
+
+import { homeRoute } from "./pages/home.js";
+import { aiCommandRoute } from "./pages/ai-command.js";
+import { campaignStudioRoute } from "./pages/campaign-studio.js";
+import { contentStudioRoute } from "./pages/content-studio-workspace.js";
+import { mediaStudioRoute } from "./pages/media-studio-workspace.js";
+import { publishingRoute } from "./pages/publishing.js";
+import { adsManagerRoute } from "./pages/ads-manager.js";
+import { insightsRoute } from "./pages/insights.js";
+import { researchRoute } from "./pages/research.js";
+import { workflowsRoute } from "./pages/workflows.js";
+import {
+  taskCenterRoute,
+  queueCenterRoute,
+  jobMonitorRoute,
+  notificationCenterRoute,
+  operationsCentersRoute
+} from "./pages/operations-centers.js";
+import { setupRoute } from "./pages/setup.js";
+import { libraryRoute } from "./pages/library.js";
+import { integrationsRoute } from "./pages/integrations.js";
+import { customerCenterRoute } from "./pages/customer-center.js";
+import { settingsRoute } from "./pages/settings.js";
+import { governanceRoute } from "./pages/governance.js";
+import {
+  DEFAULT_ROLE,
+  getFallbackRouteAccess
+} from "./runtime/authority/route-role-fallback.js";
+
+const routeRegistry = {
+  [homeRoute.id]: homeRoute,
+  [aiCommandRoute.id]: aiCommandRoute,
+  [workflowsRoute.id]: workflowsRoute,
+  [operationsCentersRoute.id]: operationsCentersRoute,
+  [taskCenterRoute.id]: taskCenterRoute,
+  [queueCenterRoute.id]: queueCenterRoute,
+  [jobMonitorRoute.id]: jobMonitorRoute,
+  [notificationCenterRoute.id]: notificationCenterRoute,
+  [campaignStudioRoute.id]: campaignStudioRoute,
+  [contentStudioRoute.id]: contentStudioRoute,
+  [mediaStudioRoute.id]: mediaStudioRoute,
+  [publishingRoute.id]: publishingRoute,
+  [adsManagerRoute.id]: adsManagerRoute,
+  [insightsRoute.id]: insightsRoute,
+  [researchRoute.id]: researchRoute,
+  [setupRoute.id]: setupRoute,
+  [libraryRoute.id]: libraryRoute,
+  [customerCenterRoute.id]: customerCenterRoute,
+  [integrationsRoute.id]: integrationsRoute,
+  [settingsRoute.id]: settingsRoute,
+  [governanceRoute.id]: governanceRoute
+};
+
+let routeAccessResolver = null;
+
+const routeChangeSubscribers = new Set();
+
+export function subscribeRouteChange(handler) {
+  if (typeof handler !== "function") return () => {};
+  routeChangeSubscribers.add(handler);
+  return () => routeChangeSubscribers.delete(handler);
+}
+
+function notifyRouteChange(route) {
+  routeChangeSubscribers.forEach((handler) => {
+    try {
+      handler(route);
+    } catch (error) {
+      console.warn("Route change subscriber failed:", error?.message || error);
+    }
+  });
+}
+
+
+function getPageRoot() {
+  return document.getElementById("pageRoot");
+}
+
+function getFallbackRoute(route) {
+  return {
+    id: route,
+    meta: {
+      eyebrow: "System",
+      title: "Page",
+      description: "Workspace view"
+    },
+    template: `
+      <section class="page is-active">
+        <div class="page-grid">
+
+public/control-center/index.html:369:  <script src="./runtime/command-runtime.js?v=20260510-command-runtime-classic-2"></script>
+public/control-center/app.js:81:import { installMhRuntimeGlobals } from "./runtime/mh-runtime-globals.js";
+public/control-center/app.js:159:    const legacy = CONTROL_ACCESS_KEY_LEGACY_STORAGE_KEYS
+public/control-center/app.js:163:    if (legacy) {
+public/control-center/app.js:164:      persistCanonicalControlKey(legacy);
+public/control-center/app.js:167:    return legacy;
+public/control-center/app.js:346:    legacySources: [],
+public/control-center/app.js:357:    CONTROL_ACCESS_KEY_LEGACY_STORAGE_KEYS.forEach((legacyKey) => {
+public/control-center/app.js:358:      const value = String(localStorage.getItem(legacyKey) || "").trim();
+public/control-center/app.js:360:        diagnostics.legacySources.push({ key: legacyKey, length: value.length });
+public/control-center/app.js:389:  } else if (diagnostics.legacySources.length) {
+public/control-center/app.js:390:    diagnostics.resolvedSource = `localStorage:${diagnostics.legacySources[0].key}`;
+public/control-center/app.js:402:    `legacy keys with values: ${diagnostics.legacySources.length}`,
+public/control-center/app.js:408:  if (diagnostics.legacySources.length) {
+public/control-center/app.js:410:      "legacy matches: " + diagnostics.legacySources.map((item) => `${item.key}(len=${item.length})`).join(", ")
+public/control-center/app.js:614:        CONTROL_ACCESS_KEY_LEGACY_STORAGE_KEYS.forEach((legacyKey) => localStorage.removeItem(legacyKey));
+public/control-center/app.js:627:        CONTROL_ACCESS_KEY_LEGACY_STORAGE_KEYS.forEach((legacyKey) => localStorage.removeItem(legacyKey));
+public/control-center/app.js:1625:        CONTROL_ACCESS_KEY_LEGACY_STORAGE_KEYS.forEach((legacyKey) => localStorage.removeItem(legacyKey));
