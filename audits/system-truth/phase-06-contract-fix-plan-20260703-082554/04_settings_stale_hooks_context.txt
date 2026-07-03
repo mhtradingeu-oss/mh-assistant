@@ -1,0 +1,146 @@
+
+  root.querySelectorAll("[data-setting-path]").forEach((control) => {
+    const eventName =
+      control.tagName === "TEXTAREA" || (control.tagName === "INPUT" && !["checkbox", "radio"].includes(control.type))
+        ? "input"
+        : "change";
+
+    control.addEventListener(eventName, () => {
+      const path = control.dataset.settingPath;
+      if (!path) return;
+
+      if (control.type === "checkbox" && control.closest(".settings-checklist")) {
+        const checkedValues = Array.from(
+          root.querySelectorAll(`input[type="checkbox"][data-setting-path="${path}"]:checked`)
+        ).map((item) => item.value);
+        setPathValue(session.form, path, checkedValues);
+      } else if (control.type === "radio") {
+        if (!control.checked) return;
+        setPathValue(session.form, path, control.value);
+      } else if (control.type === "checkbox") {
+        setPathValue(session.form, path, Boolean(control.checked));
+      } else {
+        setPathValue(session.form, path, control.value);
+      }
+
+      session.dirty = true;
+      refreshSummary(root, session, context.escapeHtml);
+      refreshActionState(root, session);
+      bindSettingsActionButtons(context, session);
+      bindSettingsAiButtons(context, session);
+    });
+  });
+
+  bindSettingsActionButtons(context, session);
+  bindSettingsAiButtons(context, session);
+}
+
+export const settingsRoute = {
+  id: "settings",
+  disableStandardLayout: true,
+  meta: {
+    eyebrow: "System",
+    title: "Settings",
+    description: "Configure project defaults, AI behavior, publishing rules, approvals, sync behavior, and governance."
+  },
+  template: `<section class="page is-active" data-page="settings"><div class="settings-page-surface"></div></section>`,
+  render(context) {
+    const state = context.getState();
+    const projectName = state?.context?.currentProject;
+
+    if (!projectName) {
+      const root = context.$("pageRoot");
+      if (!root) return;
+      root.innerHTML = `
+        <section class="page is-active" data-page="settings">
+          <div class="panel panel-span-2">
+            <div class="empty-box">
+              Select a project to configure system defaults, approvals, sync policies, and governance rules.
+            </div>
+          </div>
+        </section>
+      `;
+      return;
+    }
+
+    const session = ensureSession(state);
+    replacePage(context, session);
+    bindFormEvents(context, session);
+
+    if (!session.loaded && !session.loading) {
+      loadDurableSettings(session, state, () => {
+        replacePage(context, session);
+        bindFormEvents(context, session);
+      });
+    }
+  }
+};
+
+/**
+ * ⚡ AI CONTROL CENTER CONNECTION LAYER
+ */
+
+async function loadAIControlCenter() {
+
+  const res = await fetch("/api/ai-control/dashboard");
+  const data = await res.json();
+
+  console.log("🧠 AI CONTROL CENTER DATA:", data);
+
+  return data;
+}
+
+async function updateAIControl(payload) {
+
+  const res = await fetch("/api/ai-control/update", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(payload)
+  });
+
+  return res.json();
+}
+
+// Example hooks for UI
+window.__AI_CONTROL_CENTER__ = {
+  load: loadAIControlCenter,
+  update: updateAIControl
+};
+
+/**
+ * ⚖️ GOVERNANCE UI INTEGRATION LAYER
+ */
+
+async function loadGovernanceState() {
+
+  const res = await fetch("/api/governance/audit");
+  return await res.json();
+}
+
+async function processGovernanceAction(action) {
+
+  const res = await fetch("/api/governance/process", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(action)
+  });
+
+  return await res.json();
+}
+
+async function loadGovernanceLiveState() {
+
+  const res = await fetch("/api/governance/state");
+  return await res.json();
+}
+
+// 🌐 GLOBAL GOVERNANCE UI HOOKS
+window.__GOVERNANCE_CENTER__ = {
+  loadAudit: loadGovernanceState,
+  process: processGovernanceAction,
+  live: loadGovernanceLiveState
+};

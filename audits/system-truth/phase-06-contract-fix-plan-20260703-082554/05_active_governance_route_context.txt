@@ -1,0 +1,220 @@
+// --- Governance Evidence Summary & Intake Patch ---
+// Evidence helpers
+function asSafeArray(val) {
+  return Array.isArray(val) ? val : val ? [val] : [];
+}
+
+function collectGovernanceEvidence({ selectedItem, projectData, governanceData }) {
+  // Defensive extraction of evidence assets
+  const evidence = {
+    source_of_truth: [],
+    legal: [],
+    pricing: [],
+    certificate: [],
+    proof: [],
+    product: [],
+    brand: [],
+    claim: [],
+    media: [],
+    content: [],
+    library: [],
+    other: []
+  };
+  const sources = [selectedItem, projectData, governanceData];
+  sources.forEach((src) => {
+    if (!src) return;
+    Object.entries(src).forEach(([k, v]) => {
+      const key = k.toLowerCase();
+      if (/source_of_truth|source/.test(key)) evidence.source_of_truth.push(v);
+      else if (/legal/.test(key)) evidence.legal.push(v);
+      else if (/pricing/.test(key)) evidence.pricing.push(v);
+      else if (/certificate|certificates/.test(key)) evidence.certificate.push(v);
+      else if (/proof/.test(key)) evidence.proof.push(v);
+      else if (/product/.test(key)) evidence.product.push(v);
+      else if (/brand/.test(key)) evidence.brand.push(v);
+      else if (/claim/.test(key)) evidence.claim.push(v);
+      else if (/media/.test(key)) evidence.media.push(v);
+      else if (/content/.test(key)) evidence.content.push(v);
+      else if (/library/.test(key)) evidence.library.push(v);
+      else evidence.other.push(v);
+    });
+  });
+  // Flatten and filter
+  Object.keys(evidence).forEach((k) => {
+    evidence[k] = asSafeArray(evidence[k]).flat().filter(Boolean);
+  });
+  return evidence;
+}
+
+function classifyEvidenceAsset(asset) {
+  if (!asset) return "other";
+  const s = JSON.stringify(asset).toLowerCase();
+  if (s.includes("source_of_truth") || s.includes("source")) return "source_of_truth";
+  if (s.includes("legal")) return "legal";
+  if (s.includes("pricing")) return "pricing";
+  if (s.includes("certificate")) return "certificate";
+  if (s.includes("proof")) return "proof";
+  if (s.includes("product")) return "product";
+  if (s.includes("brand")) return "brand";
+  if (s.includes("claim")) return "claim";
+  if (s.includes("media")) return "media";
+  if (s.includes("content")) return "content";
+  if (s.includes("library")) return "library";
+  return "other";
+}
+
+function summarizeEvidenceState(evidence) {
+  // Returns true if any key evidence is present
+  return (
+    evidence.source_of_truth.length ||
+    evidence.legal.length ||
+    evidence.pricing.length ||
+    evidence.certificate.length ||
+    evidence.proof.length
+  );
+}
+
+function renderGovernanceEvidenceSummary({ selectedItem, projectData, governanceData, intakeContext, escapeHtml }) {
+  const evidence = collectGovernanceEvidence({ selectedItem, projectData, governanceData });
+  const hasEvidence = summarizeEvidenceState(evidence);
+  return `
+    <div class="governance-evidence-summary">
+      <div class="governance-evidence-summary-header">Evidence Summary</div>
+      <div class="governance-evidence-cards">
+        <div class="governance-evidence-card${evidence.source_of_truth.length ? '' : ' is-missing'}">
+          <span class="governance-evidence-label">Source of Truth</span>
+          <span class="governance-evidence-value">${evidence.source_of_truth.length ? escapeHtml(asString(evidence.source_of_truth[0])) : "Missing"}</span>
+        </div>
+        <div class="governance-evidence-card${evidence.legal.length ? '' : ' is-missing'}">
+          <span class="governance-evidence-label">Legal</span>
+          <span class="governance-evidence-value">${evidence.legal.length ? escapeHtml(asString(evidence.legal[0])) : "Missing"}</span>
+        </div>
+        <div class="governance-evidence-card${evidence.pricing.length ? '' : ' is-missing'}">
+          <span class="governance-evidence-label">Pricing</span>
+          <span class="governance-evidence-value">${evidence.pricing.length ? escapeHtml(asString(evidence.pricing[0])) : "Missing"}</span>
+        </div>
+        <div class="governance-evidence-card${evidence.certificate.length ? '' : ' is-missing'}">
+          <span class="governance-evidence-label">Certificate/Proof</span>
+          <span class="governance-evidence-value">${evidence.certificate.length ? escapeHtml(asString(evidence.certificate[0])) : evidence.proof.length ? escapeHtml(asString(evidence.proof[0])) : "Missing"}</span>
+        </div>
+        <div class="governance-evidence-card${evidence.brand.length ? '' : ' is-missing'}">
+          <span class="governance-evidence-label">Brand Asset</span>
+          <span class="governance-evidence-value">${evidence.brand.length ? escapeHtml(asString(evidence.brand[0])) : "Missing"}</span>
+        </div>
+        <div class="governance-evidence-card${evidence.product.length ? '' : ' is-missing'}">
+          <span class="governance-evidence-label">Product Asset</span>
+          <span class="governance-evidence-value">${evidence.product.length ? escapeHtml(asString(evidence.product[0])) : "Missing"}</span>
+        </div>
+      </div>
+      ${!hasEvidence ? `<div class="governance-evidence-card is-missing governance-source-warning">Missing source evidence — attach Library proof before high-risk approval.</div>` : ""}
+      <div class="governance-evidence-guidance">High-risk Governance decisions should reference source-of-truth evidence, proof assets, or an incoming handoff. Missing evidence should be resolved before approval, rejection, escalation, or override.</div>
+    </div>
+  `;
+}
+
+function renderGovernanceIntakePanel({ projectName, escapeHtml, intakeContext }) {
+  // Intake context: { ai, publishing, content, media, workflows, operations, notifications, insights }
+  const items = [];
+  if (intakeContext?.ai) items.push({ label: "AI Team", value: asString(intakeContext.ai) });
+  if (intakeContext?.publishing) items.push({ label: "Publishing", value: asString(intakeContext.publishing) });
+  if (intakeContext?.content) items.push({ label: "Content Studio", value: asString(intakeContext.content) });
+  if (intakeContext?.media) items.push({ label: "Media Studio", value: asString(intakeContext.media) });
+  if (intakeContext?.workflows) items.push({ label: "Workflows", value: asString(intakeContext.workflows) });
+  if (intakeContext?.operations) items.push({ label: "Operations", value: asString(intakeContext.operations) });
+  if (intakeContext?.notifications) items.push({ label: "Notifications", value: asString(intakeContext.notifications) });
+  if (intakeContext?.insights) items.push({ label: "Insights", value: asString(intakeContext.insights) });
+  return `
+    <div class="governance-intake-panel">
+      <div class="governance-intake-panel-header">Incoming Review Context</div>
+      <div class="governance-intake-list">
+        ${items.length ? items.map((item) => `
+          <div class="governance-intake-item"><span class="governance-intake-label">${escapeHtml(item.label)}</span><span class="governance-intake-value">${escapeHtml(item.value)}</span></div>
+        `).join("") : `<div class="governance-intake-item is-missing">No intake yet</div>`}
+      </div>
+    </div>
+  `;
+}
+import {
+  createProjectApproval,
+  decideProjectApproval,
+  fetchProjectGovernance,
+  updateProjectGovernancePolicy
+} from "../api.js";
+
+const governanceSessions = new Map();
+
+function asArray(value) {
+  return Array.isArray(value) ? value : [];
+}
+
+function asObject(value) {
+  return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+}
+
+function asString(value) {
+  if (value == null) return "";
+  return String(value);
+}
+
+function titleCase(value) {
+  return asString(value)
+    .replace(/[_-]+/g, " ")
+    .replace(/\b\w/g, (match) => match.toUpperCase());
+}
+
+function formatDateTime(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "Not recorded";
+  return new Intl.DateTimeFormat(undefined, {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit"
+  }).format(date);
+}
+
+function severityClass(value) {
+  const normalized = asString(value).toLowerCase();
+  if (normalized === "critical") return "danger";
+  if (normalized === "high") return "warning";
+  if (normalized === "approved" || normalized === "success") return "success";
+  return "neutral";
+}
+
+function getDecisionConfirmationMessage(decision) {
+  const normalized = asString(decision).toLowerCase().replace(/\s+/g, "_");
+
+  if (["approval", "approved", "approve"].includes(normalized)) {
+    return "Submit reviewed approval decision? This records a backend Governance decision and may affect downstream readiness where policy gates apply. It does not publish, send, or execute directly.";
+  }
+
+  if (["override", "overridden"].includes(normalized)) {
+    return "Record high-risk override decision? This records a backend Governance override. It may unblock downstream gated actions where policy allows override. Continue only after verifying source evidence, risk, owner, and reason.";
+  }
+
+  if (["reject", "rejected", "changes_requested", "request_changes", "escalated", "escalate"].includes(normalized)) {
+    return "Submit reviewed Governance decision? This records a backend reviewed decision and may update linked queues or review state. It does not publish or execute directly.";
+  }
+
+  return "Submit reviewed Governance decision? This records a backend reviewed decision and may update linked queues or review state. It does not publish or execute directly.";
+}
+
+function confirmGovernanceDecision(decision) {
+  if (typeof window === "undefined" || typeof window.confirm !== "function") return true;
+  return window.confirm(getDecisionConfirmationMessage(decision));
+}
+
+function confirmGovernanceApprovalRequest({ title, entityType, risk }) {
+  if (typeof window === "undefined" || typeof window.confirm !== "function") return true;
+
+  const itemTitle = title || "this item";
+  const itemType = entityType || "content_item";
+  const itemRisk = risk || "medium";
+
+  return window.confirm(
+    [
+      "Create Governance approval request?",
+      "",
+      `Action: Create a backend approval request for ${itemTitle}.`,
+      `Entity: ${itemType}`,
+      `Risk: ${itemRisk}`,

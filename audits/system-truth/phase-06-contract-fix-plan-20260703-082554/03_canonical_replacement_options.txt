@@ -1,0 +1,41 @@
+### canonical api.js governance functions
+1226:      load: () => fetchProjectOperations(safeProjectName)
+1250:      load: () => fetchProjectOperations(safeProjectName)
+1357:export async function fetchProjectOperations(projectName) {
+1699:export async function fetchProjectGovernance(projectName, params = {}) {
+1718:export async function fetchProjectGovernancePolicy(projectName) {
+1729:export async function updateProjectGovernancePolicy(projectName, payload = {}) {
+1977:export async function fetchProjectOperationsSchema(projectName) {
+1988:export async function fetchProjectTaskCenter(projectName) {
+1999:export async function fetchProjectQueueCenter(projectName) {
+2010:export async function fetchProjectJobMonitor(projectName) {
+2021:export async function fetchProjectNotificationCenter(projectName) {
+
+### canonical backend governance routes
+12311:function handleGetGovernance(req, res) {
+12325:function handleUpdateGovernancePolicy(req, res) {
+12349:function handleGetGovernancePolicy(req, res) {
+12362:app.get('/media-manager/project/:project/governance', handleGetGovernance);
+12363:app.get('/public/media-manager/project/:project/governance', handleGetGovernance);
+12364:app.get('/media-manager/project/:project/governance/policy', handleGetGovernancePolicy);
+12365:app.get('/public/media-manager/project/:project/governance/policy', handleGetGovernancePolicy);
+12366:app.post('/media-manager/project/:project/governance/policy', handleUpdateGovernancePolicy);
+12367:app.post('/public/media-manager/project/:project/governance/policy', handleUpdateGovernancePolicy);
+
+### canonical AI command routes
+11828:async function handleExecuteAiCommand(req, res) {
+11903:async function handleExecuteAiChat(req, res) {
+11973:async function handleExecuteAiGuidance(req, res) {
+12165:app.get('/media-manager/project/:project/ai/commands', handleListAiCommands);
+12166:app.get('/public/media-manager/project/:project/ai/commands', handleListAiCommands);
+12167:app.get('/media-manager/project/:project/ai/commands/:commandId', handleGetAiCommand);
+12168:app.get('/public/media-manager/project/:project/ai/commands/:commandId', handleGetAiCommand);
+12169:app.post('/media-manager/project/:project/ai/command', handleExecuteAiCommand);
+12170:app.post('/public/media-manager/project/:project/ai/command', handleExecuteAiCommand);
+12171:app.post('/media-manager/project/:project/ai/chat', handleExecuteAiChat);
+12172:app.post('/public/media-manager/project/:project/ai/chat', handleExecuteAiChat);
+12173:app.post('/media-manager/project/:project/ai/guidance', handleExecuteAiGuidance);
+12174:app.post('/public/media-manager/project/:project/ai/guidance', handleExecuteAiGuidance);
+1578:export async function executeProjectAiCommand(projectName, payload = {}) {
+1591:export async function executeProjectAiChat(projectName, payload = {}) {
+1618:export async function executeProjectAiGuidance(projectName, payload = {}) {
