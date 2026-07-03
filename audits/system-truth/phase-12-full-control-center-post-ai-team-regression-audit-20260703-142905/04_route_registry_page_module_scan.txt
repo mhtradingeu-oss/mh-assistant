@@ -1,0 +1,506 @@
+### route ids in router
+1:// public/control-center/router.js
+3:import { homeRoute } from "./pages/home.js";
+4:import { aiCommandRoute } from "./pages/ai-command.js";
+5:import { campaignStudioRoute } from "./pages/campaign-studio.js";
+6:import { contentStudioRoute } from "./pages/content-studio-workspace.js";
+7:import { mediaStudioRoute } from "./pages/media-studio-workspace.js";
+8:import { publishingRoute } from "./pages/publishing.js";
+9:import { adsManagerRoute } from "./pages/ads-manager.js";
+10:import { insightsRoute } from "./pages/insights.js";
+11:import { researchRoute } from "./pages/research.js";
+12:import { workflowsRoute } from "./pages/workflows.js";
+19:} from "./pages/operations-centers.js";
+20:import { setupRoute } from "./pages/setup.js";
+21:import { libraryRoute } from "./pages/library.js";
+22:import { integrationsRoute } from "./pages/integrations.js";
+23:import { customerCenterRoute } from "./pages/customer-center.js";
+24:import { settingsRoute } from "./pages/settings.js";
+25:import { governanceRoute } from "./pages/governance.js";
+29:} from "./runtime/authority/route-role-fallback.js";
+31:const routeRegistry = {
+55:let routeAccessResolver = null;
+57:const routeChangeSubscribers = new Set();
+61:  routeChangeSubscribers.add(handler);
+62:  return () => routeChangeSubscribers.delete(handler);
+65:function notifyRouteChange(route) {
+66:  routeChangeSubscribers.forEach((handler) => {
+68:      handler(route);
+80:function getFallbackRoute(route) {
+82:    id: route,
+92:            <div class="empty-box">Unknown route: ${route}</div>
+108:function getAccessDeniedRoute(route, reason = "") {
+109:  const detail = reason || `Route "${route}" is not available for the current role.`;
+111:    id: "__access-denied__",
+115:      description: "This workspace route is blocked by role access rules."
+123:              <h3 class="access-denied-title">Route blocked: ${escapeHtmlMin(route)}</h3>
+137:function normalizeRouteAccessResult(result, route) {
+141:      reason: result ? "" : `Access to ${route} is restricted.`
+158:function getDefaultRouteAccess(route) {
+159:  return getFallbackRouteAccess(route, DEFAULT_ROLE, { useDefaultRoleMessage: true });
+162:function getRouteAccess(route) {
+163:  if (typeof routeAccessResolver !== "function") {
+164:    return getDefaultRouteAccess(route);
+168:    return normalizeRouteAccessResult(routeAccessResolver(route), route);
+170:    return getDefaultRouteAccess(route);
+174:function updatePageHeader(route) {
+175:  const routeDef = getRouteDefinition(route);
+176:  const meta = routeDef.meta;
+187:function updateActiveNav(route) {
+188:  const navItems = Array.from(document.querySelectorAll(".nav-item[data-route]"));
+191:    const itemRoute = item.getAttribute("data-route");
+192:    item.classList.toggle("is-active", itemRoute === route);
+196:export function getRouteDefinition(route) {
+197:  const access = getRouteAccess(route);
+199:    return getAccessDeniedRoute(route, access.reason);
+202:  return routeRegistry[route] || getFallbackRoute(route);
+206:  routeAccessResolver = typeof resolver === "function" ? resolver : null;
+209:export function renderRouteTemplate(route) {
+213:  const routeDef = getRouteDefinition(route);
+214:  root.innerHTML = routeDef.template;
+216:  updatePageHeader(route);
+217:  updateActiveNav(route);
+220:export function navigateTo(route, emit = true) {
+221:  renderRouteTemplate(route);
+222:  notifyRouteChange(route);
+225:  const newHash = `#${route}`;
+232:      new CustomEvent("mh:route-change", {
+233:        detail: { route }
+
+### page module exports
+public/control-center/pages/ai-command/tool-dock.js:186:export function openLibrarySourcePickerFromAiCommand({
+public/control-center/pages/ai-command/tool-dock.js:243:export function getSelectedLibrarySource(projectName = "") {
+public/control-center/pages/ai-command/tool-dock.js:325:export function applySharedAiSourceToDrawer(drawer, projectName = "") {
+public/control-center/pages/ai-command/tool-dock.js:1226:export function getAiToolDockTools({ specialistId = "", teamMode = "solo", limit = 9 } = {}) {
+public/control-center/pages/ai-command/tool-dock.js:1235:  return Number.isFinite(limit) ? tools.slice(0, limit) : tools.slice();
+public/control-center/pages/ai-command/tool-dock.js:1304:function renderSmartToolDrawerShell(safe) {
+public/control-center/pages/ai-command/tool-dock.js:1308:      <section class="mhos-tool-drawer-card" role="dialog" aria-modal="true" aria-label="AI prompt tool setup">
+public/control-center/pages/ai-command/tool-dock.js:1400:          Review-only setup: this drawer creates a composer-ready instruction. Destination choices only frame safe handoff context; they do not publish, send, approve, route externally, create CRM records, run workflows, or mutate backend data.
+public/control-center/pages/ai-command/tool-dock.js:1413:export function renderAiToolDrawerShell({ escapeHtml } = {}) {
+public/control-center/pages/ai-command/tool-dock.js:1420:export function renderAiToolDock({ projectName = "", specialistId = "", teamMode = "solo", escapeHtml }) {
+public/control-center/pages/ai-command/tool-dock.js:1431:        <span class="mhos-tool-dock-copy">Review-only setup · source, output, destination, then load into composer</span>
+public/control-center/pages/ai-command/tool-dock.js:1574:    "Selected setup:",
+public/control-center/pages/ai-command/tool-dock.js:1601:    "Do not repeat this setup back to the user unless useful; produce the best practical output.",
+public/control-center/pages/ai-command/tool-dock.js:1727:  updateStatus?.(`${btn.getAttribute("data-aicmd-tool-dock-label") || "Quick AI tool"} setup opened. Review source and handoff requirements, then prepare the prompt.`);
+public/control-center/pages/ai-command/tool-dock.js:1731:export function openAiToolDrawerFromMetadata({
+public/control-center/pages/ai-command/tool-dock.js:1759:export function bindAiToolDock({
+public/control-center/pages/publishing/publishing-payloads.js:73:export function buildSchedulePayload(session, status = "scheduled") {
+public/control-center/pages/publishing/publishing-payloads.js:89:export function buildLocalDraftPayload(session, status = "draft") {
+public/control-center/pages/publishing/publishing-payloads.js:105:export function buildPublishingAiPrompt(projectName, selectedItem, session, handoff) {
+public/control-center/pages/home/render-sections.js:21:  return String(Math.max(0, Math.round(Number.isFinite(parsed) ? parsed : 0)));
+public/control-center/pages/home/render-sections.js:24:export function renderBadge(tone, label, escapeHtml) {
+public/control-center/pages/home/render-sections.js:28:export function renderCompactList(items, escapeHtml, emptyText = "No active blocker detected.") {
+public/control-center/pages/home/render-sections.js:44:export function renderBlockerColumn(title, items, tone, escapeHtml) {
+public/control-center/pages/home/render-sections.js:58:export function renderActivityItems(items, escapeHtml) {
+public/control-center/pages/home/render-sections.js:83:export function renderAiTeamCards(cards, escapeHtml) {
+public/control-center/pages/home/render-sections.js:105:export function renderHomeExecutiveIntro({
+public/control-center/pages/campaign-studio.js:85:  return Number.isFinite(parsed) ? parsed : fallback;
+public/control-center/pages/campaign-studio.js:90:  if (!Number.isFinite(parsed)) return "-";
+public/control-center/pages/campaign-studio.js:104:  if (!Number.isFinite(parsed)) return "-";
+public/control-center/pages/campaign-studio.js:114:function renderTeamOpsSummary(model, escapeHtml) {
+public/control-center/pages/campaign-studio.js:283:    session.generatedPackages = Number.isFinite(session.generatedPackages) ? session.generatedPackages : 0;
+public/control-center/pages/campaign-studio.js:290:function renderField({
+public/control-center/pages/campaign-studio.js:301:    <div class="setup-field-group">
+public/control-center/pages/campaign-studio.js:302:      <div class="setup-field-head">
+public/control-center/pages/campaign-studio.js:303:        <label class="setup-label" for="campaign-${escapeHtml(name)}">${escapeHtml(label)}</label>
+public/control-center/pages/campaign-studio.js:304:        <span class="setup-field-state is-optional">Draft</span>
+public/control-center/pages/campaign-studio.js:308:          ? `<textarea id="campaign-${escapeHtml(name)}" name="${escapeHtml(name)}" class="setup-input setup-textarea" rows="${rows}" placeholder="${escapeHtml(placeholder || "")}">${escapeHtml(asString(value))}</textarea>`
+public/control-center/pages/campaign-studio.js:309:          : `<input id="campaign-${escapeHtml(name)}" name="${escapeHtml(name)}" class="setup-input" type="text" value="${escapeHtml(asString(value))}" placeholder="${escapeHtml(placeholder || "")}">`
+public/control-center/pages/campaign-studio.js:311:      <div class="setup-helper">${escapeHtml(helper)}</div>
+public/control-center/pages/campaign-studio.js:316:function renderSummaryItem(label, value, escapeHtml) {
+public/control-center/pages/campaign-studio.js:545:function renderEmptyState(title, description, escapeHtml) {
+public/control-center/pages/campaign-studio.js:554:function renderIntelligenceList(items, escapeHtml, title, description) {
+public/control-center/pages/campaign-studio.js:683:      body: firstNonEmpty(record.reason, record.insight, record.summary, record.recommendation, "Performance or setup risk detected.")
+public/control-center/pages/campaign-studio.js:1172:function renderChannelRecommendationCards(items, escapeHtml) {
+public/control-center/pages/campaign-studio.js:1196:function renderBlockerGroup(title, items, escapeHtml, emptyBody) {
+public/control-center/pages/campaign-studio.js:1206:          : `<div class="setup-helper">${escapeHtml(emptyBody)}</div>`
+public/control-center/pages/campaign-studio.js:1665:                Lock the core campaign definition first so planning, routing, and AI prompts all reference the same structure.
+public/control-center/pages/campaign-studio.js:1667:              <div class="setup-form-grid setup-form-grid-2">
+public/control-center/pages/campaign-studio.js:1701:              <div class="setup-form-grid setup-form-grid-3">
+public/control-center/pages/campaign-studio.js:1737:              <div class="setup-form-grid">
+public/control-center/pages/campaign-studio.js:1848:                    <div class="setup-form-grid">
+public/control-center/pages/campaign-studio.js:1929:              <div class="setup-form-grid">
+public/control-center/pages/media-studio-workspace.js:142:  if (!Number.isFinite(parsed)) return "0";
+public/control-center/pages/media-studio-workspace.js:1318:function renderScopedStyles() {
+public/control-center/pages/media-studio-workspace.js:1644:function renderStatusPill(status, escapeHtml) {
+public/control-center/pages/media-studio-workspace.js:1772:function renderMediaReadinessSummary({ session, selectedItem, handoff, escapeHtml }) {
+public/control-center/pages/media-studio-workspace.js:1787:function renderMediaCommandHeader({ projectName, session, metrics, selectedItem, handoff, recommendation, escapeHtml }) {
+public/control-center/pages/media-studio-workspace.js:1800:          <div class="setup-kicker">Media Studio</div>
+public/control-center/pages/media-studio-workspace.js:1874:function renderMediaWorkflowStrip({ session, selectedItem, handoff, escapeHtml }) {
+public/control-center/pages/media-studio-workspace.js:1894:function renderOverview(metrics, escapeHtml) {
+public/control-center/pages/media-studio-workspace.js:1899:          <div class="setup-kicker">Media Overview</div>
+public/control-center/pages/media-studio-workspace.js:1916:function renderRecommendation(recommendation, metrics, selectedItem, handoff, escapeHtml) {
+public/control-center/pages/media-studio-workspace.js:1930:          <div class="setup-kicker">Smart Recommendation</div>
+public/control-center/pages/media-studio-workspace.js:1954:function renderField({ id, name, label, value, type = "text", options = [], multiline = false, rows = 4, helper = "", errorKey = name }, session, escapeHtml) {
+public/control-center/pages/media-studio-workspace.js:1957:      <select id="${escapeHtml(id)}" name="${escapeHtml(name)}" class="setup-input">
+public/control-center/pages/media-studio-workspace.js:1964:      ? `<textarea id="${escapeHtml(id)}" name="${escapeHtml(name)}" class="setup-input setup-textarea" rows="${rows}">${escapeHtml(value)}</textarea>`
+public/control-center/pages/media-studio-workspace.js:1965:      : `<input id="${escapeHtml(id)}" name="${escapeHtml(name)}" class="setup-input" type="${escapeHtml(type)}" value="${escapeHtml(value)}">`;
+public/control-center/pages/media-studio-workspace.js:1968:    <div class="setup-field-group">
+public/control-center/pages/media-studio-workspace.js:1969:      <div class="setup-field-head">
+public/control-center/pages/media-studio-workspace.js:1970:        <label class="setup-label" for="${escapeHtml(id)}">${escapeHtml(label)}</label>
+public/control-center/pages/media-studio-workspace.js:1973:      ${helper ? `<div class="setup-helper">${escapeHtml(helper)}</div>` : ""}
+public/control-center/pages/media-studio-workspace.js:1979:function renderGenerator(session, state, backendProjectName, escapeHtml) {
+public/control-center/pages/media-studio-workspace.js:1988:          <div class="setup-kicker">Media Generator</div>
+public/control-center/pages/media-studio-workspace.js:2001:            Start here: choose Image, Video, Voice, or Campaign Pack. Complete the brief, generate or improve the prompt, then use Generate Output only when a provider/backend is connected. If generation is unavailable or times out, keep the prompt/job-ready draft and continue with review, Library save, AI Command review, or provider setup in Integrations.
+public/control-center/pages/media-studio-workspace.js:2003:      <form id="mediaGeneratorForm" class="setup-form-grid media-generator-form" novalidate>
+public/control-center/pages/media-studio-workspace.js:2005:        <div class="setup-form-grid setup-form-grid-2">
+public/control-center/pages/media-studio-workspace.js:2009:        <div class="setup-form-grid setup-form-grid-2">
+public/control-center/pages/media-studio-workspace.js:2013:        <div class="setup-form-grid setup-form-grid-2">
+public/control-center/pages/media-studio-workspace.js:2020:        <div class="setup-form-grid setup-form-grid-2">
+public/control-center/pages/media-studio-workspace.js:2036:function renderPromptBuilder(session, handoff, escapeHtml) {
+public/control-center/pages/media-studio-workspace.js:2041:          <div class="setup-kicker">Smart Prompt Intelligence</div>
+public/control-center/pages/media-studio-workspace.js:2047:        <button id="mediaPromptFromContextBtn" class="btn btn-secondary" type="button">Generate from project setup</button>
+public/control-center/pages/media-studio-workspace.js:2062:function renderCampaignPackageSummaryRows(summary, escapeHtml) {
+public/control-center/pages/media-studio-workspace.js:2088:function renderWorkflowHandoff(handoff, session, escapeHtml) {
+public/control-center/pages/media-studio-workspace.js:2094:            <div class="setup-kicker">Inbound Media Brief</div>
+public/control-center/pages/media-studio-workspace.js:2119:          <div class="setup-kicker">${escapeHtml(kicker)}</div>
+public/control-center/pages/media-studio-workspace.js:2143:function renderQueue(session, escapeHtml) {
+public/control-center/pages/media-studio-workspace.js:2149:            <div class="setup-kicker">Media Job Queue</div>
+public/control-center/pages/media-studio-workspace.js:2163:          <div class="setup-kicker">Media Job Queue</div>
+public/control-center/pages/media-studio-workspace.js:2245:function renderOutputReadinessPanel(session, selectedItem, escapeHtml) {
+public/control-center/pages/media-studio-workspace.js:2253:          <div class="setup-kicker">Output Readiness State</div>
+public/control-center/pages/media-studio-workspace.js:2344:function renderOutputPreviewPanel(session, selectedItem, escapeHtml) {
+public/control-center/pages/media-studio-workspace.js:2351:            <div class="setup-kicker">Output Preview</div>
+public/control-center/pages/media-studio-workspace.js:2380:      : `<div class="media-prompt-box">${escapeHtml(JSON.stringify(payload, null, 2) || "No image output was returned yet. If the provider is not connected or timed out, keep the prompt/job-ready draft and continue with review, Library save, or provider setup in Integrations.")}</div>`;
+public/control-center/pages/media-studio-workspace.js:2438:          <div class="setup-kicker">Output Preview</div>
+public/control-center/pages/media-studio-workspace.js:2449:function renderVersioningPanel(session, escapeHtml) {
+public/control-center/pages/media-studio-workspace.js:2461:          <div class="setup-kicker">Versioning</div>
+public/control-center/pages/media-studio-workspace.js:2505:      <div class="setup-field-group media-block-gap">
+public/control-center/pages/media-studio-workspace.js:2506:        <div class="setup-field-head">
+public/control-center/pages/media-studio-workspace.js:2507:          <label class="setup-label" for="mediaVersionCompareNotes">Compare notes</label>
+public/control-center/pages/media-studio-workspace.js:2509:        <textarea id="mediaVersionCompareNotes" class="setup-input setup-textarea" rows="3">${escapeHtml(versioning.compareNotes || "")}</textarea>
+public/control-center/pages/media-studio-workspace.js:2551:function renderReviewPanel(session, selectedItem, escapeHtml) {
+public/control-center/pages/media-studio-workspace.js:2571:          <div class="setup-kicker">Asset Preview / Brand Safety Checklist</div>
+public/control-center/pages/media-studio-workspace.js:2609:function renderSpecialistCard(specialist, escapeHtml, { primary = false } = {}) {
+public/control-center/pages/media-studio-workspace.js:2628:function renderSpecialists(session = {}, selectedItem = null, escapeHtml) {
+public/control-center/pages/media-studio-workspace.js:2658:function renderAssetGate(state, escapeHtml) {
+public/control-center/pages/media-studio-workspace.js:2664:          <div class="setup-kicker">Brand-Safe Assets</div>
+public/control-center/pages/media-studio-workspace.js:2675:function renderApiReadiness(session, backendProjectName, escapeHtml) {
+public/control-center/pages/media-studio-workspace.js:2688:          <div class="setup-kicker">API Readiness</div>
+public/control-center/pages/media-studio-workspace.js:3737:    function renderOnboardingPanel() {
+public/control-center/pages/media-studio-workspace.js:3742:              <div class="setup-kicker">Welcome to Media Studio</div>
+public/control-center/pages/media-studio-workspace.js:3752:    function renderSourceProvenancePanel() {
+public/control-center/pages/media-studio-workspace.js:3767:              <div class="setup-kicker">Source Context</div>
+public/control-center/pages/media-studio-workspace.js:3783:    function renderCreativeReadinessPanel() {
+public/control-center/pages/media-studio-workspace.js:3790:              <div class="setup-kicker">Creative Readiness</div>
+public/control-center/pages/media-studio-workspace.js:3808:    function renderBrandCompliancePanel() {
+public/control-center/pages/media-studio-workspace.js:3815:              <div class="setup-kicker">Brand Compliance</div>
+public/control-center/pages/customer-center.js:121:function renderMetric(label, value, note = "") {
+public/control-center/pages/customer-center.js:131:function renderProtectedReadGuard(model) {
+public/control-center/pages/customer-center.js:143:        <strong>Protected-read setup required</strong>
+public/control-center/pages/customer-center.js:151:function renderEmptyState(title, body, nextStep = "Safe next step: verify protected-read readiness, then reload read-only customer projections.") {
+public/control-center/pages/customer-center.js:161:function renderInbox(model) {
+public/control-center/pages/customer-center.js:178:function renderConversations(model) {
+public/control-center/pages/customer-center.js:195:function renderTickets(model) {
+public/control-center/pages/customer-center.js:212:function renderChannels(model) {
+public/control-center/pages/customer-center.js:229:function renderDisabledActions(actions) {
+public/control-center/pages/customer-center.js:245:function renderCustomerCenter(context) {
+public/control-center/pages/customer-center.js:264:        : "Customer Center will request protected read-only projections when the page initializes. No outbound or mutation action is available.";
+public/control-center/pages/operations-centers.js:52:  return Number.isFinite(parsed) ? String(parsed) : "0";
+public/control-center/pages/operations-centers.js:55:function ensureSession(map, projectName, initialState) {
+public/control-center/pages/operations-centers.js:58:    map.set(key, { ...initialState });
+public/control-center/pages/operations-centers.js:138:function renderOpsFocusTabs(tabs, currentValue, escapeHtml) {
+public/control-center/pages/operations-centers.js:155:function renderOpsDetailRows(rows, escapeHtml) {
+public/control-center/pages/operations-centers.js:360:function renderExecutiveRuntimeStrip(context, options = {}) {
+public/control-center/pages/operations-centers.js:391:function renderFilterOptions(options, currentValue, escapeHtml, allLabel = "All") {
+public/control-center/pages/operations-centers.js:401:function renderRouteAction(item, escapeHtml, label = "Open") {
+public/control-center/pages/operations-centers.js:408:function renderOpsTable(columns, rows, emptyText, escapeHtml) {
+public/control-center/pages/operations-centers.js:428:function renderTaskCenterIncomingHandoff(incomingHandoff, escapeHtml) {
+public/control-center/pages/operations-centers.js:479:function renderTaskCenterLayout({
+public/control-center/pages/operations-centers.js:685:function renderTaskCenter(context, state, projectName) {
+public/control-center/pages/operations-centers.js:827:function renderQueueCenterLayout({
+public/control-center/pages/operations-centers.js:1037:function renderQueueCenter(context, state, projectName) {
+public/control-center/pages/operations-centers.js:1123:function renderJobMonitorLayout({
+public/control-center/pages/operations-centers.js:1332:function renderJobMonitor(context, state, projectName) {
+public/control-center/pages/operations-centers.js:1477:function renderGovernanceDecisionActions(item, escapeHtml) {
+public/control-center/pages/operations-centers.js:1494:function renderNotificationCenter(context, state, projectName) {
+public/control-center/pages/operations-centers.js:2126:function renderOperationsCentersOverview(context) {
+public/control-center/pages/business/dashboard.js:25:function renderLegacyBusinessDashboardNotice() {
+public/control-center/pages/research.js:35:    if (typeof value === "number" && Number.isFinite(value)) return String(value);
+public/control-center/pages/research.js:48:  return Number.isFinite(parsed) ? parsed : fallback;
+public/control-center/pages/research.js:53:  if (!Number.isFinite(parsed)) return "--";
+public/control-center/pages/research.js:61:  if (!Number.isFinite(parsed)) return "--";
+public/control-center/pages/research.js:76:function renderResearchTeamOps(state, escapeHtml) {
+public/control-center/pages/research.js:137:      if (typeof value === "number" && Number.isFinite(value)) return value;
+public/control-center/pages/research.js:276:    if (Number.isFinite(parsed)) return parsed;
+public/control-center/pages/research.js:765:function renderEmptyState(title, body, chips = [], escapeHtml) {
+public/control-center/pages/research.js:775:function renderKpiCard({ label, value, meta, tone = "neutral" }, escapeHtml) {
+public/control-center/pages/research.js:785:function renderSignalList(items, escapeHtml, emptyText) {
+public/control-center/pages/research.js:805:function renderSectionCard(item, escapeHtml, fields = []) {
+public/control-center/pages/research.js:1452:              <input id="researchNoteTitle" class="setup-input" type="text" placeholder="Finding title" value="${escapeHtml(session.noteDraft.title)}" />
+public/control-center/pages/research.js:1453:              <textarea id="researchNoteBody" class="setup-input setup-textarea" rows="5" placeholder="Capture the key observation, implication, or market signal...">${escapeHtml(session.noteDraft.body)}</textarea>
+public/control-center/pages/research.js:1454:              <input id="researchNoteTags" class="setup-input" type="text" placeholder="Tags, comma separated" value="${escapeHtml(session.noteDraft.tags)}" />
+public/control-center/pages/library/action-panel.js:17:export function renderLibraryActionPanel({ selectedAsset = null, disabled = false } = {}) {
+public/control-center/pages/library/action-panel.js:67:        <p class="setup-helper">Primary actions</p>
+public/control-center/pages/library/action-panel.js:75:        <p class="setup-helper">Utility</p>
+public/control-center/pages/library/action-panel.js:82:        <p class="setup-helper">Library metadata</p>
+public/control-center/pages/library/action-panel.js:118:        <p class="setup-helper">Danger</p>
+public/control-center/pages/library/listener-lifecycle.js:3:export function createListenerRegistry() {
+public/control-center/pages/library/listener-lifecycle.js:26:export function mountLibraryListeners({ root, documentRef = document, windowRef = window, handlers = {} } = {}) {
+public/control-center/pages/library/session-store.js:16:export function createLibrarySession(overrides = {}) {
+public/control-center/pages/library/session-store.js:27:export function normalizeLibrarySession(session = {}) {
+public/control-center/pages/library/session-store.js:31:export function updateLibrarySession(session = {}, patch = {}) {
+public/control-center/pages/library/session-store.js:42:export function isLibraryTransientKey(key) {
+public/control-center/pages/library/ai-panel.js:1:export function renderLibraryAiPanel({ readiness = {}, selectedAsset = null, disabled = false } = {}) {
+public/control-center/pages/library/ai-panel.js:44:        <p class="setup-helper">Why it matters</p>
+public/control-center/pages/library/ai-panel.js:52:        <p class="setup-helper">Suggested next move</p>
+public/control-center/pages/library/command-router.js:18:export function getLibraryCommands() {
+public/control-center/pages/library/command-router.js:22:export function createLibraryCommand(command, payload = {}) {
+public/control-center/pages/library/command-router.js:30:export function isLibraryMutationCommand(command) {
+public/control-center/pages/library/command-router.js:41:export function isLibraryAiCommand(command) {
+public/control-center/pages/library/command-router.js:45:export function routeLibraryCommand(commandEnvelope, handlers = {}) {
+public/control-center/pages/library/projection-adapter.js:1:export function normalizeLibraryAsset(asset = {}) {
+public/control-center/pages/library/projection-adapter.js:17:export function normalizeLibraryAssets(assets = []) {
+public/control-center/pages/ai-command.js:411:		initials: "AG",
+public/control-center/pages/ai-command.js:417:		initials: "RS",
+public/control-center/pages/ai-command.js:423:		initials: "AA",
+public/control-center/pages/ai-command.js:820:	return Number.isFinite(parsed) ? parsed : fallback;
+public/control-center/pages/ai-command.js:874:	if (!Number.isFinite(parsed)) return "--";
+public/control-center/pages/ai-command.js:883:	if (!Number.isFinite(parsed)) return "--";
+public/control-center/pages/ai-command.js:1409:		setup: "Setup",
+public/control-center/pages/ai-command.js:2083:			routeSuggestion("Setup", "setup", "Close missing project basics, goals, and audience inputs."),
+public/control-center/pages/ai-command.js:2156:			routeSuggestion("Setup", "setup", "Refine positioning if traffic signal is weak or misaligned.")
+public/control-center/pages/ai-command.js:2203:			aiContext.criticalGaps.length ? `Critical gaps affecting research quality: ${aiContext.criticalGaps.slice(0, 4).map(normalizeActionLabel).join(", ")}.` : "No major setup gaps blocking research quality.",
+public/control-center/pages/ai-command.js:2217:			routeSuggestion("Setup", "setup", "Strengthen project assumptions, goals, and audience context."),
+public/control-center/pages/ai-command.js:2396:	setup: "Setup",
+public/control-center/pages/ai-command.js:2418:	setup: "operations",
+public/control-center/pages/ai-command.js:2849:function renderControlRoomHeader(aiContext, session, intelligenceStatus, escapeHtml) {
+public/control-center/pages/ai-command.js:2917:function renderTeamSelector(session, escapeHtml) {
+public/control-center/pages/ai-command.js:2947:function renderSuggestedPromptsSection(aiContext, session, escapeHtml) {
+public/control-center/pages/ai-command.js:2981:function renderCleanResponse(response, escapeHtml, ownerId) {
+public/control-center/pages/ai-command.js:3072:function renderMessageStream(messages, escapeHtml) {
+public/control-center/pages/ai-command.js:3111:function renderResultsPanel(session, escapeHtml) {
+public/control-center/pages/ai-command.js:3129:function renderRecentCommands(session, escapeHtml) {
+public/control-center/pages/ai-command.js:3170:function renderArtifactsPanel(aiContext, session, escapeHtml) {
+public/control-center/pages/ai-command.js:3369:			reason: `${aiContext.criticalGaps.length} critical setup gap${aiContext.criticalGaps.length === 1 ? "" : "s"} can block launch quality and downstream automation reliability.`,
+public/control-center/pages/ai-command.js:3426:  const rawDefinitions = typeof SPECIALIST_DEFS !== "undefined" ? SPECIALIST_DEFS : [];
+public/control-center/pages/ai-command.js:3428:  const definitions = Array.isArray(rawDefinitions)
+public/control-center/pages/ai-command.js:3429:    ? rawDefinitions
+public/control-center/pages/ai-command.js:3430:    : Object.entries(rawDefinitions || {}).map(([id, item]) => ({
+public/control-center/pages/ai-command.js:3436:    definitions.find((item) =>
+public/control-center/pages/ai-command.js:3439:    definitions.find((item) => normalize(item?.id || item?.role || item?.key) === "strategist") ||
+public/control-center/pages/ai-command.js:3440:    definitions[0] ||
+public/control-center/pages/ai-command.js:3545:function renderAiRoomChainSegment(items, escapeHtml) {
+public/control-center/pages/ai-command.js:3552:function renderAiRoomTeamChain(escapeHtml) {
+public/control-center/pages/ai-command.js:3562:function renderPhase1Header(session, projectName, aiContext, bridgeStatus, escapeHtml) {
+public/control-center/pages/ai-command.js:3633:function renderPhase1TeamRail(session, bridgeStatus, escapeHtml) {
+public/control-center/pages/ai-command.js:3637:			<span class="aicmd-room-member-avatar" aria-hidden="true">${escapeHtml(item.initials)}</span>
+public/control-center/pages/ai-command.js:3706:function renderPhase1Profile(session, escapeHtml) {
+public/control-center/pages/ai-command.js:3766:function renderAiRoomConversationHeader(session, bridgeStatus, escapeHtml) {
+public/control-center/pages/ai-command.js:3837:function renderPhase35WorkspaceTabs(session, bridgeStatus, escapeHtml) {
+public/control-center/pages/ai-command.js:3864:function renderPhase35ToolsPanel(session, projectName, aiContext, escapeHtml) {
+public/control-center/pages/ai-command.js:3911:function renderLanguageMarketStrip(aiContext, escapeHtml) {
+public/control-center/pages/ai-command.js:3926:function renderAiCommandMainSourceIndicator(projectName, escapeHtml) {
+public/control-center/pages/ai-command.js:3951:function renderAiCommandIntelligenceLayer({ session, projectName, aiContext, bridgeStatus, escapeHtml }) {
+public/control-center/pages/ai-command.js:4034:function renderAiCommandChatFirstShell({ session, projectName, aiContext, bridgeStatus, escapeHtml }) {
+public/control-center/pages/ai-command.js:4061:function renderAiCommandMinimalContext({ session, bridgeStatus, escapeHtml }) {
+public/control-center/pages/ai-command.js:4089:function renderAiCommandCompactHeader({ session, projectName, bridgeStatus, escapeHtml }) {
+public/control-center/pages/ai-command.js:4122:function renderAiCommandChatWindow({ session, projectName, aiContext, bridgeStatus, escapeHtml }) {
+public/control-center/pages/ai-command.js:4132:function renderAiCommandChatTopbar({ session, projectName, aiContext, bridgeStatus, escapeHtml }) {
+public/control-center/pages/ai-command.js:4158:function renderAiCommandSpecialistSelect({ session, escapeHtml }) {
+public/control-center/pages/ai-command.js:4190:							<span class="aicmd-chatfirst-specialist-avatar" aria-hidden="true">${escapeHtml(item.initials)}</span>
+public/control-center/pages/ai-command.js:4203:function renderAiCommandChatMessages({ session, bridgeStatus, escapeHtml }) {
+public/control-center/pages/ai-command.js:4346:function renderAiCommandSmartActionCenter({ escapeHtml }) {
+public/control-center/pages/ai-command.js:4377:function renderCampaignPackageMiniPanel(packageInput, escapeHtml) {
+public/control-center/pages/ai-command.js:4417:function renderAiCommandCampaignWizard({ session, escapeHtml }) {
+public/control-center/pages/ai-command.js:4586:function renderAiCommandComposerSessionControls({ session, escapeHtml }) {
+public/control-center/pages/ai-command.js:4605:function renderAiCommandComposerAttachments({ session, aiContext, escapeHtml }) {
+public/control-center/pages/ai-command.js:4652:function renderAiCommandComposerTeamSelector({ session, escapeHtml }) {
+public/control-center/pages/ai-command.js:4702:function renderAiCommandChatComposer({ session, aiContext, escapeHtml }) {
+public/control-center/pages/ai-command.js:4799:function renderAiCommandSecondaryTabs({ session, escapeHtml }) {
+public/control-center/pages/ai-command.js:4826:function renderAiCommandSecondaryTabPanel({ session, projectName, aiContext, bridgeStatus, escapeHtml }) {
+public/control-center/pages/ai-command.js:4842:function renderAiCommandTeamTab({ session, bridgeStatus, escapeHtml }) {
+public/control-center/pages/ai-command.js:4881:						<span class="aicmd-chatfirst-specialist-avatar" aria-hidden="true">${escapeHtml(item.initials)}</span>
+public/control-center/pages/ai-command.js:4893:function renderAiCommandToolsTab({ session, projectName, aiContext, escapeHtml }) {
+public/control-center/pages/ai-command.js:4903:					<p>Prompt setup only. Tools prepare composer instructions, source-aware reviews, previews, and handoff context without executing actions.</p>
+public/control-center/pages/ai-command.js:4931:function renderAiCommandOutputTab({ session, aiContext, escapeHtml }) {
+public/control-center/pages/ai-command.js:4953:					<p>${hasPreview ? "Review the result, then open the destination workspace with draft context." : "Drafts, task previews, workflow previews, and handoff packages appear here after a response or tool setup."}</p>
+public/control-center/pages/ai-command.js:5016:function renderAiCommandFlowTab({ session, aiContext, bridgeStatus, escapeHtml }) {
+public/control-center/pages/ai-command.js:5049:function renderPhase35ReadinessStrip(aiContext, bridgeStatus, escapeHtml) {
+public/control-center/pages/ai-command.js:5071:function renderAiRoomStatusStrip(aiContext, session, bridgeStatus, escapeHtml) {
+public/control-center/pages/ai-command.js:5091:function renderPhase3SpecialistConversation(session, bridgeStatus, escapeHtml) {
+public/control-center/pages/ai-command.js:5301:function renderPhase1SuggestedPrompts(session, escapeHtml) {
+public/control-center/pages/ai-command.js:5329:function renderPhase1ContextPanel(state, session, aiContext, escapeHtml) {
+public/control-center/pages/ai-command.js:5387:function renderPhase1SafetyPanel(escapeHtml) {
+public/control-center/pages/ai-command.js:5416:function renderPhase4HistoryPanel(session, escapeHtml) {
+public/control-center/pages/ai-command.js:7249:function renderAiTeamPresenceUI(session) {
+public/control-center/pages/library.js:35:import { mountLibraryListeners } from "./library/listener-lifecycle.js";
+public/control-center/pages/library.js:105:    why: "Logos keep brand identity consistent across setup, media generation, and publishing.",
+public/control-center/pages/library.js:280:  if (!Number.isFinite(parsed)) return "0";
+public/control-center/pages/library.js:494:function mountLibraryGlobalListeners() {
+public/control-center/pages/library.js:499:  disposeLibraryGlobalListeners = mountLibraryListeners({
+public/control-center/pages/library.js:557:function unmountLibraryGlobalListeners() {
+public/control-center/pages/library.js:907:    return Number.isFinite(ts) && ts >= sevenDaysAgo;
+public/control-center/pages/library.js:1055:    return Number.isFinite(ts) ? ts : 0;
+public/control-center/pages/library.js:1141:function renderPreviewActionButtons(asset = {}, escapeHtml, { openLabel = "Open asset", includeCopy = true } = {}) {
+public/control-center/pages/library.js:1157:function renderUnsupportedPreviewCard(asset = {}, escapeHtml, options = {}) {
+public/control-center/pages/library.js:1181:function renderPreview(asset, escapeHtml) {
+public/control-center/pages/library.js:1518:function promptForTextInput(title, initialValue = "") {
+public/control-center/pages/library.js:1519:  const initial = asString(initialValue);
+public/control-center/pages/library.js:1523:      return Promise.resolve(window.prompt(title, initial));
+public/control-center/pages/library.js:1553:    input.value = initial;
+public/control-center/pages/library.js:2004:          <span class="setup-label">Selected asset</span>
+public/control-center/pages/library.js:2013:          <span class="setup-label">Selection hidden by filters</span>
+public/control-center/pages/library.js:2021:          <span class="setup-label">Selected asset</span>
+public/control-center/pages/library.js:3417:    mountLibraryGlobalListeners();
+public/control-center/pages/library.js:3424:              <div class="setup-kicker">Asset Source Command</div>
+public/control-center/pages/library.js:3426:              <p class="setup-helper">
+public/control-center/pages/library.js:3463:              <label class="setup-label" for="libraryUploadTypeSelect">Classify upload as</label>
+public/control-center/pages/library.js:3464:              <select id="libraryUploadTypeSelect" class="setup-input" aria-label="Upload asset type">
+public/control-center/pages/library.js:3469:              <div class="setup-helper">Upload and classify for readiness in one step.</div>
+public/control-center/pages/library.js:3508:                  <label class="setup-label" for="libraryFilterTypeSelect">Type</label>
+public/control-center/pages/library.js:3509:                  <select id="libraryFilterTypeSelect" class="setup-input" aria-label="Filter by type"></select>
+public/control-center/pages/library.js:3512:                  <label class="setup-label" for="libraryFilterStatusSelect">Status</label>
+public/control-center/pages/library.js:3513:                  <select id="libraryFilterStatusSelect" class="setup-input" aria-label="Filter by status">
+public/control-center/pages/library.js:3527:                  <label class="setup-label" for="libraryFilterSourceSelect">Source</label>
+public/control-center/pages/library.js:3528:                  <select id="libraryFilterSourceSelect" class="setup-input" aria-label="Filter by source"></select>
+public/control-center/pages/library.js:3531:                  <label class="setup-label" for="librarySortSelect">Sort</label>
+public/control-center/pages/library.js:3532:                  <select id="librarySortSelect" class="setup-input" aria-label="Sort assets">
+public/control-center/pages/library.js:3541:                  <label class="setup-label" for="librarySearchInput">Search</label>
+public/control-center/pages/library.js:3542:                  <input id="librarySearchInput" class="setup-input" type="text" placeholder="Search by name, path, type, or usage" />
+public/control-center/pages/library.js:3564:                <div id="libraryActionPanelMount" class="library-panel-mount"></div>
+public/control-center/pages/library.js:3565:                <div id="libraryAiPanelMount" class="library-panel-mount"></div>
+public/control-center/pages/library.js:3589:      unmountLibraryGlobalListeners();
+public/control-center/pages/home.js:34:  return Number.isFinite(parsed) ? parsed : fallback;
+public/control-center/pages/home.js:78:  if (Number.isFinite(parsed)) {
+public/control-center/pages/home.js:108:    if (Number.isFinite(stamp)) {
+public/control-center/pages/home.js:117:  if (!Number.isFinite(stamp)) return "Not available";
+public/control-center/pages/home.js:146:    "setup": "Complete setup foundation before execution",
+public/control-center/pages/home.js:176:      meta: health.projectReadiness >= 80 ? "Foundation is mostly ready" : "Review setup and readiness gaps",
+public/control-center/pages/home.js:232:  if (/(setup|foundation)/.test(text)) return "setup";
+public/control-center/pages/home.js:577:    secondaryActionRoute: "setup",
+public/control-center/pages/home.js:646:        hint: "Critical setup or assets",
+public/control-center/pages/home.js:1129:    if (quickReadinessBtn) quickReadinessBtn.onclick = () => openRoute("setup");
+public/control-center/pages/insights.js:92:  return Number.isFinite(parsed) ? parsed : fallback;
+public/control-center/pages/insights.js:103:  if (!Number.isFinite(parsed)) return "--";
+public/control-center/pages/insights.js:111:  if (!Number.isFinite(parsed)) return "--";
+public/control-center/pages/insights.js:120:  if (!Number.isFinite(parsed)) return "--";
+public/control-center/pages/insights.js:126:  if (!Number.isFinite(parsed)) return "--";
+public/control-center/pages/insights.js:146:    return Number.isFinite(parsed) ? `${parsed.toFixed(2)}x` : "--";
+public/control-center/pages/insights.js:204:    if (Number.isFinite(time)) return time;
+public/control-center/pages/insights.js:631:    if (hour != null && Number.isFinite(hour)) {
+public/control-center/pages/insights.js:788:function renderPlatformCards(cards, currency, escapeHtml) {
+public/control-center/pages/insights.js:821:function renderRankedContent(items, emptyText, escapeHtml) {
+public/control-center/pages/insights.js:862:function renderWeakContent(items, emptyText, escapeHtml) {
+public/control-center/pages/insights.js:884:function renderFeedAwareEmptyState(title, description, connected, escapeHtml) {
+public/control-center/pages/insights.js:894:function renderSimpleMetrics(rows, escapeHtml) {
+public/control-center/pages/insights.js:907:function renderKeyValueList(items, type, escapeHtml) {
+public/control-center/pages/content-studio-workspace.js:157:  if (!Number.isFinite(parsed)) return "0";
+public/control-center/pages/content-studio-workspace.js:882:function renderScopedStyles() {
+public/control-center/pages/content-studio-workspace.js:1094:function renderOverview(metrics, escapeHtml) {
+public/control-center/pages/content-studio-workspace.js:1099:          <div class="setup-kicker">Content Overview</div>
+public/control-center/pages/content-studio-workspace.js:1116:function renderRecommendation(recommendation, selectedItem, escapeHtml) {
+public/control-center/pages/content-studio-workspace.js:1131:          <div class="setup-kicker">Smart Recommendation</div>
+public/control-center/pages/content-studio-workspace.js:1144:function renderQueue(session, escapeHtml) {
+public/control-center/pages/content-studio-workspace.js:1150:            <div class="setup-kicker">Draft Queue</div>
+public/control-center/pages/content-studio-workspace.js:1163:          <div class="setup-kicker">Draft Queue</div>
+public/control-center/pages/content-studio-workspace.js:1181:function renderComposer(session, state, handoff, escapeHtml) {
+public/control-center/pages/content-studio-workspace.js:1191:          <div class="setup-kicker">Content Composer</div>
+public/control-center/pages/content-studio-workspace.js:1200:          <div class="setup-field-group">
+public/control-center/pages/content-studio-workspace.js:1201:            <div class="setup-field-head"><label class="setup-label" for="contentProjectInput">Project</label></div>
+public/control-center/pages/content-studio-workspace.js:1202:            <input id="contentProjectInput" name="project" class="setup-input" type="text" value="${escapeHtml(form.project || "")}">
+public/control-center/pages/content-studio-workspace.js:1205:          <div class="setup-field-group">
+public/control-center/pages/content-studio-workspace.js:1206:            <div class="setup-field-head"><label class="setup-label" for="contentCampaignInput">Campaign</label></div>
+public/control-center/pages/content-studio-workspace.js:1207:            <input id="contentCampaignInput" name="campaign" class="setup-input" type="text" value="${escapeHtml(form.campaign || "")}">
+public/control-center/pages/content-studio-workspace.js:1210:          <div class="setup-field-group">
+public/control-center/pages/content-studio-workspace.js:1211:            <div class="setup-field-head"><label class="setup-label" for="contentProductInput">Product</label></div>
+public/control-center/pages/content-studio-workspace.js:1212:            <input id="contentProductInput" name="product" class="setup-input" type="text" value="${escapeHtml(form.product || "")}">
+public/control-center/pages/content-studio-workspace.js:1215:          <div class="setup-field-group">
+public/control-center/pages/content-studio-workspace.js:1216:            <div class="setup-field-head"><label class="setup-label" for="contentChannelInput">Channel</label></div>
+public/control-center/pages/content-studio-workspace.js:1217:            <input id="contentChannelInput" name="channel" class="setup-input" type="text" value="${escapeHtml(form.channel || "")}">
+public/control-center/pages/content-studio-workspace.js:1220:          <div class="setup-field-group">
+public/control-center/pages/content-studio-workspace.js:1221:            <div class="setup-field-head"><label class="setup-label" for="contentLanguageInput">Language</label></div>
+public/control-center/pages/content-studio-workspace.js:1222:            <input id="contentLanguageInput" name="language" class="setup-input" type="text" value="${escapeHtml(form.language || "")}">
+public/control-center/pages/content-studio-workspace.js:1225:          <div class="setup-field-group">
+public/control-center/pages/content-studio-workspace.js:1226:            <div class="setup-field-head"><label class="setup-label" for="contentToneInput">Tone</label></div>
+public/control-center/pages/content-studio-workspace.js:1227:            <input id="contentToneInput" name="tone" class="setup-input" type="text" value="${escapeHtml(form.tone || "")}">
+public/control-center/pages/content-studio-workspace.js:1232:        <div class="setup-field-group">
+public/control-center/pages/content-studio-workspace.js:1233:          <div class="setup-field-head"><label class="setup-label" for="contentObjectiveInput">Objective</label></div>
+public/control-center/pages/content-studio-workspace.js:1234:          <input id="contentObjectiveInput" name="objective" class="setup-input" type="text" value="${escapeHtml(form.objective || "")}">
+public/control-center/pages/content-studio-workspace.js:1238:        <div class="setup-field-group">
+public/control-center/pages/content-studio-workspace.js:1239:          <div class="setup-field-head"><label class="setup-label" for="contentBriefInput">Main prompt / brief</label></div>
+public/control-center/pages/content-studio-workspace.js:1240:          <textarea id="contentBriefInput" name="brief" class="setup-input setup-textarea" rows="6">${escapeHtml(form.brief || "")}</textarea>
+public/control-center/pages/content-studio-workspace.js:1244:        <div class="setup-field-group">
+public/control-center/pages/content-studio-workspace.js:1245:          <div class="setup-field-head"><label class="setup-label" for="contentTitleInput">Draft title</label></div>
+public/control-center/pages/content-studio-workspace.js:1246:          <input id="contentTitleInput" name="title" class="setup-input" type="text" value="${escapeHtml(form.title || "")}">
+public/control-center/pages/content-studio-workspace.js:1350:function renderPreview(session, selectedItem, escapeHtml) {
+public/control-center/pages/content-studio-workspace.js:1366:          <div class="setup-kicker">Content Preview</div>
+public/control-center/pages/content-studio-workspace.js:1378:function renderVersioning(session, escapeHtml) {
+public/control-center/pages/content-studio-workspace.js:1386:          <div class="setup-kicker">Draft / Versioning</div>
+public/control-center/pages/content-studio-workspace.js:1435:function renderAgents(escapeHtml) {
+public/control-center/pages/content-studio-workspace.js:1440:          <div class="setup-kicker">Smart Writing Agents</div>
+public/control-center/pages/content-studio-workspace.js:1464:function renderInboundHandoff(handoff, session, escapeHtml) {
+public/control-center/pages/content-studio-workspace.js:1470:            <div class="setup-kicker">Workflow / AI Handoff</div>
+public/control-center/pages/content-studio-workspace.js:1484:          <div class="setup-kicker">Workflow / AI Handoff</div>
+public/control-center/pages/content-studio-workspace.js:1813:          <div class="setup-kicker">Content Inputs</div>
+public/control-center/pages/content-studio-workspace.js:2405:    function renderSourcePanel() {
+public/control-center/pages/content-studio-workspace.js:2432:      return `<section class="card content-card" aria-label="${ariaLabel}"><div class="card-head"><div><div class="setup-kicker">Source Context</div><h3>Source / Provenance</h3></div></div><div class="content-data-item">${sourceLines.join("")}</div></section>`;
+public/control-center/pages/content-studio-workspace.js:2436:    function renderSeoChecklistPanel() {
+public/control-center/pages/content-studio-workspace.js:2439:      return `<section class="card content-card" aria-label="${ariaLabel}"><div class="card-head"><div><div class="setup-kicker">SEO Checklist</div><h3>SEO Readiness Guidance</h3></div></div><ul class="content-seo-checklist content-readiness-list">
+public/control-center/pages/content-studio-workspace.js:2452:    function renderGovernancePanel() {
+public/control-center/pages/content-studio-workspace.js:2454:      return `<section class="card content-card" aria-label="${ariaLabel}"><div class="card-head"><div><div class="setup-kicker">Governance Risk</div><h3>Approval Readiness</h3></div></div><ul class="content-governance-checklist content-readiness-list">
+public/control-center/pages/integrations/cards.js:28:export function renderIntegrationStatusBadge(status) {
+public/control-center/pages/integrations/cards.js:39:export function renderIntegrationMetric(label, value, tone = "neutral") {
+public/control-center/pages/integrations/cards.js:48:export function renderIntegrationStatusCard(record = {}) {
+public/control-center/pages/integrations/cards.js:94:export function renderIntegrationCards(records = []) {
+public/control-center/pages/integrations/cards.js:116:  if (card.statusLabel === "Partial") return "needs_setup";
+public/control-center/pages/integrations/cards.js:121:  if (statusKey === "needs_setup") return "Needs setup";
+public/control-center/pages/integrations/cards.js:154:  if (statusKey === "needs_setup") {
+public/control-center/pages/integrations/cards.js:155:    return { action: "connect", label: "Complete setup" };
+public/control-center/pages/integrations/cards.js:217:export function renderConnectorRow(card = {}, session = {}) {
+public/control-center/pages/integrations/cards.js:224:  const setupMethodLabel = conciseSetupMethod(card);
+public/control-center/pages/integrations/cards.js:236:          <span class="integration-control-row-icon" data-integration-initials="${esc(card.icon)}">${esc(card.icon)}</span>
+public/control-center/pages/integrations/cards.js:246:              <span class="integration-control-meta-pill">Setup: ${esc(setupMethodLabel)}</span>
+public/control-center/pages/integrations/cards.js:267:export function renderConnectorGroup(group = {}, session = {}) {
+public/control-center/pages/integrations/cards.js:269:  const countLabel = `${group.connectedCount || 0} connected • ${group.setupCount || 0} needs setup • ${group.failedCount || 0} failed • ${group.missingCount || 0} missing`;
+public/control-center/pages/integrations/cards.js:278:        <span class="card-badge ${group.failedCount || group.missingCount ? "warning" : group.setupCount ? "warning" : "success"}">${esc(countLabel)}</span>
+public/control-center/pages/integrations/cards.js:309:    return "Complete setup";
+public/control-center/pages/integrations/cards.js:323:export function renderIntegrationCard(card = {}, session = {}) {
+public/control-center/pages/integrations/cards.js:388:export function renderSelectedConnectorSummary(card = {}) {
+public/control-center/pages/integrations/cards.js:390:  const compactHealth = shortenText(card.healthSummary, 120) || "Use the setup drawer for connection validation and actions.";
+public/control-center/pages/integrations/cards.js:397:          <p class="home-section-copy" style="margin:6px 0 0;">Open the setup drawer to configure fields and run connector actions.</p>
+public/control-center/pages/integrations/diagnostics.js:17:export function normalizeIntegrationRecord(record = {}) {
+public/control-center/pages/integrations/diagnostics.js:37:export function normalizeStatus(status) {
+public/control-center/pages/integrations/diagnostics.js:76:export function clampScore(value) {
+public/control-center/pages/integrations/diagnostics.js:85:export function buildDiagnosticsSummary(records = []) {
+public/control-center/pages/integrations/diagnostics.js:137:export function detectCriticalProviders(records = []) {
+public/control-center/pages/integrations/diagnostics.js:143:export function detectSlowProviders(
+public/control-center/pages/integrations/diagnostics.js:154:export function detectSyncFailures(records = []) {
+public/control-center/pages/integrations/builders.js:9:export function summarizeSectionCards(cards = []) {
+public/control-center/pages/integrations/builders.js:21:export function buildCoverageMap(domainModels = []) {
+
+### page files
+public/control-center/pages/ads-manager.js
+public/control-center/pages/ai-command.js
+public/control-center/pages/ai-command/tool-dock.js
+public/control-center/pages/business/dashboard.js
+public/control-center/pages/campaign-studio.js
+public/control-center/pages/content-studio-workspace.js
+public/control-center/pages/customer-center.js
+public/control-center/pages/governance.js
+public/control-center/pages/governance/dashboard.js
+public/control-center/pages/home.js
+public/control-center/pages/home/render-sections.js
+public/control-center/pages/insights.js
+public/control-center/pages/integrations.js
+public/control-center/pages/integrations/builders.js
+public/control-center/pages/integrations/cards.js
+public/control-center/pages/integrations/diagnostics.js
+public/control-center/pages/integrations/drawer.js
+public/control-center/pages/integrations/render.js
+public/control-center/pages/integrations/utils.js
+public/control-center/pages/library.js
+public/control-center/pages/library/action-panel.js
+public/control-center/pages/library/ai-panel.js
+public/control-center/pages/library/command-router.js
+public/control-center/pages/library/listener-lifecycle.js
+public/control-center/pages/library/projection-adapter.js
+public/control-center/pages/library/session-store.js
+public/control-center/pages/media-studio-workspace.js
+public/control-center/pages/operations-centers.js
+public/control-center/pages/publishing.js
+public/control-center/pages/publishing/publishing-payloads.js
+public/control-center/pages/research.js
+public/control-center/pages/settings.js
+public/control-center/pages/setup.js
+public/control-center/pages/workflows.js

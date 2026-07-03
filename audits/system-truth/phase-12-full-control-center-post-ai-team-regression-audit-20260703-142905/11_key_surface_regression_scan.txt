@@ -1,0 +1,917 @@
+
+### FILE: public/control-center/pages/operations-centers.js
+lines:     2279
+46:  if (["success", "approved", "published", "completed", "healthy"].includes(normalized)) return "success";
+95:function savePromptToQuickCommand(context, prompt) {
+131:      savePromptToQuickCommand(context, prompt.prompt);
+176:        preview: "Review the current task backlog and identify the highest-impact next work.",
+181:        preview: "Explain how to unblock the current task and who should act next.",
+186:        preview: "Highlight where task load or due-state suggests operational risk.",
+191:        preview: "Explain workload concentration by owner and likely bottlenecks.",
+196:        preview: "Identify highest-risk overdue items and likely downstream impact.",
+206:        preview: "Identify which queue needs attention first and why.",
+211:        preview: "Explain what the selected queue item likely needs next.",
+216:        preview: "Surface recurring queue patterns slowing execution.",
+226:        preview: "Summarize failure risk and what to inspect first.",
+231:        preview: "Explain what the selected job status implies operationally.",
+236:        preview: "Assess execution health across workflows, media, and publishing jobs.",
+237:        prompt: `Summarize current execution health for ${projectLabel} across workflows, media, and publishing jobs. Highlight failure clusters, retry patterns, and risk areas.`
+245:      preview: "Sort current notifications by severity and action urgency.",
+250:      preview: "Explain what the selected alert means and where to go next.",
+255:      preview: "Turn the current notification stream into a short operations summary.",
+256:      prompt: `Summarize the current operational notification signal for ${projectLabel} with focus on ${focusLabel}. Highlight approvals, provider health, publishing events, and urgent follow-up.`
+281:  const providerAlerts = asArray(notificationCenter.provider_disconnect_alerts).length;
+283:  const publishAlerts = asArray(notificationCenter.publish_alerts).length;
+331:      value: formatCount(publishAlerts),
+333:      tone: publishAlerts ? "warning" : "success",
+334:      route: "publishing"
+338:      value: formatCount(providerAlerts),
+339:      helper: "Disconnected provider alerts",
+340:      tone: providerAlerts ? "warning" : "success",
+365:    || "Cross-center runtime health, queue pressure, failures, publishing, governance, and provider signals.";
+437:    "Incoming task handoff"
+442:    incomingHandoff.payload?.handoff_intent ||
+444:    "Review-only handoff prepared by another MH-OS surface."
+449:    <section class="panel ops-incoming-handoff mhos-clean-surface">
+454:          <p>Review-only context from ${escapeHtml(titleCase(source))}. No durable task is created automatically from this handoff.</p>
+640:                  <p class="mhos-os-panel-copy">Active actions are refresh, copy, route, and AI guidance only. Task mutations remain deferred and disabled until backend policy and mutation safety checks are approved.</p>
+649:                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Update status (disabled: future mutation safety pass)</button>
+650:                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Reassign owner (disabled: future mutation safety pass)</button>
+651:                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Change priority (disabled: future mutation safety pass)</button>
+652:                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Update due date (disabled: future mutation safety pass)</button>
+653:                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Delete task (disabled: future mutation safety pass)</button>
+662:                  <p class="mhos-os-panel-copy">Context-only guidance: opens AI with prompt/context only. No task creation, owner assignment, status change, approval, publishing, or backend execution is performed.</p>
+672:                    <span class="ops-prompt-meta">${escapeHtml(item.preview)}</span>
+782:          `Title: ${asString(incomingHandoff.title || incomingHandoff.summary || incomingHandoff.payload?.title || incomingHandoff.payload?.summary || "Incoming task handoff")}`,
+783:          `Summary: ${asString(incomingHandoff.description || incomingHandoff.payload?.description || incomingHandoff.payload?.handoff_intent || incomingHandoff.payload?.prompt || "Review-only handoff.")}`,
+786:      : "No incoming task handoff.";
+800:      context.showMessage?.("Incoming handoff summary copied.");
+802:      context.showError?.("Failed to copy incoming handoff summary.");
+895:              <p class="std-context-description mhos-os-subtitle">Review workflow, content, media, approval, publishing, and sync queue pressure for ${escapeHtml(projectLabel)}.</p>
+987:                  <p class="mhos-os-panel-copy">Active actions are refresh, route, and AI guidance only. Queue, publishing, approval, and removal mutations remain disabled until backend policy and mutation safety checks are approved.</p>
+1003:                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Retry item (disabled: future mutation safety pass)</button>
+1006:                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Remove item (disabled: future destructive mutation safety pass)</button>
+1015:                  <p class="mhos-os-panel-copy">Context-only guidance: opens AI with prompt/context only. No approve, publish, retry, remove, Governance bypass, or backend execution is performed.</p>
+1025:                    <span class="ops-prompt-meta">${escapeHtml(item.preview)}</span>
+1186:              <p class="std-context-description mhos-os-subtitle">Review running, completed, and failed job state across workflows, media, and publishing for ${escapeHtml(projectLabel)} without triggering workers.</p>
+1229:                ${["all", "workflow", "media", "publishing"].map((value) => `<option value="${escapeHtml(value)}"${value === session.kind ? " selected" : ""}>${escapeHtml(titleCase(value))}</option>`).join("")}
+1277:                  <p class="mhos-os-panel-copy">Active actions are refresh, route, and AI guidance only. Job retry, cancel, rerun, delete, worker execution, publishing, and approval mutations remain disabled or destination-owned.</p>
+1298:                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Retry job (disabled: future mutation safety pass)</button>
+1299:                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Cancel job (disabled: future destructive mutation safety pass)</button>
+1301:                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Delete job (disabled: future destructive mutation safety pass)</button>
+1310:                  <p class="mhos-os-panel-copy">Context-only guidance: opens AI with prompt/context only. No retry, cancel, rerun, delete, worker trigger, approve, publish, Governance bypass, or backend execution is performed.</p>
+1320:                    <span class="ops-prompt-meta">${escapeHtml(item.preview)}</span>
+1425:      id: `provider-${key}`,
+1486:      <button class="btn btn-primary" type="button" data-governance-decision="approved" data-approval-id="${escapeHtml(approvalId)}">Approve</button>
+1510:  const providerDisconnectAlerts = deriveProviderDisconnectAlerts(state, notificationCenter.provider_disconnect_alerts);
+1526:  const publishAlerts = asArray(notificationCenter.publish_alerts).map((item) => ({ ...item, item_type: "publish" }));
+1527:  const providerAlerts = providerDisconnectAlerts.map((item) => ({ ...item, item_type: "provider" }));
+1529:  const workflowAlerts = asArray(notificationCenter.workflow_completion_alerts).map((item) => ({ ...item, item_type: "workflow" }));
+1533:    ...publishAlerts,
+1534:    ...providerAlerts,
+1536:    ...workflowAlerts
+1550:  if (session.focus === "provider") listItems = providerAlerts.map((item, index) => ({ ...item, _opsKey: getOpsItemKey(item, index, "provider") }));
+1608:              <p class="std-context-description mhos-os-subtitle">Review operational alerts, unread inbox state, approvals, sync issues, publishing, claim risk, provider health, and workflow completion for ${escapeHtml(projectLabel)}.</p>
+1645:              { value: "provider", label: "Provider", count: formatCount(providerAlerts.length) },
+1698:                  <p class="mhos-os-panel-copy">Active actions are refresh, route, AI guidance, and Mark Read only where supported. Lifecycle controls remain disabled until backend mutation safety checks are approved.</p>
+1704:                ${selectedItem?.notification_id ? `<button class="btn btn-secondary" type="button" data-mark-read="${escapeHtml(selectedItem.notification_id)}" title="Updates notification read-state only. Does not acknowledge, resolve, dismiss, delete, send, approve, publish, or execute.">Mark Read (read-state only)</button>` : ""}
+1714:                  <span>${escapeHtml(`${formatCount(providerAlerts.length)} alerts`)}</span>
+1722:                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Acknowledge notification (disabled: future lifecycle mutation safety pass)</button>
+1724:                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Dismiss notification (disabled: future visibility mutation safety pass)</button>
+1725:                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Delete notification (disabled: future destructive mutation safety pass)</button>
+1734:                  <p class="mhos-os-panel-copy">Context-only guidance: opens AI with prompt/context only. No mark-read, acknowledge, resolve, dismiss, delete, send, approve, publish, Governance bypass, or backend execution is performed.</p>
+1744:                    <span class="ops-prompt-meta">${escapeHtml(item.preview)}</span>
+1803:      const confirmed = window.confirm(
+1806:          "Risk: This updates durable notification read-state only. It does not acknowledge, resolve, dismiss, delete, send, approve, publish, or execute anything.\n\n" +
+1810:      if (!confirmed) {
+1863:      const confirmed = window.confirm(`Confirm Governance decision\n\nAction: ${titleCase(decision)} approval ${approvalId}.\nRisk: This updates a durable Governance approval record. It does not publish, send, or execute anything directly.\n\nSelect Cancel to review before deciding.`);
+1864:      if (!confirmed) return;
+1953:    description: "Review durable tasks, owners, due dates, priorities, filters, and linked operational entities without silent task mutation."
+1988:    description: "Review queue pressure and route workflow, content, media, approval, publishing, and sync items to owning workspaces without silent mutation."
+2036:    description: "Review job health, failures, retry risk, and execution logs across workflows, media, and publishing without silent job mutation."
+2084:    description: "Review alerts, unread inbox state, approvals, provider health, publishing, claim risks, and workflow completion signals with Mark Read limited to notification read-state."
+2196:          description: "Use this page as the routing hub from AI Team drafts, workflows, tasks, and runtime signals into the correct operations workspace.",
+2207:                  <p class="mhos-os-section-copy">AI Team can prepare drafts, tasks, workflows, and handoffs. This overview routes work to the owning operations center for review, monitoring, or controlled follow-up.</p>
+2234:                  <h3 class="mhos-os-panel-title">Operations Lead handoff</h3>
+2240:                <button class="btn btn-ghost" type="button" data-ops-route="workflows" data-ops-label="Workflows">Open Workflows</button>
+2249:                  <p class="mhos-os-panel-copy">This overview does not execute jobs, mutate tasks, send notifications, approve workflows, mark notifications read, publish, or trigger workers. It only routes to the owning workspace.</p>
+2253:                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Planned disabled: create task from draft — future task mutation safety pass</button>
+2254:                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Planned disabled: execute workflow — future workflow execution safety pass</button>
+2255:                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Planned disabled: acknowledge signal — future notification lifecycle mutation safety pass</button>
+
+### FILE: public/control-center/pages/customer-center.js
+lines:      502
+7:} from "../api.js";
+54:  const [readiness, inbox, conversations, tickets, channels] = await Promise.all([
+62:  const responses = [readiness, inbox, conversations, tickets, channels];
+71:      tickets: [],
+82:  const ticketsData = getPayload(tickets);
+91:    tickets: asArray(ticketsData?.tickets || ticketsData),
+101:    ["Send reply", "Locked: Customer Center v1 cannot send external replies or provider messages."],
+102:    ["Add CRM note", "Locked: CRM writes require a future confirmation gate, role check, and audit log."],
+103:    ["Update ticket", "Locked: ticket changes are outside this read-only release."],
+104:    ["Assign conversation", "Locked: assignment changes require a future workflow owner and audit trail."],
+107:    ["Trigger IVR", "Locked: IVR provider execution is not enabled from Customer Center."],
+108:    ["Sync CRM", "Locked: CRM provider execution is not enabled from Customer Center."],
+145:        <p>No placeholder customer records are shown. External send, CRM updates, ticket changes, calls, IVR, provider sync, and auto-reply remain locked.</p>
+171:        <p>${escapeHtml(entry.last_message_preview || "No message preview available.")}</p>
+181:    return renderEmptyState("No conversation previews available", "Masked conversation context will appear here after read-only projections return conversations. Customer identity and message content stay masked or truncated by default.");
+196:  const tickets = asArray(model?.tickets);
+197:  if (!tickets.length) {
+198:    return renderEmptyState("No ticket snapshots available", "Support ticket and SLA records will appear here when the read-only projection includes them. No ticket creation or update is available from this page.");
+201:  return tickets.slice(0, 6).map((ticket) => `
+204:        <strong>${escapeHtml(ticket.ticket_id || "Ticket")}</strong>
+205:        <p>${escapeHtml(ticket.status || "open")} • ${escapeHtml(ticket.sla_status || "unknown SLA")}</p>
+207:      <span class="card-badge">${escapeHtml(ticket.priority || "normal")}</span>
+215:    return renderEmptyState("No channel readiness records", "Provider readiness for email, social messaging, CRM, voice, and IVR will appear here when configured. Send and provider execution remain locked.");
+221:        <strong>${escapeHtml(channel.channel_id || channel.provider || "Channel")}</strong>
+224:      <span class="card-badge">${channel.external_send_ready ? "Send ready" : "Send locked"}</span>
+233:      <p class="muted">Visible for roadmap clarity only. These customer actions cannot execute here and require future confirmation gates, role permissions, provider readiness, and audit logging.</p>
+249:  const tickets = asArray(model.tickets);
+263:        ? "Customer Center is using read-only projections only. Outbound sends, CRM writes, ticket changes, assignments, calls, IVR, and auto-replies remain unavailable."
+264:        : "Customer Center will request protected read-only projections when the page initializes. No outbound or mutation action is available.";
+283:        <p class="mhos-context-description">Protected-read customer communication surface for inbox visibility, conversation previews, ticket/SLA state, channel readiness, and handoff preparation. No customer execution happens here.</p>
+287:        <button class="btn btn-primary" type="button" data-customer-center-action="ai-handoff">Prepare AI support prompt</button>
+293:      ${renderMetric("Waiting Replies", countWaitingReplies(inbox), "No auto-send")}
+294:      ${renderMetric("SLA Risk", countSlaRisk([...tickets, ...inbox]), "Review only")}
+306:        <p class="muted">This page can review customer context and prepare handoffs. Any future customer-facing action must happen in an owning workflow with confirmation, permissions, and audit logging.</p>
+317:          <article class="ops-list-item"><div><strong>External send</strong><p>Replies, social messages, SMS, and provider sends are unavailable here.</p></div><span class="card-badge">Locked</span></article>
+318:          <article class="ops-list-item"><div><strong>CRM / Ticket / Assignment writes</strong><p>CRM notes, ticket updates, review marks, and ownership changes require future confirmation gates.</p></div><span class="card-badge">Locked</span></article>
+319:          <article class="ops-list-item"><div><strong>Calls / IVR / Auto-reply</strong><p>Voice placement, IVR provider execution, and autonomous replies remain disabled.</p></div><span class="card-badge">Locked</span></article>
+324:        <div class="panel-header"><div><div class="panel-kicker">Safe Operating Rules</div><h3>Preview-first support workflow</h3></div></div>
+325:        <p class="muted">Use Customer Center to review, summarize, and prepare handoffs only. Nothing in this page sends a reply, changes CRM, updates tickets, assigns conversations, places calls, triggers IVR, or starts auto-reply.</p>
+354:        <p class="muted">These buttons prepare navigation/context handoffs only. They do not send customer messages, contact providers, update CRM, change tickets, assign conversations, or mark records reviewed.</p>
+356:          <button class="btn btn-secondary" type="button" data-customer-center-action="task-handoff">Prepare Task Center handoff</button>
+357:          <button class="btn btn-secondary" type="button" data-customer-center-action="governance-handoff">Prepare Governance review</button>
+358:          <button class="btn btn-secondary" type="button" data-customer-center-action="ai-handoff">Prepare AI Command prompt</button>
+365:        <p class="muted">AI may summarize read-only context, draft response guidance, translate, and suggest next steps for a human handoff. It must not send replies, update CRM, close tickets, assign conversations, place calls, trigger IVR, sync providers, or start auto-reply.</p>
+371:function confirmCustomerCenterHandoff(action, detail = "") {
+375:    "This prepares review context only. It does not send customer messages, update CRM, change tickets, contact providers, or execute AI automatically.",
+379:  if (typeof window === "undefined" || typeof window.confirm !== "function") {
+383:  return window.confirm(message);
+401:    if (action === "ai-handoff") {
+402:      const confirmed = confirmCustomerCenterHandoff(
+406:      if (!confirmed) return;
+411:        prompt: "Review Customer Center read-only state. Summarize customer support risks, draft safe reply guidance, and identify escalation needs. Do not send replies or mutate CRM."
+418:    if (action === "task-handoff") {
+419:      const confirmed = confirmCustomerCenterHandoff(
+420:        "Prepare Task Center customer follow-up handoff",
+423:      if (!confirmed) return;
+427:        title: "Customer follow-up task preview",
+428:        summary: "Review Customer Center state and prepare a human follow-up task. No customer mutation was performed."
+431:      context.showMessage?.("Customer task handoff prepared.");
+435:    if (action === "governance-handoff") {
+436:      const confirmed = confirmCustomerCenterHandoff(
+440:      if (!confirmed) return;
+445:        summary: "Review customer reply/escalation risk before any external response. No send action was performed."
+448:      context.showMessage?.("Customer governance handoff prepared.");
+469:      tickets: [],
+487:    description: "Read-only customer operations, inbox visibility, ticket/SLA state, and safe AI handoffs."
+
+### FILE: public/control-center/pages/workflows.js
+lines:     2406
+22:  approveCurrentGate,
+33:    purpose: "Build a launch-ready review sequence across campaign, content, and distribution handoffs.",
+49:    purpose: "Prepare media production inputs, format guidance, and downstream handoff steps.",
+55:    id: "prepare-publishing-package",
+57:    purpose: "Package final channel payloads, approval checks, and publishing queue dependencies.",
+60:    routeHint: "publishing"
+65:    purpose: "Summarize workflow state, results, blockers, and the next operational decision.",
+104:const WORKFLOW_LOCAL_DRAFTS_KEY = "mh-workflow-local-drafts-v1";
+106:const workflowSessions = new Map();
+108:let workflowBridgeRegistered = false;
+109:let workflowAutoModeUnsubscribe = null;
+110:let workflowAutomationEnabled = false;
+111:const workflowAutomationState = {
+177:  return "draft";
+213:    status: "draft",
+224:  return WORKFLOW_CATALOG.reduce((acc, workflow) => {
+225:    acc[workflow.id] = createEmptyRunState();
+231:  return WORKFLOW_CATALOG.reduce((acc, workflow) => {
+232:    acc[workflow.id] = {
+243:    String(operations?.workflows?.total_runs || 0),
+271:function saveLocalDraft(projectName, workflowId, payload) {
+275:  projectDrafts[workflowId] = {
+276:    ...asObject(projectDrafts[workflowId]),
+282:  return projectDrafts[workflowId];
+288:  WORKFLOW_CATALOG.forEach((workflow) => {
+289:    const draft = asObject(local[workflow.id]);
+290:    if (!Object.keys(draft).length) return;
+291:    session.inputsByWorkflow[workflow.id] = {
+292:      ...session.inputsByWorkflow[workflow.id],
+293:      ...asObject(draft.inputs)
+295:    if (draft.lastSelected) {
+296:      session.selectedWorkflowId = workflow.id;
+298:    if (draft.updatedAt) {
+299:      session.draftStatus = `Draft restored ${formatDateTime(draft.updatedAt)}`;
+305:function persistWorkflowDraft(projectName, session, workflowId, hint, selected) {
+306:  const saved = saveLocalDraft(projectName, workflowId, {
+307:    inputs: asObject(session.inputsByWorkflow[workflowId]),
+308:    workflowId,
+311:  session.draftStatus = hint || `Draft saved ${formatDateTime(saved.updatedAt)}`;
+316:  if (!workflowSessions.has(key)) {
+317:    workflowSessions.set(key, {
+322:      draftStatus: "",
+338:    const session = workflowSessions.get(key);
+339:    session.inputsByWorkflow = WORKFLOW_CATALOG.reduce((acc, workflow) => {
+340:      acc[workflow.id] = {
+342:        ...asObject(session.inputsByWorkflow?.[workflow.id])
+348:    session.draftStatus = asString(session.draftStatus);
+363:  const session = workflowSessions.get(key);
+374:  asArray(operations?.workflows?.items).forEach((item) => {
+375:    const sourceId = asString(item.workflow_id);
+457:    draft: 0,
+468:    else counts.draft += 1;
+476:    const when = asString(item.executed_at || item.created_at);
+485:function getBlockedRequirements(workflow, inputs, context) {
+487:  const missingRequired = workflow.requiredInputs.filter((field) => !asString(inputs[field]).trim());
+492:  if (workflow.id === "prepare-publishing-package" && context.missingAssets.length) {
+496:  if (workflow.id === "generate-report" && context.missingIntegrations.length) {
+500:  if (workflow.id === "fix-integrations" && !context.missingIntegrations.length) {
+501:    blocked.push("No integration gaps detected. Use this workflow only if connectors are unstable.");
+507:function buildWorkflowPrompt(workflow, inputs, context) {
+509:    `Workflow: ${workflow.title}`,
+510:    `Purpose: ${workflow.purpose}`,
+522:function buildFallbackOutput(workflow, inputs, context) {
+525:  const blockedRequirements = getBlockedRequirements(workflow, inputs, context);
+528:    title: `${workflow.title} review package`,
+529:    summary: `Prepared ${workflow.title.toLowerCase()} for ${inputs.project || context.projectName || "the current project"} with ${inputs.goal || "a defined goal"}.`,
+532:      `Open ${titleCase(workflow.routeHint)} for review handoff.`,
+533:      blockedRequirements.length ? "Resolve blockers before any destination-owned execution." : "Proceed to review handoff."
+536:    requiredInputs: workflow.requiredInputs.map(titleCase),
+539:        label: `Open ${titleCase(workflow.routeHint)}`,
+540:        route: workflow.routeHint,
+541:        reason: `Continue review in ${titleCase(workflow.routeHint)}.`
+546:        reason: "Refine this workflow package with AI reasoning."
+555:  if (target === "publishing") return "prepare-publishing-package";
+567:      workflowId: mapped.id,
+571:      prompt: firstNonEmpty(globalAction?.draftPayload?.prompt, `Build a ${mapped.title.toLowerCase()} review plan from current system blockers and dependencies.`)
+577:      workflowId: "fix-integrations",
+581:      prompt: "Build a prioritized integration recovery workflow with dependency order and expected readiness impact."
+587:      workflowId: "prepare-publishing-package",
+588:      title: "Prepare publishing package handoff before distribution",
+589:      reason: `${context.missingAssets.length} asset requirement${context.missingAssets.length === 1 ? "" : "s"} are still missing and can block final publishing.`,
+591:      prompt: "Prepare a publishing package checklist with missing assets and approval dependencies."
+597:      workflowId: "launch-campaign",
+598:      title: "Define launch campaign workflow",
+599:      reason: "A campaign operating sequence is required before content, media, and publishing lanes can execute clearly.",
+601:      prompt: "Create a launch campaign workflow with owner sequence and execution gates."
+607:    workflowId: selected.id,
+609:    reason: "Current context is sufficient to prepare the selected workflow review package now.",
+611:    prompt: `Refine ${selected.title.toLowerCase()} for reviewed handoff with explicit dependencies and next actions.`
+625:        <article class="wfexec-stat"><span>Total workflows</span><strong>${escapeHtml(String(metrics.total))}</strong></article>
+626:        <article class="wfexec-stat"><span>Ready workflows</span><strong>${escapeHtml(String(metrics.ready))}</strong></article>
+627:        <article class="wfexec-stat"><span>Draft workflows</span><strong>${escapeHtml(String(metrics.draft))}</strong></article>
+669:        Safe guided preparation only: navigate, create draft, generate prompt, and create review handoff.
+698:        <button id="workflowRunFullAutomationBtn" class="wfexec-btn wfexec-btn-primary" type="button">
+701:        <button id="workflowRunStepAutomationBtn" class="wfexec-btn wfexec-btn-secondary" type="button">
+706:      <div id="workflowAutomationProgress" class="wfexec-meta">
+707:        ${esc(workflowAutomationState.progress || "")}
+710:      <div id="workflowAutomationResult" class="wfexec-meta">
+711:        ${esc(workflowAutomationState.result || "")}
+723:        <button id="workflowAutoStartBtn" class="wfexec-btn wfexec-btn-primary" type="button">
+726:        <button id="workflowAutoPauseBtn" class="wfexec-btn wfexec-btn-secondary" type="button">
+729:        <button id="workflowAutoResumeBtn" class="wfexec-btn wfexec-btn-secondary" type="button">
+732:        <button id="workflowAutoStopBtn" class="wfexec-btn wfexec-btn-ghost" type="button">
+757:              <button id="workflowAutoApproveBtn" class="wfexec-btn wfexec-btn-secondary" type="button">
+760:              <button id="workflowAutoSkipBtn" class="wfexec-btn wfexec-btn-secondary" type="button">
+780:function renderBuilderSection(session, workflow, inputs, validationMessage, draftStatus, escapeHtml) {
+788:            ${WORKFLOW_CATALOG.map((item) => `<option value="${escapeHtml(item.id)}"${item.id === workflow.id ? " selected" : ""}>${escapeHtml(item.title)}</option>`).join("")}
+814:        <button id="workflowRunBtn" class="wfexec-btn wfexec-btn-primary" type="button">Prepare Review Package</button>
+815:        <button id="workflowRunBtnMain" class="wfexec-btn wfexec-btn-primary" type="button">Prepare</button>
+820:      <div class="wfexec-draft-status">${escapeHtml(draftStatus || "Drafts auto-save locally per workflow.")}</div>
+830:        ${WORKFLOW_CATALOG.map((workflow) => {
+831:          const inputs = asObject(session.inputsByWorkflow[workflow.id]);
+832:          const run = asObject(session.runsByWorkflow[workflow.id]);
+833:          const blocked = getBlockedRequirements(workflow, inputs, context);
+836:            <article class="wfexec-catalog-card${workflow.id === session.selectedWorkflowId ? " is-active" : ""}">
+838:                <h4>${escapeHtml(workflow.title)}</h4>
+841:              <p>${escapeHtml(workflow.purpose)}</p>
+842:              <div class="wfexec-required"><strong>Required inputs:</strong> ${escapeHtml(workflow.requiredInputs.map(titleCase).join(", "))}</div>
+845:                <button class="wfexec-btn wfexec-btn-primary" type="button" data-wf-catalog-run="${escapeHtml(workflow.id)}">Prepare</button>
+846:                <button class="wfexec-btn wfexec-btn-ghost" type="button" data-wf-catalog-save="${escapeHtml(workflow.id)}">Save Draft</button>
+847:                <button class="wfexec-btn wfexec-btn-secondary" type="button" data-wf-catalog-ai="${escapeHtml(workflow.id)}">Open in AI Command</button>
+858:function renderExecutionSection(run, workflow, blockedRequirements, escapeHtml) {
+864:        <div class="wfexec-empty">No prepared package yet. Prepare a workflow package to generate a review-ready output.</div>
+889:        <button id="workflowPushAiBtn" class="wfexec-btn wfexec-btn-secondary" type="button">Send to AI for Review</button>
+890:        <button id="workflowPushAiBtnSecondary" class="wfexec-btn wfexec-btn-secondary" type="button">Open in AI Command</button>
+891:        <button id="workflowSaveTaskBtn" class="wfexec-btn wfexec-btn-ghost" type="button">Prepare Task Review Handoff</button>
+892:        <button id="workflowBuildCustomBtn" class="wfexec-btn wfexec-btn-ghost" type="button">Build Custom Workflow</button>
+893:        <button id="workflowRecommendBtn" class="wfexec-btn wfexec-btn-ghost" type="button">Recommend Review Workflow</button>
+895:      <div class="wfexec-meta">Workflow review package: ${escapeHtml(workflow.title)} · Status: ${escapeHtml(titleCase(normalizeRunStatus(run.status)))}</div>
+907:  workflow,
+920:          ${renderBuilderSection(session, workflow, inputs, session.validationMessage, session.draftStatus, escapeHtml)}
+924:          ${renderExecutionSection(run, workflow, blockedRequirements, escapeHtml)}
+932:  const handoff = getSharedHandoff(projectName, "workflows", operations);
+933:  const handoffId = asString(handoff?.id);
+934:  if (!handoffId || handoffId === asString(session.lastAppliedHandoffId)) return;
+936:  const payload = asObject(handoff?.payload);
+937:  const fromWorkflowId = asString(payload.workflow_id);
+938:  const modeId = asString(payload?.draft_context?.modeId);
+940:  const workflowId = getWorkflowDef(fromWorkflowId || modeMapped || session.selectedWorkflowId).id;
+942:  session.selectedWorkflowId = workflowId;
+943:  session.inputsByWorkflow[workflowId] = {
+944:    ...session.inputsByWorkflow[workflowId],
+945:    project: firstNonEmpty(payload?.draft_context?.projectName, session.inputsByWorkflow[workflowId].project),
+946:    campaign: firstNonEmpty(payload?.campaign_name, session.inputsByWorkflow[workflowId].campaign),
+947:    goal: firstNonEmpty(payload?.draft_context?.lastResponseTitle, payload?.workflow_title, session.inputsByWorkflow[workflowId].goal),
+948:    product: firstNonEmpty(payload?.output?.product, session.inputsByWorkflow[workflowId].product),
+949:    channel: firstNonEmpty(payload?.output?.channel, session.inputsByWorkflow[workflowId].channel)
+953:    const run = session.runsByWorkflow[workflowId];
+957:    run.source = "handoff";
+962:  session.lastAppliedHandoffId = handoffId;
+964:    console.info("Workflow handoff restored without automatic durable consume; operator-owned surfaces keep handoff lifecycle authority.");
+966:  showMessage?.("Workflow context restored from shared handoff without consuming the durable handoff automatically.");
+979:    session.intelligence = { ...session.intelligence, status: "error", error: "Select a project to run workflows." };
+1016:            ? (insightsResult.reason?.message || learningResult.reason?.message || "Failed to load workflow intelligence")
+1026:          error: error.message || "Failed to load workflow intelligence",
+1039:function buildAiHandoffPrompt(workflow, inputs, runOutput, context) {
+1042:      `Refine the ${workflow.title.toLowerCase()} review package.`,
+1050:    `Build a ${workflow.title.toLowerCase()} review package.`,
+1063:  workflow,
+1072:  const prompt = buildAiHandoffPrompt(workflow, inputs, run.output, context);
+1075:    modeId: workflow.aiModeId,
+1077:    lastResponseTitle: asString(run.output?.title || workflow.title),
+1083:  const handoff = {
+1084:    source_page: "workflows",
+1088:      workflow_id: workflow.id,
+1089:      workflow_title: workflow.title,
+1090:      draft_context: aiDraft,
+1096:  setSharedHandoff(projectName, "ai-command", handoff);
+1099:    createProjectHandoff(projectName, handoff).catch((error) => {
+1100:      console.warn("Failed to persist workflow-to-ai handoff:", error.message);
+1108:function validateWorkflowInputs(workflow, inputs) {
+1109:  const missing = workflow.requiredInputs.filter((field) => !asString(inputs[field]).trim());
+1116:  if (workflowBridgeRegistered || typeof window === "undefined") return;
+1118:  window.addEventListener("mh:submit-workflow", async (event) => {
+1140:    const workflow = WORKFLOW_CATALOG.find((item) => item.aiModeId === asString(meta.modeId)) || WORKFLOW_CATALOG[0];
+1142:    session.selectedWorkflowId = workflow.id;
+1143:    session.inputsByWorkflow[workflow.id] = {
+1144:      ...session.inputsByWorkflow[workflow.id],
+1145:      project: firstNonEmpty(projectName, session.inputsByWorkflow[workflow.id].project),
+1146:      goal: firstNonEmpty(meta.assistantTitle, session.inputsByWorkflow[workflow.id].goal),
+1147:      campaign: firstNonEmpty(session.inputsByWorkflow[workflow.id].campaign, state.context.activeCampaign),
+1148:      product: firstNonEmpty(session.inputsByWorkflow[workflow.id].product, state.context.currentProject)
+1152:      session.draftStatus = "AI prompt imported into workflow review builder";
+1157:    const run = session.runsByWorkflow[workflow.id];
+1173:      const confirmed = window.confirm(
+1174:        "Confirm workflow bridge preparation\n\n" +
+1175:          `Action: Prepare workflow review package for ${workflow.title} from an external workflow event.\n` +
+1176:          "Risk: This may call the backend workflow preparation endpoint and update workflow run history. It does not publish, send messages, create CRM records, bypass Governance, or perform destructive actions.\n\n" +
+1177:          "Select Cancel to ignore this workflow event."
+1180:      if (!confirmed) {
+1185:      const result = await (runProjectAiWorkflow || runProjectWorkflow)?.(projectName, workflow.id, {
+1186:        title: workflow.title,
+1189:        inputs: session.inputsByWorkflow[workflow.id],
+1190:        prompt: firstNonEmpty(message, buildWorkflowPrompt(workflow, session.inputsByWorkflow[workflow.id], contextModel)),
+1193:          source: "workflow-auto-run"
+1196:      const output = asObject(result?.output || result?.run?.output) || buildFallbackOutput(workflow, session.inputsByWorkflow[workflow.id], contextModel);
+1206:      showMessage?.(`${workflow.title} created from AI context.`);
+1215:  workflowBridgeRegistered = true;
+1233:  if (workflowAutomationEnabled) {
+1235:    if (workflowAutoModeUnsubscribe) workflowAutoModeUnsubscribe();
+1236:    workflowAutoModeUnsubscribe = subscribeAutoMode(() => {
+1244:  const workflow = getWorkflowDef(session.selectedWorkflowId);
+1245:  const inputs = asObject(session.inputsByWorkflow[workflow.id]);
+1246:  const run = session.runsByWorkflow[workflow.id];
+1261:    persistWorkflowDraft(projectName, session, session.selectedWorkflowId, "Draft auto-saved", true);
+1273:  const workflowTypeSelect = $("wfexecWorkflowType");
+1274:  if (workflowTypeSelect) {
+1275:    workflowTypeSelect.onchange = () => {
+1276:      session.selectedWorkflowId = workflowTypeSelect.value || session.selectedWorkflowId;
+1283:  const saveDraftBtn = $("wfexecSaveDraftBtn");
+1284:  if (saveDraftBtn) {
+1285:    saveDraftBtn.onclick = () => {
+1286:      persistWorkflowDraft(projectName, session, session.selectedWorkflowId, "Draft saved", true);
+1287:      showMessage?.("Workflow draft saved.");
+1299:      showMessage?.("Workflow draft cleared.");
+1307:      const draft = asObject(getSharedAiDraft(projectName, getState().data.operations));
+1308:      if (!Object.keys(draft).length) {
+1309:        const safePrompt = `Create a workflow for ${projectName || "this project"} focused on ${inputs.goal || "operational improvement"}.`;
+1310:        setSharedHandoff(projectName, "workflows", {
+1311:          source_page: "workflows",
+1312:          destination_page: "workflows",
+1315:            draft_context: {
+1317:              modeId: workflow.aiModeId,
+1325:        persistWorkflowDraft(projectName, session, session.selectedWorkflowId, "Local handoff seed created", true);
+1326:        showMessage?.("No AI state found. Local workflow seed created safely.");
+1333:        project: firstNonEmpty(draft.projectName, session.inputsByWorkflow[session.selectedWorkflowId].project),
+1334:        goal: firstNonEmpty(draft.lastResponseTitle, session.inputsByWorkflow[session.selectedWorkflowId].goal),
+1340:      showMessage?.("AI Command state loaded into workflow inputs.");
+1345:function confirmWorkflowBackendRun(workflow) {
+1346:  if (typeof window === "undefined" || typeof window.confirm !== "function") return true;
+1347:  const title = workflow?.title || "this workflow";
+1348:  return window.confirm(
+1349:    `Confirm workflow review package preparation\n\nAction: Prepare and record backend workflow output for "${title}".\n\nThis may call the backend workflow run endpoint and update workflow run history. It prepares a review output only and does not publish, send messages, create CRM records, bypass Governance, or perform destructive actions.\n\nSelect Cancel to keep the workflow unchanged.`
+1353:  async function runWorkflow(workflowId) {
+1354:    const activeWorkflow = getWorkflowDef(workflowId || session.selectedWorkflowId);
+1368:      setValidation("Select a project before preparing a workflow review package.");
+1372:    const confirmed = confirmWorkflowBackendRun(activeWorkflow);
+1373:    if (!confirmed) {
+1374:      setValidation("Workflow preparation cancelled. No backend workflow run was recorded.");
+1406:          source: "workflow-manual-run"
+1423:      setSharedHandoff(projectName, "workflows", {
+1424:        source_page: "workflows",
+1425:        destination_page: "workflows",
+1427:          workflow_id: activeWorkflow.id,
+1444:        nextActions: ["Retry workflow", "Validate project integrations", "Check workflow dependencies"]
+1453:  const runBtn = $("workflowRunBtn");
+1455:  const runBtnMain = $("workflowRunBtnMain");
+1462:      runWorkflow(rec.workflowId);
+1466:  const saveRecommendedBtn = $("wfexecSaveRecommendedBtn");
+1467:  if (saveRecommendedBtn) {
+1468:    saveRecommendedBtn.onclick = () => {
+1470:      session.selectedWorkflowId = rec.workflowId;
+1471:      session.inputsByWorkflow[rec.workflowId].goal = firstNonEmpty(session.inputsByWorkflow[rec.workflowId].goal, rec.title);
+1472:      persistWorkflowDraft(projectName, session, rec.workflowId, "Recommendation saved as draft", true);
+1473:      showMessage?.("Recommended workflow saved as draft.");
+1478:  const sendRecommendedAiBtn = $("wfexecSendRecommendedAiBtn");
+1479:  if (sendRecommendedAiBtn) {
+1480:    sendRecommendedAiBtn.onclick = () => {
+1482:      const recWorkflow = getWorkflowDef(rec.workflowId);
+1486:        workflow: recWorkflow,
+
+### FILE: public/control-center/pages/governance.js
+lines:     1519
+110:      <div class="governance-evidence-guidance">High-risk Governance decisions should reference source-of-truth evidence, proof assets, or an incoming handoff. Missing evidence should be resolved before approval, rejection, escalation, or override.</div>
+116:  // Intake context: { ai, publishing, content, media, workflows, operations, notifications, insights }
+119:  if (intakeContext?.publishing) items.push({ label: "Publishing", value: asString(intakeContext.publishing) });
+122:  if (intakeContext?.workflows) items.push({ label: "Workflows", value: asString(intakeContext.workflows) });
+142:} from "../api.js";
+180:  if (normalized === "approved" || normalized === "success") return "success";
+187:  if (["approval", "approved", "approve"].includes(normalized)) {
+188:    return "Submit reviewed approval decision? This records a backend Governance decision and may affect downstream readiness where policy gates apply. It does not publish, send, or execute directly.";
+196:    return "Submit reviewed Governance decision? This records a backend reviewed decision and may update linked queues or review state. It does not publish or execute directly.";
+199:  return "Submit reviewed Governance decision? This records a backend reviewed decision and may update linked queues or review state. It does not publish or execute directly.";
+202:function confirmGovernanceDecision(decision) {
+203:  if (typeof window === "undefined" || typeof window.confirm !== "function") return true;
+204:  return window.confirm(getDecisionConfirmationMessage(decision));
+207:function confirmGovernanceApprovalRequest({ title, entityType, risk }) {
+208:  if (typeof window === "undefined" || typeof window.confirm !== "function") return true;
+214:  return window.confirm(
+222:      "Authority: This creates a durable Governance queue item for review. It does not approve, reject, publish, send, or execute directly.",
+250:  const publishing = asObject(settings.publishing);
+257:      approval_before_publish: Boolean(publishing.approvalBeforePublish),
+262:      freeze_publishing: false
+268:      publishing: asString(settings.team?.publishAccess) || "Publisher",
+277:      approval_before_publish: Boolean(publishing.approvalBeforePublish)
+348:      <div class="workflow-history-list">
+350:          <div class="workflow-history-item">
+382:    ...asArray(item.publish_guardrails)
+406:        <button class="btn btn-primary" type="button" data-governance-decision="approved" data-approval-id="${escapeHtml(item.id)}">Submit Reviewed Approval</button>
+432:        : asArray(item.publish_guardrails);
+500:      <label class="settings-toggle" for="governance-approval-before-publish">
+501:        <span class="settings-field-label">Require approval before publishing mutations</span>
+502:        <input id="governance-approval-before-publish" type="checkbox" class="settings-toggle-input" data-governance-policy="approval_before_publish" ${rules.approval_before_publish ? "checked" : ""} />
+525:      <label class="settings-toggle" for="governance-freeze-publishing">
+526:        <span class="settings-field-label">Freeze publishing mutations</span>
+527:        <input id="governance-freeze-publishing" type="checkbox" class="settings-toggle-input" data-governance-policy="freeze_publishing" ${rules.freeze_publishing ? "checked" : ""} />
+539:        <label class="settings-field-label" for="governance-owner-publishing">Publishing owner</label>
+540:        <input id="governance-owner-publishing" class="settings-control" type="text" data-governance-owner="publishing" value="${escapeHtml(owners.publishing || "")}" />
+546:function savePromptToQuickCommand(context, prompt) {
+570:      ...asArray(item.publish_guardrails)
+609:  const publish = asArray(sections.publish_guardrails).map((item) => {
+610:    const approval = findApprovalForEntity(summary, "publishing_job", item.entity_id);
+613:      queue_kind: "publish",
+614:      selected_key: `publish:${asString(item.entity_id || item.id)}`,
+616:      queue_summary: asArray(item.publish_guardrails).map((flag) => flag.message).join(" | ") || "No publish blockers detected.",
+618:      queue_risk: asArray(item.publish_guardrails)[0]?.severity || "medium",
+621:      queue_flags: asArray(item.publish_guardrails),
+639:  return [...approvals, ...claims, ...brand, ...publish, ...escalations];
+648:      preview: "Explain the current approval pressure, risk level, and next governance priority.",
+649:      prompt: `Summarize the current governance state for ${projectLabel}. Cover policy pressure, pending approvals, risky claims, brand safety issues, publish blockers, and the next governance priority.`
+653:      preview: "Explain the selected governance item and what decision path is safest.",
+658:      preview: "Identify the highest-risk governance gaps and what rules or ownership need tightening.",
+672:  const publishGuardrails = asArray(sections.publish_guardrails).length;
+676:  if (rules.freeze_publishing) {
+690:  if (rules.freeze_publishing || escalations > 0) {
+703:  } else if (publishGuardrails > 0) {
+704:    nextBestAction = "Review publish guardrails to ensure release paths remain compliant and safe.";
+845:    publish: queueItems.filter((item) => item.queue_kind === "publish").length,
+854:      publish: "publish",
+923:              <small class="mhos-executive-metric-note governance-ai-boundary-note">AI cannot approve or change policy. Human backend decision required.</small>
+995:            ${renderMetric("Publish Guardrails", asArray(sections.publish_guardrails).length, "Release blockers", escapeHtml)}
+1072:                  ["publish", "Publish", focusCounts.publish],
+1151:                        intakeContext.publishing = getSharedHandoff(projectName, "publishing", operations)?.payload?.summary;
+1154:                        intakeContext.workflows = getSharedHandoff(projectName, "workflows", operations)?.payload?.summary;
+1228:              <div class="simple-banner"><strong>Authority boundary:</strong> Governance records reviewed backend decisions and policy gates. It does not publish, send, or execute directly. High-risk decisions require confirmation, evidence review, and backend authority remains enforced.</div>
+1233:                <button class="btn btn-primary" type="button" data-governance-action="save-policy">Save Backend Governance Policy</button>
+1238:                      <button class="btn btn-primary" type="button" data-governance-decision="approved" data-approval-id="${escapeHtml(selectedItem.id)}">Submit Reviewed Approval</button>
+1301:              <p>Explanation-only guidance. AI cannot approve, override, or change policy; backend decisions stay in governed controls.</p>
+1312:                <span class="home-action-meta">${escapeHtml(item.preview)}</span>
+1339:      if (!confirmGovernanceDecision(decision)) {
+1378:      if (!confirmGovernanceApprovalRequest({ title, entityType, risk })) {
+1414:      if (action === "save-policy") {
+1425:        const confirmed = window.confirm("Confirm backend Governance policy save\n\nAction: Save durable Governance policy rules for this project.\nRisk: These rules can affect approvals, publishing readiness, brand safety review, admin override behavior, and freeze-publishing behavior.\nAuthority: This is a backend-governed durable policy update.\n\nSelect Cancel to review the policy settings before saving.");
+1426:        if (!confirmed) {
+1436:          context.showMessage("Backend Governance policy saved.");
+1439:          context.showError(error.message || "Failed to save governance policy.");
+1451:        const confirmed = window.confirm("Sync Settings-derived rules to Governance policy? This updates durable Governance rules including approval-before-publish, claim review, escalation, owners, override behavior, and policy behavior. Continue only if the Settings snapshot was reviewed.");
+1452:        if (!confirmed) {
+1483:      savePromptToQuickCommand(context, prompt.prompt);
+1496:    description: "Review backend approvals, policy violations, overrides, escalation, publishing gates, and audit visibility across content, media, campaigns, and publishing."
+
+### FILE: public/control-center/pages/publishing.js
+lines:     2162
+11:  const safety = `Publishing prepares channel packages, manual schedule records, and approval-ready handoffs. External publishing requires provider proof; backend status changes remain <strong>confirmation-gated</strong> and governed by <strong>backend approval rules</strong>.`;
+13:    `<button type="button" class="btn btn-secondary" onclick="document.getElementById('publishingBuilderPanel')?.scrollIntoView({behavior:'smooth',block:'start'})">Prepare Publishing Package</button>`,
+14:    `<button type="button" class="btn btn-secondary" onclick="document.getElementById('publishingQueuePanel')?.scrollIntoView({behavior:'smooth',block:'start'})">Open Queue</button>`,
+15:    `<button type="button" class="btn btn-secondary" onclick="document.getElementById('publishingHandoffPanel')?.scrollIntoView({behavior:'smooth',block:'start'})">Review Approval Gate</button>`,
+16:    `<button type="button" class="btn btn-primary" onclick="document.getElementById('publishingPushAiBtn')?.scrollIntoView({behavior:'smooth',block:'start'})">Open AI Review</button>`
+19:    <section class="publishing-command-header" role="region" aria-label="Publishing Command Header">
+20:      <div class="publishing-command-header-title">Publishing Control Workspace</div>
+21:      <div class="publishing-command-header-context">${context}</div>
+22:      <div class="publishing-command-header-status">Status: <strong>${escapeHtml(status)}</strong> &middot; Approval: <strong>${escapeHtml(approval)}</strong></div>
+23:      <div class="publishing-command-header-status">Next: <span>${nextAction}</span></div>
+24:      <div class="publishing-command-header-safety">${safety}</div>
+25:      <div class="publishing-command-header-actions">${actions}</div>
+32:    { key: "draft", label: "Draft" },
+37:    { key: "handoff", label: "Manual Completion Handoff" }
+40:    draft: selectedItem?.status === "draft" ? "active" : selectedItem ? "ready" : "missing",
+43:    approval: selectedItem?.approvalStatus === "approved" ? "ready" : selectedItem?.approvalStatus === "needs approval" ? "warning" : "missing",
+45:    handoff: selectedItem?.status === "published" ? "ready" : "missing"
+48:    <nav class="publishing-workflow-strip" aria-label="Publishing Workflow">
+50:        <div class="publishing-workflow-step is-${statusMap[step.key]}" aria-label="${escapeHtml(step.label)}: ${statusMap[step.key]}">
+52:          <span class="publishing-workflow-step-label">${statusMap[step.key]}</span>
+66:    { key: "governance", label: "Governance", state: selectedItem?.governanceStatus === "approved" ? "ready" : "missing" },
+67:    { key: "approval", label: "Approval", state: selectedItem?.approvalStatus === "approved" ? "ready" : selectedItem?.approvalStatus === "needs approval" ? "warning" : "missing" }
+69:  const blockersSummary = blockers && blockers.length ? `<div class="publishing-readiness-card is-warning">${escapeHtml(blockers.length)} blocker(s) present</div>` : "";
+71:    <section class="publishing-readiness-summary" aria-label="Publishing Readiness Summary">
+73:        <div class="publishing-readiness-card is-${r.state}">
+74:          <span class="publishing-readiness-card-label">${escapeHtml(r.label)}</span>
+94:  approveCurrentGate,
+102:} from "./publishing/publishing-payloads.js";
+104:const publishingSessions = new Map();
+105:const PUBLISHING_LOCAL_DRAFTS_KEY = "mh-publishing-local-drafts-v1";
+106:const STATUS_FILTERS = ["all", "draft", "ready", "needs approval", "scheduled", "published", "failed"];
+107:const DISPLAY_STATUSES = ["draft", "ready", "needs approval", "scheduled", "published", "failed"];
+109:const APPROVAL_STATUSES = ["draft", "needs approval", "approved"];
+120:const publishingAutomationState = {
+124:let publishingAutoModeUnsubscribe = null;
+125:let publishingAutoModeControllerReady = false;
+126:let publishingAutomationEnabled = false;
+127:let publishingRenderCallback = null;
+128:let publishingRenderTimer = null;
+132:    publishingRenderCallback = render;
+135:  if (publishingRenderTimer) {
+139:  publishingRenderTimer = window.setTimeout(() => {
+140:    publishingRenderTimer = null;
+142:    if (typeof publishingRenderCallback === "function") {
+143:      publishingRenderCallback();
+149:  publishingRenderCallback = render;
+151:  if (!publishingAutomationEnabled) {
+155:  if (!publishingAutoModeControllerReady) {
+157:    publishingAutoModeControllerReady = true;
+160:  if (publishingAutoModeUnsubscribe) {
+164:  publishingAutoModeUnsubscribe = subscribeAutoMode(() => {
+268:function normalizeStatus(value, fallback = "draft") {
+271:  if (["draft", "paused", "pause"].includes(normalized)) return "draft";
+272:  if (["ready", "approved", "ready_for_manual_publish", "ready_for_manual_send"].includes(normalized)) return "ready";
+276:  if (["scheduled", "queued", "queue", "pending", "pending_publish"].includes(normalized)) return "scheduled";
+277:  if (["published", "completed", "complete", "success", "done", "sent", "live"].includes(normalized)) return "published";
+284:  if (status === "published") return "success";
+319:function saveLocalDraft(projectName, draft) {
+322:  const drafts = asArray(map[key]).filter((item) => asString(item.id) !== asString(draft.id));
+324:    ...asObject(draft),
+325:    id: asString(draft.id || `local-publish-${Date.now()}`),
+326:    source: "Local draft",
+330:  map[key] = [nextDraft, ...drafts].slice(0, 20);
+337:  return saveLocalDraft(projectName, {
+355:    publishDate: toDateInput(tomorrow),
+356:    publishTime: "09:00",
+357:    approvalStatus: "draft",
+365:  if (!publishingSessions.has(key)) {
+366:    publishingSessions.set(key, {
+372:      draftMessage: "",
+377:  return publishingSessions.get(key);
+395:  if (item.campaign) return `${item.campaign} ${titleCase(item.channel || "publish")}`;
+396:  if (context.activeCampaign) return `${context.activeCampaign} ${titleCase(item.channel || "publish")}`;
+402:  const preview = asObject(raw.preview || raw.connector_preview);
+404:  const status = normalizeStatus(raw.execution_status || raw.status, scheduledFor ? "scheduled" : "draft");
+405:  const channel = toKey(raw.channel || preview.channel);
+409:    title: firstText(raw.title, raw.name, preview.title, preview.headline),
+413:    contentItem: firstText(raw.content_item, raw.contentItem, raw.content_id, preview.content_item, preview.caption, preview.body),
+415:    executedAt: firstText(raw.executed_at, raw.executedAt),
+416:    createdAt: firstText(raw.created_at, raw.createdAt, raw.executed_at),
+417:    updatedAt: firstText(raw.updated_at, raw.updatedAt, raw.executed_at, raw.created_at),
+418:    approvalStatus: status === "ready" ? "approved" : status === "needs approval" ? "needs approval" : "draft",
+421:    offer: firstText(raw.offer, preview.offer),
+423:    preview,
+426:    totalAssets: Number(raw.total_assets || preview.asset_count || 0) || 0
+436:    .sort((a, b) => (toDate(b.executed_at)?.getTime() || 0) - (toDate(a.executed_at)?.getTime() || 0));
+450:        preview: asObject(latest?.preview || job.preview || job.connector_preview)
+462:  const localDrafts = loadLocalDrafts(projectName).map((draft) => normalizeQueueItem(draft, state, "Local draft"));
+475:    draft: 4,
+476:    published: 5
+529:    publishDate: toDateInput(item.scheduledFor),
+530:    publishTime: toTimeInput(item.scheduledFor),
+531:    approvalStatus: item.approvalStatus || "draft",
+546:  session.draftMessage = "";
+559:  const date = clean(form.publishDate);
+561:  return `${date}T${clean(form.publishTime) || "09:00"}:00Z`;
+565:  const draftPrompt = firstText(
+568:    "Prepare publishing draft from current project context."
+573:      id: `publishing-prepare-${Date.now()}`,
+574:      type: "prepare_publishing_draft",
+575:      targetPage: "publishing",
+576:      action: "Prepare publishing draft",
+578:        prompt: draftPrompt,
+579:        reason: "Prepare a safe publishing draft without executing publish.",
+580:        title: firstText(session.form.title, "Prepared publishing draft")
+585:      id: `publishing-gate-${Date.now()}`,
+586:      type: "publish_now",
+587:      targetPage: "publishing",
+588:      action: "Record manual publish completion",
+590:        prompt: draftPrompt,
+591:        reason: "This records a manual publishing completion only after review; external provider execution requires separate proof."
+606:  if (["schedule", "publish", "retry"].includes(intent) && !clean(form.publishDate)) {
+607:    errors.publishDate = "Publish date is required for this action.";
+609:  if (intent === "publish" && form.approvalStatus !== "approved") {
+610:    errors.approvalStatus = "Publishing readiness must be approved before recording manual completion.";
+626:function guardPublishingAssetBlockers(session, assetBlockers, showMessage, actionLabel = "this publishing action") {
+630:  const message = `Publishing blocker(s) must be resolved before ${actionLabel}: ${summary || "required publishing assets are missing or need review"}.`;
+636:function confirmPublishingBackendAction(message) {
+637:  if (typeof window === "undefined" || typeof window.confirm !== "function") return true;
+638:  return window.confirm(message);
+643:  return message ? `<div class="publishing-inline-error">${escapeHtml(message)}</div>` : "";
+656:  return `<span class="publishing-status-pill is-${escapeHtml(statusClass(status))}" ${hint}>${escapeHtml(titleCase(status))}</span>`;
+662:      .publishing-execution-center {
+668:      .publishing-execution-grid {
+674:      .publishing-main-column,
+675:      .publishing-side-column {
+682:      .publishing-card {
+687:      .publishing-overview-grid {
+693:      .publishing-overview-item,
+694:      .publishing-impact-chip {
+702:      .publishing-overview-item span,
+703:      .publishing-impact-chip small {
+710:      .publishing-overview-item strong,
+711:      .publishing-impact-chip strong {
+717:      .publishing-overview-item.is-wide {
+721:      .publishing-impact-row,
+722:      .publishing-action-row,
+723:      .publishing-form-actions,
+724:      .publishing-filter-row {
+731:      .publishing-impact-row {
+735:      .publishing-action-row,
+736:      .publishing-form-actions {
+740:      .publishing-action-row .btn,
+741:      .publishing-form-actions .btn {
+747:      .publishing-impact-chip {
+751:      .publishing-filter-chip {
+764:      .publishing-filter-chip.is-active {
+770:      .publishing-queue-list,
+771:      .publishing-calendar-list,
+772:      .publishing-blocker-list {
+779:      .publishing-queue-row {
+790:      .publishing-queue-row.is-active {
+795:      .publishing-queue-main,
+796:      .publishing-calendar-row {
+807:      .publishing-queue-title {
+815:      .publishing-queue-meta {
+824:      .publishing-queue-actions {
+831:      .publishing-queue-actions button {
+843:      .publishing-queue-actions button:focus-visible,
+844:      .publishing-queue-main:focus-visible,
+845:      .publishing-calendar-row:focus-visible,
+846:      .publishing-filter-chip:focus-visible {
+851:      .publishing-queue-actions button:disabled,
+852:      .publishing-queue-actions button[disabled] {
+860:      .publishing-status-pill {
+873:      .publishing-status-pill.is-ready,
+874:      .publishing-status-pill.is-scheduled {
+878:      .publishing-status-pill.is-published {
+882:      .publishing-status-pill.is-failed {
+886:      .publishing-inline-error {
+893:      .publishing-calendar-row {
+904:      .publishing-calendar-row em {
+913:        .publishing-execution-grid {
+918:        .publishing-queue-row {
+923:        .publishing-queue-actions {
+937:function extractHandoffSummary(handoff) {
+938:  const direct = asObject(handoff);
+939:  const payload = asObject(handoff?.payload);
+941:  const draftContext = asObject(payload.draft_context);
+942:  const isAiCampaign = asString(direct.type || payload.type) === "ai_command_campaign_handoff";
+949:    id: asString(direct.id || handoff?.id || payload.workflow_id || payload.prompt || payload.workflow_title),
+950:    sourcePage: asString(handoff?.source_page || direct.source || "workflows"),
+951:    workflowId: asString(payload.workflow_id || direct.id),
+952:    title: firstText(direct.title, output.title, payload.workflow_title, draftContext.lastResponseTitle, isAiCampaign ? "AI Team Campaign Handoff" : "Workflow output"),
+953:    summary: firstText(direct.summary, output.summary, payload.summary, draftContext.lastResponseSummary, payload.prompt, isAiCampaign ? "AI Team campaign package is available for publishing preparation." : "Workflow output is available for publishing preparation."),
+956:    backendPreview: Boolean(direct.backend_preview || direct.backendPreview || payload.backendPreview || output.backendPreview),
+969:    `mh_ai_command_handoff_${destinationRoute}`,
+970:    "mh_ai_command_campaign_handoff"
+981:        if (type === "ai_command_campaign_handoff" && (!route || route === destinationRoute)) {
+985:        console.warn("Unable to read AI Command campaign handoff", error);
+995:    `mh_ai_command_handoff_${destinationRoute}`,
+996:    "mh_ai_command_campaign_handoff"
+1004:        console.warn("Unable to clear AI Command campaign handoff", error);
+1012:  const aiCommandLocalHandoff = getAiCommandLocalCampaignHandoff("publishing");
+1016:    getSharedHandoff(projectName, "publishing", operations, "workflows") ||
+1017:    getSharedHandoff(projectName, "publishing", operations, "ai-command") ||
+1018:    getSharedHandoff(projectName, "publishing", operations)
+1026:function buildRecommendation({ queue, counts, assetBlockers, checks, handoff, globalBlockers }) {
+1030:  const draft = queue.find((item) => item.status === "draft");
+1036:      action: "Retry failed publishing item",
+1045:      why: `${ready.title} is approved for a backend readiness update. Record manual completion only after external execution is verified.`,
+1052:      why: `${needsApproval.title} needs approval before it can move into the manual publishing queue.`,
+1057:  if (handoff) {
+1058:    const handoffSummary = extractHandoffSummary(handoff);
+1060:      action: handoffSummary.isAiCampaign ? "Load campaign package into a draft" : "Load workflow output into a draft",
+1061:      why: handoffSummary.isAiCampaign
+1062:        ? "An AI Team campaign package is available. Loading it creates a local publishing draft without publishing externally."
+1063:        : "A workflow handoff is available. Loading it keeps execution moving without inventing backend data.",
+1068:  if (draft) {
+1070:      action: "Complete and schedule a draft",
+1071:      why: `${draft.title} is not yet executable. Add channel, content, approval, and timing details.`,
+1072:      focusId: draft.id,
+1077:    action: connectedCount ? "Create a publishing draft" : "Connect a publishing channel",
+1079:      ? "No queue item is ready. Start with a draft and save it locally until it can be scheduled."
+1080:      : "Channel readiness is missing. Publishing can prepare drafts, but live execution needs a connected destination.",
+1088:    <section class="card publishing-card">
+1096:      <div class="publishing-overview-grid">
+1097:        <div class="publishing-overview-item"><span>Scheduled items</span><strong>${escapeHtml(String(counts.scheduled))}</strong></div>
+1098:        <div class="publishing-overview-item"><span>Ready for manual review</span><strong>${escapeHtml(String(counts.ready))}</strong></div>
+1099:        <div class="publishing-overview-item"><span>Draft items</span><strong>${escapeHtml(String(counts.draft))}</strong></div>
+1100:        <div class="publishing-overview-item"><span>Failed / blocked items</span><strong>${escapeHtml(String(counts.failed))}</strong></div>
+1101:        <div class="publishing-overview-item is-wide"><span>Next publish window</span><strong>${escapeHtml(getNextPublishWindow(queue))}</strong></div>
+1109:    ["Manual publishing readiness", counts.ready + counts.scheduled > 0 ? "Active" : "Needs queue"],
+1110:    ["Content", counts.draft || counts.ready || counts.scheduled ? "Present" : "Empty"],
+1111:    ["Workflow output", recommendation.action.includes("workflow") ? "Available" : "Optional"],
+1118:    <section class="card publishing-card" id="publishingRecommendation">
+1123:          <p class="publishing-section-copy">${escapeHtml(recommendation.why)}</p>
+1127:      <div class="publishing-impact-row">
+1129:          <span class="publishing-impact-chip">
+1135:      <div class="publishing-action-row">
+1136:        <button id="publishingOpenQueueBtn" class="btn btn-secondary" type="button">Open Publish Queue</button>
+1137:        <button id="publishingSaveDraftBtn" class="btn btn-secondary" type="button">Save publishing draft</button>
+1138:        <button id="publishingPushAiBtn" class="btn btn-primary" type="button">Send publishing context to AI</button>
+1139:        <button id="publishingAutoPrepareBtn" class="btn btn-secondary" type="button">Auto-prepare publishing plan</button>
+1140:        <button id="publishingAutoStopBtn" class="btn btn-secondary" type="button">Stop Auto Mode</button>
+1142:      <details class="publishing-automation-preview publishing-block-gap">
+1144:        <div class="publishing-automation-preview-copy">Automation cannot publish without manual review, confirmation, and backend approval gates.</div>
+1145:        <div class="simple-banner publishing-inline-gap">Auto Mode status: ${escapeHtml(getAutoModeState().status || "idle")}</div>
+1147:          <div class="simple-banner publishing-block-gap">Cross-system blockers: ${escapeHtml(asArray(recommendation.externalBlockers).map((item) => item.title).join("; "))}</div>
+1149:        ${publishingAutomationState.progress ? `<div class="simple-banner publishing-block-gap">${escapeHtml(publishingAutomationState.progress)}</div>` : ""}
+1150:        ${publishingAutomationState.result ? `<div class="simple-banner publishing-inline-gap">${escapeHtml(publishingAutomationState.result)}</div>` : ""}
+1152:          <div class="simple-banner publishing-inline-gap"><strong>Approval needed:</strong> ${escapeHtml(asObject(getAutoModeState().approvalRequiredStep).reason || "Manual approval required.")}</div>
+1153:          <div class="publishing-action-row publishing-inline-gap">
+1154:            <button id="publishingAutoApproveBtn" class="btn btn-secondary" type="button">Approve automation step</button>
+1155:            <button id="publishingAutoSkipBtn" class="btn btn-secondary" type="button">Skip automation step</button>
+1159:      <div class="simple-banner">Opens AI with this context only. <strong>No approval, publishing, or backend execution is performed.</strong></div>
+1169:    <div class="publishing-filter-row">
+1174:          <button class="publishing-filter-chip${active ? " is-active" : ""}" type="button" data-publishing-filter="${escapeHtml(status)}">
+1187:      <article class="publishing-queue-row${item.id === selectedId ? " is-active" : ""}" data-publishing-row="${escapeHtml(item.id)}">
+1188:        <button class="publishing-queue-main" type="button" data-publishing-select="${escapeHtml(item.id)}">
+1189:          <span class="publishing-queue-title">${escapeHtml(item.title)}</span>
+1190:          <span class="publishing-queue-meta">${escapeHtml(titleCase(item.channel || "unassigned"))} • ${escapeHtml(item.scheduledFor ? formatDateTime(item.scheduledFor) : "Unscheduled")} • ${escapeHtml(item.source)}</span>
+1192:        <div class="publishing-queue-state">${renderStatusPill(item.status, escapeHtml)}</div>
+1193:        <div class="publishing-queue-actions">
+1194:          <button type="button" data-publishing-action="review" data-publishing-id="${escapeHtml(item.id)}">Review Package</button>
+1195:          <button type="button" data-publishing-action="schedule" data-publishing-id="${escapeHtml(item.id)}">Queue for Manual Publishing</button>
+1196:          <button type="button" data-publishing-action="publish" data-publishing-id="${escapeHtml(item.id)}">Record Manual Completion</button>
+1197:          <button type="button" data-publishing-action="pause" data-publishing-id="${escapeHtml(item.id)}">Pause to draft</button>
+1198:          <button type="button" data-publishing-action="retry" data-publishing-id="${escapeHtml(item.id)}">Retry scheduled item</button>
+1202:    : `<div class="empty-box">No publish queue items match this filter. Create or load a draft to start the execution queue.</div>`;
+
+### FILE: public/control-center/pages/media-studio.js
+MISSING
+
+### FILE: public/control-center/pages/campaign-studio.js
+lines:     2070
+65:  publishing: { role: "publisher", domain: "publishing" },
+120:      <div class="data-row"><span>Route map</span><strong>${escapeHtml(`Content ${titleCase(CAMPAIGN_ROUTE_ROLES["content-studio"].role)} • Media ${titleCase(CAMPAIGN_ROUTE_ROLES["media-studio"].role)} • Publishing ${titleCase(CAMPAIGN_ROUTE_ROLES.publishing.role)} • Ads ${titleCase(CAMPAIGN_ROUTE_ROLES["ads-manager"].role)}`)}</strong></div>
+339:    status: "draft",
+380:  const handoff = getSharedHandoff(projectName, "campaign-studio", operations, "ai-command");
+381:  const handoffId = asString(handoff?.id || handoff?.updated_at || handoff?.created_at || handoff?.payload?.prompt);
+382:  if (!handoffId || handoffId === asString(session.lastAiHandoffId)) return false;
+384:  const payload = asObject(handoff.payload);
+421:  session.lastAiHandoffId = handoffId;
+431:    status: "draft",
+438:function confirmCampaignStudioAuthorityAction(action, detail = "") {
+439:  if (typeof window === "undefined" || typeof window.confirm !== "function") return true;
+444:    detail || "This action may create or update backend campaign records or route handoffs.",
+446:    "Authority: This does not publish, send externally, schedule ads, or approve anything automatically.",
+450:  return window.confirm(message);
+466:    status: "draft",
+483:  const handoff = {
+502:      draft_context: buildCampaignRecordPayload(projectName, session)
+506:  if (!confirmCampaignStudioAuthorityAction(
+507:    "Create campaign route handoff",
+508:    `This will create a campaign handoff from Campaign Studio to ${destinationPage} for review and execution preparation.`
+513:  setSharedHandoff(projectName, destinationPage, handoff);
+515:  createProjectHandoff?.(projectName, handoff).catch((error) => {
+516:    console.warn("Failed to persist campaign route handoff:", error.message);
+522:function scheduleCampaignPersistence(projectName, session, saveProjectCampaign) {
+523:  if (!projectName || typeof saveProjectCampaign !== "function") {
+534:    const draft = {
+537:      autosave_note: "Campaign Studio autosave is local/shared-state only. Use Save campaign draft or Save campaign plan for backend persistence."
+539:    setSharedCampaignRecord(projectName, draft);
+630:    body: "Best publishing window detected from current campaign intelligence."
+862:  const publishingBlockers = [];
+868:  if (!values.startDate) publishingBlockers.push("Set a launch start date before pushing work downstream.");
+869:  if (!values.channelPlan) publishingBlockers.push("Define the operational channel plan so scheduling knows what to activate.");
+871:    publishingBlockers.push("No publishing channel is connected yet.");
+874:    publishingBlockers.push("Critical creative or offer assets are still missing.");
+903:    publishingBlockers.length ||
+917:    publishingBlockers,
+925:      publishingBlockers.length +
+1108:  const publishingWindows = collectPublishingWindows(insights, learning, topContent);
+1159:    publishingWindows,
+1273:  saveProjectCampaign,
+1295:      scheduleCampaignPersistence(projectName, session, saveProjectCampaign);
+1299:      // Explicit actions such as Save, Build, Refresh, and route handoffs still
+1304:  const saveBtn = $("campaignSaveDraftBtn");
+1305:  if (saveBtn) {
+1306:    saveBtn.onclick = async () => {
+1309:      if (!confirmCampaignStudioAuthorityAction(
+1310:        "Save backend campaign draft",
+1311:        `This will save or update the Campaign Studio draft for ${projectName}.`
+1313:        showMessage?.("Campaign draft save cancelled.");
+1318:        const result = await saveProjectCampaign?.(projectName, buildCampaignRecordPayload(projectName, session));
+1323:        showMessage?.("Campaign draft saved to the shared operating backbone.");
+1325:        showError?.(error.message || "Failed to save campaign plan.");
+1335:      if (!confirmCampaignStudioAuthorityAction(
+1337:        `This will save or update the Campaign Studio plan for ${projectName}.`
+1339:        showMessage?.("Campaign plan save cancelled.");
+1344:        const result = await saveProjectCampaign?.(projectName, {
+1352:        showMessage?.("Campaign plan saved as a durable shared record.");
+1367:      if (!confirmCampaignStudioAuthorityAction(
+1368:        "Create AI Command campaign handoff",
+1369:        "This will create a campaign handoff from Campaign Studio to AI Command for review and planning support."
+1371:        showMessage?.("AI Command handoff cancelled.");
+1382:          draft_context: buildCampaignRecordPayload(projectName, session)
+1405:          draft_context: buildCampaignRecordPayload(projectName, session)
+1408:        console.warn("Failed to persist campaign handoff:", error.message);
+1415:  const publishingBtn = $("campaignOpenPublishingBtn");
+1416:  if (publishingBtn) {
+1417:    publishingBtn.onclick = () => {
+1418:      const accepted = persistCampaignRouteHandoff({ projectName, session, destinationPage: "publishing", createProjectHandoff });
+1419:      if (accepted) navigateTo("publishing");
+1456:      showMessage?.("Campaign package drafted in this session. Backend export wiring can be connected next.");
+1519:    saveProjectCampaign,
+1540:      saveProjectCampaign,
+1567:      publishingWindows,
+1600:      : "Current draft data is projecting direction until live intelligence arrives.";
+1629:            <button id="campaignSaveDraftBtn" class="btn btn-secondary mhos-context-action" type="button">Save campaign draft</button>
+1886:                Review the recommended campaign direction, required assets, and real blockers before sending the plan into downstream work.
+1934:                  helper: "Define what must exist before the campaign can execute smoothly across channels and waves.",
+1969:                  executionReadiness.publishingBlockers,
+1971:                  "No publishing blocker is currently stopping launch routing."
+2008:                Send campaign context to AI prefills the current campaign draft and then navigates there. The downstream send actions open the linked workspace with the current campaign context attached.
+2021:                  <span class="home-action-meta">Prefill AI Command with the current draft, blockers, and campaign context, then open that page.</span>
+2027:                  <span class="home-action-meta">Open Content Studio with a campaign handoff attached.</span>
+2031:                  <span class="home-action-meta">Open Media Studio with a campaign handoff attached.</span>
+2035:                  <span class="home-action-meta">Open Publishing with a campaign handoff attached.</span>
+2039:                  <span class="home-action-meta">Open Ads Manager with a campaign handoff attached.</span>
+2050:              <div class="campaign-helper-note">${escapeHtml(hasLiveIntelligence ? "Live intelligence is shaping the readiness and channel recommendations on this page." : "This page is still usable without full intelligence; recommendations are falling back to current draft and readiness inputs.")}</div>
+2065:      saveProjectCampaign,
+
+### FILE: public/control-center/pages/content-studio.js
+MISSING
+
+### FILE: public/control-center/pages/ads-manager.js
+lines:      623
+160:      connectionValue: getSourceValue(sources, [...platform.primarySources, ...platform.supportSources]) || "No platform connection saved",
+275:  const publishingBtn = $("adsManagerOpenPublishingBtn");
+276:  if (publishingBtn) {
+277:    publishingBtn.onclick = () => navigateTo("publishing");
+590:                <p class="home-action-meta">AI can prepare a paid growth brief and route context to AI Command. Spend changes, publishing, and campaign launch remain manual or governance-controlled.</p>
+
+### FILE: public/control-center/pages/insights.js
+lines:     1546
+199:  const fields = ["published_at", "executed_at", "scheduled_for", "updated_at", "created_at"];
+302:  const preview = asObject(item.preview || item.connector_preview);
+306:    asString(item.title || item.label || item.content_label || preview.title || preview.headline) ||
+311:    platform: platformId || asString(item.platform || item.channel || preview.channel),
+313:    format: asString(item.format || item.content_type || item.type || preview.format || "Post"),
+319:    publishedAt: asString(item.published_at || item.executed_at || item.updated_at || item.created_at),
+323:    hook: asString(item.hook || preview.headline || ""),
+324:    topic: asString(item.topic || item.angle || preview.goal || ""),
+325:    cta: asString(item.cta || preview.cta || ""),
+410:  const publishedCount = contentItems.filter((item) => item.hasMetrics).length;
+423:        meta: totalReach == null ? "Awaiting social insight feeds" : `${publishedCount} measured content items`
+630:    const hour = item.publishedAt ? new Date(item.publishedAt).getHours() : null;
+701:      meta: `These sources are connected but still not sending analytics into the Insight Engine: ${platformsAwaitingFeed.join(", ")}.`,
+757:      prompt: `Review all available insights for ${projectName} and tell me the highest-impact improvement to make next across content, publishing, SEO, paid media, and website conversion.`
+765:      prompt: `From the best-performing published content for ${projectName}, identify which posts or videos should be repurposed next and how they should be adapted for other platforms.`
+947:function confirmInsightsAuthorityAction(action, detail = "") {
+951:    "This prepares review handoff context only. It does not publish, approve, send externally, or execute AI automatically.",
+955:  if (typeof window === "undefined" || typeof window.confirm !== "function") {
+959:  return window.confirm(message);
+975:        const confirmed = confirmInsightsAuthorityAction(
+976:          "Create Insights route handoff",
+977:          `This will attach Insights handoff context and open ${route} for review.`
+979:        if (!confirmed) return;
+991:            draft_context: {
+1018:        const confirmed = confirmInsightsAuthorityAction(
+1019:          "Create Insights AI Command handoff",
+1022:        if (!confirmed) return;
+1024:        const handoff = {
+1035:            draft_context: {
+1042:        setSharedHandoff(projectName, "ai-command", handoff);
+1043:        createProjectHandoff?.(projectName, handoff).catch((error) => {
+1044:          console.warn("Failed to persist Insights handoff:", error.message);
+1215:              <h4 class="insights-subtitle">Strongest published content</h4>
+1376:            <button class="btn btn-secondary" type="button" data-insights-route="publishing">Open Publishing Workspace</button>
+1424:            Use AI Workspace to turn current signals into a review-ready intelligence brief. Opening AI only navigates; sending a prompt prefills context and creates a handoff.

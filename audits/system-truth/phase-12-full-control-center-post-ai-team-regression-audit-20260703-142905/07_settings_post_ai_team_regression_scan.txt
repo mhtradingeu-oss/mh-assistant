@@ -1,0 +1,347 @@
+### Settings AI Team naming
+4:  saveProjectTeam,
+52:const TEAM_ROLE_OPTIONS = [
+55:  "Media Director",
+58:  "Ads Optimizer",
+61:  "Operations Lead / Admin",
+65:const TEAM_ROLE_MATRIX = [
+79:    id: "designer",
+80:    label: "Media Director",
+97:    id: "adsOperator",
+98:    label: "Ads Optimizer",
+111:    service: "Safety & policy review",
+112:    description: "Checks claims, legal risk, and policy-sensitive output."
+115:    id: "admin",
+116:    label: "Operations Lead / Admin Authority",
+127:    backendLabel: "Project profile fields are ready for backend save",
+179:    backendLabel: "Operating policy is active now and ready for backend persistence",
+190:        label: "Action policy",
+193:        options: ["Recommend only", "Prepare actions with review", "Auto-run trusted actions", "Act unless blocked by policy"]
+273:    backendLabel: "Automation routing rules sync into the durable governance policy",
+290:        label: "Automation failure policy",
+306:    backendLabel: "Publishing defaults sync into the durable governance policy",
+350:    backendLabel: "Approval policy syncs into the durable governance and team records",
+404:        options: TEAM_ROLE_OPTIONS
+424:        options: ["Publishers and admins", "Compliance-reviewed publishers", "Admins only", "Project owner only"]
+431:        options: ["Compliance reviewers and admins", "Brand owner", "Admins only", "Project owner only"]
+444:        options: ["Admins only", "Project owner only", "Brand owner and admins", "Operations lead"]
+502:    backendLabel: "Sync policy is a safe placeholder until connector-level persistence lands",
+602:        placeholder: "Flag regulated claims, platform policy risk, and market-specific labeling issues."
+612:        label: "Legal / policy caution notes",
+636:    description: "Keep approval ownership, publishing permissions, and team-role authority together so governance stays understandable.",
+642:    description: "Review connector refresh behavior, import policy, and alert routing without turning Settings into a sync control center.",
+687:function extractDurableSettingsSnapshot(governancePolicy = {}, teamModel = {}) {
+688:  const governance = asObject(governancePolicy);
+689:  const bridge = asObject(governance.settings_bridge);
+692:  const owners = asObject(governance.approval_owners);
+693:  const rules = asObject(governance.policy_rules);
+706:    actionPolicy: asString(normalized.operating?.actionPolicy || bridge.action_policy)
+740:    active_role: "admin",
+744:      saved_at: nowIso(),
+746:      owner_role: "admin"
+768:    execution_policy: {
+770:      action_policy: asString(operating.actionPolicy)
+772:    policy_rules: {
+776:      allow_admin_override: true,
+794:      action_policy: asString(operating.actionPolicy),
+901:          ? "Act unless blocked by policy"
+906:      modeNotes: "Use stronger automation only when approvals, assets, and governance settings are complete."
+946:      roles: ["Strategist", "Writer", "Media Director", "Publisher", "Analyst", "Compliance Reviewer", "Operations Lead / Admin", "Brand owner"],
+949:      publishAccess: "Publishers and admins",
+950:      approveAccess: "Compliance reviewers and admins",
+968:        designer: {
+989:        adsOperator: {
+1010:        admin: {
+1011:          authority: "Operations / admin control",
+1051:      complianceAlerts: "Alert on regulated claims, platform policy conflicts, and high-risk launch copy.",
+1074:    savedAt: null,
+1075:    saveMode: "durable-pending",
+1080:    governancePolicy: null
+1095:    const [teamResult, governanceResult] = await Promise.allSettled([
+1101:    session.governancePolicy = governanceResult.status === "fulfilled" ? asObject(governanceResult.value?.policy || governanceResult.value) : null;
+1103:    const durableSnapshot = extractDurableSettingsSnapshot(session.governancePolicy, session.teamModel);
+1106:      session.savedAt =
+1107:        session.governancePolicy?.updated_at ||
+1108:        session.teamModel?.settings_status?.saved_at ||
+1111:      session.saveMode = "durable";
+1124:  if (!value) return "Not saved yet";
+1127:  if (!Number.isFinite(timestamp)) return "Not saved yet";
+1163:        : "Select channels and confirm approval-before-publish before launch."
+1166:      label: "AI and policy safety",
+1182:    ? "Review the top blocker, fix it in this page, then save to sync durable governance and team records."
+1183:    : "Save this configuration, then open Governance to verify policy impact and approval readiness.";
+1393:        ${TEAM_ROLE_MATRIX.map((role) => {
+1420:                        "Admin control"
+1564:        <span class="card-badge neutral">${escapeHtml(session.saveMode === "durable" ? "Durable backbone" : session.loading ? "Syncing..." : "Durable pending")}</span>
+1589:          <strong>${escapeHtml(formatRelativeTime(session.savedAt))}</strong>
+1600:        <div class="governance-rule-list">
+1602:            <div class="governance-rule-item">
+1611:      <div class="governance-policy-block">
+1613:        <p class="governance-copy">${escapeHtml(readiness.nextBestAction)}</p>
+1683:      detail: "Approval ownership, policy rules, and settings bridge state are written into the durable governance policy."
+1709:      <div class="governance-rule-list">
+1711:          <div class="governance-rule-item">
+1741:          <strong>${escapeHtml(session.saveMode === "durable" ? "Durable backbone" : session.loading ? "Syncing..." : "Durable pending")}</strong>
+1746:        <strong>Status:</strong> ${escapeHtml(formatRelativeTime(session.savedAt))}. Save updates durable team and governance records; backend enforcement remains authoritative.
+1750:        <button class="btn btn-secondary" type="button" data-settings-action="focus-section" data-section-id="sync">Open sync policy</button>
+1751:        <button class="btn btn-secondary" type="button" data-settings-action="open-governance">Open Governance page</button>
+1758:  const dirtyText = session.dirty ? "Unsaved changes" : "All changes captured";
+1766:          <p>${escapeHtml(dirtyText)}. Saving writes this configuration into durable team and governance records used across the operating system.</p>
+1770:        <strong>Safe execution path:</strong> Review readiness and blockers, update the required section, save once, then validate Governance impact.
+1773:        <button class="btn btn-primary" type="button" data-settings-action="save-all">Save Settings</button>
+1780:        <button class="btn btn-secondary" type="button" data-settings-action="focus-section" data-section-id="safety">Safety and governance</button>
+1827:      ? "Unsaved changes are present. Saving will update the shared durable governance and team records."
+1828:      : "All changes captured. The shared durable governance and team records are in sync.";
+1848:      if (action === "save-all") {
+1850:          const governancePayload = mapSettingsToGovernancePolicy(session.form);
+1853:          const confirmed = window.confirm("Confirm settings save\n\nAction: Save team and governance settings for this project.\nRisk: These settings can affect team roles, approval behavior, publishing readiness, brand safety review, and admin override behavior.\nAuthority: This is a backend-governed durable settings update.\n\nSelect Cancel to review the settings before saving.");
+1854:          if (!confirmed) {
+1859:            saveProjectTeam(session.projectName, teamPayload),
+1862:              ...governancePayload
+1868:            destination_page: "governance",
+1869:            source_role: "admin",
+1872:            destination_service_domain: "governance",
+1874:              entity_type: "governance_policy",
+1876:              route: "governance",
+1877:              label: "Governance policy"
+1880:              summary: "Settings updated the shared durable operating policy.",
+1883:                saveMode: "durable",
+1889:          session.savedAt = nowIso();
+1890:          session.saveMode = "durable";
+1891:          session.governancePolicy = governancePayload;
+1900:          context.showMessage(`Settings saved for ${session.projectName} and synced into the durable system backbone.`);
+1902:          context.showError(error.message || "Failed to save durable settings.");
+1912:        context.showMessage("Default settings restored for this project. Review and save when ready.");
+1932:      if (action === "open-governance") {
+1933:        context.navigateTo("governance");
+1946:          context.showMessage("Critical settings look complete. You can save this configuration whenever you’re ready.");
+2023:    description: "Configure project defaults, AI behavior, publishing rules, approvals, sync behavior, and governance."
+2037:              Select a project to configure system defaults, approvals, sync policies, and governance rules.
+2062: * but they must not call removed /api/ai-control/* or /api/governance/* routes.
+2076:      governance: {
+2078:        policy_read: "fetchProjectGovernancePolicy(projectName)",
+2079:        policy_update: "updateProjectGovernancePolicy(projectName, payload)"
+2107:  return buildLegacySettingsHookResponse("governance", "loadAudit");
+2111:  return buildLegacySettingsHookResponse("governance", "process", {
+2117:  return buildLegacySettingsHookResponse("governance", "live");
+
+### Settings save / mutation behavior
+2:  fetchProjectGovernancePolicy,
+3:  fetchProjectTeam,
+4:  saveProjectTeam,
+6:} from "../api.js";
+127:    backendLabel: "Project profile fields are ready for backend save",
+273:    backendLabel: "Automation routing rules sync into the durable governance policy",
+306:    backendLabel: "Publishing defaults sync into the durable governance policy",
+350:    backendLabel: "Approval policy syncs into the durable governance and team records",
+636:    description: "Keep approval ownership, publishing permissions, and team-role authority together so governance stays understandable.",
+687:function extractDurableSettingsSnapshot(governancePolicy = {}, teamModel = {}) {
+688:  const governance = asObject(governancePolicy);
+689:  const bridge = asObject(governance.settings_bridge);
+691:  const snapshot = asObject(team.settings_profile || bridge.form);
+692:  const owners = asObject(governance.approval_owners);
+693:  const rules = asObject(governance.policy_rules);
+741:    settings_profile: clone(form),
+742:    settings_status: {
+744:      saved_at: nowIso(),
+745:      source: "settings-page",
+788:    settings_bridge: {
+789:      source: "settings-durable-record",
+906:      modeNotes: "Use stronger automation only when approvals, assets, and governance settings are complete."
+1074:    savedAt: null,
+1075:    saveMode: "durable-pending",
+1080:    governancePolicy: null
+1095:    const [teamResult, governanceResult] = await Promise.allSettled([
+1096:      fetchProjectTeam(session.projectName),
+1097:      fetchProjectGovernancePolicy(session.projectName)
+1101:    session.governancePolicy = governanceResult.status === "fulfilled" ? asObject(governanceResult.value?.policy || governanceResult.value) : null;
+1103:    const durableSnapshot = extractDurableSettingsSnapshot(session.governancePolicy, session.teamModel);
+1106:      session.savedAt =
+1107:        session.governancePolicy?.updated_at ||
+1108:        session.teamModel?.settings_status?.saved_at ||
+1111:      session.saveMode = "durable";
+1116:    session.error = error.message || "Failed to load durable settings.";
+1124:  if (!value) return "Not saved yet";
+1127:  if (!Number.isFinite(timestamp)) return "Not saved yet";
+1163:        : "Select channels and confirm approval-before-publish before launch."
+1182:    ? "Review the top blocker, fix it in this page, then save to sync durable governance and team records."
+1261:  const requiredMark = field.critical ? '<span class="settings-required">Critical</span>' : "";
+1265:      <div class="settings-field-block settings-field-block-span-2">
+1266:        <label class="settings-field-label">${escapeHtml(field.label)} ${requiredMark}</label>
+1267:        <div class="settings-choice-grid">
+1275:                <label class="settings-choice-card">
+1284:                  <span class="settings-choice-card-body">
+1299:      <label class="settings-toggle" for="${fieldId}">
+1301:          <span class="settings-field-label">${escapeHtml(field.label)} ${requiredMark}</span>
+1306:          class="settings-toggle-input"
+1310:        <span class="settings-toggle-pill" aria-hidden="true"></span>
+1319:      <div class="settings-field-block">
+1320:        <label class="settings-field-label">${escapeHtml(field.label)} ${requiredMark}</label>
+1321:        <div class="settings-checklist">
+1328:                <label class="settings-chip">
+1347:      <div class="settings-field-block">
+1348:        <label class="settings-field-label" for="${fieldId}">${escapeHtml(field.label)} ${requiredMark}</label>
+1351:          class="settings-control settings-textarea"
+1361:      <div class="settings-field-block">
+1362:        <label class="settings-field-label" for="${fieldId}">${escapeHtml(field.label)} ${requiredMark}</label>
+1363:        <select id="${fieldId}" class="settings-control" data-setting-path="${escapeHtml(field.path)}">
+1371:    <div class="settings-field-block">
+1372:      <label class="settings-field-label" for="${fieldId}">${escapeHtml(field.label)} ${requiredMark}</label>
+1375:        class="settings-control"
+1387:    <div class="settings-role-matrix">
+1388:      <div class="settings-role-matrix-head">
+1392:      <div class="settings-role-grid">
+1397:            <div class="settings-role-card">
+1398:              <div class="settings-role-card-head">
+1404:              <p class="settings-role-description">${escapeHtml(role.description)}</p>
+1405:              <div class="settings-role-card-grid">
+1406:                <div class="settings-field-block">
+1407:                  <label class="settings-field-label" for="team-role-${role.id}-authority">Authority</label>
+1410:                    class="settings-control"
+1427:                <label class="settings-toggle settings-toggle-compact" for="team-role-${role.id}-approve">
+1428:                  <span class="settings-field-label">Can approve</span>
+1432:                    class="settings-toggle-input"
+1436:                  <span class="settings-toggle-pill" aria-hidden="true"></span>
+1438:                <label class="settings-toggle settings-toggle-compact" for="team-role-${role.id}-publish">
+1439:                  <span class="settings-field-label">Can publish</span>
+1443:                    class="settings-toggle-input"
+1447:                  <span class="settings-toggle-pill" aria-hidden="true"></span>
+1449:                <label class="settings-toggle settings-toggle-compact" for="team-role-${role.id}-integrations">
+1450:                  <span class="settings-field-label">Manage integrations</span>
+1454:                    class="settings-toggle-input"
+1458:                  <span class="settings-toggle-pill" aria-hidden="true"></span>
+1460:                <label class="settings-toggle settings-toggle-compact" for="team-role-${role.id}-defaults">
+1461:                  <span class="settings-field-label">Change defaults</span>
+1465:                    class="settings-toggle-input"
+1469:                  <span class="settings-toggle-pill" aria-hidden="true"></span>
+1498:      label: "Summarize settings",
+1500:      prompt: `Summarize the current settings for ${projectLabel}. Cover project defaults, AI behavior, approvals, permissions, integrations, sync posture, and the main configuration tradeoffs.`
+1504:      preview: "Identify the most important settings gap and the safest next fix.",
+1505:      prompt: `Review the current settings for ${projectLabel}. Identify the highest-risk configuration gap, starting with ${topRisk}, and explain the safest next fix.`
+1509:      preview: "Advise on AI and automation settings based on current risk and approval posture.",
+1510:      prompt: `Review the AI, automation, safety, approval, and sync settings for ${projectLabel}. Recommend the best operating posture and what should be tightened or relaxed next.`
+1519:    <article class="settings-section panel" id="settings-group-${group.id}">
+1524:          <p class="settings-section-copy">${escapeHtml(group.description)}</p>
+1527:      <div class="settings-group-grid">
+1529:          <div class="settings-group-block" id="settings-section-${section.id}">
+1530:            <div class="settings-group-head">
+1535:              <span class="settings-badge">${escapeHtml(section.backendLabel)}</span>
+1537:            <div class="settings-fields-grid">
+1557:    <section class="panel settings-overview std-detail-card mhos-clean-surface">
+1562:          <p class="settings-section-copy">Settings defines durable defaults for Governance, Publishing, AI, Integrations, and Operations. Backend remains the authority for enforcement.</p>
+1564:        <span class="card-badge neutral">${escapeHtml(session.saveMode === "durable" ? "Durable backbone" : session.loading ? "Syncing..." : "Durable pending")}</span>
+1566:      <div class="settings-overview-grid">
+1567:        <div class="settings-overview-item">
+1571:        <div class="settings-overview-item">
+1575:        <div class="settings-overview-item">
+1579:        <div class="settings-overview-item">
+1583:        <div class="settings-overview-item">
+1587:        <div class="settings-overview-item">
+1589:          <strong>${escapeHtml(formatRelativeTime(session.savedAt))}</strong>
+1593:      <div class="settings-risk-panel">
+1594:        <div class="settings-risk-head">
+1600:        <div class="governance-rule-list">
+1602:            <div class="governance-rule-item">
+1608:        <ul class="simple-list settings-risk-list">${riskItems}</ul>
+1611:      <div class="governance-policy-block">
+1613:        <p class="governance-copy">${escapeHtml(readiness.nextBestAction)}</p>
+1614:        <div class="settings-actions-buttons std-action-row">
+1615:          <button class="btn btn-secondary" type="button" data-settings-action="focus-section" data-section-id="approval">Review approvals</button>
+1616:          <button class="btn btn-secondary" type="button" data-settings-action="focus-section" data-section-id="publishing">Review publishing</button>
+1617:          <button class="btn btn-secondary" type="button" data-settings-open-ai>Ask AI for guidance</button>
+1627:    <section class="panel settings-ai-assistant std-ai-panel mhos-clean-surface">
+1632:          <p class="settings-section-copy">AI provides context and recommendations. Durable changes happen only through explicit Settings and Governance actions.</p>
+1638:      <div class="settings-toolbar">
+1639:        <button class="btn btn-secondary" type="button" data-settings-open-ai>Open AI: Review in AI Workspace</button>
+1643:          <button class="quick-action-btn" type="button" data-settings-ai-prompt="${index}">
+1655:    <article class="settings-section panel" id="settings-section-${section.id}">
+1656:      <div class="panel-header settings-section-header">
+1662:        <div class="settings-section-meta">
+1663:          <span class="settings-badge">${escapeHtml(section.backendLabel)}</span>
+1664:          <button class="btn btn-secondary" type="button" data-settings-action="reset-section" data-section-id="${escapeHtml(section.id)}">
+1669:      <div class="settings-fields-grid">
+1683:      detail: "Approval ownership, policy rules, and settings bridge state are written into the durable governance policy."
+1700:    <aside class="settings-summary panel std-detail-card mhos-clean-surface">
+1709:      <div class="governance-rule-list">
+1711:          <div class="governance-rule-item">
+1718:      <div class="settings-summary-grid">
+1741:          <strong>${escapeHtml(session.saveMode === "durable" ? "Durable backbone" : session.loading ? "Syncing..." : "Durable pending")}</strong>
+1746:        <strong>Status:</strong> ${escapeHtml(formatRelativeTime(session.savedAt))}. Save updates durable team and governance records; backend enforcement remains authoritative.
+1748:      <div class="settings-actions-buttons std-action-row">
+1749:        <button class="btn btn-secondary" type="button" data-settings-action="focus-section" data-section-id="operating">Open operating mode</button>
+1750:        <button class="btn btn-secondary" type="button" data-settings-action="focus-section" data-section-id="sync">Open sync policy</button>
+1751:        <button class="btn btn-secondary" type="button" data-settings-action="open-governance">Open Governance page</button>
+1758:  const dirtyText = session.dirty ? "Unsaved changes" : "All changes captured";
+1761:    <section class="settings-actions panel std-action-panel mhos-clean-surface">
+1763:        <div class="settings-actions-copy">
+1766:          <p>${escapeHtml(dirtyText)}. Saving writes this configuration into durable team and governance records used across the operating system.</p>
+1770:        <strong>Safe execution path:</strong> Review readiness and blockers, update the required section, save once, then validate Governance impact.
+1772:      <div class="settings-actions-buttons std-action-row">
+1773:        <button class="btn btn-primary" type="button" data-settings-action="save-all">Save Settings</button>
+1774:        <button class="btn btn-secondary" type="button" data-settings-action="review-critical">Review Critical Settings</button>
+1775:        <button class="btn btn-secondary" type="button" data-settings-action="restore-defaults">Restore Defaults</button>
+1777:      <div class="settings-actions-buttons std-action-row">
+1778:        <button class="btn btn-secondary" type="button" data-settings-action="focus-section" data-section-id="project">Project defaults</button>
+1779:        <button class="btn btn-secondary" type="button" data-settings-action="focus-section" data-section-id="team">Team permissions</button>
+1780:        <button class="btn btn-secondary" type="button" data-settings-action="focus-section" data-section-id="safety">Safety and governance</button>
+1790:    <section class="page is-active" data-page="settings">
+1791:      <div class="settings-page-surface">
+1792:        <div class="settings-workspace-grid">
+1793:          <div class="settings-main-stack std-main-column mhos-clean-stack">
+1797:          <aside class="settings-right-rail std-right-rail mhos-clean-stack">
+1809:  const overviewHost = root.querySelector(".settings-overview");
+1813:  const summaryHost = root.querySelector(".settings-summary");
+1817:  const aiHost = root.querySelector(".settings-ai-assistant");
+1824:  const intro = root.querySelector(".settings-actions-copy p");
+1827:      ? "Unsaved changes are present. Saving will update the shared durable governance and team records."
+1828:      : "All changes captured. The shared durable governance and team records are in sync.";
+1843:  root.querySelectorAll("[data-settings-action]").forEach((button) => {
+1845:      const action = button.dataset.settingsAction;
+1848:      if (action === "save-all") {
+1850:          const governancePayload = mapSettingsToGovernancePolicy(session.form);
+1853:          const confirmed = window.confirm("Confirm settings save\n\nAction: Save team and governance settings for this project.\nRisk: These settings can affect team roles, approval behavior, publishing readiness, brand safety review, and admin override behavior.\nAuthority: This is a backend-governed durable settings update.\n\nSelect Cancel to review the settings before saving.");
+1854:          if (!confirmed) {
+1859:            saveProjectTeam(session.projectName, teamPayload),
+1861:              actor: "settings-page",
+1862:              ...governancePayload
+1867:            source_page: "settings",
+1868:            destination_page: "governance",
+1869:            source_role: "admin",
+1872:            destination_service_domain: "governance",
+1874:              entity_type: "governance_policy",
+1876:              route: "governance",
+1883:                saveMode: "durable",
+1889:          session.savedAt = nowIso();
+1890:          session.saveMode = "durable";
+1891:          session.governancePolicy = governancePayload;
+1900:          context.showMessage(`Settings saved for ${session.projectName} and synced into the durable system backbone.`);
+1902:          context.showError(error.message || "Failed to save durable settings.");
+1912:        context.showMessage("Default settings restored for this project. Review and save when ready.");
+1921:        context.showMessage(`${titleCase(sectionId)} settings reset to defaults.`);
+1926:        const target = context.$(`settings-section-${sectionId}`) || context.$(`settings-group-${sectionId}`);
+1928:        context.showMessage(`Focused ${titleCase(sectionId)} settings.`);
+1932:      if (action === "open-governance") {
+1933:        context.navigateTo("governance");
+1943:          context.$(`settings-section-${firstSection?.id || "project"}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+1944:          context.showError("Critical settings still need review. The summary panel shows the current risk list.");
+1946:          context.showMessage("Critical settings look complete. You can save this configuration whenever you’re ready.");
+1957:  root.querySelectorAll("[data-settings-open-ai]").forEach((button) => {
+1963:  root.querySelectorAll("[data-settings-ai-prompt]").forEach((button) => {
+1965:      const prompt = buildSettingsPrompts(session)[Number(button.dataset.settingsAiPrompt)];
+1983:      control.tagName === "TEXTAREA" || (control.tagName === "INPUT" && !["checkbox", "radio"].includes(control.type))
+1991:      if (control.type === "checkbox" && control.closest(".settings-checklist")) {
+2017:export const settingsRoute = {
+2018:  id: "settings",
+2023:    description: "Configure project defaults, AI behavior, publishing rules, approvals, sync behavior, and governance."
+2025:  template: `<section class="page is-active" data-page="settings"><div class="settings-page-surface"></div></section>`,
+2034:        <section class="page is-active" data-page="settings">
+2037:              Select a project to configure system defaults, approvals, sync policies, and governance rules.
+2062: * but they must not call removed /api/ai-control/* or /api/governance/* routes.
+2064: * Canonical runtime authority now lives in project-scoped api.js helpers and the
+2074:    message: "Legacy settings global hook is neutralized. Use canonical project-scoped Control Center APIs instead.",
+2076:      governance: {
+2077:        read: "fetchProjectGovernance(projectName)",
+2078:        policy_read: "fetchProjectGovernancePolicy(projectName)",
+2107:  return buildLegacySettingsHookResponse("governance", "loadAudit");
+2111:  return buildLegacySettingsHookResponse("governance", "process", {
+2117:  return buildLegacySettingsHookResponse("governance", "live");

@@ -1,0 +1,726 @@
+### app imports and runtime boot
+// public/control-center/app.js
+
+import {
+  getProjectedActiveRole,
+  getProjectedRoutePermissions
+} from "./runtime/authority/authority-projection.js";
+import {
+  ACTIVE_ROUTE_ROLES,
+  getFallbackRouteAccess
+} from "./runtime/authority/route-role-fallback.js";
+
+import {
+  initRouter,
+  navigateTo,
+  renderRouteTemplate,
+  getRouteDefinition,
+  setRouteAccessResolver
+} from "./router.js";
+import { applyStandardPageLayout } from "./ui/page-standard.js";
+import {
+  getState,
+  setProjects,
+  setCurrentProject,
+  setCurrentRoute,
+  setProjectContext,
+  patchState,
+  setLoading,
+  setError,
+  clearError,
+  markInitialized,
+  subscribe,
+  resetProjectData
+} from "./state.js";
+import {
+  setApiBaseUrl,
+  isDebugStartupMode,
+  AccessKeyError,
+  fetchProjects,
+  createMediaManagerProject,
+  fetchAllCoreProjectData,
+  fetchProjectInsights,
+  fetchProjectLearning,
+  fetchProjectGovernance,
+  fetchProjectOperations,
+  saveProjectSetup,
+  executeProjectAiCommand,
+  saveProjectConnectorSource,
+  removeProjectConnectorSource,
+  fetchProjectIntegrationControlCenter,
+  connectProjectIntegration,
+  reconnectProjectIntegration,
+  testProjectIntegration,
+  syncProjectIntegration,
+  importProjectIntegrationHistory,
+  disconnectProjectIntegration,
+  runProjectWorkflow,
+  runProjectAiWorkflow,
+  createProjectTask,
+  createProjectApproval,
+  decideProjectApproval,
+  saveProjectCampaign,
+  createProjectHandoff,
+  consumeProjectHandoff,
+  markProjectNotification,
+  savePublishingSchedule,
+  reschedulePublishingItem,
+  approvePublishingItem,
+  publishPublishingItem,
+  failPublishingItem,
+  fetchProjectTaskCenter,
+  fetchProjectQueueCenter,
+  fetchProjectJobMonitor,
+  fetchProjectNotificationCenter
+} from "./api.js";
+import {
+  CONTROL_ACCESS_KEY_STORAGE_KEY,
+  CONTROL_ACCESS_KEY_LEGACY_STORAGE_KEYS
+} from "./constants.js";
+import { getOverlaySnapshot } from "./runtime/overlay/overlay-runtime.js";
+import { createLifecycleRegistry } from "./runtime/lifecycle/lifecycle-registry.js";
+import { installMhRuntimeGlobals } from "./runtime/mh-runtime-globals.js";
+
+/* =========================
+   CONFIG
+========================= */
+
+setApiBaseUrl("");
+
+/* =========================
+   APP SHELL LIFECYCLE REGISTRY
+========================= */
+
+// Module-level registry for app shell listeners
+// Manages global listeners (resize, orientation, route change, navigation)
+// Cleaned up on route changes to prevent listener accumulation
+const appShellLifecycle = createLifecycleRegistry("app-shell");
+
+// Helper function to register app shell listeners with the registry
+function addAppShellListener(target, type, handler, options) {
+  if (!target || typeof handler !== "function") {
+    return () => {};
+  }
+  return appShellLifecycle.addEventListener(target, type, handler, options);
+}
+
+/* =========================
+   CONTROL
+========================= */
+
+const CONTROL_WRITE_HEADER = "x-mh-control-key";
+const CONTROL_ROLE_STORAGE_KEY = "mh-control-role";
+const DEFAULT_ACTIVE_ROLE = "admin";
+
+function persistCanonicalControlKey(key) {
+  const normalized = String(key || "").trim();
+  if (!normalized) return;
+
+  try {
+    window.localStorage?.setItem(CONTROL_ACCESS_KEY_STORAGE_KEY, normalized);
+  } catch (_) {}
+}
+
+function setRuntimeControlKey(key) {
+  const normalized = String(key || "").trim();
+  try {
+    window.__MH_CONTROL_CENTER_READ_KEY__ = normalized;
+    window.__MH_CONTROL_CENTER_WRITE_KEY__ = normalized;
+    window.__MH_CONTROL_WRITE_KEY__ = normalized;
+    window.__MH_CONTROL_CENTER_ACCESS_KEY__ = normalized;
+    window.__MH_CONTROL_ACCESS_KEY__ = normalized;
+    window.__MH_ACCESS_KEY__ = normalized;
+  } catch (_) {}
+}
+
+function getControlWriteKey() {
+  if (typeof window === "undefined") return "";
+
+  const runtimeValue = [
+    window.__MH_CONTROL_CENTER_READ_KEY__,
+    window.__MH_CONTROL_CENTER_WRITE_KEY__,
+    window.__MH_CONTROL_WRITE_KEY__,
+    window.__MH_CONTROL_CENTER_ACCESS_KEY__,
+    window.__MH_CONTROL_ACCESS_KEY__,
+    window.__MH_ACCESS_KEY__
+  ].find((value) => typeof value === "string" && value.trim()) || "";
+
+  if (runtimeValue) {
+    const normalizedRuntimeKey = runtimeValue.trim();
+    persistCanonicalControlKey(normalizedRuntimeKey);
+    return normalizedRuntimeKey;
+  }
+
+  try {
+    const canonical = String(window.localStorage?.getItem(CONTROL_ACCESS_KEY_STORAGE_KEY) || "").trim();
+    if (canonical) {
+      return canonical;
+    }
+
+    const legacy = CONTROL_ACCESS_KEY_LEGACY_STORAGE_KEYS
+      .map((key) => String(window.localStorage?.getItem(key) || "").trim())
+      .find(Boolean) || "";
+
+    if (legacy) {
+      persistCanonicalControlKey(legacy);
+    }
+
+    return legacy;
+  } catch (_) {
+    return "";
+  }
+}
+
+function getActiveRole() {
+  try {
+    const stored = window.localStorage?.getItem(CONTROL_ROLE_STORAGE_KEY);
+    if (stored && ACTIVE_ROUTE_ROLES.includes(stored.trim().toLowerCase())) {
+      return stored.trim().toLowerCase();
+    }
+  } catch (_) {}
+  const state = getState();
+  const operations = state.data.operations;
+  const stateRole = getProjectedActiveRole({ operations, activeRole: state.activeRole });
+  if (stateRole && typeof stateRole === "string" && stateRole.trim()) {
+    return stateRole.trim().toLowerCase();
+  }
+  return DEFAULT_ACTIVE_ROLE;
+}
+
+function isProtectedControlWriteRequest(input, init = {}) {
+  const method = String(
+    init.method ||
+    (input instanceof Request ? input.method : "") ||
+    "GET"
+  ).trim().toUpperCase();
+
+  if (!["POST", "PATCH", "DELETE"].includes(method)) {
+    return false;
+  }
+
+  try {
+    const base = typeof window !== "undefined" ? window.location.origin : "http://localhost";
+    const url = new URL(
+      input instanceof Request ? input.url : String(input || ""),
+      base
+    );
+
+    return /^\/(?:public\/)?media-manager\//.test(url.pathname);
+  } catch (_) {
+    return false;
+  }
+}
+
+function installProtectedWriteFetch() {
+  if (typeof window === "undefined" || typeof window.fetch !== "function" || window.fetch.__mhProtectedWriteFetch) {
+    return;
+  }
+
+  const originalFetch = window.fetch.bind(window);
+
+  async function protectedWriteFetch(input, init = {}) {
+
+### router imports and route registry
+// public/control-center/router.js
+
+import { homeRoute } from "./pages/home.js";
+import { aiCommandRoute } from "./pages/ai-command.js";
+import { campaignStudioRoute } from "./pages/campaign-studio.js";
+import { contentStudioRoute } from "./pages/content-studio-workspace.js";
+import { mediaStudioRoute } from "./pages/media-studio-workspace.js";
+import { publishingRoute } from "./pages/publishing.js";
+import { adsManagerRoute } from "./pages/ads-manager.js";
+import { insightsRoute } from "./pages/insights.js";
+import { researchRoute } from "./pages/research.js";
+import { workflowsRoute } from "./pages/workflows.js";
+import {
+  taskCenterRoute,
+  queueCenterRoute,
+  jobMonitorRoute,
+  notificationCenterRoute,
+  operationsCentersRoute
+} from "./pages/operations-centers.js";
+import { setupRoute } from "./pages/setup.js";
+import { libraryRoute } from "./pages/library.js";
+import { integrationsRoute } from "./pages/integrations.js";
+import { customerCenterRoute } from "./pages/customer-center.js";
+import { settingsRoute } from "./pages/settings.js";
+import { governanceRoute } from "./pages/governance.js";
+import {
+  DEFAULT_ROLE,
+  getFallbackRouteAccess
+} from "./runtime/authority/route-role-fallback.js";
+
+const routeRegistry = {
+  [homeRoute.id]: homeRoute,
+  [aiCommandRoute.id]: aiCommandRoute,
+  [workflowsRoute.id]: workflowsRoute,
+  [operationsCentersRoute.id]: operationsCentersRoute,
+  [taskCenterRoute.id]: taskCenterRoute,
+  [queueCenterRoute.id]: queueCenterRoute,
+  [jobMonitorRoute.id]: jobMonitorRoute,
+  [notificationCenterRoute.id]: notificationCenterRoute,
+  [campaignStudioRoute.id]: campaignStudioRoute,
+  [contentStudioRoute.id]: contentStudioRoute,
+  [mediaStudioRoute.id]: mediaStudioRoute,
+  [publishingRoute.id]: publishingRoute,
+  [adsManagerRoute.id]: adsManagerRoute,
+  [insightsRoute.id]: insightsRoute,
+  [researchRoute.id]: researchRoute,
+  [setupRoute.id]: setupRoute,
+  [libraryRoute.id]: libraryRoute,
+  [customerCenterRoute.id]: customerCenterRoute,
+  [integrationsRoute.id]: integrationsRoute,
+  [settingsRoute.id]: settingsRoute,
+  [governanceRoute.id]: governanceRoute
+};
+
+let routeAccessResolver = null;
+
+const routeChangeSubscribers = new Set();
+
+export function subscribeRouteChange(handler) {
+  if (typeof handler !== "function") return () => {};
+  routeChangeSubscribers.add(handler);
+  return () => routeChangeSubscribers.delete(handler);
+}
+
+function notifyRouteChange(route) {
+  routeChangeSubscribers.forEach((handler) => {
+    try {
+      handler(route);
+    } catch (error) {
+      console.warn("Route change subscriber failed:", error?.message || error);
+    }
+  });
+}
+
+
+function getPageRoot() {
+  return document.getElementById("pageRoot");
+}
+
+function getFallbackRoute(route) {
+  return {
+    id: route,
+    meta: {
+      eyebrow: "System",
+      title: "Page",
+      description: "Workspace view"
+    },
+    template: `
+      <section class="page is-active">
+        <div class="page-grid">
+          <div class="panel panel-span-2">
+            <div class="empty-box">Unknown route: ${route}</div>
+          </div>
+        </div>
+      </section>
+    `
+  };
+}
+
+function escapeHtmlMin(str) {
+  return String(str == null ? "" : str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function getAccessDeniedRoute(route, reason = "") {
+  const detail = reason || `Route "${route}" is not available for the current role.`;
+  return {
+    id: "__access-denied__",
+    meta: {
+      eyebrow: "Access",
+      title: "Route Blocked",
+      description: "This workspace route is blocked by role access rules."
+    },
+    template: `
+      <section class="page is-active" data-page="access-denied">
+        <div class="page-grid">
+          <div class="panel panel-span-2">
+            <div class="access-denied-box">
+              <div class="access-denied-icon">&#128274;</div>
+              <h3 class="access-denied-title">Route blocked: ${escapeHtmlMin(route)}</h3>
+              <p class="access-denied-detail">${escapeHtmlMin(detail)}</p>
+              <p class="access-denied-hint">
+                To access this page, use the <strong>Role</strong> selector in the top bar and switch to a permitted role.
+                For full access during internal testing, select <strong>admin</strong>.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+    `
+  };
+}
+
+function normalizeRouteAccessResult(result, route) {
+  if (typeof result === "boolean") {
+    return {
+      allowed: result,
+      reason: result ? "" : `Access to ${route} is restricted.`
+    };
+  }
+
+  if (result && typeof result === "object") {
+    return {
+      allowed: result.allowed !== false,
+      reason: String(result.reason || "")
+    };
+  }
+
+  return {
+    allowed: true,
+    reason: ""
+  };
+}
+
+function getDefaultRouteAccess(route) {
+  return getFallbackRouteAccess(route, DEFAULT_ROLE, { useDefaultRoleMessage: true });
+}
+
+function getRouteAccess(route) {
+  if (typeof routeAccessResolver !== "function") {
+    return getDefaultRouteAccess(route);
+  }
+
+  try {
+    return normalizeRouteAccessResult(routeAccessResolver(route), route);
+  } catch (_) {
+    return getDefaultRouteAccess(route);
+  }
+}
+
+function updatePageHeader(route) {
+  const routeDef = getRouteDefinition(route);
+  const meta = routeDef.meta;
+
+  const eyebrow = document.getElementById("pageEyebrow");
+  const title = document.getElementById("pageTitle");
+  const description = document.getElementById("pageDescription");
+
+  if (eyebrow) eyebrow.textContent = meta.eyebrow;
+  if (title) title.textContent = meta.title;
+  if (description) description.textContent = meta.description;
+}
+
+function updateActiveNav(route) {
+  const navItems = Array.from(document.querySelectorAll(".nav-item[data-route]"));
+
+  navItems.forEach((item) => {
+    const itemRoute = item.getAttribute("data-route");
+    item.classList.toggle("is-active", itemRoute === route);
+  });
+}
+
+export function getRouteDefinition(route) {
+  const access = getRouteAccess(route);
+  if (!access.allowed) {
+    return getAccessDeniedRoute(route, access.reason);
+  }
+
+  return routeRegistry[route] || getFallbackRoute(route);
+}
+
+export function setRouteAccessResolver(resolver) {
+  routeAccessResolver = typeof resolver === "function" ? resolver : null;
+}
+
+export function renderRouteTemplate(route) {
+  const root = getPageRoot();
+  if (!root) return;
+
+  const routeDef = getRouteDefinition(route);
+  root.innerHTML = routeDef.template;
+
+  updatePageHeader(route);
+  updateActiveNav(route);
+}
+
+export function navigateTo(route, emit = true) {
+  renderRouteTemplate(route);
+  notifyRouteChange(route);
+
+  // Sync browser URL — setting the same hash value does not re-fire hashchange
+  const newHash = `#${route}`;
+  if (typeof location !== "undefined" && location.hash !== newHash) {
+    location.hash = newHash;
+  }
+
+  if (emit) {
+    window.dispatchEvent(
+      new CustomEvent("mh:route-change", {
+        detail: { route }
+      })
+    );
+  }
+}
+
+export function initRouter() {
+  renderRouteTemplate("home");
+}
+
+### api helper surface
+// public/control-center/api.js
+
+import {
+  CONTROL_ACCESS_KEY_STORAGE_KEY,
+  CONTROL_ACCESS_KEY_LEGACY_STORAGE_KEYS
+} from "./constants.js";
+
+let API_BASE_URL = "";
+const DEFAULT_REQUEST_TIMEOUT_MS = 20000;
+const AI_GUIDANCE_REQUEST_TIMEOUT_MS = 90000;
+const DEFAULT_RESPONSE_TEXT_TIMEOUT_MS = 20000;
+const DEFAULT_PARSE_TIMEOUT_MS = 2000;
+const REQUIRED_PROJECT_RESPONSE_TEXT_TIMEOUT_MS = 3000;
+
+export class AccessKeyError extends Error {
+  constructor(message, diagnostics = {}) {
+    super(String(message || "Project data requires a valid access key."));
+    this.name = "AccessKeyError";
+    this.code = "ACCESS_KEY_ERROR";
+    this.status = diagnostics?.status || null;
+    this.endpoint = String(diagnostics?.endpoint || "");
+    this.payload = diagnostics?.payload ?? null;
+    this.diagnostics = {
+      keyPresent: Boolean(diagnostics?.keyPresent),
+      keySource: String(diagnostics?.keySource || "none"),
+      authHeaderPresent: Boolean(diagnostics?.authHeaderPresent),
+      endpoint: this.endpoint,
+      status: this.status,
+      contentType: String(diagnostics?.contentType || "")
+    };
+  }
+}
+
+export class ProjectPayloadError extends Error {
+  constructor(message, diagnostics = {}) {
+    super(String(message || "Project response was received but could not be processed."));
+    this.name = "ProjectPayloadError";
+    this.code = "PROJECT_PAYLOAD_ERROR";
+    this.status = diagnostics?.status || null;
+    this.endpoint = String(diagnostics?.endpoint || "");
+    this.payload = diagnostics?.payload ?? null;
+    this.diagnostics = {
+      keyPresent: Boolean(diagnostics?.keyPresent),
+      keySource: String(diagnostics?.keySource || "none"),
+      authHeaderPresent: Boolean(diagnostics?.authHeaderPresent),
+      endpoint: this.endpoint,
+      status: this.status,
+      contentType: String(diagnostics?.contentType || ""),
+      bodyLength: Number(diagnostics?.bodyLength || 0),
+      parseStage: String(diagnostics?.parseStage || ""),
+      responseSnippet: String(diagnostics?.responseSnippet || "")
+    };
+  }
+}
+
+export function setApiBaseUrl(value = "") {
+  API_BASE_URL = value || "";
+}
+
+function buildUrl(path = "") {
+  return `${API_BASE_URL}${path}`;
+}
+
+function persistCanonicalControlKey(key) {
+  const normalized = String(key || "").trim();
+  if (!normalized) return;
+
+  try {
+    if (typeof localStorage !== "undefined") {
+      localStorage.setItem(CONTROL_ACCESS_KEY_STORAGE_KEY, normalized);
+    }
+  } catch (_) {
+    // Ignore storage access errors in restricted contexts
+  }
+}
+
+function readControlKeyMeta() {
+  const empty = { key: "", source: "none" };
+
+  try {
+    if (typeof window !== "undefined") {
+      const runtimeKeyCandidates = [
+        { source: "window.__MH_CONTROL_CENTER_READ_KEY__", value: window.__MH_CONTROL_CENTER_READ_KEY__ },
+        { source: "window.__MH_CONTROL_CENTER_WRITE_KEY__", value: window.__MH_CONTROL_CENTER_WRITE_KEY__ },
+        { source: "window.__MH_CONTROL_WRITE_KEY__", value: window.__MH_CONTROL_WRITE_KEY__ },
+        { source: "window.__MH_CONTROL_CENTER_ACCESS_KEY__", value: window.__MH_CONTROL_CENTER_ACCESS_KEY__ },
+        { source: "window.__MH_CONTROL_ACCESS_KEY__", value: window.__MH_CONTROL_ACCESS_KEY__ },
+        { source: "window.__MH_ACCESS_KEY__", value: window.__MH_ACCESS_KEY__ }
+      ];
+
+      for (const candidate of runtimeKeyCandidates) {
+        const normalized = String(candidate.value || "").trim();
+        if (normalized) {
+          persistCanonicalControlKey(normalized);
+          return { key: normalized, source: candidate.source };
+        }
+      }
+    }
+
+    if (typeof localStorage !== "undefined") {
+      const canonical = String(localStorage.getItem(CONTROL_ACCESS_KEY_STORAGE_KEY) || "").trim();
+      if (canonical) {
+        return { key: canonical, source: `localStorage:${CONTROL_ACCESS_KEY_STORAGE_KEY}` };
+      }
+
+      for (const legacyKey of CONTROL_ACCESS_KEY_LEGACY_STORAGE_KEYS) {
+        const legacyValue = String(localStorage.getItem(legacyKey) || "").trim();
+        if (legacyValue) {
+          persistCanonicalControlKey(legacyValue);
+          return { key: legacyValue, source: `localStorage:${legacyKey}` };
+        }
+      }
+    }
+  } catch (_) {
+    // Ignore storage access errors in restricted contexts
+  }
+
+  return empty;
+}
+
+export function getControlCenterAccessKeyMeta() {
+  const keyMeta = readControlKeyMeta();
+  return {
+    key: String(keyMeta?.key || ""),
+    source: String(keyMeta?.source || "none")
+  };
+}
+
+function isMissingReadKeyErrorMessage(message) {
+  return /missing\s+read\s+key/i.test(String(message || ""));
+}
+
+function isAccessKeyRelatedMessage(message) {
+  const normalized = String(message || "").toLowerCase();
+  if (!normalized) {
+    return false;
+  }
+
+  return /missing\s+(?:protected\s+write\s+key|read\s+key|control\s+center\s+access\s+key)/i.test(normalized)
+    || /invalid\s+(?:protected\s+write\s+key|read\s+key|access\s+key)/i.test(normalized)
+    || /access\s+key/i.test(normalized)
+    || /write\s+key/i.test(normalized)
+    || /read\s+key/i.test(normalized);
+}
+
+export function isAccessKeyFailure(error) {
+  if (!error) {
+    return false;
+  }
+
+  if (error instanceof AccessKeyError) {
+    return true;
+  }
+
+  const status = Number(error?.status ?? error?.diagnostics?.status ?? error?.payload?.status ?? NaN);
+  const message = String(
+    error?.message
+      || error?.payload?.error
+      || error?.payload?.message
+      || ""
+  );
+
+  if ((status === 401 || status === 403) && isAccessKeyRelatedMessage(message)) {
+    return true;
+  }
+
+  return isAccessKeyRelatedMessage(message);
+}
+
+function isTopLevelErrorPayload(payload) {
+  return Boolean(
+    payload &&
+    typeof payload === "object" &&
+    !Array.isArray(payload) &&
+    typeof payload.error === "string" &&
+    payload.error.trim()
+  );
+}
+
+function buildResponseDiagnostics(response, requestMeta = {}, payload = null) {
+  const endpoint = String(response?.url || requestMeta?.endpoint || "");
+  const status = Number.isFinite(response?.status) ? Number(response.status) : null;
+  const contentType = String(response?.headers?.get?.("content-type") || "");
+  const accessKeyBypass = String(response?.headers?.get?.("x-mh-control-key-bypass") || "")
+    .trim()
+    .toLowerCase() === "temporary";
+
+  return {
+    keyPresent: Boolean(requestMeta?.keyPresent),
+    keySource: String(requestMeta?.keySource || "none"),
+    authHeaderPresent: Boolean(requestMeta?.authHeaderPresent),
+    accessKeyBypass,
+    endpoint,
+    status,
+    contentType,
+    payload,
+    bodyLength: Number(requestMeta?.bodyLength || 0),
+    parseStage: String(requestMeta?.parseStage || "")
+  };
+}
+
+export function isDebugStartupMode() {
+  if (typeof window === "undefined") {
+    return false;
+  }
+
+  try {
+    return new URLSearchParams(window.location.search).get("debugStartup") === "1";
+  } catch (_) {
+    return false;
+  }
+}
+
+function shouldEmitApiRuntimeTrace(stage) {
+  const normalized = String(stage || "");
+
+  // Keep watchdog-critical and error traces in normal mode.
+  // Verbose request traces are emitted only when ?debugStartup=1.
+  if (
+    normalized === "response.text.start" ||
+    normalized === "response.text.done" ||
+    normalized === "response.text.error" ||
+    normalized === "api.response.text.start" ||
+    normalized === "api.response.text.done" ||
+    normalized === "api.response.text.timeout" ||
+    normalized === "api.response.parse.start" ||
+    normalized === "api.response.parse.done" ||
+    normalized === "api.response.parse.error" ||
+    normalized === "api.response.json.fallback.done" ||
+    normalized === "api.response.json.fallback.error" ||
+    normalized === "api.response.json.fallback.timeout" ||
+    normalized === "request.timeout" ||
+    normalized === "request.error"
+  ) {
+    return true;
+  }
+
+  return isDebugStartupMode();
+}
+
+function emitApiRuntimeTrace(stage, details = {}) {
+  if (!shouldEmitApiRuntimeTrace(stage)) {
+    return;
+  }
+
+  if (typeof window === "undefined" || typeof window.dispatchEvent !== "function") {
+    return;
+  }
+
+  try {
+    window.dispatchEvent(new CustomEvent("mh:control-center-api-trace", {
+      detail: {
+        at: new Date().toISOString(),
+        stage: String(stage || "api.trace"),
+        endpoint: String(details.endpoint || ""),
+        method: String(details.method || "GET"),
+        status: Number.isFinite(details.status) ? Number(details.status) : null,
+        contentType: String(details.contentType || ""),
+        message: String(details.message || ""),
+        bodyLength: Number(details.bodyLength || 0),

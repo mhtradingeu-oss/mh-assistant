@@ -1,0 +1,1617 @@
+### server routes overview
+56:} = require('./lib/security/governance-mutation-gate');
+75:const { executeAdapterAction } = require('./lib/integrations/adapter-manager');
+80:} = require('./lib/integrations/provider-registry');
+87:} = require('./lib/media/provider-layer');
+137:} = require('./lib/media/native/orchestrator/job-dispatch-orchestrator');
+141:} = require('./lib/customer-operations/customer-operations-runtime');
+145:} = require('./lib/media/native/models/default-models');
+150:} = require('./lib/media/native/providers/provider-model-catalog');
+153:} = require('./lib/media/native/providers/provider-readiness');
+156:} = require('./lib/media/native/capabilities/local-rendering-capabilities');
+188:const customerCenterProjection = require('./lib/customer-operations/projections/customer-center-projection');
+233:app.use(helmet({
+236:app.use(cors({
+250:app.use(compression());
+251:app.use("/public", publicAliasDeprecationHeaders);
+252:app.use(express.json());
+346:  /^\/media\/upload\/?$/i,
+354:  /^\/execute_publish_package\/?$/i,
+355:  /^\/execute_email_package\/?$/i,
+356:  /^\/generate_media_from_prompt\/?$/i,
+369:  return /^\/(?:public\/)?media-manager\//.test(requestPath)
+370:    || /^\/api\/media\//i.test(requestPath)
+427:app.use(requireProtectedControlWriteKey);
+430:  /^\/(?:public\/)?media-manager\/projects\/?$/i,
+431:  /^\/(?:public\/)?media-manager\/asset-catalog\/?$/i,
+432:  /^\/(?:public\/)?media-manager\/project\//i,
+433:  /^\/(?:public\/)?media-manager\/storage\//i,
+435:  /^\/media\/projects\/?$/i,
+436:  /^\/media\/(?:tree|registry|file)\//i,
+491:app.use(requireProtectedReadKey);
+500:app.use(runtimeSecurityEnforcement);
+525:  return /\/ai(?:\/|$)/i.test(requestPath) || /^\/api\/media\//i.test(requestPath);
+560:  return sendError(res, {
+567:app.use(applyRouteRateLimit);
+576:const mediaProviderLayer = createMediaProviderLayer({
+595:  const mediaJobId = asString(req?.body?.media_job_id || req?.body?.id || '');
+605:    const mediaJob = upsertMediaJob(projectName, {
+606:      id: mediaJobId || undefined,
+607:      title: asString(req?.body?.title || `${requestType} media job`),
+612:      provider: asString(req?.body?.provider || req?.body?.media_provider || ''),
+613:      model: asString(req?.body?.model || req?.body?.media_model || ''),
+627:        actor: 'media-api'
+636:      actor: 'media-api'
+640:      media_job: mediaJob,
+641:      operations: buildProjectOperationsPayload(projectName)
+687:      mode: 'legacy_media',
+733:    basePaths.mediaDir,
+915:  MEDIA_QUEUE: 'email_media_queue'
+920:  'executed',
+954:function sendError(res, {
+968:function sendInvalidProjectSlug(res) {
+969:  return sendError(res, {
+977:  /^\/(?:public\/)?media-manager\/project\/([^/?#]+)/i,
+979:  /^\/media\/(?:tree|registry)\/([^/?#]+)/i,
+980:  /^\/media\/file\/([^/?#]+)/i,
+1013:      return sendInvalidProjectSlug(res);
+1020:app.use(validateRawProjectSlugPathSegment);
+1022:app.param('project', (req, res, next, projectValue) => {
+1028:      return sendInvalidProjectSlug(res);
+1047:      return sendInvalidProjectSlug(res);
+1053:app.use(validateOptionalProjectSlugFields);
+1202:  publishing: {
+1204:    canonical: 'publishing'
+1236:    canonical: 'publishing/results'
+1240:function classifyImmediateFallbackReason(telemetryEntry = {}) {
+1389:  telemetryEntry.fallback_reason = classifyImmediateFallbackReason(telemetryEntry);
+1498:    canonicalLiveMediaQueueDir: path.join(EXECUTION_DIR, 'projects', safeProject, 'media', 'queue'),
+1499:    legacyLiveMediaQueueDir: path.join(EXECUTION_DIR, safeProject, 'media', 'queue')
+1537:      pathContract: 'execution/projects/<project>/email/delivery/<send>.json -> brand-assets/<project>/email/delivery/<send>.json'
+1552:      requestedFile: 'media/queue/email-image-queue.json',
+1553:      pathContract: 'execution/projects/<project>/media/queue/email-image-queue.json -> execution/<project>/media/queue/email-image-queue.json'
+1643:function readLiveEmailMediaQueue(projectName, requestedIdentifier = 'email-media-queue') {
+1689:  const mediaDir = path.join(getLegacyExecutionRoot(projectName), 'media');
+1690:  ensureDir(mediaDir);
+1691:  return mediaDir;
+1703:  'publishing',
+2064:    provider: renderRequest.result?.provider || renderRequest.provider || null,
+2088:      ready_for_send: false
+2203:    packageData.status = 'ready_for_send';
+2204:    packageData.email_asset.ready_for_send = true;
+2207:    packageData.email_asset.ready_for_send = false;
+2533:async function executeProviderRender(projectName) {
+2588:    throw new Error('No image data returned from provider');
+2603:  provider: 'openai',
+2668:    status: 'ready_for_send',
+2673:  if (pkg.status !== 'ready_for_send') {
+2675:    result.blocking_reasons.push('Prepared email package is not ready_for_send');
+2703:  const deliveryId = `emailsend_${Date.now()}`;
+2723:async function sendPreparedEmail(projectName, toEmail) {
+2726:  if (readiness.status !== 'ready_for_send') {
+2728:      status: 'send_blocked',
+2739:  // مثل SMTP / WordPress mail bridge / provider API
+2740:  // في هذه النسخة سنحفظ سجلاً آمنًا ونعتبره pending_send إذا لم تربط مزود الإرسال بعد.
+2743:    status: 'pending_provider_send',
+2749:    note: 'Prepared and verified. Waiting for provider integration or send bridge.'
+3226:      'Open with the strongest premium visual frame immediately.',
+3311:      ? 'Lead with immediate visual payoff and strong first-line hook.'
+3320:      ? 'Retention-first, immediate hook, visual momentum.'
+3342:      'Keep music and media usage rights-safe.',
+3987:    domain: 'publishing',
+3992:    domain: 'publishing',
+3995:    requestedIdentifier: 'publishing-root',
+3996:    requestedFile: 'publishing'
+4057:    domain: 'publishing',
+4058:    artifactType: 'publishing_connector_payload',
+4093:    domain: 'publishing',
+4094:    artifactType: 'publishing_scheduler_job',
+4116:      'ready_for_manual_send',
+4120:      'manual_send',
+4315:    domain: 'publishing',
+4316:    artifactType: 'publishing_scheduler_job',
+4445:    domain: 'publishing',
+4450:    requestedFile: 'publishing/scheduler/*.json'
+4571:    recommendations.push('rewrite copy in natural German for German-market publishing');
+4936:    provider: 'provider_pending',
+5464:    domain: 'media',
+5473:    registryPath: path.join(baseDir, 'media-input-registry.json'),
+5547:      has_media_root: fs.existsSync(brandPaths.baseDir) || fs.existsSync(brandPaths.legacyBaseDir),
+5548:      media_root: brandPaths.baseDir
+5554:    if (a.has_media_root !== b.has_media_root) {
+5555:      return a.has_media_root ? -1 : 1;
+5673:      has_media_root: hasMediaRoot,
+5674:      media_root: brandPaths.baseDir
+5681:    operations: null,
+5713:    payload.errors.operations = message;
+5723:    operations: buildProjectOperationsPayload
+6294:    mediaDir: path.join(baseDir, 'media'),
+6296:    publishingDir: path.join(baseDir, 'publishing'),
+6316:    mediaInputRegistryPath: path.join(resolved.projectRoot, 'media-input-registry.json')
+6364:      route: '/media-manager/project/:project/setup',
+6374:      route: '/media-manager/project/:project/setup',
+6604:    paths.mediaDir,
+6606:    paths.publishingDir,
+6629:    legacyCandidates: [paths.legacy.assetsRegistryPath, paths.legacy.mediaInputRegistryPath],
+6721:      media: { path: paths.mediaDir, exists: fs.existsSync(paths.mediaDir) },
+6722:      publishing: { path: paths.publishingDir, exists: fs.existsSync(paths.publishingDir) },
+6804:    paths.mediaDir,
+6806:    paths.publishingDir,
+6844:    workspace_priorities: ['setup', 'library', 'content-studio', 'campaign-studio', 'publishing'],
+6864:      workspace_priorities: ['setup', 'library', 'campaign-studio', 'content-studio', 'media-studio', 'publishing', 'insights'],
+6866:      starter_checklist: ['add_products', 'upload_product_media', 'define_shipping', 'connect_woocommerce', 'create_launch_campaign'],
+6867:      recommended_integrations: ['woocommerce', 'google', 'meta', 'tiktok', 'email_crm']
+6877:      workspace_priorities: ['setup', 'library', 'media-studio', 'content-studio', 'campaign-studio', 'publishing'],
+6887:      required_assets: ['logo', 'salon_photos', 'service_menu', 'price_list', 'before_after_media'],
+6890:      workspace_priorities: ['setup', 'library', 'media-studio', 'content-studio', 'publishing', 'insights'],
+6892:      starter_checklist: ['add_services', 'upload_before_after_media', 'add_booking_details', 'connect_google_business', 'create_local_campaign'],
+6899:      default_channels: ['website', 'facebook', 'instagram', 'google', 'crm'],
+6900:      required_assets: ['logo', 'property_photos', 'property_documents', 'location_media', 'agent_profile'],
+6903:      workspace_priorities: ['setup', 'library', 'content-studio', 'campaign-studio', 'ads-manager', 'governance'],
+6905:      starter_checklist: ['add_property_data', 'upload_property_media', 'define_lead_flow', 'connect_crm', 'create_listing_campaign'],
+6906:      recommended_integrations: ['website', 'crm', 'google', 'meta', 'email_crm']
+6916:      workspace_priorities: ['setup', 'library', 'content-studio', 'campaign-studio', 'publishing'],
+6919:      recommended_integrations: ['website', 'google_business', 'meta', 'email_crm']
+6929:      workspace_priorities: ['setup', 'library', 'media-studio', 'publishing', 'campaign-studio'],
+6942:      workspace_priorities: ['setup', 'library', 'content-studio', 'campaign-studio', 'insights', 'workflows'],
+6944:      starter_checklist: ['define_services', 'add_case_studies', 'define_lead_offer', 'connect_crm', 'create_lead_campaign'],
+6945:      recommended_integrations: ['website', 'linkedin', 'meta', 'google', 'crm']
+6955:      workspace_priorities: ['setup', 'library', 'content-studio', 'publishing', 'insights'],
+6957:      starter_checklist: ['add_location', 'add_opening_hours', 'upload_local_media', 'connect_google_business', 'create_local_post'],
+7010:      media: paths.mediaDir,
+7012:      publishing: paths.publishingDir,
+7312:  const publishingReadiness = fs.existsSync(paths.publishingDir) ? 100 : 0;
+7325:    publishing_readiness: publishingReadiness,
+7334:    has_media_dir: fs.existsSync(paths.mediaDir),
+7336:    has_publishing_dir: fs.existsSync(paths.publishingDir),
+7372:  if (domainScores.publishing_readiness < 100) missing.push('publishing_readiness');
+7851:// Keys matching this pattern are redacted from provider summary objects before
+7941:    provider_metadata: redactProviderSummaryObject(asPlainObject(normalizedRecord.provider_metadata)),
+7943:    provider_account: redactProviderSummaryObject(asPlainObject(normalizedRecord.provider_account)),
+8039:      status: 'unsupported_provider'
+8093:    const providerResult = await executeAdapterAction({
+8106:      status: providerResult.status,
+8107:      token_expires_at: normalizeTextValue(providerResult.token_expires_at || nextRecord.token_expires_at),
+8108:      permission_scope: normalizeTextValue(providerResult.permission_scope || nextRecord.permission_scope),
+8109:      connection_method: normalizeTextValue(providerResult.connection_method || nextRecord.connection_method),
+8110:      data_scopes: normalizeStringArray(providerResult.data_scopes?.length ? providerResult.data_scopes : nextRecord.data_scopes),
+8111:      read_scopes: normalizeStringArray(providerResult.read_scopes?.length ? providerResult.read_scopes : nextRecord.read_scopes),
+8112:      write_scopes: normalizeStringArray(providerResult.write_scopes?.length ? providerResult.write_scopes : nextRecord.write_scopes),
+8113:      provider_metadata: asPlainObject(providerResult.metadata),
+8114:      provider_account: asPlainObject(providerResult.account),
+8115:      insights_ready: asPlainObject(providerResult.insights_ready),
+8118:      notes: normalizeTextValue(providerResult.notes || nextRecord.notes),
+8119:      health_summary: normalizeTextValue(providerResult.health || ''),
+8120:      health_state: asPlainObject(providerResult.health_state)
+8212:      status: 'unsupported_provider'
+8239:      const providerResult = await executeAdapterAction({
+8250:      nextRecord.status = providerResult.status;
+8251:      nextRecord.token_expires_at = normalizeTextValue(providerResult.token_expires_at || nextRecord.token_expires_at);
+8252:      nextRecord.provider_metadata = asPlainObject(providerResult.metadata);
+8253:      nextRecord.provider_account = asPlainObject(providerResult.account);
+8254:      nextRecord.insights_ready = asPlainObject(providerResult.insights_ready);
+8256:      nextRecord.notes = normalizeTextValue(providerResult.notes || nextRecord.notes);
+8257:      nextRecord.health_summary = normalizeTextValue(providerResult.health || '');
+8258:      nextRecord.health_state = asPlainObject(providerResult.health_state);
+8264:        nextRecord.last_sync_summary = asPlainObject(providerResult.sync_summary);
+8267:        nextRecord.last_sync_summary = asPlainObject(providerResult.sync_summary);
+8349:        why_it_matters: 'Keeps setup, media creation, publishing previews, and AI output visually tied to the right brand.',
+8420:      purpose: 'visual_media',
+8421:      purpose_label: 'Visual media',
+8426:      description: 'Approved product photography for content, media, ads, and publishing.',
+8436:      purpose: 'visual_media',
+8437:      purpose_label: 'Visual media',
+8484:      purpose: 'visual_media',
+8485:      purpose_label: 'Visual media',
+9374:app.get('/health', (req, res) => {
+9382:app.get('/healthz', (req, res) => {
+9390:app.get('/readyz', (req, res) => {
+9395:app.get('/media-manager/project/:project/storage/parity-readiness', (req, res) => {
+9406:app.get('/public/media-manager/project/:project/storage/parity-readiness', (req, res) => {
+9417:app.get('/media-manager/storage/parity-readiness', (req, res) => {
+9428:app.get('/public/media-manager/storage/parity-readiness', (req, res) => {
+9439:app.post('/task', (req, res) => {
+9458:app.post('/api/agent-registry/register', registerAgent);
+9459:app.post('/api/agent-registry/resolve', resolveAgent);
+9460:app.get('/api/agent-registry/agents', listAgents);
+9465:app.get('/today', (req, res) => {
+9481:app.get('/next', (req, res) => {
+9497:app.post('/ingest', (req, res) => {
+9513:app.post('/execute_publish_package', async (req, res) => {
+9520:      action: 'execute_publish_package',
+9522:      entityId: 'execute_publish_package',
+9531:      action: 'execute_publish_package',
+9533:      entityId: 'execute_publish_package',
+9535:      routeTarget: 'publishing',
+9536:      serviceDomain: 'publishing',
+9537:      linkedExecutionId: 'execute_publish_package',
+9540:      summary: 'Approval required before publishing package execution.'
+9545:    const bridgeResult = await executeJobBridge({
+9558:      media_path: bridgeResult.media_path,
+9563:    const log = writeExecutionBridgeLog(projectName, 'execute_publish_package', {
+9568:        media_path: result.media_path,
+9583:      writeExecutionBridgeLog(logProject, 'execute_publish_package', {
+9593:    return sendError(res, {
+9596:      message: error.message || 'Failed to execute publish package'
+9601:app.post('/execute_email_package', async (req, res) => {
+9608:      action: 'execute_email_package',
+9610:      entityId: 'execute_email_package',
+9611:      requestedAction: 'provider_send',
+9619:      action: 'execute_email_package',
+9621:      entityId: 'execute_email_package',
+9622:      requestedAction: 'provider_send',
+9623:      routeTarget: 'publishing',
+9624:      serviceDomain: 'publishing',
+9625:      linkedExecutionId: 'execute_email_package',
+9633:    const bridgeResult = await executeJobBridge({
+9648:      ready_for_provider_send: true,
+9652:    const log = writeExecutionBridgeLog(projectName, 'execute_email_package', {
+9657:        ready_for_provider_send: true
+9671:      writeExecutionBridgeLog(logProject, 'execute_email_package', {
+9681:    return sendError(res, {
+9684:      message: error.message || 'Failed to execute email package'
+9689:app.post('/generate_media_from_prompt', async (req, res) => {
+9696:      action: 'generate_media_from_prompt',
+9698:      entityId: 'generate_media_from_prompt',
+9707:      action: 'generate_media_from_prompt',
+9709:      entityId: 'generate_media_from_prompt',
+9711:      routeTarget: 'media-studio',
+9712:      serviceDomain: 'media',
+9713:      linkedExecutionId: 'generate_media_from_prompt',
+9716:      summary: 'Approval required before media generation from prompt.'
+9721:    const bridgeResult = await executeJobBridge({
+9722:      type: 'media',
+9727:    const log = writeExecutionBridgeLog(projectName, 'generate_media_from_prompt', {
+9752:      writeExecutionBridgeLog(logProject, 'generate_media_from_prompt', {
+9762:    return sendError(res, {
+9765:      message: error.message || 'Failed to generate media from prompt'
+9770:app.post('/build_ad_execution_package', async (req, res) => {
+9802:    const bridgeResult = await executeJobBridge({
+9848:    return sendError(res, {
+9856:app.get('/products', async (req, res) => {
+9875:app.get('/optimize-product/:id', async (req, res) => {
+9920:app.get('/prepare-product-update/:id', async (req, res) => {
+10006:app.post('/backup-and-clone-product/:id', async (req, res) => {
+10079:        'Use the cloned draft product for safe content updates before publishing.'
+10082:    return sendError(res, {
+10090:app.post('/apply-prepared-copy-to-clone/:originalId/:cloneId', async (req, res) => {
+10197:    return sendError(res, {
+10208:  app.get('/media/projects', (req, res) => {
+10213:app.get('/media/tree/:project', (req, res) => {
+10228:      return sendInvalidProjectSlug(res);
+10231:    return sendError(res, {
+10239:app.post('/media/upload', applySingleMediaUpload, (req, res) => {
+10255:    if (uploadTarget.mode === 'legacy_media') {
+10300:      return sendInvalidProjectSlug(res);
+10309:app.get('/media/registry/:project', (req, res) => {
+10313:app.get('/media/file/:project/:type/:filename', (req, res) => {
+10324:    return res.sendFile(queryResolution.filePath);
+10328:    return res.status(400).send('Invalid media path');
+10342:    return res.status(404).send('File not found');
+10345:  return res.sendFile(filePath);
+10642:app.post('/media-manager/project/:project/rename', express.json({ limit: '1mb' }), handleRenameMediaManagerProject);
+10644:app.post('/public/media-manager/project/:project/rename', express.json({ limit: '1mb' }), handleRenameMediaManagerProject);
+10646:app.post('/media-manager/project/:project/apply-template', express.json({ limit: '1mb' }), handleApplyBusinessTemplateToProject);
+10648:app.post('/public/media-manager/project/:project/apply-template', express.json({ limit: '1mb' }), handleApplyBusinessTemplateToProject);
+10650:app.post('/media-manager/projects', express.json({ limit: '1mb' }), handleCreateMediaManagerProject);
+10652:app.post('/public/media-manager/projects', express.json({ limit: '1mb' }), handleCreateMediaManagerProject);
+10654:app.get('/media-manager/projects', (req, res) => {
+10658:app.get('/public/media-manager/projects', (req, res) => {
+10662:app.get('/media-manager/asset-catalog', (req, res) => {
+10668:app.get('/public/media-manager/asset-catalog', (req, res) => {
+10674:app.get('/media-manager/project/:project/startup', (req, res) => {
+10679:      error: error.message || 'Failed to build media manager startup payload'
+10684:app.get('/public/media-manager/project/:project/startup', (req, res) => {
+10689:      error: error.message || 'Failed to build media manager startup payload'
+10694:app.get('/media-manager/project/:project', (req, res) => {
+10699:      error: error.message || 'Failed to build media manager payload'
+10704:app.get('/public/media-manager/project/:project', (req, res) => {
+10709:      error: error.message || 'Failed to build media manager payload'
+10824:function sendAssetMutationError(res, error, fallbackMessage) {
+10841:app.post('/media-manager/project/:project/assets/:assetId/status', express.json({ limit: '1mb' }), (req, res) => {
+10891:    return sendAssetMutationError(res, error, 'Failed to update asset status.');
+10895:app.post('/media-manager/project/:project/assets/:assetId/rename', express.json({ limit: '1mb' }), (req, res) => {
+10921:    return sendAssetMutationError(res, error, 'Failed to rename asset.');
+10925:app.patch('/media-manager/project/:project/assets/:assetId/classification', express.json({ limit: '1mb' }), (req, res) => {
+10974:    return sendAssetMutationError(res, error, 'Failed to reclassify asset.');
+10979:app.post('/media-manager/project/:project/assets/:assetId/source-of-truth', express.json({ limit: '1mb' }), (req, res) => {
+11000:    return sendAssetMutationError(res, error, 'Failed to update source of truth.');
+11004:app.post('/media-manager/project/:project/assets/:assetId/archive', express.json({ limit: '1mb' }), (req, res) => {
+11028:    return sendAssetMutationError(res, error, 'Failed to archive asset.');
+11032:app.post('/media-manager/project/:project/assets/:assetId/delete', express.json({ limit: '1mb' }), (req, res) => {
+11059:    return sendAssetMutationError(res, error, 'Failed to delete asset.');
+11063:app.delete('/media-manager/project/:project/assets/:assetId', express.json({ limit: '1mb' }), (req, res) => {
+11090:    return sendAssetMutationError(res, error, 'Failed to delete asset.');
+11094:app.post('/media-manager/project/:project/library/refresh', (req, res) => {
+11104:app.post('/media-manager/project/:project/setup', (req, res) => {
+11125:      serviceDomain: 'governance',
+11143:app.post('/public/media-manager/project/:project/setup', (req, res) => {
+11164:      serviceDomain: 'governance',
+11208:  const audience = normalizeAiCommandPreviewInput(input.audience || input.target_audience || input.targetAudience, 'Primary customer segment');
+11242:      'Create media and publishing assets.',
+11248:      `Use customer pain points and product proof before publishing.`,
+11263:      'Final approval is required before publishing.',
+11269:      'Request Governance review before release if claims or publishing risk exists.'
+11273:        destination: 'media-studio',
+11275:        reason: 'Prepare creative and media assets from the campaign package.'
+11278:        destination: 'publishing',
+11280:        reason: 'Turn the campaign package into a publishing draft.'
+11302:        `Caption direction: connect ${sourceLabel} to customer need and proof.`
+11306:      id: 'media_brief',
+11316:      id: 'publishing_checklist',
+11348:      no_provider_execution_performed: true,
+11352:      no_workflow_run_created: true
+11372:        no_provider_execution_performed: true
+11378:app.post('/api/ai-command/project/:project/campaign-preview', handleAiCommandCampaignPreviewOnly);
+11386:      error: error.message || 'Failed to build project operations payload'
+11391:app.get('/media-manager/project/:project/operations', handleGetProjectOperations);
+11392:app.get('/public/media-manager/project/:project/operations', handleGetProjectOperations);
+11450:app.get('/media-manager/project/:project/task-center', handleGetTaskCenter);
+11451:app.get('/public/media-manager/project/:project/task-center', handleGetTaskCenter);
+11452:app.get('/media-manager/project/:project/queue-center', handleGetQueueCenter);
+11453:app.get('/public/media-manager/project/:project/queue-center', handleGetQueueCenter);
+11454:app.get('/media-manager/project/:project/job-monitor', handleGetJobMonitor);
+11455:app.get('/public/media-manager/project/:project/job-monitor', handleGetJobMonitor);
+11456:app.get('/media-manager/project/:project/notification-center', handleGetNotificationCenter);
+11457:app.get('/public/media-manager/project/:project/notification-center', handleGetNotificationCenter);
+11466:app.get('/media-manager/project/:project/operations/schema', handleGetOperationsSchema);
+11467:app.get('/public/media-manager/project/:project/operations/schema', handleGetOperationsSchema);
+11502:      serviceDomain: 'governance',
+11523:app.get('/media-manager/project/:project/team', handleGetProjectTeam);
+11524:app.get('/public/media-manager/project/:project/team', handleGetProjectTeam);
+11525:app.post('/media-manager/project/:project/team', handleUpdateProjectTeam);
+11526:app.post('/public/media-manager/project/:project/team', handleUpdateProjectTeam);
+11548:      operations: buildProjectOperationsPayload(req.params.project)
+11571:app.get('/media-manager/project/:project/campaigns', handleListCampaigns);
+11572:app.get('/public/media-manager/project/:project/campaigns', handleListCampaigns);
+11573:app.post('/media-manager/project/:project/campaigns', handleUpsertCampaign);
+11574:app.post('/public/media-manager/project/:project/campaigns', handleUpsertCampaign);
+11575:app.patch('/media-manager/project/:project/campaigns/:campaignId', (req, res) => {
+11582:app.patch('/public/media-manager/project/:project/campaigns/:campaignId', (req, res) => {
+11589:app.get('/media-manager/project/:project/campaigns/:campaignId', handleGetCampaign);
+11590:app.get('/public/media-manager/project/:project/campaigns/:campaignId', handleGetCampaign);
+11613:      operations: buildProjectOperationsPayload(req.params.project)
+11636:app.get('/media-manager/project/:project/content-items', handleListContentItems);
+11637:app.get('/public/media-manager/project/:project/content-items', handleListContentItems);
+11638:app.post('/media-manager/project/:project/content-items', handleUpsertContentItem);
+11639:app.post('/public/media-manager/project/:project/content-items', handleUpsertContentItem);
+11640:app.patch('/media-manager/project/:project/content-items/:contentItemId', (req, res) => {
+11647:app.patch('/public/media-manager/project/:project/content-items/:contentItemId', (req, res) => {
+11654:app.get('/media-manager/project/:project/content-items/:contentItemId', handleGetContentItem);
+11655:app.get('/public/media-manager/project/:project/content-items/:contentItemId', handleGetContentItem);
+11669:      error: error.message || 'Failed to list media jobs'
+11676:    const mediaJob = upsertMediaJob(req.params.project, req.body || {});
+11678:      media_job: mediaJob,
+11679:      operations: buildProjectOperationsPayload(req.params.project)
+11683:      error: error.message || 'Failed to save media job'
+11690:    const mediaJob = getMediaJob(req.params.project, req.params.mediaJobId);
+11691:    if (!mediaJob) {
+11694:    return res.json({ media_job: mediaJob });
+11697:      error: error.message || 'Failed to load media job'
+11702:app.get('/media-manager/project/:project/media-jobs', handleListMediaJobs);
+11703:app.get('/public/media-manager/project/:project/media-jobs', handleListMediaJobs);
+11704:app.post('/media-manager/project/:project/media-jobs', handleUpsertMediaJob);
+11705:app.post('/public/media-manager/project/:project/media-jobs', handleUpsertMediaJob);
+11706:app.patch('/media-manager/project/:project/media-jobs/:mediaJobId', (req, res) => {
+11709:    id: req.params.mediaJobId
+11713:app.patch('/public/media-manager/project/:project/media-jobs/:mediaJobId', (req, res) => {
+11716:    id: req.params.mediaJobId
+11720:app.get('/media-manager/project/:project/media-jobs/:mediaJobId', handleGetMediaJob);
+11721:app.get('/public/media-manager/project/:project/media-jobs/:mediaJobId', handleGetMediaJob);
+11733:      error: error.message || 'Failed to list workflow runs'
+11738:app.get('/media-manager/project/:project/workflows/runs', handleListWorkflowRuns);
+11739:app.get('/public/media-manager/project/:project/workflows/runs', handleListWorkflowRuns);
+11750:      error: error.message || 'Failed to load workflow run'
+11755:app.get('/media-manager/project/:project/workflows/runs/:runId', handleGetWorkflowRun);
+11756:app.get('/public/media-manager/project/:project/workflows/runs/:runId', handleGetWorkflowRun);
+11762:      action: 'workflow_run',
+11763:      entityType: 'workflow_run',
+11764:      entityId: req.params.workflowId,
+11773:      action: 'workflow_run',
+11774:      entityType: 'workflow_run',
+11775:      entityId: req.params.workflowId,
+11777:      routeTarget: 'workflows',
+11779:      linkedExecutionId: req.params.workflowId,
+11782:      summary: 'Approval required before workflow execution.'
+11789:      workflow_id: req.params.workflowId,
+11802:        type: 'workflow_output',
+11803:        title: req.body?.title || req.params.workflowId,
+11806:        source_type: 'workflow_run',
+11816:      operations: buildProjectOperationsPayload(req.params.project)
+11820:      error: error.message || 'Failed to record workflow run'
+11825:app.post('/media-manager/project/:project/workflows/:workflowId/run', handleRunWorkflow);
+11826:app.post('/public/media-manager/project/:project/workflows/:workflowId/run', handleRunWorkflow);
+11838:    requestedAction: 'execute',
+11849:    requestedAction: 'execute',
+11850:    routeTarget: 'workflows',
+11862:    action: 'execute',
+11869:    const result = await getAiOrchestrator().executeCommand(req.params.project, req.body || {});
+11872:      action: 'execute',
+11875:      provider: result?.provider?.id || result?.response?.provider || null,
+11880:      operations: buildProjectOperationsPayload(req.params.project)
+11888:        error: error.message || 'Failed to execute AI command'
+11893:      action: 'execute',
+11912:    requestedAction: 'execute',
+11923:    requestedAction: 'execute',
+11924:    routeTarget: 'workflows',
+11936:    action: 'execute',
+11942:    const result = await getAiOrchestrator().executeChat(req.params.project, req.body || {});
+11945:      action: 'execute',
+11948:      provider: result?.provider?.id || null,
+11958:        error: error.message || 'Failed to execute AI chat'
+11963:      action: 'execute',
+11982:    requestedAction: 'execute',
+11993:    requestedAction: 'execute',
+11994:    routeTarget: 'workflows',
+12006:    action: 'execute',
+12012:    const result = await getAiOrchestrator().executeGuidance(req.params.project, req.body || {});
+12015:      action: 'execute',
+12018:      provider: result?.provider?.id || null,
+12028:        error: error.message || 'Failed to execute AI guidance'
+12033:      action: 'execute',
+12047:      action: 'ai_workflow_run',
+12048:      entityType: 'workflow_run',
+12049:      entityId: req.params.workflowId,
+12058:      action: 'ai_workflow_run',
+12059:      entityType: 'workflow_run',
+12060:      entityId: req.params.workflowId,
+12062:      routeTarget: 'workflows',
+12064:      linkedExecutionId: req.params.workflowId,
+12066:      title: 'AI workflow approval',
+12067:      summary: 'Approval required before AI workflow execution.'
+12072:    const result = getAiOrchestrator().executeWorkflow(
+12074:      req.params.workflowId,
+12079:      operations: buildProjectOperationsPayload(req.params.project)
+12083:      error: error.message || 'Failed to execute AI workflow'
+12165:app.get('/media-manager/project/:project/ai/commands', handleListAiCommands);
+12166:app.get('/public/media-manager/project/:project/ai/commands', handleListAiCommands);
+12167:app.get('/media-manager/project/:project/ai/commands/:commandId', handleGetAiCommand);
+12168:app.get('/public/media-manager/project/:project/ai/commands/:commandId', handleGetAiCommand);
+12169:app.post('/media-manager/project/:project/ai/command', handleExecuteAiCommand);
+12170:app.post('/public/media-manager/project/:project/ai/command', handleExecuteAiCommand);
+12171:app.post('/media-manager/project/:project/ai/chat', handleExecuteAiChat);
+12172:app.post('/public/media-manager/project/:project/ai/chat', handleExecuteAiChat);
+12173:app.post('/media-manager/project/:project/ai/guidance', handleExecuteAiGuidance);
+12174:app.post('/public/media-manager/project/:project/ai/guidance', handleExecuteAiGuidance);
+12175:app.post('/media-manager/project/:project/ai/workflows/:workflowId/run', handleExecuteAiWorkflow);
+12176:app.post('/public/media-manager/project/:project/ai/workflows/:workflowId/run', handleExecuteAiWorkflow);
+12177:app.get('/media-manager/project/:project/ai/artifacts', handleListAiArtifacts);
+12178:app.get('/public/media-manager/project/:project/ai/artifacts', handleListAiArtifacts);
+12179:app.get('/media-manager/project/:project/ai/recommendations', handleListAiRecommendations);
+12180:app.get('/public/media-manager/project/:project/ai/recommendations', handleListAiRecommendations);
+12181:app.get('/media-manager/project/:project/ai/memory', handleListAiMemory);
+12182:app.get('/public/media-manager/project/:project/ai/memory', handleListAiMemory);
+12204:      operations: buildProjectOperationsPayload(req.params.project)
+12213:app.get('/media-manager/project/:project/tasks', handleListTasks);
+12214:app.get('/public/media-manager/project/:project/tasks', handleListTasks);
+12215:app.post('/media-manager/project/:project/tasks', handleCreateTask);
+12216:app.post('/public/media-manager/project/:project/tasks', handleCreateTask);
+12217:app.get('/media-manager/project/:project/tasks/:taskId', (req, res) => {
+12230:app.get('/public/media-manager/project/:project/tasks/:taskId', (req, res) => {
+12264:      operations: buildProjectOperationsPayload(req.params.project)
+12295:      operations: buildProjectOperationsPayload(req.params.project)
+12304:app.get('/media-manager/project/:project/approvals', handleListApprovals);
+12305:app.get('/public/media-manager/project/:project/approvals', handleListApprovals);
+12306:app.post('/media-manager/project/:project/approvals', handleCreateApproval);
+12307:app.post('/public/media-manager/project/:project/approvals', handleCreateApproval);
+12308:app.post('/media-manager/project/:project/approvals/:approvalId/decision', handleApprovalDecision);
+12309:app.post('/public/media-manager/project/:project/approvals/:approvalId/decision', handleApprovalDecision);
+12320:      error: error.message || 'Failed to load governance summary'
+12329:      action: 'governance_policy_update',
+12330:      entityType: 'governance_policy',
+12344:      error: error.message || 'Failed to update governance policy'
+12357:      error: error.message || 'Failed to load governance policy'
+12362:app.get('/media-manager/project/:project/governance', handleGetGovernance);
+12363:app.get('/public/media-manager/project/:project/governance', handleGetGovernance);
+12364:app.get('/media-manager/project/:project/governance/policy', handleGetGovernancePolicy);
+12365:app.get('/public/media-manager/project/:project/governance/policy', handleGetGovernancePolicy);
+12366:app.post('/media-manager/project/:project/governance/policy', handleUpdateGovernancePolicy);
+12367:app.post('/public/media-manager/project/:project/governance/policy', handleUpdateGovernancePolicy);
+12384:app.get('/media-manager/project/:project/notifications', handleListNotifications);
+12385:app.get('/public/media-manager/project/:project/notifications', handleListNotifications);
+12386:app.patch('/media-manager/project/:project/notifications/:notificationId', (req, res) => {
+12391:      operations: buildProjectOperationsPayload(req.params.project)
+12399:app.patch('/public/media-manager/project/:project/notifications/:notificationId', (req, res) => {
+12404:      operations: buildProjectOperationsPayload(req.params.project)
+12436:      operations: buildProjectOperationsPayload(req.params.project)
+12450:      operations: buildProjectOperationsPayload(req.params.project)
+12459:app.get('/media-manager/project/:project/handoffs', handleListHandoffs);
+12460:app.get('/public/media-manager/project/:project/handoffs', handleListHandoffs);
+12461:app.post('/media-manager/project/:project/handoffs', handleCreateHandoff);
+12462:app.post('/public/media-manager/project/:project/handoffs', handleCreateHandoff);
+12463:app.post('/media-manager/project/:project/handoffs/:handoffId/consume', handleConsumeHandoff);
+12464:app.post('/public/media-manager/project/:project/handoffs/:handoffId/consume', handleConsumeHandoff);
+12481:app.get('/media-manager/project/:project/events', handleListEvents);
+12482:app.get('/public/media-manager/project/:project/events', handleListEvents);
+12504:app.get('/api/insights/:project', handleGetProjectInsights);
+12505:app.get('/public/api/insights/:project', handleGetProjectInsights);
+12506:app.get('/api/learning/:project', handleGetProjectLearning);
+12507:app.get('/public/api/learning/:project', handleGetProjectLearning);
+12509:app.post('/media-manager/project/:project/sources', (req, res) => {
+12538:      serviceDomain: 'governance',
+12563:app.post('/public/media-manager/project/:project/sources', (req, res) => {
+12592:      serviceDomain: 'governance',
+12617:app.delete('/media-manager/project/:project/sources/:sourceType', (req, res) => {
+12637:      serviceDomain: 'governance',
+12656:app.delete('/public/media-manager/project/:project/sources/:sourceType', (req, res) => {
+12676:      serviceDomain: 'governance',
+12710:  if (status === 'unsupported_provider') {
+12723:  const governanceAction = options?.reconnect ? 'integration_reconnect' : 'integration_connect';
+12725:  const governanceOptions = {
+12727:    action: governanceAction,
+12733:    routeTarget: 'governance',
+12738:    summary: `Review ${req.params.integrationId} ${requestedAction} before applying integration credential or provider-state changes.`
+12740:  const governanceAllowed = options?.reconnect
+12741:    ? enforceGovernanceApprovalLifecycle(req, res, governanceOptions)
+12742:    : enforceGovernanceMutationGate(req, res, governanceOptions);
+12744:  if (!governanceAllowed) {
+12832:  const governanceAction = {
+12839:  const governanceOptions = {
+12841:    action: governanceAction,
+12847:    routeTarget: 'governance',
+12852:    summary: `Review ${req.params.integrationId} ${normalizedActionType} before applying integration provider action.`
+12855:  const governanceAllowed = requiresApprovalLifecycle
+12856:    ? enforceGovernanceApprovalLifecycle(req, res, governanceOptions)
+12857:    : enforceGovernanceMutationGate(req, res, governanceOptions);
+12859:  if (!governanceAllowed) {
+12885:const customerOperationsRuntime =
+12888:app.get('/media-manager/project/:project/integrations/control-center', handleGetProjectIntegrationControlCenter);
+12892:    const mediaType = String(req.query?.media_type || '').trim();
+12893:    const providers = mediaType
+12894:      ? listProviderModelsByMediaType(mediaType)
+12899:      providers,
+12900:      count: providers.length
+12904:      error: 'Failed to list native media providers',
+12919:      error: 'Failed to load native media provider readiness',
+12930:      customerOperationsRuntime.health()
+12934:      error: 'customer_operations_health_failed',
+12943:      customerOperationsRuntime.readiness.snapshot()
+12947:      error: 'customer_operations_readiness_failed',
+12957:        customerOperationsRuntime.channels.list()
+12961:      error: 'customer_operations_channels_failed',
+12971:        customerOperationsRuntime.unifiedInbox.list()
+12975:      error: 'customer_operations_inbox_failed',
+12984:// They do not send customer replies, mutate CRM, create/update tickets, assign conversations,
+12985:// place calls, trigger IVR, send provider messages, or auto-reply.
+12986:function sendCustomerCenterProjection(res, projector) {
+12988:    const runtime = customerOperationsRuntime;
+12996:      error: 'customer_center_projection_failed',
+13002:app.get('/api/projects/:project/customer-operations/readiness', (req, res) => {
+13003:  return sendCustomerCenterProjection(res, (runtime) =>
+13004:    customerCenterProjection.projectCustomerReadiness(runtime)
+13008:app.get('/api/projects/:project/customer-operations/inbox', (req, res) => {
+13009:  return sendCustomerCenterProjection(res, (runtime) =>
+13010:    customerCenterProjection.projectInboxEntries(runtime)
+13014:app.get('/api/projects/:project/customer-operations/conversations', (req, res) => {
+13015:  return sendCustomerCenterProjection(res, (runtime) =>
+13016:    customerCenterProjection.projectConversations(runtime)
+13020:app.get('/api/projects/:project/customer-operations/conversations/:conversationId', (req, res) => {
+13021:  return sendCustomerCenterProjection(res, (runtime) =>
+13022:    customerCenterProjection.projectConversationDetail(runtime, req.params.conversationId)
+13026:app.get('/api/projects/:project/customer-operations/conversations/:conversationId/messages', (req, res) => {
+13027:  return sendCustomerCenterProjection(res, (runtime) =>
+13028:    customerCenterProjection.projectConversationMessages(runtime, req.params.conversationId)
+13032:app.get('/api/projects/:project/customer-operations/customers/:customerId', (req, res) => {
+13033:  return sendCustomerCenterProjection(res, (runtime) =>
+13034:    customerCenterProjection.projectCustomerProfileById(runtime, req.params.customerId)
+13038:app.get('/api/projects/:project/customer-operations/tickets', (req, res) => {
+13039:  return sendCustomerCenterProjection(res, (runtime) =>
+13040:    customerCenterProjection.projectTickets(runtime)
+13044:app.get('/api/projects/:project/customer-operations/channels', (req, res) => {
+13045:  return sendCustomerCenterProjection(res, (runtime) =>
+13046:    customerCenterProjection.projectChannels(runtime)
+13051:app.get(
+13052:  '/media-manager/project/:project/customer-operations/health',
+13056:app.get(
+13057:  '/public/media-manager/project/:project/customer-operations/health',
+13061:app.get(
+13062:  '/media-manager/project/:project/customer-operations/readiness',
+13066:app.get(
+13067:  '/public/media-manager/project/:project/customer-operations/readiness',
+13071:app.get(
+13072:  '/media-manager/project/:project/customer-operations/channels',
+13076:app.get(
+13077:  '/public/media-manager/project/:project/customer-operations/channels',
+13081:app.get(
+13082:  '/media-manager/project/:project/customer-operations/inbox',
+13086:app.get(
+13087:  '/public/media-manager/project/:project/customer-operations/inbox',
+13098:        customerOperationsRuntime.conversations.list()
+13102:      error: 'customer_operations_conversations_failed',
+13112:        customerOperationsRuntime.messages.list()
+13116:      error: 'customer_operations_messages_failed',
+13125:      customers:
+13126:        customerOperationsRuntime.customers.list()
+13130:      error: 'customer_operations_customers_failed',
+13140:        customerOperationsRuntime.sla.list()
+13144:      error: 'customer_operations_sla_failed',
+13154:        customerOperationsRuntime.escalation.list()
+13158:      error: 'customer_operations_escalations_failed',
+13164:app.get(
+13165:  '/media-manager/project/:project/customer-operations/conversations',
+13169:app.get(
+13170:  '/public/media-manager/project/:project/customer-operations/conversations',
+13174:app.get(
+13175:  '/media-manager/project/:project/customer-operations/messages',
+13179:app.get(
+13180:  '/public/media-manager/project/:project/customer-operations/messages',
+13184:app.get(
+13185:  '/media-manager/project/:project/customer-operations/customers',
+13189:app.get(
+13190:  '/public/media-manager/project/:project/customer-operations/customers',
+13194:app.get(
+13195:  '/media-manager/project/:project/customer-operations/sla',
+13199:app.get(
+13200:  '/public/media-manager/project/:project/customer-operations/sla',
+13204:app.get(
+13205:  '/media-manager/project/:project/customer-operations/escalations',
+13209:app.get(
+13210:  '/public/media-manager/project/:project/customer-operations/escalations',
+13215:app.get('/media-manager/project/:project/native-media/providers', handleGetNativeMediaProviders);
+13216:app.get('/public/media-manager/project/:project/native-media/providers', handleGetNativeMediaProviders);
+13217:app.get('/media-manager/project/:project/native-media/providers/readiness', handleGetNativeMediaProviderReadiness);
+13218:app.get('/public/media-manager/project/:project/native-media/providers/readiness', handleGetNativeMediaProviderReadiness);
+13225:    action: 'native_media_generate',
+13226:    entityType: 'media_job',
+13227:    entityId: String(req.body?.media_job_id || req.body?.id || 'native_media_generate').trim(),
+13237:      media_type: req.body?.media_type || req.body?.type || 'image',
+13238:      provider: req.body?.provider || DEFAULT_NATIVE_MEDIA_PROVIDER,
+13248:      runtime: 'mh-os-native-media-runtime',
+13254:      error: 'native_media_generation_failed',
+13260:app.post('/media-manager/project/:project/native-media/generate', handleNativeMediaGenerate);
+13264:app.get('/public/media-manager/project/:project/integrations/control-center', handleGetProjectIntegrationControlCenter);
+13266:app.post('/media-manager/project/:project/integrations/:integrationId/connect', async (req, res) => {
+13272:app.post('/public/media-manager/project/:project/integrations/:integrationId/connect', async (req, res) => {
+13278:app.post('/media-manager/project/:project/integrations/:integrationId', async (req, res) => {
+13284:app.post('/public/media-manager/project/:project/integrations/:integrationId', async (req, res) => {
+13290:app.post('/media-manager/project/:project/integrations/:integrationId/reconnect', async (req, res) => {
+13296:app.post('/public/media-manager/project/:project/integrations/:integrationId/reconnect', async (req, res) => {
+13302:app.post('/media-manager/project/:project/integrations/:integrationId/test', async (req, res) => {
+13306:app.post('/public/media-manager/project/:project/integrations/:integrationId/test', async (req, res) => {
+13310:app.post('/media-manager/project/:project/integrations/:integrationId/sync', async (req, res) => {
+13314:app.post('/public/media-manager/project/:project/integrations/:integrationId/sync', async (req, res) => {
+13318:app.post('/media-manager/project/:project/integrations/:integrationId/import-history', async (req, res) => {
+13322:app.post('/public/media-manager/project/:project/integrations/:integrationId/import-history', async (req, res) => {
+13326:app.post('/media-manager/project/:project/integrations/:integrationId/disconnect', async (req, res) => {
+13330:app.post('/public/media-manager/project/:project/integrations/:integrationId/disconnect', async (req, res) => {
+13334:// TODO(phase4a): Keep `/public/media-manager/...` write aliases for active frontend compatibility.
+13335:// They remain protected by the same centralized write-key middleware as `/media-manager/...`.
+13336:app.post('/media-manager/project/:project/publishing/schedule', (req, res) => {
+13340:      action: 'publishing_schedule',
+13341:      entityType: 'publishing_job',
+13369:    logCriticalFailure('publishing_schedule', req, error, {
+13373:      error: error.message || 'Failed to save publishing schedule',
+13379:app.post('/public/media-manager/project/:project/publishing/schedule', (req, res) => {
+13383:      action: 'publishing_schedule',
+13384:      entityType: 'publishing_job',
+13412:    logCriticalFailure('publishing_schedule', req, error, {
+13416:      error: error.message || 'Failed to save publishing schedule',
+13422:app.post('/media-manager/project/:project/publishing/:jobId/reschedule', (req, res) => {
+13426:      action: 'publishing_reschedule',
+13427:      entityType: 'publishing_job',
+13455:      error: error.message || 'Failed to reschedule publishing item',
+13461:app.post('/public/media-manager/project/:project/publishing/:jobId/reschedule', (req, res) => {
+13465:      action: 'publishing_reschedule',
+13466:      entityType: 'publishing_job',
+13494:      error: error.message || 'Failed to reschedule publishing item',
+13500:app.post('/media-manager/project/:project/publishing/:jobId/ready', (req, res) => {
+13504:      action: 'publishing_ready',
+13505:      entityType: 'publishing_job',
+13526:      error: error.message || 'Failed to approve publishing item',
+13532:app.post('/public/media-manager/project/:project/publishing/:jobId/ready', (req, res) => {
+
+### ai orchestrator
+const path = require('path');
+const { readJsonFile } = require('../integrations/storage');
+const { resolveProjectPath } = require('../security/project-isolation');
+const {
+  resolveAiProviderConfig,
+  assertAiProviderConfig,
+  createProviderConfigError,
+  getAiModePrompt,
+  normalizeAiModeId
+} = require('../ai/provider-config');
+const {
+  getAiProvider,
+  isAiProviderSupported,
+  listAiProviders
+} = require('../ai/provider-registry');
+const { serializeErrorForLog } = require('../observability/logger');
+const {
+  createAiCommandRecord,
+  createAiArtifact,
+  createAiRecommendation,
+  upsertAiMemory,
+  createTask,
+  recordWorkflowRun,
+  createApproval,
+  createHandoff
+} = require('./backbone');
+
+const PROJECTS_DIR = path.join(process.env.MH_ASSISTANT_ROOT || path.resolve(__dirname, '../../../..'), 'data', 'projects');
+
+function asArray(value) {
+  return Array.isArray(value) ? value : [];
+}
+
+function asObject(value) {
+  return value && typeof value === 'object' ? value : {};
+}
+
+function asString(value) {
+  if (value == null) return '';
+  return String(value).trim();
+}
+
+function humanizeValue(value, fallback = '') {
+  if (value == null) return fallback;
+  if (typeof value === 'string') {
+    const clean = value.trim();
+    return clean === '[object Object]' ? fallback : clean;
+  }
+  if (typeof value === 'number' || typeof value === 'boolean') {
+    return String(value);
+  }
+  if (Array.isArray(value)) {
+    return value.map((item) => humanizeValue(item)).filter(Boolean).join('; ') || fallback;
+  }
+  if (typeof value === 'object') {
+    const title = humanizeValue(value.title || value.label || value.name || value.headline || value.hook);
+    const detail = humanizeValue(
+      value.action ||
+      value.summary ||
+      value.description ||
+      value.recommendation ||
+      value.reason ||
+      value.insight ||
+      value.body ||
+      value.text ||
+      value.value
+    );
+    if (title && detail && title !== detail) return `${title}: ${detail}`;
+    if (title || detail) return title || detail;
+
+    return Object.entries(value)
+      .filter(([key, item]) => {
+        const normalizedKey = asString(key).toLowerCase();
+        if (/credential|secret|token|key|payload|raw/.test(normalizedKey)) return false;
+        return item != null && typeof item !== 'object';
+      })
+      .slice(0, 4)
+      .map(([key, item]) => `${titleCase(key)}: ${humanizeValue(item)}`)
+      .filter(Boolean)
+      .join('; ') || fallback;
+  }
+  return fallback;
+}
+
+function titleCase(value) {
+  return asString(value)
+    .replace(/[_-]+/g, ' ')
+    .replace(/\b\w/g, (match) => match.toUpperCase());
+}
+
+function compactList(values, limit = 4) {
+  return asArray(values).map((item) => humanizeValue(item)).filter(Boolean).slice(0, limit);
+}
+
+function createAiCommandExecutionError(message, details = {}) {
+  const error = new Error(asString(message) || 'AI command execution failed');
+  error.code = asString(details.code) || 'AI_COMMAND_EXECUTION_FAILED';
+  error.statusCode = Number(details.statusCode) || 500;
+  error.details = details;
+  return error;
+}
+
+function loadProjectSettings(projectName) {
+  const resolvedProject = resolveProjectPath(PROJECTS_DIR, projectName, 'project.json');
+  const projectPath = resolvedProject.targetPath;
+  return asObject(readJsonFile(projectPath, {}));
+}
+
+function normalizeRouteSuggestion(route, reason) {
+  const routeId = asString(route);
+  return {
+    route: routeId,
+    label: titleCase(routeId),
+    reason: asString(reason)
+  };
+}
+
+const MODE_ROUTE_TARGETS = {
+  executive: 'home',
+  campaign: 'campaign-studio',
+  content: 'content-studio',
+  ads: 'ads-manager',
+  seo: 'insights',
+  research: 'research',
+  operations: 'workflows'
+};
+
+const OUTPUT_TYPE_BY_MODE = {
+  executive: 'executive_brief',
+  campaign: 'campaign_package',
+  content: 'content_pack',
+  ads: 'ad_ideas',
+  seo: 'seo_plan',
+  research: 'research_report',
+  operations: 'operations_plan'
+};
+
+const SPECIALIST_MODE_MAP = {
+  strategist: 'campaign',
+  writer: 'content',
+  designer: 'content',
+  media: 'content',
+  video_lead: 'content',
+  publisher: 'operations',
+  ads: 'ads',
+  analyst: 'seo',
+  researcher: 'research',
+  compliance_reviewer: 'operations',
+  operations: 'operations',
+  team: 'executive'
+};
+
+function inferConversationLanguage(input = {}) {
+  // Detect from request text — the language the user is writing/chatting in
+  const source = asString(input.request || input.prompt || input.command);
+  if (!source) return 'user language';
+  if (/[\u0600-\u06FF]/.test(source)) return 'Arabic';
+  if (/[\u0400-\u04FF]/.test(source)) return 'Cyrillic language';
+  if (/[\u4E00-\u9FFF]/.test(source)) return 'Chinese';
+  return 'user language';
+}
+
+function inferOutputLanguage(input = {}) {
+  // Publishing/content output language: explicit override > project/market/setup language > fallback
+  const explicit = asString(
+    input.outputLanguage ||
+    input.output_language ||
+    input.marketLanguage ||
+    input.market_language
+  );
+  if (explicit) return explicit;
+  const projectLang = asString(input.language || input.languagePreference || input.language_preference);
+  if (projectLang) return projectLang;
+  return 'user language';
+}
+
+// Backward-compatible alias — now resolves publishing/output language
+function inferLanguagePreference(input = {}) {
+  return inferOutputLanguage(input);
+}
+
+function resolveGuidanceModeId(input = {}) {
+  const requestedMode = normalizeAiModeId(input.mode_id || input.modeId);
+  if (requestedMode && OUTPUT_TYPE_BY_MODE[requestedMode]) {
+    return requestedMode;
+  }
+
+  const specialistId = asString(input.specialistId || input.specialist_id).toLowerCase();
+  const mapped = SPECIALIST_MODE_MAP[specialistId];
+  return normalizeAiModeId(mapped || 'executive');
+}
+
+function buildGuidancePrompt(input = {}) {
+  const request = asString(input.request || input.prompt || input.command);
+  const specialistId = asString(input.specialistId || input.specialist_id || 'specialist').toLowerCase();
+  const specialistName = asString(input.specialistName || input.specialist_name || specialistId || 'Specialist');
+  const teamMode = asString(input.mode || input.teamMode || 'solo').toLowerCase() === 'team' ? 'team' : 'solo';
+  const conversationLanguage = inferConversationLanguage(input);
+  const outputLanguage = inferOutputLanguage(input);
+  const market = asString(input.market || '');
+  const languagesDiffer = outputLanguage !== 'user language' && outputLanguage !== conversationLanguage;
+  const contextSummary = humanizeValue(input.contextSummary || input.context_summary || '');
+  const safetyInstruction = asString(
+    input.safetyInstruction ||
+    input.safety_instruction ||
+    'Guidance-only response. Do not execute operations. Do not claim execution happened.'
+  );
+
+  const specialistInstruction = specialistId === 'writer'
+    ? 'As Content Writer, return actual copy now: hooks, captions, CTA lines, emails, scripts, and landing copy. Never answer with only a description of what the copy could be.'
+    : specialistId === 'video_lead'
+      ? 'As Video Lead, return actual script output now: hooks, script lines, storyboard beats, and shot-list style sequencing when requested.'
+      : specialistId === 'strategist'
+        ? 'As Strategist, return a practical priority plan with positioning, rationale, and ordered next moves.'
+        : specialistId === 'compliance_reviewer'
+          ? 'As Compliance Reviewer, return concrete risks, safer wording replacements, and approval notes.'
+          : specialistId === 'operations'
+            ? 'As Operations Lead, return draft checklist/task/workflow steps only; do not execute or claim execution.'
+            : 'Produce concrete specialist chat output, not a high-level summary.';
+
+  return [
+    `Guidance-only live specialist chat response for MH Assistant OS.`,
+    `Specialist ID: ${specialistId || 'specialist'}`,
+    `Specialist name: ${specialistName}`,
+    `Mode: ${teamMode}`,
+    `Conversation language (language the user is writing in): ${conversationLanguage}`,
+    `Output/publishing language (language for publishable content, copy, hooks, captions, scripts): ${outputLanguage}`,
+    market ? `Market: ${market}` : '',
+    `Safety instruction: ${safetyInstruction}`,
+    'You are answering inside a live specialist chat.',
+    'Answer the user directly as the selected specialist.',
+    'Language separation rule: explanations, notes, and next-step guidance must stay in the conversation language.',
+    'If publishable content uses a different output language, do not make the entire answer that output language.',
+    'Start with one brief sentence in the conversation language, then add a clearly labeled publishable content section in the output language.',
+    conversationLanguage !== 'user language'
+      ? `Always respond to the user, explain, and interact in ${conversationLanguage}.`
+      : 'Match the language the user writes in for all explanations and interaction.',
+    languagesDiffer
+      ? `Generate all publishable content (hooks, captions, scripts, emails, copy, headlines) in ${outputLanguage} because that is the project publishing language.`
+      : 'Generate publishable content in the same language as your conversation.',
+    languagesDiffer
+      ? `When the output language differs from the conversation language, label the publishable section clearly, for example: "${outputLanguage} hooks for the ${market || outputLanguage} market:".`
+      : '',
+    'If the user explicitly requests a different output language, use that language for publishable content instead.',
+    'If the user asks for N items, return exactly N items.',
+    'Example rule: if the user asks for 3 hooks, return exactly 3 hooks.',
+    'If the user asks for hooks, captions, scripts, emails, headlines, tasks, workflow steps, or checklists, produce the actual requested items.',
+    'Do not summarize the task.',
+    'Do not say "I can create" or "I would create".',
+    'Create the requested output now.',
+    'Do not describe what you would do.',
+    'Do not answer with a generic summary.',
+    'Give practical, ready-to-copy output.',
+    'After delivering the requested output, add one short next-step suggestion.',
+    'The next-step suggestion must be in the conversation language, not the publishing/output language, unless they are the same.',
+    'Provide practical guidance/content only.',
+    specialistInstruction,
+    'Do not claim task/workflow/handoff/approval/publish actions were executed.',
+    'Do not claim task creation, workflow run, handoff creation, or approval creation happened.',
+    'Do not claim approvals were granted.',
+
+### backbone
+const path = require('path');
+const {
+  ensureDir,
+  ensureJsonFile,
+  readJsonFile,
+  readJsonFileDurable,
+  writeJsonFile
+} = require('../integrations/storage');
+const {
+  normalizeProjectSlug,
+  resolveProjectPath
+} = require('../security/project-isolation');
+
+const PROJECTS_DIR = path.join(process.env.MH_ASSISTANT_ROOT || path.resolve(__dirname, '../../../..'), 'data', 'projects');
+const BACKBONE_VERSION = 'mh-ops-backbone-v2';
+
+// Canonical defaults for policy_rules — these are the authoritative safe values.
+// Any governance file that is missing policy_rules (or missing individual keys)
+// will be merged with these at read-time so enforcement never silently bypasses.
+const DEFAULT_POLICY_RULES = {
+  approval_before_publish: true,
+  high_risk_claim_review_required: true,
+  brand_safety_review_required: true,
+  allow_admin_override: true,
+  auto_escalate_critical_risk: true,
+  freeze_publishing: false,
+  require_approval_for_team_model_changes: true,
+  require_approval_for_source_registry_changes: true,
+  require_approval_for_project_setup_authority_changes: true,
+  block_team_model_changes: false,
+  block_source_registry_changes: false,
+  block_project_setup_authority_changes: false
+};
+
+const MAX_ITEMS = {
+  campaigns: 150,
+  contentItems: 400,
+  mediaJobs: 400,
+  workflowRuns: 250,
+  aiCommands: 300,
+  aiArtifacts: 500,
+  aiRecommendations: 500,
+  aiMemory: 300,
+  approvals: 300,
+  tasks: 400,
+  notifications: 400,
+  queue: 400,
+  events: 1000,
+  handoffs: 250
+};
+
+const STATUS_MODELS = {
+  campaigns: {
+    statuses: ['draft', 'planned', 'active', 'paused', 'completed', 'archived'],
+    lifecycle: ['draft', 'review', 'ready', 'active', 'closed']
+  },
+  content_items: {
+    statuses: ['draft', 'in_review', 'approved', 'scheduled', 'published', 'archived'],
+    lifecycle: ['draft', 'review', 'approved', 'distribution', 'closed'],
+    approval_statuses: ['not_requested', 'pending', 'approved', 'rejected'],
+    publish_statuses: ['draft', 'scheduled', 'published', 'failed']
+  },
+  media_jobs: {
+    statuses: ['requested', 'queued', 'processing', 'completed', 'failed', 'cancelled'],
+    lifecycle: ['requested', 'prepared', 'running', 'review', 'closed'],
+    approval_states: ['not_requested', 'pending', 'approved', 'rejected']
+  },
+  workflow_runs: {
+    statuses: ['queued', 'running', 'completed', 'failed', 'cancelled'],
+    lifecycle: ['queued', 'running', 'completed', 'closed']
+  },
+  ai_commands: {
+    statuses: ['queued', 'running', 'completed', 'failed', 'cancelled'],
+    intents: ['inspect', 'task', 'workflow', 'campaign', 'content', 'media', 'approval', 'recommendation']
+  },
+  ai_artifacts: {
+    statuses: ['draft', 'saved', 'routed', 'archived'],
+    types: ['ai_response', 'workflow_output', 'recommendation_bundle', 'memory_snapshot']
+  },
+  ai_recommendations: {
+    statuses: ['open', 'accepted', 'routed', 'completed', 'dismissed'],
+    route_targets: ['campaign-studio', 'content-studio', 'media-studio', 'publishing', 'ads-manager', 'task-center', 'governance']
+  },
+  ai_memory: {
+    scopes: ['project', 'campaign', 'workflow', 'channel', 'audience', 'content'],
+    statuses: ['active', 'archived']
+  },
+  approvals: {
+    statuses: ['pending', 'approved', 'rejected', 'changes_requested', 'escalated', 'overridden', 'cancelled'],
+    lifecycle: ['requested', 'reviewing', 'decided', 'escalated', 'closed']
+  },
+  tasks: {
+    statuses: ['open', 'queued', 'in_progress', 'blocked', 'completed', 'cancelled'],
+    lifecycle: ['open', 'active', 'blocked', 'done', 'closed'],
+    priorities: ['low', 'normal', 'high', 'critical']
+  },
+  notifications: {
+    statuses: ['unread', 'read', 'archived'],
+    severities: ['info', 'success', 'warning', 'critical']
+  },
+  handoffs: {
+    statuses: ['available', 'consumed', 'superseded', 'cancelled'],
+    lifecycle: ['created', 'available', 'consumed', 'closed']
+  },
+  events: {
+    categories: ['entity', 'workflow', 'approval', 'sync', 'publish', 'ai_routing', 'system']
+  },
+  execution_bridges: {
+    statuses: ['draft', 'ready_for_review', 'manual_publish_ready', 'pending_execution', 'executed', 'failed'],
+    bridge_actions: ['execute_publish_package', 'execute_email_package', 'generate_media_from_prompt', 'build_ad_execution_package']
+  }
+};
+
+const TEAM_ROLE_DEFS = [
+  {
+    id: 'strategist',
+    label: 'Strategist',
+    routes: ['home', 'campaign-studio', 'workflows', 'research', 'insights'],
+    service_domains: ['campaign', 'research'],
+    actions: ['plan_campaign', 'route_work', 'approve_strategy', 'request_research']
+  },
+  {
+    id: 'writer',
+    label: 'Writer',
+    routes: ['content-studio', 'workflows', 'research'],
+    service_domains: ['content'],
+    actions: ['draft_content', 'revise_copy', 'handoff_to_review', 'handoff_to_publishing']
+  },
+  {
+    id: 'designer',
+    label: 'Designer',
+    routes: ['media-studio', 'library', 'workflows'],
+    service_domains: ['media'],
+    actions: ['create_visuals', 'revise_visuals', 'handoff_media']
+  },
+  {
+    id: 'video_lead',
+    label: 'Video Lead',
+    routes: ['media-studio', 'library', 'workflows'],
+    service_domains: ['media'],
+    actions: ['create_video', 'review_video', 'handoff_video']
+  },
+  {
+    id: 'publisher',
+    label: 'Publisher',
+    routes: ['publishing', 'library', 'workflows'],
+    service_domains: ['publishing'],
+    actions: ['schedule_publish', 'publish', 'return_for_changes']
+  },
+  {
+    id: 'ads_operator',
+    label: 'Ads Operator',
+    routes: ['ads-manager', 'campaign-studio', 'workflows', 'insights'],
+    service_domains: ['media', 'campaign'],
+    actions: ['launch_ads', 'update_budget', 'request_creative', 'analyze_paid']
+  },
+  {
+    id: 'analyst',
+    label: 'Analyst',
+    routes: ['insights', 'research', 'workflows', 'home'],
+    service_domains: ['research', 'governance'],
+    actions: ['analyze_performance', 'build_report', 'open_research_task']
+  },
+  {
+    id: 'compliance_reviewer',
+    label: 'Compliance Reviewer',
+    routes: ['governance', 'content-studio', 'media-studio', 'publishing'],
+    service_domains: ['governance'],
+    actions: ['review_claims', 'review_brand_safety', 'approve_release', 'escalate_risk']
+  },
+  {
+    id: 'admin',
+    label: 'Admin',
+    routes: ['home', 'settings', 'integrations', 'governance', 'workflows'],
+    service_domains: ['governance'],
+    actions: ['override_policy', 'manage_team', 'resolve_escalation', 'manage_permissions']
+  }
+];
+
+const ROUTE_ROLE_ACCESS = {
+  home: ['strategist', 'analyst', 'admin'],
+  'campaign-studio': ['strategist', 'ads_operator', 'admin'],
+  'content-studio': ['writer', 'strategist', 'compliance_reviewer', 'admin'],
+  'media-studio': ['designer', 'video_lead', 'compliance_reviewer', 'admin'],
+  publishing: ['publisher', 'compliance_reviewer', 'admin'],
+  research: ['strategist', 'analyst', 'writer', 'admin'],
+  governance: ['compliance_reviewer', 'admin', 'analyst'],
+  'ads-manager': ['ads_operator', 'strategist', 'analyst', 'admin'],
+  insights: ['analyst', 'strategist', 'ads_operator', 'admin'],
+  integrations: ['admin'],
+  workflows: TEAM_ROLE_DEFS.map((role) => role.id),
+  library: ['designer', 'video_lead', 'publisher', 'admin'],
+  settings: ['admin']
+};
+
+const SERVICE_DOMAIN_DEFS = {
+  campaign: {
+    label: 'Campaign',
+    owner_role: 'strategist',
+    review_role: 'admin',
+    handoff_to: ['writer', 'designer', 'ads_operator', 'analyst'],
+    route_target: 'campaign-studio',
+    page_permissions: ['campaign-studio', 'workflows', 'insights']
+  },
+  content: {
+    label: 'Content',
+    owner_role: 'writer',
+    review_role: 'compliance_reviewer',
+    handoff_to: ['designer', 'video_lead', 'publisher', 'compliance_reviewer'],
+    route_target: 'content-studio',
+    page_permissions: ['content-studio', 'workflows', 'publishing']
+  },
+  media: {
+    label: 'Media',
+    owner_role: 'designer',
+    review_role: 'compliance_reviewer',
+    handoff_to: ['publisher', 'ads_operator', 'compliance_reviewer'],
+    route_target: 'media-studio',
+    page_permissions: ['media-studio', 'workflows', 'publishing']
+  },
+  publishing: {
+    label: 'Publishing',
+    owner_role: 'publisher',
+    review_role: 'compliance_reviewer',
+    handoff_to: ['analyst', 'strategist'],
+    route_target: 'publishing',
+    page_permissions: ['publishing', 'governance']
+  },
+  research: {
+    label: 'Research',
+    owner_role: 'analyst',
+    review_role: 'strategist',
+    handoff_to: ['strategist', 'writer', 'ads_operator'],
+    route_target: 'research',
+    page_permissions: ['research', 'workflows', 'insights']
+  },
+  governance: {
+    label: 'Governance',
+    owner_role: 'compliance_reviewer',
+    review_role: 'admin',
+    handoff_to: ['admin'],
+    route_target: 'governance',
+    page_permissions: ['governance', 'settings']
+  }
+};
+
+const APPROVAL_DOMAIN_MAP = {
+  campaign: 'campaign',
+  content_item: 'content',
+  media_job: 'media',
+  publishing_job: 'publishing',
+  workflow_run: 'research',
+  approval: 'governance',
+  task: 'governance'
+};
+
+const ESCALATION_CHAINS = {
+  low: ['compliance_reviewer'],
+  medium: ['compliance_reviewer', 'strategist'],
+  high: ['compliance_reviewer', 'admin'],
+
+### route permission catalog
+"use strict";
+
+/**
+ * Route permission catalog for MH-Assistant backend.
+ *
+ * This module is intentionally non-enforcing in P1B.1.
+ * It creates a single source of truth for route risk classification before
+ * enforcement is introduced in later phases.
+ */
+
+const ROUTE_RISK = Object.freeze({
+  LOW: "low",
+  MEDIUM: "medium",
+  HIGH: "high",
+  CRITICAL: "critical"
+});
+
+const ROUTE_ACCESS = Object.freeze({
+  PUBLIC: "public",
+  READ_KEY: "read_key",
+  WRITE_KEY: "write_key",
+  ADMIN: "admin",
+  SERVICE: "service",
+  FUTURE_RBAC: "future_rbac"
+});
+
+const ROUTE_STATUS = Object.freeze({
+  ACTIVE: "active",
+  COMPATIBILITY_ALIAS: "compatibility_alias",
+  DEPRECATE: "deprecate",
+  RETIRE: "retire",
+  FUTURE: "future"
+});
+
+const DOMAIN_RULES = Object.freeze([
+  {
+    domain: "customer_operations",
+    match: /customer-operations|customer|conversation|message|ticket|crm|call|ivr|whatsapp|sms/i,
+    defaultReadScope: "customer.read",
+    defaultWriteScope: "customer.write",
+    dataRisk: ROUTE_RISK.CRITICAL,
+    providerRisk: ROUTE_RISK.MEDIUM,
+    destructiveRisk: ROUTE_RISK.HIGH
+  },
+  {
+    domain: "publishing",
+    match: /publishing|publish|approval|governance|claim|compliance/i,
+    defaultReadScope: "publishing.read",
+    defaultWriteScope: "publishing.write",
+    dataRisk: ROUTE_RISK.HIGH,
+    providerRisk: ROUTE_RISK.CRITICAL,
+    destructiveRisk: ROUTE_RISK.HIGH
+  },
+  {
+    domain: "integrations",
+    match: /integration|provider|connector|oauth|token/i,
+    defaultReadScope: "integration.read",
+    defaultWriteScope: "integration.write",
+    dataRisk: ROUTE_RISK.HIGH,
+    providerRisk: ROUTE_RISK.CRITICAL,
+    destructiveRisk: ROUTE_RISK.MEDIUM
+  },
+  {
+    domain: "ai_execution",
+    match: /ai\/command|ai\/chat|ai\/guidance|ai\/workflows|openai|anthropic|assistant/i,
+    defaultReadScope: "ai.read",
+    defaultWriteScope: "ai.execute",
+    dataRisk: ROUTE_RISK.HIGH,
+    providerRisk: ROUTE_RISK.HIGH,
+    destructiveRisk: ROUTE_RISK.MEDIUM
+  },
+  {
+    domain: "workflow_operations",
+    match: /workflow|task|queue|job|notification|handoff|event/i,
+    defaultReadScope: "operations.read",
+    defaultWriteScope: "operations.write",
+    dataRisk: ROUTE_RISK.MEDIUM,
+    providerRisk: ROUTE_RISK.MEDIUM,
+    destructiveRisk: ROUTE_RISK.MEDIUM
+  },
+  {
+    domain: "media_library",
+    match: /media|asset|library|source|upload|generated-output/i,
+    defaultReadScope: "media.read",
+    defaultWriteScope: "media.write",
+    dataRisk: ROUTE_RISK.MEDIUM,
+    providerRisk: ROUTE_RISK.MEDIUM,
+    destructiveRisk: ROUTE_RISK.HIGH
+  },
+  {
+    domain: "commerce_legacy",
+    match: /woocommerce|product|clone|rollback|cleanup|blog/i,
+    defaultReadScope: "commerce.read",
+    defaultWriteScope: "commerce.write",
+    dataRisk: ROUTE_RISK.HIGH,
+    providerRisk: ROUTE_RISK.CRITICAL,
+    destructiveRisk: ROUTE_RISK.CRITICAL
+  },
+  {
+    domain: "project_setup",
+    match: /project|setup|template|rename|storage|parity/i,
+    defaultReadScope: "project.read",
+    defaultWriteScope: "project.write",
+    dataRisk: ROUTE_RISK.MEDIUM,
+    providerRisk: ROUTE_RISK.LOW,
+    destructiveRisk: ROUTE_RISK.MEDIUM
+  },
+  {
+    domain: "platform_health",
+    match: /health|healthz|readyz/i,
+    defaultReadScope: "platform.health",
+    defaultWriteScope: "platform.admin",
+    dataRisk: ROUTE_RISK.LOW,
+    providerRisk: ROUTE_RISK.LOW,
+    destructiveRisk: ROUTE_RISK.LOW
+  }
+]);
+
+function normalizeMethod(method) {
+  return String(method || "GET").toUpperCase();
+}
+
+function isMutationMethod(method) {
+  return ["POST", "PATCH", "PUT", "DELETE"].includes(normalizeMethod(method));
+}
+
+function isPublicAlias(pathname) {
+  return String(pathname || "").startsWith("/public/");
+}
+
+function isDestructiveRoute(method, pathname) {
+  const value = `${normalizeMethod(method)} ${pathname || ""}`;
+  return /DELETE|delete|archive|remove|destroy|purge|replace-original|cleanup|rollback|disconnect/i.test(value);
+}
+
+function isProviderExecutionRoute(pathname) {
+  return /publish|send|provider|integration|native-media|generate|openai|anthropic|workflow|scheduler|woocommerce|email|smtp|twilio|telnyx/i.test(
+    String(pathname || "")
+  );
+}
+
+function findDomainRule(pathname) {
+  const value = String(pathname || "");
+  return DOMAIN_RULES.find((rule) => rule.match.test(value)) || {
+    domain: "general",
+    defaultReadScope: "general.read",
+    defaultWriteScope: "general.write",
+    dataRisk: ROUTE_RISK.MEDIUM,
+    providerRisk: ROUTE_RISK.LOW,
+    destructiveRisk: ROUTE_RISK.LOW
+  };
+}
+
+function classifyRoute(method, pathname) {
+  const normalizedMethod = normalizeMethod(method);
+  const routePath = String(pathname || "");
+  const mutation = isMutationMethod(normalizedMethod);
+  const publicAlias = isPublicAlias(routePath);
+  const destructive = isDestructiveRoute(normalizedMethod, routePath);
+  const providerExecution = isProviderExecutionRoute(routePath);
+  const domainRule = findDomainRule(routePath);
+
+  let requiredAccess = mutation ? ROUTE_ACCESS.WRITE_KEY : ROUTE_ACCESS.READ_KEY;
+  let status = publicAlias ? ROUTE_STATUS.COMPATIBILITY_ALIAS : ROUTE_STATUS.ACTIVE;
+
+  if (domainRule.domain === "platform_health" && !mutation) {
+    requiredAccess = ROUTE_ACCESS.PUBLIC;
+  }
+
+  if (publicAlias && mutation) {
+    status = ROUTE_STATUS.DEPRECATE;
+  }
+
+  if (publicAlias && /customer-operations|publishing|integration|governance|approval|sources/i.test(routePath)) {
+    status = mutation ? ROUTE_STATUS.RETIRE : ROUTE_STATUS.DEPRECATE;
+  }
+
+  const requiredScope = mutation ? domainRule.defaultWriteScope : domainRule.defaultReadScope;
+  const auditEvent = `${domainRule.domain}.${mutation ? "mutation" : "read"}.${publicAlias ? "public_alias" : "canonical"}`;
+
+  return {
+    method: normalizedMethod,
+    route: routePath,
+    domain: domainRule.domain,
+    readWrite: mutation ? "write" : "read",
+    publicAlias,
+    requiredAccess,
+    requiredScope,
+    status,
+    dataRisk: domainRule.dataRisk,
+    providerRisk: providerExecution ? domainRule.providerRisk : ROUTE_RISK.LOW,
+    destructiveRisk: destructive ? domainRule.destructiveRisk : ROUTE_RISK.LOW,
+    providerExecution,
+    destructive,
+    auditEvent,
+    recommendation: buildRecommendation({
+      publicAlias,
+      mutation,
+      destructive,
+      providerExecution,
+      domain: domainRule.domain
+    })
+  };
+}
+
+function buildRecommendation({ publicAlias, mutation, destructive, providerExecution, domain }) {
+  if (publicAlias && mutation) return "retire_public_mutation_alias";
+  if (publicAlias) return "deprecate_public_read_alias";
+  if (destructive) return "require_dual_confirmation_and_audit";
+  if (providerExecution) return "require_provider_scope_audit_and_idempotency";
+  if (domain === "customer_operations") return "require_pii_scope_and_access_log";
+  if (mutation) return "require_write_scope_and_audit";
+  return "keep_with_read_scope";
+}
+
+module.exports = {
+  ROUTE_RISK,
+  ROUTE_ACCESS,
+  ROUTE_STATUS,
+  DOMAIN_RULES,
+  classifyRoute,
+  isMutationMethod,
+  isPublicAlias,
+  isDestructiveRoute,
+  isProviderExecutionRoute
+};
+
+### integrations
+
+--- runtime/orchestrator-service/lib/integrations/adapter-manager.js
+1:const { getProviderAdapter } = require('./provider-registry');
+43:async function executeAdapterAction({
+55:    throw new Error(`No provider adapter registered for ${integrationId}`);
+84:    const providerResult = normalizeProviderResult(await adapter[actionName](ctx));
+91:        data_scopes: providerResult.data_scopes,
+92:        read_scopes: providerResult.read_scopes,
+93:        write_scopes: providerResult.write_scopes
+95:      providerResult,
+104:      status: providerResult.status,
+105:      health_state: providerResult.health_state?.state || '',
+106:      note: providerResult.notes
+115:        status: providerResult.status,
+116:        health_state: providerResult.health_state?.state || '',
+117:        summary: providerResult.sync_summary,
+119:        provider: insightsReady.provider
+126:        normalized: providerResult.normalized,
+127:        metadata: providerResult.metadata,
+133:      ...providerResult,
+137:    const providerError = buildProviderError(integrationId, error, `Failed to ${actionType} ${integrationId}`);
+144:      status: providerError.status,
+145:      health_state: providerError.status,
+146:      note: providerError.message
+149:    throw Object.assign(new Error(providerError.message), providerError);
+154:  executeAdapterAction
+
+--- runtime/orchestrator-service/lib/integrations/audit-log.js
+
+--- runtime/orchestrator-service/lib/integrations/health-manager.js
+
+--- runtime/orchestrator-service/lib/integrations/http-client.js
+32:function buildProviderError(provider, error, fallbackMessage = 'Provider request failed') {
+55:      provider,
+63:    provider,
+69:function buildResponseError(provider, response, fallbackMessage = 'Provider request failed') {
+74:  return buildProviderError(provider, {
+
+--- runtime/orchestrator-service/lib/integrations/insights-contract.js
+26:  if (/email|audience|contact|crm/.test(scopeText)) return 'crm_email';
+56:  providerResult = {},
+59:  const normalized = asObject(providerResult.normalized);
+68:    provider: asString(normalized.provider || integrationId),
+70:    account: Object.keys(asObject(providerResult.account)).length
+71:      ? asObject(providerResult.account)
+72:      : asObject(record.provider_account),
+74:      data_scopes: asArray(providerResult.data_scopes),
+75:      read_scopes: asArray(providerResult.read_scopes),
+76:      write_scopes: asArray(providerResult.write_scopes)
+79:      status: asString(providerResult.status),
+80:      health: asString(providerResult.health),
+81:      sync: asObject(providerResult.sync_summary)
+
+--- runtime/orchestrator-service/lib/integrations/provider-registry.js
+1:const website = require('./providers/website');
+2:const woocommerce = require('./providers/woocommerce');
+3:const shopify = require('./providers/shopify');
+4:const google = require('./providers/google');
+5:const meta = require('./providers/meta');
+6:const tiktok = require('./providers/tiktok');
+7:const ebay = require('./providers/ebay');
+8:const ops = require('./providers/ops');
+9:const { createUnsupportedAdapter } = require('./providers/unsupported');
+12:const UNSUPPORTED_INTEGRATION_IDS = ['amazon', 'smtp', 'mailer', 'crm'];
+13:const unsupportedAdapter = {
+16:    'This provider requires a dedicated auth flow or credential model that is not yet configured in MH Assistant OS.'
+18:  unsupported: true
+30:  unsupportedAdapter
+43:  return Boolean(adapter) && adapter.unsupported !== true;
+48:  if (!adapter || adapter.unsupported !== true) {
+53:    adapter.unsupportedMessage ||
+54:    'This provider requires a dedicated auth flow or credential model that is not yet configured in MH Assistant OS.'
+
+--- runtime/orchestrator-service/lib/integrations/provider-utils.js
+
+--- runtime/orchestrator-service/lib/integrations/providers/ebay.js
+2:const { asArray, requireFields, buildResult } = require('../provider-utils');
+
+--- runtime/orchestrator-service/lib/integrations/providers/google.js
+2:const { asArray, asString, requireFields, buildResult, firstNonEmpty } = require('../provider-utils');
+246:      provider: 'ga4',
+295:      provider: 'ga4',
+324:      provider: 'search_console',
+367:      provider: 'search_console',
+393:      provider: 'youtube',
+405:    writeScopes: ['publishing'],
+426:      provider: 'youtube',
+436:        published_at: item.snippet?.publishedAt || '',
+470:      provider: 'google_ads',
+498:      provider: 'google_drive',
+526:      provider: 'gtm',
+566:    const providerError = buildProviderError(ctx.integrationId, error, `Failed to process ${ctx.integrationId}`);
+567:    throw Object.assign(new Error(providerError.message), providerError);
+
+--- runtime/orchestrator-service/lib/integrations/providers/meta.js
+2:const { asArray, asString, requireFields, buildResult, firstNonEmpty } = require('../provider-utils');
+86:      provider: 'facebook',
+96:    permissionScope: 'Page insights and publishing access',
+99:    writeScopes: ['publishing'],
+114:  const posts = await graphGet(`${page.id}/published_posts`, ctx.credentials.accessToken, {
+127:      provider: 'facebook',
+160:      provider: 'instagram',
+171:    permissionScope: 'Instagram business insights and publishing access',
+174:    writeScopes: ['publishing'],
+202:      provider: 'instagram',
+239:      provider: 'meta_ads',
+274:      provider: 'meta_ads',
+306:      provider: 'meta_pixel',
+340:    const providerError = buildProviderError(ctx.integrationId, error, `Failed to process ${ctx.integrationId}`);
+341:    throw Object.assign(new Error(providerError.message), providerError);
+
+--- runtime/orchestrator-service/lib/integrations/providers/ops.js
+2:const { requireFields, buildResult, asArray } = require('../provider-utils');
+27:      provider: 'slack',
+67:      provider: 'telegram',
+104:      provider: 'notion',
+149:      provider: ctx.integrationId,
+195:      provider: 'custom_analytics',
+235:      provider: 'linkedin',
+243:    writeScopes: ['publishing'],
+274:      provider: 'mailchimp',
+305:    const providerError = buildProviderError(ctx.integrationId, error, `Failed to process ${ctx.integrationId}`);
+306:    throw Object.assign(new Error(providerError.message), providerError);
+
+--- runtime/orchestrator-service/lib/integrations/providers/shopify.js
+2:const { asArray, requireFields, buildResult } = require('../provider-utils');
+
+--- runtime/orchestrator-service/lib/integrations/providers/tiktok.js
+2:const { asArray, requireFields, buildResult, firstNonEmpty } = require('../provider-utils');
+58:      provider: 'tiktok',
+66:    writeScopes: ['publishing'],
+92:      provider: 'tiktok',
+138:      provider: 'tiktok_ads',
+178:      provider: 'tiktok_ads',
+227:      provider: 'tiktok_pixel',
+258:    const providerError = buildProviderError(ctx.integrationId, error, `Failed to process ${ctx.integrationId}`);
+259:    throw Object.assign(new Error(providerError.message), providerError);
+
+--- runtime/orchestrator-service/lib/integrations/providers/unsupported.js
+2:  async function unsupported(ctx) {
+4:    error.status = 'unsupported_provider';
+10:    unsupportedMessage: message,
+11:    connect: unsupported,
+12:    testConnection: unsupported,
+13:    syncCurrent: unsupported,
+14:    importHistory: unsupported
+
+--- runtime/orchestrator-service/lib/integrations/providers/website.js
+2:const { asString, requireFields, buildResult } = require('../provider-utils');
+118:    const providerError = buildProviderError('website', error, 'Failed to import website history');
+119:    throw Object.assign(new Error(providerError.message), providerError);
+
+--- runtime/orchestrator-service/lib/integrations/providers/woocommerce.js
+2:const { asArray, requireFields, buildResult } = require('../provider-utils');
+145:    const providerError = buildProviderError('woocommerce', error, 'Failed to import WooCommerce history');
+146:    throw Object.assign(new Error(providerError.message), providerError);
+
+--- runtime/orchestrator-service/lib/integrations/storage.js
+
+--- runtime/orchestrator-service/lib/integrations/sync-history.js
+
+--- runtime/orchestrator-service/lib/integrations/token-manager.js

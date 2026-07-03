@@ -1,0 +1,870 @@
+### shared context
+// --- Guided Library Source Type Mapping ---
+const SHARED_SOURCE_TYPE_MAP = {
+  product_photo: {
+    label: "Product Photo",
+    libraryFilter: "product_images",
+    targetSection: "asset-workspace",
+    shortGuideTitle: "Choose a product photo",
+    shortGuideText: "Select one item, then click Use as Source in AI Command."
+  },
+  video: {
+    label: "Video Asset",
+    libraryFilter: "videos",
+    targetSection: "asset-workspace",
+    shortGuideTitle: "Choose a video source",
+    shortGuideText: "Select one item, then click Use as Source in AI Command."
+  },
+  document: {
+    label: "Document",
+    libraryFilter: "documents",
+    targetSection: "asset-workspace",
+    shortGuideTitle: "Choose a document source",
+    shortGuideText: "Select one item, then click Use as Source in AI Command."
+  },
+  product_data: {
+    label: "Product Data (CSV)",
+    libraryFilter: "product_data",
+    targetSection: "asset-workspace",
+    shortGuideTitle: "Choose a product data file",
+    shortGuideText: "Select one item, then click Use as Source in AI Command."
+  },
+  brand_asset: {
+    label: "Brand Asset",
+    libraryFilter: "logos",
+    targetSection: "asset-workspace",
+    shortGuideTitle: "Choose a brand asset",
+    shortGuideText: "Select one item, then click Use as Source in AI Command."
+  },
+  legal_pricing: {
+    label: "Legal/Pricing Document",
+    libraryFilter: "legal_pricing",
+    targetSection: "asset-workspace",
+    shortGuideTitle: "Choose a legal or pricing document",
+    shortGuideText: "Select one item, then click Use as Source in AI Command."
+  },
+  research_proof: {
+    label: "Research/Proof Document",
+    libraryFilter: "research_certificates",
+    targetSection: "asset-workspace",
+    shortGuideTitle: "Choose a research/proof document",
+    shortGuideText: "Select one item, then click Use as Source in AI Command."
+  },
+  folder_collection: {
+    label: "Folder/Collection",
+    libraryFilter: "all_assets",
+    targetSection: "asset-workspace",
+    shortGuideTitle: "Choose a folder or collection",
+    shortGuideText: "Select one item, then click Use as Source in AI Command."
+  },
+  auto: {
+    label: "Any Asset",
+    libraryFilter: "all_assets",
+    targetSection: "asset-workspace",
+    shortGuideTitle: "Choose a source",
+    shortGuideText: "Select one item, then click Use as Source in AI Command."
+  }
+};
+
+export function getSourceTypeMapping(type = "auto") {
+  return SHARED_SOURCE_TYPE_MAP[type] || SHARED_SOURCE_TYPE_MAP.auto;
+}
+
+// Transient context caches
+const campaignCache = new Map();
+const aiDraftCache = new Map();
+const handoffCache = new Map();
+const librarySourceBridgeCache = new Map();
+
+// Transient AI source cache
+const aiSourceCache = new Map();
+
+// --- Transient AI Drawer Return Context ---
+const aiDrawerReturnCache = new Map();
+
+export function setSharedAiDrawerReturn(projectName, payload) {
+  if (!projectName || !payload) return;
+  aiDrawerReturnCache.set(buildKey(projectName, "ai-drawer-return"), payload);
+}
+
+export function getSharedAiDrawerReturn(projectName) {
+  return aiDrawerReturnCache.get(buildKey(projectName, "ai-drawer-return"));
+}
+
+export function clearSharedAiDrawerReturn(projectName) {
+  if (!projectName) return;
+  aiDrawerReturnCache.delete(buildKey(projectName, "ai-drawer-return"));
+}
+
+// Library Source Bridge helpers
+export function setSharedLibrarySourceBridge(projectName, bridge) {
+  if (!projectName || !bridge) return;
+  librarySourceBridgeCache.set(buildKey(projectName, "library-source-bridge"), bridge);
+}
+
+export function getSharedLibrarySourceBridge(projectName) {
+  return librarySourceBridgeCache.get(buildKey(projectName, "library-source-bridge"));
+}
+
+export function clearSharedLibrarySourceBridge(projectName) {
+  if (!projectName) return;
+  librarySourceBridgeCache.delete(buildKey(projectName, "library-source-bridge"));
+}
+
+// Shared AI Source helpers
+export function setSharedAiSource(projectName, source) {
+  if (!projectName || !source) return;
+  aiSourceCache.set(buildKey(projectName, "ai-source"), source);
+}
+
+export function getSharedAiSource(projectName) {
+  return aiSourceCache.get(buildKey(projectName, "ai-source"));
+}
+
+export function clearSharedAiSource(projectName) {
+  if (!projectName) return;
+  aiSourceCache.delete(buildKey(projectName, "ai-source"));
+}
+
+function asArray(value) {
+  return Array.isArray(value) ? value : [];
+}
+
+function asObject(value) {
+  return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+}
+
+function asString(value) {
+  if (value == null) return "";
+  return String(value);
+}
+
+function buildKey(projectName, scope = "default") {
+  return `${asString(projectName).trim().toLowerCase() || "__default__"}::${scope}`;
+}
+
+function getLatestHandoffFromOperations(operations, destinationPage, sourcePage = "") {
+  const handoffs = asArray(operations?.handoffs?.items);
+  const available = handoffs.filter((item) => {
+    const destinationMatches = asString(item?.destination_page) === asString(destinationPage);
+    const sourceMatches = !sourcePage || asString(item?.source_page) === asString(sourcePage);
+    const active = asString(item?.status || "available") === "available";
+    return destinationMatches && sourceMatches && active;
+  });
+
+  return available[0] || null;
+}
+
+export function setSharedCampaignRecord(projectName, campaign) {
+  if (!projectName || !campaign) return;
+  campaignCache.set(buildKey(projectName), campaign);
+}
+
+export function getSharedCampaignRecord(projectName, operations) {
+  const cached = campaignCache.get(buildKey(projectName));
+  if (cached) return cached;
+
+  const campaigns = asArray(operations?.campaigns?.items);
+  const activeDraft =
+    campaigns.find((item) => item?.active !== false) ||
+    campaigns[0] ||
+    null;
+
+  return activeDraft;
+}
+
+export function setSharedAiDraft(projectName, draft) {
+  if (!projectName || !draft) return;
+  aiDraftCache.set(buildKey(projectName), draft);
+}
+
+export function getSharedAiDraft(projectName, operations) {
+  const cached = aiDraftCache.get(buildKey(projectName));
+  if (cached) return cached;
+
+  const handoff =
+    getLatestHandoffFromOperations(operations, "workflows", "ai-command") ||
+    getLatestHandoffFromOperations(operations, "ai-command", "workflows") ||
+    null;
+
+  return asObject(handoff?.payload?.draft_context);
+}
+
+export function setSharedHandoff(projectName, destinationPage, handoff) {
+  if (!projectName || !destinationPage || !handoff) return;
+  handoffCache.set(buildKey(projectName, destinationPage), handoff);
+}
+
+export function getSharedHandoff(projectName, destinationPage, operations, sourcePage = "") {
+  const cached = handoffCache.get(buildKey(projectName, destinationPage));
+  if (cached) return cached;
+  return getLatestHandoffFromOperations(operations, destinationPage, sourcePage);
+}
+
+### authority projection
+/**
+ * MH-OS Authority Projection Helper
+ *
+ * IMPORTANT:
+ * This file is projection-only.
+ *
+ * Backend owns operational authority.
+ * Frontend projects operational authority.
+ *
+ * This helper MUST NEVER:
+ * - enforce permissions
+ * - mutate governance
+ * - become source of truth
+ * - generate authority
+ * - own approvals
+ * - own workflows
+ */
+
+function safeArray(value) {
+  return Array.isArray(value) ? value : [];
+}
+
+function safeObject(value) {
+  return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+}
+
+function readOperationsProjection(state = {}) {
+  return safeObject(state.operations);
+}
+
+export function getProjectedTeamServiceModel(state = {}) {
+  const operations = readOperationsProjection(state);
+  return safeObject(operations.team_service_model);
+}
+
+export function getProjectedGovernance(state = {}) {
+  const operations = readOperationsProjection(state);
+  return safeObject(operations.governance);
+}
+
+export function getProjectedApprovals(state = {}) {
+  const operations = readOperationsProjection(state);
+  return safeObject(operations.approvals);
+}
+
+export function getProjectedWorkflowRuns(state = {}) {
+  const operations = readOperationsProjection(state);
+  return safeObject(operations.workflow_runs);
+}
+
+export function getProjectedHandoffs(state = {}) {
+  const operations = readOperationsProjection(state);
+  return safeObject(operations.handoffs);
+}
+
+export function getProjectedAiRecommendations(state = {}) {
+  const operations = readOperationsProjection(state);
+  return safeObject(operations.ai_recommendations);
+}
+
+export function getProjectedAiMemory(state = {}) {
+  const operations = readOperationsProjection(state);
+  return safeObject(operations.ai_memory);
+}
+
+export function getProjectedRoutePermissions(state = {}) {
+  const model = getProjectedTeamServiceModel(state);
+  return safeArray(model.route_permissions);
+}
+
+export function getProjectedTeamMembers(state = {}) {
+  const model = getProjectedTeamServiceModel(state);
+  return safeArray(model.members);
+}
+
+export function getProjectedServiceDomains(state = {}) {
+  const model = getProjectedTeamServiceModel(state);
+  return safeArray(model.domains);
+}
+
+export function getProjectedActiveRole(state = {}) {
+  const model = getProjectedTeamServiceModel(state);
+
+  return (
+    model.active_role ||
+    state.activeRole ||
+    "admin"
+  );
+}
+
+### route role fallback
+const DEFAULT_ROLE = "admin";
+
+const ACTIVE_ROUTE_ROLES = [
+  "strategist",
+  "writer",
+  "designer",
+  "video_lead",
+  "publisher",
+  "ads_operator",
+  "analyst",
+  "compliance_reviewer",
+  "admin"
+];
+
+const DEFAULT_ROUTE_ROLE_ACCESS = {
+  home: ["strategist", "analyst", "admin"],
+  "ai-command": ACTIVE_ROUTE_ROLES,
+  "campaign-studio": ["strategist", "ads_operator", "admin"],
+  "content-studio": ["writer", "strategist", "compliance_reviewer", "admin"],
+  "media-studio": ["designer", "video_lead", "compliance_reviewer", "admin"],
+  publishing: ["publisher", "compliance_reviewer", "admin"],
+  research: ["strategist", "analyst", "writer", "admin"],
+  setup: ACTIVE_ROUTE_ROLES,
+  "task-center": ACTIVE_ROUTE_ROLES,
+  "queue-center": ACTIVE_ROUTE_ROLES,
+  "job-monitor": ACTIVE_ROUTE_ROLES,
+  "notification-center": ACTIVE_ROUTE_ROLES,
+  governance: ["compliance_reviewer", "admin", "analyst"],
+  "ads-manager": ["ads_operator", "strategist", "analyst", "admin"],
+  insights: ["analyst", "strategist", "ads_operator", "admin"],
+  integrations: ["admin"],
+  workflows: ACTIVE_ROUTE_ROLES,
+  library: ["designer", "video_lead", "publisher", "admin"],
+  settings: ["admin"]
+};
+
+function buildBlockedReason(route, allowedRoles, activeRole, useDefaultRoleMessage = false) {
+  const rolesStr = allowedRoles.join(", ");
+  if (useDefaultRoleMessage) {
+    return (
+      `Route "${route}" requires one of: [${rolesStr}]. ` +
+      `Default role is "${activeRole}". Use the Role selector in the top bar to switch.`
+    );
+  }
+
+  return (
+    `Route "${route}" requires one of: [${rolesStr}]. ` +
+    `Your current role is "${activeRole}". ` +
+    `Use the Role selector in the top bar to switch roles for internal testing.`
+  );
+}
+
+function getFallbackRouteAccess(route, activeRole = DEFAULT_ROLE, options = {}) {
+  const allowedRoles = DEFAULT_ROUTE_ROLE_ACCESS[route];
+  if (!Array.isArray(allowedRoles)) {
+    return { allowed: true, reason: "" };
+  }
+
+  const normalizedRole = String(activeRole || "").trim().toLowerCase() || DEFAULT_ROLE;
+  const allowed = allowedRoles.includes(normalizedRole);
+  return {
+    allowed,
+    reason: allowed
+      ? ""
+      : buildBlockedReason(route, allowedRoles, normalizedRole, options.useDefaultRoleMessage === true)
+  };
+}
+
+export {
+  ACTIVE_ROUTE_ROLES,
+  DEFAULT_ROLE,
+  DEFAULT_ROUTE_ROLE_ACCESS,
+  getFallbackRouteAccess
+};
+### shared context usage
+public/control-center/ai-team-model.js:54:    ownerSummary: "Publishing queue, schedules, manual handoffs, retries, and release readiness.",
+public/control-center/ai-team-model.js:99:    ownerSummary: "Workflows, tasks, queues, jobs, notifications, handoffs, and execution safety.",
+public/control-center/system-intelligence.js:48:  handoffPayload = null,
+public/control-center/system-intelligence.js:63:    handoffPayload
+public/control-center/system-intelligence.js:128:  const handoffs = asArray(operations.handoffs?.items);
+public/control-center/system-intelligence.js:132:  const hasWorkflowOutput = workflowRuns.length > 0 || handoffs.some((item) => normalizeText(item?.source_page) === "workflows");
+public/control-center/system-intelligence.js:157:    handoffs
+public/control-center/system-intelligence.js:162:  return asArray(signals.handoffs)
+public/control-center/system-intelligence.js:171:        title: asString(payload?.workflow_title || payload?.title || payload?.prompt || "Cross-page handoff"),
+public/control-center/system-intelligence.js:263:      title: "Run a workflow to create cross-page handoff",
+public/control-center/system-intelligence.js:264:      reason: "No workflow output/handoff is currently available for downstream routing.",
+public/control-center/system-intelligence.js:287:      handoffPayload: { destination_page: "publishing", status: "available" },
+public/control-center/system-intelligence.js:368:  const handoffs = mapHandoffs(signals);
+public/control-center/system-intelligence.js:406:    handoffs,
+public/control-center/system-intelligence.js:489:  return buildSystemIntelligence(state).handoffs;
+public/control-center/automation-engine.js:2:import { setSharedAiDraft, setSharedHandoff } from "./shared-context.js";
+public/control-center/automation-engine.js:10:  "create_handoff",
+public/control-center/automation-engine.js:256:      type: "create_handoff",
+public/control-center/automation-engine.js:296:      type: "create_handoff",
+public/control-center/automation-engine.js:298:      action: "Create content-to-media handoff",
+public/control-center/automation-engine.js:307:      type: "create_handoff",
+public/control-center/automation-engine.js:309:      action: "Create media-to-library handoff",
+public/control-center/automation-engine.js:318:      type: "create_handoff",
+public/control-center/automation-engine.js:320:      action: "Create library-to-publishing handoff",
+public/control-center/automation-engine.js:351:      setSharedAiDraft(projectName, {
+public/control-center/automation-engine.js:374:      setSharedHandoff(projectName, destination, localDraft);
+public/control-center/automation-engine.js:395:      setSharedHandoff(projectName, destination, draftPayload);
+public/control-center/automation-engine.js:404:      const handoff = {
+public/control-center/automation-engine.js:415:      setSharedHandoff(projectName, "workflows", handoff);
+public/control-center/automation-engine.js:417:        context.createProjectHandoff(projectName, handoff).catch(() => {});
+public/control-center/automation-engine.js:424:      const handoff = {
+public/control-center/automation-engine.js:436:      setSharedHandoff(projectName, "publishing", handoff);
+public/control-center/automation-engine.js:438:        context.createProjectHandoff(projectName, handoff).catch(() => {});
+public/control-center/automation-engine.js:443:    if (normalizeText(step.type) === "create_handoff") {
+public/control-center/automation-engine.js:445:      const handoff = {
+public/control-center/automation-engine.js:460:      setSharedHandoff(projectName, destination, handoff);
+public/control-center/automation-engine.js:462:        context.createProjectHandoff(projectName, handoff).catch(() => {});
+public/control-center/runtime/lifecycle/lifecycle-registry.js:8: * Backend authority (orchestrator-service) remains unchanged.
+public/control-center/runtime/ai-backend-connector.js:7: * Active AI runtime authority lives in project-scoped api.js helpers:
+public/control-center/runtime/authority/authority-projection.js:7: * Backend owns operational authority.
+public/control-center/runtime/authority/authority-projection.js:8: * Frontend projects operational authority.
+public/control-center/runtime/authority/authority-projection.js:14: * - generate authority
+public/control-center/runtime/authority/authority-projection.js:53:  return safeObject(operations.handoffs);
+public/control-center/runtime/authority/authority-projection.js:85:    model.active_role ||
+public/control-center/runtime/mh-runtime-globals.js:3:// Backend orchestrator remains the single decision authority.
+public/control-center/runtime/mh-runtime-globals.js:16:      authority: "frontend_debug_only",
+public/control-center/runtime/mh-runtime-globals.js:36:    authority: "none",
+public/control-center/legacy/page-standard.legacy-20260508.js:80:    description: "Manage media jobs, prompt packs, storyboards, generated assets, approvals, and publishing handoffs.",
+public/control-center/legacy/page-standard.legacy-20260508.js:94:    description: "Shape ad briefs, variants, audiences, budget suggestions, tracking status, and campaign handoffs.",
+public/control-center/legacy/page-standard.legacy-20260508.js:177:    { label: "Create execution package", description: "Prepare handoffs for content, media, paid, and publishing.", action: "focus-campaign-package" },
+public/control-center/legacy/page-standard.legacy-20260508.js:278:      "Generate the next launch wave with dependencies and handoffs."
+public/control-center/legacy/page-standard.legacy-20260508.js:580:    savedFindings: asArray(ops.handoffs?.items).filter((item) => asString(item.source_page) === "research").length,
+public/control-center/legacy/page-standard.legacy-20260508.js:672:      card("Saved findings", String(m.savedFindings), "Research handoffs preserved for downstream work.", m.savedFindings ? "success" : "neutral")
+public/control-center/legacy/page-standard.legacy-20260508.js:716:      card("Next step", "Build launch wave", "Prepare the campaign for content, media, paid, and publishing handoffs.", "success")
+public/control-center/legacy/page-standard.legacy-20260508.js:1083:      { label: "Data used", value: "Workflow catalog, workflow runs, handoffs, job monitor" },
+public/control-center/legacy/page-standard.legacy-20260508.js:1091:      { label: "Data used", value: "Content items, approvals, handoffs, AI rewrite requests" },
+public/control-center/legacy/integrations.monolith-20260508.js:478:        purpose: "Operational alerting, workflow notifications, and team collaboration handoff.",
+public/control-center/legacy/integrations.monolith-20260508.js:497:        enables: "Alerts, commands, approval handoff, and ops notifications.",
+public/control-center/legacy/integrations.monolith-20260508.js:529:        purpose: "Automation routing for triggers, syncs, approvals, and external workflow handoffs.",
+public/control-center/legacy/integrations.monolith-20260508.js:531:        enables: "Workflow automation, triggers, sync jobs, and handoffs.",
+public/control-center/legacy/integrations.monolith-20260508.js:548:        enables: "Custom events, syncs, notifications, and system handoffs.",
+public/control-center/legacy/integrations.monolith-20260508.js:2166:      description: "Automation and coordination tools that help orchestrate tasks, handoffs, notifications, and AI-assisted operations.",
+public/control-center/router.js:29:} from "./runtime/authority/route-role-fallback.js";
+public/control-center/state.js:365:    state?.data?.operations?.team_service_model?.active_role ||
+public/control-center/api.js:2265:    `/media-manager/project/${encodeURIComponent(projectName)}/handoffs${suffix}`,
+public/control-center/api.js:2266:    "Failed to load handoffs"
+public/control-center/api.js:2276:    `/media-manager/project/${encodeURIComponent(projectName)}/handoffs`,
+public/control-center/api.js:2279:    "Failed to create handoff"
+public/control-center/api.js:2283:export async function consumeProjectHandoff(projectName, handoffId, payload = {}) {
+public/control-center/api.js:2288:  if (!handoffId) {
+public/control-center/api.js:2289:    throw new Error("Missing handoff id");
+public/control-center/api.js:2293:    `/media-manager/project/${encodeURIComponent(projectName)}/handoffs/${encodeURIComponent(handoffId)}/consume`,
+public/control-center/api.js:2296:    "Failed to consume handoff"
+public/control-center/pages/ai-command/tool-dock.js:4:  getSharedAiSource,
+public/control-center/pages/ai-command/tool-dock.js:8:  getSharedAiDrawerReturn,
+public/control-center/pages/ai-command/tool-dock.js:47:  const returnContext = getSharedAiDrawerReturn(projectName) || getSharedAiDrawerReturn("__default__");
+public/control-center/pages/ai-command/tool-dock.js:110:    const selectedSource = getSharedAiSource(projectName) || getSharedAiSource("__default__");
+public/control-center/pages/ai-command/tool-dock.js:244:  return getSharedAiSource(projectName) || getSharedAiSource("__default__");
+public/control-center/pages/ai-command/tool-dock.js:485:      outputTypes: ["funnel_map", "content_needs", "handoff_points", "retention_notes"],
+public/control-center/pages/ai-command/tool-dock.js:486:      template: "Map a funnel for {projectName}. Include awareness, consideration, conversion, retention, content needs, and handoff points."
+public/control-center/pages/ai-command/tool-dock.js:616:      destinations: ["content-studio", "library", "media-studio", "publishing", "compliance", "task", "handoff"],
+public/control-center/pages/ai-command/tool-dock.js:618:      outputTypes: ["content_studio_draft", "library_save", "media_brief", "publishing_package", "compliance_review", "task_preview", "handoff_preview"],
+public/control-center/pages/ai-command/tool-dock.js:1065:      destinations: ["chat-preview", "workflows", "task", "handoff"],
+public/control-center/pages/ai-command/tool-dock.js:1066:      sourceTypes: ["current_chat", "handoff_summary", "operations_snapshot", "approval_notes", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:1071:      id: "handoff",
+public/control-center/pages/ai-command/tool-dock.js:1078:      destinations: ["chat-preview", "handoff", "workflows", "content-studio", "media-studio", "publishing", "governance"],
+public/control-center/pages/ai-command/tool-dock.js:1080:      outputTypes: ["handoff_summary", "destination_brief", "required_inputs", "review_notes"],
+public/control-center/pages/ai-command/tool-dock.js:1081:      template: "Prepare a handoff summary for {projectName}. Include context, destination workspace, owner, required inputs, and review notes."
+public/control-center/pages/ai-command/tool-dock.js:1321:          Configure a review-only AI prompt with the right output, trusted source context, and destination handoff before loading it into the composer.
+public/control-center/pages/ai-command/tool-dock.js:1338:            <span class="mhos-tool-drawer-section-label">3. Destination handoff</span>
+public/control-center/pages/ai-command/tool-dock.js:1396:          <p data-aicmd-tool-drawer-summary>Choose output, trusted source, destination handoff, language, and tone.</p>
+public/control-center/pages/ai-command/tool-dock.js:1400:          Review-only setup: this drawer creates a composer-ready instruction. Destination choices only frame safe handoff context; they do not publish, send, approve, route externally, create CRM records, run workflows, or mutate backend data.
+public/control-center/pages/ai-command/tool-dock.js:1682:    `Prepare a review-only AI prompt for ${btn.getAttribute("data-aicmd-tool-dock-label") || "this tool"}. Choose output, trusted source context, destination handoff, language, and tone before loading it into the composer.`
+public/control-center/pages/ai-command/tool-dock.js:1708:  populateDrawerSelect(drawer.querySelector("[data-aicmd-tool-drawer-destination-select]"), rawDestinations, "Choose destination handoff");
+public/control-center/pages/ai-command/tool-dock.js:1727:  updateStatus?.(`${btn.getAttribute("data-aicmd-tool-dock-label") || "Quick AI tool"} setup opened. Review source and handoff requirements, then prepare the prompt.`);
+public/control-center/pages/publishing/publishing-payloads.js:55:function extractHandoffSummary(handoff) {
+public/control-center/pages/publishing/publishing-payloads.js:56:  const payload = asObject(handoff?.payload);
+public/control-center/pages/publishing/publishing-payloads.js:60:    id: asString(handoff?.id || payload.workflow_id || payload.prompt || payload.workflow_title),
+public/control-center/pages/publishing/publishing-payloads.js:61:    sourcePage: asString(handoff?.source_page || "workflows"),
+public/control-center/pages/publishing/publishing-payloads.js:105:export function buildPublishingAiPrompt(projectName, selectedItem, session, handoff) {
+public/control-center/pages/publishing/publishing-payloads.js:106:  const handoffSummary = handoff ? extractHandoffSummary(handoff) : null;
+public/control-center/pages/publishing/publishing-payloads.js:115:    handoffSummary ? `Workflow handoff: ${handoffSummary.title} - ${summarizeText(handoffSummary.summary)}` : "Workflow handoff: none",
+public/control-center/pages/campaign-studio.js:1:import { getSharedCampaignRecord, getSharedHandoff, setSharedCampaignRecord, setSharedHandoff } from "../shared-context.js";
+public/control-center/pages/campaign-studio.js:321:  const current = getSharedCampaignRecord(projectName, null);
+public/control-center/pages/campaign-studio.js:380:  const handoff = getSharedHandoff(projectName, "campaign-studio", operations, "ai-command");
+public/control-center/pages/campaign-studio.js:381:  const handoffId = asString(handoff?.id || handoff?.updated_at || handoff?.created_at || handoff?.payload?.prompt);
+public/control-center/pages/campaign-studio.js:382:  if (!handoffId || handoffId === asString(session.lastAiHandoffId)) return false;
+public/control-center/pages/campaign-studio.js:384:  const payload = asObject(handoff.payload);
+public/control-center/pages/campaign-studio.js:421:  session.lastAiHandoffId = handoffId;
+public/control-center/pages/campaign-studio.js:423:    ...(getSharedCampaignRecord(projectName, operations) || {}),
+public/control-center/pages/campaign-studio.js:444:    detail || "This action may create or update backend campaign records or route handoffs.",
+public/control-center/pages/campaign-studio.js:483:  const handoff = {
+public/control-center/pages/campaign-studio.js:507:    "Create campaign route handoff",
+public/control-center/pages/campaign-studio.js:508:    `This will create a campaign handoff from Campaign Studio to ${destinationPage} for review and execution preparation.`
+public/control-center/pages/campaign-studio.js:513:  setSharedHandoff(projectName, destinationPage, handoff);
+public/control-center/pages/campaign-studio.js:515:  createProjectHandoff?.(projectName, handoff).catch((error) => {
+public/control-center/pages/campaign-studio.js:516:    console.warn("Failed to persist campaign route handoff:", error.message);
+public/control-center/pages/campaign-studio.js:1279:  const durableCampaign = getSharedCampaignRecord(projectName, state.data.operations);
+public/control-center/pages/campaign-studio.js:1299:      // Explicit actions such as Save, Build, Refresh, and route handoffs still
+public/control-center/pages/campaign-studio.js:1368:        "Create AI Command campaign handoff",
+public/control-center/pages/campaign-studio.js:1369:        "This will create a campaign handoff from Campaign Studio to AI Command for review and planning support."
+public/control-center/pages/campaign-studio.js:1371:        showMessage?.("AI Command handoff cancelled.");
+public/control-center/pages/campaign-studio.js:1375:      setSharedHandoff(projectName, "ai-command", {
+public/control-center/pages/campaign-studio.js:1408:        console.warn("Failed to persist campaign handoff:", error.message);
+public/control-center/pages/campaign-studio.js:2027:                  <span class="home-action-meta">Open Content Studio with a campaign handoff attached.</span>
+public/control-center/pages/campaign-studio.js:2031:                  <span class="home-action-meta">Open Media Studio with a campaign handoff attached.</span>
+public/control-center/pages/campaign-studio.js:2035:                  <span class="home-action-meta">Open Publishing with a campaign handoff attached.</span>
+public/control-center/pages/campaign-studio.js:2039:                  <span class="home-action-meta">Open Ads Manager with a campaign handoff attached.</span>
+public/control-center/pages/media-studio-workspace.js:26:import { getSharedHandoff, setSharedAiDraft, setSharedHandoff } from "../shared-context.js";
+public/control-center/pages/media-studio-workspace.js:42:  handoffRole: "publisher"
+public/control-center/pages/media-studio-workspace.js:71:    bestUse: "Before approvals and publishing handoff, especially for regulated or claim-sensitive content.",
+public/control-center/pages/media-studio-workspace.js:84:    purpose: "Finalize readiness signals and handoff payload quality before publishing.",
+public/control-center/pages/media-studio-workspace.js:86:    suggestedPrompt: "Act as Publishing Assistant. Produce a final publishing handoff summary with readiness status, blockers, approval notes, and channel delivery checklist."
+public/control-center/pages/media-studio-workspace.js:170:  if (["publishing_ready", "publishing ready", "handoff", "ready_for_publishing"].includes(normalized)) return "publishing_ready";
+public/control-center/pages/media-studio-workspace.js:471:      handoffs: [],
+public/control-center/pages/media-studio-workspace.js:536:    linked_handoffs: asArray(raw.linked_handoffs),
+public/control-center/pages/media-studio-workspace.js:594:      handoffsResult,
+public/control-center/pages/media-studio-workspace.js:606:    const handoffs = fulfilledValue(handoffsResult, { items: [] });
+public/control-center/pages/media-studio-workspace.js:618:    session.handoffs = asArray(handoffs.items);
+public/control-center/pages/media-studio-workspace.js:650:    `mh_ai_command_handoff_${destinationRoute}`,
+public/control-center/pages/media-studio-workspace.js:651:    "mh_ai_command_campaign_handoff"
+public/control-center/pages/media-studio-workspace.js:662:        if (type === "ai_command_campaign_handoff" && (!route || route === destinationRoute)) {
+public/control-center/pages/media-studio-workspace.js:666:        console.warn("Unable to read AI Command campaign handoff", error);
+public/control-center/pages/media-studio-workspace.js:676:    `mh_ai_command_handoff_${destinationRoute}`,
+public/control-center/pages/media-studio-workspace.js:677:    "mh_ai_command_campaign_handoff"
+public/control-center/pages/media-studio-workspace.js:685:        console.warn("Unable to clear AI Command campaign handoff", error);
+public/control-center/pages/media-studio-workspace.js:698:    getSharedHandoff(projectName, "media-studio", operations, "workflows") ||
+public/control-center/pages/media-studio-workspace.js:699:    getSharedHandoff(projectName, "media-studio", operations, "ai-command") ||
+public/control-center/pages/media-studio-workspace.js:700:    getSharedHandoff(projectName, "media-studio", operations, "content-studio") ||
+public/control-center/pages/media-studio-workspace.js:701:    getSharedHandoff(projectName, "media-studio", operations)
+public/control-center/pages/media-studio-workspace.js:705:function extractHandoffSummary(handoff) {
+public/control-center/pages/media-studio-workspace.js:706:  const direct = asObject(handoff);
+public/control-center/pages/media-studio-workspace.js:707:  const payload = asObject(handoff?.payload);
+public/control-center/pages/media-studio-workspace.js:710:  const isAiCampaign = asString(direct.type || payload.type) === "ai_command_campaign_handoff";
+public/control-center/pages/media-studio-workspace.js:712:  const sourcePage = asString(handoff?.source_page || direct.source || "workflows");
+public/control-center/pages/media-studio-workspace.js:728:    "Workflow handoff is available for media preparation."
+public/control-center/pages/media-studio-workspace.js:738:      handoff?.id ||
+public/control-center/pages/media-studio-workspace.js:762:  const handoff = getInboundHandoff(projectName, session);
+public/control-center/pages/media-studio-workspace.js:763:  if (!handoff) return;
+public/control-center/pages/media-studio-workspace.js:764:  const summary = extractHandoffSummary(handoff);
+public/control-center/pages/media-studio-workspace.js:851:    "Keep product identity accurate, leave safe text area, avoid unsupported claims, and prepare for Publishing handoff."
+public/control-center/pages/media-studio-workspace.js:1062:  const backend = asArray(session.handoffs).find((entry) => {
+public/control-center/pages/media-studio-workspace.js:1108:  const handoffPayload = {
+public/control-center/pages/media-studio-workspace.js:1133:  setSharedHandoff(projectName || "__default__", "library", handoffPayload);
+public/control-center/pages/media-studio-workspace.js:1135:    setSharedHandoff("__default__", "library", handoffPayload);
+public/control-center/pages/media-studio-workspace.js:1139:    handoff_id: asString(existing.backend?.id || existing.local?.handoff_id || ""),
+public/control-center/pages/media-studio-workspace.js:1148:      const result = await createProjectHandoff(backendProjectName, handoffPayload);
+public/control-center/pages/media-studio-workspace.js:1149:      const savedHandoff = asObject(result?.handoff);
+public/control-center/pages/media-studio-workspace.js:1150:      const savedId = asString(savedHandoff.id || handoffPayload.id);
+public/control-center/pages/media-studio-workspace.js:1154:        handoff_id: savedId,
+public/control-center/pages/media-studio-workspace.js:1159:        handoff_id: savedId,
+public/control-center/pages/media-studio-workspace.js:1165:      session.handoffs = [savedHandoff, ...asArray(session.handoffs).filter((item) => asString(item.id) !== savedId)];
+public/control-center/pages/media-studio-workspace.js:1174:      showMessage?.("Library backend unavailable. Saved as local library handoff.");
+public/control-center/pages/media-studio-workspace.js:1183:    showMessage?.("Selected version saved to Library (local handoff).");
+public/control-center/pages/media-studio-workspace.js:1242:function buildRecommendation(metrics, handoff, selectedItem) {
+public/control-center/pages/media-studio-workspace.js:1261:      why: `${ready.title} is ready for a safe Publishing package handoff.`
+public/control-center/pages/media-studio-workspace.js:1264:  if (handoff) {
+public/control-center/pages/media-studio-workspace.js:1266:      action: handoff && extractHandoffSummary(handoff).isAiCampaign ? "Load AI Team campaign brief" : "Load workflow media brief",
+public/control-center/pages/media-studio-workspace.js:1267:      why: handoff && extractHandoffSummary(handoff).isAiCampaign ? "An AI Team campaign package is available. Load it as the creative brief before preparing media assets." : "A workflow handoff is available. Load it into the generator to continue the Workflows -> Media Studio -> package handoff flow."
+public/control-center/pages/media-studio-workspace.js:1295:  const publishingConnected = hasBackend || capabilityFromOperations(operations, ["publishing", "handoff"]);
+public/control-center/pages/media-studio-workspace.js:1302:    publishing_handoff: publishingConnected,
+public/control-center/pages/media-studio-workspace.js:1674:function getMediaSourceReadiness(session, selectedItem, handoff) {
+public/control-center/pages/media-studio-workspace.js:1676:    selectedItem?.library_asset_ref?.handoff_id ||
+public/control-center/pages/media-studio-workspace.js:1677:    selectedVersionEntry(session)?.library_asset_ref?.handoff_id
+public/control-center/pages/media-studio-workspace.js:1681:  const hasHandoff = Boolean(handoff);
+public/control-center/pages/media-studio-workspace.js:1707:    detail: "Attach a Library asset or load a source-backed handoff before final package routing."
+public/control-center/pages/media-studio-workspace.js:1711:function getMediaReadinessItems(session, selectedItem, handoff) {
+public/control-center/pages/media-studio-workspace.js:1714:  const source = getMediaSourceReadiness(session, selectedItem, handoff);
+public/control-center/pages/media-studio-workspace.js:1758:        : "Output, selected version, and review notes should be checked before handoff."
+public/control-center/pages/media-studio-workspace.js:1772:function renderMediaReadinessSummary({ session, selectedItem, handoff, escapeHtml }) {
+public/control-center/pages/media-studio-workspace.js:1773:  const items = getMediaReadinessItems(session, selectedItem, handoff);
+public/control-center/pages/media-studio-workspace.js:1787:function renderMediaCommandHeader({ projectName, session, metrics, selectedItem, handoff, recommendation, escapeHtml }) {
+public/control-center/pages/media-studio-workspace.js:1794:  const handoffLabel = handoff ? "Brief available" : "No inbound brief";
+public/control-center/pages/media-studio-workspace.js:1802:          <p class="media-section-copy">Start by choosing Image, Video, Voice, or Campaign Pack. Generate a prompt first, then use Generate Output only when a provider/backend is connected. Save drafts for review, save reusable results to Library, or prepare a Publishing handoff without publishing directly.</p>
+public/control-center/pages/media-studio-workspace.js:1816:        <span><strong>Brief</strong>${escapeHtml(handoffLabel)}</span>
+public/control-center/pages/media-studio-workspace.js:1829:function getMediaWorkflowSteps(session, selectedItem, handoff) {
+public/control-center/pages/media-studio-workspace.js:1832:  const source = getMediaSourceReadiness(session, selectedItem, handoff);
+public/control-center/pages/media-studio-workspace.js:1836:  const savedToLibrary = Boolean(version?.library_asset_ref?.handoff_id || selectedItem?.library_asset_ref?.handoff_id);
+public/control-center/pages/media-studio-workspace.js:1837:  const handoffPrepared = readiness.readinessStatus === "sent_to_publishing";
+public/control-center/pages/media-studio-workspace.js:1868:      state: handoffPrepared ? "ready" : packageReady ? "active" : "missing",
+public/control-center/pages/media-studio-workspace.js:1869:      detail: handoffPrepared ? "Prepared" : packageReady ? "Package ready" : "Needs review"
+public/control-center/pages/media-studio-workspace.js:1874:function renderMediaWorkflowStrip({ session, selectedItem, handoff, escapeHtml }) {
+public/control-center/pages/media-studio-workspace.js:1875:  const steps = getMediaWorkflowSteps(session, selectedItem, handoff);
+public/control-center/pages/media-studio-workspace.js:1910:        <div class="media-overview-item"><span>Publishing-ready handoffs</span><strong>${escapeHtml(formatCount(metrics.publishingReady))}</strong></div>
+public/control-center/pages/media-studio-workspace.js:1916:function renderRecommendation(recommendation, metrics, selectedItem, handoff, escapeHtml) {
+public/control-center/pages/media-studio-workspace.js:1923:    ["Campaign readiness", handoff ? "Workflow linked" : "Draft first"]
+public/control-center/pages/media-studio-workspace.js:1990:          <p class="media-section-copy">Choose a media mode, prepare a prompt/job-ready draft, then render with a connected provider or continue safely with review and handoff.</p>
+public/control-center/pages/media-studio-workspace.js:2019:        ${renderField({ id: "mediaPromptInput", name: "prompt", label: "Prompt / brief", value: form.prompt, multiline: true, rows: 7, helper: "Use this as the creative brief. If no generation provider is connected, Media Studio keeps it as a prompt/job-ready draft for review, Library save, AI review, or provider handoff." }, session, escapeHtml)}
+public/control-center/pages/media-studio-workspace.js:2036:function renderPromptBuilder(session, handoff, escapeHtml) {
+public/control-center/pages/media-studio-workspace.js:2044:        <span class="card-badge neutral">${escapeHtml(handoff ? "Handoff available" : "Context")}</span>
+public/control-center/pages/media-studio-workspace.js:2048:        <button id="mediaPromptFromHandoffBtn" class="btn btn-secondary" type="button">${escapeHtml(handoff && extractHandoffSummary(handoff).isAiCampaign ? "Load AI Team Campaign Brief" : "Generate from workflow handoff")}</button>
+public/control-center/pages/media-studio-workspace.js:2088:function renderWorkflowHandoff(handoff, session, escapeHtml) {
+public/control-center/pages/media-studio-workspace.js:2089:  if (!handoff) {
+public/control-center/pages/media-studio-workspace.js:2104:  const summary = extractHandoffSummary(handoff);
+public/control-center/pages/media-studio-workspace.js:2154:        <div class="empty-box">Start a media job or load a workflow handoff to create the first prompt-ready draft.</div>
+public/control-center/pages/media-studio-workspace.js:2502:          <strong>${escapeHtml(selected?.library_asset_ref?.handoff_id ? `Saved (${selected.library_asset_ref.local_only ? "Local" : "Backend"})` : "Not saved")}</strong>
+public/control-center/pages/media-studio-workspace.js:2605:  if (mode.includes("publish") || mode.includes("handoff")) return "publishing-assistant";
+public/control-center/pages/media-studio-workspace.js:2681:    ["publishing handoff", readiness.publishing_handoff],
+public/control-center/pages/media-studio-workspace.js:2729:    destination_role: MEDIA_ROLE_DEFAULTS.handoffRole,
+public/control-center/pages/media-studio-workspace.js:2748:      title: source.title || session.form.title || "Media handoff",
+public/control-center/pages/media-studio-workspace.js:2762:        title: source.title || session.form.title || "Media handoff",
+public/control-center/pages/media-studio-workspace.js:2800:  handoff,
+public/control-center/pages/media-studio-workspace.js:2825:    return window.confirm(`${title}\n\n${detail}\n\nAuthority: Media Studio can prepare, save, request review, and hand off media work, but provider generation, approval decisions, task creation, and publishing handoff must be explicitly confirmed by the operator.\n\nSelect Cancel to review before continuing.`);
+public/control-center/pages/media-studio-workspace.js:3022:      const summary = handoff ? extractHandoffSummary(handoff) : null;
+public/control-center/pages/media-studio-workspace.js:3024:        session.draftMessage = "No workflow handoff is available.";
+public/control-center/pages/media-studio-workspace.js:3033:      session.draftMessage = "Prompt generated from workflow handoff.";
+public/control-center/pages/media-studio-workspace.js:3153:      const summary = extractHandoffSummary(handoff);
+public/control-center/pages/media-studio-workspace.js:3204:          "Action: Mark this media job as approved/review-ready locally.\nRisk: This does not publish, but it changes readiness status and can influence downstream handoff."
+public/control-center/pages/media-studio-workspace.js:3218:          "Confirm publishing handoff",
+public/control-center/pages/media-studio-workspace.js:3219:          "Action: Prepare and send this media package to Publishing.\nRisk: This creates a handoff path for downstream publishing review. It does not publish directly."
+public/control-center/pages/media-studio-workspace.js:3297:            summary: session.form.reviewNotes || "Review media output before publishing handoff.",
+public/control-center/pages/media-studio-workspace.js:3380:            handoff_roles: [MEDIA_ROLE_DEFAULTS.handoffRole, MEDIA_ROLE_DEFAULTS.reviewRole],
+public/control-center/pages/media-studio-workspace.js:3409:        "Confirm AI Command media handoff",
+public/control-center/pages/media-studio-workspace.js:3410:        "Action: Send this media context to AI Command for review and planning support.\nRisk: This attaches shared AI handoff context and navigates to AI Command. It does not publish, approve, run provider generation, or create backend tasks."
+public/control-center/pages/media-studio-workspace.js:3421:      setSharedAiDraft(projectName, aiDraft);
+public/control-center/pages/media-studio-workspace.js:3422:      setSharedHandoff(projectName, "ai-command", {
+public/control-center/pages/media-studio-workspace.js:3449:        "Confirm publishing handoff",
+public/control-center/pages/media-studio-workspace.js:3450:        "Action: Prepare and send this media package to Publishing.\nRisk: This creates a downstream publishing handoff. It does not publish directly."
+public/control-center/pages/media-studio-workspace.js:3470:        "Action: Save this media version as a Library handoff.\nRisk: This may create a durable Library handoff record for review and reuse. It does not publish directly."
+public/control-center/pages/media-studio-workspace.js:3521:          "Action: Mark this media job as approved/review-ready locally.\nRisk: This does not publish, but it changes readiness status and can influence downstream handoff."
+public/control-center/pages/media-studio-workspace.js:3565:          "Confirm publishing handoff",
+public/control-center/pages/media-studio-workspace.js:3566:          "Action: Prepare and send this media package to Publishing.\nRisk: This creates a handoff path for downstream publishing review. It does not publish directly."
+public/control-center/pages/media-studio-workspace.js:3580:          "Action: Save this selected version as a Library handoff.\nRisk: This may create a durable Library handoff record for review and reuse. It does not publish directly."
+public/control-center/pages/media-studio-workspace.js:3612:          "Confirm AI Command specialist handoff",
+public/control-center/pages/media-studio-workspace.js:3613:          `Action: Send ${specialist.title} media context to AI Command for review and planning support.\nRisk: This attaches shared AI handoff context and navigates to AI Command. It does not publish, approve, run provider generation, or create backend tasks.`
+public/control-center/pages/media-studio-workspace.js:3628:        setSharedAiDraft(projectName, aiDraft);
+public/control-center/pages/media-studio-workspace.js:3629:        setSharedHandoff(projectName, "ai-command", {
+public/control-center/pages/media-studio-workspace.js:3653:  const handoff = buildPublishingHandoff(projectName, session, selectedItem);
+public/control-center/pages/media-studio-workspace.js:3654:  const handoffScopes = new Set([asString(projectName)]);
+public/control-center/pages/media-studio-workspace.js:3656:    handoffScopes.add("__default__");
+public/control-center/pages/media-studio-workspace.js:3658:  handoffScopes.forEach((scope) => {
+public/control-center/pages/media-studio-workspace.js:3659:    setSharedHandoff(scope, "publishing", handoff);
+public/control-center/pages/media-studio-workspace.js:3664:      await createProjectHandoff(backendProjectName, handoff);
+public/control-center/pages/media-studio-workspace.js:3665:      showMessage?.("Publishing package handoff prepared from Media Studio.");
+public/control-center/pages/media-studio-workspace.js:3667:      showMessage?.("Publishing package handoff kept locally because backend handoff save is unavailable.");
+public/control-center/pages/media-studio-workspace.js:3670:    showMessage?.("Publishing package handoff prepared locally.");
+public/control-center/pages/media-studio-workspace.js:3731:    const handoff = getInboundHandoff(projectName, session);
+public/control-center/pages/media-studio-workspace.js:3733:    const recommendation = buildRecommendation(metrics, handoff, selectedItem);
+public/control-center/pages/media-studio-workspace.js:3744:              <p class="media-section-copy">Start with a brief or handoff. Attach Library assets when needed. Review creative readiness and brand compliance. Save approved assets to Library or prepare handoff to Publishing/Governance. All routing is handoff/review-based and user-triggered. Media Studio does not publish, send, or approve directly.</p>
+public/control-center/pages/media-studio-workspace.js:3753:      const sourceState = getMediaSourceReadiness(session, selectedItem, handoff);
+public/control-center/pages/media-studio-workspace.js:3756:      if (selectedItem?.library_asset_ref?.handoff_id) rows.push(["Library asset", selectedItem.library_asset_ref.handoff_id]);
+public/control-center/pages/media-studio-workspace.js:3760:      if (!rows.length && handoff) rows.push(["Inbound handoff", titleCase(handoff.source_page || "Workflow")]);
+public/control-center/pages/media-studio-workspace.js:3784:      const readinessItems = getMediaReadinessItems(session, selectedItem, handoff)
+public/control-center/pages/media-studio-workspace.js:3809:      const readinessItems = getMediaReadinessItems(session, selectedItem, handoff)
+public/control-center/pages/media-studio-workspace.js:3836:        ${renderMediaCommandHeader({ projectName, session, metrics, selectedItem, handoff, recommendation, escapeHtml })}
+public/control-center/pages/media-studio-workspace.js:3837:        ${renderMediaWorkflowStrip({ session, selectedItem, handoff, escapeHtml })}
+public/control-center/pages/media-studio-workspace.js:3838:        ${renderMediaReadinessSummary({ session, selectedItem, handoff, escapeHtml })}
+public/control-center/pages/media-studio-workspace.js:3840:        ${session.loading ? `<div class="empty-box">Loading media jobs, handoffs, approvals, tasks, and event history...</div>` : ""}
+public/control-center/pages/media-studio-workspace.js:3844:            ${renderPromptBuilder(session, handoff, escapeHtml)}
+public/control-center/pages/media-studio-workspace.js:3852:            ${renderWorkflowHandoff(handoff, session, escapeHtml)}
+public/control-center/pages/media-studio-workspace.js:3869:      handoff,
+public/control-center/pages/customer-center.js:283:        <p class="mhos-context-description">Protected-read customer communication surface for inbox visibility, conversation previews, ticket/SLA state, channel readiness, and handoff preparation. No customer execution happens here.</p>
+public/control-center/pages/customer-center.js:287:        <button class="btn btn-primary" type="button" data-customer-center-action="ai-handoff">Prepare AI support prompt</button>
+public/control-center/pages/customer-center.js:306:        <p class="muted">This page can review customer context and prepare handoffs. Any future customer-facing action must happen in an owning workflow with confirmation, permissions, and audit logging.</p>
+public/control-center/pages/customer-center.js:325:        <p class="muted">Use Customer Center to review, summarize, and prepare handoffs only. Nothing in this page sends a reply, changes CRM, updates tickets, assigns conversations, places calls, triggers IVR, or starts auto-reply.</p>
+public/control-center/pages/customer-center.js:354:        <p class="muted">These buttons prepare navigation/context handoffs only. They do not send customer messages, contact providers, update CRM, change tickets, assign conversations, or mark records reviewed.</p>
+public/control-center/pages/customer-center.js:356:          <button class="btn btn-secondary" type="button" data-customer-center-action="task-handoff">Prepare Task Center handoff</button>
+public/control-center/pages/customer-center.js:357:          <button class="btn btn-secondary" type="button" data-customer-center-action="governance-handoff">Prepare Governance review</button>
+public/control-center/pages/customer-center.js:358:          <button class="btn btn-secondary" type="button" data-customer-center-action="ai-handoff">Prepare AI Command prompt</button>
+public/control-center/pages/customer-center.js:365:        <p class="muted">AI may summarize read-only context, draft response guidance, translate, and suggest next steps for a human handoff. It must not send replies, update CRM, close tickets, assign conversations, place calls, trigger IVR, sync providers, or start auto-reply.</p>
+public/control-center/pages/customer-center.js:401:    if (action === "ai-handoff") {
+public/control-center/pages/customer-center.js:408:      context.setSharedAiDraft?.({
+public/control-center/pages/customer-center.js:418:    if (action === "task-handoff") {
+public/control-center/pages/customer-center.js:420:        "Prepare Task Center customer follow-up handoff",
+public/control-center/pages/customer-center.js:425:      context.setSharedHandoff?.("task-center", {
+public/control-center/pages/customer-center.js:431:      context.showMessage?.("Customer task handoff prepared.");
+public/control-center/pages/customer-center.js:435:    if (action === "governance-handoff") {
+public/control-center/pages/customer-center.js:442:      context.setSharedHandoff?.("governance", {
+public/control-center/pages/customer-center.js:448:      context.showMessage?.("Customer governance handoff prepared.");
+public/control-center/pages/customer-center.js:487:    description: "Read-only customer operations, inbox visibility, ticket/SLA state, and safe AI handoffs."
+public/control-center/pages/operations-centers.js:1:import { getSharedHandoff } from "../shared-context.js";
+public/control-center/pages/operations-centers.js:437:    "Incoming task handoff"
+public/control-center/pages/operations-centers.js:442:    incomingHandoff.payload?.handoff_intent ||
+public/control-center/pages/operations-centers.js:444:    "Review-only handoff prepared by another MH-OS surface."
+public/control-center/pages/operations-centers.js:449:    <section class="panel ops-incoming-handoff mhos-clean-surface">
+public/control-center/pages/operations-centers.js:454:          <p>Review-only context from ${escapeHtml(titleCase(source))}. No durable task is created automatically from this handoff.</p>
+public/control-center/pages/operations-centers.js:718:  const incomingHandoff = getSharedHandoff(projectName, "task-center", ops);
+public/control-center/pages/operations-centers.js:782:          `Title: ${asString(incomingHandoff.title || incomingHandoff.summary || incomingHandoff.payload?.title || incomingHandoff.payload?.summary || "Incoming task handoff")}`,
+public/control-center/pages/operations-centers.js:783:          `Summary: ${asString(incomingHandoff.description || incomingHandoff.payload?.description || incomingHandoff.payload?.handoff_intent || incomingHandoff.payload?.prompt || "Review-only handoff.")}`,
+public/control-center/pages/operations-centers.js:786:      : "No incoming task handoff.";
+public/control-center/pages/operations-centers.js:800:      context.showMessage?.("Incoming handoff summary copied.");
+public/control-center/pages/operations-centers.js:802:      context.showError?.("Failed to copy incoming handoff summary.");
+public/control-center/pages/operations-centers.js:2207:                  <p class="mhos-os-section-copy">AI Team can prepare drafts, tasks, workflows, and handoffs. This overview routes work to the owning operations center for review, monitoring, or controlled follow-up.</p>
+public/control-center/pages/operations-centers.js:2234:                  <h3 class="mhos-os-panel-title">Operations Lead handoff</h3>
+public/control-center/pages/business/dashboard.js:8: * Active runtime authority lives in router-registered pages and canonical api.js
+public/control-center/pages/research.js:1:import { setSharedHandoff } from "../shared-context.js";
+public/control-center/pages/research.js:78:  const handoffsByRole = asObject(operations.handoffs?.by_role);
+public/control-center/pages/research.js:87:      <div class="data-row"><span>Analyst inbound</span><strong>${escapeHtml(formatCount(asArray(handoffsByRole[RESEARCH_ROLE_DEFAULTS.ownerRole]).length))}</strong></div>
+public/control-center/pages/research.js:847:      detail || "This action may create a backend Research handoff record for downstream review.",
+public/control-center/pages/research.js:917:          "Confirm Research AI handoff",
+public/control-center/pages/research.js:918:          "This will create a backend handoff from Research to AI Command for review. It does not execute the AI command directly."
+public/control-center/pages/research.js:920:          showMessage?.("Research AI handoff cancelled.");
+public/control-center/pages/research.js:924:        setSharedHandoff(projectName, "ai-command", {
+public/control-center/pages/research.js:956:          console.warn("Failed to persist research AI handoff:", error.message);
+public/control-center/pages/research.js:986:        "Confirm Research destination handoff",
+public/control-center/pages/research.js:987:        `This will create a backend handoff from Research to ${action.label} for downstream review. It does not execute the destination workflow directly.`
+public/control-center/pages/research.js:989:        showMessage?.("Research destination handoff cancelled.");
+public/control-center/pages/research.js:993:      const handoff = {
+public/control-center/pages/research.js:1010:      setSharedHandoff(projectName, action.route, handoff);
+public/control-center/pages/research.js:1011:      createProjectHandoff?.(projectName, handoff).catch((error) => {
+public/control-center/pages/research.js:1012:        console.warn("Failed to persist research route handoff:", error.message);
+public/control-center/pages/research.js:1023:      showMessage?.(`Research handoff routed to ${action.label}.`);
+public/control-center/pages/research.js:1037:      showMessage?.(`Opportunity handoff routed to ${item.routeTarget.label}.`);
+public/control-center/pages/research.js:1136:    description: "Evidence-backed market intelligence for opportunities, risks, and destination-ready handoffs."
+public/control-center/pages/research.js:1253:              <p class="research-section-copy">Keep this workspace focused on what evidence exists, what is missing, and which destination should receive the next research handoff.</p>
+public/control-center/pages/research.js:1591:                <h4 class="insights-subtitle">Destination handoffs</h4>
+public/control-center/pages/research.js:1607:              <p class="research-section-copy">Use AI to turn current evidence into a review-ready research brief. AI should deepen the analysis, not replace saved findings or destination handoffs.</p>
+public/control-center/pages/library/listener-lifecycle.js:4:  // Runtime cleanup plumbing only. Backend authority remains unchanged.
+public/control-center/pages/ai-command.js:9:import { getProjectedActiveRole, getProjectedTeamMembers } from "../runtime/authority/authority-projection.js";
+public/control-center/pages/ai-command.js:18:        getSharedHandoff,
+public/control-center/pages/ai-command.js:19:        setSharedAiDraft,
+public/control-center/pages/ai-command.js:20:        setSharedHandoff
+public/control-center/pages/ai-command.js:69:                summary: "Publishing readiness, schedule review, and handoff preparation.",
+public/control-center/pages/ai-command.js:97:                summary: "Tasks, timelines, handoffs, approvals, and execution plans.",
+public/control-center/pages/ai-command.js:111:                summary: "Lead qualification, outreach drafts, follow-up cadence, and CRM handoff notes.",
+public/control-center/pages/ai-command.js:163:		canHelp: ["Draft captions and hooks", "Write email copy", "Create landing page text", "Prepare publisher handoff", "Suggest message variants"],
+public/control-center/pages/ai-command.js:176:		canHelp: ["Write creative briefs", "Advise on visual direction", "Map format requirements", "Review brand alignment", "Prepare media handoffs"],
+public/control-center/pages/ai-command.js:200:		summary: "Publishing readiness, schedule review, and handoff preparation.",
+public/control-center/pages/ai-command.js:201:		placeholder: "Ask the Publisher to review publishing readiness, check scheduling, or prepare a handoff package…",
+public/control-center/pages/ai-command.js:202:		canHelp: ["Review publishing readiness", "Check scheduled jobs", "Prepare handoff packages", "Map publishing dependencies", "Flag pre-publish risks"],
+public/control-center/pages/ai-command.js:252:		summary: "Tasks, timelines, handoffs, approvals, and execution plans.",
+public/control-center/pages/ai-command.js:253:		placeholder: "Ask the Operations Lead to turn this into tasks, workflow steps, or handoffs…",
+public/control-center/pages/ai-command.js:254:		canHelp: ["Create task plans", "Map execution sequences", "Prepare workflow handoffs", "Review execution health", "Identify operational blockers"],
+public/control-center/pages/ai-command.js:255:		cannotDo: ["Run workflows without confirmation", "Auto-approve tasks", "Override authority gates", "Execute backend operations directly"],
+public/control-center/pages/ai-command.js:257:		safetyNote: "Task plans and handoffs only. Workflow execution requires explicit user confirmation.",
+public/control-center/pages/ai-command.js:278:		summary: "Lead qualification, outreach drafts, follow-up cadence, CRM profile summaries, and sales handoff notes.",
+public/control-center/pages/ai-command.js:279:		placeholder: "Ask the Sales / CRM Lead to qualify a lead, draft outreach, plan follow-ups, summarize CRM context, or prepare a sales handoff for review…",
+public/control-center/pages/ai-command.js:280:		canHelp: ["Qualify lead context", "Draft outreach", "Plan follow-up sequences", "Summarize CRM profiles", "Prepare sales handoffs"],
+public/control-center/pages/ai-command.js:299:		{ label: "Prepare a Publisher handoff", sub: "Package ready content for review" },
+public/control-center/pages/ai-command.js:306:		{ label: "Prepare a media handoff", sub: "Package direction for the team" }
+public/control-center/pages/ai-command.js:318:		{ label: "Prepare a handoff package", sub: "For the approver review" }
+public/control-center/pages/ai-command.js:340:		{ label: "Draft a workflow handoff", sub: "Prepare for the next owner" },
+public/control-center/pages/ai-command.js:354:		{ label: "Prepare sales handoff", sub: "Route context to operations" }
+public/control-center/pages/ai-command.js:362:	{ label: "Prepare a full handoff sequence", sub: "Strategy, creative, compliance, publishing, ops" },
+public/control-center/pages/ai-command.js:370:	{ id: "draft", title: "Prepare", description: "Create guidance, copy, task, or handoff context." },
+public/control-center/pages/ai-command.js:381:	{ id: "handoff", label: "Handoff Preview", helper: "Destination package" },
+public/control-center/pages/ai-command.js:433:		{ id: "funnel-mapping", label: "Funnel Mapping", action: "preview", intent: "guidance", template: "Map the funnel for {project}. Include awareness, consideration, conversion, retention, and handoff points." },
+public/control-center/pages/ai-command.js:440:		{ id: "publisher-package", label: "Publisher Package", action: "preview", intent: "handoff", template: "Prepare a Publisher handoff for {project}. Include German copy package, CTA, notes, and remaining checks." }
+public/control-center/pages/ai-command.js:457:		{ id: "publishing-checklist", label: "Publishing Checklist", action: "preview", intent: "handoff", template: "Build a publishing checklist for {project}. Include German copy, assets, claims checks, and channel readiness." },
+public/control-center/pages/ai-command.js:458:		{ id: "final-packaging", label: "Final Packaging", action: "preview", intent: "handoff", template: "Prepare a final publishing package for {project}. Include copy, CTA, asset notes, approvals, and destination channel." },
+public/control-center/pages/ai-command.js:480:		{ id: "safety-checklist", label: "Safety Checklist", action: "preview", intent: "handoff", template: "Prepare a safety checklist for {project}. Include policy checks, evidence required, and approval notes." },
+public/control-center/pages/ai-command.js:481:		{ id: "publish-readiness", label: "Publish Readiness", action: "preview", intent: "handoff", template: "Review publish readiness for {project}. Confirm what needs human approval before release." },
+public/control-center/pages/ai-command.js:486:		{ id: "handoff-routing", label: "Handoff Routing", action: "preview", intent: "handoff", template: "Prepare handoff routing for {project}. Include source, destination, decision gates, and required confirmations." },
+public/control-center/pages/ai-command.js:497:		{ id: "prepare-escalation", label: "Prepare Escalation", action: "preview", intent: "handoff", template: "Prepare an escalation draft for {project}. Include reason, customer impact, owner, confirmation needed, and destination team." },
+public/control-center/pages/ai-command.js:499:		{ id: "route-support-sales-ops", label: "Route to Support / Sales / Operations", action: "preview", intent: "handoff", template: "Prepare routing guidance for {project}. Decide whether the customer item belongs with Support, Sales, or Operations, and explain the review gate." }
+public/control-center/pages/ai-command.js:508:		{ id: "influencer-lead-plan", label: "Influencer Lead Plan", action: "preview", intent: "workflow", template: "Prepare an influencer lead plan for {project}. Include target profile, outreach angle, qualification criteria, and handoff path." },
+public/control-center/pages/ai-command.js:509:		{ id: "sales-handoff-draft", label: "Sales Handoff", action: "preview", intent: "handoff", template: "Prepare a sales handoff draft for {project}. Include lead context, recommended next action, owner, and confirmation needed." }
+public/control-center/pages/ai-command.js:604:		purpose: "Translate intent into executable workflows and handoffs.",
+public/control-center/pages/ai-command.js:762:    "Prepare a handoff summary for:",
+public/control-center/pages/ai-command.js:1336:                                : activeTab === "handoff"
+public/control-center/pages/ai-command.js:1337:                                        ? "handoff"
+public/control-center/pages/ai-command.js:1341:        const looksTaskLike = /\b(task|tasks|handoff|ticket|tickets|follow-up|follow up|owner|owners|assignee|assigned|due date|priority|priorities|backlog|checklist|next task|action item|action items)\b/.test(text);
+public/control-center/pages/ai-command.js:1350:        if (outputType === "handoff" || outputType === "task" || looksTaskLike) {
+public/control-center/pages/ai-command.js:1429:		confirmationRequired: outputType === "handoff" || specialistId === "publisher" || specialistId === "compliance_reviewer",
+public/control-center/pages/ai-command.js:1537:			title: outputType === "handoff" ? "Handoff Preview: Publishing package" : "Publishing Draft: Readiness checklist",
+public/control-center/pages/ai-command.js:1547:				"Prepare handoff for publishing review"
+public/control-center/pages/ai-command.js:1646:			title: outputType === "handoff" ? "Sales Handoff" : "Sales / CRM Draft: Lead and outreach plan",
+public/control-center/pages/ai-command.js:1647:			summary: "Sales and CRM draft prepared with lead qualification, outreach direction, follow-up cadence, and pipeline handoff notes.",
+public/control-center/pages/ai-command.js:1668:			nextStep: "Review the lead fit, confirm owner, then route the handoff to operations or the CRM surface.",
+public/control-center/pages/ai-command.js:1673:				"Route sales handoff without mutating CRM data"
+public/control-center/pages/ai-command.js:1690:					"Stage 4: Destination handoff and confirmation"
+public/control-center/pages/ai-command.js:1697:			title: outputType === "handoff" ? "Handoff Preview: Operations package" : "Operations Draft: Task and handoff plan",
+public/control-center/pages/ai-command.js:1702:				"Prepare destination handoff context",
+public/control-center/pages/ai-command.js:1722:		handoff: "handoff"
+public/control-center/pages/ai-command.js:1752:			"Customer Ops / Sales: add reply, ticket, lead, outreach, or CRM handoff drafts when relevant",
+public/control-center/pages/ai-command.js:1753:			"Operations: convert the reviewed output into safe tasks, workflow draft, or handoff context"
+public/control-center/pages/ai-command.js:1767:		handoff: "Handoff Preview",
+public/control-center/pages/ai-command.js:2004:		operations: ["task plan", "workflow", "handoff", "approval", "timeline", "execution plan", "route", "publish", "status", "priority", "priorities", "blocking", "blocker", "readiness", "next", "do next"],
+public/control-center/pages/ai-command.js:2368:	setSharedAiDraft(projectName, {
+public/control-center/pages/ai-command.js:2534:	const outputType = asString(preview.outputType || preview.output_type || preview.type || "handoff").trim() || "handoff";
+public/control-center/pages/ai-command.js:2547:		title: firstAiInboundText(preview.title, normalized.title, `Inbound handoff from ${normalized.sourceLabel}`),
+public/control-center/pages/ai-command.js:2560:function getAiInboundDurableHandoffId(handoff) {
+public/control-center/pages/ai-command.js:2561:	const payload = asObject(handoff?.payload);
+public/control-center/pages/ai-command.js:2563:		handoff?.id,
+public/control-center/pages/ai-command.js:2564:		handoff?.handoff_id,
+public/control-center/pages/ai-command.js:2565:		handoff?.handoffId,
+public/control-center/pages/ai-command.js:2566:		payload.handoff_id,
+public/control-center/pages/ai-command.js:2567:		payload.handoffId
+public/control-center/pages/ai-command.js:2571:function getAiInboundHandoffId(handoff) {
+public/control-center/pages/ai-command.js:2572:	const durableId = getAiInboundDurableHandoffId(handoff);
+public/control-center/pages/ai-command.js:2574:	if (!handoff) return "";
+public/control-center/pages/ai-command.js:2575:	const payload = asObject(handoff?.payload);
+public/control-center/pages/ai-command.js:2576:	const stablePayloadId = firstAiInboundId(payload.handoff_id, payload.handoffId, payload.id, handoff?.created_at, handoff?.createdAt);
+public/control-center/pages/ai-command.js:2579:		if (!aiInboundHandoffObjectIds.has(handoff)) {
+public/control-center/pages/ai-command.js:2581:			aiInboundHandoffObjectIds.set(handoff, `cached-ai-handoff-${Date.now()}-${aiInboundHandoffCounter}`);
+public/control-center/pages/ai-command.js:2583:		return aiInboundHandoffObjectIds.get(handoff);
+public/control-center/pages/ai-command.js:2585:	return [handoff?.source_page, handoff?.destination_page, payload.prompt, payload.title]
+public/control-center/pages/ai-command.js:2588:		.join("::") || `cached-ai-handoff-${Date.now()}`;
+public/control-center/pages/ai-command.js:2591:function normalizeAiInboundHandoff(handoff, projectName) {
+public/control-center/pages/ai-command.js:2592:	const payload = asObject(handoff?.payload);
+public/control-center/pages/ai-command.js:2593:	const draftContext = firstAiInboundObject(payload.draft_context, payload.draftContext, handoff?.draft_context, handoff?.draftContext);
+public/control-center/pages/ai-command.js:2597:		handoff?.source_page,
+public/control-center/pages/ai-command.js:2598:		handoff?.sourcePage,
+public/control-center/pages/ai-command.js:2625:	)) || `Review this ${sourceLabel} handoff for ${projectLabel}. Identify the right specialist, summarize the context, produce a review-ready draft, and recommend the next safe route. Do not execute publishing, task creation, CRM updates, customer replies, workflow runs, or backend actions.`;
+public/control-center/pages/ai-command.js:2631:		handoff?.title,
+public/control-center/pages/ai-command.js:2632:		`Inbound handoff from ${sourceLabel}`
+public/control-center/pages/ai-command.js:2664:		status: asString(handoff?.status || payload.status || "available"),
+public/control-center/pages/ai-command.js:2665:		note: "Guidance only. No publishing, task creation, CRM updates, customer replies, workflow runs, exports, or backend actions are executed from this handoff."
+public/control-center/pages/ai-command.js:2672:	const handoff = getSharedHandoff(projectName, "ai-command", operations);
+public/control-center/pages/ai-command.js:2673:	const handoffId = getAiInboundHandoffId(handoff);
+public/control-center/pages/ai-command.js:2674:	if (!handoffId || handoffId === asString(session.lastAppliedHandoffId)) return;
+public/control-center/pages/ai-command.js:2676:	const normalized = normalizeAiInboundHandoff(handoff, projectName);
+public/control-center/pages/ai-command.js:2683:		id: handoffId,
+public/control-center/pages/ai-command.js:2703:	setSharedAiDraft(projectName, {
+public/control-center/pages/ai-command.js:2715:	session.lastAppliedHandoffId = handoffId;
+public/control-center/pages/ai-command.js:2716:	persistSessionDraft(projectName, session, `Inbound handoff loaded from ${normalized.sourceLabel}`);
+public/control-center/pages/ai-command.js:2718:	const durableHandoffId = getAiInboundDurableHandoffId(handoff);
+public/control-center/pages/ai-command.js:2721:			console.warn("Failed to consume AI handoff:", error.message);
+public/control-center/pages/ai-command.js:2724:	showMessage?.(`Inbound handoff loaded from ${normalized.sourceLabel}.`);
+public/control-center/pages/ai-command.js:3304:                handoff: "handoff package"
+public/control-center/pages/ai-command.js:3467:	if (preview.outputType === "handoff") return 3;
+public/control-center/pages/ai-command.js:3481:		handoff: "handoff",
+public/control-center/pages/ai-command.js:3491:	if (outputType === "handoff") return "handoff";
+public/control-center/pages/ai-command.js:3506:		handoff: "Handoff Preview",
+public/control-center/pages/ai-command.js:3529:	if (tool.intent === "handoff") return "Prepare";
+public/control-center/pages/ai-command.js:3575:				<p class="aicmd-room-subtitle mhos-context-description">Ask one expert or the full team to prepare strategy, content, analysis, reviews, and destination handoffs. AI prepares and reviews only; sensitive actions stay confirmation-gated in the owning workspace.</p>
+public/control-center/pages/ai-command.js:3640:				<span class="aicmd-room-member-role">${escapeHtml(item.status)} - destination-owned authority</span>
+public/control-center/pages/ai-command.js:3715:						<p class="aicmd-v2-profile-purpose">Coordinates specialists into one review-ready brief, workflow, or handoff.</p>
+public/control-center/pages/ai-command.js:3758:        if (roleId === "operations" || roleId === "customer_ops") return `${label} is preparing your task handoff...`;
+public/control-center/pages/ai-command.js:3800:	if (/handoff|route|destination_brief/.test(haystack)) return "handoff";
+public/control-center/pages/ai-command.js:3874:					<span class="aicmd-v2-tools-subtitle">Prompt tools for structured drafts, source-aware reviews, and destination handoffs. They prepare composer instructions only.</span>
+public/control-center/pages/ai-command.js:4029:                        <p class="aicmd-chatfirst-tab-note">AI Command prepares guidance, drafts, previews, and handoff context only. Publishing, approvals, CRM updates, workflow runs, customer sends, provider execution, and durable task creation remain confirmation-gated in the owning workspace.</p>
+public/control-center/pages/ai-command.js:4101:				<p>Chat, draft, review, and prepare handoff context only. Publishing, approvals, CRM updates, workflow runs, external sends, and durable task creation stay confirmation-gated in the owning workspace.</p>
+public/control-center/pages/ai-command.js:4193:								<small>${escapeHtml(item.status)} - destination-owned authority</small>
+public/control-center/pages/ai-command.js:4312:                                        <span>Ask ${escapeHtml(selectedLabel)} to plan, draft, review, analyze, or prepare a handoff.</span>
+public/control-center/pages/ai-command.js:4317:                                                <span>Prepare handoff</span>
+public/control-center/pages/ai-command.js:4342:                { id: "publish", label: "Publish", summary: "Prepare publishing checklist and handoff readiness.", enabled: false }
+public/control-center/pages/ai-command.js:4464:                                                <p>Guide the AI Team from source to preview. Backend workflow execution and destination handoff stay approval-gated.</p>
+public/control-center/pages/ai-command.js:4567:                                                        <span>1. Choose source, goal, and channel. The AI Team will prepare the preview package before any approval or handoff.</span>
+public/control-center/pages/ai-command.js:4903:					<p>Prompt setup only. Tools prepare composer instructions, source-aware reviews, previews, and handoff context without executing actions.</p>
+public/control-center/pages/ai-command.js:4953:					<p>${hasPreview ? "Review the result, then open the destination workspace with draft context." : "Drafts, task previews, workflow previews, and handoff packages appear here after a response or tool setup."}</p>
+public/control-center/pages/ai-command.js:5027:					<p>Read-only operating path for chat, draft preparation, review, and destination handoff. Confirmation stays in the owning workspace.</p>
+public/control-center/pages/ai-command.js:5126:                ? "Chat only. No workflow run, durable task, external handoff action, approval, publishing action, CRM update, or customer action was created."
+public/control-center/pages/ai-command.js:5128:        const emptyBody = "Ask what to do next, draft a campaign asset, review a source, prepare a handoff, or coordinate the full AI team.";
+public/control-center/pages/ai-command.js:5212:                                                <span>Home handoff</span>
+public/control-center/pages/ai-command.js:5365:				{ label: "Pipeline", value: "Operations handoff", present: true, scoped: true }
+public/control-center/pages/ai-command.js:5409:					<span>Backend owns authority — AI Command prepares guidance, previews, and handoff context. It does not override execution controls or mutate Operations records.</span>
+public/control-center/pages/ai-command.js:5465:		description: "Talk to your AI team, run structured tasks, and turn intelligence into review-ready plans and routed handoffs."
+public/control-center/pages/ai-command.js:6031:                                        body: `Prepare publishing readiness for ${channelLabel}: channel checklist, schedule draft, missing approvals, and handoff requirements.`
+public/control-center/pages/ai-command.js:6035:                                        body: "Track approval status, destination handoff, follow-up checks, improvement notes, and post-review action ownership."
+public/control-center/pages/ai-command.js:6059:                                                body: `Use ${sourceMeaning}. Produce a review-ready campaign package before any handoff, approval, publishing, sending, CRM update, provider execution, or workflow mutation.`
+public/control-center/pages/ai-command.js:6075:                                                body: "Define hero visual, product framing, scene list, required assets, image/video format, voiceover direction, and Media Studio handoff notes."
+public/control-center/pages/ai-command.js:6087:                                                body: "Create a follow-up plan for review status, owner, destination handoff, performance check, improvement loop, and next campaign iteration."
+public/control-center/pages/ai-command.js:6163:                                        ? "Backend preview only. No publish, send, CRM mutation, provider execution, workflow mutation, Governance approval, task creation, or durable handoff was performed."
+public/control-center/pages/ai-command.js:6253:                                updateStatus(preview.backendPreview ? "Backend AI Team preview prepared. Review before any handoff or approval." : "Local campaign preview prepared because backend preview is unavailable.");
+public/control-center/pages/ai-command.js:6271:                                id: `campaign_handoff_${Date.now()}`,
+public/control-center/pages/ai-command.js:6272:                                type: "ai_command_campaign_handoff",
+public/control-center/pages/ai-command.js:6278:                                title: asString(preview.title || "Campaign handoff"),
+public/control-center/pages/ai-command.js:6297:                                safety: "Prepared handoff only. No backend write, publish, send, CRM mutation, provider execution, approval creation, task creation, or workflow mutation was performed.",
+public/control-center/pages/ai-command.js:6302:                const storeCampaignReviewHandoff = (handoff) => {
+public/control-center/pages/ai-command.js:6304:                                const payload = JSON.stringify(handoff);
+public/control-center/pages/ai-command.js:6305:                                window.localStorage?.setItem?.("mh_ai_command_campaign_handoff", payload);
+public/control-center/pages/ai-command.js:6306:                                window.localStorage?.setItem?.(`mh_ai_command_handoff_${handoff.destination_route}`, payload);
+public/control-center/pages/ai-command.js:6307:                                window.sessionStorage?.setItem?.("mh_ai_command_campaign_handoff", payload);
+public/control-center/pages/ai-command.js:6308:                                window.sessionStorage?.setItem?.(`mh_ai_command_handoff_${handoff.destination_route}`, payload);
+public/control-center/pages/ai-command.js:6310:                                console.warn("Unable to store AI Command campaign handoff", error);
+public/control-center/pages/ai-command.js:6333:                                const handoff = buildCampaignReviewHandoff(action, preview);
+public/control-center/pages/ai-command.js:6334:                                storeCampaignReviewHandoff(handoff);
+public/control-center/pages/ai-command.js:6340:                                        handoff,
+public/control-center/pages/ai-command.js:6341:                                        safety: handoff.safety
+public/control-center/pages/ai-command.js:6345:                                updateStatus(`${label} prepared. Opening ${handoff.destination} for review.`);
+public/control-center/pages/ai-command.js:6348:                                if (typeof navigateTo === "function" && handoff.destination_route) {
+public/control-center/pages/ai-command.js:6349:                                        navigateTo(handoff.destination_route);
+public/control-center/pages/ai-command.js:6353:                                if (typeof context?.navigateTo === "function" && handoff.destination_route) {
+public/control-center/pages/ai-command.js:6354:                                        context.navigateTo(handoff.destination_route);
+public/control-center/pages/ai-command.js:6370:                        updateStatus(`${label} staged. Backend authority contract must be verified before this action is connected.`);
+public/control-center/pages/ai-command.js:6582:		                                safetyInstruction: "Chat only. No task/workflow/handoff/approval/publish/customer/CRM execution.",
+public/control-center/pages/ai-command.js:6667:		                        updateStatus("Specialist reply generated. No workflow/task/handoff was created.");
+public/control-center/pages/ai-command.js:6756:                // Phase 1: converts the current conversation into a handoff preview. No backend write.
+public/control-center/pages/ai-command.js:6757:                const handoffBtn = $("aicmdV2HandoffBtn");
+public/control-center/pages/ai-command.js:6758:                if (handoffBtn) {
+public/control-center/pages/ai-command.js:6759:                        handoffBtn.onclick = () => {
+public/control-center/pages/ai-command.js:6763:                                        ? `Prepare a handoff summary for: ${value}`
+public/control-center/pages/ai-command.js:6764:                                        : `Prepare a handoff summary from ${spec.label} for the current project state of ${projectName || "this project"}.`;
+public/control-center/pages/ai-command.js:6767:                                        intent: "handoff",
+public/control-center/pages/ai-command.js:6948:				setSharedAiDraft(projectName || "__default__", draftContext);
+public/control-center/pages/ai-command.js:6949:				setSharedHandoff(projectName || "__default__", destination, {
+public/control-center/pages/ai-command.js:7038:				const handoffRecord = {
+public/control-center/pages/ai-command.js:7057:				setSharedAiDraft(projectName || "__default__", handoffRecord.payload.draft_context);
+public/control-center/pages/ai-command.js:7058:				setSharedHandoff(projectName || "__default__", destination, handoffRecord);
