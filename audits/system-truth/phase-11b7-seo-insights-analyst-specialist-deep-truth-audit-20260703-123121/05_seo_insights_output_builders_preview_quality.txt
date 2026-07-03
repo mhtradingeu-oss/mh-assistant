@@ -1,0 +1,737 @@
+### output builder references
+80:                id: "analyst",
+83:                summary: "SEO signals, performance data, content insights, and traffic patterns.",
+84:                routeHint: "insights"
+124:	seo: "analyst",
+222:		id: "analyst",
+226:		summary: "SEO signals, performance data, content insights, and traffic patterns.",
+228:		canHelp: ["Review SEO signals", "Analyze content performance", "Identify traffic patterns", "Suggest keyword improvements", "Map data coverage gaps"],
+229:		cannotDo: ["Update SEO settings directly", "Edit live website", "Set analytics configurations", "Publish recommendations automatically"],
+231:		safetyNote: "Analysis and recommendations only. No direct website or analytics changes.",
+326:	analyst: [
+327:		{ label: "Review SEO signals", sub: "Top queries, CTR gaps, weak pages" },
+395:	analyst: "SI",
+470:	analyst: [
+471:		{ id: "keyword-intent", label: "Keyword Intent", action: "preview", intent: "guidance", template: "Suggest keyword intent opportunities for {project}. Include Germany-market intent, content mapping, and priority." },
+473:		{ id: "opportunity-summary", label: "Opportunity Summary", action: "preview", intent: "task", template: "Summarize SEO and insight opportunities for {project}. Focus on conversion, traffic quality, and content fit." },
+475:		{ id: "open-insights", label: "Open Insights", action: "route", route: "insights" }
+496:		{ id: "check-sla-risk", label: "Check SLA Risk", action: "preview", intent: "guidance", template: "Check SLA risk for {project}. Flag urgency, risk level, missing runtime data, and escalation recommendation for review." },
+588:		id: "analyst",
+591:		bestUse: "When you need evidence-backed recommendations.",
+638:		if (/act as the seo|act as the insights analyst/i.test(text)) return "analyst";
+643:		// Fallback: use keyword scoring from existing classifyIntent
+725:			value.recommendation ||
+831:	return message.includes("insights") || message.includes("learning") || message.includes("not found");
+901:	return asString(item.label || item.title || item.page || item.query || item.campaign_name || item.name);
+934:				insights: null,
+935:				learning: null,
+1277:	const recommendationLine = normalizeDisplayList(response.recommendations, 4)
+1295:	return [recommendationLine, findingLine, sectionLine].filter(Boolean).join("\n\n");
+1298:function destinationRouteForSpecialist(specialistId, outputType) {
+1308:	if (id === "analyst") return "insights";
+1316:function resolveAiResponseOutputRoute(session, response = {}) {
+1347:        const looksInsightLike = /\b(insight|insights|seo|keyword|keywords|analytics|performance|traffic|ranking|search intent|metrics|research|competitor|competitors|market research)\b/.test(text);
+1380:        if (/insight|research|seo|analytics/.test(outputType) || looksInsightLike) {
+1382:                return { outputType, destinationRoute: explicitDestination || "insights" };
+1393:        const destinationRoute = explicitDestination || destinationRouteForSpecialist(session?.modeId || "operations", outputType);
+1404:		insights: "Insights",
+1415:function specialistTemplateForOutput({ specialist, outputType, prompt, projectName }) {
+1419:	const route = destinationRouteForSpecialist(specialistId, outputType);
+1576:				"Platform-specific copy recommendations"
+1582:	if (specialistId === "analyst") {
+1592:			safetyLabel: "No analytics mutation or fake metrics. Guidance only."
+1712:function buildPhase2OutputPreview({ intent, session, prompt, projectName }) {
+1726:	const base = specialistTemplateForOutput({
+1896:	const insights =
+1897:		asObject(intelligence?.insights) ||
+1898:		asObject(activity.insights) ||
+1899:		asObject(activity.marketing_insights) ||
+1900:		asObject(activity.performance_insights);
+1901:	const learning =
+1902:		asObject(intelligence?.learning) ||
+1903:		asObject(activity.learning);
+1905:	const coverage = asObject(insights.data_coverage);
+1908:	const recommendations = asArray(learning.recommendations || insights.recommendations);
+1972:		insights,
+1973:		learning,
+1974:		recommendations,
+1975:		topContent: asArray(insights.best_performing_content),
+1976:		weakContent: asArray(insights.underperforming_content),
+1977:		website: asObject(insights.website),
+1978:		seo: asObject(insights.seo),
+1979:		paid: asObject(insights.paid),
+1980:		social: asObject(insights.social),
+1981:		learningPatterns: asObject(learning.learning_patterns || insights.learning_patterns),
+1982:		aiRecommendations: asObject(learning.ai_recommendations || insights.ai_recommendations),
+1983:		sourceSummary: asObject(insights.source_summary || learning.source_summary),
+1985:			Boolean(Object.keys(insights).length) ||
+1986:			Boolean(Object.keys(learning).length)
+1995:	const query = asString(text).toLowerCase();
+1996:	const keywordMap = {
+2002:		analyst: ["seo", "keyword", "keywords", "query", "search", "meta", "blog topic", "search intent", "ranking", "analytics", "performance", "traffic", "insights", "metrics"],
+2008:	return asArray(keywordMap[modeId]).reduce((total, keyword) => {
+2009:		return total + (query.includes(keyword) ? 1 : 0);
+2020:	const query = asString(message).toLowerCase();
+2021:	const actionRouting = /launch|build|reconnect|connect|improve|create|fix|route|plan|publish/.test(query);
+2045:		notes.push("Load project insights to unlock live intelligence guidance.");
+2048:	if (lane === "content" && asString(coverage.social_insights?.status) !== "covered") {
+2051:	if (lane === "seo" && asString(coverage.seo_search_console?.status) !== "covered") {
+2061:	const topRecommendation = aiContext.recommendations[0];
+2065:	if (aiContext.recommendations.length) summaryParts.push(`${aiContext.recommendations.length} recommendations available.`);
+2072:			topRecommendation ? `Top recommendation: ${topRecommendation.title}.` : "No recommendation stack yet."
+2074:		recommendations: [
+2075:			topRecommendation ? `${topRecommendation.title}: ${topRecommendation.action}` : "Connect missing integrations to produce better recommendations.",
+2076:			...aiContext.recommendations.slice(1, 3).map((item) => `${item.title}: ${item.action}`)
+2085:			routeSuggestion("Insights", "insights", "Review performance signals and the recommendation stack.")
+2094:	const bestFormat = aiContext.learningPatterns.best_formats?.label;
+2095:	const bestPlatform = aiContext.learningPatterns.best_platforms?.label;
+2107:		recommendations: [
+2108:			top ? `Reuse the pattern from ${extractTopMessage(top)} in the next publishing cycle.` : "Sync social insights to identify winning hooks and formats.",
+2120:			routeSuggestion("Insights", "insights", "Compare top and weak content performance.")
+2126:function buildSeoResponse(aiContext) {
+2127:	const seo = aiContext.seo;
+2129:	const topQuery = asArray(seo.top_queries)[0];
+2130:	const lowCtr = asArray(seo.low_ctr_pages)[0];
+2133:		title: "SEO & traffic briefing",
+2134:		summary: seo.summary?.impressions != null
+2135:			? `${formatCompactNumber(seo.summary.impressions)} impressions tracked. SEO lane is ready for prioritization.`
+2138:			topQuery ? `Top query: ${extractTopMessage(topQuery)} with ${formatCompactNumber(topQuery.clicks)} clicks.` : "No top query data yet.",
+2139:			lowCtr ? `CTR opportunity: ${extractTopMessage(lowCtr)} has visibility but weak click-through.` : "No low-CTR list yet.",
+2141:			website.summary?.sessions != null ? `Website traffic: ${formatCompactNumber(website.summary.sessions)} sessions tracked.` : "Website sessions not measured yet."
+2143:		recommendations: [
+2144:			lowCtr ? `Improve title and SERP message for ${extractTopMessage(lowCtr)}.` : "Connect Search Console to unlock CTR analysis.",
+2146:			aiContext.recommendations.find((item) => item.domain === "seo")?.action || ""
+2154:			routeSuggestion("Insights", "insights", "Review search and website performance together."),
+2156:			routeSuggestion("Setup", "setup", "Refine positioning if traffic signal is weak or misaligned.")
+2158:		missingData: buildMissingDataNotes(aiContext, "seo")
+2178:		recommendations: [
+2179:			bestCampaign ? `Scale ${extractTopMessage(bestCampaign)} only after validating strong CTR and ROAS.` : "Connect paid platforms before making scale decisions.",
+2181:			aiContext.recommendations.find((item) => item.domain === "paid")?.action || ""
+2191:			routeSuggestion("Insights", "insights", "Compare paid vs organic and website results.")
+2204:			aiContext.learningPatterns.best_topics?.label ? `Current system learning: ${aiContext.learningPatterns.best_topics.label}.` : "Learning engine needs more live data."
+2206:		recommendations: [
+2213:			"Reconnect missing analytics, SEO, and paid feeds to improve evidence quality.",
+2214:			"Use Insights to identify where the recommendation stack is still blind."
+2219:			routeSuggestion("Insights", "insights", "See where evidence is strong and where it is thin.")
+2222:			...buildMissingDataNotes(aiContext, "seo"),
+2230:	const query = asString(message).toLowerCase();
+2231:	if (/launch.*campaign|new campaign/.test(query)) {
+2234:	if (/content plan|7-day/.test(query)) {
+2237:	if (/weak post|improve content/.test(query)) {
+2240:	if (/reconnect|missing tools|missing integrations/.test(query)) {
+2241:		return { title: "Integration recovery task block", owner: "Integrations", steps: ["Reconnect critical analytics and performance feeds first.", "Test each integration after reconnect and sync current data.", "Return to Insights to confirm coverage improves."] };
+2247:	const query = asString(message).toLowerCase();
+2250:	if (/campaign/.test(query)) routeSuggestions.push(routeSuggestion("Campaign Studio", "campaign-studio", "Turn this into a structured launch plan."));
+2251:	if (/content|post/.test(query)) {
+2255:	if (/reconnect|connect|integration|tool|sync/.test(query)) routeSuggestions.push(routeSuggestion("Integrations", "integrations", "Reconnect data sources and restore intelligence coverage."));
+2256:	if (/ads|campaign scale|roas|creative/.test(query)) routeSuggestions.push(routeSuggestion("Ads Manager", "ads-manager", "Review live paid performance and action the next media move."));
+2265:		recommendations: [
+2267:			aiContext.recommendations[0]?.action || "Use the current recommendation stack to choose the first high-impact step."
+2276:function buildResponseForMode(aiContext, classified, message) {
+2282:		case "analyst":
+2283:			return buildSeoResponse(aiContext);
+2331:				const [insightsResult, learningResult] = await Promise.allSettled([
+2335:				const insightsMissing = insightsResult.status === "rejected" && isMissingIntelligenceError(insightsResult.reason);
+2336:				const learningMissing = learningResult.status === "rejected" && isMissingIntelligenceError(learningResult.reason);
+2338:					insightsResult.status === "rejected" && !insightsMissing ? insightsResult.reason?.message : "",
+2339:					learningResult.status === "rejected" && !learningMissing ? learningResult.reason?.message : ""
+2345:					insights: insightsResult.status === "fulfilled" ? insightsResult.value : (insightsMissing ? { project: projectName, generated_at: nowIso(), data_coverage: {} } : null),
+2346:					learning: learningResult.status === "fulfilled" ? learningResult.value : (learningMissing ? { project: projectName, generated_at: nowIso(), learning_patterns: {}, recommendations: [] } : null),
+2385:	insights: "Insights",
+2407:	insights: "seo",
+2416:	research: "seo",
+2424:	researcher: "seo",
+2860:	if (aiContext.recommendations.length) caps.push(`${aiContext.recommendations.length} recommendations ready`);
+2863:	if (aiContext.seo?.summary?.impressions != null) caps.push("SEO analysis");
+2986:	const recommendations = normalizeDisplayList(response.recommendations, 4);
+2997:	const hasContent = title || summary || findings.length || recommendations.length || nextActions.length;
+3024:			${recommendations.length ? `
+3028:						${recommendations.map((item) => `<div class="ctrl-response-item"><span>${escapeHtml(item)}</span></div>`).join("")}
+3171:	const recommendations = aiContext.recommendations.slice(0, 4);
+3172:	const patterns = Object.entries(asObject(aiContext.learningPatterns))
+3185:	const hasContent = recommendations.length || patterns.length || artifacts.length;
+3191:				<span style="font-size:11px;color:var(--color-text-2);">${recommendations.length} rec${recommendations.length !== 1 ? "s" : ""} · ${patterns.length} patterns</span>
+3206:						${recommendations.map((rec) => {
+3209:							const recAction = humanizeValue(r.action || r.recommendation || r.summary || r.description || "");
+3321:        const preview = buildPhase2OutputPreview({
+3388:			reason: `${impacted} integration signal${impacted === 1 ? "" : "s"} need attention before relying on full automation and optimization loops.`,
+3405:		reason: "Core readiness is stable enough to move into output generation and optimization.",
+3518:	return destinationRouteForSpecialist(session?.modeId || "operations", outputType);
+3760:        if (roleId === "seo") return `${label} is reviewing insights and signals...`;
+3809:	return destinationRouteForSpecialist(session?.modeId || "operations", getCanonicalToolIntent(tool));
+3960:        const destinationRoute = asString(preview.destinationRoute || destinationRouteForSpecialist(session.modeId, outputType));
+3979:                        const route = destinationRouteForSpecialist(spec.id, "guidance");
+4066:        const destinationRoute = asString(session.outputPreview?.destinationRoute || destinationRouteForSpecialist(session.modeId, outputType));
+4249:                const destinationRoute = asString(message.destinationRoute || preview.destinationRoute || destinationRouteForSpecialist(session.modeId, outputType));
+4937:	const destination = routeLabel(preview.destinationRoute || destinationRouteForSpecialist(session.modeId, preview.outputType || "guidance"));
+5334:	const destination = routeLabel(destinationRouteForSpecialist(session.modeId, asObject(session.outputPreview).outputType || "guidance"));
+5593:			session.outputPreview = buildPhase2OutputPreview({
+5637:                        ...Array.from(document.querySelectorAll("[data-aicmd-final-recent-select]"))
+5681:                        ...Array.from(document.querySelectorAll("[data-aicmd-final-new-chat]"))
+5694:		Array.from(document.querySelectorAll("[data-aicmd-chatfirst-tab]")).forEach((btn) => {
+5706:		Array.from(document.querySelectorAll("[data-aicmdv2-output-tab]")).forEach((btn) => {
+5717:		Array.from(document.querySelectorAll("[data-aicmdv2-specialist]")).forEach((btn) => {
+5742:                Array.from(document.querySelectorAll("[data-aicmdv2-team-mode]")).forEach((btn) => {
+5753:		Array.from(document.querySelectorAll("[data-aicmdv2-prompt]")).forEach((btn) => {
+5765:		Array.from(document.querySelectorAll("[data-aicmdv2-quick]")).forEach((btn) => {
+5778:                        const toolButtons = Array.from(document.querySelectorAll("[data-aicmdv2-tool]"));
+5794:                const finalSourceMenu = document.querySelector("[data-aicmd-final-source-menu]");
+5808:                Array.from(document.querySelectorAll("[data-aicmd-open-plus]")).forEach((btn) => {
+5815:                Array.from(document.querySelectorAll("[data-aicmd-chatfirst-source]")).forEach((btn) => {
+5822:                Array.from(document.querySelectorAll("[data-aicmd-final-source-option]")).forEach((btn) => {
+5878:                const finalDropzone = document.querySelector("[data-aicmd-final-dropzone]");
+5896:                        const menu = document.querySelector("[data-aicmd-final-team-menu]");
+5907:                Array.from(document.querySelectorAll("[data-aicmd-final-specialist]")).forEach((btn) => {
+5909:                                const menu = document.querySelector("[data-aicmd-final-team-menu]");
+5926:                        const menu = document.querySelector("[data-aicmd-final-team-menu]");
+5932:                Array.from(document.querySelectorAll("[data-aicmd-final-status]")).forEach((btn) => {
+5934:                                const drawer = document.querySelector(".aicmd-chatgpt-context-drawer");
+5945:                Array.from(document.querySelectorAll("[data-aicmd-final-voice-conversation]")).forEach((btn) => {
+6095:                Array.from(document.querySelectorAll("[data-aicmd-smart-action]")).forEach((btn) => {
+6102:                Array.from(document.querySelectorAll("[data-aicmd-smart-wizard-close]")).forEach((btn) => {
+6106:                Array.from(document.querySelectorAll("[data-aicmd-smart-wizard-backdrop]")).forEach((backdrop) => {
+6112:                Array.from(document.querySelectorAll("[data-aicmd-smart-wizard-choice]")).forEach((btn) => {
+6212:                Array.from(document.querySelectorAll("[data-aicmd-smart-campaign-preview]")).forEach((btn) => {
+6375:                Array.from(document.querySelectorAll("[data-aicmd-smart-campaign-action]")).forEach((btn) => {
+6625:                                        const responseRoute = resolveAiResponseOutputRoute(session, {
+6778:		const toolButtons = Array.from(document.querySelectorAll("[data-aicmdv2-tool]"));
+6938:				const responseRoute = resolveAiResponseOutputRoute(session, latestResponse);
+6939:				const destination = asString(latestResponse.destinationRoute || responseRoute.destinationRoute || destinationRouteForSpecialist(session.modeId, responseRoute.outputType || "guidance"));
+7619:        learningEnabled: true
+
+### exact analyst output builder context
+			title: outputType === "task" ? "Task: Analysis plan" : "Insights Guidance: Signal review",
+			summary: "Analysis plan prepared with key signals, coverage gaps, and next checks.",
+			bullets: [
+				"Signals to check: readiness, channel performance, data coverage",
+				"Coverage gaps mapped for follow-up",
+				"Recommendations prepared for Insights workspace"
+			],
+			safetyLabel: "No analytics mutation or fake metrics. Guidance only."
+		};
+	}
+
+	if (specialistId === "compliance_reviewer") {
+		return {
+			...base,
+			title: "Compliance Draft: Risk review checklist",
+			summary: "Risk review checklist prepared with claims and safety review points.",
+			steps: [
+				"Review key claims and evidence",
+				"Flag safety and policy risks",
+				"Prepare governance notes",
+				"Route to Governance for formal review"
+			],
+			confirmationRequired: true,
+			safetyLabel: "Compliance review is advisory. Formal approval remains human-governed."
+		};
+	}
+
+	if (specialistId === "customer_ops") {
+		return {
+			...base,
+			title: outputType === "task" ? "Ticket Draft: Customer operations follow-up" : "Customer Ops Draft: Thread, reply, and routing",
+			summary: "Customer operations draft prepared with safe reply language, ticket notes, SLA review, and escalation guardrails.",
+			mainOutput: "Review the customer context, confirm missing details, then route the draft through the owning support, sales, or operations surface.",
+			replyDraft: [
+				"Thank the customer, acknowledge the issue, and confirm the next reviewed support step.",
+				"Avoid promising refunds, replacements, or timelines until the owning team confirms them."
+			],
+			ticketDraft: [
+				"Issue summary: customer concern or request captured for review.",
+				"Priority: draft priority pending runtime inbox and SLA confirmation.",
+				"Owner: support, sales, or operations to be confirmed before creation."
+			],
+			notes: [
+				"Unified Inbox is not duplicated here; this is a draft and routing preview only.",
+				"SLA and escalation decisions require confirmation in the owning operations surface."
+			],
+			nextStep: "Review the draft, confirm the destination team, then route through support, sales, or operations.",
+			steps: [
+				"Summarize the customer thread",
+				"Draft a safe customer reply",
+				"Create ticket draft fields for review",
+
+### context/insight helper context
+				asset_id: assetId,
+				asset_type: item.asset_type,
+				label: item.display_label || item.label || item.asset_type
+			}))),
+		assetBlockers: assetCategories
+			.filter((item) => item.blocker || ["Missing", "Needs Review"].includes(item.status))
+			.map((item) => ({
+				asset_type: item.asset_type,
+				label: item.display_label || item.label || item.asset_type,
+				status: item.status
+			})),
+		activity,
+		insights,
+		learning,
+		recommendations,
+		topContent: asArray(insights.best_performing_content),
+		weakContent: asArray(insights.underperforming_content),
+		website: asObject(insights.website),
+		seo: asObject(insights.seo),
+		paid: asObject(insights.paid),
+		social: asObject(insights.social),
+		learningPatterns: asObject(learning.learning_patterns || insights.learning_patterns),
+		aiRecommendations: asObject(learning.ai_recommendations || insights.ai_recommendations),
+		sourceSummary: asObject(insights.source_summary || learning.source_summary),
+		hasLiveIntelligence:
+			Boolean(Object.keys(insights).length) ||
+			Boolean(Object.keys(learning).length)
+	};
+}
+
+// ============================================================
+//  INTENT CLASSIFICATION
+// ============================================================
+
+function scoreMode(text, modeId) {
+	const query = asString(text).toLowerCase();
+	const keywordMap = {
+		strategist: ["campaign", "launch campaign", "campaign plan", "marketing campaign", "market entry", "growth plan", "offer strategy", "launch plan"],
+		writer: ["content", "post", "caption", "blog", "script", "email", "landing page section", "reel script", "copy", "write", "hooks"],
+		designer: ["design", "visual", "creative brief", "format", "brand", "layout", "image direction", "creative direction"],
+		media: ["media", "design", "visual", "creative brief", "format", "brand", "layout", "image direction", "creative direction", "image", "video", "photo", "asset", "library", "gallery", "footage", "visual assets"],
+		ads: ["ad ideas", "ad copy", "facebook ads", "meta ads", "tiktok ads", "google ads", "cta", "paid", "targeting angle", "ad creative"],
+		analyst: ["seo", "keyword", "keywords", "query", "search", "meta", "blog topic", "search intent", "ranking", "analytics", "performance", "traffic", "insights", "metrics"],
+		researcher: ["research", "market trend", "market research", "audience research", "competitor", "positioning gap", "validate", "competitive"],
+		operations: ["task plan", "workflow", "handoff", "approval", "timeline", "execution plan", "route", "publish", "status", "priority", "priorities", "blocking", "blocker", "readiness", "next", "do next"],
+		customer_ops: ["customer", "support", "inbox", "ticket", "tickets", "sla", "reply", "thread", "escalation", "complaint", "refund"],
+		sales_crm: ["lead", "leads", "crm", "sales", "outreach", "follow-up", "follow up", "pipeline", "dealer", "salon", "influencer"]
+	};
+	return asArray(keywordMap[modeId]).reduce((total, keyword) => {
+		return total + (query.includes(keyword) ? 1 : 0);
+	}, 0);
+}
+
+function classifyIntent(message, selectedModeId) {
+	const scores = MODE_DEFS.map((mode) => ({
+		modeId: mode.id,
+		score: scoreMode(message, mode.id) + (mode.id === selectedModeId ? 0.75 : 0)
+	}));
+	scores.sort((a, b) => b.score - a.score);
+	const top = scores[0] || { modeId: selectedModeId || "operations" };
+	const query = asString(message).toLowerCase();
+	const actionRouting = /launch|build|reconnect|connect|improve|create|fix|route|plan|publish/.test(query);
+	return {
+		selectedModeId,
+		resolvedModeId: top.modeId || selectedModeId || "operations",
+		actionRouting
+	};
+}
+
+function routeSuggestion(label, route, reason) {
+	return { label, route, reason };
+}
+
+function normalizeActionLabel(item) {
+	return titleCase(asString(item).replace(/^connector:/, "").replace(/^asset:/, ""));
+}
+
+// ============================================================
+//  RESPONSE BUILDERS
+// ============================================================
+
+function buildMissingDataNotes(aiContext, lane) {
+	const notes = [];
+	const coverage = aiContext.coverage;
+	if (!Object.keys(coverage).length) {
+		notes.push("Load project insights to unlock live intelligence guidance.");
+		return notes;
+	}
+	if (lane === "content" && asString(coverage.social_insights?.status) !== "covered") {
+		notes.push("Sync social feeds to learn from real post performance.");
+	}
+	if (lane === "seo" && asString(coverage.seo_search_console?.status) !== "covered") {
+		notes.push("Search Console not synced — SEO guidance is limited.");
+	}
+	if (lane === "ads" && asString(coverage.paid_ads?.status) !== "covered") {
+		notes.push("Paid platform reporting not connected — ROAS guidance is limited.");
+	}
+	return notes;
+}
+
+function buildExecutiveResponse(aiContext) {
+	const topRecommendation = aiContext.recommendations[0];
+	const summaryParts = [];
+	if (aiContext.readinessScore != null) summaryParts.push(`Readiness is ${aiContext.readinessScore}/100 (${aiContext.readinessStatus || "in progress"}).`);
+	if (aiContext.criticalGaps.length) summaryParts.push(`${aiContext.criticalGaps.length} critical gaps are open.`);
+	if (aiContext.recommendations.length) summaryParts.push(`${aiContext.recommendations.length} recommendations available.`);
+	return {
+		title: "Project status briefing",
+		summary: summaryParts.join(" ") || "Project is loaded. Complete integrations to unlock stronger AI guidance.",
+		findings: [
+			aiContext.criticalGaps.length ? `Critical gaps: ${aiContext.criticalGaps.slice(0, 4).map(normalizeActionLabel).join(", ")}.` : "No critical readiness gaps flagged.",
+			aiContext.missingIntegrations.length ? `Missing intelligence: ${aiContext.missingIntegrations.slice(0, 4).map((item) => item.label).join(", ")}.` : "Intelligence coverage is solid.",
+			topRecommendation ? `Top recommendation: ${topRecommendation.title}.` : "No recommendation stack yet."
+		],
+		recommendations: [
+			topRecommendation ? `${topRecommendation.title}: ${topRecommendation.action}` : "Connect missing integrations to produce better recommendations.",
+			...aiContext.recommendations.slice(1, 3).map((item) => `${item.title}: ${item.action}`)
+		].filter(Boolean),
+		nextActions: [
+			...aiContext.nextBestActions.slice(0, 4).map((item) => `Resolve ${normalizeActionLabel(item)}.`),
+			...(aiContext.connectorIssues[0] ? [`Fix ${aiContext.connectorIssues[0].label}: ${aiContext.connectorIssues[0].reason}.`] : [])
+		],
+		routeSuggestions: [
+			routeSuggestion("Setup", "setup", "Close missing project basics, goals, and audience inputs."),
+			routeSuggestion("Integrations", "integrations", "Reconnect data sources and improve intelligence coverage."),
+			routeSuggestion("Insights", "insights", "Review performance signals and the recommendation stack.")
+		],
+		missingData: buildMissingDataNotes(aiContext, "executive")
+	};
+}
+
+function buildContentResponse(aiContext) {
+	const top = aiContext.topContent[0];
+	const weak = aiContext.weakContent[0];
+	const bestFormat = aiContext.learningPatterns.best_formats?.label;
+	const bestPlatform = aiContext.learningPatterns.best_platforms?.label;
+	return {
+		title: "Content intelligence briefing",
+		summary: top
+			? `${extractTopMessage(top)} is the strongest measured content item right now${top.platform ? ` on ${titleCase(top.platform)}` : ""}.`
+			: "Not enough post-level data yet to rank content winners.",
+		findings: [
+			top ? `Top performer: ${extractTopMessage(top)} with ${formatCompactNumber(top.engagement ?? top.reach)} signal.` : "No top post measured yet.",
+			weak ? `Weakest item: ${extractTopMessage(weak)}.` : "No weak content list yet.",
+			bestFormat && bestFormat !== "No format pattern yet" ? `Best format: ${bestFormat}.` : "No format pattern emerged yet.",
+			bestPlatform && bestPlatform !== "No platform pattern yet" ? `Best platform: ${bestPlatform}.` : "No clear platform winner yet."
+		].filter(Boolean),
+		recommendations: [
+			top ? `Reuse the pattern from ${extractTopMessage(top)} in the next publishing cycle.` : "Sync social insights to identify winning hooks and formats.",
+			weak ? `Rewrite ${extractTopMessage(weak)} with a stronger hook and better platform fit.` : null,
+			bestFormat && bestFormat !== "No format pattern yet" ? `Double down on ${bestFormat} while testing one variation.` : null
+		].filter(Boolean),
+		nextActions: [
+			top ? `Create a follow-up asset using ${extractTopMessage(top)}'s pattern.` : "Load social insight data before expanding content queue.",
+			weak ? `Move ${extractTopMessage(weak)} into a rewrite workflow.` : "Audit current content for posts not converting attention to clicks.",
+			"Prepare next batch with performance-led hooks instead of generic posting volume."
+		],
+		routeSuggestions: [
+			routeSuggestion("Content Studio", "content-studio", "Rewrite weak posts and turn winning patterns into new drafts."),
+			routeSuggestion("Publishing", "publishing", "Schedule the next batch with stronger timing and approval control."),
+			routeSuggestion("Insights", "insights", "Compare top and weak content performance.")
+		],
+		missingData: buildMissingDataNotes(aiContext, "content")
+	};
+}
+
+function buildSeoResponse(aiContext) {
+	const seo = aiContext.seo;
+	const website = aiContext.website;
+	const topQuery = asArray(seo.top_queries)[0];
+	const lowCtr = asArray(seo.low_ctr_pages)[0];
+	const weakPage = asArray(website.weak_pages)[0];
+	return {
+		title: "SEO & traffic briefing",
+		summary: seo.summary?.impressions != null
+			? `${formatCompactNumber(seo.summary.impressions)} impressions tracked. SEO lane is ready for prioritization.`
+			: "SEO visibility not live — connect Search Console to unlock guidance.",
+		findings: [
+			topQuery ? `Top query: ${extractTopMessage(topQuery)} with ${formatCompactNumber(topQuery.clicks)} clicks.` : "No top query data yet.",
+			lowCtr ? `CTR opportunity: ${extractTopMessage(lowCtr)} has visibility but weak click-through.` : "No low-CTR list yet.",
+			weakPage ? `Weak landing page: ${extractTopMessage(weakPage)}.` : "No weak page signal yet.",
+			website.summary?.sessions != null ? `Website traffic: ${formatCompactNumber(website.summary.sessions)} sessions tracked.` : "Website sessions not measured yet."
+		],
+		recommendations: [
+			lowCtr ? `Improve title and SERP message for ${extractTopMessage(lowCtr)}.` : "Connect Search Console to unlock CTR analysis.",
+			weakPage ? `Tighten intent match and CTA on ${extractTopMessage(weakPage)}.` : "Review page titles and meta descriptions on priority pages.",
+			aiContext.recommendations.find((item) => item.domain === "seo")?.action || ""
+		].filter(Boolean),
+		nextActions: [
+			topQuery ? `Expand content around ${extractTopMessage(topQuery)}.` : "Reconnect Search Console before making SEO roadmap decisions.",
+			lowCtr ? `Rewrite metadata for ${extractTopMessage(lowCtr)}.` : "Audit page titles on highest-priority pages.",
+			"Review top landing pages for stronger offer clarity and conversion flow."
+		],
+		routeSuggestions: [
+			routeSuggestion("Insights", "insights", "Review search and website performance together."),
+			routeSuggestion("Integrations", "integrations", "Reconnect GA4 or Search Console."),
+			routeSuggestion("Setup", "setup", "Refine positioning if traffic signal is weak or misaligned.")
+		],
+		missingData: buildMissingDataNotes(aiContext, "seo")
+	};
+}
+
+function buildAdsResponse(aiContext) {
+	const paid = aiContext.paid;
+	const bestCampaign = asArray(paid.best_campaigns)[0];
+	const weakCampaign = asArray(paid.weak_campaigns)[0];
+	const bestCreative = asArray(paid.best_creatives)[0];
+	return {
+		title: "Paid performance briefing",
+		summary: paid.summary?.spend != null
+			? `Paid media live with ${formatCurrency(paid.summary.spend, aiContext.currency)} tracked spend.`
+			: "Paid reporting not connected — connect Meta Ads, Google Ads, or TikTok Ads.",
+		findings: [
+			bestCampaign ? `Best campaign: ${extractTopMessage(bestCampaign)}.` : "No winning campaign measured yet.",
+			weakCampaign ? `Weak campaign: ${extractTopMessage(weakCampaign)}.` : "No weak campaign list yet.",
+			bestCreative ? `Best creative: ${extractTopMessage(bestCreative)}.` : "No creative breakdown yet.",
+			paid.summary?.roas != null ? `Current ROAS: ${Number(paid.summary.roas).toFixed(2)}x.` : "ROAS not available yet."
+		],
+		recommendations: [
+			bestCampaign ? `Scale ${extractTopMessage(bestCampaign)} only after validating strong CTR and ROAS.` : "Connect paid platforms before making scale decisions.",
+			weakCampaign ? `Pause or refresh ${extractTopMessage(weakCampaign)} if weak pattern continues.` : null,
+			aiContext.recommendations.find((item) => item.domain === "paid")?.action || ""
+		].filter(Boolean),
+		nextActions: [
+			bestCreative ? `Reuse the creative pattern behind ${extractTopMessage(bestCreative)}.` : "Sync paid data before scaling any creative.",
+			weakCampaign ? `Rebuild hook and CTA for ${extractTopMessage(weakCampaign)}.` : "Audit campaign naming and creative mapping.",
+			"Tie paid decisions to conversion and revenue signal — not just clicks."
+		],
+		routeSuggestions: [
+			routeSuggestion("Ads Manager", "ads-manager", "Review pacing, creative mapping, and paid operating view."),
+			routeSuggestion("Integrations", "integrations", "Connect or reconnect paid reporting platforms."),
+			routeSuggestion("Insights", "insights", "Compare paid vs organic and website results.")
+		],
+		missingData: buildMissingDataNotes(aiContext, "ads")
+	};
+}
+
+function buildResearchResponse(aiContext) {
+	return {
+		title: "Research & evidence briefing",
+		summary: "The system has enough operating context to highlight where better evidence would improve decision quality.",
+		findings: [
+			aiContext.missingIntegrations.length ? `Missing intelligence: ${aiContext.missingIntegrations.map((item) => item.label).join(", ")}.` : "Main intelligence lanes are structurally connected.",
+			aiContext.criticalGaps.length ? `Critical gaps affecting research quality: ${aiContext.criticalGaps.slice(0, 4).map(normalizeActionLabel).join(", ")}.` : "No major setup gaps blocking research quality.",
+			aiContext.learningPatterns.best_topics?.label ? `Current system learning: ${aiContext.learningPatterns.best_topics.label}.` : "Learning engine needs more live data."
+		].filter(Boolean),
+		recommendations: [
+			"Use the missing intelligence list as the research roadmap for what the system cannot see clearly.",
+			"Validate audience-language fit and offer clarity before expanding execution volume.",
+			"Prioritize integrations that unlock attribution and performance evidence over vanity metrics."
+		],
+
+### full team analyst context
+}
+
+function buildPhase2OutputPreview({ intent, session, prompt, projectName }) {
+	const teamMode = session.teamMode === "team";
+	const specialist = teamMode
+		? { id: "operations", label: "Full Team" }
+		: getPhase1SpecialistById(session.modeId);
+
+	const intentToType = {
+		guidance: "guidance",
+		task: "task",
+		workflow: "workflow",
+		handoff: "handoff"
+	};
+	const outputType = intentToType[intent] || "guidance";
+
+	const base = specialistTemplateForOutput({
+		specialist,
+		outputType,
+		prompt,
+		projectName
+	});
+
+	if (!teamMode) return base;
+
+	return {
+		...base,
+		specialistId: "team",
+		title: outputType === "workflow" ? "Team Workflow" : `Team ${titleCase(outputType)} Preview`,
+		summary: `Full team ${outputType.replace("_", " ")} preview prepared for ${projectName || "current project"}.`,
+		bullets: [
+			"Strategist defines priorities, positioning, launch sequence, and strongest next move",
+			"Writer, Media Director, and Video Lead turn strategy into message, asset, and production drafts",
+			"Compliance and Publisher verify claims, approvals, formatting, and release readiness",
+			"Customer Ops and Sales / CRM join when the request touches inbox, tickets, leads, outreach, or CRM"
+		],
+		steps: [
+			"Strategist: decide priority, offer angle, channel sequence, and launch wave",
+			"Writer: draft hooks, captions, messages, email, or outreach copy",
+			"Media / Video: prepare creative direction, asset needs, script, storyboard, or voiceover draft",
+			"Compliance: flag claims, evidence needs, policy risks, and approval gates",
+			"Publisher: package channel-ready copy, assets, schedule notes, and publish checks",
+			"Customer Ops / Sales: add reply, ticket, lead, outreach, or CRM handoff drafts when relevant",
+			"Operations: convert the reviewed output into safe tasks, workflow draft, or handoff context"
+		],
+		destinationRoute: outputType === "task" ? "task-center" : "workflows",
+		nextSafeAction: "Review the team draft, confirm owners, then route draft context to the destination workspace",
+		confirmationNote: "No task, workflow, outreach, customer reply, CRM update, approval, or publishing action is executed from Full Team mode.",
+		safetyLabel: "Full Team output is a coordinated draft preview only."
+	};
+}
+
+function formatOutputTypeLabel(outputType) {
+	const labels = {
+		guidance: "Guidance",
+		task: "Task",
+		workflow: "Workflow",
+		handoff: "Handoff Preview",
+		media_brief: "Media Brief"
+	};
+	return labels[outputType] || titleCase(outputType || "guidance");
+}
+
+function buildPreviewText(output, specialistLabel) {
+	if (!output) return "";
+	const lines = [
+		`Output Type: ${formatOutputTypeLabel(output.outputType)}`,
+		`Specialist: ${specialistLabel}`,
+		`Status: ${humanizeValue(output.status, "draft_preview")}`,
+		`Title: ${humanizeValue(output.title)}`,
+		`Summary: ${humanizeValue(output.summary)}`,
+		"",
+		`Source Prompt: ${humanizeValue(output.sourcePrompt)}`,
+		""
+	];
+
+	normalizeDisplayList(output.bullets, 12).forEach((item) => lines.push(`- ${item}`));
+	normalizeDisplayList(output.steps, 12).forEach((item, idx) => lines.push(`${idx + 1}. ${item}`));
+
+	lines.push("");
+	lines.push(`Destination: ${routeLabel(output.destinationRoute)}`);
+	lines.push(`Safety: ${humanizeValue(output.safetyLabel)}`);
+	lines.push(`Confirmation: ${output.confirmationRequired ? "Required before execution" : "Required for execution actions"}`);
+	return lines.join("\n");
+}
+
+function compactPreviewText(value, maxLength = 360) {
+        const text = humanizeValue(value, "").replace(/\s+/g, " ").trim();
+        if (!text) return "";
+        if (text.length <= maxLength) return text;
+        return `${text.slice(0, maxLength).trim()}...`;
+}
+
+function splitPreviewLines(value, limit = 6) {
+        const text = humanizeValue(value, "");
+        if (!text) return [];
+        return text
+                .split(/\n+|(?=\d+\.\s+)/)
+                .map((line) => line.replace(/^\s*[-•]\s*/, "").trim())
+                .filter(Boolean)
+                .slice(0, limit);
+
+### conversation work / preview context
+}
+
+function getLastAssistantMessage(session) {
+	return asArray(session.messages).slice().reverse().find((item) => item.role === "assistant") || null;
+}
+
+function buildConversationWorkContext(session, fallbackPrompt = "") {
+        const messages = asArray(session.messages).slice(-12);
+        const latestUser = getLastUserMessage(session);
+        const latestAssistant = getLastAssistantMessage(session);
+        const latestResponse = asArray(session.responseHistory)[0] || null;
+        const specialist = session.teamMode === "team"
+                ? { id: "team", label: "Full Team" }
+                : getPhase1SpecialistById(session.modeId);
+
+        const conversationLines = messages
+                .map((message) => {
+                        const role = asString(message.role || "");
+                        const label = role === "user"
+                                ? "User"
+                                : asString(message.specialistLabel || specialist.label || "Specialist");
+                        const content = asString(message.content || message.text || message.responseText || "").trim();
+                        return content ? `${label}: ${content}` : "";
+                })
+                .filter(Boolean);
+
+        const prompt = asString(
+                fallbackPrompt ||
+                latestUser?.content ||
+                latestResponse?.prompt ||
+                session.draftMessage ||
+                ""
+        ).trim();
+
+        const assistantText = asString(
+                latestAssistant?.content ||
+                latestResponse?.responseText ||
+                ""
+        ).trim();
+
+        const summaryParts = [
+                prompt ? `User request: ${prompt}` : "",
+                assistantText ? `Latest specialist answer: ${assistantText}` : "",
+                conversationLines.length ? `Conversation context:\n${conversationLines.join("\n")}` : ""
+        ].filter(Boolean);
+
+        return {
+                prompt,
+                assistantText,
+                conversationText: conversationLines.join("\n"),
+                summary: summaryParts.join("\n\n"),
+                specialistId: specialist.id || session.modeId,
+                specialistLabel: specialist.label || "Specialist",
+                teamMode: session.teamMode,
+                latestResponse
+        };
+}
+
+function buildConversationWorkPrompt(session, outputType, fallbackPrompt = "") {
+        const context = buildConversationWorkContext(session, fallbackPrompt);
+        const typeLabel = {
+                guidance: "review-ready draft",
+                task: "task plan",
+                workflow: "workflow sequence",
+                handoff: "handoff package"
+        }[outputType] || "work draft";
+
+        const basePrompt = context.summary || context.prompt || `Prepare a ${typeLabel}.`;
+
+        return [
+                `Convert this AI Team conversation into a ${typeLabel}.`,
+                `Specialist: ${context.specialistLabel}`,
+                "Use the conversation context, not only the composer text.",
+                "Keep it review-ready and do not execute backend actions.",
+                "",
+                basePrompt
+        ].join("\n");
+}
+
+function setPreviewFromConversation({ session, intent, fallbackPrompt, projectName }) {
+        const workPrompt = buildConversationWorkPrompt(session, intent, fallbackPrompt);
+        const preview = buildPhase2OutputPreview({
+                intent,
+                session,
+                prompt: workPrompt,
+                projectName
+        });
+
+        const context = buildConversationWorkContext(session, fallbackPrompt);
+        preview.sourcePrompt = context.prompt || workPrompt;
+        preview.conversationContext = context.conversationText;
+
+        // Keep raw conversation context available internally, but do not show it as the main output.
+        // The visible preview should stay clean and user-facing.
+        if (context.assistantText) {
+                preview.summary = context.assistantText;
+                preview.mainOutput = context.assistantText;
+        }
+
+        preview.generatedAt = nowIso();
+        preview.safetyLabel = preview.safetyLabel || "Conversation converted into a review-ready draft. No backend action executed.";
+
+        session.outputPreview = preview;
+        session.outputWorkspaceTab = outputTabFromIntent(intent);
+        session.activeOutputTab = session.outputWorkspaceTab;
+        session.workspaceTab = "preview";
+        return preview;
+}
+
+function buildCommandEnvelope(session, prompt) {
+	const commandTypeLabel = COMMAND_TYPES.find((item) => item.id === session.commandType)?.label || "Strategy";
+	const targetTypeLabel = TARGET_TYPES.find((item) => item.id === session.targetType)?.label || "Current project";
+	const targetValue = asString(session.targetValue).trim();
+	const targetLine = targetValue ? `${targetTypeLabel}: ${targetValue}` : targetTypeLabel;
+	return `${asString(prompt).trim()}\n\nCommand type: ${commandTypeLabel}\nTarget: ${targetLine}`;
+}
+
+function buildImpactChips(activeLabels) {
+	const activeSet = new Set(asArray(activeLabels));
+	return IMPACT_CHIP_LABELS.map((label) => ({
+		label,
+		active: activeSet.has(label)
+	}));
+}
+
+function buildSmartRecommendation(aiContext) {

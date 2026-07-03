@@ -1,0 +1,711 @@
+### frontend API insights/learning helpers
+public/control-center/api.js:915:      insights: null,
+public/control-center/api.js:916:      learning: null
+public/control-center/api.js:951:  if (section === "insights") {
+public/control-center/api.js:955:  if (section === "learning") {
+public/control-center/api.js:964:  const isOptionalNotFound = !required && status === 404 && (section === "insights" || section === "learning");
+public/control-center/api.js:1182:        "insights",
+public/control-center/api.js:1183:        "learning"
+public/control-center/api.js:1229:      section: "insights",
+public/control-center/api.js:1230:      load: () => fetchProjectInsights(safeProjectName)
+public/control-center/api.js:1233:      section: "learning",
+public/control-center/api.js:1234:      load: () => fetchProjectLearning(safeProjectName)
+public/control-center/api.js:1253:      section: "insights",
+public/control-center/api.js:1254:      load: () => fetchProjectInsights(safeProjectName)
+public/control-center/api.js:1257:      section: "learning",
+public/control-center/api.js:1258:      load: () => fetchProjectLearning(safeProjectName)
+public/control-center/api.js:1271:          if (section === "insights" || section === "learning") {
+public/control-center/api.js:1284:        if (section === "insights" || section === "learning") {
+public/control-center/api.js:1335:export async function fetchProjectInsights(projectName) {
+public/control-center/api.js:1341:    `/api/insights/${encodeURIComponent(projectName)}`,
+public/control-center/api.js:1342:    "Failed to load project insights"
+public/control-center/api.js:1346:export async function fetchProjectLearning(projectName) {
+public/control-center/api.js:1352:    `/api/learning/${encodeURIComponent(projectName)}`,
+public/control-center/api.js:1353:    "Failed to load project learning"
+public/control-center/pages/ai-command.js:76:                summary: "Ad concepts, targeting angles, platform copy, and paid strategy.",
+public/control-center/pages/ai-command.js:83:                summary: "SEO signals, performance data, content insights, and traffic patterns.",
+public/control-center/pages/ai-command.js:84:                routeHint: "insights"
+public/control-center/pages/ai-command.js:124:	seo: "analyst",
+public/control-center/pages/ai-command.js:213:		summary: "Ad concepts, targeting angles, platform copy, and paid strategy.",
+public/control-center/pages/ai-command.js:214:		placeholder: "Ask the Ads Optimizer to draft ad copy, review targeting angles, or plan a paid campaign structure…",
+public/control-center/pages/ai-command.js:215:		canHelp: ["Draft ad concepts and copy", "Review targeting angles", "Plan paid campaign structure", "Suggest creative variants", "Map platform-specific strategy"],
+public/control-center/pages/ai-command.js:226:		summary: "SEO signals, performance data, content insights, and traffic patterns.",
+public/control-center/pages/ai-command.js:227:		placeholder: "Ask the SEO & Insights Analyst to review performance, suggest SEO improvements, or identify top content patterns…",
+public/control-center/pages/ai-command.js:228:		canHelp: ["Review SEO signals", "Analyze content performance", "Identify traffic patterns", "Suggest keyword improvements", "Map data coverage gaps"],
+public/control-center/pages/ai-command.js:229:		cannotDo: ["Update SEO settings directly", "Edit live website", "Set analytics configurations", "Publish recommendations automatically"],
+public/control-center/pages/ai-command.js:231:		safetyNote: "Analysis and recommendations only. No direct website or analytics changes.",
+public/control-center/pages/ai-command.js:324:		{ label: "Plan paid campaign structure", sub: "Objective, audience, creative, budget" }
+public/control-center/pages/ai-command.js:328:		{ label: "Analyze content performance", sub: "What is working and what is not" },
+public/control-center/pages/ai-command.js:466:		{ id: "test-ideas", label: "Test Ideas", action: "preview", intent: "task", template: "Suggest paid test ideas for {project}. Provide hypotheses, segments, creative variables, and measurement notes." },
+public/control-center/pages/ai-command.js:473:		{ id: "opportunity-summary", label: "Opportunity Summary", action: "preview", intent: "task", template: "Summarize SEO and insight opportunities for {project}. Focus on conversion, traffic quality, and content fit." },
+public/control-center/pages/ai-command.js:475:		{ id: "open-insights", label: "Open Insights", action: "route", route: "insights" }
+public/control-center/pages/ai-command.js:517:	{ icon: "📊", label: "Analyze Performance", sub: "Review what's working", template: "Analyze current performance for {project}. What content, campaigns, and channels are working best right now?" },
+public/control-center/pages/ai-command.js:583:		purpose: "Optimize paid opportunities, creative testing, and budget decisions.",
+public/control-center/pages/ai-command.js:584:		bestUse: "When preparing or fixing paid performance.",
+public/control-center/pages/ai-command.js:585:		suggestedPrompt: "Act as Ads Specialist and propose paid experiments based on current readiness and data coverage."
+public/control-center/pages/ai-command.js:591:		bestUse: "When you need evidence-backed recommendations.",
+public/control-center/pages/ai-command.js:638:		if (/act as the seo|act as the insights analyst/i.test(text)) return "analyst";
+public/control-center/pages/ai-command.js:677:	if (/publish\s*now|send\s*external|paid\s*ads|final\s*approval/i.test(command)) {
+public/control-center/pages/ai-command.js:767:    "Analyze current performance for:",
+public/control-center/pages/ai-command.js:831:	return message.includes("insights") || message.includes("learning") || message.includes("not found");
+public/control-center/pages/ai-command.js:934:				insights: null,
+public/control-center/pages/ai-command.js:935:				learning: null,
+public/control-center/pages/ai-command.js:1277:	const recommendationLine = normalizeDisplayList(response.recommendations, 4)
+public/control-center/pages/ai-command.js:1308:	if (id === "analyst") return "insights";
+public/control-center/pages/ai-command.js:1347:        const looksInsightLike = /\b(insight|insights|seo|keyword|keywords|analytics|performance|traffic|ranking|search intent|metrics|research|competitor|competitors|market research)\b/.test(text);
+public/control-center/pages/ai-command.js:1380:        if (/insight|research|seo|analytics/.test(outputType) || looksInsightLike) {
+public/control-center/pages/ai-command.js:1382:                return { outputType, destinationRoute: explicitDestination || "insights" };
+public/control-center/pages/ai-command.js:1404:		insights: "Insights",
+public/control-center/pages/ai-command.js:1486:				"Claims, health, or performance promises need evidence before publishing."
+public/control-center/pages/ai-command.js:1576:				"Platform-specific copy recommendations"
+public/control-center/pages/ai-command.js:1588:				"Signals to check: readiness, channel performance, data coverage",
+public/control-center/pages/ai-command.js:1592:			safetyLabel: "No analytics mutation or fake metrics. Guidance only."
+public/control-center/pages/ai-command.js:1896:	const insights =
+public/control-center/pages/ai-command.js:1897:		asObject(intelligence?.insights) ||
+public/control-center/pages/ai-command.js:1898:		asObject(activity.insights) ||
+public/control-center/pages/ai-command.js:1899:		asObject(activity.marketing_insights) ||
+public/control-center/pages/ai-command.js:1900:		asObject(activity.performance_insights);
+public/control-center/pages/ai-command.js:1901:	const learning =
+public/control-center/pages/ai-command.js:1902:		asObject(intelligence?.learning) ||
+public/control-center/pages/ai-command.js:1903:		asObject(activity.learning);
+public/control-center/pages/ai-command.js:1905:	const coverage = asObject(insights.data_coverage);
+public/control-center/pages/ai-command.js:1908:	const recommendations = asArray(learning.recommendations || insights.recommendations);
+public/control-center/pages/ai-command.js:1972:		insights,
+public/control-center/pages/ai-command.js:1973:		learning,
+public/control-center/pages/ai-command.js:1974:		recommendations,
+public/control-center/pages/ai-command.js:1975:		topContent: asArray(insights.best_performing_content),
+public/control-center/pages/ai-command.js:1976:		weakContent: asArray(insights.underperforming_content),
+public/control-center/pages/ai-command.js:1977:		website: asObject(insights.website),
+public/control-center/pages/ai-command.js:1978:		seo: asObject(insights.seo),
+public/control-center/pages/ai-command.js:1979:		paid: asObject(insights.paid),
+public/control-center/pages/ai-command.js:1980:		social: asObject(insights.social),
+public/control-center/pages/ai-command.js:1981:		learningPatterns: asObject(learning.learning_patterns || insights.learning_patterns),
+public/control-center/pages/ai-command.js:1982:		aiRecommendations: asObject(learning.ai_recommendations || insights.ai_recommendations),
+public/control-center/pages/ai-command.js:1983:		sourceSummary: asObject(insights.source_summary || learning.source_summary),
+public/control-center/pages/ai-command.js:1985:			Boolean(Object.keys(insights).length) ||
+public/control-center/pages/ai-command.js:1986:			Boolean(Object.keys(learning).length)
+public/control-center/pages/ai-command.js:2001:		ads: ["ad ideas", "ad copy", "facebook ads", "meta ads", "tiktok ads", "google ads", "cta", "paid", "targeting angle", "ad creative"],
+public/control-center/pages/ai-command.js:2002:		analyst: ["seo", "keyword", "keywords", "query", "search", "meta", "blog topic", "search intent", "ranking", "analytics", "performance", "traffic", "insights", "metrics"],
+public/control-center/pages/ai-command.js:2045:		notes.push("Load project insights to unlock live intelligence guidance.");
+public/control-center/pages/ai-command.js:2048:	if (lane === "content" && asString(coverage.social_insights?.status) !== "covered") {
+public/control-center/pages/ai-command.js:2049:		notes.push("Sync social feeds to learn from real post performance.");
+public/control-center/pages/ai-command.js:2051:	if (lane === "seo" && asString(coverage.seo_search_console?.status) !== "covered") {
+public/control-center/pages/ai-command.js:2052:		notes.push("Search Console not synced — SEO guidance is limited.");
+public/control-center/pages/ai-command.js:2054:	if (lane === "ads" && asString(coverage.paid_ads?.status) !== "covered") {
+public/control-center/pages/ai-command.js:2061:	const topRecommendation = aiContext.recommendations[0];
+public/control-center/pages/ai-command.js:2065:	if (aiContext.recommendations.length) summaryParts.push(`${aiContext.recommendations.length} recommendations available.`);
+public/control-center/pages/ai-command.js:2074:		recommendations: [
+public/control-center/pages/ai-command.js:2075:			topRecommendation ? `${topRecommendation.title}: ${topRecommendation.action}` : "Connect missing integrations to produce better recommendations.",
+public/control-center/pages/ai-command.js:2076:			...aiContext.recommendations.slice(1, 3).map((item) => `${item.title}: ${item.action}`)
+public/control-center/pages/ai-command.js:2085:			routeSuggestion("Insights", "insights", "Review performance signals and the recommendation stack.")
+public/control-center/pages/ai-command.js:2094:	const bestFormat = aiContext.learningPatterns.best_formats?.label;
+public/control-center/pages/ai-command.js:2095:	const bestPlatform = aiContext.learningPatterns.best_platforms?.label;
+public/control-center/pages/ai-command.js:2107:		recommendations: [
+public/control-center/pages/ai-command.js:2108:			top ? `Reuse the pattern from ${extractTopMessage(top)} in the next publishing cycle.` : "Sync social insights to identify winning hooks and formats.",
+public/control-center/pages/ai-command.js:2115:			"Prepare next batch with performance-led hooks instead of generic posting volume."
+public/control-center/pages/ai-command.js:2120:			routeSuggestion("Insights", "insights", "Compare top and weak content performance.")
+public/control-center/pages/ai-command.js:2127:	const seo = aiContext.seo;
+public/control-center/pages/ai-command.js:2128:	const website = aiContext.website;
+public/control-center/pages/ai-command.js:2129:	const topQuery = asArray(seo.top_queries)[0];
+public/control-center/pages/ai-command.js:2130:	const lowCtr = asArray(seo.low_ctr_pages)[0];
+public/control-center/pages/ai-command.js:2131:	const weakPage = asArray(website.weak_pages)[0];
+public/control-center/pages/ai-command.js:2133:		title: "SEO & traffic briefing",
+public/control-center/pages/ai-command.js:2134:		summary: seo.summary?.impressions != null
+public/control-center/pages/ai-command.js:2135:			? `${formatCompactNumber(seo.summary.impressions)} impressions tracked. SEO lane is ready for prioritization.`
+public/control-center/pages/ai-command.js:2136:			: "SEO visibility not live — connect Search Console to unlock guidance.",
+public/control-center/pages/ai-command.js:2141:			website.summary?.sessions != null ? `Website traffic: ${formatCompactNumber(website.summary.sessions)} sessions tracked.` : "Website sessions not measured yet."
+public/control-center/pages/ai-command.js:2143:		recommendations: [
+public/control-center/pages/ai-command.js:2144:			lowCtr ? `Improve title and SERP message for ${extractTopMessage(lowCtr)}.` : "Connect Search Console to unlock CTR analysis.",
+public/control-center/pages/ai-command.js:2146:			aiContext.recommendations.find((item) => item.domain === "seo")?.action || ""
+public/control-center/pages/ai-command.js:2149:			topQuery ? `Expand content around ${extractTopMessage(topQuery)}.` : "Reconnect Search Console before making SEO roadmap decisions.",
+public/control-center/pages/ai-command.js:2154:			routeSuggestion("Insights", "insights", "Review search and website performance together."),
+public/control-center/pages/ai-command.js:2155:			routeSuggestion("Integrations", "integrations", "Reconnect GA4 or Search Console."),
+public/control-center/pages/ai-command.js:2156:			routeSuggestion("Setup", "setup", "Refine positioning if traffic signal is weak or misaligned.")
+public/control-center/pages/ai-command.js:2158:		missingData: buildMissingDataNotes(aiContext, "seo")
+public/control-center/pages/ai-command.js:2163:	const paid = aiContext.paid;
+public/control-center/pages/ai-command.js:2164:	const bestCampaign = asArray(paid.best_campaigns)[0];
+public/control-center/pages/ai-command.js:2165:	const weakCampaign = asArray(paid.weak_campaigns)[0];
+public/control-center/pages/ai-command.js:2166:	const bestCreative = asArray(paid.best_creatives)[0];
+public/control-center/pages/ai-command.js:2168:		title: "Paid performance briefing",
+public/control-center/pages/ai-command.js:2169:		summary: paid.summary?.spend != null
+public/control-center/pages/ai-command.js:2170:			? `Paid media live with ${formatCurrency(paid.summary.spend, aiContext.currency)} tracked spend.`
+public/control-center/pages/ai-command.js:2176:			paid.summary?.roas != null ? `Current ROAS: ${Number(paid.summary.roas).toFixed(2)}x.` : "ROAS not available yet."
+public/control-center/pages/ai-command.js:2178:		recommendations: [
+public/control-center/pages/ai-command.js:2179:			bestCampaign ? `Scale ${extractTopMessage(bestCampaign)} only after validating strong CTR and ROAS.` : "Connect paid platforms before making scale decisions.",
+public/control-center/pages/ai-command.js:2181:			aiContext.recommendations.find((item) => item.domain === "paid")?.action || ""
+public/control-center/pages/ai-command.js:2184:			bestCreative ? `Reuse the creative pattern behind ${extractTopMessage(bestCreative)}.` : "Sync paid data before scaling any creative.",
+public/control-center/pages/ai-command.js:2186:			"Tie paid decisions to conversion and revenue signal — not just clicks."
+public/control-center/pages/ai-command.js:2189:			routeSuggestion("Ads Manager", "ads-manager", "Review pacing, creative mapping, and paid operating view."),
+public/control-center/pages/ai-command.js:2190:			routeSuggestion("Integrations", "integrations", "Connect or reconnect paid reporting platforms."),
+public/control-center/pages/ai-command.js:2191:			routeSuggestion("Insights", "insights", "Compare paid vs organic and website results.")
+public/control-center/pages/ai-command.js:2204:			aiContext.learningPatterns.best_topics?.label ? `Current system learning: ${aiContext.learningPatterns.best_topics.label}.` : "Learning engine needs more live data."
+public/control-center/pages/ai-command.js:2206:		recommendations: [
+public/control-center/pages/ai-command.js:2209:			"Prioritize integrations that unlock attribution and performance evidence over vanity metrics."
+public/control-center/pages/ai-command.js:2213:			"Reconnect missing analytics, SEO, and paid feeds to improve evidence quality.",
+public/control-center/pages/ai-command.js:2219:			routeSuggestion("Insights", "insights", "See where evidence is strong and where it is thin.")
+public/control-center/pages/ai-command.js:2222:			...buildMissingDataNotes(aiContext, "seo"),
+public/control-center/pages/ai-command.js:2241:		return { title: "Integration recovery task block", owner: "Integrations", steps: ["Reconnect critical analytics and performance feeds first.", "Test each integration after reconnect and sync current data.", "Return to Insights to confirm coverage improves."] };
+public/control-center/pages/ai-command.js:2256:	if (/ads|campaign scale|roas|creative/.test(query)) routeSuggestions.push(routeSuggestion("Ads Manager", "ads-manager", "Review live paid performance and action the next media move."));
+public/control-center/pages/ai-command.js:2265:		recommendations: [
+public/control-center/pages/ai-command.js:2267:			aiContext.recommendations[0]?.action || "Use the current recommendation stack to choose the first high-impact step."
+public/control-center/pages/ai-command.js:2307:	fetchProjectInsights,
+public/control-center/pages/ai-command.js:2308:	fetchProjectLearning,
+public/control-center/pages/ai-command.js:2331:				const [insightsResult, learningResult] = await Promise.allSettled([
+public/control-center/pages/ai-command.js:2332:					fetchProjectInsights(projectName),
+public/control-center/pages/ai-command.js:2333:					fetchProjectLearning(projectName)
+public/control-center/pages/ai-command.js:2335:				const insightsMissing = insightsResult.status === "rejected" && isMissingIntelligenceError(insightsResult.reason);
+public/control-center/pages/ai-command.js:2336:				const learningMissing = learningResult.status === "rejected" && isMissingIntelligenceError(learningResult.reason);
+public/control-center/pages/ai-command.js:2338:					insightsResult.status === "rejected" && !insightsMissing ? insightsResult.reason?.message : "",
+public/control-center/pages/ai-command.js:2339:					learningResult.status === "rejected" && !learningMissing ? learningResult.reason?.message : ""
+public/control-center/pages/ai-command.js:2345:					insights: insightsResult.status === "fulfilled" ? insightsResult.value : (insightsMissing ? { project: projectName, generated_at: nowIso(), data_coverage: {} } : null),
+public/control-center/pages/ai-command.js:2346:					learning: learningResult.status === "fulfilled" ? learningResult.value : (learningMissing ? { project: projectName, generated_at: nowIso(), learning_patterns: {}, recommendations: [] } : null),
+public/control-center/pages/ai-command.js:2385:	insights: "Insights",
+public/control-center/pages/ai-command.js:2407:	insights: "seo",
+public/control-center/pages/ai-command.js:2416:	research: "seo",
+public/control-center/pages/ai-command.js:2424:	researcher: "seo",
+public/control-center/pages/ai-command.js:2860:	if (aiContext.recommendations.length) caps.push(`${aiContext.recommendations.length} recommendations ready`);
+public/control-center/pages/ai-command.js:2862:	if (aiContext.paid?.summary?.spend != null) caps.push("Paid media briefing");
+public/control-center/pages/ai-command.js:2863:	if (aiContext.seo?.summary?.impressions != null) caps.push("SEO analysis");
+public/control-center/pages/ai-command.js:2986:	const recommendations = normalizeDisplayList(response.recommendations, 4);
+public/control-center/pages/ai-command.js:2997:	const hasContent = title || summary || findings.length || recommendations.length || nextActions.length;
+public/control-center/pages/ai-command.js:3024:			${recommendations.length ? `
+public/control-center/pages/ai-command.js:3028:						${recommendations.map((item) => `<div class="ctrl-response-item"><span>${escapeHtml(item)}</span></div>`).join("")}
+public/control-center/pages/ai-command.js:3171:	const recommendations = aiContext.recommendations.slice(0, 4);
+public/control-center/pages/ai-command.js:3172:	const patterns = Object.entries(asObject(aiContext.learningPatterns))
+public/control-center/pages/ai-command.js:3185:	const hasContent = recommendations.length || patterns.length || artifacts.length;
+public/control-center/pages/ai-command.js:3191:				<span style="font-size:11px;color:var(--color-text-2);">${recommendations.length} rec${recommendations.length !== 1 ? "s" : ""} · ${patterns.length} patterns</span>
+public/control-center/pages/ai-command.js:3206:						${recommendations.map((rec) => {
+public/control-center/pages/ai-command.js:3760:        if (roleId === "seo") return `${label} is reviewing insights and signals...`;
+public/control-center/pages/ai-command.js:4436:        const channelOptions = [["social", "Social"], ["email", "Email"], ["website", "Website"], ["ads", "Ads"], ["publishing", "Publishing package"]];
+public/control-center/pages/ai-command.js:5481:			fetchProjectInsights,
+public/control-center/pages/ai-command.js:5482:			fetchProjectLearning,
+public/control-center/pages/ai-command.js:6087:                                                body: "Create a follow-up plan for review status, owner, destination handoff, performance check, improvement loop, and next campaign iteration."
+public/control-center/pages/ai-command.js:7114:				fetchProjectInsights,
+public/control-center/pages/ai-command.js:7115:				fetchProjectLearning,
+public/control-center/pages/ai-command.js:7617:        performanceMode: usage > 20 ? "optimized" : "standard",
+public/control-center/pages/ai-command.js:7619:        learningEnabled: true
+public/control-center/pages/insights.js:33:    id: "website",
+public/control-center/pages/insights.js:35:    type: "website",
+public/control-center/pages/insights.js:36:    sourceKeys: ["website", "analytics"],
+public/control-center/pages/insights.js:37:    emptyTitle: "No website analytics feed yet"
+public/control-center/pages/insights.js:40:    id: "seo",
+public/control-center/pages/insights.js:42:    type: "seo",
+public/control-center/pages/insights.js:43:    sourceKeys: ["google", "analytics", "website"],
+public/control-center/pages/insights.js:44:    emptyTitle: "No Search Console feed yet"
+public/control-center/pages/insights.js:47:    id: "paid",
+public/control-center/pages/insights.js:49:    type: "paid",
+public/control-center/pages/insights.js:50:    sourceKeys: ["google_ads", "facebook", "instagram", "tiktok", "amazon", "analytics"],
+public/control-center/pages/insights.js:51:    emptyTitle: "No paid performance feed yet"
+public/control-center/pages/insights.js:55:const insightsRefreshState = new Map();
+public/control-center/pages/insights.js:59:  if (!insightsRefreshState.has(key)) {
+public/control-center/pages/insights.js:60:    insightsRefreshState.set(key, {
+public/control-center/pages/insights.js:65:  return insightsRefreshState.get(key);
+public/control-center/pages/insights.js:71:  insightsRefreshState.set(key, {
+public/control-center/pages/insights.js:229:    activity.insights ||
+public/control-center/pages/insights.js:230:    activity.marketing_insights ||
+public/control-center/pages/insights.js:231:    activity.performance_insights ||
+public/control-center/pages/insights.js:232:    overview.insights
+public/control-center/pages/insights.js:258:    performanceLevel: asString(summary.performance_level || summary.status),
+public/control-center/pages/insights.js:270:  if (platform.type === "website") {
+public/control-center/pages/insights.js:271:    return normalizeSummary(asObject(feeds.website));
+public/control-center/pages/insights.js:273:  if (platform.type === "seo") {
+public/control-center/pages/insights.js:274:    return normalizeSummary(asObject(feeds.seo));
+public/control-center/pages/insights.js:276:  return normalizeSummary(asObject(feeds.paid));
+public/control-center/pages/insights.js:381:  const websiteSummary = normalizeSummary(asObject(feeds.website));
+public/control-center/pages/insights.js:382:  const seoSummary = normalizeSummary(asObject(feeds.seo));
+public/control-center/pages/insights.js:383:  const paidSummary = normalizeSummary(asObject(feeds.paid));
+public/control-center/pages/insights.js:392:  const totalClicks = sumMetric([...socialSummaries, websiteSummary], "clicks");
+public/control-center/pages/insights.js:395:    websiteSummary.conversions,
+public/control-center/pages/insights.js:396:    paidSummary.conversions
+public/control-center/pages/insights.js:400:    websiteSummary.revenue,
+public/control-center/pages/insights.js:401:    paidSummary.revenue,
+public/control-center/pages/insights.js:404:  const totalSpend = paidSummary.spend;
+public/control-center/pages/insights.js:408:    : paidSummary.roas;
+public/control-center/pages/insights.js:412:  const seoVisibility = seoSummary.impressions != null
+public/control-center/pages/insights.js:413:    ? `${formatCompact(seoSummary.impressions)} impressions`
+public/control-center/pages/insights.js:414:    : getConnectedValue(["google", "analytics", "website"], connections)
+public/control-center/pages/insights.js:433:        meta: totalClicks == null ? "Awaiting social + website feeds" : "Traffic-driving content signal"
+public/control-center/pages/insights.js:438:        meta: totalConversions.length ? "Attributed conversion signal" : "Awaiting site / paid conversion feed"
+public/control-center/pages/insights.js:443:        meta: totalRevenue == null ? "Awaiting commerce analytics" : "Revenue / value signal"
+public/control-center/pages/insights.js:448:        meta: totalSpend == null ? "Awaiting paid feed" : "Paid media spend"
+public/control-center/pages/insights.js:457:        value: seoVisibility,
+public/control-center/pages/insights.js:462:      ? "The Insight Engine is structurally ready, but live performance feeds are still sparse. Connect social insights, website analytics, SEO, and paid platforms to unlock real learning."
+public/control-center/pages/insights.js:463:      : "This workspace is blending the currently available social, website, SEO, and paid signals into one optimization layer so the system can learn what to scale, what to fix, and what to reuse."
+public/control-center/pages/insights.js:473:    let performanceLevel = "Not connected";
+public/control-center/pages/insights.js:474:    if (connected && !hasData) performanceLevel = "Connected, awaiting feed";
+public/control-center/pages/insights.js:476:      performanceLevel =
+public/control-center/pages/insights.js:477:        summary.performanceLevel ||
+public/control-center/pages/insights.js:481:            ? "Mixed performance signal"
+public/control-center/pages/insights.js:502:        ? "Map real API data into this card to unlock comparison and recommendations."
+public/control-center/pages/insights.js:509:      performanceLevel,
+public/control-center/pages/insights.js:557:  const website = asObject(feeds.website);
+public/control-center/pages/insights.js:558:  const summary = normalizeSummary(website);
+public/control-center/pages/insights.js:560:    connected: getConnectedValue(["website", "analytics"], connections),
+public/control-center/pages/insights.js:563:    topPages: asArray(website.top_pages || website.best_pages || website.top_landing_pages),
+public/control-center/pages/insights.js:564:    weakPages: asArray(website.weak_pages || website.low_converting_pages || website.dropoff_pages),
+public/control-center/pages/insights.js:565:    conversionSignals: asArray(website.conversion_signals || website.conversion_paths || website.funnel_signals),
+public/control-center/pages/insights.js:566:    recommendations: asArray(website.recommendations || website.opportunities)
+public/control-center/pages/insights.js:571:  const seo = asObject(feeds.seo);
+public/control-center/pages/insights.js:572:  const summary = normalizeSummary(seo);
+public/control-center/pages/insights.js:574:    connected: getConnectedValue(["google", "website", "analytics"], connections),
+public/control-center/pages/insights.js:577:    topQueries: asArray(seo.top_queries || seo.queries),
+public/control-center/pages/insights.js:578:    topPages: asArray(seo.top_pages || seo.pages),
+public/control-center/pages/insights.js:579:    ctrOpportunities: asArray(seo.low_ctr_pages || seo.ctr_opportunities),
+public/control-center/pages/insights.js:580:    rankingOpportunities: asArray(seo.opportunities || seo.ranking_opportunities || seo.content_themes)
+public/control-center/pages/insights.js:585:  const paid = asObject(feeds.paid);
+public/control-center/pages/insights.js:586:  const summary = normalizeSummary(paid);
+public/control-center/pages/insights.js:588:    connected: getConnectedValue(["google_ads", "facebook", "instagram", "tiktok", "amazon", "analytics"], connections),
+public/control-center/pages/insights.js:591:    bestCampaigns: asArray(paid.best_campaigns || paid.top_campaigns || paid.campaigns).filter((item, index) => {
+public/control-center/pages/insights.js:592:      const status = asString(item.status || item.performance_level).toLowerCase();
+public/control-center/pages/insights.js:595:    weakCampaigns: asArray(paid.weak_campaigns || paid.campaigns).filter((item) => {
+public/control-center/pages/insights.js:596:      const status = asString(item.status || item.performance_level).toLowerCase();
+public/control-center/pages/insights.js:599:    bestCreatives: asArray(paid.best_creatives || paid.top_creatives || paid.creatives).slice(0, 4),
+public/control-center/pages/insights.js:600:    weakCreatives: asArray(paid.weak_creatives || []).slice(0, 4)
+public/control-center/pages/insights.js:604:function buildLearningEngine(contentItems, platformCards, websiteIntel, seoIntel, paidIntel, connections) {
+public/control-center/pages/insights.js:650:      body: measured.length ? bestEntry(topicScores, "No repeated topic signal yet") : "No live post-performance feed yet. Connect social insight APIs to learn what hooks are winning."
+public/control-center/pages/insights.js:654:      body: measured.length ? bestEntry(formatScores, "No format signal yet") : "Format learning will appear once measured posts or videos are ingested."
+public/control-center/pages/insights.js:662:      body: measured.length ? bestEntry(postingWindows, "No timing signal yet") : "Posting window insights require timestamped post performance data."
+public/control-center/pages/insights.js:666:      body: measured.length ? bestEntry(ctaScores, "No CTA signal yet") : "CTA learning will appear once conversion-aware content data is connected."
+public/control-center/pages/insights.js:670:      body: weakPatterns.length ? weakPatterns.join(" • ") : "No weak pattern signal yet. Connect performance data so the system can detect what to avoid."
+public/control-center/pages/insights.js:675:  if (!websiteIntel.connected) {
+public/control-center/pages/insights.js:676:    systemLessons.push("Connect website analytics so content can be linked to sessions, engaged sessions, and conversions.");
+public/control-center/pages/insights.js:678:  if (!seoIntel.connected) {
+public/control-center/pages/insights.js:679:    systemLessons.push("Connect Search Console so the system can learn which pages and queries deserve new content.");
+public/control-center/pages/insights.js:681:  if (!paidIntel.connected) {
+public/control-center/pages/insights.js:682:    systemLessons.push("Connect paid performance so creative and audience learnings can improve ad spend efficiency.");
+public/control-center/pages/insights.js:691:function buildOptimizationPanel(state, platformCards, websiteIntel, seoIntel, paidIntel, measuredTop, weakItems, learning) {
+public/control-center/pages/insights.js:692:  const recommendations = [];
+public/control-center/pages/insights.js:699:    recommendations.push({
+public/control-center/pages/insights.js:701:      meta: `These sources are connected but still not sending analytics into the Insight Engine: ${platformsAwaitingFeed.join(", ")}.`,
+public/control-center/pages/insights.js:707:    recommendations.push({
+public/control-center/pages/insights.js:715:    recommendations.push({
+public/control-center/pages/insights.js:722:  if (websiteIntel.connected && !websiteIntel.hasData) {
+public/control-center/pages/insights.js:723:    recommendations.push({
+public/control-center/pages/insights.js:724:      title: "Activate website and GA4 intelligence",
+public/control-center/pages/insights.js:730:  if (seoIntel.connected && !seoIntel.hasData) {
+public/control-center/pages/insights.js:731:    recommendations.push({
+public/control-center/pages/insights.js:732:      title: "Activate Search Console intelligence",
+public/control-center/pages/insights.js:738:  if (paidIntel.connected && !paidIntel.hasData) {
+public/control-center/pages/insights.js:739:    recommendations.push({
+public/control-center/pages/insights.js:740:      title: "Activate paid campaign intelligence",
+public/control-center/pages/insights.js:746:  if (!recommendations.length) {
+public/control-center/pages/insights.js:747:    recommendations.push({
+public/control-center/pages/insights.js:749:      meta: "Feed more granular post, page, query, and campaign metrics into this page to improve learning accuracy.",
+public/control-center/pages/insights.js:757:      prompt: `Review all available insights for ${projectName} and tell me the highest-impact improvement to make next across content, publishing, SEO, paid media, and website conversion.`
+public/control-center/pages/insights.js:761:      prompt: `Using the connected cross-platform performance signals for ${projectName}, identify the strongest platform, explain why it is strongest, and say what we should scale there.`
+public/control-center/pages/insights.js:769:      prompt: `Review the SEO and Search Console signals for ${projectName}. Tell me the most valuable query, page, and CTR opportunities to act on next.`
+public/control-center/pages/insights.js:777:      prompt: `Summarize the strongest reusable pattern in ${projectName}'s current performance data, including hook, format, CTA, platform, and timing.`
+public/control-center/pages/insights.js:782:    recommendations,
+public/control-center/pages/insights.js:784:    lessons: learning.systemLessons
+public/control-center/pages/insights.js:790:    <div class="insights-platform-grid">
+public/control-center/pages/insights.js:792:        <section class="insights-platform-card">
+public/control-center/pages/insights.js:793:          <div class="insights-platform-head">
+public/control-center/pages/insights.js:798:            <span class="card-badge ${statusTone(item.performanceLevel)}">${escapeHtml(item.performanceLevel)}</span>
+public/control-center/pages/insights.js:800:          <div class="insights-platform-metrics">
+public/control-center/pages/insights.js:814:          <div class="insights-platform-note">${escapeHtml(item.recommendation)}</div>
+public/control-center/pages/insights.js:827:    <div class="insights-ranked-list">
+public/control-center/pages/insights.js:829:        <div class="insights-ranked-item">
+public/control-center/pages/insights.js:830:          <div class="insights-ranked-head">
+public/control-center/pages/insights.js:831:            <div class="insights-ranked-title">
+public/control-center/pages/insights.js:832:              ${item.rank ? `<span class="insights-rank">${escapeHtml(String(item.rank))}</span>` : ""}
+public/control-center/pages/insights.js:837:          <div class="insights-ranked-grid">
+public/control-center/pages/insights.js:855:          <div class="insights-ranked-note">${escapeHtml(item.why)}</div>
+public/control-center/pages/insights.js:868:    <div class="insights-list">
+public/control-center/pages/insights.js:870:        <div class="insights-list-item">
+public/control-center/pages/insights.js:871:          <div class="insights-list-head">
+public/control-center/pages/insights.js:875:          <div class="insights-list-meta">${escapeHtml(item.weakMetrics || "No metric detail yet")}</div>
+public/control-center/pages/insights.js:876:          <div class="insights-list-note">${escapeHtml(`Why likely weak: ${item.reason}`)}</div>
+public/control-center/pages/insights.js:877:          <div class="insights-list-note">${escapeHtml(`Improve next: ${item.improve}`)}</div>
+public/control-center/pages/insights.js:886:    <div class="insights-empty-state">
+public/control-center/pages/insights.js:913:    <div class="insights-mini-list">
+public/control-center/pages/insights.js:937:          <div class="insights-mini-item">
+public/control-center/pages/insights.js:963:  Array.from(document.querySelectorAll("[data-insights-open]")).forEach((button) => {
+public/control-center/pages/insights.js:969:  Array.from(document.querySelectorAll("[data-insights-route]")).forEach((button) => {
+public/control-center/pages/insights.js:971:      const route = button.getAttribute("data-insights-route") || "";
+public/control-center/pages/insights.js:982:          source_page: "insights",
+public/control-center/pages/insights.js:987:            route: "insights",
+public/control-center/pages/insights.js:992:              origin: "insights",
+public/control-center/pages/insights.js:1006:  Array.from(document.querySelectorAll("[data-insights-prompt]")).forEach((button) => {
+public/control-center/pages/insights.js:1008:      const index = Number(button.getAttribute("data-insights-prompt"));
+public/control-center/pages/insights.js:1025:          source_page: "insights",
+public/control-center/pages/insights.js:1030:            route: "insights",
+public/control-center/pages/insights.js:1036:              origin: "insights",
+public/control-center/pages/insights.js:1054:export const insightsRoute = {
+public/control-center/pages/insights.js:1055:  id: "insights",
+public/control-center/pages/insights.js:1063:    <section class="page is-active" data-page="insights">
+public/control-center/pages/insights.js:1064:      <div id="insightsRoot"></div>
+public/control-center/pages/insights.js:1075:    fetchProjectInsights,
+public/control-center/pages/insights.js:1088:      website: asObject(insightRoot.website || insightRoot.analytics || insightRoot.ga4 || {}),
+public/control-center/pages/insights.js:1089:      seo: asObject(insightRoot.seo || insightRoot.search_console || {}),
+public/control-center/pages/insights.js:1090:      paid: asObject(insightRoot.paid || insightRoot.paid_media || {})
+public/control-center/pages/insights.js:1096:        ? "Refresh insights"
+public/control-center/pages/insights.js:1097:        : "Retry insights";
+public/control-center/pages/insights.js:1104:    const websiteIntel = buildWebsiteIntelligence(feeds, connections);
+public/control-center/pages/insights.js:1105:    const seoIntel = buildSeoIntelligence(feeds, connections);
+public/control-center/pages/insights.js:1106:    const paidIntel = buildPaidIntelligence(feeds, connections);
+public/control-center/pages/insights.js:1107:    const learning = buildLearningEngine(contentItems, platformCards, websiteIntel, seoIntel, paidIntel, connections);
+public/control-center/pages/insights.js:1108:    const optimization = buildOptimizationPanel(state, platformCards, websiteIntel, seoIntel, paidIntel, topContent, weakContent, learning);
+public/control-center/pages/insights.js:1114:        const tone = asString(item.performanceLevel).toLowerCase();
+public/control-center/pages/insights.js:1118:    const learningHighlights = learning.cards.slice(0, 3);
+public/control-center/pages/insights.js:1119:    const recommendationItems = optimization.recommendations.slice(0, 4);
+public/control-center/pages/insights.js:1124:        status: websiteIntel.connected ? (websiteIntel.hasData ? "Live analytics" : "Waiting for feed") : "Not connected",
+public/control-center/pages/insights.js:1125:        tone: websiteIntel.connected ? (websiteIntel.hasData ? "success" : "warning") : "danger",
+public/control-center/pages/insights.js:1127:          { label: "Sessions", value: formatCompact(websiteIntel.summary.sessions) },
+public/control-center/pages/insights.js:1128:          { label: "Conversions", value: formatCompact(websiteIntel.summary.conversions) }
+public/control-center/pages/insights.js:1130:        note: websiteIntel.recommendations[0]?.title || websiteIntel.conversionSignals[0]?.label || "Landing-page and conversion signals will appear here when analytics is available."
+public/control-center/pages/insights.js:1134:        status: seoIntel.connected ? (seoIntel.hasData ? "Live SEO" : "Waiting for feed") : "Not connected",
+public/control-center/pages/insights.js:1135:        tone: seoIntel.connected ? (seoIntel.hasData ? "success" : "warning") : "danger",
+public/control-center/pages/insights.js:1137:          { label: "Clicks", value: formatCompact(seoIntel.summary.clicks) },
+public/control-center/pages/insights.js:1138:          { label: "CTR", value: formatPercent(seoIntel.summary.ctr, 2) }
+public/control-center/pages/insights.js:1140:        note: seoIntel.topQueries[0]?.title || seoIntel.ctrOpportunities[0]?.title || "Query, page, and CTR opportunity signals will appear here when Search Console data is available."
+public/control-center/pages/insights.js:1144:        status: paidIntel.connected ? (paidIntel.hasData ? "Live paid data" : "Waiting for feed") : "Not connected",
+public/control-center/pages/insights.js:1145:        tone: paidIntel.connected ? (paidIntel.hasData ? "success" : "warning") : "danger",
+public/control-center/pages/insights.js:1147:          { label: "Spend", value: formatCurrency(paidIntel.summary.spend, currency) },
+public/control-center/pages/insights.js:1148:          { label: "ROAS", value: paidIntel.summary.roas == null ? "--" : `${paidIntel.summary.roas.toFixed(2)}x` }
+public/control-center/pages/insights.js:1150:        note: paidIntel.bestCampaigns[0]?.title || paidIntel.weakCampaigns[0]?.title || "Campaign and creative performance signals will appear here when paid reporting is available."
+public/control-center/pages/insights.js:1154:    const root = $("insightsRoot");
+public/control-center/pages/insights.js:1158:      <div class="insights-wrapper insights-workspace">
+public/control-center/pages/insights.js:1162:            <div class="insights-assistant-toolbar">
+public/control-center/pages/insights.js:1163:              <button class="btn btn-secondary" type="button" id="insightsRefreshBtn" ${refreshState.loading ? "disabled" : ""}>${escapeHtml(refreshLabel)}</button>
+public/control-center/pages/insights.js:1168:          <p class="insights-section-copy">
+public/control-center/pages/insights.js:1169:            Identify what changed, what needs attention, and the next safest action across content, website, SEO, and paid performance.
+public/control-center/pages/insights.js:1171:          <div class="insights-overview-grid">
+public/control-center/pages/insights.js:1173:              <div class="insights-overview-item">
+public/control-center/pages/insights.js:1176:                <span class="insights-kpi-meta">${escapeHtml(item.meta)}</span>
+public/control-center/pages/insights.js:1180:          <div class="insights-section-copy">${escapeHtml(executive.summary)}</div>
+public/control-center/pages/insights.js:1181:          <div class="insights-overview-grid">
+public/control-center/pages/insights.js:1182:            <div class="insights-overview-item">
+public/control-center/pages/insights.js:1185:              <span class="insights-kpi-meta">Content items with usable performance data.</span>
+public/control-center/pages/insights.js:1187:            <div class="insights-overview-item">
+public/control-center/pages/insights.js:1190:              <span class="insights-kpi-meta">Sources that can feed this workspace.</span>
+public/control-center/pages/insights.js:1192:            <div class="insights-overview-item">
+public/control-center/pages/insights.js:1194:              <strong>${escapeHtml(seoIntel.connected ? (seoIntel.hasData ? "Live" : "Waiting") : "Missing")}</strong>
+public/control-center/pages/insights.js:1195:              <span class="insights-kpi-meta">Search visibility signal status.</span>
+public/control-center/pages/insights.js:1197:            <div class="insights-overview-item">
+public/control-center/pages/insights.js:1199:              <strong>${escapeHtml(paidIntel.connected ? (paidIntel.hasData ? "Live" : "Waiting") : "Missing")}</strong>
+public/control-center/pages/insights.js:1200:              <span class="insights-kpi-meta">Paid acquisition signal status.</span>
+public/control-center/pages/insights.js:1210:          <p class="insights-section-copy">
+public/control-center/pages/insights.js:1213:          <div class="insights-workspace-grid">
+public/control-center/pages/insights.js:1215:              <h4 class="insights-subtitle">Strongest published content</h4>
+public/control-center/pages/insights.js:1227:            <div class="insights-stack">
+public/control-center/pages/insights.js:1229:                <h4 class="insights-subtitle">Best performing lanes</h4>
+public/control-center/pages/insights.js:1234:                        "No connected performance lanes yet",
+public/control-center/pages/insights.js:1235:                        "Cross-platform comparisons appear here as soon as at least one connected source is returning performance metrics.",
+public/control-center/pages/insights.js:1242:                <h4 class="insights-subtitle">Emerging patterns</h4>
+public/control-center/pages/insights.js:1243:                <div class="insights-learning-grid">
+public/control-center/pages/insights.js:1244:                  ${learningHighlights.map((item) => `
+public/control-center/pages/insights.js:1245:                    <div class="insights-learning-card">
+public/control-center/pages/insights.js:1261:          <p class="insights-section-copy">
+public/control-center/pages/insights.js:1262:            Weak signals, missing feeds, and performance gaps that should be reviewed before the next business decision.
+public/control-center/pages/insights.js:1264:          <div class="insights-workspace-grid">
+public/control-center/pages/insights.js:1266:              <h4 class="insights-subtitle">Underperforming content</h4>
+public/control-center/pages/insights.js:1278:            <div class="insights-stack">
+public/control-center/pages/insights.js:1280:                <h4 class="insights-subtitle">At-risk channels</h4>
+public/control-center/pages/insights.js:1287:              <div class="insights-compact-grid">
+public/control-center/pages/insights.js:1289:                  <h4 class="insights-subtitle">Website conversion risk</h4>
+public/control-center/pages/insights.js:1291:                    websiteIntel.hasData
+public/control-center/pages/insights.js:1292:                      ? renderKeyValueList(websiteIntel.weakPages.slice(0, 4), "page", escapeHtml) || `<div class="empty-box">No weak page list yet.</div>`
+public/control-center/pages/insights.js:1294:                          "No website analytics feed yet",
+public/control-center/pages/insights.js:1295:                          "Connect GA4 or a website analytics source to surface weak landing pages and conversion risks.",
+public/control-center/pages/insights.js:1296:                          websiteIntel.connected,
+public/control-center/pages/insights.js:1302:                  <h4 class="insights-subtitle">SEO / paid weak signals</h4>
+public/control-center/pages/insights.js:1304:                    seoIntel.hasData || paidIntel.hasData
+public/control-center/pages/insights.js:1307:                            ...seoIntel.ctrOpportunities,
+public/control-center/pages/insights.js:1308:                            ...seoIntel.rankingOpportunities,
+public/control-center/pages/insights.js:1309:                            ...paidIntel.weakCampaigns,
+public/control-center/pages/insights.js:1310:                            ...paidIntel.weakCreatives
+public/control-center/pages/insights.js:1314:                        ) || `<div class="empty-box">No SEO or paid weakness list yet.</div>`
+public/control-center/pages/insights.js:1316:                          "No SEO or paid weakness feed yet",
+public/control-center/pages/insights.js:1317:                          "Connect Search Console and paid reporting to surface ranking, CTR, campaign, and creative risks here.",
+public/control-center/pages/insights.js:1318:                          seoIntel.connected || paidIntel.connected,
+public/control-center/pages/insights.js:1333:          <p class="insights-section-copy">
+public/control-center/pages/insights.js:1336:          <div class="insights-workspace-grid">
+public/control-center/pages/insights.js:1338:              <h4 class="insights-subtitle">Prioritized recommendations</h4>
+public/control-center/pages/insights.js:1339:              <div class="insights-list">
+public/control-center/pages/insights.js:1341:                  <div class="insights-list-item">
+public/control-center/pages/insights.js:1342:                    <div class="insights-list-head">
+public/control-center/pages/insights.js:1346:                    <div class="insights-list-meta">${escapeHtml(item.meta)}</div>
+public/control-center/pages/insights.js:1352:              <h4 class="insights-subtitle">Readiness notes</h4>
+public/control-center/pages/insights.js:1353:              <div class="insights-learning-grid">
+public/control-center/pages/insights.js:1355:                  learning.systemLessons.length
+public/control-center/pages/insights.js:1356:                    ? learning.systemLessons.map((item) => `
+public/control-center/pages/insights.js:1357:                      <div class="insights-learning-card">
+public/control-center/pages/insights.js:1363:                      <div class="insights-learning-card">
+public/control-center/pages/insights.js:1365:                        <p>More granular post, page, query, and campaign metrics will make these recommendations more specific.</p>
+public/control-center/pages/insights.js:1372:          <div class="insights-assistant-toolbar" style="margin-top: 16px;">
+public/control-center/pages/insights.js:1373:            <button class="btn btn-primary" type="button" data-insights-route="campaign-studio">Open Campaign Studio</button>
+public/control-center/pages/insights.js:1374:            <button class="btn btn-secondary" type="button" data-insights-route="content-studio">Open Content Studio</button>
+public/control-center/pages/insights.js:1375:            <button class="btn btn-secondary" type="button" data-insights-route="ads-manager">Open Ads Manager</button>
+public/control-center/pages/insights.js:1376:            <button class="btn btn-secondary" type="button" data-insights-route="publishing">Open Publishing Workspace</button>
+public/control-center/pages/insights.js:1385:          <p class="insights-section-copy">
+public/control-center/pages/insights.js:1386:            Compare the main channels side by side, then review the current website, SEO, and paid signal without opening separate summary panels.
+public/control-center/pages/insights.js:1388:          <div class="insights-workspace-grid">
+public/control-center/pages/insights.js:1390:              <h4 class="insights-subtitle">Cross-platform comparison</h4>
+public/control-center/pages/insights.js:1394:              <h4 class="insights-subtitle">Current trend snapshots</h4>
+public/control-center/pages/insights.js:1395:              <div class="insights-domain-summary-grid">
+public/control-center/pages/insights.js:1397:                  <div class="insights-domain-summary">
+public/control-center/pages/insights.js:1398:                    <div class="insights-list-head">
+public/control-center/pages/insights.js:1402:                    <div class="insights-domain-summary-metrics">
+public/control-center/pages/insights.js:1410:                    <div class="insights-list-note">${escapeHtml(item.note)}</div>
+public/control-center/pages/insights.js:1423:          <p class="insights-section-copy">
+public/control-center/pages/insights.js:1426:          <div class="insights-assistant-toolbar">
+public/control-center/pages/insights.js:1427:            <button class="btn ghost" type="button" data-insights-open>Open AI Workspace Review</button>
+public/control-center/pages/insights.js:1429:          <div class="insights-prompt-list">
+public/control-center/pages/insights.js:1431:              <button class="quick-action-btn" type="button" data-insights-prompt="${index}">
+public/control-center/pages/insights.js:1450:    root.querySelector("#insightsRefreshBtn")?.addEventListener("click", () => {
+public/control-center/pages/insights.js:1455:        insightsRoute.render({
+public/control-center/pages/insights.js:1463:          fetchProjectInsights,
+public/control-center/pages/insights.js:1469:      if (!fetchProjectInsights) {
+public/control-center/pages/insights.js:1473:        insightsRoute.render({
+public/control-center/pages/insights.js:1481:          fetchProjectInsights,
+public/control-center/pages/insights.js:1488:      insightsRoute.render({
+public/control-center/pages/insights.js:1496:        fetchProjectInsights,
+public/control-center/pages/insights.js:1500:      fetchProjectInsights(projectName)
+public/control-center/pages/insights.js:1510:              insights: asObject(liveData)
+public/control-center/pages/insights.js:1515:          insightsRoute.render({
+public/control-center/pages/insights.js:1523:            fetchProjectInsights,
+public/control-center/pages/insights.js:1529:          const message = `Insights: ${error?.message || "Failed to refresh insights."}`;
+public/control-center/pages/insights.js:1531:          insightsRoute.render({
+public/control-center/pages/insights.js:1539:            fetchProjectInsights,
+
+### backend insights routes and authority
+28:} = require('./lib/execution/performance-metrics');
+29:const { createPerformanceStorage } = require('./lib/execution/performance-storage');
+35:const { createLearningPatterns } = require('./lib/execution/learning-patterns');
+38:const { createEconomicCoreAnalytics } = require('../economic-core-analytics');
+84:} = require('./lib/insights/ingestion-service');
+353:  /^\/generate_optimization_recommendations\/?$/i,
+444:  /^\/get_performance_summary\/?$/i,
+978:  /^\/(?:public\/)?api\/(?:insights|learning)\/([^/?#]+)/i,
+4503:  const performanceDir = path.join(baseDir, 'performance');
+4506:  const legacyPerformanceDir = path.join(legacyBaseDir, 'performance');
+4511:  ensureDir(performanceDir);
+4521:    performanceDir,
+4567:  const recommendations = [];
+4571:    recommendations.push('rewrite copy in natural German for German-market publishing');
+4577:    recommendations.push('use a clearer and more direct CTA');
+4583:    recommendations.push('tighten the first line and move detail lower');
+4599:    recommendations,
+4722:    artifactType: 'optimization_performance_history',
+4740:  const files = fs.readdirSync(paths.performanceDir)
+4750:    const filePath = path.join(paths.performanceDir, name);
+4768:  const files = fs.readdirSync(paths.performanceDir)
+4775:    const filePath = path.join(paths.performanceDir, name);
+4791:    learning_summary: {
+4793:      note: 'This layer becomes smarter as more real performance records are stored.'
+5917:    return String(projectData.website_url || '').trim();
+6244:          : 'Return analysis and recommendations.'
+6336:    aiRecommendationsPath: path.join(opsDir, 'ai-recommendations.json'),
+6499:    website: ['website'],
+6573:    website: projectData.website || projectData.website_url || '',
+6705:      ai_recommendations: {
+6741:  if (projectData.website_url) {
+6742:    nextSources.website = {
+6743:      value: String(projectData.website_url || '').trim(),
+6840:    default_channels: ['website', 'instagram', 'facebook'],
+6853:    recommended_integrations: ['website', 'google', 'meta']
+6860:      default_channels: ['website', 'woocommerce', 'instagram', 'facebook', 'google', 'tiktok'],
+6864:      workspace_priorities: ['setup', 'library', 'campaign-studio', 'content-studio', 'media-studio', 'publishing', 'insights'],
+6873:      default_channels: ['instagram', 'tiktok', 'youtube', 'spotify', 'website'],
+6880:      recommended_integrations: ['youtube', 'instagram', 'tiktok', 'spotify', 'website']
+6886:      default_channels: ['instagram', 'tiktok', 'google_business', 'website', 'facebook'],
+6890:      workspace_priorities: ['setup', 'library', 'media-studio', 'content-studio', 'publishing', 'insights'],
+6893:      recommended_integrations: ['google_business', 'instagram', 'tiktok', 'website', 'booking']
+6899:      default_channels: ['website', 'facebook', 'instagram', 'google', 'crm'],
+6906:      recommended_integrations: ['website', 'crm', 'google', 'meta', 'email_crm']
+6912:      default_channels: ['website', 'google_business', 'instagram', 'facebook'],
+6919:      recommended_integrations: ['website', 'google_business', 'meta', 'email_crm']
+6925:      default_channels: ['instagram', 'tiktok', 'google_business', 'website', 'facebook'],
+6932:      recommended_integrations: ['google_business', 'instagram', 'tiktok', 'website', 'delivery']
+6938:      default_channels: ['website', 'linkedin', 'instagram', 'facebook'],
+6942:      workspace_priorities: ['setup', 'library', 'content-studio', 'campaign-studio', 'insights', 'workflows'],
+6945:      recommended_integrations: ['website', 'linkedin', 'meta', 'google', 'crm']
+6951:      default_channels: ['google_business', 'website', 'instagram', 'facebook'],
+6955:      workspace_priorities: ['setup', 'library', 'content-studio', 'publishing', 'insights'],
+6958:      recommended_integrations: ['google_business', 'website', 'meta']
+6969:function createProject(projectName, market, language, projectType, websiteUrl) {
+7001:    website_url: websiteUrl || '',
+7063:    website: normalizeSetupTextValue(input.website || input.website_url),
+7074:    website_url: normalizeSetupTextValue(input.website_url),
+7276:  const setupFields = ['project_name', 'project_type', 'website_url', 'market', 'language', 'currency', 'primary_goal', 'audience_primary'];
+7282:  const brandFields = ['brand_name', 'business_type', 'market', 'language', 'currency', 'tone', 'positioning', 'audience', 'goals', 'website'];
+7351:    has_ai_recommendations: baselineValidation.required_files.ai_recommendations.exists,
+7354:    has_website_url: !!projectData.website_url,
+7362:  if (!checks.has_website_url) missing.push('website_url');
+7580:  website: 'website',
+7589:  analytics: 'ga4',
+7944:    insights_ready: asPlainObject(normalizedRecord.insights_ready)
+8115:      insights_ready: asPlainObject(providerResult.insights_ready),
+8254:      nextRecord.insights_ready = asPlainObject(providerResult.insights_ready);
+9190:    website: hasSource('website'),
+9199:    analytics: hasSource('analytics')
+9898:        seo_title_suggestion: `${product.name} | ${brandName}`,
+9951:        seo_title: `${cleanName} | ${brandName}`,
+10109:      seo_title: `${cleanName} | ${brandName}`,
+10597:  const websiteUrl = String(
+10598:    body.website_url ||
+10599:    body.websiteUrl ||
+10600:    body.website ||
+10617:      websiteUrl
+12144:      error: error.message || 'Failed to list AI recommendations'
+12179:app.get('/media-manager/project/:project/ai/recommendations', handleListAiRecommendations);
+12180:app.get('/public/media-manager/project/:project/ai/recommendations', handleListAiRecommendations);
+12489:      error: error.message || 'Failed to build project insights'
+12499:      error: error.message || 'Failed to build project learning'
+12504:app.get('/api/insights/:project', handleGetProjectInsights);
+12505:app.get('/public/api/insights/:project', handleGetProjectInsights);
+12506:app.get('/api/learning/:project', handleGetProjectLearning);
+12507:app.get('/public/api/learning/:project', handleGetProjectLearning);
+14028:  const benefitText = benefits.length ? benefits.join(', ') : 'care and performance';
+15625:    if (['website', 'ecommerce', 'instagram', 'facebook'].includes(item)) {
+15675:      website_url: project.website_url,
+15712:      website_url: project.website_url,
+15913:  let insights = null;
+15933:    insights = getProjectInsightsEnginePayload(projectName);
+15935:    insights = {
+15938:      error: error.message || 'Failed to build project insights'
+15942:  const learning = insights && !insights.error
+15944:        project: insights.project,
+15945:        generated_at: insights.generated_at,
+15946:        data_coverage: insights.data_coverage,
+15947:        learning_patterns: insights.learning_patterns,
+15948:        recommendations: insights.recommendations,
+15949:        system_lessons: insights.system_lessons,
+15950:        ai_recommendations: insights.ai_recommendations,
+15951:        source_summary: insights.source_summary
+15956:        error: insights?.error || 'Failed to build learning payload'
+15966:    insights,
+15967:    marketing_insights: insights,
+15968:    performance_insights: insights,
+15969:    learning,
+15970:    learning_patterns: learning.learning_patterns || {},
+15971:    recommendations: learning.recommendations || []
+16202:        seo_title: `${topic} | ${commandBrandName}`,
+16231:          `Create a premium masculine featured image for a German blog article about ${topic}. Clean grooming aesthetic, luxury male care branding, modern barbershop mood, natural contrast, elegant composition, suitable for a premium men’s grooming website.`,
+16295:        send_goal: 'traffic + conversion',
+16573:      item.seo_title = `${item.topic} | ${commandBrandName}`;
+16666:      item.send_goal = 'traffic + conversion';
+16850:          seo_title: item.seo_title || '',
+17334:          send_goal: item.send_goal || 'traffic + conversion',
+17690:          'website',
+18600:          'website',
+18627:          'launch paid ads',
+18628:          'review performance and improve winners'
+18900:          seo_title: `${campaignExec.blog.title} | ${campaignBrandName}`,
+18938:          send_goal: 'traffic + conversion',
+21438:if (command === '/save_post_performance') {
+21453:      error: 'Failed to save post performance',
+21458:if (command === '/review_product_performance') {
+21471:      error: 'Failed to review product performance',
+21476:if (command === '/review_channel_learning') {
+21489:      error: 'Failed to review channel learning',
+21528:  const websiteUrl = (args[4] || '').trim();
+21540:      websiteUrl
+22078:      seo_note:
+22345:  const analyticsDir = path.join(projectRoot, 'analytics');
+22348:  ensureDir(analyticsDir);
+22354:    analyticsDir,
+22356:    performancePath: path.join(analyticsDir, 'performance.json'),
+22357:    recommendationsPath: path.join(aiDir, 'recommendations.json'),
+22358:    learningPath: path.join(aiDir, 'learning.json')
+22362:const performanceStorage = createPerformanceStorage({
+22374:} = performanceStorage;
+22468:const learningPatterns = createLearningPatterns({
+22475:} = learningPatterns;
+22955:        learning_updates: update.learning_updates.length,
+22958:      analytics_file: getIntelligencePaths(projectName).performancePath
+22969:app.get('/get_performance_summary', (req, res) => {
+22983:      message: error.message || 'Failed to build performance summary'
+22988:app.post('/generate_optimization_recommendations', (req, res) => {
+22998:      recommendations: {
+22999:        what_to_stop: update.recommendations.stop,
+23000:        what_to_scale: update.recommendations.scale,
+23001:        what_to_improve: update.recommendations.improve,
+23002:        new_angles_to_test: update.recommendations.new_angles_to_test
+23004:      risk_alerts: update.recommendations.alerts,
+23005:      based_on: update.recommendations.based_on
+23011:      message: error.message || 'Failed to generate optimization recommendations'
+
+### backend exact insights windows
+35:const { createLearningPatterns } = require('./lib/execution/learning-patterns');
+38:const { createEconomicCoreAnalytics } = require('../economic-core-analytics');
+84:} = require('./lib/insights/ingestion-service');
+353:  /^\/generate_optimization_recommendations\/?$/i,
+978:  /^\/(?:public\/)?api\/(?:insights|learning)\/([^/?#]+)/i,
+4567:  const recommendations = [];
+4571:    recommendations.push('rewrite copy in natural German for German-market publishing');
+4577:    recommendations.push('use a clearer and more direct CTA');
+4583:    recommendations.push('tighten the first line and move detail lower');
+4599:    recommendations,
+4791:    learning_summary: {
+6244:          : 'Return analysis and recommendations.'
+6336:    aiRecommendationsPath: path.join(opsDir, 'ai-recommendations.json'),
+6705:      ai_recommendations: {
+6864:      workspace_priorities: ['setup', 'library', 'campaign-studio', 'content-studio', 'media-studio', 'publishing', 'insights'],
+6890:      workspace_priorities: ['setup', 'library', 'media-studio', 'content-studio', 'publishing', 'insights'],
+6942:      workspace_priorities: ['setup', 'library', 'content-studio', 'campaign-studio', 'insights', 'workflows'],
+6955:      workspace_priorities: ['setup', 'library', 'content-studio', 'publishing', 'insights'],
+7351:    has_ai_recommendations: baselineValidation.required_files.ai_recommendations.exists,
+7589:  analytics: 'ga4',
+7944:    insights_ready: asPlainObject(normalizedRecord.insights_ready)
+8115:      insights_ready: asPlainObject(providerResult.insights_ready),
+8254:      nextRecord.insights_ready = asPlainObject(providerResult.insights_ready);
+9199:    analytics: hasSource('analytics')
+9898:        seo_title_suggestion: `${product.name} | ${brandName}`,
+9951:        seo_title: `${cleanName} | ${brandName}`,
+10109:      seo_title: `${cleanName} | ${brandName}`,
+12144:      error: error.message || 'Failed to list AI recommendations'
+12179:app.get('/media-manager/project/:project/ai/recommendations', handleListAiRecommendations);
+12180:app.get('/public/media-manager/project/:project/ai/recommendations', handleListAiRecommendations);
+12489:      error: error.message || 'Failed to build project insights'
+12499:      error: error.message || 'Failed to build project learning'
+12504:app.get('/api/insights/:project', handleGetProjectInsights);
+12505:app.get('/public/api/insights/:project', handleGetProjectInsights);
+12506:app.get('/api/learning/:project', handleGetProjectLearning);
+12507:app.get('/public/api/learning/:project', handleGetProjectLearning);
+15913:  let insights = null;
+15933:    insights = getProjectInsightsEnginePayload(projectName);
+15935:    insights = {
+15938:      error: error.message || 'Failed to build project insights'
+15942:  const learning = insights && !insights.error
+15944:        project: insights.project,
+15945:        generated_at: insights.generated_at,
+15946:        data_coverage: insights.data_coverage,
+15947:        learning_patterns: insights.learning_patterns,
+15948:        recommendations: insights.recommendations,
+15949:        system_lessons: insights.system_lessons,
+15950:        ai_recommendations: insights.ai_recommendations,
+15951:        source_summary: insights.source_summary
+15956:        error: insights?.error || 'Failed to build learning payload'
+15966:    insights,
+15967:    marketing_insights: insights,
+15968:    performance_insights: insights,
+15969:    learning,
+15970:    learning_patterns: learning.learning_patterns || {},
+15971:    recommendations: learning.recommendations || []
+16202:        seo_title: `${topic} | ${commandBrandName}`,
+16573:      item.seo_title = `${item.topic} | ${commandBrandName}`;
+16850:          seo_title: item.seo_title || '',
+18900:          seo_title: `${campaignExec.blog.title} | ${campaignBrandName}`,
+21476:if (command === '/review_channel_learning') {
+21489:      error: 'Failed to review channel learning',
+22078:      seo_note:
+22345:  const analyticsDir = path.join(projectRoot, 'analytics');
+22348:  ensureDir(analyticsDir);
+22354:    analyticsDir,
+22356:    performancePath: path.join(analyticsDir, 'performance.json'),
+22357:    recommendationsPath: path.join(aiDir, 'recommendations.json'),
+22358:    learningPath: path.join(aiDir, 'learning.json')
+22468:const learningPatterns = createLearningPatterns({
+22475:} = learningPatterns;
+22955:        learning_updates: update.learning_updates.length,
+22958:      analytics_file: getIntelligencePaths(projectName).performancePath
+22988:app.post('/generate_optimization_recommendations', (req, res) => {
+22998:      recommendations: {
+22999:        what_to_stop: update.recommendations.stop,
+23000:        what_to_scale: update.recommendations.scale,
+23001:        what_to_improve: update.recommendations.improve,
+23002:        new_angles_to_test: update.recommendations.new_angles_to_test
+23004:      risk_alerts: update.recommendations.alerts,
+23005:      based_on: update.recommendations.based_on
+23011:      message: error.message || 'Failed to generate optimization recommendations'

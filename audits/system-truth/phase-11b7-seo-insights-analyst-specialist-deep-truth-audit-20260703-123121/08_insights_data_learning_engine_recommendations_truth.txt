@@ -1,0 +1,1539 @@
+### frontend insights data usage
+public/control-center/pages/insights.js:7:    type: "social",
+public/control-center/pages/insights.js:14:    type: "social",
+public/control-center/pages/insights.js:21:    type: "social",
+public/control-center/pages/insights.js:28:    type: "social",
+public/control-center/pages/insights.js:33:    id: "website",
+public/control-center/pages/insights.js:35:    type: "website",
+public/control-center/pages/insights.js:36:    sourceKeys: ["website", "analytics"],
+public/control-center/pages/insights.js:37:    emptyTitle: "No website analytics feed yet"
+public/control-center/pages/insights.js:40:    id: "seo",
+public/control-center/pages/insights.js:42:    type: "seo",
+public/control-center/pages/insights.js:43:    sourceKeys: ["google", "analytics", "website"],
+public/control-center/pages/insights.js:47:    id: "paid",
+public/control-center/pages/insights.js:49:    type: "paid",
+public/control-center/pages/insights.js:51:    emptyTitle: "No paid performance feed yet"
+public/control-center/pages/insights.js:231:    activity.performance_insights ||
+public/control-center/pages/insights.js:241:function normalizeSummary(raw) {
+public/control-center/pages/insights.js:258:    performanceLevel: asString(summary.performance_level || summary.status),
+public/control-center/pages/insights.js:262:    recommendation: asString(summary.recommendation)
+public/control-center/pages/insights.js:266:function getFeedSummary(platform, feeds) {
+public/control-center/pages/insights.js:267:  if (platform.type === "social") {
+public/control-center/pages/insights.js:268:    return normalizeSummary(asObject(feeds.social?.[platform.id]));
+public/control-center/pages/insights.js:270:  if (platform.type === "website") {
+public/control-center/pages/insights.js:271:    return normalizeSummary(asObject(feeds.website));
+public/control-center/pages/insights.js:273:  if (platform.type === "seo") {
+public/control-center/pages/insights.js:274:    return normalizeSummary(asObject(feeds.seo));
+public/control-center/pages/insights.js:276:  return normalizeSummary(asObject(feeds.paid));
+public/control-center/pages/insights.js:322:    improveNext: asString(item.improve_next || item.recommendation || ""),
+public/control-center/pages/insights.js:351:function buildContentInventory(state, feeds) {
+public/control-center/pages/insights.js:353:  const socialFeeds = asObject(feeds.social);
+public/control-center/pages/insights.js:354:  const fromFeeds = Object.entries(socialFeeds).flatMap(([platformId, raw]) => {
+public/control-center/pages/insights.js:378:function buildExecutiveOverview(feeds, contentItems, connections, currency = "USD") {
+public/control-center/pages/insights.js:379:  const socialSummaries = ["facebook", "instagram", "tiktok", "youtube"]
+public/control-center/pages/insights.js:380:    .map((key) => normalizeSummary(asObject(feeds.social?.[key])));
+public/control-center/pages/insights.js:381:  const websiteSummary = normalizeSummary(asObject(feeds.website));
+public/control-center/pages/insights.js:382:  const seoSummary = normalizeSummary(asObject(feeds.seo));
+public/control-center/pages/insights.js:383:  const paidSummary = normalizeSummary(asObject(feeds.paid));
+public/control-center/pages/insights.js:390:  const totalReach = sumMetric(socialSummaries, "reach");
+public/control-center/pages/insights.js:391:  const totalEngagement = sumMetric(socialSummaries, "engagement");
+public/control-center/pages/insights.js:392:  const totalClicks = sumMetric([...socialSummaries, websiteSummary], "clicks");
+public/control-center/pages/insights.js:394:    sumMetric(socialSummaries, "conversions"),
+public/control-center/pages/insights.js:395:    websiteSummary.conversions,
+public/control-center/pages/insights.js:396:    paidSummary.conversions
+public/control-center/pages/insights.js:399:    sumMetric(socialSummaries, "revenue"),
+public/control-center/pages/insights.js:400:    websiteSummary.revenue,
+public/control-center/pages/insights.js:401:    paidSummary.revenue,
+public/control-center/pages/insights.js:402:    normalizeSummary(asObject(feeds.marketplace)).revenue
+public/control-center/pages/insights.js:404:  const totalSpend = paidSummary.spend;
+public/control-center/pages/insights.js:408:    : paidSummary.roas;
+public/control-center/pages/insights.js:410:  const publishedCount = contentItems.filter((item) => item.hasMetrics).length;
+public/control-center/pages/insights.js:412:  const seoVisibility = seoSummary.impressions != null
+public/control-center/pages/insights.js:413:    ? `${formatCompact(seoSummary.impressions)} impressions`
+public/control-center/pages/insights.js:414:    : getConnectedValue(["google", "analytics", "website"], connections)
+public/control-center/pages/insights.js:423:        meta: totalReach == null ? "Awaiting social insight feeds" : `${publishedCount} measured content items`
+public/control-center/pages/insights.js:428:        meta: totalEngagement == null ? "Awaiting social insight feeds" : "Cross-platform engagement signal"
+public/control-center/pages/insights.js:433:        meta: totalClicks == null ? "Awaiting social + website feeds" : "Traffic-driving content signal"
+public/control-center/pages/insights.js:438:        meta: totalConversions.length ? "Attributed conversion signal" : "Awaiting site / paid conversion feed"
+public/control-center/pages/insights.js:448:        meta: totalSpend == null ? "Awaiting paid feed" : "Paid media spend"
+public/control-center/pages/insights.js:457:        value: seoVisibility,
+public/control-center/pages/insights.js:462:      ? "The Insight Engine is structurally ready, but live performance feeds are still sparse. Connect social insights, website analytics, SEO, and paid platforms to unlock real learning."
+public/control-center/pages/insights.js:463:      : "This workspace is blending the currently available social, website, SEO, and paid signals into one optimization layer so the system can learn what to scale, what to fix, and what to reuse."
+public/control-center/pages/insights.js:467:function buildPlatformCards(state, feeds, connections, currency = "USD") {
+public/control-center/pages/insights.js:469:    const summary = getFeedSummary(platform, feeds);
+public/control-center/pages/insights.js:473:    let performanceLevel = "Not connected";
+public/control-center/pages/insights.js:474:    if (connected && !hasData) performanceLevel = "Connected, awaiting feed";
+public/control-center/pages/insights.js:476:      performanceLevel =
+public/control-center/pages/insights.js:477:        summary.performanceLevel ||
+public/control-center/pages/insights.js:481:            ? "Mixed performance signal"
+public/control-center/pages/insights.js:494:        ? (summary.ctr != null ? `CTR ${formatMetricValue("ctr", summary.ctr, currency)}` : "Need more optimization context")
+public/control-center/pages/insights.js:500:    const recommendation = summary.recommendation ||
+public/control-center/pages/insights.js:502:        ? "Map real API data into this card to unlock comparison and recommendations."
+public/control-center/pages/insights.js:509:      performanceLevel,
+public/control-center/pages/insights.js:513:      recommendation,
+public/control-center/pages/insights.js:519:function buildTopContent(contentItems) {
+public/control-center/pages/insights.js:520:  return contentItems
+public/control-center/pages/insights.js:537:function buildWeakContent(contentItems) {
+public/control-center/pages/insights.js:538:  return contentItems
+public/control-center/pages/insights.js:556:function buildWebsiteIntelligence(feeds, connections) {
+public/control-center/pages/insights.js:557:  const website = asObject(feeds.website);
+public/control-center/pages/insights.js:558:  const summary = normalizeSummary(website);
+public/control-center/pages/insights.js:560:    connected: getConnectedValue(["website", "analytics"], connections),
+public/control-center/pages/insights.js:563:    topPages: asArray(website.top_pages || website.best_pages || website.top_landing_pages),
+public/control-center/pages/insights.js:564:    weakPages: asArray(website.weak_pages || website.low_converting_pages || website.dropoff_pages),
+public/control-center/pages/insights.js:565:    conversionSignals: asArray(website.conversion_signals || website.conversion_paths || website.funnel_signals),
+public/control-center/pages/insights.js:566:    recommendations: asArray(website.recommendations || website.opportunities)
+public/control-center/pages/insights.js:570:function buildSeoIntelligence(feeds, connections) {
+public/control-center/pages/insights.js:571:  const seo = asObject(feeds.seo);
+public/control-center/pages/insights.js:572:  const summary = normalizeSummary(seo);
+public/control-center/pages/insights.js:574:    connected: getConnectedValue(["google", "website", "analytics"], connections),
+public/control-center/pages/insights.js:577:    topQueries: asArray(seo.top_queries || seo.queries),
+public/control-center/pages/insights.js:578:    topPages: asArray(seo.top_pages || seo.pages),
+public/control-center/pages/insights.js:579:    ctrOpportunities: asArray(seo.low_ctr_pages || seo.ctr_opportunities),
+public/control-center/pages/insights.js:580:    rankingOpportunities: asArray(seo.opportunities || seo.ranking_opportunities || seo.content_themes)
+public/control-center/pages/insights.js:584:function buildPaidIntelligence(feeds, connections) {
+public/control-center/pages/insights.js:585:  const paid = asObject(feeds.paid);
+public/control-center/pages/insights.js:586:  const summary = normalizeSummary(paid);
+public/control-center/pages/insights.js:591:    bestCampaigns: asArray(paid.best_campaigns || paid.top_campaigns || paid.campaigns).filter((item, index) => {
+public/control-center/pages/insights.js:592:      const status = asString(item.status || item.performance_level).toLowerCase();
+public/control-center/pages/insights.js:595:    weakCampaigns: asArray(paid.weak_campaigns || paid.campaigns).filter((item) => {
+public/control-center/pages/insights.js:596:      const status = asString(item.status || item.performance_level).toLowerCase();
+public/control-center/pages/insights.js:599:    bestCreatives: asArray(paid.best_creatives || paid.top_creatives || paid.creatives).slice(0, 4),
+public/control-center/pages/insights.js:600:    weakCreatives: asArray(paid.weak_creatives || []).slice(0, 4)
+public/control-center/pages/insights.js:604:function buildLearningEngine(contentItems, platformCards, websiteIntel, seoIntel, paidIntel, connections) {
+public/control-center/pages/insights.js:605:  const measured = contentItems.filter((item) => item.hasMetrics);
+public/control-center/pages/insights.js:650:      body: measured.length ? bestEntry(topicScores, "No repeated topic signal yet") : "No live post-performance feed yet. Connect social insight APIs to learn what hooks are winning."
+public/control-center/pages/insights.js:654:      body: measured.length ? bestEntry(formatScores, "No format signal yet") : "Format learning will appear once measured posts or videos are ingested."
+public/control-center/pages/insights.js:662:      body: measured.length ? bestEntry(postingWindows, "No timing signal yet") : "Posting window insights require timestamped post performance data."
+public/control-center/pages/insights.js:666:      body: measured.length ? bestEntry(ctaScores, "No CTA signal yet") : "CTA learning will appear once conversion-aware content data is connected."
+public/control-center/pages/insights.js:670:      body: weakPatterns.length ? weakPatterns.join(" • ") : "No weak pattern signal yet. Connect performance data so the system can detect what to avoid."
+public/control-center/pages/insights.js:675:  if (!websiteIntel.connected) {
+public/control-center/pages/insights.js:676:    systemLessons.push("Connect website analytics so content can be linked to sessions, engaged sessions, and conversions.");
+public/control-center/pages/insights.js:678:  if (!seoIntel.connected) {
+public/control-center/pages/insights.js:681:  if (!paidIntel.connected) {
+public/control-center/pages/insights.js:682:    systemLessons.push("Connect paid performance so creative and audience learnings can improve ad spend efficiency.");
+public/control-center/pages/insights.js:691:function buildOptimizationPanel(state, platformCards, websiteIntel, seoIntel, paidIntel, measuredTop, weakItems, learning) {
+public/control-center/pages/insights.js:692:  const recommendations = [];
+public/control-center/pages/insights.js:699:    recommendations.push({
+public/control-center/pages/insights.js:700:      title: "Connect live platform insight feeds",
+public/control-center/pages/insights.js:707:    recommendations.push({
+public/control-center/pages/insights.js:715:    recommendations.push({
+public/control-center/pages/insights.js:722:  if (websiteIntel.connected && !websiteIntel.hasData) {
+public/control-center/pages/insights.js:723:    recommendations.push({
+public/control-center/pages/insights.js:724:      title: "Activate website and GA4 intelligence",
+public/control-center/pages/insights.js:730:  if (seoIntel.connected && !seoIntel.hasData) {
+public/control-center/pages/insights.js:731:    recommendations.push({
+public/control-center/pages/insights.js:738:  if (paidIntel.connected && !paidIntel.hasData) {
+public/control-center/pages/insights.js:739:    recommendations.push({
+public/control-center/pages/insights.js:740:      title: "Activate paid campaign intelligence",
+public/control-center/pages/insights.js:746:  if (!recommendations.length) {
+public/control-center/pages/insights.js:747:    recommendations.push({
+public/control-center/pages/insights.js:748:      title: "Insight Engine is ready for deeper optimization",
+public/control-center/pages/insights.js:749:      meta: "Feed more granular post, page, query, and campaign metrics into this page to improve learning accuracy.",
+public/control-center/pages/insights.js:757:      prompt: `Review all available insights for ${projectName} and tell me the highest-impact improvement to make next across content, publishing, SEO, paid media, and website conversion.`
+public/control-center/pages/insights.js:761:      prompt: `Using the connected cross-platform performance signals for ${projectName}, identify the strongest platform, explain why it is strongest, and say what we should scale there.`
+public/control-center/pages/insights.js:777:      prompt: `Summarize the strongest reusable pattern in ${projectName}'s current performance data, including hook, format, CTA, platform, and timing.`
+public/control-center/pages/insights.js:782:    recommendations,
+public/control-center/pages/insights.js:784:    lessons: learning.systemLessons
+public/control-center/pages/insights.js:798:            <span class="card-badge ${statusTone(item.performanceLevel)}">${escapeHtml(item.performanceLevel)}</span>
+public/control-center/pages/insights.js:814:          <div class="insights-platform-note">${escapeHtml(item.recommendation)}</div>
+public/control-center/pages/insights.js:994:              optimizationFocus: "next-action"
+public/control-center/pages/insights.js:1075:    fetchProjectInsights,
+public/control-center/pages/insights.js:1084:    const insightRoot = getInsightRoot(state);
+public/control-center/pages/insights.js:1085:    const feeds = {
+public/control-center/pages/insights.js:1086:      social: asObject(insightRoot.social || insightRoot.social_platforms || {}),
+public/control-center/pages/insights.js:1087:      marketplace: asObject(insightRoot.marketplace || insightRoot.commerce || {}),
+public/control-center/pages/insights.js:1088:      website: asObject(insightRoot.website || insightRoot.analytics || insightRoot.ga4 || {}),
+public/control-center/pages/insights.js:1089:      seo: asObject(insightRoot.seo || insightRoot.search_console || {}),
+public/control-center/pages/insights.js:1090:      paid: asObject(insightRoot.paid || insightRoot.paid_media || {})
+public/control-center/pages/insights.js:1092:    const hasInsights = hasInsightPayload(insightRoot);
+public/control-center/pages/insights.js:1099:    const contentItems = buildContentInventory(state, feeds);
+public/control-center/pages/insights.js:1100:    const executive = buildExecutiveOverview(feeds, contentItems, connections, currency);
+public/control-center/pages/insights.js:1101:    const platformCards = buildPlatformCards(state, feeds, connections, currency);
+public/control-center/pages/insights.js:1102:    const topContent = buildTopContent(contentItems);
+public/control-center/pages/insights.js:1103:    const weakContent = buildWeakContent(contentItems);
+public/control-center/pages/insights.js:1104:    const websiteIntel = buildWebsiteIntelligence(feeds, connections);
+public/control-center/pages/insights.js:1105:    const seoIntel = buildSeoIntelligence(feeds, connections);
+public/control-center/pages/insights.js:1106:    const paidIntel = buildPaidIntelligence(feeds, connections);
+public/control-center/pages/insights.js:1107:    const learning = buildLearningEngine(contentItems, platformCards, websiteIntel, seoIntel, paidIntel, connections);
+public/control-center/pages/insights.js:1108:    const optimization = buildOptimizationPanel(state, platformCards, websiteIntel, seoIntel, paidIntel, topContent, weakContent, learning);
+public/control-center/pages/insights.js:1110:    const measuredContentCount = contentItems.filter((item) => item.hasMetrics).length;
+public/control-center/pages/insights.js:1114:        const tone = asString(item.performanceLevel).toLowerCase();
+public/control-center/pages/insights.js:1118:    const learningHighlights = learning.cards.slice(0, 3);
+public/control-center/pages/insights.js:1119:    const recommendationItems = optimization.recommendations.slice(0, 4);
+public/control-center/pages/insights.js:1120:    const promptItems = optimization.prompts.slice(0, 4);
+public/control-center/pages/insights.js:1124:        status: websiteIntel.connected ? (websiteIntel.hasData ? "Live analytics" : "Waiting for feed") : "Not connected",
+public/control-center/pages/insights.js:1125:        tone: websiteIntel.connected ? (websiteIntel.hasData ? "success" : "warning") : "danger",
+public/control-center/pages/insights.js:1127:          { label: "Sessions", value: formatCompact(websiteIntel.summary.sessions) },
+public/control-center/pages/insights.js:1128:          { label: "Conversions", value: formatCompact(websiteIntel.summary.conversions) }
+public/control-center/pages/insights.js:1130:        note: websiteIntel.recommendations[0]?.title || websiteIntel.conversionSignals[0]?.label || "Landing-page and conversion signals will appear here when analytics is available."
+public/control-center/pages/insights.js:1134:        status: seoIntel.connected ? (seoIntel.hasData ? "Live SEO" : "Waiting for feed") : "Not connected",
+public/control-center/pages/insights.js:1135:        tone: seoIntel.connected ? (seoIntel.hasData ? "success" : "warning") : "danger",
+public/control-center/pages/insights.js:1137:          { label: "Clicks", value: formatCompact(seoIntel.summary.clicks) },
+public/control-center/pages/insights.js:1138:          { label: "CTR", value: formatPercent(seoIntel.summary.ctr, 2) }
+public/control-center/pages/insights.js:1140:        note: seoIntel.topQueries[0]?.title || seoIntel.ctrOpportunities[0]?.title || "Query, page, and CTR opportunity signals will appear here when Search Console data is available."
+public/control-center/pages/insights.js:1144:        status: paidIntel.connected ? (paidIntel.hasData ? "Live paid data" : "Waiting for feed") : "Not connected",
+public/control-center/pages/insights.js:1145:        tone: paidIntel.connected ? (paidIntel.hasData ? "success" : "warning") : "danger",
+public/control-center/pages/insights.js:1147:          { label: "Spend", value: formatCurrency(paidIntel.summary.spend, currency) },
+public/control-center/pages/insights.js:1148:          { label: "ROAS", value: paidIntel.summary.roas == null ? "--" : `${paidIntel.summary.roas.toFixed(2)}x` }
+public/control-center/pages/insights.js:1150:        note: paidIntel.bestCampaigns[0]?.title || paidIntel.weakCampaigns[0]?.title || "Campaign and creative performance signals will appear here when paid reporting is available."
+public/control-center/pages/insights.js:1169:            Identify what changed, what needs attention, and the next safest action across content, website, SEO, and paid performance.
+public/control-center/pages/insights.js:1185:              <span class="insights-kpi-meta">Content items with usable performance data.</span>
+public/control-center/pages/insights.js:1194:              <strong>${escapeHtml(seoIntel.connected ? (seoIntel.hasData ? "Live" : "Waiting") : "Missing")}</strong>
+public/control-center/pages/insights.js:1199:              <strong>${escapeHtml(paidIntel.connected ? (paidIntel.hasData ? "Live" : "Waiting") : "Missing")}</strong>
+public/control-center/pages/insights.js:1208:            <span class="card-badge neutral">${escapeHtml(topContent.length ? `${topContent.length} ranked items` : "Awaiting feed")}</span>
+public/control-center/pages/insights.js:1217:                topContent.length
+public/control-center/pages/insights.js:1218:                  ? renderRankedContent(topContent.slice(0, 3), "", escapeHtml)
+public/control-center/pages/insights.js:1221:                      "Published content can exist, but this section only ranks winners once post-level insight feeds from social or commerce sources are connected.",
+public/control-center/pages/insights.js:1222:                      PLATFORM_DEFS.filter((platform) => platform.type === "social").some((platform) => getConnectedValue(platform.sourceKeys, connections)),
+public/control-center/pages/insights.js:1234:                        "No connected performance lanes yet",
+public/control-center/pages/insights.js:1235:                        "Cross-platform comparisons appear here as soon as at least one connected source is returning performance metrics.",
+public/control-center/pages/insights.js:1243:                <div class="insights-learning-grid">
+public/control-center/pages/insights.js:1244:                  ${learningHighlights.map((item) => `
+public/control-center/pages/insights.js:1245:                    <div class="insights-learning-card">
+public/control-center/pages/insights.js:1259:            <span class="card-badge warning">${escapeHtml(weakContent.length ? `${weakContent.length} flagged` : "Monitoring")}</span>
+public/control-center/pages/insights.js:1262:            Weak signals, missing feeds, and performance gaps that should be reviewed before the next business decision.
+public/control-center/pages/insights.js:1268:                weakContent.length
+public/control-center/pages/insights.js:1269:                  ? renderWeakContent(weakContent.slice(0, 4), "", escapeHtml)
+public/control-center/pages/insights.js:1272:                      "This section separates low-performing posts, videos, and campaigns once cross-platform content metrics are connected.",
+public/control-center/pages/insights.js:1273:                      PLATFORM_DEFS.filter((platform) => platform.type === "social").some((platform) => getConnectedValue(platform.sourceKeys, connections)),
+public/control-center/pages/insights.js:1284:                    : `<div class="empty-box">No major cross-platform risk signal is flagged right now.</div>`
+public/control-center/pages/insights.js:1291:                    websiteIntel.hasData
+public/control-center/pages/insights.js:1292:                      ? renderKeyValueList(websiteIntel.weakPages.slice(0, 4), "page", escapeHtml) || `<div class="empty-box">No weak page list yet.</div>`
+public/control-center/pages/insights.js:1294:                          "No website analytics feed yet",
+public/control-center/pages/insights.js:1295:                          "Connect GA4 or a website analytics source to surface weak landing pages and conversion risks.",
+public/control-center/pages/insights.js:1296:                          websiteIntel.connected,
+public/control-center/pages/insights.js:1302:                  <h4 class="insights-subtitle">SEO / paid weak signals</h4>
+public/control-center/pages/insights.js:1304:                    seoIntel.hasData || paidIntel.hasData
+public/control-center/pages/insights.js:1307:                            ...seoIntel.ctrOpportunities,
+public/control-center/pages/insights.js:1308:                            ...seoIntel.rankingOpportunities,
+public/control-center/pages/insights.js:1309:                            ...paidIntel.weakCampaigns,
+public/control-center/pages/insights.js:1310:                            ...paidIntel.weakCreatives
+public/control-center/pages/insights.js:1314:                        ) || `<div class="empty-box">No SEO or paid weakness list yet.</div>`
+public/control-center/pages/insights.js:1316:                          "No SEO or paid weakness feed yet",
+public/control-center/pages/insights.js:1317:                          "Connect Search Console and paid reporting to surface ranking, CTR, campaign, and creative risks here.",
+public/control-center/pages/insights.js:1318:                          seoIntel.connected || paidIntel.connected,
+public/control-center/pages/insights.js:1331:            <span class="card-badge neutral">${escapeHtml(`${recommendationItems.length} priorities`)}</span>
+public/control-center/pages/insights.js:1338:              <h4 class="insights-subtitle">Prioritized recommendations</h4>
+public/control-center/pages/insights.js:1340:                ${recommendationItems.map((item) => `
+public/control-center/pages/insights.js:1353:              <div class="insights-learning-grid">
+public/control-center/pages/insights.js:1355:                  learning.systemLessons.length
+public/control-center/pages/insights.js:1356:                    ? learning.systemLessons.map((item) => `
+public/control-center/pages/insights.js:1357:                      <div class="insights-learning-card">
+public/control-center/pages/insights.js:1363:                      <div class="insights-learning-card">
+public/control-center/pages/insights.js:1365:                        <p>More granular post, page, query, and campaign metrics will make these recommendations more specific.</p>
+public/control-center/pages/insights.js:1386:            Compare the main channels side by side, then review the current website, SEO, and paid signal without opening separate summary panels.
+public/control-center/pages/insights.js:1445:      prompts: optimization.prompts,
+public/control-center/pages/insights.js:1463:          fetchProjectInsights,
+public/control-center/pages/insights.js:1469:      if (!fetchProjectInsights) {
+public/control-center/pages/insights.js:1481:          fetchProjectInsights,
+public/control-center/pages/insights.js:1496:        fetchProjectInsights,
+public/control-center/pages/insights.js:1500:      fetchProjectInsights(projectName)
+public/control-center/pages/insights.js:1523:            fetchProjectInsights,
+public/control-center/pages/insights.js:1539:            fetchProjectInsights,
+public/control-center/pages/ai-command.js:76:                summary: "Ad concepts, targeting angles, platform copy, and paid strategy.",
+public/control-center/pages/ai-command.js:83:                summary: "SEO signals, performance data, content insights, and traffic patterns.",
+public/control-center/pages/ai-command.js:124:	seo: "analyst",
+public/control-center/pages/ai-command.js:213:		summary: "Ad concepts, targeting angles, platform copy, and paid strategy.",
+public/control-center/pages/ai-command.js:214:		placeholder: "Ask the Ads Optimizer to draft ad copy, review targeting angles, or plan a paid campaign structure…",
+public/control-center/pages/ai-command.js:215:		canHelp: ["Draft ad concepts and copy", "Review targeting angles", "Plan paid campaign structure", "Suggest creative variants", "Map platform-specific strategy"],
+public/control-center/pages/ai-command.js:226:		summary: "SEO signals, performance data, content insights, and traffic patterns.",
+public/control-center/pages/ai-command.js:227:		placeholder: "Ask the SEO & Insights Analyst to review performance, suggest SEO improvements, or identify top content patterns…",
+public/control-center/pages/ai-command.js:228:		canHelp: ["Review SEO signals", "Analyze content performance", "Identify traffic patterns", "Suggest keyword improvements", "Map data coverage gaps"],
+public/control-center/pages/ai-command.js:229:		cannotDo: ["Update SEO settings directly", "Edit live website", "Set analytics configurations", "Publish recommendations automatically"],
+public/control-center/pages/ai-command.js:231:		safetyNote: "Analysis and recommendations only. No direct website or analytics changes.",
+public/control-center/pages/ai-command.js:324:		{ label: "Plan paid campaign structure", sub: "Objective, audience, creative, budget" }
+public/control-center/pages/ai-command.js:328:		{ label: "Analyze content performance", sub: "What is working and what is not" },
+public/control-center/pages/ai-command.js:329:		{ label: "Map data coverage gaps", sub: "Which integrations are missing" },
+public/control-center/pages/ai-command.js:466:		{ id: "test-ideas", label: "Test Ideas", action: "preview", intent: "task", template: "Suggest paid test ideas for {project}. Provide hypotheses, segments, creative variables, and measurement notes." },
+public/control-center/pages/ai-command.js:496:		{ id: "check-sla-risk", label: "Check SLA Risk", action: "preview", intent: "guidance", template: "Check SLA risk for {project}. Flag urgency, risk level, missing runtime data, and escalation recommendation for review." },
+public/control-center/pages/ai-command.js:517:	{ icon: "📊", label: "Analyze Performance", sub: "Review what's working", template: "Analyze current performance for {project}. What content, campaigns, and channels are working best right now?" },
+public/control-center/pages/ai-command.js:583:		purpose: "Optimize paid opportunities, creative testing, and budget decisions.",
+public/control-center/pages/ai-command.js:584:		bestUse: "When preparing or fixing paid performance.",
+public/control-center/pages/ai-command.js:585:		suggestedPrompt: "Act as Ads Specialist and propose paid experiments based on current readiness and data coverage."
+public/control-center/pages/ai-command.js:591:		bestUse: "When you need evidence-backed recommendations.",
+public/control-center/pages/ai-command.js:638:		if (/act as the seo|act as the insights analyst/i.test(text)) return "analyst";
+public/control-center/pages/ai-command.js:677:	if (/publish\s*now|send\s*external|paid\s*ads|final\s*approval/i.test(command)) {
+public/control-center/pages/ai-command.js:725:			value.recommendation ||
+public/control-center/pages/ai-command.js:767:    "Analyze current performance for:",
+public/control-center/pages/ai-command.js:831:	return message.includes("insights") || message.includes("learning") || message.includes("not found");
+public/control-center/pages/ai-command.js:935:				learning: null,
+public/control-center/pages/ai-command.js:1277:	const recommendationLine = normalizeDisplayList(response.recommendations, 4)
+public/control-center/pages/ai-command.js:1295:	return [recommendationLine, findingLine, sectionLine].filter(Boolean).join("\n\n");
+public/control-center/pages/ai-command.js:1343:        const looksContentLike = /\b(content|caption|captions|post|posts|email|blog|article|copy|headline|landing page|script|message|cta|product copy|social post)\b/.test(text);
+public/control-center/pages/ai-command.js:1347:        const looksInsightLike = /\b(insight|insights|seo|keyword|keywords|analytics|performance|traffic|ranking|search intent|metrics|research|competitor|competitors|market research)\b/.test(text);
+public/control-center/pages/ai-command.js:1380:        if (/insight|research|seo|analytics/.test(outputType) || looksInsightLike) {
+public/control-center/pages/ai-command.js:1486:				"Claims, health, or performance promises need evidence before publishing."
+public/control-center/pages/ai-command.js:1576:				"Platform-specific copy recommendations"
+public/control-center/pages/ai-command.js:1586:			summary: "Analysis plan prepared with key signals, coverage gaps, and next checks.",
+public/control-center/pages/ai-command.js:1588:				"Signals to check: readiness, channel performance, data coverage",
+public/control-center/pages/ai-command.js:1900:		asObject(activity.performance_insights);
+public/control-center/pages/ai-command.js:1901:	const learning =
+public/control-center/pages/ai-command.js:1902:		asObject(intelligence?.learning) ||
+public/control-center/pages/ai-command.js:1903:		asObject(activity.learning);
+public/control-center/pages/ai-command.js:1905:	const coverage = asObject(insights.data_coverage);
+public/control-center/pages/ai-command.js:1906:	const coverageEntries = Object.entries(coverage);
+public/control-center/pages/ai-command.js:1907:	const coveredCount = coverageEntries.filter(([, item]) => asString(item?.status) === "covered").length;
+public/control-center/pages/ai-command.js:1908:	const recommendations = asArray(learning.recommendations || insights.recommendations);
+public/control-center/pages/ai-command.js:1914:	coverageEntries.forEach(([key, item]) => {
+public/control-center/pages/ai-command.js:1948:		coverageTotal: coverageEntries.length,
+public/control-center/pages/ai-command.js:1949:		coverage,
+public/control-center/pages/ai-command.js:1973:		learning,
+public/control-center/pages/ai-command.js:1974:		recommendations,
+public/control-center/pages/ai-command.js:1975:		topContent: asArray(insights.best_performing_content),
+public/control-center/pages/ai-command.js:1976:		weakContent: asArray(insights.underperforming_content),
+public/control-center/pages/ai-command.js:1977:		website: asObject(insights.website),
+public/control-center/pages/ai-command.js:1978:		seo: asObject(insights.seo),
+public/control-center/pages/ai-command.js:1979:		paid: asObject(insights.paid),
+public/control-center/pages/ai-command.js:1980:		social: asObject(insights.social),
+public/control-center/pages/ai-command.js:1981:		learningPatterns: asObject(learning.learning_patterns || insights.learning_patterns),
+public/control-center/pages/ai-command.js:1982:		aiRecommendations: asObject(learning.ai_recommendations || insights.ai_recommendations),
+public/control-center/pages/ai-command.js:1983:		sourceSummary: asObject(insights.source_summary || learning.source_summary),
+public/control-center/pages/ai-command.js:1986:			Boolean(Object.keys(learning).length)
+public/control-center/pages/ai-command.js:2001:		ads: ["ad ideas", "ad copy", "facebook ads", "meta ads", "tiktok ads", "google ads", "cta", "paid", "targeting angle", "ad creative"],
+public/control-center/pages/ai-command.js:2002:		analyst: ["seo", "keyword", "keywords", "query", "search", "meta", "blog topic", "search intent", "ranking", "analytics", "performance", "traffic", "insights", "metrics"],
+public/control-center/pages/ai-command.js:2043:	const coverage = aiContext.coverage;
+public/control-center/pages/ai-command.js:2044:	if (!Object.keys(coverage).length) {
+public/control-center/pages/ai-command.js:2048:	if (lane === "content" && asString(coverage.social_insights?.status) !== "covered") {
+public/control-center/pages/ai-command.js:2049:		notes.push("Sync social feeds to learn from real post performance.");
+public/control-center/pages/ai-command.js:2051:	if (lane === "seo" && asString(coverage.seo_search_console?.status) !== "covered") {
+public/control-center/pages/ai-command.js:2054:	if (lane === "ads" && asString(coverage.paid_ads?.status) !== "covered") {
+public/control-center/pages/ai-command.js:2061:	const topRecommendation = aiContext.recommendations[0];
+public/control-center/pages/ai-command.js:2065:	if (aiContext.recommendations.length) summaryParts.push(`${aiContext.recommendations.length} recommendations available.`);
+public/control-center/pages/ai-command.js:2071:			aiContext.missingIntegrations.length ? `Missing intelligence: ${aiContext.missingIntegrations.slice(0, 4).map((item) => item.label).join(", ")}.` : "Intelligence coverage is solid.",
+public/control-center/pages/ai-command.js:2072:			topRecommendation ? `Top recommendation: ${topRecommendation.title}.` : "No recommendation stack yet."
+public/control-center/pages/ai-command.js:2074:		recommendations: [
+public/control-center/pages/ai-command.js:2075:			topRecommendation ? `${topRecommendation.title}: ${topRecommendation.action}` : "Connect missing integrations to produce better recommendations.",
+public/control-center/pages/ai-command.js:2076:			...aiContext.recommendations.slice(1, 3).map((item) => `${item.title}: ${item.action}`)
+public/control-center/pages/ai-command.js:2084:			routeSuggestion("Integrations", "integrations", "Reconnect data sources and improve intelligence coverage."),
+public/control-center/pages/ai-command.js:2085:			routeSuggestion("Insights", "insights", "Review performance signals and the recommendation stack.")
+public/control-center/pages/ai-command.js:2092:	const top = aiContext.topContent[0];
+public/control-center/pages/ai-command.js:2093:	const weak = aiContext.weakContent[0];
+public/control-center/pages/ai-command.js:2094:	const bestFormat = aiContext.learningPatterns.best_formats?.label;
+public/control-center/pages/ai-command.js:2095:	const bestPlatform = aiContext.learningPatterns.best_platforms?.label;
+public/control-center/pages/ai-command.js:2107:		recommendations: [
+public/control-center/pages/ai-command.js:2108:			top ? `Reuse the pattern from ${extractTopMessage(top)} in the next publishing cycle.` : "Sync social insights to identify winning hooks and formats.",
+public/control-center/pages/ai-command.js:2113:			top ? `Create a follow-up asset using ${extractTopMessage(top)}'s pattern.` : "Load social insight data before expanding content queue.",
+public/control-center/pages/ai-command.js:2115:			"Prepare next batch with performance-led hooks instead of generic posting volume."
+public/control-center/pages/ai-command.js:2120:			routeSuggestion("Insights", "insights", "Compare top and weak content performance.")
+public/control-center/pages/ai-command.js:2127:	const seo = aiContext.seo;
+public/control-center/pages/ai-command.js:2128:	const website = aiContext.website;
+public/control-center/pages/ai-command.js:2129:	const topQuery = asArray(seo.top_queries)[0];
+public/control-center/pages/ai-command.js:2130:	const lowCtr = asArray(seo.low_ctr_pages)[0];
+public/control-center/pages/ai-command.js:2131:	const weakPage = asArray(website.weak_pages)[0];
+public/control-center/pages/ai-command.js:2134:		summary: seo.summary?.impressions != null
+public/control-center/pages/ai-command.js:2135:			? `${formatCompactNumber(seo.summary.impressions)} impressions tracked. SEO lane is ready for prioritization.`
+public/control-center/pages/ai-command.js:2141:			website.summary?.sessions != null ? `Website traffic: ${formatCompactNumber(website.summary.sessions)} sessions tracked.` : "Website sessions not measured yet."
+public/control-center/pages/ai-command.js:2143:		recommendations: [
+public/control-center/pages/ai-command.js:2146:			aiContext.recommendations.find((item) => item.domain === "seo")?.action || ""
+public/control-center/pages/ai-command.js:2154:			routeSuggestion("Insights", "insights", "Review search and website performance together."),
+public/control-center/pages/ai-command.js:2158:		missingData: buildMissingDataNotes(aiContext, "seo")
+public/control-center/pages/ai-command.js:2163:	const paid = aiContext.paid;
+public/control-center/pages/ai-command.js:2164:	const bestCampaign = asArray(paid.best_campaigns)[0];
+public/control-center/pages/ai-command.js:2165:	const weakCampaign = asArray(paid.weak_campaigns)[0];
+public/control-center/pages/ai-command.js:2166:	const bestCreative = asArray(paid.best_creatives)[0];
+public/control-center/pages/ai-command.js:2168:		title: "Paid performance briefing",
+public/control-center/pages/ai-command.js:2169:		summary: paid.summary?.spend != null
+public/control-center/pages/ai-command.js:2170:			? `Paid media live with ${formatCurrency(paid.summary.spend, aiContext.currency)} tracked spend.`
+public/control-center/pages/ai-command.js:2176:			paid.summary?.roas != null ? `Current ROAS: ${Number(paid.summary.roas).toFixed(2)}x.` : "ROAS not available yet."
+public/control-center/pages/ai-command.js:2178:		recommendations: [
+public/control-center/pages/ai-command.js:2179:			bestCampaign ? `Scale ${extractTopMessage(bestCampaign)} only after validating strong CTR and ROAS.` : "Connect paid platforms before making scale decisions.",
+public/control-center/pages/ai-command.js:2181:			aiContext.recommendations.find((item) => item.domain === "paid")?.action || ""
+public/control-center/pages/ai-command.js:2184:			bestCreative ? `Reuse the creative pattern behind ${extractTopMessage(bestCreative)}.` : "Sync paid data before scaling any creative.",
+public/control-center/pages/ai-command.js:2186:			"Tie paid decisions to conversion and revenue signal — not just clicks."
+public/control-center/pages/ai-command.js:2189:			routeSuggestion("Ads Manager", "ads-manager", "Review pacing, creative mapping, and paid operating view."),
+public/control-center/pages/ai-command.js:2190:			routeSuggestion("Integrations", "integrations", "Connect or reconnect paid reporting platforms."),
+public/control-center/pages/ai-command.js:2191:			routeSuggestion("Insights", "insights", "Compare paid vs organic and website results.")
+public/control-center/pages/ai-command.js:2204:			aiContext.learningPatterns.best_topics?.label ? `Current system learning: ${aiContext.learningPatterns.best_topics.label}.` : "Learning engine needs more live data."
+public/control-center/pages/ai-command.js:2206:		recommendations: [
+public/control-center/pages/ai-command.js:2209:			"Prioritize integrations that unlock attribution and performance evidence over vanity metrics."
+public/control-center/pages/ai-command.js:2213:			"Reconnect missing analytics, SEO, and paid feeds to improve evidence quality.",
+public/control-center/pages/ai-command.js:2214:			"Use Insights to identify where the recommendation stack is still blind."
+public/control-center/pages/ai-command.js:2218:			routeSuggestion("Integrations", "integrations", "Increase data coverage and reduce blind spots."),
+public/control-center/pages/ai-command.js:2222:			...buildMissingDataNotes(aiContext, "seo"),
+public/control-center/pages/ai-command.js:2241:		return { title: "Integration recovery task block", owner: "Integrations", steps: ["Reconnect critical analytics and performance feeds first.", "Test each integration after reconnect and sync current data.", "Return to Insights to confirm coverage improves."] };
+public/control-center/pages/ai-command.js:2255:	if (/reconnect|connect|integration|tool|sync/.test(query)) routeSuggestions.push(routeSuggestion("Integrations", "integrations", "Reconnect data sources and restore intelligence coverage."));
+public/control-center/pages/ai-command.js:2256:	if (/ads|campaign scale|roas|creative/.test(query)) routeSuggestions.push(routeSuggestion("Ads Manager", "ads-manager", "Review live paid performance and action the next media move."));
+public/control-center/pages/ai-command.js:2263:			aiContext.missingIntegrations.length ? "Intelligence coverage gaps may reduce execution quality." : "Core intelligence is available for routing."
+public/control-center/pages/ai-command.js:2265:		recommendations: [
+public/control-center/pages/ai-command.js:2267:			aiContext.recommendations[0]?.action || "Use the current recommendation stack to choose the first high-impact step."
+public/control-center/pages/ai-command.js:2307:	fetchProjectInsights,
+public/control-center/pages/ai-command.js:2308:	fetchProjectLearning,
+public/control-center/pages/ai-command.js:2331:				const [insightsResult, learningResult] = await Promise.allSettled([
+public/control-center/pages/ai-command.js:2332:					fetchProjectInsights(projectName),
+public/control-center/pages/ai-command.js:2333:					fetchProjectLearning(projectName)
+public/control-center/pages/ai-command.js:2336:				const learningMissing = learningResult.status === "rejected" && isMissingIntelligenceError(learningResult.reason);
+public/control-center/pages/ai-command.js:2339:					learningResult.status === "rejected" && !learningMissing ? learningResult.reason?.message : ""
+public/control-center/pages/ai-command.js:2345:					insights: insightsResult.status === "fulfilled" ? insightsResult.value : (insightsMissing ? { project: projectName, generated_at: nowIso(), data_coverage: {} } : null),
+public/control-center/pages/ai-command.js:2346:					learning: learningResult.status === "fulfilled" ? learningResult.value : (learningMissing ? { project: projectName, generated_at: nowIso(), learning_patterns: {}, recommendations: [] } : null),
+public/control-center/pages/ai-command.js:2407:	insights: "seo",
+public/control-center/pages/ai-command.js:2416:	research: "seo",
+public/control-center/pages/ai-command.js:2424:	researcher: "seo",
+public/control-center/pages/ai-command.js:2852:	const coverageLabel = aiContext.coverageTotal > 0 ? `${aiContext.coveredCount}/${aiContext.coverageTotal}` : "--";
+public/control-center/pages/ai-command.js:2860:	if (aiContext.recommendations.length) caps.push(`${aiContext.recommendations.length} recommendations ready`);
+public/control-center/pages/ai-command.js:2861:	if (aiContext.topContent.length) caps.push("Content intelligence");
+public/control-center/pages/ai-command.js:2862:	if (aiContext.paid?.summary?.spend != null) caps.push("Paid media briefing");
+public/control-center/pages/ai-command.js:2863:	if (aiContext.seo?.summary?.impressions != null) caps.push("SEO analysis");
+public/control-center/pages/ai-command.js:2891:					<strong>${escapeHtml(coverageLabel)} connected</strong>
+public/control-center/pages/ai-command.js:2986:	const recommendations = normalizeDisplayList(response.recommendations, 4);
+public/control-center/pages/ai-command.js:2997:	const hasContent = title || summary || findings.length || recommendations.length || nextActions.length;
+public/control-center/pages/ai-command.js:3024:			${recommendations.length ? `
+public/control-center/pages/ai-command.js:3028:						${recommendations.map((item) => `<div class="ctrl-response-item"><span>${escapeHtml(item)}</span></div>`).join("")}
+public/control-center/pages/ai-command.js:3171:	const recommendations = aiContext.recommendations.slice(0, 4);
+public/control-center/pages/ai-command.js:3172:	const patterns = Object.entries(asObject(aiContext.learningPatterns))
+public/control-center/pages/ai-command.js:3185:	const hasContent = recommendations.length || patterns.length || artifacts.length;
+public/control-center/pages/ai-command.js:3191:				<span style="font-size:11px;color:var(--color-text-2);">${recommendations.length} rec${recommendations.length !== 1 ? "s" : ""} · ${patterns.length} patterns</span>
+public/control-center/pages/ai-command.js:3206:						${recommendations.map((rec) => {
+public/control-center/pages/ai-command.js:3209:							const recAction = humanizeValue(r.action || r.recommendation || r.summary || r.description || "");
+public/control-center/pages/ai-command.js:3387:			title: "Repair integration coverage for stronger AI output",
+public/control-center/pages/ai-command.js:3388:			reason: `${impacted} integration signal${impacted === 1 ? "" : "s"} need attention before relying on full automation and optimization loops.`,
+public/control-center/pages/ai-command.js:3389:			command: `Build an integration recovery plan for ${aiContext.projectName || "this project"}. Prioritize connectors by business impact and data coverage gain.`,
+public/control-center/pages/ai-command.js:3405:		reason: "Core readiness is stable enough to move into output generation and optimization.",
+public/control-center/pages/ai-command.js:3760:        if (roleId === "seo") return `${label} is reviewing insights and signals...`;
+public/control-center/pages/ai-command.js:4423:        const channel = asString(wizard.channel || "social");
+public/control-center/pages/ai-command.js:4436:        const channelOptions = [["social", "Social"], ["email", "Email"], ["website", "Website"], ["ads", "Ads"], ["publishing", "Publishing package"]];
+public/control-center/pages/ai-command.js:5076:	const integrations = aiContext.coverageTotal > 0 ? `${aiContext.coveredCount}/${aiContext.coverageTotal}` : "0 active";
+public/control-center/pages/ai-command.js:5346:		{ label: "Integrations", value: aiContext.coverageTotal > 0 ? `${aiContext.coveredCount}/${aiContext.coverageTotal} connected` : "No coverage data", present: aiContext.coveredCount > 0 },
+public/control-center/pages/ai-command.js:5481:			fetchProjectInsights,
+public/control-center/pages/ai-command.js:5482:			fetchProjectLearning,
+public/control-center/pages/ai-command.js:5978:                                channel: asString(currentWizard.channel || "social"),
+public/control-center/pages/ai-command.js:5999:                        const channel = asString(wizard.channel || "social");
+public/control-center/pages/ai-command.js:6071:                                                body: "Create a hook, short social caption, long caption/email variant, CTA, landing-page angle, and reusable message notes in the configured publishing language."
+public/control-center/pages/ai-command.js:6087:                                                body: "Create a follow-up plan for review status, owner, destination handoff, performance check, improvement loop, and next campaign iteration."
+public/control-center/pages/ai-command.js:6179:                                        channel: asString(wizard.channel || localPreview.channel || "social"),
+public/control-center/pages/ai-command.js:7114:				fetchProjectInsights,
+public/control-center/pages/ai-command.js:7115:				fetchProjectLearning,
+public/control-center/pages/ai-command.js:7617:        performanceMode: usage > 20 ? "optimized" : "standard",
+public/control-center/pages/ai-command.js:7619:        learningEnabled: true
+public/control-center/api.js:916:      learning: null
+public/control-center/api.js:955:  if (section === "learning") {
+public/control-center/api.js:964:  const isOptionalNotFound = !required && status === 404 && (section === "insights" || section === "learning");
+public/control-center/api.js:1183:        "learning"
+public/control-center/api.js:1230:      load: () => fetchProjectInsights(safeProjectName)
+public/control-center/api.js:1233:      section: "learning",
+public/control-center/api.js:1234:      load: () => fetchProjectLearning(safeProjectName)
+public/control-center/api.js:1254:      load: () => fetchProjectInsights(safeProjectName)
+public/control-center/api.js:1257:      section: "learning",
+public/control-center/api.js:1258:      load: () => fetchProjectLearning(safeProjectName)
+public/control-center/api.js:1271:          if (section === "insights" || section === "learning") {
+public/control-center/api.js:1284:        if (section === "insights" || section === "learning") {
+public/control-center/api.js:1335:export async function fetchProjectInsights(projectName) {
+public/control-center/api.js:1346:export async function fetchProjectLearning(projectName) {
+public/control-center/api.js:1352:    `/api/learning/${encodeURIComponent(projectName)}`,
+public/control-center/api.js:1353:    "Failed to load project learning"
+
+### backend insights/learning engine files
+runtime/orchestrator-service/lib/execution/learning-patterns.js
+runtime/orchestrator-service/lib/execution/recommendation-builders.js
+runtime/orchestrator-service/lib/execution/recommendation-runtime.js
+runtime/orchestrator-service/lib/insights/ingestion-service.js
+runtime/orchestrator-service/lib/insights/learning-engine.js
+runtime/orchestrator-service/lib/integrations/insights-contract.js
+runtime/orchestrator-service/lib/media/native/intelligence/media-learning-memory.js
+
+### backend learning/recommendation exact references
+runtime/orchestrator-service/lib/insights/learning-engine.js:58:  ) || 'Published content';
+runtime/orchestrator-service/lib/insights/learning-engine.js:120:      reason: asString(item.improve_hint || item.reason || item.topic) || 'Low reach or conversion signal compared with the current content set.'
+runtime/orchestrator-service/lib/insights/learning-engine.js:124:function buildMaps(contentItems = []) {
+runtime/orchestrator-service/lib/insights/learning-engine.js:130:    topics: new Map(),
+runtime/orchestrator-service/lib/insights/learning-engine.js:153:  contentItems.forEach(item => {
+runtime/orchestrator-service/lib/insights/learning-engine.js:163:    add(maps.topics, compactWords(item.topic || label), score);
+runtime/orchestrator-service/lib/insights/learning-engine.js:175:function buildSystemLessons({ contentItems, coverage, website, seo, paid, topContent, weakContent }) {
+runtime/orchestrator-service/lib/insights/learning-engine.js:178:  if (!contentItems.length) {
+runtime/orchestrator-service/lib/insights/learning-engine.js:179:    lessons.push('Connect social insight feeds so MH Assistant can learn from measured post and video performance instead of only connection health.');
+runtime/orchestrator-service/lib/insights/learning-engine.js:182:  if (website.summary.sessions != null && website.summary.conversions != null && website.summary.sessions > 0) {
+runtime/orchestrator-service/lib/insights/learning-engine.js:183:    const conversionRate = (website.summary.conversions / website.summary.sessions) * 100;
+runtime/orchestrator-service/lib/insights/learning-engine.js:185:      lessons.push('Website traffic is present, but conversion efficiency is still weak. Prioritize landing-page clarity and CTA alignment.');
+runtime/orchestrator-service/lib/insights/learning-engine.js:189:  if (seo.summary.impressions != null && seo.summary.ctr != null && seo.summary.ctr < 2) {
+runtime/orchestrator-service/lib/insights/learning-engine.js:193:  if (paid.summary.spend != null && paid.summary.ctr != null && paid.summary.ctr < 1) {
+runtime/orchestrator-service/lib/insights/learning-engine.js:197:  if (topContent.length) {
+runtime/orchestrator-service/lib/insights/learning-engine.js:198:    lessons.push(`Top performer right now is ${topContent[0].label} on ${titleCase(topContent[0].platform || 'its platform')}. Reuse its hook, format, and CTA structure.`);
+runtime/orchestrator-service/lib/insights/learning-engine.js:201:  if (weakContent.length) {
+runtime/orchestrator-service/lib/insights/learning-engine.js:202:    lessons.push(`Weak content pattern to avoid: ${weakContent[0].label} on ${titleCase(weakContent[0].platform || 'its platform')} is not converting current attention into action.`);
+runtime/orchestrator-service/lib/insights/learning-engine.js:205:  if ((coverage.social_insights?.status || '') === 'missing') {
+runtime/orchestrator-service/lib/insights/learning-engine.js:206:    lessons.push('Social learning is incomplete because no live social insight snapshot has been synced yet.');
+runtime/orchestrator-service/lib/insights/learning-engine.js:232:  contentItems,
+runtime/orchestrator-service/lib/insights/learning-engine.js:233:  topContent,
+runtime/orchestrator-service/lib/insights/learning-engine.js:234:  weakContent,
+runtime/orchestrator-service/lib/insights/learning-engine.js:235:  website,
+runtime/orchestrator-service/lib/insights/learning-engine.js:236:  seo,
+runtime/orchestrator-service/lib/insights/learning-engine.js:237:  paid,
+runtime/orchestrator-service/lib/insights/learning-engine.js:239:  coverage,
+runtime/orchestrator-service/lib/insights/learning-engine.js:242:  const recommendations = [];
+runtime/orchestrator-service/lib/insights/learning-engine.js:244:  if (topContent.length) {
+runtime/orchestrator-service/lib/insights/learning-engine.js:245:    recommendations.push(buildRecommendationEntry({
+runtime/orchestrator-service/lib/insights/learning-engine.js:246:      domain: 'content',
+runtime/orchestrator-service/lib/insights/learning-engine.js:248:      title: 'Scale the current winning content pattern',
+runtime/orchestrator-service/lib/insights/learning-engine.js:249:      evidence: `${topContent[0].label} is the strongest measured content item right now.`,
+runtime/orchestrator-service/lib/insights/learning-engine.js:251:      reason: 'The system already has evidence that this pattern is outperforming the rest of the current content set.'
+runtime/orchestrator-service/lib/insights/learning-engine.js:255:  if (weakContent.length) {
+runtime/orchestrator-service/lib/insights/learning-engine.js:256:    recommendations.push(buildRecommendationEntry({
+runtime/orchestrator-service/lib/insights/learning-engine.js:257:      domain: 'content',
+runtime/orchestrator-service/lib/insights/learning-engine.js:259:      title: 'Rewrite weak content before publishing more of the same',
+runtime/orchestrator-service/lib/insights/learning-engine.js:260:      evidence: `${weakContent[0].label} is in the weakest content cluster.`,
+runtime/orchestrator-service/lib/insights/learning-engine.js:262:      reason: 'Low-performing content provides a clear negative pattern the system should stop repeating.'
+runtime/orchestrator-service/lib/insights/learning-engine.js:266:  if (website.summary.sessions != null && website.summary.sessions > 0 && website.summary.conversions != null && website.summary.conversions === 0) {
+runtime/orchestrator-service/lib/insights/learning-engine.js:267:    recommendations.push(buildRecommendationEntry({
+runtime/orchestrator-service/lib/insights/learning-engine.js:268:      domain: 'website',
+runtime/orchestrator-service/lib/insights/learning-engine.js:270:      title: 'Fix conversion leakage on the website',
+runtime/orchestrator-service/lib/insights/learning-engine.js:271:      evidence: `The site is receiving ${website.summary.sessions} measured sessions with no recorded conversions in the current dataset.`,
+runtime/orchestrator-service/lib/insights/learning-engine.js:273:      reason: 'Traffic without conversion means content and paid performance cannot turn into business results yet.'
+runtime/orchestrator-service/lib/insights/learning-engine.js:277:  if (seo.summary.impressions != null && seo.summary.impressions > 0 && seo.summary.ctr != null && seo.summary.ctr < 2) {
+runtime/orchestrator-service/lib/insights/learning-engine.js:278:    recommendations.push(buildRecommendationEntry({
+runtime/orchestrator-service/lib/insights/learning-engine.js:279:      domain: 'seo',
+runtime/orchestrator-service/lib/insights/learning-engine.js:282:      evidence: `SEO visibility exists at ${seo.summary.impressions} impressions, but CTR is only ${seo.summary.ctr.toFixed(2)}%.`,
+runtime/orchestrator-service/lib/insights/learning-engine.js:283:      action: 'Update titles, meta descriptions, and SERP messaging for the pages with the most impressions and the weakest CTR.',
+runtime/orchestrator-service/lib/insights/learning-engine.js:284:      reason: 'This is usually faster than creating new content because the visibility already exists.'
+runtime/orchestrator-service/lib/insights/learning-engine.js:288:  if (paid.summary.spend != null && paid.summary.spend > 0 && paid.summary.ctr != null && paid.summary.ctr < 1) {
+runtime/orchestrator-service/lib/insights/learning-engine.js:289:    recommendations.push(buildRecommendationEntry({
+runtime/orchestrator-service/lib/insights/learning-engine.js:290:      domain: 'paid',
+runtime/orchestrator-service/lib/insights/learning-engine.js:292:      title: 'Refresh paid creative before scaling spend',
+runtime/orchestrator-service/lib/insights/learning-engine.js:293:      evidence: `Paid spend is active at ${paid.summary.spend}, but CTR is below 1%.`,
+runtime/orchestrator-service/lib/insights/learning-engine.js:295:      reason: 'Low CTR usually means the ad message is not matching audience interest strongly enough.'
+runtime/orchestrator-service/lib/insights/learning-engine.js:299:  if (marketplace.summary.revenue != null && marketplace.summary.revenue > 0 && !website.summary.revenue) {
+runtime/orchestrator-service/lib/insights/learning-engine.js:300:    recommendations.push(buildRecommendationEntry({
+runtime/orchestrator-service/lib/insights/learning-engine.js:303:      title: 'Link marketplace sales learnings back into content strategy',
+runtime/orchestrator-service/lib/insights/learning-engine.js:304:      evidence: `Commerce revenue is showing in the synced marketplace data, but website attribution remains thin.`,
+runtime/orchestrator-service/lib/insights/learning-engine.js:305:      action: 'Promote the strongest-selling products with content hooks that mirror what is already converting in commerce channels.',
+runtime/orchestrator-service/lib/insights/learning-engine.js:310:  if ((coverage.website_analytics?.status || '') !== 'covered') {
+runtime/orchestrator-service/lib/insights/learning-engine.js:311:    recommendations.push(buildRecommendationEntry({
+runtime/orchestrator-service/lib/insights/learning-engine.js:312:      domain: 'website',
+runtime/orchestrator-service/lib/insights/learning-engine.js:314:      title: 'Complete website analytics coverage',
+runtime/orchestrator-service/lib/insights/learning-engine.js:315:      evidence: 'The website intelligence lane is still partial or missing.',
+runtime/orchestrator-service/lib/insights/learning-engine.js:316:      action: 'Reconnect GA4, conversion tracking, or landing-page analytics so the system can tie content and ads to business outcomes.',
+runtime/orchestrator-service/lib/insights/learning-engine.js:321:  if ((coverage.social_insights?.status || '') !== 'covered') {
+runtime/orchestrator-service/lib/insights/learning-engine.js:322:    recommendations.push(buildRecommendationEntry({
+runtime/orchestrator-service/lib/insights/learning-engine.js:325:      title: 'Increase social insight coverage',
+runtime/orchestrator-service/lib/insights/learning-engine.js:326:      evidence: 'One or more social insight sources are still missing or only partially synced.',
+runtime/orchestrator-service/lib/insights/learning-engine.js:332:  if (!recommendations.length) {
+runtime/orchestrator-service/lib/insights/learning-engine.js:333:    recommendations.push(buildRecommendationEntry({
+runtime/orchestrator-service/lib/insights/learning-engine.js:334:      domain: 'optimization',
+runtime/orchestrator-service/lib/insights/learning-engine.js:339:      reason: 'The learning engine improves as more measured history becomes available.'
+runtime/orchestrator-service/lib/insights/learning-engine.js:343:  return recommendations;
+runtime/orchestrator-service/lib/insights/learning-engine.js:346:function buildAiRecommendationLayer({ projectName, recommendations, patterns }) {
+runtime/orchestrator-service/lib/insights/learning-engine.js:347:  const filterDomain = domain => recommendations.filter(item => item.domain === domain);
+runtime/orchestrator-service/lib/insights/learning-engine.js:350:    content_improvements: filterDomain('content'),
+runtime/orchestrator-service/lib/insights/learning-engine.js:351:    seo_improvements: filterDomain('seo'),
+runtime/orchestrator-service/lib/insights/learning-engine.js:352:    ad_optimizations: filterDomain('paid'),
+runtime/orchestrator-service/lib/insights/learning-engine.js:354:    website_conversion_improvements: filterDomain('website'),
+runtime/orchestrator-service/lib/insights/learning-engine.js:358:        summary: `Best current format: ${patterns.best_formats?.label || 'Not enough content data yet'}. Best platform: ${patterns.best_platforms?.label || 'Not enough content data yet'}.`
+runtime/orchestrator-service/lib/insights/learning-engine.js:368:        prompt: `Review the latest learning patterns and recommendations for ${projectName}. Tell me the next highest-impact optimization across content, SEO, publishing, paid media, and website conversion.`
+runtime/orchestrator-service/lib/insights/learning-engine.js:372:        prompt: `Using the latest cross-platform insights for ${projectName}, identify the strongest platform and explain what winning pattern the system should reuse there.`
+runtime/orchestrator-service/lib/insights/learning-engine.js:376:        prompt: `From the latest top-performing content in ${projectName}, tell me which items should be repurposed next and how they should be adapted for other platforms.`
+runtime/orchestrator-service/lib/insights/learning-engine.js:380:        prompt: `Use the latest SEO intelligence for ${projectName} to identify the highest-value query, page, and CTR opportunities to act on next.`
+runtime/orchestrator-service/lib/insights/learning-engine.js:383:        label: 'What weak content should be rewritten?',
+runtime/orchestrator-service/lib/insights/learning-engine.js:384:        prompt: `From the latest underperforming content in ${projectName}, identify which pieces should be rewritten first and what angle should replace them.`
+runtime/orchestrator-service/lib/insights/learning-engine.js:396:  contentItems = [],
+runtime/orchestrator-service/lib/insights/learning-engine.js:397:  topContent = [],
+runtime/orchestrator-service/lib/insights/learning-engine.js:398:  weakContent = [],
+runtime/orchestrator-service/lib/insights/learning-engine.js:400:  coverage = {}
+runtime/orchestrator-service/lib/insights/learning-engine.js:402:  const measuredContent = asArray(contentItems).filter(item => calculateContentScore(item) > 0);
+runtime/orchestrator-service/lib/insights/learning-engine.js:404:  const website = asObject(feeds.website);
+runtime/orchestrator-service/lib/insights/learning-engine.js:405:  const seo = asObject(feeds.seo);
+runtime/orchestrator-service/lib/insights/learning-engine.js:406:  const paid = asObject(feeds.paid);
+runtime/orchestrator-service/lib/insights/learning-engine.js:414:    best_topics: summarizeBestEntry(maps.topics, 'No topic pattern yet'),
+runtime/orchestrator-service/lib/insights/learning-engine.js:416:    weak_patterns_to_avoid: summarizeWorstEntries(measuredContent)
+runtime/orchestrator-service/lib/insights/learning-engine.js:420:    website.summary?.conversions != null
+runtime/orchestrator-service/lib/insights/learning-engine.js:423:          conversions: website.summary.conversions,
+runtime/orchestrator-service/lib/insights/learning-engine.js:424:          revenue: website.summary.revenue ?? null
+runtime/orchestrator-service/lib/insights/learning-engine.js:427:    paid.summary?.conversions != null
+runtime/orchestrator-service/lib/insights/learning-engine.js:430:          conversions: paid.summary.conversions,
+runtime/orchestrator-service/lib/insights/learning-engine.js:431:          revenue: paid.summary.revenue ?? null
+runtime/orchestrator-service/lib/insights/learning-engine.js:443:  const systemLessons = buildSystemLessons({
+runtime/orchestrator-service/lib/insights/learning-engine.js:444:    contentItems: measuredContent,
+runtime/orchestrator-service/lib/insights/learning-engine.js:445:    coverage,
+runtime/orchestrator-service/lib/insights/learning-engine.js:446:    website,
+runtime/orchestrator-service/lib/insights/learning-engine.js:447:    seo,
+runtime/orchestrator-service/lib/insights/learning-engine.js:448:    paid,
+runtime/orchestrator-service/lib/insights/learning-engine.js:449:    topContent,
+runtime/orchestrator-service/lib/insights/learning-engine.js:450:    weakContent
+runtime/orchestrator-service/lib/insights/learning-engine.js:453:  const recommendations = buildRecommendations({
+runtime/orchestrator-service/lib/insights/learning-engine.js:455:    contentItems: measuredContent,
+runtime/orchestrator-service/lib/insights/learning-engine.js:456:    topContent,
+runtime/orchestrator-service/lib/insights/learning-engine.js:457:    weakContent,
+runtime/orchestrator-service/lib/insights/learning-engine.js:458:    website,
+runtime/orchestrator-service/lib/insights/learning-engine.js:459:    seo,
+runtime/orchestrator-service/lib/insights/learning-engine.js:460:    paid,
+runtime/orchestrator-service/lib/insights/learning-engine.js:462:    coverage,
+runtime/orchestrator-service/lib/insights/learning-engine.js:468:    recommendations,
+runtime/orchestrator-service/lib/insights/learning-engine.js:476:    recommendations,
+runtime/orchestrator-service/lib/insights/learning-engine.js:477:    ai_recommendations: aiRecommendationLayer
+runtime/orchestrator-service/lib/insights/ingestion-service.js:233:function weakestMetricLabel(summary = {}) {
+runtime/orchestrator-service/lib/insights/ingestion-service.js:271:    id: asString(fields.id || fields.post_id || fields.content_id || fields.label),
+runtime/orchestrator-service/lib/insights/ingestion-service.js:273:    label: asString(fields.label || fields.title || 'Published content'),
+runtime/orchestrator-service/lib/insights/ingestion-service.js:284:    topic: asString(fields.topic),
+runtime/orchestrator-service/lib/insights/ingestion-service.js:397:        weakest_metric: weakestMetricLabel(summary),
+runtime/orchestrator-service/lib/insights/ingestion-service.js:399:        recommendation: platformRecommendation(titleCase(platform), summary)
+runtime/orchestrator-service/lib/insights/ingestion-service.js:401:      top_content: items.slice(0, 5),
+runtime/orchestrator-service/lib/insights/ingestion-service.js:418:  const coverageSignals = [];
+runtime/orchestrator-service/lib/insights/ingestion-service.js:424:    if (provider === 'website' && Object.keys(asObject(raw.website)).length) {
+runtime/orchestrator-service/lib/insights/ingestion-service.js:427:        website: asObject(raw.website),
+runtime/orchestrator-service/lib/insights/ingestion-service.js:447:      coverageSignals.push({
+runtime/orchestrator-service/lib/insights/ingestion-service.js:478:  const topPages = pages.slice(0, 5).map(item => ({
+runtime/orchestrator-service/lib/insights/ingestion-service.js:485:  const weakPages = pages
+runtime/orchestrator-service/lib/insights/ingestion-service.js:512:    weakest_metric: weakPages.length ? 'Conversions' : strongestMetricLabel({
+runtime/orchestrator-service/lib/insights/ingestion-service.js:518:        ...asArray(historyByIntegration.website)
+runtime/orchestrator-service/lib/insights/ingestion-service.js:522:    recommendation: summaryRecommendationWebsite(pages, metadata)
+runtime/orchestrator-service/lib/insights/ingestion-service.js:527:    top_pages: topPages,
+runtime/orchestrator-service/lib/insights/ingestion-service.js:528:    weak_pages: weakPages,
+runtime/orchestrator-service/lib/insights/ingestion-service.js:530:    recommendations: buildWebsiteRecommendations(pages, metadata),
+runtime/orchestrator-service/lib/insights/ingestion-service.js:532:    coverage_signals: coverageSignals
+runtime/orchestrator-service/lib/insights/ingestion-service.js:538:    return 'The website already shows page-level traffic and conversion signal. Use the strongest landing pages as the model for future campaigns.';
+runtime/orchestrator-service/lib/insights/ingestion-service.js:541:    return 'Traffic is arriving on the website, but conversion evidence is still thin. Tighten landing-page intent match and CTA clarity next.';
+runtime/orchestrator-service/lib/insights/ingestion-service.js:544:    return 'The website endpoint is connected, but richer analytics data is still needed to link content and traffic to conversion outcomes.';
+runtime/orchestrator-service/lib/insights/ingestion-service.js:546:  return 'Connect website analytics to unlock landing-page and conversion intelligence.';
+runtime/orchestrator-service/lib/insights/ingestion-service.js:563:        label = 'Engagement quality is weak';
+runtime/orchestrator-service/lib/insights/ingestion-service.js:577:  const recommendations = [];
+runtime/orchestrator-service/lib/insights/ingestion-service.js:578:  const weakTraffic = pages
+runtime/orchestrator-service/lib/insights/ingestion-service.js:581:  const topPage = pages[0];
+runtime/orchestrator-service/lib/insights/ingestion-service.js:583:  if (weakTraffic) {
+runtime/orchestrator-service/lib/insights/ingestion-service.js:584:    recommendations.push({
+runtime/orchestrator-service/lib/insights/ingestion-service.js:586:      label: weakTraffic.page,
+runtime/orchestrator-service/lib/insights/ingestion-service.js:587:      sessions: weakTraffic.sessions
+runtime/orchestrator-service/lib/insights/ingestion-service.js:591:  if (topPage && topPage.conversions > 0) {
+runtime/orchestrator-service/lib/insights/ingestion-service.js:592:    recommendations.push({
+runtime/orchestrator-service/lib/insights/ingestion-service.js:594:      label: topPage.page,
+runtime/orchestrator-service/lib/insights/ingestion-service.js:595:      conversions: topPage.conversions
+runtime/orchestrator-service/lib/insights/ingestion-service.js:599:  if (!recommendations.length && metadata.length) {
+runtime/orchestrator-service/lib/insights/ingestion-service.js:600:    recommendations.push({
+runtime/orchestrator-service/lib/insights/ingestion-service.js:602:      label: 'Add GA4 or conversion tracking to unlock richer recommendations.'
+runtime/orchestrator-service/lib/insights/ingestion-service.js:606:  return recommendations;
+runtime/orchestrator-service/lib/insights/ingestion-service.js:667:  const topQueries = Array.from(groupedQueries.values())
+runtime/orchestrator-service/lib/insights/ingestion-service.js:678:  const topPages = Array.from(groupedPages.values())
+runtime/orchestrator-service/lib/insights/ingestion-service.js:689:  const lowCtrPages = topPages
+runtime/orchestrator-service/lib/insights/ingestion-service.js:694:  const rankingOpportunities = topPages
+runtime/orchestrator-service/lib/insights/ingestion-service.js:723:    weakest_metric: lowCtrPages.length ? 'CTR' : strongestMetricLabel({
+runtime/orchestrator-service/lib/insights/ingestion-service.js:730:    recommendation: rows.length
+runtime/orchestrator-service/lib/insights/ingestion-service.js:731:      ? 'Use the highest-impression, lowest-CTR pages to prioritize SEO title and meta updates.'
+runtime/orchestrator-service/lib/insights/ingestion-service.js:732:      : 'Connect Search Console so the system can learn which pages and queries deserve the next content expansion.'
+runtime/orchestrator-service/lib/insights/ingestion-service.js:737:    top_queries: topQueries,
+runtime/orchestrator-service/lib/insights/ingestion-service.js:738:    top_pages: topPages,
+runtime/orchestrator-service/lib/insights/ingestion-service.js:821:      weakest_metric: weakestMetricLabel({
+runtime/orchestrator-service/lib/insights/ingestion-service.js:838:      recommendation: campaigns.length
+runtime/orchestrator-service/lib/insights/ingestion-service.js:839:        ? 'Keep the best CTR and lowest-CPC campaigns as the benchmark, then refresh weak creative before scaling spend.'
+runtime/orchestrator-service/lib/insights/ingestion-service.js:840:        : 'Connect paid reporting feeds so the system can compare spend efficiency and creative performance.'
+runtime/orchestrator-service/lib/insights/ingestion-service.js:844:    weak_campaigns: rankedCampaigns.slice().reverse().slice(0, 4),
+runtime/orchestrator-service/lib/insights/ingestion-service.js:847:      metric: item.ctr != null ? `CTR ${item.ctr.toFixed(2)}%` : `Clicks ${item.clicks}`,
+runtime/orchestrator-service/lib/insights/ingestion-service.js:848:      value: item.roas != null ? `ROAS ${item.roas.toFixed(2)}x` : item.cpc != null ? `CPC ${item.cpc.toFixed(2)}` : ''
+runtime/orchestrator-service/lib/insights/ingestion-service.js:850:    weak_creatives: rankedCampaigns.slice().reverse().slice(0, 3).map(item => ({
+runtime/orchestrator-service/lib/insights/ingestion-service.js:852:      metric: item.ctr != null ? `CTR ${item.ctr.toFixed(2)}%` : `Clicks ${item.clicks}`,
+runtime/orchestrator-service/lib/insights/ingestion-service.js:853:      value: item.cpa != null ? `CPA ${item.cpa.toFixed(2)}` : item.spend != null ? `Spend ${item.spend.toFixed(2)}` : ''
+runtime/orchestrator-service/lib/insights/ingestion-service.js:910:      weakest_metric: orders.length ? 'Attribution depth' : '',
+runtime/orchestrator-service/lib/insights/ingestion-service.js:919:      recommendation: orders.length
+runtime/orchestrator-service/lib/insights/ingestion-service.js:920:        ? 'Use product and order signals to inform what the content and offer system should push harder.'
+runtime/orchestrator-service/lib/insights/ingestion-service.js:953:    social_insights: {
+runtime/orchestrator-service/lib/insights/ingestion-service.js:957:    paid_ads: {
+runtime/orchestrator-service/lib/insights/ingestion-service.js:961:    website_analytics: {
+runtime/orchestrator-service/lib/insights/ingestion-service.js:962:      status: evaluate(['website', 'ga4', 'meta-pixel', 'tiktok-pixel', 'gtm']),
+runtime/orchestrator-service/lib/insights/ingestion-service.js:963:      integrations: ['website', 'ga4', 'meta-pixel', 'tiktok-pixel', 'gtm']
+runtime/orchestrator-service/lib/insights/ingestion-service.js:965:    seo_search_console: {
+runtime/orchestrator-service/lib/insights/ingestion-service.js:984:function buildCrossPlatformComparison({ social, website, seo, paid }) {
+runtime/orchestrator-service/lib/insights/ingestion-service.js:988:      performance_level: asString(social.facebook?.summary?.performance_level),
+runtime/orchestrator-service/lib/insights/ingestion-service.js:989:      strongest_metric: asString(social.facebook?.summary?.strongest_metric),
+runtime/orchestrator-service/lib/insights/ingestion-service.js:990:      weakest_metric: asString(social.facebook?.summary?.weakest_metric),
+runtime/orchestrator-service/lib/insights/ingestion-service.js:991:      trend_direction: asString(social.facebook?.summary?.trend_direction),
+runtime/orchestrator-service/lib/insights/ingestion-service.js:992:      recommendation: asString(social.facebook?.summary?.recommendation)
+runtime/orchestrator-service/lib/insights/ingestion-service.js:996:      performance_level: asString(social.instagram?.summary?.performance_level),
+runtime/orchestrator-service/lib/insights/ingestion-service.js:997:      strongest_metric: asString(social.instagram?.summary?.strongest_metric),
+runtime/orchestrator-service/lib/insights/ingestion-service.js:998:      weakest_metric: asString(social.instagram?.summary?.weakest_metric),
+runtime/orchestrator-service/lib/insights/ingestion-service.js:999:      trend_direction: asString(social.instagram?.summary?.trend_direction),
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1000:      recommendation: asString(social.instagram?.summary?.recommendation)
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1004:      performance_level: asString(social.tiktok?.summary?.performance_level),
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1005:      strongest_metric: asString(social.tiktok?.summary?.strongest_metric),
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1006:      weakest_metric: asString(social.tiktok?.summary?.weakest_metric),
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1007:      trend_direction: asString(social.tiktok?.summary?.trend_direction),
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1008:      recommendation: asString(social.tiktok?.summary?.recommendation)
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1012:      performance_level: asString(social.youtube?.summary?.performance_level),
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1013:      strongest_metric: asString(social.youtube?.summary?.strongest_metric),
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1014:      weakest_metric: asString(social.youtube?.summary?.weakest_metric),
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1015:      trend_direction: asString(social.youtube?.summary?.trend_direction),
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1016:      recommendation: asString(social.youtube?.summary?.recommendation)
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1020:      performance_level: asString(website.summary?.performance_level),
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1021:      strongest_metric: asString(website.summary?.strongest_metric),
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1022:      weakest_metric: asString(website.summary?.weakest_metric),
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1023:      trend_direction: asString(website.summary?.trend_direction),
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1024:      recommendation: asString(website.summary?.recommendation)
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1027:      platform: 'SEO / Search Console',
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1028:      performance_level: asString(seo.summary?.performance_level),
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1029:      strongest_metric: asString(seo.summary?.strongest_metric),
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1030:      weakest_metric: asString(seo.summary?.weakest_metric),
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1031:      trend_direction: asString(seo.summary?.trend_direction),
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1032:      recommendation: asString(seo.summary?.recommendation)
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1036:      performance_level: asString(paid.summary?.performance_level),
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1037:      strongest_metric: asString(paid.summary?.strongest_metric),
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1038:      weakest_metric: asString(paid.summary?.weakest_metric),
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1039:      trend_direction: asString(paid.summary?.trend_direction),
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1040:      recommendation: asString(paid.summary?.recommendation)
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1045:function flattenContentForLearning(social = {}) {
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1046:  return Object.values(asObject(social))
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1054:function buildTopAndWeakContent(contentItems = []) {
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1055:  const measured = contentItems.filter(item => scoreContentItem(item) > 0);
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1061:    top: ranked.slice(0, 5).map(item => ({
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1063:      why_it_worked: asString(item.why_it_worked) || 'This item is outperforming the current measured content baseline.'
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1065:    weak: ranked
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1071:        likely_reason: asString(item.improve_hint) || 'This content is under the current performance baseline and needs a better hook, CTA, or platform match.',
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1077:function buildExecutiveOverview({ social, website, seo, paid, marketplace, coverage, controlCenter }) {
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1079:    social.facebook?.summary?.reach,
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1080:    social.instagram?.summary?.reach,
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1081:    social.tiktok?.summary?.reach,
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1082:    social.youtube?.summary?.reach
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1085:    social.facebook?.summary?.engagement,
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1086:    social.instagram?.summary?.engagement,
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1087:    social.tiktok?.summary?.engagement,
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1088:    social.youtube?.summary?.engagement
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1091:    social.facebook?.summary?.clicks,
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1092:    social.instagram?.summary?.clicks,
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1093:    social.tiktok?.summary?.clicks,
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1094:    social.youtube?.summary?.clicks,
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1095:    website.summary?.clicks,
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1096:    seo.summary?.clicks,
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1097:    paid.summary?.clicks
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1100:    social.facebook?.summary?.conversions,
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1101:    social.instagram?.summary?.conversions,
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1102:    social.tiktok?.summary?.conversions,
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1103:    social.youtube?.summary?.conversions,
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1104:    website.summary?.conversions,
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1105:    paid.summary?.conversions,
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1109:    social.facebook?.summary?.revenue,
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1110:    social.instagram?.summary?.revenue,
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1111:    social.tiktok?.summary?.revenue,
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1112:    social.youtube?.summary?.revenue,
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1113:    website.summary?.revenue,
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1114:    paid.summary?.revenue,
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1117:  const totalSpend = toNumber(paid.summary?.spend);
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1120:    : toNumber(paid.summary?.roas);
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1130:    seo_visibility_summary: seo.summary?.impressions != null
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1131:      ? `${seo.summary.impressions} impressions`
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1134:    data_coverage: coverage
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1152:  const social = aggregateSocialData(snapshots, historyByIntegration);
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1153:  const website = aggregateWebsiteData(snapshots, historyByIntegration);
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1154:  const seo = aggregateSeoData(snapshots, historyByIntegration);
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1155:  const paid = aggregatePaidData(snapshots, historyByIntegration);
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1157:  const coverage = buildCoverageMap({
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1161:  const contentItems = flattenContentForLearning(social);
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1162:  const contentSets = buildTopAndWeakContent(contentItems);
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1165:    contentItems,
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1166:    topContent: contentSets.top,
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1167:    weakContent: contentSets.weak,
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1169:      website,
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1170:      seo,
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1171:      paid,
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1174:    coverage
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1186:      social,
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1187:      website,
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1188:      seo,
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1189:      paid,
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1191:      coverage,
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1195:      social,
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1196:      website,
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1197:      seo,
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1198:      paid
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1200:    social,
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1202:    website,
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1203:    seo,
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1204:    paid,
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1205:    best_performing_content: contentSets.top,
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1206:    underperforming_content: contentSets.weak,
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1207:    data_coverage: coverage,
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1209:    recommendations: learning.recommendations,
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1211:    ai_recommendations: learning.ai_recommendations,
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1212:    assistant_prompts: asArray(learning.ai_recommendations?.assistant_prompts)
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1230:    data_coverage: insights.data_coverage,
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1232:    recommendations: insights.recommendations,
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1234:    ai_recommendations: insights.ai_recommendations,
+runtime/orchestrator-service/lib/security/provider-execution-gate.js:84:    provider: "social",
+runtime/orchestrator-service/lib/security/provider-execution-gate.js:89:    requiredScope: "provider.social.write"
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:196:    recommendation: buildRecommendation({
+runtime/orchestrator-service/lib/integrations/insights-contract.js:21:  if (/seo|query|position|search/.test(scopeText)) return 'seo';
+runtime/orchestrator-service/lib/integrations/insights-contract.js:24:  if (/social|post|video|reel|media|insight/.test(scopeText)) return 'social';
+runtime/orchestrator-service/lib/integrations/insights-contract.js:25:  if (/traffic|session|landing|page|analytics|website/.test(scopeText)) return 'website_analytics';
+runtime/orchestrator-service/lib/integrations/insights-contract.js:42:    content_items: asArray(payload.posts || payload.media || payload.videos),
+runtime/orchestrator-service/lib/integrations/insights-contract.js:43:    website_pages: asArray(payload.landing_pages || payload.pages),
+runtime/orchestrator-service/lib/integrations/insights-contract.js:44:    seo_rows: asArray(payload.rows || payload.queries),
+runtime/orchestrator-service/lib/integrations/provider-registry.js:1:const website = require('./providers/website');
+runtime/orchestrator-service/lib/integrations/provider-registry.js:22:  website,
+runtime/orchestrator-service/lib/integrations/providers/google.js:23:  const error = buildResponseError('ga4', response, 'GA4 request failed');
+runtime/orchestrator-service/lib/integrations/providers/google.js:38:  const error = buildResponseError('search-console', response, 'Search Console request failed');
+runtime/orchestrator-service/lib/integrations/providers/google.js:57:  const error = buildResponseError('search-console', response, 'Search Console analytics query failed');
+runtime/orchestrator-service/lib/integrations/providers/google.js:73:          part: 'snippet,statistics,contentDetails',
+runtime/orchestrator-service/lib/integrations/providers/google.js:77:          part: 'snippet,statistics,contentDetails',
+runtime/orchestrator-service/lib/integrations/providers/google.js:243:    health: 'GA4 Data API access validated successfully.',
+runtime/orchestrator-service/lib/integrations/providers/google.js:245:      scope: 'website_analytics',
+runtime/orchestrator-service/lib/integrations/providers/google.js:249:    notes: 'Connected through the Google Analytics Data API.',
+runtime/orchestrator-service/lib/integrations/providers/google.js:251:    permissionScope: 'GA4 property access token',
+runtime/orchestrator-service/lib/integrations/providers/google.js:292:    health: 'GA4 reporting sync completed successfully.',
+runtime/orchestrator-service/lib/integrations/providers/google.js:294:      scope: 'website_analytics',
+runtime/orchestrator-service/lib/integrations/providers/google.js:298:    notes: 'Synced GA4 landing page and conversion data.',
+runtime/orchestrator-service/lib/integrations/providers/google.js:315:    throw new Error('Configured Search Console property is not accessible with the provided token');
+runtime/orchestrator-service/lib/integrations/providers/google.js:321:    health: 'Search Console access validated successfully.',
+runtime/orchestrator-service/lib/integrations/providers/google.js:323:      scope: 'seo',
+runtime/orchestrator-service/lib/integrations/providers/google.js:327:    notes: 'Connected through the Google Search Console API.',
+runtime/orchestrator-service/lib/integrations/providers/google.js:329:    permissionScope: 'Search Console property access',
+runtime/orchestrator-service/lib/integrations/providers/google.js:331:    readScopes: ['seo', 'queries', 'pages'],
+runtime/orchestrator-service/lib/integrations/providers/google.js:364:    health: 'Search Console sync completed successfully.',
+runtime/orchestrator-service/lib/integrations/providers/google.js:366:      scope: 'seo',
+runtime/orchestrator-service/lib/integrations/providers/google.js:370:    notes: 'Synced Search Console queries and pages.',
+runtime/orchestrator-service/lib/integrations/providers/google.js:375:    readScopes: ['seo', 'queries', 'pages']
+runtime/orchestrator-service/lib/integrations/providers/google.js:392:      scope: 'social_insights',
+runtime/orchestrator-service/lib/integrations/providers/google.js:425:      scope: 'social_insights',
+runtime/orchestrator-service/lib/integrations/providers/google.js:442:    notes: 'Synced YouTube content performance.',
+runtime/orchestrator-service/lib/integrations/providers/google.js:525:      scope: 'website_analytics',
+runtime/orchestrator-service/lib/integrations/providers/website.js:14:  const error = buildResponseError('website', response, 'Website request failed');
+runtime/orchestrator-service/lib/integrations/providers/website.js:27:    content_type: asString(response.headers?.['content-type'])
+runtime/orchestrator-service/lib/integrations/providers/website.js:41:      scope: 'website',
+runtime/orchestrator-service/lib/integrations/providers/website.js:42:      website: metadata
+runtime/orchestrator-service/lib/integrations/providers/website.js:68:      scope: 'website',
+runtime/orchestrator-service/lib/integrations/providers/website.js:69:      website: metadata
+runtime/orchestrator-service/lib/integrations/providers/website.js:71:    notes: 'Fetched current website metadata and reachability state.',
+runtime/orchestrator-service/lib/integrations/providers/website.js:91:    const error = buildResponseError('website', response, 'Failed to fetch sitemap');
+runtime/orchestrator-service/lib/integrations/providers/website.js:104:        scope: 'website',
+runtime/orchestrator-service/lib/integrations/providers/website.js:110:      notes: 'Imported historical URL coverage from the sitemap.',
+runtime/orchestrator-service/lib/integrations/providers/website.js:118:    const providerError = buildProviderError('website', error, 'Failed to import website history');
+runtime/orchestrator-service/lib/integrations/providers/website.js:124:  integrationIds: ['website'],
+runtime/orchestrator-service/lib/integrations/providers/meta.js:85:      scope: 'social_insights',
+runtime/orchestrator-service/lib/integrations/providers/meta.js:126:      scope: 'social_insights',
+runtime/orchestrator-service/lib/integrations/providers/meta.js:159:      scope: 'social_insights',
+runtime/orchestrator-service/lib/integrations/providers/meta.js:201:      scope: 'social_insights',
+runtime/orchestrator-service/lib/integrations/providers/meta.js:305:      scope: 'website_analytics',
+runtime/orchestrator-service/lib/integrations/providers/ops.js:194:      scope: 'website_analytics',
+runtime/orchestrator-service/lib/integrations/providers/ops.js:234:      scope: 'social_insights',
+runtime/orchestrator-service/lib/integrations/providers/tiktok.js:57:      scope: 'social_insights',
+runtime/orchestrator-service/lib/integrations/providers/tiktok.js:89:    health: 'TikTok content data synced successfully.',
+runtime/orchestrator-service/lib/integrations/providers/tiktok.js:91:      scope: 'social_insights',
+runtime/orchestrator-service/lib/integrations/providers/tiktok.js:226:      scope: 'website_analytics',
+runtime/orchestrator-service/lib/execution/smart-suggestions.js:19:    const recommendationStore = readRecommendationsStore(safeProject);
+runtime/orchestrator-service/lib/execution/smart-suggestions.js:21:    const latest = recommendationStore.latest
+runtime/orchestrator-service/lib/execution/smart-suggestions.js:22:      || (snapshot.recommendations || null)
+runtime/orchestrator-service/lib/execution/smart-suggestions.js:25:    const topChannel = summary.top_channels?.[0]?.key || null;
+runtime/orchestrator-service/lib/execution/smart-suggestions.js:26:    const topProduct = summary.top_performing_products?.[0]?.key || null;
+runtime/orchestrator-service/lib/execution/smart-suggestions.js:27:    const topHook = summary.best_hooks?.[0]?.key || null;
+runtime/orchestrator-service/lib/execution/smart-suggestions.js:36:      next_campaign_idea: topProduct
+runtime/orchestrator-service/lib/execution/smart-suggestions.js:37:        ? `Launch a 3-creative sprint for ${topProduct}${topHook ? ` using hook "${topHook}"` : ''}.`
+runtime/orchestrator-service/lib/execution/smart-suggestions.js:38:        : 'Launch a 3-creative sprint around the top-converting product category this week.',
+runtime/orchestrator-service/lib/execution/smart-suggestions.js:39:      best_channel_to_focus: topChannel,
+runtime/orchestrator-service/lib/execution/smart-suggestions.js:40:      content_to_regenerate: latest.improve[0] || latest.stop[0] || 'Regenerate low-engagement creatives with a shorter hook and stronger CTA.',
+runtime/orchestrator-service/lib/execution/performance-storage.js:80:    const payload = readJsonFile(paths.recommendationsPath, {
+runtime/orchestrator-service/lib/execution/performance-storage.js:105:    writeJsonFile(paths.recommendationsPath, payload);
+runtime/orchestrator-service/lib/execution/intelligence-loop.js:27:    const recommendations = typeof generateOptimizationRecommendations === 'function'
+runtime/orchestrator-service/lib/execution/intelligence-loop.js:37:        stop: [],
+runtime/orchestrator-service/lib/execution/intelligence-loop.js:50:        recommendations,
+runtime/orchestrator-service/lib/execution/intelligence-loop.js:52:        alerts: recommendations.alerts,
+runtime/orchestrator-service/lib/execution/intelligence-loop.js:57:    const recommendationStore = readRecommendationsStore(safeProject);
+runtime/orchestrator-service/lib/execution/intelligence-loop.js:58:    recommendationStore.latest = recommendations;
+runtime/orchestrator-service/lib/execution/intelligence-loop.js:59:    recommendationStore.history.push({
+runtime/orchestrator-service/lib/execution/intelligence-loop.js:60:      generated_at: recommendations.generated_at,
+runtime/orchestrator-service/lib/execution/intelligence-loop.js:62:      stop_count: recommendations.stop.length,
+runtime/orchestrator-service/lib/execution/intelligence-loop.js:63:      scale_count: recommendations.scale.length,
+runtime/orchestrator-service/lib/execution/intelligence-loop.js:64:      improve_count: recommendations.improve.length,
+runtime/orchestrator-service/lib/execution/intelligence-loop.js:65:      angle_count: recommendations.new_angles_to_test.length,
+runtime/orchestrator-service/lib/execution/intelligence-loop.js:66:      alert_count: recommendations.alerts.length
+runtime/orchestrator-service/lib/execution/intelligence-loop.js:68:    writeRecommendationsStore(safeProject, recommendationStore);
+runtime/orchestrator-service/lib/execution/intelligence-loop.js:71:    const candidates = buildLearningCandidates(summary, recommendations);
+runtime/orchestrator-service/lib/execution/intelligence-loop.js:83:      recommendations_generated: {
+runtime/orchestrator-service/lib/execution/intelligence-loop.js:84:        stop: recommendations.stop.length,
+runtime/orchestrator-service/lib/execution/intelligence-loop.js:85:        scale: recommendations.scale.length,
+runtime/orchestrator-service/lib/execution/intelligence-loop.js:86:        improve: recommendations.improve.length,
+runtime/orchestrator-service/lib/execution/intelligence-loop.js:87:        new_angles: recommendations.new_angles_to_test.length
+runtime/orchestrator-service/lib/execution/intelligence-loop.js:89:      alerts_count: recommendations.alerts.length,
+runtime/orchestrator-service/lib/execution/intelligence-loop.js:98:      recommendations,
+runtime/orchestrator-service/lib/execution/intelligence-loop.js:100:      alerts: recommendations.alerts
+runtime/orchestrator-service/lib/execution/recommendation-runtime.js:13:    const stop = [];
+runtime/orchestrator-service/lib/execution/recommendation-runtime.js:18:    for (const channel of summary.weak_channels || []) {
+runtime/orchestrator-service/lib/execution/recommendation-runtime.js:19:      stop.push(
+runtime/orchestrator-service/lib/execution/recommendation-runtime.js:24:    for (const channel of summary.top_channels || []) {
+runtime/orchestrator-service/lib/execution/recommendation-runtime.js:53:        `Create a variant ladder for "${primaryHook}": short CTA variant, social-proof variant, and urgency variant.`
+runtime/orchestrator-service/lib/execution/recommendation-runtime.js:57:    if ((summary.top_performing_products || []).length) {
+runtime/orchestrator-service/lib/execution/recommendation-runtime.js:58:      const topProduct = summary.top_performing_products[0].key;
+runtime/orchestrator-service/lib/execution/recommendation-runtime.js:60:        `Build product-led storytelling around ${topProduct} with channel-native edits per platform.`
+runtime/orchestrator-service/lib/execution/recommendation-runtime.js:72:      stop: Array.from(new Set(stop)).slice(0, 8),
+runtime/orchestrator-service/lib/execution/execution-job-bridge.js:26:      const socialPayload = buildSocialExecutionPayload(publishPackage);
+runtime/orchestrator-service/lib/execution/execution-job-bridge.js:32:          socialPayload,
+runtime/orchestrator-service/lib/execution/execution-job-bridge.js:41:        channel: socialPayload.channel,
+runtime/orchestrator-service/lib/execution/execution-job-bridge.js:42:        caption: socialPayload.caption,
+runtime/orchestrator-service/lib/execution/execution-job-bridge.js:43:        media_path: socialPayload.media_path,
+runtime/orchestrator-service/lib/execution/recommendation-builders.js:54:function buildLearningCandidates(summary, recommendations) {
+runtime/orchestrator-service/lib/execution/recommendation-builders.js:57:  for (const channel of summary.top_channels || []) {
+runtime/orchestrator-service/lib/execution/recommendation-builders.js:60:        pattern: `${channel.key} consistently drives above-baseline CTR`,
+runtime/orchestrator-service/lib/execution/recommendation-builders.js:82:  for (const recommendation of recommendations.scale || []) {
+runtime/orchestrator-service/lib/execution/recommendation-builders.js:83:    if (/tiktok/i.test(recommendation)) {
+runtime/orchestrator-service/lib/execution/recommendation-builders.js:89:        learned_from: 'recommendation_analysis',
+runtime/orchestrator-service/lib/execution/recommendation-builders.js:90:        evidence: [recommendation]
+runtime/orchestrator-service/lib/ai/providers/openai.js:31:      value.recommendation ||
+runtime/orchestrator-service/lib/ai/providers/openai.js:65:function buildContentPackText(contentPack = {}, nextActions = []) {
+runtime/orchestrator-service/lib/ai/providers/openai.js:66:  const pack = contentPack && typeof contentPack === 'object' ? contentPack : {};
+runtime/orchestrator-service/lib/ai/providers/openai.js:132:  if (outputType === 'content_pack') {
+runtime/orchestrator-service/lib/ai/providers/openai.js:133:    return buildContentPackText(parsed.contentPack || parsed.content_pack || {}, nextActions);
+runtime/orchestrator-service/lib/ai/providers/openai.js:143:function shouldPreferStructuredContent(parsed = {}, content = '', structuredContent = '') {
+runtime/orchestrator-service/lib/ai/providers/openai.js:147:  if (!['content_pack', 'ad_ideas'].includes(outputType)) {
+runtime/orchestrator-service/lib/ai/providers/openai.js:151:  if (!content) return true;
+runtime/orchestrator-service/lib/ai/providers/openai.js:153:  const shortFlatContent = content.length < 140 && !content.includes('\n');
+runtime/orchestrator-service/lib/ai/providers/openai.js:154:  const structuredHasDepth = structuredContent.length > content.length;
+runtime/orchestrator-service/lib/ai/providers/openai.js:192:  const content = payload?.choices?.[0]?.message?.content;
+runtime/orchestrator-service/lib/ai/providers/openai.js:194:  if (typeof content === 'string') {
+runtime/orchestrator-service/lib/ai/providers/openai.js:195:    return content.trim();
+runtime/orchestrator-service/lib/ai/providers/openai.js:198:  if (Array.isArray(content)) {
+runtime/orchestrator-service/lib/ai/providers/openai.js:199:    return content
+runtime/orchestrator-service/lib/ai/providers/openai.js:217:    let content = humanizeValue(parsed.content || parsed.message || parsed.output);
+runtime/orchestrator-service/lib/ai/providers/openai.js:218:    if (shouldPreferStructuredContent(parsed, content, structuredContent)) {
+runtime/orchestrator-service/lib/ai/providers/openai.js:219:      content = structuredContent;
+runtime/orchestrator-service/lib/ai/providers/openai.js:221:    if (!content) {
+runtime/orchestrator-service/lib/ai/providers/openai.js:222:      content = humanizeValue(structuredContent || parsed.summary);
+runtime/orchestrator-service/lib/ai/providers/openai.js:224:    const summary = humanizeValue(parsed.summary || content);
+runtime/orchestrator-service/lib/ai/providers/openai.js:226:    const recommendations = compactList(
+runtime/orchestrator-service/lib/ai/providers/openai.js:227:      parsed.recommendations || parsed.actions || parsed.next_actions || parsed.nextActions
+runtime/orchestrator-service/lib/ai/providers/openai.js:233:      content,
+runtime/orchestrator-service/lib/ai/providers/openai.js:235:      recommendations,
+runtime/orchestrator-service/lib/ai/providers/openai.js:242:      contentPack: parsed.contentPack || parsed.content_pack || null,
+runtime/orchestrator-service/lib/ai/providers/openai.js:243:      seoPlan: parsed.seoPlan || parsed.seo_plan || null,
+runtime/orchestrator-service/lib/ai/providers/openai.js:248:      chat_answer: humanizeValue(parsed.chat_answer || parsed.chatAnswer || content),
+runtime/orchestrator-service/lib/ai/providers/openai.js:256:    content: asString(rawText),
+runtime/orchestrator-service/lib/ai/providers/openai.js:258:    recommendations: [],
+runtime/orchestrator-service/lib/ai/providers/openai.js:265:    contentPack: null,
+runtime/orchestrator-service/lib/ai/providers/openai.js:266:    seoPlan: null,
+runtime/orchestrator-service/lib/ai/providers/openai.js:291:            content: [
+runtime/orchestrator-service/lib/ai/providers/openai.js:297:              'Always return STRICT JSON. Required keys: title, summary, content, analysis, recommendations, nextActions, routeSuggestions, outputType.',
+runtime/orchestrator-service/lib/ai/providers/openai.js:298:              'recommendations and nextActions must be arrays of readable strings.',
+runtime/orchestrator-service/lib/ai/providers/openai.js:302:              'For outputType "campaign_package", include campaignPackage with concept, targetAudience, offer, products, channels, launchPhases, contentAngles, adAngles, requiredAssets, missingBlockers, nextActions, suggestedHandoffs.',
+runtime/orchestrator-service/lib/ai/providers/openai.js:303:              'For outputType "content_pack", include contentPack with hooks, captions, scripts, emailCopy, landingPageSections, or postIdeas as relevant.',
+runtime/orchestrator-service/lib/ai/providers/openai.js:304:              'For outputType "seo_plan", include seoPlan with keywords, searchIntent, blogTopics, landingPageSeo, metaTitle, metaDescription.',
+runtime/orchestrator-service/lib/ai/providers/openai.js:313:            content: JSON.stringify({
+runtime/orchestrator-service/lib/ai/providers/openai.js:373:      if (!normalized.content) {
+runtime/orchestrator-service/lib/ai/providers/openai.js:374:        const emptyContentError = new Error('OpenAI returned no usable content');
+runtime/orchestrator-service/lib/ai/providers/openai.js:394:        content: normalized.content,
+runtime/orchestrator-service/lib/ai/providers/openai.js:397:        recommendations: normalized.recommendations,
+runtime/orchestrator-service/lib/ai/providers/openai.js:404:        contentPack: normalized.contentPack,
+runtime/orchestrator-service/lib/ai/providers/openai.js:405:        seoPlan: normalized.seoPlan,
+runtime/orchestrator-service/lib/ai/provider-config.js:43:  content: {
+runtime/orchestrator-service/lib/ai/provider-config.js:46:    outputType: 'content_pack',
+runtime/orchestrator-service/lib/ai/provider-config.js:49:      'Produce direct content outputs: captions, hooks, scripts, post ideas, emails, and landing page sections.',
+runtime/orchestrator-service/lib/ai/provider-config.js:55:    purpose: 'ad concepts, paid media strategy, budget split, targeting angles, and platform ad copy',
+runtime/orchestrator-service/lib/ai/provider-config.js:59:      'Produce ad ideas, paid strategy, targeting angles, budget guidance, and Meta, TikTok, Google, or Facebook ad copy.',
+runtime/orchestrator-service/lib/ai/provider-config.js:63:  seo: {
+runtime/orchestrator-service/lib/ai/provider-config.js:65:    purpose: 'keywords, blog topics, landing page SEO, search intent, and meta title or description',
+runtime/orchestrator-service/lib/ai/provider-config.js:66:    outputType: 'seo_plan',
+runtime/orchestrator-service/lib/ai/provider-config.js:69:      'Produce keyword plans, blog topics, landing page SEO, search intent mapping, and metadata.',
+runtime/orchestrator-service/lib/ai/provider-config.js:70:      'Tie search recommendations to the market, audience, and offer context.'
+runtime/orchestrator-service/lib/ai/provider-config.js:99:    content_creator: 'content',
+runtime/orchestrator-service/lib/ai/provider-config.js:101:    seo_specialist: 'seo',
+runtime/orchestrator-service/lib/ops/backbone.js:37:  contentItems: 400,
+runtime/orchestrator-service/lib/ops/backbone.js:57:  content_items: {
+runtime/orchestrator-service/lib/ops/backbone.js:74:    intents: ['inspect', 'task', 'workflow', 'campaign', 'content', 'media', 'approval', 'recommendation']
+runtime/orchestrator-service/lib/ops/backbone.js:78:    types: ['ai_response', 'workflow_output', 'recommendation_bundle', 'memory_snapshot']
+runtime/orchestrator-service/lib/ops/backbone.js:80:  ai_recommendations: {
+runtime/orchestrator-service/lib/ops/backbone.js:82:    route_targets: ['campaign-studio', 'content-studio', 'media-studio', 'publishing', 'ads-manager', 'task-center', 'governance']
+runtime/orchestrator-service/lib/ops/backbone.js:85:    scopes: ['project', 'campaign', 'workflow', 'channel', 'audience', 'content'],
+runtime/orchestrator-service/lib/ops/backbone.js:125:    routes: ['content-studio', 'workflows', 'research'],
+runtime/orchestrator-service/lib/ops/backbone.js:126:    service_domains: ['content'],
+runtime/orchestrator-service/lib/ops/backbone.js:127:    actions: ['draft_content', 'revise_copy', 'handoff_to_review', 'handoff_to_publishing']
+runtime/orchestrator-service/lib/ops/backbone.js:155:    actions: ['launch_ads', 'update_budget', 'request_creative', 'analyze_paid']
+runtime/orchestrator-service/lib/ops/backbone.js:167:    routes: ['governance', 'content-studio', 'media-studio', 'publishing'],
+runtime/orchestrator-service/lib/ops/backbone.js:183:  'content-studio': ['writer', 'strategist', 'compliance_reviewer', 'admin'],
+runtime/orchestrator-service/lib/ops/backbone.js:205:  content: {
+runtime/orchestrator-service/lib/ops/backbone.js:210:    route_target: 'content-studio',
+runtime/orchestrator-service/lib/ops/backbone.js:211:    page_permissions: ['content-studio', 'workflows', 'publishing']
+runtime/orchestrator-service/lib/ops/backbone.js:249:  content_item: 'content',
+runtime/orchestrator-service/lib/ops/backbone.js:304:    const detail = asReadableString(value.action || value.summary || value.description || value.recommendation || value.reason || value.body || value.value);
+runtime/orchestrator-service/lib/ops/backbone.js:397:        service_domains: ['campaign', 'content', 'media', 'publishing', 'research', 'governance']
+runtime/orchestrator-service/lib/ops/backbone.js:519:  if (routeTarget === 'content-studio') return 'content';
+runtime/orchestrator-service/lib/ops/backbone.js:788:    contentItemsPath: path.join(opsDir, 'content-items.json'),
+runtime/orchestrator-service/lib/ops/backbone.js:793:    aiRecommendationsPath: path.join(opsDir, 'ai-recommendations.json'),
+runtime/orchestrator-service/lib/ops/backbone.js:820:      'content_items',
+runtime/orchestrator-service/lib/ops/backbone.js:825:      'ai_recommendations',
+runtime/orchestrator-service/lib/ops/backbone.js:837:  ensureJsonFile(paths.contentItemsPath, []);
+runtime/orchestrator-service/lib/ops/backbone.js:873:      content: 'Marketing lead',
+runtime/orchestrator-service/lib/ops/backbone.js:915:      'content_items',
+runtime/orchestrator-service/lib/ops/backbone.js:920:      'ai_recommendations',
+runtime/orchestrator-service/lib/ops/backbone.js:986:  if (value.includes('campaign') || value.includes('content') || value.includes('media') || value.includes('task')) return 'entity';
+runtime/orchestrator-service/lib/ops/backbone.js:1128:    normalizedType === 'content_item'
+runtime/orchestrator-service/lib/ops/backbone.js:1129:      ? paths.contentItemsPath
+runtime/orchestrator-service/lib/ops/backbone.js:1134:    normalizedType === 'content_item'
+runtime/orchestrator-service/lib/ops/backbone.js:1135:      ? MAX_ITEMS.contentItems
+runtime/orchestrator-service/lib/ops/backbone.js:1323:  if (normalizedType === 'content_item') {
+runtime/orchestrator-service/lib/ops/backbone.js:1324:    return findById(readCollection(paths.contentItemsPath), normalizedId);
+runtime/orchestrator-service/lib/ops/backbone.js:1488:  const contentItems = readCollection(paths.contentItemsPath);
+runtime/orchestrator-service/lib/ops/backbone.js:1504:    ...contentItems,
+runtime/orchestrator-service/lib/ops/backbone.js:1509:      entity_type: asString(item.entity_type) || (item.prompt ? 'media_job' : 'content_item'),
+runtime/orchestrator-service/lib/ops/backbone.js:1602:        content: roleDisplay(team, 'writer'),
+runtime/orchestrator-service/lib/ops/backbone.js:1624:    coverage: {
+runtime/orchestrator-service/lib/ops/backbone.js:1626:      content_items: contentItems.length,
+runtime/orchestrator-service/lib/ops/backbone.js:1636:    queue_type: 'content',
+runtime/orchestrator-service/lib/ops/backbone.js:1637:    entity_type: 'content_item',
+runtime/orchestrator-service/lib/ops/backbone.js:1644:    route: 'content-studio',
+runtime/orchestrator-service/lib/ops/backbone.js:1675:      content_item_id: job.content_item_id,
+runtime/orchestrator-service/lib/ops/backbone.js:1773:  const items = readCollection(paths.contentItemsPath);
+runtime/orchestrator-service/lib/ops/backbone.js:1784:  const routing = inferPrimaryRole('content_item', input, team);
+runtime/orchestrator-service/lib/ops/backbone.js:1830:    id: asString(current.id) || asString(input.id) || createId('content'),
+runtime/orchestrator-service/lib/ops/backbone.js:1843:    service_domain: 'content',
+runtime/orchestrator-service/lib/ops/backbone.js:1865:      current.id ? 'content_item_updated' : 'content_item_created',
+runtime/orchestrator-service/lib/ops/backbone.js:1876:  writeCollection(paths.contentItemsPath, upsertById(items, item), MAX_ITEMS.contentItems);
+runtime/orchestrator-service/lib/ops/backbone.js:1880:    type: current.id ? 'content_item_updated' : 'content_item_created',
+runtime/orchestrator-service/lib/ops/backbone.js:1881:    entity_type: 'content_item',
+runtime/orchestrator-service/lib/ops/backbone.js:1900:  const items = readCollection(paths.contentItemsPath);
+runtime/orchestrator-service/lib/ops/backbone.js:1908:function getContentItem(projectName, contentItemId) {
+runtime/orchestrator-service/lib/ops/backbone.js:1910:  return findById(readCollection(paths.contentItemsPath), contentItemId);
+runtime/orchestrator-service/lib/ops/backbone.js:1980:    content_item_id: asString(input.content_item_id || current.content_item_id),
+runtime/orchestrator-service/lib/ops/backbone.js:2034:  const contentItemId = asString(options.content_item_id);
+runtime/orchestrator-service/lib/ops/backbone.js:2039:    if (contentItemId && asString(item.content_item_id) !== contentItemId) {
+runtime/orchestrator-service/lib/ops/backbone.js:2173:    action_type: asString(input.action_type || current.action_type) || 'recommendation',
+runtime/orchestrator-service/lib/ops/backbone.js:2183:    recommendation_ids: normalizeStringList(input.recommendation_ids || current.recommendation_ids),
+runtime/orchestrator-service/lib/ops/backbone.js:2293:  const recommendation = {
+runtime/orchestrator-service/lib/ops/backbone.js:2311:      current.id ? 'ai_recommendation_updated' : 'ai_recommendation_created',
+runtime/orchestrator-service/lib/ops/backbone.js:2320:  writeCollection(paths.aiRecommendationsPath, upsertById(items, recommendation), MAX_ITEMS.aiRecommendations);
+runtime/orchestrator-service/lib/ops/backbone.js:2324:    type: current.id ? 'ai_recommendation_updated' : 'ai_recommendation_created',
+runtime/orchestrator-service/lib/ops/backbone.js:2325:    entity_type: 'ai_recommendation',
+runtime/orchestrator-service/lib/ops/backbone.js:2326:    entity_id: recommendation.id,
+runtime/orchestrator-service/lib/ops/backbone.js:2327:    title: recommendation.title,
+runtime/orchestrator-service/lib/ops/backbone.js:2328:    summary: recommendation.summary || 'Durable recommendation created.',
+runtime/orchestrator-service/lib/ops/backbone.js:2329:    actor: recommendation.created_by,
+runtime/orchestrator-service/lib/ops/backbone.js:2331:      domain: recommendation.domain,
+runtime/orchestrator-service/lib/ops/backbone.js:2332:      route_target: recommendation.route_target,
+runtime/orchestrator-service/lib/ops/backbone.js:2333:      priority: recommendation.priority
+runtime/orchestrator-service/lib/ops/backbone.js:2337:  return recommendation;
+runtime/orchestrator-service/lib/ops/backbone.js:2735:    if (approval.entity_type === 'content_item') {
+runtime/orchestrator-service/lib/ops/backbone.js:2745:    if (approval.entity_type === 'content_item') {
+runtime/orchestrator-service/lib/ops/backbone.js:2872:    if (next.entity_type === 'content_item') {
+runtime/orchestrator-service/lib/ops/backbone.js:3073:      if (handoffLinkedEntity.entity_type === 'content_item') {
+runtime/orchestrator-service/lib/ops/backbone.js:3394:  if (normalizedType === 'content_item') return 'content-studio';
+runtime/orchestrator-service/lib/ops/backbone.js:3542:    content: normalizedQueue.filter((item) => item.queue_type === 'content'),
+runtime/orchestrator-service/lib/ops/backbone.js:3579:    content_queue: queueGroups.content,
+runtime/orchestrator-service/lib/ops/backbone.js:3853:  const contentItems = readCollection(paths.contentItemsPath);
+runtime/orchestrator-service/lib/ops/backbone.js:3876:  const contentLimit = Number(options.contentLimit || 12) || 12;
+runtime/orchestrator-service/lib/ops/backbone.js:3881:    ...contentItems,
+runtime/orchestrator-service/lib/ops/backbone.js:3978:    content_items: {
+runtime/orchestrator-service/lib/ops/backbone.js:3979:      total: contentItems.length,
+runtime/orchestrator-service/lib/ops/backbone.js:3980:      draft_count: contentItems.filter((item) => asString(item.status) === 'draft').length,
+runtime/orchestrator-service/lib/ops/backbone.js:3981:      pending_approval_count: contentItems.filter((item) => asString(item.approval_status) === 'pending').length,
+runtime/orchestrator-service/lib/ops/backbone.js:3982:      items: contentItems.slice(0, contentLimit)
+runtime/orchestrator-service/lib/ops/backbone.js:4006:      items: aiArtifacts.slice(0, contentLimit)
+runtime/orchestrator-service/lib/ops/backbone.js:4008:    ai_recommendations: {
+runtime/orchestrator-service/lib/ops/backbone.js:4011:      items: aiRecommendations.slice(0, contentLimit)
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:61:      value.recommendation ||
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:121:  content: 'content-studio',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:123:  seo: 'insights',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:131:  content: 'content_pack',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:133:  seo: 'seo_plan',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:140:  writer: 'content',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:141:  designer: 'content',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:142:  media: 'content',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:143:  video_lead: 'content',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:146:  analyst: 'seo',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:164:  // Publishing/content output language: explicit override > project/market/setup language > fallback
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:227:    `Output/publishing language (language for publishable content, copy, hooks, captions, scripts): ${outputLanguage}`,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:233:    'If publishable content uses a different output language, do not make the entire answer that output language.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:234:    'Start with one brief sentence in the conversation language, then add a clearly labeled publishable content section in the output language.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:239:      ? `Generate all publishable content (hooks, captions, scripts, emails, copy, headlines) in ${outputLanguage} because that is the project publishing language.`
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:240:      : 'Generate publishable content in the same language as your conversation.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:244:    'If the user explicitly requests a different output language, use that language for publishable content instead.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:256:    'Provide practical guidance/content only.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:284:      "When asked for content, write strong usable copy and explain options only when helpful."
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:293:      "Focus on video scripts, reels, hooks, shot lists, motion direction, pacing, and social-first storytelling.",
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:303:      "Focus on ad concepts, targeting angles, offers, ad copy, funnel steps, and campaign optimization.",
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:304:      "When asked about ads, provide practical paid-growth recommendations and next test ideas."
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:306:    seo: [
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:308:      "Focus on SEO, keyword intent, insights, performance analysis, content opportunities, and search visibility.",
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:333:      "Think across strategy, content, media, publishing, ads, SEO, compliance, operations, customer operations, and sales.",
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:362:    const content = humanizeValue(message.content || message.text || message.message || message.responseText || message.prompt);
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:363:    return content ? `${index + 1}. ${author} (${role}): ${content}` : '';
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:383:    '- If publishable content uses a different output language, put only that publishable section in the output language under a clear label.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:385:    '- Then write a section titled exactly: Publishable content — {outputLanguage}: and put the publishable copy there only.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:399:      ? `When producing publishable content, write the publishable content in ${outputLanguage}.`
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:400:      : 'Use the conversation language for publishable content unless the user asks otherwise.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:424:    provider.content,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:429:    raw.content,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:480:    provider.content,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:485:    raw.content,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:489:    response.content,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:510:    provider.content,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:515:    raw.content,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:520:    response.content,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:537:  if (intent === 'content') return 'content-studio';
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:538:  if (intent === 'seo') return 'insights';
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:558:      actionType: 'recommendation',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:565:      actionType: 'content_generation',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:567:      pattern: /\b(ad ideas?|ad copy|ads?|facebook ads?|meta ads?|tiktok ads?|google ads?|paid media|primary text|headline|hooks?|cta|creative angles?|targeting angles?)\b/
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:577:      intent: 'content',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:578:      modeId: 'content',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:579:      actionType: 'content_generation',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:580:      outputType: 'content_pack',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:581:      pattern: /\b(caption|post|reel script|script|email|landing page section|landing page copy|content pack|content ideas?|copy|blog intro|social post)\b/
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:584:      intent: 'seo',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:585:      modeId: 'seo',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:586:      actionType: 'recommendation',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:587:      outputType: 'seo_plan',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:588:      pattern: /\b(seo|keywords?|blog topics?|meta title|meta description|search intent|search|ranking|serp|landing page seo)\b/
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:593:      actionType: 'recommendation',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:611:      actionType: selectedMode === 'operations' ? 'workflow' : 'recommendation',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:620:      actionType: 'recommendation',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:629:  if (matches(/\b(approve|approval|review)\b/) && !['ads', 'content', 'campaign'].includes(intent)) {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:715:      recommendations: compactList(learning.recommendations || insights.recommendations, 4),
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:783:function normalizeAdIdeas(value, content = '') {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:813:  return parseNumberedIdeas(content).map((item) => ({
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:844:    ['content-studio', 'media-studio', 'publishing', 'ads-manager'],
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:855:    contentAngles: normalizeReadableList(record.contentAngles || record.content_angles, 8),
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:901:  const baseRecommendations = context.summary.recommendations.length
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:902:    ? context.summary.recommendations
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:904:  const providerRecommendations = normalizeReadableList(providerOutput.recommendations, 8);
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:905:  const recommendations = providerRecommendations.length
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:909:  const content = humanizeValue(providerOutput.content || providerOutput.summary);
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:913:  const adIdeas = outputType === 'ad_ideas' ? normalizeAdIdeas(providerOutput.adIdeas || providerOutput.raw?.adIdeas || providerOutput.raw?.ad_ideas, content) : [];
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:917:  const contentPack = outputType === 'content_pack'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:918:    ? normalizeContentPack(providerOutput.contentPack || providerOutput.raw?.contentPack || providerOutput.raw?.content_pack)
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:920:  const seoPlan = outputType === 'seo_plan'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:921:    ? normalizeStructuredObject(providerOutput.seoPlan || providerOutput.raw?.seoPlan || providerOutput.raw?.seo_plan)
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:947:        normalizeRouteSuggestion('content-studio', 'Turn campaign angles into draft content.'),
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:949:        normalizeRouteSuggestion('publishing', 'Schedule approved launch content.'),
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:950:        normalizeRouteSuggestion('ads-manager', 'Prepare paid media activation.')
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:964:    content ||
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:983:    content,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:990:        : 'Integration coverage is still limited, so recommendations should be validated before execution.'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:992:    recommendations,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:998:    contentPack,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:999:    seoPlan,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1007:    recommendationObjects: recommendations.map((item, index) => ({
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1008:      title: index === 0 ? 'Primary recommendation' : `Recommendation ${index + 1}`,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1025:    : workflowId === 'build-content-plan'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1026:      ? 'content-studio'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1039:      context.summary.recommendations[0] || 'No recommendation stack was available, so the workflow leaned on project settings and operations context.'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1041:    recommendations: [
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1042:      context.summary.recommendations[0] || `Route this workflow output into ${titleCase(routeTarget)} for execution.`,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1150:        const recommendationRecords = response.recommendationObjects.map((item) =>
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1166:            recommendations: response.recommendations,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1264:          recommendation_ids: recommendationRecords.map((item) => item.id),
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1275:          recommendation_count: response.recommendations.length
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1295:          recommendations: recommendationRecords,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1307:          content: '',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1309:          recommendations: [],
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1476:            content: responseText,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1605:            items: normalizeReadableList(response.recommendations, 6)
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1647:          bullets: normalizeReadableList(response.recommendations.length ? response.recommendations : response.nextActions, 8),
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1654:            content: response.content,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1657:            recommendations: response.recommendations,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1762:      const recommendations = output.recommendations.map((item, index) =>
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1764:          title: index === 0 ? `${output.title} primary route` : `${output.title} recommendation ${index + 1}`,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1815:        recommendations,
+runtime/orchestrator-service/lib/data/execution-artifact-writer-adapter.js:41:  optimization: {
+runtime/orchestrator-service/lib/data/execution-artifact-writer-adapter.js:42:    legacy: 'optimization',
+runtime/orchestrator-service/lib/data/execution-artifact-writer-adapter.js:43:    canonical: 'optimization'
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:266:      'optimization'
+runtime/orchestrator-service/lib/customer-operations/contracts/message-contract.js:17:    content: {
+runtime/orchestrator-service/lib/customer-operations/contracts/message-contract.js:18:      text: String(input.content?.text || ''),
+runtime/orchestrator-service/lib/customer-operations/contracts/message-contract.js:19:      attachments: Array.isArray(input.content?.attachments)
+runtime/orchestrator-service/lib/customer-operations/contracts/message-contract.js:20:        ? input.content.attachments
+runtime/orchestrator-service/lib/customer-operations/contracts/conversation-contract.js:6:    channel: String(input.channel || 'website'),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:220:    { channel_id: 'instagram', provider: 'meta', type: 'social' },
+runtime/orchestrator-service/lib/customer-operations/conversations/create-integration-session.js:62:    content: {
+runtime/orchestrator-service/lib/customer-operations/channels/channel-integration-mapper.js:8:  website: {
+runtime/orchestrator-service/lib/customer-operations/channels/channel-integration-mapper.js:9:    channel_id: 'website-chat',
+runtime/orchestrator-service/lib/customer-operations/channels/channel-integration-mapper.js:122:      supports_leads: ['instagram', 'facebook', 'website', 'telegram'].includes(base.channel_id),
+runtime/orchestrator-service/lib/customer-operations/channels/registry/default-channels.js:9:    channel_id: 'website-chat',
+runtime/orchestrator-service/lib/media/native/capabilities/local-rendering-capabilities.js:44:    recommendation: hasNvidiaSmi
+runtime/orchestrator-service/lib/media/native/intelligence/media-quality-scorer.js:77:    status: score >= 85 ? 'ready' : score >= 65 ? 'needs_review' : 'weak',
+runtime/orchestrator-service/lib/media/native/intelligence/media-quality-scorer.js:80:    recommendations: failed.map(item => item.reason),
+runtime/orchestrator-service/lib/media/provider-layer.js:38:        return asString(part.text || part.content || part.output_text);
+runtime/orchestrator-service/lib/media/provider-layer.js:125:            { role: 'system', content: systemPrompt },
+runtime/orchestrator-service/lib/media/provider-layer.js:126:            { role: 'user', content: userPrompt }
+runtime/orchestrator-service/lib/media/provider-layer.js:139:      const text = extractMessageContent(response?.data?.choices?.[0]?.message?.content);
+runtime/orchestrator-service/lib/media/provider-layer.js:206:        '  "recommendations": string[]',
+runtime/orchestrator-service/lib/media/provider-layer.js:228:      recommendations: ['Review prompt wording manually.']
+runtime/orchestrator-service/lib/media/provider-layer.js:240:        recommendations: Array.isArray(parsed.recommendations)
+runtime/orchestrator-service/lib/media/provider-layer.js:241:          ? parsed.recommendations.map((item) => asString(item)).filter(Boolean)
+runtime/orchestrator-service/server.js:33:} = require('./lib/execution/recommendation-builders');
+runtime/orchestrator-service/server.js:34:const { createRecommendationRuntime } = require('./lib/execution/recommendation-runtime');
+runtime/orchestrator-service/server.js:84:} = require('./lib/insights/ingestion-service');
+runtime/orchestrator-service/server.js:234:  contentSecurityPolicy: false // CSP managed separately; avoids breaking existing UI
+runtime/orchestrator-service/server.js:353:  /^\/generate_optimization_recommendations\/?$/i,
+runtime/orchestrator-service/server.js:615:      content_item_id: asString(req?.body?.content_item_id || ''),
+runtime/orchestrator-service/server.js:1230:  optimization: {
+runtime/orchestrator-service/server.js:1231:    legacy: 'optimization',
+runtime/orchestrator-service/server.js:1232:    canonical: 'optimization'
+runtime/orchestrator-service/server.js:1496:    canonicalLiveContentDir: path.join(EXECUTION_DIR, 'projects', safeProject, 'content', 'email'),
+runtime/orchestrator-service/server.js:1497:    legacyLiveContentDir: path.join(EXECUTION_DIR, safeProject, 'content', 'email'),
+runtime/orchestrator-service/server.js:1544:      requestedFile: 'content/email/email-queue.json',
+runtime/orchestrator-service/server.js:1545:      pathContract: 'execution/projects/<project>/content/email/email-queue.json -> execution/<project>/content/email/email-queue.json'
+runtime/orchestrator-service/server.js:1657:    ads: path.join('content', 'ads', 'ad-queue.json'),
+runtime/orchestrator-service/server.js:1658:    social: path.join('content', 'social', 'post-queue.json'),
+runtime/orchestrator-service/server.js:1659:    blog: path.join('content', 'blog', 'blog-queue.json'),
+runtime/orchestrator-service/server.js:1660:    reel: path.join('content', 'campaigns', 'reel-brief-queue.json'),
+runtime/orchestrator-service/server.js:1666:    throw new Error(`Unknown content queue type: ${queueType}`);
+runtime/orchestrator-service/server.js:2295:  if (!html) errors.push('Missing HTML content');
+runtime/orchestrator-service/server.js:2322:  <meta name="viewport" content="width=device-width, initial-scale=1">
+runtime/orchestrator-service/server.js:2498:- Content family: ${productIntel.content_family || 'unknown'}
+runtime/orchestrator-service/server.js:2501:- Content type: ${intent.content_type}
+runtime/orchestrator-service/server.js:3030:    content_angle: 'Premium brand-controlled visual identity with strong product credibility and polished presentation.',
+runtime/orchestrator-service/server.js:3098:  const content = buildMetaCaption(projectName, placement, goal);
+runtime/orchestrator-service/server.js:3113:    caption: `${content.headline}\n\n${content.body}\n\n${content.cta}\n\n${content.hashtags.join(' ')}`,
+runtime/orchestrator-service/server.js:3114:    headline: content.headline,
+runtime/orchestrator-service/server.js:3115:    body: content.body,
+runtime/orchestrator-service/server.js:3116:    cta: content.cta,
+runtime/orchestrator-service/server.js:3117:    hashtags: content.hashtags,
+runtime/orchestrator-service/server.js:3118:    intelligence: content.intelligence,
+runtime/orchestrator-service/server.js:3321:      : 'CTR-first via title-thumbnail fit, then watch-time support through structure.',
+runtime/orchestrator-service/server.js:3343:      'Do not rely on claimed third-party content for Shorts over one minute.',
+runtime/orchestrator-service/server.js:3500:    competitor_gap: 'Avoid generic wording and weak image discipline. Prioritize clarity, legitimacy, and cleaner listing presentation.',
+runtime/orchestrator-service/server.js:3850:    content_cadence: {
+runtime/orchestrator-service/server.js:3855:      amazon: 'listing_optimization',
+runtime/orchestrator-service/server.js:3856:      ebay: 'listing_optimization'
+runtime/orchestrator-service/server.js:4192:          ? 'social'
+runtime/orchestrator-service/server.js:4488:    domain: 'optimization',
+runtime/orchestrator-service/server.js:4493:    domain: 'optimization',
+runtime/orchestrator-service/server.js:4496:    requestedIdentifier: 'optimization-root',
+runtime/orchestrator-service/server.js:4497:    requestedFile: 'optimization'
+runtime/orchestrator-service/server.js:4499:  const legacyBaseDir = path.join(resolution.legacyRoot, 'optimization');
+runtime/orchestrator-service/server.js:4567:  const recommendations = [];
+runtime/orchestrator-service/server.js:4571:    recommendations.push('rewrite copy in natural German for German-market publishing');
+runtime/orchestrator-service/server.js:4577:    recommendations.push('use a clearer and more direct CTA');
+runtime/orchestrator-service/server.js:4582:    issues.push('caption may be too long for fast social consumption');
+runtime/orchestrator-service/server.js:4583:    recommendations.push('tighten the first line and move detail lower');
+runtime/orchestrator-service/server.js:4593:    hook_strength: score >= 85 ? 'strong' : score >= 70 ? 'medium' : 'weak',
+runtime/orchestrator-service/server.js:4594:    cta_strength: /jetzt|shop|kaufen|discover|entdecken/i.test(text) ? 'medium' : 'weak',
+runtime/orchestrator-service/server.js:4599:    recommendations,
+runtime/orchestrator-service/server.js:4611:    domain: 'optimization',
+runtime/orchestrator-service/server.js:4612:    artifactType: 'optimization_review',
+runtime/orchestrator-service/server.js:4675:    domain: 'optimization',
+runtime/orchestrator-service/server.js:4676:    artifactType: 'optimization_improvement',
+runtime/orchestrator-service/server.js:4721:    domain: 'optimization',
+runtime/orchestrator-service/server.js:4722:    artifactType: 'optimization_performance_history',
+runtime/orchestrator-service/server.js:4792:      recommendation: 'Prioritize posts with higher saves, clicks, CTR, and conversions. Reduce weak CTA variants.',
+runtime/orchestrator-service/server.js:4841:    content: fs.readFileSync(match.path, 'utf8')
+runtime/orchestrator-service/server.js:5917:    return String(projectData.website_url || '').trim();
+runtime/orchestrator-service/server.js:5964:    text.includes('content') ||
+runtime/orchestrator-service/server.js:5995:    content_family: null
+runtime/orchestrator-service/server.js:6002:    intelligence.content_family = 'after shave';
+runtime/orchestrator-service/server.js:6007:    intelligence.content_family = 'beard care';
+runtime/orchestrator-service/server.js:6012:    intelligence.content_family = 'hair care';
+runtime/orchestrator-service/server.js:6028:      content_type: 'offer_visual',
+runtime/orchestrator-service/server.js:6036:      content_type: 'seasonal_visual',
+runtime/orchestrator-service/server.js:6044:      content_type: 'partner_visual',
+runtime/orchestrator-service/server.js:6052:      content_type: 'feature_visual',
+runtime/orchestrator-service/server.js:6060:      content_type: 'infographic',
+runtime/orchestrator-service/server.js:6068:      content_type: 'marketplace_visual',
+runtime/orchestrator-service/server.js:6076:      content_type: 'hero_visual',
+runtime/orchestrator-service/server.js:6083:    content_type: 'brand_visual',
+runtime/orchestrator-service/server.js:6244:          : 'Return analysis and recommendations.'
+runtime/orchestrator-service/server.js:6293:    contentDir: path.join(baseDir, 'content'),
+runtime/orchestrator-service/server.js:6301:    optimizationDir: path.join(baseDir, 'optimization'),
+runtime/orchestrator-service/server.js:6336:    aiRecommendationsPath: path.join(opsDir, 'ai-recommendations.json'),
+runtime/orchestrator-service/server.js:6499:    website: ['website'],
+runtime/orchestrator-service/server.js:6500:    social_links: ['instagram', 'facebook', 'tiktok', 'youtube', 'linkedin', 'x', 'pinterest'],
+runtime/orchestrator-service/server.js:6553:  const socialChannels = normalizeSetupListValue(projectData.social_channels || projectData.social_links);
+runtime/orchestrator-service/server.js:6573:    website: projectData.website || projectData.website_url || '',
+runtime/orchestrator-service/server.js:6574:    social_channels: socialChannels,
+runtime/orchestrator-service/server.js:6603:    paths.contentDir,
+runtime/orchestrator-service/server.js:6611:    paths.optimizationDir,
+runtime/orchestrator-service/server.js:6705:      ai_recommendations: {
+runtime/orchestrator-service/server.js:6720:      content: { path: paths.contentDir, exists: fs.existsSync(paths.contentDir) },
+runtime/orchestrator-service/server.js:6741:  if (projectData.website_url) {
+runtime/orchestrator-service/server.js:6742:    nextSources.website = {
+runtime/orchestrator-service/server.js:6743:      value: String(projectData.website_url || '').trim(),
+runtime/orchestrator-service/server.js:6750:  const socialChannels = normalizeSetupListValue(projectData.social_channels || projectData.social_links);
+runtime/orchestrator-service/server.js:6751:  socialChannels.forEach((channel) => {
+runtime/orchestrator-service/server.js:6803:    paths.contentDir,
+runtime/orchestrator-service/server.js:6811:    paths.optimizationDir,
+runtime/orchestrator-service/server.js:6840:    default_channels: ['website', 'instagram', 'facebook'],
+runtime/orchestrator-service/server.js:6843:    content_categories: ['brand_story', 'offers', 'education', 'social_proof'],
+runtime/orchestrator-service/server.js:6844:    workspace_priorities: ['setup', 'library', 'content-studio', 'campaign-studio', 'publishing'],
+runtime/orchestrator-service/server.js:6853:    recommended_integrations: ['website', 'google', 'meta']
+runtime/orchestrator-service/server.js:6860:      default_channels: ['website', 'woocommerce', 'instagram', 'facebook', 'google', 'tiktok'],
+runtime/orchestrator-service/server.js:6863:      content_categories: ['product_launch', 'before_after', 'offers', 'how_to_use', 'reviews'],
+runtime/orchestrator-service/server.js:6864:      workspace_priorities: ['setup', 'library', 'campaign-studio', 'content-studio', 'media-studio', 'publishing', 'insights'],
+runtime/orchestrator-service/server.js:6873:      default_channels: ['instagram', 'tiktok', 'youtube', 'spotify', 'website'],
+runtime/orchestrator-service/server.js:6876:      content_categories: ['song_release', 'behind_the_scenes', 'live_events', 'fan_engagement', 'press_updates'],
+runtime/orchestrator-service/server.js:6877:      workspace_priorities: ['setup', 'library', 'media-studio', 'content-studio', 'campaign-studio', 'publishing'],
+runtime/orchestrator-service/server.js:6880:      recommended_integrations: ['youtube', 'instagram', 'tiktok', 'spotify', 'website']
+runtime/orchestrator-service/server.js:6886:      default_channels: ['instagram', 'tiktok', 'google_business', 'website', 'facebook'],
+runtime/orchestrator-service/server.js:6889:      content_categories: ['services', 'before_after', 'offers', 'team', 'client_reviews'],
+runtime/orchestrator-service/server.js:6890:      workspace_priorities: ['setup', 'library', 'media-studio', 'content-studio', 'publishing', 'insights'],
+runtime/orchestrator-service/server.js:6893:      recommended_integrations: ['google_business', 'instagram', 'tiktok', 'website', 'booking']
+runtime/orchestrator-service/server.js:6899:      default_channels: ['website', 'facebook', 'instagram', 'google', 'crm'],
+runtime/orchestrator-service/server.js:6902:      content_categories: ['property_listing', 'market_update', 'area_guide', 'buyer_tips', 'seller_tips'],
+runtime/orchestrator-service/server.js:6903:      workspace_priorities: ['setup', 'library', 'content-studio', 'campaign-studio', 'ads-manager', 'governance'],
+runtime/orchestrator-service/server.js:6906:      recommended_integrations: ['website', 'crm', 'google', 'meta', 'email_crm']
+runtime/orchestrator-service/server.js:6912:      default_channels: ['website', 'google_business', 'instagram', 'facebook'],
+runtime/orchestrator-service/server.js:6915:      content_categories: ['services', 'case_studies', 'client_results', 'faq', 'offers'],
+runtime/orchestrator-service/server.js:6916:      workspace_priorities: ['setup', 'library', 'content-studio', 'campaign-studio', 'publishing'],
+runtime/orchestrator-service/server.js:6919:      recommended_integrations: ['website', 'google_business', 'meta', 'email_crm']
+runtime/orchestrator-service/server.js:6925:      default_channels: ['instagram', 'tiktok', 'google_business', 'website', 'facebook'],
+runtime/orchestrator-service/server.js:6928:      content_categories: ['menu_highlights', 'daily_specials', 'behind_the_kitchen', 'reviews', 'events'],
+runtime/orchestrator-service/server.js:6932:      recommended_integrations: ['google_business', 'instagram', 'tiktok', 'website', 'delivery']
+runtime/orchestrator-service/server.js:6938:      default_channels: ['website', 'linkedin', 'instagram', 'facebook'],
+runtime/orchestrator-service/server.js:6941:      content_categories: ['case_study', 'thought_leadership', 'services', 'client_results', 'lead_generation'],
+runtime/orchestrator-service/server.js:6942:      workspace_priorities: ['setup', 'library', 'content-studio', 'campaign-studio', 'insights', 'workflows'],
+runtime/orchestrator-service/server.js:6945:      recommended_integrations: ['website', 'linkedin', 'meta', 'google', 'crm']
+runtime/orchestrator-service/server.js:6951:      default_channels: ['google_business', 'website', 'instagram', 'facebook'],
+runtime/orchestrator-service/server.js:6954:      content_categories: ['local_offers', 'reviews', 'services', 'community', 'faq'],
+runtime/orchestrator-service/server.js:6955:      workspace_priorities: ['setup', 'library', 'content-studio', 'publishing', 'insights'],
+runtime/orchestrator-service/server.js:6958:      recommended_integrations: ['google_business', 'website', 'meta']
+runtime/orchestrator-service/server.js:6969:function createProject(projectName, market, language, projectType, websiteUrl) {
+runtime/orchestrator-service/server.js:6996:    content_categories: businessTemplate.content_categories,
+runtime/orchestrator-service/server.js:7001:    website_url: websiteUrl || '',
+runtime/orchestrator-service/server.js:7009:      content: paths.contentDir,
+runtime/orchestrator-service/server.js:7017:      optimization: paths.optimizationDir,
+runtime/orchestrator-service/server.js:7063:    website: normalizeSetupTextValue(input.website || input.website_url),
+runtime/orchestrator-service/server.js:7064:    social_channels: normalizeSetupListValue(input.social_channels || input.social_links),
+runtime/orchestrator-service/server.js:7074:    website_url: normalizeSetupTextValue(input.website_url),
+runtime/orchestrator-service/server.js:7244:    recommendation: fallbackDependencies > 0 || mismatches > 0
+runtime/orchestrator-service/server.js:7276:  const setupFields = ['project_name', 'project_type', 'website_url', 'market', 'language', 'currency', 'primary_goal', 'audience_primary'];
+runtime/orchestrator-service/server.js:7282:  const brandFields = ['brand_name', 'business_type', 'market', 'language', 'currency', 'tone', 'positioning', 'audience', 'goals', 'website'];
+runtime/orchestrator-service/server.js:7333:    has_content_dir: fs.existsSync(paths.contentDir),
+runtime/orchestrator-service/server.js:7341:    has_optimization_dir: fs.existsSync(paths.optimizationDir),
+runtime/orchestrator-service/server.js:7351:    has_ai_recommendations: baselineValidation.required_files.ai_recommendations.exists,
+runtime/orchestrator-service/server.js:7354:    has_website_url: !!projectData.website_url,
+runtime/orchestrator-service/server.js:7362:  if (!checks.has_website_url) missing.push('website_url');
+runtime/orchestrator-service/server.js:7580:  website: 'website',
+runtime/orchestrator-service/server.js:8378:      description: 'Structured product data for planning, content, and campaign packaging.',
+runtime/orchestrator-service/server.js:8392:      target_folder: 'content',
+runtime/orchestrator-service/server.js:8408:      target_folder: 'content',
+runtime/orchestrator-service/server.js:8426:      description: 'Approved product photography for content, media, ads, and publishing.',
+runtime/orchestrator-service/server.js:8450:      asset_type: 'social_assets',
+runtime/orchestrator-service/server.js:8452:      purpose: 'campaign_social',
+runtime/orchestrator-service/server.js:8453:      purpose_label: 'Campaign and social',
+runtime/orchestrator-service/server.js:8457:      aliases: ['social_asset', 'social_creatives', 'organic_social_assets'],
+runtime/orchestrator-service/server.js:8458:      description: 'Organic social creative, post visuals, reels, stories, and channel-ready source assets.',
+runtime/orchestrator-service/server.js:8468:      purpose: 'campaign_social',
+runtime/orchestrator-service/server.js:8469:      purpose_label: 'Campaign and social',
+runtime/orchestrator-service/server.js:8504:      target_folder: 'content',
+runtime/orchestrator-service/server.js:8520:      target_folder: 'content',
+runtime/orchestrator-service/server.js:8536:      target_folder: 'content',
+runtime/orchestrator-service/server.js:9190:    website: hasSource('website'),
+runtime/orchestrator-service/server.js:9229:    'content': base.contentDir,
+runtime/orchestrator-service/server.js:9233:    'optimization': base.optimizationDir,
+runtime/orchestrator-service/server.js:9332:    content: base.contentDir,
+runtime/orchestrator-service/server.js:9336:    optimization: base.optimizationDir,
+runtime/orchestrator-service/server.js:9897:      optimization: {
+runtime/orchestrator-service/server.js:9898:        seo_title_suggestion: `${product.name} | ${brandName}`,
+runtime/orchestrator-service/server.js:9951:        seo_title: `${cleanName} | ${brandName}`,
+runtime/orchestrator-service/server.js:10079:        'Use the cloned draft product for safe content updates before publishing.'
+runtime/orchestrator-service/server.js:10109:      seo_title: `${cleanName} | ${brandName}`,
+runtime/orchestrator-service/server.js:10498:    content_categories: businessTemplate.content_categories,
+runtime/orchestrator-service/server.js:10524:          content_categories: updated.content_categories,
+runtime/orchestrator-service/server.js:10597:  const websiteUrl = String(
+runtime/orchestrator-service/server.js:10598:    body.website_url ||
+runtime/orchestrator-service/server.js:10599:    body.websiteUrl ||
+runtime/orchestrator-service/server.js:10600:    body.website ||
+runtime/orchestrator-service/server.js:10617:      websiteUrl
+runtime/orchestrator-service/server.js:11246:    contentAngles: [
+runtime/orchestrator-service/server.js:11603:      error: error.message || 'Failed to list content items'
+runtime/orchestrator-service/server.js:11610:    const contentItem = upsertContentItem(req.params.project, req.body || {});
+runtime/orchestrator-service/server.js:11612:      content_item: contentItem,
+runtime/orchestrator-service/server.js:11617:      error: error.message || 'Failed to save content item'
+runtime/orchestrator-service/server.js:11624:    const contentItem = getContentItem(req.params.project, req.params.contentItemId);
+runtime/orchestrator-service/server.js:11625:    if (!contentItem) {
+runtime/orchestrator-service/server.js:11628:    return res.json({ content_item: contentItem });
+runtime/orchestrator-service/server.js:11631:      error: error.message || 'Failed to load content item'
+runtime/orchestrator-service/server.js:11636:app.get('/media-manager/project/:project/content-items', handleListContentItems);
+runtime/orchestrator-service/server.js:11637:app.get('/public/media-manager/project/:project/content-items', handleListContentItems);
+runtime/orchestrator-service/server.js:11638:app.post('/media-manager/project/:project/content-items', handleUpsertContentItem);
+runtime/orchestrator-service/server.js:11639:app.post('/public/media-manager/project/:project/content-items', handleUpsertContentItem);
+runtime/orchestrator-service/server.js:11640:app.patch('/media-manager/project/:project/content-items/:contentItemId', (req, res) => {
+runtime/orchestrator-service/server.js:11643:    id: req.params.contentItemId
+runtime/orchestrator-service/server.js:11647:app.patch('/public/media-manager/project/:project/content-items/:contentItemId', (req, res) => {
+runtime/orchestrator-service/server.js:11650:    id: req.params.contentItemId
+runtime/orchestrator-service/server.js:11654:app.get('/media-manager/project/:project/content-items/:contentItemId', handleGetContentItem);
+runtime/orchestrator-service/server.js:11655:app.get('/public/media-manager/project/:project/content-items/:contentItemId', handleGetContentItem);
+runtime/orchestrator-service/server.js:11664:        content_item_id: req.query?.content_item_id
+runtime/orchestrator-service/server.js:12144:      error: error.message || 'Failed to list AI recommendations'
+runtime/orchestrator-service/server.js:12179:app.get('/media-manager/project/:project/ai/recommendations', handleListAiRecommendations);
+runtime/orchestrator-service/server.js:12180:app.get('/public/media-manager/project/:project/ai/recommendations', handleListAiRecommendations);
+runtime/orchestrator-service/server.js:13959:    content_design_rules: {},
+runtime/orchestrator-service/server.js:13963:  record.content_design_rules = buildDefaultContentDesignRules(record);
+runtime/orchestrator-service/server.js:13986:      content_design_rules:
+runtime/orchestrator-service/server.js:13987:        record.content_design_rules || products[index].content_design_rules || {},
+runtime/orchestrator-service/server.js:14828:async function executePublishPackageRuntime({ project, publishPackage, socialPayload }) {
+runtime/orchestrator-service/server.js:14835:    channel: String(socialPayload?.channel || '').trim().toLowerCase(),
+runtime/orchestrator-service/server.js:14838:      has_caption: Boolean(String(socialPayload?.caption || '').trim()),
+runtime/orchestrator-service/server.js:14839:      has_media_path: Boolean(String(socialPayload?.media_path || '').trim())
+runtime/orchestrator-service/server.js:15625:    if (['website', 'ecommerce', 'instagram', 'facebook'].includes(item)) {
+runtime/orchestrator-service/server.js:15675:      website_url: project.website_url,
+runtime/orchestrator-service/server.js:15712:      website_url: project.website_url,
+runtime/orchestrator-service/server.js:15733:      social_channels: Array.isArray(project.social_channels) ? project.social_channels : [],
+runtime/orchestrator-service/server.js:15734:      channels: Array.isArray(project.social_channels) ? project.social_channels : [],
+runtime/orchestrator-service/server.js:15735:      social_links: Array.isArray(project.social_channels) ? project.social_channels : [],
+runtime/orchestrator-service/server.js:15946:        data_coverage: insights.data_coverage,
+runtime/orchestrator-service/server.js:15948:        recommendations: insights.recommendations,
+runtime/orchestrator-service/server.js:15950:        ai_recommendations: insights.ai_recommendations,
+runtime/orchestrator-service/server.js:15971:    recommendations: learning.recommendations || []
+runtime/orchestrator-service/server.js:16134:       if (command === '/content_plan') {
+runtime/orchestrator-service/server.js:16138:      const contentTasks = tasks.filter(
+runtime/orchestrator-service/server.js:16141:          ['content_plan', 'content', 'blog', 'email', 'ads'].includes(t.type)
+runtime/orchestrator-service/server.js:16148:          marketing_tasks: contentTasks
+runtime/orchestrator-service/server.js:16154:      const topic = args.join(' ') || `${commandBrandName} launch post`;
+runtime/orchestrator-service/server.js:16158:        topic,
+runtime/orchestrator-service/server.js:16161:        caption: `Entdecke ${topic} mit ${commandBrandName}. Premium Positionierung für Kunden, die Wert auf Stil, Qualität und Wirkung legen.`,
+runtime/orchestrator-service/server.js:16173:        overlay_text: `${topic} | Premium Männerpflege`,
+runtime/orchestrator-service/server.js:16175:          `Create a premium social media image for ${topic}, focused on masculine grooming, luxury styling, dark elegant brand mood, high-end product presentation, suitable for Instagram and Facebook feed.`,
+runtime/orchestrator-service/server.js:16177:          `Short-form social video for ${topic}: start with a strong visual hook, show premium product or grooming moment, reinforce confidence and routine, finish with CTA Jetzt entdecken.`
+runtime/orchestrator-service/server.js:16180:      const queuePath = getLegacyContentQueuePath(commandProject, 'social');
+runtime/orchestrator-service/server.js:16193:      const topic = args.join(' ') || 'Männerpflege und Grooming';
+runtime/orchestrator-service/server.js:16197:        topic,
+runtime/orchestrator-service/server.js:16199:        title: `${topic} | ${commandBrandName} Blog`,
+runtime/orchestrator-service/server.js:16201:          `${topic} – praktische Tipps, moderne Routinen und Premium Positionierung von ${commandBrandName}.`,
+runtime/orchestrator-service/server.js:16202:        seo_title: `${topic} | ${commandBrandName}`,
+runtime/orchestrator-service/server.js:16204:          `${topic} – entdecke Tipps, Routinen und Premium Positionierung von ${commandBrandName} für einen klaren und starken Auftritt.`,
+runtime/orchestrator-service/server.js:16206:          topic,
+runtime/orchestrator-service/server.js:16215:          topic,
+runtime/orchestrator-service/server.js:16231:          `Create a premium masculine featured image for a German blog article about ${topic}. Clean grooming aesthetic, luxury male care branding, modern barbershop mood, natural contrast, elegant composition, suitable for a premium men’s grooming website.`,
+runtime/orchestrator-service/server.js:16233:          `${topic} – Premium Artikel von ${commandBrandName}`,
+runtime/orchestrator-service/server.js:16243:          `<h2>${topic}</h2>
+runtime/orchestrator-service/server.js:16244:<p>Ein gepflegter Look beginnt nicht bei Zufall, sondern bei der richtigen Routine. ${topic} ist für viele Männer in Deutschland mehr als nur ein Trend – es ist ein Teil eines starken, bewussten und gepflegten Auftritts.</p>
+runtime/orchestrator-service/server.js:16269:<p>${topic} ist nicht nur ein Produktthema, sondern Teil eines modernen, selbstbewussten und klaren Lebensstils. Mit ${commandBrandName} entsteht eine Routine, die zu Kunden passt, die Wert auf Qualität, Stil und Wirkung legen.</p>
+runtime/orchestrator-service/server.js:16287:      const topic = args.join(' ') || `${commandBrandName} Launch`;
+runtime/orchestrator-service/server.js:16291:        topic,
+runtime/orchestrator-service/server.js:16296:        subject: `${topic} – Jetzt entdecken`,
+runtime/orchestrator-service/server.js:16299:          `Entdecke ${topic} mit ${commandBrandName}. Premium Produkte für Kunden, die ihre Routine auf das nächste Level bringen wollen.`,
+runtime/orchestrator-service/server.js:16314:      const topic = args.join(' ') || `${commandBrandName} Launch`;
+runtime/orchestrator-service/server.js:16319:        headline: `${topic} – Premium Pflege für Männer`,
+runtime/orchestrator-service/server.js:16321:          `Mit ${topic} von ${commandBrandName} setzt du auf Premium Qualität, klare Routine und einen starken Auftritt.`,
+runtime/orchestrator-service/server.js:16349:      const queuePath = getLegacyContentQueuePath(commandProject, 'social');
+runtime/orchestrator-service/server.js:16410:      const queuePath = getLegacyContentQueuePath(commandProject, 'social');
+runtime/orchestrator-service/server.js:16493:      item.headline = `Jetzt entdecken: ${item.topic} – Premium Angebot von ${commandBrandName}`;
+runtime/orchestrator-service/server.js:16495:        `Für Kunden, die Wert auf Qualität, Wirkung und eine klare Routine legen: ${item.topic} von ${commandBrandName} verbindet Premium Positionierung mit einem klaren Auftritt.`;
+runtime/orchestrator-service/server.js:16523:      const queuePath = getLegacyContentQueuePath(commandProject, 'social');
+runtime/orchestrator-service/server.js:16534:        `Ein stärkerer Auftritt beginnt mit der richtigen Routine. ${item.topic} mit ${commandBrandName} steht für Premium Positionierung, klare Wirkung und einen hochwertigen Eindruck.`;
+runtime/orchestrator-service/server.js:16540:      item.content_style = 'short-form, premium, Germany-market focused';
+runtime/orchestrator-service/server.js:16544:      item.overlay_text = `${commandBrandName} | ${item.topic}`;
+runtime/orchestrator-service/server.js:16546:        `Create a premium social creative for ${item.topic}, suitable for Instagram and Facebook, masculine luxury grooming aesthetic, clean composition, strong product focus, elegant contrast, Germany-market premium brand feel.`;
+runtime/orchestrator-service/server.js:16548:        `Create a short-form reel for ${item.topic}: start with a hook in the first 2 seconds, show the grooming transformation or product moment, reinforce premium positioning, end with CTA Jetzt entdecken.`;
+runtime/orchestrator-service/server.js:16573:      item.seo_title = `${item.topic} | ${commandBrandName}`;
+runtime/orchestrator-service/server.js:16575:        `${item.topic} – Tipps, Routine und Premium Positionierung von ${commandBrandName} für einen klaren und starken Auftritt.`;
+runtime/orchestrator-service/server.js:16577:        item.topic,
+runtime/orchestrator-service/server.js:16586:        item.topic,
+runtime/orchestrator-service/server.js:16601:        `Create a premium editorial blog image for ${item.topic}, focused on modern German men’s grooming, refined masculine styling, clean grooming tools, premium hair and beard care aesthetic, suitable as a featured image for a luxury grooming brand.`;
+runtime/orchestrator-service/server.js:16603:        `${item.topic} – Premium Artikel von ${commandBrandName}`;
+runtime/orchestrator-service/server.js:16606:        `${item.topic} – Premium Tipps, klare Routine und hochwertige Männerpflege für Deutschland.`;
+runtime/orchestrator-service/server.js:16609:        `<h2>${item.topic}</h2>
+runtime/orchestrator-service/server.js:16610:<p>Wer in Deutschland auf einen gepflegten, starken und modernen Auftritt setzt, kommt an einer klaren Routine nicht vorbei. ${item.topic} ist ein zentrales Thema für Männer, die ihre Pflege ernst nehmen und gleichzeitig Wert auf Einfachheit legen.</p>
+runtime/orchestrator-service/server.js:16612:<h3>Warum ${item.topic} heute wichtig ist</h3>
+runtime/orchestrator-service/server.js:16638:<p>${item.topic} ist ein Thema für Männer, die mehr aus ihrer Routine machen wollen. Mit der richtigen Struktur, hochwertigen Produkten und einem klaren Anspruch entsteht ein Look, der bewusst, gepflegt und stark wirkt.</p>
+runtime/orchestrator-service/server.js:16667:      item.subject = `${item.topic} – Premium Routine für Männer in Deutschland`;
+runtime/orchestrator-service/server.js:16670:        `Entdecke ${item.topic} mit ${commandBrandName}. Premium Positionierung für Kunden, die Qualität, Wirkung und einen starken Auftritt verbinden wollen. Jetzt ist der richtige Moment, deine Routine auf das nächste Level zu bringen.`;
+runtime/orchestrator-service/server.js:16713:      const queuePath = getLegacyContentQueuePath(commandProject, 'social');
+runtime/orchestrator-service/server.js:16850:          seo_title: item.seo_title || '',
+runtime/orchestrator-service/server.js:16886:      const safeSlug = String(blogItem.topic || 'blog-image')
+runtime/orchestrator-service/server.js:16904:        topic: blogItem.topic,
+runtime/orchestrator-service/server.js:17327:          topic: item.topic,
+runtime/orchestrator-service/server.js:17366:      const safeSlug = String(emailItem.topic || 'email-image')
+runtime/orchestrator-service/server.js:17379:        `Create a premium email hero image for ${emailItem.topic}, focused on luxury men’s grooming, strong masculine branding, refined product presentation, elegant dark premium styling, suitable for a high-conversion campaign email for the German market.`;
+runtime/orchestrator-service/server.js:17382:        `${emailItem.topic} – Premium Kampagne von ${commandBrandName}`;
+runtime/orchestrator-service/server.js:17390:        topic: emailItem.topic,
+runtime/orchestrator-service/server.js:17690:          'website',
+runtime/orchestrator-service/server.js:17697:        content_pillars: [
+runtime/orchestrator-service/server.js:17767:        content_pillars: profile.content_pillars || [],
+runtime/orchestrator-service/server.js:17774:        content_outputs: [
+runtime/orchestrator-service/server.js:17777:          'social post',
+runtime/orchestrator-service/server.js:17783:          'social creative',
+runtime/orchestrator-service/server.js:17790:          'CTR',
+runtime/orchestrator-service/server.js:17793:          'ROAS'
+runtime/orchestrator-service/server.js:17795:        optimization_rules: [
+runtime/orchestrator-service/server.js:17798:          'keep winners and cut weak creatives',
+runtime/orchestrator-service/server.js:17871:          social_posts: 3,
+runtime/orchestrator-service/server.js:17879:          'social post set',
+runtime/orchestrator-service/server.js:17963:    content_strategy: {
+runtime/orchestrator-service/server.js:18018:if (command === '/reuse_blog_to_social') {
+runtime/orchestrator-service/server.js:18038:  const socialPack = {
+runtime/orchestrator-service/server.js:18040:    type: 'blog_to_social',
+runtime/orchestrator-service/server.js:18044:        caption: `Ein stärkerer Look beginnt mit der richtigen Routine. ${blog.topic} mit ${commandBrandName} steht für Premium Positionierung und klare Ergebnisse.`,
+runtime/orchestrator-service/server.js:18050:        caption: `Warum ist ${blog.topic} wichtig? Entdecke eine einfache und effektive Routine für einen starken Auftritt.`,
+runtime/orchestrator-service/server.js:18056:      script: `Routine entscheidet alles. ${blog.topic} mit ${commandBrandName} bringt Klarheit und Wirkung.`,
+runtime/orchestrator-service/server.js:18060:      headline: `${blog.topic} – Premium Männerpflege`,
+runtime/orchestrator-service/server.js:18068:    result: socialPack
+runtime/orchestrator-service/server.js:18072:if (command === '/reuse_email_to_social') {
+runtime/orchestrator-service/server.js:18091:  const socialPack = {
+runtime/orchestrator-service/server.js:18093:    type: 'email_to_social',
+runtime/orchestrator-service/server.js:18107:    result: socialPack
+runtime/orchestrator-service/server.js:18119:    hook: 'Stop doing this wrong',
+runtime/orchestrator-service/server.js:18159:          'content tone',
+runtime/orchestrator-service/server.js:18169:          'top competitors',
+runtime/orchestrator-service/server.js:18173:          'weakness opportunities'
+runtime/orchestrator-service/server.js:18188:      const topic = (args[0] || '').trim().toLowerCase();
+runtime/orchestrator-service/server.js:18191:      if (!topic) {
+runtime/orchestrator-service/server.js:18192:        return res.json({ error: 'Missing topic' });
+runtime/orchestrator-service/server.js:18204:        topic,
+runtime/orchestrator-service/server.js:18213:          'rising topics',
+runtime/orchestrator-service/server.js:18215:          'content opportunities',
+runtime/orchestrator-service/server.js:18233:      const topic = args.slice(1).join(' ').trim();
+runtime/orchestrator-service/server.js:18235:      if (!projectName || !topic) {
+runtime/orchestrator-service/server.js:18236:        return res.json({ error: 'Missing project name or topic' });
+runtime/orchestrator-service/server.js:18249:        topic,
+runtime/orchestrator-service/server.js:18252:          primary: [topic],
+runtime/orchestrator-service/server.js:18254:            `${topic} germany`,
+runtime/orchestrator-service/server.js:18255:            `${topic} premium`,
+runtime/orchestrator-service/server.js:18256:            `${topic} men`,
+runtime/orchestrator-service/server.js:18257:            `${topic} routine`
+runtime/orchestrator-service/server.js:18260:            `buy ${topic}`,
+runtime/orchestrator-service/server.js:18261:            `${topic} shop`,
+runtime/orchestrator-service/server.js:18262:            `${topic} price germany`
+runtime/orchestrator-service/server.js:18265:            `how to use ${topic}`,
+runtime/orchestrator-service/server.js:18266:            `best ${topic}`,
+runtime/orchestrator-service/server.js:18267:            `${topic} tips`
+runtime/orchestrator-service/server.js:18270:        source_recommendation: 'Google Ads Keyword Planner',
+runtime/orchestrator-service/server.js:18285:      const topic = args.slice(1).join(' ').trim();
+runtime/orchestrator-service/server.js:18287:      if (!projectName || !topic) {
+runtime/orchestrator-service/server.js:18288:        return res.json({ error: 'Missing project name or topic' });
+runtime/orchestrator-service/server.js:18301:        topic,
+runtime/orchestrator-service/server.js:18306:          topic: [`#${topic.replace(/\s+/g, '')}`],
+runtime/orchestrator-service/server.js:18309:        source_recommendation: 'TikTok Creative Center + platform validation',
+runtime/orchestrator-service/server.js:18347:          'recommended content angles',
+runtime/orchestrator-service/server.js:18381:    rising_topics: [
+runtime/orchestrator-service/server.js:18391:    content_opportunities: [
+runtime/orchestrator-service/server.js:18392:      "routine-based content",
+runtime/orchestrator-service/server.js:18434:    top_competitors: [
+runtime/orchestrator-service/server.js:18449:    weaknesses: [
+runtime/orchestrator-service/server.js:18583:          trend_opportunities: latestTrend?.live_data?.content_opportunities || [],
+runtime/orchestrator-service/server.js:18584:          rising_topics: latestTrend?.live_data?.rising_topics || [],
+runtime/orchestrator-service/server.js:18586:          competitor_weaknesses: latestCompetitor?.live_data?.weaknesses || [],
+runtime/orchestrator-service/server.js:18600:          'website',
+runtime/orchestrator-service/server.js:18607:        recommended_content_stack: [
+runtime/orchestrator-service/server.js:18610:          '3 social posts',
+runtime/orchestrator-service/server.js:18617:          'CTR',
+runtime/orchestrator-service/server.js:18620:          'ROAS'
+runtime/orchestrator-service/server.js:18626:          'launch social content',
+runtime/orchestrator-service/server.js:18627:          'launch paid ads',
+runtime/orchestrator-service/server.js:18700:            facebook: 'retargeting + mixed audience content',
+runtime/orchestrator-service/server.js:18735:          'publish three social assets',
+runtime/orchestrator-service/server.js:18737:          'monitor CTR and strongest hook'
+runtime/orchestrator-service/server.js:18741:        trend_focus: latestBrain.opportunity_map?.rising_topics || [],
+runtime/orchestrator-service/server.js:18789:      topic: mainKeyword,
+runtime/orchestrator-service/server.js:18806:    social_posts: [
+runtime/orchestrator-service/server.js:18830:      hook: 'Stop doing this wrong',
+runtime/orchestrator-service/server.js:18867:      const postQueuePath = getLegacyContentQueuePath(campaignProject, 'social');
+runtime/orchestrator-service/server.js:18887:        social_post_ids: [],
+runtime/orchestrator-service/server.js:18896:          topic: campaignExec.blog.topic,
+runtime/orchestrator-service/server.js:18899:          excerpt: `${campaignExec.blog.topic} – Premium Tipps und klare Routine von ${campaignBrandName}.`,
+runtime/orchestrator-service/server.js:18900:          seo_title: `${campaignExec.blog.title} | ${campaignBrandName}`,
+runtime/orchestrator-service/server.js:18901:          meta_description: `${campaignExec.blog.topic} – entdecke eine starke und einfache Premium-Routine für Männer in Deutschland.`,
+runtime/orchestrator-service/server.js:18902:          target_keywords: [campaignExec.blog.topic],
+runtime/orchestrator-service/server.js:18907:            campaignExec.blog.topic,
+runtime/orchestrator-service/server.js:18919:          featured_image_prompt: `Create a premium editorial blog image for ${campaignExec.blog.topic}, masculine grooming, luxury brand style, clear premium composition.`,
+runtime/orchestrator-service/server.js:18920:          featured_image_alt: `${campaignExec.blog.topic} – Premium Artikel von ${campaignBrandName}`,
+runtime/orchestrator-service/server.js:18922:          body: `<h2>${campaignExec.blog.topic}</h2><p>Entdecke ${campaignExec.blog.topic} mit ${campaignBrandName}.</p>`,
+runtime/orchestrator-service/server.js:18934:          topic: campaignExec.blog?.topic || campaignExec.email.subject || 'campaign email',
+runtime/orchestrator-service/server.js:18951:      if (Array.isArray(campaignExec.social_posts)) {
+runtime/orchestrator-service/server.js:18952:        for (const post of campaignExec.social_posts) {
+runtime/orchestrator-service/server.js:18955:            topic: campaignExec.blog?.topic || 'campaign post',
+runtime/orchestrator-service/server.js:18966:            visual_format: post.platform === 'instagram' ? 'feed post / reel support' : 'social post',
+runtime/orchestrator-service/server.js:18968:            overlay_text: `${campaignBrandName} | ${campaignExec.blog?.topic || 'campaign'}`,
+runtime/orchestrator-service/server.js:18969:            creative_prompt: `Create a premium ${post.platform} creative for ${campaignExec.blog?.topic || 'campaign'}, masculine luxury grooming style.`,
+runtime/orchestrator-service/server.js:18970:            video_brief: `Create short-form visual content for ${campaignExec.blog?.topic || 'campaign'} on ${post.platform}.`,
+runtime/orchestrator-service/server.js:18975:          created.social_post_ids.push(postDraft.id);
+runtime/orchestrator-service/server.js:18984:            topic: campaignExec.blog?.topic || 'campaign ad',
+runtime/orchestrator-service/server.js:19007:          topic: campaignExec.blog?.topic || 'campaign reel',
+runtime/orchestrator-service/server.js:21528:  const websiteUrl = (args[4] || '').trim();
+runtime/orchestrator-service/server.js:21540:      websiteUrl
+runtime/orchestrator-service/server.js:22078:      seo_note:
+runtime/orchestrator-service/server.js:22166:        message: 'Blog draft has no body content'
+runtime/orchestrator-service/server.js:22191:        content: item.body,
+runtime/orchestrator-service/server.js:22357:    recommendationsPath: path.join(aiDir, 'recommendations.json'),
+runtime/orchestrator-service/server.js:22455:const recommendationRuntime = createRecommendationRuntime({
+runtime/orchestrator-service/server.js:22465:} = recommendationRuntime;
+runtime/orchestrator-service/server.js:22644:        'Missing package content. Provide package_payload object with the execution payload.'
+runtime/orchestrator-service/server.js:22956:        recommendation_alerts: update.alerts.length
+runtime/orchestrator-service/server.js:22988:app.post('/generate_optimization_recommendations', (req, res) => {
+runtime/orchestrator-service/server.js:22992:      trigger: 'recommendation_requested'
+runtime/orchestrator-service/server.js:22998:      recommendations: {
+runtime/orchestrator-service/server.js:22999:        what_to_stop: update.recommendations.stop,
+runtime/orchestrator-service/server.js:23000:        what_to_scale: update.recommendations.scale,
+runtime/orchestrator-service/server.js:23001:        what_to_improve: update.recommendations.improve,
+runtime/orchestrator-service/server.js:23002:        new_angles_to_test: update.recommendations.new_angles_to_test
+runtime/orchestrator-service/server.js:23004:      risk_alerts: update.recommendations.alerts,
+runtime/orchestrator-service/server.js:23005:      based_on: update.recommendations.based_on
+runtime/orchestrator-service/server.js:23011:      message: error.message || 'Failed to generate optimization recommendations'
