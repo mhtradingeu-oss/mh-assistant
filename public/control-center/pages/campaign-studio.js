@@ -1598,6 +1598,30 @@ export const campaignStudioRoute = {
     const strategistMode = hasLiveIntelligence
       ? "Current intelligence is shaping campaign direction and readiness."
       : "Current draft data is projecting direction until live intelligence arrives.";
+    const hasAudience = Boolean(firstNonEmpty(values.audiencePrimary, values.audienceNeed).trim());
+    const hasOffer = Boolean(firstNonEmpty(values.offerHeadline, values.offerDetail).trim());
+    const hasChannels = Boolean(asString(values.channelPlan).trim() || waves.some((wave) => asString(values[`${wave.key}Channels`]).trim()));
+    const hasObjective = Boolean(asString(values.campaignGoal).trim());
+    const briefStatus = hasObjective && hasAudience && hasOffer && hasChannels ? "Ready for review" : "Draft";
+    const audienceStatus = hasAudience ? "Defined" : "Missing";
+    const offerStatus = hasOffer ? "Defined" : "Missing";
+    const channelStatus = hasChannels ? "Planned" : "Missing";
+    const assetsStatus = executionReadiness.missingAssets.length
+      ? (asString(values.assetChecklist).trim() ? "Needs review" : "Missing")
+      : "Ready";
+    const handoffStatus = session.recordId ? "Prepared" : "Not prepared";
+    const warRoomTools = [
+      "Campaign Brief Builder",
+      "Audience Segment Mapper",
+      "Offer Angle Matrix",
+      "Launch Wave Planner",
+      "Asset Readiness Check",
+      "Handoff Packet Builder",
+      "Risk and Compliance Notes",
+      "Next Best Move",
+      "Channel Mix Planner",
+      "Approval Checklist"
+    ];
 
     root.innerHTML = `
       <div class="campaign-studio-wrapper">
@@ -1656,6 +1680,79 @@ export const campaignStudioRoute = {
 
         <div class="campaign-studio-layout">
           <form id="campaignStudioForm" class="campaign-studio-main">
+            <section class="card" aria-label="Strategy War Room">
+              <div class="card-head">
+                <h3>Strategy War Room</h3>
+                <span class="card-badge neutral">Preview-only</span>
+              </div>
+              <div class="campaign-section-copy">
+                Turn the campaign brief into a safe, review-ready execution plan.
+              </div>
+              <div class="mhos-campaign-context-row mhos-context-chip-row" aria-label="Strategy War Room ownership">
+                <span class="mhos-campaign-context-item mhos-context-chip">Owner <strong class="mhos-campaign-context-value">Strategist</strong></span>
+                <span class="mhos-campaign-context-item mhos-context-chip">Review <strong class="mhos-campaign-context-value">Admin</strong></span>
+                <span class="mhos-campaign-context-item mhos-context-chip">Mode <strong class="mhos-campaign-context-value">Preview-only</strong></span>
+              </div>
+
+              <div class="campaign-recommendation-grid">
+                <div class="campaign-studio-panel-block">
+                  <h4 class="insights-subtitle">Campaign Brief Snapshot</h4>
+                  <div class="data-stack">
+                    ${renderSummaryItem("Objective", goalLabel, escapeHtml)}
+                    ${renderSummaryItem("Audience", safeText(firstNonEmpty(values.audiencePrimary, values.audienceNeed), "Audience pending"), escapeHtml)}
+                    ${renderSummaryItem("Offer", safeText(firstNonEmpty(values.offerHeadline, values.offerDetail), "Offer pending"), escapeHtml)}
+                    ${renderSummaryItem("Channels", safeText(values.channelPlan, "Channels pending"), escapeHtml)}
+                    ${renderSummaryItem("Budget", budgetLabel, escapeHtml)}
+                    ${renderSummaryItem("Timeline", launchWindowLabel, escapeHtml)}
+                  </div>
+                </div>
+
+                <div class="campaign-studio-panel-block">
+                  <h4 class="insights-subtitle">Strategy Readiness</h4>
+                  <div class="data-stack">
+                    ${renderSummaryItem("Brief", briefStatus, escapeHtml)}
+                    ${renderSummaryItem("Audience", audienceStatus, escapeHtml)}
+                    ${renderSummaryItem("Offer", offerStatus, escapeHtml)}
+                    ${renderSummaryItem("Channels", channelStatus, escapeHtml)}
+                    ${renderSummaryItem("Assets", assetsStatus, escapeHtml)}
+                    ${renderSummaryItem("Handoffs", handoffStatus, escapeHtml)}
+                  </div>
+                </div>
+
+                <div class="campaign-studio-panel-block">
+                  <h4 class="insights-subtitle">Launch Waves Snapshot</h4>
+                  <ul class="simple-list">
+                    ${waves.map((wave) => {
+                      const waveName = safeText(values[`${wave.key}Name`], wave.index === 1 ? "Launch announcement" : wave.index === 2 ? "Education and proof" : "Conversion and retargeting");
+                      const waveFocus = safeText(values[`${wave.key}Focus`], wave.suggestedRole || wave.defaultRole);
+                      return `<li><strong>${escapeHtml(wave.label)}:</strong> ${escapeHtml(`${waveName} - ${waveFocus}`)}</li>`;
+                    }).join("")}
+                  </ul>
+                </div>
+
+                <div class="campaign-studio-panel-block">
+                  <h4 class="insights-subtitle">Team Handoff Packet</h4>
+                  <ul class="simple-list">
+                    <li><strong>Writer / Content Studio</strong>: Campaign objective, audience map, offer angles, and message priorities.</li>
+                    <li><strong>Designer / Media Studio</strong>: Creative direction, channel format notes, and required asset list.</li>
+                    <li><strong>Publisher / Publishing</strong>: Readiness status, blockers, timeline, and approval notes.</li>
+                    <li><strong>Ads Operator / Ads Manager</strong>: Offer focus, audience emphasis, paid channel mix, and risk notes.</li>
+                    <li><strong>Workflow / Workflows</strong>: Next best action sequence, dependencies, owners, and review gates.</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div class="campaign-studio-panel-block" style="margin-top: 12px;">
+                <h4 class="insights-subtitle">Recommended Strategist Tools</h4>
+                <div class="mhos-campaign-context-row mhos-context-chip-row" aria-label="Recommended strategist tools">
+                  ${warRoomTools.map((item) => `<span class="mhos-campaign-context-item mhos-context-chip">${escapeHtml(item)}</span>`).join("")}
+                </div>
+              </div>
+
+              <div class="campaign-helper-note">Strategy War Room outputs are preview and review only. Publishing, sending, workflow execution, and spend actions remain gated in their owning workspaces.</div>
+              <div class="simple-banner" style="margin-top: 12px;">Safe next move: ${escapeHtml(strategistNextAction)}</div>
+            </section>
+
             <section class="card">
               <div class="card-head">
                 <h3>Campaign Basics</h3>
