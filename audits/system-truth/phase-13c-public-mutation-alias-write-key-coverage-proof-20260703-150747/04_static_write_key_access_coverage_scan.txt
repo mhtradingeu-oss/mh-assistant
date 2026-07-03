@@ -1,0 +1,403 @@
+### write key constants and functions
+197: * - does not change write-key semantics
+231:function publicAliasDeprecationHeaders(req, res, next) {
+233:    const expectedKey = String(process.env[CONTROL_WRITE_KEY_ENV] || '').trim();
+234:    const providedKey = readProvidedControlWriteKey(req);
+235:    const hasAuthorizedWriteKey = Boolean(expectedKey)
+237:      && controlWriteKeyMatches(expectedKey, providedKey);
+240:      hasAuthorizedWriteKey,
+285:    'x-mh-control-write-key',
+291:app.use("/public", publicAliasDeprecationHeaders);
+302:const CONTROL_WRITE_KEY_HEADER = 'x-mh-control-key';
+303:const CONTROL_WRITE_KEY_ENV = 'MH_CONTROL_CENTER_WRITE_KEY';
+414:function readProvidedControlWriteKey(req) {
+415:  const explicitHeader = String(req.get(CONTROL_WRITE_KEY_HEADER) || '').trim();
+425:function controlWriteKeyMatches(expected, provided) {
+441:  const expectedKey = String(process.env[CONTROL_WRITE_KEY_ENV] || '').trim();
+444:      error: `Protected write routes are disabled until ${CONTROL_WRITE_KEY_ENV} is configured on the server.`
+448:  const providedKey = readProvidedControlWriteKey(req);
+451:      error: `Missing protected write key. Provide ${CONTROL_WRITE_KEY_HEADER} or Authorization: Bearer <key>.`
+455:  if (!controlWriteKeyMatches(expectedKey, providedKey)) {
+457:      error: 'Invalid protected write key.'
+508:  const expectedKey = String(process.env[CONTROL_WRITE_KEY_ENV] || '').trim();
+511:      error: `Protected read routes are disabled until ${CONTROL_WRITE_KEY_ENV} is configured on the server.`
+515:  const providedKey = readProvidedControlWriteKey(req);
+518:      error: `Missing read key. Provide ${CONTROL_WRITE_KEY_HEADER} or Authorization: Bearer <key>.`
+522:  if (!controlWriteKeyMatches(expectedKey, providedKey)) {
+535:  readProvidedControlWriteKey,
+536:  controlWriteKeyMatches,
+537:  controlWriteKeyEnv: CONTROL_WRITE_KEY_ENV
+1171:  const configuredWriteKey = String(process.env[CONTROL_WRITE_KEY_ENV] || '').trim();
+1215:    missingRequiredEnv.push(CONTROL_WRITE_KEY_ENV);
+1230:      required_key_env: CONTROL_WRITE_KEY_ENV,
+13375:// They remain protected by the same centralized write-key middleware as `/media-manager/...`.
+13794:    process.env.MH_CONTROL_CENTER_WRITE_KEY ||
+13807:    `window.__MH_CONTROL_CENTER_WRITE_KEY__ = ${serializedKey};`,
+13808:    `window.__MH_CONTROL_WRITE_KEY__ = ${serializedKey};`,
+
+### middleware order
+189:const app = express();
+228:app.use(applyPublicMutationAliasDeprecationTelemetry);
+273:app.use(helmet({
+276:app.use(cors({
+290:app.use(compression());
+291:app.use("/public", publicAliasDeprecationHeaders);
+292:app.use(express.json());
+10684:app.post('/public/media-manager/project/:project/rename', express.json({ limit: '1mb' }), handleRenameMediaManagerProject);
+10688:app.post('/public/media-manager/project/:project/apply-template', express.json({ limit: '1mb' }), handleApplyBusinessTemplateToProject);
+10692:app.post('/public/media-manager/projects', express.json({ limit: '1mb' }), handleCreateMediaManagerProject);
+11183:app.post('/public/media-manager/project/:project/setup', (req, res) => {
+11566:app.post('/public/media-manager/project/:project/team', handleUpdateProjectTeam);
+11614:app.post('/public/media-manager/project/:project/campaigns', handleUpsertCampaign);
+11622:app.patch('/public/media-manager/project/:project/campaigns/:campaignId', (req, res) => {
+11679:app.post('/public/media-manager/project/:project/content-items', handleUpsertContentItem);
+11687:app.patch('/public/media-manager/project/:project/content-items/:contentItemId', (req, res) => {
+11745:app.post('/public/media-manager/project/:project/media-jobs', handleUpsertMediaJob);
+11753:app.patch('/public/media-manager/project/:project/media-jobs/:mediaJobId', (req, res) => {
+11866:app.post('/public/media-manager/project/:project/workflows/:workflowId/run', handleRunWorkflow);
+12210:app.post('/public/media-manager/project/:project/ai/command', handleExecuteAiCommand);
+12212:app.post('/public/media-manager/project/:project/ai/chat', handleExecuteAiChat);
+12214:app.post('/public/media-manager/project/:project/ai/guidance', handleExecuteAiGuidance);
+12216:app.post('/public/media-manager/project/:project/ai/workflows/:workflowId/run', handleExecuteAiWorkflow);
+12256:app.post('/public/media-manager/project/:project/tasks', handleCreateTask);
+12347:app.post('/public/media-manager/project/:project/approvals', handleCreateApproval);
+12349:app.post('/public/media-manager/project/:project/approvals/:approvalId/decision', handleApprovalDecision);
+12407:app.post('/public/media-manager/project/:project/governance/policy', handleUpdateGovernancePolicy);
+12439:app.patch('/public/media-manager/project/:project/notifications/:notificationId', (req, res) => {
+12502:app.post('/public/media-manager/project/:project/handoffs', handleCreateHandoff);
+12504:app.post('/public/media-manager/project/:project/handoffs/:handoffId/consume', handleConsumeHandoff);
+12603:app.post('/public/media-manager/project/:project/sources', (req, res) => {
+12696:app.delete('/public/media-manager/project/:project/sources/:sourceType', (req, res) => {
+13312:app.post('/public/media-manager/project/:project/integrations/:integrationId/connect', async (req, res) => {
+13324:app.post('/public/media-manager/project/:project/integrations/:integrationId', async (req, res) => {
+13336:app.post('/public/media-manager/project/:project/integrations/:integrationId/reconnect', async (req, res) => {
+13346:app.post('/public/media-manager/project/:project/integrations/:integrationId/test', async (req, res) => {
+13354:app.post('/public/media-manager/project/:project/integrations/:integrationId/sync', async (req, res) => {
+13362:app.post('/public/media-manager/project/:project/integrations/:integrationId/import-history', async (req, res) => {
+13370:app.post('/public/media-manager/project/:project/integrations/:integrationId/disconnect', async (req, res) => {
+13419:app.post('/public/media-manager/project/:project/publishing/schedule', (req, res) => {
+13501:app.post('/public/media-manager/project/:project/publishing/:jobId/reschedule', (req, res) => {
+13572:app.post('/public/media-manager/project/:project/publishing/:jobId/ready', (req, res) => {
+13646:app.post('/public/media-manager/project/:project/publishing/:jobId/publish', (req, res) => {
+13730:app.post('/public/media-manager/project/:project/publishing/:jobId/fail', (req, res) => {
+
+### runtime-security enforcement references
+runtime/orchestrator-service/lib/security/provider-execution-gate.js:65:    requiredScope: "provider.commerce.write"
+runtime/orchestrator-service/lib/security/provider-execution-gate.js:81:    requiredScope: "provider.integration.write"
+runtime/orchestrator-service/lib/security/provider-execution-gate.js:89:    requiredScope: "provider.social.write"
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:39:  // Non-recursive by design: governance policy updates remain write-key + governance-checked.
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:57:  team_model_mutation: {
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:65:  source_registry_mutation: {
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:73:  project_setup_mutation: {
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:97:  /(^|\.)write_key/i,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:254:  const entityType = asString(input.entityType || input.entity_type || "governance_mutation");
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:310:    if (selectedAction && normalizeAction(item.mutation_type || item.approval_type) !== selectedAction) {
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:378:    mutation_type: context.action,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:491:    }, "write_key_only_intentional");
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:513:      "policy_blocked_for_admin_mutation",
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:518:  if (action === "project_setup_mutation") {
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:533:      }, "write_key_only_intentional");
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:545:      }, "write_key_only_intentional");
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:570:    }, "write_key_only_intentional");
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:64:  const mutation = isMutationMethod(normalizedMethod);
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:66:  const sensitiveMutation = publicAlias && mutation && isPublicSensitiveMutationPath(normalizedPath);
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:83:      reason: "public_alias_compatibility_disabled",
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:84:      code: "public_alias_retired"
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:88:  if (mutation && isProductionMode(options) && !hasAuthorizedWriteKey) {
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:92:      status: "blocked_sensitive_mutation_unauthorized",
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:93:      reason: "public_alias_mutation_requires_authorization",
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:94:      code: "route_permission_denied"
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:98:  if (mutation && critical && blockCriticalPublicMutationsEnabled()) {
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:103:      reason: "critical_public_mutation_alias_blocked",
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:104:      code: "route_permission_denied"
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:108:  if (mutation && critical) {
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:113:      reason: "critical_public_mutation_alias_compatibility_enabled"
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:117:  if (mutation) {
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:121:      status: sensitiveMutation ? "compatibility_sensitive_write" : "compatibility_write",
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:123:        ? "sensitive_public_write_alias_compatibility_enabled"
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:124:        : "public_write_alias_compatibility_enabled"
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:21:  WRITE_KEY: "write_key",
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:40:    defaultWriteScope: "customer.write",
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:49:    defaultWriteScope: "publishing.write",
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:58:    defaultWriteScope: "integration.write",
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:76:    defaultWriteScope: "operations.write",
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:85:    defaultWriteScope: "media.write",
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:94:    defaultWriteScope: "commerce.write",
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:103:    defaultWriteScope: "project.write",
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:147:    defaultWriteScope: "general.write",
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:157:  const mutation = isMutationMethod(normalizedMethod);
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:163:  let requiredAccess = mutation ? ROUTE_ACCESS.WRITE_KEY : ROUTE_ACCESS.READ_KEY;
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:166:  if (domainRule.domain === "platform_health" && !mutation) {
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:170:  if (publicAlias && mutation) {
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:175:    status = mutation ? ROUTE_STATUS.RETIRE : ROUTE_STATUS.DEPRECATE;
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:178:  const requiredScope = mutation ? domainRule.defaultWriteScope : domainRule.defaultReadScope;
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:179:  const auditEvent = `${domainRule.domain}.${mutation ? "mutation" : "read"}.${publicAlias ? "public_alias" : "canonical"}`;
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:185:    readWrite: mutation ? "write" : "read",
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:198:      mutation,
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:206:function buildRecommendation({ publicAlias, mutation, destructive, providerExecution, domain }) {
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:207:  if (publicAlias && mutation) return "retire_public_mutation_alias";
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:212:  if (mutation) return "require_write_scope_and_audit";
+runtime/orchestrator-service/lib/security/runtime-security-enforcement.js:59:function buildRoutePermissionDeniedResponse() {
+runtime/orchestrator-service/lib/security/runtime-security-enforcement.js:63:    code: "route_permission_denied",
+runtime/orchestrator-service/lib/security/runtime-security-enforcement.js:122:function createRuntimeSecurityEnforcementMiddleware(options = {}) {
+runtime/orchestrator-service/lib/security/runtime-security-enforcement.js:163:    return res.status(403).json(buildRoutePermissionDeniedResponse());
+runtime/orchestrator-service/lib/security/runtime-security-enforcement.js:171:  buildRoutePermissionDeniedResponse,
+runtime/orchestrator-service/lib/security/runtime-security-enforcement.js:173:  createRuntimeSecurityEnforcementMiddleware
+runtime/orchestrator-service/server.js:50:  createRuntimeSecurityEnforcementMiddleware,
+runtime/orchestrator-service/server.js:51:  buildRoutePermissionDeniedResponse
+runtime/orchestrator-service/server.js:56:} = require('./lib/security/governance-mutation-gate');
+runtime/orchestrator-service/server.js:67:const { ExecutionArtifactWriterAdapter } = require('./lib/data/execution-artifact-writer-adapter');
+runtime/orchestrator-service/server.js:191: * PHASE 13B.1 public mutation alias deprecation telemetry
+runtime/orchestrator-service/server.js:197: * - does not change write-key semantics
+runtime/orchestrator-service/server.js:198: * - adds response headers and warning telemetry for public mutation aliases
+runtime/orchestrator-service/server.js:216:    console.warn("[MH][public_mutation_alias_deprecated]", JSON.stringify({
+runtime/orchestrator-service/server.js:254:      if (classification.code === 'route_permission_denied') {
+runtime/orchestrator-service/server.js:255:        return res.status(403).json(buildRoutePermissionDeniedResponse());
+runtime/orchestrator-service/server.js:260:        error: "public_alias_retired",
+runtime/orchestrator-service/server.js:285:    'x-mh-control-write-key',
+runtime/orchestrator-service/server.js:302:const CONTROL_WRITE_KEY_HEADER = 'x-mh-control-key';
+runtime/orchestrator-service/server.js:444:      error: `Protected write routes are disabled until ${CONTROL_WRITE_KEY_ENV} is configured on the server.`
+runtime/orchestrator-service/server.js:451:      error: `Missing protected write key. Provide ${CONTROL_WRITE_KEY_HEADER} or Authorization: Bearer <key>.`
+runtime/orchestrator-service/server.js:457:      error: 'Invalid protected write key.'
+runtime/orchestrator-service/server.js:533:const runtimeSecurityEnforcement = createRuntimeSecurityEnforcementMiddleware({
+runtime/orchestrator-service/server.js:1173:    control_write_key_configured: {
+runtime/orchestrator-service/server.js:1214:  if (!checks.control_write_key_configured.ok) {
+runtime/orchestrator-service/server.js:1228:    protected_write_mode: {
+runtime/orchestrator-service/server.js:1321:function writeReadRedirectionTelemetry(resolution, entry) {
+runtime/orchestrator-service/server.js:1332:    appLogger.error('read_redirection_telemetry_write_failed', {
+runtime/orchestrator-service/server.js:1334:      action: 'write_read_redirection_telemetry',
+runtime/orchestrator-service/server.js:1431:  writeReadRedirectionTelemetry(resolution, telemetryEntry);
+runtime/orchestrator-service/server.js:1647:function writeEmailArtifactArray(projectName, artifactType, data) {
+runtime/orchestrator-service/server.js:1658:  fs.writeFileSync(candidatePaths.canonicalPath, payload, 'utf8');
+runtime/orchestrator-service/server.js:1659:  fs.writeFileSync(candidatePaths.legacyPath, payload, 'utf8');
+runtime/orchestrator-service/server.js:1679:function writeLiveEmailQueue(projectName, queue = []) {
+runtime/orchestrator-service/server.js:1680:  return writeEmailArtifactArray(requireQueueProjectName(projectName), EMAIL_ARTIFACT_TYPES.DRAFT_QUEUE, queue);
+runtime/orchestrator-service/server.js:1687:function writeLiveEmailMediaQueue(projectName, queue = []) {
+runtime/orchestrator-service/server.js:1688:  return writeEmailArtifactArray(requireQueueProjectName(projectName), EMAIL_ARTIFACT_TYPES.MEDIA_QUEUE, queue);
+runtime/orchestrator-service/server.js:1718:function writeLegacyContentQueue(projectName, queueType, queue = []) {
+runtime/orchestrator-service/server.js:1719:  writeJsonFile(getLegacyContentQueuePath(projectName, queueType), Array.isArray(queue) ? queue : []);
+runtime/orchestrator-service/server.js:1813:    if (dualWriteEntry && Array.isArray(dualWriteEntry.writes)) {
+runtime/orchestrator-service/server.js:1814:      const canonicalSuccess = dualWriteEntry.writes.some(
+runtime/orchestrator-service/server.js:1817:      const canonicalFailed = dualWriteEntry.writes.some(
+runtime/orchestrator-service/server.js:1820:      const legacySuccess = dualWriteEntry.writes.some(
+runtime/orchestrator-service/server.js:1825:        return 'missing_canonical_write';
+runtime/orchestrator-service/server.js:1851:      missing_canonical_write: 0,
+runtime/orchestrator-service/server.js:1862:  const dualWritePath = path.join(telemetryDir, 'dual-write-log.jsonl');
+runtime/orchestrator-service/server.js:1920:      stats.fallback_causes.missing_canonical_write +
+runtime/orchestrator-service/server.js:1952:      dual_write_log: dualWritePath
+runtime/orchestrator-service/server.js:1962:      active_write_read_mismatches: activeWriteReadMismatches
+runtime/orchestrator-service/server.js:1987:    active_write_read_mismatches: 0
+runtime/orchestrator-service/server.js:1995:    aggregate.active_write_read_mismatches += summary.totals.active_write_read_mismatches;
+runtime/orchestrator-service/server.js:2132:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:2225:  executionArtifactWriter.writeText({
+runtime/orchestrator-service/server.js:2250:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:2258:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:2633:  executionArtifactWriter.writeBuffer({
+runtime/orchestrator-service/server.js:2741:function writeEmailDeliveryRecord(projectName, data) {
+runtime/orchestrator-service/server.js:2753:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:2767:    return writeEmailDeliveryRecord(projectName, {
+runtime/orchestrator-service/server.js:2782:  return writeEmailDeliveryRecord(projectName, {
+runtime/orchestrator-service/server.js:3162:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:3283:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:3443:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:3602:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:3657:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:3915:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:3993:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:4095:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:4131:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:4353:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:4611:    recommendations.push('rewrite copy in natural German for German-market publishing');
+runtime/orchestrator-service/server.js:4649:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:4713:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:4759:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:4992:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:5047:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:5232:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:5284:  writeJsonFile(packagePath, executionPackage);
+runtime/orchestrator-service/server.js:5361:  writeJsonFile(contextPath, context);
+runtime/orchestrator-service/server.js:5426:    writeJsonFile(filePath, defaultValue);
+runtime/orchestrator-service/server.js:5443: * writeJsonFile (server-local) — atomic write with backup.
+runtime/orchestrator-service/server.js:5446:function writeJsonFile(filePath, data) {
+runtime/orchestrator-service/server.js:5453:  fs.writeFileSync(tmpPath, serialized, 'utf8');
+runtime/orchestrator-service/server.js:5791:    fs.writeFileSync(auditPath, JSON.stringify(current, null, 2));
+runtime/orchestrator-service/server.js:5793:    appLogger.error('audit_write_failed', {
+runtime/orchestrator-service/server.js:5999:    text.includes('write') ||
+runtime/orchestrator-service/server.js:6005:    text.includes('rewrite')
+runtime/orchestrator-service/server.js:6314:    writeJsonFile(registryPath, []);
+runtime/orchestrator-service/server.js:6402:    writeJsonFile(logPath, next.slice(-200));
+runtime/orchestrator-service/server.js:6463:    writeJsonFile(canonicalPath, firstLegacy.value);
+runtime/orchestrator-service/server.js:6480:  writeJsonFile(canonicalPath, fallback);
+runtime/orchestrator-service/server.js:6700:  writeJsonFile(paths.integrationsRegistryPath, {
+runtime/orchestrator-service/server.js:6777:  writeJsonFile(paths.brandProfilePath, brandProfile);
+runtime/orchestrator-service/server.js:6823:  writeJsonFile(paths.sourcesRegistryPath, nextSources);
+runtime/orchestrator-service/server.js:6824:  writeJsonFile(paths.sourceOfTruthRegistryPath, buildSourceOfTruthRegistry(nextSources));
+runtime/orchestrator-service/server.js:6885:    ai_team_defaults: ['strategist', 'writer', 'designer', 'publisher', 'analyst'],
+runtime/orchestrator-service/server.js:6905:      ai_team_defaults: ['strategist', 'writer', 'designer', 'publisher', 'ads_operator', 'analyst', 'compliance_reviewer'],
+runtime/orchestrator-service/server.js:6918:      ai_team_defaults: ['strategist', 'writer', 'designer', 'video_lead', 'publisher', 'analyst'],
+runtime/orchestrator-service/server.js:6931:      ai_team_defaults: ['strategist', 'writer', 'designer', 'publisher', 'analyst'],
+runtime/orchestrator-service/server.js:6944:      ai_team_defaults: ['strategist', 'writer', 'designer', 'ads_operator', 'publisher', 'compliance_reviewer'],
+runtime/orchestrator-service/server.js:6957:      ai_team_defaults: ['strategist', 'writer', 'designer', 'publisher', 'analyst'],
+runtime/orchestrator-service/server.js:6970:      ai_team_defaults: ['strategist', 'writer', 'designer', 'video_lead', 'publisher'],
+runtime/orchestrator-service/server.js:6983:      ai_team_defaults: ['strategist', 'writer', 'designer', 'ads_operator', 'analyst'],
+runtime/orchestrator-service/server.js:6996:      ai_team_defaults: ['strategist', 'writer', 'designer', 'publisher'],
+runtime/orchestrator-service/server.js:7065:  writeJsonFile(registry.registryPath, projects);
+runtime/orchestrator-service/server.js:7066:  writeJsonFile(paths.projectFilePath, projectData);
+runtime/orchestrator-service/server.js:7168:  writeJsonFile(paths.projectFilePath, nextProject);
+runtime/orchestrator-service/server.js:7180:    writeJsonFile(registry.registryPath, projects);
+runtime/orchestrator-service/server.js:7290:  writeJsonFile(reportPath, report);
+runtime/orchestrator-service/server.js:7530:  writeJsonFile(paths.assetsRegistryPath, withoutExisting);
+runtime/orchestrator-service/server.js:7547:  writeJsonFile(paths.assetsRegistryPath, normalized);
+runtime/orchestrator-service/server.js:7567:  writeJsonFile(paths.sourcesRegistryPath, sources);
+runtime/orchestrator-service/server.js:7568:  writeJsonFile(paths.sourceOfTruthRegistryPath, buildSourceOfTruthRegistry(sources));
+runtime/orchestrator-service/server.js:7594:  writeJsonFile(paths.sourcesRegistryPath, sources);
+runtime/orchestrator-service/server.js:7595:  writeJsonFile(paths.sourceOfTruthRegistryPath, buildSourceOfTruthRegistry(sources));
+runtime/orchestrator-service/server.js:7702:function writeProjectIntegrationRegistry(projectName, registry = {}) {
+runtime/orchestrator-service/server.js:7709:  writeJsonFile(paths.controlCenterRegistryPath, payload);
+runtime/orchestrator-service/server.js:7710:  writeJsonFile(paths.integrationsRegistryPath, payload);
+runtime/orchestrator-service/server.js:7931:    write_scopes: normalizeStringArray(record.write_scopes),
+runtime/orchestrator-service/server.js:7963:    write_scopes: normalizedRecord.write_scopes,
+runtime/orchestrator-service/server.js:8108:    write_scopes: normalizeStringArray(payload.write_scopes || existing.write_scopes),
+runtime/orchestrator-service/server.js:8152:      write_scopes: normalizeStringArray(providerResult.write_scopes?.length ? providerResult.write_scopes : nextRecord.write_scopes),
+runtime/orchestrator-service/server.js:8198:    writeProjectIntegrationRegistry(projectName, registry);
+runtime/orchestrator-service/server.js:8207:  writeProjectIntegrationRegistry(projectName, registry);
+runtime/orchestrator-service/server.js:8327:      writeProjectIntegrationRegistry(projectName, registry);
+runtime/orchestrator-service/server.js:8333:  writeProjectIntegrationRegistry(projectName, registry);
+runtime/orchestrator-service/server.js:9037:    writeJsonFile(assetsRegistryPath, nextAssets);
+runtime/orchestrator-service/server.js:9603:    const log = writeExecutionBridgeLog(projectName, 'execute_publish_package', {
+runtime/orchestrator-service/server.js:9623:      writeExecutionBridgeLog(logProject, 'execute_publish_package', {
+runtime/orchestrator-service/server.js:9692:    const log = writeExecutionBridgeLog(projectName, 'execute_email_package', {
+runtime/orchestrator-service/server.js:9711:      writeExecutionBridgeLog(logProject, 'execute_email_package', {
+runtime/orchestrator-service/server.js:9767:    const log = writeExecutionBridgeLog(projectName, 'generate_media_from_prompt', {
+runtime/orchestrator-service/server.js:9792:      writeExecutionBridgeLog(logProject, 'generate_media_from_prompt', {
+runtime/orchestrator-service/server.js:9848:    const log = writeExecutionBridgeLog(projectName, 'build_ad_execution_package', {
+runtime/orchestrator-service/server.js:9878:      writeExecutionBridgeLog(logProject, 'build_ad_execution_package', {
+runtime/orchestrator-service/server.js:10068:    fs.writeFileSync(
+runtime/orchestrator-service/server.js:10321:        writeJsonFile(paths.registryPath, registry);
+runtime/orchestrator-service/server.js:10443:  writeJsonFile(projectFile, updatedProject);
+runtime/orchestrator-service/server.js:10461:  writeJsonFile(registry.registryPath, nextRegistry);
+runtime/orchestrator-service/server.js:10546:  writeJsonFile(paths.projectFilePath, updated);
+runtime/orchestrator-service/server.js:10574:  writeJsonFile(registry.registryPath, nextProjects);
+runtime/orchestrator-service/server.js:10852:  writeJsonFile(registryPath, registry);
+runtime/orchestrator-service/server.js:11148:      action: 'project_setup_mutation',
+runtime/orchestrator-service/server.js:11160:      action: 'project_setup_mutation',
+runtime/orchestrator-service/server.js:11187:      action: 'project_setup_mutation',
+runtime/orchestrator-service/server.js:11199:      action: 'project_setup_mutation',
+runtime/orchestrator-service/server.js:11387:      no_backend_mutation_performed: true,
+runtime/orchestrator-service/server.js:11411:        no_backend_mutation_performed: true,
+runtime/orchestrator-service/server.js:11526:      action: 'team_model_mutation',
+runtime/orchestrator-service/server.js:11537:      action: 'team_model_mutation',
+runtime/orchestrator-service/server.js:12553:      action: 'source_registry_mutation',
+runtime/orchestrator-service/server.js:12573:      action: 'source_registry_mutation',
+runtime/orchestrator-service/server.js:12607:      action: 'source_registry_mutation',
+runtime/orchestrator-service/server.js:12627:      action: 'source_registry_mutation',
+runtime/orchestrator-service/server.js:12661:      action: 'source_registry_mutation',
+runtime/orchestrator-service/server.js:12672:      action: 'source_registry_mutation',
+runtime/orchestrator-service/server.js:12700:      action: 'source_registry_mutation',
+runtime/orchestrator-service/server.js:12711:      action: 'source_registry_mutation',
+runtime/orchestrator-service/server.js:12800:      write_scopes: connectionPayload?.write_scopes,
+runtime/orchestrator-service/server.js:13374:// TODO(phase4a): Keep `/public/media-manager/...` write aliases for active frontend compatibility.
+runtime/orchestrator-service/server.js:13375:// They remain protected by the same centralized write-key middleware as `/media-manager/...`.
+runtime/orchestrator-service/server.js:14034:  writeJsonFile(paths.productsPath, products);
+runtime/orchestrator-service/server.js:14272:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:14414:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:14450:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:14488:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:14570:function writeExecutionBridgeLog(projectName, action, payload = {}) {
+runtime/orchestrator-service/server.js:14595:  writeJsonFile(filePath, record);
+runtime/orchestrator-service/server.js:15027:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:15149:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:15267:  writeJsonFile(recordFilePath, record);
+runtime/orchestrator-service/server.js:15303:    executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:15358:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:15397:  appLogger.warn('governance_mutation_denied', {
+runtime/orchestrator-service/server.js:15502:      'Publishing is frozen by governance policy. The requested publishing mutation was blocked.',
+runtime/orchestrator-service/server.js:15531:        'Approval before publish is enabled. The publishing job is not approved for ready/publish mutation.',
+runtime/orchestrator-service/server.js:16224:      fs.writeFileSync(queuePath, JSON.stringify(queue, null, 2), 'utf8');
+runtime/orchestrator-service/server.js:16318:      fs.writeFileSync(queuePath, JSON.stringify(queue, null, 2), 'utf8');
+runtime/orchestrator-service/server.js:16345:      writeLiveEmailQueue(commandProject, queue);
+runtime/orchestrator-service/server.js:16369:      fs.writeFileSync(queuePath, JSON.stringify(queue, null, 2), 'utf8');
+runtime/orchestrator-service/server.js:16436:      fs.writeFileSync(queuePath, JSON.stringify(queue, null, 2), 'utf8');
+runtime/orchestrator-service/server.js:16461:      fs.writeFileSync(queuePath, JSON.stringify(queue, null, 2), 'utf8');
+runtime/orchestrator-service/server.js:16486:      fs.writeFileSync(queuePath, JSON.stringify(queue, null, 2), 'utf8');
+runtime/orchestrator-service/server.js:16509:      writeLiveEmailQueue(commandProject, queue);
+runtime/orchestrator-service/server.js:16549:      fs.writeFileSync(queuePath, JSON.stringify(queue, null, 2), 'utf8');
+runtime/orchestrator-service/server.js:16589:      fs.writeFileSync(queuePath, JSON.stringify(queue, null, 2), 'utf8');
+runtime/orchestrator-service/server.js:16682:      fs.writeFileSync(queuePath, JSON.stringify(queue, null, 2), 'utf8');
+runtime/orchestrator-service/server.js:16713:      writeLiveEmailQueue(commandProject, queue);
+runtime/orchestrator-service/server.js:16738:      fs.writeFileSync(queuePath, JSON.stringify(queue, null, 2), 'utf8');
+runtime/orchestrator-service/server.js:16764:      fs.writeFileSync(queuePath, JSON.stringify(queue, null, 2), 'utf8');
+runtime/orchestrator-service/server.js:16790:      fs.writeFileSync(queuePath, JSON.stringify(queue, null, 2), 'utf8');
+runtime/orchestrator-service/server.js:16814:      writeLiveEmailQueue(commandProject, queue);
+runtime/orchestrator-service/server.js:16957:      fs.writeFileSync(
+runtime/orchestrator-service/server.js:17045:    fs.writeFileSync(asset.output_path, imageBuffer);
+runtime/orchestrator-service/server.js:17050:    fs.writeFileSync(
+runtime/orchestrator-service/server.js:17146:    fs.writeFileSync(
+runtime/orchestrator-service/server.js:17152:    fs.writeFileSync(
+runtime/orchestrator-service/server.js:17284:        fs.writeFileSync(
+runtime/orchestrator-service/server.js:17443:      writeLiveEmailMediaQueue(commandProject, mediaQueue);
+runtime/orchestrator-service/server.js:17547:    writeLiveEmailMediaQueue(commandProject, mediaQueue);
+runtime/orchestrator-service/server.js:17548:    writeLiveEmailQueue(commandProject, emailQueue);
+runtime/orchestrator-service/server.js:17616:        fs.writeFileSync(asset.output_path, imageBuffer);
+runtime/orchestrator-service/server.js:17621:        writeLiveEmailMediaQueue(commandProject, mediaQueue);
+runtime/orchestrator-service/server.js:17686:        writeLiveEmailQueue(commandProject, emailQueue);
+runtime/orchestrator-service/server.js:17747:      fs.writeFileSync(profilePath, JSON.stringify(profile, null, 2), 'utf8');
+runtime/orchestrator-service/server.js:17845:      fs.writeFileSync(queuePath, JSON.stringify(queue, null, 2), 'utf8');
+runtime/orchestrator-service/server.js:17928:      fs.writeFileSync(planPath, JSON.stringify(assetPlan, null, 2), 'utf8');
+runtime/orchestrator-service/server.js:18048:  fs.writeFileSync(profilePath, JSON.stringify(enrichedProfile, null, 2), 'utf8');
+runtime/orchestrator-service/server.js:18219:      fs.writeFileSync(queuePath, JSON.stringify(queue, null, 2), 'utf8');
+runtime/orchestrator-service/server.js:18263:      fs.writeFileSync(queuePath, JSON.stringify(queue, null, 2), 'utf8');
+runtime/orchestrator-service/server.js:18315:      fs.writeFileSync(queuePath, JSON.stringify(queue, null, 2), 'utf8');
+runtime/orchestrator-service/server.js:18354:      fs.writeFileSync(queuePath, JSON.stringify(queue, null, 2), 'utf8');
+runtime/orchestrator-service/server.js:18394:      fs.writeFileSync(queuePath, JSON.stringify(queue, null, 2), 'utf8');
+runtime/orchestrator-service/server.js:18447:  fs.writeFileSync(queuePath, JSON.stringify(queue, null, 2), 'utf8');
+runtime/orchestrator-service/server.js:18499:  fs.writeFileSync(queuePath, JSON.stringify(queue, null, 2), 'utf8');
+runtime/orchestrator-service/server.js:18545:  fs.writeFileSync(queuePath, JSON.stringify(queue, null, 2), 'utf8');
+runtime/orchestrator-service/server.js:18674:      fs.writeFileSync(campaignBrainPath, JSON.stringify(campaignBrainQueue, null, 2), 'utf8');
+runtime/orchestrator-service/server.js:18885:  fs.writeFileSync(outputPath, JSON.stringify(outputQueue, null, 2), 'utf8');
+runtime/orchestrator-service/server.js:19073:      fs.writeFileSync(blogQueuePath, JSON.stringify(blogQueue, null, 2), 'utf8');
+runtime/orchestrator-service/server.js:19074:      writeLiveEmailQueue(commandProject, emailQueue);
+runtime/orchestrator-service/server.js:19075:      fs.writeFileSync(postQueuePath, JSON.stringify(postQueue, null, 2), 'utf8');
+runtime/orchestrator-service/server.js:19076:      fs.writeFileSync(adQueuePath, JSON.stringify(adQueue, null, 2), 'utf8');
+runtime/orchestrator-service/server.js:19077:      fs.writeFileSync(reelQueuePath, JSON.stringify(reelQueue, null, 2), 'utf8');
+runtime/orchestrator-service/server.js:19083:      fs.writeFileSync(
+runtime/orchestrator-service/server.js:19166:        fs.writeFileSync(
+runtime/orchestrator-service/server.js:19228:        fs.writeFileSync(
+runtime/orchestrator-service/server.js:19288:        operation: 'write'
+runtime/orchestrator-service/server.js:19341:      fs.writeFileSync(profilePath, JSON.stringify(brandProfile, null, 2), 'utf8');
+runtime/orchestrator-service/server.js:19383:        operation: 'write'
+runtime/orchestrator-service/server.js:19410:      fs.writeFileSync(profilePath, JSON.stringify(brandProfile, null, 2), 'utf8');
+runtime/orchestrator-service/server.js:19428:        operation: 'write'
+runtime/orchestrator-service/server.js:19450:      fs.writeFileSync(profilePath, JSON.stringify(brandProfile, null, 2), 'utf8');
+runtime/orchestrator-service/server.js:19563:    writeJsonFile(paths.registryPath, registry);
+runtime/orchestrator-service/server.js:19564:    writeJsonFile(paths.brandProfilePath, brandProfile);
+runtime/orchestrator-service/server.js:19647:  writeJsonFile(paths.registryPath, registry);
+runtime/orchestrator-service/server.js:19706:  writeJsonFile(paths.registryPath, registry);
+runtime/orchestrator-service/server.js:20688:    writeJsonFile(paths.productsPath, products);
+runtime/orchestrator-service/server.js:20730:    writeJsonFile(paths.productsPath, products);
+runtime/orchestrator-service/server.js:20770:    writeJsonFile(paths.productsPath, products);
+runtime/orchestrator-service/server.js:20806:    writeJsonFile(paths.productsPath, products);
+runtime/orchestrator-service/server.js:20873:    writeJsonFile(paths.productsPath, products);
+runtime/orchestrator-service/server.js:20909:    writeJsonFile(paths.productsPath, products);
+runtime/orchestrator-service/server.js:20970:    writeJsonFile(paths.productsPath, products);
+runtime/orchestrator-service/server.js:21000:    writeJsonFile(paths.productsPath, products);
+runtime/orchestrator-service/server.js:22080:    fs.writeFileSync(
+runtime/orchestrator-service/server.js:22259:      fs.writeFileSync(queuePath, JSON.stringify(queue, null, 2), 'utf8');
+runtime/orchestrator-service/server.js:22371:  writeJsonFile,
+runtime/orchestrator-service/server.js:22378:  writeSchedulerJobs,
+runtime/orchestrator-service/server.js:22379:  writeSchedulerAuditLog
+runtime/orchestrator-service/server.js:22405:  writeJsonFile
+runtime/orchestrator-service/server.js:22409:  writePerformanceStore,
+runtime/orchestrator-service/server.js:22411:  writeLearningStore,
+runtime/orchestrator-service/server.js:22413:  writeRecommendationsStore
+runtime/orchestrator-service/server.js:22471:  writePerformanceStore(safeProject, store);
+runtime/orchestrator-service/server.js:22524:  writeRecommendationsStore,
+runtime/orchestrator-service/server.js:22526:  writeLearningStore,
+runtime/orchestrator-service/server.js:22704:    writeSchedulerJobs(projectName, jobs);
+runtime/orchestrator-service/server.js:22706:    writeSchedulerAuditLog(projectName, {
+runtime/orchestrator-service/server.js:22835:    writeSchedulerJobs(projectName, jobs);
+runtime/orchestrator-service/server.js:22852:        const logPath = writeSchedulerAuditLog(projectName, {
+runtime/orchestrator-service/server.js:22867:          writeSchedulerAuditLog(projectName, {
+runtime/orchestrator-service/server.js:22895:        const logPath = writeSchedulerAuditLog(projectName, {
+runtime/orchestrator-service/server.js:22919:    writeSchedulerJobs(projectName, jobs);
+runtime/orchestrator-service/server.js:23351:    writeJsonFile,
