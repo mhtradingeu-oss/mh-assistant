@@ -1,0 +1,1923 @@
+### Express route declarations / app usage / router usage
+233:app.use(helmet({
+236:app.use(cors({
+250:app.use(compression());
+251:app.use("/public", publicAliasDeprecationHeaders);
+252:app.use(express.json());
+427:app.use(requireProtectedControlWriteKey);
+491:app.use(requireProtectedReadKey);
+500:app.use(runtimeSecurityEnforcement);
+567:app.use(applyRouteRateLimit);
+1020:app.use(validateRawProjectSlugPathSegment);
+1053:app.use(validateOptionalProjectSlugFields);
+9374:app.get('/health', (req, res) => {
+9382:app.get('/healthz', (req, res) => {
+9390:app.get('/readyz', (req, res) => {
+9395:app.get('/media-manager/project/:project/storage/parity-readiness', (req, res) => {
+9406:app.get('/public/media-manager/project/:project/storage/parity-readiness', (req, res) => {
+9417:app.get('/media-manager/storage/parity-readiness', (req, res) => {
+9428:app.get('/public/media-manager/storage/parity-readiness', (req, res) => {
+9439:app.post('/task', (req, res) => {
+9458:app.post('/api/agent-registry/register', registerAgent);
+9459:app.post('/api/agent-registry/resolve', resolveAgent);
+9460:app.get('/api/agent-registry/agents', listAgents);
+9465:app.get('/today', (req, res) => {
+9481:app.get('/next', (req, res) => {
+9497:app.post('/ingest', (req, res) => {
+9513:app.post('/execute_publish_package', async (req, res) => {
+9601:app.post('/execute_email_package', async (req, res) => {
+9689:app.post('/generate_media_from_prompt', async (req, res) => {
+9770:app.post('/build_ad_execution_package', async (req, res) => {
+9856:app.get('/products', async (req, res) => {
+9875:app.get('/optimize-product/:id', async (req, res) => {
+9920:app.get('/prepare-product-update/:id', async (req, res) => {
+10006:app.post('/backup-and-clone-product/:id', async (req, res) => {
+10090:app.post('/apply-prepared-copy-to-clone/:originalId/:cloneId', async (req, res) => {
+10208:  app.get('/media/projects', (req, res) => {
+10213:app.get('/media/tree/:project', (req, res) => {
+10239:app.post('/media/upload', applySingleMediaUpload, (req, res) => {
+10309:app.get('/media/registry/:project', (req, res) => {
+10313:app.get('/media/file/:project/:type/:filename', (req, res) => {
+10642:app.post('/media-manager/project/:project/rename', express.json({ limit: '1mb' }), handleRenameMediaManagerProject);
+10644:app.post('/public/media-manager/project/:project/rename', express.json({ limit: '1mb' }), handleRenameMediaManagerProject);
+10646:app.post('/media-manager/project/:project/apply-template', express.json({ limit: '1mb' }), handleApplyBusinessTemplateToProject);
+10648:app.post('/public/media-manager/project/:project/apply-template', express.json({ limit: '1mb' }), handleApplyBusinessTemplateToProject);
+10650:app.post('/media-manager/projects', express.json({ limit: '1mb' }), handleCreateMediaManagerProject);
+10652:app.post('/public/media-manager/projects', express.json({ limit: '1mb' }), handleCreateMediaManagerProject);
+10654:app.get('/media-manager/projects', (req, res) => {
+10658:app.get('/public/media-manager/projects', (req, res) => {
+10662:app.get('/media-manager/asset-catalog', (req, res) => {
+10668:app.get('/public/media-manager/asset-catalog', (req, res) => {
+10674:app.get('/media-manager/project/:project/startup', (req, res) => {
+10684:app.get('/public/media-manager/project/:project/startup', (req, res) => {
+10694:app.get('/media-manager/project/:project', (req, res) => {
+10704:app.get('/public/media-manager/project/:project', (req, res) => {
+10841:app.post('/media-manager/project/:project/assets/:assetId/status', express.json({ limit: '1mb' }), (req, res) => {
+10895:app.post('/media-manager/project/:project/assets/:assetId/rename', express.json({ limit: '1mb' }), (req, res) => {
+10925:app.patch('/media-manager/project/:project/assets/:assetId/classification', express.json({ limit: '1mb' }), (req, res) => {
+10979:app.post('/media-manager/project/:project/assets/:assetId/source-of-truth', express.json({ limit: '1mb' }), (req, res) => {
+11004:app.post('/media-manager/project/:project/assets/:assetId/archive', express.json({ limit: '1mb' }), (req, res) => {
+11032:app.post('/media-manager/project/:project/assets/:assetId/delete', express.json({ limit: '1mb' }), (req, res) => {
+11063:app.delete('/media-manager/project/:project/assets/:assetId', express.json({ limit: '1mb' }), (req, res) => {
+11094:app.post('/media-manager/project/:project/library/refresh', (req, res) => {
+11104:app.post('/media-manager/project/:project/setup', (req, res) => {
+11143:app.post('/public/media-manager/project/:project/setup', (req, res) => {
+11378:app.post('/api/ai-command/project/:project/campaign-preview', handleAiCommandCampaignPreviewOnly);
+11391:app.get('/media-manager/project/:project/operations', handleGetProjectOperations);
+11392:app.get('/public/media-manager/project/:project/operations', handleGetProjectOperations);
+11450:app.get('/media-manager/project/:project/task-center', handleGetTaskCenter);
+11451:app.get('/public/media-manager/project/:project/task-center', handleGetTaskCenter);
+11452:app.get('/media-manager/project/:project/queue-center', handleGetQueueCenter);
+11453:app.get('/public/media-manager/project/:project/queue-center', handleGetQueueCenter);
+11454:app.get('/media-manager/project/:project/job-monitor', handleGetJobMonitor);
+11455:app.get('/public/media-manager/project/:project/job-monitor', handleGetJobMonitor);
+11456:app.get('/media-manager/project/:project/notification-center', handleGetNotificationCenter);
+11457:app.get('/public/media-manager/project/:project/notification-center', handleGetNotificationCenter);
+11466:app.get('/media-manager/project/:project/operations/schema', handleGetOperationsSchema);
+11467:app.get('/public/media-manager/project/:project/operations/schema', handleGetOperationsSchema);
+11523:app.get('/media-manager/project/:project/team', handleGetProjectTeam);
+11524:app.get('/public/media-manager/project/:project/team', handleGetProjectTeam);
+11525:app.post('/media-manager/project/:project/team', handleUpdateProjectTeam);
+11526:app.post('/public/media-manager/project/:project/team', handleUpdateProjectTeam);
+11571:app.get('/media-manager/project/:project/campaigns', handleListCampaigns);
+11572:app.get('/public/media-manager/project/:project/campaigns', handleListCampaigns);
+11573:app.post('/media-manager/project/:project/campaigns', handleUpsertCampaign);
+11574:app.post('/public/media-manager/project/:project/campaigns', handleUpsertCampaign);
+11575:app.patch('/media-manager/project/:project/campaigns/:campaignId', (req, res) => {
+11582:app.patch('/public/media-manager/project/:project/campaigns/:campaignId', (req, res) => {
+11589:app.get('/media-manager/project/:project/campaigns/:campaignId', handleGetCampaign);
+11590:app.get('/public/media-manager/project/:project/campaigns/:campaignId', handleGetCampaign);
+11636:app.get('/media-manager/project/:project/content-items', handleListContentItems);
+11637:app.get('/public/media-manager/project/:project/content-items', handleListContentItems);
+11638:app.post('/media-manager/project/:project/content-items', handleUpsertContentItem);
+11639:app.post('/public/media-manager/project/:project/content-items', handleUpsertContentItem);
+11640:app.patch('/media-manager/project/:project/content-items/:contentItemId', (req, res) => {
+11647:app.patch('/public/media-manager/project/:project/content-items/:contentItemId', (req, res) => {
+11654:app.get('/media-manager/project/:project/content-items/:contentItemId', handleGetContentItem);
+11655:app.get('/public/media-manager/project/:project/content-items/:contentItemId', handleGetContentItem);
+11702:app.get('/media-manager/project/:project/media-jobs', handleListMediaJobs);
+11703:app.get('/public/media-manager/project/:project/media-jobs', handleListMediaJobs);
+11704:app.post('/media-manager/project/:project/media-jobs', handleUpsertMediaJob);
+11705:app.post('/public/media-manager/project/:project/media-jobs', handleUpsertMediaJob);
+11706:app.patch('/media-manager/project/:project/media-jobs/:mediaJobId', (req, res) => {
+11713:app.patch('/public/media-manager/project/:project/media-jobs/:mediaJobId', (req, res) => {
+11720:app.get('/media-manager/project/:project/media-jobs/:mediaJobId', handleGetMediaJob);
+11721:app.get('/public/media-manager/project/:project/media-jobs/:mediaJobId', handleGetMediaJob);
+11738:app.get('/media-manager/project/:project/workflows/runs', handleListWorkflowRuns);
+11739:app.get('/public/media-manager/project/:project/workflows/runs', handleListWorkflowRuns);
+11755:app.get('/media-manager/project/:project/workflows/runs/:runId', handleGetWorkflowRun);
+11756:app.get('/public/media-manager/project/:project/workflows/runs/:runId', handleGetWorkflowRun);
+11825:app.post('/media-manager/project/:project/workflows/:workflowId/run', handleRunWorkflow);
+11826:app.post('/public/media-manager/project/:project/workflows/:workflowId/run', handleRunWorkflow);
+12165:app.get('/media-manager/project/:project/ai/commands', handleListAiCommands);
+12166:app.get('/public/media-manager/project/:project/ai/commands', handleListAiCommands);
+12167:app.get('/media-manager/project/:project/ai/commands/:commandId', handleGetAiCommand);
+12168:app.get('/public/media-manager/project/:project/ai/commands/:commandId', handleGetAiCommand);
+12169:app.post('/media-manager/project/:project/ai/command', handleExecuteAiCommand);
+12170:app.post('/public/media-manager/project/:project/ai/command', handleExecuteAiCommand);
+12171:app.post('/media-manager/project/:project/ai/chat', handleExecuteAiChat);
+12172:app.post('/public/media-manager/project/:project/ai/chat', handleExecuteAiChat);
+12173:app.post('/media-manager/project/:project/ai/guidance', handleExecuteAiGuidance);
+12174:app.post('/public/media-manager/project/:project/ai/guidance', handleExecuteAiGuidance);
+12175:app.post('/media-manager/project/:project/ai/workflows/:workflowId/run', handleExecuteAiWorkflow);
+12176:app.post('/public/media-manager/project/:project/ai/workflows/:workflowId/run', handleExecuteAiWorkflow);
+12177:app.get('/media-manager/project/:project/ai/artifacts', handleListAiArtifacts);
+12178:app.get('/public/media-manager/project/:project/ai/artifacts', handleListAiArtifacts);
+12179:app.get('/media-manager/project/:project/ai/recommendations', handleListAiRecommendations);
+12180:app.get('/public/media-manager/project/:project/ai/recommendations', handleListAiRecommendations);
+12181:app.get('/media-manager/project/:project/ai/memory', handleListAiMemory);
+12182:app.get('/public/media-manager/project/:project/ai/memory', handleListAiMemory);
+12213:app.get('/media-manager/project/:project/tasks', handleListTasks);
+12214:app.get('/public/media-manager/project/:project/tasks', handleListTasks);
+12215:app.post('/media-manager/project/:project/tasks', handleCreateTask);
+12216:app.post('/public/media-manager/project/:project/tasks', handleCreateTask);
+12217:app.get('/media-manager/project/:project/tasks/:taskId', (req, res) => {
+12230:app.get('/public/media-manager/project/:project/tasks/:taskId', (req, res) => {
+12304:app.get('/media-manager/project/:project/approvals', handleListApprovals);
+12305:app.get('/public/media-manager/project/:project/approvals', handleListApprovals);
+12306:app.post('/media-manager/project/:project/approvals', handleCreateApproval);
+12307:app.post('/public/media-manager/project/:project/approvals', handleCreateApproval);
+12308:app.post('/media-manager/project/:project/approvals/:approvalId/decision', handleApprovalDecision);
+12309:app.post('/public/media-manager/project/:project/approvals/:approvalId/decision', handleApprovalDecision);
+12362:app.get('/media-manager/project/:project/governance', handleGetGovernance);
+12363:app.get('/public/media-manager/project/:project/governance', handleGetGovernance);
+12364:app.get('/media-manager/project/:project/governance/policy', handleGetGovernancePolicy);
+12365:app.get('/public/media-manager/project/:project/governance/policy', handleGetGovernancePolicy);
+12366:app.post('/media-manager/project/:project/governance/policy', handleUpdateGovernancePolicy);
+12367:app.post('/public/media-manager/project/:project/governance/policy', handleUpdateGovernancePolicy);
+12384:app.get('/media-manager/project/:project/notifications', handleListNotifications);
+12385:app.get('/public/media-manager/project/:project/notifications', handleListNotifications);
+12386:app.patch('/media-manager/project/:project/notifications/:notificationId', (req, res) => {
+12399:app.patch('/public/media-manager/project/:project/notifications/:notificationId', (req, res) => {
+12459:app.get('/media-manager/project/:project/handoffs', handleListHandoffs);
+12460:app.get('/public/media-manager/project/:project/handoffs', handleListHandoffs);
+12461:app.post('/media-manager/project/:project/handoffs', handleCreateHandoff);
+12462:app.post('/public/media-manager/project/:project/handoffs', handleCreateHandoff);
+12463:app.post('/media-manager/project/:project/handoffs/:handoffId/consume', handleConsumeHandoff);
+12464:app.post('/public/media-manager/project/:project/handoffs/:handoffId/consume', handleConsumeHandoff);
+12481:app.get('/media-manager/project/:project/events', handleListEvents);
+12482:app.get('/public/media-manager/project/:project/events', handleListEvents);
+12504:app.get('/api/insights/:project', handleGetProjectInsights);
+12505:app.get('/public/api/insights/:project', handleGetProjectInsights);
+12506:app.get('/api/learning/:project', handleGetProjectLearning);
+12507:app.get('/public/api/learning/:project', handleGetProjectLearning);
+12509:app.post('/media-manager/project/:project/sources', (req, res) => {
+12563:app.post('/public/media-manager/project/:project/sources', (req, res) => {
+12617:app.delete('/media-manager/project/:project/sources/:sourceType', (req, res) => {
+12656:app.delete('/public/media-manager/project/:project/sources/:sourceType', (req, res) => {
+12888:app.get('/media-manager/project/:project/integrations/control-center', handleGetProjectIntegrationControlCenter);
+13002:app.get('/api/projects/:project/customer-operations/readiness', (req, res) => {
+13008:app.get('/api/projects/:project/customer-operations/inbox', (req, res) => {
+13014:app.get('/api/projects/:project/customer-operations/conversations', (req, res) => {
+13020:app.get('/api/projects/:project/customer-operations/conversations/:conversationId', (req, res) => {
+13026:app.get('/api/projects/:project/customer-operations/conversations/:conversationId/messages', (req, res) => {
+13032:app.get('/api/projects/:project/customer-operations/customers/:customerId', (req, res) => {
+13038:app.get('/api/projects/:project/customer-operations/tickets', (req, res) => {
+13044:app.get('/api/projects/:project/customer-operations/channels', (req, res) => {
+13051:app.get(
+13056:app.get(
+13061:app.get(
+13066:app.get(
+13071:app.get(
+13076:app.get(
+13081:app.get(
+13086:app.get(
+13164:app.get(
+13169:app.get(
+13174:app.get(
+13179:app.get(
+13184:app.get(
+13189:app.get(
+13194:app.get(
+13199:app.get(
+13204:app.get(
+13209:app.get(
+13215:app.get('/media-manager/project/:project/native-media/providers', handleGetNativeMediaProviders);
+13216:app.get('/public/media-manager/project/:project/native-media/providers', handleGetNativeMediaProviders);
+13217:app.get('/media-manager/project/:project/native-media/providers/readiness', handleGetNativeMediaProviderReadiness);
+13218:app.get('/public/media-manager/project/:project/native-media/providers/readiness', handleGetNativeMediaProviderReadiness);
+13260:app.post('/media-manager/project/:project/native-media/generate', handleNativeMediaGenerate);
+13264:app.get('/public/media-manager/project/:project/integrations/control-center', handleGetProjectIntegrationControlCenter);
+13266:app.post('/media-manager/project/:project/integrations/:integrationId/connect', async (req, res) => {
+13272:app.post('/public/media-manager/project/:project/integrations/:integrationId/connect', async (req, res) => {
+13278:app.post('/media-manager/project/:project/integrations/:integrationId', async (req, res) => {
+13284:app.post('/public/media-manager/project/:project/integrations/:integrationId', async (req, res) => {
+13290:app.post('/media-manager/project/:project/integrations/:integrationId/reconnect', async (req, res) => {
+13296:app.post('/public/media-manager/project/:project/integrations/:integrationId/reconnect', async (req, res) => {
+13302:app.post('/media-manager/project/:project/integrations/:integrationId/test', async (req, res) => {
+13306:app.post('/public/media-manager/project/:project/integrations/:integrationId/test', async (req, res) => {
+13310:app.post('/media-manager/project/:project/integrations/:integrationId/sync', async (req, res) => {
+13314:app.post('/public/media-manager/project/:project/integrations/:integrationId/sync', async (req, res) => {
+13318:app.post('/media-manager/project/:project/integrations/:integrationId/import-history', async (req, res) => {
+13322:app.post('/public/media-manager/project/:project/integrations/:integrationId/import-history', async (req, res) => {
+13326:app.post('/media-manager/project/:project/integrations/:integrationId/disconnect', async (req, res) => {
+13330:app.post('/public/media-manager/project/:project/integrations/:integrationId/disconnect', async (req, res) => {
+13336:app.post('/media-manager/project/:project/publishing/schedule', (req, res) => {
+13379:app.post('/public/media-manager/project/:project/publishing/schedule', (req, res) => {
+13422:app.post('/media-manager/project/:project/publishing/:jobId/reschedule', (req, res) => {
+13461:app.post('/public/media-manager/project/:project/publishing/:jobId/reschedule', (req, res) => {
+13500:app.post('/media-manager/project/:project/publishing/:jobId/ready', (req, res) => {
+13532:app.post('/public/media-manager/project/:project/publishing/:jobId/ready', (req, res) => {
+13564:app.post('/media-manager/project/:project/publishing/:jobId/publish', (req, res) => {
+13606:app.post('/public/media-manager/project/:project/publishing/:jobId/publish', (req, res) => {
+13648:app.post('/media-manager/project/:project/publishing/:jobId/fail', (req, res) => {
+13690:app.post('/public/media-manager/project/:project/publishing/:jobId/fail', (req, res) => {
+13732:app.get('/media-manager', (req, res) => {
+13736:app.get('/media-manager/', (req, res) => {
+13740:app.get(/^\/control-center$/, (req, res) => {
+13773:app.use(/^\/control-center\/(?:index\.html)?$/, (req, res, next) => {
+13800:app.use('/control-center', express.static(CONTROL_CENTER_PUBLIC_DIR, {
+13808:app.use('/public', express.static(path.join(__dirname, 'public')));
+13810:app.get('/generated-output/:project/:filename', (req, res) => {
+16018:app.post('/telegram-command', async (req, res) => {
+21962:app.post('/publish-clone/:cloneId', async (req, res) => {
+22005:app.post('/replace-original-product/:originalId/:cloneId', async (req, res) => {
+22094:app.post('/cleanup-clone/:cloneId', async (req, res) => {
+22141:app.post('/publish-blog/:draftId', async (req, res) => {
+22247:app.post('/rollback-product/:productId', async (req, res) => {
+22596:app.post('/schedule_execution_job', (req, res) => {
+22690:app.get('/scheduler_queue', (req, res) => {
+22767:app.post('/run_scheduler_worker_once', async (req, res) => {
+22897:app.post('/record_execution_feedback', (req, res) => {
+22969:app.get('/get_performance_summary', (req, res) => {
+22988:app.post('/generate_optimization_recommendations', (req, res) => {
+23016:app.post('/api/media/improve-prompt', async (req, res) => {
+23046:app.post('/api/media/brand-check', async (req, res) => {
+23076:app.post('/api/media/generate-image', async (req, res) => {
+23106:app.post('/api/media/generate-video-brief', async (req, res) => {
+23136:app.post('/api/media/generate-voice-script', async (req, res) => {
+23166:app.post('/api/media/generate-campaign-pack', async (req, res) => {
+23196:app.get('/get_smart_suggestions', (req, res) => {
+23217:app.use((err, req, res, next) => {
+
+### All /api route strings in server.js
+9458:app.post('/api/agent-registry/register', registerAgent);
+9459:app.post('/api/agent-registry/resolve', resolveAgent);
+9460:app.get('/api/agent-registry/agents', listAgents);
+11378:app.post('/api/ai-command/project/:project/campaign-preview', handleAiCommandCampaignPreviewOnly);
+12504:app.get('/api/insights/:project', handleGetProjectInsights);
+12506:app.get('/api/learning/:project', handleGetProjectLearning);
+13002:app.get('/api/projects/:project/customer-operations/readiness', (req, res) => {
+13008:app.get('/api/projects/:project/customer-operations/inbox', (req, res) => {
+13014:app.get('/api/projects/:project/customer-operations/conversations', (req, res) => {
+13020:app.get('/api/projects/:project/customer-operations/conversations/:conversationId', (req, res) => {
+13026:app.get('/api/projects/:project/customer-operations/conversations/:conversationId/messages', (req, res) => {
+13032:app.get('/api/projects/:project/customer-operations/customers/:customerId', (req, res) => {
+13038:app.get('/api/projects/:project/customer-operations/tickets', (req, res) => {
+13044:app.get('/api/projects/:project/customer-operations/channels', (req, res) => {
+23016:app.post('/api/media/improve-prompt', async (req, res) => {
+23046:app.post('/api/media/brand-check', async (req, res) => {
+23076:app.post('/api/media/generate-image', async (req, res) => {
+23106:app.post('/api/media/generate-video-brief', async (req, res) => {
+23136:app.post('/api/media/generate-voice-script', async (req, res) => {
+23166:app.post('/api/media/generate-campaign-pack', async (req, res) => {
+
+### Health/readiness/status strings
+8:  const omitKeys = new Set(['updated_at', 'statuses', 'required_sources', 'sources']);
+34:const { createRecommendationRuntime } = require('./lib/execution/recommendation-runtime');
+40:const { orchestrationGate } = require('../control-plane/core/orchestration-gate');
+41:const decisionModeResolver = require('../control-plane/core/decision-mode');
+50:  createRuntimeSecurityEnforcementMiddleware,
+52:} = require('./lib/security/runtime-security-enforcement');
+76:const { buildHealthState } = require('./lib/integrations/health-manager');
+94:  STATUS_MODELS,
+118:  createTask,
+119:  listTasks,
+120:  getTask,
+140:  createCustomerOperationsRuntime
+141:} = require('./lib/customer-operations/customer-operations-runtime');
+152:  getProviderReadiness
+153:} = require('./lib/media/native/providers/provider-readiness');
+193:    const expectedKey = String(process.env[CONTROL_WRITE_KEY_ENV] || '').trim();
+194:    const providedKey = readProvidedControlWriteKey(req);
+197:      && controlWriteKeyMatches(expectedKey, providedKey);
+215:        return res.status(403).json(buildRoutePermissionDeniedResponse());
+218:      return res.status(410).json({
+245:    'x-mh-control-write-key',
+257:const runtimeCompatLogger = createConsoleLikeLogger(appLogger, {
+258:  route: 'runtime',
+259:  action: 'runtime_log'
+262:const CONTROL_WRITE_KEY_HEADER = 'x-mh-control-key';
+263:const CONTROL_WRITE_KEY_ENV = 'MH_CONTROL_CENTER_WRITE_KEY';
+265:const CONTROL_CENTER_DISABLE_ACCESS_KEY_ENV = 'MH_CONTROL_CENTER_DISABLE_ACCESS_KEY';
+266:const CONTROL_CENTER_KEY_BYPASS_HEADER = 'X-MH-Control-Key-Bypass';
+267:const CONTROL_CENTER_KEY_BYPASS_HEADER_VALUE = 'temporary';
+268:const CONTROL_CENTER_ACCESS_KEY_BYPASS_ENABLED = String(
+269:  process.env[CONTROL_CENTER_DISABLE_ACCESS_KEY_ENV] || ''
+273:  /^MH_CONTROL_CENTER_DISABLE_ACCESS_KEY$/i,
+282:  /^CONTROL_CENTER_.*BYPASS.*$/i
+332:  error.statusCode = 500;
+336:if (CONTROL_CENTER_ACCESS_KEY_BYPASS_ENABLED) {
+337:  console.warn('CONTROL CENTER ACCESS KEY DISABLED - TEMPORARY TEST MODE');
+341:  /^\/task\/?$/i,
+362:function isProtectedControlWriteRequest(req) {
+374:function readProvidedControlWriteKey(req) {
+375:  const explicitHeader = String(req.get(CONTROL_WRITE_KEY_HEADER) || '').trim();
+385:function controlWriteKeyMatches(expected, provided) {
+396:function requireProtectedControlWriteKey(req, res, next) {
+397:  if (!isProtectedControlWriteRequest(req)) {
+401:  const expectedKey = String(process.env[CONTROL_WRITE_KEY_ENV] || '').trim();
+403:    return res.status(503).json({
+404:      error: `Protected write routes are disabled until ${CONTROL_WRITE_KEY_ENV} is configured on the server.`
+408:  const providedKey = readProvidedControlWriteKey(req);
+410:    return res.status(401).json({
+411:      error: `Missing protected write key. Provide ${CONTROL_WRITE_KEY_HEADER} or Authorization: Bearer <key>.`
+415:  if (!controlWriteKeyMatches(expectedKey, providedKey)) {
+416:    return res.status(403).json({
+427:app.use(requireProtectedControlWriteKey);
+443:  /^\/scheduler_queue\/?$/i,
+448:function isProtectedControlReadRequest(req) {
+459:  if (!isProtectedControlReadRequest(req)) {
+463:  if (CONTROL_CENTER_ACCESS_KEY_BYPASS_ENABLED) {
+464:    res.set(CONTROL_CENTER_KEY_BYPASS_HEADER, CONTROL_CENTER_KEY_BYPASS_HEADER_VALUE);
+468:  const expectedKey = String(process.env[CONTROL_WRITE_KEY_ENV] || '').trim();
+470:    return res.status(503).json({
+471:      error: `Protected read routes are disabled until ${CONTROL_WRITE_KEY_ENV} is configured on the server.`
+475:  const providedKey = readProvidedControlWriteKey(req);
+477:    return res.status(401).json({
+478:      error: `Missing read key. Provide ${CONTROL_WRITE_KEY_HEADER} or Authorization: Bearer <key>.`
+482:  if (!controlWriteKeyMatches(expectedKey, providedKey)) {
+483:    return res.status(403).json({
+493:const runtimeSecurityEnforcement = createRuntimeSecurityEnforcementMiddleware({
+495:  readProvidedControlWriteKey,
+496:  controlWriteKeyMatches,
+497:  controlWriteKeyEnv: CONTROL_WRITE_KEY_ENV
+500:app.use(runtimeSecurityEnforcement);
+561:    statusCode: 429,
+569:const unifiedDataPathResolver = new UnifiedDataPathResolver({ logger: runtimeCompatLogger });
+572:  logger: runtimeCompatLogger
+590:  status = 'needs_review'
+611:      status,
+616:      output_versions: req?.body?.output_versions,
+617:      new_output_version: {
+905:const CONTROL_CENTER_PUBLIC_DIR = path.join(BASE_DIR, 'public', 'control-center');
+914:  DRAFT_QUEUE: 'email_draft_queue',
+915:  MEDIA_QUEUE: 'email_media_queue'
+938:function getErrorStatusCode(error, fallbackStatus = 500) {
+939:  const statusCandidate = Number(
+940:    error?.statusCode || error?.status || error?.response?.status || fallbackStatus
+943:  if (!Number.isFinite(statusCandidate)) {
+944:    return fallbackStatus;
+947:  if (statusCandidate < 400 || statusCandidate > 599) {
+948:    return fallbackStatus;
+951:  return statusCandidate;
+955:  statusCode = 500,
+959:  return res.status(statusCode).json({
+970:    statusCode: 400,
+1072:    statusCode: getErrorStatusCode(error, 500),
+1100:      const registry = readJsonFile(paths.controlCenterRegistryPath, {});
+1130:function buildReadinessState() {
+1131:  const configuredWriteKey = String(process.env[CONTROL_WRITE_KEY_ENV] || '').trim();
+1133:    control_write_key_configured: {
+1174:  if (!checks.control_write_key_configured.ok) {
+1175:    missingRequiredEnv.push(CONTROL_WRITE_KEY_ENV);
+1182:  const ready = Object.values(checks).every((check) => !check.required || check.ok);
+1186:    ready,
+1190:      required_key_env: CONTROL_WRITE_KEY_ENV,
+1367:    schema_version: 'phase3-read-redirection-v1',
+1498:    canonicalLiveMediaQueueDir: path.join(EXECUTION_DIR, 'projects', safeProject, 'media', 'queue'),
+1499:    legacyLiveMediaQueueDir: path.join(EXECUTION_DIR, safeProject, 'media', 'queue')
+1539:    [EMAIL_ARTIFACT_TYPES.DRAFT_QUEUE]: {
+1542:      relativePath: 'email-queue.json',
+1544:      requestedFile: 'content/email/email-queue.json',
+1545:      pathContract: 'execution/projects/<project>/content/email/email-queue.json -> execution/<project>/content/email/email-queue.json'
+1547:    [EMAIL_ARTIFACT_TYPES.MEDIA_QUEUE]: {
+1548:      canonicalBase: paths.canonicalLiveMediaQueueDir,
+1549:      legacyBase: paths.legacyLiveMediaQueueDir,
+1550:      relativePath: 'email-image-queue.json',
+1552:      requestedFile: 'media/queue/email-image-queue.json',
+1553:      pathContract: 'execution/projects/<project>/media/queue/email-image-queue.json -> execution/<project>/media/queue/email-image-queue.json'
+1624:function requireQueueProjectName(projectName) {
+1628:      statusCode: 400,
+1635:function readLiveEmailQueue(projectName, requestedIdentifier = 'email-draft-queue') {
+1636:  return readEmailArtifactArray(requireQueueProjectName(projectName), EMAIL_ARTIFACT_TYPES.DRAFT_QUEUE, requestedIdentifier);
+1639:function writeLiveEmailQueue(projectName, queue = []) {
+1640:  return writeEmailArtifactArray(requireQueueProjectName(projectName), EMAIL_ARTIFACT_TYPES.DRAFT_QUEUE, queue);
+1643:function readLiveEmailMediaQueue(projectName, requestedIdentifier = 'email-media-queue') {
+1644:  return readEmailArtifactArray(requireQueueProjectName(projectName), EMAIL_ARTIFACT_TYPES.MEDIA_QUEUE, requestedIdentifier);
+1647:function writeLiveEmailMediaQueue(projectName, queue = []) {
+1648:  return writeEmailArtifactArray(requireQueueProjectName(projectName), EMAIL_ARTIFACT_TYPES.MEDIA_QUEUE, queue);
+1652:  return resolveProjectPath(EXECUTION_DIR, requireQueueProjectName(projectName)).projectRoot;
+1655:function getLegacyContentQueuePath(projectName, queueType) {
+1656:  const queueMap = {
+1657:    ads: path.join('content', 'ads', 'ad-queue.json'),
+1658:    social: path.join('content', 'social', 'post-queue.json'),
+1659:    blog: path.join('content', 'blog', 'blog-queue.json'),
+1660:    reel: path.join('content', 'campaigns', 'reel-brief-queue.json'),
+1661:    tasks: path.join('tasks', 'task-board.json')
+1663:  const relativePath = queueMap[queueType];
+1666:    throw new Error(`Unknown content queue type: ${queueType}`);
+1669:  const queuePath = path.join(getLegacyExecutionRoot(projectName), relativePath);
+1670:  ensureJsonFile(queuePath, []);
+1671:  return queuePath;
+1674:function readLegacyContentQueue(projectName, queueType) {
+1675:  return readJsonFile(getLegacyContentQueuePath(projectName, queueType), []);
+1678:function writeLegacyContentQueue(projectName, queueType, queue = []) {
+1679:  writeJsonFile(getLegacyContentQueuePath(projectName, queueType), Array.isArray(queue) ? queue : []);
+1694:function getProjectBlogImageQueuePath(projectName) {
+1695:  const queuePath = path.join(getProjectMediaDir(projectName), 'queue', 'blog-image-queue.json');
+1696:  ensureJsonFile(queuePath, []);
+1697:  return queuePath;
+1775:        (item) => item.root === 'canonical' && item.status === 'success'
+1778:        (item) => item.root === 'canonical' && item.status === 'failed'
+1781:        (item) => item.root === 'legacy' && item.status === 'success'
+1888:  let readiness = 'not_ready';
+1890:    readiness = 'insufficient_data';
+1898:    readiness = 'safe_to_audit_phase4';
+1904:    readiness = 'partial_more_stabilization_needed';
+1925:    readiness
+1997:function evaluateEmailReadiness(projectName) {
+2004:    status: 'ready',
+2007:    readiness: {
+2016:    result.status = 'blocked';
+2021:    result.status = 'needs_prepare';
+2048:  if (!renderRequest || renderRequest.status !== 'completed') {
+2071:  const readiness = evaluateEmailReadiness(projectName);
+2072:  const rendered = readiness.status !== 'blocked' ? getLatestRenderedOutput(projectName) : null;
+2077:    status: readiness.status,
+2078:    blocking_reasons: readiness.blocking_reasons,
+2079:    warnings: readiness.warnings,
+2080:    checks: readiness.checks,
+2086:      body: `This campaign asset was auto-prepared by the system using the latest approved brand-controlled render.`,
+2088:      ready_for_send: false
+2155:  if (packageData.status === 'blocked') {
+2203:    packageData.status = 'ready_for_send';
+2204:    packageData.email_asset.ready_for_send = true;
+2206:    packageData.status = 'needs_manual_review';
+2207:    packageData.email_asset.ready_for_send = false;
+2446:      goal: 'conversion',
+2447:      hook: `${productName} is ideal for promotional conversion-focused campaigns.`,
+2467:      goal: 'conversion',
+2540:  if (!renderRequest || renderRequest.status !== 'render_ready') {
+2541:    throw new Error('No render-ready request found');
+2668:    status: 'ready_for_send',
+2673:  if (pkg.status !== 'ready_for_send') {
+2674:    result.status = 'blocked';
+2675:    result.blocking_reasons.push('Prepared email package is not ready_for_send');
+2679:    result.status = 'blocked';
+2684:    result.status = 'blocked';
+2689:    result.status = 'blocked';
+2694:    result.status = 'blocked';
+2724:  const readiness = evaluatePreparedEmailForSend(projectName);
+2726:  if (readiness.status !== 'ready_for_send') {
+2728:      status: 'send_blocked',
+2730:      package_id: readiness.package_id,
+2731:      blocking_reasons: readiness.blocking_reasons
+2743:    status: 'pending_provider_send',
+2802:    status: product?.status || null,
+2813:    status: product?.status || null,
+2873:      status: x.status
+2893:    if (product.status === 'publish') summary.published_count += 1;
+2894:    if (product.status === 'draft') summary.draft_count += 1;
+3030:    content_angle: 'Premium brand-controlled visual identity with strong product credibility and polished presentation.',
+3045:    : `A brand-controlled creative built for ${goal}, designed to present the product with clarity, confidence, and premium appeal.`;
+3090:    publish_status: imageInfo ? 'ready_for_publish' : 'needs_manual_review'
+3110:    status: compliance.publish_status,
+3202:    publish_status: imageInfo ? 'ready_for_production' : 'needs_manual_review'
+3221:    status: compliance.publish_status,
+3224:    hook: 'This is what premium brand-controlled creative actually looks like.',
+3229:      'End with a direct CTA for discovery or shopping.'
+3237:    caption: 'Premium visual launch built with strict brand control.',
+3347:    publish_status: imageInfo ? 'ready_for_publish' : 'needs_manual_review'
+3365:    ? 'A short-form premium visual built with real brand-controlled assets.'
+3366:    : `This video package is designed for ${goal} using approved brand-controlled creative, with emphasis on product credibility, premium presentation, and visual trust.`;
+3375:    status: compliance.publish_status,
+3381:      ? 'Here is what premium brand-controlled creative looks like in motion.'
+3471:      listing_style: 'conversion-focused marketplace listing'
+3499:    trend_direction: 'Use clearer value articulation, real product trust signals, and conversion-oriented structure.',
+3504:    conversion_angle: 'Real product, clean presentation, trustworthy copy, and compliant listing assets.',
+3523:    status: 'ready_for_listing_build',
+3528:      'Brand-controlled real-asset presentation',
+3531:      'Marketplace-ready structure',
+3534:    description: `This Amazon package is built for ${goal} using approved real assets and a conversion-oriented marketplace structure.`,
+3538:      'marketplace ready',
+3553:      listing_status: 'ready_for_listing_build',
+3587:    status: 'ready_for_listing_build',
+3597:    description: `This eBay package is built for ${goal} using approved brand-controlled assets and a trust-oriented listing structure.`,
+3608:      listing_status: 'ready_for_listing_build',
+3757:function selectLaunchReadyProducts(products, projectName, context = 'launch') {
+3769:  const launchReadyProducts = [];
+3776:    const status = String(product.status || '').trim().toLowerCase();
+3781:    if (status !== 'publish' || !slug || !name || !stableKey) {
+3795:    launchReadyProducts.push(product);
+3798:  if (!launchReadyProducts.length) {
+3799:    appLogger.warn('launch_ready_products_empty', {
+3806:  return launchReadyProducts;
+3812:  const launchReadyProducts = selectLaunchReadyProducts(products, projectName, 'build_german_launch_plan');
+3813:  const heroProducts = launchReadyProducts.slice(0, 3);
+3814:  const supportProducts = launchReadyProducts.slice(3, 10);
+3822:      'early sales conversion'
+3837:      published_count: launchReadyProducts.length,
+3840:      validation_status: launchReadyProducts.length ? 'ready' : 'no_launch_ready_products'
+3858:    audience_mapping: [
+3909:  let launchReadyProducts = selectLaunchReadyProducts(products, projectName, 'build_launch_wave');
+3912:    launchReadyProducts = launchReadyProducts.filter((p) => productMatchesLaunchTheme(p, ['beard']));
+3916:    launchReadyProducts = launchReadyProducts.filter((p) => productMatchesLaunchTheme(p, ['hair']));
+3920:    launchReadyProducts = launchReadyProducts.filter((p) => productMatchesLaunchTheme(p, ['skin', 'face']));
+3923:  const selectedProducts = launchReadyProducts.slice(0, 5).map(p => ({
+3928:    status: p.status || null,
+3941:    goals: ['awareness', 'engagement', 'conversion'],
+4072:    status: 'scheduled'
+4085:    status: 'scheduled',
+4106:function normalizePublishingJobStatus(value, fallback = 'draft') {
+4111:  if (['queued', 'queue', 'scheduled', 'pending', 'pending_publish'].includes(normalized)) return 'scheduled';
+4114:      'ready',
+4115:      'ready_for_manual_publish',
+4116:      'ready_for_manual_send',
+4117:      'ready_for_manual_handoff',
+4118:      'ready_for_manual_review',
+4124:    return 'ready';
+4292:    status: normalizePublishingJobStatus(
+4293:      rawJob.status,
+4418:  const fallbackStatus = scheduledFor ? 'scheduled' : 'draft';
+4430:    status: normalizePublishingJobStatus(input.status, existing.status || fallbackStatus),
+4476:function updateScheduledJobStatus(projectName, jobId, status) {
+4479:    status
+4482:    status
+4792:      recommendation: 'Prioritize posts with higher saves, clicks, CTR, and conversions. Reduce weak CTA variants.',
+4935:    status: 'render_ready',
+4987:function markRenderResult(projectName, renderId, status, resultData = {}) {
+5003:  renderRequest.status = status;
+5010:    artifactType: 'render_status_record',
+5018:function evaluateExecutionReadiness(projectName, assetType) {
+5020:  const readiness = context.readiness;
+5025:    status: 'allowed',
+5026:    mode: 'brand_controlled_execution',
+5031:  if (!readiness.has_logo) {
+5032:    result.status = 'blocked';
+5037:    if (!readiness.has_product) {
+5038:      result.status = 'allowed_with_constraints';
+5042:    if (!readiness.has_packaging) {
+5043:      result.status = 'allowed_with_constraints';
+5094:  const execution = evaluateExecutionReadiness(projectName, assetType);
+5101:    status: 'ready_for_generation',
+5108:    result.status = 'blocked';
+5113:    result.status = 'restricted_generation';
+5118:    result.status = 'restricted_generation';
+5135:  lines.push(`Create a brand-controlled ${assetType} visual for project ${projectName}.`);
+5181:    status: eligibility.status,
+5206:  const readinessCheck = evaluateExecutionReadiness(projectName, assetType);
+5207:  const promptPackage = generateBrandControlledPrompt(projectName, assetType, goal);
+5213:    status: readinessCheck.status,
+5214:    mode: readinessCheck.mode,
+5215:    blocking_reasons: readinessCheck.blocking_reasons,
+5216:    warnings: readinessCheck.warnings,
+5254:  const activeAssets = registry.filter(item => item.status === 'active');
+5312:    readiness: {
+5326:function generateBrandControlledPrompt(projectName, assetType, goal) {
+5372:    readiness: context.readiness,
+5679:    readiness: null,
+5711:    payload.errors.readiness = message;
+5718:    overview: buildProjectControlCenterOverview,
+5719:    assets: buildProjectControlCenterAssets,
+5720:    connectors: buildProjectControlCenterConnectors,
+5721:    readiness: buildProjectControlCenterReadiness,
+5722:    activity: buildProjectControlCenterActivity,
+5779:      route: '/task',
+5880:  error.statusCode = 400;
+5923:function detectTaskType(message) {
+5975:    text.includes('status') ||
+6030:      objective: 'conversion'
+6070:      objective: 'conversion'
+6078:      objective: 'awareness_and_conversion'
+6149:function resolveAgentRegistrySignal({ message = '', taskType = '' } = {}) {
+6155:      task: message,
+6157:      taskType,
+6158:      type: taskType,
+6159:      intent: taskType
+6178:function selectAgent(taskType) {
+6179:  switch (taskType) {
+6193:function buildTaskResult({
+6199:  const taskId = `task_${Date.now()}`;
+6201:  const taskType = detectTaskType(message);
+6203:  const agent = selectAgent(taskType);
+6225:    task_id: taskId,
+6230:    task_type: taskType,
+6238:      summary: `Task classified as ${taskType} for project ${project}.`,
+6254:    task_id: taskId,
+6259:    task_type: taskType,
+6339:    integrationControlCenterPath: path.join(base.integrationsDir, 'control-center.json'),
+6453:function normalizeSourceStatus(value) {
+6461:function computeSourceStatus(entry = {}) {
+6463:  const explicitStatus = normalizeSourceStatus(entry.status);
+6464:  if (explicitStatus !== 'missing') {
+6465:    return explicitStatus;
+6518:    const status = computeSourceStatus(entry);
+6521:      status,
+6542:    statuses: ['missing', 'connected', 'verified', 'outdated'],
+6647:  ensureJsonFile(paths.integrationControlCenterPath, {
+6656:  const integrationSnapshot = readJsonFile(paths.integrationControlCenterPath, {
+6714:        path: paths.integrationControlCenterPath,
+6715:        exists: fs.existsSync(paths.integrationControlCenterPath)
+6746:      status: 'connected'
+6757:      status: 'connected'
+6779:      status: 'connected'
+6861:      required_assets: ['logo', 'product_photos', 'product_catalog', 'price_list', 'shipping_policy', 'legal_docs'],
+6862:      data_requirements: ['products', 'inventory', 'offers', 'shipping', 'payment_methods', 'marketplaces'],
+6866:      starter_checklist: ['add_products', 'upload_product_media', 'define_shipping', 'connect_woocommerce', 'create_launch_campaign'],
+6980:    throw new Error('Project already exists');
+7005:    status: 'initialized',
+7075:    status: normalizeSetupTextValue(input.project_status || input.status),
+7245:      ? 'Reduce fallback dependencies by keeping canonical files in sync before disabling legacy reads.'
+7258:function reviewProjectReadiness(projectName) {
+7271:  const connectorReadiness = reviewProjectConnectorReadiness(safeProject);
+7297:    .filter((entry) => ['connected', 'verified'].includes(normalizeSourceStatus(entry?.status)))
+7309:  const integrationsCompleteness = Number(connectorReadiness.readiness_score || 0);
+7310:  const campaignReadiness = campaigns.length > 0 ? 100 : 40;
+7311:  const executionReadiness = fs.existsSync(paths.executionDir) && fs.existsSync(paths.opsDir) ? 100 : 0;
+7312:  const publishingReadiness = fs.existsSync(paths.publishingDir) ? 100 : 0;
+7313:  const aiMemoryReadiness = fs.existsSync(paths.aiMemoryPath)
+7323:    campaign_readiness: campaignReadiness,
+7324:    execution_readiness: executionReadiness,
+7325:    publishing_readiness: publishingReadiness,
+7326:    ai_memory_readiness: aiMemoryReadiness
+7353:    has_integration_control_center: baselineValidation.required_files.integrations.exists,
+7370:  if (domainScores.campaign_readiness < 100) missing.push('campaign_readiness');
+7371:  if (domainScores.execution_readiness < 100) missing.push('execution_readiness');
+7372:  if (domainScores.publishing_readiness < 100) missing.push('publishing_readiness');
+7373:  if (domainScores.ai_memory_readiness < 100) missing.push('ai_memory_readiness');
+7377:  const structuralReadinessScore = Math.round((passedChecks / totalChecks) * 100);
+7378:  const domainReadinessScore = Math.round(
+7381:  const readinessScore = Math.round((structuralReadinessScore + domainReadinessScore) / 2);
+7386:    readiness_score: readinessScore,
+7387:    structural_readiness_score: structuralReadinessScore,
+7388:    domain_readiness_score: domainReadinessScore,
+7389:    readiness_domains: domainScores,
+7394:    status: readinessScore >= 85 ? 'ready_for_data_upload' : 'needs_input'
+7421:  const status = normalizeSetupTextValue(asset.status)
+7439:    status,
+7440:    readiness_status: normalizeSetupTextValue(asset.readiness_status || status) || status,
+7441:    review_status: normalizeSetupTextValue(asset.review_status || asset.readiness_status || status) || status,
+7485:    status: 'connected'
+7524:    status: 'connected'
+7632:  const controlCenterRegistryPath = paths.integrationControlCenterPath;
+7633:  ensureJsonFile(controlCenterRegistryPath, {
+7644:    controlCenterRegistryPath
+7650:  const raw = readJsonFile(paths.controlCenterRegistryPath, {
+7658:    registry_path: paths.controlCenterRegistryPath
+7669:  writeJsonFile(paths.controlCenterRegistryPath, payload);
+7674:    registry_path: paths.controlCenterRegistryPath
+7772:function determineIntegrationStatus(record = {}) {
+7786:  const explicitStatus = normalizeTextValue(record.status).toLowerCase();
+7788:  let statusKey = 'not_connected';
+7790:  if (tokenExpired || explicitStatus === 'token_expired') {
+7791:    statusKey = 'token_expired';
+7792:  } else if (explicitStatus === 'error' || normalizeTextValue(record.last_error)) {
+7793:    statusKey = 'error';
+7794:  } else if (explicitStatus === 'not_connected' && !primaryValue && !hasConfig && !hasCredentials) {
+7795:    statusKey = 'not_connected';
+7801:    statusKey = 'connected';
+7803:    statusKey = 'partial';
+7806:  const statusLabelMap = {
+7814:  let healthSummary = normalizeTextValue(record.health_summary);
+7815:  if (!healthSummary) {
+7816:    healthSummary = 'This integration is not configured yet.';
+7817:    if (statusKey === 'connected') {
+7818:      healthSummary = record.last_test_at
+7819:        ? `Connection healthy. Last verified ${record.last_test_at}.`
+7820:        : 'Connection is saved on the server and ready for sync.';
+7821:    } else if (statusKey === 'partial') {
+7822:      healthSummary = 'Some connection data is saved, but required setup is still incomplete.';
+7823:    } else if (statusKey === 'token_expired') {
+7824:      healthSummary = 'Saved credentials appear to be expired and need reconnect before sync can continue.';
+7825:    } else if (statusKey === 'error') {
+7826:      healthSummary = normalizeTextValue(record.last_error) || 'The last integration action failed.';
+7831:    status: statusKey,
+7832:    status_label: statusLabelMap[statusKey] || 'Not Connected',
+7834:    health_summary: healthSummary
+7902:  const status = determineIntegrationStatus(normalizedRecord);
+7903:  const healthState = buildHealthState({
+7904:    status: status.status,
+7906:    health_summary: status.health_summary
+7912:    status: status.status,
+7913:    status_label: status.status_label,
+7920:    missing_required: status.missing_required,
+7937:    health_summary: status.health_summary,
+7938:    health_state: healthState,
+7944:    insights_ready: asPlainObject(normalizedRecord.insights_ready)
+7964:      status: 'connected',
+7978:function reviewProjectIntegrationControlCenter(projectName) {
+8003:    connected: all.filter(item => item.status === 'connected').length,
+8004:    partial: all.filter(item => item.status === 'partial').length,
+8005:    error: all.filter(item => item.status === 'error').length,
+8006:    token_expired: all.filter(item => item.status === 'token_expired').length,
+8007:    not_connected: all.filter(item => item.status === 'not_connected').length
+8039:      status: 'unsupported_provider'
+8085:        ? 'Integration was reconnected from the Control Center.'
+8086:        : 'Integration connection was updated from the Control Center.')
+8106:      status: providerResult.status,
+8115:      insights_ready: asPlainObject(providerResult.insights_ready),
+8119:      health_summary: normalizeTextValue(providerResult.health || ''),
+8120:      health_state: asPlainObject(providerResult.health_state)
+8123:    const statusFromError = normalizeTextValue(error.status);
+8124:    const fallbackStatus = determineIntegrationStatus({
+8127:    }).status;
+8131:      status:
+8132:        statusFromError === 'token_expired'
+8134:          : statusFromError === 'reconnect_required'
+8136:            : fallbackStatus === 'connected'
+8138:              : fallbackStatus,
+8141:      health_summary: normalizeTextValue(error.message || ''),
+8142:      health_state: buildHealthState({
+8143:        status:
+8144:          statusFromError === 'token_expired'
+8146:            : statusFromError === 'reconnect_required'
+8148:              : fallbackStatus === 'connected'
+8150:                : fallbackStatus,
+8152:        health_summary: normalizeTextValue(error.message || '')
+8160:      status: normalizeTextValue(error.status || nextRecord.status)
+8173:    ['connected', 'partial'].includes(String(nextRecord.status || '').toLowerCase())
+8181:    control_center: reviewProjectIntegrationControlCenter(projectName)
+8185:function assertIntegrationReadyForAction(record = {}, actionLabel = 'run this action') {
+8186:  const status = determineIntegrationStatus(record);
+8188:  if (status.status === 'not_connected') {
+8192:  if (status.status === 'partial') {
+8196:  if (status.status === 'token_expired') {
+8212:      status: 'unsupported_provider'
+8217:    assertIntegrationReadyForAction(existing, actionType === 'test' ? 'test the connection' : actionType);
+8230:    nextRecord.status = 'not_connected';
+8232:    nextRecord.notes = normalizeTextValue(payload.notes || 'Integration was disconnected from the Control Center.');
+8250:      nextRecord.status = providerResult.status;
+8254:      nextRecord.insights_ready = asPlainObject(providerResult.insights_ready);
+8257:      nextRecord.health_summary = normalizeTextValue(providerResult.health || '');
+8258:      nextRecord.health_state = asPlainObject(providerResult.health_state);
+8272:      nextRecord.status =
+8273:        normalizeTextValue(error.status) === 'token_expired'
+8275:          : normalizeTextValue(error.status) === 'reconnect_required'
+8280:      nextRecord.health_summary = normalizeTextValue(error.message || '');
+8281:      nextRecord.health_state = buildHealthState({
+8282:        status: nextRecord.status,
+8284:        health_summary: nextRecord.health_summary
+8298:    control_center: reviewProjectIntegrationControlCenter(projectName)
+8310:  const categoryReadiness = buildProjectAssetCategoryReadiness(projectName, assets);
+8317:  const missing = categoryReadiness.categories
+8318:    .filter(item => item.required && item.status === 'Missing')
+8320:  const blockers = categoryReadiness.categories
+8321:    .filter(item => item.required && ['Missing', 'Needs Review'].includes(item.status))
+8331:    category_readiness: categoryReadiness,
+8332:    status: blockers.length ? 'asset_blockers' : 'assets_ready'
+8458:      description: 'Organic social creative, post visuals, reels, stories, and channel-ready source assets.',
+8567:function getAssetCategoryStatus(asset, projectName) {
+8569:  const explicitStatus = String(
+8570:    record.readiness_status ||
+8571:    record.review_status ||
+8572:    record.approval_status ||
+8573:    record.status ||
+8577:  if (record.approved === true || ['approved', 'ready_approved'].includes(explicitStatus)) {
+8596:  if (['needs_review', 'review', 'blocked', 'rejected'].includes(explicitStatus)) {
+8609:  const queue = [rootDir];
+8612:  while (queue.length) {
+8613:    const current = queue.shift();
+8620:          queue.push(fullPath);
+8885:      status: projectProductDataFiles.concat(mirrorProductDataFiles).length > 0 ? 'Uploaded' : 'Missing',
+8911:      status:
+8924:      status: productVideoFiles.length ? 'Uploaded' : 'Missing',
+8983:      status: fs.existsSync(filePath) ? 'connected' : 'missing',
+9000:  const categoryReadiness = buildProjectAssetCategoryReadiness(safeProject, nextAssets, {
+9007:    categories: categoryReadiness.categories,
+9018:    category_readiness: categoryReadiness
+9022:function buildProjectAssetCategoryReadiness(projectName, assetsInput = null, options = {}) {
+9028:    const statuses = matchingAssets.map(asset => getAssetCategoryStatus(asset, projectName));
+9029:    let status =
+9032:        : statuses.includes('Approved')
+9034:          : statuses.includes('Uploaded')
+9039:    let uploadedCount = statuses.filter(value => value === 'Uploaded').length;
+9040:    let approvedCount = statuses.filter(value => value === 'Approved').length;
+9041:    let needsReviewCount = statuses.filter(value => value === 'Needs Review').length;
+9046:      status = metrics.status || status;
+9048:      uploadedCount = status === 'Uploaded' ? Math.max(1, count) : 0;
+9050:      needsReviewCount = status === 'Needs Review' ? Math.max(1, count) : 0;
+9054:      status = metrics.status || status;
+9062:    const blocker = item.required && ['Missing', 'Needs Review'].includes(status);
+9064:      .filter(asset => getAssetCategoryStatus(asset, projectName) === 'Uploaded')
+9068:      .filter(asset => getAssetCategoryStatus(asset, projectName) === 'Approved')
+9086:      status,
+9103:        item.asset_type === 'product_photos' && status === 'Needs Review'
+9105:          : status === 'Missing'
+9107:          : status === 'Needs Review'
+9109:            : status === 'Uploaded'
+9110:              ? `Review and approve ${item.label} when ready.`
+9116:    const key = item.status.toLowerCase().replace(/\s+/g, '_');
+9129:  const nextCategory = categories.find(item => item.status === 'Missing') ||
+9130:    categories.find(item => item.status === 'Needs Review') ||
+9131:    categories.find(item => item.status === 'Uploaded') ||
+9145:function reviewProjectUploadMapping(projectName) {
+9157:    upload_mapping: catalog.map(item => ({
+9172:function reviewProjectConnectorReadiness(projectName) {
+9183:      const status = normalizeSourceStatus(source.status);
+9184:      return ['connected', 'verified'].includes(status) && Boolean(normalizeSetupTextValue(source.value));
+9205:  const readinessScore = Math.round((passedChecks / totalChecks) * 100);
+9210:    readiness_score: readinessScore,
+9213:    status: missing.length ? 'connectors_incomplete' : 'connectors_ready'
+9241:    throw new Error('No target folder mapping found');
+9322:function reviewProjectFolderHealth(projectName) {
+9374:app.get('/health', (req, res) => {
+9376:    status: 'ok',
+9382:app.get('/healthz', (req, res) => {
+9384:    status: 'ok',
+9390:app.get('/readyz', (req, res) => {
+9391:  const readiness = buildReadinessState();
+9392:  return res.status(readiness.ready ? 200 : 503).json(readiness);
+9395:app.get('/media-manager/project/:project/storage/parity-readiness', (req, res) => {
+9400:    return res.status(500).json({
+9401:      error: error.message || 'Failed to summarize project parity readiness'
+9406:app.get('/public/media-manager/project/:project/storage/parity-readiness', (req, res) => {
+9411:    return res.status(500).json({
+9412:      error: error.message || 'Failed to summarize project parity readiness'
+9417:app.get('/media-manager/storage/parity-readiness', (req, res) => {
+9422:    return res.status(500).json({
+9423:      error: error.message || 'Failed to summarize storage parity readiness'
+9428:app.get('/public/media-manager/storage/parity-readiness', (req, res) => {
+9433:    return res.status(500).json({
+9434:      error: error.message || 'Failed to summarize storage parity readiness'
+9439:app.post('/task', (req, res) => {
+9468:    const tasks = readLegacyContentQueue(projectName, 'tasks');
+9470:    const pending = tasks.filter(t => t.status === 'pending');
+9474:      today_tasks: pending.slice(0, 5)
+9484:    const tasks = readLegacyContentQueue(projectName, 'tasks');
+9486:    const next = tasks.find(t => t.status === 'pending');
+9490:      next_task: next || null
+9503:  const result = buildTaskResult({
+9559:      runtime_result: bridgeResult.runtime_result,
+9564:      status: bridgeResult.execution_state,
+9579:    const statusCode = getErrorStatusCode(error, 400);
+9584:        status: 'failed',
+9594:      statusCode,
+9647:      runtime_result: bridgeResult.runtime_result,
+9648:      ready_for_provider_send: true,
+9653:      status: bridgeResult.execution_state,
+9657:        ready_for_provider_send: true
+9667:    const statusCode = getErrorStatusCode(error, 400);
+9672:        status: 'failed',
+9682:      statusCode,
+9728:      status: bridgeResult.execution_state,
+9744:      runtime_result: bridgeResult.runtime_result,
+9748:    const statusCode = getErrorStatusCode(error, 400);
+9753:        status: 'failed',
+9763:      statusCode,
+9809:      status: bridgeResult.execution_state,
+9830:      runtime_result: bridgeResult.runtime_result,
+9834:    const statusCode = getErrorStatusCode(error, 400);
+9839:        status: 'failed',
+9849:      statusCode,
+9900:        conversion_improvements: [
+9903:          'Add trust elements like fast shipping and premium quality',
+9908:        next_step: 'Review the current product copy and prepare an optimized version for homepage and product page blocks'
+10037:      status: 'draft',
+10074:        status: clonedProduct.status,
+10083:      statusCode: getErrorStatusCode(error, 502),
+10161:      name: `${cleanName} [DRAFT READY]`,
+10164:      status: 'draft'
+10187:        status: updatedClone.status,
+10198:      statusCode: getErrorStatusCode(error, 502),
+10232:      statusCode: 400,
+10245:      return res.status(400).json({
+10277:          status: 'active',
+10302:    return res.status(500).json({
+10328:    return res.status(400).send('Invalid media path');
+10342:    return res.status(404).send('File not found');
+10364:    throw new Error('Project already uses this name');
+10376:    throw new Error('Target project already exists');
+10385:    throw new Error('Target project already exists');
+10444:    return res.status(400).json({
+10451:    return res.status(400).json({
+10467:    const conflict = /already exists|already uses/i.test(message);
+10469:    return res.status(notFound ? 404 : conflict ? 409 : 500).json({
+10551:    return res.status(400).json({
+10568:    return res.status(notFound ? 404 : 500).json({
+10605:    return res.status(400).json({
+10620:    return res.status(201).json({
+10628:    const duplicate = /already exists/i.test(message);
+10630:    return res.status(duplicate ? 409 : 500).json({
+10632:      code: duplicate ? "PROJECT_ALREADY_EXISTS" : "CREATE_PROJECT_FAILED",
+10678:    return res.status(400).json({
+10688:    return res.status(400).json({
+10698:    return res.status(400).json({
+10708:    return res.status(400).json({
+10765:    throw Object.assign(new Error('Missing asset id.'), { statusCode: 400 });
+10770:      statusCode: 404,
+10802:      statusCode: 404,
+10825:  const statusCode = Number(error?.statusCode || 0);
+10831:  if (statusCode >= 400 && statusCode < 600) {
+10832:    return res.status(statusCode).json(payload);
+10835:  return res.status(500).json({
+10841:app.post('/media-manager/project/:project/assets/:assetId/status', express.json({ limit: '1mb' }), (req, res) => {
+10844:    const status = String(req.body?.status || '').trim().toLowerCase();
+10849:      return res.status(400).json({ error: 'Missing assetId.' });
+10852:    if (!allowed.has(status)) {
+10853:      return res.status(400).json({
+10854:        error: 'Invalid status.',
+10860:      asset.status = status;
+10861:      asset.readiness_status = status;
+10862:      asset.review_status = status;
+10863:      asset.needs_review = status === 'needs_review';
+10864:      asset.approved = status === 'approved';
+10865:      asset.rejected = status === 'rejected';
+10866:      asset.archived = status === 'archived';
+10868:      asset.reviewed_by = 'control_center';
+10870:      if (status === 'approved') {
+10872:        asset.approval_note = note || asset.approval_note || 'Approved from Control Center Library.';
+10875:      if (status === 'rejected') {
+10877:        asset.rejection_note = note || asset.rejection_note || 'Rejected from Control Center Library.';
+10880:      if (status === 'archived') {
+10882:        asset.archive_note = note || asset.archive_note || 'Archived from Control Center Library.';
+10888:      status
+10891:    return sendAssetMutationError(res, error, 'Failed to update asset status.');
+10901:      return res.status(400).json({ error: 'Missing assetId.' });
+10905:      return res.status(400).json({ error: 'Missing asset name.' });
+10913:      asset.renamed_by = 'control_center';
+10932:      return res.status(400).json({ error: 'Missing assetId.' });
+10936:      return res.status(400).json({ error: 'Missing asset_type.' });
+10943:      return res.status(400).json({
+10953:        error.statusCode = 409;
+10964:      asset.reclassified_by = 'control_center';
+10965:      asset.reclassification_note = note || `Reclassified from ${previousAssetType || 'unknown'} to ${canonicalType} from Control Center Library.`;
+10985:      return res.status(400).json({ error: 'Missing assetId.' });
+10992:      asset.source_of_truth_updated_by = 'control_center';
+11010:      return res.status(400).json({ error: 'Missing assetId.' });
+11014:      asset.status = 'archived';
+11015:      asset.readiness_status = 'archived';
+11016:      asset.review_status = 'archived';
+11019:      asset.archive_note = note || asset.archive_note || 'Archived from Control Center Library.';
+11020:      asset.reviewed_by = 'control_center';
+11025:      status: 'archived'
+11038:      return res.status(400).json({ error: 'Missing assetId.' });
+11044:      asset.deleted_by = 'control_center';
+11045:      asset.delete_note = note || asset.delete_note || 'Soft deleted from Control Center Library.';
+11046:      asset.status = 'archived';
+11047:      asset.readiness_status = 'archived';
+11048:      asset.review_status = 'archived';
+11056:      status: 'archived'
+11069:      return res.status(400).json({ error: 'Missing assetId.' });
+11075:      asset.deleted_by = 'control_center';
+11076:      asset.delete_note = note || asset.delete_note || 'Soft deleted from Control Center Library.';
+11077:      asset.status = 'archived';
+11078:      asset.readiness_status = 'archived';
+11079:      asset.review_status = 'archived';
+11087:      status: 'archived'
+11098:    return res.status(400).json({
+11137:    return res.status(400).json({
+11176:    return res.status(400).json({
+11209:  const offer = normalizeAiCommandPreviewInput(input.offer, 'Review-ready offer angle');
+11249:      `Keep claims review-ready before external distribution.`
+11264:      'Destination owner must confirm execution readiness.'
+11349:      no_task_created: true,
+11365:    return res.status(500).json({
+11385:    return res.status(400).json({
+11394:function handleGetTaskCenter(req, res) {
+11399:      task_center: snapshot.task_center || {}
+11402:    return res.status(400).json({
+11403:      error: error.message || 'Failed to build task center payload'
+11408:function handleGetQueueCenter(req, res) {
+11413:      queue_center: snapshot.queue_center || {}
+11416:    return res.status(400).json({
+11417:      error: error.message || 'Failed to build queue center payload'
+11430:    return res.status(400).json({
+11444:    return res.status(400).json({
+11450:app.get('/media-manager/project/:project/task-center', handleGetTaskCenter);
+11451:app.get('/public/media-manager/project/:project/task-center', handleGetTaskCenter);
+11452:app.get('/media-manager/project/:project/queue-center', handleGetQueueCenter);
+11453:app.get('/public/media-manager/project/:project/queue-center', handleGetQueueCenter);
+11462:    status_models: STATUS_MODELS
+11476:    return res.status(400).json({
+11514:      team: updateTeamModel(req.params.project, req.body || {}, req.body?.actor || 'control-center')
+11517:    return res.status(400).json({
+11537:    return res.status(400).json({
+11551:    return res.status(400).json({
+11561:      return res.status(404).json({ error: 'Campaign not found' });
+11565:    return res.status(400).json({
+11602:    return res.status(400).json({
+11616:    return res.status(400).json({
+11626:      return res.status(404).json({ error: 'Content item not found' });
+11630:    return res.status(400).json({
+11668:    return res.status(400).json({
+11682:    return res.status(400).json({
+11692:      return res.status(404).json({ error: 'Media job not found' });
+11696:    return res.status(400).json({
+11732:    return res.status(400).json({
+11745:      return res.status(404).json({ error: 'Workflow run not found' });
+11749:    return res.status(400).json({
+11791:      status: req.body?.status,
+11819:    return res.status(400).json({
+11874:      status: result?.status || 'completed',
+11883:    const statusCode = getErrorStatusCode(error, 500);
+11887:        status: 'failed',
+11895:      status_code: statusCode,
+11899:    return res.status(statusCode).json(payload);
+11947:      status: result?.status || 'completed',
+11953:    const statusCode = getErrorStatusCode(error, 500);
+11957:        status: 'failed',
+11965:      status_code: statusCode,
+11969:    return res.status(statusCode).json(payload);
+12017:      status: result?.status || 'completed',
+12023:    const statusCode = getErrorStatusCode(error, 500);
+12027:        status: 'failed',
+12035:      status_code: statusCode,
+12039:    return res.status(statusCode).json(payload);
+12082:    return res.status(400).json({
+12097:    return res.status(400).json({
+12107:      return res.status(404).json({ error: 'AI command not found' });
+12111:    return res.status(400).json({
+12127:    return res.status(400).json({
+12143:    return res.status(400).json({
+12159:    return res.status(400).json({
+12184:function handleListTasks(req, res) {
+12188:      items: listTasks(req.params.project, {
+12193:    return res.status(400).json({
+12194:      error: error.message || 'Failed to list tasks'
+12199:function handleCreateTask(req, res) {
+12201:    const task = createTask(req.params.project, req.body || {});
+12203:      task,
+12207:    return res.status(400).json({
+12208:      error: error.message || 'Failed to create task'
+12213:app.get('/media-manager/project/:project/tasks', handleListTasks);
+12214:app.get('/public/media-manager/project/:project/tasks', handleListTasks);
+12215:app.post('/media-manager/project/:project/tasks', handleCreateTask);
+12216:app.post('/public/media-manager/project/:project/tasks', handleCreateTask);
+12217:app.get('/media-manager/project/:project/tasks/:taskId', (req, res) => {
+12219:    const task = getTask(req.params.project, req.params.taskId);
+12220:    if (!task) {
+12221:      return res.status(404).json({ error: 'Task not found' });
+12223:    return res.json({ task });
+12225:    return res.status(400).json({
+12226:      error: error.message || 'Failed to load task'
+12230:app.get('/public/media-manager/project/:project/tasks/:taskId', (req, res) => {
+12232:    const task = getTask(req.params.project, req.params.taskId);
+12233:    if (!task) {
+12234:      return res.status(404).json({ error: 'Task not found' });
+12236:    return res.json({ task });
+12238:    return res.status(400).json({
+12239:      error: error.message || 'Failed to load task'
+12253:    return res.status(400).json({
+12267:    return res.status(400).json({
+12298:    return res.status(400).json({
+12319:    return res.status(400).json({
+12343:    return res.status(400).json({
+12356:    return res.status(400).json({
+12378:    return res.status(400).json({
+12394:    return res.status(400).json({
+12407:    return res.status(400).json({
+12421:        status: req.query?.status
+12425:    return res.status(400).json({
+12439:    return res.status(400).json({
+12453:    return res.status(400).json({
+12475:    return res.status(400).json({
+12488:    return res.status(400).json({
+12498:    return res.status(400).json({
+12526:      return res.status(400).json({
+12549:      return res.status(400).json({
+12557:    return res.status(400).json({
+12580:      return res.status(400).json({
+12603:      return res.status(400).json({
+12611:    return res.status(400).json({
+12650:    return res.status(400).json({
+12689:    return res.status(400).json({
+12695:function handleGetProjectIntegrationControlCenter(req, res) {
+12697:    return res.json(reviewProjectIntegrationControlCenter(req.params.project));
+12699:    return res.status(400).json({
+12700:      error: error.message || 'Failed to load integration control center'
+12705:function getIntegrationErrorHttpStatus(error) {
+12706:  const status = normalizeTextValue(error?.status).toLowerCase();
+12707:  if (status === 'token_expired') {
+12710:  if (status === 'unsupported_provider') {
+12713:  if (status === 'reconnect_required') {
+12716:  if (status === 'error') {
+12777:    return res.status(getIntegrationErrorHttpStatus(error)).json({
+12878:    return res.status(getIntegrationErrorHttpStatus(error)).json({
+12885:const customerOperationsRuntime =
+12886:  createCustomerOperationsRuntime();
+12888:app.get('/media-manager/project/:project/integrations/control-center', handleGetProjectIntegrationControlCenter);
+12903:    return res.status(500).json({
+12910:function handleGetNativeMediaProviderReadiness(req, res) {
+12914:      readiness: getProviderReadiness(),
+12918:    return res.status(500).json({
+12919:      error: 'Failed to load native media provider readiness',
+12927:function handleCustomerOperationsHealth(req, res) {
+12930:      customerOperationsRuntime.health()
+12933:    return res.status(500).json({
+12934:      error: 'customer_operations_health_failed',
+12940:function handleCustomerOperationsReadiness(req, res) {
+12943:      customerOperationsRuntime.readiness.snapshot()
+12946:    return res.status(500).json({
+12947:      error: 'customer_operations_readiness_failed',
+12957:        customerOperationsRuntime.channels.list()
+12960:    return res.status(500).json({
+12971:        customerOperationsRuntime.unifiedInbox.list()
+12974:    return res.status(500).json({
+12982:// Canonical Control Center Customer Operations read-only projection routes.
+12988:    const runtime = customerOperationsRuntime;
+12991:      data: projector(runtime)
+12994:    return res.status(500).json({
+13002:app.get('/api/projects/:project/customer-operations/readiness', (req, res) => {
+13003:  return sendCustomerCenterProjection(res, (runtime) =>
+13004:    customerCenterProjection.projectCustomerReadiness(runtime)
+13009:  return sendCustomerCenterProjection(res, (runtime) =>
+13010:    customerCenterProjection.projectInboxEntries(runtime)
+13015:  return sendCustomerCenterProjection(res, (runtime) =>
+13016:    customerCenterProjection.projectConversations(runtime)
+13021:  return sendCustomerCenterProjection(res, (runtime) =>
+13022:    customerCenterProjection.projectConversationDetail(runtime, req.params.conversationId)
+13027:  return sendCustomerCenterProjection(res, (runtime) =>
+13028:    customerCenterProjection.projectConversationMessages(runtime, req.params.conversationId)
+13033:  return sendCustomerCenterProjection(res, (runtime) =>
+13034:    customerCenterProjection.projectCustomerProfileById(runtime, req.params.customerId)
+13039:  return sendCustomerCenterProjection(res, (runtime) =>
+13040:    customerCenterProjection.projectTickets(runtime)
+13045:  return sendCustomerCenterProjection(res, (runtime) =>
+13046:    customerCenterProjection.projectChannels(runtime)
+13052:  '/media-manager/project/:project/customer-operations/health',
+13053:  handleCustomerOperationsHealth
+13057:  '/public/media-manager/project/:project/customer-operations/health',
+13058:  handleCustomerOperationsHealth
+13062:  '/media-manager/project/:project/customer-operations/readiness',
+13063:  handleCustomerOperationsReadiness
+13067:  '/public/media-manager/project/:project/customer-operations/readiness',
+13068:  handleCustomerOperationsReadiness
+13098:        customerOperationsRuntime.conversations.list()
+13101:    return res.status(500).json({
+13112:        customerOperationsRuntime.messages.list()
+13115:    return res.status(500).json({
+13126:        customerOperationsRuntime.customers.list()
+13129:    return res.status(500).json({
+13140:        customerOperationsRuntime.sla.list()
+13143:    return res.status(500).json({
+13154:        customerOperationsRuntime.escalation.list()
+13157:    return res.status(500).json({
+13217:app.get('/media-manager/project/:project/native-media/providers/readiness', handleGetNativeMediaProviderReadiness);
+13218:app.get('/public/media-manager/project/:project/native-media/providers/readiness', handleGetNativeMediaProviderReadiness);
+13248:      runtime: 'mh-os-native-media-runtime',
+13252:    return res.status(500).json({
+13264:app.get('/public/media-manager/project/:project/integrations/control-center', handleGetProjectIntegrationControlCenter);
+13349:      status: req.body?.status
+13356:      status: req.body?.status,
+13372:    return res.status(error.statusCode || 400).json({
+13392:      status: req.body?.status
+13399:      status: req.body?.status,
+13415:    return res.status(error.statusCode || 400).json({
+13436:      status: req.body?.status || 'scheduled'
+13443:      status: req.body?.status || 'scheduled',
+13454:    return res.status(error.statusCode || 400).json({
+13475:      status: req.body?.status || 'scheduled'
+13482:      status: req.body?.status || 'scheduled',
+13493:    return res.status(error.statusCode || 400).json({
+13500:app.post('/media-manager/project/:project/publishing/:jobId/ready', (req, res) => {
+13504:      action: 'publishing_ready',
+13507:      requestedAction: 'ready'
+13512:    assertPublishingMutationAllowed(req.params.project, 'ready', {
+13514:      status: 'ready'
+13517:      status: 'ready',
+13525:    return res.status(error.statusCode || 400).json({
+13532:app.post('/public/media-manager/project/:project/publishing/:jobId/ready', (req, res) => {
+13536:      action: 'publishing_ready',
+13539:      requestedAction: 'ready'
+13544:    assertPublishingMutationAllowed(req.params.project, 'ready', {
+13546:      status: 'ready'
+13549:      status: 'ready',
+13557:    return res.status(error.statusCode || 400).json({
+13578:      status: 'published'
+13581:      status: 'published',
+13585:      execution_status: 'published',
+13587:      notes: req.body?.notes || ['Publishing completed from Control Center.']
+13599:    return res.status(error.statusCode || 400).json({
+13620:      status: 'published'
+13623:      status: 'published',
+13627:      execution_status: 'published',
+13629:      notes: req.body?.notes || ['Publishing completed from Control Center.']
+13641:    return res.status(error.statusCode || 400).json({
+13662:      status: 'failed'
+13665:      status: 'failed',
+13669:      execution_status: 'failed',
+13683:    return res.status(error.statusCode || 400).json({
+13704:      status: 'failed'
+13707:      status: 'failed',
+13711:      execution_status: 'failed',
+13725:    return res.status(error.statusCode || 400).json({
+13733:  return res.redirect(302, '/control-center/');
+13737:  return res.redirect(302, '/control-center/');
+13740:app.get(/^\/control-center$/, (req, res) => {
+13741:  return res.redirect(302, '/control-center/');
+13744:function buildControlCenterBootstrapScript(req) {
+13752:  const controlKey =
+13753:    process.env.MH_CONTROL_CENTER_READ_KEY ||
+13754:    process.env.MH_CONTROL_CENTER_WRITE_KEY ||
+13755:    process.env.MH_CONTROL_KEY ||
+13758:  if (!controlKey) {
+13762:  const serializedKey = JSON.stringify(String(controlKey));
+13766:    `window.__MH_CONTROL_CENTER_READ_KEY__ = ${serializedKey};`,
+13767:    `window.__MH_CONTROL_CENTER_WRITE_KEY__ = ${serializedKey};`,
+13768:    `window.__MH_CONTROL_WRITE_KEY__ = ${serializedKey};`,
+13773:app.use(/^\/control-center\/(?:index\.html)?$/, (req, res, next) => {
+13779:    const filePath = path.join(CONTROL_CENTER_PUBLIC_DIR, 'index.html');
+13781:    const bootstrapScript = buildControlCenterBootstrapScript(req);
+13793:    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+13800:app.use('/control-center', express.static(CONTROL_CENTER_PUBLIC_DIR, {
+13805:    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+13816:    return res.status(400).send('Missing project or filename');
+13829:    return res.status(404).send('Generated output not found');
+13893:      objective: 'conversion',
+13895:      emphasize: ['offer clarity', 'product visibility', 'CTA readiness'],
+13905:      objective: 'conversion',
+13942:    status: product?.status || null,
+14046:        `Create a brand-controlled ${type} visual for ${productName}. ` +
+14076:    offer: makeBlock('offer', 'conversion'),
+14079:    marketplace: makeBlock('marketplace', 'conversion'),
+14136:      goal: 'conversion'
+14405:    ready_for_publish: payload.assets.length > 0,
+14443:    ready_for_prepare: !!firstAsset,
+14505:    ready: mediaFiles.length > 0 || publishFiles.length > 0 || fs.existsSync(emailFile)
+14543:    status: String(payload.status || 'failed').trim() || 'failed',
+14574:    error.statusCode = 422;
+14594:    error.statusCode = 400;
+14660:    error.statusCode = 400;
+14668:function buildEmailReadyPayload(emailPackage) {
+14675:    error.statusCode = 422;
+14760:    error.statusCode = 400;
+14772:    error.statusCode = 422;
+14828:async function executePublishPackageRuntime({ project, publishPackage, socialPayload }) {
+14831:    execution_backend: 'canonical_publish_runtime',
+14844:async function executeEmailPackageRuntime({ project, emailPackage, emailPayload }) {
+14847:    execution_backend: 'canonical_email_runtime',
+14851:    ready_for_provider_send: true,
+14859:async function executeMediaGenerationRuntime({ project, payload, promptPack }) {
+14875:    const failureMessage = String(submission?.message || dispatchResult?.error || 'Native media execution runtime is not available.').trim();
+14877:    error.statusCode = 503;
+14884:    execution_backend: 'native_media_runtime',
+14892:async function executeAdExecutionPackageRuntime({ payload, adPackage }) {
+14896:    error.statusCode = 422;
+14903:    objective: payload?.objective || 'Generate execution-ready ad assets',
+14911:    error.statusCode = 503;
+14920:    execution_backend: 'ad_ai_provider_runtime',
+15047:      status: 'published'
+15063:    source_status: job.status,
+15064:    execution_status: 'pending',
+15072:      result.execution_status = 'ready_for_manual_send';
+15074:      result.notes.push('Email package is ready for operator-controlled sending.');
+15076:      result.execution_status = 'ready_for_manual_publish';
+15078:      result.notes.push('Social payload is ready for operator-controlled publishing.');
+15080:      result.execution_status = 'ready_for_manual_handoff';
+15082:      result.notes.push('Marketplace payload is ready for manual listing handoff.');
+15084:      result.execution_status = 'ready_for_manual_review';
+15090:      result.execution_status = 'auto_send_pending';
+15094:      result.execution_status = 'auto_publish_pending';
+15098:      result.execution_status = 'auto_marketplace_pending';
+15102:      result.execution_status = 'auto_review_pending';
+15104:      result.notes.push('Unknown channel type. Review connector mapping.');
+15144:    error.statusCode = 400;
+15149:    error.statusCode = 400;
+15154:    error.statusCode = 400;
+15159:    error.statusCode = 400;
+15164:    error.statusCode = 400;
+15169:    error.statusCode = 400;
+15176:    error.statusCode = 404;
+15183:    error.statusCode = 409;
+15200:    error.statusCode = 404;
+15249:      final_status: 'manually_published',
+15311:    source_status: job.status,
+15312:    execution_status: String(options.execution_status || existing.execution_status || job.status || 'pending').trim(),
+15335:  error.statusCode = 409;
+15368:  res.status(403).json(decision.response);
+15385:    actor: options.actor || req.body?.actor || 'control-center',
+15386:    requestedBy: options.requestedBy || req.body?.actor || 'control-center',
+15405:  res.status(403).json(decision.response);
+15431:  const requestedStatus = normalizePublishingJobStatus(options.status, '');
+15433:  const freezeSensitiveAction = ['schedule', 'reschedule', 'ready', 'publish'].includes(actionKey)
+15434:    || ['ready', 'published'].includes(requestedStatus);
+15435:  const approvalSensitiveAction = ['ready', 'publish'].includes(actionKey)
+15436:    || ['ready', 'published'].includes(requestedStatus);
+15453:      status: requestedStatus || null,
+15483:    const approvalStatus = String(approval?.status || '').trim().toLowerCase();
+15485:    if (!['approved', 'overridden'].includes(approvalStatus)) {
+15488:        approval_status: approvalStatus || 'missing'
+15491:        'Approval before publish is enabled. The publishing job is not approved for ready/publish mutation.',
+15496:          approval_status: approvalStatus || 'missing'
+15520:    status: normalizePublishingJobStatus(
+15521:      rawResult.execution_status,
+15522:      relatedJob?.status || 'draft'
+15581:function reviewProjectAlignmentStatus(projectName) {
+15587:  let status = 'not_aligned';
+15589:    status = 'fully_aligned';
+15591:    status = 'partially_aligned';
+15600:    status
+15606:  const connectorReadiness = reviewProjectConnectorReadiness(projectName);
+15613:  const connectorMissing = connectorReadiness.missing || [];
+15640:    status: critical.length ? 'critical_gaps_found' : important.length ? 'important_gaps_found' : 'healthy'
+15646:  const readiness = reviewProjectReadiness(projectName);
+15648:  const connectorReadiness = reviewProjectConnectorReadiness(projectName);
+15649:  const alignment = reviewProjectAlignmentStatus(projectName);
+15650:  const folderHealth = reviewProjectFolderHealth(projectName);
+15654:    readiness.readiness_score || 0,
+15655:    connectorReadiness.readiness_score || 0
+15660:  let overallStatus = 'needs_work';
+15662:    overallStatus = 'strong';
+15664:    overallStatus = 'progressing';
+15677:      status: project.status
+15679:    readiness_score: overallScore,
+15680:    readiness_status: overallStatus,
+15682:      base_readiness: readiness,
+15684:      connectors: connectorReadiness,
+15686:      folder_health: folderHealth
+15696:function buildProjectControlCenterOverview(projectName) {
+15701:  const connectorReadiness = reviewProjectConnectorReadiness(projectName);
+15702:  const alignment = reviewProjectAlignmentStatus(projectName);
+15714:      status: project.status,
+15715:      project_status: project.status,
+15741:      readiness_score: dashboard.readiness_score,
+15742:      readiness_status: dashboard.readiness_status,
+15743:      alignment_status: alignment.status,
+15746:      connector_readiness_score: connectorReadiness.readiness_score
+15812:function buildProjectControlCenterAssets(projectName) {
+15839:  const folderHealth = reviewProjectFolderHealth(projectName);
+15840:  const categoryReadiness = missingAssets.category_readiness || buildProjectAssetCategoryReadiness(projectName, assets);
+15849:    category_readiness: categoryReadiness,
+15850:    approved_assets: categoryReadiness.categories
+15858:    folder_health: folderHealth
+15862:function buildProjectControlCenterConnectors(projectName) {
+15864:  const readiness = reviewProjectConnectorReadiness(projectName);
+15865:  const controlCenter = reviewProjectIntegrationControlCenter(projectName);
+15871:    readiness,
+15872:    control_center: controlCenter
+15876:function buildProjectControlCenterReadiness(projectName) {
+15879:  const alignment = reviewProjectAlignmentStatus(projectName);
+15892:  const controlCenter = reviewProjectIntegrationControlCenter(safeProject);
+15896:    integrationControlCenter: controlCenter
+15902:  const controlCenter = reviewProjectIntegrationControlCenter(safeProject);
+15906:    integrationControlCenter: controlCenter
+15910:function buildProjectControlCenterActivity(projectName) {
+16001:    campaignStrategyQueuePath: path.join(projectDir, 'campaign-strategy-queue.json'),
+16024:        statusCode: 400,
+16055:          status: p.status,
+16065:          statusCode: 400,
+16082:          statusCode: 400,
+16099:          statusCode: 400,
+16118:          statusCode: 400,
+16135:      const taskBoardPath = getLegacyContentQueuePath(commandProject, 'tasks');
+16137:      const tasks = readJsonFile(taskBoardPath, []);
+16138:      const contentTasks = tasks.filter(
+16148:          marketing_tasks: contentTasks
+16160:        status: 'draft',
+16180:      const queuePath = getLegacyContentQueuePath(commandProject, 'social');
+16182:      const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
+16183:      queue.push(postDraft);
+16184:      fs.writeFileSync(queuePath, JSON.stringify(queue, null, 2), 'utf8');
+16198:        status: 'draft',
+16274:      const queuePath = getLegacyContentQueuePath(commandProject, 'blog');
+16276:      const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
+16277:      queue.push(blogDraft);
+16278:      fs.writeFileSync(queuePath, JSON.stringify(queue, null, 2), 'utf8');
+16292:        status: 'draft',
+16295:        send_goal: 'traffic + conversion',
+16303:      const { data: queue } = readLiveEmailQueue(commandProject, emailDraft.id);
+16304:      queue.push(emailDraft);
+16305:      writeLiveEmailQueue(commandProject, queue);
+16317:        status: 'draft',
+16325:      const queuePath = getLegacyContentQueuePath(commandProject, 'ads');
+16327:      const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
+16328:      queue.push(adDraft);
+16329:      fs.writeFileSync(queuePath, JSON.stringify(queue, null, 2), 'utf8');
+16338:      const queuePath = getLegacyContentQueuePath(commandProject, 'ads');
+16340:      const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
+16344:        result: queue
+16349:      const queuePath = getLegacyContentQueuePath(commandProject, 'social');
+16351:      const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
+16355:        result: queue
+16360:      const queuePath = getLegacyContentQueuePath(commandProject, 'blog');
+16362:      const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
+16366:        result: queue
+16371:      const { data: queue } = readLiveEmailQueue(commandProject, 'review-emails');
+16375:        result: queue
+16385:      const queuePath = getLegacyContentQueuePath(commandProject, 'ads');
+16387:      const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
+16388:      const item = queue.find(x => x.id === draftId);
+16394:      item.status = 'approved';
+16396:      fs.writeFileSync(queuePath, JSON.stringify(queue, null, 2), 'utf8');
+16410:      const queuePath = getLegacyContentQueuePath(commandProject, 'social');
+16412:      const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
+16413:      const item = queue.find(x => x.id === draftId);
+16419:      item.status = 'approved';
+16421:      fs.writeFileSync(queuePath, JSON.stringify(queue, null, 2), 'utf8');
+16435:      const queuePath = getLegacyContentQueuePath(commandProject, 'blog');
+16437:      const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
+16438:      const item = queue.find(x => x.id === draftId);
+16444:      item.status = 'approved';
+16446:      fs.writeFileSync(queuePath, JSON.stringify(queue, null, 2), 'utf8');
+16460:      const { data: queue } = readLiveEmailQueue(commandProject, draftId);
+16461:      const item = queue.find(x => x.id === draftId);
+16467:      item.status = 'approved';
+16469:      writeLiveEmailQueue(commandProject, queue);
+16483:      const queuePath = getLegacyContentQueuePath(commandProject, 'ads');
+16485:      const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
+16486:      const item = queue.find(x => x.id === draftId);
+16492:      item.status = 'improved';
+16509:      fs.writeFileSync(queuePath, JSON.stringify(queue, null, 2), 'utf8');
+16523:      const queuePath = getLegacyContentQueuePath(commandProject, 'social');
+16525:      const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
+16526:      const item = queue.find(x => x.id === draftId);
+16532:      item.status = 'improved';
+16549:      fs.writeFileSync(queuePath, JSON.stringify(queue, null, 2), 'utf8');
+16563:      const queuePath = getLegacyContentQueuePath(commandProject, 'blog');
+16565:      const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
+16566:      const item = queue.find(x => x.id === draftId);
+16572:            item.status = 'improved';
+16642:      fs.writeFileSync(queuePath, JSON.stringify(queue, null, 2), 'utf8');
+16656:      const { data: queue } = readLiveEmailQueue(commandProject, draftId);
+16657:      const item = queue.find(x => x.id === draftId);
+16663:      item.status = 'improved';
+16666:      item.send_goal = 'traffic + conversion';
+16673:      writeLiveEmailQueue(commandProject, queue);
+16687:      const queuePath = getLegacyContentQueuePath(commandProject, 'ads');
+16689:      const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
+16690:      const item = queue.find(x => x.id === draftId);
+16696:      item.status = 'ready_for_launch';
+16698:      fs.writeFileSync(queuePath, JSON.stringify(queue, null, 2), 'utf8');
+16703:        note: 'Ad draft is now ready_for_launch. External Meta launch connector is the next layer.'
+16713:      const queuePath = getLegacyContentQueuePath(commandProject, 'social');
+16715:      const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
+16716:      const item = queue.find(x => x.id === draftId);
+16722:      item.status = 'ready_for_publish';
+16724:      fs.writeFileSync(queuePath, JSON.stringify(queue, null, 2), 'utf8');
+16729:        note: 'Post draft is now ready_for_publish. Social publishing connector is the next layer.'
+16739:      const queuePath = getLegacyContentQueuePath(commandProject, 'blog');
+16741:      const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
+16742:      const item = queue.find(x => x.id === draftId);
+16748:      item.status = 'ready_for_publish';
+16750:      fs.writeFileSync(queuePath, JSON.stringify(queue, null, 2), 'utf8');
+16755:        note: 'Blog draft is now ready_for_publish. Website/blog publishing connector is the next layer.'
+16765:      const { data: queue } = readLiveEmailQueue(commandProject, draftId);
+16766:      const item = queue.find(x => x.id === draftId);
+16772:      item.status = 'ready_for_send';
+16774:      writeLiveEmailQueue(commandProject, queue);
+16779:        note: 'Email draft is now ready_for_send. Email connector is the next layer.'
+16806:      const queuePath = getLegacyContentQueuePath(commandProject, 'blog');
+16808:      const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
+16809:      const item = queue.find(x => x.id === draftId);
+16824:          media_ready: Boolean(item.featured_image_prompt && item.featured_image_alt)
+16835:      const queuePath = getLegacyContentQueuePath(commandProject, 'blog');
+16837:      const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
+16838:      const item = queue.find(x => x.id === draftId);
+16849:          status: item.status,
+16869:      const blogQueuePath = getLegacyContentQueuePath(commandProject, 'blog');
+16871:      const blogQueue = JSON.parse(fs.readFileSync(blogQueuePath, 'utf8'));
+16872:      const blogItem = blogQueue.find(x => x.id === draftId);
+16879:      const mediaQueuePath = getProjectBlogImageQueuePath(commandProject);
+16880:      fs.mkdirSync(path.join(mediaDir, 'queue'), { recursive: true });
+16883:      const mediaQueue = readJsonFile(mediaQueuePath, []);
+16901:        status: 'draft',
+16913:        media_ready: Boolean(blogItem.featured_image_prompt && blogItem.featured_image_alt)
+16916:      mediaQueue.push(assetRecord);
+16918:        mediaQueuePath,
+16919:        JSON.stringify(mediaQueue, null, 2),
+16935:      const mediaQueue = readJsonFile(getProjectBlogImageQueuePath(commandProject), []);
+16937:      let asset = mediaQueue.find(x => x.asset_id === ref);
+16940:        const linkedAssets = mediaQueue
+16963:  const mediaQueuePath = getProjectBlogImageQueuePath(commandProject);
+16964:  const mediaQueue = readJsonFile(mediaQueuePath, []);
+16966:  let asset = mediaQueue.find(x => x.asset_id === ref);
+16969:    const linkedAssets = mediaQueue
+17007:    asset.status = 'generated';
+17011:      mediaQueuePath,
+17012:      JSON.stringify(mediaQueue, null, 2),
+17020:        status: asset.status,
+17041:  const blogQueuePath = getLegacyContentQueuePath(commandProject, 'blog');
+17043:  const blogQueue = JSON.parse(fs.readFileSync(blogQueuePath, 'utf8'));
+17044:  const blogItem = blogQueue.find(x => x.id === draftId);
+17050:  const mediaQueuePath = getProjectBlogImageQueuePath(commandProject);
+17051:  const mediaQueue = readJsonFile(mediaQueuePath, []);
+17053:  const asset = mediaQueue
+17057:  if (!asset || asset.status !== 'generated') {
+17097:    asset.status = 'attached';
+17107:      mediaQueuePath,
+17108:      JSON.stringify(mediaQueue, null, 2),
+17113:      blogQueuePath,
+17114:      JSON.stringify(blogQueue, null, 2),
+17125:        status: 'attached',
+17126:        wp_post_status: postUpdateResponse.data.status || '',
+17146:      const blogQueuePath = getLegacyContentQueuePath(commandProject, 'blog');
+17148:      const blogQueue = JSON.parse(fs.readFileSync(blogQueuePath, 'utf8'));
+17149:      const blogItem = blogQueue.find(x => x.id === draftId);
+17241:        blogItem.enhancement_status = 'complete';
+17245:          blogQueuePath,
+17246:          JSON.stringify(blogQueue, null, 2),
+17260:            enhancement_status: blogItem.enhancement_status,
+17261:            wp_post_status: postUpdateResp.data.status || ''
+17279:      const blogQueuePath = getLegacyContentQueuePath(commandProject, 'blog');
+17281:      const blogQueue = JSON.parse(fs.readFileSync(blogQueuePath, 'utf8'));
+17282:      const blogItem = blogQueue.find(x => x.id === draftId);
+17293:          status: blogItem.status,
+17305:          enhancement_status: blogItem.enhancement_status || 'not_run'
+17316:      const { data: queue } = readLiveEmailQueue(commandProject, draftId);
+17317:      const item = queue.find(x => x.id === draftId);
+17328:          status: item.status,
+17334:          send_goal: item.send_goal || 'traffic + conversion',
+17336:          ready_for_send: item.status === 'ready_for_send',
+17340:          html_ready: Boolean(item.html_body),
+17352:      const { data: emailQueue } = readLiveEmailQueue(commandProject, draftId);
+17353:      const emailItem = emailQueue.find(x => x.id === draftId);
+17360:      fs.mkdirSync(path.join(mediaDir, 'queue'), { recursive: true });
+17363:      const { data: mediaQueue } = readLiveEmailMediaQueue(commandProject, draftId);
+17379:        `Create a premium email hero image for ${emailItem.topic}, focused on luxury men’s grooming, strong masculine branding, refined product presentation, elegant dark premium styling, suitable for a high-conversion campaign email for the German market.`;
+17387:        status: 'draft',
+17399:        media_ready: true
+17402:      mediaQueue.push(assetRecord);
+17403:      writeLiveEmailMediaQueue(commandProject, mediaQueue);
+17417:      const { data: mediaQueue } = readLiveEmailMediaQueue(commandProject, ref);
+17419:      let asset = mediaQueue.find(x => x.asset_id === ref);
+17422:        const linkedAssets = mediaQueue
+17445:  const { data: emailQueue } = readLiveEmailQueue(commandProject, draftId);
+17446:  const emailItem = emailQueue.find(x => x.id === draftId);
+17452:  const { data: mediaQueue } = readLiveEmailMediaQueue(commandProject, draftId);
+17454:  const generatedAssets = mediaQueue
+17455:    .filter(x => x.linked_email_id === draftId && x.status === 'generated')
+17485:    asset.status = 'uploaded';
+17507:    writeLiveEmailMediaQueue(commandProject, mediaQueue);
+17508:    writeLiveEmailQueue(commandProject, emailQueue);
+17518:        html_ready: true,
+17519:        status: emailItem.status
+17537:      const { data: mediaQueue } = readLiveEmailMediaQueue(commandProject, ref);
+17539:      let asset = mediaQueue.find(x => x.asset_id === ref);
+17542:        const linkedAssets = mediaQueue
+17578:        asset.status = 'generated';
+17581:        writeLiveEmailMediaQueue(commandProject, mediaQueue);
+17587:            status: asset.status,
+17613:        const { data: emailQueue } = readLiveEmailQueue(commandProject, draftId);
+17614:      const emailItem = emailQueue.find(x => x.id === draftId);
+17641:        emailItem.status = 'sent';
+17646:        writeLiveEmailQueue(commandProject, emailQueue);
+17652:            status: emailItem.status,
+17682:        status: 'active',
+17701:          'conversion'
+17747:      const queuePath = projectPaths.campaignStrategyQueuePath;
+17754:      const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
+17759:        status: 'draft',
+17764:        funnel_type: 'awareness -> consideration -> conversion',
+17772:          'conversion CTA'
+17791:          'conversion rate',
+17804:      queue.push(strategy);
+17805:      fs.writeFileSync(queuePath, JSON.stringify(queue, null, 2), 'utf8');
+17821:      const queuePath = resolveLegacyExecutionProjectPaths(projectName).campaignStrategyQueuePath;
+17823:      if (!fs.existsSync(queuePath)) {
+17824:        return res.json({ error: 'Campaign strategy queue not found' });
+17827:      const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
+17828:      const strategy = queue.find(x => x.strategy_id === strategyId);
+17849:      const strategyQueuePath = projectPaths.campaignStrategyQueuePath;
+17852:      if (!fs.existsSync(strategyQueuePath)) {
+17853:        return res.json({ error: 'Campaign strategy queue not found' });
+17856:      const strategyQueue = JSON.parse(fs.readFileSync(strategyQueuePath, 'utf8'));
+17857:      const strategy = strategyQueue.find(x => x.strategy_id === strategyId);
+17867:        status: 'draft',
+17924:        behavior: "already invest in grooming",
+17968:        "conversion"
+17981:      email: "conversion + retention",
+18025:  const blogQueuePath = getLegacyContentQueuePath(commandProject, 'blog');
+18027:  if (!fs.existsSync(blogQueuePath)) {
+18028:    return res.json({ error: 'Blog queue not found' });
+18031:  const blogQueue = JSON.parse(fs.readFileSync(blogQueuePath, 'utf8'));
+18032:  const blog = blogQueue.find(b => b.id === blogId);
+18079:  const { candidate, data: emailQueue } = readLiveEmailQueue(commandProject, emailId);
+18082:    return res.json({ error: 'Email queue not found' });
+18085:  const email = emailQueue.find(e => e.id === emailId);
+18143:      const queuePath = path.join(
+18145:        'intelligence/competitor-queue.json'
+18148:      const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
+18154:        status: 'draft',
+18178:      queue.push(record);
+18179:      fs.writeFileSync(queuePath, JSON.stringify(queue, null, 2), 'utf8');
+18195:      const queuePath = path.join(
+18197:        'intelligence/trend-queue.json'
+18200:      const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
+18206:        status: 'draft',
+18222:      queue.push(record);
+18223:      fs.writeFileSync(queuePath, JSON.stringify(queue, null, 2), 'utf8');
+18239:      const queuePath = path.join(
+18241:        'intelligence/keyword-queue.json'
+18244:      const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
+18250:        status: 'draft',
+18274:      queue.push(record);
+18275:      fs.writeFileSync(queuePath, JSON.stringify(queue, null, 2), 'utf8');
+18291:      const queuePath = path.join(
+18293:        'intelligence/hashtag-queue.json'
+18296:      const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
+18302:        status: 'draft',
+18313:      queue.push(record);
+18314:      fs.writeFileSync(queuePath, JSON.stringify(queue, null, 2), 'utf8');
+18330:      const queuePath = path.join(
+18332:        'intelligence/intelligence-brief-queue.json'
+18335:      const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
+18341:        status: 'draft',
+18353:      queue.push(record);
+18354:      fs.writeFileSync(queuePath, JSON.stringify(queue, null, 2), 'utf8');
+18368:  const queuePath = path.join(
+18370:    'intelligence/trend-queue.json'
+18373:  const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
+18374:  const trend = queue.find(t => t.id === trendId);
+18400:      email: "conversion"
+18404:  trend.status = 'enriched';
+18407:  fs.writeFileSync(queuePath, JSON.stringify(queue, null, 2), 'utf8');
+18421:  const queuePath = path.join(
+18423:    'intelligence/competitor-queue.json'
+18426:  const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
+18427:  const comp = queue.find(c => c.id === compId);
+18456:  comp.status = 'enriched';
+18459:  fs.writeFileSync(queuePath, JSON.stringify(queue, null, 2), 'utf8');
+18473:  const queuePath = path.join(
+18475:    'intelligence/keyword-queue.json'
+18478:  const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
+18479:  const kw = queue.find(k => k.id === keywordId);
+18502:  kw.status = 'enriched';
+18505:  fs.writeFileSync(queuePath, JSON.stringify(queue, null, 2), 'utf8');
+18522:      const strategyQueuePath = projectPaths.campaignStrategyQueuePath;
+18524:      const trendQueuePath = path.join(
+18526:        'intelligence/trend-queue.json'
+18529:      const competitorQueuePath = path.join(
+18531:        'intelligence/competitor-queue.json'
+18534:      const keywordQueuePath = path.join(
+18536:        'intelligence/keyword-queue.json'
+18539:      const hashtagQueuePath = path.join(
+18541:        'intelligence/hashtag-queue.json'
+18546:        'intelligence/campaign-brain-queue.json'
+18554:      const strategyQueue = JSON.parse(fs.readFileSync(strategyQueuePath, 'utf8'));
+18555:      const trendQueue = JSON.parse(fs.readFileSync(trendQueuePath, 'utf8'));
+18556:      const competitorQueue = JSON.parse(fs.readFileSync(competitorQueuePath, 'utf8'));
+18557:      const keywordQueue = JSON.parse(fs.readFileSync(keywordQueuePath, 'utf8'));
+18558:      const hashtagQueue = JSON.parse(fs.readFileSync(hashtagQueuePath, 'utf8'));
+18559:      const campaignBrainQueue = JSON.parse(fs.readFileSync(campaignBrainPath, 'utf8'));
+18561:      const latestStrategy = [...strategyQueue].reverse()[0] || null;
+18562:      const latestTrend = [...trendQueue].reverse().find(x => x.status === 'enriched') || [...trendQueue].reverse()[0] || null;
+18563:      const latestCompetitor = [...competitorQueue].reverse().find(x => x.status === 'enriched') || [...competitorQueue].reverse()[0] || null;
+18564:      const latestKeyword = [...keywordQueue].reverse().find(x => x.status === 'enriched') || [...keywordQueue].reverse()[0] || null;
+18565:      const latestHashtag = [...hashtagQueue].reverse()[0] || null;
+18571:        status: 'draft',
+18609:          '1 conversion email',
+18618:          'conversion rate',
+18633:      campaignBrainQueue.push(brain);
+18634:      fs.writeFileSync(campaignBrainPath, JSON.stringify(campaignBrainQueue, null, 2), 'utf8');
+18651:        'intelligence/campaign-brain-queue.json'
+18654:      const queue = JSON.parse(fs.readFileSync(campaignBrainPath, 'utf8'));
+18655:      const latestBrain = [...queue].reverse().find(x => x.project_id === projectName);
+18683:        'intelligence/campaign-brain-queue.json'
+18686:      const queue = JSON.parse(fs.readFileSync(campaignBrainPath, 'utf8'));
+18687:      const latestBrain = [...queue].reverse().find(x => x.project_id === projectName);
+18701:            email: 'conversion + retention',
+18718:        'intelligence/campaign-brain-queue.json'
+18721:      const queue = JSON.parse(fs.readFileSync(campaignBrainPath, 'utf8'));
+18722:      const latestBrain = [...queue].reverse().find(x => x.project_id === projectName);
+18731:        status: 'draft',
+18734:          'launch one conversion email',
+18760:    'intelligence/campaign-brain-queue.json'
+18765:    'campaign-output/campaign-output-queue.json'
+18768:  const brainQueue = JSON.parse(fs.readFileSync(brainPath, 'utf8'));
+18769:  const outputQueue = JSON.parse(fs.readFileSync(outputPath, 'utf8'));
+18771:  const brain = brainQueue.find(b => b.id === brainId);
+18785:    status: 'generated',
+18844:  outputQueue.push(result);
+18845:  fs.writeFileSync(outputPath, JSON.stringify(outputQueue, null, 2), 'utf8');
+18861:        'campaign-output/campaign-output-queue.json'
+18866:      const blogQueuePath = getLegacyContentQueuePath(campaignProject, 'blog');
+18867:      const postQueuePath = getLegacyContentQueuePath(campaignProject, 'social');
+18868:      const adQueuePath = getLegacyContentQueuePath(campaignProject, 'ads');
+18869:      const reelQueuePath = getLegacyContentQueuePath(campaignProject, 'reel');
+18871:      const campaignOutputQueue = JSON.parse(fs.readFileSync(campaignOutputPath, 'utf8'));
+18872:      const blogQueue = JSON.parse(fs.readFileSync(blogQueuePath, 'utf8'));
+18873:      const { data: emailQueue } = readLiveEmailQueue(commandProject, execId);
+18874:      const postQueue = JSON.parse(fs.readFileSync(postQueuePath, 'utf8'));
+18875:      const adQueue = JSON.parse(fs.readFileSync(adQueuePath, 'utf8'));
+18876:      const reelQueue = JSON.parse(fs.readFileSync(reelQueuePath, 'utf8'));
+18878:      const campaignExec = campaignOutputQueue.find(x => x.id === execId);
+18897:          status: 'draft',
+18926:        blogQueue.push(blogDraft);
+18935:          status: 'draft',
+18938:          send_goal: 'traffic + conversion',
+18946:        emailQueue.push(emailDraft);
+18957:            status: 'draft',
+18974:          postQueue.push(postDraft);
+18985:            status: 'draft',
+18993:            offer_angle: 'premium routine + conversion',
+18998:          adQueue.push(adDraft);
+19008:          status: 'draft',
+19029:        reelQueue.push(reelBrief);
+19033:      fs.writeFileSync(blogQueuePath, JSON.stringify(blogQueue, null, 2), 'utf8');
+19034:      writeLiveEmailQueue(commandProject, emailQueue);
+19035:      fs.writeFileSync(postQueuePath, JSON.stringify(postQueue, null, 2), 'utf8');
+19036:      fs.writeFileSync(adQueuePath, JSON.stringify(adQueue, null, 2), 'utf8');
+19037:      fs.writeFileSync(reelQueuePath, JSON.stringify(reelQueue, null, 2), 'utf8');
+19039:      campaignExec.autogen_status = 'completed';
+19045:        JSON.stringify(campaignOutputQueue, null, 2),
+19053:          autogen_status: 'completed',
+19067:        'campaign-output/campaign-output-queue.json'
+19070:      const campaignOutputQueue = JSON.parse(fs.readFileSync(campaignOutputPath, 'utf8'));
+19071:      const campaignExec = campaignOutputQueue.find(x => x.id === execId);
+19081:          autogen_status: campaignExec.autogen_status || 'not_run',
+19097:        'campaign-output/campaign-output-queue.json'
+19100:      const campaignOutputQueue = JSON.parse(fs.readFileSync(campaignOutputPath, 'utf8'));
+19101:      const campaignExec = campaignOutputQueue.find(x => x.id === execId);
+19118:        campaignExec.controlled_publish = campaignExec.controlled_publish || {};
+19119:        campaignExec.controlled_publish.blog = {
+19120:          status: 'published',
+19128:          JSON.stringify(campaignOutputQueue, null, 2),
+19134:          result: campaignExec.controlled_publish.blog
+19154:        'campaign-output/campaign-output-queue.json'
+19157:      const campaignOutputQueue = JSON.parse(fs.readFileSync(campaignOutputPath, 'utf8'));
+19158:      const campaignExec = campaignOutputQueue.find(x => x.id === execId);
+19179:        campaignExec.controlled_publish = campaignExec.controlled_publish || {};
+19180:        campaignExec.controlled_publish.email = {
+19181:          status: 'sent',
+19190:          JSON.stringify(campaignOutputQueue, null, 2),
+19196:          result: campaignExec.controlled_publish.email
+19215:        'campaign-output/campaign-output-queue.json'
+19218:      const campaignOutputQueue = JSON.parse(fs.readFileSync(campaignOutputPath, 'utf8'));
+19219:      const campaignExec = campaignOutputQueue.find(x => x.id === execId);
+19229:          autogen_status: campaignExec.autogen_status || 'not_run',
+19231:          controlled_publish: campaignExec.controlled_publish || {},
+19232:          status_summary: {
+19233:            blog: campaignExec.controlled_publish?.blog?.status || 'not_published',
+19234:            email: campaignExec.controlled_publish?.email?.status || 'not_sent'
+19262:        status: 'active',
+19488:        status: 'active',
+19587:        message: 'Asset already registered',
+19602:    status: 'active',
+19645:        message: 'Reference already registered',
+19661:    status: 'active',
+19747:        readiness: context.readiness,
+19770:if (command === '/generate_brand_controlled_prompt') {
+19780:    const result = generateBrandControlledPrompt(projectName, assetType, goal);
+19787:      error: 'Failed to generate brand controlled prompt',
+19793:if (command === '/evaluate_execution_readiness') {
+19802:    const result = evaluateExecutionReadiness(projectName, assetType);
+19809:      error: 'Failed to evaluate execution readiness',
+20002:  const status = (args[2] || '').trim().toLowerCase();
+20005:  if (!projectName || !renderId || !status) {
+20006:    return res.json({ error: 'Missing project name, render id, or status' });
+20010:    const result = markRenderResult(projectName, renderId, status, {
+20046:if (command === '/evaluate_email_readiness') {
+20054:    const result = evaluateEmailReadiness(projectName);
+20061:      error: 'Failed to evaluate email readiness',
+20121:        status: result.status,
+20414:        status: 'initialized'
+20465:        status: 'synced'
+21245:    return res.status(error.statusCode || 400).json({
+21268:if (command === '/update_scheduled_job_status') {
+21271:  const status = (args[2] || '').trim().toLowerCase();
+21273:  if (!projectName || !jobId || !status) {
+21274:    return res.json({ error: 'Missing project, job id, or status' });
+21278:    const result = updateScheduledJobStatus(projectName, jobId, status);
+21281:    return res.status(error.statusCode || 400).json({
+21282:      error: 'Failed to update scheduled job status',
+21306:    return res.status(error.statusCode || 400).json({
+21359:    return res.status(error.statusCode || 400).json({
+21582:if (command === '/review_project_readiness') {
+21590:    const result = reviewProjectReadiness(projectName);
+21594:      error: 'Failed to review project readiness',
+21630:  return res.status(500).json({
+21704:if (command === '/review_project_upload_mapping') {
+21712:    const result = reviewProjectUploadMapping(projectName);
+21716:      error: 'Failed to review project upload mapping',
+21722:if (command === '/review_project_connector_readiness') {
+21730:    const result = reviewProjectConnectorReadiness(projectName);
+21734:      error: 'Failed to review project connector readiness',
+21777:if (command === '/review_project_folder_health') {
+21785:    const result = reviewProjectFolderHealth(projectName);
+21789:      error: 'Failed to review project folder health',
+21794:if (command === '/review_project_alignment_status') {
+21802:    const result = reviewProjectAlignmentStatus(projectName);
+21806:      error: 'Failed to review project alignment status',
+21847:if (command === '/project_control_center_overview') {
+21855:    const result = buildProjectControlCenterOverview(projectName);
+21859:      error: 'Failed to build project control center overview',
+21865:if (command === '/project_control_center_assets') {
+21873:    const result = buildProjectControlCenterAssets(projectName);
+21877:      error: 'Failed to build project control center assets',
+21883:if (command === '/project_control_center_connectors') {
+21891:    const result = buildProjectControlCenterConnectors(projectName);
+21895:      error: 'Failed to build project control center connectors',
+21901:if (command === '/project_control_center_readiness') {
+21909:    const result = buildProjectControlCenterReadiness(projectName);
+21913:      error: 'Failed to build project control center readiness',
+21919:if (command === '/project_control_center_activity') {
+21927:    const result = buildProjectControlCenterActivity(projectName);
+21931:      error: 'Failed to build project control center activity',
+21949:      statusCode: 400,
+21955:      statusCode: getErrorStatusCode(error, 502),
+21966:      status: 'published'
+21973:        status: 'publish'
+21989:      status: publishedProduct.status,
+21999:    return res.status(getErrorStatusCode(error, 502)).json({
+22009:      status: 'published'
+22049:      status: 'publish'
+22076:      status: updatedOriginal.status,
+22088:    return res.status(getErrorStatusCode(error, 502)).json({
+22099:    let statusUpdate = 'draft';
+22102:      statusUpdate = 'trash';
+22108:        status: statusUpdate
+22123:      action: statusUpdate,
+22124:      status: updated.status,
+22134:      statusCode: getErrorStatusCode(error, 502),
+22145:      status: 'published'
+22149:    const queuePath = getLegacyContentQueuePath(projectName, 'blog');
+22151:    const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
+22152:    const item = queue.find(x => x.id === draftId);
+22156:        statusCode: 404,
+22164:        statusCode: 400,
+22176:        statusCode: 503,
+22193:        status: 'publish'
+22201:        statusCode: response.status || 502,
+22203:        message: `WordPress publish failed with status ${response.status}`
+22207:    item.status = 'published';
+22210:    item.wp_status = data.status || '';
+22215:    item.featured_image_ready = Boolean(
+22219:      fs.writeFileSync(queuePath, JSON.stringify(queue, null, 2), 'utf8');
+22226:      wp_status: data.status || '',
+22230:      featured_image_ready: Boolean(
+22240:      statusCode: getErrorStatusCode(err, 500),
+22251:      status: 'published'
+22264:        statusCode: 404,
+22279:      status: backupData.status || 'publish'
+22299:      status: restored.status,
+22308:      statusCode: getErrorStatusCode(error, 502),
+22455:const recommendationRuntime = createRecommendationRuntime({
+22465:} = recommendationRuntime;
+22512:  buildEmailReadyPayload,
+22516:  executePublishPackage: executePublishPackageRuntime,
+22517:  executeEmailPackage: executeEmailPackageRuntime,
+22518:  executeMediaGeneration: executeMediaGenerationRuntime,
+22519:  executeAdExecutionPackage: executeAdExecutionPackageRuntime
+22558:    readiness: full.readiness,
+22564:      category_readiness: full.assets?.category_readiness || null,
+22607:      err.statusCode = 400;
+22615:      err.statusCode = 400;
+22623:      err.statusCode = 400;
+22633:      err.statusCode = 400;
+22646:      err.statusCode = 400;
+22669:      status: 'pending',
+22677:    return res.status(201).json({
+22683:      statusCode: getErrorStatusCode(error, 400),
+22690:app.get('/scheduler_queue', (req, res) => {
+22704:      if (job.status === 'completed') {
+22709:      if (job.status === 'failed') {
+22714:      if (job.status === 'running') {
+22719:      if (job.status === 'retryable') {
+22728:      if (job.status === 'pending') {
+22741:      queue: {
+22760:      statusCode: getErrorStatusCode(error, 400),
+22761:      code: error.code || 'SCHEDULER_QUEUE_FAILED',
+22762:      message: error.message || 'Failed to retrieve scheduler queue'
+22780:      if (job.status === 'completed') continue;
+22781:      if (job.status === 'failed' && job.attempts >= job.max_attempts) continue;
+22783:      const isStaleRunning = job.status === 'running' && isJobLockExpired(job, SCHEDULER_LOCK_TIMEOUT_MS);
+22788:      job.status = 'running';
+22797:    // Phase 2: execute locked jobs and update status
+22799:      if (job.status !== 'running' || job.locked_by !== workerId) continue;
+22805:        job.status = 'completed';
+22815:          status: 'completed',
+22830:            status: 'non_fatal',
+22838:          status: 'completed',
+22848:        job.status = canRetry ? 'retryable' : 'failed';
+22858:          status: job.status,
+22870:          status: job.status,
+22890:      statusCode: getErrorStatusCode(error, 400),
+22906:      err.statusCode = 400;
+22913:      err.statusCode = 400;
+22920:      err.statusCode = 400;
+22925:    const required = ['impressions', 'clicks', 'engagement', 'conversions', 'revenue'];
+22929:        err.statusCode = 400;
+22949:    return res.status(201).json({
+22962:      statusCode: getErrorStatusCode(error, 400),
+22981:      statusCode: getErrorStatusCode(error, 400),
+23009:      statusCode: getErrorStatusCode(error, 400),
+23019:    if (!result.ok && result.status === 'provider_not_configured') {
+23020:      return res.status(200).json(result);
+23026:      status: 'prompt_ready'
+23031:      status: 'prompt_ready',
+23039:      statusCode: getErrorStatusCode(error, 500),
+23049:    if (!result.ok && result.status === 'provider_not_configured') {
+23050:      return res.status(200).json(result);
+23056:      status: 'needs_review'
+23061:      status: 'needs_review',
+23069:      statusCode: getErrorStatusCode(error, 500),
+23079:    if (!result.ok && result.status === 'provider_not_configured') {
+23080:      return res.status(200).json(result);
+23086:      status: 'needs_review'
+23091:      status: 'needs_review',
+23099:      statusCode: getErrorStatusCode(error, 500),
+23109:    if (!result.ok && result.status === 'provider_not_configured') {
+23110:      return res.status(200).json(result);
+23116:      status: 'needs_review'
+23121:      status: 'needs_review',
+23129:      statusCode: getErrorStatusCode(error, 500),
+23139:    if (!result.ok && result.status === 'provider_not_configured') {
+23140:      return res.status(200).json(result);
+23146:      status: 'needs_review'
+23151:      status: 'needs_review',
+23159:      statusCode: getErrorStatusCode(error, 500),
+23169:    if (!result.ok && result.status === 'provider_not_configured') {
+23170:      return res.status(200).json(result);
+23176:      status: 'needs_review'
+23181:      status: 'needs_review',
+23189:      statusCode: getErrorStatusCode(error, 500),
+23208:      statusCode: getErrorStatusCode(error, 400),
+23218:  const statusCode = getErrorStatusCode(err, 500);
+23222:    : statusCode >= 500
+23227:  const responseMessage = statusCode >= 500 && isProduction
+23235:    statusCode,
+23243:  return res.status(statusCode).json({
+23257:      route: '/health',
+23291:    reviewProjectReadiness,
+23303:    selectLaunchReadyProducts,

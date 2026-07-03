@@ -1,0 +1,374 @@
+### server.js write-like endpoints
+9439:app.post('/task', (req, res) => {
+9458:app.post('/api/agent-registry/register', registerAgent);
+9459:app.post('/api/agent-registry/resolve', resolveAgent);
+9497:app.post('/ingest', (req, res) => {
+9513:app.post('/execute_publish_package', async (req, res) => {
+9601:app.post('/execute_email_package', async (req, res) => {
+9689:app.post('/generate_media_from_prompt', async (req, res) => {
+9770:app.post('/build_ad_execution_package', async (req, res) => {
+10006:app.post('/backup-and-clone-product/:id', async (req, res) => {
+10090:app.post('/apply-prepared-copy-to-clone/:originalId/:cloneId', async (req, res) => {
+10239:app.post('/media/upload', applySingleMediaUpload, (req, res) => {
+10642:app.post('/media-manager/project/:project/rename', express.json({ limit: '1mb' }), handleRenameMediaManagerProject);
+10644:app.post('/public/media-manager/project/:project/rename', express.json({ limit: '1mb' }), handleRenameMediaManagerProject);
+10646:app.post('/media-manager/project/:project/apply-template', express.json({ limit: '1mb' }), handleApplyBusinessTemplateToProject);
+10648:app.post('/public/media-manager/project/:project/apply-template', express.json({ limit: '1mb' }), handleApplyBusinessTemplateToProject);
+10650:app.post('/media-manager/projects', express.json({ limit: '1mb' }), handleCreateMediaManagerProject);
+10652:app.post('/public/media-manager/projects', express.json({ limit: '1mb' }), handleCreateMediaManagerProject);
+10841:app.post('/media-manager/project/:project/assets/:assetId/status', express.json({ limit: '1mb' }), (req, res) => {
+10895:app.post('/media-manager/project/:project/assets/:assetId/rename', express.json({ limit: '1mb' }), (req, res) => {
+10925:app.patch('/media-manager/project/:project/assets/:assetId/classification', express.json({ limit: '1mb' }), (req, res) => {
+10979:app.post('/media-manager/project/:project/assets/:assetId/source-of-truth', express.json({ limit: '1mb' }), (req, res) => {
+11004:app.post('/media-manager/project/:project/assets/:assetId/archive', express.json({ limit: '1mb' }), (req, res) => {
+11032:app.post('/media-manager/project/:project/assets/:assetId/delete', express.json({ limit: '1mb' }), (req, res) => {
+11063:app.delete('/media-manager/project/:project/assets/:assetId', express.json({ limit: '1mb' }), (req, res) => {
+11094:app.post('/media-manager/project/:project/library/refresh', (req, res) => {
+11104:app.post('/media-manager/project/:project/setup', (req, res) => {
+11143:app.post('/public/media-manager/project/:project/setup', (req, res) => {
+11378:app.post('/api/ai-command/project/:project/campaign-preview', handleAiCommandCampaignPreviewOnly);
+11525:app.post('/media-manager/project/:project/team', handleUpdateProjectTeam);
+11526:app.post('/public/media-manager/project/:project/team', handleUpdateProjectTeam);
+11573:app.post('/media-manager/project/:project/campaigns', handleUpsertCampaign);
+11574:app.post('/public/media-manager/project/:project/campaigns', handleUpsertCampaign);
+11575:app.patch('/media-manager/project/:project/campaigns/:campaignId', (req, res) => {
+11582:app.patch('/public/media-manager/project/:project/campaigns/:campaignId', (req, res) => {
+11638:app.post('/media-manager/project/:project/content-items', handleUpsertContentItem);
+11639:app.post('/public/media-manager/project/:project/content-items', handleUpsertContentItem);
+11640:app.patch('/media-manager/project/:project/content-items/:contentItemId', (req, res) => {
+11647:app.patch('/public/media-manager/project/:project/content-items/:contentItemId', (req, res) => {
+11704:app.post('/media-manager/project/:project/media-jobs', handleUpsertMediaJob);
+11705:app.post('/public/media-manager/project/:project/media-jobs', handleUpsertMediaJob);
+11706:app.patch('/media-manager/project/:project/media-jobs/:mediaJobId', (req, res) => {
+11713:app.patch('/public/media-manager/project/:project/media-jobs/:mediaJobId', (req, res) => {
+11825:app.post('/media-manager/project/:project/workflows/:workflowId/run', handleRunWorkflow);
+11826:app.post('/public/media-manager/project/:project/workflows/:workflowId/run', handleRunWorkflow);
+12169:app.post('/media-manager/project/:project/ai/command', handleExecuteAiCommand);
+12170:app.post('/public/media-manager/project/:project/ai/command', handleExecuteAiCommand);
+12171:app.post('/media-manager/project/:project/ai/chat', handleExecuteAiChat);
+12172:app.post('/public/media-manager/project/:project/ai/chat', handleExecuteAiChat);
+12173:app.post('/media-manager/project/:project/ai/guidance', handleExecuteAiGuidance);
+12174:app.post('/public/media-manager/project/:project/ai/guidance', handleExecuteAiGuidance);
+12175:app.post('/media-manager/project/:project/ai/workflows/:workflowId/run', handleExecuteAiWorkflow);
+12176:app.post('/public/media-manager/project/:project/ai/workflows/:workflowId/run', handleExecuteAiWorkflow);
+12215:app.post('/media-manager/project/:project/tasks', handleCreateTask);
+12216:app.post('/public/media-manager/project/:project/tasks', handleCreateTask);
+12306:app.post('/media-manager/project/:project/approvals', handleCreateApproval);
+12307:app.post('/public/media-manager/project/:project/approvals', handleCreateApproval);
+12308:app.post('/media-manager/project/:project/approvals/:approvalId/decision', handleApprovalDecision);
+12309:app.post('/public/media-manager/project/:project/approvals/:approvalId/decision', handleApprovalDecision);
+12366:app.post('/media-manager/project/:project/governance/policy', handleUpdateGovernancePolicy);
+12367:app.post('/public/media-manager/project/:project/governance/policy', handleUpdateGovernancePolicy);
+12386:app.patch('/media-manager/project/:project/notifications/:notificationId', (req, res) => {
+12399:app.patch('/public/media-manager/project/:project/notifications/:notificationId', (req, res) => {
+12461:app.post('/media-manager/project/:project/handoffs', handleCreateHandoff);
+12462:app.post('/public/media-manager/project/:project/handoffs', handleCreateHandoff);
+12463:app.post('/media-manager/project/:project/handoffs/:handoffId/consume', handleConsumeHandoff);
+12464:app.post('/public/media-manager/project/:project/handoffs/:handoffId/consume', handleConsumeHandoff);
+12509:app.post('/media-manager/project/:project/sources', (req, res) => {
+12563:app.post('/public/media-manager/project/:project/sources', (req, res) => {
+12617:app.delete('/media-manager/project/:project/sources/:sourceType', (req, res) => {
+12656:app.delete('/public/media-manager/project/:project/sources/:sourceType', (req, res) => {
+13260:app.post('/media-manager/project/:project/native-media/generate', handleNativeMediaGenerate);
+13266:app.post('/media-manager/project/:project/integrations/:integrationId/connect', async (req, res) => {
+13272:app.post('/public/media-manager/project/:project/integrations/:integrationId/connect', async (req, res) => {
+13278:app.post('/media-manager/project/:project/integrations/:integrationId', async (req, res) => {
+13284:app.post('/public/media-manager/project/:project/integrations/:integrationId', async (req, res) => {
+13290:app.post('/media-manager/project/:project/integrations/:integrationId/reconnect', async (req, res) => {
+13296:app.post('/public/media-manager/project/:project/integrations/:integrationId/reconnect', async (req, res) => {
+13302:app.post('/media-manager/project/:project/integrations/:integrationId/test', async (req, res) => {
+13306:app.post('/public/media-manager/project/:project/integrations/:integrationId/test', async (req, res) => {
+13310:app.post('/media-manager/project/:project/integrations/:integrationId/sync', async (req, res) => {
+13314:app.post('/public/media-manager/project/:project/integrations/:integrationId/sync', async (req, res) => {
+13318:app.post('/media-manager/project/:project/integrations/:integrationId/import-history', async (req, res) => {
+13322:app.post('/public/media-manager/project/:project/integrations/:integrationId/import-history', async (req, res) => {
+13326:app.post('/media-manager/project/:project/integrations/:integrationId/disconnect', async (req, res) => {
+13330:app.post('/public/media-manager/project/:project/integrations/:integrationId/disconnect', async (req, res) => {
+13336:app.post('/media-manager/project/:project/publishing/schedule', (req, res) => {
+13379:app.post('/public/media-manager/project/:project/publishing/schedule', (req, res) => {
+13422:app.post('/media-manager/project/:project/publishing/:jobId/reschedule', (req, res) => {
+13461:app.post('/public/media-manager/project/:project/publishing/:jobId/reschedule', (req, res) => {
+13500:app.post('/media-manager/project/:project/publishing/:jobId/ready', (req, res) => {
+13532:app.post('/public/media-manager/project/:project/publishing/:jobId/ready', (req, res) => {
+13564:app.post('/media-manager/project/:project/publishing/:jobId/publish', (req, res) => {
+13606:app.post('/public/media-manager/project/:project/publishing/:jobId/publish', (req, res) => {
+13648:app.post('/media-manager/project/:project/publishing/:jobId/fail', (req, res) => {
+13690:app.post('/public/media-manager/project/:project/publishing/:jobId/fail', (req, res) => {
+16018:app.post('/telegram-command', async (req, res) => {
+21962:app.post('/publish-clone/:cloneId', async (req, res) => {
+22005:app.post('/replace-original-product/:originalId/:cloneId', async (req, res) => {
+22094:app.post('/cleanup-clone/:cloneId', async (req, res) => {
+22141:app.post('/publish-blog/:draftId', async (req, res) => {
+22247:app.post('/rollback-product/:productId', async (req, res) => {
+22596:app.post('/schedule_execution_job', (req, res) => {
+22767:app.post('/run_scheduler_worker_once', async (req, res) => {
+22897:app.post('/record_execution_feedback', (req, res) => {
+22988:app.post('/generate_optimization_recommendations', (req, res) => {
+23016:app.post('/api/media/improve-prompt', async (req, res) => {
+23046:app.post('/api/media/brand-check', async (req, res) => {
+23076:app.post('/api/media/generate-image', async (req, res) => {
+23106:app.post('/api/media/generate-video-brief', async (req, res) => {
+23136:app.post('/api/media/generate-voice-script', async (req, res) => {
+23166:app.post('/api/media/generate-campaign-pack', async (req, res) => {
+
+### mutation/write words in backend
+runtime/orchestrator-service/server.js:8:  const omitKeys = new Set(['updated_at', 'statuses', 'required_sources', 'sources']);
+runtime/orchestrator-service/server.js:22:const { createSchedulerStorage } = require('./lib/execution/scheduler-storage');
+runtime/orchestrator-service/server.js:23:const { createExecutionJobBridge } = require('./lib/execution/execution-job-bridge');
+runtime/orchestrator-service/server.js:29:const { createPerformanceStorage } = require('./lib/execution/performance-storage');
+runtime/orchestrator-service/server.js:34:const { createRecommendationRuntime } = require('./lib/execution/recommendation-runtime');
+runtime/orchestrator-service/server.js:35:const { createLearningPatterns } = require('./lib/execution/learning-patterns');
+runtime/orchestrator-service/server.js:36:const { createIntelligenceLoop } = require('./lib/execution/intelligence-loop');
+runtime/orchestrator-service/server.js:37:const { createSmartSuggestions } = require('./lib/execution/smart-suggestions');
+runtime/orchestrator-service/server.js:38:const { createEconomicCoreAnalytics } = require('../economic-core-analytics');
+runtime/orchestrator-service/server.js:50:  createRuntimeSecurityEnforcementMiddleware,
+runtime/orchestrator-service/server.js:52:} = require('./lib/security/runtime-security-enforcement');
+runtime/orchestrator-service/server.js:67:const { ExecutionArtifactWriterAdapter } = require('./lib/data/execution-artifact-writer-adapter');
+runtime/orchestrator-service/server.js:69:  createLogger,
+runtime/orchestrator-service/server.js:70:  createConsoleLikeLogger,
+runtime/orchestrator-service/server.js:74:const { createInMemoryRateLimiter } = require('./lib/observability/rate-limit');
+runtime/orchestrator-service/server.js:75:const { executeAdapterAction } = require('./lib/integrations/adapter-manager');
+runtime/orchestrator-service/server.js:86:  createMediaProviderLayer
+runtime/orchestrator-service/server.js:98:  updateTeamModel,
+runtime/orchestrator-service/server.js:100:  updateGovernancePolicy,
+runtime/orchestrator-service/server.js:111:  createAiArtifact,
+runtime/orchestrator-service/server.js:118:  createTask,
+runtime/orchestrator-service/server.js:121:  createApproval,
+runtime/orchestrator-service/server.js:126:  createHandoff,
+runtime/orchestrator-service/server.js:130:  syncPublishingJob
+runtime/orchestrator-service/server.js:134:const { createAiOrchestrationService } = require('./lib/ops/ai-orchestrator');
+runtime/orchestrator-service/server.js:136:  createJobDispatchOrchestrator
+runtime/orchestrator-service/server.js:140:  createCustomerOperationsRuntime
+runtime/orchestrator-service/server.js:141:} = require('./lib/customer-operations/customer-operations-runtime');
+runtime/orchestrator-service/server.js:178:    appLogger.error('unhandled_rejection', {
+runtime/orchestrator-service/server.js:180:      action: 'unhandled_rejection',
+runtime/orchestrator-service/server.js:245:    'x-mh-control-write-key',
+runtime/orchestrator-service/server.js:254:const appLogger = createLogger({
+runtime/orchestrator-service/server.js:257:const runtimeCompatLogger = createConsoleLikeLogger(appLogger, {
+runtime/orchestrator-service/server.js:258:  route: 'runtime',
+runtime/orchestrator-service/server.js:259:  action: 'runtime_log'
+runtime/orchestrator-service/server.js:346:  /^\/media\/upload\/?$/i,
+runtime/orchestrator-service/server.js:347:  /^\/publish-clone\/[^/]+\/?$/i,
+runtime/orchestrator-service/server.js:350:  /^\/publish-blog\/[^/]+\/?$/i,
+runtime/orchestrator-service/server.js:354:  /^\/execute_publish_package\/?$/i,
+runtime/orchestrator-service/server.js:355:  /^\/execute_email_package\/?$/i,
+runtime/orchestrator-service/server.js:359:  /^\/run_scheduler_worker_once\/?$/i
+runtime/orchestrator-service/server.js:404:      error: `Protected write routes are disabled until ${CONTROL_WRITE_KEY_ENV} is configured on the server.`
+runtime/orchestrator-service/server.js:411:      error: `Missing protected write key. Provide ${CONTROL_WRITE_KEY_HEADER} or Authorization: Bearer <key>.`
+runtime/orchestrator-service/server.js:417:      error: 'Invalid protected write key.'
+runtime/orchestrator-service/server.js:442:  /^\/prepare-product-update\//i,
+runtime/orchestrator-service/server.js:493:const runtimeSecurityEnforcement = createRuntimeSecurityEnforcementMiddleware({
+runtime/orchestrator-service/server.js:500:app.use(runtimeSecurityEnforcement);
+runtime/orchestrator-service/server.js:502:const telegramRateLimiter = createInMemoryRateLimiter({
+runtime/orchestrator-service/server.js:506:const aiRateLimiter = createInMemoryRateLimiter({
+runtime/orchestrator-service/server.js:569:const unifiedDataPathResolver = new UnifiedDataPathResolver({ logger: runtimeCompatLogger });
+runtime/orchestrator-service/server.js:572:  logger: runtimeCompatLogger
+runtime/orchestrator-service/server.js:576:const mediaProviderLayer = createMediaProviderLayer({
+runtime/orchestrator-service/server.js:633:          created_at: now
+runtime/orchestrator-service/server.js:701:  const uploadTarget = resolveUploadTarget(project, normalizedType);
+runtime/orchestrator-service/server.js:702:  return path.join(uploadTarget.dir, safeFilename);
+runtime/orchestrator-service/server.js:850:  const base = path.basename(String(originalName || '').trim()) || 'upload';
+runtime/orchestrator-service/server.js:865:  stem = stem.slice(0, 128) || 'upload';
+runtime/orchestrator-service/server.js:870:const upload = multer({
+runtime/orchestrator-service/server.js:881:        const uploadTarget = resolveUploadTarget(project, type);
+runtime/orchestrator-service/server.js:882:        const dir = uploadTarget.dir;
+runtime/orchestrator-service/server.js:920:  'executed',
+runtime/orchestrator-service/server.js:1133:    control_write_key_configured: {
+runtime/orchestrator-service/server.js:1174:  if (!checks.control_write_key_configured.ok) {
+runtime/orchestrator-service/server.js:1188:    protected_write_mode: {
+runtime/orchestrator-service/server.js:1202:  publishing: {
+runtime/orchestrator-service/server.js:1204:    canonical: 'publishing'
+runtime/orchestrator-service/server.js:1236:    canonical: 'publishing/results'
+runtime/orchestrator-service/server.js:1281:function writeReadRedirectionTelemetry(resolution, entry) {
+runtime/orchestrator-service/server.js:1292:    appLogger.error('read_redirection_telemetry_write_failed', {
+runtime/orchestrator-service/server.js:1294:      action: 'write_read_redirection_telemetry',
+runtime/orchestrator-service/server.js:1391:  writeReadRedirectionTelemetry(resolution, telemetryEntry);
+runtime/orchestrator-service/server.js:1607:function writeEmailArtifactArray(projectName, artifactType, data) {
+runtime/orchestrator-service/server.js:1618:  fs.writeFileSync(candidatePaths.canonicalPath, payload, 'utf8');
+runtime/orchestrator-service/server.js:1619:  fs.writeFileSync(candidatePaths.legacyPath, payload, 'utf8');
+runtime/orchestrator-service/server.js:1639:function writeLiveEmailQueue(projectName, queue = []) {
+runtime/orchestrator-service/server.js:1640:  return writeEmailArtifactArray(requireQueueProjectName(projectName), EMAIL_ARTIFACT_TYPES.DRAFT_QUEUE, queue);
+runtime/orchestrator-service/server.js:1647:function writeLiveEmailMediaQueue(projectName, queue = []) {
+runtime/orchestrator-service/server.js:1648:  return writeEmailArtifactArray(requireQueueProjectName(projectName), EMAIL_ARTIFACT_TYPES.MEDIA_QUEUE, queue);
+runtime/orchestrator-service/server.js:1678:function writeLegacyContentQueue(projectName, queueType, queue = []) {
+runtime/orchestrator-service/server.js:1679:  writeJsonFile(getLegacyContentQueuePath(projectName, queueType), Array.isArray(queue) ? queue : []);
+runtime/orchestrator-service/server.js:1703:  'publishing',
+runtime/orchestrator-service/server.js:1773:    if (dualWriteEntry && Array.isArray(dualWriteEntry.writes)) {
+runtime/orchestrator-service/server.js:1774:      const canonicalSuccess = dualWriteEntry.writes.some(
+runtime/orchestrator-service/server.js:1777:      const canonicalFailed = dualWriteEntry.writes.some(
+runtime/orchestrator-service/server.js:1780:      const legacySuccess = dualWriteEntry.writes.some(
+runtime/orchestrator-service/server.js:1785:        return 'missing_canonical_write';
+runtime/orchestrator-service/server.js:1801:function createDomainStats() {
+runtime/orchestrator-service/server.js:1811:      missing_canonical_write: 0,
+runtime/orchestrator-service/server.js:1822:  const dualWritePath = path.join(telemetryDir, 'dual-write-log.jsonl');
+runtime/orchestrator-service/server.js:1838:      byDomain[domain] = createDomainStats();
+runtime/orchestrator-service/server.js:1880:      stats.fallback_causes.missing_canonical_write +
+runtime/orchestrator-service/server.js:1912:      dual_write_log: dualWritePath
+runtime/orchestrator-service/server.js:1922:      active_write_read_mismatches: activeWriteReadMismatches
+runtime/orchestrator-service/server.js:1947:    active_write_read_mismatches: 0
+runtime/orchestrator-service/server.js:1955:    aggregate.active_write_read_mismatches += summary.totals.active_write_read_mismatches;
+runtime/orchestrator-service/server.js:2045:function getLatestRenderedOutput(projectName) {
+runtime/orchestrator-service/server.js:2072:  const rendered = readiness.status !== 'blocked' ? getLatestRenderedOutput(projectName) : null;
+runtime/orchestrator-service/server.js:2086:      body: `This campaign asset was auto-prepared by the system using the latest approved brand-controlled render.`,
+runtime/orchestrator-service/server.js:2092:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:2185:  executionArtifactWriter.writeText({
+runtime/orchestrator-service/server.js:2210:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:2218:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:2533:async function executeProviderRender(projectName) {
+runtime/orchestrator-service/server.js:2569:  form.append('image[]', fs.createReadStream(productPath));
+runtime/orchestrator-service/server.js:2570:  form.append('image[]', fs.createReadStream(logoPath));
+runtime/orchestrator-service/server.js:2572:  const response = await axios.post(
+runtime/orchestrator-service/server.js:2593:  executionArtifactWriter.writeBuffer({
+runtime/orchestrator-service/server.js:2602:  const updated = markRenderResult(projectName, renderId, 'completed', {
+runtime/orchestrator-service/server.js:2611:  return updated;
+runtime/orchestrator-service/server.js:2701:function writeEmailDeliveryRecord(projectName, data) {
+runtime/orchestrator-service/server.js:2709:    created_at: new Date().toISOString(),
+runtime/orchestrator-service/server.js:2713:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:2723:async function sendPreparedEmail(projectName, toEmail) {
+runtime/orchestrator-service/server.js:2727:    return writeEmailDeliveryRecord(projectName, {
+runtime/orchestrator-service/server.js:2742:  return writeEmailDeliveryRecord(projectName, {
+runtime/orchestrator-service/server.js:2758:async function fetchWooProductsPage(page = 1, perPage = 20) {
+runtime/orchestrator-service/server.js:2778:async function fetchWooProductBySlug(productSlug) {
+runtime/orchestrator-service/server.js:2844:async function syncAllWooProducts(projectName) {
+runtime/orchestrator-service/server.js:2845:  const synced = [];
+runtime/orchestrator-service/server.js:2856:      synced.push(record);
+runtime/orchestrator-service/server.js:2865:    total_synced: synced.length,
+runtime/orchestrator-service/server.js:2866:    products: synced.map(x => ({
+runtime/orchestrator-service/server.js:2884:    published_count: 0,
+runtime/orchestrator-service/server.js:2893:    if (product.status === 'publish') summary.published_count += 1;
+runtime/orchestrator-service/server.js:3090:    publish_status: imageInfo ? 'ready_for_publish' : 'needs_manual_review'
+runtime/orchestrator-service/server.js:3110:    status: compliance.publish_status,
+runtime/orchestrator-service/server.js:3122:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:3202:    publish_status: imageInfo ? 'ready_for_production' : 'needs_manual_review'
+runtime/orchestrator-service/server.js:3221:    status: compliance.publish_status,
+runtime/orchestrator-service/server.js:3243:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:3347:    publish_status: imageInfo ? 'ready_for_publish' : 'needs_manual_review'
+runtime/orchestrator-service/server.js:3366:    : `This video package is designed for ${goal} using approved brand-controlled creative, with emphasis on product credibility, premium presentation, and visual trust.`;
+runtime/orchestrator-service/server.js:3375:    status: compliance.publish_status,
+runtime/orchestrator-service/server.js:3403:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:3534:    description: `This Amazon package is built for ${goal} using approved real assets and a conversion-oriented marketplace structure.`,
+runtime/orchestrator-service/server.js:3562:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:3597:    description: `This eBay package is built for ${goal} using approved brand-controlled assets and a trust-oriented listing structure.`,
+runtime/orchestrator-service/server.js:3617:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:3781:    if (status !== 'publish' || !slug || !name || !stableKey) {
+runtime/orchestrator-service/server.js:3837:      published_count: launchReadyProducts.length,
+runtime/orchestrator-service/server.js:3875:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:3953:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:3987:    domain: 'publishing',
+runtime/orchestrator-service/server.js:3992:    domain: 'publishing',
+runtime/orchestrator-service/server.js:3995:    requestedIdentifier: 'publishing-root',
+runtime/orchestrator-service/server.js:3996:    requestedFile: 'publishing'
+runtime/orchestrator-service/server.js:3999:  const connectorsDir = path.join(baseDir, 'connectors');
+runtime/orchestrator-service/server.js:4001:  const legacyConnectorsDir = path.join(legacyBaseDir, 'connectors');
+runtime/orchestrator-service/server.js:4005:  ensureDir(connectorsDir);
+runtime/orchestrator-service/server.js:4013:    connectorsDir,
+runtime/orchestrator-service/server.js:4055:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:4057:    domain: 'publishing',
+runtime/orchestrator-service/server.js:4058:    artifactType: 'publishing_connector_payload',
+runtime/orchestrator-service/server.js:4084:    created_at: new Date().toISOString(),
+runtime/orchestrator-service/server.js:4087:    connector_file: payload.file_path
+runtime/orchestrator-service/server.js:4091:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:4093:    domain: 'publishing',
+runtime/orchestrator-service/server.js:4094:    artifactType: 'publishing_scheduler_job',
+runtime/orchestrator-service/server.js:4111:  if (['queued', 'queue', 'scheduled', 'pending', 'pending_publish'].includes(normalized)) return 'scheduled';
+runtime/orchestrator-service/server.js:4115:      'ready_for_manual_publish',
+runtime/orchestrator-service/server.js:4119:      'manual_publish',
+runtime/orchestrator-service/server.js:4126:  if (['published', 'completed', 'complete', 'success', 'done', 'sent', 'live'].includes(normalized)) {
+runtime/orchestrator-service/server.js:4127:    return 'published';
+runtime/orchestrator-service/server.js:4129:  if (['failed', 'error', 'blocked', 'rejected'].includes(normalized)) return 'failed';
+runtime/orchestrator-service/server.js:4171:  if (safeChannel) return `${safeChannel} publish`;
+runtime/orchestrator-service/server.js:4262:  let connectorPreview =
+runtime/orchestrator-service/server.js:4263:    rawJob.connector_preview && typeof rawJob.connector_preview === 'object'
+runtime/orchestrator-service/server.js:4264:      ? rawJob.connector_preview
+runtime/orchestrator-service/server.js:4267:  if (!connectorPreview && rawJob.connector_file && fs.existsSync(rawJob.connector_file)) {
+runtime/orchestrator-service/server.js:4268:    const connectorPayload = readJsonFile(rawJob.connector_file, {});
+runtime/orchestrator-service/server.js:4269:    connectorPreview = buildPublishingPreviewFromConnectorPayload(connectorPayload, rawJob);
+runtime/orchestrator-service/server.js:4274:      ...connectorPreview,
+runtime/orchestrator-service/server.js:4279:    connectorPreview
+runtime/orchestrator-service/server.js:4290:    created_at: rawJob.created_at || new Date().toISOString(),
+runtime/orchestrator-service/server.js:4291:    updated_at: rawJob.updated_at || rawJob.created_at || new Date().toISOString(),
+runtime/orchestrator-service/server.js:4296:    total_assets: Number(rawJob.total_assets || connectorPreview?.asset_count || 0) || 0,
+runtime/orchestrator-service/server.js:4297:    connector_file: rawJob.connector_file || null,
+runtime/orchestrator-service/server.js:4298:    connector_error: rawJob.connector_error || null,
+runtime/orchestrator-service/server.js:4302:    connector_preview: connectorPreview,
+runtime/orchestrator-service/server.js:4307:function saveScheduledJobRecord(projectName, job) {
+runtime/orchestrator-service/server.js:4311:  delete payload.file_path;
+runtime/orchestrator-service/server.js:4313:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:4315:    domain: 'publishing',
+runtime/orchestrator-service/server.js:4316:    artifactType: 'publishing_scheduler_job',
+runtime/orchestrator-service/server.js:4321:  syncPublishingJob(projectName, payload);
+runtime/orchestrator-service/server.js:4335:      connector_file: null,
+runtime/orchestrator-service/server.js:4336:      connector_preview: null,
+runtime/orchestrator-service/server.js:4338:      connector_error: null
+runtime/orchestrator-service/server.js:4345:      connector_file: payload.file_path,
+runtime/orchestrator-service/server.js:4346:      connector_preview: buildPublishingPreviewFromConnectorPayload(payload, input),
+runtime/orchestrator-service/server.js:4348:      connector_error: null
+runtime/orchestrator-service/server.js:4352:      connector_file: null,
+runtime/orchestrator-service/server.js:4353:      connector_preview: null,
+runtime/orchestrator-service/server.js:4355:      connector_error: error.message || 'Connector payload unavailable'
+runtime/orchestrator-service/server.js:4363:  const createIfMissing = options.createIfMissing !== false;
+runtime/orchestrator-service/server.js:4367:  if (requestedJobId && !hasExisting && !createIfMissing) {
+runtime/orchestrator-service/server.js:4397:  const connectorInfo = tryBuildPublishingConnector(safeProject, waveName, channel, {
+runtime/orchestrator-service/server.js:4406:      ...(connectorInfo.connector_preview || {}),
+runtime/orchestrator-service/server.js:4414:    connectorInfo.connector_preview || existing.preview || existing.connector_preview || null
+runtime/orchestrator-service/server.js:4420:  return saveScheduledJobRecord(safeProject, {
+runtime/orchestrator-service/server.js:4428:    created_at: existing.created_at || now,
+runtime/orchestrator-service/server.js:4429:    updated_at: now,
+runtime/orchestrator-service/server.js:4431:    total_assets: connectorInfo.total_assets || existing.total_assets || preview.asset_count || 0,
+runtime/orchestrator-service/server.js:4432:    connector_file: connectorInfo.connector_file || existing.connector_file || null,
+runtime/orchestrator-service/server.js:4433:    connector_preview: connectorInfo.connector_preview || existing.connector_preview || preview,
+runtime/orchestrator-service/server.js:4434:    connector_error: connectorInfo.connector_error || existing.connector_error || null,
+runtime/orchestrator-service/server.js:4445:    domain: 'publishing',
+runtime/orchestrator-service/server.js:4450:    requestedFile: 'publishing/scheduler/*.json'
+runtime/orchestrator-service/server.js:4461:    const aTime = new Date(a.updated_at || a.created_at || 0).getTime();
+runtime/orchestrator-service/server.js:4462:    const bTime = new Date(b.updated_at || b.created_at || 0).getTime();
+runtime/orchestrator-service/server.js:4467:function updateScheduledJobRecord(projectName, jobId, updates = {}) {
+runtime/orchestrator-service/server.js:4469:    ...updates,
+runtime/orchestrator-service/server.js:4472:    createIfMissing: false
+runtime/orchestrator-service/server.js:4476:function updateScheduledJobStatus(projectName, jobId, status) {
+runtime/orchestrator-service/server.js:4481:  return updateScheduledJobRecord(projectName, jobId, {
+runtime/orchestrator-service/server.js:4571:    recommendations.push('rewrite copy in natural German for German-market publishing');
+runtime/orchestrator-service/server.js:4609:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:4673:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:4681:  syncPublishingJob(safeProject, job, result);
+runtime/orchestrator-service/server.js:4689:function savePostPerformance(projectName, channel, productSlug, metricJson) {
+runtime/orchestrator-service/server.js:4719:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:4792:      recommendation: 'Prioritize posts with higher saves, clicks, CTR, and conversions. Reduce weak CTA variants.',
+runtime/orchestrator-service/server.js:4805:    runbooksDir: path.join(baseDir, 'runbooks')
+runtime/orchestrator-service/server.js:4827:    ...safeList(paths.runbooksDir, 'runbooks')
+runtime/orchestrator-service/server.js:4952:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:5007:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:5156:  lines.push(`Do not create generic AI product visuals.`);
+runtime/orchestrator-service/server.js:5192:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:5244:  writeJsonFile(packagePath, executionPackage);
+runtime/orchestrator-service/server.js:5308:    created_at: new Date().toISOString(),
+runtime/orchestrator-service/server.js:5321:  writeJsonFile(contextPath, context);
+runtime/orchestrator-service/server.js:5360:  lines.push(`Do not create generic AI packaging.`);
+runtime/orchestrator-service/server.js:5386:    writeJsonFile(filePath, defaultValue);
+runtime/orchestrator-service/server.js:5403: * writeJsonFile (server-local) — atomic write with backup.
+runtime/orchestrator-service/server.js:5406:function writeJsonFile(filePath, data) {
+runtime/orchestrator-service/server.js:5413:  fs.writeFileSync(tmpPath, serialized, 'utf8');
+runtime/orchestrator-service/server.js:5418:    fs.fsyncSync(fd);
+runtime/orchestrator-service/server.js:5420:    // fsync is best-effort
+runtime/orchestrator-service/server.js:5678:    connectors: null,
+runtime/orchestrator-service/server.js:5710:    payload.errors.connectors = message;
+runtime/orchestrator-service/server.js:5720:    connectors: buildProjectControlCenterConnectors,
+runtime/orchestrator-service/server.js:5751:    fs.writeFileSync(auditPath, JSON.stringify(current, null, 2));
+runtime/orchestrator-service/server.js:5753:    appLogger.error('audit_write_failed', {
+runtime/orchestrator-service/server.js:5959:    text.includes('write') ||
+runtime/orchestrator-service/server.js:5965:    text.includes('rewrite')
+runtime/orchestrator-service/server.js:6274:    writeJsonFile(registryPath, []);
+runtime/orchestrator-service/server.js:6296:    publishingDir: path.join(baseDir, 'publishing'),
+runtime/orchestrator-service/server.js:6304:    uploadsDir: path.join(baseDir, 'uploads'),
+runtime/orchestrator-service/server.js:6346:    .createHash('sha256')
+runtime/orchestrator-service/server.js:6347:    .update(JSON.stringify(value == null ? null : value))
+runtime/orchestrator-service/server.js:6362:    writeJsonFile(logPath, next.slice(-200));
+runtime/orchestrator-service/server.js:6423:    writeJsonFile(canonicalPath, firstLegacy.value);
+runtime/orchestrator-service/server.js:6440:  writeJsonFile(canonicalPath, fallback);
+runtime/orchestrator-service/server.js:6457:  if (raw === 'connected') return 'connected';
+runtime/orchestrator-service/server.js:6472:  const updatedAt = normalizeSetupTextValue(entry.updated_at);
+runtime/orchestrator-service/server.js:6473:  const updatedMs = updatedAt ? Date.parse(updatedAt) : NaN;
+runtime/orchestrator-service/server.js:6474:  if (Number.isFinite(updatedMs)) {
+runtime/orchestrator-service/server.js:6475:    const ageMs = Date.now() - updatedMs;
+runtime/orchestrator-service/server.js:6486:  return 'connected';
+runtime/orchestrator-service/server.js:6523:      updated_at: normalizeSetupTextValue(entry.updated_at),

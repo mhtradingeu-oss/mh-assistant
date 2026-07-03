@@ -1,0 +1,321 @@
+### auth / project / permission / governance hints
+runtime/orchestrator-service/server.js:7:  // Defensive: skip wrapper keys if present
+runtime/orchestrator-service/server.js:40:const { orchestrationGate } = require('../control-plane/core/orchestration-gate');
+runtime/orchestrator-service/server.js:48:const { classifyPublicAliasAccess, buildPublicAliasHeaders } = require("./lib/security/public-alias-compatibility");
+runtime/orchestrator-service/server.js:56:} = require('./lib/security/governance-mutation-gate');
+runtime/orchestrator-service/server.js:65:} = require('./lib/integrations/token-manager');
+runtime/orchestrator-service/server.js:92:} = require('./lib/security/project-isolation');
+runtime/orchestrator-service/server.js:188:const customerCenterProjection = require('./lib/customer-operations/projections/customer-center-projection');
+runtime/orchestrator-service/server.js:191:function publicAliasDeprecationHeaders(req, res, next) {
+runtime/orchestrator-service/server.js:205:    Object.entries(headers).forEach(([key, value]) => {
+runtime/orchestrator-service/server.js:206:      res.setHeader(key, value);
+runtime/orchestrator-service/server.js:209:    if (classification && classification.publicAlias) {
+runtime/orchestrator-service/server.js:213:    if (classification && classification.publicAlias && classification.allowed === false) {
+runtime/orchestrator-service/server.js:214:      if (classification.code === 'route_permission_denied') {
+runtime/orchestrator-service/server.js:220:        error: "public_alias_retired",
+runtime/orchestrator-service/server.js:221:        message: "This public compatibility route is retired. Use the canonical API route.",
+runtime/orchestrator-service/server.js:245:    'x-mh-control-write-key',
+runtime/orchestrator-service/server.js:246:    'x-mh-access-key'
+runtime/orchestrator-service/server.js:251:app.use("/public", publicAliasDeprecationHeaders);
+runtime/orchestrator-service/server.js:262:const CONTROL_WRITE_KEY_HEADER = 'x-mh-control-key';
+runtime/orchestrator-service/server.js:369:  return /^\/(?:public\/)?media-manager\//.test(requestPath)
+runtime/orchestrator-service/server.js:380:  const authorization = String(req.get('authorization') || '').trim();
+runtime/orchestrator-service/server.js:381:  const bearerMatch = authorization.match(/^Bearer\s+(.+)$/i);
+runtime/orchestrator-service/server.js:411:      error: `Missing protected write key. Provide ${CONTROL_WRITE_KEY_HEADER} or Authorization: Bearer <key>.`
+runtime/orchestrator-service/server.js:417:      error: 'Invalid protected write key.'
+runtime/orchestrator-service/server.js:430:  /^\/(?:public\/)?media-manager\/projects\/?$/i,
+runtime/orchestrator-service/server.js:431:  /^\/(?:public\/)?media-manager\/asset-catalog\/?$/i,
+runtime/orchestrator-service/server.js:432:  /^\/(?:public\/)?media-manager\/project\//i,
+runtime/orchestrator-service/server.js:433:  /^\/(?:public\/)?media-manager\/storage\//i,
+runtime/orchestrator-service/server.js:434:  /^\/(?:public\/)?api\//i,
+runtime/orchestrator-service/server.js:435:  /^\/media\/projects\/?$/i,
+runtime/orchestrator-service/server.js:478:      error: `Missing read key. Provide ${CONTROL_WRITE_KEY_HEADER} or Authorization: Bearer <key>.`
+runtime/orchestrator-service/server.js:484:      error: 'Invalid read key.'
+runtime/orchestrator-service/server.js:583:    req?.body?.project || req?.query?.project || req?.params?.project
+runtime/orchestrator-service/server.js:592:  const projectName = resolveMediaProjectName(req);
+runtime/orchestrator-service/server.js:593:  if (!projectName) return null;
+runtime/orchestrator-service/server.js:605:    const mediaJob = upsertMediaJob(projectName, {
+runtime/orchestrator-service/server.js:641:      operations: buildProjectOperationsPayload(projectName)
+runtime/orchestrator-service/server.js:659:function resolveUploadTarget(projectName, type) {
+runtime/orchestrator-service/server.js:660:  const project = normalizeProjectSlug(projectName);
+runtime/orchestrator-service/server.js:662:  const basePaths = getProjectBasePaths(project);
+runtime/orchestrator-service/server.js:663:  if (!fs.existsSync(basePaths.projectFilePath)) {
+runtime/orchestrator-service/server.js:670:    const { catalog_item, target_dir } = getTargetFolderForAssetType(project, canonicalType);
+runtime/orchestrator-service/server.js:673:      mode: 'project_catalog',
+runtime/orchestrator-service/server.js:685:    const paths = getProjectBrandPaths(project);
+runtime/orchestrator-service/server.js:697:function resolveMediaFilePath(projectName, type, filename) {
+runtime/orchestrator-service/server.js:698:  const project = normalizeProjectSlug(projectName);
+runtime/orchestrator-service/server.js:701:  const uploadTarget = resolveUploadTarget(project, normalizedType);
+runtime/orchestrator-service/server.js:725:function getAllowedMediaRoots(projectName) {
+runtime/orchestrator-service/server.js:726:  const project = normalizeProjectSlug(projectName);
+runtime/orchestrator-service/server.js:727:  const basePaths = getProjectBasePaths(project);
+runtime/orchestrator-service/server.js:728:  const brandPaths = getProjectBrandPaths(project);
+runtime/orchestrator-service/server.js:736:    path.join(LEGACY_BRAND_ASSETS_DIR, project)
+runtime/orchestrator-service/server.js:744:function findProjectAssetFilePathById(projectName, assetId) {
+runtime/orchestrator-service/server.js:745:  const project = normalizeProjectSlug(projectName);
+runtime/orchestrator-service/server.js:753:    const assetPaths = getProjectAssetPaths(project);
+runtime/orchestrator-service/server.js:773:function resolveMediaFilePathFromQuery(projectName, requestedPath, assetId) {
+runtime/orchestrator-service/server.js:774:  const project = normalizeProjectSlug(projectName);
+runtime/orchestrator-service/server.js:777:  const allowedRoots = getAllowedMediaRoots(project);
+runtime/orchestrator-service/server.js:832:    const byAssetId = findProjectAssetFilePathById(project, decodedAssetId);
+runtime/orchestrator-service/server.js:874:        const project = normalizeProjectSlug(req.body.project);
+runtime/orchestrator-service/server.js:877:        if (!project || !type) {
+runtime/orchestrator-service/server.js:878:          return cb(new Error('Missing project or type'));
+runtime/orchestrator-service/server.js:881:        const uploadTarget = resolveUploadTarget(project, type);
+runtime/orchestrator-service/server.js:905:const CONTROL_CENTER_PUBLIC_DIR = path.join(BASE_DIR, 'public', 'control-center');
+runtime/orchestrator-service/server.js:972:    message: 'Invalid project slug'
+runtime/orchestrator-service/server.js:977:  /^\/(?:public\/)?media-manager\/project\/([^/?#]+)/i,
+runtime/orchestrator-service/server.js:978:  /^\/(?:public\/)?api\/(?:insights|learning)\/([^/?#]+)/i,
+runtime/orchestrator-service/server.js:1022:app.param('project', (req, res, next, projectValue) => {
+runtime/orchestrator-service/server.js:1024:    req.params.project = normalizeProjectSlug(projectValue);
+runtime/orchestrator-service/server.js:1036:    if (req.body && Object.prototype.hasOwnProperty.call(req.body, 'project')) {
+runtime/orchestrator-service/server.js:1037:      req.body.project = normalizeProjectSlug(req.body.project);
+runtime/orchestrator-service/server.js:1040:    if (req.query && Object.prototype.hasOwnProperty.call(req.query, 'project')) {
+runtime/orchestrator-service/server.js:1041:      req.query.project = normalizeProjectSlug(req.query.project);
+runtime/orchestrator-service/server.js:1091:function detectIntegrationSecretUsage(projects = []) {
+runtime/orchestrator-service/server.js:1092:  for (const project of projects) {
+runtime/orchestrator-service/server.js:1093:    const projectName = String(project?.project_name || project?.project_id || '').trim().toLowerCase();
+runtime/orchestrator-service/server.js:1094:    if (!projectName) {
+runtime/orchestrator-service/server.js:1099:      const paths = getProjectIntegrationPaths(projectName);
+runtime/orchestrator-service/server.js:1112:          && Object.keys(record.credentials_encrypted).length > 0;
+runtime/orchestrator-service/server.js:1115:          && Object.keys(record.credentials).length > 0;
+runtime/orchestrator-service/server.js:1133:    control_write_key_configured: {
+runtime/orchestrator-service/server.js:1147:    project_registry_load: {
+runtime/orchestrator-service/server.js:1150:      total_projects: 0
+runtime/orchestrator-service/server.js:1157:    checks.project_registry_load.ok = Array.isArray(registryProjects);
+runtime/orchestrator-service/server.js:1158:    checks.project_registry_load.total_projects = Array.isArray(registryProjects) ? registryProjects.length : 0;
+runtime/orchestrator-service/server.js:1160:    checks.project_registry_load.error = sanitizeErrorMessage(error.message, 'Failed to load project registry');
+runtime/orchestrator-service/server.js:1163:  const integrationSecretRequired = checks.project_registry_load.ok
+runtime/orchestrator-service/server.js:1166:  checks.integration_secret_key = {
+runtime/orchestrator-service/server.js:1170:    file: path.join(DATA_DIR, 'system', 'integration-secret.key.json')
+runtime/orchestrator-service/server.js:1174:  if (!checks.control_write_key_configured.ok) {
+runtime/orchestrator-service/server.js:1178:  if (checks.integration_secret_key.required && !checks.integration_secret_key.ok) {
+runtime/orchestrator-service/server.js:1188:    protected_write_mode: {
+runtime/orchestrator-service/server.js:1190:      required_key_env: CONTROL_WRITE_KEY_ENV,
+runtime/orchestrator-service/server.js:1191:      key_configured: Boolean(configuredWriteKey)
+runtime/orchestrator-service/server.js:1295:      project: entry.project,
+runtime/orchestrator-service/server.js:1312:  const projectName = String(options.projectName || '').trim().toLowerCase();
+runtime/orchestrator-service/server.js:1321:  const resolution = options.resolution || unifiedDataPathResolver.resolve(projectName, {
+runtime/orchestrator-service/server.js:1368:    project: projectName,
+runtime/orchestrator-service/server.js:1396:    project: projectName,
+runtime/orchestrator-service/server.js:1418:  const projectName = String(options.projectName || '').trim().toLowerCase();
+runtime/orchestrator-service/server.js:1427:  const resolution = unifiedDataPathResolver.resolve(projectName, {
+runtime/orchestrator-service/server.js:1464:    projectName,
+runtime/orchestrator-service/server.js:1480:function getEmailDomainPaths(projectName) {
+runtime/orchestrator-service/server.js:1481:  const safeProject = String(projectName || '').trim().toLowerCase();
+runtime/orchestrator-service/server.js:1488:    project: safeProject,
+runtime/orchestrator-service/server.js:1496:    canonicalLiveContentDir: path.join(EXECUTION_DIR, 'projects', safeProject, 'content', 'email'),
+runtime/orchestrator-service/server.js:1498:    canonicalLiveMediaQueueDir: path.join(EXECUTION_DIR, 'projects', safeProject, 'media', 'queue'),
+runtime/orchestrator-service/server.js:1503:function getEmailArtifactContract(projectName, artifactType) {
+runtime/orchestrator-service/server.js:1504:  const paths = getEmailDomainPaths(projectName);
+runtime/orchestrator-service/server.js:1513:      pathContract: 'execution/projects/<project>/email-prepare-package.json -> brand-assets/<project>/email-prepare-package.json'
+runtime/orchestrator-service/server.js:1521:      pathContract: 'execution/projects/<project>/email/html/<package>.html -> brand-assets/<project>/email/html/<package>.html'
+runtime/orchestrator-service/server.js:1529:      pathContract: 'execution/projects/<project>/email/prepared/<package>.json -> brand-assets/<project>/email/prepared/<package>.json'
+runtime/orchestrator-service/server.js:1537:      pathContract: 'execution/projects/<project>/email/delivery/<send>.json -> brand-assets/<project>/email/delivery/<send>.json'
+runtime/orchestrator-service/server.js:1545:      pathContract: 'execution/projects/<project>/content/email/email-queue.json -> execution/<project>/content/email/email-queue.json'
+runtime/orchestrator-service/server.js:1553:      pathContract: 'execution/projects/<project>/media/queue/email-image-queue.json -> execution/<project>/media/queue/email-image-queue.json'
+runtime/orchestrator-service/server.js:1565:    project: paths.project,
+runtime/orchestrator-service/server.js:1572:  const safeProject = String(options.projectName || '').trim().toLowerCase();
+runtime/orchestrator-service/server.js:1580:    projectName: safeProject,
+runtime/orchestrator-service/server.js:1594:function readEmailArtifactArray(projectName, artifactType, requestedIdentifier) {
+runtime/orchestrator-service/server.js:1596:    projectName,
+runtime/orchestrator-service/server.js:1607:function writeEmailArtifactArray(projectName, artifactType, data) {
+runtime/orchestrator-service/server.js:1608:  const contract = getEmailArtifactContract(projectName, artifactType);
+runtime/orchestrator-service/server.js:1624:function requireQueueProjectName(projectName) {
+runtime/orchestrator-service/server.js:1625:  const safeProject = normalizeOptionalProjectSlug(projectName) || getPreferredProjectName();
+runtime/orchestrator-service/server.js:1627:    throw Object.assign(new Error(`Missing project context. Set ${DEFAULT_PROJECT_ENV} or pass project explicitly.`), {
+runtime/orchestrator-service/server.js:1635:function readLiveEmailQueue(projectName, requestedIdentifier = 'email-draft-queue') {
+runtime/orchestrator-service/server.js:1636:  return readEmailArtifactArray(requireQueueProjectName(projectName), EMAIL_ARTIFACT_TYPES.DRAFT_QUEUE, requestedIdentifier);
+runtime/orchestrator-service/server.js:1639:function writeLiveEmailQueue(projectName, queue = []) {
+runtime/orchestrator-service/server.js:1640:  return writeEmailArtifactArray(requireQueueProjectName(projectName), EMAIL_ARTIFACT_TYPES.DRAFT_QUEUE, queue);
+runtime/orchestrator-service/server.js:1643:function readLiveEmailMediaQueue(projectName, requestedIdentifier = 'email-media-queue') {
+runtime/orchestrator-service/server.js:1644:  return readEmailArtifactArray(requireQueueProjectName(projectName), EMAIL_ARTIFACT_TYPES.MEDIA_QUEUE, requestedIdentifier);
+runtime/orchestrator-service/server.js:1647:function writeLiveEmailMediaQueue(projectName, queue = []) {
+runtime/orchestrator-service/server.js:1648:  return writeEmailArtifactArray(requireQueueProjectName(projectName), EMAIL_ARTIFACT_TYPES.MEDIA_QUEUE, queue);
+runtime/orchestrator-service/server.js:1651:function getLegacyExecutionRoot(projectName) {
+runtime/orchestrator-service/server.js:1652:  return resolveProjectPath(EXECUTION_DIR, requireQueueProjectName(projectName)).projectRoot;
+runtime/orchestrator-service/server.js:1655:function getLegacyContentQueuePath(projectName, queueType) {
+runtime/orchestrator-service/server.js:1669:  const queuePath = path.join(getLegacyExecutionRoot(projectName), relativePath);
+runtime/orchestrator-service/server.js:1674:function readLegacyContentQueue(projectName, queueType) {
+runtime/orchestrator-service/server.js:1675:  return readJsonFile(getLegacyContentQueuePath(projectName, queueType), []);
+runtime/orchestrator-service/server.js:1678:function writeLegacyContentQueue(projectName, queueType, queue = []) {
+runtime/orchestrator-service/server.js:1679:  writeJsonFile(getLegacyContentQueuePath(projectName, queueType), Array.isArray(queue) ? queue : []);
+runtime/orchestrator-service/server.js:1682:function getProjectBackupDir(projectName) {
+runtime/orchestrator-service/server.js:1683:  const backupDir = path.join(getLegacyExecutionRoot(projectName), 'assets', 'backups');
+runtime/orchestrator-service/server.js:1688:function getProjectMediaDir(projectName) {
+runtime/orchestrator-service/server.js:1689:  const mediaDir = path.join(getLegacyExecutionRoot(projectName), 'media');
+runtime/orchestrator-service/server.js:1694:function getProjectBlogImageQueuePath(projectName) {
+runtime/orchestrator-service/server.js:1695:  const queuePath = path.join(getProjectMediaDir(projectName), 'queue', 'blog-image-queue.json');
+runtime/orchestrator-service/server.js:1744:    const key = `${domain}::${identifier}`;
+runtime/orchestrator-service/server.js:1745:    const previous = index.get(key);
+runtime/orchestrator-service/server.js:1750:      index.set(key, entry);
+runtime/orchestrator-service/server.js:1818:function summarizeProjectParity(projectName) {
+runtime/orchestrator-service/server.js:1819:  const safeProject = String(projectName || '').trim().toLowerCase();
+runtime/orchestrator-service/server.js:1820:  const telemetryDir = path.join(EXECUTION_DIR, 'projects', safeProject, 'telemetry');
+runtime/orchestrator-service/server.js:1867:  Object.keys(byDomain).forEach((domain) => {
+runtime/orchestrator-service/server.js:1908:    project: safeProject,
+runtime/orchestrator-service/server.js:1930:  const executionProjectsDir = path.join(EXECUTION_DIR, 'projects');
+runtime/orchestrator-service/server.js:1931:  const projects = fs.existsSync(executionProjectsDir)
+runtime/orchestrator-service/server.js:1940:  const projectSummaries = projects.map((projectName) => summarizeProjectParity(projectName));
+runtime/orchestrator-service/server.js:1942:  const aggregate = {
+runtime/orchestrator-service/server.js:1950:  for (const summary of projectSummaries) {
+runtime/orchestrator-service/server.js:1951:    aggregate.read_events += summary.totals.read_events;
+runtime/orchestrator-service/server.js:1952:    aggregate.canonical_hit_count += summary.totals.canonical_hit_count;
+runtime/orchestrator-service/server.js:1953:    aggregate.fallback_hit_count += summary.totals.fallback_hit_count;
+runtime/orchestrator-service/server.js:1954:    aggregate.unresolved_structural_mismatches += summary.totals.unresolved_structural_mismatches;
+runtime/orchestrator-service/server.js:1955:    aggregate.active_write_read_mismatches += summary.totals.active_write_read_mismatches;
+runtime/orchestrator-service/server.js:1958:  const totalReads = aggregate.read_events;
+runtime/orchestrator-service/server.js:1959:  aggregate.canonical_hit_rate = totalReads > 0
+runtime/orchestrator-service/server.js:1960:    ? Number((aggregate.canonical_hit_count / totalReads).toFixed(4))
+runtime/orchestrator-service/server.js:1962:  aggregate.fallback_rate = totalReads > 0
+runtime/orchestrator-service/server.js:1963:    ? Number((aggregate.fallback_hit_count / totalReads).toFixed(4))
+runtime/orchestrator-service/server.js:1968:    project_count: projectSummaries.length,
+runtime/orchestrator-service/server.js:1969:    aggregate,
+runtime/orchestrator-service/server.js:1970:    projects: projectSummaries
+runtime/orchestrator-service/server.js:1974:function getLatestRenderedImage(projectName) {
+runtime/orchestrator-service/server.js:1976:    projectName,
+runtime/orchestrator-service/server.js:1997:function evaluateEmailReadiness(projectName) {
+runtime/orchestrator-service/server.js:1998:  const context = buildPromptEngineContext(projectName);
+runtime/orchestrator-service/server.js:2000:  const renderedImage = getLatestRenderedImage(projectName);
+runtime/orchestrator-service/server.js:2003:    project: projectName,
+runtime/orchestrator-service/server.js:2010:      has_public_image_url: false,
+runtime/orchestrator-service/server.js:2028:function getEmailPreparePaths(projectName) {
+runtime/orchestrator-service/server.js:2029:  const safeProject = String(projectName || '').trim().toLowerCase();
+runtime/orchestrator-service/server.js:2045:function getLatestRenderedOutput(projectName) {
+runtime/orchestrator-service/server.js:2046:  const renderRequest = getLatestRenderRequest(projectName);
+runtime/orchestrator-service/server.js:2069:function buildEmailPreparePackage(projectName) {
+runtime/orchestrator-service/server.js:2070:  const preparePaths = getEmailPreparePaths(projectName);
+runtime/orchestrator-service/server.js:2071:  const readiness = evaluateEmailReadiness(projectName);
+runtime/orchestrator-service/server.js:2072:  const rendered = readiness.status !== 'blocked' ? getLatestRenderedOutput(projectName) : null;
+runtime/orchestrator-service/server.js:2075:    project: projectName,
+runtime/orchestrator-service/server.js:2083:      subject: `New campaign visual for ${projectName}`,
+runtime/orchestrator-service/server.js:2093:    project: projectName,
+runtime/orchestrator-service/server.js:2096:    identifier: packageData.package_id || projectName,
+runtime/orchestrator-service/server.js:2111:  // وسيتم لاحقًا استبداله بـ public URL layer
+runtime/orchestrator-service/server.js:2116:    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f5f5f5;padding:24px 0;">
+runtime/orchestrator-service/server.js:2119:          <table role="presentation" width="640" cellspacing="0" cellpadding="0" style="background:#ffffff;border-radius:12px;overflow:hidden;">
+runtime/orchestrator-service/server.js:2151:function autoPrepareEmailAsset(projectName, rawText = '') {
+runtime/orchestrator-service/server.js:2152:  const preparePaths = getEmailPreparePaths(projectName);
+runtime/orchestrator-service/server.js:2153:  const packageData = buildEmailPreparePackage(projectName);
+runtime/orchestrator-service/server.js:2165:  const publicImageUrl = buildPublicImageUrl(projectName, packageData.rendered_asset?.output_path || '');
+runtime/orchestrator-service/server.js:2172:  packageData.email_asset.public_image_url = publicImageUrl;
+runtime/orchestrator-service/server.js:2186:    project: projectName,
+runtime/orchestrator-service/server.js:2199:  packageData.public_image_url = publicImageUrl;
+runtime/orchestrator-service/server.js:2211:    project: projectName,
+runtime/orchestrator-service/server.js:2219:    project: projectName,
+runtime/orchestrator-service/server.js:2230:function reviewEmailPreparePackage(projectName) {
+runtime/orchestrator-service/server.js:2232:    projectName,
+runtime/orchestrator-service/server.js:2234:    requestedIdentifier: projectName,
+runtime/orchestrator-service/server.js:2259:function buildPublicImageUrl(projectName, outputPath) {
+runtime/orchestrator-service/server.js:2263:  return `http://46.62.173.30/generated-output/${projectName}/${filename}`;
+runtime/orchestrator-service/server.js:2276:  const publicImageUrl = String(packageData.email_asset?.public_image_url || '').trim();
+runtime/orchestrator-service/server.js:2289:  if (!publicImageUrl) {
+runtime/orchestrator-service/server.js:2290:    errors.push('Missing public image URL');
+runtime/orchestrator-service/server.js:2291:  } else if (!isValidHttpUrl(publicImageUrl)) {
+runtime/orchestrator-service/server.js:2314:  const publicImageUrl = packageData.email_asset.public_image_url;
+runtime/orchestrator-service/server.js:2325:  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#f4f4f4;padding:32px 0;">
+runtime/orchestrator-service/server.js:2328:        <table role="presentation" width="640" cellspacing="0" cellpadding="0" border="0" style="max-width:640px;width:100%;background:#ffffff;border-radius:12px;overflow:hidden;">
+runtime/orchestrator-service/server.js:2331:              <img src="${publicImageUrl}" alt="${headline}" style="display:block;width:100%;max-width:640px;height:auto;">
+runtime/orchestrator-service/server.js:2352:function getLatestRenderRequest(projectName) {
+runtime/orchestrator-service/server.js:2354:    projectName,
+runtime/orchestrator-service/server.js:2533:async function executeProviderRender(projectName) {
+runtime/orchestrator-service/server.js:2538:  const renderRequest = getLatestRenderRequest(projectName);
+runtime/orchestrator-service/server.js:2594:    project: projectName,
+runtime/orchestrator-service/server.js:2602:  const updated = markRenderResult(projectName, renderId, 'completed', {
+runtime/orchestrator-service/server.js:2614:function getEmailDeliveryPaths(projectName) {
+runtime/orchestrator-service/server.js:2615:  const safeProject = String(projectName || '').trim().toLowerCase();
+runtime/orchestrator-service/server.js:2641:function getLatestPreparedEmailPackage(projectName) {
+runtime/orchestrator-service/server.js:2643:    projectName,
+runtime/orchestrator-service/server.js:2663:function evaluatePreparedEmailForSend(projectName) {
+runtime/orchestrator-service/server.js:2664:  const pkg = getLatestPreparedEmailPackage(projectName);
+runtime/orchestrator-service/server.js:2667:    project: projectName,
+runtime/orchestrator-service/server.js:2688:  if (!pkg.email_asset || !pkg.email_asset.public_image_url) {
+runtime/orchestrator-service/server.js:2690:    result.blocking_reasons.push('Missing public image URL');
+runtime/orchestrator-service/server.js:2701:function writeEmailDeliveryRecord(projectName, data) {
+runtime/orchestrator-service/server.js:2702:  const paths = getEmailDeliveryPaths(projectName);
+runtime/orchestrator-service/server.js:2708:    project: projectName,
+runtime/orchestrator-service/server.js:2714:    project: projectName,
+runtime/orchestrator-service/server.js:2723:async function sendPreparedEmail(projectName, toEmail) {
+runtime/orchestrator-service/server.js:2724:  const readiness = evaluatePreparedEmailForSend(projectName);
+runtime/orchestrator-service/server.js:2727:    return writeEmailDeliveryRecord(projectName, {
+runtime/orchestrator-service/server.js:2735:  const pkg = getLatestPreparedEmailPackage(projectName);
+runtime/orchestrator-service/server.js:2742:  return writeEmailDeliveryRecord(projectName, {
+runtime/orchestrator-service/server.js:2748:    public_image_url: pkg.public_image_url,
+runtime/orchestrator-service/server.js:2764:      auth: {
+runtime/orchestrator-service/server.js:2784:      auth: {
+runtime/orchestrator-service/server.js:2844:async function syncAllWooProducts(projectName) {
+runtime/orchestrator-service/server.js:2855:      upsertProductIntelligenceRecord(projectName, record);
+runtime/orchestrator-service/server.js:2864:    project: projectName,
+runtime/orchestrator-service/server.js:2878:function buildWcSyncSummary(projectName) {
+runtime/orchestrator-service/server.js:2879:  const products = listProductIntelligence(projectName);
+runtime/orchestrator-service/server.js:2882:    project: projectName,
+runtime/orchestrator-service/server.js:2923:function getLatestGeneratedImage(projectName) {
+runtime/orchestrator-service/server.js:2924:  const resolution = unifiedDataPathResolver.resolve(projectName, {
+runtime/orchestrator-service/server.js:2929:    projectName,
+runtime/orchestrator-service/server.js:2955:    public_url: `http://46.62.173.30/generated-output/${projectName}/${latest}`
+runtime/orchestrator-service/server.js:2960:function getMetaExecutionPaths(projectName) {
+runtime/orchestrator-service/server.js:2961:  const resolution = unifiedDataPathResolver.resolve(projectName, {
+runtime/orchestrator-service/server.js:3016:function buildMetaIntelligence(projectName, placement, goal) {
+runtime/orchestrator-service/server.js:3024:    project: projectName,
+runtime/orchestrator-service/server.js:3035:function buildMetaCaption(projectName, placement, goal) {
+runtime/orchestrator-service/server.js:3037:  const intelligence = buildMetaIntelligence(projectName, placement, goal);
+runtime/orchestrator-service/server.js:3041:    : `Discover the new ${projectName} visual experience`;
+runtime/orchestrator-service/server.js:3052:    `#${projectName}`,
+runtime/orchestrator-service/server.js:3069:function buildMetaCompliance(projectName, placement, imageInfo) {
+runtime/orchestrator-service/server.js:3077:    project: projectName,
+runtime/orchestrator-service/server.js:3083:    public_image_url: imageInfo?.public_url || null,
+runtime/orchestrator-service/server.js:3094:function buildMetaPackage(projectName, placement, goal) {
+runtime/orchestrator-service/server.js:3095:  const metaPaths = getMetaExecutionPaths(projectName);
+runtime/orchestrator-service/server.js:3096:  const image = getLatestGeneratedImage(projectName);
+runtime/orchestrator-service/server.js:3097:  const compliance = buildMetaCompliance(projectName, placement, image);
+runtime/orchestrator-service/server.js:3098:  const content = buildMetaCaption(projectName, placement, goal);
+runtime/orchestrator-service/server.js:3105:    project: projectName,
+runtime/orchestrator-service/server.js:3112:    public_image_url: image.public_url,
+runtime/orchestrator-service/server.js:3123:    project: projectName,
+runtime/orchestrator-service/server.js:3133:function reviewLatestMetaPackage(projectName) {
+runtime/orchestrator-service/server.js:3135:    projectName,
+runtime/orchestrator-service/server.js:3155:function getVideoExecutionPaths(projectName) {
+runtime/orchestrator-service/server.js:3156:  const resolution = unifiedDataPathResolver.resolve(projectName, {
+runtime/orchestrator-service/server.js:3175:function buildTikTokIntelligence(projectName, goal) {
+runtime/orchestrator-service/server.js:3177:    project: projectName,
+runtime/orchestrator-service/server.js:3187:function buildTikTokCompliance(projectName, imageInfo) {
+runtime/orchestrator-service/server.js:3189:    project: projectName,
+runtime/orchestrator-service/server.js:3195:    public_image_url: imageInfo?.public_url || null,
+runtime/orchestrator-service/server.js:3198:      'Keep key creative elements inside safe zones.',
+runtime/orchestrator-service/server.js:3206:function buildTikTokPackage(projectName, goal) {
+runtime/orchestrator-service/server.js:3207:  const paths = getVideoExecutionPaths(projectName);
+runtime/orchestrator-service/server.js:3208:  const image = getLatestGeneratedImage(projectName);
+runtime/orchestrator-service/server.js:3209:  const intelligence = buildTikTokIntelligence(projectName, goal);
+runtime/orchestrator-service/server.js:3210:  const compliance = buildTikTokCompliance(projectName, image);
+runtime/orchestrator-service/server.js:3217:    project: projectName,
+runtime/orchestrator-service/server.js:3223:    public_image_url: image.public_url,
+runtime/orchestrator-service/server.js:3244:    project: projectName,
+runtime/orchestrator-service/server.js:3254:function reviewLatestTikTokPackage(projectName) {
+runtime/orchestrator-service/server.js:3256:    projectName,
+runtime/orchestrator-service/server.js:3298:function buildYouTubeIntelligence(projectName, format, goal) {
+runtime/orchestrator-service/server.js:3306:    project: projectName,
+runtime/orchestrator-service/server.js:3318:      : 'Target viewers looking for clear value, authority, and product understanding.',
+runtime/orchestrator-service/server.js:3326:function buildYouTubeCompliance(projectName, format, imageInfo) {
+runtime/orchestrator-service/server.js:3334:    project: projectName,
+runtime/orchestrator-service/server.js:3340:    public_image_url: imageInfo?.public_url || null,
+runtime/orchestrator-service/server.js:3351:function buildYouTubePackage(projectName, format, goal) {
+runtime/orchestrator-service/server.js:3352:  const paths = getVideoExecutionPaths(projectName);
+runtime/orchestrator-service/server.js:3353:  const image = getLatestGeneratedImage(projectName);
+runtime/orchestrator-service/server.js:3354:  const intelligence = buildYouTubeIntelligence(projectName, format, goal);
+runtime/orchestrator-service/server.js:3355:  const compliance = buildYouTubeCompliance(projectName, format, image);
+runtime/orchestrator-service/server.js:3362:    : `${projectName}: Premium Visual Execution for ${goal}`;
+runtime/orchestrator-service/server.js:3370:    project: projectName,
+runtime/orchestrator-service/server.js:3377:    public_image_url: image.public_url,
+runtime/orchestrator-service/server.js:3404:    project: projectName,
+runtime/orchestrator-service/server.js:3414:function reviewLatestYouTubePackage(projectName) {
+runtime/orchestrator-service/server.js:3416:    projectName,
+runtime/orchestrator-service/server.js:3436:function getMarketplaceExecutionPaths(projectName) {
+runtime/orchestrator-service/server.js:3437:  const resolution = unifiedDataPathResolver.resolve(projectName, {
+runtime/orchestrator-service/server.js:3488:function buildMarketplaceIntelligence(projectName, marketplace, goal) {
+runtime/orchestrator-service/server.js:3496:    project: projectName,
+runtime/orchestrator-service/server.js:3509:function buildAmazonPackage(projectName, goal) {
+runtime/orchestrator-service/server.js:3510:  const paths = getMarketplaceExecutionPaths(projectName);
+runtime/orchestrator-service/server.js:3511:  const image = getLatestGeneratedImage(projectName);
+runtime/orchestrator-service/server.js:3512:  const intelligence = buildMarketplaceIntelligence(projectName, 'amazon', goal);
+runtime/orchestrator-service/server.js:3519:    project: projectName,
+runtime/orchestrator-service/server.js:3525:    public_image_url: image.public_url,

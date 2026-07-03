@@ -1,0 +1,421 @@
+### file system / path / JSON IO hints
+runtime/orchestrator-service/server.js:1:// Deterministic source registry extraction for canonical/legacy compatibility
+runtime/orchestrator-service/server.js:46:} = require('../agent-registry/agent-api');
+runtime/orchestrator-service/server.js:80:} = require('./lib/integrations/provider-registry');
+runtime/orchestrator-service/server.js:436:  /^\/media\/(?:tree|registry|file)\//i,
+runtime/orchestrator-service/server.js:602:    : JSON.stringify(output || {});
+runtime/orchestrator-service/server.js:663:  if (!fs.existsSync(basePaths.projectFilePath)) {
+runtime/orchestrator-service/server.js:689:      target_folder: path.basename(getAssetDirByRole(paths, legacyRole)),
+runtime/orchestrator-service/server.js:700:  const safeFilename = path.basename(String(filename || '').trim());
+runtime/orchestrator-service/server.js:702:  return path.join(uploadTarget.dir, safeFilename);
+runtime/orchestrator-service/server.js:706:  const absoluteRoot = path.resolve(String(rootPath || ''));
+runtime/orchestrator-service/server.js:707:  const absoluteTarget = path.resolve(String(targetPath || ''));
+runtime/orchestrator-service/server.js:708:  const relative = path.relative(absoluteRoot, absoluteTarget);
+runtime/orchestrator-service/server.js:709:  return relative === '' || (!relative.startsWith('..') && !path.isAbsolute(relative));
+runtime/orchestrator-service/server.js:736:    path.join(LEGACY_BRAND_ASSETS_DIR, project)
+runtime/orchestrator-service/server.js:739:    .map((entry) => path.resolve(entry));
+runtime/orchestrator-service/server.js:780:    const candidate = path.resolve(String(candidatePath || ''));
+runtime/orchestrator-service/server.js:781:    if (!candidate || !fs.existsSync(candidate)) {
+runtime/orchestrator-service/server.js:791:      const stat = fs.statSync(candidate);
+runtime/orchestrator-service/server.js:806:    if (path.isAbsolute(decodedPath)) {
+runtime/orchestrator-service/server.js:811:      candidates.push(path.join(root, normalizedRelative));
+runtime/orchestrator-service/server.js:850:  const base = path.basename(String(originalName || '').trim()) || 'upload';
+runtime/orchestrator-service/server.js:901:const BASE_DIR = process.env.MH_ASSISTANT_ROOT || path.resolve(__dirname, '../..');
+runtime/orchestrator-service/server.js:902:const CONTEXTS_DIR = path.join(BASE_DIR, 'contexts');
+runtime/orchestrator-service/server.js:903:const PROMPTS_DIR = path.join(BASE_DIR, 'prompts');
+runtime/orchestrator-service/server.js:904:const DATA_DIR = path.join(BASE_DIR, 'data');
+runtime/orchestrator-service/server.js:905:const CONTROL_CENTER_PUBLIC_DIR = path.join(BASE_DIR, 'public', 'control-center');
+runtime/orchestrator-service/server.js:906:const LEGACY_BRAND_ASSETS_DIR = path.join(DATA_DIR, 'brand-assets');
+runtime/orchestrator-service/server.js:907:const EXECUTION_DIR = path.join(DATA_DIR, 'execution');
+runtime/orchestrator-service/server.js:979:  /^\/media\/(?:tree|registry)\/([^/?#]+)/i,
+runtime/orchestrator-service/server.js:1079:  if (!fs.existsSync(DATA_DIR)) {
+runtime/orchestrator-service/server.js:1084:    fs.accessSync(DATA_DIR, fs.constants.W_OK);
+runtime/orchestrator-service/server.js:1100:      const registry = readJsonFile(paths.controlCenterRegistryPath, {});
+runtime/orchestrator-service/server.js:1101:      const records = registry && typeof registry.records === 'object'
+runtime/orchestrator-service/server.js:1102:        ? Object.values(registry.records)
+runtime/orchestrator-service/server.js:1138:      ok: fs.existsSync(DATA_DIR),
+runtime/orchestrator-service/server.js:1140:      path: DATA_DIR
+runtime/orchestrator-service/server.js:1145:      path: DATA_DIR
+runtime/orchestrator-service/server.js:1147:    project_registry_load: {
+runtime/orchestrator-service/server.js:1154:  let registryProjects = [];
+runtime/orchestrator-service/server.js:1156:    registryProjects = listProjects();
+runtime/orchestrator-service/server.js:1157:    checks.project_registry_load.ok = Array.isArray(registryProjects);
+runtime/orchestrator-service/server.js:1158:    checks.project_registry_load.total_projects = Array.isArray(registryProjects) ? registryProjects.length : 0;
+runtime/orchestrator-service/server.js:1160:    checks.project_registry_load.error = sanitizeErrorMessage(error.message, 'Failed to load project registry');
+runtime/orchestrator-service/server.js:1163:  const integrationSecretRequired = checks.project_registry_load.ok
+runtime/orchestrator-service/server.js:1164:    ? detectIntegrationSecretUsage(registryProjects)
+runtime/orchestrator-service/server.js:1170:    file: path.join(DATA_DIR, 'system', 'integration-secret.key.json')
+runtime/orchestrator-service/server.js:1256:function readFileSafe(filePath) {
+runtime/orchestrator-service/server.js:1258:    return fs.readFileSync(filePath, 'utf8');
+runtime/orchestrator-service/server.js:1265:  if (!fs.existsSync(dirPath)) {
+runtime/orchestrator-service/server.js:1274:    const entries = fs.readdirSync(dirPath);
+runtime/orchestrator-service/server.js:1287:    const telemetryDir = path.join(resolution.executionRoot, 'telemetry');
+runtime/orchestrator-service/server.js:1289:    const logPath = path.join(telemetryDir, 'read-redirection-log.jsonl');
+runtime/orchestrator-service/server.js:1290:    fs.appendFileSync(logPath, `${JSON.stringify(entry)}\n`, 'utf8');
+runtime/orchestrator-service/server.js:1306:    canonicalPath: safeRelativePath ? path.join(canonicalBase, safeRelativePath) : canonicalBase,
+runtime/orchestrator-service/server.js:1307:    legacyPath: safeRelativePath ? path.join(legacyBase, safeRelativePath) : legacyBase
+runtime/orchestrator-service/server.js:1331:      : fs.existsSync(candidatePaths.canonicalPath);
+runtime/orchestrator-service/server.js:1335:      : fs.existsSync(candidatePaths.legacyPath);
+runtime/orchestrator-service/server.js:1437:    const passthroughPath = path.join(resolution.activeReadPath, relativePath);
+runtime/orchestrator-service/server.js:1442:      canonicalHit: fs.existsSync(passthroughPath),
+runtime/orchestrator-service/server.js:1443:      legacyHit: fs.existsSync(passthroughPath),
+runtime/orchestrator-service/server.js:1457:    ? path.join(resolution.executionRoot, domainConfig.canonical)
+runtime/orchestrator-service/server.js:1460:    ? path.join(resolution.legacyRoot, domainConfig.legacy)
+runtime/orchestrator-service/server.js:1494:    canonicalEmailDir: path.join(resolution.executionRoot, 'email'),
+runtime/orchestrator-service/server.js:1495:    legacyEmailDir: path.join(resolution.legacyRoot, 'email'),
+runtime/orchestrator-service/server.js:1496:    canonicalLiveContentDir: path.join(EXECUTION_DIR, 'projects', safeProject, 'content', 'email'),
+runtime/orchestrator-service/server.js:1497:    legacyLiveContentDir: path.join(EXECUTION_DIR, safeProject, 'content', 'email'),
+runtime/orchestrator-service/server.js:1498:    canonicalLiveMediaQueueDir: path.join(EXECUTION_DIR, 'projects', safeProject, 'media', 'queue'),
+runtime/orchestrator-service/server.js:1499:    legacyLiveMediaQueueDir: path.join(EXECUTION_DIR, safeProject, 'media', 'queue')
+runtime/orchestrator-service/server.js:1513:      pathContract: 'execution/projects/<project>/email-prepare-package.json -> brand-assets/<project>/email-prepare-package.json'
+runtime/orchestrator-service/server.js:1521:      pathContract: 'execution/projects/<project>/email/html/<package>.html -> brand-assets/<project>/email/html/<package>.html'
+runtime/orchestrator-service/server.js:1529:      pathContract: 'execution/projects/<project>/email/prepared/<package>.json -> brand-assets/<project>/email/prepared/<package>.json'
+runtime/orchestrator-service/server.js:1537:      pathContract: 'execution/projects/<project>/email/delivery/<send>.json -> brand-assets/<project>/email/delivery/<send>.json'
+runtime/orchestrator-service/server.js:1614:  const payload = JSON.stringify(Array.isArray(data) ? data : [], null, 2);
+runtime/orchestrator-service/server.js:1616:  ensureDir(path.dirname(candidatePaths.canonicalPath));
+runtime/orchestrator-service/server.js:1617:  ensureDir(path.dirname(candidatePaths.legacyPath));
+runtime/orchestrator-service/server.js:1618:  fs.writeFileSync(candidatePaths.canonicalPath, payload, 'utf8');
+runtime/orchestrator-service/server.js:1619:  fs.writeFileSync(candidatePaths.legacyPath, payload, 'utf8');
+runtime/orchestrator-service/server.js:1657:    ads: path.join('content', 'ads', 'ad-queue.json'),
+runtime/orchestrator-service/server.js:1658:    social: path.join('content', 'social', 'post-queue.json'),
+runtime/orchestrator-service/server.js:1659:    blog: path.join('content', 'blog', 'blog-queue.json'),
+runtime/orchestrator-service/server.js:1660:    reel: path.join('content', 'campaigns', 'reel-brief-queue.json'),
+runtime/orchestrator-service/server.js:1661:    tasks: path.join('tasks', 'task-board.json')
+runtime/orchestrator-service/server.js:1669:  const queuePath = path.join(getLegacyExecutionRoot(projectName), relativePath);
+runtime/orchestrator-service/server.js:1683:  const backupDir = path.join(getLegacyExecutionRoot(projectName), 'assets', 'backups');
+runtime/orchestrator-service/server.js:1689:  const mediaDir = path.join(getLegacyExecutionRoot(projectName), 'media');
+runtime/orchestrator-service/server.js:1695:  const queuePath = path.join(getProjectMediaDir(projectName), 'queue', 'blog-image-queue.json');
+runtime/orchestrator-service/server.js:1710:  if (!fs.existsSync(filePath)) {
+runtime/orchestrator-service/server.js:1714:  const raw = readFileSafe(filePath);
+runtime/orchestrator-service/server.js:1724:      parsed.push(JSON.parse(line));
+runtime/orchestrator-service/server.js:1820:  const telemetryDir = path.join(EXECUTION_DIR, 'projects', safeProject, 'telemetry');
+runtime/orchestrator-service/server.js:1821:  const readLogPath = path.join(telemetryDir, 'read-redirection-log.jsonl');
+runtime/orchestrator-service/server.js:1822:  const dualWritePath = path.join(telemetryDir, 'dual-write-log.jsonl');
+runtime/orchestrator-service/server.js:1930:  const executionProjectsDir = path.join(EXECUTION_DIR, 'projects');
+runtime/orchestrator-service/server.js:1931:  const projects = fs.existsSync(executionProjectsDir)
+runtime/orchestrator-service/server.js:1932:    ? fs.readdirSync(executionProjectsDir)
+runtime/orchestrator-service/server.js:1934:          const fullPath = path.join(executionProjectsDir, name);
+runtime/orchestrator-service/server.js:1935:          return fs.statSync(fullPath).isDirectory();
+runtime/orchestrator-service/server.js:1985:  const files = fs.readdirSync(outputsDir)
+runtime/orchestrator-service/server.js:1994:  return path.join(outputsDir, files[0]);
+runtime/orchestrator-service/server.js:2033:  const preparePath = path.join(legacyBaseDir, contract.relativePath);
+runtime/orchestrator-service/server.js:2057:  if (!outputPath || !fs.existsSync(outputPath)) {
+runtime/orchestrator-service/server.js:2176:  const htmlDir = path.join(preparePaths.legacyBaseDir, 'email', 'html');
+runtime/orchestrator-service/server.js:2177:  const preparedDir = path.join(preparePaths.legacyBaseDir, 'email', 'prepared');
+runtime/orchestrator-service/server.js:2182:  const htmlPath = path.join(htmlDir, `${packageId}.html`);
+runtime/orchestrator-service/server.js:2183:  const jsonPath = path.join(preparedDir, `${packageId}.json`);
+runtime/orchestrator-service/server.js:2238:  if (!fs.existsSync(prepareFile.selectedPath)) {
+runtime/orchestrator-service/server.js:2262:  const filename = path.basename(outputPath);
+runtime/orchestrator-service/server.js:2363:  const files = fs.readdirSync(rendersDir)
+runtime/orchestrator-service/server.js:2372:  const latestPath = path.join(rendersDir, files[0]);
+runtime/orchestrator-service/server.js:2552:  if (!productPath || !fs.existsSync(productPath)) {
+runtime/orchestrator-service/server.js:2556:  if (!logoPath || !fs.existsSync(logoPath)) {
+runtime/orchestrator-service/server.js:2569:  form.append('image[]', fs.createReadStream(productPath));
+runtime/orchestrator-service/server.js:2570:  form.append('image[]', fs.createReadStream(logoPath));
+runtime/orchestrator-service/server.js:2592:  ensureDir(path.dirname(outputPath));
+runtime/orchestrator-service/server.js:2618:  const deliveryDir = path.join(baseDir, 'delivery');
+runtime/orchestrator-service/server.js:2619:  const preparedDir = path.join(baseDir, 'prepared');
+runtime/orchestrator-service/server.js:2621:  const legacyDeliveryDir = path.join(legacyBaseDir, 'delivery');
+runtime/orchestrator-service/server.js:2622:  const legacyPreparedDir = path.join(legacyBaseDir, 'prepared');
+runtime/orchestrator-service/server.js:2650:  const files = fs.readdirSync(preparedDir)
+runtime/orchestrator-service/server.js:2659:  const latestPath = path.join(preparedDir, files[0]);
+runtime/orchestrator-service/server.js:2704:  const recordPath = path.join(paths.legacyDeliveryDir, `${deliveryId}.json`);
+runtime/orchestrator-service/server.js:2941:  const files = fs.readdirSync(outputDir)
+runtime/orchestrator-service/server.js:2954:    path: path.join(outputDir, latest),
+runtime/orchestrator-service/server.js:2965:  const baseDir = path.join(resolution.activeReadPath, 'channels', 'meta');
+runtime/orchestrator-service/server.js:2966:  const packagesDir = path.join(baseDir, 'packages');
+runtime/orchestrator-service/server.js:3101:  const packagePath = path.join(metaPaths.packagesDir, `${packageId}.json`);
+runtime/orchestrator-service/server.js:3137:    relativePath: path.join('meta', 'packages'),
+runtime/orchestrator-service/server.js:3144:  const files = fs.readdirSync(packagesDir)
+runtime/orchestrator-service/server.js:3153:  return readJsonFile(path.join(packagesDir, files[0]), {});
+runtime/orchestrator-service/server.js:3160:  const baseDir = path.join(resolution.activeReadPath, 'channels');
+runtime/orchestrator-service/server.js:3161:  const tiktokDir = path.join(baseDir, 'tiktok');
+runtime/orchestrator-service/server.js:3162:  const youtubeDir = path.join(baseDir, 'youtube');
+runtime/orchestrator-service/server.js:3213:  const packagePath = path.join(paths.tiktokDir, `${packageId}.json`);
+runtime/orchestrator-service/server.js:3265:  const files = fs.readdirSync(tiktokDir)
+runtime/orchestrator-service/server.js:3274:  return readJsonFile(path.join(tiktokDir, files[0]), {});
+runtime/orchestrator-service/server.js:3358:  const packagePath = path.join(paths.youtubeDir, `${packageId}.json`);
+runtime/orchestrator-service/server.js:3425:  const files = fs.readdirSync(youtubeDir)
+runtime/orchestrator-service/server.js:3434:  return readJsonFile(path.join(youtubeDir, files[0]), {});
+runtime/orchestrator-service/server.js:3441:  const baseDir = path.join(resolution.activeReadPath, 'channels');
+runtime/orchestrator-service/server.js:3442:  const marketplaceDir = path.join(baseDir, 'marketplace');
+runtime/orchestrator-service/server.js:3443:  const amazonDir = path.join(marketplaceDir, 'amazon');
+runtime/orchestrator-service/server.js:3444:  const ebayDir = path.join(marketplaceDir, 'ebay');
+runtime/orchestrator-service/server.js:3515:  const packagePath = path.join(paths.amazonDir, `${packageId}.json`);
+runtime/orchestrator-service/server.js:3579:  const packagePath = path.join(paths.ebayDir, `${packageId}.json`);
+runtime/orchestrator-service/server.js:3646:          relativePath: path.join('marketplace', 'amazon'),
+runtime/orchestrator-service/server.js:3656:          relativePath: path.join('marketplace', 'ebay'),
+runtime/orchestrator-service/server.js:3668:  const files = fs.readdirSync(dir)
+runtime/orchestrator-service/server.js:3677:  return readJsonFile(path.join(dir, files[0]), {});
+runtime/orchestrator-service/server.js:3693:  const legacyBaseDir = path.join(resolution.legacyRoot, 'german-launch');
+runtime/orchestrator-service/server.js:3695:  const planDir = path.join(baseDir, 'plan');
+runtime/orchestrator-service/server.js:3696:  const wavesDir = path.join(baseDir, 'waves');
+runtime/orchestrator-service/server.js:3697:  const legacyPlanDir = path.join(legacyBaseDir, 'plan');
+runtime/orchestrator-service/server.js:3698:  const legacyWavesDir = path.join(legacyBaseDir, 'waves');
+runtime/orchestrator-service/server.js:3873:  const filePath = path.join(paths.legacyPlanDir, 'launch-plan.json');
+runtime/orchestrator-service/server.js:3892:  const filePath = path.join(paths.planDir, 'launch-plan.json');
+runtime/orchestrator-service/server.js:3894:  if (!fs.existsSync(filePath)) {
+runtime/orchestrator-service/server.js:3948:  const filePath = path.join(
+runtime/orchestrator-service/server.js:3970:  const filePath = path.join(
+runtime/orchestrator-service/server.js:3975:  if (!fs.existsSync(filePath)) {
+runtime/orchestrator-service/server.js:3998:  const legacyBaseDir = path.join(resolution.legacyRoot, 'launch-ops');
+runtime/orchestrator-service/server.js:3999:  const connectorsDir = path.join(baseDir, 'connectors');
+runtime/orchestrator-service/server.js:4000:  const schedulerDir = path.join(baseDir, 'scheduler');
+runtime/orchestrator-service/server.js:4001:  const legacyConnectorsDir = path.join(legacyBaseDir, 'connectors');
+runtime/orchestrator-service/server.js:4002:  const legacySchedulerDir = path.join(legacyBaseDir, 'scheduler');
+runtime/orchestrator-service/server.js:4050:  const filePath = path.join(
+runtime/orchestrator-service/server.js:4090:  const filePath = path.join(paths.legacySchedulerDir, `${jobId}.json`);
+runtime/orchestrator-service/server.js:4256:  return path.join(paths.legacySchedulerDir, `${String(jobId || '').trim()}.json`);
+runtime/orchestrator-service/server.js:4267:  if (!connectorPreview && rawJob.connector_file && fs.existsSync(rawJob.connector_file)) {
+runtime/orchestrator-service/server.js:4365:  const hasExisting = requestedJobId && fs.existsSync(existingFilePath);
+runtime/orchestrator-service/server.js:4453:  const files = fs.readdirSync(schedulerDir)
+runtime/orchestrator-service/server.js:4458:    const filePath = path.join(schedulerDir, name);
+runtime/orchestrator-service/server.js:4499:  const legacyBaseDir = path.join(resolution.legacyRoot, 'optimization');
+runtime/orchestrator-service/server.js:4501:  const reviewsDir = path.join(baseDir, 'reviews');
+runtime/orchestrator-service/server.js:4502:  const improvementsDir = path.join(baseDir, 'improvements');
+runtime/orchestrator-service/server.js:4503:  const performanceDir = path.join(baseDir, 'performance');
+runtime/orchestrator-service/server.js:4504:  const legacyReviewsDir = path.join(legacyBaseDir, 'reviews');
+runtime/orchestrator-service/server.js:4505:  const legacyImprovementsDir = path.join(legacyBaseDir, 'improvements');
+runtime/orchestrator-service/server.js:4506:  const legacyPerformanceDir = path.join(legacyBaseDir, 'performance');
+runtime/orchestrator-service/server.js:4538:    throw new Error('Product not found in intelligence registry');
+runtime/orchestrator-service/server.js:4604:  const filePath = path.join(
+runtime/orchestrator-service/server.js:4668:  const filePath = path.join(
+runtime/orchestrator-service/server.js:4693:    metrics = JSON.parse(metricJson);
+runtime/orchestrator-service/server.js:4700:  const filePath = path.join(
+runtime/orchestrator-service/server.js:4706:  if (fs.existsSync(filePath)) {
+runtime/orchestrator-service/server.js:4740:  const files = fs.readdirSync(paths.performanceDir)
+runtime/orchestrator-service/server.js:4750:    const filePath = path.join(paths.performanceDir, name);
+runtime/orchestrator-service/server.js:4768:  const files = fs.readdirSync(paths.performanceDir)
+runtime/orchestrator-service/server.js:4775:    const filePath = path.join(paths.performanceDir, name);
+runtime/orchestrator-service/server.js:4799:  const baseDir = path.join(BASE_DIR, 'docs');
+runtime/orchestrator-service/server.js:4803:    systemDir: path.join(baseDir, 'system'),
+runtime/orchestrator-service/server.js:4804:    blueprintsDir: path.join(baseDir, 'project-blueprints'),
+runtime/orchestrator-service/server.js:4805:    runbooksDir: path.join(baseDir, 'runbooks')
+runtime/orchestrator-service/server.js:4813:    if (!fs.existsSync(dirPath)) return [];
+runtime/orchestrator-service/server.js:4814:    return fs.readdirSync(dirPath)
+runtime/orchestrator-service/server.js:4820:        path: path.join(dirPath, name)
+runtime/orchestrator-service/server.js:4841:    content: fs.readFileSync(match.path, 'utf8')
+runtime/orchestrator-service/server.js:4868:  const legacyBaseDir = path.join(resolution.legacyRoot, 'generated');
+runtime/orchestrator-service/server.js:4869:  const jobsDir = path.join(baseDir, 'jobs');
+runtime/orchestrator-service/server.js:4870:  const outputsDir = path.join(baseDir, 'outputs');
+runtime/orchestrator-service/server.js:4871:  const rendersDir = path.join(baseDir, 'renders');
+runtime/orchestrator-service/server.js:4872:  const legacyJobsDir = path.join(legacyBaseDir, 'jobs');
+runtime/orchestrator-service/server.js:4873:  const legacyOutputsDir = path.join(legacyBaseDir, 'outputs');
+runtime/orchestrator-service/server.js:4874:  const legacyRendersDir = path.join(legacyBaseDir, 'renders');
+runtime/orchestrator-service/server.js:4908:  const files = fs.readdirSync(jobsDir)
+runtime/orchestrator-service/server.js:4917:  const latestPath = path.join(jobsDir, files[0]);
+runtime/orchestrator-service/server.js:4926:    path.join(paths.legacyOutputsDir, `${renderId}_${job.asset_type}.png`);
+runtime/orchestrator-service/server.js:4950:  const requestPath = path.join(paths.legacyRendersDir, `${request.render_id}.json`);
+runtime/orchestrator-service/server.js:4974:  const files = fs.readdirSync(rendersDir)
+runtime/orchestrator-service/server.js:4983:  const latestPath = path.join(rendersDir, files[0]);
+runtime/orchestrator-service/server.js:4991:    relativePath: path.join('renders', `${renderId}.json`),
+runtime/orchestrator-service/server.js:4998:  if (!fs.existsSync(renderPath)) {
+runtime/orchestrator-service/server.js:5070:  const legacyBaseDir = path.join(resolution.legacyRoot, 'generated');
+runtime/orchestrator-service/server.js:5071:  const jobsDir = path.join(baseDir, 'jobs');
+runtime/orchestrator-service/server.js:5072:  const outputsDir = path.join(baseDir, 'outputs');
+runtime/orchestrator-service/server.js:5073:  const legacyJobsDir = path.join(legacyBaseDir, 'jobs');
+runtime/orchestrator-service/server.js:5074:  const legacyOutputsDir = path.join(legacyBaseDir, 'outputs');
+runtime/orchestrator-service/server.js:5173:  const outputPath = path.join(outputPaths.legacyJobsDir, outputFilename);
+runtime/orchestrator-service/server.js:5189:    suggested_output_path: path.join(outputPaths.legacyOutputsDir, `${jobId}_${assetType}.png`)
+runtime/orchestrator-service/server.js:5243:  const packagePath = path.join(paths.baseDir, 'execution-package.json');
+runtime/orchestrator-service/server.js:5251:  ensureJsonFile(paths.registryPath, []);
+runtime/orchestrator-service/server.js:5252:  const registry = readJsonFile(paths.registryPath, []);
+runtime/orchestrator-service/server.js:5254:  const activeAssets = registry.filter(item => item.status === 'active');
+runtime/orchestrator-service/server.js:5300:  ensureJsonFile(paths.registryPath, []);
+runtime/orchestrator-service/server.js:5320:  const contextPath = path.join(paths.baseDir, 'prompt-engine-context.json');
+runtime/orchestrator-service/server.js:5378:  fs.mkdirSync(dirPath, { recursive: true });
+runtime/orchestrator-service/server.js:5382:  const dir = path.dirname(filePath);
+runtime/orchestrator-service/server.js:5385:  if (!fs.existsSync(filePath)) {
+runtime/orchestrator-service/server.js:5392:    if (!fs.existsSync(filePath)) return fallback;
+runtime/orchestrator-service/server.js:5393:    const raw = fs.readFileSync(filePath, 'utf8').trim();
+runtime/orchestrator-service/server.js:5395:    return JSON.parse(raw);
+runtime/orchestrator-service/server.js:5407:  ensureDir(path.dirname(filePath));
+runtime/orchestrator-service/server.js:5409:  const serialized = JSON.stringify(data, null, 2);
+runtime/orchestrator-service/server.js:5413:  fs.writeFileSync(tmpPath, serialized, 'utf8');
+runtime/orchestrator-service/server.js:5417:    fd = fs.openSync(tmpPath, 'r+');
+runtime/orchestrator-service/server.js:5418:    fs.fsyncSync(fd);
+runtime/orchestrator-service/server.js:5423:      try { fs.closeSync(fd); } catch (_) { /* ignore */ }
+runtime/orchestrator-service/server.js:5427:  if (fs.existsSync(filePath)) {
+runtime/orchestrator-service/server.js:5428:    try { fs.copyFileSync(filePath, backupPath); } catch (_) { /* non-fatal */ }
+runtime/orchestrator-service/server.js:5432:    fs.renameSync(tmpPath, filePath);
+runtime/orchestrator-service/server.js:5434:    try { fs.unlinkSync(tmpPath); } catch (_) { /* ignore */ }
+runtime/orchestrator-service/server.js:5436:      new Error(`[server] Atomic rename failed for ${filePath}: ${err.message}`),
+runtime/orchestrator-service/server.js:5473:    registryPath: path.join(baseDir, 'media-input-registry.json'),
+runtime/orchestrator-service/server.js:5474:    brandProfilePath: path.join(baseDir, 'brand-profile.json'),
+runtime/orchestrator-service/server.js:5475:    logoDir: path.join(baseDir, 'logo'),
+runtime/orchestrator-service/server.js:5476:    packagingDir: path.join(baseDir, 'packaging'),
+runtime/orchestrator-service/server.js:5477:    productDir: path.join(baseDir, 'product'),
+runtime/orchestrator-service/server.js:5478:    referenceDir: path.join(baseDir, 'reference'),
+runtime/orchestrator-service/server.js:5479:    videoDir: path.join(baseDir, 'video')
+runtime/orchestrator-service/server.js:5491:    return fs.existsSync(getProjectBasePaths(safeProject).projectFilePath);
+runtime/orchestrator-service/server.js:5499:  const registryProjects = listProjects();
+runtime/orchestrator-service/server.js:5501:  registryProjects.forEach((project) => {
+runtime/orchestrator-service/server.js:5508:  const registryPaths = getProjectRegistryPaths();
+runtime/orchestrator-service/server.js:5509:  const entries = fs.readdirSync(registryPaths.baseDir, { withFileTypes: true });
+runtime/orchestrator-service/server.js:5517:    const projectFilePath = path.join(registryPaths.baseDir, name, 'project.json');
+runtime/orchestrator-service/server.js:5518:    if (fs.existsSync(projectFilePath)) {
+runtime/orchestrator-service/server.js:5529:  return fs.readdirSync(LEGACY_BRAND_ASSETS_DIR, { withFileTypes: true })
+runtime/orchestrator-service/server.js:5547:      has_media_root: fs.existsSync(brandPaths.baseDir) || fs.existsSync(brandPaths.legacyBaseDir),
+runtime/orchestrator-service/server.js:5571:  if (!project || !fs.existsSync(paths.baseDir)) {
+runtime/orchestrator-service/server.js:5576:    const dirPath = path.join(paths.baseDir, type);
+runtime/orchestrator-service/server.js:5579:    const files = fs.readdirSync(dirPath, { withFileTypes: true })
+runtime/orchestrator-service/server.js:5596:  ensureJsonFile(paths.registryPath, []);
+runtime/orchestrator-service/server.js:5597:  const registry = readJsonFile(paths.registryPath, []);
+runtime/orchestrator-service/server.js:5601:    total_assets: registry.length,
+runtime/orchestrator-service/server.js:5602:    assets: registry
+runtime/orchestrator-service/server.js:5609:  const safeFilename = path.basename(String(filename || '').trim());
+runtime/orchestrator-service/server.js:5620:        const assetFilename = path.basename(String(asset.file_path || '').trim());
+runtime/orchestrator-service/server.js:5628:      if (assetMatch && fs.existsSync(assetMatch.file_path)) {
+runtime/orchestrator-service/server.js:5632:      // Fall through to the legacy registry search.
+runtime/orchestrator-service/server.js:5638:    const registry = readJsonFile(brandPaths.registryPath, []);
+runtime/orchestrator-service/server.js:5640:    const legacyMatch = registry.find((asset) => {
+runtime/orchestrator-service/server.js:5641:      const assetFilename = path.basename(String(asset.local_path || asset.filename || '').trim());
+runtime/orchestrator-service/server.js:5653:    if (legacyMatch && fs.existsSync(legacyMatch.local_path)) {
+runtime/orchestrator-service/server.js:5668:  const hasMediaRoot = fs.existsSync(brandPaths.baseDir) || fs.existsSync(brandPaths.legacyBaseDir);
+runtime/orchestrator-service/server.js:5686:    registry: {
+runtime/orchestrator-service/server.js:5701:    payload.registry = buildLegacyMediaRegistry(project);
+runtime/orchestrator-service/server.js:5703:    payload.errors.registry = error.message;
+runtime/orchestrator-service/server.js:5747:  const auditPath = path.join(DATA_DIR, 'audit.json');
+runtime/orchestrator-service/server.js:5749:    const current = JSON.parse(fs.readFileSync(auditPath, 'utf8'));
+runtime/orchestrator-service/server.js:5751:    fs.writeFileSync(auditPath, JSON.stringify(current, null, 2));
+runtime/orchestrator-service/server.js:5778:    appLogger.warn('project_detection_registry_failed', {
+runtime/orchestrator-service/server.js:5988:  const filename = path.basename(productPath).toLowerCase();
+runtime/orchestrator-service/server.js:6151:    const registry = require('../agent-registry');
+runtime/orchestrator-service/server.js:6152:    if (!registry || typeof registry.resolve !== 'function') return null;
+runtime/orchestrator-service/server.js:6154:    const signal = registry.resolve({
+runtime/orchestrator-service/server.js:6208:      : path.join(CONTEXTS_DIR, `${project}.md`);
+runtime/orchestrator-service/server.js:6218:  const sharedPolicy = readFileSafe(path.join(PROMPTS_DIR, 'shared-policy.md'));
+runtime/orchestrator-service/server.js:6219:  const agentPrompt = readFileSafe(
+runtime/orchestrator-service/server.js:6220:    path.join(PROMPTS_DIR, promptFileMap[agent] || 'orchestrator.md')
+runtime/orchestrator-service/server.js:6222:  const projectContext = contextPath ? readFileSafe(contextPath) : '';
+runtime/orchestrator-service/server.js:6268:  const baseDir = path.join(DATA_DIR, 'projects');
+runtime/orchestrator-service/server.js:6269:  const registryPath = path.join(baseDir, 'registry.json');
+runtime/orchestrator-service/server.js:6273:  if (!fs.existsSync(registryPath)) {
+runtime/orchestrator-service/server.js:6274:    writeJsonFile(registryPath, []);
+runtime/orchestrator-service/server.js:6279:    registryPath
+runtime/orchestrator-service/server.js:6284:  const resolved = resolveProjectPath(path.join(DATA_DIR, 'projects'), projectName);
+runtime/orchestrator-service/server.js:6291:    brandAssetsDir: path.join(baseDir, 'brand-assets'),
+runtime/orchestrator-service/server.js:6292:    productsDir: path.join(baseDir, 'products'),
+runtime/orchestrator-service/server.js:6293:    contentDir: path.join(baseDir, 'content'),
+runtime/orchestrator-service/server.js:6294:    mediaDir: path.join(baseDir, 'media'),
+runtime/orchestrator-service/server.js:6295:    campaignsDir: path.join(baseDir, 'campaigns'),
+runtime/orchestrator-service/server.js:6296:    publishingDir: path.join(baseDir, 'publishing'),
+runtime/orchestrator-service/server.js:6297:    launchDir: path.join(baseDir, 'launch'),
+runtime/orchestrator-service/server.js:6298:    executionDir: path.join(baseDir, 'execution'),
+runtime/orchestrator-service/server.js:6299:    telemetryDir: path.join(baseDir, 'telemetry'),
+runtime/orchestrator-service/server.js:6300:    logsDir: path.join(baseDir, 'logs'),
+runtime/orchestrator-service/server.js:6301:    optimizationDir: path.join(baseDir, 'optimization'),
+runtime/orchestrator-service/server.js:6302:    reportsDir: path.join(baseDir, 'reports'),
+runtime/orchestrator-service/server.js:6303:    integrationsDir: path.join(baseDir, 'integrations'),
+runtime/orchestrator-service/server.js:6304:    uploadsDir: path.join(baseDir, 'uploads'),
+runtime/orchestrator-service/server.js:6305:    projectFilePath: path.join(baseDir, 'project.json')
+runtime/orchestrator-service/server.js:6314:    brandProfilePath: path.join(resolved.projectRoot, 'brand-profile.json'),
+runtime/orchestrator-service/server.js:6315:    assetsRegistryPath: path.join(resolved.projectRoot, 'assets-registry.json'),
+runtime/orchestrator-service/server.js:6316:    mediaInputRegistryPath: path.join(resolved.projectRoot, 'media-input-registry.json')
+runtime/orchestrator-service/server.js:6323:  const opsDir = path.join(base.baseDir, 'ops');
+runtime/orchestrator-service/server.js:6324:  const integrationsRegistryPath = path.join(base.baseDir, 'integrations-registry.json');
+runtime/orchestrator-service/server.js:6329:    brandProfilePath: path.join(base.brandAssetsDir, 'brand-profile.json'),
+runtime/orchestrator-service/server.js:6330:    assetsRegistryPath: path.join(base.baseDir, 'assets-registry.json'),
+runtime/orchestrator-service/server.js:6331:    sourcesRegistryPath: path.join(base.baseDir, 'sources-registry.json'),
+runtime/orchestrator-service/server.js:6332:    sourceOfTruthRegistryPath: path.join(base.baseDir, 'source-of-truth-registry.json'),
+runtime/orchestrator-service/server.js:6334:    aiCommandsPath: path.join(opsDir, 'ai-commands.json'),
+runtime/orchestrator-service/server.js:6335:    aiArtifactsPath: path.join(opsDir, 'ai-artifacts.json'),
+runtime/orchestrator-service/server.js:6336:    aiRecommendationsPath: path.join(opsDir, 'ai-recommendations.json'),
+runtime/orchestrator-service/server.js:6337:    aiMemoryPath: path.join(opsDir, 'ai-memory.json'),
+runtime/orchestrator-service/server.js:6339:    integrationControlCenterPath: path.join(base.integrationsDir, 'control-center.json'),
+runtime/orchestrator-service/server.js:6347:    .update(JSON.stringify(value == null ? null : value))
+runtime/orchestrator-service/server.js:6354:    const logPath = path.join(paths.baseDir, 'ops', 'data-mismatches.json');
+runtime/orchestrator-service/server.js:6388:  const canonicalExists = fs.existsSync(canonicalPath);
+runtime/orchestrator-service/server.js:6393:    if (!fs.existsSync(legacyPath)) {
+runtime/orchestrator-service/server.js:6422:    ensureDir(path.dirname(canonicalPath));
+runtime/orchestrator-service/server.js:6439:  ensureDir(path.dirname(canonicalPath));
+runtime/orchestrator-service/server.js:6627:    domain: 'assets-registry',
+runtime/orchestrator-service/server.js:6673:        exists: fs.existsSync(paths.projectFilePath)
+runtime/orchestrator-service/server.js:6677:        exists: fs.existsSync(paths.brandProfilePath),
+runtime/orchestrator-service/server.js:6681:      assets_registry: {
+runtime/orchestrator-service/server.js:6683:        exists: fs.existsSync(paths.assetsRegistryPath),
+runtime/orchestrator-service/server.js:6687:      source_of_truth_registry: {
+runtime/orchestrator-service/server.js:6689:        exists: fs.existsSync(paths.sourceOfTruthRegistryPath),
+runtime/orchestrator-service/server.js:6693:      integrations_registry: {
+runtime/orchestrator-service/server.js:6695:        exists: fs.existsSync(paths.integrationsRegistryPath)
+runtime/orchestrator-service/server.js:6699:        exists: fs.existsSync(paths.aiCommandsPath)
+runtime/orchestrator-service/server.js:6703:        exists: fs.existsSync(paths.aiArtifactsPath)
+runtime/orchestrator-service/server.js:6707:        exists: fs.existsSync(paths.aiRecommendationsPath)
+runtime/orchestrator-service/server.js:6711:        exists: fs.existsSync(paths.aiMemoryPath)
+runtime/orchestrator-service/server.js:6715:        exists: fs.existsSync(paths.integrationControlCenterPath)
+runtime/orchestrator-service/server.js:6719:      campaigns: { path: paths.campaignsDir, exists: fs.existsSync(paths.campaignsDir) },
+runtime/orchestrator-service/server.js:6720:      content: { path: paths.contentDir, exists: fs.existsSync(paths.contentDir) },
+runtime/orchestrator-service/server.js:6721:      media: { path: paths.mediaDir, exists: fs.existsSync(paths.mediaDir) },
+runtime/orchestrator-service/server.js:6722:      publishing: { path: paths.publishingDir, exists: fs.existsSync(paths.publishingDir) },
+runtime/orchestrator-service/server.js:6723:      reports: { path: paths.reportsDir, exists: fs.existsSync(paths.reportsDir) },
+runtime/orchestrator-service/server.js:6724:      execution: { path: paths.executionDir, exists: fs.existsSync(paths.executionDir) },
+runtime/orchestrator-service/server.js:6725:      telemetry: { path: paths.telemetryDir, exists: fs.existsSync(paths.telemetryDir) },
+runtime/orchestrator-service/server.js:6726:      logs: { path: paths.logsDir, exists: fs.existsSync(paths.logsDir) }
+runtime/orchestrator-service/server.js:6789:    assets_registry_path: paths.assetsRegistryPath,
+runtime/orchestrator-service/server.js:6790:    source_of_truth_registry_path: paths.sourceOfTruthRegistryPath,
+runtime/orchestrator-service/server.js:6972:  const registry = getProjectRegistryPaths();
+runtime/orchestrator-service/server.js:6973:  const projects = readJsonFile(registry.registryPath, []);
+runtime/orchestrator-service/server.js:7025:  writeJsonFile(registry.registryPath, projects);
+runtime/orchestrator-service/server.js:7031:    registry_path: registry.registryPath,
+runtime/orchestrator-service/server.js:7108:    throw new Error('Project rename is not supported by Setup persistence');
+runtime/orchestrator-service/server.js:7113:  if (!fs.existsSync(paths.projectFilePath)) {
+runtime/orchestrator-service/server.js:7117:  const registry = getProjectRegistryPaths();
+runtime/orchestrator-service/server.js:7118:  const projects = readJsonFile(registry.registryPath, []);
+runtime/orchestrator-service/server.js:7140:    writeJsonFile(registry.registryPath, projects);
+runtime/orchestrator-service/server.js:7150:    registry_path: registry.registryPath,
+runtime/orchestrator-service/server.js:7157:  const registry = getProjectRegistryPaths();
+runtime/orchestrator-service/server.js:7158:  return readJsonFile(registry.registryPath, []);
+runtime/orchestrator-service/server.js:7164:  if (!fs.existsSync(paths.projectFilePath)) {
+runtime/orchestrator-service/server.js:7175:  const mismatchLogPath = path.join(paths.opsDir, 'data-mismatches.json');
+runtime/orchestrator-service/server.js:7184:      domain: 'assets_registry',
+runtime/orchestrator-service/server.js:7189:      domain: 'source_of_truth_registry',
+runtime/orchestrator-service/server.js:7196:    const canonicalExists = fs.existsSync(item.canonical_path);
+runtime/orchestrator-service/server.js:7197:    const legacyExists = fs.existsSync(item.legacy_path);
+runtime/orchestrator-service/server.js:7201:    if (item.domain === 'source_of_truth_registry') {
+runtime/orchestrator-service/server.js:7249:  const reportPath = path.join(paths.reportsDir, 'canonical-migration-report.json');
+runtime/orchestrator-service/server.js:7261:  if (!fs.existsSync(paths.projectFilePath)) {
+runtime/orchestrator-service/server.js:7311:  const executionReadiness = fs.existsSync(paths.executionDir) && fs.existsSync(paths.opsDir) ? 100 : 0;
+runtime/orchestrator-service/server.js:7312:  const publishingReadiness = fs.existsSync(paths.publishingDir) ? 100 : 0;
+runtime/orchestrator-service/server.js:7313:  const aiMemoryReadiness = fs.existsSync(paths.aiMemoryPath)
+runtime/orchestrator-service/server.js:7330:    has_project_file: fs.existsSync(paths.projectFilePath),
+runtime/orchestrator-service/server.js:7331:    has_brand_assets_dir: fs.existsSync(paths.brandAssetsDir),
+runtime/orchestrator-service/server.js:7332:    has_products_dir: fs.existsSync(paths.productsDir),
+runtime/orchestrator-service/server.js:7333:    has_content_dir: fs.existsSync(paths.contentDir),
+runtime/orchestrator-service/server.js:7334:    has_media_dir: fs.existsSync(paths.mediaDir),
+runtime/orchestrator-service/server.js:7335:    has_campaigns_dir: fs.existsSync(paths.campaignsDir),
+runtime/orchestrator-service/server.js:7336:    has_publishing_dir: fs.existsSync(paths.publishingDir),
+runtime/orchestrator-service/server.js:7337:    has_launch_dir: fs.existsSync(paths.launchDir),
+runtime/orchestrator-service/server.js:7338:    has_execution_dir: fs.existsSync(paths.executionDir),
+runtime/orchestrator-service/server.js:7339:    has_telemetry_dir: fs.existsSync(paths.telemetryDir),
+runtime/orchestrator-service/server.js:7340:    has_logs_dir: fs.existsSync(paths.logsDir),
+runtime/orchestrator-service/server.js:7341:    has_optimization_dir: fs.existsSync(paths.optimizationDir),
+runtime/orchestrator-service/server.js:7342:    has_reports_dir: fs.existsSync(paths.reportsDir),
+runtime/orchestrator-service/server.js:7343:    has_integrations_dir: fs.existsSync(paths.integrationsDir),
+runtime/orchestrator-service/server.js:7344:    has_uploads_dir: fs.existsSync(paths.uploadsDir),
+runtime/orchestrator-service/server.js:7346:    has_assets_registry: baselineValidation.required_files.assets_registry.exists,
+runtime/orchestrator-service/server.js:7347:    has_source_of_truth_registry: baselineValidation.required_files.source_of_truth_registry.exists,
+runtime/orchestrator-service/server.js:7348:    has_integrations_registry: baselineValidation.required_files.integrations_registry.exists,
+runtime/orchestrator-service/server.js:7418:  const fileName = normalizeSetupTextValue(asset.file_name || (filePath ? path.basename(filePath) : ''));
+runtime/orchestrator-service/server.js:7464:    renamed_at: normalizeSetupTextValue(asset.renamed_at),
+runtime/orchestrator-service/server.js:7465:    renamed_by: normalizeSetupTextValue(asset.renamed_by),
+runtime/orchestrator-service/server.js:7466:    exists: fs.existsSync(filePath),
+runtime/orchestrator-service/server.js:7474:  if (!fs.existsSync(paths.projectFilePath)) {
+runtime/orchestrator-service/server.js:7494:    registry_path: paths.assetsRegistryPath
+runtime/orchestrator-service/server.js:7501:  if (!fs.existsSync(paths.projectFilePath)) {
+runtime/orchestrator-service/server.js:7514:  if (!fs.existsSync(paths.projectFilePath)) {
+runtime/orchestrator-service/server.js:7534:    registry_path: paths.sourcesRegistryPath
+runtime/orchestrator-service/server.js:7541:  if (!fs.existsSync(paths.projectFilePath)) {
+runtime/orchestrator-service/server.js:7561:    registry_path: paths.sourcesRegistryPath
+runtime/orchestrator-service/server.js:7568:  if (!fs.existsSync(paths.projectFilePath)) {
+runtime/orchestrator-service/server.js:7575:    source_of_truth_registry: readJsonFile(paths.sourceOfTruthRegistryPath, buildSourceOfTruthRegistry({}))
+runtime/orchestrator-service/server.js:7627:  if (!fs.existsSync(paths.projectFilePath)) {
+runtime/orchestrator-service/server.js:7658:    registry_path: paths.controlCenterRegistryPath
+runtime/orchestrator-service/server.js:7662:function writeProjectIntegrationRegistry(projectName, registry = {}) {
+runtime/orchestrator-service/server.js:7666:    records: asPlainObject(registry.records)
+runtime/orchestrator-service/server.js:7674:    registry_path: paths.controlCenterRegistryPath
+runtime/orchestrator-service/server.js:7899:    sync_source_registry: Boolean(record.sync_source_registry)
+runtime/orchestrator-service/server.js:7940:    sync_source_registry: normalizedRecord.sync_source_registry,
+runtime/orchestrator-service/server.js:7970:      notes: 'Connected through the legacy source registry.',
+runtime/orchestrator-service/server.js:7979:  const registry = readProjectIntegrationRegistry(projectName);
+runtime/orchestrator-service/server.js:7982:  Object.entries(asPlainObject(registry.records)).forEach(([integrationId, record]) => {
+runtime/orchestrator-service/server.js:8019:    registry_path: registry.registry_path,

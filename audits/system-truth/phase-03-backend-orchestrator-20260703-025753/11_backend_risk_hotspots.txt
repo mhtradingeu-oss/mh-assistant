@@ -1,0 +1,361 @@
+### risky patterns
+runtime/orchestrator-service/server.js:1:// Deterministic source registry extraction for canonical/legacy compatibility
+runtime/orchestrator-service/server.js:7:  // Defensive: skip wrapper keys if present
+runtime/orchestrator-service/server.js:264:// Temporary local/server diagnostic bypass. Do not enable in production.
+runtime/orchestrator-service/server.js:311:  const bypassFlags = collectProductionBypassFlags(env);
+runtime/orchestrator-service/server.js:315:    bypassFlags,
+runtime/orchestrator-service/server.js:316:    blocked: productionMode && bypassFlags.length > 0,
+runtime/orchestrator-service/server.js:317:    allowedLocalDevelopment: !productionMode && bypassFlags.length > 0
+runtime/orchestrator-service/server.js:327:  const flagList = result.bypassFlags.map((flag) => flag.name).join(', ');
+runtime/orchestrator-service/server.js:329:    `Production startup blocked: bypass environment flags are not allowed in production (${flagList})`
+runtime/orchestrator-service/server.js:337:  console.warn('CONTROL CENTER ACCESS KEY DISABLED - TEMPORARY TEST MODE');
+runtime/orchestrator-service/server.js:682:  const legacyRole = buildAssetRoleFromType(normalizedType);
+runtime/orchestrator-service/server.js:684:  if (legacyRole) {
+runtime/orchestrator-service/server.js:687:      mode: 'legacy_media',
+runtime/orchestrator-service/server.js:688:      assetRole: legacyRole,
+runtime/orchestrator-service/server.js:689:      target_folder: path.basename(getAssetDirByRole(paths, legacyRole)),
+runtime/orchestrator-service/server.js:690:      dir: getAssetDirByRole(paths, legacyRole)
+runtime/orchestrator-service/server.js:735:    brandPaths.legacyBaseDir,
+runtime/orchestrator-service/server.js:858:  // 3. Normalize stem: replace whitespace and unsafe chars with underscores.
+runtime/orchestrator-service/server.js:929:function sanitizeErrorMessage(rawMessage, fallbackMessage) {
+runtime/orchestrator-service/server.js:930:  const fallback = String(fallbackMessage || 'Request failed').trim() || 'Request failed';
+runtime/orchestrator-service/server.js:933:    return fallback;
+runtime/orchestrator-service/server.js:938:function getErrorStatusCode(error, fallbackStatus = 500) {
+runtime/orchestrator-service/server.js:940:    error?.statusCode || error?.status || error?.response?.status || fallbackStatus
+runtime/orchestrator-service/server.js:944:    return fallbackStatus;
+runtime/orchestrator-service/server.js:948:    return fallbackStatus;
+runtime/orchestrator-service/server.js:1199:    legacy: 'generated',
+runtime/orchestrator-service/server.js:1203:    legacy: 'launch-ops',
+runtime/orchestrator-service/server.js:1207:    legacy: '',
+runtime/orchestrator-service/server.js:1211:    legacy: 'channels',
+runtime/orchestrator-service/server.js:1215:    legacy: 'campaign-execution',
+runtime/orchestrator-service/server.js:1219:    legacy: 'campaign-finalization',
+runtime/orchestrator-service/server.js:1223:    legacy: 'execution',
+runtime/orchestrator-service/server.js:1227:    legacy: 'german-launch',
+runtime/orchestrator-service/server.js:1231:    legacy: 'optimization',
+runtime/orchestrator-service/server.js:1235:    legacy: 'execution/results',
+runtime/orchestrator-service/server.js:1241:  if (telemetryEntry.selected_root !== 'legacy') {
+runtime/orchestrator-service/server.js:1249:  if (telemetryEntry.legacy_fallback_hit) {
+runtime/orchestrator-service/server.js:1302:function buildCandidatePaths(canonicalBase, legacyBase, relativePath = '') {
+runtime/orchestrator-service/server.js:1307:    legacyPath: safeRelativePath ? path.join(legacyBase, safeRelativePath) : legacyBase
+runtime/orchestrator-service/server.js:1326:  const candidatePaths = buildCandidatePaths(options.canonicalBase, options.legacyBase, relativePath);
+runtime/orchestrator-service/server.js:1332:  const legacyHit =
+runtime/orchestrator-service/server.js:1334:      ? hasMatchingEntries(candidatePaths.legacyPath, matcher)
+runtime/orchestrator-service/server.js:1335:      : fs.existsSync(candidatePaths.legacyPath);
+runtime/orchestrator-service/server.js:1338:  const legacyFallbackEnabled = !!readPolicy.legacyFallbackRead;
+runtime/orchestrator-service/server.js:1340:  let selectedPath = candidatePaths.legacyPath;
+runtime/orchestrator-service/server.js:1341:  let selectedRoot = 'legacy';
+runtime/orchestrator-service/server.js:1347:    } else if (legacyFallbackEnabled && legacyHit) {
+runtime/orchestrator-service/server.js:1348:      selectedPath = candidatePaths.legacyPath;
+runtime/orchestrator-service/server.js:1349:      selectedRoot = 'legacy';
+runtime/orchestrator-service/server.js:1350:    } else if (legacyHit) {
+runtime/orchestrator-service/server.js:1351:      selectedPath = candidatePaths.legacyPath;
+runtime/orchestrator-service/server.js:1352:      selectedRoot = 'legacy';
+runtime/orchestrator-service/server.js:1357:  } else if (legacyHit) {
+runtime/orchestrator-service/server.js:1358:    selectedPath = candidatePaths.legacyPath;
+runtime/orchestrator-service/server.js:1359:    selectedRoot = 'legacy';
+runtime/orchestrator-service/server.js:1375:    legacy_candidate: candidatePaths.legacyPath,
+runtime/orchestrator-service/server.js:1377:    legacy_fallback_hit: legacyHit,
+runtime/orchestrator-service/server.js:1385:      legacy_fallback_read: !!readPolicy.legacyFallbackRead
+runtime/orchestrator-service/server.js:1389:  telemetryEntry.fallback_reason = classifyImmediateFallbackReason(telemetryEntry);
+runtime/orchestrator-service/server.js:1402:    legacyHit,
+runtime/orchestrator-service/server.js:1409:    legacyPath: candidatePaths.legacyPath,
+runtime/orchestrator-service/server.js:1411:    legacyHit,
+runtime/orchestrator-service/server.js:1434:  const legacyBaseOverride = options.legacyBaseOverride || null;
+runtime/orchestrator-service/server.js:1436:  if (!domainConfig && !canonicalBaseOverride && !legacyBaseOverride) {
+runtime/orchestrator-service/server.js:1441:      legacyPath: passthroughPath,
+runtime/orchestrator-service/server.js:1443:      legacyHit: fs.existsSync(passthroughPath),
+runtime/orchestrator-service/server.js:1450:        legacyFallbackRead: !!resolution.featureFlags.legacy_fallback_read,
+runtime/orchestrator-service/server.js:1459:  const legacyBase = legacyBaseOverride || (domainConfig.legacy
+runtime/orchestrator-service/server.js:1460:    ? path.join(resolution.legacyRoot, domainConfig.legacy)
+runtime/orchestrator-service/server.js:1461:    : resolution.legacyRoot);
+runtime/orchestrator-service/server.js:1476:    legacyBase
+runtime/orchestrator-service/server.js:1491:    legacyMirrorRoot: resolution.legacyRoot,
+runtime/orchestrator-service/server.js:1493:    fallbackRoot: resolution.legacyRoot,
+runtime/orchestrator-service/server.js:1495:    legacyEmailDir: path.join(resolution.legacyRoot, 'email'),
+runtime/orchestrator-service/server.js:1497:    legacyLiveContentDir: path.join(EXECUTION_DIR, safeProject, 'content', 'email'),
+runtime/orchestrator-service/server.js:1499:    legacyLiveMediaQueueDir: path.join(EXECUTION_DIR, safeProject, 'media', 'queue')
+runtime/orchestrator-service/server.js:1509:      legacyBase: paths.fallbackRoot,
+runtime/orchestrator-service/server.js:1517:      legacyBase: paths.legacyEmailDir,
+runtime/orchestrator-service/server.js:1525:      legacyBase: paths.legacyEmailDir,
+runtime/orchestrator-service/server.js:1533:      legacyBase: paths.legacyEmailDir,
+runtime/orchestrator-service/server.js:1541:      legacyBase: paths.legacyLiveContentDir,
+runtime/orchestrator-service/server.js:1549:      legacyBase: paths.legacyLiveMediaQueueDir,
+runtime/orchestrator-service/server.js:1590:    legacyBaseOverride: contract.legacyBase
+runtime/orchestrator-service/server.js:1611:    contract.legacyBase,
+runtime/orchestrator-service/server.js:1617:  ensureDir(path.dirname(candidatePaths.legacyPath));
+runtime/orchestrator-service/server.js:1619:  fs.writeFileSync(candidatePaths.legacyPath, payload, 'utf8');
+runtime/orchestrator-service/server.js:1758:  if (!readEntry || readEntry.selected_root !== 'legacy' || !readEntry.legacy_fallback_hit) {
+runtime/orchestrator-service/server.js:1780:      const legacySuccess = dualWriteEntry.writes.some(
+runtime/orchestrator-service/server.js:1781:        (item) => item.root === 'legacy' && item.status === 'success'
+runtime/orchestrator-service/server.js:1784:      if (canonicalFailed && legacySuccess) {
+runtime/orchestrator-service/server.js:1805:    fallback_hit_count: 0,
+runtime/orchestrator-service/server.js:1806:    fallback_rate: 0,
+runtime/orchestrator-service/server.js:1807:    fallback_causes: {
+runtime/orchestrator-service/server.js:1848:    if (entry.selected_root === 'legacy' && entry.legacy_fallback_hit) {
+runtime/orchestrator-service/server.js:1849:      stats.fallback_hit_count += 1;
+runtime/orchestrator-service/server.js:1852:      if (!Object.prototype.hasOwnProperty.call(stats.fallback_causes, cause)) {
+runtime/orchestrator-service/server.js:1853:        stats.fallback_causes.unresolved_risk += 1;
+runtime/orchestrator-service/server.js:1855:        stats.fallback_causes[cause] += 1;
+runtime/orchestrator-service/server.js:1862:  let fallbackHits = 0;
+runtime/orchestrator-service/server.js:1869:    stats.fallback_rate = stats.read_events > 0
+runtime/orchestrator-service/server.js:1870:      ? Number((stats.fallback_hit_count / stats.read_events).toFixed(4))
+runtime/orchestrator-service/server.js:1875:    fallbackHits += stats.fallback_hit_count;
+runtime/orchestrator-service/server.js:1876:    historicalFallbacks += stats.fallback_causes.historical_artifact;
+runtime/orchestrator-service/server.js:1877:    unresolvedStructuralMismatches += stats.fallback_causes.structural_mismatch;
+runtime/orchestrator-service/server.js:1879:      stats.fallback_causes.parity_gap +
+runtime/orchestrator-service/server.js:1880:      stats.fallback_causes.missing_canonical_write +
+runtime/orchestrator-service/server.js:1881:      stats.fallback_causes.policy_or_config_mismatch;
+runtime/orchestrator-service/server.js:1885:  const fallbackRate = totalReads > 0 ? fallbackHits / totalReads : 0;
+runtime/orchestrator-service/server.js:1886:  const historicalFallbackRate = fallbackHits > 0 ? historicalFallbacks / fallbackHits : 0;
+runtime/orchestrator-service/server.js:1893:    fallbackRate <= 0.15 &&
+runtime/orchestrator-service/server.js:1901:    fallbackRate <= 0.4 &&
+runtime/orchestrator-service/server.js:1917:      fallback_hit_count: fallbackHits,
+runtime/orchestrator-service/server.js:1919:      fallback_rate: Number(fallbackRate.toFixed(4)),
+runtime/orchestrator-service/server.js:1920:      fallback_historical_rate: Number(historicalFallbackRate.toFixed(4)),
+runtime/orchestrator-service/server.js:1945:    fallback_hit_count: 0,
+runtime/orchestrator-service/server.js:1953:    aggregate.fallback_hit_count += summary.totals.fallback_hit_count;
+runtime/orchestrator-service/server.js:1962:  aggregate.fallback_rate = totalReads > 0
+runtime/orchestrator-service/server.js:1963:    ? Number((aggregate.fallback_hit_count / totalReads).toFixed(4))
+runtime/orchestrator-service/server.js:2032:  const legacyBaseDir = contract.legacyBase;
+runtime/orchestrator-service/server.js:2033:  const preparePath = path.join(legacyBaseDir, contract.relativePath);
+runtime/orchestrator-service/server.js:2036:  ensureDir(legacyBaseDir);
+runtime/orchestrator-service/server.js:2040:    legacyBaseDir,
+runtime/orchestrator-service/server.js:2097:    legacyPath: preparePaths.preparePath,
+runtime/orchestrator-service/server.js:2176:  const htmlDir = path.join(preparePaths.legacyBaseDir, 'email', 'html');
+runtime/orchestrator-service/server.js:2177:  const preparedDir = path.join(preparePaths.legacyBaseDir, 'email', 'prepared');
+runtime/orchestrator-service/server.js:2190:    legacyPath: htmlPath,
+runtime/orchestrator-service/server.js:2215:    legacyPath: jsonPath,
+runtime/orchestrator-service/server.js:2223:    legacyPath: preparePaths.preparePath,
+runtime/orchestrator-service/server.js:2406:      'fake packaging',
+runtime/orchestrator-service/server.js:2407:      'fake product color swap'
+runtime/orchestrator-service/server.js:2598:    legacyPath: outputPath,
+runtime/orchestrator-service/server.js:2620:  const legacyBaseDir = emailPaths.legacyEmailDir;
+runtime/orchestrator-service/server.js:2621:  const legacyDeliveryDir = path.join(legacyBaseDir, 'delivery');
+runtime/orchestrator-service/server.js:2622:  const legacyPreparedDir = path.join(legacyBaseDir, 'prepared');
+runtime/orchestrator-service/server.js:2627:  ensureDir(legacyBaseDir);
+runtime/orchestrator-service/server.js:2628:  ensureDir(legacyDeliveryDir);
+runtime/orchestrator-service/server.js:2629:  ensureDir(legacyPreparedDir);
+runtime/orchestrator-service/server.js:2635:    legacyBaseDir,
+runtime/orchestrator-service/server.js:2636:    legacyDeliveryDir,
+runtime/orchestrator-service/server.js:2637:    legacyPreparedDir
+runtime/orchestrator-service/server.js:2704:  const recordPath = path.join(paths.legacyDeliveryDir, `${deliveryId}.json`);
+runtime/orchestrator-service/server.js:2718:    legacyPath: recordPath,
+runtime/orchestrator-service/server.js:2737:  // TODO:
+runtime/orchestrator-service/server.js:3127:    legacyPath: packagePath,
+runtime/orchestrator-service/server.js:3248:    legacyPath: packagePath,
+runtime/orchestrator-service/server.js:3408:    legacyPath: packagePath,
+runtime/orchestrator-service/server.js:3567:    legacyPath: packagePath,
+runtime/orchestrator-service/server.js:3622:    legacyPath: packagePath,
+runtime/orchestrator-service/server.js:3693:  const legacyBaseDir = path.join(resolution.legacyRoot, 'german-launch');
+runtime/orchestrator-service/server.js:3697:  const legacyPlanDir = path.join(legacyBaseDir, 'plan');
+runtime/orchestrator-service/server.js:3698:  const legacyWavesDir = path.join(legacyBaseDir, 'waves');
+runtime/orchestrator-service/server.js:3703:  ensureDir(legacyBaseDir);
+runtime/orchestrator-service/server.js:3704:  ensureDir(legacyPlanDir);
+runtime/orchestrator-service/server.js:3705:  ensureDir(legacyWavesDir);
+runtime/orchestrator-service/server.js:3711:    legacyBaseDir,
+runtime/orchestrator-service/server.js:3712:    legacyPlanDir,
+runtime/orchestrator-service/server.js:3713:    legacyWavesDir
+runtime/orchestrator-service/server.js:3873:  const filePath = path.join(paths.legacyPlanDir, 'launch-plan.json');
+runtime/orchestrator-service/server.js:3880:    legacyPath: filePath,
+runtime/orchestrator-service/server.js:3949:    paths.legacyWavesDir,
+runtime/orchestrator-service/server.js:3958:    legacyPath: filePath,
+runtime/orchestrator-service/server.js:3998:  const legacyBaseDir = path.join(resolution.legacyRoot, 'launch-ops');
+runtime/orchestrator-service/server.js:4001:  const legacyConnectorsDir = path.join(legacyBaseDir, 'connectors');
+runtime/orchestrator-service/server.js:4002:  const legacySchedulerDir = path.join(legacyBaseDir, 'scheduler');
+runtime/orchestrator-service/server.js:4007:  ensureDir(legacyBaseDir);
+runtime/orchestrator-service/server.js:4008:  ensureDir(legacyConnectorsDir);
+runtime/orchestrator-service/server.js:4009:  ensureDir(legacySchedulerDir);
+runtime/orchestrator-service/server.js:4015:    legacyBaseDir,
+runtime/orchestrator-service/server.js:4016:    legacyConnectorsDir,
+runtime/orchestrator-service/server.js:4017:    legacySchedulerDir
+runtime/orchestrator-service/server.js:4051:    paths.legacyConnectorsDir,
+runtime/orchestrator-service/server.js:4060:    legacyPath: filePath,
+runtime/orchestrator-service/server.js:4090:  const filePath = path.join(paths.legacySchedulerDir, `${jobId}.json`);
+runtime/orchestrator-service/server.js:4096:    legacyPath: filePath,
+runtime/orchestrator-service/server.js:4106:function normalizePublishingJobStatus(value, fallback = 'draft') {
+runtime/orchestrator-service/server.js:4109:  if (!normalized) return fallback;
+runtime/orchestrator-service/server.js:4131:  return fallback;
+runtime/orchestrator-service/server.js:4256:  return path.join(paths.legacySchedulerDir, `${String(jobId || '').trim()}.json`);
+runtime/orchestrator-service/server.js:4318:    legacyPath: filePath,
+runtime/orchestrator-service/server.js:4418:  const fallbackStatus = scheduledFor ? 'scheduled' : 'draft';
+runtime/orchestrator-service/server.js:4430:    status: normalizePublishingJobStatus(input.status, existing.status || fallbackStatus),
+runtime/orchestrator-service/server.js:4499:  const legacyBaseDir = path.join(resolution.legacyRoot, 'optimization');
+runtime/orchestrator-service/server.js:4504:  const legacyReviewsDir = path.join(legacyBaseDir, 'reviews');
+runtime/orchestrator-service/server.js:4505:  const legacyImprovementsDir = path.join(legacyBaseDir, 'improvements');
+runtime/orchestrator-service/server.js:4506:  const legacyPerformanceDir = path.join(legacyBaseDir, 'performance');
+runtime/orchestrator-service/server.js:4512:  ensureDir(legacyBaseDir);
+runtime/orchestrator-service/server.js:4513:  ensureDir(legacyReviewsDir);
+runtime/orchestrator-service/server.js:4514:  ensureDir(legacyImprovementsDir);
+runtime/orchestrator-service/server.js:4515:  ensureDir(legacyPerformanceDir);
+runtime/orchestrator-service/server.js:4522:    legacyBaseDir,
+runtime/orchestrator-service/server.js:4523:    legacyReviewsDir,
+runtime/orchestrator-service/server.js:4524:    legacyImprovementsDir,
+runtime/orchestrator-service/server.js:4525:    legacyPerformanceDir
+runtime/orchestrator-service/server.js:4605:    paths.legacyReviewsDir,
+runtime/orchestrator-service/server.js:4614:    legacyPath: filePath,
+runtime/orchestrator-service/server.js:4669:    paths.legacyImprovementsDir,
+runtime/orchestrator-service/server.js:4678:    legacyPath: filePath,
+runtime/orchestrator-service/server.js:4701:    paths.legacyPerformanceDir,
+runtime/orchestrator-service/server.js:4724:    legacyPath: filePath,
+runtime/orchestrator-service/server.js:4868:  const legacyBaseDir = path.join(resolution.legacyRoot, 'generated');
+runtime/orchestrator-service/server.js:4872:  const legacyJobsDir = path.join(legacyBaseDir, 'jobs');
+runtime/orchestrator-service/server.js:4873:  const legacyOutputsDir = path.join(legacyBaseDir, 'outputs');
+runtime/orchestrator-service/server.js:4874:  const legacyRendersDir = path.join(legacyBaseDir, 'renders');
+runtime/orchestrator-service/server.js:4880:  ensureDir(legacyBaseDir);
+runtime/orchestrator-service/server.js:4881:  ensureDir(legacyJobsDir);
+runtime/orchestrator-service/server.js:4882:  ensureDir(legacyOutputsDir);
+runtime/orchestrator-service/server.js:4883:  ensureDir(legacyRendersDir);
+runtime/orchestrator-service/server.js:4890:    legacyBaseDir,
+runtime/orchestrator-service/server.js:4891:    legacyJobsDir,
+runtime/orchestrator-service/server.js:4892:    legacyOutputsDir,
+runtime/orchestrator-service/server.js:4893:    legacyRendersDir
+runtime/orchestrator-service/server.js:4926:    path.join(paths.legacyOutputsDir, `${renderId}_${job.asset_type}.png`);
+runtime/orchestrator-service/server.js:4950:  const requestPath = path.join(paths.legacyRendersDir, `${request.render_id}.json`);
+runtime/orchestrator-service/server.js:4957:    legacyPath: requestPath,
+runtime/orchestrator-service/server.js:5012:    legacyPath: renderRecord.legacyPath,
+runtime/orchestrator-service/server.js:5070:  const legacyBaseDir = path.join(resolution.legacyRoot, 'generated');
+runtime/orchestrator-service/server.js:5073:  const legacyJobsDir = path.join(legacyBaseDir, 'jobs');
+runtime/orchestrator-service/server.js:5074:  const legacyOutputsDir = path.join(legacyBaseDir, 'outputs');
+runtime/orchestrator-service/server.js:5079:  ensureDir(legacyBaseDir);
+runtime/orchestrator-service/server.js:5080:  ensureDir(legacyJobsDir);
+runtime/orchestrator-service/server.js:5081:  ensureDir(legacyOutputsDir);
+runtime/orchestrator-service/server.js:5087:    legacyBaseDir,
+runtime/orchestrator-service/server.js:5088:    legacyJobsDir,
+runtime/orchestrator-service/server.js:5089:    legacyOutputsDir
+runtime/orchestrator-service/server.js:5142:    lines.push(`No product source is available. Do not invent a fake product.`);
+runtime/orchestrator-service/server.js:5173:  const outputPath = path.join(outputPaths.legacyJobsDir, outputFilename);
+runtime/orchestrator-service/server.js:5189:    suggested_output_path: path.join(outputPaths.legacyOutputsDir, `${jobId}_${assetType}.png`)
+runtime/orchestrator-service/server.js:5197:    legacyPath: outputPath,
+runtime/orchestrator-service/server.js:5285:    no_fake_product_visuals: true,
+runtime/orchestrator-service/server.js:5347:    lines.push(`No real product source is available. Do not invent a fake product.`);
+runtime/orchestrator-service/server.js:5390:function readJsonFile(filePath, fallback = []) {
+runtime/orchestrator-service/server.js:5392:    if (!fs.existsSync(filePath)) return fallback;
+runtime/orchestrator-service/server.js:5394:    if (!raw) return fallback;
+runtime/orchestrator-service/server.js:5397:    console.warn(`[server] readJsonFile: non-fatal read/parse error for ${filePath}, returning fallback. Error: ${err.message}`);
+runtime/orchestrator-service/server.js:5398:    return fallback;
+runtime/orchestrator-service/server.js:5467:  const legacyBaseDir = resolution.legacyRoot;
+runtime/orchestrator-service/server.js:5472:    legacyBaseDir,
+runtime/orchestrator-service/server.js:5538:  const legacyProjects = listLegacyMediaProjectNames();
+runtime/orchestrator-service/server.js:5539:  const allNames = uniqueValues([...profileProjects, ...legacyProjects]);
+runtime/orchestrator-service/server.js:5547:      has_media_root: fs.existsSync(brandPaths.baseDir) || fs.existsSync(brandPaths.legacyBaseDir),
+runtime/orchestrator-service/server.js:5632:      // Fall through to the legacy registry search.
+runtime/orchestrator-service/server.js:5640:    const legacyMatch = registry.find((asset) => {
+runtime/orchestrator-service/server.js:5653:    if (legacyMatch && fs.existsSync(legacyMatch.local_path)) {
+runtime/orchestrator-service/server.js:5654:      return legacyMatch.local_path;
+runtime/orchestrator-service/server.js:5668:  const hasMediaRoot = fs.existsSync(brandPaths.baseDir) || fs.existsSync(brandPaths.legacyBaseDir);
+runtime/orchestrator-service/server.js:6162:    if (!signal || signal.fallback) return null;
+runtime/orchestrator-service/server.js:6322:  const legacy = getLegacyProjectBasePaths(projectName);
+runtime/orchestrator-service/server.js:6340:    legacy
+runtime/orchestrator-service/server.js:6369:      legacyPath: entry.legacy_path,
+runtime/orchestrator-service/server.js:6384:  const legacyCandidates = Array.isArray(options.legacyCandidates) ? options.legacyCandidates : [];
+runtime/orchestrator-service/server.js:6385:  const fallback = options.fallback;
+runtime/orchestrator-service/server.js:6389:  const canonicalValue = canonicalExists ? normalize(readJsonFile(canonicalPath, fallback)) : null;
+runtime/orchestrator-service/server.js:6392:  for (const legacyPath of legacyCandidates.filter(Boolean)) {
+runtime/orchestrator-service/server.js:6393:    if (!fs.existsSync(legacyPath)) {
+runtime/orchestrator-service/server.js:6397:    const legacyValue = normalize(readJsonFile(legacyPath, fallback));
+runtime/orchestrator-service/server.js:6398:    firstLegacy = firstLegacy || { path: legacyPath, value: legacyValue };
+runtime/orchestrator-service/server.js:6400:    if (canonicalExists && stableJsonHash(canonicalValue) !== stableJsonHash(legacyValue)) {
+runtime/orchestrator-service/server.js:6403:        reason: 'canonical_legacy_value_mismatch',
+runtime/orchestrator-service/server.js:6405:        legacy_path: legacyPath,
+runtime/orchestrator-service/server.js:6407:        legacy_hash: stableJsonHash(legacyValue)
+runtime/orchestrator-service/server.js:6426:      reason: 'canonical_missing_migrated_from_legacy',
+runtime/orchestrator-service/server.js:6428:      legacy_path: firstLegacy.path,
+runtime/orchestrator-service/server.js:6429:      legacy_hash: stableJsonHash(firstLegacy.value)
+runtime/orchestrator-service/server.js:6433:      source: 'legacy',
+runtime/orchestrator-service/server.js:6440:  writeJsonFile(canonicalPath, fallback);
+runtime/orchestrator-service/server.js:6442:    value: fallback,
+runtime/orchestrator-service/server.js:6513:    const fallbackValue = candidates
+runtime/orchestrator-service/server.js:6517:    const entry = foundEntry || (fallbackValue ? { value: fallbackValue } : {});
+runtime/orchestrator-service/server.js:6522:      value: normalizeSetupTextValue(entry.value || fallbackValue),
+runtime/orchestrator-service/server.js:6616:    paths.legacy.baseDir
+runtime/orchestrator-service/server.js:6622:    legacyCandidates: [paths.legacy.brandProfilePath],
+runtime/orchestrator-service/server.js:6623:    fallback: buildDefaultBrandProfile(safeProject, projectData)
+runtime/orchestrator-service/server.js:6629:    legacyCandidates: [paths.legacy.assetsRegistryPath, paths.legacy.mediaInputRegistryPath],
+runtime/orchestrator-service/server.js:6630:    fallback: [],
+runtime/orchestrator-service/server.js:6637:    legacyCandidates: [paths.sourcesRegistryPath],
+runtime/orchestrator-service/server.js:6638:    fallback: buildSourceOfTruthRegistry({}),
+runtime/orchestrator-service/server.js:7181:      legacy_path: paths.legacy.brandProfilePath
+runtime/orchestrator-service/server.js:7186:      legacy_path: paths.legacy.assetsRegistryPath
+runtime/orchestrator-service/server.js:7191:      legacy_path: paths.sourcesRegistryPath
+runtime/orchestrator-service/server.js:7197:    const legacyExists = fs.existsSync(item.legacy_path);
+runtime/orchestrator-service/server.js:7199:    const legacyRaw = legacyExists ? readJsonFile(item.legacy_path, null) : null;
+runtime/orchestrator-service/server.js:7200:    let canonicalValue, legacyValue;
+runtime/orchestrator-service/server.js:7204:      legacyValue = extractSourceRegistryEntries(legacyRaw);
+runtime/orchestrator-service/server.js:7207:      legacyValue = legacyRaw;
+runtime/orchestrator-service/server.js:7209:    const parity = canonicalExists && legacyExists
+runtime/orchestrator-service/server.js:7210:      ? stableJsonHash(canonicalValue) === stableJsonHash(legacyValue)
+runtime/orchestrator-service/server.js:7213:    if (canonicalExists && legacyExists && !parity) {
+runtime/orchestrator-service/server.js:7216:        reason: 'canonical_legacy_parity_check_mismatch',
+runtime/orchestrator-service/server.js:7218:        legacy_path: item.legacy_path,
+runtime/orchestrator-service/server.js:7220:        legacy_hash: stableJsonHash(legacyValue)
+runtime/orchestrator-service/server.js:7227:      legacy_path: item.legacy_path,
+runtime/orchestrator-service/server.js:7229:      legacy_exists: legacyExists,
+runtime/orchestrator-service/server.js:7231:      fallback_in_use: !canonicalExists && legacyExists
+runtime/orchestrator-service/server.js:7236:  const fallbackDependencies = checks.filter((item) => item.fallback_in_use).length;
+runtime/orchestrator-service/server.js:7241:    fallback_dependencies: fallbackDependencies,
+runtime/orchestrator-service/server.js:7244:    recommendation: fallbackDependencies > 0 || mismatches > 0
+runtime/orchestrator-service/server.js:7245:      ? 'Reduce fallback dependencies by keeping canonical files in sync before disabling legacy reads.'
+runtime/orchestrator-service/server.js:7246:      : 'Canonical files are aligned with available legacy data.'
+runtime/orchestrator-service/server.js:7939:    legacy_source: Boolean(normalizedRecord.legacy_source),
+runtime/orchestrator-service/server.js:7965:      primary_field: 'legacy_source',
+runtime/orchestrator-service/server.js:7970:      notes: 'Connected through the legacy source registry.',
+runtime/orchestrator-service/server.js:7971:      legacy_source: true
+runtime/orchestrator-service/server.js:7994:  const legacyRecords = buildLegacyIntegrationRecords(projectName);
+runtime/orchestrator-service/server.js:7995:  Object.entries(legacyRecords).forEach(([integrationId, record]) => {
+runtime/orchestrator-service/server.js:8124:    const fallbackStatus = determineIntegrationStatus({
+runtime/orchestrator-service/server.js:8136:            : fallbackStatus === 'connected'
+runtime/orchestrator-service/server.js:8138:              : fallbackStatus,
+runtime/orchestrator-service/server.js:8148:              : fallbackStatus === 'connected'
+runtime/orchestrator-service/server.js:8150:                : fallbackStatus,
+runtime/orchestrator-service/server.js:8727:    path.join(brandPaths.legacyBaseDir, 'product_csv'),
+runtime/orchestrator-service/server.js:8732:    path.join(brandPaths.legacyBaseDir, 'products', 'images'),
+runtime/orchestrator-service/server.js:8737:    path.join(brandPaths.legacyBaseDir, 'products', 'videos'),
+runtime/orchestrator-service/server.js:9524:      skipApprovalGate: true
+runtime/orchestrator-service/server.js:9612:      skipApprovalGate: true
+runtime/orchestrator-service/server.js:9700:      skipApprovalGate: true
+runtime/orchestrator-service/server.js:9781:      skipApprovalGate: true
+runtime/orchestrator-service/server.js:10255:    if (uploadTarget.mode === 'legacy_media') {
+runtime/orchestrator-service/server.js:10570:      code: notFound ? 'PROJECT_NOT_FOUND' : 'APPLY_TEMPLATE_FAILED',
+runtime/orchestrator-service/server.js:10628:    const duplicate = /already exists/i.test(message);
+runtime/orchestrator-service/server.js:10630:    return res.status(duplicate ? 409 : 500).json({
+runtime/orchestrator-service/server.js:10632:      code: duplicate ? "PROJECT_ALREADY_EXISTS" : "CREATE_PROJECT_FAILED",
+runtime/orchestrator-service/server.js:10824:function sendAssetMutationError(res, error, fallbackMessage) {
+runtime/orchestrator-service/server.js:10827:    error: error?.message || fallbackMessage,
+runtime/orchestrator-service/server.js:10836:    error: fallbackMessage,
+runtime/orchestrator-service/server.js:11112:      skipApprovalGate: true,
+runtime/orchestrator-service/server.js:11151:      skipApprovalGate: true,
+runtime/orchestrator-service/server.js:11183:function normalizeAiCommandPreviewInput(value, fallback = '') {
+runtime/orchestrator-service/server.js:11184:  return String(value || fallback || '').trim();
+runtime/orchestrator-service/server.js:11490:      skipApprovalGate: true
+runtime/orchestrator-service/server.js:11766:      skipApprovalGate: true
+runtime/orchestrator-service/server.js:11839:    skipApprovalGate: true
+runtime/orchestrator-service/server.js:11913:    skipApprovalGate: true
+runtime/orchestrator-service/server.js:11983:    skipApprovalGate: true
+runtime/orchestrator-service/server.js:12051:      skipApprovalGate: true
+runtime/orchestrator-service/server.js:12517:      skipApprovalGate: true
+runtime/orchestrator-service/server.js:12571:      skipApprovalGate: true
+runtime/orchestrator-service/server.js:12625:      skipApprovalGate: true
+runtime/orchestrator-service/server.js:12664:      skipApprovalGate: true
+runtime/orchestrator-service/server.js:13334:// TODO(phase4a): Keep `/public/media-manager/...` write aliases for active frontend compatibility.
+runtime/orchestrator-service/server.js:13819:  // Use canonical-first candidate resolution with fallback instrumentation
+runtime/orchestrator-service/server.js:13908:      avoid: ['fake claims', 'decorative clutter', 'non-compliant overlays']
+runtime/orchestrator-service/server.js:14033:  function makeBlock(type, fallbackGoal) {
+runtime/orchestrator-service/server.js:14037:    const goal = map.goal || fallbackGoal;
+runtime/orchestrator-service/server.js:14061:        `No fake brand elements.`,
+runtime/orchestrator-service/server.js:14175:  const legacyBaseDir = path.join(resolution.legacyRoot, 'campaign-execution');
+runtime/orchestrator-service/server.js:14178:  const legacyPackagesDir = path.join(legacyBaseDir, 'packages');
+runtime/orchestrator-service/server.js:14182:  ensureDir(legacyBaseDir);
+runtime/orchestrator-service/server.js:14183:  ensureDir(legacyPackagesDir);
+runtime/orchestrator-service/server.js:14188:    legacyBaseDir,
+runtime/orchestrator-service/server.js:14189:    legacyPackagesDir
+runtime/orchestrator-service/server.js:14228:    execPaths.legacyPackagesDir,
+runtime/orchestrator-service/server.js:14237:    legacyPath: filePath,
+runtime/orchestrator-service/server.js:14296:      fallback_prompt_pack:
+runtime/orchestrator-service/server.js:14310:  // canonical reads are preferred when present, with legacy brand-assets as
+runtime/orchestrator-service/server.js:14311:  // the required fallback for existing HAIROTICMEN dry-run packages.
+runtime/orchestrator-service/server.js:14324:  const legacyBaseDir = path.join(resolution.legacyRoot, 'campaign-finalization');
+runtime/orchestrator-service/server.js:14329:  const legacyMediaDir = path.join(legacyBaseDir, 'media-jobs');
+runtime/orchestrator-service/server.js:14330:  const legacyPublishDir = path.join(legacyBaseDir, 'publish-packages');
+runtime/orchestrator-service/server.js:14331:  const legacyEmailDir = path.join(legacyBaseDir, 'email');
+runtime/orchestrator-service/server.js:14337:  ensureDir(legacyBaseDir);
