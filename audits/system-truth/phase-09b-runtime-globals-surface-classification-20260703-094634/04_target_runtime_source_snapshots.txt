@@ -1,0 +1,243 @@
+
+### public/control-center/runtime/ai-settings-controller.js
+     1	/**
+     2	 * PHASE 19 — AI SETTINGS CONTROLLER
+     3	 */
+     4	
+     5	window.__AI_SETTINGS__ = {
+     6	
+     7	  mode: "CONTROLLED", // SAFE | CONTROLLED | AUTONOMOUS
+     8	
+     9	  autonomyLevel: 0.6,
+    10	
+    11	  canPublish: false,
+    12	  canRunAds: false,
+    13	  canExecuteWorkflows: true,
+    14	
+    15	  setMode(mode) {
+    16	    this.mode = mode;
+    17	
+    18	    if (mode === "AUTONOMOUS") {
+    19	      this.autonomyLevel = 1;
+    20	      this.canPublish = true;
+    21	      this.canRunAds = true;
+    22	    }
+    23	
+    24	    if (mode === "SAFE") {
+    25	      this.autonomyLevel = 0;
+    26	      this.canPublish = false;
+    27	      this.canRunAds = false;
+    28	    }
+    29	
+    30	    console.log("[AI SETTINGS UPDATED]", this);
+    31	  }
+    32	
+    33	};
+
+### public/control-center/runtime/control-plane-settings.js
+     1	/**
+     2	 * PHASE 20.1 — SETTINGS CONTROL PLANE CONNECTOR
+     3	 */
+     4	
+     5	window.__CONTROL_PLANE_SETTINGS__ = {
+     6	
+     7	  mode: "CONTROLLED",
+     8	
+     9	  setMode(mode) {
+    10	
+    11	    this.mode = mode;
+    12	
+    13	    if (window.__mhLog) {
+    14	      window.__mhLog("CONTROL_PLANE_MODE_CHANGE", { mode });
+    15	    }
+    16	
+    17	    if (window.__CONTROL_PLANE__) {
+    18	      window.__CONTROL_PLANE__.setMode(mode);
+    19	    }
+    20	  }
+    21	};
+
+### public/control-center/runtime/governance-ai-bridge.js
+     1	/**
+     2	 * PHASE 19.2 — FRONTEND GOVERNANCE AWARENESS
+     3	 */
+     4	
+     5	window.__GOVERNANCE_AI__ = {
+     6	
+     7	  handle(response) {
+     8	
+     9	    if (!response) return;
+    10	
+    11	    if (response.allowed === false) {
+    12	
+    13	      window.__mhLog?.("GOVERNANCE_BLOCK", response);
+    14	
+    15	      window.__mhGraphLog?.("AI_GOVERNANCE_BLOCK", response);
+    16	
+    17	      return {
+    18	        action: "ADAPT",
+    19	        reason: response.reason
+    20	      };
+    21	    }
+    22	
+    23	    return {
+    24	      action: "CONTINUE"
+    25	    };
+    26	  }
+    27	
+    28	};
+
+### public/control-center/runtime/mh-runtime-globals.js
+     1	// public/control-center/runtime/mh-runtime-globals.js
+     2	// Debug/view instrumentation only.
+     3	// Backend orchestrator remains the single decision authority.
+     4	
+     5	export function installMhRuntimeGlobals() {
+     6	  const w = window;
+     7	
+     8	  w.__MH_OBSERVER__ = w.__MH_OBSERVER__ || { events: [] };
+     9	  w.__MH_GRAPH__ = w.__MH_GRAPH__ || { nodes: [] };
+    10	
+    11	  function record(type, data = {}) {
+    12	    const event = {
+    13	      type: String(type || "DEBUG_EVENT"),
+    14	      data,
+    15	      timestamp: Date.now(),
+    16	      authority: "frontend_debug_only",
+    17	      can_execute: false,
+    18	      can_decide: false
+    19	    };
+    20	
+    21	    w.__MH_OBSERVER__.events.push(event);
+    22	    w.__MH_GRAPH__.nodes.push(event);
+    23	
+    24	    if (w.__MH_DEV_MODE__ === true || location.hostname === "localhost") {
+    25	      console.debug("[MH-FRONTEND-DEBUG]", event);
+    26	    }
+    27	
+    28	    return event;
+    29	  }
+    30	
+    31	  w.__mhLog = record;
+    32	  w.__mhGraphLog = record;
+    33	
+    34	  w.__MH_FRONTEND_RUNTIME__ = Object.freeze({
+    35	    mode: "debug_view_only",
+    36	    authority: "none",
+    37	    backendAuthority: "orchestrator",
+    38	    canExecute: false,
+    39	    canDecide: false,
+    40	    installedAt: new Date().toISOString()
+    41	  });
+    42	
+    43	  // Compatibility no-op bridges. These must never execute or decide.
+    44	  w.__mhExecute = function(type, payload) {
+    45	    return record("FRONTEND_EXECUTION_BLOCKED", { type, payload });
+    46	  };
+    47	
+    48	  w.__mhDecide = function(intent) {
+    49	    record("FRONTEND_DECISION_BLOCKED", { intent });
+    50	    return "BACKEND_AUTHORITY_REQUIRED";
+    51	  };
+    52	
+    53	  w.__mhGate = function(input) {
+    54	    return record("FRONTEND_GATE_BLOCKED", { input });
+    55	  };
+    56	
+    57	  w.__mhAIIntercept = function(payload) {
+    58	    return record("FRONTEND_AI_INTENT_CAPTURED", { payload });
+    59	  };
+    60	
+    61	  w.__mhCommand = function(command) {
+    62	    return record("FRONTEND_COMMAND_CAPTURED", { command });
+    63	  };
+    64	
+    65	  w.__mhWorkflow = function(step, data) {
+    66	    return record("FRONTEND_WORKFLOW_CAPTURED", { step, data });
+    67	  };
+    68	
+    69	  w.__mhRoute = function(route) {
+    70	    return record("FRONTEND_ROUTE_CAPTURED", { route });
+    71	  };
+    72	
+    73	  w.__MH_BRAIN__ = Object.freeze({
+    74	    mode: "debug_view_only",
+    75	    add: record,
+    76	    query: () => []
+    77	  });
+    78	
+    79	  w.__MH_ENFORCEMENT__ = Object.freeze({
+    80	    mode: "debug_view_only",
+    81	    logViolation: record,
+    82	    rules: Object.freeze({})
+    83	  });
+    84	}
+
+### public/control-center/runtime/runtime-boundaries.js
+     1	export const RUNTIME_BOUNDARIES = Object.freeze({
+     2	  shell: "global-app-shell",
+     3	  workspace: "dynamic-workspace",
+     4	  command: "global-command-runtime",
+     5	  overlays: "overlay-runtime",
+     6	  diagnostics: "diagnostics-runtime",
+     7	  ai: "ai-runtime",
+     8	  startup: "startup-runtime"
+     9	});
+    10	
+    11	export const FRONTEND_RUNTIME_RULES = Object.freeze({
+    12	  noHeavyRenderLogic: true,
+    13	  noGlobalOverlayDuplication: true,
+    14	  noDirectDOMMutationOutsideRuntime: true,
+    15	  noPageLevelShellCreation: true,
+    16	  preserveCanonicalRouting: true
+    17	});
+
+### public/control-center/runtime/ai-backend-connector.js
+     1	/**
+     2	 * Legacy AI backend connector skeleton.
+     3	 *
+     4	 * This file is intentionally preserved for compatibility but is not loaded by
+     5	 * index.html. It must not call removed legacy AI execute routes.
+     6	 *
+     7	 * Active AI runtime authority lives in project-scoped api.js helpers:
+     8	 * - executeProjectAiCommand(projectName, payload)
+     9	 * - executeProjectAiChat(projectName, payload)
+    10	 * - executeProjectAiGuidance(projectName, payload)
+    11	 */
+    12	
+    13	function buildLegacyAiBridgeResponse(command, payload) {
+    14	  return {
+    15	    ok: false,
+    16	    neutralized: true,
+    17	    legacy: true,
+    18	    bridge: "__AI_BACKEND_BRIDGE__",
+    19	    command,
+    20	    message: "Legacy AI backend bridge is neutralized. Use canonical project-scoped AI helpers instead.",
+    21	    canonical: {
+    22	      command: "executeProjectAiCommand(projectName, payload)",
+    23	      chat: "executeProjectAiChat(projectName, payload)",
+    24	      guidance: "executeProjectAiGuidance(projectName, payload)"
+    25	    },
+    26	    payloadReceived: Boolean(payload)
+    27	  };
+    28	}
+    29	
+    30	if (typeof window !== "undefined") {
+    31	  window.__AI_BACKEND_BRIDGE__ = {
+    32	    async call(command, payload) {
+    33	      return buildLegacyAiBridgeResponse(command, payload);
+    34	    },
+    35	
+    36	    workflow(data) {
+    37	      return this.call("WORKFLOW", data);
+    38	    },
+    39	
+    40	    publish(data) {
+    41	      return this.call("PUBLISH", data);
+    42	    },
+    43	
+    44	    approve(data) {
+    45	      return this.call("APPROVE", data);
+    46	    }
+    47	  };
+    48	}
