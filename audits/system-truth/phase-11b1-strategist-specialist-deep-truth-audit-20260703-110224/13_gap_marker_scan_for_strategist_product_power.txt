@@ -1,0 +1,1328 @@
+public/control-center/pages/ai-command.js:39:                label: "Strategist",
+public/control-center/pages/ai-command.js:41:                summary: "Campaign concepts, launch plans, channel mix, and offer strategy.",
+public/control-center/pages/ai-command.js:42:                routeHint: "campaign-studio"
+public/control-center/pages/ai-command.js:62:                summary: "Short-form video scripts, motion direction, and reel strategy.",
+public/control-center/pages/ai-command.js:76:                summary: "Ad concepts, targeting angles, platform copy, and paid strategy.",
+public/control-center/pages/ai-command.js:119:	campaign: "strategist",
+public/control-center/pages/ai-command.js:145:		label: "Strategist",
+public/control-center/pages/ai-command.js:148:		summary: "Campaign concepts, launch plans, channel mix, and offer strategy.",
+public/control-center/pages/ai-command.js:149:		placeholder: "Ask the Strategist to plan a campaign, map launch phases, review channel priorities, or define the offer strategy…",
+public/control-center/pages/ai-command.js:150:		canHelp: ["Draft campaign plans", "Prioritize next actions", "Map launch sequences", "Advise on offer strategy", "Prepare channel briefs"],
+public/control-center/pages/ai-command.js:151:		cannotDo: ["Publish campaigns directly", "Execute workflows automatically", "Approve content", "Set live budgets"],
+public/control-center/pages/ai-command.js:162:		placeholder: "Ask the Content Writer to draft captions, hooks, landing copy, or campaign messages…",
+public/control-center/pages/ai-command.js:175:		placeholder: "Ask the Media Director to define visual direction, prepare a creative brief, or review brand consistency…",
+public/control-center/pages/ai-command.js:187:		summary: "Short-form video scripts, motion direction, and reel strategy.",
+public/control-center/pages/ai-command.js:188:		placeholder: "Ask the Video Lead to write a reel script, map short-form strategy, or outline the next video concept…",
+public/control-center/pages/ai-command.js:189:		canHelp: ["Write video scripts", "Plan short-form strategy", "Define motion direction", "Map video asset requirements", "Prepare video briefs"],
+public/control-center/pages/ai-command.js:201:		placeholder: "Ask the Publisher to review publishing readiness, check scheduling, or prepare a handoff package…",
+public/control-center/pages/ai-command.js:213:		summary: "Ad concepts, targeting angles, platform copy, and paid strategy.",
+public/control-center/pages/ai-command.js:214:		placeholder: "Ask the Ads Optimizer to draft ad copy, review targeting angles, or plan a paid campaign structure…",
+public/control-center/pages/ai-command.js:215:		canHelp: ["Draft ad concepts and copy", "Review targeting angles", "Plan paid campaign structure", "Suggest creative variants", "Map platform-specific strategy"],
+public/control-center/pages/ai-command.js:227:		placeholder: "Ask the SEO & Insights Analyst to review performance, suggest SEO improvements, or identify top content patterns…",
+public/control-center/pages/ai-command.js:240:		placeholder: "Ask the Compliance Reviewer to check claims, approval risks, publishing safety, and governance notes…",
+public/control-center/pages/ai-command.js:253:		placeholder: "Ask the Operations Lead to turn this into tasks, workflow steps, or handoffs…",
+public/control-center/pages/ai-command.js:266:		placeholder: "Ask the Customer Operations Lead to summarize a customer thread, draft a safe reply, prepare a ticket draft, check SLA risk, or route an escalation for review…",
+public/control-center/pages/ai-command.js:279:		placeholder: "Ask the Sales / CRM Lead to qualify a lead, draft outreach, plan follow-ups, summarize CRM context, or prepare a sales handoff for review…",
+public/control-center/pages/ai-command.js:292:		{ label: "Draft a campaign brief", sub: "Map objective, audience, and channels" },
+public/control-center/pages/ai-command.js:293:		{ label: "Review launch readiness", sub: "Identify what is blocking launch" },
+public/control-center/pages/ai-command.js:294:		{ label: "Suggest the next campaign move", sub: "Based on current project state" }
+public/control-center/pages/ai-command.js:297:		{ label: "Draft campaign captions", sub: "For the active campaign" },
+public/control-center/pages/ai-command.js:303:		{ label: "Write a creative brief", sub: "For the next campaign visual" },
+public/control-center/pages/ai-command.js:305:		{ label: "Map format requirements", sub: "By platform and campaign phase" },
+public/control-center/pages/ai-command.js:309:		{ label: "Write a reel script", sub: "For the current campaign" },
+public/control-center/pages/ai-command.js:311:		{ label: "Outline motion direction", sub: "Align visuals with campaign tone" },
+public/control-center/pages/ai-command.js:321:		{ label: "Draft ad concepts", sub: "For the current campaign" },
+public/control-center/pages/ai-command.js:324:		{ label: "Plan paid campaign structure", sub: "Objective, audience, creative, budget" }
+public/control-center/pages/ai-command.js:361:	{ label: "Map the next launch wave", sub: "Strategist to Publisher to Operations" },
+public/control-center/pages/ai-command.js:385:const AI_ROOM_TEAM_CHAIN = ["Strategist", "Writer", "Media / Video", "Compliance", "Publisher", "Operations"];
+public/control-center/pages/ai-command.js:431:		{ id: "campaign-angle-generator", label: "Campaign Angle Generator", action: "preview", intent: "guidance", template: "Generate campaign angles for {project}. Include audience tension, promise, channel fit, and strongest first test." },
+public/control-center/pages/ai-command.js:432:		{ id: "launch-plan", label: "Launch Plan", action: "preview", intent: "workflow", template: "Build a launch plan for {project}. Include phases, channels, owners, blockers, and next move." },
+public/control-center/pages/ai-command.js:433:		{ id: "funnel-mapping", label: "Funnel Mapping", action: "preview", intent: "guidance", template: "Map the funnel for {project}. Include awareness, consideration, conversion, retention, and handoff points." },
+public/control-center/pages/ai-command.js:515:	{ icon: "🚀", label: "Launch Campaign", sub: "Build a campaign plan", template: "Build a launch campaign for {project}. Map the channels, offer, phases, and required assets." },
+public/control-center/pages/ai-command.js:517:	{ icon: "📊", label: "Analyze Performance", sub: "Review what's working", template: "Analyze current performance for {project}. What content, campaigns, and channels are working best right now?" },
+public/control-center/pages/ai-command.js:525:	{ id: "strategy", label: "Strategy" },
+public/control-center/pages/ai-command.js:527:	{ id: "campaign", label: "Campaign" },
+public/control-center/pages/ai-command.js:538:	{ id: "campaign", label: "Campaign" },
+public/control-center/pages/ai-command.js:554:		name: "Strategist",
+public/control-center/pages/ai-command.js:555:		purpose: "Build high-leverage decisions for launch sequencing and channel focus.",
+public/control-center/pages/ai-command.js:557:		suggestedPrompt: "Act as Strategist and propose the next campaign move based on current readiness and integrations."
+public/control-center/pages/ai-command.js:562:		purpose: "Transform strategy into high-converting copy and scripts.",
+public/control-center/pages/ai-command.js:563:		bestUse: "When campaigns need content batches fast.",
+public/control-center/pages/ai-command.js:564:		suggestedPrompt: "Act as Writer and generate content angles for the current project and active campaign."
+public/control-center/pages/ai-command.js:571:		suggestedPrompt: "Act as Designer and propose creative directions tied to current campaign goals."
+public/control-center/pages/ai-command.js:578:		suggestedPrompt: "Act as Media Planner and map media needs by platform for this launch cycle."
+public/control-center/pages/ai-command.js:598:		bestUse: "When strategy needs stronger external evidence.",
+public/control-center/pages/ai-command.js:707:function humanizeValue(value, fallback = "") {
+public/control-center/pages/ai-command.js:708:	if (value == null) return fallback;
+public/control-center/pages/ai-command.js:711:		return clean === "[object Object]" ? fallback : clean;
+public/control-center/pages/ai-command.js:717:		return value.map((item) => humanizeValue(item)).filter(Boolean).join("; ") || fallback;
+public/control-center/pages/ai-command.js:739:			.join("; ") || fallback;
+public/control-center/pages/ai-command.js:741:	return fallback;
+public/control-center/pages/ai-command.js:750:		campaign: asString(context.campaign || "active campaign") || "active campaign"
+public/control-center/pages/ai-command.js:753:	return asString(template).replace(/\{(project|projectName|specialist|specialistLabel|campaign)\}/g, (_, token) => tokenMap[token] || "");
+public/control-center/pages/ai-command.js:765:    "Build a launch campaign for:",
+public/control-center/pages/ai-command.js:817:function toNumber(value, fallback = null) {
+public/control-center/pages/ai-command.js:818:	if (value == null || value === "") return fallback;
+public/control-center/pages/ai-command.js:820:	return Number.isFinite(parsed) ? parsed : fallback;
+public/control-center/pages/ai-command.js:901:	return asString(item.label || item.title || item.page || item.query || item.campaign_name || item.name);
+public/control-center/pages/ai-command.js:918:			commandType: "strategy",
+public/control-center/pages/ai-command.js:925:			taskType: "launch",
+public/control-center/pages/ai-command.js:1061:			reason: "AI response guidance bridge is not connected yet (API function unavailable)."
+public/control-center/pages/ai-command.js:1101:function summarizeAiCommandSessionIntent(value = "", fallback = "Session") {
+public/control-center/pages/ai-command.js:1107:        if (!text) return fallback;
+public/control-center/pages/ai-command.js:1231:			"Full Team workflow: Strategist -> Writer -> Media/Video -> Compliance -> Publisher -> Operations.",
+public/control-center/pages/ai-command.js:1246:                `Use ${safeOutputLanguage} only for customer-facing or publishable copy such as captions, ads, emails, landing pages, final campaign text, or publishing packages.`,
+public/control-center/pages/ai-command.js:1302:	if (id === "strategist") return outputType === "task" ? "campaign-studio" : "workflows";
+public/control-center/pages/ai-command.js:1348:        const looksCampaignLike = /\b(campaign|launch|audience|offer|funnel|positioning|channel mix|campaign brief|go-to-market|go to market)\b/.test(text);
+public/control-center/pages/ai-command.js:1385:        if (/campaign|strategy|launch/.test(outputType) || looksCampaignLike) {
+public/control-center/pages/ai-command.js:1386:                outputType = "campaign";
+public/control-center/pages/ai-command.js:1389:                        destinationRoute: explicitDestination || (session?.teamMode === "team" ? "workflows" : "campaign-studio")
+public/control-center/pages/ai-command.js:1399:		"campaign-studio": "Campaign Studio",
+public/control-center/pages/ai-command.js:1455:			title: `Strategist Guidance: Next operating move`,
+public/control-center/pages/ai-command.js:1468:			title: outputType === "task" ? "Task: Draft campaign copy" : "Content Guidance: Messaging draft",
+public/control-center/pages/ai-command.js:1570:				"Keep budget, launch, and live ad changes inside Ads Manager.",
+public/control-center/pages/ai-command.js:1578:			safetyLabel: "No budget updates or ad launches executed."
+public/control-center/pages/ai-command.js:1741:			"Strategist defines priorities, positioning, launch sequence, and strongest next move",
+public/control-center/pages/ai-command.js:1742:			"Writer, Media Director, and Video Lead turn strategy into message, asset, and production drafts",
+public/control-center/pages/ai-command.js:1747:			"Strategist: decide priority, offer angle, channel sequence, and launch wave",
+public/control-center/pages/ai-command.js:1936:		campaign: state.context.activeCampaign || "Not selected",
+public/control-center/pages/ai-command.js:1997:		strategist: ["campaign", "launch campaign", "campaign plan", "marketing campaign", "market entry", "growth plan", "offer strategy", "launch plan"],
+public/control-center/pages/ai-command.js:2021:	const actionRouting = /launch|build|reconnect|connect|improve|create|fix|route|plan|publish/.test(query);
+public/control-center/pages/ai-command.js:2055:		notes.push("Paid platform reporting not connected — ROAS guidance is limited.");
+public/control-center/pages/ai-command.js:2164:	const bestCampaign = asArray(paid.best_campaigns)[0];
+public/control-center/pages/ai-command.js:2165:	const weakCampaign = asArray(paid.weak_campaigns)[0];
+public/control-center/pages/ai-command.js:2171:			: "Paid reporting not connected — connect Meta Ads, Google Ads, or TikTok Ads.",
+public/control-center/pages/ai-command.js:2173:			bestCampaign ? `Best campaign: ${extractTopMessage(bestCampaign)}.` : "No winning campaign measured yet.",
+public/control-center/pages/ai-command.js:2174:			weakCampaign ? `Weak campaign: ${extractTopMessage(weakCampaign)}.` : "No weak campaign list yet.",
+public/control-center/pages/ai-command.js:2185:			weakCampaign ? `Rebuild hook and CTA for ${extractTopMessage(weakCampaign)}.` : "Audit campaign naming and creative mapping.",
+public/control-center/pages/ai-command.js:2231:	if (/launch.*campaign|new campaign/.test(query)) {
+public/control-center/pages/ai-command.js:2232:		return { title: "Campaign launch task block", owner: "Campaign Studio", steps: ["Define the campaign objective, audience, and offer.", "Choose channels and budget based on current intelligence.", "List required assets and publishing dependencies before launch."] };
+public/control-center/pages/ai-command.js:2250:	if (/campaign/.test(query)) routeSuggestions.push(routeSuggestion("Campaign Studio", "campaign-studio", "Turn this into a structured launch plan."));
+public/control-center/pages/ai-command.js:2256:	if (/ads|campaign scale|roas|creative/.test(query)) routeSuggestions.push(routeSuggestion("Ads Manager", "ads-manager", "Review live paid performance and action the next media move."));
+public/control-center/pages/ai-command.js:2382:	"campaign-studio": "Campaign Studio",
+public/control-center/pages/ai-command.js:2404:	"campaign-studio": "strategist",
+public/control-center/pages/ai-command.js:2439:	campaign: "campaign-studio",
+public/control-center/pages/ai-command.js:2440:	campaigns: "campaign-studio",
+public/control-center/pages/ai-command.js:2496:function normalizeAiInboundSpecialistId(value, fallback = "operations") {
+public/control-center/pages/ai-command.js:2497:	const fallbackId = MODE_ID_ALIASES[getAiRoomRoleId(fallback)] || getAiRoomRoleId(fallback);
+public/control-center/pages/ai-command.js:2498:	const raw = getAiRoomRoleId(value || fallbackId);
+public/control-center/pages/ai-command.js:2502:	return SPECIALIST_DEFS.some((item) => item.id === finalId) ? finalId : fallbackId;
+public/control-center/pages/ai-command.js:2511:	const fallbackRoute = sourcePage === "workspace" ? "workflows" : sourcePage;
+public/control-center/pages/ai-command.js:2512:	const fallbackLabel = sourceLabel || routeLabel(fallbackRoute);
+public/control-center/pages/ai-command.js:2517:		const route = normalizeAiInboundSourcePage(rawRoute || stringRoute || fallbackRoute);
+public/control-center/pages/ai-command.js:2518:		const label = firstAiInboundText(record.label, record.title, record.name) || routeLabel(route) || fallbackLabel;
+public/control-center/pages/ai-command.js:2525:		route: fallbackRoute,
+public/control-center/pages/ai-command.js:2526:		label: fallbackLabel,
+public/control-center/pages/ai-command.js:2527:		reason: `Return to ${fallbackLabel} after AI Team review.`
+public/control-center/pages/ai-command.js:2739:	if (typeof executeProjectAiCommand !== "function") throw new Error("AI command service is unavailable.");
+public/control-center/pages/ai-command.js:2831:    const fallback =
+public/control-center/pages/ai-command.js:2838:      ...fallback,
+public/control-center/pages/ai-command.js:2840:      name: asString(member.name || fallback.name || member.role || "AI Specialist"),
+public/control-center/pages/ai-command.js:2841:      role: asString(member.role || fallback.role || id),
+public/control-center/pages/ai-command.js:2842:      purpose: asString(member.purpose || member.description || fallback.purpose || "Support the current operating context."),
+public/control-center/pages/ai-command.js:2843:      bestUse: asString(member.bestUse || member.best_use || fallback.bestUse || "Use when this specialist owns the next step."),
+public/control-center/pages/ai-command.js:2895:					<strong>${escapeHtml(aiContext.campaign || "None")}</strong>
+public/control-center/pages/ai-command.js:3246:function buildConversationWorkContext(session, fallbackPrompt = "") {
+public/control-center/pages/ai-command.js:3267:                fallbackPrompt ||
+public/control-center/pages/ai-command.js:3298:function buildConversationWorkPrompt(session, outputType, fallbackPrompt = "") {
+public/control-center/pages/ai-command.js:3299:        const context = buildConversationWorkContext(session, fallbackPrompt);
+public/control-center/pages/ai-command.js:3319:function setPreviewFromConversation({ session, intent, fallbackPrompt, projectName }) {
+public/control-center/pages/ai-command.js:3320:        const workPrompt = buildConversationWorkPrompt(session, intent, fallbackPrompt);
+public/control-center/pages/ai-command.js:3328:        const context = buildConversationWorkContext(session, fallbackPrompt);
+public/control-center/pages/ai-command.js:3369:			reason: `${aiContext.criticalGaps.length} critical setup gap${aiContext.criticalGaps.length === 1 ? "" : "s"} can block launch quality and downstream automation reliability.`,
+public/control-center/pages/ai-command.js:3378:			reason: `${aiContext.assetBlockers.length} asset category blocker${aiContext.assetBlockers.length === 1 ? "" : "s"} may reduce content throughput and campaign delivery speed.`,
+public/control-center/pages/ai-command.js:3394:	if (!aiContext.campaign || aiContext.campaign === "Not selected") {
+public/control-center/pages/ai-command.js:3396:			title: "Define the active campaign operating plan",
+public/control-center/pages/ai-command.js:3397:			reason: "A clear campaign context helps every specialist agent generate more precise outputs.",
+public/control-center/pages/ai-command.js:3398:			command: `Create a campaign operating brief for ${aiContext.projectName || "this project"} with objective, audience, channels, and first execution wave.`,
+public/control-center/pages/ai-command.js:3406:		command: `Generate the next high-impact content wave for ${aiContext.projectName || "this project"} based on current readiness and campaign context.`,
+public/control-center/pages/ai-command.js:3539:		.replace(/\{campaign\}/g, "active campaign");
+public/control-center/pages/ai-command.js:3575:				<p class="aicmd-room-subtitle mhos-context-description">Ask one expert or the full team to prepare strategy, content, analysis, reviews, and destination handoffs. AI prepares and reviews only; sensitive actions stay confirmation-gated in the owning workspace.</p>
+public/control-center/pages/ai-command.js:3578:				<span class="aicmd-v2-chat-bridge ${safeBridgeStatus.available ? "is-available" : "is-unavailable"}">
+public/control-center/pages/ai-command.js:3635:	const plannedSpecialists = AI_ROOM_PLANNED_SPECIALISTS.map((item) => `
+public/control-center/pages/ai-command.js:3636:		<div class="aicmd-room-member aicmd-room-member-planned" aria-disabled="true">
+public/control-center/pages/ai-command.js:3698:			<div class="aicmd-room-planned-specialists" aria-label="Additional specialists planned">
+public/control-center/pages/ai-command.js:3699:				<span class="aicmd-room-planned-title">Planned lanes, not active specialists</span>
+public/control-center/pages/ai-command.js:3700:				${plannedSpecialists}
+public/control-center/pages/ai-command.js:3772:		? "Team orchestration across strategy, writing, media/video, compliance, publishing, customer operations, sales/CRM, and operations"
+public/control-center/pages/ai-command.js:4014:                                <span class="aicmd-chatfirst-pill ${safeBridgeStatus.available ? "is-available" : "is-planned"}">${escapeHtml(bridgeLabel)}</span>
+public/control-center/pages/ai-command.js:4104:				<span class="aicmd-chatfirst-status ${safeBridgeStatus.available ? "is-available" : "is-unavailable"}">${escapeHtml(bridgeLabel)}</span>
+public/control-center/pages/ai-command.js:4149:				<span class="aicmd-chatfirst-pill ${safeBridgeStatus.available ? "is-available" : "is-planned"}">${escapeHtml(safeBridgeStatus.available ? "Connected" : "Guarded")}</span>
+public/control-center/pages/ai-command.js:4187:				<div class="aicmd-chatfirst-planned-list" aria-label="Planned specialists">
+public/control-center/pages/ai-command.js:4189:						<div class="aicmd-chatfirst-specialist-option is-planned" aria-disabled="true">
+public/control-center/pages/ai-command.js:4221:        const fallbackMessages = !selectedMessages.length && selectedResponses.length
+public/control-center/pages/ai-command.js:4243:        const conversationMessages = session.isFreshAiChatSession ? [] : (selectedMessages.length ? selectedMessages : fallbackMessages);
+public/control-center/pages/ai-command.js:4314:                                                <span>Plan campaign</span>
+public/control-center/pages/ai-command.js:4337:                { id: "campaign", label: "Campaign", summary: "Build a review-ready campaign with the full AI Team.", enabled: true },
+public/control-center/pages/ai-command.js:4338:                { id: "write", label: "Write", summary: "Prepare documents, copy, agreements, or presentation drafts.", enabled: false },
+public/control-center/pages/ai-command.js:4339:                { id: "offer", label: "Offer", summary: "Shape a product offer from pricing, market, and audience context.", enabled: false },
+public/control-center/pages/ai-command.js:4340:                { id: "lead", label: "Lead", summary: "Prepare lead discovery and outreach workflow drafts.", enabled: false },
+public/control-center/pages/ai-command.js:4341:                { id: "media", label: "Media", summary: "Create a media brief, storyboard, and production direction.", enabled: false },
+public/control-center/pages/ai-command.js:4342:                { id: "publish", label: "Publish", summary: "Prepare publishing checklist and handoff readiness.", enabled: false }
+public/control-center/pages/ai-command.js:4357:                                                class="aicmd-smart-action${action.enabled ? "" : " is-planned"}"
+public/control-center/pages/ai-command.js:4360:                                                ${action.enabled ? "" : "disabled"}
+public/control-center/pages/ai-command.js:4378:        const campaignPackage = asObject(packageInput);
+public/control-center/pages/ai-command.js:4380:                ["Concept", asString(campaignPackage.concept)],
+public/control-center/pages/ai-command.js:4381:                ["Target audience", asString(campaignPackage.targetAudience || campaignPackage.target_audience)],
+public/control-center/pages/ai-command.js:4382:                ["Offer", asString(campaignPackage.offer)]
+public/control-center/pages/ai-command.js:4386:                ["Launch phases", asArray(campaignPackage.launchPhases || campaignPackage.launch_phases)],
+public/control-center/pages/ai-command.js:4387:                ["Content angles", asArray(campaignPackage.contentAngles || campaignPackage.content_angles)],
+public/control-center/pages/ai-command.js:4388:                ["Ad angles", asArray(campaignPackage.adAngles || campaignPackage.ad_angles)],
+public/control-center/pages/ai-command.js:4389:                ["Required assets", asArray(campaignPackage.requiredAssets || campaignPackage.required_assets)],
+public/control-center/pages/ai-command.js:4390:                ["Review blockers", asArray(campaignPackage.missingBlockers || campaignPackage.missing_blockers)],
+public/control-center/pages/ai-command.js:4391:                ["Next actions", asArray(campaignPackage.nextActions || campaignPackage.next_actions)]
+public/control-center/pages/ai-command.js:4397:                <div class="aicmd-smart-preview-grid aicmd-smart-campaign-package-grid">
+public/control-center/pages/ai-command.js:4419:        if (wizard.type !== "campaign" || !wizard.open) return "";
+public/control-center/pages/ai-command.js:4435:        const goalOptions = [["sales", "Sales"], ["launch", "Product launch"], ["leads", "Lead generation"], ["awareness", "Awareness"], ["retargeting", "Retargeting"]];
+public/control-center/pages/ai-command.js:4440:        const deadlineOptions = [["standard", "Standard"], ["urgent", "Urgent"], ["launch-week", "Launch week"], ["evergreen", "Evergreen"]];
+public/control-center/pages/ai-command.js:4500:                                                <strong>4. Premium campaign brief</strong>
+public/control-center/pages/ai-command.js:4538:                                                                <span><strong>Status</strong>${escapeHtml(preview.backendPreview ? "Backend preview" : "Local fallback")}</span>
+public/control-center/pages/ai-command.js:4545:                                                        ${renderCampaignPackageMiniPanel(preview.campaignPackage, escapeHtml)}
+public/control-center/pages/ai-command.js:4557:                                                                <button type="button" data-aicmd-smart-campaign-action="library">Save to Library</button>
+public/control-center/pages/ai-command.js:4558:                                                                <button type="button" data-aicmd-smart-campaign-action="media">Send to Media Studio</button>
+public/control-center/pages/ai-command.js:4559:                                                                <button type="button" data-aicmd-smart-campaign-action="governance">Request Governance Review</button>
+public/control-center/pages/ai-command.js:4560:                                                                <button type="button" data-aicmd-smart-campaign-action="publishing">Prepare Publishing Handoff</button>
+public/control-center/pages/ai-command.js:4561:                                                                <button type="button" data-aicmd-smart-campaign-action="operations">Create Operations Follow-up</button>
+public/control-center/pages/ai-command.js:4576:                                                <button class="aicmd-smart-wizard-primary" type="button" data-aicmd-smart-campaign-preview>
+public/control-center/pages/ai-command.js:4670:                                        <small>Strategy, content, media, operations, compliance, customer, campaign and provider-readiness planning.</small>
+public/control-center/pages/ai-command.js:4696:                                <span>Library, campaigns, content, customers, governance, integrations and provider readiness are connected as guarded planning context. Execution stays confirmation-gated.</span>
+public/control-center/pages/ai-command.js:4735:                                                placeholder="Ask anything"
+public/control-center/pages/ai-command.js:4747:                                        <button id="aicmdV2AskBtn" class="aicmd-chatfirst-send aicmd-final-send" type="button" ${isGenerating ? "disabled" : ""} title="Ask AI Team">
+public/control-center/pages/ai-command.js:4853:				<span class="aicmd-chatfirst-pill ${safeBridgeStatus.available ? "is-available" : "is-planned"}">${escapeHtml(safeBridgeStatus.available ? "Chat ready" : "Preview guarded")}</span>
+public/control-center/pages/ai-command.js:4878:			<div class="aicmd-chatfirst-planned-grid" aria-label="Planned specialists">
+public/control-center/pages/ai-command.js:4880:					<div class="aicmd-chatfirst-team-card is-planned" aria-disabled="true">
+public/control-center/pages/ai-command.js:5053:		{ label: "Voice input", value: "Coming", className: "is-planned" },
+public/control-center/pages/ai-command.js:5054:		{ label: "Team chat", value: bridgeStatus.available ? "AI ready" : "Coming", className: bridgeStatus.available ? "is-available" : "is-planned" },
+public/control-center/pages/ai-command.js:5055:		{ label: "Media gen", value: "Coming", className: "is-planned" },
+public/control-center/pages/ai-command.js:5056:		{ label: "GPU video", value: "Coming", className: "is-planned" },
+public/control-center/pages/ai-command.js:5057:		{ label: "Image prompt generation", value: providerConfigured ? "Provider may be ready" : "Provider dependent", className: providerConfigured ? "is-available" : "is-planned" }
+public/control-center/pages/ai-command.js:5128:        const emptyBody = "Ask what to do next, draft a campaign asset, review a source, prepare a handoff, or coordinate the full AI team.";
+public/control-center/pages/ai-command.js:5171:        const fallbackSelectedResponses = !selectedMessages.length && selectedResponses.length
+public/control-center/pages/ai-command.js:5190:        const conversationMessages = selectedMessages.length ? selectedMessages : fallbackSelectedResponses;
+public/control-center/pages/ai-command.js:5199:                                <span class="aicmd-v2-chat-bridge ${safeBridgeStatus.available ? "is-available" : "is-unavailable"}">${escapeHtml(bridgeLabel)}</span>
+public/control-center/pages/ai-command.js:5578:		const setPreviewFromIntent = (intent, fallbackPrompt = "", options = {}) => {
+public/control-center/pages/ai-command.js:5579:			const value = asString(input?.value || session.draftMessage || fallbackPrompt || "").trim();
+public/control-center/pages/ai-command.js:5781:                                return text.includes("source") || text.includes("review") || text.includes("brief") || text.includes("campaign");
+public/control-center/pages/ai-command.js:5804:                        updateStatus(open ? `${reason} opened. Choose temporary file context, trusted Library source, planned product context, or current project context.` : `${reason} closed.`);
+public/control-center/pages/ai-command.js:5844:                                        updateStatus("Direct product/SKU source selection is planned. Use a trusted Library source or paste product details for now.");
+public/control-center/pages/ai-command.js:5845:                                        showMessage?.("Product/SKU selector is planned. Current safe options: Library source, uploaded filename context, project context, or manual product details.");
+public/control-center/pages/ai-command.js:5967:                        if (type !== "campaign") {
+public/control-center/pages/ai-command.js:5968:                                updateStatus("This Smart Action is planned. Campaign Builder is available first.");
+public/control-center/pages/ai-command.js:5974:                                type: "campaign",
+public/control-center/pages/ai-command.js:6014:                                        label: "Strategist",
+public/control-center/pages/ai-command.js:6015:                                        body: `Define the ${goalLabel.toLowerCase()} objective, target segment, market angle, and campaign promise for ${projectLabel}.`
+public/control-center/pages/ai-command.js:6040:                                title: `${goalLabel} campaign for ${projectLabel}`,
+public/control-center/pages/ai-command.js:6041:                                summary: `AI Team preview for a ${goalLabel.toLowerCase()} campaign using ${sourceLabel.toLowerCase()} and optimized for ${channelLabel}.`,
+public/control-center/pages/ai-command.js:6059:                                                body: `Use ${sourceMeaning}. Produce a review-ready campaign package before any handoff, approval, publishing, sending, CRM update, provider execution, or workflow mutation.`
+public/control-center/pages/ai-command.js:6087:                                                body: "Create a follow-up plan for review status, owner, destination handoff, performance check, improvement loop, and next campaign iteration."
+public/control-center/pages/ai-command.js:6129:                function normalizeBackendCampaignPreview(payload = {}, fallbackPreview = {}) {
+public/control-center/pages/ai-command.js:6131:                        const campaignPackage = asObject(body.campaignPackage || body.campaign_package);
+public/control-center/pages/ai-command.js:6133:                                campaignPackage.concept ? { label: "Campaign concept", body: asString(campaignPackage.concept) } : null,
+public/control-center/pages/ai-command.js:6134:                                campaignPackage.targetAudience ? { label: "Target audience", body: asString(campaignPackage.targetAudience) } : null,
+public/control-center/pages/ai-command.js:6135:                                campaignPackage.offer ? { label: "Offer", body: asString(campaignPackage.offer) } : null,
+public/control-center/pages/ai-command.js:6136:                                asArray(campaignPackage.launchPhases).length ? { label: "Launch phases", items: asArray(campaignPackage.launchPhases) } : null,
+public/control-center/pages/ai-command.js:6137:                                asArray(campaignPackage.contentAngles).length ? { label: "Content angles", items: asArray(campaignPackage.contentAngles) } : null,
+public/control-center/pages/ai-command.js:6138:                                asArray(campaignPackage.adAngles).length ? { label: "Ad angles", items: asArray(campaignPackage.adAngles) } : null,
+public/control-center/pages/ai-command.js:6139:                                asArray(campaignPackage.requiredAssets).length ? { label: "Required assets", items: asArray(campaignPackage.requiredAssets) } : null,
+public/control-center/pages/ai-command.js:6140:                                asArray(campaignPackage.missingBlockers).length ? { label: "Review blockers", items: asArray(campaignPackage.missingBlockers) } : null,
+public/control-center/pages/ai-command.js:6141:                                asArray(campaignPackage.nextActions).length ? { label: "Next actions", items: asArray(campaignPackage.nextActions) } : null
+public/control-center/pages/ai-command.js:6145:                                ...asObject(fallbackPreview),
+public/control-center/pages/ai-command.js:6146:                                title: asString(body.title || fallbackPreview.title || "AI Team campaign preview"),
+public/control-center/pages/ai-command.js:6147:                                summary: asString(body.summary || fallbackPreview.summary || ""),
+public/control-center/pages/ai-command.js:6148:                                source: asString(body.source_type || body.source || fallbackPreview.source || ""),
+public/control-center/pages/ai-command.js:6149:                                sourceLabel: asString(body.source_label || fallbackPreview.sourceLabel || fallbackPreview.source || ""),
+public/control-center/pages/ai-command.js:6150:                                goal: asString(body.goal || fallbackPreview.goal || ""),
+public/control-center/pages/ai-command.js:6151:                                channel: asString(body.channel || fallbackPreview.channel || ""),
+public/control-center/pages/ai-command.js:6152:                                market: asString(body.market || fallbackPreview.market || ""),
+public/control-center/pages/ai-command.js:6153:                                language: asString(body.language || fallbackPreview.language || ""),
+public/control-center/pages/ai-command.js:6154:                                format: asString(body.format || fallbackPreview.format || ""),
+public/control-center/pages/ai-command.js:6155:                                deadline: asString(body.deadline || fallbackPreview.deadline || ""),
+public/control-center/pages/ai-command.js:6156:                                audience: asString(body.audience || campaignPackage.targetAudience || fallbackPreview.audience || ""),
+public/control-center/pages/ai-command.js:6157:                                offer: asString(body.offer || campaignPackage.offer || fallbackPreview.offer || ""),
+public/control-center/pages/ai-command.js:6158:                                productFocus: asString(body.product_focus || body.productFocus || fallbackPreview.productFocus || ""),
+public/control-center/pages/ai-command.js:6159:                                complianceSensitivity: asString(body.compliance_sensitivity || body.complianceSensitivity || fallbackPreview.complianceSensitivity || ""),
+public/control-center/pages/ai-command.js:6160:                                campaignPackage,
+public/control-center/pages/ai-command.js:6164:                                        : asString(fallbackPreview.safety || "Preview only."),
+public/control-center/pages/ai-command.js:6202:                                console.warn("AI Command backend campaign preview fallback", error);
+public/control-center/pages/ai-command.js:6206:                                        backendFallbackReason: asString(error?.message || "Backend preview unavailable")
+public/control-center/pages/ai-command.js:6212:                Array.from(document.querySelectorAll("[data-aicmd-smart-campaign-preview]")).forEach((btn) => {
+public/control-center/pages/ai-command.js:6214:                                updateStatus("Preparing AI Team campaign preview...");
+public/control-center/pages/ai-command.js:6218:                                        type: "campaign",
+public/control-center/pages/ai-command.js:6223:                                        type: "smart_campaign_preview",
+public/control-center/pages/ai-command.js:6224:                                        outputType: "campaign_package",
+public/control-center/pages/ai-command.js:6240:                                        campaignPackage: asObject(preview.campaignPackage),
+public/control-center/pages/ai-command.js:6245:                                        confirmationNote: "Review and route this campaign package through the owning destination workspace before any publishing, sending, approval, task creation, provider execution, or workflow mutation.",
+public/control-center/pages/ai-command.js:6246:                                        nextSafeAction: "Review the campaign package, then send it to Media Studio or Publishing.",
+public/control-center/pages/ai-command.js:6249:                                        backendFallbackReason: asString(preview.backendFallbackReason || "")
+public/control-center/pages/ai-command.js:6252:                                persistSessionDraft(sessionKey, session, preview.backendPreview ? "Campaign Builder backend preview prepared" : "Campaign Builder local fallback preview prepared");
+public/control-center/pages/ai-command.js:6253:                                updateStatus(preview.backendPreview ? "Backend AI Team preview prepared. Review before any handoff or approval." : "Local campaign preview prepared because backend preview is unavailable.");
+public/control-center/pages/ai-command.js:6254:                                showMessage?.(preview.backendPreview ? "Backend AI Team campaign preview is ready for review." : "Campaign preview is ready using the local fallback.");
+public/control-center/pages/ai-command.js:6271:                                id: `campaign_handoff_${Date.now()}`,
+public/control-center/pages/ai-command.js:6272:                                type: "ai_command_campaign_handoff",
+public/control-center/pages/ai-command.js:6292:                                campaignPackage: asObject(preview.campaignPackage),
+public/control-center/pages/ai-command.js:6296:                                backend_fallback_reason: asString(preview.backendFallbackReason || ""),
+public/control-center/pages/ai-command.js:6305:                                window.localStorage?.setItem?.("mh_ai_command_campaign_handoff", payload);
+public/control-center/pages/ai-command.js:6307:                                window.sessionStorage?.setItem?.("mh_ai_command_campaign_handoff", payload);
+public/control-center/pages/ai-command.js:6310:                                console.warn("Unable to store AI Command campaign handoff", error);
+public/control-center/pages/ai-command.js:6318:                                updateStatus("Generate a campaign preview before choosing a review action.");
+public/control-center/pages/ai-command.js:6375:                Array.from(document.querySelectorAll("[data-aicmd-smart-campaign-action]")).forEach((btn) => {
+public/control-center/pages/ai-command.js:6377:                                const action = asString(btn.getAttribute("data-aicmd-smart-campaign-action") || "");
+public/control-center/pages/ai-command.js:6399:			        if (sendBtn && !sendBtn.disabled) {
+public/control-center/pages/ai-command.js:6526:		                        showMessage?.("AI chat route is not connected yet.");
+public/control-center/pages/ai-command.js:6578:		                                        campaign: aiContext.campaign,
+public/control-center/pages/ai-command.js:6692:                                const fallback = asString(input?.value || session.draftMessage || "").trim();
+public/control-center/pages/ai-command.js:6696:                                        fallbackPrompt: fallback,
+public/control-center/pages/ai-command.js:6715:                                const fallback = value
+public/control-center/pages/ai-command.js:6721:                                        fallbackPrompt: fallback,
+public/control-center/pages/ai-command.js:6738:                                const fallback = value
+public/control-center/pages/ai-command.js:6744:                                        fallbackPrompt: fallback,
+public/control-center/pages/ai-command.js:6762:                                const fallback = value
+public/control-center/pages/ai-command.js:6768:                                        fallbackPrompt: fallback,
+public/control-center/pages/ai-command.js:6790:					campaign: aiContext.campaign
+public/control-center/pages/ai-command.js:6814:					updateStatus("Smart tool drawer is unavailable. Refresh AI Command and try again.");
+public/control-center/pages/ai-command.js:6906:		                const fallback = latestResponse?.prompt || asString(input?.value || session.draftMessage || "");
+public/control-center/pages/ai-command.js:6910:		                        fallbackPrompt: fallback,
+public/control-center/pages/ai-command.js:7201:        { id: "strategist", label: "Strategist" },
+public/control-center/pages/ai-command.js:7810:      session.taskType = "launch";
+public/control-center/pages/ai-command/tool-dock.js:14:function moveFocusOutOfDrawer(drawer, fallbackTarget = null) {
+public/control-center/pages/ai-command/tool-dock.js:19:    if (fallbackTarget && typeof fallbackTarget.focus === "function") {
+public/control-center/pages/ai-command/tool-dock.js:20:      fallbackTarget.focus({ preventScroll: true });
+public/control-center/pages/ai-command/tool-dock.js:78:    const fallbackTool = findToolMetadataById(returnContext.toolId);
+public/control-center/pages/ai-command/tool-dock.js:79:    if (fallbackTool) {
+public/control-center/pages/ai-command/tool-dock.js:82:        btn: createToolButtonAdapter(fallbackTool),
+public/control-center/pages/ai-command/tool-dock.js:83:        tool: fallbackTool,
+public/control-center/pages/ai-command/tool-dock.js:84:        text: fallbackTool.template || "",
+public/control-center/pages/ai-command/tool-dock.js:337:      sourceInput.placeholder = "Optional: add source usage notes, audience, angle, or claims to avoid...";
+public/control-center/pages/ai-command/tool-dock.js:360:  // Set placeholder for Source Details if empty
+public/control-center/pages/ai-command/tool-dock.js:362:    sourceInput.placeholder = "Optional: add source usage notes, audience, angle, or claims to avoid...";
+public/control-center/pages/ai-command/tool-dock.js:388:        if (sourceInput) sourceInput.placeholder = "Optional: add source usage notes, audience, angle, or claims to avoid...";
+public/control-center/pages/ai-command/tool-dock.js:424:      id: "campaign-plan",
+public/control-center/pages/ai-command/tool-dock.js:430:      frontendOwnerPage: "campaign-studio",
+public/control-center/pages/ai-command/tool-dock.js:431:      destinations: ["chat-preview", "campaign-studio", "content-studio", "workflows"],
+public/control-center/pages/ai-command/tool-dock.js:432:      sourceTypes: ["current_chat", "campaign_notes", "market_notes", "audience_notes", "product_data", "library_source", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:433:      outputTypes: ["campaign_plan", "campaign_brief", "channel_plan", "next_best_actions"],
+public/control-center/pages/ai-command/tool-dock.js:434:      template: "Create a campaign plan for {projectName}. Include objective, audience, offer, channels, phases, risks, and next best actions. Keep it review-ready only."
+public/control-center/pages/ai-command/tool-dock.js:437:      id: "launch-plan",
+public/control-center/pages/ai-command/tool-dock.js:443:      frontendOwnerPage: "campaign-studio",
+public/control-center/pages/ai-command/tool-dock.js:444:      destinations: ["chat-preview", "campaign-studio", "workflows", "publishing"],
+public/control-center/pages/ai-command/tool-dock.js:445:      sourceTypes: ["current_chat", "campaign_brief", "asset_requirements", "timeline_notes", "library_source", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:446:      outputTypes: ["launch_plan", "readiness_plan", "timeline", "dependency_map"],
+public/control-center/pages/ai-command/tool-dock.js:447:      template: "Build a launch plan for {projectName}. Include timeline, required assets, owners, channels, readiness gaps, and safe next actions."
+public/control-center/pages/ai-command/tool-dock.js:456:      frontendOwnerPage: "campaign-studio",
+public/control-center/pages/ai-command/tool-dock.js:457:      destinations: ["chat-preview", "campaign-studio", "content-studio", "insights"],
+public/control-center/pages/ai-command/tool-dock.js:469:      frontendOwnerPage: "campaign-studio",
+public/control-center/pages/ai-command/tool-dock.js:470:      destinations: ["chat-preview", "campaign-studio", "content-studio", "ads-manager"],
+public/control-center/pages/ai-command/tool-dock.js:476:      id: "funnel",
+public/control-center/pages/ai-command/tool-dock.js:482:      frontendOwnerPage: "campaign-studio",
+public/control-center/pages/ai-command/tool-dock.js:483:      destinations: ["chat-preview", "campaign-studio", "content-studio", "workflows", "publishing"],
+public/control-center/pages/ai-command/tool-dock.js:484:      sourceTypes: ["current_chat", "campaign_brief", "audience_notes", "content_inventory", "library_source", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:485:      outputTypes: ["funnel_map", "content_needs", "handoff_points", "retention_notes"],
+public/control-center/pages/ai-command/tool-dock.js:486:      template: "Map a funnel for {projectName}. Include awareness, consideration, conversion, retention, content needs, and handoff points."
+public/control-center/pages/ai-command/tool-dock.js:496:      destinations: ["chat-preview", "workflows", "task", "campaign-studio"],
+public/control-center/pages/ai-command/tool-dock.js:497:      sourceTypes: ["current_chat", "operations_snapshot", "readiness_gaps", "campaign_notes", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:632:      sourceTypes: ["current_chat", "campaign_brief", "brand_guidelines", "product_images", "reference_asset", "library_source", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:645:      sourceTypes: ["current_chat", "brand_guidelines", "reference_asset", "campaign_mood", "library_source", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:671:      sourceTypes: ["current_chat", "campaign_brief", "library_folder", "brand_assets", "product_images", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:713:      sourceTypes: ["current_chat", "campaign_brief", "content_draft", "product_data", "library_source", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:752:      sourceTypes: ["current_chat", "script_draft", "campaign_brief", "brand_voice", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:765:      sourceTypes: ["current_chat", "campaign_brief", "offer_data", "video_script", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:767:      template: "Create CTA options for a video campaign for {projectName}. Include soft, direct, urgency, and brand-led versions."
+public/control-center/pages/ai-command/tool-dock.js:794:      sourceTypes: ["content_draft", "media_asset", "campaign_brief", "channel_notes", "library_source", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:807:      sourceTypes: ["publishing_package", "campaign_timeline", "channel_notes", "approval_notes", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:849:      sourceTypes: ["campaign_brief", "audience_notes", "offer_data", "proof_points", "library_source", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:862:      sourceTypes: ["ad_angle", "campaign_brief", "landing_page_copy", "product_data", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:874:      destinations: ["chat-preview", "ads-manager", "insights", "campaign-studio"],
+public/control-center/pages/ai-command/tool-dock.js:875:      sourceTypes: ["audience_notes", "insights_report", "campaign_brief", "customer_notes", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:876:      outputTypes: ["audience_map", "targeting_ideas", "exclusions", "funnel_stage_map"],
+public/control-center/pages/ai-command/tool-dock.js:877:      template: "Map targeting ideas for {projectName}. Include audience groups, interests, exclusions, funnel stage, and testing notes."
+public/control-center/pages/ai-command/tool-dock.js:888:      sourceTypes: ["creative_assets", "campaign_brief", "ad_copy", "performance_notes", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:929:      destinations: ["chat-preview", "insights", "campaign-studio", "workflows"],
+public/control-center/pages/ai-command/tool-dock.js:955:      destinations: ["chat-preview", "insights", "campaign-studio", "workflows"],
+public/control-center/pages/ai-command/tool-dock.js:956:      sourceTypes: ["analytics_summary", "performance_notes", "campaign_results", "content_inventory", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:968:      destinations: ["chat-preview", "insights", "content-studio", "campaign-studio"],
+public/control-center/pages/ai-command/tool-dock.js:971:      template: "Identify content gaps for {projectName}. Include missing pages, missing topics, weak funnel stages, and priority actions."
+public/control-center/pages/ai-command/tool-dock.js:1091:      destinations: ["chat-preview", "workflows", "campaign-studio", "publishing"],
+public/control-center/pages/ai-command/tool-dock.js:1092:      sourceTypes: ["current_chat", "project_plan", "campaign_timeline", "dependency_notes", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:1253:    .replace(/\{campaign\}/g, values.campaign || "the active campaign")
+public/control-center/pages/ai-command/tool-dock.js:1262:function getToolMetaList(tool = {}, key = "", fallback = []) {
+public/control-center/pages/ai-command/tool-dock.js:1266:  return fallback;
+public/control-center/pages/ai-command/tool-dock.js:1373:                placeholder="Example: use the selected Library source for facts only, avoid unsupported claims..."
+public/control-center/pages/ai-command/tool-dock.js:1383:                placeholder="Add audience, goal, keywords, offer, product, or any must-use information..."
+public/control-center/pages/ai-command/tool-dock.js:1500:function populateDrawerSelect(select, rawValue = "", fallbackLabel = "Auto") {
+public/control-center/pages/ai-command/tool-dock.js:1510:  const options = values.length ? values : [String(fallbackLabel || "Auto").trim() || "Auto"];
+public/control-center/pages/ai-command/tool-dock.js:1514:    const label = humanizeMeta(value || fallbackLabel || "Auto");
+public/control-center/pages/ai-command/tool-dock.js:1519:function getSelectedLabel(drawer, selector, fallback = "Auto") {
+public/control-center/pages/ai-command/tool-dock.js:1521:  if (!select || !select.value) return fallback;
+public/control-center/pages/ai-command/tool-dock.js:1658:function closeToolDrawer(drawer, fallbackTarget = null) {
+public/control-center/pages/ai-command/tool-dock.js:1659:  moveFocusOutOfDrawer(drawer, fallbackTarget);
+public/control-center/pages/ai-command/tool-dock.js:1693:  const hardDestinationDefaults = ["chat-preview", "campaign-studio", "content-studio", "composer"];
+public/control-center/pages/ai-command/tool-dock.js:1840:          campaign: aiContext.campaign,
+public/control-center/pages/ai-command/tool-dock.js:1889:        campaign: aiContext.campaign,
+public/control-center/pages/campaign-studio.js:9:const campaignSessions = new Map();
+public/control-center/pages/campaign-studio.js:10:const campaignSaveTimers = new Map();
+public/control-center/pages/campaign-studio.js:18:    roleHint: "Use this wave to introduce the campaign, establish the core promise, and create awareness."
+public/control-center/pages/campaign-studio.js:58:  serviceDomain: "campaign",
+public/control-center/pages/campaign-studio.js:66:  "ads-manager": { role: "ads_operator", domain: "campaign" },
+public/control-center/pages/campaign-studio.js:83:function toNumber(value, fallback = null) {
+public/control-center/pages/campaign-studio.js:85:  return Number.isFinite(parsed) ? parsed : fallback;
+public/control-center/pages/campaign-studio.js:157:function readableValue(value, fallback = "") {
+public/control-center/pages/campaign-studio.js:158:  if (value == null) return fallback;
+public/control-center/pages/campaign-studio.js:159:  if (typeof value === "string") return value.trim() === "[object Object]" ? fallback : value.trim();
+public/control-center/pages/campaign-studio.js:161:  if (Array.isArray(value)) return uniqueStrings(value.map((item) => readableValue(item))).join(", ") || fallback;
+public/control-center/pages/campaign-studio.js:173:    fallback
+public/control-center/pages/campaign-studio.js:216:  const campaignName = context.activeCampaign || `${context.currentProject || "Campaign"} Launch`;
+public/control-center/pages/campaign-studio.js:227:    campaignName,
+public/control-center/pages/campaign-studio.js:228:    campaignGoal: overviewData.primary_goal || "Launch",
+public/control-center/pages/campaign-studio.js:229:    campaignType: overviewData.project_type || "Growth campaign",
+public/control-center/pages/campaign-studio.js:243:    wave1Name: campaignName,
+public/control-center/pages/campaign-studio.js:260:  if (!campaignSessions.has(key)) {
+public/control-center/pages/campaign-studio.js:261:    campaignSessions.set(key, {
+public/control-center/pages/campaign-studio.js:274:    const session = campaignSessions.get(key);
+public/control-center/pages/campaign-studio.js:287:  return campaignSessions.get(key);
+public/control-center/pages/campaign-studio.js:295:  placeholder,
+public/control-center/pages/campaign-studio.js:303:        <label class="setup-label" for="campaign-${escapeHtml(name)}">${escapeHtml(label)}</label>
+public/control-center/pages/campaign-studio.js:308:          ? `<textarea id="campaign-${escapeHtml(name)}" name="${escapeHtml(name)}" class="setup-input setup-textarea" rows="${rows}" placeholder="${escapeHtml(placeholder || "")}">${escapeHtml(asString(value))}</textarea>`
+public/control-center/pages/campaign-studio.js:309:          : `<input id="campaign-${escapeHtml(name)}" name="${escapeHtml(name)}" class="setup-input" type="text" value="${escapeHtml(asString(value))}" placeholder="${escapeHtml(placeholder || "")}">`
+public/control-center/pages/campaign-studio.js:325:    source_page: "campaign-studio",
+public/control-center/pages/campaign-studio.js:326:    name: asString(values?.campaignName),
+public/control-center/pages/campaign-studio.js:327:    objective: asString(values?.campaignGoal),
+public/control-center/pages/campaign-studio.js:345:function hydrateValuesFromCampaignRecord(defaults, campaign) {
+public/control-center/pages/campaign-studio.js:346:  const record = asObject(campaign);
+public/control-center/pages/campaign-studio.js:352:    campaignName: asString(formValues.campaignName || record.name || defaults.campaignName),
+public/control-center/pages/campaign-studio.js:353:    campaignGoal: asString(formValues.campaignGoal || record.objective || defaults.campaignGoal),
+public/control-center/pages/campaign-studio.js:380:  const handoff = getSharedHandoff(projectName, "campaign-studio", operations, "ai-command");
+public/control-center/pages/campaign-studio.js:387:  const pkg = asObject(response.campaignPackage || response.campaign_package || payload.campaignPackage || payload.campaign_package);
+public/control-center/pages/campaign-studio.js:390:  const phases = asArray(pkg.launchPhases || pkg.launch_phases || pkg.phases);
+public/control-center/pages/campaign-studio.js:393:    campaignName: firstNonEmpty(pkg.concept, pkg.campaignConcept, response.title, session.values.campaignName),
+public/control-center/pages/campaign-studio.js:394:    campaignGoal: firstNonEmpty(response.summary, pkg.goal, pkg.objective, session.values.campaignGoal),
+public/control-center/pages/campaign-studio.js:400:    offerHeadline: firstNonEmpty(pkg.offer, pkg.offerStrategy, pkg.offer_strategy, session.values.offerHeadline),
+public/control-center/pages/campaign-studio.js:426:    name: session.values.campaignName,
+public/control-center/pages/campaign-studio.js:427:    objective: session.values.campaignGoal,
+public/control-center/pages/campaign-studio.js:444:    detail || "This action may create or update backend campaign records or route handoffs.",
+public/control-center/pages/campaign-studio.js:447:    "Select Cancel to review the campaign plan, evidence, and destination before continuing."
+public/control-center/pages/campaign-studio.js:459:    name: asString(values.campaignName || projectName),
+public/control-center/pages/campaign-studio.js:460:    objective: asString(values.campaignGoal),
+public/control-center/pages/campaign-studio.js:467:    source_page: "campaign-studio",
+public/control-center/pages/campaign-studio.js:468:    owner: "Strategist",
+public/control-center/pages/campaign-studio.js:484:    source_page: "campaign-studio",
+public/control-center/pages/campaign-studio.js:491:      entity_type: "campaign",
+public/control-center/pages/campaign-studio.js:493:      route: "campaign-studio",
+public/control-center/pages/campaign-studio.js:494:      label: asString(session.values.campaignName || projectName)
+public/control-center/pages/campaign-studio.js:497:      campaign_id: session.recordId || "",
+public/control-center/pages/campaign-studio.js:498:      campaign_name: asString(session.values.campaignName || projectName),
+public/control-center/pages/campaign-studio.js:507:    "Create campaign route handoff",
+public/control-center/pages/campaign-studio.js:508:    `This will create a campaign handoff from Campaign Studio to ${destinationPage} for review and execution preparation.`
+public/control-center/pages/campaign-studio.js:516:    console.warn("Failed to persist campaign route handoff:", error.message);
+public/control-center/pages/campaign-studio.js:528:  const existing = campaignSaveTimers.get(key);
+public/control-center/pages/campaign-studio.js:537:      autosave_note: "Campaign Studio autosave is local/shared-state only. Use Save campaign draft or Save campaign plan for backend persistence."
+public/control-center/pages/campaign-studio.js:542:  campaignSaveTimers.set(key, timer);
+public/control-center/pages/campaign-studio.js:547:    <div class="campaign-studio-empty-state">
+public/control-center/pages/campaign-studio.js:630:    body: "Best publishing window detected from current campaign intelligence."
+public/control-center/pages/campaign-studio.js:671:  asArray(paid.best_campaigns || paid.best_creatives).slice(0, 2).forEach((item) => {
+public/control-center/pages/campaign-studio.js:674:      title: firstNonEmpty(record.campaign_name, record.title, record.label, "Top paid signal"),
+public/control-center/pages/campaign-studio.js:675:      body: firstNonEmpty(record.reason, record.insight, record.summary, record.recommendation, "This campaign is outperforming peers.")
+public/control-center/pages/campaign-studio.js:679:  asArray(paid.weak_campaigns || paid.weak_creatives).slice(0, 2).forEach((item) => {
+public/control-center/pages/campaign-studio.js:682:      title: firstNonEmpty(record.campaign_name, record.title, record.label, "Paid risk"),
+public/control-center/pages/campaign-studio.js:731:      body: "This platform is not operational yet, so campaign execution will be constrained."
+public/control-center/pages/campaign-studio.js:776:          ? "Connected inside the current system, so this channel can support launch execution."
+public/control-center/pages/campaign-studio.js:805:          ? "Platform connection exists, so this can be activated once the campaign package is ready."
+public/control-center/pages/campaign-studio.js:815:      ? "Use lifecycle support to reinforce the launch and recover warm traffic."
+public/control-center/pages/campaign-studio.js:821:    rationale: seoOpportunities[0]?.body || "Use website and search support to capture campaign intent beyond social reach."
+public/control-center/pages/campaign-studio.js:868:  if (!values.startDate) publishingBlockers.push("Set a launch start date before pushing work downstream.");
+public/control-center/pages/campaign-studio.js:877:  if (!values.budget) adsBlockers.push("Add a working campaign budget before routing to Ads Manager.");
+public/control-center/pages/campaign-studio.js:885:    trackingBlockers.push("Website, analytics, or ecommerce tracking is not connected.");
+public/control-center/pages/campaign-studio.js:887:  if (!values.campaignName || !values.campaignGoal) {
+public/control-center/pages/campaign-studio.js:891:    trackingBlockers.push("Live intelligence is still sparse, so optimization loops will be weaker after launch.");
+public/control-center/pages/campaign-studio.js:894:  if (!checks.website) seoBlockers.push("Website source is not connected yet.");
+public/control-center/pages/campaign-studio.js:949:      aiRecommendations.campaign_angle,
+public/control-center/pages/campaign-studio.js:955:      "Refine the campaign angle once stronger content and audience learning is available."
+public/control-center/pages/campaign-studio.js:962:      "Clarify the single strongest commercial promise before launch."
+public/control-center/pages/campaign-studio.js:977:      readinessStatus ? `Readiness status is ${readinessStatus}. Close the top blocker before routing this campaign.` : "",
+public/control-center/pages/campaign-studio.js:1008:      ? "Hero visual, launch copy, offer banner"
+public/control-center/pages/campaign-studio.js:1041:  const campaignAssetKeys = [
+public/control-center/pages/campaign-studio.js:1046:    "campaign_assets",
+public/control-center/pages/campaign-studio.js:1050:  const campaignAssetCategories = getCategoryReadinessList(assets)
+public/control-center/pages/campaign-studio.js:1051:    .filter((item) => campaignAssetKeys.includes(item.asset_type));
+public/control-center/pages/campaign-studio.js:1052:  const missingAssets = getMissingAssetLabels(assets, campaignAssetKeys);
+public/control-center/pages/campaign-studio.js:1053:  const requiredAssetTypes = uniqueStrings(campaignAssetCategories.map((item) => item.display_label || item.label || item.asset_type));
+public/control-center/pages/campaign-studio.js:1055:    campaignAssetCategories
+public/control-center/pages/campaign-studio.js:1130:  const strategyGuidance = buildStrategyGuidance({
+public/control-center/pages/campaign-studio.js:1151:    campaignAssetKeys,
+public/control-center/pages/campaign-studio.js:1152:    campaignAssetCategories,
+public/control-center/pages/campaign-studio.js:1153:    assetNextAction: getAssetNextAction(assets, campaignAssetKeys),
+public/control-center/pages/campaign-studio.js:1164:    strategyGuidance,
+public/control-center/pages/campaign-studio.js:1176:      "Connect more intelligence or lock the campaign inputs to tighten the channel recommendation.",
+public/control-center/pages/campaign-studio.js:1182:    <div class="campaign-channel-card-list">
+public/control-center/pages/campaign-studio.js:1184:        <div class="campaign-channel-card">
+public/control-center/pages/campaign-studio.js:1185:          <div class="campaign-channel-head">
+public/control-center/pages/campaign-studio.js:1198:    <div class="campaign-readiness-block">
+public/control-center/pages/campaign-studio.js:1199:      <div class="campaign-readiness-head">
+public/control-center/pages/campaign-studio.js:1258:      session.intelligence.error = error?.message || "Failed to load campaign intelligence";
+public/control-center/pages/campaign-studio.js:1287:  const form = $("campaignStudioForm");
+public/control-center/pages/campaign-studio.js:1304:  const saveBtn = $("campaignSaveDraftBtn");
+public/control-center/pages/campaign-studio.js:1310:        "Save backend campaign draft",
+public/control-center/pages/campaign-studio.js:1319:        if (result?.campaign?.id) {
+public/control-center/pages/campaign-studio.js:1320:          session.recordId = result.campaign.id;
+public/control-center/pages/campaign-studio.js:1321:          setSharedCampaignRecord(projectName, result.campaign);
+public/control-center/pages/campaign-studio.js:1325:        showError?.(error.message || "Failed to save campaign plan.");
+public/control-center/pages/campaign-studio.js:1330:  const buildBtn = $("campaignBuildPlanBtn");
+public/control-center/pages/campaign-studio.js:1336:        "Save backend campaign plan",
+public/control-center/pages/campaign-studio.js:1346:          status: "planned"
+public/control-center/pages/campaign-studio.js:1348:        if (result?.campaign?.id) {
+public/control-center/pages/campaign-studio.js:1349:          session.recordId = result.campaign.id;
+public/control-center/pages/campaign-studio.js:1350:          setSharedCampaignRecord(projectName, result.campaign);
+public/control-center/pages/campaign-studio.js:1354:        showError?.(error.message || "Failed to structure the campaign plan.");
+public/control-center/pages/campaign-studio.js:1359:  const askAiBtn = $("campaignAskAiBtn");
+public/control-center/pages/campaign-studio.js:1362:      const prompt = `Build an execution plan for campaign ${session.values.campaignName || "this campaign"} with goal ${session.values.campaignGoal || "launch"}, channels ${session.values.channelPlan || "to be defined"}, and offer ${session.values.offerHeadline || "to be defined"}. Use current project intelligence, readiness blockers, and recommendation signals.`;
+public/control-center/pages/campaign-studio.js:1368:        "Create AI Command campaign handoff",
+public/control-center/pages/campaign-studio.js:1369:        "This will create a campaign handoff from Campaign Studio to AI Command for review and planning support."
+public/control-center/pages/campaign-studio.js:1376:        source_page: "campaign-studio",
+public/control-center/pages/campaign-studio.js:1380:          campaign_id: session.recordId || "",
+public/control-center/pages/campaign-studio.js:1381:          campaign_name: session.values.campaignName || projectName,
+public/control-center/pages/campaign-studio.js:1388:        source_page: "campaign-studio",
+public/control-center/pages/campaign-studio.js:1395:          entity_type: "campaign",
+public/control-center/pages/campaign-studio.js:1400:          campaign_id: session.recordId || "",
+public/control-center/pages/campaign-studio.js:1401:          campaign_name: session.values.campaignName || projectName,
+public/control-center/pages/campaign-studio.js:1408:        console.warn("Failed to persist campaign handoff:", error.message);
+public/control-center/pages/campaign-studio.js:1415:  const publishingBtn = $("campaignOpenPublishingBtn");
+public/control-center/pages/campaign-studio.js:1423:  const assetsBtn = $("campaignReviewAssetsBtn");
+public/control-center/pages/campaign-studio.js:1428:  const contentBtn = $("campaignOpenContentStudioBtn");
+public/control-center/pages/campaign-studio.js:1436:  const mediaBtn = $("campaignOpenMediaStudioBtn");
+public/control-center/pages/campaign-studio.js:1444:  const adsBtn = $("campaignOpenAdsManagerBtn");
+public/control-center/pages/campaign-studio.js:1452:  const generatePackageBtn = $("campaignGeneratePackageBtn");
+public/control-center/pages/campaign-studio.js:1461:  const dependenciesBtn = $("campaignReviewDependenciesBtn");
+public/control-center/pages/campaign-studio.js:1477:  const refreshIntelligenceBtn = $("campaignRefreshIntelligenceBtn");
+public/control-center/pages/campaign-studio.js:1491:      showMessage?.("Refreshing campaign intelligence.");
+public/control-center/pages/campaign-studio.js:1496:export const campaignStudioRoute = {
+public/control-center/pages/campaign-studio.js:1497:  id: "campaign-studio",
+public/control-center/pages/campaign-studio.js:1502:    description: "Plan campaign basics, launch waves, channel mix, and required assets in one execution-oriented workspace."
+public/control-center/pages/campaign-studio.js:1505:    <section class="page is-active" data-page="campaign-studio">
+public/control-center/pages/campaign-studio.js:1506:      <div id="campaignStudioRoot"></div>
+public/control-center/pages/campaign-studio.js:1527:    const root = $("campaignStudioRoot");
+public/control-center/pages/campaign-studio.js:1560:      campaignAssetKeys,
+public/control-center/pages/campaign-studio.js:1572:      strategyGuidance,
+public/control-center/pages/campaign-studio.js:1579:    const activeCampaignLabel = safeText(firstNonEmpty(state.context.activeCampaign, values.campaignName), projectName || "Campaign Studio");
+public/control-center/pages/campaign-studio.js:1593:    const launchWindowLabel = [values.startDate, values.endDate].filter(Boolean).join(" to ") || "Window pending";
+public/control-center/pages/campaign-studio.js:1596:    const goalLabel = safeText(values.campaignGoal, "Goal pending");
+public/control-center/pages/campaign-studio.js:1597:    const strategistNextAction = safeText(strategyGuidance.nextAction, "Review campaign plan");
+public/control-center/pages/campaign-studio.js:1599:      ? "Current intelligence is shaping campaign direction and readiness."
+public/control-center/pages/campaign-studio.js:1603:      <div class="campaign-studio-wrapper">
+public/control-center/pages/campaign-studio.js:1605:        <section class="mhos-campaign-command-header mhos-context-ribbon" aria-label="Campaign command board">
+public/control-center/pages/campaign-studio.js:1606:          <div class="mhos-campaign-command-main mhos-context-main">
+public/control-center/pages/campaign-studio.js:1607:            <div class="mhos-campaign-kicker-row mhos-context-kicker">
+public/control-center/pages/campaign-studio.js:1608:              <span class="mhos-campaign-kicker mhos-context-kicker">Campaign Command Board</span>
+public/control-center/pages/campaign-studio.js:1609:              <span class="mhos-campaign-state mhos-campaign-state--${readinessTone}">${escapeHtml(executionReadiness.status)}</span>
+public/control-center/pages/campaign-studio.js:1611:            <h2 class="mhos-campaign-title mhos-context-title">${escapeHtml(activeCampaignLabel)}</h2>
+public/control-center/pages/campaign-studio.js:1612:            <p class="mhos-campaign-summary mhos-context-description">${escapeHtml(goalLabel)}</p>
+public/control-center/pages/campaign-studio.js:1613:            <div class="mhos-campaign-context-row mhos-context-chip-row" aria-label="Campaign context">
+public/control-center/pages/campaign-studio.js:1614:              <span class="mhos-campaign-context-item mhos-context-chip">Market <strong class="mhos-campaign-context-value">${escapeHtml(marketLabel)}</strong></span>
+public/control-center/pages/campaign-studio.js:1615:              <span class="mhos-campaign-context-item mhos-context-chip">Product <strong class="mhos-campaign-context-value">${escapeHtml(productLabel)}</strong></span>
+public/control-center/pages/campaign-studio.js:1616:              <span class="mhos-campaign-context-item mhos-context-chip">Budget <strong class="mhos-campaign-context-value">${escapeHtml(budgetLabel)}</strong></span>
+public/control-center/pages/campaign-studio.js:1617:              <span class="mhos-campaign-context-item mhos-context-chip">Window <strong class="mhos-campaign-context-value">${escapeHtml(launchWindowLabel)}</strong></span>
+public/control-center/pages/campaign-studio.js:1621:          <aside class="mhos-campaign-strategist-panel mhos-context-actions mhos-executive-ai-panel" aria-label="Campaign strategist recommendation">
+public/control-center/pages/campaign-studio.js:1622:            <span class="mhos-campaign-panel-label">Strategist next move</span>
+public/control-center/pages/campaign-studio.js:1623:            <strong class="mhos-campaign-panel-action mhos-executive-guidance">${escapeHtml(strategistNextAction)}</strong>
+public/control-center/pages/campaign-studio.js:1624:            <p class="mhos-campaign-panel-copy mhos-executive-guidance">${escapeHtml(strategistMode)}</p>
+public/control-center/pages/campaign-studio.js:1627:          <div class="mhos-campaign-actions mhos-context-actions mhos-executive-action-row" aria-label="Campaign command actions">
+public/control-center/pages/campaign-studio.js:1628:            <button id="campaignRefreshIntelligenceBtn" class="btn btn-secondary mhos-context-action" type="button">Refresh campaign intelligence</button>
+public/control-center/pages/campaign-studio.js:1629:            <button id="campaignSaveDraftBtn" class="btn btn-secondary mhos-context-action" type="button">Save campaign draft</button>
+public/control-center/pages/campaign-studio.js:1630:            <button id="campaignBuildPlanBtn" class="btn btn-primary mhos-context-action" type="button">Save campaign plan</button>
+public/control-center/pages/campaign-studio.js:1633:          <div class="mhos-campaign-operating-summary mhos-executive-summary-grid" aria-label="Campaign operating summary">
+public/control-center/pages/campaign-studio.js:1634:            <article class="mhos-campaign-summary-item mhos-campaign-summary-item--${readinessTone} mhos-executive-summary-item">
+public/control-center/pages/campaign-studio.js:1635:              <span class="mhos-campaign-metric-label mhos-executive-metric-label">Readiness</span>
+public/control-center/pages/campaign-studio.js:1636:              <strong class="mhos-campaign-metric-value mhos-executive-metric-value">${escapeHtml(executionReadiness.status)}</strong>
+public/control-center/pages/campaign-studio.js:1637:              <small class="mhos-campaign-metric-note mhos-executive-metric-note">${escapeHtml(executionReadiness.total ? `${executionReadiness.total} open gate${executionReadiness.total === 1 ? "" : "s"}` : "Launch gates clear")}</small>
+public/control-center/pages/campaign-studio.js:1639:            <article class="mhos-campaign-summary-item mhos-campaign-summary-item--${intelligenceTone} mhos-executive-summary-item">
+public/control-center/pages/campaign-studio.js:1640:              <span class="mhos-campaign-metric-label mhos-executive-metric-label">Intelligence</span>
+public/control-center/pages/campaign-studio.js:1641:              <strong class="mhos-campaign-metric-value mhos-executive-metric-value">${escapeHtml(intelligenceLabel)}</strong>
+public/control-center/pages/campaign-studio.js:1642:              <small class="mhos-campaign-metric-note mhos-executive-metric-note">${escapeHtml(intelligenceError || (hasLiveIntelligence ? "Signals active" : "Projection mode"))}</small>
+public/control-center/pages/campaign-studio.js:1644:            <article class="mhos-campaign-summary-item mhos-campaign-summary-item--${blockerTone} mhos-executive-summary-item">
+public/control-center/pages/campaign-studio.js:1645:              <span class="mhos-campaign-metric-label mhos-executive-metric-label">Blockers</span>
+public/control-center/pages/campaign-studio.js:1646:              <strong class="mhos-campaign-metric-value mhos-executive-metric-value">${escapeHtml(String(executionReadiness.total))}</strong>
+public/control-center/pages/campaign-studio.js:1647:              <small class="mhos-campaign-metric-note mhos-executive-metric-note">${escapeHtml(executionReadiness.total ? "Needs operator attention" : "No open launch blockers")}</small>
+public/control-center/pages/campaign-studio.js:1649:            <article class="mhos-campaign-summary-item mhos-campaign-summary-item--${channelTone} mhos-executive-summary-item">
+public/control-center/pages/campaign-studio.js:1650:              <span class="mhos-campaign-metric-label mhos-executive-metric-label">Channels</span>
+public/control-center/pages/campaign-studio.js:1651:              <strong class="mhos-campaign-metric-value mhos-executive-metric-value">${escapeHtml(channelStateLabel)}</strong>
+public/control-center/pages/campaign-studio.js:1652:              <small class="mhos-campaign-metric-note mhos-executive-metric-note">${escapeHtml(recommendedChannelCount ? `${recommendedChannelCount} AI recommendations` : "Awaiting channel mix")}</small>
+public/control-center/pages/campaign-studio.js:1657:        <div class="campaign-studio-layout">
+public/control-center/pages/campaign-studio.js:1658:          <form id="campaignStudioForm" class="campaign-studio-main">
+public/control-center/pages/campaign-studio.js:1664:              <div class="campaign-section-copy">
+public/control-center/pages/campaign-studio.js:1665:                Lock the core campaign definition first so planning, routing, and AI prompts all reference the same structure.
+public/control-center/pages/campaign-studio.js:1669:                  name: "campaignName",
+public/control-center/pages/campaign-studio.js:1671:                  value: values.campaignName,
+public/control-center/pages/campaign-studio.js:1673:                  placeholder: "Spring launch wave 1",
+public/control-center/pages/campaign-studio.js:1677:                  name: "campaignGoal",
+public/control-center/pages/campaign-studio.js:1679:                  value: values.campaignGoal,
+public/control-center/pages/campaign-studio.js:1680:                  helper: "Lead with the business outcome: launch, revenue, retention, awareness, or activation.",
+public/control-center/pages/campaign-studio.js:1681:                  placeholder: "Launch, sales growth, lead generation...",
+public/control-center/pages/campaign-studio.js:1685:                  name: "campaignType",
+public/control-center/pages/campaign-studio.js:1687:                  value: values.campaignType,
+public/control-center/pages/campaign-studio.js:1689:                  placeholder: "Product launch, seasonal push, retention sprint...",
+public/control-center/pages/campaign-studio.js:1696:                  helper: "Primary market or region this campaign is optimized for.",
+public/control-center/pages/campaign-studio.js:1697:                  placeholder: "Germany",
+public/control-center/pages/campaign-studio.js:1706:                  helper: "When should the campaign start going live?",
+public/control-center/pages/campaign-studio.js:1707:                  placeholder: "2026-05-01",
+public/control-center/pages/campaign-studio.js:1715:                  placeholder: "2026-05-21",
+public/control-center/pages/campaign-studio.js:1723:                  placeholder: "5000",
+public/control-center/pages/campaign-studio.js:1734:              <div class="campaign-section-copy">
+public/control-center/pages/campaign-studio.js:1742:                  helper: "What product, bundle, or offer family should this campaign push first?",
+public/control-center/pages/campaign-studio.js:1743:                  placeholder: "Primary hero product",
+public/control-center/pages/campaign-studio.js:1750:                  helper: "Capture the benefit, problem-solution, or proof angle the campaign should repeat.",
+public/control-center/pages/campaign-studio.js:1751:                  placeholder: "Why this product matters now",
+public/control-center/pages/campaign-studio.js:1760:                  placeholder: "Who is this campaign for?",
+public/control-center/pages/campaign-studio.js:1768:                  helper: "The core need the campaign should speak to directly.",
+public/control-center/pages/campaign-studio.js:1769:                  placeholder: "What problem are we solving?",
+public/control-center/pages/campaign-studio.js:1777:                  helper: "List the first channels this campaign should activate. The recommendation panel below can help tighten the mix.",
+public/control-center/pages/campaign-studio.js:1778:                  placeholder: "instagram, facebook, email",
+public/control-center/pages/campaign-studio.js:1786:                  placeholder: "Premium grooming with stronger routine results",
+public/control-center/pages/campaign-studio.js:1795:                  placeholder: "What makes the offer persuasive?",
+public/control-center/pages/campaign-studio.js:1804:                  placeholder: "Warm prospect",
+public/control-center/pages/campaign-studio.js:1815:              <div class="campaign-section-copy">
+public/control-center/pages/campaign-studio.js:1816:                Plan each wave separately so launch, education, and conversion work stay clear before routing into execution workspaces.
+public/control-center/pages/campaign-studio.js:1818:              <div class="campaign-wave-grid">
+public/control-center/pages/campaign-studio.js:1820:                  <div class="campaign-wave-card">
+public/control-center/pages/campaign-studio.js:1821:                    <div class="campaign-wave-head">
+public/control-center/pages/campaign-studio.js:1825:                    <div class="campaign-wave-meta">
+public/control-center/pages/campaign-studio.js:1826:                      <div class="campaign-wave-meta-item">
+public/control-center/pages/campaign-studio.js:1830:                      <div class="campaign-wave-meta-item">
+public/control-center/pages/campaign-studio.js:1834:                      <div class="campaign-wave-meta-item">
+public/control-center/pages/campaign-studio.js:1838:                      <div class="campaign-wave-meta-item">
+public/control-center/pages/campaign-studio.js:1845:                        ? `<div class="campaign-wave-callout">Missing inputs: ${escapeHtml(wave.missingInputs.join(", "))}</div>`
+public/control-center/pages/campaign-studio.js:1846:                        : `<div class="campaign-wave-callout is-ready">${escapeHtml(wave.roleHint)}</div>`
+public/control-center/pages/campaign-studio.js:1854:                        placeholder: wave.index === 1 ? "Launch wave" : wave.index === 2 ? "Education wave" : "Conversion wave",
+public/control-center/pages/campaign-studio.js:1862:                        placeholder: wave.index === 1 ? "Awareness, announcement, validation..." : wave.index === 2 ? "Proof, education, comparison..." : "Offer push, urgency, retargeting...",
+public/control-center/pages/campaign-studio.js:1871:                        placeholder: wave.allocationSuggestion,
+public/control-center/pages/campaign-studio.js:1885:              <div class="campaign-section-copy">
+public/control-center/pages/campaign-studio.js:1886:                Review the recommended campaign direction, required assets, and real blockers before sending the plan into downstream work.
+public/control-center/pages/campaign-studio.js:1893:              <div class="campaign-strategy-stack">
+public/control-center/pages/campaign-studio.js:1894:                <div class="campaign-strategy-item">
+public/control-center/pages/campaign-studio.js:1895:                  <span>Recommended campaign angle</span>
+public/control-center/pages/campaign-studio.js:1896:                  <strong>${escapeHtml(strategyGuidance.angle)}</strong>
+public/control-center/pages/campaign-studio.js:1898:                <div class="campaign-strategy-item">
+public/control-center/pages/campaign-studio.js:1900:                  <strong>${escapeHtml(strategyGuidance.offer)}</strong>
+public/control-center/pages/campaign-studio.js:1902:                <div class="campaign-strategy-item">
+public/control-center/pages/campaign-studio.js:1904:                  <strong>${escapeHtml(strategyGuidance.audience)}</strong>
+public/control-center/pages/campaign-studio.js:1906:                <div class="campaign-strategy-item">
+public/control-center/pages/campaign-studio.js:1908:                  <strong>${escapeHtml(strategyGuidance.channels)}</strong>
+public/control-center/pages/campaign-studio.js:1910:                <div class="campaign-strategy-item">
+public/control-center/pages/campaign-studio.js:1912:                  <strong>${escapeHtml(strategyGuidance.nextAction)}</strong>
+public/control-center/pages/campaign-studio.js:1915:              <div class="campaign-recommendation-grid">
+public/control-center/pages/campaign-studio.js:1916:                <div class="campaign-studio-panel-block">
+public/control-center/pages/campaign-studio.js:1920:                <div class="campaign-studio-panel-block">
+public/control-center/pages/campaign-studio.js:1924:                <div class="campaign-studio-panel-block">
+public/control-center/pages/campaign-studio.js:1934:                  helper: "Define what must exist before the campaign can execute smoothly across channels and waves.",
+public/control-center/pages/campaign-studio.js:1935:                  placeholder: "logo, product images, pricing doc, offer banner...",
+public/control-center/pages/campaign-studio.js:1944:                  placeholder: "Anything the execution team must know",
+public/control-center/pages/campaign-studio.js:1949:              <div class="campaign-studio-panel-block">
+public/control-center/pages/campaign-studio.js:1950:                <h4 class="insights-subtitle">Library inputs for campaign planning</h4>
+public/control-center/pages/campaign-studio.js:1951:                ${renderAssetDependencyRows(state.data.assets, campaignAssetKeys, escapeHtml, "Product, pricing, and campaign assets are covered.")}
+public/control-center/pages/campaign-studio.js:1954:              <div class="campaign-readiness-grid">
+public/control-center/pages/campaign-studio.js:1971:                  "No publishing blocker is currently stopping launch routing."
+public/control-center/pages/campaign-studio.js:2001:          <aside class="campaign-studio-side">
+public/control-center/pages/campaign-studio.js:2007:              <div class="campaign-section-copy">
+public/control-center/pages/campaign-studio.js:2008:                Send campaign context to AI prefills the current campaign draft and then navigates there. The downstream send actions open the linked workspace with the current campaign context attached.
+public/control-center/pages/campaign-studio.js:2011:                ${renderSummaryItem("Campaign", values.campaignName, escapeHtml)}
+public/control-center/pages/campaign-studio.js:2012:                ${renderSummaryItem("Goal", values.campaignGoal, escapeHtml)}
+public/control-center/pages/campaign-studio.js:2019:                <button id="campaignAskAiBtn" class="quick-action-btn" type="button">
+public/control-center/pages/campaign-studio.js:2020:                  <span class="home-action-title">Send campaign context to AI</span>
+public/control-center/pages/campaign-studio.js:2021:                  <span class="home-action-meta">Prefill AI Command with the current draft, blockers, and campaign context, then open that page.</span>
+public/control-center/pages/campaign-studio.js:2024:              <div class="campaign-routing-grid">
+public/control-center/pages/campaign-studio.js:2025:                <button id="campaignOpenContentStudioBtn" class="quick-action-btn" type="button">
+public/control-center/pages/campaign-studio.js:2027:                  <span class="home-action-meta">Open Content Studio with a campaign handoff attached.</span>
+public/control-center/pages/campaign-studio.js:2029:                <button id="campaignOpenMediaStudioBtn" class="quick-action-btn" type="button">
+public/control-center/pages/campaign-studio.js:2031:                  <span class="home-action-meta">Open Media Studio with a campaign handoff attached.</span>
+public/control-center/pages/campaign-studio.js:2033:                <button id="campaignOpenPublishingBtn" class="quick-action-btn" type="button">
+public/control-center/pages/campaign-studio.js:2035:                  <span class="home-action-meta">Open Publishing with a campaign handoff attached.</span>
+public/control-center/pages/campaign-studio.js:2037:                <button id="campaignOpenAdsManagerBtn" class="quick-action-btn" type="button">
+public/control-center/pages/campaign-studio.js:2039:                  <span class="home-action-meta">Open Ads Manager with a campaign handoff attached.</span>
+public/control-center/pages/campaign-studio.js:2041:                <button id="campaignReviewDependenciesBtn" class="quick-action-btn" type="button">
+public/control-center/pages/campaign-studio.js:2042:                  <span class="home-action-title">Review campaign dependencies</span>
+public/control-center/pages/campaign-studio.js:2043:                  <span class="home-action-meta">Jump to the highest-priority place to close launch blockers.</span>
+public/control-center/pages/campaign-studio.js:2045:                <button id="campaignReviewAssetsBtn" class="quick-action-btn" type="button">
+public/control-center/pages/campaign-studio.js:2046:                  <span class="home-action-title">Review campaign assets in Library</span>
+public/control-center/pages/campaign-studio.js:2050:              <div class="campaign-helper-note">${escapeHtml(hasLiveIntelligence ? "Live intelligence is shaping the readiness and channel recommendations on this page." : "This page is still usable without full intelligence; recommendations are falling back to current draft and readiness inputs.")}</div>
+public/control-center/api.js:229:    normalized === "api.response.json.fallback.done" ||
+public/control-center/api.js:230:    normalized === "api.response.json.fallback.error" ||
+public/control-center/api.js:231:    normalized === "api.response.json.fallback.timeout" ||
+public/control-center/api.js:360:          let fallbackTimer = null;
+public/control-center/api.js:361:          const fallbackPayload = await Promise.race([
+public/control-center/api.js:364:              fallbackTimer = setTimeout(() => {
+public/control-center/api.js:365:                const fallbackTimeoutError = new Error(`JSON fallback timed out after ${timeoutMs}ms.`);
+public/control-center/api.js:366:                fallbackTimeoutError.endpoint = endpoint;
+public/control-center/api.js:367:                fallbackTimeoutError.isTimeout = true;
+public/control-center/api.js:368:                fallbackTimeoutError.parseStage = "api.response.json.fallback.timeout";
+public/control-center/api.js:369:                reject(fallbackTimeoutError);
+public/control-center/api.js:373:            if (fallbackTimer) {
+public/control-center/api.js:374:              clearTimeout(fallbackTimer);
+public/control-center/api.js:378:          const fallbackBodyLength = JSON.stringify(fallbackPayload || null).length;
+public/control-center/api.js:380:          emitApiRuntimeTrace("api.response.json.fallback.done", {
+public/control-center/api.js:384:            bodyLength: fallbackBodyLength,
+public/control-center/api.js:389:            mode: "json-fallback",
+public/control-center/api.js:390:            payload: fallbackPayload,
+public/control-center/api.js:391:            bodyLength: fallbackBodyLength,
+public/control-center/api.js:392:            parseStage: "api.response.json.fallback.done"
+public/control-center/api.js:394:        } catch (fallbackError) {
+public/control-center/api.js:395:          const fallbackParseStage = fallbackError?.isTimeout
+public/control-center/api.js:396:            ? "api.response.json.fallback.timeout"
+public/control-center/api.js:397:            : "api.response.json.fallback.error";
+public/control-center/api.js:399:          emitApiRuntimeTrace("api.response.json.fallback.error", {
+public/control-center/api.js:404:            message: fallbackError?.message || "JSON fallback failed"
+public/control-center/api.js:415:            parseStage: fallbackParseStage,
+public/control-center/api.js:516:async function parseJson(response, fallbackMessage = "Request failed", requestMeta = {}) {
+public/control-center/api.js:523:  if (bodyReadResult?.mode === "json-fallback") {
+public/control-center/api.js:525:    parseStage = String(bodyReadResult.parseStage || "api.response.json.fallback.done");
+public/control-center/api.js:553:      `${fallbackMessage} (${response.status})`;
+public/control-center/api.js:577:    const message = String(payload.error || fallbackMessage);
+public/control-center/api.js:705:async function getJson(path, fallbackMessage, timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS, requestOptions = {}) {
+public/control-center/api.js:712:  return parseJson(response, fallbackMessage, {
+public/control-center/api.js:723:async function sendRawJson(path, method, body, fallbackMessage, timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS) {
+public/control-center/api.js:738:      const parseError = new Error(fallbackMessage || "Response was not valid JSON.");
+public/control-center/api.js:752:    const message = String(payload?.error || payload?.message || fallbackMessage || "Request failed").trim();
+public/control-center/api.js:763:async function sendJson(path, method, body, fallbackMessage, timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS) {
+public/control-center/api.js:771:  return parseJson(response, fallbackMessage, {
+public/control-center/api.js:781:async function sendForm(path, formData, fallbackMessage, timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS) {
+public/control-center/api.js:796:  return parseJson(response, fallbackMessage, {
+public/control-center/api.js:1057:    console.warn("Using fallback projects list:", error.message);
+public/control-center/api.js:1062:      fallback: true
+public/control-center/api.js:1129:        const fallbackProjects = await fetchProjects();
+public/control-center/api.js:1130:        const fallbackItems = Array.isArray(fallbackProjects?.items) ? fallbackProjects.items : [];
+public/control-center/api.js:1131:        const projectExists = fallbackItems.some((item) => {
+public/control-center/api.js:1143:      } catch (fallbackError) {
+public/control-center/api.js:1150:          message: String(fallbackError?.message || "Failed to verify project fallback")
+public/control-center/api.js:1610:    `/api/ai-command/project/${encodedProject}/campaign-preview`,
+public/control-center/api.js:1613:    "Failed to generate AI Command campaign preview",
+public/control-center/api.js:2064:    `/media-manager/project/${encodeURIComponent(projectName)}/campaigns${suffix}`,
+public/control-center/api.js:2065:    "Failed to load campaigns"
+public/control-center/api.js:2076:      `/media-manager/project/${encodeURIComponent(projectName)}/campaigns/${encodeURIComponent(payload.id)}`,
+public/control-center/api.js:2079:      "Failed to update campaign"
+public/control-center/api.js:2084:    `/media-manager/project/${encodeURIComponent(projectName)}/campaigns`,
+public/control-center/api.js:2087:    "Failed to create campaign"
+public/control-center/api.js:2102:  if (params.campaign_id) {
+public/control-center/api.js:2103:    search.set("campaign_id", String(params.campaign_id));
+public/control-center/api.js:2147:  if (params.campaign_id) {
+public/control-center/api.js:2148:    search.set("campaign_id", String(params.campaign_id));
+public/control-center/api.js:2232:    "/api/media/generate-campaign-pack",
+public/control-center/api.js:2235:    "Failed to generate campaign pack"
+runtime/orchestrator-service/server.js:404:      error: `Protected write routes are disabled until ${CONTROL_WRITE_KEY_ENV} is configured on the server.`
+runtime/orchestrator-service/server.js:471:      error: `Protected read routes are disabled until ${CONTROL_WRITE_KEY_ENV} is configured on the server.`
+runtime/orchestrator-service/server.js:614:      campaign_id: asString(req?.body?.campaign || req?.body?.campaign_id || ''),
+runtime/orchestrator-service/server.js:929:function sanitizeErrorMessage(rawMessage, fallbackMessage) {
+runtime/orchestrator-service/server.js:930:  const fallback = String(fallbackMessage || 'Request failed').trim() || 'Request failed';
+runtime/orchestrator-service/server.js:933:    return fallback;
+runtime/orchestrator-service/server.js:938:function getErrorStatusCode(error, fallbackStatus = 500) {
+runtime/orchestrator-service/server.js:940:    error?.statusCode || error?.status || error?.response?.status || fallbackStatus
+runtime/orchestrator-service/server.js:944:    return fallbackStatus;
+runtime/orchestrator-service/server.js:948:    return fallbackStatus;
+runtime/orchestrator-service/server.js:1203:    legacy: 'launch-ops',
+runtime/orchestrator-service/server.js:1214:  'campaign-execution': {
+runtime/orchestrator-service/server.js:1215:    legacy: 'campaign-execution',
+runtime/orchestrator-service/server.js:1216:    canonical: 'campaign-execution'
+runtime/orchestrator-service/server.js:1218:  'campaign-finalization': {
+runtime/orchestrator-service/server.js:1219:    legacy: 'campaign-finalization',
+runtime/orchestrator-service/server.js:1220:    canonical: 'campaign-finalization'
+runtime/orchestrator-service/server.js:1226:  'german-launch': {
+runtime/orchestrator-service/server.js:1227:    legacy: 'german-launch',
+runtime/orchestrator-service/server.js:1228:    canonical: 'german-launch'
+runtime/orchestrator-service/server.js:1249:  if (telemetryEntry.legacy_fallback_hit) {
+runtime/orchestrator-service/server.js:1377:    legacy_fallback_hit: legacyHit,
+runtime/orchestrator-service/server.js:1385:      legacy_fallback_read: !!readPolicy.legacyFallbackRead
+runtime/orchestrator-service/server.js:1389:  telemetryEntry.fallback_reason = classifyImmediateFallbackReason(telemetryEntry);
+runtime/orchestrator-service/server.js:1450:        legacyFallbackRead: !!resolution.featureFlags.legacy_fallback_read,
+runtime/orchestrator-service/server.js:1493:    fallbackRoot: resolution.legacyRoot,
+runtime/orchestrator-service/server.js:1509:      legacyBase: paths.fallbackRoot,
+runtime/orchestrator-service/server.js:1660:    reel: path.join('content', 'campaigns', 'reel-brief-queue.json'),
+runtime/orchestrator-service/server.js:1704:  'campaign-execution',
+runtime/orchestrator-service/server.js:1705:  'campaign-finalization',
+runtime/orchestrator-service/server.js:1758:  if (!readEntry || readEntry.selected_root !== 'legacy' || !readEntry.legacy_fallback_hit) {
+runtime/orchestrator-service/server.js:1805:    fallback_hit_count: 0,
+runtime/orchestrator-service/server.js:1806:    fallback_rate: 0,
+runtime/orchestrator-service/server.js:1807:    fallback_causes: {
+runtime/orchestrator-service/server.js:1848:    if (entry.selected_root === 'legacy' && entry.legacy_fallback_hit) {
+runtime/orchestrator-service/server.js:1849:      stats.fallback_hit_count += 1;
+runtime/orchestrator-service/server.js:1852:      if (!Object.prototype.hasOwnProperty.call(stats.fallback_causes, cause)) {
+runtime/orchestrator-service/server.js:1853:        stats.fallback_causes.unresolved_risk += 1;
+runtime/orchestrator-service/server.js:1855:        stats.fallback_causes[cause] += 1;
+runtime/orchestrator-service/server.js:1862:  let fallbackHits = 0;
+runtime/orchestrator-service/server.js:1869:    stats.fallback_rate = stats.read_events > 0
+runtime/orchestrator-service/server.js:1870:      ? Number((stats.fallback_hit_count / stats.read_events).toFixed(4))
+runtime/orchestrator-service/server.js:1875:    fallbackHits += stats.fallback_hit_count;
+runtime/orchestrator-service/server.js:1876:    historicalFallbacks += stats.fallback_causes.historical_artifact;
+runtime/orchestrator-service/server.js:1877:    unresolvedStructuralMismatches += stats.fallback_causes.structural_mismatch;
+runtime/orchestrator-service/server.js:1879:      stats.fallback_causes.parity_gap +
+runtime/orchestrator-service/server.js:1880:      stats.fallback_causes.missing_canonical_write +
+runtime/orchestrator-service/server.js:1881:      stats.fallback_causes.policy_or_config_mismatch;
+runtime/orchestrator-service/server.js:1885:  const fallbackRate = totalReads > 0 ? fallbackHits / totalReads : 0;
+runtime/orchestrator-service/server.js:1886:  const historicalFallbackRate = fallbackHits > 0 ? historicalFallbacks / fallbackHits : 0;
+runtime/orchestrator-service/server.js:1893:    fallbackRate <= 0.15 &&
+runtime/orchestrator-service/server.js:1901:    fallbackRate <= 0.4 &&
+runtime/orchestrator-service/server.js:1917:      fallback_hit_count: fallbackHits,
+runtime/orchestrator-service/server.js:1919:      fallback_rate: Number(fallbackRate.toFixed(4)),
+runtime/orchestrator-service/server.js:1920:      fallback_historical_rate: Number(historicalFallbackRate.toFixed(4)),
+runtime/orchestrator-service/server.js:1945:    fallback_hit_count: 0,
+runtime/orchestrator-service/server.js:1953:    aggregate.fallback_hit_count += summary.totals.fallback_hit_count;
+runtime/orchestrator-service/server.js:1962:  aggregate.fallback_rate = totalReads > 0
+runtime/orchestrator-service/server.js:1963:    ? Number((aggregate.fallback_hit_count / totalReads).toFixed(4))
+runtime/orchestrator-service/server.js:2083:      subject: `New campaign visual for ${projectName}`,
+runtime/orchestrator-service/server.js:2086:      body: `This campaign asset was auto-prepared by the system using the latest approved brand-controlled render.`,
+runtime/orchestrator-service/server.js:2447:      hook: `${productName} is ideal for promotional conversion-focused campaigns.`,
+runtime/orchestrator-service/server.js:2527:Create a realistic, premium, cinematic, marketing-grade visual that supports the campaign objective while preserving the exact product identity.
+runtime/orchestrator-service/server.js:2737:  // TODO:
+runtime/orchestrator-service/server.js:3055:    '#campaigncreative',
+runtime/orchestrator-service/server.js:3237:    caption: 'Premium visual launch built with strict brand control.',
+runtime/orchestrator-service/server.js:3682:    domain: 'german-launch',
+runtime/orchestrator-service/server.js:3687:    domain: 'german-launch',
+runtime/orchestrator-service/server.js:3690:    requestedIdentifier: 'german-launch-root',
+runtime/orchestrator-service/server.js:3691:    requestedFile: 'german-launch'
+runtime/orchestrator-service/server.js:3693:  const legacyBaseDir = path.join(resolution.legacyRoot, 'german-launch');
+runtime/orchestrator-service/server.js:3757:function selectLaunchReadyProducts(products, projectName, context = 'launch') {
+runtime/orchestrator-service/server.js:3759:    appLogger.warn('launch_products_invalid', {
+runtime/orchestrator-service/server.js:3769:  const launchReadyProducts = [];
+runtime/orchestrator-service/server.js:3795:    launchReadyProducts.push(product);
+runtime/orchestrator-service/server.js:3798:  if (!launchReadyProducts.length) {
+runtime/orchestrator-service/server.js:3799:    appLogger.warn('launch_ready_products_empty', {
+runtime/orchestrator-service/server.js:3806:  return launchReadyProducts;
+runtime/orchestrator-service/server.js:3812:  const launchReadyProducts = selectLaunchReadyProducts(products, projectName, 'build_german_launch_plan');
+runtime/orchestrator-service/server.js:3813:  const heroProducts = launchReadyProducts.slice(0, 3);
+runtime/orchestrator-service/server.js:3814:  const supportProducts = launchReadyProducts.slice(3, 10);
+runtime/orchestrator-service/server.js:3819:    launch_goals: [
+runtime/orchestrator-service/server.js:3824:    launch_priorities: {
+runtime/orchestrator-service/server.js:3837:      published_count: launchReadyProducts.length,
+runtime/orchestrator-service/server.js:3840:      validation_status: launchReadyProducts.length ? 'ready' : 'no_launch_ready_products'
+runtime/orchestrator-service/server.js:3866:      'launch discount',
+runtime/orchestrator-service/server.js:3868:      'limited-time campaign'
+runtime/orchestrator-service/server.js:3873:  const filePath = path.join(paths.legacyPlanDir, 'launch-plan.json');
+runtime/orchestrator-service/server.js:3877:    domain: 'german-launch',
+runtime/orchestrator-service/server.js:3878:    artifactType: 'german_launch_plan',
+runtime/orchestrator-service/server.js:3879:    identifier: 'launch-plan',
+runtime/orchestrator-service/server.js:3892:  const filePath = path.join(paths.planDir, 'launch-plan.json');
+runtime/orchestrator-service/server.js:3895:    throw new Error('German launch plan not found');
+runtime/orchestrator-service/server.js:3909:  let launchReadyProducts = selectLaunchReadyProducts(products, projectName, 'build_launch_wave');
+runtime/orchestrator-service/server.js:3912:    launchReadyProducts = launchReadyProducts.filter((p) => productMatchesLaunchTheme(p, ['beard']));
+runtime/orchestrator-service/server.js:3916:    launchReadyProducts = launchReadyProducts.filter((p) => productMatchesLaunchTheme(p, ['hair']));
+runtime/orchestrator-service/server.js:3920:    launchReadyProducts = launchReadyProducts.filter((p) => productMatchesLaunchTheme(p, ['skin', 'face']));
+runtime/orchestrator-service/server.js:3923:  const selectedProducts = launchReadyProducts.slice(0, 5).map(p => ({
+runtime/orchestrator-service/server.js:3940:    campaign_type: 'launch',
+runtime/orchestrator-service/server.js:3955:    domain: 'german-launch',
+runtime/orchestrator-service/server.js:3956:    artifactType: 'german_launch_wave',
+runtime/orchestrator-service/server.js:3998:  const legacyBaseDir = path.join(resolution.legacyRoot, 'launch-ops');
+runtime/orchestrator-service/server.js:4106:function normalizePublishingJobStatus(value, fallback = 'draft') {
+runtime/orchestrator-service/server.js:4109:  if (!normalized) return fallback;
+runtime/orchestrator-service/server.js:4131:  return fallback;
+runtime/orchestrator-service/server.js:4355:      connector_error: error.message || 'Connector payload unavailable'
+runtime/orchestrator-service/server.js:4418:  const fallbackStatus = scheduledFor ? 'scheduled' : 'draft';
+runtime/orchestrator-service/server.js:4430:    status: normalizePublishingJobStatus(input.status, existing.status || fallbackStatus),
+runtime/orchestrator-service/server.js:5390:function readJsonFile(filePath, fallback = []) {
+runtime/orchestrator-service/server.js:5392:    if (!fs.existsSync(filePath)) return fallback;
+runtime/orchestrator-service/server.js:5394:    if (!raw) return fallback;
+runtime/orchestrator-service/server.js:5397:    console.warn(`[server] readJsonFile: non-fatal read/parse error for ${filePath}, returning fallback. Error: ${err.message}`);
+runtime/orchestrator-service/server.js:5398:    return fallback;
+runtime/orchestrator-service/server.js:5946:    text.includes('campaign') ||
+runtime/orchestrator-service/server.js:5951:    text.includes('launch') ||
+runtime/orchestrator-service/server.js:6037:      visual_style: 'campaign_thematic',
+runtime/orchestrator-service/server.js:6162:    if (!signal || signal.fallback) return null;
+runtime/orchestrator-service/server.js:6295:    campaignsDir: path.join(baseDir, 'campaigns'),
+runtime/orchestrator-service/server.js:6297:    launchDir: path.join(baseDir, 'launch'),
+runtime/orchestrator-service/server.js:6385:  const fallback = options.fallback;
+runtime/orchestrator-service/server.js:6389:  const canonicalValue = canonicalExists ? normalize(readJsonFile(canonicalPath, fallback)) : null;
+runtime/orchestrator-service/server.js:6397:    const legacyValue = normalize(readJsonFile(legacyPath, fallback));
+runtime/orchestrator-service/server.js:6440:  writeJsonFile(canonicalPath, fallback);
+runtime/orchestrator-service/server.js:6442:    value: fallback,
+runtime/orchestrator-service/server.js:6505:    campaign_docs: ['campaign_docs', 'campaign_doc']
+runtime/orchestrator-service/server.js:6513:    const fallbackValue = candidates
+runtime/orchestrator-service/server.js:6517:    const entry = foundEntry || (fallbackValue ? { value: fallbackValue } : {});
+runtime/orchestrator-service/server.js:6522:      value: normalizeSetupTextValue(entry.value || fallbackValue),
+runtime/orchestrator-service/server.js:6605:    paths.campaignsDir,
+runtime/orchestrator-service/server.js:6607:    paths.launchDir,
+runtime/orchestrator-service/server.js:6623:    fallback: buildDefaultBrandProfile(safeProject, projectData)
+runtime/orchestrator-service/server.js:6630:    fallback: [],
+runtime/orchestrator-service/server.js:6638:    fallback: buildSourceOfTruthRegistry({}),
+runtime/orchestrator-service/server.js:6719:      campaigns: { path: paths.campaignsDir, exists: fs.existsSync(paths.campaignsDir) },
+runtime/orchestrator-service/server.js:6766:    campaign_docs: projectData.campaign_docs
+runtime/orchestrator-service/server.js:6805:    paths.campaignsDir,
+runtime/orchestrator-service/server.js:6807:    paths.launchDir,
+runtime/orchestrator-service/server.js:6844:    workspace_priorities: ['setup', 'library', 'content-studio', 'campaign-studio', 'publishing'],
+runtime/orchestrator-service/server.js:6851:      'create_first_campaign'
+runtime/orchestrator-service/server.js:6863:      content_categories: ['product_launch', 'before_after', 'offers', 'how_to_use', 'reviews'],
+runtime/orchestrator-service/server.js:6864:      workspace_priorities: ['setup', 'library', 'campaign-studio', 'content-studio', 'media-studio', 'publishing', 'insights'],
+runtime/orchestrator-service/server.js:6866:      starter_checklist: ['add_products', 'upload_product_media', 'define_shipping', 'connect_woocommerce', 'create_launch_campaign'],
+runtime/orchestrator-service/server.js:6877:      workspace_priorities: ['setup', 'library', 'media-studio', 'content-studio', 'campaign-studio', 'publishing'],
+runtime/orchestrator-service/server.js:6879:      starter_checklist: ['complete_artist_profile', 'upload_press_photos', 'add_music_links', 'define_fan_audience', 'create_release_campaign'],
+runtime/orchestrator-service/server.js:6892:      starter_checklist: ['add_services', 'upload_before_after_media', 'add_booking_details', 'connect_google_business', 'create_local_campaign'],
+runtime/orchestrator-service/server.js:6903:      workspace_priorities: ['setup', 'library', 'content-studio', 'campaign-studio', 'ads-manager', 'governance'],
+runtime/orchestrator-service/server.js:6905:      starter_checklist: ['add_property_data', 'upload_property_media', 'define_lead_flow', 'connect_crm', 'create_listing_campaign'],
+runtime/orchestrator-service/server.js:6916:      workspace_priorities: ['setup', 'library', 'content-studio', 'campaign-studio', 'publishing'],
+runtime/orchestrator-service/server.js:6918:      starter_checklist: ['define_services', 'add_service_area', 'upload_testimonials', 'connect_contact_flow', 'create_offer_campaign'],
+runtime/orchestrator-service/server.js:6929:      workspace_priorities: ['setup', 'library', 'media-studio', 'publishing', 'campaign-studio'],
+runtime/orchestrator-service/server.js:6942:      workspace_priorities: ['setup', 'library', 'content-studio', 'campaign-studio', 'insights', 'workflows'],
+runtime/orchestrator-service/server.js:6944:      starter_checklist: ['define_services', 'add_case_studies', 'define_lead_offer', 'connect_crm', 'create_lead_campaign'],
+runtime/orchestrator-service/server.js:7011:      campaigns: paths.campaignsDir,
+runtime/orchestrator-service/server.js:7013:      launch: paths.launchDir,
+runtime/orchestrator-service/server.js:7069:    campaign_docs: normalizeSetupTextValue(input.campaign_docs)
+runtime/orchestrator-service/server.js:7087:    launch_window: normalizeSetupTextValue(input.launch_window),
+runtime/orchestrator-service/server.js:7231:      fallback_in_use: !canonicalExists && legacyExists
+runtime/orchestrator-service/server.js:7236:  const fallbackDependencies = checks.filter((item) => item.fallback_in_use).length;
+runtime/orchestrator-service/server.js:7241:    fallback_dependencies: fallbackDependencies,
+runtime/orchestrator-service/server.js:7244:    recommendation: fallbackDependencies > 0 || mismatches > 0
+runtime/orchestrator-service/server.js:7245:      ? 'Reduce fallback dependencies by keeping canonical files in sync before disabling legacy reads.'
+runtime/orchestrator-service/server.js:7273:  const campaigns = listCampaigns(safeProject, { limit: 50 });
+runtime/orchestrator-service/server.js:7310:  const campaignReadiness = campaigns.length > 0 ? 100 : 40;
+runtime/orchestrator-service/server.js:7323:    campaign_readiness: campaignReadiness,
+runtime/orchestrator-service/server.js:7335:    has_campaigns_dir: fs.existsSync(paths.campaignsDir),
+runtime/orchestrator-service/server.js:7337:    has_launch_dir: fs.existsSync(paths.launchDir),
+runtime/orchestrator-service/server.js:7370:  if (domainScores.campaign_readiness < 100) missing.push('campaign_readiness');
+runtime/orchestrator-service/server.js:8124:    const fallbackStatus = determineIntegrationStatus({
+runtime/orchestrator-service/server.js:8136:            : fallbackStatus === 'connected'
+runtime/orchestrator-service/server.js:8138:              : fallbackStatus,
+runtime/orchestrator-service/server.js:8148:              : fallbackStatus === 'connected'
+runtime/orchestrator-service/server.js:8150:                : fallbackStatus,
+runtime/orchestrator-service/server.js:8378:      description: 'Structured product data for planning, content, and campaign packaging.',
+runtime/orchestrator-service/server.js:8396:        what_to_upload: 'Price lists, offer sheets, bundles, campaign discounts, coupons, and margin guardrails.',
+runtime/orchestrator-service/server.js:8452:      purpose: 'campaign_social',
+runtime/orchestrator-service/server.js:8456:      target_folder: 'campaigns',
+runtime/orchestrator-service/server.js:8466:      asset_type: 'campaign_assets',
+runtime/orchestrator-service/server.js:8468:      purpose: 'campaign_social',
+runtime/orchestrator-service/server.js:8472:      target_folder: 'campaigns',
+runtime/orchestrator-service/server.js:8473:      aliases: ['campaign_asset', 'creative_assets', 'ad_assets'],
+runtime/orchestrator-service/server.js:8477:        why_it_matters: 'Campaign Studio and Publishing need a reusable package for each campaign or wave.',
+runtime/orchestrator-service/server.js:9230:    'campaigns': base.campaignsDir,
+runtime/orchestrator-service/server.js:9231:    'launch': base.launchDir,
+runtime/orchestrator-service/server.js:9333:    campaigns: base.campaignsDir,
+runtime/orchestrator-service/server.js:9334:    launch: base.launchDir,
+runtime/orchestrator-service/server.js:9553:      campaign_name: String(req.body?.campaign_name || req.body?.publish_package?.campaign_name || '').trim(),
+runtime/orchestrator-service/server.js:9566:        campaign_name: result.campaign_name,
+runtime/orchestrator-service/server.js:9641:      campaign_name: String(req.body?.campaign_name || req.body?.email_package?.campaign_name || '').trim(),
+runtime/orchestrator-service/server.js:9655:        campaign_name: result.campaign_name,
+runtime/orchestrator-service/server.js:9780:      requestedAction: 'launch',
+runtime/orchestrator-service/server.js:9791:      requestedAction: 'launch',
+runtime/orchestrator-service/server.js:9793:      serviceDomain: 'campaign',
+runtime/orchestrator-service/server.js:9811:        campaign_name: String(req.body?.campaign_name || req.body?.campaign_package?.campaign_name || '').trim(),
+runtime/orchestrator-service/server.js:9821:      campaign_name: String(req.body?.campaign_name || req.body?.campaign_package?.campaign_name || '').trim(),
+runtime/orchestrator-service/server.js:9901:          'Add a stronger launch-offer banner above the fold',
+runtime/orchestrator-service/server.js:9907:        offer_suggestion: '15% launch discount or bundle with shaving gel',
+runtime/orchestrator-service/server.js:10824:function sendAssetMutationError(res, error, fallbackMessage) {
+runtime/orchestrator-service/server.js:10827:    error: error?.message || fallbackMessage,
+runtime/orchestrator-service/server.js:10836:    error: fallbackMessage,
+runtime/orchestrator-service/server.js:11183:function normalizeAiCommandPreviewInput(value, fallback = '') {
+runtime/orchestrator-service/server.js:11184:  return String(value || fallback || '').trim();
+runtime/orchestrator-service/server.js:11206:  const goal = normalizeAiCommandPreviewInput(input.goal, 'Campaign launch');
+runtime/orchestrator-service/server.js:11221:    `${goal} campaign for ${sourceLabel}`
+runtime/orchestrator-service/server.js:11228:  const campaignPackage = {
+runtime/orchestrator-service/server.js:11229:    concept: `${goal} campaign built from ${sourceLabel}.`,
+runtime/orchestrator-service/server.js:11240:    launchPhases: [
+runtime/orchestrator-service/server.js:11241:      'Prepare campaign message and proof points.',
+runtime/orchestrator-service/server.js:11275:        reason: 'Prepare creative and media assets from the campaign package.'
+runtime/orchestrator-service/server.js:11280:        reason: 'Turn the campaign package into a publishing draft.'
+runtime/orchestrator-service/server.js:11287:      id: 'campaign_summary',
+runtime/orchestrator-service/server.js:11308:      items: campaignPackage.requiredAssets
+runtime/orchestrator-service/server.js:11313:      items: campaignPackage.missingBlockers
+runtime/orchestrator-service/server.js:11318:      items: campaignPackage.nextActions
+runtime/orchestrator-service/server.js:11323:    type: 'smart_campaign_preview',
+runtime/orchestrator-service/server.js:11328:    summary: `Backend preview-only AI Team campaign package for ${goal} using ${sourceLabel}.`,
+runtime/orchestrator-service/server.js:11341:    campaignPackage,
+runtime/orchestrator-service/server.js:11368:      message: error.message || 'Failed to build AI Command campaign preview.',
+runtime/orchestrator-service/server.js:11378:app.post('/api/ai-command/project/:project/campaign-preview', handleAiCommandCampaignPreviewOnly);
+runtime/orchestrator-service/server.js:11538:      error: error.message || 'Failed to list campaigns'
+runtime/orchestrator-service/server.js:11545:    const campaign = upsertCampaign(req.params.project, req.body || {});
+runtime/orchestrator-service/server.js:11547:      campaign,
+runtime/orchestrator-service/server.js:11552:      error: error.message || 'Failed to save campaign'
+runtime/orchestrator-service/server.js:11559:    const campaign = getCampaign(req.params.project, req.params.campaignId);
+runtime/orchestrator-service/server.js:11560:    if (!campaign) {
+runtime/orchestrator-service/server.js:11563:    return res.json({ campaign });
+runtime/orchestrator-service/server.js:11566:      error: error.message || 'Failed to load campaign'
+runtime/orchestrator-service/server.js:11571:app.get('/media-manager/project/:project/campaigns', handleListCampaigns);
+runtime/orchestrator-service/server.js:11572:app.get('/public/media-manager/project/:project/campaigns', handleListCampaigns);
+runtime/orchestrator-service/server.js:11573:app.post('/media-manager/project/:project/campaigns', handleUpsertCampaign);
+runtime/orchestrator-service/server.js:11574:app.post('/public/media-manager/project/:project/campaigns', handleUpsertCampaign);
+runtime/orchestrator-service/server.js:11575:app.patch('/media-manager/project/:project/campaigns/:campaignId', (req, res) => {
+runtime/orchestrator-service/server.js:11578:    id: req.params.campaignId
+runtime/orchestrator-service/server.js:11582:app.patch('/public/media-manager/project/:project/campaigns/:campaignId', (req, res) => {
+runtime/orchestrator-service/server.js:11585:    id: req.params.campaignId
+runtime/orchestrator-service/server.js:11589:app.get('/media-manager/project/:project/campaigns/:campaignId', handleGetCampaign);
+runtime/orchestrator-service/server.js:11590:app.get('/public/media-manager/project/:project/campaigns/:campaignId', handleGetCampaign);
+runtime/orchestrator-service/server.js:11598:        campaign_id: req.query?.campaign_id
+runtime/orchestrator-service/server.js:11663:        campaign_id: req.query?.campaign_id,
+runtime/orchestrator-service/server.js:13334:// TODO(phase4a): Keep `/public/media-manager/...` write aliases for active frontend compatibility.
+runtime/orchestrator-service/server.js:13819:  // Use canonical-first candidate resolution with fallback instrumentation
+runtime/orchestrator-service/server.js:14033:  function makeBlock(type, fallbackGoal) {
+runtime/orchestrator-service/server.js:14037:    const goal = map.goal || fallbackGoal;
+runtime/orchestrator-service/server.js:14164:    domain: 'campaign-execution',
+runtime/orchestrator-service/server.js:14169:    domain: 'campaign-execution',
+runtime/orchestrator-service/server.js:14172:    requestedIdentifier: 'campaign-execution-root',
+runtime/orchestrator-service/server.js:14173:    requestedFile: 'campaign-execution'
+runtime/orchestrator-service/server.js:14175:  const legacyBaseDir = path.join(resolution.legacyRoot, 'campaign-execution');
+runtime/orchestrator-service/server.js:14193:function buildCampaignExecutionPackage(projectName, campaignName, productSlugs = []) {
+runtime/orchestrator-service/server.js:14202:    throw new Error('No matching products found for campaign package');
+runtime/orchestrator-service/server.js:14211:    campaign_name: campaignName,
+runtime/orchestrator-service/server.js:14229:    `${campaignName.replace(/[^a-z0-9_-]/gi, '_').toLowerCase()}.json`
+runtime/orchestrator-service/server.js:14234:    domain: 'campaign-execution',
+runtime/orchestrator-service/server.js:14235:    artifactType: 'campaign_execution_package',
+runtime/orchestrator-service/server.js:14247:function readCampaignExecutionPackage(projectName, campaignName) {
+runtime/orchestrator-service/server.js:14248:  const safeName = `${campaignName.replace(/[^a-z0-9_-]/gi, '_').toLowerCase()}.json`;
+runtime/orchestrator-service/server.js:14251:    domain: 'campaign-execution',
+runtime/orchestrator-service/server.js:14254:    requestedIdentifier: campaignName,
+runtime/orchestrator-service/server.js:14255:    requestedFile: `campaign-execution/packages/${safeName}`
+runtime/orchestrator-service/server.js:14269:function buildChannelExecutionPayload(projectName, campaignName, channel) {
+runtime/orchestrator-service/server.js:14270:  const pkg = readCampaignExecutionPackage(projectName, campaignName);
+runtime/orchestrator-service/server.js:14275:    campaign_name: campaignName,
+runtime/orchestrator-service/server.js:14296:      fallback_prompt_pack:
+runtime/orchestrator-service/server.js:14309:  // Semi-auto campaign artifacts are still dual-path during stabilization:
+runtime/orchestrator-service/server.js:14311:  // the required fallback for existing HAIROTICMEN dry-run packages.
+runtime/orchestrator-service/server.js:14313:    domain: 'campaign-finalization',
+runtime/orchestrator-service/server.js:14318:    domain: 'campaign-finalization',
+runtime/orchestrator-service/server.js:14321:    requestedIdentifier: 'campaign-finalization-root',
+runtime/orchestrator-service/server.js:14322:    requestedFile: 'campaign-finalization'
+runtime/orchestrator-service/server.js:14324:  const legacyBaseDir = path.join(resolution.legacyRoot, 'campaign-finalization');
+runtime/orchestrator-service/server.js:14354:function buildCampaignMediaJob(projectName, campaignName, channel) {
+runtime/orchestrator-service/server.js:14355:  const payload = buildChannelExecutionPayload(projectName, campaignName, channel);
+runtime/orchestrator-service/server.js:14361:    `${campaignName.replace(/[^a-z0-9_-]/gi, '_').toLowerCase()}_${channel}.json`
+runtime/orchestrator-service/server.js:14367:    campaign_name: campaignName,
+runtime/orchestrator-service/server.js:14376:    domain: 'campaign-finalization',
+runtime/orchestrator-service/server.js:14377:    artifactType: 'campaign_media_job',
+runtime/orchestrator-service/server.js:14389:function buildCampaignPublishPackage(projectName, campaignName, channel) {
+runtime/orchestrator-service/server.js:14390:  const payload = buildChannelExecutionPayload(projectName, campaignName, channel);
+runtime/orchestrator-service/server.js:14396:    `${campaignName.replace(/[^a-z0-9_-]/gi, '_').toLowerCase()}_${channel}.json`
+runtime/orchestrator-service/server.js:14402:    campaign_name: campaignName,
+runtime/orchestrator-service/server.js:14412:    domain: 'campaign-finalization',
+runtime/orchestrator-service/server.js:14413:    artifactType: 'campaign_publish_package',
+runtime/orchestrator-service/server.js:14425:function buildCampaignEmailPackage(projectName, campaignName) {
+runtime/orchestrator-service/server.js:14426:  const payload = buildChannelExecutionPayload(projectName, campaignName, 'email');
+runtime/orchestrator-service/server.js:14432:    `${campaignName.replace(/[^a-z0-9_-]/gi, '_').toLowerCase()}.json`
+runtime/orchestrator-service/server.js:14440:    campaign_name: campaignName,
+runtime/orchestrator-service/server.js:14450:    domain: 'campaign-finalization',
+runtime/orchestrator-service/server.js:14451:    artifactType: 'campaign_email_package',
+runtime/orchestrator-service/server.js:14463:function reviewCampaignFinalization(projectName, campaignName) {
+runtime/orchestrator-service/server.js:14464:  const safeName = campaignName.replace(/[^a-z0-9_-]/gi, '_').toLowerCase();
+runtime/orchestrator-service/server.js:14467:    domain: 'campaign-finalization',
+runtime/orchestrator-service/server.js:14471:    requestedIdentifier: campaignName,
+runtime/orchestrator-service/server.js:14472:    requestedFile: `campaign-finalization/media-jobs/${safeName}*`
+runtime/orchestrator-service/server.js:14476:    domain: 'campaign-finalization',
+runtime/orchestrator-service/server.js:14480:    requestedIdentifier: campaignName,
+runtime/orchestrator-service/server.js:14481:    requestedFile: `campaign-finalization/publish-packages/${safeName}*`
+runtime/orchestrator-service/server.js:14485:    domain: 'campaign-finalization',
+runtime/orchestrator-service/server.js:14488:    requestedIdentifier: campaignName,
+runtime/orchestrator-service/server.js:14489:    requestedFile: `campaign-finalization/email/${safeName}.json`
+runtime/orchestrator-service/server.js:14501:    campaign_name: campaignName,
+runtime/orchestrator-service/server.js:14590:  const campaignName = String(input.campaign_name || '').trim();
+runtime/orchestrator-service/server.js:14592:  if (!campaignName || !channel) {
+runtime/orchestrator-service/server.js:14593:    const error = new Error('Missing publish package. Provide publish_package or campaign_name + channel');
+runtime/orchestrator-service/server.js:14599:  return buildCampaignPublishPackage(projectName, campaignName, channel);
+runtime/orchestrator-service/server.js:14610:    || `${String(primaryAsset.product_name || publishPackage.campaign_name || 'Campaign').trim()} update`;
+runtime/orchestrator-service/server.js:14657:  const campaignName = String(input.campaign_name || '').trim();
+runtime/orchestrator-service/server.js:14658:  if (!campaignName) {
+runtime/orchestrator-service/server.js:14659:    const error = new Error('Missing email package. Provide email_package or campaign_name');
+runtime/orchestrator-service/server.js:14665:  return buildCampaignEmailPackage(projectName, campaignName);
+runtime/orchestrator-service/server.js:14681:  const campaignName = String(emailPackage.campaign_name || '').trim();
+runtime/orchestrator-service/server.js:14682:  const subject = String(channelAsset.subject || `${campaignName || 'Campaign'} Update`).trim();
+runtime/orchestrator-service/server.js:14683:  const headline = String(channelAsset.headline || primaryAsset.product_name || campaignName || 'Campaign Update').trim();
+runtime/orchestrator-service/server.js:14750:  const inlinePackage = input.campaign_package && typeof input.campaign_package === 'object'
+runtime/orchestrator-service/server.js:14751:    ? input.campaign_package
+runtime/orchestrator-service/server.js:14757:  const campaignName = String(input.campaign_name || '').trim();
+runtime/orchestrator-service/server.js:14758:  if (!campaignName) {
+runtime/orchestrator-service/server.js:14759:    const error = new Error('Missing campaign package. Provide campaign_package or campaign_name');
+runtime/orchestrator-service/server.js:14765:  return readCampaignExecutionPackage(projectName, campaignName);
+runtime/orchestrator-service/server.js:14768:function buildAdExecutionPackage(campaignPackage, input = {}) {
+runtime/orchestrator-service/server.js:14769:  const products = Array.isArray(campaignPackage?.products) ? campaignPackage.products : [];
+runtime/orchestrator-service/server.js:14787:  const headline = String(input.headline || offer.headline || branding.headline || `${primary.product_name || campaignPackage.campaign_name} offer`).trim();
+runtime/orchestrator-service/server.js:14800:    rationale: `Starter budget based on ${products.length} product(s) in campaign package.`
+runtime/orchestrator-service/server.js:14824:    || 'Create a premium brand-safe visual for campaign execution.'
+runtime/orchestrator-service/server.js:14834:    campaign_name: String(publishPackage?.campaign_name || '').trim(),
+runtime/orchestrator-service/server.js:14850:    campaign_name: String(emailPackage?.campaign_name || '').trim(),
+runtime/orchestrator-service/server.js:14901:  const campaignPack = await mediaProviderLayer.generateCampaignPack({
+runtime/orchestrator-service/server.js:14908:  if (!campaignPack?.ok) {
+runtime/orchestrator-service/server.js:14909:    const message = String(campaignPack?.message || 'Ad execution provider is not configured.').trim();
+runtime/orchestrator-service/server.js:14916:  const generated = campaignPack.campaign_pack || {};
+runtime/orchestrator-service/server.js:14927:    provider: campaignPack.provider,
+runtime/orchestrator-service/server.js:14928:    model: campaignPack.model,
+runtime/orchestrator-service/server.js:14929:    generated_campaign_pack: generated
+runtime/orchestrator-service/server.js:15058:    campaign_name: job.campaign_name || null,
+runtime/orchestrator-service/server.js:15133:function recordManualPublish(projectName, campaignName, channel, jobId, operator, postUrl, notes = '') {
+runtime/orchestrator-service/server.js:15135:  const safeCampaign = String(campaignName || '').trim();
+runtime/orchestrator-service/server.js:15148:    const error = new Error('Missing campaign');
+runtime/orchestrator-service/server.js:15187:  const campaignSafe = safeCampaign.replace(/[^a-z0-9_-]/gi, '_').toLowerCase();
+runtime/orchestrator-service/server.js:15188:  const executionCampaignPackagePath = path.join(DATA_DIR, 'execution', 'projects', safeProject, 'campaign-execution', 'packages', `${campaignSafe}.json`);
+runtime/orchestrator-service/server.js:15189:  const projectCampaignPackagePath = path.join(DATA_DIR, 'projects', safeProject, 'brand-assets', 'campaign-execution', 'packages', `${campaignSafe}.json`);
+runtime/orchestrator-service/server.js:15190:  const legacyCampaignPackagePath = path.join(LEGACY_BRAND_ASSETS_DIR, safeProject, 'campaign-execution', 'packages', `${campaignSafe}.json`);
+runtime/orchestrator-service/server.js:15192:  const campaignPackagePath = pickFirstExistingPath([
+runtime/orchestrator-service/server.js:15198:  if (!campaignPackagePath) {
+runtime/orchestrator-service/server.js:15199:    const error = new Error('Campaign package not found for this project/campaign.');
+runtime/orchestrator-service/server.js:15211:    campaign: safeCampaign,
+runtime/orchestrator-service/server.js:15225:    `${campaignSafe}_${safeChannel}_${timestampSafe}.json`
+runtime/orchestrator-service/server.js:15252:      campaign_name: existingResult.campaign_name || safeCampaign,
+runtime/orchestrator-service/server.js:15280:    campaign: safeCampaign,
+runtime/orchestrator-service/server.js:15290:    campaign_package_path: campaignPackagePath
+runtime/orchestrator-service/server.js:15725:      launch_window: project.launch_window,
+runtime/orchestrator-service/server.js:16001:    campaignStrategyQueuePath: path.join(projectDir, 'campaign-strategy-queue.json'),
+runtime/orchestrator-service/server.js:16002:    campaignAssetPlanPath: path.join(projectDir, 'campaign-asset-plan.json')
+runtime/orchestrator-service/server.js:16154:      const topic = args.join(' ') || `${commandBrandName} launch post`;
+runtime/orchestrator-service/server.js:16293:        format: 'campaign email',
+runtime/orchestrator-service/server.js:16294:        audience: 'general launch audience',
+runtime/orchestrator-service/server.js:16318:        campaign_type: 'meta',
+runtime/orchestrator-service/server.js:16664:      item.format = 'campaign email';
+runtime/orchestrator-service/server.js:16696:      item.status = 'ready_for_launch';
+runtime/orchestrator-service/server.js:16703:        note: 'Ad draft is now ready_for_launch. External Meta launch connector is the next layer.'
+runtime/orchestrator-service/server.js:16891:      const plannedFilename = `${assetId}-${safeSlug}.png`;
+runtime/orchestrator-service/server.js:16892:      const plannedOutputPath = path.join(
+runtime/orchestrator-service/server.js:16895:        plannedFilename
+runtime/orchestrator-service/server.js:16910:        output_path: plannedOutputPath,
+runtime/orchestrator-service/server.js:16911:        filename: plannedFilename,
+runtime/orchestrator-service/server.js:17333:          audience: item.audience || 'general launch audience',
+runtime/orchestrator-service/server.js:17335:          format: item.format || 'campaign email',
+runtime/orchestrator-service/server.js:17371:      const plannedFilename = `${assetId}-${safeSlug}.png`;
+runtime/orchestrator-service/server.js:17372:      const plannedOutputPath = path.join(
+runtime/orchestrator-service/server.js:17375:        plannedFilename
+runtime/orchestrator-service/server.js:17379:        `Create a premium email hero image for ${emailItem.topic}, focused on luxury men’s grooming, strong masculine branding, refined product presentation, elegant dark premium styling, suitable for a high-conversion campaign email for the German market.`;
+runtime/orchestrator-service/server.js:17395:        style: 'premium masculine campaign email',
+runtime/orchestrator-service/server.js:17396:        output_path: plannedOutputPath,
+runtime/orchestrator-service/server.js:17397:        filename: plannedFilename,
+runtime/orchestrator-service/server.js:17735:    if (command === '/create_campaign_strategy') {
+runtime/orchestrator-service/server.js:17747:      const queuePath = projectPaths.campaignStrategyQueuePath;
+runtime/orchestrator-service/server.js:17756:      const strategy = {
+runtime/orchestrator-service/server.js:17757:        strategy_id: `strategy_${Date.now()}`,
+runtime/orchestrator-service/server.js:17760:        campaign_goal: goal,
+runtime/orchestrator-service/server.js:17764:        funnel_type: 'awareness -> consideration -> conversion',
+runtime/orchestrator-service/server.js:17765:        offer_strategy: 'clear offer + premium value + direct CTA',
+runtime/orchestrator-service/server.js:17804:      queue.push(strategy);
+runtime/orchestrator-service/server.js:17809:        result: strategy
+runtime/orchestrator-service/server.js:17813:    if (command === '/review_campaign_strategy') {
+runtime/orchestrator-service/server.js:17814:      const strategyId = args[0];
+runtime/orchestrator-service/server.js:17817:      if (!strategyId || !projectName) {
+runtime/orchestrator-service/server.js:17818:        return res.json({ error: 'Missing strategy id or project name' });
+runtime/orchestrator-service/server.js:17821:      const queuePath = resolveLegacyExecutionProjectPaths(projectName).campaignStrategyQueuePath;
+runtime/orchestrator-service/server.js:17824:        return res.json({ error: 'Campaign strategy queue not found' });
+runtime/orchestrator-service/server.js:17828:      const strategy = queue.find(x => x.strategy_id === strategyId);
+runtime/orchestrator-service/server.js:17830:      if (!strategy) {
+runtime/orchestrator-service/server.js:17831:        return res.json({ error: 'Campaign strategy not found' });
+runtime/orchestrator-service/server.js:17836:        result: strategy
+runtime/orchestrator-service/server.js:17840:    if (command === '/plan_campaign_assets') {
+runtime/orchestrator-service/server.js:17841:      const strategyId = args[0];
+runtime/orchestrator-service/server.js:17844:      if (!strategyId || !projectName) {
+runtime/orchestrator-service/server.js:17845:        return res.json({ error: 'Missing strategy id or project name' });
+runtime/orchestrator-service/server.js:17849:      const strategyQueuePath = projectPaths.campaignStrategyQueuePath;
+runtime/orchestrator-service/server.js:17850:      const planPath = projectPaths.campaignAssetPlanPath;
+runtime/orchestrator-service/server.js:17852:      if (!fs.existsSync(strategyQueuePath)) {
+runtime/orchestrator-service/server.js:17853:        return res.json({ error: 'Campaign strategy queue not found' });
+runtime/orchestrator-service/server.js:17856:      const strategyQueue = JSON.parse(fs.readFileSync(strategyQueuePath, 'utf8'));
+runtime/orchestrator-service/server.js:17857:      const strategy = strategyQueue.find(x => x.strategy_id === strategyId);
+runtime/orchestrator-service/server.js:17859:      if (!strategy) {
+runtime/orchestrator-service/server.js:17860:        return res.json({ error: 'Campaign strategy not found' });
+runtime/orchestrator-service/server.js:17865:        strategy_id: strategy.strategy_id,
+runtime/orchestrator-service/server.js:17868:        planned_assets: {
+runtime/orchestrator-service/server.js:17880:          'ad launch',
+runtime/orchestrator-service/server.js:17884:          'Generate assets from strategy, then run review -> approval -> media -> publish/send.',
+runtime/orchestrator-service/server.js:17963:    content_strategy: {
+runtime/orchestrator-service/server.js:18512:    if (command === '/build_campaign_from_intelligence') {
+runtime/orchestrator-service/server.js:18522:      const strategyQueuePath = projectPaths.campaignStrategyQueuePath;
+runtime/orchestrator-service/server.js:18544:      const campaignBrainPath = path.join(
+runtime/orchestrator-service/server.js:18546:        'intelligence/campaign-brain-queue.json'
+runtime/orchestrator-service/server.js:18554:      const strategyQueue = JSON.parse(fs.readFileSync(strategyQueuePath, 'utf8'));
+runtime/orchestrator-service/server.js:18559:      const campaignBrainQueue = JSON.parse(fs.readFileSync(campaignBrainPath, 'utf8'));
+runtime/orchestrator-service/server.js:18561:      const latestStrategy = [...strategyQueue].reverse()[0] || null;
+runtime/orchestrator-service/server.js:18568:        id: `campaignbrain_${Date.now()}`,
+runtime/orchestrator-service/server.js:18592:        recommended_campaign_angles: [
+runtime/orchestrator-service/server.js:18625:          'send launch email',
+runtime/orchestrator-service/server.js:18626:          'launch social content',
+runtime/orchestrator-service/server.js:18627:          'launch paid ads',
+runtime/orchestrator-service/server.js:18633:      campaignBrainQueue.push(brain);
+runtime/orchestrator-service/server.js:18634:      fs.writeFileSync(campaignBrainPath, JSON.stringify(campaignBrainQueue, null, 2), 'utf8');
+runtime/orchestrator-service/server.js:18642:    if (command === '/recommend_campaign_angles') {
+runtime/orchestrator-service/server.js:18649:      const campaignBrainPath = path.join(
+runtime/orchestrator-service/server.js:18651:        'intelligence/campaign-brain-queue.json'
+runtime/orchestrator-service/server.js:18654:      const queue = JSON.parse(fs.readFileSync(campaignBrainPath, 'utf8'));
+runtime/orchestrator-service/server.js:18658:        return res.json({ error: 'No campaign brain found for project' });
+runtime/orchestrator-service/server.js:18666:          recommended_campaign_angles: latestBrain.recommended_campaign_angles,
+runtime/orchestrator-service/server.js:18681:      const campaignBrainPath = path.join(
+runtime/orchestrator-service/server.js:18683:        'intelligence/campaign-brain-queue.json'
+runtime/orchestrator-service/server.js:18686:      const queue = JSON.parse(fs.readFileSync(campaignBrainPath, 'utf8'));
+runtime/orchestrator-service/server.js:18690:        return res.json({ error: 'No campaign brain found for project' });
+runtime/orchestrator-service/server.js:18716:      const campaignBrainPath = path.join(
+runtime/orchestrator-service/server.js:18718:        'intelligence/campaign-brain-queue.json'
+runtime/orchestrator-service/server.js:18721:      const queue = JSON.parse(fs.readFileSync(campaignBrainPath, 'utf8'));
+runtime/orchestrator-service/server.js:18725:        return res.json({ error: 'No campaign brain found for project' });
+runtime/orchestrator-service/server.js:18734:          'launch one conversion email',
+runtime/orchestrator-service/server.js:18739:        best_angles_this_week: latestBrain.recommended_campaign_angles,
+runtime/orchestrator-service/server.js:18751:if (command === '/execute_campaign_brain') {
+runtime/orchestrator-service/server.js:18755:    return res.json({ error: 'Missing campaign brain ID' });
+runtime/orchestrator-service/server.js:18760:    'intelligence/campaign-brain-queue.json'
+runtime/orchestrator-service/server.js:18765:    'campaign-output/campaign-output-queue.json'
+runtime/orchestrator-service/server.js:18782:    id: `campaignexec_${Date.now()}`,
+runtime/orchestrator-service/server.js:18783:    campaign_brain_id: brainId,
+runtime/orchestrator-service/server.js:18809:        hook: brain.recommended_campaign_angles[0],
+runtime/orchestrator-service/server.js:18815:        hook: brain.recommended_campaign_angles[1],
+runtime/orchestrator-service/server.js:18852:    if (command === '/autogen_campaign_assets') {
+runtime/orchestrator-service/server.js:18856:        return res.json({ error: 'Missing campaign execution ID' });
+runtime/orchestrator-service/server.js:18859:      const campaignOutputPath = path.join(
+runtime/orchestrator-service/server.js:18861:        'campaign-output/campaign-output-queue.json'
+runtime/orchestrator-service/server.js:18864:      const campaignProject = commandProject;
+runtime/orchestrator-service/server.js:18865:      const campaignBrandName = getProjectDisplayName(campaignProject);
+runtime/orchestrator-service/server.js:18866:      const blogQueuePath = getLegacyContentQueuePath(campaignProject, 'blog');
+runtime/orchestrator-service/server.js:18867:      const postQueuePath = getLegacyContentQueuePath(campaignProject, 'social');
+runtime/orchestrator-service/server.js:18868:      const adQueuePath = getLegacyContentQueuePath(campaignProject, 'ads');
+runtime/orchestrator-service/server.js:18869:      const reelQueuePath = getLegacyContentQueuePath(campaignProject, 'reel');
+runtime/orchestrator-service/server.js:18871:      const campaignOutputQueue = JSON.parse(fs.readFileSync(campaignOutputPath, 'utf8'));
+runtime/orchestrator-service/server.js:18878:      const campaignExec = campaignOutputQueue.find(x => x.id === execId);
+runtime/orchestrator-service/server.js:18880:      if (!campaignExec) {
+runtime/orchestrator-service/server.js:18893:      if (campaignExec.blog) {
+runtime/orchestrator-service/server.js:18896:          topic: campaignExec.blog.topic,
+runtime/orchestrator-service/server.js:18898:          title: campaignExec.blog.title,
+runtime/orchestrator-service/server.js:18899:          excerpt: `${campaignExec.blog.topic} – Premium Tipps und klare Routine von ${campaignBrandName}.`,
+runtime/orchestrator-service/server.js:18900:          seo_title: `${campaignExec.blog.title} | ${campaignBrandName}`,
+runtime/orchestrator-service/server.js:18901:          meta_description: `${campaignExec.blog.topic} – entdecke eine starke und einfache Premium-Routine für Männer in Deutschland.`,
+runtime/orchestrator-service/server.js:18902:          target_keywords: [campaignExec.blog.topic],
+runtime/orchestrator-service/server.js:18907:            campaignExec.blog.topic,
+runtime/orchestrator-service/server.js:18909:            campaignBrandName,
+runtime/orchestrator-service/server.js:18919:          featured_image_prompt: `Create a premium editorial blog image for ${campaignExec.blog.topic}, masculine grooming, luxury brand style, clear premium composition.`,
+runtime/orchestrator-service/server.js:18920:          featured_image_alt: `${campaignExec.blog.topic} – Premium Artikel von ${campaignBrandName}`,
+runtime/orchestrator-service/server.js:18921:          outline: campaignExec.blog.structure || [],
+runtime/orchestrator-service/server.js:18922:          body: `<h2>${campaignExec.blog.topic}</h2><p>Entdecke ${campaignExec.blog.topic} mit ${campaignBrandName}.</p>`,
+runtime/orchestrator-service/server.js:18923:          source_campaign_execution_id: execId
+runtime/orchestrator-service/server.js:18931:      if (campaignExec.email) {
+runtime/orchestrator-service/server.js:18934:          topic: campaignExec.blog?.topic || campaignExec.email.subject || 'campaign email',
+runtime/orchestrator-service/server.js:18936:          format: 'campaign email',
+runtime/orchestrator-service/server.js:18937:          audience: 'campaign audience',
+runtime/orchestrator-service/server.js:18939:          subject: campaignExec.email.subject,
+runtime/orchestrator-service/server.js:18941:          body: campaignExec.email.body,
+runtime/orchestrator-service/server.js:18942:          cta: campaignExec.email.cta || 'Jetzt entdecken',
+runtime/orchestrator-service/server.js:18943:          source_campaign_execution_id: execId
+runtime/orchestrator-service/server.js:18951:      if (Array.isArray(campaignExec.social_posts)) {
+runtime/orchestrator-service/server.js:18952:        for (const post of campaignExec.social_posts) {
+runtime/orchestrator-service/server.js:18955:            topic: campaignExec.blog?.topic || 'campaign post',
+runtime/orchestrator-service/server.js:18961:              buildProjectHashtag(campaignProject),
+runtime/orchestrator-service/server.js:18965:            hook_type: post.hook || 'campaign angle',
+runtime/orchestrator-service/server.js:18968:            overlay_text: `${campaignBrandName} | ${campaignExec.blog?.topic || 'campaign'}`,
+runtime/orchestrator-service/server.js:18969:            creative_prompt: `Create a premium ${post.platform} creative for ${campaignExec.blog?.topic || 'campaign'}, masculine luxury grooming style.`,
+runtime/orchestrator-service/server.js:18970:            video_brief: `Create short-form visual content for ${campaignExec.blog?.topic || 'campaign'} on ${post.platform}.`,
+runtime/orchestrator-service/server.js:18971:            source_campaign_execution_id: execId
+runtime/orchestrator-service/server.js:18980:      if (Array.isArray(campaignExec.ads)) {
+runtime/orchestrator-service/server.js:18981:        for (const ad of campaignExec.ads) {
+runtime/orchestrator-service/server.js:18984:            topic: campaignExec.blog?.topic || 'campaign ad',
+runtime/orchestrator-service/server.js:18986:            campaign_type: 'meta',
+runtime/orchestrator-service/server.js:18987:            source_type: 'campaign_execution',
+runtime/orchestrator-service/server.js:18992:            audience_angle: 'campaign audience',
+runtime/orchestrator-service/server.js:19004:      if (campaignExec.reel) {
+runtime/orchestrator-service/server.js:19007:          topic: campaignExec.blog?.topic || 'campaign reel',
+runtime/orchestrator-service/server.js:19010:          hook: campaignExec.reel.hook || '',
+runtime/orchestrator-service/server.js:19022:          script: campaignExec.reel.script || '',
+runtime/orchestrator-service/server.js:19023:          cta: campaignExec.reel.cta || 'Jetzt starten',
+runtime/orchestrator-service/server.js:19026:          source_campaign_execution_id: execId
+runtime/orchestrator-service/server.js:19039:      campaignExec.autogen_status = 'completed';
+runtime/orchestrator-service/server.js:19040:      campaignExec.autogen_created_assets = created;
+runtime/orchestrator-service/server.js:19041:      campaignExec.autogen_completed_at = new Date().toISOString();
+runtime/orchestrator-service/server.js:19044:        campaignOutputPath,
+runtime/orchestrator-service/server.js:19045:        JSON.stringify(campaignOutputQueue, null, 2),
+runtime/orchestrator-service/server.js:19052:          campaign_execution_id: execId,
+runtime/orchestrator-service/server.js:19058:    if (command === '/review_campaign_autogen') {
+runtime/orchestrator-service/server.js:19062:        return res.json({ error: 'Missing campaign execution ID' });
+runtime/orchestrator-service/server.js:19065:      const campaignOutputPath = path.join(
+runtime/orchestrator-service/server.js:19067:        'campaign-output/campaign-output-queue.json'
+runtime/orchestrator-service/server.js:19070:      const campaignOutputQueue = JSON.parse(fs.readFileSync(campaignOutputPath, 'utf8'));
+runtime/orchestrator-service/server.js:19071:      const campaignExec = campaignOutputQueue.find(x => x.id === execId);
+runtime/orchestrator-service/server.js:19073:      if (!campaignExec) {
+runtime/orchestrator-service/server.js:19080:          campaign_execution_id: execId,
+runtime/orchestrator-service/server.js:19081:          autogen_status: campaignExec.autogen_status || 'not_run',
+runtime/orchestrator-service/server.js:19082:          created_assets: campaignExec.autogen_created_assets || {},
+runtime/orchestrator-service/server.js:19083:          autogen_completed_at: campaignExec.autogen_completed_at || null
+runtime/orchestrator-service/server.js:19088:    if (command === '/campaign_publish_blog') {
+runtime/orchestrator-service/server.js:19092:        return res.json({ error: 'Missing campaign execution ID' });
+runtime/orchestrator-service/server.js:19095:      const campaignOutputPath = path.join(
+runtime/orchestrator-service/server.js:19097:        'campaign-output/campaign-output-queue.json'
+runtime/orchestrator-service/server.js:19100:      const campaignOutputQueue = JSON.parse(fs.readFileSync(campaignOutputPath, 'utf8'));
+runtime/orchestrator-service/server.js:19101:      const campaignExec = campaignOutputQueue.find(x => x.id === execId);
+runtime/orchestrator-service/server.js:19103:      if (!campaignExec) {
+runtime/orchestrator-service/server.js:19107:      const blogId = campaignExec.autogen_created_assets?.blog_id;
+runtime/orchestrator-service/server.js:19110:        return res.json({ error: 'No generated blog asset linked to this campaign' });
+runtime/orchestrator-service/server.js:19118:        campaignExec.controlled_publish = campaignExec.controlled_publish || {};
+runtime/orchestrator-service/server.js:19119:        campaignExec.controlled_publish.blog = {
+runtime/orchestrator-service/server.js:19127:          campaignOutputPath,
+runtime/orchestrator-service/server.js:19128:          JSON.stringify(campaignOutputQueue, null, 2),
+runtime/orchestrator-service/server.js:19134:          result: campaignExec.controlled_publish.blog
+runtime/orchestrator-service/server.js:19144:    if (command === '/campaign_send_email') {
+runtime/orchestrator-service/server.js:19149:        return res.json({ error: 'Missing campaign execution ID or recipient email' });
+runtime/orchestrator-service/server.js:19152:      const campaignOutputPath = path.join(
+runtime/orchestrator-service/server.js:19154:        'campaign-output/campaign-output-queue.json'
+runtime/orchestrator-service/server.js:19157:      const campaignOutputQueue = JSON.parse(fs.readFileSync(campaignOutputPath, 'utf8'));
+runtime/orchestrator-service/server.js:19158:      const campaignExec = campaignOutputQueue.find(x => x.id === execId);
+runtime/orchestrator-service/server.js:19160:      if (!campaignExec) {
+runtime/orchestrator-service/server.js:19164:      const emailId = campaignExec.autogen_created_assets?.email_id;
+runtime/orchestrator-service/server.js:19167:        return res.json({ error: 'No generated email asset linked to this campaign' });
+runtime/orchestrator-service/server.js:19179:        campaignExec.controlled_publish = campaignExec.controlled_publish || {};
+runtime/orchestrator-service/server.js:19180:        campaignExec.controlled_publish.email = {
+runtime/orchestrator-service/server.js:19189:          campaignOutputPath,
+runtime/orchestrator-service/server.js:19190:          JSON.stringify(campaignOutputQueue, null, 2),
+runtime/orchestrator-service/server.js:19196:          result: campaignExec.controlled_publish.email
+runtime/orchestrator-service/server.js:19206:    if (command === '/campaign_review_publish_state') {
+runtime/orchestrator-service/server.js:19210:        return res.json({ error: 'Missing campaign execution ID' });
+runtime/orchestrator-service/server.js:19213:      const campaignOutputPath = path.join(
+runtime/orchestrator-service/server.js:19215:        'campaign-output/campaign-output-queue.json'
+runtime/orchestrator-service/server.js:19218:      const campaignOutputQueue = JSON.parse(fs.readFileSync(campaignOutputPath, 'utf8'));
+runtime/orchestrator-service/server.js:19219:      const campaignExec = campaignOutputQueue.find(x => x.id === execId);
+runtime/orchestrator-service/server.js:19221:      if (!campaignExec) {
+runtime/orchestrator-service/server.js:19228:          campaign_execution_id: execId,
+runtime/orchestrator-service/server.js:19229:          autogen_status: campaignExec.autogen_status || 'not_run',
+runtime/orchestrator-service/server.js:19230:          created_assets: campaignExec.autogen_created_assets || {},
+runtime/orchestrator-service/server.js:19231:          controlled_publish: campaignExec.controlled_publish || {},
+runtime/orchestrator-service/server.js:19233:            blog: campaignExec.controlled_publish?.blog?.status || 'not_published',
+runtime/orchestrator-service/server.js:19234:            email: campaignExec.controlled_publish?.email?.status || 'not_sent'
+runtime/orchestrator-service/server.js:20997:if (command === '/build_campaign_execution_package') {
+runtime/orchestrator-service/server.js:20999:  const campaignName = (args[1] || '').trim();
+runtime/orchestrator-service/server.js:21002:  if (!projectName || !campaignName || !rawSlugs) {
+runtime/orchestrator-service/server.js:21003:    return res.json({ error: 'Missing project, campaign name, or product slugs' });
+runtime/orchestrator-service/server.js:21014:      campaignName,
+runtime/orchestrator-service/server.js:21024:      error: 'Failed to build campaign execution package',
+runtime/orchestrator-service/server.js:21029:if (command === '/review_campaign_execution_package') {
+runtime/orchestrator-service/server.js:21031:  const campaignName = (args[1] || '').trim();
+runtime/orchestrator-service/server.js:21033:  if (!projectName || !campaignName) {
+runtime/orchestrator-service/server.js:21034:    return res.json({ error: 'Missing project or campaign name' });
+runtime/orchestrator-service/server.js:21038:    const result = readCampaignExecutionPackage(projectName, campaignName);
+runtime/orchestrator-service/server.js:21046:      error: 'Failed to review campaign execution package',
+runtime/orchestrator-service/server.js:21053:  const campaignName = (args[1] || '').trim();
+runtime/orchestrator-service/server.js:21056:  if (!projectName || !campaignName || !channel) {
+runtime/orchestrator-service/server.js:21057:    return res.json({ error: 'Missing project, campaign name, or channel' });
+runtime/orchestrator-service/server.js:21063:      campaignName,
+runtime/orchestrator-service/server.js:21078:if (command === '/build_campaign_media_job') {
+runtime/orchestrator-service/server.js:21080:  const campaignName = (args[1] || '').trim();
+runtime/orchestrator-service/server.js:21083:  if (!projectName || !campaignName || !channel) {
+runtime/orchestrator-service/server.js:21084:    return res.json({ error: 'Missing project, campaign name, or channel' });
+runtime/orchestrator-service/server.js:21088:    const result = buildCampaignMediaJob(projectName, campaignName, channel);
+runtime/orchestrator-service/server.js:21095:      error: 'Failed to build campaign media job',
+runtime/orchestrator-service/server.js:21100:if (command === '/prepare_campaign_email') {
+runtime/orchestrator-service/server.js:21102:  const campaignName = (args[1] || '').trim();
+runtime/orchestrator-service/server.js:21104:  if (!projectName || !campaignName) {
+runtime/orchestrator-service/server.js:21105:    return res.json({ error: 'Missing project or campaign name' });
+runtime/orchestrator-service/server.js:21109:    const result = buildCampaignEmailPackage(projectName, campaignName);
+runtime/orchestrator-service/server.js:21116:      error: 'Failed to prepare campaign email package',
+runtime/orchestrator-service/server.js:21121:if (command === '/build_campaign_publish_package') {
+runtime/orchestrator-service/server.js:21123:  const campaignName = (args[1] || '').trim();
+runtime/orchestrator-service/server.js:21126:  if (!projectName || !campaignName || !channel) {
+runtime/orchestrator-service/server.js:21127:    return res.json({ error: 'Missing project, campaign name, or channel' });
+runtime/orchestrator-service/server.js:21131:    const result = buildCampaignPublishPackage(projectName, campaignName, channel);
+runtime/orchestrator-service/server.js:21138:      error: 'Failed to build campaign publish package',
+runtime/orchestrator-service/server.js:21143:if (command === '/review_campaign_finalization') {
+runtime/orchestrator-service/server.js:21145:  const campaignName = (args[1] || '').trim();
+runtime/orchestrator-service/server.js:21147:  if (!projectName || !campaignName) {
+runtime/orchestrator-service/server.js:21148:    return res.json({ error: 'Missing project or campaign name' });
+runtime/orchestrator-service/server.js:21152:    const result = reviewCampaignFinalization(projectName, campaignName);
+runtime/orchestrator-service/server.js:21159:      error: 'Failed to review campaign finalization',
+runtime/orchestrator-service/server.js:21164:if (command === '/build_german_launch_plan') {
+runtime/orchestrator-service/server.js:21171:    return res.json({ error: 'Failed to build launch plan', details: error.message });
+runtime/orchestrator-service/server.js:21174:if (command === '/review_german_launch_plan') {
+runtime/orchestrator-service/server.js:21179:    const filePath = path.join(paths.planDir, 'launch-plan.json');
+runtime/orchestrator-service/server.js:21184:    return res.json({ error: 'Failed to review launch plan', details: error.message });
+runtime/orchestrator-service/server.js:21187:if (command === '/build_launch_wave') {
+runtime/orchestrator-service/server.js:21195:    return res.json({ error: 'Failed to build launch wave', details: error.message });
+runtime/orchestrator-service/server.js:21198:if (command === '/review_launch_wave') {
+runtime/orchestrator-service/server.js:21209:    return res.json({ error: 'Failed to review launch wave', details: error.message });
+runtime/orchestrator-service/server.js:21231:if (command === '/schedule_launch_job') {
+runtime/orchestrator-service/server.js:21246:      error: 'Failed to schedule launch job',
+runtime/orchestrator-service/server.js:21289:  const campaignName = (args[1] || '').trim();
+runtime/orchestrator-service/server.js:21296:  if (!projectName || !campaignName || !channel || !jobId || !operator || !postUrl) {
+runtime/orchestrator-service/server.js:21298:      error: 'Missing required args. Usage: /record_manual_publish <project> <campaign> <channel> <job_id> <operator> <post_url> [notes...]'
+runtime/orchestrator-service/server.js:21303:    const result = recordManualPublish(projectName, campaignName, channel, jobId, operator, postUrl, notes);
+runtime/orchestrator-service/server.js:22385:    campaign_id: String(
+runtime/orchestrator-service/server.js:22386:      payload.campaign_id
+runtime/orchestrator-service/server.js:22387:      || publishPackage.campaign_id
+runtime/orchestrator-service/server.js:22423:    campaign_id: String(input.campaign_id || inferred.campaign_id || '').trim() || null,
+runtime/orchestrator-service/server.js:22938:      campaign_id: req.body?.campaign_id,
+runtime/orchestrator-service/server.js:23166:app.post('/api/media/generate-campaign-pack', async (req, res) => {
+runtime/orchestrator-service/server.js:23175:      output: { campaign_pack: result.campaign_pack },
+runtime/orchestrator-service/server.js:23184:      campaign_pack: result.campaign_pack,
+runtime/orchestrator-service/server.js:23191:      message: error.message || 'Failed to generate campaign pack'

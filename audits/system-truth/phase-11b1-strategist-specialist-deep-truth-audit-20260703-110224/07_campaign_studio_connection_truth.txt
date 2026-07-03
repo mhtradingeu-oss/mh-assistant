@@ -1,0 +1,334 @@
+### campaign studio AI/strategy/handoff references
+1:import { getSharedCampaignRecord, getSharedHandoff, setSharedCampaignRecord, setSharedHandoff } from "../shared-context.js";
+59:  ownerRole: "strategist",
+67:  "ai-command": { role: "admin", domain: "governance" }
+380:  const handoff = getSharedHandoff(projectName, "campaign-studio", operations, "ai-command");
+381:  const handoffId = asString(handoff?.id || handoff?.updated_at || handoff?.created_at || handoff?.payload?.prompt);
+382:  if (!handoffId || handoffId === asString(session.lastAiHandoffId)) return false;
+384:  const payload = asObject(handoff.payload);
+400:    offerHeadline: firstNonEmpty(pkg.offer, pkg.offerStrategy, pkg.offer_strategy, session.values.offerHeadline),
+421:  session.lastAiHandoffId = handoffId;
+425:    source_page: "ai-command",
+444:    detail || "This action may create or update backend campaign records or route handoffs.",
+483:  const handoff = {
+507:    "Create campaign route handoff",
+508:    `This will create a campaign handoff from Campaign Studio to ${destinationPage} for review and execution preparation.`
+513:  setSharedHandoff(projectName, destinationPage, handoff);
+515:  createProjectHandoff?.(projectName, handoff).catch((error) => {
+516:    console.warn("Failed to persist campaign route handoff:", error.message);
+1130:  const strategyGuidance = buildStrategyGuidance({
+1164:    strategyGuidance,
+1299:      // Explicit actions such as Save, Build, Refresh, and route handoffs still
+1368:        "Create AI Command campaign handoff",
+1369:        "This will create a campaign handoff from Campaign Studio to AI Command for review and planning support."
+1371:        showMessage?.("AI Command handoff cancelled.");
+1375:      setSharedHandoff(projectName, "ai-command", {
+1377:        destination_page: "ai-command",
+1389:        destination_page: "ai-command",
+1391:        destination_role: CAMPAIGN_ROUTE_ROLES["ai-command"].role,
+1393:        destination_service_domain: CAMPAIGN_ROUTE_ROLES["ai-command"].domain,
+1408:        console.warn("Failed to persist campaign handoff:", error.message);
+1410:      navigateTo("ai-command");
+1411:      showMessage?.("Campaign context sent to AI Command.");
+1572:      strategyGuidance,
+1597:    const strategistNextAction = safeText(strategyGuidance.nextAction, "Review campaign plan");
+1598:    const strategistMode = hasLiveIntelligence
+1621:          <aside class="mhos-campaign-strategist-panel mhos-context-actions mhos-executive-ai-panel" aria-label="Campaign strategist recommendation">
+1623:            <strong class="mhos-campaign-panel-action mhos-executive-guidance">${escapeHtml(strategistNextAction)}</strong>
+1624:            <p class="mhos-campaign-panel-copy mhos-executive-guidance">${escapeHtml(strategistMode)}</p>
+1893:              <div class="campaign-strategy-stack">
+1894:                <div class="campaign-strategy-item">
+1896:                  <strong>${escapeHtml(strategyGuidance.angle)}</strong>
+1898:                <div class="campaign-strategy-item">
+1900:                  <strong>${escapeHtml(strategyGuidance.offer)}</strong>
+1902:                <div class="campaign-strategy-item">
+1904:                  <strong>${escapeHtml(strategyGuidance.audience)}</strong>
+1906:                <div class="campaign-strategy-item">
+1908:                  <strong>${escapeHtml(strategyGuidance.channels)}</strong>
+1910:                <div class="campaign-strategy-item">
+1912:                  <strong>${escapeHtml(strategyGuidance.nextAction)}</strong>
+2021:                  <span class="home-action-meta">Prefill AI Command with the current draft, blockers, and campaign context, then open that page.</span>
+2027:                  <span class="home-action-meta">Open Content Studio with a campaign handoff attached.</span>
+2031:                  <span class="home-action-meta">Open Media Studio with a campaign handoff attached.</span>
+2035:                  <span class="home-action-meta">Open Publishing with a campaign handoff attached.</span>
+2039:                  <span class="home-action-meta">Open Ads Manager with a campaign handoff attached.</span>
+
+### campaign studio handoff context
+    form_values: { ...asObject(values) },
+    updated_at: new Date().toISOString()
+  });
+}
+
+function hydrateValuesFromCampaignRecord(defaults, campaign) {
+  const record = asObject(campaign);
+  const formValues = asObject(record.form_values);
+
+  return {
+    ...defaults,
+    ...formValues,
+    campaignName: asString(formValues.campaignName || record.name || defaults.campaignName),
+    campaignGoal: asString(formValues.campaignGoal || record.objective || defaults.campaignGoal),
+    audiencePrimary: asString(formValues.audiencePrimary || record.audience || defaults.audiencePrimary),
+    channelPlan: asString(formValues.channelPlan || asArray(record.channels).join(", ") || defaults.channelPlan),
+    offerHeadline: asString(formValues.offerHeadline || record.offer || defaults.offerHeadline),
+    budget: asString(formValues.budget || record.budget || defaults.budget)
+  };
+}
+
+function joinPackageList(value) {
+  if (!Array.isArray(value)) return readableValue(value);
+  return uniqueStrings(asArray(value).map((item) => {
+    if (typeof item === "string") return item;
+    const record = asObject(item);
+    return firstNonEmpty(record.name, record.title, record.label, record.channel, record.product, record.summary, record.action);
+  })).join(", ");
+}
+
+function phaseValue(phases, index, key) {
+  const phase = asObject(asArray(phases)[index]);
+  if (!Object.keys(phase).length) return "";
+  if (key === "name") return firstNonEmpty(phase.name, phase.title, `Wave ${index + 1}`);
+  if (key === "focus") return firstNonEmpty(phase.goal, phase.objective, phase.focus, phase.summary, joinPackageList(phase.actions || phase.steps));
+  if (key === "channels") return joinPackageList(phase.channels);
+  return "";
+}
+
+function applyAiCampaignHandoff(projectName, operations, session) {
+  const handoff = getSharedHandoff(projectName, "campaign-studio", operations, "ai-command");
+  const handoffId = asString(handoff?.id || handoff?.updated_at || handoff?.created_at || handoff?.payload?.prompt);
+  if (!handoffId || handoffId === asString(session.lastAiHandoffId)) return false;
+
+  const payload = asObject(handoff.payload);
+  const output = asObject(payload.output);
+  const response = asObject(output.response || output);
+  const pkg = asObject(response.campaignPackage || response.campaign_package || payload.campaignPackage || payload.campaign_package);
+  if (!Object.keys(pkg).length) return false;
+
+  const phases = asArray(pkg.launchPhases || pkg.launch_phases || pkg.phases);
+  session.values = {
+    ...session.values,
+    campaignName: firstNonEmpty(pkg.concept, pkg.campaignConcept, response.title, session.values.campaignName),
+    campaignGoal: firstNonEmpty(response.summary, pkg.goal, pkg.objective, session.values.campaignGoal),
+    productFocus: firstNonEmpty(joinPackageList(pkg.products), session.values.productFocus),
+    productAngle: firstNonEmpty(joinPackageList(pkg.contentAngles || pkg.content_angles), pkg.concept, session.values.productAngle),
+    audiencePrimary: firstNonEmpty(pkg.targetAudience, pkg.target_audience, pkg.audience, session.values.audiencePrimary),
+    audienceNeed: firstNonEmpty(pkg.audienceNeed, pkg.audience_need, session.values.audienceNeed),
+    channelPlan: firstNonEmpty(joinPackageList(pkg.channels), session.values.channelPlan),
+    offerHeadline: firstNonEmpty(pkg.offer, pkg.offerStrategy, pkg.offer_strategy, session.values.offerHeadline),
+    offerDetail: firstNonEmpty(joinPackageList(pkg.adAngles || pkg.ad_angles), session.values.offerDetail),
+    wave1Name: firstNonEmpty(phaseValue(phases, 0, "name"), session.values.wave1Name),
+    wave1Focus: firstNonEmpty(phaseValue(phases, 0, "focus"), session.values.wave1Focus),
+    wave1Channels: firstNonEmpty(phaseValue(phases, 0, "channels"), session.values.wave1Channels),
+    wave2Name: firstNonEmpty(phaseValue(phases, 1, "name"), session.values.wave2Name),
+    wave2Focus: firstNonEmpty(phaseValue(phases, 1, "focus"), session.values.wave2Focus),
+    wave2Channels: firstNonEmpty(phaseValue(phases, 1, "channels"), session.values.wave2Channels),
+    wave3Name: firstNonEmpty(phaseValue(phases, 2, "name"), session.values.wave3Name),
+    wave3Focus: firstNonEmpty(phaseValue(phases, 2, "focus"), session.values.wave3Focus),
+    wave3Channels: firstNonEmpty(phaseValue(phases, 2, "channels"), session.values.wave3Channels),
+    assetChecklist: firstNonEmpty(joinPackageList(pkg.requiredAssets || pkg.required_assets), session.values.assetChecklist),
+    executionNotes: firstNonEmpty(
+      joinPackageList([
+        ...asArray(pkg.missingBlockers || pkg.missing_blockers || pkg.blockers),
+        ...asArray(pkg.nextActions || pkg.next_actions)
+      ]),
+      session.values.executionNotes
+    )
+  };
+  session.generatedPackages += 1;
+  session.lastAiHandoffId = handoffId;
+  setSharedCampaignRecord(projectName, {
+    ...(getSharedCampaignRecord(projectName, operations) || {}),
+    project: projectName,
+    source_page: "ai-command",
+    name: session.values.campaignName,
+    objective: session.values.campaignGoal,
+    audience: session.values.audiencePrimary,
+    channels: parseList(session.values.channelPlan),
+    offer: session.values.offerHeadline,
+    status: "draft",
+    form_values: { ...session.values },
+    updated_at: new Date().toISOString()
+  });
+  return true;
+}
+
+function confirmCampaignStudioAuthorityAction(action, detail = "") {
+  if (typeof window === "undefined" || typeof window.confirm !== "function") return true;
+
+  const message = [
+    `Confirm Campaign Studio action: ${action}`,
+    "",
+    detail || "This action may create or update backend campaign records or route handoffs.",
+    "",
+    "Authority: This does not publish, send externally, schedule ads, or approve anything automatically.",
+    "Select Cancel to review the campaign plan, evidence, and destination before continuing."
+  ].join("\n");
+
+  return window.confirm(message);
+}
+
+function buildCampaignRecordPayload(projectName, session) {
+  const values = asObject(session.values);
+  const timeline = [asString(values.startDate), asString(values.endDate)].filter(Boolean).join(" to ");
+
+  return {
+    id: session.recordId || undefined,
+    name: asString(values.campaignName || projectName),
+    objective: asString(values.campaignGoal),
+    audience: asString(values.audiencePrimary),
+    channels: asString(values.channelPlan),
+    offer: asString(values.offerHeadline),
+    timeline,
+    budget: asString(values.budget),
+    status: "draft",
+    source_page: "campaign-studio",
+    owner: "Strategist",
+    owner_role: CAMPAIGN_ROLE_DEFAULTS.ownerRole,
+    review_role: CAMPAIGN_ROLE_DEFAULTS.reviewRole,
+    service_domain: CAMPAIGN_ROLE_DEFAULTS.serviceDomain,
+    linked_assets: [],
+    linked_tasks: [],
+    linked_approvals: [],
+    form_values: { ...values }
+  };
+}
+
+function persistCampaignRouteHandoff({ projectName, session, destinationPage, createProjectHandoff }) {
+  const destination = CAMPAIGN_ROUTE_ROLES[destinationPage];
+  if (!projectName || !destination) return;
+
+  const handoff = {
+    source_page: "campaign-studio",
+    destination_page: destinationPage,
+    source_role: CAMPAIGN_ROLE_DEFAULTS.ownerRole,
+    destination_role: destination.role,
+    source_service_domain: CAMPAIGN_ROLE_DEFAULTS.serviceDomain,
+    destination_service_domain: destination.domain,
+    linked_entity: {
+      entity_type: "campaign",
+      entity_id: session.recordId || "",
+      route: "campaign-studio",
+      label: asString(session.values.campaignName || projectName)
+    },
+    payload: {
+      campaign_id: session.recordId || "",
+      campaign_name: asString(session.values.campaignName || projectName),
+      owner_role: CAMPAIGN_ROLE_DEFAULTS.ownerRole,
+      review_role: CAMPAIGN_ROLE_DEFAULTS.reviewRole,
+      service_domain: CAMPAIGN_ROLE_DEFAULTS.serviceDomain,
+      draft_context: buildCampaignRecordPayload(projectName, session)
+    }
+  };
+
+  if (!confirmCampaignStudioAuthorityAction(
+    "Create campaign route handoff",
+    `This will create a campaign handoff from Campaign Studio to ${destinationPage} for review and execution preparation.`
+  )) {
+    return false;
+  }
+
+  setSharedHandoff(projectName, destinationPage, handoff);
+
+  createProjectHandoff?.(projectName, handoff).catch((error) => {
+    console.warn("Failed to persist campaign route handoff:", error.message);
+  });
+
+  return true;
+}
+
+function scheduleCampaignPersistence(projectName, session, saveProjectCampaign) {
+  if (!projectName || typeof saveProjectCampaign !== "function") {
+    return;
+  }
+
+  const key = projectName || "__default__";
+  const existing = campaignSaveTimers.get(key);
+  if (existing) {
+    clearTimeout(existing);
+
+        return;
+      }
+
+      try {
+        const result = await saveProjectCampaign?.(projectName, {
+          ...buildCampaignRecordPayload(projectName, session),
+          status: "planned"
+        });
+        if (result?.campaign?.id) {
+          session.recordId = result.campaign.id;
+          setSharedCampaignRecord(projectName, result.campaign);
+        }
+        showMessage?.("Campaign plan saved as a durable shared record.");
+      } catch (error) {
+        showError?.(error.message || "Failed to structure the campaign plan.");
+      }
+    };
+  }
+
+  const askAiBtn = $("campaignAskAiBtn");
+  if (askAiBtn) {
+    askAiBtn.onclick = async () => {
+      const prompt = `Build an execution plan for campaign ${session.values.campaignName || "this campaign"} with goal ${session.values.campaignGoal || "launch"}, channels ${session.values.channelPlan || "to be defined"}, and offer ${session.values.offerHeadline || "to be defined"}. Use current project intelligence, readiness blockers, and recommendation signals.`;
+      const input = $("quickCommandInput");
+      if (input) {
+        input.value = prompt;
+      }
+      if (!confirmCampaignStudioAuthorityAction(
+        "Create AI Command campaign handoff",
+        "This will create a campaign handoff from Campaign Studio to AI Command for review and planning support."
+      )) {
+        showMessage?.("AI Command handoff cancelled.");
+        return;
+      }
+
+      setSharedHandoff(projectName, "ai-command", {
+        source_page: "campaign-studio",
+        destination_page: "ai-command",
+        payload: {
+          prompt,
+          campaign_id: session.recordId || "",
+          campaign_name: session.values.campaignName || projectName,
+          draft_context: buildCampaignRecordPayload(projectName, session)
+        },
+        status: "available"
+      });
+
+      createProjectHandoff?.(projectName, {
+        source_page: "campaign-studio",
+        destination_page: "ai-command",
+        source_role: CAMPAIGN_ROLE_DEFAULTS.ownerRole,
+        destination_role: CAMPAIGN_ROUTE_ROLES["ai-command"].role,
+        source_service_domain: CAMPAIGN_ROLE_DEFAULTS.serviceDomain,
+        destination_service_domain: CAMPAIGN_ROUTE_ROLES["ai-command"].domain,
+        linked_entity: {
+          entity_type: "campaign",
+          entity_id: session.recordId || ""
+        },
+        payload: {
+          prompt,
+          campaign_id: session.recordId || "",
+          campaign_name: session.values.campaignName || projectName,
+          owner_role: CAMPAIGN_ROLE_DEFAULTS.ownerRole,
+          review_role: CAMPAIGN_ROLE_DEFAULTS.reviewRole,
+          service_domain: CAMPAIGN_ROLE_DEFAULTS.serviceDomain,
+          draft_context: buildCampaignRecordPayload(projectName, session)
+        }
+      }).catch((error) => {
+        console.warn("Failed to persist campaign handoff:", error.message);
+      });
+      navigateTo("ai-command");
+      showMessage?.("Campaign context sent to AI Command.");
+    };
+  }
+
+  const publishingBtn = $("campaignOpenPublishingBtn");
+  if (publishingBtn) {
+    publishingBtn.onclick = () => {
+      const accepted = persistCampaignRouteHandoff({ projectName, session, destinationPage: "publishing", createProjectHandoff });
+      if (accepted) navigateTo("publishing");
+    };
+  }
+
+  const assetsBtn = $("campaignReviewAssetsBtn");
+  if (assetsBtn) {
+    assetsBtn.onclick = () => navigateTo("library");

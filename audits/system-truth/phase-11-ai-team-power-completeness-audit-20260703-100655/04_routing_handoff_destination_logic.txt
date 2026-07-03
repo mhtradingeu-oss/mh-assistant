@@ -1,0 +1,645 @@
+18:        getSharedHandoff,
+19:        setSharedAiDraft,
+20:        setSharedHandoff
+69:                summary: "Publishing readiness, schedule review, and handoff preparation.",
+97:                summary: "Tasks, timelines, handoffs, approvals, and execution plans.",
+111:                summary: "Lead qualification, outreach drafts, follow-up cadence, and CRM handoff notes.",
+163:		canHelp: ["Draft captions and hooks", "Write email copy", "Create landing page text", "Prepare publisher handoff", "Suggest message variants"],
+176:		canHelp: ["Write creative briefs", "Advise on visual direction", "Map format requirements", "Review brand alignment", "Prepare media handoffs"],
+200:		summary: "Publishing readiness, schedule review, and handoff preparation.",
+201:		placeholder: "Ask the Publisher to review publishing readiness, check scheduling, or prepare a handoff package…",
+202:		canHelp: ["Review publishing readiness", "Check scheduled jobs", "Prepare handoff packages", "Map publishing dependencies", "Flag pre-publish risks"],
+250:		position: "Execution and Handoff Lead",
+252:		summary: "Tasks, timelines, handoffs, approvals, and execution plans.",
+253:		placeholder: "Ask the Operations Lead to turn this into tasks, workflow steps, or handoffs…",
+254:		canHelp: ["Create task plans", "Map execution sequences", "Prepare workflow handoffs", "Review execution health", "Identify operational blockers"],
+257:		safetyNote: "Task plans and handoffs only. Workflow execution requires explicit user confirmation.",
+278:		summary: "Lead qualification, outreach drafts, follow-up cadence, CRM profile summaries, and sales handoff notes.",
+279:		placeholder: "Ask the Sales / CRM Lead to qualify a lead, draft outreach, plan follow-ups, summarize CRM context, or prepare a sales handoff for review…",
+280:		canHelp: ["Qualify lead context", "Draft outreach", "Plan follow-up sequences", "Summarize CRM profiles", "Prepare sales handoffs"],
+299:		{ label: "Prepare a Publisher handoff", sub: "Package ready content for review" },
+306:		{ label: "Prepare a media handoff", sub: "Package direction for the team" }
+318:		{ label: "Prepare a handoff package", sub: "For the approver review" }
+340:		{ label: "Draft a workflow handoff", sub: "Prepare for the next owner" },
+354:		{ label: "Prepare sales handoff", sub: "Route context to operations" }
+362:	{ label: "Prepare a full handoff sequence", sub: "Strategy, creative, compliance, publishing, ops" },
+370:	{ id: "draft", title: "Prepare", description: "Create guidance, copy, task, or handoff context." },
+372:	{ id: "route", title: "Handoff", description: "Open the owning workspace with draft context." },
+381:	{ id: "handoff", label: "Handoff Preview", helper: "Destination package" },
+433:		{ id: "funnel-mapping", label: "Funnel Mapping", action: "preview", intent: "guidance", template: "Map the funnel for {project}. Include awareness, consideration, conversion, retention, and handoff points." },
+440:		{ id: "publisher-package", label: "Publisher Package", action: "preview", intent: "handoff", template: "Prepare a Publisher handoff for {project}. Include German copy package, CTA, notes, and remaining checks." }
+457:		{ id: "publishing-checklist", label: "Publishing Checklist", action: "preview", intent: "handoff", template: "Build a publishing checklist for {project}. Include German copy, assets, claims checks, and channel readiness." },
+458:		{ id: "final-packaging", label: "Final Packaging", action: "preview", intent: "handoff", template: "Prepare a final publishing package for {project}. Include copy, CTA, asset notes, approvals, and destination channel." },
+480:		{ id: "safety-checklist", label: "Safety Checklist", action: "preview", intent: "handoff", template: "Prepare a safety checklist for {project}. Include policy checks, evidence required, and approval notes." },
+481:		{ id: "publish-readiness", label: "Publish Readiness", action: "preview", intent: "handoff", template: "Review publish readiness for {project}. Confirm what needs human approval before release." },
+486:		{ id: "handoff-routing", label: "Handoff Routing", action: "preview", intent: "handoff", template: "Prepare handoff routing for {project}. Include source, destination, decision gates, and required confirmations." },
+497:		{ id: "prepare-escalation", label: "Prepare Escalation", action: "preview", intent: "handoff", template: "Prepare an escalation draft for {project}. Include reason, customer impact, owner, confirmation needed, and destination team." },
+499:		{ id: "route-support-sales-ops", label: "Route to Support / Sales / Operations", action: "preview", intent: "handoff", template: "Prepare routing guidance for {project}. Decide whether the customer item belongs with Support, Sales, or Operations, and explain the review gate." }
+508:		{ id: "influencer-lead-plan", label: "Influencer Lead Plan", action: "preview", intent: "workflow", template: "Prepare an influencer lead plan for {project}. Include target profile, outreach angle, qualification criteria, and handoff path." },
+509:		{ id: "sales-handoff-draft", label: "Sales Handoff", action: "preview", intent: "handoff", template: "Prepare a sales handoff draft for {project}. Include lead context, recommended next action, owner, and confirmation needed." }
+604:		purpose: "Translate intent into executable workflows and handoffs.",
+612:const aiInboundHandoffObjectIds = typeof WeakMap !== "undefined" ? new WeakMap() : null;
+613:let aiInboundHandoffCounter = 0;
+762:    "Prepare a handoff summary for:",
+915:			outputWorkspaceTab: "draft",
+940:			lastAppliedHandoffId: "",
+942:			routeSuggestions: [],
+943:			inboundHandoff: null,
+1203:        session.outputWorkspaceTab = outputTabFromPreview(session.outputPreview);
+1204:        session.activeOutputTab = session.outputWorkspaceTab;
+1298:function destinationRouteForSpecialist(specialistId, outputType) {
+1316:function resolveAiResponseOutputRoute(session, response = {}) {
+1319:        const explicitDestination = asString(response.destinationRoute || "").trim();
+1324:                response.destinationRoute,
+1336:                                : activeTab === "handoff"
+1337:                                        ? "handoff"
+1341:        const looksTaskLike = /\b(task|tasks|handoff|ticket|tickets|follow-up|follow up|owner|owners|assignee|assigned|due date|priority|priorities|backlog|checklist|next task|action item|action items)\b/.test(text);
+1350:        if (outputType === "handoff" || outputType === "task" || looksTaskLike) {
+1352:                return { outputType, destinationRoute: "task-center" };
+1357:                return { outputType, destinationRoute: explicitDestination || "workflows" };
+1362:                return { outputType, destinationRoute: explicitDestination || "content-studio" };
+1367:                return { outputType, destinationRoute: explicitDestination || "media-studio" };
+1372:                return { outputType, destinationRoute: explicitDestination || "publishing" };
+1377:                return { outputType, destinationRoute: explicitDestination || "governance" };
+1382:                return { outputType, destinationRoute: explicitDestination || "insights" };
+1389:                        destinationRoute: explicitDestination || (session?.teamMode === "team" ? "workflows" : "campaign-studio")
+1393:        const destinationRoute = explicitDestination || destinationRouteForSpecialist(session?.modeId || "operations", outputType);
+1394:        return { outputType, destinationRoute };
+1419:	const route = destinationRouteForSpecialist(specialistId, outputType);
+1428:		destinationRoute: route,
+1429:		confirmationRequired: outputType === "handoff" || specialistId === "publisher" || specialistId === "compliance_reviewer",
+1537:			title: outputType === "handoff" ? "Handoff Preview: Publishing package" : "Publishing Draft: Readiness checklist",
+1547:				"Prepare handoff for publishing review"
+1646:			title: outputType === "handoff" ? "Sales Handoff" : "Sales / CRM Draft: Lead and outreach plan",
+1647:			summary: "Sales and CRM draft prepared with lead qualification, outreach direction, follow-up cadence, and pipeline handoff notes.",
+1668:			nextStep: "Review the lead fit, confirm owner, then route the handoff to operations or the CRM surface.",
+1673:				"Route sales handoff without mutating CRM data"
+1690:					"Stage 4: Destination handoff and confirmation"
+1697:			title: outputType === "handoff" ? "Handoff Preview: Operations package" : "Operations Draft: Task and handoff plan",
+1702:				"Prepare destination handoff context",
+1722:		handoff: "handoff"
+1752:			"Customer Ops / Sales: add reply, ticket, lead, outreach, or CRM handoff drafts when relevant",
+1753:			"Operations: convert the reviewed output into safe tasks, workflow draft, or handoff context"
+1755:		destinationRoute: outputType === "task" ? "task-center" : "workflows",
+1767:		handoff: "Handoff Preview",
+1790:	lines.push(`Destination: ${routeLabel(output.destinationRoute)}`);
+2004:		operations: ["task plan", "workflow", "handoff", "approval", "timeline", "execution plan", "route", "publish", "status", "priority", "priorities", "blocking", "blocker", "readiness", "next", "do next"],
+2029:function routeSuggestion(label, route, reason) {
+2082:		routeSuggestions: [
+2083:			routeSuggestion("Setup", "setup", "Close missing project basics, goals, and audience inputs."),
+2084:			routeSuggestion("Integrations", "integrations", "Reconnect data sources and improve intelligence coverage."),
+2085:			routeSuggestion("Insights", "insights", "Review performance signals and the recommendation stack.")
+2117:		routeSuggestions: [
+2118:			routeSuggestion("Content Studio", "content-studio", "Rewrite weak posts and turn winning patterns into new drafts."),
+2119:			routeSuggestion("Publishing", "publishing", "Schedule the next batch with stronger timing and approval control."),
+2120:			routeSuggestion("Insights", "insights", "Compare top and weak content performance.")
+2153:		routeSuggestions: [
+2154:			routeSuggestion("Insights", "insights", "Review search and website performance together."),
+2155:			routeSuggestion("Integrations", "integrations", "Reconnect GA4 or Search Console."),
+2156:			routeSuggestion("Setup", "setup", "Refine positioning if traffic signal is weak or misaligned.")
+2188:		routeSuggestions: [
+2189:			routeSuggestion("Ads Manager", "ads-manager", "Review pacing, creative mapping, and paid operating view."),
+2190:			routeSuggestion("Integrations", "integrations", "Connect or reconnect paid reporting platforms."),
+2191:			routeSuggestion("Insights", "insights", "Compare paid vs organic and website results.")
+2216:		routeSuggestions: [
+2217:			routeSuggestion("Setup", "setup", "Strengthen project assumptions, goals, and audience context."),
+2218:			routeSuggestion("Integrations", "integrations", "Increase data coverage and reduce blind spots."),
+2219:			routeSuggestion("Insights", "insights", "See where evidence is strong and where it is thin.")
+2249:	const routeSuggestions = [];
+2250:	if (/campaign/.test(query)) routeSuggestions.push(routeSuggestion("Campaign Studio", "campaign-studio", "Turn this into a structured launch plan."));
+2252:		routeSuggestions.push(routeSuggestion("Content Studio", "content-studio", "Draft, rewrite, or prepare the requested content outputs."));
+2253:		routeSuggestions.push(routeSuggestion("Publishing", "publishing", "Schedule or approve if the next step is publishing."));
+2255:	if (/reconnect|connect|integration|tool|sync/.test(query)) routeSuggestions.push(routeSuggestion("Integrations", "integrations", "Reconnect data sources and restore intelligence coverage."));
+2256:	if (/ads|campaign scale|roas|creative/.test(query)) routeSuggestions.push(routeSuggestion("Ads Manager", "ads-manager", "Review live paid performance and action the next media move."));
+2257:	if (!routeSuggestions.length) routeSuggestions.push(routeSuggestion("Workflows", "workflows", "Use Workflows when the task spans multiple execution areas."));
+2270:		routeSuggestions,
+2368:	setSharedAiDraft(projectName, {
+2373:		routeSuggestions: asArray(response?.routeSuggestions),
+2534:	const outputType = asString(preview.outputType || preview.output_type || preview.type || "handoff").trim() || "handoff";
+2535:	const destinationRoute = normalizeAiInboundSourcePage(
+2536:		preview.destinationRoute ||
+2538:		asArray(normalized.routeSuggestions)[0]?.route ||
+2547:		title: firstAiInboundText(preview.title, normalized.title, `Inbound handoff from ${normalized.sourceLabel}`),
+2549:		destinationRoute,
+2560:function getAiInboundDurableHandoffId(handoff) {
+2561:	const payload = asObject(handoff?.payload);
+2563:		handoff?.id,
+2564:		handoff?.handoff_id,
+2565:		handoff?.handoffId,
+2566:		payload.handoff_id,
+2567:		payload.handoffId
+2571:function getAiInboundHandoffId(handoff) {
+2572:	const durableId = getAiInboundDurableHandoffId(handoff);
+2574:	if (!handoff) return "";
+2575:	const payload = asObject(handoff?.payload);
+2576:	const stablePayloadId = firstAiInboundId(payload.handoff_id, payload.handoffId, payload.id, handoff?.created_at, handoff?.createdAt);
+2578:	if (aiInboundHandoffObjectIds) {
+2579:		if (!aiInboundHandoffObjectIds.has(handoff)) {
+2580:			aiInboundHandoffCounter += 1;
+2581:			aiInboundHandoffObjectIds.set(handoff, `cached-ai-handoff-${Date.now()}-${aiInboundHandoffCounter}`);
+2583:		return aiInboundHandoffObjectIds.get(handoff);
+2585:	return [handoff?.source_page, handoff?.destination_page, payload.prompt, payload.title]
+2588:		.join("::") || `cached-ai-handoff-${Date.now()}`;
+2591:function normalizeAiInboundHandoff(handoff, projectName) {
+2592:	const payload = asObject(handoff?.payload);
+2593:	const draftContext = firstAiInboundObject(payload.draft_context, payload.draftContext, handoff?.draft_context, handoff?.draftContext);
+2597:		handoff?.source_page,
+2598:		handoff?.sourcePage,
+2625:	)) || `Review this ${sourceLabel} handoff for ${projectLabel}. Identify the right specialist, summarize the context, produce a review-ready draft, and recommend the next safe route. Do not execute publishing, task creation, CRM updates, customer replies, workflow runs, or backend actions.`;
+2631:		handoff?.title,
+2632:		`Inbound handoff from ${sourceLabel}`
+2634:	const routeSuggestions = normalizeAiInboundRouteSuggestions(
+2635:		asAiInboundList(payload.routeSuggestions).length ? payload.routeSuggestions :
+2637:		asAiInboundList(draftContext.routeSuggestions).length ? draftContext.routeSuggestions :
+2657:		routeSuggestions,
+2664:		status: asString(handoff?.status || payload.status || "available"),
+2665:		note: "Guidance only. No publishing, task creation, CRM updates, customer replies, workflow runs, exports, or backend actions are executed from this handoff."
+2671:function applyDurableAiHandoff(projectName, operations, session, consumeProjectHandoff, showMessage) {
+2672:	const handoff = getSharedHandoff(projectName, "ai-command", operations);
+2673:	const handoffId = getAiInboundHandoffId(handoff);
+2674:	if (!handoffId || handoffId === asString(session.lastAppliedHandoffId)) return;
+2676:	const normalized = normalizeAiInboundHandoff(handoff, projectName);
+2681:	session.routeSuggestions = normalized.routeSuggestions;
+2682:	session.inboundHandoff = {
+2683:		id: handoffId,
+2687:		routeSuggestions: normalized.routeSuggestions
+2693:		session.outputWorkspaceTab = outputTabFromPreview(normalized.outputPreview);
+2694:		session.activeOutputTab = session.outputWorkspaceTab;
+2703:	setSharedAiDraft(projectName, {
+2710:		routeSuggestions: normalized.routeSuggestions,
+2711:		inboundHandoff: session.inboundHandoff,
+2715:	session.lastAppliedHandoffId = handoffId;
+2716:	persistSessionDraft(projectName, session, `Inbound handoff loaded from ${normalized.sourceLabel}`);
+2718:	const durableHandoffId = getAiInboundDurableHandoffId(handoff);
+2719:	if (durableHandoffId) {
+2720:		consumeProjectHandoff?.(projectName, durableHandoffId, { actor: "mh-assistant" }).catch((error) => {
+2721:			console.warn("Failed to consume AI handoff:", error.message);
+2724:	showMessage?.(`Inbound handoff loaded from ${normalized.sourceLabel}.`);
+2775:			routeSuggestions: [],
+2988:	const routeSuggestions = asArray(response.routeSuggestions || response.route_suggestions).map((item) => {
+3052:			${routeSuggestions.length ? `
+3056:						${routeSuggestions.map((item, index) => `
+3304:                handoff: "handoff package"
+3343:        session.outputWorkspaceTab = outputTabFromIntent(intent);
+3344:        session.activeOutputTab = session.outputWorkspaceTab;
+3467:	if (preview.outputType === "handoff") return 3;
+3481:		handoff: "handoff",
+3487:function outputTabFromPreview(preview) {
+3491:	if (outputType === "handoff") return "handoff";
+3496:	const requested = asString(session.outputWorkspaceTab || "");
+3498:	return outputTabFromPreview(asObject(session.outputPreview));
+3506:		handoff: "Handoff Preview",
+3518:	return destinationRouteForSpecialist(session?.modeId || "operations", outputType);
+3529:	if (tool.intent === "handoff") return "Prepare";
+3575:				<p class="aicmd-room-subtitle mhos-context-description">Ask one expert or the full team to prepare strategy, content, analysis, reviews, and destination handoffs. AI prepares and reviews only; sensitive actions stay confirmation-gated in the owning workspace.</p>
+3715:						<p class="aicmd-v2-profile-purpose">Coordinates specialists into one review-ready brief, workflow, or handoff.</p>
+3758:        if (roleId === "operations" || roleId === "customer_ops") return `${label} is preparing your task handoff...`;
+3800:	if (/handoff|route|destination_brief/.test(haystack)) return "handoff";
+3809:	return destinationRouteForSpecialist(session?.modeId || "operations", getCanonicalToolIntent(tool));
+3874:					<span class="aicmd-v2-tools-subtitle">Prompt tools for structured drafts, source-aware reviews, and destination handoffs. They prepare composer instructions only.</span>
+3899:								<span>Handoff: ${escapeHtml(destination)}</span>
+3960:        const destinationRoute = asString(preview.destinationRoute || destinationRouteForSpecialist(session.modeId, outputType));
+3961:        const destinationLabel = routeLabel(destinationRoute);
+3966:        const governanceRequired = destinationRoute === "governance" || /approval|claim|compliance|risk|gdpr|review/i.test(`${outputType} ${asString(preview.title)} ${asString(preview.summary)}`);
+3979:                        const route = destinationRouteForSpecialist(spec.id, "guidance");
+4029:                        <p class="aicmd-chatfirst-tab-note">AI Command prepares guidance, drafts, previews, and handoff context only. Publishing, approvals, CRM updates, workflow runs, customer sends, provider execution, and durable task creation remain confirmation-gated in the owning workspace.</p>
+4066:        const destinationRoute = asString(session.outputPreview?.destinationRoute || destinationRouteForSpecialist(session.modeId, outputType));
+4078:                                <span>${escapeHtml(statusLabel)} · ${escapeHtml(routeLabel(destinationRoute))} · ${escapeHtml(outputType)}</span>
+4101:				<p>Chat, draft, review, and prepare handoff context only. Publishing, approvals, CRM updates, workflow runs, external sends, and durable task creation stay confirmation-gated in the owning workspace.</p>
+4237:                                destinationRoute: item.destinationRoute || item.preview?.destinationRoute || "",
+4249:                const destinationRoute = asString(message.destinationRoute || preview.destinationRoute || destinationRouteForSpecialist(session.modeId, outputType));
+4250:                const destination = routeLabel(destinationRoute);
+4254:                        { label: `Open ${destination}`, attr: "data-aicmd-smart-route", route: destinationRoute },
+4312:                                        <span>Ask ${escapeHtml(selectedLabel)} to plan, draft, review, analyze, or prepare a handoff.</span>
+4317:                                                <span>Prepare handoff</span>
+4342:                { id: "publish", label: "Publish", summary: "Prepare publishing checklist and handoff readiness.", enabled: false }
+4464:                                                <p>Guide the AI Team from source to preview. Backend workflow execution and destination handoff stay approval-gated.</p>
+4560:                                                                <button type="button" data-aicmd-smart-campaign-action="publishing">Prepare Publishing Handoff</button>
+4567:                                                        <span>1. Choose source, goal, and channel. The AI Team will prepare the preview package before any approval or handoff.</span>
+4903:					<p>Prompt setup only. Tools prepare composer instructions, source-aware reviews, previews, and handoff context without executing actions.</p>
+4921:							<small>Handoff: ${escapeHtml(destination)}</small>
+4937:	const destination = routeLabel(preview.destinationRoute || destinationRouteForSpecialist(session.modeId, preview.outputType || "guidance"));
+4943:		? "Open Content Studio Handoff"
+4945:			? "Open Publishing Handoff"
+4946:			: `Open ${destination} Handoff`;
+4953:					<p>${hasPreview ? "Review the result, then open the destination workspace with draft context." : "Drafts, task previews, workflow previews, and handoff packages appear here after a response or tool setup."}</p>
+5027:					<p>Read-only operating path for chat, draft preparation, review, and destination handoff. Confirmation stays in the owning workspace.</p>
+5126:                ? "Chat only. No workflow run, durable task, external handoff action, approval, publishing action, CRM update, or customer action was created."
+5128:        const emptyBody = "Ask what to do next, draft a campaign asset, review a source, prepare a handoff, or coordinate the full AI team.";
+5148:        const inbound = asObject(session.inboundHandoff);
+5212:                                                <span>Home handoff</span>
+5267:                                                <button id="aicmdV3ResponseSendBtn" class="aicmd-v2-btn-secondary" type="button">Open Handoff</button>
+5334:	const destination = routeLabel(destinationRouteForSpecialist(session.modeId, asObject(session.outputPreview).outputType || "guidance"));
+5365:				{ label: "Pipeline", value: "Operations handoff", present: true, scoped: true }
+5409:					<span>Backend owns authority — AI Command prepares guidance, previews, and handoff context. It does not override execution controls or mutate Operations records.</span>
+5465:		description: "Talk to your AI team, run structured tasks, and turn intelligence into review-ready plans and routed handoffs."
+5479:			consumeProjectHandoff,
+5506:				session.outputWorkspaceTab = outputTabFromPreview(preview);
+5543:		applyDurableAiHandoff(sessionKey, operations, session, consumeProjectHandoff, showMessage);
+5590:			session.routeSuggestions = [];
+5591:			session.inboundHandoff = null;
+5602:			session.outputWorkspaceTab = outputTabFromIntent(intent);
+5647:                        session.routeSuggestions = [];
+5648:                        session.inboundHandoff = null;
+5659:                        session.outputWorkspaceTab = "draft";
+5710:				session.outputWorkspaceTab = nextTab;
+6031:                                        body: `Prepare publishing readiness for ${channelLabel}: channel checklist, schedule draft, missing approvals, and handoff requirements.`
+6035:                                        body: "Track approval status, destination handoff, follow-up checks, improvement notes, and post-review action ownership."
+6059:                                                body: `Use ${sourceMeaning}. Produce a review-ready campaign package before any handoff, approval, publishing, sending, CRM update, provider execution, or workflow mutation.`
+6075:                                                body: "Define hero visual, product framing, scene list, required assets, image/video format, voiceover direction, and Media Studio handoff notes."
+6087:                                                body: "Create a follow-up plan for review status, owner, destination handoff, performance check, improvement loop, and next campaign iteration."
+6163:                                        ? "Backend preview only. No publish, send, CRM mutation, provider execution, workflow mutation, Governance approval, task creation, or durable handoff was performed."
+6225:                                        destinationRoute: "publishing",
+6253:                                updateStatus(preview.backendPreview ? "Backend AI Team preview prepared. Review before any handoff or approval." : "Local campaign preview prepared because backend preview is unavailable.");
+6259:                const buildCampaignReviewHandoff = (action, preview) => {
+6260:                        const destinationRoutes = {
+6268:                        const route = destinationRoutes[action] || "";
+6271:                                id: `campaign_handoff_${Date.now()}`,
+6272:                                type: "ai_command_campaign_handoff",
+6278:                                title: asString(preview.title || "Campaign handoff"),
+6297:                                safety: "Prepared handoff only. No backend write, publish, send, CRM mutation, provider execution, approval creation, task creation, or workflow mutation was performed.",
+6302:                const storeCampaignReviewHandoff = (handoff) => {
+6304:                                const payload = JSON.stringify(handoff);
+6305:                                window.localStorage?.setItem?.("mh_ai_command_campaign_handoff", payload);
+6306:                                window.localStorage?.setItem?.(`mh_ai_command_handoff_${handoff.destination_route}`, payload);
+6307:                                window.sessionStorage?.setItem?.("mh_ai_command_campaign_handoff", payload);
+6308:                                window.sessionStorage?.setItem?.(`mh_ai_command_handoff_${handoff.destination_route}`, payload);
+6310:                                console.warn("Unable to store AI Command campaign handoff", error);
+6326:                                publishing: "Prepare Publishing Handoff",
+6333:                                const handoff = buildCampaignReviewHandoff(action, preview);
+6334:                                storeCampaignReviewHandoff(handoff);
+6340:                                        handoff,
+6341:                                        safety: handoff.safety
+6345:                                updateStatus(`${label} prepared. Opening ${handoff.destination} for review.`);
+6348:                                if (typeof navigateTo === "function" && handoff.destination_route) {
+6349:                                        navigateTo(handoff.destination_route);
+6353:                                if (typeof context?.navigateTo === "function" && handoff.destination_route) {
+6354:                                        context.navigateTo(handoff.destination_route);
+6582:		                                safetyInstruction: "Chat only. No task/workflow/handoff/approval/publish/customer/CRM execution.",
+6624:		                        const routeSuggestion = asArray(response.routeSuggestions || result?.routeSuggestions)[0];
+6625:                                        const responseRoute = resolveAiResponseOutputRoute(session, {
+6631:                                                destinationRoute: asString(routeSuggestion?.route)
+6649:		                                destinationRoute: responseRoute.destinationRoute
+6667:		                        updateStatus("Specialist reply generated. No workflow/task/handoff was created.");
+6756:                // Phase 1: converts the current conversation into a handoff preview. No backend write.
+6757:                const handoffBtn = $("aicmdV2HandoffBtn");
+6758:                if (handoffBtn) {
+6759:                        handoffBtn.onclick = () => {
+6763:                                        ? `Prepare a handoff summary for: ${value}`
+6764:                                        : `Prepare a handoff summary from ${spec.label} for the current project state of ${projectName || "this project"}.`;
+6767:                                        intent: "handoff",
+6772:                                persistSessionDraft(sessionKey, session, "Handoff preview prepared from conversation");
+6773:                                updateStatus("Handoff preview prepared from conversation context. Review destination before sending.");
+6774:                                showMessage?.("Handoff preview prepared from conversation.");
+6836:				session.routeSuggestions = [];
+6837:				session.inboundHandoff = null;
+6938:				const responseRoute = resolveAiResponseOutputRoute(session, latestResponse);
+6939:				const destination = asString(latestResponse.destinationRoute || responseRoute.destinationRoute || destinationRouteForSpecialist(session.modeId, responseRoute.outputType || "guidance"));
+6945:					routeSuggestions: [{ route: destination, label: routeLabel(destination), reason: "Specialist response destination" }],
+6948:				setSharedAiDraft(projectName || "__default__", draftContext);
+6949:				setSharedHandoff(projectName || "__default__", destination, {
+7032:				const destination = asString(output.destinationRoute || "").trim();
+7038:				const handoffRecord = {
+7051:							routeSuggestions: [{ route: destination, label: routeLabel(destination), reason: "Phase 2 preview destination" }],
+7057:				setSharedAiDraft(projectName || "__default__", handoffRecord.payload.draft_context);
+7058:				setSharedHandoff(projectName || "__default__", destination, handoffRecord);
+7130:        if (session.isHandoff) return "handoff";
+7146:                case "handoff":
+7147:                        return "Preparing handoff";
+7168:            state === "handoff" ? "Finalizing" :
+7182:        isHandoff: state === "handoff",
+7192:            state === "handoff" ? "📦 Handoff" :
+7231:            state === "handoff" ? "AI is finalizing output" :
+7271:        handoff: "AI is preparing delivery"
+7317:        handoff: { pulse: 1.0, label: "finalizing output" }
+7332:        handoff: ["finalizing", "packaging", "delivering"]
+7398:        handoff: 800
+7600:        handoff: "finalize_delivery"
+7822:      session.routeSuggestions = ["Ask me anything", "Run analysis", "Generate plan"];
+
+	return session.intelligence.loadingPromise;
+}
+
+// ============================================================
+//  COMMAND SUBMISSION
+// ============================================================
+
+function syncAiWorkflowBridge({ projectName, modeId, command, response }) {
+	setSharedAiDraft(projectName, {
+		projectName: projectName || "",
+		modeId: modeId || "",
+		lastCommand: asString(command),
+		lastResponseTitle: asString(response?.title),
+		routeSuggestions: asArray(response?.routeSuggestions),
+		updatedAt: nowIso()
+	});
+}
+
+const AI_INBOUND_SOURCE_LABELS = {
+	"content-studio": "Content Studio",
+	"media-studio": "Media Studio",
+	publishing: "Publishing",
+	"campaign-studio": "Campaign Studio",
+	workflows: "Workflows",
+	library: "Library",
+	insights: "Insights",
+	integrations: "Integrations",
+	settings: "Settings",
+	governance: "Governance",
+	"operations-centers": "Operations Centers",
+	"task-center": "Task Center",
+	"queue-center": "Queue Center",
+	"job-monitor": "Job Monitor",
+	"notification-center": "Notification Center",
+	research: "Research",
+	"ads-manager": "Ads Manager",
+	setup: "Setup",
+	workspace: "Workspace"
+};
+
+const AI_INBOUND_SPECIALIST_BY_SOURCE = {
+	"content-studio": "writer",
+	"media-studio": "media",
+	publishing: "publisher",
+	"campaign-studio": "strategist",
+	workflows: "operations",
+	library: "media",
+	insights: "seo",
+	integrations: "operations",
+	settings: "operations",
+	governance: "compliance_reviewer",
+	"operations-centers": "operations",
+	"task-center": "operations",
+	"queue-center": "operations",
+	"job-monitor": "operations",
+	"notification-center": "operations",
+	research: "seo",
+	"ads-manager": "ads",
+	setup: "operations",
+	workspace: "operations"
+};
+
+const AI_INBOUND_SPECIALIST_ALIASES = {
+	designer: "media",
+	researcher: "seo",
+	compliance: "compliance_reviewer",
+	"customer-ops": "customer_ops",
+	customer_ops: "customer_ops",
+	"sales-crm": "sales_crm",
+	sales_crm: "sales_crm"
+};
+
+const AI_INBOUND_SOURCE_ALIASES = {
+	content: "content-studio",
+	"content-studio-workspace": "content-studio",
+	media: "media-studio",
+	"media-studio-workspace": "media-studio",
+	publish: "publishing",
+	publisher: "publishing",
+	campaign: "campaign-studio",
+	campaigns: "campaign-studio",
+	workflow: "workflows",
+	asset: "library",
+	"asset-library": "library",
+	operation: "operations-centers",
+	operations: "operations-centers",
+	tasks: "task-center",
+	queue: "queue-center",
+	jobs: "job-monitor",
+	notifications: "notification-center",
+	integration: "integrations",
+	govern: "governance",
+	home: "workspace"
+};
+
+function firstAiInboundId(...values) {
+	for (const value of values) {
+		const text = asString(value).trim();
+		if (text) return text;
+	}
+	return "";
+}
+
+function firstAiInboundText(...values) {
+	for (const value of values) {
+		const text = humanizeValue(value, "").trim();
+		if (text) return text;
+	}
+	return "";
+}
+
+function firstAiInboundObject(...values) {
+	return values.map((value) => asObject(value)).find((item) => Object.keys(item).length) || {};
+}
+
+function asAiInboundList(value) {
+	if (Array.isArray(value)) return value;
+	if (value == null || value === "") return [];
+	if (typeof value === "object") {
+		const record = asObject(value);
+		if (Array.isArray(record.items)) return record.items;
+		return Object.keys(record).length ? [record] : [];
+	}
+	return [value];
+}
+
+function normalizeAiInboundSourcePage(value) {
+	const clean = asString(value)
+		.trim()
+		.toLowerCase()
+		.replace(/_/g, "-")
+		.replace(/\s+/g, "-")
+		.replace(/[^a-z0-9-]/g, "");
+	return AI_INBOUND_SOURCE_ALIASES[clean] || clean || "workspace";
+}
+
+function normalizeAiInboundSpecialistId(value, fallback = "operations") {
+	const fallbackId = MODE_ID_ALIASES[getAiRoomRoleId(fallback)] || getAiRoomRoleId(fallback);
+	const raw = getAiRoomRoleId(value || fallbackId);
+	const legacy = AI_INBOUND_SPECIALIST_ALIASES[raw] || AI_INBOUND_SPECIALIST_ALIASES[asString(value).trim().toLowerCase()] || raw;
+	const resolved = MODE_ID_ALIASES[legacy] || MODE_ID_ALIASES[getAiRoomRoleId(legacy)] || getAiRoomRoleId(legacy);
+	const finalId = MODE_ID_ALIASES[resolved] || resolved;
+	return SPECIALIST_DEFS.some((item) => item.id === finalId) ? finalId : fallbackId;
+}
+
+function normalizeAiInboundTeamMode(value) {
+	const clean = asString(value).trim().toLowerCase().replace(/[\s_]+/g, "-");
+	return ["team", "full-team", "fullteam", "multi-specialist", "team-mode"].includes(clean) ? "team" : "solo";
+}
+
+function normalizeAiInboundRouteSuggestions(rawSuggestions, sourcePage, sourceLabel) {
+	const fallbackRoute = sourcePage === "workspace" ? "workflows" : sourcePage;
+	const fallbackLabel = sourceLabel || routeLabel(fallbackRoute);
+	const suggestions = asAiInboundList(rawSuggestions).map((item) => {
+		const record = asObject(item);
+		const rawRoute = firstAiInboundId(record.route, record.destination, record.page, record.targetPage, record.target_page);
+		const stringRoute = rawRoute ? "" : firstAiInboundId(item);
+		const route = normalizeAiInboundSourcePage(rawRoute || stringRoute || fallbackRoute);
+		const label = firstAiInboundText(record.label, record.title, record.name) || routeLabel(route) || fallbackLabel;
+		const reason = firstAiInboundText(record.reason, record.summary, record.description) || `Return to ${label} after AI Team review.`;
+		return { route, label, reason };
+	}).filter((item) => item.route || item.label);
+
+	if (suggestions.length) return suggestions;
+	return [{
+		route: fallbackRoute,
+		label: fallbackLabel,
+		reason: `Return to ${fallbackLabel} after AI Team review.`
+	}];
+}
+
+function normalizeAiInboundOutputPreview(rawPreview, normalized) {
+	const preview = asObject(rawPreview);
+	if (!Object.keys(preview).length) return null;
+	const outputType = asString(preview.outputType || preview.output_type || preview.type || "handoff").trim() || "handoff";
+	const destinationRoute = normalizeAiInboundSourcePage(
+		preview.destinationRoute ||
+		preview.destination_route ||
+		asArray(normalized.routeSuggestions)[0]?.route ||
+		normalized.sourcePage ||
+		"workflows"
+	);
+	const specialistId = normalizeAiInboundSpecialistId(preview.specialistId || preview.specialist_id || normalized.suggestedSpecialist, normalized.suggestedSpecialist);
+
+	return {
+		...preview,
+		outputType,
+		title: firstAiInboundText(preview.title, normalized.title, `Inbound handoff from ${normalized.sourceLabel}`),
+		summary: firstAiInboundText(preview.summary, preview.description, normalized.prompt),
+		destinationRoute,
+		specialistId,
+		generatedAt: asString(preview.generatedAt || preview.generated_at || nowIso()),
+		sourcePrompt: firstAiInboundText(preview.sourcePrompt, preview.source_prompt, normalized.prompt),
+		status: asString(preview.status || "draft_preview"),
+		safetyLabel: firstAiInboundText(preview.safetyLabel, preview.safety_label, "Guidance and draft only. No backend execution."),
+		confirmationNote: firstAiInboundText(preview.confirmationNote, preview.confirmation_note, "Execution, approvals, publishing, CRM updates, customer replies, and workflow runs require explicit confirmation in the owning workspace."),
+		confirmationRequired: preview.confirmationRequired ?? preview.confirmation_required ?? true
+	};
+}
+
+function getAiInboundDurableHandoffId(handoff) {
+	const payload = asObject(handoff?.payload);
+	return firstAiInboundId(
+		handoff?.id,
+		handoff?.handoff_id,
+		handoff?.handoffId,
+		payload.handoff_id,
+		payload.handoffId
+	);
+}
+
+function getAiInboundHandoffId(handoff) {
+	const durableId = getAiInboundDurableHandoffId(handoff);
+	if (durableId) return durableId;
+	if (!handoff) return "";
+	const payload = asObject(handoff?.payload);
+	const stablePayloadId = firstAiInboundId(payload.handoff_id, payload.handoffId, payload.id, handoff?.created_at, handoff?.createdAt);
+	if (stablePayloadId) return stablePayloadId;
+	if (aiInboundHandoffObjectIds) {
+		if (!aiInboundHandoffObjectIds.has(handoff)) {
+			aiInboundHandoffCounter += 1;
+			aiInboundHandoffObjectIds.set(handoff, `cached-ai-handoff-${Date.now()}-${aiInboundHandoffCounter}`);
+		}
+		return aiInboundHandoffObjectIds.get(handoff);
+	}
+	return [handoff?.source_page, handoff?.destination_page, payload.prompt, payload.title]
+		.map((item) => asString(item).trim())
+		.filter(Boolean)
+		.join("::") || `cached-ai-handoff-${Date.now()}`;
+}
+
+function normalizeAiInboundHandoff(handoff, projectName) {
+	const payload = asObject(handoff?.payload);
+	const draftContext = firstAiInboundObject(payload.draft_context, payload.draftContext, handoff?.draft_context, handoff?.draftContext);
+	const sourcePage = normalizeAiInboundSourcePage(firstAiInboundId(
+		payload.source_page,
+		payload.sourcePage,
+		handoff?.source_page,
+		handoff?.sourcePage,
+		draftContext.source_page,
+		draftContext.sourcePage
+	));
+	const sourceLabel = AI_INBOUND_SOURCE_LABELS[sourcePage] || routeLabel(sourcePage) || "Workspace";
+	const explicitSpecialist = firstAiInboundId(payload.specialist, payload.specialist_id);
+	const suggestedSpecialist = normalizeAiInboundSpecialistId(
+		explicitSpecialist ||
+		AI_INBOUND_SPECIALIST_BY_SOURCE[sourcePage] ||
+		payload.modeId ||
+		payload.mode_id ||
+		draftContext.specialist ||
+		draftContext.specialist_id ||
+		draftContext.modeId ||
+		draftContext.mode_id ||
+		"operations",
+		"operations"
+	);
+	const projectLabel = projectName && projectName !== "__default__" ? projectName : "this project";
+	const prompt = normalizeAiComposerPrompt(firstAiInboundText(
+		payload.prompt,
+		payload.message,
+		payload.summary,
+		draftContext.prompt,
+		draftContext.message,
+		draftContext.request,
+		draftContext.summary
+	)) || `Review this ${sourceLabel} handoff for ${projectLabel}. Identify the right specialist, summarize the context, produce a review-ready draft, and recommend the next safe route. Do not execute publishing, task creation, CRM updates, customer replies, workflow runs, or backend actions.`;
+	const title = firstAiInboundText(
+		payload.title,
+		payload.name,
+		draftContext.title,
+		draftContext.lastResponseTitle,
+		handoff?.title,
+		`Inbound handoff from ${sourceLabel}`
+	);
+	const routeSuggestions = normalizeAiInboundRouteSuggestions(
+		asAiInboundList(payload.routeSuggestions).length ? payload.routeSuggestions :
+		asAiInboundList(payload.route_suggestions).length ? payload.route_suggestions :
+		asAiInboundList(draftContext.routeSuggestions).length ? draftContext.routeSuggestions :
+		draftContext.route_suggestions,
+		sourcePage,
+		sourceLabel
+	);
+	const teamMode = normalizeAiInboundTeamMode(firstAiInboundId(payload.teamMode, payload.team_mode, draftContext.teamMode, draftContext.team_mode));
+	const rawOutputPreview = firstAiInboundObject(
+		draftContext.outputPreview,
+		draftContext.output_preview,
+		draftContext.phase2_output_preview,
+		payload.outputPreview,
+		payload.output_preview
+	);
+	const normalized = {
+		sourcePage,
+		sourceLabel,
+		title,
+		prompt,
+		suggestedSpecialist,
+		teamMode,
+		routeSuggestions,
+		outputPreview: null,
+		draftContext: {
+			...draftContext,
+			source_page: sourcePage,
+			sourcePage
+		},
+		status: asString(handoff?.status || payload.status || "available"),
+		note: "Guidance only. No publishing, task creation, CRM updates, customer replies, workflow runs, exports, or backend actions are executed from this handoff."
+	};
+	normalized.outputPreview = normalizeAiInboundOutputPreview(rawOutputPreview, normalized);
+	return normalized;
+}
+
+function applyDurableAiHandoff(projectName, operations, session, consumeProjectHandoff, showMessage) {
+	const handoff = getSharedHandoff(projectName, "ai-command", operations);
+	const handoffId = getAiInboundHandoffId(handoff);
+	if (!handoffId || handoffId === asString(session.lastAppliedHandoffId)) return;
+
+	const normalized = normalizeAiInboundHandoff(handoff, projectName);
+	/* AI_WRITE */ StateKernel.write(session, normalized.prompt, "ai");
+	/* composerText_FROZEN */ normalized.prompt;
+	session.modeId = normalized.suggestedSpecialist;
+	session.teamMode = normalized.teamMode || "solo";
+	session.routeSuggestions = normalized.routeSuggestions;
+	session.inboundHandoff = {
+		id: handoffId,
+		sourcePage: normalized.sourcePage,
+		sourceLabel: normalized.sourceLabel,

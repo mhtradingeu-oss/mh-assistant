@@ -1,0 +1,291 @@
+66:                id: "publisher",
+70:                routeHint: "publishing"
+90:                summary: "Claims review, approvals, safety language, and governance checks.",
+91:                routeHint: "governance"
+97:                summary: "Tasks, timelines, handoffs, approvals, and execution plans.",
+109:                label: "Sales / CRM Lead",
+111:                summary: "Lead qualification, outreach drafts, follow-up cadence, and CRM handoff notes.",
+127:	publisher: "publisher",
+153:		safetyNote: "All outputs are guidance and draft only. Execution requires explicit confirmation.",
+163:		canHelp: ["Draft captions and hooks", "Write email copy", "Create landing page text", "Prepare publisher handoff", "Suggest message variants"],
+166:		safetyNote: "Drafts require review before publishing. Cannot approve or publish without confirmation.",
+177:		cannotDo: ["Generate images directly", "Upload assets without review", "Approve without confirmation", "Execute media jobs"],
+179:		safetyNote: "Direction and briefs only. Media generation requires backend confirmation and explicit action.",
+190:		cannotDo: ["Generate video directly", "Upload footage without review", "Approve without confirmation", "Run media jobs automatically"],
+192:		safetyNote: "Scripts and direction only. Video generation requires explicit backend action and approval.",
+196:		id: "publisher",
+201:		placeholder: "Ask the Publisher to review publishing readiness, check scheduling, or prepare a handoff package…",
+202:		canHelp: ["Review publishing readiness", "Check scheduled jobs", "Prepare handoff packages", "Map publishing dependencies", "Flag pre-publish risks"],
+203:		cannotDo: ["Publish without explicit approval", "Override schedules", "Bypass governance gates", "Push to live channels directly"],
+205:		safetyNote: "Publishing always requires explicit approval. No live publishing from AI guidance alone.",
+218:		safetyNote: "Ad concepts and copy only. Live ad actions require platform integration and explicit approval.",
+231:		safetyNote: "Analysis and recommendations only. No direct website or analytics changes.",
+237:		position: "Claims and Governance Lead",
+239:		summary: "Claims review, approval safety, publishing risk, and governance notes.",
+240:		placeholder: "Ask the Compliance Reviewer to check claims, approval risks, publishing safety, and governance notes…",
+241:		canHelp: ["Review marketing claims", "Flag approval risks", "Check publishing safety", "Prepare governance notes", "Identify compliance blockers"],
+242:		cannotDo: ["Grant approvals directly", "Override governance gates", "Publish on behalf of approvers", "Remove flags without review"],
+243:		destinations: ["Workflows", "Publishing", "Governance"],
+244:		safetyNote: "Compliance review is advisory. Approvals always require human confirmation before execution.",
+252:		summary: "Tasks, timelines, handoffs, approvals, and execution plans.",
+255:		cannotDo: ["Run workflows without confirmation", "Auto-approve tasks", "Override authority gates", "Execute backend operations directly"],
+257:		safetyNote: "Task plans and handoffs only. Workflow execution requires explicit user confirmation.",
+268:		cannotDo: ["Send customer replies", "Create live tickets", "Change SLA policy", "Escalate without confirmation"],
+270:		safetyNote: "Customer operations outputs are drafts only. Sending replies, ticket creation, and escalations require confirmation in the owning surface.",
+275:		label: "Sales / CRM Lead",
+276:		position: "Revenue and CRM Operations Lead",
+278:		summary: "Lead qualification, outreach drafts, follow-up cadence, CRM profile summaries, and sales handoff notes.",
+279:		placeholder: "Ask the Sales / CRM Lead to qualify a lead, draft outreach, plan follow-ups, summarize CRM context, or prepare a sales handoff for review…",
+280:		canHelp: ["Qualify lead context", "Draft outreach", "Plan follow-up sequences", "Summarize CRM profiles", "Prepare sales handoffs"],
+281:		cannotDo: ["Send outreach", "Mutate CRM records", "Advance pipeline stages", "Confirm follow-ups without review"],
+282:		destinations: ["CRM", "Workflows", "Operations Centers"],
+283:		safetyNote: "Sales and CRM outputs are guidance and drafts only. CRM mutations and outreach sends require confirmation in the owning surface.",
+314:	publisher: [
+315:		{ label: "Review publishing readiness", sub: "Check what is ready to publish" },
+316:		{ label: "Flag pre-publish risks", sub: "Identify what needs review first" },
+318:		{ label: "Prepare a handoff package", sub: "For the approver review" }
+333:		{ label: "Check claims for approval", sub: "Review all marketing claims" },
+334:		{ label: "Flag publishing risks", sub: "Identify blockers before release" },
+335:		{ label: "Prepare governance notes", sub: "Document compliance status" },
+336:		{ label: "Review approval requirements", sub: "What needs sign-off" }
+362:	{ label: "Prepare a full handoff sequence", sub: "Strategy, creative, compliance, publishing, ops" },
+363:	{ label: "Review customer and sales impact", sub: "Customer Ops, Sales / CRM, Operations" }
+371:	{ id: "review", title: "Review", description: "Check safety, scope, language, and source." },
+373:	{ id: "execute", title: "Confirm", description: "Execution stays gated in backend-owned surfaces." },
+386:const AI_ROOM_BUSINESS_BRANCH = ["Customer Ops", "Sales / CRM", "Operations"];
+393:	publisher: "PB",
+410:		label: "Admin / Governance",
+413:		summary: "Policy, approvals, roles, and audit controls stay destination-owned."
+440:		{ id: "publisher-package", label: "Publisher Package", action: "preview", intent: "handoff", template: "Prepare a Publisher handoff for {project}. Include German copy package, CTA, notes, and remaining checks." }
+456:	publisher: [
+457:		{ id: "publishing-checklist", label: "Publishing Checklist", action: "preview", intent: "handoff", template: "Build a publishing checklist for {project}. Include German copy, assets, claims checks, and channel readiness." },
+458:		{ id: "final-packaging", label: "Final Packaging", action: "preview", intent: "handoff", template: "Prepare a final publishing package for {project}. Include copy, CTA, asset notes, approvals, and destination channel." },
+460:		{ id: "schedule-draft", label: "Schedule Draft", action: "preview", intent: "workflow", template: "Prepare a publishing schedule draft for {project}. Include channel cadence, dependencies, and review gates." },
+461:		{ id: "open-publishing", label: "Open Publishing", action: "route", route: "publishing" }
+479:		{ id: "approval-flags", label: "Approval Flags", action: "preview", intent: "task", template: "Check approval risks for {project}. List risk, impact, mitigation, and required owner." },
+480:		{ id: "safety-checklist", label: "Safety Checklist", action: "preview", intent: "handoff", template: "Prepare a safety checklist for {project}. Include policy checks, evidence required, and approval notes." },
+481:		{ id: "publish-readiness", label: "Publish Readiness", action: "preview", intent: "handoff", template: "Review publish readiness for {project}. Confirm what needs human approval before release." },
+482:		{ id: "open-governance", label: "Open Governance", action: "route", route: "governance" }
+486:		{ id: "handoff-routing", label: "Handoff Routing", action: "preview", intent: "handoff", template: "Prepare handoff routing for {project}. Include source, destination, decision gates, and required confirmations." },
+497:		{ id: "prepare-escalation", label: "Prepare Escalation", action: "preview", intent: "handoff", template: "Prepare an escalation draft for {project}. Include reason, customer impact, owner, confirmation needed, and destination team." },
+502:		{ id: "lead-qualification", label: "Lead Qualification", action: "preview", intent: "guidance", template: "Qualify the lead for {project}. Include fit, intent, urgency, missing CRM fields, and the safest next step." },
+503:		{ id: "outreach-draft", label: "Outreach Draft", action: "preview", intent: "guidance", template: "Draft outreach for {project}. Include subject or opener, personalized message, CTA, and review notes before sending." },
+504:		{ id: "follow-up-sequence", label: "Follow-up Sequence", action: "preview", intent: "workflow", template: "Build a follow-up sequence for {project}. Include timing, message angle, CTA, stop condition, and confirmation requirements." },
+505:		{ id: "crm-profile-summary", label: "CRM Profile Summary", action: "preview", intent: "guidance", template: "Summarize the CRM profile context for {project}. Include fit, history, open questions, and next sales action without mutating CRM data." },
+506:		{ id: "pipeline-next-step", label: "Pipeline Next Step", action: "preview", intent: "task", template: "Recommend the pipeline next step for {project}. Include stage, rationale, owner, risk, and required confirmation." },
+509:		{ id: "sales-handoff-draft", label: "Sales Handoff", action: "preview", intent: "handoff", template: "Prepare a sales handoff draft for {project}. Include lead context, recommended next action, owner, and confirmation needed." }
+636:		if (/act as the publisher/i.test(text)) return "publisher";
+677:	if (/publish\s*now|send\s*external|paid\s*ads|final\s*approval/i.test(command)) {
+679:			id: `auto-gated-${Date.now()}`,
+680:			type: "publish_now",
+681:			targetPage: "publishing",
+685:				reason: "Requires approval gate before external publishing actions."
+845:		overview.publishing_language ||
+846:		overview.publish_language ||
+851:	const publishLanguage = configuredPublishLanguage || "German";
+861:		publishLanguage,
+1232:			"When the request touches inbox, tickets, leads, outreach, or CRM, include Customer Ops -> Sales/CRM -> Operations.",
+1246:                `Use ${safeOutputLanguage} only for customer-facing or publishable copy such as captions, ads, emails, landing pages, final campaign text, or publishing packages.`,
+1247:                "When you include publishable copy, label it clearly as publishable content and keep the explanation in the user chat language.",
+1250:		`When drafting publishable copy, write it in ${safeOutputLanguage}.`,
+1252:		"Never claim publish, approval, deletion, archival, sync, or operational runs happened.",
+1306:	if (id === "publisher") return "publishing";
+1309:	if (id === "compliance_reviewer") return "governance";
+1342:        const looksWorkflowLike = /\b(workflow|workflows|process|sequence|phase|phases|approval flow|automation|operating loop|step-by-step|steps|dependencies|trigger|review gate|execution flow)\b/.test(text);
+1345:        const looksPublishingLike = /\b(publish|publishing|schedule|channel package|channel payload|approval-ready post|final post|ready to publish|publishing package)\b/.test(text);
+1346:        const looksGovernanceLike = /\b(compliance|governance|claim|claims|risk|risks|approval|approvals|policy|privacy|legal|safe language|safety review)\b/.test(text);
+1370:        if (/publishing|publish|schedule/.test(outputType) || looksPublishingLike) {
+1371:                outputType = "publishing";
+1372:                return { outputType, destinationRoute: explicitDestination || "publishing" };
+1375:        if (/governance|compliance|risk|approval/.test(outputType) || looksGovernanceLike) {
+1376:                outputType = "governance";
+1377:                return { outputType, destinationRoute: explicitDestination || "governance" };
+1402:		publishing: "Publishing",
+1406:		governance: "Governance",
+1429:		confirmationRequired: outputType === "handoff" || specialistId === "publisher" || specialistId === "compliance_reviewer",
+1433:		safetyLabel: "Guidance and draft only. No backend execution.",
+1435:		confirmationNote: "Execution, approvals, and publishing require explicit confirmation in the owning workspace."
+1472:				"Outcome-led hook direction for a German publishing draft",
+1477:				"German caption version should keep the CTA direct and easy to approve."
+1485:				"Use Arabic freely in the conversation; publishable copy should be reviewed in German.",
+1486:				"Claims, health, or performance promises need evidence before publishing."
+1495:			safetyLabel: "Claims require review before publishing. No direct publish action."
+1514:			safetyLabel: "No media generation executed. Brief and routing only.",
+1530:			safetyLabel: "Video generation requires configured provider or GPU worker; no execution started."
+1534:	if (specialistId === "publisher") {
+1541:				"Publishing remains gated until channel, approval, and asset readiness are confirmed."
+1545:				"Draft publish schedule by channel",
+1546:				"Flag approval dependencies",
+1547:				"Prepare handoff for publishing review"
+1549:			confirmationRequired: true,
+1550:			safetyLabel: "Confirmation required before publish. No publish action performed."
+1578:			safetyLabel: "No budget updates or ad launches executed."
+1592:			safetyLabel: "No analytics mutation or fake metrics. Guidance only."
+1600:			summary: "Risk review checklist prepared with claims and safety review points.",
+1603:				"Flag safety and policy risks",
+1604:				"Prepare governance notes",
+1605:				"Route to Governance for formal review"
+1607:			confirmationRequired: true,
+1608:			safetyLabel: "Compliance review is advisory. Formal approval remains human-governed."
+1624:				"Priority: draft priority pending runtime inbox and SLA confirmation.",
+1629:				"SLA and escalation decisions require confirmation in the owning operations surface."
+1638:			confirmationRequired: true,
+1639:			safetyLabel: "No reply sent, ticket created, SLA changed, or escalation triggered."
+1646:			title: outputType === "handoff" ? "Sales Handoff" : "Sales / CRM Draft: Lead and outreach plan",
+1647:			summary: "Sales and CRM draft prepared with lead qualification, outreach direction, follow-up cadence, and pipeline handoff notes.",
+1648:			mainOutput: "Use this as a sales planning draft. Confirm CRM context and owner before sending outreach or changing pipeline status.",
+1661:				"Can I send more details?",
+1665:				"CRM profile and pipeline changes remain outside AI Team.",
+1666:				"Outreach and follow-ups require confirmation before sending."
+1668:			nextStep: "Review the lead fit, confirm owner, then route the handoff to operations or the CRM surface.",
+1673:				"Route sales handoff without mutating CRM data"
+1675:			confirmationRequired: true,
+1676:			safetyLabel: "No outreach sent, CRM record changed, follow-up scheduled, or pipeline stage advanced."
+1690:					"Stage 4: Destination handoff and confirmation"
+1692:				safetyLabel: "Workflow run is not started. This is a draft preview only."
+1705:			safetyLabel: "No workflow run and no backend task creation executed."
+1743:			"Compliance and Publisher verify claims, approvals, formatting, and release readiness",
+1744:			"Customer Ops and Sales / CRM join when the request touches inbox, tickets, leads, outreach, or CRM"
+1750:			"Compliance: flag claims, evidence needs, policy risks, and approval gates",
+1751:			"Publisher: package channel-ready copy, assets, schedule notes, and publish checks",
+1752:			"Customer Ops / Sales: add reply, ticket, lead, outreach, or CRM handoff drafts when relevant",
+1757:		confirmationNote: "No task, workflow, outreach, customer reply, CRM update, approval, or publishing action is executed from Full Team mode.",
+1758:		safetyLabel: "Full Team output is a coordinated draft preview only."
+1791:	lines.push(`Safety: ${humanizeValue(output.safetyLabel)}`);
+1792:	lines.push(`Confirmation: ${output.confirmationRequired ? "Required before execution" : "Required for execution actions"}`);
+1957:		approvedAssets: assetCategories
+1959:			.flatMap((item) => asArray(item.approved_assets).map((assetId) => ({
+2004:		operations: ["task plan", "workflow", "handoff", "approval", "timeline", "execution plan", "route", "publish", "status", "priority", "priorities", "blocking", "blocker", "readiness", "next", "do next"],
+2021:	const actionRouting = /launch|build|reconnect|connect|improve|create|fix|route|plan|publish/.test(query);
+2108:			top ? `Reuse the pattern from ${extractTopMessage(top)} in the next publishing cycle.` : "Sync social insights to identify winning hooks and formats.",
+2119:			routeSuggestion("Publishing", "publishing", "Schedule the next batch with stronger timing and approval control."),
+2232:		return { title: "Campaign launch task block", owner: "Campaign Studio", steps: ["Define the campaign objective, audience, and offer.", "Choose channels and budget based on current intelligence.", "List required assets and publishing dependencies before launch."] };
+2235:		return { title: "Content plan task block", owner: "Content Studio", steps: ["Use the strongest content pattern as the starting template.", "Map posts by platform, hook, format, and CTA.", "Route approved items into Publishing for scheduling."] };
+2238:		return { title: "Content repair task block", owner: "Content Studio", steps: ["Select the weakest items from Insights.", "Rewrite hooks, sharpen CTAs, and adjust format-platform fit.", "Republish only after updated versions are approved."] };
+2253:		routeSuggestions.push(routeSuggestion("Publishing", "publishing", "Schedule or approve if the next step is publishing."));
+2381:	publishing: "Publishing",
+2388:	governance: "Governance",
+2403:	publishing: "publisher",
+2410:	governance: "compliance_reviewer",
+2437:	publish: "publishing",
+2438:	publisher: "publishing",
+2451:	govern: "governance",
+2554:		safetyLabel: firstAiInboundText(preview.safetyLabel, preview.safety_label, "Guidance and draft only. No backend execution."),
+2555:		confirmationNote: firstAiInboundText(preview.confirmationNote, preview.confirmation_note, "Execution, approvals, publishing, CRM updates, customer replies, and workflow runs require explicit confirmation in the owning workspace."),
+2556:		confirmationRequired: preview.confirmationRequired ?? preview.confirmation_required ?? true
+2625:	)) || `Review this ${sourceLabel} handoff for ${projectLabel}. Identify the right specialist, summarize the context, produce a review-ready draft, and recommend the next safe route. Do not execute publishing, task creation, CRM updates, customer replies, workflow runs, or backend actions.`;
+2665:		note: "Guidance only. No publishing, task creation, CRM updates, customer replies, workflow runs, exports, or backend actions are executed from this handoff."
+2754:				approved_assets: aiContext.approvedAssets,
+2953:				<span style="font-size:11px;color:var(--color-text-2);">Prefill only — send prompt for preview</span>
+3159:					<div class="ctrl-empty-box">Commands you send appear here. Click any to restore and re-run.</div>
+3340:        preview.safetyLabel = preview.safetyLabel || "Conversation converted into a review-ready draft. No backend action executed.";
+3522:	if (tool.safetyLevel === "confirmation_required") return "Destination confirmation required";
+3531:	if (/review|check|compliance|readiness|governance/i.test(asString(tool.label))) return "Review";
+3575:				<p class="aicmd-room-subtitle mhos-context-description">Ask one expert or the full team to prepare strategy, content, analysis, reviews, and destination handoffs. AI prepares and reviews only; sensitive actions stay confirmation-gated in the owning workspace.</p>
+3612:					<strong>${escapeHtml(languagePlan.publishLanguage)}</strong>
+3649:			<span>Strategy, writing, creative, compliance, publishing, customer, sales, and operations specialists coordinate one review-ready answer. No workflow, send, publish, approval, or CRM action is executed here.</span>
+3708:		const lanes = ["Strategy", "Content", "Media", "Customer Ops", "Sales / CRM", "Compliance", "Publishing", "Operations"];
+3759:        if (roleId === "compliance") return `${label} is checking safety and compliance...`;
+3761:        if (roleId === "publisher") return `${label} is preparing publishing guidance...`;
+3772:		? "Team orchestration across strategy, writing, media/video, compliance, publishing, customer operations, sales/CRM, and operations"
+3906:			${projectName ? `<div class="aicmd-v2-tools-note">Project context: ${escapeHtml(projectName)}. Tools do not execute, publish, send, approve, save, or mutate records.</div>` : ""}
+3914:        const outputLanguage = asString(languagePlan.publishLanguage || languagePlan.outputLanguage || "German").trim() || "German";
+3966:        const governanceRequired = destinationRoute === "governance" || /approval|claim|compliance|risk|gdpr|review/i.test(`${outputType} ${asString(preview.title)} ${asString(preview.summary)}`);
+3967:        const riskLabel = governanceRequired ? "Review required" : "Low";
+3968:        const governanceLabel = governanceRequired ? "Governance route" : "Not required";
+3977:                        const complianceWatching = spec.id === "compliance_reviewer" && governanceRequired;
+4022:                                <span><strong>Governance</strong>${escapeHtml(governanceLabel)}</span>
+4029:                        <p class="aicmd-chatfirst-tab-note">AI Command prepares guidance, drafts, previews, and handoff context only. Publishing, approvals, CRM updates, workflow runs, customer sends, provider execution, and durable task creation remain confirmation-gated in the owning workspace.</p>
+4083:                                <span>No execution without confirmation</span>
+4101:				<p>Chat, draft, review, and prepare handoff context only. Publishing, approvals, CRM updates, workflow runs, external sends, and durable task creation stay confirmation-gated in the owning workspace.</p>
+4342:                { id: "publish", label: "Publish", summary: "Prepare publishing checklist and handoff readiness.", enabled: false }
+4436:        const channelOptions = [["social", "Social"], ["email", "Email"], ["website", "Website"], ["ads", "Ads"], ["publishing", "Publishing package"]];
+4464:                                                <p>Guide the AI Team from source to preview. Backend workflow execution and destination handoff stay approval-gated.</p>
+4559:                                                                <button type="button" data-aicmd-smart-campaign-action="governance">Request Governance Review</button>
+4560:                                                                <button type="button" data-aicmd-smart-campaign-action="publishing">Prepare Publishing Handoff</button>
+4567:                                                        <span>1. Choose source, goal, and channel. The AI Team will prepare the preview package before any approval or handoff.</span>
+4573:                                        <span>Review-first flow: generate preview, approve, then hand off to the owning surface. No publish, send, CRM update, provider execution, or workflow mutation happens here.</span>
+4696:                                <span>Library, campaigns, content, customers, governance, integrations and provider readiness are connected as guarded planning context. Execution stays confirmation-gated.</span>
+4747:                                        <button id="aicmdV2AskBtn" class="aicmd-chatfirst-send aicmd-final-send" type="button" ${isGenerating ? "disabled" : ""} title="Ask AI Team">
+4926:			${projectName ? `<p class="aicmd-chatfirst-tab-note">Project context: ${escapeHtml(projectName)}. Tools do not execute, publish, send, approve, save, or mutate records.</p>` : ""}
+4974:					<span><strong>Language</strong>${escapeHtml(languagePlan.publishLanguage)}</span>
+4994:					<div class="aicmd-chatfirst-output-safety">
+4995:						<strong>${escapeHtml(humanizeValue(preview.safetyLabel, "Guidance only. No backend execution."))}</strong>
+4996:						<span>${escapeHtml(humanizeValue(preview.confirmationNote, "Execution requires explicit confirmation in the destination workspace."))}</span>
+5005:				<p class="aicmd-chatfirst-tab-note">This is a review-ready preview. Execution, publishing, approvals, CRM updates, external sends, durable task creation, and workflow runs happen only in the owning destination workspace after confirmation.</p>
+5074:	const approval = preview.confirmationRequired ? "Confirmation required" : (preview.outputType ? "Review ready" : "No draft yet");
+5083:			<div><span>Approval</span><strong>${escapeHtml(approval)}</strong></div>
+5125:        const safetyLine = safeBridgeStatus.available
+5126:                ? "Chat only. No workflow run, durable task, external handoff action, approval, publishing action, CRM update, or customer action was created."
+5202:                        <div class="aicmd-v2-chat-safety">${escapeHtml(safetyLine)}</div>
+5341:		{ label: "Publishing language", value: languagePlan.publishLanguage, present: true },
+5348:		{ label: "Approved assets", value: aiContext.approvedAssets.length ? `${aiContext.approvedAssets.length} ready` : "No approved assets", present: aiContext.approvedAssets.length > 0 },
+5356:			{ label: "Escalations", value: "Requires confirmation", present: false, scoped: true },
+5362:				{ label: "CRM", value: "Profile context", present: true, scoped: true },
+5364:				{ label: "Follow-ups", value: "Requires confirmation", present: false, scoped: true },
+5387:function renderPhase1SafetyPanel(escapeHtml) {
+5389:		<div class="aicmd-v2-safety">
+5390:			<div class="aicmd-v2-safety-head">
+5391:				<span class="aicmd-v2-safety-icon">🔒</span>
+5392:				<span class="aicmd-v2-safety-label">How this workspace operates</span>
+5394:			<div class="aicmd-v2-safety-rules">
+5395:				<div class="aicmd-v2-safety-rule">
+5396:					<span class="aicmd-v2-safety-bullet">●</span>
+5397:					<span>Guidance only — no execution happens from this workspace without confirmation.</span>
+5399:				<div class="aicmd-v2-safety-rule">
+5400:					<span class="aicmd-v2-safety-bullet">●</span>
+5403:				<div class="aicmd-v2-safety-rule">
+5404:					<span class="aicmd-v2-safety-bullet">●</span>
+5405:					<span>Publishing, approval, and workflow runs require your explicit confirmation in the right workspace.</span>
+5407:				<div class="aicmd-v2-safety-rule">
+5408:					<span class="aicmd-v2-safety-bullet">●</span>
+5759:				persistSessionDraft(sessionKey, session, "Suggested prompt loaded — review and send when ready");
+6008:                                library: "trusted Library source, approved assets, saved briefs, or validated knowledge",
+6027:                                        body: "Flag unsupported claims, pricing promises, before/after language, evidence gaps, restricted wording, and approval requirements."
+6031:                                        body: `Prepare publishing readiness for ${channelLabel}: channel checklist, schedule draft, missing approvals, and handoff requirements.`
+6035:                                        body: "Track approval status, destination handoff, follow-up checks, improvement notes, and post-review action ownership."
+6059:                                                body: `Use ${sourceMeaning}. Produce a review-ready campaign package before any handoff, approval, publishing, sending, CRM update, provider execution, or workflow mutation.`
+6071:                                                body: "Create a hook, short social caption, long caption/email variant, CTA, landing-page angle, and reusable message notes in the configured publishing language."
+6079:                                                body: "Review claims, proof, pricing language, guarantees, sensitive wording, platform policy risk, and required Governance approval before external use."
+6083:                                                body: `Prepare ${channelLabel} readiness: asset status, copy status, approval status, schedule suggestion, channel dependencies, and final reviewer.`
+6091:                                safety: "Preview only. No publish, send, CRM mutation, provider execution, workflow mutation, or Governance approval is performed here."
+6162:                                safety: asObject(body.safety).preview_only
+6163:                                        ? "Backend preview only. No publish, send, CRM mutation, provider execution, workflow mutation, Governance approval, task creation, or durable handoff was performed."
+6164:                                        : asString(fallbackPreview.safety || "Preview only."),
+6195:                                const safety = asObject(backendPayload.safety);
+6196:                                if (!safety.preview_only || !safety.no_backend_mutation_performed || !safety.no_provider_execution_performed) {
+6197:                                        throw new Error("Backend preview response did not confirm preview-only safety.");
+6225:                                        destinationRoute: "publishing",
+6242:                                        safety: preview.safety,
+6243:                                        safetyLabel: preview.safety,
+6244:                                        confirmationRequired: true,
+6245:                                        confirmationNote: "Review and route this campaign package through the owning destination workspace before any publishing, sending, approval, task creation, provider execution, or workflow mutation.",
+6246:                                        nextSafeAction: "Review the campaign package, then send it to Media Studio or Publishing.",
+6253:                                updateStatus(preview.backendPreview ? "Backend AI Team preview prepared. Review before any handoff or approval." : "Local campaign preview prepared because backend preview is unavailable.");
+6262:                                publishing: "publishing"
+6266:                                publishing: "Publishing"
+6297:                                safety: "Prepared handoff only. No backend write, publish, send, CRM mutation, provider execution, approval creation, task creation, or workflow mutation was performed.",
+6325:                                governance: "Request Governance Review",
+6326:                                publishing: "Prepare Publishing Handoff",
+6330:                        const safeRouteActions = ["media", "publishing"];
+6341:                                        safety: handoff.safety
+6346:                                showMessage?.(`${label} prepared. No external action was executed.`);
+6366:                                safety: "Staged review action only. No backend write, publish, send, CRM mutation, provider execution, approval creation, task creation, or workflow mutation was performed."
+6371:                        showMessage?.(`${label} staged for review. No external action was executed.`);
+6398:			        const sendBtn = $("aicmdV2AskBtn");
+6399:			        if (sendBtn && !sendBtn.disabled) {
+6400:			                sendBtn.click?.();
+6446:                                                const outputLanguage = asString(languagePlan.outputLanguage || languagePlan.publishLanguage || "").toLowerCase();
+6573:		                                outputLanguage: languagePlan.publishLanguage,
+6575:		                                marketLanguage: languagePlan.publishLanguage,
+6582:		                                safetyInstruction: "Chat only. No task/workflow/handoff/approval/publish/customer/CRM execution.",
+6599:		                        const safetyLabel = asString(result?.safety_label || "chat_only");
+6610:		                                safetyLabel,
+6617:		                                        safety_label: safetyLabel
+6643:		                                        safety_label: safetyLabel,
+6667:		                        updateStatus("Specialist reply generated. No workflow/task/handoff was created.");
+6688:                // Phase 1: stages draft locally from conversation context. No backend execution.
+6709:                // Phase 1: converts the current conversation into a task preview. No backend execution.
+6749:                                updateStatus("Workflow draft preview prepared from conversation context. No workflow run started.");
+6756:                // Phase 1: converts the current conversation into a handoff preview. No backend write.
+6773:                                updateStatus("Handoff preview prepared from conversation context. Review destination before sending.");

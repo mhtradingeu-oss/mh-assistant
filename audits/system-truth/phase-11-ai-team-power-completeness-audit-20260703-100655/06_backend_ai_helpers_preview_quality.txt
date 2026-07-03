@@ -1,0 +1,30 @@
+public/control-center/pages/ai-command.js:28:        executeProjectAiChat,
+public/control-center/pages/ai-command.js:29:        executeProjectAiGuidance,
+public/control-center/pages/ai-command.js:30:        generateAiCommandCampaignPreview
+public/control-center/pages/ai-command.js:1057:function getAiResponseBridgeStatus(executeProjectAiGuidanceFn) {
+public/control-center/pages/ai-command.js:1058:	if (typeof executeProjectAiGuidanceFn !== "function") {
+public/control-center/pages/ai-command.js:2554:		safetyLabel: firstAiInboundText(preview.safetyLabel, preview.safety_label, "Guidance and draft only. No backend execution."),
+public/control-center/pages/ai-command.js:2734:	executeProjectAiCommand,
+public/control-center/pages/ai-command.js:2739:	if (typeof executeProjectAiCommand !== "function") throw new Error("AI command service is unavailable.");
+public/control-center/pages/ai-command.js:2747:		result = await executeProjectAiCommand(projectName, {
+public/control-center/pages/ai-command.js:4576:                                                <button class="aicmd-smart-wizard-primary" type="button" data-aicmd-smart-campaign-preview>
+public/control-center/pages/ai-command.js:5480:			executeProjectAiCommand,
+public/control-center/pages/ai-command.js:5548:		const bridgeStatus = getAiResponseBridgeStatus(executeProjectAiChat);
+public/control-center/pages/ai-command.js:6162:                                safety: asObject(body.safety).preview_only
+public/control-center/pages/ai-command.js:6175:                                const backendPayload = await generateAiCommandCampaignPreview(projectName || "default", {
+public/control-center/pages/ai-command.js:6196:                                if (!safety.preview_only || !safety.no_backend_mutation_performed || !safety.no_provider_execution_performed) {
+public/control-center/pages/ai-command.js:6212:                Array.from(document.querySelectorAll("[data-aicmd-smart-campaign-preview]")).forEach((btn) => {
+public/control-center/pages/ai-command.js:6564:		                        const result = await executeProjectAiChat(projectName, {
+public/control-center/pages/ai-command.js:6599:		                        const safetyLabel = asString(result?.safety_label || "chat_only");
+public/control-center/pages/ai-command.js:6617:		                                        safety_label: safetyLabel
+public/control-center/pages/ai-command.js:6643:		                                        safety_label: safetyLabel,
+public/control-center/api.js:1561:export async function runProjectAiWorkflow(projectName, workflowId, payload = {}) {
+public/control-center/api.js:1578:export async function executeProjectAiCommand(projectName, payload = {}) {
+public/control-center/api.js:1591:export async function executeProjectAiChat(projectName, payload = {}) {
+public/control-center/api.js:1607:export async function generateAiCommandCampaignPreview(projectName, payload = {}) {
+public/control-center/api.js:1610:    `/api/ai-command/project/${encodedProject}/campaign-preview`,
+public/control-center/api.js:1618:export async function executeProjectAiGuidance(projectName, payload = {}) {
+runtime/orchestrator-service/server.js:11325:    preview_only: true,
+runtime/orchestrator-service/server.js:11345:      preview_only: true,
+runtime/orchestrator-service/server.js:11370:        preview_only: true,
+runtime/orchestrator-service/server.js:11378:app.post('/api/ai-command/project/:project/campaign-preview', handleAiCommandCampaignPreviewOnly);

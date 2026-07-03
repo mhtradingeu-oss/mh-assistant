@@ -1,0 +1,366 @@
+### output builder references
+41:                summary: "Campaign concepts, launch plans, channel mix, and offer strategy.",
+42:                routeHint: "campaign-studio"
+62:                summary: "Short-form video scripts, motion direction, and reel strategy.",
+76:                summary: "Ad concepts, targeting angles, platform copy, and paid strategy.",
+119:	campaign: "strategist",
+148:		summary: "Campaign concepts, launch plans, channel mix, and offer strategy.",
+149:		placeholder: "Ask the Strategist to plan a campaign, map launch phases, review channel priorities, or define the offer strategy…",
+150:		canHelp: ["Draft campaign plans", "Prioritize next actions", "Map launch sequences", "Advise on offer strategy", "Prepare channel briefs"],
+151:		cannotDo: ["Publish campaigns directly", "Execute workflows automatically", "Approve content", "Set live budgets"],
+162:		placeholder: "Ask the Content Writer to draft captions, hooks, landing copy, or campaign messages…",
+187:		summary: "Short-form video scripts, motion direction, and reel strategy.",
+188:		placeholder: "Ask the Video Lead to write a reel script, map short-form strategy, or outline the next video concept…",
+189:		canHelp: ["Write video scripts", "Plan short-form strategy", "Define motion direction", "Map video asset requirements", "Prepare video briefs"],
+213:		summary: "Ad concepts, targeting angles, platform copy, and paid strategy.",
+214:		placeholder: "Ask the Ads Optimizer to draft ad copy, review targeting angles, or plan a paid campaign structure…",
+215:		canHelp: ["Draft ad concepts and copy", "Review targeting angles", "Plan paid campaign structure", "Suggest creative variants", "Map platform-specific strategy"],
+292:		{ label: "Draft a campaign brief", sub: "Map objective, audience, and channels" },
+293:		{ label: "Review launch readiness", sub: "Identify what is blocking launch" },
+294:		{ label: "Suggest the next campaign move", sub: "Based on current project state" }
+297:		{ label: "Draft campaign captions", sub: "For the active campaign" },
+303:		{ label: "Write a creative brief", sub: "For the next campaign visual" },
+305:		{ label: "Map format requirements", sub: "By platform and campaign phase" },
+309:		{ label: "Write a reel script", sub: "For the current campaign" },
+311:		{ label: "Outline motion direction", sub: "Align visuals with campaign tone" },
+321:		{ label: "Draft ad concepts", sub: "For the current campaign" },
+324:		{ label: "Plan paid campaign structure", sub: "Objective, audience, creative, budget" }
+361:	{ label: "Map the next launch wave", sub: "Strategist to Publisher to Operations" },
+431:		{ id: "campaign-angle-generator", label: "Campaign Angle Generator", action: "preview", intent: "guidance", template: "Generate campaign angles for {project}. Include audience tension, promise, channel fit, and strongest first test." },
+432:		{ id: "launch-plan", label: "Launch Plan", action: "preview", intent: "workflow", template: "Build a launch plan for {project}. Include phases, channels, owners, blockers, and next move." },
+515:	{ icon: "🚀", label: "Launch Campaign", sub: "Build a campaign plan", template: "Build a launch campaign for {project}. Map the channels, offer, phases, and required assets." },
+517:	{ icon: "📊", label: "Analyze Performance", sub: "Review what's working", template: "Analyze current performance for {project}. What content, campaigns, and channels are working best right now?" },
+525:	{ id: "strategy", label: "Strategy" },
+527:	{ id: "campaign", label: "Campaign" },
+538:	{ id: "campaign", label: "Campaign" },
+555:		purpose: "Build high-leverage decisions for launch sequencing and channel focus.",
+557:		suggestedPrompt: "Act as Strategist and propose the next campaign move based on current readiness and integrations."
+562:		purpose: "Transform strategy into high-converting copy and scripts.",
+563:		bestUse: "When campaigns need content batches fast.",
+564:		suggestedPrompt: "Act as Writer and generate content angles for the current project and active campaign."
+571:		suggestedPrompt: "Act as Designer and propose creative directions tied to current campaign goals."
+578:		suggestedPrompt: "Act as Media Planner and map media needs by platform for this launch cycle."
+598:		bestUse: "When strategy needs stronger external evidence.",
+750:		campaign: asString(context.campaign || "active campaign") || "active campaign"
+753:	return asString(template).replace(/\{(project|projectName|specialist|specialistLabel|campaign)\}/g, (_, token) => tokenMap[token] || "");
+765:    "Build a launch campaign for:",
+901:	return asString(item.label || item.title || item.page || item.query || item.campaign_name || item.name);
+918:			commandType: "strategy",
+925:			taskType: "launch",
+1246:                `Use ${safeOutputLanguage} only for customer-facing or publishable copy such as captions, ads, emails, landing pages, final campaign text, or publishing packages.`,
+1298:function destinationRouteForSpecialist(specialistId, outputType) {
+1302:	if (id === "strategist") return outputType === "task" ? "campaign-studio" : "workflows";
+1316:function resolveAiResponseOutputRoute(session, response = {}) {
+1348:        const looksCampaignLike = /\b(campaign|launch|audience|offer|funnel|positioning|channel mix|campaign brief|go-to-market|go to market)\b/.test(text);
+1385:        if (/campaign|strategy|launch/.test(outputType) || looksCampaignLike) {
+1386:                outputType = "campaign";
+1389:                        destinationRoute: explicitDestination || (session?.teamMode === "team" ? "workflows" : "campaign-studio")
+1393:        const destinationRoute = explicitDestination || destinationRouteForSpecialist(session?.modeId || "operations", outputType);
+1399:		"campaign-studio": "Campaign Studio",
+1415:function specialistTemplateForOutput({ specialist, outputType, prompt, projectName }) {
+1419:	const route = destinationRouteForSpecialist(specialistId, outputType);
+1438:	if (specialistId === "strategist") {
+1468:			title: outputType === "task" ? "Task: Draft campaign copy" : "Content Guidance: Messaging draft",
+1570:				"Keep budget, launch, and live ad changes inside Ads Manager.",
+1578:			safetyLabel: "No budget updates or ad launches executed."
+1712:function buildPhase2OutputPreview({ intent, session, prompt, projectName }) {
+1726:	const base = specialistTemplateForOutput({
+1741:			"Strategist defines priorities, positioning, launch sequence, and strongest next move",
+1742:			"Writer, Media Director, and Video Lead turn strategy into message, asset, and production drafts",
+1747:			"Strategist: decide priority, offer angle, channel sequence, and launch wave",
+1936:		campaign: state.context.activeCampaign || "Not selected",
+1997:		strategist: ["campaign", "launch campaign", "campaign plan", "marketing campaign", "market entry", "growth plan", "offer strategy", "launch plan"],
+2021:	const actionRouting = /launch|build|reconnect|connect|improve|create|fix|route|plan|publish/.test(query);
+2060:function buildExecutiveResponse(aiContext) {
+2164:	const bestCampaign = asArray(paid.best_campaigns)[0];
+2165:	const weakCampaign = asArray(paid.weak_campaigns)[0];
+2173:			bestCampaign ? `Best campaign: ${extractTopMessage(bestCampaign)}.` : "No winning campaign measured yet.",
+2174:			weakCampaign ? `Weak campaign: ${extractTopMessage(weakCampaign)}.` : "No weak campaign list yet.",
+2185:			weakCampaign ? `Rebuild hook and CTA for ${extractTopMessage(weakCampaign)}.` : "Audit campaign naming and creative mapping.",
+2231:	if (/launch.*campaign|new campaign/.test(query)) {
+2232:		return { title: "Campaign launch task block", owner: "Campaign Studio", steps: ["Define the campaign objective, audience, and offer.", "Choose channels and budget based on current intelligence.", "List required assets and publishing dependencies before launch."] };
+2250:	if (/campaign/.test(query)) routeSuggestions.push(routeSuggestion("Campaign Studio", "campaign-studio", "Turn this into a structured launch plan."));
+2256:	if (/ads|campaign scale|roas|creative/.test(query)) routeSuggestions.push(routeSuggestion("Ads Manager", "ads-manager", "Review live paid performance and action the next media move."));
+2276:function buildResponseForMode(aiContext, classified, message) {
+2294:				: buildExecutiveResponse(aiContext);
+2382:	"campaign-studio": "Campaign Studio",
+2404:	"campaign-studio": "strategist",
+2439:	campaign: "campaign-studio",
+2440:	campaigns: "campaign-studio",
+2895:					<strong>${escapeHtml(aiContext.campaign || "None")}</strong>
+3321:        const preview = buildPhase2OutputPreview({
+3369:			reason: `${aiContext.criticalGaps.length} critical setup gap${aiContext.criticalGaps.length === 1 ? "" : "s"} can block launch quality and downstream automation reliability.`,
+3378:			reason: `${aiContext.assetBlockers.length} asset category blocker${aiContext.assetBlockers.length === 1 ? "" : "s"} may reduce content throughput and campaign delivery speed.`,
+3394:	if (!aiContext.campaign || aiContext.campaign === "Not selected") {
+3396:			title: "Define the active campaign operating plan",
+3397:			reason: "A clear campaign context helps every specialist agent generate more precise outputs.",
+3398:			command: `Create a campaign operating brief for ${aiContext.projectName || "this project"} with objective, audience, channels, and first execution wave.`,
+3406:		command: `Generate the next high-impact content wave for ${aiContext.projectName || "this project"} based on current readiness and campaign context.`,
+3518:	return destinationRouteForSpecialist(session?.modeId || "operations", outputType);
+3539:		.replace(/\{campaign\}/g, "active campaign");
+3575:				<p class="aicmd-room-subtitle mhos-context-description">Ask one expert or the full team to prepare strategy, content, analysis, reviews, and destination handoffs. AI prepares and reviews only; sensitive actions stay confirmation-gated in the owning workspace.</p>
+3772:		? "Team orchestration across strategy, writing, media/video, compliance, publishing, customer operations, sales/CRM, and operations"
+3809:	return destinationRouteForSpecialist(session?.modeId || "operations", getCanonicalToolIntent(tool));
+3960:        const destinationRoute = asString(preview.destinationRoute || destinationRouteForSpecialist(session.modeId, outputType));
+3979:                        const route = destinationRouteForSpecialist(spec.id, "guidance");
+4066:        const destinationRoute = asString(session.outputPreview?.destinationRoute || destinationRouteForSpecialist(session.modeId, outputType));
+4249:                const destinationRoute = asString(message.destinationRoute || preview.destinationRoute || destinationRouteForSpecialist(session.modeId, outputType));
+4314:                                                <span>Plan campaign</span>
+4337:                { id: "campaign", label: "Campaign", summary: "Build a review-ready campaign with the full AI Team.", enabled: true },
+4378:        const campaignPackage = asObject(packageInput);
+4380:                ["Concept", asString(campaignPackage.concept)],
+4381:                ["Target audience", asString(campaignPackage.targetAudience || campaignPackage.target_audience)],
+4382:                ["Offer", asString(campaignPackage.offer)]
+4386:                ["Launch phases", asArray(campaignPackage.launchPhases || campaignPackage.launch_phases)],
+4387:                ["Content angles", asArray(campaignPackage.contentAngles || campaignPackage.content_angles)],
+4388:                ["Ad angles", asArray(campaignPackage.adAngles || campaignPackage.ad_angles)],
+4389:                ["Required assets", asArray(campaignPackage.requiredAssets || campaignPackage.required_assets)],
+4390:                ["Review blockers", asArray(campaignPackage.missingBlockers || campaignPackage.missing_blockers)],
+4391:                ["Next actions", asArray(campaignPackage.nextActions || campaignPackage.next_actions)]
+4397:                <div class="aicmd-smart-preview-grid aicmd-smart-campaign-package-grid">
+4419:        if (wizard.type !== "campaign" || !wizard.open) return "";
+4435:        const goalOptions = [["sales", "Sales"], ["launch", "Product launch"], ["leads", "Lead generation"], ["awareness", "Awareness"], ["retargeting", "Retargeting"]];
+4440:        const deadlineOptions = [["standard", "Standard"], ["urgent", "Urgent"], ["launch-week", "Launch week"], ["evergreen", "Evergreen"]];
+4500:                                                <strong>4. Premium campaign brief</strong>
+4545:                                                        ${renderCampaignPackageMiniPanel(preview.campaignPackage, escapeHtml)}
+4557:                                                                <button type="button" data-aicmd-smart-campaign-action="library">Save to Library</button>
+4558:                                                                <button type="button" data-aicmd-smart-campaign-action="media">Send to Media Studio</button>
+4559:                                                                <button type="button" data-aicmd-smart-campaign-action="governance">Request Governance Review</button>
+4560:                                                                <button type="button" data-aicmd-smart-campaign-action="publishing">Prepare Publishing Handoff</button>
+4561:                                                                <button type="button" data-aicmd-smart-campaign-action="operations">Create Operations Follow-up</button>
+4576:                                                <button class="aicmd-smart-wizard-primary" type="button" data-aicmd-smart-campaign-preview>
+4670:                                        <small>Strategy, content, media, operations, compliance, customer, campaign and provider-readiness planning.</small>
+4696:                                <span>Library, campaigns, content, customers, governance, integrations and provider readiness are connected as guarded planning context. Execution stays confirmation-gated.</span>
+4937:	const destination = routeLabel(preview.destinationRoute || destinationRouteForSpecialist(session.modeId, preview.outputType || "guidance"));
+5128:        const emptyBody = "Ask what to do next, draft a campaign asset, review a source, prepare a handoff, or coordinate the full AI team.";
+5334:	const destination = routeLabel(destinationRouteForSpecialist(session.modeId, asObject(session.outputPreview).outputType || "guidance"));
+5593:			session.outputPreview = buildPhase2OutputPreview({
+5781:                                return text.includes("source") || text.includes("review") || text.includes("brief") || text.includes("campaign");
+5967:                        if (type !== "campaign") {
+5974:                                type: "campaign",
+6015:                                        body: `Define the ${goalLabel.toLowerCase()} objective, target segment, market angle, and campaign promise for ${projectLabel}.`
+6040:                                title: `${goalLabel} campaign for ${projectLabel}`,
+6041:                                summary: `AI Team preview for a ${goalLabel.toLowerCase()} campaign using ${sourceLabel.toLowerCase()} and optimized for ${channelLabel}.`,
+6059:                                                body: `Use ${sourceMeaning}. Produce a review-ready campaign package before any handoff, approval, publishing, sending, CRM update, provider execution, or workflow mutation.`
+6087:                                                body: "Create a follow-up plan for review status, owner, destination handoff, performance check, improvement loop, and next campaign iteration."
+6131:                        const campaignPackage = asObject(body.campaignPackage || body.campaign_package);
+6133:                                campaignPackage.concept ? { label: "Campaign concept", body: asString(campaignPackage.concept) } : null,
+6134:                                campaignPackage.targetAudience ? { label: "Target audience", body: asString(campaignPackage.targetAudience) } : null,
+6135:                                campaignPackage.offer ? { label: "Offer", body: asString(campaignPackage.offer) } : null,
+6136:                                asArray(campaignPackage.launchPhases).length ? { label: "Launch phases", items: asArray(campaignPackage.launchPhases) } : null,
+6137:                                asArray(campaignPackage.contentAngles).length ? { label: "Content angles", items: asArray(campaignPackage.contentAngles) } : null,
+6138:                                asArray(campaignPackage.adAngles).length ? { label: "Ad angles", items: asArray(campaignPackage.adAngles) } : null,
+6139:                                asArray(campaignPackage.requiredAssets).length ? { label: "Required assets", items: asArray(campaignPackage.requiredAssets) } : null,
+6140:                                asArray(campaignPackage.missingBlockers).length ? { label: "Review blockers", items: asArray(campaignPackage.missingBlockers) } : null,
+6141:                                asArray(campaignPackage.nextActions).length ? { label: "Next actions", items: asArray(campaignPackage.nextActions) } : null
+6146:                                title: asString(body.title || fallbackPreview.title || "AI Team campaign preview"),
+6156:                                audience: asString(body.audience || campaignPackage.targetAudience || fallbackPreview.audience || ""),
+6157:                                offer: asString(body.offer || campaignPackage.offer || fallbackPreview.offer || ""),
+6160:                                campaignPackage,
+6202:                                console.warn("AI Command backend campaign preview fallback", error);
+6212:                Array.from(document.querySelectorAll("[data-aicmd-smart-campaign-preview]")).forEach((btn) => {
+6214:                                updateStatus("Preparing AI Team campaign preview...");
+6218:                                        type: "campaign",
+6223:                                        type: "smart_campaign_preview",
+6224:                                        outputType: "campaign_package",
+6240:                                        campaignPackage: asObject(preview.campaignPackage),
+6245:                                        confirmationNote: "Review and route this campaign package through the owning destination workspace before any publishing, sending, approval, task creation, provider execution, or workflow mutation.",
+6246:                                        nextSafeAction: "Review the campaign package, then send it to Media Studio or Publishing.",
+6253:                                updateStatus(preview.backendPreview ? "Backend AI Team preview prepared. Review before any handoff or approval." : "Local campaign preview prepared because backend preview is unavailable.");
+6254:                                showMessage?.(preview.backendPreview ? "Backend AI Team campaign preview is ready for review." : "Campaign preview is ready using the local fallback.");
+6271:                                id: `campaign_handoff_${Date.now()}`,
+6272:                                type: "ai_command_campaign_handoff",
+6292:                                campaignPackage: asObject(preview.campaignPackage),
+6305:                                window.localStorage?.setItem?.("mh_ai_command_campaign_handoff", payload);
+6307:                                window.sessionStorage?.setItem?.("mh_ai_command_campaign_handoff", payload);
+6310:                                console.warn("Unable to store AI Command campaign handoff", error);
+6318:                                updateStatus("Generate a campaign preview before choosing a review action.");
+6375:                Array.from(document.querySelectorAll("[data-aicmd-smart-campaign-action]")).forEach((btn) => {
+6377:                                const action = asString(btn.getAttribute("data-aicmd-smart-campaign-action") || "");
+6578:		                                        campaign: aiContext.campaign,
+6625:                                        const responseRoute = resolveAiResponseOutputRoute(session, {
+6790:					campaign: aiContext.campaign
+6938:				const responseRoute = resolveAiResponseOutputRoute(session, latestResponse);
+6939:				const destination = asString(latestResponse.destinationRoute || responseRoute.destinationRoute || destinationRouteForSpecialist(session.modeId, responseRoute.outputType || "guidance"));
+7810:      session.taskType = "launch";
+
+### exact strategist output builder context
+                        outputType,
+                        destinationRoute: explicitDestination || (session?.teamMode === "team" ? "workflows" : "campaign-studio")
+                };
+        }
+
+        const destinationRoute = explicitDestination || destinationRouteForSpecialist(session?.modeId || "operations", outputType);
+        return { outputType, destinationRoute };
+}
+
+function routeLabel(route) {
+	const labels = {
+		"campaign-studio": "Campaign Studio",
+		"content-studio": "Content Studio",
+		"media-studio": "Media Studio",
+		publishing: "Publishing",
+		"ads-manager": "Ads Manager",
+		insights: "Insights",
+		integrations: "Integrations",
+		governance: "Governance",
+		"operations-centers": "Operations Centers",
+		"task-center": "Task Center",
+		setup: "Setup",
+		workflows: "Workflows"
+	};
+	return labels[route] || titleCase(route);
+}
+
+function specialistTemplateForOutput({ specialist, outputType, prompt, projectName }) {
+	const cleanPrompt = asString(prompt).trim();
+	const promptSnippet = cleanPrompt || `Project request for ${projectName || "current project"}`;
+	const specialistId = asString(specialist?.id || "operations");
+	const route = destinationRouteForSpecialist(specialistId, outputType);
+
+	const base = {
+		specialistId,
+		outputType,
+		title: "Draft output",
+		summary: "Guidance prepared for review.",
+		bullets: [],
+		steps: [],
+		destinationRoute: route,
+		confirmationRequired: outputType === "handoff" || specialistId === "publisher" || specialistId === "compliance_reviewer",
+		generatedAt: nowIso(),
+		sourcePrompt: promptSnippet,
+		status: "draft_preview",
+		safetyLabel: "Guidance and draft only. No backend execution.",
+		nextSafeAction: `Review in ${routeLabel(route)}`,
+		confirmationNote: "Execution, approvals, and publishing require explicit confirmation in the owning workspace."
+	};
+
+	if (specialistId === "strategist") {
+		if (outputType === "task") {
+			return {
+				...base,
+				title: `Task: Strategic plan for ${projectName || "current project"}`,
+				summary: "Strategic task draft prepared with priorities, blockers, and operating sequence.",
+				steps: [
+					"Define top 3 strategic priorities for this cycle",
+					"List blockers and dependency owners",
+					"Map next operating move by channel",
+					"Route execution draft to Campaign Studio or Workflows"
+				],
+				nextSafeAction: "Review and refine the task draft before creating durable tasks"
+			};
+		}
+		return {
+			...base,
+			title: `Strategist Guidance: Next operating move`,
+			summary: `Priority guidance prepared from: ${promptSnippet}`,
+			bullets: [
+				"Strategic priorities aligned to current readiness",
+				"Key blockers and risk dependencies identified",
+				"Next operating move drafted with destination routing"
+			]
+		};
+	}
+
+	if (specialistId === "writer") {
+		return {
+			...base,
+			title: outputType === "task" ? "Task: Draft campaign copy" : "Content Guidance: Messaging draft",
+			summary: "Content draft prepared with hooks, captions, CTA flow, and review checkpoint.",
+			hooks: [
+
+### executive/strategy response context
+	if (lane === "content" && asString(coverage.social_insights?.status) !== "covered") {
+		notes.push("Sync social feeds to learn from real post performance.");
+	}
+	if (lane === "seo" && asString(coverage.seo_search_console?.status) !== "covered") {
+		notes.push("Search Console not synced — SEO guidance is limited.");
+	}
+	if (lane === "ads" && asString(coverage.paid_ads?.status) !== "covered") {
+		notes.push("Paid platform reporting not connected — ROAS guidance is limited.");
+	}
+	return notes;
+}
+
+function buildExecutiveResponse(aiContext) {
+	const topRecommendation = aiContext.recommendations[0];
+	const summaryParts = [];
+	if (aiContext.readinessScore != null) summaryParts.push(`Readiness is ${aiContext.readinessScore}/100 (${aiContext.readinessStatus || "in progress"}).`);
+	if (aiContext.criticalGaps.length) summaryParts.push(`${aiContext.criticalGaps.length} critical gaps are open.`);
+	if (aiContext.recommendations.length) summaryParts.push(`${aiContext.recommendations.length} recommendations available.`);
+	return {
+		title: "Project status briefing",
+		summary: summaryParts.join(" ") || "Project is loaded. Complete integrations to unlock stronger AI guidance.",
+		findings: [
+			aiContext.criticalGaps.length ? `Critical gaps: ${aiContext.criticalGaps.slice(0, 4).map(normalizeActionLabel).join(", ")}.` : "No critical readiness gaps flagged.",
+			aiContext.missingIntegrations.length ? `Missing intelligence: ${aiContext.missingIntegrations.slice(0, 4).map((item) => item.label).join(", ")}.` : "Intelligence coverage is solid.",
+			topRecommendation ? `Top recommendation: ${topRecommendation.title}.` : "No recommendation stack yet."
+		],
+		recommendations: [
+			topRecommendation ? `${topRecommendation.title}: ${topRecommendation.action}` : "Connect missing integrations to produce better recommendations.",
+			...aiContext.recommendations.slice(1, 3).map((item) => `${item.title}: ${item.action}`)
+		].filter(Boolean),
+		nextActions: [
+			...aiContext.nextBestActions.slice(0, 4).map((item) => `Resolve ${normalizeActionLabel(item)}.`),
+			...(aiContext.connectorIssues[0] ? [`Fix ${aiContext.connectorIssues[0].label}: ${aiContext.connectorIssues[0].reason}.`] : [])
+		],
+		routeSuggestions: [
+			routeSuggestion("Setup", "setup", "Close missing project basics, goals, and audience inputs."),
+			routeSuggestion("Integrations", "integrations", "Reconnect data sources and improve intelligence coverage."),
+			routeSuggestion("Insights", "insights", "Review performance signals and the recommendation stack.")
+		],
+		missingData: buildMissingDataNotes(aiContext, "executive")
+	};
+}
+
+
+### operations campaign task context
+		],
+		missingData: [
+			...buildMissingDataNotes(aiContext, "seo"),
+			...buildMissingDataNotes(aiContext, "ads"),
+			...buildMissingDataNotes(aiContext, "content")
+		]
+	};
+}
+
+function buildOperationsTaskBlock(aiContext, message) {
+	const query = asString(message).toLowerCase();
+	if (/launch.*campaign|new campaign/.test(query)) {
+		return { title: "Campaign launch task block", owner: "Campaign Studio", steps: ["Define the campaign objective, audience, and offer.", "Choose channels and budget based on current intelligence.", "List required assets and publishing dependencies before launch."] };
+	}
+	if (/content plan|7-day/.test(query)) {
+		return { title: "Content plan task block", owner: "Content Studio", steps: ["Use the strongest content pattern as the starting template.", "Map posts by platform, hook, format, and CTA.", "Route approved items into Publishing for scheduling."] };
+	}
+	if (/weak post|improve content/.test(query)) {
+		return { title: "Content repair task block", owner: "Content Studio", steps: ["Select the weakest items from Insights.", "Rewrite hooks, sharpen CTAs, and adjust format-platform fit.", "Republish only after updated versions are approved."] };
+	}
+	if (/reconnect|missing tools|missing integrations/.test(query)) {
+		return { title: "Integration recovery task block", owner: "Integrations", steps: ["Reconnect critical analytics and performance feeds first.", "Test each integration after reconnect and sync current data.", "Return to Insights to confirm coverage improves."] };
+	}
+	return { title: "Execution task block", owner: "Workflows", steps: ["Confirm the goal and required output.", "Identify which workspace owns the work.", "Move into the correct page and review the first step in the owning workspace."] };
+}
+
+function buildOperationsResponse(aiContext, message) {
+	const query = asString(message).toLowerCase();
+	const taskBlock = buildOperationsTaskBlock(aiContext, message);
+	const routeSuggestions = [];
+	if (/campaign/.test(query)) routeSuggestions.push(routeSuggestion("Campaign Studio", "campaign-studio", "Turn this into a structured launch plan."));
+	if (/content|post/.test(query)) {
+		routeSuggestions.push(routeSuggestion("Content Studio", "content-studio", "Draft, rewrite, or prepare the requested content outputs."));
+		routeSuggestions.push(routeSuggestion("Publishing", "publishing", "Schedule or approve if the next step is publishing."));
+	}
+	if (/reconnect|connect|integration|tool|sync/.test(query)) routeSuggestions.push(routeSuggestion("Integrations", "integrations", "Reconnect data sources and restore intelligence coverage."));
+	if (/ads|campaign scale|roas|creative/.test(query)) routeSuggestions.push(routeSuggestion("Ads Manager", "ads-manager", "Review live paid performance and action the next media move."));
+	if (!routeSuggestions.length) routeSuggestions.push(routeSuggestion("Workflows", "workflows", "Use Workflows when the task spans multiple execution areas."));
+	return {
+		title: "Operations routing brief",
+		summary: "This request is best handled as a structured workflow — moving into the right workspace gets results faster than chat alone.",
+		findings: [
+			aiContext.criticalGaps.length ? `Unresolved critical gaps: ${aiContext.criticalGaps.slice(0, 3).map(normalizeActionLabel).join(", ")}.` : "No critical gap is blocking this operation.",
+			aiContext.missingIntegrations.length ? "Intelligence coverage gaps may reduce execution quality." : "Core intelligence is available for routing."
+		],
+		recommendations: [
+			"Move into the correct workspace rather than managing the whole flow from chat.",
+			aiContext.recommendations[0]?.action || "Use the current recommendation stack to choose the first high-impact step."
+		].filter(Boolean),

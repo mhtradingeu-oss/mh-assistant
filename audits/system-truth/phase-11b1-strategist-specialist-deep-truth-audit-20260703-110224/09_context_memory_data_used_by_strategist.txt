@@ -1,0 +1,453 @@
+12:        selectCurrentProject,
+13:        selectOperationsSnapshot,
+14:        selectProjectPayload
+41:                summary: "Campaign concepts, launch plans, channel mix, and offer strategy.",
+42:                routeHint: "campaign-studio"
+69:                summary: "Publishing readiness, schedule review, and handoff preparation.",
+119:	campaign: "strategist",
+148:		summary: "Campaign concepts, launch plans, channel mix, and offer strategy.",
+149:		placeholder: "Ask the Strategist to plan a campaign, map launch phases, review channel priorities, or define the offer strategy…",
+150:		canHelp: ["Draft campaign plans", "Prioritize next actions", "Map launch sequences", "Advise on offer strategy", "Prepare channel briefs"],
+151:		cannotDo: ["Publish campaigns directly", "Execute workflows automatically", "Approve content", "Set live budgets"],
+162:		placeholder: "Ask the Content Writer to draft captions, hooks, landing copy, or campaign messages…",
+200:		summary: "Publishing readiness, schedule review, and handoff preparation.",
+201:		placeholder: "Ask the Publisher to review publishing readiness, check scheduling, or prepare a handoff package…",
+202:		canHelp: ["Review publishing readiness", "Check scheduled jobs", "Prepare handoff packages", "Map publishing dependencies", "Flag pre-publish risks"],
+214:		placeholder: "Ask the Ads Optimizer to draft ad copy, review targeting angles, or plan a paid campaign structure…",
+215:		canHelp: ["Draft ad concepts and copy", "Review targeting angles", "Plan paid campaign structure", "Suggest creative variants", "Map platform-specific strategy"],
+229:		cannotDo: ["Update SEO settings directly", "Edit live website", "Set analytics configurations", "Publish recommendations automatically"],
+231:		safetyNote: "Analysis and recommendations only. No direct website or analytics changes.",
+241:		canHelp: ["Review marketing claims", "Flag approval risks", "Check publishing safety", "Prepare governance notes", "Identify compliance blockers"],
+292:		{ label: "Draft a campaign brief", sub: "Map objective, audience, and channels" },
+293:		{ label: "Review launch readiness", sub: "Identify what is blocking launch" },
+294:		{ label: "Suggest the next campaign move", sub: "Based on current project state" }
+297:		{ label: "Draft campaign captions", sub: "For the active campaign" },
+303:		{ label: "Write a creative brief", sub: "For the next campaign visual" },
+305:		{ label: "Map format requirements", sub: "By platform and campaign phase" },
+309:		{ label: "Write a reel script", sub: "For the current campaign" },
+311:		{ label: "Outline motion direction", sub: "Align visuals with campaign tone" },
+315:		{ label: "Review publishing readiness", sub: "Check what is ready to publish" },
+321:		{ label: "Draft ad concepts", sub: "For the current campaign" },
+322:		{ label: "Review targeting angles", sub: "Map audience and platform fit" },
+324:		{ label: "Plan paid campaign structure", sub: "Objective, audience, creative, budget" }
+329:		{ label: "Map data coverage gaps", sub: "Which integrations are missing" },
+333:		{ label: "Check claims for approval", sub: "Review all marketing claims" },
+374:	{ id: "monitor", title: "Monitor", description: "Track readiness, integrations, and recent activity." }
+431:		{ id: "campaign-angle-generator", label: "Campaign Angle Generator", action: "preview", intent: "guidance", template: "Generate campaign angles for {project}. Include audience tension, promise, channel fit, and strongest first test." },
+437:		{ id: "hook-generator", label: "Hook Generator", action: "preview", intent: "guidance", template: "Write 5 German hook variants for {project}. Keep them concise, testable, and suitable for the Germany market." },
+450:		{ id: "write-video-hook", label: "Write video hook", action: "preview", intent: "guidance", template: "Write short-form video hooks for {project}. Include 3 opening variants and audience fit." },
+457:		{ id: "publishing-checklist", label: "Publishing Checklist", action: "preview", intent: "handoff", template: "Build a publishing checklist for {project}. Include German copy, assets, claims checks, and channel readiness." },
+464:		{ id: "ad-angle-generator", label: "Ad Angle Generator", action: "preview", intent: "guidance", template: "Draft ad angles for {project}. Include audience problem, value promise, German hook direction, and platform fit." },
+471:		{ id: "keyword-intent", label: "Keyword Intent", action: "preview", intent: "guidance", template: "Suggest keyword intent opportunities for {project}. Include Germany-market intent, content mapping, and priority." },
+478:		{ id: "claims-check", label: "Claims Check", action: "preview", intent: "guidance", template: "Review marketing claims for {project}. Flag unsupported, high-risk, or evidence-dependent wording." },
+481:		{ id: "publish-readiness", label: "Publish Readiness", action: "preview", intent: "handoff", template: "Review publish readiness for {project}. Confirm what needs human approval before release." },
+492:		{ id: "review-unified-inbox", label: "Review Unified Inbox", action: "preview", intent: "guidance", template: "Review the Unified Inbox readiness for {project}. Summarize visible customer-operation signals, open gaps, and safe next review steps. Do not claim inbox actions happened." },
+507:		{ id: "dealer-salon-outreach", label: "Dealer / Salon Outreach", action: "preview", intent: "guidance", template: "Draft dealer or salon outreach for {project}. Include positioning, proof needs, offer angle, CTA, and follow-up note." },
+515:	{ icon: "🚀", label: "Launch Campaign", sub: "Build a campaign plan", template: "Build a launch campaign for {project}. Map the channels, offer, phases, and required assets." },
+517:	{ icon: "📊", label: "Analyze Performance", sub: "Review what's working", template: "Analyze current performance for {project}. What content, campaigns, and channels are working best right now?" },
+518:	{ icon: "🔧", label: "Fix Readiness", sub: "Close critical gaps", template: "What are the critical readiness gaps for {project} and what exactly needs to be done to fix them?" }
+527:	{ id: "campaign", label: "Campaign" },
+538:	{ id: "campaign", label: "Campaign" },
+543:	"Launch readiness",
+557:		suggestedPrompt: "Act as Strategist and propose the next campaign move based on current readiness and integrations."
+563:		bestUse: "When campaigns need content batches fast.",
+564:		suggestedPrompt: "Act as Writer and generate content angles for the current project and active campaign."
+571:		suggestedPrompt: "Act as Designer and propose creative directions tied to current campaign goals."
+576:		purpose: "Align media formats with channels, cadence, and readiness.",
+585:		suggestedPrompt: "Act as Ads Specialist and propose paid experiments based on current readiness and data coverage."
+591:		bestUse: "When you need evidence-backed recommendations.",
+597:		purpose: "Strengthen decisions with market, competitor, and audience insight.",
+599:		suggestedPrompt: "Act as Researcher and identify high-confidence market opportunities for this project."
+750:		campaign: asString(context.campaign || "active campaign") || "active campaign"
+753:	return asString(template).replace(/\{(project|projectName|specialist|specialistLabel|campaign)\}/g, (_, token) => tokenMap[token] || "");
+765:    "Build a launch campaign for:",
+768:    "Fix readiness for:"
+840:function getWorkspaceLanguagePlan(aiContext = {}) {
+841:	const overview = asObject(aiContext.overview);
+842:	const rawMarket = asString(aiContext.market || overview.market || "").trim();
+843:	const market = rawMarket || "Germany";
+848:		overview.market_language ||
+862:		market
+901:	return asString(item.label || item.title || item.page || item.query || item.campaign_name || item.name);
+1221:function buildSpecialistChatPrompt({ prompt, specialistLabel, modeLabel, projectName, language, outputLanguage, market }) {
+1228:	const safeMarket = asString(market || "Germany").trim();
+1243:		`Target market: ${safeMarket}`,
+1246:                `Use ${safeOutputLanguage} only for customer-facing or publishable copy such as captions, ads, emails, landing pages, final campaign text, or publishing packages.`,
+1277:	const recommendationLine = normalizeDisplayList(response.recommendations, 4)
+1302:	if (id === "strategist") return outputType === "task" ? "campaign-studio" : "workflows";
+1347:        const looksInsightLike = /\b(insight|insights|seo|keyword|keywords|analytics|performance|traffic|ranking|search intent|metrics|research|competitor|competitors|market research)\b/.test(text);
+1348:        const looksCampaignLike = /\b(campaign|launch|audience|offer|funnel|positioning|channel mix|campaign brief|go-to-market|go to market)\b/.test(text);
+1385:        if (/campaign|strategy|launch/.test(outputType) || looksCampaignLike) {
+1386:                outputType = "campaign";
+1389:                        destinationRoute: explicitDestination || (session?.teamMode === "team" ? "workflows" : "campaign-studio")
+1399:		"campaign-studio": "Campaign Studio",
+1405:		integrations: "Integrations",
+1458:				"Strategic priorities aligned to current readiness",
+1468:			title: outputType === "task" ? "Task: Draft campaign copy" : "Content Guidance: Messaging draft",
+1476:				"Caption opens with the audience problem, then moves into the practical value promise.",
+1525:				"Draft opening hook and audience angle",
+1540:				"Final copy should be German for the Germany market unless a destination overrides it.",
+1541:				"Publishing remains gated until channel, approval, and asset readiness are confirmed."
+1544:				"Validate asset and copy readiness",
+1558:			summary: "Ad angle and audience testing draft prepared for review.",
+1576:				"Platform-specific copy recommendations"
+1588:				"Signals to check: readiness, channel performance, data coverage",
+1651:				"Value: concise project-specific offer or collaboration angle.",
+1743:			"Compliance and Publisher verify claims, approvals, formatting, and release readiness",
+1747:			"Strategist: decide priority, offer angle, channel sequence, and launch wave",
+1870:function isProviderLikelyConfigured(aiContext) {
+1871:	const records = asObject(aiContext?.controlCenter?.records);
+1888:	const readiness = asObject(state.data.readiness);
+1889:	const readinessDashboard = asObject(readiness.dashboard);
+1890:	const connectors = asObject(state.data.integrations);
+1899:		asObject(activity.marketing_insights) ||
+1908:	const recommendations = asArray(learning.recommendations || insights.recommendations);
+1909:	const nextBestActions = asArray(overviewBlock.next_best_actions || readinessDashboard.next_best_actions);
+1910:	const criticalGaps = asArray(readinessDashboard.priorities?.critical || readiness.priorities?.critical);
+1911:	const importantGaps = asArray(readinessDashboard.priorities?.important || readiness.priorities?.important);
+1919:				integrations: asArray(item?.integrations)
+1934:		market: state.context.currentMarket || overview.market || "",
+1936:		campaign: state.context.activeCampaign || "Not selected",
+1939:		readinessScore: toNumber(readinessDashboard.readiness_score ?? overview.readiness_score),
+1940:		readinessStatus: asString(readinessDashboard.readiness_status || overview.readiness_status || "unknown"),
+1941:		nextBestActions,
+1942:		criticalGaps,
+1951:		readiness,
+1952:		readinessDashboard,
+1974:		recommendations,
+1981:		learningPatterns: asObject(learning.learning_patterns || insights.learning_patterns),
+1982:		aiRecommendations: asObject(learning.ai_recommendations || insights.ai_recommendations),
+1983:		sourceSummary: asObject(insights.source_summary || learning.source_summary),
+1997:		strategist: ["campaign", "launch campaign", "campaign plan", "marketing campaign", "market entry", "growth plan", "offer strategy", "launch plan"],
+2003:		researcher: ["research", "market trend", "market research", "audience research", "competitor", "positioning gap", "validate", "competitive"],
+2004:		operations: ["task plan", "workflow", "handoff", "approval", "timeline", "execution plan", "route", "publish", "status", "priority", "priorities", "blocking", "blocker", "readiness", "next", "do next"],
+2041:function buildMissingDataNotes(aiContext, lane) {
+2043:	const coverage = aiContext.coverage;
+2060:function buildExecutiveResponse(aiContext) {
+2061:	const topRecommendation = aiContext.recommendations[0];
+2063:	if (aiContext.readinessScore != null) summaryParts.push(`Readiness is ${aiContext.readinessScore}/100 (${aiContext.readinessStatus || "in progress"}).`);
+2064:	if (aiContext.criticalGaps.length) summaryParts.push(`${aiContext.criticalGaps.length} critical gaps are open.`);
+2065:	if (aiContext.recommendations.length) summaryParts.push(`${aiContext.recommendations.length} recommendations available.`);
+2068:		summary: summaryParts.join(" ") || "Project is loaded. Complete integrations to unlock stronger AI guidance.",
+2070:			aiContext.criticalGaps.length ? `Critical gaps: ${aiContext.criticalGaps.slice(0, 4).map(normalizeActionLabel).join(", ")}.` : "No critical readiness gaps flagged.",
+2071:			aiContext.missingIntegrations.length ? `Missing intelligence: ${aiContext.missingIntegrations.slice(0, 4).map((item) => item.label).join(", ")}.` : "Intelligence coverage is solid.",
+2074:		recommendations: [
+2075:			topRecommendation ? `${topRecommendation.title}: ${topRecommendation.action}` : "Connect missing integrations to produce better recommendations.",
+2076:			...aiContext.recommendations.slice(1, 3).map((item) => `${item.title}: ${item.action}`)
+2079:			...aiContext.nextBestActions.slice(0, 4).map((item) => `Resolve ${normalizeActionLabel(item)}.`),
+2080:			...(aiContext.connectorIssues[0] ? [`Fix ${aiContext.connectorIssues[0].label}: ${aiContext.connectorIssues[0].reason}.`] : [])
+2083:			routeSuggestion("Setup", "setup", "Close missing project basics, goals, and audience inputs."),
+2084:			routeSuggestion("Integrations", "integrations", "Reconnect data sources and improve intelligence coverage."),
+2087:		missingData: buildMissingDataNotes(aiContext, "executive")
+2091:function buildContentResponse(aiContext) {
+2092:	const top = aiContext.topContent[0];
+2093:	const weak = aiContext.weakContent[0];
+2094:	const bestFormat = aiContext.learningPatterns.best_formats?.label;
+2095:	const bestPlatform = aiContext.learningPatterns.best_platforms?.label;
+2107:		recommendations: [
+2122:		missingData: buildMissingDataNotes(aiContext, "content")
+2126:function buildSeoResponse(aiContext) {
+2127:	const seo = aiContext.seo;
+2128:	const website = aiContext.website;
+2143:		recommendations: [
+2146:			aiContext.recommendations.find((item) => item.domain === "seo")?.action || ""
+2151:			"Review top landing pages for stronger offer clarity and conversion flow."
+2155:			routeSuggestion("Integrations", "integrations", "Reconnect GA4 or Search Console."),
+2158:		missingData: buildMissingDataNotes(aiContext, "seo")
+2162:function buildAdsResponse(aiContext) {
+2163:	const paid = aiContext.paid;
+2164:	const bestCampaign = asArray(paid.best_campaigns)[0];
+2165:	const weakCampaign = asArray(paid.weak_campaigns)[0];
+2170:			? `Paid media live with ${formatCurrency(paid.summary.spend, aiContext.currency)} tracked spend.`
+2173:			bestCampaign ? `Best campaign: ${extractTopMessage(bestCampaign)}.` : "No winning campaign measured yet.",
+2174:			weakCampaign ? `Weak campaign: ${extractTopMessage(weakCampaign)}.` : "No weak campaign list yet.",
+2178:		recommendations: [
+2181:			aiContext.recommendations.find((item) => item.domain === "paid")?.action || ""
+2185:			weakCampaign ? `Rebuild hook and CTA for ${extractTopMessage(weakCampaign)}.` : "Audit campaign naming and creative mapping.",
+2190:			routeSuggestion("Integrations", "integrations", "Connect or reconnect paid reporting platforms."),
+2193:		missingData: buildMissingDataNotes(aiContext, "ads")
+2197:function buildResearchResponse(aiContext) {
+2202:			aiContext.missingIntegrations.length ? `Missing intelligence: ${aiContext.missingIntegrations.map((item) => item.label).join(", ")}.` : "Main intelligence lanes are structurally connected.",
+2203:			aiContext.criticalGaps.length ? `Critical gaps affecting research quality: ${aiContext.criticalGaps.slice(0, 4).map(normalizeActionLabel).join(", ")}.` : "No major setup gaps blocking research quality.",
+2204:			aiContext.learningPatterns.best_topics?.label ? `Current system learning: ${aiContext.learningPatterns.best_topics.label}.` : "Learning engine needs more live data."
+2206:		recommendations: [
+2208:			"Validate audience-language fit and offer clarity before expanding execution volume.",
+2209:			"Prioritize integrations that unlock attribution and performance evidence over vanity metrics."
+2212:			"Review Setup and tighten goals, audience, competitor, and market assumptions.",
+2217:			routeSuggestion("Setup", "setup", "Strengthen project assumptions, goals, and audience context."),
+2218:			routeSuggestion("Integrations", "integrations", "Increase data coverage and reduce blind spots."),
+2222:			...buildMissingDataNotes(aiContext, "seo"),
+2223:			...buildMissingDataNotes(aiContext, "ads"),
+2224:			...buildMissingDataNotes(aiContext, "content")
+2229:function buildOperationsTaskBlock(aiContext, message) {
+2231:	if (/launch.*campaign|new campaign/.test(query)) {
+2232:		return { title: "Campaign launch task block", owner: "Campaign Studio", steps: ["Define the campaign objective, audience, and offer.", "Choose channels and budget based on current intelligence.", "List required assets and publishing dependencies before launch."] };
+2240:	if (/reconnect|missing tools|missing integrations/.test(query)) {
+2246:function buildOperationsResponse(aiContext, message) {
+2248:	const taskBlock = buildOperationsTaskBlock(aiContext, message);
+2250:	if (/campaign/.test(query)) routeSuggestions.push(routeSuggestion("Campaign Studio", "campaign-studio", "Turn this into a structured launch plan."));
+2255:	if (/reconnect|connect|integration|tool|sync/.test(query)) routeSuggestions.push(routeSuggestion("Integrations", "integrations", "Reconnect data sources and restore intelligence coverage."));
+2256:	if (/ads|campaign scale|roas|creative/.test(query)) routeSuggestions.push(routeSuggestion("Ads Manager", "ads-manager", "Review live paid performance and action the next media move."));
+2262:			aiContext.criticalGaps.length ? `Unresolved critical gaps: ${aiContext.criticalGaps.slice(0, 3).map(normalizeActionLabel).join(", ")}.` : "No critical gap is blocking this operation.",
+2263:			aiContext.missingIntegrations.length ? "Intelligence coverage gaps may reduce execution quality." : "Core intelligence is available for routing."
+2265:		recommendations: [
+2267:			aiContext.recommendations[0]?.action || "Use the current recommendation stack to choose the first high-impact step."
+2272:		missingData: buildMissingDataNotes(aiContext, "content")
+2276:function buildResponseForMode(aiContext, classified, message) {
+2281:			return buildContentResponse(aiContext);
+2283:			return buildSeoResponse(aiContext);
+2285:			return buildAdsResponse(aiContext);
+2287:			return buildResearchResponse(aiContext);
+2289:			return buildOperationsResponse(aiContext, message);
+2293:				? buildOperationsResponse(aiContext, message)
+2294:				: buildExecutiveResponse(aiContext);
+2307:	fetchProjectInsights,
+2308:	fetchProjectLearning,
+2321:	const needsDashboard = !state.data.overview || !state.data.readiness || !state.data.integrations || !state.data.activity;
+2332:					fetchProjectInsights(projectName),
+2333:					fetchProjectLearning(projectName)
+2346:					learning: learningResult.status === "fulfilled" ? learningResult.value : (learningMissing ? { project: projectName, generated_at: nowIso(), learning_patterns: {}, recommendations: [] } : null),
+2382:	"campaign-studio": "Campaign Studio",
+2386:	integrations: "Integrations",
+2404:	"campaign-studio": "strategist",
+2408:	integrations: "operations",
+2439:	campaign: "campaign-studio",
+2440:	campaigns: "campaign-studio",
+2450:	integration: "integrations",
+2729:	aiContext,
+2753:				categories: aiContext.assetCategories,
+2754:				approved_assets: aiContext.approvedAssets,
+2755:				blockers: aiContext.assetBlockers
+2814:	syncAiWorkflowBridge({ projectName: aiContext.projectName, modeId: resolvedModeId, command: cleanCommand, response });
+2849:function renderControlRoomHeader(aiContext, session, intelligenceStatus, escapeHtml) {
+2850:	const projectLabel = aiContext.projectName || "No project selected";
+2851:	const readinessLabel = aiContext.readinessScore != null ? `${aiContext.readinessScore}/100` : "--";
+2852:	const coverageLabel = aiContext.coverageTotal > 0 ? `${aiContext.coveredCount}/${aiContext.coverageTotal}` : "--";
+2858:	if (aiContext.projectName) caps.push("Campaign planning");
+2859:	if (aiContext.hasLiveIntelligence) caps.push("Performance analysis");
+2860:	if (aiContext.recommendations.length) caps.push(`${aiContext.recommendations.length} recommendations ready`);
+2861:	if (aiContext.topContent.length) caps.push("Content intelligence");
+2862:	if (aiContext.paid?.summary?.spend != null) caps.push("Paid media briefing");
+2863:	if (aiContext.seo?.summary?.impressions != null) caps.push("SEO analysis");
+2887:					<strong>${escapeHtml(readinessLabel)}</strong>
+2895:					<strong>${escapeHtml(aiContext.campaign || "None")}</strong>
+2897:				${aiContext.market ? `<div class="ctrl-room-ctx-chip"><span>Market</span><strong>${escapeHtml(aiContext.market)}</strong></div>` : ""}
+2947:function renderSuggestedPromptsSection(aiContext, session, escapeHtml) {
+2948:	const projectLabel = aiContext.projectName || "this project";
+2986:	const recommendations = normalizeDisplayList(response.recommendations, 4);
+2997:	const hasContent = title || summary || findings.length || recommendations.length || nextActions.length;
+3024:			${recommendations.length ? `
+3028:						${recommendations.map((item) => `<div class="ctrl-response-item"><span>${escapeHtml(item)}</span></div>`).join("")}
+3170:function renderArtifactsPanel(aiContext, session, escapeHtml) {
+3171:	const recommendations = aiContext.recommendations.slice(0, 4);
+3172:	const patterns = Object.entries(asObject(aiContext.learningPatterns))
+3185:	const hasContent = recommendations.length || patterns.length || artifacts.length;
+3191:				<span style="font-size:11px;color:var(--color-text-2);">${recommendations.length} rec${recommendations.length !== 1 ? "s" : ""} · ${patterns.length} patterns</span>
+3206:						${recommendations.map((rec) => {
+3365:function buildSmartRecommendation(aiContext) {
+3366:	if (aiContext.criticalGaps.length) {
+3368:			title: "Close critical readiness gaps before scale",
+3369:			reason: `${aiContext.criticalGaps.length} critical setup gap${aiContext.criticalGaps.length === 1 ? "" : "s"} can block launch quality and downstream automation reliability.`,
+3370:			command: `Review the critical readiness gaps for ${aiContext.projectName || "this project"} and produce a fix plan with owners, order, and dependencies.`,
+3371:			chips: buildImpactChips(["Launch readiness", "Campaign", "Automation"])
+3375:	if (aiContext.assetBlockers.length) {
+3378:			reason: `${aiContext.assetBlockers.length} asset category blocker${aiContext.assetBlockers.length === 1 ? "" : "s"} may reduce content throughput and campaign delivery speed.`,
+3379:			command: `Create an asset unblock plan for ${aiContext.projectName || "this project"}. List missing files, priority, and where each is needed.`,
+3384:	if (aiContext.missingIntegrations.length || aiContext.connectorIssues.length) {
+3385:		const impacted = aiContext.missingIntegrations.length + aiContext.connectorIssues.length;
+3389:			command: `Build an integration recovery plan for ${aiContext.projectName || "this project"}. Prioritize connectors by business impact and data coverage gain.`,
+3390:			chips: buildImpactChips(["Integrations", "Automation", "Launch readiness"])
+3394:	if (!aiContext.campaign || aiContext.campaign === "Not selected") {
+3396:			title: "Define the active campaign operating plan",
+3397:			reason: "A clear campaign context helps every specialist agent generate more precise outputs.",
+3398:			command: `Create a campaign operating brief for ${aiContext.projectName || "this project"} with objective, audience, channels, and first execution wave.`,
+3399:			chips: buildImpactChips(["Campaign", "Content", "Launch readiness"])
+3405:		reason: "Core readiness is stable enough to move into output generation and optimization.",
+3406:		command: `Generate the next high-impact content wave for ${aiContext.projectName || "this project"} based on current readiness and campaign context.`,
+3531:	if (/review|check|compliance|readiness|governance/i.test(asString(tool.label))) return "Review";
+3539:		.replace(/\{campaign\}/g, "active campaign");
+3562:function renderPhase1Header(session, projectName, aiContext, bridgeStatus, escapeHtml) {
+3566:	const languagePlan = getWorkspaceLanguagePlan(aiContext);
+3568:	const readinessLabel = aiContext.readinessScore != null ? `${aiContext.readinessScore}/100` : "Pending";
+3608:					<strong>${escapeHtml(languagePlan.market)}</strong>
+3616:					<strong>${escapeHtml(readinessLabel)}</strong>
+3864:function renderPhase35ToolsPanel(session, projectName, aiContext, escapeHtml) {
+3911:function renderLanguageMarketStrip(aiContext, escapeHtml) {
+3912:        const languagePlan = getWorkspaceLanguagePlan(aiContext);
+3915:        const market = asString(languagePlan.market || "Germany").trim() || "Germany";
+3918:                <div class="aicmd-language-market-strip aicmd-text-only-chip-strip" aria-label="Language and market context">
+3921:                        <span>${escapeHtml(market)}</span>
+3951:function renderAiCommandIntelligenceLayer({ session, projectName, aiContext, bridgeStatus, escapeHtml }) {
+3962:        const source = getSelectedLibrarySource(projectName || aiContext?.projectName || "");
+4034:function renderAiCommandChatFirstShell({ session, projectName, aiContext, bridgeStatus, escapeHtml }) {
+4044:                                        ${renderAiCommandChatWindow({ session, projectName, aiContext, bridgeStatus, escapeHtml })}
+4122:function renderAiCommandChatWindow({ session, projectName, aiContext, bridgeStatus, escapeHtml }) {
+4125:			${renderAiCommandChatTopbar({ session, projectName, aiContext, bridgeStatus, escapeHtml })}
+4127:			${renderAiCommandChatComposer({ session, aiContext, escapeHtml })}
+4132:function renderAiCommandChatTopbar({ session, projectName, aiContext, bridgeStatus, escapeHtml }) {
+4134:	const source = getSelectedLibrarySource(projectName || aiContext?.projectName || "");
+4314:                                                <span>Plan campaign</span>
+4337:                { id: "campaign", label: "Campaign", summary: "Build a review-ready campaign with the full AI Team.", enabled: true },
+4339:                { id: "offer", label: "Offer", summary: "Shape a product offer from pricing, market, and audience context.", enabled: false },
+4342:                { id: "publish", label: "Publish", summary: "Prepare publishing checklist and handoff readiness.", enabled: false }
+4378:        const campaignPackage = asObject(packageInput);
+4380:                ["Concept", asString(campaignPackage.concept)],
+4381:                ["Target audience", asString(campaignPackage.targetAudience || campaignPackage.target_audience)],
+4382:                ["Offer", asString(campaignPackage.offer)]
+4386:                ["Launch phases", asArray(campaignPackage.launchPhases || campaignPackage.launch_phases)],
+4387:                ["Content angles", asArray(campaignPackage.contentAngles || campaignPackage.content_angles)],
+4388:                ["Ad angles", asArray(campaignPackage.adAngles || campaignPackage.ad_angles)],
+4389:                ["Required assets", asArray(campaignPackage.requiredAssets || campaignPackage.required_assets)],
+4390:                ["Review blockers", asArray(campaignPackage.missingBlockers || campaignPackage.missing_blockers)],
+4391:                ["Next actions", asArray(campaignPackage.nextActions || campaignPackage.next_actions)]
+4397:                <div class="aicmd-smart-preview-grid aicmd-smart-campaign-package-grid">
+4419:        if (wizard.type !== "campaign" || !wizard.open) return "";
+4424:        const market = asString(wizard.market || "germany");
+4428:        const audience = asString(wizard.audience || "target-customers");
+4429:        const offer = asString(wizard.offer || "review-ready-offer");
+4437:        const marketOptions = [["germany", "Germany"], ["eu", "EU"], ["mena", "MENA"], ["global", "Global"]];
+4441:        const audienceOptions = [["target-customers", "Target customers"], ["new-buyers", "New buyers"], ["returning-customers", "Returning customers"], ["b2b", "B2B"], ["local", "Local audience"]];
+4442:        const offerOptions = [["review-ready-offer", "Review-ready offer"], ["discount", "Discount"], ["bundle", "Bundle"], ["premium-value", "Premium value"], ["lead-magnet", "Lead magnet"]];
+4500:                                                <strong>4. Premium campaign brief</strong>
+4502:                                                        ${marketOptions.map(([value, label]) => optionButton("market", value, label, market)).join("")}
+4514:                                                        ${audienceOptions.map(([value, label]) => optionButton("audience", value, label, audience)).join("")}
+4517:                                                        ${offerOptions.map(([value, label]) => optionButton("offer", value, label, offer)).join("")}
+4539:                                                                <span><strong>Market</strong>${escapeHtml(titleCase(preview.market || market))}</span>
+4545:                                                        ${renderCampaignPackageMiniPanel(preview.campaignPackage, escapeHtml)}
+4557:                                                                <button type="button" data-aicmd-smart-campaign-action="library">Save to Library</button>
+4558:                                                                <button type="button" data-aicmd-smart-campaign-action="media">Send to Media Studio</button>
+4559:                                                                <button type="button" data-aicmd-smart-campaign-action="governance">Request Governance Review</button>
+4560:                                                                <button type="button" data-aicmd-smart-campaign-action="publishing">Prepare Publishing Handoff</button>
+4561:                                                                <button type="button" data-aicmd-smart-campaign-action="operations">Create Operations Follow-up</button>
+4576:                                                <button class="aicmd-smart-wizard-primary" type="button" data-aicmd-smart-campaign-preview>
+4605:function renderAiCommandComposerAttachments({ session, aiContext, escapeHtml }) {
+4606:        const projectName = aiContext?.projectName || "";
+4670:                                        <small>Strategy, content, media, operations, compliance, customer, campaign and provider-readiness planning.</small>
+4694:                        <div class="aicmd-final-team-readiness">
+4696:                                <span>Library, campaigns, content, customers, governance, integrations and provider readiness are connected as guarded planning context. Execution stays confirmation-gated.</span>
+4702:function renderAiCommandChatComposer({ session, aiContext, escapeHtml }) {
+4728:                                ${renderAiCommandComposerAttachments({ session, aiContext, escapeHtml })}
+4790:                                ${renderLanguageMarketStrip(aiContext, escapeHtml)}
+4826:function renderAiCommandSecondaryTabPanel({ session, projectName, aiContext, bridgeStatus, escapeHtml }) {
+4830:		? renderAiCommandToolsTab({ session, projectName, aiContext, escapeHtml })
+4832:			? renderAiCommandOutputTab({ session, aiContext, escapeHtml })
+4833:			: renderAiCommandFlowTab({ session, aiContext, bridgeStatus, escapeHtml });
+4893:function renderAiCommandToolsTab({ session, projectName, aiContext, escapeHtml }) {
+4931:function renderAiCommandOutputTab({ session, aiContext, escapeHtml }) {
+4936:	const languagePlan = getWorkspaceLanguagePlan(aiContext);
+4973:					<span><strong>Market</strong>${escapeHtml(languagePlan.market)}</span>
+5016:function renderAiCommandFlowTab({ session, aiContext, bridgeStatus, escapeHtml }) {
+5020:	const readiness = aiContext.readinessScore != null ? `${aiContext.readinessScore}/100` : "No score";
+5041:				<span><strong>Readiness</strong>${escapeHtml(readiness)}</span>
+5049:function renderPhase35ReadinessStrip(aiContext, bridgeStatus, escapeHtml) {
+5050:	const providerConfigured = isProviderLikelyConfigured(aiContext);
+5051:	const readinessItems = [
+5061:		<section class="aicmd-v2-readiness-strip">
+5062:			${readinessItems.map((item) => `
+5063:				<span class="aicmd-v2-readiness-chip ${item.className}">
+5071:function renderAiRoomStatusStrip(aiContext, session, bridgeStatus, escapeHtml) {
+5073:	const readiness = aiContext.readinessScore != null ? `${aiContext.readinessScore}/100` : "No score";
+5076:	const integrations = aiContext.coverageTotal > 0 ? `${aiContext.coveredCount}/${aiContext.coverageTotal}` : "0 active";
+5082:			<div><span>Readiness</span><strong>${escapeHtml(readiness)}</strong></div>
+5085:			<div><span>Active integrations</span><strong>${escapeHtml(integrations)}</strong></div>
+5128:        const emptyBody = "Ask what to do next, draft a campaign asset, review a source, prepare a handoff, or coordinate the full AI team.";
+5329:function renderPhase1ContextPanel(state, session, aiContext, escapeHtml) {
+5330:	const projectName = aiContext.projectName;
+5331:	const readiness = aiContext.readinessScore;
+5332:	const languagePlan = getWorkspaceLanguagePlan(aiContext);
+5339:		{ label: "Market", value: languagePlan.market, present: true },
+5345:		{ label: "Readiness", value: readiness != null ? `${readiness}/100` : "No readiness data", present: readiness != null },
+5346:		{ label: "Integrations", value: aiContext.coverageTotal > 0 ? `${aiContext.coveredCount}/${aiContext.coverageTotal} connected` : "No coverage data", present: aiContext.coveredCount > 0 },
+5348:		{ label: "Approved assets", value: aiContext.approvedAssets.length ? `${aiContext.approvedAssets.length} ready` : "No approved assets", present: aiContext.approvedAssets.length > 0 },
+5481:			fetchProjectInsights,
+5482:			fetchProjectLearning,
+5487:		const projectName = asString(selectCurrentProject(state) || "");
+5539:		const payload = asObject(selectProjectPayload(state));
+5541:		const readiness = asObject(payload.readiness?.dashboard || payload.readiness);
+5542:		const operations = asObject(selectOperationsSnapshot(state));
+5544:		const readinessScore = readiness.readiness_score ?? overview.readiness_score ?? null;
+5547:		const aiContext = buildUnifiedAiContext(state, session.intelligence);
+5566:			aiContext,
+5781:                                return text.includes("source") || text.includes("review") || text.includes("brief") || text.includes("campaign");
+5957:                        aiContext,
+5967:                        if (type !== "campaign") {
+5974:                                type: "campaign",
+6007:                                product: "selected product details, offer notes, pricing evidence, and product readiness",
+6015:                                        body: `Define the ${goalLabel.toLowerCase()} objective, target segment, market angle, and campaign promise for ${projectLabel}.`
+6031:                                        body: `Prepare publishing readiness for ${channelLabel}: channel checklist, schedule draft, missing approvals, and handoff requirements.`
+6040:                                title: `${goalLabel} campaign for ${projectLabel}`,
+6041:                                summary: `AI Team preview for a ${goalLabel.toLowerCase()} campaign using ${sourceLabel.toLowerCase()} and optimized for ${channelLabel}.`,
+6045:                                market: asString(wizard.market || "germany"),
+6049:                                audience: asString(wizard.audience || "target-customers"),
+6050:                                offer: asString(wizard.offer || "review-ready-offer"),
+6059:                                                body: `Use ${sourceMeaning}. Produce a review-ready campaign package before any handoff, approval, publishing, sending, CRM update, provider execution, or workflow mutation.`
+6063:                                                body: `Primary objective: ${goalLabel}. Define the audience, buying trigger, objection, proof point, and conversion path for ${projectLabel}.`
+6067:                                                body: `Shape the offer around verified ${sourceLabel.toLowerCase()} information. If pricing, discount, stock, competitor, or claim evidence is missing, mark it as a review blocker.`
+6083:                                                body: `Prepare ${channelLabel} readiness: asset status, copy status, approval status, schedule suggestion, channel dependencies, and final reviewer.`
+6087:                                                body: "Create a follow-up plan for review status, owner, destination handoff, performance check, improvement loop, and next campaign iteration."
+6131:                        const campaignPackage = asObject(body.campaignPackage || body.campaign_package);
+6133:                                campaignPackage.concept ? { label: "Campaign concept", body: asString(campaignPackage.concept) } : null,
+6134:                                campaignPackage.targetAudience ? { label: "Target audience", body: asString(campaignPackage.targetAudience) } : null,
+6135:                                campaignPackage.offer ? { label: "Offer", body: asString(campaignPackage.offer) } : null,
+6136:                                asArray(campaignPackage.launchPhases).length ? { label: "Launch phases", items: asArray(campaignPackage.launchPhases) } : null,
+6137:                                asArray(campaignPackage.contentAngles).length ? { label: "Content angles", items: asArray(campaignPackage.contentAngles) } : null,
+6138:                                asArray(campaignPackage.adAngles).length ? { label: "Ad angles", items: asArray(campaignPackage.adAngles) } : null,
+6139:                                asArray(campaignPackage.requiredAssets).length ? { label: "Required assets", items: asArray(campaignPackage.requiredAssets) } : null,
+6140:                                asArray(campaignPackage.missingBlockers).length ? { label: "Review blockers", items: asArray(campaignPackage.missingBlockers) } : null,
+6141:                                asArray(campaignPackage.nextActions).length ? { label: "Next actions", items: asArray(campaignPackage.nextActions) } : null
+6146:                                title: asString(body.title || fallbackPreview.title || "AI Team campaign preview"),
+6152:                                market: asString(body.market || fallbackPreview.market || ""),
+6156:                                audience: asString(body.audience || campaignPackage.targetAudience || fallbackPreview.audience || ""),
+6157:                                offer: asString(body.offer || campaignPackage.offer || fallbackPreview.offer || ""),
+6160:                                campaignPackage,
+6181:                                        audience: asString(wizard.audience || localPreview.audience || ""),
+6182:                                        offer: asString(wizard.offer || localPreview.offer || ""),
+6183:                                        market: asString(wizard.market || localPreview.market || ""),
+6202:                                console.warn("AI Command backend campaign preview fallback", error);
+6212:                Array.from(document.querySelectorAll("[data-aicmd-smart-campaign-preview]")).forEach((btn) => {
+6214:                                updateStatus("Preparing AI Team campaign preview...");
+6218:                                        type: "campaign",
+6223:                                        type: "smart_campaign_preview",
+6224:                                        outputType: "campaign_package",
+6232:                                        market: asString(preview.market || ""),
+6236:                                        audience: asString(preview.audience || ""),
+6237:                                        offer: asString(preview.offer || ""),
+6240:                                        campaignPackage: asObject(preview.campaignPackage),
+6245:                                        confirmationNote: "Review and route this campaign package through the owning destination workspace before any publishing, sending, approval, task creation, provider execution, or workflow mutation.",
+6246:                                        nextSafeAction: "Review the campaign package, then send it to Media Studio or Publishing.",
+6253:                                updateStatus(preview.backendPreview ? "Backend AI Team preview prepared. Review before any handoff or approval." : "Local campaign preview prepared because backend preview is unavailable.");
+6254:                                showMessage?.(preview.backendPreview ? "Backend AI Team campaign preview is ready for review." : "Campaign preview is ready using the local fallback.");
+6271:                                id: `campaign_handoff_${Date.now()}`,
+6272:                                type: "ai_command_campaign_handoff",
+6284:                                market: asString(preview.market || ""),
+6288:                                audience: asString(preview.audience || ""),
+6289:                                offer: asString(preview.offer || ""),
+6292:                                campaignPackage: asObject(preview.campaignPackage),
+6305:                                window.localStorage?.setItem?.("mh_ai_command_campaign_handoff", payload);
+6307:                                window.sessionStorage?.setItem?.("mh_ai_command_campaign_handoff", payload);
+6310:                                console.warn("Unable to store AI Command campaign handoff", error);
+6318:                                updateStatus("Generate a campaign preview before choosing a review action.");
+6375:                Array.from(document.querySelectorAll("[data-aicmd-smart-campaign-action]")).forEach((btn) => {
+6377:                                const action = asString(btn.getAttribute("data-aicmd-smart-campaign-action") || "");
+6445:                                                const languagePlan = getWorkspaceLanguagePlan?.(aiContext) || {};
+6518:                                        __AI_RUNTIME_TICK(session, aiContext);
+6563:		                        const languagePlan = getWorkspaceLanguagePlan(aiContext);
+6574:		                                market: languagePlan.market,
+6575:		                                marketLanguage: languagePlan.publishLanguage,
+6578:		                                        campaign: aiContext.campaign,
+6579:		                                        readinessScore: aiContext.readinessScore,
+6580:		                                        readinessSummary: aiContext.summary
+6790:					campaign: aiContext.campaign
+7114:				fetchProjectInsights,
+7115:				fetchProjectLearning,
+7734:  analyze(session, aiContext) {
+7750:  decide(session, aiContext) {
+7752:    const intent = this.analyze(session, aiContext);
+7796:  execute(session, aiContext) {
+7798:    const decision = AiCommandBrain.decide(session, aiContext);
+7837:function triggerAiRouter(session, aiContext = {}) {
+7842:    const decision = AiCommandRouter.execute(session, aiContext);
+7860:function safeTriggerAi(session, aiContext = {}) {
+7864:    return triggerAiRouter(session, aiContext);
+7879:function __AI_RUNTIME_TICK(session, aiContext = {}) {
+7886:  const decision = safeTriggerAi(session, aiContext);

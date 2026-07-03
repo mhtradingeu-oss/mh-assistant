@@ -1,0 +1,285 @@
+public/control-center/pages/ai-command.js:149:		placeholder: "Ask the Strategist to plan a campaign, map launch phases, review channel priorities, or define the offer strategy…",
+public/control-center/pages/ai-command.js:162:		placeholder: "Ask the Content Writer to draft captions, hooks, landing copy, or campaign messages…",
+public/control-center/pages/ai-command.js:175:		placeholder: "Ask the Media Director to define visual direction, prepare a creative brief, or review brand consistency…",
+public/control-center/pages/ai-command.js:188:		placeholder: "Ask the Video Lead to write a reel script, map short-form strategy, or outline the next video concept…",
+public/control-center/pages/ai-command.js:201:		placeholder: "Ask the Publisher to review publishing readiness, check scheduling, or prepare a handoff package…",
+public/control-center/pages/ai-command.js:214:		placeholder: "Ask the Ads Optimizer to draft ad copy, review targeting angles, or plan a paid campaign structure…",
+public/control-center/pages/ai-command.js:227:		placeholder: "Ask the SEO & Insights Analyst to review performance, suggest SEO improvements, or identify top content patterns…",
+public/control-center/pages/ai-command.js:240:		placeholder: "Ask the Compliance Reviewer to check claims, approval risks, publishing safety, and governance notes…",
+public/control-center/pages/ai-command.js:253:		placeholder: "Ask the Operations Lead to turn this into tasks, workflow steps, or handoffs…",
+public/control-center/pages/ai-command.js:266:		placeholder: "Ask the Customer Operations Lead to summarize a customer thread, draft a safe reply, prepare a ticket draft, check SLA risk, or route an escalation for review…",
+public/control-center/pages/ai-command.js:279:		placeholder: "Ask the Sales / CRM Lead to qualify a lead, draft outreach, plan follow-ups, summarize CRM context, or prepare a sales handoff for review…",
+public/control-center/pages/ai-command.js:707:function humanizeValue(value, fallback = "") {
+public/control-center/pages/ai-command.js:708:	if (value == null) return fallback;
+public/control-center/pages/ai-command.js:711:		return clean === "[object Object]" ? fallback : clean;
+public/control-center/pages/ai-command.js:717:		return value.map((item) => humanizeValue(item)).filter(Boolean).join("; ") || fallback;
+public/control-center/pages/ai-command.js:739:			.join("; ") || fallback;
+public/control-center/pages/ai-command.js:741:	return fallback;
+public/control-center/pages/ai-command.js:817:function toNumber(value, fallback = null) {
+public/control-center/pages/ai-command.js:818:	if (value == null || value === "") return fallback;
+public/control-center/pages/ai-command.js:820:	return Number.isFinite(parsed) ? parsed : fallback;
+public/control-center/pages/ai-command.js:1061:			reason: "AI response guidance bridge is not connected yet (API function unavailable)."
+public/control-center/pages/ai-command.js:1101:function summarizeAiCommandSessionIntent(value = "", fallback = "Session") {
+public/control-center/pages/ai-command.js:1107:        if (!text) return fallback;
+public/control-center/pages/ai-command.js:1592:			safetyLabel: "No analytics mutation or fake metrics. Guidance only."
+public/control-center/pages/ai-command.js:2055:		notes.push("Paid platform reporting not connected — ROAS guidance is limited.");
+public/control-center/pages/ai-command.js:2171:			: "Paid reporting not connected — connect Meta Ads, Google Ads, or TikTok Ads.",
+public/control-center/pages/ai-command.js:2496:function normalizeAiInboundSpecialistId(value, fallback = "operations") {
+public/control-center/pages/ai-command.js:2497:	const fallbackId = MODE_ID_ALIASES[getAiRoomRoleId(fallback)] || getAiRoomRoleId(fallback);
+public/control-center/pages/ai-command.js:2498:	const raw = getAiRoomRoleId(value || fallbackId);
+public/control-center/pages/ai-command.js:2502:	return SPECIALIST_DEFS.some((item) => item.id === finalId) ? finalId : fallbackId;
+public/control-center/pages/ai-command.js:2511:	const fallbackRoute = sourcePage === "workspace" ? "workflows" : sourcePage;
+public/control-center/pages/ai-command.js:2512:	const fallbackLabel = sourceLabel || routeLabel(fallbackRoute);
+public/control-center/pages/ai-command.js:2517:		const route = normalizeAiInboundSourcePage(rawRoute || stringRoute || fallbackRoute);
+public/control-center/pages/ai-command.js:2518:		const label = firstAiInboundText(record.label, record.title, record.name) || routeLabel(route) || fallbackLabel;
+public/control-center/pages/ai-command.js:2525:		route: fallbackRoute,
+public/control-center/pages/ai-command.js:2526:		label: fallbackLabel,
+public/control-center/pages/ai-command.js:2527:		reason: `Return to ${fallbackLabel} after AI Team review.`
+public/control-center/pages/ai-command.js:2739:	if (typeof executeProjectAiCommand !== "function") throw new Error("AI command service is unavailable.");
+public/control-center/pages/ai-command.js:2831:    const fallback =
+public/control-center/pages/ai-command.js:2838:      ...fallback,
+public/control-center/pages/ai-command.js:2840:      name: asString(member.name || fallback.name || member.role || "AI Specialist"),
+public/control-center/pages/ai-command.js:2841:      role: asString(member.role || fallback.role || id),
+public/control-center/pages/ai-command.js:2842:      purpose: asString(member.purpose || member.description || fallback.purpose || "Support the current operating context."),
+public/control-center/pages/ai-command.js:2843:      bestUse: asString(member.bestUse || member.best_use || fallback.bestUse || "Use when this specialist owns the next step."),
+public/control-center/pages/ai-command.js:3246:function buildConversationWorkContext(session, fallbackPrompt = "") {
+public/control-center/pages/ai-command.js:3267:                fallbackPrompt ||
+public/control-center/pages/ai-command.js:3298:function buildConversationWorkPrompt(session, outputType, fallbackPrompt = "") {
+public/control-center/pages/ai-command.js:3299:        const context = buildConversationWorkContext(session, fallbackPrompt);
+public/control-center/pages/ai-command.js:3319:function setPreviewFromConversation({ session, intent, fallbackPrompt, projectName }) {
+public/control-center/pages/ai-command.js:3320:        const workPrompt = buildConversationWorkPrompt(session, intent, fallbackPrompt);
+public/control-center/pages/ai-command.js:3328:        const context = buildConversationWorkContext(session, fallbackPrompt);
+public/control-center/pages/ai-command.js:3578:				<span class="aicmd-v2-chat-bridge ${safeBridgeStatus.available ? "is-available" : "is-unavailable"}">
+public/control-center/pages/ai-command.js:3635:	const plannedSpecialists = AI_ROOM_PLANNED_SPECIALISTS.map((item) => `
+public/control-center/pages/ai-command.js:3636:		<div class="aicmd-room-member aicmd-room-member-planned" aria-disabled="true">
+public/control-center/pages/ai-command.js:3698:			<div class="aicmd-room-planned-specialists" aria-label="Additional specialists planned">
+public/control-center/pages/ai-command.js:3699:				<span class="aicmd-room-planned-title">Planned lanes, not active specialists</span>
+public/control-center/pages/ai-command.js:3700:				${plannedSpecialists}
+public/control-center/pages/ai-command.js:4014:                                <span class="aicmd-chatfirst-pill ${safeBridgeStatus.available ? "is-available" : "is-planned"}">${escapeHtml(bridgeLabel)}</span>
+public/control-center/pages/ai-command.js:4104:				<span class="aicmd-chatfirst-status ${safeBridgeStatus.available ? "is-available" : "is-unavailable"}">${escapeHtml(bridgeLabel)}</span>
+public/control-center/pages/ai-command.js:4149:				<span class="aicmd-chatfirst-pill ${safeBridgeStatus.available ? "is-available" : "is-planned"}">${escapeHtml(safeBridgeStatus.available ? "Connected" : "Guarded")}</span>
+public/control-center/pages/ai-command.js:4187:				<div class="aicmd-chatfirst-planned-list" aria-label="Planned specialists">
+public/control-center/pages/ai-command.js:4189:						<div class="aicmd-chatfirst-specialist-option is-planned" aria-disabled="true">
+public/control-center/pages/ai-command.js:4221:        const fallbackMessages = !selectedMessages.length && selectedResponses.length
+public/control-center/pages/ai-command.js:4243:        const conversationMessages = session.isFreshAiChatSession ? [] : (selectedMessages.length ? selectedMessages : fallbackMessages);
+public/control-center/pages/ai-command.js:4338:                { id: "write", label: "Write", summary: "Prepare documents, copy, agreements, or presentation drafts.", enabled: false },
+public/control-center/pages/ai-command.js:4339:                { id: "offer", label: "Offer", summary: "Shape a product offer from pricing, market, and audience context.", enabled: false },
+public/control-center/pages/ai-command.js:4340:                { id: "lead", label: "Lead", summary: "Prepare lead discovery and outreach workflow drafts.", enabled: false },
+public/control-center/pages/ai-command.js:4341:                { id: "media", label: "Media", summary: "Create a media brief, storyboard, and production direction.", enabled: false },
+public/control-center/pages/ai-command.js:4342:                { id: "publish", label: "Publish", summary: "Prepare publishing checklist and handoff readiness.", enabled: false }
+public/control-center/pages/ai-command.js:4357:                                                class="aicmd-smart-action${action.enabled ? "" : " is-planned"}"
+public/control-center/pages/ai-command.js:4360:                                                ${action.enabled ? "" : "disabled"}
+public/control-center/pages/ai-command.js:4538:                                                                <span><strong>Status</strong>${escapeHtml(preview.backendPreview ? "Backend preview" : "Local fallback")}</span>
+public/control-center/pages/ai-command.js:4735:                                                placeholder="Ask anything"
+public/control-center/pages/ai-command.js:4747:                                        <button id="aicmdV2AskBtn" class="aicmd-chatfirst-send aicmd-final-send" type="button" ${isGenerating ? "disabled" : ""} title="Ask AI Team">
+public/control-center/pages/ai-command.js:4853:				<span class="aicmd-chatfirst-pill ${safeBridgeStatus.available ? "is-available" : "is-planned"}">${escapeHtml(safeBridgeStatus.available ? "Chat ready" : "Preview guarded")}</span>
+public/control-center/pages/ai-command.js:4878:			<div class="aicmd-chatfirst-planned-grid" aria-label="Planned specialists">
+public/control-center/pages/ai-command.js:4880:					<div class="aicmd-chatfirst-team-card is-planned" aria-disabled="true">
+public/control-center/pages/ai-command.js:5053:		{ label: "Voice input", value: "Coming", className: "is-planned" },
+public/control-center/pages/ai-command.js:5054:		{ label: "Team chat", value: bridgeStatus.available ? "AI ready" : "Coming", className: bridgeStatus.available ? "is-available" : "is-planned" },
+public/control-center/pages/ai-command.js:5055:		{ label: "Media gen", value: "Coming", className: "is-planned" },
+public/control-center/pages/ai-command.js:5056:		{ label: "GPU video", value: "Coming", className: "is-planned" },
+public/control-center/pages/ai-command.js:5057:		{ label: "Image prompt generation", value: providerConfigured ? "Provider may be ready" : "Provider dependent", className: providerConfigured ? "is-available" : "is-planned" }
+public/control-center/pages/ai-command.js:5171:        const fallbackSelectedResponses = !selectedMessages.length && selectedResponses.length
+public/control-center/pages/ai-command.js:5190:        const conversationMessages = selectedMessages.length ? selectedMessages : fallbackSelectedResponses;
+public/control-center/pages/ai-command.js:5199:                                <span class="aicmd-v2-chat-bridge ${safeBridgeStatus.available ? "is-available" : "is-unavailable"}">${escapeHtml(bridgeLabel)}</span>
+public/control-center/pages/ai-command.js:5578:		const setPreviewFromIntent = (intent, fallbackPrompt = "", options = {}) => {
+public/control-center/pages/ai-command.js:5579:			const value = asString(input?.value || session.draftMessage || fallbackPrompt || "").trim();
+public/control-center/pages/ai-command.js:5804:                        updateStatus(open ? `${reason} opened. Choose temporary file context, trusted Library source, planned product context, or current project context.` : `${reason} closed.`);
+public/control-center/pages/ai-command.js:5844:                                        updateStatus("Direct product/SKU source selection is planned. Use a trusted Library source or paste product details for now.");
+public/control-center/pages/ai-command.js:5845:                                        showMessage?.("Product/SKU selector is planned. Current safe options: Library source, uploaded filename context, project context, or manual product details.");
+public/control-center/pages/ai-command.js:5968:                                updateStatus("This Smart Action is planned. Campaign Builder is available first.");
+public/control-center/pages/ai-command.js:6129:                function normalizeBackendCampaignPreview(payload = {}, fallbackPreview = {}) {
+public/control-center/pages/ai-command.js:6145:                                ...asObject(fallbackPreview),
+public/control-center/pages/ai-command.js:6146:                                title: asString(body.title || fallbackPreview.title || "AI Team campaign preview"),
+public/control-center/pages/ai-command.js:6147:                                summary: asString(body.summary || fallbackPreview.summary || ""),
+public/control-center/pages/ai-command.js:6148:                                source: asString(body.source_type || body.source || fallbackPreview.source || ""),
+public/control-center/pages/ai-command.js:6149:                                sourceLabel: asString(body.source_label || fallbackPreview.sourceLabel || fallbackPreview.source || ""),
+public/control-center/pages/ai-command.js:6150:                                goal: asString(body.goal || fallbackPreview.goal || ""),
+public/control-center/pages/ai-command.js:6151:                                channel: asString(body.channel || fallbackPreview.channel || ""),
+public/control-center/pages/ai-command.js:6152:                                market: asString(body.market || fallbackPreview.market || ""),
+public/control-center/pages/ai-command.js:6153:                                language: asString(body.language || fallbackPreview.language || ""),
+public/control-center/pages/ai-command.js:6154:                                format: asString(body.format || fallbackPreview.format || ""),
+public/control-center/pages/ai-command.js:6155:                                deadline: asString(body.deadline || fallbackPreview.deadline || ""),
+public/control-center/pages/ai-command.js:6156:                                audience: asString(body.audience || campaignPackage.targetAudience || fallbackPreview.audience || ""),
+public/control-center/pages/ai-command.js:6157:                                offer: asString(body.offer || campaignPackage.offer || fallbackPreview.offer || ""),
+public/control-center/pages/ai-command.js:6158:                                productFocus: asString(body.product_focus || body.productFocus || fallbackPreview.productFocus || ""),
+public/control-center/pages/ai-command.js:6159:                                complianceSensitivity: asString(body.compliance_sensitivity || body.complianceSensitivity || fallbackPreview.complianceSensitivity || ""),
+public/control-center/pages/ai-command.js:6164:                                        : asString(fallbackPreview.safety || "Preview only."),
+public/control-center/pages/ai-command.js:6202:                                console.warn("AI Command backend campaign preview fallback", error);
+public/control-center/pages/ai-command.js:6206:                                        backendFallbackReason: asString(error?.message || "Backend preview unavailable")
+public/control-center/pages/ai-command.js:6249:                                        backendFallbackReason: asString(preview.backendFallbackReason || "")
+public/control-center/pages/ai-command.js:6252:                                persistSessionDraft(sessionKey, session, preview.backendPreview ? "Campaign Builder backend preview prepared" : "Campaign Builder local fallback preview prepared");
+public/control-center/pages/ai-command.js:6253:                                updateStatus(preview.backendPreview ? "Backend AI Team preview prepared. Review before any handoff or approval." : "Local campaign preview prepared because backend preview is unavailable.");
+public/control-center/pages/ai-command.js:6254:                                showMessage?.(preview.backendPreview ? "Backend AI Team campaign preview is ready for review." : "Campaign preview is ready using the local fallback.");
+public/control-center/pages/ai-command.js:6296:                                backend_fallback_reason: asString(preview.backendFallbackReason || ""),
+public/control-center/pages/ai-command.js:6399:			        if (sendBtn && !sendBtn.disabled) {
+public/control-center/pages/ai-command.js:6526:		                        showMessage?.("AI chat route is not connected yet.");
+public/control-center/pages/ai-command.js:6692:                                const fallback = asString(input?.value || session.draftMessage || "").trim();
+public/control-center/pages/ai-command.js:6696:                                        fallbackPrompt: fallback,
+public/control-center/pages/ai-command.js:6715:                                const fallback = value
+public/control-center/pages/ai-command.js:6721:                                        fallbackPrompt: fallback,
+public/control-center/pages/ai-command.js:6738:                                const fallback = value
+public/control-center/pages/ai-command.js:6744:                                        fallbackPrompt: fallback,
+public/control-center/pages/ai-command.js:6762:                                const fallback = value
+public/control-center/pages/ai-command.js:6768:                                        fallbackPrompt: fallback,
+public/control-center/pages/ai-command.js:6814:					updateStatus("Smart tool drawer is unavailable. Refresh AI Command and try again.");
+public/control-center/pages/ai-command.js:6906:		                const fallback = latestResponse?.prompt || asString(input?.value || session.draftMessage || "");
+public/control-center/pages/ai-command.js:6910:		                        fallbackPrompt: fallback,
+public/control-center/api.js:229:    normalized === "api.response.json.fallback.done" ||
+public/control-center/api.js:230:    normalized === "api.response.json.fallback.error" ||
+public/control-center/api.js:231:    normalized === "api.response.json.fallback.timeout" ||
+public/control-center/api.js:360:          let fallbackTimer = null;
+public/control-center/api.js:361:          const fallbackPayload = await Promise.race([
+public/control-center/api.js:364:              fallbackTimer = setTimeout(() => {
+public/control-center/api.js:365:                const fallbackTimeoutError = new Error(`JSON fallback timed out after ${timeoutMs}ms.`);
+public/control-center/api.js:366:                fallbackTimeoutError.endpoint = endpoint;
+public/control-center/api.js:367:                fallbackTimeoutError.isTimeout = true;
+public/control-center/api.js:368:                fallbackTimeoutError.parseStage = "api.response.json.fallback.timeout";
+public/control-center/api.js:369:                reject(fallbackTimeoutError);
+public/control-center/api.js:373:            if (fallbackTimer) {
+public/control-center/api.js:374:              clearTimeout(fallbackTimer);
+public/control-center/api.js:378:          const fallbackBodyLength = JSON.stringify(fallbackPayload || null).length;
+public/control-center/api.js:380:          emitApiRuntimeTrace("api.response.json.fallback.done", {
+public/control-center/api.js:384:            bodyLength: fallbackBodyLength,
+public/control-center/api.js:389:            mode: "json-fallback",
+public/control-center/api.js:390:            payload: fallbackPayload,
+public/control-center/api.js:391:            bodyLength: fallbackBodyLength,
+public/control-center/api.js:392:            parseStage: "api.response.json.fallback.done"
+public/control-center/api.js:394:        } catch (fallbackError) {
+public/control-center/api.js:395:          const fallbackParseStage = fallbackError?.isTimeout
+public/control-center/api.js:396:            ? "api.response.json.fallback.timeout"
+public/control-center/api.js:397:            : "api.response.json.fallback.error";
+public/control-center/api.js:399:          emitApiRuntimeTrace("api.response.json.fallback.error", {
+public/control-center/api.js:404:            message: fallbackError?.message || "JSON fallback failed"
+public/control-center/api.js:415:            parseStage: fallbackParseStage,
+public/control-center/api.js:516:async function parseJson(response, fallbackMessage = "Request failed", requestMeta = {}) {
+public/control-center/api.js:523:  if (bodyReadResult?.mode === "json-fallback") {
+public/control-center/api.js:525:    parseStage = String(bodyReadResult.parseStage || "api.response.json.fallback.done");
+public/control-center/api.js:553:      `${fallbackMessage} (${response.status})`;
+public/control-center/api.js:577:    const message = String(payload.error || fallbackMessage);
+public/control-center/api.js:705:async function getJson(path, fallbackMessage, timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS, requestOptions = {}) {
+public/control-center/api.js:712:  return parseJson(response, fallbackMessage, {
+public/control-center/api.js:723:async function sendRawJson(path, method, body, fallbackMessage, timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS) {
+public/control-center/api.js:738:      const parseError = new Error(fallbackMessage || "Response was not valid JSON.");
+public/control-center/api.js:752:    const message = String(payload?.error || payload?.message || fallbackMessage || "Request failed").trim();
+public/control-center/api.js:763:async function sendJson(path, method, body, fallbackMessage, timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS) {
+public/control-center/api.js:771:  return parseJson(response, fallbackMessage, {
+public/control-center/api.js:781:async function sendForm(path, formData, fallbackMessage, timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS) {
+public/control-center/api.js:796:  return parseJson(response, fallbackMessage, {
+public/control-center/api.js:1057:    console.warn("Using fallback projects list:", error.message);
+public/control-center/api.js:1062:      fallback: true
+public/control-center/api.js:1129:        const fallbackProjects = await fetchProjects();
+public/control-center/api.js:1130:        const fallbackItems = Array.isArray(fallbackProjects?.items) ? fallbackProjects.items : [];
+public/control-center/api.js:1131:        const projectExists = fallbackItems.some((item) => {
+public/control-center/api.js:1143:      } catch (fallbackError) {
+public/control-center/api.js:1150:          message: String(fallbackError?.message || "Failed to verify project fallback")
+runtime/orchestrator-service/server.js:404:      error: `Protected write routes are disabled until ${CONTROL_WRITE_KEY_ENV} is configured on the server.`
+runtime/orchestrator-service/server.js:471:      error: `Protected read routes are disabled until ${CONTROL_WRITE_KEY_ENV} is configured on the server.`
+runtime/orchestrator-service/server.js:929:function sanitizeErrorMessage(rawMessage, fallbackMessage) {
+runtime/orchestrator-service/server.js:930:  const fallback = String(fallbackMessage || 'Request failed').trim() || 'Request failed';
+runtime/orchestrator-service/server.js:933:    return fallback;
+runtime/orchestrator-service/server.js:938:function getErrorStatusCode(error, fallbackStatus = 500) {
+runtime/orchestrator-service/server.js:940:    error?.statusCode || error?.status || error?.response?.status || fallbackStatus
+runtime/orchestrator-service/server.js:944:    return fallbackStatus;
+runtime/orchestrator-service/server.js:948:    return fallbackStatus;
+runtime/orchestrator-service/server.js:1249:  if (telemetryEntry.legacy_fallback_hit) {
+runtime/orchestrator-service/server.js:1377:    legacy_fallback_hit: legacyHit,
+runtime/orchestrator-service/server.js:1385:      legacy_fallback_read: !!readPolicy.legacyFallbackRead
+runtime/orchestrator-service/server.js:1389:  telemetryEntry.fallback_reason = classifyImmediateFallbackReason(telemetryEntry);
+runtime/orchestrator-service/server.js:1450:        legacyFallbackRead: !!resolution.featureFlags.legacy_fallback_read,
+runtime/orchestrator-service/server.js:1493:    fallbackRoot: resolution.legacyRoot,
+runtime/orchestrator-service/server.js:1509:      legacyBase: paths.fallbackRoot,
+runtime/orchestrator-service/server.js:1758:  if (!readEntry || readEntry.selected_root !== 'legacy' || !readEntry.legacy_fallback_hit) {
+runtime/orchestrator-service/server.js:1805:    fallback_hit_count: 0,
+runtime/orchestrator-service/server.js:1806:    fallback_rate: 0,
+runtime/orchestrator-service/server.js:1807:    fallback_causes: {
+runtime/orchestrator-service/server.js:1848:    if (entry.selected_root === 'legacy' && entry.legacy_fallback_hit) {
+runtime/orchestrator-service/server.js:1849:      stats.fallback_hit_count += 1;
+runtime/orchestrator-service/server.js:1852:      if (!Object.prototype.hasOwnProperty.call(stats.fallback_causes, cause)) {
+runtime/orchestrator-service/server.js:1853:        stats.fallback_causes.unresolved_risk += 1;
+runtime/orchestrator-service/server.js:1855:        stats.fallback_causes[cause] += 1;
+runtime/orchestrator-service/server.js:1862:  let fallbackHits = 0;
+runtime/orchestrator-service/server.js:1869:    stats.fallback_rate = stats.read_events > 0
+runtime/orchestrator-service/server.js:1870:      ? Number((stats.fallback_hit_count / stats.read_events).toFixed(4))
+runtime/orchestrator-service/server.js:1875:    fallbackHits += stats.fallback_hit_count;
+runtime/orchestrator-service/server.js:1876:    historicalFallbacks += stats.fallback_causes.historical_artifact;
+runtime/orchestrator-service/server.js:1877:    unresolvedStructuralMismatches += stats.fallback_causes.structural_mismatch;
+runtime/orchestrator-service/server.js:1879:      stats.fallback_causes.parity_gap +
+runtime/orchestrator-service/server.js:1880:      stats.fallback_causes.missing_canonical_write +
+runtime/orchestrator-service/server.js:1881:      stats.fallback_causes.policy_or_config_mismatch;
+runtime/orchestrator-service/server.js:1885:  const fallbackRate = totalReads > 0 ? fallbackHits / totalReads : 0;
+runtime/orchestrator-service/server.js:1886:  const historicalFallbackRate = fallbackHits > 0 ? historicalFallbacks / fallbackHits : 0;
+runtime/orchestrator-service/server.js:1893:    fallbackRate <= 0.15 &&
+runtime/orchestrator-service/server.js:1901:    fallbackRate <= 0.4 &&
+runtime/orchestrator-service/server.js:1917:      fallback_hit_count: fallbackHits,
+runtime/orchestrator-service/server.js:1919:      fallback_rate: Number(fallbackRate.toFixed(4)),
+runtime/orchestrator-service/server.js:1920:      fallback_historical_rate: Number(historicalFallbackRate.toFixed(4)),
+runtime/orchestrator-service/server.js:1945:    fallback_hit_count: 0,
+runtime/orchestrator-service/server.js:1953:    aggregate.fallback_hit_count += summary.totals.fallback_hit_count;
+runtime/orchestrator-service/server.js:1962:  aggregate.fallback_rate = totalReads > 0
+runtime/orchestrator-service/server.js:1963:    ? Number((aggregate.fallback_hit_count / totalReads).toFixed(4))
+runtime/orchestrator-service/server.js:2406:      'fake packaging',
+runtime/orchestrator-service/server.js:2407:      'fake product color swap'
+runtime/orchestrator-service/server.js:2737:  // TODO:
+runtime/orchestrator-service/server.js:4106:function normalizePublishingJobStatus(value, fallback = 'draft') {
+runtime/orchestrator-service/server.js:4109:  if (!normalized) return fallback;
+runtime/orchestrator-service/server.js:4131:  return fallback;
+runtime/orchestrator-service/server.js:4355:      connector_error: error.message || 'Connector payload unavailable'
+runtime/orchestrator-service/server.js:4418:  const fallbackStatus = scheduledFor ? 'scheduled' : 'draft';
+runtime/orchestrator-service/server.js:4430:    status: normalizePublishingJobStatus(input.status, existing.status || fallbackStatus),
+runtime/orchestrator-service/server.js:5142:    lines.push(`No product source is available. Do not invent a fake product.`);
+runtime/orchestrator-service/server.js:5285:    no_fake_product_visuals: true,
+runtime/orchestrator-service/server.js:5347:    lines.push(`No real product source is available. Do not invent a fake product.`);
+runtime/orchestrator-service/server.js:5390:function readJsonFile(filePath, fallback = []) {
+runtime/orchestrator-service/server.js:5392:    if (!fs.existsSync(filePath)) return fallback;
+runtime/orchestrator-service/server.js:5394:    if (!raw) return fallback;
+runtime/orchestrator-service/server.js:5397:    console.warn(`[server] readJsonFile: non-fatal read/parse error for ${filePath}, returning fallback. Error: ${err.message}`);
+runtime/orchestrator-service/server.js:5398:    return fallback;
+runtime/orchestrator-service/server.js:6162:    if (!signal || signal.fallback) return null;
+runtime/orchestrator-service/server.js:6385:  const fallback = options.fallback;
+runtime/orchestrator-service/server.js:6389:  const canonicalValue = canonicalExists ? normalize(readJsonFile(canonicalPath, fallback)) : null;
+runtime/orchestrator-service/server.js:6397:    const legacyValue = normalize(readJsonFile(legacyPath, fallback));
+runtime/orchestrator-service/server.js:6440:  writeJsonFile(canonicalPath, fallback);
+runtime/orchestrator-service/server.js:6442:    value: fallback,
+runtime/orchestrator-service/server.js:6513:    const fallbackValue = candidates
+runtime/orchestrator-service/server.js:6517:    const entry = foundEntry || (fallbackValue ? { value: fallbackValue } : {});
+runtime/orchestrator-service/server.js:6522:      value: normalizeSetupTextValue(entry.value || fallbackValue),
+runtime/orchestrator-service/server.js:6623:    fallback: buildDefaultBrandProfile(safeProject, projectData)
+runtime/orchestrator-service/server.js:6630:    fallback: [],
+runtime/orchestrator-service/server.js:6638:    fallback: buildSourceOfTruthRegistry({}),
+runtime/orchestrator-service/server.js:7231:      fallback_in_use: !canonicalExists && legacyExists
+runtime/orchestrator-service/server.js:7236:  const fallbackDependencies = checks.filter((item) => item.fallback_in_use).length;
+runtime/orchestrator-service/server.js:7241:    fallback_dependencies: fallbackDependencies,
+runtime/orchestrator-service/server.js:7244:    recommendation: fallbackDependencies > 0 || mismatches > 0
+runtime/orchestrator-service/server.js:7245:      ? 'Reduce fallback dependencies by keeping canonical files in sync before disabling legacy reads.'
+runtime/orchestrator-service/server.js:8124:    const fallbackStatus = determineIntegrationStatus({
+runtime/orchestrator-service/server.js:8136:            : fallbackStatus === 'connected'
+runtime/orchestrator-service/server.js:8138:              : fallbackStatus,
+runtime/orchestrator-service/server.js:8148:              : fallbackStatus === 'connected'
+runtime/orchestrator-service/server.js:8150:                : fallbackStatus,
+runtime/orchestrator-service/server.js:10824:function sendAssetMutationError(res, error, fallbackMessage) {
+runtime/orchestrator-service/server.js:10827:    error: error?.message || fallbackMessage,
+runtime/orchestrator-service/server.js:10836:    error: fallbackMessage,
+runtime/orchestrator-service/server.js:11183:function normalizeAiCommandPreviewInput(value, fallback = '') {
+runtime/orchestrator-service/server.js:11184:  return String(value || fallback || '').trim();
+runtime/orchestrator-service/server.js:13334:// TODO(phase4a): Keep `/public/media-manager/...` write aliases for active frontend compatibility.
+runtime/orchestrator-service/server.js:13819:  // Use canonical-first candidate resolution with fallback instrumentation
+runtime/orchestrator-service/server.js:13908:      avoid: ['fake claims', 'decorative clutter', 'non-compliant overlays']
+runtime/orchestrator-service/server.js:14033:  function makeBlock(type, fallbackGoal) {
+runtime/orchestrator-service/server.js:14037:    const goal = map.goal || fallbackGoal;
+runtime/orchestrator-service/server.js:14061:        `No fake brand elements.`,
+runtime/orchestrator-service/server.js:14296:      fallback_prompt_pack:
+runtime/orchestrator-service/server.js:14311:  // the required fallback for existing HAIROTICMEN dry-run packages.
+runtime/orchestrator-service/server.js:16891:      const plannedFilename = `${assetId}-${safeSlug}.png`;
+runtime/orchestrator-service/server.js:16892:      const plannedOutputPath = path.join(
+runtime/orchestrator-service/server.js:16895:        plannedFilename
+runtime/orchestrator-service/server.js:16910:        output_path: plannedOutputPath,
+runtime/orchestrator-service/server.js:16911:        filename: plannedFilename,
+runtime/orchestrator-service/server.js:17371:      const plannedFilename = `${assetId}-${safeSlug}.png`;
+runtime/orchestrator-service/server.js:17372:      const plannedOutputPath = path.join(
+runtime/orchestrator-service/server.js:17375:        plannedFilename
+runtime/orchestrator-service/server.js:17396:        output_path: plannedOutputPath,
+runtime/orchestrator-service/server.js:17397:        filename: plannedFilename,
+runtime/orchestrator-service/server.js:17868:        planned_assets: {
+runtime/orchestrator-service/server.js:19286:            'fake product labels',

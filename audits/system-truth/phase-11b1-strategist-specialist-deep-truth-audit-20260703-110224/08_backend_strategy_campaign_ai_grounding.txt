@@ -1,0 +1,1771 @@
+### frontend API helpers
+public/control-center/api.js:1578:export async function executeProjectAiCommand(projectName, payload = {}) {
+public/control-center/api.js:1591:export async function executeProjectAiChat(projectName, payload = {}) {
+public/control-center/api.js:1607:export async function generateAiCommandCampaignPreview(projectName, payload = {}) {
+public/control-center/api.js:1610:    `/api/ai-command/project/${encodedProject}/campaign-preview`,
+public/control-center/api.js:1613:    "Failed to generate AI Command campaign preview",
+public/control-center/api.js:1618:export async function executeProjectAiGuidance(projectName, payload = {}) {
+public/control-center/api.js:2064:    `/media-manager/project/${encodeURIComponent(projectName)}/campaigns${suffix}`,
+public/control-center/api.js:2065:    "Failed to load campaigns"
+public/control-center/api.js:2076:      `/media-manager/project/${encodeURIComponent(projectName)}/campaigns/${encodeURIComponent(payload.id)}`,
+public/control-center/api.js:2079:      "Failed to update campaign"
+public/control-center/api.js:2084:    `/media-manager/project/${encodeURIComponent(projectName)}/campaigns`,
+public/control-center/api.js:2087:    "Failed to create campaign"
+public/control-center/api.js:2102:  if (params.campaign_id) {
+public/control-center/api.js:2103:    search.set("campaign_id", String(params.campaign_id));
+public/control-center/api.js:2147:  if (params.campaign_id) {
+public/control-center/api.js:2148:    search.set("campaign_id", String(params.campaign_id));
+public/control-center/api.js:2232:    "/api/media/generate-campaign-pack",
+public/control-center/api.js:2235:    "Failed to generate campaign pack"
+public/control-center/pages/ai-command.js:28:        executeProjectAiChat,
+public/control-center/pages/ai-command.js:29:        executeProjectAiGuidance,
+public/control-center/pages/ai-command.js:30:        generateAiCommandCampaignPreview
+public/control-center/pages/ai-command.js:41:                summary: "Campaign concepts, launch plans, channel mix, and offer strategy.",
+public/control-center/pages/ai-command.js:42:                routeHint: "campaign-studio"
+public/control-center/pages/ai-command.js:62:                summary: "Short-form video scripts, motion direction, and reel strategy.",
+public/control-center/pages/ai-command.js:76:                summary: "Ad concepts, targeting angles, platform copy, and paid strategy.",
+public/control-center/pages/ai-command.js:119:	campaign: "strategist",
+public/control-center/pages/ai-command.js:148:		summary: "Campaign concepts, launch plans, channel mix, and offer strategy.",
+public/control-center/pages/ai-command.js:149:		placeholder: "Ask the Strategist to plan a campaign, map launch phases, review channel priorities, or define the offer strategy…",
+public/control-center/pages/ai-command.js:150:		canHelp: ["Draft campaign plans", "Prioritize next actions", "Map launch sequences", "Advise on offer strategy", "Prepare channel briefs"],
+public/control-center/pages/ai-command.js:151:		cannotDo: ["Publish campaigns directly", "Execute workflows automatically", "Approve content", "Set live budgets"],
+public/control-center/pages/ai-command.js:162:		placeholder: "Ask the Content Writer to draft captions, hooks, landing copy, or campaign messages…",
+public/control-center/pages/ai-command.js:187:		summary: "Short-form video scripts, motion direction, and reel strategy.",
+public/control-center/pages/ai-command.js:188:		placeholder: "Ask the Video Lead to write a reel script, map short-form strategy, or outline the next video concept…",
+public/control-center/pages/ai-command.js:189:		canHelp: ["Write video scripts", "Plan short-form strategy", "Define motion direction", "Map video asset requirements", "Prepare video briefs"],
+public/control-center/pages/ai-command.js:213:		summary: "Ad concepts, targeting angles, platform copy, and paid strategy.",
+public/control-center/pages/ai-command.js:214:		placeholder: "Ask the Ads Optimizer to draft ad copy, review targeting angles, or plan a paid campaign structure…",
+public/control-center/pages/ai-command.js:215:		canHelp: ["Draft ad concepts and copy", "Review targeting angles", "Plan paid campaign structure", "Suggest creative variants", "Map platform-specific strategy"],
+public/control-center/pages/ai-command.js:292:		{ label: "Draft a campaign brief", sub: "Map objective, audience, and channels" },
+public/control-center/pages/ai-command.js:294:		{ label: "Suggest the next campaign move", sub: "Based on current project state" }
+public/control-center/pages/ai-command.js:297:		{ label: "Draft campaign captions", sub: "For the active campaign" },
+public/control-center/pages/ai-command.js:303:		{ label: "Write a creative brief", sub: "For the next campaign visual" },
+public/control-center/pages/ai-command.js:305:		{ label: "Map format requirements", sub: "By platform and campaign phase" },
+public/control-center/pages/ai-command.js:309:		{ label: "Write a reel script", sub: "For the current campaign" },
+public/control-center/pages/ai-command.js:311:		{ label: "Outline motion direction", sub: "Align visuals with campaign tone" },
+public/control-center/pages/ai-command.js:321:		{ label: "Draft ad concepts", sub: "For the current campaign" },
+public/control-center/pages/ai-command.js:324:		{ label: "Plan paid campaign structure", sub: "Objective, audience, creative, budget" }
+public/control-center/pages/ai-command.js:366:const PHASE35_WORKSPACE_TABS = ["chat", "preview", "tools", "context", "history"];
+public/control-center/pages/ai-command.js:378:	{ id: "draft", label: "Draft", helper: "Latest draft or guidance preview" },
+public/control-center/pages/ai-command.js:431:		{ id: "campaign-angle-generator", label: "Campaign Angle Generator", action: "preview", intent: "guidance", template: "Generate campaign angles for {project}. Include audience tension, promise, channel fit, and strongest first test." },
+public/control-center/pages/ai-command.js:432:		{ id: "launch-plan", label: "Launch Plan", action: "preview", intent: "workflow", template: "Build a launch plan for {project}. Include phases, channels, owners, blockers, and next move." },
+public/control-center/pages/ai-command.js:433:		{ id: "funnel-mapping", label: "Funnel Mapping", action: "preview", intent: "guidance", template: "Map the funnel for {project}. Include awareness, consideration, conversion, retention, and handoff points." },
+public/control-center/pages/ai-command.js:434:		{ id: "prioritize-next-move", label: "Priority Sort", action: "preview", intent: "task", template: "Prioritize the next moves for {project}. Rank by impact, urgency, dependencies, and safest first action." }
+public/control-center/pages/ai-command.js:437:		{ id: "hook-generator", label: "Hook Generator", action: "preview", intent: "guidance", template: "Write 5 German hook variants for {project}. Keep them concise, testable, and suitable for the Germany market." },
+public/control-center/pages/ai-command.js:438:		{ id: "caption-builder", label: "Caption Builder", action: "preview", intent: "guidance", template: "Draft German captions for {project}. Include angle, body, CTA, and platform adaptation notes." },
+public/control-center/pages/ai-command.js:439:		{ id: "cta-refiner", label: "CTA Refiner", action: "preview", intent: "task", template: "Refine CTA options for {project}. Provide German variants for awareness, consideration, and action stages." },
+public/control-center/pages/ai-command.js:440:		{ id: "publisher-package", label: "Publisher Package", action: "preview", intent: "handoff", template: "Prepare a Publisher handoff for {project}. Include German copy package, CTA, notes, and remaining checks." }
+public/control-center/pages/ai-command.js:443:		{ id: "creative-brief-builder", label: "Creative Brief Builder", action: "preview", intent: "media", template: "Prepare a creative brief for {project}. Include concept, visual rules, subject, brand constraints, and production notes." },
+public/control-center/pages/ai-command.js:444:		{ id: "format-mapper", label: "Format Mapper", action: "preview", intent: "guidance", template: "Map required creative formats for {project}. Include platform, aspect ratio, asset type, and usage context." },
+public/control-center/pages/ai-command.js:445:		{ id: "asset-checklist", label: "Asset Checklist", action: "preview", intent: "task", template: "Create an asset checklist for {project}. List must-have files, missing references, usage context, and priority." },
+public/control-center/pages/ai-command.js:446:		{ id: "visual-direction", label: "Visual Direction", action: "preview", intent: "guidance", template: "Review visual direction for {project}. Identify mismatches, improvements, and required references." },
+public/control-center/pages/ai-command.js:450:		{ id: "write-video-hook", label: "Write video hook", action: "preview", intent: "guidance", template: "Write short-form video hooks for {project}. Include 3 opening variants and audience fit." },
+public/control-center/pages/ai-command.js:451:		{ id: "draft-script", label: "Draft script", action: "preview", intent: "guidance", template: "Draft a short-form video script for {project}. Include hook, body, CTA, and visual cues." },
+public/control-center/pages/ai-command.js:452:		{ id: "build-storyboard", label: "Build storyboard", action: "preview", intent: "workflow", template: "Build storyboard beats for {project}. Sequence shots and key transitions." },
+public/control-center/pages/ai-command.js:453:		{ id: "prepare-voiceover", label: "Prepare voiceover", action: "preview", intent: "guidance", template: "Prepare voiceover script options for {project}. Keep clean timing and emphasis notes." },
+public/control-center/pages/ai-command.js:454:		{ id: "map-video-asset-needs", label: "Map video asset needs", action: "preview", intent: "task", template: "Map video asset needs for {project}. Include format, source, and production owner." }
+public/control-center/pages/ai-command.js:457:		{ id: "publishing-checklist", label: "Publishing Checklist", action: "preview", intent: "handoff", template: "Build a publishing checklist for {project}. Include German copy, assets, claims checks, and channel readiness." },
+public/control-center/pages/ai-command.js:458:		{ id: "final-packaging", label: "Final Packaging", action: "preview", intent: "handoff", template: "Prepare a final publishing package for {project}. Include copy, CTA, asset notes, approvals, and destination channel." },
+public/control-center/pages/ai-command.js:459:		{ id: "channel-formatting", label: "Channel Formatting", action: "preview", intent: "guidance", template: "Format the next output for {project} by channel. Include German copy, limits, CTA, and scheduling notes." },
+public/control-center/pages/ai-command.js:460:		{ id: "schedule-draft", label: "Schedule Draft", action: "preview", intent: "workflow", template: "Prepare a publishing schedule draft for {project}. Include channel cadence, dependencies, and review gates." },
+public/control-center/pages/ai-command.js:464:		{ id: "ad-angle-generator", label: "Ad Angle Generator", action: "preview", intent: "guidance", template: "Draft ad angles for {project}. Include audience problem, value promise, German hook direction, and platform fit." },
+public/control-center/pages/ai-command.js:465:		{ id: "copy-variants", label: "Copy Variants", action: "preview", intent: "guidance", template: "Prepare German ad copy variants for {project}. Include hooks, primary text, CTA, and creative notes." },
+public/control-center/pages/ai-command.js:466:		{ id: "test-ideas", label: "Test Ideas", action: "preview", intent: "task", template: "Suggest paid test ideas for {project}. Provide hypotheses, segments, creative variables, and measurement notes." },
+public/control-center/pages/ai-command.js:467:		{ id: "budget-notes", label: "Budget Notes", action: "preview", intent: "guidance", template: "Review budget notes for {project}. Summarize constraints and safe test allocation guidance." },
+public/control-center/pages/ai-command.js:471:		{ id: "keyword-intent", label: "Keyword Intent", action: "preview", intent: "guidance", template: "Suggest keyword intent opportunities for {project}. Include Germany-market intent, content mapping, and priority." },
+public/control-center/pages/ai-command.js:472:		{ id: "meta-direction", label: "Meta Direction", action: "preview", intent: "guidance", template: "Prepare meta direction for {project}. Include page angle, title direction, description direction, and CTA intent." },
+public/control-center/pages/ai-command.js:473:		{ id: "opportunity-summary", label: "Opportunity Summary", action: "preview", intent: "task", template: "Summarize SEO and insight opportunities for {project}. Focus on conversion, traffic quality, and content fit." },
+public/control-center/pages/ai-command.js:474:		{ id: "analysis-plan", label: "Analysis Plan", action: "preview", intent: "workflow", template: "Draft an analysis plan for {project}. Define questions, datasets, cadence, and owners." },
+public/control-center/pages/ai-command.js:478:		{ id: "claims-check", label: "Claims Check", action: "preview", intent: "guidance", template: "Review marketing claims for {project}. Flag unsupported, high-risk, or evidence-dependent wording." },
+public/control-center/pages/ai-command.js:479:		{ id: "approval-flags", label: "Approval Flags", action: "preview", intent: "task", template: "Check approval risks for {project}. List risk, impact, mitigation, and required owner." },
+public/control-center/pages/ai-command.js:480:		{ id: "safety-checklist", label: "Safety Checklist", action: "preview", intent: "handoff", template: "Prepare a safety checklist for {project}. Include policy checks, evidence required, and approval notes." },
+public/control-center/pages/ai-command.js:481:		{ id: "publish-readiness", label: "Publish Readiness", action: "preview", intent: "handoff", template: "Review publish readiness for {project}. Confirm what needs human approval before release." },
+public/control-center/pages/ai-command.js:485:		{ id: "timeline-draft", label: "Timeline Draft", action: "preview", intent: "workflow", template: "Draft an execution timeline for {project}. Include milestones, owners, dependencies, and review gates." },
+public/control-center/pages/ai-command.js:486:		{ id: "handoff-routing", label: "Handoff Routing", action: "preview", intent: "handoff", template: "Prepare handoff routing for {project}. Include source, destination, decision gates, and required confirmations." },
+public/control-center/pages/ai-command.js:487:		{ id: "checklist", label: "Checklist", action: "preview", intent: "task", template: "Draft an operational checklist for {project}. Include owners, dependencies, priority, and first action." },
+public/control-center/pages/ai-command.js:488:		{ id: "blocker-review", label: "Blocker Review", action: "preview", intent: "guidance", template: "Review operational blockers for {project}. Prioritize by risk and impact." },
+public/control-center/pages/ai-command.js:492:		{ id: "review-unified-inbox", label: "Review Unified Inbox", action: "preview", intent: "guidance", template: "Review the Unified Inbox readiness for {project}. Summarize visible customer-operation signals, open gaps, and safe next review steps. Do not claim inbox actions happened." },
+public/control-center/pages/ai-command.js:493:		{ id: "summarize-customer-thread", label: "Summarize Customer Thread", action: "preview", intent: "guidance", template: "Summarize this customer thread for {project}. Include customer issue, sentiment, reply goal, missing details, and safe next step." },
+public/control-center/pages/ai-command.js:494:		{ id: "draft-customer-reply", label: "Draft Customer Reply", action: "preview", intent: "guidance", template: "Draft a customer reply for {project}. Keep it helpful, calm, review-ready, and do not claim any operational action has been completed." },
+public/control-center/pages/ai-command.js:495:		{ id: "create-ticket-draft", label: "Create Ticket Draft", action: "preview", intent: "task", template: "Create a ticket draft for {project}. Include issue, priority, owner suggestion, evidence needed, and next safe action." },
+public/control-center/pages/ai-command.js:496:		{ id: "check-sla-risk", label: "Check SLA Risk", action: "preview", intent: "guidance", template: "Check SLA risk for {project}. Flag urgency, risk level, missing runtime data, and escalation recommendation for review." },
+public/control-center/pages/ai-command.js:497:		{ id: "prepare-escalation", label: "Prepare Escalation", action: "preview", intent: "handoff", template: "Prepare an escalation draft for {project}. Include reason, customer impact, owner, confirmation needed, and destination team." },
+public/control-center/pages/ai-command.js:498:		{ id: "customer-profile-snapshot", label: "Customer Profile Snapshot", action: "preview", intent: "guidance", template: "Prepare a customer profile snapshot for {project}. Include known context, purchase/support signals, missing fields, and safe follow-up questions." },
+public/control-center/pages/ai-command.js:499:		{ id: "route-support-sales-ops", label: "Route to Support / Sales / Operations", action: "preview", intent: "handoff", template: "Prepare routing guidance for {project}. Decide whether the customer item belongs with Support, Sales, or Operations, and explain the review gate." }
+public/control-center/pages/ai-command.js:502:		{ id: "lead-qualification", label: "Lead Qualification", action: "preview", intent: "guidance", template: "Qualify the lead for {project}. Include fit, intent, urgency, missing CRM fields, and the safest next step." },
+public/control-center/pages/ai-command.js:503:		{ id: "outreach-draft", label: "Outreach Draft", action: "preview", intent: "guidance", template: "Draft outreach for {project}. Include subject or opener, personalized message, CTA, and review notes before sending." },
+public/control-center/pages/ai-command.js:504:		{ id: "follow-up-sequence", label: "Follow-up Sequence", action: "preview", intent: "workflow", template: "Build a follow-up sequence for {project}. Include timing, message angle, CTA, stop condition, and confirmation requirements." },
+public/control-center/pages/ai-command.js:505:		{ id: "crm-profile-summary", label: "CRM Profile Summary", action: "preview", intent: "guidance", template: "Summarize the CRM profile context for {project}. Include fit, history, open questions, and next sales action without mutating CRM data." },
+public/control-center/pages/ai-command.js:506:		{ id: "pipeline-next-step", label: "Pipeline Next Step", action: "preview", intent: "task", template: "Recommend the pipeline next step for {project}. Include stage, rationale, owner, risk, and required confirmation." },
+public/control-center/pages/ai-command.js:507:		{ id: "dealer-salon-outreach", label: "Dealer / Salon Outreach", action: "preview", intent: "guidance", template: "Draft dealer or salon outreach for {project}. Include positioning, proof needs, offer angle, CTA, and follow-up note." },
+public/control-center/pages/ai-command.js:508:		{ id: "influencer-lead-plan", label: "Influencer Lead Plan", action: "preview", intent: "workflow", template: "Prepare an influencer lead plan for {project}. Include target profile, outreach angle, qualification criteria, and handoff path." },
+public/control-center/pages/ai-command.js:509:		{ id: "sales-handoff-draft", label: "Sales Handoff", action: "preview", intent: "handoff", template: "Prepare a sales handoff draft for {project}. Include lead context, recommended next action, owner, and confirmation needed." }
+public/control-center/pages/ai-command.js:515:	{ icon: "🚀", label: "Launch Campaign", sub: "Build a campaign plan", template: "Build a launch campaign for {project}. Map the channels, offer, phases, and required assets." },
+public/control-center/pages/ai-command.js:517:	{ icon: "📊", label: "Analyze Performance", sub: "Review what's working", template: "Analyze current performance for {project}. What content, campaigns, and channels are working best right now?" },
+public/control-center/pages/ai-command.js:525:	{ id: "strategy", label: "Strategy" },
+public/control-center/pages/ai-command.js:527:	{ id: "campaign", label: "Campaign" },
+public/control-center/pages/ai-command.js:538:	{ id: "campaign", label: "Campaign" },
+public/control-center/pages/ai-command.js:557:		suggestedPrompt: "Act as Strategist and propose the next campaign move based on current readiness and integrations."
+public/control-center/pages/ai-command.js:562:		purpose: "Transform strategy into high-converting copy and scripts.",
+public/control-center/pages/ai-command.js:563:		bestUse: "When campaigns need content batches fast.",
+public/control-center/pages/ai-command.js:564:		suggestedPrompt: "Act as Writer and generate content angles for the current project and active campaign."
+public/control-center/pages/ai-command.js:571:		suggestedPrompt: "Act as Designer and propose creative directions tied to current campaign goals."
+public/control-center/pages/ai-command.js:598:		bestUse: "When strategy needs stronger external evidence.",
+public/control-center/pages/ai-command.js:750:		campaign: asString(context.campaign || "active campaign") || "active campaign"
+public/control-center/pages/ai-command.js:753:	return asString(template).replace(/\{(project|projectName|specialist|specialistLabel|campaign)\}/g, (_, token) => tokenMap[token] || "");
+public/control-center/pages/ai-command.js:765:    "Build a launch campaign for:",
+public/control-center/pages/ai-command.js:901:	return asString(item.label || item.title || item.page || item.query || item.campaign_name || item.name);
+public/control-center/pages/ai-command.js:914:			workspaceTab: "preview",
+public/control-center/pages/ai-command.js:918:			commandType: "strategy",
+public/control-center/pages/ai-command.js:1057:function getAiResponseBridgeStatus(executeProjectAiGuidanceFn) {
+public/control-center/pages/ai-command.js:1058:	if (typeof executeProjectAiGuidanceFn !== "function") {
+public/control-center/pages/ai-command.js:1111:                .replace(/\b(public|private|review-only|preview-only)\b/gi, "")
+public/control-center/pages/ai-command.js:1140:        const preview = asObject(session.outputPreview);
+public/control-center/pages/ai-command.js:1145:                preview.title ||
+public/control-center/pages/ai-command.js:1152:                preview.outputType ? `${formatOutputTypeLabel(preview.outputType)} preview` : "Session"
+public/control-center/pages/ai-command.js:1179:                preview: session.outputPreview || null,
+public/control-center/pages/ai-command.js:1202:        session.outputPreview = asObject(record.preview);
+public/control-center/pages/ai-command.js:1246:                `Use ${safeOutputLanguage} only for customer-facing or publishable copy such as captions, ads, emails, landing pages, final campaign text, or publishing packages.`,
+public/control-center/pages/ai-command.js:1302:	if (id === "strategist") return outputType === "task" ? "campaign-studio" : "workflows";
+public/control-center/pages/ai-command.js:1348:        const looksCampaignLike = /\b(campaign|launch|audience|offer|funnel|positioning|channel mix|campaign brief|go-to-market|go to market)\b/.test(text);
+public/control-center/pages/ai-command.js:1385:        if (/campaign|strategy|launch/.test(outputType) || looksCampaignLike) {
+public/control-center/pages/ai-command.js:1386:                outputType = "campaign";
+public/control-center/pages/ai-command.js:1389:                        destinationRoute: explicitDestination || (session?.teamMode === "team" ? "workflows" : "campaign-studio")
+public/control-center/pages/ai-command.js:1399:		"campaign-studio": "Campaign Studio",
+public/control-center/pages/ai-command.js:1432:		status: "draft_preview",
+public/control-center/pages/ai-command.js:1468:			title: outputType === "task" ? "Task: Draft campaign copy" : "Content Guidance: Messaging draft",
+public/control-center/pages/ai-command.js:1628:				"Unified Inbox is not duplicated here; this is a draft and routing preview only.",
+public/control-center/pages/ai-command.js:1692:				safetyLabel: "Workflow run is not started. This is a draft preview only."
+public/control-center/pages/ai-command.js:1739:		summary: `Full team ${outputType.replace("_", " ")} preview prepared for ${projectName || "current project"}.`,
+public/control-center/pages/ai-command.js:1742:			"Writer, Media Director, and Video Lead turn strategy into message, asset, and production drafts",
+public/control-center/pages/ai-command.js:1758:		safetyLabel: "Full Team output is a coordinated draft preview only."
+public/control-center/pages/ai-command.js:1778:		`Status: ${humanizeValue(output.status, "draft_preview")}`,
+public/control-center/pages/ai-command.js:1826:function buildStructuredPreviewBlocks(preview = {}) {
+public/control-center/pages/ai-command.js:1827:        const summary = humanizeValue(preview.summary, "");
+public/control-center/pages/ai-command.js:1829:                preview.mainOutput ||
+public/control-center/pages/ai-command.js:1830:                preview.output ||
+public/control-center/pages/ai-command.js:1831:                preview.generatedOutput ||
+public/control-center/pages/ai-command.js:1832:                preview.result ||
+public/control-center/pages/ai-command.js:1847:        const bullets = normalizeUniqueDisplayList(preview.bullets, 8)
+public/control-center/pages/ai-command.js:1854:        const steps = normalizeUniqueDisplayList(preview.steps, 8)
+public/control-center/pages/ai-command.js:1859:        } else if (preview.nextStep) {
+public/control-center/pages/ai-command.js:1860:                blocks.push({ label: "Next step", items: [compactPreviewText(preview.nextStep, 280)] });
+public/control-center/pages/ai-command.js:1936:		campaign: state.context.activeCampaign || "Not selected",
+public/control-center/pages/ai-command.js:1997:		strategist: ["campaign", "launch campaign", "campaign plan", "marketing campaign", "market entry", "growth plan", "offer strategy", "launch plan"],
+public/control-center/pages/ai-command.js:2164:	const bestCampaign = asArray(paid.best_campaigns)[0];
+public/control-center/pages/ai-command.js:2165:	const weakCampaign = asArray(paid.weak_campaigns)[0];
+public/control-center/pages/ai-command.js:2173:			bestCampaign ? `Best campaign: ${extractTopMessage(bestCampaign)}.` : "No winning campaign measured yet.",
+public/control-center/pages/ai-command.js:2174:			weakCampaign ? `Weak campaign: ${extractTopMessage(weakCampaign)}.` : "No weak campaign list yet.",
+public/control-center/pages/ai-command.js:2185:			weakCampaign ? `Rebuild hook and CTA for ${extractTopMessage(weakCampaign)}.` : "Audit campaign naming and creative mapping.",
+public/control-center/pages/ai-command.js:2231:	if (/launch.*campaign|new campaign/.test(query)) {
+public/control-center/pages/ai-command.js:2232:		return { title: "Campaign launch task block", owner: "Campaign Studio", steps: ["Define the campaign objective, audience, and offer.", "Choose channels and budget based on current intelligence.", "List required assets and publishing dependencies before launch."] };
+public/control-center/pages/ai-command.js:2250:	if (/campaign/.test(query)) routeSuggestions.push(routeSuggestion("Campaign Studio", "campaign-studio", "Turn this into a structured launch plan."));
+public/control-center/pages/ai-command.js:2256:	if (/ads|campaign scale|roas|creative/.test(query)) routeSuggestions.push(routeSuggestion("Ads Manager", "ads-manager", "Review live paid performance and action the next media move."));
+public/control-center/pages/ai-command.js:2382:	"campaign-studio": "Campaign Studio",
+public/control-center/pages/ai-command.js:2404:	"campaign-studio": "strategist",
+public/control-center/pages/ai-command.js:2439:	campaign: "campaign-studio",
+public/control-center/pages/ai-command.js:2440:	campaigns: "campaign-studio",
+public/control-center/pages/ai-command.js:2532:	const preview = asObject(rawPreview);
+public/control-center/pages/ai-command.js:2533:	if (!Object.keys(preview).length) return null;
+public/control-center/pages/ai-command.js:2534:	const outputType = asString(preview.outputType || preview.output_type || preview.type || "handoff").trim() || "handoff";
+public/control-center/pages/ai-command.js:2536:		preview.destinationRoute ||
+public/control-center/pages/ai-command.js:2537:		preview.destination_route ||
+public/control-center/pages/ai-command.js:2542:	const specialistId = normalizeAiInboundSpecialistId(preview.specialistId || preview.specialist_id || normalized.suggestedSpecialist, normalized.suggestedSpecialist);
+public/control-center/pages/ai-command.js:2545:		...preview,
+public/control-center/pages/ai-command.js:2547:		title: firstAiInboundText(preview.title, normalized.title, `Inbound handoff from ${normalized.sourceLabel}`),
+public/control-center/pages/ai-command.js:2548:		summary: firstAiInboundText(preview.summary, preview.description, normalized.prompt),
+public/control-center/pages/ai-command.js:2551:		generatedAt: asString(preview.generatedAt || preview.generated_at || nowIso()),
+public/control-center/pages/ai-command.js:2552:		sourcePrompt: firstAiInboundText(preview.sourcePrompt, preview.source_prompt, normalized.prompt),
+public/control-center/pages/ai-command.js:2553:		status: asString(preview.status || "draft_preview"),
+public/control-center/pages/ai-command.js:2554:		safetyLabel: firstAiInboundText(preview.safetyLabel, preview.safety_label, "Guidance and draft only. No backend execution."),
+public/control-center/pages/ai-command.js:2555:		confirmationNote: firstAiInboundText(preview.confirmationNote, preview.confirmation_note, "Execution, approvals, publishing, CRM updates, customer replies, and workflow runs require explicit confirmation in the owning workspace."),
+public/control-center/pages/ai-command.js:2556:		confirmationRequired: preview.confirmationRequired ?? preview.confirmation_required ?? true
+public/control-center/pages/ai-command.js:2645:		draftContext.output_preview,
+public/control-center/pages/ai-command.js:2646:		draftContext.phase2_output_preview,
+public/control-center/pages/ai-command.js:2648:		payload.output_preview
+public/control-center/pages/ai-command.js:2696:			preview: session.outputPreview,
+public/control-center/pages/ai-command.js:2734:	executeProjectAiCommand,
+public/control-center/pages/ai-command.js:2739:	if (typeof executeProjectAiCommand !== "function") throw new Error("AI command service is unavailable.");
+public/control-center/pages/ai-command.js:2747:		result = await executeProjectAiCommand(projectName, {
+public/control-center/pages/ai-command.js:2895:					<strong>${escapeHtml(aiContext.campaign || "None")}</strong>
+public/control-center/pages/ai-command.js:2953:				<span style="font-size:11px;color:var(--color-text-2);">Prefill only — send prompt for preview</span>
+public/control-center/pages/ai-command.js:3321:        const preview = buildPhase2OutputPreview({
+public/control-center/pages/ai-command.js:3329:        preview.sourcePrompt = context.prompt || workPrompt;
+public/control-center/pages/ai-command.js:3330:        preview.conversationContext = context.conversationText;
+public/control-center/pages/ai-command.js:3333:        // The visible preview should stay clean and user-facing.
+public/control-center/pages/ai-command.js:3335:                preview.summary = context.assistantText;
+public/control-center/pages/ai-command.js:3336:                preview.mainOutput = context.assistantText;
+public/control-center/pages/ai-command.js:3339:        preview.generatedAt = nowIso();
+public/control-center/pages/ai-command.js:3340:        preview.safetyLabel = preview.safetyLabel || "Conversation converted into a review-ready draft. No backend action executed.";
+public/control-center/pages/ai-command.js:3342:        session.outputPreview = preview;
+public/control-center/pages/ai-command.js:3345:        session.workspaceTab = "preview";
+public/control-center/pages/ai-command.js:3346:        return preview;
+public/control-center/pages/ai-command.js:3378:			reason: `${aiContext.assetBlockers.length} asset category blocker${aiContext.assetBlockers.length === 1 ? "" : "s"} may reduce content throughput and campaign delivery speed.`,
+public/control-center/pages/ai-command.js:3394:	if (!aiContext.campaign || aiContext.campaign === "Not selected") {
+public/control-center/pages/ai-command.js:3396:			title: "Define the active campaign operating plan",
+public/control-center/pages/ai-command.js:3397:			reason: "A clear campaign context helps every specialist agent generate more precise outputs.",
+public/control-center/pages/ai-command.js:3398:			command: `Create a campaign operating brief for ${aiContext.projectName || "this project"} with objective, audience, channels, and first execution wave.`,
+public/control-center/pages/ai-command.js:3406:		command: `Generate the next high-impact content wave for ${aiContext.projectName || "this project"} based on current readiness and campaign context.`,
+public/control-center/pages/ai-command.js:3464:	const preview = asObject(session.outputPreview);
+public/control-center/pages/ai-command.js:3466:	if (preview.outputType === "workflow") return 2;
+public/control-center/pages/ai-command.js:3467:	if (preview.outputType === "handoff") return 3;
+public/control-center/pages/ai-command.js:3468:	if (preview.outputType === "task") return 1;
+public/control-center/pages/ai-command.js:3469:	if (preview.outputType) return 2;
+public/control-center/pages/ai-command.js:3478:		preview: "draft",
+public/control-center/pages/ai-command.js:3487:function outputTabFromPreview(preview) {
+public/control-center/pages/ai-command.js:3488:	const outputType = asString(preview?.outputType || "");
+public/control-center/pages/ai-command.js:3524:	return "Local preview only";
+public/control-center/pages/ai-command.js:3539:		.replace(/\{campaign\}/g, "active campaign");
+public/control-center/pages/ai-command.js:3575:				<p class="aicmd-room-subtitle mhos-context-description">Ask one expert or the full team to prepare strategy, content, analysis, reviews, and destination handoffs. AI prepares and reviews only; sensitive actions stay confirmation-gated in the owning workspace.</p>
+public/control-center/pages/ai-command.js:3772:		? "Team orchestration across strategy, writing, media/video, compliance, publishing, customer operations, sales/CRM, and operations"
+public/control-center/pages/ai-command.js:3807:	const preferred = destinations.find((item) => !["chat-preview", "composer", "preview", "ai-command"].includes(asString(item)));
+public/control-center/pages/ai-command.js:3820:		action: "preview",
+public/control-center/pages/ai-command.js:3840:		{ id: "preview", label: "Preview", hint: "Draft output" },
+public/control-center/pages/ai-command.js:3953:        const preview = asObject(session.outputPreview);
+public/control-center/pages/ai-command.js:3958:        const outputType = asString(preview.outputType || "guidance");
+public/control-center/pages/ai-command.js:3959:        const outputLabel = preview.outputType ? formatOutputTypeLabel(outputType) : "Guidance";
+public/control-center/pages/ai-command.js:3960:        const destinationRoute = asString(preview.destinationRoute || destinationRouteForSpecialist(session.modeId, outputType));
+public/control-center/pages/ai-command.js:3966:        const governanceRequired = destinationRoute === "governance" || /approval|claim|compliance|risk|gdpr|review/i.test(`${outputType} ${asString(preview.title)} ${asString(preview.summary)}`);
+public/control-center/pages/ai-command.js:4029:                        <p class="aicmd-chatfirst-tab-note">AI Command prepares guidance, drafts, previews, and handoff context only. Publishing, approvals, CRM updates, workflow runs, customer sends, provider execution, and durable task creation remain confirmation-gated in the owning workspace.</p>
+public/control-center/pages/ai-command.js:4236:                                outputType: item.outputType || item.preview?.outputType || "",
+public/control-center/pages/ai-command.js:4237:                                destinationRoute: item.destinationRoute || item.preview?.destinationRoute || "",
+public/control-center/pages/ai-command.js:4238:                                previewTitle: item.preview?.title || item.responseTitle || "",
+public/control-center/pages/ai-command.js:4244:        const preview = asObject(session.outputPreview);
+public/control-center/pages/ai-command.js:4248:                const outputType = asString(message.outputType || preview.outputType || "guidance");
+public/control-center/pages/ai-command.js:4249:                const destinationRoute = asString(message.destinationRoute || preview.destinationRoute || destinationRouteForSpecialist(session.modeId, outputType));
+public/control-center/pages/ai-command.js:4280:                const previewTitle = asString(message.previewTitle || preview.title || "");
+public/control-center/pages/ai-command.js:4288:                                        ${previewTitle && !isUser ? `<strong class="aicmd-chat-output-title">${escapeHtml(previewTitle)}</strong>` : ""}
+public/control-center/pages/ai-command.js:4314:                                                <span>Plan campaign</span>
+public/control-center/pages/ai-command.js:4337:                { id: "campaign", label: "Campaign", summary: "Build a review-ready campaign with the full AI Team.", enabled: true },
+public/control-center/pages/ai-command.js:4352:                                <span>Choose a guided workflow. The team prepares a preview first.</span>
+public/control-center/pages/ai-command.js:4378:        const campaignPackage = asObject(packageInput);
+public/control-center/pages/ai-command.js:4380:                ["Concept", asString(campaignPackage.concept)],
+public/control-center/pages/ai-command.js:4381:                ["Target audience", asString(campaignPackage.targetAudience || campaignPackage.target_audience)],
+public/control-center/pages/ai-command.js:4382:                ["Offer", asString(campaignPackage.offer)]
+public/control-center/pages/ai-command.js:4386:                ["Launch phases", asArray(campaignPackage.launchPhases || campaignPackage.launch_phases)],
+public/control-center/pages/ai-command.js:4387:                ["Content angles", asArray(campaignPackage.contentAngles || campaignPackage.content_angles)],
+public/control-center/pages/ai-command.js:4388:                ["Ad angles", asArray(campaignPackage.adAngles || campaignPackage.ad_angles)],
+public/control-center/pages/ai-command.js:4389:                ["Required assets", asArray(campaignPackage.requiredAssets || campaignPackage.required_assets)],
+public/control-center/pages/ai-command.js:4390:                ["Review blockers", asArray(campaignPackage.missingBlockers || campaignPackage.missing_blockers)],
+public/control-center/pages/ai-command.js:4391:                ["Next actions", asArray(campaignPackage.nextActions || campaignPackage.next_actions)]
+public/control-center/pages/ai-command.js:4397:                <div class="aicmd-smart-preview-grid aicmd-smart-campaign-package-grid">
+public/control-center/pages/ai-command.js:4419:        if (wizard.type !== "campaign" || !wizard.open) return "";
+public/control-center/pages/ai-command.js:4432:        const preview = asObject(wizard.preview);
+public/control-center/pages/ai-command.js:4464:                                                <p>Guide the AI Team from source to preview. Backend workflow execution and destination handoff stay approval-gated.</p>
+public/control-center/pages/ai-command.js:4474:                                        <span class="${preview.title ? "is-active" : ""}">5 Preview</span>
+public/control-center/pages/ai-command.js:4500:                                                <strong>4. Premium campaign brief</strong>
+public/control-center/pages/ai-command.js:4526:                                        ${preview.title ? `
+public/control-center/pages/ai-command.js:4527:                                                <article class="aicmd-smart-preview">
+public/control-center/pages/ai-command.js:4528:                                                        <div class="aicmd-smart-preview-head">
+public/control-center/pages/ai-command.js:4530:                                                                <strong>${escapeHtml(preview.title)}</strong>
+public/control-center/pages/ai-command.js:4531:                                                                <p>${escapeHtml(preview.summary)}</p>
+public/control-center/pages/ai-command.js:4534:                                                        <div class="aicmd-smart-preview-meta">
+public/control-center/pages/ai-command.js:4535:                                                                <span><strong>Source</strong>${escapeHtml(preview.sourceLabel)}</span>
+public/control-center/pages/ai-command.js:4536:                                                                <span><strong>Goal</strong>${escapeHtml(preview.goalLabel || titleCase(preview.goal))}</span>
+public/control-center/pages/ai-command.js:4537:                                                                <span><strong>Channel</strong>${escapeHtml(preview.channelLabel || titleCase(preview.channel))}</span>
+public/control-center/pages/ai-command.js:4538:                                                                <span><strong>Status</strong>${escapeHtml(preview.backendPreview ? "Backend preview" : "Local fallback")}</span>
+public/control-center/pages/ai-command.js:4539:                                                                <span><strong>Market</strong>${escapeHtml(titleCase(preview.market || market))}</span>
+public/control-center/pages/ai-command.js:4540:                                                                <span><strong>Language</strong>${escapeHtml(titleCase(preview.language || language))}</span>
+public/control-center/pages/ai-command.js:4541:                                                                <span><strong>Format</strong>${escapeHtml(titleCase(preview.format || format))}</span>
+public/control-center/pages/ai-command.js:4542:                                                                <span><strong>Deadline</strong>${escapeHtml(titleCase(preview.deadline || deadline))}</span>
+public/control-center/pages/ai-command.js:4545:                                                        ${renderCampaignPackageMiniPanel(preview.campaignPackage, escapeHtml)}
+public/control-center/pages/ai-command.js:4547:                                                        <div class="aicmd-smart-preview-grid">
+public/control-center/pages/ai-command.js:4548:                                                                ${asArray(preview.sections).map((section) => `
+public/control-center/pages/ai-command.js:4556:                                                        <div class="aicmd-smart-preview-actions" aria-label="Campaign review actions">
+public/control-center/pages/ai-command.js:4557:                                                                <button type="button" data-aicmd-smart-campaign-action="library">Save to Library</button>
+public/control-center/pages/ai-command.js:4558:                                                                <button type="button" data-aicmd-smart-campaign-action="media">Send to Media Studio</button>
+public/control-center/pages/ai-command.js:4559:                                                                <button type="button" data-aicmd-smart-campaign-action="governance">Request Governance Review</button>
+public/control-center/pages/ai-command.js:4560:                                                                <button type="button" data-aicmd-smart-campaign-action="publishing">Prepare Publishing Handoff</button>
+public/control-center/pages/ai-command.js:4561:                                                                <button type="button" data-aicmd-smart-campaign-action="operations">Create Operations Follow-up</button>
+public/control-center/pages/ai-command.js:4567:                                                        <span>1. Choose source, goal, and channel. The AI Team will prepare the preview package before any approval or handoff.</span>
+public/control-center/pages/ai-command.js:4573:                                        <span>Review-first flow: generate preview, approve, then hand off to the owning surface. No publish, send, CRM update, provider execution, or workflow mutation happens here.</span>
+public/control-center/pages/ai-command.js:4576:                                                <button class="aicmd-smart-wizard-primary" type="button" data-aicmd-smart-campaign-preview>
+public/control-center/pages/ai-command.js:4577:                                                        ${preview.title ? "Regenerate AI Team Preview" : "Generate AI Team Preview"}
+public/control-center/pages/ai-command.js:4670:                                        <small>Strategy, content, media, operations, compliance, customer, campaign and provider-readiness planning.</small>
+public/control-center/pages/ai-command.js:4696:                                <span>Library, campaigns, content, customers, governance, integrations and provider readiness are connected as guarded planning context. Execution stays confirmation-gated.</span>
+public/control-center/pages/ai-command.js:4903:					<p>Prompt setup only. Tools prepare composer instructions, source-aware reviews, previews, and handoff context without executing actions.</p>
+public/control-center/pages/ai-command.js:4932:	const preview = asObject(session.outputPreview);
+public/control-center/pages/ai-command.js:4933:	const hasPreview = Boolean(preview.outputType && preview.title);
+public/control-center/pages/ai-command.js:4935:	const structuredPreview = hasPreview ? buildStructuredPreviewBlocks(preview) : { blocks: [], compactSummary: "" };
+public/control-center/pages/ai-command.js:4937:	const destination = routeLabel(preview.destinationRoute || destinationRouteForSpecialist(session.modeId, preview.outputType || "guidance"));
+public/control-center/pages/ai-command.js:4940:		: getPhase1SpecialistById(preview.specialistId || session.modeId);
+public/control-center/pages/ai-command.js:4941:	const outputLabel = hasPreview ? formatOutputTypeLabel(preview.outputType) : "Output";
+public/control-center/pages/ai-command.js:4953:					<p>${hasPreview ? "Review the result, then open the destination workspace with draft context." : "Drafts, task previews, workflow previews, and handoff packages appear here after a response or tool setup."}</p>
+public/control-center/pages/ai-command.js:4980:					<h3>${escapeHtml(humanizeValue(preview.title, "Draft output"))}</h3>
+public/control-center/pages/ai-command.js:4981:					<p>${escapeHtml(structuredPreview.compactSummary || humanizeValue(preview.summary, "Guidance preview prepared."))}</p>
+public/control-center/pages/ai-command.js:4995:						<strong>${escapeHtml(humanizeValue(preview.safetyLabel, "Guidance only. No backend execution."))}</strong>
+public/control-center/pages/ai-command.js:4996:						<span>${escapeHtml(humanizeValue(preview.confirmationNote, "Execution requires explicit confirmation in the destination workspace."))}</span>
+public/control-center/pages/ai-command.js:5005:				<p class="aicmd-chatfirst-tab-note">This is a review-ready preview. Execution, publishing, approvals, CRM updates, external sends, durable task creation, and workflow runs happen only in the owning destination workspace after confirmation.</p>
+public/control-center/pages/ai-command.js:5009:					<span>Start in the chat composer or open a Tool Drawer prompt to prepare a preview.</span>
+public/control-center/pages/ai-command.js:5019:	const preview = asObject(session.outputPreview);
+public/control-center/pages/ai-command.js:5042:				<span><strong>Output</strong>${escapeHtml(preview.outputType ? formatOutputTypeLabel(preview.outputType) : "No draft yet")}</span>
+public/control-center/pages/ai-command.js:5052:		{ label: "Read preview", value: "AI ready", className: "is-available" },
+public/control-center/pages/ai-command.js:5072:	const preview = asObject(session.outputPreview);
+public/control-center/pages/ai-command.js:5074:	const approval = preview.confirmationRequired ? "Confirmation required" : (preview.outputType ? "Review ready" : "No draft yet");
+public/control-center/pages/ai-command.js:5077:	const recentAt = asArray(session.responseHistory)[0]?.generatedAt || preview.generatedAt || "";
+public/control-center/pages/ai-command.js:5128:        const emptyBody = "Ask what to do next, draft a campaign asset, review a source, prepare a handoff, or coordinate the full AI team.";
+public/control-center/pages/ai-command.js:5335:	const sessionState = session.responseLoading ? "Generating" : (session.outputPreview ? "AI Team preview ready" : (asString(session.draftMessage).trim() ? "Drafting" : "AI ready"));
+public/control-center/pages/ai-command.js:5409:					<span>Backend owns authority — AI Command prepares guidance, previews, and handoff context. It does not override execution controls or mutate Operations records.</span>
+public/control-center/pages/ai-command.js:5418:	const preview = asObject(session.outputPreview);
+public/control-center/pages/ai-command.js:5426:		...(preview.outputType ? [{
+public/control-center/pages/ai-command.js:5428:			title: preview.title || "Draft preview",
+public/control-center/pages/ai-command.js:5429:			body: preview.sourcePrompt || preview.summary || "",
+public/control-center/pages/ai-command.js:5430:			time: preview.generatedAt
+public/control-center/pages/ai-command.js:5451:				<div class="aicmd-v2-chat-empty">Saved responses and previews appear here during this session.</div>
+public/control-center/pages/ai-command.js:5480:			executeProjectAiCommand,
+public/control-center/pages/ai-command.js:5503:                        const preview = asObject(savedOutput.preview);
+public/control-center/pages/ai-command.js:5504:			if (preview.outputType) {
+public/control-center/pages/ai-command.js:5505:				session.outputPreview = preview;
+public/control-center/pages/ai-command.js:5506:				session.outputWorkspaceTab = outputTabFromPreview(preview);
+public/control-center/pages/ai-command.js:5548:		const bridgeStatus = getAiResponseBridgeStatus(executeProjectAiChat);
+public/control-center/pages/ai-command.js:5550:			session.workspaceTab = bridgeStatus.available ? "chat" : "preview";
+public/control-center/pages/ai-command.js:5554:			session.workspaceTab = bridgeStatus.available ? "chat" : "preview";
+public/control-center/pages/ai-command.js:5622:                                preview: session.outputPreview,
+public/control-center/pages/ai-command.js:5658:                        session.workspaceTab = bridgeStatus.available ? "chat" : "preview";
+public/control-center/pages/ai-command.js:5666:                                preview: null,
+public/control-center/pages/ai-command.js:5772:				updateStatus("Quick action loaded into composer. Review it, then ask or preview.");
+public/control-center/pages/ai-command.js:5781:                                return text.includes("source") || text.includes("review") || text.includes("brief") || text.includes("campaign");
+public/control-center/pages/ai-command.js:5967:                        if (type !== "campaign") {
+public/control-center/pages/ai-command.js:5974:                                type: "campaign",
+public/control-center/pages/ai-command.js:5979:                                preview: asObject(currentWizard.preview)
+public/control-center/pages/ai-command.js:6015:                                        body: `Define the ${goalLabel.toLowerCase()} objective, target segment, market angle, and campaign promise for ${projectLabel}.`
+public/control-center/pages/ai-command.js:6040:                                title: `${goalLabel} campaign for ${projectLabel}`,
+public/control-center/pages/ai-command.js:6041:                                summary: `AI Team preview for a ${goalLabel.toLowerCase()} campaign using ${sourceLabel.toLowerCase()} and optimized for ${channelLabel}.`,
+public/control-center/pages/ai-command.js:6059:                                                body: `Use ${sourceMeaning}. Produce a review-ready campaign package before any handoff, approval, publishing, sending, CRM update, provider execution, or workflow mutation.`
+public/control-center/pages/ai-command.js:6087:                                                body: "Create a follow-up plan for review status, owner, destination handoff, performance check, improvement loop, and next campaign iteration."
+public/control-center/pages/ai-command.js:6121:                                        preview: {}
+public/control-center/pages/ai-command.js:6131:                        const campaignPackage = asObject(body.campaignPackage || body.campaign_package);
+public/control-center/pages/ai-command.js:6133:                                campaignPackage.concept ? { label: "Campaign concept", body: asString(campaignPackage.concept) } : null,
+public/control-center/pages/ai-command.js:6134:                                campaignPackage.targetAudience ? { label: "Target audience", body: asString(campaignPackage.targetAudience) } : null,
+public/control-center/pages/ai-command.js:6135:                                campaignPackage.offer ? { label: "Offer", body: asString(campaignPackage.offer) } : null,
+public/control-center/pages/ai-command.js:6136:                                asArray(campaignPackage.launchPhases).length ? { label: "Launch phases", items: asArray(campaignPackage.launchPhases) } : null,
+public/control-center/pages/ai-command.js:6137:                                asArray(campaignPackage.contentAngles).length ? { label: "Content angles", items: asArray(campaignPackage.contentAngles) } : null,
+public/control-center/pages/ai-command.js:6138:                                asArray(campaignPackage.adAngles).length ? { label: "Ad angles", items: asArray(campaignPackage.adAngles) } : null,
+public/control-center/pages/ai-command.js:6139:                                asArray(campaignPackage.requiredAssets).length ? { label: "Required assets", items: asArray(campaignPackage.requiredAssets) } : null,
+public/control-center/pages/ai-command.js:6140:                                asArray(campaignPackage.missingBlockers).length ? { label: "Review blockers", items: asArray(campaignPackage.missingBlockers) } : null,
+public/control-center/pages/ai-command.js:6141:                                asArray(campaignPackage.nextActions).length ? { label: "Next actions", items: asArray(campaignPackage.nextActions) } : null
+public/control-center/pages/ai-command.js:6146:                                title: asString(body.title || fallbackPreview.title || "AI Team campaign preview"),
+public/control-center/pages/ai-command.js:6156:                                audience: asString(body.audience || campaignPackage.targetAudience || fallbackPreview.audience || ""),
+public/control-center/pages/ai-command.js:6157:                                offer: asString(body.offer || campaignPackage.offer || fallbackPreview.offer || ""),
+public/control-center/pages/ai-command.js:6160:                                campaignPackage,
+public/control-center/pages/ai-command.js:6162:                                safety: asObject(body.safety).preview_only
+public/control-center/pages/ai-command.js:6163:                                        ? "Backend preview only. No publish, send, CRM mutation, provider execution, workflow mutation, Governance approval, task creation, or durable handoff was performed."
+public/control-center/pages/ai-command.js:6175:                                const backendPayload = await generateAiCommandCampaignPreview(projectName || "default", {
+public/control-center/pages/ai-command.js:6192:                                        throw new Error(asString(backendPayload.message || "Backend preview failed"));
+public/control-center/pages/ai-command.js:6196:                                if (!safety.preview_only || !safety.no_backend_mutation_performed || !safety.no_provider_execution_performed) {
+public/control-center/pages/ai-command.js:6197:                                        throw new Error("Backend preview response did not confirm preview-only safety.");
+public/control-center/pages/ai-command.js:6202:                                console.warn("AI Command backend campaign preview fallback", error);
+public/control-center/pages/ai-command.js:6206:                                        backendFallbackReason: asString(error?.message || "Backend preview unavailable")
+public/control-center/pages/ai-command.js:6212:                Array.from(document.querySelectorAll("[data-aicmd-smart-campaign-preview]")).forEach((btn) => {
+public/control-center/pages/ai-command.js:6214:                                updateStatus("Preparing AI Team campaign preview...");
+public/control-center/pages/ai-command.js:6215:                                const preview = await buildCampaignWizardPreviewWithBackendFallback();
+public/control-center/pages/ai-command.js:6218:                                        type: "campaign",
+public/control-center/pages/ai-command.js:6220:                                        preview
+public/control-center/pages/ai-command.js:6223:                                        type: "smart_campaign_preview",
+public/control-center/pages/ai-command.js:6224:                                        outputType: "campaign_package",
+public/control-center/pages/ai-command.js:6226:                                        title: preview.title,
+public/control-center/pages/ai-command.js:6227:                                        summary: preview.summary,
+public/control-center/pages/ai-command.js:6228:                                        source: preview.source,
+public/control-center/pages/ai-command.js:6229:                                        sourceLabel: asString(preview.sourceLabel || ""),
+public/control-center/pages/ai-command.js:6230:                                        goal: preview.goal,
+public/control-center/pages/ai-command.js:6231:                                        channel: preview.channel,
+public/control-center/pages/ai-command.js:6232:                                        market: asString(preview.market || ""),
+public/control-center/pages/ai-command.js:6233:                                        language: asString(preview.language || ""),
+public/control-center/pages/ai-command.js:6234:                                        format: asString(preview.format || ""),
+public/control-center/pages/ai-command.js:6235:                                        deadline: asString(preview.deadline || ""),
+public/control-center/pages/ai-command.js:6236:                                        audience: asString(preview.audience || ""),
+public/control-center/pages/ai-command.js:6237:                                        offer: asString(preview.offer || ""),
+public/control-center/pages/ai-command.js:6238:                                        productFocus: asString(preview.productFocus || ""),
+public/control-center/pages/ai-command.js:6239:                                        complianceSensitivity: asString(preview.complianceSensitivity || ""),
+public/control-center/pages/ai-command.js:6240:                                        campaignPackage: asObject(preview.campaignPackage),
+public/control-center/pages/ai-command.js:6241:                                        sections: preview.sections,
+public/control-center/pages/ai-command.js:6242:                                        safety: preview.safety,
+public/control-center/pages/ai-command.js:6243:                                        safetyLabel: preview.safety,
+public/control-center/pages/ai-command.js:6245:                                        confirmationNote: "Review and route this campaign package through the owning destination workspace before any publishing, sending, approval, task creation, provider execution, or workflow mutation.",
+public/control-center/pages/ai-command.js:6246:                                        nextSafeAction: "Review the campaign package, then send it to Media Studio or Publishing.",
+public/control-center/pages/ai-command.js:6247:                                        backendPreview: Boolean(preview.backendPreview),
+public/control-center/pages/ai-command.js:6248:                                        backendSource: asString(preview.backendSource || ""),
+public/control-center/pages/ai-command.js:6249:                                        backendFallbackReason: asString(preview.backendFallbackReason || "")
+public/control-center/pages/ai-command.js:6252:                                persistSessionDraft(sessionKey, session, preview.backendPreview ? "Campaign Builder backend preview prepared" : "Campaign Builder local fallback preview prepared");
+public/control-center/pages/ai-command.js:6253:                                updateStatus(preview.backendPreview ? "Backend AI Team preview prepared. Review before any handoff or approval." : "Local campaign preview prepared because backend preview is unavailable.");
+public/control-center/pages/ai-command.js:6254:                                showMessage?.(preview.backendPreview ? "Backend AI Team campaign preview is ready for review." : "Campaign preview is ready using the local fallback.");
+public/control-center/pages/ai-command.js:6259:                const buildCampaignReviewHandoff = (action, preview) => {
+public/control-center/pages/ai-command.js:6271:                                id: `campaign_handoff_${Date.now()}`,
+public/control-center/pages/ai-command.js:6272:                                type: "ai_command_campaign_handoff",
+public/control-center/pages/ai-command.js:6278:                                title: asString(preview.title || "Campaign handoff"),
+public/control-center/pages/ai-command.js:6279:                                summary: asString(preview.summary || ""),
+public/control-center/pages/ai-command.js:6280:                                source_type: asString(preview.source || ""),
+public/control-center/pages/ai-command.js:6281:                                source_label: asString(preview.sourceLabel || preview.source || ""),
+public/control-center/pages/ai-command.js:6282:                                goal: asString(preview.goal || ""),
+public/control-center/pages/ai-command.js:6283:                                channel: asString(preview.channel || ""),
+public/control-center/pages/ai-command.js:6284:                                market: asString(preview.market || ""),
+public/control-center/pages/ai-command.js:6285:                                language: asString(preview.language || ""),
+public/control-center/pages/ai-command.js:6286:                                format: asString(preview.format || ""),
+public/control-center/pages/ai-command.js:6287:                                deadline: asString(preview.deadline || ""),
+public/control-center/pages/ai-command.js:6288:                                audience: asString(preview.audience || ""),
+public/control-center/pages/ai-command.js:6289:                                offer: asString(preview.offer || ""),
+public/control-center/pages/ai-command.js:6290:                                product_focus: asString(preview.productFocus || ""),
+public/control-center/pages/ai-command.js:6291:                                compliance_sensitivity: asString(preview.complianceSensitivity || ""),
+public/control-center/pages/ai-command.js:6292:                                campaignPackage: asObject(preview.campaignPackage),
+public/control-center/pages/ai-command.js:6293:                                sections: asArray(preview.sections),
+public/control-center/pages/ai-command.js:6294:                                backend_preview: Boolean(preview.backendPreview),
+public/control-center/pages/ai-command.js:6295:                                backend_source: asString(preview.backendSource || ""),
+public/control-center/pages/ai-command.js:6296:                                backend_fallback_reason: asString(preview.backendFallbackReason || ""),
+public/control-center/pages/ai-command.js:6305:                                window.localStorage?.setItem?.("mh_ai_command_campaign_handoff", payload);
+public/control-center/pages/ai-command.js:6307:                                window.sessionStorage?.setItem?.("mh_ai_command_campaign_handoff", payload);
+public/control-center/pages/ai-command.js:6310:                                console.warn("Unable to store AI Command campaign handoff", error);
+public/control-center/pages/ai-command.js:6316:                        const preview = asObject(wizard.preview);
+public/control-center/pages/ai-command.js:6317:                        if (!preview.title) {
+public/control-center/pages/ai-command.js:6318:                                updateStatus("Generate a campaign preview before choosing a review action.");
+public/control-center/pages/ai-command.js:6333:                                const handoff = buildCampaignReviewHandoff(action, preview);
+public/control-center/pages/ai-command.js:6375:                Array.from(document.querySelectorAll("[data-aicmd-smart-campaign-action]")).forEach((btn) => {
+public/control-center/pages/ai-command.js:6377:                                const action = asString(btn.getAttribute("data-aicmd-smart-campaign-action") || "");
+public/control-center/pages/ai-command.js:6553:		                        preview: session.outputPreview,
+public/control-center/pages/ai-command.js:6564:		                        const result = await executeProjectAiChat(projectName, {
+public/control-center/pages/ai-command.js:6578:		                                        campaign: aiContext.campaign,
+public/control-center/pages/ai-command.js:6657:		                                preview: session.outputPreview,
+public/control-center/pages/ai-command.js:6674:		                                preview: session.outputPreview,
+public/control-center/pages/ai-command.js:6693:                                const preview = setPreviewFromConversation({
+public/control-center/pages/ai-command.js:6699:                                if (!preview) return;
+public/control-center/pages/ai-command.js:6700:                                persistSessionDraft(sessionKey, session, "Guidance preview prepared from conversation");
+public/control-center/pages/ai-command.js:6702:                                updateStatus("Guidance preview prepared from conversation context.");
+public/control-center/pages/ai-command.js:6703:                                showMessage?.(`${specLabel} guidance preview prepared from conversation.`);
+public/control-center/pages/ai-command.js:6709:                // Phase 1: converts the current conversation into a task preview. No backend execution.
+public/control-center/pages/ai-command.js:6718:                                const preview = setPreviewFromConversation({
+public/control-center/pages/ai-command.js:6724:                                if (!preview) return;
+public/control-center/pages/ai-command.js:6725:                                persistSessionDraft(sessionKey, session, "Task preview prepared from conversation");
+public/control-center/pages/ai-command.js:6726:                                updateStatus("Task draft preview prepared from conversation context. Review before creating durable tasks.");
+public/control-center/pages/ai-command.js:6727:                                showMessage?.("Task draft preview prepared from conversation.");
+public/control-center/pages/ai-command.js:6741:                                const preview = setPreviewFromConversation({
+public/control-center/pages/ai-command.js:6747:                                if (!preview) return;
+public/control-center/pages/ai-command.js:6748:                                persistSessionDraft(sessionKey, session, "Workflow preview prepared from conversation");
+public/control-center/pages/ai-command.js:6749:                                updateStatus("Workflow draft preview prepared from conversation context. No workflow run started.");
+public/control-center/pages/ai-command.js:6750:                                showMessage?.("Workflow draft preview prepared from conversation.");
+public/control-center/pages/ai-command.js:6756:                // Phase 1: converts the current conversation into a handoff preview. No backend write.
+public/control-center/pages/ai-command.js:6765:                                const preview = setPreviewFromConversation({
+public/control-center/pages/ai-command.js:6771:                                if (!preview) return;
+public/control-center/pages/ai-command.js:6772:                                persistSessionDraft(sessionKey, session, "Handoff preview prepared from conversation");
+public/control-center/pages/ai-command.js:6773:                                updateStatus("Handoff preview prepared from conversation context. Review destination before sending.");
+public/control-center/pages/ai-command.js:6774:                                showMessage?.("Handoff preview prepared from conversation.");
+public/control-center/pages/ai-command.js:6790:					campaign: aiContext.campaign
+public/control-center/pages/ai-command.js:6893:					preview: session.outputPreview,
+public/control-center/pages/ai-command.js:6907:		                const preview = setPreviewFromConversation({
+public/control-center/pages/ai-command.js:6915:		                        preview.title = latestResponse.responseTitle || preview.title;
+public/control-center/pages/ai-command.js:6916:		                        preview.summary = latestResponse.responseText;
+public/control-center/pages/ai-command.js:6917:		                        preview.generatedAt = latestResponse.generatedAt || nowIso();
+public/control-center/pages/ai-command.js:6921:		                        preview: session.outputPreview,
+public/control-center/pages/ai-command.js:6928:		                updateStatus("Conversation converted into a draft preview.");
+public/control-center/pages/ai-command.js:6929:		                showMessage?.("Draft preview ready from conversation.");
+public/control-center/pages/ai-command.js:6985:		const previewCopyBtn = $("aicmdV2PreviewCopyBtn");
+public/control-center/pages/ai-command.js:6986:		if (previewCopyBtn) {
+public/control-center/pages/ai-command.js:6987:			previewCopyBtn.onclick = async () => {
+public/control-center/pages/ai-command.js:7009:		const previewUseBtn = $("aicmdV2PreviewUseBtn");
+public/control-center/pages/ai-command.js:7010:		if (previewUseBtn) {
+public/control-center/pages/ai-command.js:7011:			previewUseBtn.onclick = () => {
+public/control-center/pages/ai-command.js:7028:		const previewSendBtn = $("aicmdV2PreviewSendBtn");
+public/control-center/pages/ai-command.js:7029:		if (previewSendBtn) {
+public/control-center/pages/ai-command.js:7030:			previewSendBtn.onclick = () => {
+public/control-center/pages/ai-command.js:7034:					updateStatus("No destination route is available for this preview.");
+public/control-center/pages/ai-command.js:7039:					id: `aicmd-preview-${Date.now()}`,
+public/control-center/pages/ai-command.js:7051:							routeSuggestions: [{ route: destination, label: routeLabel(destination), reason: "Phase 2 preview destination" }],
+public/control-center/pages/ai-command.js:7052:							phase2_output_preview: output
+public/control-center/pages/ai-command.js:7064:		const previewSaveBtn = $("aicmdV2PreviewSaveBtn");
+public/control-center/pages/ai-command.js:7065:		if (previewSaveBtn) {
+public/control-center/pages/ai-command.js:7066:			previewSaveBtn.onclick = () => {
+public/control-center/pages/ai-command.js:7070:					preview: output,
+public/control-center/pages/ai-command.js:7079:		const previewReadBtn = $("aicmdV2PreviewReadBtn");
+public/control-center/pages/ai-command.js:7080:		if (previewReadBtn) {
+public/control-center/pages/ai-command.js:7081:			previewReadBtn.onclick = () => {
+public/control-center/pages/ai-command.js:7085:					updateStatus("Read preview is not supported in this browser.");
+public/control-center/pages/ai-command.js:7088:				const previewText = [humanizeValue(output.title), humanizeValue(output.summary)]
+public/control-center/pages/ai-command.js:7091:				const utterance = new SpeechSynthesisUtterance(previewText || "Draft preview ready.");
+public/control-center/pages/ai-command.js:7094:				updateStatus("Reading preview locally in browser.");
+public/control-center/pages/ai-command.js:7098:		const previewClearBtn = $("aicmdV2PreviewClearBtn");
+public/control-center/pages/ai-command.js:7099:		if (previewClearBtn) {
+public/control-center/pages/ai-command.js:7100:			previewClearBtn.onclick = () => {
+
+### backend AI/campaign preview/strategy references
+614:      campaign_id: asString(req?.body?.campaign || req?.body?.campaign_id || ''),
+1203:    legacy: 'launch-ops',
+1210:  channels: {
+1211:    legacy: 'channels',
+1212:    canonical: 'channels'
+1214:  'campaign-execution': {
+1215:    legacy: 'campaign-execution',
+1216:    canonical: 'campaign-execution'
+1218:  'campaign-finalization': {
+1219:    legacy: 'campaign-finalization',
+1220:    canonical: 'campaign-finalization'
+1226:  'german-launch': {
+1227:    legacy: 'german-launch',
+1228:    canonical: 'german-launch'
+1660:    reel: path.join('content', 'campaigns', 'reel-brief-queue.json'),
+1704:  'campaign-execution',
+1705:  'campaign-finalization',
+2083:      subject: `New campaign visual for ${projectName}`,
+2086:      body: `This campaign asset was auto-prepared by the system using the latest approved brand-controlled render.`,
+2376:function buildAssetFidelityRules(sourceOfTruth = {}, goal = '') {
+2378:  const designIntent = inferDesignIntent(goal);
+2422:  const audience =
+2423:    Array.isArray(mi.target_audience) && mi.target_audience.length > 0
+2424:      ? mi.target_audience[0]
+2432:      goal: 'awareness',
+2439:      goal: 'consideration',
+2440:      hook: `${productName} highlights real ${productType} care benefits for ${audience}.`,
+2445:    offer: {
+2446:      goal: 'conversion',
+2447:      hook: `${productName} is ideal for promotional conversion-focused campaigns.`,
+2448:      visual_style: 'bold_offer_visual',
+2449:      format: 'offer post',
+2453:      goal: 'education',
+2460:      goal: 'attention',
+2467:      goal: 'conversion',
+2474:      goal: 'recruitment',
+2485:  const rules = buildAssetFidelityRules(sourceOfTruth, renderRequest.goal || '');
+2527:Create a realistic, premium, cinematic, marketing-grade visual that supports the campaign objective while preserving the exact product identity.
+2912:      (Array.isArray(m.target_audience) && m.target_audience.length > 0) ||
+2962:    domain: 'channels',
+2965:  const baseDir = path.join(resolution.activeReadPath, 'channels', 'meta');
+2983:      goal_style: 'visual storytelling with concise caption',
+2991:      goal_style: 'short-form visual momentum',
+2999:      goal_style: 'clear value-led copy',
+3007:      goal_style: 'attention-first short-form creative',
+3016:function buildMetaIntelligence(projectName, placement, goal) {
+3026:    goal,
+3029:    audience_fit: 'Target visually-driven users who respond to premium presentation, clarity, and direct value cues.',
+3035:function buildMetaCaption(projectName, placement, goal) {
+3037:  const intelligence = buildMetaIntelligence(projectName, placement, goal);
+3045:    : `A brand-controlled creative built for ${goal}, designed to present the product with clarity, confidence, and premium appeal.`;
+3055:    '#campaigncreative',
+3094:function buildMetaPackage(projectName, placement, goal) {
+3098:  const content = buildMetaCaption(projectName, placement, goal);
+3106:    channel_group: 'meta',
+3109:    goal,
+3124:    domain: 'channels',
+3125:    artifactType: 'meta_channel_package',
+3136:    domain: 'channels',
+3141:    requestedFile: 'channels/meta/packages/*.json'
+3157:    domain: 'channels',
+3160:  const baseDir = path.join(resolution.activeReadPath, 'channels');
+3175:function buildTikTokIntelligence(projectName, goal) {
+3179:    goal,
+3182:    audience_fit: 'Target short-attention users who respond to fast visual payoff, clarity, and premium product framing.',
+3206:function buildTikTokPackage(projectName, goal) {
+3209:  const intelligence = buildTikTokIntelligence(projectName, goal);
+3218:    channel: 'tiktok',
+3220:    goal,
+3237:    caption: 'Premium visual launch built with strict brand control.',
+3245:    domain: 'channels',
+3246:    artifactType: 'tiktok_channel_package',
+3257:    domain: 'channels',
+3262:    requestedFile: 'channels/tiktok/*.json'
+3284:      goal_style: 'fast hook + short-form retention'
+3291:      goal_style: 'title + thumbnail + structured value delivery'
+3298:function buildYouTubeIntelligence(projectName, format, goal) {
+3309:    goal,
+3316:    audience_fit: format === 'short'
+3351:function buildYouTubePackage(projectName, format, goal) {
+3354:  const intelligence = buildYouTubeIntelligence(projectName, format, goal);
+3362:    : `${projectName}: Premium Visual Execution for ${goal}`;
+3366:    : `This video package is designed for ${goal} using approved brand-controlled creative, with emphasis on product credibility, premium presentation, and visual trust.`;
+3371:    channel: 'youtube',
+3374:    goal,
+3405:    domain: 'channels',
+3406:    artifactType: 'youtube_channel_package',
+3417:    domain: 'channels',
+3422:    requestedFile: 'channels/youtube/*.json'
+3438:    domain: 'channels',
+3441:  const baseDir = path.join(resolution.activeReadPath, 'channels');
+3488:function buildMarketplaceIntelligence(projectName, marketplace, goal) {
+3498:    goal,
+3501:    audience_fit: marketplace === 'amazon'
+3502:      ? 'Target users comparing offers quickly and relying on listing clarity, image trust, and bullet readability.'
+3509:function buildAmazonPackage(projectName, goal) {
+3512:  const intelligence = buildMarketplaceIntelligence(projectName, 'amazon', goal);
+3522:    goal,
+3534:    description: `This Amazon package is built for ${goal} using approved real assets and a conversion-oriented marketplace structure.`,
+3564:    domain: 'channels',
+3565:    artifactType: 'amazon_channel_package',
+3573:function buildEbayPackage(projectName, goal) {
+3576:  const intelligence = buildMarketplaceIntelligence(projectName, 'ebay', goal);
+3586:    goal,
+3597:    description: `This eBay package is built for ${goal} using approved brand-controlled assets and a trust-oriented listing structure.`,
+3619:    domain: 'channels',
+3620:    artifactType: 'ebay_channel_package',
+3628:function buildMarketplacePackage(projectName, marketplace, goal) {
+3630:    return buildAmazonPackage(projectName, goal);
+3634:    return buildEbayPackage(projectName, goal);
+3645:          domain: 'channels',
+3650:          requestedFile: 'channels/marketplace/amazon/*.json'
+3655:          domain: 'channels',
+3660:          requestedFile: 'channels/marketplace/ebay/*.json'
+3682:    domain: 'german-launch',
+3687:    domain: 'german-launch',
+3690:    requestedIdentifier: 'german-launch-root',
+3691:    requestedFile: 'german-launch'
+3693:  const legacyBaseDir = path.join(resolution.legacyRoot, 'german-launch');
+3757:function selectLaunchReadyProducts(products, projectName, context = 'launch') {
+3759:    appLogger.warn('launch_products_invalid', {
+3769:  const launchReadyProducts = [];
+3795:    launchReadyProducts.push(product);
+3798:  if (!launchReadyProducts.length) {
+3799:    appLogger.warn('launch_ready_products_empty', {
+3806:  return launchReadyProducts;
+3812:  const launchReadyProducts = selectLaunchReadyProducts(products, projectName, 'build_german_launch_plan');
+3813:  const heroProducts = launchReadyProducts.slice(0, 3);
+3814:  const supportProducts = launchReadyProducts.slice(3, 10);
+3819:    launch_goals: [
+3824:    launch_priorities: {
+3837:      published_count: launchReadyProducts.length,
+3840:      validation_status: launchReadyProducts.length ? 'ready' : 'no_launch_ready_products'
+3842:    channel_mix: [
+3858:    audience_mapping: [
+3865:    offer_logic: [
+3866:      'launch discount',
+3867:      'bundle offers',
+3868:      'limited-time campaign'
+3873:  const filePath = path.join(paths.legacyPlanDir, 'launch-plan.json');
+3877:    domain: 'german-launch',
+3878:    artifactType: 'german_launch_plan',
+3879:    identifier: 'launch-plan',
+3892:  const filePath = path.join(paths.planDir, 'launch-plan.json');
+3895:    throw new Error('German launch plan not found');
+3909:  let launchReadyProducts = selectLaunchReadyProducts(products, projectName, 'build_launch_wave');
+3912:    launchReadyProducts = launchReadyProducts.filter((p) => productMatchesLaunchTheme(p, ['beard']));
+3916:    launchReadyProducts = launchReadyProducts.filter((p) => productMatchesLaunchTheme(p, ['hair']));
+3920:    launchReadyProducts = launchReadyProducts.filter((p) => productMatchesLaunchTheme(p, ['skin', 'face']));
+3923:  const selectedProducts = launchReadyProducts.slice(0, 5).map(p => ({
+3933:    channel_pack: p.channel_pack || {}
+3940:    campaign_type: 'launch',
+3941:    goals: ['awareness', 'engagement', 'conversion'],
+3942:    channels: ['instagram', 'tiktok', 'facebook', 'email'],
+3955:    domain: 'german-launch',
+3956:    artifactType: 'german_launch_wave',
+3998:  const legacyBaseDir = path.join(resolution.legacyRoot, 'launch-ops');
+4021:function buildChannelConnectorPayload(projectName, waveName, channel) {
+4023:  const normalizedChannel = String(channel || '').toLowerCase();
+4029:    channel: normalizedChannel,
+4036:    const channelPack = product.channel_pack || {};
+4037:    const asset = channelPack[normalizedChannel] || null;
+4046:      channel_asset: asset
+4070:function scheduleLaunchJob(projectName, waveName, channel, scheduledFor) {
+4074:  const payload = buildChannelConnectorPayload(projectName, waveName, channel);
+4082:    channel: channel,
+4159:function buildPublishingDisplayTitle(title, waveName, channel) {
+4164:  const safeChannel = String(channel || '').trim();
+4177:  const channel = String(input.channel || base.channel || '').trim().toLowerCase();
+4178:  const title = buildPublishingDisplayTitle(input.title || base.title, input.wave_name || base.wave_name, channel);
+4180:  const offer = String(input.offer || base.offer || '').trim();
+4183:    offer ||
+4189:      channel === 'email'
+4191:        : ['instagram', 'facebook', 'tiktok', 'youtube'].includes(channel)
+4194:    channel,
+4200:    cta: String(input.cta || base.cta || (channel === 'email' ? 'Review email' : 'Shop now')).trim(),
+4201:    offer,
+4203:    goal: String(input.goal || base.goal || '').trim(),
+4220:  const channelAsset = primary.channel_asset || {};
+4223:      channel: input.channel || payload.channel,
+4226:      caption: channelAsset.caption || channelAsset.body || '',
+4227:      body: channelAsset.body || channelAsset.caption || '',
+4228:      subject: channelAsset.subject || '',
+4229:      headline: channelAsset.headline || primary.product_name || payload.wave_name || '',
+4230:      cta: channelAsset.cta || '',
+4231:      format: channelAsset.format || '',
+4232:      goal: channelAsset.goal || '',
+4233:      visual_prompt: channelAsset.visual_prompt || '',
+4237:      offer: input.offer || ''
+4246:    caption: item.channel_asset?.caption || '',
+4247:    format: item.channel_asset?.format || '',
+4248:    goal: item.channel_asset?.goal || ''
+4261:  const normalizedChannel = String(rawJob.channel || '').trim().toLowerCase();
+4276:      channel: normalizedChannel,
+4288:    channel: normalizedChannel,
+4300:    offer: String(rawJob.offer || '').trim(),
+4329:function tryBuildPublishingConnector(projectName, waveName, channel, input = {}) {
+4331:  const safeChannel = String(channel || '').trim().toLowerCase();
+4372:  const channel = String(input.channel || existing.channel || '').trim().toLowerCase();
+4374:  if (!channel) {
+4375:    throw new Error('Missing channel');
+4393:  const title = buildPublishingDisplayTitle(input.title || existing.title, waveName, channel);
+4397:  const connectorInfo = tryBuildPublishingConnector(safeProject, waveName, channel, {
+4401:    offer: input.offer || existing.offer || ''
+4410:      channel,
+4411:      offer: input.offer || existing.offer || '',
+4426:    channel,
+4436:    offer: String(input.offer || existing.offer || '').trim(),
+4544:function getChannelAssetForProduct(product, channel) {
+4545:  const normalizedChannel = String(channel || '').toLowerCase();
+4546:  const channelPack = product.channel_pack || {};
+4547:  return channelPack[normalizedChannel] || null;
+4550:function buildPostReview(projectName, channel, productSlug) {
+4552:  const asset = getChannelAssetForProduct(product, channel);
+4581:  if ((asset.caption || '').length > 220 && ['instagram', 'facebook'].includes(String(channel).toLowerCase())) {
+4589:    channel: String(channel || '').toLowerCase(),
+4596:    channel_fit: 'strong',
+4606:    `${String(channel).toLowerCase()}_${productSlug}.json`
+4613:    identifier: `${String(channel).toLowerCase()}_${productSlug}`,
+4624:function buildImprovedChannelPost(projectName, channel, productSlug) {
+4626:  const asset = getChannelAssetForProduct(product, channel);
+4634:  const normalizedChannel = String(channel || '').toLowerCase();
+4660:    channel: normalizedChannel,
+4689:function savePostPerformance(projectName, channel, productSlug, metricJson) {
+4698:  const normalizedChannel = String(channel || '').toLowerCase();
+4713:    channel: normalizedChannel,
+4730:    channel: normalizedChannel,
+4746:    channels: []
+4754:    result.channels.push({
+4764:function reviewChannelLearning(projectName, channel) {
+4765:  const normalizedChannel = String(channel || '').toLowerCase();
+4788:    channel: normalizedChannel,
+4933:    goal: job.goal,
+5129:function buildGenerationPrompt(projectName, assetType, goal) {
+5130:  const executionPackage = buildExecutionPackage(projectName, assetType, goal);
+5136:  lines.push(`Goal: ${goal}.`);
+5166:function buildGenerationJob(projectName, assetType, goal) {
+5168:  const executionPackage = buildExecutionPackage(projectName, assetType, goal);
+5179:    goal,
+5188:    final_generation_prompt: buildGenerationPrompt(projectName, assetType, goal),
+5203:function buildExecutionInstructions(projectName, assetType, goal) {
+5207:  const promptPackage = generateBrandControlledPrompt(projectName, assetType, goal);
+5212:    goal,
+5231:function buildExecutionPackage(projectName, assetType, goal) {
+5233:  const execution = buildExecutionInstructions(projectName, assetType, goal);
+5238:    goal,
+5326:function generateBrandControlledPrompt(projectName, assetType, goal) {
+5335:  lines.push(`Goal: ${goal}.`);
+5370:    goal,
+5946:    text.includes('campaign') ||
+5949:    text.includes('audience') ||
+5950:    text.includes('offer') ||
+5951:    text.includes('launch') ||
+6023:function inferDesignIntent(goal = '') {
+6024:  const g = String(goal || '').toLowerCase();
+6026:  if (g.includes('offer') || g.includes('discount') || g.includes('sale')) {
+6028:      content_type: 'offer_visual',
+6037:      visual_style: 'campaign_thematic',
+6099:    target_audience: [],
+6130:  if (text.includes('barber')) enrichment.target_audience.push('barbers');
+6131:  if (text.includes('gift')) enrichment.target_audience.push('gift buyers');
+6132:  enrichment.target_audience.push('men');
+6295:    campaignsDir: path.join(baseDir, 'campaigns'),
+6297:    launchDir: path.join(baseDir, 'launch'),
+6505:    campaign_docs: ['campaign_docs', 'campaign_doc']
+6550:  const goals = [projectData.primary_goal, projectData.secondary_goal]
+6553:  const socialChannels = normalizeSetupListValue(projectData.social_channels || projectData.social_links);
+6563:    positioning: projectData.positioning || projectData.offer_positioning || projectData.differentiation || '',
+6564:    offer_positioning: projectData.offer_positioning || '',
+6568:    audience: projectData.audience || projectData.audience_primary || '',
+6569:    audience_primary: projectData.audience_primary || '',
+6570:    audience_problem: projectData.audience_problem || '',
+6572:    goals,
+6574:    social_channels: socialChannels,
+6605:    paths.campaignsDir,
+6607:    paths.launchDir,
+6719:      campaigns: { path: paths.campaignsDir, exists: fs.existsSync(paths.campaignsDir) },
+6750:  const socialChannels = normalizeSetupListValue(projectData.social_channels || projectData.social_links);
+6751:  socialChannels.forEach((channel) => {
+6752:    const key = channel.toLowerCase();
+6766:    campaign_docs: projectData.campaign_docs
+6805:    paths.campaignsDir,
+6807:    paths.launchDir,
+6840:    default_channels: ['website', 'instagram', 'facebook'],
+6842:    data_requirements: ['business_profile', 'target_audience', 'offers', 'contact_details'],
+6843:    content_categories: ['brand_story', 'offers', 'education', 'social_proof'],
+6844:    workspace_priorities: ['setup', 'library', 'content-studio', 'campaign-studio', 'publishing'],
+6849:      'define_target_audience',
+6850:      'connect_primary_channels',
+6851:      'create_first_campaign'
+6860:      default_channels: ['website', 'woocommerce', 'instagram', 'facebook', 'google', 'tiktok'],
+6862:      data_requirements: ['products', 'inventory', 'offers', 'shipping', 'payment_methods', 'marketplaces'],
+6863:      content_categories: ['product_launch', 'before_after', 'offers', 'how_to_use', 'reviews'],
+6864:      workspace_priorities: ['setup', 'library', 'campaign-studio', 'content-studio', 'media-studio', 'publishing', 'insights'],
+6866:      starter_checklist: ['add_products', 'upload_product_media', 'define_shipping', 'connect_woocommerce', 'create_launch_campaign'],
+6873:      default_channels: ['instagram', 'tiktok', 'youtube', 'spotify', 'website'],
+6877:      workspace_priorities: ['setup', 'library', 'media-studio', 'content-studio', 'campaign-studio', 'publishing'],
+6879:      starter_checklist: ['complete_artist_profile', 'upload_press_photos', 'add_music_links', 'define_fan_audience', 'create_release_campaign'],
+6886:      default_channels: ['instagram', 'tiktok', 'google_business', 'website', 'facebook'],
+6888:      data_requirements: ['services', 'staff', 'booking_info', 'location', 'offers', 'reviews'],
+6889:      content_categories: ['services', 'before_after', 'offers', 'team', 'client_reviews'],
+6892:      starter_checklist: ['add_services', 'upload_before_after_media', 'add_booking_details', 'connect_google_business', 'create_local_campaign'],
+6899:      default_channels: ['website', 'facebook', 'instagram', 'google', 'crm'],
+6903:      workspace_priorities: ['setup', 'library', 'content-studio', 'campaign-studio', 'ads-manager', 'governance'],
+6905:      starter_checklist: ['add_property_data', 'upload_property_media', 'define_lead_flow', 'connect_crm', 'create_listing_campaign'],
+6912:      default_channels: ['website', 'google_business', 'instagram', 'facebook'],
+6915:      content_categories: ['services', 'case_studies', 'client_results', 'faq', 'offers'],
+6916:      workspace_priorities: ['setup', 'library', 'content-studio', 'campaign-studio', 'publishing'],
+6918:      starter_checklist: ['define_services', 'add_service_area', 'upload_testimonials', 'connect_contact_flow', 'create_offer_campaign'],
+6925:      default_channels: ['instagram', 'tiktok', 'google_business', 'website', 'facebook'],
+6926:      required_assets: ['logo', 'menu', 'food_photos', 'location_photos', 'offers'],
+6929:      workspace_priorities: ['setup', 'library', 'media-studio', 'publishing', 'campaign-studio'],
+6931:      starter_checklist: ['add_menu', 'upload_food_photos', 'add_opening_hours', 'connect_google_business', 'create_local_offer'],
+6938:      default_channels: ['website', 'linkedin', 'instagram', 'facebook'],
+6942:      workspace_priorities: ['setup', 'library', 'content-studio', 'campaign-studio', 'insights', 'workflows'],
+6944:      starter_checklist: ['define_services', 'add_case_studies', 'define_lead_offer', 'connect_crm', 'create_lead_campaign'],
+6951:      default_channels: ['google_business', 'website', 'instagram', 'facebook'],
+6953:      data_requirements: ['opening_hours', 'location', 'offers', 'contact_details', 'reviews'],
+6954:      content_categories: ['local_offers', 'reviews', 'services', 'community', 'faq'],
+6993:    default_channels: businessTemplate.default_channels,
+7011:      campaigns: paths.campaignsDir,
+7013:      launch: paths.launchDir,
+7060:    positioning: normalizeSetupTextValue(input.positioning || input.offer_positioning || input.differentiation),
+7061:    audience: normalizeSetupTextValue(input.audience || input.audience_primary),
+7062:    goals: normalizeSetupListValue(input.goals),
+7064:    social_channels: normalizeSetupListValue(input.social_channels || input.social_links),
+7069:    campaign_docs: normalizeSetupTextValue(input.campaign_docs)
+7081:    offer_positioning: normalizeSetupTextValue(input.offer_positioning),
+7085:    primary_goal: normalizeSetupTextValue(input.primary_goal),
+7086:    secondary_goal: normalizeSetupTextValue(input.secondary_goal),
+7087:    launch_window: normalizeSetupTextValue(input.launch_window),
+7088:    audience_primary: normalizeSetupTextValue(input.audience_primary),
+7089:    audience_problem: normalizeSetupTextValue(input.audience_problem),
+7090:    audience_geography: normalizeSetupTextValue(input.audience_geography),
+7273:  const campaigns = listCampaigns(safeProject, { limit: 50 });
+7276:  const setupFields = ['project_name', 'project_type', 'website_url', 'market', 'language', 'currency', 'primary_goal', 'audience_primary'];
+7282:  const brandFields = ['brand_name', 'business_type', 'market', 'language', 'currency', 'tone', 'positioning', 'audience', 'goals', 'website'];
+7310:  const campaignReadiness = campaigns.length > 0 ? 100 : 40;
+7323:    campaign_readiness: campaignReadiness,
+7335:    has_campaigns_dir: fs.existsSync(paths.campaignsDir),
+7337:    has_launch_dir: fs.existsSync(paths.launchDir),
+7370:  if (domainScores.campaign_readiness < 100) missing.push('campaign_readiness');
+8372:      purpose: 'product_offers',
+8373:      purpose_label: 'Product and offers',
+8378:      description: 'Structured product data for planning, content, and campaign packaging.',
+8388:      purpose: 'product_offers',
+8389:      purpose_label: 'Product and offers',
+8393:      aliases: ['pricing', 'price_list', 'offers', 'offer_doc'],
+8394:      description: 'Pricing, bundles, discounts, and commercial offer rules.',
+8396:        what_to_upload: 'Price lists, offer sheets, bundles, campaign discounts, coupons, and margin guardrails.',
+8397:        why_it_matters: 'Prevents Campaign Studio, Publishing, and AI Command from inventing prices or offers.',
+8452:      purpose: 'campaign_social',
+8456:      target_folder: 'campaigns',
+8458:      description: 'Organic social creative, post visuals, reels, stories, and channel-ready source assets.',
+8460:        what_to_upload: 'Organic post images, story frames, reels, thumbnails, channel templates, and captions references.',
+8461:        why_it_matters: 'Content Studio, Media Studio, Campaign Studio, and Publishing can reuse proven channel assets.',
+8466:      asset_type: 'campaign_assets',
+8468:      purpose: 'campaign_social',
+8472:      target_folder: 'campaigns',
+8473:      aliases: ['campaign_asset', 'creative_assets', 'ad_assets'],
+8474:      description: 'Campaign-specific creative, copy, export packs, banners, and channel packages.',
+8477:        why_it_matters: 'Campaign Studio and Publishing need a reusable package for each campaign or wave.',
+9230:    'campaigns': base.campaignsDir,
+9231:    'launch': base.launchDir,
+9333:    campaigns: base.campaignsDir,
+9334:    launch: base.launchDir,
+9553:      campaign_name: String(req.body?.campaign_name || req.body?.publish_package?.campaign_name || '').trim(),
+9554:      channel: bridgeResult.channel,
+9566:        campaign_name: result.campaign_name,
+9567:        channel: result.channel,
+9641:      campaign_name: String(req.body?.campaign_name || req.body?.email_package?.campaign_name || '').trim(),
+9655:        campaign_name: result.campaign_name,
+9780:      requestedAction: 'launch',
+9791:      requestedAction: 'launch',
+9793:      serviceDomain: 'campaign',
+9811:        campaign_name: String(req.body?.campaign_name || req.body?.campaign_package?.campaign_name || '').trim(),
+9813:        audience: bridgeResult.audience,
+9821:      campaign_name: String(req.body?.campaign_name || req.body?.campaign_package?.campaign_name || '').trim(),
+9828:      audience: bridgeResult.audience,
+9901:          'Add a stronger launch-offer banner above the fold',
+9907:        offer_suggestion: '15% launch discount or bundle with shaving gel',
+10495:    default_channels: businessTemplate.default_channels,
+10521:          default_channels: updated.default_channels,
+11206:  const goal = normalizeAiCommandPreviewInput(input.goal, 'Campaign launch');
+11207:  const channel = normalizeAiCommandPreviewInput(input.channel, 'Multi-channel');
+11208:  const audience = normalizeAiCommandPreviewInput(input.audience || input.target_audience || input.targetAudience, 'Primary customer segment');
+11209:  const offer = normalizeAiCommandPreviewInput(input.offer, 'Review-ready offer angle');
+11221:    `${goal} campaign for ${sourceLabel}`
+11228:  const campaignPackage = {
+11229:    concept: `${goal} campaign built from ${sourceLabel}.`,
+11230:    targetAudience: audience,
+11231:    offer,
+11239:    channels: [channel],
+11240:    launchPhases: [
+11241:      'Prepare campaign message and proof points.',
+11247:      `Position ${sourceLabel} around the ${goal.toLowerCase()} objective.`,
+11252:      `Lead with ${offer}.`,
+11254:      `Use destination-specific copy variations for ${channel}.`
+11275:        reason: 'Prepare creative and media assets from the campaign package.'
+11280:        reason: 'Turn the campaign package into a publishing draft.'
+11287:      id: 'campaign_summary',
+11289:      body: `${title}. Source: ${sourceLabel}. Goal: ${goal}. Channel: ${channel}.`
+11292:      id: 'audience_offer',
+11293:      title: 'Audience and offer',
+11294:      body: `Audience: ${audience}. Offer: ${offer}. Market: ${market}. Language: ${language}. Format: ${format}. Deadline: ${deadline}. Product focus: ${productFocus}. Compliance: ${complianceSensitivity}.`
+11300:        `Hook: ${offer}`,
+11301:        `CTA: Review and prepare the ${goal.toLowerCase()} package.`,
+11308:      items: campaignPackage.requiredAssets
+11313:      items: campaignPackage.missingBlockers
+11318:      items: campaignPackage.nextActions
+11323:    type: 'smart_campaign_preview',
+11325:    preview_only: true,
+11328:    summary: `Backend preview-only AI Team campaign package for ${goal} using ${sourceLabel}.`,
+11331:    goal,
+11332:    channel,
+11337:    audience,
+11338:    offer,
+11341:    campaignPackage,
+11345:      preview_only: true,
+11368:      message: error.message || 'Failed to build AI Command campaign preview.',
+11370:        preview_only: true,
+11378:app.post('/api/ai-command/project/:project/campaign-preview', handleAiCommandCampaignPreviewOnly);
+11538:      error: error.message || 'Failed to list campaigns'
+11545:    const campaign = upsertCampaign(req.params.project, req.body || {});
+11547:      campaign,
+11552:      error: error.message || 'Failed to save campaign'
+11559:    const campaign = getCampaign(req.params.project, req.params.campaignId);
+11560:    if (!campaign) {
+11563:    return res.json({ campaign });
+11566:      error: error.message || 'Failed to load campaign'
+11571:app.get('/media-manager/project/:project/campaigns', handleListCampaigns);
+11572:app.get('/public/media-manager/project/:project/campaigns', handleListCampaigns);
+11573:app.post('/media-manager/project/:project/campaigns', handleUpsertCampaign);
+11574:app.post('/public/media-manager/project/:project/campaigns', handleUpsertCampaign);
+11575:app.patch('/media-manager/project/:project/campaigns/:campaignId', (req, res) => {
+11578:    id: req.params.campaignId
+11582:app.patch('/public/media-manager/project/:project/campaigns/:campaignId', (req, res) => {
+11585:    id: req.params.campaignId
+11589:app.get('/media-manager/project/:project/campaigns/:campaignId', handleGetCampaign);
+11590:app.get('/public/media-manager/project/:project/campaigns/:campaignId', handleGetCampaign);
+11598:        campaign_id: req.query?.campaign_id
+11663:        campaign_id: req.query?.campaign_id,
+11828:async function handleExecuteAiCommand(req, res) {
+11903:async function handleExecuteAiChat(req, res) {
+11973:async function handleExecuteAiGuidance(req, res) {
+12043:function handleExecuteAiWorkflow(req, res) {
+12169:app.post('/media-manager/project/:project/ai/command', handleExecuteAiCommand);
+12170:app.post('/public/media-manager/project/:project/ai/command', handleExecuteAiCommand);
+12171:app.post('/media-manager/project/:project/ai/chat', handleExecuteAiChat);
+12172:app.post('/public/media-manager/project/:project/ai/chat', handleExecuteAiChat);
+12173:app.post('/media-manager/project/:project/ai/guidance', handleExecuteAiGuidance);
+12174:app.post('/public/media-manager/project/:project/ai/guidance', handleExecuteAiGuidance);
+12175:app.post('/media-manager/project/:project/ai/workflows/:workflowId/run', handleExecuteAiWorkflow);
+12176:app.post('/public/media-manager/project/:project/ai/workflows/:workflowId/run', handleExecuteAiWorkflow);
+12956:      channels:
+12957:        customerOperationsRuntime.channels.list()
+12961:      error: 'customer_operations_channels_failed',
+13044:app.get('/api/projects/:project/customer-operations/channels', (req, res) => {
+13072:  '/media-manager/project/:project/customer-operations/channels',
+13077:  '/public/media-manager/project/:project/customer-operations/channels',
+13354:      channel: req.body?.channel,
+13358:      offer: req.body?.offer,
+13397:      channel: req.body?.channel,
+13401:      offer: req.body?.offer,
+13441:      channel: req.body?.channel,
+13445:      offer: req.body?.offer,
+13480:      channel: req.body?.channel,
+13484:      offer: req.body?.offer,
+13892:    offer: {
+13895:      emphasize: ['offer clarity', 'product visibility', 'CTA readiness'],
+13956:      target_audience: [],
+14025:  const audience = Array.isArray(mi.target_audience) ? mi.target_audience : ['men'];
+14031:  const audienceText = audience.join(', ');
+14037:    const goal = map.goal || fallbackGoal;
+14041:      goal,
+14050:        `Usage context: ${usageText}. Audience: ${audienceText}. ` +
+14056:        `Open with a strong hook for ${audienceText}. ` +
+14076:    offer: makeBlock('offer', 'conversion'),
+14095:      goal: 'engagement + awareness'
+14110:      goal: 'attention + reach'
+14121:      goal: 'discovery'
+14136:      goal: 'conversion'
+14164:    domain: 'campaign-execution',
+14169:    domain: 'campaign-execution',
+14172:    requestedIdentifier: 'campaign-execution-root',
+14173:    requestedFile: 'campaign-execution'
+14175:  const legacyBaseDir = path.join(resolution.legacyRoot, 'campaign-execution');
+14193:function buildCampaignExecutionPackage(projectName, campaignName, productSlugs = []) {
+14202:    throw new Error('No matching products found for campaign package');
+14211:    campaign_name: campaignName,
+14222:      channel_pack: product.channel_pack || {}
+14229:    `${campaignName.replace(/[^a-z0-9_-]/gi, '_').toLowerCase()}.json`
+14234:    domain: 'campaign-execution',
+14235:    artifactType: 'campaign_execution_package',
+14247:function readCampaignExecutionPackage(projectName, campaignName) {
+14248:  const safeName = `${campaignName.replace(/[^a-z0-9_-]/gi, '_').toLowerCase()}.json`;
+14251:    domain: 'campaign-execution',
+14254:    requestedIdentifier: campaignName,
+14255:    requestedFile: `campaign-execution/packages/${safeName}`
+14269:function buildChannelExecutionPayload(projectName, campaignName, channel) {
+14270:  const pkg = readCampaignExecutionPackage(projectName, campaignName);
+14271:  const normalizedChannel = String(channel || '').toLowerCase();
+14275:    campaign_name: campaignName,
+14276:    channel: normalizedChannel,
+14283:    const channelPack = product.channel_pack || {};
+14285:    const asset = channelPack[normalizedChannel] || null;
+14295:      channel_asset: asset,
+14309:  // Semi-auto campaign artifacts are still dual-path during stabilization:
+14313:    domain: 'campaign-finalization',
+14318:    domain: 'campaign-finalization',
+14321:    requestedIdentifier: 'campaign-finalization-root',
+14322:    requestedFile: 'campaign-finalization'
+14324:  const legacyBaseDir = path.join(resolution.legacyRoot, 'campaign-finalization');
+14354:function buildCampaignMediaJob(projectName, campaignName, channel) {
+14355:  const payload = buildChannelExecutionPayload(projectName, campaignName, channel);
+14361:    `${campaignName.replace(/[^a-z0-9_-]/gi, '_').toLowerCase()}_${channel}.json`
+14367:    campaign_name: campaignName,
+14368:    channel,
+14376:    domain: 'campaign-finalization',
+14377:    artifactType: 'campaign_media_job',
+14389:function buildCampaignPublishPackage(projectName, campaignName, channel) {
+14390:  const payload = buildChannelExecutionPayload(projectName, campaignName, channel);
+14396:    `${campaignName.replace(/[^a-z0-9_-]/gi, '_').toLowerCase()}_${channel}.json`
+14402:    campaign_name: campaignName,
+14403:    channel,
+14412:    domain: 'campaign-finalization',
+14413:    artifactType: 'campaign_publish_package',
+14425:function buildCampaignEmailPackage(projectName, campaignName) {
+14426:  const payload = buildChannelExecutionPayload(projectName, campaignName, 'email');
+14432:    `${campaignName.replace(/[^a-z0-9_-]/gi, '_').toLowerCase()}.json`
+14440:    campaign_name: campaignName,
+14441:    channel: 'email',
+14450:    domain: 'campaign-finalization',
+14451:    artifactType: 'campaign_email_package',
+14463:function reviewCampaignFinalization(projectName, campaignName) {
+14464:  const safeName = campaignName.replace(/[^a-z0-9_-]/gi, '_').toLowerCase();
+14467:    domain: 'campaign-finalization',
+14471:    requestedIdentifier: campaignName,
+14472:    requestedFile: `campaign-finalization/media-jobs/${safeName}*`
+14476:    domain: 'campaign-finalization',
+14480:    requestedIdentifier: campaignName,
+14481:    requestedFile: `campaign-finalization/publish-packages/${safeName}*`
+14485:    domain: 'campaign-finalization',
+14488:    requestedIdentifier: campaignName,
+14489:    requestedFile: `campaign-finalization/email/${safeName}.json`
+14501:    campaign_name: campaignName,
+14590:  const campaignName = String(input.campaign_name || '').trim();
+14591:  const channel = String(input.channel || '').trim().toLowerCase();
+14592:  if (!campaignName || !channel) {
+14593:    const error = new Error('Missing publish package. Provide publish_package or campaign_name + channel');
+14599:  return buildCampaignPublishPackage(projectName, campaignName, channel);
+14604:  const channel = String(publishPackage.channel || '').trim().toLowerCase();
+14606:  const channelAsset = primaryAsset.channel_asset && typeof primaryAsset.channel_asset === 'object'
+14607:    ? primaryAsset.channel_asset
+14609:  const caption = String(channelAsset.caption || channelAsset.body || '').trim()
+14610:    || `${String(primaryAsset.product_name || publishPackage.campaign_name || 'Campaign').trim()} update`;
+14612:    channelAsset.media_path
+14613:    || channelAsset.asset_path
+14614:    || channelAsset.file_path
+14618:  const tiktokSteps = Array.isArray(channelAsset.structure) && channelAsset.structure.length
+14619:    ? channelAsset.structure
+14623:    channel,
+14630:        format: String(channelAsset.format || '4:5').trim(),
+14631:        goal: String(channelAsset.goal || 'engagement').trim()
+14636:        format: String(channelAsset.format || '1:1').trim(),
+14637:        goal: String(channelAsset.goal || 'reach').trim()
+14641:        hook_3s: String(channelAsset.hook_3s || '').trim(),
+14642:        video_prompt: String(channelAsset.video_prompt || channelAsset.visual_prompt || '').trim(),
+14657:  const campaignName = String(input.campaign_name || '').trim();
+14658:  if (!campaignName) {
+14659:    const error = new Error('Missing email package. Provide email_package or campaign_name');
+14665:  return buildCampaignEmailPackage(projectName, campaignName);
+14673:  if (!primaryAsset || !primaryAsset.channel_asset || typeof primaryAsset.channel_asset !== 'object') {
+14674:    const error = new Error('Email package does not include a primary channel asset');
+14680:  const channelAsset = primaryAsset.channel_asset;
+14681:  const campaignName = String(emailPackage.campaign_name || '').trim();
+14682:  const subject = String(channelAsset.subject || `${campaignName || 'Campaign'} Update`).trim();
+14683:  const headline = String(channelAsset.headline || primaryAsset.product_name || campaignName || 'Campaign Update').trim();
+14684:  const body = String(channelAsset.body || channelAsset.caption || '').trim();
+14685:  const cta = String(channelAsset.cta || 'Shop now').trim();
+14718:    String(reel.hook || branding.hook || 'Start with a direct hook for the target audience.').trim(),
+14731:        direction: String(reel.hook || branding.hook || 'Open with audience pain or aspiration.').trim()
+14750:  const inlinePackage = input.campaign_package && typeof input.campaign_package === 'object'
+14751:    ? input.campaign_package
+14757:  const campaignName = String(input.campaign_name || '').trim();
+14758:  if (!campaignName) {
+14759:    const error = new Error('Missing campaign package. Provide campaign_package or campaign_name');
+14765:  return readCampaignExecutionPackage(projectName, campaignName);
+14768:function buildAdExecutionPackage(campaignPackage, input = {}) {
+14769:  const products = Array.isArray(campaignPackage?.products) ? campaignPackage.products : [];
+14781:  const offer = promptPack.offer && typeof promptPack.offer === 'object' ? promptPack.offer : {};
+14787:  const headline = String(input.headline || offer.headline || branding.headline || `${primary.product_name || campaignPackage.campaign_name} offer`).trim();
+14788:  const cta = String(input.cta || offer.cta || branding.cta || 'Shop now').trim();
+14789:  const adCopy = String(input.ad_copy || offer.hook || branding.hook || `${headline}. ${cta}`).trim();
+14790:  const audience = String(
+14791:    input.audience
+14792:    || intelligence.audience_primary
+14793:    || intelligence.target_audience
+14800:    rationale: `Starter budget based on ${products.length} product(s) in campaign package.`
+14807:    audience,
+14824:    || 'Create a premium brand-safe visual for campaign execution.'
+14834:    campaign_name: String(publishPackage?.campaign_name || '').trim(),
+14835:    channel: String(socialPayload?.channel || '').trim().toLowerCase(),
+14850:    campaign_name: String(emailPackage?.campaign_name || '').trim(),
+14901:  const campaignPack = await mediaProviderLayer.generateCampaignPack({
+14904:    channel: payload?.channel || payload?.platform || 'multi-channel',
+14908:  if (!campaignPack?.ok) {
+14909:    const message = String(campaignPack?.message || 'Ad execution provider is not configured.').trim();
+14916:  const generated = campaignPack.campaign_pack || {};
+14922:    ad_copy: String(generated.channel_notes || adPackage.ad_copy || '').trim(),
+14925:    audience: adPackage.audience,
+14927:    provider: campaignPack.provider,
+14928:    model: campaignPack.model,
+14929:    generated_campaign_pack: generated
+15058:    campaign_name: job.campaign_name || null,
+15060:    channel: job.channel,
+15071:    if (job.channel === 'email') {
+15075:    } else if (['instagram', 'facebook', 'tiktok', 'youtube'].includes(job.channel)) {
+15079:    } else if (['amazon', 'ebay'].includes(job.channel)) {
+15086:      result.notes.push('Unknown channel type. Manual review required.');
+15089:    if (job.channel === 'email') {
+15093:    } else if (['instagram', 'facebook', 'tiktok', 'youtube'].includes(job.channel)) {
+15097:    } else if (['amazon', 'ebay'].includes(job.channel)) {
+15104:      result.notes.push('Unknown channel type. Review connector mapping.');
+15133:function recordManualPublish(projectName, campaignName, channel, jobId, operator, postUrl, notes = '') {
+15135:  const safeCampaign = String(campaignName || '').trim();
+15136:  const safeChannel = String(channel || '').trim().toLowerCase();
+15148:    const error = new Error('Missing campaign');
+15153:    const error = new Error('Missing channel');
+15187:  const campaignSafe = safeCampaign.replace(/[^a-z0-9_-]/gi, '_').toLowerCase();
+15188:  const executionCampaignPackagePath = path.join(DATA_DIR, 'execution', 'projects', safeProject, 'campaign-execution', 'packages', `${campaignSafe}.json`);
+15189:  const projectCampaignPackagePath = path.join(DATA_DIR, 'projects', safeProject, 'brand-assets', 'campaign-execution', 'packages', `${campaignSafe}.json`);
+15190:  const legacyCampaignPackagePath = path.join(LEGACY_BRAND_ASSETS_DIR, safeProject, 'campaign-execution', 'packages', `${campaignSafe}.json`);
+15192:  const campaignPackagePath = pickFirstExistingPath([
+15198:  if (!campaignPackagePath) {
+15199:    const error = new Error('Campaign package not found for this project/campaign.');
+15211:    campaign: safeCampaign,
+15212:    channel: safeChannel,
+15225:    `${campaignSafe}_${safeChannel}_${timestampSafe}.json`
+15252:      campaign_name: existingResult.campaign_name || safeCampaign,
+15253:      channel: String(existingResult.channel || safeChannel).trim().toLowerCase(),
+15280:    campaign: safeCampaign,
+15281:    channel: safeChannel,
+15290:    campaign_package_path: campaignPackagePath
+15308:    channel: job.channel,
+15514:  const normalizedChannel = String(rawResult.channel || relatedJob?.channel || '').trim().toLowerCase();
+15519:    channel: normalizedChannel,
+15526:    offer: String(rawResult.offer || relatedJob?.offer || '').trim(),
+15720:      offer_positioning: project.offer_positioning,
+15722:      primary_goal: project.primary_goal,
+15723:      goal: project.primary_goal,
+15724:      secondary_goal: project.secondary_goal,
+15725:      launch_window: project.launch_window,
+15726:      audience_primary: project.audience_primary,
+15727:      target_audience: project.audience_primary,
+15728:      audience_problem: project.audience_problem,
+15729:      customer_problem: project.audience_problem,
+15730:      audience_geography: project.audience_geography,
+15733:      social_channels: Array.isArray(project.social_channels) ? project.social_channels : [],
+15734:      channels: Array.isArray(project.social_channels) ? project.social_channels : [],
+15735:      social_links: Array.isArray(project.social_channels) ? project.social_channels : [],
+15740:      positioning: project.offer_positioning || project.differentiation,
+16001:    campaignStrategyQueuePath: path.join(projectDir, 'campaign-strategy-queue.json'),
+16002:    campaignAssetPlanPath: path.join(projectDir, 'campaign-asset-plan.json')
+16154:      const topic = args.join(' ') || `${commandBrandName} launch post`;
+16293:        format: 'campaign email',
+16294:        audience: 'general launch audience',
+16295:        send_goal: 'traffic + conversion',
+16318:        campaign_type: 'meta',
+16664:      item.format = 'campaign email';
+16665:      item.audience = 'German men interested in premium grooming';
+16666:      item.send_goal = 'traffic + conversion';
+16696:      item.status = 'ready_for_launch';
+16703:        note: 'Ad draft is now ready_for_launch. External Meta launch connector is the next layer.'
+17333:          audience: item.audience || 'general launch audience',
+17334:          send_goal: item.send_goal || 'traffic + conversion',
+17335:          format: item.format || 'campaign email',
+17379:        `Create a premium email hero image for ${emailItem.topic}, focused on luxury men’s grooming, strong masculine branding, refined product presentation, elegant dark premium styling, suitable for a high-conversion campaign email for the German market.`;
+17395:        style: 'premium masculine campaign email',
+17687:        primary_goal: 'sales + brand growth',
+17688:        target_audience: 'to be defined',
+17689:        channel_priority: [
+17703:        default_offer_style: 'premium + value + clear CTA',
+17735:    if (command === '/create_campaign_strategy') {
+17737:      const goal = args.slice(1).join(' ').trim() || 'sales';
+17747:      const queuePath = projectPaths.campaignStrategyQueuePath;
+17756:      const strategy = {
+17757:        strategy_id: `strategy_${Date.now()}`,
+17760:        campaign_goal: goal,
+17763:        target_audience: profile.target_audience || 'to be refined',
+17765:        offer_strategy: 'clear offer + premium value + direct CTA',
+17766:        channel_mix: profile.channel_priority || [],
+17799:          'reuse high-performing assets across channels'
+17804:      queue.push(strategy);
+17809:        result: strategy
+17813:    if (command === '/review_campaign_strategy') {
+17814:      const strategyId = args[0];
+17817:      if (!strategyId || !projectName) {
+17818:        return res.json({ error: 'Missing strategy id or project name' });
+17821:      const queuePath = resolveLegacyExecutionProjectPaths(projectName).campaignStrategyQueuePath;
+17824:        return res.json({ error: 'Campaign strategy queue not found' });
+17828:      const strategy = queue.find(x => x.strategy_id === strategyId);
+17830:      if (!strategy) {
+17831:        return res.json({ error: 'Campaign strategy not found' });
+17836:        result: strategy
+17840:    if (command === '/plan_campaign_assets') {
+17841:      const strategyId = args[0];
+17844:      if (!strategyId || !projectName) {
+17845:        return res.json({ error: 'Missing strategy id or project name' });
+17849:      const strategyQueuePath = projectPaths.campaignStrategyQueuePath;
+17850:      const planPath = projectPaths.campaignAssetPlanPath;
+17852:      if (!fs.existsSync(strategyQueuePath)) {
+17853:        return res.json({ error: 'Campaign strategy queue not found' });
+17856:      const strategyQueue = JSON.parse(fs.readFileSync(strategyQueuePath, 'utf8'));
+17857:      const strategy = strategyQueue.find(x => x.strategy_id === strategyId);
+17859:      if (!strategy) {
+17860:        return res.json({ error: 'Campaign strategy not found' });
+17865:        strategy_id: strategy.strategy_id,
+17880:          'ad launch',
+17884:          'Generate assets from strategy, then run review -> approval -> media -> publish/send.',
+17914:    audience_segments: [
+17956:    offer_logic: {
+17957:      entry_offer: "starter grooming routine",
+17958:      main_offer: "premium product bundle",
+17963:    content_strategy: {
+17978:    channel_behavior: {
+18157:          'offer style',
+18160:          'channel behavior'
+18171:          'offer patterns',
+18307:          audience: ['#MensStyle', '#GroomingRoutine']
+18324:      const goal = args.slice(1).join(' ').trim() || 'sales';
+18340:        goal,
+18512:    if (command === '/build_campaign_from_intelligence') {
+18514:      const goal = args.slice(1).join(' ').trim() || 'sales';
+18522:      const strategyQueuePath = projectPaths.campaignStrategyQueuePath;
+18544:      const campaignBrainPath = path.join(
+18546:        'intelligence/campaign-brain-queue.json'
+18554:      const strategyQueue = JSON.parse(fs.readFileSync(strategyQueuePath, 'utf8'));
+18559:      const campaignBrainQueue = JSON.parse(fs.readFileSync(campaignBrainPath, 'utf8'));
+18561:      const latestStrategy = [...strategyQueue].reverse()[0] || null;
+18568:        id: `campaignbrain_${Date.now()}`,
+18570:        goal,
+18575:          primary_goal: profile.primary_goal || goal,
+18577:          audience_segments: profile.audience_segments || [],
+18592:        recommended_campaign_angles: [
+18599:        recommended_channel_priorities: profile.channel_priority || [
+18623:          'finalize offer',
+18625:          'send launch email',
+18626:          'launch social content',
+18627:          'launch paid ads',
+18633:      campaignBrainQueue.push(brain);
+18634:      fs.writeFileSync(campaignBrainPath, JSON.stringify(campaignBrainQueue, null, 2), 'utf8');
+18642:    if (command === '/recommend_campaign_angles') {
+18649:      const campaignBrainPath = path.join(
+18651:        'intelligence/campaign-brain-queue.json'
+18654:      const queue = JSON.parse(fs.readFileSync(campaignBrainPath, 'utf8'));
+18658:        return res.json({ error: 'No campaign brain found for project' });
+18665:          goal: latestBrain.goal,
+18666:          recommended_campaign_angles: latestBrain.recommended_campaign_angles,
+18681:      const campaignBrainPath = path.join(
+18683:        'intelligence/campaign-brain-queue.json'
+18686:      const queue = JSON.parse(fs.readFileSync(campaignBrainPath, 'utf8'));
+18690:        return res.json({ error: 'No campaign brain found for project' });
+18697:          recommended_channel_priorities: latestBrain.recommended_channel_priorities,
+18700:            facebook: 'retargeting + mixed audience content',
+18716:      const campaignBrainPath = path.join(
+18718:        'intelligence/campaign-brain-queue.json'
+18721:      const queue = JSON.parse(fs.readFileSync(campaignBrainPath, 'utf8'));
+18725:        return res.json({ error: 'No campaign brain found for project' });
+18734:          'launch one conversion email',
+18739:        best_angles_this_week: latestBrain.recommended_campaign_angles,
+18742:        channel_priority: latestBrain.recommended_channel_priorities || [],
+18751:if (command === '/execute_campaign_brain') {
+18755:    return res.json({ error: 'Missing campaign brain ID' });
+18760:    'intelligence/campaign-brain-queue.json'
+18765:    'campaign-output/campaign-output-queue.json'
+18782:    id: `campaignexec_${Date.now()}`,
+18783:    campaign_brain_id: brainId,
+18809:        hook: brain.recommended_campaign_angles[0],
+18815:        hook: brain.recommended_campaign_angles[1],
+18852:    if (command === '/autogen_campaign_assets') {
+18856:        return res.json({ error: 'Missing campaign execution ID' });
+18859:      const campaignOutputPath = path.join(
+18861:        'campaign-output/campaign-output-queue.json'
+18864:      const campaignProject = commandProject;
+18865:      const campaignBrandName = getProjectDisplayName(campaignProject);
+18866:      const blogQueuePath = getLegacyContentQueuePath(campaignProject, 'blog');
+18867:      const postQueuePath = getLegacyContentQueuePath(campaignProject, 'social');
+18868:      const adQueuePath = getLegacyContentQueuePath(campaignProject, 'ads');
+18869:      const reelQueuePath = getLegacyContentQueuePath(campaignProject, 'reel');
+18871:      const campaignOutputQueue = JSON.parse(fs.readFileSync(campaignOutputPath, 'utf8'));
+18878:      const campaignExec = campaignOutputQueue.find(x => x.id === execId);
+18880:      if (!campaignExec) {
+18893:      if (campaignExec.blog) {
+18896:          topic: campaignExec.blog.topic,
+18898:          title: campaignExec.blog.title,
+18899:          excerpt: `${campaignExec.blog.topic} – Premium Tipps und klare Routine von ${campaignBrandName}.`,
+18900:          seo_title: `${campaignExec.blog.title} | ${campaignBrandName}`,
+18901:          meta_description: `${campaignExec.blog.topic} – entdecke eine starke und einfache Premium-Routine für Männer in Deutschland.`,
+18902:          target_keywords: [campaignExec.blog.topic],
+18907:            campaignExec.blog.topic,
+18909:            campaignBrandName,
+18919:          featured_image_prompt: `Create a premium editorial blog image for ${campaignExec.blog.topic}, masculine grooming, luxury brand style, clear premium composition.`,
+18920:          featured_image_alt: `${campaignExec.blog.topic} – Premium Artikel von ${campaignBrandName}`,
+18921:          outline: campaignExec.blog.structure || [],
+18922:          body: `<h2>${campaignExec.blog.topic}</h2><p>Entdecke ${campaignExec.blog.topic} mit ${campaignBrandName}.</p>`,
+18923:          source_campaign_execution_id: execId
+18931:      if (campaignExec.email) {
+18934:          topic: campaignExec.blog?.topic || campaignExec.email.subject || 'campaign email',
+18936:          format: 'campaign email',
+18937:          audience: 'campaign audience',
+18938:          send_goal: 'traffic + conversion',
+18939:          subject: campaignExec.email.subject,
+18941:          body: campaignExec.email.body,
+18942:          cta: campaignExec.email.cta || 'Jetzt entdecken',
+18943:          source_campaign_execution_id: execId
+18951:      if (Array.isArray(campaignExec.social_posts)) {
+18952:        for (const post of campaignExec.social_posts) {
+18955:            topic: campaignExec.blog?.topic || 'campaign post',
+18961:              buildProjectHashtag(campaignProject),
+18965:            hook_type: post.hook || 'campaign angle',
+18968:            overlay_text: `${campaignBrandName} | ${campaignExec.blog?.topic || 'campaign'}`,
+18969:            creative_prompt: `Create a premium ${post.platform} creative for ${campaignExec.blog?.topic || 'campaign'}, masculine luxury grooming style.`,
+18970:            video_brief: `Create short-form visual content for ${campaignExec.blog?.topic || 'campaign'} on ${post.platform}.`,
+18971:            source_campaign_execution_id: execId
+18980:      if (Array.isArray(campaignExec.ads)) {
+18981:        for (const ad of campaignExec.ads) {
+18984:            topic: campaignExec.blog?.topic || 'campaign ad',
+18986:            campaign_type: 'meta',
+18987:            source_type: 'campaign_execution',
+18992:            audience_angle: 'campaign audience',
+18993:            offer_angle: 'premium routine + conversion',
+19004:      if (campaignExec.reel) {
+19007:          topic: campaignExec.blog?.topic || 'campaign reel',
+19010:          hook: campaignExec.reel.hook || '',
+19022:          script: campaignExec.reel.script || '',
+19023:          cta: campaignExec.reel.cta || 'Jetzt starten',
+19026:          source_campaign_execution_id: execId
+19039:      campaignExec.autogen_status = 'completed';
+19040:      campaignExec.autogen_created_assets = created;
+19041:      campaignExec.autogen_completed_at = new Date().toISOString();
+19044:        campaignOutputPath,
+19045:        JSON.stringify(campaignOutputQueue, null, 2),
+19052:          campaign_execution_id: execId,
+19058:    if (command === '/review_campaign_autogen') {
+19062:        return res.json({ error: 'Missing campaign execution ID' });
+19065:      const campaignOutputPath = path.join(
+19067:        'campaign-output/campaign-output-queue.json'
+19070:      const campaignOutputQueue = JSON.parse(fs.readFileSync(campaignOutputPath, 'utf8'));
+19071:      const campaignExec = campaignOutputQueue.find(x => x.id === execId);
+19073:      if (!campaignExec) {
+19080:          campaign_execution_id: execId,
+19081:          autogen_status: campaignExec.autogen_status || 'not_run',
+19082:          created_assets: campaignExec.autogen_created_assets || {},
+19083:          autogen_completed_at: campaignExec.autogen_completed_at || null
+19088:    if (command === '/campaign_publish_blog') {
+19092:        return res.json({ error: 'Missing campaign execution ID' });
+19095:      const campaignOutputPath = path.join(
+19097:        'campaign-output/campaign-output-queue.json'
+19100:      const campaignOutputQueue = JSON.parse(fs.readFileSync(campaignOutputPath, 'utf8'));
+19101:      const campaignExec = campaignOutputQueue.find(x => x.id === execId);
+19103:      if (!campaignExec) {
+19107:      const blogId = campaignExec.autogen_created_assets?.blog_id;
+19110:        return res.json({ error: 'No generated blog asset linked to this campaign' });
+19118:        campaignExec.controlled_publish = campaignExec.controlled_publish || {};
+19119:        campaignExec.controlled_publish.blog = {
+19127:          campaignOutputPath,
+19128:          JSON.stringify(campaignOutputQueue, null, 2),
+19134:          result: campaignExec.controlled_publish.blog
+19144:    if (command === '/campaign_send_email') {
+19149:        return res.json({ error: 'Missing campaign execution ID or recipient email' });
+19152:      const campaignOutputPath = path.join(
+19154:        'campaign-output/campaign-output-queue.json'
+19157:      const campaignOutputQueue = JSON.parse(fs.readFileSync(campaignOutputPath, 'utf8'));
+19158:      const campaignExec = campaignOutputQueue.find(x => x.id === execId);
+19160:      if (!campaignExec) {
+19164:      const emailId = campaignExec.autogen_created_assets?.email_id;
+19167:        return res.json({ error: 'No generated email asset linked to this campaign' });
+19179:        campaignExec.controlled_publish = campaignExec.controlled_publish || {};
+19180:        campaignExec.controlled_publish.email = {
+19189:          campaignOutputPath,
+19190:          JSON.stringify(campaignOutputQueue, null, 2),
+19196:          result: campaignExec.controlled_publish.email
+19206:    if (command === '/campaign_review_publish_state') {
+19210:        return res.json({ error: 'Missing campaign execution ID' });
+19213:      const campaignOutputPath = path.join(
+19215:        'campaign-output/campaign-output-queue.json'
+19218:      const campaignOutputQueue = JSON.parse(fs.readFileSync(campaignOutputPath, 'utf8'));
+19219:      const campaignExec = campaignOutputQueue.find(x => x.id === execId);
+19221:      if (!campaignExec) {
+19228:          campaign_execution_id: execId,
+19229:          autogen_status: campaignExec.autogen_status || 'not_run',
+19230:          created_assets: campaignExec.autogen_created_assets || {},
+19231:          controlled_publish: campaignExec.controlled_publish || {},
+19233:            blog: campaignExec.controlled_publish?.blog?.status || 'not_published',
+19234:            email: campaignExec.controlled_publish?.email?.status || 'not_sent'
+19773:  const goal = args.slice(2).join(' ').trim();
+19775:  if (!projectName || !assetType || !goal) {
+19776:    return res.json({ error: 'Missing project name, asset type, or goal' });
+19780:    const result = generateBrandControlledPrompt(projectName, assetType, goal);
+19818:  const goal = args.slice(2).join(' ').trim();
+19820:  if (!projectName || !assetType || !goal) {
+19821:    return res.json({ error: 'Missing project name, asset type, or goal' });
+19825:    const result = buildExecutionPackage(projectName, assetType, goal);
+19866:  const goal = args.slice(1).join(' ').trim();
+19868:  if (!projectName || !goal) {
+19869:    return res.json({ error: 'Missing project name or goal' });
+19873:    const result = buildGenerationJob(projectName, 'ad', goal);
+19887:  const goal = args.slice(1).join(' ').trim();
+19889:  if (!projectName || !goal) {
+19890:    return res.json({ error: 'Missing project name or goal' });
+19894:    const result = buildGenerationJob(projectName, 'email_hero', goal);
+19908:  const goal = args.slice(1).join(' ').trim();
+19910:  if (!projectName || !goal) {
+19911:    return res.json({ error: 'Missing project name or goal' });
+19915:    const result = buildGenerationJob(projectName, 'blog_visual', goal);
+20217:  const goal = args.slice(2).join(' ').trim();
+20219:  if (!projectName || !placement || !goal) {
+20220:    return res.json({ error: 'Missing project name, placement, or goal' });
+20224:    const result = buildMetaPackage(projectName, placement, goal);
+20259:  const goal = args.slice(1).join(' ').trim();
+20261:  if (!projectName || !goal) {
+20262:    return res.json({ error: 'Missing project name or goal' });
+20266:    const result = buildTikTokPackage(projectName, goal);
+20297:  const goal = args.slice(2).join(' ').trim();
+20299:  if (!projectName || !format || !goal) {
+20300:    return res.json({ error: 'Missing project name, format, or goal' });
+20304:    const result = buildYouTubePackage(projectName, format, goal);
+20334:  const goal = args.slice(2).join(' ').trim();
+20336:  if (!projectName || !marketplace || !goal) {
+20337:    return res.json({ error: 'Missing project name, marketplace, or goal' });
+20341:    const result = buildMarketplacePackage(projectName, marketplace, goal);
+20386:      renderRequest.goal || ''
+20912:if (command === '/build_product_channel_pack') {
+20927:    p.channel_pack = buildChannelPack(p);
+20936:        channel_pack: p.channel_pack
+20943:if (command === '/bulk_build_channel_packs') {
+20955:      p.channel_pack = buildChannelPack(p);
+20966:        channel_packs_built: count
+20973:if (command === '/review_product_channel_pack') {
+20988:        channel_pack: product.channel_pack || null
+20997:if (command === '/build_campaign_execution_package') {
+20999:  const campaignName = (args[1] || '').trim();
+21002:  if (!projectName || !campaignName || !rawSlugs) {
+21003:    return res.json({ error: 'Missing project, campaign name, or product slugs' });
+21014:      campaignName,
+21024:      error: 'Failed to build campaign execution package',
+21029:if (command === '/review_campaign_execution_package') {
+21031:  const campaignName = (args[1] || '').trim();
+21033:  if (!projectName || !campaignName) {
+21034:    return res.json({ error: 'Missing project or campaign name' });
+21038:    const result = readCampaignExecutionPackage(projectName, campaignName);
+21046:      error: 'Failed to review campaign execution package',
+21051:if (command === '/build_channel_execution_payload') {
+21053:  const campaignName = (args[1] || '').trim();
+21054:  const channel = (args[2] || '').trim().toLowerCase();
+21056:  if (!projectName || !campaignName || !channel) {
+21057:    return res.json({ error: 'Missing project, campaign name, or channel' });
+21063:      campaignName,
+21064:      channel
+21073:      error: 'Failed to build channel execution payload',
+21078:if (command === '/build_campaign_media_job') {
+21080:  const campaignName = (args[1] || '').trim();
+21081:  const channel = (args[2] || '').trim().toLowerCase();
+21083:  if (!projectName || !campaignName || !channel) {
+21084:    return res.json({ error: 'Missing project, campaign name, or channel' });
+21088:    const result = buildCampaignMediaJob(projectName, campaignName, channel);
+21095:      error: 'Failed to build campaign media job',
+21100:if (command === '/prepare_campaign_email') {
+21102:  const campaignName = (args[1] || '').trim();
+21104:  if (!projectName || !campaignName) {
+21105:    return res.json({ error: 'Missing project or campaign name' });
+21109:    const result = buildCampaignEmailPackage(projectName, campaignName);
+21116:      error: 'Failed to prepare campaign email package',
+21121:if (command === '/build_campaign_publish_package') {
+21123:  const campaignName = (args[1] || '').trim();
+21124:  const channel = (args[2] || '').trim().toLowerCase();
+21126:  if (!projectName || !campaignName || !channel) {
+21127:    return res.json({ error: 'Missing project, campaign name, or channel' });
+21131:    const result = buildCampaignPublishPackage(projectName, campaignName, channel);
+21138:      error: 'Failed to build campaign publish package',
+21143:if (command === '/review_campaign_finalization') {
+21145:  const campaignName = (args[1] || '').trim();
+21147:  if (!projectName || !campaignName) {
+21148:    return res.json({ error: 'Missing project or campaign name' });
+21152:    const result = reviewCampaignFinalization(projectName, campaignName);
+21159:      error: 'Failed to review campaign finalization',
+21164:if (command === '/build_german_launch_plan') {
+21171:    return res.json({ error: 'Failed to build launch plan', details: error.message });
+21174:if (command === '/review_german_launch_plan') {
+21179:    const filePath = path.join(paths.planDir, 'launch-plan.json');
+21184:    return res.json({ error: 'Failed to review launch plan', details: error.message });
+21187:if (command === '/build_launch_wave') {
+21195:    return res.json({ error: 'Failed to build launch wave', details: error.message });
+21198:if (command === '/review_launch_wave') {
+21209:    return res.json({ error: 'Failed to review launch wave', details: error.message });
+21212:if (command === '/build_channel_connector_payload') {
+21215:  const channel = (args[2] || '').trim().toLowerCase();
+21217:  if (!projectName || !waveName || !channel) {
+21218:    return res.json({ error: 'Missing project, wave name, or channel' });
+21222:    const result = buildChannelConnectorPayload(projectName, waveName, channel);
+21226:      error: 'Failed to build channel connector payload',
+21231:if (command === '/schedule_launch_job') {
+21234:  const channel = (args[2] || '').trim().toLowerCase();
+21237:  if (!projectName || !waveName || !channel || !scheduledFor) {
+21238:    return res.json({ error: 'Missing project, wave name, channel, or datetime' });
+21242:    const result = scheduleLaunchJob(projectName, waveName, channel, scheduledFor);
+21246:      error: 'Failed to schedule launch job',
+21289:  const campaignName = (args[1] || '').trim();
+21290:  const channel = (args[2] || '').trim().toLowerCase();
+21296:  if (!projectName || !campaignName || !channel || !jobId || !operator || !postUrl) {
+21298:      error: 'Missing required args. Usage: /record_manual_publish <project> <campaign> <channel> <job_id> <operator> <post_url> [notes...]'
+21303:    const result = recordManualPublish(projectName, campaignName, channel, jobId, operator, postUrl, notes);
+21400:if (command === '/review_channel_post') {
+21402:  const channel = (args[1] || '').trim().toLowerCase();
+21405:  if (!projectName || !channel || !productSlug) {
+21406:    return res.json({ error: 'Missing project, channel, or product slug' });
+21410:    const result = buildPostReview(projectName, channel, productSlug);
+21414:      error: 'Failed to review channel post',
+21419:if (command === '/improve_channel_post') {
+21421:  const channel = (args[1] || '').trim().toLowerCase();
+21424:  if (!projectName || !channel || !productSlug) {
+21425:    return res.json({ error: 'Missing project, channel, or product slug' });
+21429:    const result = buildImprovedChannelPost(projectName, channel, productSlug);
+21433:      error: 'Failed to improve channel post',
+21440:  const channel = (args[1] || '').trim().toLowerCase();
+21444:  if (!projectName || !channel || !productSlug || !metricJson) {
+21445:    return res.json({ error: 'Missing project, channel, product slug, or metric json' });
+21449:    const result = savePostPerformance(projectName, channel, productSlug, metricJson);
+21476:if (command === '/review_channel_learning') {
+21478:  const channel = (args[1] || '').trim().toLowerCase();
+21480:  if (!projectName || !channel) {
+21481:    return res.json({ error: 'Missing project or channel' });
+21485:    const result = reviewChannelLearning(projectName, channel);
+21489:      error: 'Failed to review channel learning',
+22385:    campaign_id: String(
+22386:      payload.campaign_id
+22387:      || publishPackage.campaign_id
+22412:  const normalizedChannel = String(input.channel || matchedJob?.channel || '').trim().toLowerCase();
+22422:    channel: normalizedChannel,
+22423:    campaign_id: String(input.campaign_id || inferred.campaign_id || '').trim() || null,
+22655:      channel: req.body?.channel,
+22901:    const channel = String(req.body?.channel || '').trim().toLowerCase();
+22911:    if (!channel) {
+22912:      const err = new Error('Missing channel');
+22937:      channel,
+22938:      campaign_id: req.body?.campaign_id,
+23166:app.post('/api/media/generate-campaign-pack', async (req, res) => {
+23175:      output: { campaign_pack: result.campaign_pack },
+23184:      campaign_pack: result.campaign_pack,
+23191:      message: error.message || 'Failed to generate campaign pack'
+
+### backend campaign preview exact context
+    })) {
+      return;
+    }
+
+    return res.json(updateProjectSetup(req.params.project, req.body || {}));
+  } catch (error) {
+    return res.status(400).json({
+      error: error.message || 'Failed to save project setup'
+    });
+  }
+});
+
+
+function normalizeAiCommandPreviewInput(value, fallback = '') {
+  return String(value || fallback || '').trim();
+}
+
+function normalizeAiCommandPreviewList(value) {
+  if (Array.isArray(value)) {
+    return value.map((item) => normalizeAiCommandPreviewInput(item)).filter(Boolean);
+  }
+
+  if (typeof value === 'string') {
+    return value
+      .split(',')
+      .map((item) => normalizeAiCommandPreviewInput(item))
+      .filter(Boolean);
+  }
+
+  return [];
+}
+
+function buildAiCommandCampaignPreviewOnly(projectName, input = {}) {
+  const project = normalizeAiCommandPreviewInput(projectName, 'default');
+  const sourceType = normalizeAiCommandPreviewInput(input.source_type || input.sourceType, 'Project source');
+  const sourceLabel = normalizeAiCommandPreviewInput(input.source_label || input.sourceLabel, sourceType);
+  const goal = normalizeAiCommandPreviewInput(input.goal, 'Campaign launch');
+  const channel = normalizeAiCommandPreviewInput(input.channel, 'Multi-channel');
+  const audience = normalizeAiCommandPreviewInput(input.audience || input.target_audience || input.targetAudience, 'Primary customer segment');
+  const offer = normalizeAiCommandPreviewInput(input.offer, 'Review-ready offer angle');
+  const market = normalizeAiCommandPreviewInput(input.market || input.region, 'Germany');
+  const language = normalizeAiCommandPreviewInput(input.language || input.output_language, 'German');
+  const format = normalizeAiCommandPreviewInput(input.format || input.asset_format || input.creative_format, 'Mixed package');
+  const deadline = normalizeAiCommandPreviewInput(input.deadline || input.priority || input.timeline, 'Standard');
+  const productFocus = normalizeAiCommandPreviewInput(input.product_focus || input.productFocus, 'Selected product or service');
+  const complianceSensitivity = normalizeAiCommandPreviewInput(input.compliance_sensitivity || input.complianceSensitivity, 'Standard review');
+  const productNames = normalizeAiCommandPreviewList(input.products || input.product_names || input.productNames);
+  const now = new Date().toISOString();
+
+  const title = normalizeAiCommandPreviewInput(
+    input.title,
+    `${goal} campaign for ${sourceLabel}`
+  );
+
+  const products = productNames.length ? productNames : [
+    normalizeAiCommandPreviewInput(input.product || input.product_name || input.productName, 'Selected product or service')
+  ];
+
+  const campaignPackage = {
+    concept: `${goal} campaign built from ${sourceLabel}.`,
+    targetAudience: audience,
+    offer,
+    market,
+    language,
+    format,
+    deadline,
+    productFocus,
+    complianceSensitivity,
+    products,
+    channels: [channel],
+    launchPhases: [
+      'Prepare campaign message and proof points.',
+      'Create media and publishing assets.',
+      'Review compliance and approval requirements.',
+      'Hand off to destination owner for execution.'
+    ],
+    contentAngles: [
+      `Position ${sourceLabel} around the ${goal.toLowerCase()} objective.`,
+      `Use customer pain points and product proof before publishing.`,
+      `Keep claims review-ready before external distribution.`
+    ],
+    adAngles: [
+      `Lead with ${offer}.`,
+      `Retarget engaged visitors with proof-led creative.`,
+      `Use destination-specific copy variations for ${channel}.`
+    ],
+    requiredAssets: [
+      'Approved product visuals',
+      'Offer details',
+      'Channel copy',
+      'Compliance-safe proof points'
+    ],
+    missingBlockers: [
+      'Final approval is required before publishing.',
+      'Destination owner must confirm execution readiness.'
+    ],
+    nextActions: [
+      'Review the AI Team preview.',
+      'Send the package to Media Studio or Publishing.',
+      'Request Governance review before release if claims or publishing risk exists.'
+    ],
+    suggestedHandoffs: [
+      {
+        destination: 'media-studio',
+        label: 'Send to Media Studio',
+        reason: 'Prepare creative and media assets from the campaign package.'
+      },
+      {
+        destination: 'publishing',
+        label: 'Prepare Publishing Handoff',
+        reason: 'Turn the campaign package into a publishing draft.'
+      }
+    ]
+  };
+
+  const sections = [
+    {
+      id: 'campaign_summary',
+      title: 'Campaign summary',
+      body: `${title}. Source: ${sourceLabel}. Goal: ${goal}. Channel: ${channel}.`
+    },
+    {
+      id: 'audience_offer',
+      title: 'Audience and offer',
+      body: `Audience: ${audience}. Offer: ${offer}. Market: ${market}. Language: ${language}. Format: ${format}. Deadline: ${deadline}. Product focus: ${productFocus}. Compliance: ${complianceSensitivity}.`
+    },
+    {
+      id: 'copy_package',
+      title: 'Copy package',
+      items: [
+        `Hook: ${offer}`,
+        `CTA: Review and prepare the ${goal.toLowerCase()} package.`,
+        `Caption direction: connect ${sourceLabel} to customer need and proof.`
+      ]
+    },
+    {
+      id: 'media_brief',
+      title: 'Media brief',
+      items: campaignPackage.requiredAssets
+    },
+    {
+      id: 'compliance_risks',
+      title: 'Compliance risks',
+      items: campaignPackage.missingBlockers
+    },
+    {
+      id: 'publishing_checklist',
+      title: 'Publishing checklist',
+      items: campaignPackage.nextActions
+    }
+  ];
+
+  return {
+    type: 'smart_campaign_preview',
+    source: 'backend_ai_team',
+    preview_only: true,
+    project,
+    title,
+    summary: `Backend preview-only AI Team campaign package for ${goal} using ${sourceLabel}.`,
+    source_type: sourceType,
+    source_label: sourceLabel,
+    goal,
+    channel,
+    market,
+    language,
+    format,
+    deadline,
+    audience,
+    offer,
+    product_focus: productFocus,
+    compliance_sensitivity: complianceSensitivity,
+    campaignPackage,
+    sections,
+    generated_at: now,
+    safety: {
+      preview_only: true,
+      requires_approval_before_publish: true,
+      no_backend_mutation_performed: true,
+      no_provider_execution_performed: true,
+      no_task_created: true,
+      no_approval_created: true,
+      no_handoff_created: true,
+      no_workflow_run_created: true
+    }
+  };
+}
+
+function handleAiCommandCampaignPreviewOnly(req, res) {
+  try {
+    const preview = buildAiCommandCampaignPreviewOnly(req.params.project, req.body || {});
+    return res.json({
+      ok: true,
+      ...preview
+    });
+  } catch (error) {
+    return res.status(500).json({
+      ok: false,
+      code: 'AI_COMMAND_CAMPAIGN_PREVIEW_FAILED',
+      message: error.message || 'Failed to build AI Command campaign preview.',
+      safety: {
+        preview_only: true,
+        no_backend_mutation_performed: true,
+        no_provider_execution_performed: true
+      }
+    });
+  }
+}
+
+app.post('/api/ai-command/project/:project/campaign-preview', handleAiCommandCampaignPreviewOnly);
+
+
+function handleGetProjectOperations(req, res) {
+  try {
+    return res.json(buildProjectOperationsPayload(req.params.project));
+  } catch (error) {
+    return res.status(400).json({
+      error: error.message || 'Failed to build project operations payload'
+    });
+  }
+}
+
+app.get('/media-manager/project/:project/operations', handleGetProjectOperations);
+app.get('/public/media-manager/project/:project/operations', handleGetProjectOperations);
+
+function handleGetTaskCenter(req, res) {
+  try {
+    const snapshot = buildProjectOperationsPayload(req.params.project);
+    return res.json({
+      project: String(req.params.project || '').trim().toLowerCase(),
+      task_center: snapshot.task_center || {}
+    });

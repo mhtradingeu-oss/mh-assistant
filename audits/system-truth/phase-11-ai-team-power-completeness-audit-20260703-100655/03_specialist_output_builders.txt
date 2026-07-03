@@ -1,0 +1,644 @@
+1429:		confirmationRequired: outputType === "handoff" || specialistId === "publisher" || specialistId === "compliance_reviewer",
+1438:	if (specialistId === "strategist") {
+1465:	if (specialistId === "writer") {
+1499:	if (specialistId === "media") {
+1519:	if (specialistId === "video_lead") {
+1534:	if (specialistId === "publisher") {
+1554:	if (specialistId === "ads") {
+1582:	if (specialistId === "analyst") {
+1596:	if (specialistId === "compliance_reviewer") {
+1612:	if (specialistId === "customer_ops") {
+1643:	if (specialistId === "sales_crm") {
+1680:	if (specialistId === "operations") {
+1712:function buildPhase2OutputPreview({ intent, session, prompt, projectName }) {
+1773:function buildPreviewText(output, specialistLabel) {
+1826:function buildStructuredPreviewBlocks(preview = {}) {
+2060:function buildExecutiveResponse(aiContext) {
+2091:function buildContentResponse(aiContext) {
+2126:function buildSeoResponse(aiContext) {
+2162:function buildAdsResponse(aiContext) {
+2197:function buildResearchResponse(aiContext) {
+2246:function buildOperationsResponse(aiContext, message) {
+2276:function buildResponseForMode(aiContext, classified, message) {
+2278:		case "writer":
+2279:		case "designer":
+2280:		case "media":
+2282:		case "analyst":
+2284:		case "ads":
+2286:		case "researcher":
+2288:		case "strategist":
+2290:		case "operations":
+6170:                async function buildCampaignWizardPreviewWithBackendFallback() {
+7136:                case "thinking":
+7138:                case "searching":
+7140:                case "analysing":
+7142:                case "selecting_specialist":
+7144:                case "composing":
+7146:                case "handoff":
+
+                createdAt: asString(options.createdAt || session.activeChatSessionCreatedAt || now),
+                updatedAt: now
+        };
+
+        const nextSessions = [record, ...sessions.filter((item) => asString(item.id) !== sessionId)].slice(0, 20);
+        map[key] = nextSessions;
+        writeAiChatSessionsMap(map);
+
+        session.activeChatSessionId = sessionId;
+        session.activeChatSessionCreatedAt = record.createdAt;
+        session.chatSessions = nextSessions;
+        return record;
+}
+
+function loadAiChatSessionIntoState(projectName, session, sessionId) {
+        const record = getAiChatSessions(projectName).find((item) => asString(item.id) === asString(sessionId));
+        if (!record) return null;
+
+        session.modeId = asString(record.modeId || session.modeId || "operations");
+        session.teamMode = asString(record.teamMode || "solo");
+        session.messages = asArray(record.messages).slice(-40);
+        session.responseHistory = asArray(record.responses).slice(0, 12);
+        session.outputPreview = asObject(record.preview);
+        session.outputWorkspaceTab = outputTabFromPreview(session.outputPreview);
+        session.activeOutputTab = session.outputWorkspaceTab;
+        /* SYSTEM_RESET */ StateKernel.write(session, "", "system");
+        /* composerText_FROZEN */ '';
+        session.responseError = "";
+        session.responseLoading = false;
+        session.activeChatSessionId = asString(record.id);
+        session.activeChatSessionCreatedAt = asString(record.createdAt || record.updatedAt || nowIso());
+        session.bridgeContext = null;
+        session.chatSessions = getAiChatSessions(projectName);
+        return record;
+}
+
+function refreshAiChatSessions(projectName, session) {
+        session.chatSessions = getAiChatSessions(projectName);
+        return session.chatSessions;
+}
+
+function buildSpecialistChatPrompt({ prompt, specialistLabel, modeLabel, projectName, language, outputLanguage, market }) {
+	const cleanPrompt = asString(prompt).trim();
+	const safeProject = asString(projectName || "current project").trim();
+	const safeSpecialist = asString(specialistLabel || "Specialist").trim();
+	const safeMode = asString(modeLabel || "Solo Specialist").trim();
+	const safeLanguage = asString(language || "user language").trim();
+	const safeOutputLanguage = asString(outputLanguage || "German").trim();
+	const safeMarket = asString(market || "Germany").trim();
+	const teamWorkflowLines = safeMode === "Full Team"
+		? [
+			"Full Team workflow: Strategist -> Writer -> Media/Video -> Compliance -> Publisher -> Operations.",
+			"When the request touches inbox, tickets, leads, outreach, or CRM, include Customer Ops -> Sales/CRM -> Operations.",
+			"Name the specialist owner for each next action and destination."
+		]
+		: [];
+
+	return [
+		`Role: ${safeSpecialist}`,
+		`Project: ${safeProject}`,
+		`Mode: ${safeMode}`,
+		`User conversation language: ${safeLanguage}`,
+		`Publishable output language: ${safeOutputLanguage}`,
+		`Target market: ${safeMarket}`,
+                "Reply to the user in the same language as the latest user request.",
+                "If the user writes Arabic, reply in Arabic. If the user writes English, reply in English. If the user writes German, reply in German.",
+                `Use ${safeOutputLanguage} only for customer-facing or publishable copy such as captions, ads, emails, landing pages, final campaign text, or publishing packages.`,
+                "When you include publishable copy, label it clearly as publishable content and keep the explanation in the user chat language.",
+		...teamWorkflowLines,
+		"Return practical guidance and content only.",
+		`When drafting publishable copy, write it in ${safeOutputLanguage}.`,
+		"Never claim actions were executed.",
+		"Never claim publish, approval, deletion, archival, sync, or operational runs happened.",
+		"Deliver a structured, review-ready answer.",
+		"",
+		"User request:",
+		cleanPrompt
+	].join("\n");
+}
+
+function extractGeneratedResponseText(response = {}) {
+	const direct = humanizeValue(
+		response.chat_answer ||
+		response.response_text ||
+		response.content ||
+		response.summary ||
+		response.analysis ||
+		response.title
+	);
+	if (direct) return direct;
+
+	const bullets = normalizeDisplayList(response.bullets, 6)
+		.map((item) => `- ${item}`)
+		.join("\n");
+
+	if (bullets) return bullets;
+
+	const recommendationLine = normalizeDisplayList(response.recommendations, 4)
+		.map((item, index) => `${index + 1}. ${item}`)
+		.join("\n");
+
+	const findingLine = normalizeDisplayList(response.findings, 4)
+		.map((item) => `- ${item}`)
+		.join("\n");
+
+	const sectionLine = asArray(response.sections)
+		.map((section) => {
+			const title = humanizeValue(section?.title);
+			const items = normalizeDisplayList(section?.items, 4);
+			if (!items.length) return "";
+			return [title ? `${title}:` : "", ...items.map((item) => `- ${item}`)].filter(Boolean).join("\n");
+		})
+		.filter(Boolean)
+		.join("\n\n");
+
+	return [recommendationLine, findingLine, sectionLine].filter(Boolean).join("\n\n");
+}
+
+function destinationRouteForSpecialist(specialistId, outputType) {
+	const rawId = getAiRoomRoleId(specialistId || "operations");
+	const id = MODE_ID_ALIASES[rawId] || rawId;
+	if (outputType === "workflow") return "workflows";
+	if (id === "strategist") return outputType === "task" ? "campaign-studio" : "workflows";
+	if (id === "writer") return "content-studio";
+	if (id === "media") return "media-studio";
+	if (id === "video_lead") return "media-studio";
+	if (id === "publisher") return "publishing";
+	if (id === "ads") return "ads-manager";
+	if (id === "analyst") return "insights";
+	if (id === "compliance_reviewer") return "governance";
+	if (id === "operations") return outputType === "task" ? "task-center" : "workflows";
+	if (id === "customer_ops") return outputType === "task" ? "task-center" : "operations-centers";
+	if (id === "sales_crm") return "workflows";
+	return "workflows";
+}
+
+function resolveAiResponseOutputRoute(session, response = {}) {
+        const activeTab = getOutputWorkspaceTab(session);
+        const specialistId = getAiRoomRoleId(session?.modeId || "operations");
+        const explicitDestination = asString(response.destinationRoute || "").trim();
+
+        const text = [
+                activeTab,
+                response.outputType,
+                response.destinationRoute,
+                response.responseTitle,
+                response.responseText,
+                response.prompt
+        ].map((value) => asString(value).toLowerCase()).join(" ");
+
+        let outputType = asString(response.outputType || "").toLowerCase();
+        if (!outputType || outputType === "chat") {
+                outputType = activeTab === "task"
+                        ? "task"
+                        : activeTab === "workflow"
+                                ? "workflow"
+                                : activeTab === "handoff"
+                                        ? "handoff"
+                                        : "guidance";
+        }
+
+        const looksTaskLike = /\b(task|tasks|handoff|ticket|tickets|follow-up|follow up|owner|owners|assignee|assigned|due date|priority|priorities|backlog|checklist|next task|action item|action items)\b/.test(text);
+        const looksWorkflowLike = /\b(workflow|workflows|process|sequence|phase|phases|approval flow|automation|operating loop|step-by-step|steps|dependencies|trigger|review gate|execution flow)\b/.test(text);
+        const looksContentLike = /\b(content|caption|captions|post|posts|email|blog|article|copy|headline|landing page|script|message|cta|product copy|social post)\b/.test(text);
+        const looksMediaLike = /\b(media|visual|creative|image|images|video|reel|storyboard|shot list|asset|assets|design|production|creative direction|voiceover)\b/.test(text);
+        const looksPublishingLike = /\b(publish|publishing|schedule|channel package|channel payload|approval-ready post|final post|ready to publish|publishing package)\b/.test(text);
+        const looksGovernanceLike = /\b(compliance|governance|claim|claims|risk|risks|approval|approvals|policy|privacy|legal|safe language|safety review)\b/.test(text);
+        const looksInsightLike = /\b(insight|insights|seo|keyword|keywords|analytics|performance|traffic|ranking|search intent|metrics|research|competitor|competitors|market research)\b/.test(text);
+        const looksCampaignLike = /\b(campaign|launch|audience|offer|funnel|positioning|channel mix|campaign brief|go-to-market|go to market)\b/.test(text);
+
+        if (outputType === "handoff" || outputType === "task" || looksTaskLike) {
+                outputType = "task";
+                return { outputType, destinationRoute: "task-center" };
+        }
+
+        if (outputType === "workflow" || looksWorkflowLike) {
+                outputType = "workflow";
+                return { outputType, destinationRoute: explicitDestination || "workflows" };
+        }
+
+        if (/content|copy|draft|caption|email|blog|article|script/.test(outputType) || looksContentLike) {
+                outputType = "content";
+                return { outputType, destinationRoute: explicitDestination || "content-studio" };
+        }
+
+        if (/media|video|visual|asset|creative/.test(outputType) || looksMediaLike) {
+                outputType = "media";
+                return { outputType, destinationRoute: explicitDestination || "media-studio" };
+        }
+
+        if (/publishing|publish|schedule/.test(outputType) || looksPublishingLike) {
+                outputType = "publishing";
+                return { outputType, destinationRoute: explicitDestination || "publishing" };
+        }
+
+        if (/governance|compliance|risk|approval/.test(outputType) || looksGovernanceLike) {
+                outputType = "governance";
+                return { outputType, destinationRoute: explicitDestination || "governance" };
+        }
+
+        if (/insight|research|seo|analytics/.test(outputType) || looksInsightLike) {
+                outputType = "insight";
+                return { outputType, destinationRoute: explicitDestination || "insights" };
+        }
+
+        if (/campaign|strategy|launch/.test(outputType) || looksCampaignLike) {
+                outputType = "campaign";
+                return {
+                        outputType,
+                        destinationRoute: explicitDestination || (session?.teamMode === "team" ? "workflows" : "campaign-studio")
+                };
+        }
+
+        const destinationRoute = explicitDestination || destinationRouteForSpecialist(session?.modeId || "operations", outputType);
+        return { outputType, destinationRoute };
+}
+
+function routeLabel(route) {
+	const labels = {
+		"campaign-studio": "Campaign Studio",
+		"content-studio": "Content Studio",
+		"media-studio": "Media Studio",
+		publishing: "Publishing",
+		"ads-manager": "Ads Manager",
+		insights: "Insights",
+		integrations: "Integrations",
+		governance: "Governance",
+		"operations-centers": "Operations Centers",
+		"task-center": "Task Center",
+		setup: "Setup",
+		workflows: "Workflows"
+	};
+	return labels[route] || titleCase(route);
+}
+
+function specialistTemplateForOutput({ specialist, outputType, prompt, projectName }) {
+	const cleanPrompt = asString(prompt).trim();
+	const promptSnippet = cleanPrompt || `Project request for ${projectName || "current project"}`;
+	const specialistId = asString(specialist?.id || "operations");
+	const route = destinationRouteForSpecialist(specialistId, outputType);
+
+	const base = {
+		specialistId,
+		outputType,
+		title: "Draft output",
+		summary: "Guidance prepared for review.",
+		bullets: [],
+		steps: [],
+		destinationRoute: route,
+		confirmationRequired: outputType === "handoff" || specialistId === "publisher" || specialistId === "compliance_reviewer",
+		generatedAt: nowIso(),
+		sourcePrompt: promptSnippet,
+		status: "draft_preview",
+		safetyLabel: "Guidance and draft only. No backend execution.",
+		nextSafeAction: `Review in ${routeLabel(route)}`,
+		confirmationNote: "Execution, approvals, and publishing require explicit confirmation in the owning workspace."
+	};
+
+	if (specialistId === "strategist") {
+		if (outputType === "task") {
+			return {
+				...base,
+				title: `Task: Strategic plan for ${projectName || "current project"}`,
+				summary: "Strategic task draft prepared with priorities, blockers, and operating sequence.",
+				steps: [
+					"Define top 3 strategic priorities for this cycle",
+					"List blockers and dependency owners",
+					"Map next operating move by channel",
+					"Route execution draft to Campaign Studio or Workflows"
+				],
+				nextSafeAction: "Review and refine the task draft before creating durable tasks"
+			};
+		}
+		return {
+			...base,
+			title: `Strategist Guidance: Next operating move`,
+			summary: `Priority guidance prepared from: ${promptSnippet}`,
+			bullets: [
+				"Strategic priorities aligned to current readiness",
+				"Key blockers and risk dependencies identified",
+				"Next operating move drafted with destination routing"
+			]
+		};
+	}
+
+	if (specialistId === "writer") {
+		return {
+			...base,
+			title: outputType === "task" ? "Task: Draft campaign copy" : "Content Guidance: Messaging draft",
+			summary: "Content draft prepared with hooks, captions, CTA flow, and review checkpoint.",
+			hooks: [
+				`Problem-aware hook direction for ${projectName || "this project"}`,
+				"Outcome-led hook direction for a German publishing draft",
+				"Proof-led hook direction with claims marked for review"
+			],
+			captions: [
+				"Caption opens with the audience problem, then moves into the practical value promise.",
+				"German caption version should keep the CTA direct and easy to approve."
+			],
+			ctas: [
+				"Jetzt mehr erfahren",
+				"Mehr Details ansehen",
+				"Zum Angebot"
+			],
+			notes: [
+				"Use Arabic freely in the conversation; publishable copy should be reviewed in German.",
+				"Claims, health, or performance promises need evidence before publishing."
+			],
+			nextStep: "Send this package to Content Studio or Publisher after review.",
+			steps: [
+				"Draft 3 hook variants",
+				"Draft captions with CTA",
+				"Prepare review notes and claims check",
+				"Route to Content Studio for refinement"
+			],
+			safetyLabel: "Claims require review before publishing. No direct publish action."
+		};
+	}
+
+	if (specialistId === "media") {
+		return {
+			...base,
+			outputType: outputType === "guidance" ? "media_brief" : outputType,
+			title: "Media Brief: Visual direction draft",
+			summary: "Media brief prepared with visual direction, prompt ideas, and required assets.",
+			notes: [
+				"Define the hero subject, composition, lighting, and brand guardrails before production.",
+				"Confirm platform formats before routing to Media Studio."
+			],
+			bullets: [
+				"Visual direction and brand constraints summarized",
+				"Prompt ideas prepared for image/video planning",
+				"Required assets and missing assets listed"
+			],
+			safetyLabel: "No media generation executed. Brief and routing only.",
+			nextSafeAction: "Open Media Studio to review and refine the brief"
+		};
+	}
+
+	if (specialistId === "video_lead") {
+		return {
+			...base,
+			title: outputType === "task" ? "Task: Video production plan" : "Video Brief: Hook, script, storyboard",
+			summary: "Video draft prepared with hook, script structure, and storyboard flow.",
+			steps: [
+				"Draft opening hook and audience angle",
+				"Write short-form script outline",
+				"Outline storyboard beats",
+				"Route to Media Studio for production planning"
+			],
+			safetyLabel: "Video generation requires configured provider or GPU worker; no execution started."
+		};
+	}
+
+	if (specialistId === "publisher") {
+		return {
+			...base,
+			title: outputType === "handoff" ? "Handoff Preview: Publishing package" : "Publishing Draft: Readiness checklist",
+			summary: "Publishing checklist and schedule draft prepared.",
+			notes: [
+				"Final copy should be German for the Germany market unless a destination overrides it.",
+				"Publishing remains gated until channel, approval, and asset readiness are confirmed."
+			],
+			steps: [
+				"Validate asset and copy readiness",
+				"Draft publish schedule by channel",
+				"Flag approval dependencies",
+				"Prepare handoff for publishing review"
+			],
+			confirmationRequired: true,
+			safetyLabel: "Confirmation required before publish. No publish action performed."
+		};
+	}
+
+	if (specialistId === "ads") {
+		return {
+			...base,
+			title: outputType === "task" ? "Task: Paid test plan" : "Ads Draft: Angles and tests",
+			summary: "Ad angle and audience testing draft prepared for review.",
+			hooks: [
+				"German problem-led ad hook",
+				"German outcome-led ad hook",
+				"German objection-led ad hook"
+			],
+			ctas: [
+				"Jetzt testen",
+				"Mehr erfahren",
+				"Angebot ansehen"
+			],
+			notes: [
+				"Keep budget, launch, and live ad changes inside Ads Manager.",
+				"Use this as copy and testing direction only."
+			],
+			bullets: [
+				"Primary ad angle draft",
+				"Audience/testing suggestions",
+				"Platform-specific copy recommendations"
+			],
+			safetyLabel: "No budget updates or ad launches executed."
+		};
+	}
+
+	if (specialistId === "analyst") {
+		return {
+			...base,
+			title: outputType === "task" ? "Task: Analysis plan" : "Insights Guidance: Signal review",
+			summary: "Analysis plan prepared with key signals, coverage gaps, and next checks.",
+			bullets: [
+				"Signals to check: readiness, channel performance, data coverage",
+				"Coverage gaps mapped for follow-up",
+				"Recommendations prepared for Insights workspace"
+			],
+			safetyLabel: "No analytics mutation or fake metrics. Guidance only."
+		};
+	}
+
+	if (specialistId === "compliance_reviewer") {
+		return {
+			...base,
+			title: "Compliance Draft: Risk review checklist",
+			summary: "Risk review checklist prepared with claims and safety review points.",
+			steps: [
+				"Review key claims and evidence",
+				"Flag safety and policy risks",
+				"Prepare governance notes",
+				"Route to Governance for formal review"
+			],
+			confirmationRequired: true,
+			safetyLabel: "Compliance review is advisory. Formal approval remains human-governed."
+		};
+	}
+
+	if (specialistId === "customer_ops") {
+		return {
+			...base,
+			title: outputType === "task" ? "Ticket Draft: Customer operations follow-up" : "Customer Ops Draft: Thread, reply, and routing",
+			summary: "Customer operations draft prepared with safe reply language, ticket notes, SLA review, and escalation guardrails.",
+			mainOutput: "Review the customer context, confirm missing details, then route the draft through the owning support, sales, or operations surface.",
+			replyDraft: [
+				"Thank the customer, acknowledge the issue, and confirm the next reviewed support step.",
+				"Avoid promising refunds, replacements, or timelines until the owning team confirms them."
+			],
+			ticketDraft: [
+				"Issue summary: customer concern or request captured for review.",
+				"Priority: draft priority pending runtime inbox and SLA confirmation.",
+				"Owner: support, sales, or operations to be confirmed before creation."
+			],
+			notes: [
+				"Unified Inbox is not duplicated here; this is a draft and routing preview only.",
+				"SLA and escalation decisions require confirmation in the owning operations surface."
+			],
+			nextStep: "Review the draft, confirm the destination team, then route through support, sales, or operations.",
+			steps: [
+				"Summarize the customer thread",
+				"Draft a safe customer reply",
+				"Create ticket draft fields for review",
+				"Confirm escalation or routing before action"
+			],
+			confirmationRequired: true,
+			safetyLabel: "No reply sent, ticket created, SLA changed, or escalation triggered."
+		};
+	}
+
+	if (specialistId === "sales_crm") {
+		return {
+			...base,
+			title: outputType === "handoff" ? "Sales Handoff" : "Sales / CRM Draft: Lead and outreach plan",
+			summary: "Sales and CRM draft prepared with lead qualification, outreach direction, follow-up cadence, and pipeline handoff notes.",
+			mainOutput: "Use this as a sales planning draft. Confirm CRM context and owner before sending outreach or changing pipeline status.",
+			outreachDraft: [
+				"Opening: personalized reason for reaching out based on the lead segment.",
+				"Value: concise project-specific offer or collaboration angle.",
+				"CTA: ask for a low-friction next step."
+			],
+			followUps: [
+				"Follow-up 1: clarify value and ask for interest.",
+				"Follow-up 2: add proof or relevant context.",
+				"Stop condition: pause when the lead opts out or owner confirms no fit."
+			],
+			ctas: [
+				"Would you like a short intro?",
+				"Can I send more details?",
+				"Should we schedule the next step?"
+			],
+			notes: [
+				"CRM profile and pipeline changes remain outside AI Team.",
+				"Outreach and follow-ups require confirmation before sending."
+			],
+			nextStep: "Review the lead fit, confirm owner, then route the handoff to operations or the CRM surface.",
+			steps: [
+				"Qualify fit, intent, urgency, and missing fields",
+				"Draft outreach for review",
+				"Prepare follow-up sequence",
+				"Route sales handoff without mutating CRM data"
+			],
+			confirmationRequired: true,
+			safetyLabel: "No outreach sent, CRM record changed, follow-up scheduled, or pipeline stage advanced."
+		};
+	}
+
+	if (specialistId === "operations") {
+		if (outputType === "workflow") {
+			return {
+				...base,
+				title: "Workflow: Operating sequence",
+				summary: "Workflow draft prepared with stage owners and checkpoints.",
+				steps: [
+					"Stage 1: Intake and objective alignment",
+					"Stage 2: Specialist draft production",
+					"Stage 3: Compliance/review gate",
+					"Stage 4: Destination handoff and confirmation"
+				],
+				safetyLabel: "Workflow run is not started. This is a draft preview only."
+			};
+		}
+		return {
+			...base,
+			title: outputType === "handoff" ? "Handoff Preview: Operations package" : "Operations Draft: Task and handoff plan",
+			summary: "Operational plan drafted with next tasks, owners, and route.",
+			steps: [
+				"Define immediate tasks",
+				"Assign suggested owners",
+				"Prepare destination handoff context",
+				"Review before creating durable records"
+			],
+			safetyLabel: "No workflow run and no backend task creation executed."
+		};
+	}
+
+	return base;
+}
+
+function buildPhase2OutputPreview({ intent, session, prompt, projectName }) {
+	const teamMode = session.teamMode === "team";
+	const specialist = teamMode
+		? { id: "operations", label: "Full Team" }
+		: getPhase1SpecialistById(session.modeId);
+
+	const intentToType = {
+		guidance: "guidance",
+		task: "task",
+		workflow: "workflow",
+		handoff: "handoff"
+	};
+	const outputType = intentToType[intent] || "guidance";
+
+	const base = specialistTemplateForOutput({
+		specialist,
+		outputType,
+		prompt,
+		projectName
+	});
+
+	if (!teamMode) return base;
+
+	return {
+		...base,
+		specialistId: "team",
+		title: outputType === "workflow" ? "Team Workflow" : `Team ${titleCase(outputType)} Preview`,
+		summary: `Full team ${outputType.replace("_", " ")} preview prepared for ${projectName || "current project"}.`,
+		bullets: [
+			"Strategist defines priorities, positioning, launch sequence, and strongest next move",
+			"Writer, Media Director, and Video Lead turn strategy into message, asset, and production drafts",
+			"Compliance and Publisher verify claims, approvals, formatting, and release readiness",
+			"Customer Ops and Sales / CRM join when the request touches inbox, tickets, leads, outreach, or CRM"
+		],
+		steps: [
+			"Strategist: decide priority, offer angle, channel sequence, and launch wave",
+			"Writer: draft hooks, captions, messages, email, or outreach copy",
+			"Media / Video: prepare creative direction, asset needs, script, storyboard, or voiceover draft",
+			"Compliance: flag claims, evidence needs, policy risks, and approval gates",
+			"Publisher: package channel-ready copy, assets, schedule notes, and publish checks",
+			"Customer Ops / Sales: add reply, ticket, lead, outreach, or CRM handoff drafts when relevant",
+			"Operations: convert the reviewed output into safe tasks, workflow draft, or handoff context"
+		],
+		destinationRoute: outputType === "task" ? "task-center" : "workflows",
+		nextSafeAction: "Review the team draft, confirm owners, then route draft context to the destination workspace",
+		confirmationNote: "No task, workflow, outreach, customer reply, CRM update, approval, or publishing action is executed from Full Team mode.",
+		safetyLabel: "Full Team output is a coordinated draft preview only."
+	};
+}
+
+function formatOutputTypeLabel(outputType) {
+	const labels = {
+		guidance: "Guidance",
+		task: "Task",
+		workflow: "Workflow",
+		handoff: "Handoff Preview",
+		media_brief: "Media Brief"
+	};
+	return labels[outputType] || titleCase(outputType || "guidance");
+}
+
+function buildPreviewText(output, specialistLabel) {
+	if (!output) return "";
+	const lines = [
+		`Output Type: ${formatOutputTypeLabel(output.outputType)}`,
+		`Specialist: ${specialistLabel}`,
+		`Status: ${humanizeValue(output.status, "draft_preview")}`,
+		`Title: ${humanizeValue(output.title)}`,
+		`Summary: ${humanizeValue(output.summary)}`,
+		"",
+		`Source Prompt: ${humanizeValue(output.sourcePrompt)}`,
+		""
+	];
+
