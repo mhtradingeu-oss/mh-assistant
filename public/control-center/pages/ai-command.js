@@ -38,7 +38,7 @@ const MODE_DEFS = [
                 id: "strategist",
                 label: "Strategist",
                 icon: "🎯",
-                summary: "Campaign concepts, launch plans, channel mix, and offer strategy.",
+                summary: "Campaign briefs, audience strategy, offer angles, launch plans, and team handoff packages.",
                 routeHint: "campaign-studio"
         },
         {
@@ -143,11 +143,11 @@ const SPECIALIST_DEFS = [
 	{
 		id: "strategist",
 		label: "Strategist",
-		position: "Executive Strategy Lead",
+		position: "Campaign & Growth Strategist",
 		icon: "🎯",
-		summary: "Campaign concepts, launch plans, channel mix, and offer strategy.",
-		placeholder: "Ask the Strategist to plan a campaign, map launch phases, review channel priorities, or define the offer strategy…",
-		canHelp: ["Draft campaign plans", "Prioritize next actions", "Map launch sequences", "Advise on offer strategy", "Prepare channel briefs"],
+		summary: "Campaign briefs, positioning, audience strategy, offer angles, launch plans, and team handoff packages.",
+		placeholder: "Ask the Strategist to build a campaign brief, define audience segments, create offer angles, compare launch directions, or prepare a team handoff…",
+		canHelp: ["Build Campaign Briefs", "Define Audience Segments", "Create Offer Angles", "Compare Strategy Directions", "Plan Launch Waves", "Prepare Team Handoffs"],
 		cannotDo: ["Publish campaigns directly", "Execute workflows automatically", "Approve content", "Set live budgets"],
 		destinations: ["Campaign Studio", "Workflows", "AI Command"],
 		safetyNote: "All outputs are guidance and draft only. Execution requires explicit confirmation.",
@@ -288,10 +288,10 @@ const SPECIALIST_DEFS = [
 // Role-specific suggested prompt chips (prefill only, no auto-execute)
 const SPECIALIST_SUGGESTED_PROMPTS = {
 	strategist: [
-		{ label: "What should I do next?", sub: "Review priorities and blockers" },
-		{ label: "Draft a campaign brief", sub: "Map objective, audience, and channels" },
-		{ label: "Review launch readiness", sub: "Identify what is blocking launch" },
-		{ label: "Suggest the next campaign move", sub: "Based on current project state" }
+		{ label: "Build a campaign brief", sub: "Objective, audience, offer, channels, and next move" },
+		{ label: "Define the audience", sub: "Segments, needs, objections, and buying triggers" },
+		{ label: "Create offer angles", sub: "Value proposition, proof points, CTAs, and risk notes" },
+		{ label: "Compare launch directions", sub: "3 strategic routes with tradeoffs and recommendation" }
 	],
 	writer: [
 		{ label: "Draft campaign captions", sub: "For the active campaign" },

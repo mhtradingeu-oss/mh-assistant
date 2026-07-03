@@ -423,7 +423,7 @@ export const TOOL_DOCK_BY_SPECIALIST = {
     {
       id: "campaign-plan",
       icon: "🎯",
-      label: "Campaign",
+      label: "Build Strategy",
       badge: "Plan",
       actionType: "guided",
       safetyLevel: "review_only",
@@ -431,12 +431,12 @@ export const TOOL_DOCK_BY_SPECIALIST = {
       destinations: ["chat-preview", "campaign-studio", "content-studio", "workflows"],
       sourceTypes: ["current_chat", "campaign_notes", "market_notes", "audience_notes", "product_data", "library_source", "manual_input"],
       outputTypes: ["campaign_plan", "campaign_brief", "channel_plan", "next_best_actions"],
-      template: "Create a campaign plan for {projectName}. Include objective, audience, offer, channels, phases, risks, and next best actions. Keep it review-ready only."
+      template: "Build a Campaign Brief for {projectName}. Include objective, audience segments, positioning, offer angles, message pillars, channel mix, launch phases, risks, and next best actions. Keep it preview-only and ready for review."
     },
     {
       id: "launch-plan",
       icon: "🚀",
-      label: "Launch",
+      label: "Plan Launch",
       badge: "Plan",
       actionType: "guided",
       safetyLevel: "review_only",
@@ -444,12 +444,12 @@ export const TOOL_DOCK_BY_SPECIALIST = {
       destinations: ["chat-preview", "campaign-studio", "workflows", "publishing"],
       sourceTypes: ["current_chat", "campaign_brief", "asset_requirements", "timeline_notes", "library_source", "manual_input"],
       outputTypes: ["launch_plan", "readiness_plan", "timeline", "dependency_map"],
-      template: "Build a launch plan for {projectName}. Include timeline, required assets, owners, channels, readiness gaps, and safe next actions."
+      template: "Plan launch waves for {projectName}. Include timeline, channels, dependencies, required assets, readiness gaps, and safe next actions. Keep it review-ready."
     },
     {
       id: "audience",
       icon: "◎",
-      label: "Audience",
+      label: "Define Audience",
       badge: "Map",
       actionType: "guided",
       safetyLevel: "review_only",
@@ -457,12 +457,12 @@ export const TOOL_DOCK_BY_SPECIALIST = {
       destinations: ["chat-preview", "campaign-studio", "content-studio", "insights"],
       sourceTypes: ["current_chat", "market_notes", "customer_notes", "insights_report", "library_source", "manual_input"],
       outputTypes: ["audience_map", "segment_notes", "objection_map", "message_angles"],
-      template: "Map the target audience for {projectName}. Include segments, needs, objections, buying triggers, and message angles."
+      template: "Define audience segments for {projectName}. Include segments, needs, objections, buying triggers, and message angles for each segment."
     },
     {
       id: "offer",
       icon: "◆",
-      label: "Offer",
+      label: "Offer Angles",
       badge: "Value",
       actionType: "guided",
       safetyLevel: "review_only",
@@ -470,12 +470,12 @@ export const TOOL_DOCK_BY_SPECIALIST = {
       destinations: ["chat-preview", "campaign-studio", "content-studio", "ads-manager"],
       sourceTypes: ["current_chat", "product_data", "pricing_notes", "proof_points", "library_source", "manual_input"],
       outputTypes: ["offer_brief", "value_proposition", "proof_points", "cta_options"],
-      template: "Create offer angles for {projectName}. Include value proposition, benefits, proof points, CTA ideas, and risk notes."
+      template: "Create offer angles for {projectName}. Include positioning, value proposition, proof points, CTA options, and risk notes. Keep it preview-only."
     },
     {
       id: "funnel",
       icon: "⌁",
-      label: "Funnel",
+      label: "Funnel Map",
       badge: "Flow",
       actionType: "guided",
       safetyLevel: "review_only",
@@ -483,12 +483,12 @@ export const TOOL_DOCK_BY_SPECIALIST = {
       destinations: ["chat-preview", "campaign-studio", "content-studio", "workflows", "publishing"],
       sourceTypes: ["current_chat", "campaign_brief", "audience_notes", "content_inventory", "library_source", "manual_input"],
       outputTypes: ["funnel_map", "content_needs", "handoff_points", "retention_notes"],
-      template: "Map a funnel for {projectName}. Include awareness, consideration, conversion, retention, content needs, and handoff points."
+      template: "Map the funnel for {projectName}. Include awareness, consideration, conversion, retention, content needs, and handoff points for review."
     },
     {
       id: "priority",
       icon: "✓",
-      label: "Priority",
+      label: "Next Move",
       badge: "Next",
       actionType: "preview",
       safetyLevel: "review_only",
@@ -496,7 +496,7 @@ export const TOOL_DOCK_BY_SPECIALIST = {
       destinations: ["chat-preview", "workflows", "task", "campaign-studio"],
       sourceTypes: ["current_chat", "operations_snapshot", "readiness_gaps", "campaign_notes", "manual_input"],
       outputTypes: ["next_best_action", "priority_list", "blocker_map", "action_sequence"],
-      template: "Prioritize the next best actions for {projectName}. Separate urgent, important, blocked, and later work."
+      template: "Recommend the next best move for {projectName}. Separate urgent, important, blocked, and later actions with clear rationale."
     }
   ],
 
