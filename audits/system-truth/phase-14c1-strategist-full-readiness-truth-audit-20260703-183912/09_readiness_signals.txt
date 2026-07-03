@@ -1,0 +1,710 @@
+### expected copy
+public/control-center/pages/ai-command.js:41:                summary: "Campaign briefs, audience strategy, offer angles, launch plans, and team handoff packages.",
+public/control-center/pages/ai-command.js:146:		position: "Campaign & Growth Strategist",
+public/control-center/pages/ai-command.js:148:		summary: "Campaign briefs, positioning, audience strategy, offer angles, launch plans, and team handoff packages.",
+public/control-center/pages/ai-command.js:149:		placeholder: "Ask the Strategist to build a campaign brief, define audience segments, create offer angles, compare launch directions, or prepare a team handoff…",
+public/control-center/pages/ai-command.js:150:		canHelp: ["Build Campaign Briefs", "Define Audience Segments", "Create Offer Angles", "Compare Strategy Directions", "Plan Launch Waves", "Prepare Team Handoffs"],
+public/control-center/pages/ai-command.js:433:		{ id: "funnel-mapping", label: "Funnel Mapping", action: "preview", intent: "guidance", template: "Map the funnel for {project}. Include awareness, consideration, conversion, retention, and handoff points." },
+public/control-center/pages/ai-command/tool-dock.js:426:      label: "Build Strategy",
+public/control-center/pages/ai-command/tool-dock.js:434:      template: "Build a Campaign Brief for {projectName}. Include objective, audience segments, positioning, offer angles, message pillars, channel mix, launch phases, risks, and next best actions. Keep it preview-only and ready for review."
+public/control-center/pages/ai-command/tool-dock.js:439:      label: "Plan Launch",
+public/control-center/pages/ai-command/tool-dock.js:452:      label: "Define Audience",
+public/control-center/pages/ai-command/tool-dock.js:465:      label: "Offer Angles",
+public/control-center/pages/ai-command/tool-dock.js:478:      label: "Funnel Map",
+public/control-center/pages/ai-command/tool-dock.js:491:      label: "Next Move",
+
+### safety
+public/control-center/pages/ai-command.js:90:                summary: "Claims review, approvals, safety language, and governance checks.",
+public/control-center/pages/ai-command.js:91:                routeHint: "governance"
+public/control-center/pages/ai-command.js:97:                summary: "Tasks, timelines, handoffs, approvals, and execution plans.",
+public/control-center/pages/ai-command.js:151:		cannotDo: ["Publish campaigns directly", "Execute workflows automatically", "Approve content", "Set live budgets"],
+public/control-center/pages/ai-command.js:153:		safetyNote: "All outputs are guidance and draft only. Execution requires explicit confirmation.",
+public/control-center/pages/ai-command.js:192:		safetyNote: "Scripts and direction only. Video generation requires explicit backend action and approval.",
+public/control-center/pages/ai-command.js:203:		cannotDo: ["Publish without explicit approval", "Override schedules", "Bypass governance gates", "Push to live channels directly"],
+public/control-center/pages/ai-command.js:205:		safetyNote: "Publishing always requires explicit approval. No live publishing from AI guidance alone.",
+public/control-center/pages/ai-command.js:216:		cannotDo: ["Launch ads directly", "Set live budgets without review", "Approve spend", "Access ad accounts directly"],
+public/control-center/pages/ai-command.js:218:		safetyNote: "Ad concepts and copy only. Live ad actions require platform integration and explicit approval.",
+public/control-center/pages/ai-command.js:239:		summary: "Claims review, approval safety, publishing risk, and governance notes.",
+public/control-center/pages/ai-command.js:240:		placeholder: "Ask the Compliance Reviewer to check claims, approval risks, publishing safety, and governance notes…",
+public/control-center/pages/ai-command.js:241:		canHelp: ["Review marketing claims", "Flag approval risks", "Check publishing safety", "Prepare governance notes", "Identify compliance blockers"],
+public/control-center/pages/ai-command.js:242:		cannotDo: ["Grant approvals directly", "Override governance gates", "Publish on behalf of approvers", "Remove flags without review"],
+public/control-center/pages/ai-command.js:252:		summary: "Tasks, timelines, handoffs, approvals, and execution plans.",
+public/control-center/pages/ai-command.js:333:		{ label: "Check claims for approval", sub: "Review all marketing claims" },
+public/control-center/pages/ai-command.js:335:		{ label: "Prepare governance notes", sub: "Document compliance status" },
+public/control-center/pages/ai-command.js:336:		{ label: "Review approval requirements", sub: "What needs sign-off" }
+public/control-center/pages/ai-command.js:413:		summary: "Policy, approvals, roles, and audit controls stay destination-owned."
+public/control-center/pages/ai-command.js:458:		{ id: "final-packaging", label: "Final Packaging", action: "preview", intent: "handoff", template: "Prepare a final publishing package for {project}. Include copy, CTA, asset notes, approvals, and destination channel." },
+public/control-center/pages/ai-command.js:479:		{ id: "approval-flags", label: "Approval Flags", action: "preview", intent: "task", template: "Check approval risks for {project}. List risk, impact, mitigation, and required owner." },
+public/control-center/pages/ai-command.js:480:		{ id: "safety-checklist", label: "Safety Checklist", action: "preview", intent: "handoff", template: "Prepare a safety checklist for {project}. Include policy checks, evidence required, and approval notes." },
+public/control-center/pages/ai-command.js:481:		{ id: "publish-readiness", label: "Publish Readiness", action: "preview", intent: "handoff", template: "Review publish readiness for {project}. Confirm what needs human approval before release." },
+public/control-center/pages/ai-command.js:482:		{ id: "open-governance", label: "Open Governance", action: "route", route: "governance" }
+public/control-center/pages/ai-command.js:677:	if (/publish\s*now|send\s*external|paid\s*ads|final\s*approval/i.test(command)) {
+public/control-center/pages/ai-command.js:685:				reason: "Requires approval gate before external publishing actions."
+public/control-center/pages/ai-command.js:1252:		"Never claim publish, approval, deletion, archival, sync, or operational runs happened.",
+public/control-center/pages/ai-command.js:1309:	if (id === "compliance_reviewer") return "governance";
+public/control-center/pages/ai-command.js:1342:        const looksWorkflowLike = /\b(workflow|workflows|process|sequence|phase|phases|approval flow|automation|operating loop|step-by-step|steps|dependencies|trigger|review gate|execution flow)\b/.test(text);
+public/control-center/pages/ai-command.js:1345:        const looksPublishingLike = /\b(publish|publishing|schedule|channel package|channel payload|approval-ready post|final post|ready to publish|publishing package)\b/.test(text);
+public/control-center/pages/ai-command.js:1346:        const looksGovernanceLike = /\b(compliance|governance|claim|claims|risk|risks|approval|approvals|policy|privacy|legal|safe language|safety review)\b/.test(text);
+public/control-center/pages/ai-command.js:1375:        if (/governance|compliance|risk|approval/.test(outputType) || looksGovernanceLike) {
+public/control-center/pages/ai-command.js:1376:                outputType = "governance";
+public/control-center/pages/ai-command.js:1377:                return { outputType, destinationRoute: explicitDestination || "governance" };
+public/control-center/pages/ai-command.js:1406:		governance: "Governance",
+public/control-center/pages/ai-command.js:1435:		confirmationNote: "Execution, approvals, and publishing require explicit confirmation in the owning workspace."
+public/control-center/pages/ai-command.js:1541:				"Publishing remains gated until channel, approval, and asset readiness are confirmed."
+public/control-center/pages/ai-command.js:1546:				"Flag approval dependencies",
+public/control-center/pages/ai-command.js:1604:				"Prepare governance notes",
+public/control-center/pages/ai-command.js:1608:			safetyLabel: "Compliance review is advisory. Formal approval remains human-governed."
+public/control-center/pages/ai-command.js:1743:			"Compliance and Publisher verify claims, approvals, formatting, and release readiness",
+public/control-center/pages/ai-command.js:1750:			"Compliance: flag claims, evidence needs, policy risks, and approval gates",
+public/control-center/pages/ai-command.js:1757:		confirmationNote: "No task, workflow, outreach, customer reply, CRM update, approval, or publishing action is executed from Full Team mode.",
+public/control-center/pages/ai-command.js:2004:		operations: ["task plan", "workflow", "handoff", "approval", "timeline", "execution plan", "route", "publish", "status", "priority", "priorities", "blocking", "blocker", "readiness", "next", "do next"],
+public/control-center/pages/ai-command.js:2119:			routeSuggestion("Publishing", "publishing", "Schedule the next batch with stronger timing and approval control."),
+public/control-center/pages/ai-command.js:2388:	governance: "Governance",
+public/control-center/pages/ai-command.js:2410:	governance: "compliance_reviewer",
+public/control-center/pages/ai-command.js:2451:	govern: "governance",
+public/control-center/pages/ai-command.js:2555:		confirmationNote: firstAiInboundText(preview.confirmationNote, preview.confirmation_note, "Execution, approvals, publishing, CRM updates, customer replies, and workflow runs require explicit confirmation in the owning workspace."),
+public/control-center/pages/ai-command.js:3531:	if (/review|check|compliance|readiness|governance/i.test(asString(tool.label))) return "Review";
+public/control-center/pages/ai-command.js:3649:			<span>Strategy, writing, creative, compliance, publishing, customer, sales, and operations specialists coordinate one review-ready answer. No workflow, send, publish, approval, or CRM action is executed here.</span>
+public/control-center/pages/ai-command.js:3966:        const governanceRequired = destinationRoute === "governance" || /approval|claim|compliance|risk|gdpr|review/i.test(`${outputType} ${asString(preview.title)} ${asString(preview.summary)}`);
+public/control-center/pages/ai-command.js:3967:        const riskLabel = governanceRequired ? "Review required" : "Low";
+public/control-center/pages/ai-command.js:3968:        const governanceLabel = governanceRequired ? "Governance route" : "Not required";
+public/control-center/pages/ai-command.js:3977:                        const complianceWatching = spec.id === "compliance_reviewer" && governanceRequired;
+public/control-center/pages/ai-command.js:4022:                                <span><strong>Governance</strong>${escapeHtml(governanceLabel)}</span>
+public/control-center/pages/ai-command.js:4029:                        <p class="aicmd-chatfirst-tab-note">AI Command prepares guidance, drafts, previews, and handoff context only. Publishing, approvals, CRM updates, workflow runs, customer sends, provider execution, and durable task creation remain confirmation-gated in the owning workspace.</p>
+public/control-center/pages/ai-command.js:4101:				<p>Chat, draft, review, and prepare handoff context only. Publishing, approvals, CRM updates, workflow runs, external sends, and durable task creation stay confirmation-gated in the owning workspace.</p>
+public/control-center/pages/ai-command.js:4464:                                                <p>Guide the AI Team from source to preview. Backend workflow execution and destination handoff stay approval-gated.</p>
+public/control-center/pages/ai-command.js:4559:                                                                <button type="button" data-aicmd-smart-campaign-action="governance">Request Governance Review</button>
+public/control-center/pages/ai-command.js:4567:                                                        <span>1. Choose source, goal, and channel. The AI Team will prepare the preview package before any approval or handoff.</span>
+public/control-center/pages/ai-command.js:4696:                                <span>Library, campaigns, content, customers, governance, integrations and provider readiness are connected as guarded planning context. Execution stays confirmation-gated.</span>
+public/control-center/pages/ai-command.js:4996:						<span>${escapeHtml(humanizeValue(preview.confirmationNote, "Execution requires explicit confirmation in the destination workspace."))}</span>
+public/control-center/pages/ai-command.js:5005:				<p class="aicmd-chatfirst-tab-note">This is a review-ready preview. Execution, publishing, approvals, CRM updates, external sends, durable task creation, and workflow runs happen only in the owning destination workspace after confirmation.</p>
+public/control-center/pages/ai-command.js:5074:	const approval = preview.confirmationRequired ? "Confirmation required" : (preview.outputType ? "Review ready" : "No draft yet");
+public/control-center/pages/ai-command.js:5083:			<div><span>Approval</span><strong>${escapeHtml(approval)}</strong></div>
+public/control-center/pages/ai-command.js:5126:                ? "Chat only. No workflow run, durable task, external handoff action, approval, publishing action, CRM update, or customer action was created."
+public/control-center/pages/ai-command.js:5405:					<span>Publishing, approval, and workflow runs require your explicit confirmation in the right workspace.</span>
+public/control-center/pages/ai-command.js:6027:                                        body: "Flag unsupported claims, pricing promises, before/after language, evidence gaps, restricted wording, and approval requirements."
+public/control-center/pages/ai-command.js:6031:                                        body: `Prepare publishing readiness for ${channelLabel}: channel checklist, schedule draft, missing approvals, and handoff requirements.`
+public/control-center/pages/ai-command.js:6035:                                        body: "Track approval status, destination handoff, follow-up checks, improvement notes, and post-review action ownership."
+public/control-center/pages/ai-command.js:6059:                                                body: `Use ${sourceMeaning}. Produce a review-ready campaign package before any handoff, approval, publishing, sending, CRM update, provider execution, or workflow mutation.`
+public/control-center/pages/ai-command.js:6079:                                                body: "Review claims, proof, pricing language, guarantees, sensitive wording, platform policy risk, and required Governance approval before external use."
+public/control-center/pages/ai-command.js:6083:                                                body: `Prepare ${channelLabel} readiness: asset status, copy status, approval status, schedule suggestion, channel dependencies, and final reviewer.`
+public/control-center/pages/ai-command.js:6091:                                safety: "Preview only. No publish, send, CRM mutation, provider execution, workflow mutation, or Governance approval is performed here."
+public/control-center/pages/ai-command.js:6162:                                safety: asObject(body.safety).preview_only
+public/control-center/pages/ai-command.js:6163:                                        ? "Backend preview only. No publish, send, CRM mutation, provider execution, workflow mutation, Governance approval, task creation, or durable handoff was performed."
+public/control-center/pages/ai-command.js:6196:                                if (!safety.preview_only || !safety.no_backend_mutation_performed || !safety.no_provider_execution_performed) {
+public/control-center/pages/ai-command.js:6245:                                        confirmationNote: "Review and route this campaign package through the owning destination workspace before any publishing, sending, approval, task creation, provider execution, or workflow mutation.",
+public/control-center/pages/ai-command.js:6253:                                updateStatus(preview.backendPreview ? "Backend AI Team preview prepared. Review before any handoff or approval." : "Local campaign preview prepared because backend preview is unavailable.");
+public/control-center/pages/ai-command.js:6297:                                safety: "Prepared handoff only. No backend write, publish, send, CRM mutation, provider execution, approval creation, task creation, or workflow mutation was performed.",
+public/control-center/pages/ai-command.js:6325:                                governance: "Request Governance Review",
+public/control-center/pages/ai-command.js:6366:                                safety: "Staged review action only. No backend write, publish, send, CRM mutation, provider execution, approval creation, task creation, or workflow mutation was performed."
+public/control-center/pages/ai-command.js:6582:		                                safetyInstruction: "Chat only. No task/workflow/handoff/approval/publish/customer/CRM execution.",
+public/control-center/pages/ai-command/tool-dock.js:350:        <div class=\"mhos-tool-drawer-source-meta\">${escapeHtml(type)} · Added from Library · Not approval or publish readiness</div>
+public/control-center/pages/ai-command/tool-dock.js:429:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:442:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:455:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:468:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:481:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:494:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:510:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:523:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:536:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:549:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:562:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:588:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:601:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:629:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:642:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:655:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:668:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:681:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:694:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:696:      destinations: ["chat-preview", "media-studio", "governance", "library"],
+public/control-center/pages/ai-command/tool-dock.js:710:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:723:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:736:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:749:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:762:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:778:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:780:      destinations: ["chat-preview", "publishing", "governance", "content-studio", "media-studio"],
+public/control-center/pages/ai-command/tool-dock.js:781:      sourceTypes: ["content_draft", "media_asset", "publishing_package", "approval_notes", "current_chat", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:783:      template: "Review publishing readiness for {projectName}. Check copy, assets, channel fit, schedule, approvals, and missing items. Do not publish."
+public/control-center/pages/ai-command/tool-dock.js:791:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:795:      outputTypes: ["channel_pack", "caption_pack", "format_notes", "approval_checklist"],
+public/control-center/pages/ai-command/tool-dock.js:796:      template: "Prepare a channel package for {projectName}. Include caption, hashtags, format notes, asset needs, schedule notes, and approval checklist."
+public/control-center/pages/ai-command/tool-dock.js:807:      sourceTypes: ["publishing_package", "campaign_timeline", "channel_notes", "approval_notes", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:817:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:825:      id: "approval-pack",
+public/control-center/pages/ai-command/tool-dock.js:831:      frontendOwnerPage: "governance",
+public/control-center/pages/ai-command/tool-dock.js:832:      destinations: ["chat-preview", "governance", "publishing", "workflows"],
+public/control-center/pages/ai-command/tool-dock.js:833:      sourceTypes: ["final_copy", "media_asset", "approval_notes", "claim_review", "publishing_package", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:834:      outputTypes: ["approval_pack", "risk_summary", "asset_checklist", "confirmation_list"],
+public/control-center/pages/ai-command/tool-dock.js:835:      template: "Prepare an approval package for {projectName}. Include final copy summary, risk notes, assets checklist, and required confirmations."
+public/control-center/pages/ai-command/tool-dock.js:846:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:848:      destinations: ["chat-preview", "ads-manager", "content-studio", "governance"],
+public/control-center/pages/ai-command/tool-dock.js:859:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:861:      destinations: ["chat-preview", "ads-manager", "content-studio", "governance"],
+public/control-center/pages/ai-command/tool-dock.js:872:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:885:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:898:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:900:      destinations: ["chat-preview", "ads-manager", "content-studio", "governance"],
+public/control-center/pages/ai-command/tool-dock.js:914:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:927:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:940:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:953:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:966:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:982:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:983:      frontendOwnerPage: "governance",
+public/control-center/pages/ai-command/tool-dock.js:984:      destinations: ["chat-preview", "governance", "content-studio", "publishing"],
+public/control-center/pages/ai-command/tool-dock.js:987:      template: "Review claims for {projectName}. Flag unsupported, risky, health/performance, legal, or approval-sensitive statements."
+public/control-center/pages/ai-command/tool-dock.js:995:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:996:      frontendOwnerPage: "governance",
+public/control-center/pages/ai-command/tool-dock.js:997:      destinations: ["chat-preview", "governance", "content-studio"],
+public/control-center/pages/ai-command/tool-dock.js:1008:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:1009:      frontendOwnerPage: "governance",
+public/control-center/pages/ai-command/tool-dock.js:1010:      destinations: ["chat-preview", "governance", "library", "workflows"],
+public/control-center/pages/ai-command/tool-dock.js:1021:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:1022:      frontendOwnerPage: "governance",
+public/control-center/pages/ai-command/tool-dock.js:1023:      destinations: ["chat-preview", "governance", "workflows", "publishing"],
+public/control-center/pages/ai-command/tool-dock.js:1029:      id: "approval-notes",
+public/control-center/pages/ai-command/tool-dock.js:1035:      frontendOwnerPage: "governance",
+public/control-center/pages/ai-command/tool-dock.js:1036:      destinations: ["chat-preview", "governance", "publishing", "workflows"],
+public/control-center/pages/ai-command/tool-dock.js:1037:      sourceTypes: ["final_copy", "claims_check", "approval_context", "asset_checklist", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:1038:      outputTypes: ["approval_notes", "risk_summary", "reviewer_requirements", "unresolved_issues"],
+public/control-center/pages/ai-command/tool-dock.js:1039:      template: "Prepare approval notes for {projectName}. Include risks, required reviewer, unresolved issues, and safe next actions."
+public/control-center/pages/ai-command/tool-dock.js:1050:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:1066:      sourceTypes: ["current_chat", "handoff_summary", "operations_snapshot", "approval_notes", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:1078:      destinations: ["chat-preview", "handoff", "workflows", "content-studio", "media-studio", "publishing", "governance"],
+public/control-center/pages/ai-command/tool-dock.js:1089:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:1102:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:1104:      destinations: ["chat-preview", "workflows", "governance", "publishing"],
+public/control-center/pages/ai-command/tool-dock.js:1105:      sourceTypes: ["current_chat", "readiness_gaps", "asset_requirements", "approval_notes", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:1106:      outputTypes: ["execution_checklist", "approval_checklist", "asset_checklist", "qa_steps"],
+public/control-center/pages/ai-command/tool-dock.js:1107:      template: "Create an execution checklist for {projectName}. Include required approvals, assets, content, integrations, and QA steps."
+public/control-center/pages/ai-command/tool-dock.js:1120:      destinations: ["chat-preview", "operations-centers", "task", "governance"],
+public/control-center/pages/ai-command/tool-dock.js:1144:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:1157:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:1173:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:1199:      safetyLevel: "review_only",
+public/control-center/pages/ai-command/tool-dock.js:1201:      destinations: ["chat-preview", "workflows", "content-studio", "governance"],
+public/control-center/pages/ai-command/tool-dock.js:1290:    "data-aicmd-tool-dock-safety": tool.safetyLevel || "review_only",
+public/control-center/pages/ai-command/tool-dock.js:1443:            data-aicmd-tool-dock-safety="${safe(tool.safetyLevel || "review_only")}"
+public/control-center/pages/ai-command/tool-dock.js:1684:  setDrawerText(drawer, "[data-aicmd-tool-drawer-safety]", humanizeMeta(btn.getAttribute("data-aicmd-tool-dock-safety") || "review_only"));
+public/control-center/pages/campaign-studio.js:67:  "ai-command": { role: "admin", domain: "governance" }
+public/control-center/pages/campaign-studio.js:474:    linked_approvals: [],
+public/control-center/pages/campaign-studio.js:866:  const approvalBlockers = [];
+public/control-center/pages/campaign-studio.js:898:  if (!values.executionNotes) approvalBlockers.push("Execution notes are missing, which makes approvals harder downstream.");
+public/control-center/pages/campaign-studio.js:899:  if (!values.audiencePrimary || !values.audienceNeed) approvalBlockers.push("Audience framing is incomplete for creative review.");
+public/control-center/pages/campaign-studio.js:900:  if (!values.productAngle) approvalBlockers.push("Product angle needs to be explicit so operators do not improvise.");
+public/control-center/pages/campaign-studio.js:907:    approvalBlockers.length ||
+public/control-center/pages/campaign-studio.js:921:    approvalBlockers,
+public/control-center/pages/campaign-studio.js:929:      approvalBlockers.length
+public/control-center/pages/campaign-studio.js:1943:                  helper: "Capture dependencies, packaging notes, approval guidance, or production instructions for the next operator.",
+public/control-center/pages/campaign-studio.js:1993:                  executionReadiness.approvalBlockers,
+runtime/orchestrator-service/server.js:56:} = require('./lib/security/governance-mutation-gate');
+runtime/orchestrator-service/server.js:6273:    approval_required: mode === 'approval_required',
+runtime/orchestrator-service/server.js:6280:        mode === 'approval_required'
+runtime/orchestrator-service/server.js:6281:          ? 'Prepare execution summary and request approval.'
+runtime/orchestrator-service/server.js:6943:      workspace_priorities: ['setup', 'library', 'content-studio', 'campaign-studio', 'ads-manager', 'governance'],
+runtime/orchestrator-service/server.js:7488:    approval_note: normalizeSetupTextValue(asset.approval_note),
+runtime/orchestrator-service/server.js:8612:    record.approval_status ||
+runtime/orchestrator-service/server.js:9579:      title: 'Publish package execution approval',
+runtime/orchestrator-service/server.js:9667:      title: 'Email package execution approval',
+runtime/orchestrator-service/server.js:9755:      title: 'Media generation approval',
+runtime/orchestrator-service/server.js:9836:      title: 'Ad execution package approval',
+runtime/orchestrator-service/server.js:10912:        asset.approval_note = note || asset.approval_note || 'Approved from Control Center Library.';
+runtime/orchestrator-service/server.js:11165:      serviceDomain: 'governance',
+runtime/orchestrator-service/server.js:11168:      title: 'Project setup approval',
+runtime/orchestrator-service/server.js:11204:      serviceDomain: 'governance',
+runtime/orchestrator-service/server.js:11207:      title: 'Project setup approval',
+runtime/orchestrator-service/server.js:11283:      'Review compliance and approval requirements.',
+runtime/orchestrator-service/server.js:11303:      'Final approval is required before publishing.',
+runtime/orchestrator-service/server.js:11365:    preview_only: true,
+runtime/orchestrator-service/server.js:11385:      preview_only: true,
+runtime/orchestrator-service/server.js:11386:      requires_approval_before_publish: true,
+runtime/orchestrator-service/server.js:11390:      no_approval_created: true,
+runtime/orchestrator-service/server.js:11410:        preview_only: true,
+runtime/orchestrator-service/server.js:11542:      serviceDomain: 'governance',
+runtime/orchestrator-service/server.js:11545:      title: 'Team model approval',
+runtime/orchestrator-service/server.js:11821:      title: 'Workflow run approval',
+runtime/orchestrator-service/server.js:11894:    title: 'AI command approval',
+runtime/orchestrator-service/server.js:11968:    title: 'AI chat approval',
+runtime/orchestrator-service/server.js:12038:    title: 'AI guidance approval',
+runtime/orchestrator-service/server.js:12106:      title: 'AI workflow approval',
+runtime/orchestrator-service/server.js:12294:      error: error.message || 'Failed to list approvals'
+runtime/orchestrator-service/server.js:12301:    const approval = createApproval(req.params.project, req.body || {});
+runtime/orchestrator-service/server.js:12303:      approval,
+runtime/orchestrator-service/server.js:12308:      error: error.message || 'Failed to create approval'
+runtime/orchestrator-service/server.js:12317:      action: 'approvals_decision',
+runtime/orchestrator-service/server.js:12318:      entityType: 'approval',
+runtime/orchestrator-service/server.js:12319:      entityId: req.params.approvalId,
+runtime/orchestrator-service/server.js:12325:    const approval = resolveGovernanceApproval(req.params.project, req.params.approvalId, {
+runtime/orchestrator-service/server.js:12334:      approval,
+runtime/orchestrator-service/server.js:12339:      error: error.message || 'Failed to update approval'
+runtime/orchestrator-service/server.js:12344:app.get('/media-manager/project/:project/approvals', handleListApprovals);
+runtime/orchestrator-service/server.js:12345:app.get('/public/media-manager/project/:project/approvals', handleListApprovals);
+runtime/orchestrator-service/server.js:12346:app.post('/media-manager/project/:project/approvals', handleCreateApproval);
+runtime/orchestrator-service/server.js:12347:app.post('/public/media-manager/project/:project/approvals', handleCreateApproval);
+runtime/orchestrator-service/server.js:12348:app.post('/media-manager/project/:project/approvals/:approvalId/decision', handleApprovalDecision);
+runtime/orchestrator-service/server.js:12349:app.post('/public/media-manager/project/:project/approvals/:approvalId/decision', handleApprovalDecision);
+runtime/orchestrator-service/server.js:12360:      error: error.message || 'Failed to load governance summary'
+runtime/orchestrator-service/server.js:12369:      action: 'governance_policy_update',
+runtime/orchestrator-service/server.js:12370:      entityType: 'governance_policy',
+runtime/orchestrator-service/server.js:12384:      error: error.message || 'Failed to update governance policy'
+runtime/orchestrator-service/server.js:12397:      error: error.message || 'Failed to load governance policy'
+runtime/orchestrator-service/server.js:12402:app.get('/media-manager/project/:project/governance', handleGetGovernance);
+runtime/orchestrator-service/server.js:12403:app.get('/public/media-manager/project/:project/governance', handleGetGovernance);
+runtime/orchestrator-service/server.js:12404:app.get('/media-manager/project/:project/governance/policy', handleGetGovernancePolicy);
+runtime/orchestrator-service/server.js:12405:app.get('/public/media-manager/project/:project/governance/policy', handleGetGovernancePolicy);
+runtime/orchestrator-service/server.js:12406:app.post('/media-manager/project/:project/governance/policy', handleUpdateGovernancePolicy);
+runtime/orchestrator-service/server.js:12407:app.post('/public/media-manager/project/:project/governance/policy', handleUpdateGovernancePolicy);
+runtime/orchestrator-service/server.js:12578:      serviceDomain: 'governance',
+runtime/orchestrator-service/server.js:12581:      title: 'Source registry approval',
+runtime/orchestrator-service/server.js:12632:      serviceDomain: 'governance',
+runtime/orchestrator-service/server.js:12635:      title: 'Source registry approval',
+runtime/orchestrator-service/server.js:12677:      serviceDomain: 'governance',
+runtime/orchestrator-service/server.js:12680:      title: 'Source registry approval',
+runtime/orchestrator-service/server.js:12716:      serviceDomain: 'governance',
+runtime/orchestrator-service/server.js:12719:      title: 'Source registry approval',
+runtime/orchestrator-service/server.js:12763:  const governanceAction = options?.reconnect ? 'integration_reconnect' : 'integration_connect';
+runtime/orchestrator-service/server.js:12765:  const governanceOptions = {
+runtime/orchestrator-service/server.js:12767:    action: governanceAction,
+runtime/orchestrator-service/server.js:12773:    routeTarget: 'governance',
+runtime/orchestrator-service/server.js:12777:    title: `${req.params.integrationId} ${requestedAction} approval`,
+runtime/orchestrator-service/server.js:12780:  const governanceAllowed = options?.reconnect
+runtime/orchestrator-service/server.js:12781:    ? enforceGovernanceApprovalLifecycle(req, res, governanceOptions)
+runtime/orchestrator-service/server.js:12782:    : enforceGovernanceMutationGate(req, res, governanceOptions);
+runtime/orchestrator-service/server.js:12784:  if (!governanceAllowed) {
+runtime/orchestrator-service/server.js:12872:  const governanceAction = {
+runtime/orchestrator-service/server.js:12879:  const governanceOptions = {
+runtime/orchestrator-service/server.js:12881:    action: governanceAction,
+runtime/orchestrator-service/server.js:12887:    routeTarget: 'governance',
+runtime/orchestrator-service/server.js:12891:    title: `${req.params.integrationId} ${normalizedActionType} approval`,
+runtime/orchestrator-service/server.js:12895:  const governanceAllowed = requiresApprovalLifecycle
+runtime/orchestrator-service/server.js:12896:    ? enforceGovernanceApprovalLifecycle(req, res, governanceOptions)
+runtime/orchestrator-service/server.js:12897:    : enforceGovernanceMutationGate(req, res, governanceOptions);
+runtime/orchestrator-service/server.js:12899:  if (!governanceAllowed) {
+runtime/orchestrator-service/server.js:15385:    approvalId: options.approvalId || req.body?.approval_id || req.body?.approvalId,
+runtime/orchestrator-service/server.js:15397:  appLogger.warn('governance_mutation_denied', {
+runtime/orchestrator-service/server.js:15404:    governance_code: decision.code,
+runtime/orchestrator-service/server.js:15417:    approvalId: options.approvalId || req.body?.approval_id || req.body?.approvalId,
+runtime/orchestrator-service/server.js:15439:    if (decision.approval) {
+runtime/orchestrator-service/server.js:15440:      req.governanceApproval = decision.approval;
+runtime/orchestrator-service/server.js:15463:  const governance = getGovernancePolicy(projectName);
+runtime/orchestrator-service/server.js:15467:  const policyRules = governance && typeof governance === 'object' && governance.policy_rules && typeof governance.policy_rules === 'object'
+runtime/orchestrator-service/server.js:15468:    ? governance.policy_rules
+runtime/orchestrator-service/server.js:15475:  const approvalSensitiveAction = ['ready', 'publish'].includes(actionKey)
+runtime/orchestrator-service/server.js:15480:  //   approval_before_publish → default true (restrictive — approval is required by default)
+runtime/orchestrator-service/server.js:15484:  const approvalBeforePublish = typeof policyRules.approval_before_publish === 'boolean'
+runtime/orchestrator-service/server.js:15485:    ? policyRules.approval_before_publish
+runtime/orchestrator-service/server.js:15486:    : policyRules.approval_before_publish == null ? true : Boolean(policyRules.approval_before_publish);
+runtime/orchestrator-service/server.js:15489:    appLogger.warn('governance_blocked', {
+runtime/orchestrator-service/server.js:15490:      route: '/governance/publishing',
+runtime/orchestrator-service/server.js:15502:      'Publishing is frozen by governance policy. The requested publishing mutation was blocked.',
+runtime/orchestrator-service/server.js:15510:  if (approvalSensitiveAction && approvalBeforePublish) {
+runtime/orchestrator-service/server.js:15512:      logGovernanceBlock('approval_before_publish', { reason: 'job_id_missing' });
+runtime/orchestrator-service/server.js:15514:        'Approval before publish is enabled. This publishing action requires a durable publishing job with an approved governance decision.',
+runtime/orchestrator-service/server.js:15517:          rule: 'approval_before_publish'
+runtime/orchestrator-service/server.js:15522:    const approval = getLatestPublishingApproval(projectName, jobId);
+runtime/orchestrator-service/server.js:15523:    const approvalStatus = String(approval?.status || '').trim().toLowerCase();
+runtime/orchestrator-service/server.js:15525:    if (!['approved', 'overridden'].includes(approvalStatus)) {
+runtime/orchestrator-service/server.js:15526:      logGovernanceBlock('approval_before_publish', {
+runtime/orchestrator-service/server.js:15528:        approval_status: approvalStatus || 'missing'
+runtime/orchestrator-service/server.js:15534:          rule: 'approval_before_publish',
+runtime/orchestrator-service/server.js:15536:          approval_status: approvalStatus || 'missing'
+runtime/orchestrator-service/server.js:17924:          'Generate assets from strategy, then run review -> approval -> media -> publish/send.',
+runtime/orchestrator-service/lib/security/provider-execution-gate.js:20:  REQUIRE_APPROVAL: "require_approval",
+runtime/orchestrator-service/lib/security/provider-execution-gate.js:165:    message: "Provider execution is gated until configuration, approval, and audit requirements are satisfied.",
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:13:  code: "governance_approval_required",
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:14:  message: "This backend action requires governance approval before execution."
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:20:  code: "governance_policy_blocked",
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:21:  message: "This backend action is blocked by the active governance policy."
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:27:  code: "governance_approval_rejected",
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:28:  message: "This backend action was rejected by governance approval."
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:37:  // Non-recursive by design: approvals must be decidable without requiring another approval.
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:38:  approvals_decision: { highRisk: false, requiresGovernance: true, requiresApproval: false, freezeSensitive: false },
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:39:  // Non-recursive by design: governance policy updates remain write-key + governance-checked.
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:40:  governance_policy_update: { highRisk: true, requiresGovernance: true, requiresApproval: false, freezeSensitive: false },
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:62:    policyApprovalKey: "require_approval_for_team_model_changes",
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:70:    policyApprovalKey: "require_approval_for_source_registry_changes",
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:78:    policyApprovalKey: "require_approval_for_project_setup_authority_changes",
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:86:  /(^|\.)approval_required_actions$/i,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:88:  /(^|\.)governance/i,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:146:function findApprovedDecision(approvals, selector = {}) {
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:147:  const selectedApprovalId = asString(selector.approvalId);
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:152:  const approved = sortByNewest(Array.isArray(approvals) ? approvals : [])
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:184:    decision: responsePayload.code === "governance_policy_blocked" ? "policy_blocked" : "approval_required",
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:254:  const entityType = asString(input.entityType || input.entity_type || "governance_mutation");
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:277:    approvalFingerprint: fingerprint,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:282:    routeTarget: asString(input.routeTarget || input.route_target || route || "governance"),
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:284:    serviceDomain: asString(input.serviceDomain || input.service_domain || "governance")
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:289:  const approvals = sortByNewest(listApprovals(projectName, { limit: 500 }) || []);
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:297:  return approvals.find((item) => {
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:298:    if (selectedFingerprint && asString(item.approval_fingerprint) !== selectedFingerprint) {
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:310:    if (selectedAction && normalizeAction(item.mutation_type || item.approval_type) !== selectedAction) {
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:326:function buildGovernanceApprovalResponse(approval) {
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:329:    error: "approval_required",
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:330:    code: "governance_approval_required",
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:331:    message: "This backend action requires governance approval before execution.",
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:332:    approval: {
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:334:      approval_id: asString(approval && approval.id)
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:345:  const existing = findMatchingGovernanceApproval(context.projectName, context.approvalFingerprint, context);
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:352:        approval: existing,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:353:        reason: "approval_already_granted"
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:360:        approval: existing,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:362:        reason: "approval_rejected"
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:368:      approval: existing,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:370:      reason: "approval_pending"
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:374:  const approval = createApproval(context.projectName, {
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:375:    title: input.title || `${context.action} approval required`,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:381:    approval_type: context.action,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:391:    approval_fingerprint: context.approvalFingerprint,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:408:    approval,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:409:    response: buildGovernanceApprovalResponse(approval),
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:410:    reason: "approval_created"
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:423:      approval: null,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:434:      approval: null,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:494:  const governance = input.governancePolicy && typeof input.governancePolicy === "object"
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:495:    ? input.governancePolicy
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:497:  const policyRules = governance.policy_rules && typeof governance.policy_rules === "object"
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:498:    ? governance.policy_rules
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:521:      policyRules.require_approval_for_project_setup_authority_changes,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:544:        policy_key: "require_approval_for_project_setup_authority_changes"
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:557:      approvalGateDeferred: true,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:559:    }, "approval_gate_deferred");
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:592:  const approvalSelector = {
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:593:    approvalId: input.approvalId,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:599:    asString(approvalSelector.approvalId)
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:600:    || asString(approvalSelector.entityType)
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:601:    || asString(approvalSelector.entityId)
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:602:    || asString(approvalSelector.requestedAction)
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:608:      "missing_approval_selector",
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:616:  const approvedDecision = findApprovedDecision(input.approvals || [], approvalSelector);
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:621:      "missing_approved_governance_decision",
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:626:          approval_id: asString(approvalSelector.approvalId) || null,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:627:          entity_type: asString(approvalSelector.entityType) || null,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:628:          entity_id: asString(approvalSelector.entityId) || null,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:629:          requested_action: asString(approvalSelector.requestedAction) || null
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:641:    approvalId: asString(approvedDecision.id) || null
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:648:  let governancePolicy = null;
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:649:  let approvals = [];
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:653:    governancePolicy = getGovernancePolicy(projectName);
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:656:    governancePolicy = {};
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:660:    approvals = listApprovals(projectName, { limit: 500 });
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:662:    approvals = [];
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:670:    governancePolicy,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:671:    approvals
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:48:  return /customer-operations|integrations|publishing|governance|approvals|sources|workflows|ai\/workflows/i.test(value);
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:57:  return /ai\/|native-media|api\/media|execute_|generate_media_from_prompt|build_ad_execution_package|integrations|publishing|governance|approvals|sources|workflows/i.test(value);
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:47:    match: /publishing|publish|approval|governance|claim|compliance/i,
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:174:  if (publicAlias && /customer-operations|publishing|integration|governance|approval|sources/i.test(routePath)) {
+runtime/orchestrator-service/lib/security/runtime-security-enforcement.js:12:  /^\/(?:public\/)?media-manager\/project\/[^/]+\/approvals(?:\/)?$/i,
+runtime/orchestrator-service/lib/security/runtime-security-enforcement.js:13:  /^\/(?:public\/)?media-manager\/project\/[^/]+\/approvals\/[^/]+\/decision(?:\/)?$/i,
+runtime/orchestrator-service/lib/security/runtime-security-enforcement.js:14:  /^\/(?:public\/)?media-manager\/project\/[^/]+\/governance\/policy(?:\/)?$/i,
+runtime/orchestrator-service/lib/integrations/storage.js:55: * Use this for every read of critical ops state (collections, governance, team).
+runtime/orchestrator-service/lib/ai/providers/openai.js:306:              'For outputType "operations_plan", include operationsPlan with tasks, timeline, owners, handoffs, approvals, dependencies.',
+runtime/orchestrator-service/lib/ai/provider-config.js:85:    purpose: 'tasks, timelines, handoffs, approvals, and execution planning',
+runtime/orchestrator-service/lib/ai/provider-config.js:89:      'Produce task plans, timelines, handoffs, approvals, ownership, and execution plans.',
+runtime/orchestrator-service/lib/ops/backbone.js:18:// Any governance file that is missing policy_rules (or missing individual keys)
+runtime/orchestrator-service/lib/ops/backbone.js:21:  approval_before_publish: true,
+runtime/orchestrator-service/lib/ops/backbone.js:27:  require_approval_for_team_model_changes: true,
+runtime/orchestrator-service/lib/ops/backbone.js:28:  require_approval_for_source_registry_changes: true,
+runtime/orchestrator-service/lib/ops/backbone.js:29:  require_approval_for_project_setup_authority_changes: true,
+runtime/orchestrator-service/lib/ops/backbone.js:44:  approvals: 300,
+runtime/orchestrator-service/lib/ops/backbone.js:60:    approval_statuses: ['not_requested', 'pending', 'approved', 'rejected'],
+runtime/orchestrator-service/lib/ops/backbone.js:66:    approval_states: ['not_requested', 'pending', 'approved', 'rejected']
+runtime/orchestrator-service/lib/ops/backbone.js:74:    intents: ['inspect', 'task', 'workflow', 'campaign', 'content', 'media', 'approval', 'recommendation']
+runtime/orchestrator-service/lib/ops/backbone.js:82:    route_targets: ['campaign-studio', 'content-studio', 'media-studio', 'publishing', 'ads-manager', 'task-center', 'governance']
+runtime/orchestrator-service/lib/ops/backbone.js:88:  approvals: {
+runtime/orchestrator-service/lib/ops/backbone.js:106:    categories: ['entity', 'workflow', 'approval', 'sync', 'publish', 'ai_routing', 'system']
+runtime/orchestrator-service/lib/ops/backbone.js:161:    service_domains: ['research', 'governance'],
+runtime/orchestrator-service/lib/ops/backbone.js:167:    routes: ['governance', 'content-studio', 'media-studio', 'publishing'],
+runtime/orchestrator-service/lib/ops/backbone.js:168:    service_domains: ['governance'],
+runtime/orchestrator-service/lib/ops/backbone.js:174:    routes: ['home', 'settings', 'integrations', 'governance', 'workflows'],
+runtime/orchestrator-service/lib/ops/backbone.js:175:    service_domains: ['governance'],
+runtime/orchestrator-service/lib/ops/backbone.js:187:  governance: ['compliance_reviewer', 'admin', 'analyst'],
+runtime/orchestrator-service/lib/ops/backbone.js:227:    page_permissions: ['publishing', 'governance']
+runtime/orchestrator-service/lib/ops/backbone.js:237:  governance: {
+runtime/orchestrator-service/lib/ops/backbone.js:242:    route_target: 'governance',
+runtime/orchestrator-service/lib/ops/backbone.js:243:    page_permissions: ['governance', 'settings']
+runtime/orchestrator-service/lib/ops/backbone.js:253:  approval: 'governance',
+runtime/orchestrator-service/lib/ops/backbone.js:254:  task: 'governance'
+runtime/orchestrator-service/lib/ops/backbone.js:395:        page_permissions: ['workflows', 'governance'],
+runtime/orchestrator-service/lib/ops/backbone.js:397:        service_domains: ['campaign', 'content', 'media', 'publishing', 'research', 'governance']
+runtime/orchestrator-service/lib/ops/backbone.js:523:  if (routeTarget === 'governance') return 'governance';
+runtime/orchestrator-service/lib/ops/backbone.js:796:    approvalsPath: path.join(opsDir, 'approvals.json'),
+runtime/orchestrator-service/lib/ops/backbone.js:800:    governancePath: path.join(opsDir, 'governance.json'),
+runtime/orchestrator-service/lib/ops/backbone.js:828:      'approvals',
+runtime/orchestrator-service/lib/ops/backbone.js:845:  ensureJsonFile(paths.approvalsPath, []);
+runtime/orchestrator-service/lib/ops/backbone.js:850:  ensureJsonFile(paths.governancePath, {
+runtime/orchestrator-service/lib/ops/backbone.js:851:    approval_required_actions: ['publish', 'launch', 'budget_change', 'integration_reconnect', 'execution_mode_change'],
+runtime/orchestrator-service/lib/ops/backbone.js:854:      semi_auto_requires_approval: true,
+runtime/orchestrator-service/lib/ops/backbone.js:859:      approval_before_publish: true,
+runtime/orchestrator-service/lib/ops/backbone.js:865:      require_approval_for_team_model_changes: true,
+runtime/orchestrator-service/lib/ops/backbone.js:866:      require_approval_for_source_registry_changes: true,
+runtime/orchestrator-service/lib/ops/backbone.js:867:      require_approval_for_project_setup_authority_changes: true,
+runtime/orchestrator-service/lib/ops/backbone.js:872:    approval_owners: {
+runtime/orchestrator-service/lib/ops/backbone.js:883:      approval_mode: 'Only high-risk',
+runtime/orchestrator-service/lib/ops/backbone.js:885:      approval_before_publish: true
+runtime/orchestrator-service/lib/ops/backbone.js:923:      'approvals',
+runtime/orchestrator-service/lib/ops/backbone.js:981:  if (value.includes('approval')) return 'approval';
+runtime/orchestrator-service/lib/ops/backbone.js:1194: * Normalizes a raw governance file object so that:
+runtime/orchestrator-service/lib/ops/backbone.js:1197: *  - freeze_publishing and approval_before_publish are always explicit booleans
+runtime/orchestrator-service/lib/ops/backbone.js:1217:    approval_before_publish: asBoolean(safeRules.approval_before_publish, DEFAULT_POLICY_RULES.approval_before_publish)
+runtime/orchestrator-service/lib/ops/backbone.js:1230:    raw = readJsonFileDurable(paths.governancePath);
+runtime/orchestrator-service/lib/ops/backbone.js:1233:    console.error(`[backbone] getGovernancePolicy: governance file corrupt for project ${projectName}: ${err.message}`);
+runtime/orchestrator-service/lib/ops/backbone.js:1256:    approval_owners: {
+runtime/orchestrator-service/lib/ops/backbone.js:1257:      ...asObject(current.approval_owners),
+runtime/orchestrator-service/lib/ops/backbone.js:1258:      ...asObject(sourcePatch.approval_owners)
+runtime/orchestrator-service/lib/ops/backbone.js:1270:  writeJsonFile(paths.governancePath, next);
+runtime/orchestrator-service/lib/ops/backbone.js:1274:    type: 'governance_policy_updated',
+runtime/orchestrator-service/lib/ops/backbone.js:1275:    entity_type: 'governance_policy',
+runtime/orchestrator-service/lib/ops/backbone.js:1296:    approval_id: asString(input.approval_id),
+runtime/orchestrator-service/lib/ops/backbone.js:1345:function buildPolicyFlags(record = {}, governance = {}) {
+runtime/orchestrator-service/lib/ops/backbone.js:1356:  if (asBoolean(governance.policy_rules?.freeze_publishing) && asString(record.entity_type) === 'publishing_job') {
+runtime/orchestrator-service/lib/ops/backbone.js:1360:      message: 'Publishing is frozen by governance policy.'
+runtime/orchestrator-service/lib/ops/backbone.js:1408:function buildBrandSafetyFlags(record = {}, governance = {}) {
+runtime/orchestrator-service/lib/ops/backbone.js:1434:  if (asString(record.entity_type) === 'media_job' && asBoolean(governance.policy_rules?.brand_safety_review_required, true)) {
+runtime/orchestrator-service/lib/ops/backbone.js:1435:    if (!asString(record.approval_state) || asString(record.approval_state) === 'not_requested') {
+runtime/orchestrator-service/lib/ops/backbone.js:1447:function buildPublishGuardrails(record = {}, governance = {}) {
+runtime/orchestrator-service/lib/ops/backbone.js:1464:  if (asBoolean(governance.policy_rules?.approval_before_publish, true) && !['approved', 'ready', 'published'].includes(status)) {
+runtime/orchestrator-service/lib/ops/backbone.js:1472:  if (asBoolean(governance.policy_rules?.freeze_publishing)) {
+runtime/orchestrator-service/lib/ops/backbone.js:1485:  const governance = getGovernancePolicy(projectName);
+runtime/orchestrator-service/lib/ops/backbone.js:1487:  const approvals = readCollection(paths.approvalsPath);
+runtime/orchestrator-service/lib/ops/backbone.js:1493:  const pendingApprovals = approvals.filter((item) => asString(item.status) === 'pending');
+runtime/orchestrator-service/lib/ops/backbone.js:1494:  const escalationApprovals = approvals.filter((item) => asString(item.status) === 'escalated');
+runtime/orchestrator-service/lib/ops/backbone.js:1495:  const activeOverrides = asArray(governance.active_overrides).filter((item) => asString(item.status) === 'active');
+runtime/orchestrator-service/lib/ops/backbone.js:1497:  const approvalQueue = pendingApprovals.map((approval) => ({
+runtime/orchestrator-service/lib/ops/backbone.js:1498:    ...approval,
+runtime/orchestrator-service/lib/ops/backbone.js:1499:    entity_snapshot: buildEntitySnapshot(projectName, approval.entity_type, approval.entity_id),
+runtime/orchestrator-service/lib/ops/backbone.js:1500:    policy_flags: buildPolicyFlags(approval, governance)
+runtime/orchestrator-service/lib/ops/backbone.js:1505:    ...approvals.filter((item) => ['pending', 'changes_requested', 'escalated'].includes(asString(item.status)))
+runtime/orchestrator-service/lib/ops/backbone.js:1512:      status: asString(item.status || item.approval_status) || 'open',
+runtime/orchestrator-service/lib/ops/backbone.js:1523:      status: asString(item.status || item.approval_state),
+runtime/orchestrator-service/lib/ops/backbone.js:1524:      brand_safety_flags: buildBrandSafetyFlags(item, governance)
+runtime/orchestrator-service/lib/ops/backbone.js:1532:      publish_guardrails: buildPublishGuardrails(item, governance)
+runtime/orchestrator-service/lib/ops/backbone.js:1537:    ...approvalQueue.flatMap((item) =>
+runtime/orchestrator-service/lib/ops/backbone.js:1540:        source: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:1589:      asString(item.source_type) === 'approval' || asString(item.route_target) === 'governance'
+runtime/orchestrator-service/lib/ops/backbone.js:1598:    policy: governance,
+runtime/orchestrator-service/lib/ops/backbone.js:1608:      escalation_chain: governance.escalation_chain || ESCALATION_CHAINS
+runtime/orchestrator-service/lib/ops/backbone.js:1611:      approval_queue: approvalQueue,
+runtime/orchestrator-service/lib/ops/backbone.js:1619:        freeze_publishing: asBoolean(governance.policy_rules?.freeze_publishing),
+runtime/orchestrator-service/lib/ops/backbone.js:1620:        allow_admin_override: asBoolean(governance.policy_rules?.allow_admin_override, true)
+runtime/orchestrator-service/lib/ops/backbone.js:1629:      pending_approvals: pendingApprovals.length
+runtime/orchestrator-service/lib/ops/backbone.js:1640:    status: item.publish_status || item.approval_status || item.status || 'draft',
+runtime/orchestrator-service/lib/ops/backbone.js:1643:    priority: item.approval_status === 'pending' ? 'high' : 'normal',
+runtime/orchestrator-service/lib/ops/backbone.js:1650:      approval_status: item.approval_status,
+runtime/orchestrator-service/lib/ops/backbone.js:1665:    status: job.approval_state === 'pending' ? 'pending_approval' : (job.status || 'requested'),
+runtime/orchestrator-service/lib/ops/backbone.js:1668:    priority: job.approval_state === 'pending' ? 'high' : 'normal',
+runtime/orchestrator-service/lib/ops/backbone.js:1677:      approval_state: job.approval_state,
+runtime/orchestrator-service/lib/ops/backbone.js:1722:    linked_approvals: normalizeStringList(input.linked_approvals || current.linked_approvals),
+runtime/orchestrator-service/lib/ops/backbone.js:1785:  const approvalStatus = asString(input.approval_status || current.approval_status) || 'not_requested';
+runtime/orchestrator-service/lib/ops/backbone.js:1839:    approval_status: approvalStatus,
+runtime/orchestrator-service/lib/ops/backbone.js:1851:      publishStatus === 'published' ? 'distribution' : approvalStatus === 'approved' ? 'approved' : 'draft'
+runtime/orchestrator-service/lib/ops/backbone.js:1854:    linked_approvals: normalizeStringList(input.linked_approvals || current.linked_approvals),
+runtime/orchestrator-service/lib/ops/backbone.js:1860:    queue_status: asString(input.queue_status || current.queue_status || publishStatus || approvalStatus || status) || 'draft',
+runtime/orchestrator-service/lib/ops/backbone.js:1869:        approval_status: approvalStatus,
+runtime/orchestrator-service/lib/ops/backbone.js:1889:      approval_status: approvalStatus,
+runtime/orchestrator-service/lib/ops/backbone.js:1976:    approval_state: asString(input.approval_state || current.approval_state) || 'not_requested',
+runtime/orchestrator-service/lib/ops/backbone.js:1978:    approval_notes: normalizeNotes(input.approval_notes || current.approval_notes),
+runtime/orchestrator-service/lib/ops/backbone.js:1988:    linked_approvals: normalizeStringList(input.linked_approvals || current.linked_approvals),
+runtime/orchestrator-service/lib/ops/backbone.js:2569:  const items = readCollection(paths.approvalsPath);
+runtime/orchestrator-service/lib/ops/backbone.js:2570:  const governance = getGovernancePolicy(projectName);
+runtime/orchestrator-service/lib/ops/backbone.js:2580:  const title = asString(input.title) || `${targetEntityType} approval`;
+runtime/orchestrator-service/lib/ops/backbone.js:2599:  const approval = {
+runtime/orchestrator-service/lib/ops/backbone.js:2600:    id: asString(current.id) || asString(input.id) || createId('approval'),
+runtime/orchestrator-service/lib/ops/backbone.js:2605:    mutation_type: asString(input.mutation_type || current.mutation_type) || asString(input.approval_type || current.approval_type) || targetEntityType,
+runtime/orchestrator-service/lib/ops/backbone.js:2608:    approval_fingerprint: asString(input.approval_fingerprint || current.approval_fingerprint),
+runtime/orchestrator-service/lib/ops/backbone.js:2623:    approval_type: asString(input.approval_type || current.approval_type) || targetEntityType,
+runtime/orchestrator-service/lib/ops/backbone.js:2626:    route_target: asString(input.route_target || current.route_target || entityLink?.route || routing.route_target || 'governance'),
+runtime/orchestrator-service/lib/ops/backbone.js:2636:    policy_flags: asArray(input.policy_flags || current.policy_flags || buildPolicyFlags(input, governance)),
+runtime/orchestrator-service/lib/ops/backbone.js:2638:    brand_safety_flags: asArray(input.brand_safety_flags || current.brand_safety_flags || buildBrandSafetyFlags(input, governance)),
+runtime/orchestrator-service/lib/ops/backbone.js:2652:      current.id ? 'approval_updated' : 'approval_requested',
+runtime/orchestrator-service/lib/ops/backbone.js:2663:  writeCollection(paths.approvalsPath, upsertById(items, approval), MAX_ITEMS.approvals);
+runtime/orchestrator-service/lib/ops/backbone.js:2666:    type: current.id ? 'approval_updated' : 'approval_requested',
+runtime/orchestrator-service/lib/ops/backbone.js:2667:    entity_type: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:2668:    entity_id: approval.id,
+runtime/orchestrator-service/lib/ops/backbone.js:2669:    title: approval.title,
+runtime/orchestrator-service/lib/ops/backbone.js:2670:    summary: approval.summary || 'A new approval was requested.',
+runtime/orchestrator-service/lib/ops/backbone.js:2671:    actor: approval.requested_by,
+runtime/orchestrator-service/lib/ops/backbone.js:2673:      entity_type: approval.entity_type,
+runtime/orchestrator-service/lib/ops/backbone.js:2674:      entity_id: approval.entity_id,
+runtime/orchestrator-service/lib/ops/backbone.js:2675:      risk_level: approval.risk_level,
+runtime/orchestrator-service/lib/ops/backbone.js:2676:      approval_type: approval.approval_type
+runtime/orchestrator-service/lib/ops/backbone.js:2680:    category: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:2681:    type: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:2682:    title: `${approval.title} needs approval`,
+runtime/orchestrator-service/lib/ops/backbone.js:2683:    message: approval.summary || 'Review and decide on the requested operation.',
+runtime/orchestrator-service/lib/ops/backbone.js:2684:    body: approval.summary || 'Review and decide on the requested operation.',
+runtime/orchestrator-service/lib/ops/backbone.js:2685:    severity: approval.risk_level === 'high' || approval.risk_level === 'critical' ? 'warning' : 'info',
+runtime/orchestrator-service/lib/ops/backbone.js:2687:      entity_type: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:2688:      entity_id: approval.id,
+runtime/orchestrator-service/lib/ops/backbone.js:2689:      route: inferRouteTarget('approval', approval)
+runtime/orchestrator-service/lib/ops/backbone.js:2691:    entity_type: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:2692:    entity_id: approval.id
+runtime/orchestrator-service/lib/ops/backbone.js:2696:    queue_type: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:2697:    entity_type: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:2698:    entity_id: approval.id,
+runtime/orchestrator-service/lib/ops/backbone.js:2699:    title: approval.title,
+runtime/orchestrator-service/lib/ops/backbone.js:2700:    status: approval.status,
+runtime/orchestrator-service/lib/ops/backbone.js:2701:    assignee: approval.reviewer,
+runtime/orchestrator-service/lib/ops/backbone.js:2703:    priority: approval.risk_level === 'critical' ? 'critical' : approval.risk_level === 'high' ? 'high' : 'normal',
+runtime/orchestrator-service/lib/ops/backbone.js:2704:    route: 'governance',
+runtime/orchestrator-service/lib/ops/backbone.js:2706:      entity_type: approval.entity_type,
+runtime/orchestrator-service/lib/ops/backbone.js:2707:      entity_id: approval.entity_id,
+runtime/orchestrator-service/lib/ops/backbone.js:2708:      approval_type: approval.approval_type,
+runtime/orchestrator-service/lib/ops/backbone.js:2709:      requested_action: approval.requested_action,
+runtime/orchestrator-service/lib/ops/backbone.js:2711:      escalation_chain: approval.escalation_chain
+runtime/orchestrator-service/lib/ops/backbone.js:2715:  updateLinkedEntity(paths.project, approval.entity_type, approval.entity_id, (record) => {
+runtime/orchestrator-service/lib/ops/backbone.js:2717:      approval.entity_type === 'media_job'
+runtime/orchestrator-service/lib/ops/backbone.js:2721:      approval.entity_type === 'media_job'
+runtime/orchestrator-service/lib/ops/backbone.js:2727:      linked_approvals: [...new Set([approval.id, ...normalizeStringList(record.linked_approvals)])],
+runtime/orchestrator-service/lib/ops/backbone.js:2729:      history: appendHistory(record, 'approval_linked', input.actor || input.requested_by, {
+runtime/orchestrator-service/lib/ops/backbone.js:2730:        approval_id: approval.id,
+runtime/orchestrator-service/lib/ops/backbone.js:2731:        status: approval.status
+runtime/orchestrator-service/lib/ops/backbone.js:2735:    if (approval.entity_type === 'content_item') {
+runtime/orchestrator-service/lib/ops/backbone.js:2736:      nextRecord.approval_status = nextApprovalStatus;
+runtime/orchestrator-service/lib/ops/backbone.js:2738:      nextRecord.queue_status = 'pending_approval';
+runtime/orchestrator-service/lib/ops/backbone.js:2741:    if (approval.entity_type === 'media_job') {
+runtime/orchestrator-service/lib/ops/backbone.js:2742:      nextRecord.approval_state = nextApprovalState;
+runtime/orchestrator-service/lib/ops/backbone.js:2745:    if (approval.entity_type === 'content_item') {
+runtime/orchestrator-service/lib/ops/backbone.js:2747:    } else if (approval.entity_type === 'media_job') {
+runtime/orchestrator-service/lib/ops/backbone.js:2754:  return approval;
+runtime/orchestrator-service/lib/ops/backbone.js:2759:  return listItems(readCollection(paths.approvalsPath), options);
+runtime/orchestrator-service/lib/ops/backbone.js:2762:function decideApproval(projectName, approvalId, input = {}) {
+runtime/orchestrator-service/lib/ops/backbone.js:2764:  const items = readCollection(paths.approvalsPath);
+runtime/orchestrator-service/lib/ops/backbone.js:2766:  const targetId = asString(approvalId);
+runtime/orchestrator-service/lib/ops/backbone.js:2770:    throw new Error('Invalid approval decision');
+runtime/orchestrator-service/lib/ops/backbone.js:2808:      `approval_${decision}`,
+runtime/orchestrator-service/lib/ops/backbone.js:2819:  writeJsonFile(paths.approvalsPath, items);
+runtime/orchestrator-service/lib/ops/backbone.js:2822:    type: `approval_${decision}`,
+runtime/orchestrator-service/lib/ops/backbone.js:2823:    entity_type: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:2835:    category: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:2836:    type: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:2842:      entity_type: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:2844:      route: inferRouteTarget('approval', next)
+runtime/orchestrator-service/lib/ops/backbone.js:2846:    entity_type: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:2850:  updateQueueEntity(paths.project, 'approval', next.id, {
+runtime/orchestrator-service/lib/ops/backbone.js:2864:      linked_approvals: [...new Set([next.id, ...normalizeStringList(record.linked_approvals)])],
+runtime/orchestrator-service/lib/ops/backbone.js:2866:      history: appendHistory(record, `linked_approval_${decision}`, input.actor, {
+runtime/orchestrator-service/lib/ops/backbone.js:2867:        approval_id: next.id,
+runtime/orchestrator-service/lib/ops/backbone.js:2873:      nextRecord.approval_status =
+runtime/orchestrator-service/lib/ops/backbone.js:2887:      nextRecord.approval_state =
+runtime/orchestrator-service/lib/ops/backbone.js:2927:      service_domain: 'governance',
+runtime/orchestrator-service/lib/ops/backbone.js:2928:      route_target: 'governance',
+runtime/orchestrator-service/lib/ops/backbone.js:2929:      source_type: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:2941:      approval_id: next.id,
+runtime/orchestrator-service/lib/ops/backbone.js:3204:      message: 'The publishing item is waiting for operator approval or handoff.',
+runtime/orchestrator-service/lib/ops/backbone.js:3205:      body: 'The publishing item is waiting for operator approval or handoff.',
+runtime/orchestrator-service/lib/ops/backbone.js:3392:  if (normalizedType === 'approval') return 'governance';
+runtime/orchestrator-service/lib/ops/backbone.js:3544:    approval: normalizedQueue.filter((item) => item.queue_type === 'approval'),
+runtime/orchestrator-service/lib/ops/backbone.js:3581:    approval_queue: queueGroups.approval,
+runtime/orchestrator-service/lib/ops/backbone.js:3698:  approvals = [],
+runtime/orchestrator-service/lib/ops/backbone.js:3701:  governanceSummary = {},
+runtime/orchestrator-service/lib/ops/backbone.js:3723:  const approvalPendingAlerts = asArray(approvals)
+runtime/orchestrator-service/lib/ops/backbone.js:3726:      id: `approval-pending-${item.id}`,
+runtime/orchestrator-service/lib/ops/backbone.js:3730:      source: 'approval_pending',
+runtime/orchestrator-service/lib/ops/backbone.js:3731:      entity_type: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:3746:            : 'Publishing item is waiting for approval or release.',
+runtime/orchestrator-service/lib/ops/backbone.js:3779:    ...asArray(governanceSummary?.sections?.claim_review)
+runtime/orchestrator-service/lib/ops/backbone.js:3789:    ...asArray(governanceSummary?.sections?.policy_violations)
+runtime/orchestrator-service/lib/ops/backbone.js:3821:    ...approvalPendingAlerts,
+runtime/orchestrator-service/lib/ops/backbone.js:3838:    approval_pending_alerts: approvalPendingAlerts,
+runtime/orchestrator-service/lib/ops/backbone.js:3850:  const governance = asObject(readJsonFile(paths.governancePath, {}));
+runtime/orchestrator-service/lib/ops/backbone.js:3861:  const approvals = readCollection(paths.approvalsPath);
+runtime/orchestrator-service/lib/ops/backbone.js:3866:  const governanceSummary = buildGovernanceSummary(paths.project, {
+runtime/orchestrator-service/lib/ops/backbone.js:3871:  const approvalLimit = Number(options.approvalLimit || 8) || 8;
+runtime/orchestrator-service/lib/ops/backbone.js:3884:    ...approvals,
+runtime/orchestrator-service/lib/ops/backbone.js:3906:    approvals,
+runtime/orchestrator-service/lib/ops/backbone.js:3909:    governanceSummary,
+runtime/orchestrator-service/lib/ops/backbone.js:3923:    governance,
+runtime/orchestrator-service/lib/ops/backbone.js:3981:      pending_approval_count: contentItems.filter((item) => asString(item.approval_status) === 'pending').length,
+runtime/orchestrator-service/lib/ops/backbone.js:4023:    approvals: {
+runtime/orchestrator-service/lib/ops/backbone.js:4024:      total: approvals.length,
+runtime/orchestrator-service/lib/ops/backbone.js:4025:      pending_count: approvals.filter((item) => asString(item.status) === 'pending').length,
+runtime/orchestrator-service/lib/ops/backbone.js:4026:      by_reviewer_role: summarizeOwnershipVisibility(team, approvals),
+runtime/orchestrator-service/lib/ops/backbone.js:4027:      items: approvals.slice(0, approvalLimit)
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:216:          ? 'As Compliance Reviewer, return concrete risks, safer wording replacements, and approval notes.'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:258:    'Do not claim task/workflow/handoff/approval/publish actions were executed.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:259:    'Do not claim task creation, workflow run, handoff creation, or approval creation happened.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:260:    'Do not claim approvals were granted.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:313:      "Focus on approval safety, claims review, legal/compliance risk, disclaimers, and governance boundaries.",
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:404:    '- Do not claim that publishing, approval, deletion, sync, CRM update, customer reply, workflow run, export, task creation, handoff creation, or backend action happened.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:543:  if (intent === 'approval') return 'governance';
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:602:      pattern: /\b(task plan|workflow|handoff|approval|approvals|timeline|execution plan|operator|owners?|assign|todo|follow up|route)\b/
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:629:  if (matches(/\b(approve|approval|review)\b/) && !['ads', 'content', 'campaign'].includes(intent)) {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:630:    intent = 'approval';
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:631:    actionType = 'approval';
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:967:  const taskBlock = ['workflow', 'task', 'approval'].includes(classified.actionType)
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:974:        'Create approval only if execution changes publishing, spend, or sensitive settings.'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1044:      `Use tasks or approvals if human follow-through is required.`
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1210:        if (classified.actionType === 'approval') {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1211:          const approval = createApproval(projectName, {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1212:            title: `${response.title} approval`,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1219:          linkedEntities.push({ entity_type: 'approval', entity_id: approval.id, route: 'governance', label: approval.title });
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1457:            created_approval: false,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1634:            created_approval: false,
+runtime/orchestrator-service/lib/customer-operations/contracts/ticket-contract.js:22:      requires_approval: Boolean(input.workflow?.requires_approval || false),
+runtime/orchestrator-service/lib/customer-operations/contracts/ticket-contract.js:23:      approval_state: String(input.workflow?.approval_state || 'not_required')
+
+### possible gaps
+public/control-center/pages/ai-command.js:149:		placeholder: "Ask the Strategist to build a campaign brief, define audience segments, create offer angles, compare launch directions, or prepare a team handoff…",
+public/control-center/pages/ai-command.js:162:		placeholder: "Ask the Content Writer to draft captions, hooks, landing copy, or campaign messages…",
+public/control-center/pages/ai-command.js:175:		placeholder: "Ask the Media Director to define visual direction, prepare a creative brief, or review brand consistency…",
+public/control-center/pages/ai-command.js:188:		placeholder: "Ask the Video Lead to write a reel script, map short-form strategy, or outline the next video concept…",
+public/control-center/pages/ai-command.js:201:		placeholder: "Ask the Publisher to review publishing readiness, check scheduling, or prepare a handoff package…",
+public/control-center/pages/ai-command.js:214:		placeholder: "Ask the Ads Optimizer to draft ad copy, review targeting angles, or plan a paid campaign structure…",
+public/control-center/pages/ai-command.js:227:		placeholder: "Ask the SEO & Insights Analyst to review performance, suggest SEO improvements, or identify top content patterns…",
+public/control-center/pages/ai-command.js:240:		placeholder: "Ask the Compliance Reviewer to check claims, approval risks, publishing safety, and governance notes…",
+public/control-center/pages/ai-command.js:253:		placeholder: "Ask the Operations Lead to turn this into tasks, workflow steps, or handoffs…",
+public/control-center/pages/ai-command.js:266:		placeholder: "Ask the Customer Operations Lead to summarize a customer thread, draft a safe reply, prepare a ticket draft, check SLA risk, or route an escalation for review…",
+public/control-center/pages/ai-command.js:279:		placeholder: "Ask the Sales / CRM Lead to qualify a lead, draft outreach, plan follow-ups, summarize CRM context, or prepare a sales handoff for review…",
+public/control-center/pages/ai-command.js:1958:			.filter((item) => item.status === "Approved")
+public/control-center/pages/ai-command.js:4735:                                                placeholder="Ask anything"
+public/control-center/pages/ai-command.js:5348:		{ label: "Approved assets", value: aiContext.approvedAssets.length ? `${aiContext.approvedAssets.length} ready` : "No approved assets", present: aiContext.approvedAssets.length > 0 },
+public/control-center/pages/ai-command/tool-dock.js:337:      sourceInput.placeholder = "Optional: add source usage notes, audience, angle, or claims to avoid...";
+public/control-center/pages/ai-command/tool-dock.js:360:  // Set placeholder for Source Details if empty
+public/control-center/pages/ai-command/tool-dock.js:362:    sourceInput.placeholder = "Optional: add source usage notes, audience, angle, or claims to avoid...";
+public/control-center/pages/ai-command/tool-dock.js:388:        if (sourceInput) sourceInput.placeholder = "Optional: add source usage notes, audience, angle, or claims to avoid...";
+public/control-center/pages/ai-command/tool-dock.js:1373:                placeholder="Example: use the selected Library source for facts only, avoid unsupported claims..."
+public/control-center/pages/ai-command/tool-dock.js:1383:                placeholder="Add audience, goal, keywords, offer, product, or any must-use information..."
+public/control-center/pages/campaign-studio.js:295:  placeholder,
+public/control-center/pages/campaign-studio.js:308:          ? `<textarea id="campaign-${escapeHtml(name)}" name="${escapeHtml(name)}" class="setup-input setup-textarea" rows="${rows}" placeholder="${escapeHtml(placeholder || "")}">${escapeHtml(asString(value))}</textarea>`
+public/control-center/pages/campaign-studio.js:309:          : `<input id="campaign-${escapeHtml(name)}" name="${escapeHtml(name)}" class="setup-input" type="text" value="${escapeHtml(asString(value))}" placeholder="${escapeHtml(placeholder || "")}">`
+public/control-center/pages/campaign-studio.js:1673:                  placeholder: "Spring launch wave 1",
+public/control-center/pages/campaign-studio.js:1681:                  placeholder: "Launch, sales growth, lead generation...",
+public/control-center/pages/campaign-studio.js:1689:                  placeholder: "Product launch, seasonal push, retention sprint...",
+public/control-center/pages/campaign-studio.js:1697:                  placeholder: "Germany",
+public/control-center/pages/campaign-studio.js:1707:                  placeholder: "2026-05-01",
+public/control-center/pages/campaign-studio.js:1715:                  placeholder: "2026-05-21",
+public/control-center/pages/campaign-studio.js:1723:                  placeholder: "5000",
+public/control-center/pages/campaign-studio.js:1743:                  placeholder: "Primary hero product",
+public/control-center/pages/campaign-studio.js:1751:                  placeholder: "Why this product matters now",
+public/control-center/pages/campaign-studio.js:1760:                  placeholder: "Who is this campaign for?",
+public/control-center/pages/campaign-studio.js:1769:                  placeholder: "What problem are we solving?",
+public/control-center/pages/campaign-studio.js:1778:                  placeholder: "instagram, facebook, email",
+public/control-center/pages/campaign-studio.js:1786:                  placeholder: "Premium grooming with stronger routine results",
+public/control-center/pages/campaign-studio.js:1795:                  placeholder: "What makes the offer persuasive?",
+public/control-center/pages/campaign-studio.js:1804:                  placeholder: "Warm prospect",
+public/control-center/pages/campaign-studio.js:1854:                        placeholder: wave.index === 1 ? "Launch wave" : wave.index === 2 ? "Education wave" : "Conversion wave",
+public/control-center/pages/campaign-studio.js:1862:                        placeholder: wave.index === 1 ? "Awareness, announcement, validation..." : wave.index === 2 ? "Proof, education, comparison..." : "Offer push, urgency, retargeting...",
+public/control-center/pages/campaign-studio.js:1871:                        placeholder: wave.allocationSuggestion,
+public/control-center/pages/campaign-studio.js:1935:                  placeholder: "logo, product images, pricing doc, offer banner...",
+public/control-center/pages/campaign-studio.js:1944:                  placeholder: "Anything the execution team must know",
+runtime/orchestrator-service/server.js:2777:  // TODO:
+runtime/orchestrator-service/server.js:8466:      description: 'Approved product photography for content, media, ads, and publishing.',
+runtime/orchestrator-service/server.js:8482:      description: 'Approved product videos, demos, UGC clips, and cutdowns.',
+runtime/orchestrator-service/server.js:8618:    return 'Approved';
+runtime/orchestrator-service/server.js:9072:        : statuses.includes('Approved')
+runtime/orchestrator-service/server.js:9073:          ? 'Approved'
+runtime/orchestrator-service/server.js:9080:    let approvedCount = statuses.filter(value => value === 'Approved').length;
+runtime/orchestrator-service/server.js:9108:      .filter(asset => getAssetCategoryStatus(asset, projectName) === 'Approved')
+runtime/orchestrator-service/server.js:10912:        asset.approval_note = note || asset.approval_note || 'Approved from Control Center Library.';
+runtime/orchestrator-service/server.js:11297:      'Approved product visuals',
+runtime/orchestrator-service/server.js:13374:// TODO(phase4a): Keep `/public/media-manager/...` write aliases for active frontend compatibility.
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:146:function findApprovedDecision(approvals, selector = {}) {
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:616:  const approvedDecision = findApprovedDecision(input.approvals || [], approvalSelector);
+runtime/orchestrator-service/lib/ai/providers/openai.js:295:              'Be specific to the supplied project context and avoid generic placeholder text.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:724:        .filter((item) => asString(item.status) === 'Approved')
+runtime/orchestrator-service/lib/media/native/providers/adapters/openai-provider-adapter.js:81:      message: 'Realtime voice execution adapter is registered but not implemented yet.'
+runtime/orchestrator-service/lib/media/native/providers/router/provider-execution-router-demo.js:11:    prompt: 'Start realtime voice session placeholder'
