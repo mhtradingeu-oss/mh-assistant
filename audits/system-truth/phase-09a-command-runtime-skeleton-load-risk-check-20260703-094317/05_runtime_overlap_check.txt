@@ -1,0 +1,224 @@
+### app.js command/runtime ownership refs
+46:  executeProjectAiCommand,
+1034:    commandRuntime: getCommandRuntimeState(),
+1068:      `commandRuntime.version: ${payload.commandRuntime?.version || "-"}`,
+1069:      `commandBar.exists: ${payload.commandRuntime?.commandBar?.exists ? "true" : "false"}`,
+1070:      `commandBackdrop.exists: ${payload.commandRuntime?.commandBackdrop?.exists ? "true" : "false"}`,
+1071:      `aiDock.exists: ${payload.commandRuntime?.aiDock?.exists ? "true" : "false"}`,
+1072:      `aiDock.open: ${payload.commandRuntime?.aiDock?.open ? "true" : "false"}`,
+1073:      `aiDock.dataOpen: ${payload.commandRuntime?.aiDock?.dataOpen || "-"}`,
+1074:      `aiDock.toggle.aria-expanded: ${payload.commandRuntime?.aiDock?.toggle?.ariaExpanded || "-"}`,
+1075:      `aiDock.panel.hidden: ${payload.commandRuntime?.aiDock?.panel?.hidden ? "true" : "false"}`,
+1076:      `aiDock.panel.aria-hidden: ${payload.commandRuntime?.aiDock?.panel?.ariaHidden || "-"}`,
+1133:    commandRuntime: getCommandRuntimeState(),
+1998:    ["aiCommandChat", "This section is currently unavailable."],
+1999:    ["aiCommandSuggestions", "No data is available yet."],
+2000:    ["aiCommandHistory", "No data is available yet."],
+2089:      executeProjectAiCommand,
+3042:    "AI Command": "ai-command",
+3065:    "open-ai-command": "ai-command",
+3068:    "send-ai-command": "ai-command"
+3095:    if (actionName === "send-ai-command") {
+3096:      if (typeof executeQuickCommand === "function") {
+3097:        executeQuickCommand();
+3099:        navigateTo("ai-command");
+3100:        showMessage("AI Command opened.");
+3136:      (candidate.closest("#openAiBtn") ? "open-ai-command" : "") ||
+3138:      (candidate.closest("#runQuickCommandBtn") ? "send-ai-command" : "") ||
+3235:  const commandBar = $("globalCommandBar");
+3236:  const commandToggleBtn = $("commandToggleBtn");
+3237:  const commandBackdrop = $("commandBackdrop");
+3255:  function setMobileCommandExpanded(expanded) {
+3256:    if (!appRoot || !commandBar || !commandToggleBtn) return;
+3259:      appRoot.classList.remove("is-mobile-shell", "is-mobile-command-open");
+3260:      const desktopCommandOpen = appRoot.classList.contains("is-command-open");
+3261:      commandBar.classList.toggle("is-collapsed", !desktopCommandOpen);
+3262:      commandBar.hidden = !desktopCommandOpen;
+3263:      commandBar.setAttribute("aria-hidden", desktopCommandOpen ? "false" : "true");
+3264:      if (commandBackdrop) {
+3265:        commandBackdrop.classList.toggle("is-visible", desktopCommandOpen);
+3266:        commandBackdrop.hidden = !desktopCommandOpen;
+3267:        commandBackdrop.setAttribute("aria-hidden", desktopCommandOpen ? "false" : "true");
+3269:      commandToggleBtn.setAttribute("aria-expanded", desktopCommandOpen ? "true" : "false");
+3270:      commandToggleBtn.textContent = desktopCommandOpen ? "Close" : "Command";
+3275:    appRoot.classList.toggle("is-mobile-command-open", expanded);
+3276:    commandBar.classList.toggle("is-collapsed", !expanded);
+3277:    commandBar.hidden = !expanded;
+3278:    commandBar.setAttribute("aria-hidden", expanded ? "false" : "true");
+3279:    if (commandBackdrop) {
+3280:      commandBackdrop.classList.toggle("is-visible", expanded);
+3281:      commandBackdrop.hidden = !expanded;
+3282:      commandBackdrop.setAttribute("aria-hidden", expanded ? "false" : "true");
+3284:    commandToggleBtn.setAttribute("aria-expanded", expanded ? "true" : "false");
+3285:    commandToggleBtn.textContent = expanded ? "Close" : "Command";
+3290:    if (!appRoot || !commandToggleBtn) return;
+3293:    commandToggleBtn.hidden = false;
+3296:      setMobileCommandExpanded(false);
+3300:    const isOpen = appRoot.classList.contains("is-mobile-command-open");
+3301:    setMobileCommandExpanded(isOpen);
+3351:  if (commandToggleBtn) {
+3352:    commandToggleBtn.onclick = (event) => {
+3356:        if (appRoot.classList.contains("is-command-open")) {
+3357:          closeGlobalCommandBarSafe();
+3359:          openGlobalCommandBar();
+3363:      const nextOpen = !appRoot.classList.contains("is-mobile-command-open");
+3364:      setMobileCommandExpanded(nextOpen);
+3368:  if (commandBackdrop) {
+3369:    commandBackdrop.onclick = () => {
+3370:      setMobileCommandExpanded(false);
+3371:      closeGlobalCommandBarSafe();
+3381:    if (!isCompactMobileViewport() || !appRoot?.classList.contains("is-mobile-command-open")) {
+3385:    const clickedCommandToggle = event.target.closest("#commandToggleBtn");
+3386:    const clickedInsideCommand = event.target.closest("#globalCommandBar");
+3387:    if (!clickedCommandToggle && !clickedInsideCommand) {
+3388:      setMobileCommandExpanded(false);
+3396:    if (event.key === "Escape" && appRoot?.classList.contains("is-mobile-command-open")) {
+3397:      setMobileCommandExpanded(false);
+3431:  const commandBackdrop = $("commandBackdrop");
+3441:  const commandActive =
+3442:    commandBackdrop &&
+3443:    !commandBackdrop.hidden &&
+3444:    commandBackdrop.getAttribute("aria-hidden") !== "true";
+3451:  const blocked = loadingActive || commandActive || sidebarActive;
+3464:function getCommandRuntimeState() {
+3465:  const commandBar = $("globalCommandBar");
+3466:  const commandBackdrop = $("commandBackdrop");
+3470:  const fallbackCommandRuntimeSnapshot = ({
+3471:    commandBar: fallbackCommandBar = null,
+3472:    commandBackdrop: fallbackCommandBackdrop = null,
+3479:    commandBar: {
+3480:      exists: Boolean(fallbackCommandBar),
+3481:      hidden: Boolean(fallbackCommandBar?.hidden),
+3482:      ariaHidden: String(fallbackCommandBar?.getAttribute?.("aria-hidden") || ""),
+3483:      className: String(fallbackCommandBar?.className || "")
+3486:    commandBackdrop: {
+3487:      exists: Boolean(fallbackCommandBackdrop),
+3488:      hidden: Boolean(fallbackCommandBackdrop?.hidden),
+3489:      ariaHidden: String(fallbackCommandBackdrop?.getAttribute?.("aria-hidden") || ""),
+3490:      className: String(fallbackCommandBackdrop?.className || "")
+3513:    window.__MH_COMMAND_RUNTIME__?.getCommandRuntimeSnapshot || fallbackCommandRuntimeSnapshot;
+3516:    commandBar,
+3517:    commandBackdrop,
+3563:function openGlobalCommandBar() {
+3565:  const commandBar = $("globalCommandBar");
+3566:  const commandBackdrop = $("commandBackdrop");
+3567:  const commandInput = $("quickCommandInput");
+3568:  const toggleBtn = $("commandToggleBtn");
+3572:    appRoot?.classList.add("is-mobile-shell", "is-mobile-command-open");
+3573:    appRoot?.classList.remove("is-command-open");
+3575:    appRoot?.classList.add("is-command-open");
+3576:    appRoot?.classList.remove("is-mobile-command-open");
+3578:  commandBar?.classList.remove("is-collapsed");
+3579:  if (commandBar) {
+3580:    commandBar.hidden = false;
+3582:  commandBar?.setAttribute("aria-hidden", "false");
+3583:  commandBackdrop?.classList.add("is-visible");
+3584:  if (commandBackdrop) {
+3585:    commandBackdrop.hidden = false;
+3587:  commandBackdrop?.setAttribute("aria-hidden", "false");
+3593:  setTimeout(() => commandInput?.focus(), 40);
+3596:function executeQuickCommand() {
+3597:  const value = $("quickCommandInput")?.value?.trim() || "";
+3599:    showError("Please enter a command first.");
+3603:  navigateTo("ai-command");
+3605:  window.dispatchEvent(new CustomEvent("mh:submit-ai-command", {
+3609:        source: "global-quick-command"
+3616:function closeGlobalCommandBarSafe() {
+3618:  const commandBar = $("globalCommandBar");
+3619:  const commandBackdrop = $("commandBackdrop");
+3620:  const toggleBtn = $("commandToggleBtn");
+3622:  appRoot?.classList.remove("is-command-open", "is-mobile-command-open");
+3623:  commandBar?.classList.add("is-collapsed");
+3624:  if (commandBar) {
+3625:    commandBar.hidden = true;
+3627:  commandBar?.setAttribute("aria-hidden", "true");
+3628:  commandBackdrop?.classList.remove("is-visible");
+3629:  if (commandBackdrop) {
+3630:    commandBackdrop.hidden = true;
+3632:  commandBackdrop?.setAttribute("aria-hidden", "true");
+3637:    toggleBtn.textContent = "Command";
+3641:function bindCommandOutsideClose() {
+3642:  if (window.__mhCommandOutsideBound) return;
+3643:window.__mhCommandOutsideBound = true;
+3645:  const commandBar = $("globalCommandBar");
+3648:    const commandOpen = appRoot?.classList.contains("is-command-open") || appRoot?.classList.contains("is-mobile-command-open");
+3649:    if (!commandOpen) return;
+3651:    const clickedInsideCommand = event.target.closest("#globalCommandBar");
+3652:    const clickedCommandToggle = event.target.closest("#commandToggleBtn");
+3653:    const clickedAiButton = event.target.closest("#execAskAiBtn, #openAiBtn, [data-action='open-ai-command']");
+3656:    if (!clickedInsideCommand && !clickedCommandToggle && !clickedAiButton && !clickedDock) {
+3657:      closeGlobalCommandBarSafe();
+3663:      closeGlobalCommandBarSafe();
+3667:  if (commandBar) {
+3668:    commandBar.addEventListener("click", (event) => event.stopPropagation());
+3673:function bindCommandInputs() {
+3675:  const commandInput = $("quickCommandInput");
+3676:  const runBtn = $("runQuickCommandBtn");
+3687:  if (commandInput && commandInput.dataset.mhCommandEnterBound !== "true") {
+3688:    commandInput.dataset.mhCommandEnterBound = "true";
+3689:    commandInput.addEventListener("keydown", (event) => {
+3692:        executeQuickCommand();
+3709:    runBtn.setAttribute("data-action", "send-ai-command");
+3768:      const input = $("quickCommandInput");
+3774:      openGlobalCommandBar?.();
+4023:        const route = button.getAttribute("data-new-route") || "ai-command";
+4025:        const input = $("quickCommandInput");
+4029:        openGlobalCommandBar();
+4070:      navigateTo("ai-command");
+4080:    openAiBtn.setAttribute("data-action", "open-ai-command");
+4127:    bindCommandInputs();
+4128:    bindCommandOutsideClose();
+
+### runtime boundary/global files
+public/control-center/runtime/ai-backend-connector.js:8: * - executeProjectAiCommand(projectName, payload)
+public/control-center/runtime/ai-backend-connector.js:13:function buildLegacyAiBridgeResponse(command, payload) {
+public/control-center/runtime/ai-backend-connector.js:19:    command,
+public/control-center/runtime/ai-backend-connector.js:22:      command: "executeProjectAiCommand(projectName, payload)",
+public/control-center/runtime/ai-backend-connector.js:31:  window.__AI_BACKEND_BRIDGE__ = {
+public/control-center/runtime/ai-backend-connector.js:32:    async call(command, payload) {
+public/control-center/runtime/ai-backend-connector.js:33:      return buildLegacyAiBridgeResponse(command, payload);
+public/control-center/runtime/ai-settings-controller.js:5:window.__AI_SETTINGS__ = {
+public/control-center/runtime/command-runtime.js:2:  Control Center Command Runtime
+public/control-center/runtime/command-runtime.js:6:  - command lifecycle
+public/control-center/runtime/command-runtime.js:7:  - command overlay
+public/control-center/runtime/command-runtime.js:8:  - command accessibility
+public/control-center/runtime/command-runtime.js:9:  - command state transitions
+public/control-center/runtime/command-runtime.js:32:  - openGlobalCommandBar()
+public/control-center/runtime/command-runtime.js:33:  - closeGlobalCommandBarSafe()
+public/control-center/runtime/command-runtime.js:34:  - setMobileCommandExpanded()
+public/control-center/runtime/command-runtime.js:48:function getCommandRuntimeSnapshot({
+public/control-center/runtime/command-runtime.js:49:  commandBar = null,
+public/control-center/runtime/command-runtime.js:50:  commandBackdrop = null,
+public/control-center/runtime/command-runtime.js:58:    commandBar: {
+public/control-center/runtime/command-runtime.js:59:      exists: Boolean(commandBar),
+public/control-center/runtime/command-runtime.js:60:      hidden: Boolean(commandBar?.hidden),
+public/control-center/runtime/command-runtime.js:61:      ariaHidden: String(commandBar?.getAttribute?.("aria-hidden") || ""),
+public/control-center/runtime/command-runtime.js:62:      className: String(commandBar?.className || "")
+public/control-center/runtime/command-runtime.js:65:    commandBackdrop: {
+public/control-center/runtime/command-runtime.js:66:      exists: Boolean(commandBackdrop),
+public/control-center/runtime/command-runtime.js:67:      hidden: Boolean(commandBackdrop?.hidden),
+public/control-center/runtime/command-runtime.js:68:      ariaHidden: String(commandBackdrop?.getAttribute?.("aria-hidden") || ""),
+public/control-center/runtime/command-runtime.js:69:      className: String(commandBackdrop?.className || "")
+public/control-center/runtime/command-runtime.js:99:  - command-closed
+public/control-center/runtime/command-runtime.js:100:  - command-inline
+public/control-center/runtime/command-runtime.js:101:  - command-overlay
+public/control-center/runtime/command-runtime.js:102:  - command-transitioning
+public/control-center/runtime/command-runtime.js:112:  initializeCommandRuntime()
+public/control-center/runtime/command-runtime.js:113:  openCommandRuntime()
+public/control-center/runtime/command-runtime.js:114:  closeCommandRuntime()
+public/control-center/runtime/command-runtime.js:115:  toggleCommandRuntime()
+public/control-center/runtime/command-runtime.js:116:  syncCommandRuntime()
+public/control-center/runtime/command-runtime.js:123:window.__MH_COMMAND_RUNTIME__ = {
+public/control-center/runtime/command-runtime.js:126:  getCommandRuntimeSnapshot
+public/control-center/runtime/control-plane-settings.js:5:window.__CONTROL_PLANE_SETTINGS__ = {
+public/control-center/runtime/control-plane-settings.js:13:    if (window.__mhLog) {
+public/control-center/runtime/control-plane-settings.js:14:      window.__mhLog("CONTROL_PLANE_MODE_CHANGE", { mode });
+public/control-center/runtime/control-plane-settings.js:17:    if (window.__CONTROL_PLANE__) {
+public/control-center/runtime/control-plane-settings.js:18:      window.__CONTROL_PLANE__.setMode(mode);
+public/control-center/runtime/governance-ai-bridge.js:5:window.__GOVERNANCE_AI__ = {
+public/control-center/runtime/governance-ai-bridge.js:13:      window.__mhLog?.("GOVERNANCE_BLOCK", response);
+public/control-center/runtime/governance-ai-bridge.js:15:      window.__mhGraphLog?.("AI_GOVERNANCE_BLOCK", response);
+public/control-center/runtime/mh-runtime-globals.js:61:  w.__mhCommand = function(command) {
+public/control-center/runtime/mh-runtime-globals.js:62:    return record("FRONTEND_COMMAND_CAPTURED", { command });
+public/control-center/runtime/runtime-boundaries.js:4:  command: "global-command-runtime",
+public/control-center/runtime/authority/route-role-fallback.js:17:  "ai-command": ACTIVE_ROUTE_ROLES,

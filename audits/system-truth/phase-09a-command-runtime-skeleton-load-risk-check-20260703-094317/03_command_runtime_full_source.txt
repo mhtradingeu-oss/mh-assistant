@@ -1,0 +1,127 @@
+     1	/*
+     2	  Control Center Command Runtime
+     3	
+     4	  Goal:
+     5	  Canonical ownership layer for:
+     6	  - command lifecycle
+     7	  - command overlay
+     8	  - command accessibility
+     9	  - command state transitions
+    10	  - keyboard interactions
+    11	
+    12	  IMPORTANT:
+    13	  This file is currently a non-active runtime skeleton.
+    14	  No production runtime integration has started yet.
+    15	*/
+    16	
+    17	"use strict";
+    18	
+    19	/* =========================================
+    20	   Runtime State
+    21	========================================= */
+    22	
+    23	const COMMAND_RUNTIME_VERSION = "phase-1-diagnostics";
+    24	
+    25	/* =========================================
+    26	   Runtime Ownership Plan
+    27	========================================= */
+    28	
+    29	/*
+    30	  Future ownership targets:
+    31	
+    32	  - openGlobalCommandBar()
+    33	  - closeGlobalCommandBarSafe()
+    34	  - setMobileCommandExpanded()
+    35	
+    36	  Additional future responsibilities:
+    37	  - overlay lifecycle
+    38	  - focus management
+    39	  - accessibility synchronization
+    40	  - keyboard shortcuts
+    41	  - runtime transitions
+    42	*/
+    43	
+    44	/* =========================================
+    45	   Runtime Snapshot Helpers
+    46	========================================= */
+    47	
+    48	function getCommandRuntimeSnapshot({
+    49	  commandBar = null,
+    50	  commandBackdrop = null,
+    51	  aiDock = null,
+    52	  aiDockToggle = null,
+    53	  aiDockPanel = null
+    54	} = {}) {
+    55	  return {
+    56	    version: COMMAND_RUNTIME_VERSION,
+    57	
+    58	    commandBar: {
+    59	      exists: Boolean(commandBar),
+    60	      hidden: Boolean(commandBar?.hidden),
+    61	      ariaHidden: String(commandBar?.getAttribute?.("aria-hidden") || ""),
+    62	      className: String(commandBar?.className || "")
+    63	    },
+    64	
+    65	    commandBackdrop: {
+    66	      exists: Boolean(commandBackdrop),
+    67	      hidden: Boolean(commandBackdrop?.hidden),
+    68	      ariaHidden: String(commandBackdrop?.getAttribute?.("aria-hidden") || ""),
+    69	      className: String(commandBackdrop?.className || "")
+    70	    },
+    71	
+    72	    aiDock: {
+    73	      exists: Boolean(aiDock),
+    74	      open: Boolean(aiDock?.classList?.contains("is-open")),
+    75	      dataOpen: String(aiDock?.getAttribute?.("data-open") || ""),
+    76	      className: String(aiDock?.className || ""),
+    77	      toggle: {
+    78	        exists: Boolean(aiDockToggle),
+    79	        ariaExpanded: String(aiDockToggle?.getAttribute?.("aria-expanded") || "")
+    80	      },
+    81	      panel: {
+    82	        exists: Boolean(aiDockPanel),
+    83	        hidden: Boolean(aiDockPanel?.hidden),
+    84	        inert: Boolean(aiDockPanel?.inert),
+    85	        ariaHidden: String(aiDockPanel?.getAttribute?.("aria-hidden") || ""),
+    86	        pointerEvents: String(aiDockPanel?.style?.pointerEvents || "")
+    87	      }
+    88	    }
+    89	  };
+    90	}
+    91	
+    92	/* =========================================
+    93	   Future Canonical State Model
+    94	========================================= */
+    95	
+    96	/*
+    97	  Planned states:
+    98	
+    99	  - command-closed
+   100	  - command-inline
+   101	  - command-overlay
+   102	  - command-transitioning
+   103	*/
+   104	
+   105	/* =========================================
+   106	   Future Public Runtime API
+   107	========================================= */
+   108	
+   109	/*
+   110	  Planned API:
+   111	
+   112	  initializeCommandRuntime()
+   113	  openCommandRuntime()
+   114	  closeCommandRuntime()
+   115	  toggleCommandRuntime()
+   116	  syncCommandRuntime()
+   117	*/
+   118	
+   119	/* =========================================
+   120	   Runtime Skeleton Export Placeholder
+   121	========================================= */
+   122	
+   123	window.__MH_COMMAND_RUNTIME__ = {
+   124	  version: COMMAND_RUNTIME_VERSION,
+   125	  active: false,
+   126	  getCommandRuntimeSnapshot
+   127	};
