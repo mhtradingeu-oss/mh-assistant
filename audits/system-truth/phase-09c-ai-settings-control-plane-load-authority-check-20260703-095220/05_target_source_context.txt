@@ -1,0 +1,57 @@
+### ai-settings-controller.js
+     1	/**
+     2	 * PHASE 19 — AI SETTINGS CONTROLLER
+     3	 */
+     4	
+     5	window.__AI_SETTINGS__ = {
+     6	
+     7	  mode: "CONTROLLED", // SAFE | CONTROLLED | AUTONOMOUS
+     8	
+     9	  autonomyLevel: 0.6,
+    10	
+    11	  canPublish: false,
+    12	  canRunAds: false,
+    13	  canExecuteWorkflows: true,
+    14	
+    15	  setMode(mode) {
+    16	    this.mode = mode;
+    17	
+    18	    if (mode === "AUTONOMOUS") {
+    19	      this.autonomyLevel = 1;
+    20	      this.canPublish = true;
+    21	      this.canRunAds = true;
+    22	    }
+    23	
+    24	    if (mode === "SAFE") {
+    25	      this.autonomyLevel = 0;
+    26	      this.canPublish = false;
+    27	      this.canRunAds = false;
+    28	    }
+    29	
+    30	    console.log("[AI SETTINGS UPDATED]", this);
+    31	  }
+    32	
+    33	};
+
+### control-plane-settings.js
+     1	/**
+     2	 * PHASE 20.1 — SETTINGS CONTROL PLANE CONNECTOR
+     3	 */
+     4	
+     5	window.__CONTROL_PLANE_SETTINGS__ = {
+     6	
+     7	  mode: "CONTROLLED",
+     8	
+     9	  setMode(mode) {
+    10	
+    11	    this.mode = mode;
+    12	
+    13	    if (window.__mhLog) {
+    14	      window.__mhLog("CONTROL_PLANE_MODE_CHANGE", { mode });
+    15	    }
+    16	
+    17	    if (window.__CONTROL_PLANE__) {
+    18	      window.__CONTROL_PLANE__.setMode(mode);
+    19	    }
+    20	  }
+    21	};
