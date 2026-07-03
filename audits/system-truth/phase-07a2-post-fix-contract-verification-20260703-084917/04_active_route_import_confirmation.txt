@@ -1,0 +1,58 @@
+### router active imports
+public/control-center/router.js:24:import { settingsRoute } from "./pages/settings.js";
+public/control-center/router.js:25:import { governanceRoute } from "./pages/governance.js";
+public/control-center/router.js:51:  [settingsRoute.id]: settingsRoute,
+public/control-center/router.js:52:  [governanceRoute.id]: governanceRoute
+
+### active governance API usage
+138:  createProjectApproval,
+139:  decideProjectApproval,
+140:  fetchProjectGovernance,
+141:  updateProjectGovernancePolicy
+297:    session.summary = await fetchProjectGovernance(projectName, {
+1344:        await decideProjectApproval(projectName, approvalId, {
+1384:        await createProjectApproval(projectName, {
+1431:          await updateProjectGovernancePolicy(projectName, {
+1457:          await updateProjectGovernancePolicy(projectName, {
+
+### settings API imports
+import {
+  fetchProjectGovernancePolicy,
+  fetchProjectTeam,
+  saveProjectTeam,
+  updateProjectGovernancePolicy
+} from "../api.js";
+
+const sessions = new Map();
+
+const OPERATING_MODE_OPTIONS = [
+  {
+    value: "Planning Mode",
+    label: "Planning Mode",
+    description: "Recommend, prioritize, and prepare work without taking action."
+  },
+  {
+    value: "Guided Execution",
+    label: "Guided Execution",
+    description: "Prepare actions and prompt operators step by step."
+  },
+  {
+    value: "Semi-Auto",
+    label: "Semi-Auto",
+    description: "Automate low-risk work while keeping humans in the loop."
+  },
+  {
+    value: "Approval-First",
+    label: "Approval-First",
+    description: "Everything important queues for human review before execution."
+  },
+  {
+    value: "Full AI Assist",
+    label: "Full AI Assist",
+    description: "The system acts aggressively inside approved guardrails."
+  },
+  {
+    value: "Emergency Safe Mode",
+    label: "Emergency Safe Mode",
+    description: "Freeze automation and reduce the system to protective operations."
+  }
