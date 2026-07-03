@@ -1,71 +1,49 @@
-
 /**
- * ⚖️ LIVE GOVERNANCE DASHBOARD
- * Real-time AI control room
+ * Legacy governance dashboard.
+ *
+ * This file is intentionally preserved as a non-active legacy artifact.
+ * The active Governance route is public/control-center/pages/governance.js.
+ *
+ * This legacy dashboard must not call removed /api/governance/* endpoints if
+ * opened directly.
  */
 
-async function fetchLiveState() {
-  const res = await fetch("/api/governance/state");
-  return await res.json();
-}
+const legacyGovernanceDashboardState = {
+  ok: false,
+  neutralized: true,
+  legacy: true,
+  page: "governance/dashboard",
+  message: "Legacy governance dashboard is neutralized. Use the active Governance route instead.",
+  canonicalRoutes: {
+    governance: "public/control-center/pages/governance.js"
+  },
+  canonicalHelpers: [
+    "fetchProjectGovernance(projectName)",
+    "createProjectApproval(projectName, payload)",
+    "decideProjectApproval(projectName, approvalId, payload)",
+    "updateProjectGovernancePolicy(projectName, payload)"
+  ]
+};
 
-async function fetchAudit() {
-  const res = await fetch("/api/governance/audit");
-  return await res.json();
-}
-
-async function sendAction(action) {
-  const res = await fetch("/api/governance/process", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(action)
-  });
-
-  return await res.json();
-}
-
-// ================================
-// UI STATE ENGINE (SIMPLE LIVE LOOP)
-// ================================
-
-async function initGovernanceDashboard() {
-
-  const state = await fetchLiveState();
-  const audit = await fetchAudit();
-
-  console.log("🧠 LIVE GOVERNANCE STATE:", state);
-  console.log("📊 AUDIT LOG:", audit);
+function renderLegacyGovernanceDashboardNotice() {
+  if (typeof document === "undefined" || !document.body) {
+    return legacyGovernanceDashboardState;
+  }
 
   document.body.innerHTML = `
-    <div style="font-family: Arial; padding: 20px;">
-      
-      <h1>⚖️ GOVERNANCE CONTROL CENTER</h1>
-
-      <h2>🧠 Live State</h2>
-      <pre>${JSON.stringify(state, null, 2)}</pre>
-
-      <h2>📊 Audit Log</h2>
-      <pre>${JSON.stringify(audit, null, 2)}</pre>
-
-      <h2>⚙️ Actions</h2>
-      <button onclick='sendAction({type:"ADS", budget:3000})'>
-        Increase Ads Budget
-      </button>
-
-      <button onclick='sendAction({type:"FINANCE", amount:2000})'>
-        Trigger Finance Action
-      </button>
-
-      <button onclick='sendAction({type:"CIVILIZATION"})'>
-        Run Civilization Rule
-      </button>
-
-    </div>
+    <main style="font-family: Arial, sans-serif; padding: 24px; min-height: 100vh;">
+      <h1>Legacy Governance Dashboard Neutralized</h1>
+      <p>This inactive legacy dashboard no longer calls removed Governance endpoints.</p>
+      <pre style="background: #f3f4f6; padding: 16px; overflow: auto;">${JSON.stringify(legacyGovernanceDashboardState, null, 2)}</pre>
+    </main>
   `;
+
+  return legacyGovernanceDashboardState;
 }
 
-// Auto-start dashboard
-initGovernanceDashboard();
-
+if (typeof window !== "undefined") {
+  window.__LEGACY_GOVERNANCE_DASHBOARD__ = {
+    state: legacyGovernanceDashboardState,
+    render: renderLegacyGovernanceDashboardNotice
+  };
+}

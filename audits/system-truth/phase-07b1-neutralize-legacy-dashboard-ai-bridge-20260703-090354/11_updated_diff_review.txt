@@ -1,0 +1,321 @@
+diff --git a/public/control-center/pages/business/dashboard.js b/public/control-center/pages/business/dashboard.js
+index 7e91154..4d78e26 100644
+--- a/public/control-center/pages/business/dashboard.js
++++ b/public/control-center/pages/business/dashboard.js
+@@ -1,77 +1,46 @@
+-
+ /**
+- * ⚡ AUTONOMOUS BUSINESS OPERATING UI
+- * Real-time AI business cockpit
++ * Legacy autonomous business dashboard.
++ *
++ * This file is intentionally preserved as a non-active legacy artifact.
++ * It is not registered by the Control Center router and must not call removed
++ * /api/governance/* or /api/ai-control/* endpoints if opened directly.
++ *
++ * Active runtime authority lives in router-registered pages and canonical api.js
++ * project-scoped helpers.
+  */
+ 
+-async function loadBusinessState() {
+-
+-  const [gov, econ, civ] = await Promise.all([
+-    fetch("/api/governance/state").then(r => r.json()),
+-    fetch("/api/ai-control/dashboard").then(r => r.json()),
+-    fetch("/api/governance/audit").then(r => r.json())
+-  ]);
+-
+-  return { gov, econ, civ };
+-}
+-
+-function renderMetric(label, value) {
+-  return `<div style="margin:8px 0;"><b>${label}:</b> ${JSON.stringify(value)}</div>`;
+-}
+-
+-async function initBusinessUI() {
+-
+-  const state = await loadBusinessState();
++const legacyBusinessDashboardState = {
++  ok: false,
++  neutralized: true,
++  legacy: true,
++  page: "business/dashboard",
++  message: "Legacy autonomous business dashboard is neutralized. Use active Control Center routes instead.",
++  canonicalRoutes: {
++    governance: "public/control-center/pages/governance.js",
++    aiCommand: "public/control-center/pages/ai-command.js",
++    settings: "public/control-center/pages/settings.js"
++  }
++};
++
++function renderLegacyBusinessDashboardNotice() {
++  if (typeof document === "undefined" || !document.body) {
++    return legacyBusinessDashboardState;
++  }
+ 
+   document.body.innerHTML = `
+-    <div style="font-family:Arial;padding:20px;background:#0f172a;color:#fff;">
+-
+-      <h1>⚡ AUTONOMOUS BUSINESS OPERATING SYSTEM</h1>
+-
+-      <h2>🧠 AI CONTROL STATE</h2>
+-      ${renderMetric("AI Brain", state.econ.brain)}
+-
+-      <h2>💰 ECONOMY</h2>
+-      ${renderMetric("Economy", state.econ.economy)}
+-
+-      <h2>⚖️ GOVERNANCE</h2>
+-      ${renderMetric("Governance", state.gov)}
+-
+-      <h2>📊 AUDIT STREAM</h2>
+-      <pre style="background:#111;padding:10px;max-height:200px;overflow:auto;">
+-        ${JSON.stringify(state.civ, null, 2)}
+-      </pre>
+-
+-      <h2>⚙️ CONTROL PANEL</h2>
+-
+-      <button onclick='sendAction({type:"ADS", budget:5000})'>
+-        📢 Scale Ads
+-      </button>
+-
+-      <button onclick='sendAction({type:"FINANCE", amount:10000})'>
+-        💰 Trigger Revenue Action
+-      </button>
+-
+-      <button onclick='sendAction({type:"CIVILIZATION"})'>
+-        🌍 Run System Evolution
+-      </button>
+-
+-    </div>
++    <main style="font-family: Arial, sans-serif; padding: 24px; background: #0f172a; color: #fff; min-height: 100vh;">
++      <h1>Legacy Business Dashboard Neutralized</h1>
++      <p>This inactive legacy dashboard no longer calls removed backend endpoints.</p>
++      <pre style="background: #111827; padding: 16px; overflow: auto;">${JSON.stringify(legacyBusinessDashboardState, null, 2)}</pre>
++    </main>
+   `;
+-}
+-
+-// action bridge
+-async function sendAction(action) {
+-
+-  await fetch("/api/governance/process", {
+-    method: "POST",
+-    headers: { "Content-Type": "application/json" },
+-    body: JSON.stringify(action)
+-  });
+ 
+-  alert("⚡ Action sent to AI system");
++  return legacyBusinessDashboardState;
+ }
+ 
+-// init
+-initBusinessUI();
+-
++if (typeof window !== "undefined") {
++  window.__LEGACY_BUSINESS_DASHBOARD__ = {
++    state: legacyBusinessDashboardState,
++    render: renderLegacyBusinessDashboardNotice
++  };
++}
+diff --git a/public/control-center/pages/governance/dashboard.js b/public/control-center/pages/governance/dashboard.js
+index a60504e..df8568e 100644
+--- a/public/control-center/pages/governance/dashboard.js
++++ b/public/control-center/pages/governance/dashboard.js
+@@ -1,71 +1,49 @@
+-
+ /**
+- * ⚖️ LIVE GOVERNANCE DASHBOARD
+- * Real-time AI control room
++ * Legacy governance dashboard.
++ *
++ * This file is intentionally preserved as a non-active legacy artifact.
++ * The active Governance route is public/control-center/pages/governance.js.
++ *
++ * This legacy dashboard must not call removed /api/governance/* endpoints if
++ * opened directly.
+  */
+ 
+-async function fetchLiveState() {
+-  const res = await fetch("/api/governance/state");
+-  return await res.json();
+-}
+-
+-async function fetchAudit() {
+-  const res = await fetch("/api/governance/audit");
+-  return await res.json();
+-}
+-
+-async function sendAction(action) {
+-  const res = await fetch("/api/governance/process", {
+-    method: "POST",
+-    headers: {
+-      "Content-Type": "application/json"
+-    },
+-    body: JSON.stringify(action)
+-  });
+-
+-  return await res.json();
+-}
+-
+-// ================================
+-// UI STATE ENGINE (SIMPLE LIVE LOOP)
+-// ================================
+-
+-async function initGovernanceDashboard() {
+-
+-  const state = await fetchLiveState();
+-  const audit = await fetchAudit();
+-
+-  console.log("🧠 LIVE GOVERNANCE STATE:", state);
+-  console.log("📊 AUDIT LOG:", audit);
++const legacyGovernanceDashboardState = {
++  ok: false,
++  neutralized: true,
++  legacy: true,
++  page: "governance/dashboard",
++  message: "Legacy governance dashboard is neutralized. Use the active Governance route instead.",
++  canonicalRoutes: {
++    governance: "public/control-center/pages/governance.js"
++  },
++  canonicalHelpers: [
++    "fetchProjectGovernance(projectName)",
++    "createProjectApproval(projectName, payload)",
++    "decideProjectApproval(projectName, approvalId, payload)",
++    "updateProjectGovernancePolicy(projectName, payload)"
++  ]
++};
++
++function renderLegacyGovernanceDashboardNotice() {
++  if (typeof document === "undefined" || !document.body) {
++    return legacyGovernanceDashboardState;
++  }
+ 
+   document.body.innerHTML = `
+-    <div style="font-family: Arial; padding: 20px;">
+-      
+-      <h1>⚖️ GOVERNANCE CONTROL CENTER</h1>
+-
+-      <h2>🧠 Live State</h2>
+-      <pre>${JSON.stringify(state, null, 2)}</pre>
+-
+-      <h2>📊 Audit Log</h2>
+-      <pre>${JSON.stringify(audit, null, 2)}</pre>
+-
+-      <h2>⚙️ Actions</h2>
+-      <button onclick='sendAction({type:"ADS", budget:3000})'>
+-        Increase Ads Budget
+-      </button>
+-
+-      <button onclick='sendAction({type:"FINANCE", amount:2000})'>
+-        Trigger Finance Action
+-      </button>
+-
+-      <button onclick='sendAction({type:"CIVILIZATION"})'>
+-        Run Civilization Rule
+-      </button>
+-
+-    </div>
++    <main style="font-family: Arial, sans-serif; padding: 24px; min-height: 100vh;">
++      <h1>Legacy Governance Dashboard Neutralized</h1>
++      <p>This inactive legacy dashboard no longer calls removed Governance endpoints.</p>
++      <pre style="background: #f3f4f6; padding: 16px; overflow: auto;">${JSON.stringify(legacyGovernanceDashboardState, null, 2)}</pre>
++    </main>
+   `;
+-}
+ 
+-// Auto-start dashboard
+-initGovernanceDashboard();
++  return legacyGovernanceDashboardState;
++}
+ 
++if (typeof window !== "undefined") {
++  window.__LEGACY_GOVERNANCE_DASHBOARD__ = {
++    state: legacyGovernanceDashboardState,
++    render: renderLegacyGovernanceDashboardNotice
++  };
++}
+diff --git a/public/control-center/runtime/ai-backend-connector.js b/public/control-center/runtime/ai-backend-connector.js
+index b096120..283bce5 100644
+--- a/public/control-center/runtime/ai-backend-connector.js
++++ b/public/control-center/runtime/ai-backend-connector.js
+@@ -1,35 +1,48 @@
+ /**
+- * PHASE 19 — FRONTEND AI CONNECTOR
++ * Legacy AI backend connector skeleton.
++ *
++ * This file is intentionally preserved for compatibility but is not loaded by
++ * index.html. It must not call removed legacy AI execute routes.
++ *
++ * Active AI runtime authority lives in project-scoped api.js helpers:
++ * - executeProjectAiCommand(projectName, payload)
++ * - executeProjectAiChat(projectName, payload)
++ * - executeProjectAiGuidance(projectName, payload)
+  */
+ 
+-window.__AI_BACKEND_BRIDGE__ = {
+-
+-  async call(command, payload) {
+-
+-    const res = await fetch("/ai/execute", {
+-      method: "POST",
+-      headers: {
+-        "Content-Type": "application/json"
+-      },
+-      body: JSON.stringify({
+-        command,
+-        payload
+-      })
+-    });
+-
+-    return res.json();
+-  },
+-
+-  workflow(data) {
+-    return this.call("WORKFLOW", data);
+-  },
+-
+-  publish(data) {
+-    return this.call("PUBLISH", data);
+-  },
+-
+-  approve(data) {
+-    return this.call("APPROVE", data);
+-  }
+-
+-};
++function buildLegacyAiBridgeResponse(command, payload) {
++  return {
++    ok: false,
++    neutralized: true,
++    legacy: true,
++    bridge: "__AI_BACKEND_BRIDGE__",
++    command,
++    message: "Legacy AI backend bridge is neutralized. Use canonical project-scoped AI helpers instead.",
++    canonical: {
++      command: "executeProjectAiCommand(projectName, payload)",
++      chat: "executeProjectAiChat(projectName, payload)",
++      guidance: "executeProjectAiGuidance(projectName, payload)"
++    },
++    payloadReceived: Boolean(payload)
++  };
++}
++
++if (typeof window !== "undefined") {
++  window.__AI_BACKEND_BRIDGE__ = {
++    async call(command, payload) {
++      return buildLegacyAiBridgeResponse(command, payload);
++    },
++
++    workflow(data) {
++      return this.call("WORKFLOW", data);
++    },
++
++    publish(data) {
++      return this.call("PUBLISH", data);
++    },
++
++    approve(data) {
++      return this.call("APPROVE", data);
++    }
++  };
++}

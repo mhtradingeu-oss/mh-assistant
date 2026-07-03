@@ -1,77 +1,46 @@
-
 /**
- * ⚡ AUTONOMOUS BUSINESS OPERATING UI
- * Real-time AI business cockpit
+ * Legacy autonomous business dashboard.
+ *
+ * This file is intentionally preserved as a non-active legacy artifact.
+ * It is not registered by the Control Center router and must not call removed
+ * /api/governance/* or /api/ai-control/* endpoints if opened directly.
+ *
+ * Active runtime authority lives in router-registered pages and canonical api.js
+ * project-scoped helpers.
  */
 
-async function loadBusinessState() {
+const legacyBusinessDashboardState = {
+  ok: false,
+  neutralized: true,
+  legacy: true,
+  page: "business/dashboard",
+  message: "Legacy autonomous business dashboard is neutralized. Use active Control Center routes instead.",
+  canonicalRoutes: {
+    governance: "public/control-center/pages/governance.js",
+    aiCommand: "public/control-center/pages/ai-command.js",
+    settings: "public/control-center/pages/settings.js"
+  }
+};
 
-  const [gov, econ, civ] = await Promise.all([
-    fetch("/api/governance/state").then(r => r.json()),
-    fetch("/api/ai-control/dashboard").then(r => r.json()),
-    fetch("/api/governance/audit").then(r => r.json())
-  ]);
-
-  return { gov, econ, civ };
-}
-
-function renderMetric(label, value) {
-  return `<div style="margin:8px 0;"><b>${label}:</b> ${JSON.stringify(value)}</div>`;
-}
-
-async function initBusinessUI() {
-
-  const state = await loadBusinessState();
+function renderLegacyBusinessDashboardNotice() {
+  if (typeof document === "undefined" || !document.body) {
+    return legacyBusinessDashboardState;
+  }
 
   document.body.innerHTML = `
-    <div style="font-family:Arial;padding:20px;background:#0f172a;color:#fff;">
-
-      <h1>⚡ AUTONOMOUS BUSINESS OPERATING SYSTEM</h1>
-
-      <h2>🧠 AI CONTROL STATE</h2>
-      ${renderMetric("AI Brain", state.econ.brain)}
-
-      <h2>💰 ECONOMY</h2>
-      ${renderMetric("Economy", state.econ.economy)}
-
-      <h2>⚖️ GOVERNANCE</h2>
-      ${renderMetric("Governance", state.gov)}
-
-      <h2>📊 AUDIT STREAM</h2>
-      <pre style="background:#111;padding:10px;max-height:200px;overflow:auto;">
-        ${JSON.stringify(state.civ, null, 2)}
-      </pre>
-
-      <h2>⚙️ CONTROL PANEL</h2>
-
-      <button onclick='sendAction({type:"ADS", budget:5000})'>
-        📢 Scale Ads
-      </button>
-
-      <button onclick='sendAction({type:"FINANCE", amount:10000})'>
-        💰 Trigger Revenue Action
-      </button>
-
-      <button onclick='sendAction({type:"CIVILIZATION"})'>
-        🌍 Run System Evolution
-      </button>
-
-    </div>
+    <main style="font-family: Arial, sans-serif; padding: 24px; background: #0f172a; color: #fff; min-height: 100vh;">
+      <h1>Legacy Business Dashboard Neutralized</h1>
+      <p>This inactive legacy dashboard no longer calls removed backend endpoints.</p>
+      <pre style="background: #111827; padding: 16px; overflow: auto;">${JSON.stringify(legacyBusinessDashboardState, null, 2)}</pre>
+    </main>
   `;
+
+  return legacyBusinessDashboardState;
 }
 
-// action bridge
-async function sendAction(action) {
-
-  await fetch("/api/governance/process", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(action)
-  });
-
-  alert("⚡ Action sent to AI system");
+if (typeof window !== "undefined") {
+  window.__LEGACY_BUSINESS_DASHBOARD__ = {
+    state: legacyBusinessDashboardState,
+    render: renderLegacyBusinessDashboardNotice
+  };
 }
-
-// init
-initBusinessUI();
-
