@@ -1,0 +1,1346 @@
+public/control-center/pages/ai-command.js:101:                id: "customer_ops",
+public/control-center/pages/ai-command.js:102:                label: "Customer Operations Lead",
+public/control-center/pages/ai-command.js:104:                summary: "Inbox review, reply drafts, ticket drafts, SLA risk, and escalation routing.",
+public/control-center/pages/ai-command.js:108:                id: "sales_crm",
+public/control-center/pages/ai-command.js:129:	customer_operations: "customer_ops",
+public/control-center/pages/ai-command.js:130:	customer_ops: "customer_ops",
+public/control-center/pages/ai-command.js:131:	support: "customer_ops",
+public/control-center/pages/ai-command.js:132:	sales: "sales_crm",
+public/control-center/pages/ai-command.js:133:	crm: "sales_crm",
+public/control-center/pages/ai-command.js:134:	sales_crm: "sales_crm",
+public/control-center/pages/ai-command.js:149:		placeholder: "Ask the Strategist to plan a campaign, map launch phases, review channel priorities, or define the offer strategy…",
+public/control-center/pages/ai-command.js:153:		safetyNote: "All outputs are guidance and draft only. Execution requires explicit confirmation.",
+public/control-center/pages/ai-command.js:162:		placeholder: "Ask the Content Writer to draft captions, hooks, landing copy, or campaign messages…",
+public/control-center/pages/ai-command.js:164:		cannotDo: ["Publish directly", "Approve risky claims", "Invent unsupported facts", "Run workflows automatically"],
+public/control-center/pages/ai-command.js:175:		placeholder: "Ask the Media Director to define visual direction, prepare a creative brief, or review brand consistency…",
+public/control-center/pages/ai-command.js:179:		safetyNote: "Direction and briefs only. Media generation requires backend confirmation and explicit action.",
+public/control-center/pages/ai-command.js:188:		placeholder: "Ask the Video Lead to write a reel script, map short-form strategy, or outline the next video concept…",
+public/control-center/pages/ai-command.js:192:		safetyNote: "Scripts and direction only. Video generation requires explicit backend action and approval.",
+public/control-center/pages/ai-command.js:201:		placeholder: "Ask the Publisher to review publishing readiness, check scheduling, or prepare a handoff package…",
+public/control-center/pages/ai-command.js:205:		safetyNote: "Publishing always requires explicit approval. No live publishing from AI guidance alone.",
+public/control-center/pages/ai-command.js:214:		placeholder: "Ask the Ads Optimizer to draft ad copy, review targeting angles, or plan a paid campaign structure…",
+public/control-center/pages/ai-command.js:227:		placeholder: "Ask the SEO & Insights Analyst to review performance, suggest SEO improvements, or identify top content patterns…",
+public/control-center/pages/ai-command.js:240:		placeholder: "Ask the Compliance Reviewer to check claims, approval risks, publishing safety, and governance notes…",
+public/control-center/pages/ai-command.js:253:		placeholder: "Ask the Operations Lead to turn this into tasks, workflow steps, or handoffs…",
+public/control-center/pages/ai-command.js:257:		safetyNote: "Task plans and handoffs only. Workflow execution requires explicit user confirmation.",
+public/control-center/pages/ai-command.js:261:		id: "customer_ops",
+public/control-center/pages/ai-command.js:262:		label: "Customer Operations Lead",
+public/control-center/pages/ai-command.js:265:		summary: "Inbox review, reply drafts, ticket drafts, SLA risk, customer profile context, and escalation routing.",
+public/control-center/pages/ai-command.js:266:		placeholder: "Ask the Customer Operations Lead to summarize a customer thread, draft a safe reply, prepare a ticket draft, check SLA risk, or route an escalation for review…",
+public/control-center/pages/ai-command.js:267:		canHelp: ["Review inbox context", "Summarize customer threads", "Draft safe replies", "Prepare ticket drafts", "Flag SLA and escalation risk"],
+public/control-center/pages/ai-command.js:268:		cannotDo: ["Send customer replies", "Create live tickets", "Change SLA policy", "Escalate without confirmation"],
+public/control-center/pages/ai-command.js:270:		safetyNote: "Customer operations outputs are drafts only. Sending replies, ticket creation, and escalations require confirmation in the owning surface.",
+public/control-center/pages/ai-command.js:274:		id: "sales_crm",
+public/control-center/pages/ai-command.js:278:		summary: "Lead qualification, outreach drafts, follow-up cadence, CRM profile summaries, and sales handoff notes.",
+public/control-center/pages/ai-command.js:279:		placeholder: "Ask the Sales / CRM Lead to qualify a lead, draft outreach, plan follow-ups, summarize CRM context, or prepare a sales handoff for review…",
+public/control-center/pages/ai-command.js:280:		canHelp: ["Qualify lead context", "Draft outreach", "Plan follow-up sequences", "Summarize CRM profiles", "Prepare sales handoffs"],
+public/control-center/pages/ai-command.js:344:	customer_ops: [
+public/control-center/pages/ai-command.js:345:		{ label: "Summarize customer thread", sub: "Capture issue, tone, and next reply" },
+public/control-center/pages/ai-command.js:346:		{ label: "Draft customer reply", sub: "Safe response for review" },
+public/control-center/pages/ai-command.js:347:		{ label: "Check SLA risk", sub: "Flag urgency and escalation path" },
+public/control-center/pages/ai-command.js:348:		{ label: "Prepare escalation", sub: "Route support, sales, or operations" }
+public/control-center/pages/ai-command.js:350:	sales_crm: [
+public/control-center/pages/ai-command.js:353:		{ label: "Build follow-up sequence", sub: "Multi-step sales cadence" },
+public/control-center/pages/ai-command.js:354:		{ label: "Prepare sales handoff", sub: "Route context to operations" }
+public/control-center/pages/ai-command.js:363:	{ label: "Review customer and sales impact", sub: "Customer Ops, Sales / CRM, Operations" }
+public/control-center/pages/ai-command.js:398:	customer_ops: "CO",
+public/control-center/pages/ai-command.js:399:	sales_crm: "SC"
+public/control-center/pages/ai-command.js:478:		{ id: "claims-check", label: "Claims Check", action: "preview", intent: "guidance", template: "Review marketing claims for {project}. Flag unsupported, high-risk, or evidence-dependent wording." },
+public/control-center/pages/ai-command.js:491:	customer_ops: [
+public/control-center/pages/ai-command.js:492:		{ id: "review-unified-inbox", label: "Review Unified Inbox", action: "preview", intent: "guidance", template: "Review the Unified Inbox readiness for {project}. Summarize visible customer-operation signals, open gaps, and safe next review steps. Do not claim inbox actions happened." },
+public/control-center/pages/ai-command.js:493:		{ id: "summarize-customer-thread", label: "Summarize Customer Thread", action: "preview", intent: "guidance", template: "Summarize this customer thread for {project}. Include customer issue, sentiment, reply goal, missing details, and safe next step." },
+public/control-center/pages/ai-command.js:494:		{ id: "draft-customer-reply", label: "Draft Customer Reply", action: "preview", intent: "guidance", template: "Draft a customer reply for {project}. Keep it helpful, calm, review-ready, and do not claim any operational action has been completed." },
+public/control-center/pages/ai-command.js:495:		{ id: "create-ticket-draft", label: "Create Ticket Draft", action: "preview", intent: "task", template: "Create a ticket draft for {project}. Include issue, priority, owner suggestion, evidence needed, and next safe action." },
+public/control-center/pages/ai-command.js:496:		{ id: "check-sla-risk", label: "Check SLA Risk", action: "preview", intent: "guidance", template: "Check SLA risk for {project}. Flag urgency, risk level, missing runtime data, and escalation recommendation for review." },
+public/control-center/pages/ai-command.js:497:		{ id: "prepare-escalation", label: "Prepare Escalation", action: "preview", intent: "handoff", template: "Prepare an escalation draft for {project}. Include reason, customer impact, owner, confirmation needed, and destination team." },
+public/control-center/pages/ai-command.js:498:		{ id: "customer-profile-snapshot", label: "Customer Profile Snapshot", action: "preview", intent: "guidance", template: "Prepare a customer profile snapshot for {project}. Include known context, purchase/support signals, missing fields, and safe follow-up questions." },
+public/control-center/pages/ai-command.js:499:		{ id: "route-support-sales-ops", label: "Route to Support / Sales / Operations", action: "preview", intent: "handoff", template: "Prepare routing guidance for {project}. Decide whether the customer item belongs with Support, Sales, or Operations, and explain the review gate." }
+public/control-center/pages/ai-command.js:501:	sales_crm: [
+public/control-center/pages/ai-command.js:505:		{ id: "crm-profile-summary", label: "CRM Profile Summary", action: "preview", intent: "guidance", template: "Summarize the CRM profile context for {project}. Include fit, history, open questions, and next sales action without mutating CRM data." },
+public/control-center/pages/ai-command.js:509:		{ id: "sales-handoff-draft", label: "Sales Handoff", action: "preview", intent: "handoff", template: "Prepare a sales handoff draft for {project}. Include lead context, recommended next action, owner, and confirmation needed." }
+public/control-center/pages/ai-command.js:604:		purpose: "Translate intent into executable workflows and handoffs.",
+public/control-center/pages/ai-command.js:641:		if (/act as the customer operations lead|act as customer ops/i.test(text)) return "customer_ops";
+public/control-center/pages/ai-command.js:642:		if (/act as the sales|act as the crm|sales \/ crm lead/i.test(text)) return "sales_crm";
+public/control-center/pages/ai-command.js:707:function humanizeValue(value, fallback = "") {
+public/control-center/pages/ai-command.js:708:	if (value == null) return fallback;
+public/control-center/pages/ai-command.js:711:		return clean === "[object Object]" ? fallback : clean;
+public/control-center/pages/ai-command.js:717:		return value.map((item) => humanizeValue(item)).filter(Boolean).join("; ") || fallback;
+public/control-center/pages/ai-command.js:739:			.join("; ") || fallback;
+public/control-center/pages/ai-command.js:741:	return fallback;
+public/control-center/pages/ai-command.js:817:function toNumber(value, fallback = null) {
+public/control-center/pages/ai-command.js:818:	if (value == null || value === "") return fallback;
+public/control-center/pages/ai-command.js:820:	return Number.isFinite(parsed) ? parsed : fallback;
+public/control-center/pages/ai-command.js:852:	const conversationLanguage = asString(
+public/control-center/pages/ai-command.js:853:		overview.conversation_language ||
+public/control-center/pages/ai-command.js:860:		conversationLanguage,
+public/control-center/pages/ai-command.js:1061:			reason: "AI response guidance bridge is not connected yet (API function unavailable)."
+public/control-center/pages/ai-command.js:1101:function summarizeAiCommandSessionIntent(value = "", fallback = "Session") {
+public/control-center/pages/ai-command.js:1107:        if (!text) return fallback;
+public/control-center/pages/ai-command.js:1232:			"When the request touches inbox, tickets, leads, outreach, or CRM, include Customer Ops -> Sales/CRM -> Operations.",
+public/control-center/pages/ai-command.js:1241:		`User conversation language: ${safeLanguage}`,
+public/control-center/pages/ai-command.js:1245:                "If the user writes Arabic, reply in Arabic. If the user writes English, reply in English. If the user writes German, reply in German.",
+public/control-center/pages/ai-command.js:1311:	if (id === "customer_ops") return outputType === "task" ? "task-center" : "operations-centers";
+public/control-center/pages/ai-command.js:1312:	if (id === "sales_crm") return "workflows";
+public/control-center/pages/ai-command.js:1341:        const looksTaskLike = /\b(task|tasks|handoff|ticket|tickets|follow-up|follow up|owner|owners|assignee|assigned|due date|priority|priorities|backlog|checklist|next task|action item|action items)\b/.test(text);
+public/control-center/pages/ai-command.js:1485:				"Use Arabic freely in the conversation; publishable copy should be reviewed in German.",
+public/control-center/pages/ai-command.js:1612:	if (specialistId === "customer_ops") {
+public/control-center/pages/ai-command.js:1615:			title: outputType === "task" ? "Ticket Draft: Customer operations follow-up" : "Customer Ops Draft: Thread, reply, and routing",
+public/control-center/pages/ai-command.js:1616:			summary: "Customer operations draft prepared with safe reply language, ticket notes, SLA review, and escalation guardrails.",
+public/control-center/pages/ai-command.js:1617:			mainOutput: "Review the customer context, confirm missing details, then route the draft through the owning support, sales, or operations surface.",
+public/control-center/pages/ai-command.js:1618:			replyDraft: [
+public/control-center/pages/ai-command.js:1619:				"Thank the customer, acknowledge the issue, and confirm the next reviewed support step.",
+public/control-center/pages/ai-command.js:1622:			ticketDraft: [
+public/control-center/pages/ai-command.js:1624:				"Priority: draft priority pending runtime inbox and SLA confirmation.",
+public/control-center/pages/ai-command.js:1625:				"Owner: support, sales, or operations to be confirmed before creation."
+public/control-center/pages/ai-command.js:1629:				"SLA and escalation decisions require confirmation in the owning operations surface."
+public/control-center/pages/ai-command.js:1631:			nextStep: "Review the draft, confirm the destination team, then route through support, sales, or operations.",
+public/control-center/pages/ai-command.js:1634:				"Draft a safe customer reply",
+public/control-center/pages/ai-command.js:1635:				"Create ticket draft fields for review",
+public/control-center/pages/ai-command.js:1636:				"Confirm escalation or routing before action"
+public/control-center/pages/ai-command.js:1639:			safetyLabel: "No reply sent, ticket created, SLA changed, or escalation triggered."
+public/control-center/pages/ai-command.js:1643:	if (specialistId === "sales_crm") {
+public/control-center/pages/ai-command.js:1648:			mainOutput: "Use this as a sales planning draft. Confirm CRM context and owner before sending outreach or changing pipeline status.",
+public/control-center/pages/ai-command.js:1673:				"Route sales handoff without mutating CRM data"
+public/control-center/pages/ai-command.js:1744:			"Customer Ops and Sales / CRM join when the request touches inbox, tickets, leads, outreach, or CRM"
+public/control-center/pages/ai-command.js:1752:			"Customer Ops / Sales: add reply, ticket, lead, outreach, or CRM handoff drafts when relevant",
+public/control-center/pages/ai-command.js:1757:		confirmationNote: "No task, workflow, outreach, customer reply, CRM update, approval, or publishing action is executed from Full Team mode.",
+public/control-center/pages/ai-command.js:2005:		customer_ops: ["customer", "support", "inbox", "ticket", "tickets", "sla", "reply", "thread", "escalation", "complaint", "refund"],
+public/control-center/pages/ai-command.js:2006:		sales_crm: ["lead", "leads", "crm", "sales", "outreach", "follow-up", "follow up", "pipeline", "dealer", "salon", "influencer"]
+public/control-center/pages/ai-command.js:2055:		notes.push("Paid platform reporting not connected — ROAS guidance is limited.");
+public/control-center/pages/ai-command.js:2171:			: "Paid reporting not connected — connect Meta Ads, Google Ads, or TikTok Ads.",
+public/control-center/pages/ai-command.js:2176:			paid.summary?.roas != null ? `Current ROAS: ${Number(paid.summary.roas).toFixed(2)}x.` : "ROAS not available yet."
+public/control-center/pages/ai-command.js:2426:	"customer-ops": "customer_ops",
+public/control-center/pages/ai-command.js:2427:	customer_ops: "customer_ops",
+public/control-center/pages/ai-command.js:2428:	"sales-crm": "sales_crm",
+public/control-center/pages/ai-command.js:2429:	sales_crm: "sales_crm"
+public/control-center/pages/ai-command.js:2496:function normalizeAiInboundSpecialistId(value, fallback = "operations") {
+public/control-center/pages/ai-command.js:2497:	const fallbackId = MODE_ID_ALIASES[getAiRoomRoleId(fallback)] || getAiRoomRoleId(fallback);
+public/control-center/pages/ai-command.js:2498:	const raw = getAiRoomRoleId(value || fallbackId);
+public/control-center/pages/ai-command.js:2502:	return SPECIALIST_DEFS.some((item) => item.id === finalId) ? finalId : fallbackId;
+public/control-center/pages/ai-command.js:2511:	const fallbackRoute = sourcePage === "workspace" ? "workflows" : sourcePage;
+public/control-center/pages/ai-command.js:2512:	const fallbackLabel = sourceLabel || routeLabel(fallbackRoute);
+public/control-center/pages/ai-command.js:2517:		const route = normalizeAiInboundSourcePage(rawRoute || stringRoute || fallbackRoute);
+public/control-center/pages/ai-command.js:2518:		const label = firstAiInboundText(record.label, record.title, record.name) || routeLabel(route) || fallbackLabel;
+public/control-center/pages/ai-command.js:2525:		route: fallbackRoute,
+public/control-center/pages/ai-command.js:2526:		label: fallbackLabel,
+public/control-center/pages/ai-command.js:2527:		reason: `Return to ${fallbackLabel} after AI Team review.`
+public/control-center/pages/ai-command.js:2739:	if (typeof executeProjectAiCommand !== "function") throw new Error("AI command service is unavailable.");
+public/control-center/pages/ai-command.js:2831:    const fallback =
+public/control-center/pages/ai-command.js:2838:      ...fallback,
+public/control-center/pages/ai-command.js:2840:      name: asString(member.name || fallback.name || member.role || "AI Specialist"),
+public/control-center/pages/ai-command.js:2841:      role: asString(member.role || fallback.role || id),
+public/control-center/pages/ai-command.js:2842:      purpose: asString(member.purpose || member.description || fallback.purpose || "Support the current operating context."),
+public/control-center/pages/ai-command.js:2843:      bestUse: asString(member.bestUse || member.best_use || fallback.bestUse || "Use when this specialist owns the next step."),
+public/control-center/pages/ai-command.js:3077:				<div class="ctrl-empty-title">Start the conversation</div>
+public/control-center/pages/ai-command.js:3246:function buildConversationWorkContext(session, fallbackPrompt = "") {
+public/control-center/pages/ai-command.js:3255:        const conversationLines = messages
+public/control-center/pages/ai-command.js:3267:                fallbackPrompt ||
+public/control-center/pages/ai-command.js:3283:                conversationLines.length ? `Conversation context:\n${conversationLines.join("\n")}` : ""
+public/control-center/pages/ai-command.js:3289:                conversationText: conversationLines.join("\n"),
+public/control-center/pages/ai-command.js:3298:function buildConversationWorkPrompt(session, outputType, fallbackPrompt = "") {
+public/control-center/pages/ai-command.js:3299:        const context = buildConversationWorkContext(session, fallbackPrompt);
+public/control-center/pages/ai-command.js:3310:                `Convert this AI Team conversation into a ${typeLabel}.`,
+public/control-center/pages/ai-command.js:3312:                "Use the conversation context, not only the composer text.",
+public/control-center/pages/ai-command.js:3319:function setPreviewFromConversation({ session, intent, fallbackPrompt, projectName }) {
+public/control-center/pages/ai-command.js:3320:        const workPrompt = buildConversationWorkPrompt(session, intent, fallbackPrompt);
+public/control-center/pages/ai-command.js:3328:        const context = buildConversationWorkContext(session, fallbackPrompt);
+public/control-center/pages/ai-command.js:3330:        preview.conversationContext = context.conversationText;
+public/control-center/pages/ai-command.js:3332:        // Keep raw conversation context available internally, but do not show it as the main output.
+public/control-center/pages/ai-command.js:3578:				<span class="aicmd-v2-chat-bridge ${safeBridgeStatus.available ? "is-available" : "is-unavailable"}">
+public/control-center/pages/ai-command.js:3635:	const plannedSpecialists = AI_ROOM_PLANNED_SPECIALISTS.map((item) => `
+public/control-center/pages/ai-command.js:3636:		<div class="aicmd-room-member aicmd-room-member-planned" aria-disabled="true">
+public/control-center/pages/ai-command.js:3649:			<span>Strategy, writing, creative, compliance, publishing, customer, sales, and operations specialists coordinate one review-ready answer. No workflow, send, publish, approval, or CRM action is executed here.</span>
+public/control-center/pages/ai-command.js:3698:			<div class="aicmd-room-planned-specialists" aria-label="Additional specialists planned">
+public/control-center/pages/ai-command.js:3699:				<span class="aicmd-room-planned-title">Planned lanes, not active specialists</span>
+public/control-center/pages/ai-command.js:3700:				${plannedSpecialists}
+public/control-center/pages/ai-command.js:3758:        if (roleId === "operations" || roleId === "customer_ops") return `${label} is preparing your task handoff...`;
+public/control-center/pages/ai-command.js:3772:		? "Team orchestration across strategy, writing, media/video, compliance, publishing, customer operations, sales/CRM, and operations"
+public/control-center/pages/ai-command.js:3778:		<div class="aicmd-room-conversation-head" data-role="${escapeHtml(isTeam ? "team" : getAiRoomRoleId(spec.id))}">
+public/control-center/pages/ai-command.js:3801:	if (/task|ticket|checklist|owner_map|priority/.test(haystack)) return "task";
+public/control-center/pages/ai-command.js:3913:        const conversationLanguage = asString(languagePlan.conversationLanguage || "Auto").trim() || "Auto";
+public/control-center/pages/ai-command.js:3919:                        <span>${escapeHtml(conversationLanguage)}</span>
+public/control-center/pages/ai-command.js:4014:                                <span class="aicmd-chatfirst-pill ${safeBridgeStatus.available ? "is-available" : "is-planned"}">${escapeHtml(bridgeLabel)}</span>
+public/control-center/pages/ai-command.js:4104:				<span class="aicmd-chatfirst-status ${safeBridgeStatus.available ? "is-available" : "is-unavailable"}">${escapeHtml(bridgeLabel)}</span>
+public/control-center/pages/ai-command.js:4149:				<span class="aicmd-chatfirst-pill ${safeBridgeStatus.available ? "is-available" : "is-planned"}">${escapeHtml(safeBridgeStatus.available ? "Connected" : "Guarded")}</span>
+public/control-center/pages/ai-command.js:4187:				<div class="aicmd-chatfirst-planned-list" aria-label="Planned specialists">
+public/control-center/pages/ai-command.js:4189:						<div class="aicmd-chatfirst-specialist-option is-planned" aria-disabled="true">
+public/control-center/pages/ai-command.js:4221:        const fallbackMessages = !selectedMessages.length && selectedResponses.length
+public/control-center/pages/ai-command.js:4243:        const conversationMessages = session.isFreshAiChatSession ? [] : (selectedMessages.length ? selectedMessages : fallbackMessages);
+public/control-center/pages/ai-command.js:4305:                        ${conversationMessages.length ? `
+public/control-center/pages/ai-command.js:4307:                                        ${conversationMessages.map(renderMessage).join("")}
+public/control-center/pages/ai-command.js:4338:                { id: "write", label: "Write", summary: "Prepare documents, copy, agreements, or presentation drafts.", enabled: false },
+public/control-center/pages/ai-command.js:4339:                { id: "offer", label: "Offer", summary: "Shape a product offer from pricing, market, and audience context.", enabled: false },
+public/control-center/pages/ai-command.js:4340:                { id: "lead", label: "Lead", summary: "Prepare lead discovery and outreach workflow drafts.", enabled: false },
+public/control-center/pages/ai-command.js:4341:                { id: "media", label: "Media", summary: "Create a media brief, storyboard, and production direction.", enabled: false },
+public/control-center/pages/ai-command.js:4342:                { id: "publish", label: "Publish", summary: "Prepare publishing checklist and handoff readiness.", enabled: false }
+public/control-center/pages/ai-command.js:4357:                                                class="aicmd-smart-action${action.enabled ? "" : " is-planned"}"
+public/control-center/pages/ai-command.js:4360:                                                ${action.enabled ? "" : "disabled"}
+public/control-center/pages/ai-command.js:4422:        const goal = asString(wizard.goal || "sales");
+public/control-center/pages/ai-command.js:4435:        const goalOptions = [["sales", "Sales"], ["launch", "Product launch"], ["leads", "Lead generation"], ["awareness", "Awareness"], ["retargeting", "Retargeting"]];
+public/control-center/pages/ai-command.js:4538:                                                                <span><strong>Status</strong>${escapeHtml(preview.backendPreview ? "Backend preview" : "Local fallback")}</span>
+public/control-center/pages/ai-command.js:4735:                                                placeholder="Ask anything"
+public/control-center/pages/ai-command.js:4746:                                        <button class="aicmd-final-voice-btn" type="button" data-aicmd-final-voice-conversation title="Voice conversation roadmap" hidden aria-hidden="true">${getAiCommandUiIcon("voice")}</button>
+public/control-center/pages/ai-command.js:4747:                                        <button id="aicmdV2AskBtn" class="aicmd-chatfirst-send aicmd-final-send" type="button" ${isGenerating ? "disabled" : ""} title="Ask AI Team">
+public/control-center/pages/ai-command.js:4853:				<span class="aicmd-chatfirst-pill ${safeBridgeStatus.available ? "is-available" : "is-planned"}">${escapeHtml(safeBridgeStatus.available ? "Chat ready" : "Preview guarded")}</span>
+public/control-center/pages/ai-command.js:4878:			<div class="aicmd-chatfirst-planned-grid" aria-label="Planned specialists">
+public/control-center/pages/ai-command.js:4880:					<div class="aicmd-chatfirst-team-card is-planned" aria-disabled="true">
+public/control-center/pages/ai-command.js:4996:						<span>${escapeHtml(humanizeValue(preview.confirmationNote, "Execution requires explicit confirmation in the destination workspace."))}</span>
+public/control-center/pages/ai-command.js:5053:		{ label: "Voice input", value: "Coming", className: "is-planned" },
+public/control-center/pages/ai-command.js:5054:		{ label: "Team chat", value: bridgeStatus.available ? "AI ready" : "Coming", className: bridgeStatus.available ? "is-available" : "is-planned" },
+public/control-center/pages/ai-command.js:5055:		{ label: "Media gen", value: "Coming", className: "is-planned" },
+public/control-center/pages/ai-command.js:5056:		{ label: "GPU video", value: "Coming", className: "is-planned" },
+public/control-center/pages/ai-command.js:5057:		{ label: "Image prompt generation", value: providerConfigured ? "Provider may be ready" : "Provider dependent", className: providerConfigured ? "is-available" : "is-planned" }
+public/control-center/pages/ai-command.js:5171:        const fallbackSelectedResponses = !selectedMessages.length && selectedResponses.length
+public/control-center/pages/ai-command.js:5190:        const conversationMessages = selectedMessages.length ? selectedMessages : fallbackSelectedResponses;
+public/control-center/pages/ai-command.js:5199:                                <span class="aicmd-v2-chat-bridge ${safeBridgeStatus.available ? "is-available" : "is-unavailable"}">${escapeHtml(bridgeLabel)}</span>
+public/control-center/pages/ai-command.js:5228:                                        <span>Latest selected reply</span>
+public/control-center/pages/ai-command.js:5230:                                        <small>${escapeHtml(latestSelected ? formatTime(latestSelected.generatedAt) : "No reply yet")}</small>
+public/control-center/pages/ai-command.js:5245:                        ${conversationMessages.length ? `
+public/control-center/pages/ai-command.js:5247:                                        ${conversationMessages.map(renderMessage).join("")}
+public/control-center/pages/ai-command.js:5340:		{ label: "Conversation language", value: languagePlan.conversationLanguage, present: true },
+public/control-center/pages/ai-command.js:5351:	const scopedContextItems = session.teamMode === "solo" && session.modeId === "customer_ops"
+public/control-center/pages/ai-command.js:5353:			{ label: "Open conversations", value: "Snapshot / requires runtime surface", present: false, scoped: true },
+public/control-center/pages/ai-command.js:5355:			{ label: "SLA", value: "Safe review only", present: true, scoped: true },
+public/control-center/pages/ai-command.js:5359:		: session.teamMode === "solo" && session.modeId === "sales_crm"
+public/control-center/pages/ai-command.js:5578:		const setPreviewFromIntent = (intent, fallbackPrompt = "", options = {}) => {
+public/control-center/pages/ai-command.js:5579:			const value = asString(input?.value || session.draftMessage || fallbackPrompt || "").trim();
+public/control-center/pages/ai-command.js:5785:                                updateStatus("Tool Drawer is not available on this surface yet.");
+public/control-center/pages/ai-command.js:5797:                                updateStatus("Source menu is not available yet.");
+public/control-center/pages/ai-command.js:5804:                        updateStatus(open ? `${reason} opened. Choose temporary file context, trusted Library source, planned product context, or current project context.` : `${reason} closed.`);
+public/control-center/pages/ai-command.js:5844:                                        updateStatus("Direct product/SKU source selection is planned. Use a trusted Library source or paste product details for now.");
+public/control-center/pages/ai-command.js:5845:                                        showMessage?.("Product/SKU selector is planned. Current safe options: Library source, uploaded filename context, project context, or manual product details.");
+public/control-center/pages/ai-command.js:5898:                                updateStatus("AI Team selector is not available yet.");
+public/control-center/pages/ai-command.js:5936:                                        updateStatus("AI Team context is not available yet.");
+public/control-center/pages/ai-command.js:5945:                Array.from(document.querySelectorAll("[data-aicmd-final-voice-conversation]")).forEach((btn) => {
+public/control-center/pages/ai-command.js:5947:                                updateStatus("Voice conversation requires the next provider-backed phase: recording, STT, specialist reply, and TTS playback. Voice dictation is ready now.");
+public/control-center/pages/ai-command.js:5948:                                showMessage?.("Voice dictation is ready. Full voice conversation will be implemented as the next provider-backed voice mode.");
+public/control-center/pages/ai-command.js:5968:                                updateStatus("This Smart Action is planned. Campaign Builder is available first.");
+public/control-center/pages/ai-command.js:5977:                                goal: asString(currentWizard.goal || "sales"),
+public/control-center/pages/ai-command.js:5998:                        const goal = asString(wizard.goal || "sales");
+public/control-center/pages/ai-command.js:6027:                                        body: "Flag unsupported claims, pricing promises, before/after language, evidence gaps, restricted wording, and approval requirements."
+public/control-center/pages/ai-command.js:6129:                function normalizeBackendCampaignPreview(payload = {}, fallbackPreview = {}) {
+public/control-center/pages/ai-command.js:6145:                                ...asObject(fallbackPreview),
+public/control-center/pages/ai-command.js:6146:                                title: asString(body.title || fallbackPreview.title || "AI Team campaign preview"),
+public/control-center/pages/ai-command.js:6147:                                summary: asString(body.summary || fallbackPreview.summary || ""),
+public/control-center/pages/ai-command.js:6148:                                source: asString(body.source_type || body.source || fallbackPreview.source || ""),
+public/control-center/pages/ai-command.js:6149:                                sourceLabel: asString(body.source_label || fallbackPreview.sourceLabel || fallbackPreview.source || ""),
+public/control-center/pages/ai-command.js:6150:                                goal: asString(body.goal || fallbackPreview.goal || ""),
+public/control-center/pages/ai-command.js:6151:                                channel: asString(body.channel || fallbackPreview.channel || ""),
+public/control-center/pages/ai-command.js:6152:                                market: asString(body.market || fallbackPreview.market || ""),
+public/control-center/pages/ai-command.js:6153:                                language: asString(body.language || fallbackPreview.language || ""),
+public/control-center/pages/ai-command.js:6154:                                format: asString(body.format || fallbackPreview.format || ""),
+public/control-center/pages/ai-command.js:6155:                                deadline: asString(body.deadline || fallbackPreview.deadline || ""),
+public/control-center/pages/ai-command.js:6156:                                audience: asString(body.audience || campaignPackage.targetAudience || fallbackPreview.audience || ""),
+public/control-center/pages/ai-command.js:6157:                                offer: asString(body.offer || campaignPackage.offer || fallbackPreview.offer || ""),
+public/control-center/pages/ai-command.js:6158:                                productFocus: asString(body.product_focus || body.productFocus || fallbackPreview.productFocus || ""),
+public/control-center/pages/ai-command.js:6159:                                complianceSensitivity: asString(body.compliance_sensitivity || body.complianceSensitivity || fallbackPreview.complianceSensitivity || ""),
+public/control-center/pages/ai-command.js:6164:                                        : asString(fallbackPreview.safety || "Preview only."),
+public/control-center/pages/ai-command.js:6178:                                        goal: asString(wizard.goal || localPreview.goal || "sales"),
+public/control-center/pages/ai-command.js:6202:                                console.warn("AI Command backend campaign preview fallback", error);
+public/control-center/pages/ai-command.js:6206:                                        backendFallbackReason: asString(error?.message || "Backend preview unavailable")
+public/control-center/pages/ai-command.js:6249:                                        backendFallbackReason: asString(preview.backendFallbackReason || "")
+public/control-center/pages/ai-command.js:6252:                                persistSessionDraft(sessionKey, session, preview.backendPreview ? "Campaign Builder backend preview prepared" : "Campaign Builder local fallback preview prepared");
+public/control-center/pages/ai-command.js:6253:                                updateStatus(preview.backendPreview ? "Backend AI Team preview prepared. Review before any handoff or approval." : "Local campaign preview prepared because backend preview is unavailable.");
+public/control-center/pages/ai-command.js:6254:                                showMessage?.(preview.backendPreview ? "Backend AI Team campaign preview is ready for review." : "Campaign preview is ready using the local fallback.");
+public/control-center/pages/ai-command.js:6296:                                backend_fallback_reason: asString(preview.backendFallbackReason || ""),
+public/control-center/pages/ai-command.js:6399:			        if (sendBtn && !sendBtn.disabled) {
+public/control-center/pages/ai-command.js:6431:					updateStatus("Voice dictation is ready, but browser speech recognition is not available in this environment yet.");
+public/control-center/pages/ai-command.js:6526:		                        showMessage?.("AI chat route is not connected yet.");
+public/control-center/pages/ai-command.js:6572:		                                language: languagePlan.conversationLanguage === "Auto" ? "Auto - follow the latest user message language" : languagePlan.conversationLanguage,
+public/control-center/pages/ai-command.js:6628:                                                responseTitle: "Chat reply",
+public/control-center/pages/ai-command.js:6639:		                                responseTitle: "Chat reply",
+public/control-center/pages/ai-command.js:6667:		                        updateStatus("Specialist reply generated. No workflow/task/handoff was created.");
+public/control-center/pages/ai-command.js:6668:		                        showMessage?.("Specialist reply generated.");
+public/control-center/pages/ai-command.js:6671:		                        session.responseError = asString(error?.message || "Failed to generate specialist chat reply.");
+public/control-center/pages/ai-command.js:6688:                // Phase 1: stages draft locally from conversation context. No backend execution.
+public/control-center/pages/ai-command.js:6692:                                const fallback = asString(input?.value || session.draftMessage || "").trim();
+public/control-center/pages/ai-command.js:6696:                                        fallbackPrompt: fallback,
+public/control-center/pages/ai-command.js:6700:                                persistSessionDraft(sessionKey, session, "Guidance preview prepared from conversation");
+public/control-center/pages/ai-command.js:6702:                                updateStatus("Guidance preview prepared from conversation context.");
+public/control-center/pages/ai-command.js:6703:                                showMessage?.(`${specLabel} guidance preview prepared from conversation.`);
+public/control-center/pages/ai-command.js:6709:                // Phase 1: converts the current conversation into a task preview. No backend execution.
+public/control-center/pages/ai-command.js:6715:                                const fallback = value
+public/control-center/pages/ai-command.js:6721:                                        fallbackPrompt: fallback,
+public/control-center/pages/ai-command.js:6725:                                persistSessionDraft(sessionKey, session, "Task preview prepared from conversation");
+public/control-center/pages/ai-command.js:6726:                                updateStatus("Task draft preview prepared from conversation context. Review before creating durable tasks.");
+public/control-center/pages/ai-command.js:6727:                                showMessage?.("Task draft preview prepared from conversation.");
+public/control-center/pages/ai-command.js:6738:                                const fallback = value
+public/control-center/pages/ai-command.js:6744:                                        fallbackPrompt: fallback,
+public/control-center/pages/ai-command.js:6748:                                persistSessionDraft(sessionKey, session, "Workflow preview prepared from conversation");
+public/control-center/pages/ai-command.js:6749:                                updateStatus("Workflow draft preview prepared from conversation context. No workflow run started.");
+public/control-center/pages/ai-command.js:6750:                                showMessage?.("Workflow draft preview prepared from conversation.");
+public/control-center/pages/ai-command.js:6756:                // Phase 1: converts the current conversation into a handoff preview. No backend write.
+public/control-center/pages/ai-command.js:6762:                                const fallback = value
+public/control-center/pages/ai-command.js:6768:                                        fallbackPrompt: fallback,
+public/control-center/pages/ai-command.js:6772:                                persistSessionDraft(sessionKey, session, "Handoff preview prepared from conversation");
+public/control-center/pages/ai-command.js:6773:                                updateStatus("Handoff preview prepared from conversation context. Review destination before sending.");
+public/control-center/pages/ai-command.js:6774:                                showMessage?.("Handoff preview prepared from conversation.");
+public/control-center/pages/ai-command.js:6814:					updateStatus("Smart tool drawer is unavailable. Refresh AI Command and try again.");
+public/control-center/pages/ai-command.js:6867:						updateStatus("Clipboard is not available in this browser context.");
+public/control-center/pages/ai-command.js:6870:					updateStatus("Copy failed. Clipboard access may be blocked.");
+public/control-center/pages/ai-command.js:6906:		                const fallback = latestResponse?.prompt || asString(input?.value || session.draftMessage || "");
+public/control-center/pages/ai-command.js:6910:		                        fallbackPrompt: fallback,
+public/control-center/pages/ai-command.js:6929:		                showMessage?.("Draft preview ready from conversation.");
+public/control-center/pages/ai-command.js:6974:					updateStatus("Read is not supported in this browser.");
+public/control-center/pages/ai-command.js:7001:						updateStatus("Clipboard is not available in this browser context.");
+public/control-center/pages/ai-command.js:7004:					updateStatus("Copy failed. Clipboard access may be blocked.");
+public/control-center/pages/ai-command.js:7085:					updateStatus("Read preview is not supported in this browser.");
+public/control-center/pages/ai-command.js:7458:        uiConsistency: "locked"
+public/control-center/pages/ai-command.js:7543:        stability: "locked"
+public/control-center/pages/ai-command/tool-dock.js:14:function moveFocusOutOfDrawer(drawer, fallbackTarget = null) {
+public/control-center/pages/ai-command/tool-dock.js:19:    if (fallbackTarget && typeof fallbackTarget.focus === "function") {
+public/control-center/pages/ai-command/tool-dock.js:20:      fallbackTarget.focus({ preventScroll: true });
+public/control-center/pages/ai-command/tool-dock.js:78:    const fallbackTool = findToolMetadataById(returnContext.toolId);
+public/control-center/pages/ai-command/tool-dock.js:79:    if (fallbackTool) {
+public/control-center/pages/ai-command/tool-dock.js:82:        btn: createToolButtonAdapter(fallbackTool),
+public/control-center/pages/ai-command/tool-dock.js:83:        tool: fallbackTool,
+public/control-center/pages/ai-command/tool-dock.js:84:        text: fallbackTool.template || "",
+public/control-center/pages/ai-command/tool-dock.js:286:  lines.push("Use this Library source as trusted context. Do not add unsupported claims.");
+public/control-center/pages/ai-command/tool-dock.js:337:      sourceInput.placeholder = "Optional: add source usage notes, audience, angle, or claims to avoid...";
+public/control-center/pages/ai-command/tool-dock.js:360:  // Set placeholder for Source Details if empty
+public/control-center/pages/ai-command/tool-dock.js:362:    sourceInput.placeholder = "Optional: add source usage notes, audience, angle, or claims to avoid...";
+public/control-center/pages/ai-command/tool-dock.js:388:        if (sourceInput) sourceInput.placeholder = "Optional: add source usage notes, audience, angle, or claims to avoid...";
+public/control-center/pages/ai-command/tool-dock.js:406:    id: "translate",
+public/control-center/pages/ai-command/tool-dock.js:408:    label: "Translate",
+public/control-center/pages/ai-command/tool-dock.js:410:    template: "Translate or adapt the selected text for the project target market. Keep the explanation in the user's chat language and prepare only review-ready copy."
+public/control-center/pages/ai-command/tool-dock.js:499:      template: "Prioritize the next best actions for {projectName}. Separate urgent, important, blocked, and later work."
+public/control-center/pages/ai-command/tool-dock.js:531:      id: "translate",
+public/control-center/pages/ai-command/tool-dock.js:533:      label: "Translate",
+public/control-center/pages/ai-command/tool-dock.js:540:      outputTypes: ["translation", "localization", "market_adaptation", "cta_localization"],
+public/control-center/pages/ai-command/tool-dock.js:541:      template: "Translate and localize the current text for {projectName}. Ask for target language and market if missing. Preserve brand tone, adapt CTA and wording for the target audience, and keep the result review-ready."
+public/control-center/pages/ai-command/tool-dock.js:593:      template: "Prepare SEO support for {projectName}. Ask for topic, market, language, and audience if missing. Create keyword ideas, search intent, meta title/description, blog outline, FAQ ideas, internal link ideas, and content gap notes."
+public/control-center/pages/ai-command/tool-dock.js:987:      template: "Review claims for {projectName}. Flag unsupported, risky, health/performance, legal, or approval-sensitive statements."
+public/control-center/pages/ai-command/tool-dock.js:1000:      template: "Rewrite this content in a safer compliant way. Keep the value clear while reducing unsupported or risky claims."
+public/control-center/pages/ai-command/tool-dock.js:1111:  customer_ops: [
+public/control-center/pages/ai-command/tool-dock.js:1113:      id: "reply-draft",
+public/control-center/pages/ai-command/tool-dock.js:1121:      sourceTypes: ["customer_thread", "support_notes", "policy_doc", "faq_source", "current_chat", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:1122:      outputTypes: ["reply_draft", "empathetic_response", "next_step_note", "escalation_note"],
+public/control-center/pages/ai-command/tool-dock.js:1123:      template: "Draft a safe customer reply for {projectName}. Do not send it. Include empathy, answer, next step, and escalation note if needed."
+public/control-center/pages/ai-command/tool-dock.js:1126:      id: "ticket",
+public/control-center/pages/ai-command/tool-dock.js:1134:      sourceTypes: ["customer_thread", "support_notes", "order_case_summary", "current_chat", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:1135:      outputTypes: ["ticket_draft", "issue_summary", "priority_note", "missing_information"],
+public/control-center/pages/ai-command/tool-dock.js:1136:      template: "Prepare a ticket draft for {projectName}. Include issue summary, priority, owner, customer impact, and missing information."
+public/control-center/pages/ai-command/tool-dock.js:1139:      id: "sla",
+public/control-center/pages/ai-command/tool-dock.js:1141:      label: "SLA",
+public/control-center/pages/ai-command/tool-dock.js:1147:      sourceTypes: ["customer_thread", "sla_policy", "support_notes", "current_chat", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:1148:      outputTypes: ["sla_risk_review", "urgency_flags", "escalation_needs", "safe_next_actions"],
+public/control-center/pages/ai-command/tool-dock.js:1149:      template: "Review SLA or response risk for this customer context. Flag urgency, escalation needs, and safe next actions."
+public/control-center/pages/ai-command/tool-dock.js:1159:      destinations: ["chat-preview", "operations-centers", "workflows", "sales-crm-draft"],
+public/control-center/pages/ai-command/tool-dock.js:1160:      sourceTypes: ["customer_thread", "support_notes", "current_chat", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:1166:  sales_crm: [
+public/control-center/pages/ai-command/tool-dock.js:1168:      id: "sales-pitch",
+public/control-center/pages/ai-command/tool-dock.js:1175:      destinations: ["chat-preview", "workflows", "content-studio", "sales-crm-draft"],
+public/control-center/pages/ai-command/tool-dock.js:1176:      sourceTypes: ["lead_context", "sales_notes", "product_data", "offer_data", "proof_points", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:1177:      outputTypes: ["sales_pitch", "value_proposition", "pain_solution_map", "cta_note"],
+public/control-center/pages/ai-command/tool-dock.js:1178:      template: "Create a sales pitch for {projectName}. Include value proposition, customer pain, proof, offer, CTA, and follow-up note."
+public/control-center/pages/ai-command/tool-dock.js:1188:      destinations: ["chat-preview", "content-studio", "workflows", "sales-crm-draft"],
+public/control-center/pages/ai-command/tool-dock.js:1189:      sourceTypes: ["lead_context", "meeting_notes", "sales_notes", "offer_data", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:1191:      template: "Draft a sales follow-up for {projectName}. Include context, value reminder, question, CTA, and next step."
+public/control-center/pages/ai-command/tool-dock.js:1202:      sourceTypes: ["lead_context", "sales_notes", "product_data", "proof_points", "objection_notes", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:1214:      destinations: ["chat-preview", "workflows", "operations-centers", "sales-crm-draft"],
+public/control-center/pages/ai-command/tool-dock.js:1215:      sourceTypes: ["lead_context", "crm_profile_summary", "sales_notes", "customer_notes", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:1262:function getToolMetaList(tool = {}, key = "", fallback = []) {
+public/control-center/pages/ai-command/tool-dock.js:1266:  return fallback;
+public/control-center/pages/ai-command/tool-dock.js:1373:                placeholder="Example: use the selected Library source for facts only, avoid unsupported claims..."
+public/control-center/pages/ai-command/tool-dock.js:1383:                placeholder="Add audience, goal, keywords, offer, product, or any must-use information..."
+public/control-center/pages/ai-command/tool-dock.js:1469:    crm: "CRM",
+public/control-center/pages/ai-command/tool-dock.js:1500:function populateDrawerSelect(select, rawValue = "", fallbackLabel = "Auto") {
+public/control-center/pages/ai-command/tool-dock.js:1510:  const options = values.length ? values : [String(fallbackLabel || "Auto").trim() || "Auto"];
+public/control-center/pages/ai-command/tool-dock.js:1514:    const label = humanizeMeta(value || fallbackLabel || "Auto");
+public/control-center/pages/ai-command/tool-dock.js:1519:function getSelectedLabel(drawer, selector, fallback = "Auto") {
+public/control-center/pages/ai-command/tool-dock.js:1521:  if (!select || !select.value) return fallback;
+public/control-center/pages/ai-command/tool-dock.js:1568:    : `${source}. If the selected source is not available in the current context, ask me to choose, paste, upload, or open the relevant source before producing final content.`;
+public/control-center/pages/ai-command/tool-dock.js:1605:    "- If the conversation language differs from the publishable output language, keep any short explanation in the conversation language and put only the publishable content in the selected output language.",
+public/control-center/pages/ai-command/tool-dock.js:1622:    "- Do not make unsupported claims. Mark missing proof clearly."
+public/control-center/pages/ai-command/tool-dock.js:1658:function closeToolDrawer(drawer, fallbackTarget = null) {
+public/control-center/pages/ai-command/tool-dock.js:1659:  moveFocusOutOfDrawer(drawer, fallbackTarget);
+public/control-center/pages/customer-center.js:46:  return /protected read routes are disabled/i.test(message);
+public/control-center/pages/customer-center.js:50:  return asString(value?.error || value?.message || value || "Protected read routes are disabled.");
+public/control-center/pages/customer-center.js:54:  const [readiness, inbox, conversations, tickets, channels] = await Promise.all([
+public/control-center/pages/customer-center.js:62:  const responses = [readiness, inbox, conversations, tickets, channels];
+public/control-center/pages/customer-center.js:69:      inbox: [],
+public/control-center/pages/customer-center.js:70:      conversations: [],
+public/control-center/pages/customer-center.js:71:      tickets: [],
+public/control-center/pages/customer-center.js:74:      warnings: ["Configure MH_CONTROL_CENTER_WRITE_KEY on the server to load Customer Center data."],
+public/control-center/pages/customer-center.js:75:      disabledActions: buildDisabledActions()
+public/control-center/pages/customer-center.js:80:  const inboxData = getPayload(inbox);
+public/control-center/pages/customer-center.js:81:  const conversationsData = getPayload(conversations);
+public/control-center/pages/customer-center.js:82:  const ticketsData = getPayload(tickets);
+public/control-center/pages/customer-center.js:89:    inbox: asArray(inboxData?.inbox || inboxData),
+public/control-center/pages/customer-center.js:90:    conversations: asArray(conversationsData?.conversations || conversationsData),
+public/control-center/pages/customer-center.js:91:    tickets: asArray(ticketsData?.tickets || ticketsData),
+public/control-center/pages/customer-center.js:95:    disabledActions: buildDisabledActions()
+public/control-center/pages/customer-center.js:101:    ["Send reply", "Locked: Customer Center v1 cannot send external replies or provider messages."],
+public/control-center/pages/customer-center.js:102:    ["Add CRM note", "Locked: CRM writes require a future confirmation gate, role check, and audit log."],
+public/control-center/pages/customer-center.js:103:    ["Update ticket", "Locked: ticket changes are outside this read-only release."],
+public/control-center/pages/customer-center.js:104:    ["Assign conversation", "Locked: assignment changes require a future workflow owner and audit trail."],
+public/control-center/pages/customer-center.js:106:    ["Trigger callback", "Locked: call placement is not enabled from Customer Center."],
+public/control-center/pages/customer-center.js:107:    ["Trigger IVR", "Locked: IVR provider execution is not enabled from Customer Center."],
+public/control-center/pages/customer-center.js:108:    ["Sync CRM", "Locked: CRM provider execution is not enabled from Customer Center."],
+public/control-center/pages/customer-center.js:109:    ["Auto-reply", "Locked: autonomous customer replies remain forbidden by default."]
+public/control-center/pages/customer-center.js:113:function countWaitingReplies(inbox) {
+public/control-center/pages/customer-center.js:114:  return asArray(inbox).filter((entry) => /waiting|open|unread/i.test(`${entry.status || ""} ${entry.sla_status || ""}`)).length;
+public/control-center/pages/customer-center.js:118:  return asArray(items).filter((item) => /risk|breach|late|urgent/i.test(`${item.sla_status || ""} ${item.priority || ""}`)).length;
+public/control-center/pages/customer-center.js:144:        <p>This page is intentionally blank while protected customer read routes are disabled. Configure <code>MH_CONTROL_CENTER_WRITE_KEY</code> on the server, restart the service, then reload to show read-only projections.</p>
+public/control-center/pages/customer-center.js:145:        <p>No placeholder customer records are shown. External send, CRM updates, ticket changes, calls, IVR, provider sync, and auto-reply remain locked.</p>
+public/control-center/pages/customer-center.js:151:function renderEmptyState(title, body, nextStep = "Safe next step: verify protected-read readiness, then reload read-only customer projections.") {
+public/control-center/pages/customer-center.js:162:  const inbox = asArray(model?.inbox);
+public/control-center/pages/customer-center.js:163:  if (!inbox.length) {
+public/control-center/pages/customer-center.js:164:    return renderEmptyState("Inbox is empty in read-only mode", "No inbound customer signals are available for this project right now. This is expected when protected-read data is not connected or no conversations match the current projection.");
+public/control-center/pages/customer-center.js:167:  return inbox.slice(0, 8).map((entry) => `
+public/control-center/pages/customer-center.js:179:  const conversations = asArray(model?.conversations);
+public/control-center/pages/customer-center.js:180:  if (!conversations.length) {
+public/control-center/pages/customer-center.js:181:    return renderEmptyState("No conversation previews available", "Masked conversation context will appear here after read-only projections return conversations. Customer identity and message content stay masked or truncated by default.");
+public/control-center/pages/customer-center.js:184:  return conversations.slice(0, 6).map((item) => `
+public/control-center/pages/customer-center.js:196:  const tickets = asArray(model?.tickets);
+public/control-center/pages/customer-center.js:197:  if (!tickets.length) {
+public/control-center/pages/customer-center.js:198:    return renderEmptyState("No ticket snapshots available", "Support ticket and SLA records will appear here when the read-only projection includes them. No ticket creation or update is available from this page.");
+public/control-center/pages/customer-center.js:201:  return tickets.slice(0, 6).map((ticket) => `
+public/control-center/pages/customer-center.js:204:        <strong>${escapeHtml(ticket.ticket_id || "Ticket")}</strong>
+public/control-center/pages/customer-center.js:205:        <p>${escapeHtml(ticket.status || "open")} • ${escapeHtml(ticket.sla_status || "unknown SLA")}</p>
+public/control-center/pages/customer-center.js:207:      <span class="card-badge">${escapeHtml(ticket.priority || "normal")}</span>
+public/control-center/pages/customer-center.js:215:    return renderEmptyState("No channel readiness records", "Provider readiness for email, social messaging, CRM, voice, and IVR will appear here when configured. Send and provider execution remain locked.");
+public/control-center/pages/customer-center.js:222:        <p>${escapeHtml(channel.blocked_reason || "Read-only projection only.")}</p>
+public/control-center/pages/customer-center.js:224:      <span class="card-badge">${channel.external_send_ready ? "Send ready" : "Send locked"}</span>
+public/control-center/pages/customer-center.js:231:    <div class="customer-center-locked-actions" aria-label="Future customer actions locked">
+public/control-center/pages/customer-center.js:232:      <div class="panel-kicker">Execution actions locked</div>
+public/control-center/pages/customer-center.js:233:      <p class="muted">Visible for roadmap clarity only. These customer actions cannot execute here and require future confirmation gates, role permissions, provider readiness, and audit logging.</p>
+public/control-center/pages/customer-center.js:236:          <button class="btn btn-ghost" type="button" disabled title="${escapeHtml(reason)}">
+public/control-center/pages/customer-center.js:247:  const inbox = asArray(model.inbox);
+public/control-center/pages/customer-center.js:248:  const conversations = asArray(model.conversations);
+public/control-center/pages/customer-center.js:249:  const tickets = asArray(model.tickets);
+public/control-center/pages/customer-center.js:261:      ? "Customer Center could not load the current read-only projection. Customer execution actions remain unavailable."
+public/control-center/pages/customer-center.js:263:        ? "Customer Center is using read-only projections only. Outbound sends, CRM writes, ticket changes, assignments, calls, IVR, and auto-replies remain unavailable."
+public/control-center/pages/customer-center.js:264:        : "Customer Center will request protected read-only projections when the page initializes. No outbound or mutation action is available.";
+public/control-center/pages/customer-center.js:270:          <div class="panel-kicker">Customer Center</div>
+public/control-center/pages/customer-center.js:271:          <h2>Loading customer operations…</h2>
+public/control-center/pages/customer-center.js:272:          <p class="muted">Fetching read-only customer projections.</p>
+public/control-center/pages/customer-center.js:282:        <h1>Customer Center</h1>
+public/control-center/pages/customer-center.js:283:        <p class="mhos-context-description">Protected-read customer communication surface for inbox visibility, conversation previews, ticket/SLA state, channel readiness, and handoff preparation. No customer execution happens here.</p>
+public/control-center/pages/customer-center.js:286:        <button class="btn btn-secondary" type="button" data-customer-center-action="refresh">Refresh read-only data</button>
+public/control-center/pages/customer-center.js:287:        <button class="btn btn-primary" type="button" data-customer-center-action="ai-handoff">Prepare AI support prompt</button>
+public/control-center/pages/customer-center.js:292:      ${renderMetric("Open Conversations", conversations.length || "0", "Read-only")}
+public/control-center/pages/customer-center.js:293:      ${renderMetric("Waiting Replies", countWaitingReplies(inbox), "No auto-send")}
+public/control-center/pages/customer-center.js:294:      ${renderMetric("SLA Risk", countSlaRisk([...tickets, ...inbox]), "Review only")}
+public/control-center/pages/customer-center.js:295:      ${renderMetric("Channels", channels.length || "0", "Send locked")}
+public/control-center/pages/customer-center.js:314:        <div class="panel-header"><div><div class="panel-kicker">Readiness Locks</div><h3>Read-only customer operations mode</h3></div></div>
+public/control-center/pages/customer-center.js:316:          <article class="ops-list-item"><div><strong>Read-only projections</strong><p>Customer Center can display protected customer snapshots only.</p></div><span class="card-badge">Allowed</span></article>
+public/control-center/pages/customer-center.js:317:          <article class="ops-list-item"><div><strong>External send</strong><p>Replies, social messages, SMS, and provider sends are unavailable here.</p></div><span class="card-badge">Locked</span></article>
+public/control-center/pages/customer-center.js:318:          <article class="ops-list-item"><div><strong>CRM / Ticket / Assignment writes</strong><p>CRM notes, ticket updates, review marks, and ownership changes require future confirmation gates.</p></div><span class="card-badge">Locked</span></article>
+public/control-center/pages/customer-center.js:319:          <article class="ops-list-item"><div><strong>Calls / IVR / Auto-reply</strong><p>Voice placement, IVR provider execution, and autonomous replies remain disabled.</p></div><span class="card-badge">Locked</span></article>
+public/control-center/pages/customer-center.js:324:        <div class="panel-header"><div><div class="panel-kicker">Safe Operating Rules</div><h3>Preview-first support workflow</h3></div></div>
+public/control-center/pages/customer-center.js:325:        <p class="muted">Use Customer Center to review, summarize, and prepare handoffs only. Nothing in this page sends a reply, changes CRM, updates tickets, assigns conversations, places calls, triggers IVR, or starts auto-reply.</p>
+public/control-center/pages/customer-center.js:336:        <div class="panel-header"><div><div class="panel-kicker">Conversation Preview</div><h3>Masked conversation context</h3></div></div>
+public/control-center/pages/customer-center.js:341:        <div class="panel-header"><div><div class="panel-kicker">Tickets / SLA</div><h3>Support state snapshot</h3></div></div>
+public/control-center/pages/customer-center.js:354:        <p class="muted">These buttons prepare navigation/context handoffs only. They do not send customer messages, contact providers, update CRM, change tickets, assign conversations, or mark records reviewed.</p>
+public/control-center/pages/customer-center.js:356:          <button class="btn btn-secondary" type="button" data-customer-center-action="task-handoff">Prepare Task Center handoff</button>
+public/control-center/pages/customer-center.js:357:          <button class="btn btn-secondary" type="button" data-customer-center-action="governance-handoff">Prepare Governance review</button>
+public/control-center/pages/customer-center.js:358:          <button class="btn btn-secondary" type="button" data-customer-center-action="ai-handoff">Prepare AI Command prompt</button>
+public/control-center/pages/customer-center.js:360:        ${renderDisabledActions(model.disabledActions)}
+public/control-center/pages/customer-center.js:365:        <p class="muted">AI may summarize read-only context, draft response guidance, translate, and suggest next steps for a human handoff. It must not send replies, update CRM, close tickets, assign conversations, place calls, trigger IVR, sync providers, or start auto-reply.</p>
+public/control-center/pages/customer-center.js:373:    `Customer Center action: ${action}`,
+public/control-center/pages/customer-center.js:375:    "This prepares review context only. It does not send customer messages, update CRM, change tickets, contact providers, or execute AI automatically.",
+public/control-center/pages/customer-center.js:387:  const root = document.querySelector('[data-page="customer-center"]');
+public/control-center/pages/customer-center.js:391:    const button = event.target.closest("[data-customer-center-action]");
+public/control-center/pages/customer-center.js:397:      context.showMessage?.("Customer Center read-only data refreshed.");
+public/control-center/pages/customer-center.js:403:        "Prepare AI Command customer support prompt",
+public/control-center/pages/customer-center.js:404:        "This will attach a read-only Customer Center prompt and open AI Command for review."
+public/control-center/pages/customer-center.js:409:        source: "customer-center",
+public/control-center/pages/customer-center.js:410:        title: "Customer Center support prompt",
+public/control-center/pages/customer-center.js:411:        prompt: "Review Customer Center read-only state. Summarize customer support risks, draft safe reply guidance, and identify escalation needs. Do not send replies or mutate CRM."
+public/control-center/pages/customer-center.js:414:      context.showMessage?.("Customer Center context sent to AI Command.");
+public/control-center/pages/customer-center.js:421:        "This will attach Customer Center context and open Task Center for human follow-up planning."
+public/control-center/pages/customer-center.js:426:        source: "customer-center",
+public/control-center/pages/customer-center.js:428:        summary: "Review Customer Center state and prepare a human follow-up task. No customer mutation was performed."
+public/control-center/pages/customer-center.js:438:        "This will attach Customer Center context and open Governance for review before any external response."
+public/control-center/pages/customer-center.js:443:        source: "customer-center",
+public/control-center/pages/customer-center.js:445:        summary: "Review customer reply/escalation risk before any external response. No send action was performed."
+public/control-center/pages/customer-center.js:463:    CUSTOMER_CENTER_STATE.error = error?.message || "Failed to load Customer Center.";
+public/control-center/pages/customer-center.js:467:      inbox: [],
+public/control-center/pages/customer-center.js:468:      conversations: [],
+public/control-center/pages/customer-center.js:469:      tickets: [],
+public/control-center/pages/customer-center.js:473:      disabledActions: buildDisabledActions()
+public/control-center/pages/customer-center.js:482:  id: "customer-center",
+public/control-center/pages/customer-center.js:483:  label: "Customer Center",
+public/control-center/pages/customer-center.js:486:    title: "Customer Center",
+public/control-center/pages/customer-center.js:487:    description: "Read-only customer operations, inbox visibility, ticket/SLA state, and safe AI handoffs."
+public/control-center/pages/customer-center.js:491:      <section class="page is-active customer-center-page" data-page="customer-center">
+public/control-center/pages/operations-centers.js:44:  if (["critical", "failed", "blocked", "overdue"].includes(normalized)) return "danger";
+public/control-center/pages/operations-centers.js:177:        prompt: `Review the current task backlog for ${projectLabel}. Prioritize the next work based on blocked items, due-state, ownership, and operational impact.`
+public/control-center/pages/operations-centers.js:187:        prompt: `Summarize execution risk in Task Center for ${projectLabel}. Focus on overdue, due soon, blocked, and ownership concentration risk.`
+public/control-center/pages/operations-centers.js:529:              <span class="std-context-chip mhos-os-chip is-warning"><span>Blocked</span><strong>${escapeHtml(formatCount(taskCenter.blocked_count))}</strong></span>
+public/control-center/pages/operations-centers.js:561:              { value: "blocked", label: "Blocked", count: formatCount(taskCenter.blocked_count) },
+public/control-center/pages/operations-centers.js:567:              <input id="taskCenterSearch" class="command-input" type="text" placeholder="Search tasks, owners, domains..." value="${escapeHtml(session.search)}">
+public/control-center/pages/operations-centers.js:640:                  <p class="mhos-os-panel-copy">Active actions are refresh, copy, route, and AI guidance only. Task mutations remain deferred and disabled until backend policy and mutation safety checks are approved.</p>
+public/control-center/pages/operations-centers.js:649:                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Update status (disabled: future mutation safety pass)</button>
+public/control-center/pages/operations-centers.js:650:                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Reassign owner (disabled: future mutation safety pass)</button>
+public/control-center/pages/operations-centers.js:651:                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Change priority (disabled: future mutation safety pass)</button>
+public/control-center/pages/operations-centers.js:652:                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Update due date (disabled: future mutation safety pass)</button>
+public/control-center/pages/operations-centers.js:653:                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Delete task (disabled: future mutation safety pass)</button>
+public/control-center/pages/operations-centers.js:709:  if (session.focus === "blocked") items = items.filter((item) => asString(item.status) === "blocked");
+public/control-center/pages/operations-centers.js:939:              <input id="queueCenterSearch" class="command-input" type="text" placeholder="Search queues, items, assignees..." value="${escapeHtml(session.search)}">
+public/control-center/pages/operations-centers.js:987:                  <p class="mhos-os-panel-copy">Active actions are refresh, route, and AI guidance only. Queue, publishing, approval, and removal mutations remain disabled until backend policy and mutation safety checks are approved.</p>
+public/control-center/pages/operations-centers.js:1003:                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Retry item (disabled: future mutation safety pass)</button>
+public/control-center/pages/operations-centers.js:1004:                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Approve item (disabled: Governance/Publishing-owned)</button>
+public/control-center/pages/operations-centers.js:1005:                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Publish item (disabled: Publishing-owned and Governance-gated)</button>
+public/control-center/pages/operations-centers.js:1006:                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Remove item (disabled: future destructive mutation safety pass)</button>
+public/control-center/pages/operations-centers.js:1227:              <input id="jobMonitorSearch" class="command-input" type="text" placeholder="Search jobs, kinds, owners..." value="${escapeHtml(session.search)}">
+public/control-center/pages/operations-centers.js:1277:                  <p class="mhos-os-panel-copy">Active actions are refresh, route, and AI guidance only. Job retry, cancel, rerun, delete, worker execution, publishing, and approval mutations remain disabled or destination-owned.</p>
+public/control-center/pages/operations-centers.js:1298:                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Retry job (disabled: future mutation safety pass)</button>
+public/control-center/pages/operations-centers.js:1299:                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Cancel job (disabled: future destructive mutation safety pass)</button>
+public/control-center/pages/operations-centers.js:1300:                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Rerun job (disabled: backend worker-control safety pass)</button>
+public/control-center/pages/operations-centers.js:1301:                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Delete job (disabled: future destructive mutation safety pass)</button>
+public/control-center/pages/operations-centers.js:1512:  const inboxItems = asArray(notificationCenter.notification_items).map((item) => ({
+public/control-center/pages/operations-centers.js:1519:    item_type: "inbox"
+public/control-center/pages/operations-centers.js:1542:  const inboxList = inboxItems.map((item, index) => ({
+public/control-center/pages/operations-centers.js:1544:    _opsKey: getOpsItemKey(item, index, "inbox")
+public/control-center/pages/operations-centers.js:1547:  let listItems = session.focus === "inbox" ? inboxList : baseAlerts;
+public/control-center/pages/operations-centers.js:1608:              <p class="std-context-description mhos-os-subtitle">Review operational alerts, unread inbox state, approvals, sync issues, publishing, claim risk, provider health, and workflow completion for ${escapeHtml(projectLabel)}.</p>
+public/control-center/pages/operations-centers.js:1635:                <h3 class="mhos-os-section-title">${escapeHtml(session.focus === "inbox" ? "Notification history and read-state review" : "Operational alert review")}</h3>
+public/control-center/pages/operations-centers.js:1636:                <p class="mhos-os-section-copy">${escapeHtml(session.focus === "inbox" ? "Review durable inbox history. Mark Read updates read-state only where a backend notification id exists." : "Review route-aware alerts, then inspect the selected signal before routing or follow-up.")}</p>
+public/control-center/pages/operations-centers.js:1646:              { value: "inbox", label: "Inbox", count: formatCount(inboxList.length) }
+public/control-center/pages/operations-centers.js:1650:              <input id="notificationCenterSearch" class="command-input" type="text" placeholder="Search alerts, sources, messages..." value="${escapeHtml(session.search)}">
+public/control-center/pages/operations-centers.js:1674:                  <p class="mhos-os-panel-copy">${escapeHtml(selectedItem ? "Review source, severity, timing, and owning route before follow-up." : "Choose an alert or inbox item to inspect details.")}</p>
+public/control-center/pages/operations-centers.js:1698:                  <p class="mhos-os-panel-copy">Active actions are refresh, route, AI guidance, and Mark Read only where supported. Lifecycle controls remain disabled until backend mutation safety checks are approved.</p>
+public/control-center/pages/operations-centers.js:1722:                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Acknowledge notification (disabled: future lifecycle mutation safety pass)</button>
+public/control-center/pages/operations-centers.js:1723:                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Resolve notification (disabled: future incident-resolution safety pass)</button>
+public/control-center/pages/operations-centers.js:1724:                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Dismiss notification (disabled: future visibility mutation safety pass)</button>
+public/control-center/pages/operations-centers.js:1725:                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Delete notification (disabled: future destructive mutation safety pass)</button>
+public/control-center/pages/operations-centers.js:1829:        context.showError?.("Governance refresh is unavailable for this project.");
+public/control-center/pages/operations-centers.js:1859:        context.showError?.("Governance decision is unavailable for this notification.");
+public/control-center/pages/operations-centers.js:1960:    // Render immediately from state as fallback
+public/control-center/pages/operations-centers.js:2084:    description: "Review alerts, unread inbox state, approvals, provider health, publishing, claim risks, and workflow completion signals with Mark Read limited to notification read-state."
+public/control-center/pages/operations-centers.js:2253:                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Planned disabled: create task from draft — future task mutation safety pass</button>
+public/control-center/pages/operations-centers.js:2254:                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Planned disabled: execute workflow — future workflow execution safety pass</button>
+public/control-center/pages/operations-centers.js:2255:                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Planned disabled: acknowledge signal — future notification lifecycle mutation safety pass</button>
+public/control-center/api.js:229:    normalized === "api.response.json.fallback.done" ||
+public/control-center/api.js:230:    normalized === "api.response.json.fallback.error" ||
+public/control-center/api.js:231:    normalized === "api.response.json.fallback.timeout" ||
+public/control-center/api.js:360:          let fallbackTimer = null;
+public/control-center/api.js:361:          const fallbackPayload = await Promise.race([
+public/control-center/api.js:364:              fallbackTimer = setTimeout(() => {
+public/control-center/api.js:365:                const fallbackTimeoutError = new Error(`JSON fallback timed out after ${timeoutMs}ms.`);
+public/control-center/api.js:366:                fallbackTimeoutError.endpoint = endpoint;
+public/control-center/api.js:367:                fallbackTimeoutError.isTimeout = true;
+public/control-center/api.js:368:                fallbackTimeoutError.parseStage = "api.response.json.fallback.timeout";
+public/control-center/api.js:369:                reject(fallbackTimeoutError);
+public/control-center/api.js:373:            if (fallbackTimer) {
+public/control-center/api.js:374:              clearTimeout(fallbackTimer);
+public/control-center/api.js:378:          const fallbackBodyLength = JSON.stringify(fallbackPayload || null).length;
+public/control-center/api.js:380:          emitApiRuntimeTrace("api.response.json.fallback.done", {
+public/control-center/api.js:384:            bodyLength: fallbackBodyLength,
+public/control-center/api.js:389:            mode: "json-fallback",
+public/control-center/api.js:390:            payload: fallbackPayload,
+public/control-center/api.js:391:            bodyLength: fallbackBodyLength,
+public/control-center/api.js:392:            parseStage: "api.response.json.fallback.done"
+public/control-center/api.js:394:        } catch (fallbackError) {
+public/control-center/api.js:395:          const fallbackParseStage = fallbackError?.isTimeout
+public/control-center/api.js:396:            ? "api.response.json.fallback.timeout"
+public/control-center/api.js:397:            : "api.response.json.fallback.error";
+public/control-center/api.js:399:          emitApiRuntimeTrace("api.response.json.fallback.error", {
+public/control-center/api.js:404:            message: fallbackError?.message || "JSON fallback failed"
+public/control-center/api.js:415:            parseStage: fallbackParseStage,
+public/control-center/api.js:516:async function parseJson(response, fallbackMessage = "Request failed", requestMeta = {}) {
+public/control-center/api.js:523:  if (bodyReadResult?.mode === "json-fallback") {
+public/control-center/api.js:525:    parseStage = String(bodyReadResult.parseStage || "api.response.json.fallback.done");
+public/control-center/api.js:553:      `${fallbackMessage} (${response.status})`;
+public/control-center/api.js:577:    const message = String(payload.error || fallbackMessage);
+public/control-center/api.js:705:async function getJson(path, fallbackMessage, timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS, requestOptions = {}) {
+public/control-center/api.js:712:  return parseJson(response, fallbackMessage, {
+public/control-center/api.js:723:async function sendRawJson(path, method, body, fallbackMessage, timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS) {
+public/control-center/api.js:738:      const parseError = new Error(fallbackMessage || "Response was not valid JSON.");
+public/control-center/api.js:752:    const message = String(payload?.error || payload?.message || fallbackMessage || "Request failed").trim();
+public/control-center/api.js:763:async function sendJson(path, method, body, fallbackMessage, timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS) {
+public/control-center/api.js:771:  return parseJson(response, fallbackMessage, {
+public/control-center/api.js:781:async function sendForm(path, formData, fallbackMessage, timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS) {
+public/control-center/api.js:796:  return parseJson(response, fallbackMessage, {
+public/control-center/api.js:1057:    console.warn("Using fallback projects list:", error.message);
+public/control-center/api.js:1062:      fallback: true
+public/control-center/api.js:1129:        const fallbackProjects = await fetchProjects();
+public/control-center/api.js:1130:        const fallbackItems = Array.isArray(fallbackProjects?.items) ? fallbackProjects.items : [];
+public/control-center/api.js:1131:        const projectExists = fallbackItems.some((item) => {
+public/control-center/api.js:1143:      } catch (fallbackError) {
+public/control-center/api.js:1150:          message: String(fallbackError?.message || "Failed to verify project fallback")
+public/control-center/api.js:2366:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/inbox`);
+public/control-center/api.js:2370:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/conversations`);
+public/control-center/api.js:2373:export async function fetchCustomerConversationDetail(projectName, conversationId) {
+public/control-center/api.js:2374:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/conversations/${encodeURIComponent(conversationId)}`);
+public/control-center/api.js:2377:export async function fetchCustomerConversationMessages(projectName, conversationId) {
+public/control-center/api.js:2378:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/conversations/${encodeURIComponent(conversationId)}/messages`);
+public/control-center/api.js:2386:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/tickets`);
+runtime/orchestrator-service/server.js:79:  getUnsupportedProviderMessage
+runtime/orchestrator-service/server.js:188:const customerCenterProjection = require('./lib/customer-operations/projections/customer-center-projection');
+runtime/orchestrator-service/server.js:316:    blocked: productionMode && bypassFlags.length > 0,
+runtime/orchestrator-service/server.js:323:  if (!result.blocked) {
+runtime/orchestrator-service/server.js:329:    `Production startup blocked: bypass environment flags are not allowed in production (${flagList})`
+runtime/orchestrator-service/server.js:404:      error: `Protected write routes are disabled until ${CONTROL_WRITE_KEY_ENV} is configured on the server.`
+runtime/orchestrator-service/server.js:471:      error: `Protected read routes are disabled until ${CONTROL_WRITE_KEY_ENV} is configured on the server.`
+runtime/orchestrator-service/server.js:929:function sanitizeErrorMessage(rawMessage, fallbackMessage) {
+runtime/orchestrator-service/server.js:930:  const fallback = String(fallbackMessage || 'Request failed').trim() || 'Request failed';
+runtime/orchestrator-service/server.js:933:    return fallback;
+runtime/orchestrator-service/server.js:938:function getErrorStatusCode(error, fallbackStatus = 500) {
+runtime/orchestrator-service/server.js:940:    error?.statusCode || error?.status || error?.response?.status || fallbackStatus
+runtime/orchestrator-service/server.js:944:    return fallbackStatus;
+runtime/orchestrator-service/server.js:948:    return fallbackStatus;
+runtime/orchestrator-service/server.js:1249:  if (telemetryEntry.legacy_fallback_hit) {
+runtime/orchestrator-service/server.js:1377:    legacy_fallback_hit: legacyHit,
+runtime/orchestrator-service/server.js:1385:      legacy_fallback_read: !!readPolicy.legacyFallbackRead
+runtime/orchestrator-service/server.js:1389:  telemetryEntry.fallback_reason = classifyImmediateFallbackReason(telemetryEntry);
+runtime/orchestrator-service/server.js:1450:        legacyFallbackRead: !!resolution.featureFlags.legacy_fallback_read,
+runtime/orchestrator-service/server.js:1493:    fallbackRoot: resolution.legacyRoot,
+runtime/orchestrator-service/server.js:1509:      legacyBase: paths.fallbackRoot,
+runtime/orchestrator-service/server.js:1560:    throw new Error(`Unsupported email artifact contract: ${artifactType}`);
+runtime/orchestrator-service/server.js:1758:  if (!readEntry || readEntry.selected_root !== 'legacy' || !readEntry.legacy_fallback_hit) {
+runtime/orchestrator-service/server.js:1805:    fallback_hit_count: 0,
+runtime/orchestrator-service/server.js:1806:    fallback_rate: 0,
+runtime/orchestrator-service/server.js:1807:    fallback_causes: {
+runtime/orchestrator-service/server.js:1848:    if (entry.selected_root === 'legacy' && entry.legacy_fallback_hit) {
+runtime/orchestrator-service/server.js:1849:      stats.fallback_hit_count += 1;
+runtime/orchestrator-service/server.js:1852:      if (!Object.prototype.hasOwnProperty.call(stats.fallback_causes, cause)) {
+runtime/orchestrator-service/server.js:1853:        stats.fallback_causes.unresolved_risk += 1;
+runtime/orchestrator-service/server.js:1855:        stats.fallback_causes[cause] += 1;
+runtime/orchestrator-service/server.js:1862:  let fallbackHits = 0;
+runtime/orchestrator-service/server.js:1869:    stats.fallback_rate = stats.read_events > 0
+runtime/orchestrator-service/server.js:1870:      ? Number((stats.fallback_hit_count / stats.read_events).toFixed(4))
+runtime/orchestrator-service/server.js:1875:    fallbackHits += stats.fallback_hit_count;
+runtime/orchestrator-service/server.js:1876:    historicalFallbacks += stats.fallback_causes.historical_artifact;
+runtime/orchestrator-service/server.js:1877:    unresolvedStructuralMismatches += stats.fallback_causes.structural_mismatch;
+runtime/orchestrator-service/server.js:1879:      stats.fallback_causes.parity_gap +
+runtime/orchestrator-service/server.js:1880:      stats.fallback_causes.missing_canonical_write +
+runtime/orchestrator-service/server.js:1881:      stats.fallback_causes.policy_or_config_mismatch;
+runtime/orchestrator-service/server.js:1885:  const fallbackRate = totalReads > 0 ? fallbackHits / totalReads : 0;
+runtime/orchestrator-service/server.js:1886:  const historicalFallbackRate = fallbackHits > 0 ? historicalFallbacks / fallbackHits : 0;
+runtime/orchestrator-service/server.js:1893:    fallbackRate <= 0.15 &&
+runtime/orchestrator-service/server.js:1901:    fallbackRate <= 0.4 &&
+runtime/orchestrator-service/server.js:1917:      fallback_hit_count: fallbackHits,
+runtime/orchestrator-service/server.js:1919:      fallback_rate: Number(fallbackRate.toFixed(4)),
+runtime/orchestrator-service/server.js:1920:      fallback_historical_rate: Number(historicalFallbackRate.toFixed(4)),
+runtime/orchestrator-service/server.js:1945:    fallback_hit_count: 0,
+runtime/orchestrator-service/server.js:1953:    aggregate.fallback_hit_count += summary.totals.fallback_hit_count;
+runtime/orchestrator-service/server.js:1962:  aggregate.fallback_rate = totalReads > 0
+runtime/orchestrator-service/server.js:1963:    ? Number((aggregate.fallback_hit_count / totalReads).toFixed(4))
+runtime/orchestrator-service/server.js:2016:    result.status = 'blocked';
+runtime/orchestrator-service/server.js:2072:  const rendered = readiness.status !== 'blocked' ? getLatestRenderedOutput(projectName) : null;
+runtime/orchestrator-service/server.js:2155:  if (packageData.status === 'blocked') {
+runtime/orchestrator-service/server.js:2527:Create a realistic, premium, cinematic, marketing-grade visual that supports the campaign objective while preserving the exact product identity.
+runtime/orchestrator-service/server.js:2606:  fidelity_mode: 'real_asset_locked',
+runtime/orchestrator-service/server.js:2607:  product_locked: true,
+runtime/orchestrator-service/server.js:2608:  logo_locked: true
+runtime/orchestrator-service/server.js:2674:    result.status = 'blocked';
+runtime/orchestrator-service/server.js:2679:    result.status = 'blocked';
+runtime/orchestrator-service/server.js:2684:    result.status = 'blocked';
+runtime/orchestrator-service/server.js:2689:    result.status = 'blocked';
+runtime/orchestrator-service/server.js:2694:    result.status = 'blocked';
+runtime/orchestrator-service/server.js:2728:      status: 'send_blocked',
+runtime/orchestrator-service/server.js:2737:  // TODO:
+runtime/orchestrator-service/server.js:3020:    throw new Error('Unsupported Meta placement');
+runtime/orchestrator-service/server.js:3073:    throw new Error('Unsupported Meta placement');
+runtime/orchestrator-service/server.js:3302:    throw new Error('Unsupported YouTube format');
+runtime/orchestrator-service/server.js:3321:      : 'CTR-first via title-thumbnail fit, then watch-time support through structure.',
+runtime/orchestrator-service/server.js:3330:    throw new Error('Unsupported YouTube format');
+runtime/orchestrator-service/server.js:3492:    throw new Error('Unsupported marketplace');
+runtime/orchestrator-service/server.js:3637:  throw new Error('Unsupported marketplace');
+runtime/orchestrator-service/server.js:3665:    throw new Error('Unsupported marketplace');
+runtime/orchestrator-service/server.js:3814:  const supportProducts = launchReadyProducts.slice(3, 10);
+runtime/orchestrator-service/server.js:3822:      'early sales conversion'
+runtime/orchestrator-service/server.js:3830:      support_products: supportProducts.map(p => ({
+runtime/orchestrator-service/server.js:3839:      support_count: supportProducts.length,
+runtime/orchestrator-service/server.js:4106:function normalizePublishingJobStatus(value, fallback = 'draft') {
+runtime/orchestrator-service/server.js:4109:  if (!normalized) return fallback;
+runtime/orchestrator-service/server.js:4129:  if (['failed', 'error', 'blocked', 'rejected'].includes(normalized)) return 'failed';
+runtime/orchestrator-service/server.js:4131:  return fallback;
+runtime/orchestrator-service/server.js:4355:      connector_error: error.message || 'Connector payload unavailable'
+runtime/orchestrator-service/server.js:4418:  const fallbackStatus = scheduledFor ? 'scheduled' : 'draft';
+runtime/orchestrator-service/server.js:4430:    status: normalizePublishingJobStatus(input.status, existing.status || fallbackStatus),
+runtime/orchestrator-service/server.js:5032:    result.status = 'blocked';
+runtime/orchestrator-service/server.js:5049:    result.mode = 'blocked';
+runtime/orchestrator-service/server.js:5108:    result.status = 'blocked';
+runtime/orchestrator-service/server.js:5123:    result.mode = 'blocked';
+runtime/orchestrator-service/server.js:5390:function readJsonFile(filePath, fallback = []) {
+runtime/orchestrator-service/server.js:5392:    if (!fs.existsSync(filePath)) return fallback;
+runtime/orchestrator-service/server.js:5394:    if (!raw) return fallback;
+runtime/orchestrator-service/server.js:5397:    console.warn(`[server] readJsonFile: non-fatal read/parse error for ${filePath}, returning fallback. Error: ${err.message}`);
+runtime/orchestrator-service/server.js:5398:    return fallback;
+runtime/orchestrator-service/server.js:6162:    if (!signal || signal.fallback) return null;
+runtime/orchestrator-service/server.js:6385:  const fallback = options.fallback;
+runtime/orchestrator-service/server.js:6389:  const canonicalValue = canonicalExists ? normalize(readJsonFile(canonicalPath, fallback)) : null;
+runtime/orchestrator-service/server.js:6397:    const legacyValue = normalize(readJsonFile(legacyPath, fallback));
+runtime/orchestrator-service/server.js:6440:  writeJsonFile(canonicalPath, fallback);
+runtime/orchestrator-service/server.js:6442:    value: fallback,
+runtime/orchestrator-service/server.js:6513:    const fallbackValue = candidates
+runtime/orchestrator-service/server.js:6517:    const entry = foundEntry || (fallbackValue ? { value: fallbackValue } : {});
+runtime/orchestrator-service/server.js:6522:      value: normalizeSetupTextValue(entry.value || fallbackValue),
+runtime/orchestrator-service/server.js:6623:    fallback: buildDefaultBrandProfile(safeProject, projectData)
+runtime/orchestrator-service/server.js:6630:    fallback: [],
+runtime/orchestrator-service/server.js:6638:    fallback: buildSourceOfTruthRegistry({}),
+runtime/orchestrator-service/server.js:6867:      recommended_integrations: ['woocommerce', 'google', 'meta', 'tiktok', 'email_crm']
+runtime/orchestrator-service/server.js:6899:      default_channels: ['website', 'facebook', 'instagram', 'google', 'crm'],
+runtime/orchestrator-service/server.js:6905:      starter_checklist: ['add_property_data', 'upload_property_media', 'define_lead_flow', 'connect_crm', 'create_listing_campaign'],
+runtime/orchestrator-service/server.js:6906:      recommended_integrations: ['website', 'crm', 'google', 'meta', 'email_crm']
+runtime/orchestrator-service/server.js:6919:      recommended_integrations: ['website', 'google_business', 'meta', 'email_crm']
+runtime/orchestrator-service/server.js:6940:      data_requirements: ['services', 'case_studies', 'target_segments', 'lead_magnets', 'sales_process'],
+runtime/orchestrator-service/server.js:6944:      starter_checklist: ['define_services', 'add_case_studies', 'define_lead_offer', 'connect_crm', 'create_lead_campaign'],
+runtime/orchestrator-service/server.js:6945:      recommended_integrations: ['website', 'linkedin', 'meta', 'google', 'crm']
+runtime/orchestrator-service/server.js:7108:    throw new Error('Project rename is not supported by Setup persistence');
+runtime/orchestrator-service/server.js:7231:      fallback_in_use: !canonicalExists && legacyExists
+runtime/orchestrator-service/server.js:7236:  const fallbackDependencies = checks.filter((item) => item.fallback_in_use).length;
+runtime/orchestrator-service/server.js:7241:    fallback_dependencies: fallbackDependencies,
+runtime/orchestrator-service/server.js:7244:    recommendation: fallbackDependencies > 0 || mismatches > 0
+runtime/orchestrator-service/server.js:7245:      ? 'Reduce fallback dependencies by keeping canonical files in sync before disabling legacy reads.'
+runtime/orchestrator-service/server.js:8038:    throw Object.assign(new Error(getUnsupportedProviderMessage(normalizedId)), {
+runtime/orchestrator-service/server.js:8039:      status: 'unsupported_provider'
+runtime/orchestrator-service/server.js:8124:    const fallbackStatus = determineIntegrationStatus({
+runtime/orchestrator-service/server.js:8136:            : fallbackStatus === 'connected'
+runtime/orchestrator-service/server.js:8138:              : fallbackStatus,
+runtime/orchestrator-service/server.js:8148:              : fallbackStatus === 'connected'
+runtime/orchestrator-service/server.js:8150:                : fallbackStatus,
+runtime/orchestrator-service/server.js:8211:    throw Object.assign(new Error(getUnsupportedProviderMessage(normalizedId)), {
+runtime/orchestrator-service/server.js:8212:      status: 'unsupported_provider'
+runtime/orchestrator-service/server.js:8269:        throw new Error('Unsupported integration action');
+runtime/orchestrator-service/server.js:8596:  if (['needs_review', 'review', 'blocked', 'rejected'].includes(explicitStatus)) {
+runtime/orchestrator-service/server.js:9560:      supported_execution_states: EXECUTION_BRIDGE_STATES
+runtime/orchestrator-service/server.js:9649:      supported_execution_states: EXECUTION_BRIDGE_STATES
+runtime/orchestrator-service/server.js:9741:      supported_execution_states: EXECUTION_BRIDGE_STATES,
+runtime/orchestrator-service/server.js:9824:      supported_execution_states: EXECUTION_BRIDGE_STATES,
+runtime/orchestrator-service/server.js:10824:function sendAssetMutationError(res, error, fallbackMessage) {
+runtime/orchestrator-service/server.js:10827:    error: error?.message || fallbackMessage,
+runtime/orchestrator-service/server.js:10836:    error: fallbackMessage,
+runtime/orchestrator-service/server.js:11183:function normalizeAiCommandPreviewInput(value, fallback = '') {
+runtime/orchestrator-service/server.js:11184:  return String(value || fallback || '').trim();
+runtime/orchestrator-service/server.js:11346:      requires_approval_before_publish: true,
+runtime/orchestrator-service/server.js:12710:  if (status === 'unsupported_provider') {
+runtime/orchestrator-service/server.js:12934:      error: 'customer_operations_health_failed',
+runtime/orchestrator-service/server.js:12947:      error: 'customer_operations_readiness_failed',
+runtime/orchestrator-service/server.js:12961:      error: 'customer_operations_channels_failed',
+runtime/orchestrator-service/server.js:12970:      inbox:
+runtime/orchestrator-service/server.js:12975:      error: 'customer_operations_inbox_failed',
+runtime/orchestrator-service/server.js:12982:// Canonical Control Center Customer Operations read-only projection routes.
+runtime/orchestrator-service/server.js:12983:// These routes are GET-only aliases for Customer Center v1 projections.
+runtime/orchestrator-service/server.js:12984:// They do not send customer replies, mutate CRM, create/update tickets, assign conversations,
+runtime/orchestrator-service/server.js:12985:// place calls, trigger IVR, send provider messages, or auto-reply.
+runtime/orchestrator-service/server.js:13008:app.get('/api/projects/:project/customer-operations/inbox', (req, res) => {
+runtime/orchestrator-service/server.js:13014:app.get('/api/projects/:project/customer-operations/conversations', (req, res) => {
+runtime/orchestrator-service/server.js:13020:app.get('/api/projects/:project/customer-operations/conversations/:conversationId', (req, res) => {
+runtime/orchestrator-service/server.js:13022:    customerCenterProjection.projectConversationDetail(runtime, req.params.conversationId)
+runtime/orchestrator-service/server.js:13026:app.get('/api/projects/:project/customer-operations/conversations/:conversationId/messages', (req, res) => {
+runtime/orchestrator-service/server.js:13028:    customerCenterProjection.projectConversationMessages(runtime, req.params.conversationId)
+runtime/orchestrator-service/server.js:13038:app.get('/api/projects/:project/customer-operations/tickets', (req, res) => {
+runtime/orchestrator-service/server.js:13082:  '/media-manager/project/:project/customer-operations/inbox',
+runtime/orchestrator-service/server.js:13087:  '/public/media-manager/project/:project/customer-operations/inbox',
+runtime/orchestrator-service/server.js:13097:      conversations:
+runtime/orchestrator-service/server.js:13098:        customerOperationsRuntime.conversations.list()
+runtime/orchestrator-service/server.js:13102:      error: 'customer_operations_conversations_failed',
+runtime/orchestrator-service/server.js:13116:      error: 'customer_operations_messages_failed',
+runtime/orchestrator-service/server.js:13130:      error: 'customer_operations_customers_failed',
+runtime/orchestrator-service/server.js:13139:      sla:
+runtime/orchestrator-service/server.js:13140:        customerOperationsRuntime.sla.list()
+runtime/orchestrator-service/server.js:13144:      error: 'customer_operations_sla_failed',
+runtime/orchestrator-service/server.js:13153:      escalations:
+runtime/orchestrator-service/server.js:13154:        customerOperationsRuntime.escalation.list()
+runtime/orchestrator-service/server.js:13158:      error: 'customer_operations_escalations_failed',
+runtime/orchestrator-service/server.js:13165:  '/media-manager/project/:project/customer-operations/conversations',
+runtime/orchestrator-service/server.js:13170:  '/public/media-manager/project/:project/customer-operations/conversations',
+runtime/orchestrator-service/server.js:13195:  '/media-manager/project/:project/customer-operations/sla',
+runtime/orchestrator-service/server.js:13200:  '/public/media-manager/project/:project/customer-operations/sla',
+runtime/orchestrator-service/server.js:13205:  '/media-manager/project/:project/customer-operations/escalations',
+runtime/orchestrator-service/server.js:13210:  '/public/media-manager/project/:project/customer-operations/escalations',
+runtime/orchestrator-service/server.js:13334:// TODO(phase4a): Keep `/public/media-manager/...` write aliases for active frontend compatibility.
+runtime/orchestrator-service/server.js:13819:  // Use canonical-first candidate resolution with fallback instrumentation
+runtime/orchestrator-service/server.js:14033:  function makeBlock(type, fallbackGoal) {
+runtime/orchestrator-service/server.js:14035:    const hook = map.hook || `${productName} supports ${category} care with ${benefitText}.`;
+runtime/orchestrator-service/server.js:14037:    const goal = map.goal || fallbackGoal;
+runtime/orchestrator-service/server.js:14068:        'Avoid unsupported medical or misleading claims.'
+runtime/orchestrator-service/server.js:14296:      fallback_prompt_pack:
+runtime/orchestrator-service/server.js:14311:  // the required fallback for existing HAIROTICMEN dry-run packages.
+runtime/orchestrator-service/server.js:14875:    const failureMessage = String(submission?.message || dispatchResult?.error || 'Native media execution runtime is not available.').trim();
+runtime/orchestrator-service/server.js:15449:    appLogger.warn('governance_blocked', {
+runtime/orchestrator-service/server.js:15462:      'Publishing is frozen by governance policy. The requested publishing mutation was blocked.',
+runtime/orchestrator-service/server.js:16542:      item.visual_format = 'feed post / reel support';
+runtime/orchestrator-service/server.js:16598:        'Add one high-authority source only if it supports trust and relevance'
+runtime/orchestrator-service/server.js:16891:      const plannedFilename = `${assetId}-${safeSlug}.png`;
+runtime/orchestrator-service/server.js:16892:      const plannedOutputPath = path.join(
+runtime/orchestrator-service/server.js:16895:        plannedFilename
+runtime/orchestrator-service/server.js:16910:        output_path: plannedOutputPath,
+runtime/orchestrator-service/server.js:16911:        filename: plannedFilename,
+runtime/orchestrator-service/server.js:17371:      const plannedFilename = `${assetId}-${safeSlug}.png`;
+runtime/orchestrator-service/server.js:17372:      const plannedOutputPath = path.join(
+runtime/orchestrator-service/server.js:17375:        plannedFilename
+runtime/orchestrator-service/server.js:17396:        output_path: plannedOutputPath,
+runtime/orchestrator-service/server.js:17397:        filename: plannedFilename,
+runtime/orchestrator-service/server.js:17687:        primary_goal: 'sales + brand growth',
+runtime/orchestrator-service/server.js:17737:      const goal = args.slice(1).join(' ').trim() || 'sales';
+runtime/orchestrator-service/server.js:17792:          'sales',
+runtime/orchestrator-service/server.js:17868:        planned_assets: {
+runtime/orchestrator-service/server.js:17881:          'reel/tiktok support'
+runtime/orchestrator-service/server.js:18324:      const goal = args.slice(1).join(' ').trim() || 'sales';
+runtime/orchestrator-service/server.js:18514:      const goal = args.slice(1).join(' ').trim() || 'sales';
+runtime/orchestrator-service/server.js:18619:          'sales',
+runtime/orchestrator-service/server.js:18966:            visual_format: post.platform === 'instagram' ? 'feed post / reel support' : 'social post',
+runtime/orchestrator-service/server.js:21951:      message: `Unsupported command: ${command}`
+runtime/orchestrator-service/server.js:22789:      job.locked_at = lockTimestamp;
+runtime/orchestrator-service/server.js:22790:      job.locked_by = workerId;
+runtime/orchestrator-service/server.js:22797:    // Phase 2: execute locked jobs and update status
+runtime/orchestrator-service/server.js:22799:      if (job.status !== 'running' || job.locked_by !== workerId) continue;
+runtime/orchestrator-service/server.js:22808:        job.locked_at = null;
+runtime/orchestrator-service/server.js:22809:        job.locked_by = null;
+runtime/orchestrator-service/server.js:22851:        job.locked_at = null;
+runtime/orchestrator-service/server.js:22852:        job.locked_by = null;
+runtime/orchestrator-service/lib/insights/learning-engine.js:13:function toNumber(value, fallback = null) {
+runtime/orchestrator-service/lib/insights/learning-engine.js:15:    return fallback;
+runtime/orchestrator-service/lib/insights/learning-engine.js:18:  return Number.isFinite(parsed) ? parsed : fallback;
+runtime/orchestrator-service/lib/insights/learning-engine.js:27:function compactWords(value, fallback = 'Untitled pattern') {
+runtime/orchestrator-service/lib/insights/learning-engine.js:35:  return words.length ? words.join(' ') : fallback;
+runtime/orchestrator-service/lib/insights/learning-engine.js:86:function summarizeBestEntry(map, fallback, options = {}) {
+runtime/orchestrator-service/lib/insights/learning-engine.js:97:      label: fallback,
+runtime/orchestrator-service/lib/insights/learning-engine.js:303:      title: 'Link marketplace sales learnings back into content strategy',
+runtime/orchestrator-service/lib/insights/ingestion-service.js:19:function toNumber(value, fallback = null) {
+runtime/orchestrator-service/lib/insights/ingestion-service.js:21:    return fallback;
+runtime/orchestrator-service/lib/insights/ingestion-service.js:24:  return Number.isFinite(parsed) ? parsed : fallback;
+runtime/orchestrator-service/lib/insights/ingestion-service.js:922:          ? 'Marketplace connectivity exists, but sales-level signal is still limited.'
+runtime/orchestrator-service/lib/insights/ingestion-service.js:973:    email_crm: {
+runtime/orchestrator-service/lib/insights/ingestion-service.js:974:      status: evaluate(['smtp', 'mailchimp', 'crm']),
+runtime/orchestrator-service/lib/insights/ingestion-service.js:975:      integrations: ['smtp', 'mailchimp', 'crm']
+runtime/orchestrator-service/lib/insights/ingestion-service.js:978:      status: evaluate(['google-drive', 'slack', 'telegram', 'notion', 'zapier', 'make', 'webhook']),
+runtime/orchestrator-service/lib/insights/ingestion-service.js:979:      integrations: ['google-drive', 'slack', 'telegram', 'notion', 'zapier', 'make', 'webhook']
+runtime/orchestrator-service/lib/security/provider-execution-gate.js:144:    reason = "blocked_until_configured";
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:14:  message: "This backend action requires governance approval before execution."
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:20:  code: "governance_policy_blocked",
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:21:  message: "This backend action is blocked by the active governance policy."
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:110:function asBoolean(value, fallback) {
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:115:    return fallback;
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:184:    decision: responsePayload.code === "governance_policy_blocked" ? "policy_blocked" : "approval_required",
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:331:    message: "This backend action requires governance approval before execution.",
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:513:      "policy_blocked_for_admin_mutation",
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:587:      "policy_unavailable_secure_default",
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:24:function readBooleanEnv(name, fallback = false) {
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:26:  if (value === undefined || value === null || value === "") return fallback;
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:82:      status: "blocked",
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:83:      reason: "public_alias_compatibility_disabled",
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:92:      status: "blocked_sensitive_mutation_unauthorized",
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:102:      status: "blocked",
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:103:      reason: "critical_public_mutation_alias_blocked",
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:37:    domain: "customer_operations",
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:38:    match: /customer-operations|customer|conversation|message|ticket|crm|call|ivr|whatsapp|sms/i,
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:211:  if (domain === "customer_operations") return "require_pii_scope_and_access_log";
+runtime/orchestrator-service/lib/integrations/insights-contract.js:26:  if (/email|audience|contact|crm/.test(scopeText)) return 'crm_email';
+runtime/orchestrator-service/lib/integrations/http-client.js:32:function buildProviderError(provider, error, fallbackMessage = 'Provider request failed') {
+runtime/orchestrator-service/lib/integrations/http-client.js:35:      message: fallbackMessage,
+runtime/orchestrator-service/lib/integrations/http-client.js:46:      `${fallbackMessage} (${error.response.status})`;
+runtime/orchestrator-service/lib/integrations/http-client.js:65:    message: error.message || fallbackMessage
+runtime/orchestrator-service/lib/integrations/http-client.js:69:function buildResponseError(provider, response, fallbackMessage = 'Provider request failed') {
+runtime/orchestrator-service/lib/integrations/http-client.js:76:  }, fallbackMessage);
+runtime/orchestrator-service/lib/integrations/provider-registry.js:9:const { createUnsupportedAdapter } = require('./providers/unsupported');
+runtime/orchestrator-service/lib/integrations/provider-registry.js:12:const UNSUPPORTED_INTEGRATION_IDS = ['amazon', 'smtp', 'mailer', 'crm'];
+runtime/orchestrator-service/lib/integrations/provider-registry.js:13:const unsupportedAdapter = {
+runtime/orchestrator-service/lib/integrations/provider-registry.js:14:  ...createUnsupportedAdapter(
+runtime/orchestrator-service/lib/integrations/provider-registry.js:18:  unsupported: true
+runtime/orchestrator-service/lib/integrations/provider-registry.js:30:  unsupportedAdapter
+runtime/orchestrator-service/lib/integrations/provider-registry.js:43:  return Boolean(adapter) && adapter.unsupported !== true;
+runtime/orchestrator-service/lib/integrations/provider-registry.js:46:function getUnsupportedProviderMessage(integrationId) {
+runtime/orchestrator-service/lib/integrations/provider-registry.js:48:  if (!adapter || adapter.unsupported !== true) {
+runtime/orchestrator-service/lib/integrations/provider-registry.js:53:    adapter.unsupportedMessage ||
+runtime/orchestrator-service/lib/integrations/provider-registry.js:62:  getUnsupportedProviderMessage
+runtime/orchestrator-service/lib/integrations/providers/woocommerce.js:58:    readScopes: ['products', 'orders', 'sales'],
+runtime/orchestrator-service/lib/integrations/providers/woocommerce.js:108:    readScopes: ['products', 'orders', 'sales']
+runtime/orchestrator-service/lib/integrations/providers/woocommerce.js:142:      readScopes: ['orders', 'sales']
+runtime/orchestrator-service/lib/integrations/providers/google.js:564:    throw new Error(`Unsupported Google integration: ${ctx.integrationId}`);
+runtime/orchestrator-service/lib/integrations/providers/shopify.js:73:    readScopes: ['products', 'orders', 'sales'],
+runtime/orchestrator-service/lib/integrations/providers/shopify.js:152:    readScopes: ['products', 'orders', 'sales']
+runtime/orchestrator-service/lib/integrations/providers/shopify.js:203:    readScopes: ['orders', 'sales']
+runtime/orchestrator-service/lib/integrations/providers/unsupported.js:1:function createUnsupportedAdapter(integrationIds = [], message) {
+runtime/orchestrator-service/lib/integrations/providers/unsupported.js:2:  async function unsupported(ctx) {
+runtime/orchestrator-service/lib/integrations/providers/unsupported.js:4:    error.status = 'unsupported_provider';
+runtime/orchestrator-service/lib/integrations/providers/unsupported.js:10:    unsupportedMessage: message,
+runtime/orchestrator-service/lib/integrations/providers/unsupported.js:11:    connect: unsupported,
+runtime/orchestrator-service/lib/integrations/providers/unsupported.js:12:    testConnection: unsupported,
+runtime/orchestrator-service/lib/integrations/providers/unsupported.js:13:    syncCurrent: unsupported,
+runtime/orchestrator-service/lib/integrations/providers/unsupported.js:14:    importHistory: unsupported
+runtime/orchestrator-service/lib/integrations/providers/unsupported.js:19:  createUnsupportedAdapter
+runtime/orchestrator-service/lib/integrations/providers/meta.js:338:    throw new Error(`Unsupported Meta integration: ${ctx.integrationId}`);
+runtime/orchestrator-service/lib/integrations/providers/ops.js:8:    url: 'https://slack.com/api/auth.test',
+runtime/orchestrator-service/lib/integrations/providers/ops.js:13:  const error = buildResponseError('slack', response, 'Slack auth test failed');
+runtime/orchestrator-service/lib/integrations/providers/ops.js:27:      provider: 'slack',
+runtime/orchestrator-service/lib/integrations/providers/ops.js:295:    if (ctx.integrationId === 'slack') return connectSlack(ctx);
+runtime/orchestrator-service/lib/integrations/providers/ops.js:303:    throw new Error(`Unsupported Ops integration: ${ctx.integrationId}`);
+runtime/orchestrator-service/lib/integrations/providers/ops.js:311:  integrationIds: ['slack', 'telegram', 'notion', 'webhook', 'zapier-make', 'custom-analytics', 'linkedin', 'mailchimp'],
+runtime/orchestrator-service/lib/integrations/providers/tiktok.js:256:    throw new Error(`Unsupported TikTok integration: ${ctx.integrationId}`);
+runtime/orchestrator-service/lib/integrations/token-manager.js:25: *    the file key will fail to decrypt. Rotate the key only during a planned
+runtime/orchestrator-service/lib/integrations/adapter-manager.js:16:function normalizeProviderResult(result = {}, fallbackStatus = 'connected') {
+runtime/orchestrator-service/lib/integrations/adapter-manager.js:18:    status: asString(result.status || fallbackStatus).toLowerCase() || fallbackStatus,
+runtime/orchestrator-service/lib/integrations/adapter-manager.js:70:    throw new Error(`Provider adapter for ${integrationId} does not support ${actionType}`);
+runtime/orchestrator-service/lib/integrations/storage.js:24: * readJsonFile — safe read with silent fallback.
+runtime/orchestrator-service/lib/integrations/storage.js:29:function readJsonFile(filePath, fallback = {}) {
+runtime/orchestrator-service/lib/integrations/storage.js:32:      return fallback;
+runtime/orchestrator-service/lib/integrations/storage.js:37:      return fallback;
+runtime/orchestrator-service/lib/integrations/storage.js:42:    console.warn(`[storage] readJsonFile: non-fatal read/parse error for ${filePath}, returning fallback. Error: ${err.message}`);
+runtime/orchestrator-service/lib/integrations/storage.js:43:    return fallback;
+runtime/orchestrator-service/lib/integrations/storage.js:122:    // fsync is best-effort — some filesystems (e.g. network mounts) may not support it
+runtime/orchestrator-service/lib/execution/performance-metrics.js:3:function toFiniteNumber(value, fallback = 0) {
+runtime/orchestrator-service/lib/execution/performance-metrics.js:5:  return Number.isFinite(parsed) ? parsed : fallback;
+runtime/orchestrator-service/lib/execution/learning-patterns.js:25:        support_count: Number(current.support_count || 0) + Number(pattern.support_count || 1),
+runtime/orchestrator-service/lib/execution/learning-patterns.js:37:      support_count: Number(pattern.support_count || 1),
+runtime/orchestrator-service/lib/execution/scheduler-helpers.js:18:  if (!job.locked_at) return false;
+runtime/orchestrator-service/lib/execution/scheduler-helpers.js:19:  const lockedAt = new Date(job.locked_at).getTime();
+runtime/orchestrator-service/lib/execution/scheduler-helpers.js:20:  return !isNaN(lockedAt) && (Date.now() - lockedAt) > lockTimeoutMs;
+runtime/orchestrator-service/lib/execution/scheduler-helpers.js:55:    locked_at: null,
+runtime/orchestrator-service/lib/execution/scheduler-helpers.js:56:    locked_by: null,
+runtime/orchestrator-service/lib/execution/execution-job-bridge.js:76:        : payload.publish_package?.assets?.[0]?.fallback_prompt_pack;
+runtime/orchestrator-service/lib/execution/execution-job-bridge.js:108:        execution_backend: 'fallback_media_mock',
+runtime/orchestrator-service/lib/execution/recommendation-builders.js:63:        support_count: channel.count,
+runtime/orchestrator-service/lib/execution/recommendation-builders.js:75:        support_count: hook.count,
+runtime/orchestrator-service/lib/execution/recommendation-builders.js:88:        support_count: 2,
+runtime/orchestrator-service/lib/ai/providers/openai.js:13:function humanizeValue(value, fallback = '') {
+runtime/orchestrator-service/lib/ai/providers/openai.js:14:  if (value == null) return fallback;
+runtime/orchestrator-service/lib/ai/providers/openai.js:17:    return clean === '[object Object]' ? fallback : clean;
+runtime/orchestrator-service/lib/ai/providers/openai.js:23:    return value.map((item) => humanizeValue(item)).filter(Boolean).join('; ') || fallback;
+runtime/orchestrator-service/lib/ai/providers/openai.js:46:      .join('; ') || fallback;
+runtime/orchestrator-service/lib/ai/providers/openai.js:48:  return fallback;
+runtime/orchestrator-service/lib/ai/providers/openai.js:295:              'Be specific to the supplied project context and avoid generic placeholder text.',
+runtime/orchestrator-service/lib/ai/providers/openai.js:300:              `Set outputType to "${requestedOutputType}" unless the command clearly requires a better supported output type.`,
+runtime/orchestrator-service/lib/ai/provider-config.js:6:function toPositiveInt(value, fallback) {
+runtime/orchestrator-service/lib/ai/provider-config.js:9:    return fallback;
+runtime/orchestrator-service/lib/ops/backbone.js:54:    statuses: ['draft', 'planned', 'active', 'paused', 'completed', 'archived'],
+runtime/orchestrator-service/lib/ops/backbone.js:93:    statuses: ['open', 'queued', 'in_progress', 'blocked', 'completed', 'cancelled'],
+runtime/orchestrator-service/lib/ops/backbone.js:94:    lifecycle: ['open', 'active', 'blocked', 'done', 'closed'],
+runtime/orchestrator-service/lib/ops/backbone.js:176:    actions: ['override_policy', 'manage_team', 'resolve_escalation', 'manage_permissions']
+runtime/orchestrator-service/lib/ops/backbone.js:292:function asReadableString(value, fallback = '') {
+runtime/orchestrator-service/lib/ops/backbone.js:293:  if (value == null) return fallback;
+runtime/orchestrator-service/lib/ops/backbone.js:296:    return clean === '[object Object]' ? fallback : clean;
+runtime/orchestrator-service/lib/ops/backbone.js:300:    return value.map((item) => asReadableString(item)).filter(Boolean).join('; ') || fallback;
+runtime/orchestrator-service/lib/ops/backbone.js:308:  return fallback;
+runtime/orchestrator-service/lib/ops/backbone.js:311:function asBoolean(value, fallback = false) {
+runtime/orchestrator-service/lib/ops/backbone.js:317:    return fallback;
+runtime/orchestrator-service/lib/ops/backbone.js:329:  return fallback;
+runtime/orchestrator-service/lib/ops/backbone.js:332:function normalizeRoleKey(value, fallback = '') {
+runtime/orchestrator-service/lib/ops/backbone.js:333:  return asString(value).toLowerCase().replace(/[^a-z0-9]+/g, '_') || fallback;
+runtime/orchestrator-service/lib/ops/backbone.js:424:    escalation_chain: ESCALATION_CHAINS,
+runtime/orchestrator-service/lib/ops/backbone.js:446:    escalation_chain: {
+runtime/orchestrator-service/lib/ops/backbone.js:447:      ...defaults.escalation_chain,
+runtime/orchestrator-service/lib/ops/backbone.js:448:      ...asObject(current.escalation_chain),
+runtime/orchestrator-service/lib/ops/backbone.js:449:      ...asObject(patch.escalation_chain)
+runtime/orchestrator-service/lib/ops/backbone.js:598:function normalizeCommentEntry(input = {}, fallbackActor = 'mh-assistant') {
+runtime/orchestrator-service/lib/ops/backbone.js:610:    author: asString(source.author || source.actor || source.created_by) || fallbackActor,
+runtime/orchestrator-service/lib/ops/backbone.js:615:function normalizeCommentList(value, fallbackActor = 'mh-assistant') {
+runtime/orchestrator-service/lib/ops/backbone.js:623:    .map((item) => normalizeCommentEntry(item, fallbackActor))
+runtime/orchestrator-service/lib/ops/backbone.js:627:function appendCommentList(current = [], additions = [], fallbackActor = 'mh-assistant', maxItems = 50) {
+runtime/orchestrator-service/lib/ops/backbone.js:629:    ...normalizeCommentList(additions, fallbackActor),
+runtime/orchestrator-service/lib/ops/backbone.js:630:    ...normalizeCommentList(current, fallbackActor)
+runtime/orchestrator-service/lib/ops/backbone.js:636:function normalizeRequestList(value, fallbackActor = 'mh-assistant') {
+runtime/orchestrator-service/lib/ops/backbone.js:657:        requested_by: asString(source.requested_by || source.actor) || fallbackActor,
+runtime/orchestrator-service/lib/ops/backbone.js:664:function appendRequestList(current = [], additions = [], fallbackActor = 'mh-assistant', maxItems = 25) {
+runtime/orchestrator-service/lib/ops/backbone.js:666:    ...normalizeRequestList(additions, fallbackActor),
+runtime/orchestrator-service/lib/ops/backbone.js:667:    ...normalizeRequestList(current, fallbackActor)
+runtime/orchestrator-service/lib/ops/backbone.js:671:function normalizeRevisionEntry(input = {}, fallbackActor = 'mh-assistant') {
+runtime/orchestrator-service/lib/ops/backbone.js:681:    actor: asString(source.actor || source.author || source.created_by) || fallbackActor
+runtime/orchestrator-service/lib/ops/backbone.js:685:function normalizeRevisionList(value, fallbackActor = 'mh-assistant') {
+runtime/orchestrator-service/lib/ops/backbone.js:687:    .map((item) => normalizeRevisionEntry(item, fallbackActor))
+runtime/orchestrator-service/lib/ops/backbone.js:691:function normalizeOutputVersionEntry(input = {}, fallbackActor = 'mh-assistant') {
+runtime/orchestrator-service/lib/ops/backbone.js:703:    actor: asString(source.actor || source.author || source.created_by) || fallbackActor
+runtime/orchestrator-service/lib/ops/backbone.js:707:function normalizeOutputVersionList(value, fallbackActor = 'mh-assistant') {
+runtime/orchestrator-service/lib/ops/backbone.js:709:    .map((item) => normalizeOutputVersionEntry(item, fallbackActor))
+runtime/orchestrator-service/lib/ops/backbone.js:713:function normalizePreviewHistoryEntry(input = {}, fallbackActor = 'mh-assistant') {
+runtime/orchestrator-service/lib/ops/backbone.js:727:    actor: asString(source.actor || source.author || source.created_by) || fallbackActor
+runtime/orchestrator-service/lib/ops/backbone.js:731:function appendPreviewHistory(current = [], additions = [], fallbackActor = 'mh-assistant', maxItems = 30) {
+runtime/orchestrator-service/lib/ops/backbone.js:739:    ...list.map((item) => normalizePreviewHistoryEntry(item, fallbackActor)).filter(Boolean),
+runtime/orchestrator-service/lib/ops/backbone.js:854:      semi_auto_requires_approval: true,
+runtime/orchestrator-service/lib/ops/backbone.js:1368:      message: 'Potentially unsupported or regulated claim language detected.'
+runtime/orchestrator-service/lib/ops/backbone.js:1460:      message: 'Publishing item has no schedule locked.'
+runtime/orchestrator-service/lib/ops/backbone.js:1494:  const escalationApprovals = approvals.filter((item) => asString(item.status) === 'escalated');
+runtime/orchestrator-service/lib/ops/backbone.js:1586:  const escalationQueue = [
+runtime/orchestrator-service/lib/ops/backbone.js:1587:    ...escalationApprovals,
+runtime/orchestrator-service/lib/ops/backbone.js:1608:      escalation_chain: governance.escalation_chain || ESCALATION_CHAINS
+runtime/orchestrator-service/lib/ops/backbone.js:1622:      escalation_queue: escalationQueue
+runtime/orchestrator-service/lib/ops/backbone.js:2464:      status === 'completed' ? 'done' : status === 'blocked' ? 'blocked' : ['queued', 'in_progress'].includes(status) ? 'active' : 'open'
+runtime/orchestrator-service/lib/ops/backbone.js:2596:  const escalationChain = normalizeStringList(input.escalation_chain || current.escalation_chain).length
+runtime/orchestrator-service/lib/ops/backbone.js:2597:    ? normalizeStringList(input.escalation_chain || current.escalation_chain)
+runtime/orchestrator-service/lib/ops/backbone.js:2635:    escalation_chain: escalationChain,
+runtime/orchestrator-service/lib/ops/backbone.js:2711:      escalation_chain: approval.escalation_chain
+runtime/orchestrator-service/lib/ops/backbone.js:2781:  const escalationChain = normalizeStringList(current.escalation_chain).length
+runtime/orchestrator-service/lib/ops/backbone.js:2782:    ? normalizeStringList(current.escalation_chain)
+runtime/orchestrator-service/lib/ops/backbone.js:2784:  const escalationTargetRole = normalizeRoleKey(
+runtime/orchestrator-service/lib/ops/backbone.js:2786:      escalationChain.find((role) => normalizeRoleKey(role) !== normalizeRoleKey(current.reviewer_role)) ||
+runtime/orchestrator-service/lib/ops/backbone.js:2787:      escalationChain[0] ||
+runtime/orchestrator-service/lib/ops/backbone.js:2798:    escalation_chain: escalationChain,
+runtime/orchestrator-service/lib/ops/backbone.js:2813:        escalate_to: escalationTargetRole
+runtime/orchestrator-service/lib/ops/backbone.js:2857:      escalate_to: escalationTargetRole
+runtime/orchestrator-service/lib/ops/backbone.js:2921:      description: next.decision_note || 'Governance escalation requires follow-up.',
+runtime/orchestrator-service/lib/ops/backbone.js:2922:      owner: roleDisplay(team, escalationTargetRole),
+runtime/orchestrator-service/lib/ops/backbone.js:2923:      owner_role: escalationTargetRole,
+runtime/orchestrator-service/lib/ops/backbone.js:2924:      assignee: roleDisplay(team, escalationTargetRole),
+runtime/orchestrator-service/lib/ops/backbone.js:2925:      assignee_role: escalationTargetRole,
+runtime/orchestrator-service/lib/ops/backbone.js:3340:  if (['blocked', 'failed', 'escalated', 'critical'].includes(normalized)) return 0;
+runtime/orchestrator-service/lib/ops/backbone.js:3452:    blocked_count: items.filter((item) => item.status === 'blocked').length,
+runtime/orchestrator-service/lib/ops/backbone.js:3933:      escalation_chain: asObject(team.escalation_chain)
+runtime/orchestrator-service/lib/ops/backbone.js:3954:      escalation_chain: asObject(team.escalation_chain)
+runtime/orchestrator-service/lib/ops/backbone.js:4020:      blocked_count: tasks.filter((item) => asString(item.status) === 'blocked').length,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:43:function humanizeValue(value, fallback = '') {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:44:  if (value == null) return fallback;
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:47:    return clean === '[object Object]' ? fallback : clean;
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:53:    return value.map((item) => humanizeValue(item)).filter(Boolean).join('; ') || fallback;
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:80:      .join('; ') || fallback;
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:82:  return fallback;
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:164:  // Publishing/content output language: explicit override > project/market/setup language > fallback
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:198:  const conversationLanguage = inferConversationLanguage(input);
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:201:  const languagesDiffer = outputLanguage !== 'user language' && outputLanguage !== conversationLanguage;
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:226:    `Conversation language (language the user is writing in): ${conversationLanguage}`,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:232:    'Language separation rule: explanations, notes, and next-step guidance must stay in the conversation language.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:234:    'Start with one brief sentence in the conversation language, then add a clearly labeled publishable content section in the output language.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:235:    conversationLanguage !== 'user language'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:236:      ? `Always respond to the user, explain, and interact in ${conversationLanguage}.`
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:240:      : 'Generate publishable content in the same language as your conversation.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:242:      ? `When the output language differs from the conversation language, label the publishable section clearly, for example: "${outputLanguage} hooks for the ${market || outputLanguage} market:".`
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:255:    'The next-step suggestion must be in the conversation language, not the publishing/output language, unless they are the same.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:319:      "When asked to turn conversation into work, prepare a task/workflow-ready draft but do not execute it."
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:321:    customer_ops: [
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:323:      "Focus on inbox review, reply drafts, customer service, SLA thinking, escalation paths, and support tone.",
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:324:      "Do not send customer replies or mutate tickets from chat; prepare safe drafts and guidance only."
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:326:    sales: [
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:333:      "Think across strategy, content, media, publishing, ads, SEO, compliance, operations, customer operations, and sales.",
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:341:    "Be conversational, helpful, and safe. Prepare work only when requested; do not claim backend actions were executed."
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:353:  const conversationLanguage = inferConversationLanguage(input);
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:366:  const languagesDiffer = conversationLanguage && outputLanguage && conversationLanguage !== outputLanguage;
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:370:    'Chat-only live specialist conversation for MH Assistant OS.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:374:    `Conversation language: ${conversationLanguage}`,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:381:    '- Strict language separation: interaction, explanations, framing, notes, and next-step guidance must stay in the conversation language.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:382:    '- If conversation language is Arabic, the first sentence must be Arabic and the next-step guidance must be Arabic.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:384:    '- MANDATORY FORMAT when conversation language differs from publishable output language: first write one short opening sentence in the conversation language.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:386:    '- Then write a final section titled Next step in the conversation language, not the publishable output language.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:387:    '- For Arabic conversations, the opening sentence and final next step must use Arabic script.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:391:    '- If the user asks for copy, caption, script, plan, task, workflow, handoff, or route, help prepare it conversationally.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:395:    conversationLanguage !== 'user language'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:396:      ? `Use ${conversationLanguage} for interaction and explanations.`
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:400:      : 'Use the conversation language for publishable content unless the user asks otherwise.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:404:    '- Do not claim that publishing, approval, deletion, sync, CRM update, customer reply, workflow run, export, task creation, handoff creation, or backend action happened.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:406:    '- Never pretend to have used tools that are not connected in this chat route.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:454:  const conversationLanguage = inferConversationLanguage(input);
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:458:  const needsArabicFrame = conversationLanguage === 'Arabic'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1094:            `Unsupported AI provider "${providerConfig.provider}". Supported providers: ${listAiProviders().join(', ')}`,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1368:      const conversationLanguage = inferConversationLanguage(input);
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1390:            `Unsupported AI provider "${providerConfig.provider}". Supported providers: ${listAiProviders().join(', ')}`,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1425:            conversation_language: conversationLanguage,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1448:            conversationLanguage,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1462:            sent_customer_reply: false,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1463:            mutated_crm: false,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1530:      const conversationLanguage = inferConversationLanguage(input);
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1554:            `Unsupported AI provider "${providerConfig.provider}". Supported providers: ${listAiProviders().join(', ')}`,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1590:            conversation_language: conversationLanguage,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1625:            conversationLanguage,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1709:            conversationLanguage,
+runtime/orchestrator-service/lib/data/execution-artifact-writer-adapter.js:190:      throw new Error(`Unsupported dual-write domain: ${input.domain}`);
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:41:      legacy_fallback_read: parseBooleanFlag(
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:97:      fallback_reads: 0,
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:135:      legacyFallbackRead: !!featureFlags.legacy_fallback_read,
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:177:        fallbackUsed: !!decision.fallbackUsed,
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:189:      fallbackUsed: !!decision.fallbackUsed,
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:213:        fallbackUsed: false,
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:227:          : 'media-legacy-fallback-no-project-profile',
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:228:        fallbackUsed: !hasProjectProfile,
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:242:          fallbackUsed: false,
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:250:        reason: 'media-intelligence-canonical-read-disabled',
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:251:        fallbackUsed: false,
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:274:        fallbackUsed: false,
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:281:    let fallbackUsed = false;
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:289:      if (!fs.existsSync(activeReadPath) && this.featureFlags.legacy_fallback_read) {
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:291:        fallbackUsed = true;
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:292:        reasonParts.push('legacy-fallback-read-used');
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:295:      reasonParts.push('execution-canonical-read-disabled');
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:308:      reasonParts.push('execution-canonical-write-disabled');
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:320:      fallbackUsed,
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:376:    if (entry.fallbackUsed) {
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:377:      this.telemetry.fallback_reads += 1;
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:390:      `[UnifiedDataPathResolver] project=${entry.project} domain=${entry.domain} op=${entry.operation} mode=${entry.mode} read=${entry.activeReadPath} write=${entry.activeWritePath} fallback=${entry.fallbackUsed ? 'yes' : 'no'} reason=${entry.reason}`
+runtime/orchestrator-service/lib/customer-operations/tickets/store/ticket-store.js:5:} = require('../../contracts/ticket-contract');
+runtime/orchestrator-service/lib/customer-operations/tickets/store/ticket-store.js:7:const tickets = new Map();
+runtime/orchestrator-service/lib/customer-operations/tickets/store/ticket-store.js:10:  const ticket = createTicketContract(input);
+runtime/orchestrator-service/lib/customer-operations/tickets/store/ticket-store.js:12:  if (!ticket.ticket_id) {
+runtime/orchestrator-service/lib/customer-operations/tickets/store/ticket-store.js:13:    throw new Error('ticket_id is required');
+runtime/orchestrator-service/lib/customer-operations/tickets/store/ticket-store.js:16:  tickets.set(ticket.ticket_id, ticket);
+runtime/orchestrator-service/lib/customer-operations/tickets/store/ticket-store.js:18:  return ticket;
+runtime/orchestrator-service/lib/customer-operations/tickets/store/ticket-store.js:21:function getTicket(ticketId) {
+runtime/orchestrator-service/lib/customer-operations/tickets/store/ticket-store.js:22:  return tickets.get(String(ticketId || '')) || null;
+runtime/orchestrator-service/lib/customer-operations/tickets/store/ticket-store.js:26:  return Array.from(tickets.values());
+runtime/orchestrator-service/lib/customer-operations/tickets/store/ticket-store.js:29:function updateTicket(ticketId, updates = {}) {
+runtime/orchestrator-service/lib/customer-operations/tickets/store/ticket-store.js:30:  const current = getTicket(ticketId);
+runtime/orchestrator-service/lib/customer-operations/tickets/store/ticket-store.js:45:  tickets.set(current.ticket_id, updated);
+runtime/orchestrator-service/lib/customer-operations/contracts/message-contract.js:6:    conversation_id: String(input.conversation_id || ''),
+runtime/orchestrator-service/lib/customer-operations/contracts/unified-inbox-contract.js:5:    inbox_id: String(input.inbox_id || ''),
+runtime/orchestrator-service/lib/customer-operations/contracts/unified-inbox-contract.js:12:    conversation: {
+runtime/orchestrator-service/lib/customer-operations/contracts/unified-inbox-contract.js:13:      conversation_id: String(
+runtime/orchestrator-service/lib/customer-operations/contracts/unified-inbox-contract.js:14:        input.conversation?.conversation_id || ''
+runtime/orchestrator-service/lib/customer-operations/contracts/unified-inbox-contract.js:18:        input.conversation?.customer_id || ''
+runtime/orchestrator-service/lib/customer-operations/contracts/unified-inbox-contract.js:42:    sla: {
+runtime/orchestrator-service/lib/customer-operations/contracts/unified-inbox-contract.js:43:      policy_id: String(input.sla?.policy_id || ''),
+runtime/orchestrator-service/lib/customer-operations/contracts/unified-inbox-contract.js:44:      breached: Boolean(input.sla?.breached || false)
+runtime/orchestrator-service/lib/customer-operations/contracts/unified-inbox-contract.js:47:    escalation: {
+runtime/orchestrator-service/lib/customer-operations/contracts/unified-inbox-contract.js:48:      active: Boolean(input.escalation?.active || false),
+runtime/orchestrator-service/lib/customer-operations/contracts/unified-inbox-contract.js:49:      escalation_id: String(
+runtime/orchestrator-service/lib/customer-operations/contracts/unified-inbox-contract.js:50:        input.escalation?.escalation_id || ''
+runtime/orchestrator-service/lib/customer-operations/contracts/conversation-contract.js:5:    conversation_id: String(input.conversation_id || ''),
+runtime/orchestrator-service/lib/customer-operations/contracts/conversation-contract.js:19:    escalation: {
+runtime/orchestrator-service/lib/customer-operations/contracts/conversation-contract.js:20:      level: Number(input.escalation?.level || 0),
+runtime/orchestrator-service/lib/customer-operations/contracts/conversation-contract.js:21:      queue: String(input.escalation?.queue || ''),
+runtime/orchestrator-service/lib/customer-operations/contracts/conversation-contract.js:22:      requires_human: Boolean(input.escalation?.requires_human || false)
+runtime/orchestrator-service/lib/customer-operations/contracts/conversation-contract.js:25:    sla: {
+runtime/orchestrator-service/lib/customer-operations/contracts/conversation-contract.js:26:      response_due_at: input.sla?.response_due_at || null,
+runtime/orchestrator-service/lib/customer-operations/contracts/conversation-contract.js:27:      resolution_due_at: input.sla?.resolution_due_at || null
+runtime/orchestrator-service/lib/customer-operations/contracts/ticket-contract.js:5:    ticket_id: String(input.ticket_id || ''),
+runtime/orchestrator-service/lib/customer-operations/contracts/ticket-contract.js:6:    conversation_id: String(input.conversation_id || ''),
+runtime/orchestrator-service/lib/customer-operations/contracts/ticket-contract.js:8:    type: String(input.type || 'support'),
+runtime/orchestrator-service/lib/customer-operations/contracts/ticket-contract.js:16:    escalation: {
+runtime/orchestrator-service/lib/customer-operations/contracts/ticket-contract.js:17:      level: Number(input.escalation?.level || 0),
+runtime/orchestrator-service/lib/customer-operations/contracts/ticket-contract.js:18:      state: String(input.escalation?.state || 'none')
+runtime/orchestrator-service/lib/customer-operations/contracts/ticket-contract.js:22:      requires_approval: Boolean(input.workflow?.requires_approval || false),
+runtime/orchestrator-service/lib/customer-operations/contracts/escalation-contract.js:5:    escalation_id: String(input.escalation_id || ''),
+runtime/orchestrator-service/lib/customer-operations/contracts/escalation-contract.js:8:      type: String(input.source?.type || 'conversation'),
+runtime/orchestrator-service/lib/customer-operations/contracts/escalation-contract.js:23:      escalation_queue: String(
+runtime/orchestrator-service/lib/customer-operations/contracts/escalation-contract.js:24:        input.routing?.escalation_queue || 'default'
+runtime/orchestrator-service/lib/customer-operations/contracts/customer-profile-contract.js:29:    crm: {
+runtime/orchestrator-service/lib/customer-operations/contracts/customer-profile-contract.js:30:      owner: String(input.crm?.owner || ''),
+runtime/orchestrator-service/lib/customer-operations/contracts/customer-profile-contract.js:31:      stage: String(input.crm?.stage || 'new'),
+runtime/orchestrator-service/lib/customer-operations/contracts/customer-profile-contract.js:32:      source: String(input.crm?.source || '')
+runtime/orchestrator-service/lib/customer-operations/contracts/sla-policy-contract.js:28:    escalation: {
+runtime/orchestrator-service/lib/customer-operations/contracts/sla-policy-contract.js:29:      enabled: Boolean(input.escalation?.enabled ?? true),
+runtime/orchestrator-service/lib/customer-operations/contracts/sla-policy-contract.js:32:        input.escalation?.human_handoff_minutes || 120
+runtime/orchestrator-service/lib/customer-operations/contracts/sla-policy-contract.js:35:      escalation_queue: String(
+runtime/orchestrator-service/lib/customer-operations/contracts/sla-policy-contract.js:36:        input.escalation?.escalation_queue || 'customer-care'
+runtime/orchestrator-service/lib/customer-operations/contracts/sla-policy-contract.js:41:      auto_reply_enabled: Boolean(
+runtime/orchestrator-service/lib/customer-operations/contracts/sla-policy-contract.js:42:        input.ai?.auto_reply_enabled ?? true
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:3:const conversationStore = require('./conversations/store/conversation-store');
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:4:const ticketStore = require('./tickets/store/ticket-store');
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:6:const messageStore = require('./conversations/messages/message-store');
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:10:const slaPolicyStore = require('./sla/store/sla-policy-store');
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:12:const escalationStore = require('./escalation/store/escalation-store');
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:14:const unifiedInboxStore = require('./unified-inbox/store/unified-inbox-store');
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:18:} = require('./unified-inbox/register-integration-inbox');
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:48:    conversations: {
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:49:      create: conversationStore.createConversation,
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:50:      get: conversationStore.getConversation,
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:51:      list: conversationStore.listConversations,
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:52:      update: conversationStore.updateConversation
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:69:    escalation: {
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:70:      create: escalationStore.createEscalation,
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:71:      get: escalationStore.getEscalation,
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:72:      list: escalationStore.listEscalations,
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:73:      update: escalationStore.updateEscalation
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:76:    sla: {
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:77:      create: slaPolicyStore.createSlaPolicy,
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:78:      get: slaPolicyStore.getSlaPolicy,
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:79:      list: slaPolicyStore.listSlaPolicies,
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:80:      update: slaPolicyStore.updateSlaPolicy
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:103:    tickets: {
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:104:      create: ticketStore.createTicket,
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:105:      get: ticketStore.getTicket,
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:106:      list: ticketStore.listTickets,
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:107:      update: ticketStore.updateTicket
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:119:          conversations: true,
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:120:          tickets: true,
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:125:          sla: true,
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:126:          escalation: true,
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:127:          unified_inbox: true,
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:128:          integration_inbox_bridge: true,
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:132:          crm: false
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:14:function maskIdentifier(value, fallback = 'customer') {
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:16:  if (!text) return fallback;
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:46:    runtime_ready: Boolean(capabilities.conversations || capabilities.unified_inbox),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:47:    inbox_ready: Boolean(capabilities.unified_inbox),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:48:    conversations_ready: Boolean(capabilities.conversations),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:50:    tickets_ready: Boolean(capabilities.tickets),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:52:    escalation_ready: Boolean(capabilities.escalations),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:53:    sla_ready: Boolean(capabilities.sla_policies),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:54:    integration_inbox_bridge_ready: Boolean(capabilities.integration_inbox_bridge),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:57:    crm_ready: Boolean(provider.crm || capabilities.crm),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:63:      ...(provider.crm || capabilities.crm ? [] : ['CRM provider execution is not ready.']),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:64:      'External send is locked for Customer Center v1.'
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:67:      'Customer Center read model is preview-first and read-only.',
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:74:  const conversation = entry.conversation || {};
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:81:    inbox_id: asString(entry.inbox_id || entry.id),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:83:      channel_id: asString(channel.channel_id || entry.channel_id || conversation.channel || 'unknown'),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:87:    conversation_id: asString(conversation.conversation_id || entry.conversation_id),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:88:    customer_label: maskIdentifier(conversation.customer_id || entry.customer_id || 'customer'),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:89:    masked_customer_id: maskIdentifier(conversation.customer_id || entry.customer_id || ''),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:97:    last_message_at: asString(lastMessage.created_at || entry.last_message_at || conversation.last_message_at || ''),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:98:    sla_status: asString(entry.sla_status || state.sla_status || 'unknown'),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:109:function projectConversation(conversation = {}, runtime = {}) {
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:110:  const messages = safeList(runtime.messages?.listByConversation?.bind(null, conversation.conversation_id));
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:111:  const tickets = safeList(runtime.tickets?.list).filter((ticket) => ticket.conversation_id === conversation.conversation_id);
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:114:    conversation_id: asString(conversation.conversation_id),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:115:    customer_label: maskIdentifier(conversation.customer_id || 'customer'),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:116:    masked_customer_id: maskIdentifier(conversation.customer_id || ''),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:117:    channel: asString(conversation.channel || conversation.channel_id || 'unknown'),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:118:    status: asString(conversation.status || 'open'),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:119:    priority: asString(conversation.priority || 'normal'),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:120:    assigned_team: asString(conversation.assigned_team || 'customer-care'),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:121:    assigned_ai_agent: asString(conversation.assigned_ai_agent || ''),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:122:    last_message_at: asString(conversation.last_message_at || ''),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:124:    ticket_count: tickets.length,
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:125:    escalation_state: tickets.some((ticket) => ticket.escalation_state) ? 'active' : 'none',
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:131:  return safeList(runtime.conversations?.list).map((conversation) => projectConversation(conversation, runtime));
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:134:function projectConversationMessages(runtime = {}, conversationId = '') {
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:135:  return safeList(runtime.messages?.listByConversation?.bind(null, conversationId)).map((message) => ({
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:137:    conversation_id: asString(message.conversation_id),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:153:  const crm = profile.crm || {};
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:163:    crm_stage_internal_only: asString(crm.stage || ''),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:171:function projectConversationDetail(runtime = {}, conversationId = '') {
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:172:  const conversation = typeof runtime.conversations?.get === 'function' ? runtime.conversations.get(conversationId) : null;
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:173:  if (!conversation) return null;
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:175:  const messages = projectConversationMessages(runtime, conversationId);
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:176:  const customer = typeof runtime.customers?.get === 'function' ? runtime.customers.get(conversation.customer_id) : null;
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:177:  const tickets = safeList(runtime.tickets?.list).filter((ticket) => ticket.conversation_id === conversationId);
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:180:    conversation: projectConversation(conversation, runtime),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:183:    tickets: tickets.map(projectTicket),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:184:    escalation_summary: tickets.some((ticket) => ticket.escalation_state) ? 'Escalation active' : 'No escalation recorded',
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:190:  return safeList(runtime.tickets?.list).map(projectTicket);
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:193:function projectTicket(ticket = {}) {
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:195:    ticket_id: asString(ticket.ticket_id),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:196:    conversation_id: asString(ticket.conversation_id),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:197:    customer_label: maskIdentifier(ticket.customer_id || 'customer'),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:198:    type: asString(ticket.type || 'support'),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:199:    status: asString(ticket.status || 'open'),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:200:    priority: asString(ticket.priority || 'normal'),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:201:    assigned_team: asString(ticket.assigned_team || 'customer-care'),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:202:    sla_status: asString(ticket.sla_status || 'unknown'),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:203:    escalation_state: asString(ticket.escalation_state || ''),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:204:    created_at: asString(ticket.created_at || ''),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:205:    updated_at: asString(ticket.updated_at || ''),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:218:  const fallbackChannels = channels.length ? channels : [
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:223:    { channel_id: 'crm', provider: 'not-configured', type: 'crm' }
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:226:  return fallbackChannels.map((channel) => ({
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:230:    read_ready: Boolean(capabilities.integration_inbox_bridge || capabilities.unified_inbox),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:235:    crm_sync_ready: Boolean(channel.capabilities?.crm || capabilities.crm),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:236:    backend_supported: Boolean(capabilities.integration_inbox_bridge || capabilities.unified_inbox),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:237:    blocked_reason: 'External send, voice, IVR, and CRM mutation are locked for Customer Center v1.'
+runtime/orchestrator-service/lib/customer-operations/conversations/messages/message-store.js:29:function listConversationMessages(conversationId) {
+runtime/orchestrator-service/lib/customer-operations/conversations/messages/message-store.js:30:  const id = String(conversationId || '');
+runtime/orchestrator-service/lib/customer-operations/conversations/messages/message-store.js:33:    (message) => message.conversation_id === id
+runtime/orchestrator-service/lib/customer-operations/conversations/create-integration-session.js:5:} = require('../unified-inbox/register-integration-inbox');
+runtime/orchestrator-service/lib/customer-operations/conversations/create-integration-session.js:9:} = require('./store/conversation-store');
+runtime/orchestrator-service/lib/customer-operations/conversations/create-integration-session.js:24:  const inboxSeed = createIntegrationInboxSeed(
+runtime/orchestrator-service/lib/customer-operations/conversations/create-integration-session.js:30:  if (!inboxSeed.created) {
+runtime/orchestrator-service/lib/customer-operations/conversations/create-integration-session.js:33:      reason: inboxSeed.reason,
+runtime/orchestrator-service/lib/customer-operations/conversations/create-integration-session.js:38:  const inbox = inboxSeed.inbox;
+runtime/orchestrator-service/lib/customer-operations/conversations/create-integration-session.js:40:  const conversation = createConversation({
+runtime/orchestrator-service/lib/customer-operations/conversations/create-integration-session.js:41:    conversation_id: inbox.conversation.conversation_id,
+runtime/orchestrator-service/lib/customer-operations/conversations/create-integration-session.js:42:    channel: inbox.channel.channel_id,
+runtime/orchestrator-service/lib/customer-operations/conversations/create-integration-session.js:43:    customer_id: inbox.conversation.customer_id,
+runtime/orchestrator-service/lib/customer-operations/conversations/create-integration-session.js:44:    assigned_ai_agent: inbox.assignment.assigned_ai_agent,
+runtime/orchestrator-service/lib/customer-operations/conversations/create-integration-session.js:45:    priority: inbox.state.priority,
+runtime/orchestrator-service/lib/customer-operations/conversations/create-integration-session.js:52:      `${conversation.conversation_id}_message_1`
+runtime/orchestrator-service/lib/customer-operations/conversations/create-integration-session.js:54:    conversation_id: conversation.conversation_id,
+runtime/orchestrator-service/lib/customer-operations/conversations/create-integration-session.js:55:    channel_id: inbox.channel.channel_id,
+runtime/orchestrator-service/lib/customer-operations/conversations/create-integration-session.js:65:        'New customer conversation started.'
+runtime/orchestrator-service/lib/customer-operations/conversations/create-integration-session.js:75:    inbox,
+runtime/orchestrator-service/lib/customer-operations/conversations/create-integration-session.js:76:    conversation,
+runtime/orchestrator-service/lib/customer-operations/conversations/store/conversation-store.js:5:} = require('../../contracts/conversation-contract');
+runtime/orchestrator-service/lib/customer-operations/conversations/store/conversation-store.js:7:const conversations = new Map();
+runtime/orchestrator-service/lib/customer-operations/conversations/store/conversation-store.js:10:  const conversation = createConversationContract(input);
+runtime/orchestrator-service/lib/customer-operations/conversations/store/conversation-store.js:12:  if (!conversation.conversation_id) {
+runtime/orchestrator-service/lib/customer-operations/conversations/store/conversation-store.js:13:    throw new Error('conversation_id is required');
+runtime/orchestrator-service/lib/customer-operations/conversations/store/conversation-store.js:16:  conversations.set(conversation.conversation_id, conversation);
+runtime/orchestrator-service/lib/customer-operations/conversations/store/conversation-store.js:18:  return conversation;
+runtime/orchestrator-service/lib/customer-operations/conversations/store/conversation-store.js:21:function getConversation(conversationId) {
+runtime/orchestrator-service/lib/customer-operations/conversations/store/conversation-store.js:22:  return conversations.get(String(conversationId || '')) || null;
+runtime/orchestrator-service/lib/customer-operations/conversations/store/conversation-store.js:26:  return Array.from(conversations.values());
+runtime/orchestrator-service/lib/customer-operations/conversations/store/conversation-store.js:29:function updateConversation(conversationId, updates = {}) {
+runtime/orchestrator-service/lib/customer-operations/conversations/store/conversation-store.js:30:  const current = getConversation(conversationId);
+runtime/orchestrator-service/lib/customer-operations/conversations/store/conversation-store.js:45:  conversations.set(current.conversation_id, updated);
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js:19:  const conversations = safeList(runtime.conversations?.list);
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js:20:  const tickets = safeList(runtime.tickets?.list);
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js:23:  const slaPolicies = safeList(runtime.sla?.list);
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js:24:  const escalations = safeList(runtime.escalation?.list);
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js:25:  const inboxEntries = safeList(runtime.unifiedInbox?.list);
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js:38:      integration_inbox_seed: typeof runtime.unifiedInbox?.createFromIntegration === 'function'
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js:44:      conversations: conversations.length,
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js:46:      tickets: tickets.length,
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js:48:      sla_policies: slaPolicies.length,
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js:49:      escalations: escalations.length,
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js:50:      unified_inbox_entries: inboxEntries.length
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js:55:      inbox_ready: Boolean(capabilities.unified_inbox),
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js:56:      tickets_ready: Boolean(capabilities.tickets),
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js:58:      sla_ready: Boolean(capabilities.sla),
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js:59:      escalation_ready: Boolean(capabilities.escalation),
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js:61:      integration_inbox_bridge_ready: Boolean(capabilities.integration_inbox_bridge)
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js:80:      creates_tickets: false,
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js:81:      changes_sla: false,
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js:82:      triggers_escalation: false,
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js:83:      requires_confirmation_for_actions: true
+runtime/orchestrator-service/lib/customer-operations/escalation/store/escalation-store.js:5:} = require('../../contracts/escalation-contract');
+runtime/orchestrator-service/lib/customer-operations/escalation/store/escalation-store.js:7:const escalations = new Map();
+runtime/orchestrator-service/lib/customer-operations/escalation/store/escalation-store.js:10:  const escalation = createEscalationContract(input);
+runtime/orchestrator-service/lib/customer-operations/escalation/store/escalation-store.js:12:  if (!escalation.escalation_id) {
+runtime/orchestrator-service/lib/customer-operations/escalation/store/escalation-store.js:13:    throw new Error('escalation_id is required');
+runtime/orchestrator-service/lib/customer-operations/escalation/store/escalation-store.js:16:  escalations.set(escalation.escalation_id, escalation);
+runtime/orchestrator-service/lib/customer-operations/escalation/store/escalation-store.js:18:  return escalation;
+runtime/orchestrator-service/lib/customer-operations/escalation/store/escalation-store.js:21:function getEscalation(escalationId) {
+runtime/orchestrator-service/lib/customer-operations/escalation/store/escalation-store.js:22:  return escalations.get(String(escalationId || '')) || null;
+runtime/orchestrator-service/lib/customer-operations/escalation/store/escalation-store.js:26:  return Array.from(escalations.values());
+runtime/orchestrator-service/lib/customer-operations/escalation/store/escalation-store.js:29:function updateEscalation(escalationId, updates = {}) {
+runtime/orchestrator-service/lib/customer-operations/escalation/store/escalation-store.js:30:  const current = getEscalation(escalationId);
+runtime/orchestrator-service/lib/customer-operations/escalation/store/escalation-store.js:45:  escalations.set(current.escalation_id, updated);
+runtime/orchestrator-service/lib/customer-operations/sla/store/sla-policy-store.js:5:} = require('../../contracts/sla-policy-contract');
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/register-integration-inbox.js:9:} = require('./store/unified-inbox-store');
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/register-integration-inbox.js:35:  const inboxId = asString(
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/register-integration-inbox.js:36:    options.inbox_id ||
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/register-integration-inbox.js:37:    `inbox_${channel.channel_id}`
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/register-integration-inbox.js:41:    inbox_id: inboxId,
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/register-integration-inbox.js:48:    conversation: {
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/register-integration-inbox.js:49:      conversation_id: asString(
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/register-integration-inbox.js:50:        options.conversation_id ||
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/register-integration-inbox.js:51:        `${channel.channel_id}_conversation`
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/register-integration-inbox.js:88:    inbox: entry
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/store/unified-inbox-store.js:5:} = require('../../contracts/unified-inbox-contract');
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/store/unified-inbox-store.js:7:const inboxEntries = new Map();
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/store/unified-inbox-store.js:12:  if (!entry.inbox_id) {
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/store/unified-inbox-store.js:13:    throw new Error('inbox_id is required');
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/store/unified-inbox-store.js:16:  inboxEntries.set(entry.inbox_id, entry);
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/store/unified-inbox-store.js:21:function getInboxEntry(inboxId) {
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/store/unified-inbox-store.js:22:  return inboxEntries.get(String(inboxId || '')) || null;
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/store/unified-inbox-store.js:26:  return Array.from(inboxEntries.values());
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/store/unified-inbox-store.js:29:function updateInboxEntry(inboxId, updates = {}) {
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/store/unified-inbox-store.js:30:  const current = getInboxEntry(inboxId);
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/store/unified-inbox-store.js:45:  inboxEntries.set(current.inbox_id, updated);
+runtime/orchestrator-service/lib/customer-operations/channels/channel-integration-mapper.js:118:    enabled: asString(providerResult.status || 'connected') !== 'disabled',
+runtime/orchestrator-service/lib/customer-operations/channels/channel-integration-mapper.js:119:    customer_operations: {
+runtime/orchestrator-service/lib/customer-operations/channels/channel-integration-mapper.js:120:      supports_inbox: Boolean(base.capabilities.messaging),
+runtime/orchestrator-service/lib/customer-operations/channels/channel-integration-mapper.js:121:      supports_messages: Boolean(base.capabilities.messaging),
+runtime/orchestrator-service/lib/customer-operations/channels/channel-integration-mapper.js:122:      supports_leads: ['instagram', 'facebook', 'website', 'telegram'].includes(base.channel_id),
+runtime/orchestrator-service/lib/customer-operations/channels/channel-integration-mapper.js:123:      supports_outreach: ['email', 'instagram', 'telegram'].includes(base.channel_id),
+runtime/orchestrator-service/lib/customer-operations/channels/channel-integration-mapper.js:124:      supports_voice: Boolean(base.capabilities.voice)
+runtime/orchestrator-service/lib/customer-operations/channels/register-integration-channel.js:33:      customer_operations: channel.customer_operations
+runtime/orchestrator-service/lib/customer-operations/channels/registry/default-channels.js:32:    enabled: false,
+runtime/orchestrator-service/lib/customer-operations/channels/registry/default-channels.js:42:    enabled: false,
+runtime/orchestrator-service/lib/media/native/intelligence/media-prompt-intelligence.js:5:function asText(value, fallback = '') {
+runtime/orchestrator-service/lib/media/native/intelligence/media-prompt-intelligence.js:6:  return String(value == null ? fallback : value).trim();
+runtime/orchestrator-service/lib/media/native/intelligence/media-knowledge-loader.js:8:function readJsonSafe(fileName, fallback = {}) {
+runtime/orchestrator-service/lib/media/native/intelligence/media-knowledge-loader.js:13:    return fallback;
+runtime/orchestrator-service/lib/media/native/providers/adapters/openai-provider-adapter.js:81:      message: 'Realtime voice execution adapter is registered but not implemented yet.'
+runtime/orchestrator-service/lib/media/native/providers/router/provider-execution-router-demo.js:11:    prompt: 'Start realtime voice session placeholder'
+runtime/orchestrator-service/lib/media/native/providers/router/provider-execution-router.js:39:        status: 'unsupported_media_type',
+runtime/orchestrator-service/lib/media/native/providers/router/provider-execution-router.js:40:        message: `OpenAI adapter does not yet support media type: ${mediaType}`
+runtime/orchestrator-service/lib/media/native/models/model-registry-store.js:19:    supports_realtime: Boolean(model.supports_realtime),
+runtime/orchestrator-service/lib/media/native/models/model-registry-store.js:20:    supports_streaming: Boolean(model.supports_streaming),
+runtime/orchestrator-service/lib/media/native/models/model-registry-store.js:21:    supported_resolutions: Array.isArray(model.supported_resolutions)
+runtime/orchestrator-service/lib/media/native/models/model-registry-store.js:22:      ? model.supported_resolutions
+runtime/orchestrator-service/lib/media/native/models/default-models.js:14:      supported_resolutions: ['1024x1024']
+runtime/orchestrator-service/lib/media/native/models/default-models.js:24:      supports_realtime: true,
+runtime/orchestrator-service/lib/media/native/models/default-models.js:25:      supports_streaming: true
+runtime/orchestrator-service/lib/media/native/models/default-models.js:35:      supported_resolutions: ['1024x1024', '2048x2048']
+runtime/orchestrator-service/lib/media/native/models/default-models.js:45:      supported_resolutions: ['1024x1024']
+runtime/orchestrator-service/lib/media/native/models/default-models.js:55:      supported_resolutions: ['720p', '1080p']
+runtime/orchestrator-service/lib/media/native/models/default-models.js:65:      supported_resolutions: ['720p']
+runtime/orchestrator-service/lib/media/native/models/default-models.js:75:      supports_streaming: true
+runtime/orchestrator-service/lib/media/native/models/default-models.js:85:      supports_realtime: true
+runtime/orchestrator-service/lib/media/native/registry/worker-selection-engine.js:6:  const supported = worker.capabilities?.supported_media_types;
+runtime/orchestrator-service/lib/media/native/registry/worker-selection-engine.js:8:  if (!Array.isArray(supported)) {
+runtime/orchestrator-service/lib/media/native/registry/worker-selection-engine.js:12:  return supported.includes(mediaType);
+runtime/orchestrator-service/lib/media/native/rendering/rendering-voice-chat-adapter.js:9:    message: 'Native voice chat rendering engine is not connected yet.',
+runtime/orchestrator-service/lib/media/native/rendering/rendering-image-adapter.js:9:    message: 'Native image rendering engine is not connected yet.',
+runtime/orchestrator-service/lib/media/native/rendering/rendering-audio-adapter.js:9:    message: 'Native audio rendering engine is not connected yet.',
+runtime/orchestrator-service/lib/media/native/rendering/rendering-video-adapter.js:9:    message: 'Native video rendering engine is not connected yet.',
+runtime/orchestrator-service/lib/media/native/orchestrator/orchestrator-demo.js:19:      supported_media_types: ['image', 'video']
+runtime/orchestrator-service/lib/media/provider-layer.js:3:const PROVIDER_NOT_CONFIGURED_MESSAGE = 'Generator backend not connected yet — prompt/job is ready.';
+runtime/orchestrator-service/lib/media/provider-layer.js:47:function safeJsonParse(text, fallback = {}) {
+runtime/orchestrator-service/lib/media/provider-layer.js:50:    return parsed && typeof parsed === 'object' ? parsed : fallback;
+runtime/orchestrator-service/lib/media/provider-layer.js:52:    return fallback;
+runtime/orchestrator-service/lib/media/provider-layer.js:56:function normalizeOpenAiError(error, fallbackMessage) {
+runtime/orchestrator-service/lib/media/provider-layer.js:61:    fallbackMessage;
+runtime/orchestrator-service/lib/media/provider-layer.js:63:  const wrapped = new Error(providerMessage || fallbackMessage);

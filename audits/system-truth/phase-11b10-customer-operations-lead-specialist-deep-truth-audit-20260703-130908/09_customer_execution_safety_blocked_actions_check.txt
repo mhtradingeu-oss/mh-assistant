@@ -1,0 +1,171 @@
+public/control-center/pages/ai-command.js:153:		safetyNote: "All outputs are guidance and draft only. Execution requires explicit confirmation.",
+public/control-center/pages/ai-command.js:166:		safetyNote: "Drafts require review before publishing. Cannot approve or publish without confirmation.",
+public/control-center/pages/ai-command.js:177:		cannotDo: ["Generate images directly", "Upload assets without review", "Approve without confirmation", "Execute media jobs"],
+public/control-center/pages/ai-command.js:179:		safetyNote: "Direction and briefs only. Media generation requires backend confirmation and explicit action.",
+public/control-center/pages/ai-command.js:190:		cannotDo: ["Generate video directly", "Upload footage without review", "Approve without confirmation", "Run media jobs automatically"],
+public/control-center/pages/ai-command.js:244:		safetyNote: "Compliance review is advisory. Approvals always require human confirmation before execution.",
+public/control-center/pages/ai-command.js:255:		cannotDo: ["Run workflows without confirmation", "Auto-approve tasks", "Override authority gates", "Execute backend operations directly"],
+public/control-center/pages/ai-command.js:257:		safetyNote: "Task plans and handoffs only. Workflow execution requires explicit user confirmation.",
+public/control-center/pages/ai-command.js:268:		cannotDo: ["Send customer replies", "Create live tickets", "Change SLA policy", "Escalate without confirmation"],
+public/control-center/pages/ai-command.js:270:		safetyNote: "Customer operations outputs are drafts only. Sending replies, ticket creation, and escalations require confirmation in the owning surface.",
+public/control-center/pages/ai-command.js:283:		safetyNote: "Sales and CRM outputs are guidance and drafts only. CRM mutations and outreach sends require confirmation in the owning surface.",
+public/control-center/pages/ai-command.js:460:		{ id: "schedule-draft", label: "Schedule Draft", action: "preview", intent: "workflow", template: "Prepare a publishing schedule draft for {project}. Include channel cadence, dependencies, and review gates." },
+public/control-center/pages/ai-command.js:485:		{ id: "timeline-draft", label: "Timeline Draft", action: "preview", intent: "workflow", template: "Draft an execution timeline for {project}. Include milestones, owners, dependencies, and review gates." },
+public/control-center/pages/ai-command.js:486:		{ id: "handoff-routing", label: "Handoff Routing", action: "preview", intent: "handoff", template: "Prepare handoff routing for {project}. Include source, destination, decision gates, and required confirmations." },
+public/control-center/pages/ai-command.js:497:		{ id: "prepare-escalation", label: "Prepare Escalation", action: "preview", intent: "handoff", template: "Prepare an escalation draft for {project}. Include reason, customer impact, owner, confirmation needed, and destination team." },
+public/control-center/pages/ai-command.js:499:		{ id: "route-support-sales-ops", label: "Route to Support / Sales / Operations", action: "preview", intent: "handoff", template: "Prepare routing guidance for {project}. Decide whether the customer item belongs with Support, Sales, or Operations, and explain the review gate." }
+public/control-center/pages/ai-command.js:504:		{ id: "follow-up-sequence", label: "Follow-up Sequence", action: "preview", intent: "workflow", template: "Build a follow-up sequence for {project}. Include timing, message angle, CTA, stop condition, and confirmation requirements." },
+public/control-center/pages/ai-command.js:506:		{ id: "pipeline-next-step", label: "Pipeline Next Step", action: "preview", intent: "task", template: "Recommend the pipeline next step for {project}. Include stage, rationale, owner, risk, and required confirmation." },
+public/control-center/pages/ai-command.js:509:		{ id: "sales-handoff-draft", label: "Sales Handoff", action: "preview", intent: "handoff", template: "Prepare a sales handoff draft for {project}. Include lead context, recommended next action, owner, and confirmation needed." }
+public/control-center/pages/ai-command.js:685:				reason: "Requires approval gate before external publishing actions."
+public/control-center/pages/ai-command.js:1342:        const looksWorkflowLike = /\b(workflow|workflows|process|sequence|phase|phases|approval flow|automation|operating loop|step-by-step|steps|dependencies|trigger|review gate|execution flow)\b/.test(text);
+public/control-center/pages/ai-command.js:1429:		confirmationRequired: outputType === "handoff" || specialistId === "publisher" || specialistId === "compliance_reviewer",
+public/control-center/pages/ai-command.js:1435:		confirmationNote: "Execution, approvals, and publishing require explicit confirmation in the owning workspace."
+public/control-center/pages/ai-command.js:1549:			confirmationRequired: true,
+public/control-center/pages/ai-command.js:1607:			confirmationRequired: true,
+public/control-center/pages/ai-command.js:1624:				"Priority: draft priority pending runtime inbox and SLA confirmation.",
+public/control-center/pages/ai-command.js:1629:				"SLA and escalation decisions require confirmation in the owning operations surface."
+public/control-center/pages/ai-command.js:1638:			confirmationRequired: true,
+public/control-center/pages/ai-command.js:1666:				"Outreach and follow-ups require confirmation before sending."
+public/control-center/pages/ai-command.js:1675:			confirmationRequired: true,
+public/control-center/pages/ai-command.js:1689:					"Stage 3: Compliance/review gate",
+public/control-center/pages/ai-command.js:1690:					"Stage 4: Destination handoff and confirmation"
+public/control-center/pages/ai-command.js:1750:			"Compliance: flag claims, evidence needs, policy risks, and approval gates",
+public/control-center/pages/ai-command.js:1757:		confirmationNote: "No task, workflow, outreach, customer reply, CRM update, approval, or publishing action is executed from Full Team mode.",
+public/control-center/pages/ai-command.js:1792:	lines.push(`Confirmation: ${output.confirmationRequired ? "Required before execution" : "Required for execution actions"}`);
+public/control-center/pages/ai-command.js:2555:		confirmationNote: firstAiInboundText(preview.confirmationNote, preview.confirmation_note, "Execution, approvals, publishing, CRM updates, customer replies, and workflow runs require explicit confirmation in the owning workspace."),
+public/control-center/pages/ai-command.js:2556:		confirmationRequired: preview.confirmationRequired ?? preview.confirmation_required ?? true
+public/control-center/pages/ai-command.js:3522:	if (tool.safetyLevel === "confirmation_required") return "Destination confirmation required";
+public/control-center/pages/ai-command.js:3575:				<p class="aicmd-room-subtitle mhos-context-description">Ask one expert or the full team to prepare strategy, content, analysis, reviews, and destination handoffs. AI prepares and reviews only; sensitive actions stay confirmation-gated in the owning workspace.</p>
+public/control-center/pages/ai-command.js:4029:                        <p class="aicmd-chatfirst-tab-note">AI Command prepares guidance, drafts, previews, and handoff context only. Publishing, approvals, CRM updates, workflow runs, customer sends, provider execution, and durable task creation remain confirmation-gated in the owning workspace.</p>
+public/control-center/pages/ai-command.js:4083:                                <span>No execution without confirmation</span>
+public/control-center/pages/ai-command.js:4101:				<p>Chat, draft, review, and prepare handoff context only. Publishing, approvals, CRM updates, workflow runs, external sends, and durable task creation stay confirmation-gated in the owning workspace.</p>
+public/control-center/pages/ai-command.js:4696:                                <span>Library, campaigns, content, customers, governance, integrations and provider readiness are connected as guarded planning context. Execution stays confirmation-gated.</span>
+public/control-center/pages/ai-command.js:4996:						<span>${escapeHtml(humanizeValue(preview.confirmationNote, "Execution requires explicit confirmation in the destination workspace."))}</span>
+public/control-center/pages/ai-command.js:5005:				<p class="aicmd-chatfirst-tab-note">This is a review-ready preview. Execution, publishing, approvals, CRM updates, external sends, durable task creation, and workflow runs happen only in the owning destination workspace after confirmation.</p>
+public/control-center/pages/ai-command.js:5074:	const approval = preview.confirmationRequired ? "Confirmation required" : (preview.outputType ? "Review ready" : "No draft yet");
+public/control-center/pages/ai-command.js:5356:			{ label: "Escalations", value: "Requires confirmation", present: false, scoped: true },
+public/control-center/pages/ai-command.js:5364:				{ label: "Follow-ups", value: "Requires confirmation", present: false, scoped: true },
+public/control-center/pages/ai-command.js:5397:					<span>Guidance only — no execution happens from this workspace without confirmation.</span>
+public/control-center/pages/ai-command.js:5405:					<span>Publishing, approval, and workflow runs require your explicit confirmation in the right workspace.</span>
+public/control-center/pages/ai-command.js:6244:                                        confirmationRequired: true,
+public/control-center/pages/ai-command.js:6245:                                        confirmationNote: "Review and route this campaign package through the owning destination workspace before any publishing, sending, approval, task creation, provider execution, or workflow mutation.",
+public/control-center/pages/ai-command.js:6870:					updateStatus("Copy failed. Clipboard access may be blocked.");
+public/control-center/pages/ai-command.js:7004:					updateStatus("Copy failed. Clipboard access may be blocked.");
+public/control-center/pages/ai-command.js:7458:        uiConsistency: "locked"
+public/control-center/pages/ai-command.js:7543:        stability: "locked"
+public/control-center/pages/ai-command/tool-dock.js:499:      template: "Prioritize the next best actions for {projectName}. Separate urgent, important, blocked, and later work."
+public/control-center/pages/ai-command/tool-dock.js:614:      safetyLevel: "confirmation_required",
+public/control-center/pages/ai-command/tool-dock.js:804:      safetyLevel: "confirmation_required",
+public/control-center/pages/ai-command/tool-dock.js:809:      template: "Draft a publishing schedule for {projectName}. Include channels, timing, dependencies, review gates, and next actions."
+public/control-center/pages/ai-command/tool-dock.js:830:      safetyLevel: "confirmation_required",
+public/control-center/pages/ai-command/tool-dock.js:834:      outputTypes: ["approval_pack", "risk_summary", "asset_checklist", "confirmation_list"],
+public/control-center/pages/ai-command/tool-dock.js:835:      template: "Prepare an approval package for {projectName}. Include final copy summary, risk notes, assets checklist, and required confirmations."
+public/control-center/pages/ai-command/tool-dock.js:1034:      safetyLevel: "confirmation_required",
+public/control-center/pages/ai-command/tool-dock.js:1063:      safetyLevel: "confirmation_required",
+public/control-center/pages/ai-command/tool-dock.js:1068:      template: "Draft a workflow for {projectName}. Include steps, triggers, inputs, outputs, owners, review gates, and execution risks."
+public/control-center/pages/ai-command/tool-dock.js:1076:      safetyLevel: "confirmation_required",
+public/control-center/pages/ai-command/tool-dock.js:1118:      safetyLevel: "confirmation_required",
+public/control-center/pages/ai-command/tool-dock.js:1131:      safetyLevel: "confirmation_required",
+public/control-center/pages/ai-command/tool-dock.js:1186:      safetyLevel: "confirmation_required",
+public/control-center/pages/ai-command/tool-dock.js:1212:      safetyLevel: "confirmation_required",
+public/control-center/pages/ai-command/tool-dock.js:1617:    `Prepare the output for ${destination}, but do not send, save, route, publish, or create records automatically.`,
+public/control-center/pages/customer-center.js:102:    ["Add CRM note", "Locked: CRM writes require a future confirmation gate, role check, and audit log."],
+public/control-center/pages/customer-center.js:103:    ["Update ticket", "Locked: ticket changes are outside this read-only release."],
+public/control-center/pages/customer-center.js:104:    ["Assign conversation", "Locked: assignment changes require a future workflow owner and audit trail."],
+public/control-center/pages/customer-center.js:144:        <p>This page is intentionally blank while protected customer read routes are disabled. Configure <code>MH_CONTROL_CENTER_WRITE_KEY</code> on the server, restart the service, then reload to show read-only projections.</p>
+public/control-center/pages/customer-center.js:145:        <p>No placeholder customer records are shown. External send, CRM updates, ticket changes, calls, IVR, provider sync, and auto-reply remain locked.</p>
+public/control-center/pages/customer-center.js:151:function renderEmptyState(title, body, nextStep = "Safe next step: verify protected-read readiness, then reload read-only customer projections.") {
+public/control-center/pages/customer-center.js:164:    return renderEmptyState("Inbox is empty in read-only mode", "No inbound customer signals are available for this project right now. This is expected when protected-read data is not connected or no conversations match the current projection.");
+public/control-center/pages/customer-center.js:181:    return renderEmptyState("No conversation previews available", "Masked conversation context will appear here after read-only projections return conversations. Customer identity and message content stay masked or truncated by default.");
+public/control-center/pages/customer-center.js:198:    return renderEmptyState("No ticket snapshots available", "Support ticket and SLA records will appear here when the read-only projection includes them. No ticket creation or update is available from this page.");
+public/control-center/pages/customer-center.js:215:    return renderEmptyState("No channel readiness records", "Provider readiness for email, social messaging, CRM, voice, and IVR will appear here when configured. Send and provider execution remain locked.");
+public/control-center/pages/customer-center.js:222:        <p>${escapeHtml(channel.blocked_reason || "Read-only projection only.")}</p>
+public/control-center/pages/customer-center.js:224:      <span class="card-badge">${channel.external_send_ready ? "Send ready" : "Send locked"}</span>
+public/control-center/pages/customer-center.js:231:    <div class="customer-center-locked-actions" aria-label="Future customer actions locked">
+public/control-center/pages/customer-center.js:232:      <div class="panel-kicker">Execution actions locked</div>
+public/control-center/pages/customer-center.js:233:      <p class="muted">Visible for roadmap clarity only. These customer actions cannot execute here and require future confirmation gates, role permissions, provider readiness, and audit logging.</p>
+public/control-center/pages/customer-center.js:257:        : "Awaiting protected-read load";
+public/control-center/pages/customer-center.js:261:      ? "Customer Center could not load the current read-only projection. Customer execution actions remain unavailable."
+public/control-center/pages/customer-center.js:263:        ? "Customer Center is using read-only projections only. Outbound sends, CRM writes, ticket changes, assignments, calls, IVR, and auto-replies remain unavailable."
+public/control-center/pages/customer-center.js:264:        : "Customer Center will request protected read-only projections when the page initializes. No outbound or mutation action is available.";
+public/control-center/pages/customer-center.js:272:          <p class="muted">Fetching read-only customer projections.</p>
+public/control-center/pages/customer-center.js:283:        <p class="mhos-context-description">Protected-read customer communication surface for inbox visibility, conversation previews, ticket/SLA state, channel readiness, and handoff preparation. No customer execution happens here.</p>
+public/control-center/pages/customer-center.js:286:        <button class="btn btn-secondary" type="button" data-customer-center-action="refresh">Refresh read-only data</button>
+public/control-center/pages/customer-center.js:295:      ${renderMetric("Channels", channels.length || "0", "Send locked")}
+public/control-center/pages/customer-center.js:306:        <p class="muted">This page can review customer context and prepare handoffs. Any future customer-facing action must happen in an owning workflow with confirmation, permissions, and audit logging.</p>
+public/control-center/pages/customer-center.js:318:          <article class="ops-list-item"><div><strong>CRM / Ticket / Assignment writes</strong><p>CRM notes, ticket updates, review marks, and ownership changes require future confirmation gates.</p></div><span class="card-badge">Locked</span></article>
+public/control-center/pages/customer-center.js:354:        <p class="muted">These buttons prepare navigation/context handoffs only. They do not send customer messages, contact providers, update CRM, change tickets, assign conversations, or mark records reviewed.</p>
+public/control-center/pages/customer-center.js:365:        <p class="muted">AI may summarize read-only context, draft response guidance, translate, and suggest next steps for a human handoff. It must not send replies, update CRM, close tickets, assign conversations, place calls, trigger IVR, sync providers, or start auto-reply.</p>
+public/control-center/pages/customer-center.js:375:    "This prepares review context only. It does not send customer messages, update CRM, change tickets, contact providers, or execute AI automatically.",
+public/control-center/pages/customer-center.js:397:      context.showMessage?.("Customer Center read-only data refreshed.");
+public/control-center/pages/customer-center.js:404:        "This will attach a read-only Customer Center prompt and open AI Command for review."
+public/control-center/pages/customer-center.js:411:        prompt: "Review Customer Center read-only state. Summarize customer support risks, draft safe reply guidance, and identify escalation needs. Do not send replies or mutate CRM."
+public/control-center/pages/operations-centers.js:44:  if (["critical", "failed", "blocked", "overdue"].includes(normalized)) return "danger";
+public/control-center/pages/operations-centers.js:177:        prompt: `Review the current task backlog for ${projectLabel}. Prioritize the next work based on blocked items, due-state, ownership, and operational impact.`
+public/control-center/pages/operations-centers.js:187:        prompt: `Summarize execution risk in Task Center for ${projectLabel}. Focus on overdue, due soon, blocked, and ownership concentration risk.`
+public/control-center/pages/operations-centers.js:529:              <span class="std-context-chip mhos-os-chip is-warning"><span>Blocked</span><strong>${escapeHtml(formatCount(taskCenter.blocked_count))}</strong></span>
+public/control-center/pages/operations-centers.js:561:              { value: "blocked", label: "Blocked", count: formatCount(taskCenter.blocked_count) },
+public/control-center/pages/operations-centers.js:709:  if (session.focus === "blocked") items = items.filter((item) => asString(item.status) === "blocked");
+runtime/orchestrator-service/server.js:316:    blocked: productionMode && bypassFlags.length > 0,
+runtime/orchestrator-service/server.js:323:  if (!result.blocked) {
+runtime/orchestrator-service/server.js:329:    `Production startup blocked: bypass environment flags are not allowed in production (${flagList})`
+runtime/orchestrator-service/server.js:2016:    result.status = 'blocked';
+runtime/orchestrator-service/server.js:2072:  const rendered = readiness.status !== 'blocked' ? getLatestRenderedOutput(projectName) : null;
+runtime/orchestrator-service/server.js:2155:  if (packageData.status === 'blocked') {
+runtime/orchestrator-service/server.js:2606:  fidelity_mode: 'real_asset_locked',
+runtime/orchestrator-service/server.js:2607:  product_locked: true,
+runtime/orchestrator-service/server.js:2608:  logo_locked: true
+runtime/orchestrator-service/server.js:2674:    result.status = 'blocked';
+runtime/orchestrator-service/server.js:2679:    result.status = 'blocked';
+runtime/orchestrator-service/server.js:2684:    result.status = 'blocked';
+runtime/orchestrator-service/server.js:2689:    result.status = 'blocked';
+runtime/orchestrator-service/server.js:2694:    result.status = 'blocked';
+runtime/orchestrator-service/server.js:2728:      status: 'send_blocked',
+runtime/orchestrator-service/server.js:4129:  if (['failed', 'error', 'blocked', 'rejected'].includes(normalized)) return 'failed';
+runtime/orchestrator-service/server.js:5032:    result.status = 'blocked';
+runtime/orchestrator-service/server.js:5049:    result.mode = 'blocked';
+runtime/orchestrator-service/server.js:5108:    result.status = 'blocked';
+runtime/orchestrator-service/server.js:5123:    result.mode = 'blocked';
+runtime/orchestrator-service/server.js:8596:  if (['needs_review', 'review', 'blocked', 'rejected'].includes(explicitStatus)) {
+runtime/orchestrator-service/server.js:12982:// Canonical Control Center Customer Operations read-only projection routes.
+runtime/orchestrator-service/server.js:12984:// They do not send customer replies, mutate CRM, create/update tickets, assign conversations,
+runtime/orchestrator-service/server.js:12985:// place calls, trigger IVR, send provider messages, or auto-reply.
+runtime/orchestrator-service/server.js:15449:    appLogger.warn('governance_blocked', {
+runtime/orchestrator-service/server.js:15462:      'Publishing is frozen by governance policy. The requested publishing mutation was blocked.',
+runtime/orchestrator-service/server.js:22789:      job.locked_at = lockTimestamp;
+runtime/orchestrator-service/server.js:22790:      job.locked_by = workerId;
+runtime/orchestrator-service/server.js:22797:    // Phase 2: execute locked jobs and update status
+runtime/orchestrator-service/server.js:22799:      if (job.status !== 'running' || job.locked_by !== workerId) continue;
+runtime/orchestrator-service/server.js:22808:        job.locked_at = null;
+runtime/orchestrator-service/server.js:22809:        job.locked_by = null;
+runtime/orchestrator-service/server.js:22851:        job.locked_at = null;
+runtime/orchestrator-service/server.js:22852:        job.locked_by = null;
+runtime/orchestrator-service/lib/security/provider-execution-gate.js:144:    reason = "blocked_until_configured";
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:20:  code: "governance_policy_blocked",
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:21:  message: "This backend action is blocked by the active governance policy."
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:184:    decision: responsePayload.code === "governance_policy_blocked" ? "policy_blocked" : "approval_required",
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:513:      "policy_blocked_for_admin_mutation",
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:82:      status: "blocked",
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:92:      status: "blocked_sensitive_mutation_unauthorized",
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:102:      status: "blocked",
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:103:      reason: "critical_public_mutation_alias_blocked",
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:209:  if (destructive) return "require_dual_confirmation_and_audit";
+runtime/orchestrator-service/lib/execution/scheduler-helpers.js:18:  if (!job.locked_at) return false;
+runtime/orchestrator-service/lib/execution/scheduler-helpers.js:19:  const lockedAt = new Date(job.locked_at).getTime();
+runtime/orchestrator-service/lib/execution/scheduler-helpers.js:20:  return !isNaN(lockedAt) && (Date.now() - lockedAt) > lockTimeoutMs;
+runtime/orchestrator-service/lib/execution/scheduler-helpers.js:55:    locked_at: null,
+runtime/orchestrator-service/lib/execution/scheduler-helpers.js:56:    locked_by: null,
+runtime/orchestrator-service/lib/ops/backbone.js:93:    statuses: ['open', 'queued', 'in_progress', 'blocked', 'completed', 'cancelled'],
+runtime/orchestrator-service/lib/ops/backbone.js:94:    lifecycle: ['open', 'active', 'blocked', 'done', 'closed'],
+runtime/orchestrator-service/lib/ops/backbone.js:1460:      message: 'Publishing item has no schedule locked.'
+runtime/orchestrator-service/lib/ops/backbone.js:2464:      status === 'completed' ? 'done' : status === 'blocked' ? 'blocked' : ['queued', 'in_progress'].includes(status) ? 'active' : 'open'
+runtime/orchestrator-service/lib/ops/backbone.js:3340:  if (['blocked', 'failed', 'escalated', 'critical'].includes(normalized)) return 0;
+runtime/orchestrator-service/lib/ops/backbone.js:3452:    blocked_count: items.filter((item) => item.status === 'blocked').length,
+runtime/orchestrator-service/lib/ops/backbone.js:4020:      blocked_count: tasks.filter((item) => asString(item.status) === 'blocked').length,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:324:      "Do not send customer replies or mutate tickets from chat; prepare safe drafts and guidance only."
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:329:      "Do not update CRM, send outreach, or schedule follow-ups from chat; prepare drafts and next-step guidance only."
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:64:      'External send is locked for Customer Center v1.'
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:67:      'Customer Center read model is preview-first and read-only.',
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:237:    blocked_reason: 'External send, voice, IVR, and CRM mutation are locked for Customer Center v1.'
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js:83:      requires_confirmation_for_actions: true

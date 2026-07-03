@@ -1,0 +1,301 @@
+### frontend API exact customer operations references
+887:    readiness: payload?.readiness || null,
+938:      readiness: {
+939:        readiness_score: 0,
+1101:  const requiredSections = ["overview", "readiness", "assets"];
+1197:    readiness: requiredData.readiness,
+2265:    `/media-manager/project/${encodeURIComponent(projectName)}/handoffs${suffix}`,
+2266:    "Failed to load handoffs"
+2276:    `/media-manager/project/${encodeURIComponent(projectName)}/handoffs`,
+2279:    "Failed to create handoff"
+2283:export async function consumeProjectHandoff(projectName, handoffId, payload = {}) {
+2288:  if (!handoffId) {
+2289:    throw new Error("Missing handoff id");
+2293:    `/media-manager/project/${encodeURIComponent(projectName)}/handoffs/${encodeURIComponent(handoffId)}/consume`,
+2296:    "Failed to consume handoff"
+2362:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/readiness`);
+2366:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/inbox`);
+2370:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/conversations`);
+2373:export async function fetchCustomerConversationDetail(projectName, conversationId) {
+2374:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/conversations/${encodeURIComponent(conversationId)}`);
+2377:export async function fetchCustomerConversationMessages(projectName, conversationId) {
+2378:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/conversations/${encodeURIComponent(conversationId)}/messages`);
+2381:export async function fetchCustomerProfilePreview(projectName, customerId) {
+2382:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/customers/${encodeURIComponent(customerId)}`);
+2386:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/tickets`);
+2390:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/channels`);
+
+### backend exact customer operations route references
+141:} = require('./lib/customer-operations/customer-operations-runtime');
+153:} = require('./lib/media/native/providers/provider-readiness');
+188:const customerCenterProjection = require('./lib/customer-operations/projections/customer-center-projection');
+1210:  channels: {
+1211:    legacy: 'channels',
+1212:    canonical: 'channels'
+1888:  let readiness = 'not_ready';
+1890:    readiness = 'insufficient_data';
+1898:    readiness = 'safe_to_audit_phase4';
+1904:    readiness = 'partial_more_stabilization_needed';
+1925:    readiness
+2007:    readiness: {
+2071:  const readiness = evaluateEmailReadiness(projectName);
+2072:  const rendered = readiness.status !== 'blocked' ? getLatestRenderedOutput(projectName) : null;
+2077:    status: readiness.status,
+2078:    blocking_reasons: readiness.blocking_reasons,
+2079:    warnings: readiness.warnings,
+2080:    checks: readiness.checks,
+2724:  const readiness = evaluatePreparedEmailForSend(projectName);
+2726:  if (readiness.status !== 'ready_for_send') {
+2730:      package_id: readiness.package_id,
+2731:      blocking_reasons: readiness.blocking_reasons
+2962:    domain: 'channels',
+2965:  const baseDir = path.join(resolution.activeReadPath, 'channels', 'meta');
+3124:    domain: 'channels',
+3136:    domain: 'channels',
+3141:    requestedFile: 'channels/meta/packages/*.json'
+3157:    domain: 'channels',
+3160:  const baseDir = path.join(resolution.activeReadPath, 'channels');
+3245:    domain: 'channels',
+3257:    domain: 'channels',
+3262:    requestedFile: 'channels/tiktok/*.json'
+3405:    domain: 'channels',
+3417:    domain: 'channels',
+3422:    requestedFile: 'channels/youtube/*.json'
+3438:    domain: 'channels',
+3441:  const baseDir = path.join(resolution.activeReadPath, 'channels');
+3564:    domain: 'channels',
+3619:    domain: 'channels',
+3645:          domain: 'channels',
+3650:          requestedFile: 'channels/marketplace/amazon/*.json'
+3655:          domain: 'channels',
+3660:          requestedFile: 'channels/marketplace/ebay/*.json'
+3942:    channels: ['instagram', 'tiktok', 'facebook', 'email'],
+4117:      'ready_for_manual_handoff',
+4746:    channels: []
+4754:    result.channels.push({
+5020:  const readiness = context.readiness;
+5031:  if (!readiness.has_logo) {
+5037:    if (!readiness.has_product) {
+5042:    if (!readiness.has_packaging) {
+5206:  const readinessCheck = evaluateExecutionReadiness(projectName, assetType);
+5213:    status: readinessCheck.status,
+5214:    mode: readinessCheck.mode,
+5215:    blocking_reasons: readinessCheck.blocking_reasons,
+5216:    warnings: readinessCheck.warnings,
+5312:    readiness: {
+5372:    readiness: context.readiness,
+5679:    readiness: null,
+5711:    payload.errors.readiness = message;
+5721:    readiness: buildProjectControlCenterReadiness,
+6553:  const socialChannels = normalizeSetupListValue(projectData.social_channels || projectData.social_links);
+6574:    social_channels: socialChannels,
+6750:  const socialChannels = normalizeSetupListValue(projectData.social_channels || projectData.social_links);
+6840:    default_channels: ['website', 'instagram', 'facebook'],
+6850:      'connect_primary_channels',
+6860:      default_channels: ['website', 'woocommerce', 'instagram', 'facebook', 'google', 'tiktok'],
+6867:      recommended_integrations: ['woocommerce', 'google', 'meta', 'tiktok', 'email_crm']
+6873:      default_channels: ['instagram', 'tiktok', 'youtube', 'spotify', 'website'],
+6886:      default_channels: ['instagram', 'tiktok', 'google_business', 'website', 'facebook'],
+6899:      default_channels: ['website', 'facebook', 'instagram', 'google', 'crm'],
+6905:      starter_checklist: ['add_property_data', 'upload_property_media', 'define_lead_flow', 'connect_crm', 'create_listing_campaign'],
+6906:      recommended_integrations: ['website', 'crm', 'google', 'meta', 'email_crm']
+6912:      default_channels: ['website', 'google_business', 'instagram', 'facebook'],
+6919:      recommended_integrations: ['website', 'google_business', 'meta', 'email_crm']
+6925:      default_channels: ['instagram', 'tiktok', 'google_business', 'website', 'facebook'],
+6938:      default_channels: ['website', 'linkedin', 'instagram', 'facebook'],
+6944:      starter_checklist: ['define_services', 'add_case_studies', 'define_lead_offer', 'connect_crm', 'create_lead_campaign'],
+6945:      recommended_integrations: ['website', 'linkedin', 'meta', 'google', 'crm']
+6951:      default_channels: ['google_business', 'website', 'instagram', 'facebook'],
+6993:    default_channels: businessTemplate.default_channels,
+7064:    social_channels: normalizeSetupListValue(input.social_channels || input.social_links),
+7309:  const integrationsCompleteness = Number(connectorReadiness.readiness_score || 0);
+7323:    campaign_readiness: campaignReadiness,
+7324:    execution_readiness: executionReadiness,
+7325:    publishing_readiness: publishingReadiness,
+7326:    ai_memory_readiness: aiMemoryReadiness
+7370:  if (domainScores.campaign_readiness < 100) missing.push('campaign_readiness');
+7371:  if (domainScores.execution_readiness < 100) missing.push('execution_readiness');
+7372:  if (domainScores.publishing_readiness < 100) missing.push('publishing_readiness');
+7373:  if (domainScores.ai_memory_readiness < 100) missing.push('ai_memory_readiness');
+7381:  const readinessScore = Math.round((structuralReadinessScore + domainReadinessScore) / 2);
+7386:    readiness_score: readinessScore,
+7387:    structural_readiness_score: structuralReadinessScore,
+7388:    domain_readiness_score: domainReadinessScore,
+7389:    readiness_domains: domainScores,
+7394:    status: readinessScore >= 85 ? 'ready_for_data_upload' : 'needs_input'
+7440:    readiness_status: normalizeSetupTextValue(asset.readiness_status || status) || status,
+7441:    review_status: normalizeSetupTextValue(asset.review_status || asset.readiness_status || status) || status,
+8331:    category_readiness: categoryReadiness,
+8570:    record.readiness_status ||
+9018:    category_readiness: categoryReadiness
+9205:  const readinessScore = Math.round((passedChecks / totalChecks) * 100);
+9210:    readiness_score: readinessScore,
+9391:  const readiness = buildReadinessState();
+9392:  return res.status(readiness.ready ? 200 : 503).json(readiness);
+9395:app.get('/media-manager/project/:project/storage/parity-readiness', (req, res) => {
+9401:      error: error.message || 'Failed to summarize project parity readiness'
+9406:app.get('/public/media-manager/project/:project/storage/parity-readiness', (req, res) => {
+9412:      error: error.message || 'Failed to summarize project parity readiness'
+9417:app.get('/media-manager/storage/parity-readiness', (req, res) => {
+9423:      error: error.message || 'Failed to summarize storage parity readiness'
+9428:app.get('/public/media-manager/storage/parity-readiness', (req, res) => {
+9434:      error: error.message || 'Failed to summarize storage parity readiness'
+10495:    default_channels: businessTemplate.default_channels,
+10521:          default_channels: updated.default_channels,
+10861:      asset.readiness_status = status;
+11015:      asset.readiness_status = 'archived';
+11047:      asset.readiness_status = 'archived';
+11078:      asset.readiness_status = 'archived';
+11208:  const audience = normalizeAiCommandPreviewInput(input.audience || input.target_audience || input.targetAudience, 'Primary customer segment');
+11239:    channels: [channel],
+11248:      `Use customer pain points and product proof before publishing.`,
+11264:      'Destination owner must confirm execution readiness.'
+11302:        `Caption direction: connect ${sourceLabel} to customer need and proof.`
+11351:      no_handoff_created: true,
+12426:      error: error.message || 'Failed to list handoffs'
+12433:    const handoff = createHandoff(req.params.project, req.body || {});
+12435:      handoff,
+12440:      error: error.message || 'Failed to create handoff'
+12447:    const handoff = consumeHandoff(req.params.project, req.params.handoffId, req.body || {});
+12449:      handoff,
+12454:      error: error.message || 'Failed to consume handoff'
+12459:app.get('/media-manager/project/:project/handoffs', handleListHandoffs);
+12460:app.get('/public/media-manager/project/:project/handoffs', handleListHandoffs);
+12461:app.post('/media-manager/project/:project/handoffs', handleCreateHandoff);
+12462:app.post('/public/media-manager/project/:project/handoffs', handleCreateHandoff);
+12463:app.post('/media-manager/project/:project/handoffs/:handoffId/consume', handleConsumeHandoff);
+12464:app.post('/public/media-manager/project/:project/handoffs/:handoffId/consume', handleConsumeHandoff);
+12885:const customerOperationsRuntime =
+12914:      readiness: getProviderReadiness(),
+12919:      error: 'Failed to load native media provider readiness',
+12930:      customerOperationsRuntime.health()
+12934:      error: 'customer_operations_health_failed',
+12943:      customerOperationsRuntime.readiness.snapshot()
+12947:      error: 'customer_operations_readiness_failed',
+12956:      channels:
+12957:        customerOperationsRuntime.channels.list()
+12961:      error: 'customer_operations_channels_failed',
+12970:      inbox:
+12971:        customerOperationsRuntime.unifiedInbox.list()
+12975:      error: 'customer_operations_inbox_failed',
+12984:// They do not send customer replies, mutate CRM, create/update tickets, assign conversations,
+12985:// place calls, trigger IVR, send provider messages, or auto-reply.
+12988:    const runtime = customerOperationsRuntime;
+12996:      error: 'customer_center_projection_failed',
+13002:app.get('/api/projects/:project/customer-operations/readiness', (req, res) => {
+13004:    customerCenterProjection.projectCustomerReadiness(runtime)
+13008:app.get('/api/projects/:project/customer-operations/inbox', (req, res) => {
+13010:    customerCenterProjection.projectInboxEntries(runtime)
+13014:app.get('/api/projects/:project/customer-operations/conversations', (req, res) => {
+13016:    customerCenterProjection.projectConversations(runtime)
+13020:app.get('/api/projects/:project/customer-operations/conversations/:conversationId', (req, res) => {
+13022:    customerCenterProjection.projectConversationDetail(runtime, req.params.conversationId)
+13026:app.get('/api/projects/:project/customer-operations/conversations/:conversationId/messages', (req, res) => {
+13028:    customerCenterProjection.projectConversationMessages(runtime, req.params.conversationId)
+13032:app.get('/api/projects/:project/customer-operations/customers/:customerId', (req, res) => {
+13034:    customerCenterProjection.projectCustomerProfileById(runtime, req.params.customerId)
+13038:app.get('/api/projects/:project/customer-operations/tickets', (req, res) => {
+13040:    customerCenterProjection.projectTickets(runtime)
+13044:app.get('/api/projects/:project/customer-operations/channels', (req, res) => {
+13046:    customerCenterProjection.projectChannels(runtime)
+13052:  '/media-manager/project/:project/customer-operations/health',
+13057:  '/public/media-manager/project/:project/customer-operations/health',
+13062:  '/media-manager/project/:project/customer-operations/readiness',
+13067:  '/public/media-manager/project/:project/customer-operations/readiness',
+13072:  '/media-manager/project/:project/customer-operations/channels',
+13077:  '/public/media-manager/project/:project/customer-operations/channels',
+13082:  '/media-manager/project/:project/customer-operations/inbox',
+13087:  '/public/media-manager/project/:project/customer-operations/inbox',
+13097:      conversations:
+13098:        customerOperationsRuntime.conversations.list()
+13102:      error: 'customer_operations_conversations_failed',
+13111:      messages:
+13112:        customerOperationsRuntime.messages.list()
+13116:      error: 'customer_operations_messages_failed',
+13125:      customers:
+13126:        customerOperationsRuntime.customers.list()
+13130:      error: 'customer_operations_customers_failed',
+13139:      sla:
+13140:        customerOperationsRuntime.sla.list()
+13144:      error: 'customer_operations_sla_failed',
+13154:        customerOperationsRuntime.escalation.list()
+13158:      error: 'customer_operations_escalations_failed',
+13165:  '/media-manager/project/:project/customer-operations/conversations',
+13170:  '/public/media-manager/project/:project/customer-operations/conversations',
+13175:  '/media-manager/project/:project/customer-operations/messages',
+13180:  '/public/media-manager/project/:project/customer-operations/messages',
+13185:  '/media-manager/project/:project/customer-operations/customers',
+13190:  '/public/media-manager/project/:project/customer-operations/customers',
+13195:  '/media-manager/project/:project/customer-operations/sla',
+13200:  '/public/media-manager/project/:project/customer-operations/sla',
+13205:  '/media-manager/project/:project/customer-operations/escalations',
+13210:  '/public/media-manager/project/:project/customer-operations/escalations',
+13217:app.get('/media-manager/project/:project/native-media/providers/readiness', handleGetNativeMediaProviderReadiness);
+13218:app.get('/public/media-manager/project/:project/native-media/providers/readiness', handleGetNativeMediaProviderReadiness);
+13895:      emphasize: ['offer clarity', 'product visibility', 'CTA readiness'],
+15080:      result.execution_status = 'ready_for_manual_handoff';
+15081:      result.action_type = 'manual_marketplace_handoff';
+15082:      result.notes.push('Marketplace payload is ready for manual listing handoff.');
+15646:  const readiness = reviewProjectReadiness(projectName);
+15654:    readiness.readiness_score || 0,
+15655:    connectorReadiness.readiness_score || 0
+15679:    readiness_score: overallScore,
+15680:    readiness_status: overallStatus,
+15682:      base_readiness: readiness,
+15729:      customer_problem: project.audience_problem,
+15733:      social_channels: Array.isArray(project.social_channels) ? project.social_channels : [],
+15734:      channels: Array.isArray(project.social_channels) ? project.social_channels : [],
+15735:      social_links: Array.isArray(project.social_channels) ? project.social_channels : [],
+15741:      readiness_score: dashboard.readiness_score,
+15742:      readiness_status: dashboard.readiness_status,
+15746:      connector_readiness_score: connectorReadiness.readiness_score
+15840:  const categoryReadiness = missingAssets.category_readiness || buildProjectAssetCategoryReadiness(projectName, assets);
+15849:    category_readiness: categoryReadiness,
+15864:  const readiness = reviewProjectConnectorReadiness(projectName);
+15871:    readiness,
+17799:          'reuse high-performing assets across channels'
+19747:        readiness: context.readiness,
+19793:if (command === '/evaluate_execution_readiness') {
+19809:      error: 'Failed to evaluate execution readiness',
+20046:if (command === '/evaluate_email_readiness') {
+20061:      error: 'Failed to evaluate email readiness',
+21582:if (command === '/review_project_readiness') {
+21594:      error: 'Failed to review project readiness',
+21722:if (command === '/review_project_connector_readiness') {
+21734:      error: 'Failed to review project connector readiness',
+21901:if (command === '/project_control_center_readiness') {
+21913:      error: 'Failed to build project control center readiness',
+22558:    readiness: full.readiness,
+22564:      category_readiness: full.assets?.category_readiness || null,
+
+### backend customer operations lib files
+runtime/orchestrator-service/lib/customer-operations/README.md
+runtime/orchestrator-service/lib/customer-operations/channels/README.md
+runtime/orchestrator-service/lib/customer-operations/channels/channel-integration-mapper.js
+runtime/orchestrator-service/lib/customer-operations/channels/register-integration-channel.js
+runtime/orchestrator-service/lib/customer-operations/channels/registry/channel-registry-store.js
+runtime/orchestrator-service/lib/customer-operations/channels/registry/default-channels.js
+runtime/orchestrator-service/lib/customer-operations/contracts/README.md
+runtime/orchestrator-service/lib/customer-operations/contracts/conversation-contract.js
+runtime/orchestrator-service/lib/customer-operations/contracts/customer-profile-contract.js
+runtime/orchestrator-service/lib/customer-operations/contracts/escalation-contract.js
+runtime/orchestrator-service/lib/customer-operations/contracts/message-contract.js
+runtime/orchestrator-service/lib/customer-operations/contracts/sla-policy-contract.js
+runtime/orchestrator-service/lib/customer-operations/contracts/ticket-contract.js
+runtime/orchestrator-service/lib/customer-operations/contracts/unified-inbox-contract.js
+runtime/orchestrator-service/lib/customer-operations/conversations/README.md
+runtime/orchestrator-service/lib/customer-operations/conversations/create-integration-session.js
+runtime/orchestrator-service/lib/customer-operations/conversations/messages/message-store.js
+runtime/orchestrator-service/lib/customer-operations/conversations/store/conversation-store.js
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js
+runtime/orchestrator-service/lib/customer-operations/customers/store/customer-profile-store.js
+runtime/orchestrator-service/lib/customer-operations/escalation/store/escalation-store.js
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js
+runtime/orchestrator-service/lib/customer-operations/registry/README.md
+runtime/orchestrator-service/lib/customer-operations/sla/store/sla-policy-store.js
+runtime/orchestrator-service/lib/customer-operations/tickets/README.md
+runtime/orchestrator-service/lib/customer-operations/tickets/store/ticket-store.js
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/register-integration-inbox.js
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/store/unified-inbox-store.js
+runtime/orchestrator-service/lib/integrations/providers/unsupported.js

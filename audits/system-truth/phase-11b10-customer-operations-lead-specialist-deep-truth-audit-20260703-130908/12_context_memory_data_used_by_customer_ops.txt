@@ -1,0 +1,967 @@
+public/control-center/pages/ai-command.js:12:        selectCurrentProject,
+public/control-center/pages/ai-command.js:13:        selectOperationsSnapshot,
+public/control-center/pages/ai-command.js:14:        selectProjectPayload
+public/control-center/pages/ai-command.js:25:} from "../asset-library.js";
+public/control-center/pages/ai-command.js:69:                summary: "Publishing readiness, schedule review, and handoff preparation.",
+public/control-center/pages/ai-command.js:94:                id: "operations",
+public/control-center/pages/ai-command.js:97:                summary: "Tasks, timelines, handoffs, approvals, and execution plans.",
+public/control-center/pages/ai-command.js:101:                id: "customer_ops",
+public/control-center/pages/ai-command.js:104:                summary: "Inbox review, reply drafts, ticket drafts, SLA risk, and escalation routing.",
+public/control-center/pages/ai-command.js:105:                routeHint: "operations-centers"
+public/control-center/pages/ai-command.js:108:                id: "sales_crm",
+public/control-center/pages/ai-command.js:111:                summary: "Lead qualification, outreach drafts, follow-up cadence, and CRM handoff notes.",
+public/control-center/pages/ai-command.js:118:	executive: "operations",
+public/control-center/pages/ai-command.js:129:	customer_operations: "customer_ops",
+public/control-center/pages/ai-command.js:130:	customer_ops: "customer_ops",
+public/control-center/pages/ai-command.js:131:	support: "customer_ops",
+public/control-center/pages/ai-command.js:132:	sales: "sales_crm",
+public/control-center/pages/ai-command.js:133:	crm: "sales_crm",
+public/control-center/pages/ai-command.js:134:	sales_crm: "sales_crm",
+public/control-center/pages/ai-command.js:135:	admin: "operations"
+public/control-center/pages/ai-command.js:163:		canHelp: ["Draft captions and hooks", "Write email copy", "Create landing page text", "Prepare publisher handoff", "Suggest message variants"],
+public/control-center/pages/ai-command.js:164:		cannotDo: ["Publish directly", "Approve risky claims", "Invent unsupported facts", "Run workflows automatically"],
+public/control-center/pages/ai-command.js:176:		canHelp: ["Write creative briefs", "Advise on visual direction", "Map format requirements", "Review brand alignment", "Prepare media handoffs"],
+public/control-center/pages/ai-command.js:200:		summary: "Publishing readiness, schedule review, and handoff preparation.",
+public/control-center/pages/ai-command.js:201:		placeholder: "Ask the Publisher to review publishing readiness, check scheduling, or prepare a handoff package…",
+public/control-center/pages/ai-command.js:202:		canHelp: ["Review publishing readiness", "Check scheduled jobs", "Prepare handoff packages", "Map publishing dependencies", "Flag pre-publish risks"],
+public/control-center/pages/ai-command.js:248:		id: "operations",
+public/control-center/pages/ai-command.js:252:		summary: "Tasks, timelines, handoffs, approvals, and execution plans.",
+public/control-center/pages/ai-command.js:253:		placeholder: "Ask the Operations Lead to turn this into tasks, workflow steps, or handoffs…",
+public/control-center/pages/ai-command.js:254:		canHelp: ["Create task plans", "Map execution sequences", "Prepare workflow handoffs", "Review execution health", "Identify operational blockers"],
+public/control-center/pages/ai-command.js:255:		cannotDo: ["Run workflows without confirmation", "Auto-approve tasks", "Override authority gates", "Execute backend operations directly"],
+public/control-center/pages/ai-command.js:257:		safetyNote: "Task plans and handoffs only. Workflow execution requires explicit user confirmation.",
+public/control-center/pages/ai-command.js:261:		id: "customer_ops",
+public/control-center/pages/ai-command.js:265:		summary: "Inbox review, reply drafts, ticket drafts, SLA risk, customer profile context, and escalation routing.",
+public/control-center/pages/ai-command.js:266:		placeholder: "Ask the Customer Operations Lead to summarize a customer thread, draft a safe reply, prepare a ticket draft, check SLA risk, or route an escalation for review…",
+public/control-center/pages/ai-command.js:267:		canHelp: ["Review inbox context", "Summarize customer threads", "Draft safe replies", "Prepare ticket drafts", "Flag SLA and escalation risk"],
+public/control-center/pages/ai-command.js:268:		cannotDo: ["Send customer replies", "Create live tickets", "Change SLA policy", "Escalate without confirmation"],
+public/control-center/pages/ai-command.js:270:		safetyNote: "Customer operations outputs are drafts only. Sending replies, ticket creation, and escalations require confirmation in the owning surface.",
+public/control-center/pages/ai-command.js:274:		id: "sales_crm",
+public/control-center/pages/ai-command.js:278:		summary: "Lead qualification, outreach drafts, follow-up cadence, CRM profile summaries, and sales handoff notes.",
+public/control-center/pages/ai-command.js:279:		placeholder: "Ask the Sales / CRM Lead to qualify a lead, draft outreach, plan follow-ups, summarize CRM context, or prepare a sales handoff for review…",
+public/control-center/pages/ai-command.js:280:		canHelp: ["Qualify lead context", "Draft outreach", "Plan follow-up sequences", "Summarize CRM profiles", "Prepare sales handoffs"],
+public/control-center/pages/ai-command.js:293:		{ label: "Review launch readiness", sub: "Identify what is blocking launch" },
+public/control-center/pages/ai-command.js:299:		{ label: "Prepare a Publisher handoff", sub: "Package ready content for review" },
+public/control-center/pages/ai-command.js:306:		{ label: "Prepare a media handoff", sub: "Package direction for the team" }
+public/control-center/pages/ai-command.js:315:		{ label: "Review publishing readiness", sub: "Check what is ready to publish" },
+public/control-center/pages/ai-command.js:318:		{ label: "Prepare a handoff package", sub: "For the approver review" }
+public/control-center/pages/ai-command.js:338:	operations: [
+public/control-center/pages/ai-command.js:340:		{ label: "Draft a workflow handoff", sub: "Prepare for the next owner" },
+public/control-center/pages/ai-command.js:344:	customer_ops: [
+public/control-center/pages/ai-command.js:345:		{ label: "Summarize customer thread", sub: "Capture issue, tone, and next reply" },
+public/control-center/pages/ai-command.js:346:		{ label: "Draft customer reply", sub: "Safe response for review" },
+public/control-center/pages/ai-command.js:347:		{ label: "Check SLA risk", sub: "Flag urgency and escalation path" },
+public/control-center/pages/ai-command.js:348:		{ label: "Prepare escalation", sub: "Route support, sales, or operations" }
+public/control-center/pages/ai-command.js:350:	sales_crm: [
+public/control-center/pages/ai-command.js:353:		{ label: "Build follow-up sequence", sub: "Multi-step sales cadence" },
+public/control-center/pages/ai-command.js:354:		{ label: "Prepare sales handoff", sub: "Route context to operations" }
+public/control-center/pages/ai-command.js:362:	{ label: "Prepare a full handoff sequence", sub: "Strategy, creative, compliance, publishing, ops" },
+public/control-center/pages/ai-command.js:363:	{ label: "Review customer and sales impact", sub: "Customer Ops, Sales / CRM, Operations" }
+public/control-center/pages/ai-command.js:370:	{ id: "draft", title: "Prepare", description: "Create guidance, copy, task, or handoff context." },
+public/control-center/pages/ai-command.js:371:	{ id: "review", title: "Review", description: "Check safety, scope, language, and source." },
+public/control-center/pages/ai-command.js:374:	{ id: "monitor", title: "Monitor", description: "Track readiness, integrations, and recent activity." }
+public/control-center/pages/ai-command.js:381:	{ id: "handoff", label: "Handoff Preview", helper: "Destination package" },
+public/control-center/pages/ai-command.js:397:	operations: "OL",
+public/control-center/pages/ai-command.js:398:	customer_ops: "CO",
+public/control-center/pages/ai-command.js:399:	sales_crm: "SC"
+public/control-center/pages/ai-command.js:419:		summary: "Market, evidence, competitor, and proof research will prepare source packs only."
+public/control-center/pages/ai-command.js:433:		{ id: "funnel-mapping", label: "Funnel Mapping", action: "preview", intent: "guidance", template: "Map the funnel for {project}. Include awareness, consideration, conversion, retention, and handoff points." },
+public/control-center/pages/ai-command.js:440:		{ id: "publisher-package", label: "Publisher Package", action: "preview", intent: "handoff", template: "Prepare a Publisher handoff for {project}. Include German copy package, CTA, notes, and remaining checks." }
+public/control-center/pages/ai-command.js:454:		{ id: "map-video-asset-needs", label: "Map video asset needs", action: "preview", intent: "task", template: "Map video asset needs for {project}. Include format, source, and production owner." }
+public/control-center/pages/ai-command.js:457:		{ id: "publishing-checklist", label: "Publishing Checklist", action: "preview", intent: "handoff", template: "Build a publishing checklist for {project}. Include German copy, assets, claims checks, and channel readiness." },
+public/control-center/pages/ai-command.js:458:		{ id: "final-packaging", label: "Final Packaging", action: "preview", intent: "handoff", template: "Prepare a final publishing package for {project}. Include copy, CTA, asset notes, approvals, and destination channel." },
+public/control-center/pages/ai-command.js:478:		{ id: "claims-check", label: "Claims Check", action: "preview", intent: "guidance", template: "Review marketing claims for {project}. Flag unsupported, high-risk, or evidence-dependent wording." },
+public/control-center/pages/ai-command.js:480:		{ id: "safety-checklist", label: "Safety Checklist", action: "preview", intent: "handoff", template: "Prepare a safety checklist for {project}. Include policy checks, evidence required, and approval notes." },
+public/control-center/pages/ai-command.js:481:		{ id: "publish-readiness", label: "Publish Readiness", action: "preview", intent: "handoff", template: "Review publish readiness for {project}. Confirm what needs human approval before release." },
+public/control-center/pages/ai-command.js:484:	operations: [
+public/control-center/pages/ai-command.js:486:		{ id: "handoff-routing", label: "Handoff Routing", action: "preview", intent: "handoff", template: "Prepare handoff routing for {project}. Include source, destination, decision gates, and required confirmations." },
+public/control-center/pages/ai-command.js:491:	customer_ops: [
+public/control-center/pages/ai-command.js:492:		{ id: "review-unified-inbox", label: "Review Unified Inbox", action: "preview", intent: "guidance", template: "Review the Unified Inbox readiness for {project}. Summarize visible customer-operation signals, open gaps, and safe next review steps. Do not claim inbox actions happened." },
+public/control-center/pages/ai-command.js:493:		{ id: "summarize-customer-thread", label: "Summarize Customer Thread", action: "preview", intent: "guidance", template: "Summarize this customer thread for {project}. Include customer issue, sentiment, reply goal, missing details, and safe next step." },
+public/control-center/pages/ai-command.js:494:		{ id: "draft-customer-reply", label: "Draft Customer Reply", action: "preview", intent: "guidance", template: "Draft a customer reply for {project}. Keep it helpful, calm, review-ready, and do not claim any operational action has been completed." },
+public/control-center/pages/ai-command.js:495:		{ id: "create-ticket-draft", label: "Create Ticket Draft", action: "preview", intent: "task", template: "Create a ticket draft for {project}. Include issue, priority, owner suggestion, evidence needed, and next safe action." },
+public/control-center/pages/ai-command.js:496:		{ id: "check-sla-risk", label: "Check SLA Risk", action: "preview", intent: "guidance", template: "Check SLA risk for {project}. Flag urgency, risk level, missing runtime data, and escalation recommendation for review." },
+public/control-center/pages/ai-command.js:497:		{ id: "prepare-escalation", label: "Prepare Escalation", action: "preview", intent: "handoff", template: "Prepare an escalation draft for {project}. Include reason, customer impact, owner, confirmation needed, and destination team." },
+public/control-center/pages/ai-command.js:498:		{ id: "customer-profile-snapshot", label: "Customer Profile Snapshot", action: "preview", intent: "guidance", template: "Prepare a customer profile snapshot for {project}. Include known context, purchase/support signals, missing fields, and safe follow-up questions." },
+public/control-center/pages/ai-command.js:499:		{ id: "route-support-sales-ops", label: "Route to Support / Sales / Operations", action: "preview", intent: "handoff", template: "Prepare routing guidance for {project}. Decide whether the customer item belongs with Support, Sales, or Operations, and explain the review gate." }
+public/control-center/pages/ai-command.js:501:	sales_crm: [
+public/control-center/pages/ai-command.js:505:		{ id: "crm-profile-summary", label: "CRM Profile Summary", action: "preview", intent: "guidance", template: "Summarize the CRM profile context for {project}. Include fit, history, open questions, and next sales action without mutating CRM data." },
+public/control-center/pages/ai-command.js:508:		{ id: "influencer-lead-plan", label: "Influencer Lead Plan", action: "preview", intent: "workflow", template: "Prepare an influencer lead plan for {project}. Include target profile, outreach angle, qualification criteria, and handoff path." },
+public/control-center/pages/ai-command.js:509:		{ id: "sales-handoff-draft", label: "Sales Handoff", action: "preview", intent: "handoff", template: "Prepare a sales handoff draft for {project}. Include lead context, recommended next action, owner, and confirmation needed." }
+public/control-center/pages/ai-command.js:518:	{ icon: "🔧", label: "Fix Readiness", sub: "Close critical gaps", template: "What are the critical readiness gaps for {project} and what exactly needs to be done to fix them?" }
+public/control-center/pages/ai-command.js:543:	"Launch readiness",
+public/control-center/pages/ai-command.js:557:		suggestedPrompt: "Act as Strategist and propose the next campaign move based on current readiness and integrations."
+public/control-center/pages/ai-command.js:576:		purpose: "Align media formats with channels, cadence, and readiness.",
+public/control-center/pages/ai-command.js:585:		suggestedPrompt: "Act as Ads Specialist and propose paid experiments based on current readiness and data coverage."
+public/control-center/pages/ai-command.js:602:		id: "operations",
+public/control-center/pages/ai-command.js:604:		purpose: "Translate intent into executable workflows and handoffs.",
+public/control-center/pages/ai-command.js:626:			SPECIALIST_DEFS.find((s) => s.id === "operations") ||
+public/control-center/pages/ai-command.js:640:		if (/act as the operations lead/i.test(text)) return "operations";
+public/control-center/pages/ai-command.js:641:		if (/act as the customer operations lead|act as customer ops/i.test(text)) return "customer_ops";
+public/control-center/pages/ai-command.js:642:		if (/act as the sales|act as the crm|sales \/ crm lead/i.test(text)) return "sales_crm";
+public/control-center/pages/ai-command.js:645:		if (classified.resolvedModeId && classified.resolvedModeId !== "operations") {
+public/control-center/pages/ai-command.js:762:    "Prepare a handoff summary for:",
+public/control-center/pages/ai-command.js:768:    "Fix readiness for:"
+public/control-center/pages/ai-command.js:840:function getWorkspaceLanguagePlan(aiContext = {}) {
+public/control-center/pages/ai-command.js:841:	const overview = asObject(aiContext.overview);
+public/control-center/pages/ai-command.js:842:	const rawMarket = asString(aiContext.market || overview.market || "").trim();
+public/control-center/pages/ai-command.js:852:	const conversationLanguage = asString(
+public/control-center/pages/ai-command.js:853:		overview.conversation_language ||
+public/control-center/pages/ai-command.js:860:		conversationLanguage,
+public/control-center/pages/ai-command.js:912:			modeId: "operations",
+public/control-center/pages/ai-command.js:1114:        const source = compact || text;
+public/control-center/pages/ai-command.js:1115:        return source.length > 38 ? `${source.slice(0, 35).trim()}...` : source;
+public/control-center/pages/ai-command.js:1198:        session.modeId = asString(record.modeId || session.modeId || "operations");
+public/control-center/pages/ai-command.js:1232:			"When the request touches inbox, tickets, leads, outreach, or CRM, include Customer Ops -> Sales/CRM -> Operations.",
+public/control-center/pages/ai-command.js:1241:		`User conversation language: ${safeLanguage}`,
+public/control-center/pages/ai-command.js:1246:                `Use ${safeOutputLanguage} only for customer-facing or publishable copy such as captions, ads, emails, landing pages, final campaign text, or publishing packages.`,
+public/control-center/pages/ai-command.js:1299:	const rawId = getAiRoomRoleId(specialistId || "operations");
+public/control-center/pages/ai-command.js:1310:	if (id === "operations") return outputType === "task" ? "task-center" : "workflows";
+public/control-center/pages/ai-command.js:1311:	if (id === "customer_ops") return outputType === "task" ? "task-center" : "operations-centers";
+public/control-center/pages/ai-command.js:1312:	if (id === "sales_crm") return "workflows";
+public/control-center/pages/ai-command.js:1318:        const specialistId = getAiRoomRoleId(session?.modeId || "operations");
+public/control-center/pages/ai-command.js:1336:                                : activeTab === "handoff"
+public/control-center/pages/ai-command.js:1337:                                        ? "handoff"
+public/control-center/pages/ai-command.js:1341:        const looksTaskLike = /\b(task|tasks|handoff|ticket|tickets|follow-up|follow up|owner|owners|assignee|assigned|due date|priority|priorities|backlog|checklist|next task|action item|action items)\b/.test(text);
+public/control-center/pages/ai-command.js:1350:        if (outputType === "handoff" || outputType === "task" || looksTaskLike) {
+public/control-center/pages/ai-command.js:1393:        const destinationRoute = explicitDestination || destinationRouteForSpecialist(session?.modeId || "operations", outputType);
+public/control-center/pages/ai-command.js:1407:		"operations-centers": "Operations Centers",
+public/control-center/pages/ai-command.js:1418:	const specialistId = asString(specialist?.id || "operations");
+public/control-center/pages/ai-command.js:1429:		confirmationRequired: outputType === "handoff" || specialistId === "publisher" || specialistId === "compliance_reviewer",
+public/control-center/pages/ai-command.js:1431:		sourcePrompt: promptSnippet,
+public/control-center/pages/ai-command.js:1458:				"Strategic priorities aligned to current readiness",
+public/control-center/pages/ai-command.js:1485:				"Use Arabic freely in the conversation; publishable copy should be reviewed in German.",
+public/control-center/pages/ai-command.js:1537:			title: outputType === "handoff" ? "Handoff Preview: Publishing package" : "Publishing Draft: Readiness checklist",
+public/control-center/pages/ai-command.js:1541:				"Publishing remains gated until channel, approval, and asset readiness are confirmed."
+public/control-center/pages/ai-command.js:1544:				"Validate asset and copy readiness",
+public/control-center/pages/ai-command.js:1547:				"Prepare handoff for publishing review"
+public/control-center/pages/ai-command.js:1588:				"Signals to check: readiness, channel performance, data coverage",
+public/control-center/pages/ai-command.js:1612:	if (specialistId === "customer_ops") {
+public/control-center/pages/ai-command.js:1615:			title: outputType === "task" ? "Ticket Draft: Customer operations follow-up" : "Customer Ops Draft: Thread, reply, and routing",
+public/control-center/pages/ai-command.js:1616:			summary: "Customer operations draft prepared with safe reply language, ticket notes, SLA review, and escalation guardrails.",
+public/control-center/pages/ai-command.js:1617:			mainOutput: "Review the customer context, confirm missing details, then route the draft through the owning support, sales, or operations surface.",
+public/control-center/pages/ai-command.js:1619:				"Thank the customer, acknowledge the issue, and confirm the next reviewed support step.",
+public/control-center/pages/ai-command.js:1622:			ticketDraft: [
+public/control-center/pages/ai-command.js:1623:				"Issue summary: customer concern or request captured for review.",
+public/control-center/pages/ai-command.js:1624:				"Priority: draft priority pending runtime inbox and SLA confirmation.",
+public/control-center/pages/ai-command.js:1625:				"Owner: support, sales, or operations to be confirmed before creation."
+public/control-center/pages/ai-command.js:1629:				"SLA and escalation decisions require confirmation in the owning operations surface."
+public/control-center/pages/ai-command.js:1631:			nextStep: "Review the draft, confirm the destination team, then route through support, sales, or operations.",
+public/control-center/pages/ai-command.js:1633:				"Summarize the customer thread",
+public/control-center/pages/ai-command.js:1634:				"Draft a safe customer reply",
+public/control-center/pages/ai-command.js:1635:				"Create ticket draft fields for review",
+public/control-center/pages/ai-command.js:1636:				"Confirm escalation or routing before action"
+public/control-center/pages/ai-command.js:1639:			safetyLabel: "No reply sent, ticket created, SLA changed, or escalation triggered."
+public/control-center/pages/ai-command.js:1643:	if (specialistId === "sales_crm") {
+public/control-center/pages/ai-command.js:1646:			title: outputType === "handoff" ? "Sales Handoff" : "Sales / CRM Draft: Lead and outreach plan",
+public/control-center/pages/ai-command.js:1647:			summary: "Sales and CRM draft prepared with lead qualification, outreach direction, follow-up cadence, and pipeline handoff notes.",
+public/control-center/pages/ai-command.js:1648:			mainOutput: "Use this as a sales planning draft. Confirm CRM context and owner before sending outreach or changing pipeline status.",
+public/control-center/pages/ai-command.js:1668:			nextStep: "Review the lead fit, confirm owner, then route the handoff to operations or the CRM surface.",
+public/control-center/pages/ai-command.js:1673:				"Route sales handoff without mutating CRM data"
+public/control-center/pages/ai-command.js:1680:	if (specialistId === "operations") {
+public/control-center/pages/ai-command.js:1690:					"Stage 4: Destination handoff and confirmation"
+public/control-center/pages/ai-command.js:1697:			title: outputType === "handoff" ? "Handoff Preview: Operations package" : "Operations Draft: Task and handoff plan",
+public/control-center/pages/ai-command.js:1702:				"Prepare destination handoff context",
+public/control-center/pages/ai-command.js:1715:		? { id: "operations", label: "Full Team" }
+public/control-center/pages/ai-command.js:1722:		handoff: "handoff"
+public/control-center/pages/ai-command.js:1743:			"Compliance and Publisher verify claims, approvals, formatting, and release readiness",
+public/control-center/pages/ai-command.js:1744:			"Customer Ops and Sales / CRM join when the request touches inbox, tickets, leads, outreach, or CRM"
+public/control-center/pages/ai-command.js:1752:			"Customer Ops / Sales: add reply, ticket, lead, outreach, or CRM handoff drafts when relevant",
+public/control-center/pages/ai-command.js:1753:			"Operations: convert the reviewed output into safe tasks, workflow draft, or handoff context"
+public/control-center/pages/ai-command.js:1757:		confirmationNote: "No task, workflow, outreach, customer reply, CRM update, approval, or publishing action is executed from Full Team mode.",
+public/control-center/pages/ai-command.js:1767:		handoff: "Handoff Preview",
+public/control-center/pages/ai-command.js:1782:		`Source Prompt: ${humanizeValue(output.sourcePrompt)}`,
+public/control-center/pages/ai-command.js:1828:        const sourceText = humanizeValue(
+public/control-center/pages/ai-command.js:1837:        const compactSummary = compactPreviewText(sourceText || summary, 420);
+public/control-center/pages/ai-command.js:1840:        const mainLines = splitPreviewLines(sourceText || summary, 14)
+public/control-center/pages/ai-command.js:1870:function isProviderLikelyConfigured(aiContext) {
+public/control-center/pages/ai-command.js:1871:	const records = asObject(aiContext?.controlCenter?.records);
+public/control-center/pages/ai-command.js:1888:	const readiness = asObject(state.data.readiness);
+public/control-center/pages/ai-command.js:1889:	const readinessDashboard = asObject(readiness.dashboard);
+public/control-center/pages/ai-command.js:1909:	const nextBestActions = asArray(overviewBlock.next_best_actions || readinessDashboard.next_best_actions);
+public/control-center/pages/ai-command.js:1910:	const criticalGaps = asArray(readinessDashboard.priorities?.critical || readiness.priorities?.critical);
+public/control-center/pages/ai-command.js:1911:	const importantGaps = asArray(readinessDashboard.priorities?.important || readiness.priorities?.important);
+public/control-center/pages/ai-command.js:1939:		readinessScore: toNumber(readinessDashboard.readiness_score ?? overview.readiness_score),
+public/control-center/pages/ai-command.js:1940:		readinessStatus: asString(readinessDashboard.readiness_status || overview.readiness_status || "unknown"),
+public/control-center/pages/ai-command.js:1951:		readiness,
+public/control-center/pages/ai-command.js:1952:		readinessDashboard,
+public/control-center/pages/ai-command.js:1983:		sourceSummary: asObject(insights.source_summary || learning.source_summary),
+public/control-center/pages/ai-command.js:2000:		media: ["media", "design", "visual", "creative brief", "format", "brand", "layout", "image direction", "creative direction", "image", "video", "photo", "asset", "library", "gallery", "footage", "visual assets"],
+public/control-center/pages/ai-command.js:2004:		operations: ["task plan", "workflow", "handoff", "approval", "timeline", "execution plan", "route", "publish", "status", "priority", "priorities", "blocking", "blocker", "readiness", "next", "do next"],
+public/control-center/pages/ai-command.js:2005:		customer_ops: ["customer", "support", "inbox", "ticket", "tickets", "sla", "reply", "thread", "escalation", "complaint", "refund"],
+public/control-center/pages/ai-command.js:2006:		sales_crm: ["lead", "leads", "crm", "sales", "outreach", "follow-up", "follow up", "pipeline", "dealer", "salon", "influencer"]
+public/control-center/pages/ai-command.js:2019:	const top = scores[0] || { modeId: selectedModeId || "operations" };
+public/control-center/pages/ai-command.js:2024:		resolvedModeId: top.modeId || selectedModeId || "operations",
+public/control-center/pages/ai-command.js:2041:function buildMissingDataNotes(aiContext, lane) {
+public/control-center/pages/ai-command.js:2043:	const coverage = aiContext.coverage;
+public/control-center/pages/ai-command.js:2060:function buildExecutiveResponse(aiContext) {
+public/control-center/pages/ai-command.js:2061:	const topRecommendation = aiContext.recommendations[0];
+public/control-center/pages/ai-command.js:2063:	if (aiContext.readinessScore != null) summaryParts.push(`Readiness is ${aiContext.readinessScore}/100 (${aiContext.readinessStatus || "in progress"}).`);
+public/control-center/pages/ai-command.js:2064:	if (aiContext.criticalGaps.length) summaryParts.push(`${aiContext.criticalGaps.length} critical gaps are open.`);
+public/control-center/pages/ai-command.js:2065:	if (aiContext.recommendations.length) summaryParts.push(`${aiContext.recommendations.length} recommendations available.`);
+public/control-center/pages/ai-command.js:2070:			aiContext.criticalGaps.length ? `Critical gaps: ${aiContext.criticalGaps.slice(0, 4).map(normalizeActionLabel).join(", ")}.` : "No critical readiness gaps flagged.",
+public/control-center/pages/ai-command.js:2071:			aiContext.missingIntegrations.length ? `Missing intelligence: ${aiContext.missingIntegrations.slice(0, 4).map((item) => item.label).join(", ")}.` : "Intelligence coverage is solid.",
+public/control-center/pages/ai-command.js:2076:			...aiContext.recommendations.slice(1, 3).map((item) => `${item.title}: ${item.action}`)
+public/control-center/pages/ai-command.js:2079:			...aiContext.nextBestActions.slice(0, 4).map((item) => `Resolve ${normalizeActionLabel(item)}.`),
+public/control-center/pages/ai-command.js:2080:			...(aiContext.connectorIssues[0] ? [`Fix ${aiContext.connectorIssues[0].label}: ${aiContext.connectorIssues[0].reason}.`] : [])
+public/control-center/pages/ai-command.js:2084:			routeSuggestion("Integrations", "integrations", "Reconnect data sources and improve intelligence coverage."),
+public/control-center/pages/ai-command.js:2087:		missingData: buildMissingDataNotes(aiContext, "executive")
+public/control-center/pages/ai-command.js:2091:function buildContentResponse(aiContext) {
+public/control-center/pages/ai-command.js:2092:	const top = aiContext.topContent[0];
+public/control-center/pages/ai-command.js:2093:	const weak = aiContext.weakContent[0];
+public/control-center/pages/ai-command.js:2094:	const bestFormat = aiContext.learningPatterns.best_formats?.label;
+public/control-center/pages/ai-command.js:2095:	const bestPlatform = aiContext.learningPatterns.best_platforms?.label;
+public/control-center/pages/ai-command.js:2122:		missingData: buildMissingDataNotes(aiContext, "content")
+public/control-center/pages/ai-command.js:2126:function buildSeoResponse(aiContext) {
+public/control-center/pages/ai-command.js:2127:	const seo = aiContext.seo;
+public/control-center/pages/ai-command.js:2128:	const website = aiContext.website;
+public/control-center/pages/ai-command.js:2146:			aiContext.recommendations.find((item) => item.domain === "seo")?.action || ""
+public/control-center/pages/ai-command.js:2158:		missingData: buildMissingDataNotes(aiContext, "seo")
+public/control-center/pages/ai-command.js:2162:function buildAdsResponse(aiContext) {
+public/control-center/pages/ai-command.js:2163:	const paid = aiContext.paid;
+public/control-center/pages/ai-command.js:2170:			? `Paid media live with ${formatCurrency(paid.summary.spend, aiContext.currency)} tracked spend.`
+public/control-center/pages/ai-command.js:2181:			aiContext.recommendations.find((item) => item.domain === "paid")?.action || ""
+public/control-center/pages/ai-command.js:2193:		missingData: buildMissingDataNotes(aiContext, "ads")
+public/control-center/pages/ai-command.js:2197:function buildResearchResponse(aiContext) {
+public/control-center/pages/ai-command.js:2202:			aiContext.missingIntegrations.length ? `Missing intelligence: ${aiContext.missingIntegrations.map((item) => item.label).join(", ")}.` : "Main intelligence lanes are structurally connected.",
+public/control-center/pages/ai-command.js:2203:			aiContext.criticalGaps.length ? `Critical gaps affecting research quality: ${aiContext.criticalGaps.slice(0, 4).map(normalizeActionLabel).join(", ")}.` : "No major setup gaps blocking research quality.",
+public/control-center/pages/ai-command.js:2204:			aiContext.learningPatterns.best_topics?.label ? `Current system learning: ${aiContext.learningPatterns.best_topics.label}.` : "Learning engine needs more live data."
+public/control-center/pages/ai-command.js:2222:			...buildMissingDataNotes(aiContext, "seo"),
+public/control-center/pages/ai-command.js:2223:			...buildMissingDataNotes(aiContext, "ads"),
+public/control-center/pages/ai-command.js:2224:			...buildMissingDataNotes(aiContext, "content")
+public/control-center/pages/ai-command.js:2229:function buildOperationsTaskBlock(aiContext, message) {
+public/control-center/pages/ai-command.js:2246:function buildOperationsResponse(aiContext, message) {
+public/control-center/pages/ai-command.js:2248:	const taskBlock = buildOperationsTaskBlock(aiContext, message);
+public/control-center/pages/ai-command.js:2255:	if (/reconnect|connect|integration|tool|sync/.test(query)) routeSuggestions.push(routeSuggestion("Integrations", "integrations", "Reconnect data sources and restore intelligence coverage."));
+public/control-center/pages/ai-command.js:2262:			aiContext.criticalGaps.length ? `Unresolved critical gaps: ${aiContext.criticalGaps.slice(0, 3).map(normalizeActionLabel).join(", ")}.` : "No critical gap is blocking this operation.",
+public/control-center/pages/ai-command.js:2263:			aiContext.missingIntegrations.length ? "Intelligence coverage gaps may reduce execution quality." : "Core intelligence is available for routing."
+public/control-center/pages/ai-command.js:2267:			aiContext.recommendations[0]?.action || "Use the current recommendation stack to choose the first high-impact step."
+public/control-center/pages/ai-command.js:2272:		missingData: buildMissingDataNotes(aiContext, "content")
+public/control-center/pages/ai-command.js:2276:function buildResponseForMode(aiContext, classified, message) {
+public/control-center/pages/ai-command.js:2281:			return buildContentResponse(aiContext);
+public/control-center/pages/ai-command.js:2283:			return buildSeoResponse(aiContext);
+public/control-center/pages/ai-command.js:2285:			return buildAdsResponse(aiContext);
+public/control-center/pages/ai-command.js:2287:			return buildResearchResponse(aiContext);
+public/control-center/pages/ai-command.js:2289:			return buildOperationsResponse(aiContext, message);
+public/control-center/pages/ai-command.js:2290:		case "operations":
+public/control-center/pages/ai-command.js:2293:				? buildOperationsResponse(aiContext, message)
+public/control-center/pages/ai-command.js:2294:				: buildExecutiveResponse(aiContext);
+public/control-center/pages/ai-command.js:2321:	const needsDashboard = !state.data.overview || !state.data.readiness || !state.data.integrations || !state.data.activity;
+public/control-center/pages/ai-command.js:2384:	library: "Library",
+public/control-center/pages/ai-command.js:2389:	"operations-centers": "Operations Centers",
+public/control-center/pages/ai-command.js:2405:	workflows: "operations",
+public/control-center/pages/ai-command.js:2406:	library: "media",
+public/control-center/pages/ai-command.js:2408:	integrations: "operations",
+public/control-center/pages/ai-command.js:2409:	settings: "operations",
+public/control-center/pages/ai-command.js:2411:	"operations-centers": "operations",
+public/control-center/pages/ai-command.js:2412:	"task-center": "operations",
+public/control-center/pages/ai-command.js:2413:	"queue-center": "operations",
+public/control-center/pages/ai-command.js:2414:	"job-monitor": "operations",
+public/control-center/pages/ai-command.js:2415:	"notification-center": "operations",
+public/control-center/pages/ai-command.js:2418:	setup: "operations",
+public/control-center/pages/ai-command.js:2419:	workspace: "operations"
+public/control-center/pages/ai-command.js:2426:	"customer-ops": "customer_ops",
+public/control-center/pages/ai-command.js:2427:	customer_ops: "customer_ops",
+public/control-center/pages/ai-command.js:2428:	"sales-crm": "sales_crm",
+public/control-center/pages/ai-command.js:2429:	sales_crm: "sales_crm"
+public/control-center/pages/ai-command.js:2442:	asset: "library",
+public/control-center/pages/ai-command.js:2443:	"asset-library": "library",
+public/control-center/pages/ai-command.js:2444:	operation: "operations-centers",
+public/control-center/pages/ai-command.js:2445:	operations: "operations-centers",
+public/control-center/pages/ai-command.js:2496:function normalizeAiInboundSpecialistId(value, fallback = "operations") {
+public/control-center/pages/ai-command.js:2510:function normalizeAiInboundRouteSuggestions(rawSuggestions, sourcePage, sourceLabel) {
+public/control-center/pages/ai-command.js:2511:	const fallbackRoute = sourcePage === "workspace" ? "workflows" : sourcePage;
+public/control-center/pages/ai-command.js:2512:	const fallbackLabel = sourceLabel || routeLabel(fallbackRoute);
+public/control-center/pages/ai-command.js:2534:	const outputType = asString(preview.outputType || preview.output_type || preview.type || "handoff").trim() || "handoff";
+public/control-center/pages/ai-command.js:2539:		normalized.sourcePage ||
+public/control-center/pages/ai-command.js:2547:		title: firstAiInboundText(preview.title, normalized.title, `Inbound handoff from ${normalized.sourceLabel}`),
+public/control-center/pages/ai-command.js:2552:		sourcePrompt: firstAiInboundText(preview.sourcePrompt, preview.source_prompt, normalized.prompt),
+public/control-center/pages/ai-command.js:2555:		confirmationNote: firstAiInboundText(preview.confirmationNote, preview.confirmation_note, "Execution, approvals, publishing, CRM updates, customer replies, and workflow runs require explicit confirmation in the owning workspace."),
+public/control-center/pages/ai-command.js:2560:function getAiInboundDurableHandoffId(handoff) {
+public/control-center/pages/ai-command.js:2561:	const payload = asObject(handoff?.payload);
+public/control-center/pages/ai-command.js:2563:		handoff?.id,
+public/control-center/pages/ai-command.js:2564:		handoff?.handoff_id,
+public/control-center/pages/ai-command.js:2565:		handoff?.handoffId,
+public/control-center/pages/ai-command.js:2566:		payload.handoff_id,
+public/control-center/pages/ai-command.js:2567:		payload.handoffId
+public/control-center/pages/ai-command.js:2571:function getAiInboundHandoffId(handoff) {
+public/control-center/pages/ai-command.js:2572:	const durableId = getAiInboundDurableHandoffId(handoff);
+public/control-center/pages/ai-command.js:2574:	if (!handoff) return "";
+public/control-center/pages/ai-command.js:2575:	const payload = asObject(handoff?.payload);
+public/control-center/pages/ai-command.js:2576:	const stablePayloadId = firstAiInboundId(payload.handoff_id, payload.handoffId, payload.id, handoff?.created_at, handoff?.createdAt);
+public/control-center/pages/ai-command.js:2579:		if (!aiInboundHandoffObjectIds.has(handoff)) {
+public/control-center/pages/ai-command.js:2581:			aiInboundHandoffObjectIds.set(handoff, `cached-ai-handoff-${Date.now()}-${aiInboundHandoffCounter}`);
+public/control-center/pages/ai-command.js:2583:		return aiInboundHandoffObjectIds.get(handoff);
+public/control-center/pages/ai-command.js:2585:	return [handoff?.source_page, handoff?.destination_page, payload.prompt, payload.title]
+public/control-center/pages/ai-command.js:2588:		.join("::") || `cached-ai-handoff-${Date.now()}`;
+public/control-center/pages/ai-command.js:2591:function normalizeAiInboundHandoff(handoff, projectName) {
+public/control-center/pages/ai-command.js:2592:	const payload = asObject(handoff?.payload);
+public/control-center/pages/ai-command.js:2593:	const draftContext = firstAiInboundObject(payload.draft_context, payload.draftContext, handoff?.draft_context, handoff?.draftContext);
+public/control-center/pages/ai-command.js:2594:	const sourcePage = normalizeAiInboundSourcePage(firstAiInboundId(
+public/control-center/pages/ai-command.js:2595:		payload.source_page,
+public/control-center/pages/ai-command.js:2596:		payload.sourcePage,
+public/control-center/pages/ai-command.js:2597:		handoff?.source_page,
+public/control-center/pages/ai-command.js:2598:		handoff?.sourcePage,
+public/control-center/pages/ai-command.js:2599:		draftContext.source_page,
+public/control-center/pages/ai-command.js:2600:		draftContext.sourcePage
+public/control-center/pages/ai-command.js:2602:	const sourceLabel = AI_INBOUND_SOURCE_LABELS[sourcePage] || routeLabel(sourcePage) || "Workspace";
+public/control-center/pages/ai-command.js:2606:		AI_INBOUND_SPECIALIST_BY_SOURCE[sourcePage] ||
+public/control-center/pages/ai-command.js:2613:		"operations",
+public/control-center/pages/ai-command.js:2614:		"operations"
+public/control-center/pages/ai-command.js:2625:	)) || `Review this ${sourceLabel} handoff for ${projectLabel}. Identify the right specialist, summarize the context, produce a review-ready draft, and recommend the next safe route. Do not execute publishing, task creation, CRM updates, customer replies, workflow runs, or backend actions.`;
+public/control-center/pages/ai-command.js:2631:		handoff?.title,
+public/control-center/pages/ai-command.js:2632:		`Inbound handoff from ${sourceLabel}`
+public/control-center/pages/ai-command.js:2639:		sourcePage,
+public/control-center/pages/ai-command.js:2640:		sourceLabel
+public/control-center/pages/ai-command.js:2651:		sourcePage,
+public/control-center/pages/ai-command.js:2652:		sourceLabel,
+public/control-center/pages/ai-command.js:2661:			source_page: sourcePage,
+public/control-center/pages/ai-command.js:2662:			sourcePage
+public/control-center/pages/ai-command.js:2664:		status: asString(handoff?.status || payload.status || "available"),
+public/control-center/pages/ai-command.js:2665:		note: "Guidance only. No publishing, task creation, CRM updates, customer replies, workflow runs, exports, or backend actions are executed from this handoff."
+public/control-center/pages/ai-command.js:2671:function applyDurableAiHandoff(projectName, operations, session, consumeProjectHandoff, showMessage) {
+public/control-center/pages/ai-command.js:2672:	const handoff = getSharedHandoff(projectName, "ai-command", operations);
+public/control-center/pages/ai-command.js:2673:	const handoffId = getAiInboundHandoffId(handoff);
+public/control-center/pages/ai-command.js:2674:	if (!handoffId || handoffId === asString(session.lastAppliedHandoffId)) return;
+public/control-center/pages/ai-command.js:2676:	const normalized = normalizeAiInboundHandoff(handoff, projectName);
+public/control-center/pages/ai-command.js:2683:		id: handoffId,
+public/control-center/pages/ai-command.js:2684:		sourcePage: normalized.sourcePage,
+public/control-center/pages/ai-command.js:2685:		sourceLabel: normalized.sourceLabel,
+public/control-center/pages/ai-command.js:2715:	session.lastAppliedHandoffId = handoffId;
+public/control-center/pages/ai-command.js:2716:	persistSessionDraft(projectName, session, `Inbound handoff loaded from ${normalized.sourceLabel}`);
+public/control-center/pages/ai-command.js:2718:	const durableHandoffId = getAiInboundDurableHandoffId(handoff);
+public/control-center/pages/ai-command.js:2721:			console.warn("Failed to consume AI handoff:", error.message);
+public/control-center/pages/ai-command.js:2724:	showMessage?.(`Inbound handoff loaded from ${normalized.sourceLabel}.`);
+public/control-center/pages/ai-command.js:2729:	aiContext,
+public/control-center/pages/ai-command.js:2733:	source,
+public/control-center/pages/ai-command.js:2750:			source,
+public/control-center/pages/ai-command.js:2753:				categories: aiContext.assetCategories,
+public/control-center/pages/ai-command.js:2754:				approved_assets: aiContext.approvedAssets,
+public/control-center/pages/ai-command.js:2755:				blockers: aiContext.assetBlockers
+public/control-center/pages/ai-command.js:2790:		source
+public/control-center/pages/ai-command.js:2798:		source: "durable-ai-response",
+public/control-center/pages/ai-command.js:2807:		source,
+public/control-center/pages/ai-command.js:2814:	syncAiWorkflowBridge({ projectName: aiContext.projectName, modeId: resolvedModeId, command: cleanCommand, response });
+public/control-center/pages/ai-command.js:2833:      AGENT_CARDS.find((agent) => agent.id === "operations") ||
+public/control-center/pages/ai-command.js:2849:function renderControlRoomHeader(aiContext, session, intelligenceStatus, escapeHtml) {
+public/control-center/pages/ai-command.js:2850:	const projectLabel = aiContext.projectName || "No project selected";
+public/control-center/pages/ai-command.js:2851:	const readinessLabel = aiContext.readinessScore != null ? `${aiContext.readinessScore}/100` : "--";
+public/control-center/pages/ai-command.js:2852:	const coverageLabel = aiContext.coverageTotal > 0 ? `${aiContext.coveredCount}/${aiContext.coverageTotal}` : "--";
+public/control-center/pages/ai-command.js:2858:	if (aiContext.projectName) caps.push("Campaign planning");
+public/control-center/pages/ai-command.js:2859:	if (aiContext.hasLiveIntelligence) caps.push("Performance analysis");
+public/control-center/pages/ai-command.js:2860:	if (aiContext.recommendations.length) caps.push(`${aiContext.recommendations.length} recommendations ready`);
+public/control-center/pages/ai-command.js:2861:	if (aiContext.topContent.length) caps.push("Content intelligence");
+public/control-center/pages/ai-command.js:2862:	if (aiContext.paid?.summary?.spend != null) caps.push("Paid media briefing");
+public/control-center/pages/ai-command.js:2863:	if (aiContext.seo?.summary?.impressions != null) caps.push("SEO analysis");
+public/control-center/pages/ai-command.js:2887:					<strong>${escapeHtml(readinessLabel)}</strong>
+public/control-center/pages/ai-command.js:2895:					<strong>${escapeHtml(aiContext.campaign || "None")}</strong>
+public/control-center/pages/ai-command.js:2897:				${aiContext.market ? `<div class="ctrl-room-ctx-chip"><span>Market</span><strong>${escapeHtml(aiContext.market)}</strong></div>` : ""}
+public/control-center/pages/ai-command.js:2947:function renderSuggestedPromptsSection(aiContext, session, escapeHtml) {
+public/control-center/pages/ai-command.js:2948:	const projectLabel = aiContext.projectName || "this project";
+public/control-center/pages/ai-command.js:3077:				<div class="ctrl-empty-title">Start the conversation</div>
+public/control-center/pages/ai-command.js:3170:function renderArtifactsPanel(aiContext, session, escapeHtml) {
+public/control-center/pages/ai-command.js:3171:	const recommendations = aiContext.recommendations.slice(0, 4);
+public/control-center/pages/ai-command.js:3172:	const patterns = Object.entries(asObject(aiContext.learningPatterns))
+public/control-center/pages/ai-command.js:3255:        const conversationLines = messages
+public/control-center/pages/ai-command.js:3283:                conversationLines.length ? `Conversation context:\n${conversationLines.join("\n")}` : ""
+public/control-center/pages/ai-command.js:3289:                conversationText: conversationLines.join("\n"),
+public/control-center/pages/ai-command.js:3304:                handoff: "handoff package"
+public/control-center/pages/ai-command.js:3310:                `Convert this AI Team conversation into a ${typeLabel}.`,
+public/control-center/pages/ai-command.js:3312:                "Use the conversation context, not only the composer text.",
+public/control-center/pages/ai-command.js:3329:        preview.sourcePrompt = context.prompt || workPrompt;
+public/control-center/pages/ai-command.js:3330:        preview.conversationContext = context.conversationText;
+public/control-center/pages/ai-command.js:3332:        // Keep raw conversation context available internally, but do not show it as the main output.
+public/control-center/pages/ai-command.js:3365:function buildSmartRecommendation(aiContext) {
+public/control-center/pages/ai-command.js:3366:	if (aiContext.criticalGaps.length) {
+public/control-center/pages/ai-command.js:3368:			title: "Close critical readiness gaps before scale",
+public/control-center/pages/ai-command.js:3369:			reason: `${aiContext.criticalGaps.length} critical setup gap${aiContext.criticalGaps.length === 1 ? "" : "s"} can block launch quality and downstream automation reliability.`,
+public/control-center/pages/ai-command.js:3370:			command: `Review the critical readiness gaps for ${aiContext.projectName || "this project"} and produce a fix plan with owners, order, and dependencies.`,
+public/control-center/pages/ai-command.js:3371:			chips: buildImpactChips(["Launch readiness", "Campaign", "Automation"])
+public/control-center/pages/ai-command.js:3375:	if (aiContext.assetBlockers.length) {
+public/control-center/pages/ai-command.js:3378:			reason: `${aiContext.assetBlockers.length} asset category blocker${aiContext.assetBlockers.length === 1 ? "" : "s"} may reduce content throughput and campaign delivery speed.`,
+public/control-center/pages/ai-command.js:3379:			command: `Create an asset unblock plan for ${aiContext.projectName || "this project"}. List missing files, priority, and where each is needed.`,
+public/control-center/pages/ai-command.js:3384:	if (aiContext.missingIntegrations.length || aiContext.connectorIssues.length) {
+public/control-center/pages/ai-command.js:3385:		const impacted = aiContext.missingIntegrations.length + aiContext.connectorIssues.length;
+public/control-center/pages/ai-command.js:3389:			command: `Build an integration recovery plan for ${aiContext.projectName || "this project"}. Prioritize connectors by business impact and data coverage gain.`,
+public/control-center/pages/ai-command.js:3390:			chips: buildImpactChips(["Integrations", "Automation", "Launch readiness"])
+public/control-center/pages/ai-command.js:3394:	if (!aiContext.campaign || aiContext.campaign === "Not selected") {
+public/control-center/pages/ai-command.js:3398:			command: `Create a campaign operating brief for ${aiContext.projectName || "this project"} with objective, audience, channels, and first execution wave.`,
+public/control-center/pages/ai-command.js:3399:			chips: buildImpactChips(["Campaign", "Content", "Launch readiness"])
+public/control-center/pages/ai-command.js:3405:		reason: "Core readiness is stable enough to move into output generation and optimization.",
+public/control-center/pages/ai-command.js:3406:		command: `Generate the next high-impact content wave for ${aiContext.projectName || "this project"} based on current readiness and campaign context.`,
+public/control-center/pages/ai-command.js:3446:	return asString(value || "operations")
+public/control-center/pages/ai-command.js:3449:		.replace(/[^a-z0-9_]+/g, "_") || "operations";
+public/control-center/pages/ai-command.js:3467:	if (preview.outputType === "handoff") return 3;
+public/control-center/pages/ai-command.js:3481:		handoff: "handoff",
+public/control-center/pages/ai-command.js:3491:	if (outputType === "handoff") return "handoff";
+public/control-center/pages/ai-command.js:3506:		handoff: "Handoff Preview",
+public/control-center/pages/ai-command.js:3518:	return destinationRouteForSpecialist(session?.modeId || "operations", outputType);
+public/control-center/pages/ai-command.js:3523:	if (tool.actionType === "source_required") return "Source required";
+public/control-center/pages/ai-command.js:3529:	if (tool.intent === "handoff") return "Prepare";
+public/control-center/pages/ai-command.js:3531:	if (/review|check|compliance|readiness|governance/i.test(asString(tool.label))) return "Review";
+public/control-center/pages/ai-command.js:3562:function renderPhase1Header(session, projectName, aiContext, bridgeStatus, escapeHtml) {
+public/control-center/pages/ai-command.js:3566:	const languagePlan = getWorkspaceLanguagePlan(aiContext);
+public/control-center/pages/ai-command.js:3568:	const readinessLabel = aiContext.readinessScore != null ? `${aiContext.readinessScore}/100` : "Pending";
+public/control-center/pages/ai-command.js:3575:				<p class="aicmd-room-subtitle mhos-context-description">Ask one expert or the full team to prepare strategy, content, analysis, reviews, and destination handoffs. AI prepares and reviews only; sensitive actions stay confirmation-gated in the owning workspace.</p>
+public/control-center/pages/ai-command.js:3616:					<strong>${escapeHtml(readinessLabel)}</strong>
+public/control-center/pages/ai-command.js:3649:			<span>Strategy, writing, creative, compliance, publishing, customer, sales, and operations specialists coordinate one review-ready answer. No workflow, send, publish, approval, or CRM action is executed here.</span>
+public/control-center/pages/ai-command.js:3715:						<p class="aicmd-v2-profile-purpose">Coordinates specialists into one review-ready brief, workflow, or handoff.</p>
+public/control-center/pages/ai-command.js:3758:        if (roleId === "operations" || roleId === "customer_ops") return `${label} is preparing your task handoff...`;
+public/control-center/pages/ai-command.js:3772:		? "Team orchestration across strategy, writing, media/video, compliance, publishing, customer operations, sales/CRM, and operations"
+public/control-center/pages/ai-command.js:3778:		<div class="aicmd-room-conversation-head" data-role="${escapeHtml(isTeam ? "team" : getAiRoomRoleId(spec.id))}">
+public/control-center/pages/ai-command.js:3800:	if (/handoff|route|destination_brief/.test(haystack)) return "handoff";
+public/control-center/pages/ai-command.js:3801:	if (/task|ticket|checklist|owner_map|priority/.test(haystack)) return "task";
+public/control-center/pages/ai-command.js:3809:	return destinationRouteForSpecialist(session?.modeId || "operations", getCanonicalToolIntent(tool));
+public/control-center/pages/ai-command.js:3813:	const sourceMeta = asArray(tool.sourceTypes).join(" ");
+public/control-center/pages/ai-command.js:3814:	return tool.actionType === "source_required" || /source_of_truth_assets|selected_asset|proof_doc|legal_doc|privacy_policy/i.test(sourceMeta);
+public/control-center/pages/ai-command.js:3864:function renderPhase35ToolsPanel(session, projectName, aiContext, escapeHtml) {
+public/control-center/pages/ai-command.js:3874:					<span class="aicmd-v2-tools-subtitle">Prompt tools for structured drafts, source-aware reviews, and destination handoffs. They prepare composer instructions only.</span>
+public/control-center/pages/ai-command.js:3911:function renderLanguageMarketStrip(aiContext, escapeHtml) {
+public/control-center/pages/ai-command.js:3912:        const languagePlan = getWorkspaceLanguagePlan(aiContext);
+public/control-center/pages/ai-command.js:3913:        const conversationLanguage = asString(languagePlan.conversationLanguage || "Auto").trim() || "Auto";
+public/control-center/pages/ai-command.js:3919:                        <span>${escapeHtml(conversationLanguage)}</span>
+public/control-center/pages/ai-command.js:3927:	const source = getSelectedLibrarySource(projectName);
+public/control-center/pages/ai-command.js:3928:	if (!source) return "";
+public/control-center/pages/ai-command.js:3929:	const name = asString(source.name || source.filename || source.fileName || "Selected Library source");
+public/control-center/pages/ai-command.js:3931:	const type = asString(source.asset_type || source.type || source.source_type || "Library asset");
+public/control-center/pages/ai-command.js:3932:	const sourceOfTruth = typeof source.source_of_truth === "boolean"
+public/control-center/pages/ai-command.js:3933:		? (source.source_of_truth ? "Source of truth" : "")
+public/control-center/pages/ai-command.js:3934:		: asString(source.source_of_truth || "");
+public/control-center/pages/ai-command.js:3935:	const status = asString(source.review_status || source.status_label || source.status || "");
+public/control-center/pages/ai-command.js:3936:	const meta = [type, sourceOfTruth, status]
+public/control-center/pages/ai-command.js:3943:		<div class="aicmd-main-source-indicator" title="${escapeHtml(name)}">
+public/control-center/pages/ai-command.js:3951:function renderAiCommandIntelligenceLayer({ session, projectName, aiContext, bridgeStatus, escapeHtml }) {
+public/control-center/pages/ai-command.js:3962:        const source = getSelectedLibrarySource(projectName || aiContext?.projectName || "");
+public/control-center/pages/ai-command.js:3963:        const sourceLabel = source
+public/control-center/pages/ai-command.js:3964:                ? asString(source.name || source.filename || source.fileName || "Trusted source")
+public/control-center/pages/ai-command.js:3965:                : "No Library source selected";
+public/control-center/pages/ai-command.js:3971:        const teamIds = ["strategist", "writer", "media", "video_lead", "compliance_reviewer", "operations"];
+public/control-center/pages/ai-command.js:4012:                                        <p>Active specialist, source grounding, destination, risk, and execution lock in one compact command strip.</p>
+public/control-center/pages/ai-command.js:4023:                                <span><strong>Source</strong>${escapeHtml(sourceLabel)}</span>
+public/control-center/pages/ai-command.js:4029:                        <p class="aicmd-chatfirst-tab-note">AI Command prepares guidance, drafts, previews, and handoff context only. Publishing, approvals, CRM updates, workflow runs, customer sends, provider execution, and durable task creation remain confirmation-gated in the owning workspace.</p>
+public/control-center/pages/ai-command.js:4034:function renderAiCommandChatFirstShell({ session, projectName, aiContext, bridgeStatus, escapeHtml }) {
+public/control-center/pages/ai-command.js:4044:                                        ${renderAiCommandChatWindow({ session, projectName, aiContext, bridgeStatus, escapeHtml })}
+public/control-center/pages/ai-command.js:4101:				<p>Chat, draft, review, and prepare handoff context only. Publishing, approvals, CRM updates, workflow runs, external sends, and durable task creation stay confirmation-gated in the owning workspace.</p>
+public/control-center/pages/ai-command.js:4122:function renderAiCommandChatWindow({ session, projectName, aiContext, bridgeStatus, escapeHtml }) {
+public/control-center/pages/ai-command.js:4125:			${renderAiCommandChatTopbar({ session, projectName, aiContext, bridgeStatus, escapeHtml })}
+public/control-center/pages/ai-command.js:4127:			${renderAiCommandChatComposer({ session, aiContext, escapeHtml })}
+public/control-center/pages/ai-command.js:4132:function renderAiCommandChatTopbar({ session, projectName, aiContext, bridgeStatus, escapeHtml }) {
+public/control-center/pages/ai-command.js:4134:	const source = getSelectedLibrarySource(projectName || aiContext?.projectName || "");
+public/control-center/pages/ai-command.js:4135:	const sourceLabel = source?.name || source?.filename || source?.fileName || "";
+public/control-center/pages/ai-command.js:4150:				<button id="aicmdV2SourceBtnTopbar" class="aicmd-chatfirst-icon-control" type="button" data-aicmd-chatfirst-source title="${escapeHtml(sourceLabel ? `Trusted source: ${sourceLabel}` : "1. Choose source through Tool Drawer / Library")}">
+public/control-center/pages/ai-command.js:4151:					Source${sourceLabel ? `: ${escapeHtml(asString(sourceLabel).slice(0, 36))}` : ""}
+public/control-center/pages/ai-command.js:4243:        const conversationMessages = session.isFreshAiChatSession ? [] : (selectedMessages.length ? selectedMessages : fallbackMessages);
+public/control-center/pages/ai-command.js:4305:                        ${conversationMessages.length ? `
+public/control-center/pages/ai-command.js:4307:                                        ${conversationMessages.map(renderMessage).join("")}
+public/control-center/pages/ai-command.js:4312:                                        <span>Ask ${escapeHtml(selectedLabel)} to plan, draft, review, analyze, or prepare a handoff.</span>
+public/control-center/pages/ai-command.js:4316:                                                <span>Review source</span>
+public/control-center/pages/ai-command.js:4317:                                                <span>Prepare handoff</span>
+public/control-center/pages/ai-command.js:4328:                source: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M5 8h14M5 16h14"/></svg>',
+public/control-center/pages/ai-command.js:4342:                { id: "publish", label: "Publish", summary: "Prepare publishing checklist and handoff readiness.", enabled: false }
+public/control-center/pages/ai-command.js:4421:        const source = asString(wizard.source || "project");
+public/control-center/pages/ai-command.js:4422:        const goal = asString(wizard.goal || "sales");
+public/control-center/pages/ai-command.js:4428:        const audience = asString(wizard.audience || "target-customers");
+public/control-center/pages/ai-command.js:4434:        const sourceOptions = [["project", "Project context"], ["product", "Product"], ["library", "Library source"], ["upload", "Uploaded source"]];
+public/control-center/pages/ai-command.js:4435:        const goalOptions = [["sales", "Sales"], ["launch", "Product launch"], ["leads", "Lead generation"], ["awareness", "Awareness"], ["retargeting", "Retargeting"]];
+public/control-center/pages/ai-command.js:4441:        const audienceOptions = [["target-customers", "Target customers"], ["new-buyers", "New buyers"], ["returning-customers", "Returning customers"], ["b2b", "B2B"], ["local", "Local audience"]];
+public/control-center/pages/ai-command.js:4464:                                                <p>Guide the AI Team from source to preview. Backend workflow execution and destination handoff stay approval-gated.</p>
+public/control-center/pages/ai-command.js:4479:                                                <strong>1. Choose source</strong>
+public/control-center/pages/ai-command.js:4481:                                                        ${sourceOptions.map(([value, label]) => optionButton("source", value, label, source)).join("")}
+public/control-center/pages/ai-command.js:4535:                                                                <span><strong>Source</strong>${escapeHtml(preview.sourceLabel)}</span>
+public/control-center/pages/ai-command.js:4557:                                                                <button type="button" data-aicmd-smart-campaign-action="library">Save to Library</button>
+public/control-center/pages/ai-command.js:4561:                                                                <button type="button" data-aicmd-smart-campaign-action="operations">Create Operations Follow-up</button>
+public/control-center/pages/ai-command.js:4567:                                                        <span>1. Choose source, goal, and channel. The AI Team will prepare the preview package before any approval or handoff.</span>
+public/control-center/pages/ai-command.js:4605:function renderAiCommandComposerAttachments({ session, aiContext, escapeHtml }) {
+public/control-center/pages/ai-command.js:4606:        const projectName = aiContext?.projectName || "";
+public/control-center/pages/ai-command.js:4607:        const source = getSelectedLibrarySource(projectName);
+public/control-center/pages/ai-command.js:4631:        if (source?.name || source?.filename || source?.fileName) {
+public/control-center/pages/ai-command.js:4632:                const name = source.name || source.filename || source.fileName || "Library source";
+public/control-center/pages/ai-command.js:4633:                const type = source.asset_type || source.type || source.source_type || "Library";
+public/control-center/pages/ai-command.js:4635:                        <span class="aicmd-final-attachment-chip is-library" title="${escapeHtml(name)}">
+public/control-center/pages/ai-command.js:4670:                                        <small>Strategy, content, media, operations, compliance, customer, campaign and provider-readiness planning.</small>
+public/control-center/pages/ai-command.js:4694:                        <div class="aicmd-final-team-readiness">
+public/control-center/pages/ai-command.js:4696:                                <span>Library, campaigns, content, customers, governance, integrations and provider readiness are connected as guarded planning context. Execution stays confirmation-gated.</span>
+public/control-center/pages/ai-command.js:4702:function renderAiCommandChatComposer({ session, aiContext, escapeHtml }) {
+public/control-center/pages/ai-command.js:4728:                                ${renderAiCommandComposerAttachments({ session, aiContext, escapeHtml })}
+public/control-center/pages/ai-command.js:4746:                                        <button class="aicmd-final-voice-btn" type="button" data-aicmd-final-voice-conversation title="Voice conversation roadmap" hidden aria-hidden="true">${getAiCommandUiIcon("voice")}</button>
+public/control-center/pages/ai-command.js:4754:                        <div class="aicmd-final-source-menu" data-aicmd-final-source-menu data-aicmd-final-dropzone hidden aria-hidden="true">
+public/control-center/pages/ai-command.js:4757:                                <button type="button" class="aicmd-final-source-option" data-aicmd-final-source-option="upload">
+public/control-center/pages/ai-command.js:4761:                                <button type="button" class="aicmd-final-source-option" data-aicmd-final-source-option="library">
+public/control-center/pages/ai-command.js:4762:                                        <strong>Choose trusted Library source</strong>
+public/control-center/pages/ai-command.js:4763:                                        <span>Open Library, select a saved source, then return it as guarded AI context.</span>
+public/control-center/pages/ai-command.js:4765:                                <button type="button" class="aicmd-final-source-option" data-aicmd-final-source-option="product">
+public/control-center/pages/ai-command.js:4767:                                        <span>Planned direct selector. For now, use Library source or paste product details.</span>
+public/control-center/pages/ai-command.js:4769:                                <button type="button" class="aicmd-final-source-option" data-aicmd-final-source-option="project">
+public/control-center/pages/ai-command.js:4790:                                ${renderLanguageMarketStrip(aiContext, escapeHtml)}
+public/control-center/pages/ai-command.js:4826:function renderAiCommandSecondaryTabPanel({ session, projectName, aiContext, bridgeStatus, escapeHtml }) {
+public/control-center/pages/ai-command.js:4830:		? renderAiCommandToolsTab({ session, projectName, aiContext, escapeHtml })
+public/control-center/pages/ai-command.js:4832:			? renderAiCommandOutputTab({ session, aiContext, escapeHtml })
+public/control-center/pages/ai-command.js:4833:			: renderAiCommandFlowTab({ session, aiContext, bridgeStatus, escapeHtml });
+public/control-center/pages/ai-command.js:4893:function renderAiCommandToolsTab({ session, projectName, aiContext, escapeHtml }) {
+public/control-center/pages/ai-command.js:4903:					<p>Prompt setup only. Tools prepare composer instructions, source-aware reviews, previews, and handoff context without executing actions.</p>
+public/control-center/pages/ai-command.js:4931:function renderAiCommandOutputTab({ session, aiContext, escapeHtml }) {
+public/control-center/pages/ai-command.js:4936:	const languagePlan = getWorkspaceLanguagePlan(aiContext);
+public/control-center/pages/ai-command.js:4953:					<p>${hasPreview ? "Review the result, then open the destination workspace with draft context." : "Drafts, task previews, workflow previews, and handoff packages appear here after a response or tool setup."}</p>
+public/control-center/pages/ai-command.js:5016:function renderAiCommandFlowTab({ session, aiContext, bridgeStatus, escapeHtml }) {
+public/control-center/pages/ai-command.js:5020:	const readiness = aiContext.readinessScore != null ? `${aiContext.readinessScore}/100` : "No score";
+public/control-center/pages/ai-command.js:5027:					<p>Read-only operating path for chat, draft preparation, review, and destination handoff. Confirmation stays in the owning workspace.</p>
+public/control-center/pages/ai-command.js:5041:				<span><strong>Readiness</strong>${escapeHtml(readiness)}</span>
+public/control-center/pages/ai-command.js:5049:function renderPhase35ReadinessStrip(aiContext, bridgeStatus, escapeHtml) {
+public/control-center/pages/ai-command.js:5050:	const providerConfigured = isProviderLikelyConfigured(aiContext);
+public/control-center/pages/ai-command.js:5051:	const readinessItems = [
+public/control-center/pages/ai-command.js:5061:		<section class="aicmd-v2-readiness-strip">
+public/control-center/pages/ai-command.js:5062:			${readinessItems.map((item) => `
+public/control-center/pages/ai-command.js:5063:				<span class="aicmd-v2-readiness-chip ${item.className}">
+public/control-center/pages/ai-command.js:5071:function renderAiRoomStatusStrip(aiContext, session, bridgeStatus, escapeHtml) {
+public/control-center/pages/ai-command.js:5073:	const readiness = aiContext.readinessScore != null ? `${aiContext.readinessScore}/100` : "No score";
+public/control-center/pages/ai-command.js:5076:	const integrations = aiContext.coverageTotal > 0 ? `${aiContext.coveredCount}/${aiContext.coverageTotal}` : "0 active";
+public/control-center/pages/ai-command.js:5082:			<div><span>Readiness</span><strong>${escapeHtml(readiness)}</strong></div>
+public/control-center/pages/ai-command.js:5126:                ? "Chat only. No workflow run, durable task, external handoff action, approval, publishing action, CRM update, or customer action was created."
+public/control-center/pages/ai-command.js:5128:        const emptyBody = "Ask what to do next, draft a campaign asset, review a source, prepare a handoff, or coordinate the full AI team.";
+public/control-center/pages/ai-command.js:5132:                bridgeContext.source &&
+public/control-center/pages/ai-command.js:5144:                : (SPECIALIST_SUGGESTED_PROMPTS[promptModeId] || SPECIALIST_SUGGESTED_PROMPTS.operations);
+public/control-center/pages/ai-command.js:5149:        const inboundSourceLabel = asString(inbound.sourceLabel || "");
+public/control-center/pages/ai-command.js:5190:        const conversationMessages = selectedMessages.length ? selectedMessages : fallbackSelectedResponses;
+public/control-center/pages/ai-command.js:5212:                                                <span>Home handoff</span>
+public/control-center/pages/ai-command.js:5245:                        ${conversationMessages.length ? `
+public/control-center/pages/ai-command.js:5247:                                        ${conversationMessages.map(renderMessage).join("")}
+public/control-center/pages/ai-command.js:5305:		: (SPECIALIST_SUGGESTED_PROMPTS[promptModeId] || SPECIALIST_SUGGESTED_PROMPTS.operations);
+public/control-center/pages/ai-command.js:5329:function renderPhase1ContextPanel(state, session, aiContext, escapeHtml) {
+public/control-center/pages/ai-command.js:5330:	const projectName = aiContext.projectName;
+public/control-center/pages/ai-command.js:5331:	const readiness = aiContext.readinessScore;
+public/control-center/pages/ai-command.js:5332:	const languagePlan = getWorkspaceLanguagePlan(aiContext);
+public/control-center/pages/ai-command.js:5340:		{ label: "Conversation language", value: languagePlan.conversationLanguage, present: true },
+public/control-center/pages/ai-command.js:5345:		{ label: "Readiness", value: readiness != null ? `${readiness}/100` : "No readiness data", present: readiness != null },
+public/control-center/pages/ai-command.js:5346:		{ label: "Integrations", value: aiContext.coverageTotal > 0 ? `${aiContext.coveredCount}/${aiContext.coverageTotal} connected` : "No coverage data", present: aiContext.coveredCount > 0 },
+public/control-center/pages/ai-command.js:5347:		{ label: "Library context", value: getSelectedLibrarySource(projectName)?.name ? "Trusted source selected" : "No source selected", present: Boolean(getSelectedLibrarySource(projectName)?.name) },
+public/control-center/pages/ai-command.js:5348:		{ label: "Approved assets", value: aiContext.approvedAssets.length ? `${aiContext.approvedAssets.length} ready` : "No approved assets", present: aiContext.approvedAssets.length > 0 },
+public/control-center/pages/ai-command.js:5349:		{ label: "Operations", value: state.data.operations ? "Snapshot available" : "No operations snapshot", present: Boolean(state.data.operations) }
+public/control-center/pages/ai-command.js:5351:	const scopedContextItems = session.teamMode === "solo" && session.modeId === "customer_ops"
+public/control-center/pages/ai-command.js:5353:			{ label: "Open conversations", value: "Snapshot / requires runtime surface", present: false, scoped: true },
+public/control-center/pages/ai-command.js:5355:			{ label: "SLA", value: "Safe review only", present: true, scoped: true },
+public/control-center/pages/ai-command.js:5359:		: session.teamMode === "solo" && session.modeId === "sales_crm"
+public/control-center/pages/ai-command.js:5365:				{ label: "Pipeline", value: "Operations handoff", present: true, scoped: true }
+public/control-center/pages/ai-command.js:5409:					<span>Backend owns authority — AI Command prepares guidance, previews, and handoff context. It does not override execution controls or mutate Operations records.</span>
+public/control-center/pages/ai-command.js:5429:			body: preview.sourcePrompt || preview.summary || "",
+public/control-center/pages/ai-command.js:5465:		description: "Talk to your AI team, run structured tasks, and turn intelligence into review-ready plans and routed handoffs."
+public/control-center/pages/ai-command.js:5487:		const projectName = asString(selectCurrentProject(state) || "");
+public/control-center/pages/ai-command.js:5525:					source: "Home",
+public/control-center/pages/ai-command.js:5539:		const payload = asObject(selectProjectPayload(state));
+public/control-center/pages/ai-command.js:5541:		const readiness = asObject(payload.readiness?.dashboard || payload.readiness);
+public/control-center/pages/ai-command.js:5542:		const operations = asObject(selectOperationsSnapshot(state));
+public/control-center/pages/ai-command.js:5543:		applyDurableAiHandoff(sessionKey, operations, session, consumeProjectHandoff, showMessage);
+public/control-center/pages/ai-command.js:5544:		const readinessScore = readiness.readiness_score ?? overview.readiness_score ?? null;
+public/control-center/pages/ai-command.js:5547:		const aiContext = buildUnifiedAiContext(state, session.intelligence);
+public/control-center/pages/ai-command.js:5566:			aiContext,
+public/control-center/pages/ai-command.js:5719:                                const specId = btn.getAttribute("data-aicmdv2-specialist") || "operations";
+public/control-center/pages/ai-command.js:5722:                                const shouldReplaceRoleDraft = Boolean(previousBridgeContext.source) ||
+public/control-center/pages/ai-command.js:5781:                                return text.includes("source") || text.includes("review") || text.includes("brief") || text.includes("campaign");
+public/control-center/pages/ai-command.js:5790:                        updateStatus(`${reason} opened. Choose a tool or source-aware action.`);
+public/control-center/pages/ai-command.js:5794:                const finalSourceMenu = document.querySelector("[data-aicmd-final-source-menu]");
+public/control-center/pages/ai-command.js:5804:                        updateStatus(open ? `${reason} opened. Choose temporary file context, trusted Library source, planned product context, or current project context.` : `${reason} closed.`);
+public/control-center/pages/ai-command.js:5815:                Array.from(document.querySelectorAll("[data-aicmd-chatfirst-source]")).forEach((btn) => {
+public/control-center/pages/ai-command.js:5822:                Array.from(document.querySelectorAll("[data-aicmd-final-source-option]")).forEach((btn) => {
+public/control-center/pages/ai-command.js:5824:                                const option = asString(btn.getAttribute("data-aicmd-final-source-option") || "").trim();
+public/control-center/pages/ai-command.js:5833:                                } else if (option === "library") {
+public/control-center/pages/ai-command.js:5836:                                                sourceType: "auto",
+public/control-center/pages/ai-command.js:5844:                                        updateStatus("Direct product/SKU source selection is planned. Use a trusted Library source or paste product details for now.");
+public/control-center/pages/ai-command.js:5845:                                        showMessage?.("Product/SKU selector is planned. Current safe options: Library source, uploaded filename context, project context, or manual product details.");
+public/control-center/pages/ai-command.js:5865:                        showMessage?.(`${label} attached to AI Command: ${names.join(", ")}. Persistent upload/source storage will be connected in the dedicated source phase.`);
+public/control-center/pages/ai-command.js:5945:                Array.from(document.querySelectorAll("[data-aicmd-final-voice-conversation]")).forEach((btn) => {
+public/control-center/pages/ai-command.js:5947:                                updateStatus("Voice conversation requires the next provider-backed phase: recording, STT, specialist reply, and TTS playback. Voice dictation is ready now.");
+public/control-center/pages/ai-command.js:5948:                                showMessage?.("Voice dictation is ready. Full voice conversation will be implemented as the next provider-backed voice mode.");
+public/control-center/pages/ai-command.js:5957:                        aiContext,
+public/control-center/pages/ai-command.js:5976:                                source: asString(currentWizard.source || "project"),
+public/control-center/pages/ai-command.js:5977:                                goal: asString(currentWizard.goal || "sales"),
+public/control-center/pages/ai-command.js:5982:                        updateStatus("Campaign Builder opened. 1. Choose source, goal, and channel.");
+public/control-center/pages/ai-command.js:5997:                        const source = asString(wizard.source || "project");
+public/control-center/pages/ai-command.js:5998:                        const goal = asString(wizard.goal || "sales");
+public/control-center/pages/ai-command.js:6003:                        const sourceLabel = titleCase(source);
+public/control-center/pages/ai-command.js:6005:                        const sourceMeaning = {
+public/control-center/pages/ai-command.js:6007:                                product: "selected product details, offer notes, pricing evidence, and product readiness",
+public/control-center/pages/ai-command.js:6008:                                library: "trusted Library source, approved assets, saved briefs, or validated knowledge",
+public/control-center/pages/ai-command.js:6009:                                upload: "uploaded source material after user review and attachment"
+public/control-center/pages/ai-command.js:6010:                        }[source] || "selected source context";
+public/control-center/pages/ai-command.js:6027:                                        body: "Flag unsupported claims, pricing promises, before/after language, evidence gaps, restricted wording, and approval requirements."
+public/control-center/pages/ai-command.js:6031:                                        body: `Prepare publishing readiness for ${channelLabel}: channel checklist, schedule draft, missing approvals, and handoff requirements.`
+public/control-center/pages/ai-command.js:6035:                                        body: "Track approval status, destination handoff, follow-up checks, improvement notes, and post-review action ownership."
+public/control-center/pages/ai-command.js:6041:                                summary: `AI Team preview for a ${goalLabel.toLowerCase()} campaign using ${sourceLabel.toLowerCase()} and optimized for ${channelLabel}.`,
+public/control-center/pages/ai-command.js:6042:                                source,
+public/control-center/pages/ai-command.js:6049:                                audience: asString(wizard.audience || "target-customers"),
+public/control-center/pages/ai-command.js:6053:                                sourceLabel,
+public/control-center/pages/ai-command.js:6059:                                                body: `Use ${sourceMeaning}. Produce a review-ready campaign package before any handoff, approval, publishing, sending, CRM update, provider execution, or workflow mutation.`
+public/control-center/pages/ai-command.js:6067:                                                body: `Shape the offer around verified ${sourceLabel.toLowerCase()} information. If pricing, discount, stock, competitor, or claim evidence is missing, mark it as a review blocker.`
+public/control-center/pages/ai-command.js:6075:                                                body: "Define hero visual, product framing, scene list, required assets, image/video format, voiceover direction, and Media Studio handoff notes."
+public/control-center/pages/ai-command.js:6083:                                                body: `Prepare ${channelLabel} readiness: asset status, copy status, approval status, schedule suggestion, channel dependencies, and final reviewer.`
+public/control-center/pages/ai-command.js:6087:                                                body: "Create a follow-up plan for review status, owner, destination handoff, performance check, improvement loop, and next campaign iteration."
+public/control-center/pages/ai-command.js:6148:                                source: asString(body.source_type || body.source || fallbackPreview.source || ""),
+public/control-center/pages/ai-command.js:6149:                                sourceLabel: asString(body.source_label || fallbackPreview.sourceLabel || fallbackPreview.source || ""),
+public/control-center/pages/ai-command.js:6163:                                        ? "Backend preview only. No publish, send, CRM mutation, provider execution, workflow mutation, Governance approval, task creation, or durable handoff was performed."
+public/control-center/pages/ai-command.js:6166:                                backendSource: asString(body.source || "backend_ai_team")
+public/control-center/pages/ai-command.js:6176:                                        source_type: asString(wizard.source || localPreview.source || "project"),
+public/control-center/pages/ai-command.js:6177:                                        source_label: asString(localPreview.sourceLabel || wizard.source || "Project"),
+public/control-center/pages/ai-command.js:6178:                                        goal: asString(wizard.goal || localPreview.goal || "sales"),
+public/control-center/pages/ai-command.js:6228:                                        source: preview.source,
+public/control-center/pages/ai-command.js:6229:                                        sourceLabel: asString(preview.sourceLabel || ""),
+public/control-center/pages/ai-command.js:6253:                                updateStatus(preview.backendPreview ? "Backend AI Team preview prepared. Review before any handoff or approval." : "Local campaign preview prepared because backend preview is unavailable.");
+public/control-center/pages/ai-command.js:6271:                                id: `campaign_handoff_${Date.now()}`,
+public/control-center/pages/ai-command.js:6272:                                type: "ai_command_campaign_handoff",
+public/control-center/pages/ai-command.js:6273:                                source: "ai-command",
+public/control-center/pages/ai-command.js:6274:                                source_label: "AI Command Campaign Builder",
+public/control-center/pages/ai-command.js:6278:                                title: asString(preview.title || "Campaign handoff"),
+public/control-center/pages/ai-command.js:6280:                                source_type: asString(preview.source || ""),
+public/control-center/pages/ai-command.js:6281:                                source_label: asString(preview.sourceLabel || preview.source || ""),
+public/control-center/pages/ai-command.js:6295:                                backend_source: asString(preview.backendSource || ""),
+public/control-center/pages/ai-command.js:6297:                                safety: "Prepared handoff only. No backend write, publish, send, CRM mutation, provider execution, approval creation, task creation, or workflow mutation was performed.",
+public/control-center/pages/ai-command.js:6302:                const storeCampaignReviewHandoff = (handoff) => {
+public/control-center/pages/ai-command.js:6304:                                const payload = JSON.stringify(handoff);
+public/control-center/pages/ai-command.js:6305:                                window.localStorage?.setItem?.("mh_ai_command_campaign_handoff", payload);
+public/control-center/pages/ai-command.js:6306:                                window.localStorage?.setItem?.(`mh_ai_command_handoff_${handoff.destination_route}`, payload);
+public/control-center/pages/ai-command.js:6307:                                window.sessionStorage?.setItem?.("mh_ai_command_campaign_handoff", payload);
+public/control-center/pages/ai-command.js:6308:                                window.sessionStorage?.setItem?.(`mh_ai_command_handoff_${handoff.destination_route}`, payload);
+public/control-center/pages/ai-command.js:6310:                                console.warn("Unable to store AI Command campaign handoff", error);
+public/control-center/pages/ai-command.js:6323:                                library: "Save to Library",
+public/control-center/pages/ai-command.js:6327:                                operations: "Create Operations Follow-up"
+public/control-center/pages/ai-command.js:6333:                                const handoff = buildCampaignReviewHandoff(action, preview);
+public/control-center/pages/ai-command.js:6334:                                storeCampaignReviewHandoff(handoff);
+public/control-center/pages/ai-command.js:6340:                                        handoff,
+public/control-center/pages/ai-command.js:6341:                                        safety: handoff.safety
+public/control-center/pages/ai-command.js:6345:                                updateStatus(`${label} prepared. Opening ${handoff.destination} for review.`);
+public/control-center/pages/ai-command.js:6348:                                if (typeof navigateTo === "function" && handoff.destination_route) {
+public/control-center/pages/ai-command.js:6349:                                        navigateTo(handoff.destination_route);
+public/control-center/pages/ai-command.js:6353:                                if (typeof context?.navigateTo === "function" && handoff.destination_route) {
+public/control-center/pages/ai-command.js:6354:                                        context.navigateTo(handoff.destination_route);
+public/control-center/pages/ai-command.js:6445:                                                const languagePlan = getWorkspaceLanguagePlan?.(aiContext) || {};
+public/control-center/pages/ai-command.js:6518:                                        __AI_RUNTIME_TICK(session, aiContext);
+public/control-center/pages/ai-command.js:6543:		                        source: "ai-command-chat"
+public/control-center/pages/ai-command.js:6563:		                        const languagePlan = getWorkspaceLanguagePlan(aiContext);
+public/control-center/pages/ai-command.js:6572:		                                language: languagePlan.conversationLanguage === "Auto" ? "Auto - follow the latest user message language" : languagePlan.conversationLanguage,
+public/control-center/pages/ai-command.js:6578:		                                        campaign: aiContext.campaign,
+public/control-center/pages/ai-command.js:6579:		                                        readinessScore: aiContext.readinessScore,
+public/control-center/pages/ai-command.js:6580:		                                        readinessSummary: aiContext.summary
+public/control-center/pages/ai-command.js:6582:		                                safetyInstruction: "Chat only. No task/workflow/handoff/approval/publish/customer/CRM execution.",
+public/control-center/pages/ai-command.js:6583:		                                source: "ai-command-specialist-chat",
+public/control-center/pages/ai-command.js:6609:		                                source: "ai-chat-response",
+public/control-center/pages/ai-command.js:6667:		                        updateStatus("Specialist reply generated. No workflow/task/handoff was created.");
+public/control-center/pages/ai-command.js:6688:                // Phase 1: stages draft locally from conversation context. No backend execution.
+public/control-center/pages/ai-command.js:6700:                                persistSessionDraft(sessionKey, session, "Guidance preview prepared from conversation");
+public/control-center/pages/ai-command.js:6702:                                updateStatus("Guidance preview prepared from conversation context.");
+public/control-center/pages/ai-command.js:6703:                                showMessage?.(`${specLabel} guidance preview prepared from conversation.`);
+public/control-center/pages/ai-command.js:6709:                // Phase 1: converts the current conversation into a task preview. No backend execution.
+public/control-center/pages/ai-command.js:6725:                                persistSessionDraft(sessionKey, session, "Task preview prepared from conversation");
+public/control-center/pages/ai-command.js:6726:                                updateStatus("Task draft preview prepared from conversation context. Review before creating durable tasks.");
+public/control-center/pages/ai-command.js:6727:                                showMessage?.("Task draft preview prepared from conversation.");
+public/control-center/pages/ai-command.js:6748:                                persistSessionDraft(sessionKey, session, "Workflow preview prepared from conversation");
+public/control-center/pages/ai-command.js:6749:                                updateStatus("Workflow draft preview prepared from conversation context. No workflow run started.");
+public/control-center/pages/ai-command.js:6750:                                showMessage?.("Workflow draft preview prepared from conversation.");
+public/control-center/pages/ai-command.js:6756:                // Phase 1: converts the current conversation into a handoff preview. No backend write.
+public/control-center/pages/ai-command.js:6757:                const handoffBtn = $("aicmdV2HandoffBtn");
+public/control-center/pages/ai-command.js:6758:                if (handoffBtn) {
+public/control-center/pages/ai-command.js:6759:                        handoffBtn.onclick = () => {
+public/control-center/pages/ai-command.js:6763:                                        ? `Prepare a handoff summary for: ${value}`
+public/control-center/pages/ai-command.js:6764:                                        : `Prepare a handoff summary from ${spec.label} for the current project state of ${projectName || "this project"}.`;
+public/control-center/pages/ai-command.js:6767:                                        intent: "handoff",
+public/control-center/pages/ai-command.js:6772:                                persistSessionDraft(sessionKey, session, "Handoff preview prepared from conversation");
+public/control-center/pages/ai-command.js:6773:                                updateStatus("Handoff preview prepared from conversation context. Review destination before sending.");
+public/control-center/pages/ai-command.js:6774:                                showMessage?.("Handoff preview prepared from conversation.");
+public/control-center/pages/ai-command.js:6790:					campaign: aiContext.campaign
+public/control-center/pages/ai-command.js:6795:					actionType: tool.requiresSelectedSource ? "source_required" : (tool.actionType || "guided"),
+public/control-center/pages/ai-command.js:6797:					sourceTypes: asArray(tool.sourceTypes).length ? tool.sourceTypes : ["current_chat"],
+public/control-center/pages/ai-command.js:6929:		                showMessage?.("Draft preview ready from conversation.");
+public/control-center/pages/ai-command.js:6951:					source_page: "ai-command",
+public/control-center/pages/ai-command.js:6974:					updateStatus("Read is not supported in this browser.");
+public/control-center/pages/ai-command.js:7038:				const handoffRecord = {
+public/control-center/pages/ai-command.js:7040:					source_page: "ai-command",
+public/control-center/pages/ai-command.js:7045:						prompt: output.sourcePrompt,
+public/control-center/pages/ai-command.js:7049:							lastCommand: output.sourcePrompt || "",
+public/control-center/pages/ai-command.js:7057:				setSharedAiDraft(projectName || "__default__", handoffRecord.payload.draft_context);
+public/control-center/pages/ai-command.js:7058:				setSharedHandoff(projectName || "__default__", destination, handoffRecord);
+public/control-center/pages/ai-command.js:7085:					updateStatus("Read preview is not supported in this browser.");
+public/control-center/pages/ai-command.js:7130:        if (session.isHandoff) return "handoff";
+public/control-center/pages/ai-command.js:7146:                case "handoff":
+public/control-center/pages/ai-command.js:7147:                        return "Preparing handoff";
+public/control-center/pages/ai-command.js:7168:            state === "handoff" ? "Finalizing" :
+public/control-center/pages/ai-command.js:7182:        isHandoff: state === "handoff",
+public/control-center/pages/ai-command.js:7192:            state === "handoff" ? "📦 Handoff" :
+public/control-center/pages/ai-command.js:7204:        { id: "operations", label: "Operations" }
+public/control-center/pages/ai-command.js:7231:            state === "handoff" ? "AI is finalizing output" :
+public/control-center/pages/ai-command.js:7271:        handoff: "AI is preparing delivery"
+public/control-center/pages/ai-command.js:7317:        handoff: { pulse: 1.0, label: "finalizing output" }
+public/control-center/pages/ai-command.js:7332:        handoff: ["finalizing", "packaging", "delivering"]
+public/control-center/pages/ai-command.js:7398:        handoff: 800
+public/control-center/pages/ai-command.js:7600:        handoff: "finalize_delivery"
+public/control-center/pages/ai-command.js:7646:  write(session, value, source = "unknown") {
+public/control-center/pages/ai-command.js:7653:    session._lastInputSource = source;
+public/control-center/pages/ai-command.js:7676:  write(session, value, source = "unknown") {
+public/control-center/pages/ai-command.js:7682:    session.draftMessage = source === "system" ? "" : clean;
+public/control-center/pages/ai-command.js:7683:    session._stateSource = String(source || "unknown").toUpperCase();
+public/control-center/pages/ai-command.js:7693:  source(session) {
+public/control-center/pages/ai-command.js:7734:  analyze(session, aiContext) {
+public/control-center/pages/ai-command.js:7750:  decide(session, aiContext) {
+public/control-center/pages/ai-command.js:7752:    const intent = this.analyze(session, aiContext);
+public/control-center/pages/ai-command.js:7796:  execute(session, aiContext) {
+public/control-center/pages/ai-command.js:7798:    const decision = AiCommandBrain.decide(session, aiContext);
+public/control-center/pages/ai-command.js:7837:function triggerAiRouter(session, aiContext = {}) {
+public/control-center/pages/ai-command.js:7842:    const decision = AiCommandRouter.execute(session, aiContext);
+public/control-center/pages/ai-command.js:7860:function safeTriggerAi(session, aiContext = {}) {
+public/control-center/pages/ai-command.js:7864:    return triggerAiRouter(session, aiContext);
+public/control-center/pages/ai-command.js:7879:function __AI_RUNTIME_TICK(session, aiContext = {}) {
+public/control-center/pages/ai-command.js:7886:  const decision = safeTriggerAi(session, aiContext);
+public/control-center/pages/customer-center.js:2:  fetchCustomerOperationsReadiness,
+public/control-center/pages/customer-center.js:3:  fetchCustomerOperationsInbox,
+public/control-center/pages/customer-center.js:54:  const [readiness, inbox, conversations, tickets, channels] = await Promise.all([
+public/control-center/pages/customer-center.js:55:    fetchCustomerOperationsReadiness(projectName),
+public/control-center/pages/customer-center.js:56:    fetchCustomerOperationsInbox(projectName),
+public/control-center/pages/customer-center.js:62:  const responses = [readiness, inbox, conversations, tickets, channels];
+public/control-center/pages/customer-center.js:68:      readiness: {},
+public/control-center/pages/customer-center.js:69:      inbox: [],
+public/control-center/pages/customer-center.js:70:      conversations: [],
+public/control-center/pages/customer-center.js:71:      tickets: [],
+public/control-center/pages/customer-center.js:79:  const readinessData = asObject(getPayload(readiness));
+public/control-center/pages/customer-center.js:80:  const inboxData = getPayload(inbox);
+public/control-center/pages/customer-center.js:81:  const conversationsData = getPayload(conversations);
+public/control-center/pages/customer-center.js:82:  const ticketsData = getPayload(tickets);
+public/control-center/pages/customer-center.js:88:    readiness: readinessData,
+public/control-center/pages/customer-center.js:89:    inbox: asArray(inboxData?.inbox || inboxData),
+public/control-center/pages/customer-center.js:90:    conversations: asArray(conversationsData?.conversations || conversationsData),
+public/control-center/pages/customer-center.js:91:    tickets: asArray(ticketsData?.tickets || ticketsData),
+public/control-center/pages/customer-center.js:93:    blockers: asArray(readinessData.blockers),
+public/control-center/pages/customer-center.js:94:    warnings: asArray(readinessData.warnings),
+public/control-center/pages/customer-center.js:103:    ["Update ticket", "Locked: ticket changes are outside this read-only release."],
+public/control-center/pages/customer-center.js:104:    ["Assign conversation", "Locked: assignment changes require a future workflow owner and audit trail."],
+public/control-center/pages/customer-center.js:109:    ["Auto-reply", "Locked: autonomous customer replies remain forbidden by default."]
+public/control-center/pages/customer-center.js:113:function countWaitingReplies(inbox) {
+public/control-center/pages/customer-center.js:114:  return asArray(inbox).filter((entry) => /waiting|open|unread/i.test(`${entry.status || ""} ${entry.sla_status || ""}`)).length;
+public/control-center/pages/customer-center.js:118:  return asArray(items).filter((item) => /risk|breach|late|urgent/i.test(`${item.sla_status || ""} ${item.priority || ""}`)).length;
+public/control-center/pages/customer-center.js:138:          <h3>Server guard is active: no customer data is loaded</h3>
+public/control-center/pages/customer-center.js:144:        <p>This page is intentionally blank while protected customer read routes are disabled. Configure <code>MH_CONTROL_CENTER_WRITE_KEY</code> on the server, restart the service, then reload to show read-only projections.</p>
+public/control-center/pages/customer-center.js:145:        <p>No placeholder customer records are shown. External send, CRM updates, ticket changes, calls, IVR, provider sync, and auto-reply remain locked.</p>
+public/control-center/pages/customer-center.js:151:function renderEmptyState(title, body, nextStep = "Safe next step: verify protected-read readiness, then reload read-only customer projections.") {
+public/control-center/pages/customer-center.js:162:  const inbox = asArray(model?.inbox);
+public/control-center/pages/customer-center.js:163:  if (!inbox.length) {
+public/control-center/pages/customer-center.js:164:    return renderEmptyState("Inbox is empty in read-only mode", "No inbound customer signals are available for this project right now. This is expected when protected-read data is not connected or no conversations match the current projection.");
+public/control-center/pages/customer-center.js:167:  return inbox.slice(0, 8).map((entry) => `
+public/control-center/pages/customer-center.js:170:        <strong>${escapeHtml(entry.customer_label || "Masked customer")}</strong>
+public/control-center/pages/customer-center.js:179:  const conversations = asArray(model?.conversations);
+public/control-center/pages/customer-center.js:180:  if (!conversations.length) {
+public/control-center/pages/customer-center.js:181:    return renderEmptyState("No conversation previews available", "Masked conversation context will appear here after read-only projections return conversations. Customer identity and message content stay masked or truncated by default.");
+public/control-center/pages/customer-center.js:184:  return conversations.slice(0, 6).map((item) => `
+public/control-center/pages/customer-center.js:187:        <strong>${escapeHtml(item.customer_label || "Masked customer")}</strong>
+public/control-center/pages/customer-center.js:196:  const tickets = asArray(model?.tickets);
+public/control-center/pages/customer-center.js:197:  if (!tickets.length) {
+public/control-center/pages/customer-center.js:198:    return renderEmptyState("No ticket snapshots available", "Support ticket and SLA records will appear here when the read-only projection includes them. No ticket creation or update is available from this page.");
+public/control-center/pages/customer-center.js:201:  return tickets.slice(0, 6).map((ticket) => `
+public/control-center/pages/customer-center.js:204:        <strong>${escapeHtml(ticket.ticket_id || "Ticket")}</strong>
+public/control-center/pages/customer-center.js:205:        <p>${escapeHtml(ticket.status || "open")} • ${escapeHtml(ticket.sla_status || "unknown SLA")}</p>
+public/control-center/pages/customer-center.js:207:      <span class="card-badge">${escapeHtml(ticket.priority || "normal")}</span>
+public/control-center/pages/customer-center.js:215:    return renderEmptyState("No channel readiness records", "Provider readiness for email, social messaging, CRM, voice, and IVR will appear here when configured. Send and provider execution remain locked.");
+public/control-center/pages/customer-center.js:231:    <div class="customer-center-locked-actions" aria-label="Future customer actions locked">
+public/control-center/pages/customer-center.js:233:      <p class="muted">Visible for roadmap clarity only. These customer actions cannot execute here and require future confirmation gates, role permissions, provider readiness, and audit logging.</p>
+public/control-center/pages/customer-center.js:247:  const inbox = asArray(model.inbox);
+public/control-center/pages/customer-center.js:248:  const conversations = asArray(model.conversations);
+public/control-center/pages/customer-center.js:249:  const tickets = asArray(model.tickets);
+public/control-center/pages/customer-center.js:252:    ? "Guard active: waiting for server readiness"
+public/control-center/pages/customer-center.js:263:        ? "Customer Center is using read-only projections only. Outbound sends, CRM writes, ticket changes, assignments, calls, IVR, and auto-replies remain unavailable."
+public/control-center/pages/customer-center.js:271:          <h2>Loading customer operations…</h2>
+public/control-center/pages/customer-center.js:272:          <p class="muted">Fetching read-only customer projections.</p>
+public/control-center/pages/customer-center.js:283:        <p class="mhos-context-description">Protected-read customer communication surface for inbox visibility, conversation previews, ticket/SLA state, channel readiness, and handoff preparation. No customer execution happens here.</p>
+public/control-center/pages/customer-center.js:286:        <button class="btn btn-secondary" type="button" data-customer-center-action="refresh">Refresh read-only data</button>
+public/control-center/pages/customer-center.js:287:        <button class="btn btn-primary" type="button" data-customer-center-action="ai-handoff">Prepare AI support prompt</button>
+public/control-center/pages/customer-center.js:292:      ${renderMetric("Open Conversations", conversations.length || "0", "Read-only")}
+public/control-center/pages/customer-center.js:293:      ${renderMetric("Waiting Replies", countWaitingReplies(inbox), "No auto-send")}
+public/control-center/pages/customer-center.js:294:      ${renderMetric("SLA Risk", countSlaRisk([...tickets, ...inbox]), "Review only")}
+public/control-center/pages/customer-center.js:305:        <div class="panel-header"><div><div class="panel-kicker">Execution boundary</div><h3>No direct customer actions</h3></div></div>
+public/control-center/pages/customer-center.js:306:        <p class="muted">This page can review customer context and prepare handoffs. Any future customer-facing action must happen in an owning workflow with confirmation, permissions, and audit logging.</p>
+public/control-center/pages/customer-center.js:314:        <div class="panel-header"><div><div class="panel-kicker">Readiness Locks</div><h3>Read-only customer operations mode</h3></div></div>
+public/control-center/pages/customer-center.js:316:          <article class="ops-list-item"><div><strong>Read-only projections</strong><p>Customer Center can display protected customer snapshots only.</p></div><span class="card-badge">Allowed</span></article>
+public/control-center/pages/customer-center.js:318:          <article class="ops-list-item"><div><strong>CRM / Ticket / Assignment writes</strong><p>CRM notes, ticket updates, review marks, and ownership changes require future confirmation gates.</p></div><span class="card-badge">Locked</span></article>
+public/control-center/pages/customer-center.js:324:        <div class="panel-header"><div><div class="panel-kicker">Safe Operating Rules</div><h3>Preview-first support workflow</h3></div></div>
+public/control-center/pages/customer-center.js:325:        <p class="muted">Use Customer Center to review, summarize, and prepare handoffs only. Nothing in this page sends a reply, changes CRM, updates tickets, assigns conversations, places calls, triggers IVR, or starts auto-reply.</p>
+public/control-center/pages/customer-center.js:331:        <div class="panel-header"><div><div class="panel-kicker">Unified Inbox</div><h3>Inbound customer signals</h3></div></div>
+public/control-center/pages/customer-center.js:336:        <div class="panel-header"><div><div class="panel-kicker">Conversation Preview</div><h3>Masked conversation context</h3></div></div>
+public/control-center/pages/customer-center.js:341:        <div class="panel-header"><div><div class="panel-kicker">Tickets / SLA</div><h3>Support state snapshot</h3></div></div>
+public/control-center/pages/customer-center.js:354:        <p class="muted">These buttons prepare navigation/context handoffs only. They do not send customer messages, contact providers, update CRM, change tickets, assign conversations, or mark records reviewed.</p>
+public/control-center/pages/customer-center.js:356:          <button class="btn btn-secondary" type="button" data-customer-center-action="task-handoff">Prepare Task Center handoff</button>
+public/control-center/pages/customer-center.js:357:          <button class="btn btn-secondary" type="button" data-customer-center-action="governance-handoff">Prepare Governance review</button>
+public/control-center/pages/customer-center.js:358:          <button class="btn btn-secondary" type="button" data-customer-center-action="ai-handoff">Prepare AI Command prompt</button>
+public/control-center/pages/customer-center.js:365:        <p class="muted">AI may summarize read-only context, draft response guidance, translate, and suggest next steps for a human handoff. It must not send replies, update CRM, close tickets, assign conversations, place calls, trigger IVR, sync providers, or start auto-reply.</p>
+public/control-center/pages/customer-center.js:375:    "This prepares review context only. It does not send customer messages, update CRM, change tickets, contact providers, or execute AI automatically.",
+public/control-center/pages/customer-center.js:387:  const root = document.querySelector('[data-page="customer-center"]');
+public/control-center/pages/customer-center.js:391:    const button = event.target.closest("[data-customer-center-action]");
+public/control-center/pages/customer-center.js:394:    const action = button.dataset.customerCenterAction;
+public/control-center/pages/customer-center.js:401:    if (action === "ai-handoff") {
+public/control-center/pages/customer-center.js:403:        "Prepare AI Command customer support prompt",
+public/control-center/pages/customer-center.js:409:        source: "customer-center",
+public/control-center/pages/customer-center.js:410:        title: "Customer Center support prompt",
+public/control-center/pages/customer-center.js:411:        prompt: "Review Customer Center read-only state. Summarize customer support risks, draft safe reply guidance, and identify escalation needs. Do not send replies or mutate CRM."
+public/control-center/pages/customer-center.js:418:    if (action === "task-handoff") {
+public/control-center/pages/customer-center.js:420:        "Prepare Task Center customer follow-up handoff",
+public/control-center/pages/customer-center.js:426:        source: "customer-center",
+public/control-center/pages/customer-center.js:428:        summary: "Review Customer Center state and prepare a human follow-up task. No customer mutation was performed."
+public/control-center/pages/customer-center.js:431:      context.showMessage?.("Customer task handoff prepared.");
+public/control-center/pages/customer-center.js:435:    if (action === "governance-handoff") {
+public/control-center/pages/customer-center.js:437:        "Prepare Governance customer communication review",
+public/control-center/pages/customer-center.js:443:        source: "customer-center",
+public/control-center/pages/customer-center.js:445:        summary: "Review customer reply/escalation risk before any external response. No send action was performed."
+public/control-center/pages/customer-center.js:448:      context.showMessage?.("Customer governance handoff prepared.");
+public/control-center/pages/customer-center.js:467:      inbox: [],
+public/control-center/pages/customer-center.js:468:      conversations: [],
+public/control-center/pages/customer-center.js:469:      tickets: [],
+public/control-center/pages/customer-center.js:481:export const customerCenterRoute = {
+public/control-center/pages/customer-center.js:482:  id: "customer-center",
+public/control-center/pages/customer-center.js:487:    description: "Read-only customer operations, inbox visibility, ticket/SLA state, and safe AI handoffs."
+public/control-center/pages/customer-center.js:491:      <section class="page is-active customer-center-page" data-page="customer-center">
+public/control-center/pages/operations-centers.js:255:      preview: "Turn the current notification stream into a short operations summary.",
+public/control-center/pages/operations-centers.js:264:  return asObject(asObject(state.data).operations);
+public/control-center/pages/operations-centers.js:431:  const source = asString(incomingHandoff.source_page || incomingHandoff.sourcePage || "unknown");
+public/control-center/pages/operations-centers.js:437:    "Incoming task handoff"
+public/control-center/pages/operations-centers.js:442:    incomingHandoff.payload?.handoff_intent ||
+public/control-center/pages/operations-centers.js:444:    "Review-only handoff prepared by another MH-OS surface."
+public/control-center/pages/operations-centers.js:449:    <section class="panel ops-incoming-handoff mhos-clean-surface">
+public/control-center/pages/operations-centers.js:454:          <p>Review-only context from ${escapeHtml(titleCase(source))}. No durable task is created automatically from this handoff.</p>
+public/control-center/pages/operations-centers.js:464:          { label: "Source", value: titleCase(source) },
+public/control-center/pages/operations-centers.js:497:    session.source !== "all"
+public/control-center/pages/operations-centers.js:553:                <p class="mhos-os-section-copy">Filter by focus, owner, source, and priority to review task risk quickly.</p>
+public/control-center/pages/operations-centers.js:570:              <select id="taskCenterSource" class="sidebar-select">${renderFilterOptions(filters.source_pages, session.source, escapeHtml, "All sources")}</select>
+public/control-center/pages/operations-centers.js:594:                  <td>${escapeHtml(titleCase(item.source_page || "-"))}</td>
+public/control-center/pages/operations-centers.js:627:                    { label: "Source", value: titleCase(selectedItem.source_page || "-") },
+public/control-center/pages/operations-centers.js:689:  const ops = asObject(state.data.operations);
+public/control-center/pages/operations-centers.js:696:    source: "all",
+public/control-center/pages/operations-centers.js:714:  if (session.source !== "all") items = items.filter((item) => asString(item.source_page) === session.source);
+public/control-center/pages/operations-centers.js:743:          const ops = asObject(context.getState().data.operations);
+public/control-center/pages/operations-centers.js:745:          renderTaskCenter(context, { ...context.getState(), data: { ...context.getState().data, operations: ops } }, projectName);
+public/control-center/pages/operations-centers.js:781:          `Source: ${asString(incomingHandoff.source_page || incomingHandoff.sourcePage || "unknown")}`,
+public/control-center/pages/operations-centers.js:782:          `Title: ${asString(incomingHandoff.title || incomingHandoff.summary || incomingHandoff.payload?.title || incomingHandoff.payload?.summary || "Incoming task handoff")}`,
+public/control-center/pages/operations-centers.js:783:          `Summary: ${asString(incomingHandoff.description || incomingHandoff.payload?.description || incomingHandoff.payload?.handoff_intent || incomingHandoff.payload?.prompt || "Review-only handoff.")}`,
+public/control-center/pages/operations-centers.js:786:      : "No incoming task handoff.";
+public/control-center/pages/operations-centers.js:800:      context.showMessage?.("Incoming handoff summary copied.");
+public/control-center/pages/operations-centers.js:802:      context.showError?.("Failed to copy incoming handoff summary.");
+public/control-center/pages/operations-centers.js:817:  [["#taskCenterPriority", "priority"], ["#taskCenterOwner", "owner"], ["#taskCenterSource", "source"]].forEach(([selector, key]) => {
+public/control-center/pages/operations-centers.js:923:                <h3 class="mhos-os-section-title">Queue review operations</h3>
+public/control-center/pages/operations-centers.js:1041:  const queueCenter = asObject(asObject(state.data.operations).queue_center);
+public/control-center/pages/operations-centers.js:1084:          const ops = asObject(context.getState().data.operations);
+public/control-center/pages/operations-centers.js:1086:          renderQueueCenter(context, { ...context.getState(), data: { ...context.getState().data, operations: ops } }, projectName);
+public/control-center/pages/operations-centers.js:1336:  const jobMonitor = asObject(asObject(state.data.operations).job_monitor);
+public/control-center/pages/operations-centers.js:1377:          const ops = asObject(context.getState().data.operations);
+public/control-center/pages/operations-centers.js:1379:          renderJobMonitor(context, { ...context.getState(), data: { ...context.getState().data, operations: ops } }, projectName);
+public/control-center/pages/operations-centers.js:1420:  const checks = asObject(integrations.readiness?.checks);
+public/control-center/pages/operations-centers.js:1427:      message: "Provider readiness check is currently failing.",
+public/control-center/pages/operations-centers.js:1440:    source: "approval_pending",
+public/control-center/pages/operations-centers.js:1469:    || asString(item?.source) === "approval_pending";
+public/control-center/pages/operations-centers.js:1498:  const notificationCenter = asObject(asObject(state.data.operations).notification_center);
+public/control-center/pages/operations-centers.js:1512:  const inboxItems = asArray(notificationCenter.notification_items).map((item) => ({
+public/control-center/pages/operations-centers.js:1519:    item_type: "inbox"
+public/control-center/pages/operations-centers.js:1542:  const inboxList = inboxItems.map((item, index) => ({
+public/control-center/pages/operations-centers.js:1544:    _opsKey: getOpsItemKey(item, index, "inbox")
+public/control-center/pages/operations-centers.js:1547:  let listItems = session.focus === "inbox" ? inboxList : baseAlerts;
+public/control-center/pages/operations-centers.js:1552:  listItems = filterBySearch(listItems, session.search, ["title", "message", "source"]);
+public/control-center/pages/operations-centers.js:1594:          <td>${escapeHtml(titleCase(item.source || item.item_type || "system"))}</td>
+public/control-center/pages/operations-centers.js:1608:              <p class="std-context-description mhos-os-subtitle">Review operational alerts, unread inbox state, approvals, sync issues, publishing, claim risk, provider health, and workflow completion for ${escapeHtml(projectLabel)}.</p>
+public/control-center/pages/operations-centers.js:1635:                <h3 class="mhos-os-section-title">${escapeHtml(session.focus === "inbox" ? "Notification history and read-state review" : "Operational alert review")}</h3>
+public/control-center/pages/operations-centers.js:1636:                <p class="mhos-os-section-copy">${escapeHtml(session.focus === "inbox" ? "Review durable inbox history. Mark Read updates read-state only where a backend notification id exists." : "Review route-aware alerts, then inspect the selected signal before routing or follow-up.")}</p>
+public/control-center/pages/operations-centers.js:1646:              { value: "inbox", label: "Inbox", count: formatCount(inboxList.length) }
+public/control-center/pages/operations-centers.js:1650:              <input id="notificationCenterSearch" class="command-input" type="text" placeholder="Search alerts, sources, messages..." value="${escapeHtml(session.search)}">
+public/control-center/pages/operations-centers.js:1674:                  <p class="mhos-os-panel-copy">${escapeHtml(selectedItem ? "Review source, severity, timing, and owning route before follow-up." : "Choose an alert or inbox item to inspect details.")}</p>
+public/control-center/pages/operations-centers.js:1685:                    { label: "Source", value: titleCase(selectedItem.source || selectedItem.item_type || "system") },
+public/control-center/pages/operations-centers.js:1698:                  <p class="mhos-os-panel-copy">Active actions are refresh, route, AI guidance, and Mark Read only where supported. Lifecycle controls remain disabled until backend mutation safety checks are approved.</p>
+public/control-center/pages/operations-centers.js:1765:          const ops = asObject(context.getState().data.operations);
+public/control-center/pages/operations-centers.js:1767:          renderNotificationCenter(context, { ...context.getState(), data: { ...context.getState().data, operations: ops } }, projectName);
+public/control-center/pages/operations-centers.js:1916:          const ops = asObject(currentState.data.operations);
+public/control-center/pages/operations-centers.js:1927:              operations: ops,
+public/control-center/pages/operations-centers.js:1969:          const ops = asObject(context.getState().data.operations);
+public/control-center/pages/operations-centers.js:1971:          renderTaskCenter(context, { ...context.getState(), data: { ...context.getState().data, operations: ops } }, projectName);
+public/control-center/pages/operations-centers.js:2014:          const ops = asObject(context.getState().data.operations);
+public/control-center/pages/operations-centers.js:2016:          renderQueueCenter(context, { ...context.getState(), data: { ...context.getState().data, operations: ops } }, projectName);
+public/control-center/pages/operations-centers.js:2062:          const ops = asObject(context.getState().data.operations);
+public/control-center/pages/operations-centers.js:2064:          renderJobMonitor(context, { ...context.getState(), data: { ...context.getState().data, operations: ops } }, projectName);
+public/control-center/pages/operations-centers.js:2084:    description: "Review alerts, unread inbox state, approvals, provider health, publishing, claim risks, and workflow completion signals with Mark Read limited to notification read-state."
+public/control-center/pages/operations-centers.js:2110:          const ops = asObject(context.getState().data.operations);
+public/control-center/pages/operations-centers.js:2112:          renderNotificationCenter(context, { ...context.getState(), data: { ...context.getState().data, operations: ops } }, projectName);
+public/control-center/pages/operations-centers.js:2127:  const root = document.querySelector('[data-page="operations-centers"] .ops-shell');
+public/control-center/pages/operations-centers.js:2132:  const operations = asObject(asObject(state.data).operations);
+public/control-center/pages/operations-centers.js:2134:  const taskCount = asArray(operations.tasks?.items || operations.tasks).length;
+public/control-center/pages/operations-centers.js:2135:  const queueCount = asArray(operations.queue?.items || operations.queue).length;
+public/control-center/pages/operations-centers.js:2136:  const jobCount = asArray(operations.jobs?.items || operations.jobs).length;
+public/control-center/pages/operations-centers.js:2137:  const notificationCount = asArray(operations.notifications?.items || operations.notifications).length;
+public/control-center/pages/operations-centers.js:2145:      description: "Review generated tasks, owners, priorities, and execution readiness.",
+public/control-center/pages/operations-centers.js:2175:    <section class="page is-active" data-page="operations-centers">
+public/control-center/pages/operations-centers.js:2196:          description: "Use this page as the routing hub from AI Team drafts, workflows, tasks, and runtime signals into the correct operations workspace.",
+public/control-center/pages/operations-centers.js:2206:                  <h3 class="mhos-os-section-title">Choose the owning operations surface</h3>
+public/control-center/pages/operations-centers.js:2207:                  <p class="mhos-os-section-copy">AI Team can prepare drafts, tasks, workflows, and handoffs. This overview routes work to the owning operations center for review, monitoring, or controlled follow-up.</p>
+public/control-center/pages/operations-centers.js:2234:                  <h3 class="mhos-os-panel-title">Operations Lead handoff</h3>
+public/control-center/pages/operations-centers.js:2267:export const operationsCentersRoute = {
+public/control-center/pages/operations-centers.js:2268:  id: "operations-centers",
+public/control-center/pages/operations-centers.js:2275:  template: `<section class="page is-active" data-page="operations-centers"><div class="ops-shell"></div></section>`,
+public/control-center/api.js:78:  const empty = { key: "", source: "none" };
+public/control-center/api.js:83:        { source: "window.__MH_CONTROL_CENTER_READ_KEY__", value: window.__MH_CONTROL_CENTER_READ_KEY__ },
+public/control-center/api.js:84:        { source: "window.__MH_CONTROL_CENTER_WRITE_KEY__", value: window.__MH_CONTROL_CENTER_WRITE_KEY__ },
+public/control-center/api.js:85:        { source: "window.__MH_CONTROL_WRITE_KEY__", value: window.__MH_CONTROL_WRITE_KEY__ },
+public/control-center/api.js:86:        { source: "window.__MH_CONTROL_CENTER_ACCESS_KEY__", value: window.__MH_CONTROL_CENTER_ACCESS_KEY__ },
+public/control-center/api.js:87:        { source: "window.__MH_CONTROL_ACCESS_KEY__", value: window.__MH_CONTROL_ACCESS_KEY__ },
+public/control-center/api.js:88:        { source: "window.__MH_ACCESS_KEY__", value: window.__MH_ACCESS_KEY__ }
+public/control-center/api.js:95:          return { key: normalized, source: candidate.source };
+public/control-center/api.js:103:        return { key: canonical, source: `localStorage:${CONTROL_ACCESS_KEY_STORAGE_KEY}` };
+public/control-center/api.js:110:          return { key: legacyValue, source: `localStorage:${legacyKey}` };
+public/control-center/api.js:125:    source: String(keyMeta?.source || "none")
+public/control-center/api.js:280:    keySource: keyMeta.source
+public/control-center/api.js:299:    keySource: keyMeta.source
+public/control-center/api.js:799:    keySource: keyMeta.source,
+public/control-center/api.js:887:    readiness: payload?.readiness || null,
+public/control-center/api.js:893:    operations: payload?.operations || null
+public/control-center/api.js:938:      readiness: {
+public/control-center/api.js:939:        readiness_score: 0,
+public/control-center/api.js:943:      sources: {}
+public/control-center/api.js:947:  if (section === "operations") {
+public/control-center/api.js:1101:  const requiredSections = ["overview", "readiness", "assets"];
+public/control-center/api.js:1178:        "operations",
+public/control-center/api.js:1197:    readiness: requiredData.readiness,
+public/control-center/api.js:1203:    operations: createOptionalFallback(safeProjectName, "operations"),
+public/control-center/api.js:1225:      section: "operations",
+public/control-center/api.js:1244:    operations: createOptionalFallback(safeProjectName, "operations")
+public/control-center/api.js:1249:      section: "operations",
+public/control-center/api.js:1363:    `/media-manager/project/${encodeURIComponent(projectName)}/operations`,
+public/control-center/api.js:1364:    "Failed to load project operations",
+public/control-center/api.js:1419:    `/media-manager/project/${encodeURIComponent(projectName)}/library/refresh`,
+public/control-center/api.js:1422:    "Failed to refresh project library"
+public/control-center/api.js:1468:export async function setProjectAssetSourceOfTruth(projectName, assetId, sourceOfTruth) {
+public/control-center/api.js:1478:    `/media-manager/project/${encodeURIComponent(projectName)}/assets/${encodeURIComponent(assetId)}/source-of-truth`,
+public/control-center/api.js:1480:    { source_of_truth: Boolean(sourceOfTruth) },
+public/control-center/api.js:1481:    "Failed to update source of truth"
+public/control-center/api.js:1742:export async function saveProjectConnectorSource(projectName, sourceType, sourceValue) {
+public/control-center/api.js:1747:  if (!sourceType) {
+public/control-center/api.js:1748:    throw new Error("Missing source type");
+public/control-center/api.js:1751:  if (!sourceValue) {
+public/control-center/api.js:1752:    throw new Error("Missing source value");
+public/control-center/api.js:1756:    `/media-manager/project/${encodeURIComponent(projectName)}/sources`,
+public/control-center/api.js:1759:      source_type: sourceType,
+public/control-center/api.js:1760:      source_value: sourceValue
+public/control-center/api.js:1766:export async function removeProjectConnectorSource(projectName, sourceType) {
+public/control-center/api.js:1771:  if (!sourceType) {
+public/control-center/api.js:1772:    throw new Error("Missing source type");
+public/control-center/api.js:1776:    `/media-manager/project/${encodeURIComponent(projectName)}/sources/${encodeURIComponent(sourceType)}`,
+public/control-center/api.js:1983:    `/media-manager/project/${encodeURIComponent(projectName)}/operations/schema`,
+public/control-center/api.js:1984:    "Failed to load operations schema"
+public/control-center/api.js:2254:  if (params.source_page) {
+public/control-center/api.js:2255:    search.set("source_page", String(params.source_page));
+public/control-center/api.js:2265:    `/media-manager/project/${encodeURIComponent(projectName)}/handoffs${suffix}`,
+public/control-center/api.js:2266:    "Failed to load handoffs"
+public/control-center/api.js:2276:    `/media-manager/project/${encodeURIComponent(projectName)}/handoffs`,
+public/control-center/api.js:2279:    "Failed to create handoff"
+public/control-center/api.js:2283:export async function consumeProjectHandoff(projectName, handoffId, payload = {}) {
+public/control-center/api.js:2288:  if (!handoffId) {
+public/control-center/api.js:2289:    throw new Error("Missing handoff id");
+public/control-center/api.js:2293:    `/media-manager/project/${encodeURIComponent(projectName)}/handoffs/${encodeURIComponent(handoffId)}/consume`,
+public/control-center/api.js:2296:    "Failed to consume handoff"
+public/control-center/api.js:2361:export async function fetchCustomerOperationsReadiness(projectName) {
+public/control-center/api.js:2362:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/readiness`);
+public/control-center/api.js:2365:export async function fetchCustomerOperationsInbox(projectName) {
+public/control-center/api.js:2366:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/inbox`);
+public/control-center/api.js:2370:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/conversations`);
+public/control-center/api.js:2373:export async function fetchCustomerConversationDetail(projectName, conversationId) {
+public/control-center/api.js:2374:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/conversations/${encodeURIComponent(conversationId)}`);
+public/control-center/api.js:2377:export async function fetchCustomerConversationMessages(projectName, conversationId) {
+public/control-center/api.js:2378:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/conversations/${encodeURIComponent(conversationId)}/messages`);
+public/control-center/api.js:2381:export async function fetchCustomerProfilePreview(projectName, customerId) {
+public/control-center/api.js:2382:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/customers/${encodeURIComponent(customerId)}`);
+public/control-center/api.js:2386:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/tickets`);
+public/control-center/api.js:2390:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/channels`);
