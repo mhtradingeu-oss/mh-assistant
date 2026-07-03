@@ -1,0 +1,51 @@
+### backend public aliases still present for compatibility
+10684:app.post('/public/media-manager/project/:project/rename', express.json({ limit: '1mb' }), handleRenameMediaManagerProject);
+10688:app.post('/public/media-manager/project/:project/apply-template', express.json({ limit: '1mb' }), handleApplyBusinessTemplateToProject);
+10692:app.post('/public/media-manager/projects', express.json({ limit: '1mb' }), handleCreateMediaManagerProject);
+11183:app.post('/public/media-manager/project/:project/setup', (req, res) => {
+11566:app.post('/public/media-manager/project/:project/team', handleUpdateProjectTeam);
+11614:app.post('/public/media-manager/project/:project/campaigns', handleUpsertCampaign);
+11622:app.patch('/public/media-manager/project/:project/campaigns/:campaignId', (req, res) => {
+11679:app.post('/public/media-manager/project/:project/content-items', handleUpsertContentItem);
+11687:app.patch('/public/media-manager/project/:project/content-items/:contentItemId', (req, res) => {
+11745:app.post('/public/media-manager/project/:project/media-jobs', handleUpsertMediaJob);
+11753:app.patch('/public/media-manager/project/:project/media-jobs/:mediaJobId', (req, res) => {
+11866:app.post('/public/media-manager/project/:project/workflows/:workflowId/run', handleRunWorkflow);
+12210:app.post('/public/media-manager/project/:project/ai/command', handleExecuteAiCommand);
+12212:app.post('/public/media-manager/project/:project/ai/chat', handleExecuteAiChat);
+12214:app.post('/public/media-manager/project/:project/ai/guidance', handleExecuteAiGuidance);
+12216:app.post('/public/media-manager/project/:project/ai/workflows/:workflowId/run', handleExecuteAiWorkflow);
+12256:app.post('/public/media-manager/project/:project/tasks', handleCreateTask);
+12347:app.post('/public/media-manager/project/:project/approvals', handleCreateApproval);
+12349:app.post('/public/media-manager/project/:project/approvals/:approvalId/decision', handleApprovalDecision);
+12407:app.post('/public/media-manager/project/:project/governance/policy', handleUpdateGovernancePolicy);
+12439:app.patch('/public/media-manager/project/:project/notifications/:notificationId', (req, res) => {
+12502:app.post('/public/media-manager/project/:project/handoffs', handleCreateHandoff);
+12504:app.post('/public/media-manager/project/:project/handoffs/:handoffId/consume', handleConsumeHandoff);
+12603:app.post('/public/media-manager/project/:project/sources', (req, res) => {
+12696:app.delete('/public/media-manager/project/:project/sources/:sourceType', (req, res) => {
+13312:app.post('/public/media-manager/project/:project/integrations/:integrationId/connect', async (req, res) => {
+13324:app.post('/public/media-manager/project/:project/integrations/:integrationId', async (req, res) => {
+13336:app.post('/public/media-manager/project/:project/integrations/:integrationId/reconnect', async (req, res) => {
+13346:app.post('/public/media-manager/project/:project/integrations/:integrationId/test', async (req, res) => {
+13354:app.post('/public/media-manager/project/:project/integrations/:integrationId/sync', async (req, res) => {
+13362:app.post('/public/media-manager/project/:project/integrations/:integrationId/import-history', async (req, res) => {
+13370:app.post('/public/media-manager/project/:project/integrations/:integrationId/disconnect', async (req, res) => {
+13419:app.post('/public/media-manager/project/:project/publishing/schedule', (req, res) => {
+13501:app.post('/public/media-manager/project/:project/publishing/:jobId/reschedule', (req, res) => {
+13572:app.post('/public/media-manager/project/:project/publishing/:jobId/ready', (req, res) => {
+13646:app.post('/public/media-manager/project/:project/publishing/:jobId/publish', (req, res) => {
+13730:app.post('/public/media-manager/project/:project/publishing/:jobId/fail', (req, res) => {
+
+### Phase 13B.1 visibility headers still present
+209:function applyPublicMutationAliasDeprecationTelemetry(req, res, next) {
+213:    res.setHeader("X-MH-Public-Alias-Recommendation", "use-canonical-media-manager-route");
+216:    console.warn("[MH][public_mutation_alias_deprecated]", JSON.stringify({
+228:app.use(applyPublicMutationAliasDeprecationTelemetry);
+
+### compatibility classification middleware still present
+48:const { classifyPublicAliasAccess, buildPublicAliasHeaders } = require("./lib/security/public-alias-compatibility");
+231:function publicAliasDeprecationHeaders(req, res, next) {
+239:    const classification = classifyPublicAliasAccess(req.method, req.path || req.originalUrl || "", {
+243:    const headers = buildPublicAliasHeaders(classification);
+291:app.use("/public", publicAliasDeprecationHeaders);
