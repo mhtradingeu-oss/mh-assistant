@@ -1,0 +1,420 @@
+3:        getAiToolDockTools,
+4:        getSelectedLibrarySource,
+6:        openLibrarySourcePickerFromAiCommand,
+46:                label: "Content Writer",
+48:                summary: "Captions, hooks, scripts, emails, and landing page copy.",
+69:                summary: "Publishing readiness, schedule review, and handoff preparation.",
+97:                summary: "Tasks, timelines, handoffs, approvals, and execution plans.",
+111:                summary: "Lead qualification, outreach drafts, follow-up cadence, and CRM handoff notes.",
+158:		label: "Content Writer",
+159:		position: "Messaging and Content Lead",
+161:		summary: "Captions, hooks, scripts, emails, and landing page copy.",
+162:		placeholder: "Ask the Content Writer to draft captions, hooks, landing copy, or campaign messages…",
+163:		canHelp: ["Draft captions and hooks", "Write email copy", "Create landing page text", "Prepare publisher handoff", "Suggest message variants"],
+165:		destinations: ["Content Studio", "Publishing", "AI Command"],
+176:		canHelp: ["Write creative briefs", "Advise on visual direction", "Map format requirements", "Review brand alignment", "Prepare media handoffs"],
+178:		destinations: ["Asset Library", "Content Studio", "AI Command"],
+191:		destinations: ["Asset Library", "Content Studio", "Media Native"],
+200:		summary: "Publishing readiness, schedule review, and handoff preparation.",
+201:		placeholder: "Ask the Publisher to review publishing readiness, check scheduling, or prepare a handoff package…",
+202:		canHelp: ["Review publishing readiness", "Check scheduled jobs", "Prepare handoff packages", "Map publishing dependencies", "Flag pre-publish risks"],
+252:		summary: "Tasks, timelines, handoffs, approvals, and execution plans.",
+253:		placeholder: "Ask the Operations Lead to turn this into tasks, workflow steps, or handoffs…",
+254:		canHelp: ["Create task plans", "Map execution sequences", "Prepare workflow handoffs", "Review execution health", "Identify operational blockers"],
+257:		safetyNote: "Task plans and handoffs only. Workflow execution requires explicit user confirmation.",
+278:		summary: "Lead qualification, outreach drafts, follow-up cadence, CRM profile summaries, and sales handoff notes.",
+279:		placeholder: "Ask the Sales / CRM Lead to qualify a lead, draft outreach, plan follow-ups, summarize CRM context, or prepare a sales handoff for review…",
+280:		canHelp: ["Qualify lead context", "Draft outreach", "Plan follow-up sequences", "Summarize CRM profiles", "Prepare sales handoffs"],
+297:		{ label: "Draft campaign captions", sub: "For the active campaign" },
+298:		{ label: "Write a hook sequence", sub: "3 hook variants to test" },
+299:		{ label: "Prepare a Publisher handoff", sub: "Package ready content for review" },
+306:		{ label: "Prepare a media handoff", sub: "Package direction for the team" }
+318:		{ label: "Prepare a handoff package", sub: "For the approver review" }
+323:		{ label: "Suggest creative variants", sub: "Test different hooks and CTAs" },
+340:		{ label: "Draft a workflow handoff", sub: "Prepare for the next owner" },
+354:		{ label: "Prepare sales handoff", sub: "Route context to operations" }
+362:	{ label: "Prepare a full handoff sequence", sub: "Strategy, creative, compliance, publishing, ops" },
+366:const PHASE35_WORKSPACE_TABS = ["chat", "preview", "tools", "context", "history"];
+370:	{ id: "draft", title: "Prepare", description: "Create guidance, copy, task, or handoff context." },
+371:	{ id: "review", title: "Review", description: "Check safety, scope, language, and source." },
+378:	{ id: "draft", label: "Draft", helper: "Latest draft or guidance preview" },
+381:	{ id: "handoff", label: "Handoff Preview", helper: "Destination package" },
+385:const AI_ROOM_TEAM_CHAIN = ["Strategist", "Writer", "Media / Video", "Compliance", "Publisher", "Operations"];
+419:		summary: "Market, evidence, competitor, and proof research will prepare source packs only."
+431:		{ id: "campaign-angle-generator", label: "Campaign Angle Generator", action: "preview", intent: "guidance", template: "Generate campaign angles for {project}. Include audience tension, promise, channel fit, and strongest first test." },
+432:		{ id: "launch-plan", label: "Launch Plan", action: "preview", intent: "workflow", template: "Build a launch plan for {project}. Include phases, channels, owners, blockers, and next move." },
+433:		{ id: "funnel-mapping", label: "Funnel Mapping", action: "preview", intent: "guidance", template: "Map the funnel for {project}. Include awareness, consideration, conversion, retention, and handoff points." },
+434:		{ id: "prioritize-next-move", label: "Priority Sort", action: "preview", intent: "task", template: "Prioritize the next moves for {project}. Rank by impact, urgency, dependencies, and safest first action." }
+437:		{ id: "hook-generator", label: "Hook Generator", action: "preview", intent: "guidance", template: "Write 5 German hook variants for {project}. Keep them concise, testable, and suitable for the Germany market." },
+438:		{ id: "caption-builder", label: "Caption Builder", action: "preview", intent: "guidance", template: "Draft German captions for {project}. Include angle, body, CTA, and platform adaptation notes." },
+439:		{ id: "cta-refiner", label: "CTA Refiner", action: "preview", intent: "task", template: "Refine CTA options for {project}. Provide German variants for awareness, consideration, and action stages." },
+440:		{ id: "publisher-package", label: "Publisher Package", action: "preview", intent: "handoff", template: "Prepare a Publisher handoff for {project}. Include German copy package, CTA, notes, and remaining checks." }
+443:		{ id: "creative-brief-builder", label: "Creative Brief Builder", action: "preview", intent: "media", template: "Prepare a creative brief for {project}. Include concept, visual rules, subject, brand constraints, and production notes." },
+444:		{ id: "format-mapper", label: "Format Mapper", action: "preview", intent: "guidance", template: "Map required creative formats for {project}. Include platform, aspect ratio, asset type, and usage context." },
+445:		{ id: "asset-checklist", label: "Asset Checklist", action: "preview", intent: "task", template: "Create an asset checklist for {project}. List must-have files, missing references, usage context, and priority." },
+446:		{ id: "visual-direction", label: "Visual Direction", action: "preview", intent: "guidance", template: "Review visual direction for {project}. Identify mismatches, improvements, and required references." },
+450:		{ id: "write-video-hook", label: "Write video hook", action: "preview", intent: "guidance", template: "Write short-form video hooks for {project}. Include 3 opening variants and audience fit." },
+451:		{ id: "draft-script", label: "Draft script", action: "preview", intent: "guidance", template: "Draft a short-form video script for {project}. Include hook, body, CTA, and visual cues." },
+452:		{ id: "build-storyboard", label: "Build storyboard", action: "preview", intent: "workflow", template: "Build storyboard beats for {project}. Sequence shots and key transitions." },
+453:		{ id: "prepare-voiceover", label: "Prepare voiceover", action: "preview", intent: "guidance", template: "Prepare voiceover script options for {project}. Keep clean timing and emphasis notes." },
+454:		{ id: "map-video-asset-needs", label: "Map video asset needs", action: "preview", intent: "task", template: "Map video asset needs for {project}. Include format, source, and production owner." }
+457:		{ id: "publishing-checklist", label: "Publishing Checklist", action: "preview", intent: "handoff", template: "Build a publishing checklist for {project}. Include German copy, assets, claims checks, and channel readiness." },
+458:		{ id: "final-packaging", label: "Final Packaging", action: "preview", intent: "handoff", template: "Prepare a final publishing package for {project}. Include copy, CTA, asset notes, approvals, and destination channel." },
+459:		{ id: "channel-formatting", label: "Channel Formatting", action: "preview", intent: "guidance", template: "Format the next output for {project} by channel. Include German copy, limits, CTA, and scheduling notes." },
+460:		{ id: "schedule-draft", label: "Schedule Draft", action: "preview", intent: "workflow", template: "Prepare a publishing schedule draft for {project}. Include channel cadence, dependencies, and review gates." },
+464:		{ id: "ad-angle-generator", label: "Ad Angle Generator", action: "preview", intent: "guidance", template: "Draft ad angles for {project}. Include audience problem, value promise, German hook direction, and platform fit." },
+465:		{ id: "copy-variants", label: "Copy Variants", action: "preview", intent: "guidance", template: "Prepare German ad copy variants for {project}. Include hooks, primary text, CTA, and creative notes." },
+466:		{ id: "test-ideas", label: "Test Ideas", action: "preview", intent: "task", template: "Suggest paid test ideas for {project}. Provide hypotheses, segments, creative variables, and measurement notes." },
+467:		{ id: "budget-notes", label: "Budget Notes", action: "preview", intent: "guidance", template: "Review budget notes for {project}. Summarize constraints and safe test allocation guidance." },
+471:		{ id: "keyword-intent", label: "Keyword Intent", action: "preview", intent: "guidance", template: "Suggest keyword intent opportunities for {project}. Include Germany-market intent, content mapping, and priority." },
+472:		{ id: "meta-direction", label: "Meta Direction", action: "preview", intent: "guidance", template: "Prepare meta direction for {project}. Include page angle, title direction, description direction, and CTA intent." },
+473:		{ id: "opportunity-summary", label: "Opportunity Summary", action: "preview", intent: "task", template: "Summarize SEO and insight opportunities for {project}. Focus on conversion, traffic quality, and content fit." },
+474:		{ id: "analysis-plan", label: "Analysis Plan", action: "preview", intent: "workflow", template: "Draft an analysis plan for {project}. Define questions, datasets, cadence, and owners." },
+478:		{ id: "claims-check", label: "Claims Check", action: "preview", intent: "guidance", template: "Review marketing claims for {project}. Flag unsupported, high-risk, or evidence-dependent wording." },
+479:		{ id: "approval-flags", label: "Approval Flags", action: "preview", intent: "task", template: "Check approval risks for {project}. List risk, impact, mitigation, and required owner." },
+480:		{ id: "safety-checklist", label: "Safety Checklist", action: "preview", intent: "handoff", template: "Prepare a safety checklist for {project}. Include policy checks, evidence required, and approval notes." },
+481:		{ id: "publish-readiness", label: "Publish Readiness", action: "preview", intent: "handoff", template: "Review publish readiness for {project}. Confirm what needs human approval before release." },
+485:		{ id: "timeline-draft", label: "Timeline Draft", action: "preview", intent: "workflow", template: "Draft an execution timeline for {project}. Include milestones, owners, dependencies, and review gates." },
+486:		{ id: "handoff-routing", label: "Handoff Routing", action: "preview", intent: "handoff", template: "Prepare handoff routing for {project}. Include source, destination, decision gates, and required confirmations." },
+487:		{ id: "checklist", label: "Checklist", action: "preview", intent: "task", template: "Draft an operational checklist for {project}. Include owners, dependencies, priority, and first action." },
+488:		{ id: "blocker-review", label: "Blocker Review", action: "preview", intent: "guidance", template: "Review operational blockers for {project}. Prioritize by risk and impact." },
+492:		{ id: "review-unified-inbox", label: "Review Unified Inbox", action: "preview", intent: "guidance", template: "Review the Unified Inbox readiness for {project}. Summarize visible customer-operation signals, open gaps, and safe next review steps. Do not claim inbox actions happened." },
+493:		{ id: "summarize-customer-thread", label: "Summarize Customer Thread", action: "preview", intent: "guidance", template: "Summarize this customer thread for {project}. Include customer issue, sentiment, reply goal, missing details, and safe next step." },
+494:		{ id: "draft-customer-reply", label: "Draft Customer Reply", action: "preview", intent: "guidance", template: "Draft a customer reply for {project}. Keep it helpful, calm, review-ready, and do not claim any operational action has been completed." },
+495:		{ id: "create-ticket-draft", label: "Create Ticket Draft", action: "preview", intent: "task", template: "Create a ticket draft for {project}. Include issue, priority, owner suggestion, evidence needed, and next safe action." },
+496:		{ id: "check-sla-risk", label: "Check SLA Risk", action: "preview", intent: "guidance", template: "Check SLA risk for {project}. Flag urgency, risk level, missing runtime data, and escalation recommendation for review." },
+497:		{ id: "prepare-escalation", label: "Prepare Escalation", action: "preview", intent: "handoff", template: "Prepare an escalation draft for {project}. Include reason, customer impact, owner, confirmation needed, and destination team." },
+498:		{ id: "customer-profile-snapshot", label: "Customer Profile Snapshot", action: "preview", intent: "guidance", template: "Prepare a customer profile snapshot for {project}. Include known context, purchase/support signals, missing fields, and safe follow-up questions." },
+499:		{ id: "route-support-sales-ops", label: "Route to Support / Sales / Operations", action: "preview", intent: "handoff", template: "Prepare routing guidance for {project}. Decide whether the customer item belongs with Support, Sales, or Operations, and explain the review gate." }
+502:		{ id: "lead-qualification", label: "Lead Qualification", action: "preview", intent: "guidance", template: "Qualify the lead for {project}. Include fit, intent, urgency, missing CRM fields, and the safest next step." },
+503:		{ id: "outreach-draft", label: "Outreach Draft", action: "preview", intent: "guidance", template: "Draft outreach for {project}. Include subject or opener, personalized message, CTA, and review notes before sending." },
+504:		{ id: "follow-up-sequence", label: "Follow-up Sequence", action: "preview", intent: "workflow", template: "Build a follow-up sequence for {project}. Include timing, message angle, CTA, stop condition, and confirmation requirements." },
+505:		{ id: "crm-profile-summary", label: "CRM Profile Summary", action: "preview", intent: "guidance", template: "Summarize the CRM profile context for {project}. Include fit, history, open questions, and next sales action without mutating CRM data." },
+506:		{ id: "pipeline-next-step", label: "Pipeline Next Step", action: "preview", intent: "task", template: "Recommend the pipeline next step for {project}. Include stage, rationale, owner, risk, and required confirmation." },
+507:		{ id: "dealer-salon-outreach", label: "Dealer / Salon Outreach", action: "preview", intent: "guidance", template: "Draft dealer or salon outreach for {project}. Include positioning, proof needs, offer angle, CTA, and follow-up note." },
+508:		{ id: "influencer-lead-plan", label: "Influencer Lead Plan", action: "preview", intent: "workflow", template: "Prepare an influencer lead plan for {project}. Include target profile, outreach angle, qualification criteria, and handoff path." },
+509:		{ id: "sales-handoff-draft", label: "Sales Handoff", action: "preview", intent: "handoff", template: "Prepare a sales handoff draft for {project}. Include lead context, recommended next action, owner, and confirmation needed." }
+516:	{ icon: "✍️", label: "Generate Content", sub: "Write hooks, captions & scripts", template: "Generate content for {project}. Create hooks, caption ideas, and a reel script for the next product push." },
+561:		name: "Writer",
+564:		suggestedPrompt: "Act as Writer and generate content angles for the current project and active campaign."
+604:		purpose: "Translate intent into executable workflows and handoffs.",
+720:		const title = humanizeValue(value.title || value.label || value.name || value.headline || value.hook);
+762:    "Prepare a handoff summary for:",
+843:	const market = rawMarket || "Germany";
+851:	const publishLanguage = configuredPublishLanguage || "German";
+914:			workspaceTab: "preview",
+1111:                .replace(/\b(public|private|review-only|preview-only)\b/gi, "")
+1114:        const source = compact || text;
+1115:        return source.length > 38 ? `${source.slice(0, 35).trim()}...` : source;
+1140:        const preview = asObject(session.outputPreview);
+1145:                preview.title ||
+1152:                preview.outputType ? `${formatOutputTypeLabel(preview.outputType)} preview` : "Session"
+1179:                preview: session.outputPreview || null,
+1202:        session.outputPreview = asObject(record.preview);
+1227:	const safeOutputLanguage = asString(outputLanguage || "German").trim();
+1228:	const safeMarket = asString(market || "Germany").trim();
+1231:			"Full Team workflow: Strategist -> Writer -> Media/Video -> Compliance -> Publisher -> Operations.",
+1245:                "If the user writes Arabic, reply in Arabic. If the user writes English, reply in English. If the user writes German, reply in German.",
+1246:                `Use ${safeOutputLanguage} only for customer-facing or publishable copy such as captions, ads, emails, landing pages, final campaign text, or publishing packages.`,
+1247:                "When you include publishable copy, label it clearly as publishable content and keep the explanation in the user chat language.",
+1250:		`When drafting publishable copy, write it in ${safeOutputLanguage}.`,
+1336:                                : activeTab === "handoff"
+1337:                                        ? "handoff"
+1341:        const looksTaskLike = /\b(task|tasks|handoff|ticket|tickets|follow-up|follow up|owner|owners|assignee|assigned|due date|priority|priorities|backlog|checklist|next task|action item|action items)\b/.test(text);
+1343:        const looksContentLike = /\b(content|caption|captions|post|posts|email|blog|article|copy|headline|landing page|script|message|cta|product copy|social post)\b/.test(text);
+1350:        if (outputType === "handoff" || outputType === "task" || looksTaskLike) {
+1360:        if (/content|copy|draft|caption|email|blog|article|script/.test(outputType) || looksContentLike) {
+1400:		"content-studio": "Content Studio",
+1429:		confirmationRequired: outputType === "handoff" || specialistId === "publisher" || specialistId === "compliance_reviewer",
+1431:		sourcePrompt: promptSnippet,
+1432:		status: "draft_preview",
+1469:			summary: "Content draft prepared with hooks, captions, CTA flow, and review checkpoint.",
+1470:			hooks: [
+1471:				`Problem-aware hook direction for ${projectName || "this project"}`,
+1472:				"Outcome-led hook direction for a German publishing draft",
+1473:				"Proof-led hook direction with claims marked for review"
+1475:			captions: [
+1477:				"German caption version should keep the CTA direct and easy to approve."
+1485:				"Use Arabic freely in the conversation; publishable copy should be reviewed in German.",
+1488:			nextStep: "Send this package to Content Studio or Publisher after review.",
+1490:				"Draft 3 hook variants",
+1491:				"Draft captions with CTA",
+1493:				"Route to Content Studio for refinement"
+1523:			summary: "Video draft prepared with hook, script structure, and storyboard flow.",
+1525:				"Draft opening hook and audience angle",
+1537:			title: outputType === "handoff" ? "Handoff Preview: Publishing package" : "Publishing Draft: Readiness checklist",
+1540:				"Final copy should be German for the Germany market unless a destination overrides it.",
+1547:				"Prepare handoff for publishing review"
+1559:			hooks: [
+1560:				"German problem-led ad hook",
+1561:				"German outcome-led ad hook",
+1562:				"German objection-led ad hook"
+1628:				"Unified Inbox is not duplicated here; this is a draft and routing preview only.",
+1646:			title: outputType === "handoff" ? "Sales Handoff" : "Sales / CRM Draft: Lead and outreach plan",
+1647:			summary: "Sales and CRM draft prepared with lead qualification, outreach direction, follow-up cadence, and pipeline handoff notes.",
+1652:				"CTA: ask for a low-friction next step."
+1668:			nextStep: "Review the lead fit, confirm owner, then route the handoff to operations or the CRM surface.",
+1673:				"Route sales handoff without mutating CRM data"
+1690:					"Stage 4: Destination handoff and confirmation"
+1692:				safetyLabel: "Workflow run is not started. This is a draft preview only."
+1697:			title: outputType === "handoff" ? "Handoff Preview: Operations package" : "Operations Draft: Task and handoff plan",
+1702:				"Prepare destination handoff context",
+1722:		handoff: "handoff"
+1739:		summary: `Full team ${outputType.replace("_", " ")} preview prepared for ${projectName || "current project"}.`,
+1742:			"Writer, Media Director, and Video Lead turn strategy into message, asset, and production drafts",
+1748:			"Writer: draft hooks, captions, messages, email, or outreach copy",
+1752:			"Customer Ops / Sales: add reply, ticket, lead, outreach, or CRM handoff drafts when relevant",
+1753:			"Operations: convert the reviewed output into safe tasks, workflow draft, or handoff context"
+1758:		safetyLabel: "Full Team output is a coordinated draft preview only."
+1767:		handoff: "Handoff Preview",
+1778:		`Status: ${humanizeValue(output.status, "draft_preview")}`,
+1782:		`Source Prompt: ${humanizeValue(output.sourcePrompt)}`,
+1826:function buildStructuredPreviewBlocks(preview = {}) {
+1827:        const summary = humanizeValue(preview.summary, "");
+1828:        const sourceText = humanizeValue(
+1829:                preview.mainOutput ||
+1830:                preview.output ||
+1831:                preview.generatedOutput ||
+1832:                preview.result ||
+1837:        const compactSummary = compactPreviewText(sourceText || summary, 420);
+1840:        const mainLines = splitPreviewLines(sourceText || summary, 14)
+1847:        const bullets = normalizeUniqueDisplayList(preview.bullets, 8)
+1854:        const steps = normalizeUniqueDisplayList(preview.steps, 8)
+1859:        } else if (preview.nextStep) {
+1860:                blocks.push({ label: "Next step", items: [compactPreviewText(preview.nextStep, 280)] });
+1983:		sourceSummary: asObject(insights.source_summary || learning.source_summary),
+1998:		writer: ["content", "post", "caption", "blog", "script", "email", "landing page section", "reel script", "copy", "write", "hooks"],
+2004:		operations: ["task plan", "workflow", "handoff", "approval", "timeline", "execution plan", "route", "publish", "status", "priority", "priorities", "blocking", "blocker", "readiness", "next", "do next"],
+2084:			routeSuggestion("Integrations", "integrations", "Reconnect data sources and improve intelligence coverage."),
+2108:			top ? `Reuse the pattern from ${extractTopMessage(top)} in the next publishing cycle.` : "Sync social insights to identify winning hooks and formats.",
+2109:			weak ? `Rewrite ${extractTopMessage(weak)} with a stronger hook and better platform fit.` : null,
+2115:			"Prepare next batch with performance-led hooks instead of generic posting volume."
+2118:			routeSuggestion("Content Studio", "content-studio", "Rewrite weak posts and turn winning patterns into new drafts."),
+2140:			weakPage ? `Weak landing page: ${extractTopMessage(weakPage)}.` : "No weak page signal yet.",
+2145:			weakPage ? `Tighten intent match and CTA on ${extractTopMessage(weakPage)}.` : "Review page titles and meta descriptions on priority pages.",
+2151:			"Review top landing pages for stronger offer clarity and conversion flow."
+2185:			weakCampaign ? `Rebuild hook and CTA for ${extractTopMessage(weakCampaign)}.` : "Audit campaign naming and creative mapping.",
+2235:		return { title: "Content plan task block", owner: "Content Studio", steps: ["Use the strongest content pattern as the starting template.", "Map posts by platform, hook, format, and CTA.", "Route approved items into Publishing for scheduling."] };
+2238:		return { title: "Content repair task block", owner: "Content Studio", steps: ["Select the weakest items from Insights.", "Rewrite hooks, sharpen CTAs, and adjust format-platform fit.", "Republish only after updated versions are approved."] };
+2252:		routeSuggestions.push(routeSuggestion("Content Studio", "content-studio", "Draft, rewrite, or prepare the requested content outputs."));
+2255:	if (/reconnect|connect|integration|tool|sync/.test(query)) routeSuggestions.push(routeSuggestion("Integrations", "integrations", "Reconnect data sources and restore intelligence coverage."));
+2379:	"content-studio": "Content Studio",
+2384:	library: "Library",
+2510:function normalizeAiInboundRouteSuggestions(rawSuggestions, sourcePage, sourceLabel) {
+2511:	const fallbackRoute = sourcePage === "workspace" ? "workflows" : sourcePage;
+2512:	const fallbackLabel = sourceLabel || routeLabel(fallbackRoute);
+2532:	const preview = asObject(rawPreview);
+2533:	if (!Object.keys(preview).length) return null;
+2534:	const outputType = asString(preview.outputType || preview.output_type || preview.type || "handoff").trim() || "handoff";
+2536:		preview.destinationRoute ||
+2537:		preview.destination_route ||
+2539:		normalized.sourcePage ||
+2542:	const specialistId = normalizeAiInboundSpecialistId(preview.specialistId || preview.specialist_id || normalized.suggestedSpecialist, normalized.suggestedSpecialist);
+2545:		...preview,
+2547:		title: firstAiInboundText(preview.title, normalized.title, `Inbound handoff from ${normalized.sourceLabel}`),
+2548:		summary: firstAiInboundText(preview.summary, preview.description, normalized.prompt),
+2551:		generatedAt: asString(preview.generatedAt || preview.generated_at || nowIso()),
+2552:		sourcePrompt: firstAiInboundText(preview.sourcePrompt, preview.source_prompt, normalized.prompt),
+2553:		status: asString(preview.status || "draft_preview"),
+2554:		safetyLabel: firstAiInboundText(preview.safetyLabel, preview.safety_label, "Guidance and draft only. No backend execution."),
+2555:		confirmationNote: firstAiInboundText(preview.confirmationNote, preview.confirmation_note, "Execution, approvals, publishing, CRM updates, customer replies, and workflow runs require explicit confirmation in the owning workspace."),
+2556:		confirmationRequired: preview.confirmationRequired ?? preview.confirmation_required ?? true
+2560:function getAiInboundDurableHandoffId(handoff) {
+2561:	const payload = asObject(handoff?.payload);
+2563:		handoff?.id,
+2564:		handoff?.handoff_id,
+2565:		handoff?.handoffId,
+2566:		payload.handoff_id,
+2567:		payload.handoffId
+2571:function getAiInboundHandoffId(handoff) {
+2572:	const durableId = getAiInboundDurableHandoffId(handoff);
+2574:	if (!handoff) return "";
+2575:	const payload = asObject(handoff?.payload);
+2576:	const stablePayloadId = firstAiInboundId(payload.handoff_id, payload.handoffId, payload.id, handoff?.created_at, handoff?.createdAt);
+2579:		if (!aiInboundHandoffObjectIds.has(handoff)) {
+2581:			aiInboundHandoffObjectIds.set(handoff, `cached-ai-handoff-${Date.now()}-${aiInboundHandoffCounter}`);
+2583:		return aiInboundHandoffObjectIds.get(handoff);
+2585:	return [handoff?.source_page, handoff?.destination_page, payload.prompt, payload.title]
+2588:		.join("::") || `cached-ai-handoff-${Date.now()}`;
+2591:function normalizeAiInboundHandoff(handoff, projectName) {
+2592:	const payload = asObject(handoff?.payload);
+2593:	const draftContext = firstAiInboundObject(payload.draft_context, payload.draftContext, handoff?.draft_context, handoff?.draftContext);
+2594:	const sourcePage = normalizeAiInboundSourcePage(firstAiInboundId(
+2595:		payload.source_page,
+2596:		payload.sourcePage,
+2597:		handoff?.source_page,
+2598:		handoff?.sourcePage,
+2599:		draftContext.source_page,
+2600:		draftContext.sourcePage
+2602:	const sourceLabel = AI_INBOUND_SOURCE_LABELS[sourcePage] || routeLabel(sourcePage) || "Workspace";
+2606:		AI_INBOUND_SPECIALIST_BY_SOURCE[sourcePage] ||
+2625:	)) || `Review this ${sourceLabel} handoff for ${projectLabel}. Identify the right specialist, summarize the context, produce a review-ready draft, and recommend the next safe route. Do not execute publishing, task creation, CRM updates, customer replies, workflow runs, or backend actions.`;
+2631:		handoff?.title,
+2632:		`Inbound handoff from ${sourceLabel}`
+2639:		sourcePage,
+2640:		sourceLabel
+2645:		draftContext.output_preview,
+2646:		draftContext.phase2_output_preview,
+2648:		payload.output_preview
+2651:		sourcePage,
+2652:		sourceLabel,
+2661:			source_page: sourcePage,
+2662:			sourcePage
+2664:		status: asString(handoff?.status || payload.status || "available"),
+2665:		note: "Guidance only. No publishing, task creation, CRM updates, customer replies, workflow runs, exports, or backend actions are executed from this handoff."
+2672:	const handoff = getSharedHandoff(projectName, "ai-command", operations);
+2673:	const handoffId = getAiInboundHandoffId(handoff);
+2674:	if (!handoffId || handoffId === asString(session.lastAppliedHandoffId)) return;
+2676:	const normalized = normalizeAiInboundHandoff(handoff, projectName);
+2683:		id: handoffId,
+2684:		sourcePage: normalized.sourcePage,
+2685:		sourceLabel: normalized.sourceLabel,
+2696:			preview: session.outputPreview,
+2715:	session.lastAppliedHandoffId = handoffId;
+2716:	persistSessionDraft(projectName, session, `Inbound handoff loaded from ${normalized.sourceLabel}`);
+2718:	const durableHandoffId = getAiInboundDurableHandoffId(handoff);
+2721:			console.warn("Failed to consume AI handoff:", error.message);
+2724:	showMessage?.(`Inbound handoff loaded from ${normalized.sourceLabel}.`);
+2733:	source,
+2750:			source,
+2790:		source
+2798:		source: "durable-ai-response",
+2807:		source,
+2953:				<span style="font-size:11px;color:var(--color-text-2);">Prefill only — send prompt for preview</span>
+3304:                handoff: "handoff package"
+3321:        const preview = buildPhase2OutputPreview({
+3329:        preview.sourcePrompt = context.prompt || workPrompt;
+3330:        preview.conversationContext = context.conversationText;
+3333:        // The visible preview should stay clean and user-facing.
+3335:                preview.summary = context.assistantText;
+3336:                preview.mainOutput = context.assistantText;
+3339:        preview.generatedAt = nowIso();
+3340:        preview.safetyLabel = preview.safetyLabel || "Conversation converted into a review-ready draft. No backend action executed.";
+3342:        session.outputPreview = preview;
+3345:        session.workspaceTab = "preview";
+3346:        return preview;
+3464:	const preview = asObject(session.outputPreview);
+3466:	if (preview.outputType === "workflow") return 2;
+3467:	if (preview.outputType === "handoff") return 3;
+3468:	if (preview.outputType === "task") return 1;
+3469:	if (preview.outputType) return 2;
+3478:		preview: "draft",
+3481:		handoff: "handoff",
+3487:function outputTabFromPreview(preview) {
+3488:	const outputType = asString(preview?.outputType || "");
+3491:	if (outputType === "handoff") return "handoff";
+3506:		handoff: "Handoff Preview",
+3523:	if (tool.actionType === "source_required") return "Source required";
+3524:	return "Local preview only";
+3529:	if (tool.intent === "handoff") return "Prepare";
+3575:				<p class="aicmd-room-subtitle mhos-context-description">Ask one expert or the full team to prepare strategy, content, analysis, reviews, and destination handoffs. AI prepares and reviews only; sensitive actions stay confirmation-gated in the owning workspace.</p>
+3715:						<p class="aicmd-v2-profile-purpose">Coordinates specialists into one review-ready brief, workflow, or handoff.</p>
+3726:	const specialistTools = getAiToolDockTools({ specialistId: spec.id, teamMode: "solo", limit: 3 });
+3739:				${specialistTools.slice(0, 3).map((tool) => `<span class="aicmd-v2-strength-chip is-tool">${escapeHtml(tool.label)}</span>`).join("")}
+3758:        if (roleId === "operations" || roleId === "customer_ops") return `${label} is preparing your task handoff...`;
+3800:	if (/handoff|route|destination_brief/.test(haystack)) return "handoff";
+3807:	const preferred = destinations.find((item) => !["chat-preview", "composer", "preview", "ai-command"].includes(asString(item)));
+3813:	const sourceMeta = asArray(tool.sourceTypes).join(" ");
+3814:	return tool.actionType === "source_required" || /source_of_truth_assets|selected_asset|proof_doc|legal_doc|privacy_policy/i.test(sourceMeta);
+3820:		action: "preview",
+3830:	return getAiToolDockTools({
+3840:		{ id: "preview", label: "Preview", hint: "Draft output" },
+3841:		{ id: "tools", label: "Tools", hint: "Role actions" },
+3864:function renderPhase35ToolsPanel(session, projectName, aiContext, escapeHtml) {
+3874:					<span class="aicmd-v2-tools-subtitle">Prompt tools for structured drafts, source-aware reviews, and destination handoffs. They prepare composer instructions only.</span>
+3906:			${projectName ? `<div class="aicmd-v2-tools-note">Project context: ${escapeHtml(projectName)}. Tools do not execute, publish, send, approve, save, or mutate records.</div>` : ""}
+3914:        const outputLanguage = asString(languagePlan.publishLanguage || languagePlan.outputLanguage || "German").trim() || "German";
+3915:        const market = asString(languagePlan.market || "Germany").trim() || "Germany";
+3927:	const source = getSelectedLibrarySource(projectName);
+3928:	if (!source) return "";
+3929:	const name = asString(source.name || source.filename || source.fileName || "Selected Library source");
+3931:	const type = asString(source.asset_type || source.type || source.source_type || "Library asset");
+3932:	const sourceOfTruth = typeof source.source_of_truth === "boolean"
+3933:		? (source.source_of_truth ? "Source of truth" : "")
+3934:		: asString(source.source_of_truth || "");
+3935:	const status = asString(source.review_status || source.status_label || source.status || "");
+3936:	const meta = [type, sourceOfTruth, status]
+3943:		<div class="aicmd-main-source-indicator" title="${escapeHtml(name)}">
+3953:        const preview = asObject(session.outputPreview);
+3958:        const outputType = asString(preview.outputType || "guidance");
+3959:        const outputLabel = preview.outputType ? formatOutputTypeLabel(outputType) : "Guidance";
+3960:        const destinationRoute = asString(preview.destinationRoute || destinationRouteForSpecialist(session.modeId, outputType));
+3962:        const source = getSelectedLibrarySource(projectName || aiContext?.projectName || "");
+3963:        const sourceLabel = source
+3964:                ? asString(source.name || source.filename || source.fileName || "Trusted source")
+3965:                : "No Library source selected";
+3966:        const governanceRequired = destinationRoute === "governance" || /approval|claim|compliance|risk|gdpr|review/i.test(`${outputType} ${asString(preview.title)} ${asString(preview.summary)}`);
+4012:                                        <p>Active specialist, source grounding, destination, risk, and execution lock in one compact command strip.</p>
+4023:                                <span><strong>Source</strong>${escapeHtml(sourceLabel)}</span>
+4029:                        <p class="aicmd-chatfirst-tab-note">AI Command prepares guidance, drafts, previews, and handoff context only. Publishing, approvals, CRM updates, workflow runs, customer sends, provider execution, and durable task creation remain confirmation-gated in the owning workspace.</p>
+4101:				<p>Chat, draft, review, and prepare handoff context only. Publishing, approvals, CRM updates, workflow runs, external sends, and durable task creation stay confirmation-gated in the owning workspace.</p>
+4134:	const source = getSelectedLibrarySource(projectName || aiContext?.projectName || "");
+4135:	const sourceLabel = source?.name || source?.filename || source?.fileName || "";
+4150:				<button id="aicmdV2SourceBtnTopbar" class="aicmd-chatfirst-icon-control" type="button" data-aicmd-chatfirst-source title="${escapeHtml(sourceLabel ? `Trusted source: ${sourceLabel}` : "1. Choose source through Tool Drawer / Library")}">
+4151:					Source${sourceLabel ? `: ${escapeHtml(asString(sourceLabel).slice(0, 36))}` : ""}
+4236:                                outputType: item.outputType || item.preview?.outputType || "",
+4237:                                destinationRoute: item.destinationRoute || item.preview?.destinationRoute || "",
+4238:                                previewTitle: item.preview?.title || item.responseTitle || "",
+4244:        const preview = asObject(session.outputPreview);
+4248:                const outputType = asString(message.outputType || preview.outputType || "guidance");
+4249:                const destinationRoute = asString(message.destinationRoute || preview.destinationRoute || destinationRouteForSpecialist(session.modeId, outputType));
+4280:                const previewTitle = asString(message.previewTitle || preview.title || "");
+4288:                                        ${previewTitle && !isUser ? `<strong class="aicmd-chat-output-title">${escapeHtml(previewTitle)}</strong>` : ""}
+4312:                                        <span>Ask ${escapeHtml(selectedLabel)} to plan, draft, review, analyze, or prepare a handoff.</span>
+4316:                                                <span>Review source</span>
+4317:                                                <span>Prepare handoff</span>
+4328:                source: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M5 8h14M5 16h14"/></svg>',
+4342:                { id: "publish", label: "Publish", summary: "Prepare publishing checklist and handoff readiness.", enabled: false }
+4352:                                <span>Choose a guided workflow. The team prepares a preview first.</span>
+4397:                <div class="aicmd-smart-preview-grid aicmd-smart-campaign-package-grid">
+4421:        const source = asString(wizard.source || "project");
+4432:        const preview = asObject(wizard.preview);
+4434:        const sourceOptions = [["project", "Project context"], ["product", "Product"], ["library", "Library source"], ["upload", "Uploaded source"]];
+4436:        const channelOptions = [["social", "Social"], ["email", "Email"], ["website", "Website"], ["ads", "Ads"], ["publishing", "Publishing package"]];
+4437:        const marketOptions = [["germany", "Germany"], ["eu", "EU"], ["mena", "MENA"], ["global", "Global"]];
+4438:        const languageOptions = [["german", "German"], ["english", "English"], ["arabic", "Arabic"], ["multi", "Multi-language"]];
+4439:        const formatOptions = [["mixed", "Mixed package"], ["image", "Image"], ["video", "Video"], ["email", "Email"], ["landing", "Landing page"], ["ads", "Ads"]];
+4464:                                                <p>Guide the AI Team from source to preview. Backend workflow execution and destination handoff stay approval-gated.</p>
+4474:                                        <span class="${preview.title ? "is-active" : ""}">5 Preview</span>
+4479:                                                <strong>1. Choose source</strong>
+4481:                                                        ${sourceOptions.map(([value, label]) => optionButton("source", value, label, source)).join("")}
+4526:                                        ${preview.title ? `
+4527:                                                <article class="aicmd-smart-preview">
+4528:                                                        <div class="aicmd-smart-preview-head">
+4530:                                                                <strong>${escapeHtml(preview.title)}</strong>
+4531:                                                                <p>${escapeHtml(preview.summary)}</p>
+4534:                                                        <div class="aicmd-smart-preview-meta">
+4535:                                                                <span><strong>Source</strong>${escapeHtml(preview.sourceLabel)}</span>
+4536:                                                                <span><strong>Goal</strong>${escapeHtml(preview.goalLabel || titleCase(preview.goal))}</span>
+4537:                                                                <span><strong>Channel</strong>${escapeHtml(preview.channelLabel || titleCase(preview.channel))}</span>
+4538:                                                                <span><strong>Status</strong>${escapeHtml(preview.backendPreview ? "Backend preview" : "Local fallback")}</span>
+4539:                                                                <span><strong>Market</strong>${escapeHtml(titleCase(preview.market || market))}</span>
+4540:                                                                <span><strong>Language</strong>${escapeHtml(titleCase(preview.language || language))}</span>
+4541:                                                                <span><strong>Format</strong>${escapeHtml(titleCase(preview.format || format))}</span>
+4542:                                                                <span><strong>Deadline</strong>${escapeHtml(titleCase(preview.deadline || deadline))}</span>
+4545:                                                        ${renderCampaignPackageMiniPanel(preview.campaignPackage, escapeHtml)}
+4547:                                                        <div class="aicmd-smart-preview-grid">
+4548:                                                                ${asArray(preview.sections).map((section) => `
+4556:                                                        <div class="aicmd-smart-preview-actions" aria-label="Campaign review actions">
+4557:                                                                <button type="button" data-aicmd-smart-campaign-action="library">Save to Library</button>
+4567:                                                        <span>1. Choose source, goal, and channel. The AI Team will prepare the preview package before any approval or handoff.</span>
+4573:                                        <span>Review-first flow: generate preview, approve, then hand off to the owning surface. No publish, send, CRM update, provider execution, or workflow mutation happens here.</span>
+4576:                                                <button class="aicmd-smart-wizard-primary" type="button" data-aicmd-smart-campaign-preview>
+4577:                                                        ${preview.title ? "Regenerate AI Team Preview" : "Generate AI Team Preview"}
+4607:        const source = getSelectedLibrarySource(projectName);
+4631:        if (source?.name || source?.filename || source?.fileName) {
+4632:                const name = source.name || source.filename || source.fileName || "Library source";
+4633:                const type = source.asset_type || source.type || source.source_type || "Library";
+4636:                                <strong>Library</strong>
+4696:                                <span>Library, campaigns, content, customers, governance, integrations and provider readiness are connected as guarded planning context. Execution stays confirmation-gated.</span>
+4713:        const quickTools = getPhase35ToolSet(session).slice(0, 5);
+4754:                        <div class="aicmd-final-source-menu" data-aicmd-final-source-menu data-aicmd-final-dropzone hidden aria-hidden="true">
+4757:                                <button type="button" class="aicmd-final-source-option" data-aicmd-final-source-option="upload">
+4761:                                <button type="button" class="aicmd-final-source-option" data-aicmd-final-source-option="library">
+4762:                                        <strong>Choose trusted Library source</strong>
+4763:                                        <span>Open Library, select a saved source, then return it as guarded AI context.</span>
+4765:                                <button type="button" class="aicmd-final-source-option" data-aicmd-final-source-option="product">
+4767:                                        <span>Planned direct selector. For now, use Library source or paste product details.</span>
+4769:                                <button type="button" class="aicmd-final-source-option" data-aicmd-final-source-option="project">
+4777:                                ${quickTools.map((tool) => `
+4801:		{ id: "tools", label: "Tools" },

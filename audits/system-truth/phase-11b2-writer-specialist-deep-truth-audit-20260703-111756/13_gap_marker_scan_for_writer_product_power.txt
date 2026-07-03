@@ -1,0 +1,1614 @@
+public/control-center/pages/ai-command.js:45:                id: "writer",
+public/control-center/pages/ai-command.js:46:                label: "Content Writer",
+public/control-center/pages/ai-command.js:48:                summary: "Captions, hooks, scripts, emails, and landing page copy.",
+public/control-center/pages/ai-command.js:49:                routeHint: "content-studio"
+public/control-center/pages/ai-command.js:66:                id: "publisher",
+public/control-center/pages/ai-command.js:76:                summary: "Ad concepts, targeting angles, platform copy, and paid strategy.",
+public/control-center/pages/ai-command.js:83:                summary: "SEO signals, performance data, content insights, and traffic patterns.",
+public/control-center/pages/ai-command.js:120:	content: "writer",
+public/control-center/pages/ai-command.js:127:	publisher: "publisher",
+public/control-center/pages/ai-command.js:149:		placeholder: "Ask the Strategist to plan a campaign, map launch phases, review channel priorities, or define the offer strategy…",
+public/control-center/pages/ai-command.js:151:		cannotDo: ["Publish campaigns directly", "Execute workflows automatically", "Approve content", "Set live budgets"],
+public/control-center/pages/ai-command.js:157:		id: "writer",
+public/control-center/pages/ai-command.js:158:		label: "Content Writer",
+public/control-center/pages/ai-command.js:161:		summary: "Captions, hooks, scripts, emails, and landing page copy.",
+public/control-center/pages/ai-command.js:162:		placeholder: "Ask the Content Writer to draft captions, hooks, landing copy, or campaign messages…",
+public/control-center/pages/ai-command.js:163:		canHelp: ["Draft captions and hooks", "Write email copy", "Create landing page text", "Prepare publisher handoff", "Suggest message variants"],
+public/control-center/pages/ai-command.js:175:		placeholder: "Ask the Media Director to define visual direction, prepare a creative brief, or review brand consistency…",
+public/control-center/pages/ai-command.js:188:		placeholder: "Ask the Video Lead to write a reel script, map short-form strategy, or outline the next video concept…",
+public/control-center/pages/ai-command.js:196:		id: "publisher",
+public/control-center/pages/ai-command.js:201:		placeholder: "Ask the Publisher to review publishing readiness, check scheduling, or prepare a handoff package…",
+public/control-center/pages/ai-command.js:213:		summary: "Ad concepts, targeting angles, platform copy, and paid strategy.",
+public/control-center/pages/ai-command.js:214:		placeholder: "Ask the Ads Optimizer to draft ad copy, review targeting angles, or plan a paid campaign structure…",
+public/control-center/pages/ai-command.js:215:		canHelp: ["Draft ad concepts and copy", "Review targeting angles", "Plan paid campaign structure", "Suggest creative variants", "Map platform-specific strategy"],
+public/control-center/pages/ai-command.js:218:		safetyNote: "Ad concepts and copy only. Live ad actions require platform integration and explicit approval.",
+public/control-center/pages/ai-command.js:226:		summary: "SEO signals, performance data, content insights, and traffic patterns.",
+public/control-center/pages/ai-command.js:227:		placeholder: "Ask the SEO & Insights Analyst to review performance, suggest SEO improvements, or identify top content patterns…",
+public/control-center/pages/ai-command.js:228:		canHelp: ["Review SEO signals", "Analyze content performance", "Identify traffic patterns", "Suggest keyword improvements", "Map data coverage gaps"],
+public/control-center/pages/ai-command.js:240:		placeholder: "Ask the Compliance Reviewer to check claims, approval risks, publishing safety, and governance notes…",
+public/control-center/pages/ai-command.js:253:		placeholder: "Ask the Operations Lead to turn this into tasks, workflow steps, or handoffs…",
+public/control-center/pages/ai-command.js:266:		placeholder: "Ask the Customer Operations Lead to summarize a customer thread, draft a safe reply, prepare a ticket draft, check SLA risk, or route an escalation for review…",
+public/control-center/pages/ai-command.js:279:		placeholder: "Ask the Sales / CRM Lead to qualify a lead, draft outreach, plan follow-ups, summarize CRM context, or prepare a sales handoff for review…",
+public/control-center/pages/ai-command.js:296:	writer: [
+public/control-center/pages/ai-command.js:297:		{ label: "Draft campaign captions", sub: "For the active campaign" },
+public/control-center/pages/ai-command.js:298:		{ label: "Write a hook sequence", sub: "3 hook variants to test" },
+public/control-center/pages/ai-command.js:299:		{ label: "Prepare a Publisher handoff", sub: "Package ready content for review" },
+public/control-center/pages/ai-command.js:310:		{ label: "Plan short-form content", sub: "Map next 4 video concepts" },
+public/control-center/pages/ai-command.js:314:	publisher: [
+public/control-center/pages/ai-command.js:323:		{ label: "Suggest creative variants", sub: "Test different hooks and CTAs" },
+public/control-center/pages/ai-command.js:328:		{ label: "Analyze content performance", sub: "What is working and what is not" },
+public/control-center/pages/ai-command.js:370:	{ id: "draft", title: "Prepare", description: "Create guidance, copy, task, or handoff context." },
+public/control-center/pages/ai-command.js:385:const AI_ROOM_TEAM_CHAIN = ["Strategist", "Writer", "Media / Video", "Compliance", "Publisher", "Operations"];
+public/control-center/pages/ai-command.js:390:	writer: "CW",
+public/control-center/pages/ai-command.js:393:	publisher: "PB",
+public/control-center/pages/ai-command.js:436:	writer: [
+public/control-center/pages/ai-command.js:437:		{ id: "hook-generator", label: "Hook Generator", action: "preview", intent: "guidance", template: "Write 5 German hook variants for {project}. Keep them concise, testable, and suitable for the Germany market." },
+public/control-center/pages/ai-command.js:438:		{ id: "caption-builder", label: "Caption Builder", action: "preview", intent: "guidance", template: "Draft German captions for {project}. Include angle, body, CTA, and platform adaptation notes." },
+public/control-center/pages/ai-command.js:440:		{ id: "publisher-package", label: "Publisher Package", action: "preview", intent: "handoff", template: "Prepare a Publisher handoff for {project}. Include German copy package, CTA, notes, and remaining checks." }
+public/control-center/pages/ai-command.js:450:		{ id: "write-video-hook", label: "Write video hook", action: "preview", intent: "guidance", template: "Write short-form video hooks for {project}. Include 3 opening variants and audience fit." },
+public/control-center/pages/ai-command.js:451:		{ id: "draft-script", label: "Draft script", action: "preview", intent: "guidance", template: "Draft a short-form video script for {project}. Include hook, body, CTA, and visual cues." },
+public/control-center/pages/ai-command.js:456:	publisher: [
+public/control-center/pages/ai-command.js:457:		{ id: "publishing-checklist", label: "Publishing Checklist", action: "preview", intent: "handoff", template: "Build a publishing checklist for {project}. Include German copy, assets, claims checks, and channel readiness." },
+public/control-center/pages/ai-command.js:458:		{ id: "final-packaging", label: "Final Packaging", action: "preview", intent: "handoff", template: "Prepare a final publishing package for {project}. Include copy, CTA, asset notes, approvals, and destination channel." },
+public/control-center/pages/ai-command.js:459:		{ id: "channel-formatting", label: "Channel Formatting", action: "preview", intent: "guidance", template: "Format the next output for {project} by channel. Include German copy, limits, CTA, and scheduling notes." },
+public/control-center/pages/ai-command.js:464:		{ id: "ad-angle-generator", label: "Ad Angle Generator", action: "preview", intent: "guidance", template: "Draft ad angles for {project}. Include audience problem, value promise, German hook direction, and platform fit." },
+public/control-center/pages/ai-command.js:465:		{ id: "copy-variants", label: "Copy Variants", action: "preview", intent: "guidance", template: "Prepare German ad copy variants for {project}. Include hooks, primary text, CTA, and creative notes." },
+public/control-center/pages/ai-command.js:471:		{ id: "keyword-intent", label: "Keyword Intent", action: "preview", intent: "guidance", template: "Suggest keyword intent opportunities for {project}. Include Germany-market intent, content mapping, and priority." },
+public/control-center/pages/ai-command.js:473:		{ id: "opportunity-summary", label: "Opportunity Summary", action: "preview", intent: "task", template: "Summarize SEO and insight opportunities for {project}. Focus on conversion, traffic quality, and content fit." },
+public/control-center/pages/ai-command.js:516:	{ icon: "✍️", label: "Generate Content", sub: "Write hooks, captions & scripts", template: "Generate content for {project}. Create hooks, caption ideas, and a reel script for the next product push." },
+public/control-center/pages/ai-command.js:517:	{ icon: "📊", label: "Analyze Performance", sub: "Review what's working", template: "Analyze current performance for {project}. What content, campaigns, and channels are working best right now?" },
+public/control-center/pages/ai-command.js:526:	{ id: "content", label: "Content" },
+public/control-center/pages/ai-command.js:560:		id: "writer",
+public/control-center/pages/ai-command.js:561:		name: "Writer",
+public/control-center/pages/ai-command.js:562:		purpose: "Transform strategy into high-converting copy and scripts.",
+public/control-center/pages/ai-command.js:563:		bestUse: "When campaigns need content batches fast.",
+public/control-center/pages/ai-command.js:564:		suggestedPrompt: "Act as Writer and generate content angles for the current project and active campaign."
+public/control-center/pages/ai-command.js:633:		if (/act as the content writer/i.test(text)) return "writer";
+public/control-center/pages/ai-command.js:636:		if (/act as the publisher/i.test(text)) return "publisher";
+public/control-center/pages/ai-command.js:707:function humanizeValue(value, fallback = "") {
+public/control-center/pages/ai-command.js:708:	if (value == null) return fallback;
+public/control-center/pages/ai-command.js:711:		return clean === "[object Object]" ? fallback : clean;
+public/control-center/pages/ai-command.js:717:		return value.map((item) => humanizeValue(item)).filter(Boolean).join("; ") || fallback;
+public/control-center/pages/ai-command.js:720:		const title = humanizeValue(value.title || value.label || value.name || value.headline || value.hook);
+public/control-center/pages/ai-command.js:739:			.join("; ") || fallback;
+public/control-center/pages/ai-command.js:741:	return fallback;
+public/control-center/pages/ai-command.js:766:    "Generate content for:",
+public/control-center/pages/ai-command.js:817:function toNumber(value, fallback = null) {
+public/control-center/pages/ai-command.js:818:	if (value == null || value === "") return fallback;
+public/control-center/pages/ai-command.js:820:	return Number.isFinite(parsed) ? parsed : fallback;
+public/control-center/pages/ai-command.js:1061:			reason: "AI response guidance bridge is not connected yet (API function unavailable)."
+public/control-center/pages/ai-command.js:1101:function summarizeAiCommandSessionIntent(value = "", fallback = "Session") {
+public/control-center/pages/ai-command.js:1107:        if (!text) return fallback;
+public/control-center/pages/ai-command.js:1149:                latestUser?.content ||
+public/control-center/pages/ai-command.js:1231:			"Full Team workflow: Strategist -> Writer -> Media/Video -> Compliance -> Publisher -> Operations.",
+public/control-center/pages/ai-command.js:1246:                `Use ${safeOutputLanguage} only for customer-facing or publishable copy such as captions, ads, emails, landing pages, final campaign text, or publishing packages.`,
+public/control-center/pages/ai-command.js:1247:                "When you include publishable copy, label it clearly as publishable content and keep the explanation in the user chat language.",
+public/control-center/pages/ai-command.js:1249:		"Return practical guidance and content only.",
+public/control-center/pages/ai-command.js:1250:		`When drafting publishable copy, write it in ${safeOutputLanguage}.`,
+public/control-center/pages/ai-command.js:1264:		response.content ||
+public/control-center/pages/ai-command.js:1303:	if (id === "writer") return "content-studio";
+public/control-center/pages/ai-command.js:1306:	if (id === "publisher") return "publishing";
+public/control-center/pages/ai-command.js:1343:        const looksContentLike = /\b(content|caption|captions|post|posts|email|blog|article|copy|headline|landing page|script|message|cta|product copy|social post)\b/.test(text);
+public/control-center/pages/ai-command.js:1360:        if (/content|copy|draft|caption|email|blog|article|script/.test(outputType) || looksContentLike) {
+public/control-center/pages/ai-command.js:1361:                outputType = "content";
+public/control-center/pages/ai-command.js:1362:                return { outputType, destinationRoute: explicitDestination || "content-studio" };
+public/control-center/pages/ai-command.js:1400:		"content-studio": "Content Studio",
+public/control-center/pages/ai-command.js:1429:		confirmationRequired: outputType === "handoff" || specialistId === "publisher" || specialistId === "compliance_reviewer",
+public/control-center/pages/ai-command.js:1465:	if (specialistId === "writer") {
+public/control-center/pages/ai-command.js:1468:			title: outputType === "task" ? "Task: Draft campaign copy" : "Content Guidance: Messaging draft",
+public/control-center/pages/ai-command.js:1469:			summary: "Content draft prepared with hooks, captions, CTA flow, and review checkpoint.",
+public/control-center/pages/ai-command.js:1470:			hooks: [
+public/control-center/pages/ai-command.js:1471:				`Problem-aware hook direction for ${projectName || "this project"}`,
+public/control-center/pages/ai-command.js:1472:				"Outcome-led hook direction for a German publishing draft",
+public/control-center/pages/ai-command.js:1473:				"Proof-led hook direction with claims marked for review"
+public/control-center/pages/ai-command.js:1475:			captions: [
+public/control-center/pages/ai-command.js:1477:				"German caption version should keep the CTA direct and easy to approve."
+public/control-center/pages/ai-command.js:1485:				"Use Arabic freely in the conversation; publishable copy should be reviewed in German.",
+public/control-center/pages/ai-command.js:1490:				"Draft 3 hook variants",
+public/control-center/pages/ai-command.js:1491:				"Draft captions with CTA",
+public/control-center/pages/ai-command.js:1523:			summary: "Video draft prepared with hook, script structure, and storyboard flow.",
+public/control-center/pages/ai-command.js:1525:				"Draft opening hook and audience angle",
+public/control-center/pages/ai-command.js:1534:	if (specialistId === "publisher") {
+public/control-center/pages/ai-command.js:1540:				"Final copy should be German for the Germany market unless a destination overrides it.",
+public/control-center/pages/ai-command.js:1544:				"Validate asset and copy readiness",
+public/control-center/pages/ai-command.js:1559:			hooks: [
+public/control-center/pages/ai-command.js:1560:				"German problem-led ad hook",
+public/control-center/pages/ai-command.js:1561:				"German outcome-led ad hook",
+public/control-center/pages/ai-command.js:1562:				"German objection-led ad hook"
+public/control-center/pages/ai-command.js:1571:				"Use this as copy and testing direction only."
+public/control-center/pages/ai-command.js:1576:				"Platform-specific copy recommendations"
+public/control-center/pages/ai-command.js:1742:			"Writer, Media Director, and Video Lead turn strategy into message, asset, and production drafts",
+public/control-center/pages/ai-command.js:1748:			"Writer: draft hooks, captions, messages, email, or outreach copy",
+public/control-center/pages/ai-command.js:1751:			"Publisher: package channel-ready copy, assets, schedule notes, and publish checks",
+public/control-center/pages/ai-command.js:1975:		topContent: asArray(insights.best_performing_content),
+public/control-center/pages/ai-command.js:1976:		weakContent: asArray(insights.underperforming_content),
+public/control-center/pages/ai-command.js:1998:		writer: ["content", "post", "caption", "blog", "script", "email", "landing page section", "reel script", "copy", "write", "hooks"],
+public/control-center/pages/ai-command.js:2001:		ads: ["ad ideas", "ad copy", "facebook ads", "meta ads", "tiktok ads", "google ads", "cta", "paid", "targeting angle", "ad creative"],
+public/control-center/pages/ai-command.js:2048:	if (lane === "content" && asString(coverage.social_insights?.status) !== "covered") {
+public/control-center/pages/ai-command.js:2055:		notes.push("Paid platform reporting not connected — ROAS guidance is limited.");
+public/control-center/pages/ai-command.js:2099:			? `${extractTopMessage(top)} is the strongest measured content item right now${top.platform ? ` on ${titleCase(top.platform)}` : ""}.`
+public/control-center/pages/ai-command.js:2100:			: "Not enough post-level data yet to rank content winners.",
+public/control-center/pages/ai-command.js:2103:			weak ? `Weakest item: ${extractTopMessage(weak)}.` : "No weak content list yet.",
+public/control-center/pages/ai-command.js:2108:			top ? `Reuse the pattern from ${extractTopMessage(top)} in the next publishing cycle.` : "Sync social insights to identify winning hooks and formats.",
+public/control-center/pages/ai-command.js:2109:			weak ? `Rewrite ${extractTopMessage(weak)} with a stronger hook and better platform fit.` : null,
+public/control-center/pages/ai-command.js:2113:			top ? `Create a follow-up asset using ${extractTopMessage(top)}'s pattern.` : "Load social insight data before expanding content queue.",
+public/control-center/pages/ai-command.js:2114:			weak ? `Move ${extractTopMessage(weak)} into a rewrite workflow.` : "Audit current content for posts not converting attention to clicks.",
+public/control-center/pages/ai-command.js:2115:			"Prepare next batch with performance-led hooks instead of generic posting volume."
+public/control-center/pages/ai-command.js:2118:			routeSuggestion("Content Studio", "content-studio", "Rewrite weak posts and turn winning patterns into new drafts."),
+public/control-center/pages/ai-command.js:2120:			routeSuggestion("Insights", "insights", "Compare top and weak content performance.")
+public/control-center/pages/ai-command.js:2122:		missingData: buildMissingDataNotes(aiContext, "content")
+public/control-center/pages/ai-command.js:2140:			weakPage ? `Weak landing page: ${extractTopMessage(weakPage)}.` : "No weak page signal yet.",
+public/control-center/pages/ai-command.js:2149:			topQuery ? `Expand content around ${extractTopMessage(topQuery)}.` : "Reconnect Search Console before making SEO roadmap decisions.",
+public/control-center/pages/ai-command.js:2151:			"Review top landing pages for stronger offer clarity and conversion flow."
+public/control-center/pages/ai-command.js:2171:			: "Paid reporting not connected — connect Meta Ads, Google Ads, or TikTok Ads.",
+public/control-center/pages/ai-command.js:2185:			weakCampaign ? `Rebuild hook and CTA for ${extractTopMessage(weakCampaign)}.` : "Audit campaign naming and creative mapping.",
+public/control-center/pages/ai-command.js:2224:			...buildMissingDataNotes(aiContext, "content")
+public/control-center/pages/ai-command.js:2234:	if (/content plan|7-day/.test(query)) {
+public/control-center/pages/ai-command.js:2235:		return { title: "Content plan task block", owner: "Content Studio", steps: ["Use the strongest content pattern as the starting template.", "Map posts by platform, hook, format, and CTA.", "Route approved items into Publishing for scheduling."] };
+public/control-center/pages/ai-command.js:2237:	if (/weak post|improve content/.test(query)) {
+public/control-center/pages/ai-command.js:2238:		return { title: "Content repair task block", owner: "Content Studio", steps: ["Select the weakest items from Insights.", "Rewrite hooks, sharpen CTAs, and adjust format-platform fit.", "Republish only after updated versions are approved."] };
+public/control-center/pages/ai-command.js:2251:	if (/content|post/.test(query)) {
+public/control-center/pages/ai-command.js:2252:		routeSuggestions.push(routeSuggestion("Content Studio", "content-studio", "Draft, rewrite, or prepare the requested content outputs."));
+public/control-center/pages/ai-command.js:2272:		missingData: buildMissingDataNotes(aiContext, "content")
+public/control-center/pages/ai-command.js:2278:		case "writer":
+public/control-center/pages/ai-command.js:2379:	"content-studio": "Content Studio",
+public/control-center/pages/ai-command.js:2401:	"content-studio": "writer",
+public/control-center/pages/ai-command.js:2403:	publishing: "publisher",
+public/control-center/pages/ai-command.js:2433:	content: "content-studio",
+public/control-center/pages/ai-command.js:2434:	"content-studio-workspace": "content-studio",
+public/control-center/pages/ai-command.js:2438:	publisher: "publishing",
+public/control-center/pages/ai-command.js:2496:function normalizeAiInboundSpecialistId(value, fallback = "operations") {
+public/control-center/pages/ai-command.js:2497:	const fallbackId = MODE_ID_ALIASES[getAiRoomRoleId(fallback)] || getAiRoomRoleId(fallback);
+public/control-center/pages/ai-command.js:2498:	const raw = getAiRoomRoleId(value || fallbackId);
+public/control-center/pages/ai-command.js:2502:	return SPECIALIST_DEFS.some((item) => item.id === finalId) ? finalId : fallbackId;
+public/control-center/pages/ai-command.js:2511:	const fallbackRoute = sourcePage === "workspace" ? "workflows" : sourcePage;
+public/control-center/pages/ai-command.js:2512:	const fallbackLabel = sourceLabel || routeLabel(fallbackRoute);
+public/control-center/pages/ai-command.js:2517:		const route = normalizeAiInboundSourcePage(rawRoute || stringRoute || fallbackRoute);
+public/control-center/pages/ai-command.js:2518:		const label = firstAiInboundText(record.label, record.title, record.name) || routeLabel(route) || fallbackLabel;
+public/control-center/pages/ai-command.js:2525:		route: fallbackRoute,
+public/control-center/pages/ai-command.js:2526:		label: fallbackLabel,
+public/control-center/pages/ai-command.js:2527:		reason: `Return to ${fallbackLabel} after AI Team review.`
+public/control-center/pages/ai-command.js:2739:	if (typeof executeProjectAiCommand !== "function") throw new Error("AI command service is unavailable.");
+public/control-center/pages/ai-command.js:2788:		content: cleanCommand,
+public/control-center/pages/ai-command.js:2831:    const fallback =
+public/control-center/pages/ai-command.js:2838:      ...fallback,
+public/control-center/pages/ai-command.js:2840:      name: asString(member.name || fallback.name || member.role || "AI Specialist"),
+public/control-center/pages/ai-command.js:2841:      role: asString(member.role || fallback.role || id),
+public/control-center/pages/ai-command.js:2842:      purpose: asString(member.purpose || member.description || fallback.purpose || "Support the current operating context."),
+public/control-center/pages/ai-command.js:2843:      bestUse: asString(member.bestUse || member.best_use || fallback.bestUse || "Use when this specialist owns the next step."),
+public/control-center/pages/ai-command.js:3089:						<div class="ctrl-msg-user-text">${escapeHtml(message.content)}</div>
+public/control-center/pages/ai-command.js:3146:									<div class="ctrl-recent-content">
+public/control-center/pages/ai-command.js:3246:function buildConversationWorkContext(session, fallbackPrompt = "") {
+public/control-center/pages/ai-command.js:3261:                        const content = asString(message.content || message.text || message.responseText || "").trim();
+public/control-center/pages/ai-command.js:3262:                        return content ? `${label}: ${content}` : "";
+public/control-center/pages/ai-command.js:3267:                fallbackPrompt ||
+public/control-center/pages/ai-command.js:3268:                latestUser?.content ||
+public/control-center/pages/ai-command.js:3275:                latestAssistant?.content ||
+public/control-center/pages/ai-command.js:3298:function buildConversationWorkPrompt(session, outputType, fallbackPrompt = "") {
+public/control-center/pages/ai-command.js:3299:        const context = buildConversationWorkContext(session, fallbackPrompt);
+public/control-center/pages/ai-command.js:3319:function setPreviewFromConversation({ session, intent, fallbackPrompt, projectName }) {
+public/control-center/pages/ai-command.js:3320:        const workPrompt = buildConversationWorkPrompt(session, intent, fallbackPrompt);
+public/control-center/pages/ai-command.js:3328:        const context = buildConversationWorkContext(session, fallbackPrompt);
+public/control-center/pages/ai-command.js:3378:			reason: `${aiContext.assetBlockers.length} asset category blocker${aiContext.assetBlockers.length === 1 ? "" : "s"} may reduce content throughput and campaign delivery speed.`,
+public/control-center/pages/ai-command.js:3404:		title: "Generate next content wave from current signals",
+public/control-center/pages/ai-command.js:3406:		command: `Generate the next high-impact content wave for ${aiContext.projectName || "this project"} based on current readiness and campaign context.`,
+public/control-center/pages/ai-command.js:3575:				<p class="aicmd-room-subtitle mhos-context-description">Ask one expert or the full team to prepare strategy, content, analysis, reviews, and destination handoffs. AI prepares and reviews only; sensitive actions stay confirmation-gated in the owning workspace.</p>
+public/control-center/pages/ai-command.js:3578:				<span class="aicmd-v2-chat-bridge ${safeBridgeStatus.available ? "is-available" : "is-unavailable"}">
+public/control-center/pages/ai-command.js:3635:	const plannedSpecialists = AI_ROOM_PLANNED_SPECIALISTS.map((item) => `
+public/control-center/pages/ai-command.js:3636:		<div class="aicmd-room-member aicmd-room-member-planned" aria-disabled="true">
+public/control-center/pages/ai-command.js:3638:			<span class="aicmd-room-member-copy">
+public/control-center/pages/ai-command.js:3688:							<span class="aicmd-room-member-copy">
+public/control-center/pages/ai-command.js:3698:			<div class="aicmd-room-planned-specialists" aria-label="Additional specialists planned">
+public/control-center/pages/ai-command.js:3699:				<span class="aicmd-room-planned-title">Planned lanes, not active specialists</span>
+public/control-center/pages/ai-command.js:3700:				${plannedSpecialists}
+public/control-center/pages/ai-command.js:3756:        if (roleId === "content_writer") return `${label} is drafting your content...`;
+public/control-center/pages/ai-command.js:3761:        if (roleId === "publisher") return `${label} is preparing publishing guidance...`;
+public/control-center/pages/ai-command.js:3780:			<div class="aicmd-room-active-copy">
+public/control-center/pages/ai-command.js:3971:        const teamIds = ["strategist", "writer", "media", "video_lead", "compliance_reviewer", "operations"];
+public/control-center/pages/ai-command.js:4014:                                <span class="aicmd-chatfirst-pill ${safeBridgeStatus.available ? "is-available" : "is-planned"}">${escapeHtml(bridgeLabel)}</span>
+public/control-center/pages/ai-command.js:4098:			<div class="aicmd-chatfirst-header-copy">
+public/control-center/pages/ai-command.js:4104:				<span class="aicmd-chatfirst-status ${safeBridgeStatus.available ? "is-available" : "is-unavailable"}">${escapeHtml(bridgeLabel)}</span>
+public/control-center/pages/ai-command.js:4149:				<span class="aicmd-chatfirst-pill ${safeBridgeStatus.available ? "is-available" : "is-planned"}">${escapeHtml(safeBridgeStatus.available ? "Connected" : "Guarded")}</span>
+public/control-center/pages/ai-command.js:4187:				<div class="aicmd-chatfirst-planned-list" aria-label="Planned specialists">
+public/control-center/pages/ai-command.js:4189:						<div class="aicmd-chatfirst-specialist-option is-planned" aria-disabled="true">
+public/control-center/pages/ai-command.js:4221:        const fallbackMessages = !selectedMessages.length && selectedResponses.length
+public/control-center/pages/ai-command.js:4227:                                content: item.prompt || "",
+public/control-center/pages/ai-command.js:4234:                                content: item.responseText || "",
+public/control-center/pages/ai-command.js:4243:        const conversationMessages = session.isFreshAiChatSession ? [] : (selectedMessages.length ? selectedMessages : fallbackMessages);
+public/control-center/pages/ai-command.js:4279:                const content = asString(message.content || message.text || message.responseText || "");
+public/control-center/pages/ai-command.js:4289:                                        <p>${escapeHtml(content)}</p>
+public/control-center/pages/ai-command.js:4315:                                                <span>Draft content</span>
+public/control-center/pages/ai-command.js:4338:                { id: "write", label: "Write", summary: "Prepare documents, copy, agreements, or presentation drafts.", enabled: false },
+public/control-center/pages/ai-command.js:4339:                { id: "offer", label: "Offer", summary: "Shape a product offer from pricing, market, and audience context.", enabled: false },
+public/control-center/pages/ai-command.js:4340:                { id: "lead", label: "Lead", summary: "Prepare lead discovery and outreach workflow drafts.", enabled: false },
+public/control-center/pages/ai-command.js:4341:                { id: "media", label: "Media", summary: "Create a media brief, storyboard, and production direction.", enabled: false },
+public/control-center/pages/ai-command.js:4342:                { id: "publish", label: "Publish", summary: "Prepare publishing checklist and handoff readiness.", enabled: false }
+public/control-center/pages/ai-command.js:4357:                                                class="aicmd-smart-action${action.enabled ? "" : " is-planned"}"
+public/control-center/pages/ai-command.js:4360:                                                ${action.enabled ? "" : "disabled"}
+public/control-center/pages/ai-command.js:4387:                ["Content angles", asArray(campaignPackage.contentAngles || campaignPackage.content_angles)],
+public/control-center/pages/ai-command.js:4436:        const channelOptions = [["social", "Social"], ["email", "Email"], ["website", "Website"], ["ads", "Ads"], ["publishing", "Publishing package"]];
+public/control-center/pages/ai-command.js:4439:        const formatOptions = [["mixed", "Mixed package"], ["image", "Image"], ["video", "Video"], ["email", "Email"], ["landing", "Landing page"], ["ads", "Ads"]];
+public/control-center/pages/ai-command.js:4538:                                                                <span><strong>Status</strong>${escapeHtml(preview.backendPreview ? "Backend preview" : "Local fallback")}</span>
+public/control-center/pages/ai-command.js:4670:                                        <small>Strategy, content, media, operations, compliance, customer, campaign and provider-readiness planning.</small>
+public/control-center/pages/ai-command.js:4696:                                <span>Library, campaigns, content, customers, governance, integrations and provider readiness are connected as guarded planning context. Execution stays confirmation-gated.</span>
+public/control-center/pages/ai-command.js:4735:                                                placeholder="Ask anything"
+public/control-center/pages/ai-command.js:4747:                                        <button id="aicmdV2AskBtn" class="aicmd-chatfirst-send aicmd-final-send" type="button" ${isGenerating ? "disabled" : ""} title="Ask AI Team">
+public/control-center/pages/ai-command.js:4853:				<span class="aicmd-chatfirst-pill ${safeBridgeStatus.available ? "is-available" : "is-planned"}">${escapeHtml(safeBridgeStatus.available ? "Chat ready" : "Preview guarded")}</span>
+public/control-center/pages/ai-command.js:4878:			<div class="aicmd-chatfirst-planned-grid" aria-label="Planned specialists">
+public/control-center/pages/ai-command.js:4880:					<div class="aicmd-chatfirst-team-card is-planned" aria-disabled="true">
+public/control-center/pages/ai-command.js:5053:		{ label: "Voice input", value: "Coming", className: "is-planned" },
+public/control-center/pages/ai-command.js:5054:		{ label: "Team chat", value: bridgeStatus.available ? "AI ready" : "Coming", className: bridgeStatus.available ? "is-available" : "is-planned" },
+public/control-center/pages/ai-command.js:5055:		{ label: "Media gen", value: "Coming", className: "is-planned" },
+public/control-center/pages/ai-command.js:5056:		{ label: "GPU video", value: "Coming", className: "is-planned" },
+public/control-center/pages/ai-command.js:5057:		{ label: "Image prompt generation", value: providerConfigured ? "Provider may be ready" : "Provider dependent", className: providerConfigured ? "is-available" : "is-planned" }
+public/control-center/pages/ai-command.js:5157:                const content = asString(message.content || message.text || message.responseText || "");
+public/control-center/pages/ai-command.js:5165:                                        <p>${escapeHtml(content)}</p>
+public/control-center/pages/ai-command.js:5171:        const fallbackSelectedResponses = !selectedMessages.length && selectedResponses.length
+public/control-center/pages/ai-command.js:5177:                                content: item.prompt || "",
+public/control-center/pages/ai-command.js:5184:                                content: item.responseText || "",
+public/control-center/pages/ai-command.js:5190:        const conversationMessages = selectedMessages.length ? selectedMessages : fallbackSelectedResponses;
+public/control-center/pages/ai-command.js:5199:                                <span class="aicmd-v2-chat-bridge ${safeBridgeStatus.available ? "is-available" : "is-unavailable"}">${escapeHtml(bridgeLabel)}</span>
+public/control-center/pages/ai-command.js:5401:					<span>Drafts are not execution — prepared content stays local until you act on it.</span>
+public/control-center/pages/ai-command.js:5578:		const setPreviewFromIntent = (intent, fallbackPrompt = "", options = {}) => {
+public/control-center/pages/ai-command.js:5579:			const value = asString(input?.value || session.draftMessage || fallbackPrompt || "").trim();
+public/control-center/pages/ai-command.js:5804:                        updateStatus(open ? `${reason} opened. Choose temporary file context, trusted Library source, planned product context, or current project context.` : `${reason} closed.`);
+public/control-center/pages/ai-command.js:5832:                                        updateStatus("Choose files to stage as temporary chat context. AI Command does not upload or persist file content here.");
+public/control-center/pages/ai-command.js:5844:                                        updateStatus("Direct product/SKU source selection is planned. Use a trusted Library source or paste product details for now.");
+public/control-center/pages/ai-command.js:5845:                                        showMessage?.("Product/SKU selector is planned. Current safe options: Library source, uploaded filename context, project context, or manual product details.");
+public/control-center/pages/ai-command.js:5968:                                updateStatus("This Smart Action is planned. Campaign Builder is available first.");
+public/control-center/pages/ai-command.js:6018:                                        label: "Writer",
+public/control-center/pages/ai-command.js:6019:                                        body: `Prepare ${channelLabel.toLowerCase()} copy variants: hook, short caption, primary CTA, email or landing adaptation, and review notes.`
+public/control-center/pages/ai-command.js:6071:                                                body: "Create a hook, short social caption, long caption/email variant, CTA, landing-page angle, and reusable message notes in the configured publishing language."
+public/control-center/pages/ai-command.js:6083:                                                body: `Prepare ${channelLabel} readiness: asset status, copy status, approval status, schedule suggestion, channel dependencies, and final reviewer.`
+public/control-center/pages/ai-command.js:6129:                function normalizeBackendCampaignPreview(payload = {}, fallbackPreview = {}) {
+public/control-center/pages/ai-command.js:6137:                                asArray(campaignPackage.contentAngles).length ? { label: "Content angles", items: asArray(campaignPackage.contentAngles) } : null,
+public/control-center/pages/ai-command.js:6145:                                ...asObject(fallbackPreview),
+public/control-center/pages/ai-command.js:6146:                                title: asString(body.title || fallbackPreview.title || "AI Team campaign preview"),
+public/control-center/pages/ai-command.js:6147:                                summary: asString(body.summary || fallbackPreview.summary || ""),
+public/control-center/pages/ai-command.js:6148:                                source: asString(body.source_type || body.source || fallbackPreview.source || ""),
+public/control-center/pages/ai-command.js:6149:                                sourceLabel: asString(body.source_label || fallbackPreview.sourceLabel || fallbackPreview.source || ""),
+public/control-center/pages/ai-command.js:6150:                                goal: asString(body.goal || fallbackPreview.goal || ""),
+public/control-center/pages/ai-command.js:6151:                                channel: asString(body.channel || fallbackPreview.channel || ""),
+public/control-center/pages/ai-command.js:6152:                                market: asString(body.market || fallbackPreview.market || ""),
+public/control-center/pages/ai-command.js:6153:                                language: asString(body.language || fallbackPreview.language || ""),
+public/control-center/pages/ai-command.js:6154:                                format: asString(body.format || fallbackPreview.format || ""),
+public/control-center/pages/ai-command.js:6155:                                deadline: asString(body.deadline || fallbackPreview.deadline || ""),
+public/control-center/pages/ai-command.js:6156:                                audience: asString(body.audience || campaignPackage.targetAudience || fallbackPreview.audience || ""),
+public/control-center/pages/ai-command.js:6157:                                offer: asString(body.offer || campaignPackage.offer || fallbackPreview.offer || ""),
+public/control-center/pages/ai-command.js:6158:                                productFocus: asString(body.product_focus || body.productFocus || fallbackPreview.productFocus || ""),
+public/control-center/pages/ai-command.js:6159:                                complianceSensitivity: asString(body.compliance_sensitivity || body.complianceSensitivity || fallbackPreview.complianceSensitivity || ""),
+public/control-center/pages/ai-command.js:6164:                                        : asString(fallbackPreview.safety || "Preview only."),
+public/control-center/pages/ai-command.js:6202:                                console.warn("AI Command backend campaign preview fallback", error);
+public/control-center/pages/ai-command.js:6206:                                        backendFallbackReason: asString(error?.message || "Backend preview unavailable")
+public/control-center/pages/ai-command.js:6249:                                        backendFallbackReason: asString(preview.backendFallbackReason || "")
+public/control-center/pages/ai-command.js:6252:                                persistSessionDraft(sessionKey, session, preview.backendPreview ? "Campaign Builder backend preview prepared" : "Campaign Builder local fallback preview prepared");
+public/control-center/pages/ai-command.js:6253:                                updateStatus(preview.backendPreview ? "Backend AI Team preview prepared. Review before any handoff or approval." : "Local campaign preview prepared because backend preview is unavailable.");
+public/control-center/pages/ai-command.js:6254:                                showMessage?.(preview.backendPreview ? "Backend AI Team campaign preview is ready for review." : "Campaign preview is ready using the local fallback.");
+public/control-center/pages/ai-command.js:6296:                                backend_fallback_reason: asString(preview.backendFallbackReason || ""),
+public/control-center/pages/ai-command.js:6399:			        if (sendBtn && !sendBtn.disabled) {
+public/control-center/pages/ai-command.js:6526:		                        showMessage?.("AI chat route is not connected yet.");
+public/control-center/pages/ai-command.js:6541:		                        content: value,
+public/control-center/pages/ai-command.js:6592:		                                content: response?.content
+public/control-center/pages/ai-command.js:6607:		                                content: responseText,
+public/control-center/pages/ai-command.js:6614:		                                        content: responseText,
+public/control-center/pages/ai-command.js:6692:                                const fallback = asString(input?.value || session.draftMessage || "").trim();
+public/control-center/pages/ai-command.js:6696:                                        fallbackPrompt: fallback,
+public/control-center/pages/ai-command.js:6715:                                const fallback = value
+public/control-center/pages/ai-command.js:6721:                                        fallbackPrompt: fallback,
+public/control-center/pages/ai-command.js:6738:                                const fallback = value
+public/control-center/pages/ai-command.js:6744:                                        fallbackPrompt: fallback,
+public/control-center/pages/ai-command.js:6762:                                const fallback = value
+public/control-center/pages/ai-command.js:6768:                                        fallbackPrompt: fallback,
+public/control-center/pages/ai-command.js:6814:					updateStatus("Smart tool drawer is unavailable. Refresh AI Command and try again.");
+public/control-center/pages/ai-command.js:6906:		                const fallback = latestResponse?.prompt || asString(input?.value || session.draftMessage || "");
+public/control-center/pages/ai-command.js:6910:		                        fallbackPrompt: fallback,
+public/control-center/pages/ai-command.js:7202:        { id: "writer", label: "Writer" },
+public/control-center/pages/ai-command.js:7211:        if (state === "composing" && member.id === "writer") status = "active";
+public/control-center/pages/ai-command.js:7681:    // StateKernel is the ONLY direct writer to draftMessage.
+public/control-center/pages/ai-command.js:7818:      session.taskType = "content";
+public/control-center/pages/ai-command/tool-dock.js:14:function moveFocusOutOfDrawer(drawer, fallbackTarget = null) {
+public/control-center/pages/ai-command/tool-dock.js:19:    if (fallbackTarget && typeof fallbackTarget.focus === "function") {
+public/control-center/pages/ai-command/tool-dock.js:20:      fallbackTarget.focus({ preventScroll: true });
+public/control-center/pages/ai-command/tool-dock.js:78:    const fallbackTool = findToolMetadataById(returnContext.toolId);
+public/control-center/pages/ai-command/tool-dock.js:79:    if (fallbackTool) {
+public/control-center/pages/ai-command/tool-dock.js:82:        btn: createToolButtonAdapter(fallbackTool),
+public/control-center/pages/ai-command/tool-dock.js:83:        tool: fallbackTool,
+public/control-center/pages/ai-command/tool-dock.js:84:        text: fallbackTool.template || "",
+public/control-center/pages/ai-command/tool-dock.js:337:      sourceInput.placeholder = "Optional: add source usage notes, audience, angle, or claims to avoid...";
+public/control-center/pages/ai-command/tool-dock.js:360:  // Set placeholder for Source Details if empty
+public/control-center/pages/ai-command/tool-dock.js:362:    sourceInput.placeholder = "Optional: add source usage notes, audience, angle, or claims to avoid...";
+public/control-center/pages/ai-command/tool-dock.js:388:        if (sourceInput) sourceInput.placeholder = "Optional: add source usage notes, audience, angle, or claims to avoid...";
+public/control-center/pages/ai-command/tool-dock.js:410:    template: "Translate or adapt the selected text for the project target market. Keep the explanation in the user's chat language and prepare only review-ready copy."
+public/control-center/pages/ai-command/tool-dock.js:431:      destinations: ["chat-preview", "campaign-studio", "content-studio", "workflows"],
+public/control-center/pages/ai-command/tool-dock.js:457:      destinations: ["chat-preview", "campaign-studio", "content-studio", "insights"],
+public/control-center/pages/ai-command/tool-dock.js:470:      destinations: ["chat-preview", "campaign-studio", "content-studio", "ads-manager"],
+public/control-center/pages/ai-command/tool-dock.js:483:      destinations: ["chat-preview", "campaign-studio", "content-studio", "workflows", "publishing"],
+public/control-center/pages/ai-command/tool-dock.js:484:      sourceTypes: ["current_chat", "campaign_brief", "audience_notes", "content_inventory", "library_source", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:485:      outputTypes: ["funnel_map", "content_needs", "handoff_points", "retention_notes"],
+public/control-center/pages/ai-command/tool-dock.js:486:      template: "Map a funnel for {projectName}. Include awareness, consideration, conversion, retention, content needs, and handoff points."
+public/control-center/pages/ai-command/tool-dock.js:503:  writer: [
+public/control-center/pages/ai-command/tool-dock.js:511:      frontendOwnerPage: "content-studio",
+public/control-center/pages/ai-command/tool-dock.js:512:      destinations: ["chat-preview", "content-studio", "library", "media-studio", "publishing", "compliance"],
+public/control-center/pages/ai-command/tool-dock.js:514:      outputTypes: ["company_profile", "product_copy", "email", "blog_article", "landing_page", "contract_draft", "presentation_outline", "speech", "faq", "proposal", "social_post", "ad_copy"],
+public/control-center/pages/ai-command/tool-dock.js:515:      template: "Use the Content Writer to create a new written output for {projectName}. First ask or infer the output type: company profile, product copy, email, blog article, landing page, contract draft, presentation outline, speech, FAQ, proposal, social post, or ad copy. Ask for sources if needed. Keep it review-ready and do not publish or send anything."
+public/control-center/pages/ai-command/tool-dock.js:525:      destinations: ["composer", "content-studio"],
+public/control-center/pages/ai-command/tool-dock.js:537:      frontendOwnerPage: "content-studio",
+public/control-center/pages/ai-command/tool-dock.js:538:      destinations: ["composer", "content-studio"],
+public/control-center/pages/ai-command/tool-dock.js:551:      destinations: ["composer", "content-studio"],
+public/control-center/pages/ai-command/tool-dock.js:554:      template: "Improve this content for {projectName}. Focus on clarity, flow, value proposition, CTA strength, trust signals, readability, and conversion. Return practical improvements and a better draft."
+public/control-center/pages/ai-command/tool-dock.js:564:      destinations: ["preview", "content-studio", "compliance"],
+public/control-center/pages/ai-command/tool-dock.js:565:      sourceTypes: ["composer_text", "selected_text", "content_draft", "current_chat"],
+public/control-center/pages/ai-command/tool-dock.js:567:      template: "Check this content for {projectName}. Review grammar, spelling, tone, readability, CTA strength, claim risk, missing proof, SEO weakness, and compliance notes. Return issues, severity, and suggested fixes."
+public/control-center/pages/ai-command/tool-dock.js:577:      destinations: ["library", "ai-command", "content-studio"],
+public/control-center/pages/ai-command/tool-dock.js:580:      template: "Prepare source context for the next Content Writer task for {projectName}. Ask which source should be used: current chat, Library folder, brand profile, product data, legal/pricing documents, research/proof documents, source-of-truth assets, or manual input."
+public/control-center/pages/ai-command/tool-dock.js:589:      frontendOwnerPage: "content-studio",
+public/control-center/pages/ai-command/tool-dock.js:590:      destinations: ["content-studio", "insights", "library"],
+public/control-center/pages/ai-command/tool-dock.js:592:      outputTypes: ["seo_brief", "keyword_clusters", "search_intent_map", "blog_outline", "meta_pack", "faq_ideas", "internal_link_plan", "content_gap_notes"],
+public/control-center/pages/ai-command/tool-dock.js:593:      template: "Prepare SEO support for {projectName}. Ask for topic, market, language, and audience if missing. Create keyword ideas, search intent, meta title/description, blog outline, FAQ ideas, internal link ideas, and content gap notes."
+public/control-center/pages/ai-command/tool-dock.js:602:      frontendOwnerPage: "content-studio",
+public/control-center/pages/ai-command/tool-dock.js:603:      destinations: ["chat-preview", "content-studio", "publishing"],
+public/control-center/pages/ai-command/tool-dock.js:604:      sourceTypes: ["existing_content", "composer_text", "content_draft", "current_chat", "library_folder"],
+public/control-center/pages/ai-command/tool-dock.js:605:      outputTypes: ["blog_to_social", "profile_to_pitch", "product_to_ad_copy", "transcript_to_article", "notes_to_presentation", "long_text_to_email_sequence"],
+public/control-center/pages/ai-command/tool-dock.js:606:      template: "Repurpose existing content for {projectName}. Ask or infer the source format and target format: blog to posts, profile to pitch, product page to ad copy, transcript to article, notes to presentation outline, or long text to email sequence."
+public/control-center/pages/ai-command/tool-dock.js:616:      destinations: ["content-studio", "library", "media-studio", "publishing", "compliance", "task", "handoff"],
+public/control-center/pages/ai-command/tool-dock.js:618:      outputTypes: ["content_studio_draft", "library_save", "media_brief", "publishing_package", "compliance_review", "task_preview", "handoff_preview"],
+public/control-center/pages/ai-command/tool-dock.js:619:      template: "Prepare safe routing for this Content Writer output for {projectName}. Ask the destination: Content Studio, Save to Library, Prepare Media Brief, Publishing package, Compliance review, Task, or Handoff. Do not route or execute before review."
+public/control-center/pages/ai-command/tool-dock.js:631:      destinations: ["chat-preview", "media-studio", "library", "content-studio", "publishing"],
+public/control-center/pages/ai-command/tool-dock.js:683:      destinations: ["chat-preview", "media-studio", "content-studio", "publishing"],
+public/control-center/pages/ai-command/tool-dock.js:684:      sourceTypes: ["current_chat", "content_draft", "visual_brief", "brand_guidelines", "reference_asset", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:712:      destinations: ["chat-preview", "media-studio", "content-studio", "publishing"],
+public/control-center/pages/ai-command/tool-dock.js:713:      sourceTypes: ["current_chat", "campaign_brief", "content_draft", "product_data", "library_source", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:714:      outputTypes: ["reel_script", "short_video_script", "hook_variants", "overlay_copy"],
+public/control-center/pages/ai-command/tool-dock.js:715:      template: "Write a short-form reel script for {projectName}. Include hook, scene sequence, voiceover, text overlays, CTA, and shot notes."
+public/control-center/pages/ai-command/tool-dock.js:727:      outputTypes: ["storyboard", "scene_plan", "caption_plan", "asset_requirements"],
+public/control-center/pages/ai-command/tool-dock.js:728:      template: "Create a storyboard for {projectName}. Include scenes, camera direction, motion, captions, assets needed, and CTA."
+public/control-center/pages/ai-command/tool-dock.js:751:      destinations: ["chat-preview", "media-studio", "content-studio"],
+public/control-center/pages/ai-command/tool-dock.js:754:      template: "Draft a voiceover script for {projectName}. Include tone, pacing, hook, proof points, and CTA."
+public/control-center/pages/ai-command/tool-dock.js:771:  publisher: [
+public/control-center/pages/ai-command/tool-dock.js:780:      destinations: ["chat-preview", "publishing", "governance", "content-studio", "media-studio"],
+public/control-center/pages/ai-command/tool-dock.js:781:      sourceTypes: ["content_draft", "media_asset", "publishing_package", "approval_notes", "current_chat", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:783:      template: "Review publishing readiness for {projectName}. Check copy, assets, channel fit, schedule, approvals, and missing items. Do not publish."
+public/control-center/pages/ai-command/tool-dock.js:793:      destinations: ["chat-preview", "publishing", "content-studio", "media-studio"],
+public/control-center/pages/ai-command/tool-dock.js:794:      sourceTypes: ["content_draft", "media_asset", "campaign_brief", "channel_notes", "library_source", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:795:      outputTypes: ["channel_pack", "caption_pack", "format_notes", "approval_checklist"],
+public/control-center/pages/ai-command/tool-dock.js:796:      template: "Prepare a channel package for {projectName}. Include caption, hashtags, format notes, asset needs, schedule notes, and approval checklist."
+public/control-center/pages/ai-command/tool-dock.js:819:      destinations: ["chat-preview", "publishing", "content-studio", "insights"],
+public/control-center/pages/ai-command/tool-dock.js:820:      sourceTypes: ["content_draft", "topic", "market", "channel_notes", "seo_brief", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:833:      sourceTypes: ["final_copy", "media_asset", "approval_notes", "claim_review", "publishing_package", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:835:      template: "Prepare an approval package for {projectName}. Include final copy summary, risk notes, assets checklist, and required confirmations."
+public/control-center/pages/ai-command/tool-dock.js:848:      destinations: ["chat-preview", "ads-manager", "content-studio", "governance"],
+public/control-center/pages/ai-command/tool-dock.js:851:      template: "Create paid ad angles for {projectName}. Include hook, audience pain, benefit, proof, CTA, and compliance risks."
+public/control-center/pages/ai-command/tool-dock.js:854:      id: "ad-copy",
+public/control-center/pages/ai-command/tool-dock.js:861:      destinations: ["chat-preview", "ads-manager", "content-studio", "governance"],
+public/control-center/pages/ai-command/tool-dock.js:862:      sourceTypes: ["ad_angle", "campaign_brief", "landing_page_copy", "product_data", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:863:      outputTypes: ["ad_copy", "headline_variants", "primary_text_variants", "cta_variants"],
+public/control-center/pages/ai-command/tool-dock.js:864:      template: "Draft paid ad copy variants for {projectName}. Include primary text, headline, CTA, and angle notes."
+public/control-center/pages/ai-command/tool-dock.js:888:      sourceTypes: ["creative_assets", "campaign_brief", "ad_copy", "performance_notes", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:893:      id: "landing-match",
+public/control-center/pages/ai-command/tool-dock.js:900:      destinations: ["chat-preview", "ads-manager", "content-studio", "governance"],
+public/control-center/pages/ai-command/tool-dock.js:901:      sourceTypes: ["ad_copy", "landing_page_copy", "offer_data", "proof_points", "library_source", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:902:      outputTypes: ["landing_match_review", "message_gap_report", "cta_improvements", "trust_signal_notes"],
+public/control-center/pages/ai-command/tool-dock.js:903:      template: "Review ad-to-landing-page message match for {projectName}. Identify gaps, stronger claims, CTA improvements, and trust signals."
+public/control-center/pages/ai-command/tool-dock.js:916:      destinations: ["chat-preview", "insights", "content-studio", "library"],
+public/control-center/pages/ai-command/tool-dock.js:918:      outputTypes: ["seo_brief", "search_intent_map", "content_structure", "meta_ideas", "internal_links"],
+public/control-center/pages/ai-command/tool-dock.js:919:      template: "Create an SEO brief for {projectName}. Include keywords, search intent, content structure, meta ideas, internal links, and risks."
+public/control-center/pages/ai-command/tool-dock.js:942:      destinations: ["chat-preview", "insights", "content-studio", "library"],
+public/control-center/pages/ai-command/tool-dock.js:956:      sourceTypes: ["analytics_summary", "performance_notes", "campaign_results", "content_inventory", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:961:      id: "content-gap",
+public/control-center/pages/ai-command/tool-dock.js:968:      destinations: ["chat-preview", "insights", "content-studio", "campaign-studio"],
+public/control-center/pages/ai-command/tool-dock.js:969:      sourceTypes: ["content_inventory", "seo_brief", "audience_notes", "competitor_notes", "library_source", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:970:      outputTypes: ["content_gap_report", "missing_topics", "missing_pages", "priority_actions"],
+public/control-center/pages/ai-command/tool-dock.js:971:      template: "Identify content gaps for {projectName}. Include missing pages, missing topics, weak funnel stages, and priority actions."
+public/control-center/pages/ai-command/tool-dock.js:984:      destinations: ["chat-preview", "governance", "content-studio", "publishing"],
+public/control-center/pages/ai-command/tool-dock.js:985:      sourceTypes: ["content_draft", "claim_list", "proof_doc", "product_data", "legal_doc", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:997:      destinations: ["chat-preview", "governance", "content-studio"],
+public/control-center/pages/ai-command/tool-dock.js:998:      sourceTypes: ["content_draft", "claims_check", "legal_doc", "proof_doc", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:999:      outputTypes: ["safe_rewrite", "risk_reduced_copy", "claim_softening", "review_notes"],
+public/control-center/pages/ai-command/tool-dock.js:1000:      template: "Rewrite this content in a safer compliant way. Keep the value clear while reducing unsupported or risky claims."
+public/control-center/pages/ai-command/tool-dock.js:1011:      sourceTypes: ["content_draft", "claim_list", "product_data", "legal_doc", "research_proof_docs", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:1013:      template: "List the evidence needed before this content can be approved or published. Separate required, recommended, and optional proof."
+public/control-center/pages/ai-command/tool-dock.js:1026:      template: "Review GDPR/privacy considerations for this content or workflow. Flag consent, tracking, data use, and disclosure risks."
+public/control-center/pages/ai-command/tool-dock.js:1037:      sourceTypes: ["final_copy", "claims_check", "approval_context", "asset_checklist", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:1052:      destinations: ["chat-preview", "workflows", "task", "content-studio", "media-studio"],
+public/control-center/pages/ai-command/tool-dock.js:1053:      sourceTypes: ["current_chat", "ai_preview", "content_draft", "media_job", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:1078:      destinations: ["chat-preview", "handoff", "workflows", "content-studio", "media-studio", "publishing", "governance"],
+public/control-center/pages/ai-command/tool-dock.js:1079:      sourceTypes: ["current_chat", "ai_preview", "content_draft", "media_job", "publishing_package", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:1107:      template: "Create an execution checklist for {projectName}. Include required approvals, assets, content, integrations, and QA steps."
+public/control-center/pages/ai-command/tool-dock.js:1175:      destinations: ["chat-preview", "workflows", "content-studio", "sales-crm-draft"],
+public/control-center/pages/ai-command/tool-dock.js:1188:      destinations: ["chat-preview", "content-studio", "workflows", "sales-crm-draft"],
+public/control-center/pages/ai-command/tool-dock.js:1190:      outputTypes: ["follow_up_email", "follow_up_sequence", "value_reminder", "next_step_prompt"],
+public/control-center/pages/ai-command/tool-dock.js:1201:      destinations: ["chat-preview", "workflows", "content-studio", "governance"],
+public/control-center/pages/ai-command/tool-dock.js:1230:      ...TOOL_DOCK_BY_SPECIALIST.writer.slice(0, 2),
+public/control-center/pages/ai-command/tool-dock.js:1242:      ...TOOL_DOCK_BY_SPECIALIST.writer.slice(0, 2),
+public/control-center/pages/ai-command/tool-dock.js:1262:function getToolMetaList(tool = {}, key = "", fallback = []) {
+public/control-center/pages/ai-command/tool-dock.js:1266:  return fallback;
+public/control-center/pages/ai-command/tool-dock.js:1373:                placeholder="Example: use the selected Library source for facts only, avoid unsupported claims..."
+public/control-center/pages/ai-command/tool-dock.js:1383:                placeholder="Add audience, goal, keywords, offer, product, or any must-use information..."
+public/control-center/pages/ai-command/tool-dock.js:1431:        <span class="mhos-tool-dock-copy">Review-only setup · source, output, destination, then load into composer</span>
+public/control-center/pages/ai-command/tool-dock.js:1500:function populateDrawerSelect(select, rawValue = "", fallbackLabel = "Auto") {
+public/control-center/pages/ai-command/tool-dock.js:1510:  const options = values.length ? values : [String(fallbackLabel || "Auto").trim() || "Auto"];
+public/control-center/pages/ai-command/tool-dock.js:1514:    const label = humanizeMeta(value || fallbackLabel || "Auto");
+public/control-center/pages/ai-command/tool-dock.js:1519:function getSelectedLabel(drawer, selector, fallback = "Auto") {
+public/control-center/pages/ai-command/tool-dock.js:1521:  if (!select || !select.value) return fallback;
+public/control-center/pages/ai-command/tool-dock.js:1535:    value.includes("landing page") ||
+public/control-center/pages/ai-command/tool-dock.js:1568:    : `${source}. If the selected source is not available in the current context, ask me to choose, paste, upload, or open the relevant source before producing final content.`;
+public/control-center/pages/ai-command/tool-dock.js:1598:    `Create the requested ${output.toLowerCase()} as review-ready content.`,
+public/control-center/pages/ai-command/tool-dock.js:1605:    "- If the conversation language differs from the publishable output language, keep any short explanation in the conversation language and put only the publishable content in the selected output language.",
+public/control-center/pages/ai-command/tool-dock.js:1606:    "- Do not mix languages inside the publishable content unless the user asks for bilingual output."
+public/control-center/pages/ai-command/tool-dock.js:1658:function closeToolDrawer(drawer, fallbackTarget = null) {
+public/control-center/pages/ai-command/tool-dock.js:1659:  moveFocusOutOfDrawer(drawer, fallbackTarget);
+public/control-center/pages/ai-command/tool-dock.js:1693:  const hardDestinationDefaults = ["chat-preview", "campaign-studio", "content-studio", "composer"];
+public/control-center/pages/content-studio-workspace.js:18:const contentStudioSessions = new Map();
+public/control-center/pages/content-studio-workspace.js:19:const CONTENT_LOCAL_DRAFTS_KEY = "mh-content-studio-local-drafts-v1";
+public/control-center/pages/content-studio-workspace.js:24:  "caption",
+public/control-center/pages/content-studio-workspace.js:28:  "email",
+public/control-center/pages/content-studio-workspace.js:29:  "marketplace-copy",
+public/control-center/pages/content-studio-workspace.js:30:  "ad-copy"
+public/control-center/pages/content-studio-workspace.js:35:  caption: "Caption",
+public/control-center/pages/content-studio-workspace.js:39:  email: "Email",
+public/control-center/pages/content-studio-workspace.js:40:  "marketplace-copy": "Marketplace Copy",
+public/control-center/pages/content-studio-workspace.js:41:  "ad-copy": "Ad Copy"
+public/control-center/pages/content-studio-workspace.js:54:  serviceDomain: "content",
+public/control-center/pages/content-studio-workspace.js:55:  ownerRole: "writer",
+public/control-center/pages/content-studio-workspace.js:58:  handoffRole: "publisher"
+public/control-center/pages/content-studio-workspace.js:63:    id: "content-strategist",
+public/control-center/pages/content-studio-workspace.js:66:    bestUse: "When choosing what to write first across social, email, and marketplace.",
+public/control-center/pages/content-studio-workspace.js:67:    suggestedPrompt: "Act as Content Strategist. Build a priority content plan by channel with hooks, outcomes, and handoff order."
+public/control-center/pages/content-studio-workspace.js:70:    id: "copywriter",
+public/control-center/pages/content-studio-workspace.js:71:    title: "Copywriter",
+public/control-center/pages/content-studio-workspace.js:72:    purpose: "Write concise, conversion-focused copy with clear value framing.",
+public/control-center/pages/content-studio-workspace.js:73:    bestUse: "When you need strong post copy, ad text, or direct-response messaging.",
+public/control-center/pages/content-studio-workspace.js:74:    suggestedPrompt: "Act as Copywriter. Produce high-conversion copy with a strong hook, body value stack, and clear CTA."
+public/control-center/pages/content-studio-workspace.js:77:    id: "seo-writer",
+public/control-center/pages/content-studio-workspace.js:78:    title: "SEO Writer",
+public/control-center/pages/content-studio-workspace.js:79:    purpose: "Draft discoverable long-form content with search intent alignment.",
+public/control-center/pages/content-studio-workspace.js:80:    bestUse: "When creating blog drafts and landing content for organic traffic.",
+public/control-center/pages/content-studio-workspace.js:81:    suggestedPrompt: "Act as SEO Writer. Produce an SEO-structured draft with intent match, metadata, headings, and semantic coverage."
+public/control-center/pages/content-studio-workspace.js:84:    id: "social-writer",
+public/control-center/pages/content-studio-workspace.js:85:    title: "Social Media Writer",
+public/control-center/pages/content-studio-workspace.js:88:    suggestedPrompt: "Act as Social Media Writer. Write platform-native content variants with hook lines, scroll-stopping openings, and CTA endings."
+public/control-center/pages/content-studio-workspace.js:91:    id: "email-writer",
+public/control-center/pages/content-studio-workspace.js:92:    title: "Email Writer",
+public/control-center/pages/content-studio-workspace.js:93:    purpose: "Create subject, preheader, and body copy that improves open and click-through.",
+public/control-center/pages/content-studio-workspace.js:94:    bestUse: "When building campaign newsletters, launch emails, and promos.",
+public/control-center/pages/content-studio-workspace.js:95:    suggestedPrompt: "Act as Email Writer. Generate subject, preheader, and body with clear structure, benefit-led copy, and CTA clarity."
+public/control-center/pages/content-studio-workspace.js:98:    id: "script-writer",
+public/control-center/pages/content-studio-workspace.js:99:    title: "Script Writer",
+public/control-center/pages/content-studio-workspace.js:100:    purpose: "Turn ideas into scene-ready scripts with hooks, beats, and CTA flow.",
+public/control-center/pages/content-studio-workspace.js:102:    suggestedPrompt: "Act as Script Writer. Create a short-form script with opening hook, scene beats, voiceover-friendly lines, and CTA close."
+public/control-center/pages/content-studio-workspace.js:105:    id: "marketplace-copywriter",
+public/control-center/pages/content-studio-workspace.js:106:    title: "Marketplace Copywriter",
+public/control-center/pages/content-studio-workspace.js:107:    purpose: "Write listing-optimized product copy for conversion and clarity.",
+public/control-center/pages/content-studio-workspace.js:109:    suggestedPrompt: "Act as Marketplace Copywriter. Draft title, bullet points, and description focused on conversion while keeping product truth."
+public/control-center/pages/content-studio-workspace.js:195:function normalizeStatus(value, fallback = "draft") {
+public/control-center/pages/content-studio-workspace.js:197:  if (!normalized) return fallback;
+public/control-center/pages/content-studio-workspace.js:204:  return fallback;
+public/control-center/pages/content-studio-workspace.js:220:  if (mode === "marketplace-copy") return "marketplace";
+public/control-center/pages/content-studio-workspace.js:221:  if (mode === "ad-copy") return "ad";
+public/control-center/pages/content-studio-workspace.js:222:  if (mode === "email") return "email";
+public/control-center/pages/content-studio-workspace.js:237:    objective: firstText(overview.primary_goal, "Create conversion-ready content"),
+public/control-center/pages/content-studio-workspace.js:270:    id: asString(draft.id || `local-content-${Date.now()}`),
+public/control-center/pages/content-studio-workspace.js:308:    id: asString(asset.id || `content-library-${Date.now()}`),
+public/control-center/pages/content-studio-workspace.js:344:    output_content: asString(outputContent),
+public/control-center/pages/content-studio-workspace.js:360:    mode: firstText(raw.mode, raw.content_type, "social-post"),
+public/control-center/pages/content-studio-workspace.js:362:    outputContent: firstText(raw.output_content, raw.content, raw.body, raw.draft),
+public/control-center/pages/content-studio-workspace.js:420:  const fallback = versioning.versions[versioning.versions.length - 1] || null;
+public/control-center/pages/content-studio-workspace.js:421:  versioning.selectedVersionId = fallback?.id || "v1";
+public/control-center/pages/content-studio-workspace.js:422:  return fallback;
+public/control-center/pages/content-studio-workspace.js:468:  const versions = asArray(raw.content_versions || raw.output_versions || raw.versions)
+public/control-center/pages/content-studio-workspace.js:493:  const mode = firstText(raw.type, raw.content_type, raw.mode, "social-post");
+public/control-center/pages/content-studio-workspace.js:495:    id: firstText(raw.id, raw.content_item_id),
+public/control-center/pages/content-studio-workspace.js:514:    content_versions: asArray(raw.content_versions || raw.output_versions || []),
+public/control-center/pages/content-studio-workspace.js:547:  if (!contentStudioSessions.has(key)) {
+public/control-center/pages/content-studio-workspace.js:548:    contentStudioSessions.set(key, {
+public/control-center/pages/content-studio-workspace.js:570:  return contentStudioSessions.get(key);
+public/control-center/pages/content-studio-workspace.js:642:  return message ? `<div class="content-inline-error">${escapeHtml(message)}</div>` : "";
+public/control-center/pages/content-studio-workspace.js:662:    draft: firstText(selected?.output_content, ""),
+public/control-center/pages/content-studio-workspace.js:669:    content_versions: asArray(versioning.versions).map((version) => ({
+public/control-center/pages/content-studio-workspace.js:673:      output_content: version.output_content,
+public/control-center/pages/content-studio-workspace.js:683:    actor: "content-studio"
+public/control-center/pages/content-studio-workspace.js:709:    "Save backend content draft",
+public/control-center/pages/content-studio-workspace.js:712:    showMessage?.("Backend content save cancelled.");
+public/control-center/pages/content-studio-workspace.js:718:    const backendItem = normalizeContentItem(result.content_item || payload);
+public/control-center/pages/content-studio-workspace.js:728:    showMessage?.("Backend content save unavailable; local draft kept.");
+public/control-center/pages/content-studio-workspace.js:737:  const contentChanged = Boolean(previous && clean(previous.output_content) !== clean(selected?.output_content));
+public/control-center/pages/content-studio-workspace.js:739:  return { selected, previous, promptChanged, contentChanged, statusChanged };
+public/control-center/pages/content-studio-workspace.js:747:  const content = firstText(version?.output_content, version?.prompt, form.brief);
+public/control-center/pages/content-studio-workspace.js:749:    `Create media assets for ${modeLabel(mode)} content.`,
+public/control-center/pages/content-studio-workspace.js:752:    `Core message: ${firstText(content, "No content body yet.")}`,
+public/control-center/pages/content-studio-workspace.js:762:    id: asString(handoff?.id || payload.id || payload.workflow_id || payload.content_item_id),
+public/control-center/pages/content-studio-workspace.js:769:    mode: firstText(payload.content_type, selectedVersion.mode, payload.type),
+public/control-center/pages/content-studio-workspace.js:774:    contentBody: firstText(selectedVersion.output_content, payload.content, payload.body, output.content_item),
+public/control-center/pages/content-studio-workspace.js:783:    getSharedHandoff(projectName, "content-studio", operations, "workflows") ||
+public/control-center/pages/content-studio-workspace.js:784:    getSharedHandoff(projectName, "content-studio", operations, "ai-command") ||
+public/control-center/pages/content-studio-workspace.js:785:    getSharedHandoff(projectName, "content-studio", operations)
+public/control-center/pages/content-studio-workspace.js:804:    const [contentItems, tasks, approvals, handoffs, events, operations] = await Promise.all([
+public/control-center/pages/content-studio-workspace.js:813:    const backendItems = asArray(contentItems.items).map((item) => normalizeContentItem(item));
+public/control-center/pages/content-studio-workspace.js:825:    session.error = "Backend content data unavailable. Content Studio is running in local draft mode.";
+public/control-center/pages/content-studio-workspace.js:858:      why: "Review decisions reduce production delay and move content into executable lanes."
+public/control-center/pages/content-studio-workspace.js:864:      action: "Send approved content to Media Studio",
+public/control-center/pages/content-studio-workspace.js:865:      why: "Approved copy can now drive structured media generation with fewer revisions."
+public/control-center/pages/content-studio-workspace.js:871:      action: "Create next content variant",
+public/control-center/pages/content-studio-workspace.js:872:      why: "Version expansion keeps campaign momentum while existing content moves downstream."
+public/control-center/pages/content-studio-workspace.js:885:      .content-smart-root {
+public/control-center/pages/content-studio-workspace.js:891:      .content-smart-grid {
+public/control-center/pages/content-studio-workspace.js:897:      .content-main,
+public/control-center/pages/content-studio-workspace.js:898:      .content-side {
+public/control-center/pages/content-studio-workspace.js:902:        align-content: start;
+public/control-center/pages/content-studio-workspace.js:905:      .content-card {
+public/control-center/pages/content-studio-workspace.js:910:      .content-overview-grid,
+public/control-center/pages/content-studio-workspace.js:911:      .content-impact-grid,
+public/control-center/pages/content-studio-workspace.js:912:      .content-preview-grid,
+public/control-center/pages/content-studio-workspace.js:913:      .content-version-grid,
+public/control-center/pages/content-studio-workspace.js:914:      .content-handoff-grid {
+public/control-center/pages/content-studio-workspace.js:920:      .content-overview-item,
+public/control-center/pages/content-studio-workspace.js:921:      .content-impact-chip,
+public/control-center/pages/content-studio-workspace.js:922:      .content-data-item {
+public/control-center/pages/content-studio-workspace.js:930:      .content-overview-item span,
+public/control-center/pages/content-studio-workspace.js:931:      .content-impact-chip small,
+public/control-center/pages/content-studio-workspace.js:932:      .content-data-item span {
+public/control-center/pages/content-studio-workspace.js:938:      .content-overview-item strong,
+public/control-center/pages/content-studio-workspace.js:939:      .content-impact-chip strong,
+public/control-center/pages/content-studio-workspace.js:940:      .content-data-item strong {
+public/control-center/pages/content-studio-workspace.js:946:      .content-impact-chip {
+public/control-center/pages/content-studio-workspace.js:950:      .content-mode-tabs,
+public/control-center/pages/content-studio-workspace.js:951:      .content-action-row,
+public/control-center/pages/content-studio-workspace.js:952:      .content-version-tabs,
+public/control-center/pages/content-studio-workspace.js:953:      .content-agent-actions {
+public/control-center/pages/content-studio-workspace.js:960:      .content-mode-tab,
+public/control-center/pages/content-studio-workspace.js:961:      .content-version-tab {
+public/control-center/pages/content-studio-workspace.js:971:      .content-mode-tab.is-active,
+public/control-center/pages/content-studio-workspace.js:972:      .content-version-tab.is-active {
+public/control-center/pages/content-studio-workspace.js:977:      .content-inline-error {
+public/control-center/pages/content-studio-workspace.js:984:      .content-text-box {
+public/control-center/pages/content-studio-workspace.js:994:      .content-queue-list,
+public/control-center/pages/content-studio-workspace.js:995:      .content-agent-grid {
+public/control-center/pages/content-studio-workspace.js:1000:      .content-queue-item,
+public/control-center/pages/content-studio-workspace.js:1001:      .content-agent-card {
+public/control-center/pages/content-studio-workspace.js:1012:      .content-queue-item {
+public/control-center/pages/content-studio-workspace.js:1016:      .content-queue-item.is-active {
+public/control-center/pages/content-studio-workspace.js:1021:      .content-queue-title {
+public/control-center/pages/content-studio-workspace.js:1027:      .content-queue-meta,
+public/control-center/pages/content-studio-workspace.js:1028:      .content-copy,
+public/control-center/pages/content-studio-workspace.js:1029:      .content-hint {
+public/control-center/pages/content-studio-workspace.js:1034:      .content-agent-card strong,
+public/control-center/pages/content-studio-workspace.js:1035:      .content-agent-card p {
+public/control-center/pages/content-studio-workspace.js:1039:      .content-preview-social,
+public/control-center/pages/content-studio-workspace.js:1040:      .content-preview-email,
+public/control-center/pages/content-studio-workspace.js:1041:      .content-preview-marketplace,
+public/control-center/pages/content-studio-workspace.js:1042:      .content-preview-ad,
+public/control-center/pages/content-studio-workspace.js:1043:      .content-preview-script,
+public/control-center/pages/content-studio-workspace.js:1044:      .content-preview-blog {
+public/control-center/pages/content-studio-workspace.js:1052:      .content-preview-social .headline,
+public/control-center/pages/content-studio-workspace.js:1053:      .content-preview-blog .headline,
+public/control-center/pages/content-studio-workspace.js:1054:      .content-preview-email .headline,
+public/control-center/pages/content-studio-workspace.js:1055:      .content-preview-marketplace .headline,
+public/control-center/pages/content-studio-workspace.js:1056:      .content-preview-ad .headline,
+public/control-center/pages/content-studio-workspace.js:1057:      .content-preview-script .headline {
+public/control-center/pages/content-studio-workspace.js:1063:      .content-preview-script .scene,
+public/control-center/pages/content-studio-workspace.js:1064:      .content-preview-marketplace .bullet,
+public/control-center/pages/content-studio-workspace.js:1065:      .content-preview-blog .section,
+public/control-center/pages/content-studio-workspace.js:1066:      .content-preview-email .segment,
+public/control-center/pages/content-studio-workspace.js:1067:      .content-preview-ad .segment {
+public/control-center/pages/content-studio-workspace.js:1073:        .content-smart-grid {
+public/control-center/pages/content-studio-workspace.js:1078:        .content-overview-grid,
+public/control-center/pages/content-studio-workspace.js:1079:        .content-impact-grid,
+public/control-center/pages/content-studio-workspace.js:1080:        .content-preview-grid,
+public/control-center/pages/content-studio-workspace.js:1081:        .content-version-grid,
+public/control-center/pages/content-studio-workspace.js:1082:        .content-handoff-grid {
+public/control-center/pages/content-studio-workspace.js:1086:        .content-agent-grid {
+public/control-center/pages/content-studio-workspace.js:1096:    <section class="card content-card">
+public/control-center/pages/content-studio-workspace.js:1104:      <div class="content-overview-grid">
+public/control-center/pages/content-studio-workspace.js:1105:        <div class="content-overview-item"><span>Total content drafts</span><strong>${escapeHtml(formatCount(metrics.total))}</strong></div>
+public/control-center/pages/content-studio-workspace.js:1106:        <div class="content-overview-item"><span>Ready content</span><strong>${escapeHtml(formatCount(metrics.ready))}</strong></div>
+public/control-center/pages/content-studio-workspace.js:1107:        <div class="content-overview-item"><span>Needs review</span><strong>${escapeHtml(formatCount(metrics.needsReview))}</strong></div>
+public/control-center/pages/content-studio-workspace.js:1108:        <div class="content-overview-item"><span>Approved content</span><strong>${escapeHtml(formatCount(metrics.approved))}</strong></div>
+public/control-center/pages/content-studio-workspace.js:1109:        <div class="content-overview-item"><span>Sent to Media</span><strong>${escapeHtml(formatCount(metrics.sentMedia))}</strong></div>
+public/control-center/pages/content-studio-workspace.js:1110:        <div class="content-overview-item"><span>Sent to Publishing</span><strong>${escapeHtml(formatCount(metrics.sentPublishing))}</strong></div>
+public/control-center/pages/content-studio-workspace.js:1122:    ["Social", ["social-post", "caption", "reel-script"].includes(selectedItem?.mode) ? "Focused" : "Available"],
+public/control-center/pages/content-studio-workspace.js:1123:    ["Email", selectedItem?.mode === "email" ? "Focused" : "Available"],
+public/control-center/pages/content-studio-workspace.js:1124:    ["Marketplace", selectedItem?.mode === "marketplace-copy" ? "Focused" : "Available"]
+public/control-center/pages/content-studio-workspace.js:1128:    <section class="card content-card">
+public/control-center/pages/content-studio-workspace.js:1133:          <p class="content-copy">${escapeHtml(recommendation.why)}</p>
+public/control-center/pages/content-studio-workspace.js:1137:      <div class="content-impact-grid">
+public/control-center/pages/content-studio-workspace.js:1138:        ${chips.map(([label, value]) => `<span class="content-impact-chip"><strong>${escapeHtml(label)}</strong><small>${escapeHtml(value)}</small></span>`).join("")}
+public/control-center/pages/content-studio-workspace.js:1147:      <section class="card content-card">
+public/control-center/pages/content-studio-workspace.js:1151:            <h3>Saved content records</h3>
+public/control-center/pages/content-studio-workspace.js:1160:    <section class="card content-card">
+public/control-center/pages/content-studio-workspace.js:1164:          <h3>Saved content records</h3>
+public/control-center/pages/content-studio-workspace.js:1168:      <div class="content-queue-list">
+public/control-center/pages/content-studio-workspace.js:1170:          <button class="content-queue-item${item.id === session.selectedId ? " is-active" : ""}" type="button" data-content-select="${escapeHtml(item.id)}">
+public/control-center/pages/content-studio-workspace.js:1171:            <span class="content-queue-title">${escapeHtml(item.title || "Untitled")}</span>
+public/control-center/pages/content-studio-workspace.js:1172:            <span class="content-queue-meta">${escapeHtml(modeLabel(item.mode))} • ${escapeHtml(item.channel || "channel")} • ${escapeHtml(item.source || "source")}</span>
+public/control-center/pages/content-studio-workspace.js:1184:    <button class="content-mode-tab${form.mode === mode ? " is-active" : ""}" type="button" data-content-mode="${escapeHtml(mode)}">${escapeHtml(modeLabel(mode))}</button>
+public/control-center/pages/content-studio-workspace.js:1188:    <section class="card content-card" id="contentComposerPanel">
+public/control-center/pages/content-studio-workspace.js:1197:      <div class="content-mode-tabs">${modeTabs}</div>
+public/control-center/pages/content-studio-workspace.js:1198:      <form id="contentComposerForm" class="content-composer-form">
+public/control-center/pages/content-studio-workspace.js:1199:        <div class="content-preview-grid">
+public/control-center/pages/content-studio-workspace.js:1201:            <div class="setup-field-head"><label class="setup-label" for="contentProjectInput">Project</label></div>
+public/control-center/pages/content-studio-workspace.js:1202:            <input id="contentProjectInput" name="project" class="setup-input" type="text" value="${escapeHtml(form.project || "")}">
+public/control-center/pages/content-studio-workspace.js:1206:            <div class="setup-field-head"><label class="setup-label" for="contentCampaignInput">Campaign</label></div>
+public/control-center/pages/content-studio-workspace.js:1207:            <input id="contentCampaignInput" name="campaign" class="setup-input" type="text" value="${escapeHtml(form.campaign || "")}">
+public/control-center/pages/content-studio-workspace.js:1211:            <div class="setup-field-head"><label class="setup-label" for="contentProductInput">Product</label></div>
+public/control-center/pages/content-studio-workspace.js:1212:            <input id="contentProductInput" name="product" class="setup-input" type="text" value="${escapeHtml(form.product || "")}">
+public/control-center/pages/content-studio-workspace.js:1216:            <div class="setup-field-head"><label class="setup-label" for="contentChannelInput">Channel</label></div>
+public/control-center/pages/content-studio-workspace.js:1217:            <input id="contentChannelInput" name="channel" class="setup-input" type="text" value="${escapeHtml(form.channel || "")}">
+public/control-center/pages/content-studio-workspace.js:1221:            <div class="setup-field-head"><label class="setup-label" for="contentLanguageInput">Language</label></div>
+public/control-center/pages/content-studio-workspace.js:1222:            <input id="contentLanguageInput" name="language" class="setup-input" type="text" value="${escapeHtml(form.language || "")}">
+public/control-center/pages/content-studio-workspace.js:1226:            <div class="setup-field-head"><label class="setup-label" for="contentToneInput">Tone</label></div>
+public/control-center/pages/content-studio-workspace.js:1227:            <input id="contentToneInput" name="tone" class="setup-input" type="text" value="${escapeHtml(form.tone || "")}">
+public/control-center/pages/content-studio-workspace.js:1233:          <div class="setup-field-head"><label class="setup-label" for="contentObjectiveInput">Objective</label></div>
+public/control-center/pages/content-studio-workspace.js:1234:          <input id="contentObjectiveInput" name="objective" class="setup-input" type="text" value="${escapeHtml(form.objective || "")}">
+public/control-center/pages/content-studio-workspace.js:1239:          <div class="setup-field-head"><label class="setup-label" for="contentBriefInput">Main prompt / brief</label></div>
+public/control-center/pages/content-studio-workspace.js:1240:          <textarea id="contentBriefInput" name="brief" class="setup-input setup-textarea" rows="6">${escapeHtml(form.brief || "")}</textarea>
+public/control-center/pages/content-studio-workspace.js:1245:          <div class="setup-field-head"><label class="setup-label" for="contentTitleInput">Draft title</label></div>
+public/control-center/pages/content-studio-workspace.js:1246:          <input id="contentTitleInput" name="title" class="setup-input" type="text" value="${escapeHtml(form.title || "")}">
+public/control-center/pages/content-studio-workspace.js:1250:      <div class="content-action-row">
+public/control-center/pages/content-studio-workspace.js:1251:        <button id="contentGenerateDraftBtn" class="btn btn-primary" type="button">Generate Draft</button>
+public/control-center/pages/content-studio-workspace.js:1252:        <button id="contentImproveBtn" class="btn btn-secondary" type="button">Improve</button>
+public/control-center/pages/content-studio-workspace.js:1253:        <button id="contentTranslateBtn" class="btn btn-secondary" type="button">Translate / Adapt</button>
+public/control-center/pages/content-studio-workspace.js:1254:        <button id="contentSaveDraftBtn" class="btn btn-secondary" type="button">Save Draft</button>
+public/control-center/pages/content-studio-workspace.js:1255:        <button id="contentSendMediaBtn" class="btn btn-secondary" type="button">Send Design Brief to Media Studio</button>
+public/control-center/pages/content-studio-workspace.js:1256:        <button id="contentSendPublishingBtn" class="btn btn-secondary" type="button">Send to Publishing</button>
+public/control-center/pages/content-studio-workspace.js:1257:        <button id="contentSendAiBtn" class="btn btn-secondary" type="button">Open AI: Send Context to AI Workspace</button>
+public/control-center/pages/content-studio-workspace.js:1266:function previewPost(content, escapeHtml) {
+public/control-center/pages/content-studio-workspace.js:1268:    <div class="content-preview-social">
+public/control-center/pages/content-studio-workspace.js:1270:      <div class="content-text-box">${escapeHtml(content || "No social post body yet.")}</div>
+public/control-center/pages/content-studio-workspace.js:1275:function previewScript(content, escapeHtml) {
+public/control-center/pages/content-studio-workspace.js:1276:  const lines = parseLines(content);
+public/control-center/pages/content-studio-workspace.js:1277:  const hook = lines.find((line) => /hook/i.test(line)) || lines[0] || "Hook: missing";
+public/control-center/pages/content-studio-workspace.js:1281:    <div class="content-preview-script">
+public/control-center/pages/content-studio-workspace.js:1283:      <div class="scene"><strong>Hook:</strong> ${escapeHtml(hook)}</div>
+public/control-center/pages/content-studio-workspace.js:1290:function previewBlog(content, escapeHtml) {
+public/control-center/pages/content-studio-workspace.js:1291:  const lines = parseLines(content);
+public/control-center/pages/content-studio-workspace.js:1296:    <div class="content-preview-blog">
+public/control-center/pages/content-studio-workspace.js:1305:function previewEmail(content, escapeHtml) {
+public/control-center/pages/content-studio-workspace.js:1306:  const lines = parseLines(content);
+public/control-center/pages/content-studio-workspace.js:1309:  const body = lines.slice(2).join("\n") || content || "Email body missing";
+public/control-center/pages/content-studio-workspace.js:1311:    <div class="content-preview-email">
+public/control-center/pages/content-studio-workspace.js:1315:      <div class="segment"><strong>Body:</strong><div class="content-text-box">${escapeHtml(body)}</div></div>
+public/control-center/pages/content-studio-workspace.js:1320:function previewMarketplace(content, escapeHtml) {
+public/control-center/pages/content-studio-workspace.js:1321:  const lines = parseLines(content);
+public/control-center/pages/content-studio-workspace.js:1324:  const description = lines.slice(bullets.length + 1).join("\n") || content || "Description missing";
+public/control-center/pages/content-studio-workspace.js:1326:    <div class="content-preview-marketplace">
+public/control-center/pages/content-studio-workspace.js:1330:      <div class="segment"><strong>Description:</strong><div class="content-text-box">${escapeHtml(description)}</div></div>
+public/control-center/pages/content-studio-workspace.js:1335:function previewAd(content, escapeHtml) {
+public/control-center/pages/content-studio-workspace.js:1336:  const lines = parseLines(content);
+public/control-center/pages/content-studio-workspace.js:1341:    <div class="content-preview-ad">
+public/control-center/pages/content-studio-workspace.js:1353:  const content = firstText(selected?.output_content, selectedItem?.draft);
+public/control-center/pages/content-studio-workspace.js:1355:  let body = previewPost(content, escapeHtml);
+public/control-center/pages/content-studio-workspace.js:1356:  if (["reel-script", "video-script"].includes(mode)) body = previewScript(content, escapeHtml);
+public/control-center/pages/content-studio-workspace.js:1357:  if (mode === "blog-draft") body = previewBlog(content, escapeHtml);
+public/control-center/pages/content-studio-workspace.js:1358:  if (mode === "email") body = previewEmail(content, escapeHtml);
+public/control-center/pages/content-studio-workspace.js:1359:  if (mode === "marketplace-copy") body = previewMarketplace(content, escapeHtml);
+public/control-center/pages/content-studio-workspace.js:1360:  if (mode === "ad-copy") body = previewAd(content, escapeHtml);
+public/control-center/pages/content-studio-workspace.js:1363:    <section class="card content-card" id="contentPreviewPanel">
+public/control-center/pages/content-studio-workspace.js:1368:          <p class="content-copy">Selected version rendering by content type with fallback-safe formatting.</p>
+public/control-center/pages/content-studio-workspace.js:1373:      ${!clean(content) ? `<div class="content-text-box" style="margin-top:10px;">${escapeHtml("No generated output yet. Draft is in prompt-ready state until content output is produced.")}</div>` : ""}
+public/control-center/pages/content-studio-workspace.js:1380:  const { selected, previous, promptChanged, contentChanged, statusChanged } = getVersionMetrics(session);
+public/control-center/pages/content-studio-workspace.js:1383:    <section class="card content-card" id="contentVersioningPanel">
+public/control-center/pages/content-studio-workspace.js:1392:      <div class="content-version-tabs">
+public/control-center/pages/content-studio-workspace.js:1394:          <button class="content-version-tab${selected?.id === version.id ? " is-active" : ""}" type="button" data-content-version="${escapeHtml(version.id)}">${escapeHtml(titleCase(version.id))}</button>
+public/control-center/pages/content-studio-workspace.js:1398:      <div class="content-version-grid" style="margin-top:12px;">
+public/control-center/pages/content-studio-workspace.js:1399:        <div class="content-data-item"><span>Prompt used</span><strong>${escapeHtml(selected?.prompt || "-")}</strong></div>
+public/control-center/pages/content-studio-workspace.js:1400:        <div class="content-data-item"><span>Content output</span><strong>${escapeHtml(selected?.output_content ? "Generated" : "Not generated")}</strong></div>
+public/control-center/pages/content-studio-workspace.js:1401:        <div class="content-data-item"><span>Language</span><strong>${escapeHtml(firstText(selected?.language, "English"))}</strong></div>
+public/control-center/pages/content-studio-workspace.js:1402:        <div class="content-data-item"><span>Tone</span><strong>${escapeHtml(firstText(selected?.tone, "-") || "-")}</strong></div>
+public/control-center/pages/content-studio-workspace.js:1403:        <div class="content-data-item"><span>Channel</span><strong>${escapeHtml(firstText(selected?.channel, "-") || "-")}</strong></div>
+public/control-center/pages/content-studio-workspace.js:1404:        <div class="content-data-item"><span>Readiness status</span><strong>${escapeHtml(titleCase(firstText(selected?.readiness_status, "draft")))}</strong></div>
+public/control-center/pages/content-studio-workspace.js:1405:        <div class="content-data-item"><span>Approval status</span><strong>${escapeHtml(titleCase(firstText(selected?.approval_status, "draft")))}</strong></div>
+public/control-center/pages/content-studio-workspace.js:1406:        <div class="content-data-item"><span>Timestamp</span><strong>${escapeHtml(formatDateTime(selected?.timestamp || ""))}</strong></div>
+public/control-center/pages/content-studio-workspace.js:1409:      <div class="content-action-row" style="margin-top:12px;">
+public/control-center/pages/content-studio-workspace.js:1410:        <button class="btn btn-secondary" type="button" data-content-version-action="compare-toggle">${escapeHtml(versioning.compareMode ? "Hide Compare" : "Compare version")}</button>
+public/control-center/pages/content-studio-workspace.js:1414:        <div class="content-version-grid" style="margin-top:10px;">
+public/control-center/pages/content-studio-workspace.js:1415:          <div class="content-data-item"><span>Current version</span><strong>${escapeHtml(selected?.id ? titleCase(selected.id) : "None")}</strong></div>
+public/control-center/pages/content-studio-workspace.js:1416:          <div class="content-data-item"><span>Previous version</span><strong>${escapeHtml(previous?.id ? titleCase(previous.id) : "None")}</strong></div>
+public/control-center/pages/content-studio-workspace.js:1417:          <div class="content-data-item"><span>Prompt difference</span><strong>${escapeHtml(previous ? (promptChanged ? "Changed" : "Unchanged") : "N/A")}</strong></div>
+public/control-center/pages/content-studio-workspace.js:1418:          <div class="content-data-item"><span>Content difference</span><strong>${escapeHtml(previous ? (contentChanged ? "Changed" : "Unchanged") : "N/A")}</strong></div>
+public/control-center/pages/content-studio-workspace.js:1419:          <div class="content-data-item"><span>Status difference</span><strong>${escapeHtml(previous ? (statusChanged ? "Changed" : "Unchanged") : "N/A")}</strong></div>
+public/control-center/pages/content-studio-workspace.js:1423:      <div class="content-action-row" style="margin-top:12px;">
+public/control-center/pages/content-studio-workspace.js:1424:        <button class="btn btn-secondary" type="button" data-content-version-action="approve">Approve</button>
+public/control-center/pages/content-studio-workspace.js:1425:        <button class="btn btn-secondary" type="button" data-content-version-action="reject">Reject</button>
+public/control-center/pages/content-studio-workspace.js:1426:        <button class="btn btn-secondary" type="button" data-content-version-action="regenerate">Regenerate</button>
+public/control-center/pages/content-studio-workspace.js:1427:        <button class="btn btn-secondary" type="button" data-content-version-action="save-draft">Save Draft</button>
+public/control-center/pages/content-studio-workspace.js:1428:        <button class="btn btn-secondary" type="button" data-content-version-action="save-library">Save to Library</button>
+public/control-center/pages/content-studio-workspace.js:1437:    <section class="card content-card" id="contentAgentsPanel">
+public/control-center/pages/content-studio-workspace.js:1445:      <div class="content-agent-grid">
+public/control-center/pages/content-studio-workspace.js:1447:          <article class="content-agent-card">
+public/control-center/pages/content-studio-workspace.js:1449:            <p class="content-copy"><strong>Purpose:</strong> ${escapeHtml(agent.purpose)}</p>
+public/control-center/pages/content-studio-workspace.js:1450:            <p class="content-copy"><strong>Best use:</strong> ${escapeHtml(agent.bestUse)}</p>
+public/control-center/pages/content-studio-workspace.js:1451:            <div class="content-text-box">${escapeHtml(agent.suggestedPrompt)}</div>
+public/control-center/pages/content-studio-workspace.js:1452:            <div class="content-agent-actions" style="margin-top:10px;">
+public/control-center/pages/content-studio-workspace.js:1453:              <button class="btn btn-secondary" type="button" data-content-agent-use="${escapeHtml(agent.id)}">Use Prompt</button>
+public/control-center/pages/content-studio-workspace.js:1454:              <button class="btn btn-secondary" type="button" data-content-agent-save="${escapeHtml(agent.id)}">Save Draft</button>
+public/control-center/pages/content-studio-workspace.js:1455:              <button class="btn btn-secondary" type="button" data-content-agent-ai="${escapeHtml(agent.id)}">Send to AI Workspace</button>
+public/control-center/pages/content-studio-workspace.js:1467:      <section class="card content-card" id="contentHandoffPanel">
+public/control-center/pages/content-studio-workspace.js:1481:    <section class="card content-card" id="contentHandoffPanel">
+public/control-center/pages/content-studio-workspace.js:1485:          <h3>${escapeHtml(firstText(handoff.title, "Inbound content context"))}</h3>
+public/control-center/pages/content-studio-workspace.js:1486:          <p class="content-copy">Source: ${escapeHtml(titleCase(handoff.sourcePage || "workflow"))}</p>
+public/control-center/pages/content-studio-workspace.js:1490:      <div class="content-handoff-grid">
+public/control-center/pages/content-studio-workspace.js:1491:        <div class="content-data-item"><span>Project</span><strong>${escapeHtml(firstText(handoff.project, "-"))}</strong></div>
+public/control-center/pages/content-studio-workspace.js:1492:        <div class="content-data-item"><span>Campaign</span><strong>${escapeHtml(firstText(handoff.campaign, "-"))}</strong></div>
+public/control-center/pages/content-studio-workspace.js:1493:        <div class="content-data-item"><span>Channel</span><strong>${escapeHtml(firstText(handoff.channel, "-"))}</strong></div>
+public/control-center/pages/content-studio-workspace.js:1494:        <div class="content-data-item"><span>Type</span><strong>${escapeHtml(modeLabel(firstText(handoff.mode, "social-post")))}</strong></div>
+public/control-center/pages/content-studio-workspace.js:1496:      <div class="content-text-box" style="margin-top:10px;">${escapeHtml(firstText(handoff.brief, handoff.contentBody, "No handoff brief text."))}</div>
+public/control-center/pages/content-studio-workspace.js:1497:      <div class="content-action-row" style="margin-top:10px;">
+public/control-center/pages/content-studio-workspace.js:1498:        <button id="contentLoadHandoffBtn" class="btn btn-secondary" type="button">Load into Composer</button>
+public/control-center/pages/content-studio-workspace.js:1507:    `Improve content for ${projectName || "current project"}.`,
+public/control-center/pages/content-studio-workspace.js:1517:    firstText(selected?.output_content, selectedItem?.draft, "none")
+public/control-center/pages/content-studio-workspace.js:1524:  const contentBody = firstText(selected?.output_content, selectedItem?.draft, "");
+public/control-center/pages/content-studio-workspace.js:1527:    source_page: "content-studio",
+public/control-center/pages/content-studio-workspace.js:1534:      entity_type: "content_item",
+public/control-center/pages/content-studio-workspace.js:1536:      route: "content-studio",
+public/control-center/pages/content-studio-workspace.js:1544:      content_type: firstText(selected?.mode, session.form.mode, selectedItem?.mode),
+public/control-center/pages/content-studio-workspace.js:1545:      selected_content_version: {
+public/control-center/pages/content-studio-workspace.js:1548:        content_output: contentBody,
+public/control-center/pages/content-studio-workspace.js:1556:      script_caption_copy: contentBody,
+public/control-center/pages/content-studio-workspace.js:1563:    actor: "content-studio"
+public/control-center/pages/content-studio-workspace.js:1571:  const body = firstText(selected?.output_content, selectedItem?.draft, "");
+public/control-center/pages/content-studio-workspace.js:1574:    source_page: "content-studio",
+public/control-center/pages/content-studio-workspace.js:1581:      entity_type: "content_item",
+public/control-center/pages/content-studio-workspace.js:1583:      route: "content-studio",
+public/control-center/pages/content-studio-workspace.js:1592:      selected_content_version: {
+public/control-center/pages/content-studio-workspace.js:1595:        caption_body_script: body,
+public/control-center/pages/content-studio-workspace.js:1603:      caption: body,
+public/control-center/pages/content-studio-workspace.js:1606:      content_item: body,
+public/control-center/pages/content-studio-workspace.js:1610:    actor: "content-studio"
+public/control-center/pages/content-studio-workspace.js:1627:  if (mode === "email") return "email";
+public/control-center/pages/content-studio-workspace.js:1628:  if (mode === "marketplace-copy") return "marketplace_copy";
+public/control-center/pages/content-studio-workspace.js:1629:  if (mode === "ad-copy") return "ad_copy";
+public/control-center/pages/content-studio-workspace.js:1630:  return "content_draft";
+public/control-center/pages/content-studio-workspace.js:1641:  const hasPayload = Boolean(clean(selected.prompt) || clean(selected.output_content));
+public/control-center/pages/content-studio-workspace.js:1643:    session.validation = { ...session.validation, version: "Version needs prompt or content output before Library save." };
+public/control-center/pages/content-studio-workspace.js:1663:    id: `content-lib-${Date.now()}`,
+public/control-center/pages/content-studio-workspace.js:1665:    source: "content-studio",
+public/control-center/pages/content-studio-workspace.js:1675:      content_output: selected.output_content,
+public/control-center/pages/content-studio-workspace.js:1690:    source_page: "content-studio",
+public/control-center/pages/content-studio-workspace.js:1697:      entity_type: "content_item",
+public/control-center/pages/content-studio-workspace.js:1699:      route: "content-studio",
+public/control-center/pages/content-studio-workspace.js:1707:      content_type: libraryAsset.media_type
+public/control-center/pages/content-studio-workspace.js:1710:    actor: "content-studio"
+public/control-center/pages/content-studio-workspace.js:1756:      showMessage?.("Library backend unavailable. Saved as local library handoff.");
+public/control-center/pages/content-studio-workspace.js:1810:    <section class="card content-card">
+public/control-center/pages/content-studio-workspace.js:1834:  const form = document.getElementById("contentComposerForm");
+public/control-center/pages/content-studio-workspace.js:1855:  Array.from(document.querySelectorAll("[data-content-mode]")).forEach((button) => {
+public/control-center/pages/content-studio-workspace.js:1857:      const mode = button.getAttribute("data-content-mode") || "social-post";
+public/control-center/pages/content-studio-workspace.js:1863:  Array.from(document.querySelectorAll("[data-content-select]")).forEach((button) => {
+public/control-center/pages/content-studio-workspace.js:1865:      const item = session.items.find((entry) => asString(entry.id) === asString(button.getAttribute("data-content-select")));
+public/control-center/pages/content-studio-workspace.js:1873:  const loadHandoffBtn = document.getElementById("contentLoadHandoffBtn");
+public/control-center/pages/content-studio-workspace.js:1891:        brief: firstText(handoff.brief, handoff.contentBody, session.form.brief),
+public/control-center/pages/content-studio-workspace.js:1898:        outputContent: firstText(handoff.contentBody),
+public/control-center/pages/content-studio-workspace.js:1911:  const generateBtn = document.getElementById("contentGenerateDraftBtn");
+public/control-center/pages/content-studio-workspace.js:1937:            route_target: "content-studio",
+public/control-center/pages/content-studio-workspace.js:1938:            actor: "content-studio"
+public/control-center/pages/content-studio-workspace.js:1943:            aiResult?.response?.content,
+public/control-center/pages/content-studio-workspace.js:1985:            notes: "Generation backend unavailable. Prompt-ready state only."
+public/control-center/pages/content-studio-workspace.js:1987:          session.draftMessage = "Generation backend unavailable. Prompt-ready state only.";
+public/control-center/pages/content-studio-workspace.js:2009:  const improveBtn = document.getElementById("contentImproveBtn");
+public/control-center/pages/content-studio-workspace.js:2018:      session.form.brief = `${clean(session.form.brief)}\n\nImprove for clarity: stronger opening hook, tighter value message, cleaner CTA, and channel-safe length.`;
+public/control-center/pages/content-studio-workspace.js:2025:  const translateBtn = document.getElementById("contentTranslateBtn");
+public/control-center/pages/content-studio-workspace.js:2055:          message: `Adapt this content brief to ${language} while preserving brand tone and campaign intent:\n\n${session.form.brief}`,
+public/control-center/pages/content-studio-workspace.js:2056:          route_target: "content-studio",
+public/control-center/pages/content-studio-workspace.js:2057:          actor: "content-studio"
+public/control-center/pages/content-studio-workspace.js:2063:        session.form.brief = `${clean(session.form.brief)}\n\nAdaptation note: backend unavailable for ${language}; prompt-ready adaptation added.`;
+public/control-center/pages/content-studio-workspace.js:2065:        session.draftMessage = "Translate/adapt backend unavailable. Prompt-ready adaptation saved.";
+public/control-center/pages/content-studio-workspace.js:2071:  const saveBtn = document.getElementById("contentSaveDraftBtn");
+public/control-center/pages/content-studio-workspace.js:2085:  const sendAiBtn = document.getElementById("contentSendAiBtn");
+public/control-center/pages/content-studio-workspace.js:2092:        "Create AI Command content handoff",
+public/control-center/pages/content-studio-workspace.js:2099:        modeId: "content",
+public/control-center/pages/content-studio-workspace.js:2106:        source_page: "content-studio",
+public/control-center/pages/content-studio-workspace.js:2109:          entity_type: "content_item",
+public/control-center/pages/content-studio-workspace.js:2115:          content_item_id: firstText(selectedItem?.id, session.formSourceId),
+public/control-center/pages/content-studio-workspace.js:2117:          content: buildContentPayload(session, session.form.status || "draft")
+public/control-center/pages/content-studio-workspace.js:2126:  const sendMediaBtn = document.getElementById("contentSendMediaBtn");
+public/control-center/pages/content-studio-workspace.js:2141:        failMessage: "Design brief kept locally because backend handoff save is unavailable.",
+public/control-center/pages/content-studio-workspace.js:2158:  const sendPublishingBtn = document.getElementById("contentSendPublishingBtn");
+public/control-center/pages/content-studio-workspace.js:2173:        failMessage: "Publishing handoff kept locally because backend save is unavailable.",
+public/control-center/pages/content-studio-workspace.js:2190:  Array.from(document.querySelectorAll("[data-content-version]")).forEach((button) => {
+public/control-center/pages/content-studio-workspace.js:2192:      ensureVersioning(session).selectedVersionId = button.getAttribute("data-content-version") || "v1";
+public/control-center/pages/content-studio-workspace.js:2199:  Array.from(document.querySelectorAll("[data-content-version-action]")).forEach((button) => {
+public/control-center/pages/content-studio-workspace.js:2202:      const action = button.getAttribute("data-content-version-action") || "";
+public/control-center/pages/content-studio-workspace.js:2215:          "Confirm content approval mark",
+public/control-center/pages/content-studio-workspace.js:2216:          "This will mark the selected content version as approved/review-ready and may save that readiness state to the backend."
+public/control-center/pages/content-studio-workspace.js:2229:          "Confirm content revision decision",
+public/control-center/pages/content-studio-workspace.js:2230:          "This will return the selected content version to draft/revision and may save that readiness state to the backend."
+public/control-center/pages/content-studio-workspace.js:2243:          "Confirm content version regeneration",
+public/control-center/pages/content-studio-workspace.js:2244:          "This will create a new prompt-ready version from the selected content version and may save it to the backend."
+public/control-center/pages/content-studio-workspace.js:2268:          "Confirm content draft save",
+public/control-center/pages/content-studio-workspace.js:2269:          "This will save the selected content version as a draft. If a backend project is selected, it may update the backend content record."
+public/control-center/pages/content-studio-workspace.js:2286:  Array.from(document.querySelectorAll("[data-content-agent-use], [data-content-agent-save], [data-content-agent-ai]")).forEach((button) => {
+public/control-center/pages/content-studio-workspace.js:2288:      const id = button.getAttribute("data-content-agent-use") || button.getAttribute("data-content-agent-save") || button.getAttribute("data-content-agent-ai") || "";
+public/control-center/pages/content-studio-workspace.js:2296:      if (button.hasAttribute("data-content-agent-save")) {
+public/control-center/pages/content-studio-workspace.js:2299:          "This will save the agent-assisted content draft. If a backend project is selected, it may update the backend content record."
+public/control-center/pages/content-studio-workspace.js:2306:      if (button.hasAttribute("data-content-agent-ai")) {
+public/control-center/pages/content-studio-workspace.js:2319:          modeId: "content",
+public/control-center/pages/content-studio-workspace.js:2326:          source_page: "content-studio",
+public/control-center/pages/content-studio-workspace.js:2329:            entity_type: "content_item",
+public/control-center/pages/content-studio-workspace.js:2336:            content: buildContentPayload(session, session.form.status || "draft")
+public/control-center/pages/content-studio-workspace.js:2349:export const contentStudioRoute = {
+public/control-center/pages/content-studio-workspace.js:2350:  id: "content-studio",
+public/control-center/pages/content-studio-workspace.js:2355:    description: "Smart content production hub for draft generation, review, and routing to Media Studio and Publishing."
+public/control-center/pages/content-studio-workspace.js:2358:    <section class="page is-active" data-page="content-studio">
+public/control-center/pages/content-studio-workspace.js:2359:      <div id="contentStudioRoot"></div>
+public/control-center/pages/content-studio-workspace.js:2372:    const root = $("contentStudioRoot");
+public/control-center/pages/content-studio-workspace.js:2376:    const rerender = () => contentStudioRoute.render({
+public/control-center/pages/content-studio-workspace.js:2429:        sourceLines.push(`<div>No source context attached yet. Use AI Command or Library to attach source-backed content.</div>`);
+public/control-center/pages/content-studio-workspace.js:2431:      sourceLines.push(`<div class="content-hint content-readiness-hint">Source context helps the reviewer verify claims before routing.</div>`);
+public/control-center/pages/content-studio-workspace.js:2432:      return `<section class="card content-card" aria-label="${ariaLabel}"><div class="card-head"><div><div class="setup-kicker">Source Context</div><h3>Source / Provenance</h3></div></div><div class="content-data-item">${sourceLines.join("")}</div></section>`;
+public/control-center/pages/content-studio-workspace.js:2439:      return `<section class="card content-card" aria-label="${ariaLabel}"><div class="card-head"><div><div class="setup-kicker">SEO Checklist</div><h3>SEO Readiness Guidance</h3></div></div><ul class="content-seo-checklist content-readiness-list">
+public/control-center/pages/content-studio-workspace.js:2448:      </ul><div class="content-hint content-readiness-hint">Review these before routing for publishing or governance.</div></section>`;
+public/control-center/pages/content-studio-workspace.js:2454:      return `<section class="card content-card" aria-label="${ariaLabel}"><div class="card-head"><div><div class="setup-kicker">Governance Risk</div><h3>Approval Readiness</h3></div></div><ul class="content-governance-checklist content-readiness-list">
+public/control-center/pages/content-studio-workspace.js:2461:      </ul><div class="content-hint content-readiness-hint">Prepare Governance Review before publishing or campaign use.</div></section>`;
+public/control-center/pages/content-studio-workspace.js:2469:      <div class="content-smart-root">
+public/control-center/pages/content-studio-workspace.js:2476:        ${session.loading ? `<div class="empty-box">Loading content records, approvals, tasks, handoffs, and events...</div>` : ""}
+public/control-center/pages/content-studio-workspace.js:2478:        <div class="content-smart-grid">
+public/control-center/pages/content-studio-workspace.js:2479:          <div class="content-main">
+public/control-center/pages/content-studio-workspace.js:2485:          <aside class="content-side">
+public/control-center/api.js:29:      contentType: String(diagnostics?.contentType || "")
+public/control-center/api.js:48:      contentType: String(diagnostics?.contentType || ""),
+public/control-center/api.js:183:  const contentType = String(response?.headers?.get?.("content-type") || "");
+public/control-center/api.js:195:    contentType,
+public/control-center/api.js:229:    normalized === "api.response.json.fallback.done" ||
+public/control-center/api.js:230:    normalized === "api.response.json.fallback.error" ||
+public/control-center/api.js:231:    normalized === "api.response.json.fallback.timeout" ||
+public/control-center/api.js:258:        contentType: String(details.contentType || ""),
+public/control-center/api.js:313:    contentType: response?.headers?.get?.("content-type") || "",
+public/control-center/api.js:334:      contentType: response?.headers?.get?.("content-type") || "",
+public/control-center/api.js:352:        contentType: response?.headers?.get?.("content-type") || "",
+public/control-center/api.js:360:          let fallbackTimer = null;
+public/control-center/api.js:361:          const fallbackPayload = await Promise.race([
+public/control-center/api.js:364:              fallbackTimer = setTimeout(() => {
+public/control-center/api.js:365:                const fallbackTimeoutError = new Error(`JSON fallback timed out after ${timeoutMs}ms.`);
+public/control-center/api.js:366:                fallbackTimeoutError.endpoint = endpoint;
+public/control-center/api.js:367:                fallbackTimeoutError.isTimeout = true;
+public/control-center/api.js:368:                fallbackTimeoutError.parseStage = "api.response.json.fallback.timeout";
+public/control-center/api.js:369:                reject(fallbackTimeoutError);
+public/control-center/api.js:373:            if (fallbackTimer) {
+public/control-center/api.js:374:              clearTimeout(fallbackTimer);
+public/control-center/api.js:378:          const fallbackBodyLength = JSON.stringify(fallbackPayload || null).length;
+public/control-center/api.js:380:          emitApiRuntimeTrace("api.response.json.fallback.done", {
+public/control-center/api.js:383:            contentType: response?.headers?.get?.("content-type") || "",
+public/control-center/api.js:384:            bodyLength: fallbackBodyLength,
+public/control-center/api.js:389:            mode: "json-fallback",
+public/control-center/api.js:390:            payload: fallbackPayload,
+public/control-center/api.js:391:            bodyLength: fallbackBodyLength,
+public/control-center/api.js:392:            parseStage: "api.response.json.fallback.done"
+public/control-center/api.js:394:        } catch (fallbackError) {
+public/control-center/api.js:395:          const fallbackParseStage = fallbackError?.isTimeout
+public/control-center/api.js:396:            ? "api.response.json.fallback.timeout"
+public/control-center/api.js:397:            : "api.response.json.fallback.error";
+public/control-center/api.js:399:          emitApiRuntimeTrace("api.response.json.fallback.error", {
+public/control-center/api.js:402:            contentType: response?.headers?.get?.("content-type") || "",
+public/control-center/api.js:404:            message: fallbackError?.message || "JSON fallback failed"
+public/control-center/api.js:413:            contentType: String(response?.headers?.get?.("content-type") || ""),
+public/control-center/api.js:415:            parseStage: fallbackParseStage,
+public/control-center/api.js:427:        contentType: String(response?.headers?.get?.("content-type") || ""),
+public/control-center/api.js:437:      contentType: response?.headers?.get?.("content-type") || "",
+public/control-center/api.js:469:    contentType: response?.headers?.get?.("content-type") || "",
+public/control-center/api.js:486:      contentType: response?.headers?.get?.("content-type") || "",
+public/control-center/api.js:496:      contentType: response?.headers?.get?.("content-type") || "",
+public/control-center/api.js:508:      contentType: String(response?.headers?.get?.("content-type") || ""),
+public/control-center/api.js:516:async function parseJson(response, fallbackMessage = "Request failed", requestMeta = {}) {
+public/control-center/api.js:523:  if (bodyReadResult?.mode === "json-fallback") {
+public/control-center/api.js:525:    parseStage = String(bodyReadResult.parseStage || "api.response.json.fallback.done");
+public/control-center/api.js:553:      `${fallbackMessage} (${response.status})`;
+public/control-center/api.js:569:      contentType: diagnostics.contentType,
+public/control-center/api.js:577:    const message = String(payload.error || fallbackMessage);
+public/control-center/api.js:593:      contentType: diagnostics.contentType,
+public/control-center/api.js:609:        contentType: diagnostics.contentType
+public/control-center/api.js:674:      contentType: response?.headers?.get?.("content-type") || ""
+public/control-center/api.js:705:async function getJson(path, fallbackMessage, timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS, requestOptions = {}) {
+public/control-center/api.js:712:  return parseJson(response, fallbackMessage, {
+public/control-center/api.js:723:async function sendRawJson(path, method, body, fallbackMessage, timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS) {
+public/control-center/api.js:738:      const parseError = new Error(fallbackMessage || "Response was not valid JSON.");
+public/control-center/api.js:752:    const message = String(payload?.error || payload?.message || fallbackMessage || "Request failed").trim();
+public/control-center/api.js:763:async function sendJson(path, method, body, fallbackMessage, timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS) {
+public/control-center/api.js:771:  return parseJson(response, fallbackMessage, {
+public/control-center/api.js:781:async function sendForm(path, formData, fallbackMessage, timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS) {
+public/control-center/api.js:796:  return parseJson(response, fallbackMessage, {
+public/control-center/api.js:847:        contentType: String(response.headers.get("content-type") || "")
+public/control-center/api.js:856:    contentType: String(response.headers.get("content-type") || "")
+public/control-center/api.js:1057:    console.warn("Using fallback projects list:", error.message);
+public/control-center/api.js:1062:      fallback: true
+public/control-center/api.js:1129:        const fallbackProjects = await fetchProjects();
+public/control-center/api.js:1130:        const fallbackItems = Array.isArray(fallbackProjects?.items) ? fallbackProjects.items : [];
+public/control-center/api.js:1131:        const projectExists = fallbackItems.some((item) => {
+public/control-center/api.js:1143:      } catch (fallbackError) {
+public/control-center/api.js:1150:          message: String(fallbackError?.message || "Failed to verify project fallback")
+public/control-center/api.js:2109:    `/media-manager/project/${encodeURIComponent(projectName)}/content-items${suffix}`,
+public/control-center/api.js:2110:    "Failed to load content items"
+public/control-center/api.js:2121:      `/media-manager/project/${encodeURIComponent(projectName)}/content-items/${encodeURIComponent(payload.id)}`,
+public/control-center/api.js:2124:      "Failed to update content item"
+public/control-center/api.js:2129:    `/media-manager/project/${encodeURIComponent(projectName)}/content-items`,
+public/control-center/api.js:2132:    "Failed to create content item"
+public/control-center/api.js:2151:  if (params.content_item_id) {
+public/control-center/api.js:2152:    search.set("content_item_id", String(params.content_item_id));
+runtime/orchestrator-service/server.js:67:const { ExecutionArtifactWriterAdapter } = require('./lib/data/execution-artifact-writer-adapter');
+runtime/orchestrator-service/server.js:234:  contentSecurityPolicy: false // CSP managed separately; avoids breaking existing UI
+runtime/orchestrator-service/server.js:344:  /^\/apply-prepared-copy-to-clone\/[^/]+\/[^/]+\/?$/i,
+runtime/orchestrator-service/server.js:355:  /^\/execute_email_package\/?$/i,
+runtime/orchestrator-service/server.js:404:      error: `Protected write routes are disabled until ${CONTROL_WRITE_KEY_ENV} is configured on the server.`
+runtime/orchestrator-service/server.js:471:      error: `Protected read routes are disabled until ${CONTROL_WRITE_KEY_ENV} is configured on the server.`
+runtime/orchestrator-service/server.js:570:const executionArtifactWriter = new ExecutionArtifactWriterAdapter({
+runtime/orchestrator-service/server.js:615:      content_item_id: asString(req?.body?.content_item_id || ''),
+runtime/orchestrator-service/server.js:910:  PREPARE_PACKAGE: 'email_prepare_package',
+runtime/orchestrator-service/server.js:911:  PREPARED_HTML: 'email_prepared_html',
+runtime/orchestrator-service/server.js:912:  PREPARED_PACKAGE: 'email_prepared_package',
+runtime/orchestrator-service/server.js:913:  DELIVERY_RECORD: 'email_delivery_record',
+runtime/orchestrator-service/server.js:914:  DRAFT_QUEUE: 'email_draft_queue',
+runtime/orchestrator-service/server.js:915:  MEDIA_QUEUE: 'email_media_queue'
+runtime/orchestrator-service/server.js:929:function sanitizeErrorMessage(rawMessage, fallbackMessage) {
+runtime/orchestrator-service/server.js:930:  const fallback = String(fallbackMessage || 'Request failed').trim() || 'Request failed';
+runtime/orchestrator-service/server.js:933:    return fallback;
+runtime/orchestrator-service/server.js:938:function getErrorStatusCode(error, fallbackStatus = 500) {
+runtime/orchestrator-service/server.js:940:    error?.statusCode || error?.status || error?.response?.status || fallbackStatus
+runtime/orchestrator-service/server.js:944:    return fallbackStatus;
+runtime/orchestrator-service/server.js:948:    return fallbackStatus;
+runtime/orchestrator-service/server.js:1206:  email: {
+runtime/orchestrator-service/server.js:1249:  if (telemetryEntry.legacy_fallback_hit) {
+runtime/orchestrator-service/server.js:1377:    legacy_fallback_hit: legacyHit,
+runtime/orchestrator-service/server.js:1385:      legacy_fallback_read: !!readPolicy.legacyFallbackRead
+runtime/orchestrator-service/server.js:1389:  telemetryEntry.fallback_reason = classifyImmediateFallbackReason(telemetryEntry);
+runtime/orchestrator-service/server.js:1450:        legacyFallbackRead: !!resolution.featureFlags.legacy_fallback_read,
+runtime/orchestrator-service/server.js:1483:    domain: 'email',
+runtime/orchestrator-service/server.js:1493:    fallbackRoot: resolution.legacyRoot,
+runtime/orchestrator-service/server.js:1494:    canonicalEmailDir: path.join(resolution.executionRoot, 'email'),
+runtime/orchestrator-service/server.js:1495:    legacyEmailDir: path.join(resolution.legacyRoot, 'email'),
+runtime/orchestrator-service/server.js:1496:    canonicalLiveContentDir: path.join(EXECUTION_DIR, 'projects', safeProject, 'content', 'email'),
+runtime/orchestrator-service/server.js:1497:    legacyLiveContentDir: path.join(EXECUTION_DIR, safeProject, 'content', 'email'),
+runtime/orchestrator-service/server.js:1509:      legacyBase: paths.fallbackRoot,
+runtime/orchestrator-service/server.js:1510:      relativePath: 'email-prepare-package.json',
+runtime/orchestrator-service/server.js:1512:      requestedFile: 'email-prepare-package.json',
+runtime/orchestrator-service/server.js:1513:      pathContract: 'execution/projects/<project>/email-prepare-package.json -> brand-assets/<project>/email-prepare-package.json'
+runtime/orchestrator-service/server.js:1520:      requestedFile: 'email/html/*.html',
+runtime/orchestrator-service/server.js:1521:      pathContract: 'execution/projects/<project>/email/html/<package>.html -> brand-assets/<project>/email/html/<package>.html'
+runtime/orchestrator-service/server.js:1528:      requestedFile: 'email/prepared/*.json',
+runtime/orchestrator-service/server.js:1529:      pathContract: 'execution/projects/<project>/email/prepared/<package>.json -> brand-assets/<project>/email/prepared/<package>.json'
+runtime/orchestrator-service/server.js:1536:      requestedFile: 'email/delivery/*.json',
+runtime/orchestrator-service/server.js:1537:      pathContract: 'execution/projects/<project>/email/delivery/<send>.json -> brand-assets/<project>/email/delivery/<send>.json'
+runtime/orchestrator-service/server.js:1542:      relativePath: 'email-queue.json',
+runtime/orchestrator-service/server.js:1544:      requestedFile: 'content/email/email-queue.json',
+runtime/orchestrator-service/server.js:1545:      pathContract: 'execution/projects/<project>/content/email/email-queue.json -> execution/<project>/content/email/email-queue.json'
+runtime/orchestrator-service/server.js:1550:      relativePath: 'email-image-queue.json',
+runtime/orchestrator-service/server.js:1552:      requestedFile: 'media/queue/email-image-queue.json',
+runtime/orchestrator-service/server.js:1553:      pathContract: 'execution/projects/<project>/media/queue/email-image-queue.json -> execution/<project>/media/queue/email-image-queue.json'
+runtime/orchestrator-service/server.js:1560:    throw new Error(`Unsupported email artifact contract: ${artifactType}`);
+runtime/orchestrator-service/server.js:1581:    domain: 'email',
+runtime/orchestrator-service/server.js:1635:function readLiveEmailQueue(projectName, requestedIdentifier = 'email-draft-queue') {
+runtime/orchestrator-service/server.js:1643:function readLiveEmailMediaQueue(projectName, requestedIdentifier = 'email-media-queue') {
+runtime/orchestrator-service/server.js:1657:    ads: path.join('content', 'ads', 'ad-queue.json'),
+runtime/orchestrator-service/server.js:1658:    social: path.join('content', 'social', 'post-queue.json'),
+runtime/orchestrator-service/server.js:1659:    blog: path.join('content', 'blog', 'blog-queue.json'),
+runtime/orchestrator-service/server.js:1660:    reel: path.join('content', 'campaigns', 'reel-brief-queue.json'),
+runtime/orchestrator-service/server.js:1666:    throw new Error(`Unknown content queue type: ${queueType}`);
+runtime/orchestrator-service/server.js:1701:  'email',
+runtime/orchestrator-service/server.js:1758:  if (!readEntry || readEntry.selected_root !== 'legacy' || !readEntry.legacy_fallback_hit) {
+runtime/orchestrator-service/server.js:1805:    fallback_hit_count: 0,
+runtime/orchestrator-service/server.js:1806:    fallback_rate: 0,
+runtime/orchestrator-service/server.js:1807:    fallback_causes: {
+runtime/orchestrator-service/server.js:1848:    if (entry.selected_root === 'legacy' && entry.legacy_fallback_hit) {
+runtime/orchestrator-service/server.js:1849:      stats.fallback_hit_count += 1;
+runtime/orchestrator-service/server.js:1852:      if (!Object.prototype.hasOwnProperty.call(stats.fallback_causes, cause)) {
+runtime/orchestrator-service/server.js:1853:        stats.fallback_causes.unresolved_risk += 1;
+runtime/orchestrator-service/server.js:1855:        stats.fallback_causes[cause] += 1;
+runtime/orchestrator-service/server.js:1862:  let fallbackHits = 0;
+runtime/orchestrator-service/server.js:1869:    stats.fallback_rate = stats.read_events > 0
+runtime/orchestrator-service/server.js:1870:      ? Number((stats.fallback_hit_count / stats.read_events).toFixed(4))
+runtime/orchestrator-service/server.js:1875:    fallbackHits += stats.fallback_hit_count;
+runtime/orchestrator-service/server.js:1876:    historicalFallbacks += stats.fallback_causes.historical_artifact;
+runtime/orchestrator-service/server.js:1877:    unresolvedStructuralMismatches += stats.fallback_causes.structural_mismatch;
+runtime/orchestrator-service/server.js:1879:      stats.fallback_causes.parity_gap +
+runtime/orchestrator-service/server.js:1880:      stats.fallback_causes.missing_canonical_write +
+runtime/orchestrator-service/server.js:1881:      stats.fallback_causes.policy_or_config_mismatch;
+runtime/orchestrator-service/server.js:1885:  const fallbackRate = totalReads > 0 ? fallbackHits / totalReads : 0;
+runtime/orchestrator-service/server.js:1886:  const historicalFallbackRate = fallbackHits > 0 ? historicalFallbacks / fallbackHits : 0;
+runtime/orchestrator-service/server.js:1893:    fallbackRate <= 0.15 &&
+runtime/orchestrator-service/server.js:1901:    fallbackRate <= 0.4 &&
+runtime/orchestrator-service/server.js:1917:      fallback_hit_count: fallbackHits,
+runtime/orchestrator-service/server.js:1919:      fallback_rate: Number(fallbackRate.toFixed(4)),
+runtime/orchestrator-service/server.js:1920:      fallback_historical_rate: Number(historicalFallbackRate.toFixed(4)),
+runtime/orchestrator-service/server.js:1945:    fallback_hit_count: 0,
+runtime/orchestrator-service/server.js:1953:    aggregate.fallback_hit_count += summary.totals.fallback_hit_count;
+runtime/orchestrator-service/server.js:1962:  aggregate.fallback_rate = totalReads > 0
+runtime/orchestrator-service/server.js:1963:    ? Number((aggregate.fallback_hit_count / totalReads).toFixed(4))
+runtime/orchestrator-service/server.js:2082:    email_asset: {
+runtime/orchestrator-service/server.js:2092:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:2094:    domain: 'email',
+runtime/orchestrator-service/server.js:2095:    artifactType: 'email_prepare_package',
+runtime/orchestrator-service/server.js:2104:  const subject = packageData.email_asset.subject || 'Campaign Update';
+runtime/orchestrator-service/server.js:2105:  const headline = packageData.email_asset.headline || 'New Campaign Asset';
+runtime/orchestrator-service/server.js:2106:  const body = packageData.email_asset.body || '';
+runtime/orchestrator-service/server.js:2107:  const cta = packageData.email_asset.cta || 'Learn More';
+runtime/orchestrator-service/server.js:2159:  const subject = extractFlagValue(rawText, 'subject') || packageData.email_asset.subject;
+runtime/orchestrator-service/server.js:2160:  const headline = extractFlagValue(rawText, 'headline') || packageData.email_asset.headline;
+runtime/orchestrator-service/server.js:2161:  const body = extractFlagValue(rawText, 'body') || packageData.email_asset.body;
+runtime/orchestrator-service/server.js:2162:  const cta = extractFlagValue(rawText, 'cta') || packageData.email_asset.cta;
+runtime/orchestrator-service/server.js:2167:  packageData.email_asset.subject = subject;
+runtime/orchestrator-service/server.js:2168:  packageData.email_asset.headline = headline;
+runtime/orchestrator-service/server.js:2169:  packageData.email_asset.body = body;
+runtime/orchestrator-service/server.js:2170:  packageData.email_asset.cta = cta;
+runtime/orchestrator-service/server.js:2171:  packageData.email_asset.cta_url = ctaUrl;
+runtime/orchestrator-service/server.js:2172:  packageData.email_asset.public_image_url = publicImageUrl;
+runtime/orchestrator-service/server.js:2174:  packageData.email_asset.html = buildHardenedEmailHtml(packageData);
+runtime/orchestrator-service/server.js:2176:  const htmlDir = path.join(preparePaths.legacyBaseDir, 'email', 'html');
+runtime/orchestrator-service/server.js:2177:  const preparedDir = path.join(preparePaths.legacyBaseDir, 'email', 'prepared');
+runtime/orchestrator-service/server.js:2181:  const packageId = `emailprep_${Date.now()}`;
+runtime/orchestrator-service/server.js:2185:  executionArtifactWriter.writeText({
+runtime/orchestrator-service/server.js:2187:    domain: 'email',
+runtime/orchestrator-service/server.js:2188:    artifactType: 'email_prepared_html',
+runtime/orchestrator-service/server.js:2191:    payload: packageData.email_asset.html,
+runtime/orchestrator-service/server.js:2204:    packageData.email_asset.ready_for_send = true;
+runtime/orchestrator-service/server.js:2207:    packageData.email_asset.ready_for_send = false;
+runtime/orchestrator-service/server.js:2210:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:2212:    domain: 'email',
+runtime/orchestrator-service/server.js:2213:    artifactType: 'email_prepared_package',
+runtime/orchestrator-service/server.js:2218:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:2220:    domain: 'email',
+runtime/orchestrator-service/server.js:2221:    artifactType: 'email_prepare_package',
+runtime/orchestrator-service/server.js:2235:    requestedFile: 'email-prepare-package.json'
+runtime/orchestrator-service/server.js:2270:  const subject = String(packageData.email_asset?.subject || '').trim();
+runtime/orchestrator-service/server.js:2271:  const headline = String(packageData.email_asset?.headline || '').trim();
+runtime/orchestrator-service/server.js:2272:  const body = String(packageData.email_asset?.body || '').trim();
+runtime/orchestrator-service/server.js:2273:  const cta = String(packageData.email_asset?.cta || '').trim();
+runtime/orchestrator-service/server.js:2274:  const url = String(packageData.email_asset?.cta_url || '').trim();
+runtime/orchestrator-service/server.js:2275:  const html = String(packageData.email_asset?.html || '').trim();
+runtime/orchestrator-service/server.js:2276:  const publicImageUrl = String(packageData.email_asset?.public_image_url || '').trim();
+runtime/orchestrator-service/server.js:2278:  if (!subject) errors.push('Missing email subject');
+runtime/orchestrator-service/server.js:2279:  if (!headline) errors.push('Missing email headline');
+runtime/orchestrator-service/server.js:2280:  if (!body) errors.push('Missing email body');
+runtime/orchestrator-service/server.js:2295:  if (!html) errors.push('Missing HTML content');
+runtime/orchestrator-service/server.js:2309:  const subject = packageData.email_asset.subject;
+runtime/orchestrator-service/server.js:2310:  const headline = packageData.email_asset.headline;
+runtime/orchestrator-service/server.js:2311:  const body = packageData.email_asset.body;
+runtime/orchestrator-service/server.js:2312:  const cta = packageData.email_asset.cta;
+runtime/orchestrator-service/server.js:2313:  const ctaUrl = packageData.email_asset.cta_url;
+runtime/orchestrator-service/server.js:2314:  const publicImageUrl = packageData.email_asset.public_image_url;
+runtime/orchestrator-service/server.js:2322:  <meta name="viewport" content="width=device-width, initial-scale=1">
+runtime/orchestrator-service/server.js:2433:      hook: `${productName} builds a stronger ${productType} identity with ${mainBenefit}.`,
+runtime/orchestrator-service/server.js:2440:      hook: `${productName} highlights real ${productType} care benefits for ${audience}.`,
+runtime/orchestrator-service/server.js:2447:      hook: `${productName} is ideal for promotional conversion-focused campaigns.`,
+runtime/orchestrator-service/server.js:2454:      hook: `${productName} can be explained clearly through benefit, ingredient, and usage blocks.`,
+runtime/orchestrator-service/server.js:2461:      hook: `${productName} fits short-form visual storytelling with strong first-second attention.`,
+runtime/orchestrator-service/server.js:2468:      hook: `${productName} should emphasize clarity, trust, and real product presentation.`,
+runtime/orchestrator-service/server.js:2475:      hook: `${productName} is suitable for barbershops, resellers, and partner promotion use cases.`,
+runtime/orchestrator-service/server.js:2498:- Content family: ${productIntel.content_family || 'unknown'}
+runtime/orchestrator-service/server.js:2501:- Content type: ${intent.content_type}
+runtime/orchestrator-service/server.js:2593:  executionArtifactWriter.writeBuffer({
+runtime/orchestrator-service/server.js:2616:  const emailPaths = getEmailDomainPaths(safeProject);
+runtime/orchestrator-service/server.js:2617:  const baseDir = emailPaths.canonicalEmailDir;
+runtime/orchestrator-service/server.js:2620:  const legacyBaseDir = emailPaths.legacyEmailDir;
+runtime/orchestrator-service/server.js:2646:    requestedIdentifier: 'latest-prepared-email-package',
+runtime/orchestrator-service/server.js:2647:    requestedFile: 'email/prepared/*.json'
+runtime/orchestrator-service/server.js:2656:    throw new Error('No prepared email package found');
+runtime/orchestrator-service/server.js:2675:    result.blocking_reasons.push('Prepared email package is not ready_for_send');
+runtime/orchestrator-service/server.js:2680:    result.blocking_reasons.push('Prepared email package validation failed');
+runtime/orchestrator-service/server.js:2683:  if (!pkg.email_asset || !pkg.email_asset.html) {
+runtime/orchestrator-service/server.js:2685:    result.blocking_reasons.push('Missing email HTML');
+runtime/orchestrator-service/server.js:2688:  if (!pkg.email_asset || !pkg.email_asset.public_image_url) {
+runtime/orchestrator-service/server.js:2693:  if (!pkg.email_asset || !pkg.email_asset.cta_url) {
+runtime/orchestrator-service/server.js:2703:  const deliveryId = `emailsend_${Date.now()}`;
+runtime/orchestrator-service/server.js:2713:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:2715:    domain: 'email',
+runtime/orchestrator-service/server.js:2716:    artifactType: 'email_delivery_record',
+runtime/orchestrator-service/server.js:2729:      to_email: toEmail,
+runtime/orchestrator-service/server.js:2737:  // TODO:
+runtime/orchestrator-service/server.js:2744:    to_email: toEmail,
+runtime/orchestrator-service/server.js:2746:    subject: pkg.email_asset.subject,
+runtime/orchestrator-service/server.js:2983:      goal_style: 'visual storytelling with concise caption',
+runtime/orchestrator-service/server.js:2984:      max_caption_style: 'short_to_medium',
+runtime/orchestrator-service/server.js:2992:      max_caption_style: 'short',
+runtime/orchestrator-service/server.js:2999:      goal_style: 'clear value-led copy',
+runtime/orchestrator-service/server.js:3000:      max_caption_style: 'medium',
+runtime/orchestrator-service/server.js:3008:      max_caption_style: 'short',
+runtime/orchestrator-service/server.js:3030:    content_angle: 'Premium brand-controlled visual identity with strong product credibility and polished presentation.',
+runtime/orchestrator-service/server.js:3098:  const content = buildMetaCaption(projectName, placement, goal);
+runtime/orchestrator-service/server.js:3113:    caption: `${content.headline}\n\n${content.body}\n\n${content.cta}\n\n${content.hashtags.join(' ')}`,
+runtime/orchestrator-service/server.js:3114:    headline: content.headline,
+runtime/orchestrator-service/server.js:3115:    body: content.body,
+runtime/orchestrator-service/server.js:3116:    cta: content.cta,
+runtime/orchestrator-service/server.js:3117:    hashtags: content.hashtags,
+runtime/orchestrator-service/server.js:3118:    intelligence: content.intelligence,
+runtime/orchestrator-service/server.js:3122:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:3180:    trend_direction: 'Prioritize high-contrast first-frame impact, fast hook delivery, and visually clean premium presentation.',
+runtime/orchestrator-service/server.js:3199:      'Avoid relying on clickable links, @ mentions, or hashtag behavior inside ad caption logic.',
+runtime/orchestrator-service/server.js:3224:    hook: 'This is what premium brand-controlled creative actually looks like.',
+runtime/orchestrator-service/server.js:3237:    caption: 'Premium visual launch built with strict brand control.',
+runtime/orchestrator-service/server.js:3243:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:3284:      goal_style: 'fast hook + short-form retention'
+runtime/orchestrator-service/server.js:3311:      ? 'Lead with immediate visual payoff and strong first-line hook.'
+runtime/orchestrator-service/server.js:3320:      ? 'Retention-first, immediate hook, visual momentum.'
+runtime/orchestrator-service/server.js:3343:      'Do not rely on claimed third-party content for Shorts over one minute.',
+runtime/orchestrator-service/server.js:3380:    hook: format === 'short'
+runtime/orchestrator-service/server.js:3385:          '0-3s: visual hook',
+runtime/orchestrator-service/server.js:3391:          'Intro hook',
+runtime/orchestrator-service/server.js:3403:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:3504:    conversion_angle: 'Real product, clean presentation, trustworthy copy, and compliant listing assets.',
+runtime/orchestrator-service/server.js:3562:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:3617:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:3846:      'email',
+runtime/orchestrator-service/server.js:3850:    content_cadence: {
+runtime/orchestrator-service/server.js:3854:      email: '1x_per_week',
+runtime/orchestrator-service/server.js:3875:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:3942:    channels: ['instagram', 'tiktok', 'facebook', 'email'],
+runtime/orchestrator-service/server.js:3953:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:4055:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:4091:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:4106:function normalizePublishingJobStatus(value, fallback = 'draft') {
+runtime/orchestrator-service/server.js:4109:  if (!normalized) return fallback;
+runtime/orchestrator-service/server.js:4131:  return fallback;
+runtime/orchestrator-service/server.js:4182:    String(input.body || input.caption || base.body || base.caption || '').trim() ||
+runtime/orchestrator-service/server.js:4189:      channel === 'email'
+runtime/orchestrator-service/server.js:4190:        ? 'email'
+runtime/orchestrator-service/server.js:4198:    caption: String(input.caption || base.caption || body).trim(),
+runtime/orchestrator-service/server.js:4200:    cta: String(input.cta || base.cta || (channel === 'email' ? 'Review email' : 'Shop now')).trim(),
+runtime/orchestrator-service/server.js:4226:      caption: channelAsset.caption || channelAsset.body || '',
+runtime/orchestrator-service/server.js:4227:      body: channelAsset.body || channelAsset.caption || '',
+runtime/orchestrator-service/server.js:4246:    caption: item.channel_asset?.caption || '',
+runtime/orchestrator-service/server.js:4313:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:4355:      connector_error: error.message || 'Connector payload unavailable'
+runtime/orchestrator-service/server.js:4418:  const fallbackStatus = scheduledFor ? 'scheduled' : 'draft';
+runtime/orchestrator-service/server.js:4430:    status: normalizePublishingJobStatus(input.status, existing.status || fallbackStatus),
+runtime/orchestrator-service/server.js:4559:    asset.caption || '',
+runtime/orchestrator-service/server.js:4571:    recommendations.push('rewrite copy in natural German for German-market publishing');
+runtime/orchestrator-service/server.js:4581:  if ((asset.caption || '').length > 220 && ['instagram', 'facebook'].includes(String(channel).toLowerCase())) {
+runtime/orchestrator-service/server.js:4582:    issues.push('caption may be too long for fast social consumption');
+runtime/orchestrator-service/server.js:4593:    hook_strength: score >= 85 ? 'strong' : score >= 70 ? 'medium' : 'weak',
+runtime/orchestrator-service/server.js:4609:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:4640:    improved.caption =
+runtime/orchestrator-service/server.js:4646:  if (normalizedChannel === 'email') {
+runtime/orchestrator-service/server.js:4655:    improved.hook_3s = `${productName}: starke Bartpflege in Sekunden erklaert.`;
+runtime/orchestrator-service/server.js:4673:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:4719:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:4841:    content: fs.readFileSync(match.path, 'utf8')
+runtime/orchestrator-service/server.js:4952:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:5007:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:5036:  if (assetType === 'ad' || assetType === 'blog_image' || assetType === 'email_hero') {
+runtime/orchestrator-service/server.js:5112:  if ((assetType === 'ad' || assetType === 'email_hero' || assetType === 'blog_visual') && !truth.product) {
+runtime/orchestrator-service/server.js:5117:  if ((assetType === 'ad' || assetType === 'email_hero' || assetType === 'blog_visual') && !truth.packaging) {
+runtime/orchestrator-service/server.js:5192:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:5390:function readJsonFile(filePath, fallback = []) {
+runtime/orchestrator-service/server.js:5392:    if (!fs.existsSync(filePath)) return fallback;
+runtime/orchestrator-service/server.js:5394:    if (!raw) return fallback;
+runtime/orchestrator-service/server.js:5397:    console.warn(`[server] readJsonFile: non-fatal read/parse error for ${filePath}, returning fallback. Error: ${err.message}`);
+runtime/orchestrator-service/server.js:5398:    return fallback;
+runtime/orchestrator-service/server.js:5428:    try { fs.copyFileSync(filePath, backupPath); } catch (_) { /* non-fatal */ }
+runtime/orchestrator-service/server.js:5962:    text.includes('copy') ||
+runtime/orchestrator-service/server.js:5963:    text.includes('caption') ||
+runtime/orchestrator-service/server.js:5964:    text.includes('content') ||
+runtime/orchestrator-service/server.js:5995:    content_family: null
+runtime/orchestrator-service/server.js:6002:    intelligence.content_family = 'after shave';
+runtime/orchestrator-service/server.js:6007:    intelligence.content_family = 'beard care';
+runtime/orchestrator-service/server.js:6012:    intelligence.content_family = 'hair care';
+runtime/orchestrator-service/server.js:6028:      content_type: 'offer_visual',
+runtime/orchestrator-service/server.js:6036:      content_type: 'seasonal_visual',
+runtime/orchestrator-service/server.js:6044:      content_type: 'partner_visual',
+runtime/orchestrator-service/server.js:6052:      content_type: 'feature_visual',
+runtime/orchestrator-service/server.js:6060:      content_type: 'infographic',
+runtime/orchestrator-service/server.js:6068:      content_type: 'marketplace_visual',
+runtime/orchestrator-service/server.js:6076:      content_type: 'hero_visual',
+runtime/orchestrator-service/server.js:6083:    content_type: 'brand_visual',
+runtime/orchestrator-service/server.js:6162:    if (!signal || signal.fallback) return null;
+runtime/orchestrator-service/server.js:6293:    contentDir: path.join(baseDir, 'content'),
+runtime/orchestrator-service/server.js:6385:  const fallback = options.fallback;
+runtime/orchestrator-service/server.js:6389:  const canonicalValue = canonicalExists ? normalize(readJsonFile(canonicalPath, fallback)) : null;
+runtime/orchestrator-service/server.js:6397:    const legacyValue = normalize(readJsonFile(legacyPath, fallback));
+runtime/orchestrator-service/server.js:6440:  writeJsonFile(canonicalPath, fallback);
+runtime/orchestrator-service/server.js:6442:    value: fallback,
+runtime/orchestrator-service/server.js:6513:    const fallbackValue = candidates
+runtime/orchestrator-service/server.js:6517:    const entry = foundEntry || (fallbackValue ? { value: fallbackValue } : {});
+runtime/orchestrator-service/server.js:6522:      value: normalizeSetupTextValue(entry.value || fallbackValue),
+runtime/orchestrator-service/server.js:6603:    paths.contentDir,
+runtime/orchestrator-service/server.js:6623:    fallback: buildDefaultBrandProfile(safeProject, projectData)
+runtime/orchestrator-service/server.js:6630:    fallback: [],
+runtime/orchestrator-service/server.js:6638:    fallback: buildSourceOfTruthRegistry({}),
+runtime/orchestrator-service/server.js:6720:      content: { path: paths.contentDir, exists: fs.existsSync(paths.contentDir) },
+runtime/orchestrator-service/server.js:6803:    paths.contentDir,
+runtime/orchestrator-service/server.js:6843:    content_categories: ['brand_story', 'offers', 'education', 'social_proof'],
+runtime/orchestrator-service/server.js:6844:    workspace_priorities: ['setup', 'library', 'content-studio', 'campaign-studio', 'publishing'],
+runtime/orchestrator-service/server.js:6845:    ai_team_defaults: ['strategist', 'writer', 'designer', 'publisher', 'analyst'],
+runtime/orchestrator-service/server.js:6863:      content_categories: ['product_launch', 'before_after', 'offers', 'how_to_use', 'reviews'],
+runtime/orchestrator-service/server.js:6864:      workspace_priorities: ['setup', 'library', 'campaign-studio', 'content-studio', 'media-studio', 'publishing', 'insights'],
+runtime/orchestrator-service/server.js:6865:      ai_team_defaults: ['strategist', 'writer', 'designer', 'publisher', 'ads_operator', 'analyst', 'compliance_reviewer'],
+runtime/orchestrator-service/server.js:6867:      recommended_integrations: ['woocommerce', 'google', 'meta', 'tiktok', 'email_crm']
+runtime/orchestrator-service/server.js:6876:      content_categories: ['song_release', 'behind_the_scenes', 'live_events', 'fan_engagement', 'press_updates'],
+runtime/orchestrator-service/server.js:6877:      workspace_priorities: ['setup', 'library', 'media-studio', 'content-studio', 'campaign-studio', 'publishing'],
+runtime/orchestrator-service/server.js:6878:      ai_team_defaults: ['strategist', 'writer', 'designer', 'video_lead', 'publisher', 'analyst'],
+runtime/orchestrator-service/server.js:6889:      content_categories: ['services', 'before_after', 'offers', 'team', 'client_reviews'],
+runtime/orchestrator-service/server.js:6890:      workspace_priorities: ['setup', 'library', 'media-studio', 'content-studio', 'publishing', 'insights'],
+runtime/orchestrator-service/server.js:6891:      ai_team_defaults: ['strategist', 'writer', 'designer', 'publisher', 'analyst'],
+runtime/orchestrator-service/server.js:6902:      content_categories: ['property_listing', 'market_update', 'area_guide', 'buyer_tips', 'seller_tips'],
+runtime/orchestrator-service/server.js:6903:      workspace_priorities: ['setup', 'library', 'content-studio', 'campaign-studio', 'ads-manager', 'governance'],
+runtime/orchestrator-service/server.js:6904:      ai_team_defaults: ['strategist', 'writer', 'designer', 'ads_operator', 'publisher', 'compliance_reviewer'],
+runtime/orchestrator-service/server.js:6906:      recommended_integrations: ['website', 'crm', 'google', 'meta', 'email_crm']
+runtime/orchestrator-service/server.js:6915:      content_categories: ['services', 'case_studies', 'client_results', 'faq', 'offers'],
+runtime/orchestrator-service/server.js:6916:      workspace_priorities: ['setup', 'library', 'content-studio', 'campaign-studio', 'publishing'],
+runtime/orchestrator-service/server.js:6917:      ai_team_defaults: ['strategist', 'writer', 'designer', 'publisher', 'analyst'],
+runtime/orchestrator-service/server.js:6919:      recommended_integrations: ['website', 'google_business', 'meta', 'email_crm']
+runtime/orchestrator-service/server.js:6928:      content_categories: ['menu_highlights', 'daily_specials', 'behind_the_kitchen', 'reviews', 'events'],
+runtime/orchestrator-service/server.js:6930:      ai_team_defaults: ['strategist', 'writer', 'designer', 'video_lead', 'publisher'],
+runtime/orchestrator-service/server.js:6941:      content_categories: ['case_study', 'thought_leadership', 'services', 'client_results', 'lead_generation'],
+runtime/orchestrator-service/server.js:6942:      workspace_priorities: ['setup', 'library', 'content-studio', 'campaign-studio', 'insights', 'workflows'],
+runtime/orchestrator-service/server.js:6943:      ai_team_defaults: ['strategist', 'writer', 'designer', 'ads_operator', 'analyst'],
+runtime/orchestrator-service/server.js:6954:      content_categories: ['local_offers', 'reviews', 'services', 'community', 'faq'],
+runtime/orchestrator-service/server.js:6955:      workspace_priorities: ['setup', 'library', 'content-studio', 'publishing', 'insights'],
+runtime/orchestrator-service/server.js:6956:      ai_team_defaults: ['strategist', 'writer', 'designer', 'publisher'],
+runtime/orchestrator-service/server.js:6996:    content_categories: businessTemplate.content_categories,
+runtime/orchestrator-service/server.js:7009:      content: paths.contentDir,
+runtime/orchestrator-service/server.js:7231:      fallback_in_use: !canonicalExists && legacyExists
+runtime/orchestrator-service/server.js:7236:  const fallbackDependencies = checks.filter((item) => item.fallback_in_use).length;
+runtime/orchestrator-service/server.js:7241:    fallback_dependencies: fallbackDependencies,
+runtime/orchestrator-service/server.js:7244:    recommendation: fallbackDependencies > 0 || mismatches > 0
+runtime/orchestrator-service/server.js:7245:      ? 'Reduce fallback dependencies by keeping canonical files in sync before disabling legacy reads.'
+runtime/orchestrator-service/server.js:7333:    has_content_dir: fs.existsSync(paths.contentDir),
+runtime/orchestrator-service/server.js:7586:  email: 'smtp',
+runtime/orchestrator-service/server.js:8124:    const fallbackStatus = determineIntegrationStatus({
+runtime/orchestrator-service/server.js:8136:            : fallbackStatus === 'connected'
+runtime/orchestrator-service/server.js:8138:              : fallbackStatus,
+runtime/orchestrator-service/server.js:8148:              : fallbackStatus === 'connected'
+runtime/orchestrator-service/server.js:8150:                : fallbackStatus,
+runtime/orchestrator-service/server.js:8378:      description: 'Structured product data for planning, content, and campaign packaging.',
+runtime/orchestrator-service/server.js:8392:      target_folder: 'content',
+runtime/orchestrator-service/server.js:8408:      target_folder: 'content',
+runtime/orchestrator-service/server.js:8412:        what_to_upload: 'Terms, privacy policy, disclaimers, compliance notes, claim restrictions, and regulated copy rules.',
+runtime/orchestrator-service/server.js:8426:      description: 'Approved product photography for content, media, ads, and publishing.',
+runtime/orchestrator-service/server.js:8460:        what_to_upload: 'Organic post images, story frames, reels, thumbnails, channel templates, and captions references.',
+runtime/orchestrator-service/server.js:8474:      description: 'Campaign-specific creative, copy, export packs, banners, and channel packages.',
+runtime/orchestrator-service/server.js:8476:        what_to_upload: 'Campaign banners, ad creative, landing-page assets, email hero files, export packs, and wave-specific files.',
+runtime/orchestrator-service/server.js:8504:      target_folder: 'content',
+runtime/orchestrator-service/server.js:8520:      target_folder: 'content',
+runtime/orchestrator-service/server.js:8536:      target_folder: 'content',
+runtime/orchestrator-service/server.js:9196:    email: hasSource('email'),
+runtime/orchestrator-service/server.js:9229:    'content': base.contentDir,
+runtime/orchestrator-service/server.js:9268:  fs.copyFileSync(inputPath, destinationPath);
+runtime/orchestrator-service/server.js:9332:    content: base.contentDir,
+runtime/orchestrator-service/server.js:9557:      caption: bridgeResult.caption,
+runtime/orchestrator-service/server.js:9569:        has_caption: Boolean(result.caption)
+runtime/orchestrator-service/server.js:9601:app.post('/execute_email_package', async (req, res) => {
+runtime/orchestrator-service/server.js:9608:      action: 'execute_email_package',
+runtime/orchestrator-service/server.js:9610:      entityId: 'execute_email_package',
+runtime/orchestrator-service/server.js:9619:      action: 'execute_email_package',
+runtime/orchestrator-service/server.js:9621:      entityId: 'execute_email_package',
+runtime/orchestrator-service/server.js:9625:      linkedExecutionId: 'execute_email_package',
+runtime/orchestrator-service/server.js:9628:      summary: 'Approval required before email package execution.'
+runtime/orchestrator-service/server.js:9634:      type: 'email',
+runtime/orchestrator-service/server.js:9641:      campaign_name: String(req.body?.campaign_name || req.body?.email_package?.campaign_name || '').trim(),
+runtime/orchestrator-service/server.js:9652:    const log = writeExecutionBridgeLog(projectName, 'execute_email_package', {
+runtime/orchestrator-service/server.js:9671:      writeExecutionBridgeLog(logProject, 'execute_email_package', {
+runtime/orchestrator-service/server.js:9684:      message: error.message || 'Failed to execute email package'
+runtime/orchestrator-service/server.js:9825:      ad_copy: bridgeResult.ad_copy,
+runtime/orchestrator-service/server.js:9908:        next_step: 'Review the current product copy and prepare an optimized version for homepage and product page blocks'
+runtime/orchestrator-service/server.js:10079:        'Use the cloned draft product for safe content updates before publishing.'
+runtime/orchestrator-service/server.js:10090:app.post('/apply-prepared-copy-to-clone/:originalId/:cloneId', async (req, res) => {
+runtime/orchestrator-service/server.js:10181:      mode: 'apply_prepared_copy_to_clone',
+runtime/orchestrator-service/server.js:10200:      message: 'Failed to apply prepared copy to clone'
+runtime/orchestrator-service/server.js:10498:    content_categories: businessTemplate.content_categories,
+runtime/orchestrator-service/server.js:10524:          content_categories: updated.content_categories,
+runtime/orchestrator-service/server.js:10824:function sendAssetMutationError(res, error, fallbackMessage) {
+runtime/orchestrator-service/server.js:10827:    error: error?.message || fallbackMessage,
+runtime/orchestrator-service/server.js:10836:    error: fallbackMessage,
+runtime/orchestrator-service/server.js:11183:function normalizeAiCommandPreviewInput(value, fallback = '') {
+runtime/orchestrator-service/server.js:11184:  return String(value || fallback || '').trim();
+runtime/orchestrator-service/server.js:11246:    contentAngles: [
+runtime/orchestrator-service/server.js:11254:      `Use destination-specific copy variations for ${channel}.`
+runtime/orchestrator-service/server.js:11259:      'Channel copy',
+runtime/orchestrator-service/server.js:11297:      id: 'copy_package',
+runtime/orchestrator-service/server.js:11603:      error: error.message || 'Failed to list content items'
+runtime/orchestrator-service/server.js:11610:    const contentItem = upsertContentItem(req.params.project, req.body || {});
+runtime/orchestrator-service/server.js:11612:      content_item: contentItem,
+runtime/orchestrator-service/server.js:11617:      error: error.message || 'Failed to save content item'
+runtime/orchestrator-service/server.js:11624:    const contentItem = getContentItem(req.params.project, req.params.contentItemId);
+runtime/orchestrator-service/server.js:11625:    if (!contentItem) {
+runtime/orchestrator-service/server.js:11628:    return res.json({ content_item: contentItem });
+runtime/orchestrator-service/server.js:11631:      error: error.message || 'Failed to load content item'
+runtime/orchestrator-service/server.js:11636:app.get('/media-manager/project/:project/content-items', handleListContentItems);
+runtime/orchestrator-service/server.js:11637:app.get('/public/media-manager/project/:project/content-items', handleListContentItems);
+runtime/orchestrator-service/server.js:11638:app.post('/media-manager/project/:project/content-items', handleUpsertContentItem);
+runtime/orchestrator-service/server.js:11639:app.post('/public/media-manager/project/:project/content-items', handleUpsertContentItem);
+runtime/orchestrator-service/server.js:11640:app.patch('/media-manager/project/:project/content-items/:contentItemId', (req, res) => {
+runtime/orchestrator-service/server.js:11643:    id: req.params.contentItemId
+runtime/orchestrator-service/server.js:11647:app.patch('/public/media-manager/project/:project/content-items/:contentItemId', (req, res) => {
+runtime/orchestrator-service/server.js:11650:    id: req.params.contentItemId
+runtime/orchestrator-service/server.js:11654:app.get('/media-manager/project/:project/content-items/:contentItemId', handleGetContentItem);
+runtime/orchestrator-service/server.js:11655:app.get('/public/media-manager/project/:project/content-items/:contentItemId', handleGetContentItem);
+runtime/orchestrator-service/server.js:11664:        content_item_id: req.query?.content_item_id
+runtime/orchestrator-service/server.js:13334:// TODO(phase4a): Keep `/public/media-manager/...` write aliases for active frontend compatibility.
+runtime/orchestrator-service/server.js:13819:  // Use canonical-first candidate resolution with fallback instrumentation
+runtime/orchestrator-service/server.js:13959:    content_design_rules: {},
+runtime/orchestrator-service/server.js:13963:  record.content_design_rules = buildDefaultContentDesignRules(record);
+runtime/orchestrator-service/server.js:13986:      content_design_rules:
+runtime/orchestrator-service/server.js:13987:        record.content_design_rules || products[index].content_design_rules || {},
+runtime/orchestrator-service/server.js:14033:  function makeBlock(type, fallbackGoal) {
+runtime/orchestrator-service/server.js:14035:    const hook = map.hook || `${productName} supports ${category} care with ${benefitText}.`;
+runtime/orchestrator-service/server.js:14037:    const goal = map.goal || fallbackGoal;
+runtime/orchestrator-service/server.js:14042:      hook,
+runtime/orchestrator-service/server.js:14056:        `Open with a strong hook for ${audienceText}. ` +
+runtime/orchestrator-service/server.js:14062:      caption_direction:
+runtime/orchestrator-service/server.js:14063:        `${hook} Focus on ${benefitText}. Keep tone aligned with ${positioning} ${category} branding.`,
+runtime/orchestrator-service/server.js:14092:      caption: `${b.hook}\n\n${b.cta}\n\n${brandHashtag} #mensgrooming #premiumstyle`,
+runtime/orchestrator-service/server.js:14102:      hook_3s: r.hook,
+runtime/orchestrator-service/server.js:14118:      hook: r.hook,
+runtime/orchestrator-service/server.js:14140:  function email() {
+runtime/orchestrator-service/server.js:14145:      body: b.hook,
+runtime/orchestrator-service/server.js:14158:    email: email()
+runtime/orchestrator-service/server.js:14232:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:14296:      fallback_prompt_pack:
+runtime/orchestrator-service/server.js:14299:          : normalizedChannel === 'email'
+runtime/orchestrator-service/server.js:14311:  // the required fallback for existing HAIROTICMEN dry-run packages.
+runtime/orchestrator-service/server.js:14328:  const emailDir = path.join(baseDir, 'email');
+runtime/orchestrator-service/server.js:14331:  const legacyEmailDir = path.join(legacyBaseDir, 'email');
+runtime/orchestrator-service/server.js:14336:  ensureDir(emailDir);
+runtime/orchestrator-service/server.js:14346:    emailDir,
+runtime/orchestrator-service/server.js:14374:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:14410:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:14426:  const payload = buildChannelExecutionPayload(projectName, campaignName, 'email');
+runtime/orchestrator-service/server.js:14429:  const packageId = `campemail_${Date.now()}`;
+runtime/orchestrator-service/server.js:14437:  const emailPackage = {
+runtime/orchestrator-service/server.js:14441:    channel: 'email',
+runtime/orchestrator-service/server.js:14448:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:14451:    artifactType: 'campaign_email_package',
+runtime/orchestrator-service/server.js:14454:    data: emailPackage
+runtime/orchestrator-service/server.js:14458:    ...emailPackage,
+runtime/orchestrator-service/server.js:14483:  const emailFile = resolveExecutionReadCandidate({
+runtime/orchestrator-service/server.js:14486:    relativePath: path.join('email', `${safeName}.json`),
+runtime/orchestrator-service/server.js:14489:    requestedFile: `campaign-finalization/email/${safeName}.json`
+runtime/orchestrator-service/server.js:14504:    has_email_package: fs.existsSync(emailFile),
+runtime/orchestrator-service/server.js:14505:    ready: mediaFiles.length > 0 || publishFiles.length > 0 || fs.existsSync(emailFile)
+runtime/orchestrator-service/server.js:14609:  const caption = String(channelAsset.caption || channelAsset.body || '').trim()
+runtime/orchestrator-service/server.js:14624:    caption,
+runtime/orchestrator-service/server.js:14628:        caption,
+runtime/orchestrator-service/server.js:14634:        message: caption,
+runtime/orchestrator-service/server.js:14640:        caption,
+runtime/orchestrator-service/server.js:14641:        hook_3s: String(channelAsset.hook_3s || '').trim(),
+runtime/orchestrator-service/server.js:14650:  const inlinePackage = input.email_package && typeof input.email_package === 'object'
+runtime/orchestrator-service/server.js:14651:    ? input.email_package
+runtime/orchestrator-service/server.js:14659:    const error = new Error('Missing email package. Provide email_package or campaign_name');
+runtime/orchestrator-service/server.js:14668:function buildEmailReadyPayload(emailPackage) {
+runtime/orchestrator-service/server.js:14669:  const primaryAsset = emailPackage.primary_asset && typeof emailPackage.primary_asset === 'object'
+runtime/orchestrator-service/server.js:14670:    ? emailPackage.primary_asset
+runtime/orchestrator-service/server.js:14681:  const campaignName = String(emailPackage.campaign_name || '').trim();
+runtime/orchestrator-service/server.js:14684:  const body = String(channelAsset.body || channelAsset.caption || '').trim();
+runtime/orchestrator-service/server.js:14718:    String(reel.hook || branding.hook || 'Start with a direct hook for the target audience.').trim(),
+runtime/orchestrator-service/server.js:14731:        direction: String(reel.hook || branding.hook || 'Open with audience pain or aspiration.').trim()
+runtime/orchestrator-service/server.js:14789:  const adCopy = String(input.ad_copy || offer.hook || branding.hook || `${headline}. ${cta}`).trim();
+runtime/orchestrator-service/server.js:14804:    ad_copy: adCopy,
+runtime/orchestrator-service/server.js:14838:      has_caption: Boolean(String(socialPayload?.caption || '').trim()),
+runtime/orchestrator-service/server.js:14844:async function executeEmailPackageRuntime({ project, emailPackage, emailPayload }) {
+runtime/orchestrator-service/server.js:14847:    execution_backend: 'canonical_email_runtime',
+runtime/orchestrator-service/server.js:14850:    campaign_name: String(emailPackage?.campaign_name || '').trim(),
+runtime/orchestrator-service/server.js:14853:      has_subject: Boolean(String(emailPayload?.subject || '').trim()),
+runtime/orchestrator-service/server.js:14854:      has_html_body: Boolean(String(emailPayload?.html_body || '').trim())
+runtime/orchestrator-service/server.js:14893:  const basePrompt = String(payload?.prompt || adPackage?.ad_copy || adPackage?.headline || '').trim();
+runtime/orchestrator-service/server.js:14922:    ad_copy: String(generated.channel_notes || adPackage.ad_copy || '').trim(),
+runtime/orchestrator-service/server.js:14987:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:15071:    if (job.channel === 'email') {
+runtime/orchestrator-service/server.js:15089:    if (job.channel === 'email') {
+runtime/orchestrator-service/server.js:15109:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:15263:    executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:15318:  executionArtifactWriter.writeJson({
+runtime/orchestrator-service/server.js:15627:    } else if (['tiktok', 'youtube', 'email'].includes(item)) {
+runtime/orchestrator-service/server.js:16125:        `http://localhost:${PORT}/apply-prepared-copy-to-clone/${originalId}/${cloneId}`
+runtime/orchestrator-service/server.js:16134:       if (command === '/content_plan') {
+runtime/orchestrator-service/server.js:16138:      const contentTasks = tasks.filter(
+runtime/orchestrator-service/server.js:16141:          ['content_plan', 'content', 'blog', 'email', 'ads'].includes(t.type)
+runtime/orchestrator-service/server.js:16148:          marketing_tasks: contentTasks
+runtime/orchestrator-service/server.js:16161:        caption: `Entdecke ${topic} mit ${commandBrandName}. Premium Positionierung für Kunden, die Wert auf Stil, Qualität und Wirkung legen.`,
+runtime/orchestrator-service/server.js:16170:        hook_type: 'brand + premium',
+runtime/orchestrator-service/server.js:16177:          `Short-form social video for ${topic}: start with a strong visual hook, show premium product or grooming moment, reinforce confidence and routine, finish with CTA Jetzt entdecken.`
+runtime/orchestrator-service/server.js:16286:   if (command === '/create_email') {
+runtime/orchestrator-service/server.js:16289:      const emailDraft = {
+runtime/orchestrator-service/server.js:16290:        id: `email_${Date.now()}`,
+runtime/orchestrator-service/server.js:16293:        format: 'campaign email',
+runtime/orchestrator-service/server.js:16303:      const { data: queue } = readLiveEmailQueue(commandProject, emailDraft.id);
+runtime/orchestrator-service/server.js:16304:      queue.push(emailDraft);
+runtime/orchestrator-service/server.js:16309:        result: emailDraft
+runtime/orchestrator-service/server.js:16370:    if (command === '/review_emails') {
+runtime/orchestrator-service/server.js:16371:      const { data: queue } = readLiveEmailQueue(commandProject, 'review-emails');
+runtime/orchestrator-service/server.js:16454:    if (command === '/approve_email') {
+runtime/orchestrator-service/server.js:16457:        return res.json({ error: 'Missing email draft id' });
+runtime/orchestrator-service/server.js:16496:      item.hooks = [
+runtime/orchestrator-service/server.js:16533:      item.caption =
+runtime/orchestrator-service/server.js:16535:      item.hooks = [
+runtime/orchestrator-service/server.js:16540:      item.content_style = 'short-form, premium, Germany-market focused';
+runtime/orchestrator-service/server.js:16541:      item.hook_type = 'premium + transformation';
+runtime/orchestrator-service/server.js:16548:        `Create a short-form reel for ${item.topic}: start with a hook in the first 2 seconds, show the grooming transformation or product moment, reinforce premium positioning, end with CTA Jetzt entdecken.`;
+runtime/orchestrator-service/server.js:16650:    if (command === '/improve_email') {
+runtime/orchestrator-service/server.js:16653:        return res.json({ error: 'Missing email draft id' });
+runtime/orchestrator-service/server.js:16664:      item.format = 'campaign email';
+runtime/orchestrator-service/server.js:16759:    if (command === '/execute_email') {
+runtime/orchestrator-service/server.js:16762:        return res.json({ error: 'Missing email draft id' });
+runtime/orchestrator-service/server.js:16891:      const plannedFilename = `${assetId}-${safeSlug}.png`;
+runtime/orchestrator-service/server.js:16892:      const plannedOutputPath = path.join(
+runtime/orchestrator-service/server.js:16895:        plannedFilename
+runtime/orchestrator-service/server.js:16910:        output_path: plannedOutputPath,
+runtime/orchestrator-service/server.js:16911:        filename: plannedFilename,
+runtime/orchestrator-service/server.js:17310:    if (command === '/review_email_asset') {
+runtime/orchestrator-service/server.js:17313:        return res.json({ error: 'Missing email draft id' });
+runtime/orchestrator-service/server.js:17335:          format: item.format || 'campaign email',
+runtime/orchestrator-service/server.js:17346:    if (command === '/generate_email_image') {
+runtime/orchestrator-service/server.js:17349:        return res.json({ error: 'Missing email draft id' });
+runtime/orchestrator-service/server.js:17352:      const { data: emailQueue } = readLiveEmailQueue(commandProject, draftId);
+runtime/orchestrator-service/server.js:17353:      const emailItem = emailQueue.find(x => x.id === draftId);
+runtime/orchestrator-service/server.js:17355:      if (!emailItem) {
+runtime/orchestrator-service/server.js:17361:      fs.mkdirSync(path.join(mediaDir, 'email'), { recursive: true });
+runtime/orchestrator-service/server.js:17365:      const assetId = `emailimg_${Date.now()}`;
+runtime/orchestrator-service/server.js:17366:      const safeSlug = String(emailItem.topic || 'email-image')
+runtime/orchestrator-service/server.js:17371:      const plannedFilename = `${assetId}-${safeSlug}.png`;
+runtime/orchestrator-service/server.js:17372:      const plannedOutputPath = path.join(
+runtime/orchestrator-service/server.js:17374:        'email',
+runtime/orchestrator-service/server.js:17375:        plannedFilename
+runtime/orchestrator-service/server.js:17379:        `Create a premium email hero image for ${emailItem.topic}, focused on luxury men’s grooming, strong masculine branding, refined product presentation, elegant dark premium styling, suitable for a high-conversion campaign email for the German market.`;
+runtime/orchestrator-service/server.js:17382:        `${emailItem.topic} – Premium Kampagne von ${commandBrandName}`;
+runtime/orchestrator-service/server.js:17386:        type: 'email_hero_image',
+runtime/orchestrator-service/server.js:17388:        linked_email_id: emailItem.id,
+runtime/orchestrator-service/server.js:17389:        email_subject: emailItem.subject || '',
+runtime/orchestrator-service/server.js:17390:        topic: emailItem.topic,
+runtime/orchestrator-service/server.js:17395:        style: 'premium masculine campaign email',
+runtime/orchestrator-service/server.js:17396:        output_path: plannedOutputPath,
+runtime/orchestrator-service/server.js:17397:        filename: plannedFilename,
+runtime/orchestrator-service/server.js:17411:    if (command === '/review_email_media') {
+runtime/orchestrator-service/server.js:17414:        return res.json({ error: 'Missing email draft id or asset id' });
+runtime/orchestrator-service/server.js:17423:          .filter(x => x.linked_email_id === ref)
+runtime/orchestrator-service/server.js:17439:    if (command === '/attach_email_image') {
+runtime/orchestrator-service/server.js:17442:    return res.json({ error: 'Missing email draft id' });
+runtime/orchestrator-service/server.js:17445:  const { data: emailQueue } = readLiveEmailQueue(commandProject, draftId);
+runtime/orchestrator-service/server.js:17446:  const emailItem = emailQueue.find(x => x.id === draftId);
+runtime/orchestrator-service/server.js:17448:  if (!emailItem) {
+runtime/orchestrator-service/server.js:17455:    .filter(x => x.linked_email_id === draftId && x.status === 'generated')
+runtime/orchestrator-service/server.js:17461:    return res.json({ error: 'No generated email image found' });
+runtime/orchestrator-service/server.js:17490:    emailItem.hero_image_asset_id = asset.asset_id;
+runtime/orchestrator-service/server.js:17491:    emailItem.hero_image_path = asset.output_path;
+runtime/orchestrator-service/server.js:17492:    emailItem.hero_image_url = publicImageUrl;
+runtime/orchestrator-service/server.js:17493:    emailItem.hero_image_alt = asset.alt_text;
+runtime/orchestrator-service/server.js:17494:    emailItem.hero_image_wp_media_id = mediaId;
+runtime/orchestrator-service/server.js:17497:    emailItem.html_body =
+runtime/orchestrator-service/server.js:17501:      `<h2 style="margin:0 0 12px 0;color:#111;">${emailItem.subject || ''}</h2>` +
+runtime/orchestrator-service/server.js:17502:      `<p style="margin:0 0 16px 0;color:#444;">${emailItem.preheader || ''}</p>` +
+runtime/orchestrator-service/server.js:17503:      `<p style="margin:0 0 24px 0;color:#222;line-height:1.6;">${emailItem.body || ''}</p>` +
+runtime/orchestrator-service/server.js:17504:      `<a href="${projectWebsiteUrl}" style="display:inline-block;padding:14px 24px;background:#111;color:#fff;text-decoration:none;border-radius:6px;">${emailItem.cta || 'Jetzt entdecken'}</a>` +
+runtime/orchestrator-service/server.js:17508:    writeLiveEmailQueue(commandProject, emailQueue);
+runtime/orchestrator-service/server.js:17513:        draft_id: emailItem.id,
+runtime/orchestrator-service/server.js:17514:        subject: emailItem.subject,
+runtime/orchestrator-service/server.js:17515:        hero_image_asset_id: emailItem.hero_image_asset_id,
+runtime/orchestrator-service/server.js:17516:        hero_image_url: emailItem.hero_image_url,
+runtime/orchestrator-service/server.js:17517:        hero_image_wp_media_id: emailItem.hero_image_wp_media_id,
+runtime/orchestrator-service/server.js:17519:        status: emailItem.status
+runtime/orchestrator-service/server.js:17524:      error: 'Attach email image failed',
+runtime/orchestrator-service/server.js:17530:    if (command === '/generate_email_image_real') {
+runtime/orchestrator-service/server.js:17534:        return res.json({ error: 'Missing email draft id or asset id' });
+runtime/orchestrator-service/server.js:17543:          .filter(x => x.linked_email_id === ref)
+runtime/orchestrator-service/server.js:17601:     if (command === '/send_email_draft') {
+runtime/orchestrator-service/server.js:17606:        return res.json({ error: 'Missing email draft id' });
+runtime/orchestrator-service/server.js:17610:        return res.json({ error: 'Missing recipient email' });
+runtime/orchestrator-service/server.js:17613:        const { data: emailQueue } = readLiveEmailQueue(commandProject, draftId);
+runtime/orchestrator-service/server.js:17614:      const emailItem = emailQueue.find(x => x.id === draftId);
+runtime/orchestrator-service/server.js:17616:      if (!emailItem) {
+runtime/orchestrator-service/server.js:17620:      if (!emailItem.html_body) {
+runtime/orchestrator-service/server.js:17629:            subject: emailItem.subject,
+runtime/orchestrator-service/server.js:17630:            preheader: emailItem.preheader || '',
+runtime/orchestrator-service/server.js:17631:            html_body: emailItem.html_body
+runtime/orchestrator-service/server.js:17641:        emailItem.status = 'sent';
+runtime/orchestrator-service/server.js:17642:        emailItem.sent_to = toEmail;
+runtime/orchestrator-service/server.js:17643:        emailItem.sent_at = new Date().toISOString();
+runtime/orchestrator-service/server.js:17644:        emailItem.send_result = response.data;
+runtime/orchestrator-service/server.js:17646:        writeLiveEmailQueue(commandProject, emailQueue);
+runtime/orchestrator-service/server.js:17651:            draft_id: emailItem.id,
+runtime/orchestrator-service/server.js:17652:            status: emailItem.status,
+runtime/orchestrator-service/server.js:17653:            sent_to: emailItem.sent_to,
+runtime/orchestrator-service/server.js:17654:            sent_at: emailItem.sent_at,
+runtime/orchestrator-service/server.js:17691:          'email',
+runtime/orchestrator-service/server.js:17697:        content_pillars: [
+runtime/orchestrator-service/server.js:17767:        content_pillars: profile.content_pillars || [],
+runtime/orchestrator-service/server.js:17774:        content_outputs: [
+runtime/orchestrator-service/server.js:17776:          'email',
+runtime/orchestrator-service/server.js:17784:          'email hero image',
+runtime/orchestrator-service/server.js:17796:          'test multiple hooks',
+runtime/orchestrator-service/server.js:17868:        planned_assets: {
+runtime/orchestrator-service/server.js:17870:          email: 1,
+runtime/orchestrator-service/server.js:17878:          'email follow-up',
+runtime/orchestrator-service/server.js:17963:    content_strategy: {
+runtime/orchestrator-service/server.js:17970:      hook_types: [
+runtime/orchestrator-service/server.js:17981:      email: "conversion + retention",
+runtime/orchestrator-service/server.js:18044:        caption: `Ein stärkerer Look beginnt mit der richtigen Routine. ${blog.topic} mit ${commandBrandName} steht für Premium Positionierung und klare Ergebnisse.`,
+runtime/orchestrator-service/server.js:18050:        caption: `Warum ist ${blog.topic} wichtig? Entdecke eine einfache und effektive Routine für einen starken Auftritt.`,
+runtime/orchestrator-service/server.js:18055:      hook: 'Dein Look ist kein Zufall',
+runtime/orchestrator-service/server.js:18072:if (command === '/reuse_email_to_social') {
+runtime/orchestrator-service/server.js:18073:  const emailId = args[0];
+runtime/orchestrator-service/server.js:18075:  if (!emailId) {
+runtime/orchestrator-service/server.js:18076:    return res.json({ error: 'Missing email ID' });
+runtime/orchestrator-service/server.js:18079:  const { candidate, data: emailQueue } = readLiveEmailQueue(commandProject, emailId);
+runtime/orchestrator-service/server.js:18085:  const email = emailQueue.find(e => e.id === emailId);
+runtime/orchestrator-service/server.js:18087:  if (!email) {
+runtime/orchestrator-service/server.js:18092:    source: emailId,
+runtime/orchestrator-service/server.js:18093:    type: 'email_to_social',
+runtime/orchestrator-service/server.js:18095:      caption: email.body,
+runtime/orchestrator-service/server.js:18096:      cta: email.cta
+runtime/orchestrator-service/server.js:18099:      headline: email.subject,
+runtime/orchestrator-service/server.js:18100:      primary_text: email.body,
+runtime/orchestrator-service/server.js:18101:      cta: email.cta
+runtime/orchestrator-service/server.js:18119:    hook: 'Stop doing this wrong',
+runtime/orchestrator-service/server.js:18159:          'content tone',
+runtime/orchestrator-service/server.js:18215:          'content opportunities',
+runtime/orchestrator-service/server.js:18347:          'recommended content angles',
+runtime/orchestrator-service/server.js:18391:    content_opportunities: [
+runtime/orchestrator-service/server.js:18392:      "routine-based content",
+runtime/orchestrator-service/server.js:18398:      tiktok: "fast hook + routine",
+runtime/orchestrator-service/server.js:18400:      email: "conversion"
+runtime/orchestrator-service/server.js:18583:          trend_opportunities: latestTrend?.live_data?.content_opportunities || [],
+runtime/orchestrator-service/server.js:18601:          'email',
+runtime/orchestrator-service/server.js:18607:        recommended_content_stack: [
+runtime/orchestrator-service/server.js:18609:          '1 conversion email',
+runtime/orchestrator-service/server.js:18624:          'publish landing/product/blog asset',
+runtime/orchestrator-service/server.js:18625:          'send launch email',
+runtime/orchestrator-service/server.js:18626:          'launch social content',
+runtime/orchestrator-service/server.js:18699:            instagram: 'visual storytelling + reels + hooks',
+runtime/orchestrator-service/server.js:18700:            facebook: 'retargeting + mixed audience content',
+runtime/orchestrator-service/server.js:18701:            email: 'conversion + retention',
+runtime/orchestrator-service/server.js:18734:          'launch one conversion email',
+runtime/orchestrator-service/server.js:18737:          'monitor CTR and strongest hook'
+runtime/orchestrator-service/server.js:18800:    email: {
+runtime/orchestrator-service/server.js:18809:        hook: brain.recommended_campaign_angles[0],
+runtime/orchestrator-service/server.js:18810:        caption: `Dein Look beginnt mit ${mainKeyword}.`,
+runtime/orchestrator-service/server.js:18815:        hook: brain.recommended_campaign_angles[1],
+runtime/orchestrator-service/server.js:18816:        caption: `Warum ${mainKeyword} wichtig ist.`,
+runtime/orchestrator-service/server.js:18830:      hook: 'Stop doing this wrong',
+runtime/orchestrator-service/server.js:18873:      const { data: emailQueue } = readLiveEmailQueue(commandProject, execId);
+runtime/orchestrator-service/server.js:18886:        email_id: null,
+runtime/orchestrator-service/server.js:18931:      if (campaignExec.email) {
+runtime/orchestrator-service/server.js:18932:        const emailDraft = {
+runtime/orchestrator-service/server.js:18933:          id: `email_${Date.now() + 1}`,
+runtime/orchestrator-service/server.js:18934:          topic: campaignExec.blog?.topic || campaignExec.email.subject || 'campaign email',
+runtime/orchestrator-service/server.js:18936:          format: 'campaign email',
+runtime/orchestrator-service/server.js:18939:          subject: campaignExec.email.subject,
+runtime/orchestrator-service/server.js:18941:          body: campaignExec.email.body,
+runtime/orchestrator-service/server.js:18942:          cta: campaignExec.email.cta || 'Jetzt entdecken',
+runtime/orchestrator-service/server.js:18946:        emailQueue.push(emailDraft);
+runtime/orchestrator-service/server.js:18947:        created.email_id = emailDraft.id;
+runtime/orchestrator-service/server.js:18958:            caption: post.caption || '',
+runtime/orchestrator-service/server.js:18965:            hook_type: post.hook || 'campaign angle',
+runtime/orchestrator-service/server.js:18970:            video_brief: `Create short-form visual content for ${campaignExec.blog?.topic || 'campaign'} on ${post.platform}.`,
+runtime/orchestrator-service/server.js:19010:          hook: campaignExec.reel.hook || '',
+runtime/orchestrator-service/server.js:19034:      writeLiveEmailQueue(commandProject, emailQueue);
+runtime/orchestrator-service/server.js:19144:    if (command === '/campaign_send_email') {
+runtime/orchestrator-service/server.js:19149:        return res.json({ error: 'Missing campaign execution ID or recipient email' });
+runtime/orchestrator-service/server.js:19164:      const emailId = campaignExec.autogen_created_assets?.email_id;
+runtime/orchestrator-service/server.js:19166:      if (!emailId) {
+runtime/orchestrator-service/server.js:19167:        return res.json({ error: 'No generated email asset linked to this campaign' });
+runtime/orchestrator-service/server.js:19175:            text: `/send_email_draft ${emailId} ${toEmail}`
+runtime/orchestrator-service/server.js:19180:        campaignExec.controlled_publish.email = {
+runtime/orchestrator-service/server.js:19182:          draft_id: emailId,
+runtime/orchestrator-service/server.js:19196:          result: campaignExec.controlled_publish.email
+runtime/orchestrator-service/server.js:19200:          error: 'Campaign email send failed',
+runtime/orchestrator-service/server.js:19234:            email: campaignExec.controlled_publish?.email?.status || 'not_sent'
+runtime/orchestrator-service/server.js:19885:if (command === '/generate_email_hero') {
+runtime/orchestrator-service/server.js:19894:    const result = buildGenerationJob(projectName, 'email_hero', goal);
+runtime/orchestrator-service/server.js:19901:      error: 'Failed to generate email hero job',
+runtime/orchestrator-service/server.js:20046:if (command === '/evaluate_email_readiness') {
+runtime/orchestrator-service/server.js:20061:      error: 'Failed to evaluate email readiness',
+runtime/orchestrator-service/server.js:20066:if (command === '/auto_prepare_email_asset') {
+runtime/orchestrator-service/server.js:20083:      error: 'Failed to auto prepare email asset',
+runtime/orchestrator-service/server.js:20088:if (command === '/review_email_prepare_package') {
+runtime/orchestrator-service/server.js:20103:      error: 'Failed to review email prepare package',
+runtime/orchestrator-service/server.js:20108:if (command === '/validate_email_prepare_package') {
+runtime/orchestrator-service/server.js:20129:      error: 'Failed to validate email prepare package',
+runtime/orchestrator-service/server.js:20134:if (command === '/evaluate_prepared_email_for_send') {
+runtime/orchestrator-service/server.js:20149:      error: 'Failed to evaluate prepared email for send',
+runtime/orchestrator-service/server.js:20154:if (command === '/send_prepared_email') {
+runtime/orchestrator-service/server.js:20159:    return res.json({ error: 'Missing project name or recipient email' });
+runtime/orchestrator-service/server.js:20170:      error: 'Failed to send prepared email',
+runtime/orchestrator-service/server.js:20175:if (command === '/review_email_delivery') {
+runtime/orchestrator-service/server.js:20187:      requestedIdentifier: 'latest-email-delivery',
+runtime/orchestrator-service/server.js:20188:      requestedFile: 'email/delivery/*.json'
+runtime/orchestrator-service/server.js:20197:      return res.json({ error: 'No email delivery records found' });
+runtime/orchestrator-service/server.js:20209:      error: 'Failed to review email delivery',
+runtime/orchestrator-service/server.js:21100:if (command === '/prepare_campaign_email') {
+runtime/orchestrator-service/server.js:21116:      error: 'Failed to prepare campaign email package',
+runtime/orchestrator-service/server.js:22166:        message: 'Blog draft has no body content'
+runtime/orchestrator-service/server.js:22191:        content: item.body,
+runtime/orchestrator-service/server.js:22318:const SCHEDULER_VALID_JOB_TYPES = Object.freeze(['publish', 'email', 'media', 'ads']);
+runtime/orchestrator-service/server.js:22397:    hook: String(
+runtime/orchestrator-service/server.js:22398:      payload.hook
+runtime/orchestrator-service/server.js:22399:      || payload.primary_hook
+runtime/orchestrator-service/server.js:22400:      || firstAsset.hook
+runtime/orchestrator-service/server.js:22425:    hook: String(input.hook || inferred.hook || '').trim() || null,
+runtime/orchestrator-service/server.js:22644:        'Missing package content. Provide package_payload object with the execution payload.'
+runtime/orchestrator-service/server.js:22940:      hook: req.body?.hook,
