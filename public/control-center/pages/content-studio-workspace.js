@@ -320,6 +320,7 @@ function upsertLocalLibraryAsset(projectName, asset) {
 }
 
 function nextVersionId(versions = []) {
+
   return `v${asArray(versions).length + 1}`;
 }
 
@@ -1860,6 +1861,27 @@ function bindPage({
     };
   });
 
+  Array.from(document.querySelectorAll("[data-content-specialist]")).forEach((button) => {
+    button.onclick = () => {
+      session.activeSpecialistId = button.getAttribute("data-content-specialist") || "";
+      rerender();
+    };
+  });
+
+  Array.from(document.querySelectorAll("[data-content-review]")).forEach((button) => {
+    button.onclick = () => {
+      session.activeReviewMode = button.getAttribute("data-content-review") || "output";
+      rerender();
+    };
+  });
+
+  Array.from(document.querySelectorAll("[data-content-timeline]")).forEach((button) => {
+    button.onclick = () => {
+      session.activeTimelineMode = button.getAttribute("data-content-timeline") || "drafts";
+      rerender();
+    };
+  });
+
   Array.from(document.querySelectorAll("[data-content-select]")).forEach((button) => {
     button.onclick = () => {
       const item = session.items.find((entry) => asString(entry.id) === asString(button.getAttribute("data-content-select")));
@@ -2346,6 +2368,737 @@ function bindPage({
   });
 }
 
+
+
+
+function contentOsSpecialists() {
+  return WRITING_AGENTS.map((agent, index) => ({
+    ...agent,
+    step: index + 1
+  }));
+}
+
+function contentOsActiveSpecialist(session) {
+  const list = contentOsSpecialists();
+  const requested = session.activeSpecialistId || list[0]?.id || "";
+  return list.find((agent) => agent.id === requested) || list[0] || {
+    id: "content-strategist",
+    title: "Content Strategist",
+    purpose: "Plan content direction.",
+    bestUse: "Use before drafting.",
+    suggestedPrompt: "Act as Content Strategist.",
+    step: 1
+  };
+}
+
+function contentOsActiveReviewMode(session) {
+  const allowed = ["readiness", "sources", "brand", "platform", "governance", "handoff"];
+  return allowed.includes(session.activeReviewMode) ? session.activeReviewMode : "readiness";
+}
+
+function contentOsActiveTimeline(session) {
+  const allowed = ["request", "brief", "draft", "review", "approved", "handoff", "learned"];
+  return allowed.includes(session.activeTimelineMode) ? session.activeTimelineMode : "request";
+}
+
+function contentOsDetectedType(session, selectedItem) {
+  const form = session.form || {};
+  const joined = [
+    form.mode,
+    form.objective,
+    form.brief,
+    form.title,
+    selectedItem?.type,
+    selectedItem?.title,
+    selectedItem?.draft
+  ].filter(Boolean).join(" ").toLowerCase();
+
+  if (/video|reel|short|storyboard|scene|shot|voiceover|voice over|kling|runway|sora/.test(joined)) {
+    return "Video Ad / Media Brief";
+  }
+
+  if (/image|photo|picture|visual|prompt|logo|product shot|frame/.test(joined)) {
+    return "Image Prompt / Visual Brief";
+  }
+
+  if (/profile|company profile|about us|company/.test(joined)) {
+    return "Company Profile";
+  }
+
+  if (/agreement|contract|terms|legal/.test(joined)) {
+    return "Agreement Draft";
+  }
+
+  if (/speech|talk|presentation|voice/.test(joined)) {
+    return "Speech / Voice Draft";
+  }
+
+  if (/email|newsletter/.test(joined)) {
+    return "Email Content";
+  }
+
+  if (/marketplace|amazon|ebay|shopify|woocommerce|listing/.test(joined)) {
+    return "Marketplace Listing";
+  }
+
+  if (/campaign|ad|ads|caption|social|post|instagram|tiktok|facebook|linkedin/.test(joined)) {
+    return "Campaign / Social Content";
+  }
+
+  if (/customer|reply|whatsapp|message|crm/.test(joined)) {
+    return "Customer Message";
+  }
+
+  if (/research|insight|competitor|trend|report|performance/.test(joined)) {
+    return "Research-to-Content";
+  }
+
+  return modeLabel(form.mode || "social-post");
+}
+
+function contentOsDestination(session, selectedItem) {
+  const detected = contentOsDetectedType(session, selectedItem);
+  const text = `${detected} ${session.form?.objective || ""} ${session.form?.brief || ""}`.toLowerCase();
+
+  if (/video|image|visual|scene|shot|voiceover|media/.test(text)) {
+    return "Media Studio";
+  }
+
+  if (/ad|ads|campaign|variant/.test(text)) {
+    return "Ads / Campaign";
+  }
+
+  if (/customer|crm|whatsapp|reply/.test(text)) {
+    return "CRM";
+  }
+
+  if (/post|caption|publish|instagram|tiktok|facebook|linkedin|youtube/.test(text)) {
+    return "Publishing";
+  }
+
+  if (/profile|library|approved/.test(text)) {
+    return "Library";
+  }
+
+  return "Final Content";
+}
+
+function contentOsWorkflowName(session, selectedItem) {
+  const detected = contentOsDetectedType(session, selectedItem);
+
+  if (/Video|Media/.test(detected)) return "Media Production Blueprint";
+  if (/Image/.test(detected)) return "Image Prompt Blueprint";
+  if (/Company Profile/.test(detected)) return "Company Profile Package";
+  if (/Agreement/.test(detected)) return "Agreement Draft Workflow";
+  if (/Speech|Voice/.test(detected)) return "Speech & Voice Workflow";
+  if (/Marketplace/.test(detected)) return "Marketplace Listing Workflow";
+  if (/Research/.test(detected)) return "Insight-to-Content Builder";
+  if (/Customer/.test(detected)) return "Customer Message Workflow";
+  return "Content Package Builder";
+}
+
+function contentOsIsMediaWorkflow(session, selectedItem) {
+  return /Media|Video|Image|Voice|Storyboard|Prompt/.test(contentOsDetectedType(session, selectedItem)) ||
+    /Media|Image|Video/.test(contentOsWorkflowName(session, selectedItem));
+}
+
+function contentOsReadiness(session, state, handoff, selectedItem) {
+  const form = session.form || {};
+  const sourceCount = asArray(state?.sharedContext?.sources).length +
+    asArray(handoff?.sources).length +
+    (handoff ? 1 : 0) +
+    (form.product ? 1 : 0) +
+    (form.campaign ? 1 : 0);
+
+  const hasBrief = Boolean(String(form.brief || "").trim());
+  const hasObjective = Boolean(String(form.objective || "").trim());
+  const hasProduct = Boolean(String(form.product || "").trim());
+  const hasChannel = Boolean(String(form.channel || "").trim());
+  const hasOutput = Boolean(selectedVersionEntry(session)?.output_content || selectedItem?.draft);
+  const isMedia = contentOsIsMediaWorkflow(session, selectedItem);
+
+  const items = [
+    ["Source ready", sourceCount > 0 || hasProduct || Boolean(handoff)],
+    ["Brief ready", hasBrief || hasObjective],
+    ["Audience / channel", hasChannel || Boolean(form.tone)],
+    ["Output created", hasOutput],
+    ["Brand / product lock", isMedia ? hasProduct : true],
+    ["Review ready", hasOutput && (hasBrief || hasObjective)]
+  ];
+
+  const ready = items.filter((item) => item[1]).length;
+  const score = Math.round((ready / items.length) * 100);
+
+  return {
+    items,
+    score,
+    level: score >= 80 ? "High" : score >= 50 ? "Medium" : "Low",
+    missing: items.filter((item) => !item[1]).map((item) => item[0])
+  };
+}
+
+
+function contentOsNextAction(session, state, handoff, selectedItem) {
+  const readiness = contentOsReadiness(session, state, handoff, selectedItem);
+  const missing = readiness.missing || [];
+  const destination = contentOsDestination(session, selectedItem);
+
+  if (missing.includes("Output created")) {
+    return "Generate the first output to unlock review, versions, and handoff.";
+  }
+
+  if (missing.includes("Review ready")) {
+    return "Run review, approve the version, then create the handoff packet.";
+  }
+
+  if (missing.includes("Brief ready")) {
+    return "Complete the brief or use Smart Tools to build it from the command.";
+  }
+
+  if (missing.includes("Brand / product lock")) {
+    return "Confirm product and logo lock before sending to Media Studio.";
+  }
+
+  if (destination === "Media Studio") {
+    return "Create a media production packet with prompts, scenes, voiceover, and locks.";
+  }
+
+  if (destination === "Publishing") {
+    return "Approve final copy, then send a publishing packet with caption, CTA, and hashtags.";
+  }
+
+  if (destination === "Ads / Campaign") {
+    return "Create ad-ready variants, hooks, CTA options, and claim-safe copy.";
+  }
+
+  return "Approve the output or improve it before sending to the next workspace.";
+}
+
+function contentOsPackageItems(session, selectedItem) {
+  const detected = contentOsDetectedType(session, selectedItem);
+
+  if (/Video|Media/.test(detected)) {
+    return [
+      "Concept",
+      "Hook",
+      "Script",
+      "Voiceover",
+      "Scene list",
+      "Shot list",
+      "Prompt per scene",
+      "Start / end frame",
+      "Sound direction",
+      "Media packet"
+    ];
+  }
+
+  if (/Image/.test(detected)) {
+    return [
+      "Image description",
+      "Product identity notes",
+      "Logo rule",
+      "Camera angle",
+      "Lighting",
+      "Background",
+      "Negative prompt",
+      "Visual packet"
+    ];
+  }
+
+  if (/Company Profile/.test(detected)) {
+    return [
+      "Executive summary",
+      "About us",
+      "Services",
+      "Mission / vision",
+      "Why choose us",
+      "Short version",
+      "Website version",
+      "PDF-ready version"
+    ];
+  }
+
+  if (/Research/.test(detected)) {
+    return [
+      "Insight summary",
+      "Content opportunities",
+      "Post ideas",
+      "Ad hooks",
+      "Video concepts",
+      "SEO angles",
+      "Media brief",
+      "Campaign suggestion"
+    ];
+  }
+
+  if (/Customer/.test(detected)) {
+    return [
+      "Short message",
+      "Formal version",
+      "Friendly version",
+      "WhatsApp version",
+      "Email version",
+      "Follow-up"
+    ];
+  }
+
+  return [
+    "Main draft",
+    "Improved version",
+    "Short version",
+    "Platform version",
+    "CTA",
+    "Variants"
+  ];
+}
+
+function renderContentOsAppBar(session, state, handoff, metrics, selectedItem, escapeHtml) {
+  const detected = contentOsDetectedType(session, selectedItem);
+  const destination = contentOsDestination(session, selectedItem);
+  const workflow = contentOsWorkflowName(session, selectedItem);
+  const readiness = contentOsReadiness(session, state, handoff, selectedItem);
+  const form = session.form || {};
+
+  return `
+    <header class="content-os-appbar">
+      <div class="content-os-appbrand">
+        <span>Content Studio</span>
+        <strong>AI Content Production Agency</strong>
+      </div>
+
+      <label class="content-os-commandline" for="contentObjectiveInput">
+        <span>Creative Command</span>
+        <input id="contentObjectiveInput" name="objective" form="contentComposerForm" class="content-os-input" type="text" value="${escapeHtml(form.objective || "")}" placeholder="Tell the AI team what you want to create, improve, adapt, script, prompt, or hand off...">
+      </label>
+
+      <div class="content-os-appmeta">
+        <span>${escapeHtml(detected)}</span>
+        <span>${escapeHtml(destination)}</span>
+        <span>${escapeHtml(readiness.level)} · ${escapeHtml(String(readiness.score))}%</span>
+      </div>
+
+      <button id="contentGenerateDraftBtn" class="content-os-action is-primary" type="button">Generate Draft</button>
+
+      <div class="content-os-live-line"><span class="content-os-live-dot"></span><strong>Live studio ready</strong><em>AI team is standing by for brief, draft, prompt, review, and handoff.</em></div><div class="content-os-contextline">
+        <span>Workflow: ${escapeHtml(workflow)}</span>
+        <span>Project: ${escapeHtml(form.project || "No project")}</span>
+        <span>Incoming: ${handoff ? escapeHtml(titleCase(handoff.sourcePage || "handover")) : "None"}</span>
+        <span>Status: ${escapeHtml(titleCase(selectedItem?.status || form.status || "draft"))}</span>
+      </div>
+    </header>
+  `;
+}
+
+function renderContentOsContextStrip(session, state, handoff, recommendation, escapeHtml) {
+  const form = session.form || {};
+  const items = [
+    ["AI Command", handoff?.sourcePage ? `Handover from ${titleCase(handoff.sourcePage)}` : "No handover"],
+    ["Campaign", form.campaign || "Not selected"],
+    ["Research", state?.sharedContext?.insight ? "Insight attached" : "No insight"],
+    ["Reports", "Can improve variants"],
+    ["Media", "Can return prompt fixes"],
+    ["CRM", "Can request replies"]
+  ];
+
+  return `
+    <section class="content-os-context-strip" aria-label="Incoming context">
+      <div class="content-os-guide-tower" aria-label="Content production guide"><span class="is-active">01 Request</span><span>02 Sources</span><span>03 Draft</span><span>04 Review</span><span>05 Handoff</span></div><div class="content-os-context-items">
+        ${items.map(([label, value]) => `
+          <span><em>${escapeHtml(label)}</em>${escapeHtml(value)}</span>
+        `).join("")}
+      </div>
+      <strong>${escapeHtml(recommendation?.action || "Build brief, attach sources, then generate output.")}</strong>
+    </section>
+  `;
+}
+
+function renderContentOsField(id, name, label, value, session, escapeHtml) {
+  return `
+    <label class="content-os-field" for="${escapeHtml(id)}">
+      <span>${escapeHtml(label)}</span>
+      <input id="${escapeHtml(id)}" name="${escapeHtml(name)}" class="content-os-input" type="text" value="${escapeHtml(value || "")}">
+      ${fieldError(session, name, escapeHtml)}
+    </label>
+  `;
+}
+
+function renderContentOsSourceRail(session, state, handoff, selectedItem, escapeHtml) {
+  const form = session.form || {};
+  const readiness = contentOsReadiness(session, state, handoff, selectedItem);
+  const sourceRows = [
+    ["Setup", firstText(state?.setup?.brand, state?.brand?.name, "Brand / product setup")],
+    ["Library", asArray(state?.sharedContext?.sources).length ? `${asArray(state?.sharedContext?.sources).length} linked sources` : "Select approved sources"],
+    ["Handover", handoff ? firstText(handoff.sourcePage, "Incoming context") : "No active handover"],
+    ["Research", state?.sharedContext?.insight ? "Insight attached" : "No insight"],
+    ["Upload", "PDF / image / voice / document"],
+    ["Rules", "Do / Don’t, locks, legal-safe wording"]
+  ];
+
+  return `
+    <aside class="content-os-source-rail" aria-label="Sources and brief">
+      <div class="content-os-rail-heading">
+        <span>Sources & Brief</span>
+        <strong>Source truth, locks, and brief</strong>
+      </div>
+
+      <form id="contentComposerForm" class="content-os-form">
+        ${renderContentOsField("contentProjectInput", "project", "Project", form.project, session, escapeHtml)}
+        ${renderContentOsField("contentCampaignInput", "campaign", "Campaign", form.campaign, session, escapeHtml)}
+        ${renderContentOsField("contentProductInput", "product", "Product / Subject", form.product, session, escapeHtml)}
+        ${renderContentOsField("contentChannelInput", "channel", "Platform", form.channel, session, escapeHtml)}
+        ${renderContentOsField("contentLanguageInput", "language", "Language", form.language, session, escapeHtml)}
+        ${renderContentOsField("contentToneInput", "tone", "Tone", form.tone, session, escapeHtml)}
+
+        <label class="content-os-writing is-brief" for="contentBriefInput">
+          <span>Brief</span>
+          <textarea id="contentBriefInput" name="brief" class="content-os-textarea" rows="9" placeholder="Goal, audience, sources, rules, platform, and desired output.">${escapeHtml(form.brief || "")}</textarea>
+          ${fieldError(session, "brief", escapeHtml)}
+        </label>
+
+        <label class="content-os-field content-os-title-field" for="contentTitleInput">
+          <span>Output title</span>
+          <input id="contentTitleInput" name="title" class="content-os-input" type="text" value="${escapeHtml(form.title || "")}">
+        </label>
+      </form>
+
+      <div class="content-os-source-stack">
+        <div class="content-os-mini-title">Source map</div>
+        ${sourceRows.map(([label, value]) => `
+          <div class="content-os-source-line">
+            <span>${escapeHtml(label)}</span>
+            <strong>${escapeHtml(value)}</strong>
+          </div>
+        `).join("")}
+      </div>
+
+      <div class="content-os-readiness-chip">
+        <span>Source confidence</span>
+        <strong>${escapeHtml(readiness.level)} · ${escapeHtml(String(readiness.score))}%</strong>
+      </div>
+    </aside>
+  `;
+}
+
+function renderContentOsModeTabs(session, selectedItem, escapeHtml) {
+  const tabs = ["Draft", "Prompt", "Script", "Scene", "Voiceover", "Packet"];
+  return `
+    <nav class="content-os-mode-tabs" aria-label="Output modes">
+      ${tabs.map((tab, index) => `
+        <button class="${index === 0 ? "is-active" : ""}" type="button">${escapeHtml(tab)}</button>
+      `).join("")}
+    </nav>
+  `;
+}
+
+function renderContentOsInlineToolbelt(session, selectedItem, escapeHtml) {
+  const active = contentOsActiveSpecialist(session);
+  const tools = [
+    ["Improve", "contentImproveBtn"],
+    ["Translate / Localize", "contentTranslateBtn"],
+    ["Save Draft", "contentSaveDraftBtn"],
+    ["Media Packet", "contentSendMediaBtn"],
+    ["Publishing Packet", "contentSendPublishingBtn"],
+    ["AI Context", "contentSendAiBtn"]
+  ];
+
+  return `
+    <div class="content-os-inline-tools" aria-label="Smart content tools">
+      <div class="content-os-tool-left">
+        ${tools.map(([label, id]) => `
+          <button id="${escapeHtml(id)}" class="content-os-action" type="button">${escapeHtml(label)}</button>
+        `).join("")}
+      </div>
+      <div class="content-os-tool-right">
+        <span>Assistant</span>
+        <strong>${escapeHtml(active.title)}</strong>
+      </div>
+    </div>
+  `;
+}
+
+function renderContentOsProductionCanvas(session, state, handoff, selectedItem, escapeHtml) {
+  const form = session.form || {};
+  const version = selectedVersionEntry(session);
+  const content = firstText(version?.output_content, selectedItem?.draft, "");
+  const detected = contentOsDetectedType(session, selectedItem);
+  const workflow = contentOsWorkflowName(session, selectedItem);
+  const destination = contentOsDestination(session, selectedItem);
+
+  return `
+    <main class="content-os-canvas-main" aria-label="Production canvas">
+      <div class="content-os-canvas-header">
+        <div>
+          <span>Production Desk</span>
+          <strong>${escapeHtml(workflow)}</strong>
+        </div>
+        ${renderContentOsModeTabs(session, selectedItem, escapeHtml)}
+      </div>
+
+      ${renderContentOsInlineToolbelt(session, selectedItem, escapeHtml)}
+
+      <section class="content-os-editor-surface content-os-live-surface" id="contentPreviewPanel">
+        <div class="content-os-editor-meta">
+          <span>${escapeHtml(detected)}</span>
+          <strong>${escapeHtml(firstText(form.title, selectedItem?.title, "Untitled output"))}</strong>
+          <em>Destination: ${escapeHtml(destination)}</em>
+        </div>
+
+        <div class="content-os-editor-actions"><button id="contentCanvasDraftCta" class="content-os-action is-ghost" type="button">Generate first draft</button><button id="contentCanvasBriefCta" class="content-os-action is-ghost" type="button">Build better brief</button><button id="contentCanvasPacketCta" class="content-os-action is-ghost" type="button">Prepare packet</button></div><div class="content-os-editor-body">
+          ${escapeHtml(content || "Ready to produce your first content package. Start with a draft, strengthen the brief, or prepare a production packet for the selected destination.")}
+        </div>
+      </section>
+
+      ${renderContentOsPackageLine(session, selectedItem, escapeHtml)}
+      ${renderContentOsMediaBlueprint(session, selectedItem, escapeHtml)}
+    </main>
+  `;
+}
+
+function renderContentOsPackageLine(session, selectedItem, escapeHtml) {
+  return `
+    <div class="content-os-package-line" aria-label="Expected package">
+      <span>Expected package</span>
+      ${contentOsPackageItems(session, selectedItem).map((item) => `
+        <strong>${escapeHtml(item)}</strong>
+      `).join("")}
+    </div>
+  `;
+}
+
+function renderContentOsMediaBlueprint(session, selectedItem, escapeHtml) {
+  if (!contentOsIsMediaWorkflow(session, selectedItem)) {
+    return "";
+  }
+
+  const rows = [
+    ["Product lock", "Same approved product shape, color, proportions, and details"],
+    ["Logo lock", "Exact approved logo, readable, not distorted"],
+    ["Location strategy", "Choose and keep one approved location style"],
+    ["Scene logic", "Hook → feature/demo → benefit → hero → CTA"],
+    ["Motion rules", "Define movement and what must stay fixed"],
+    ["Negative prompt", "No wrong logo, altered product, or random background"]
+  ];
+
+  return `
+    <section class="content-os-blueprint-line" aria-label="Media production blueprint">
+      <span>Media blueprint</span>
+      ${rows.map(([label, value]) => `
+        <div>
+          <strong>${escapeHtml(label)}</strong>
+          <em>${escapeHtml(value)}</em>
+        </div>
+      `).join("")}
+    </section>
+  `;
+}
+
+function renderContentOsInspector(session, state, handoff, recommendation, selectedItem, escapeHtml) {
+  const mode = contentOsActiveReviewMode(session);
+  const readiness = contentOsReadiness(session, state, handoff, selectedItem);
+  const destination = contentOsDestination(session, selectedItem);
+  const tabs = [
+    ["readiness", "Ready"],
+    ["sources", "Sources"],
+    ["brand", "Brand"],
+    ["platform", "Platform"],
+    ["governance", "Risk"],
+    ["handoff", "Handoff"]
+  ];
+
+  let body = `
+    <div class="content-os-inspector-body">
+      <div class="content-os-inspector-priority"><span>Priority</span><strong>Next action first</strong></div><div class="content-os-scoreline">
+        <span>${escapeHtml(readiness.level)}</span>
+        <strong>${escapeHtml(String(readiness.score))}%</strong>
+      </div>
+      <div class="content-os-next-action">
+        <span>Next action</span>
+        <strong>${escapeHtml(contentOsNextAction(session, state, handoff, selectedItem))}</strong>
+      </div>
+      ${readiness.items.map(([label, ready]) => `
+        <div class="content-os-inspector-row ${ready ? "is-ready" : "is-missing"}">
+          <span>${ready ? "Ready" : "Missing"}</span>
+          <strong>${escapeHtml(label)}</strong>
+        </div>
+      `).join("")}
+    </div>
+  `;
+
+  if (mode === "sources") {
+    body = `
+      <div class="content-os-inspector-body">
+        <p>Classify sources before final handoff: exact reference, style reference, research source, legal source, product source, brand source, or performance source.</p>
+        <button id="contentLoadHandoffBtn" class="content-os-action" type="button"${handoff ? "" : " disabled"}>Load Handoff</button>
+      </div>
+    `;
+  }
+
+  if (mode === "brand") {
+    body = `
+      <div class="content-os-inspector-body">
+        ${["Product identity", "Logo visibility", "Tone of voice", "Approved claims", "Do / Don’t rules"].map((item) => `
+          <div class="content-os-inspector-row is-missing"><span>Check</span><strong>${escapeHtml(item)}</strong></div>
+        `).join("")}
+      </div>
+    `;
+  }
+
+  if (mode === "platform") {
+    body = `
+      <div class="content-os-inspector-body">
+        ${["Platform length", "Hook style", "Caption style", "Hashtags / keywords", "CTA", "Aspect ratio if media"].map((item) => `
+          <div class="content-os-inspector-row is-missing"><span>Review</span><strong>${escapeHtml(item)}</strong></div>
+        `).join("")}
+      </div>
+    `;
+  }
+
+  if (mode === "governance") {
+    body = `
+      <div class="content-os-inspector-body">
+        ${["Risky claims", "Proof-required wording", "Legal-safe alternatives", "Privacy / GDPR", "Human approval"].map((item) => `
+          <div class="content-os-inspector-row is-missing"><span>Review</span><strong>${escapeHtml(item)}</strong></div>
+        `).join("")}
+      </div>
+    `;
+  }
+
+  if (mode === "handoff") {
+    body = `
+      <div class="content-os-inspector-body">
+        <p>${escapeHtml(recommendation?.why || "Create a validated packet before sending content to the next workspace.")}</p>
+        ${["Media Studio", "Publishing", "Ads", "CRM", "AI Command", "Library"].map((item) => `
+          <div class="content-os-inspector-row ${destination.includes(item.split(" ")[0]) ? "is-ready" : ""}">
+            <span>Destination</span><strong>${escapeHtml(item)}</strong>
+          </div>
+        `).join("")}
+      </div>
+    `;
+  }
+
+  return `
+    <aside class="content-os-inspector" aria-label="Review inspector">
+      <div class="content-os-inspector-head">
+        <span>Quality Inspector</span>
+        <strong>${escapeHtml(destination)}</strong>
+      </div>
+
+      <nav class="content-os-inspector-tabs" aria-label="Inspector tabs">
+        ${tabs.map(([id, label]) => `
+          <button class="${mode === id ? "is-active" : ""}" type="button" data-content-review="${escapeHtml(id)}">${escapeHtml(label)}</button>
+        `).join("")}
+      </nav>
+
+      ${body}
+    </aside>
+  `;
+}
+
+function renderContentOsAssistantDock(session, selectedItem, escapeHtml) {
+  const active = contentOsActiveSpecialist(session);
+  const toolGroups = [
+    ["Brief", "Build brief", "Ask questions", "Suggest structure"],
+    ["Write", "Generate", "Rewrite", "Improve"],
+    ["Prompt", "Image prompt", "Video prompt", "Negative prompt"],
+    ["Video", "Scene list", "Shot list", "Voiceover"],
+    ["Review", "Brand", "SEO", "Governance"]
+  ];
+
+  return `
+    <section class="content-os-assistant-dock" aria-label="Assistant and smart tools">
+      <div class="content-os-dock-head">
+        <span>AI Team Tools</span>
+        <strong>Active: ${escapeHtml(active.title)}</strong>
+      </div>
+
+      <div class="content-os-tool-dock">
+        ${toolGroups.map(([label, ...tools]) => `
+          <div>
+            <span>${escapeHtml(label)}</span>
+            ${tools.map((tool) => `<button type="button">${escapeHtml(tool)}</button>`).join("")}
+          </div>
+        `).join("")}
+      </div>
+
+      <div class="content-os-agent-strip">
+        ${contentOsSpecialists().map((agent) => `
+          <button class="${agent.id === active.id ? "is-active" : ""}" type="button" data-content-specialist="${escapeHtml(agent.id)}">
+            ${escapeHtml(agent.title)}
+          </button>
+        `).join("")}
+      </div>
+
+      <div class="content-os-agent-actions">
+        <button class="content-os-action" type="button" data-content-agent-use="${escapeHtml(active.id)}">Use Assistant</button>
+        <button class="content-os-action" type="button" data-content-agent-save="${escapeHtml(active.id)}">Save Prompt</button>
+        <button class="content-os-action" type="button" data-content-agent-ai="${escapeHtml(active.id)}">Send to AI</button>
+      </div>
+    </section>
+  `;
+}
+
+function renderContentOsTimeline(session, metrics, escapeHtml) {
+  const active = contentOsActiveTimeline(session);
+  const steps = [
+    ["request", "Request"],
+    ["brief", "Brief"],
+    ["draft", "Draft"],
+    ["review", "Review"],
+    ["approved", "Approved"],
+    ["handoff", "Handoff"],
+    ["learned", "Learned"]
+  ];
+  const versioning = ensureVersioning(session);
+  const currentVersion = selectedVersionEntry(session);
+
+  return `
+    <footer class="content-os-status-timeline" aria-label="Production timeline">
+      <nav>
+        ${steps.map(([id, label]) => `
+          <button class="${active === id ? "is-active" : ""}" type="button" data-content-timeline="${escapeHtml(id)}">${escapeHtml(label)}</button>
+        `).join("")}
+      </nav>
+
+      <div>
+        <span>Total drafts <strong>${escapeHtml(formatCount(metrics.total || 0))}</strong></span>
+        <span>Needs review <strong>${escapeHtml(formatCount(metrics.needsReview || 0))}</strong></span>
+        <span>Approved <strong>${escapeHtml(formatCount(metrics.approved || 0))}</strong></span>
+        <span>Current <strong>${escapeHtml(currentVersion?.id || "V1")}</strong></span>
+      </div>
+
+      <section>
+        ${asArray(versioning.versions).map((version) => `
+          <button class="${version.id === currentVersion?.id ? "is-active" : ""}" type="button" data-content-version="${escapeHtml(version.id)}">${escapeHtml(titleCase(version.id))}</button>
+        `).join("")}
+        <button type="button" data-content-version-action="compare-toggle">Compare</button>
+        <button type="button" data-content-version-action="approve">Approve</button>
+        <button type="button" data-content-version-action="reject">Reject</button>
+        <button type="button" data-content-version-action="regenerate">Regenerate</button>
+        <button type="button" data-content-version-action="save-draft">Save Version</button>
+        <button type="button" data-content-version-action="save-library">Save Library</button>
+      </section>
+    </footer>
+  `;
+}
+
+function renderContentOsShell({ session, state, handoff, metrics, recommendation, selectedItem, escapeHtml }) {
+  return `
+    <div class="content-os-shell content-os-shell-2e content-os-shell-2g" data-theme-version="v2">
+      ${renderContentOsAppBar(session, state, handoff, metrics, selectedItem, escapeHtml)}
+      ${renderContentOsContextStrip(session, state, handoff, recommendation, escapeHtml)}
+
+      <div class="content-os-editor-layout">
+        ${renderContentOsSourceRail(session, state, handoff, selectedItem, escapeHtml)}
+        ${renderContentOsProductionCanvas(session, state, handoff, selectedItem, escapeHtml)}
+        ${renderContentOsInspector(session, state, handoff, recommendation, selectedItem, escapeHtml)}
+      </div>
+
+      ${renderContentOsAssistantDock(session, selectedItem, escapeHtml)}
+      ${renderContentOsTimeline(session, metrics, escapeHtml)}
+    </div>
+  `;
+}
+
 export const contentStudioRoute = {
   id: "content-studio",
   disableStandardLayout: true,
@@ -2465,30 +3218,15 @@ export const contentStudioRoute = {
     // No direct publish/approve/send labels found in action rows; all routing is review/handoff-based.
 
     root.innerHTML = `
-      ${renderScopedStyles()}
-      <div class="content-smart-root">
-        ${renderOverview(metrics, escapeHtml)}
-        ${renderRecommendation(recommendation, selectedItem, escapeHtml)}
-        ${renderSourcePanel()}
-        ${renderSeoChecklistPanel()}
-        ${renderGovernancePanel()}
-        ${session.error ? `<div class="simple-banner">${escapeHtml(session.error)}</div>` : ""}
-        ${session.loading ? `<div class="empty-box">Loading content records, approvals, tasks, handoffs, and events...</div>` : ""}
-
-        <div class="content-smart-grid">
-          <div class="content-main">
-            ${renderComposer(session, state, inboundSummary, escapeHtml)}
-            ${renderQueue(session, escapeHtml)}
-            ${renderPreview(session, selectedItem, escapeHtml)}
-            ${renderVersioning(session, escapeHtml)}
-          </div>
-          <aside class="content-side">
-            ${renderInboundHandoff(inboundSummary, session, escapeHtml)}
-            ${renderAgents(escapeHtml)}
-            ${buildAssetGate(state, escapeHtml)}
-          </aside>
-        </div>
-      </div>
+      ${renderContentOsShell({
+        session,
+        state,
+        handoff: inboundSummary,
+        metrics,
+        recommendation,
+        selectedItem,
+        escapeHtml
+      })}
     `;
 
     bindPage({

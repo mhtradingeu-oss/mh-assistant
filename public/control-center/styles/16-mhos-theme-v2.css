@@ -1,0 +1,4961 @@
+/*
+ * MH-OS Theme V2 — Manual Canvas System
+ * Phase THEME-1S
+ *
+ * This is not a card system.
+ * This is a canvas / split workspace / live stage / inspector rail / dock system.
+ *
+ * Safety:
+ * - Opt-in only via [data-theme-version="v2"].
+ * - Does not affect old pages by default.
+ * - Does not redefine global .card, .btn, .page, .workspace.
+ * - Old CSS remains compatibility only.
+ */
+
+/* ==========================================================================
+   01. TOKENS
+   ========================================================================== */
+
+[data-theme-version="v2"] {
+  --v2-bg: #020712;
+  --v2-bg-2: #06111f;
+  --v2-ink: rgba(248, 250, 252, 0.97);
+  --v2-muted: rgba(203, 213, 225, 0.72);
+  --v2-faint: rgba(148, 163, 184, 0.52);
+
+  --v2-line: rgba(148, 163, 184, 0.14);
+  --v2-line-soft: rgba(148, 163, 184, 0.075);
+  --v2-line-hot: rgba(94, 234, 212, 0.48);
+
+  --v2-accent: #5eead4;
+  --v2-accent-2: #38bdf8;
+  --v2-warning: #fbbf24;
+  --v2-danger: #fb7185;
+  --v2-success: #34d399;
+
+  --v2-space-1: 6px;
+  --v2-space-2: 10px;
+  --v2-space-3: 16px;
+  --v2-space-4: 22px;
+  --v2-space-5: 30px;
+
+  color: var(--v2-ink);
+}
+
+/* ==========================================================================
+   02. ROOT PAGE
+   ========================================================================== */
+
+[data-theme-version="v2"].mh-v2,
+[data-theme-version="v2"] .mh-v2,
+[data-theme-version="v2"].mhos-v2-page,
+[data-theme-version="v2"] .mhos-v2-page {
+  display: grid;
+  gap: var(--v2-space-3);
+  min-width: 0;
+  color: var(--v2-ink);
+  background:
+    radial-gradient(circle at 12% 0%, rgba(20, 184, 166, 0.08), transparent 28%),
+    radial-gradient(circle at 88% 8%, rgba(56, 189, 248, 0.07), transparent 30%);
+}
+
+[data-theme-version="v2"] *,
+[data-theme-version="v2"] *::before,
+[data-theme-version="v2"] *::after {
+  box-sizing: border-box;
+}
+
+/* ==========================================================================
+   03. TYPE
+   ========================================================================== */
+
+[data-theme-version="v2"] .mh-v2-kicker,
+[data-theme-version="v2"] .mhos-v2-eyebrow {
+  color: var(--v2-accent);
+  font-size: 0.72rem;
+  font-weight: 850;
+  letter-spacing: 0.15em;
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+
+[data-theme-version="v2"] .mh-v2-title,
+[data-theme-version="v2"] .mhos-v2-title {
+  margin: 0;
+  color: var(--v2-ink);
+  font-size: clamp(2.8rem, 5.8vw, 6.2rem);
+  font-weight: 850;
+  line-height: 0.88;
+  letter-spacing: -0.08em;
+}
+
+[data-theme-version="v2"] .mh-v2-subtitle,
+[data-theme-version="v2"] .mhos-v2-subtitle {
+  max-width: 860px;
+  margin: 0;
+  color: var(--v2-muted);
+  font-size: 1rem;
+  line-height: 1.55;
+}
+
+[data-theme-version="v2"] .mh-v2-label {
+  color: var(--v2-faint);
+  font-size: 0.68rem;
+  font-weight: 850;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+[data-theme-version="v2"] .mh-v2-value {
+  color: var(--v2-ink);
+  font-size: 0.92rem;
+  font-weight: 750;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+/* ==========================================================================
+   04. COMMAND CANVAS
+   ========================================================================== */
+
+[data-theme-version="v2"] .mh-v2-command,
+[data-theme-version="v2"] .mhos-v2-command {
+  position: relative;
+  display: grid;
+  gap: var(--v2-space-4);
+  min-width: 0;
+  padding: 26px 0 24px 20px;
+  border: 0;
+  border-left: 3px solid var(--v2-accent);
+  background:
+    linear-gradient(90deg, rgba(20, 184, 166, 0.13), transparent 44%),
+    radial-gradient(circle at top right, rgba(56, 189, 248, 0.11), transparent 36%);
+  box-shadow: none;
+}
+
+[data-theme-version="v2"] .mh-v2-command-grid,
+[data-theme-version="v2"] .mhos-v2-command-grid {
+  display: grid;
+  gap: var(--v2-space-4);
+  align-items: start;
+  min-width: 0;
+}
+
+[data-theme-version="v2"] .mh-v2-command-copy,
+[data-theme-version="v2"] .mhos-v2-command-copy {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+
+/* ==========================================================================
+   05. STATUS MATRIX — GRID, NOT CARDS
+   ========================================================================== */
+
+[data-theme-version="v2"] .mh-v2-status,
+[data-theme-version="v2"] .mhos-v2-status-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0;
+  min-width: 0;
+  border-top: 1px solid var(--v2-line-soft);
+  border-left: 1px solid var(--v2-line-soft);
+}
+
+[data-theme-version="v2"] .mh-v2-status-cell,
+[data-theme-version="v2"] .mhos-v2-status-item {
+  min-width: 0;
+  padding: 11px 12px;
+  border-right: 1px solid var(--v2-line-soft);
+  border-bottom: 1px solid var(--v2-line-soft);
+  background: transparent;
+}
+
+[data-theme-version="v2"] .mh-v2-status-cell span,
+[data-theme-version="v2"] .mhos-v2-status-item span {
+  display: block;
+  color: var(--v2-faint);
+  font-size: 0.68rem;
+  font-weight: 850;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+[data-theme-version="v2"] .mh-v2-status-cell strong,
+[data-theme-version="v2"] .mhos-v2-status-item strong {
+  display: block;
+  margin-top: 4px;
+  color: var(--v2-ink);
+  font-size: 0.9rem;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+/* ==========================================================================
+   06. WORKSPACE CANVAS
+   ========================================================================== */
+
+[data-theme-version="v2"] .mh-v2-workspace,
+[data-theme-version="v2"] .mhos-v2-workbench {
+  display: grid;
+  min-width: 0;
+  gap: 0;
+  border: 1px solid var(--v2-line);
+  background:
+    linear-gradient(180deg, rgba(2, 7, 18, 0.96), rgba(3, 12, 24, 0.96));
+  box-shadow: none;
+  overflow: hidden;
+}
+
+[data-theme-version="v2"] .mh-v2-main,
+[data-theme-version="v2"] .mhos-v2-main-grid {
+  display: grid;
+  min-width: 0;
+  gap: 0;
+}
+
+[data-theme-version="v2"] .mh-v2-editor,
+[data-theme-version="v2"] .mhos-v2-lane {
+  display: grid;
+  align-content: start;
+  min-width: 0;
+  gap: var(--v2-space-3);
+  padding: 20px;
+  border: 0;
+  border-right: 1px solid var(--v2-line-soft);
+  background: transparent;
+  box-shadow: none;
+}
+
+[data-theme-version="v2"] .mh-v2-stage,
+[data-theme-version="v2"] .mhos-v2-stage {
+  display: grid;
+  align-content: start;
+  min-width: 0;
+  gap: var(--v2-space-3);
+  padding: 20px;
+  border: 0;
+  background:
+    radial-gradient(circle at top right, rgba(56, 189, 248, 0.075), transparent 38%),
+    rgba(255, 255, 255, 0.01);
+  box-shadow: none;
+}
+
+[data-theme-version="v2"] .mh-v2-inspector,
+[data-theme-version="v2"] .mhos-v2-inspector {
+  display: grid;
+  align-content: start;
+  min-width: 0;
+  gap: var(--v2-space-3);
+  padding: 16px;
+  border: 0;
+  border-left: 1px solid var(--v2-line-soft);
+  background: rgba(255, 255, 255, 0.012);
+  box-shadow: none;
+}
+
+[data-theme-version="v2"] .mh-v2-dock,
+[data-theme-version="v2"] .mhos-v2-dock {
+  display: grid;
+  min-width: 0;
+  gap: 0;
+  margin-top: var(--v2-space-3);
+  border: 1px solid var(--v2-line-soft);
+  background: rgba(2, 7, 18, 0.62);
+  box-shadow: none;
+}
+
+/* ==========================================================================
+   07. SECTIONS — DIVIDERS ONLY
+   ========================================================================== */
+
+[data-theme-version="v2"] .mh-v2-section,
+[data-theme-version="v2"] .mhos-v2-section {
+  display: grid;
+  gap: var(--v2-space-2);
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+[data-theme-version="v2"] .mh-v2-section + .mh-v2-section,
+[data-theme-version="v2"] .mhos-v2-section + .mhos-v2-section {
+  padding-top: var(--v2-space-3);
+  border-top: 1px solid var(--v2-line-soft);
+}
+
+[data-theme-version="v2"] .mh-v2-dock > .mh-v2-section,
+[data-theme-version="v2"] .mhos-v2-dock > .mhos-v2-section {
+  padding: 16px;
+  border-bottom: 1px solid var(--v2-line-soft);
+}
+
+[data-theme-version="v2"] .mh-v2-dock > .mh-v2-section:last-child,
+[data-theme-version="v2"] .mhos-v2-dock > .mhos-v2-section:last-child {
+  border-bottom: 0;
+}
+
+[data-theme-version="v2"] .mh-v2-section-head,
+[data-theme-version="v2"] .mhos-v2-section-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--v2-space-2);
+  min-width: 0;
+}
+
+[data-theme-version="v2"] .mh-v2-section-title,
+[data-theme-version="v2"] .mhos-v2-section-title {
+  margin: 0;
+  color: var(--v2-ink);
+  font-size: 1rem;
+  line-height: 1.22;
+}
+
+[data-theme-version="v2"] .mh-v2-section-copy,
+[data-theme-version="v2"] .mhos-v2-section-copy {
+  margin: 4px 0 0;
+  color: var(--v2-muted);
+  font-size: 0.86rem;
+  line-height: 1.45;
+}
+
+/* ==========================================================================
+   08. DIVIDER LISTS
+   ========================================================================== */
+
+[data-theme-version="v2"] .mh-v2-list,
+[data-theme-version="v2"] .mhos-v2-divider-list,
+[data-theme-version="v2"] .mhos-v2-routing-map,
+[data-theme-version="v2"] .mhos-v2-inspector-stack {
+  display: grid;
+  gap: 0;
+  min-width: 0;
+  border-top: 1px solid var(--v2-line-soft);
+}
+
+[data-theme-version="v2"] .mh-v2-row,
+[data-theme-version="v2"] .mhos-v2-row,
+[data-theme-version="v2"] .mhos-v2-routing-item,
+[data-theme-version="v2"] .mhos-v2-inspector-item {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  padding: 10px 0;
+  border: 0;
+  border-bottom: 1px solid var(--v2-line-soft);
+  background: transparent;
+  box-shadow: none;
+}
+
+[data-theme-version="v2"] .mh-v2-row span,
+[data-theme-version="v2"] .mhos-v2-row span,
+[data-theme-version="v2"] .mhos-v2-routing-item span,
+[data-theme-version="v2"] .mhos-v2-inspector-item span {
+  display: block;
+  color: var(--v2-faint);
+  font-size: 0.68rem;
+  font-weight: 850;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+[data-theme-version="v2"] .mh-v2-row strong,
+[data-theme-version="v2"] .mhos-v2-row strong,
+[data-theme-version="v2"] .mhos-v2-routing-item strong,
+[data-theme-version="v2"] .mhos-v2-inspector-item strong {
+  color: var(--v2-ink);
+  font-size: 0.9rem;
+  line-height: 1.28;
+}
+
+/* ==========================================================================
+   09. ACTIONS — BUTTONS, NOT CARDS
+   ========================================================================== */
+
+[data-theme-version="v2"] .mh-v2-actions,
+[data-theme-version="v2"] .mhos-v2-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+[data-theme-version="v2"] .mh-v2-action,
+[data-theme-version="v2"] .mhos-v2-action {
+  min-height: 34px;
+  padding: 8px 12px;
+  border: 1px solid var(--v2-line);
+  border-radius: 0;
+  background: transparent;
+  color: var(--v2-ink);
+  font: inherit;
+  font-size: 0.86rem;
+  font-weight: 820;
+  line-height: 1.1;
+  cursor: pointer;
+  box-shadow: none;
+}
+
+[data-theme-version="v2"] .mh-v2-action:hover,
+[data-theme-version="v2"] .mhos-v2-action:hover {
+  border-color: var(--v2-line-hot);
+  background: rgba(20, 184, 166, 0.09);
+}
+
+[data-theme-version="v2"] .mh-v2-action.is-primary,
+[data-theme-version="v2"] .mhos-v2-action.is-primary {
+  border-color: rgba(94, 234, 212, 0.58);
+  background: rgba(20, 184, 166, 0.19);
+  color: #ecfeff;
+}
+
+[data-theme-version="v2"] .mh-v2-action:focus-visible,
+[data-theme-version="v2"] .mhos-v2-action:focus-visible {
+  outline: 2px solid rgba(94, 234, 212, 0.82);
+  outline-offset: 2px;
+}
+
+/* ==========================================================================
+   10. REAL TABS
+   ========================================================================== */
+
+[data-theme-version="v2"] .mh-v2-tabs,
+[data-theme-version="v2"] .mhos-v2-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  align-items: center;
+  min-width: 0;
+  border-top: 1px solid var(--v2-line-soft);
+  border-left: 1px solid var(--v2-line-soft);
+}
+
+[data-theme-version="v2"] .mh-v2-tab,
+[data-theme-version="v2"] .mhos-v2-tab {
+  min-height: 36px;
+  padding: 8px 12px;
+  border: 0;
+  border-right: 1px solid var(--v2-line-soft);
+  border-bottom: 1px solid var(--v2-line-soft);
+  border-radius: 0;
+  background: transparent;
+  color: var(--v2-muted);
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 850;
+  cursor: pointer;
+  box-shadow: none;
+}
+
+[data-theme-version="v2"] .mh-v2-tab:hover,
+[data-theme-version="v2"] .mhos-v2-tab:hover {
+  color: var(--v2-ink);
+  background: rgba(255, 255, 255, 0.025);
+}
+
+[data-theme-version="v2"] .mh-v2-tab.is-active,
+[data-theme-version="v2"] .mh-v2-tab[aria-selected="true"],
+[data-theme-version="v2"] .mhos-v2-tab.is-active,
+[data-theme-version="v2"] .mhos-v2-tab[aria-selected="true"] {
+  color: var(--v2-ink);
+  background: rgba(20, 184, 166, 0.13);
+}
+
+[data-theme-version="v2"] .mh-v2-tab-panel[hidden],
+[data-theme-version="v2"] .mhos-v2-tab-panel[hidden] {
+  display: none !important;
+}
+
+/* ==========================================================================
+   11. PILLS
+   ========================================================================== */
+
+[data-theme-version="v2"] .mh-v2-pill,
+[data-theme-version="v2"] .mhos-v2-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 22px;
+  padding: 3px 8px;
+  border: 1px solid var(--v2-line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--v2-muted);
+  font-size: 0.68rem;
+  font-weight: 850;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+[data-theme-version="v2"] .mh-v2-pill.is-success,
+[data-theme-version="v2"] .mhos-v2-pill.is-success {
+  border-color: rgba(52, 211, 153, 0.38);
+  color: #bbf7d0;
+}
+
+[data-theme-version="v2"] .mh-v2-pill.is-warning,
+[data-theme-version="v2"] .mhos-v2-pill.is-warning {
+  border-color: rgba(251, 191, 36, 0.42);
+  color: #fde68a;
+}
+
+[data-theme-version="v2"] .mh-v2-pill.is-danger,
+[data-theme-version="v2"] .mhos-v2-pill.is-danger {
+  border-color: rgba(251, 113, 133, 0.42);
+  color: #fecdd3;
+}
+
+/* ==========================================================================
+   12. FORM NORMALIZATION INSIDE V2
+   ========================================================================== */
+
+[data-theme-version="v2"] input,
+[data-theme-version="v2"] textarea,
+[data-theme-version="v2"] select,
+[data-theme-version="v2"] .setup-input {
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+[data-theme-version="v2"] textarea {
+  resize: vertical;
+}
+
+/* ==========================================================================
+   13. OLD PRIMITIVE COMPATIBILITY GUARD
+   ========================================================================== */
+
+[data-theme-version="v2"] .card,
+[data-theme-version="v2"] .content-card,
+[data-theme-version="v2"] .card-head,
+[data-theme-version="v2"] .card-badge,
+[data-theme-version="v2"] .btn,
+[data-theme-version="v2"] .btn-primary,
+[data-theme-version="v2"] .btn-secondary {
+  box-shadow: none !important;
+}
+
+[data-theme-version="v2"] .card,
+[data-theme-version="v2"] .content-card {
+  border-radius: 0 !important;
+  background: transparent !important;
+}
+
+[data-theme-version="v2"] .card-head,
+[data-theme-version="v2"] .card-badge {
+  background: transparent !important;
+}
+
+[data-theme-version="v2"] .btn,
+[data-theme-version="v2"] .btn-primary,
+[data-theme-version="v2"] .btn-secondary {
+  border-radius: 0 !important;
+}
+
+/* ==========================================================================
+   14. RESPONSIVE
+   ========================================================================== */
+
+@media (min-width: 980px) {
+  [data-theme-version="v2"] .mh-v2-command-grid,
+  [data-theme-version="v2"] .mhos-v2-command-grid {
+    grid-template-columns: minmax(0, 1.1fr) minmax(360px, 0.9fr);
+  }
+
+  [data-theme-version="v2"] .mh-v2-workspace,
+  [data-theme-version="v2"] .mhos-v2-workbench {
+    grid-template-columns: minmax(0, 1fr) minmax(300px, 0.34fr);
+  }
+
+  [data-theme-version="v2"] .mh-v2-main,
+  [data-theme-version="v2"] .mhos-v2-main-grid {
+    grid-template-columns: minmax(390px, 0.96fr) minmax(420px, 1.04fr);
+  }
+}
+
+@media (max-width: 979px) {
+  [data-theme-version="v2"] .mh-v2-editor,
+  [data-theme-version="v2"] .mhos-v2-lane {
+    border-right: 0;
+    border-bottom: 1px solid var(--v2-line-soft);
+  }
+
+  [data-theme-version="v2"] .mh-v2-inspector,
+  [data-theme-version="v2"] .mhos-v2-inspector {
+    border-left: 0;
+    border-top: 1px solid var(--v2-line-soft);
+  }
+}
+
+@media (max-width: 760px) {
+  [data-theme-version="v2"] .mh-v2-title,
+  [data-theme-version="v2"] .mhos-v2-title {
+    font-size: clamp(2.1rem, 14vw, 3.6rem);
+  }
+
+  [data-theme-version="v2"] .mh-v2-status,
+  [data-theme-version="v2"] .mhos-v2-status-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ==========================================================================
+   THEME-2S.2 CONTENT STUDIO VISUAL HARDENING
+   Purpose: make the V2 shell feel like a workspace canvas, not old cards.
+   Scope: Content Studio V2 only.
+   ========================================================================== */
+
+[data-theme-version="v2"].content-studio-v2 {
+  gap: 14px;
+}
+
+[data-theme-version="v2"].content-studio-v2 .mh-v2-command {
+  min-height: 260px;
+  padding: 28px 0 24px 22px;
+  border-top: 0;
+  border-right: 0;
+  border-bottom: 0;
+}
+
+[data-theme-version="v2"].content-studio-v2 .mh-v2-title {
+  max-width: 820px;
+}
+
+[data-theme-version="v2"].content-studio-v2 .mh-v2-workspace {
+  border-left: 0;
+  border-right: 0;
+  border-bottom: 0;
+  background:
+    linear-gradient(90deg, rgba(2, 7, 18, 0.98), rgba(4, 13, 27, 0.94));
+}
+
+[data-theme-version="v2"].content-studio-v2 .mh-v2-editor,
+[data-theme-version="v2"].content-studio-v2 .mh-v2-stage,
+[data-theme-version="v2"].content-studio-v2 .mh-v2-inspector {
+  min-height: 560px;
+}
+
+[data-theme-version="v2"].content-studio-v2 .mh-v2-editor {
+  border-right: 1px solid var(--v2-line-soft);
+}
+
+[data-theme-version="v2"].content-studio-v2 .mh-v2-stage {
+  background:
+    radial-gradient(circle at 82% 0%, rgba(56, 189, 248, 0.06), transparent 42%),
+    transparent;
+}
+
+[data-theme-version="v2"].content-studio-v2 .mh-v2-inspector {
+  border-left: 1px solid var(--v2-line-soft);
+  background: rgba(2, 7, 18, 0.2);
+}
+
+[data-theme-version="v2"].content-studio-v2 .content-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0;
+  border-top: 1px solid var(--v2-line-soft);
+  border-left: 1px solid var(--v2-line-soft);
+}
+
+[data-theme-version="v2"].content-studio-v2 .content-preview-grid .setup-field-group {
+  padding: 10px 10px 9px;
+  border-right: 1px solid var(--v2-line-soft);
+  border-bottom: 1px solid var(--v2-line-soft);
+}
+
+[data-theme-version="v2"].content-studio-v2 .setup-field-group {
+  margin: 0;
+}
+
+[data-theme-version="v2"].content-studio-v2 .setup-field-head {
+  margin-bottom: 4px;
+}
+
+[data-theme-version="v2"].content-studio-v2 .setup-label {
+  color: var(--v2-faint);
+  font-size: 0.68rem;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+[data-theme-version="v2"].content-studio-v2 .setup-input,
+[data-theme-version="v2"].content-studio-v2 input.setup-input,
+[data-theme-version="v2"].content-studio-v2 textarea.setup-input {
+  width: 100%;
+  border: 0 !important;
+  border-radius: 0 !important;
+  border-bottom: 1px solid var(--v2-line-soft) !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: var(--v2-ink);
+  padding: 8px 0;
+}
+
+[data-theme-version="v2"].content-studio-v2 textarea.setup-input {
+  min-height: 150px;
+  border: 1px solid var(--v2-line-soft) !important;
+  padding: 12px;
+  background: rgba(2, 7, 18, 0.32) !important;
+}
+
+[data-theme-version="v2"].content-studio-v2 .mh-v2-tabs {
+  border-top: 1px solid var(--v2-line-soft);
+  border-left: 0;
+}
+
+[data-theme-version="v2"].content-studio-v2 .mh-v2-tab {
+  border-right: 0;
+  border-bottom: 1px solid transparent;
+  padding: 9px 12px;
+}
+
+[data-theme-version="v2"].content-studio-v2 .mh-v2-tab.is-active,
+[data-theme-version="v2"].content-studio-v2 .mh-v2-tab[aria-selected="true"] {
+  border-bottom-color: var(--v2-accent);
+  background: rgba(20, 184, 166, 0.11);
+}
+
+[data-theme-version="v2"].content-studio-v2 .mh-v2-action {
+  border-color: var(--v2-line-soft);
+  background: rgba(2, 7, 18, 0.18);
+}
+
+[data-theme-version="v2"].content-studio-v2 .mh-v2-action.is-primary {
+  border-color: rgba(94, 234, 212, 0.72);
+  background: rgba(20, 184, 166, 0.88);
+  color: #04111c;
+}
+
+[data-theme-version="v2"].content-studio-v2 .mh-v2-list {
+  border-top: 1px solid var(--v2-line-soft);
+}
+
+[data-theme-version="v2"].content-studio-v2 .mh-v2-row {
+  border-bottom: 1px solid var(--v2-line-soft);
+  background: transparent;
+}
+
+[data-theme-version="v2"].content-studio-v2 button.mh-v2-row {
+  width: 100%;
+  text-align: left;
+  color: inherit;
+  cursor: pointer;
+}
+
+[data-theme-version="v2"].content-studio-v2 button.mh-v2-row.is-active {
+  background: rgba(20, 184, 166, 0.09);
+}
+
+[data-theme-version="v2"].content-studio-v2 .mh-v2-dock {
+  border-left: 0;
+  border-right: 0;
+  border-bottom: 0;
+  background: rgba(2, 7, 18, 0.42);
+}
+
+[data-theme-version="v2"].content-studio-v2 .mh-v2-dock > .mh-v2-section {
+  padding: 18px 20px;
+}
+
+[data-theme-version="v2"].content-studio-v2 .simple-banner,
+[data-theme-version="v2"].content-studio-v2 .empty-box {
+  border-radius: 0 !important;
+  border: 1px solid var(--v2-line-soft) !important;
+  background: rgba(2, 7, 18, 0.38) !important;
+  box-shadow: none !important;
+}
+
+@media (max-width: 980px) {
+  [data-theme-version="v2"].content-studio-v2 .content-preview-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ==========================================================================
+   THEME-2S.CLEAN CONTENT STUDIO CLEAN ACTIVE PATH
+   Purpose: active Content Studio V2 must not visually depend on old page/card/form primitives.
+   ========================================================================== */
+
+[data-theme-version="v2"].content-studio-v2 {
+  gap: 14px;
+}
+
+[data-theme-version="v2"].content-studio-v2 .mh-v2-command {
+  min-height: 255px;
+  border-top: 0;
+  border-right: 0;
+  border-bottom: 0;
+}
+
+[data-theme-version="v2"].content-studio-v2 .mh-v2-workspace {
+  border-left: 0;
+  border-right: 0;
+  border-bottom: 0;
+  background:
+    linear-gradient(90deg, rgba(2, 7, 18, 0.98), rgba(3, 11, 24, 0.94));
+}
+
+[data-theme-version="v2"].content-studio-v2 .mh-v2-editor,
+[data-theme-version="v2"].content-studio-v2 .mh-v2-stage,
+[data-theme-version="v2"].content-studio-v2 .mh-v2-inspector {
+  min-height: 560px;
+}
+
+[data-theme-version="v2"].content-studio-v2 .mh-v2-field-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  border-top: 1px solid var(--v2-line-soft);
+  border-left: 1px solid var(--v2-line-soft);
+}
+
+[data-theme-version="v2"].content-studio-v2 .mh-v2-form {
+  display: grid;
+  gap: 14px;
+}
+
+[data-theme-version="v2"].content-studio-v2 .mh-v2-field {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  margin: 0;
+  color: var(--v2-ink);
+}
+
+[data-theme-version="v2"].content-studio-v2 .mh-v2-field-grid .mh-v2-field {
+  padding: 10px 10px 9px;
+  border-right: 1px solid var(--v2-line-soft);
+  border-bottom: 1px solid var(--v2-line-soft);
+}
+
+[data-theme-version="v2"].content-studio-v2 .mh-v2-field > span {
+  color: var(--v2-faint);
+  font-size: 0.68rem;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+[data-theme-version="v2"].content-studio-v2 .mh-v2-input,
+[data-theme-version="v2"].content-studio-v2 .mh-v2-textarea {
+  width: 100%;
+  border: 0;
+  border-radius: 0;
+  border-bottom: 1px solid var(--v2-line-soft);
+  background: transparent;
+  color: var(--v2-ink);
+  font: inherit;
+  font-weight: 760;
+  box-shadow: none;
+  outline: 0;
+}
+
+[data-theme-version="v2"].content-studio-v2 .mh-v2-input {
+  min-height: 32px;
+  padding: 6px 0;
+}
+
+[data-theme-version="v2"].content-studio-v2 .mh-v2-textarea {
+  min-height: 150px;
+  padding: 12px;
+  border: 1px solid var(--v2-line-soft);
+  background: rgba(2, 7, 18, 0.28);
+  resize: vertical;
+}
+
+[data-theme-version="v2"].content-studio-v2 .mh-v2-input:focus,
+[data-theme-version="v2"].content-studio-v2 .mh-v2-textarea:focus {
+  border-color: var(--v2-line-hot);
+}
+
+[data-theme-version="v2"].content-studio-v2 .mh-v2-tabs {
+  border-left: 0;
+  border-top: 1px solid var(--v2-line-soft);
+}
+
+[data-theme-version="v2"].content-studio-v2 .mh-v2-tab {
+  border-right: 0;
+  border-bottom: 1px solid transparent;
+}
+
+[data-theme-version="v2"].content-studio-v2 .mh-v2-tab.is-active,
+[data-theme-version="v2"].content-studio-v2 .mh-v2-tab[aria-selected="true"] {
+  border-bottom-color: var(--v2-accent);
+  background: rgba(20, 184, 166, 0.12);
+}
+
+[data-theme-version="v2"].content-studio-v2 .mh-v2-notice {
+  padding: 12px 14px;
+  border: 1px solid var(--v2-line-soft);
+  background: rgba(2, 7, 18, 0.34);
+  color: var(--v2-muted);
+}
+
+[data-theme-version="v2"].content-studio-v2 .mh-v2-notice.is-danger {
+  border-color: rgba(251, 113, 133, 0.42);
+  color: #fecdd3;
+}
+
+[data-theme-version="v2"].content-studio-v2 .content-studio-v2-dock-tabs {
+  padding: 0 20px;
+  border-bottom: 1px solid var(--v2-line-soft);
+  background: rgba(2, 7, 18, 0.46);
+}
+
+[data-theme-version="v2"].content-studio-v2 .content-studio-v2-dock-panel {
+  min-height: 220px;
+}
+
+[data-theme-version="v2"].content-studio-v2 button.mh-v2-row {
+  width: 100%;
+  text-align: left;
+  color: inherit;
+  cursor: pointer;
+}
+
+[data-theme-version="v2"].content-studio-v2 button.mh-v2-row.is-active {
+  background: rgba(20, 184, 166, 0.09);
+}
+
+@media (max-width: 980px) {
+  [data-theme-version="v2"].content-studio-v2 .mh-v2-field-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ==========================================================================
+   THEME-2S.WIDE CONTENT COMPOSER LAYOUT
+   Purpose: make Composer dominant and remove remaining panel/card feeling.
+   Scope: Content Studio V2 only.
+   ========================================================================== */
+
+[data-theme-version="v2"].content-studio-v2 {
+  gap: 10px;
+}
+
+/* Header stays canvas, not card */
+[data-theme-version="v2"].content-studio-v2 .mh-v2-command {
+  min-height: 250px;
+  padding: 28px 0 24px 22px;
+  border-top: 0;
+  border-right: 0;
+  border-bottom: 0;
+  background:
+    linear-gradient(90deg, rgba(20, 184, 166, 0.14), transparent 52%),
+    radial-gradient(circle at top right, rgba(56, 189, 248, 0.09), transparent 42%);
+}
+
+/* Remove panel frame from main workspace */
+[data-theme-version="v2"].content-studio-v2 .mh-v2-workspace {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  overflow: visible;
+}
+
+/* Make inspector a rail, not a box */
+[data-theme-version="v2"].content-studio-v2 .mh-v2-inspector {
+  border: 0;
+  border-left: 1px solid var(--v2-line-soft);
+  background: transparent;
+  padding-left: 18px;
+}
+
+/* Make editor and preview feel like one canvas split */
+[data-theme-version="v2"].content-studio-v2 .mh-v2-editor,
+[data-theme-version="v2"].content-studio-v2 .mh-v2-stage {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+[data-theme-version="v2"].content-studio-v2 .mh-v2-editor {
+  padding: 20px 20px 20px 0;
+  border-right: 1px solid var(--v2-line-soft);
+}
+
+[data-theme-version="v2"].content-studio-v2 .mh-v2-stage {
+  padding: 20px 20px;
+}
+
+/* Real wide layout: Composer dominates */
+@media (min-width: 1180px) {
+  [data-theme-version="v2"].content-studio-v2 .content-studio-v2-workbench {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 330px;
+    column-gap: 0;
+  }
+
+  [data-theme-version="v2"].content-studio-v2 .content-studio-v2-main-grid {
+    display: grid;
+    grid-template-columns: minmax(760px, 1.45fr) minmax(360px, 0.55fr);
+    column-gap: 0;
+  }
+}
+
+/* Kill field-box feeling */
+[data-theme-version="v2"].content-studio-v2 .mh-v2-field-grid {
+  border: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 18px;
+}
+
+[data-theme-version="v2"].content-studio-v2 .mh-v2-field-grid .mh-v2-field {
+  padding: 0;
+  border: 0;
+  border-bottom: 1px solid var(--v2-line-soft);
+}
+
+[data-theme-version="v2"].content-studio-v2 .mh-v2-field {
+  padding: 0;
+  border: 0;
+  border-bottom: 1px solid var(--v2-line-soft);
+}
+
+[data-theme-version="v2"].content-studio-v2 .mh-v2-input,
+[data-theme-version="v2"].content-studio-v2 .mh-v2-textarea {
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+[data-theme-version="v2"].content-studio-v2 .mh-v2-textarea {
+  min-height: 190px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--v2-line-soft) !important;
+}
+
+/* Tabs as control rail, not boxes */
+[data-theme-version="v2"].content-studio-v2 .mh-v2-tabs {
+  border: 0;
+  border-bottom: 1px solid var(--v2-line-soft);
+  gap: 4px;
+}
+
+[data-theme-version="v2"].content-studio-v2 .mh-v2-tab {
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+}
+
+[data-theme-version="v2"].content-studio-v2 .mh-v2-tab.is-active,
+[data-theme-version="v2"].content-studio-v2 .mh-v2-tab[aria-selected="true"] {
+  border-bottom-color: var(--v2-accent);
+  background: rgba(20, 184, 166, 0.12);
+}
+
+/* Rows as lines, not cards */
+[data-theme-version="v2"].content-studio-v2 .mh-v2-list {
+  border-top: 1px solid var(--v2-line-soft);
+}
+
+[data-theme-version="v2"].content-studio-v2 .mh-v2-row {
+  border: 0;
+  border-bottom: 1px solid var(--v2-line-soft);
+  background: transparent !important;
+}
+
+/* Buttons flat, not old button boxes */
+[data-theme-version="v2"].content-studio-v2 .mh-v2-action {
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+}
+
+[data-theme-version="v2"].content-studio-v2 .mh-v2-action.is-primary {
+  background: var(--v2-accent);
+  color: #021014;
+}
+
+/* Dock as horizontal workspace strip */
+[data-theme-version="v2"].content-studio-v2 .mh-v2-dock {
+  margin-top: 12px;
+  border: 0;
+  border-top: 1px solid var(--v2-line-soft);
+  background: transparent;
+  box-shadow: none;
+}
+
+[data-theme-version="v2"].content-studio-v2 .content-studio-v2-dock-tabs {
+  padding: 0;
+  border: 0;
+  border-bottom: 1px solid var(--v2-line-soft);
+  background: transparent;
+}
+
+[data-theme-version="v2"].content-studio-v2 .content-studio-v2-dock-panel {
+  padding-top: 14px;
+}
+
+/* Prevent old primitives from visually leaking inside V2 */
+[data-theme-version="v2"].content-studio-v2 .card,
+[data-theme-version="v2"].content-studio-v2 .content-card,
+[data-theme-version="v2"].content-studio-v2 .content-preview-grid,
+[data-theme-version="v2"].content-studio-v2 .setup-field-group,
+[data-theme-version="v2"].content-studio-v2 .simple-banner,
+[data-theme-version="v2"].content-studio-v2 .empty-box {
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Responsive fallback */
+@media (max-width: 1179px) {
+  [data-theme-version="v2"].content-studio-v2 .content-studio-v2-workbench,
+  [data-theme-version="v2"].content-studio-v2 .content-studio-v2-main-grid {
+    grid-template-columns: 1fr;
+  }
+
+  [data-theme-version="v2"].content-studio-v2 .mh-v2-editor,
+  [data-theme-version="v2"].content-studio-v2 .mh-v2-stage,
+  [data-theme-version="v2"].content-studio-v2 .mh-v2-inspector {
+    border: 0;
+    border-bottom: 1px solid var(--v2-line-soft);
+    padding-left: 0;
+    padding-right: 0;
+  }
+}
+
+/* ==========================================================================
+   THEME-2S.FINAL-LAYOUT CONTENT STUDIO WIDE COMPOSER
+   Purpose:
+   - Composer becomes the primary workspace.
+   - Preview and inspector become a right drawer.
+   - No active V2 dependency on legacy scoped page CSS.
+   - Reduce panel/card feeling by removing outer frames.
+   ========================================================================== */
+
+[data-theme-version="v2"].content-studio-v2-final-layout {
+  gap: 12px;
+}
+
+/* Command remains a canvas header, not a card. */
+[data-theme-version="v2"].content-studio-v2-final-layout .mh-v2-command {
+  min-height: 235px;
+  border-top: 0;
+  border-right: 0;
+  border-bottom: 0;
+  background:
+    linear-gradient(90deg, rgba(20, 184, 166, 0.14), transparent 56%),
+    radial-gradient(circle at top right, rgba(56, 189, 248, 0.09), transparent 44%);
+}
+
+/* New main production layout. */
+[data-theme-version="v2"].content-studio-v2-final-layout .content-studio-v2-production-canvas {
+  display: grid;
+  gap: 0;
+  min-width: 0;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+@media (min-width: 1180px) {
+  [data-theme-version="v2"].content-studio-v2-final-layout .content-studio-v2-production-canvas {
+    grid-template-columns: minmax(780px, 1fr) minmax(320px, 0.34fr);
+  }
+}
+
+/* Composer dominates the page. */
+[data-theme-version="v2"].content-studio-v2-final-layout .content-studio-v2-composer-canvas {
+  min-width: 0;
+  padding: 20px 28px 20px 0;
+  border-right: 1px solid var(--v2-line-soft);
+  background: transparent;
+}
+
+/* Right drawer is a rail, not a card column. */
+[data-theme-version="v2"].content-studio-v2-final-layout .content-studio-v2-right-drawer {
+  display: grid;
+  align-content: start;
+  gap: 22px;
+  min-width: 0;
+  padding: 20px 0 20px 22px;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+/* Kill old workbench frame if any remains. */
+[data-theme-version="v2"].content-studio-v2-final-layout .mh-v2-workspace,
+[data-theme-version="v2"].content-studio-v2-final-layout .mh-v2-workbench {
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* The composer, preview, inspector are zones, not cards. */
+[data-theme-version="v2"].content-studio-v2-final-layout .mh-v2-editor,
+[data-theme-version="v2"].content-studio-v2-final-layout .mh-v2-stage,
+[data-theme-version="v2"].content-studio-v2-final-layout .mh-v2-inspector {
+  min-height: auto;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+/* Right drawer sections get separators only. */
+[data-theme-version="v2"].content-studio-v2-final-layout .content-studio-v2-right-drawer .mh-v2-stage,
+[data-theme-version="v2"].content-studio-v2-final-layout .content-studio-v2-right-drawer .mh-v2-inspector {
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--v2-line-soft);
+}
+
+/* Form is lines, not boxes. */
+[data-theme-version="v2"].content-studio-v2-final-layout .mh-v2-form {
+  display: grid;
+  gap: 16px;
+  margin-top: 12px;
+}
+
+[data-theme-version="v2"].content-studio-v2-final-layout .mh-v2-field-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 26px;
+  border: 0;
+}
+
+[data-theme-version="v2"].content-studio-v2-final-layout .mh-v2-field {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  padding: 0 0 8px;
+  margin: 0;
+  border: 0;
+  border-bottom: 1px solid var(--v2-line-soft);
+  background: transparent;
+}
+
+[data-theme-version="v2"].content-studio-v2-final-layout .mh-v2-field-grid .mh-v2-field {
+  border-right: 0;
+  border-bottom: 1px solid var(--v2-line-soft);
+  padding: 0 0 8px;
+}
+
+[data-theme-version="v2"].content-studio-v2-final-layout .mh-v2-field > span {
+  color: var(--v2-faint);
+  font-size: 0.68rem;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+[data-theme-version="v2"].content-studio-v2-final-layout .mh-v2-input,
+[data-theme-version="v2"].content-studio-v2-final-layout .mh-v2-textarea {
+  width: 100%;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  outline: 0;
+  color: var(--v2-ink);
+  font: inherit;
+  font-weight: 760;
+}
+
+[data-theme-version="v2"].content-studio-v2-final-layout .mh-v2-input {
+  min-height: 32px;
+  padding: 5px 0;
+}
+
+[data-theme-version="v2"].content-studio-v2-final-layout .mh-v2-textarea {
+  min-height: 220px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--v2-line-soft) !important;
+  resize: vertical;
+}
+
+/* Tabs as rails, not pills/cards. */
+[data-theme-version="v2"].content-studio-v2-final-layout .mh-v2-tabs {
+  border: 0;
+  border-bottom: 1px solid var(--v2-line-soft);
+  gap: 6px;
+}
+
+[data-theme-version="v2"].content-studio-v2-final-layout .mh-v2-tab {
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  padding: 9px 10px;
+}
+
+[data-theme-version="v2"].content-studio-v2-final-layout .mh-v2-tab.is-active,
+[data-theme-version="v2"].content-studio-v2-final-layout .mh-v2-tab[aria-selected="true"] {
+  border-bottom-color: var(--v2-accent);
+  background: rgba(20, 184, 166, 0.11);
+}
+
+/* Lists are separators, not boxes. */
+[data-theme-version="v2"].content-studio-v2-final-layout .mh-v2-list {
+  border-top: 1px solid var(--v2-line-soft);
+}
+
+[data-theme-version="v2"].content-studio-v2-final-layout .mh-v2-row {
+  border: 0;
+  border-bottom: 1px solid var(--v2-line-soft);
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Actions are a command strip. */
+[data-theme-version="v2"].content-studio-v2-final-layout .mh-v2-actions {
+  padding-top: 4px;
+}
+
+[data-theme-version="v2"].content-studio-v2-final-layout .mh-v2-action {
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+}
+
+[data-theme-version="v2"].content-studio-v2-final-layout .mh-v2-action.is-primary {
+  background: var(--v2-accent);
+  color: #031014;
+}
+
+/* Dock is a bottom control area, not a card. */
+[data-theme-version="v2"].content-studio-v2-final-layout .mh-v2-dock {
+  margin-top: 12px;
+  border: 0;
+  border-top: 1px solid var(--v2-line-soft);
+  background: transparent;
+  box-shadow: none;
+}
+
+[data-theme-version="v2"].content-studio-v2-final-layout .content-studio-v2-dock-tabs {
+  padding: 0;
+  border: 0;
+  border-bottom: 1px solid var(--v2-line-soft);
+  background: transparent;
+}
+
+[data-theme-version="v2"].content-studio-v2-final-layout .content-studio-v2-dock-panel {
+  padding-top: 14px;
+  min-height: 180px;
+}
+
+/* Hard neutralize legacy primitives in case they appear inside V2. */
+[data-theme-version="v2"].content-studio-v2-final-layout .card,
+[data-theme-version="v2"].content-studio-v2-final-layout .content-card,
+[data-theme-version="v2"].content-studio-v2-final-layout .content-preview-grid,
+[data-theme-version="v2"].content-studio-v2-final-layout .setup-field-group,
+[data-theme-version="v2"].content-studio-v2-final-layout .simple-banner,
+[data-theme-version="v2"].content-studio-v2-final-layout .empty-box,
+[data-theme-version="v2"].content-studio-v2-final-layout .content-data-item,
+[data-theme-version="v2"].content-studio-v2-final-layout .content-agent-card {
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Responsive fallback. */
+@media (max-width: 1179px) {
+  [data-theme-version="v2"].content-studio-v2-final-layout .content-studio-v2-production-canvas {
+    grid-template-columns: 1fr;
+  }
+
+  [data-theme-version="v2"].content-studio-v2-final-layout .content-studio-v2-composer-canvas {
+    border-right: 0;
+    padding-right: 0;
+  }
+
+  [data-theme-version="v2"].content-studio-v2-final-layout .content-studio-v2-right-drawer {
+    padding-left: 0;
+    border-top: 1px solid var(--v2-line-soft);
+  }
+
+  [data-theme-version="v2"].content-studio-v2-final-layout .mh-v2-field-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ==========================================================================
+   THEME-2S.COMPOSER-FIRST CONTENT STUDIO UX
+   Purpose:
+   - Make Composer the first usable area.
+   - Move specialist needs into the right drawer.
+   - Compact the command header.
+   - Reduce visual mass before the writing form.
+   ========================================================================== */
+
+[data-theme-version="v2"].content-studio-v2-composer-first {
+  gap: 8px;
+}
+
+/* Compact command strip: no giant hero feeling. */
+[data-theme-version="v2"].content-studio-v2-composer-first .mh-v2-command {
+  min-height: 168px;
+  padding: 18px 0 18px 18px;
+  border-left-width: 2px;
+}
+
+[data-theme-version="v2"].content-studio-v2-composer-first .mh-v2-title {
+  max-width: 760px;
+  font-size: clamp(2.4rem, 4.8vw, 4.9rem);
+  line-height: 0.9;
+  letter-spacing: -0.075em;
+}
+
+[data-theme-version="v2"].content-studio-v2-composer-first .mh-v2-subtitle {
+  max-width: 760px;
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+/* Status grid becomes compact. */
+[data-theme-version="v2"].content-studio-v2-composer-first .mh-v2-status {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+[data-theme-version="v2"].content-studio-v2-composer-first .mh-v2-status-cell {
+  padding: 8px 10px;
+}
+
+[data-theme-version="v2"].content-studio-v2-composer-first .mh-v2-status-cell strong {
+  font-size: 0.84rem;
+}
+
+/* Composer gets more usable width. */
+@media (min-width: 1180px) {
+  [data-theme-version="v2"].content-studio-v2-composer-first .content-studio-v2-production-canvas {
+    grid-template-columns: minmax(860px, 1fr) minmax(280px, 0.28fr);
+  }
+}
+
+/* Less top friction inside composer. */
+[data-theme-version="v2"].content-studio-v2-composer-first .content-studio-v2-composer-canvas {
+  padding-top: 16px;
+}
+
+[data-theme-version="v2"].content-studio-v2-composer-first .content-studio-v2-composer-canvas .mh-v2-editor {
+  display: grid;
+  gap: 12px;
+}
+
+/* The composer should show tabs then form immediately. */
+[data-theme-version="v2"].content-studio-v2-composer-first .content-studio-v2-composer-canvas .content-studio-v2-specialist-needs {
+  display: none !important;
+}
+
+/* Right drawer owns specialist explanation and review context. */
+[data-theme-version="v2"].content-studio-v2-composer-first .content-studio-v2-right-drawer {
+  gap: 18px;
+  padding-left: 18px;
+}
+
+[data-theme-version="v2"].content-studio-v2-composer-first .content-studio-v2-right-drawer .content-studio-v2-specialist-needs {
+  display: grid;
+  padding: 0 0 16px;
+  border-top: 0;
+  border-bottom: 1px solid var(--v2-line-soft);
+}
+
+/* Reduce right drawer density. */
+[data-theme-version="v2"].content-studio-v2-composer-first .content-studio-v2-right-drawer .mh-v2-section-copy {
+  font-size: 0.8rem;
+}
+
+[data-theme-version="v2"].content-studio-v2-composer-first .content-studio-v2-right-drawer .mh-v2-row {
+  padding: 8px 0;
+}
+
+/* Form appears sooner and reads as writing surface. */
+[data-theme-version="v2"].content-studio-v2-composer-first .mh-v2-form {
+  margin-top: 4px;
+  gap: 13px;
+}
+
+[data-theme-version="v2"].content-studio-v2-composer-first .mh-v2-field-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px 24px;
+}
+
+[data-theme-version="v2"].content-studio-v2-composer-first .mh-v2-textarea {
+  min-height: 260px;
+  font-size: 0.98rem;
+  line-height: 1.55;
+}
+
+/* Keep action row visible and compact. */
+[data-theme-version="v2"].content-studio-v2-composer-first .mh-v2-actions {
+  gap: 7px;
+}
+
+[data-theme-version="v2"].content-studio-v2-composer-first .mh-v2-action {
+  min-height: 32px;
+  padding: 7px 10px;
+}
+
+/* Preview becomes a compact right-drawer summary, not a rival panel. */
+[data-theme-version="v2"].content-studio-v2-composer-first .content-studio-v2-preview-stage .mh-v2-row strong {
+  font-size: 0.84rem;
+}
+
+/* Bottom dock should not visually dominate first viewport. */
+[data-theme-version="v2"].content-studio-v2-composer-first .mh-v2-dock {
+  margin-top: 8px;
+}
+
+[data-theme-version="v2"].content-studio-v2-composer-first .content-studio-v2-dock-panel {
+  min-height: 140px;
+}
+
+/* Mobile/tablet fallback. */
+@media (max-width: 1179px) {
+  [data-theme-version="v2"].content-studio-v2-composer-first .mh-v2-command {
+    min-height: 0;
+  }
+
+  [data-theme-version="v2"].content-studio-v2-composer-first .mh-v2-field-grid {
+    grid-template-columns: 1fr;
+  }
+
+  [data-theme-version="v2"].content-studio-v2-composer-first .content-studio-v2-right-drawer {
+    padding-left: 0;
+  }
+}
+
+/* ==========================================================================
+   CONTENT-STUDIO-UX-RESET.2A CONTENT OS CLEAN LAYOUT
+   Scope: Content Studio only through .content-os-shell[data-theme-version="v2"]
+   ========================================================================== */
+
+.content-os-shell[data-theme-version="v2"] {
+  --os-bg: #020711;
+  --os-bg-soft: rgba(8, 16, 31, 0.72);
+  --os-line: rgba(148, 163, 184, 0.14);
+  --os-line-soft: rgba(148, 163, 184, 0.08);
+  --os-text: rgba(248, 250, 252, 0.96);
+  --os-muted: rgba(203, 213, 225, 0.68);
+  --os-faint: rgba(148, 163, 184, 0.52);
+  --os-accent: #5eead4;
+  --os-accent-2: #38bdf8;
+
+  display: grid;
+  gap: 0;
+  min-width: 0;
+  color: var(--os-text);
+  background:
+    radial-gradient(circle at 12% 0%, rgba(20, 184, 166, 0.08), transparent 30%),
+    radial-gradient(circle at 86% 8%, rgba(56, 189, 248, 0.08), transparent 32%),
+    var(--os-bg);
+}
+
+.content-os-shell[data-theme-version="v2"] * {
+  box-sizing: border-box;
+}
+
+.content-os-command {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.8fr) minmax(260px, 1.4fr) minmax(240px, 1fr);
+  gap: 18px;
+  align-items: center;
+  min-height: 76px;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--os-line);
+}
+
+.content-os-brand {
+  display: grid;
+  gap: 3px;
+}
+
+.content-os-brand span,
+.content-os-field span,
+.content-os-writing span,
+.content-os-data-line span,
+.content-os-timeline-row span {
+  color: var(--os-faint);
+  font-size: 0.68rem;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.content-os-brand strong {
+  color: var(--os-text);
+  font-size: 1.05rem;
+  letter-spacing: -0.03em;
+}
+
+.content-os-context {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.content-os-context span,
+.content-os-command-action em {
+  border: 1px solid var(--os-line-soft);
+  padding: 6px 8px;
+  color: var(--os-muted);
+  font-size: 0.78rem;
+  font-style: normal;
+}
+
+.content-os-command-action {
+  display: grid;
+  gap: 4px;
+  justify-items: end;
+  text-align: right;
+  min-width: 0;
+}
+
+.content-os-command-action span {
+  color: var(--os-muted);
+  font-size: 0.82rem;
+}
+
+.content-os-command-action strong {
+  color: var(--os-accent);
+  font-size: 0.88rem;
+}
+
+.content-os-workspace {
+  display: grid;
+  grid-template-columns: 210px minmax(460px, 1fr) 340px;
+  min-height: calc(100vh - 205px);
+  border-bottom: 1px solid var(--os-line);
+}
+
+.content-os-rail {
+  display: grid;
+  align-content: start;
+  gap: 0;
+  border-right: 1px solid var(--os-line);
+  background: rgba(2, 7, 17, 0.42);
+}
+
+.content-os-rail-title {
+  padding: 14px 14px 10px;
+  color: var(--os-faint);
+  font-size: 0.68rem;
+  font-weight: 850;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.content-os-rail-step {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  gap: 4px 8px;
+  width: 100%;
+  padding: 11px 14px;
+  border: 0;
+  border-top: 1px solid var(--os-line-soft);
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.content-os-rail-step span {
+  color: var(--os-faint);
+  font-size: 0.7rem;
+  font-weight: 850;
+}
+
+.content-os-rail-step strong {
+  color: var(--os-muted);
+  font-size: 0.84rem;
+  line-height: 1.1;
+}
+
+.content-os-rail-step small {
+  grid-column: 2;
+  color: var(--os-faint);
+  font-size: 0.72rem;
+  line-height: 1.28;
+}
+
+.content-os-rail-step.is-active {
+  background: linear-gradient(90deg, rgba(20, 184, 166, 0.16), transparent);
+  border-left: 3px solid var(--os-accent);
+}
+
+.content-os-rail-step.is-active strong {
+  color: var(--os-text);
+}
+
+.content-os-canvas {
+  display: grid;
+  align-content: start;
+  gap: 18px;
+  padding: 22px;
+  min-width: 0;
+}
+
+.content-os-canvas-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 0.4fr);
+  gap: 18px;
+  align-items: end;
+}
+
+.content-os-canvas-head span {
+  color: var(--os-accent);
+  font-size: 0.72rem;
+  font-weight: 850;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.content-os-canvas-head h2 {
+  margin: 3px 0 0;
+  color: var(--os-text);
+  font-size: clamp(2rem, 4vw, 4.4rem);
+  line-height: 0.92;
+  letter-spacing: -0.07em;
+}
+
+.content-os-canvas-head p {
+  margin: 0;
+  color: var(--os-muted);
+  line-height: 1.45;
+}
+
+.content-os-modebar,
+.content-os-actions,
+.content-os-review-tabs,
+.content-os-timeline-tabs,
+.content-os-version-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.content-os-mode,
+.content-os-action,
+.content-os-review-tabs button,
+.content-os-timeline-tabs button,
+.content-os-version-strip button {
+  min-height: 34px;
+  border: 1px solid var(--os-line-soft);
+  background: transparent;
+  color: var(--os-muted);
+  padding: 7px 10px;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 780;
+  cursor: pointer;
+}
+
+.content-os-mode.is-active,
+.content-os-review-tabs button.is-active,
+.content-os-timeline-tabs button.is-active,
+.content-os-version-strip button.is-active {
+  border-color: rgba(94, 234, 212, 0.6);
+  background: rgba(20, 184, 166, 0.12);
+  color: var(--os-text);
+}
+
+.content-os-action.is-primary {
+  border-color: rgba(94, 234, 212, 0.8);
+  background: rgba(20, 184, 166, 0.86);
+  color: #03111c;
+}
+
+.content-os-form {
+  display: grid;
+  gap: 16px;
+}
+
+.content-os-meta {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0;
+  border-top: 1px solid var(--os-line-soft);
+  border-left: 1px solid var(--os-line-soft);
+}
+
+.content-os-field {
+  display: grid;
+  gap: 5px;
+  padding: 10px;
+  border-right: 1px solid var(--os-line-soft);
+  border-bottom: 1px solid var(--os-line-soft);
+}
+
+.content-os-input,
+.content-os-textarea {
+  width: 100%;
+  border: 0;
+  border-bottom: 1px solid var(--os-line-soft);
+  background: transparent;
+  color: var(--os-text);
+  font: inherit;
+  outline: none;
+}
+
+.content-os-input {
+  min-height: 30px;
+  padding: 4px 0;
+}
+
+.content-os-writing {
+  display: grid;
+  gap: 8px;
+}
+
+.content-os-textarea {
+  min-height: 250px;
+  padding: 14px;
+  border: 1px solid var(--os-line-soft);
+  background: rgba(2, 7, 17, 0.38);
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.content-os-title-field {
+  border-left: 1px solid var(--os-line-soft);
+}
+
+.content-os-specialist-note,
+.content-os-notice {
+  display: grid;
+  gap: 4px;
+  padding: 12px 0;
+  border-top: 1px solid var(--os-line-soft);
+  color: var(--os-muted);
+}
+
+.content-os-specialist-note span {
+  color: var(--os-faint);
+  font-size: 0.68rem;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.content-os-specialist-note strong {
+  color: var(--os-text);
+  font-size: 0.86rem;
+  line-height: 1.4;
+}
+
+.content-os-review {
+  display: grid;
+  align-content: start;
+  gap: 14px;
+  padding: 16px;
+  border-left: 1px solid var(--os-line);
+  background: rgba(2, 7, 17, 0.28);
+  min-width: 0;
+}
+
+.content-os-output-sheet,
+.content-os-review-body {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+
+.content-os-output-sheet span {
+  color: var(--os-accent);
+  font-size: 0.7rem;
+  font-weight: 850;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.content-os-output-sheet h3,
+.content-os-review-body h3 {
+  margin: 0;
+  color: var(--os-text);
+  font-size: 1.25rem;
+}
+
+.content-os-output-sheet p,
+.content-os-review-body p {
+  margin: 0;
+  color: var(--os-muted);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  line-height: 1.5;
+}
+
+.content-os-output-sheet dl {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  border-top: 1px solid var(--os-line-soft);
+}
+
+.content-os-output-sheet dl div,
+.content-os-data-line,
+.content-os-timeline-row {
+  display: grid;
+  grid-template-columns: minmax(110px, 0.35fr) minmax(0, 1fr);
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--os-line-soft);
+}
+
+.content-os-output-sheet dt {
+  color: var(--os-faint);
+  font-size: 0.68rem;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.content-os-output-sheet dd,
+.content-os-data-line strong,
+.content-os-timeline-row strong {
+  margin: 0;
+  color: var(--os-text);
+  overflow-wrap: anywhere;
+}
+
+.content-os-timeline {
+  display: grid;
+  gap: 12px;
+  padding: 14px 20px 18px;
+  border-top: 1px solid var(--os-line-soft);
+  background: rgba(2, 7, 17, 0.5);
+}
+
+.content-os-timeline-row {
+  grid-template-columns: repeat(6, minmax(0, auto));
+  justify-content: start;
+  align-items: center;
+}
+
+.content-os-actions.is-compact {
+  margin-top: 8px;
+}
+
+@media (max-width: 1160px) {
+  .content-os-workspace {
+    grid-template-columns: 180px minmax(0, 1fr);
+  }
+
+  .content-os-review {
+    grid-column: 1 / -1;
+    border-left: 0;
+    border-top: 1px solid var(--os-line);
+  }
+}
+
+@media (max-width: 780px) {
+  .content-os-command,
+  .content-os-workspace,
+  .content-os-canvas-head,
+  .content-os-meta {
+    grid-template-columns: 1fr;
+  }
+
+  .content-os-rail {
+    border-right: 0;
+    border-bottom: 1px solid var(--os-line);
+  }
+}
+
+/* ==========================================================================
+   CONTENT-STUDIO-UX-RESET.2B INTERNATIONAL UI POLISH
+   Scope: .content-os-shell[data-theme-version="v2"]
+   Goal: production-tool feel, not dashboard/card feel.
+   ========================================================================== */
+
+.content-os-shell[data-theme-version="v2"] {
+  min-height: calc(100vh - 74px);
+  background:
+    radial-gradient(circle at 16% 0%, rgba(20, 184, 166, 0.075), transparent 26%),
+    radial-gradient(circle at 88% 0%, rgba(56, 189, 248, 0.075), transparent 28%),
+    linear-gradient(180deg, #020711 0%, #030a16 100%);
+}
+
+/* Top command strip: compact, product-tool style */
+.content-os-shell[data-theme-version="v2"] .content-os-command {
+  min-height: 64px;
+  padding: 10px 18px;
+  grid-template-columns: minmax(190px, 0.6fr) minmax(260px, 1.45fr) minmax(220px, 0.95fr);
+  background: rgba(2, 7, 17, 0.62);
+  backdrop-filter: blur(18px);
+}
+
+.content-os-shell[data-theme-version="v2"] .content-os-brand strong {
+  font-size: 0.98rem;
+}
+
+.content-os-shell[data-theme-version="v2"] .content-os-brand span {
+  font-size: 0.64rem;
+}
+
+.content-os-shell[data-theme-version="v2"] .content-os-context {
+  gap: 6px;
+  align-items: center;
+}
+
+.content-os-shell[data-theme-version="v2"] .content-os-context span,
+.content-os-shell[data-theme-version="v2"] .content-os-command-action em {
+  min-height: 28px;
+  padding: 5px 8px;
+  border-color: rgba(148, 163, 184, 0.09);
+  background: rgba(255, 255, 255, 0.018);
+}
+
+.content-os-shell[data-theme-version="v2"] .content-os-command-action {
+  gap: 2px;
+}
+
+.content-os-shell[data-theme-version="v2"] .content-os-command-action span {
+  font-size: 0.76rem;
+}
+
+.content-os-shell[data-theme-version="v2"] .content-os-command-action strong {
+  font-size: 0.82rem;
+}
+
+/* Workspace proportions */
+.content-os-shell[data-theme-version="v2"] .content-os-workspace {
+  grid-template-columns: 230px minmax(560px, 1fr) 360px;
+  min-height: calc(100vh - 188px);
+}
+
+/* Workflow rail: less card-like, more vertical process */
+.content-os-shell[data-theme-version="v2"] .content-os-rail {
+  background:
+    linear-gradient(180deg, rgba(2, 7, 17, 0.82), rgba(2, 7, 17, 0.58));
+}
+
+.content-os-shell[data-theme-version="v2"] .content-os-rail-title {
+  padding: 16px 14px 9px;
+}
+
+.content-os-shell[data-theme-version="v2"] .content-os-rail-step {
+  position: relative;
+  grid-template-columns: 26px minmax(0, 1fr);
+  padding: 10px 14px 10px 12px;
+  border-top-color: rgba(148, 163, 184, 0.055);
+}
+
+.content-os-shell[data-theme-version="v2"] .content-os-rail-step::before {
+  content: "";
+  position: absolute;
+  left: 24px;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: rgba(148, 163, 184, 0.08);
+}
+
+.content-os-shell[data-theme-version="v2"] .content-os-rail-step span {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  background: #020711;
+  color: rgba(203, 213, 225, 0.64);
+}
+
+.content-os-shell[data-theme-version="v2"] .content-os-rail-step strong {
+  font-size: 0.82rem;
+}
+
+.content-os-shell[data-theme-version="v2"] .content-os-rail-step small {
+  display: -webkit-box;
+  max-height: 2.55em;
+  overflow: hidden;
+  color: rgba(148, 163, 184, 0.58);
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.content-os-shell[data-theme-version="v2"] .content-os-rail-step.is-active {
+  border-left: 0;
+  background:
+    linear-gradient(90deg, rgba(20, 184, 166, 0.18), rgba(20, 184, 166, 0.02) 72%, transparent);
+}
+
+.content-os-shell[data-theme-version="v2"] .content-os-rail-step.is-active::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 8px;
+  bottom: 8px;
+  width: 3px;
+  background: var(--os-accent);
+}
+
+.content-os-shell[data-theme-version="v2"] .content-os-rail-step.is-active span {
+  border-color: rgba(94, 234, 212, 0.72);
+  background: rgba(20, 184, 166, 0.15);
+  color: #ccfbf1;
+}
+
+/* Main canvas: reduce huge headline, make it feel like editor */
+.content-os-shell[data-theme-version="v2"] .content-os-canvas {
+  gap: 14px;
+  padding: 20px 22px 18px;
+  background:
+    radial-gradient(circle at 82% 8%, rgba(56, 189, 248, 0.045), transparent 34%),
+    transparent;
+}
+
+.content-os-shell[data-theme-version="v2"] .content-os-canvas-head {
+  grid-template-columns: minmax(0, 0.95fr) minmax(220px, 0.45fr);
+  gap: 22px;
+  align-items: end;
+  padding-bottom: 4px;
+}
+
+.content-os-shell[data-theme-version="v2"] .content-os-canvas-head h2 {
+  max-width: 860px;
+  font-size: clamp(1.9rem, 3.25vw, 3.7rem);
+  line-height: 0.96;
+  letter-spacing: -0.062em;
+}
+
+.content-os-shell[data-theme-version="v2"] .content-os-canvas-head p {
+  max-width: 340px;
+  font-size: 0.88rem;
+}
+
+/* Mode bar: tool switch, not tab-card */
+.content-os-shell[data-theme-version="v2"] .content-os-modebar {
+  gap: 4px;
+  padding: 0 0 8px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+}
+
+.content-os-shell[data-theme-version="v2"] .content-os-mode,
+.content-os-shell[data-theme-version="v2"] .content-os-review-tabs button,
+.content-os-shell[data-theme-version="v2"] .content-os-timeline-tabs button,
+.content-os-shell[data-theme-version="v2"] .content-os-version-strip button {
+  min-height: 32px;
+  border-color: transparent;
+  background: transparent;
+  color: rgba(203, 213, 225, 0.68);
+}
+
+.content-os-shell[data-theme-version="v2"] .content-os-mode:hover,
+.content-os-shell[data-theme-version="v2"] .content-os-review-tabs button:hover,
+.content-os-shell[data-theme-version="v2"] .content-os-timeline-tabs button:hover,
+.content-os-shell[data-theme-version="v2"] .content-os-version-strip button:hover {
+  background: rgba(255, 255, 255, 0.028);
+  color: var(--os-text);
+}
+
+.content-os-shell[data-theme-version="v2"] .content-os-mode.is-active,
+.content-os-shell[data-theme-version="v2"] .content-os-review-tabs button.is-active,
+.content-os-shell[data-theme-version="v2"] .content-os-timeline-tabs button.is-active,
+.content-os-shell[data-theme-version="v2"] .content-os-version-strip button.is-active {
+  border-color: rgba(94, 234, 212, 0.44);
+  background: rgba(20, 184, 166, 0.14);
+}
+
+/* Meta fields: more like compact production metadata */
+.content-os-shell[data-theme-version="v2"] .content-os-form {
+  gap: 12px;
+}
+
+.content-os-shell[data-theme-version="v2"] .content-os-meta {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  border-left: 0;
+  border-top-color: rgba(148, 163, 184, 0.07);
+}
+
+.content-os-shell[data-theme-version="v2"] .content-os-field {
+  padding: 8px 10px 8px 0;
+  border-right: 0;
+  border-bottom-color: rgba(148, 163, 184, 0.07);
+}
+
+.content-os-shell[data-theme-version="v2"] .content-os-meta .content-os-field {
+  padding-right: 12px;
+}
+
+.content-os-shell[data-theme-version="v2"] .content-os-meta .content-os-field + .content-os-field {
+  padding-left: 12px;
+  border-left: 1px solid rgba(148, 163, 184, 0.055);
+}
+
+.content-os-shell[data-theme-version="v2"] .content-os-input {
+  min-height: 28px;
+  border-bottom-color: rgba(148, 163, 184, 0.09);
+}
+
+.content-os-shell[data-theme-version="v2"] .content-os-input:focus,
+.content-os-shell[data-theme-version="v2"] .content-os-textarea:focus {
+  border-color: rgba(94, 234, 212, 0.48);
+}
+
+/* Writing canvas: intentional editor surface */
+.content-os-shell[data-theme-version="v2"] .content-os-writing {
+  gap: 7px;
+}
+
+.content-os-shell[data-theme-version="v2"] .content-os-textarea {
+  min-height: 300px;
+  border-color: rgba(148, 163, 184, 0.09);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.014), rgba(255, 255, 255, 0.006)),
+    rgba(2, 7, 17, 0.28);
+  font-size: 0.95rem;
+}
+
+.content-os-shell[data-theme-version="v2"] .content-os-title-field {
+  padding: 8px 0;
+  border-left: 0;
+}
+
+/* Actions: compact pro toolbar */
+.content-os-shell[data-theme-version="v2"] .content-os-actions {
+  gap: 6px;
+  padding-top: 2px;
+}
+
+.content-os-shell[data-theme-version="v2"] .content-os-action {
+  min-height: 34px;
+  padding: 7px 11px;
+  border-color: rgba(148, 163, 184, 0.11);
+  background: rgba(255, 255, 255, 0.012);
+}
+
+.content-os-shell[data-theme-version="v2"] .content-os-action:hover {
+  border-color: rgba(94, 234, 212, 0.42);
+  background: rgba(20, 184, 166, 0.08);
+}
+
+.content-os-shell[data-theme-version="v2"] .content-os-action.is-primary {
+  border-color: rgba(94, 234, 212, 0.92);
+  background: linear-gradient(135deg, #5eead4, #22d3ee);
+  color: #02131d;
+}
+
+/* Specialist note: subtle */
+.content-os-shell[data-theme-version="v2"] .content-os-specialist-note,
+.content-os-shell[data-theme-version="v2"] .content-os-notice {
+  padding: 10px 0;
+  border-top-color: rgba(148, 163, 184, 0.08);
+}
+
+/* Right review rail: stronger output/readiness area */
+.content-os-shell[data-theme-version="v2"] .content-os-review {
+  padding: 16px 18px;
+  border-left-color: rgba(148, 163, 184, 0.12);
+  background:
+    radial-gradient(circle at 50% 0%, rgba(56, 189, 248, 0.055), transparent 32%),
+    rgba(2, 7, 17, 0.38);
+}
+
+.content-os-shell[data-theme-version="v2"] .content-os-review-tabs {
+  gap: 4px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.075);
+}
+
+.content-os-shell[data-theme-version="v2"] .content-os-output-sheet,
+.content-os-shell[data-theme-version="v2"] .content-os-review-body {
+  gap: 14px;
+}
+
+.content-os-shell[data-theme-version="v2"] .content-os-output-sheet h3,
+.content-os-shell[data-theme-version="v2"] .content-os-review-body h3 {
+  font-size: 1.18rem;
+  letter-spacing: -0.03em;
+}
+
+.content-os-shell[data-theme-version="v2"] .content-os-output-sheet p,
+.content-os-shell[data-theme-version="v2"] .content-os-review-body p {
+  min-height: 76px;
+  padding: 12px 0;
+  border-top: 1px solid rgba(148, 163, 184, 0.075);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.075);
+}
+
+.content-os-shell[data-theme-version="v2"] .content-os-output-sheet dl div,
+.content-os-shell[data-theme-version="v2"] .content-os-data-line {
+  padding: 9px 0;
+  border-bottom-color: rgba(148, 163, 184, 0.075);
+}
+
+/* Bottom timeline: production strip */
+.content-os-shell[data-theme-version="v2"] .content-os-timeline {
+  gap: 10px;
+  padding: 12px 18px 14px;
+  background:
+    linear-gradient(90deg, rgba(20, 184, 166, 0.035), transparent 34%),
+    rgba(2, 7, 17, 0.62);
+}
+
+.content-os-shell[data-theme-version="v2"] .content-os-timeline-tabs {
+  gap: 4px;
+}
+
+.content-os-shell[data-theme-version="v2"] .content-os-timeline-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 18px;
+  padding: 8px 0 0;
+  border-bottom: 0;
+}
+
+.content-os-shell[data-theme-version="v2"] .content-os-timeline-row span {
+  color: rgba(148, 163, 184, 0.62);
+}
+
+.content-os-shell[data-theme-version="v2"] .content-os-timeline-row strong {
+  color: var(--os-text);
+}
+
+/* Keep first viewport cleaner */
+.content-os-shell[data-theme-version="v2"] .content-os-review,
+.content-os-shell[data-theme-version="v2"] .content-os-rail,
+.content-os-shell[data-theme-version="v2"] .content-os-canvas {
+  min-height: calc(100vh - 190px);
+}
+
+@media (max-width: 1360px) {
+  .content-os-shell[data-theme-version="v2"] .content-os-workspace {
+    grid-template-columns: 210px minmax(460px, 1fr) 330px;
+  }
+
+  .content-os-shell[data-theme-version="v2"] .content-os-meta {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 1160px) {
+  .content-os-shell[data-theme-version="v2"] .content-os-workspace {
+    grid-template-columns: 190px minmax(0, 1fr);
+  }
+
+  .content-os-shell[data-theme-version="v2"] .content-os-review {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 780px) {
+  .content-os-shell[data-theme-version="v2"] .content-os-command,
+  .content-os-shell[data-theme-version="v2"] .content-os-workspace,
+  .content-os-shell[data-theme-version="v2"] .content-os-canvas-head,
+  .content-os-shell[data-theme-version="v2"] .content-os-meta {
+    grid-template-columns: 1fr;
+  }
+
+  .content-os-shell[data-theme-version="v2"] .content-os-canvas-head h2 {
+    font-size: clamp(1.9rem, 12vw, 3rem);
+  }
+}
+
+/* ==========================================================================
+   CONTENT-STUDIO-UX-RESET.2C CREATION-FIRST MEDIA-AWARE INSIGHT-AWARE
+   Scope: .content-os-shell-2c[data-theme-version="v2"]
+   ========================================================================== */
+
+.content-os-shell-2c[data-theme-version="v2"] {
+  --os-bg: #020711;
+  --os-surface: rgba(8, 16, 31, 0.58);
+  --os-surface-2: rgba(15, 23, 42, 0.46);
+  --os-line: rgba(148, 163, 184, 0.12);
+  --os-line-soft: rgba(148, 163, 184, 0.075);
+  --os-text: rgba(248, 250, 252, 0.96);
+  --os-muted: rgba(203, 213, 225, 0.72);
+  --os-faint: rgba(148, 163, 184, 0.56);
+  --os-accent: #5eead4;
+  --os-accent-2: #38bdf8;
+  --os-warning: #fbbf24;
+  --os-danger: #fb7185;
+
+  min-height: calc(100vh - 74px);
+  color: var(--os-text);
+  background:
+    radial-gradient(circle at 9% 0%, rgba(20, 184, 166, 0.09), transparent 28%),
+    radial-gradient(circle at 92% 4%, rgba(56, 189, 248, 0.08), transparent 30%),
+    linear-gradient(180deg, #020711 0%, #030a16 100%);
+}
+
+.content-os-shell-2c * {
+  box-sizing: border-box;
+}
+
+.content-os-shell-2c .content-os-topbar {
+  display: grid;
+  grid-template-columns: minmax(180px, 0.42fr) minmax(520px, 1fr) auto;
+  gap: 16px;
+  align-items: center;
+  min-height: 68px;
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--os-line);
+  background: rgba(2, 7, 17, 0.72);
+  backdrop-filter: blur(18px);
+}
+
+.content-os-shell-2c .content-os-topbar-main {
+  display: grid;
+  gap: 2px;
+}
+
+.content-os-shell-2c .content-os-topbar-main span,
+.content-os-shell-2c .content-os-start-copy span,
+.content-os-shell-2c .content-os-column-head span,
+.content-os-shell-2c .content-os-mini-title,
+.content-os-shell-2c .content-os-toolbelt-head span,
+.content-os-shell-2c .content-os-field span,
+.content-os-shell-2c .content-os-writing span,
+.content-os-shell-2c .content-os-command-input span,
+.content-os-shell-2c .content-os-source-row span,
+.content-os-shell-2c .content-os-check span,
+.content-os-shell-2c .content-os-blueprint-row span,
+.content-os-shell-2c .content-os-incoming-item span,
+.content-os-shell-2c .content-os-recommendation span {
+  color: var(--os-faint);
+  font-size: 0.67rem;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.content-os-shell-2c .content-os-topbar-main strong {
+  font-size: 1.02rem;
+  letter-spacing: -0.035em;
+}
+
+.content-os-shell-2c .content-os-status-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.content-os-shell-2c .content-os-status-strip span {
+  display: inline-grid;
+  gap: 1px;
+  min-height: 34px;
+  padding: 5px 8px;
+  border: 1px solid var(--os-line-soft);
+  background: rgba(255, 255, 255, 0.016);
+  color: var(--os-text);
+  font-size: 0.76rem;
+}
+
+.content-os-shell-2c .content-os-status-strip em {
+  color: var(--os-faint);
+  font-size: 0.58rem;
+  font-style: normal;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.content-os-shell-2c .content-os-start,
+.content-os-shell-2c .content-os-incoming,
+.content-os-shell-2c .content-os-toolbelt,
+.content-os-shell-2c .content-os-timeline {
+  margin: 0;
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--os-line);
+}
+
+.content-os-shell-2c .content-os-start {
+  display: grid;
+  grid-template-columns: minmax(300px, 0.58fr) minmax(420px, 1fr) minmax(280px, 0.55fr);
+  gap: 18px;
+  align-items: end;
+  background:
+    radial-gradient(circle at 16% 0%, rgba(94, 234, 212, 0.08), transparent 32%),
+    rgba(2, 7, 17, 0.32);
+}
+
+.content-os-shell-2c .content-os-start-copy h2 {
+  margin: 3px 0 8px;
+  max-width: 780px;
+  font-size: clamp(2rem, 4.6vw, 5rem);
+  line-height: 0.9;
+  letter-spacing: -0.075em;
+}
+
+.content-os-shell-2c .content-os-start-copy p {
+  margin: 0;
+  max-width: 640px;
+  color: var(--os-muted);
+  line-height: 1.5;
+}
+
+.content-os-shell-2c .content-os-start-input {
+  display: grid;
+  gap: 10px;
+}
+
+.content-os-shell-2c .content-os-command-input {
+  display: grid;
+  gap: 6px;
+}
+
+.content-os-shell-2c .content-os-start-buttons,
+.content-os-shell-2c .content-os-actions,
+.content-os-shell-2c .content-os-review-tabs,
+.content-os-shell-2c .content-os-output-modebar,
+.content-os-shell-2c .content-os-version-strip,
+.content-os-shell-2c .content-os-timeline-tabs,
+.content-os-shell-2c .content-os-agent-strip,
+.content-os-shell-2c .content-os-agent-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.content-os-shell-2c .content-os-action,
+.content-os-shell-2c .content-os-start-buttons button,
+.content-os-shell-2c .content-os-review-tabs button,
+.content-os-shell-2c .content-os-output-modebar button,
+.content-os-shell-2c .content-os-version-strip button,
+.content-os-shell-2c .content-os-timeline-tabs button,
+.content-os-shell-2c .content-os-agent-strip button,
+.content-os-shell-2c .content-os-tool-group button {
+  min-height: 32px;
+  border: 1px solid var(--os-line-soft);
+  background: rgba(255, 255, 255, 0.012);
+  color: var(--os-muted);
+  padding: 7px 10px;
+  font: inherit;
+  font-size: 0.76rem;
+  font-weight: 780;
+  cursor: pointer;
+}
+
+.content-os-shell-2c .content-os-action:hover,
+.content-os-shell-2c .content-os-start-buttons button:hover,
+.content-os-shell-2c .content-os-review-tabs button:hover,
+.content-os-shell-2c .content-os-output-modebar button:hover,
+.content-os-shell-2c .content-os-version-strip button:hover,
+.content-os-shell-2c .content-os-timeline-tabs button:hover,
+.content-os-shell-2c .content-os-agent-strip button:hover,
+.content-os-shell-2c .content-os-tool-group button:hover {
+  border-color: rgba(94, 234, 212, 0.42);
+  background: rgba(20, 184, 166, 0.08);
+  color: var(--os-text);
+}
+
+.content-os-shell-2c .content-os-action.is-primary,
+.content-os-shell-2c .content-os-output-modebar button.is-active,
+.content-os-shell-2c .content-os-review-tabs button.is-active,
+.content-os-shell-2c .content-os-version-strip button.is-active,
+.content-os-shell-2c .content-os-timeline-tabs button.is-active,
+.content-os-shell-2c .content-os-agent-strip button.is-active {
+  border-color: rgba(94, 234, 212, 0.72);
+  background: rgba(20, 184, 166, 0.14);
+  color: var(--os-text);
+}
+
+.content-os-shell-2c .content-os-action.is-primary {
+  background: linear-gradient(135deg, #5eead4, #22d3ee);
+  color: #02131d;
+}
+
+.content-os-shell-2c .content-os-detected {
+  display: grid;
+  gap: 8px;
+}
+
+.content-os-shell-2c .content-os-detected div,
+.content-os-shell-2c .content-os-source-row,
+.content-os-shell-2c .content-os-check,
+.content-os-shell-2c .content-os-blueprint-row,
+.content-os-shell-2c .content-os-incoming-item,
+.content-os-shell-2c .content-os-recommendation {
+  display: grid;
+  gap: 3px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--os-line-soft);
+}
+
+.content-os-shell-2c .content-os-detected span {
+  color: var(--os-faint);
+  font-size: 0.66rem;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.content-os-shell-2c .content-os-detected strong,
+.content-os-shell-2c .content-os-source-row strong,
+.content-os-shell-2c .content-os-check strong,
+.content-os-shell-2c .content-os-blueprint-row strong,
+.content-os-shell-2c .content-os-incoming-item strong,
+.content-os-shell-2c .content-os-recommendation strong {
+  color: var(--os-text);
+  font-size: 0.86rem;
+  line-height: 1.3;
+}
+
+.content-os-shell-2c .content-os-incoming {
+  display: grid;
+  gap: 12px;
+  background: rgba(8, 16, 31, 0.22);
+}
+
+.content-os-shell-2c .content-os-incoming-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.content-os-shell-2c .content-os-production-board {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.72fr) minmax(520px, 1fr) minmax(300px, 0.66fr);
+  min-height: calc(100vh - 420px);
+  border-bottom: 1px solid var(--os-line);
+}
+
+.content-os-shell-2c .content-os-brief,
+.content-os-shell-2c .content-os-output-workspace,
+.content-os-shell-2c .content-os-review-delivery {
+  min-width: 0;
+  padding: 18px;
+}
+
+.content-os-shell-2c .content-os-brief,
+.content-os-shell-2c .content-os-output-workspace {
+  border-right: 1px solid var(--os-line);
+}
+
+.content-os-shell-2c .content-os-column-head {
+  display: grid;
+  gap: 3px;
+  margin-bottom: 14px;
+}
+
+.content-os-shell-2c .content-os-column-head strong {
+  color: var(--os-text);
+  font-size: 1rem;
+  letter-spacing: -0.035em;
+}
+
+.content-os-shell-2c .content-os-form {
+  display: grid;
+  gap: 10px;
+}
+
+.content-os-shell-2c .content-os-field,
+.content-os-shell-2c .content-os-writing {
+  display: grid;
+  gap: 5px;
+}
+
+.content-os-shell-2c .content-os-input,
+.content-os-shell-2c .content-os-textarea {
+  width: 100%;
+  border: 0;
+  border-bottom: 1px solid var(--os-line-soft);
+  background: transparent;
+  color: var(--os-text);
+  font: inherit;
+  outline: none;
+}
+
+.content-os-shell-2c .content-os-input {
+  min-height: 30px;
+  padding: 4px 0;
+}
+
+.content-os-shell-2c .content-os-textarea {
+  min-height: 165px;
+  padding: 12px;
+  border: 1px solid var(--os-line-soft);
+  background: rgba(255, 255, 255, 0.012);
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.content-os-shell-2c .content-os-input:focus,
+.content-os-shell-2c .content-os-textarea:focus {
+  border-color: rgba(94, 234, 212, 0.5);
+}
+
+.content-os-shell-2c .content-os-source-map,
+.content-os-shell-2c .content-os-readiness-mini,
+.content-os-shell-2c .content-os-package-preview,
+.content-os-shell-2c .content-os-blueprint,
+.content-os-shell-2c .content-os-review-body {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--os-line-soft);
+}
+
+.content-os-shell-2c .content-os-readiness-mini {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--os-muted);
+}
+
+.content-os-shell-2c .content-os-readiness-mini span {
+  color: var(--os-faint);
+  font-size: 0.72rem;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.content-os-shell-2c .content-os-output-workspace {
+  display: grid;
+  align-content: start;
+  gap: 14px;
+  background:
+    radial-gradient(circle at 70% 0%, rgba(56, 189, 248, 0.04), transparent 36%),
+    rgba(2, 7, 17, 0.18);
+}
+
+.content-os-shell-2c .content-os-output-sheet {
+  display: grid;
+  gap: 12px;
+  min-height: 280px;
+  padding: 16px;
+  border: 1px solid var(--os-line-soft);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.018), rgba(255, 255, 255, 0.006)),
+    rgba(2, 7, 17, 0.32);
+}
+
+.content-os-shell-2c .content-os-output-meta {
+  display: grid;
+  gap: 4px;
+}
+
+.content-os-shell-2c .content-os-output-meta span {
+  color: var(--os-accent);
+  font-size: 0.68rem;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.content-os-shell-2c .content-os-output-meta strong {
+  color: var(--os-text);
+  font-size: 1.2rem;
+  letter-spacing: -0.035em;
+}
+
+.content-os-shell-2c .content-os-output-meta em {
+  color: var(--os-faint);
+  font-size: 0.78rem;
+  font-style: normal;
+}
+
+.content-os-shell-2c .content-os-output-sheet p {
+  margin: 0;
+  color: var(--os-muted);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  line-height: 1.55;
+}
+
+.content-os-shell-2c .content-os-package-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.content-os-shell-2c .content-os-package-grid span {
+  border: 1px solid var(--os-line-soft);
+  padding: 6px 8px;
+  color: var(--os-muted);
+  font-size: 0.74rem;
+}
+
+.content-os-shell-2c .content-os-blueprint {
+  display: grid;
+  gap: 0;
+}
+
+.content-os-shell-2c .content-os-review-delivery {
+  background:
+    radial-gradient(circle at 50% 0%, rgba(20, 184, 166, 0.05), transparent 34%),
+    rgba(2, 7, 17, 0.28);
+}
+
+.content-os-shell-2c .content-os-review-body h3 {
+  margin: 0 0 10px;
+  font-size: 1.12rem;
+  letter-spacing: -0.03em;
+}
+
+.content-os-shell-2c .content-os-review-body p {
+  margin: 0 0 10px;
+  color: var(--os-muted);
+  line-height: 1.5;
+}
+
+.content-os-shell-2c .content-os-score {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: baseline;
+  padding: 12px 0;
+  border-top: 1px solid var(--os-line-soft);
+  border-bottom: 1px solid var(--os-line-soft);
+}
+
+.content-os-shell-2c .content-os-score span {
+  color: var(--os-accent);
+  font-size: 0.78rem;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.content-os-shell-2c .content-os-score strong {
+  font-size: 2rem;
+  letter-spacing: -0.05em;
+}
+
+.content-os-shell-2c .content-os-check {
+  grid-template-columns: 72px minmax(0, 1fr);
+  align-items: center;
+}
+
+.content-os-shell-2c .content-os-check.is-ready span {
+  color: var(--os-accent);
+}
+
+.content-os-shell-2c .content-os-check.is-missing span {
+  color: var(--os-warning);
+}
+
+.content-os-shell-2c .content-os-toolbelt {
+  display: grid;
+  gap: 14px;
+  background: rgba(2, 7, 17, 0.48);
+}
+
+.content-os-shell-2c .content-os-toolbelt-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.content-os-shell-2c .content-os-toolbelt-head strong {
+  color: var(--os-text);
+  font-size: 0.9rem;
+}
+
+.content-os-shell-2c .content-os-tool-groups {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.content-os-shell-2c .content-os-tool-group {
+  display: grid;
+  gap: 6px;
+  align-content: start;
+  padding: 10px;
+  border: 1px solid var(--os-line-soft);
+  background: rgba(255, 255, 255, 0.01);
+}
+
+.content-os-shell-2c .content-os-tool-group span {
+  color: var(--os-accent);
+  font-size: 0.68rem;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.content-os-shell-2c .content-os-agent-actions {
+  justify-content: flex-end;
+}
+
+.content-os-shell-2c .content-os-timeline {
+  display: grid;
+  gap: 10px;
+  background:
+    linear-gradient(90deg, rgba(20, 184, 166, 0.035), transparent 34%),
+    rgba(2, 7, 17, 0.64);
+}
+
+.content-os-shell-2c .content-os-timeline-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 18px;
+  padding: 8px 0 0;
+  border: 0;
+}
+
+.content-os-shell-2c .content-os-timeline-row span {
+  color: var(--os-faint);
+  font-size: 0.68rem;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.content-os-shell-2c .content-os-timeline-row strong {
+  color: var(--os-text);
+}
+
+@media (max-width: 1380px) {
+  .content-os-shell-2c .content-os-production-board {
+    grid-template-columns: minmax(260px, 0.7fr) minmax(420px, 1fr);
+  }
+
+  .content-os-shell-2c .content-os-review-delivery {
+    grid-column: 1 / -1;
+    border-top: 1px solid var(--os-line);
+  }
+
+  .content-os-shell-2c .content-os-incoming-grid,
+  .content-os-shell-2c .content-os-tool-groups {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 980px) {
+  .content-os-shell-2c .content-os-topbar,
+  .content-os-shell-2c .content-os-start,
+  .content-os-shell-2c .content-os-production-board {
+    grid-template-columns: 1fr;
+  }
+
+  .content-os-shell-2c .content-os-brief,
+  .content-os-shell-2c .content-os-output-workspace {
+    border-right: 0;
+    border-bottom: 1px solid var(--os-line);
+  }
+
+  .content-os-shell-2c .content-os-incoming-grid,
+  .content-os-shell-2c .content-os-tool-groups {
+    grid-template-columns: 1fr;
+  }
+
+  .content-os-shell-2c .content-os-start-copy h2 {
+    font-size: clamp(2rem, 12vw, 3.4rem);
+  }
+}
+
+/* ==========================================================================
+   CONTENT-STUDIO-UX-RESET.2D FINAL USABILITY VISUAL HIERARCHY POLISH
+   Scope: .content-os-shell-2c[data-theme-version="v2"]
+   Goal: first-screen clarity, compact workflow, stronger command input.
+   ========================================================================== */
+
+/* Overall density and first viewport behavior */
+.content-os-shell-2c[data-theme-version="v2"] {
+  --os-2d-topbar-h: 56px;
+  --os-2d-start-h: auto;
+  --os-2d-tight-line: rgba(148, 163, 184, 0.085);
+}
+
+/* Top bar: less height, clearer command surface */
+.content-os-shell-2c .content-os-topbar {
+  min-height: 56px;
+  padding: 9px 16px;
+  grid-template-columns: minmax(160px, 0.32fr) minmax(520px, 1fr) auto;
+}
+
+.content-os-shell-2c .content-os-topbar-main strong {
+  font-size: 0.96rem;
+}
+
+.content-os-shell-2c .content-os-status-strip span {
+  min-height: 30px;
+  padding: 4px 8px;
+  font-size: 0.72rem;
+}
+
+.content-os-shell-2c .content-os-primary-action .content-os-action {
+  min-height: 34px;
+  padding-inline: 14px;
+}
+
+/* Start area: still prominent, but no longer consumes the whole page */
+.content-os-shell-2c .content-os-start {
+  grid-template-columns: minmax(300px, 0.44fr) minmax(520px, 1fr) minmax(260px, 0.44fr);
+  gap: 18px;
+  align-items: center;
+  padding: 18px 18px 16px;
+}
+
+.content-os-shell-2c .content-os-start-copy h2 {
+  max-width: 560px;
+  margin: 2px 0 8px;
+  font-size: clamp(2rem, 3.35vw, 3.9rem);
+  line-height: 0.92;
+  letter-spacing: -0.072em;
+}
+
+.content-os-shell-2c .content-os-start-copy p {
+  max-width: 520px;
+  font-size: 0.88rem;
+}
+
+/* Make natural request the visual hero of the start hub */
+.content-os-shell-2c .content-os-command-input {
+  padding: 10px 12px;
+  border: 1px solid rgba(94, 234, 212, 0.22);
+  background:
+    linear-gradient(180deg, rgba(94, 234, 212, 0.045), rgba(255, 255, 255, 0.008)),
+    rgba(2, 7, 17, 0.42);
+  box-shadow: 0 0 0 1px rgba(94, 234, 212, 0.025) inset;
+}
+
+.content-os-shell-2c .content-os-command-input .content-os-input {
+  min-height: 38px;
+  border-bottom-color: rgba(94, 234, 212, 0.26);
+  font-size: 0.96rem;
+}
+
+.content-os-shell-2c .content-os-command-input .content-os-input::placeholder {
+  color: rgba(203, 213, 225, 0.46);
+}
+
+.content-os-shell-2c .content-os-start-buttons {
+  gap: 5px;
+}
+
+.content-os-shell-2c .content-os-start-buttons .content-os-action,
+.content-os-shell-2c .content-os-start-buttons button {
+  min-height: 30px;
+  padding: 6px 9px;
+}
+
+/* Detected block: compact and easy to scan */
+.content-os-shell-2c .content-os-detected {
+  gap: 4px;
+  padding: 8px 10px;
+  border-left: 1px solid rgba(94, 234, 212, 0.18);
+  background: rgba(255, 255, 255, 0.008);
+}
+
+.content-os-shell-2c .content-os-detected div {
+  grid-template-columns: 84px minmax(0, 1fr);
+  align-items: baseline;
+  gap: 10px;
+  padding: 6px 0;
+}
+
+.content-os-shell-2c .content-os-detected span {
+  font-size: 0.6rem;
+}
+
+.content-os-shell-2c .content-os-detected strong {
+  font-size: 0.82rem;
+  overflow-wrap: anywhere;
+}
+
+/* Incoming: convert the long row into a compact intelligence strip */
+.content-os-shell-2c .content-os-incoming {
+  gap: 8px;
+  padding: 11px 18px 12px;
+  background: rgba(8, 16, 31, 0.18);
+}
+
+.content-os-shell-2c .content-os-incoming .content-os-mini-title {
+  margin-bottom: 0;
+}
+
+.content-os-shell-2c .content-os-incoming-grid {
+  grid-template-columns: repeat(6, minmax(120px, 1fr));
+  gap: 8px;
+}
+
+.content-os-shell-2c .content-os-incoming-item {
+  min-height: 48px;
+  padding: 8px 0;
+}
+
+.content-os-shell-2c .content-os-incoming-item span {
+  font-size: 0.58rem;
+}
+
+.content-os-shell-2c .content-os-incoming-item strong {
+  display: -webkit-box;
+  max-height: 2.55em;
+  overflow: hidden;
+  font-size: 0.78rem;
+  line-height: 1.28;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.content-os-shell-2c .content-os-recommendation {
+  grid-template-columns: 210px minmax(0, 1fr);
+  align-items: baseline;
+  gap: 14px;
+  padding: 8px 0 0;
+}
+
+.content-os-shell-2c .content-os-recommendation strong {
+  font-size: 0.84rem;
+}
+
+/* Production board: bring work area higher and improve hierarchy */
+.content-os-shell-2c .content-os-production-board {
+  grid-template-columns: minmax(310px, 0.68fr) minmax(560px, 1fr) minmax(320px, 0.62fr);
+  min-height: auto;
+}
+
+.content-os-shell-2c .content-os-brief,
+.content-os-shell-2c .content-os-output-workspace,
+.content-os-shell-2c .content-os-review-delivery {
+  padding: 16px 18px;
+}
+
+.content-os-shell-2c .content-os-column-head {
+  margin-bottom: 12px;
+}
+
+.content-os-shell-2c .content-os-column-head strong {
+  font-size: 0.96rem;
+}
+
+/* Brief: reduce vertical drag while preserving source truth */
+.content-os-shell-2c .content-os-form {
+  gap: 8px;
+}
+
+.content-os-shell-2c .content-os-field {
+  gap: 3px;
+}
+
+.content-os-shell-2c .content-os-input {
+  min-height: 28px;
+  font-size: 0.9rem;
+}
+
+.content-os-shell-2c .content-os-textarea {
+  min-height: 126px;
+  font-size: 0.9rem;
+}
+
+.content-os-shell-2c .content-os-source-map,
+.content-os-shell-2c .content-os-readiness-mini {
+  margin-top: 10px;
+  padding-top: 10px;
+}
+
+.content-os-shell-2c .content-os-source-row {
+  grid-template-columns: 88px minmax(0, 1fr);
+  align-items: baseline;
+  gap: 12px;
+  padding: 7px 0;
+}
+
+.content-os-shell-2c .content-os-source-row strong {
+  font-size: 0.8rem;
+}
+
+/* Output workspace: make the empty state clearer and stronger */
+.content-os-shell-2c .content-os-output-workspace {
+  gap: 12px;
+}
+
+.content-os-shell-2c .content-os-output-sheet {
+  min-height: 220px;
+  padding: 16px;
+  border-color: rgba(94, 234, 212, 0.14);
+}
+
+.content-os-shell-2c .content-os-output-sheet p {
+  max-width: 780px;
+  font-size: 0.92rem;
+}
+
+.content-os-shell-2c .content-os-output-meta strong {
+  font-size: 1.12rem;
+}
+
+.content-os-shell-2c .content-os-output-modebar {
+  gap: 5px;
+}
+
+.content-os-shell-2c .content-os-package-preview {
+  margin-top: 8px;
+  padding-top: 10px;
+}
+
+.content-os-shell-2c .content-os-package-grid {
+  gap: 5px;
+}
+
+.content-os-shell-2c .content-os-package-grid span {
+  padding: 5px 7px;
+  font-size: 0.7rem;
+}
+
+/* Media blueprint: compact, not a heavy second page */
+.content-os-shell-2c .content-os-blueprint {
+  margin-top: 10px;
+  padding-top: 10px;
+}
+
+.content-os-shell-2c .content-os-blueprint-row {
+  grid-template-columns: 142px minmax(0, 1fr);
+  align-items: baseline;
+  gap: 12px;
+  padding: 7px 0;
+}
+
+.content-os-shell-2c .content-os-blueprint-row strong {
+  font-size: 0.8rem;
+}
+
+/* Review & Delivery: fix joined label/value issue and make status obvious */
+.content-os-shell-2c .content-os-review-delivery {
+  min-width: 0;
+}
+
+.content-os-shell-2c .content-os-review-tabs {
+  gap: 4px;
+  margin-bottom: 10px;
+}
+
+.content-os-shell-2c .content-os-review-tabs button {
+  min-height: 30px;
+  padding: 6px 8px;
+}
+
+.content-os-shell-2c .content-os-review-body {
+  margin-top: 10px;
+  padding-top: 10px;
+}
+
+.content-os-shell-2c .content-os-review-body h3 {
+  margin-bottom: 8px;
+  font-size: 1.04rem;
+}
+
+.content-os-shell-2c .content-os-review-body p {
+  min-height: unset;
+  margin-bottom: 10px;
+  padding: 0 0 10px;
+  border-bottom: 1px solid var(--os-line-soft);
+  font-size: 0.9rem;
+}
+
+.content-os-shell-2c .content-os-score {
+  padding: 10px 0;
+}
+
+.content-os-shell-2c .content-os-score strong {
+  font-size: 1.65rem;
+}
+
+.content-os-shell-2c .content-os-check {
+  display: grid;
+  grid-template-columns: minmax(86px, 0.35fr) minmax(0, 1fr);
+  column-gap: 14px;
+  row-gap: 2px;
+  align-items: baseline;
+  padding: 8px 0;
+}
+
+.content-os-shell-2c .content-os-check span {
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.content-os-shell-2c .content-os-check strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-size: 0.84rem;
+}
+
+/* Smart Toolbelt: compact dock instead of a heavy grid */
+.content-os-shell-2c .content-os-toolbelt {
+  gap: 10px;
+  padding: 12px 18px;
+}
+
+.content-os-shell-2c .content-os-toolbelt-head {
+  align-items: baseline;
+}
+
+.content-os-shell-2c .content-os-tool-groups {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 3px;
+  scrollbar-width: thin;
+}
+
+.content-os-shell-2c .content-os-tool-group {
+  flex: 0 0 176px;
+  gap: 5px;
+  padding: 8px;
+  border-color: rgba(148, 163, 184, 0.08);
+  background: rgba(255, 255, 255, 0.008);
+}
+
+.content-os-shell-2c .content-os-tool-group span {
+  font-size: 0.62rem;
+}
+
+.content-os-shell-2c .content-os-tool-group button {
+  min-height: 28px;
+  padding: 5px 7px;
+  font-size: 0.7rem;
+}
+
+.content-os-shell-2c .content-os-agent-strip {
+  gap: 5px;
+}
+
+.content-os-shell-2c .content-os-agent-strip button {
+  min-height: 28px;
+  padding: 5px 8px;
+  font-size: 0.7rem;
+}
+
+.content-os-shell-2c .content-os-agent-actions {
+  gap: 5px;
+}
+
+.content-os-shell-2c .content-os-agent-actions .content-os-action {
+  min-height: 28px;
+  padding: 5px 8px;
+  font-size: 0.7rem;
+}
+
+/* Timeline: keep it as status, not a second workspace */
+.content-os-shell-2c .content-os-timeline {
+  gap: 8px;
+  padding: 11px 18px 12px;
+}
+
+.content-os-shell-2c .content-os-timeline-tabs button,
+.content-os-shell-2c .content-os-version-strip button,
+.content-os-shell-2c .content-os-actions.is-compact .content-os-action {
+  min-height: 28px;
+  padding: 5px 8px;
+  font-size: 0.7rem;
+}
+
+.content-os-shell-2c .content-os-timeline-row {
+  gap: 8px 14px;
+  padding-top: 4px;
+}
+
+.content-os-shell-2c .content-os-timeline-row span {
+  font-size: 0.62rem;
+}
+
+.content-os-shell-2c .content-os-timeline-row strong {
+  font-size: 0.78rem;
+}
+
+/* Better readable focus states */
+.content-os-shell-2c button:focus-visible,
+.content-os-shell-2c input:focus-visible,
+.content-os-shell-2c textarea:focus-visible {
+  outline: 2px solid rgba(94, 234, 212, 0.55);
+  outline-offset: 2px;
+}
+
+/* Responsive corrections */
+@media (max-width: 1500px) {
+  .content-os-shell-2c .content-os-start {
+    grid-template-columns: minmax(260px, 0.46fr) minmax(440px, 1fr) minmax(250px, 0.42fr);
+  }
+
+  .content-os-shell-2c .content-os-start-copy h2 {
+    font-size: clamp(2rem, 3vw, 3.4rem);
+  }
+
+  .content-os-shell-2c .content-os-production-board {
+    grid-template-columns: minmax(300px, 0.68fr) minmax(500px, 1fr) minmax(300px, 0.6fr);
+  }
+}
+
+@media (max-width: 1280px) {
+  .content-os-shell-2c .content-os-start,
+  .content-os-shell-2c .content-os-topbar {
+    grid-template-columns: 1fr;
+  }
+
+  .content-os-shell-2c .content-os-production-board {
+    grid-template-columns: minmax(300px, 0.75fr) minmax(420px, 1fr);
+  }
+
+  .content-os-shell-2c .content-os-review-delivery {
+    grid-column: 1 / -1;
+    border-top: 1px solid var(--os-line);
+  }
+
+  .content-os-shell-2c .content-os-incoming-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 860px) {
+  .content-os-shell-2c .content-os-production-board,
+  .content-os-shell-2c .content-os-detected div,
+  .content-os-shell-2c .content-os-source-row,
+  .content-os-shell-2c .content-os-blueprint-row,
+  .content-os-shell-2c .content-os-check,
+  .content-os-shell-2c .content-os-recommendation {
+    grid-template-columns: 1fr;
+  }
+
+  .content-os-shell-2c .content-os-brief,
+  .content-os-shell-2c .content-os-output-workspace {
+    border-right: 0;
+    border-bottom: 1px solid var(--os-line);
+  }
+
+  .content-os-shell-2c .content-os-incoming-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ==========================================================================
+   CONTENT-STUDIO-UX-RESET.2E EDITOR CANVAS FINALIZATION
+   Scope: .content-os-shell-2e[data-theme-version="v2"]
+   Goal: editor canvas, not dashboard cards.
+   ========================================================================== */
+
+.content-os-shell-2e[data-theme-version="v2"] {
+  --os-bg: #020711;
+  --os-text: rgba(248, 250, 252, 0.96);
+  --os-muted: rgba(203, 213, 225, 0.72);
+  --os-faint: rgba(148, 163, 184, 0.56);
+  --os-line: rgba(148, 163, 184, 0.085);
+  --os-line-strong: rgba(148, 163, 184, 0.14);
+  --os-accent: #5eead4;
+  --os-accent-2: #38bdf8;
+  --os-warning: #fbbf24;
+  min-height: calc(100vh - 74px);
+  color: var(--os-text);
+  background:
+    radial-gradient(circle at 18% 0%, rgba(20, 184, 166, 0.065), transparent 26%),
+    radial-gradient(circle at 86% 0%, rgba(56, 189, 248, 0.055), transparent 30%),
+    linear-gradient(180deg, #020711 0%, #030a16 100%);
+}
+
+.content-os-shell-2e * {
+  box-sizing: border-box;
+}
+
+.content-os-shell-2e .content-os-appbar {
+  display: grid;
+  grid-template-columns: 180px minmax(480px, 1fr) minmax(260px, auto) auto;
+  gap: 12px;
+  align-items: center;
+  padding: 12px 18px 10px;
+  border-bottom: 1px solid var(--os-line);
+  background: rgba(2, 7, 17, 0.78);
+  backdrop-filter: blur(18px);
+}
+
+.content-os-shell-2e .content-os-appbrand {
+  display: grid;
+  gap: 2px;
+}
+
+.content-os-shell-2e .content-os-appbrand span,
+.content-os-shell-2e .content-os-commandline span,
+.content-os-shell-2e .content-os-rail-heading span,
+.content-os-shell-2e .content-os-canvas-header span,
+.content-os-shell-2e .content-os-inspector-head span,
+.content-os-shell-2e .content-os-mini-title,
+.content-os-shell-2e .content-os-field span,
+.content-os-shell-2e .content-os-writing span,
+.content-os-shell-2e .content-os-source-line span,
+.content-os-shell-2e .content-os-editor-meta span,
+.content-os-shell-2e .content-os-readiness-chip span,
+.content-os-shell-2e .content-os-dock-head span {
+  color: var(--os-faint);
+  font-size: 0.64rem;
+  font-weight: 850;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.content-os-shell-2e .content-os-appbrand strong {
+  font-size: 0.98rem;
+  letter-spacing: -0.035em;
+}
+
+.content-os-shell-2e .content-os-commandline {
+  display: grid;
+  gap: 4px;
+  padding: 8px 10px;
+  border: 1px solid rgba(94, 234, 212, 0.24);
+  background: rgba(20, 184, 166, 0.035);
+}
+
+.content-os-shell-2e .content-os-input,
+.content-os-shell-2e .content-os-textarea {
+  width: 100%;
+  border: 0;
+  border-bottom: 1px solid var(--os-line);
+  background: transparent;
+  color: var(--os-text);
+  font: inherit;
+  outline: none;
+}
+
+.content-os-shell-2e .content-os-commandline .content-os-input {
+  min-height: 34px;
+  border-bottom-color: rgba(94, 234, 212, 0.3);
+  font-size: 0.96rem;
+}
+
+.content-os-shell-2e .content-os-input:focus,
+.content-os-shell-2e .content-os-textarea:focus {
+  border-color: rgba(94, 234, 212, 0.55);
+}
+
+.content-os-shell-2e .content-os-appmeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+.content-os-shell-2e .content-os-appmeta span {
+  padding: 5px 7px;
+  border-left: 1px solid var(--os-line);
+  color: var(--os-muted);
+  font-size: 0.72rem;
+}
+
+.content-os-shell-2e .content-os-contextline {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  color: var(--os-faint);
+  font-size: 0.72rem;
+}
+
+.content-os-shell-2e .content-os-context-strip {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 0.42fr);
+  gap: 16px;
+  align-items: center;
+  padding: 9px 18px;
+  border-bottom: 1px solid var(--os-line);
+  background: rgba(8, 16, 31, 0.18);
+}
+
+.content-os-shell-2e .content-os-context-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  min-width: 0;
+}
+
+.content-os-shell-2e .content-os-context-items span {
+  color: var(--os-muted);
+  font-size: 0.74rem;
+  overflow-wrap: anywhere;
+}
+
+.content-os-shell-2e .content-os-context-items em {
+  margin-right: 5px;
+  color: var(--os-faint);
+  font-style: normal;
+  font-weight: 820;
+  text-transform: uppercase;
+}
+
+.content-os-shell-2e .content-os-context-strip strong {
+  color: var(--os-text);
+  font-size: 0.82rem;
+  text-align: right;
+}
+
+.content-os-shell-2e .content-os-editor-layout {
+  display: grid;
+  grid-template-columns: 300px minmax(560px, 1fr) 300px;
+  min-height: calc(100vh - 275px);
+}
+
+.content-os-shell-2e .content-os-source-rail,
+.content-os-shell-2e .content-os-canvas-main,
+.content-os-shell-2e .content-os-inspector {
+  min-width: 0;
+  padding: 18px;
+}
+
+.content-os-shell-2e .content-os-source-rail {
+  border-right: 1px solid var(--os-line);
+}
+
+.content-os-shell-2e .content-os-inspector {
+  border-left: 1px solid var(--os-line);
+}
+
+.content-os-shell-2e .content-os-rail-heading,
+.content-os-shell-2e .content-os-canvas-header,
+.content-os-shell-2e .content-os-inspector-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.content-os-shell-2e .content-os-rail-heading strong,
+.content-os-shell-2e .content-os-canvas-header strong,
+.content-os-shell-2e .content-os-inspector-head strong {
+  color: var(--os-text);
+  font-size: 0.96rem;
+  letter-spacing: -0.03em;
+}
+
+.content-os-shell-2e .content-os-form {
+  display: grid;
+  gap: 10px;
+}
+
+.content-os-shell-2e .content-os-field,
+.content-os-shell-2e .content-os-writing {
+  display: grid;
+  gap: 4px;
+}
+
+.content-os-shell-2e .content-os-input {
+  min-height: 28px;
+  padding: 4px 0;
+  font-size: 0.9rem;
+}
+
+.content-os-shell-2e .content-os-textarea {
+  min-height: 150px;
+  padding: 10px 0;
+  line-height: 1.48;
+  resize: vertical;
+}
+
+.content-os-shell-2e .content-os-source-stack {
+  display: grid;
+  gap: 0;
+  margin-top: 18px;
+  padding-top: 12px;
+  border-top: 1px solid var(--os-line);
+}
+
+.content-os-shell-2e .content-os-source-line {
+  display: grid;
+  grid-template-columns: 78px minmax(0, 1fr);
+  gap: 10px;
+  align-items: baseline;
+  padding: 7px 0;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.055);
+}
+
+.content-os-shell-2e .content-os-source-line strong {
+  color: var(--os-text);
+  font-size: 0.8rem;
+  line-height: 1.3;
+}
+
+.content-os-shell-2e .content-os-readiness-chip {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 13px;
+  padding-top: 10px;
+  border-top: 1px solid var(--os-line);
+}
+
+.content-os-shell-2e .content-os-readiness-chip strong {
+  color: var(--os-text);
+}
+
+.content-os-shell-2e .content-os-canvas-main {
+  display: grid;
+  align-content: start;
+  gap: 14px;
+  background:
+    radial-gradient(circle at 75% 0%, rgba(56, 189, 248, 0.035), transparent 32%),
+    rgba(2, 7, 17, 0.08);
+}
+
+.content-os-shell-2e .content-os-mode-tabs,
+.content-os-shell-2e .content-os-inline-tools,
+.content-os-shell-2e .content-os-inspector-tabs,
+.content-os-shell-2e .content-os-agent-strip,
+.content-os-shell-2e .content-os-agent-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.content-os-shell-2e button,
+.content-os-shell-2e .content-os-action {
+  min-height: 30px;
+  border: 0;
+  border-bottom: 1px solid var(--os-line);
+  background: transparent;
+  color: var(--os-muted);
+  padding: 6px 8px;
+  font: inherit;
+  font-size: 0.74rem;
+  font-weight: 780;
+  cursor: pointer;
+}
+
+.content-os-shell-2e button:hover,
+.content-os-shell-2e .content-os-action:hover {
+  border-bottom-color: rgba(94, 234, 212, 0.52);
+  color: var(--os-text);
+}
+
+.content-os-shell-2e button.is-active,
+.content-os-shell-2e .content-os-action.is-primary {
+  border-bottom-color: rgba(94, 234, 212, 0.9);
+  color: var(--os-text);
+}
+
+.content-os-shell-2e .content-os-action.is-primary {
+  border: 1px solid rgba(94, 234, 212, 0.72);
+  background: linear-gradient(135deg, #5eead4, #22d3ee);
+  color: #02131d;
+}
+
+.content-os-shell-2e .content-os-inline-tools {
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 0 10px;
+  border-bottom: 1px solid var(--os-line);
+}
+
+.content-os-shell-2e .content-os-tool-left {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.content-os-shell-2e .content-os-tool-right {
+  display: flex;
+  gap: 6px;
+  align-items: baseline;
+  color: var(--os-faint);
+  font-size: 0.74rem;
+}
+
+.content-os-shell-2e .content-os-tool-right strong {
+  color: var(--os-accent);
+}
+
+.content-os-shell-2e .content-os-editor-surface {
+  display: grid;
+  gap: 16px;
+  min-height: 330px;
+  padding: 8px 0 18px;
+  border-bottom: 1px solid var(--os-line);
+}
+
+.content-os-shell-2e .content-os-editor-meta {
+  display: grid;
+  gap: 4px;
+}
+
+.content-os-shell-2e .content-os-editor-meta strong {
+  color: var(--os-text);
+  font-size: clamp(1.6rem, 2.5vw, 3rem);
+  line-height: 0.98;
+  letter-spacing: -0.06em;
+}
+
+.content-os-shell-2e .content-os-editor-meta em {
+  color: var(--os-faint);
+  font-style: normal;
+  font-size: 0.8rem;
+}
+
+.content-os-shell-2e .content-os-editor-body {
+  max-width: 900px;
+  color: var(--os-muted);
+  font-size: 0.98rem;
+  line-height: 1.58;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.content-os-shell-2e .content-os-package-line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  padding: 3px 0;
+}
+
+.content-os-shell-2e .content-os-package-line span,
+.content-os-shell-2e .content-os-blueprint-line > span {
+  color: var(--os-faint);
+  font-size: 0.64rem;
+  font-weight: 850;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.content-os-shell-2e .content-os-package-line strong {
+  color: var(--os-muted);
+  font-size: 0.74rem;
+  font-weight: 760;
+}
+
+.content-os-shell-2e .content-os-blueprint-line {
+  display: grid;
+  gap: 7px;
+  margin-top: 6px;
+  padding-top: 10px;
+  border-top: 1px solid var(--os-line);
+}
+
+.content-os-shell-2e .content-os-blueprint-line div {
+  display: grid;
+  grid-template-columns: 132px minmax(0, 1fr);
+  gap: 12px;
+  align-items: baseline;
+}
+
+.content-os-shell-2e .content-os-blueprint-line strong {
+  color: var(--os-text);
+  font-size: 0.78rem;
+}
+
+.content-os-shell-2e .content-os-blueprint-line em {
+  color: var(--os-muted);
+  font-size: 0.78rem;
+  font-style: normal;
+}
+
+.content-os-shell-2e .content-os-inspector-tabs {
+  margin-bottom: 14px;
+}
+
+.content-os-shell-2e .content-os-inspector-body {
+  display: grid;
+  gap: 0;
+}
+
+.content-os-shell-2e .content-os-inspector-body p {
+  margin: 0 0 14px;
+  color: var(--os-muted);
+  line-height: 1.48;
+}
+
+.content-os-shell-2e .content-os-scoreline {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  padding: 0 0 14px;
+  border-bottom: 1px solid var(--os-line);
+}
+
+.content-os-shell-2e .content-os-scoreline span {
+  color: var(--os-accent);
+  font-size: 0.72rem;
+  font-weight: 850;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.content-os-shell-2e .content-os-scoreline strong {
+  color: var(--os-text);
+  font-size: 2.1rem;
+  letter-spacing: -0.06em;
+}
+
+.content-os-shell-2e .content-os-inspector-row {
+  display: grid;
+  grid-template-columns: 78px minmax(0, 1fr);
+  gap: 12px;
+  align-items: baseline;
+  padding: 9px 0;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.055);
+}
+
+.content-os-shell-2e .content-os-inspector-row span {
+  color: var(--os-faint);
+  font-size: 0.64rem;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.content-os-shell-2e .content-os-inspector-row.is-ready span {
+  color: var(--os-accent);
+}
+
+.content-os-shell-2e .content-os-inspector-row.is-missing span {
+  color: var(--os-warning);
+}
+
+.content-os-shell-2e .content-os-inspector-row strong {
+  min-width: 0;
+  color: var(--os-text);
+  font-size: 0.84rem;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.content-os-shell-2e .content-os-assistant-dock {
+  display: grid;
+  gap: 10px;
+  padding: 12px 18px;
+  border-top: 1px solid var(--os-line);
+  border-bottom: 1px solid var(--os-line);
+  background: rgba(2, 7, 17, 0.38);
+}
+
+.content-os-shell-2e .content-os-dock-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: baseline;
+}
+
+.content-os-shell-2e .content-os-dock-head strong {
+  color: var(--os-text);
+  font-size: 0.86rem;
+}
+
+.content-os-shell-2e .content-os-tool-dock {
+  display: flex;
+  gap: 18px;
+  overflow-x: auto;
+  padding-bottom: 3px;
+}
+
+.content-os-shell-2e .content-os-tool-dock > div {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 7px;
+  align-items: center;
+}
+
+.content-os-shell-2e .content-os-tool-dock span {
+  color: var(--os-accent);
+  font-size: 0.66rem;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.content-os-shell-2e .content-os-status-timeline {
+  display: grid;
+  gap: 8px;
+  padding: 11px 18px 13px;
+  background: rgba(2, 7, 17, 0.52);
+}
+
+.content-os-shell-2e .content-os-status-timeline nav,
+.content-os-shell-2e .content-os-status-timeline section,
+.content-os-shell-2e .content-os-status-timeline div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  align-items: center;
+}
+
+.content-os-shell-2e .content-os-status-timeline span {
+  color: var(--os-faint);
+  font-size: 0.7rem;
+}
+
+.content-os-shell-2e .content-os-status-timeline span strong {
+  color: var(--os-text);
+}
+
+.content-os-shell-2e button:focus-visible,
+.content-os-shell-2e input:focus-visible,
+.content-os-shell-2e textarea:focus-visible {
+  outline: 2px solid rgba(94, 234, 212, 0.55);
+  outline-offset: 2px;
+}
+
+@media (max-width: 1360px) {
+  .content-os-shell-2e .content-os-appbar {
+    grid-template-columns: 1fr;
+  }
+
+  .content-os-shell-2e .content-os-appmeta {
+    justify-content: flex-start;
+  }
+
+  .content-os-shell-2e .content-os-contextline {
+    grid-column: auto;
+  }
+
+  .content-os-shell-2e .content-os-editor-layout {
+    grid-template-columns: 280px minmax(460px, 1fr);
+  }
+
+  .content-os-shell-2e .content-os-inspector {
+    grid-column: 1 / -1;
+    border-left: 0;
+    border-top: 1px solid var(--os-line);
+  }
+}
+
+@media (max-width: 900px) {
+  .content-os-shell-2e .content-os-context-strip,
+  .content-os-shell-2e .content-os-editor-layout,
+  .content-os-shell-2e .content-os-source-line,
+  .content-os-shell-2e .content-os-inspector-row,
+  .content-os-shell-2e .content-os-blueprint-line div {
+    grid-template-columns: 1fr;
+  }
+
+  .content-os-shell-2e .content-os-source-rail {
+    border-right: 0;
+    border-bottom: 1px solid var(--os-line);
+  }
+
+  .content-os-shell-2e .content-os-inspector {
+    border-left: 0;
+  }
+
+  .content-os-shell-2e .content-os-context-strip strong {
+    text-align: left;
+  }
+}
+
+/* ==========================================================================
+   CONTENT-STUDIO-UX-RESET.2F FINAL FIRST-VIEWPORT BALANCE
+   Scope: .content-os-shell-2e[data-theme-version="v2"]
+   Goal: tighter appbar, clearer empty state, next action, lighter dock/timeline.
+   ========================================================================== */
+
+/* Appbar: more compact, less top-heavy */
+.content-os-shell-2e .content-os-appbar {
+  grid-template-columns: 160px minmax(500px, 1fr) minmax(230px, auto) auto;
+  gap: 10px;
+  padding: 8px 14px 7px;
+}
+
+.content-os-shell-2e .content-os-appbrand strong {
+  font-size: 0.92rem;
+}
+
+.content-os-shell-2e .content-os-commandline {
+  padding: 6px 9px;
+}
+
+.content-os-shell-2e .content-os-commandline .content-os-input {
+  min-height: 30px;
+  font-size: 0.9rem;
+}
+
+.content-os-shell-2e .content-os-appmeta span {
+  padding: 4px 6px;
+  font-size: 0.68rem;
+}
+
+.content-os-shell-2e .content-os-contextline {
+  gap: 10px;
+  font-size: 0.68rem;
+  opacity: 0.78;
+}
+
+/* Context strip: lighter and less dominant */
+.content-os-shell-2e .content-os-context-strip {
+  padding: 7px 14px;
+  gap: 12px;
+}
+
+.content-os-shell-2e .content-os-context-items {
+  gap: 9px;
+}
+
+.content-os-shell-2e .content-os-context-items span {
+  font-size: 0.69rem;
+}
+
+.content-os-shell-2e .content-os-context-strip strong {
+  font-size: 0.76rem;
+}
+
+/* First viewport balance */
+.content-os-shell-2e .content-os-editor-layout {
+  grid-template-columns: 280px minmax(600px, 1fr) 286px;
+  min-height: calc(100vh - 245px);
+}
+
+.content-os-shell-2e .content-os-source-rail,
+.content-os-shell-2e .content-os-canvas-main,
+.content-os-shell-2e .content-os-inspector {
+  padding: 14px 16px;
+}
+
+/* Source rail: reduce height and make fields calmer */
+.content-os-shell-2e .content-os-rail-heading,
+.content-os-shell-2e .content-os-canvas-header,
+.content-os-shell-2e .content-os-inspector-head {
+  margin-bottom: 10px;
+}
+
+.content-os-shell-2e .content-os-form {
+  gap: 7px;
+}
+
+.content-os-shell-2e .content-os-input {
+  min-height: 24px;
+  padding: 2px 0 4px;
+  font-size: 0.84rem;
+}
+
+.content-os-shell-2e .content-os-field span,
+.content-os-shell-2e .content-os-writing span {
+  font-size: 0.59rem;
+}
+
+.content-os-shell-2e .content-os-textarea {
+  min-height: 104px;
+  padding: 8px 0;
+  font-size: 0.84rem;
+}
+
+.content-os-shell-2e .content-os-source-stack {
+  margin-top: 12px;
+  padding-top: 8px;
+}
+
+.content-os-shell-2e .content-os-source-line {
+  grid-template-columns: 70px minmax(0, 1fr);
+  gap: 8px;
+  padding: 5px 0;
+}
+
+.content-os-shell-2e .content-os-source-line strong {
+  font-size: 0.74rem;
+}
+
+.content-os-shell-2e .content-os-readiness-chip {
+  margin-top: 9px;
+  padding-top: 8px;
+}
+
+/* Canvas: stronger empty state and less wasted space */
+.content-os-shell-2e .content-os-canvas-main {
+  gap: 11px;
+}
+
+.content-os-shell-2e .content-os-inline-tools {
+  padding: 3px 0 7px;
+}
+
+.content-os-shell-2e .content-os-editor-surface {
+  min-height: 285px;
+  gap: 12px;
+  padding: 4px 0 14px;
+}
+
+.content-os-shell-2e .content-os-editor-meta strong {
+  font-size: clamp(1.45rem, 2.25vw, 2.65rem);
+}
+
+.content-os-shell-2e .content-os-editor-body {
+  max-width: 820px;
+  color: rgba(203, 213, 225, 0.82);
+  font-size: 0.94rem;
+}
+
+.content-os-shell-2e .content-os-editor-body:only-child,
+.content-os-shell-2e .content-os-editor-body {
+  position: relative;
+}
+
+.content-os-shell-2e .content-os-package-line {
+  gap: 6px;
+}
+
+.content-os-shell-2e .content-os-package-line strong {
+  font-size: 0.69rem;
+}
+
+/* Inspector: add next action and improve scanability */
+.content-os-shell-2e .content-os-inspector-tabs {
+  gap: 5px;
+  margin-bottom: 10px;
+}
+
+.content-os-shell-2e .content-os-inspector-tabs button {
+  min-height: 26px;
+  padding: 4px 6px;
+  font-size: 0.68rem;
+}
+
+.content-os-shell-2e .content-os-scoreline {
+  padding-bottom: 10px;
+}
+
+.content-os-shell-2e .content-os-scoreline strong {
+  font-size: 1.85rem;
+}
+
+.content-os-shell-2e .content-os-next-action {
+  display: grid;
+  gap: 5px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--os-line);
+}
+
+.content-os-shell-2e .content-os-next-action span {
+  color: var(--os-accent);
+  font-size: 0.62rem;
+  font-weight: 850;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.content-os-shell-2e .content-os-next-action strong {
+  color: var(--os-text);
+  font-size: 0.82rem;
+  line-height: 1.38;
+}
+
+.content-os-shell-2e .content-os-inspector-row {
+  grid-template-columns: 70px minmax(0, 1fr);
+  gap: 9px;
+  padding: 7px 0;
+}
+
+.content-os-shell-2e .content-os-inspector-row span {
+  font-size: 0.58rem;
+}
+
+.content-os-shell-2e .content-os-inspector-row strong {
+  font-size: 0.78rem;
+}
+
+/* Tool dock: lighter, closer to professional editor toolbar */
+.content-os-shell-2e .content-os-assistant-dock {
+  gap: 7px;
+  padding: 9px 14px;
+  background: rgba(2, 7, 17, 0.28);
+}
+
+.content-os-shell-2e .content-os-dock-head {
+  opacity: 0.9;
+}
+
+.content-os-shell-2e .content-os-tool-dock {
+  gap: 14px;
+}
+
+.content-os-shell-2e .content-os-tool-dock > div {
+  gap: 5px;
+}
+
+.content-os-shell-2e .content-os-tool-dock span {
+  font-size: 0.6rem;
+}
+
+.content-os-shell-2e .content-os-agent-strip {
+  gap: 5px;
+}
+
+.content-os-shell-2e .content-os-agent-actions {
+  gap: 5px;
+}
+
+.content-os-shell-2e .content-os-assistant-dock button,
+.content-os-shell-2e .content-os-status-timeline button {
+  min-height: 25px;
+  padding: 4px 6px;
+  font-size: 0.66rem;
+}
+
+/* Timeline: status strip, not workspace */
+.content-os-shell-2e .content-os-status-timeline {
+  gap: 5px;
+  padding: 8px 14px 9px;
+}
+
+.content-os-shell-2e .content-os-status-timeline nav,
+.content-os-shell-2e .content-os-status-timeline section,
+.content-os-shell-2e .content-os-status-timeline div {
+  gap: 6px 11px;
+}
+
+.content-os-shell-2e .content-os-status-timeline span {
+  font-size: 0.64rem;
+}
+
+/* Make buttons visually lighter across 2E */
+.content-os-shell-2e button,
+.content-os-shell-2e .content-os-action {
+  min-height: 28px;
+  padding: 5px 7px;
+  font-size: 0.7rem;
+}
+
+/* Responsive balance */
+@media (max-width: 1450px) {
+  .content-os-shell-2e .content-os-editor-layout {
+    grid-template-columns: 265px minmax(520px, 1fr) 275px;
+  }
+}
+
+@media (max-width: 1200px) {
+  .content-os-shell-2e .content-os-appbar {
+    grid-template-columns: 1fr;
+  }
+
+  .content-os-shell-2e .content-os-editor-layout {
+    grid-template-columns: 270px minmax(420px, 1fr);
+  }
+
+  .content-os-shell-2e .content-os-inspector {
+    grid-column: 1 / -1;
+  }
+}
+
+/* ==========================================================================
+   CONTENT-STUDIO-UX-RESET.2G LIVE AI AGENCY STUDIO UPGRADE
+   Scope: .content-os-shell-2g[data-theme-version="v2"]
+   Goal: make Content Studio feel like a live international AI agency workspace.
+   ========================================================================== */
+
+.content-os-shell-2g[data-theme-version="v2"] {
+  --agency-bg: #020711;
+  --agency-panel: rgba(5, 13, 25, 0.72);
+  --agency-panel-soft: rgba(8, 20, 36, 0.46);
+  --agency-line: rgba(125, 211, 252, 0.12);
+  --agency-line-hot: rgba(94, 234, 212, 0.38);
+  --agency-text: rgba(248, 250, 252, 0.97);
+  --agency-muted: rgba(203, 213, 225, 0.74);
+  --agency-faint: rgba(148, 163, 184, 0.58);
+  --agency-cyan: #22d3ee;
+  --agency-mint: #5eead4;
+  --agency-blue: #60a5fa;
+  --agency-violet: #a78bfa;
+  --agency-amber: #fbbf24;
+
+  background:
+    radial-gradient(circle at 22% 0%, rgba(34, 211, 238, 0.11), transparent 22%),
+    radial-gradient(circle at 76% 6%, rgba(167, 139, 250, 0.085), transparent 26%),
+    linear-gradient(180deg, #020711 0%, #030a16 100%);
+}
+
+/* live but subtle; respects users who prefer reduced motion */
+@media (prefers-reduced-motion: no-preference) {
+  .content-os-shell-2g .content-os-live-dot,
+  .content-os-shell-2g .content-os-action.is-primary,
+  .content-os-shell-2g .content-os-editor-meta strong {
+    animation: contentStudioLivePulse 3.8s ease-in-out infinite;
+  }
+
+  .content-os-shell-2g .content-os-editor-surface {
+    animation: contentStudioSurfaceGlow 7s ease-in-out infinite;
+  }
+
+  @keyframes contentStudioLivePulse {
+    0%, 100% {
+      filter: drop-shadow(0 0 0 rgba(94, 234, 212, 0));
+    }
+    50% {
+      filter: drop-shadow(0 0 10px rgba(94, 234, 212, 0.25));
+    }
+  }
+
+  @keyframes contentStudioSurfaceGlow {
+    0%, 100% {
+      box-shadow: inset 0 1px 0 rgba(94, 234, 212, 0.05);
+    }
+    50% {
+      box-shadow: inset 0 1px 0 rgba(94, 234, 212, 0.16), 0 0 42px rgba(34, 211, 238, 0.035);
+    }
+  }
+}
+
+/* Appbar: agency command surface */
+.content-os-shell-2g .content-os-appbar {
+  grid-template-columns: 168px minmax(560px, 1fr) minmax(250px, auto) auto;
+  padding: 10px 16px 8px;
+  background:
+    linear-gradient(90deg, rgba(2, 7, 17, 0.92), rgba(6, 15, 29, 0.78)),
+    radial-gradient(circle at 52% 0%, rgba(94, 234, 212, 0.09), transparent 34%);
+}
+
+.content-os-shell-2g .content-os-appbrand strong {
+  color: var(--agency-text);
+  font-size: 1rem;
+  letter-spacing: -0.045em;
+}
+
+.content-os-shell-2g .content-os-commandline {
+  border: 1px solid rgba(94, 234, 212, 0.34);
+  background:
+    linear-gradient(180deg, rgba(94, 234, 212, 0.07), rgba(255, 255, 255, 0.012)),
+    rgba(2, 7, 17, 0.54);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.035),
+    0 14px 42px rgba(0, 0, 0, 0.16);
+}
+
+.content-os-shell-2g .content-os-commandline .content-os-input {
+  color: var(--agency-text);
+  font-size: 0.94rem;
+}
+
+.content-os-shell-2g .content-os-commandline span {
+  color: var(--agency-mint);
+}
+
+.content-os-shell-2g .content-os-appmeta span {
+  border-left-color: rgba(125, 211, 252, 0.18);
+  color: var(--agency-muted);
+}
+
+.content-os-shell-2g .content-os-live-line {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--agency-faint);
+  font-size: 0.7rem;
+}
+
+.content-os-shell-2g .content-os-live-line strong {
+  color: var(--agency-mint);
+  font-size: 0.72rem;
+  letter-spacing: 0.02em;
+}
+
+.content-os-shell-2g .content-os-live-line em {
+  color: var(--agency-muted);
+  font-style: normal;
+}
+
+.content-os-shell-2g .content-os-live-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--agency-mint);
+  box-shadow: 0 0 0 4px rgba(94, 234, 212, 0.08), 0 0 18px rgba(94, 234, 212, 0.45);
+}
+
+/* Context strip becomes a real guide strip */
+.content-os-shell-2g .content-os-context-strip {
+  grid-template-columns: auto minmax(0, 1fr) minmax(260px, 0.34fr);
+  padding: 8px 16px;
+  background:
+    linear-gradient(90deg, rgba(5, 13, 25, 0.86), rgba(4, 10, 20, 0.74));
+}
+
+.content-os-shell-2g .content-os-guide-tower {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.content-os-shell-2g .content-os-guide-tower span {
+  padding: 5px 8px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.14);
+  color: var(--agency-faint);
+  font-size: 0.64rem;
+  font-weight: 820;
+  letter-spacing: 0.055em;
+  text-transform: uppercase;
+}
+
+.content-os-shell-2g .content-os-guide-tower span.is-active {
+  border-bottom-color: var(--agency-mint);
+  color: var(--agency-text);
+}
+
+.content-os-shell-2g .content-os-context-items span {
+  color: rgba(203, 213, 225, 0.78);
+}
+
+.content-os-shell-2g .content-os-context-items em {
+  color: rgba(94, 234, 212, 0.68);
+}
+
+/* Three-zone workspace: clear focus */
+.content-os-shell-2g .content-os-editor-layout {
+  grid-template-columns: 276px minmax(640px, 1fr) 292px;
+  min-height: calc(100vh - 236px);
+}
+
+.content-os-shell-2g .content-os-source-rail,
+.content-os-shell-2g .content-os-inspector {
+  background: linear-gradient(180deg, rgba(8, 20, 36, 0.24), rgba(2, 7, 17, 0.08));
+}
+
+.content-os-shell-2g .content-os-source-rail {
+  border-right-color: rgba(125, 211, 252, 0.11);
+}
+
+.content-os-shell-2g .content-os-inspector {
+  border-left-color: rgba(125, 211, 252, 0.11);
+}
+
+.content-os-shell-2g .content-os-rail-heading strong,
+.content-os-shell-2g .content-os-canvas-header strong,
+.content-os-shell-2g .content-os-inspector-head strong {
+  color: var(--agency-text);
+}
+
+/* Production Desk gets the attention */
+.content-os-shell-2g .content-os-canvas-main {
+  background:
+    radial-gradient(circle at 54% 4%, rgba(94, 234, 212, 0.07), transparent 34%),
+    radial-gradient(circle at 95% 0%, rgba(96, 165, 250, 0.055), transparent 28%),
+    rgba(2, 7, 17, 0.12);
+}
+
+.content-os-shell-2g .content-os-mode-tabs button.is-active {
+  color: var(--agency-text);
+  border-bottom-color: var(--agency-mint);
+}
+
+.content-os-shell-2g .content-os-inline-tools {
+  align-items: center;
+  border-bottom-color: rgba(125, 211, 252, 0.11);
+}
+
+.content-os-shell-2g .content-os-tool-right strong {
+  color: var(--agency-mint);
+}
+
+.content-os-shell-2g .content-os-editor-surface {
+  min-height: 320px;
+  padding: 14px 0 18px;
+  border-bottom-color: rgba(125, 211, 252, 0.13);
+}
+
+.content-os-shell-2g .content-os-editor-meta span {
+  color: var(--agency-mint);
+}
+
+.content-os-shell-2g .content-os-editor-meta strong {
+  max-width: 880px;
+  color: var(--agency-text);
+  font-size: clamp(1.75rem, 2.9vw, 3.35rem);
+}
+
+.content-os-shell-2g .content-os-editor-body {
+  max-width: 900px;
+  color: rgba(226, 232, 240, 0.86);
+  font-size: 1rem;
+}
+
+.content-os-shell-2g .content-os-editor-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 4px 0 4px;
+}
+
+.content-os-shell-2g .content-os-action.is-ghost {
+  min-height: 30px;
+  border: 1px solid rgba(94, 234, 212, 0.16);
+  border-bottom-color: rgba(94, 234, 212, 0.35);
+  background: rgba(94, 234, 212, 0.035);
+  color: var(--agency-muted);
+}
+
+.content-os-shell-2g .content-os-action.is-ghost:hover {
+  border-color: rgba(94, 234, 212, 0.44);
+  color: var(--agency-text);
+}
+
+/* Source Rail clarity */
+.content-os-shell-2g .content-os-field,
+.content-os-shell-2g .content-os-writing {
+  position: relative;
+}
+
+.content-os-shell-2g .content-os-field span,
+.content-os-shell-2g .content-os-writing span {
+  color: rgba(148, 163, 184, 0.72);
+}
+
+.content-os-shell-2g .content-os-input,
+.content-os-shell-2g .content-os-textarea {
+  border-bottom-color: rgba(125, 211, 252, 0.10);
+}
+
+.content-os-shell-2g .content-os-source-line {
+  border-bottom-color: rgba(125, 211, 252, 0.07);
+}
+
+.content-os-shell-2g .content-os-readiness-chip {
+  border-top-color: rgba(94, 234, 212, 0.18);
+}
+
+/* Inspector: next action is the guide, not a hidden detail */
+.content-os-shell-2g .content-os-inspector-priority {
+  display: grid;
+  gap: 4px;
+  padding: 0 0 10px;
+  border-bottom: 1px solid rgba(94, 234, 212, 0.18);
+}
+
+.content-os-shell-2g .content-os-inspector-priority span {
+  color: var(--agency-mint);
+  font-size: 0.62rem;
+  font-weight: 850;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.content-os-shell-2g .content-os-inspector-priority strong {
+  color: var(--agency-text);
+  font-size: 0.9rem;
+}
+
+.content-os-shell-2g .content-os-scoreline {
+  border-bottom-color: rgba(125, 211, 252, 0.11);
+}
+
+.content-os-shell-2g .content-os-scoreline span {
+  color: var(--agency-mint);
+}
+
+.content-os-shell-2g .content-os-scoreline strong {
+  color: var(--agency-text);
+  font-size: 2.25rem;
+}
+
+.content-os-shell-2g .content-os-next-action {
+  border-bottom-color: rgba(125, 211, 252, 0.11);
+}
+
+.content-os-shell-2g .content-os-next-action span {
+  color: var(--agency-mint);
+}
+
+.content-os-shell-2g .content-os-inspector-row {
+  border-bottom-color: rgba(125, 211, 252, 0.07);
+}
+
+.content-os-shell-2g .content-os-inspector-row.is-ready span {
+  color: var(--agency-mint);
+}
+
+.content-os-shell-2g .content-os-inspector-row.is-missing span {
+  color: var(--agency-amber);
+}
+
+/* AI Team Tools: alive and compact */
+.content-os-shell-2g .content-os-assistant-dock {
+  background:
+    linear-gradient(90deg, rgba(5, 13, 25, 0.82), rgba(8, 20, 36, 0.46));
+  border-top-color: rgba(125, 211, 252, 0.12);
+  border-bottom-color: rgba(125, 211, 252, 0.12);
+}
+
+.content-os-shell-2g .content-os-dock-head strong {
+  color: var(--agency-text);
+}
+
+.content-os-shell-2g .content-os-tool-dock span {
+  color: var(--agency-mint);
+}
+
+.content-os-shell-2g .content-os-agent-strip button.is-active {
+  color: var(--agency-text);
+  border-bottom-color: var(--agency-mint);
+}
+
+/* Flow should be light, but visible */
+.content-os-shell-2g .content-os-status-timeline {
+  background: rgba(2, 7, 17, 0.44);
+}
+
+.content-os-shell-2g .content-os-status-timeline button.is-active {
+  color: var(--agency-text);
+  border-bottom-color: var(--agency-mint);
+}
+
+/* Better first impression in wide screens */
+@media (min-width: 1500px) {
+  .content-os-shell-2g .content-os-editor-layout {
+    grid-template-columns: 292px minmax(720px, 1fr) 306px;
+  }
+
+  .content-os-shell-2g .content-os-editor-surface {
+    min-height: 350px;
+  }
+}
+
+@media (max-width: 1300px) {
+  .content-os-shell-2g .content-os-appbar,
+  .content-os-shell-2g .content-os-context-strip {
+    grid-template-columns: 1fr;
+  }
+
+  .content-os-shell-2g .content-os-editor-layout {
+    grid-template-columns: 280px minmax(460px, 1fr);
+  }
+
+  .content-os-shell-2g .content-os-inspector {
+    grid-column: 1 / -1;
+  }
+}
+
+/* ==========================================================================
+   CONTENT-STUDIO-UX-RESET.2H MICRO VISUAL CLOSEOUT
+   Scope: .content-os-shell-2g[data-theme-version="v2"]
+   Goal: widen inspector, tighten source rail, clean tab focus, improve overflow.
+   ========================================================================== */
+
+/* 1) Better workspace proportions: slightly smaller source rail, wider inspector */
+.content-os-shell-2g .content-os-editor-layout {
+  grid-template-columns: 258px minmax(640px, 1fr) 332px;
+}
+
+@media (min-width: 1500px) {
+  .content-os-shell-2g .content-os-editor-layout {
+    grid-template-columns: 270px minmax(720px, 1fr) 344px;
+  }
+}
+
+@media (max-width: 1450px) {
+  .content-os-shell-2g .content-os-editor-layout {
+    grid-template-columns: 250px minmax(520px, 1fr) 320px;
+  }
+}
+
+@media (max-width: 1300px) {
+  .content-os-shell-2g .content-os-editor-layout {
+    grid-template-columns: 270px minmax(460px, 1fr);
+  }
+
+  .content-os-shell-2g .content-os-inspector {
+    grid-column: 1 / -1;
+  }
+}
+
+/* 2) Source Rail: tighter, cleaner, less dominant */
+.content-os-shell-2g .content-os-source-rail {
+  padding-right: 14px;
+}
+
+.content-os-shell-2g .content-os-source-rail .content-os-rail-heading {
+  margin-bottom: 8px;
+}
+
+.content-os-shell-2g .content-os-source-rail .content-os-rail-heading strong {
+  font-size: 0.9rem;
+}
+
+.content-os-shell-2g .content-os-source-rail .content-os-field,
+.content-os-shell-2g .content-os-source-rail .content-os-writing {
+  gap: 2px;
+}
+
+.content-os-shell-2g .content-os-source-rail .content-os-input {
+  min-height: 22px;
+  font-size: 0.8rem;
+}
+
+.content-os-shell-2g .content-os-source-rail .content-os-textarea {
+  min-height: 92px;
+  font-size: 0.8rem;
+  line-height: 1.42;
+}
+
+.content-os-shell-2g .content-os-source-line {
+  grid-template-columns: 62px minmax(0, 1fr);
+  gap: 8px;
+  padding: 4px 0;
+}
+
+.content-os-shell-2g .content-os-source-line strong {
+  font-size: 0.7rem;
+}
+
+/* 3) Quality Inspector: more breathing room and better hierarchy */
+.content-os-shell-2g .content-os-inspector {
+  padding-left: 18px;
+  padding-right: 18px;
+}
+
+.content-os-shell-2g .content-os-inspector-head {
+  margin-bottom: 12px;
+}
+
+.content-os-shell-2g .content-os-inspector-head strong {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.content-os-shell-2g .content-os-inspector-tabs {
+  gap: 8px;
+}
+
+.content-os-shell-2g .content-os-inspector-tabs button {
+  min-width: auto;
+  padding-inline: 4px;
+}
+
+.content-os-shell-2g .content-os-inspector-priority {
+  margin-top: 2px;
+  padding-bottom: 12px;
+}
+
+.content-os-shell-2g .content-os-next-action strong {
+  display: block;
+  max-width: 100%;
+  line-height: 1.42;
+}
+
+.content-os-shell-2g .content-os-inspector-row {
+  grid-template-columns: 76px minmax(0, 1fr);
+  gap: 12px;
+}
+
+.content-os-shell-2g .content-os-inspector-row strong {
+  line-height: 1.34;
+}
+
+/* 4) Tabs: active is active, focus is focus, hover is hover */
+.content-os-shell-2g .content-os-mode-tabs button,
+.content-os-shell-2g .content-os-inspector-tabs button,
+.content-os-shell-2g .content-os-agent-strip button,
+.content-os-shell-2g .content-os-status-timeline button {
+  outline: none;
+  box-shadow: none;
+  border: 0;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+  background: transparent;
+}
+
+.content-os-shell-2g .content-os-mode-tabs button:hover,
+.content-os-shell-2g .content-os-inspector-tabs button:hover,
+.content-os-shell-2g .content-os-agent-strip button:hover,
+.content-os-shell-2g .content-os-status-timeline button:hover {
+  border-bottom-color: rgba(94, 234, 212, 0.38);
+  color: var(--agency-text);
+  background: transparent;
+}
+
+.content-os-shell-2g .content-os-mode-tabs button:focus,
+.content-os-shell-2g .content-os-inspector-tabs button:focus,
+.content-os-shell-2g .content-os-agent-strip button:focus,
+.content-os-shell-2g .content-os-status-timeline button:focus {
+  background: transparent;
+}
+
+.content-os-shell-2g .content-os-mode-tabs button:focus-visible,
+.content-os-shell-2g .content-os-inspector-tabs button:focus-visible,
+.content-os-shell-2g .content-os-agent-strip button:focus-visible,
+.content-os-shell-2g .content-os-status-timeline button:focus-visible {
+  outline: 2px solid rgba(94, 234, 212, 0.48);
+  outline-offset: 3px;
+  border-bottom-color: rgba(94, 234, 212, 0.38);
+}
+
+.content-os-shell-2g .content-os-mode-tabs button.is-active,
+.content-os-shell-2g .content-os-inspector-tabs button.is-active,
+.content-os-shell-2g .content-os-agent-strip button.is-active,
+.content-os-shell-2g .content-os-status-timeline button.is-active {
+  border-bottom: 2px solid var(--agency-mint);
+  color: var(--agency-text);
+  background: transparent;
+}
+
+/* 5) Appbar title/command overflow control */
+.content-os-shell-2g .content-os-appbar {
+  grid-template-columns: 176px minmax(520px, 1fr) minmax(260px, auto) auto;
+}
+
+.content-os-shell-2g .content-os-appbrand {
+  min-width: 0;
+}
+
+.content-os-shell-2g .content-os-appbrand strong {
+  display: block;
+  max-width: 150px;
+  line-height: 1.16;
+}
+
+.content-os-shell-2g .content-os-commandline {
+  min-width: 0;
+}
+
+.content-os-shell-2g .content-os-commandline .content-os-input {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.content-os-shell-2g .content-os-appmeta {
+  min-width: 0;
+}
+
+.content-os-shell-2g .content-os-appmeta span {
+  max-width: 145px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 6) Center canvas: keep attention in the middle */
+.content-os-shell-2g .content-os-editor-meta strong {
+  max-width: 980px;
+}
+
+.content-os-shell-2g .content-os-editor-actions {
+  margin-top: 2px;
+  margin-bottom: 10px;
+}
+
+.content-os-shell-2g .content-os-action.is-ghost {
+  min-width: 116px;
+  justify-content: center;
+}
+
+/* 7) Assistant dock and timeline: lighter final state */
+.content-os-shell-2g .content-os-assistant-dock {
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+.content-os-shell-2g .content-os-tool-dock {
+  gap: 12px;
+}
+
+.content-os-shell-2g .content-os-tool-dock > div {
+  gap: 5px;
+}
+
+.content-os-shell-2g .content-os-status-timeline {
+  padding-top: 7px;
+  padding-bottom: 8px;
+}
+
+/* 8) Prevent accidental horizontal visual noise */
+.content-os-shell-2g .content-os-canvas-main,
+.content-os-shell-2g .content-os-source-rail,
+.content-os-shell-2g .content-os-inspector,
+.content-os-shell-2g .content-os-context-strip,
+.content-os-shell-2g .content-os-appbar {
+  min-width: 0;
+}
+
+.content-os-shell-2g .content-os-context-items,
+.content-os-shell-2g .content-os-contextline,
+.content-os-shell-2g .content-os-live-line {
+  overflow: hidden;
+}
+
+.content-os-shell-2g .content-os-context-items span,
+.content-os-shell-2g .content-os-contextline span,
+.content-os-shell-2g .content-os-live-line em {
+  overflow-wrap: anywhere;
+}
