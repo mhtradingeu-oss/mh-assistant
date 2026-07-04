@@ -1868,6 +1868,405 @@ function bindPage({
     };
   });
 
+  
+  
+  
+  
+  
+  
+  Array.from(document.querySelectorAll("[data-content-publish-action]")).forEach((button) => {
+    button.onclick = () => {
+      const action = button.getAttribute("data-content-publish-action") || "";
+      const clickExisting = (id) => {
+        const target = document.getElementById(id);
+        if (target && typeof target.click === "function") {
+          target.click();
+          return true;
+        }
+        return false;
+      };
+
+      if (action === "build-caption") {
+        session.activeOutputMode = "draft";
+        showMessage?.("Caption workflow selected. Build platform caption, opening hook, CTA, tone, language, and safe wording.");
+        rerender();
+        return;
+      }
+
+      if (action === "build-hashtags") {
+        session.activeOutputMode = "packet";
+        showMessage?.("Hashtag workflow selected. Build brand, category, problem, result, campaign, trend, and local-market hashtag set.");
+        rerender();
+        return;
+      }
+
+      if (action === "build-ads") {
+        session.activeOutputMode = "packet";
+        showMessage?.("Ad variants workflow selected. Prepare primary text, headlines, CTA variants, hook variants, and A/B labels.");
+        rerender();
+        return;
+      }
+
+      if (action === "legal-check") {
+        session.activeReviewMode = "risk";
+        showMessage?.("Legal check selected. Review claims, before/after, copyright, platform policy, brand safety, and consumer clarity.");
+        rerender();
+        return;
+      }
+
+      if (action === "approval-gates") {
+        session.activeReviewMode = "handoff";
+        showMessage?.("Approval gates selected. Confirm brand, source, governance, media, and publishing approvals before launch.");
+        rerender();
+        return;
+      }
+
+      if (action === "performance-plan") {
+        session.activeReviewMode = "platform";
+        showMessage?.("Performance plan selected. Track hook, watch time, engagement, clicks, conversions, ROAS, and learning loop.");
+        rerender();
+        return;
+      }
+
+      if (action === "save-learning") {
+        if (!clickExisting("contentSaveDraftBtn")) {
+          showMessage?.("Learning pack selected. Save winning hooks, weak points, audience reactions, prompt templates, and next actions to Library.");
+        }
+        return;
+      }
+
+      if (action === "send-publishing") {
+        if (!clickExisting("contentSendPublishingBtn")) {
+          showMessage?.("Publishing Pack is ready after caption, hashtags, CTA, legal checks, approvals, schedule, A/B plan, and measurement are complete.");
+        }
+        return;
+      }
+
+      showMessage?.("Publishing / Legal / Performance action selected.");
+    };
+  });
+
+  Array.from(document.querySelectorAll("[data-content-post-action]")).forEach((button) => {
+    button.onclick = () => {
+      const action = button.getAttribute("data-content-post-action") || "";
+      const clickExisting = (id) => {
+        const target = document.getElementById(id);
+        if (target && typeof target.click === "function") {
+          target.click();
+          return true;
+        }
+        return false;
+      };
+
+      if (action === "build-voiceover") {
+        session.activeOutputMode = "voiceover";
+        showMessage?.("Voiceover workflow selected. Build script, language variants, voice profile, pace, emotion, pronunciation notes, and duration.");
+        rerender();
+        return;
+      }
+
+      if (action === "sound-design") {
+        session.activeOutputMode = "voiceover";
+        showMessage?.("Sound design selected. Define music mood, BPM, transitions, beat sync, logo sting, and emotional sound direction.");
+        rerender();
+        return;
+      }
+
+      if (action === "sfx-plan") {
+        session.activeOutputMode = "scene";
+        showMessage?.("SFX plan selected. Map sound effects per scene: hits, risers, whooshes, texture swipes, jar click, and CTA sting.");
+        rerender();
+        return;
+      }
+
+      if (action === "graphics-plan") {
+        session.activeOutputMode = "scene";
+        showMessage?.("Graphics plan selected. Prepare text overlays, callouts, badges, safe zones, Canva-style motion, and After Effects notes.");
+        rerender();
+        return;
+      }
+
+      if (action === "editing-notes") {
+        session.activeOutputMode = "packet";
+        showMessage?.("Editing notes selected. Define cut rhythm, scene order, transitions, hold frames, CTA ending, and beat sync.");
+        rerender();
+        return;
+      }
+
+      if (action === "export-plan") {
+        session.activeReviewMode = "platform";
+        showMessage?.("Export plan selected. Prepare 9:16, 1:1, 4:5, VO, no-VO, music-only, subtitle, and ad-safe versions.");
+        rerender();
+        return;
+      }
+
+      if (action === "post-qc") {
+        session.activeReviewMode = "risk";
+        showMessage?.("Post QC selected. Validate audio clarity, subtitle accuracy, graphic safety, edit rhythm, platform specs, and final approval.");
+        rerender();
+        return;
+      }
+
+      if (action === "send-media-post") {
+        if (!clickExisting("contentSendMediaBtn")) {
+          showMessage?.("Post Production Pack is ready for Media Studio after VO, sound, SFX, graphics, edit notes, exports, and QC are complete.");
+        }
+        return;
+      }
+
+      showMessage?.("Post-production action selected.");
+    };
+  });
+
+  Array.from(document.querySelectorAll("[data-content-video-action]")).forEach((button) => {
+    button.onclick = () => {
+      const action = button.getAttribute("data-content-video-action") || "";
+      const clickExisting = (id) => {
+        const target = document.getElementById(id);
+        if (target && typeof target.click === "function") {
+          target.click();
+          return true;
+        }
+        return false;
+      };
+
+      if (action === "build-motion-system") {
+        session.activeOutputMode = "scene";
+        showMessage?.("Motion system selected. Define platform ratio, duration, scene timing, camera language, product motion, and video continuity rules.");
+        rerender();
+        return;
+      }
+
+      if (action === "scene-motion-rules") {
+        session.activeOutputMode = "scene";
+        showMessage?.("Scene motion rules selected. Every scene must have one action, start frame, end frame, motion prompt, negative prompt, and QC rule.");
+        rerender();
+        return;
+      }
+
+      if (action === "camera-plan") {
+        session.activeOutputMode = "prompt";
+        showMessage?.("Camera plan selected. Define shot size, angle, lens feel, movement, speed, and stabilization for each scene.");
+        rerender();
+        return;
+      }
+
+      if (action === "continuity-locks") {
+        session.activeReviewMode = "brand";
+        showMessage?.("Continuity locks selected. Keep product, logo, label, model, hand, outfit, location, light, and color grade consistent.");
+        rerender();
+        return;
+      }
+
+      if (action === "negative-motion") {
+        session.activeOutputMode = "prompt";
+        showMessage?.("Negative motion prompt selected. Prevent product morphing, unreadable logo, distorted hands, random objects, and scene jumps.");
+        rerender();
+        return;
+      }
+
+      if (action === "video-qc") {
+        session.activeReviewMode = "risk";
+        showMessage?.("Video QC selected. Validate scene logic, timing, motion clarity, logo readability, audio sync, and Media Studio readiness.");
+        rerender();
+        return;
+      }
+
+      if (action === "send-media-video") {
+        if (!clickExisting("contentSendMediaBtn")) {
+          showMessage?.("Video Motion Pack is ready for Media Studio after image locks, scene motion, audio notes, export specs, and QC are complete.");
+        }
+        return;
+      }
+
+      showMessage?.("Video / Motion action selected.");
+    };
+  });
+
+  Array.from(document.querySelectorAll("[data-content-image-action]")).forEach((button) => {
+    button.onclick = () => {
+      const action = button.getAttribute("data-content-image-action") || "";
+      const clickExisting = (id) => {
+        const target = document.getElementById(id);
+        if (target && typeof target.click === "function") {
+          target.click();
+          return true;
+        }
+        return false;
+      };
+
+      if (action === "check-assets") {
+        session.activeReviewMode = "sources";
+        showMessage?.("Image asset check selected. Approve product, logo, model, location, texture, start/end frames, thumbnail, and clean plate references.");
+        rerender();
+        return;
+      }
+
+      if (action === "build-image-prompt") {
+        session.activeOutputMode = "prompt";
+        showMessage?.("Image prompt workflow selected. Build prompt with product lock, logo lock, background, camera, lighting, style, and negative prompt.");
+        rerender();
+        return;
+      }
+
+      if (action === "build-start-frame") {
+        session.activeOutputMode = "scene";
+        showMessage?.("Start Frame workflow selected. Prepare the approved still image before motion with product, logo, model, and location locked.");
+        rerender();
+        return;
+      }
+
+      if (action === "build-end-frame") {
+        session.activeOutputMode = "scene";
+        showMessage?.("End Frame workflow selected. Prepare the approved final still for CTA, logo readability, and product hero continuity.");
+        rerender();
+        return;
+      }
+
+      if (action === "build-thumbnail") {
+        session.activeOutputMode = "prompt";
+        showMessage?.("Thumbnail workflow selected. Prepare a high-attention cover image with safe text zone and platform-ready crop.");
+        rerender();
+        return;
+      }
+
+      if (action === "send-media-image") {
+        if (!clickExisting("contentSendMediaBtn")) {
+          showMessage?.("Image Pack is ready for Media Studio after product, logo, background, start/end frames, and QC are approved.");
+        }
+        return;
+      }
+
+      showMessage?.("Image production action selected.");
+    };
+  });
+
+  Array.from(document.querySelectorAll("[data-content-research-action]")).forEach((button) => {
+    button.onclick = () => {
+      const action = button.getAttribute("data-content-research-action") || "";
+      const clickExisting = (id) => {
+        const target = document.getElementById(id);
+        if (target && typeof target.click === "function") {
+          target.click();
+          return true;
+        }
+        return false;
+      };
+
+      if (action === "load-research") {
+        session.activeReviewMode = "sources";
+        showMessage?.("Research Packet selected. Attach competitor, trend, audience, sound, hashtag, and hook findings from Research.");
+        rerender();
+        return;
+      }
+
+      if (action === "load-insight") {
+        session.activeReviewMode = "sources";
+        showMessage?.("Insight Packet selected. Attach performance gaps, weak hooks, best variants, audience behavior, and improvement notes.");
+        rerender();
+        return;
+      }
+
+      if (action === "build-angles") {
+        session.activeOutputMode = "draft";
+        showMessage?.("Creative angle workflow selected. Convert research signals into campaign angles, audience pain points, and content opportunities.");
+        rerender();
+        return;
+      }
+
+      if (action === "build-hooks") {
+        if (!clickExisting("contentGenerateDraftBtn")) {
+          showMessage?.("Hook Bank workflow selected. Generate hooks from audience pain, competitor patterns, platform trends, and performance insights.");
+        }
+        return;
+      }
+
+      if (action === "send-storyboard") {
+        session.activeOutputMode = "script";
+        session.activeReviewMode = "handoff";
+        showMessage?.("Research findings are ready to feed the Storyboard Execution Packet.");
+        rerender();
+        return;
+      }
+
+      if (action === "save-learning") {
+        if (!clickExisting("contentSaveDraftBtn")) {
+          showMessage?.("Learning packet is ready to save after approved outputs and performance results.");
+        }
+        return;
+      }
+
+      showMessage?.("Research / Insight action selected.");
+    };
+  });
+
+  Array.from(document.querySelectorAll("[data-content-bible-action]")).forEach((button) => {
+    button.onclick = () => {
+      const action = button.getAttribute("data-content-bible-action") || "";
+      const clickExisting = (id) => {
+        const target = document.getElementById(id);
+        if (target && typeof target.click === "function") {
+          target.click();
+          return true;
+        }
+        return false;
+      };
+
+      if (action === "check-references") {
+        session.activeReviewMode = "sources";
+        showMessage?.("Reference check selected. Attach approved product, logo, model, location, motion, and audio references before Media Studio.");
+        rerender();
+        return;
+      }
+
+      if (action === "improve-brief") {
+        if (!clickExisting("contentImproveBtn")) {
+          showMessage?.("Improve Brief is ready. Add missing audience, CTA, platform, and source rules first.");
+        }
+        return;
+      }
+
+      if (action === "build-scene-prompts") {
+        session.activeOutputMode = "prompt";
+        session.activeReviewMode = "handoff";
+        showMessage?.("Scene prompt workflow selected. Build one prompt per scene with product, logo, model, location, motion, and negative prompt rules.");
+        rerender();
+        return;
+      }
+
+      if (action === "build-audio-plan") {
+        session.activeOutputMode = "voiceover";
+        session.activeReviewMode = "handoff";
+        showMessage?.("Audio plan selected. Prepare voiceover, music direction, SFX, timing, and export variants before Media Studio.");
+        rerender();
+        return;
+      }
+
+      if (action === "prepare-handoff") {
+        session.activeReviewMode = "handoff";
+        showMessage?.("Media handoff preparation selected. Review the validator, complete missing references, then send the packet to Media Studio.");
+        rerender();
+        return;
+      }
+
+      if (action === "save-bible") {
+        if (!clickExisting("contentSaveDraftBtn")) {
+          showMessage?.("Production Bible is ready to save once the draft packet is available.");
+        }
+        return;
+      }
+
+      if (action === "send-media") {
+        if (!clickExisting("contentSendMediaBtn")) {
+          showMessage?.("Media Studio handoff is ready once the production bible, references, scene prompts, and audio plan are complete.");
+        }
+        return;
+      }
+
+      showMessage?.("Production Bible action selected.");
+    };
+  });
+
   Array.from(document.querySelectorAll("[data-content-review]")).forEach((button) => {
     button.onclick = () => {
       session.activeReviewMode = button.getAttribute("data-content-review") || "output";
@@ -2849,6 +3248,14 @@ function renderContentOsProductionCanvas(session, state, handoff, selectedItem, 
       </section>
 
       ${renderContentOsPackageLine(session, selectedItem, escapeHtml)}
+      ${renderContentOsProductionBible(session, selectedItem, escapeHtml)}
+      ${renderContentOsStoryboardPacket(session, selectedItem, escapeHtml)}
+      ${renderContentOsCampaignContentPack(session, selectedItem, escapeHtml)}
+      ${renderContentOsResearchInsightPacket(session, selectedItem, escapeHtml)}
+      ${renderContentOsImageProductionPack(session, selectedItem, escapeHtml)}
+      ${renderContentOsVideoMotionPack(session, selectedItem, escapeHtml)}
+      ${renderContentOsPostProductionPack(session, selectedItem, escapeHtml)}
+      ${renderContentOsPublishingLegalPerformancePack(session, selectedItem, escapeHtml)}
       ${renderContentOsMediaBlueprint(session, selectedItem, escapeHtml)}
     </main>
   `;
@@ -2888,6 +3295,1587 @@ function renderContentOsMediaBlueprint(session, selectedItem, escapeHtml) {
           <em>${escapeHtml(value)}</em>
         </div>
       `).join("")}
+    </section>
+  `;
+}
+
+
+function contentOsCampaignBibleSections(session, selectedItem) {
+  const form = session.form || {};
+  const detected = contentOsDetectedType(session, selectedItem);
+  const destination = contentOsDestination(session, selectedItem);
+  const workflow = contentOsWorkflowName(session, selectedItem);
+
+  return [
+    {
+      title: "Campaign Intake",
+      status: "ready",
+      items: [
+        ["Product", form.product || "Not selected"],
+        ["Goal", form.objective || "Needs campaign goal"],
+        ["Audience", "Target audience and buyer segment required"],
+        ["Platform", form.channel || "Needs platform"],
+        ["Language", form.language || "Needs language"],
+        ["CTA", "CTA and landing link required"]
+      ]
+    },
+    {
+      title: "Reference Packs",
+      status: "missing",
+      items: [
+        ["Product Reference", "Front, side, packaging, logo close-up, texture"],
+        ["Brand Assets", "Logo, colors, tone, visual identity"],
+        ["Model Reference", "Same model, hair, outfit, expression"],
+        ["Location Reference", "Approved studio / location reference"],
+        ["Motion Reference", "Product handling, application, styling movement"],
+        ["Audio Reference", "Music mood, SFX, voice profile"]
+      ]
+    },
+    {
+      title: "Consistency Locks",
+      status: "needs-review",
+      items: [
+        ["Product Lock", "Same product, label, cap, logo, size, no redesign"],
+        ["Brand Lock", "Premium masculine grooming, dark clean style"],
+        ["Model Lock", "Same face, hair, outfit, skin tone"],
+        ["Location Lock", "Same room, lighting, background"],
+        ["Logo Lock", "Readable, not distorted, not hidden"],
+        ["Claim Safety", "No medical or unsupported performance claims"]
+      ]
+    },
+    {
+      title: "Scene Production Table",
+      status: "draft",
+      items: [
+        ["Scene 01", "Hook / problem / first impression"],
+        ["Scene 02", "Product reveal / logo readable"],
+        ["Scene 03", "Texture and small amount"],
+        ["Scene 04", "Application and styling"],
+        ["Scene 05", "Final look and confidence"],
+        ["Scene 06", "Product hero and CTA"]
+      ]
+    },
+    {
+      title: "Prompt System",
+      status: "draft",
+      items: [
+        ["Master Prompt", "Campaign-wide visual, brand, product, model, location rules"],
+        ["Scene Prompts", "One prompt per scene, one action per shot"],
+        ["Negative Prompt", "No product redesign, no logo change, no fake labels, no random text"],
+        ["Start Frames", "Approved still image before motion"],
+        ["End Frames", "Approved final image before motion"],
+        ["Prompt Preview", "What AI will use and why"]
+      ]
+    },
+    {
+      title: "Audio & Post Production",
+      status: "draft",
+      items: [
+        ["Music Direction", "Dark premium beat, 90–110 BPM"],
+        ["Sound Effects", "Bass hit, jar click, texture swipe, riser, logo sting"],
+        ["Voiceover", "Language, tone, pace, pronunciation"],
+        ["Text Animation", "Short safe text, no AI-generated text inside video"],
+        ["Color Grade", "Premium dark grade, clean skin tone, visible product"],
+        ["Exports", "9:16 ad, story, no-VO, VO, music-only versions"]
+      ]
+    },
+    {
+      title: "Media Handoff Validator",
+      status: "missing",
+      items: [
+        ["Production Bible", "Must be complete before Media Studio"],
+        ["References", "Product, logo, model, and location references approved"],
+        ["Scenes", "Scene list, shot list, and durations approved"],
+        ["Prompts", "Master, scene, and negative prompts ready"],
+        ["Audio", "Voiceover, music, and SFX direction ready"],
+        ["QC Gates", "Product, brand, motion, audio, platform checks ready"]
+      ]
+    }
+  ];
+}
+
+function contentOsBibleReadiness(session, selectedItem) {
+  const sections = contentOsCampaignBibleSections(session, selectedItem);
+  const ready = sections.filter((section) => section.status === "ready").length;
+  const draft = sections.filter((section) => section.status === "draft").length;
+  const missing = sections.filter((section) => section.status === "missing").length;
+  const needsReview = sections.filter((section) => section.status === "needs-review").length;
+  const total = sections.length;
+  const score = Math.max(12, Math.round(((ready * 1 + draft * 0.55 + needsReview * 0.38) / total) * 100));
+
+  return {
+    score,
+    label: score >= 85 ? "Media handoff ready" : score >= 60 ? "Production bible in progress" : "Bible needs sources",
+    missing,
+    draft,
+    needsReview,
+    ready
+  };
+}
+
+function renderContentOsProductionBible(session, selectedItem, escapeHtml) {
+  const sections = contentOsCampaignBibleSections(session, selectedItem);
+  const readiness = contentOsBibleReadiness(session, selectedItem);
+
+  return `
+    <section class="content-os-bible" aria-label="Campaign Production Bible">
+      <header class="content-os-bible-head">
+        <div>
+          <span>Campaign Production Bible</span>
+          <strong>Media-ready production control file</strong>
+          <p>Lock product, brand, references, scenes, prompts, audio, post-production, and handoff readiness before Media Studio execution.</p>
+        </div>
+        <aside>
+          <span>${escapeHtml(readiness.label)}</span>
+          <strong>${escapeHtml(String(readiness.score))}%</strong>
+        </aside>
+      </header>
+
+      <div class="content-os-bible-route" aria-label="Production Bible flow">
+        <span class="is-ready">01 Intake</span>
+        <span class="is-missing">02 References</span>
+        <span class="is-review">03 Locks</span>
+        <span class="is-draft">04 Scenes</span>
+        <span class="is-draft">05 Prompts</span>
+        <span class="is-draft">06 Audio/Edit</span>
+        <span class="is-missing">07 Handoff</span>
+      </div>
+
+      <div class="content-os-bible-alert">
+        <strong>Before Media Studio</strong>
+        <span>Attach approved product, logo, model, location, motion, and audio references. Then generate scene prompts and validate the handoff packet.</span>
+      </div>
+
+      <div class="content-os-bible-actions" aria-label="Media Studio handoff actions">
+        <button type="button" data-content-bible-action="check-references">
+          <span>01</span>
+          <strong>Check Missing References</strong>
+        </button>
+        <button type="button" data-content-bible-action="improve-brief">
+          <span>02</span>
+          <strong>Improve Brief</strong>
+        </button>
+        <button type="button" data-content-bible-action="build-scene-prompts">
+          <span>03</span>
+          <strong>Build Scene Prompts</strong>
+        </button>
+        <button type="button" data-content-bible-action="build-audio-plan">
+          <span>04</span>
+          <strong>Build Audio Plan</strong>
+        </button>
+        <button type="button" data-content-bible-action="prepare-handoff">
+          <span>05</span>
+          <strong>Prepare Media Handoff</strong>
+        </button>
+        <button type="button" data-content-bible-action="save-bible">
+          <span>06</span>
+          <strong>Save Production Bible</strong>
+        </button>
+        <button type="button" data-content-bible-action="send-media" class="is-primary">
+          <span>07</span>
+          <strong>Send to Media Studio</strong>
+        </button>
+      </div>
+
+      <div class="content-os-bible-grid">
+        ${sections.map((section) => `
+          <article class="content-os-bible-section is-${escapeHtml(section.status)}">
+            <header>
+              <span>${escapeHtml(section.status.replace("-", " "))}</span>
+              <strong>${escapeHtml(section.title)}</strong>
+            </header>
+            <div>
+              ${section.items.map(([label, value]) => `
+                <p>
+                  <span>${escapeHtml(label)}</span>
+                  <strong>${escapeHtml(value)}</strong>
+                </p>
+              `).join("")}
+            </div>
+          </article>
+        `).join("")}
+      </div>
+    </section>
+  `;
+}
+
+
+function contentOsStoryboardScenes(session, selectedItem) {
+  const detected = contentOsDetectedType(session, selectedItem);
+  const isMedia = /video|media|image|visual|campaign|social/i.test(`${detected} ${session.form?.objective || ""} ${session.form?.brief || ""}`);
+
+  if (!isMedia) {
+    return [
+      {
+        scene: "01",
+        duration: "Draft",
+        purpose: "Main message",
+        visual: "Turn the request into a clear content structure.",
+        camera: "N/A",
+        action: "Write and refine",
+        text: "Main headline",
+        voice: "Optional",
+        audio: "N/A",
+        start: "N/A",
+        end: "N/A",
+        motion: "N/A",
+        negative: "Avoid unclear claims and off-brand language",
+        qc: "Brand tone, source truth, destination fit"
+      }
+    ];
+  }
+
+  return [
+    {
+      scene: "01",
+      duration: "0:00–0:03",
+      purpose: "Problem hook",
+      visual: "Model in mirror with slightly uncontrolled hair; dissatisfaction is clear.",
+      camera: "Close medium over-shoulder mirror shot",
+      action: "Hand through hair, pause, serious expression",
+      text: "Bad hair ruins the first impression.",
+      voice: "Your style starts before you leave the room.",
+      audio: "Low bass hit + natural hair movement",
+      start: "Model before styling, same room, same outfit, hair uncontrolled",
+      end: "Model pauses in mirror, problem clearly visible",
+      motion: "One natural hand-through-hair motion only",
+      negative: "No product yet, no location change, no different model",
+      qc: "Problem visible in first 2 seconds"
+    },
+    {
+      scene: "02",
+      duration: "0:03–0:06",
+      purpose: "Product reveal",
+      visual: "Real product jar on premium dark counter; logo readable.",
+      camera: "Slow cinematic push-in / macro product shot",
+      action: "Product appears as solution",
+      text: "HAIROTICMEN Aqua Wax",
+      voice: "HAIROTICMEN Aqua Wax gives you strong control.",
+      audio: "Premium whoosh",
+      start: "Product centered on counter",
+      end: "Logo sharp and readable",
+      motion: "Slow camera push-in only",
+      negative: "No product redesign, no fake label, no blurry logo",
+      qc: "Logo readable and product identical to reference"
+    },
+    {
+      scene: "03",
+      duration: "0:06–0:10",
+      purpose: "Texture and usage",
+      visual: "Hand opens jar and takes a small amount of wax.",
+      camera: "Macro close-up on jar, hand, texture",
+      action: "Open jar, take small amount",
+      text: "Small amount. Strong control.",
+      voice: "A small amount helps shape and define your look.",
+      audio: "Jar click + texture swipe",
+      start: "Jar closed or just opened",
+      end: "Small amount visible on finger",
+      motion: "Open and scoop one small amount only",
+      negative: "No deformed hands, no extra product, no dirty counter",
+      qc: "Texture visible, hand natural, package unchanged"
+    },
+    {
+      scene: "04",
+      duration: "0:10–0:15",
+      purpose: "Styling transformation",
+      visual: "Model rubs wax between hands and applies it to hair.",
+      camera: "Close-up hands and hair, mirror reflection",
+      action: "Rub, apply, define shape",
+      text: "Shape it. Define it. Own it.",
+      voice: "Shape it. Define it. Own it.",
+      audio: "Soft riser + styling movement",
+      start: "Wax on hands before application",
+      end: "Hair begins to look defined",
+      motion: "One styling movement sequence, no sudden jump",
+      negative: "No unrealistic hair movement, no face change, no location change",
+      qc: "Hair transformation looks natural"
+    },
+    {
+      scene: "05",
+      duration: "0:15–0:20",
+      purpose: "Final look and emotion",
+      visual: "Model looks confident with finished styled hair.",
+      camera: "Hero close-up then half-body confidence shot",
+      action: "Look in mirror, adjust collar, turn slightly",
+      text: "All-day confidence.",
+      voice: "Clean definition and all-day confidence.",
+      audio: "Impact hit",
+      start: "Final hair visible in mirror",
+      end: "Confident hero look",
+      motion: "Subtle collar adjustment and turn",
+      negative: "No different model, no overdramatic transformation",
+      qc: "Confidence clear, hair controlled"
+    },
+    {
+      scene: "06",
+      duration: "0:20–0:24",
+      purpose: "Product hero and CTA",
+      visual: "Product sharp in foreground, model blurred in background.",
+      camera: "Static premium hero shot",
+      action: "Product hold, final brand memory",
+      text: "AQUA WAX · LOCK YOUR LOOK · Shop now",
+      voice: "Lock your look. Own your day.",
+      audio: "Final bass hit + logo sting",
+      start: "Product foreground, final styled model behind",
+      end: "Logo and CTA clear",
+      motion: "Subtle light movement only",
+      negative: "No extra objects, no unreadable logo, no fake text on package",
+      qc: "Product sells the final frame"
+    }
+  ];
+}
+
+function contentOsCampaignPacks(session, selectedItem) {
+  return [
+    {
+      title: "Hook Bank",
+      status: "ready",
+      items: [
+        "Bad hair ruins the first impression.",
+        "From messy to sharp in seconds.",
+        "Small amount. Strong control.",
+        "Your hair. Your rules.",
+        "Look sharp. Feel confident."
+      ]
+    },
+    {
+      title: "Ad Copy Pack",
+      status: "draft",
+      items: [
+        "Primary text variants",
+        "Problem / solution angle",
+        "Premium brand angle",
+        "German ad version",
+        "Arabic ad version"
+      ]
+    },
+    {
+      title: "Social Pack",
+      status: "draft",
+      items: [
+        "Product hero post",
+        "Before / after post",
+        "Texture close-up post",
+        "Lifestyle result post",
+        "Barber / salon version"
+      ]
+    },
+    {
+      title: "Voice Pack",
+      status: "draft",
+      items: [
+        "English voiceover",
+        "Arabic voiceover",
+        "German voiceover",
+        "No-voice version",
+        "Music + SFX only"
+      ]
+    },
+    {
+      title: "Landing / Thumbnail",
+      status: "draft",
+      items: [
+        "Landing hero headline",
+        "Subheadline",
+        "CTA",
+        "Thumbnail text",
+        "Safe overlay copy"
+      ]
+    },
+    {
+      title: "Calendar / Learning",
+      status: "draft",
+      items: [
+        "14-day launch calendar",
+        "A/B campaign versions",
+        "3-second hold rate",
+        "Watch time / completion",
+        "CTR / conversion / ROAS learning"
+      ]
+    }
+  ];
+}
+
+function contentOsReferenceStatusItems(session, selectedItem) {
+  return [
+    ["Product reference", "Missing", "Front, side, packaging, logo close-up, texture"],
+    ["Logo file", "Missing", "Approved logo, no distortion, readable lock"],
+    ["Model reference", "Missing", "Same face, hair, outfit, expression"],
+    ["Location reference", "Missing", "Approved dark bathroom / studio"],
+    ["Motion reference", "Missing", "Open jar, apply wax, style hair"],
+    ["Audio reference", "Missing", "Music mood, SFX, voice profile"],
+    ["Start / End frames", "Missing", "Approved stills before animation"],
+    ["Export specs", "Draft", "9:16, story, 1:1, VO, no-VO, languages"]
+  ];
+}
+
+
+function contentOsResearchInsightItems(session, selectedItem) {
+  const objective = session.form?.objective || "";
+  const brief = session.form?.brief || "";
+  const campaign = session.form?.campaign || "Not selected yet";
+  const platform = session.form?.channel || "instagram";
+
+  return {
+    source: [
+      ["Research source", "Research Page", "Market, competitor, trend, audience, keyword, sound, and hashtag findings"],
+      ["Insight source", "Insights Page", "Performance reports, content gaps, weak hooks, best variants, and next opportunities"],
+      ["Campaign source", "Campaign Studio", campaign],
+      ["Current platform", platform, "Used to adapt hooks, caption style, media format, safe zones, and publishing packet"]
+    ],
+    signals: [
+      ["Audience pain", "Needs buyer segment", "Define exact buyer pain, lifestyle, motivation, and objection"],
+      ["Competitor pattern", "Needs research packet", "Winning ads, repeated hooks, claims, visual structure, and offer style"],
+      ["Trend signal", "No trend attached", "Relevant creative trend, format, sound, pacing, and platform behavior"],
+      ["Hook pattern", "Draft", "Problem hook, transformation hook, proof hook, product demo hook, social proof hook"],
+      ["Sound direction", "Draft", "Music mood, sound effect pattern, voice energy, and licensed usage"],
+      ["Hashtag direction", "Draft", "Brand, category, problem, result, campaign, and local market hashtags"]
+    ],
+    opportunities: [
+      {
+        title: "Creative Angles",
+        status: "draft",
+        items: [
+          "Problem / solution angle",
+          "Premium grooming angle",
+          "Confidence and first impression angle",
+          "Small amount / strong control angle",
+          "Salon and barber recommendation angle"
+        ]
+      },
+      {
+        title: "Content Opportunities",
+        status: "draft",
+        items: [
+          "Short-form video concept",
+          "Product education post",
+          "Before / after transformation",
+          "Texture close-up content",
+          "Marketplace product copy"
+        ]
+      },
+      {
+        title: "Research-to-Output",
+        status: "draft",
+        items: [
+          "Turn top hook into ad script",
+          "Turn competitor pattern into safe variant",
+          "Turn trend signal into scene direction",
+          "Turn audience pain into caption",
+          "Turn report weakness into improved version"
+        ]
+      },
+      {
+        title: "Missing Research",
+        status: "missing",
+        items: [
+          "Top 5 competitor ads",
+          "Top 5 platform hooks",
+          "Audience segment and objections",
+          "Trend / sound references",
+          "Hashtag and keyword set"
+        ]
+      }
+    ],
+    next: [
+      "Attach Research Packet from Research Page",
+      "Attach Insight Packet from Insights Page",
+      "Convert findings into hook bank and creative angles",
+      "Send selected angles into Storyboard and Campaign Content Pack",
+      "Save winning patterns to Library after performance review"
+    ],
+    objective,
+    brief
+  };
+}
+
+
+function contentOsImageRequirements(session, selectedItem) {
+  return [
+    ["Product master reference", "missing", "Approved front, side, top, packaging, label, cap, texture, and scale references"],
+    ["Logo lock", "missing", "Approved logo file; must stay readable, undistorted, correctly placed, and never regenerated"],
+    ["Brand visual system", "draft", "Color palette, typography style, lighting language, premium grooming mood, and design rules"],
+    ["Background / location", "missing", "Approved studio, bathroom, counter, or lifestyle background; no random locations"],
+    ["Model / hand reference", "missing", "Same model, hand, skin tone, hair type, outfit, and expression when people are used"],
+    ["Texture / product detail", "draft", "Macro texture, wax amount, shine level, jar opening, application detail"],
+    ["Start frame", "missing", "Approved still image before motion; product, logo, model, and location locked"],
+    ["End frame", "missing", "Approved final still image for CTA or product hero; no surprise change in video"],
+    ["Clean plate", "draft", "Background image without product/model for editing, masking, or graphics"],
+    ["Thumbnail / hero image", "draft", "High-attention campaign still for ads, reels cover, website, and marketplace use"],
+    ["Safe text zone", "draft", "Text overlay area; avoid adding fake AI text inside generated product image"],
+    ["Image QC", "missing", "Product identical, logo readable, no fake label, no extra objects, no distorted hands, no brand drift"]
+  ];
+}
+
+function contentOsImagePromptLayers(session, selectedItem) {
+  return [
+    {
+      title: "Product Hero",
+      status: "missing",
+      items: [
+        "Main product image",
+        "Logo readable",
+        "Premium lighting",
+        "Clean background",
+        "Ad-ready composition"
+      ]
+    },
+    {
+      title: "Texture Macro",
+      status: "draft",
+      items: [
+        "Wax texture detail",
+        "Small amount on finger",
+        "Natural hand",
+        "No deformed fingers",
+        "No extra product"
+      ]
+    },
+    {
+      title: "Lifestyle Result",
+      status: "draft",
+      items: [
+        "Same model",
+        "Styled hair result",
+        "Same room / lighting",
+        "Premium grooming mood",
+        "Confidence expression"
+      ]
+    },
+    {
+      title: "Start / End Frames",
+      status: "missing",
+      items: [
+        "Scene start still",
+        "Scene end still",
+        "No product change",
+        "No logo change",
+        "Motion-safe continuity"
+      ]
+    },
+    {
+      title: "Thumbnail / Cover",
+      status: "draft",
+      items: [
+        "Readable product",
+        "Strong contrast",
+        "Short text area",
+        "Platform-safe crop",
+        "CTA-ready framing"
+      ]
+    },
+    {
+      title: "Image Negative Prompt",
+      status: "ready",
+      items: [
+        "No product redesign",
+        "No fake logo",
+        "No unreadable label",
+        "No distorted hands",
+        "No random background"
+      ]
+    }
+  ];
+}
+
+function contentOsImageOutputList(session, selectedItem) {
+  return [
+    ["Product hero image", "Required before video hero scene"],
+    ["Logo close-up", "Required for brand lock and final frame"],
+    ["Packaging / label image", "Required to prevent product redesign"],
+    ["Texture macro image", "Required for product detail scene"],
+    ["Model result image", "Required if model appears in video"],
+    ["Location reference image", "Required for visual consistency"],
+    ["Start frame per key scene", "Required before motion generation"],
+    ["End frame per key scene", "Required before motion generation"],
+    ["Thumbnail / cover image", "Required for publishing and ads"],
+    ["Clean plate", "Useful for graphics, text overlay, and editing"]
+  ];
+}
+
+
+function contentOsVideoMotionRequirements(session, selectedItem) {
+  return [
+    ["Video objective", "draft", "Define what the video must achieve: awareness, product proof, sales, education, or retargeting"],
+    ["Platform ratio", "draft", "9:16, 1:1, 4:5, 16:9, story, reels, TikTok, ad, website, marketplace"],
+    ["Duration plan", "draft", "Exact total duration and scene timing; each scene must have seconds and purpose"],
+    ["Start frame lock", "missing", "Approved still image before motion for every key scene"],
+    ["End frame lock", "missing", "Approved final still image for every key scene"],
+    ["One action per shot", "ready", "Each shot must contain one clear motion only to avoid AI drift"],
+    ["Camera movement", "draft", "Push-in, pull-out, orbit, pan, tilt, macro, handheld, static, or locked tripod"],
+    ["Product motion", "draft", "What moves: product, hand, model, camera, light, or background"],
+    ["Continuity locks", "missing", "Same product, logo, label, model, outfit, location, lighting, and color grade"],
+    ["Negative motion prompt", "ready", "No product redesign, no logo change, no random text, no distorted hands, no scene jump"],
+    ["Transition logic", "draft", "Cut, match cut, whip, hard cut, speed ramp, before/after, or clean product reveal"],
+    ["Video QC", "missing", "Check product identity, logo readability, scene logic, motion quality, timing, and export readiness"]
+  ];
+}
+
+function contentOsVideoMotionLayers(session, selectedItem) {
+  return [
+    {
+      title: "Master Video Prompt",
+      status: "draft",
+      items: [
+        "Campaign-wide visual rules",
+        "Product and logo lock",
+        "Model / location continuity",
+        "Camera language",
+        "Platform and duration"
+      ]
+    },
+    {
+      title: "Scene Motion Rules",
+      status: "draft",
+      items: [
+        "One action per scene",
+        "Start frame approved",
+        "End frame approved",
+        "Motion path defined",
+        "QC rule per scene"
+      ]
+    },
+    {
+      title: "Camera Direction",
+      status: "draft",
+      items: [
+        "Shot size",
+        "Camera movement",
+        "Lens / angle",
+        "Speed and pacing",
+        "Stabilization rule"
+      ]
+    },
+    {
+      title: "Continuity Locks",
+      status: "missing",
+      items: [
+        "Same product",
+        "Same logo",
+        "Same model / hand",
+        "Same location",
+        "Same light and grade"
+      ]
+    },
+    {
+      title: "Negative Motion Prompt",
+      status: "ready",
+      items: [
+        "No product morphing",
+        "No unreadable logo",
+        "No extra objects",
+        "No warped hands",
+        "No random scene change"
+      ]
+    },
+    {
+      title: "Video Export Rules",
+      status: "draft",
+      items: [
+        "9:16 story / reel",
+        "No-VO version",
+        "VO version",
+        "Music-only version",
+        "Ad-safe cutdown"
+      ]
+    }
+  ];
+}
+
+function contentOsVideoQcItems(session, selectedItem) {
+  return [
+    ["Scene logic", "Hook → product reveal → proof/detail → transformation/result → hero/CTA"],
+    ["Timing", "Every scene has duration, pacing, and clear cut point"],
+    ["Motion clarity", "Only one main motion per shot; no confusing or competing movement"],
+    ["Product identity", "Product shape, size, label, cap, packaging, and texture remain unchanged"],
+    ["Logo visibility", "Logo readable in product reveal and final hero frame"],
+    ["Model consistency", "Same face, hair, hand, outfit, and expression when model appears"],
+    ["Location consistency", "Same approved studio, bathroom, counter, or lifestyle environment"],
+    ["Prompt completeness", "Master prompt, scene prompt, motion prompt, and negative prompt are ready"],
+    ["Audio sync", "Motion allows room for VO, SFX, music beat, and text animation"],
+    ["Handoff readiness", "Video pack can be sent to Media Studio only after missing references are resolved"]
+  ];
+}
+
+
+function contentOsPostProductionRequirements(session, selectedItem) {
+  return [
+    ["Voiceover script", "draft", "Final spoken script by language, tone, pacing, pronunciation, pauses, and duration"],
+    ["Voice profile", "missing", "Male/female, age feel, accent, energy, emotion, brand style, and provider reference"],
+    ["Speech-to-text source", "draft", "Voice note or recorded idea can be transcribed into structured script and captions"],
+    ["Music direction", "draft", "Genre, mood, BPM, intensity, platform suitability, license status, and cut points"],
+    ["Sound design", "draft", "Bass hits, risers, whooshes, product sounds, texture swipes, logo sting, and transitions"],
+    ["Sound effects / SFX", "draft", "Specific SFX per scene; not generic noise; must support motion and product action"],
+    ["Text overlays", "draft", "Short readable text, safe area, timing, hierarchy, no fake AI text inside generated footage"],
+    ["Motion graphics", "draft", "Canva / After Effects style elements, lower thirds, callouts, arrows, badges, and highlights"],
+    ["Editing notes", "draft", "Cut rhythm, scene order, pacing, transition logic, beat sync, hold times, and final CTA"],
+    ["Color grade", "draft", "Premium dark/gold, clean skin, product visible, brand-safe contrast, and platform readability"],
+    ["Export versions", "draft", "VO, no-VO, music-only, subtitle version, short cutdown, 9:16, 1:1, 4:5, 16:9"],
+    ["Post QC", "missing", "Audio clarity, sync, subtitle accuracy, logo visibility, text safety, platform specs, final approval"]
+  ];
+}
+
+function contentOsPostProductionLayers(session, selectedItem) {
+  return [
+    {
+      title: "Voiceover Pack",
+      status: "draft",
+      items: [
+        "Final VO script",
+        "Language variants",
+        "Voice tone and pace",
+        "Pronunciation notes",
+        "Duration timing"
+      ]
+    },
+    {
+      title: "Sound Design Pack",
+      status: "draft",
+      items: [
+        "Music mood",
+        "SFX per scene",
+        "Beat sync notes",
+        "Logo sting",
+        "Transition sounds"
+      ]
+    },
+    {
+      title: "Graphics Pack",
+      status: "draft",
+      items: [
+        "Text overlays",
+        "Callouts / badges",
+        "Canva-style motion",
+        "After Effects notes",
+        "Safe text zones"
+      ]
+    },
+    {
+      title: "Editing Pack",
+      status: "draft",
+      items: [
+        "Scene order",
+        "Cut rhythm",
+        "Transition logic",
+        "Hold frames",
+        "CTA ending"
+      ]
+    },
+    {
+      title: "Localization Pack",
+      status: "draft",
+      items: [
+        "Arabic version",
+        "English version",
+        "German version",
+        "Subtitle adaptation",
+        "Market-safe wording"
+      ]
+    },
+    {
+      title: "Final Export Pack",
+      status: "missing",
+      items: [
+        "9:16 final",
+        "No-VO version",
+        "VO version",
+        "Music-only version",
+        "Ad-safe version"
+      ]
+    }
+  ];
+}
+
+function contentOsPostProductionScenePlan(session, selectedItem) {
+  return [
+    ["Scene 01", "Hook", "Low bass hit", "Problem text", "Hard cut after first impression"],
+    ["Scene 02", "Product reveal", "Logo sting", "Product name / benefit", "Slow push-in, hold logo readable"],
+    ["Scene 03", "Texture detail", "Jar click + texture swipe", "Small amount", "Macro cut, no fast motion"],
+    ["Scene 04", "Application", "Soft riser", "Shape it. Define it.", "Beat-synced application sequence"],
+    ["Scene 05", "Result", "Impact hit", "All-day confidence", "Hold confident expression"],
+    ["Scene 06", "Hero / CTA", "Final bass hit + logo sting", "AQUA WAX · LOCK YOUR LOOK", "End frame locked for CTA"]
+  ];
+}
+
+function contentOsPostQcItems(session, selectedItem) {
+  return [
+    ["Voiceover clarity", "Voice is clear, on-brand, correctly paced, and fits scene timing"],
+    ["Audio mix", "Music, SFX, and voice do not fight each other; levels are platform-safe"],
+    ["Subtitle accuracy", "Captions match VO and are readable on mobile"],
+    ["Graphic safety", "No fake AI-generated product text; overlays are outside protected product/logo areas"],
+    ["Brand consistency", "Color, motion, typography, sound, and CTA match brand rules"],
+    ["Edit rhythm", "Hook fast, product readable, detail clear, result emotional, CTA held long enough"],
+    ["Platform specs", "Safe zones, ratio, duration, captions, file naming, and export versions ready"],
+    ["Legal safety", "No unsupported medical, performance, or misleading claims"],
+    ["Media handoff", "Media Studio receives VO, SFX notes, graphics notes, edit notes, and exports"],
+    ["Publishing readiness", "Final assets can move to Publishing / Ads after review and approval"]
+  ];
+}
+
+
+function contentOsPublishingRequirements(session, selectedItem) {
+  return [
+    ["Publishing caption", "draft", "Final caption by platform, language, tone, CTA, hook, and safe claim rules"],
+    ["Platform versions", "draft", "Instagram, TikTok, YouTube Shorts, Facebook, LinkedIn, website, marketplace, email, and ads variants"],
+    ["Hashtag set", "missing", "Brand, category, problem, result, campaign, local market, and trend hashtags"],
+    ["CTA system", "missing", "Shop now, learn more, book, message us, visit page, claim offer, or save for later"],
+    ["Ad copy variants", "draft", "Primary text, headline, description, hook angle, benefit angle, problem angle, and retargeting angle"],
+    ["SEO / metadata", "draft", "Title, meta description, keywords, alt text, video title, video description, and searchable terms"],
+    ["Legal / claim safety", "missing", "No unsupported medical, performance, guarantee, before/after, or misleading claims"],
+    ["Approval gates", "missing", "Brand approval, source approval, governance approval, media approval, publishing approval"],
+    ["Schedule plan", "draft", "Best posting windows, campaign wave, launch sequence, reminders, and reuse plan"],
+    ["A/B testing plan", "draft", "Hook variants, CTA variants, caption variants, thumbnail variants, and audience angle variants"],
+    ["Performance tracking", "draft", "CTR, hold rate, watch time, saves, shares, comments, conversion, ROAS, and learning notes"],
+    ["Learning loop", "missing", "Save winning hooks, weak points, audience reactions, and next content actions to Library and Insights"]
+  ];
+}
+
+function contentOsPlatformDeliverables(session, selectedItem) {
+  return [
+    {
+      title: "Instagram / TikTok",
+      status: "draft",
+      items: [
+        "Short caption",
+        "Hook in first line",
+        "Hashtags",
+        "Reel cover text",
+        "CTA and safe zone"
+      ]
+    },
+    {
+      title: "Ads Manager",
+      status: "draft",
+      items: [
+        "Primary text variants",
+        "Headline variants",
+        "CTA variants",
+        "Audience angle",
+        "A/B test labels"
+      ]
+    },
+    {
+      title: "Publishing",
+      status: "missing",
+      items: [
+        "Approved final caption",
+        "Asset link",
+        "Schedule note",
+        "Platform format",
+        "Approval status"
+      ]
+    },
+    {
+      title: "Website / Landing",
+      status: "draft",
+      items: [
+        "Hero headline",
+        "Subheadline",
+        "Benefit bullets",
+        "CTA",
+        "SEO metadata"
+      ]
+    },
+    {
+      title: "CRM / WhatsApp",
+      status: "draft",
+      items: [
+        "Short message",
+        "Friendly version",
+        "Formal version",
+        "Follow-up message",
+        "Localized version"
+      ]
+    },
+    {
+      title: "Library / Learning",
+      status: "missing",
+      items: [
+        "Approved final copy",
+        "Winning hooks",
+        "Prompt template",
+        "Performance notes",
+        "Reusable asset pack"
+      ]
+    }
+  ];
+}
+
+function contentOsLegalChecklist(session, selectedItem) {
+  return [
+    ["Claims", "No medical, guaranteed, unsupported, exaggerated, or unverifiable product claims"],
+    ["Before / after", "Use only if supported, truthful, non-misleading, and visually fair"],
+    ["AI-generated assets", "Avoid fake product labels, fake certification, fake testimonials, and fake legal proof"],
+    ["Copyright", "Music, voice, image, and video references must be licensed or approved"],
+    ["Platform policy", "Ad text, landing claims, targeting, and creative must follow platform rules"],
+    ["Brand safety", "Tone, visuals, CTA, and message must match brand guidelines and approved source truth"],
+    ["Consumer clarity", "Offer, price, product, delivery, and CTA must be clear and not deceptive"],
+    ["Approval", "High-risk claims route to Governance before Publishing / Ads"]
+  ];
+}
+
+function contentOsPerformancePlan(session, selectedItem) {
+  return [
+    ["Hook performance", "Measure first 1–3 seconds, scroll stop, and opening line strength"],
+    ["Watch time", "Track average watch duration, completion rate, and drop-off scene"],
+    ["Engagement", "Track saves, shares, comments, replies, and message requests"],
+    ["Click behavior", "Track CTR, landing clicks, profile visits, and CTA action"],
+    ["Conversion", "Track orders, leads, CRM replies, booking, or campaign goal completion"],
+    ["Creative learning", "Save winning angles, weak scenes, best caption, best thumbnail, and next test"],
+    ["Optimization", "Generate new variants from weak points and send back to Content Studio"],
+    ["Reporting", "Send performance packet to Insights and Library for future campaign decisions"]
+  ];
+}
+
+function renderContentOsPublishingLegalPerformancePack(session, selectedItem, escapeHtml) {
+  const requirements = contentOsPublishingRequirements(session, selectedItem);
+  const deliverables = contentOsPlatformDeliverables(session, selectedItem);
+  const legal = contentOsLegalChecklist(session, selectedItem);
+  const performance = contentOsPerformancePlan(session, selectedItem);
+
+  return `
+    <section class="content-os-publish-pack" aria-label="Publishing Legal and Performance Pack">
+      <header class="content-os-publish-head">
+        <div>
+          <span>Publishing + Legal + Performance Pack</span>
+          <strong>Prepare platform-ready content, approvals, and learning loop</strong>
+          <p>Final content is not complete until captions, hashtags, platform variants, ad copy, legal safety, approval gates, publishing checklist, performance tracking, and learning actions are ready.</p>
+        </div>
+        <aside>
+          <span>Launch readiness</span>
+          <strong>Needs approval</strong>
+        </aside>
+      </header>
+
+      <div class="content-os-publish-actions" aria-label="Publishing legal performance actions">
+        <button type="button" data-content-publish-action="build-caption">
+          <span>01</span>
+          <strong>Build Caption</strong>
+        </button>
+        <button type="button" data-content-publish-action="build-hashtags">
+          <span>02</span>
+          <strong>Build Hashtags</strong>
+        </button>
+        <button type="button" data-content-publish-action="build-ads">
+          <span>03</span>
+          <strong>Build Ad Variants</strong>
+        </button>
+        <button type="button" data-content-publish-action="legal-check">
+          <span>04</span>
+          <strong>Legal Check</strong>
+        </button>
+        <button type="button" data-content-publish-action="approval-gates">
+          <span>05</span>
+          <strong>Approval Gates</strong>
+        </button>
+        <button type="button" data-content-publish-action="performance-plan">
+          <span>06</span>
+          <strong>Performance Plan</strong>
+        </button>
+        <button type="button" data-content-publish-action="save-learning">
+          <span>07</span>
+          <strong>Save Learning</strong>
+        </button>
+        <button type="button" data-content-publish-action="send-publishing">
+          <span>08</span>
+          <strong>Send Publishing Pack</strong>
+        </button>
+      </div>
+
+      <div class="content-os-publish-requirements">
+        <header>
+          <span>Launch Requirements</span>
+          <strong>Publishing, ads, legal, and learning must be ready before campaign release</strong>
+        </header>
+        <div>
+          ${requirements.map(([label, status, note]) => `
+            <p class="is-${escapeHtml(status)}">
+              <span>${escapeHtml(status)}</span>
+              <strong>${escapeHtml(label)}</strong>
+              <em>${escapeHtml(note)}</em>
+            </p>
+          `).join("")}
+        </div>
+      </div>
+
+      <div class="content-os-publish-grid">
+        ${deliverables.map((pack) => `
+          <article class="content-os-publish-card is-${escapeHtml(pack.status)}">
+            <header>
+              <strong>${escapeHtml(pack.title)}</strong>
+              <span>${escapeHtml(pack.status)}</span>
+            </header>
+            <ul>
+              ${pack.items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
+            </ul>
+          </article>
+        `).join("")}
+      </div>
+
+      <div class="content-os-legal-performance">
+        <article>
+          <header>
+            <span>Legal / Claim Safety</span>
+            <strong>Governance-ready checklist</strong>
+          </header>
+          <div>
+            ${legal.map(([label, note]) => `
+              <p>
+                <strong>${escapeHtml(label)}</strong>
+                <em>${escapeHtml(note)}</em>
+              </p>
+            `).join("")}
+          </div>
+        </article>
+
+        <article>
+          <header>
+            <span>Performance Learning</span>
+            <strong>Close the loop after publishing</strong>
+          </header>
+          <div>
+            ${performance.map(([label, note]) => `
+              <p>
+                <strong>${escapeHtml(label)}</strong>
+                <em>${escapeHtml(note)}</em>
+              </p>
+            `).join("")}
+          </div>
+        </article>
+      </div>
+
+      <div class="content-os-publish-handoff">
+        <span>Final Launch Handoff Rule</span>
+        <strong>Do not publish without approvals, platform variants, and measurement plan.</strong>
+        <p>Send the final packet to Publishing / Ads only after caption, hashtags, CTA, legal safety, platform specs, approval gates, asset links, schedule plan, A/B variants, and performance learning rules are prepared.</p>
+      </div>
+    </section>
+  `;
+}
+
+function renderContentOsPostProductionPack(session, selectedItem, escapeHtml) {
+  const requirements = contentOsPostProductionRequirements(session, selectedItem);
+  const layers = contentOsPostProductionLayers(session, selectedItem);
+  const scenePlan = contentOsPostProductionScenePlan(session, selectedItem);
+  const qc = contentOsPostQcItems(session, selectedItem);
+
+  return `
+    <section class="content-os-post-pack" aria-label="Voiceover Sound Design Graphics and Editing Pack">
+      <header class="content-os-post-head">
+        <div>
+          <span>Voiceover + Sound Design + Graphics + Editing Pack</span>
+          <strong>Prepare the complete post-production direction before Media Studio</strong>
+          <p>Post-production must be planned before execution: voiceover, music, sound effects, text overlays, motion graphics, editing rhythm, export versions, subtitles, and final QC must be clear before Media Studio builds the final asset.</p>
+        </div>
+        <aside>
+          <span>Post readiness</span>
+          <strong>Needs direction</strong>
+        </aside>
+      </header>
+
+      <div class="content-os-post-actions" aria-label="Post production actions">
+        <button type="button" data-content-post-action="build-voiceover">
+          <span>01</span>
+          <strong>Build Voiceover</strong>
+        </button>
+        <button type="button" data-content-post-action="sound-design">
+          <span>02</span>
+          <strong>Sound Design</strong>
+        </button>
+        <button type="button" data-content-post-action="sfx-plan">
+          <span>03</span>
+          <strong>SFX Plan</strong>
+        </button>
+        <button type="button" data-content-post-action="graphics-plan">
+          <span>04</span>
+          <strong>Graphics Plan</strong>
+        </button>
+        <button type="button" data-content-post-action="editing-notes">
+          <span>05</span>
+          <strong>Editing Notes</strong>
+        </button>
+        <button type="button" data-content-post-action="export-plan">
+          <span>06</span>
+          <strong>Export Plan</strong>
+        </button>
+        <button type="button" data-content-post-action="post-qc">
+          <span>07</span>
+          <strong>Post QC</strong>
+        </button>
+        <button type="button" data-content-post-action="send-media-post">
+          <span>08</span>
+          <strong>Send Post Pack</strong>
+        </button>
+      </div>
+
+      <div class="content-os-post-requirements">
+        <header>
+          <span>Post-Production Requirements</span>
+          <strong>Separate voiceover, sound design, SFX, graphics, and editing direction</strong>
+        </header>
+        <div>
+          ${requirements.map(([label, status, note]) => `
+            <p class="is-${escapeHtml(status)}">
+              <span>${escapeHtml(status)}</span>
+              <strong>${escapeHtml(label)}</strong>
+              <em>${escapeHtml(note)}</em>
+            </p>
+          `).join("")}
+        </div>
+      </div>
+
+      <div class="content-os-post-grid">
+        ${layers.map((pack) => `
+          <article class="content-os-post-card is-${escapeHtml(pack.status)}">
+            <header>
+              <strong>${escapeHtml(pack.title)}</strong>
+              <span>${escapeHtml(pack.status)}</span>
+            </header>
+            <ul>
+              ${pack.items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
+            </ul>
+          </article>
+        `).join("")}
+      </div>
+
+      <div class="content-os-post-scene-plan">
+        <header>
+          <span>Scene Audio / Graphics / Edit Plan</span>
+          <strong>Per-scene post-production direction</strong>
+        </header>
+        <div>
+          ${scenePlan.map(([scene, purpose, audio, graphics, edit]) => `
+            <p>
+              <span>${escapeHtml(scene)}</span>
+              <strong>${escapeHtml(purpose)}</strong>
+              <em>${escapeHtml(audio)}</em>
+              <b>${escapeHtml(graphics)}</b>
+              <i>${escapeHtml(edit)}</i>
+            </p>
+          `).join("")}
+        </div>
+      </div>
+
+      <div class="content-os-post-qc">
+        <header>
+          <span>Post QC Checklist</span>
+          <strong>Before final Media Studio export</strong>
+        </header>
+        <div>
+          ${qc.map(([label, note]) => `
+            <p>
+              <strong>${escapeHtml(label)}</strong>
+              <em>${escapeHtml(note)}</em>
+            </p>
+          `).join("")}
+        </div>
+      </div>
+
+      <div class="content-os-post-handoff">
+        <span>Final Post-Production Handoff Rule</span>
+        <strong>Media Studio must receive creative direction, not only a script.</strong>
+        <p>Send voiceover script, voice profile, music direction, SFX map, graphics instructions, editing notes, subtitle rules, export versions, and QC requirements together with the video motion packet.</p>
+      </div>
+    </section>
+  `;
+}
+
+function renderContentOsVideoMotionPack(session, selectedItem, escapeHtml) {
+  const requirements = contentOsVideoMotionRequirements(session, selectedItem);
+  const layers = contentOsVideoMotionLayers(session, selectedItem);
+  const qc = contentOsVideoQcItems(session, selectedItem);
+
+  return `
+    <section class="content-os-video-pack" aria-label="Video and Motion Prompt Pack">
+      <header class="content-os-video-head">
+        <div>
+          <span>Video / Motion Prompt Pack</span>
+          <strong>Turn storyboard and image references into controllable video motion</strong>
+          <p>Video generation must not start from a vague prompt. It needs approved start frames, end frames, one-action-per-shot rules, camera movement, continuity locks, negative motion prompts, and QC checks before Media Studio execution.</p>
+        </div>
+        <aside>
+          <span>Motion readiness</span>
+          <strong>Needs locks</strong>
+        </aside>
+      </header>
+
+      <div class="content-os-video-actions" aria-label="Video motion actions">
+        <button type="button" data-content-video-action="build-motion-system">
+          <span>01</span>
+          <strong>Build Motion System</strong>
+        </button>
+        <button type="button" data-content-video-action="scene-motion-rules">
+          <span>02</span>
+          <strong>Scene Motion Rules</strong>
+        </button>
+        <button type="button" data-content-video-action="camera-plan">
+          <span>03</span>
+          <strong>Camera Plan</strong>
+        </button>
+        <button type="button" data-content-video-action="continuity-locks">
+          <span>04</span>
+          <strong>Continuity Locks</strong>
+        </button>
+        <button type="button" data-content-video-action="negative-motion">
+          <span>05</span>
+          <strong>Negative Motion</strong>
+        </button>
+        <button type="button" data-content-video-action="video-qc">
+          <span>06</span>
+          <strong>Video QC</strong>
+        </button>
+        <button type="button" data-content-video-action="send-media-video">
+          <span>07</span>
+          <strong>Send Video Pack</strong>
+        </button>
+      </div>
+
+      <div class="content-os-video-requirements">
+        <header>
+          <span>Motion Requirements</span>
+          <strong>Start frame → motion → end frame must be controlled for every scene</strong>
+        </header>
+        <div>
+          ${requirements.map(([label, status, note]) => `
+            <p class="is-${escapeHtml(status)}">
+              <span>${escapeHtml(status)}</span>
+              <strong>${escapeHtml(label)}</strong>
+              <em>${escapeHtml(note)}</em>
+            </p>
+          `).join("")}
+        </div>
+      </div>
+
+      <div class="content-os-video-grid">
+        ${layers.map((pack) => `
+          <article class="content-os-video-card is-${escapeHtml(pack.status)}">
+            <header>
+              <strong>${escapeHtml(pack.title)}</strong>
+              <span>${escapeHtml(pack.status)}</span>
+            </header>
+            <ul>
+              ${pack.items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
+            </ul>
+          </article>
+        `).join("")}
+      </div>
+
+      <div class="content-os-video-qc">
+        <header>
+          <span>Video QC Checklist</span>
+          <strong>Before Media Studio execution</strong>
+        </header>
+        <div>
+          ${qc.map(([label, note]) => `
+            <p>
+              <strong>${escapeHtml(label)}</strong>
+              <em>${escapeHtml(note)}</em>
+            </p>
+          `).join("")}
+        </div>
+      </div>
+
+      <div class="content-os-video-handoff">
+        <span>Final Video Handoff Rule</span>
+        <strong>Do not send vague video prompts to Media Studio.</strong>
+        <p>Send a complete motion packet: approved image references, scene timing, camera direction, one-action motion rules, start/end frames, negative motion prompts, audio timing notes, export ratio, and QC checklist.</p>
+      </div>
+    </section>
+  `;
+}
+
+function renderContentOsImageProductionPack(session, selectedItem, escapeHtml) {
+  const requirements = contentOsImageRequirements(session, selectedItem);
+  const promptLayers = contentOsImagePromptLayers(session, selectedItem);
+  const outputs = contentOsImageOutputList(session, selectedItem);
+
+  return `
+    <section class="content-os-image-pack" aria-label="Image Production Pack and Asset Requirements">
+      <header class="content-os-image-head">
+        <div>
+          <span>Image Production Pack</span>
+          <strong>Lock product, logo, background, and frames before video</strong>
+          <p>Images are the foundation of strong video generation. This pack prepares approved product references, logo locks, background/location references, start frames, end frames, thumbnails, and image QC before Media Studio execution.</p>
+        </div>
+        <aside>
+          <span>Image readiness</span>
+          <strong>Needs assets</strong>
+        </aside>
+      </header>
+
+      <div class="content-os-image-actions" aria-label="Image production actions">
+        <button type="button" data-content-image-action="check-assets">
+          <span>01</span>
+          <strong>Check Image Assets</strong>
+        </button>
+        <button type="button" data-content-image-action="build-image-prompt">
+          <span>02</span>
+          <strong>Build Image Prompt</strong>
+        </button>
+        <button type="button" data-content-image-action="build-start-frame">
+          <span>03</span>
+          <strong>Build Start Frame</strong>
+        </button>
+        <button type="button" data-content-image-action="build-end-frame">
+          <span>04</span>
+          <strong>Build End Frame</strong>
+        </button>
+        <button type="button" data-content-image-action="build-thumbnail">
+          <span>05</span>
+          <strong>Build Thumbnail</strong>
+        </button>
+        <button type="button" data-content-image-action="send-media-image">
+          <span>06</span>
+          <strong>Send Image Pack</strong>
+        </button>
+      </div>
+
+      <div class="content-os-image-requirements">
+        <header>
+          <span>Asset Requirements</span>
+          <strong>Do not start video until core image references are approved</strong>
+        </header>
+        <div>
+          ${requirements.map(([label, status, note]) => `
+            <p class="is-${escapeHtml(status)}">
+              <span>${escapeHtml(status)}</span>
+              <strong>${escapeHtml(label)}</strong>
+              <em>${escapeHtml(note)}</em>
+            </p>
+          `).join("")}
+        </div>
+      </div>
+
+      <div class="content-os-image-grid">
+        ${promptLayers.map((pack) => `
+          <article class="content-os-image-card is-${escapeHtml(pack.status)}">
+            <header>
+              <strong>${escapeHtml(pack.title)}</strong>
+              <span>${escapeHtml(pack.status)}</span>
+            </header>
+            <ul>
+              ${pack.items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
+            </ul>
+          </article>
+        `).join("")}
+      </div>
+
+      <div class="content-os-image-output">
+        <header>
+          <span>Required Image Outputs</span>
+          <strong>Media Studio input checklist</strong>
+        </header>
+        <div>
+          ${outputs.map(([label, note]) => `
+            <p>
+              <strong>${escapeHtml(label)}</strong>
+              <em>${escapeHtml(note)}</em>
+            </p>
+          `).join("")}
+        </div>
+      </div>
+
+      <div class="content-os-image-qc">
+        <span>Image QC Gate</span>
+        <strong>Product identity must be locked before video motion.</strong>
+        <p>Before video generation, confirm that product shape, logo, label, background, model, lighting, color grade, and safe text areas are approved. Any missing image reference should block final Media Studio handoff.</p>
+      </div>
+    </section>
+  `;
+}
+
+function renderContentOsResearchInsightPacket(session, selectedItem, escapeHtml) {
+  const data = contentOsResearchInsightItems(session, selectedItem);
+
+  return `
+    <section class="content-os-research-packet" aria-label="Research and Insight Receiver Packet">
+      <header class="content-os-research-head">
+        <div>
+          <span>Research / Insight Receiver Packet</span>
+          <strong>Turn market intelligence into content decisions</strong>
+          <p>Research and Insights stay in their own pages. Content Studio receives their packets, detects what matters, then converts findings into hooks, angles, scripts, prompts, campaign assets, and improvement actions.</p>
+        </div>
+        <aside>
+          <span>Receiver status</span>
+          <strong>Needs packet</strong>
+        </aside>
+      </header>
+
+      <div class="content-os-research-actions" aria-label="Research and insight actions">
+        <button type="button" data-content-research-action="load-research">
+          <span>01</span>
+          <strong>Load Research Packet</strong>
+        </button>
+        <button type="button" data-content-research-action="load-insight">
+          <span>02</span>
+          <strong>Load Insight Packet</strong>
+        </button>
+        <button type="button" data-content-research-action="build-angles">
+          <span>03</span>
+          <strong>Build Creative Angles</strong>
+        </button>
+        <button type="button" data-content-research-action="build-hooks">
+          <span>04</span>
+          <strong>Generate Hook Bank</strong>
+        </button>
+        <button type="button" data-content-research-action="send-storyboard">
+          <span>05</span>
+          <strong>Send to Storyboard</strong>
+        </button>
+        <button type="button" data-content-research-action="save-learning">
+          <span>06</span>
+          <strong>Save Learning</strong>
+        </button>
+      </div>
+
+      <div class="content-os-research-grid">
+        <article class="content-os-research-source">
+          <header>
+            <span>Incoming Intelligence</span>
+            <strong>Source map</strong>
+          </header>
+          ${data.source.map(([label, value, note]) => `
+            <p>
+              <span>${escapeHtml(label)}</span>
+              <strong>${escapeHtml(value)}</strong>
+              <em>${escapeHtml(note)}</em>
+            </p>
+          `).join("")}
+        </article>
+
+        <article class="content-os-research-source is-signals">
+          <header>
+            <span>Decision Signals</span>
+            <strong>What the content team must use</strong>
+          </header>
+          ${data.signals.map(([label, value, note]) => `
+            <p>
+              <span>${escapeHtml(label)}</span>
+              <strong>${escapeHtml(value)}</strong>
+              <em>${escapeHtml(note)}</em>
+            </p>
+          `).join("")}
+        </article>
+      </div>
+
+      <div class="content-os-research-opportunities">
+        ${data.opportunities.map((pack) => `
+          <article class="content-os-research-card is-${escapeHtml(pack.status)}">
+            <header>
+              <strong>${escapeHtml(pack.title)}</strong>
+              <span>${escapeHtml(pack.status)}</span>
+            </header>
+            <ul>
+              ${pack.items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
+            </ul>
+          </article>
+        `).join("")}
+      </div>
+
+      <div class="content-os-research-next">
+        <span>Research-to-content workflow</span>
+        <strong>Use research as decision input, not as a separate writing page.</strong>
+        <ol>
+          ${data.next.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
+        </ol>
+      </div>
+    </section>
+  `;
+}
+
+function renderContentOsStoryboardPacket(session, selectedItem, escapeHtml) {
+  const scenes = contentOsStoryboardScenes(session, selectedItem);
+
+  return `
+    <section class="content-os-storyboard" aria-label="Storyboard Execution Packet">
+      <header class="content-os-storyboard-head">
+        <div>
+          <span>Storyboard Execution Packet</span>
+          <strong>Scene-by-scene media execution</strong>
+          <p>Define every scene with duration, purpose, visual, camera, text, audio, start frame, end frame, motion prompt, negative prompt, and QC rule.</p>
+        </div>
+        <aside>
+          <span>Media execution</span>
+          <strong>${escapeHtml(String(scenes.length))} scenes</strong>
+        </aside>
+      </header>
+
+      <div class="content-os-storyboard-table">
+        ${scenes.map((scene) => `
+          <article class="content-os-storyboard-row">
+            <header>
+              <span>Scene ${escapeHtml(scene.scene)} · ${escapeHtml(scene.duration)}</span>
+              <strong>${escapeHtml(scene.purpose)}</strong>
+            </header>
+            <div class="content-os-storyboard-grid">
+              <p><span>Visual</span><strong>${escapeHtml(scene.visual)}</strong></p>
+              <p><span>Camera</span><strong>${escapeHtml(scene.camera)}</strong></p>
+              <p><span>Action</span><strong>${escapeHtml(scene.action)}</strong></p>
+              <p><span>On-screen text</span><strong>${escapeHtml(scene.text)}</strong></p>
+              <p><span>Voiceover</span><strong>${escapeHtml(scene.voice)}</strong></p>
+              <p><span>Audio / SFX</span><strong>${escapeHtml(scene.audio)}</strong></p>
+              <p><span>Start frame</span><strong>${escapeHtml(scene.start)}</strong></p>
+              <p><span>End frame</span><strong>${escapeHtml(scene.end)}</strong></p>
+              <p><span>Motion prompt</span><strong>${escapeHtml(scene.motion)}</strong></p>
+              <p><span>Negative prompt</span><strong>${escapeHtml(scene.negative)}</strong></p>
+              <p><span>QC rule</span><strong>${escapeHtml(scene.qc)}</strong></p>
+            </div>
+          </article>
+        `).join("")}
+      </div>
+    </section>
+  `;
+}
+
+function renderContentOsCampaignContentPack(session, selectedItem, escapeHtml) {
+  const packs = contentOsCampaignPacks(session, selectedItem);
+  const refs = contentOsReferenceStatusItems(session, selectedItem);
+
+  return `
+    <section class="content-os-campaign-pack" aria-label="Campaign Content Pack">
+      <header class="content-os-campaign-pack-head">
+        <div>
+          <span>Campaign Content Pack</span>
+          <strong>Copy, social, ads, voice, landing, and learning assets</strong>
+          <p>Prepare the campaign assets around the storyboard so Media Studio, Publishing, Ads, and CRM receive one consistent package.</p>
+        </div>
+      </header>
+
+      <div class="content-os-reference-status">
+        <header>
+          <span>Reference Status Manager</span>
+          <strong>Sources required before full media execution</strong>
+        </header>
+        <div>
+          ${refs.map(([label, status, note]) => `
+            <p class="is-${escapeHtml(status.toLowerCase())}">
+              <span>${escapeHtml(status)}</span>
+              <strong>${escapeHtml(label)}</strong>
+              <em>${escapeHtml(note)}</em>
+            </p>
+          `).join("")}
+        </div>
+      </div>
+
+      <div class="content-os-campaign-pack-grid">
+        ${packs.map((pack) => `
+          <article class="content-os-pack-card is-${escapeHtml(pack.status)}">
+            <header>
+              <strong>${escapeHtml(pack.title)}</strong>
+              <span>${escapeHtml(pack.status)}</span>
+            </header>
+            <ul>
+              ${pack.items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
+            </ul>
+          </article>
+        `).join("")}
+      </div>
+
+      <div class="content-os-final-media-packet">
+        <span>Final Media Studio Packet Preview</span>
+        <strong>Campaign Bible + Storyboard + Prompts + References + Audio + Exports + QC</strong>
+        <p>Do not send to Media Studio until product/logo/model/location references, start/end frames, scene prompts, audio plan, export specs, and QC checklist are ready.</p>
+      </div>
     </section>
   `;
 }
