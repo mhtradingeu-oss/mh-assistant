@@ -7,6 +7,7 @@ const tiktok = require('./providers/tiktok');
 const ebay = require('./providers/ebay');
 const ops = require('./providers/ops');
 const { createUnsupportedAdapter } = require('./providers/unsupported');
+const { aiMediaProviderAdapter } = require('./providers/ai-media');
 
 const registry = new Map();
 const UNSUPPORTED_INTEGRATION_IDS = ['amazon', 'smtp', 'mailer', 'crm'];
@@ -27,6 +28,7 @@ const unsupportedAdapter = {
   tiktok,
   ebay,
   ops,
+  aiMediaProviderAdapter,
   unsupportedAdapter
 ].forEach((adapter) => {
   (adapter.integrationIds || []).forEach((integrationId) => {
