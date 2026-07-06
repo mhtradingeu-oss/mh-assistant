@@ -591,7 +591,231 @@ const INTEGRATION_DOMAINS = [
       }
     ]
   }
-];
+,
+  {
+    id: "ai-media",
+    title: "AI Media Providers",
+    description: "Image, video, voice, and local generation providers used by Media Studio.",
+    integrations: [
+      {
+        id: "openai",
+        sourceKey: "openai",
+        label: "OpenAI",
+        icon: "OA",
+        purpose: "Image, audio, and multimodal generation provider for Media Studio.",
+        whyItMatters: "OpenAI can power image generation, prompt execution, voice/audio routing, and campaign production workflows.",
+        enables: "Image generation, audio generation, prompt execution, and campaign media routing.",
+        dataScope: ["Image jobs", "Audio jobs", "Prompt execution", "Usage metadata"],
+        permissionScope: "OpenAI API key",
+        critical: true,
+        primaryField: "apiKey",
+        fields: [
+          { key: "apiKey", label: "API key", placeholder: "sk-...", type: "password", required: true },
+          { key: "organizationId", label: "Organization ID", placeholder: "Optional OpenAI organization ID" }
+        ]
+      },
+      {
+        id: "higgsfield",
+        sourceKey: "higgsfield",
+        label: "Higgsfield",
+        icon: "HF",
+        purpose: "Cinematic image and video provider for product scenes and campaign visuals.",
+        whyItMatters: "Higgsfield-style workflows support premium visual production and short-form campaign assets.",
+        enables: "Image looks, video scenes, motion prompts, and creative campaign assets.",
+        dataScope: ["Image jobs", "Video jobs", "Provider status"],
+        permissionScope: "Higgsfield API key or account token",
+        primaryField: "apiKey",
+        fields: [
+          { key: "apiKey", label: "API key", placeholder: "Higgsfield API key", type: "password", required: true }
+        ]
+      },
+      {
+        id: "kling",
+        sourceKey: "kling",
+        label: "Kling",
+        icon: "KL",
+        purpose: "Image-to-video and controlled short video generation provider.",
+        whyItMatters: "Kling is useful for product motion, start-frame based video, and campaign video drafts.",
+        enables: "Video generation, image-to-video, product scenes, and motion prompts.",
+        dataScope: ["Video jobs", "Image-to-video jobs", "Provider status"],
+        permissionScope: "Kling API key or access token",
+        primaryField: "apiKey",
+        fields: [
+          { key: "apiKey", label: "API key", placeholder: "Kling API key", type: "password", required: true }
+        ]
+      },
+      {
+        id: "runway",
+        sourceKey: "runway",
+        label: "Runway",
+        icon: "RW",
+        purpose: "Video generation and creative production provider for campaign scenes.",
+        whyItMatters: "Runway can support fast video drafts, product motion, and creative campaign variants.",
+        enables: "Video generation, scene drafts, and campaign motion assets.",
+        dataScope: ["Video jobs", "Provider status"],
+        permissionScope: "Runway API key",
+        primaryField: "apiKey",
+        fields: [
+          { key: "apiKey", label: "API key", placeholder: "Runway API key", type: "password", required: true }
+        ]
+      },
+      {
+        id: "luma",
+        sourceKey: "luma",
+        label: "Luma",
+        icon: "LU",
+        purpose: "Creative video generation provider for visual campaign drafts.",
+        whyItMatters: "Luma can support short-form motion, video ideation, and visual variants.",
+        enables: "Video jobs, motion assets, and visual variants.",
+        dataScope: ["Video jobs", "Provider status"],
+        permissionScope: "Luma API key",
+        primaryField: "apiKey",
+        fields: [
+          { key: "apiKey", label: "API key", placeholder: "Luma API key", type: "password", required: true }
+        ]
+      },
+      {
+        id: "google-ai",
+        sourceKey: "google_ai",
+        label: "Google AI / Veo",
+        icon: "GV",
+        purpose: "Google AI media route for Veo, Nano Banana, and future Google image/video workflows.",
+        whyItMatters: "Keeps AI media generation separate from GA4, GTM, Google Ads, and Google Drive connectors.",
+        enables: "Veo routing, image/video model routing, and Google AI media workflows.",
+        dataScope: ["Image jobs", "Video jobs", "Provider status"],
+        permissionScope: "Google AI API key or service credentials",
+        primaryField: "apiKey",
+        fields: [
+          { key: "apiKey", label: "API key", placeholder: "Google AI API key", type: "password", required: true }
+        ]
+      },
+      {
+        id: "bytedance",
+        sourceKey: "bytedance",
+        label: "ByteDance / Seed",
+        icon: "BD",
+        purpose: "Seedream image and Seed Audio provider route for Media Studio.",
+        whyItMatters: "Supports image and voice generation families without mapping to unrelated social connectors.",
+        enables: "Image jobs, audio jobs, and provider routing.",
+        dataScope: ["Image jobs", "Audio jobs", "Provider status"],
+        permissionScope: "Provider API key",
+        primaryField: "apiKey",
+        fields: [
+          { key: "apiKey", label: "API key", placeholder: "ByteDance / Seed API key", type: "password", required: true }
+        ]
+      },
+      {
+        id: "recraft",
+        sourceKey: "recraft",
+        label: "Recraft",
+        icon: "RC",
+        purpose: "Design and image generation provider for brand-safe visual assets.",
+        whyItMatters: "Recraft can support branded imagery, product graphics, and campaign creatives.",
+        enables: "Image jobs, design assets, and brand visual variants.",
+        dataScope: ["Image jobs", "Design jobs", "Provider status"],
+        permissionScope: "Recraft API key",
+        primaryField: "apiKey",
+        fields: [
+          { key: "apiKey", label: "API key", placeholder: "Recraft API key", type: "password", required: true }
+        ]
+      },
+      {
+        id: "elevenlabs",
+        sourceKey: "elevenlabs",
+        label: "ElevenLabs",
+        icon: "EL",
+        purpose: "Voiceover and multilingual speech generation provider for Media Studio.",
+        whyItMatters: "ElevenLabs supports campaign voiceovers, narration, and multilingual audio drafts.",
+        enables: "Voiceover generation, multilingual speech, and audio asset routing.",
+        dataScope: ["Voice jobs", "Audio assets", "Provider status"],
+        permissionScope: "ElevenLabs API key",
+        primaryField: "apiKey",
+        fields: [
+          { key: "apiKey", label: "API key", placeholder: "ElevenLabs API key", type: "password", required: true }
+        ]
+      },
+      {
+        id: "minimax",
+        sourceKey: "minimax",
+        label: "MiniMax",
+        icon: "MX",
+        purpose: "Speech and voice provider route for Media Studio audio workflows.",
+        whyItMatters: "MiniMax can support voice variants and future speech generation workflows.",
+        enables: "Voice jobs, speech variants, and audio routing.",
+        dataScope: ["Voice jobs", "Provider status"],
+        permissionScope: "MiniMax API key",
+        primaryField: "apiKey",
+        fields: [
+          { key: "apiKey", label: "API key", placeholder: "MiniMax API key", type: "password", required: true }
+        ]
+      },
+      {
+        id: "comfyui",
+        sourceKey: "comfyui",
+        label: "ComfyUI",
+        icon: "CU",
+        purpose: "Local and open-source image/video workflow runtime for Media Studio.",
+        whyItMatters: "ComfyUI enables local FLUX, SDXL, Wan, HunyuanVideo, and custom production workflows.",
+        enables: "Local image generation, local video workflows, queue routing, and model inventory.",
+        dataScope: ["Local jobs", "Model list", "Queue status", "Provider status"],
+        permissionScope: "Local endpoint URL and optional token",
+        primaryField: "endpointUrl",
+        fields: [
+          { key: "endpointUrl", label: "Endpoint URL", placeholder: "http://127.0.0.1:8188", required: true },
+          { key: "apiKey", label: "Access token", placeholder: "Optional token", type: "password" }
+        ]
+      },
+      {
+        id: "coqui",
+        sourceKey: "coqui",
+        label: "Coqui",
+        icon: "CQ",
+        purpose: "Open voice workflow route for local or self-hosted speech generation.",
+        whyItMatters: "Coqui supports open voice workflows without forcing a paid provider.",
+        enables: "Voice jobs, local speech generation, and audio routing.",
+        dataScope: ["Voice jobs", "Provider status"],
+        permissionScope: "Endpoint URL and optional token",
+        primaryField: "endpointUrl",
+        fields: [
+          { key: "endpointUrl", label: "Endpoint URL", placeholder: "http://127.0.0.1:5002", required: true },
+          { key: "apiKey", label: "Access token", placeholder: "Optional token", type: "password" }
+        ]
+      },
+      {
+        id: "bark",
+        sourceKey: "bark",
+        label: "Bark",
+        icon: "BK",
+        purpose: "Open voice/audio model route for experimental speech and audio generation.",
+        whyItMatters: "Bark gives Media Studio an open audio provider path for future local generation.",
+        enables: "Voice jobs, audio experiments, and local/open routing.",
+        dataScope: ["Voice jobs", "Audio jobs", "Provider status"],
+        permissionScope: "Endpoint URL and optional token",
+        primaryField: "endpointUrl",
+        fields: [
+          { key: "endpointUrl", label: "Endpoint URL", placeholder: "http://127.0.0.1:7860", required: true },
+          { key: "apiKey", label: "Access token", placeholder: "Optional token", type: "password" }
+        ]
+      },
+      {
+        id: "musicgen",
+        sourceKey: "musicgen",
+        label: "MusicGen",
+        icon: "MG",
+        purpose: "Open music/audio workflow route for sound beds and campaign audio generation.",
+        whyItMatters: "MusicGen can support music beds, sound direction, and campaign audio drafts.",
+        enables: "Music generation, audio drafts, and local/open routing.",
+        dataScope: ["Music jobs", "Audio assets", "Provider status"],
+        permissionScope: "Endpoint URL and optional token",
+        primaryField: "endpointUrl",
+        fields: [
+          { key: "endpointUrl", label: "Endpoint URL", placeholder: "http://127.0.0.1:7861", required: true },
+          { key: "apiKey", label: "Access token", placeholder: "Optional token", type: "password" }
+        ]
+      }
+    ]
+  }
+  /* MEDIA-STUDIO-PHASE-C2-AI-MEDIA-PROVIDER-CONNECTORS */];
 
 function asArray(value) {
   return Array.isArray(value) ? value : [];
@@ -643,6 +867,156 @@ function getAllIntegrations() {
 function getIntegrationById(integrationId) {
   return getAllIntegrations().find((item) => item.id === integrationId) || null;
 }
+
+const MEDIA_STUDIO_INTEGRATION_INTENT_KEY_C1 = "mh.mediaStudio.integrationIntent.v1";
+
+function readMediaStudioIntegrationIntentC1() {
+  try {
+    const raw = window.sessionStorage?.getItem(MEDIA_STUDIO_INTEGRATION_INTENT_KEY_C1);
+    if (!raw) return null;
+    window.sessionStorage?.removeItem(MEDIA_STUDIO_INTEGRATION_INTENT_KEY_C1);
+    const parsed = JSON.parse(raw);
+    return parsed && parsed.source === "media-studio" ? parsed : null;
+  } catch (error) {
+    console.warn("Unable to read Media Studio integration intent", error);
+    return null;
+  }
+}
+
+function getMediaStudioIntegrationSearchTermsC1(intent = {}) {
+  const direct = [
+    intent.integrationId,
+    intent.providerId,
+    intent.providerLabel
+  ].filter(Boolean).map((item) => String(item).toLowerCase());
+
+  const aliases = {
+    openai: ["openai", "chatgpt", "gpt"],
+    google: ["google", "gemini", "veo", "nano"],
+    bytedance: ["bytedance", "seedream", "seed audio"],
+    higgsfield: ["higgsfield"],
+    kling: ["kling"],
+    runway: ["runway"],
+    luma: ["luma"],
+    comfyui: ["comfyui", "comfy", "flux", "sdxl", "local", "open"],
+    elevenlabs: ["elevenlabs", "eleven labs"],
+    minimax: ["minimax"],
+    recraft: ["recraft"],
+    coqui: ["coqui"],
+    bark: ["bark"],
+    musicgen: ["musicgen"]
+  };
+
+  const aliasTerms = direct.flatMap((term) => aliases[term] || []);
+  return Array.from(new Set([...direct, ...aliasTerms].filter(Boolean)));
+}
+
+function resolveMediaStudioIntegrationIdC1(intent = {}) {
+  const directCandidates = [
+    intent.integrationId,
+    intent.providerId
+  ].filter(Boolean).map((item) => String(item).trim()).filter(Boolean);
+
+  for (const candidate of directCandidates) {
+    if (candidate && getIntegrationById(candidate)) return candidate;
+  }
+
+  const mediaProviderIntegrationMap = {
+    openai_image: "openai",
+    openai_audio: "openai",
+    sora: "openai",
+    google: "google-ai",
+    nano_banana: "google-ai",
+    veo: "google-ai",
+    higgsfield_soul: "higgsfield",
+    higgsfield_video: "higgsfield",
+    seedream: "bytedance",
+    seed_audio: "bytedance",
+    comfyui_flux: "comfyui",
+    comfyui_sdxl: "comfyui",
+    minimax_speech: "minimax",
+    coqui_tts: "coqui",
+    paid_cloud_pack: "openai",
+    local_open_pack: "comfyui",
+    auto_route: "openai"
+  };
+
+  for (const candidate of directCandidates) {
+    const mappedIntegrationId = mediaProviderIntegrationMap[String(candidate).toLowerCase()];
+    if (mappedIntegrationId && getIntegrationById(mappedIntegrationId)) return mappedIntegrationId;
+  }
+
+  // Strict rule: do not fuzzy-match AI media providers to unrelated connectors.
+  // Example: Nano Banana / Veo must not open GA4, GTM, Google Ads, or Google Drive.
+  const mediaProviderIds = new Set([
+    "openai",
+    "openai_image",
+    "openai_audio",
+    "sora",
+    "google",
+    "nano_banana",
+    "veo",
+    "higgsfield",
+    "higgsfield_soul",
+    "higgsfield_video",
+    "bytedance",
+    "seedream",
+    "seed_audio",
+    "recraft",
+    "comfyui",
+    "comfyui_flux",
+    "comfyui_sdxl",
+    "wan",
+    "hunyuanvideo",
+    "kling",
+    "runway",
+    "luma",
+    "elevenlabs",
+    "minimax",
+    "minimax_speech",
+    "coqui",
+    "bark",
+    "musicgen",
+    "paid_cloud_pack",
+    "local_open_pack",
+    "auto_route"
+  ]);
+
+  const requested = directCandidates.map((item) => item.toLowerCase());
+  const isMediaProvider = requested.some((item) => mediaProviderIds.has(item));
+
+  if (isMediaProvider) {
+    return "";
+  }
+
+  // Non-media integrations may still use the existing page search behavior later,
+  // but Media Studio provider routing must be exact-only until AI provider connectors exist.
+  return "";
+}
+
+/* MEDIA-STUDIO-PHASE-C1N-STRICT-PROVIDER-MAPPING */
+
+function applyMediaStudioIntegrationIntentC1(session, { showMessage } = {}) {
+  const intent = readMediaStudioIntegrationIntentC1();
+  if (!intent) return null;
+
+  const integrationId = resolveMediaStudioIntegrationIdC1(intent);
+  session.mediaStudioReturnIntent = intent;
+
+  if (integrationId) {
+    openIntegrationDrawer(session, integrationId);
+    showMessage?.(`Opened Integrations for ${intent.providerLabel || integrationId}.`);
+    return { ...intent, resolvedIntegrationId: integrationId };
+  }
+
+  session.selectedIntegrationId = session.selectedIntegrationId || getAllIntegrations()[0]?.id || "";
+  showMessage?.(`${intent.providerLabel || "This provider"} is not available in Integrations yet. No connector was opened.`);
+  return { ...intent, resolvedIntegrationId: "" };
+}
+
+/* MEDIA-STUDIO-PHASE-C1-INTEGRATIONS-RETURN-FLOW */
+
+
 
 function ensureSession(projectName) {
   const key = projectName || "__default__";
@@ -1762,7 +2136,9 @@ export const integrationsRoute = {
     const diagnostics = buildLaunchDiagnostics(allCards);
     const connectorGroups = buildConnectorWorkspaceGroups(allCards, session);
     const filteredCards = connectorGroups.flatMap((group) => group.cards);
-    const selectedCard = filteredCards.find((card) => card.id === session.selectedIntegrationId) || allCards.find((card) => card.id === session.selectedIntegrationId) || filteredCards[0] || allCards[0] || null;
+      applyMediaStudioIntegrationIntentC1(session, { showMessage });
+
+const selectedCard = filteredCards.find((card) => card.id === session.selectedIntegrationId) || allCards.find((card) => card.id === session.selectedIntegrationId) || filteredCards[0] || allCards[0] || null;
     const drawerCard = allCards.find((card) => card.id === session.activeDrawerIntegrationId) || selectedCard;
     const attentionTotal = allCards.filter((card) => ["needs_setup", "failed"].includes(getConnectorWorkspaceStatus(card))).length;
     const readinessBase = Math.max(allCards.length, 1);
