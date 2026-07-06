@@ -715,6 +715,180 @@ function resolveMediaProjectName(req) {
   );
 }
 
+
+function inferGeneratedMediaAssetType(requestType) {
+  const normalized = asString(requestType).toLowerCase();
+  if (normalized.includes('image')) return 'social_assets';
+  if (normalized.includes('campaign')) return 'campaign_assets';
+  if (normalized.includes('video')) return 'product_videos';
+  if (normalized.includes('voice') || normalized.includes('audio')) return 'social_assets';
+  return 'social_assets';
+}
+
+function registerGeneratedMediaAssetsFromResult(projectName, {
+  requestType,
+  output,
+  mediaJob,
+  req
+} = {}) {
+  const project = normalizeProjectSlug(projectName);
+  if (!project || !output || typeof output !== 'object') {
+    return [];
+  }
+
+  const images = Array.isArray(output.images) ? output.images : [];
+  if (!images.length && !output.image_url && !output.file_path) {
+    return [];
+  }
+
+  const now = new Date().toISOString();
+  const assetType = inferGeneratedMediaAssetType(requestType);
+  const prompt = asString(req?.body?.prompt || '');
+  const provider = asString(output.provider || req?.body?.provider || req?.body?.media_provider || '');
+  const model = asString(output.model || req?.body?.model || req?.body?.media_model || '');
+
+  const candidates = images.length
+    ? images
+    : [{
+        url: output.image_url || '',
+        file_path: output.file_path || '',
+        revised_prompt: output.revised_prompt || ''
+      }];
+
+  const registered = [];
+
+  candidates.forEach((image, index) => {
+    let filePath = asString(image?.file_path || output.file_path || '');
+    const previewUrl = asString(image?.url || output.image_url || '');
+    const b64Payload = asString(image?.b64_json || output.b64_json || '');
+    const hasB64 = Boolean(b64Payload);
+
+    if (!filePath && !previewUrl && !hasB64) {
+      return;
+    }
+
+    const baseId = asString(mediaJob?.id || req?.body?.media_job_id || req?.body?.id || `media_${Date.now()}`);
+    const assetId = `${baseId}_asset_${index + 1}`;
+
+    if (!filePath && hasB64) {
+      try {
+        const folderInfo = getTargetFolderForAssetType(project, assetType);
+        ensureDir(folderInfo.target_dir);
+        const outputPath = path.join(folderInfo.target_dir, `${assetId}.png`);
+        const cleanB64 = b64Payload.includes(',') ? b64Payload.split(',').pop() : b64Payload;
+        fs.writeFileSync(outputPath, Buffer.from(cleanB64, 'base64'));
+        filePath = outputPath;
+      } catch (_) {
+        filePath = '';
+      }
+    }
+
+    let record;
+    if (filePath) {
+      record = registerProjectAsset(project, assetType, filePath);
+    } else {
+      const paths = getProjectAssetPaths(project);
+      const assets = readJsonFile(paths.assetsRegistryPath, [])
+        .map(asset => normalizeAssetRecord(project, asset));
+
+      record = normalizeAssetRecord(project, {
+        id: assetId,
+        asset_id: assetId,
+        type: assetType,
+        asset_type: assetType,
+        title: asString(req?.body?.title || `${requestType || 'Generated'} media asset`),
+        display_name: asString(req?.body?.title || `${requestType || 'Generated'} media asset`),
+        file_name: `${assetId}.remote`,
+        file_path: '',
+        preview_url: previewUrl,
+        public_url: previewUrl,
+        media_kind: 'image',
+        status: 'needs_review',
+        readiness_status: 'needs_review',
+        review_status: 'needs_review',
+        approval_status: 'not_requested',
+        approved: false,
+        needs_review: true,
+        source: 'ai_generation',
+        tags: ['ai-generated', asString(requestType || 'media')].filter(Boolean),
+        metadata: {
+          managed_by: 'media_generation',
+          source: 'ai_generation',
+          preview_url: previewUrl,
+          has_b64_json: hasB64,
+          provider,
+          model,
+          prompt,
+          revised_prompt: asString(image?.revised_prompt || output.revised_prompt || ''),
+          media_job_id: asString(mediaJob?.id || ''),
+          output_version_id: asString(mediaJob?.output_versions?.[0]?.id || ''),
+          request_type: asString(requestType || ''),
+          created_from: 'api_media_generation'
+        }
+      });
+
+      const withoutExisting = assets.filter(asset => {
+        const currentId = asString(asset.asset_id || asset.id);
+        return currentId !== record.asset_id;
+      });
+
+      withoutExisting.push(record);
+      writeJsonFile(paths.assetsRegistryPath, withoutExisting);
+    }
+
+    const paths = getProjectAssetPaths(project);
+    const assets = readJsonFile(paths.assetsRegistryPath, [])
+      .map(asset => normalizeAssetRecord(project, asset));
+
+    const nextAssets = assets.map(asset => {
+      const currentId = asString(asset.asset_id || asset.id);
+      const recordId = asString(record.asset_id || record.id);
+      if (currentId !== recordId) return asset;
+
+      return {
+        ...asset,
+        source: 'ai_generation',
+        preview_url: previewUrl || asset.preview_url || asset.metadata?.preview_url || '',
+        public_url: previewUrl || asset.public_url || asset.metadata?.preview_url || '',
+        media_kind: asset.media_kind || 'image',
+        readiness_status: 'needs_review',
+        review_status: 'needs_review',
+        approval_status: asset.approval_status || 'not_requested',
+        approved: false,
+        needs_review: true,
+        metadata: {
+          ...(asset.metadata || {}),
+          managed_by: 'media_generation',
+          source: 'ai_generation',
+          preview_url: previewUrl || asset.metadata?.preview_url || '',
+          has_b64_json: hasB64,
+          provider,
+          model,
+          prompt,
+          revised_prompt: asString(image?.revised_prompt || output.revised_prompt || asset.metadata?.revised_prompt || ''),
+          media_job_id: asString(mediaJob?.id || ''),
+          output_version_id: asString(mediaJob?.output_versions?.[0]?.id || ''),
+          request_type: asString(requestType || ''),
+          created_from: 'api_media_generation',
+          registered_at: now
+        }
+      };
+    });
+
+    writeJsonFile(paths.assetsRegistryPath, nextAssets);
+
+    registered.push({
+      asset_id: asString(record.asset_id || record.id),
+      asset_type: assetType,
+      preview_url: previewUrl,
+      file_path: filePath,
+      review_status: 'needs_review'
+    });
+  });
+
+  return registered;
+}
+
 function maybePersistMediaGenerationResult(req, {
   requestType,
   output,
@@ -767,8 +941,16 @@ function maybePersistMediaGenerationResult(req, {
       actor: 'media-api'
     });
 
+    const registeredAssets = registerGeneratedMediaAssetsFromResult(projectName, {
+      requestType,
+      output,
+      mediaJob,
+      req
+    });
+
     return {
       media_job: mediaJob,
+      registered_assets: registeredAssets,
       operations: buildProjectOperationsPayload(projectName)
     };
   } catch (error) {
