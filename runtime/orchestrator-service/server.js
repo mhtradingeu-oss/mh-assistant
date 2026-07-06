@@ -701,6 +701,14 @@ const mediaProviderLayer = createMediaProviderLayer({
   axios
 });
 
+
+function asString(value) {
+  if (value === null || value === undefined) {
+    return '';
+  }
+  return String(value).trim();
+}
+
 function resolveMediaProjectName(req) {
   return normalizeOptionalProjectSlug(
     req?.body?.project || req?.query?.project || req?.params?.project
