@@ -1,4 +1,87 @@
 // Deterministic source registry extraction for canonical/legacy compatibility
+const fsBoot = require('node:fs');
+const pathBoot = require('node:path');
+
+function parseEnvValue(rawValue) {
+  const trimmed = String(rawValue || '').trim();
+  if (!trimmed) {
+    return '';
+  }
+
+  if (
+    (trimmed.startsWith('"') && trimmed.endsWith('"')) ||
+    (trimmed.startsWith("'") && trimmed.endsWith("'"))
+  ) {
+    const unquoted = trimmed.slice(1, -1);
+    return unquoted
+      .replace(/\\n/g, '\n')
+      .replace(/\\r/g, '\r')
+      .replace(/\\t/g, '\t')
+      .replace(/\\"/g, '"')
+      .replace(/\\'/g, "'")
+      .replace(/\\\\/g, '\\');
+  }
+
+  return trimmed.replace(/\s+#.*$/, '').trim();
+}
+
+function applyEnvFile(filePath) {
+  const body = fsBoot.readFileSync(filePath, 'utf8');
+  const lines = body.split(/\r?\n/);
+
+  lines.forEach((line) => {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#')) {
+      return;
+    }
+
+    const normalized = trimmed.startsWith('export ') ? trimmed.slice(7).trim() : trimmed;
+    const eqIndex = normalized.indexOf('=');
+    if (eqIndex <= 0) {
+      return;
+    }
+
+    const key = normalized.slice(0, eqIndex).trim();
+    if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(key)) {
+      return;
+    }
+
+    if (process.env[key] !== undefined) {
+      return;
+    }
+
+    const value = parseEnvValue(normalized.slice(eqIndex + 1));
+    process.env[key] = value;
+  });
+}
+
+function bootstrapEnvironment() {
+  const projectRoot = pathBoot.resolve(__dirname, '../..');
+  const nodeEnv = String(process.env.NODE_ENV || '').trim();
+  const candidateFiles = [];
+
+  if (nodeEnv) {
+    candidateFiles.push(pathBoot.join(projectRoot, `.env.${nodeEnv}`));
+  }
+
+  candidateFiles.push(
+    pathBoot.join(projectRoot, '.env.local'),
+    pathBoot.join(projectRoot, '.env')
+  );
+
+  candidateFiles.forEach((filePath) => {
+    try {
+      if (fsBoot.existsSync(filePath)) {
+        applyEnvFile(filePath);
+      }
+    } catch (_) {
+      // Environment bootstrap failures should not block service startup.
+    }
+  });
+}
+
+bootstrapEnvironment();
+
 function extractSourceRegistryEntries(value) {
   if (!value || typeof value !== 'object') return {};
   if (value.sources && typeof value.sources === 'object' && !Array.isArray(value.sources)) {
